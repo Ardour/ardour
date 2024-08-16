@@ -202,21 +202,6 @@ MackieControlProtocol::thread_init ()
 	set_thread_priority ();
 }
 
-void
-MackieControlProtocol::ping_devices ()
-{
-	/* should not be called if surfaces are not connected, but will not
-	 * malfunction if it is.
-	 */
-
-	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
-		for (auto const& si : surfaces) {
-			si->connected ();
-		}
-	}
-}
-
 // go to the previous track.
 void
 MackieControlProtocol::prev_track()

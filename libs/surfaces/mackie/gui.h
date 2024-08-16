@@ -122,12 +122,10 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 	Gtk::HScale      touch_sensitivity_scale;
 	Gtk::Button      recalibrate_fader_button;
 	Gtk::Adjustment  ipmidi_base_port_adjustment;
-	Gtk::Button      discover_button;
 
 	Gtk::HBox  hpacker;
 	Gtk::Image image;
 
-	void discover_clicked ();
 	void recalibrate_faders ();
 	void toggle_backlight ();
 	void touch_sensitive_change ();

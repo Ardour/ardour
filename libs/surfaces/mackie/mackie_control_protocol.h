@@ -234,8 +234,6 @@ class MackieControlProtocol
 	int16_t ipmidi_base() const { return _ipmidi_base; }
 	void    set_ipmidi_base (int16_t);
 
-	void ping_devices ();
-
   protected:
 	// shut down the surface
 	void close();

@@ -99,7 +99,6 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	, touch_sensitivity_scale (touch_sensitivity_adjustment)
 	, recalibrate_fader_button (_("Recalibrate Faders"))
 	, ipmidi_base_port_adjustment (_cp.ipmidi_base(), 0, 32767, 1, 1000)
-	, discover_button (_("Discover Mackie Devices"))
 	, _device_dependent_widget (0)
 	, _ignore_profile_changed (false)
 	, ignore_active_change (false)
@@ -220,11 +219,6 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	table.attach (touch_sensitivity_scale, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	row++;
 	table.attach (recalibrate_fader_button, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	row++;
-
-
-	table.attach (discover_button, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	discover_button.signal_clicked().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::discover_clicked));
 	row++;
 
 	vector<string> profiles;
@@ -774,13 +768,6 @@ void
 MackieControlProtocolGUI::ipmidi_spinner_changed ()
 {
 	_cp.set_ipmidi_base ((int16_t) lrintf (ipmidi_base_port_adjustment.get_value()));
-}
-
-void
-MackieControlProtocolGUI::discover_clicked ()
-{
-	/* this should help to get things started */
-	_cp.ping_devices ();
 }
 
 void
