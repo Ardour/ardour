@@ -116,7 +116,6 @@ static std::string ardour_sans_file;
 static __cdecl void
 unload_custom_fonts()
 {
-	printf ("unload_custom_fonts\n");
 	if (!ardour_mono_file.empty ()) {
 		RemoveFontResource(ardour_mono_file.c_str());
 	}
