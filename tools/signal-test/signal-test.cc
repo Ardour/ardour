@@ -46,7 +46,7 @@ public:
 		run_loop_thread = Glib::Threads::Thread::self ();
 	}
 
-	void call_slot (InvalidationRecord* ir, const boost::function<void ()>& f)
+	void call_slot (InvalidationRecord* ir, const std::function<void ()>& f)
 	{
 		if (Glib::Threads::Thread::self () == run_loop_thread) {
 			f ();
