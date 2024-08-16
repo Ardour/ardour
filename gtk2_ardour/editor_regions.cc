@@ -55,8 +55,8 @@ EditorRegions::EditorRegions (Editor* e)
 
 	_change_connection = _display.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &EditorRegions::selection_changed));
 
-	e->EditorFreeze.connect (_editor_freeze_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::freeze_tree_model, this), gui_context ());
-	e->EditorThaw.connect (_editor_thaw_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::thaw_tree_model, this), gui_context ());
+	e->EditorFreeze.connect (_editor_freeze_connection, MISSING_INVALIDATOR, std::bind (&EditorRegions::freeze_tree_model, this), gui_context ());
+	e->EditorThaw.connect (_editor_thaw_connection, MISSING_INVALIDATOR, std::bind (&EditorRegions::thaw_tree_model, this), gui_context ());
 }
 
 void

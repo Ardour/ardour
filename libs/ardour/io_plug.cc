@@ -255,7 +255,7 @@ IOPlug::setup ()
 	 }
 
 	 _plugin->reconfigure_io (_n_in, aux_in, _n_out);
-	 _plugin->ParameterChangedExternally.connect_same_thread (*this, boost::bind (&IOPlug::parameter_changed_externally, this, _1, _2));
+	 _plugin->ParameterChangedExternally.connect_same_thread (*this, std::bind (&IOPlug::parameter_changed_externally, this, _1, _2));
 	 _plugin->activate ();
 	 _plugin->set_insert (this, 0);
 }
@@ -359,7 +359,7 @@ IOPlug::create_parameters ()
 		add_control (c);
 	}
 
-	_plugin->PresetPortSetValue.connect_same_thread (*this, boost::bind (&IOPlug::preset_load_set_value, this, _1, _2));
+	_plugin->PresetPortSetValue.connect_same_thread (*this, std::bind (&IOPlug::preset_load_set_value, this, _1, _2));
 }
 
 void

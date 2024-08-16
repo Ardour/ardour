@@ -450,7 +450,7 @@ setup_lua ()
 
 	AudioEngine::instance ()->stop ();
 
-	AudioEngine::instance ()->Halted.connect_same_thread (engine_connections, boost::bind (&engine_halted, _1));
+	AudioEngine::instance ()->Halted.connect_same_thread (engine_connections, std::bind (&engine_halted, _1));
 }
 
 static int

@@ -137,7 +137,7 @@ PortGroup::add_bundle_internal (std::shared_ptr<Bundle> b, std::shared_ptr<IO> i
 	}
 
 	BundleRecord* br = new BundleRecord (b, io, colour, has_colour);
-	b->Changed.connect (br->changed_connection, invalidator (*this), boost::bind (&PortGroup::bundle_changed, this, _1), gui_context());
+	b->Changed.connect (br->changed_connection, invalidator (*this), std::bind (&PortGroup::bundle_changed, this, _1), gui_context());
 	_bundles.push_back (br);
 
 	Changed ();
@@ -400,7 +400,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 #endif
 
 		RouteIOs rb (r, io);
-		r->foreach_processor (boost::bind (&PortGroupList::maybe_add_processor_to_list, this, _1, &rb.ios, inputs, used_io));
+		r->foreach_processor (std::bind (&PortGroupList::maybe_add_processor_to_list, this, _1, &rb.ios, inputs, used_io));
 		route_ios.push_back (rb);
 	}
 
@@ -919,8 +919,8 @@ PortGroupList::add_group (std::shared_ptr<PortGroup> g)
 {
 	_groups.push_back (g);
 
-	g->Changed.connect (_changed_connections, invalidator (*this), boost::bind (&PortGroupList::emit_changed, this), gui_context());
-	g->BundleChanged.connect (_bundle_changed_connections, invalidator (*this), boost::bind (&PortGroupList::emit_bundle_changed, this, _1), gui_context());
+	g->Changed.connect (_changed_connections, invalidator (*this), std::bind (&PortGroupList::emit_changed, this), gui_context());
+	g->BundleChanged.connect (_bundle_changed_connections, invalidator (*this), std::bind (&PortGroupList::emit_bundle_changed, this, _1), gui_context());
 
 	emit_changed ();
 }

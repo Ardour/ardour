@@ -100,7 +100,7 @@ Plugin::Plugin (AudioEngine& e, Session& s)
 	, _num (0)
 {
 	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
-	PresetsChanged.connect_same_thread(_preset_connection, boost::bind (&Plugin::invalidate_preset_cache, this, _1, _2, _3));
+	PresetsChanged.connect_same_thread(_preset_connection, std::bind (&Plugin::invalidate_preset_cache, this, _1, _2, _3));
 }
 
 Plugin::Plugin (const Plugin& other)
@@ -123,7 +123,7 @@ Plugin::Plugin (const Plugin& other)
 {
 	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
 
-	PresetsChanged.connect_same_thread(_preset_connection, boost::bind (&Plugin::invalidate_preset_cache, this, _1, _2, _3));
+	PresetsChanged.connect_same_thread(_preset_connection, std::bind (&Plugin::invalidate_preset_cache, this, _1, _2, _3));
 }
 
 Plugin::~Plugin ()

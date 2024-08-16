@@ -262,8 +262,8 @@ main (int argc, char* argv[])
 	}
 
 	PBD::ScopedConnectionList con;
-	BasicUI::AccessAction.connect_same_thread (con, boost::bind (&access_action, _1, _2));
-	AudioEngine::instance ()->Halted.connect_same_thread (con, boost::bind (&engine_halted, _1));
+	BasicUI::AccessAction.connect_same_thread (con, std::bind (&access_action, _1, _2));
+	AudioEngine::instance ()->Halted.connect_same_thread (con, std::bind (&engine_halted, _1));
 
 #ifndef PLATFORM_WINDOWS
 	signal (SIGINT, wearedone);

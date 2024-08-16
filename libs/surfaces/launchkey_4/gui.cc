@@ -142,9 +142,9 @@ LK4_GUI::LK4_GUI (LaunchKey4& p)
 
 	/* catch future changes to connection state */
 
-	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), boost::bind (&LK4_GUI::connection_handler, this), gui_context());
-	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), boost::bind (&LK4_GUI::connection_handler, this), gui_context());
-	_lp.ConnectionChange.connect (_port_connections, invalidator (*this), boost::bind (&LK4_GUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), std::bind (&LK4_GUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), std::bind (&LK4_GUI::connection_handler, this), gui_context());
+	_lp.ConnectionChange.connect (_port_connections, invalidator (*this), std::bind (&LK4_GUI::connection_handler, this), gui_context());
 }
 
 LK4_GUI::~LK4_GUI ()

@@ -61,14 +61,14 @@ StereoPannerEditor::StereoPannerEditor (StereoPanner* p)
 	set_width_range ();
 
 	_panner->get_position_controllable()->Changed.connect (
-		_connections, invalidator (*this), boost::bind (&StereoPannerEditor::update_editor, this), gui_context ()
+		_connections, invalidator (*this), std::bind (&StereoPannerEditor::update_editor, this), gui_context ()
 		);
 
 	_panner->get_width_controllable()->Changed.connect (
-		_connections, invalidator (*this), boost::bind (&StereoPannerEditor::update_editor, this), gui_context ()
+		_connections, invalidator (*this), std::bind (&StereoPannerEditor::update_editor, this), gui_context ()
 		);
 
-	_panner->DropReferences.connect (_connections, invalidator (*this), boost::bind (&StereoPannerEditor::panner_going_away, this), gui_context ());
+	_panner->DropReferences.connect (_connections, invalidator (*this), std::bind (&StereoPannerEditor::panner_going_away, this), gui_context ());
 	_position.signal_value_changed().connect (sigc::mem_fun (*this, &StereoPannerEditor::position_changed));
 	_width.signal_value_changed().connect (sigc::mem_fun (*this, &StereoPannerEditor::width_changed));
 

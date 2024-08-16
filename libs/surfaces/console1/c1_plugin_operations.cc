@@ -333,7 +333,7 @@ Console1::spill_plugins (const int32_t plugin_index)
 		});
 
 		plugin_insert->ActiveChanged.connect (
-		  plugin_connections, MISSING_INVALIDATOR, boost::bind (plugin_mapping), this);
+		  plugin_connections, MISSING_INVALIDATOR, std::bind (plugin_mapping), this);
 		plugin_insert->ActiveChanged ();
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("No ControllerButton found %1\n", n_controls));
@@ -404,7 +404,7 @@ Console1::spill_plugins (const int32_t plugin_index)
 							  string_compose ("->Encoder Plugin parameter %1: %2 - %3\n", n_controls, val, v));
 						});
 						c->Changed.connect (
-						  plugin_connections, MISSING_INVALIDATOR, boost::bind (plugin_mapping, _1, _2), this);
+						  plugin_connections, MISSING_INVALIDATOR, std::bind (plugin_mapping, _1, _2), this);
 						c->Changed (true, PBD::Controllable::GroupControlDisposition::UseGroup);
 						continue;
 					} catch (ControlNotFoundException const&) {
@@ -431,7 +431,7 @@ Console1::spill_plugins (const int32_t plugin_index)
 						});
 
 						c->Changed.connect (
-						  plugin_connections, MISSING_INVALIDATOR, boost::bind (plugin_mapping, _1, _2), this);
+						  plugin_connections, MISSING_INVALIDATOR, std::bind (plugin_mapping, _1, _2), this);
 						c->Changed (true, PBD::Controllable::GroupControlDisposition::UseGroup);
 						continue;
 					} catch (ControlNotFoundException const&) {

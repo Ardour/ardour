@@ -508,25 +508,25 @@ Session::Session (AudioEngine &eng,
 
 	bool was_dirty = dirty();
 
-	PresentationInfo::Change.connect_same_thread (*this, boost::bind (&Session::notify_presentation_info_change, this, _1));
+	PresentationInfo::Change.connect_same_thread (*this, std::bind (&Session::notify_presentation_info_change, this, _1));
 
-	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Session::config_changed, this, _1, false));
-	config.ParameterChanged.connect_same_thread (*this, boost::bind (&Session::config_changed, this, _1, true));
+	Config->ParameterChanged.connect_same_thread (*this, std::bind (&Session::config_changed, this, _1, false));
+	config.ParameterChanged.connect_same_thread (*this, std::bind (&Session::config_changed, this, _1, true));
 
-	StartTimeChanged.connect_same_thread (*this, boost::bind (&Session::start_time_changed, this, _1));
-	EndTimeChanged.connect_same_thread (*this, boost::bind (&Session::end_time_changed, this, _1));
+	StartTimeChanged.connect_same_thread (*this, std::bind (&Session::start_time_changed, this, _1));
+	EndTimeChanged.connect_same_thread (*this, std::bind (&Session::end_time_changed, this, _1));
 
-	LatentSend::ChangedLatency.connect_same_thread (*this, boost::bind (&Session::send_latency_compensation_change, this));
-	LatentSend::QueueUpdate.connect_same_thread (*this, boost::bind (&Session::update_send_delaylines, this));
-	Latent::DisableSwitchChanged.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, this));
+	LatentSend::ChangedLatency.connect_same_thread (*this, std::bind (&Session::send_latency_compensation_change, this));
+	LatentSend::QueueUpdate.connect_same_thread (*this, std::bind (&Session::update_send_delaylines, this));
+	Latent::DisableSwitchChanged.connect_same_thread (*this, std::bind (&Session::queue_latency_recompute, this));
 
-	Controllable::ControlTouched.connect_same_thread (*this, boost::bind (&Session::controllable_touched, this, _1));
+	Controllable::ControlTouched.connect_same_thread (*this, std::bind (&Session::controllable_touched, this, _1));
 
-	Location::cue_change.connect_same_thread (*this, boost::bind (&Session::cue_marker_change, this, _1));
+	Location::cue_change.connect_same_thread (*this, std::bind (&Session::cue_marker_change, this, _1));
 
-	IOPluginsChanged.connect_same_thread (*this, boost::bind (&Session::resort_io_plugs, this));
+	IOPluginsChanged.connect_same_thread (*this, std::bind (&Session::resort_io_plugs, this));
 
-	TempoMap::MapChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this));
+	TempoMap::MapChanged.connect_same_thread (*this, std::bind (&Session::tempo_map_changed, this));
 
 	emit_thread_start ();
 	auto_connect_thread_start ();
@@ -609,7 +609,7 @@ Session::immediately_post_engine ()
 
 	/* every time we reconnect, recompute worst case output latencies */
 
-	_engine.Running.connect_same_thread (*this, boost::bind (&Session::initialize_latencies, this));
+	_engine.Running.connect_same_thread (*this, std::bind (&Session::initialize_latencies, this));
 
 	/* Restart transport FSM */
 
@@ -617,7 +617,7 @@ Session::immediately_post_engine ()
 
 	/* every time we reconnect, do stuff ... */
 
-	_engine.Running.connect_same_thread (*this, boost::bind (&Session::engine_running, this));
+	_engine.Running.connect_same_thread (*this, std::bind (&Session::engine_running, this));
 
 	try {
 		BootMessage (_("Set up LTC"));
@@ -634,8 +634,8 @@ Session::immediately_post_engine ()
 
 	/* TODO, connect in different thread. (PortRegisteredOrUnregistered may be in RT context)
 	 * can we do that? */
-	 _engine.PortRegisteredOrUnregistered.connect_same_thread (*this, boost::bind (&Session::port_registry_changed, this));
-	 _engine.PortPrettyNameChanged.connect_same_thread (*this, boost::bind (&Session::setup_bundles, this));
+	 _engine.PortRegisteredOrUnregistered.connect_same_thread (*this, std::bind (&Session::port_registry_changed, this));
+	 _engine.PortPrettyNameChanged.connect_same_thread (*this, std::bind (&Session::setup_bundles, this));
 
 	// set samplerate for plugins added early
 	// e.g from templates or MB channelstrip
@@ -920,7 +920,7 @@ void
 Session::port_registry_changed()
 {
 	setup_bundles ();
-	_butler->delegate (boost::bind (&Session::probe_ctrl_surfaces, this));
+	_butler->delegate (std::bind (&Session::probe_ctrl_surfaces, this));
 }
 
 void
@@ -975,7 +975,7 @@ Session::setup_click ()
 		setup_click_state (0);
 	}
 	click_io_resync_latency (true);
-	LatencyUpdated.connect_same_thread (_click_io_connection, boost::bind (&Session::click_io_resync_latency, this, _1));
+	LatencyUpdated.connect_same_thread (_click_io_connection, std::bind (&Session::click_io_resync_latency, this, _1));
 }
 
 void
@@ -1693,9 +1693,9 @@ Session::track_playlist_changed (std::weak_ptr<Track> wp)
 	std::shared_ptr<Playlist> playlist;
 
 	if ((playlist = track->playlist()) != 0) {
-		playlist->RegionAdded.connect_same_thread (*this, boost::bind (&Session::playlist_region_added, this, _1));
-		playlist->RangesMoved.connect_same_thread (*this, boost::bind (&Session::playlist_ranges_moved, this, _1));
-		playlist->RegionsExtended.connect_same_thread (*this, boost::bind (&Session::playlist_regions_extended, this, _1));
+		playlist->RegionAdded.connect_same_thread (*this, std::bind (&Session::playlist_region_added, this, _1));
+		playlist->RangesMoved.connect_same_thread (*this, std::bind (&Session::playlist_ranges_moved, this, _1));
+		playlist->RegionsExtended.connect_same_thread (*this, std::bind (&Session::playlist_regions_extended, this, _1));
 	}
 }
 
@@ -1913,9 +1913,9 @@ Session::set_auto_punch_location (Location* location)
 
 	punch_connections.drop_connections ();
 
-	location->StartChanged.connect_same_thread (punch_connections, boost::bind (&Session::auto_punch_start_changed, this, location));
-	location->EndChanged.connect_same_thread (punch_connections, boost::bind (&Session::auto_punch_end_changed, this, location));
-	location->Changed.connect_same_thread (punch_connections, boost::bind (&Session::auto_punch_changed, this, location));
+	location->StartChanged.connect_same_thread (punch_connections, std::bind (&Session::auto_punch_start_changed, this, location));
+	location->EndChanged.connect_same_thread (punch_connections, std::bind (&Session::auto_punch_end_changed, this, location));
+	location->Changed.connect_same_thread (punch_connections, std::bind (&Session::auto_punch_changed, this, location));
 
 	location->set_auto_punch (true, this);
 
@@ -1970,10 +1970,10 @@ Session::set_auto_loop_location (Location* location)
 
 	loop_connections.drop_connections ();
 
-	location->StartChanged.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, location));
-	location->EndChanged.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, location));
-	location->Changed.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, location));
-	location->FlagsChanged.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, location));
+	location->StartChanged.connect_same_thread (loop_connections, std::bind (&Session::auto_loop_changed, this, location));
+	location->EndChanged.connect_same_thread (loop_connections, std::bind (&Session::auto_loop_changed, this, location));
+	location->Changed.connect_same_thread (loop_connections, std::bind (&Session::auto_loop_changed, this, location));
+	location->FlagsChanged.connect_same_thread (loop_connections, std::bind (&Session::auto_loop_changed, this, location));
 
 	location->set_auto_loop (true, this);
 
@@ -2062,7 +2062,7 @@ Session::sync_locations_to_skips ()
 	/* This happens asynchronously (in the audioengine thread). After the clear is done, we will call
 	 * Session::_sync_locations_to_skips() from the audioengine thread.
 	 */
-	clear_events (SessionEvent::Skip, boost::bind (&Session::_sync_locations_to_skips, this));
+	clear_events (SessionEvent::Skip, std::bind (&Session::_sync_locations_to_skips, this));
 }
 
 void
@@ -2105,31 +2105,31 @@ Session::location_added (Location *location)
 	if (location->is_mark()) {
 		/* listen for per-location signals that require us to do any * global updates for marks */
 
-		location->StartChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-		location->EndChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-		location->Changed.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-		location->FlagsChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-		location->TimeDomainChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
+		location->StartChanged.connect_same_thread (skip_update_connections, std::bind (&Session::update_marks, this, location));
+		location->EndChanged.connect_same_thread (skip_update_connections, std::bind (&Session::update_marks, this, location));
+		location->Changed.connect_same_thread (skip_update_connections, std::bind (&Session::update_marks, this, location));
+		location->FlagsChanged.connect_same_thread (skip_update_connections, std::bind (&Session::update_marks, this, location));
+		location->TimeDomainChanged.connect_same_thread (skip_update_connections, std::bind (&Session::update_marks, this, location));
 	}
 
 	if (location->is_range_marker()) {
 		/* listen for per-location signals that require us to do any * global updates for marks */
 
-		location->StartChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-		location->EndChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-		location->Changed.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-		location->FlagsChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-		location->TimeDomainChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
+		location->StartChanged.connect_same_thread (skip_update_connections, std::bind (&Session::update_marks, this, location));
+		location->EndChanged.connect_same_thread (skip_update_connections, std::bind (&Session::update_marks, this, location));
+		location->Changed.connect_same_thread (skip_update_connections, std::bind (&Session::update_marks, this, location));
+		location->FlagsChanged.connect_same_thread (skip_update_connections, std::bind (&Session::update_marks, this, location));
+		location->TimeDomainChanged.connect_same_thread (skip_update_connections, std::bind (&Session::update_marks, this, location));
 	}
 
 	if (location->is_skip()) {
 		/* listen for per-location signals that require us to update skip-locate events */
 
-		location->StartChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
-		location->EndChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
-		location->Changed.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
-		location->FlagsChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, false));
-		location->TimeDomainChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
+		location->StartChanged.connect_same_thread (skip_update_connections, std::bind (&Session::update_skips, this, location, true));
+		location->EndChanged.connect_same_thread (skip_update_connections, std::bind (&Session::update_skips, this, location, true));
+		location->Changed.connect_same_thread (skip_update_connections, std::bind (&Session::update_skips, this, location, true));
+		location->FlagsChanged.connect_same_thread (skip_update_connections, std::bind (&Session::update_skips, this, location, false));
+		location->TimeDomainChanged.connect_same_thread (skip_update_connections, std::bind (&Session::update_marks, this, location));
 
 		update_skips (location, true);
 	}
@@ -2599,7 +2599,7 @@ Session::rechain_process_graph (GraphNodeList& g)
 			 * However, the graph-chain may be in use (session process), and the last reference
 			 * be helf by the process-callback. So we delegate deletion to the butler thread.
 			 */
-			_graph_chain = std::shared_ptr<GraphChain> (new GraphChain (g, edges), boost::bind (&rt_safe_delete<GraphChain>, this, _1));
+			_graph_chain = std::shared_ptr<GraphChain> (new GraphChain (g, edges), std::bind (&rt_safe_delete<GraphChain>, this, _1));
 		} else {
 			_graph_chain.reset ();
 		}
@@ -2632,7 +2632,7 @@ Session::rechain_ioplug_graph (bool pre)
 	GraphEdges edges;
 
 	if (topological_sort (gnl, edges)) {
-		_io_graph_chain[pre ? 0 : 1] = std::shared_ptr<GraphChain> (new GraphChain (gnl, edges), boost::bind (&rt_safe_delete<GraphChain>, this, _1));
+		_io_graph_chain[pre ? 0 : 1] = std::shared_ptr<GraphChain> (new GraphChain (gnl, edges), std::bind (&rt_safe_delete<GraphChain>, this, _1));
 		return true;
 	}
 	return false;
@@ -3549,12 +3549,12 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 			std::weak_ptr<Route> wpr (*x);
 			std::shared_ptr<Route> r (*x);
 
-			r->solo_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, _2,wpr));
-			r->solo_isolate_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_solo_isolated_changed, this, wpr));
-			r->mute_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this));
+			r->solo_control()->Changed.connect_same_thread (*this, std::bind (&Session::route_solo_changed, this, _1, _2,wpr));
+			r->solo_isolate_control()->Changed.connect_same_thread (*this, std::bind (&Session::route_solo_isolated_changed, this, wpr));
+			r->mute_control()->Changed.connect_same_thread (*this, std::bind (&Session::route_mute_changed, this));
 
-			r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
-			r->processor_latency_changed.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, this));
+			r->processors_changed.connect_same_thread (*this, std::bind (&Session::route_processors_changed, this, _1));
+			r->processor_latency_changed.connect_same_thread (*this, std::bind (&Session::queue_latency_recompute, this));
 
 			if (r->is_master()) {
 				_master_out = r;
@@ -3570,19 +3570,19 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 
 			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (r);
 			if (tr) {
-				tr->PlaylistChanged.connect_same_thread (*this, boost::bind (&Session::track_playlist_changed, this, std::weak_ptr<Track> (tr)));
+				tr->PlaylistChanged.connect_same_thread (*this, std::bind (&Session::track_playlist_changed, this, std::weak_ptr<Track> (tr)));
 				track_playlist_changed (std::weak_ptr<Track> (tr));
-				tr->rec_enable_control()->Changed.connect_same_thread (*this, boost::bind (&Session::update_route_record_state, this));
+				tr->rec_enable_control()->Changed.connect_same_thread (*this, std::bind (&Session::update_route_record_state, this));
 
 				std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (tr);
 				if (mt) {
-					mt->StepEditStatusChange.connect_same_thread (*this, boost::bind (&Session::step_edit_status_change, this, _1));
-					mt->presentation_info().PropertyChanged.connect_same_thread (*this, boost::bind (&Session::midi_track_presentation_info_changed, this, _1, std::weak_ptr<MidiTrack>(mt)));
+					mt->StepEditStatusChange.connect_same_thread (*this, std::bind (&Session::step_edit_status_change, this, _1));
+					mt->presentation_info().PropertyChanged.connect_same_thread (*this, std::bind (&Session::midi_track_presentation_info_changed, this, _1, std::weak_ptr<MidiTrack>(mt)));
 				}
 			}
 
 			if (r->triggerbox()) {
-				r->triggerbox()->EmptyStatusChanged.connect_same_thread (*this, boost::bind (&Session::handle_slots_empty_status, this, wpr));
+				r->triggerbox()->EmptyStatusChanged.connect_same_thread (*this, std::bind (&Session::handle_slots_empty_status, this, wpr));
 				if (!r->triggerbox()->empty()) {
 					tb_with_filled_slots++;
 				}
@@ -3678,7 +3678,7 @@ Session::load_and_connect_instruments (RouteList& new_routes, bool strict_io, st
 		}
 	}
 	for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
-		(*r)->output()->changed.connect_same_thread (*this, boost::bind (&Session::midi_output_change_handler, this, _1, _2, std::weak_ptr<Route>(*r)));
+		(*r)->output()->changed.connect_same_thread (*this, std::bind (&Session::midi_output_change_handler, this, _1, _2, std::weak_ptr<Route>(*r)));
 	}
 }
 
@@ -4891,7 +4891,7 @@ Session::add_source (std::shared_ptr<Source> source)
 			}
 		}
 
-		source->DropReferences.connect_same_thread (*this, boost::bind (&Session::remove_source, this, std::weak_ptr<Source> (source), false));
+		source->DropReferences.connect_same_thread (*this, std::bind (&Session::remove_source, this, std::weak_ptr<Source> (source), false));
 
 		SourceAdded (std::weak_ptr<Source> (source)); /* EMIT SIGNAL */
 	} else {
@@ -5482,7 +5482,7 @@ Session::load_io_plugin (std::shared_ptr<IOPlug> ioplugin)
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		ioplugin->ensure_io ();
 		iop->push_back (ioplugin);
-		ioplugin->LatencyChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, this, true, false));
+		ioplugin->LatencyChanged.connect_same_thread (*this, std::bind (&Session::update_latency_compensation, this, true, false));
 	}
 	IOPluginsChanged (); /* EMIT SIGNAL */
 	set_dirty();

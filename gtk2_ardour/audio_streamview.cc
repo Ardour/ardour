@@ -151,7 +151,7 @@ AudioStreamView::add_region_view_internal (std::shared_ptr<Region> r, bool wait_
 
 	/* catch region going away */
 
-	r->DropReferences.connect (*this, invalidator (*this), boost::bind (&AudioStreamView::remove_region_view, this, std::weak_ptr<Region> (r)), gui_context());
+	r->DropReferences.connect (*this, invalidator (*this), std::bind (&AudioStreamView::remove_region_view, this, std::weak_ptr<Region> (r)), gui_context());
 
 	RegionViewAdded (region_view);
 
@@ -229,7 +229,7 @@ AudioStreamView::setup_rec_box ()
 						sources.push_back (src);
 						src->PeakRangeReady.connect (rec_data_ready_connections,
 						                             invalidator (*this),
-						                             boost::bind (&AudioStreamView::rec_peak_range_ready, this, _1, _2, std::weak_ptr<Source>(src)),
+						                             std::bind (&AudioStreamView::rec_peak_range_ready, this, _1, _2, std::weak_ptr<Source>(src)),
 						                             gui_context());
 					}
 				}

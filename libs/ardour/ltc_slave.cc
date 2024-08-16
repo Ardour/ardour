@@ -61,7 +61,7 @@ LTC_TransportMaster::LTC_TransportMaster (std::string const & name)
 {
 	memset (&prev_frame, 0, sizeof(LTCFrameExt));
 
-	AudioEngine::instance()->Xrun.connect_same_thread (port_connection, boost::bind (&LTC_TransportMaster::resync_xrun, this));
+	AudioEngine::instance()->Xrun.connect_same_thread (port_connection, std::bind (&LTC_TransportMaster::resync_xrun, this));
 
 }
 
@@ -102,8 +102,8 @@ LTC_TransportMaster::set_session (Session *s)
 
 		fps_detected = false;
 
-		_session->config.ParameterChanged.connect_same_thread (session_connections, boost::bind (&LTC_TransportMaster::parameter_changed, this, _1));
-		_session->LatencyUpdated.connect_same_thread (session_connections, boost::bind (&LTC_TransportMaster::resync_latency, this, _1));
+		_session->config.ParameterChanged.connect_same_thread (session_connections, std::bind (&LTC_TransportMaster::parameter_changed, this, _1));
+		_session->LatencyUpdated.connect_same_thread (session_connections, std::bind (&LTC_TransportMaster::resync_latency, this, _1));
 	}
 }
 

@@ -1186,7 +1186,7 @@ AudioRegionView::set_region_fx_line (std::shared_ptr<AutomationControl> ac, std:
 	_fx_line->set_height ((uint32_t) rint (height() - NAME_HIGHLIGHT_SIZE) - 2);
 	_fx_line->reset ();
 
-	rfx->DropReferences.connect (_region_fx_connection, invalidator (*this), boost::bind (&AudioRegionView::set_region_gain_line, this), gui_context ());
+	rfx->DropReferences.connect (_region_fx_connection, invalidator (*this), std::bind (&AudioRegionView::set_region_gain_line, this), gui_context ());
 
 	bool changed = _rfx_id != rfx->id () || _rdx_param != param_id;
 	_rfx_id    = rfx->id ();
@@ -1369,7 +1369,7 @@ AudioRegionView::create_waves ()
 		// cerr << "\tchannel " << n << endl;
 
 		if (wait_for_data) {
-			if (audio_region()->audio_source(n)->peaks_ready (boost::bind (&AudioRegionView::peaks_ready_handler, this, n), &_data_ready_connections[n], gui_context())) {
+			if (audio_region()->audio_source(n)->peaks_ready (std::bind (&AudioRegionView::peaks_ready_handler, this, n), &_data_ready_connections[n], gui_context())) {
 				// cerr << "\tData is ready for channel " << n << "\n";
 				create_one_wave (n, true);
 			} else {
@@ -1499,7 +1499,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 void
 AudioRegionView::peaks_ready_handler (uint32_t which)
 {
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&AudioRegionView::create_one_wave, this, which, false));
+	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), std::bind (&AudioRegionView::create_one_wave, this, which, false));
 	// cerr << "AudioRegionView::peaks_ready_handler() called on " << which << " this: " << this << endl;
 }
 

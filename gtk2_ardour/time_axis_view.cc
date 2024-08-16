@@ -633,7 +633,7 @@ void
 TimeAxisView::set_height_enum (Height h, bool apply_to_selection)
 {
 	if (apply_to_selection) {
-		_editor.get_selection().tracks.foreach_time_axis (boost::bind (&TimeAxisView::set_height_enum, _1, h, false));
+		_editor.get_selection().tracks.foreach_time_axis (std::bind (&TimeAxisView::set_height_enum, _1, h, false));
 	} else {
 		set_height (preset_height (h));
 	}

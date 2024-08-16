@@ -68,8 +68,8 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, std:
 	, _jack_ports (new JackPorts)
 	, _session (0)
 {
-	_jack_connection->Connected.connect_same_thread (jack_connection_connection, boost::bind (&JACKAudioBackend::when_connected_to_jack, this));
-	_jack_connection->Disconnected.connect_same_thread (disconnect_connection, boost::bind (&JACKAudioBackend::disconnected, this, _1));
+	_jack_connection->Connected.connect_same_thread (jack_connection_connection, std::bind (&JACKAudioBackend::when_connected_to_jack, this));
+	_jack_connection->Disconnected.connect_same_thread (disconnect_connection, std::bind (&JACKAudioBackend::disconnected, this, _1));
 }
 
 JACKAudioBackend::~JACKAudioBackend()

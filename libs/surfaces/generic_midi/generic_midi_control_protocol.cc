@@ -125,23 +125,23 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	 * thread
 	 */
 
-	Controllable::StartLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::start_learning, this, _1));
-	Controllable::StopLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::stop_learning, this, _1));
+	Controllable::StartLearning.connect_same_thread (*this, std::bind (&GenericMidiControlProtocol::start_learning, this, _1));
+	Controllable::StopLearning.connect_same_thread (*this, std::bind (&GenericMidiControlProtocol::stop_learning, this, _1));
 
 	/* this signal is emitted by the process() callback, and if
 	 * send_feedback() is going to do anything, it should do it in the
 	 * context of the process() callback itself.
 	 */
 
-	Session::SendFeedback.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::send_feedback, this));
+	Session::SendFeedback.connect_same_thread (*this, std::bind (&GenericMidiControlProtocol::send_feedback, this));
 
 	/* this one is cross-thread */
 
-	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::reset_controllables, this), this);
+	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, std::bind (&GenericMidiControlProtocol::reset_controllables, this), this);
 
 	/* Catch port connections and disconnections (cross-thread) */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (_port_connection, MISSING_INVALIDATOR,
-	                                                                      boost::bind (&GenericMidiControlProtocol::connection_handler, this, _1, _2, _3, _4, _5),
+	                                                                      std::bind (&GenericMidiControlProtocol::connection_handler, this, _1, _2, _3, _4, _5),
 	                                                                      this);
 
 	reload_maps ();
@@ -465,7 +465,7 @@ GenericMidiControlProtocol::start_learning (std::weak_ptr <Controllable> wc)
 		Glib::Threads::Mutex::Lock lm (pending_lock);
 
 		MIDIPendingControllable* element = new MIDIPendingControllable (mc, own_mc);
-		c->LearningFinished.connect_same_thread (element->connection, boost::bind (&GenericMidiControlProtocol::learning_stopped, this, mc));
+		c->LearningFinished.connect_same_thread (element->connection, std::bind (&GenericMidiControlProtocol::learning_stopped, this, mc));
 
 		pending_controllables.push_back (element);
 	}

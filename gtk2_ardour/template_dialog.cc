@@ -208,8 +208,8 @@ TemplateDialog::TemplateDialog ()
 	session_tm->init ();
 	route_tm->init ();
 
-	session_tm->TemplatesImported.connect (*this, invalidator (*this), boost::bind (&RouteTemplateManager::init, route_tm), gui_context ());
-	route_tm->TemplatesImported.connect (*this, invalidator (*this), boost::bind (&SessionTemplateManager::init, session_tm), gui_context ());
+	session_tm->TemplatesImported.connect (*this, invalidator (*this), std::bind (&RouteTemplateManager::init, route_tm), gui_context ());
+	route_tm->TemplatesImported.connect (*this, invalidator (*this), std::bind (&SessionTemplateManager::init, session_tm), gui_context ());
 
 	signal_hide().connect (sigc::mem_fun (session_tm, &TemplateManager::handle_dirty_description));
 	signal_hide().connect (sigc::mem_fun (route_tm, &TemplateManager::handle_dirty_description));

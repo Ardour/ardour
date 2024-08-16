@@ -259,7 +259,7 @@ IOButtonBase::set_label (IOButtonBase& self, ARDOUR::Session& session, std::shar
 			if (io->bundle ()->connected_to (dest_io->bundle (), session.engine (), dt, true)) {
 				label << Gtkmm2ext::markup_escape_text (route->name ());
 				have_label = true;
-				route->PropertyChanged.connect (self._bundle_connections, invalidator (self), boost::bind (&IOButtonBase::maybe_update, &self, _1), gui_context ());
+				route->PropertyChanged.connect (self._bundle_connections, invalidator (self), std::bind (&IOButtonBase::maybe_update, &self, _1), gui_context ());
 				break;
 			}
 
@@ -269,7 +269,7 @@ IOButtonBase::set_label (IOButtonBase& self, ARDOUR::Session& session, std::shar
 
 			if (exclusively_connected (dest_io, io, dt, typed_connection_count, route->name (), label)) {
 				have_label = true;
-				route->PropertyChanged.connect (self._bundle_connections, invalidator (self), boost::bind (&IOButtonBase::maybe_update, &self, _1), gui_context ());
+				route->PropertyChanged.connect (self._bundle_connections, invalidator (self), std::bind (&IOButtonBase::maybe_update, &self, _1), gui_context ());
 			}
 			break;
 		}
@@ -449,12 +449,12 @@ IOButton::set_route (std::shared_ptr<ARDOUR::Route> rt, RouteUI* routeui)
 		return;
 	}
 
-	AudioEngine::instance ()->PortConnectedOrDisconnected.connect (_connections, invalidator (*this), boost::bind (&IOButton::port_connected_or_disconnected, this, _1, _3), gui_context ());
-	AudioEngine::instance ()->PortPrettyNameChanged.connect (_connections, invalidator (*this), boost::bind (&IOButton::port_pretty_name_changed, this, _1), gui_context ());
+	AudioEngine::instance ()->PortConnectedOrDisconnected.connect (_connections, invalidator (*this), std::bind (&IOButton::port_connected_or_disconnected, this, _1, _3), gui_context ());
+	AudioEngine::instance ()->PortPrettyNameChanged.connect (_connections, invalidator (*this), std::bind (&IOButton::port_pretty_name_changed, this, _1), gui_context ());
 
-	io ()->changed.connect (_connections, invalidator (*this), boost::bind (&IOButton::update, this), gui_context ());
+	io ()->changed.connect (_connections, invalidator (*this), std::bind (&IOButton::update, this), gui_context ());
 	/* We're really only interested in BundleRemoved when connected to that bundle */
-	_route->session ().BundleAddedOrRemoved.connect (_connections, invalidator (*this), boost::bind (&IOButton::update, this), gui_context ());
+	_route->session ().BundleAddedOrRemoved.connect (_connections, invalidator (*this), std::bind (&IOButton::update, this), gui_context ());
 
 	update ();
 }
@@ -719,7 +719,7 @@ IOButton::update ()
 	set_label (*this, _route->session (), bundle, _input ? _route->input () : _route->output ());
 
 	if (bundle) {
-		bundle->Changed.connect (_bundle_connections, invalidator (*this), boost::bind (&IOButton::update, this), gui_context ());
+		bundle->Changed.connect (_bundle_connections, invalidator (*this), std::bind (&IOButton::update, this), gui_context ());
 	}
 }
 

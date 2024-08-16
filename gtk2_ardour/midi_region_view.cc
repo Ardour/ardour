@@ -140,7 +140,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
-	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 
 	connect_to_diskstream ();
 }
@@ -280,21 +280,21 @@ MidiRegionView::init (bool /*wfd*/)
 	group->raise_to_top();
 
 	midi_view()->midi_track()->playback_filter().ChannelModeChanged.connect (_channel_mode_changed_connection, invalidator (*this),
-	                                                                         boost::bind (&MidiRegionView::midi_channel_mode_changed, this),
+	                                                                         std::bind (&MidiRegionView::midi_channel_mode_changed, this),
 	                                                                         gui_context ());
 
 	instrument_info().Changed.connect (_instrument_changed_connection, invalidator (*this),
-	                                   boost::bind (&MidiRegionView::instrument_settings_changed, this), gui_context());
+	                                   std::bind (&MidiRegionView::instrument_settings_changed, this), gui_context());
 
 	trackview.editor().SnapChanged.connect(snap_changed_connection, invalidator(*this),
-	                                       boost::bind (&MidiRegionView::snap_changed, this),
+	                                       std::bind (&MidiRegionView::snap_changed, this),
 	                                       gui_context());
 
 	trackview.editor().MouseModeChanged.connect(_mouse_mode_connection, invalidator (*this),
-	                                            boost::bind (&MidiRegionView::mouse_mode_changed, this),
+	                                            std::bind (&MidiRegionView::mouse_mode_changed, this),
 	                                            gui_context ());
 
-	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
 }
 
@@ -316,7 +316,7 @@ MidiRegionView::connect_to_diskstream ()
 {
 	midi_view()->midi_track()->DataRecorded.connect(
 		*this, invalidator(*this),
-		boost::bind (&MidiRegionView::data_recorded, this, _1),
+		std::bind (&MidiRegionView::data_recorded, this, _1),
 		gui_context());
 }
 
@@ -940,7 +940,7 @@ MidiRegionView::display_model (std::shared_ptr<MidiModel> model)
 	_model = model;
 
 	content_connection.disconnect ();
-	_model->ContentsChanged.connect (content_connection, invalidator (*this), boost::bind (&MidiRegionView::model_changed, this), gui_context());
+	_model->ContentsChanged.connect (content_connection, invalidator (*this), std::bind (&MidiRegionView::model_changed, this), gui_context());
 	/* Don't signal as nobody else needs to know until selection has been altered. */
 	clear_events();
 	model_changed ();

@@ -60,7 +60,7 @@ Control::set_list(std::shared_ptr<ControlList> list)
 	_list = list;
 
 	if (_list) {
-		_list->Dirty.connect_same_thread (_list_marked_dirty_connection, boost::bind (&Control::list_marked_dirty, this));
+		_list->Dirty.connect_same_thread (_list_marked_dirty_connection, std::bind (&Control::list_marked_dirty, this));
 	}
 }
 

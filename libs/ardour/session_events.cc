@@ -167,7 +167,7 @@ SessionEventManager::clear_events (SessionEvent::Type type, std::function<void (
 
 	ev->event_loop = PBD::EventLoop::get_event_loop_for_thread ();
 	if (ev->event_loop) {
-		ev->rt_return = boost::bind (&CrossThreadPool::flush_pending_with_ev, ev->event_pool(), _1);
+		ev->rt_return = std::bind (&CrossThreadPool::flush_pending_with_ev, ev->event_pool(), _1);
 	}
 
 	queue_event (ev);
@@ -218,7 +218,7 @@ SessionEventManager::merge_event (SessionEvent* ev)
 		}
 		if (ev->event_loop) {
 			/* run non-realtime callback (in some other thread) */
-			ev->event_loop->call_slot (MISSING_INVALIDATOR, boost::bind (ev->rt_return, ev));
+			ev->event_loop->call_slot (MISSING_INVALIDATOR, std::bind (ev->rt_return, ev));
 		} else {
 			delete ev;
 		}

@@ -291,7 +291,7 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session* session, AudioR
 			throw ExportFailed ("Unhandled type in ExportChannelFactory constructor");
 	}
 
-	session->ProcessExport.connect_same_thread (export_connection, boost::bind (&RegionExportChannelFactory::new_cycle_started, this, _1));
+	session->ProcessExport.connect_same_thread (export_connection, std::bind (&RegionExportChannelFactory::new_cycle_started, this, _1));
 
 	buffers.ensure_buffers (DataType::AUDIO, n_channels, samples_per_cycle);
 	buffers.set_count (ChanCount (DataType::AUDIO, n_channels));

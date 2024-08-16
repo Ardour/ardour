@@ -69,7 +69,7 @@ Butler::Butler (Session& s)
 	SessionEvent::pool->set_trash (&pool_trash);
 
 	/* catch future changes to parameters */
-	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Butler::config_changed, this, _1));
+	Config->ParameterChanged.connect_same_thread (*this, std::bind (&Butler::config_changed, this, _1));
 }
 
 Butler::~Butler ()
@@ -81,7 +81,7 @@ void
 Butler::map_parameters ()
 {
 	/* use any current ones that we care about */
-	std::function<void (std::string)> ff (boost::bind (&Butler::config_changed, this, _1));
+	std::function<void (std::string)> ff (std::bind (&Butler::config_changed, this, _1));
 	Config->map_parameters (ff);
 }
 

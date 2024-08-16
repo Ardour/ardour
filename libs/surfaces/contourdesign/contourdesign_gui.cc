@@ -195,8 +195,8 @@ ContourDesignGUI::ContourDesignGUI (ContourDesignControlProtocol& ccp)
 	pack_start (*top_box);
 	pack_start (*btn_action_sample);
 
-	_ccp.ButtonPress.connect (*this, invalidator (*this), boost::bind (&ContourDesignGUI::test_button_press, this, _1), gui_context ());
-	_ccp.ButtonRelease.connect (*this, invalidator (*this), boost::bind (&ContourDesignGUI::test_button_release, this, _1), gui_context ());
+	_ccp.ButtonPress.connect (*this, invalidator (*this), std::bind (&ContourDesignGUI::test_button_press, this, _1), gui_context ());
+	_ccp.ButtonRelease.connect (*this, invalidator (*this), std::bind (&ContourDesignGUI::test_button_release, this, _1), gui_context ());
 
 	signal_map().connect (sigc::mem_fun (*this, &ContourDesignGUI::init_on_show));
 	update_device_state ();

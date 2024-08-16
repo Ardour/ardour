@@ -61,7 +61,7 @@ LevelMeterBase::LevelMeterBase (Session* s, PBD::EventLoop::InvalidationRecord* 
 {
 	set_session (s);
 
-	Config->ParameterChanged.connect (_parameter_connection, parent_invalidator, boost::bind (&LevelMeterBase::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (_parameter_connection, parent_invalidator, std::bind (&LevelMeterBase::parameter_changed, this, _1), gui_context());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun(*this, &LevelMeterBase::parameter_changed));
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &LevelMeterBase::color_handler));
 }
@@ -87,8 +87,8 @@ LevelMeterBase::set_meter (PeakMeter* meter)
 	color_changed = true; // force update
 
 	if (_meter) {
-		_meter->ConfigurationChanged.connect (_configuration_connection, parent_invalidator, boost::bind (&LevelMeterBase::configuration_changed, this, _1, _2), gui_context());
-		_meter->MeterTypeChanged.connect (_meter_type_connection, parent_invalidator, boost::bind (&LevelMeterBase::meter_type_changed, this, _1), gui_context());
+		_meter->ConfigurationChanged.connect (_configuration_connection, parent_invalidator, std::bind (&LevelMeterBase::configuration_changed, this, _1, _2), gui_context());
+		_meter->MeterTypeChanged.connect (_meter_type_connection, parent_invalidator, std::bind (&LevelMeterBase::meter_type_changed, this, _1), gui_context());
 	}
 }
 

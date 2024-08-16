@@ -49,7 +49,7 @@ Convolution::Convolution (Session& session, uint32_t n_in, uint32_t n_out)
     , _n_inputs (n_in)
     , _n_outputs (n_out)
 {
-	AudioEngine::instance ()->BufferSizeChanged.connect_same_thread (*this, boost::bind (&Convolution::restart, this));
+	AudioEngine::instance ()->BufferSizeChanged.connect_same_thread (*this, std::bind (&Convolution::restart, this));
 }
 
 bool

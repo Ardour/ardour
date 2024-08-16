@@ -196,7 +196,7 @@ RegionLayeringOrderEditor::set_context (const string& a_name, Session* s, TimeAx
 	clock.set (pos, true);
 
 	playlist_modified_connection.disconnect ();
-	pl->ContentsChanged.connect (playlist_modified_connection, invalidator (*this), boost::bind
+	pl->ContentsChanged.connect (playlist_modified_connection, invalidator (*this), std::bind
 				     (&RegionLayeringOrderEditor::playlist_modified, this), gui_context());
 
 	_time_axis_view = tav;

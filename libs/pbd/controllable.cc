@@ -118,8 +118,8 @@ Controllable::add (Controllable& ctl)
 {
 	Glib::Threads::RWLock::WriterLock lm (registry_lock);
 	registry.insert (&ctl);
-	ctl.DropReferences.connect_same_thread (registry_connections, boost::bind (&Controllable::remove, &ctl));
-	ctl.Destroyed.connect_same_thread (registry_connections, boost::bind (&Controllable::remove, &ctl));
+	ctl.DropReferences.connect_same_thread (registry_connections, std::bind (&Controllable::remove, &ctl));
+	ctl.Destroyed.connect_same_thread (registry_connections, std::bind (&Controllable::remove, &ctl));
 }
 
 void

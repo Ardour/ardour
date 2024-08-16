@@ -124,7 +124,7 @@ MidiClipEditorBox::set_region (std::shared_ptr<Region> r, TriggerReference /*not
 	PBD::PropertyChange interesting_stuff;
 	region_changed (interesting_stuff);
 
-	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&MidiClipEditorBox::region_changed, this, _1), gui_context ());
+	_region->PropertyChanged.connect (state_connection, invalidator (*this), std::bind (&MidiClipEditorBox::region_changed, this, _1), gui_context ());
 }
 
 void

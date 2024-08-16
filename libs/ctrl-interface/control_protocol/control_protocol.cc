@@ -67,12 +67,12 @@ const std::string ControlProtocol::state_node_name ("Protocol");
 ControlProtocol::ControlProtocol (Session& s, string str)
 	: BasicUI (s)
 	, _name (str)
-	, glib_event_callback (boost::bind (&ControlProtocol::event_loop_precall, this))
+	, glib_event_callback (std::bind (&ControlProtocol::event_loop_precall, this))
 	, _active (false)
 {
 	if (!selection_connected) {
 		/* this is all static, connect it only once (and early), for all ControlProtocols */
-		ControlProtocolManager::StripableSelectionChanged.connect_same_thread (selection_connection, boost::bind (&ControlProtocol::notify_stripable_selection_changed, _1));
+		ControlProtocolManager::StripableSelectionChanged.connect_same_thread (selection_connection, std::bind (&ControlProtocol::notify_stripable_selection_changed, _1));
 		selection_connected = true;
 	}
 }

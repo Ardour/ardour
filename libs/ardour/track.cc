@@ -141,17 +141,17 @@ Track::init ()
 		set_name (name ());
 	}
 
-	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&Track::parameter_changed, this, _1));
-	_session.RecordStateChanged.connect_same_thread (*this, boost::bind (&Track::update_input_meter, this));
-	_session.TransportStateChange.connect_same_thread (*this, boost::bind (&Track::update_input_meter, this));
+	_session.config.ParameterChanged.connect_same_thread (*this, std::bind (&Track::parameter_changed, this, _1));
+	_session.RecordStateChanged.connect_same_thread (*this, std::bind (&Track::update_input_meter, this));
+	_session.TransportStateChange.connect_same_thread (*this, std::bind (&Track::update_input_meter, this));
 
-	_monitoring_control->Changed.connect_same_thread (*this, boost::bind (&Track::monitoring_changed, this, _1, _2));
-	_record_safe_control->Changed.connect_same_thread (*this, boost::bind (&Track::record_safe_changed, this, _1, _2));
-	_record_enable_control->Changed.connect_same_thread (*this, boost::bind (&Track::record_enable_changed, this, _1, _2));
+	_monitoring_control->Changed.connect_same_thread (*this, std::bind (&Track::monitoring_changed, this, _1, _2));
+	_record_safe_control->Changed.connect_same_thread (*this, std::bind (&Track::record_safe_changed, this, _1, _2));
+	_record_enable_control->Changed.connect_same_thread (*this, std::bind (&Track::record_enable_changed, this, _1, _2));
 
-	_input->changed.connect_same_thread (*this, boost::bind (&Track::input_changed, this));
+	_input->changed.connect_same_thread (*this, std::bind (&Track::input_changed, this));
 
-	_disk_reader->ConfigurationChanged.connect_same_thread (*this, boost::bind (&Track::chan_count_changed, this));
+	_disk_reader->ConfigurationChanged.connect_same_thread (*this, std::bind (&Track::chan_count_changed, this));
 
 	return 0;
 }

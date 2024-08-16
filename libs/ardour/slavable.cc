@@ -41,7 +41,7 @@ PBD::Signal1<void,VCAManager*> Slavable::Assign; /* signal sent once
 
 Slavable::Slavable ()
 {
-	Assign.connect_same_thread (assign_connection, boost::bind (&Slavable::do_assign, this, _1));
+	Assign.connect_same_thread (assign_connection, std::bind (&Slavable::do_assign, this, _1));
 }
 
 XMLNode&
@@ -161,8 +161,8 @@ Slavable::assign (std::shared_ptr<VCA> v)
 		 */
 
 
-		v->Drop.connect_same_thread (unassign_connections, boost::bind (&Slavable::weak_unassign, this, std::weak_ptr<VCA>(v)));
-		v->DropReferences.connect_same_thread (unassign_connections, boost::bind (&Slavable::weak_unassign, this, std::weak_ptr<VCA>(v)));
+		v->Drop.connect_same_thread (unassign_connections, std::bind (&Slavable::weak_unassign, this, std::weak_ptr<VCA>(v)));
+		v->DropReferences.connect_same_thread (unassign_connections, std::bind (&Slavable::weak_unassign, this, std::weak_ptr<VCA>(v)));
 	}
 
 	AssignmentChange (v, true);

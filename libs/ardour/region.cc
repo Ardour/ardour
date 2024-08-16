@@ -2152,13 +2152,13 @@ Region::subscribe_to_source_drop ()
 	for (auto const& i : _sources) {
 		if (unique_srcs.find (i) == unique_srcs.end ()) {
 			unique_srcs.insert (i);
-			i->DropReferences.connect_same_thread (_source_deleted_connections, boost::bind (&Region::source_deleted, this, std::weak_ptr<Source>(i)));
+			i->DropReferences.connect_same_thread (_source_deleted_connections, std::bind (&Region::source_deleted, this, std::weak_ptr<Source>(i)));
 		}
 	}
 	for (auto const& i : _master_sources) {
 		if (unique_srcs.find (i) == unique_srcs.end ()) {
 			unique_srcs.insert (i);
-			i->DropReferences.connect_same_thread (_source_deleted_connections, boost::bind (&Region::source_deleted, this, std::weak_ptr<Source>(i)));
+			i->DropReferences.connect_same_thread (_source_deleted_connections, std::bind (&Region::source_deleted, this, std::weak_ptr<Source>(i)));
 		}
 	}
 }

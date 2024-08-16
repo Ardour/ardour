@@ -202,16 +202,16 @@ Session::pre_engine_init (string fullpath)
 	_speakers->setup_default_speakers (2);
 
 	_solo_cut_control.reset (new ProxyControllable (_("solo cut control (dB)"), PBD::Controllable::GainLike,
-				boost::bind (&RCConfiguration::set_solo_mute_gain, Config, _1),
-				boost::bind (&RCConfiguration::get_solo_mute_gain, Config)));
+				std::bind (&RCConfiguration::set_solo_mute_gain, Config, _1),
+				std::bind (&RCConfiguration::get_solo_mute_gain, Config)));
 	add_controllable (_solo_cut_control);
 
 	/* These are all static "per-class" signals */
 
-	SourceFactory::SourceCreated.connect_same_thread (*this, boost::bind (&Session::add_source, this, _1));
-	PlaylistFactory::PlaylistCreated.connect_same_thread (*this, boost::bind (&Session::add_playlist, this, _1));
-	AutomationList::AutomationListCreated.connect_same_thread (*this, boost::bind (&Session::add_automation_list, this, _1));
-	IO::PortCountChanged.connect_same_thread (*this, boost::bind (&Session::ensure_buffers, this, _1));
+	SourceFactory::SourceCreated.connect_same_thread (*this, std::bind (&Session::add_source, this, _1));
+	PlaylistFactory::PlaylistCreated.connect_same_thread (*this, std::bind (&Session::add_playlist, this, _1));
+	AutomationList::AutomationListCreated.connect_same_thread (*this, std::bind (&Session::add_automation_list, this, _1));
+	IO::PortCountChanged.connect_same_thread (*this, std::bind (&Session::ensure_buffers, this, _1));
 
 	/* stop IO objects from doing stuff until we're ready for them */
 
@@ -236,14 +236,14 @@ Session::post_engine_init ()
 	msc->set_input_port (std::dynamic_pointer_cast<MidiPort>(scene_input_port()));
 	msc->set_output_port (std::dynamic_pointer_cast<MidiPort>(scene_output_port()));
 
-	std::function<samplecnt_t(void)> timer_func (boost::bind (&Session::audible_sample, this, (bool*)(0)));
+	std::function<samplecnt_t(void)> timer_func (std::bind (&Session::audible_sample, this, (bool*)(0)));
 	std::dynamic_pointer_cast<AsyncMIDIPort>(scene_input_port())->set_timer (timer_func);
 
 	setup_midi_machine_control ();
 
 	/* setup MTC generator */
 	mtc_tx_resync_latency (true);
-	LatencyUpdated.connect_same_thread (*this, boost::bind (&Session::mtc_tx_resync_latency, this, _1));
+	LatencyUpdated.connect_same_thread (*this, std::bind (&Session::mtc_tx_resync_latency, this, _1));
 
 	if (_butler->start_thread()) {
 		error << _("Butler did not start") << endmsg;
@@ -258,8 +258,8 @@ Session::post_engine_init ()
 	setup_click_sounds (0);
 	setup_midi_control ();
 
-	_engine.Halted.connect_same_thread (*this, boost::bind (&Session::engine_halted, this));
-	_engine.Xrun.connect_same_thread (*this, boost::bind (&Session::xrun_recovery, this));
+	_engine.Halted.connect_same_thread (*this, std::bind (&Session::engine_halted, this));
+	_engine.Xrun.connect_same_thread (*this, std::bind (&Session::xrun_recovery, this));
 
 
 	try {
@@ -270,8 +270,8 @@ Session::post_engine_init ()
 
 		/* crossfades require sample rate knowledge */
 
-		_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this, true));
-		_engine.MidiSelectionPortsChanged.connect_same_thread (*this, boost::bind (&Session::rewire_midi_selection_ports, this));
+		_engine.GraphReordered.connect_same_thread (*this, std::bind (&Session::graph_reordered, this, true));
+		_engine.MidiSelectionPortsChanged.connect_same_thread (*this, std::bind (&Session::rewire_midi_selection_ports, this));
 
 		refresh_disk_space ();
 
@@ -304,8 +304,8 @@ Session::post_engine_init ()
 
 		/* ENGINE */
 
-		std::function<void (std::string)> ff (boost::bind (&Session::config_changed, this, _1, false));
-		std::function<void (std::string)> ft (boost::bind (&Session::config_changed, this, _1, true));
+		std::function<void (std::string)> ff (std::bind (&Session::config_changed, this, _1, false));
+		std::function<void (std::string)> ft (std::bind (&Session::config_changed, this, _1, true));
 
 		Config->map_parameters (ff);
 		config.map_parameters (ft);
@@ -368,9 +368,9 @@ Session::post_engine_init ()
 
 		initialize_latencies ();
 
-		_locations->added.connect_same_thread (*this, boost::bind (&Session::location_added, this, _1));
-		_locations->removed.connect_same_thread (*this, boost::bind (&Session::location_removed, this, _1));
-		_locations->changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
+		_locations->added.connect_same_thread (*this, std::bind (&Session::location_added, this, _1));
+		_locations->removed.connect_same_thread (*this, std::bind (&Session::location_removed, this, _1));
+		_locations->changed.connect_same_thread (*this, std::bind (&Session::locations_changed, this));
 
 		if (synced_to_engine()) {
 			_engine.transport_stop ();
@@ -1181,7 +1181,7 @@ void
 Session::collect_sources_of_this_snapshot (set<std::shared_ptr<Source>>& s, bool incl_unused) const
 {
 	_playlists->sync_all_regions_with_regions ();
-	_playlists->foreach (boost::bind (merge_all_sources, _1, &s), incl_unused);
+	_playlists->foreach (std::bind (merge_all_sources, _1, &s), incl_unused);
 
 	std::shared_ptr<RouteList const> rl = routes.reader();
 	for (auto const& r : *rl) {
@@ -2088,7 +2088,7 @@ Session::set_state (const XMLNode& node, int version)
 			std::shared_ptr<IOPlug> iop = std::make_shared<IOPlug>(*this);
 			if (0 == iop->set_state (**n, version)) {
 				iopl->push_back (iop);
-				iop->LatencyChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, this, true, false));
+				iop->LatencyChanged.connect_same_thread (*this, std::bind (&Session::update_latency_compensation, this, true, false));
 			} else {
 				/* TODO Unknown I/O Plugin, retain state */
 			}
@@ -2167,7 +2167,7 @@ Session::load_routes (const XMLNode& node, int version)
 		std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (*r);
 		bool is_midi_route = (*r)->n_inputs().n_midi() > 0 && (*r)->n_inputs().n_midi() > 0;
 		if (mt || is_midi_route) {
-			(*r)->output()->changed.connect_same_thread (*this, boost::bind (&Session::midi_output_change_handler, this, _1, _2, std::weak_ptr<Route>(*r)));
+			(*r)->output()->changed.connect_same_thread (*this, std::bind (&Session::midi_output_change_handler, this, _1, _2, std::weak_ptr<Route>(*r)));
 		}
 	}
 
@@ -3281,9 +3281,9 @@ Session::add_route_group (RouteGroup* g)
 	_route_groups.push_back (g);
 	route_group_added (g); /* EMIT SIGNAL */
 
-	g->RouteAdded.connect_same_thread (*this, boost::bind (&Session::route_added_to_route_group, this, _1, _2));
-	g->RouteRemoved.connect_same_thread (*this, boost::bind (&Session::route_removed_from_route_group, this, _1, _2));
-	g->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::route_group_property_changed, this, g));
+	g->RouteAdded.connect_same_thread (*this, std::bind (&Session::route_added_to_route_group, this, _1, _2));
+	g->RouteRemoved.connect_same_thread (*this, std::bind (&Session::route_removed_from_route_group, this, _1, _2));
+	g->PropertyChanged.connect_same_thread (*this, std::bind (&Session::route_group_property_changed, this, g));
 
 	set_dirty ();
 }
@@ -3785,7 +3785,7 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	/* consider deleting all unused playlists */
 
-	if (_playlists->maybe_delete_unused (boost::bind (Session::ask_about_playlist_deletion, _1))) {
+	if (_playlists->maybe_delete_unused (std::bind (Session::ask_about_playlist_deletion, _1))) {
 		ret = 0;
 		goto out;
 	}
@@ -4672,25 +4672,25 @@ Session::setup_midi_machine_control ()
 
 	_mmc->set_ports (mmc_in, mmc_out);
 
-	_mmc->Play.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
-	_mmc->DeferredPlay.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
-	_mmc->Stop.connect_same_thread (*this, boost::bind (&Session::mmc_stop, this, _1));
-	_mmc->FastForward.connect_same_thread (*this, boost::bind (&Session::mmc_fast_forward, this, _1));
-	_mmc->Rewind.connect_same_thread (*this, boost::bind (&Session::mmc_rewind, this, _1));
-	_mmc->Pause.connect_same_thread (*this, boost::bind (&Session::mmc_pause, this, _1));
-	_mmc->RecordPause.connect_same_thread (*this, boost::bind (&Session::mmc_record_pause, this, _1));
-	_mmc->RecordStrobe.connect_same_thread (*this, boost::bind (&Session::mmc_record_strobe, this, _1));
-	_mmc->RecordExit.connect_same_thread (*this, boost::bind (&Session::mmc_record_exit, this, _1));
-	_mmc->Locate.connect_same_thread (*this, boost::bind (&Session::mmc_locate, this, _1, _2));
-	_mmc->Step.connect_same_thread (*this, boost::bind (&Session::mmc_step, this, _1, _2));
-	_mmc->Shuttle.connect_same_thread (*this, boost::bind (&Session::mmc_shuttle, this, _1, _2, _3));
-	_mmc->TrackRecordStatusChange.connect_same_thread (*this, boost::bind (&Session::mmc_record_enable, this, _1, _2, _3));
+	_mmc->Play.connect_same_thread (*this, std::bind (&Session::mmc_deferred_play, this, _1));
+	_mmc->DeferredPlay.connect_same_thread (*this, std::bind (&Session::mmc_deferred_play, this, _1));
+	_mmc->Stop.connect_same_thread (*this, std::bind (&Session::mmc_stop, this, _1));
+	_mmc->FastForward.connect_same_thread (*this, std::bind (&Session::mmc_fast_forward, this, _1));
+	_mmc->Rewind.connect_same_thread (*this, std::bind (&Session::mmc_rewind, this, _1));
+	_mmc->Pause.connect_same_thread (*this, std::bind (&Session::mmc_pause, this, _1));
+	_mmc->RecordPause.connect_same_thread (*this, std::bind (&Session::mmc_record_pause, this, _1));
+	_mmc->RecordStrobe.connect_same_thread (*this, std::bind (&Session::mmc_record_strobe, this, _1));
+	_mmc->RecordExit.connect_same_thread (*this, std::bind (&Session::mmc_record_exit, this, _1));
+	_mmc->Locate.connect_same_thread (*this, std::bind (&Session::mmc_locate, this, _1, _2));
+	_mmc->Step.connect_same_thread (*this, std::bind (&Session::mmc_step, this, _1, _2));
+	_mmc->Shuttle.connect_same_thread (*this, std::bind (&Session::mmc_shuttle, this, _1, _2, _3));
+	_mmc->TrackRecordStatusChange.connect_same_thread (*this, std::bind (&Session::mmc_record_enable, this, _1, _2, _3));
 
 	/* also handle MIDI SPP because its so common */
 
-	_mmc->SPPStart.connect_same_thread (*this, boost::bind (&Session::spp_start, this));
-	_mmc->SPPContinue.connect_same_thread (*this, boost::bind (&Session::spp_continue, this));
-	_mmc->SPPStop.connect_same_thread (*this, boost::bind (&Session::spp_stop, this));
+	_mmc->SPPStart.connect_same_thread (*this, std::bind (&Session::spp_start, this));
+	_mmc->SPPContinue.connect_same_thread (*this, std::bind (&Session::spp_continue, this));
+	_mmc->SPPStop.connect_same_thread (*this, std::bind (&Session::spp_stop, this));
 }
 
 std::shared_ptr<Controllable>
@@ -5535,7 +5535,7 @@ Session::save_as (SaveAs& saveas)
 		save_default_options ();
 
 		if (saveas.copy_media && saveas.copy_external) {
-			if (bring_all_sources_into_session (boost::bind (&Session::save_as_bring_callback, this, _1, _2, _3))) {
+			if (bring_all_sources_into_session (std::bind (&Session::save_as_bring_callback, this, _1, _2, _3))) {
 				throw Glib::FileError (Glib::FileError::NO_SPACE_LEFT, "consolidate failed");
 			}
 		}

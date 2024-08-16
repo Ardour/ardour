@@ -75,7 +75,7 @@ MidiTracer::MidiTracer ()
 	_midi_port_combo.pack_start (_midi_port_cols.pretty_name);
 
 	AudioEngine::instance()->PortRegisteredOrUnregistered.connect
-		(_manager_connection, invalidator (*this), boost::bind (&MidiTracer::ports_changed, this), gui_context());
+		(_manager_connection, invalidator (*this), std::bind (&MidiTracer::ports_changed, this), gui_context());
 
 	VBox* vbox = manage (new VBox);
 	vbox->set_spacing (4);
@@ -243,7 +243,7 @@ MidiTracer::port_changed ()
 		/* connect to external port */
 		if (0 == tracer_port->connect (pn)) {
 			_midi_parser = std::shared_ptr<MIDI::Parser> (new MIDI::Parser);
-			_midi_parser->any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3, _4));
+			_midi_parser->any.connect_same_thread (_parser_connection, std::bind (&MidiTracer::tracer, this, _1, _2, _3, _4));
 			tracer_port->set_trace (_midi_parser);
 		} else {
 			std::cerr << "CANNOT TRACE PORT " << pn << "\n";
@@ -272,18 +272,18 @@ MidiTracer::port_changed ()
 				std::shared_ptr<TransportMaster> tm = TransportMasterManager::instance().master_by_port(std::dynamic_pointer_cast<ARDOUR::Port> (p));
 				std::shared_ptr<TransportMasterViaMIDI> tm_midi = std::dynamic_pointer_cast<TransportMasterViaMIDI> (tm);
 				if (tm_midi) {
-					tm_midi->transport_parser().any.connect_same_thread(_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3, _4));
+					tm_midi->transport_parser().any.connect_same_thread(_parser_connection, std::bind (&MidiTracer::tracer, this, _1, _2, _3, _4));
 				}
 			} else {
 				_midi_parser = std::shared_ptr<MIDI::Parser> (new MIDI::Parser);
-				_midi_parser->any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3, _4));
+				_midi_parser->any.connect_same_thread (_parser_connection, std::bind (&MidiTracer::tracer, this, _1, _2, _3, _4));
 				mp->set_trace (_midi_parser);
 				traced_port = mp;
 			}
 		}
 
 	} else {
-		async->parser()->any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3, _4));
+		async->parser()->any.connect_same_thread (_parser_connection, std::bind (&MidiTracer::tracer, this, _1, _2, _3, _4));
 	}
 }
 
@@ -560,7 +560,7 @@ MidiTracer::tracer (Parser&, MIDI::byte* msg, size_t len, samplecnt_t now)
 
 	int canderef (0);
 	if (_update_queued.compare_exchange_strong (canderef, 1)) {
-		gui_context()->call_slot (invalidator (*this), boost::bind (&MidiTracer::update, this));
+		gui_context()->call_slot (invalidator (*this), std::bind (&MidiTracer::update, this));
 	}
 }
 

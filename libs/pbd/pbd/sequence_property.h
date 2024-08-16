@@ -173,7 +173,7 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 			*/
 
 			for (typename ChangeContainer::const_iterator i = a->changes().added.begin(); i != a->changes().added.end(); ++i) {
-				(*i)->DropReferences.connect_same_thread (*cmd, boost::bind (&Destructible::drop_references, cmd));
+				(*i)->DropReferences.connect_same_thread (*cmd, std::bind (&Destructible::drop_references, cmd));
 			}
 		}
         }

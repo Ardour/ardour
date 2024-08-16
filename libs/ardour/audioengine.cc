@@ -769,13 +769,13 @@ AudioEngine::start_hw_event_processing()
 	if (_hw_reset_event_thread == 0) {
 		_hw_reset_request_count.store (0);
 		_stop_hw_reset_processing.store (0);
-		_hw_reset_event_thread = PBD::Thread::create (boost::bind (&AudioEngine::do_reset_backend, this));
+		_hw_reset_event_thread = PBD::Thread::create (std::bind (&AudioEngine::do_reset_backend, this));
 	}
 
 	if (_hw_devicelist_update_thread == 0) {
 		_hw_devicelist_update_count.store (0);
 		_stop_hw_devicelist_processing.store (0);
-		_hw_devicelist_update_thread = PBD::Thread::create (boost::bind (&AudioEngine::do_devicelist_update, this));
+		_hw_devicelist_update_thread = PBD::Thread::create (std::bind (&AudioEngine::do_devicelist_update, this));
 	}
 }
 

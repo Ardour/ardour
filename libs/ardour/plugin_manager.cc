@@ -330,7 +330,7 @@ PluginManager::PluginManager ()
 
 	BootMessage (_("Discovering Plugins"));
 
-	LuaScripting::instance().scripts_changed.connect_same_thread (lua_refresh_connection, boost::bind (&PluginManager::lua_refresh_cb, this));
+	LuaScripting::instance().scripts_changed.connect_same_thread (lua_refresh_connection, std::bind (&PluginManager::lua_refresh_cb, this));
 }
 
 
@@ -1204,7 +1204,7 @@ PluginManager::run_auv2_scanner_app (CAComponentDescription const& desc, AUv2Des
 	stringstream scan_log;
 	ARDOUR::SystemExec scanner (auv2_scanner_bin_path, argp);
 	PBD::ScopedConnection c;
-	scanner.ReadStdout.connect_same_thread (c, boost::bind (&auv2_scanner_log, _1, &scan_log));
+	scanner.ReadStdout.connect_same_thread (c, std::bind (&auv2_scanner_log, _1, &scan_log));
 
 	if (scanner.start (ARDOUR::SystemExec::MergeWithStdin)) {
 		psle->msg (PluginScanLogEntry::Error, string_compose (_("Cannot launch AU scanner app '%1': %2"), auv2_scanner_bin_path, strerror (errno)));
@@ -1500,7 +1500,7 @@ PluginManager::run_vst2_scanner_app (std::string path, PSLEPtr psle) const
 	stringstream scan_log;
 	ARDOUR::SystemExec scanner (vst2_scanner_bin_path, argp);
 	PBD::ScopedConnection c;
-	scanner.ReadStdout.connect_same_thread (c, boost::bind (&vst2_scanner_log, _1, &scan_log));
+	scanner.ReadStdout.connect_same_thread (c, std::bind (&vst2_scanner_log, _1, &scan_log));
 
 	if (scanner.start (ARDOUR::SystemExec::MergeWithStdin)) {
 		psle->msg (PluginScanLogEntry::Error, string_compose (_("Cannot launch VST scanner app '%1': %2"), vst2_scanner_bin_path, strerror (errno)));
@@ -2261,7 +2261,7 @@ PluginManager::run_vst3_scanner_app (std::string bundle_path, PSLEPtr psle) cons
 	stringstream scan_log;
 	ARDOUR::SystemExec scanner (vst3_scanner_bin_path, argp);
 	PBD::ScopedConnection c;
-	scanner.ReadStdout.connect_same_thread (c, boost::bind (&vst3_scanner_log, _1, &scan_log));
+	scanner.ReadStdout.connect_same_thread (c, std::bind (&vst3_scanner_log, _1, &scan_log));
 
 	if (scanner.start (ARDOUR::SystemExec::MergeWithStdin)) {
 		psle->msg (PluginScanLogEntry::Error, string_compose (_("Cannot launch VST scanner app '%1': %2"), vst3_scanner_bin_path, strerror (errno)));

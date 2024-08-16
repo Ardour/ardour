@@ -581,7 +581,7 @@ int main() { return 0; }''',
             conf.define("_DARWIN_C_SOURCE", 1)
         else:
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
-            cxx_flags.append('-DBOOST_BIND_GLOBAL_PLACEHOLDERS')
+            cxx_flags.append('-DBOOST_BIND_NO_PLACEHOLDERS')
 
     if (is_clang and platform == "darwin") or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' , 'bigsur',  'monterey', 'ventura', 'sonoma' ]:
         # Silence warnings about the non-existing osx clang compiler flags
@@ -796,7 +796,7 @@ int main() { return 0; }''',
 
     # need ISOC9X for llabs()
     compiler_flags.extend(
-        ('-DBOOST_SYSTEM_NO_DEPRECATED', '-DBOOST_BIND_GLOBAL_PLACEHOLDERS', '-D_ISOC9X_SOURCE',
+        ('-DBOOST_SYSTEM_NO_DEPRECATED', '-DBOOST_BIND_NO_PLACEHOLDERS', '-D_ISOC9X_SOURCE',
          '-D_LARGEFILE64_SOURCE', '-D_FILE_OFFSET_BITS=64'))
     cxx_flags.extend(
         ('-D__STDC_LIMIT_MACROS', '-D__STDC_FORMAT_MACROS',

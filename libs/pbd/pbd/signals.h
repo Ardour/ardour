@@ -35,7 +35,6 @@
 
 #include <glibmm/threads.h>
 
-#include <boost/bind.hpp>
 #include <boost/bind/protect.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <optional>
@@ -52,7 +51,11 @@
 #include <iostream>
 #endif
 
+using namespace std::placeholders;
+
 namespace PBD {
+
+// using namespace std::placeholders;
 
 class LIBPBD_API Connection;
 

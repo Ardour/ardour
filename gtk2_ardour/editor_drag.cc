@@ -662,7 +662,7 @@ RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Re
 		_views.push_back (DraggingView (*i, this, &(*i)->get_time_axis_view ()));
 	}
 
-	RegionView::RegionViewGoingAway.connect (death_connection, invalidator (*this), boost::bind (&RegionDrag::region_going_away, this, _1), gui_context ());
+	RegionView::RegionViewGoingAway.connect (death_connection, invalidator (*this), std::bind (&RegionDrag::region_going_away, this, _1), gui_context ());
 }
 
 void

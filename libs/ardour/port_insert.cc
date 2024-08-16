@@ -73,8 +73,8 @@ PortInsert::PortInsert (Session& s, std::shared_ptr<Pannable> pannable, std::sha
 
 	_io_latency = _session.engine().samples_per_cycle();
 
-	input ()->changed.connect_same_thread (*this, boost::bind (&PortInsert::io_changed, this, _1, _2));
-	output ()->changed.connect_same_thread (*this, boost::bind (&PortInsert::io_changed, this, _1, _2));
+	input ()->changed.connect_same_thread (*this, std::bind (&PortInsert::io_changed, this, _1, _2));
+	output ()->changed.connect_same_thread (*this, std::bind (&PortInsert::io_changed, this, _1, _2));
 }
 
 PortInsert::~PortInsert ()

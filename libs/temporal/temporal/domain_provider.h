@@ -86,7 +86,7 @@ class TimeDomainProvider  {
   protected:
 	void listen () {
 		if (parent) {
-			parent->TimeDomainChanged.connect_same_thread (parent_connection, boost::bind (&TimeDomainProvider::time_domain_changed, this));
+			parent->TimeDomainChanged.connect_same_thread (parent_connection, std::bind (&TimeDomainProvider::time_domain_changed, this));
 		}
 	}
 

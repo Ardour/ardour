@@ -24,7 +24,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <boost/bind.hpp> /* we don't need this here, but anything calling call_slot() probably will, so this is convenient */
 #include <stdint.h>
 #include <pthread.h>
 #include <glibmm/threads.h>

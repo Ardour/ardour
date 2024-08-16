@@ -587,8 +587,8 @@ Mootcher::fetchAudioFile(std::string originalFileName, std::string theID, std::s
 
 	sfb = caller;
 
-	Progress.connect(*this, invalidator (*this), boost::bind(&Mootcher::updateProgress, this, _1, _2), gui_context());
-	Finished.connect(*this, invalidator (*this), boost::bind(&Mootcher::doneWithMootcher, this), gui_context());
+	Progress.connect(*this, invalidator (*this), std::bind(&Mootcher::updateProgress, this, _1, _2), gui_context());
+	Finished.connect(*this, invalidator (*this), std::bind(&Mootcher::doneWithMootcher, this), gui_context());
 	pthread_t freesound_download_thread;
 	pthread_create_and_store("freesound_import", &freesound_download_thread, freesound_download_thread_func, this);
 

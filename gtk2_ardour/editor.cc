@@ -570,7 +570,7 @@ Editor::Editor ()
 
 	_summary = new EditorSummary (this);
 
-	TempoMap::MapChanged.connect (tempo_map_connection, invalidator (*this), boost::bind (&Editor::tempo_map_changed, this), gui_context());
+	TempoMap::MapChanged.connect (tempo_map_connection, invalidator (*this), std::bind (&Editor::tempo_map_changed, this), gui_context());
 
 	selection->TimeChanged.connect (sigc::mem_fun(*this, &Editor::time_selection_changed));
 	selection->TracksChanged.connect (sigc::mem_fun(*this, &Editor::track_selection_changed));
@@ -649,7 +649,7 @@ Editor::Editor ()
 	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
 
-	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, boost::bind (&Editor::presentation_info_changed, this, _1), gui_context());
+	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, std::bind (&Editor::presentation_info_changed, this, _1), gui_context());
 
 	_route_groups = new EditorRouteGroups (this);
 	_routes = new EditorRoutes ();
@@ -662,9 +662,9 @@ Editor::Editor ()
 
 	/* these are static location signals */
 
-	Location::start_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
-	Location::end_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
-	Location::changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
+	Location::start_changed.connect (*this, invalidator (*this), std::bind (&Editor::location_changed, this, _1), gui_context());
+	Location::end_changed.connect (*this, invalidator (*this), std::bind (&Editor::location_changed, this, _1), gui_context());
+	Location::changed.connect (*this, invalidator (*this), std::bind (&Editor::location_changed, this, _1), gui_context());
 
 #if SELECTION_PROPERTIES_BOX_TODO
 	add_notebook_page (_("Selection"), *_properties_box);
@@ -791,7 +791,7 @@ Editor::Editor ()
 
 	setup_toolbar ();
 
-	RegionView::RegionViewGoingAway.connect (*this, invalidator (*this),  boost::bind (&Editor::catch_vanishing_regionview, this, _1), gui_context());
+	RegionView::RegionViewGoingAway.connect (*this, invalidator (*this),  std::bind (&Editor::catch_vanishing_regionview, this, _1), gui_context());
 
 	/* nudge stuff */
 
@@ -807,36 +807,36 @@ Editor::Editor ()
 
 	/* allow external control surfaces/protocols to do various things */
 
-	ControlProtocol::ZoomToSession.connect (*this, invalidator (*this), boost::bind (&Editor::temporal_zoom_session, this), gui_context());
-	ControlProtocol::ZoomIn.connect (*this, invalidator (*this), boost::bind (&Editor::temporal_zoom_step, this, false), gui_context());
-	ControlProtocol::ZoomOut.connect (*this, invalidator (*this), boost::bind (&Editor::temporal_zoom_step, this, true), gui_context());
-	ControlProtocol::Undo.connect (*this, invalidator (*this), boost::bind (&Editor::undo, this, true), gui_context());
-	ControlProtocol::Redo.connect (*this, invalidator (*this), boost::bind (&Editor::redo, this, true), gui_context());
-	ControlProtocol::ScrollTimeline.connect (*this, invalidator (*this), boost::bind (&Editor::control_scroll, this, _1), gui_context());
-	ControlProtocol::StepTracksUp.connect (*this, invalidator (*this), boost::bind (&Editor::control_step_tracks_up, this), gui_context());
-	ControlProtocol::StepTracksDown.connect (*this, invalidator (*this), boost::bind (&Editor::control_step_tracks_down, this), gui_context());
-	ControlProtocol::GotoView.connect (*this, invalidator (*this), boost::bind (&Editor::control_view, this, _1), gui_context());
+	ControlProtocol::ZoomToSession.connect (*this, invalidator (*this), std::bind (&Editor::temporal_zoom_session, this), gui_context());
+	ControlProtocol::ZoomIn.connect (*this, invalidator (*this), std::bind (&Editor::temporal_zoom_step, this, false), gui_context());
+	ControlProtocol::ZoomOut.connect (*this, invalidator (*this), std::bind (&Editor::temporal_zoom_step, this, true), gui_context());
+	ControlProtocol::Undo.connect (*this, invalidator (*this), std::bind (&Editor::undo, this, true), gui_context());
+	ControlProtocol::Redo.connect (*this, invalidator (*this), std::bind (&Editor::redo, this, true), gui_context());
+	ControlProtocol::ScrollTimeline.connect (*this, invalidator (*this), std::bind (&Editor::control_scroll, this, _1), gui_context());
+	ControlProtocol::StepTracksUp.connect (*this, invalidator (*this), std::bind (&Editor::control_step_tracks_up, this), gui_context());
+	ControlProtocol::StepTracksDown.connect (*this, invalidator (*this), std::bind (&Editor::control_step_tracks_down, this), gui_context());
+	ControlProtocol::GotoView.connect (*this, invalidator (*this), std::bind (&Editor::control_view, this, _1), gui_context());
 	ControlProtocol::CloseDialog.connect (*this, invalidator (*this), Keyboard::close_current_dialog, gui_context());
-	ControlProtocol::VerticalZoomInAll.connect (*this, invalidator (*this), boost::bind (&Editor::control_vertical_zoom_in_all, this), gui_context());
-	ControlProtocol::VerticalZoomOutAll.connect (*this, invalidator (*this), boost::bind (&Editor::control_vertical_zoom_out_all, this), gui_context());
-	ControlProtocol::VerticalZoomInSelected.connect (*this, invalidator (*this), boost::bind (&Editor::control_vertical_zoom_in_selected, this), gui_context());
-	ControlProtocol::VerticalZoomOutSelected.connect (*this, invalidator (*this), boost::bind (&Editor::control_vertical_zoom_out_selected, this), gui_context());
+	ControlProtocol::VerticalZoomInAll.connect (*this, invalidator (*this), std::bind (&Editor::control_vertical_zoom_in_all, this), gui_context());
+	ControlProtocol::VerticalZoomOutAll.connect (*this, invalidator (*this), std::bind (&Editor::control_vertical_zoom_out_all, this), gui_context());
+	ControlProtocol::VerticalZoomInSelected.connect (*this, invalidator (*this), std::bind (&Editor::control_vertical_zoom_in_selected, this), gui_context());
+	ControlProtocol::VerticalZoomOutSelected.connect (*this, invalidator (*this), std::bind (&Editor::control_vertical_zoom_out_selected, this), gui_context());
 
-	BasicUI::AccessAction.connect (*this, invalidator (*this), boost::bind (&Editor::access_action, this, _1, _2), gui_context());
+	BasicUI::AccessAction.connect (*this, invalidator (*this), std::bind (&Editor::access_action, this, _1, _2), gui_context());
 
 	/* handle escape */
 
-	ARDOUR_UI::instance()->Escape.connect (*this, invalidator (*this), boost::bind (&Editor::escape, this), gui_context());
+	ARDOUR_UI::instance()->Escape.connect (*this, invalidator (*this), std::bind (&Editor::escape, this), gui_context());
 
 	/* problematic: has to return a value and thus cannot be x-thread */
 
-	Session::AskAboutPlaylistDeletion.connect_same_thread (*this, boost::bind (&Editor::playlist_deletion_dialog, this, _1));
-	Route::PluginSetup.connect_same_thread (*this, boost::bind (&Editor::plugin_setup, this, _1, _2, _3));
+	Session::AskAboutPlaylistDeletion.connect_same_thread (*this, std::bind (&Editor::playlist_deletion_dialog, this, _1));
+	Route::PluginSetup.connect_same_thread (*this, std::bind (&Editor::plugin_setup, this, _1, _2, _3));
 
-	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&Editor::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&Editor::parameter_changed, this, _1), gui_context());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &Editor::ui_parameter_changed));
 
-	TimeAxisView::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Editor::timeaxisview_deleted, this, _1), gui_context());
+	TimeAxisView::CatchDeletion.connect (*this, invalidator (*this), std::bind (&Editor::timeaxisview_deleted, this, _1), gui_context());
 
 	_ignore_region_action = false;
 	_last_region_menu_was_main = false;
@@ -857,7 +857,7 @@ Editor::Editor ()
 	constructed = true;
 
 	/* grab current parameter state */
-	std::function<void (string)> pc (boost::bind (&Editor::ui_parameter_changed, this, _1));
+	std::function<void (string)> pc (std::bind (&Editor::ui_parameter_changed, this, _1));
 	UIConfiguration::instance().map_parameters (pc);
 
 	setup_fade_images ();
@@ -1391,22 +1391,22 @@ Editor::set_session (Session *t)
 	   ("context") where the handler will be asked to run.
 	*/
 
-	_session->StepEditStatusChange.connect (_session_connections, invalidator (*this), boost::bind (&Editor::step_edit_status_change, this, _1), gui_context());
-	_session->TransportStateChange.connect (_session_connections, invalidator (*this), boost::bind (&Editor::map_transport_state, this), gui_context());
-	_session->TransportLooped.connect (_session_connections, invalidator (*this), boost::bind (&Editor::transport_looped, this), gui_context());
-	_session->PositionChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::map_position_change, this, _1), gui_context());
-	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_vcas, this, _1), gui_context());
-	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_routes, this, _1), gui_context());
-	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_title, this), gui_context());
-	_session->Located.connect (_session_connections, invalidator (*this), boost::bind (&Editor::located, this), gui_context());
-	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::parameter_changed, this, _1), gui_context());
-	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&Editor::session_state_saved, this, _1), gui_context());
-	_session->locations()->added.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_new_location, this, _1), gui_context());
-	_session->locations()->removed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::location_gone, this, _1), gui_context());
-	_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
-	_session->auto_loop_location_changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::loop_location_changed, this, _1), gui_context ());
-	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
-	Location::flags_changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_section_rects, this), gui_context ());
+	_session->StepEditStatusChange.connect (_session_connections, invalidator (*this), std::bind (&Editor::step_edit_status_change, this, _1), gui_context());
+	_session->TransportStateChange.connect (_session_connections, invalidator (*this), std::bind (&Editor::map_transport_state, this), gui_context());
+	_session->TransportLooped.connect (_session_connections, invalidator (*this), std::bind (&Editor::transport_looped, this), gui_context());
+	_session->PositionChanged.connect (_session_connections, invalidator (*this), std::bind (&Editor::map_position_change, this, _1), gui_context());
+	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), std::bind (&Editor::add_vcas, this, _1), gui_context());
+	_session->RouteAdded.connect (_session_connections, invalidator (*this), std::bind (&Editor::add_routes, this, _1), gui_context());
+	_session->DirtyChanged.connect (_session_connections, invalidator (*this), std::bind (&Editor::update_title, this), gui_context());
+	_session->Located.connect (_session_connections, invalidator (*this), std::bind (&Editor::located, this), gui_context());
+	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), std::bind (&Editor::parameter_changed, this, _1), gui_context());
+	_session->StateSaved.connect (_session_connections, invalidator (*this), std::bind (&Editor::session_state_saved, this, _1), gui_context());
+	_session->locations()->added.connect (_session_connections, invalidator (*this), std::bind (&Editor::add_new_location, this, _1), gui_context());
+	_session->locations()->removed.connect (_session_connections, invalidator (*this), std::bind (&Editor::location_gone, this, _1), gui_context());
+	_session->locations()->changed.connect (_session_connections, invalidator (*this), std::bind (&Editor::refresh_location_display, this), gui_context());
+	_session->auto_loop_location_changed.connect (_session_connections, invalidator (*this), std::bind (&Editor::loop_location_changed, this, _1), gui_context ());
+	_session->history().Changed.connect (_session_connections, invalidator (*this), std::bind (&Editor::history_changed, this), gui_context());
+	Location::flags_changed.connect (_session_connections, invalidator (*this), std::bind (&Editor::update_section_rects, this), gui_context ());
 
 	_playhead_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
 	_playhead_cursor->show ();
@@ -1414,7 +1414,7 @@ Editor::set_session (Session *t)
 	_snapped_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
 	_snapped_cursor->set_color (UIConfiguration::instance().color ("edit point"));
 
-	std::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));
+	std::function<void (string)> pc (std::bind (&Editor::parameter_changed, this, _1));
 	Config->map_parameters (pc);
 	_session->config.map_parameters (pc);
 
@@ -1764,7 +1764,7 @@ Editor::loudness_analyze_region_selection ()
 	SimpleProgressDialog spd (_("Region Loudness Analysis"), sigc::mem_fun (ag, &AnalysisGraph::cancel));
 	ScopedConnection c;
 	ag.set_total_samples (total_work);
-	ag.Progress.connect_same_thread (c, boost::bind (&SimpleProgressDialog::update_progress, &spd, _1, _2));
+	ag.Progress.connect_same_thread (c, std::bind (&SimpleProgressDialog::update_progress, &spd, _1, _2));
 	spd.show();
 
 	for (RegionSelection::iterator j = ars.begin (); j != ars.end (); ++j) {
@@ -1813,7 +1813,7 @@ Editor::loudness_analyze_range_selection ()
 	SimpleProgressDialog spd (_("Range Loudness Analysis"), sigc::mem_fun (ag, &AnalysisGraph::cancel));
 	ScopedConnection c;
 	ag.set_total_samples (total_work);
-	ag.Progress.connect_same_thread (c, boost::bind (&SimpleProgressDialog::update_progress, &spd, _1, _2));
+	ag.Progress.connect_same_thread (c, std::bind (&SimpleProgressDialog::update_progress, &spd, _1, _2));
 	spd.show();
 
 	for (TrackSelection::iterator i = s.tracks.begin (); i != s.tracks.end (); ++i) {
@@ -5931,7 +5931,7 @@ Editor::add_stripables (StripableList& sl)
 			vtv->set_vca (v);
 			track_views.push_back (vtv);
 
-			(*s)->gui_changed.connect (*this, invalidator (*this), boost::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
+			(*s)->gui_changed.connect (*this, invalidator (*this), std::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
 			changed = true;
 
 		} else if ((r = std::dynamic_pointer_cast<Route> (*s)) != 0) {
@@ -5960,7 +5960,7 @@ Editor::add_stripables (StripableList& sl)
 
 			rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
 			rtv->view()->RegionViewRemoved.connect (sigc::mem_fun (*this, &Editor::region_view_removed));
-			(*s)->gui_changed.connect (*this, invalidator (*this), boost::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
+			(*s)->gui_changed.connect (*this, invalidator (*this), std::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
 			changed = true;
 		}
 	}

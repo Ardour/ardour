@@ -243,10 +243,10 @@ Editor::add_new_location_internal (Location* location)
 		}
 	}
 
-	location->NameChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, location), gui_context());
-	location->CueChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, location), gui_context());
-	location->TimeDomainChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, location), gui_context());
-	location->FlagsChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_flags_changed, this, location), gui_context());
+	location->NameChanged.connect (*this, invalidator (*this), std::bind (&Editor::location_changed, this, location), gui_context());
+	location->CueChanged.connect (*this, invalidator (*this), std::bind (&Editor::location_changed, this, location), gui_context());
+	location->TimeDomainChanged.connect (*this, invalidator (*this), std::bind (&Editor::location_changed, this, location), gui_context());
+	location->FlagsChanged.connect (*this, invalidator (*this), std::bind (&Editor::location_flags_changed, this, location), gui_context());
 
 	pair<Location*,LocationMarkers*> newpair;
 

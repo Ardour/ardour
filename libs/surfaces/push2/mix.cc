@@ -159,8 +159,8 @@ MixLayout::MixLayout (Push2& p, Session & s, std::string const & name)
 
 	_mode_button = _p2.button_by_id (Push2::Upper1);
 
-	_session.RouteAdded.connect (_session_connections, invalidator(*this), boost::bind (&MixLayout::stripables_added, this), &_p2);
-	_session.vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), boost::bind (&MixLayout::stripables_added, this), &_p2);
+	_session.RouteAdded.connect (_session_connections, invalidator(*this), std::bind (&MixLayout::stripables_added, this), &_p2);
+	_session.vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), std::bind (&MixLayout::stripables_added, this), &_p2);
 }
 
 MixLayout::~MixLayout ()
@@ -583,10 +583,10 @@ MixLayout::switch_bank (uint32_t base)
 
 			/* stripable goes away? refill the bank, starting at the same point */
 
-			_stripable[n]->DropReferences.connect (_stripable_connections, invalidator (*this), boost::bind (&MixLayout::switch_bank, this, _bank_start), &_p2);
-			_stripable[n]->presentation_info().PropertyChanged.connect (_stripable_connections, invalidator (*this), boost::bind (&MixLayout::stripable_property_change, this, _1, n), &_p2);
-			_stripable[n]->solo_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&MixLayout::solo_changed, this, n), &_p2);
-			_stripable[n]->mute_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&MixLayout::mute_changed, this, n), &_p2);
+			_stripable[n]->DropReferences.connect (_stripable_connections, invalidator (*this), std::bind (&MixLayout::switch_bank, this, _bank_start), &_p2);
+			_stripable[n]->presentation_info().PropertyChanged.connect (_stripable_connections, invalidator (*this), std::bind (&MixLayout::stripable_property_change, this, _1, n), &_p2);
+			_stripable[n]->solo_control()->Changed.connect (_stripable_connections, invalidator (*this), std::bind (&MixLayout::solo_changed, this, n), &_p2);
+			_stripable[n]->mute_control()->Changed.connect (_stripable_connections, invalidator (*this), std::bind (&MixLayout::mute_changed, this, n), &_p2);
 
 			if (_stripable[n]->is_selected()) {
 				show_selection (n);
