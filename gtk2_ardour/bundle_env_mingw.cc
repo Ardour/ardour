@@ -110,24 +110,31 @@ fixup_bundle_environment (int, char* [], string & localedir)
 	}
 }
 
+static std::string ardour_mono_file;
+static std::string ardour_sans_file;
+
 static __cdecl void
 unload_custom_fonts()
 {
-	std::string font_file;
-	if (find_file (ardour_data_search_path(), "ArdourMono.ttf", font_file)) {
-		RemoveFontResource(font_file.c_str());
+	printf ("unload_custom_fonts\n");
+	if (!ardour_mono_file.empty ()) {
+		RemoveFontResource(ardour_mono_file.c_str());
 	}
-	if (find_file (ardour_data_search_path(), "ArdourSans.ttf", font_file)) {
-		RemoveFontResource(font_file.c_str());
+	if (!ardour_sans_file.empty ()) {
+		RemoveFontResource(ardour_sans_file.c_str());
 	}
+}
+
+static LONG WINAPI
+unload_font_at_exception (PEXCEPTION_POINTERS pExceptionInfo)
+{
+	unload_custom_fonts ();
+	return EXCEPTION_CONTINUE_SEARCH;
 }
 
 void
 load_custom_fonts()
 {
-	std::string ardour_mono_file;
-	std::string ardour_sans_file;
-
 	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
 		cerr << _("Cannot find ArdourMono TrueType font") << endl;
 	}
@@ -144,10 +151,12 @@ load_custom_fonts()
 		FcConfig *config = FcInitLoadConfigAndFonts();
 
 		if (!ardour_mono_file.empty () && FcFalse == FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_mono_file.c_str()))) {
+			ardour_mono_file.clear ();
 			cerr << _("Cannot load ArdourMono TrueType font.") << endl;
 		}
 
 		if (!ardour_sans_file.empty () && FcFalse == FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_sans_file.c_str()))) {
+			ardour_sans_file.clear ();
 			cerr << _("Cannot load ArdourSans TrueType font.") << endl;
 		}
 
@@ -157,11 +166,14 @@ load_custom_fonts()
 	} else {
 		// pango with win32 backend
 		if (0 == AddFontResource(ardour_mono_file.c_str())) {
+			ardour_mono_file.clear ();
 			cerr << _("Cannot register ArdourMono TrueType font with windows gdi.") << endl;
 		}
 		if (0 == AddFontResource(ardour_sans_file.c_str())) {
+			ardour_sans_file.clear ();
 			cerr << _("Cannot register ArdourSans TrueType font with windows gdi.") << endl;
 		}
 		atexit (&unload_custom_fonts);
+		SetUnhandledExceptionFilter (unload_font_at_exception);
 	}
 }
