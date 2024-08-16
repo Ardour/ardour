@@ -163,7 +163,7 @@ public:
 	samplepos_t sample_time_at_cycle_start ();
 	pframes_t   samples_since_cycle_start ();
 
-	int create_process_thread (boost::function<void()> func);
+	int create_process_thread (std::function<void()> func);
 	int      join_process_threads ();
 	bool     in_process_thread ();
 	uint32_t process_thread_count ();
@@ -275,10 +275,10 @@ private:
 
 	struct ThreadData {
 		PulseAudioBackend*      engine;
-		boost::function<void()> f;
+		std::function<void()> f;
 		size_t                  stacksize;
 
-		ThreadData (PulseAudioBackend* e, boost::function<void()> fp, size_t stacksz)
+		ThreadData (PulseAudioBackend* e, std::function<void()> fp, size_t stacksz)
 			: engine (e), f (fp), stacksize (stacksz) {}
 	};
 

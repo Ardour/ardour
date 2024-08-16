@@ -1103,7 +1103,7 @@ FaderPort8::assign_stripables (bool select_only)
 			_ctrls.strip(id).set_stripable (*s, _ctrls.fader_mode() == ModePan);
 		}
 
-		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_strip, this, std::weak_ptr<Stripable> (*s)));
+		 std::function<void ()> cb (boost::bind (&FaderPort8::select_strip, this, std::weak_ptr<Stripable> (*s)));
 		 _ctrls.strip(id).set_select_cb (cb);
 
 		if (++id == N_STRIPS) {
@@ -1297,7 +1297,7 @@ FaderPort8::assign_plugin_presets (std::shared_ptr<PluginInsert> pi)
 	uint8_t id = 0;
 	for (size_t i = _parameter_off; i < (size_t)n_parameters; ++i) {
 		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT01 & ~FP8Strip::CTRL_TEXT3 & ~FP8Strip::CTRL_SELECT);
-		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin_preset, this, i));
+		 std::function<void ()> cb (boost::bind (&FaderPort8::select_plugin_preset, this, i));
 		_ctrls.strip(id).set_select_cb (cb);
 		_ctrls.strip(id).select_button ().set_active (true);
 		if (active != presets.at(i)) {
@@ -1324,7 +1324,7 @@ FaderPort8::assign_plugin_presets (std::shared_ptr<PluginInsert> pi)
 	// pin clear-preset to the last slot
 	assert (id == (N_STRIPS - 1));
 	_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT0 & ~FP8Strip::CTRL_TEXT3 & ~FP8Strip::CTRL_SELECT);
-	 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin_preset, this, SIZE_MAX));
+	 std::function<void ()> cb (boost::bind (&FaderPort8::select_plugin_preset, this, SIZE_MAX));
 	_ctrls.strip(id).set_select_cb (cb);
 	_ctrls.strip(id).select_button ().set_blinking (false);
 	_ctrls.strip(id).select_button ().set_color (active.uri.empty() ? 0x00ffffff : 0x0000ffff);
@@ -1646,7 +1646,7 @@ FaderPort8::spill_plugins ()
 			break;
 		}
 		std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (proc);
-		boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, procs[i]));
+		std::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, procs[i]));
 
 		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
 		_ctrls.strip(id).set_select_cb (cb);
@@ -1671,7 +1671,7 @@ FaderPort8::spill_plugins ()
 
 	if (have_well_known_gate) {
 			assert (id < N_STRIPS);
-		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, -3));
+		 std::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, -3));
 		 _ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
 		 _ctrls.strip(id).set_select_cb (cb);
 		 _ctrls.strip(id).select_button ().set_color (0xffff00ff);
@@ -1685,7 +1685,7 @@ FaderPort8::spill_plugins ()
 	}
 	if (have_well_known_eq) {
 			assert (id < N_STRIPS);
-		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, -1));
+		 std::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, -1));
 		 _ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
 		 _ctrls.strip(id).set_select_cb (cb);
 		 _ctrls.strip(id).select_button ().set_color (0xffff00ff);
@@ -1699,7 +1699,7 @@ FaderPort8::spill_plugins ()
 	}
 	if (have_well_known_comp) {
 			assert (id < N_STRIPS);
-		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, -2));
+		 std::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, -2));
 		 _ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
 		 _ctrls.strip(id).set_select_cb (cb);
 		 _ctrls.strip(id).select_button ().set_color (0xffff00ff);

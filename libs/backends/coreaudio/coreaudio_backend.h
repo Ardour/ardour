@@ -245,7 +245,7 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	samplepos_t sample_time_at_cycle_start ();
 	pframes_t samples_since_cycle_start ();
 
-	int create_process_thread (boost::function<void()> func);
+	int create_process_thread (std::function<void()> func);
 	int join_process_threads ();
 	bool in_process_thread ();
 	uint32_t process_thread_count ();
@@ -379,7 +379,7 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 
 	struct ThreadData {
 		CoreAudioBackend* engine;
-		boost::function<void ()> f;
+		std::function<void ()> f;
 		size_t stacksize;
 		double period_ns;
 
@@ -389,7 +389,7 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		os_workgroup_join_token_s _join_token;
 #endif
 
-		ThreadData (CoreAudioBackend* e, boost::function<void ()> fp, size_t stacksz, double period)
+		ThreadData (CoreAudioBackend* e, std::function<void ()> fp, size_t stacksz, double period)
 			: engine (e) , f (fp) , stacksize (stacksz), period_ns (period) {}
 	};
 

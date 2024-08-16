@@ -62,7 +62,7 @@ class LIBARDOUR_API MidiPort : public Port {
 	void set_trace (std::weak_ptr<MIDI::Parser> trace_parser);
 	std::shared_ptr<MIDI::Parser> trace_parser() const;
 
-	typedef boost::function<bool(MidiBuffer&,MidiBuffer&)> MidiFilter;
+	typedef std::function<bool(MidiBuffer&,MidiBuffer&)> MidiFilter;
 	void set_inbound_filter (MidiFilter);
 	int add_shadow_port (std::string const &, MidiFilter);
 	std::shared_ptr<MidiPort> shadow_port() const { return _shadow_port; }

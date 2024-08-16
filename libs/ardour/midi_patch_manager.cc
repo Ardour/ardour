@@ -297,7 +297,7 @@ MidiPatchManager::load_midnams_in_thread ()
 void
 MidiPatchManager::maybe_use (PBD::ScopedConnectionList& cl,
                              PBD::EventLoop::InvalidationRecord* ir,
-                             const boost::function<void()> & midnam_info_method,
+                             const std::function<void()> & midnam_info_method,
                              PBD::EventLoop* event_loop)
 {
 	{

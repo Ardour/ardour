@@ -787,7 +787,7 @@ FaderPort::Button::get_action (bool press, FaderPort::ButtonState bs)
 }
 
 void
-FaderPort::Button::set_action (boost::function<void()> f, bool when_pressed, FaderPort::ButtonState bs)
+FaderPort::Button::set_action (std::function<void()> f, bool when_pressed, FaderPort::ButtonState bs)
 {
 	ToDo todo;
 	todo.type = InternalFunction;

@@ -343,7 +343,7 @@ private:
 
 		ActionType _type;
 		std::string _action_name;
-		//boost::function<void()> function; // unused
+		//std::function<void()> function; // unused
 
 		void clear ()
 		{

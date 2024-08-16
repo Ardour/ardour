@@ -309,7 +309,7 @@ void
 ARDOUR_UI::setup_session_options ()
 {
 	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
-	boost::function<void (std::string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
+	std::function<void (std::string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	_session->config.map_parameters (pc);
 }
 

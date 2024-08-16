@@ -456,7 +456,7 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 }
 
 template<typename RequestObject> bool
-AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const boost::function<void()>& f)
+AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const std::function<void()>& f)
 {
 	if (caller_is_self()) {
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 direct dispatch of call slot via functor @ %3, invalidation %4\n", event_loop_name(), pthread_name(), &f, invalidation));

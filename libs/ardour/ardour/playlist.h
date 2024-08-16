@@ -187,7 +187,7 @@ public:
 	virtual std::shared_ptr<Region> combine (const RegionList&, std::shared_ptr<Track>);
 	virtual void uncombine (std::shared_ptr<Region>);
 	void fade_range (std::list<TimelineRange>&);
-	void remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_gap, boost::function<void (timepos_t, timecnt_t)> gap_callback);
+	void remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_gap, std::function<void (timepos_t, timecnt_t)> gap_callback);
 
 	void shuffle (std::shared_ptr<Region>, int dir);
 
@@ -241,7 +241,7 @@ public:
 
 	samplepos_t find_next_transient (timepos_t const & position, int dir);
 
-	void foreach_region (boost::function<void(std::shared_ptr<Region>)>);
+	void foreach_region (std::function<void(std::shared_ptr<Region>)>);
 
 	XMLNode&    get_state () const;
 	virtual int set_state (const XMLNode&, int version);

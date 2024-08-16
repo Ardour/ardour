@@ -23,7 +23,6 @@
 #include <string>
 #include <iostream>
 
-#include <boost/function.hpp>
 
 #include "pbd/xml++.h"
 #include "pbd/crossthread.h"
@@ -73,7 +72,7 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 
 		/* Not selectable; use ios() */
 		int selectable() const { return -1; }
-		void set_timer (boost::function<samplecnt_t (void)>&);
+		void set_timer (std::function<samplecnt_t (void)>&);
 
 		static void set_process_thread (pthread_t);
 		static pthread_t get_process_thread () { return _process_thread; }
@@ -84,7 +83,7 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 		MIDI::timestamp_t       _last_write_timestamp;
 		bool                    _flush_at_cycle_start;
 		bool                    have_timer;
-		boost::function<samplecnt_t (void)> timer;
+		std::function<samplecnt_t (void)> timer;
 		PBD::RingBuffer< Evoral::Event<double> > output_fifo;
 		EventRingBuffer<MIDI::timestamp_t> input_fifo;
 		Glib::Threads::Mutex output_fifo_lock;

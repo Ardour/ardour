@@ -875,7 +875,7 @@ Playlist::remove_region_internal (std::shared_ptr<Region> region, ThawList& thaw
 }
 
 void
-Playlist::remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_gap, boost::function<void (timepos_t, timecnt_t)> gap_callback)
+Playlist::remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_gap, std::function<void (timepos_t, timecnt_t)> gap_callback)
 {
 	bool closed = false;
 
@@ -3061,7 +3061,7 @@ Playlist::update_after_tempo_map_change ()
 }
 
 void
-Playlist::foreach_region (boost::function<void(std::shared_ptr<Region>)> func)
+Playlist::foreach_region (std::function<void(std::shared_ptr<Region>)> func)
 {
 	RegionReadLock rl (this);
 	for (auto & r : regions) {

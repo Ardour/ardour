@@ -799,7 +799,7 @@ JACKAudioBackend::_latency_callback (jack_latency_callback_mode_t mode, void* ar
 }
 
 int
-JACKAudioBackend::create_process_thread (boost::function<void()> f)
+JACKAudioBackend::create_process_thread (std::function<void()> f)
 {
         GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 
@@ -889,7 +889,7 @@ void*
 JACKAudioBackend::_start_process_thread (void* arg)
 {
         ThreadData* td = reinterpret_cast<ThreadData*> (arg);
-        boost::function<void()> f = td->f;
+        std::function<void()> f = td->f;
         delete td;
 
         f ();

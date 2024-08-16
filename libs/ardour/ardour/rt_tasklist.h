@@ -19,7 +19,6 @@
 #ifndef _ardour_rt_tasklist_h_
 #define _ardour_rt_tasklist_h_
 
-#include <boost/function.hpp>
 #include <vector>
 
 #include "ardour/libardour_visibility.h"
@@ -36,7 +35,7 @@ public:
 
 	/** process tasks in list in parallel, wait for them to complete */
 	void process ();
-	void push_back (boost::function<void ()> fn);
+	void push_back (std::function<void ()> fn);
 
 	std::vector<RTTask> const& tasks () const { return _tasks; }
 

@@ -3792,7 +3792,7 @@ LV2PluginInfo::get_presets (bool user_only) const
 }
 
 PluginInfoList*
-LV2PluginInfo::discover (boost::function <void (std::string const&, PluginScanLogEntry::PluginScanResult, std::string const&, bool)> cb)
+LV2PluginInfo::discover (std::function <void (std::string const&, PluginScanLogEntry::PluginScanResult, std::string const&, bool)> cb)
 {
 	LV2World world;
 	world.load_bundled_plugins();

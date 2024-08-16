@@ -943,7 +943,7 @@ ARDOUR_UI::set_punch_sensitivity ()
 void
 ARDOUR_UI::editor_realized ()
 {
-	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
+	std::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	Config->map_parameters (pc);
 
 	UIConfiguration::instance().reset_dpi ();

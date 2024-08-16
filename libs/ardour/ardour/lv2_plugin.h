@@ -410,7 +410,7 @@ public:
 	LV2PluginInfo (const char* plugin_uri);
 	~LV2PluginInfo ();
 
-	static PluginInfoList* discover (boost::function <void (std::string const&, PluginScanLogEntry::PluginScanResult, std::string const&, bool)> cb);
+	static PluginInfoList* discover (std::function <void (std::string const&, PluginScanLogEntry::PluginScanResult, std::string const&, bool)> cb);
 
 	PluginPtr load (Session& session);
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;

@@ -1306,7 +1306,7 @@ Mixer_UI::set_session (Session* sess)
 
 #if 0
 	/* skip mapping all session-config vars, we only need one */
-	boost::function<void (string)> pc (boost::bind (&Mixer_UI::parameter_changed, this, _1));
+	std::function<void (string)> pc (boost::bind (&Mixer_UI::parameter_changed, this, _1));
 	_session->config.map_parameters (pc);
 #else
 	parameter_changed ("show-group-tabs");

@@ -18,7 +18,7 @@
 
 #include "pbd/glib_event_source.h"
 
-GlibEventLoopCallback::GlibEventLoopCallback (boost::function<void()> callback)
+GlibEventLoopCallback::GlibEventLoopCallback (std::function<void()> callback)
 	: _callback (callback)
 {
 	funcs.prepare = c_prepare;;

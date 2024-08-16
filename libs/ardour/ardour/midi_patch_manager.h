@@ -151,7 +151,7 @@ public:
 	void load_midnams_in_thread ();
 	void maybe_use (PBD::ScopedConnectionList& clist,
 	                PBD::EventLoop::InvalidationRecord* ir,
-	                const boost::function<void()>& slot,
+	                const std::function<void()>& slot,
 	                PBD::EventLoop* event_loop);
 private:
 	bool load_midi_name_document(const std::string& file_path);

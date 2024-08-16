@@ -218,7 +218,7 @@ UIConfiguration::get_ui_scale ()
 }
 
 void
-UIConfiguration::map_parameters (boost::function<void (std::string)>& functor)
+UIConfiguration::map_parameters (std::function<void (std::string)>& functor)
 {
 #undef  UI_CONFIG_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,Name,value) functor (Name);
