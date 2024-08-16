@@ -96,7 +96,7 @@ Plugin::Plugin (AudioEngine& e, Session& s)
 	, _parameter_changed_since_last_preset (false)
 	, _immediate_events(6096) // FIXME: size?
 	, _resolve_midi (false)
-	, _pi (0)
+	, _pib (0)
 	, _num (0)
 {
 	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
@@ -118,7 +118,7 @@ Plugin::Plugin (const Plugin& other)
 	, _parameter_changed_since_last_preset (false)
 	, _immediate_events(6096) // FIXME: size?
 	, _resolve_midi (false)
-	, _pi (other._pi)
+	, _pib (other._pib)
 	, _num (other._num)
 {
 	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);

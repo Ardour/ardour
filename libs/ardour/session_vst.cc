@@ -33,7 +33,7 @@
 #include "ardour/debug.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
-#include "ardour/plugin_insert.h"
+#include "ardour/plug_insert_base.h"
 #include "ardour/windows_vst_plugin.h"
 #include "ardour/vestige/vestige.h"
 #include "ardour/vst_types.h"
@@ -529,7 +529,7 @@ intptr_t Session::vst_callback (
 		SHOW_CALLBACK ("audioMasterBeginEdit");
 		// begin of automation session (when mouse down), parameter index in <index>
 		if (plug && plug->plugin_insert ()) {
-			std::shared_ptr<AutomationControl> ac = plug->plugin_insert ()->automation_control (Evoral::Parameter (PluginAutomation, 0, index));
+			std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl>(plug->plugin_insert ()->control (Evoral::Parameter (PluginAutomation, 0, index)));
 			if (ac) {
 				ac->start_touch (timepos_t (ac->session().transport_sample()));
 			}
@@ -540,7 +540,7 @@ intptr_t Session::vst_callback (
 		SHOW_CALLBACK ("audioMasterEndEdit");
 		// end of automation session (when mouse up),     parameter index in <index>
 		if (plug && plug->plugin_insert ()) {
-			std::shared_ptr<AutomationControl> ac = plug->plugin_insert ()->automation_control (Evoral::Parameter (PluginAutomation, 0, index));
+			std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl>(plug->plugin_insert ()->control (Evoral::Parameter (PluginAutomation, 0, index)));
 			if (ac) {
 				ac->stop_touch (timepos_t (ac->session().transport_sample()));
 			}

@@ -103,6 +103,22 @@ public:
 	}
 	void clear_stats () {}
 
+	ChanMapping input_map (uint32_t num) const {
+		if (num < _in_map.size()) {
+			return _in_map.find (num)->second;
+		} else {
+			return ChanMapping ();
+		}
+	}
+
+	ChanMapping output_map (uint32_t num) const {
+		if (num < _out_map.size()) {
+			return _out_map.find (num)->second;
+		} else {
+			return ChanMapping ();
+		}
+	}
+
 	/* Stateful */
 	XMLNode& get_state (void) const;
 	int      set_state (const XMLNode&, int version);

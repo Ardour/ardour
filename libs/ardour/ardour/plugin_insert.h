@@ -34,7 +34,6 @@
 
 #include "ardour/ardour.h"
 #include "ardour/libardour_visibility.h"
-#include "ardour/chan_mapping.h"
 #include "ardour/fixed_delay.h"
 #include "ardour/io.h"
 #include "ardour/types.h"

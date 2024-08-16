@@ -95,6 +95,9 @@ public:
 	virtual bool get_stats (PBD::microseconds_t&, PBD::microseconds_t&, double&, double&) const;
 	virtual void clear_stats ();
 
+	ChanMapping input_map (uint32_t num) const;
+	ChanMapping output_map (uint32_t num) const;
+
 	/* ControlSet */
 	std::shared_ptr<Evoral::Control> control_factory (const Evoral::Parameter& id);
 

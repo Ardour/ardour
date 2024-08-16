@@ -25,6 +25,7 @@
 
 #include "ardour/ardour.h"
 #include "ardour/automation_control.h"
+#include "ardour/chan_mapping.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_types.h"
 
@@ -67,6 +68,9 @@ public:
 	virtual bool provides_stats () const = 0;
 	virtual bool get_stats (PBD::microseconds_t&, PBD::microseconds_t&, double&, double&) const = 0;
 	virtual void clear_stats () = 0;
+
+	virtual ChanMapping input_map (uint32_t num) const = 0;
+	virtual ChanMapping output_map (uint32_t num) const = 0;
 
 	/** A control that manipulates a plugin parameter (control port). */
 	struct PluginControl : public AutomationControl {

@@ -257,6 +257,7 @@ IOPlug::setup ()
 	 _plugin->reconfigure_io (_n_in, aux_in, _n_out);
 	 _plugin->ParameterChangedExternally.connect_same_thread (*this, boost::bind (&IOPlug::parameter_changed_externally, this, _1, _2));
 	 _plugin->activate ();
+	 _plugin->set_insert (this, 0);
 }
 
 samplecnt_t
@@ -434,6 +435,26 @@ IOPlug::ensure_io ()
 		 }
 	 }
 	return true;
+}
+
+ChanMapping
+IOPlug::input_map (uint32_t num) const
+{
+	if (num == 1) {
+		return ChanMapping (_n_in);
+	} else {
+		return ChanMapping ();
+	}
+}
+
+ChanMapping
+IOPlug::output_map (uint32_t num) const
+{
+	if (num == 1) {
+		return ChanMapping (_n_out);
+	} else {
+		return ChanMapping ();
+	}
 }
 
 void

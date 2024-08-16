@@ -222,6 +222,8 @@ RegionFxPlugin::add_plugin (std::shared_ptr<Plugin> plugin)
 		plugin->EndTouch.connect_same_thread (*this, boost::bind (&RegionFxPlugin::end_touch, this, _1));
 	}
 
+	plugin->set_insert (this, _plugins.size ());
+
 	_plugins.push_back (plugin);
 
 	if (_plugins.size () > 1) {

@@ -87,12 +87,12 @@ public:
 	virtual void set_insert_id (PBD::ID id) {}
 	virtual void set_state_dir (const std::string& d = "") {}
 
-	void set_insert (PluginInsert* pi, uint32_t num) {
-		_pi = pi;
+	void set_insert (PlugInsertBase* pib, uint32_t num) {
+		_pib = pib;
 		_num = num;
 	}
 
-	PluginInsert* plugin_insert () const { return _pi; }
+	PlugInsertBase* plugin_insert () const { return _pib; }
 	uint32_t plugin_number () const { return _num; }
 
 	virtual std::string unique_id () const                   = 0;
@@ -443,8 +443,8 @@ private:
 	void invalidate_preset_cache (std::string const&, Plugin*, bool);
 	void resolve_midi ();
 
-	PluginInsert* _pi;
-	uint32_t      _num;
+	PlugInsertBase* _pib;
+	uint32_t        _num;
 
 	PBD::ScopedConnection _preset_connection;
 };
