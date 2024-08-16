@@ -42,9 +42,8 @@ void
 Receiver::listen_to (Transmitter &transmitter)
 
 {
-	/* odd syntax here because boost's placeholders (_1, _2) are in an
-	   anonymous namespace which causes ambiguity with sigc++ (and will also
-	   do so with std::placeholder in the C++11 future
+	/* odd syntax here because std's placeholders (_1, _2) are in an
+	   anonymous namespace which causes ambiguity with sigc++
 	*/
 	transmitter.sender().connect_same_thread (connections, std::bind (&Receiver::receive, this, std::placeholders::_1, std::placeholders::_2));
 
