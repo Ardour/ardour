@@ -832,8 +832,8 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 	get_vbox ()->pack_start (pages, false, false);
 
 	if (_session && _session->the_auditioner()) {
-		_session->AuditionActive.connect(auditioner_connections, invalidator (*this), boost::bind (&ExportReport::audition_active, this, _1), gui_context());
-		_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), boost::bind (&ExportReport::audition_progress, this, _1, _2), gui_context());
+		_session->AuditionActive.connect(auditioner_connections, invalidator (*this), std::bind (&ExportReport::audition_active, this, _1), gui_context());
+		_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), std::bind (&ExportReport::audition_progress, this, _1, _2), gui_context());
 	}
 
 	if (_session && with_file && _session->the_auditioner()) {

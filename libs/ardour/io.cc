@@ -501,7 +501,7 @@ IO::reestablish_port_subscriptions ()
 {
 	_port_connections.drop_connections ();
 	for (auto const& p : *ports ()) {
-		p->ConnectedOrDisconnected.connect_same_thread (*this, boost::bind (&IO::connection_change, this, _1, _2));
+		p->ConnectedOrDisconnected.connect_same_thread (*this, std::bind (&IO::connection_change, this, _1, _2));
 	}
 }
 
@@ -1506,7 +1506,7 @@ IO::bundles_connected ()
 IO::UserBundleInfo::UserBundleInfo (IO* io, std::shared_ptr<UserBundle> b)
 {
 	bundle = b;
-	b->Changed.connect_same_thread (changed, boost::bind (&IO::bundle_changed, io, _1));
+	b->Changed.connect_same_thread (changed, std::bind (&IO::bundle_changed, io, _1));
 }
 
 std::string

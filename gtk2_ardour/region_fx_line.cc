@@ -46,7 +46,7 @@ RegionFxLine::RegionFxLine (std::string const& name, RegionView& r, ArdourCanvas
 void
 RegionFxLine::init ()
 {
-	_rv.region()->PropertyChanged.connect (_region_changed_connection, invalidator (*this), boost::bind (&RegionFxLine::region_changed, this, _1), gui_context());
+	_rv.region()->PropertyChanged.connect (_region_changed_connection, invalidator (*this), std::bind (&RegionFxLine::region_changed, this, _1), gui_context());
 	group->raise_to_top ();
 	group->set_y_position (2);
 }

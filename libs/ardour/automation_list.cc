@@ -174,7 +174,7 @@ AutomationList::create_curve_if_necessary()
 		break;
 	}
 
-	WritePassStarted.connect_same_thread (_writepass_connection, boost::bind (&AutomationList::snapshot_history, this, false));
+	WritePassStarted.connect_same_thread (_writepass_connection, std::bind (&AutomationList::snapshot_history, this, false));
 }
 
 AutomationList&

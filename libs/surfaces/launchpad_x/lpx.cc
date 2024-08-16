@@ -174,11 +174,11 @@ LaunchPadX::LaunchPadX (ARDOUR::Session& s)
 	build_color_map ();
 	build_pad_map ();
 
-	Trigger::TriggerPropertyChange.connect (trigger_connections, invalidator (*this), boost::bind (&LaunchPadX::trigger_property_change, this, _1, _2), this);
+	Trigger::TriggerPropertyChange.connect (trigger_connections, invalidator (*this), std::bind (&LaunchPadX::trigger_property_change, this, _1, _2), this);
 
-	session->RecordStateChanged.connect (session_connections, invalidator(*this), boost::bind (&LaunchPadX::record_state_changed, this), this);
-	session->TransportStateChange.connect (session_connections, invalidator(*this), boost::bind (&LaunchPadX::transport_state_changed, this), this);
-	session->RouteAdded.connect (session_connections, invalidator(*this), boost::bind (&LaunchPadX::viewport_changed, this), this);
+	session->RecordStateChanged.connect (session_connections, invalidator(*this), std::bind (&LaunchPadX::record_state_changed, this), this);
+	session->TransportStateChange.connect (session_connections, invalidator(*this), std::bind (&LaunchPadX::transport_state_changed, this), this);
+	session->RouteAdded.connect (session_connections, invalidator(*this), std::bind (&LaunchPadX::viewport_changed, this), this);
 }
 
 LaunchPadX::~LaunchPadX ()
@@ -1553,8 +1553,8 @@ LaunchPadX::viewport_changed ()
 	for (int n = 0; n < 8; ++n) {
 		std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + n);
 		if (r) {
-			r->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&LaunchPadX::viewport_changed, this), this);
-			r->presentation_info().PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&LaunchPadX::route_property_change, this, _1, n), this);
+			r->DropReferences.connect (route_connections, invalidator (*this), std::bind (&LaunchPadX::viewport_changed, this), this);
+			r->presentation_info().PropertyChanged.connect (route_connections, invalidator (*this), std::bind (&LaunchPadX::route_property_change, this, _1, n), this);
 		} else {
 			if (n == 0) {
 				/* not even the first stripable ... so do nothing */
@@ -1766,7 +1766,7 @@ LaunchPadX::map_faders ()
 		}
 
 		if (ac) {
-			ac->Changed.connect (control_connections, invalidator (*this), boost::bind (&LaunchPadX::automation_control_change, this, n, std::weak_ptr<AutomationControl> (ac)), this);
+			ac->Changed.connect (control_connections, invalidator (*this), std::bind (&LaunchPadX::automation_control_change, this, n, std::weak_ptr<AutomationControl> (ac)), this);
 		}
 
 		daw_write (msg, 3);

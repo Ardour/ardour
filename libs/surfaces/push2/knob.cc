@@ -266,7 +266,7 @@ Push2Knob::set_controllable (std::shared_ptr<AutomationControl> c)
 	}
 
 	_controllable = c;
-	_controllable->Changed.connect (watch_connection, invalidator(*this), boost::bind (&Push2Knob::controllable_changed, this), &_p2);
+	_controllable->Changed.connect (watch_connection, invalidator(*this), std::bind (&Push2Knob::controllable_changed, this), &_p2);
 
 	controllable_changed ();
 }

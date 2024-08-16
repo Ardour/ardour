@@ -145,9 +145,9 @@ LPX_GUI::LPX_GUI (LaunchPadX& p)
 
 	/* catch future changes to connection state */
 
-	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), boost::bind (&LPX_GUI::connection_handler, this), gui_context());
-	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), boost::bind (&LPX_GUI::connection_handler, this), gui_context());
-	_lp.ConnectionChange.connect (_port_connections, invalidator (*this), boost::bind (&LPX_GUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), std::bind (&LPX_GUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), std::bind (&LPX_GUI::connection_handler, this), gui_context());
+	_lp.ConnectionChange.connect (_port_connections, invalidator (*this), std::bind (&LPX_GUI::connection_handler, this), gui_context());
 }
 
 LPX_GUI::~LPX_GUI ()

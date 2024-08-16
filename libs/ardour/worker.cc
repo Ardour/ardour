@@ -41,7 +41,7 @@ Worker::Worker(Workee* workee, uint32_t ring_size, bool threaded)
 	, _synchronous(!threaded)
 {
 	if (threaded) {
-		_thread = PBD::Thread::create (boost::bind (&Worker::run, this));
+		_thread = PBD::Thread::create (std::bind (&Worker::run, this));
 	}
 }
 

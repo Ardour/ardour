@@ -1017,7 +1017,7 @@ AutomationLine::list_changed ()
 
 	if (!update_pending) {
 		update_pending = true;
-		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&AutomationLine::queue_reset, this));
+		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), std::bind (&AutomationLine::queue_reset, this));
 	}
 }
 
@@ -1468,10 +1468,10 @@ AutomationLine::connect_to_list ()
 {
 	_list_connections.drop_connections ();
 
-	alist->StateChanged.connect (_list_connections, invalidator (*this), boost::bind (&AutomationLine::list_changed, this), gui_context());
+	alist->StateChanged.connect (_list_connections, invalidator (*this), std::bind (&AutomationLine::list_changed, this), gui_context());
 
 	alist->InterpolationChanged.connect (
-		_list_connections, invalidator (*this), boost::bind (&AutomationLine::interpolation_changed, this, _1), gui_context());
+		_list_connections, invalidator (*this), std::bind (&AutomationLine::interpolation_changed, this, _1), gui_context());
 }
 
 MementoCommandBinder<AutomationList>*

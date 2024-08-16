@@ -106,7 +106,7 @@ AutomationWatch::add_automation_watch (std::shared_ptr<AutomationControl> ac)
 	 */
 
 	std::weak_ptr<AutomationControl> wac (ac);
-	ac->DropReferences.connect_same_thread (automation_connections[ac], boost::bind (&AutomationWatch::remove_weak_automation_watch, this, wac));
+	ac->DropReferences.connect_same_thread (automation_connections[ac], std::bind (&AutomationWatch::remove_weak_automation_watch, this, wac));
 }
 
 void
@@ -224,9 +224,9 @@ AutomationWatch::set_session (Session* s)
 
 	if (_session) {
 		_run_thread = true;
-		_thread = PBD::Thread::create (boost::bind (&AutomationWatch::thread, this));
+		_thread = PBD::Thread::create (std::bind (&AutomationWatch::thread, this));
 
-		_session->TransportStateChange.connect_same_thread (transport_connection, boost::bind (&AutomationWatch::transport_state_change, this));
+		_session->TransportStateChange.connect_same_thread (transport_connection, std::bind (&AutomationWatch::transport_state_change, this));
 	}
 }
 

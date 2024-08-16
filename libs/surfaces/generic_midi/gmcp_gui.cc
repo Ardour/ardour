@@ -246,9 +246,9 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	update_port_combos ();
 
 	/* catch future changes to connection state */
-	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), boost::bind (&GMCPGUI::connection_handler, this), gui_context());
-	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), boost::bind (&GMCPGUI::connection_handler, this), gui_context());
-	cp.ConnectionChange.connect (_port_connections, invalidator (*this), boost::bind (&GMCPGUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), std::bind (&GMCPGUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), std::bind (&GMCPGUI::connection_handler, this), gui_context());
+	cp.ConnectionChange.connect (_port_connections, invalidator (*this), std::bind (&GMCPGUI::connection_handler, this), gui_context());
 }
 
 GMCPGUI::~GMCPGUI ()

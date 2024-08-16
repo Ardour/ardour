@@ -466,7 +466,7 @@ void
 AudioRegion::connect_to_analysis_changed ()
 {
 	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-		(*i)->AnalysisChanged.connect_same_thread (*this, boost::bind (&AudioRegion::maybe_invalidate_transients, this));
+		(*i)->AnalysisChanged.connect_same_thread (*this, std::bind (&AudioRegion::maybe_invalidate_transients, this));
 	}
 }
 
@@ -484,7 +484,7 @@ AudioRegion::connect_to_header_position_offset_changed ()
 			unique_srcs.insert (*i);
 			std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource> (*i);
 			if (afs) {
-				afs->HeaderPositionOffsetChanged.connect_same_thread (*this, boost::bind (&AudioRegion::source_offset_changed, this));
+				afs->HeaderPositionOffsetChanged.connect_same_thread (*this, std::bind (&AudioRegion::source_offset_changed, this));
 			}
 		}
 	}
@@ -493,9 +493,9 @@ AudioRegion::connect_to_header_position_offset_changed ()
 void
 AudioRegion::listen_to_my_curves ()
 {
-	_envelope->StateChanged.connect_same_thread (*this, boost::bind (&AudioRegion::envelope_changed, this));
-	_fade_in->StateChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fade_in_changed, this));
-	_fade_out->StateChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fade_out_changed, this));
+	_envelope->StateChanged.connect_same_thread (*this, std::bind (&AudioRegion::envelope_changed, this));
+	_fade_in->StateChanged.connect_same_thread (*this, std::bind (&AudioRegion::fade_in_changed, this));
+	_fade_out->StateChanged.connect_same_thread (*this, std::bind (&AudioRegion::fade_out_changed, this));
 }
 
 void
@@ -2482,7 +2482,7 @@ AudioRegion::_add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<R
 						if (SessionEvent::has_per_thread_pool ()) {
 							send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
 						} else {
-							_session.butler ()->delegate (boost::bind (&AudioRegion::send_change, this, PropertyChange (Properties::region_fx)));
+							_session.butler ()->delegate (std::bind (&AudioRegion::send_change, this, PropertyChange (Properties::region_fx)));
 						}
 					}
 				});
@@ -2497,8 +2497,8 @@ AudioRegion::_add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<R
 				});
 	}
 
-	rfx->LatencyChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fx_latency_changed, this, false));
-	rfx->TailTimeChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fx_tail_changed, this, false));
+	rfx->LatencyChanged.connect_same_thread (*this, std::bind (&AudioRegion::fx_latency_changed, this, false));
+	rfx->TailTimeChanged.connect_same_thread (*this, std::bind (&AudioRegion::fx_tail_changed, this, false));
 	rfx->set_block_size (_session.get_block_size ());
 
 	if (from_set_state) {

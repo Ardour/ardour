@@ -104,11 +104,11 @@ MIDIClock_TransportMaster::set_session (Session* s)
 	 */
 
 	if (_session) {
-		parser.timing.connect_same_thread (port_connections, boost::bind (&MIDIClock_TransportMaster::update_midi_clock, this, _1, _2));
-		parser.start.connect_same_thread (port_connections, boost::bind (&MIDIClock_TransportMaster::start, this, _1, _2));
-		parser.contineu.connect_same_thread (port_connections, boost::bind (&MIDIClock_TransportMaster::contineu, this, _1, _2));
-		parser.stop.connect_same_thread (port_connections, boost::bind (&MIDIClock_TransportMaster::stop, this, _1, _2));
-		parser.position.connect_same_thread (port_connections, boost::bind (&MIDIClock_TransportMaster::position, this, _1, _2, _3, _4));
+		parser.timing.connect_same_thread (port_connections, std::bind (&MIDIClock_TransportMaster::update_midi_clock, this, _1, _2));
+		parser.start.connect_same_thread (port_connections, std::bind (&MIDIClock_TransportMaster::start, this, _1, _2));
+		parser.contineu.connect_same_thread (port_connections, std::bind (&MIDIClock_TransportMaster::contineu, this, _1, _2));
+		parser.stop.connect_same_thread (port_connections, std::bind (&MIDIClock_TransportMaster::stop, this, _1, _2));
+		parser.position.connect_same_thread (port_connections, std::bind (&MIDIClock_TransportMaster::position, this, _1, _2, _3, _4));
 
 		reset (true);
 	}

@@ -172,7 +172,7 @@ Maschine2Knob::set_controllable (std::shared_ptr<AutomationControl> c)
 	}
 
 	_controllable = c;
-	_controllable->Changed.connect (watch_connection, invalidator(*this), boost::bind (&Maschine2Knob::controllable_changed, this), _eventloop);
+	_controllable->Changed.connect (watch_connection, invalidator(*this), std::bind (&Maschine2Knob::controllable_changed, this), _eventloop);
 
 	controllable_changed ();
 	// set _controllable->desc()->label
@@ -186,7 +186,7 @@ Maschine2Knob::set_control (M2EncoderInterface* ctrl)
 	if (!ctrl) {
 		return;
 	}
-	ctrl->changed.connect_same_thread (encoder_connection, boost::bind (&Maschine2Knob::encoder_changed, this, _1));
+	ctrl->changed.connect_same_thread (encoder_connection, std::bind (&Maschine2Knob::encoder_changed, this, _1));
 }
 
 void

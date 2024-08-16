@@ -128,7 +128,7 @@ def signal(f, n, v):
         q = ", %s" % comma_separated(an)
 
     print("\tstatic void compositor (%sstd::function<void(%s)> f, EventLoop* event_loop, EventLoop::InvalidationRecord* ir%s) {" % (typename, comma_separated(An), p), file=f)
-    print("\t\tevent_loop->call_slot (ir, boost::bind (f%s));" % q, file=f)
+    print("\t\tevent_loop->call_slot (ir, std::bind (f%s));" % q, file=f)
     print("\t}", file=f)
 
     print("""
@@ -197,7 +197,7 @@ def signal(f, n, v):
     else:
         p = ", %s" % comma_separated(u)
 
-    print("\t\tclist.add_connection (_connect (ir, boost::bind (&compositor, slot, event_loop, ir%s)));" % p, file=f)
+    print("\t\tclist.add_connection (_connect (ir, std::bind (&compositor, slot, event_loop, ir%s)));" % p, file=f)
 
     print("""
 \t}
@@ -216,7 +216,7 @@ def signal(f, n, v):
 \t\t\tir->event_loop = event_loop;
 \t\t}
 """, file=f)
-    print("\t\tc = _connect (ir, boost::bind (&compositor, slot, event_loop, ir%s));" % p, file=f)
+    print("\t\tc = _connect (ir, std::bind (&compositor, slot, event_loop, ir%s));" % p, file=f)
     print("\t}", file=f)
 
     print("""

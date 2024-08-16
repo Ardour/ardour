@@ -111,7 +111,7 @@ MonitorSection::MonitorSection ()
 
 	channel_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
 
-	insert_box = new ProcessorBox (0, boost::bind (&MonitorSection::plugin_selector, this), _rr_selection, 0);
+	insert_box = new ProcessorBox (0, std::bind (&MonitorSection::plugin_selector, this), _rr_selection, 0);
 	insert_box->set_no_show_all ();
 	insert_box->show ();
 	// TODO allow keyboard shortcuts in ProcessorBox
@@ -494,7 +494,7 @@ MonitorSection::MonitorSection ()
 	_ui_initialized = true;
 
 	/* catch changes that affect us */
-	Config->ParameterChanged.connect (config_connection, invalidator (*this), boost::bind (&MonitorSection::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (config_connection, invalidator (*this), std::bind (&MonitorSection::parameter_changed, this, _1), gui_context());
 }
 
 MonitorSection::~MonitorSection ()
@@ -606,9 +606,9 @@ MonitorSection::set_session (Session* s)
 			_monitor = _route->monitor_control ();
 			assign_controllables ();
 			insert_box->set_route (_route);
-			_route->processors_changed.connect (route_connections, invalidator (*this), boost::bind (&MonitorSection::processors_changed, this, _1), gui_context());
-			_route->output()->PortCountChanged.connect (route_connections, invalidator (*this), boost::bind (&MonitorSection::populate_buttons, this), gui_context());
-			_route->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&MonitorSection::drop_route, this), gui_context());
+			_route->processors_changed.connect (route_connections, invalidator (*this), std::bind (&MonitorSection::processors_changed, this, _1), gui_context());
+			_route->output()->PortCountChanged.connect (route_connections, invalidator (*this), std::bind (&MonitorSection::populate_buttons, this), gui_context());
+			_route->DropReferences.connect (route_connections, invalidator (*this), std::bind (&MonitorSection::drop_route, this), gui_context());
 
 			if (_ui_initialized) {
 				update_processor_box ();

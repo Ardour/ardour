@@ -23,7 +23,7 @@ class Rx1
 public:
 	Rx1 (Tx& sender)
 	{
-		sender.sig1.connect_same_thread (_connection, boost::bind (&Rx1::cb, this, _1));
+		sender.sig1.connect_same_thread (_connection, std::bind (&Rx1::cb, this, _1));
 	}
 
 private:
@@ -87,7 +87,7 @@ class Rx2 : public PBD::ScopedConnectionList
 public:
 	Rx2 (Tx& sender)
 	{
-		sender.sig1.connect (*this, &_ir, boost::bind (&Rx2::cb, this, _1), &event_loop);
+		sender.sig1.connect (*this, &_ir, std::bind (&Rx2::cb, this, _1), &event_loop);
 	}
 
 private:

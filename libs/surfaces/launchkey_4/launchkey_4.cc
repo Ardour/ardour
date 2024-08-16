@@ -190,13 +190,13 @@ LaunchKey4::LaunchKey4 (ARDOUR::Session& s)
 	build_color_map ();
 	build_pad_map ();
 
-	Trigger::TriggerPropertyChange.connect (trigger_connections, invalidator (*this), boost::bind (&LaunchKey4::trigger_property_change, this, _1, _2), this);
-	ControlProtocol::PluginSelected.connect (session_connections, invalidator (*this), boost::bind (&LaunchKey4::plugin_selected, this, _1), this);
+	Trigger::TriggerPropertyChange.connect (trigger_connections, invalidator (*this), std::bind (&LaunchKey4::trigger_property_change, this, _1, _2), this);
+	ControlProtocol::PluginSelected.connect (session_connections, invalidator (*this), std::bind (&LaunchKey4::plugin_selected, this, _1), this);
 
-	session->RecordStateChanged.connect (session_connections, invalidator(*this), boost::bind (&LaunchKey4::record_state_changed, this), this);
-	session->TransportStateChange.connect (session_connections, invalidator(*this), boost::bind (&LaunchKey4::transport_state_changed, this), this);
-	session->RouteAdded.connect (session_connections, invalidator(*this), boost::bind (&LaunchKey4::stripables_added, this), this);
-	session->SoloChanged.connect (session_connections, invalidator(*this), boost::bind (&LaunchKey4::solo_changed, this), this);
+	session->RecordStateChanged.connect (session_connections, invalidator(*this), std::bind (&LaunchKey4::record_state_changed, this), this);
+	session->TransportStateChange.connect (session_connections, invalidator(*this), std::bind (&LaunchKey4::transport_state_changed, this), this);
+	session->RouteAdded.connect (session_connections, invalidator(*this), std::bind (&LaunchKey4::stripables_added, this), this);
+	session->SoloChanged.connect (session_connections, invalidator(*this), std::bind (&LaunchKey4::solo_changed, this), this);
 }
 
 LaunchKey4::~LaunchKey4 ()
@@ -1192,7 +1192,7 @@ LaunchKey4::connect_daw_ports ()
 
 	MIDI::Parser* p = _daw_in_port->parser();
 	/* fader messages are controllers but always on channel 0xf */
-	p->channel_controller[15].connect_same_thread (*this, boost::bind (&LaunchKey4::handle_midi_controller_message_chnF, this, _1, _2));
+	p->channel_controller[15].connect_same_thread (*this, std::bind (&LaunchKey4::handle_midi_controller_message_chnF, this, _1, _2));
 
 	/* Connect DAW input port to event loop */
 
@@ -2239,12 +2239,12 @@ LaunchKey4::switch_bank (uint32_t base)
 
 			/* stripable goes away? refill the bank, starting at the same point */
 
-			stripable[n]->DropReferences.connect (stripable_connections, invalidator (*this), boost::bind (&LaunchKey4::switch_bank, this, bank_start), this);
-			stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, invalidator (*this), boost::bind (&LaunchKey4::stripable_property_change, this, _1, n), this);
-			stripable[n]->mute_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&LaunchKey4::mute_changed, this, n), this);
+			stripable[n]->DropReferences.connect (stripable_connections, invalidator (*this), std::bind (&LaunchKey4::switch_bank, this, bank_start), this);
+			stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, invalidator (*this), std::bind (&LaunchKey4::stripable_property_change, this, _1, n), this);
+			stripable[n]->mute_control()->Changed.connect (stripable_connections, invalidator (*this), std::bind (&LaunchKey4::mute_changed, this, n), this);
 			std::shared_ptr<AutomationControl> ac = stripable[n]->rec_enable_control();
 			if (ac) {
-				ac->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&LaunchKey4::rec_enable_changed, this, n), this);
+				ac->Changed.connect (stripable_connections, invalidator (*this), std::bind (&LaunchKey4::rec_enable_changed, this, n), this);
 			}
 		}
 

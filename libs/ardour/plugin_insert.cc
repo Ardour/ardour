@@ -600,11 +600,11 @@ PluginInsert::create_automatable_parameters ()
 		_inverted_bypass_enable = type () == VST3;
 		std::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, _bypass_port));
 		if (0 == (ac->flags () & Controllable::NotAutomatable)) {
-			ac->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&PluginInsert::bypassable_changed, this));
-			ac->Changed.connect_same_thread (*this, boost::bind (&PluginInsert::enable_changed, this));
+			ac->alist()->automation_state_changed.connect_same_thread (*this, std::bind (&PluginInsert::bypassable_changed, this));
+			ac->Changed.connect_same_thread (*this, std::bind (&PluginInsert::enable_changed, this));
 		}
 	}
-	plugin->PresetPortSetValue.connect_same_thread (*this, boost::bind (&PluginInsert::preset_load_set_value, this, _1, _2));
+	plugin->PresetPortSetValue.connect_same_thread (*this, std::bind (&PluginInsert::preset_load_set_value, this, _1, _2));
 }
 
 /** Called when something outside of this host has modified a plugin
@@ -2982,7 +2982,7 @@ PluginInsert::get_impulse_analysis_plugin()
 		_impulseAnalysisPlugin = ret;
 
 		_plugins[0]->add_slave (ret, false);
-		ret->DropReferences.connect_same_thread (*this, boost::bind (&PluginInsert::plugin_removed, this, _impulseAnalysisPlugin));
+		ret->DropReferences.connect_same_thread (*this, std::bind (&PluginInsert::plugin_removed, this, _impulseAnalysisPlugin));
 	} else {
 		ret = _impulseAnalysisPlugin.lock();
 	}
@@ -3020,9 +3020,9 @@ PluginInsert::add_plugin (std::shared_ptr<Plugin> plugin)
 	if (_plugins.empty()) {
 		/* first (and probably only) plugin instance - connect to relevant signals */
 
-		plugin->ParameterChangedExternally.connect_same_thread (*this, boost::bind (&PluginInsert::parameter_changed_externally, this, _1, _2));
-		plugin->StartTouch.connect_same_thread (*this, boost::bind (&PluginInsert::start_touch, this, _1));
-		plugin->EndTouch.connect_same_thread (*this, boost::bind (&PluginInsert::end_touch, this, _1));
+		plugin->ParameterChangedExternally.connect_same_thread (*this, std::bind (&PluginInsert::parameter_changed_externally, this, _1, _2));
+		plugin->StartTouch.connect_same_thread (*this, std::bind (&PluginInsert::start_touch, this, _1));
+		plugin->EndTouch.connect_same_thread (*this, std::bind (&PluginInsert::end_touch, this, _1));
 		_custom_sinks = plugin->get_info()->n_inputs;
 		// cache sidechain port count
 		_cached_sidechain_pins.reset ();
@@ -3043,7 +3043,7 @@ PluginInsert::add_plugin (std::shared_ptr<Plugin> plugin)
 
 	if (_plugins.size() > 1) {
 		_plugins[0]->add_slave (plugin, true);
-		plugin->DropReferences.connect_same_thread (*this, boost::bind (&PluginInsert::plugin_removed, this, std::weak_ptr<Plugin> (plugin)));
+		plugin->DropReferences.connect_same_thread (*this, std::bind (&PluginInsert::plugin_removed, this, std::weak_ptr<Plugin> (plugin)));
 	}
 }
 

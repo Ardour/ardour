@@ -125,7 +125,7 @@ UIConfiguration::UIConfiguration ()
 		}
 	}
 
-	ColorsChanged.connect (boost::bind (&UIConfiguration::colors_changed, this));
+	ColorsChanged.connect (std::bind (&UIConfiguration::colors_changed, this));
 
 	ParameterChanged.connect (sigc::mem_fun (*this, &UIConfiguration::parameter_changed));
 }

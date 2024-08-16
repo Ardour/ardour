@@ -1054,7 +1054,7 @@ ArdourButton::watch ()
 		warning << _("button cannot watch state of non-existing Controllable\n") << endmsg;
 		return;
 	}
-	c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&ArdourButton::controllable_changed, this), gui_context());
+	c->Changed.connect (watch_connection, invalidator(*this), std::bind (&ArdourButton::controllable_changed, this), gui_context());
 }
 
 void

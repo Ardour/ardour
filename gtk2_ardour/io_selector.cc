@@ -65,7 +65,7 @@ IOSelector::IOSelector (Gtk::Window* p, ARDOUR::Session* session, std::shared_pt
 	_port_group.reset (new PortGroup (io->name()));
 	_ports[_ours].add_group (_port_group);
 
-	io->changed.connect (_io_connection, invalidator (*this), boost::bind (&IOSelector::io_changed_proxy, this), gui_context ());
+	io->changed.connect (_io_connection, invalidator (*this), std::bind (&IOSelector::io_changed_proxy, this), gui_context ());
 
 	setup_all_ports ();
 	init ();

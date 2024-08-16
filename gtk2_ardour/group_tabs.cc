@@ -72,16 +72,16 @@ GroupTabs::set_session (Session* s)
 
 	if (_session) {
 		_session->RouteGroupPropertyChanged.connect (
-			_session_connections, invalidator (*this), boost::bind (&GroupTabs::route_group_property_changed, this, _1), gui_context()
+			_session_connections, invalidator (*this), std::bind (&GroupTabs::route_group_property_changed, this, _1), gui_context()
 			);
 		_session->RouteAddedToRouteGroup.connect (
-			_session_connections, invalidator (*this), boost::bind (&GroupTabs::route_added_to_route_group, this, _1, _2), gui_context()
+			_session_connections, invalidator (*this), std::bind (&GroupTabs::route_added_to_route_group, this, _1, _2), gui_context()
 			);
 		_session->RouteRemovedFromRouteGroup.connect (
-			_session_connections, invalidator (*this), boost::bind (&GroupTabs::route_removed_from_route_group, this, _1, _2), gui_context()
+			_session_connections, invalidator (*this), std::bind (&GroupTabs::route_removed_from_route_group, this, _1, _2), gui_context()
 			);
 
-		_session->route_group_removed.connect (_session_connections, invalidator (*this), boost::bind (&GroupTabs::set_dirty, this, (cairo_rectangle_t*)0), gui_context());
+		_session->route_group_removed.connect (_session_connections, invalidator (*this), std::bind (&GroupTabs::set_dirty, this, (cairo_rectangle_t*)0), gui_context());
 	}
 }
 
@@ -702,7 +702,7 @@ GroupTabs::run_new_group_dialog (RouteList const * rl, bool with_master)
 
 	if (rl) {
 		for (auto const& r : *rl) {
-			r->DropReferences.connect (_new_route_group_connection, invalidator (*d), boost::bind (&Dialog::response, d, RESPONSE_CANCEL), gui_context());
+			r->DropReferences.connect (_new_route_group_connection, invalidator (*d), std::bind (&Dialog::response, d, RESPONSE_CANCEL), gui_context());
 		}
 	}
 

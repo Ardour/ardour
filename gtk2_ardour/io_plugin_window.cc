@@ -100,7 +100,7 @@ IOPluginWindow::set_session (Session* s)
 		return;
 	}
 	refill ();
-	_session->IOPluginsChanged.connect (_session_connections, invalidator (*this), boost::bind (&IOPluginWindow::refill, this), gui_context ());
+	_session->IOPluginsChanged.connect (_session_connections, invalidator (*this), std::bind (&IOPluginWindow::refill, this), gui_context ());
 }
 
 void
@@ -310,7 +310,7 @@ IOPluginWindow::IOPlugUI::IOPlugUI (std::shared_ptr<ARDOUR::IOPlug> iop)
 	}
 
 	_btn_ioplug.signal_button_press_event ().connect (sigc::mem_fun (*this, &IOPluginWindow::IOPlugUI::button_press_event), false);
-	_iop->DropReferences.connect (_going_away_connection, invalidator (*this), boost::bind (&IOPluginWindow::IOPlugUI::self_delete, this), gui_context ());
+	_iop->DropReferences.connect (_going_away_connection, invalidator (*this), std::bind (&IOPluginWindow::IOPlugUI::self_delete, this), gui_context ());
 	show_all ();
 }
 
@@ -392,11 +392,11 @@ IOPluginWindow::IOButton::IOButton (std::shared_ptr<ARDOUR::IO> io, bool pre)
 	signal_button_press_event ().connect (sigc::mem_fun (*this, &IOButton::button_press), false);
 	signal_button_release_event ().connect (sigc::mem_fun (*this, &IOButton::button_release), false);
 
-	AudioEngine::instance ()->PortConnectedOrDisconnected.connect (_connections, invalidator (*this), boost::bind (&IOButton::port_connected_or_disconnected, this, _1, _3), gui_context ());
-	AudioEngine::instance ()->PortPrettyNameChanged.connect (_connections, invalidator (*this), boost::bind (&IOButton::port_pretty_name_changed, this, _1), gui_context ());
+	AudioEngine::instance ()->PortConnectedOrDisconnected.connect (_connections, invalidator (*this), std::bind (&IOButton::port_connected_or_disconnected, this, _1, _3), gui_context ());
+	AudioEngine::instance ()->PortPrettyNameChanged.connect (_connections, invalidator (*this), std::bind (&IOButton::port_pretty_name_changed, this, _1), gui_context ());
 
-	_io->changed.connect (_connections, invalidator (*this), boost::bind (&IOButton::update, this), gui_context ());
-	_io->session ().BundleAddedOrRemoved.connect (_connections, invalidator (*this), boost::bind (&IOButton::update, this), gui_context ());
+	_io->changed.connect (_connections, invalidator (*this), std::bind (&IOButton::update, this), gui_context ());
+	_io->session ().BundleAddedOrRemoved.connect (_connections, invalidator (*this), std::bind (&IOButton::update, this), gui_context ());
 }
 
 IOPluginWindow::IOButton::~IOButton ()
@@ -444,7 +444,7 @@ IOPluginWindow::IOButton::update ()
 	set_label (*this, _io->session (), bundle, _io);
 
 	if (bundle) {
-		bundle->Changed.connect (_bundle_connections, invalidator (*this), boost::bind (&IOButton::update, this), gui_context ());
+		bundle->Changed.connect (_bundle_connections, invalidator (*this), std::bind (&IOButton::update, this), gui_context ());
 	}
 }
 

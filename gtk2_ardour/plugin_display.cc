@@ -37,9 +37,9 @@ PluginDisplay::PluginDisplay (std::shared_ptr<ARDOUR::Plugin> p, uint32_t max_he
 	, _scroll (false)
 {
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	_plug->DropReferences.connect (_death_connection, invalidator (*this), boost::bind (&PluginDisplay::plugin_going_away, this), gui_context());
+	_plug->DropReferences.connect (_death_connection, invalidator (*this), std::bind (&PluginDisplay::plugin_going_away, this), gui_context());
 	_plug->QueueDraw.connect (_qdraw_connection, invalidator (*this),
-			boost::bind (&Gtk::Widget::queue_draw, this), gui_context ());
+			std::bind (&Gtk::Widget::queue_draw, this), gui_context ());
 }
 
 PluginDisplay::~PluginDisplay ()

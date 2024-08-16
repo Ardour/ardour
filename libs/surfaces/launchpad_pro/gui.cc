@@ -134,9 +134,9 @@ LPPRO_GUI::LPPRO_GUI (LaunchPadPro& p)
 
 	/* catch future changes to connection state */
 
-	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), boost::bind (&LPPRO_GUI::connection_handler, this), gui_context());
-	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), boost::bind (&LPPRO_GUI::connection_handler, this), gui_context());
-	_lp.ConnectionChange.connect (_port_connections, invalidator (*this), boost::bind (&LPPRO_GUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), std::bind (&LPPRO_GUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), std::bind (&LPPRO_GUI::connection_handler, this), gui_context());
+	_lp.ConnectionChange.connect (_port_connections, invalidator (*this), std::bind (&LPPRO_GUI::connection_handler, this), gui_context());
 }
 
 LPPRO_GUI::~LPPRO_GUI ()

@@ -199,24 +199,24 @@ ARDOUR_UI::set_session (Session *s)
 
 	blink_connection = Timers::blink_connect (sigc::mem_fun(*this, &ARDOUR_UI::blink_handler));
 
-	_session->SaveSessionRequested.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::save_session_at_its_request, this, _1), gui_context());
-	_session->StateSaved.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_title, this), gui_context());
-	_session->StateSaved.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_path_label, this), gui_context());
-	_session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::record_state_changed, this), gui_context());
-	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::map_transport_state, this), gui_context());
-	_session->DirtyChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_dirty_changed, this), gui_context());
+	_session->SaveSessionRequested.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::save_session_at_its_request, this, _1), gui_context());
+	_session->StateSaved.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::update_title, this), gui_context());
+	_session->StateSaved.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::update_path_label, this), gui_context());
+	_session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::record_state_changed, this), gui_context());
+	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::map_transport_state, this), gui_context());
+	_session->DirtyChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::session_dirty_changed, this), gui_context());
 
-	_session->PunchLoopConstraintChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::set_punch_sensitivity, this), gui_context());
-	_session->auto_punch_location_changed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::set_punch_sensitivity, this), gui_context ());
+	_session->PunchLoopConstraintChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::set_punch_sensitivity, this), gui_context());
+	_session->auto_punch_location_changed.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::set_punch_sensitivity, this), gui_context ());
 
-	_session->Xrun.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::xrun_handler, this, _1), gui_context());
-	_session->SoloActive.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::soloing_changed, this, _1), gui_context());
-	_session->AuditionActive.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::auditioning_changed, this, _1), gui_context());
-	_session->locations()->added.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
-	_session->locations()->removed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
-	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_parameter_changed, this, _1), gui_context ());
+	_session->Xrun.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::xrun_handler, this, _1), gui_context());
+	_session->SoloActive.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::soloing_changed, this, _1), gui_context());
+	_session->AuditionActive.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::auditioning_changed, this, _1), gui_context());
+	_session->locations()->added.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
+	_session->locations()->removed.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
+	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::session_parameter_changed, this, _1), gui_context ());
 
-	_session->LatencyUpdated.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_latency_updated, this, _1), gui_context());
+	_session->LatencyUpdated.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::session_latency_updated, this, _1), gui_context());
 	session_latency_updated (true);
 
 	/* Clocks are on by default after we are connected to a session, so show that here.

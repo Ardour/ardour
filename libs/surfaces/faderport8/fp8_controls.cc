@@ -153,12 +153,12 @@ FP8Controls::FP8Controls (FP8Base& b)
 	/* internal bindings */
 
 #define BindMethod(ID, CB) \
-	button (ID).released.connect_same_thread (button_connections, boost::bind (&FP8Controls:: CB, this));
+	button (ID).released.connect_same_thread (button_connections, std::bind (&FP8Controls:: CB, this));
 
 	BindMethod (FP8Controls::BtnTimecode, toggle_timecode);
 
 #define BindNav(BTN, MODE)\
-	button (BTN).released.connect_same_thread (button_connections, boost::bind (&FP8Controls::set_nav_mode, this, MODE))
+	button (BTN).released.connect_same_thread (button_connections, std::bind (&FP8Controls::set_nav_mode, this, MODE))
 
 	BindNav (BtnChannel, NavChannel);
 	BindNav (BtnZoom,    NavZoom);
@@ -172,7 +172,7 @@ FP8Controls::FP8Controls (FP8Base& b)
 #endif
 
 #define BindFader(BTN, MODE)\
-	button (BTN).released.connect_same_thread (button_connections, boost::bind (&FP8Controls::set_fader_mode, this, MODE))
+	button (BTN).released.connect_same_thread (button_connections, std::bind (&FP8Controls::set_fader_mode, this, MODE))
 
 	BindFader (BtnTrack,   ModeTrack);
 	BindFader (BtnPlugins, ModePlugins);
@@ -183,7 +183,7 @@ FP8Controls::FP8Controls (FP8Base& b)
 
 
 #define BindMix(BTN, MODE)\
-	button (BTN).released.connect_same_thread (button_connections, boost::bind (&FP8Controls::set_mix_mode, this, MODE))
+	button (BTN).released.connect_same_thread (button_connections, std::bind (&FP8Controls::set_mix_mode, this, MODE))
 
 	BindMix (BtnMAudio,   MixAudio);
 	BindMix (BtnMVI,      MixInstrument);

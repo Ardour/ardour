@@ -122,7 +122,7 @@ Splash::Splash ()
 	expose_is_the_one = false;
 
 	if (!ARDOUR_COMMAND_LINE::no_splash) {
-		ARDOUR::BootMessage.connect (msg_connection, invalidator (*this), boost::bind (&Splash::boot_message, this, _1), gui_context());
+		ARDOUR::BootMessage.connect (msg_connection, invalidator (*this), std::bind (&Splash::boot_message, this, _1), gui_context());
 		present ();
 	}
 }

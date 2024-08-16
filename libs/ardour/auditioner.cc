@@ -84,7 +84,7 @@ Auditioner::init ()
 		lookup_fallback_synth ();
 	}
 
-	_output->changed.connect_same_thread (*this, boost::bind (&Auditioner::output_changed, this, _1, _2));
+	_output->changed.connect_same_thread (*this, std::bind (&Auditioner::output_changed, this, _1, _2));
 
 	return 0;
 }

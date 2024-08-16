@@ -138,7 +138,7 @@ PatchChangeDialog::PatchChangeDialog (
 	bank_combo_changed ();
 
 	_info.Changed.connect (_info_changed_connection, invalidator (*this),
-			       boost::bind (&PatchChangeDialog::instrument_info_changed, this), gui_context());
+			       std::bind (&PatchChangeDialog::instrument_info_changed, this), gui_context());
 
 	show_all ();
 }

@@ -184,7 +184,7 @@ Maschine2Menu::set_control (M2EncoderInterface* ctrl)
 	if (!ctrl) {
 		return;
 	}
-	ctrl->changed.connect_same_thread (encoder_connection, boost::bind (&Maschine2Menu::encoder_changed, this, _1));
+	ctrl->changed.connect_same_thread (encoder_connection, std::bind (&Maschine2Menu::encoder_changed, this, _1));
 }
 
 void

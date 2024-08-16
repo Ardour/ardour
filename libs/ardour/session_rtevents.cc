@@ -18,7 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/bind.hpp>
 #include <glibmm/timer.h>
 
 #include "pbd/error.h"
@@ -191,9 +190,9 @@ Session::process_rtop (SessionEvent* ev)
 	ev->rt_slot ();
 
 	if (ev->event_loop) {
-		if (!ev->event_loop->call_slot (MISSING_INVALIDATOR, boost::bind (ev->rt_return, ev))) {
+		if (!ev->event_loop->call_slot (MISSING_INVALIDATOR, std::bind (ev->rt_return, ev))) {
 			/* The event must be deleted, otherwise the SessionEvent Pool may fill up */
-			if (!butler ()->delegate (boost::bind (ev->rt_return, ev))) {
+			if (!butler ()->delegate (std::bind (ev->rt_return, ev))) {
 				ev->rt_return (ev);
 			}
 		}

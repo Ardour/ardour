@@ -93,15 +93,15 @@ PluginPinWidget::PluginPinWidget (std::shared_ptr<ARDOUR::PluginInsert> pi)
 	assert (pi->owner ()); // Route
 
 	_pi->PluginIoReConfigure.connect (
-			_plugin_connections, invalidator (*this), boost::bind (&PluginPinWidget::queue_idle_update, this), gui_context ()
+			_plugin_connections, invalidator (*this), std::bind (&PluginPinWidget::queue_idle_update, this), gui_context ()
 			);
 
 	_pi->PluginMapChanged.connect (
-			_plugin_connections, invalidator (*this), boost::bind (&PluginPinWidget::queue_idle_update, this), gui_context ()
+			_plugin_connections, invalidator (*this), std::bind (&PluginPinWidget::queue_idle_update, this), gui_context ()
 			);
 
 	_pi->PluginConfigChanged.connect (
-			_plugin_connections, invalidator (*this), boost::bind (&PluginPinWidget::queue_idle_update, this), gui_context ()
+			_plugin_connections, invalidator (*this), std::bind (&PluginPinWidget::queue_idle_update, this), gui_context ()
 			);
 
 	_pin_box_size = 2 * ceil (max (8., 10. * UIConfiguration::instance ().get_ui_scale ()) * .5);
@@ -262,14 +262,14 @@ PluginPinWidget::PluginPinWidget (std::shared_ptr<ARDOUR::PluginInsert> pi)
 	_add_sc_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_sidechain_port), DataType::AUDIO));
 	_add_sc_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_sidechain_port), DataType::MIDI));
 
-	_route ()->PropertyChanged.connect (_plugin_connections, invalidator (*this), boost::bind (&PluginPinWidget::property_changed, this, _1), gui_context ());
-	_pi->PropertyChanged.connect (_plugin_connections, invalidator (*this), boost::bind (&PluginPinWidget::property_changed, this, _1), gui_context ());
+	_route ()->PropertyChanged.connect (_plugin_connections, invalidator (*this), std::bind (&PluginPinWidget::property_changed, this, _1), gui_context ());
+	_pi->PropertyChanged.connect (_plugin_connections, invalidator (*this), std::bind (&PluginPinWidget::property_changed, this, _1), gui_context ());
 
 	AudioEngine::instance ()->PortConnectedOrDisconnected.connect (
-			_io_connection, invalidator (*this), boost::bind (&PluginPinWidget::port_connected_or_disconnected, this, _1, _3), gui_context ()
+			_io_connection, invalidator (*this), std::bind (&PluginPinWidget::port_connected_or_disconnected, this, _1, _3), gui_context ()
 			);
 	AudioEngine::instance ()->PortPrettyNameChanged.connect (
-			_io_connection, invalidator (*this), boost::bind (&PluginPinWidget::port_pretty_name_changed, this, _1), gui_context ()
+			_io_connection, invalidator (*this), std::bind (&PluginPinWidget::port_pretty_name_changed, this, _1), gui_context ()
 			);
 }
 
@@ -2051,7 +2051,7 @@ PluginPinWidget::Control::Control (std::shared_ptr<AutomationControl> c, string 
 
 	_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &Control::slider_adjusted));
 	// dup. currently timers are used :(
-	//c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
+	//c->Changed.connect (_connection, MISSING_INVALIDATOR, std::bind (&Control::control_changed, this), gui_context ());
 
 	// yuck, do we really need to do this?
 	// according to c404374 this is only needed for send automation
@@ -2125,7 +2125,7 @@ PluginPinDialog::PluginPinDialog (std::shared_ptr<ARDOUR::PluginInsert> pi)
 	add (*ppw.back());
 	unset_transient_for ();
 
-	_pi->PropertyChanged.connect (_connections, invalidator (*this), boost::bind (&PluginPinDialog::processor_property_changed, this, _1), gui_context());
+	_pi->PropertyChanged.connect (_connections, invalidator (*this), std::bind (&PluginPinDialog::processor_property_changed, this, _1), gui_context());
 	/* Note: PluginPinWindowProxy handles DropReferences */
 }
 
@@ -2148,14 +2148,14 @@ PluginPinDialog::PluginPinDialog (std::shared_ptr<ARDOUR::Route> r)
 	_route->foreach_processor (sigc::mem_fun (*this, &PluginPinDialog::add_processor));
 
 	_route->processors_changed.connect (
-		_connections, invalidator (*this), boost::bind (&PluginPinDialog::route_processors_changed, this, _1), gui_context()
+		_connections, invalidator (*this), std::bind (&PluginPinDialog::route_processors_changed, this, _1), gui_context()
 		);
 
 	_route->DropReferences.connect (
-		_connections, invalidator (*this), boost::bind (&PluginPinDialog::going_away, this), gui_context()
+		_connections, invalidator (*this), std::bind (&PluginPinDialog::going_away, this), gui_context()
 		);
 
-	_route->PropertyChanged.connect ( _connections, invalidator (*this), boost::bind (&PluginPinDialog::route_property_changed, this, _1), gui_context());
+	_route->PropertyChanged.connect ( _connections, invalidator (*this), std::bind (&PluginPinDialog::route_property_changed, this, _1), gui_context());
 }
 
 void

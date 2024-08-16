@@ -437,7 +437,7 @@ ExportGraphBuilder::Encoder::init_writer (std::shared_ptr<AudioGrapher::SndfileW
 	writer_filename = config.filename->get_path (config.format);
 
 	writer.reset (new AudioGrapher::SndfileWriter<T> (writer_filename, format, channels, config.format->sample_rate(), config.broadcast_info));
-	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
+	writer->FileWritten.connect_same_thread (copy_files_connection, std::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
 	if ((format & SF_FORMAT_SUBMASK) == ExportFormatBase::SF_Vorbis ||
 	    (format & SF_FORMAT_TYPEMASK) == ExportFormatBase::F_MPEG ||
 	    (format & SF_FORMAT_SUBMASK) == ExportFormatBase::SF_Opus) {
@@ -557,7 +557,7 @@ ExportGraphBuilder::Encoder::init_writer (std::shared_ptr<AudioGrapher::CmdPipeW
 
 	PBD::info << "Encode command: { " << exec->to_s () << "}" << endmsg;
 	writer.reset (new AudioGrapher::CmdPipeWriter<T> (exec, writer_filename, fd, tmpfile_name));
-	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
+	writer->FileWritten.connect_same_thread (copy_files_connection, std::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
 }
 
 void
@@ -802,9 +802,9 @@ ExportGraphBuilder::Intermediate::Intermediate (ExportGraphBuilder & parent, Fil
 	}
 
 	tmp_file->FileWritten.connect_same_thread (post_processing_connection,
-	                                           boost::bind (&Intermediate::prepare_post_processing, this));
+	                                           std::bind (&Intermediate::prepare_post_processing, this));
 	tmp_file->FileFlushed.connect_same_thread (post_processing_connection,
-	                                           boost::bind (&Intermediate::start_post_processing, this));
+	                                           std::bind (&Intermediate::start_post_processing, this));
 
 	add_child (new_config);
 

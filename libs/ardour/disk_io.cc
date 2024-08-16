@@ -312,10 +312,10 @@ DiskIOProcessor::use_playlist (DataType dt, std::shared_ptr<Playlist> playlist)
 	_playlists[dt] = playlist;
 	playlist->use();
 
-	playlist->ContentsChanged.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_modified, this));
-	playlist->LayeringChanged.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_modified, this));
-	playlist->DropReferences.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_deleted, this, std::weak_ptr<Playlist>(playlist)));
-	playlist->RangesMoved.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_ranges_moved, this, _1, _2));
+	playlist->ContentsChanged.connect_same_thread (playlist_connections, std::bind (&DiskIOProcessor::playlist_modified, this));
+	playlist->LayeringChanged.connect_same_thread (playlist_connections, std::bind (&DiskIOProcessor::playlist_modified, this));
+	playlist->DropReferences.connect_same_thread (playlist_connections, std::bind (&DiskIOProcessor::playlist_deleted, this, std::weak_ptr<Playlist>(playlist)));
+	playlist->RangesMoved.connect_same_thread (playlist_connections, std::bind (&DiskIOProcessor::playlist_ranges_moved, this, _1, _2));
 
 	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 now using playlist %1 (%2)\n", name(), playlist->name(), playlist->id()));
 

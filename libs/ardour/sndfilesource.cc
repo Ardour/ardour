@@ -340,7 +340,7 @@ SndFileSource::init_sndfile ()
 
 	memset (&_info, 0, sizeof(_info));
 
-	AudioFileSource::HeaderPositionOffsetChanged.connect_same_thread (header_position_connection, boost::bind (&SndFileSource::handle_header_position_change, this));
+	AudioFileSource::HeaderPositionOffsetChanged.connect_same_thread (header_position_connection, std::bind (&SndFileSource::handle_header_position_change, this));
 }
 
 void

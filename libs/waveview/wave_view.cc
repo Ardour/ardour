@@ -114,9 +114,9 @@ WaveView::init ()
 	_props->outline_color = _outline_color;
 
 	VisualPropertiesChanged.connect_same_thread (
-	    invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
+	    invalidation_connection, std::bind (&WaveView::handle_visual_property_change, this));
 	ClipLevelChanged.connect_same_thread (invalidation_connection,
-	                                      boost::bind (&WaveView::handle_clip_level_change, this));
+	                                      std::bind (&WaveView::handle_clip_level_change, this));
 }
 
 WaveView::~WaveView ()

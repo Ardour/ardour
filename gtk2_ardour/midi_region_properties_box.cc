@@ -80,7 +80,7 @@ MidiRegionPropertiesBox::set_region (std::shared_ptr<Region> r)
 {
 	RegionPropertiesBox::set_region (r);
 
-	_region->PropertyChanged.connect (midi_state_connection, invalidator (*this), boost::bind (&MidiRegionPropertiesBox::region_changed, this, _1), gui_context ());
+	_region->PropertyChanged.connect (midi_state_connection, invalidator (*this), std::bind (&MidiRegionPropertiesBox::region_changed, this, _1), gui_context ());
 }
 
 void

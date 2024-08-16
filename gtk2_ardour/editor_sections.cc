@@ -96,14 +96,14 @@ EditorSections::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
-		_session->locations ()->added.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::location_changed, this, _1), gui_context ());
-		_session->locations ()->removed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::location_changed, this, _1), gui_context ());
-		_session->locations ()->changed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::queue_redisplay, this), gui_context ());
+		_session->locations ()->added.connect (_session_connections, invalidator (*this), std::bind (&EditorSections::location_changed, this, _1), gui_context ());
+		_session->locations ()->removed.connect (_session_connections, invalidator (*this), std::bind (&EditorSections::location_changed, this, _1), gui_context ());
+		_session->locations ()->changed.connect (_session_connections, invalidator (*this), std::bind (&EditorSections::queue_redisplay, this), gui_context ());
 
-		Location::start_changed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::location_changed, this, _1), gui_context ());
-		Location::end_changed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::location_changed, this, _1), gui_context ());
-		Location::flags_changed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::queue_redisplay, this), gui_context ());
-		Location::name_changed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::location_changed, this, _1), gui_context ());
+		Location::start_changed.connect (_session_connections, invalidator (*this), std::bind (&EditorSections::location_changed, this, _1), gui_context ());
+		Location::end_changed.connect (_session_connections, invalidator (*this), std::bind (&EditorSections::location_changed, this, _1), gui_context ());
+		Location::flags_changed.connect (_session_connections, invalidator (*this), std::bind (&EditorSections::queue_redisplay, this), gui_context ());
+		Location::name_changed.connect (_session_connections, invalidator (*this), std::bind (&EditorSections::location_changed, this, _1), gui_context ());
 	}
 
 	redisplay ();

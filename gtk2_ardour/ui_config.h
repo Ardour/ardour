@@ -29,7 +29,6 @@
 #include <iostream>
 #include <map>
 
-#include <boost/bind.hpp>
 
 #include "ardour/types.h" // required for operators used in pbd/configuration_variable.h
 #include "ardour/types_convert.h"

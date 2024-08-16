@@ -91,7 +91,7 @@ Playlist::make_property_quarks ()
 }
 
 RegionListProperty::RegionListProperty (Playlist& pl)
-	: SequenceProperty<std::list<std::shared_ptr<Region> > > (Properties::regions.property_id, boost::bind (&Playlist::update, &pl, _1))
+	: SequenceProperty<std::list<std::shared_ptr<Region> > > (Properties::regions.property_id, std::bind (&Playlist::update, &pl, _1))
 	, _playlist (pl)
 {
 }
@@ -355,10 +355,10 @@ Playlist::init (bool hide)
 	_end_space = timecnt_t (_type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime);
 	_playlist_shift_active = false;
 
-	_session.history ().BeginUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::begin_undo, this));
-	_session.history ().EndUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::end_undo, this));
+	_session.history ().BeginUndoRedo.connect_same_thread (*this, std::bind (&Playlist::begin_undo, this));
+	_session.history ().EndUndoRedo.connect_same_thread (*this, std::bind (&Playlist::end_undo, this));
 
-	ContentsChanged.connect_same_thread (*this, boost::bind (&Playlist::mark_session_dirty, this));
+	ContentsChanged.connect_same_thread (*this, std::bind (&Playlist::mark_session_dirty, this));
 }
 
 Playlist::~Playlist ()
@@ -798,8 +798,8 @@ Playlist::add_region_internal (std::shared_ptr<Region> region, timepos_t const &
 
 	notify_region_added (region);
 
-	region->PropertyChanged.connect_same_thread (region_state_changed_connections, boost::bind (&Playlist::region_changed_proxy, this, _1, std::weak_ptr<Region> (region)));
-	region->DropReferences.connect_same_thread (region_drop_references_connections, boost::bind (&Playlist::region_going_away, this, std::weak_ptr<Region> (region)));
+	region->PropertyChanged.connect_same_thread (region_state_changed_connections, std::bind (&Playlist::region_changed_proxy, this, _1, std::weak_ptr<Region> (region)));
+	region->DropReferences.connect_same_thread (region_drop_references_connections, std::bind (&Playlist::region_going_away, this, std::weak_ptr<Region> (region)));
 
 	/* do not handle property changes of newly added regions.
 	 * Otherwise this would trigger Playlist::notify_region_moved()

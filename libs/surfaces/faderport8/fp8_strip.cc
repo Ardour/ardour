@@ -109,11 +109,11 @@ FP8Strip::FP8Strip (FP8Base& b, uint8_t id)
 	_last_fader = 65535;
 	_last_meter = _last_redux = _last_barpos = 0xff;
 
-	_mute.StateChange.connect_same_thread (_button_connections, boost::bind (&FP8Strip::set_mute, this, _1));
-	_solo.StateChange.connect_same_thread (_button_connections, boost::bind (&FP8Strip::set_solo, this, _1));
-	select_button ().released.connect_same_thread (_button_connections, boost::bind (&FP8Strip::set_select, this));
-	recarm_button ().released.connect_same_thread (_button_connections, boost::bind (&FP8Strip::set_recarm, this));
-	b.Periodic.connect_same_thread (_base_connection, boost::bind (&FP8Strip::periodic, this));
+	_mute.StateChange.connect_same_thread (_button_connections, std::bind (&FP8Strip::set_mute, this, _1));
+	_solo.StateChange.connect_same_thread (_button_connections, std::bind (&FP8Strip::set_solo, this, _1));
+	select_button ().released.connect_same_thread (_button_connections, std::bind (&FP8Strip::set_select, this));
+	recarm_button ().released.connect_same_thread (_button_connections, std::bind (&FP8Strip::set_recarm, this));
+	b.Periodic.connect_same_thread (_base_connection, std::bind (&FP8Strip::periodic, this));
 }
 
 FP8Strip::~FP8Strip ()
@@ -204,7 +204,7 @@ FP8Strip::set_ ##NAME##_controllable (std::shared_ptr<AutomationControl> ac)    
                                                                                     \
   if (ac) {                                                                         \
     ac->Changed.connect (_##NAME##_connection, MISSING_INVALIDATOR,                 \
-      boost::bind (&FP8Strip::notify_##NAME##_changed, this), fp8_context());       \
+      std::bind (&FP8Strip::notify_##NAME##_changed, this), fp8_context());       \
   }                                                                                 \
   notify_##NAME##_changed ();                                                       \
 }

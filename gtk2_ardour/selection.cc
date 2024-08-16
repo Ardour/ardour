@@ -73,13 +73,13 @@ Selection::Selection (const PublicEditor* e, bool mls)
 	/* we have disambiguate which remove() for the compiler */
 
 	void (Selection::*marker_remove)(ArdourMarker*) = &Selection::remove;
-	ArdourMarker::CatchDeletion.connect (*this, MISSING_INVALIDATOR, boost::bind (marker_remove, this, _1), gui_context());
+	ArdourMarker::CatchDeletion.connect (*this, MISSING_INVALIDATOR, std::bind (marker_remove, this, _1), gui_context());
 
 	void (Selection::*point_remove)(ControlPoint*) = &Selection::remove;
-	ControlPoint::CatchDeletion.connect (*this, MISSING_INVALIDATOR, boost::bind (point_remove, this, _1), gui_context());
+	ControlPoint::CatchDeletion.connect (*this, MISSING_INVALIDATOR, std::bind (point_remove, this, _1), gui_context());
 
 	void (Selection::*rv_remove)(RegionView*) = &Selection::remove;
-	RegionView::RegionViewGoingAway.connect (*this, MISSING_INVALIDATOR, boost::bind (rv_remove, this, _1), gui_context());
+	RegionView::RegionViewGoingAway.connect (*this, MISSING_INVALIDATOR, std::bind (rv_remove, this, _1), gui_context());
 }
 
 #if 0

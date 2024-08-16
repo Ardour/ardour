@@ -101,8 +101,8 @@ Panner2in2out::Panner2in2out (std::shared_ptr<Pannable> p)
 	left_interp[1] = left[1] = desired_left[1];
 	right_interp[1] = right[1] = desired_right[1];
 
-	_pannable->pan_azimuth_control->Changed.connect_same_thread (*this, boost::bind (&Panner2in2out::update, this));
-	_pannable->pan_width_control->Changed.connect_same_thread (*this, boost::bind (&Panner2in2out::update, this));
+	_pannable->pan_azimuth_control->Changed.connect_same_thread (*this, std::bind (&Panner2in2out::update, this));
+	_pannable->pan_width_control->Changed.connect_same_thread (*this, std::bind (&Panner2in2out::update, this));
 }
 
 Panner2in2out::~Panner2in2out ()

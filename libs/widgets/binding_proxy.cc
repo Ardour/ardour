@@ -44,7 +44,7 @@ BindingProxy::BindingProxy (std::shared_ptr<Controllable> c)
 	if (c) {
 		c->DropReferences.connect (
 				_controllable_going_away_connection, invalidator (*this),
-				boost::bind (&BindingProxy::set_controllable, this, std::shared_ptr<Controllable> ()),
+				std::bind (&BindingProxy::set_controllable, this, std::shared_ptr<Controllable> ()),
 				gui_context());
 	}
 }
@@ -71,7 +71,7 @@ BindingProxy::set_controllable (std::shared_ptr<Controllable> c)
 	if (c) {
 		c->DropReferences.connect (
 				_controllable_going_away_connection, invalidator (*this),
-				boost::bind (&BindingProxy::set_controllable, this, std::shared_ptr<Controllable> ()),
+				std::bind (&BindingProxy::set_controllable, this, std::shared_ptr<Controllable> ()),
 				gui_context());
 	}
 }
@@ -101,7 +101,7 @@ BindingProxy::button_press_handler (GdkEventButton *ev)
 			}
 			prompter->set_text (prompt);
 			prompter->touch (); // shows popup
-			controllable->LearningFinished.connect_same_thread (learning_connection, boost::bind (&BindingProxy::learning_finished, this));
+			controllable->LearningFinished.connect_same_thread (learning_connection, std::bind (&BindingProxy::learning_finished, this));
 		}
 		return true;
 	}
