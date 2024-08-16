@@ -857,7 +857,7 @@ Editor::Editor ()
 	constructed = true;
 
 	/* grab current parameter state */
-	boost::function<void (string)> pc (boost::bind (&Editor::ui_parameter_changed, this, _1));
+	std::function<void (string)> pc (boost::bind (&Editor::ui_parameter_changed, this, _1));
 	UIConfiguration::instance().map_parameters (pc);
 
 	setup_fade_images ();
@@ -1414,7 +1414,7 @@ Editor::set_session (Session *t)
 	_snapped_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
 	_snapped_cursor->set_color (UIConfiguration::instance().color ("edit point"));
 
-	boost::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));
+	std::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));
 	Config->map_parameters (pc);
 	_session->config.map_parameters (pc);
 

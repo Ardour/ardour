@@ -1935,7 +1935,7 @@ static std::list<Gtk::TargetEntry> drag_targets_noplugin()
 	return tmp;
 }
 
-ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelector*()> get_plugin_selector,
+ProcessorBox::ProcessorBox (ARDOUR::Session* sess, std::function<PluginSelector*()> get_plugin_selector,
 			    ProcessorSelection& psel, MixerStrip* parent, bool owner_is_mixer)
 	: _parent_strip (parent)
 	, _owner_is_mixer (owner_is_mixer)

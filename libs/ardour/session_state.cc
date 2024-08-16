@@ -236,7 +236,7 @@ Session::post_engine_init ()
 	msc->set_input_port (std::dynamic_pointer_cast<MidiPort>(scene_input_port()));
 	msc->set_output_port (std::dynamic_pointer_cast<MidiPort>(scene_output_port()));
 
-	boost::function<samplecnt_t(void)> timer_func (boost::bind (&Session::audible_sample, this, (bool*)(0)));
+	std::function<samplecnt_t(void)> timer_func (boost::bind (&Session::audible_sample, this, (bool*)(0)));
 	std::dynamic_pointer_cast<AsyncMIDIPort>(scene_input_port())->set_timer (timer_func);
 
 	setup_midi_machine_control ();
@@ -304,8 +304,8 @@ Session::post_engine_init ()
 
 		/* ENGINE */
 
-		boost::function<void (std::string)> ff (boost::bind (&Session::config_changed, this, _1, false));
-		boost::function<void (std::string)> ft (boost::bind (&Session::config_changed, this, _1, true));
+		std::function<void (std::string)> ff (boost::bind (&Session::config_changed, this, _1, false));
+		std::function<void (std::string)> ft (boost::bind (&Session::config_changed, this, _1, true));
 
 		Config->map_parameters (ff);
 		config.map_parameters (ft);
@@ -5096,7 +5096,7 @@ typedef std::vector<std::shared_ptr<FileSource> > SeveralFileSources;
 typedef std::map<std::string,SeveralFileSources> SourcePathMap;
 
 int
-Session::bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,string)> callback)
+Session::bring_all_sources_into_session (std::function<void(uint32_t,uint32_t,string)> callback)
 {
 	uint32_t total = 0;
 	uint32_t n = 0;

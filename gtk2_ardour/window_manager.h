@@ -24,7 +24,6 @@
 #include <string>
 #include <map>
 
-#include <boost/function.hpp>
 #include <glibmm/refptr.h>
 #include <sigc++/trackable.h>
 
@@ -117,10 +116,10 @@ template<typename T>
 class ProxyWithConstructor: public ProxyBase
 {
 public:
-	ProxyWithConstructor (const std::string& name, const std::string& menu_name, const boost::function<T*()>& c)
+	ProxyWithConstructor (const std::string& name, const std::string& menu_name, const std::function<T*()>& c)
 		: ProxyBase (name, menu_name) , creator (c) {}
 
-	ProxyWithConstructor (const std::string& name, const std::string& menu_name, const boost::function<T*()>& c, const XMLNode* node)
+	ProxyWithConstructor (const std::string& name, const std::string& menu_name, const std::function<T*()>& c, const XMLNode* node)
 		: ProxyBase (name, menu_name, *node) , creator (c) {}
 
 	Gtk::Window* get (bool create = false) {
@@ -163,7 +162,7 @@ public:
 	}
 
 private:
-	boost::function<T*()>	creator;
+	std::function<T*()>	creator;
 };
 
 template<typename T>
@@ -216,7 +215,7 @@ public:
 	}
 
 private:
-	boost::function<T*()>	creator;
+	std::function<T*()>	creator;
 };
 
 } /* namespace */

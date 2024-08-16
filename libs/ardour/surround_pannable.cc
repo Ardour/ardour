@@ -143,7 +143,7 @@ SurroundPannable::sync_auto_state_with (std::shared_ptr<SurroundPannable> other)
 }
 
 void
-SurroundPannable::foreach_pan_control (boost::function<void(std::shared_ptr<AutomationControl>)> f) const
+SurroundPannable::foreach_pan_control (std::function<void(std::shared_ptr<AutomationControl>)> f) const
 {
 	f (pan_pos_x);
 	f (pan_pos_y);

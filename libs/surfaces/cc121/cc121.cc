@@ -944,7 +944,7 @@ CC121::Button::get_action (bool press, CC121::ButtonState bs)
 }
 
 void
-CC121::Button::set_action (boost::function<void()> f, bool when_pressed, CC121::ButtonState bs)
+CC121::Button::set_action (std::function<void()> f, bool when_pressed, CC121::ButtonState bs)
 {
 	ToDo todo;
 	todo.type = InternalFunction;

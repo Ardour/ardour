@@ -589,7 +589,7 @@ ARDOUR::check_for_old_configuration_files ()
 }
 
 int
-ARDOUR::handle_old_configuration_files (boost::function<bool(std::string const&, std::string const&, int)> ui_handler)
+ARDOUR::handle_old_configuration_files (std::function<bool(std::string const&, std::string const&, int)> ui_handler)
 {
 	if (have_old_configuration_files) {
 		int current_version = atoi (X_(PROGRAM_VERSION));

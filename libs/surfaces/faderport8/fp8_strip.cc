@@ -141,7 +141,7 @@ FP8Strip::drop_automation_controls ()
 	_x_select_ctrl.reset ();
 	_peak_meter.reset ();
 	_redux_ctrl.reset ();
-	_select_plugin_functor.clear ();
+	_select_plugin_functor = {};
 }
 
 void
@@ -223,12 +223,12 @@ GENERATE_SET_CTRL_FUNCTION (x_select)
 void
 FP8Strip::set_select_controllable (std::shared_ptr<AutomationControl> ac)
 {
-	_select_plugin_functor.clear ();
+	_select_plugin_functor = {};
 	set_x_select_controllable (ac);
 }
 
 void
-FP8Strip::set_select_cb (boost::function<void ()>& functor)
+FP8Strip::set_select_cb (std::function<void ()>& functor)
 {
 	set_select_controllable (std::shared_ptr<AutomationControl>());
 	_select_plugin_functor = functor;
@@ -431,7 +431,7 @@ FP8Strip::set_recarm ()
 void
 FP8Strip::set_select ()
 {
-	if (!_select_plugin_functor.empty ()) {
+	if (_select_plugin_functor) {
 		assert (!_x_select_ctrl);
 		_select_plugin_functor ();
 	} else if (_x_select_ctrl) {
@@ -512,13 +512,13 @@ FP8Strip::notify_pan_changed ()
 void
 FP8Strip::notify_x_select_changed ()
 {
-	if (!_select_plugin_functor.empty ()) {
+	if (_select_plugin_functor) {
 		assert (!_x_select_ctrl);
 		return;
 	}
 
 	if (_x_select_ctrl) {
-		assert (_select_plugin_functor.empty ());
+		assert (!_select_plugin_functor);
 		select_button ().set_active (_x_select_ctrl->get_value() > 0.);
 		select_button ().set_color (0xffff00ff);
 		select_button ().set_blinking (false);

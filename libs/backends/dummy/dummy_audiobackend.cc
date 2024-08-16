@@ -517,14 +517,14 @@ void *
 DummyAudioBackend::dummy_process_thread (void *arg)
 {
 	ThreadData* td = reinterpret_cast<ThreadData*> (arg);
-	boost::function<void ()> f = td->f;
+	std::function<void ()> f = td->f;
 	delete td;
 	f ();
 	return 0;
 }
 
 int
-DummyAudioBackend::create_process_thread (boost::function<void()> func)
+DummyAudioBackend::create_process_thread (std::function<void()> func)
 {
 	pthread_t   thread_id;
 	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);

@@ -300,7 +300,7 @@ public:
 	std::vector<std::string> get_paths_for_new_sources (bool allow_replacing, const std::string& import_file_path,
 	                                                    uint32_t channels, std::vector<std::string> const & smf_track_names);
 
-	int bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,std::string)> callback);
+	int bring_all_sources_into_session (std::function<void(uint32_t,uint32_t,std::string)> callback);
 
 	void process (pframes_t nframes);
 
@@ -716,7 +716,7 @@ public:
 	PBD::Signal0<void>             route_group_removed;
 	PBD::Signal0<void>             route_groups_reordered;
 
-	void foreach_route_group (boost::function<void(RouteGroup*)> f) {
+	void foreach_route_group (std::function<void(RouteGroup*)> f) {
 		for (std::list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
 			f (*i);
 		}
@@ -1842,7 +1842,7 @@ private:
 	struct timeval last_mmc_step;
 	double step_speed;
 
-	typedef boost::function<bool()> MidiTimeoutCallback;
+	typedef std::function<bool()> MidiTimeoutCallback;
 	typedef std::list<MidiTimeoutCallback> MidiTimeoutList;
 
 	MidiTimeoutList midi_timeouts;
@@ -2033,7 +2033,7 @@ public:
 
 	typedef std::map<PBD::ID,std::shared_ptr<Source> > SourceMap;
 
-	void foreach_source (boost::function<void( std::shared_ptr<Source> )> f) {
+	void foreach_source (std::function<void( std::shared_ptr<Source> )> f) {
 		Glib::Threads::Mutex::Lock ls (source_lock);
 		for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 			f ( (*i).second );

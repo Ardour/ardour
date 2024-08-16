@@ -270,151 +270,151 @@ Console1::setup_controls ()
 	for (uint32_t i = 0; i < 20; ++i) {
 		new ControllerButton (this,
 		                      ControllerID (FOCUS1 + i),
-		                      boost::function<void (uint32_t)> (boost::bind (&Console1::select, this, i)),
+		                      std::function<void (uint32_t)> (boost::bind (&Console1::select, this, i)),
 		                      0,
-		                      boost::function<void (uint32_t)> (boost::bind (&Console1::select_plugin, this, i)));
+		                      std::function<void (uint32_t)> (boost::bind (&Console1::select_plugin, this, i)));
 	}
 
 	new ControllerButton (
-	  this, ControllerID::PRESET, boost::function<void (uint32_t)> (boost::bind (&Console1::shift, this, _1)));
+	  this, ControllerID::PRESET, std::function<void (uint32_t)> (boost::bind (&Console1::shift, this, _1)));
 
 	new ControllerButton (this,
 	                      ControllerID::TRACK_GROUP,
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::plugin_state, this, _1)));
+	                      std::function<void (uint32_t)> (boost::bind (&Console1::plugin_state, this, _1)));
 
 	new ControllerButton (
-	  this, ControllerID::DISPLAY_ON, boost::function<void (uint32_t)> (boost::bind (&Console1::rude_solo, this, _1)));
+	  this, ControllerID::DISPLAY_ON, std::function<void (uint32_t)> (boost::bind (&Console1::rude_solo, this, _1)));
 	new ControllerButton (
-	  this, ControllerID::MODE, boost::function<void (uint32_t)> (boost::bind (&Console1::zoom, this, _1)));
+	  this, ControllerID::MODE, std::function<void (uint32_t)> (boost::bind (&Console1::zoom, this, _1)));
 	new MultiStateButton (this,
 	                      ControllerID::EXTERNAL_SIDECHAIN,
 	                      std::vector<uint32_t>{ 0, 63, 127 },
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::window, this, _1)));
+	                      std::function<void (uint32_t)> (boost::bind (&Console1::window, this, _1)));
 
 	new ControllerButton (
-	  this, ControllerID::PAGE_UP, boost::function<void (uint32_t)> (boost::bind (&Console1::bank, this, true)));
+	  this, ControllerID::PAGE_UP, std::function<void (uint32_t)> (boost::bind (&Console1::bank, this, true)));
 	new ControllerButton (
-	  this, ControllerID::PAGE_DOWN, boost::function<void (uint32_t)> (boost::bind (&Console1::bank, this, false)));
+	  this, ControllerID::PAGE_DOWN, std::function<void (uint32_t)> (boost::bind (&Console1::bank, this, false)));
 
 	new ControllerButton (this,
 	                      swap_solo_mute ? ControllerID::SOLO : ControllerID::MUTE,
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::mute, this, _1)));
+	                      std::function<void (uint32_t)> (boost::bind (&Console1::mute, this, _1)));
 	new ControllerButton (this,
 	                      swap_solo_mute ? ControllerID::MUTE : ControllerID::SOLO,
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::solo, this, _1)));
+	                      std::function<void (uint32_t)> (boost::bind (&Console1::solo, this, _1)));
 
 	new ControllerButton (
-	  this, ControllerID::PHASE_INV, boost::function<void (uint32_t)> (boost::bind (&Console1::phase, this, _1)));
+	  this, ControllerID::PHASE_INV, std::function<void (uint32_t)> (boost::bind (&Console1::phase, this, _1)));
 
 	/*
 	Console 1: Input Gain - Ardour / Mixbus: Trim
 	*/
-	new Encoder (this, ControllerID::GAIN, boost::function<void (uint32_t)> (boost::bind (&Console1::trim, this, _1)));
+	new Encoder (this, ControllerID::GAIN, std::function<void (uint32_t)> (boost::bind (&Console1::trim, this, _1)));
 
 	/*
 	Console 1: Volume - Ardour / Mixbus: Gain
 	*/
 	new Encoder (
-	  this, ControllerID::VOLUME, boost::function<void (uint32_t)> (boost::bind (&Console1::gain, this, _1)));
+	  this, ControllerID::VOLUME, std::function<void (uint32_t)> (boost::bind (&Console1::gain, this, _1)));
 
-	new Encoder (this, ControllerID::PAN, boost::function<void (uint32_t)> (boost::bind (&Console1::pan, this, _1)));
+	new Encoder (this, ControllerID::PAN, std::function<void (uint32_t)> (boost::bind (&Console1::pan, this, _1)));
 
 	/* Filter Section*/
 	new ControllerButton (this,
 	                      ControllerID::FILTER_TO_COMPRESSORS,
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::filter, this, _1)));
+	                      std::function<void (uint32_t)> (boost::bind (&Console1::filter, this, _1)));
 	new Encoder (
-	  this, ControllerID::LOW_CUT, boost::function<void (uint32_t)> (boost::bind (&Console1::low_cut, this, _1)));
+	  this, ControllerID::LOW_CUT, std::function<void (uint32_t)> (boost::bind (&Console1::low_cut, this, _1)));
 	new Encoder (
-	  this, ControllerID::HIGH_CUT, boost::function<void (uint32_t)> (boost::bind (&Console1::high_cut, this, _1)));
+	  this, ControllerID::HIGH_CUT, std::function<void (uint32_t)> (boost::bind (&Console1::high_cut, this, _1)));
 
 	/* Gate Section */
 	new ControllerButton (
-	  this, ControllerID::SHAPE, boost::function<void (uint32_t)> (boost::bind (&Console1::gate, this, _1)));
+	  this, ControllerID::SHAPE, std::function<void (uint32_t)> (boost::bind (&Console1::gate, this, _1)));
 	new ControllerButton (this,
 	                      ControllerID::HARD_GATE,
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::gate_scf, this, _1)),
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::gate_listen, this, _1)));
+	                      std::function<void (uint32_t)> (boost::bind (&Console1::gate_scf, this, _1)),
+	                      std::function<void (uint32_t)> (boost::bind (&Console1::gate_listen, this, _1)));
 	new Encoder (this,
 	             ControllerID::SHAPE_GATE,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_thresh, this, _1)));
+	             std::function<void (uint32_t)> (boost::bind (&Console1::gate_thresh, this, _1)));
 	new Encoder (this,
 	             ControllerID::SHAPE_RELEASE,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_release, this, _1)),
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_hyst, this, _1)));
+	             std::function<void (uint32_t)> (boost::bind (&Console1::gate_release, this, _1)),
+	             std::function<void (uint32_t)> (boost::bind (&Console1::gate_hyst, this, _1)));
 	new Encoder (this,
 	             ControllerID::SHAPE_SUSTAIN,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_attack, this, _1)),
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_hold, this, _1)));
+	             std::function<void (uint32_t)> (boost::bind (&Console1::gate_attack, this, _1)),
+	             std::function<void (uint32_t)> (boost::bind (&Console1::gate_hold, this, _1)));
 	new Encoder (this,
 	             ControllerID::SHAPE_PUNCH,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_depth, this, _1)),
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_filter_freq, this, _1)));
+	             std::function<void (uint32_t)> (boost::bind (&Console1::gate_depth, this, _1)),
+	             std::function<void (uint32_t)> (boost::bind (&Console1::gate_filter_freq, this, _1)));
 
-	new Meter (this, ControllerID::SHAPE_METER, boost::function<void ()> ([] () {}));
+	new Meter (this, ControllerID::SHAPE_METER, std::function<void ()> ([] () {}));
 
 	/* EQ Section */
 	new ControllerButton (
-	  this, ControllerID::EQ, boost::function<void (uint32_t)> (boost::bind (&Console1::eq, this, _1)));
+	  this, ControllerID::EQ, std::function<void (uint32_t)> (boost::bind (&Console1::eq, this, _1)));
 
 	for (uint32_t i = 0; i < 4; ++i) {
 		new Encoder (this,
 		             eq_freq_controller_for_band (i),
-		             boost::function<void (uint32_t)> (boost::bind (&Console1::eq_freq, this, i, _1)),
-		             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, i, _1)));
+		             std::function<void (uint32_t)> (boost::bind (&Console1::eq_freq, this, i, _1)),
+		             std::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, i, _1)));
 		new Encoder (this,
 		             eq_gain_controller_for_band (i),
-		             boost::function<void (uint32_t)> (boost::bind (&Console1::eq_gain, this, i, _1)),
-		             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, i + 4, _1)));
+		             std::function<void (uint32_t)> (boost::bind (&Console1::eq_gain, this, i, _1)),
+		             std::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, i + 4, _1)));
 	}
 	new Encoder (this,
 	             ControllerID::LOW_MID_SHAPE,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 10, _1)),
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 8, _1)));
+	             std::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 10, _1)),
+	             std::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 8, _1)));
 	new Encoder (this,
 	             ControllerID::HIGH_MID_SHAPE,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 11, _1)),
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 9, _1)));
+	             std::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 11, _1)),
+	             std::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 9, _1)));
 
 	new ControllerButton (this,
 	                      ControllerID::LOW_SHAPE,
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::eq_low_shape, this, _1)));
+	                      std::function<void (uint32_t)> (boost::bind (&Console1::eq_low_shape, this, _1)));
 	new ControllerButton (this,
 	                      ControllerID::HIGH_SHAPE,
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::eq_high_shape, this, _1)));
+	                      std::function<void (uint32_t)> (boost::bind (&Console1::eq_high_shape, this, _1)));
 
 	new Encoder (
-	  this, ControllerID::CHARACTER, boost::function<void (uint32_t)> (boost::bind (&Console1::drive, this, _1)));
+	  this, ControllerID::CHARACTER, std::function<void (uint32_t)> (boost::bind (&Console1::drive, this, _1)));
 
 	/* Compressor Section */
 	new ControllerButton (
-	  this, ControllerID::COMP, boost::function<void (uint32_t)> (boost::bind (&Console1::comp, this, _1)));
+	  this, ControllerID::COMP, std::function<void (uint32_t)> (boost::bind (&Console1::comp, this, _1)));
 	new MultiStateButton (this,
 	                      ControllerID::ORDER,
 	                      std::vector<uint32_t>{ 0, 63, 127 },
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::comp_mode, this, _1)));
+	                      std::function<void (uint32_t)> (boost::bind (&Console1::comp_mode, this, _1)));
 
 	new Encoder (this,
 	             ControllerID::COMP_THRESH,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::comp_thresh, this, _1)));
+	             std::function<void (uint32_t)> (boost::bind (&Console1::comp_thresh, this, _1)));
 	new Encoder (this,
 	             ControllerID::COMP_ATTACK,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::comp_attack, this, _1)));
+	             std::function<void (uint32_t)> (boost::bind (&Console1::comp_attack, this, _1)));
 	new Encoder (this,
 	             ControllerID::COMP_RELEASE,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::comp_release, this, _1)));
+	             std::function<void (uint32_t)> (boost::bind (&Console1::comp_release, this, _1)));
 	new Encoder (
-	  this, ControllerID::COMP_RATIO, boost::function<void (uint32_t)> (boost::bind (&Console1::comp_ratio, this, _1)));
+	  this, ControllerID::COMP_RATIO, std::function<void (uint32_t)> (boost::bind (&Console1::comp_ratio, this, _1)));
 	new Encoder (
-	  this, ControllerID::COMP_PAR, boost::function<void (uint32_t)> (boost::bind (&Console1::comp_makeup, this, _1)));
+	  this, ControllerID::COMP_PAR, std::function<void (uint32_t)> (boost::bind (&Console1::comp_makeup, this, _1)));
 	new Encoder (
-	  this, ControllerID::DRIVE, boost::function<void (uint32_t)> (boost::bind (&Console1::comp_emph, this, _1)));
+	  this, ControllerID::DRIVE, std::function<void (uint32_t)> (boost::bind (&Console1::comp_emph, this, _1)));
 
-	new Meter (this, ControllerID::COMP_METER, boost::function<void ()> ([] () {}));
+	new Meter (this, ControllerID::COMP_METER, std::function<void ()> ([] () {}));
 
 	/* Output Section */
-	new Meter (this, ControllerID::OUTPUT_METER_L, boost::function<void ()> ([] () {}));
-	new Meter (this, ControllerID::OUTPUT_METER_R, boost::function<void ()> ([] () {}));
+	new Meter (this, ControllerID::OUTPUT_METER_L, std::function<void ()> ([] () {}));
+	new Meter (this, ControllerID::OUTPUT_METER_R, std::function<void ()> ([] () {}));
 }
 
 void

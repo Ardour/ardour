@@ -37,7 +37,6 @@
 
 #include <boost/bind.hpp>
 #include <boost/bind/protect.hpp>
-#include <boost/function.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <optional>
 

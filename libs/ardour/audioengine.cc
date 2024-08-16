@@ -1345,7 +1345,7 @@ AudioEngine::get_sync_offset (pframes_t& offset) const
 }
 
 int
-AudioEngine::create_process_thread (boost::function<void()> func)
+AudioEngine::create_process_thread (std::function<void()> func)
 {
 	if (!_backend) {
 		return -1;

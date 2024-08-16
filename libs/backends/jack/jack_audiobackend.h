@@ -112,7 +112,7 @@ class JACKAudioBackend : public AudioBackend {
 
 	size_t raw_buffer_size (DataType t);
 
-	int create_process_thread (boost::function<void()> func);
+	int create_process_thread (std::function<void()> func);
 	int join_process_threads ();
 	bool in_process_thread ();
 	uint32_t process_thread_count ();
@@ -256,10 +256,10 @@ class JACKAudioBackend : public AudioBackend {
 
 	struct ThreadData {
 		JACKAudioBackend* engine;
-		boost::function<void()> f;
+		std::function<void()> f;
 		size_t stacksize;
 
-		ThreadData (JACKAudioBackend* e, boost::function<void()> fp, size_t stacksz)
+		ThreadData (JACKAudioBackend* e, std::function<void()> fp, size_t stacksz)
 			: engine (e) , f (fp) , stacksize (stacksz) {}
 	};
 

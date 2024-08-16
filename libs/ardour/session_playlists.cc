@@ -465,7 +465,7 @@ SessionPlaylists::add_state (XMLNode* node, bool save_template, bool include_unu
 
 /** @return true for `stop cleanup', otherwise false */
 bool
-SessionPlaylists::maybe_delete_unused (boost::function<int(std::shared_ptr<Playlist>)> ask)
+SessionPlaylists::maybe_delete_unused (std::function<int(std::shared_ptr<Playlist>)> ask)
 {
 	vector<std::shared_ptr<Playlist> > playlists_tbd;
 
@@ -670,7 +670,7 @@ SessionPlaylists::playlists_for_track (std::shared_ptr<Track> tr) const
 }
 
 void
-SessionPlaylists::foreach (boost::function<void(std::shared_ptr<const Playlist>)> functor, bool incl_unused)
+SessionPlaylists::foreach (std::function<void(std::shared_ptr<const Playlist>)> functor, bool incl_unused)
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 	for (PlaylistSet::iterator i = playlists.begin(); i != playlists.end(); i++) {

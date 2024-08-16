@@ -177,7 +177,7 @@ AudioSource::update_length (timepos_t const & dur)
  *  @param event_loop Event loop for doThisWhenReady to be called in.
  */
 bool
-AudioSource::peaks_ready (boost::function<void()> doThisWhenReady, ScopedConnection** connect_here_if_not, EventLoop* event_loop) const
+AudioSource::peaks_ready (std::function<void()> doThisWhenReady, ScopedConnection** connect_here_if_not, EventLoop* event_loop) const
 {
 	bool ret;
 	Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);

@@ -9815,10 +9815,10 @@ Editor::remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_ga
 		 */
 
 		if (markers_too && (*i == first_selected_playlist)) {
-			boost::function<void (timepos_t, timecnt_t)> callback (boost::bind (&Editor::remove_gap_marker_callback, this, _1, _2));
+			std::function<void (timepos_t, timecnt_t)> callback (boost::bind (&Editor::remove_gap_marker_callback, this, _1, _2));
 			(*i)->remove_gaps (gap_threshold, leave_gap, callback);
 		} else {
-			boost::function<void (timepos_t, timecnt_t)> callback (boost::bind (gap_marker_callback_relax, _1, _2));
+			std::function<void (timepos_t, timecnt_t)> callback (boost::bind (gap_marker_callback_relax, _1, _2));
 			(*i)->remove_gaps (gap_threshold, leave_gap, callback);
 		}
 

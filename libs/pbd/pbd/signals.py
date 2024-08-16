@@ -90,10 +90,10 @@ def signal(f, n, v):
     print("public:", file=f)
     print("", file=f)
     if v:
-        print("\ttypedef boost::function<void(%s)> slot_function_type;" % comma_separated(An), file=f)
+        print("\ttypedef std::function<void(%s)> slot_function_type;" % comma_separated(An), file=f)
         print("\ttypedef void result_type;", file=f)
     else:
-        print("\ttypedef boost::function<R(%s)> slot_function_type;" % comma_separated(An), file=f)
+        print("\ttypedef std::function<R(%s)> slot_function_type;" % comma_separated(An), file=f)
         print("\ttypedef std::optional<R> result_type;", file=f)
 
     print("", file=f)
@@ -127,7 +127,7 @@ def signal(f, n, v):
         p = ", %s" % comma_separated(Anan)
         q = ", %s" % comma_separated(an)
 
-    print("\tstatic void compositor (%sboost::function<void(%s)> f, EventLoop* event_loop, EventLoop::InvalidationRecord* ir%s) {" % (typename, comma_separated(An), p), file=f)
+    print("\tstatic void compositor (%sstd::function<void(%s)> f, EventLoop* event_loop, EventLoop::InvalidationRecord* ir%s) {" % (typename, comma_separated(An), p), file=f)
     print("\t\tevent_loop->call_slot (ir, boost::bind (f%s));" % q, file=f)
     print("\t}", file=f)
 

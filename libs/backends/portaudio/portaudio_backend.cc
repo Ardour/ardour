@@ -1075,7 +1075,7 @@ void *
 PortAudioBackend::portaudio_process_thread (void *arg)
 {
 	ThreadData* td = reinterpret_cast<ThreadData*> (arg);
-	boost::function<void ()> f = td->f;
+	std::function<void ()> f = td->f;
 	delete td;
 
 #ifdef USE_MMCSS_THREAD_PRIORITIES
@@ -1098,7 +1098,7 @@ PortAudioBackend::portaudio_process_thread (void *arg)
 }
 
 int
-PortAudioBackend::create_process_thread (boost::function<void()> func)
+PortAudioBackend::create_process_thread (std::function<void()> func)
 {
 	pthread_t   thread_id;
 	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);

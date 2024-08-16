@@ -142,7 +142,7 @@ SessionConfiguration::set_variables (const XMLNode& node)
 
 }
 void
-SessionConfiguration::map_parameters (boost::function<void (std::string)>& functor)
+SessionConfiguration::map_parameters (std::function<void (std::string)>& functor)
 {
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL

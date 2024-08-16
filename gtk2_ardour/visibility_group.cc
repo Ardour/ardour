@@ -50,7 +50,7 @@ VisibilityGroup::VisibilityGroup (std::string const & name)
  */
 
 void
-VisibilityGroup::add (Gtk::Widget* widget, string const & id, string const & name, bool visible, boost::function<std::optional<bool> ()> override)
+VisibilityGroup::add (Gtk::Widget* widget, string const & id, string const & name, bool visible, std::function<std::optional<bool> ()> override)
 {
 	Member m;
 	m.widget = widget;

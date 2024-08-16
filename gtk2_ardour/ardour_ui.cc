@@ -436,7 +436,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	install_actions ();
 
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
-	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
+	std::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	UIConfiguration::instance().map_parameters (pc);
 
 	transport_ctrl.setup (this);
@@ -855,7 +855,7 @@ ARDOUR_UI::post_engine ()
 	{
 		DisplaySuspender ds;
 		Config->ParameterChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
-		boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
+		std::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 		Config->map_parameters (pc);
 
 		UIConfiguration::instance().map_parameters (pc);

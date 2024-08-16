@@ -155,7 +155,7 @@ SessionEventManager::clear_events (SessionEvent::Type type)
 }
 
 void
-SessionEventManager::clear_events (SessionEvent::Type type, boost::function<void (void)> after)
+SessionEventManager::clear_events (SessionEvent::Type type, std::function<void (void)> after)
 {
 	SessionEvent* ev = new SessionEvent (type, SessionEvent::Clear, SessionEvent::Immediate, 0, 0);
 	ev->rt_slot = after;
