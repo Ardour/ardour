@@ -49,6 +49,7 @@ RegionFxPlugin::RegionFxPlugin (Session& s, Temporal::TimeDomain const td, std::
 
 	if (plug) {
 		add_plugin (plug);
+		plug->activate ();
 		create_parameters ();
 	}
 }
