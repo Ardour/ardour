@@ -734,10 +734,13 @@ RegionFxPlugin::configure_io (ChanCount in, ChanCount out)
 			if (_plugins.front ()->reconfigure_io (din, daux, dout) == false) {
 				return false;
 			}
-			DEBUG_TRACE (DEBUG::RegionFx, string_compose ("Delegate configured in: %1, out: %2 for in: %3 out: %4", din, dout, in, _configured_out));
+			DEBUG_TRACE (DEBUG::RegionFx, string_compose ("Delegate configured in: %1, out: %2 for in: %3 out: %4\n", din, dout, in, _configured_out));
 			if (din < in || dout < _configured_out) {
 				return false;
 			}
+			/* update after match_variable_io sets info */
+			natural_input_streams  = _plugins[0]->get_info ()->n_inputs;
+			natural_output_streams = _plugins[0]->get_info ()->n_outputs;
 		}
 			break;
 		case Replicate:
@@ -831,6 +834,7 @@ RegionFxPlugin::configure_io (ChanCount in, ChanCount out)
 			DEBUG_STR_APPEND(a, _out_map[pc]);
 		}
 		DEBUG_STR_APPEND(a, "-------->>--------\n");
+		DEBUG_TRACE (DEBUG::RegionFx, DEBUG_STR(a).str());
 	}
 #endif
 
