@@ -2478,7 +2478,8 @@ AudioRegion::apply_region_fx (BufferSet& bufs, samplepos_t start_sample, samplep
 
 		while (remain > 0) {
 			pframes_t run = std::min <pframes_t> (remain, block_size);
-			if (!rfx->run (bufs, start_sample + offset - latency_offset, end_sample + offset - latency_offset, position().samples(), run, offset)) {
+			samplepos_t cycle_start = start_sample + offset - latency_offset;
+			if (!rfx->run (bufs, cycle_start, cycle_start + run, position().samples(), run, offset)) {
 				lm.release ();
 				/* this triggers a re-read */
 				const_cast<AudioRegion*>(this)->remove_plugin (rfx);
