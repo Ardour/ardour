@@ -47,6 +47,7 @@
 #include "ardour/analysis_graph.h"
 #include "ardour/audioregion.h"
 #include "ardour/buffer_manager.h"
+#include "ardour/butler.h"
 #include "ardour/session.h"
 #include "ardour/dB.h"
 #include "ardour/debug.h"
@@ -2350,7 +2351,12 @@ AudioRegion::_add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<R
 						return;
 					}
 					if (!_invalidated.exchange (true)) {
-						send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
+					  /* catch changes from some custom plugin GUI threads (VST2, and JUCE) */
+						if (SessionEvent::has_per_thread_pool ()) {
+							send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
+						} else {
+							_session.butler ()->delegate (boost::bind (&AudioRegion::send_change, this, PropertyChange (Properties::region_fx)));
+						}
 					}
 				});
 		if (!ac->alist ()) {
