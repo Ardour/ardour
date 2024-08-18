@@ -58,6 +58,10 @@ namespace PBD {
 
 class LIBPBD_API Connection;
 
+class LIBPBD_API ScopedConnection;
+
+class LIBPBD_API ScopedConnectionList;
+
 class LIBPBD_API SignalBase
 {
 public:
@@ -80,6 +84,202 @@ protected:
 	bool _debug_connection;
 #endif
 };
+
+template<typename R>
+class /*LIBPBD_API*/ OptionalLastValue
+{
+public:
+	typedef boost::optional<R> result_type;
+
+	template <typename Iter>
+	result_type operator() (Iter first, Iter last) const {
+		result_type r;
+		while (first != last) {
+			r = *first;
+			++first;
+		}
+
+		return r;
+	}
+};
+
+template <typename Combiner, typename _Signature>
+class SignalWithCombiner;
+
+template <typename Combiner, typename R, typename... A>
+class SignalWithCombiner<Combiner, R(A...)> : public SignalBase
+{
+public:
+
+	typedef boost::function<R(A...)> slot_function_type;
+
+private:
+
+	/** The slots that this signal will call on emission */
+	typedef std::map<std::shared_ptr<Connection>, slot_function_type> Slots;
+	Slots _slots;
+
+public:
+
+	static void compositor (typename boost::function<void(A...)> f,
+	                        EventLoop* event_loop,
+	                        EventLoop::InvalidationRecord* ir, A... a);
+
+	~SignalWithCombiner ();
+
+	void connect_same_thread (ScopedConnection& c, const slot_function_type& slot);
+	void connect_same_thread (ScopedConnectionList& clist, const slot_function_type& slot);
+	void connect (ScopedConnectionList& clist,
+	              PBD::EventLoop::InvalidationRecord* ir,
+	              const slot_function_type& slot,
+	              PBD::EventLoop* event_loop);
+	void connect (ScopedConnection& c,
+	              PBD::EventLoop::InvalidationRecord* ir,
+	              const slot_function_type& slot,
+	              PBD::EventLoop* event_loop);
+
+	typename Combiner::result_type operator() (A... a);
+
+	bool empty () const {
+		Glib::Threads::Mutex::Lock lm (_mutex);
+		return _slots.empty ();
+	}
+
+	size_t size () const {
+		Glib::Threads::Mutex::Lock lm (_mutex);
+		return _slots.size ();
+	}
+
+private:
+
+	friend class Connection;
+
+	std::shared_ptr<Connection> _connect (PBD::EventLoop::InvalidationRecord* ir, slot_function_type f);
+	void disconnect (std::shared_ptr<Connection> c);
+
+};
+
+template <typename Combiner, typename... A>
+class SignalWithCombiner<Combiner, void(A...)> : public SignalBase
+{
+public:
+
+	typedef boost::function<void(A...)> slot_function_type;
+
+private:
+
+	/** The slots that this signal will call on emission */
+	typedef std::map<std::shared_ptr<Connection>, slot_function_type> Slots;
+	Slots _slots;
+
+public:
+
+	static void compositor (typename boost::function<void(A...)> f,
+	                        EventLoop* event_loop,
+	                        EventLoop::InvalidationRecord* ir, A... a);
+
+	~SignalWithCombiner ();
+
+	void connect_same_thread (ScopedConnection& c, const slot_function_type& slot);
+	void connect_same_thread (ScopedConnectionList& clist, const slot_function_type& slot);
+	void connect (ScopedConnectionList& clist,
+                  PBD::EventLoop::InvalidationRecord* ir,
+                  const slot_function_type& slot,
+                  PBD::EventLoop* event_loop);
+	void connect (ScopedConnection& c,
+                  PBD::EventLoop::InvalidationRecord* ir,
+                  const slot_function_type& slot,
+                  PBD::EventLoop* event_loop);
+	void operator() (A... a);
+
+	bool empty () const {
+		Glib::Threads::Mutex::Lock lm (_mutex);
+		return _slots.empty ();
+	}
+
+	size_t size () const {
+		Glib::Threads::Mutex::Lock lm (_mutex);
+		return _slots.size ();
+	}
+
+private:
+
+	friend class Connection;
+
+	std::shared_ptr<Connection> _connect (PBD::EventLoop::InvalidationRecord* ir,
+	                                      slot_function_type f);
+	void disconnect (std::shared_ptr<Connection> c);
+
+};
+
+template <typename R>
+using DefaultCombiner = OptionalLastValue<R>;
+
+template <typename _Signature>
+class Signal;
+
+template <typename R, typename... A>
+class Signal<R(A...)> : public SignalWithCombiner<DefaultCombiner<R>, R(A...)> {};
+
+template <typename R, typename C = DefaultCombiner<R>>
+class
+#ifndef NDEBUG
+[[deprecated("Use Signal<R(A...)> or SignalWithCombiner<C, R(A...)> if you need a specific combiner instead.")]]
+#endif
+Signal0 : public SignalWithCombiner<C, R()> {};
+
+template <typename R>
+class Signal0<R> : public Signal<R()> {};
+
+template <typename R, typename A1, typename C = DefaultCombiner<R>>
+class
+#ifndef NDEBUG
+[[deprecated("Use Signal<R(A...)> or SignalWithCombiner<C, R(A...)> if you need a specific combiner instead.")]]
+#endif
+Signal1 : public SignalWithCombiner<C, R(A1)> {};
+
+template <typename R, typename A1>
+class Signal1<R, A1> : public Signal<R(A1)> {};
+
+template <typename R, typename A1, typename A2, typename C = DefaultCombiner<R>>
+class
+#ifndef NDEBUG
+[[deprecated("Use Signal<R(A...)> or SignalWithCombiner<C, R(A...)> if you need a specific combiner instead.")]]
+#endif
+Signal2 : public SignalWithCombiner<C, R(A1, A2)> {};
+
+template <typename R, typename A1, typename A2>
+class Signal2<R, A1, A2> : public Signal<R(A1, A2)> {};
+
+template <typename R, typename A1, typename A2, typename A3, typename C = DefaultCombiner<R>>
+class
+#ifndef NDEBUG
+[[deprecated("Use Signal<R(A...)> or SignalWithCombiner<C, R(A...)> if you need a specific combiner instead.")]]
+#endif
+Signal3 : public SignalWithCombiner<C, R(A1, A2, A3)> {};
+
+template <typename R, typename A1, typename A2, typename A3>
+class Signal3<R, A1, A2, A3> : public Signal<R(A1, A2, A3)> {};
+
+template <typename R, typename A1, typename A2, typename A3, typename A4, typename C = DefaultCombiner<R>>
+class
+#ifndef NDEBUG
+[[deprecated("Use Signal<R(A...)> or SignalWithCombiner<C, R(A...)> if you need a specific combiner instead.")]]
+#endif
+Signal4 : public SignalWithCombiner<C, R(A1, A2, A3, A4)> {};
+
+template <typename R, typename A1, typename A2, typename A3, typename A4>
+class Signal4<R, A1, A2, A3, A4> : public Signal<R(A1, A2, A3, A4)> {};
+
+template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5, typename C = DefaultCombiner<R>>
+class
+#ifndef NDEBUG
+[[deprecated("Use Signal<R(A...)> or SignalWithCombiner<C, R(A...)> if you need a specific combiner instead.")]]
+#endif
+Signal5 : public SignalWithCombiner<C, R(A1, A2, A3, A4, A5)> {};
+
+template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5>
+class Signal5<R, A1, A2, A3, A4, A5> : public Signal<R(A1, A2, A3, A4, A5)> {};
 
 class LIBPBD_API Connection : public std::enable_shared_from_this<Connection>
 {
@@ -138,24 +338,6 @@ private:
 	Glib::Threads::Mutex     _mutex;
 	std::atomic<SignalBase*> _signal;
 	PBD::EventLoop::InvalidationRecord* _invalidation_record;
-};
-
-template<typename R>
-class /*LIBPBD_API*/ OptionalLastValue
-{
-public:
-	typedef boost::optional<R> result_type;
-
-	template <typename Iter>
-	result_type operator() (Iter first, Iter last) const {
-		result_type r;
-		while (first != last) {
-			r = *first;
-			++first;
-		}
-
-		return r;
-	}
 };
 
 typedef std::shared_ptr<Connection> UnscopedConnection;
@@ -223,7 +405,343 @@ class LIBPBD_API ScopedConnectionList  : public boost::noncopyable
 	ConnectionList _scoped_connection_list;
 };
 
-#include "pbd/signals_generated.h"
+template <typename Combiner, typename R, typename... A>
+void
+SignalWithCombiner<Combiner, R(A...)>::compositor (typename boost::function<void(A...)> f,
+                                                   EventLoop* event_loop,
+                                                   EventLoop::InvalidationRecord* ir, A... a)
+{
+	event_loop->call_slot (ir, boost::bind (f, a...));
+}
+
+template <typename Combiner, typename... A>
+void
+SignalWithCombiner<Combiner, void(A...)>::compositor (typename boost::function<void(A...)> f,
+                                                      EventLoop* event_loop,
+                                                      EventLoop::InvalidationRecord* ir, A... a)
+{
+	event_loop->call_slot (ir, boost::bind (f, a...));
+}
+
+template <typename Combiner, typename R, typename... A>
+SignalWithCombiner<Combiner, R(A...)>::~SignalWithCombiner ()
+{
+	_in_dtor.store (true, std::memory_order_release);
+	Glib::Threads::Mutex::Lock lm (_mutex);
+	/* Tell our connection objects that we are going away, so they don't try to call us */
+	for (typename Slots::const_iterator i = _slots.begin(); i != _slots.end(); ++i) {
+		i->first->signal_going_away ();
+	}
+}
+
+template <typename Combiner, typename... A>
+SignalWithCombiner<Combiner, void(A...)>::~SignalWithCombiner ()
+{
+	_in_dtor.store (true, std::memory_order_release);
+	Glib::Threads::Mutex::Lock lm (_mutex);
+	/* Tell our connection objects that we are going away, so they don't try to call us */
+	for (typename Slots::const_iterator i = _slots.begin(); i != _slots.end(); ++i) {
+		i->first->signal_going_away ();
+	}
+}
+
+/** Arrange for @a slot to be executed whenever this signal is emitted.
+ * Store the connection that represents this arrangement in @a c.
+ *
+ * NOTE: @a slot will be executed in the same thread that the signal is
+ * emitted in.
+ */
+
+template <typename Combiner, typename R, typename... A>
+void
+SignalWithCombiner<Combiner, R(A...)>::connect_same_thread (ScopedConnection& c,
+                                                            const slot_function_type& slot)
+{
+	c = _connect (0, slot);
+}
+
+template <typename Combiner, typename... A>
+void
+SignalWithCombiner<Combiner, void(A...)>::connect_same_thread (ScopedConnection& c,
+                                                               const slot_function_type& slot)
+{
+	c = _connect (0, slot);
+}
+
+/** Arrange for @a slot to be executed whenever this signal is emitted.
+ * Add the connection that represents this arrangement to @a clist.
+ *
+ * NOTE: @a slot will be executed in the same thread that the signal is
+ * emitted in.
+ */
+
+template <typename Combiner, typename R, typename... A>
+void
+SignalWithCombiner<Combiner, R(A...)>::connect_same_thread (ScopedConnectionList& clist,
+                                                            const slot_function_type& slot)
+{
+	clist.add_connection (_connect (0, slot));
+}
+
+template <typename Combiner, typename... A>
+void
+SignalWithCombiner<Combiner, void(A...)>::connect_same_thread (ScopedConnectionList& clist,
+                                                               const slot_function_type& slot)
+{
+	clist.add_connection (_connect (0, slot));
+}
+
+/** Arrange for @a slot to be executed in the context of @a event_loop
+ * whenever this signal is emitted. Add the connection that represents
+ * this arrangement to @a clist.
+ *
+ * If the event loop/thread in which @a slot will be executed will
+ * outlive the lifetime of any object referenced in @a slot,
+ * then an InvalidationRecord should be passed, allowing
+ * any request sent to the @a event_loop and not executed
+ * before the object is destroyed to be marked invalid.
+ *
+ * "outliving the lifetime" doesn't have a specific, detailed meaning,
+ * but is best illustrated by two contrasting examples:
+ *
+ * 1) the main GUI event loop/thread - this will outlive more or
+ * less all objects in the application, and thus when arranging for
+ * @a slot to be called in that context, an invalidation record is
+ * highly advisable.
+ *
+ * 2) a secondary event loop/thread which will be destroyed along
+ * with the objects that are typically referenced by @a slot.
+ * Assuming that the event loop is stopped before the objects are
+ * destroyed, there is no reason to pass in an invalidation record,
+ * and MISSING_INVALIDATOR may be used.
+ */
+
+template <typename Combiner, typename R, typename... A>
+void
+SignalWithCombiner<Combiner, R(A...)>::connect (ScopedConnectionList& clist,
+                                                PBD::EventLoop::InvalidationRecord* ir,
+                                                const slot_function_type& slot,
+                                                PBD::EventLoop* event_loop)
+{
+	if (ir) {
+		ir->event_loop = event_loop;
+	}
+
+	clist.add_connection (_connect (ir, [slot, event_loop, ir](A... a) {
+		return compositor(slot, event_loop, ir, a...);
+	}));
+}
+
+template <typename Combiner, typename... A>
+void
+SignalWithCombiner<Combiner, void(A...)>::connect (ScopedConnectionList& clist,
+                                                   PBD::EventLoop::InvalidationRecord* ir,
+                                                   const slot_function_type& slot,
+                                                   PBD::EventLoop* event_loop)
+{
+	if (ir) {
+		ir->event_loop = event_loop;
+	}
+
+	clist.add_connection (_connect (ir, [slot, event_loop, ir](A... a) {
+		return compositor(slot, event_loop, ir, a...);
+	}));
+}
+
+/** See notes for the ScopedConnectionList variant of this function. This
+ *  differs in that it stores the connection to the signal in a single
+ *  ScopedConnection rather than a ScopedConnectionList.
+ */
+
+template <typename Combiner, typename R, typename... A>
+void
+SignalWithCombiner<Combiner, R(A...)>::connect (ScopedConnection& c,
+                                                PBD::EventLoop::InvalidationRecord* ir,
+                                                const slot_function_type& slot,
+                                                PBD::EventLoop* event_loop)
+{
+	if (ir) {
+		ir->event_loop = event_loop;
+	}
+
+	c = _connect (ir, [slot, event_loop, ir](A... a) {
+		return compositor(slot, event_loop, ir, a...);
+	});
+}
+
+template <typename Combiner, typename... A>
+void
+SignalWithCombiner<Combiner, void(A...)>::connect (ScopedConnection& c,
+                                                   PBD::EventLoop::InvalidationRecord* ir,
+                                                   const slot_function_type& slot,
+                                                   PBD::EventLoop* event_loop)
+{
+	if (ir) {
+		ir->event_loop = event_loop;
+	}
+
+	c = _connect (ir, [slot, event_loop, ir](A... a) {
+		return compositor(slot, event_loop, ir, a...);
+	});
+}
+
+/** Emit this signal. This will cause all slots connected to it be executed
+ * in the order that they were connected (cross-thread issues may alter
+ * the precise execution time of cross-thread slots).
+ */
+
+template <typename Combiner, typename R, typename... A>
+typename Combiner::result_type
+SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
+{
+	/* First, take a copy of our list of slots as it is now */
+
+	Slots s;
+	{
+		Glib::Threads::Mutex::Lock lm (_mutex);
+		s = _slots;
+	}
+
+	std::list<R> r;
+	for (typename Slots::const_iterator i = s.begin(); i != s.end(); ++i) {
+
+		/* We may have just called a slot, and this may have resulted in
+		 * disconnection of other slots from us.  The list copy means that
+		 * this won't cause any problems with invalidated iterators, but we
+		 * must check to see if the slot we are about to call is still on the list.
+		 */
+		bool still_there = false;
+		{
+			Glib::Threads::Mutex::Lock lm (_mutex);
+			still_there = _slots.find (i->first) != _slots.end ();
+		}
+
+		if (still_there) {
+			r.push_back ((i->second)(a...));
+		}
+	}
+
+	/* Call our combiner to do whatever is required to the result values */
+	Combiner c;
+	return c (r.begin(), r.end());
+}
+
+template <typename Combiner, typename... A>
+void
+SignalWithCombiner<Combiner, void(A...)>::operator() (A... a)
+{
+	/* First, take a copy of our list of slots as it is now */
+
+	Slots s;
+	{
+		Glib::Threads::Mutex::Lock lm (_mutex);
+		s = _slots;
+	}
+
+	for (typename Slots::const_iterator i = s.begin(); i != s.end(); ++i) {
+
+		/* We may have just called a slot, and this may have resulted in
+		 * disconnection of other slots from us.  The list copy means that
+		 * this won't cause any problems with invalidated iterators, but we
+		 * must check to see if the slot we are about to call is still on the list.
+		 */
+		bool still_there = false;
+		{
+			Glib::Threads::Mutex::Lock lm (_mutex);
+			still_there = _slots.find (i->first) != _slots.end ();
+		}
+
+		if (still_there) {
+			(i->second)(a...);
+		}
+	}
+}
+
+template <typename Combiner, typename R, typename... A>
+std::shared_ptr<Connection>
+SignalWithCombiner<Combiner, R(A...)>::_connect (PBD::EventLoop::InvalidationRecord* ir,
+                                                 slot_function_type f)
+{
+	std::shared_ptr<Connection> c (new Connection (this, ir));
+	Glib::Threads::Mutex::Lock lm (_mutex);
+	_slots[c] = f;
+	#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+	if (_debug_connection) {
+		std::cerr << "+++++++ CONNECT " << this << " size now " << _slots.size() << std::endl;
+		stacktrace (std::cerr, 10);
+	}
+	#endif
+	return c;
+}
+
+template <typename Combiner, typename... A>
+std::shared_ptr<Connection>
+SignalWithCombiner<Combiner, void(A...)>::_connect (PBD::EventLoop::InvalidationRecord* ir,
+                                                    slot_function_type f)
+{
+	std::shared_ptr<Connection> c (new Connection (this, ir));
+	Glib::Threads::Mutex::Lock lm (_mutex);
+	_slots[c] = f;
+	#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+	if (_debug_connection) {
+		std::cerr << "+++++++ CONNECT " << this << " size now " << _slots.size() << std::endl;
+		stacktrace (std::cerr, 10);
+	}
+	#endif
+	return c;
+}
+
+template <typename Combiner, typename R, typename... A>
+void
+SignalWithCombiner<Combiner, R(A...)>::disconnect (std::shared_ptr<Connection> c)
+{
+	/* ~ScopedConnection can call this concurrently with our d'tor */
+	Glib::Threads::Mutex::Lock lm (_mutex, Glib::Threads::TRY_LOCK);
+	while (!lm.locked()) {
+		if (_in_dtor.load (std::memory_order_acquire)) {
+			/* d'tor signal_going_away() took care of everything already */
+			return;
+		}
+		/* Spin */
+		lm.try_acquire ();
+	}
+	_slots.erase (c);
+	lm.release ();
+
+	c->disconnected ();
+	#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+	if (_debug_connection) {
+		std::cerr << "------- DISCCONNECT " << this << " size now " << _slots.size() << std::endl;
+		stacktrace (std::cerr, 10);
+	}
+	#endif
+}
+
+template <typename Combiner, typename... A>
+void
+SignalWithCombiner<Combiner, void(A...)>::disconnect (std::shared_ptr<Connection> c)
+{
+	/* ~ScopedConnection can call this concurrently with our d'tor */
+	Glib::Threads::Mutex::Lock lm (_mutex, Glib::Threads::TRY_LOCK);
+	while (!lm.locked()) {
+		if (_in_dtor.load (std::memory_order_acquire)) {
+			/* d'tor signal_going_away() took care of everything already */
+			return;
+		}
+		/* Spin */
+		lm.try_acquire ();
+	}
+	_slots.erase (c);
+	lm.release ();
+
+	c->disconnected ();
+	#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+	if (_debug_connection) {
+		std::cerr << "------- DISCCONNECT " << this << " size now " << _slots.size() << std::endl;
+		stacktrace (std::cerr, 10);
+	}
+	#endif
+}
 
 } /* namespace */
 
