@@ -22,6 +22,7 @@
 
 #include <glibmm.h>
 
+#include "pbd/history_owner.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/openuri.h"
 #include "pbd/progress.h"
@@ -295,6 +296,7 @@ CLASSKEYS(Temporal::superclock_t)
 
 CLASSKEYS(PBD::ID);
 CLASSKEYS(PBD::Configuration);
+CLASSKEYS(PBD::HistoryOwner);
 CLASSKEYS(PBD::PropertyChange);
 CLASSKEYS(PBD::StatefulDestructible);
 
@@ -501,6 +503,16 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginClass <PBD::Progress> ("Progress")
+		.endClass ()
+
+		.beginClass <PBD::HistoryOwner> ("HistoryOwner")
+			.addFunction ("begin_reversible_command", (void (PBD::HistoryOwner::*)(const std::string&))&PBD::HistoryOwner::begin_reversible_command)
+			.addFunction ("commit_reversible_command", &PBD::HistoryOwner::commit_reversible_command)
+			.addFunction ("abort_reversible_command", &PBD::HistoryOwner::abort_reversible_command)
+			.addFunction ("collected_undo_commands", &PBD::HistoryOwner::collected_undo_commands)
+			.addFunction ("abort_empty_reversible_command", &PBD::HistoryOwner::abort_empty_reversible_command)
+			.addFunction ("add_command", &PBD::HistoryOwner::add_command)
+			.addFunction ("add_stateful_diff_command", &PBD::HistoryOwner::add_stateful_diff_command)
 		.endClass ()
 
 		.beginClass <PBD::Stateful> ("Stateful")
@@ -3027,7 +3039,7 @@ LuaBindings::common (lua_State* L)
 	// functions which can be used from realtime and non-realtime contexts
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ARDOUR")
-		.beginClass <Session> ("Session")
+		.deriveClass <Session, PBD::HistoryOwner> ("Session")
 		.addFunction ("scripts_changed", &Session::scripts_changed) // used internally
 		.addFunction ("engine_speed", &Session::engine_speed)
 		.addFunction ("actual_speed", &Session::actual_speed)
@@ -3113,13 +3125,6 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_controls", &Session::set_controls)
 		.addFunction ("set_control", &Session::set_control)
 		.addFunction ("set_exclusive_input_active", &Session::set_exclusive_input_active)
-		.addFunction ("begin_reversible_command", (void (Session::*)(const std::string&))&Session::begin_reversible_command)
-		.addFunction ("commit_reversible_command", &Session::commit_reversible_command)
-		.addFunction ("abort_reversible_command", &Session::abort_reversible_command)
-		.addFunction ("collected_undo_commands", &Session::collected_undo_commands)
-		.addFunction ("abort_empty_reversible_command", &Session::abort_empty_reversible_command)
-		.addFunction ("add_command", &Session::add_command)
-		.addFunction ("add_stateful_diff_command", &Session::add_stateful_diff_command)
 		.addFunction ("playlists", &Session::playlists)
 		.addFunction ("engine", (AudioEngine& (Session::*)())&Session::engine)
 		.addFunction ("get_block_size", &Session::get_block_size)
