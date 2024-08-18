@@ -899,26 +899,56 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 #endif
 		.endClass ()
 
-		.beginClass <PublicEditor> ("Editor")
-		.addFunction ("grid_type", &PublicEditor::grid_type)
-		.addFunction ("snap_mode", &PublicEditor::snap_mode)
-		.addFunction ("set_snap_mode", &PublicEditor::set_snap_mode)
+		.beginClass <EditingContext> ("EditingContext")
+		.addFunction ("set_mouse_mode", &EditingContext::set_mouse_mode)
+		.addFunction ("current_mouse_mode", &EditingContext::current_mouse_mode)
 
-		.addFunction ("undo", &PublicEditor::undo)
-		.addFunction ("redo", &PublicEditor::redo)
+		.addFunction ("pixel_to_sample", &EditingContext::pixel_to_sample)
+		.addFunction ("sample_to_pixel", &EditingContext::sample_to_pixel)
 
-		.addFunction ("set_mouse_mode", &PublicEditor::set_mouse_mode)
-		.addFunction ("current_mouse_mode", &PublicEditor::current_mouse_mode)
+		.addFunction ("get_selection", &EditingContext::get_selection)
+		.addFunction ("get_cut_buffer", &EditingContext::get_cut_buffer)
+
+		.addFunction ("set_zoom_focus", &EditingContext::set_zoom_focus)
+		.addFunction ("get_zoom_focus", &EditingContext::get_zoom_focus)
+		.addFunction ("get_current_zoom", &EditingContext::get_current_zoom)
+		.addFunction ("reset_zoom", &EditingContext::reset_zoom)
+
+		.addFunction ("reset_x_origin", &EditingContext::reset_x_origin)
+		.addFunction ("get_y_origin", &EditingContext::get_y_origin)
+		.addFunction ("reset_y_origin", &EditingContext::reset_y_origin)
+
+		.addRefFunction ("get_nudge_distance", &EditingContext::get_nudge_distance)
+
+		.addFunction ("get_grid_beat_divisions", &EditingContext::get_grid_beat_divisions)
+		.addRefFunction ("get_grid_type_as_beats", &EditingContext::get_grid_type_as_beats)
+		.addRefFunction ("get_draw_length_as_beats", &EditingContext::get_draw_length_as_beats)
+
+		.addFunction ("grid_type", &EditingContext::grid_type)
+		.addFunction ("snap_mode", &EditingContext::snap_mode)
+		.addFunction ("set_snap_mode", &EditingContext::set_snap_mode)
+
+		.addFunction ("undo", &EditingContext::undo)
+		.addFunction ("redo", &EditingContext::redo)
+
+		.addFunction ("get_stripable_time_axis_by_id", &EditingContext::get_stripable_time_axis_by_id)
+		.addFunction ("axis_views_from_routes", &EditingContext::axis_views_from_routes)
+
+		.addRefFunction ("find_location_from_marker", &EditingContext::find_location_from_marker)
+		.addFunction ("find_marker_from_location_id", &EditingContext::find_marker_from_location_id)
+#if 0
+		.addFunction ("get_regionviews_by_id", &EditingContext::get_regionviews_by_id)
+		.addFunction ("get_per_region_note_selection", &EditingContext::get_per_region_note_selection)
+#endif
+		.endClass ()
+
+		.deriveClass <PublicEditor, EditingContext> ("Editor")
 
 		.addFunction ("consider_auditioning", &PublicEditor::consider_auditioning)
 
 		.addFunction ("new_region_from_selection", &PublicEditor::new_region_from_selection)
 		.addFunction ("separate_region_from_selection", &PublicEditor::separate_region_from_selection)
-		.addFunction ("pixel_to_sample", &PublicEditor::pixel_to_sample)
-		.addFunction ("sample_to_pixel", &PublicEditor::sample_to_pixel)
 
-		.addFunction ("get_selection", &PublicEditor::get_selection)
-		.addFunction ("get_cut_buffer", &PublicEditor::get_cut_buffer)
 		.addRefFunction ("get_selection_extents", &PublicEditor::get_selection_extents)
 
 		.addFunction ("current_mixer_stripable", &PublicEditor::current_mixer_stripable)
@@ -933,6 +963,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addFunction ("add_location_from_playhead_cursor", &PublicEditor::add_location_from_playhead_cursor)
 		.addFunction ("remove_location_at_playhead_cursor", &PublicEditor::remove_location_at_playhead_cursor)
 		.addFunction ("add_location_mark", &PublicEditor::add_location_mark)
+		.addFunction ("mouse_add_new_marker", &PublicEditor::add_location_mark) // deprecated use add_location_mark
 
 		.addFunction ("update_grid", &PublicEditor::update_grid)
 		.addFunction ("remove_tracks", &PublicEditor::remove_tracks)
@@ -950,11 +981,6 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addFunction ("export_selection", &PublicEditor::export_selection)
 		.addFunction ("export_range", &PublicEditor::export_range)
 		.addFunction ("quick_export", &PublicEditor::quick_export)
-
-		.addFunction ("set_zoom_focus", &PublicEditor::set_zoom_focus)
-		.addFunction ("get_zoom_focus", &PublicEditor::get_zoom_focus)
-		.addFunction ("get_current_zoom", &PublicEditor::get_current_zoom)
-		.addFunction ("reset_zoom", &PublicEditor::reset_zoom)
 
 		.addFunction ("clear_playlist", &PublicEditor::clear_playlist)
 		.addFunction ("clear_grouped_playlists", &PublicEditor::clear_grouped_playlists)
@@ -996,10 +1022,6 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addFunction ("scroll_down_one_track", &PublicEditor::scroll_down_one_track)
 		.addFunction ("scroll_up_one_track", &PublicEditor::scroll_up_one_track)
 
-		.addFunction ("reset_x_origin", &PublicEditor::reset_x_origin)
-		.addFunction ("get_y_origin", &PublicEditor::get_y_origin)
-		.addFunction ("reset_y_origin", &PublicEditor::reset_y_origin)
-
 		.addFunction ("remove_last_capture", &PublicEditor::remove_last_capture)
 
 		.addFunction ("maximise_editing_space", &PublicEditor::maximise_editing_space)
@@ -1009,11 +1031,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		//.addFunction ("get_preferred_edit_position", &PublicEditor::get_preferred_edit_position)
 		//.addFunction ("split_regions_at", &PublicEditor::split_regions_at)
 
-		.addRefFunction ("get_nudge_distance", &PublicEditor::get_nudge_distance)
 		.addFunction ("get_paste_offset", &PublicEditor::get_paste_offset)
-		.addFunction ("get_grid_beat_divisions", &PublicEditor::get_grid_beat_divisions)
-		.addRefFunction ("get_grid_type_as_beats", &PublicEditor::get_grid_type_as_beats)
-		.addRefFunction ("get_draw_length_as_beats", &PublicEditor::get_draw_length_as_beats)
 
 		.addFunction ("toggle_ruler_video", &PublicEditor::toggle_ruler_video)
 		.addFunction ("toggle_xjadeo_proc", &PublicEditor::toggle_xjadeo_proc)
@@ -1024,26 +1042,18 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addFunction ("get_equivalent_regions", &PublicEditor::get_equivalent_regions)
 		.addFunction ("drags", &PublicEditor::drags)
 #endif
-
-		.addFunction ("get_stripable_time_axis_by_id", &PublicEditor::get_stripable_time_axis_by_id)
 		.addFunction ("get_track_views", &PublicEditor::get_track_views)
 		.addFunction ("rtav_from_route", &PublicEditor::rtav_from_route)
-		.addFunction ("axis_views_from_routes", &PublicEditor::axis_views_from_routes)
 
 		.addFunction ("center_screen", &PublicEditor::center_screen)
 
 		.addFunction ("get_smart_mode", &PublicEditor::get_smart_mode)
 		.addRefFunction ("get_pointer_position", &PublicEditor::get_pointer_position)
 
-		.addRefFunction ("find_location_from_marker", &PublicEditor::find_location_from_marker)
-		.addFunction ("find_marker_from_location_id", &PublicEditor::find_marker_from_location_id)
-		.addFunction ("mouse_add_new_marker", &PublicEditor::add_location_mark)
 #if 0
 		.addFunction ("get_regions_at", &PublicEditor::get_regions_at)
 		.addFunction ("get_regions_after", &PublicEditor::get_regions_after)
 		.addFunction ("get_regions_from_selection_and_mouse", &PublicEditor::get_regions_from_selection_and_mouse)
-		.addFunction ("get_regionviews_by_id", &PublicEditor::get_regionviews_by_id)
-		.addFunction ("get_per_region_note_selection", &PublicEditor::get_per_region_note_selection)
 #endif
 
 #if 0
