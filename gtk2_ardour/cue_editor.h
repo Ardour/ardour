@@ -30,7 +30,7 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner, public sigc::
 	CueEditor (std::string const & name);
 	~CueEditor ();
 
-	void select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, TrackViewList const &, Selection::Operation, bool);
+	void select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, TrackViewList const &, ARDOUR::SelectionOperation, bool);
 
 	void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const;
 	StripableTimeAxisView* get_stripable_time_axis_by_id (const PBD::ID& id) const;

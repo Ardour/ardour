@@ -28,7 +28,7 @@ CueEditor::filter_to_unique_midi_region_views (RegionSelection const & ms) const
 }
 
 void
-CueEditor::select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, TrackViewList const &, Selection::Operation, bool)
+CueEditor::select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, TrackViewList const &, ARDOUR::SelectionOperation, bool)
 {
 }
 

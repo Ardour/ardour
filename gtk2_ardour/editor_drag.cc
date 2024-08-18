@@ -4403,8 +4403,8 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		/* we toggle on the button release */
 		break;
 	case SelectionSet:
-		if (!_editor->selection->selected (_marker)) {
-			_editor->selection->set (_marker);
+		if (!editing_context.get_selection().selected (_marker)) {
+			editing_context.get_selection().set (_marker);
 			_selection_changed = true;
 		}
 		break;
@@ -4412,7 +4412,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		Locations::LocationList ll;
 		list<ArdourMarker*>     to_add;
 		timepos_t               s, e;
-		_editing_context.get_selection().markers.range (s, e);
+		editing_context.get_selection().markers.range (s, e);
 		s = min (_marker->position (), s);
 		e = max (_marker->position (), e);
 		s = min (s, e);
@@ -4420,9 +4420,9 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		if (e < timepos_t::max (e.time_domain ())) {
 			e = e.increment ();
 		}
-		_editor->session ()->locations ()->find_all_between (s, e, ll, Location::Flags (0));
+		_editor.session ()->locations ()->find_all_between (s, e, ll, Location::Flags (0));
 		for (Locations::LocationList::iterator i = ll.begin (); i != ll.end (); ++i) {
-			Editor::LocationMarkers* lm = _editor->find_location_markers (*i);
+			Editor::LocationMarkers* lm = _editor.find_location_markers (*i);
 			if (lm) {
 				if (lm->start) {
 					to_add.push_back (lm->start);
@@ -4433,7 +4433,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 			}
 		}
 		if (!to_add.empty ()) {
-			_editing_context.get_selection().add (to_add);
+			editing_context.get_selection().add (to_add);
 			_selection_changed = true;
 		}
 		break;
@@ -4656,15 +4656,15 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
 		switch (op) {
 		case SelectionSet:
-			if (_editor->selection->selected (_marker) && _editor->selection->markers.size () > 1) {
-				_editing_context.selection->set (_marker);
+			if (editing_context.get_selection().selected (_marker) && _editor.selection->markers.size () > 1) {
+				editing_context.get_selection().set (_marker);
 				_selection_changed = true;
 			}
 			break;
 
 		case SelectionToggle:
 			/* we toggle on the button release, click only */
-			_editing_context.selection->toggle (_marker);
+			editing_context.get_selection().toggle (_marker);
 			_selection_changed = true;
 
 			break;
@@ -5609,14 +5609,14 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 			if (first_move) {
 				if (_add) {
 					/* adding to the selection */
-					_editor->set_selected_track_as_side_effect (SelectionAdd, gcd);
-					_editor->clicked_selection = _editing_context.get_selection().add (start, end);
+					_editor.set_selected_track_as_side_effect (SelectionAdd, gcd);
+					_editor.clicked_selection = editing_context.get_selection().add (start, end);
 					_add                       = false;
 
 				} else {
 					/* new selection */
-					if (_editor->clicked_axisview && !_editing_context.get_selection()selected (_editor->clicked_axisview)) {
-						_editor->set_selected_track_as_side_effect (SelectionSet, gcd);
+					if (_editor.clicked_axisview && !editing_context.get_selection().selected (_editor.clicked_axisview)) {
+						_editor.set_selected_track_as_side_effect (SelectionSet, gcd);
 					}
 
 					_editor.clicked_selection = editing_context.get_selection().set (start, end);
@@ -6113,7 +6113,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			switch (editing_context.current_mouse_mode()) {
 				case MouseObject:
 					/* find the two markers on either side and then make the selection from it */
-					_editing_context.select_all_within (start, end, 0.0f, FLT_MAX, _editor->track_views, SelectionSet, false);
+					editing_context.select_all_within (start, end, 0.0f, FLT_MAX, _editor.track_views, SelectionSet, false);
 					break;
 
 				case MouseRange:
@@ -6211,8 +6211,8 @@ NoteDrag::total_dx (GdkEvent* event) const
 	}
 
 	/* we need to use absolute positions here to honor the tempo-map */
-	timepos_t const t1 = pixel_to_time (_drags->current_pointer_x ());
-	timepos_t const t2 = pixel_to_time (grab_x ());
+	timepos_t const t1 = pixel_duration_to_time (_drags->current_pointer_x ());
+	timepos_t const t2 = pixel_duration_to_time (grab_x ());
 
 	/* now calculate proper `b@b` time */
 	timecnt_t dx = t2.distance (t1);
@@ -6260,10 +6260,7 @@ NoteDrag::total_dy () const
 		return 0;
 	}
 
-
 	double const y = _region->midi_context().y_position ();
-	double const p = current_pointer_y();
-
 	/* new current note */
 	uint8_t n = _region->y_to_note (current_pointer_y () - y);
 	/* clamp */
