@@ -71,7 +71,7 @@ compiler_flags_dictionaries= {
         # Any additional flags for warnings that are specific to C (not C++)
         'extra-c-warnings' : [ '-Wstrict-prototypes', '-Wmissing-prototypes' ],
         # Any additional flags for warnings that are specific to C++ (not C)
-        'extra-cxx-warnings' : [ '-Woverloaded-virtual', '-Wno-unused-local-typedefs' ],
+        'extra-cxx-warnings' : [ '-Woverloaded-virtual', '-Wno-unused-local-typedefs', '-Wno-deprecated-copy' ],
         # Flags used for "strict" compilation, C and C++ (i.e. compiler will warn about language issues)
         'strict' : ['-Wall', '-Wcast-align', '-Wextra', '-Wwrite-strings', '-Wunsafe-loop-optimizations', '-Wlogical-op' ],
         # Flags used for "strict" compilation, C only (i.e. compiler will warn about language issues)
