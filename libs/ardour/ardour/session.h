@@ -204,12 +204,12 @@ private:
 };
 
 /** Ardour Session */
-class LIBARDOUR_API Session : public PBD::StatefulDestructible,
+class LIBARDOUR_API Session : public PBD::HistoryOwner,
+                              public PBD::StatefulDestructible,
                               public PBD::ScopedConnectionList,
                               public SessionEventManager,
                               public TransportAPI,
-                              public Temporal::TimeDomainProvider,
-                              public PBD::HistoryOwner
+                              public Temporal::TimeDomainProvider
 {
 public:
 	enum RecordState {
