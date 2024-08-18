@@ -143,6 +143,8 @@ public:
 	timepos_t end()        const;
 	timepos_t nt_last()    const { return end().decrement(); }
 
+	virtual timecnt_t tail () const { return timecnt_t (0); }
+
 	timepos_t source_position () const;
 	timecnt_t source_relative_position (Temporal::timepos_t const &) const;
 	timecnt_t region_relative_position (Temporal::timepos_t const &) const;
