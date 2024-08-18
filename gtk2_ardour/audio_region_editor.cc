@@ -60,7 +60,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	, _audio_region (arv->audio_region ())
 	, gain_adjustment(accurate_coefficient_to_dB(fabsf (_audio_region->scale_amplitude())), -40.0, +40.0, 0.1, 1.0, 0)
 	, _polarity_toggle (_("Invert"))
-	, _pre_fade_fx_toggle (_("Pre Fade Fx"))
+	, _pre_fade_fx_toggle (_("Pre-Fade Fx"))
 	, _show_on_touch (_("Show on Touch"))
 	, _peak_channel (false)
 {
@@ -106,6 +106,10 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	_table.attach (_show_on_touch, 2, 3, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	++_table_row;
 
+	UI::instance()->set_tip (_polarity_toggle, _("Invert the signal polarity (180deg phase shift)"));
+	UI::instance()->set_tip (_pre_fade_fx_toggle, _("Apply region effects before the region fades.\nThis is useful if the effect(s) have tail, that would otherwise be faded out by the region fade (e.g. reverb, delay)"));
+	UI::instance()->set_tip (_show_on_touch, _("When touching a control in a region effect plugin UI, the corresponding region-automation line is shown the editor, and edit mode is set to 'draw'."));
+
 	gain_changed ();
 	pre_fade_fx_changed ();
 	refill_region_line ();
@@ -126,6 +130,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	snprintf (name, 64, "peak amplitude-%p", this);
 	pthread_create_and_store (name, &_peak_amplitude_thread_handle, _peak_amplitude_thread, this);
 	signal_peak_thread ();
+
 
 }
 
