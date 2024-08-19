@@ -49,8 +49,6 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/utility.hpp>
-
 #include <glibmm/threads.h>
 
 #include <ltc.h>

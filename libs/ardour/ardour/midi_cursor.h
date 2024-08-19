@@ -21,8 +21,6 @@
 
 #include <set>
 
-#include <boost/utility.hpp>
-
 
 
 #include "pbd/signals.h"

@@ -37,7 +37,6 @@
 #include <sys/stat.h>
 
 #include <boost/optional.hpp>
-#include <boost/utility.hpp>
 
 #include <glib.h>
 

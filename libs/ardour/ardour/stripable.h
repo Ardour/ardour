@@ -26,8 +26,6 @@
 #include <memory>
 #include <string>
 
-#include <boost/utility.hpp>
-
 #include "pbd/signals.h"
 
 #include "ardour/automatable.h"

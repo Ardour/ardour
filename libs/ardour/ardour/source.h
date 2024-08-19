@@ -30,8 +30,6 @@
 
 #include <glibmm/threads.h>
 
-#include <boost/utility.hpp>
-
 #include "pbd/statefuldestructible.h"
 
 #include "ardour/ardour.h"

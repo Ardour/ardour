@@ -27,8 +27,6 @@
 #include <memory>
 #include <vector>
 
-#include <boost/utility.hpp>
-
 #include "temporal/domain_swap.h"
 #include "temporal/timeline.h"
 #include "temporal/range.h"
