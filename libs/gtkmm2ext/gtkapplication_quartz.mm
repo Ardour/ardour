@@ -41,7 +41,6 @@
 #import <Foundation/NSString.h>
 #import <Foundation/NSNotification.h>
 
-#include <iostream>
 #include <vector>
 
 #define UNUSED_PARAMETER(a) (void) (a)
