@@ -26,8 +26,6 @@
 #include <algorithm>
 #include <unistd.h>
 
-#include <boost/algorithm/string/erase.hpp>
-
 #include "pbd/i18n.h"
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
