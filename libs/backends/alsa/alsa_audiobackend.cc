@@ -24,7 +24,6 @@
 
 #include <glibmm.h>
 
-#include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 
 #include "alsa_audiobackend.h"
@@ -1002,7 +1001,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 		boost::tokenizer<boost::char_separator<char> > devs (ext, sep);
 
-		BOOST_FOREACH (const std::string& tmp, devs) {
+		for (const std::string& tmp : devs) {
 			std::string            dev (tmp);
 			unsigned int           sr     = _samplerate;
 			unsigned int           spp    = _samples_per_period;
