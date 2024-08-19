@@ -94,8 +94,7 @@ struct TypeTraits
   class isEnum
   {
   public:
-    //static const bool value = std::is_enum<T>::value; // C++11
-    static const bool value = boost::is_enum<T>::value;
+    static const bool value = std::is_enum<T>::value;
   };
 
 
