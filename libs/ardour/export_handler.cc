@@ -32,6 +32,7 @@
 #include "ardour/audiofile_tagger.h"
 #include "ardour/audio_port.h"
 #include "ardour/debug.h"
+#include "ardour/disk_reader.h"
 #include "ardour/export_graph_builder.h"
 #include "ardour/export_handler.h"
 #include "ardour/export_timespan.h"
@@ -380,7 +381,10 @@ ExportHandler::start_timespan_bg (void* eh)
 	ExportHandler* self = static_cast<ExportHandler*> (eh);
 	self->process_connection.disconnect ();
 	Glib::Threads::Mutex::Lock l (self->export_status->lock());
+	SessionEvent::create_per_thread_pool (name, 512);
+	DiskReader::allocate_working_buffers ();
 	self->start_timespan ();
+	DiskReader::free_working_buffers ();
 	return 0;
 }
 
