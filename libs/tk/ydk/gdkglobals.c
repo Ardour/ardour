@@ -40,6 +40,7 @@ gchar              *_gdk_display_name = NULL;
 gint                _gdk_screen_number = -1;
 gchar              *_gdk_display_arg_name = NULL;
 gboolean            _gdk_native_windows = FALSE;
+void               (*_gdk_modal_notify)(GdkWindow*,gboolean) = 0;
 
 GSList             *_gdk_displays = NULL;
 
