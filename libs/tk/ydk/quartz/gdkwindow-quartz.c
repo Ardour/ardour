@@ -2389,6 +2389,9 @@ gdk_window_set_modal_hint (GdkWindow *window,
       !WINDOW_IS_TOPLEVEL (window))
     return;
 
+  if (_gdk_modal_notify) {
+	  _gdk_modal_notify (window, modal);
+  }
   /* FIXME: Implement */
 }
 
