@@ -19,80 +19,80 @@
 
 // editor
 #if 0
-STATIC(SessionLoad, &, 0)
-STATIC(SessionClose, &, 0)
+STATIC(SessionLoad, &)
+STATIC(SessionClose, &)
 #endif
-STATIC(ConfigChanged, &ARDOUR::Config->ParameterChanged, 1)
+STATIC(ConfigChanged, &ARDOUR::Config->ParameterChanged)
 
 // engine instance
-ENGINE(EngineRunning, Running, 0)
-ENGINE(EngineStopped, Stopped, 0)
-ENGINE(EngineHalted, Halted, 1)
-ENGINE(EngineDeviceListChanged, DeviceListChanged, 0)
-ENGINE(BufferSizeChanged, BufferSizeChanged, 1)
-ENGINE(SampleRateChanged, SampleRateChanged, 1)
+ENGINE(EngineRunning, Running)
+ENGINE(EngineStopped, Stopped)
+ENGINE(EngineHalted, Halted)
+ENGINE(EngineDeviceListChanged, DeviceListChanged)
+ENGINE(BufferSizeChanged, BufferSizeChanged)
+ENGINE(SampleRateChanged, SampleRateChanged)
 
 // session static
-STATIC(FeedbackDetected, &ARDOUR::Session::FeedbackDetected, 0)
-STATIC(SuccessfulGraphSort, &ARDOUR::Session::SuccessfulGraphSort, 0)
-STATIC(StartTimeChanged, &ARDOUR::Session::StartTimeChanged, 1)
-STATIC(EndTimeChanged, &ARDOUR::Session::EndTimeChanged, 1)
-STATIC(Exported, &ARDOUR::Session::Exported, 4)
+STATIC(FeedbackDetected, &ARDOUR::Session::FeedbackDetected)
+STATIC(SuccessfulGraphSort, &ARDOUR::Session::SuccessfulGraphSort)
+STATIC(StartTimeChanged, &ARDOUR::Session::StartTimeChanged)
+STATIC(EndTimeChanged, &ARDOUR::Session::EndTimeChanged)
+STATIC(Exported, &ARDOUR::Session::Exported)
 
 // stripable static globals
-STATIC(Change, &PresentationInfo::Change, 0)
+STATIC(Change, &PresentationInfo::Change)
 
 // session specific (re-subscribe when session changes)
-SESSION(SessionConfigChanged, config.ParameterChanged, 1)
-SESSION(TransportStateChange, TransportStateChange, 0)
-SESSION(DirtyChanged, DirtyChanged, 0)
-SESSION(StateSaved, StateSaved, 1)
-SESSION(Xrun, Xrun, 1)
-SESSION(TransportLooped, TransportLooped, 0)
-SESSION(SoloActive, SoloActive, 1)
-SESSION(SoloChanged, SoloChanged, 0)
-SESSION(IsolatedChanged, IsolatedChanged, 0)
-SESSION(MonitorChanged, MonitorChanged, 0)
-SESSION(RecordStateChanged, RecordStateChanged, 0)
-SESSION(RecordArmStateChanged, RecordArmStateChanged, 0)
-SESSION(AudioLoopLocationChanged, auto_loop_location_changed, 1)
-SESSION(AudioPunchLocationChanged, auto_punch_location_changed, 1)
-SESSION(LocationsModified, locations_modified, 0)
-SESSION(AuditionActive, AuditionActive, 1)
-SESSION(BundleAddedOrRemoved, BundleAddedOrRemoved, 0)
-SESSION(PositionChanged, PositionChanged, 1)
-SESSION(Located, Located, 0)
-SESSION(RoutesReconnected, session_routes_reconnected, 0)
-SESSION(RouteAdded, RouteAdded, 1)
-SESSION(RouteGroupPropertyChanged, RouteGroupPropertyChanged, 1)
-SESSION(RouteAddedToRouteGroup, RouteAddedToRouteGroup, 2)
-SESSION(RouteRemovedFromRouteGroup, RouteRemovedFromRouteGroup, 2)
-SESSION(StepEditStatusChange, StepEditStatusChange, 1)
-SESSION(RouteGroupAdded, route_group_added, 1)
-SESSION(RouteGroupRemoved, route_group_removed, 0)
-SESSION(RouteGroupsReordered, route_groups_reordered, 0)
+SESSION(SessionConfigChanged, config.ParameterChanged)
+SESSION(TransportStateChange, TransportStateChange)
+SESSION(DirtyChanged, DirtyChanged)
+SESSION(StateSaved, StateSaved)
+SESSION(Xrun, Xrun)
+SESSION(TransportLooped, TransportLooped)
+SESSION(SoloActive, SoloActive)
+SESSION(SoloChanged, SoloChanged)
+SESSION(IsolatedChanged, IsolatedChanged)
+SESSION(MonitorChanged, MonitorChanged)
+SESSION(RecordStateChanged, RecordStateChanged)
+SESSION(RecordArmStateChanged, RecordArmStateChanged)
+SESSION(AudioLoopLocationChanged, auto_loop_location_changed)
+SESSION(AudioPunchLocationChanged, auto_punch_location_changed)
+SESSION(LocationsModified, locations_modified)
+SESSION(AuditionActive, AuditionActive)
+SESSION(BundleAddedOrRemoved, BundleAddedOrRemoved)
+SESSION(PositionChanged, PositionChanged)
+SESSION(Located, Located)
+SESSION(RoutesReconnected, session_routes_reconnected)
+SESSION(RouteAdded, RouteAdded)
+SESSION(RouteGroupPropertyChanged, RouteGroupPropertyChanged)
+SESSION(RouteAddedToRouteGroup, RouteAddedToRouteGroup)
+SESSION(RouteRemovedFromRouteGroup, RouteRemovedFromRouteGroup)
+SESSION(StepEditStatusChange, StepEditStatusChange)
+SESSION(RouteGroupAdded, route_group_added)
+SESSION(RouteGroupRemoved, route_group_removed)
+SESSION(RouteGroupsReordered, route_groups_reordered)
 
 // plugin manager instance
-STATIC(PluginListChanged, &(PluginManager::instance().PluginListChanged), 0)
-STATIC(PluginStatusChanged, &(PluginManager::instance().PluginStatusChanged), 3)
-//STATIC(PluginStatusesChanged, &(PluginManager::instance().PluginTagsChanged), 3)
+STATIC(PluginListChanged, &(PluginManager::instance().PluginListChanged))
+STATIC(PluginStatusChanged, &(PluginManager::instance().PluginStatusChanged))
+//STATIC(PluginStatusesChanged, &(PluginManager::instance().PluginTagsChanged))
 
 // Diskstream static global
-STATIC(DiskOverrun, &ARDOUR::DiskWriter::Overrun, 0)
-STATIC(DiskUnderrun, &ARDOUR::DiskReader::Underrun, 0)
+STATIC(DiskOverrun, &ARDOUR::DiskWriter::Overrun)
+STATIC(DiskUnderrun, &ARDOUR::DiskReader::Underrun)
 
 // Region static
-STATIC(RegionsPropertyChanged, &ARDOUR::Region::RegionsPropertyChanged, 2)
+STATIC(RegionsPropertyChanged, &ARDOUR::Region::RegionsPropertyChanged)
 
 // Timers
-STATIC(LuaTimerS,  &LuaInstance::LuaTimerS, 0)
-STATIC(LuaTimerDS, &LuaInstance::LuaTimerDS, 0)
+STATIC(LuaTimerS,  &LuaInstance::LuaTimerS)
+STATIC(LuaTimerDS, &LuaInstance::LuaTimerDS)
 
 // Session load
-STATIC(SetSession, &LuaInstance::SetSession, 0)
+STATIC(SetSession, &LuaInstance::SetSession)
 
 // Editor Selection Changed
-STATIC(SelectionChanged, &LuaInstance::SelectionChanged, 0)
+STATIC(SelectionChanged, &LuaInstance::SelectionChanged)
 
 // TODO per track/route signals,
 // TODO per plugin actions / controllables

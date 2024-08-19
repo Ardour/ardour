@@ -83,20 +83,8 @@ private:
 
 	PBD::ScopedConnectionList _connections;
 
-	template <typename T, typename S> void connect_0 (enum LuaSignal::LuaSignal, T, S*);
-	template <typename T> void proxy_0 (enum LuaSignal::LuaSignal, T);
-
-	template <typename T, typename C1> void connect_1 (enum LuaSignal::LuaSignal, T, PBD::Signal1<void, C1>*);
-	template <typename T, typename C1> void proxy_1 (enum LuaSignal::LuaSignal, T, C1);
-
-	template <typename T, typename C1, typename C2> void connect_2 (enum LuaSignal::LuaSignal, T, PBD::Signal2<void, C1, C2>*);
-	template <typename T, typename C1, typename C2> void proxy_2 (enum LuaSignal::LuaSignal, T, C1, C2);
-
-	template <typename T, typename C1, typename C2, typename C3> void connect_3 (enum LuaSignal::LuaSignal, T, PBD::Signal3<void, C1, C2, C3>*);
-	template <typename T, typename C1, typename C2, typename C3> void proxy_3 (enum LuaSignal::LuaSignal, T, C1, C2, C3);
-
-	template <typename T, typename C1, typename C2, typename C3, typename C4> void connect_4 (enum LuaSignal::LuaSignal, T, PBD::Signal4<void, C1, C2, C3, C4>*);
-	template <typename T, typename C1, typename C2, typename C3, typename C4> void proxy_4 (enum LuaSignal::LuaSignal, T, C1, C2, C3, C4);
+	template <typename T, typename... C> void connect (enum LuaSignal::LuaSignal, T, PBD::Signal<void(C...)>*);
+	template <typename T, typename... C> void proxy (enum LuaSignal::LuaSignal, T, C...);
 };
 
 typedef std::shared_ptr<LuaCallback> LuaCallbackPtr;
