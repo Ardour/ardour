@@ -1584,7 +1584,11 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 		for (auto const& child : node.children ()) {
 			if (child->name() == X_("RegionFXPlugin")) {
 				std::shared_ptr<RegionFxPlugin> rfx (new RegionFxPlugin (_session, time_domain ()));
-				rfx->set_state (*child, version);
+				if (rfx->set_state (*child, version)) {
+					PBD::warning << string_compose (_("Failed to load RegionFx Plugin for region `%1'"), name()) << endmsg;
+					// TODO replace w/stub, retain config
+					continue;
+				}
 				if (!_add_plugin (rfx, std::shared_ptr<RegionFxPlugin>(), true)) {
 					continue;
 				}
