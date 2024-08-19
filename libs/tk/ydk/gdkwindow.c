@@ -159,8 +159,6 @@ typedef struct {
   int dx, dy; /* The amount that the source was moved to reach dest_region */
 } GdkWindowRegionMove;
 
-void (*_gdk_modal_motify)(GdkWindowModalNotify) = 0;
-
 /* Global info */
 
 static GdkGC *gdk_window_create_gc      (GdkDrawable     *drawable,
@@ -11412,7 +11410,7 @@ gdk_window_get_height (GdkWindow *window)
 void
 gdk_window_set_modal_notify (void (*modal_notify)(GdkWindow*,gboolean))
 {
-	_gdk_modal_motify = modal_notify;
+	_gdk_modal_notify = modal_notify;
 }
 
 #define __GDK_WINDOW_C__
