@@ -30,6 +30,7 @@ RegionFxLine::RegionFxLine (std::string const& name, RegionView& r, ArdourCanvas
 	: AutomationLine (name, r.get_time_axis_view(), parent, l, d)
 	, _rv (r)
 {
+	terminal_points_can_slide = false;
 	init ();
 }
 
@@ -38,6 +39,7 @@ RegionFxLine::RegionFxLine (std::string const& name, RegionView& r, ArdourCanvas
 	, _rv (r)
 	, _ac (ac)
 {
+	terminal_points_can_slide = false;
 	init ();
 }
 

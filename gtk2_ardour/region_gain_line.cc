@@ -45,8 +45,6 @@ AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& 
 	: RegionFxLine (name, r, parent, l, l->parameter ())
 	, arv (r)
 {
-
-	terminal_points_can_slide = false;
 }
 
 void
