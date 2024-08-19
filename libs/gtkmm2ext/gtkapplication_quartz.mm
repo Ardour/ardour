@@ -41,10 +41,13 @@
 #import <Foundation/NSString.h>
 #import <Foundation/NSNotification.h>
 
+#include <iostream>
+#include <vector>
+
 #define UNUSED_PARAMETER(a) (void) (a)
 
-// #define DEBUG(format, ...) g_printerr ("%s: " format, G_STRFUNC, ## __VA_ARGS__)
-#define DEBUG(format, ...)
+#define DEBUG(format, ...) g_printerr ("%s: " format, G_STRFUNC, ## __VA_ARGS__)
+//#define DEBUG(format, ...)
 
 /* TODO
  *
@@ -56,6 +59,7 @@
  */
 
 static gint _exiting = 0;
+static std::vector<GtkMenuItem*> global_menu_items;
 
 static guint
 gdk_quartz_keyval_to_ns_keyval (guint keyval)
@@ -1082,7 +1086,7 @@ add_menu_item (NSMenu* cocoa_menu, GtkWidget* menu_item, int index)
 		[cocoa_item setHidden:YES];
 #endif
 	
-	if (GTK_IS_CHECK_MENU_ITEM (menu_item))
+	if (GTK_IS_CHECK_MENU_ITEM (menu_item)) 
 		cocoa_menu_item_update_active (cocoa_item, menu_item);
 	
 	if (!GTK_IS_SEPARATOR_MENU_ITEM (menu_item))
@@ -1092,6 +1096,11 @@ add_menu_item (NSMenu* cocoa_menu, GtkWidget* menu_item, int index)
 		cocoa_menu_item_update_submenu (cocoa_item, menu_item);
 
 	[ cocoa_item release];
+
+	if (GTK_IS_CHECK_MENU_ITEM (menu_item)) {
+		GtkMenuItem* mitem = GTK_MENU_ITEM(menu_item);
+		global_menu_items.push_back (mitem);
+	}
 }
 	
 static void
@@ -1448,12 +1457,32 @@ namespace Gtk {
 }
 @end
 
+static void
+gdk_quartz_modal_notify (GdkWindow*, gboolean modal)
+{
+	for (auto & mitem : global_menu_items) {
+
+		GNSMenuItem *cocoa_item;
+		cocoa_item = cocoa_menu_item_get (GTK_WIDGET(mitem));
+
+		if (cocoa_item) {
+			[cocoa_item setEnabled:!modal];
+		}
+
+		GtkAction* act = gtk_activatable_get_related_action (GTK_ACTIVATABLE(mitem));
+		if (act) {
+			gtk_action_set_sensitive (act, !modal);
+		}
+	}
+}
 
 /* Basic setup */
 
 extern "C" int
 gtk_application_init ()
 {
+	gdk_window_set_modal_notify (gdk_quartz_modal_notify);
+
 	_main_menubar = [[NSMenu alloc] initWithTitle: @""];
 
 	if (!_main_menubar) 
