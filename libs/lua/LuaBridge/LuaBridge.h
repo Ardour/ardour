@@ -48,7 +48,6 @@
 #include <vector>
 
 #include <inttypes.h>
-#include <boost/type_traits.hpp>
 
 #include "lua/luastate.h"
 
