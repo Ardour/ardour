@@ -1,4 +1,4 @@
-/* GTK+ application-level integration for the Mac OS X/Cocoa 
+/* GTK+ application-level integration for the Mac OS X/Cocoa
  *
  * Copyright (C) 2007 Pioneer Research Center USA, Inc.
  * Copyright (C) 2007 Imendio AB
@@ -313,7 +313,7 @@ keyval_keypad_nonkeypad_equivalent (guint keyval)
 	return GDK_VoidSymbol;
 }
 
-static const gchar* 
+static const gchar*
 gdk_quartz_keyval_to_string (guint keyval)
 {
 	switch (keyval) {
@@ -525,7 +525,7 @@ keyval_is_uppercase (guint keyval)
 }
 
 /* gtk/osx has a problem in that mac main menu events
-   are handled using an "internal" event handling system that 
+   are handled using an "internal" event handling system that
    doesn't pass things back to the glib/gtk main loop. if we call
    gtk_main_iteration() block while in a menu event handler, then
    glib gets confused and thinks there are two threads running
@@ -535,7 +535,7 @@ keyval_is_uppercase (guint keyval)
 
 static int _in_menu_event_handler = 0;
 
-int 
+int
 gdk_quartz_in_menu_event_handler ()
 {
 	return _in_menu_event_handler;
@@ -688,7 +688,7 @@ cocoa_menu_connect (GtkWidget *menu,
 
 	if (cocoa_menu_quark == 0)
 		cocoa_menu_quark = g_quark_from_static_string ("NSMenu");
-	
+
 	g_object_set_qdata_full (G_OBJECT (menu), cocoa_menu_quark,
 				 cocoa_menu,
 				 (GDestroyNotify) cocoa_menu_free);
@@ -751,7 +751,7 @@ cocoa_menu_item_update_active (NSMenuItem *cocoa_item,
 
   g_object_get (widget, "active", &active, NULL);
 
-  if (active) 
+  if (active)
     [cocoa_item setState:NSOnState];
   else
     [cocoa_item setState:NSOffState];
@@ -762,7 +762,7 @@ cocoa_menu_item_update_submenu (NSMenuItem *cocoa_item,
 				GtkWidget      *widget)
 {
   GtkWidget *submenu;
-  
+
   g_return_if_fail (cocoa_item != NULL);
   g_return_if_fail (widget != NULL);
 
@@ -778,7 +778,7 @@ cocoa_menu_item_update_submenu (NSMenuItem *cocoa_item,
 
       /* create a new nsmenu to hold the GTK menu */
 
-      if (label_text) 
+      if (label_text)
 	      cocoa_submenu = [ [ NSMenu alloc ] initWithTitle:[ [ NSString alloc] initWithCString:label_text encoding:NSUTF8StringEncoding]];
       else
 	      cocoa_submenu = [ [ NSMenu alloc ] initWithTitle:@""];
@@ -811,7 +811,7 @@ cocoa_menu_item_update_label (NSMenuItem *cocoa_item,
   label_text = get_menu_label_text (widget, NULL);
   if (label_text)
 	  [cocoa_item setTitle:[ [ NSString alloc] initWithCString:label_text encoding:NSUTF8StringEncoding]];
-  else 
+  else
 	  [cocoa_item setTitle:@""];
 }
 
@@ -827,29 +827,29 @@ cocoa_menu_item_update_accelerator (NSMenuItem *cocoa_item,
   /* important note: this function doesn't do anything to actually change
      key handling. Its goal is to get Cocoa to display the correct
      accelerator as part of a menu item. Actual accelerator handling
-     is still done by GTK, so this is more cosmetic than it may 
+     is still done by GTK, so this is more cosmetic than it may
      appear.
   */
 
-  get_menu_label_text (widget, &label);  
+  get_menu_label_text (widget, &label);
 
   if (GTK_IS_ACCEL_LABEL (label) &&
 	    GTK_ACCEL_LABEL (label)->accel_closure)
 	{
 		GtkAccelKey *key;
-		
+
 		key = gtk_accel_group_find (GTK_ACCEL_LABEL (label)->accel_group,
 					    accel_find_func,
 				  GTK_ACCEL_LABEL (label)->accel_closure);
-		
+
 		if (key            &&
 		    key->accel_key &&
 		    key->accel_flags & GTK_ACCEL_VISIBLE)
 		{
-			guint modifiers = 0; 
+			guint modifiers = 0;
 			const gchar* str = NULL;
-			guint actual_key = key->accel_key; 
-			
+			guint actual_key = key->accel_key;
+
 			if (keyval_is_keypad (actual_key)) {
 				if ((actual_key = keyval_keypad_nonkeypad_equivalent (actual_key)) == GDK_VoidSymbol) {
 					/* GDK_KP_Separator */
@@ -858,17 +858,17 @@ cocoa_menu_item_update_accelerator (NSMenuItem *cocoa_item,
 				}
 				modifiers |= NSNumericPadKeyMask;
 			}
-			
+
 			/* if we somehow got here with GDK_A ... GDK_Z rather than GDK_a ... GDK_z, then take note
 			   of that and make sure we use a shift modifier.
 			*/
-			
+
 			if (keyval_is_uppercase (actual_key)) {
 				modifiers |= NSShiftKeyMask;
 			}
-			
+
 			str = gdk_quartz_keyval_to_string (actual_key);
-			
+
 			if (str) {
 				unichar ukey = str[0];
 				[cocoa_item setKeyEquivalent:[NSString stringWithCharacters:&ukey length:1]];
@@ -881,31 +881,31 @@ cocoa_menu_item_update_accelerator (NSMenuItem *cocoa_item,
 					[cocoa_item setKeyEquivalent:@""];
 					return;
 				}
-			} 
-			
+			}
+
 			if (key->accel_mods || modifiers)
 			{
 				if (key->accel_mods & GDK_SHIFT_MASK) {
 					modifiers |= NSShiftKeyMask;
 				}
-				
+
 				/* gdk/quartz maps Alt/Option to Mod1 */
-				
+
 				if (key->accel_mods & (GDK_MOD1_MASK)) {
 					modifiers |= NSAlternateKeyMask;
 				}
-				
+
 				if (key->accel_mods & GDK_CONTROL_MASK) {
 					modifiers |= NSControlKeyMask;
 				}
-				
+
 				/* our modified gdk/quartz maps Command to Mod2 */
-				
+
 				if (key->accel_mods & GDK_MOD2_MASK) {
 					modifiers |= NSCommandKeyMask;
 				}
-			}  
-			
+			}
+
 			[cocoa_item setKeyEquivalentModifierMask:modifiers];
 			return;
 		}
@@ -925,7 +925,7 @@ cocoa_menu_item_accel_changed (GtkAccelGroup*   /*accel_group*/,
   GNSMenuItem *cocoa_item;
   GtkWidget      *label;
 
-  if (_exiting) 
+  if (_exiting)
     return;
 
   cocoa_item = cocoa_menu_item_get (widget);
@@ -982,7 +982,7 @@ cocoa_menu_item_notify_label (GObject    *object,
 {
   GNSMenuItem *cocoa_item;
 
-  if (_exiting) 
+  if (_exiting)
     return;
 
   cocoa_item = cocoa_menu_item_get (GTK_WIDGET (object));
@@ -1037,13 +1037,13 @@ cocoa_menu_item_connect (GtkWidget*   menu_item,
 	g_object_set_qdata_full (G_OBJECT (menu_item), cocoa_menu_item_quark,
 				 cocoa_item,
 				 (GDestroyNotify) cocoa_menu_item_free);
-	
+
 	if (!old_item) {
 
 		g_signal_connect (menu_item, "notify",
 				  G_CALLBACK (cocoa_menu_item_notify),
 				  cocoa_item);
-		
+
 		if (label)
 			g_signal_connect_swapped (label, "notify::label",
 						  G_CALLBACK (cocoa_menu_item_notify_label),
@@ -1056,14 +1056,14 @@ add_menu_item (NSMenu* cocoa_menu, GtkWidget* menu_item, int index)
 {
 	GtkWidget* label      = NULL;
 	GNSMenuItem *cocoa_item;
-	
-	DEBUG ("add %s to menu %s separator ? %d\n", get_menu_label_text (menu_item, NULL), 
+
+	DEBUG ("add %s to menu %s separator ? %d\n", get_menu_label_text (menu_item, NULL),
 	       [[cocoa_menu title] cStringUsingEncoding:NSUTF8StringEncoding],
 	       GTK_IS_SEPARATOR_MENU_ITEM(menu_item));
 
 	cocoa_item = cocoa_menu_item_get (menu_item);
 
-	if (cocoa_item) 
+	if (cocoa_item)
 		return;
 
 	if (GTK_IS_SEPARATOR_MENU_ITEM (menu_item)) {
@@ -1077,7 +1077,7 @@ add_menu_item (NSMenu* cocoa_menu, GtkWidget* menu_item, int index)
 		}
 
 		const gchar* label_text = get_menu_label_text (menu_item, &label);
-		
+
 		if (label_text)
 			cocoa_item = [ [ GNSMenuItem alloc] initWithTitle:[ [ NSString alloc] initWithCString:label_text encoding:NSUTF8StringEncoding]
 				       andGtkWidget:(GtkMenuItem*)menu_item];
@@ -1085,16 +1085,16 @@ add_menu_item (NSMenu* cocoa_menu, GtkWidget* menu_item, int index)
 			cocoa_item = [ [ GNSMenuItem alloc] initWithTitle:@"" andGtkWidget:(GtkMenuItem*)menu_item];
 		DEBUG ("\tan item\n");
 	}
-	
+
 	/* connect GtkMenuItem and NSMenuItem so that we can notice changes to accel/label/submenu etc. */
 	cocoa_menu_item_connect (menu_item, (GNSMenuItem*) cocoa_item, label);
 	cocoa_menu_item_update_state (cocoa_item, menu_item);
 
-	if (index >= 0) 
+	if (index >= 0)
 		[ cocoa_menu insertItem:cocoa_item atIndex:index];
-	else 
+	else
 		[ cocoa_menu addItem:cocoa_item];
-	
+
 	if (!GTK_WIDGET_IS_SENSITIVE (menu_item))
 		[cocoa_item setState:NSOffState];
 
@@ -1102,14 +1102,14 @@ add_menu_item (NSMenu* cocoa_menu, GtkWidget* menu_item, int index)
 	if (!GTK_WIDGET_VISIBLE (menu_item))
 		[cocoa_item setHidden:YES];
 #endif
-	
-	if (GTK_IS_CHECK_MENU_ITEM (menu_item)) 
+
+	if (GTK_IS_CHECK_MENU_ITEM (menu_item))
 		cocoa_menu_item_update_active (cocoa_item, menu_item);
-	
+
 	if (!GTK_IS_SEPARATOR_MENU_ITEM (menu_item))
 		cocoa_menu_item_update_accel_closure (cocoa_item, menu_item);
-	
-	if (gtk_menu_item_get_submenu (GTK_MENU_ITEM (menu_item))) 
+
+	if (gtk_menu_item_get_submenu (GTK_MENU_ITEM (menu_item)))
 		cocoa_menu_item_update_submenu (cocoa_item, menu_item);
 
 	[ cocoa_item release];
@@ -1119,7 +1119,7 @@ add_menu_item (NSMenu* cocoa_menu, GtkWidget* menu_item, int index)
 		global_menu_items.push_back (mitem);
 	}
 }
-	
+
 static void
 push_menu_shell_to_nsmenu (GtkMenuShell *menu_shell,
 			   NSMenu*       cocoa_menu,
@@ -1143,7 +1143,7 @@ push_menu_shell_to_nsmenu (GtkMenuShell *menu_shell,
 
       add_menu_item (cocoa_menu, menu_item, -1);
     }
-  
+
   g_list_free (children);
 }
 
@@ -1290,7 +1290,7 @@ add_to_window_menu (NSMenu *menu)
 
 static int
 create_window_menu ()
-{   
+{
 	_window_menu = [[NSMenu alloc] initWithTitle: @"Window"];
 
 	[_window_menu addItemWithTitle:@"Minimize"
@@ -1303,7 +1303,7 @@ create_window_menu ()
 	add_to_menubar(_window_menu);
 
 	return 0;
-}  
+}
 #endif
 
 /*
@@ -1381,7 +1381,7 @@ gtk_application_add_app_menu_item (GtkApplicationMenuGroup *group,
 		/*  add a separator before adding the first item, but not
 		 *  for the first group
 		 */
-		
+
 		if (!group->items && list->prev)
 		   {
 			   [appMenu insertItem:[NSMenuItem separatorItem] atIndex:index+1];
@@ -1415,7 +1415,7 @@ namespace Gtk {
 }
 
 @interface GtkApplicationNotificationObject : NSObject {}
-- (GtkApplicationNotificationObject*) init; 
+- (GtkApplicationNotificationObject*) init;
 @end
 
 @implementation GtkApplicationNotificationObject
@@ -1431,7 +1431,7 @@ namespace Gtk {
 
 		[[NSNotificationCenter defaultCenter] addObserver:self
 		 selector:@selector(appDidBecomeInactive:)
-		 name:NSApplicationWillResignActiveNotification 
+		 name:NSApplicationWillResignActiveNotification
 		 object:[NSApplication sharedApplication]];
 	}
 
@@ -1498,7 +1498,7 @@ gtk_application_init ()
 
 	_main_menubar = [[NSMenu alloc] initWithTitle: @""];
 
-	if (!_main_menubar) 
+	if (!_main_menubar)
 		return -1;
 
 	[NSApp setMainMenu: _main_menubar];
