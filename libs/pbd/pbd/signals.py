@@ -94,7 +94,7 @@ def signal(f, n, v):
         print("\ttypedef void result_type;", file=f)
     else:
         print("\ttypedef boost::function<R(%s)> slot_function_type;" % comma_separated(An), file=f)
-        print("\ttypedef boost::optional<R> result_type;", file=f)
+        print("\ttypedef std::optional<R> result_type;", file=f)
 
     print("", file=f)
 

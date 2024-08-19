@@ -1373,11 +1373,11 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 					/* How high is this region view ? */
 
-					boost::optional<ArdourCanvas::Rect> obbox = rv->get_canvas_group ()->bounding_box ();
+					std::optional<ArdourCanvas::Rect> obbox = rv->get_canvas_group ()->bounding_box ();
 					ArdourCanvas::Rect                  bbox;
 
 					if (obbox) {
-						bbox = obbox.get ();
+						bbox = obbox.value ();
 					}
 
 					last_track_bottom_edge += bbox.height ();
@@ -5123,9 +5123,9 @@ FeatureLineDrag::motion (GdkEvent*, bool)
 		cx = 0;
 	}
 
-	boost::optional<ArdourCanvas::Rect> bbox = _line->bounding_box ();
+	std::optional<ArdourCanvas::Rect> bbox = _line->bounding_box ();
 	assert (bbox);
-	_line->set (ArdourCanvas::Duple (cx, 2.0), ArdourCanvas::Duple (cx, bbox.get ().height ()));
+	_line->set (ArdourCanvas::Duple (cx, 2.0), ArdourCanvas::Duple (cx, bbox.value ().height ()));
 
 	float* pos = new float;
 	*pos       = cx;

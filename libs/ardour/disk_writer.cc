@@ -535,7 +535,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			if (_midi_write_source) {
 				assert (_capture_start_sample);
 
-				timepos_t start (_capture_start_sample.get());
+				timepos_t start (_capture_start_sample.value());
 
 				if (time_domain() != Temporal::AudioTime) {
 					start = timepos_t (start.beats());

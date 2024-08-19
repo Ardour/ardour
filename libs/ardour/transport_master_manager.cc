@@ -160,7 +160,7 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 		return 1.0;
 	}
 
-	boost::optional<samplepos_t> session_pos;
+	std::optional<samplepos_t> session_pos;
 
 	if (_session) {
 		session_pos = _session->audible_sample();

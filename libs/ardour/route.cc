@@ -1128,7 +1128,7 @@ Route::add_processors (const ProcessorList& others, std::shared_ptr<Processor> b
 		flags &= mask;
 
 		if (flags != None) {
-			boost::optional<int> rv = PluginSetup (std::dynamic_pointer_cast<Route>(shared_from_this ()), pi, flags);  /* EMIT SIGNAL */
+			std::optional<int> rv = PluginSetup (std::dynamic_pointer_cast<Route>(shared_from_this ()), pi, flags);  /* EMIT SIGNAL */
 			int mode = rv.value_or (0);
 			switch (mode & 3) {
 				case 1:

@@ -115,7 +115,7 @@ MIDIClock_TransportMaster::set_session (Session* s)
 }
 
 void
-MIDIClock_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now, boost::optional<samplepos_t> session_pos)
+MIDIClock_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now, std::optional<samplepos_t> session_pos)
 {
 	/* Read and parse incoming MIDI */
 	if (!_midi_port) {

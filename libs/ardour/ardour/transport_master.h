@@ -22,7 +22,7 @@
 #include <vector>
 
 #include <boost/atomic.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <glibmm/threads.h>
 #include <glibmm/timer.h>
@@ -154,7 +154,7 @@ public:
 	static std::shared_ptr<TransportMaster> factory (SyncSource, std::string const&, bool removeable);
 	static std::shared_ptr<TransportMaster> factory (XMLNode const&);
 
-	virtual void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>) = 0;
+	virtual void pre_process (pframes_t nframes, samplepos_t now, std::optional<samplepos_t>) = 0;
 
 	/**
 	 * This is the most important function to implement:
@@ -515,7 +515,7 @@ public:
 
 	void set_session (Session*);
 
-	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
+	void pre_process (pframes_t nframes, samplepos_t now, std::optional<samplepos_t>);
 
 	void unregister_port ();
 
@@ -587,7 +587,7 @@ public:
 
 	void set_session (Session*);
 
-	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
+	void pre_process (pframes_t nframes, samplepos_t now, std::optional<samplepos_t>);
 
 	void reset (bool with_pos);
 	bool locked () const;
@@ -657,7 +657,7 @@ public:
 
 	void unregister_port ();
 
-	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
+	void pre_process (pframes_t nframes, samplepos_t now, std::optional<samplepos_t>);
 
 	void rebind (MidiPort&);
 
@@ -728,7 +728,7 @@ public:
 	Engine_TransportMaster (AudioEngine&);
 	~Engine_TransportMaster ();
 
-	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
+	void pre_process (pframes_t nframes, samplepos_t now, std::optional<samplepos_t>);
 	bool speed_and_position (double& speed, samplepos_t& pos, samplepos_t&, samplepos_t&, samplepos_t);
 
 	bool starting () const
