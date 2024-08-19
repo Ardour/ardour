@@ -19,9 +19,9 @@
 #define _luasignal_h_
 namespace LuaSignal {
 
-#define ENGINE(name,c,p) name,
-#define STATIC(name,c,p) name,
-#define SESSION(name,c,p) name,
+#define ENGINE(name,c) name,
+#define STATIC(name,c) name,
+#define SESSION(name,c) name,
 
 	enum LuaSignal {
 #		include "luasignal_syms.h"
