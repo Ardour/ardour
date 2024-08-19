@@ -23,7 +23,6 @@
 #include <unistd.h>
 
 #include <boost/atomic.hpp>
-#include <boost/rational.hpp>
 #include <boost/intrusive/list.hpp>
 
 #include <glibmm/threads.h>
