@@ -30,7 +30,6 @@
 #endif
 
 #if SMTG_OS_LINUX
-#include <boost/unordered_map.hpp>
 #include <glibmm.h>
 #endif
 
@@ -102,8 +101,8 @@ private:
 		guint                 _source_id;
 	};
 
-	boost::unordered_map<FileDescriptor, EventHandler> _event_handlers;
-	boost::unordered_map<guint, Linux::ITimerHandler*> _timer_handlers;
+	std::unordered_map<FileDescriptor, EventHandler> _event_handlers;
+	std::unordered_map<guint, Linux::ITimerHandler*> _timer_handlers;
 
 	static gboolean event (GIOChannel* source, GIOCondition condition, gpointer data)
 	{
@@ -132,11 +131,11 @@ public:
 
 	void clear () {
 		Glib::Threads::Mutex::Lock lm (_lock);
-		for (boost::unordered_map<FileDescriptor, EventHandler>::const_iterator it = _event_handlers.begin (); it != _event_handlers.end (); ++it) {
+		for (std::unordered_map<FileDescriptor, EventHandler>::const_iterator it = _event_handlers.begin (); it != _event_handlers.end (); ++it) {
 			g_source_remove (it->second._source_id);
 			g_io_channel_unref (it->second._gio_channel);
 		}
-		for (boost::unordered_map<guint, Linux::ITimerHandler*>::const_iterator it = _timer_handlers.begin (); it != _timer_handlers.end (); ++it) {
+		for (std::unordered_map<guint, Linux::ITimerHandler*>::const_iterator it = _timer_handlers.begin (); it != _timer_handlers.end (); ++it) {
 			g_source_remove (it->first);
 		}
 		_event_handlers.clear ();
@@ -165,7 +164,7 @@ public:
 
 		tresult rv = false;
 		Glib::Threads::Mutex::Lock lm (_lock);
-		for (boost::unordered_map<FileDescriptor, EventHandler>::const_iterator it = _event_handlers.begin (); it != _event_handlers.end ();) {
+		for (std::unordered_map<FileDescriptor, EventHandler>::const_iterator it = _event_handlers.begin (); it != _event_handlers.end ();) {
 			if (it->second._handler == handler) {
 				g_source_remove (it->second._source_id);
 				g_io_channel_unref (it->second._gio_channel);
@@ -198,7 +197,7 @@ public:
 
 		tresult rv = false;
 		Glib::Threads::Mutex::Lock lm (_lock);
-		for (boost::unordered_map<guint, Linux::ITimerHandler*>::const_iterator it = _timer_handlers.begin (); it != _timer_handlers.end ();) {
+		for (std::unordered_map<guint, Linux::ITimerHandler*>::const_iterator it = _timer_handlers.begin (); it != _timer_handlers.end ();) {
 			if (it->second == handler) {
 				g_source_remove (it->first);
 				it = _timer_handlers.erase (it);

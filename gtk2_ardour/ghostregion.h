@@ -26,7 +26,6 @@
 #define __ardour_gtk_ghost_region_h__
 
 #include <vector>
-#include <boost/unordered_map.hpp>
 
 #include "evoral/Note.h"
 #include "pbd/signals.h"
@@ -147,7 +146,7 @@ public:
 	typedef Evoral::Note<Temporal::Beats> NoteType;
 	MidiGhostRegion::GhostEvent* find_event (std::shared_ptr<NoteType>);
 
-	typedef boost::unordered_map<std::shared_ptr<NoteType>, MidiGhostRegion::GhostEvent* > EventList;
+	typedef std::unordered_map<std::shared_ptr<NoteType>, MidiGhostRegion::GhostEvent* > EventList;
 	EventList events;
 	EventList::iterator _optimization_iterator;
 };

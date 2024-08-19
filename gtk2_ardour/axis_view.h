@@ -25,7 +25,6 @@
 #define __ardour_gtk_axis_view_h__
 
 #include <list>
-#include <boost/unordered_map.hpp>
 
 #include <gtkmm/label.h>
 #include <gtkmm/table.h>
@@ -134,7 +133,7 @@ protected:
 	Gtk::Label inactive_label;
 	Gtk::Table inactive_table;
 
-	mutable boost::unordered_map<std::string, std::string> property_hashtable;
+	mutable std::unordered_map<std::string, std::string> property_hashtable;
 }; /* class AxisView */
 
 #endif /* __ardour_gtk_axis_view_h__ */

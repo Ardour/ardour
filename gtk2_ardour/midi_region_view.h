@@ -459,9 +459,9 @@ public:
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
 
-	typedef boost::unordered_map<std::shared_ptr<NoteType>, NoteBase*>                             Events;
-	typedef boost::unordered_map<ARDOUR::MidiModel::PatchChangePtr, std::shared_ptr<PatchChange> > PatchChanges;
-	typedef boost::unordered_map<ARDOUR::MidiModel::constSysExPtr, std::shared_ptr<SysEx> >        SysExes;
+	typedef std::unordered_map<std::shared_ptr<NoteType>, NoteBase*>                             Events;
+	typedef std::unordered_map<ARDOUR::MidiModel::PatchChangePtr, std::shared_ptr<PatchChange> > PatchChanges;
+	typedef std::unordered_map<ARDOUR::MidiModel::constSysExPtr, std::shared_ptr<SysEx> >        SysExes;
 	typedef std::vector<NoteBase*> CopyDragEvents;
 
 	std::shared_ptr<ARDOUR::MidiModel> _model;

@@ -22,7 +22,6 @@
 #ifndef _gtk_ardour_region_list_base_h_
 #define _gtk_ardour_region_list_base_h_
 
-#include <boost/unordered_map.hpp>
 
 #include <gtkmm/celleditable.h>
 #include <gtkmm/frame.h>
@@ -236,7 +235,7 @@ protected:
 
 	bool _no_redisplay;
 
-	typedef boost::unordered_map<std::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::iterator> RegionRowMap;
+	typedef std::unordered_map<std::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::iterator> RegionRowMap;
 
 	RegionRowMap region_row_map;
 
