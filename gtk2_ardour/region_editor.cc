@@ -51,6 +51,7 @@
 #include "new_plugin_preset_dialog.h"
 #include "region_editor.h"
 #include "region_view.h"
+#include "timers.h"
 #include "plugin_selector.h"
 #include "plugin_window_proxy.h"
 #include "public_editor.h"
@@ -552,6 +553,8 @@ RegionEditor::RegionFxBox::RegionFxBox (std::shared_ptr<ARDOUR::Region> r)
 
 	_display.signal_key_press_event ().connect (sigc::mem_fun (*this, &RegionFxBox::on_key_press), false);
 
+	screen_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &RegionFxBox::update_controls));
+
 	_scroller.show ();
 	_display.show ();
 
@@ -743,6 +746,19 @@ RegionEditor::RegionFxBox::on_key_press (GdkEventKey* ev)
 		queue_delete_region_fx (std::weak_ptr<RegionFxPlugin> (i->region_fx_plugin ()));
 	}
 	return true;
+}
+
+void
+RegionEditor::RegionFxBox::update_controls ()
+{
+	for (auto const& i : _display.children ()) {
+		std::shared_ptr<ARDOUR::RegionFxPlugin> rfx = i->region_fx_plugin ();
+		PluginWindowProxy* pwp = dynamic_cast<PluginWindowProxy*> (rfx->window_proxy ());
+		if (!pwp || !pwp->get (false) || !pwp->get (false)->is_mapped ()) {
+			continue;
+		}
+		rfx->maybe_emit_changed_signals ();
+	}
 }
 
 void

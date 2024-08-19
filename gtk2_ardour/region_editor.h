@@ -109,6 +109,7 @@ private:
 		void notify_plugin_load_fail (uint32_t cnt = 1);
 		bool on_key_press (GdkEventKey*);
 		void clear_automation (std::weak_ptr<ARDOUR::RegionFxPlugin>);
+		void update_controls ();
 
 		/* PluginInterestedObject */
 		bool use_plugins (SelectedPlugins const&);
@@ -130,6 +131,8 @@ private:
 		Gtk::EventBox                     _base;
 		bool                              _no_redisplay;
 		int                               _placement;
+
+		sigc::connection screen_update_connection;
 	};
 
 	std::shared_ptr<ARDOUR::Region> _region;
