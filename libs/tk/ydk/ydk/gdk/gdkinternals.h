@@ -709,7 +709,7 @@ void       _gdk_offscreen_window_new                 (GdkWindow     *window,
 void _gdk_image_exit  (void);
 void _gdk_windowing_exit (void);
 
-extern void (*_gdk_modal_motify)(GdkWindowModalNotify);
+extern void (*_gdk_modal_notify)(GdkWindow*, gboolean);
 
 G_END_DECLS
 

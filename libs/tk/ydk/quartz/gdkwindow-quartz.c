@@ -23,6 +23,7 @@
 #include <Carbon/Carbon.h>
 
 #include "gdk.h"
+#include "gdkinternals.h"
 #include "gdkwindowimpl.h"
 #include "gdkprivate-quartz.h"
 #include "gdkscreen-quartz.h"
