@@ -1468,6 +1468,9 @@ namespace Gtk {
 - (NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication *) app
 {
 	UNUSED_PARAMETER(app);
+	if (_modal_state) {
+		return NSTerminateCancel;
+	}
 	Gtkmm2ext::Application::instance()->ShouldQuit ();
 	return NSTerminateCancel;
 }
