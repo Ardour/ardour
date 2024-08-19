@@ -21,7 +21,6 @@
 
 #include <vector>
 
-#include <boost/atomic.hpp>
 #include <optional>
 
 #include <glibmm/threads.h>
@@ -82,11 +81,11 @@ struct LIBARDOUR_API SafeTime {
 	 * complete and the values stored there are consistent.
 	 */
 
-	boost::atomic<int> guard1;
+	std::atomic<int> guard1;
 	samplepos_t        position;
 	samplepos_t        timestamp;
 	double             speed;
-	boost::atomic<int> guard2;
+	std::atomic<int> guard2;
 
 	SafeTime ()
 	{
@@ -108,11 +107,11 @@ struct LIBARDOUR_API SafeTime {
 
 	void update (samplepos_t p, samplepos_t t, double s)
 	{
-		guard1.fetch_add (1, boost::memory_order_acquire);
+		guard1.fetch_add (1, std::memory_order_acquire);
 		position  = p;
 		timestamp = t;
 		speed     = s;
-		guard2.fetch_add (1, boost::memory_order_acquire);
+		guard2.fetch_add (1, std::memory_order_acquire);
 	}
 
 	void safe_read (SafeTime& dst) const
@@ -125,14 +124,14 @@ struct LIBARDOUR_API SafeTime {
 				Glib::usleep (20);
 				tries = 0;
 			}
-			dst.guard1.store (guard1.load (boost::memory_order_seq_cst), boost::memory_order_seq_cst);
+			dst.guard1.store (guard1.load (std::memory_order_seq_cst), std::memory_order_seq_cst);
 			dst.position  = position;
 			dst.timestamp = timestamp;
 			dst.speed     = speed;
-			dst.guard2.store (guard2.load (boost::memory_order_seq_cst), boost::memory_order_seq_cst);
+			dst.guard2.store (guard2.load (std::memory_order_seq_cst), std::memory_order_seq_cst);
 			tries++;
 
-		} while (dst.guard1.load (boost::memory_order_seq_cst) != dst.guard2.load (boost::memory_order_seq_cst));
+		} while (dst.guard1.load (std::memory_order_seq_cst) != dst.guard2.load (std::memory_order_seq_cst));
 	}
 };
 
