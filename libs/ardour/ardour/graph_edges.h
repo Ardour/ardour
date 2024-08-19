@@ -22,8 +22,6 @@
 #include <map>
 #include <set>
 
-#include <boost/shared_ptr.hpp>
-
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 

@@ -19,8 +19,6 @@
 #ifndef _libardour_mixer_scene_h_
 #define _libardour_mixer_scene_h_
 
-#include <boost/shared_ptr.hpp>
-
 #include "pbd/stateful.h"
 
 #include "ardour/libardour_visibility.h"
