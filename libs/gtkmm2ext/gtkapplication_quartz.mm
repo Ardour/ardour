@@ -46,8 +46,8 @@
 
 #define UNUSED_PARAMETER(a) (void) (a)
 
-#define DEBUG(format, ...) g_printerr ("%s: " format, G_STRFUNC, ## __VA_ARGS__)
-//#define DEBUG(format, ...)
+//#define DEBUG(format, ...) g_printerr ("%s: " format, G_STRFUNC, ## __VA_ARGS__)
+#define DEBUG(format, ...)
 
 /* TODO
  *
@@ -60,6 +60,7 @@
 
 static gint _exiting = 0;
 static std::vector<GtkMenuItem*> global_menu_items;
+static bool _modal_state = false;
 
 static guint
 gdk_quartz_keyval_to_ns_keyval (guint keyval)
@@ -548,14 +549,16 @@ idle_call_activate (gpointer data)
 	return FALSE;
 }
 
-@interface GNSMenuItem : NSMenuItem
+@interface GNSMenuItem : NSMenuItem <NSMenuItemValidation>
 {
     @public
 	GtkMenuItem* gtk_menu_item;
-	GClosure      *accel_closure;
+	GClosure*    accel_closure;
+	bool         premodal;
 }
 - (id) initWithTitle:(NSString*) title andGtkWidget:(GtkMenuItem*) w;
 - (void) activate:(id) sender;
+- (BOOL) validateMenuItem:(NSMenuItem*) menuItem;
 @end
 
 @implementation GNSMenuItem
@@ -580,6 +583,20 @@ idle_call_activate (gpointer data)
     // Hot Fix. Increase Priority.
 	g_idle_add_full (G_PRIORITY_HIGH_IDLE, idle_call_activate, gtk_menu_item, NULL);
 //    g_idle_add (idle_call_activate, gtk_menu_item);
+}
+- (BOOL) validateMenuItem:(NSMenuItem*) menuItem
+{
+	if (_modal_state) {
+		return false;
+	}
+
+	GtkAction* act = gtk_activatable_get_related_action (GTK_ACTIVATABLE(gtk_menu_item));
+
+	if (act) {
+		return gtk_action_get_sensitive (act);
+	} else {
+		return true;
+	}
 }
 @end
 
@@ -712,10 +729,11 @@ cocoa_menu_item_update_state (NSMenuItem* cocoa_item,
                 "visible",   &visible,
                 NULL);
 
-  if (!sensitive)
+  if (!sensitive) {
 	  [cocoa_item setEnabled:NO];
-  else
+  } else {
 	  [cocoa_item setEnabled:YES];
+  }
 
 #if 0
   // requires OS X 10.5 or later
@@ -766,7 +784,7 @@ cocoa_menu_item_update_submenu (NSMenuItem *cocoa_item,
       else
 	      cocoa_submenu = [ [ NSMenu alloc ] initWithTitle:@""];
 
-      [cocoa_submenu setAutoenablesItems:NO];
+      [cocoa_submenu setAutoenablesItems:YES];
       cocoa_menu_connect (submenu, cocoa_submenu);
 
       /* connect the new nsmenu to the passed-in item (which lives in
@@ -1312,7 +1330,7 @@ gtk_application_set_menu_bar (GtkMenuShell *menu_shell)
      doesn't really make sense for a Gtk/Cocoa hybrid menu.
    */
 
-  [cocoa_menubar setAutoenablesItems:NO];
+  [cocoa_menubar setAutoenablesItems:YES];
 
   emission_hook_id =
     g_signal_add_emission_hook (g_signal_lookup ("parent-set",
@@ -1438,7 +1456,6 @@ namespace Gtk {
 @interface GtkApplicationDelegate : NSObject
 -(BOOL) application:(NSApplication*) app openFile:(NSString*) file;
 - (NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication *) app;
-- (void) startApp;
 @end
 
 @implementation GtkApplicationDelegate
@@ -1460,15 +1477,12 @@ namespace Gtk {
 static void
 gdk_quartz_modal_notify (GdkWindow*, gboolean modal)
 {
+	/* this global will control sensitivity of our app menu items, via validateMenuItem */
+	_modal_state = modal;
+
+	/* Need to notify GTK that actions are insensitive where necessary */
+
 	for (auto & mitem : global_menu_items) {
-
-		GNSMenuItem *cocoa_item;
-		cocoa_item = cocoa_menu_item_get (GTK_WIDGET(mitem));
-
-		if (cocoa_item) {
-			[cocoa_item setEnabled:!modal];
-		}
-
 		GtkAction* act = gtk_activatable_get_related_action (GTK_ACTIVATABLE(mitem));
 		if (act) {
 			gtk_action_set_sensitive (act, !modal);
