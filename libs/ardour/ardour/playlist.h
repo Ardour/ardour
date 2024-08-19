@@ -36,7 +36,7 @@
 
 #include <sys/stat.h>
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <glib.h>
 
@@ -472,7 +472,7 @@ private:
 	void coalesce_and_check_crossfades (std::list<Temporal::TimeRange>);
 	std::shared_ptr<RegionList> find_regions_at (timepos_t const &);
 
-	mutable boost::optional<std::pair<timepos_t, timepos_t> > _cached_extent;
+	mutable std::optional<std::pair<timepos_t, timepos_t> > _cached_extent;
 	timepos_t _end_space;  //this is used when we are pasting a range with extra space at the end
 	bool _playlist_shift_active;
 

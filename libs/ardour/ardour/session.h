@@ -772,7 +772,7 @@ public:
 	samplepos_t audible_sample (bool* latent_locate = NULL) const;
 	samplepos_t requested_return_sample() const { return _requested_return_sample; }
 	void set_requested_return_sample(samplepos_t return_to);
-	boost::optional<samplepos_t> const & nominal_jack_transport_sample() { return _nominal_jack_transport_sample; }
+	std::optional<samplepos_t> const & nominal_jack_transport_sample() { return _nominal_jack_transport_sample; }
 
 	bool compute_audible_delta (samplepos_t& pos_and_delta) const;
 	samplecnt_t remaining_latency_preroll () const { return _remaining_latency_preroll; }
@@ -1055,7 +1055,7 @@ public:
 
 	/* s/w "RAID" management */
 
-	boost::optional<samplecnt_t> available_capture_duration();
+	std::optional<samplecnt_t> available_capture_duration();
 
 	/* I/O bundles */
 
@@ -1503,8 +1503,8 @@ private:
 	void add_surround_master ();
 	void remove_surround_master ();
 
-	boost::optional<bool> _vapor_available;
-	boost::optional<bool> _vapor_exportable;
+	std::optional<bool> _vapor_available;
+	std::optional<bool> _vapor_exportable;
 
 	void update_latency (bool playback);
 	void set_owned_port_public_latency (bool playback);
@@ -2393,7 +2393,7 @@ private:
 	CoreSelection* _selection;
 
 	bool _global_locate_pending;
-	boost::optional<samplepos_t> _nominal_jack_transport_sample;
+	std::optional<samplepos_t> _nominal_jack_transport_sample;
 
 	bool _had_destructive_tracks;
 

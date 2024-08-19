@@ -22,7 +22,7 @@
 #ifndef __ardour_track_h__
 #define __ardour_track_h__
 
-#include <boost/optional.hpp>
+#include <optional>
 #include <memory>
 
 #include "pbd/enum_convert.h"
@@ -197,7 +197,7 @@ protected:
 	void update_input_meter ();
 
 	std::shared_ptr<Playlist>   _playlists[DataType::num_types];
-	boost::optional<MeterPoint> _saved_meter_point;
+	std::optional<MeterPoint> _saved_meter_point;
 	bool                        _record_prepared;
 	TrackMode                   _mode;
 

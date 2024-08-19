@@ -318,7 +318,7 @@ RemainInfoBox::render (Cairo::RefPtr<Cairo::Context> const& cr, cairo_rectangle_
 	}
 
 	samplecnt_t  sample_rate                 = _session->nominal_sample_rate ();
-	boost::optional<samplecnt_t> opt_samples = _session->available_capture_duration ();
+	std::optional<samplecnt_t> opt_samples = _session->available_capture_duration ();
 
 	Gtkmm2ext::set_source_rgb_a (cr, UIConfiguration::instance ().color ("widget:bg"), .7);
 

@@ -1459,7 +1459,7 @@ ARDOUR_UI::update_disk_space()
 		return;
 	}
 
-	boost::optional<samplecnt_t> opt_samples = _session->available_capture_duration();
+	std::optional<samplecnt_t> opt_samples = _session->available_capture_duration();
 	samplecnt_t fr = _session->sample_rate();
 
 	if (fr == 0) {

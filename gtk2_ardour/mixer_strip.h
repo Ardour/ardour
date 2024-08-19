@@ -312,8 +312,8 @@ private:
 	 *  the RC option editor.
 	 */
 	VisibilityGroup _visibility;
-	boost::optional<bool> override_solo_visibility () const;
-	boost::optional<bool> override_rec_mon_visibility () const;
+	std::optional<bool> override_solo_visibility () const;
+	std::optional<bool> override_rec_mon_visibility () const;
 
 	PBD::ScopedConnectionList _config_connection;
 

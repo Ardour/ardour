@@ -201,7 +201,7 @@ Session::locate (samplepos_t target_sample, bool for_loop_end, bool force, bool 
 
 	// Update Timecode time
 	_transport_sample = target_sample;
-	_nominal_jack_transport_sample = boost::none;
+	_nominal_jack_transport_sample = std::nullopt;
 	// Bump seek counter so that any in-process locate in the butler
 	// thread(s?) can restart.
 	_seek_counter.fetch_add (1);

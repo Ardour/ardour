@@ -118,7 +118,7 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 	static TransportMasterManager* _instance;
 
 	/* original TC format in case the slave changed it */
-	boost::optional<Timecode::TimecodeFormat> _session_tc_format;
+	std::optional<Timecode::TimecodeFormat> _session_tc_format;
 	void maybe_restore_tc_format ();
 	void maybe_set_tc_format ();
 

@@ -87,7 +87,7 @@ bool
 TempoMapImporter::_prepare_move ()
 {
 	// Prompt user for verification
-	boost::optional<bool> replace = Prompt (_("This will replace the current tempo map!\nAre you sure you want to do this?"));
+	std::optional<bool> replace = Prompt (_("This will replace the current tempo map!\nAre you sure you want to do this?"));
 	return replace.value_or (false);
 }
 

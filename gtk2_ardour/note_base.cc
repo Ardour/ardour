@@ -251,7 +251,7 @@ NoteBase::set_mouse_fractions (GdkEvent* ev)
 		return;
 	}
 
-	boost::optional<ArdourCanvas::Rect> bbox = _item->bounding_box ();
+	std::optional<ArdourCanvas::Rect> bbox = _item->bounding_box ();
 	assert (bbox);
 
 	_item->canvas_to_item (ix, iy);
@@ -259,16 +259,16 @@ NoteBase::set_mouse_fractions (GdkEvent* ev)
 	/* hmm, something wrong here. w2i should give item-local coordinates
 	   but it doesn't. for now, finesse this.
 	*/
-	ix = ix - bbox.get().x0;
-	iy = iy - bbox.get().y0;
+	ix = ix - bbox->x0;
+	iy = iy - bbox->y0;
 
 	/* fraction of width/height */
 	double xf;
 	double yf;
 	bool notify = false;
 
-	xf = ix / bbox.get().width ();
-	yf = iy / bbox.get().height ();
+	xf = ix / bbox->width ();
+	yf = iy / bbox->height ();
 
 	if (xf != _mouse_x_fraction || yf != _mouse_y_fraction) {
 		notify = true;

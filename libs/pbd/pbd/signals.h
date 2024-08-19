@@ -40,7 +40,7 @@
 #include <boost/bind/protect.hpp>
 #include <boost/function.hpp>
 #include <boost/enable_shared_from_this.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/event_loop.h"
@@ -144,7 +144,7 @@ template<typename R>
 class /*LIBPBD_API*/ OptionalLastValue
 {
 public:
-	typedef boost::optional<R> result_type;
+	typedef std::optional<R> result_type;
 
 	template <typename Iter>
 	result_type operator() (Iter first, Iter last) const {

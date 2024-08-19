@@ -1846,24 +1846,24 @@ MixerStrip::parameter_changed (string p)
  *
  *  @return optional value that is present if visibility state should be overridden.
  */
-boost::optional<bool>
+std::optional<bool>
 MixerStrip::override_solo_visibility () const
 {
 	if (is_master ()) {
-		return boost::optional<bool> (false);
+		return std::optional<bool> (false);
 	}
 
-	return boost::optional<bool> ();
+	return std::optional<bool> ();
 }
 
-boost::optional<bool>
+std::optional<bool>
 MixerStrip::override_rec_mon_visibility () const
 {
 	if (is_master ()) {
-		return boost::optional<bool> (false);
+		return std::optional<bool> (false);
 	}
 
-	return boost::optional<bool> ();
+	return std::optional<bool> ();
 }
 
 

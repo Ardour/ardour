@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "pbd/abstract_ui.cc" // instantiate template
 #include "pbd/controllable.h"
@@ -1112,7 +1112,7 @@ void
 Console1::create_strip_inventory ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "create_strip_inventory()\n");
-	boost::optional<order_t> master_order;
+	std::optional<order_t> master_order;
 	strip_inventory.clear ();
 	StripableList sl = session->get_stripables ();
 	uint32_t index = 0;

@@ -41,7 +41,7 @@ public:
 		std::string const &,
 		std::string const &,
 		bool visible = false,
-		boost::function<boost::optional<bool> ()> = 0
+		boost::function<std::optional<bool> ()> = 0
 		);
 
 	Gtk::Widget* list_view ();
@@ -64,7 +64,7 @@ private:
 		std::string  id;
 		std::string  name;
 		bool         visible;
-		boost::function<boost::optional<bool> ()> override;
+		boost::function<std::optional<bool> ()> override;
 	};
 
 	class ModelColumns : public Gtk::TreeModelColumnRecord {

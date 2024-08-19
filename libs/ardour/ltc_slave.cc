@@ -533,7 +533,7 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 }
 
 void
-LTC_TransportMaster::pre_process (ARDOUR::pframes_t nframes, samplepos_t now, boost::optional<samplepos_t> session_pos)
+LTC_TransportMaster::pre_process (ARDOUR::pframes_t nframes, samplepos_t now, std::optional<samplepos_t> session_pos)
 {
 	if (!_port) {
 		reset (true);

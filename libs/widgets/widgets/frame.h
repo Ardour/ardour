@@ -19,7 +19,7 @@
 #ifndef _WIDGETS_FRAME_H_
 #define _WIDGETS_FRAME_H_
 
-#include <boost/optional.hpp>
+#include <optional>
 #include <gtkmm/bin.h>
 
 #include "gtkmm2ext/colors.h"
@@ -65,7 +65,7 @@ private:
 	sigc::connection            _parent_style_change;
 	Glib::RefPtr<Pango::Layout> _layout;
 	std::string                 _label_text;
-	boost::optional<Gdk::Color> _edge_color;
+	std::optional<Gdk::Color> _edge_color;
 	GtkRequisition              _min_size;
 
 	int  _border;
