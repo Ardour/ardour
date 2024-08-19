@@ -108,6 +108,7 @@ private:
 		bool idle_delete_region_fx (std::weak_ptr<ARDOUR::RegionFxPlugin>);
 		void notify_plugin_load_fail (uint32_t cnt = 1);
 		bool on_key_press (GdkEventKey*);
+		void clear_automation (std::weak_ptr<ARDOUR::RegionFxPlugin>);
 
 		/* PluginInterestedObject */
 		bool use_plugins (SelectedPlugins const&);

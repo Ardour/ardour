@@ -671,7 +671,8 @@ RegionEditor::RegionFxBox::fxe_button_press_event (GdkEventButton* ev, RegionFxE
 
 			if (!ac_items.empty ()) {
 				items.push_back (SeparatorElem ());
-				items.push_back (MenuElem ("Automation Enable", *automation_menu));
+				items.push_back (MenuElem (_("Automation Enable"), *automation_menu));
+				items.push_back (MenuElem (_("Clear All Automation"), sigc::bind (sigc::mem_fun (*this, &RegionFxBox::clear_automation), wfx)));
 			} else {
 				delete automation_menu;
 			}
@@ -742,6 +743,47 @@ RegionEditor::RegionFxBox::on_key_press (GdkEventKey* ev)
 		queue_delete_region_fx (std::weak_ptr<RegionFxPlugin> (i->region_fx_plugin ()));
 	}
 	return true;
+}
+
+void
+RegionEditor::RegionFxBox::clear_automation (std::weak_ptr<ARDOUR::RegionFxPlugin> wfx)
+{
+	std::shared_ptr<RegionFxPlugin> fx (wfx.lock ());
+	if (!fx) {
+		return;
+	}
+	bool in_command = false;
+
+	timepos_t tas ((samplepos_t)_region->length().samples());
+
+	for (auto const& c : fx->controls ()) {
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (c.second);
+		if (!ac) {
+			continue;
+		}
+		std::shared_ptr<ARDOUR::AutomationList> alist = ac->alist ();
+		if (!alist) {
+			continue;
+		}
+
+		XMLNode& before (alist->get_state());
+
+		alist->freeze ();
+		alist->clear ();
+		fx->set_default_automation (tas);
+		alist->thaw ();
+		alist->set_automation_state (ARDOUR::Off);
+
+		if (!in_command) {
+			_region->session ().begin_reversible_command (_("Clear region fx automation"));
+			in_command = true;
+		}
+		_region->session ().add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+	}
+
+	if (in_command) {
+		_region->session ().commit_reversible_command ();
+	}
 }
 
 void
