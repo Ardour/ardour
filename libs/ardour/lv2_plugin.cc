@@ -38,8 +38,6 @@
 #include <glib/gprintf.h>
 #include <glibmm.h>
 
-#include <boost/utility.hpp>
-
 #include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
 #include "pbd/compose.h"
