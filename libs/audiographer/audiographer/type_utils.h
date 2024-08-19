@@ -1,7 +1,6 @@
 #ifndef AUDIOGRAPHER_TYPE_UTILS_H
 #define AUDIOGRAPHER_TYPE_UTILS_H
 
-#include <boost/static_assert.hpp>
 #include <memory>
 #include <algorithm>
 #include <cstring>
@@ -30,7 +29,7 @@ class LIBAUDIOGRAPHER_API TypeUtilsBase
 template<typename T = DefaultSampleType>
 class /*LIBAUDIOGRAPHER_API*/ TypeUtils : private TypeUtilsBase
 {
-	BOOST_STATIC_ASSERT (std::is_trivially_destructible<T>::value);
+	static_assert (std::is_trivially_destructible<T>::value);
 
 	typedef std::bool_constant<std::is_floating_point<T>::value ||
 	                           std::is_signed<T>::value> zero_fillable;

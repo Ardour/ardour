@@ -1,7 +1,6 @@
 #ifndef AUDIOGRAPHER_PROCESS_CONTEXT_H
 #define AUDIOGRAPHER_PROCESS_CONTEXT_H
 
-#include <boost/static_assert.hpp>
 #include <boost/format.hpp>
 
 #include "audiographer/visibility.h"
@@ -28,7 +27,7 @@ class /*LIBAUDIOGRAPHER_API*/ ProcessContext
 	// This will need to be modified if if it's modified above
 	static const ThrowLevel throwLevel = DEFAULT_THROW_LEVEL;
 
-	BOOST_STATIC_ASSERT (std::is_trivially_destructible<T>::value);
+	static_assert (std::is_trivially_destructible<T>::value);
 
 public:
 
