@@ -28,7 +28,7 @@ class /*LIBAUDIOGRAPHER_API*/ ProcessContext
 	// This will need to be modified if if it's modified above
 	static const ThrowLevel throwLevel = DEFAULT_THROW_LEVEL;
 
-	BOOST_STATIC_ASSERT (boost::has_trivial_destructor<T>::value);
+	BOOST_STATIC_ASSERT (std::is_trivially_destructible<T>::value);
 
 public:
 
