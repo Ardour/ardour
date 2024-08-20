@@ -529,7 +529,7 @@ timecnt_t
 AudioRegion::tail () const
 {
 	if (_fade_before_fx && has_region_fx ()) {
-		return timecnt_t (_session.sample_rate ()); // TODO use plugin API
+		return timecnt_t ((samplecnt_t)_fx_tail);
 	} else {
 		return timecnt_t (0);
 	}
