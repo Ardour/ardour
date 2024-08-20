@@ -302,6 +302,10 @@ AudioRegionEditor::refill_region_line ()
 		}
 		std::shared_ptr<Plugin> plugin = fx->plugin ();
 
+		if (!plugin) {
+			return;
+		}
+
 		Gtk::Menu* acm = manage (new Gtk::Menu);
 		MenuList&  acm_items (acm->items ());
 
