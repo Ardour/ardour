@@ -75,6 +75,7 @@ Session::remove_bundle (std::shared_ptr<Bundle> bundle)
 
 	if (removed) {
 		 BundleAddedOrRemoved (); /* EMIT SIGNAL */
+		 _bundles.flush ();
 	}
 
 	set_dirty();

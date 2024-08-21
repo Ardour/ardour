@@ -1158,6 +1158,9 @@ PortManager::update_input_ports (bool clear)
 		 * do this when called from ::reestablish_ports()
 		 * "JACK: Cannot connect ports owned by inactive clients"
 		 */
+		/* .. but take the opportunity to clear out dead wood */
+		_audio_input_ports.flush ();
+		_midi_input_ports.flush ();
 		return;
 	}
 
