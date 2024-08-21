@@ -287,8 +287,6 @@ class LIBTEMPORAL_API Meter {
 	int divisions_per_bar () const { return _divisions_per_bar; }
 	int note_value() const { return _note_value; }
 
-	int32_t ticks_per_grid () const { return (4 * Beats::PPQN) / _note_value; }
-
 	inline bool operator==(const Meter& other) const { return _divisions_per_bar == other.divisions_per_bar() && _note_value == other.note_value(); }
 	inline bool operator!=(const Meter& other) const { return _divisions_per_bar != other.divisions_per_bar() || _note_value != other.note_value(); }
 
@@ -456,7 +454,7 @@ class LIBTEMPORAL_API TempoMetric
 	superclock_t superclock_at (Beats const & qn) const { return _tempo->superclock_at (qn); }
 	samplepos_t  sample_at (Beats const & qn) const { return _tempo->sample_at (qn); }
 	Beats        quarters_at (BBT_Time const & bbt) const { return _meter->quarters_at (bbt); }
-	BBT_Argument     bbt_at (Beats const & beats) const { return BBT_Argument (reftime(), _meter->bbt_at (beats)); }
+	BBT_Argument bbt_at (Beats const& qn) const;
 
 	superclock_t superclocks_per_note_type () const { return _tempo->superclocks_per_note_type (); }
 	superclock_t end_superclocks_per_note_type () const {return _tempo->end_superclocks_per_note_type (); }

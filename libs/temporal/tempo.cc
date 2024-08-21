@@ -252,23 +252,19 @@ Meter::bbt_add (Temporal::BBT_Time const & bbt, Temporal::BBT_Offset const & add
 
 	Temporal::BBT_Offset r (bars + add.bars, beats + add.beats, ticks + add.ticks);
 
-	/* ticks-per-bar-division; PPQN is ticks-per-quarter note */
-
-	const int32_t tpg = ticks_per_grid ();
-
-	if (r.ticks >= tpg) {
+	if (r.ticks >= ticks_per_beat) {
 
 		/* ticks per bar */
-		const int32_t tpB = tpg * _divisions_per_bar;
+		const int32_t tpB = ticks_per_beat * _divisions_per_bar;
 
 		if (r.ticks >= tpB) {
 			r.bars += r.ticks / tpB;
 			r.ticks %= tpB;
 		}
 
-		if (r.ticks >= tpg) {
-			r.beats += r.ticks / tpg;
-			r.ticks %= tpg;
+		if (r.ticks >= ticks_per_beat) {
+			r.beats += r.ticks / ticks_per_beat;
+			r.ticks %= ticks_per_beat;
 		}
 	}
 
@@ -327,11 +323,9 @@ Meter::bbt_subtract (Temporal::BBT_Time const & bbt, Temporal::BBT_Offset const 
 
 	/* ticks-per-bar-division; PPQN is ticks-per-quarter note */
 
-	const int32_t tpg = ticks_per_grid ();
-
 	if (r.ticks < 0) {
-		r.beats += floor ((double) r.ticks / tpg);
-		r.ticks = tpg + (r.ticks % Temporal::Beats::PPQN);
+		r.beats += floor ((double) r.ticks / ticks_per_beat);
+		r.ticks = ticks_per_beat + (r.ticks % ticks_per_beat);
 	}
 
 	if (r.beats <= 0) {
@@ -386,21 +380,11 @@ Meter::to_quarters (Temporal::BBT_Offset const & offset) const
 {
 	int64_t ticks = 0;
 
-	ticks += (Beats::PPQN * offset.bars * _divisions_per_bar * 4) / _note_value;
-	ticks += (Beats::PPQN * offset.beats * 4) / _note_value;
+	ticks += (ticks_per_beat * offset.bars * _divisions_per_bar * 4) / _note_value;
+	ticks += (ticks_per_beat * offset.beats * 4) / _note_value;
+	ticks += offset.ticks;
 
-	/* "parts per bar division" */
-
-	const int tpg = ticks_per_grid ();
-
-	if (offset.ticks > tpg) {
-		ticks += Beats::PPQN * offset.ticks / tpg;
-		ticks += offset.ticks % tpg;
-	} else {
-		ticks += offset.ticks;
-	}
-
-	return Beats (ticks/Beats::PPQN, ticks%Beats::PPQN);
+	return Beats (ticks / Beats::PPQN, ticks % Beats::PPQN);
 }
 
 int
@@ -712,6 +696,12 @@ TempoMap::reftime (TempoPoint const & t, MeterPoint const & m) const
 }
 
 Temporal::BBT_Argument
+TempoMetric::bbt_at (Beats const& qn) const
+{
+	return BBT_Argument (reftime(), _meter->bbt_at (qn * _meter->note_value() / 4));
+}
+
+Temporal::BBT_Argument
 TempoMetric::bbt_at (timepos_t const & pos) const
 {
 	if (pos.is_beats()) {
@@ -742,11 +732,27 @@ TempoMetric::bbt_at (timepos_t const & pos) const
 	   the current meter, which we'll call "grid"
 	*/
 
-	const int64_t note_value_count = muldiv_round (dq.get_beats(), _meter->note_value(), int64_t (4));
+	int64_t note_value_count;
+	int64_t tick_value_count;
+
+	if (_meter->note_value() >= 4) {
+		/* easy case:  meter is in qn (or shorter) Temporal::ticks_per_beat applies */
+		note_value_count = muldiv_round (dq.get_beats(), _meter->note_value(), int64_t (4));
+		tick_value_count = muldiv_round (dq.get_ticks(), _meter->note_value(), int64_t (4));
+	} else {
+		/* we need to 'scale' down ticks for 1/1  N/2 and N/3 meters.
+		 * tick wraps around qn, which is shorter than a beat (e.g. half note at 2/2).
+		 */
+		const int64_t ticks = dq.get_beats() * Temporal::ticks_per_beat + dq.get_ticks ();
+
+		tick_value_count = muldiv_round (ticks, _meter->note_value(), int64_t (4));
+		note_value_count = tick_value_count / Temporal::ticks_per_beat;
+		tick_value_count = tick_value_count % Temporal::ticks_per_beat;
+	}
 
 	/* now construct a BBT_Offset using the count in grid units */
 
-	const BBT_Offset bbt_offset (0, note_value_count, dq.get_ticks());
+	const BBT_Offset bbt_offset (0, note_value_count, tick_value_count);
 
 	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("BBT offset from %3 @ %1: %2\n", (_tempo->beats() < _meter->beats() ?  _meter->bbt() : _tempo->bbt()), bbt_offset,
 	                                                 (_tempo->beats() < _meter->beats() ? "meter" : "tempo")));
@@ -2135,7 +2141,7 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 
 	const Beats delta ((beats - tp.beats()).abs());
 
-	if (delta < Beats::ticks (metric.meter().ticks_per_grid())) {
+	if (delta < Beats::ticks (ticks_per_beat)) {
 		return false;
 	}
 
@@ -2773,7 +2779,7 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 					ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
 					DEBUG_TRACE (DEBUG::Grid, string_compose ("Gb %1\t       [%2]\n", metric, ret.back()));
 				} else {
-					int ticks = (bbt.beats * metric.meter().ticks_per_grid()) + bbt.ticks;
+					int ticks = (bbt.beats * ticks_per_beat) + bbt.ticks;
 					int mod = Temporal::ticks_per_beat / beat_div;
 
 					if ((ticks % mod) == 0) {
@@ -3010,7 +3016,7 @@ TempoMap::fill_grid_with_final_metric (TempoMapPoints& ret, TempoMetric metric, 
 					ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
 					DEBUG_TRACE (DEBUG::Grid, string_compose ("Gendb %1\t       [%2]\n", metric, ret.back()));
 				} else {
-					int ticks = (bbt.beats * metric.meter().ticks_per_grid()) + bbt.ticks;
+					int ticks = (bbt.beats * ticks_per_beat) + bbt.ticks;
 					int mod = Temporal::ticks_per_beat / beat_div;
 					if ((ticks % mod) == 0) {
 						ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
@@ -3187,13 +3193,12 @@ TempoMap::bbt_walk (BBT_Argument const & bbt, BBT_Offset const & o) const
 
 
 	/* normalize possibly too-large ticks count */
+	assert (offset.ticks <= ticks_per_beat);
 
-	const int32_t tpg = metric.meter().ticks_per_grid ();
-
-	if (offset.ticks > tpg) {
+	if (offset.ticks > ticks_per_beat) {
 		/* normalize */
-		offset.beats += offset.ticks / tpg;
-		offset.ticks %= tpg;
+		offset.beats += offset.ticks / ticks_per_beat;
+		offset.ticks %= ticks_per_beat;
 	}
 
 	/* add each beat, 1 by 1, rechecking to see if there's a new
