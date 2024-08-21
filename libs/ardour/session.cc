@@ -5505,6 +5505,7 @@ Session::unload_io_plugin (std::shared_ptr<IOPlug> ioplugin)
 	}
 	IOPluginsChanged (); /* EMIT SIGNAL */
 	set_dirty();
+	_io_plugins.flush ();
 	return true;
 }
 
