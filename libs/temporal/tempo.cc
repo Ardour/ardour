@@ -2581,7 +2581,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t rstart, superclock_t end, 
 		if (bar_mod == 1) {
 			spdiv = llrintf (metric.superclocks_per_note_type() * (metric.meter().divisions_per_bar() * (4. / metric.meter().note_value())));
 		} else {
-			spdiv = metric.superclocks_per_note_type() / beat_div;
+			spdiv = metric.superclocks_per_note_type() * (4. / metric.meter().note_value()) / beat_div;
 		}
 
 		superclock_t start = (rstart / spdiv) * spdiv; /* div (bar/beat) preceding rstart */
