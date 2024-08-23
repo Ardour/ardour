@@ -2483,7 +2483,7 @@ AudioRegion::_add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<R
 	}
 
 	rfx->LatencyChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fx_latency_changed, this, false));
-	rfx->plugin()->TailChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fx_tail_changed, this, false));
+	rfx->TailChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fx_tail_changed, this, false));
 	rfx->set_block_size (_session.get_block_size ());
 
 	if (from_set_state) {
@@ -2570,7 +2570,7 @@ AudioRegion::fx_tail_changed (bool no_emit)
 {
 	uint32_t t = 0;
 	for (auto const& rfx : _plugins) {
-		t = max<uint32_t> (t, rfx->plugin()->effective_tail ());
+		t = max<uint32_t> (t, rfx->effective_tail ());
 	}
 	if (t == _fx_tail) {
 		return;

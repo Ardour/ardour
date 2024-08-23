@@ -155,6 +155,10 @@ public:
 		return _required_buffers;
 	}
 
+	/* wrapped Plugin API */
+	PBD::Signal0<void> TailChanged;
+	samplecnt_t effective_tail () const;
+
 private:
 	/* disallow copy construction */
 	RegionFxPlugin (RegionFxPlugin const&);

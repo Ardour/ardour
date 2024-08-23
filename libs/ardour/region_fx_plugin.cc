@@ -390,6 +390,7 @@ RegionFxPlugin::add_plugin (std::shared_ptr<Plugin> plugin)
 		plugin->ParameterChangedExternally.connect_same_thread (*this, boost::bind (&RegionFxPlugin::parameter_changed_externally, this, _1, _2));
 		plugin->StartTouch.connect_same_thread (*this, boost::bind (&RegionFxPlugin::start_touch, this, _1));
 		plugin->EndTouch.connect_same_thread (*this, boost::bind (&RegionFxPlugin::end_touch, this, _1));
+		plugin->TailChanged.connect_same_thread (*this, [this](){ TailChanged (); });
 	}
 
 	plugin->set_insert (this, _plugins.size ());
@@ -464,6 +465,12 @@ ARDOUR::samplecnt_t
 RegionFxPlugin::signal_latency () const
 {
 	return _plugins.front ()->signal_latency ();
+}
+
+ARDOUR::samplecnt_t
+RegionFxPlugin::effective_tail () const
+{
+	return _plugins.front ()->effective_tail ();
 }
 
 PlugInsertBase::UIElements
