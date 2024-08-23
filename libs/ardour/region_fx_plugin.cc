@@ -213,6 +213,7 @@ RegionFxPlugin::RegionFxPlugin (Session& s, Temporal::TimeDomain const td, std::
 	, _no_inplace (false)
 	, _last_emit (0)
 	, _window_proxy (0)
+	, _state (0)
 {
 	_flush.store (0);
 
@@ -234,11 +235,18 @@ RegionFxPlugin::~RegionFxPlugin ()
 		std::dynamic_pointer_cast<AutomationControl>(i.second)->drop_references ();
 	}
 	_controls.clear ();
+
+	delete _state;
 }
 
 XMLNode&
 RegionFxPlugin::get_state () const
 {
+	if (_plugins.empty ()) {
+		assert (_state);
+		return *(new XMLNode (*_state));
+	}
+
 	XMLNode* node = new XMLNode (/*state_node_name*/ "RegionFXPlugin");
 
 	Latent::add_state (node);
@@ -294,7 +302,15 @@ RegionFxPlugin::set_state (const XMLNode& node, int version)
 		std::shared_ptr<Plugin> plugin = find_and_load_plugin (_session, node, type, unique_id, any_vst);
 
 		if (!plugin) {
-			return -1;
+			delete _state;
+			_state = new XMLNode (node);
+			string name;
+			if (node.get_property ("name", name)) {
+				set_name (name);
+			} else {
+				set_name ("Unknown Plugin");
+			}
+			return 0;
 		}
 
 		add_plugin (plugin);
@@ -368,6 +384,22 @@ RegionFxPlugin::set_state (const XMLNode& node, int version)
 		}
 	}
 	return 0;
+}
+
+PluginType
+RegionFxPlugin::type () const
+{
+	if (!_plugins.empty ()) {
+		return plugin ()->get_info ()->type;
+	}
+	if (_state) {
+		ARDOUR::PluginType type;
+		std::string        unique_id;
+		if (parse_plugin_type (*_state, type, unique_id)) {
+			return type;
+		}
+	}
+	return LXVST; /* whatever */
 }
 
 void
@@ -464,12 +496,18 @@ RegionFxPlugin::drop_references ()
 ARDOUR::samplecnt_t
 RegionFxPlugin::signal_latency () const
 {
+	if (_plugins.empty ()) {
+		return 0;
+	}
 	return _plugins.front ()->signal_latency ();
 }
 
 ARDOUR::samplecnt_t
 RegionFxPlugin::effective_tail () const
 {
+	if (_plugins.empty ()) {
+		return 0;
+	}
 	return _plugins.front ()->effective_tail ();
 }
 
@@ -639,6 +677,7 @@ RegionFxPlugin::parameter_changed_externally (uint32_t which, float val)
 std::string
 RegionFxPlugin::describe_parameter (Evoral::Parameter param)
 {
+	assert (!_plugins.empty ());
 	if (param.type () == PluginAutomation) {
 		return _plugins[0]->describe_parameter (param);
 	} else if (param.type () == PluginPropertyAutomation) {
@@ -671,6 +710,10 @@ RegionFxPlugin::end_touch (uint32_t param_id)
 bool
 RegionFxPlugin::can_reset_all_parameters ()
 {
+	if (_plugins.empty ()) {
+		return false;
+	}
+
 	bool                    all    = true;
 	uint32_t                params = 0;
 	std::shared_ptr<Plugin> plugin = _plugins.front ();
@@ -700,6 +743,8 @@ RegionFxPlugin::can_reset_all_parameters ()
 bool
 RegionFxPlugin::reset_parameters_to_default ()
 {
+	assert (!_plugins.empty ());
+
 	bool                    all    = true;
 	std::shared_ptr<Plugin> plugin = _plugins.front ();
 
@@ -751,6 +796,10 @@ RegionFxPlugin::flush ()
 bool
 RegionFxPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
+	if (_plugins.empty ()) {
+		out = ChanCount::min (in, out);
+		return true;
+	}
 	return private_can_support_io_configuration (in, out).method != Impossible;
 }
 
@@ -903,6 +952,10 @@ RegionFxPlugin::configure_io (ChanCount in, ChanCount out)
 {
 	_configured_in  = in;
 	_configured_out = out;
+
+	if (_plugins.empty ()) {
+		return true;
+	}
 
 	ChanCount natural_input_streams  = _plugins[0]->get_info ()->n_inputs;
 	ChanCount natural_output_streams = _plugins[0]->get_info ()->n_outputs;
@@ -1191,6 +1244,10 @@ RegionFxPlugin::find_next_event (timepos_t const& start, timepos_t const& end, E
 bool
 RegionFxPlugin::run (BufferSet& bufs, samplepos_t start, samplepos_t end, samplepos_t pos, pframes_t nframes, sampleoffset_t off)
 {
+	if (_plugins.empty ()) {
+		return true;
+	}
+
 	Glib::Threads::Mutex::Lock lp (_process_lock);
 
 	int canderef (1);

@@ -67,16 +67,14 @@ public:
 	{
 		return _plugins.size ();
 	}
-	PluginType type () const
-	{
-		return plugin ()->get_info ()->type;
-	}
+	PluginType type () const;
+
 	std::shared_ptr<Plugin> plugin (uint32_t num = 0) const
 	{
 		if (num < _plugins.size ()) {
 			return _plugins[num];
 		} else {
-			return _plugins[0];
+			return std::shared_ptr<Plugin>();
 		}
 	}
 
@@ -202,6 +200,8 @@ private:
 
 	Gtkmm2ext::WindowProxy* _window_proxy;
 	std::atomic<int>        _flush;
+
+	XMLNode* _state;
 
 	mutable Glib::Threads::Mutex _process_lock;
 };
