@@ -1562,7 +1562,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 
 		trackview.editor().begin_reversible_command (_("add gain control point"));
 
-		_fx_line->enable_autoation ();
+		_fx_line->enable_automation ();
 
 		trackview.session()->add_command (new MementoCommand<AutomationList>(*_fx_line->the_list(), &before, &after));
 

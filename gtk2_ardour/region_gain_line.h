@@ -46,7 +46,7 @@ public:
 	void start_drag_multiple (std::list<ControlPoint*>, float, XMLNode*);
 	void end_drag (bool with_push, uint32_t final_index);
 	void end_draw_merge ();
-	void enable_autoation ();
+	void enable_automation ();
 	void remove_point (ControlPoint&);
 
 private:

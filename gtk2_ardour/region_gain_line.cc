@@ -117,12 +117,12 @@ AudioRegionGainLine::end_drag (bool with_push, uint32_t final_index)
 void
 AudioRegionGainLine::end_draw_merge ()
 {
-	enable_autoation ();
+	enable_automation ();
 	RegionFxLine::end_draw_merge ();
 }
 
 void
-AudioRegionGainLine::enable_autoation ()
+AudioRegionGainLine::enable_automation ()
 {
 	if (!arv.audio_region()->envelope_active()) {
 		XMLNode& before = arv.audio_region()->get_state();
