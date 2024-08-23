@@ -2418,7 +2418,11 @@ Region::load_plugin (ARDOUR::PluginType type, std::string const& name)
 bool
 Region::add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<RegionFxPlugin> pos)
 {
-	return _add_plugin (rfx, pos, false);
+	bool rv = _add_plugin (rfx, pos, false);
+	if (rv) {
+		_session.set_dirty ();
+	}
+	return rv;
 }
 
 void
@@ -2445,6 +2449,7 @@ Region::reorder_plugins (RegionFxList const& new_order)
 		oiter = _plugins.erase (oiter);
 	}
 	_plugins.insert (oiter, as_it_will_be.begin (), as_it_will_be.end ());
+	_session.set_dirty ();
 }
 
 void

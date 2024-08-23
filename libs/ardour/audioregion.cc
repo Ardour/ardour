@@ -2531,6 +2531,7 @@ AudioRegion::remove_plugin (std::shared_ptr<RegionFxPlugin> fx)
 		send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
 	}
 	RegionFxChanged (); /* EMIT SIGNAL */
+	_session.set_dirty ();
 	return true;
 }
 
