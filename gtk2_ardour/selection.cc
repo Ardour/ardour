@@ -37,6 +37,7 @@
 #include "control_protocol/control_protocol.h"
 
 #include "audio_region_view.h"
+#include "automation_line_base.h"
 #include "debug.h"
 #include "gui_thread.h"
 #include "midi_cut_buffer.h"
@@ -1163,25 +1164,27 @@ Selection::get_state () const
 		}
 	}
 
-	for (PointSelection::const_iterator i = points.begin(); i != points.end(); ++i) {
-		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (&(*i)->line().trackview);
+	for (auto & cp : points) {
+		AutomationLine* al = dynamic_cast<AutomationLine*> (&cp->line());
+		assert (al);
+		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (&al->trackview);
 		if (atv) {
 
 			XMLNode* r = node->add_child (X_("ControlPoint"));
 			r->set_property (X_("type"), "track");
 			r->set_property (X_("route-id"), atv->parent_stripable()->id ());
-			r->set_property (X_("automation-list-id"), (*i)->line().the_list()->id ());
-			r->set_property (X_("parameter"), EventTypeMap::instance().to_symbol ((*i)->line().the_list()->parameter ()));
-			r->set_property (X_("view-index"), (*i)->view_index());
-			continue;
-		}
+			r->set_property (X_("automation-list-id"), al->the_list()->id ());
+			r->set_property (X_("parameter"), EventTypeMap::instance().to_symbol (al->the_list()->parameter ()));
+			r->set_property (X_("view-index"), cp->view_index());
+		} else {
 
-		RegionFxLine* fxl = dynamic_cast<RegionFxLine*> (&(*i)->line());
-		if (fxl) {
-			XMLNode* r = node->add_child (X_("ControlPoint"));
-			r->set_property (X_("type"), "region");
-			r->set_property (X_("region-id"), fxl->region_view ().region ()->id ());
-			r->set_property (X_("view-index"), (*i)->view_index());
+			RegionFxLine* fxl = dynamic_cast<RegionFxLine*> (al);
+			if (fxl) {
+				XMLNode* r = node->add_child (X_("ControlPoint"));
+				r->set_property (X_("type"), "region");
+				r->set_property (X_("region-id"), fxl->region_view ().region ()->id ());
+				r->set_property (X_("view-index"), cp->view_index());
+			}
 		}
 
 	}

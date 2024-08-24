@@ -53,6 +53,7 @@
 
 #include "canvas/canvas.h"
 #include "canvas/lollipop.h"
+#include "canvas/rectangle.h"
 #include "canvas/scroll_group.h"
 
 #include "ardour_ui.h"

@@ -19,7 +19,7 @@
  */
 
 #include "control_point.h"
-#include "automation_line.h"
+#include "automation_line_base.h"
 #include "public_editor.h"
 #include "ui_config.h"
 
@@ -33,7 +33,7 @@ using namespace PBD;
 
 PBD::Signal1<void, ControlPoint *> ControlPoint::CatchDeletion;
 
-ControlPoint::ControlPoint (AutomationLine& al)
+ControlPoint::ControlPoint (AutomationLineBase& al)
 	: _line (al)
 {
 	_model = al.the_list()->end();

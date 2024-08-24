@@ -89,6 +89,7 @@
 #include "audio_region_view.h"
 #include "audio_streamview.h"
 #include "audio_time_axis.h"
+#include "automation_line_base.h"
 #include "automation_time_axis.h"
 #include "control_point.h"
 #include "debug.h"
@@ -4815,11 +4816,11 @@ Editor::cut_copy (CutCopyOp op)
 
 
 struct AutomationRecord {
-	AutomationRecord () : state (0) , line(NULL) {}
-	AutomationRecord (XMLNode* s, const AutomationLine* l) : state (s) , line (l) {}
+	AutomationRecord () : state (0) , line (nullptr) {}
+	AutomationRecord (XMLNode* s, const AutomationLineBase* l) : state (s) , line (l) {}
 
 	XMLNode* state; ///< state before any operation
-	const AutomationLine* line; ///< line this came from
+	const AutomationLineBase* line; ///< line this came from
 	std::shared_ptr<Evoral::ControlList> copy; ///< copied events for the cut buffer
 };
 
@@ -4842,7 +4843,9 @@ Editor::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
 	timepos_t earliest (earliest_time);
 
 	/* XXX: not ideal, as there may be more than one track involved in the point selection */
-	_last_cut_copy_source_track = &selection->points.front()->line().trackview;
+	AutomationLine* line = dynamic_cast<AutomationLine*> (&selection->points.front()->line());
+	assert (line);
+	_last_cut_copy_source_track = &line->trackview;
 
 	/* Keep a record of the AutomationLists that we end up using in this operation */
 	typedef std::map<std::shared_ptr<AutomationList>, AutomationRecord> Lists;
@@ -4852,8 +4855,8 @@ Editor::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
 	selection->points.sort(PointsSelectionPositionSorter ());
 
 	/* Go through all selected points, making an AutomationRecord for each distinct AutomationList */
-	for (PointSelection::iterator sel_point = selection->points.begin(); sel_point != selection->points.end(); ++sel_point) {
-		const AutomationLine&                   line = (*sel_point)->line();
+	for (auto & selected_point : selection->points) {
+		const AutomationLineBase& line (selected_point->line());
 		const std::shared_ptr<AutomationList> al   = line.the_list();
 		if (lists.find (al) == lists.end ()) {
 			/* We haven't seen this list yet, so make a record for it.  This includes
@@ -4873,9 +4876,9 @@ Editor::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
 
 		/* Add all selected points to the relevant copy ControlLists */
 
-		for (PointSelection::iterator sel_point = selection->points.begin(); sel_point != selection->points.end(); ++sel_point) {
-			std::shared_ptr<AutomationList>    al = (*sel_point)->line().the_list();
-			AutomationList::const_iterator ctrl_evt = (*sel_point)->model ();
+		for (auto & selected_point : selection->points) {
+			std::shared_ptr<AutomationList>    al = selected_point->line().the_list();
+			AutomationList::const_iterator ctrl_evt = selected_point->model ();
 
 			lists[al].copy->fast_simple_add ((*ctrl_evt)->when, (*ctrl_evt)->value);
 			earliest = std::min (earliest, (*ctrl_evt)->when);
@@ -4905,21 +4908,21 @@ Editor::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
 		}
 
 		/* Remove each selected point from its AutomationList */
-		for (PointSelection::iterator sel_point = selection->points.begin(); sel_point != selection->points.end(); ++sel_point) {
-			AutomationLine& line = (*sel_point)->line ();
+		for (auto & selected_point : selection->points) {
+			AutomationLineBase& line (selected_point->line ());
 			std::shared_ptr<AutomationList> al = line.the_list();
 
 			bool erase = true;
 
 			if (dynamic_cast<RegionFxLine*> (&line)) {
 				/* removing of first and last gain point in region gain lines is prohibited*/
-				if (line.is_last_point (*(*sel_point)) || line.is_first_point (*(*sel_point))) {
+				if (line.is_last_point (*selected_point) || line.is_first_point (*selected_point)) {
 					erase = false;
 				}
 			}
 
 			if(erase) {
-				al->erase ((*sel_point)->model ());
+				al->erase (selected_point->model ());
 			}
 		}
 
