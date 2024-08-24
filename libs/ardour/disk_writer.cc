@@ -60,7 +60,7 @@ DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcesso
 	, _accumulated_capture_offset (0)
 	, _transport_looped (false)
 	, _transport_loop_sample (0)
-	, _gui_feed_fifo (AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
+	, _gui_feed_fifo (min<size_t> (64000, max<size_t> (s.sample_rate() / 10, 2 * AudioEngine::instance()->raw_buffer_size (DataType::MIDI))))
 {
 	DiskIOProcessor::init ();
 	_xruns.reserve (128);
