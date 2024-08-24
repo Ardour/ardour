@@ -167,6 +167,8 @@ public:
 	Vst::ParamID index_to_id (uint32_t) const;
 
 	Glib::Threads::Mutex& process_lock () { return _process_lock; }
+	bool& component_is_synced () { return _restart_component_is_synced; }
+
 
 	enum ParameterChange { BeginGesture,
 	                       EndGesture,

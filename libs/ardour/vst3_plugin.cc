@@ -1025,9 +1025,10 @@ VST3Plugin::load_preset (PresetRecord r)
 		return false;
 	}
 
-	Glib::Threads::Mutex::Lock lx (_plug->process_lock ());
 
 	if (tmp[0] == "VST3-P") {
+		Glib::Threads::Mutex::Lock lx (_plug->process_lock ());
+		PBD::Unwinder<bool> uw (_plug->component_is_synced (), true);
 		int program = PBD::atoi (tmp[2]);
 		assert (!r.user);
 		if (!_plug->set_program (program, 0)) {
@@ -1044,13 +1045,13 @@ VST3Plugin::load_preset (PresetRecord r)
 		std::string const& fn = _preset_uri_map[r.uri];
 
 		if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+			Glib::Threads::Mutex::Lock lx (_plug->process_lock ());
+			PBD::Unwinder<bool> uw (_plug->component_is_synced (), true);
 			RAMStream stream (fn);
 			ok = _plug->load_state (stream);
 			DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3Plugin::load_preset: file %1 status %2\n", fn, ok ? "OK" : "error"));
 		}
 	}
-
-	lx.release ();
 
 	if (ok) {
 		Plugin::load_preset (r);
