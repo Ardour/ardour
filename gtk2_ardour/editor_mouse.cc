@@ -906,19 +906,19 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case StreamItem:
 			/* in the past, we created a new midi region here, but perhaps that is best left to the Draw mode */
 			/* .. now we allow for rubberband selection (region gain) */
-			_drags->set (new EditorRubberbandSelectDrag (*this, get_trackview_group()), event);
+			_drags->set (new EditorRubberbandSelectDrag (*this, item), event);
 			return true;
 			break;
 
 		case AutomationTrackItem:
 			/* rubberband drag to select automation points */
-			_drags->set (new EditorRubberbandSelectDrag (*this, get_trackview_group()), event);
+			_drags->set (new EditorRubberbandSelectDrag (*this, item), event);
 			return true;
 			break;
 
 		case RegionItem:
 			/* rubberband drag to select region gain points */
-			_drags->set (new EditorRubberbandSelectDrag (*this, get_trackview_group()), event);
+			_drags->set (new EditorRubberbandSelectDrag (*this, item), event);
 			return true;
 			break;
 
