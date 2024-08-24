@@ -62,8 +62,8 @@ class MidiCueEditor : public CueEditor
 
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const {}
 
-	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) const { return Temporal::Beats (1, 0); }
-	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) const { return Temporal::Beats (1, 0); }
+	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) const;
+	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) const;
 
 	bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item*);
 

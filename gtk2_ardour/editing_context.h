@@ -255,11 +255,11 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	virtual bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 
-	virtual Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) const = 0;
-	virtual Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) const = 0;
+	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) const;
+	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) const;
 
-	virtual int32_t get_grid_beat_divisions (Editing::GridType gt) const = 0;
-	virtual int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const = 0;
+	int32_t get_grid_beat_divisions (Editing::GridType gt) const;
+	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const;
 
 	Editing::GridType  grid_type () const;
 	bool  grid_type_is_musical (Editing::GridType) const;

@@ -311,12 +311,6 @@ public:
 	Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) const;
 	Temporal::timecnt_t get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count, Temporal::timecnt_t const & duration);
 
-	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) const;
-	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) const;
-
-	int32_t get_grid_beat_divisions (Editing::GridType gt) const;
-	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const;
-
 	void nudge_forward (bool next, bool force_playhead);
 	void nudge_backward (bool next, bool force_playhead);
 

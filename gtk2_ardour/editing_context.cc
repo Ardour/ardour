@@ -2508,3 +2508,141 @@ EditingContext::update_undo_redo_actions (PBD::UndoHistory const & history)
 		redo_action->property_label() = label;
 	}
 }
+
+int32_t
+EditingContext::get_grid_beat_divisions (GridType gt) const
+{
+	switch (gt) {
+	case GridTypeBeatDiv32:  return 32;
+	case GridTypeBeatDiv28:  return 28;
+	case GridTypeBeatDiv24:  return 24;
+	case GridTypeBeatDiv20:  return 20;
+	case GridTypeBeatDiv16:  return 16;
+	case GridTypeBeatDiv14:  return 14;
+	case GridTypeBeatDiv12:  return 12;
+	case GridTypeBeatDiv10:  return 10;
+	case GridTypeBeatDiv8:   return 8;
+	case GridTypeBeatDiv7:   return 7;
+	case GridTypeBeatDiv6:   return 6;
+	case GridTypeBeatDiv5:   return 5;
+	case GridTypeBeatDiv4:   return 4;
+	case GridTypeBeatDiv3:   return 3;
+	case GridTypeBeatDiv2:   return 2;
+	case GridTypeBeat:       return 1;
+	case GridTypeBar:        return -1;
+
+	case GridTypeNone:       return 0;
+	case GridTypeTimecode:   return 0;
+	case GridTypeMinSec:     return 0;
+	case GridTypeCDFrame:    return 0;
+	default:                 return 0;
+	}
+	return 0;
+}
+
+/**
+ * Return the musical grid divisions
+ *
+ * @param event_state the current keyboard modifier mask.
+ * @return Music grid beat divisions
+ */
+int32_t
+EditingContext::get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const
+{
+	return get_grid_beat_divisions (gt);
+}
+
+Temporal::Beats
+EditingContext::get_grid_type_as_beats (bool& success, timepos_t const & position) const
+{
+	success = true;
+
+	int32_t const divisions = get_grid_beat_divisions (_grid_type);
+	/* Beat (+1), and Bar (-1) are handled below */
+	if (divisions > 1) {
+		/* grid divisions are divisions of a 1/4 note */
+		return Temporal::Beats::ticks(Temporal::Beats::PPQN / divisions);
+	}
+
+	TempoMap::SharedPtr tmap (TempoMap::use());
+
+	switch (_grid_type) {
+	case GridTypeBar:
+		if (_session) {
+			const Meter& m = tmap->meter_at (position);
+			return Temporal::Beats::from_double ((4.0 * m.divisions_per_bar()) / m.note_value());
+		}
+		break;
+
+	case GridTypeBeat:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 4.0);
+
+	case GridTypeBeatDiv2:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 8.0);
+
+	case GridTypeBeatDiv4:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 16.0);
+
+	case GridTypeBeatDiv8:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 32.0);
+
+	case GridTypeBeatDiv16:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 64.0);
+
+	case GridTypeBeatDiv32:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 128.0);
+
+	case GridTypeBeatDiv3:  //Triplet eighth
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 12.0);
+
+
+	case GridTypeBeatDiv6:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 24.0);
+
+	case GridTypeBeatDiv12:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 48.0);
+
+	case GridTypeBeatDiv24:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 96.0);
+
+	case GridTypeBeatDiv5:  //Quintuplet //eighth
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 20.0);
+
+	case GridTypeBeatDiv10:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 40.0);
+
+	case GridTypeBeatDiv20:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 80.0);
+
+	case GridTypeBeatDiv7:  //Septuplet eighth
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 28.0);
+
+	case GridTypeBeatDiv14:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 56.0);
+
+	case GridTypeBeatDiv28:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 112.0);
+
+	default:
+		success = false;
+		break;
+	}
+
+	return Temporal::Beats();
+}
+
+Temporal::Beats
+EditingContext::get_draw_length_as_beats (bool& success, timepos_t const & position) const
+{
+	success = true;
+	GridType grid_to_use = draw_length() == DRAW_LEN_AUTO ? grid_type() : draw_length();
+	int32_t const divisions = get_grid_beat_divisions (grid_to_use);
+
+	if (divisions != 0) {
+		return Temporal::Beats::ticks (Temporal::Beats::PPQN / divisions);
+	}
+
+	success = false;
+	return Temporal::Beats();
+}
+
