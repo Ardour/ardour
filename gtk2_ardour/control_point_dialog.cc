@@ -21,7 +21,7 @@
 
 #include "gtkmm2ext/gtk_ui.h"
 
-#include "automation_line.h"
+#include "automation_line_base.h"
 #include "control_point.h"
 #include "control_point_dialog.h"
 
