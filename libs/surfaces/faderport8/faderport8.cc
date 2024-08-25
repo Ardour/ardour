@@ -117,7 +117,7 @@ FaderPort8::probe (std::string& i, std::string& o)
 #elif defined FADERPORT2
 	    "PreSonus FP2"
 #else
-	    "PreSonus FP8"
+	    "PreSonus FP8 Port 1"
 #endif
 	    ;
 
