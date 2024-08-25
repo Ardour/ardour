@@ -23,8 +23,6 @@
 
 #include <stddef.h>
 
-#include <boost/noncopyable.hpp>
-
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/data_type.h"
@@ -41,9 +39,11 @@ namespace ARDOUR {
  *
  * To actually read/write buffer contents, use the appropriate derived class.
  */
-class LIBARDOUR_API Buffer : public boost::noncopyable
+class LIBARDOUR_API Buffer
 {
 public:
+	Buffer (const Buffer&) = delete;
+	Buffer& operator= (const Buffer&) = delete;
 	virtual ~Buffer() {}
 
 	/** Factory function */

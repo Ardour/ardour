@@ -31,8 +31,10 @@
 
 namespace ARDOUR {
 
-struct MidiCursor : public boost::noncopyable {
+struct MidiCursor {
 	MidiCursor()  {}
+	MidiCursor(const MidiCursor&) = delete;
+	MidiCursor& operator=(const MidiCursor&) = delete;
 
 	void connect(PBD::Signal<void(bool)>& invalidated) {
 		connections.drop_connections();

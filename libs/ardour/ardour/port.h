@@ -28,7 +28,6 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <boost/noncopyable.hpp>
 #include "pbd/signals.h"
 
 #include "ardour/data_type.h"
@@ -41,9 +40,11 @@ namespace ARDOUR {
 class AudioEngine;
 class Buffer;
 
-class LIBARDOUR_API Port : public boost::noncopyable
+class LIBARDOUR_API Port
 {
 public:
+	Port (const Port&) = delete;
+	Port& operator= (const Port&) = delete;
 	virtual ~Port ();
 
 	static void set_connecting_blocked( bool yn ) {

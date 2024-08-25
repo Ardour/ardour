@@ -157,9 +157,11 @@ uint32_t      LV2Plugin::_ui_contrasting_color = 0x33ff33ff; // RGBA
 unsigned long LV2Plugin::_ui_transient_win_id  = 0;
 
 
-class LV2World : boost::noncopyable {
+class LV2World {
 public:
 	LV2World ();
+	LV2World (const LV2World&) = delete;
+	LV2World& operator= (const LV2World&) = delete;
 	~LV2World ();
 
 	void load_bundled_plugins(bool verbose=false);

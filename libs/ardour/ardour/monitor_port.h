@@ -31,9 +31,11 @@
 
 namespace ARDOUR {
 
-class LIBARDOUR_API MonitorPort : public boost::noncopyable
+class LIBARDOUR_API MonitorPort
 {
 public:
+	MonitorPort (const MonitorPort&) = delete;
+	MonitorPort& operator= (const MonitorPort&) = delete;
 	~MonitorPort ();
 
 	void set_buffer_size (pframes_t);
