@@ -146,6 +146,7 @@ class MidiCueEditor : public CueEditor
 	ArdourCanvas::Container* global_rect_group;
 	ArdourCanvas::Container* no_scroll_group;
 	ArdourCanvas::Container* data_group;
+	ArdourCanvas::Rectangle* automation_group;
 	ArdourCanvas::Container* time_line_group;
 	ArdourCanvas::Ruler*     bbt_ruler;
 	ArdourCanvas::Rectangle* tempo_bar;
