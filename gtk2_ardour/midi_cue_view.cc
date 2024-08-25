@@ -68,6 +68,7 @@ void
 MidiCueView::set_height (double h)
 {
 	event_rect->set (ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, h));
+	view_changed ();
 }
 
 ArdourCanvas::Item*
