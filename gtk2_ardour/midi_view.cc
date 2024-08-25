@@ -1213,7 +1213,7 @@ MidiView::view_changed()
 	Note* sus = NULL;
 	Hit*  hit = NULL;
 
-	for (Events::iterator i = _events.begin(); i != _events.end(); ) {
+	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 
 		NoteBase* cne = i->second;
 		bool visible;
@@ -1236,8 +1236,6 @@ MidiView::view_changed()
 
 			cne->item()->hide ();
 		}
-
-		++i;
 	}
 
 	ghosts_view_changed ();
