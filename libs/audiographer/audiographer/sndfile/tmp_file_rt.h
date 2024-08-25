@@ -63,15 +63,22 @@ class TmpFileRt
 		SndfileWriter<T>::check_flags (*this, c);
 
 		if (SndfileWriter<T>::throw_level (ThrowStrict) && c.channels() != SndfileHandle::channels()) {
-			throw Exception (*this, boost::str (boost::format
-				("Wrong number of channels given to process(), %1% instead of %2%")
-				% c.channels() % SndfileHandle::channels()));
+			std::stringstream reason;
+			reason << "Wrong number of channels given to process(), "
+			       << c.channels()
+			       << " instead of "
+			       << SndfileHandle::channels();
+
+			throw Exception (*this, reason.str());
 		}
 
 		if (SndfileWriter<T>::throw_level (ThrowProcess) && _rb.write_space() < (size_t) c.samples()) {
-			throw Exception (*this, boost::str (boost::format
-				("Could not write data to ringbuffer/output file (%1%)")
-				% SndfileHandle::strError()));
+			std::stringstream reason;
+			reason << "Could not write data to ringbuffer/output file ("
+			<< SndfileHandle::strError()
+			<< ")";
+
+			throw Exception (*this, reason.str());
 		}
 
 		_rb.write (c.data(), c.samples());

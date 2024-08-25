@@ -1,8 +1,6 @@
 #ifndef AUDIOGRAPHER_PROCESS_CONTEXT_H
 #define AUDIOGRAPHER_PROCESS_CONTEXT_H
 
-#include <boost/format.hpp>
-
 #include "audiographer/visibility.h"
 #include "exception.h"
 #include "debug_utils.h"
@@ -71,9 +69,15 @@ public:
 	ProcessContext beginning (samplecnt_t samples)
 	{
 		if (throw_level (ThrowProcess) && samples > _samples) {
-			throw Exception (*this, boost::str (boost::format
-				("Trying to use too many samples of %1% for a new Context: %2% instead of %3%")
-				% DebugUtils::demangled_name (*this) % samples % _samples));
+			std::stringstream reason;
+			reason << "Trying to use too many samples of "
+			       << DebugUtils::demangled_name (*this)
+			       << " for a new Context: "
+			       << samples
+			       << " instead of "
+			       << _samples;
+
+			throw Exception (*this, reason.str());
 		}
 		validate_data ();
 
@@ -115,9 +119,16 @@ protected:
 	inline void validate_data()
 	{
 		if (throw_level (ThrowProcess) && (_samples % _channels != 0)) {
-			throw Exception (*this, boost::str (boost::format
-				("Number of samples given to %1% was not a multiple of channels: %2% samples with %3% channels")
-				% DebugUtils::demangled_name (*this) % _samples % _channels));
+			std::stringstream reason;
+			reason << "Number of samples given to "
+			       << DebugUtils::demangled_name (*this)
+			       << " was not a multiple of channels: "
+			       << _samples
+			       << " samples with "
+			       << _channels
+			       << " channels";
+
+			throw Exception (*this, reason.str());
 		}
 	}
 };

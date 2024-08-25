@@ -24,12 +24,9 @@
 #include "audiographer/type_utils.h"
 
 #include <cmath>
-#include <boost/format.hpp>
 
 namespace AudioGrapher
 {
-using boost::format;
-using boost::str;
 
 SampleRateConverter::SampleRateConverter (uint32_t channels)
   : active (false)
@@ -59,9 +56,11 @@ SampleRateConverter::init (samplecnt_t in_rate, samplecnt_t out_rate, int qualit
 	int err;
 	src_state = src_new (quality, channels, &err);
 	if (throw_level (ThrowObject) && !src_state) {
-		throw Exception (*this, str (format
-			("Cannot initialize sample rate converter: %1%")
-			% src_strerror (err)));
+		std::stringstream reason;
+		reason << "Cannot initialize sample rate converter: "
+		       << src_strerror (err);
+
+		throw Exception (*this, reason.str());
 	}
 
 	src_data.src_ratio = (double) out_rate / (double) in_rate;
@@ -113,9 +112,13 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 	float * in = const_cast<float *> (c.data()); // TODO check if this is safe!
 
 	if (throw_level (ThrowProcess) && samples > max_samples_in) {
-		throw Exception (*this, str (format (
-			"process() called with too many samples, %1% instead of %2%")
-			% samples % max_samples_in));
+		std::stringstream reason;
+		reason << "process() called with too many samples, "
+		       << samples
+		       << " instead of "
+		       << max_samples_in;
+
+		throw Exception (*this, reason.str());
 	}
 
 	int err;
@@ -163,9 +166,11 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 
 		err = src_process (src_state, &src_data);
 		if (throw_level (ThrowProcess) && err) {
-			throw Exception (*this, str (format
-			("An error occurred during sample rate conversion: %1%")
-			% src_strerror (err)));
+			std::stringstream reason;
+			reason << "An error occurred during sample rate conversion: "
+			       << src_strerror (err);
+
+			throw Exception (*this, reason.str());
 		}
 
 		leftover_samples = src_data.input_frames - src_data.input_frames_used;
@@ -191,9 +196,12 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 		}
 
 		if (throw_level (ThrowProcess) && src_data.output_frames_gen == 0 && leftover_samples) {
-			throw Exception (*this, boost::str (boost::format
-				("No output samples generated with %1% leftover samples")
-				% leftover_samples));
+			std::stringstream reason;
+			reason << "No output samples generated with "
+			       << leftover_samples
+			       << " leftover samples";
+
+			throw Exception (*this, reason.str());
 		}
 
 	} while (leftover_samples > samples);

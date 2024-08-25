@@ -25,8 +25,6 @@
 #include "audiographer/type_utils.h"
 #include "private/gdither/gdither.h"
 
-#include <boost/format.hpp>
-
 namespace AudioGrapher
 {
 
@@ -72,9 +70,12 @@ void
 SampleFormatConverter<int16_t>::init (samplecnt_t max_samples, int type, int data_width)
 {
 	if (throw_level (ThrowObject) && data_width > 16) {
-		throw Exception (*this, boost::str(boost::format
-		    ("Data width (%1%) too large for int16_t")
-		    % data_width));
+		std::stringstream reason;
+		reason << "Data width ("
+		       << data_width
+		       << ") too large for int16_t";
+
+		throw Exception (*this, reason.str());
 	}
 	init_common (max_samples);
 	dither = gdither_new ((GDitherType) type, channels, GDither16bit, data_width);
@@ -85,9 +86,12 @@ void
 SampleFormatConverter<uint8_t>::init (samplecnt_t max_samples, int type, int data_width)
 {
 	if (throw_level (ThrowObject) && data_width > 8) {
-		throw Exception (*this, boost::str(boost::format
-		    ("Data width (%1%) too large for uint8_t")
-		    % data_width));
+		std::stringstream reason;
+		reason << "Data width ("
+		       << data_width
+		       << ") too large for uint8_t";
+
+		throw Exception (*this, reason.str());
 	}
 	init_common (max_samples);
 	dither = gdither_new ((GDitherType) type, channels, GDither8bit, data_width);
@@ -197,15 +201,23 @@ void
 SampleFormatConverter<TOut>::check_sample_and_channel_count (samplecnt_t samples, ChannelCount channels_)
 {
 	if (throw_level (ThrowStrict) && channels_ != channels) {
-		throw Exception (*this, boost::str (boost::format
-			("Wrong channel count given to process(), %1% instead of %2%")
-			% channels_ % channels));
+		std::stringstream reason;
+		reason << "Wrong channel count given to process(), "
+		       << channels_
+		       << " instead of "
+		       << channels;
+
+		throw Exception (*this, reason.str());
 	}
 
 	if (throw_level (ThrowProcess) && samples  > data_out_size) {
-		throw Exception (*this, boost::str (boost::format
-			("Too many samples given to process(), %1% instead of %2%")
-			% samples % data_out_size));
+		std::stringstream reason;
+		reason << "Too many samples given to process(), "
+		       << samples
+		       << " instead of "
+		       << data_out_size;
+
+		throw Exception (*this, reason.str());
 	}
 }
 

@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cassert>
+
 #include "audiographer/general/demo_noise.h"
 #include "ardour/dB.h"
 
@@ -67,10 +69,22 @@ DemoNoiseAdder::process (ProcessContext<float> const& ctx)
 	const samplecnt_t n_samples = ctx.samples_per_channel ();
 
 	if (throw_level (ThrowStrict) && ctx.channels () != _channels) {
-		throw Exception (*this, boost::str (boost::format ("Wrong channel count given to process(), %1% instead of %2%") % ctx.channels () % _channels));
+		std::stringstream reason;
+		reason << "Wrong channel count given to process(), "
+		       << ctx.channels ()
+		       << " instead of "
+		       << _channels;
+
+		throw Exception (*this, reason.str());
 	}
 	if (throw_level (ThrowProcess) && ctx.samples () > _data_out_size) {
-		throw Exception (*this, boost::str (boost::format ("Too many samples given to process(), %1% instead of %2%") % ctx.samples () % _data_out_size));
+		std::stringstream reason;
+		reason << "Too many samples given to process(), "
+		       << ctx.samples ()
+		       << " instead of "
+		       << _data_out_size;
+
+		throw Exception (*this, reason.str());
 	}
 
 	if (_pos + n_samples > _duration) {
