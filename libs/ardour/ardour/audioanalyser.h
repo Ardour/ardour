@@ -23,7 +23,7 @@
 
 #include <vector>
 #include <string>
-#include <boost/utility.hpp>
+#include <boost/noncopyable.hpp>
 #include <vamp-hostsdk/Plugin.h>
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"

@@ -29,7 +29,7 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <boost/utility.hpp>
+#include <boost/noncopyable.hpp>
 #include "pbd/signals.h"
 
 #include "ardour/data_type.h"
