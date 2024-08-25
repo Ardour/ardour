@@ -20,7 +20,7 @@
 #define EVORAL_CURVE_HPP
 
 #include <inttypes.h>
-#include <boost/utility.hpp>
+#include <boost/noncopyable.hpp>
 
 #include "temporal/timeline.h"
 

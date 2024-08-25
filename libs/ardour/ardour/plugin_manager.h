@@ -32,7 +32,6 @@
 #include <map>
 #include <string>
 #include <set>
-#include <boost/utility.hpp>
 #include <boost/container/set.hpp>
 
 #include "ardour/libardour_visibility.h"

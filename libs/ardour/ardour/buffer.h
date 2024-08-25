@@ -24,7 +24,7 @@
 
 #include <stddef.h>
 
-#include <boost/utility.hpp>
+#include <boost/noncopyable.hpp>
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"

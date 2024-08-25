@@ -29,7 +29,6 @@
 #include <queue>
 #include <utility>
 
-#include <boost/utility.hpp>
 #include <glibmm/threads.h>
 
 #include "pbd/command.h"
