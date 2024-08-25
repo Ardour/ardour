@@ -13,8 +13,6 @@
 
 #include "MonoNoteHMM.h"
 
-#include <boost/math/distributions.hpp>
-
 #include <cstdio>
 #include <cmath>
 

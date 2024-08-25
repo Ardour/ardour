@@ -13,8 +13,6 @@
 
 #include "MonoPitchHMM.h"
 
-#include <boost/math/distributions.hpp>
-
 #include <cstdio>
 #include <cmath>
 

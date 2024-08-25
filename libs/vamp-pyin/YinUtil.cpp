@@ -19,8 +19,6 @@
 #include <cmath>
 #include <algorithm>
 
-#include <boost/math/distributions.hpp>
-
 void
 YinUtil::slowDifference(const double *in, double *yinBuffer, const size_t yinBufferSize)
 {

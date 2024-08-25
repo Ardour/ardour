@@ -27,8 +27,6 @@
 #include <complex>
 #include <map>
 
-#include <boost/math/distributions.hpp>
-
 using std::string;
 using std::vector;
 using std::map;
