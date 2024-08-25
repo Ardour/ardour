@@ -80,7 +80,7 @@ private:
 
 	std::shared_ptr<ARDOUR::PlugInsertBase> _pib;
 	std::shared_ptr<ARDOUR::LV2Plugin>      _lv2;
-	std::vector<int>                          _output_ports;
+	std::vector<uint32_t>                     _output_ports;
 	sigc::connection                          _screen_update_connection;
 	sigc::connection                          _message_update_connection;
 	Gtk::Widget*                              _gui_widget;
