@@ -56,6 +56,7 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	event_rect->Event.connect (sigc::mem_fun (*this, &MidiCueView::canvas_event));
 	event_rect->set_fill (false);
 	event_rect->set_outline (false);
+	CANVAS_DEBUG_NAME (event_rect, "cue event rect");
 
 	_note_group->raise_to_top ();
 
