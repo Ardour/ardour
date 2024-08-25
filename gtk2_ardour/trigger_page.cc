@@ -154,8 +154,8 @@ TriggerPage::TriggerPage ()
 	_parameter_box.pack_start (*table);
 
 	/* Top-level Layout */
-	_content.pack_start (_pane_upper, true, true);
-	_content.pack_start (_parameter_box, false, false);
+	_content.add (_pane_upper);
+	_content.add (_parameter_box);
 	_content.show ();
 
 	/* Show all */

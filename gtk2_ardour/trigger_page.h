@@ -104,7 +104,7 @@ private:
 	void fast_update_strips ();
 
 	Gtkmm2ext::Bindings* bindings;
-	Gtk::VBox            _content;
+	ArdourWidgets::VPane _content;
 
 	ArdourWidgets::HPane _pane_upper;
 	Gtk::HBox            _strip_group_box;
