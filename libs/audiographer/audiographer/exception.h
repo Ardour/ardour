@@ -2,9 +2,8 @@
 #define AUDIOGRAPHER_EXCEPTION_H
 
 #include <exception>
+#include <sstream>
 #include <string>
-
-#include <boost/format.hpp>
 
 #include "audiographer/visibility.h"
 #include "audiographer/debug_utils.h"
@@ -20,20 +19,25 @@ class LIBAUDIOGRAPHER_API Exception : public std::exception
   public:
 	template<typename T>
 	Exception (T const & thrower, std::string const & reason)
-	  : reason (boost::str (boost::format
-			("Exception thrown by %1%: %2%")
-			% DebugUtils::demangled_name (thrower) % reason))
+		: explanation(
+			  (std::stringstream()
+				  << "Exception thrown by "
+				  << DebugUtils::demangled_name (thrower)
+				  << ": "
+				  << reason
+			  ).str()
+		  )
 	{}
 
 	virtual ~Exception () throw() { }
 
 	const char* what() const throw()
 	{
-		return reason.c_str();
+		return explanation.c_str();
 	}
 
   private:
-	std::string const reason;
+	std::string const explanation;
 
 };
 

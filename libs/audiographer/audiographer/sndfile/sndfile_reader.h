@@ -32,9 +32,13 @@ class SndfileReader
 	samplecnt_t read (ProcessContext<T> & context)
 	{
 		if (throw_level (ThrowStrict) && context.channels() != channels() ) {
-			throw Exception (*this, boost::str (boost::format
-				("Wrong number of channels given to process(), %1% instead of %2%")
-				% context.channels() % channels()));
+			std::stringstream reason;
+			reason << "Wrong number of channels given to process(), "
+			       << context.channels()
+			       << " instead of "
+			       << channels();
+
+			throw Exception (*this, reason.str());
 		}
 
 		samplecnt_t const samples_read = SndfileHandle::read (context.data(), context.samples());
