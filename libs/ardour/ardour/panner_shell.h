@@ -27,8 +27,6 @@
 #include <string>
 #include <iostream>
 
-#include <boost/noncopyable.hpp>
-
 #include "pbd/cartesian.h"
 
 #include "ardour/libardour_visibility.h"

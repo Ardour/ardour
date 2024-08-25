@@ -64,13 +64,15 @@ struct AUv2DescStr;
 #endif
 
 
-class LIBARDOUR_API PluginManager : public boost::noncopyable {
+class LIBARDOUR_API PluginManager {
 public:
 	static PluginManager& instance();
 	static std::string auv2_scanner_bin_path;
 	static std::string vst2_scanner_bin_path;
 	static std::string vst3_scanner_bin_path;
 
+	PluginManager (const PluginManager&) = delete;
+	PluginManager& operator= (const PluginManager&) = delete;
 	~PluginManager ();
 
 	const ARDOUR::PluginInfoList& windows_vst_plugin_info ();

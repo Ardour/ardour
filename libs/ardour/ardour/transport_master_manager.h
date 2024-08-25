@@ -21,8 +21,6 @@
 
 #include <string>
 
-#include <boost/noncopyable.hpp>
-
 #include "ardour/transport_master.h"
 #include "ardour/types.h"
 
@@ -30,10 +28,12 @@ namespace ARDOUR {
 
 class UI_TransportMaster;
 
-class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
+class LIBARDOUR_API TransportMasterManager
 {
   public:
 	static TransportMasterManager& create ();
+	TransportMasterManager (const TransportMasterManager&) = delete;
+	TransportMasterManager& operator= (const TransportMasterManager&) = delete;
 	~TransportMasterManager ();
 
 	int set_default_configuration ();

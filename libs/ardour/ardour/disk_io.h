@@ -30,6 +30,7 @@
 #include "ardour/midi_buffer.h"
 #include "ardour/processor.h"
 #include "ardour/rt_midibuffer.h"
+#include "types.h"
 
 namespace PBD {
 	template<class T> class PlaybackBuffer;
@@ -143,9 +144,11 @@ protected:
 	/** Information about one audio channel, playback or capture
 	 * (depending on the derived class)
 	 */
-	struct ChannelInfo : public boost::noncopyable {
+	struct ChannelInfo {
 
 		ChannelInfo (samplecnt_t buffer_size);
+		ChannelInfo (const ChannelInfo&) = delete;
+		ChannelInfo& operator= (const ChannelInfo&) = delete;
 		virtual ~ChannelInfo ();
 
 		/** A semi-random-access ringbuffers for data to be played back.

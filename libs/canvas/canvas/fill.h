@@ -24,8 +24,6 @@
 #include <vector>
 #include <stdint.h>
 
-#include <boost/noncopyable.hpp>
-
 #include "canvas/visibility.h"
 #include "canvas/types.h"
 
@@ -33,10 +31,12 @@ namespace ArdourCanvas {
 
 class Item;
 
-class LIBCANVAS_API Fill : public boost::noncopyable
+class LIBCANVAS_API Fill
 {
 public:
 	Fill (Item& self);
+	Fill (const Fill&) = delete;
+	Fill& operator= (const Fill&) = delete;
 	virtual ~Fill() {}
 
 	virtual void set_fill_color (Gtkmm2ext::Color);
