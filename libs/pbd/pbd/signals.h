@@ -35,7 +35,6 @@
 
 #include <glibmm/threads.h>
 
-#include <boost/noncopyable.hpp>
 #include <boost/bind.hpp>
 #include <boost/bind/protect.hpp>
 #include <boost/function.hpp>
@@ -193,19 +192,18 @@ private:
 	UnscopedConnection _c;
 };
 
-class LIBPBD_API ScopedConnectionList  : public boost::noncopyable
+class LIBPBD_API ScopedConnectionList
 {
   public:
-	ScopedConnectionList();
+	ScopedConnectionList ();
+	ScopedConnectionList (const ScopedConnectionList&) = delete;
+	ScopedConnectionList& operator= (const ScopedConnectionList&) = delete;
 	virtual ~ScopedConnectionList ();
 
 	void add_connection (const UnscopedConnection& c);
 	void drop_connections ();
 
   private:
-	/* this class is not copyable */
-	ScopedConnectionList(const ScopedConnectionList&);
-
 	/* Even though our signals code is thread-safe, this additional list of
 	   scoped connections needs to be protected in 2 cases:
 
