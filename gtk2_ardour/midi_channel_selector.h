@@ -24,7 +24,6 @@
 #define __ardour_ui_midi_channel_selector_h__
 
 #include <set>
-#include "boost/shared_ptr.hpp"
 #include "sigc++/trackable.h"
 
 #include "gtkmm/table.h"
