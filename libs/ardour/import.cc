@@ -40,7 +40,6 @@
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_array.hpp>
 
 #include "pbd/basename.h"
@@ -540,8 +539,7 @@ Session::deinterlace_midi_region (std::shared_ptr<MidiRegion> mr)
 		smf->session_saved(); //TODO:  should we just expose flush_midi() instead?
 
 		/* open the SMF file for reading */
-		boost::scoped_ptr<Evoral::SMF> smf_reader;
-		smf_reader.reset (new Evoral::SMF());
+		const std::unique_ptr<Evoral::SMF> smf_reader (new Evoral::SMF());
 		if (smf_reader->open (source_path)) {
 			throw Evoral::SMF::FileError (source_path);
 		}
@@ -642,7 +640,7 @@ Session::import_files (ImportStatus& status)
 		std::shared_ptr<ImportableSource> source;
 
 		const DataType type = SMFSource::safe_midi_file_extension (*p) ? DataType::MIDI : DataType::AUDIO;
-		boost::scoped_ptr<Evoral::SMF> smf_reader;
+		std::unique_ptr<Evoral::SMF> smf_reader;
 
 		if (type == DataType::AUDIO) {
 			try {
