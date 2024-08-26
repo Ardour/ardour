@@ -19,7 +19,6 @@
 #ifndef PBD_STACK_ALLOCATOR_H
 #define PBD_STACK_ALLOCATOR_H
 
-#include <boost/type_traits/aligned_storage.hpp>
 #include <limits>
 
 #include "pbd/libpbd_visibility.h"
@@ -61,22 +60,22 @@ public:
 	};
 
 	StackAllocator ()
-		: _ptr ((pointer)&_buf)
+		: _ptr (_buf.data())
 	{ }
 
 	StackAllocator (const StackAllocator&)
-		: _ptr ((pointer)&_buf)
+		: StackAllocator ()
 	{ }
 
 	template <typename U, size_t other_capacity>
 	StackAllocator (const StackAllocator<U, other_capacity>&)
-		: _ptr ((pointer)&_buf)
+		: StackAllocator ()
 	{ }
 
 	/* inspired by http://howardhinnant.github.io/stack_alloc.h */
 	pointer allocate (size_type n, void* hint = 0)
 	{
-		if ((pointer)&_buf + stack_capacity >= _ptr + n) {
+		if (_buf.data() + stack_capacity >= _ptr + n) {
 			DEBUG_STACK_ALLOC ("Allocate %ld item(s) of size %zu on the stack\n", n, sizeof (T));
 			pointer rv = _ptr;
 			_ptr += n;
@@ -108,12 +107,12 @@ public:
 
 	bool operator== (StackAllocator const& a) const
 	{
-		return &_buf == &a._buf;
+		return _buf.data() == a._buf.data();
 	}
 
 	bool operator!= (StackAllocator const& a) const
 	{
-		return &_buf != &a._buf;
+		return _buf.data() != a._buf.data();
 	}
 
 	template <class U>
@@ -147,12 +146,10 @@ private:
 
 	bool pointer_in_buffer (pointer const p)
 	{
-		return ((pointer const)&_buf <= p && p < (pointer const)&_buf + stack_capacity);
+		return (_buf.data() <= p && p < _buf.data() + stack_capacity);
 	}
 
-	typedef typename boost::aligned_storage<sizeof (T) * stack_capacity, 16>::type align_t;
-
-	align_t _buf;
+	alignas(16) std::array<value_type, stack_capacity> _buf;
 	pointer _ptr;
 };
 
