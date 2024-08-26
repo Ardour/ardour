@@ -179,7 +179,7 @@ class LIBARDOUR_API ExportGraphBuilder
 
 		FileSpec           config;
 		int                data_width;
-		boost::ptr_list<Encoder> children;
+		std::list<Encoder> children;
 
 		NormalizerPtr   normalizer;
 		LimiterPtr      limiter;
@@ -228,7 +228,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		ThreaderPtr     threader;
 
 		LoudnessReaderPtr    loudness_reader;
-		boost::ptr_list<SFC> children;
+		std::list<SFC> children;
 
 		PBD::ScopedConnectionList post_processing_connection;
 	};
