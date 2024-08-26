@@ -26,12 +26,13 @@
 #define __ardour_gtk_ghost_region_h__
 
 #include <vector>
-#include <boost/unordered_map.hpp>
 
 #include "evoral/Note.h"
 #include "pbd/signals.h"
 
 #include "gtkmm2ext/colors.h"
+
+#include "ghost_event.h"
 
 namespace ArdourWaveView {
 	class WaveView;
@@ -99,19 +100,6 @@ public:
 
 class MidiGhostRegion : public GhostRegion {
 public:
-	class GhostEvent : public sigc::trackable
-	{
-	public:
-		GhostEvent (::NoteBase *, ArdourCanvas::Container *);
-		GhostEvent (::NoteBase *, ArdourCanvas::Container *, ArdourCanvas::Item* i);
-		virtual ~GhostEvent ();
-
-		NoteBase* event;
-		ArdourCanvas::Item* item;
-		bool is_hit;
-		int velocity_while_editing;
-	};
-
 	MidiGhostRegion(MidiRegionView& rv,
 	                TimeAxisView& tv,
 	                TimeAxisView& source_tv,
@@ -143,13 +131,10 @@ public:
 	ArdourCanvas::Polygon* _tmp_poly;
 
 	MidiRegionView& parent_mrv;
-	/* must match typedef in NoteBase */
-	typedef Evoral::Note<Temporal::Beats> NoteType;
-	MidiGhostRegion::GhostEvent* find_event (std::shared_ptr<NoteType>);
+	GhostEvent* find_event (std::shared_ptr<GhostEvent::NoteType>);
 
-	typedef boost::unordered_map<std::shared_ptr<NoteType>, MidiGhostRegion::GhostEvent* > EventList;
-	EventList events;
-	EventList::iterator _optimization_iterator;
+	GhostEvent::EventList events;
+	GhostEvent::EventList::iterator _optimization_iterator;
 };
 
 #endif /* __ardour_gtk_ghost_region_h__ */

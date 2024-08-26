@@ -529,7 +529,7 @@ class MidiView : public virtual sigc::trackable
 	std::shared_ptr<PatchChange> find_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr p);
 	std::shared_ptr<SysEx> find_canvas_sys_ex (ARDOUR::MidiModel::SysExPtr s);
 
-	friend class VelocityGhostRegion;
+	friend class VelocityDisplay;
 	void sync_velocity_drag (double factor);
 
 	void update_note (NoteBase*, bool update_ghost_regions = true);
