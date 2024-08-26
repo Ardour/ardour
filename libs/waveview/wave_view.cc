@@ -20,8 +20,6 @@
 
 #include <cmath>
 
-#include <boost/scoped_array.hpp>
-
 #include <cairomm/cairomm.h>
 
 #include <glibmm/threads.h>
@@ -471,7 +469,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 	clip_context->set_antialias (Cairo::ANTIALIAS_NONE);
 	zero_context->set_antialias (Cairo::ANTIALIAS_NONE);
 
-	boost::scoped_array<LineTips> tips (new LineTips[n_peaks]);
+	std::unique_ptr<LineTips[]> tips (new LineTips[n_peaks]);
 
 	/* Clip level nominally set to -0.9dBFS to account for inter-sample
 	   interpolation possibly clipping (value may be too low).
@@ -894,7 +892,7 @@ WaveView::process_draw_request (std::shared_ptr<WaveViewDrawRequest> req)
 
 	assert (n_peaks > 0 && n_peaks < 32767);
 
-	boost::scoped_array<ARDOUR::PeakData> peaks (new PeakData[n_peaks]);
+	std::unique_ptr<ARDOUR::PeakData[]> peaks (new PeakData[n_peaks]);
 
 	/* Note that Region::read_peaks() takes a start position based on an
 	   offset into the Region's **SOURCE**, rather than an offset into

@@ -359,7 +359,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		samplecnt_t peak = 0;
 
 #if 1 // direct read
-		boost::scoped_array<Sample> buf(new Sample[scm]);
+		std::unique_ptr<Sample[]> buf(new Sample[scm]);
 		while (peak < npeaks && cnt > 0) {
 			samplecnt_t samples_read = read_unlocked (buf.get(), start, scm);
 			if (samples_read == 0) {
@@ -482,7 +482,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		   both max and min peak values.
 		*/
 
-		boost::scoped_array<Sample> raw_staging(new Sample[cnt]);
+		std::unique_ptr<Sample[]> raw_staging(new Sample[cnt]);
 
 		if (read_unlocked (raw_staging.get(), start, cnt) != cnt) {
 			error << _("cannot read sample data for unscaled peak computation") << endmsg;
@@ -604,7 +604,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 
 		if (_first_run || (_last_scale != samples_per_visual_peak) || (_last_map_off != map_off) || (_last_raw_map_length < raw_map_length)) {
 			peak_cache.reset (new PeakData[npeaks]);
-			boost::scoped_array<PeakData> staging (new PeakData[chunksize]);
+			std::unique_ptr<PeakData[]> staging (new PeakData[chunksize]);
 
 			char* addr;
 #ifdef PLATFORM_WINDOWS
@@ -697,7 +697,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		samplecnt_t i = 0;
 		samplecnt_t nvisual_peaks = 0;
 		samplecnt_t chunksize = (samplecnt_t) min (cnt, (samplecnt_t) 4096);
-		boost::scoped_array<Sample> raw_staging(new Sample[chunksize]);
+		std::unique_ptr<Sample[]> raw_staging(new Sample[chunksize]);
 
 		double pixel_pos         = start / samples_per_visual_peak;
 		double next_pixel_pos    = 1.0 + floor (pixel_pos);
@@ -769,7 +769,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 int
 AudioSource::build_peaks_from_scratch ()
 {
-	const samplecnt_t bufsize = 65536; // 256kB per disk read for mono data is about ideal
+	constexpr samplecnt_t bufsize = 65536; // 256kB per disk read for mono data is about ideal
 
 	DEBUG_TRACE (DEBUG::Peaks, "Building peaks from scratch\n");
 
@@ -788,14 +788,14 @@ AudioSource::build_peaks_from_scratch ()
 		samplecnt_t cnt = _length.samples();
 
 		_peaks_built = false;
-		boost::scoped_array<Sample> buf(new Sample[bufsize]);
+		std::array<Sample, bufsize> buf;
 
 		while (cnt) {
 
 			samplecnt_t samples_to_read = min (bufsize, cnt);
 			samplecnt_t samples_read;
 
-			if ((samples_read = read_unlocked (buf.get(), current_sample, samples_to_read)) != samples_to_read) {
+			if ((samples_read = read_unlocked (buf.data(), current_sample, samples_to_read)) != samples_to_read) {
 				error << string_compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;
 				done_with_peakfile_writes (false);
 				goto out;
@@ -810,7 +810,7 @@ AudioSource::build_peaks_from_scratch ()
 				goto out;
 			}
 
-			if (compute_and_write_peaks (buf.get(), current_sample, samples_read, true, false, _FPP)) {
+			if (compute_and_write_peaks (buf.data(), current_sample, samples_read, true, false, _FPP)) {
 				break;
 			}
 
@@ -916,7 +916,6 @@ AudioSource::compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, sam
 	samplecnt_t samples_done;
 	const size_t blocksize = (128 * 1024);
 	off_t first_peak_byte;
-	boost::scoped_array<Sample> buf2;
 
 	if (-1 == _peakfile_fd) {
 		if (prepare_for_peakfile_writes ()) {
@@ -976,7 +975,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, sam
 		/* make a new contiguous buffer containing leftovers and the new stuff */
 
 		to_do = cnt + peak_leftover_cnt;
-		buf2.reset(new Sample[to_do]);
+		std::unique_ptr<Sample[]> buf2(new Sample[to_do]);
 
 		/* the remnants */
 		memcpy (buf2.get(), peak_leftovers, peak_leftover_cnt * sizeof (Sample));
@@ -1000,7 +999,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, sam
 		to_do = cnt;
 	}
 
-	boost::scoped_array<PeakData> peakbuf(new PeakData[(to_do/fpp)+1]);
+	std::unique_ptr<PeakData[]> peakbuf(new PeakData[(to_do/fpp)+1]);
 	peaks_computed = 0;
 	current_sample = first_sample;
 	samples_done = 0;
