@@ -24,8 +24,6 @@
 
 #include <memory>
 
-#include <boost/shared_array.hpp>
-
 #include <time.h>
 
 #include <glibmm/threads.h>
@@ -107,8 +105,8 @@ class LIBARDOUR_API AudioSource : virtual public Source, public ARDOUR::AudioRea
 	   thread, or a lock around calls that use them.
 	*/
 
-	static std::vector<boost::shared_array<Sample> > _mixdown_buffers;
-	static std::vector<boost::shared_array<gain_t> > _gain_buffers;
+	static std::vector<std::shared_ptr<Sample[]> > _mixdown_buffers;
+	static std::vector<std::shared_ptr<gain_t[]> > _gain_buffers;
 	static Glib::Threads::Mutex    _level_buffer_lock;
 
 	std::string         _peakpath;

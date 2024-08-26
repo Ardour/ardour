@@ -23,8 +23,6 @@
 #include <cstdint>
 #include <memory>
 
-#include <boost/shared_array.hpp>
-
 #include "canvas/visibility.h"
 #include "canvas/item.h"
 
