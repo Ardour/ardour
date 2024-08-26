@@ -29,8 +29,6 @@
 #include <memory>
 #include <set>
 
-#include <boost/scoped_array.hpp>
-
 #include <glibmm/fileutils.h>
 #include <glibmm/threads.h>
 
@@ -730,8 +728,8 @@ AudioRegion::read_at (Sample*     buf,
 		_cache_tail  = 0;
 	}
 
-	boost::scoped_array<gain_t> gain_array;
-	boost::scoped_array<Sample> mixdown_array;
+	std::unique_ptr<gain_t[]> gain_array;
+	std::unique_ptr<Sample[]> mixdown_array;
 
 	// TODO optimize mono reader, w/o plugins -> old code
 	if (n_chn > 1 && _cache_start < _cache_end && internal_offset + suffix >= _cache_start && internal_offset + suffix + can_read <= _cache_end) {
@@ -2224,9 +2222,9 @@ AudioRegion::get_transients (AnalysisFeatureList& results)
 AudioIntervalResult
 AudioRegion::find_silence (Sample threshold, samplecnt_t min_length, samplecnt_t fade_length, InterThreadInfo& itt) const
 {
-	samplecnt_t const block_size = 64 * 1024;
-	boost::scoped_array<Sample> loudest (new Sample[block_size]);
-	boost::scoped_array<Sample> buf (new Sample[block_size]);
+	constexpr samplecnt_t block_size = 64 * 1024;
+	std::array<Sample, block_size> loudest;
+	std::array<Sample, block_size> buf;
 
 	assert (fade_length >= 0);
 	assert (min_length > 0);
@@ -2244,11 +2242,11 @@ AudioRegion::find_silence (Sample threshold, samplecnt_t min_length, samplecnt_t
 		samplecnt_t cur_samples = 0;
 		samplecnt_t const to_read = min (end - pos, block_size);
 		/* fill `loudest' with the loudest absolute sample at each instant, across all channels */
-		memset (loudest.get(), 0, sizeof (Sample) * block_size);
+		loudest.fill(0);
 
 		for (uint32_t n = 0; n < n_channels(); ++n) {
 
-			cur_samples = read_raw_internal (buf.get(), pos, to_read, n);
+			cur_samples = read_raw_internal (buf.data(), pos, to_read, n);
 			for (samplecnt_t i = 0; i < cur_samples; ++i) {
 				loudest[i] = max (loudest[i], abs (buf[i]));
 			}

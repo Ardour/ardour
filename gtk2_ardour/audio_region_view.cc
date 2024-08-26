@@ -28,8 +28,6 @@
 #include <algorithm>
 #include <vector>
 
-#include <boost/scoped_array.hpp>
-
 #include <gtkmm.h>
 
 #include "ardour/playlist.h"

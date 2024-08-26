@@ -40,7 +40,6 @@
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 
-#include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_array.hpp>
 
@@ -263,7 +262,7 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 		return;
 	}
 
-	boost::scoped_array<float> data(new float[nframes * channels]);
+	std::unique_ptr<float[]> data(new float[nframes * channels]);
 	vector<boost::shared_array<Sample> > channel_data;
 
 	for (uint32_t n = 0; n < channels; ++n) {
