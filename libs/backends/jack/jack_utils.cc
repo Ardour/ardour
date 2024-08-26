@@ -42,8 +42,6 @@
 #include <portaudio.h>
 #endif
 
-#include <boost/scoped_ptr.hpp>
-
 #include "pbd/gstdio_compat.h"
 #include <glibmm/miscutils.h>
 

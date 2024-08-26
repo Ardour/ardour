@@ -27,8 +27,6 @@
 #include <map>
 #include <vector>
 
-#include <boost/scoped_ptr.hpp>
-
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/locale_guard.h"

@@ -49,8 +49,6 @@
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 
-#include <boost/scoped_ptr.hpp>
-
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
