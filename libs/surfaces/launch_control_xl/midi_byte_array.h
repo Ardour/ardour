@@ -21,8 +21,6 @@
 #include <iostream>
 #include <vector>
 
-#include <boost/shared_array.hpp>
-
 //#include <midi++/types.h>
 namespace MIDI {
 	typedef unsigned char byte;
