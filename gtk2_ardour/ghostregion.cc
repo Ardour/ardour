@@ -210,7 +210,7 @@ MidiGhostRegion::~MidiGhostRegion()
 	delete _note_group;
 }
 
-MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g, ArdourCanvas::Item* i)
+GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g, ArdourCanvas::Item* i)
 	: event (e)
 	, item (i)
 	, is_hit (false)
@@ -221,7 +221,7 @@ MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g
 	}
 }
 
-MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g)
+GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g)
 	: event (e)
 {
 	if (dynamic_cast<Note*>(e)) {
@@ -244,11 +244,37 @@ MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g
 	CANVAS_DEBUG_NAME (item, "ghost note item");
 }
 
-MidiGhostRegion::GhostEvent::~GhostEvent ()
+GhostEvent::~GhostEvent ()
 {
 	/* event is not ours to delete */
 	delete item;
 }
+/** Given a note in our parent region (ie the actual MidiRegionView), find our
+ *  representation of it.
+ *  @return Our Event, or 0 if not found.
+ */
+GhostEvent *
+GhostEvent::find (std::shared_ptr<GhostEvent::NoteType> parent, EventList& events, EventList::iterator& opti)
+{
+	/* we are using _optimization_iterator to speed up the common case where a caller
+	   is going through our notes in order.
+	*/
+
+	if (opti != events.end()) {
+		++opti;
+		if (opti != events.end() && opti->first == parent) {
+			return opti->second;
+		}
+	}
+
+	opti = events.find (parent);
+	if (opti != events.end()) {
+		return opti->second;
+	}
+
+	return nullptr;
+}
+
 
 void
 MidiGhostRegion::set_samples_per_pixel (double /*spu*/)
@@ -280,7 +306,7 @@ MidiGhostRegion::set_colors()
 	GhostRegion::set_colors();
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
-	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
+	for (GhostEvent::EventList::iterator it = events.begin(); it != events.end(); ++it) {
 		it->second->item->set_fill_color (UIConfiguration::instance().color_mod((*it).second->event->base_color(), "ghost track midi fill"));
 		it->second->item->set_outline_color (_outline);
 	}
@@ -316,7 +342,7 @@ MidiGhostRegion::update_contents_height ()
 
 	double const h = note_height(trackview, mv);
 
-	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
+	for (GhostEvent::EventList::iterator it = events.begin(); it != events.end(); ++it) {
 		uint8_t const note_num = it->second->event->note()->note();
 
 		double const y = note_y(trackview, mv, note_num);
@@ -427,7 +453,7 @@ MidiGhostRegion::update_hit (GhostEvent* ev)
 void
 MidiGhostRegion::remove_note (NoteBase* note)
 {
-	EventList::iterator f = events.find (note->note());
+	GhostEvent::EventList::iterator f = events.find (note->note());
 	if (f == events.end()) {
 		return;
 	}
@@ -448,9 +474,9 @@ void
 MidiGhostRegion::model_changed ()
 {
 	/* we rely on the parent MRV having removed notes not in the model */
-	for (EventList::iterator i = events.begin(); i != events.end(); ) {
+	for (GhostEvent::EventList::iterator i = events.begin(); i != events.end(); ) {
 
-		std::shared_ptr<NoteType> note = i->first;
+		std::shared_ptr<GhostEvent::NoteType> note = i->first;
 		GhostEvent* cne = i->second;
 		const bool visible = (note->note() >= parent_mrv.midi_context().lowest_note()) &&
 			(note->note() <= parent_mrv.midi_context().highest_note());
@@ -470,28 +496,3 @@ MidiGhostRegion::model_changed ()
 	}
 }
 
-/** Given a note in our parent region (ie the actual MidiRegionView), find our
- *  representation of it.
- *  @return Our Event, or 0 if not found.
- */
-MidiGhostRegion::GhostEvent *
-MidiGhostRegion::find_event (std::shared_ptr<NoteType> parent)
-{
-	/* we are using _optimization_iterator to speed up the common case where a caller
-	   is going through our notes in order.
-	*/
-
-	if (_optimization_iterator != events.end()) {
-		++_optimization_iterator;
-		if (_optimization_iterator != events.end() && _optimization_iterator->first == parent) {
-			return _optimization_iterator->second;
-		}
-	}
-
-	_optimization_iterator = events.find (parent);
-	if (_optimization_iterator != events.end()) {
-		return _optimization_iterator->second;
-	}
-
-	return 0;
-}
