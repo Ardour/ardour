@@ -700,14 +700,14 @@ ExportGraphBuilder::SFC::sink ()
 void
 ExportGraphBuilder::SFC::add_child (FileSpec const & new_config)
 {
-	for (boost::ptr_list<Encoder>::iterator it = children.begin(); it != children.end(); ++it) {
+	for (std::list<Encoder>::iterator it = children.begin(); it != children.end(); ++it) {
 		if (*it == new_config) {
 			it->add_child (new_config);
 			return;
 		}
 	}
 
-	children.push_back (new Encoder());
+	children.push_back (Encoder());
 	Encoder & encoder = children.back();
 
 	if (data_width == 8 || data_width == 16) {
@@ -722,7 +722,7 @@ ExportGraphBuilder::SFC::add_child (FileSpec const & new_config)
 void
 ExportGraphBuilder::SFC::remove_children (bool remove_out_files)
 {
-	boost::ptr_list<Encoder>::iterator iter = children.begin ();
+	std::list<Encoder>::iterator iter = children.begin ();
 
 	while (iter != children.end() ) {
 
@@ -830,21 +830,21 @@ ExportGraphBuilder::Intermediate::add_child (FileSpec const & new_config)
 	use_peak     |= new_config.format->normalize ();
 	use_loudness |= new_config.format->normalize_loudness ();
 
-	for (boost::ptr_list<SFC>::iterator it = children.begin(); it != children.end(); ++it) {
+	for (std::list<SFC>::iterator it = children.begin(); it != children.end(); ++it) {
 		if (*it == new_config) {
 			it->add_child (new_config);
 			return;
 		}
 	}
 
-	children.push_back (new SFC (parent, new_config, max_samples_out));
+	children.push_back (SFC (parent, new_config, max_samples_out));
 	threader->add_output (children.back().sink());
 }
 
 void
 ExportGraphBuilder::Intermediate::remove_children (bool remove_out_files)
 {
-	boost::ptr_list<SFC>::iterator iter = children.begin ();
+	std::list<SFC>::iterator iter = children.begin ();
 
 	while (iter != children.end() ) {
 		iter->remove_children (remove_out_files);
@@ -875,7 +875,7 @@ ExportGraphBuilder::Intermediate::process()
 void
 ExportGraphBuilder::Intermediate::prepare_post_processing()
 {
-	for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (std::list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
 		if (use_peak) {
 			(*i).set_peak_dbfs (peak_reader->get_peak());
 		}
@@ -891,7 +891,7 @@ ExportGraphBuilder::Intermediate::prepare_post_processing()
 void
 ExportGraphBuilder::Intermediate::start_post_processing()
 {
-	for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (std::list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i).set_duration (tmp_file->get_samples_written() / config.channel_config->get_n_chans());
 	}
 
