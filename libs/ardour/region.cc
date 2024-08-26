@@ -1579,6 +1579,10 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 		Glib::Threads::RWLock::WriterLock lm (_fx_lock);
 		bool changed = !_plugins.empty ();
 
+		for (auto const& rfx : _plugins) {
+			rfx->drop_references ();
+		}
+
 		_plugins.clear ();
 
 		for (auto const& child : node.children ()) {
@@ -1596,6 +1600,7 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 				changed = true;
 			}
 		}
+		lm.release ();
 		if (changed) {
 			fx_latency_changed (true);
 			fx_tail_changed (true);
