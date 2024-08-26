@@ -22,7 +22,6 @@
 #include <list>
 #include <math.h>
 
-#include <boost/scoped_ptr.hpp>
 #include <glibmm/timer.h>
 #include <glibmm/spawn.h>
 

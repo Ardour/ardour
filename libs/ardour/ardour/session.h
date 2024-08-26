@@ -47,7 +47,6 @@
 #include <stdint.h>
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <glibmm/threads.h>
 
 #include <ltc.h>
@@ -1553,7 +1552,7 @@ private:
 	bool                     loop_changing;
 	samplepos_t              last_loopend;
 
-	boost::scoped_ptr<SessionDirectory> _session_dir;
+	const std::unique_ptr<SessionDirectory> _session_dir;
 
 	void hookup_io ();
 	void graph_reordered (bool called_from_backend);

@@ -27,8 +27,6 @@
 
 #include <string>
 
-#include <boost/scoped_ptr.hpp>
-
 #include <pbd/ringbuffer.h>
 
 #define MaxWinMidiEventSize 256
@@ -98,7 +96,7 @@ private: // Data
 	bool m_thread_running;
 	bool m_thread_quit;
 
-	boost::scoped_ptr<PBD::RingBuffer<uint8_t> > m_midi_buffer;
+	const std::unique_ptr<PBD::RingBuffer<uint8_t> > m_midi_buffer;
 };
 
 } // namespace ARDOUR
