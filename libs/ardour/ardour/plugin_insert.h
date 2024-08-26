@@ -323,20 +323,7 @@ private:
 	Match _match;
 
 	/* ordered map [plugin instance ID] => ARDOUR::ChanMapping */
-#if defined(_MSC_VER) /* && (_MSC_VER < 1900)
-	                   * Regarding the note (below) it was initially
-	                   * thought that this got fixed in VS2015 - but
-	                   * in fact it's still faulty (JE - Feb 2021) */
-	/* Use the older (heap based) mapping for early versions of MSVC.
-	 * In fact it might be safer to use this for all MSVC builds - as
-	 * our StackAllocator class depends on 'boost::aligned_storage'
-	 * which is known to be troublesome with Visual C++ :-
-	 * https://www.boost.org/doc/libs/1_65_0/libs/type_traits/doc/html/boost_typetraits/reference/aligned_storage.html
-	 */
-	typedef std::map <uint32_t, ARDOUR::ChanMapping> PinMappings;
-#else
 	typedef std::map <uint32_t, ARDOUR::ChanMapping, std::less<uint32_t>, PBD::StackAllocator<std::pair<const uint32_t, ARDOUR::ChanMapping>, 4> > PinMappings;
-#endif
 
 	PinMappings _in_map;
 	PinMappings _out_map;

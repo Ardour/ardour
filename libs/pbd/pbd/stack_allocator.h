@@ -72,6 +72,11 @@ public:
 		: _ptr ((pointer)_buf)
 	{ }
 
+	StackAllocator& operator= (const StackAllocator&)
+	{
+		return *this;
+	}
+
 	/* inspired by http://howardhinnant.github.io/stack_alloc.h */
 	pointer allocate (size_type n, void* hint = 0)
 	{
@@ -142,8 +147,6 @@ public:
 #endif
 
 private:
-	StackAllocator& operator= (const StackAllocator&);
-
 	bool pointer_in_buffer (pointer const p)
 	{
 		return ((pointer const)_buf <= p && p < (pointer const)_buf + stack_capacity);
