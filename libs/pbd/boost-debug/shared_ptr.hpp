@@ -1,9 +1,5 @@
 #define DEBUG_SHARED_PTR
-#ifndef DEBUG_SHARED_PTR
-
-#include <boost/shared_ptr.hpp>
-
-#else
+#ifdef DEBUG_SHARED_PTR
 
 #include "pbd/stacktrace.h"
 

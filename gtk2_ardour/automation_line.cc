@@ -38,8 +38,6 @@
 #include <climits>
 #include <vector>
 
-#include "boost/shared_ptr.hpp"
-
 #include "pbd/floating.h"
 #include "pbd/memento_command.h"
 #include "pbd/stl_delete.h"

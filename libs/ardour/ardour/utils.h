@@ -32,8 +32,6 @@
 #include <string>
 #include <cmath>
 
-#include "boost/shared_ptr.hpp"
-
 #if __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
 #endif /* __APPLE__ */
