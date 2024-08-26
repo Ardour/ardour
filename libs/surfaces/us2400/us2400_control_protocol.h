@@ -26,8 +26,6 @@
 
 #include <sys/time.h>
 #include <pthread.h>
-#include <boost/smart_ptr.hpp>
-
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
 #include "midi++/types.h"

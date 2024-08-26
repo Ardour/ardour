@@ -20,7 +20,6 @@
 #define __ardour_control_protocol_types_h__
 
 #include <vector>
-#include <boost/smart_ptr.hpp>
 
 namespace ARDOUR {
 	class Route;
