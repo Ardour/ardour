@@ -35,7 +35,6 @@
 #include <sys/time.h>
 #include <errno.h>
 
-#include <boost/shared_array.hpp>
 #include <glibmm/miscutils.h>
 
 #include "midi++/types.h"

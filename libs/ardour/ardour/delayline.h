@@ -21,8 +21,6 @@
 
 #include <memory>
 
-#include <boost/shared_array.hpp>
-
 #include "ardour/types.h"
 #include "ardour/processor.h"
 
@@ -68,7 +66,7 @@ private:
 	sampleoffset_t _roff, _woff;
 	bool           _pending_flush;
 
-	typedef std::vector<boost::shared_array<Sample> > AudioDlyBuf;
+	typedef std::vector<std::shared_ptr<Sample[]> > AudioDlyBuf;
 	typedef std::vector<std::shared_ptr<MidiBuffer> > MidiDlyBuf;
 
 	AudioDlyBuf _buf;
