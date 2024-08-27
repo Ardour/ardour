@@ -29,6 +29,11 @@
 #include "pbd/compose.h"
 #endif
 
+#if SMTG_OS_LINUX
+#include <boost/unordered_map.hpp>
+#include <glibmm.h>
+#endif
+
 using namespace Steinberg;
 
 DEF_CLASS_IID (FUnknown)
@@ -77,6 +82,143 @@ DEF_CLASS_IID (Presonus::IPlugInViewScaling)
 
 #if SMTG_OS_LINUX
 DEF_CLASS_IID (Linux::IRunLoop);
+
+class AVST3Runloop : public Linux::IRunLoop
+{
+private:
+	struct EventHandler
+	{
+		EventHandler (Linux::IEventHandler* handler = 0, GIOChannel* gio_channel = 0, guint source_id = 0)
+			: _handler (handler)
+			, _gio_channel (gio_channel)
+			, _source_id (source_id)
+		{}
+
+		bool operator== (EventHandler const& other) {
+			return other._handler == _handler && other._gio_channel == _gio_channel && other._source_id == _source_id;
+		}
+		Linux::IEventHandler* _handler;
+		GIOChannel*           _gio_channel;
+		guint                 _source_id;
+	};
+
+	boost::unordered_map<FileDescriptor, EventHandler> _event_handlers;
+	boost::unordered_map<guint, Linux::ITimerHandler*> _timer_handlers;
+
+	static gboolean event (GIOChannel* source, GIOCondition condition, gpointer data)
+	{
+		Linux::IEventHandler* handler = reinterpret_cast<Linux::IEventHandler*> (data);
+		handler->onFDIsSet (g_io_channel_unix_get_fd (source));
+		if (condition & ~G_IO_IN) {
+			/* remove on error */
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	static gboolean timeout (gpointer data)
+	{
+		Linux::ITimerHandler* handler = reinterpret_cast<Linux::ITimerHandler*> (data);
+		handler->onTimer ();
+		return true;
+	}
+
+public:
+	~AVST3Runloop ()
+	{
+		clear ();
+	}
+
+	void clear () {
+		Glib::Threads::Mutex::Lock lm (_lock);
+		for (boost::unordered_map<FileDescriptor, EventHandler>::const_iterator it = _event_handlers.begin (); it != _event_handlers.end (); ++it) {
+			g_source_remove (it->second._source_id);
+			g_io_channel_unref (it->second._gio_channel);
+		}
+		for (boost::unordered_map<guint, Linux::ITimerHandler*>::const_iterator it = _timer_handlers.begin (); it != _timer_handlers.end (); ++it) {
+			g_source_remove (it->first);
+		}
+		_event_handlers.clear ();
+		_timer_handlers.clear ();
+	}
+
+	/* VST3 IRunLoop interface */
+	tresult registerEventHandler (Linux::IEventHandler* handler, FileDescriptor fd) SMTG_OVERRIDE
+	{
+		if (!handler || _event_handlers.find(fd) != _event_handlers.end()) {
+			return kInvalidArgument;
+		}
+
+		Glib::Threads::Mutex::Lock lm (_lock);
+		GIOChannel* gio_channel = g_io_channel_unix_new (fd);
+		guint id = g_io_add_watch (gio_channel, (GIOCondition) (G_IO_IN /*| G_IO_OUT*/ | G_IO_ERR | G_IO_HUP), event, handler);
+		_event_handlers[fd] = EventHandler (handler, gio_channel, id);
+		return kResultTrue;
+	}
+
+	tresult unregisterEventHandler (Linux::IEventHandler* handler) SMTG_OVERRIDE
+	{
+		if (!handler) {
+			return kInvalidArgument;
+		}
+
+		tresult rv = false;
+		Glib::Threads::Mutex::Lock lm (_lock);
+		for (boost::unordered_map<FileDescriptor, EventHandler>::const_iterator it = _event_handlers.begin (); it != _event_handlers.end ();) {
+			if (it->second._handler == handler) {
+				g_source_remove (it->second._source_id);
+				g_io_channel_unref (it->second._gio_channel);
+				it = _event_handlers.erase (it);
+				rv = kResultTrue;
+			} else {
+				++it;
+			}
+		}
+		return rv;
+	}
+
+	tresult registerTimer (Linux::ITimerHandler* handler, TimerInterval milliseconds) SMTG_OVERRIDE
+	{
+		if (!handler || milliseconds == 0) {
+			return kInvalidArgument;
+		}
+		Glib::Threads::Mutex::Lock lm (_lock);
+		guint id = g_timeout_add_full (G_PRIORITY_HIGH_IDLE, milliseconds, timeout, handler, NULL);
+		_timer_handlers[id] = handler;
+		return kResultTrue;
+
+	}
+
+	tresult unregisterTimer (Linux::ITimerHandler* handler) SMTG_OVERRIDE
+	{
+		if (!handler) {
+			return kInvalidArgument;
+		}
+
+		tresult rv = false;
+		Glib::Threads::Mutex::Lock lm (_lock);
+		for (boost::unordered_map<guint, Linux::ITimerHandler*>::const_iterator it = _timer_handlers.begin (); it != _timer_handlers.end ();) {
+			if (it->second == handler) {
+				g_source_remove (it->first);
+				it = _timer_handlers.erase (it);
+				rv = kResultTrue;
+			} else {
+				++it;
+			}
+		}
+		return rv;
+	}
+
+	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
+	uint32 PLUGIN_API release () SMTG_OVERRIDE { return 1; }
+	tresult queryInterface (const TUID, void**) SMTG_OVERRIDE { return kNoInterface; }
+
+private:
+	Glib::Threads::Mutex _lock;
+};
+
+AVST3Runloop static_runloop;
 #endif
 
 std::string
@@ -466,6 +608,13 @@ HostApplication::queryInterface (const char* _iid, void** obj)
 {
 	QUERY_INTERFACE (_iid, obj, FUnknown::iid, IHostApplication)
 	QUERY_INTERFACE (_iid, obj, IHostApplication::iid, IHostApplication)
+
+#if SMTG_OS_LINUX
+	if (FUnknownPrivate::iidEqual (_iid, Linux::IRunLoop::iid)) {
+		*obj = &static_runloop;
+		return kResultOk;
+	}
+#endif
 
 	if (_plug_interface_support && _plug_interface_support->queryInterface (_iid, obj) == kResultTrue) {
 		return kResultOk;
