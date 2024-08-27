@@ -610,6 +610,11 @@ AudioRegion::read_at (Sample*     buf,
 	   The caller has verified that we cover the desired section.
 	*/
 
+	DEBUG_TRACE (DEBUG::AudioCacheRefill, string_compose ("- Region '%1' chn: %2 from %3 to %4 [s]\n",
+				name(), chan_n,
+				std::setprecision (3), std::fixed,
+				pos / (float)_session.sample_rate (), (pos + cnt) / (float)_session.sample_rate ()));
+
 	/* See doc/region_read.svg for a drawing which might help to explain
 	   what is going on.
 	*/

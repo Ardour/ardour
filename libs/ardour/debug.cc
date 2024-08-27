@@ -29,6 +29,7 @@ using namespace std;
 
 PBD::DebugBits PBD::DEBUG::AudioEngine = PBD::new_debug_bit ("AudioEngine");
 PBD::DebugBits PBD::DEBUG::AudioPlayback = PBD::new_debug_bit ("audioplayback");
+PBD::DebugBits PBD::DEBUG::AudioCacheRefill = PBD::new_debug_bit ("audiocacherefill");
 PBD::DebugBits PBD::DEBUG::AudioUnitConfig = PBD::new_debug_bit ("AudioUnitConfig");
 PBD::DebugBits PBD::DEBUG::AudioUnitGUI = PBD::new_debug_bit ("AudioUnitGUI");
 PBD::DebugBits PBD::DEBUG::AudioUnitProcess = PBD::new_debug_bit ("AudioUnitProcess");
