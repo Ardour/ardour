@@ -1517,6 +1517,12 @@ VST3PI::queryInterface (const TUID _iid, void** obj)
 
 	QUERY_INTERFACE (_iid, obj, IPlugFrame::iid, IPlugFrame)
 
+#if SMTG_OS_LINUX
+	if (FUnknownPrivate::iidEqual (_iid, Linux::IRunLoop::iid)) {
+		return HostApplication::getHostContext()->queryInterface (_iid, obj);
+	}
+#endif
+
 	if (DEBUG_ENABLED (DEBUG::VST3Config)) {
 		char fuid[33];
 		FUID::fromTUID (_iid).toString (fuid);
