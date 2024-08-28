@@ -802,7 +802,7 @@ StepView::set_timing_text ()
 	if (_step.offset() == Temporal::Beats()) {
 		text->set (X_("0"));
 	} else {
-		const int64_t gcd = boost::integer::gcd (_step.offset().to_ticks(), int64_t (1920));
+		const int64_t gcd = std::gcd (_step.offset().to_ticks(), int64_t (1920));
 		const int64_t n = _step.offset().to_ticks() / gcd;
 		const int64_t d = 1920 / gcd;
 		text->set (string_compose ("%1/%2", n, d));
