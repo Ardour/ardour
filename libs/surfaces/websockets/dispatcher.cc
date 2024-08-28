@@ -16,8 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/assign.hpp>
-
 #include "ardour/plugin_insert.h"
 
 #include "ardour_websockets.h"
@@ -27,18 +25,19 @@
 using namespace ARDOUR;
 using namespace ArdourSurface;
 
-#define NODE_METHOD_PAIR(x) (Node::x, &WebsocketsDispatcher::x##_handler)
+#define NODE_METHOD_PAIR(x) {Node::x, &WebsocketsDispatcher::x##_handler}
 
 WebsocketsDispatcher::NodeMethodMap
-	WebsocketsDispatcher::_node_to_method = boost::assign::map_list_of
-		NODE_METHOD_PAIR (transport_tempo)
-		NODE_METHOD_PAIR (transport_roll)
-		NODE_METHOD_PAIR (transport_record)
-		NODE_METHOD_PAIR (strip_gain)
-		NODE_METHOD_PAIR (strip_pan)
-		NODE_METHOD_PAIR (strip_mute)
-		NODE_METHOD_PAIR (strip_plugin_enable)
-		NODE_METHOD_PAIR (strip_plugin_param_value);
+	WebsocketsDispatcher::_node_to_method {
+		NODE_METHOD_PAIR (transport_tempo),
+		NODE_METHOD_PAIR (transport_roll),
+		NODE_METHOD_PAIR (transport_record),
+		NODE_METHOD_PAIR (strip_gain),
+		NODE_METHOD_PAIR (strip_pan),
+		NODE_METHOD_PAIR (strip_mute),
+		NODE_METHOD_PAIR (strip_plugin_enable),
+		NODE_METHOD_PAIR (strip_plugin_param_value)
+	};
 
 void
 WebsocketsDispatcher::dispatch (Client client, const NodeStateMessage& msg)
