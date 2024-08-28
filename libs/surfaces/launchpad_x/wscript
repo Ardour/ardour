@@ -5,7 +5,7 @@ import os
 lpxm_sources = [
     'lpx.cc',
     'gui.cc',
-]    
+]
 
 def options(opt):
     pass

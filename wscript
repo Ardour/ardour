@@ -16,22 +16,6 @@ from waflib.Tools.compiler_cxx import cxx_compiler
 c_compiler['darwin'] = ['gcc', 'clang' ]
 cxx_compiler['darwin'] = ['g++', 'clang++' ]
 
-class i18n(BuildContext):
-    cmd = 'i18n'
-    fun = 'i18n'
-
-class i18n_pot(BuildContext):
-    cmd = 'i18n_pot'
-    fun = 'i18n_pot'
-
-class i18n_po(BuildContext):
-    cmd = 'i18n_po'
-    fun = 'i18n_po'
-
-class i18n_mo(BuildContext):
-    cmd = 'i18n_mo'
-    fun = 'i18n_mo'
-
 compiler_flags_dictionaries= {
     'gcc' : {
         # Flags required when building a debug build
@@ -719,7 +703,7 @@ int main() { return 0; }''',
                  "-mmacosx-version-min=11.0"))
         linker_flags.append("-mmacosx-version-min=11.0")
         # Xcode 15 does not like our boost version, producing warnings from almost every file
-        # boost/type_traits/has_trivial_destructor.hpp:30:86: warning: builtin __has_trivial_destructor is deprecated; use __is_trivially_destructible instead 
+        # boost/type_traits/has_trivial_destructor.hpp:30:86: warning: builtin __has_trivial_destructor is deprecated; use __is_trivially_destructible instead
         flags_dict['basic-warnings'].append ("-Wno-deprecated-builtins")
 
     #
@@ -817,8 +801,6 @@ int main() { return 0; }''',
     compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
     compiler_flags.append ('-DPROGRAM_VERSION="' + PROGRAM_VERSION + '"')
 
-    conf.env['PROGRAM_NAME'] = Options.options.program_name
-
     if opt.debug:
         conf.env.append_value('CFLAGS', debug_flags)
         conf.env.append_value('CXXFLAGS', debug_flags)
@@ -839,9 +821,9 @@ int main() { return 0; }''',
     conf.env.append_value('CXXFLAGS', cxx_flags)
     conf.env.append_value('LINKFLAGS', linker_flags)
 
-def create_resource_file(icon):
+def create_resource_file(name):
     try:
-        text = 'IDI_ICON1 ICON DISCARDABLE "icons/' + icon + '.ico"\n'
+        text = 'IDI_ICON1 ICON DISCARDABLE "icons/' + name + '.ico"\n'
         o = open('gtk2_ardour/windows_icon.rc', 'w')
         o.write(text)
         o.close()
@@ -1017,6 +999,8 @@ def configure(conf):
         # lazy approach: just use major version 2.X.X
         if itstool != "itstool" or version[0] < "2":
             conf.fatal("--freedesktop requires itstool > 2.0.0 to translate files.")
+
+    conf.env['PROGRAM_NAME'] = Options.options.program_name or 'Ardour'
 
     conf.env['VERSION'] = VERSION
     conf.env['MAJOR'] = MAJOR
@@ -1687,17 +1671,36 @@ def build(bld):
     if bld.env['RUN_TESTS']:
         bld.add_post_fun(test)
 
-def i18n(bld):
-    print(bld.env)
+# The following i18n command implementations need a BuildContext (with .env),
+# and we thus create BuildContext subclasses that define the `cmd` command to
+# execute the `fun` function (which often will recurse).
+
+class _i18n_build_context(BuildContext):
+    cmd = 'i18n'
+    fun = 'i18n_func'
+
+def i18n_func(bld):
     bld.recurse (i18n_children)
 
-def i18n_pot(bld):
+class _i18n_pot_build_context(BuildContext):
+    cmd = 'i18n_pot'
+    fun = 'i18n_pot_func'
+
+def i18n_pot_func(bld):
     bld.recurse (i18n_children)
 
-def i18n_po(bld):
+class _i18n_po_build_context(BuildContext):
+    cmd = 'i18n_po'
+    fun = 'i18n_po_func'
+
+def i18n_po_func(bld):
     bld.recurse (i18n_children)
 
-def i18n_mo(bld):
+class _i18n_mo_build_context(BuildContext):
+    cmd = 'i18n_mo'
+    fun = 'i18n_mo_func'
+
+def i18n_mo_func(bld):
     bld.recurse (i18n_children)
 
 def tarball(bld):
