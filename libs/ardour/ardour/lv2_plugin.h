@@ -28,7 +28,6 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <boost/enable_shared_from_this.hpp>
 
 #include "temporal/tempo.h"
 

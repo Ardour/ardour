@@ -23,7 +23,6 @@
 #include <string>
 
 #include <lo/lo.h>
-#include <boost/enable_shared_from_this.hpp>
 #include <rubberband/RubberBandStretcher.h>
 #include <vamp-hostsdk/Plugin.h>
 
