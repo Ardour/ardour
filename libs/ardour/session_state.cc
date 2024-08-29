@@ -419,9 +419,9 @@ Session::post_engine_init ()
 void
 Session::session_loaded ()
 {
-	SessionLoaded();
-
 	set_clean ();
+
+	SessionLoaded();
 
 	if (_is_new) {
 		save_state ("");
