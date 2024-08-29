@@ -883,7 +883,7 @@ RouteTimeAxisView::build_display_menu ()
 		i->set_inconsistent (true);
 	}
 	i->set_sensitive(! _session->transport_rolling() && ! always_active);
-	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), click_sets_active, true));
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), click_sets_active, !_editor.get_selection().tracks.empty ()));
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), sigc::bind (sigc::mem_fun(_editor, &PublicEditor::hide_track_in_display), this, true)));
