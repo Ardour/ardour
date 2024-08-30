@@ -90,6 +90,7 @@ class MIDISurface : public ARDOUR::ControlProtocol
   protected:
 	bool with_pad_filter;
 	bool _in_use;
+	bool _data_required;
 	std::string port_name_prefix;
 	MIDI::Port* _input_port;
 	MIDI::Port* _output_port;
