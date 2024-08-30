@@ -31,7 +31,7 @@ namespace ARDOUR
 	class PortInsert;
 }
 
-class LatencyGUI;
+class TimeCtlGUI;
 class MTDM;
 
 class PortInsertUI : public Gtk::VBox
@@ -78,7 +78,7 @@ private:
 	Gtk::HBox  _latency_hbox;
 
 	Gtk::Window*  _parent;
-	LatencyGUI*   _latency_gui;
+	TimeCtlGUI*   _latency_gui;
 	ArdourWindow* _latency_dialog;
 
 	sigc::connection _latency_timeout;

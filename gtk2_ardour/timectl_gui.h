@@ -2,7 +2,7 @@
  * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2009 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2009 David Robillard <d@drobilla.net>
- * Copyright (C) 2017-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017-2024 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk2_ardour_latency_gui_h__
-#define __gtk2_ardour_latency_gui_h__
+#ifndef __gtk2_ardour_timectl_gui_h__
+#define __gtk2_ardour_timectl_gui_h__
 
 #include <vector>
 #include <string>
@@ -38,16 +38,17 @@
 
 namespace ARDOUR {
 	class Latent;
+	class TailTime;
 }
 
-class LatencyGUI;
+class TimeCtlGUI;
 
-class LatencyGUIControllable : public PBD::Controllable
+class TimeCtlGUIControllable : public PBD::Controllable
 {
 public:
-	LatencyGUIControllable (LatencyGUI* g)
+	TimeCtlGUIControllable (TimeCtlGUI* g)
 		: PBD::Controllable ("ignoreMe")
-		, _latency_gui (g)
+		, _timectl_gui (g)
 	{}
 
 	void set_value (double v, PBD::Controllable::GroupControlDisposition group_override);
@@ -62,44 +63,48 @@ public:
 	}
 
 private:
-	LatencyGUI* _latency_gui;
+	TimeCtlGUI* _timectl_gui;
 };
 
-class LatencyBarController : public ArdourWidgets::BarController
+class TimeCtlBarController : public ArdourWidgets::BarController
 {
 public:
-	LatencyBarController (Gtk::Adjustment& adj, LatencyGUI* g)
-		: BarController (adj, std::shared_ptr<PBD::Controllable> (new LatencyGUIControllable (g)))
-		, _latency_gui (g)
+	TimeCtlBarController (Gtk::Adjustment& adj, TimeCtlGUI* g)
+		: BarController (adj, std::shared_ptr<PBD::Controllable> (new TimeCtlGUIControllable (g)))
+		, _timectl_gui (g)
 	{
 		set_digits (0);
 	}
 
 private:
-	LatencyGUI* _latency_gui;
+	TimeCtlGUI* _timectl_gui;
 
 	std::string get_label (double&);
 };
 
-class LatencyGUI : public Gtk::VBox
+class TimeCtlGUI : public Gtk::VBox
 {
 public:
-	LatencyGUI (ARDOUR::Latent&, samplepos_t sample_rate, samplepos_t period_size);
-	~LatencyGUI() { }
+	TimeCtlGUI (ARDOUR::Latent&, samplepos_t sample_rate, samplepos_t period_size);
+	TimeCtlGUI (ARDOUR::TailTime&, samplepos_t sample_rate, samplepos_t period_size);
+	~TimeCtlGUI() { }
 
 	void refresh ();
 
 private:
+	void init ();
 	void reset ();
 	void finish ();
 
-	ARDOUR::Latent& _latent;
+	ARDOUR::Latent*   _latent;
+	ARDOUR::TailTime* _tailtime;
+
 	samplepos_t sample_rate;
 	samplepos_t period_size;
 
 	bool _ignore_change;
 	Gtk::Adjustment adjustment;
-	LatencyBarController bc;
+	TimeCtlBarController bc;
 	Gtk::HBox hbox1;
 	Gtk::HBox hbox2;
 	Gtk::HButtonBox hbbox;
@@ -108,12 +113,12 @@ private:
 	Gtk::Button reset_button;
 	Gtk::ComboBoxText units_combo;
 
-	void change_latency_from_button (int dir);
+	void change_from_button (int dir);
 
-	friend class LatencyBarController;
-	friend class LatencyGUIControllable;
+	friend class TimeCtlBarController;
+	friend class TimeCtlGUIControllable;
 
 	static std::vector<std::string> unit_strings;
 };
 
-#endif /* __gtk2_ardour_latency_gui_h__ */
+#endif /* __gtk2_ardour_timectl_gui_h__ */

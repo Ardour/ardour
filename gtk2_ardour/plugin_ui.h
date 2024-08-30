@@ -81,7 +81,7 @@ namespace ArdourWidgets {
 	class FastMeter;
 }
 
-class LatencyGUI;
+class TimeCtlGUI;
 class ArdourWindow;
 class PluginEqGui;
 class PluginLoadStatsGui;
@@ -110,6 +110,7 @@ public:
 	void update_preset ();
 
 	void latency_button_clicked ();
+	void tailtime_button_clicked ();
 
 	virtual bool on_window_show(const std::string& /*title*/) { return true; }
 	virtual void on_window_hide() {}
@@ -157,6 +158,8 @@ protected:
 	Gtk::Expander cpuload_expander;
 	/** a button which, when clicked, opens the latency GUI */
 	ArdourWidgets::ArdourButton _latency_button;
+	/** a button which, when clicked, opens the tailtime GUI */
+	ArdourWidgets::ArdourButton _tailtime_button;
 	/** a button which sets all controls' automation setting to Manual */
 	ArdourWidgets::ArdourButton automation_manual_all_button;
 	/** a button which sets all controls' automation setting to Play */
@@ -169,8 +172,12 @@ protected:
 	ArdourWidgets::ArdourButton automation_latch_all_button;
 
 	void set_latency_label ();
-	LatencyGUI* latency_gui;
+	TimeCtlGUI*   latency_gui;
 	ArdourWindow* latency_dialog;
+
+	void set_tailtime_label ();
+	TimeCtlGUI*   tailtime_gui;
+	ArdourWindow* tailtime_dialog;
 
 	PluginEqGui* eqgui;
 	PluginLoadStatsGui* stats_gui;
