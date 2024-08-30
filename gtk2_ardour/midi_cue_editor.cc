@@ -269,9 +269,6 @@ MidiCueEditor::build_canvas ()
 	rubberband_rect->set_fill_color (UIConfiguration::instance().color_mod ("rubber band rect", "selection rect"));
 	CANVAS_DEBUG_NAME (rubberband_rect, X_("cue rubberband rect"));
 
-	automation_group = new ArdourCanvas::Rectangle (hv_scroll_group);
-	CANVAS_DEBUG_NAME (automation_group, "cue automation group");
-
 	prh = new ArdourCanvas::PianoRollHeader (v_scroll_group, *bg);
 
 	double w, h;
@@ -330,13 +327,7 @@ MidiCueEditor::canvas_allocate (Gtk::Allocation alloc)
 
 	if (view) {
 		double timebars = n_timebars * timebar_height;
-		double minus_timebars = alloc.get_height() - timebars;
-		double midi_view = ceil (minus_timebars * (2./3.));
-		double auto_view = minus_timebars - midi_view;
-
-		view->set_height (midi_view);
-		automation_group->set (ArdourCanvas::Rect (prh->width(), timebars + midi_view, ArdourCanvas::COORD_MAX, auto_view));
-		bg->set_size (alloc.get_width(), midi_view);
+		view->set_height (alloc.get_height() - timebars);
 	} else {
 		bg->set_size (alloc.get_width(), alloc.get_height());
 	}

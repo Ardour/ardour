@@ -2,6 +2,10 @@
 #define __gtk2_ardour_ghost_event_h__
 
 #include <boost/unordered_map.hpp>
+#include <sigc++/trackable.h>
+
+#include "evoral/Note.h"
+#include "temporal/beats.h"
 
 namespace ArdourCanvas {
 	class Container;

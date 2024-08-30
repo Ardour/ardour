@@ -140,11 +140,20 @@ VelocityDisplay::line_extended (ArdourCanvas::Duple const & from, ArdourCanvas::
 }
 
 void
-VelocityDisplay::update_contents_height ()
+VelocityDisplay::redisplay ()
 {
 	for (auto const & i : events) {
 		set_size_and_position (*i.second);
 	}
+}
+
+void
+VelocityDisplay::clear ()
+{
+	for (auto & ev : events) {
+		delete ev.second;
+	}
+	events.clear ();
 }
 
 void
