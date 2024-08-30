@@ -451,9 +451,9 @@ class LIBTEMPORAL_API TempoMetric
 	 * TempoMetric (i.e. just tempo or just meter information required
 	 */
 
-	superclock_t superclock_at (Beats const & qn) const { return _tempo->superclock_at (qn); }
-	samplepos_t  sample_at (Beats const & qn) const { return _tempo->sample_at (qn); }
-	Beats        quarters_at (BBT_Time const & bbt) const { return _meter->quarters_at (bbt); }
+	superclock_t superclock_at (Beats const & qn) const;
+	samplepos_t  sample_at (Beats const & qn) const;
+	Beats        quarters_at (BBT_Time const & bbt) const;
 	BBT_Argument bbt_at (Beats const& qn) const;
 
 	superclock_t superclocks_per_note_type () const { return _tempo->superclocks_per_note_type (); }

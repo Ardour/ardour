@@ -85,7 +85,12 @@ TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, TempoPoint& point, co
 	, _tap_source_label (_("Tap Source:"), ALIGN_START, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
+	cout << "TEMPODIALOG PT " << point.time() << " beats:" << point.note_type() << " sample: " << point.sample(48000) << "\n";
+
 	Temporal::BBT_Time when (map->bbt_at (point.time()));
+	cout << "TEMPODIALOG BBT " << when << " to ARG " << Temporal::BBT_Argument (when) << "\n";
+	cout << "TEMPODIALOG SC " << map->superclock_at (Temporal::BBT_Argument (when)) / (float) Temporal::superclock_ticks_per_second () << " [s]\n";
+	cout << "TEMPODIALOG SC " << map->superclock_at (point.beats()) / (float) Temporal::superclock_ticks_per_second () << " [s]\n";
 	init (when, _section->note_types_per_minute(), _section->end_note_types_per_minute(), _section->note_type(), _section->type(), map->is_initial (point), Temporal::BeatTime);
 }
 
