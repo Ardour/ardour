@@ -45,12 +45,13 @@ class VelocityDisplay
 	VelocityDisplay (EditingContext&, MidiViewBackground&, MidiView&, ArdourCanvas::Rectangle& base_rect, ArdourCanvas::Container&, GhostEvent::EventList& el, Gtkmm2ext::Color oc);
 	virtual ~VelocityDisplay ();
 
-	void update_contents_height();
+	void redisplay();
 	void add_note(NoteBase*);
 	void update_note (GhostEvent* note);
 	void update_hit (GhostEvent* hit);
 	virtual void remove_note (NoteBase*) = 0;
 	void note_selected (NoteBase*);
+	void clear ();
 
 	void set_colors ();
 	void drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev);
@@ -70,7 +71,6 @@ class VelocityDisplay
   protected:
 	virtual bool lollevent (GdkEvent*, GhostEvent*) = 0;
 
-  private:
 	EditingContext& editing_context;
 	MidiViewBackground& bg;
 	MidiView& view;

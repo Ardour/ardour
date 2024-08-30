@@ -20,6 +20,9 @@
 #define __gtk_ardour_note_h__
 
 #include <iostream>
+
+#include "canvas/rectangle.h"
+
 #include "note_base.h"
 #include "midi_util.h"
 

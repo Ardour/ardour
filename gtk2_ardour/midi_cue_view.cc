@@ -29,6 +29,8 @@
 #include "editor_drag.h"
 #include "keyboard.h"
 #include "midi_cue_view.h"
+#include "midi_cue_velocity.h"
+#include "velocity_display.h"
 
 #include "pbd/i18n.h"
 
@@ -42,6 +44,8 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
                           MidiViewBackground&      bg,
                           uint32_t                 basic_color)
 	: MidiView (mt, parent, ec, bg, basic_color)
+	, velocity_base (nullptr)
+	, velocity_display (nullptr)
 	, _slot_index (slot_index)
 {
 	CANVAS_DEBUG_NAME (_note_group, X_("note group for MIDI cue"));
@@ -60,6 +64,12 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 
 	_note_group->raise_to_top ();
 
+	automation_group = new ArdourCanvas::Rectangle (&parent);
+	CANVAS_DEBUG_NAME (automation_group, "cue automation group");
+
+	velocity_base = new ArdourCanvas::Rectangle (&parent);
+	velocity_display = new MidiCueVelocityDisplay (editing_context(), midi_context(), *this, *velocity_base, 0x312244ff);
+
 	set_extensible (true);
 	set_region (region);
 }
@@ -67,7 +77,15 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 void
 MidiCueView::set_height (double h)
 {
-	event_rect->set (ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, h));
+	double note_area_height = ceil (h / 2.);
+	double velocity_height = ceil ((h - note_area_height) / 2.);
+	double automation_height = h - note_area_height - velocity_height;
+
+	event_rect->set (ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, note_area_height));
+	midi_context().set_size (ArdourCanvas::COORD_MAX, note_area_height);
+	velocity_base->set (ArdourCanvas::Rect (0., note_area_height, ArdourCanvas::COORD_MAX, note_area_height + velocity_height));
+	automation_group->set (ArdourCanvas::Rect (0., note_area_height + velocity_height, ArdourCanvas::COORD_MAX, note_area_height + velocity_height + automation_height));
+
 	view_changed ();
 }
 
@@ -127,3 +145,53 @@ MidiCueView::set_samples_per_pixel (double spp)
 	reset_width_dependent_items (_editing_context.duration_to_pixels (duration));
 }
 
+void
+MidiCueView::clear_ghost_events ()
+{
+	if (velocity_display) {
+		velocity_display->clear ();
+	}
+}
+
+void
+MidiCueView::ghosts_model_changed ()
+{
+	if (velocity_display) {
+		velocity_display->clear ();
+		for (auto & ev : _events) {
+			velocity_display->add_note (ev.second);
+		}
+	}
+}
+
+void
+MidiCueView::ghosts_view_changed ()
+{
+	if (velocity_display) {
+		velocity_display->redisplay();
+	}
+}
+
+void
+MidiCueView::ghost_remove_note (NoteBase* nb)
+{
+	if (velocity_display) {
+		velocity_display->remove_note (nb);
+	}
+}
+
+void
+MidiCueView::ghost_add_note (NoteBase* nb)
+{
+	if (velocity_display) {
+		velocity_display->add_note (nb);
+	}
+}
+
+void
+MidiCueView::ghost_sync_selection (NoteBase* nb)
+{
+	if (velocity_display) {
+		velocity_display->note_selected (nb);
+	}
+}

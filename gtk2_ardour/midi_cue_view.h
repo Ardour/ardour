@@ -27,6 +27,8 @@
 
 #include "midi_view.h"
 
+class VelocityDisplay;
+
 class MidiCueView : public MidiView
 {
   public:
@@ -43,14 +45,21 @@ class MidiCueView : public MidiView
 	void set_samples_per_pixel (double);
 	void set_height (double);
 
+	void clear_ghost_events();
+	void ghosts_model_changed();
+	void ghosts_view_changed();
+	void ghost_remove_note (NoteBase*);
+	void ghost_add_note (NoteBase*);
+	void ghost_sync_selection (NoteBase*);
+
 	ArdourCanvas::Item* drag_group() const;
-	bool note_in_region_range (const std::shared_ptr<NoteType> note, bool& visible) const {
-		visible = true;
-		return true;
-	}
 
   protected:
 	bool scroll (GdkEventScroll* ev);
+
+	ArdourCanvas::Rectangle* automation_group;
+	ArdourCanvas::Rectangle* velocity_base;
+	VelocityDisplay* velocity_display;
 
 	std::shared_ptr<Temporal::TempoMap const> tempo_map;
 	ArdourCanvas::Rectangle* event_rect;
