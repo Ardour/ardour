@@ -40,6 +40,7 @@
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/parameter_descriptor.h"
+#include "ardour/tailtime.h"
 #include "ardour/types.h"
 #include "ardour/variant.h"
 
@@ -74,7 +75,7 @@ typedef std::set<uint32_t>            PluginOutputConfiguration;
  *
  * Plugins are not used directly in Ardour but always wrapped by a PluginInsert.
  */
-class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public HasLatency
+class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public HasLatency, public HasTailTime
 {
 public:
 	Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&);
@@ -172,11 +173,13 @@ public:
 		return plugin_latency ();
 	}
 
+	samplecnt_t signal_tailtime () const
+	{
+		return plugin_tailtime ();
+	}
+
 	/** the max possible latency a plugin will have */
 	virtual samplecnt_t max_latency () const { return 0; }
-
-	samplecnt_t effective_tail() const;
-	PBD::Signal0<void> TailChanged;
 
 	virtual int  set_block_size (pframes_t nframes) = 0;
 	virtual bool requires_fixed_sized_buffers () const { return false; }
@@ -429,7 +432,7 @@ private:
 	/** tail duration in samples. e.g. for reverb or delay plugins.
 	 *
 	 * The default when unknown is 2 sec */
-	virtual samplecnt_t plugin_tail () const;
+	virtual samplecnt_t plugin_tailtime () const;
 
 
 	/** Fill _presets with our presets */

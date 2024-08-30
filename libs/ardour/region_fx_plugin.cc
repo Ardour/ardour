@@ -250,6 +250,7 @@ RegionFxPlugin::get_state () const
 	XMLNode* node = new XMLNode (/*state_node_name*/ "RegionFXPlugin");
 
 	Latent::add_state (node);
+	TailTime::add_state (node);
 
 	node->set_property ("type", _plugins[0]->state_node_name ());
 	node->set_property ("unique-id", _plugins[0]->unique_id ());
@@ -383,6 +384,10 @@ RegionFxPlugin::set_state (const XMLNode& node, int version)
 			ac->Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 		}
 	}
+
+	Latent::set_state (node, version);
+	TailTime::set_state (node, version);
+
 	return 0;
 }
 
@@ -422,7 +427,6 @@ RegionFxPlugin::add_plugin (std::shared_ptr<Plugin> plugin)
 		plugin->ParameterChangedExternally.connect_same_thread (*this, boost::bind (&RegionFxPlugin::parameter_changed_externally, this, _1, _2));
 		plugin->StartTouch.connect_same_thread (*this, boost::bind (&RegionFxPlugin::start_touch, this, _1));
 		plugin->EndTouch.connect_same_thread (*this, boost::bind (&RegionFxPlugin::end_touch, this, _1));
-		plugin->TailChanged.connect_same_thread (*this, [this](){ TailChanged (); });
 	}
 
 	plugin->set_insert (this, _plugins.size ());
@@ -503,12 +507,12 @@ RegionFxPlugin::signal_latency () const
 }
 
 ARDOUR::samplecnt_t
-RegionFxPlugin::effective_tail () const
+RegionFxPlugin::signal_tailtime () const
 {
 	if (_plugins.empty ()) {
 		return 0;
 	}
-	return _plugins.front ()->effective_tail ();
+	return _plugins.front ()->signal_tailtime ();
 }
 
 PlugInsertBase::UIElements
@@ -1439,6 +1443,11 @@ RegionFxPlugin::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t
 	if (_plugin_signal_latency != l) {
 		_plugin_signal_latency= l;
 		LatencyChanged (); /* EMIT SIGNAL */
+	}
+	const samplecnt_t t = effective_latency ();
+	if (_plugin_signal_tailtime != l) {
+		_plugin_signal_tailtime = t;
+		TailTimeChanged (); /* EMIT SIGNAL */
 	}
 	return true;
 }

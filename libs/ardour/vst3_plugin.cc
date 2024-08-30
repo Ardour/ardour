@@ -678,9 +678,9 @@ VST3Plugin::set_block_size (pframes_t n_samples)
 }
 
 samplecnt_t
-VST3Plugin::plugin_tail () const
+VST3Plugin::plugin_tailtime () const
 {
-	return _plug->plugin_tail ();
+	return _plug->plugin_tailtime ();
 }
 
 samplecnt_t
@@ -1816,7 +1816,7 @@ VST3PI::plugin_latency ()
 }
 
 uint32_t
-VST3PI::plugin_tail ()
+VST3PI::plugin_tailtime ()
 {
 	if (!_plugin_tail) { // XXX this is currently never reset
 		_plugin_tail = _processor->getTailSamples ();

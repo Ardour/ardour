@@ -318,14 +318,7 @@ Plugin::input_streams () const
 }
 
 samplecnt_t
-Plugin::effective_tail () const
-{
-	/* consider adding a user-override per plugin; compare to HasLatency, Latent */
-	return max<samplecnt_t> (0, min<samplecnt_t> (plugin_tail (), Config->get_max_tail_samples ()));
-}
-
-samplecnt_t
-Plugin::plugin_tail () const
+Plugin::plugin_tailtime () const
 {
 	return _session.sample_rate () * Config->get_tail_duration_sec ();
 }

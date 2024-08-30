@@ -182,7 +182,7 @@ public:
 
 	/* API for Ardour -- Setup/Processing */
 	uint32_t plugin_latency ();
-	uint32_t plugin_tail ();
+	uint32_t plugin_tailtime ();
 	bool     set_block_size (int32_t);
 	bool     activate ();
 	bool     deactivate ();
@@ -444,7 +444,7 @@ public:
 
 private:
 	samplecnt_t plugin_latency () const;
-	samplecnt_t plugin_tail () const;
+	samplecnt_t plugin_tailtime () const;
 	void        init ();
 	void        find_presets ();
 	void        forward_resize_view (int w, int h);

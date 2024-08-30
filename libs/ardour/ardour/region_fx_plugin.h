@@ -43,7 +43,7 @@ namespace ARDOUR
 {
 class ReadOnlyControl;
 
-class LIBARDOUR_API RegionFxPlugin : public SessionObject, public PlugInsertBase, public Latent, public Temporal::TimeDomainProvider
+class LIBARDOUR_API RegionFxPlugin : public SessionObject, public PlugInsertBase, public Latent, public TailTime, public Temporal::TimeDomainProvider
 {
 public:
 	RegionFxPlugin (Session&, Temporal::TimeDomain const, std::shared_ptr<Plugin> = std::shared_ptr<Plugin> ());
@@ -61,6 +61,8 @@ public:
 
 	/* Latent */
 	samplecnt_t signal_latency () const;
+	/* TailTime */
+	samplecnt_t signal_tailtime () const;
 
 	/* PlugInsertBase */
 	uint32_t get_count () const
@@ -153,10 +155,6 @@ public:
 		return _required_buffers;
 	}
 
-	/* wrapped Plugin API */
-	PBD::Signal0<void> TailChanged;
-	samplecnt_t effective_tail () const;
-
 private:
 	/* disallow copy construction */
 	RegionFxPlugin (RegionFxPlugin const&);
@@ -178,7 +176,8 @@ private:
 	/** details of the match currently being used */
 	Match _match;
 
-	uint32_t _plugin_signal_latency;
+	samplecnt_t _plugin_signal_latency;
+	samplecnt_t _plugin_signal_tailtime;
 
 	typedef std::vector<std::shared_ptr<Plugin>> Plugins;
 	Plugins                                      _plugins;

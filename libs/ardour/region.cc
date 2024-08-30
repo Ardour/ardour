@@ -2475,7 +2475,7 @@ Region::fx_tail_changed (bool)
 {
 	uint32_t t = 0;
 	for (auto const& rfx : _plugins) {
-		t = max<uint32_t> (t, rfx->plugin()->effective_tail ());
+		t = max<uint32_t> (t, rfx->effective_tailtime ());
 	}
 	if (t == _fx_tail) {
 		return;
