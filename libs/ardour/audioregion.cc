@@ -872,7 +872,19 @@ AudioRegion::read_at (Sample*     buf,
 
 		/* apply region FX to all channels */
 		if (have_fx) {
+#ifndef NDEBUG
+			microseconds_t t_start = get_microseconds ();
+#endif
 			const_cast<AudioRegion*>(this)->apply_region_fx (_readcache, offset + suffix, offset + suffix + n_proc, n_proc);
+#ifndef NDEBUG
+			if (DEBUG_ENABLED (DEBUG::AudioCacheRefill)) {
+				microseconds_t t_end = get_microseconds ();
+				int nsecs_per_sample = lrintf ((t_end - t_start) * 1000 / std::max<double> (1.0, n_proc * n_chn));
+				float load =  (t_end - t_start) / (10000.f * n_proc / (float) _session.sample_rate ());
+				DEBUG_TRACE (DEBUG::AudioCacheRefill, string_compose ("- RegionFx '%1' took %2 us, frames: %3, nchn: %4, ns/spl: %5 load: %6%%\n",
+							name (), (t_end - t_start), n_proc, n_chn, nsecs_per_sample, load));
+			}
+#endif
 		}
 
 		/* for mono regions without plugins, mixdown_buffer is valid as-is */
