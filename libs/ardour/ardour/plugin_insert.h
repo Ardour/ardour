@@ -333,11 +333,10 @@ private:
 	 * which is known to be troublesome with Visual C++ :-
 	 * https://www.boost.org/doc/libs/1_65_0/libs/type_traits/doc/html/boost_typetraits/reference/aligned_storage.html
 	 */
-	class PinMappings : public std::map <uint32_t, ARDOUR::ChanMapping>
+	typedef std::map <uint32_t, ARDOUR::ChanMapping> PinMappings;
 #else
-	class PinMappings : public std::map <uint32_t, ARDOUR::ChanMapping, std::less<uint32_t>, PBD::StackAllocator<std::pair<const uint32_t, ARDOUR::ChanMapping>, 4> >
+	typedef std::map <uint32_t, ARDOUR::ChanMapping, std::less<uint32_t>, PBD::StackAllocator<std::pair<const uint32_t, ARDOUR::ChanMapping>, 4> > PinMappings;
 #endif
-	{};
 
 	PinMappings _in_map;
 	PinMappings _out_map;
