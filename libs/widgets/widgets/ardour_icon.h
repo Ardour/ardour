@@ -77,6 +77,7 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		Mixer,
 		Meters,
 		TrackWaveform,
+		TailTimeClock,
 		NoIcon //< Last
 	};
 
