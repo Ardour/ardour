@@ -322,11 +322,7 @@ private:
 	/** details of the match currently being used */
 	Match _match;
 
-	/* ordered map [plugin instance ID] => ARDOUR::ChanMapping
-	 * TODO: consider replacing with boost::flat_map<> or std::vector<>.
-	 * TODO: Remove class and turn it into a type alias when .p(i) method
-	 * becomes completely unused.
-	 */
+	/* ordered map [plugin instance ID] => ARDOUR::ChanMapping */
 #if defined(_MSC_VER) /* && (_MSC_VER < 1900)
 	                   * Regarding the note (below) it was initially
 	                   * thought that this got fixed in VS2015 - but
@@ -341,13 +337,7 @@ private:
 #else
 	class PinMappings : public std::map <uint32_t, ARDOUR::ChanMapping, std::less<uint32_t>, PBD::StackAllocator<std::pair<const uint32_t, ARDOUR::ChanMapping>, 4> >
 #endif
-	{
-		public:
-			[[deprecated]]
-			inline ARDOUR::ChanMapping const& p (const uint32_t i) const {
-				return at(i);
-			}
-	};
+	{};
 
 	PinMappings _in_map;
 	PinMappings _out_map;
