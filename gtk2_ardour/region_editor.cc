@@ -987,7 +987,7 @@ RegionEditor::RegionFxBox::show_plugin_gui (std::weak_ptr<RegionFxPlugin> wfx, b
 		rfx->set_window_proxy (pwp);
 		WM::Manager::instance ().register_window (pwp);
 		RegionView* rv = PublicEditor::instance ().regionview_from_region (_region);
-		rv->RegionViewGoingAway.connect_same_thread (*pwp, [pwp] (RegionView*) { pwp->hide (); });
+		rv->RegionViewGoingAway.connect_same_thread (*pwp, [pwp, rv] (RegionView* srv) { if (rv == srv) { pwp->hide (); }});
 	}
 
 	pwp->set_custom_ui_mode (custom_ui);
