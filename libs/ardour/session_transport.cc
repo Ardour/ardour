@@ -1276,7 +1276,6 @@ Session::non_realtime_locate ()
 		/* no more looping .. should have been noticed elsewhere */
 	}
 
-	microseconds_t start;
 	uint32_t nt = 0;
 
 	samplepos_t tf;
@@ -1288,7 +1287,9 @@ Session::non_realtime_locate ()
 	  restart:
 		sc = _seek_counter.load ();
 		tf = _transport_sample;
-		start = get_microseconds ();
+#ifndef NDEBUG
+		microseconds_t start = get_microseconds ();
+#endif
 
 		std::shared_ptr<IOTaskList> tl = io_tasklist ();
 		for (auto const& i : *rl) {
@@ -1300,9 +1301,9 @@ Session::non_realtime_locate ()
 			goto restart;
 		}
 
+#ifndef NDEBUG
 		microseconds_t end = get_microseconds ();
 		int usecs_per_track = lrintf ((end - start) / std::max<double> (1.0, nt));
-#ifndef NDEBUG
 		std::cerr << "locate to " << tf << " took " << (end - start) << " usecs for " << nt << " tracks = " << usecs_per_track << " per track\n";
 #endif
 		if (usecs_per_track > _current_usecs_per_track.load ()) {
