@@ -324,6 +324,8 @@ private:
 
 	/* ordered map [plugin instance ID] => ARDOUR::ChanMapping
 	 * TODO: consider replacing with boost::flat_map<> or std::vector<>.
+	 * TODO: Remove class and turn it into a type alias when .p(i) method
+	 * becomes completely unused.
 	 */
 #if defined(_MSC_VER) /* && (_MSC_VER < 1900)
 	                   * Regarding the note (below) it was initially
@@ -341,16 +343,9 @@ private:
 #endif
 	{
 		public:
-			/* this emulates C++11's  std::map::at()
-			 * return mapping for given plugin instance */
+			[[deprecated]]
 			inline ARDOUR::ChanMapping const& p (const uint32_t i) const {
-#ifndef NDEBUG
-				const_iterator x = find (i);
-				assert (x != end ());
-				return x->second;
-#else
-				return find(i)->second;
-#endif
+				return at(i);
 			}
 	};
 
