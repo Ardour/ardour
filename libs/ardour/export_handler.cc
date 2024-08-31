@@ -451,17 +451,8 @@ ExportHandler::finish_timespan ()
 		if (!fmt->command().empty()) {
 			SessionMetadata const & metadata (*SessionMetadata::Metadata());
 
-#if 0 // would be nicer with C++11 initialiser...
-			std::map<char, std::string> subs {
-				{ 'f', filename },
-				{ 'd', Glib::path_get_dirname(filename)  + G_DIR_SEPARATOR },
-				{ 'b', PBD::basename_nosuffix(filename) },
-				...
-			};
-#endif
 			export_status->active_job = ExportStatus::Command;
 			PBD::ScopedConnection command_connection;
-			std::map<char, std::string> subs;
 
 			std::stringstream track_number;
 			track_number << metadata.track_number ();
@@ -470,30 +461,32 @@ ExportHandler::finish_timespan ()
 			std::stringstream year;
 			year << metadata.year ();
 
-			subs.insert (std::pair<char, std::string> ('a', metadata.artist ()));
-			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix (filename)));
-			subs.insert (std::pair<char, std::string> ('c', metadata.copyright ()));
-			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname (filename) + G_DIR_SEPARATOR));
-			subs.insert (std::pair<char, std::string> ('f', filename));
-			subs.insert (std::pair<char, std::string> ('l', metadata.lyricist ()));
-			subs.insert (std::pair<char, std::string> ('n', session.name ()));
-			subs.insert (std::pair<char, std::string> ('s', session.path ()));
-			subs.insert (std::pair<char, std::string> ('o', metadata.conductor ()));
-			subs.insert (std::pair<char, std::string> ('t', metadata.title ()));
-			subs.insert (std::pair<char, std::string> ('z', metadata.organization ()));
-			subs.insert (std::pair<char, std::string> ('A', metadata.album ()));
-			subs.insert (std::pair<char, std::string> ('C', metadata.comment ()));
-			subs.insert (std::pair<char, std::string> ('E', metadata.engineer ()));
-			subs.insert (std::pair<char, std::string> ('G', metadata.genre ()));
-			subs.insert (std::pair<char, std::string> ('L', total_tracks.str ()));
-			subs.insert (std::pair<char, std::string> ('M', metadata.mixer ()));
-			subs.insert (std::pair<char, std::string> ('N', current_timespan->name())); // =?= config_map.begin()->first->name ()
-			subs.insert (std::pair<char, std::string> ('O', metadata.composer ()));
-			subs.insert (std::pair<char, std::string> ('P', metadata.producer ()));
-			subs.insert (std::pair<char, std::string> ('S', metadata.disc_subtitle ()));
-			subs.insert (std::pair<char, std::string> ('T', track_number.str ()));
-			subs.insert (std::pair<char, std::string> ('Y', year.str ()));
-			subs.insert (std::pair<char, std::string> ('Z', metadata.country ()));
+			std::map<char, std::string> subs {
+				{'a', metadata.artist ()},
+				{'b', PBD::basename_nosuffix (filename)},
+				{'c', metadata.copyright ()},
+				{'d', Glib::path_get_dirname (filename) + G_DIR_SEPARATOR},
+				{'f', filename},
+				{'l', metadata.lyricist ()},
+				{'n', session.name ()},
+				{'s', session.path ()},
+				{'o', metadata.conductor ()},
+				{'t', metadata.title ()},
+				{'z', metadata.organization ()},
+				{'A', metadata.album ()},
+				{'C', metadata.comment ()},
+				{'E', metadata.engineer ()},
+				{'G', metadata.genre ()},
+				{'L', total_tracks.str ()},
+				{'M', metadata.mixer ()},
+				{'N', current_timespan->name()}, // =?= config_map.begin()->first->name ()
+				{'O', metadata.composer ()},
+				{'P', metadata.producer ()},
+				{'S', metadata.disc_subtitle ()},
+				{'T', track_number.str ()},
+				{'Y', year.str ()},
+				{'Z', metadata.country ()}
+			};
 
 			ARDOUR::SystemExec *se = new ARDOUR::SystemExec(fmt->command(), subs, true);
 			info << "Post-export command line : {" << se->to_s () << "}" << endmsg;
