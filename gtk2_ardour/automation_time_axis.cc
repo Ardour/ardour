@@ -1042,6 +1042,13 @@ AutomationTimeAxisView::color_handler ()
 	if (_line) {
 		_line->set_colors();
 	}
+
+	if (_base_rect) {
+		const std::string fill_color_name = (dynamic_cast<MidiTimeAxisView*>(get_parent())
+		                                     ? "midi automation track fill"
+		                                     : "audio automation track fill");
+		_base_rect->set_fill_color (UIConfiguration::instance().color_mod (fill_color_name, "automation track fill"));
+	}
 }
 
 int
