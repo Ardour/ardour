@@ -20,6 +20,7 @@
  */
 
 #include <iostream>
+#include <thread>
 #include <vector>
 
 #include <glibmm/timer.h>
@@ -211,7 +212,7 @@ AsyncMIDIPort::drain (int check_interval_usecs, int total_usecs_to_wait)
 		if (vec.len[0] + vec.len[1] >= output_fifo.bufsize() - 1) {
 			break;
 		}
-		Glib::usleep (check_interval_usecs);
+		std::this_thread::sleep_for (std::chrono::microseconds(check_interval_usecs));
 		now = get_microseconds();
 	}
 }

@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #include <glibmm/timer.h>
 
 #include "pbd/error.h"
@@ -63,7 +65,7 @@ Session::set_controls (std::shared_ptr<AutomationControlList> cl, double val, Co
 		int sleeptm = std::max (40000, engine().usecs_per_cycle ());
 		int timeout = std::max (10, 1000000 / sleeptm);
 		do {
-			Glib::usleep (sleeptm);
+			std::this_thread::sleep_for (std::chrono::microseconds(sleeptm));
 			ARDOUR::GUIIdle ();
 		}
 		while (SessionEvent::pool_available () < 8 && --timeout > 0);

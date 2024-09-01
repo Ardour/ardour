@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #include <math.h>
 #include <sys/time.h>
 #include <regex.h>
@@ -441,7 +443,9 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 	}
 
 	int timeout = 5000;
-	while (!_running && --timeout > 0) { Glib::usleep (1000); }
+	while (!_running && --timeout > 0) {
+		std::this_thread::sleep_for (std::chrono::milliseconds(1));
+	}
 
 	if (timeout == 0 || !_running) {
 		PBD::error << _("DummyAudioBackend: failed to start process thread.") << endmsg;
@@ -971,13 +975,13 @@ DummyAudioBackend::main_process_thread ()
 			const int64_t nominal_time = _dsp_load_calc.get_max_time_us ();
 			if (elapsed_time < nominal_time) {
 				const int64_t sleepy = _speedup * (nominal_time - elapsed_time);
-				Glib::usleep (std::max ((int64_t) 10, sleepy));
+				std::this_thread::sleep_for (std::chrono::microseconds(std::max(static_cast<int64_t>(10), sleepy)));
 			} else {
-				Glib::usleep (10); // don't hog cpu
+				std::this_thread::sleep_for (std::chrono::microseconds(10)); // don't hog cpu
 			}
 		} else {
 			_dsp_load = 1.0f;
-			Glib::usleep (10); // don't hog cpu
+			std::this_thread::sleep_for (std::chrono::microseconds(10)); // don't hog cpu
 		}
 
 		/* beginning of next cycle */

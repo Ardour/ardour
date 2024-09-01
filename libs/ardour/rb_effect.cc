@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <thread>
 
 #include <glibmm.h>
 
@@ -302,7 +303,7 @@ RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 		while ((avail = stretcher.available ()) >= 0 && !tsr.cancel) {
 			if (avail == 0) {
 				/* wait for stretcher threads */
-				Glib::usleep (10000);
+				std::this_thread::sleep_for (std::chrono::milliseconds(10));
 				continue;
 			}
 

@@ -22,6 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
 #include <vector>
 
 #include <glib.h>
@@ -911,7 +912,7 @@ ExportGraphBuilder::Intermediate::start_post_processing()
 	if (!AudioEngine::instance()->freewheeling ()) {
 		AudioEngine::instance()->freewheel (true);
 		while (!AudioEngine::instance()->freewheeling ()) {
-			Glib::usleep (AudioEngine::instance()->usecs_per_cycle ());
+			std::this_thread::sleep_for (std::chrono::microseconds(AudioEngine::instance()->usecs_per_cycle ()));
 		}
 	}
 }

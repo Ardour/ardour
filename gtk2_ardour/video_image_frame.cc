@@ -17,6 +17,9 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <thread>
+
 #include <sigc++/bind.h>
 #include "ardour/tempo.h"
 
@@ -211,7 +214,7 @@ http_get_thread (void *arg) {
 	char *res = NULL;
 	do {
 		res = ArdourCurl::http_get (url, &status, false);
-		if (status == 503) Glib::usleep(5000); // try-again
+		if (status == 503) 		std::this_thread::sleep_for (std::chrono::milliseconds(5)); // try-again
 	} while (status == 503 && --timeout > 0);
 
 	if (status != 200 || !res) {
@@ -251,7 +254,7 @@ VideoImageFrame::http_download_done (char *data){
 
 	exposeimg();
 	/* don't request frames too quickly, wait after user has zoomed */
-	Glib::usleep(40000);
+	std::this_thread::sleep_for (std::chrono::milliseconds(40));
 
 	if (queued_request) {
 		http_get_again(want_video_frame_number);

@@ -19,6 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <cstdio>
+#include <thread>
 
 #include "pbd/file_utils.h"
 #include "pbd/convert.h"
@@ -95,7 +96,7 @@ VideoMonitor::query_full_state (bool wait)
 	process->write_to_stdin("get osdcfg\n");
 	int timeout = 40;
 	if (wait && knownstate !=127 && --timeout) {
-		Glib::usleep(50000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(50));
 		sched_yield();
 	}
 }
@@ -114,7 +115,7 @@ VideoMonitor::quit ()
 	 */
 	int timeout = 40;
 	while (is_started() && --timeout) {
-		Glib::usleep(50000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(50));
 		sched_yield();
 	}
 	if (timeout <= 0) {

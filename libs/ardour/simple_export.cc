@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #include <glibmm.h>
 
 #include "ardour/export_channel_configuration.h"
@@ -222,7 +224,7 @@ SimpleExport::run_export ()
 	while (_status->running ()) {
 		GUIIdle ();
 		// TODO only sleep if GUI did not process any events
-		Glib::usleep (10000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(10));
 	}
 
 	_status->finish (TRS_UI);

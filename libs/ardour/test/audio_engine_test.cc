@@ -51,7 +51,7 @@ AudioEngineTest::test_start ()
 
 	CPPUNIT_ASSERT (engine->start () == 0);
 
-	Glib::usleep(2000);
+	std::this_thread::sleep_for (std::chrono::milliseconds(2));
 
 	CPPUNIT_ASSERT (engine->stop () == 0);
 }

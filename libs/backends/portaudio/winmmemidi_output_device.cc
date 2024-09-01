@@ -236,7 +236,10 @@ WinMMEMidiOutputDevice::start_midi_output_thread ()
 	}
 
 	int timeout = 5000;
-	while (!m_thread_running && --timeout > 0) { Glib::usleep (1000); }
+	while (!m_thread_running && --timeout > 0) {
+		std::this_thread::sleep_for (std::chrono::milliseconds(1));
+	}
+
 	if (timeout == 0 || !m_thread_running) {
 		DEBUG_MIDI (string_compose ("Unable to start midi output device thread: %1\n",
 					    m_name));
@@ -252,7 +255,10 @@ WinMMEMidiOutputDevice::stop_midi_output_thread ()
 	m_thread_quit = true;
 	signal (m_queue_semaphore);
 
-	while (m_thread_running && --timeout > 0) { Glib::usleep (1000); }
+	while (m_thread_running && --timeout > 0) {
+		std::this_thread::sleep_for (std::chrono::milliseconds(1));
+	}
+
 	if (timeout == 0 || m_thread_running) {
 		DEBUG_MIDI (string_compose ("Unable to stop midi output device thread: %1\n",
 					     m_name));

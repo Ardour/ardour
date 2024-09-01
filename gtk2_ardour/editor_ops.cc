@@ -37,6 +37,7 @@
 #include <string>
 #include <map>
 #include <set>
+#include <thread>
 
 #include <gtkmm/messagedialog.h>
 
@@ -4326,7 +4327,7 @@ Editor::freeze_route ()
 	/* wait for just a little while, because the above call is asynchronous */
 	int timeout = 10;
 	do {
-		Glib::usleep (_session->engine().usecs_per_cycle ());
+		std::this_thread::sleep_for (std::chrono::microseconds(_session->engine().usecs_per_cycle ()));
 	} while (!_session->transport_stopped() && --timeout > 0);
 
 	if (timeout == 0) {

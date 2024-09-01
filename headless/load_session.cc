@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <getopt.h>
 #include <iostream>
+#include <thread>
 
 #ifndef PLATFORM_WINDOWS
 #include <signal.h>
@@ -254,7 +255,7 @@ main (int argc, char* argv[])
 	/* allow signal propagation, callback/thread-pool setup, etc
 	 * similar to to GUI "first idle"
 	 */
-	Glib::usleep (1000000); // 1 sec
+	std::this_thread::sleep_for (std::chrono::seconds(1)); // 1 sec
 
 	if (!s) {
 		cerr << "failed_to load session\n";

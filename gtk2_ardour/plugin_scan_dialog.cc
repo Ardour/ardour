@@ -17,6 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
 #include "gtk2ardour-version.h"
@@ -308,7 +310,7 @@ PluginScanDialog::message_handler (std::string type, std::string plugin, bool ca
 		btn_timeout_enable.set_sensitive (false);
 		queue_draw ();
 		for (int i = 0; delayed_close && i < 30; ++i) { // 1.5 sec delay
-			Glib::usleep (50000);
+			std::this_thread::sleep_for (std::chrono::milliseconds(50));
 			ARDOUR_UI::instance ()->gui_idle_handler ();
 		}
 		hide ();

@@ -3573,7 +3573,7 @@ Session::cleanup_peakfiles ()
 
 	int timeout = 5000; // 5 seconds
 	while (!SourceFactory::files_with_peaks.empty()) {
-		Glib::usleep (1000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(1));
 		if (--timeout < 0) {
 			warning << _("Timeout waiting for peak-file creation to terminate before cleanup, please try again later.") << endmsg;
 			_state_of_the_state = StateOfTheState (_state_of_the_state & (~PeakCleanup));

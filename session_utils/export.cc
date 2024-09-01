@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
 #include <iostream>
 #include <cstdlib>
 #include <getopt.h>
@@ -202,7 +203,7 @@ static int export_session (Session *session,
 			printf ("* Exporting...            \r");
 			break;
 		}
-		Glib::usleep (1000000);
+		std::this_thread::sleep_for (std::chrono::seconds(1));;
 	}
 	printf("\n");
 

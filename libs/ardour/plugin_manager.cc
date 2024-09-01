@@ -33,6 +33,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <sstream>
+#include <thread>
 
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
@@ -1227,7 +1228,7 @@ PluginManager::run_auv2_scanner_app (CAComponentDescription const& desc, AUv2Des
 			--timeout;
 		}
 		ARDOUR::PluginScanTimeout (timeout);
-		Glib::usleep (100000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(100));
 
 		if (cancelled () || (!notime && timeout == 0)) {
 			scanner.terminate ();
@@ -1523,7 +1524,7 @@ PluginManager::run_vst2_scanner_app (std::string path, PSLEPtr psle) const
 			--timeout;
 		}
 		ARDOUR::PluginScanTimeout (timeout);
-		Glib::usleep (100000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(100));
 
 		if (cancelled () || (!notime && timeout == 0)) {
 			scanner.terminate ();
@@ -2284,7 +2285,7 @@ PluginManager::run_vst3_scanner_app (std::string bundle_path, PSLEPtr psle) cons
 			--timeout;
 		}
 		ARDOUR::PluginScanTimeout (timeout);
-		Glib::usleep (100000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(100));
 
 		if (cancelled () || (!notime && timeout == 0)) {
 			scanner.terminate ();

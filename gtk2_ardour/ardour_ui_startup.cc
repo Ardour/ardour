@@ -31,6 +31,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
 #include "gtk2ardour-version.h"
@@ -463,7 +465,7 @@ ARDOUR_UI::nsm_init ()
 	for ( i = 0; i < 5000; ++i) {
 		nsm->check ();
 
-		Glib::usleep (i);
+		std::this_thread::sleep_for (std::chrono::microseconds(i));
 		if (nsm->is_active()) {
 			break;
 		}
@@ -478,7 +480,7 @@ ARDOUR_UI::nsm_init ()
 	/* wait for open command from nsm server */
 	for (i = 0; i < 5000; ++i) {
 		nsm->check ();
-		Glib::usleep (1000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(1));
 		if (nsm->client_id ()) {
 			break;
 		}

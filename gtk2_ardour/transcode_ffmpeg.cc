@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #include <glib.h>
 #include <sstream>
 #include <stdio.h>
@@ -105,6 +107,7 @@ TranscodeFfmpeg::probe ()
 	 * SystemExec::Terminated is emitted and ffcmd set to NULL */
 	int timeout = 300; // 1.5 sec
 	while (ffcmd && --timeout > 0) {
+		std::this_thread::sleep_for (std::chrono::milliseconds(5));
 		Glib::usleep (5000);
 		ARDOUR::GUIIdle ();
 	}
@@ -549,7 +552,7 @@ TranscodeFfmpeg::cancel ()
 		return;
 	}
 	ffcmd->write_to_stdin ("q");
-	Glib::usleep (1000000); /* 1 sec */
+	std::this_thread::sleep_for (std::chrono::seconds(1));
 	if (ffcmd) {
 		ffcmd->terminate ();
 	}

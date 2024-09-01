@@ -6,6 +6,7 @@
 #include <iostream>
 #include <list>
 #include <string>
+#include <thread>
 #include <vector>
 
 #ifdef PLATFORM_WINDOWS
@@ -312,7 +313,7 @@ create_session (string dir, string state, uint32_t rate)
 		cerr << "unknown exception.\n";
 		return 0;
 	}
-	Glib::usleep (1000000); // allow signal propagation, callback/thread-pool setup
+	std::this_thread::sleep_for (std::chrono::seconds(1)); // allow signal propagation, callback/thread-pool setup
 	if (!s) {
 		return 0;
 	}
@@ -345,7 +346,7 @@ load_session (string dir, string state)
 		cerr << "unknown exception.\n";
 		return 0;
 	}
-	Glib::usleep (1000000); // allow signal propagation, callback/thread-pool setup
+	std::this_thread::sleep_for (std::chrono::seconds(1)); // allow signal propagation, callback/thread-pool setup
 	if (!s) {
 		return 0;
 	}
@@ -383,7 +384,7 @@ static void
 delay (float d)
 {
 	if (d > 0) {
-		Glib::usleep (d * 1000000);
+		std::this_thread::sleep_for (std::chrono::duration<float>(d * 1000000)); // std::chrono::duration is in seconds by default
 	}
 }
 

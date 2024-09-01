@@ -28,6 +28,7 @@
 #include <ctime>
 #include <string>
 #include <set>
+#include <thread>
 
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
@@ -465,6 +466,6 @@ Editor::timefx_thread (void *arg)
 	   event loop doesn't die before any changes we made are processed
 	   by the GUI ...
 	*/
-	Glib::usleep(G_USEC_PER_SEC / 5);
+	std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	return 0;
 }

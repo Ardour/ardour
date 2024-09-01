@@ -19,6 +19,8 @@
 
 
 #include <cmath>
+#include <thread>
+
 #include <glibmm.h>
 
 #include "pbd/compose.h"
@@ -122,7 +124,9 @@ AlsaAudioSlave::start ()
 	}
 
 	int timeout = 5000;
-	while (!_active && --timeout > 0) { Glib::usleep (1000); }
+	while (!_active && --timeout > 0) {
+		std::this_thread::sleep_for (std::chrono::milliseconds(1));
+	}
 
 	if (timeout == 0 || !_active) {
 		_run = false;

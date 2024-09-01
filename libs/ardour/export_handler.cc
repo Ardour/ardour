@@ -22,6 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 #include <glibmm/convert.h>
@@ -234,7 +236,7 @@ ExportHandler::start_timespan ()
 	if (AudioEngine::instance()->freewheeling ()) {
 		AudioEngine::instance()->freewheel (false);
 		do {
-			Glib::usleep (AudioEngine::instance()->usecs_per_cycle ());
+			std::this_thread::sleep_for (std::chrono::microseconds(AudioEngine::instance()->usecs_per_cycle ()));
 		} while (AudioEngine::instance()->freewheeling ());
 		session.reset_xrun_count ();
 	}
@@ -534,7 +536,7 @@ ExportHandler::finish_timespan ()
 				// successfully started
 				while (se->is_running ()) {
 					// wait for system exec to terminate
-					Glib::usleep (1000);
+					std::this_thread::sleep_for (std::chrono::milliseconds(1));
 				}
 			} else {
 				error << "Post-export command FAILED with Error: " << ret << endmsg;

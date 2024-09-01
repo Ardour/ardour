@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #include <math.h>
 #include <regex.h>
 #include <stdlib.h>
@@ -597,7 +599,7 @@ PulseAudioBackend::_start (bool /*for_latency_measurement*/)
 
 	int timeout = 5000;
 	while (!_active && --timeout > 0) {
-		Glib::usleep (1000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(1));
 	}
 
 	if (timeout == 0 || !_active) {
@@ -1049,7 +1051,7 @@ PulseAudioBackend::main_process_thread ()
 			}
 
 			_dsp_load = 1.0f;
-			Glib::usleep (100); // don't hog cpu
+			std::this_thread::sleep_for (std::chrono::microseconds(100)); // don't hog cpu
 		}
 
 		bool connections_changed = false;

@@ -16,7 +16,9 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include <cstring>
+#include <thread>
 #include <vamp-hostsdk/PluginLoader.h>
 
 #include "pbd/basename.h"
@@ -649,7 +651,7 @@ ARDOUR::LuaAPI::wait_for_process_callback (size_t n_cycles, int64_t timeout_ms)
 
 	InternalSend::CycleStart.connect_same_thread (c, std::bind (&proc_cycle_start, &cnt));
 	while (cnt <= n_cycles) {
-		Glib::usleep (1000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(1));
 		if (timeout_ms > 0) {
 			if (--timeout_ms == 0) {
 				return cnt > n_cycles;

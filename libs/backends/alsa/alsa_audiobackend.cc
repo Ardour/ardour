@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #include <regex.h>
 #include <sys/mman.h>
 #include <sys/time.h>
@@ -967,7 +969,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 	int timeout = 5000;
 	while (!_active && --timeout > 0) {
-		Glib::usleep (1000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(1));
 	}
 
 	if (timeout == 0 || !_active) {
@@ -1762,7 +1764,7 @@ AlsaAudioBackend::main_process_thread ()
 			_active = false;
 			return 0;
 		}
-		Glib::usleep (1000000 * (_samples_per_period / _samplerate));
+		std::this_thread::sleep_for (std::chrono::duration<double>(dll_dt)); // std::chrono::duration is in seconds by default
 	}
 
 	_dsp_load_calc.reset ();
@@ -2008,7 +2010,7 @@ AlsaAudioBackend::main_process_thread ()
 
 			_dsp_load = 1.0;
 			reset_dll = true;
-			Glib::usleep (100); // don't hog cpu
+			std::this_thread::sleep_for (std::chrono::microseconds(100)); // don't hog cpu
 		}
 
 		bool connections_changed = false;
@@ -2406,7 +2408,7 @@ AlsaDeviceReservation::acquire_device (const char* device_name, bool silent)
 	/* wait to check if reservation succeeded. */
 	int timeout = 500; // 5 sec
 	while (_device_reservation && !_reservation_succeeded && --timeout > 0) {
-		Glib::usleep (10000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(10));
 	}
 
 	if (timeout == 0 || !_reservation_succeeded) {

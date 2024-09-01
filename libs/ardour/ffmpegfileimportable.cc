@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #include <boost/property_tree/json_parser.hpp>
 #include <glibmm.h>
 
@@ -124,7 +126,7 @@ FFMPEGFileImportableSource::seek (samplepos_t pos)
 				break;
 			}
 			// TODO: don't just spin, but use some signalling
-			Glib::usleep (1000);
+			std::this_thread::sleep_for (std::chrono::milliseconds(1));
 			continue;
 		}
 		guint inc = std::min<guint> (read_space, pos - _read_pos);
@@ -149,7 +151,7 @@ FFMPEGFileImportableSource::read (Sample* dst, samplecnt_t nframes)
 				break;
 			}
 			// TODO: don't just spin, but use some signalling
-			Glib::usleep (1000);
+			std::this_thread::sleep_for (std::chrono::milliseconds(1));
 			continue;
 		}
 		nframes -= read;
@@ -229,7 +231,7 @@ FFMPEGFileImportableSource::did_read_data (std::string data, size_t size)
 		_buffer.get_write_vector (&wv);
 		if (wv.len[0] == 0) {
 			// TODO: don't just spin, but use some signalling
-			Glib::usleep (1000);
+			std::this_thread::sleep_for (std::chrono::milliseconds(1));
 			continue;
 		}
 

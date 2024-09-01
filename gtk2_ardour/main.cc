@@ -27,6 +27,7 @@
 
 #include <cstdlib>
 #include <cerrno>
+#include <thread>
 #include <vector>
 
 #include <signal.h>
@@ -476,7 +477,7 @@ int main (int argc, char *argv[])
 	ARDOUR::cleanup ();
 #ifndef NDEBUG
 	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
-		Glib::usleep(100000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(100));
 		sched_yield();
 	}
 #endif
@@ -485,7 +486,7 @@ int main (int argc, char *argv[])
 
 #ifndef NDEBUG
 	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
-		Glib::usleep(100000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(100));
 		sched_yield();
 	}
 #endif

@@ -36,6 +36,7 @@
 #include <cmath>
 #include <cassert>
 #include <algorithm>
+#include <thread>
 
 #include <glibmm.h>
 #include <boost/algorithm/string.hpp>
@@ -2318,7 +2319,7 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 			// TODO rather use a semaphore or something.
 			// but since ::reorder_processors() is called
 			// from the GUI thread, this is fine..
-			Glib::usleep(500);
+			std::this_thread::sleep_for (std::chrono::microseconds(500));
 		}
 	}
 

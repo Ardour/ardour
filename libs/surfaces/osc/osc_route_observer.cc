@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #include "pbd/control_math.h"
 #include <glibmm.h>
 
@@ -115,7 +117,7 @@ OSCRouteObserver::refresh_strip (std::shared_ptr<ARDOUR::Stripable> new_strip, b
 {
 	_init = true;
 	if (_tick_busy) {
-		Glib::usleep(100); // let tick finish
+		std::this_thread::sleep_for (std::chrono::microseconds(100)); // let tick finish
 	}
 	_last_gain =-1.0;
 	_last_trim =-1.0;
@@ -228,7 +230,7 @@ OSCRouteObserver::refresh_send (std::shared_ptr<ARDOUR::Send> new_send, bool for
 {
 	_init = true;
 	if (_tick_busy) {
-		Glib::usleep(100); // let tick finish
+		std::this_thread::sleep_for (std::chrono::microseconds(100)); // let tick finish
 	}
 	_last_gain =-1.0;
 	_last_trim =-1.0;

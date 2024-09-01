@@ -28,6 +28,7 @@
 #include <cstdlib>
 #include <cerrno>
 #include <algorithm>
+#include <thread>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -5995,7 +5996,7 @@ OSC::periodic (void)
 		return true;
 	}
 	if (!tick) {
-		Glib::usleep(100); // let flurry of signals subside
+		std::this_thread::sleep_for (std::chrono::microseconds(100)); // let flurry of signals subside
 		if (global_init) {
 			for (uint32_t it = 0; it < _surface.size(); it++) {
 				OSCSurface* sur = &_surface[it];
@@ -6620,7 +6621,7 @@ OSC::float_message (string path, float val, lo_address addr)
 	lo_message_add_float (reply, (float) val);
 
 	lo_send_message (addr, path.c_str(), reply);
-	Glib::usleep(1);
+	std::this_thread::sleep_for (std::chrono::microseconds(1));
 	lo_message_free (reply);
 	_lo_lock.unlock ();
 
@@ -6640,7 +6641,7 @@ OSC::float_message_with_id (std::string path, uint32_t ssid, float value, bool i
 	lo_message_add_float (msg, value);
 
 	lo_send_message (addr, path.c_str(), msg);
-	Glib::usleep(1);
+	std::this_thread::sleep_for (std::chrono::microseconds(1));
 	lo_message_free (msg);
 	_lo_lock.unlock ();
 	return 0;
@@ -6656,7 +6657,7 @@ OSC::int_message (string path, int val, lo_address addr)
 	lo_message_add_int32 (reply, (float) val);
 
 	lo_send_message (addr, path.c_str(), reply);
-	Glib::usleep(1);
+	std::this_thread::sleep_for (std::chrono::microseconds(1));
 	lo_message_free (reply);
 	_lo_lock.unlock ();
 
@@ -6676,7 +6677,7 @@ OSC::int_message_with_id (std::string path, uint32_t ssid, int value, bool in_li
 	lo_message_add_int32 (msg, value);
 
 	lo_send_message (addr, path.c_str(), msg);
-	Glib::usleep(1);
+	std::this_thread::sleep_for (std::chrono::microseconds(1));
 	lo_message_free (msg);
 	_lo_lock.unlock ();
 	return 0;
@@ -6692,7 +6693,7 @@ OSC::text_message (string path, string val, lo_address addr)
 	lo_message_add_string (reply, val.c_str());
 
 	lo_send_message (addr, path.c_str(), reply);
-	Glib::usleep(1);
+	std::this_thread::sleep_for (std::chrono::microseconds(1));
 	lo_message_free (reply);
 	_lo_lock.unlock ();
 
@@ -6713,7 +6714,7 @@ OSC::text_message_with_id (std::string path, uint32_t ssid, std::string val, boo
 	lo_message_add_string (msg, val.c_str());
 
 	lo_send_message (addr, path.c_str(), msg);
-	Glib::usleep(1);
+	std::this_thread::sleep_for (std::chrono::microseconds(1));
 	lo_message_free (msg);
 	_lo_lock.unlock ();
 	return 0;

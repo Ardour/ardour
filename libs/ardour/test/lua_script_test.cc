@@ -51,7 +51,7 @@ LuaScriptTest::session_script_test ()
 			continue;
 		}
 		CPPUNIT_ASSERT_MESSAGE (spi->name, !_session->registered_lua_functions ().empty());
-		Glib::usleep(200000); // wait to script to execute during process()
+		std::this_thread::sleep_for (std::chrono::milliseconds(200)); // wait to script to execute during process()
 		// if the script fails, it'll be removed.
 		CPPUNIT_ASSERT_MESSAGE (spi->name, !_session->registered_lua_functions ().empty());
 		_session->unregister_lua_function ("test");
@@ -97,7 +97,7 @@ LuaScriptTest::dsp_script_test ()
 		int rv = r->add_processor (processor, std::shared_ptr<Processor>(), 0);
 		CPPUNIT_ASSERT_MESSAGE ((*i)->name, rv == 0);
 		processor->enable (true);
-		Glib::usleep(200000); // run process, failing plugins will be deactivated.
+		std::this_thread::sleep_for (std::chrono::milliseconds(200)); // run process, failing plugins will be deactivated.
 		CPPUNIT_ASSERT_MESSAGE ((*i)->name, processor->active());
 		rv = r->remove_processor (processor, NULL, true);
 		CPPUNIT_ASSERT_MESSAGE ((*i)->name, rv == 0);

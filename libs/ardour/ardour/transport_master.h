@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <thread>
 #include <vector>
 
 #include <optional>
@@ -120,7 +121,7 @@ struct LIBARDOUR_API SafeTime {
 		do {
 			if (tries == 10) {
 				std::cerr << "SafeTime: atomic read of current time failed, sleeping!" << std::endl;
-				Glib::usleep (20);
+				std::this_thread::sleep_for (std::chrono::microseconds(20));
 				tries = 0;
 			}
 			dst.guard1.store (guard1.load (std::memory_order_seq_cst), std::memory_order_seq_cst);

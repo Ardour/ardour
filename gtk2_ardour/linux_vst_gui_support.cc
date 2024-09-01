@@ -21,6 +21,8 @@
 /** VSTFX - An engine based on FST for handling linuxVST plugins **/
 /******************************************************************/
 
+#include <thread>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <libgen.h>
@@ -368,7 +370,7 @@ gui_event_loop (void*)
 
 		/*We don't want to use all the CPU.. */
 
-		Glib::usleep (1000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(1));
 
 		/*See if its time for us to do a scheduled event pass on all the plugins*/
 
@@ -462,7 +464,7 @@ again:
 		}
 
 		if (0 == gui_state && may_sleep && elapsed_time_ms + 1 < LXVST_sched_timer_interval) {
-			Glib::usleep (1000 * (LXVST_sched_timer_interval - elapsed_time_ms - 1));
+			std::this_thread::sleep_for (std::chrono::milliseconds(LXVST_sched_timer_interval - elapsed_time_ms - 1));
 		}
 	}
 
@@ -730,7 +732,7 @@ vstfx_launch_editor (VSTState* vstfx)
 	/*QUIRK - some plugins need a slight delay after opening the editor before you can
 	ask the window size or they might return zero - specifically discoDSP */
 
-	Glib::usleep(100000);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	/*Now we can find out how big the parent window should be (and try) to resize it*/
 

@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
 
 #include "pbd/error.h"
 #include <glibmm/threads.h>
@@ -147,7 +148,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 	int sleeptm = std::max (40000, engine().usecs_per_cycle ());
 	int timeout = std::max (100, 8000000 / sleeptm);
 	do {
-		Glib::usleep (sleeptm);
+		std::this_thread::sleep_for (std::chrono::microseconds(sleeptm));
 		sched_yield ();
 	} while (_transport_fsm->waiting_for_butler() && --timeout > 0);
 

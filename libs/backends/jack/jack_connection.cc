@@ -16,7 +16,9 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include <iostream>
+#include <thread>
 
 #include <glibmm/timer.h>
 
@@ -148,7 +150,7 @@ JackConnection::close ()
 		_jack = 0;
 
 		/* If we started JACK, it will be closing down */
-		Glib::usleep (500000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(500));
 
 		Disconnected (""); /* EMIT SIGNAL */
 

@@ -17,6 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -152,7 +154,7 @@ Worker::run()
 			continue;
 		}
 		while (!verify_message_completeness(_requests)) {
-			Glib::usleep(2000);
+			std::this_thread::sleep_for (std::chrono::milliseconds(2));
 			if (_exit) {
 				if (buf) free(buf);
 				return;

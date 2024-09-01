@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <algorithm>
+#include <thread>
+
 #include <sigc++/bind.h>
 #include "ardour/tempo.h"
 
@@ -743,7 +745,7 @@ VideoTimeLine::find_xjadeo () {
 
 		int timeout = 300;
 		while (xjadeo_version.empty() && --timeout) {
-			Glib::usleep(10000);
+			std::this_thread::sleep_for (std::chrono::milliseconds(10));
 		}
 
 		bool v_ok = false;
@@ -811,7 +813,7 @@ VideoTimeLine::find_harvid () {
 
 	int timeout = 300;
 	while (harvid_version.empty() && --timeout) {
-		Glib::usleep(10000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(10));
 	}
 
 	size_t vo = harvid_version.find("harvid v");

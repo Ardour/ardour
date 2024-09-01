@@ -18,6 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
 #include <vector>
 #include "pbd/control_math.h"
 
@@ -124,7 +125,7 @@ OSCSelectObserver::refresh_strip (std::shared_ptr<ARDOUR::Stripable> new_strip, 
 {
 	_init = true;
 	if (_tick_busy) {
-		Glib::usleep(100); // let tick finish
+		std::this_thread::sleep_for (std::chrono::microseconds(100)); // let tick finish
 	}
 	gainmode = gm;
 
@@ -888,7 +889,7 @@ void
 OSCSelectObserver::plug_enable (string path, std::shared_ptr<Processor> proc)
 {
 	// with no delay value is wrong
-	Glib::usleep(10);
+	std::this_thread::sleep_for (std::chrono::microseconds(10));
 
 	_osc.float_message (path, proc->enabled(), addr);
 }
@@ -1058,7 +1059,7 @@ void
 OSCSelectObserver::send_enable (string path, uint32_t id, std::shared_ptr<Processor> proc)
 {
 	// with no delay value is wrong
-	Glib::usleep(10);
+	std::this_thread::sleep_for (std::chrono::microseconds(10));
 
 	_osc.float_message_with_id (X_("/select/send_enable"), id, proc->enabled(), in_line, addr);
 }

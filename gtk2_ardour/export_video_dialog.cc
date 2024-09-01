@@ -23,6 +23,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <thread>
 
 #include <sigc++/bind.h>
 
@@ -640,7 +641,7 @@ ExportVideoDialog::launch_export ()
 		if (gtk_events_pending ()) {
 			gtk_main_iteration ();
 		} else {
-			Glib::usleep (10000);
+			std::this_thread::sleep_for (std::chrono::milliseconds(10));
 		}
 	}
 	_audio_progress_connection.disconnect ();

@@ -31,6 +31,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
 #include "gtk2ardour-version.h"
@@ -201,7 +203,7 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 		}
 		int timeout = 120; // 6 sec
 		while (!ARDOUR_UI::instance()->video_timeline->check_server()) {
-			Glib::usleep (50000);
+			std::this_thread::sleep_for (std::chrono::milliseconds(50));
 			gui_idle_handler();
 			if (--timeout <= 0 || !video_server_process->is_running()) break;
 		}

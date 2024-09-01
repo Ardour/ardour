@@ -685,7 +685,9 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 		/* wait for backend to become active */
 		int timeout = 5000;
-		while (!_active && --timeout > 0) { Glib::usleep (1000); }
+		while (!_active && --timeout > 0) {
+			std::this_thread::sleep_for (std::chrono::milliseconds(1));
+		}
 
 		if (timeout == 0 || !_active) {
 			PBD::error << _("PortAudio:: failed to start device.") << endmsg;
@@ -789,7 +791,9 @@ PortAudioBackend::start_blocking_process_thread ()
 	}
 
 	int timeout = 5000;
-	while (!_active && --timeout > 0) { Glib::usleep (1000); }
+	while (!_active && --timeout > 0) {
+		std::this_thread::sleep_for (std::chrono::milliseconds(1));
+	}
 
 	if (timeout == 0 || !_active) {
 		DEBUG_AUDIO("Failed to start main audio thread\n");
@@ -862,7 +866,9 @@ PortAudioBackend::start_freewheel_process_thread ()
 	}
 
 	int timeout = 5000;
-	while (!_freewheel_thread_active && --timeout > 0) { Glib::usleep (1000); }
+	while (!_freewheel_thread_active && --timeout > 0) {
+		std::this_thread::sleep_for (std::chrono::milliseconds(1));
+	}
 
 	if (timeout == 0 || !_freewheel_thread_active) {
 		DEBUG_AUDIO("Failed to start freewheel thread\n");
@@ -1696,7 +1702,7 @@ PortAudioBackend::blocking_process_freewheel()
 	_freewheel_processed += _samples_per_period;
 	if (_freewheel_processed > _samplerate) {
 		_freewheel_processed = 0;
-		Glib::usleep(100); // don't hog cpu
+		std::this_thread::sleep_for (std::chrono::microseconds(100)); // don't hog cpu
 	}
 	return true;
 }

@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #include <unistd.h>
 
 #include <glibmm.h>
@@ -84,7 +86,10 @@ AlsaMidiIO::start ()
 		}
 	}
 	int timeout = 5000;
-	while (!_running && --timeout > 0) { Glib::usleep (1000); }
+	while (!_running && --timeout > 0) {
+		std::this_thread::sleep_for (std::chrono::milliseconds(1));
+	}
+
 	if (timeout == 0 || !_running) {
 		return -1;
 	}

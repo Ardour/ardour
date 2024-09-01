@@ -1,3 +1,5 @@
+#include <thread>
+
 #include "filesystem_test.h"
 
 #include <glib.h>
@@ -436,7 +438,7 @@ FilesystemTest::testStatFile ()
 
 	CPPUNIT_ASSERT (touch_file(path1));
 
-	Glib::usleep (2000000);
+	std::this_thread::sleep_for (std::chrono::seconds(2));
 
 	CPPUNIT_ASSERT (touch_file(path2));
 

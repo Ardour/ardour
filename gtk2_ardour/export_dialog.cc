@@ -25,6 +25,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
 
 #include <sigc++/signal.h>
 
@@ -413,7 +414,7 @@ ExportDialog::show_progress ()
 		if (gtk_events_pending()) {
 			gtk_main_iteration ();
 		} else {
-			Glib::usleep (10000);
+			std::this_thread::sleep_for (std::chrono::milliseconds(10));
 		}
 	}
 

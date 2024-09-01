@@ -7928,7 +7928,7 @@ Session::auto_connect_thread_run ()
 			while (_latency_recompute_pending.fetch_and (0)) {
 				update_latency_compensation (false, false);
 				if (_latency_recompute_pending.load ()) {
-					Glib::usleep (1000);
+					std::this_thread::sleep_for (std::chrono::milliseconds(1));
 				}
 			}
 		}
