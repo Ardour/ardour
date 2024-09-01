@@ -4,6 +4,7 @@
 #include <cstdlib>
 
 #include <glib.h>
+#include <thread>
 
 #include "pbd/failed_constructor.h"
 #include "pbd/timing.h"
@@ -30,7 +31,7 @@ pause_for_effect()
 
 	std::cerr << "pausing for " << sleep_seconds << " seconds" << std::endl;
 
-	g_usleep(sleep_seconds*1000000);
+	std::this_thread::sleep_for(std::chrono::seconds(sleep_seconds));
 }
 
 int main (int argc, char* argv[])

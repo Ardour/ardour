@@ -22,6 +22,7 @@
 #include <cmath>
 #include <limits>
 #include <regex>
+#include <thread>
 
 #include <stdlib.h>
 #include <pthread.h>
@@ -549,7 +550,7 @@ LaunchPadPro::set_device_mode (DeviceMode m)
 		live_or_programmer.push_back (0xf7);
 		/* Back to "live" state */
 		write (live_or_programmer);
-		g_usleep (100000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(100));
 		/* disable "daw" mode */
 		standalone_or_daw.push_back (0x10);
 		standalone_or_daw.push_back (0x0);
@@ -563,7 +564,7 @@ LaunchPadPro::set_device_mode (DeviceMode m)
 		// live_or_programmer.push_back (0xf7);
 		/* Back to "live" state */
 		// daw_write (live_or_programmer);
-		// g_usleep (100000);
+		// std::this_thread::sleep_for (std::chrono::milliseconds(100));
 		/* Enable DAW mode */
 		standalone_or_daw.push_back (0x10);
 		standalone_or_daw.push_back (0x1);

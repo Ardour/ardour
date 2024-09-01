@@ -20,8 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <chrono>
 #include <cstdlib>
 #include <sstream>
+#include <thread>
 #include <algorithm>
 
 #include <stdint.h>
@@ -823,7 +825,7 @@ CC121::connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1, std::
 		   sent and/or the responses from being received.
 		*/
 
-		g_usleep (100000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(100));
                 DEBUG_TRACE (DEBUG::CC121, "device now connected for both input and output\n");
 		connected ();
 

@@ -20,6 +20,7 @@
 
 #include <cstdlib>
 #include <sstream>
+#include <thread>
 #include <algorithm>
 
 #include <stdint.h>
@@ -498,7 +499,7 @@ FaderPort8::connection_handler (std::string name1, std::string name2)
 		 * something prevents the device wakeup messages from being
 		 * sent and/or the responses from being received.
 		 */
-		g_usleep (100000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(100));
 		DEBUG_TRACE (DEBUG::FaderPort8, "device now connected for both input and output\n");
 		connected ();
 		_device_active = true;
@@ -593,9 +594,9 @@ FaderPort8::tx_midi (std::vector<uint8_t> const& d) const
 	if (d.size() == 3 && (d[0] == 0x91 || d[0] == 0x92)) {
 		/* set colors triplet in one go */
 	} else if (d.size() == 3 && (d[0] == 0x93)) {
-		g_usleep (1500);
+		std::this_thread::sleep_for (std::chrono::microseconds(1500));
 	} else {
-		g_usleep (400 * d.size());
+		std::this_thread::sleep_for (std::chrono::microseconds(400 * d.size()));
 	}
 #ifndef NDEBUG
 	size_t tx = _output_port->write (&d[0], d.size(), 0);

@@ -18,6 +18,7 @@
  */
 
 #include <sstream>
+#include <thread>
 #include <iomanip>
 #include <iostream>
 #include <cstdio>
@@ -158,7 +159,7 @@ Surface::~Surface ()
 	delete _port;
 	// the ports take time to release and we may be rebuilding right away
 	// in the case of changing devices.
-	g_usleep (10000);
+	std::this_thread::sleep_for (std::chrono::milliseconds(100));
 	DEBUG_TRACE (DEBUG::US2400, "Surface::~Surface done\n");
 }
 
@@ -220,7 +221,7 @@ Surface::connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1, std
 		   sent and/or the responses from being received.
 		*/
 
-		g_usleep (100000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(100));
 		connected ();
 
 	} else {

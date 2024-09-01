@@ -16,7 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <chrono>
 #include <regex>
+#include <thread>
 
 #include "pbd/debug.h"
 #include "pbd/i18n.h"
@@ -298,7 +300,7 @@ MIDISurface::connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1,
 			   sent and/or the responses from being received.
 			*/
 
-			g_usleep (100000);
+			std::this_thread::sleep_for (std::chrono::milliseconds(100));
 
 			/* may not have the device open if it was just plugged
 			   in. Really need USB device detection rather than MIDI port

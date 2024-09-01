@@ -17,6 +17,7 @@
  */
 
 #include <sstream>
+#include <thread>
 #include <cstring>
 #include <cerrno>
 
@@ -171,7 +172,7 @@ SurfacePort::write (const MidiByteArray & mba)
 	 */
 
 	int count = output_port().write (&mba[0], mba.size(), 0);
-	g_usleep (1000);
+	std::this_thread::sleep_for (std::chrono::milliseconds(1));
 
 	if  (count != (int) mba.size()) {
 

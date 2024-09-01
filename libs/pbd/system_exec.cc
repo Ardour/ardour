@@ -18,9 +18,11 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <chrono>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <thread>
 #include <errno.h>
 #include <unistd.h>
 #include <algorithm>
@@ -943,7 +945,7 @@ SystemExec::write_to_stdin (const void* data, size_t bytes)
 				break;
 			}
 			if (errno == EINTR || errno == EAGAIN) {
-				g_usleep(100000);
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 				continue;
 			}
 			::pthread_mutex_unlock(&write_lock);

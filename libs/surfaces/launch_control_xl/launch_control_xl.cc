@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #include <stdlib.h>
 #include <pthread.h>
 
@@ -842,7 +844,7 @@ LaunchControlXL::connection_handler (std::weak_ptr<ARDOUR::Port>, std::string na
 		   sent and/or the responses from being received.
 		*/
 
-		g_usleep (100000);
+		std::this_thread::sleep_for (std::chrono::milliseconds(100));
                 DEBUG_TRACE (DEBUG::LaunchControlXL, "device now connected for both input and output\n");
 
                 begin_using_device ();
