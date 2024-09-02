@@ -27,6 +27,9 @@
 
 namespace PBD {
 	typedef int64_t microseconds_t;
+#ifndef NDEBUG
+	[[deprecated("Use std::chrono instead.")]]
+#endif
 	LIBPBD_API microseconds_t get_microseconds();
 	void microsecond_timer_init ();
 }

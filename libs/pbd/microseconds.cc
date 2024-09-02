@@ -18,6 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <chrono>
 #include <time.h>
 
 #ifdef PLATFORM_WINDOWS
@@ -83,22 +84,7 @@ PBD::microsecond_timer_init ()
 PBD::microseconds_t
 PBD::get_microseconds ()
 {
-#ifdef PLATFORM_WINDOWS
-	LARGE_INTEGER time;
-
-	if (timer_rate_usecs) {
-		if (QueryPerformanceCounter (&time)) {
-			return (microseconds_t) (time.QuadPart * timer_rate_usecs);
-		}
-	}
-
-	return (microseconds_t) 0;
-#else
-	struct timespec ts;
-	if (clock_gettime (CLOCK_MONOTONIC, &ts) != 0) {
-		/* EEEK! */
-		return 0;
-	}
-	return (microseconds_t)ts.tv_sec * 1000000 + (ts.tv_nsec / 1000);
-#endif
+	return std::chrono::duration_cast<std::chrono::microseconds>(
+			std::chrono::steady_clock::now().time_since_epoch()
+		).count();
 }
