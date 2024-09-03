@@ -76,21 +76,22 @@ public:
 	/* inspired by http://howardhinnant.github.io/stack_alloc.h */
 	pointer allocate (size_type n, void* hint = 0)
 	{
-		if ((pointer)&_buf + stack_capacity >= _ptr + n) {
+		if (range_in_buffer(_ptr, elems_to_bytes(n))) {
 			DEBUG_STACK_ALLOC ("Allocate %ld item(s) of size %zu on the stack\n", n, sizeof (T));
 			pointer rv = _ptr;
-			_ptr += n;
+			_ptr += elems_to_bytes(n);
 			return rv;
 		} else {
 			DEBUG_STACK_ALLOC ("Allocate using new (%ld * %zu)\n", n, sizeof (T));
-			return static_cast<pointer> (::operator new (n * sizeof (T)));
+			return static_cast<pointer> (::operator new (elems_to_bytes(n)));
 		}
 	}
 
 	void deallocate (pointer p, size_type n)
 	{
-		if (pointer_in_buffer (p)) {
-			if (p + n == _ptr) {
+		const size_type bytes = elems_to_bytes(n);
+		if (range_in_buffer(p, bytes)) {
+			if (p + bytes == _ptr) {
 				DEBUG_STACK_ALLOC ("Deallocate: pop item from the top of the stack\n");
 				_ptr = p;
 			} else {
@@ -147,10 +148,21 @@ private:
 
 	bool pointer_in_buffer (pointer const p)
 	{
-		return ((pointer const)&_buf <= p && p < (pointer const)&_buf + stack_capacity);
+		return ((pointer const)&_buf <= p && p < (pointer const)&_buf + size_bytes);
 	}
 
-	typedef typename boost::aligned_storage<sizeof (T) * stack_capacity, 16>::type align_t;
+
+	bool range_in_buffer (pointer const p, size_type n)
+	{
+		return pointer_in_buffer (p) && pointer_in_buffer (p + n - 1);
+	}
+
+	static constexpr size_type elems_to_bytes (size_type elems) {
+		return elems * sizeof (T);
+	}
+
+	static constexpr size_type size_bytes = elems_to_bytes(stack_capacity);
+	typedef typename boost::aligned_storage<size_bytes, 16>::type align_t;
 
 	align_t _buf;
 	pointer _ptr;
