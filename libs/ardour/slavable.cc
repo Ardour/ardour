@@ -78,8 +78,8 @@ Slavable::assigned_to (VCAManager* manager, std::shared_ptr<VCA> mst) const
 		return true;
 	}
 	std::vector<std::shared_ptr<VCA> > ml = mst->masters (manager);
-	for (std::vector<std::shared_ptr<VCA> >::const_iterator i = ml.begin (); i != ml.end(); ++i) {
-		if (assigned_to (manager, *i)) {
+	for (const std::shared_ptr<VCA>& i : ml) {
+		if (assigned_to (manager, i)) {
 			return true;
 		}
 	}

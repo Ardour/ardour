@@ -312,8 +312,8 @@ auv2_plugin_info (AudioComponent& comp, CAComponentDescription& desc, std::vecto
 	 */
 
 	const vector<pair<int,int> >& ioc (info.io_configs);
-	for (vector<pair<int,int> >::const_iterator i = ioc.begin(); i != ioc.end(); ++i) {
-		int32_t possible_out = i->second;
+	for (const pair<int,int> & i : ioc) {
+		int32_t possible_out = i.second;
 		if (possible_out < 0) {
 			continue;
 		} else if (possible_out > info.max_outputs) {
@@ -460,9 +460,9 @@ ARDOUR::auv2_scan_and_cache (CAComponentDescription& desc, std::function<void (C
 			delete root;
 			return false;
 		}
-		for (std::vector<AUv2Info>::const_iterator i = nfo.begin(); i != nfo.end(); ++i) {
-			cb (desc, *i);
-			root->add_child_nocopy (i->state ());
+		for (const AUv2Info& i : nfo) {
+			cb (desc, i);
+			root->add_child_nocopy (i.state ());
 		}
 	} catch (...) {
 		cerr << "Cannot load AudioUnit plugin: '" << auv2_stringify_descriptor (desc) << "'\n";
@@ -613,10 +613,10 @@ AUv2Info::state () const
 	node->set_property ("n_midi_outputs", n_midi_outputs);
 	node->set_property ("max_outputs",    max_outputs);
 
-	for (vector<pair<int, int> >::const_iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
+	for (const pair<int, int> & i : io_configs) {
 		XMLNode* child = new XMLNode (X_("io_config"));
-		child->set_property (X_("in"), i->first);
-		child->set_property (X_("out"), i->second);
+		child->set_property (X_("in"), i.first);
+		child->set_property (X_("out"), i.second);
 		node->add_child_nocopy (*child);
 	}
 	return *node;

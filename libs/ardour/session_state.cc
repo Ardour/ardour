@@ -439,8 +439,8 @@ Session::raid_path () const
 {
 	Searchpath raid_search_path;
 
-	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		raid_search_path += (*i).path;
+	for (const space_and_path& i : session_dirs) {
+		raid_search_path += i.path;
 	}
 
 	return raid_search_path.to_string ();
@@ -480,8 +480,8 @@ Session::setup_raid_path (string path)
 bool
 Session::path_is_within_session (const std::string& path)
 {
-	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		if (PBD::path_is_within (i->path, path)) {
+	for (const space_and_path& i : session_dirs) {
+		if (PBD::path_is_within (i.path, path)) {
 			return true;
 		}
 	}
@@ -3666,8 +3666,8 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	/* build a list of all the possible audio directories for the session */
 
-	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		SessionDirectory sdir ((*i).path);
+	for (const space_and_path& i : session_dirs) {
+		SessionDirectory sdir (i.path);
 		asp += sdir.sound_path();
 	}
 	audio_path += asp.to_string();
@@ -3675,8 +3675,8 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	/* build a list of all the possible midi directories for the session */
 
-	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		SessionDirectory sdir ((*i).path);
+	for (const space_and_path& i : session_dirs) {
+		SessionDirectory sdir (i.path);
 		msp += sdir.midi_path();
 	}
 	midi_path += msp.to_string();
@@ -4621,9 +4621,9 @@ Session::rename (const std::string& new_name)
 	 * already exist ...
 	 */
 
-	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+	for (const space_and_path& i : session_dirs) {
 
-		oldstr = (*i).path;
+		oldstr = i.path;
 
 		/* this is a stupid hack because Glib::path_get_dirname() is
 		 * lexical-only, and so passing it /a/b/c/ gives a different
@@ -5082,7 +5082,7 @@ Session::save_as (SaveAs& saveas)
 
 	/* get total size */
 
-	for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
+	for (const space_and_path& sd : session_dirs) {
 
 		/* need to clear this because
 		 * find_files_matching_filter() is cumulative
@@ -5090,7 +5090,7 @@ Session::save_as (SaveAs& saveas)
 
 		files.clear ();
 
-		find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
+		find_files_matching_filter (files, sd.path, accept_all_files, 0, false, true, true);
 
 		all += files.size();
 
@@ -5131,7 +5131,7 @@ Session::save_as (SaveAs& saveas)
 		 * and copy files from there to target.
 		 */
 
-		for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
+		for (const space_and_path& sd : session_dirs) {
 
 			/* need to clear this because
 			 * find_files_matching_filter() is cumulative
@@ -5139,11 +5139,11 @@ Session::save_as (SaveAs& saveas)
 
 			files.clear ();
 
-			const size_t prefix_len = (*sd).path.size();
+			const size_t prefix_len = sd.path.size();
 
 			/* Work just on the files within this session dir */
 
-			find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
+			find_files_matching_filter (files, sd.path, accept_all_files, 0, false, true, true);
 
 			/* add dir separator to protect against collisions with
 			 * track names (e.g. track named "audiofiles" or
@@ -5522,8 +5522,8 @@ Session::archive_session (const std::string& dest,
 
 	/* ensure that session-path is included in search-path */
 	bool ok = false;
-	for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
-		if ((*sd).path == old_path) {
+	for (const space_and_path& sd : session_dirs) {
+		if (sd.path == old_path) {
 			ok = true;
 		}
 	}
@@ -5766,23 +5766,21 @@ Session::archive_session (const std::string& dest,
 	}
 
 	/* index files relevant for this session */
-	for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
+	for (const space_and_path& sd : session_dirs) {
 		vector<string> files;
 
-		size_t prefix_len = (*sd).path.size();
-		if (prefix_len > 0 && (*sd).path.at (prefix_len - 1) != G_DIR_SEPARATOR) {
+		size_t prefix_len = sd.path.size();
+		if (prefix_len > 0 && sd.path.at (prefix_len - 1) != G_DIR_SEPARATOR) {
 			++prefix_len;
 		}
 
-		find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
+		find_files_matching_filter (files, sd.path, accept_all_files, 0, false, true, true);
 
 		static const std::string audiofile_dir_string = string (sound_dir_name) + G_DIR_SEPARATOR;
 		static const std::string videofile_dir_string = string (video_dir_name) + G_DIR_SEPARATOR;
 		static const std::string midifile_dir_string  = string (midi_dir_name)  + G_DIR_SEPARATOR;
 
-		for (vector<string>::const_iterator i = files.begin (); i != files.end (); ++i) {
-			std::string from = *i;
-
+		for (const string& from : files) {
 #ifdef __APPLE__
 			string filename = Glib::path_get_basename (from);
 			std::transform (filename.begin(), filename.end(), filename.begin(), ::toupper);

@@ -253,9 +253,8 @@ ContourDesignGUI::reset_test_state (GdkEventAny*)
 {
 	_ccp.set_test_mode (false);
 	_test_button.set_active (Gtkmm2ext::Off);
-	vector<std::shared_ptr<ArdourButton> >::const_iterator it;
-	for (it = _btn_leds.begin(); it != _btn_leds.end(); ++it) {
-		(*it)->set_active_state (Gtkmm2ext::Off);
+	for (const std::shared_ptr<ArdourButton>& it : _btn_leds) {
+		it->set_active_state (Gtkmm2ext::Off);
 	}
 
 	return false;

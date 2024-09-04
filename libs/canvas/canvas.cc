@@ -635,13 +635,9 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 	   first item is the upper-most item that can be chosen as _current_item.
 	*/
 
-	vector<Item const *>::const_iterator i;
 	list<Item const *> within_items;
 
-	for (i = items.begin(); i != items.end(); ++i) {
-
-		Item const * possible_item = *i;
-
+	for (Item const * const possible_item : items) {
 		/* We ignore invisible items, containers and items that ignore events */
 
 		if (!possible_item->visible() || possible_item->ignore_events() || dynamic_cast<ArdourCanvas::Container const *>(possible_item) != 0) {

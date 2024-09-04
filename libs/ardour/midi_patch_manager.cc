@@ -125,11 +125,11 @@ MidiPatchManager::add_midnam_files_from_directory(const std::string& directory_p
 
 	info << string_compose (P_("Loading %1 MIDI patch from %2", "Loading %1 MIDI patches from %2", result.size()), result.size(), directory_path) << endmsg;
 
-	for (vector<std::string>::const_iterator i = result.begin(); i != result.end(); ++i) {
+	for (const std::string& i : result) {
 		if (stop_thread) {
 			break;
 		}
-		load_midi_name_document (*i);
+		load_midi_name_document (i);
 	}
 }
 
@@ -159,8 +159,8 @@ MidiPatchManager::remove_midnam_files_from_directory(const std::string& director
 		result.size(), directory_path)
 	     << endmsg;
 
-	for (vector<std::string>::const_iterator i = result.begin(); i != result.end(); ++i) {
-		remove_midi_name_document (*i);
+	for (const std::string& i : result) {
+		remove_midi_name_document (i);
 	}
 }
 

@@ -141,15 +141,15 @@ EnvironmentalProtectionAgency::clear () const
 		ecopy.push_back (environ[i]);
 	}
 
-	for (vector<string>::const_iterator e = ecopy.begin(); e != ecopy.end(); ++e) {
-                string::size_type equal = (*e).find_first_of ('=');
+	for (const string& e : ecopy) {
+                string::size_type equal = e.find_first_of ('=');
 
                 if (equal == string::npos) {
                         /* say what? an environ value without = ? */
                         continue;
                 }
 
-                string var_name = (*e).substr (0, equal);
+                string var_name = e.substr (0, equal);
                 g_unsetenv(var_name.c_str());
         }
 }

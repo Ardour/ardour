@@ -477,9 +477,9 @@ FileArchive::create (const std::string& srcdir, CompressionLevel compression_lev
 
 	std::map<std::string, std::string> filemap;
 
-	for (std::vector<std::string>::const_iterator f = files.begin (); f != files.end (); ++f) {
-		assert (f->size () > p_len);
-		filemap[*f] = f->substr (p_len);
+	for (const std::string& f : files) {
+		assert (f.size () > p_len);
+		filemap[f] = f.substr (p_len);
 	}
 
 	return create (filemap, compression_level);

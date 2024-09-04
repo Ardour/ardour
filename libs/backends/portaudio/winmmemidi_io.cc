@@ -273,11 +273,9 @@ WinMMEMidiIO::update_device_info ()
 MidiDeviceInfo*
 WinMMEMidiIO::get_device_info (const std::string& name)
 {
-	for (std::vector<MidiDeviceInfo*>::const_iterator i = m_device_info.begin();
-	     i != m_device_info.end();
-	     ++i) {
-		if ((*i)->device_name == name) {
-			return *i;
+	for (MidiDeviceInfo* const& i : m_device_info) {
+		if (i->device_name == name) {
+			return i;
 		}
 	}
 	return 0;

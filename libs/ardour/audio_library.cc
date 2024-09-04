@@ -153,12 +153,11 @@ AudioLibrary::search_members_and (vector<string>& members, const vector<string>&
 	lrdf_statement* old = 0;
 	head = &pattern;
 
-	vector<string>::const_iterator i;
-	for (i = tags.begin(); i != tags.end(); ++i){
+	for (const string& i : tags) {
 		pattern = new lrdf_statement;
 		pattern->subject = const_cast<char*>("?");
 		pattern->predicate = const_cast<char*>(TAG);
-		pattern->object = strdup((*i).c_str());
+		pattern->object = strdup(i.c_str());
 		pattern->next = old;
 
 		old = pattern;

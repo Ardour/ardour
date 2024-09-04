@@ -799,12 +799,12 @@ MackieControlProtocolGUI::build_midi_port_list (vector<string> const & ports, bo
 	row[midi_port_columns.full_name] = string();
 	row[midi_port_columns.short_name] = _("Disconnected");
 
-	for (vector<string>::const_iterator p = ports.begin(); p != ports.end(); ++p) {
+	for (const string& p : ports) {
 		row = *store->append ();
-		row[midi_port_columns.full_name] = *p;
-		std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*p);
+		row[midi_port_columns.full_name] = p;
+		std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (p);
 		if (pn.empty ()) {
-			pn = (*p).substr ((*p).find (':') + 1);
+			pn = p.substr (p.find (':') + 1);
 		}
 		row[midi_port_columns.short_name] = pn;
 	}

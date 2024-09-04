@@ -93,10 +93,9 @@ SessionTest::open_session_utf8_path ()
 
 	const string test_dir = new_test_output_dir ("open_session_utf8_path");
 
-	for (std::vector<std::string>::const_iterator i = utf8_strings.begin (); i != utf8_strings.end ();
-	     ++i) {
+	for (const std::string& i : utf8_strings) {
 
-		const string session_name (*i);
+		const string session_name (i);
 		std::string new_session_dir = Glib::build_filename (test_dir, session_name);
 		bool new_session_failed = false;
 
@@ -114,7 +113,7 @@ SessionTest::open_session_utf8_path ()
 		} catch(...) {
 			new_session_failed = true;
 
-			std::cerr << "Failed to create new session using name : " << *i << std::endl;
+			std::cerr << "Failed to create new session using name : " << i << std::endl;
 		}
 
 		delete session;

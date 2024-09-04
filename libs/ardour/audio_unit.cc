@@ -1161,9 +1161,9 @@ AUPlugin::match_variable_io (ChanCount& in, ChanCount& aux_in, ChanCount& out)
 #endif
 	if (output_elements > 1) {
 		const vector<pair<int,int> >& ioc (pinfo->io_configs);
-		for (vector<pair<int,int> >::const_iterator i = ioc.begin(); i != ioc.end(); ++i) {
-			int32_t possible_in = i->first;
-			int32_t possible_out = i->second;
+		for (const pair<int,int> & i : ioc) {
+			int32_t possible_in = i.first;
+			int32_t possible_out = i.second;
 			if (possible_out < 0) {
 				continue;
 			}

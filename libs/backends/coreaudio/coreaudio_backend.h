@@ -397,9 +397,9 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	int register_system_audio_ports ();
 
 	BackendPortPtr find_port_in (std::vector<BackendPortPtr> const & plist, const std::string& port_name) const {
-		for (std::vector<BackendPortPtr>::const_iterator it = plist.begin (); it != plist.end (); ++it) {
-			if ((*it)->name () == port_name) {
-				return *it;
+		for (const BackendPortPtr& it : plist) {
+			if (it->name () == port_name) {
+				return it;
 			}
 		}
 		return BackendPortPtr();

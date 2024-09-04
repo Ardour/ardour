@@ -155,12 +155,12 @@ ServerResources::read_manifests (std::string dir)
 	find_paths_matching_filter (subdirs, spath, dir_filter,
 		0 /*arg*/, true /*pass_fullpath*/, true /*return_fullpath*/, false /*recurse*/);
 
-	for (std::vector<std::string>::const_iterator it = subdirs.begin (); it != subdirs.end (); ++it) {
-		if (!SurfaceManifest::exists_at_path (*it)) {
+	for (const std::string& it : subdirs) {
+		if (!SurfaceManifest::exists_at_path (it)) {
 			continue;
 		}
 
-		SurfaceManifest manifest (*it);
+		SurfaceManifest manifest (it);
 
 		if (manifest.valid ()) {
 			result.push_back (manifest);

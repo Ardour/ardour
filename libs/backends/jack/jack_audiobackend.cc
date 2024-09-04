@@ -151,8 +151,8 @@ JACKAudioBackend::enumerate_devices () const
 
 	DeviceList& all (all_devices[_target_driver]);
 
-	for (vector<string>::const_iterator d = currently_available.begin(); d != currently_available.end(); ++d) {
-		all.insert (*d);
+	for (const string& d : currently_available) {
+		all.insert (d);
 	}
 
 	for (DeviceList::const_iterator d = all.begin(); d != all.end(); ++d) {

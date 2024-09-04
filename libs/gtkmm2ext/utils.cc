@@ -380,12 +380,10 @@ Gtkmm2ext::anchored_menu_popup (Gtk::Menu* const menu,
 void
 Gtkmm2ext::set_popdown_strings (Gtk::ComboBoxText& cr, const vector<string>& strings)
 {
-	vector<string>::const_iterator i;
-
 	cr.clear ();
 
-	for (i = strings.begin(); i != strings.end(); ++i) {
-		cr.append (*i);
+	for (const string& i : strings) {
+		cr.append (i);
 	}
 }
 

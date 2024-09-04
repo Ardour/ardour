@@ -689,9 +689,9 @@ ARDOUR::vst2_scan_and_cache (std::string const& path, ARDOUR::PluginType type, s
 			delete root;
 			return false;
 		}
-		for (std::vector<VST2Info>::const_iterator i = nfo.begin(); i != nfo.end(); ++i) {
-			cb (path, type, *i);
-			root->add_child_nocopy (i->state ());
+		for (const VST2Info& i : nfo) {
+			cb (path, type, i);
+			root->add_child_nocopy (i.state ());
 		}
 	} catch (...) {
 		PBD::warning << string_compose (_("Cannot load VST plugin '%1'"), path) << endmsg;

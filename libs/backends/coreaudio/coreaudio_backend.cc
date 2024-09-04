@@ -334,8 +334,8 @@ CoreAudioBackend::set_buffer_size (uint32_t bs)
 	if (_run) {
 		pbd_mach_set_realtime_policy (_main_thread, 1e9 * bs / _samplerate, true);
 	}
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
-		pbd_mach_set_realtime_policy (*i, 1e9 * bs / _samplerate, false);
+	for (const pthread_t& i : _threads) {
+		pbd_mach_set_realtime_policy (i, 1e9 * bs / _samplerate, false);
 	}
 	return 0;
 }
@@ -847,10 +847,10 @@ CoreAudioBackend::join_process_threads ()
 {
 	int rv = 0;
 
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
+	for (const pthread_t& i : _threads)
 	{
 		void *status;
-		if (pthread_join (*i, &status)) {
+		if (pthread_join (i, &status)) {
 			PBD::error << _("AudioEngine: cannot terminate process thread.") << endmsg;
 			rv -= 1;
 		}
@@ -866,9 +866,9 @@ CoreAudioBackend::in_process_thread ()
 		return true;
 	}
 
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
+	for (const pthread_t& i : _threads)
 	{
-		if (pthread_equal (*i, pthread_self ()) != 0) {
+		if (pthread_equal (i, pthread_self ()) != 0) {
 			return true;
 		}
 	}
@@ -1243,8 +1243,8 @@ CoreAudioBackend::pre_process ()
 void
 CoreAudioBackend::reset_midi_parsers ()
 {
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
-		std::shared_ptr<CoreMidiPort> port = std::dynamic_pointer_cast<CoreMidiPort>(*it);
+	for (const BackendPortPtr& it : _system_midi_in) {
+		std::shared_ptr<CoreMidiPort> port = std::dynamic_pointer_cast<CoreMidiPort>(it);
 		if (port) {
 			port->reset_parser ();
 		}
@@ -1317,11 +1317,11 @@ CoreAudioBackend::freewheel_thread ()
 		/* Freewheelin' */
 
 		// clear input buffers
-		for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
-			memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
+		for (const BackendPortPtr& it : _system_inputs) {
+			memset (it->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 		}
-		for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
-			static_cast<CoreMidiBuffer*>((*it)->get_buffer(0))->clear ();
+		for (const BackendPortPtr& it : _system_midi_in) {
+			static_cast<CoreMidiBuffer*>(it->get_buffer(0))->clear ();
 		}
 
 		_last_process_start = 0;
@@ -1421,8 +1421,8 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	}
 
 	/* clear output buffers */
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
-		memset ((*it)->get_buffer (n_samples), 0, n_samples * sizeof (Sample));
+	for (const BackendPortPtr& it : _system_outputs) {
+		memset (it->get_buffer (n_samples), 0, n_samples * sizeof (Sample));
 	}
 
 	if (engine.process_callback (n_samples)) {
@@ -1434,8 +1434,8 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	}
 
 	/* mixdown midi */
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-		(*it)->get_buffer(0);
+	for (const BackendPortPtr& it : _system_midi_out) {
+		it->get_buffer(0);
 	}
 
 	/* queue outgoing midi */

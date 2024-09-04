@@ -185,13 +185,11 @@ static bool
 map_existing_mono_sources (const vector<string>& new_paths, Session& /*sess*/,
                            uint32_t /*samplerate*/, vector<std::shared_ptr<Source> >& newfiles, Session *session)
 {
-	for (vector<string>::const_iterator i = new_paths.begin();
-	     i != new_paths.end(); ++i)
-	{
-		std::shared_ptr<Source> source = session->audio_source_by_path_and_channel(*i, 0);
+	for (const string& i : new_paths) {
+		std::shared_ptr<Source> source = session->audio_source_by_path_and_channel(i, 0);
 
 		if (source == 0) {
-			error << string_compose(_("Could not find a source for %1 even though we are updating this file!"), (*i)) << endl;
+			error << string_compose(_("Could not find a source for %1 even though we are updating this file!"), i) << endl;
 			return false;
 		}
 
@@ -206,18 +204,18 @@ create_mono_sources_for_writing (const vector<string>& new_paths,
                                  vector<std::shared_ptr<Source> >& newfiles,
                                  samplepos_t natural_position, bool announce)
 {
-	for (vector<string>::const_iterator i = new_paths.begin(); i != new_paths.end(); ++i) {
+	for (const string& i : new_paths) {
 
 		std::shared_ptr<Source> source;
 
 		try {
-			const DataType type = SMFSource::safe_midi_file_extension (*i) ? DataType::MIDI : DataType::AUDIO;
+			const DataType type = SMFSource::safe_midi_file_extension (i) ? DataType::MIDI : DataType::AUDIO;
 
-			source = SourceFactory::createWritable (type, sess, i->c_str(), samplerate, announce);
+			source = SourceFactory::createWritable (type, sess, i.c_str(), samplerate, announce);
 		}
 
 		catch (const failed_constructor& err) {
-			error << string_compose (_("Unable to create file %1 during import"), *i) << endmsg;
+			error << string_compose (_("Unable to create file %1 during import"), i) << endmsg;
 			return false;
 		}
 
@@ -625,19 +623,20 @@ Session::import_files (ImportStatus& status)
 
 	status.sources.clear ();
 
-	for (vector<string>::const_iterator p = status.paths.begin(); p != status.paths.end() && !status.cancel; ++p) {
+	for (const string& p : status.paths) {
+		if (status.cancel) break;
 
 		std::shared_ptr<ImportableSource> source;
 
-		const DataType type = SMFSource::safe_midi_file_extension (*p) ? DataType::MIDI : DataType::AUDIO;
+		const DataType type = SMFSource::safe_midi_file_extension (p) ? DataType::MIDI : DataType::AUDIO;
 		std::unique_ptr<Evoral::SMF> smf_reader;
 
 		if (type == DataType::AUDIO) {
 			try {
-				source = open_importable_source (*p, sample_rate(), status.quality);
+				source = open_importable_source (p, sample_rate(), status.quality);
 				num_channels = source->channels();
 			} catch (const failed_constructor& err) {
-				error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;
+				error << string_compose(_("Import: cannot open input sound file \"%1\""), p) << endmsg;
 				status.done = status.cancel = true;
 				return;
 			}
@@ -646,8 +645,8 @@ Session::import_files (ImportStatus& status)
 			try {
 				smf_reader.reset (new Evoral::SMF());
 
-				if (smf_reader->open(*p)) {
-					throw Evoral::SMF::FileError (*p);
+				if (smf_reader->open(p)) {
+					throw Evoral::SMF::FileError (p);
 				}
 
 				if (smf_reader->smf_format()==0) {
@@ -718,7 +717,7 @@ Session::import_files (ImportStatus& status)
 			continue;
 		}
 
-		vector<string> new_paths = get_paths_for_new_sources (status.replace_existing_source, *p, num_channels, smf_names, smf_keep_filename);
+		vector<string> new_paths = get_paths_for_new_sources (status.replace_existing_source, p, num_channels, smf_names, smf_keep_filename);
 		Sources newfiles;
 		samplepos_t natural_position = source ? source->natural_position() : 0;
 
@@ -744,11 +743,11 @@ Session::import_files (ImportStatus& status)
 		}
 
 		if (source) { // audio
-			status.doing_what = compose_status_message (*p, source->samplerate(),
+			status.doing_what = compose_status_message (p, source->samplerate(),
 			                                            sample_rate(), status.current, status.total);
 			write_audio_data_to_new_files (source.get(), status, newfiles);
 		} else if (smf_reader) { // midi
-			status.doing_what = string_compose(_("Loading MIDI file %1"), *p);
+			status.doing_what = string_compose(_("Loading MIDI file %1"), p);
 			write_midi_data_to_new_files (smf_reader.get(), status, newfiles, status.split_midi_channels);
 
 			if (status.import_markers) {

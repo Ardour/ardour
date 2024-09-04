@@ -112,12 +112,12 @@ ARDOUR::UserBundle::get_state () const
 	{
 		Glib::Threads::Mutex::Lock lm (_channel_mutex);
 
-		for (std::vector<Channel>::const_iterator i = _channel.begin(); i != _channel.end(); ++i) {
+		for (const Channel& i : _channel) {
 			XMLNode* c = new XMLNode ("Channel");
-			c->set_property ("name", i->name);
-			c->set_property ("type", i->type);
+			c->set_property ("name", i.name);
+			c->set_property ("type", i.type);
 
-			for (PortList::const_iterator j = i->ports.begin(); j != i->ports.end(); ++j) {
+			for (PortList::const_iterator j = i.ports.begin(); j != i.ports.end(); ++j) {
 				XMLNode* p = new XMLNode ("Port");
 				p->set_property ("name", *j);
 				c->add_child_nocopy (*p);

@@ -73,8 +73,8 @@ Bundle::nchannels () const
 	Glib::Threads::Mutex::Lock lm (_channel_mutex);
 
 	ChanCount c;
-	for (vector<Channel>::const_iterator i = _channel.begin(); i != _channel.end(); ++i) {
-		c.set (i->type, c.get (i->type) + 1);
+	for (const Channel& i : _channel) {
+		c.set (i.type, c.get (i.type) + 1);
 	}
 
 	return c;
@@ -240,8 +240,8 @@ Bundle::offers_port (std::string p) const
 {
 	Glib::Threads::Mutex::Lock lm (_channel_mutex);
 
-	for (std::vector<Channel>::const_iterator i = _channel.begin(); i != _channel.end(); ++i) {
-		for (PortList::const_iterator j = i->ports.begin(); j != i->ports.end(); ++j) {
+	for (const Channel& i : _channel) {
+		for (PortList::const_iterator j = i.ports.begin(); j != i.ports.end(); ++j) {
 			if (*j == p) {
 				return true;
 			}
@@ -259,8 +259,8 @@ Bundle::offers_port_alone (std::string p) const
 {
 	Glib::Threads::Mutex::Lock lm (_channel_mutex);
 
-	for (std::vector<Channel>::const_iterator i = _channel.begin(); i != _channel.end(); ++i) {
-		if (i->ports.size() == 1 && i->ports[0] == p) {
+	for (const Channel& i : _channel) {
+		if (i.ports.size() == 1 && i.ports[0] == p) {
 			return true;
 		}
 	}

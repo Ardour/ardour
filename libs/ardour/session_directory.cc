@@ -64,10 +64,10 @@ bool
 SessionDirectory::create ()
 {
 	vector<std::string> sub_dirs = sub_directories ();
-	for (vector<std::string>::const_iterator i = sub_dirs.begin(); i != sub_dirs.end(); ++i)
+	for (const std::string& i : sub_dirs)
 	{
-		if (g_mkdir_with_parents (i->c_str(), 0755) != 0) {
-			PBD::error << string_compose(_("Cannot create Session directory at path %1 Error: %2"), *i, g_strerror(errno)) << endmsg;
+		if (g_mkdir_with_parents (i.c_str(), 0755) != 0) {
+			PBD::error << string_compose(_("Cannot create Session directory at path %1 Error: %2"), i, g_strerror(errno)) << endmsg;
 			return false;
 		}
 	}

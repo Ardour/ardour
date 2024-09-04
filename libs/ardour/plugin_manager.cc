@@ -1838,8 +1838,8 @@ PluginManager::mac_vst_discover_from_path (string path, std::set<std::string>& s
 
 	Searchpath paths (path);
 	/* customized version of run_functor_for_paths() */
-	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
-		string expanded_path = path_expand (*i);
+	for (const string& i : paths) {
+		string expanded_path = path_expand (i);
 		if (!Glib::file_test (expanded_path, Glib::FILE_TEST_IS_DIR)) continue;
 		try {
 			Glib::Dir dir(expanded_path);

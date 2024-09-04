@@ -493,9 +493,9 @@ ARDOUR::vst3_scan_and_cache (std::string const& module_path, std::string const& 
 			delete root;
 			return false;
 		}
-		for (std::vector<VST3Info>::const_iterator i = nfo.begin(); i != nfo.end(); ++i) {
-			cb (module_path, bundle_path, *i);
-			root->add_child_nocopy (i->state ());
+		for (const VST3Info& i : nfo) {
+			cb (module_path, bundle_path, i);
+			root->add_child_nocopy (i.state ());
 		}
 
 	} catch (...) {

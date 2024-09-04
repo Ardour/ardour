@@ -111,10 +111,10 @@ AudioTrack::state (bool save_template) const
 		freeze_node->set_property ("playlist-id", _freeze_record.playlist->id().to_s ());
 		freeze_node->set_property ("state", _freeze_record.state);
 
-		for (vector<FreezeRecordProcessorInfo*>::const_iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
+		for (FreezeRecordProcessorInfo* const& i : _freeze_record.processor_info) {
 			inode = new XMLNode (X_("processor"));
-			inode->set_property (X_ ("id"), (*i)->id.to_s ());
-			inode->add_child_copy ((*i)->state);
+			inode->set_property (X_ ("id"), i->id.to_s ());
+			inode->add_child_copy (i->state);
 
 			freeze_node->add_child_nocopy (*inode);
 		}

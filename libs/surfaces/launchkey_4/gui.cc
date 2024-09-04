@@ -233,12 +233,12 @@ LK4_GUI::build_midi_port_list (std::vector<std::string> const & ports, bool for_
 	row[_midi_port_columns.full_name] = std::string();
 	row[_midi_port_columns.short_name] = _("Disconnected");
 
-	for (std::vector<std::string>::const_iterator p = ports.begin(); p != ports.end(); ++p) {
+	for (const std::string& p : ports) {
 		row = *store->append ();
-		row[_midi_port_columns.full_name] = *p;
-		std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*p);
+		row[_midi_port_columns.full_name] = p;
+		std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (p);
 		if (pn.empty ()) {
-			pn = (*p).substr ((*p).find (':') + 1);
+			pn = p.substr (p.find (':') + 1);
 		}
 		row[_midi_port_columns.short_name] = pn;
 	}

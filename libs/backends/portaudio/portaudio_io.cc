@@ -148,13 +148,12 @@ PortAudioIO::available_sample_rates(int device_id, std::vector<float>& sampleRat
 		std::vector<float> rates;
 		get_default_sample_rates(rates);
 
-		for (std::vector<float>::const_iterator i = rates.begin(); i != rates.end();
-		     ++i) {
+		for (const float& i : rates) {
 			if (paFormatIsSupported ==
 			    Pa_IsFormatSupported(nfo->maxInputChannels > 0 ? &inputParam : NULL,
 			                         nfo->maxOutputChannels > 0 ? &outputParam : NULL,
-			                         *i)) {
-				sampleRates.push_back(*i);
+			                         i)) {
+				sampleRates.push_back(i);
 			}
 		}
 	}

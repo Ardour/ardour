@@ -387,14 +387,12 @@ FilesystemTest::testCanonicalPathUTF8 ()
 
 	get_utf8_test_strings (utf8_strings);
 
-	for (std::vector<std::string>::const_iterator i = utf8_strings.begin (); i != utf8_strings.end ();
-	     ++i) {
-
-		const std::string absolute_path = Glib::build_filename (top_dir, *i);
+	for (const std::string& i : utf8_strings) {
+		const std::string absolute_path = Glib::build_filename (top_dir, i);
 		// make a directory in the current test/working directory
 		CPPUNIT_ASSERT (g_mkdir (absolute_path.c_str (), 0755) == 0);
 
-		string relative_path = Glib::build_filename (".", *i);
+		string relative_path = Glib::build_filename (".", i);
 
 		string canonical_path = PBD::canonical_path (relative_path);
 

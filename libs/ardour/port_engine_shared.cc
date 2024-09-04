@@ -814,18 +814,18 @@ PortEngineSharedImpl::get_connections (PortEngine::PortHandle port_handle, std::
 void
 PortEngineSharedImpl::update_system_port_latencies ()
 {
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
-		(*it)->update_connected_latency (true);
+	for (const BackendPortPtr& it : _system_inputs) {
+		it->update_connected_latency (true);
 	}
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
-		(*it)->update_connected_latency (false);
+	for (const BackendPortPtr& it : _system_outputs) {
+		it->update_connected_latency (false);
 	}
 
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
-		(*it)->update_connected_latency (true);
+	for (const BackendPortPtr& it : _system_midi_in) {
+		it->update_connected_latency (true);
 	}
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-		(*it)->update_connected_latency (false);
+	for (const BackendPortPtr& it : _system_midi_out) {
+		it->update_connected_latency (false);
 	}
 }
 

@@ -72,8 +72,8 @@ Searchpath::remove_directory (const std::string& directory_path)
 void
 Searchpath::remove_directories (const vector<std::string>& paths)
 {
-	for(vector<std::string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
-		remove_directory (*i);
+	for (const std::string& i : paths) {
+		remove_directory (i);
 	}
 }
 
@@ -83,8 +83,8 @@ Searchpath::add_directory (const std::string& directory_path)
 	if (directory_path.empty()) {
 		return;
 	}
-	for (vector<std::string>::const_iterator i = begin(); i != end(); ++i) {
-		if (poor_mans_glob (*i) == poor_mans_glob(directory_path)) {
+	for (const std::string& i : *this) {
+		if (poor_mans_glob (i) == poor_mans_glob(directory_path)) {
 			return;
 		}
 	}
@@ -94,8 +94,8 @@ Searchpath::add_directory (const std::string& directory_path)
 void
 Searchpath::add_directories (const vector<std::string>& paths)
 {
-	for(vector<std::string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
-		add_directory (*i);
+	for (const std::string& i : paths) {
+		add_directory (i);
 	}
 }
 
@@ -104,8 +104,8 @@ Searchpath::to_string () const
 {
 	string path;
 
-	for (vector<std::string>::const_iterator i = begin(); i != end(); ++i) {
-		path += *i;
+	for (const std::string& i : *this) {
+		path += i;
 		path += G_SEARCHPATH_SEPARATOR;
 	}
 
@@ -117,8 +117,8 @@ Searchpath::to_string () const
 Searchpath&
 Searchpath::operator+= (const Searchpath& spath)
 {
-	for (vector<std::string>::const_iterator i = spath.begin(); i != spath.end(); ++i) {
-		add_directory (*i);
+	for (const std::string& i : spath) {
+		add_directory (i);
 	}
 	return *this;
 }

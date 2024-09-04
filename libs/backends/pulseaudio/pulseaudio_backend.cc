@@ -720,9 +720,9 @@ PulseAudioBackend::join_process_threads ()
 {
 	int rv = 0;
 
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
+	for (const pthread_t& i : _threads) {
 		void* status;
-		if (pthread_join (*i, &status)) {
+		if (pthread_join (i, &status)) {
 			PBD::error << _("AudioEngine: cannot terminate process thread.") << endmsg;
 			rv -= 1;
 		}
@@ -738,8 +738,8 @@ PulseAudioBackend::in_process_thread ()
 		return true;
 	}
 
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
-		if (pthread_equal (*i, pthread_self ()) != 0) {
+	for (const pthread_t& i : _threads) {
+		if (pthread_equal (i, pthread_self ()) != 0) {
 			return true;
 		}
 	}

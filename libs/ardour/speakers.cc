@@ -246,12 +246,12 @@ Speakers::get_state () const
 {
         XMLNode* node = new XMLNode (X_("Speakers"));
 
-        for (vector<Speaker>::const_iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
+        for (const Speaker& i : _speakers) {
                 XMLNode* speaker = new XMLNode (X_("Speaker"));
 
-                speaker->set_property (X_("azimuth"), (*i).angles().azi);
-                speaker->set_property (X_("elevation"), (*i).angles().ele);
-                speaker->set_property (X_("distance"), (*i).angles().length);
+                speaker->set_property (X_("azimuth"), i.angles().azi);
+                speaker->set_property (X_("elevation"), i.angles().ele);
+                speaker->set_property (X_("distance"), i.angles().length);
 
                 node->add_child_nocopy (*speaker);
         }

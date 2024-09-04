@@ -73,11 +73,11 @@ Maschine2Menu::Maschine2Menu (PBD::EventLoop* el, Item* parent, const std::vecto
 	_active_bg = new ArdourCanvas::Rectangle (this);
 	_active_bg->set_fill_color (0xffffffff);
 
-	for (vector<string>::const_iterator i = s.begin(); i != s.end(); ++i) {
+	for (const string& i : s) {
 		Text* t = new Text (this);
 		t->set_font_description (fd);
 		t->set_color (0xffffffff);
-		t->set (*i);
+		t->set (i);
 		_displays.push_back (t);
 	}
 	rearrange (0);

@@ -84,10 +84,10 @@ run_functor_for_paths (vector<string>& result,
                        bool recurse,
                        set<string>& scanned_paths)
 {
-	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+	for (const string& i : paths) {
 		try
 		{
-			string expanded_path = path_expand (*i);
+			string expanded_path = path_expand (i);
 
 			DEBUG_TRACE (DEBUG::FileUtils,
 					string_compose("Find files in expanded path: %1\n", expanded_path));
@@ -550,22 +550,21 @@ remove_directory_internal (const string& dir, size_t* size, vector<string>* path
 
 	get_paths (tmp_paths, dir, just_remove_files, true);
 
-	for (vector<string>::const_iterator i = tmp_paths.begin();
-			i != tmp_paths.end(); ++i) {
+	for (const string& i : tmp_paths) {
 
-		if (g_stat (i->c_str(), &statbuf) && g_lstat (i->c_str(), &statbuf)) {
+		if (g_stat (i.c_str(), &statbuf) && g_lstat (i.c_str(), &statbuf)) {
 			continue;
 		}
 
-		if (::g_remove (i->c_str())) {
-			error << string_compose (_("cannot remove path %1 (%2)"), *i, strerror (errno))
+		if (::g_remove (i.c_str())) {
+			error << string_compose (_("cannot remove path %1 (%2)"), i, strerror (errno))
 				<< endmsg;
 			ret = 1;
 			continue;
 		}
 
 		if (paths) {
-			paths->push_back (Glib::path_get_basename(*i));
+			paths->push_back (Glib::path_get_basename(i));
 		}
 
 		// statbuf.st_size is off_t

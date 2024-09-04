@@ -824,17 +824,17 @@ Session::rewire_selected_midi (std::shared_ptr<MidiTrack> new_midi_target)
 	AudioEngine::instance()->get_midi_selection_ports (msp);
 
 	if (!msp.empty()) {
-		for (vector<string>::const_iterator p = msp.begin(); p != msp.end(); ++p) {
+		for (const string& p : msp) {
 			/* disconnect port */
-			disconnect_port_for_rewire (*p);
+			disconnect_port_for_rewire (p);
 			/* connect it to the new target */
-			new_midi_target->input()->connect (new_midi_target->input()->nth(0), (*p), this);
+			new_midi_target->input()->connect (new_midi_target->input()->nth(0), p, this);
 			/* and grouped tracks */
 			RouteGroup* group = new_midi_target->route_group ();
 			if (group && group->is_active () && group->is_select ()) {
 				for (auto const& r : *group->route_list ()) {
 					if (dynamic_pointer_cast<MidiTrack> (r)) {
-						r->input()->connect (r->input()->nth(0), (*p), this);
+						r->input()->connect (r->input()->nth(0), p, this);
 					}
 				}
 			}
@@ -870,15 +870,15 @@ Session::rewire_midi_selection_ports ()
 
 	target->input()->disconnect (this);
 
-	for (vector<string>::const_iterator p = msp.begin(); p != msp.end(); ++p) {
-		disconnect_port_for_rewire (*p);
-		target->input()->connect (target->input()->nth (0), (*p), this);
+	for (const string& p : msp) {
+		disconnect_port_for_rewire (p);
+		target->input()->connect (target->input()->nth (0), (p), this);
 
 		RouteGroup* group = target->route_group ();
 		if (group && group->is_active () && group->is_select ()) {
 			for (auto const& r : *group->route_list ()) {
 				if (dynamic_pointer_cast<MidiTrack> (r)) {
-					r->input()->connect (r->input()->nth(0), (*p), this);
+					r->input()->connect (r->input()->nth(0), p, this);
 				}
 			}
 		}

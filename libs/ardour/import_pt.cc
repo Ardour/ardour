@@ -190,7 +190,6 @@ Session::import_pt_sources (PTFFormat& ptf, ImportStatus& status)
 	bool onefailed = false;
 	timepos_t pos = timepos_t::max (Temporal::AudioTime);
 
-	vector<PTFFormat::wav_t>::const_iterator w;
 	uint32_t wth = 0;
 
 	SourceList just_one_src;
@@ -199,20 +198,21 @@ Session::import_pt_sources (PTFFormat& ptf, ImportStatus& status)
 	pt_imported_sources.clear();
 	status.clear();
 
-	for (w = ptf.audiofiles ().begin (); w != ptf.audiofiles ().end () && !status.cancel; ++w) {
-		struct ptflookup p;
+	for (const PTFFormat::wav_t& w : ptf.audiofiles ()) {
+		if (status.cancel) break;
+		ptflookup p;
 		wth++;
 		ok = false;
 		/* Try audio file */
 		fullpath = Glib::build_filename (Glib::path_get_dirname (ptf.path ()), "Audio Files");
-		fullpath = Glib::build_filename (fullpath, w->filename);
+		fullpath = Glib::build_filename (fullpath, w.filename);
 		if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS)) {
 			just_one_src.clear();
 			ok = import_sndfile_as_region (fullpath, SrcBest, pos, just_one_src, status, wth, ptf.audiofiles ().size ());
 		} else {
 			/* Try fade file */
 			fullpath = Glib::build_filename (Glib::path_get_dirname (ptf.path ()), "Fade Files");
-			fullpath = Glib::build_filename (fullpath, w->filename);
+			fullpath = Glib::build_filename (fullpath, w.filename);
 			if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS)) {
 				just_one_src.clear();
 				ok = import_sndfile_as_region (fullpath, SrcBest, pos, just_one_src, status, wth, ptf.audiofiles ().size ());
@@ -226,13 +226,13 @@ Session::import_pt_sources (PTFFormat& ptf, ImportStatus& status)
 				 */
 				if (sample_rate () == ptf.sessionrate ()) {
 					/* Insert reference to missing source */
-					samplecnt_t sourcelen = w->length;
+					samplecnt_t sourcelen = w.length;
 					XMLNode srcxml (X_("Source"));
-					srcxml.set_property ("name", w->filename);
+					srcxml.set_property ("name", w.filename);
 					srcxml.set_property ("type", "audio");
 					srcxml.set_property ("id", PBD::ID ().to_s ());
 					std::shared_ptr<Source> source = SourceFactory::createSilent (*this, srcxml, sourcelen, sample_rate ());
-					p.index1 = w->index;
+					p.index1 = w.index;
 					p.id = source->id ();
 					ptfwavpair.push_back (p);
 					pt_imported_sources.push_back (source);
@@ -243,7 +243,7 @@ Session::import_pt_sources (PTFFormat& ptf, ImportStatus& status)
 			}
 		}
 		if (ok) {
-			p.index1 = w->index;
+			p.index1 = w.index;
 			p.id = just_one_src.back ()->id ();
 
 			ptfwavpair.push_back (p);
@@ -297,19 +297,18 @@ Session::import_pt_rest (PTFFormat& ptf)
 	regions.clear();
 	playlists.clear();
 
-	for (vector<PTFFormat::region_t>::const_iterator a = ptf.regions ().begin ();
-			a != ptf.regions ().end (); ++a) {
+	for (const PTFFormat::region_t& a : ptf.regions ()) {
 		for (ptflookup& p : ptfwavpair) {
-			if ((p.index1 == a->wave.index) && (strcmp (a->wave.filename.c_str (), "") != 0)) {
+			if ((p.index1 == a.wave.index) && (strcmp (a.wave.filename.c_str (), "") != 0)) {
 				for (SourceList::iterator x = pt_imported_sources.begin (); x != pt_imported_sources.end (); ++x) {
 					if ((*x)->id () == p.id) {
 						/* Matched an uncreated ptf region to ardour region */
 						struct ptflookup rp;
 						PropertyList plist;
 
-						plist.add (ARDOUR::Properties::start, timepos_t (a->sampleoffset));
-						plist.add (ARDOUR::Properties::length, a->length);
-						plist.add (ARDOUR::Properties::name, a->name);
+						plist.add (ARDOUR::Properties::start, timepos_t (a.sampleoffset));
+						plist.add (ARDOUR::Properties::length, a.length);
+						plist.add (ARDOUR::Properties::name, a.name);
 						plist.add (ARDOUR::Properties::layer, 0);
 						plist.add (ARDOUR::Properties::whole_file, false);
 						plist.add (ARDOUR::Properties::external, true);
@@ -321,7 +320,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 						regions.push_back (r);
 
 						rp.id = regions.back ()->id ();
-						rp.index1 = a->index;
+						rp.index1 = a.index;
 						ptfregpair.push_back (rp);
 					}
 				}
@@ -336,13 +335,13 @@ Session::import_pt_rest (PTFFormat& ptf)
 
 	/* Create all PT tracks if not already present and freeze all playlists of tracks we will touch */
 	nth = -1;
-	for (vector<PTFFormat::track_t>::const_iterator a = ptf.tracks ().begin (); a != ptf.tracks ().end (); ++a) {
-		if (a->index != nth) {
+	for (const PTFFormat::track_t& a : ptf.tracks ()) {
+		if (a.index != nth) {
 			nth++;
-			if (!(existing_track = dynamic_pointer_cast<AudioTrack> (route_by_name (a->name)))) {
+			if (!(existing_track = dynamic_pointer_cast<AudioTrack> (route_by_name (a.name)))) {
 				/* Create missing track */
-				DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\tcreate tr(%1) %2\n", nth, a->name.c_str()));
-				list<std::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, a->name.c_str(), PresentationInfo::max_order, Normal));
+				DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\tcreate tr(%1) %2\n", nth, a.name.c_str()));
+				list<std::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, a.name.c_str(), PresentationInfo::max_order, Normal));
 				if (at.empty ()) {
 					return;
 				}
@@ -360,28 +359,28 @@ Session::import_pt_rest (PTFFormat& ptf)
 	}
 
 	/* Add regions */
-	for (vector<PTFFormat::track_t>::const_iterator a = ptf.tracks ().begin (); a != ptf.tracks ().end (); ++a) {
+	for (const PTFFormat::track_t& a : ptf.tracks ()) {
 		for (ptflookup& p : ptfregpair) {
 
-			if (p.index1 == a->reg.index)  {
+			if (p.index1 == a.reg.index)  {
 
 				/* Matched a ptf active region to an ardour region */
 				std::shared_ptr<Region> r = RegionFactory::region_by_id (p.id);
-				DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) tr(%3)\n", a->reg.wave.filename.c_str (), a->reg.index, a->index));
+				DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) tr(%3)\n", a.reg.wave.filename.c_str (), a.reg.index, a.index));
 
 				/* Use audio track we know exists */
-				existing_track = dynamic_pointer_cast<AudioTrack> (route_by_name (a->name));
+				existing_track = dynamic_pointer_cast<AudioTrack> (route_by_name (a.name));
 				assert (existing_track);
 
 				/* Put on existing track */
 				std::shared_ptr<Playlist> playlist = existing_track->playlist ();
 				std::shared_ptr<Region> copy (RegionFactory::create (r, true));
 				playlist->clear_changes ();
-				playlist->add_region (copy, timepos_t (a->reg.startpos));
+				playlist->add_region (copy, timepos_t (a.reg.startpos));
 				//add_command (new StatefulDiffCommand (playlist));
 
 				/* Collect latest end of all regions */
-				timepos_t end_of_region = timepos_t (a->reg.startpos + a->reg.length);
+				timepos_t end_of_region = timepos_t (a.reg.startpos + a.reg.length);
 				if (latest < end_of_region) {
 					latest = end_of_region;
 				}
@@ -399,17 +398,17 @@ Session::import_pt_rest (PTFFormat& ptf)
 no_audio_tracks:
 	/* MIDI - Find list of unique midi tracks first */
 
-	for (vector<PTFFormat::track_t>::const_iterator a = ptf.miditracks ().begin (); a != ptf.miditracks ().end (); ++a) {
+	for (const PTFFormat::track_t& a : ptf.miditracks ()) {
 		bool found = false;
 		for (midipair& b : uniquetr) {
-			if (b.trname == a->name) {
+			if (b.trname == a.name) {
 				found = true;
 				break;
 			}
 		}
 		if (!found) {
-			uniquetr.push_back (midipair (a->index, a->name));
-			//printf(" : %d : %s\n", a->index, a->name.c_str());
+			uniquetr.push_back (midipair (a.index, a.name));
+			//printf(" : %d : %s\n", a.index, a.name.c_str());
 		}
 	}
 
@@ -432,20 +431,20 @@ no_audio_tracks:
 	}
 
 	/* MIDI - Add midi regions one-by-one to corresponding midi tracks */
-	for (vector<PTFFormat::track_t>::const_iterator a = ptf.miditracks ().begin (); a != ptf.miditracks ().end (); ++a) {
+	for (const PTFFormat::track_t& a : ptf.miditracks ()) {
 
-		std::shared_ptr<MidiTrack> midi_track = midi_tracks[a->index];
+		std::shared_ptr<MidiTrack> midi_track = midi_tracks[a.index];
 		assert (midi_track);
 		std::shared_ptr<Playlist> playlist = midi_track->playlist ();
-		samplepos_t f = (samplepos_t)a->reg.startpos * srate / 1920000.;
-		samplecnt_t length = (samplecnt_t)a->reg.length * srate / 1920000.;
+		samplepos_t f = (samplepos_t)a.reg.startpos * srate / 1920000.;
+		samplecnt_t length = (samplecnt_t)a.reg.length * srate / 1920000.;
 		MusicSample pos (f, 0);
 		std::shared_ptr<Source> src = create_midi_source_by_stealing_name (midi_track);
 		PropertyList plist;
 		plist.add (ARDOUR::Properties::start, 0);
 		plist.add (ARDOUR::Properties::length, length);
 		plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix (src->name ()));
-		//printf(" : %d - trackname: (%s)\n", a->index, src->name ().c_str ());
+		//printf(" : %d - trackname: (%s)\n", a.index, src->name ().c_str ());
 		std::shared_ptr<Region> region = (RegionFactory::create (src, plist));
 		/* sets position */
 		region->set_position (timepos_t (pos.sample));
@@ -456,12 +455,12 @@ no_audio_tracks:
 		MidiModel::NoteDiffCommand *midicmd;
 		midicmd = mm->new_note_diff_command ("Import ProTools MIDI");
 
-		for (vector<PTFFormat::midi_ev_t>::const_iterator j = a->reg.midi.begin (); j != a->reg.midi.end (); ++j) {
-			//printf(" : MIDI : pos=%f len=%f\n", (float)j->pos / 960000., (float)j->length / 960000.);
-			Temporal::Beats start = Temporal::Beats::from_double (j->pos / 960000.);
-			Temporal::Beats len = Temporal::Beats::from_double(j->length / 960000.);
+		for (const PTFFormat::midi_ev_t& j : a.reg.midi) {
+			//printf(" : MIDI : pos=%f len=%f\n", (float)j.pos / 960000., (float)j.length / 960000.);
+			Temporal::Beats start = Temporal::Beats::from_double (j.pos / 960000.);
+			Temporal::Beats len = Temporal::Beats::from_double(j.length / 960000.);
 			/* PT C-2 = 0, Ardour C-1 = 0, subtract twelve to convert ? */
-			midicmd->add (std::shared_ptr<Evoral::Note<Temporal::Beats> > (new Evoral::Note<Temporal::Beats> ((uint8_t)1, start, len, j->note, j->velocity)));
+			midicmd->add (std::shared_ptr<Evoral::Note<Temporal::Beats> > (new Evoral::Note<Temporal::Beats> ((uint8_t)1, start, len, j.note, j.velocity)));
 		}
 		mm->apply_diff_command_only (midicmd);
 		delete midicmd;

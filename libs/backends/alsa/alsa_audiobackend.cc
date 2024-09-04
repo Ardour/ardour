@@ -480,13 +480,13 @@ AlsaAudioBackend::update_systemic_audio_latencies ()
 	LatencyRange   lr;
 
 	lr.min = lr.max = lcpp + (_measure_latency ? 0 : _systemic_audio_output_latency);
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
-		set_latency_range (*it, true, lr);
+	for (const BackendPortPtr& it : _system_outputs) {
+		set_latency_range (it, true, lr);
 	}
 
 	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_input_latency);
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
-		set_latency_range (*it, false, lr);
+	for (const BackendPortPtr& it : _system_inputs) {
+		set_latency_range (it, false, lr);
 	}
 	update_latencies ();
 }
@@ -1167,9 +1167,9 @@ AlsaAudioBackend::join_process_threads ()
 {
 	int rv = 0;
 
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
+	for (const pthread_t& i : _threads) {
 		void* status;
-		if (pthread_join (*i, &status)) {
+		if (pthread_join (i, &status)) {
 			PBD::error << _("AudioEngine: cannot terminate process thread.") << endmsg;
 			rv -= 1;
 		}
@@ -1185,8 +1185,8 @@ AlsaAudioBackend::in_process_thread ()
 		return true;
 	}
 
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
-		if (pthread_equal (*i, pthread_self ()) != 0) {
+	for (const pthread_t& i : _threads) {
+		if (pthread_equal (i, pthread_self ()) != 0) {
 			return true;
 		}
 	}
@@ -1417,12 +1417,12 @@ AlsaAudioBackend::update_system_port_latencies ()
 			continue;
 		}
 
-		for (std::vector<BackendPortPtr>::const_iterator it = (*s)->inputs.begin (); it != (*s)->inputs.end (); ++it) {
-			(*it)->update_connected_latency (true);
+		for (const BackendPortPtr& it : (*s)->inputs) {
+			it->update_connected_latency (true);
 		}
 
-		for (std::vector<BackendPortPtr>::const_iterator it = (*s)->outputs.begin (); it != (*s)->outputs.end (); ++it) {
-			(*it)->update_connected_latency (false);
+		for (const BackendPortPtr& it : (*s)->outputs) {
+			it->update_connected_latency (false);
 		}
 	}
 }
@@ -1755,8 +1755,8 @@ AlsaAudioBackend::main_process_thread ()
 	/* warm up freewheel dry-run - see also AudioEngine _init_countdown */
 	int cnt = std::max (4, (int)(_samplerate / _samples_per_period) / 8);
 	for (int w = 0; w < cnt; ++w) {
-		for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
-			memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
+		for (const BackendPortPtr& it : _system_inputs) {
+			memset (it->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 		}
 		if (engine.process_callback (_samples_per_period)) {
 			_active = false;
@@ -1815,11 +1815,11 @@ AlsaAudioBackend::main_process_thread ()
 				if ((*s)->halt) {
 					/* slave died, unregister its ports (not rt-safe, but no matter) */
 					PBD::error << _("ALSA Slave device halted") << endmsg;
-					for (std::vector<BackendPortPtr>::const_iterator it = (*s)->inputs.begin (); it != (*s)->inputs.end (); ++it) {
-						unregister_port (*it);
+					for (const BackendPortPtr& it : (*s)->inputs) {
+						unregister_port (it);
 					}
-					for (std::vector<BackendPortPtr>::const_iterator it = (*s)->outputs.begin (); it != (*s)->outputs.end (); ++it) {
-						unregister_port (*it);
+					for (const BackendPortPtr& it : (*s)->outputs) {
+						unregister_port (it);
 					}
 					(*s)->inputs.clear ();
 					(*s)->outputs.clear ();
@@ -1890,8 +1890,8 @@ AlsaAudioBackend::main_process_thread ()
 				}
 				pthread_mutex_unlock (&_device_port_mutex);
 
-				for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
-					memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
+				for (const BackendPortPtr& it : _system_outputs) {
+					memset (it->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 				}
 
 				/* call engine process callback */
@@ -1967,8 +1967,8 @@ AlsaAudioBackend::main_process_thread ()
 			// Freewheelin'
 
 			// zero audio input buffers
-			for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
-				memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
+			for (const BackendPortPtr& it : _system_inputs) {
+				memset (it->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 			}
 
 			clock1     = g_get_monotonic_time ();
@@ -1988,6 +1988,7 @@ AlsaAudioBackend::main_process_thread ()
 					; // discard midi-data from HW.
 				}
 				rm->sync_time (clock1);
+				++i;
 			}
 			pthread_mutex_unlock (&_device_port_mutex);
 
@@ -2000,8 +2001,8 @@ AlsaAudioBackend::main_process_thread ()
 
 			// drop all outgoing MIDI messages
 			pthread_mutex_lock (&_device_port_mutex);
-			for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-				void* bptr = (*it)->get_buffer (0);
+			for (const BackendPortPtr& it : _system_midi_out) {
+				void* bptr = it->get_buffer (0);
 				midi_clear (bptr);
 			}
 			pthread_mutex_unlock (&_device_port_mutex);
@@ -2154,24 +2155,24 @@ AlsaAudioBackend::AudioSlave::update_latencies (uint32_t play, uint32_t capt)
 	LatencyRange lr;
 	lr.min = lr.max = (capt);
 	bool changed = false;
-	for (std::vector<BackendPortPtr>::const_iterator it = inputs.begin (); it != inputs.end (); ++it) {
+	for (const BackendPortPtr& it : inputs) {
 		LatencyRange lx;
-		lx = (*it)->latency_range (false);
+		lx = it->latency_range (false);
 		if (lr == lx) {
 			continue;
 		}
-		(*it)->set_latency_range (lr, false);
+		it->set_latency_range (lr, false);
 		changed = true;
 	}
 
 	lr.min = lr.max = play;
-	for (std::vector<BackendPortPtr>::const_iterator it = outputs.begin (); it != outputs.end (); ++it) {
+	for (const BackendPortPtr& it : outputs) {
 		LatencyRange lx;
-		lx = (*it)->latency_range (true);
+		lx = it->latency_range (true);
 		if (lr == lx) {
 			continue;
 		}
-		(*it)->set_latency_range (lr, true);
+		it->set_latency_range (lr, true);
 		changed = true;
 	}
 #ifndef NDEBUG

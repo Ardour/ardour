@@ -5064,8 +5064,8 @@ Session::construct_peak_filepath (const string& filepath, const bool in_session,
 
 			/* see if it is within our session */
 
-			for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-				if (i->path == session_path) {
+			for (const space_and_path& i : session_dirs) {
+				if (i.path == session_path) {
 					in_another_session = false;
 					break;
 				}
@@ -5175,15 +5175,13 @@ Session::audio_source_name_is_unique (const string& name)
 	std::vector<string> sdirs = source_search_path (DataType::AUDIO);
 	uint32_t existing = 0;
 
-	for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {
+	for (const string& spath : sdirs) {
 
 		/* note that we search *without* the extension so that
 		   we don't end up both "Audio 1-1.wav" and "Audio 1-1.caf"
 		   in the event that this new name is required for
 		   a file format change.
 		*/
-
-		const string spath = *i;
 
 		if (matching_unsuffixed_filename_exists_in (spath, name)) {
 			existing++;
@@ -5318,9 +5316,9 @@ Session::new_midi_source_path (const string& base, bool need_lock)
 
 		uint32_t existing = 0;
 
-		for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {
+		for (const string& i : sdirs) {
 
-			possible_path = Glib::build_filename (*i, possible_name + ".mid");
+			possible_path = Glib::build_filename (i, possible_name + ".mid");
 
 			if (Glib::file_test (possible_path, Glib::FILE_TEST_EXISTS)) {
 				existing++;
@@ -6950,8 +6948,8 @@ Session::source_search_path (DataType type) const
 			break;
 		}
 	} else {
-		for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-			SessionDirectory sdir (i->path);
+		for (const space_and_path& i : session_dirs) {
+			SessionDirectory sdir (i.path);
 			switch (type) {
 			case DataType::AUDIO:
 				sp.push_back (sdir.sound_path());

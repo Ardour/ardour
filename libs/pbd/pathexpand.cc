@@ -146,17 +146,17 @@ PBD::parse_path(std::string path, bool check_if_exists)
 	vector <std::string> tmp;
 	PBD::tokenize (path, string(G_SEARCHPATH_SEPARATOR_S), std::back_inserter (tmp));
 
-	for(vector<std::string>::const_iterator i = tmp.begin(); i != tmp.end(); ++i) {
-		if ((*i).empty()) continue;
+	for (const std::string& i : tmp) {
+		if (i.empty()) continue;
 		std::string dir;
 #ifndef PLATFORM_WINDOWS
-		if ((*i).substr(0,1) == "~") {
-			dir = Glib::build_filename(Glib::get_home_dir(), (*i).substr(1));
+		if (i.substr(0,1) == "~") {
+			dir = Glib::build_filename(Glib::get_home_dir(), i.substr(1));
 		}
 		else
 #endif
 		{
-			dir = *i;
+			dir = i;
 		}
 		if (!check_if_exists || Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
 			pathlist.push_back(dir);

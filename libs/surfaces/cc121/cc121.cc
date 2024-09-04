@@ -982,18 +982,18 @@ CC121::Button::set_state (XMLNode const& node)
 
 	state_pairs.push_back (make_pair (string ("plain"), ButtonState (0)));
 
-	for (vector<state_pair_t>::const_iterator sp = state_pairs.begin(); sp != state_pairs.end(); ++sp) {
+	for (const state_pair_t& sp : state_pairs) {
 		string prop_name;
 		string prop_value;
 
-		prop_name = sp->first + X_("-press");
+		prop_name = sp.first + X_("-press");
 		if (node.get_property (prop_name.c_str(), prop_value)) {
-			set_action (prop_value, true, sp->second);
+			set_action (prop_value, true, sp.second);
 		}
 
-		prop_name = sp->first + X_("-release");
+		prop_name = sp.first + X_("-release");
 		if (node.get_property (prop_name.c_str(), prop_value)) {
-			set_action (prop_value, false, sp->second);
+			set_action (prop_value, false, sp.second);
 		}
 	}
 
@@ -1016,16 +1016,16 @@ CC121::Button::get_state () const
 
 	state_pairs.push_back (make_pair (string ("plain"), ButtonState (0)));
 
-	for (vector<state_pair_t>::const_iterator sp = state_pairs.begin(); sp != state_pairs.end(); ++sp) {
-		if ((x = on_press.find (sp->second)) != on_press.end()) {
+	for (const state_pair_t& sp : state_pairs) {
+		if ((x = on_press.find (sp.second)) != on_press.end()) {
 			if (x->second.type == NamedAction) {
-				node->set_property (string (sp->first + X_("-press")).c_str(), x->second.action_name);
+				node->set_property (string (sp.first + X_("-press")).c_str(), x->second.action_name);
 			}
 		}
 
-		if ((x = on_release.find (sp->second)) != on_release.end()) {
+		if ((x = on_release.find (sp.second)) != on_release.end()) {
 			if (x->second.type == NamedAction) {
-				node->set_property (string (sp->first + X_("-release")).c_str(), x->second.action_name);
+				node->set_property (string (sp.first + X_("-release")).c_str(), x->second.action_name);
 			}
 		}
 	}

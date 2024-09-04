@@ -888,13 +888,13 @@ int
 LuaTableRef::get (lua_State* L)
 {
 	luabridge::LuaRef rv (luabridge::newTable (L));
-	for (std::vector<LuaTableEntry>::const_iterator i = _data.begin (); i != _data.end (); ++i) {
-		switch ((*i).keytype) {
+	for (const LuaTableEntry& i : _data) {
+		switch (i.keytype) {
 			case LUA_TSTRING:
-				assign (&rv, i->k_s, *i);
+				assign (&rv, i.k_s, i);
 				break;
 			case LUA_TNUMBER:
-				assign (&rv, i->k_n, *i);
+				assign (&rv, i.k_n, i);
 				break;
 		}
 	}
