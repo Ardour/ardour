@@ -1435,8 +1435,8 @@ DiskReader::move_processor_automation (std::weak_ptr<Processor> p, list<Temporal
 
 	set<Evoral::Parameter> const a = processor->what_can_be_automated ();
 
-	for (set<Evoral::Parameter>::const_iterator i = a.begin (); i != a.end (); ++i) {
-		std::shared_ptr<AutomationList> al = processor->automation_control (*i)->alist ();
+	for (const Evoral::Parameter& i : a) {
+		std::shared_ptr<AutomationList> al = processor->automation_control (i)->alist ();
 		if (!al->size ()) {
 			continue;
 		}

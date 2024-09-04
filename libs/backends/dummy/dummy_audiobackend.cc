@@ -1869,11 +1869,8 @@ void* DummyMidiPort::get_buffer (pframes_t n_samples)
 {
 	if (is_input ()) {
 		_buffer.clear ();
-		const std::set<BackendPortPtr>& connections = get_connections ();
-		for (std::set<BackendPortPtr>::const_iterator i = connections.begin ();
-				i != connections.end ();
-				++i) {
-			std::shared_ptr<DummyMidiPort> source = std::dynamic_pointer_cast<DummyMidiPort>(*i);
+		for (const BackendPortPtr& i : get_connections ()) {
+			std::shared_ptr<DummyMidiPort> source = std::dynamic_pointer_cast<DummyMidiPort>(i);
 			if (source->is_physical() && source->is_terminal()) {
 				source->get_buffer(n_samples); // generate signal.
 			}

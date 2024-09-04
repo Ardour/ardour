@@ -103,8 +103,8 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 
 	// Add currently active notes, if given
 	if (active_notes) {
-		for (typename std::set<WeakNotePtr>::const_iterator i = active_notes->begin(); i != active_notes->end(); ++i) {
-			NotePtr note = i->lock();
+		for (const WeakNotePtr& i : *active_notes) {
+			NotePtr note = i.lock();
 			if (note && note->time() <= t && note->end_time() > t) {
 				_active_notes.push(note);
 			}

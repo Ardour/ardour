@@ -1900,10 +1900,8 @@ void* PortMidiPort::get_buffer (pframes_t /* nframes */)
 {
 	if (is_input ()) {
 		(_buffer[_bufperiod]).clear ();
-		for (std::set<BackendPortPtr>::const_iterator i = get_connections ().begin ();
-				i != get_connections ().end ();
-				++i) {
-			const PortMidiBuffer * src = std::dynamic_pointer_cast<const PortMidiPort>(*i)->const_buffer ();
+		for (const BackendPortPtr& i : get_connections ()) {
+			const PortMidiBuffer * src = std::dynamic_pointer_cast<const PortMidiPort>(i)->const_buffer ();
 			for (PortMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
 				(_buffer[_bufperiod]).push_back (*it);
 			}

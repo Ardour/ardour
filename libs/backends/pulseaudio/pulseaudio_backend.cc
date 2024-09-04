@@ -1209,11 +1209,8 @@ void* PulseMidiPort::get_buffer (pframes_t /*n_samples*/)
 {
 	if (is_input ()) {
 		_buffer.clear ();
-		const std::set<BackendPortPtr>& connections = get_connections ();
-		for (std::set<BackendPortPtr>::const_iterator i = connections.begin ();
-		     i != connections.end ();
-		     ++i) {
-			const PulseMidiBuffer* src = std::dynamic_pointer_cast<PulseMidiPort> (*i)->const_buffer ();
+		for (const BackendPortPtr& i : get_connections ()) {
+			const PulseMidiBuffer* src = std::dynamic_pointer_cast<PulseMidiPort> (i)->const_buffer ();
 			for (PulseMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
 				_buffer.push_back (*it);
 			}

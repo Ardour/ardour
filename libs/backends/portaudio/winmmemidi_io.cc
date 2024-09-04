@@ -263,10 +263,8 @@ WinMMEMidiIO::update_device_info ()
 
 	clear_device_info ();
 
-	for (std::set<std::string>::const_iterator i = device_names.begin();
-	     i != device_names.end();
-	     ++i) {
-	  m_device_info.push_back(new MidiDeviceInfo(*i));
+	for (const std::string& i : device_names) {
+	  m_device_info.push_back(new MidiDeviceInfo(i));
 	}
 }
 

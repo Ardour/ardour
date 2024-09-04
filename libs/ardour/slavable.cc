@@ -51,9 +51,9 @@ Slavable::get_state () const
 	XMLNode* child;
 
 	Glib::Threads::RWLock::ReaderLock lm (master_lock);
-	for (std::set<uint32_t>::const_iterator i = _masters.begin(); i != _masters.end(); ++i) {
+	for (const uint32_t& i : _masters) {
 		child = new XMLNode (X_("Master"));
-		child->set_property (X_("number"), *i);
+		child->set_property (X_("number"), i);
 		node->add_child_nocopy (*child);
 	}
 
@@ -65,8 +65,8 @@ Slavable::masters (VCAManager* manager) const
 {
 	std::vector<std::shared_ptr<VCA> > rv;
 	Glib::Threads::RWLock::ReaderLock lm (master_lock);
-	for (std::set<uint32_t>::const_iterator i = _masters.begin(); i != _masters.end(); ++i) {
-		rv.push_back (manager->vca_by_number (*i));
+	for (const uint32_t& i : _masters) {
+		rv.push_back (manager->vca_by_number (i));
 	}
 	return rv;
 }
@@ -116,12 +116,12 @@ Slavable::do_assign (VCAManager* manager)
 	{
 		Glib::Threads::RWLock::ReaderLock lm (master_lock);
 
-		for (std::set<uint32_t>::const_iterator i = _masters.begin(); i != _masters.end(); ++i) {
-			std::shared_ptr<VCA> v = manager->vca_by_number (*i);
+		for (const uint32_t& i : _masters) {
+			std::shared_ptr<VCA> v = manager->vca_by_number (i);
 			if (v) {
 				vcas.push_back (v);
 			} else {
-				warning << string_compose (_("Master #%1 not found, assignment lost"), *i) << endmsg;
+				warning << string_compose (_("Master #%1 not found, assignment lost"), i) << endmsg;
 			}
 		}
 	}

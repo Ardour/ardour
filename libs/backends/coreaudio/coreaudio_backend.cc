@@ -1661,11 +1661,8 @@ void* CoreMidiPort::get_buffer (pframes_t /* nframes */)
 {
 	if (is_input ()) {
 		(_buffer[_bufperiod]).clear ();
-		const std::set<BackendPortPtr>& connections = get_connections ();
-		for (std::set<BackendPortPtr>::const_iterator i = connections.begin ();
-		     i != connections.end ();
-		     ++i) {
-			const CoreMidiBuffer * src = std::dynamic_pointer_cast<const CoreMidiPort>(*i)->const_buffer ();
+		for (const BackendPortPtr& i : get_connections ()) {
+			const CoreMidiBuffer * src = std::dynamic_pointer_cast<const CoreMidiPort>(i)->const_buffer ();
 			for (CoreMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
 				(_buffer[_bufperiod]).push_back (*it);
 			}
