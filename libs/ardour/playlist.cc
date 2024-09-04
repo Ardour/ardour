@@ -576,18 +576,13 @@ Playlist::notify_region_added (std::shared_ptr<Region> r)
 void
 Playlist::flush_notifications (bool from_undo)
 {
-	set<std::shared_ptr<Region> >::iterator s;
-	bool regions_changed = false;
-
 	if (in_flush) {
 		return;
 	}
 
 	in_flush = true;
 
-	if (!pending_bounds.empty () || !pending_removes.empty () || !pending_adds.empty ()) {
-		regions_changed = true;
-	}
+	bool regions_changed = !pending_bounds.empty () || !pending_removes.empty () || !pending_adds.empty ();
 
 	/* XXX: it'd be nice if we could use pending_bounds for
 	   RegionsExtended and RegionsMoved.
@@ -610,17 +605,17 @@ Playlist::flush_notifications (bool from_undo)
 	}
 
 	std::shared_ptr<RegionList> rl (new RegionList);
-	for (s = pending_removes.begin (); s != pending_removes.end (); ++s) {
-		crossfade_ranges.push_back ((*s)->range ());
-		RegionRemoved (std::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
-		rl->push_back (*s);
+	for (const std::shared_ptr<Region>& s : pending_removes) {
+		crossfade_ranges.push_back (s->range ());
+		RegionRemoved (std::weak_ptr<Region> (s)); /* EMIT SIGNAL */
+		rl->push_back (s);
 	}
 	if (rl->size () > 0) {
 		Region::RegionsPropertyChanged (rl, Properties::hidden);
 	}
 
-	for (s = pending_adds.begin (); s != pending_adds.end (); ++s) {
-		crossfade_ranges.push_back ((*s)->range ());
+	for (const std::shared_ptr<Region>& s : pending_adds) {
+		crossfade_ranges.push_back (s->range ());
 		/* don't emit RegionAdded signal until relayering is done,
 		   so that the region is fully setup by the time
 		   anyone hears that its been added
@@ -636,10 +631,10 @@ Playlist::flush_notifications (bool from_undo)
 		ContentsChanged (); /* EMIT SIGNAL */
 	}
 
-	for (s = pending_adds.begin (); s != pending_adds.end (); ++s) {
-		(*s)->clear_changes ();
-		RegionAdded (std::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
-		RegionFactory::CheckNewRegion (*s);         /* EMIT SIGNAL */
+	for (const std::shared_ptr<Region>& s : pending_adds) {
+		s->clear_changes ();
+		RegionAdded (std::weak_ptr<Region> (s)); /* EMIT SIGNAL */
+		RegionFactory::CheckNewRegion (s);         /* EMIT SIGNAL */
 	}
 
 	if ((regions_changed && !in_set_state) || pending_layering) {
@@ -1569,9 +1564,7 @@ Playlist::RemoveFromSoloSelectedList (const Region* r)
 bool
 Playlist::SoloSelectedListIncludes (const Region* r)
 {
-	std::set<const Region*>::iterator i = _soloSelectedRegions.find (r);
-
-	return (i != _soloSelectedRegions.end ());
+	return _soloSelectedRegions.find (r) != _soloSelectedRegions.end ();
 }
 
 bool

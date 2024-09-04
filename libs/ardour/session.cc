@@ -4773,21 +4773,14 @@ Session::destroy_sources (list<std::shared_ptr<Source> > const& srcs)
 		RegionFactory::get_regions_using_source (*s, relevant_regions);
 	}
 
-	for (set<std::shared_ptr<Region> >::iterator r = relevant_regions.begin(); r != relevant_regions.end(); ) {
-		set<std::shared_ptr<Region> >::iterator tmp;
-
-		tmp = r;
-		++tmp;
-
+	for (set<std::shared_ptr<Region> >::iterator r = relevant_regions.begin(); r != relevant_regions.end();) {
 		_playlists->destroy_region (*r);
 		RegionFactory::map_remove (*r);
 
 		(*r)->drop_sources ();
 		(*r)->drop_references ();
 
-		relevant_regions.erase (r);
-
-		r = tmp;
+		r = relevant_regions.erase (r);
 	}
 
 	for (list<std::shared_ptr<Source> >::const_iterator s = srcs.begin(); s != srcs.end(); ++s) {

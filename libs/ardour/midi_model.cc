@@ -317,9 +317,9 @@ MidiModel::NoteDiffCommand::operator() ()
 			}
 		}
 
-		for (set<NotePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
+		for (const NotePtr& i : temporary_removals) {
 			NoteDiffCommand side_effects (model(), "side effects");
-			if (_model->add_note_unlocked (*i, &side_effects)) {
+			if (_model->add_note_unlocked (i, &side_effects)) {
 				/* The note was re-added ok */
 				*this += side_effects;
 			} else {
@@ -327,14 +327,14 @@ MidiModel::NoteDiffCommand::operator() ()
 				   must say that the note was removed.  We'll keep the changes we made, though,
 				   as if the note is re-added by the undo the changes must also be undone.
 				*/
-				_removed_notes.push_back (*i);
+				_removed_notes.push_back (i);
 			}
 		}
 
 		if (!side_effect_removals.empty()) {
 			cerr << "SER: \n";
-			for (set<NotePtr>::iterator i = side_effect_removals.begin(); i != side_effect_removals.end(); ++i) {
-				cerr << "\t" << *i << ' ' << **i << endl;
+			for (const NotePtr& i : side_effect_removals) {
+				cerr << "\t" << i << ' ' << *i << endl;
 			}
 		}
 	}
@@ -435,8 +435,8 @@ MidiModel::NoteDiffCommand::undo ()
 			_model->add_note_unlocked(*i);
 		}
 
-		for (set<NotePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
-			_model->add_note_unlocked (*i);
+		for (const NotePtr& i : temporary_removals) {
+			_model->add_note_unlocked (i);
 		}
 
 		/* finally add back notes that were removed by the "do". we don't care
@@ -444,8 +444,8 @@ MidiModel::NoteDiffCommand::undo ()
 		   state once this is done.
 		*/
 
-		for (set<NotePtr>::iterator i = side_effect_removals.begin(); i != side_effect_removals.end(); ++i) {
-			_model->add_note_unlocked (*i);
+		for (const NotePtr& i : side_effect_removals) {
+			_model->add_note_unlocked (i);
 		}
 	}
 
@@ -989,8 +989,8 @@ MidiModel::PatchChangeDiffCommand::operator() ()
 			}
 		}
 
-		for (set<PatchChangePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
-			_model->add_patch_change_unlocked (*i);
+		for (const PatchChangePtr& i : temporary_removals) {
+			_model->add_patch_change_unlocked (i);
 		}
 	}
 
@@ -1046,8 +1046,8 @@ MidiModel::PatchChangeDiffCommand::undo ()
 			}
 		}
 
-		for (set<PatchChangePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
-			_model->add_patch_change_unlocked (*i);
+		for (const PatchChangePtr& i : temporary_removals) {
+			_model->add_patch_change_unlocked (i);
 		}
 
 	}
@@ -1613,11 +1613,11 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 		}
 	}
 
-	for (set<NotePtr>::iterator i = to_be_deleted.begin(); i != to_be_deleted.end(); ++i) {
-		remove_note_unlocked (*i);
+	for (const NotePtr& i : to_be_deleted) {
+		remove_note_unlocked (i);
 
 		if (cmd) {
-			cmd->side_effect_remove (*i);
+			cmd->side_effect_remove (i);
 		}
 	}
 

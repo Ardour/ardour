@@ -3779,10 +3779,10 @@ Session::cleanup_sources (CleanupReport& rep)
 
 		bool used = false;
 
-		for (set<string>::iterator i = sources_used_by_all_snapshots.begin(); i != sources_used_by_all_snapshots.end(); ++i) {
+		for (const string& i : sources_used_by_all_snapshots) {
 
 			tmppath1 = canonical_path (spath);
-			tmppath2 = canonical_path ((*i));
+			tmppath2 = canonical_path (i);
 
 
 			if (tmppath1 == tmppath2) {

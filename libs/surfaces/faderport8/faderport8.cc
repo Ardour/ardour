@@ -1517,13 +1517,13 @@ FaderPort8::select_plugin (int num)
 	// build params
 	_proc_params.clear();
 	set<Evoral::Parameter> p = proc->what_can_be_automated ();
-	for (set<Evoral::Parameter>::iterator i = p.begin(); i != p.end(); ++i) {
-		std::string n = proc->describe_parameter (*i);
+	for (const Evoral::Parameter& i : p) {
+		std::string n = proc->describe_parameter (i);
 		if (n == "hidden") {
 			continue;
 		}
 
-		_proc_params.push_back (ProcessorCtrl (n, proc->automation_control (*i)));
+		_proc_params.push_back (ProcessorCtrl (n, proc->automation_control (i)));
 	}
 
 	/* sort by display priority */
@@ -1592,8 +1592,8 @@ FaderPort8::spill_plugins ()
 #endif
 		int n_controls = 0;
 		set<Evoral::Parameter> p = proc->what_can_be_automated ();
-		for (set<Evoral::Parameter>::iterator j = p.begin(); j != p.end(); ++j) {
-			std::string n = proc->describe_parameter (*j);
+		for (const Evoral::Parameter& j : p) {
+			std::string n = proc->describe_parameter (j);
 			if (n == "hidden") {
 				continue;
 			}

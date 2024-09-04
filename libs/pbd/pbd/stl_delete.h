@@ -72,10 +72,8 @@ template<class T> /*LIBPBD_API*/ void slist_delete (std::slist<T *> *l)
 #if defined(_CPP_SET) || defined(_GLIBCXX_SET) || defined(__SGI_STL_SET)
 template<class T> void /*LIBPBD_API*/ set_delete (std::set<T *> *sset)
 {
-	typename std::set<T *>::iterator i;
-
-	for (i = sset->begin(); i != sset->end(); i++) {
-		delete *i;
+	for (T* const& i : sset) {
+		delete i;
 	}
 	sset->erase (sset->begin(), sset->end());
 }

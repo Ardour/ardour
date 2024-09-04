@@ -563,9 +563,9 @@ LaunchControlXL::handle_button_message(std::shared_ptr<Button> button, MIDI::Eve
 {
 	if (ev->value) {
 		/* any press cancels any pending long press timeouts */
-		for (set<ButtonID>::iterator x = buttons_down.begin(); x != buttons_down.end(); ++x) {
-			std::shared_ptr<ControllerButton> cb = id_controller_button_map[*x];
-			std::shared_ptr<NoteButton>	nb = id_note_button_map[*x];
+		for (const ButtonID& x : buttons_down) {
+			std::shared_ptr<ControllerButton> cb = id_controller_button_map[x];
+			std::shared_ptr<NoteButton>	nb = id_note_button_map[x];
 			if (cb != 0) {
 				cb->timeout_connection.disconnect();
 			} else if (nb != 0) {
