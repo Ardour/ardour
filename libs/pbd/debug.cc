@@ -145,12 +145,12 @@ PBD::parse_debug_options (const char* str)
 			return 0;
 		}
 
-		for (map<const char*,DebugBits>::iterator i = _debug_bit_map().begin(); i != _debug_bit_map().end(); ++i) {
+		for (auto& flag : _debug_bit_map()) {
 			const char* cstr = (*tok_iter).c_str();
 
-			if (strncasecmp (cstr, i->first, strlen (cstr)) == 0) {
-				debug_bits |= i->second;
-				cout << string_compose (X_("Debug flag '%1' set\n"), i->first);
+			if (strncasecmp (cstr, flag.first, strlen (cstr)) == 0) {
+				debug_bits |= flag.second;
+				cout << string_compose (X_("Debug flag '%1' set\n"), flag.first);
 			}
 		}
 	}
@@ -166,9 +166,9 @@ PBD::list_debug_options ()
 
 	vector<string> options;
 
-	for (map<const char*,DebugBits>::iterator i = _debug_bit_map().begin(); i != _debug_bit_map().end(); ++i) {
-		options.push_back (i->first);
-        }
+	for (auto& flag : _debug_bit_map()) {
+		options.push_back (flag.first);
+	}
 
 	sort (options.begin(), options.end());
 

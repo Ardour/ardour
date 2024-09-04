@@ -385,9 +385,9 @@ Keyboard::snooper (GtkWidget* widget, GdkEventKey* event)
 			/* August 2015: we don't have any release bindings
 			 */
 
-			for (map<AccelKey,two_strings,AccelKeyLess>::iterator k = release_keys.begin(); k != release_keys.end(); ++k) {
+			for (auto& k : release_keys) {
 
-				const AccelKey& ak (k->first);
+				const AccelKey& ak (k.first);
 
 				if (keyval == ak.get_key() && (Gdk::ModifierType)((event->state & Keyboard::RelevantModifierKeyMask) | Gdk::RELEASE_MASK) == ak.get_mod()) {
 					DEBUG_TRACE (DEBUG::Keyboard, "Suppress auto repeat\n");
@@ -770,9 +770,9 @@ Keyboard::load_keybindings (string const& path)
 
 		_current_binding_name = _("Unknown");
 
-		for (map<string, string>::iterator x = binding_files.begin (); x != binding_files.end (); ++x) {
-			if (path == x->second) {
-				_current_binding_name = x->first;
+		for (auto& f : binding_files) {
+			if (path == f.second) {
+				_current_binding_name = f.first;
 				break;
 			}
 		}
