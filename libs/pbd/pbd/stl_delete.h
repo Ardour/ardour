@@ -26,10 +26,8 @@
 #if defined(_CPP_VECTOR) || defined(_GLIBCXX_VECTOR) || defined(__SGI_STL_VECTOR) || defined(_LIBCPP_VECTOR)
 template<class T> /*LIBPBD_API*/ void vector_delete (std::vector<T *> *vec)
 {
-	typename std::vector<T *>::iterator i;
-
-	for (i = vec->begin(); i != vec->end(); i++) {
-		delete *i;
+	for (T*& i : vec) {
+		delete i;
 	}
 	vec->clear ();
 }

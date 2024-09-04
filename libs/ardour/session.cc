@@ -3389,8 +3389,8 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 
 			/* Fix up sharing of playlists with the new Route/Track */
 
-			for (vector<std::shared_ptr<Playlist> >::iterator sp = shared_playlists.begin(); sp != shared_playlists.end(); ++sp) {
-				(*sp)->share_with (route->id());
+			for (std::shared_ptr<Playlist> & sp : shared_playlists) {
+				sp->share_with (route->id());
 			}
 
 			if (std::dynamic_pointer_cast<Track>(route)) {
@@ -4401,8 +4401,8 @@ Session::set_exclusive_input_active (std::shared_ptr<RouteList> rl, bool onoff, 
 			p->get_connections (connections);
 		}
 
-		for (vector<string>::iterator s = connections.begin(); s != connections.end(); ++s) {
-			routes_using_input_from (*s, rl2);
+		for (string& s : connections) {
+			routes_using_input_from (s, rl2);
 		}
 
 		/* scan all relevant routes to see if others are on or off */
@@ -6302,9 +6302,9 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 	/* prepare MIDI files */
 
-	for (vector<std::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
+	for (std::shared_ptr<Source> & src : srcs) {
 
-		std::shared_ptr<MidiSource> ms = std::dynamic_pointer_cast<MidiSource>(*src);
+		std::shared_ptr<MidiSource> ms = std::dynamic_pointer_cast<MidiSource>(src);
 
 		if (ms) {
 			midi_source_locks.push_back (new MidiSourceLockMap (ms));
@@ -6314,8 +6314,8 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 	/* prepare audio files */
 
-	for (vector<std::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
-		std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource>(*src);
+	for (std::shared_ptr<Source> & src : srcs) {
+		std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource>(src);
 		if (afs) {
 			afs->prepare_for_peakfile_writes ();
 		}
@@ -6357,7 +6357,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 		/* XXX NUTEMPO fix this to not use samples */
 
-		for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
+		for (MidiSourceLockMap*& m : midi_source_locks) {
 				const MidiBuffer& buf = buffers.get_midi(0);
 				for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
 					Evoral::Event<samplepos_t> ev = *i;
@@ -6367,7 +6367,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 						/* MidiTrack::export_stuff moves event to the current cycle */
 						ev.set_time(ev.time() + out_pos - position);
 					}
-					(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position().samples());
+					m->src->append_event_samples (m->lock, ev, m->src->natural_position().samples());
 				}
 		}
 		out_pos += current_chunk;
@@ -6378,20 +6378,20 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 	if (!resolved.empty()) {
 
-		for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
+		for (MidiSourceLockMap*& m : midi_source_locks) {
 
 			for (MidiBuffer::iterator i = resolved.begin(); i != resolved.end(); ++i) {
 				Evoral::Event<samplepos_t> ev = *i;
 				if (!endpoint || for_export) {
 					ev.set_time(ev.time() - position);
 				}
-				(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position().samples());
+				m->src->append_event_samples (m->lock, ev, m->src->natural_position().samples());
 			}
 		}
 	}
 
-	for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
-		delete *m;
+	for (MidiSourceLockMap*& m : midi_source_locks) {
+		delete m;
 	}
 
 	midi_source_locks.clear ();
@@ -6421,7 +6421,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 		/* XXX NUTEMPO fix this to not use samples */
 
-		for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
+		for (MidiSourceLockMap*& m : midi_source_locks) {
 				const MidiBuffer& buf = buffers.get_midi(0);
 				for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
 					Evoral::Event<samplepos_t> ev = *i;
@@ -6430,7 +6430,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 					} else {
 						ev.set_time(ev.time() + out_pos - position);
 					}
-					(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position().samples());
+					m->src->append_event_samples (m->lock, ev, m->src->natural_position().samples());
 				}
 		}
 		out_pos += this_chunk;
@@ -6440,7 +6440,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 	if (!resolved.empty()) {
 
-		for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
+		for (MidiSourceLockMap*& m : midi_source_locks) {
 
 			for (MidiBuffer::iterator i = resolved.begin(); i != resolved.end(); ++i) {
 				Evoral::Event<samplepos_t> ev = *i;
@@ -6449,13 +6449,13 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 				} else {
 					ev.set_time(ev.time() + out_pos - position);
 				}
-				(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position().samples());
+				m->src->append_event_samples (m->lock, ev, m->src->natural_position().samples());
 			}
 		}
 	}
 
-	for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
-		delete *m;
+	for (MidiSourceLockMap*& m : midi_source_locks) {
+		delete m;
 	}
 
 	midi_source_locks.clear ();
@@ -6473,8 +6473,8 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 		const timecnt_t duration (end - start);
 
-		for (vector<std::shared_ptr<Source> >::iterator src=srcs.begin(); src != srcs.end(); ++src) {
-			std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource>(*src);
+		for (std::shared_ptr<Source> & src : srcs) {
+			std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource>(src);
 			std::shared_ptr<MidiSource> ms;
 
 			if (afs) {
@@ -6482,7 +6482,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 				afs->flush_header ();
 				afs->mark_immutable ();
 				plist.add (Properties::start, timepos_t (0));
-			} else if ((ms = std::dynamic_pointer_cast<MidiSource>(*src))) {
+			} else if ((ms = std::dynamic_pointer_cast<MidiSource>(src))) {
 				Source::WriterLock lock (ms->mutex());
 				ms->mark_streaming_write_completed (lock, duration);
 				plist.add (Properties::start, timepos_t (Beats()));
@@ -6508,14 +6508,14 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 	out:
 	if (!result) {
-		for (vector<std::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
-			(*src)->mark_for_remove ();
-			(*src)->drop_references ();
+		for (std::shared_ptr<Source> & src : srcs) {
+			src->mark_for_remove ();
+			src->drop_references ();
 		}
 
 	} else {
-		for (vector<std::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
-			std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource>(*src);
+		for (std::shared_ptr<Source> & src : srcs) {
+			std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource>(src);
 
 			if (afs)
 				afs->done_with_peakfile_writes ();
@@ -7004,14 +7004,14 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 		break;
 	}
 
-	for (vector<std::string>::iterator i = sp.begin(); i != sp.end(); ++i) {
+	for (std::string& i : sp) {
 		/* No need to add this new directory if it has the same inode as
 		   an existing one; checking inode rather than name prevents duplicated
 		   directories when we are using symlinks.
 
 		   On Windows, I think we could just do if (*i == path) here.
 		*/
-		if (PBD::equivalent_paths (*i, path)) {
+		if (PBD::equivalent_paths (i, path)) {
 			return;
 		}
 	}

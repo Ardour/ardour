@@ -159,20 +159,16 @@ WinMMEMidiIO::stop ()
 void
 WinMMEMidiIO::start_devices ()
 {
-	for (std::vector<WinMMEMidiInputDevice*>::iterator i = m_inputs.begin ();
-	     i < m_inputs.end();
-	     ++i) {
-		if (!(*i)->start ()) {
+	for (WinMMEMidiInputDevice*& i :  m_inputs) {
+		if (!i->start ()) {
 			PBD::error << string_compose (_("Unable to start MIDI input device %1\n"),
-			                              (*i)->name ()) << endmsg;
+			                              i->name ()) << endmsg;
 		}
 	}
-	for (std::vector<WinMMEMidiOutputDevice*>::iterator i = m_outputs.begin ();
-	     i < m_outputs.end();
-	     ++i) {
-		if (!(*i)->start ()) {
+	for (WinMMEMidiOutputDevice*& i :  m_outputs) {
+		if (!i->start ()) {
 			PBD::error << string_compose (_ ("Unable to start MIDI output device %1\n"),
-			                              (*i)->name ()) << endmsg;
+			                              i->name ()) << endmsg;
 		}
 	}
 }
@@ -180,17 +176,13 @@ WinMMEMidiIO::start_devices ()
 void
 WinMMEMidiIO::stop_devices ()
 {
-	for (std::vector<WinMMEMidiInputDevice*>::iterator i = m_inputs.begin ();
-	     i < m_inputs.end();
-	     ++i) {
+	for (WinMMEMidiInputDevice*& i :  m_inputs) {
 		if (!(*i)->stop ()) {
 			PBD::error << string_compose (_ ("Unable to stop MIDI input device %1\n"),
 			                              (*i)->name ()) << endmsg;
 		}
 	}
-	for (std::vector<WinMMEMidiOutputDevice*>::iterator i = m_outputs.begin ();
-	     i < m_outputs.end();
-	     ++i) {
+	for (WinMMEMidiOutputDevice*& i :  m_outputs) {
 		if (!(*i)->stop ()) {
 			PBD::error << string_compose (_ ("Unable to stop MIDI output device %1\n"),
 			                              (*i)->name ()) << endmsg;
@@ -201,10 +193,8 @@ WinMMEMidiIO::stop_devices ()
 void
 WinMMEMidiIO::clear_device_info ()
 {
-	for (std::vector<MidiDeviceInfo*>::iterator i = m_device_info.begin();
-	     i != m_device_info.end();
-	     ++i) {
-	  delete *i;
+	for (MidiDeviceInfo*& i : m_device_info) {
+	  delete i;
 	}
 	m_device_info.clear();
 }

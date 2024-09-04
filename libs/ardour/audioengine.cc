@@ -899,13 +899,13 @@ AudioEngine::discover_backends ()
 
 	DEBUG_TRACE (DEBUG::AudioEngine, string_compose ("looking for backends in %1\n", backend_search_path().to_string()));
 
-	for (vector<std::string>::iterator i = backend_modules.begin(); i != backend_modules.end(); ++i) {
+	for (std::string& i : backend_modules) {
 
 		AudioBackendInfo* info;
 
-		DEBUG_TRACE (DEBUG::AudioEngine, string_compose ("Checking possible backend in %1\n", *i));
+		DEBUG_TRACE (DEBUG::AudioEngine, string_compose ("Checking possible backend in %1\n", i));
 
-		if ((info = backend_discover (*i)) != 0) {
+		if ((info = backend_discover (i)) != 0) {
 			_backends.insert (make_pair (info->name, info));
 		}
 	}

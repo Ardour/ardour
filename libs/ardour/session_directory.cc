@@ -82,9 +82,9 @@ SessionDirectory::is_valid () const
 
 	vector<std::string> sub_dirs = sub_directories ();
 
-	for (vector<std::string>::iterator i = sub_dirs.begin(); i != sub_dirs.end(); ++i) {
-		if (!Glib::file_test (*i, Glib::FILE_TEST_IS_DIR)) {
-			PBD::warning << string_compose(_("Session subdirectory does not exist at path %1"), *i) << endmsg;
+	for (std::string& i : sub_dirs) {
+		if (!Glib::file_test (i, Glib::FILE_TEST_IS_DIR)) {
+			PBD::warning << string_compose(_("Session subdirectory does not exist at path %1"), i) << endmsg;
 			return false;
 		}
 	}

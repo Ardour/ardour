@@ -145,8 +145,8 @@ AudioTrack::set_state_part_two ()
 
 		_freeze_record.state = Frozen;
 
-		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
-			delete *i;
+		for (FreezeRecordProcessorInfo*& i : _freeze_record.processor_info) {
+			delete i;
 		}
 		_freeze_record.processor_info.clear ();
 
@@ -435,9 +435,9 @@ AudioTrack::unfreeze ()
 		{
 			Glib::Threads::RWLock::ReaderLock lm (_processor_lock); // should this be a write lock? jlc
 			for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-				for (vector<FreezeRecordProcessorInfo*>::iterator ii = _freeze_record.processor_info.begin(); ii != _freeze_record.processor_info.end(); ++ii) {
-					if ((*ii)->id == (*i)->id()) {
-						(*i)->set_state (((*ii)->state), Stateful::current_state_version);
+				for (FreezeRecordProcessorInfo*& ii : _freeze_record.processor_info) {
+					if (ii->id == (*i)->id()) {
+						(*i)->set_state ((ii->state), Stateful::current_state_version);
 						break;
 					}
 				}
@@ -448,8 +448,8 @@ AudioTrack::unfreeze ()
 		/* XXX need to use _main_outs _panner->set_automation_state (_freeze_record.pan_automation_state); */
 	}
 
-	for (vector<FreezeRecordProcessorInfo*>::iterator ii = _freeze_record.processor_info.begin(); ii != _freeze_record.processor_info.end(); ++ii) {
-		delete *ii;
+	for (FreezeRecordProcessorInfo*& ii : _freeze_record.processor_info) {
+		delete ii;
 	}
 	_freeze_record.processor_info.clear ();
 

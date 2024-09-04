@@ -1052,16 +1052,16 @@ VST3Plugin::find_presets ()
 	std::vector<std::string> preset_files;
 	find_paths_matching_filter (preset_files, psp, vst3_preset_filter, 0, false, true, false);
 
-	for (std::vector<std::string>::iterator i = preset_files.begin (); i != preset_files.end (); ++i) {
-		bool        is_user     = PBD::path_is_within (psp.front (), *i);
-		std::string preset_name = PBD::basename_nosuffix (*i);
+	for (std::string& i : preset_files) {
+		bool        is_user     = PBD::path_is_within (psp.front (), i);
+		std::string preset_name = PBD::basename_nosuffix (i);
 		std::string uri         = string_compose (X_("VST3-S:%1:%2"), unique_id (), preset_name);
 		if (_presets.find (uri) != _presets.end ()) {
 			continue;
 		}
 		PresetRecord r (uri, preset_name, is_user);
 		_presets.insert (make_pair (uri, r));
-		_preset_uri_map[uri] = *i;
+		_preset_uri_map[uri] = i;
 	}
 }
 
@@ -1117,9 +1117,9 @@ VST3PluginInfo::get_presets (bool user_only) const
 	std::vector<std::string> preset_files;
 	find_paths_matching_filter (preset_files, psp, vst3_preset_filter, 0, false, true, false);
 
-	for (std::vector<std::string>::iterator i = preset_files.begin (); i != preset_files.end (); ++i) {
-		bool        is_user     = PBD::path_is_within (psp.front (), *i);
-		std::string preset_name = PBD::basename_nosuffix (*i);
+	for (std::string& i : preset_files) {
+		bool        is_user     = PBD::path_is_within (psp.front (), i);
+		std::string preset_name = PBD::basename_nosuffix (i);
 		std::string uri         = string_compose (X_("VST3-S:%1:%2"), unique_id, preset_name);
 		if (!is_user) {
 			continue;

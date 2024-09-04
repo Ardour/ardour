@@ -203,9 +203,7 @@ GenericMidiControlProtocol::reload_maps ()
 		return;
 	}
 
-	for (vector<string>::iterator i = midi_maps.begin(); i != midi_maps.end(); ++i) {
-		string fullpath = *i;
-
+	for (string& fullpath : midi_maps) {
 		XMLTree tree;
 
 		if (!tree.read (fullpath.c_str())) {

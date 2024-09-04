@@ -108,8 +108,8 @@ AudioLibrary::set_tags (string member, vector<string> tags)
 
 	lrdf_remove_uri_matches (file_uri.c_str());
 
-	for (vector<string>::iterator i = tags.begin(); i != tags.end(); ++i) {
-		lrdf_add_triple (src.c_str(), file_uri.c_str(), TAG, (*i).c_str(), lrdf_literal);
+	for (string& i : tags) {
+		lrdf_add_triple (src.c_str(), file_uri.c_str(), TAG, i.c_str(), lrdf_literal);
 	}
 #endif
 }

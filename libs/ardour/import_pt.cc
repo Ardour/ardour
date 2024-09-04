@@ -289,7 +289,6 @@ Session::import_pt_rest (PTFFormat& ptf)
 	vector<midipair> uniquetr;
 
 	vector<PlaylistState> playlists;
-	vector<PlaylistState>::iterator pl;
 
 	just_one_src.clear();
 	uniquetr.clear();
@@ -300,11 +299,10 @@ Session::import_pt_rest (PTFFormat& ptf)
 
 	for (vector<PTFFormat::region_t>::const_iterator a = ptf.regions ().begin ();
 			a != ptf.regions ().end (); ++a) {
-		for (vector<struct ptflookup>::iterator p = ptfwavpair.begin ();
-				p != ptfwavpair.end (); ++p) {
-			if ((p->index1 == a->wave.index) && (strcmp (a->wave.filename.c_str (), "") != 0)) {
+		for (ptflookup& p : ptfwavpair) {
+			if ((p.index1 == a->wave.index) && (strcmp (a->wave.filename.c_str (), "") != 0)) {
 				for (SourceList::iterator x = pt_imported_sources.begin (); x != pt_imported_sources.end (); ++x) {
-					if ((*x)->id () == p->id) {
+					if ((*x)->id () == p.id) {
 						/* Matched an uncreated ptf region to ardour region */
 						struct ptflookup rp;
 						PropertyList plist;
@@ -363,13 +361,12 @@ Session::import_pt_rest (PTFFormat& ptf)
 
 	/* Add regions */
 	for (vector<PTFFormat::track_t>::const_iterator a = ptf.tracks ().begin (); a != ptf.tracks ().end (); ++a) {
-		for (vector<struct ptflookup>::iterator p = ptfregpair.begin ();
-				p != ptfregpair.end (); ++p) {
+		for (ptflookup& p : ptfregpair) {
 
-			if (p->index1 == a->reg.index)  {
+			if (p.index1 == a->reg.index)  {
 
 				/* Matched a ptf active region to an ardour region */
-				std::shared_ptr<Region> r = RegionFactory::region_by_id (p->id);
+				std::shared_ptr<Region> r = RegionFactory::region_by_id (p.id);
 				DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) tr(%3)\n", a->reg.wave.filename.c_str (), a->reg.index, a->index));
 
 				/* Use audio track we know exists */
@@ -395,8 +392,8 @@ Session::import_pt_rest (PTFFormat& ptf)
 	maybe_update_session_range (timepos_t (0), latest);
 
 	/* Playlist::thaw() all tracks */
-	for (pl = playlists.begin(); pl != playlists.end(); ++pl) {
-		(*pl).playlist->thaw ();
+	for (PlaylistState& pl : playlists) {
+		pl.playlist->thaw ();
 	}
 
 no_audio_tracks:
@@ -404,8 +401,8 @@ no_audio_tracks:
 
 	for (vector<PTFFormat::track_t>::const_iterator a = ptf.miditracks ().begin (); a != ptf.miditracks ().end (); ++a) {
 		bool found = false;
-		for (vector<midipair>::iterator b = uniquetr.begin (); b != uniquetr.end (); ++b) {
-			if (b->trname == a->name) {
+		for (midipair& b : uniquetr) {
+			if (b.trname == a->name) {
 				found = true;
 				break;
 			}
@@ -418,7 +415,7 @@ no_audio_tracks:
 
 	std::map <int, std::shared_ptr<MidiTrack> > midi_tracks;
 	/* MIDI - Create unique midi tracks and a lookup table for used tracks */
-	for (vector<midipair>::iterator a = uniquetr.begin (); a != uniquetr.end (); ++a) {
+	for (midipair& a : uniquetr) {
 		struct ptflookup miditr;
 		list<std::shared_ptr<MidiTrack> > mt (new_midi_track (
 				ChanCount (DataType::MIDI, 1),
@@ -427,11 +424,11 @@ no_audio_tracks:
 				instrument, (Plugin::PresetRecord*) 0,
 				(RouteGroup*) 0,
 				1,
-				a->trname,
+				a.trname,
 				PresentationInfo::max_order,
 				Normal, true));
 		assert (mt.size () == 1);
-		midi_tracks[a->ptfindex] = mt.front ();
+		midi_tracks[a.ptfindex] = mt.front ();
 	}
 
 	/* MIDI - Add midi regions one-by-one to corresponding midi tracks */

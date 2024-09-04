@@ -816,18 +816,18 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 	leave_event.detail = GDK_NOTIFY_VIRTUAL;
 	enter_event.detail = GDK_NOTIFY_VIRTUAL;
 
-	for (vector<Item*>::iterator it = items_to_leave_virtual.begin(); it != items_to_leave_virtual.end(); ++it) {
-		if (!(*it)->ignore_events()) {
-			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("leave %1/%2\n", (*it)->whatami(), (*it)->name));
-			(*it)->Event ((GdkEvent*)&leave_event);
+	for (Item*& it : items_to_leave_virtual) {
+		if (!it->ignore_events()) {
+			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("leave %1/%2\n", it->whatami(), it->name));
+			it->Event ((GdkEvent*)&leave_event);
 		}
 	}
 
-	for (vector<Item*>::iterator it = items_to_enter_virtual.begin(); it != items_to_enter_virtual.end(); ++it) {
-		if (!(*it)->ignore_events()) {
-			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("enter %1/%2\n", (*it)->whatami(), (*it)->name));
-			(*it)->Event ((GdkEvent*)&enter_event);
-			// std::cerr << "enter " << (*it)->whatami() << '/' << (*it)->name << std::endl;
+	for (Item*& it : items_to_enter_virtual) {
+		if (!it->ignore_events()) {
+			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("enter %1/%2\n", it->whatami(), it->name));
+			it->Event ((GdkEvent*)&enter_event);
+			// std::cerr << "enter " << it->whatami() << '/' << it->name << std::endl;
 		}
 	}
 

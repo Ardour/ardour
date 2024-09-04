@@ -212,8 +212,8 @@ EnumWriter::validate (EnumRegistration& er, int val) const
         }
 
 
-        for (i = er.values.begin(); i != er.values.end(); ++i) {
-                if (*i == val) {
+        for (int& i : er.values) {
+                if (i == val) {
                         return val;
                 }
         }

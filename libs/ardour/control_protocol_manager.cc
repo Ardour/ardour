@@ -420,8 +420,8 @@ ControlProtocolManager::discover_control_protocols ()
 	DEBUG_TRACE (DEBUG::ControlProtocols,
 		     string_compose (_("looking for control protocols in %1\n"), control_protocol_search_path().to_string()));
 
-	for (vector<std::string>::iterator i = cp_modules.begin(); i != cp_modules.end(); ++i) {
-		control_protocol_discover (*i);
+	for (std::string& i : cp_modules) {
+		control_protocol_discover (i);
 	}
 
 	ControlProtocolOrderByName cpn;

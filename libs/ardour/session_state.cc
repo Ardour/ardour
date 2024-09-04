@@ -2949,21 +2949,21 @@ Session::refresh_disk_space ()
 	_total_free_4k_blocks = 0;
 	_total_free_4k_blocks_uncertain = false;
 
-	for (vector<space_and_path>::iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+	for (space_and_path& i : session_dirs) {
 #if defined(__NetBSD__)
 		struct statvfs statfsbuf;
 
-		statvfs (i->path.c_str(), &statfsbuf);
+		statvfs (i.path.c_str(), &statfsbuf);
 #else
 		struct statfs statfsbuf;
 
-		statfs (i->path.c_str(), &statfsbuf);
+		statfs (i.path.c_str(), &statfsbuf);
 #endif
 		double const scale = statfsbuf.f_bsize / 4096.0;
 
 		/* See if this filesystem is read-only */
 		struct statvfs statvfsbuf;
-		statvfs (i->path.c_str(), &statvfsbuf);
+		statvfs (i.path.c_str(), &statvfsbuf);
 
 		/* f_bavail can be 0 if it is undefined for whatever
 		   filesystem we are looking at; Samba shares mounted
@@ -2971,27 +2971,25 @@ Session::refresh_disk_space ()
 		*/
 		if (statfsbuf.f_bavail == 0) {
 			/* block count unknown */
-			i->blocks = 0;
-			i->blocks_unknown = true;
+			i.blocks = 0;
+			i.blocks_unknown = true;
 		} else if (statvfsbuf.f_flag & ST_RDONLY) {
 			/* read-only filesystem */
-			i->blocks = 0;
-			i->blocks_unknown = false;
+			i.blocks = 0;
+			i.blocks_unknown = false;
 		} else {
 			/* read/write filesystem with known space */
-			i->blocks = (uint32_t) floor (statfsbuf.f_bavail * scale);
-			i->blocks_unknown = false;
+			i.blocks = (uint32_t) floor (statfsbuf.f_bavail * scale);
+			i.blocks_unknown = false;
 		}
 
-		_total_free_4k_blocks += i->blocks;
-		if (i->blocks_unknown) {
+		_total_free_4k_blocks += i.blocks;
+		if (i.blocks_unknown) {
 			_total_free_4k_blocks_uncertain = true;
 		}
 	}
 #elif defined PLATFORM_WINDOWS
 	vector<string> scanned_volumes;
-	vector<string>::iterator j;
-	vector<space_and_path>::iterator i;
 	DWORD nSectorsPerCluster, nBytesPerSector,
 	      nFreeClusters, nTotalClusters;
 	char disk_drive[4];
@@ -2999,8 +2997,8 @@ Session::refresh_disk_space ()
 
 	_total_free_4k_blocks = 0;
 
-	for (i = session_dirs.begin(); i != session_dirs.end(); i++) {
-		strncpy (disk_drive, (*i).path.c_str(), 3);
+	for (space_and_path& i : session_dirs) {
+		strncpy (disk_drive, i.path.c_str(), 3);
 		disk_drive[3] = 0;
 		strupr(disk_drive);
 
@@ -3011,8 +3009,8 @@ Session::refresh_disk_space ()
 			int64_t nFreeBytes = nBytesPerCluster * (int64_t)nFreeClusters;
 			i->blocks = (uint32_t)(nFreeBytes / 4096);
 
-			for (j = scanned_volumes.begin(); j != scanned_volumes.end(); j++) {
-				if (0 == j->compare(disk_drive)) {
+			for (string& j : scanned_volumes) {
+				if (0 == j.compare(disk_drive)) {
 					volume_found = true;
 					break;
 				}
@@ -3020,7 +3018,7 @@ Session::refresh_disk_space ()
 
 			if (!volume_found) {
 				scanned_volumes.push_back(disk_drive);
-				_total_free_4k_blocks += i->blocks;
+				_total_free_4k_blocks += i.blocks;
 			}
 		}
 	}
@@ -3455,14 +3453,14 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 	this_snapshot_path = Glib::build_filename (_path, legalize_for_path (_current_snapshot_name));
 	this_snapshot_path += statefile_suffix;
 
-	for (vector<string>::iterator i = state_files.begin(); i != state_files.end(); ++i) {
+	for (string& i : state_files) {
 
-		if (exclude_this_snapshot && *i == this_snapshot_path) {
+		if (exclude_this_snapshot && i == this_snapshot_path) {
 			continue;
 
 		}
 
-		if (find_all_sources (*i, result) < 0) {
+		if (find_all_sources (i, result) < 0) {
 			return -1;
 		}
 	}
@@ -3612,7 +3610,6 @@ Session::cleanup_sources (CleanupReport& rep)
 	vector<string> candidates;
 	vector<string> unused;
 	set<string> sources_used_by_all_snapshots;
-	string spath;
 	int ret = -1;
 	string tmppath1;
 	string tmppath2;
@@ -3778,10 +3775,9 @@ Session::cleanup_sources (CleanupReport& rep)
 	cerr << "Candidates: " << candidates.size() << endl;
 	cerr << "Used by others: " << sources_used_by_all_snapshots.size() << endl;
 
-	for (vector<string>::iterator x = candidates.begin(); x != candidates.end(); ++x) {
+	for (string& spath : candidates) {
 
 		bool used = false;
-		spath = *x;
 
 		for (set<string>::iterator i = sources_used_by_all_snapshots.begin(); i != sources_used_by_all_snapshots.end(); ++i) {
 
@@ -3810,7 +3806,7 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	/* now try to move all unused files into the "dead" directory(ies) */
 
-	for (vector<string>::iterator x = unused.begin(); x != unused.end(); ++x) {
+	for (string& x : unused) {
 		GStatBuf statbuf;
 
 		string newpath;
@@ -3820,18 +3816,18 @@ Session::cleanup_sources (CleanupReport& rep)
 		 * on whichever filesystem it was already on.
 		 */
 
-		if ((*x).find ("/sounds/") != string::npos) {
+		if (x.find ("/sounds/") != string::npos) {
 
 			/* old school, go up 1 level */
 
-			newpath = Glib::path_get_dirname (*x);      // "sounds"
+			newpath = Glib::path_get_dirname (x);      // "sounds"
 			newpath = Glib::path_get_dirname (newpath); // "session-name"
 
 		} else {
 
 			/* new school, go up 4 levels */
 
-			newpath = Glib::path_get_dirname (*x);      // "audiofiles" or "midifiles"
+			newpath = Glib::path_get_dirname (x);      // "audiofiles" or "midifiles"
 			newpath = Glib::path_get_dirname (newpath); // "session-name"
 			newpath = Glib::path_get_dirname (newpath); // "interchange"
 			newpath = Glib::path_get_dirname (newpath); // "session-dir"
@@ -3844,7 +3840,7 @@ Session::cleanup_sources (CleanupReport& rep)
 			return -1;
 		}
 
-		newpath = Glib::build_filename (newpath, Glib::path_get_basename ((*x)));
+		newpath = Glib::build_filename (newpath, Glib::path_get_basename (x));
 
 		if (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS)) {
 
@@ -3872,15 +3868,15 @@ Session::cleanup_sources (CleanupReport& rep)
 
 		}
 
-		if ((g_stat ((*x).c_str(), &statbuf) != 0) || (::g_rename ((*x).c_str(), newpath.c_str()) != 0)) {
-			error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"), (*x),
+		if ((g_stat (x.c_str(), &statbuf) != 0) || (::g_rename (x.c_str(), newpath.c_str()) != 0)) {
+			error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"), x,
 					newpath, g_strerror (errno)) << endmsg;
 			continue;
 		}
 
 		/* see if there an easy to find peakfile for this file, and remove it.  */
 
-		string base = Glib::path_get_basename (*x);
+		string base = Glib::path_get_basename (x);
 		base += "%A"; /* this is what we add for the channel suffix of all native files,
 									 * or for the first channel of embedded files. it will miss
 									 * some peakfiles for other channels
@@ -3897,7 +3893,7 @@ Session::cleanup_sources (CleanupReport& rep)
 			}
 		}
 
-		rep.paths.push_back (*x);
+		rep.paths.push_back (x);
 		rep.space += statbuf.st_size;
 	}
 
@@ -3926,13 +3922,8 @@ Session::cleanup_trash_sources (CleanupReport& rep)
 {
 	// FIXME: needs adaptation for MIDI
 
-	vector<space_and_path>::iterator i;
-	string dead_dir;
-
-	for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-
-		dead_dir = Glib::build_filename ((*i).path, dead_dir_name);
-
+	for (space_and_path& i : session_dirs) {
+		string dead_dir = Glib::build_filename (i.path, dead_dir_name);
 		clear_directory (dead_dir, &rep.space, &rep.paths);
 	}
 
@@ -4656,11 +4647,11 @@ Session::rename (const std::string& new_name)
 
 	first = true;
 
-	for (vector<space_and_path>::iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+	for (space_and_path& i : session_dirs) {
 
 		vector<string> v;
 
-		oldstr = (*i).path;
+		oldstr = i.path;
 
 		/* this is a stupid hack because Glib::path_get_dirname() is
 		 * lexical-only, and so passing it /a/b/c/ gives a different
@@ -4681,8 +4672,8 @@ Session::rename (const std::string& new_name)
 
 		/* Reset path in "session dirs" */
 
-		(*i).path = newstr;
-		(*i).blocks = 0;
+		i.path = newstr;
+		i.blocks = 0;
 
 		/* reset primary SessionDirectory object */
 
@@ -5103,9 +5094,9 @@ Session::save_as (SaveAs& saveas)
 
 		all += files.size();
 
-		for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
+		for (string& i : files) {
 			GStatBuf gsb;
-			g_stat ((*i).c_str(), &gsb);
+			g_stat (i.c_str(), &gsb);
 			total_bytes += gsb.st_size;
 		}
 	}
@@ -5169,9 +5160,7 @@ Session::save_as (SaveAs& saveas)
 			   implementing ::save_as().
 			*/
 
-			for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
-
-				std::string from = *i;
+			for (string& from : files) {
 
 #ifdef __APPLE__
 				string filename = Glib::path_get_basename (from);
@@ -5187,7 +5176,7 @@ Session::save_as (SaveAs& saveas)
 
 					if (saveas.include_media && saveas.copy_media) {
 
-						string to = make_new_media_path (*i, to_dir, new_folder);
+						string to = make_new_media_path (from, to_dir, new_folder);
 
 						info << "media file copying from " << from << " to " << to << endmsg;
 
@@ -5209,7 +5198,7 @@ Session::save_as (SaveAs& saveas)
 
 					if (saveas.include_media) {
 
-						string to = make_new_media_path (*i, to_dir, new_folder);
+						string to = make_new_media_path (from, to_dir, new_folder);
 
 						info << "media file copying from " << from << " to " << to << endmsg;
 
@@ -5240,8 +5229,8 @@ Session::save_as (SaveAs& saveas)
 
 					bool do_copy = true;
 
-					for (vector<string>::iterator v = do_not_copy_extensions.begin(); v != do_not_copy_extensions.end(); ++v) {
-						if ((from.length() > (*v).length()) && (from.find (*v) == from.length() - (*v).length())) {
+					for (string& v : do_not_copy_extensions) {
+						if ((from.length() > v.length()) && (from.find (v) == from.length() - v.length())) {
 							/* end of filename matches extension, do not copy file */
 							do_copy = false;
 							break;
@@ -5371,8 +5360,8 @@ Session::save_as (SaveAs& saveas)
 			*/
 
 			if (internal_file_cnt) {
-				for (vector<string>::iterator s = old_search_path[DataType::AUDIO].begin(); s != old_search_path[DataType::AUDIO].end(); ++s) {
-					ensure_search_path_includes (*s, DataType::AUDIO);
+				for (string& s : old_search_path[DataType::AUDIO]) {
+					ensure_search_path_includes (s, DataType::AUDIO);
 				}
 
 				/* we do not do this for MIDI because we copy
@@ -5810,14 +5799,14 @@ Session::archive_session (const std::string& dest,
 				filemap[from] = make_new_media_path (from, name, name);
 			} else {
 				bool do_copy = true;
-				for (vector<string>::iterator v = blacklist_dirs.begin(); v != blacklist_dirs.end(); ++v) {
-					if (from.find (*v) != string::npos) {
+				for (string& v : blacklist_dirs) {
+					if (from.find (v) != string::npos) {
 						do_copy = false;
 						break;
 					}
 				}
-				for (vector<string>::iterator v = do_not_copy_extensions.begin(); v != do_not_copy_extensions.end(); ++v) {
-					if ((from.length() > (*v).length()) && (from.find (*v) == from.length() - (*v).length())) {
+				for (string& v : do_not_copy_extensions) {
+					if ((from.length() > v.length()) && (from.find (v) == from.length() - v.length())) {
 						do_copy = false;
 						break;
 					}
@@ -5857,14 +5846,14 @@ Session::archive_session (const std::string& dest,
 	find_files_matching_filter (extra_files, to_dir, accept_all_files, 0, false, true, true);
 	for (auto const& from : extra_files) {
 		bool do_copy = true;
-		for (vector<string>::iterator v = blacklist_dirs.begin(); v != blacklist_dirs.end(); ++v) {
-			if (from.find (*v) != string::npos) {
+		for (string& v : blacklist_dirs) {
+			if (from.find (v) != string::npos) {
 				do_copy = false;
 				break;
 			}
 		}
-		for (vector<string>::iterator v = do_not_copy_extensions.begin(); v != do_not_copy_extensions.end(); ++v) {
-			if ((from.length() > (*v).length()) && (from.find (*v) == from.length() - (*v).length())) {
+		for (string& v : do_not_copy_extensions) {
+			if ((from.length() > v.length()) && (from.find (v) == from.length() - v.length())) {
 				do_copy = false;
 				break;
 			}

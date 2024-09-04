@@ -33,8 +33,8 @@ Transpose::operator()(std::shared_ptr<MidiModel> model,
 
 	Command* cmd = new Command(model, name());
 
-	for (std::vector<Notes>::iterator s = seqs.begin(); s != seqs.end(); ++s) {
-		for (Notes::const_iterator i = (*s).begin(); i != (*s).end(); ++i) {
+	for (Notes& s : seqs) {
+		for (Notes::const_iterator i = s.begin(); i != s.end(); ++i) {
 
 			const NotePtr note = *i;
 

@@ -111,8 +111,7 @@ DeviceProfile::reload_device_profiles ()
 		return;
 	}
 
-	for (vector<string>::iterator i = devprofiles.begin(); i != devprofiles.end(); ++i) {
-		string fullpath = *i;
+	for (string& fullpath : devprofiles) {
 		DeviceProfile dp; // has to be initial every loop or info from last added.
 
 		XMLTree tree;

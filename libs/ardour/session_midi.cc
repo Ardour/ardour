@@ -783,18 +783,18 @@ Session::disconnect_port_for_rewire (std::string const& port) const
 	vector<string> port_connections;
 	AudioEngine::instance()->get_connections (port, port_connections, false);
 
-	for (vector<string>::iterator i = port_connections.begin(); i != port_connections.end(); ++i) {
+	for (string& i : port_connections) {
 
 		/* test if (*i) is a control-surface input port */
-		if (keep_ctrl && AudioEngine::instance()->port_is_control_only (*i)) {
+		if (keep_ctrl && AudioEngine::instance()->port_is_control_only (i)) {
 			continue;
 		}
 		/* retain connection to "physical_midi_input_monitor_enable" */
-		if (AudioEngine::instance()->port_is_physical_input_monitor_enable (*i)) {
+		if (AudioEngine::instance()->port_is_physical_input_monitor_enable (i)) {
 			continue;
 		}
 
-		AudioEngine::instance()->disconnect (port, *i);
+		AudioEngine::instance()->disconnect (port, i);
 	}
 }
 

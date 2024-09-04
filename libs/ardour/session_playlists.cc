@@ -513,9 +513,9 @@ SessionPlaylists::maybe_delete_unused (std::function<int(std::shared_ptr<Playlis
 
 	/* now delete any that were marked for deletion */
 
-	for (vector<std::shared_ptr<Playlist> >::iterator x = playlists_tbd.begin(); x != playlists_tbd.end(); ++x) {
-		std::shared_ptr<Playlist> keeper (*x);
-		(*x)->drop_references ();
+	for (std::shared_ptr<Playlist> & x : playlists_tbd) {
+		std::shared_ptr<Playlist> keeper (x);
+		x->drop_references ();
 	}
 
 	playlists_tbd.clear ();
@@ -657,12 +657,12 @@ SessionPlaylists::playlists_for_track (std::shared_ptr<Track> tr) const
 
 	vector<std::shared_ptr<Playlist> > pl_tr;
 
-	for (vector<std::shared_ptr<Playlist> >::iterator i = pl.begin(); i != pl.end(); ++i) {
-		if ( ((*i)->get_orig_track_id() == tr->id()) ||
-			(tr->playlist()->id() == (*i)->id())    ||
-			((*i)->shared_with (tr->id())) )
+	for (std::shared_ptr<Playlist> & i : pl) {
+		if ( (i->get_orig_track_id() == tr->id()) ||
+			(tr->playlist()->id() == i->id())    ||
+			(i->shared_with (tr->id())) )
 		{
-			pl_tr.push_back (*i);
+			pl_tr.push_back (i);
 		}
 	}
 

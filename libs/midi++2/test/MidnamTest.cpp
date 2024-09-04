@@ -183,11 +183,11 @@ MidnamTest::load_all_midnams_test ()
 
     cout << "Loading " << result.size() << " MIDI patches from " << test_search_path ().to_string () << endl;
 
-    for (vector<std::string>::iterator i = result.begin(); i != result.end(); ++i) {
-        cout << "Processing file " << Glib::path_get_basename(*i) << endl;
+    for (std::string& i : result) {
+        cout << "Processing file " << Glib::path_get_basename(i) << endl;
         std::shared_ptr<MIDINameDocument> document(new MIDINameDocument(*i));
 
-        XMLTree xmldoc(*i);
+        XMLTree xmldoc(i);
         std::shared_ptr<XMLSharedNodeList> result = xmldoc.find("//MIDINameDocument");
         CPPUNIT_ASSERT(result->size() == 1);
 

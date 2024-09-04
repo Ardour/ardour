@@ -101,8 +101,8 @@ PannerManager::discover_panners ()
 
 	find_files_matching_filter (panner_modules, panner_search_path(), panner_filter, 0, false, true, true);
 
-	for (vector<std::string>::iterator i = panner_modules.begin(); i != panner_modules.end(); ++i) {
-		panner_discover (*i);
+	for (std::string& i : panner_modules) {
+		panner_discover (i);
 	}
 }
 

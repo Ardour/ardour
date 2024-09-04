@@ -304,8 +304,8 @@ MidiTrack::set_state_part_two ()
 
 		_freeze_record.state = Frozen;
 
-		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
-			delete *i;
+		for (FreezeRecordProcessorInfo*& i : _freeze_record.processor_info) {
+			delete i;
 		}
 		_freeze_record.processor_info.clear ();
 

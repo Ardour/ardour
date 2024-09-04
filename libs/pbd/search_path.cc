@@ -160,10 +160,10 @@ Searchpath::operator-= (const std::string& directory_path)
 Searchpath&
 Searchpath::add_subdirectory_to_paths (const string& subdir)
 {
-	for (vector<std::string>::iterator i = begin(); i != end(); ++i) {
+	for (std::string& i : *this) {
 		// should these new paths just be added to the end of
 		// the search path rather than replace?
-		*i = Glib::build_filename (*i, subdir);
+		i = Glib::build_filename (i, subdir);
 	}
 
 	return *this;

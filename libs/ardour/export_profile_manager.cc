@@ -212,8 +212,8 @@ ExportProfileManager::load_presets ()
 {
 	vector<std::string> found = find_file (string_compose (X_("*%1"), export_preset_suffix));
 
-	for (vector<std::string>::iterator it = found.begin (); it != found.end (); ++it) {
-		load_preset_from_disk (*it);
+	for (std::string& it : found) {
+		load_preset_from_disk (it);
 	}
 }
 
@@ -766,8 +766,8 @@ ExportProfileManager::load_formats ()
 {
 	vector<std::string> found = find_file (string_compose ("*%1", export_format_suffix));
 
-	for (vector<std::string>::iterator it = found.begin (); it != found.end (); ++it) {
-		load_format_from_disk (*it);
+	for (std::string& it : found) {
+		load_format_from_disk (it);
 	}
 }
 

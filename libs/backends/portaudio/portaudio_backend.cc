@@ -1296,14 +1296,14 @@ PortAudioBackend::register_system_midi_ports (std::string const& device)
 void
 PortAudioBackend::update_systemic_midi_latencies ()
 {
-	for (std::vector<BackendPortPtr>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-		MidiDeviceInfo* info = _midiio->get_device_info((*it)->hw_port_name());
+	for (BackendPortPtr& it : _system_midi_out) {
+		MidiDeviceInfo* info = _midiio->get_device_info(it->hw_port_name());
 		if (!info) {
 			continue;
 		}
 		LatencyRange lr;
 		lr.min = lr.max = (_measure_latency ? 0 : info->systemic_output_latency);
-		set_latency_range (*it, true, lr);
+		set_latency_range (it, true, lr);
 	}
 
 	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
@@ -1737,10 +1737,8 @@ void
 PortAudioBackend::process_outgoing_midi ()
 {
 	/* mixdown midi */
-	for (std::vector<BackendPortPtr>::iterator it = _system_midi_out.begin();
-	     it != _system_midi_out.end();
-	     ++it) {
-		std::dynamic_pointer_cast<PortMidiPort>(*it)->next_period();
+	for (BackendPortPtr& it : _system_midi_out) {
+		std::dynamic_pointer_cast<PortMidiPort>(it)->next_period();
 	}
 	/* queue outgoing midi */
 	uint32_t i = 0;

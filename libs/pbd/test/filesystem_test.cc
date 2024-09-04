@@ -117,9 +117,9 @@ FilesystemTest::testCopyFileUTF8Filename ()
 
 	string output_dir = test_output_directory ("CopyFile");
 
-	for (vector<string>::iterator i = i18n_files.begin(); i != i18n_files.end(); ++i) {
-		string input_path = *i;
-		string output_file = Glib::path_get_basename(*i);
+	for (string& i : i18n_files) {
+		string input_path = i;
+		string output_file = Glib::path_get_basename(i);
 		string output_path = Glib::build_filename (output_dir, output_file);
 
 		cerr << "Copying test file: " << input_path
@@ -146,10 +146,7 @@ FilesystemTest::testOpenFileUTF8Filename ()
 	     << " test files from: " << i18n_path.to_string () << endl;
 
 	// check that g_open will successfully open all the test files
-	for (vector<string>::iterator i = i18n_files.begin (); i != i18n_files.end ();
-	     ++i) {
-		string input_path = *i;
-
+	for (string& input_path : i18n_files) {
 		cerr << "Opening file: " << input_path << " with g_open" << endl;
 
 		int fdgo = g_open (input_path.c_str(), O_RDONLY, 0444);
@@ -177,9 +174,7 @@ FilesystemTest::testOpenFileUTF8Filename ()
 
 	bool conversion_failed = false;
 
-	for (vector<string>::iterator i = i18n_files.begin (); i != i18n_files.end ();
-	     ++i) {
-		string input_path = *i;
+	for (string& input_path : i18n_files) {
 		cerr << "Opening file: " << input_path << " with locale_from_utf8 and ::open "
 		     << endl;
 		string converted_input_path;
@@ -281,9 +276,9 @@ create_test_directory (std::string test_dir)
 	cerr << "Copying " << i18n_files.size() << " i18n test files to: "
 	     << subdir_path << endl;
 
-	for (vector<string>::iterator i = i18n_files.begin(); i != i18n_files.end(); ++i) {
-		string input_filepath = *i;
-		string output_filename = Glib::path_get_basename(*i);
+	for (string& i : i18n_files) {
+		string input_filepath = i;
+		string output_filename = Glib::path_get_basename(i);
 		string output_filepath = Glib::build_filename (subdir_path, output_filename);
 
 		CPPUNIT_ASSERT (PBD::copy_file (input_filepath, output_filepath));

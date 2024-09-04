@@ -63,11 +63,11 @@ FixedDelay::ensure_buffers (DataType type, size_t num_buffers, size_t buffer_cap
 void
 FixedDelay::clear ()
 {
-	for (std::vector<BufferVec>::iterator i = _buffers.begin (); i != _buffers.end (); ++i) {
-		for (BufferVec::iterator j = (*i).begin (); j != (*i).end (); ++j) {
+	for (BufferVec& i : _buffers) {
+		for (BufferVec::iterator j = i.begin (); j != i.end (); ++j) {
 			delete *j;
 		}
-		(*i).clear ();
+		i.clear ();
 	}
 	_buffers.clear ();
 	_count.reset ();
@@ -76,8 +76,8 @@ FixedDelay::clear ()
 void
 FixedDelay::flush()
 {
-	for (std::vector<BufferVec>::iterator i = _buffers.begin (); i != _buffers.end (); ++i) {
-		for (BufferVec::iterator j = (*i).begin (); j != (*i).end (); ++j) {
+	for (BufferVec& i : _buffers) {
+		for (BufferVec::iterator j = i.begin (); j != i.end (); ++j) {
 			(*j)->buf->silence (_buf_size);
 		}
 	}

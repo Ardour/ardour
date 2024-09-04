@@ -1904,8 +1904,8 @@ AlsaAudioBackend::main_process_thread ()
 
 				/* only used when adding/removing MIDI device/system ports */
 				pthread_mutex_lock (&_device_port_mutex);
-				for (std::vector<BackendPortPtr>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-					std::dynamic_pointer_cast<AlsaMidiPort> (*it)->next_period ();
+				for (BackendPortPtr& it : _system_midi_out) {
+					std::dynamic_pointer_cast<AlsaMidiPort> (it)->next_period ();
 				}
 
 				/* queue outgoing midi */

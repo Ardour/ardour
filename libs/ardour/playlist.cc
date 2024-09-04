@@ -2325,9 +2325,8 @@ Playlist::set_state (const XMLNode& node, int version)
 		if (!shared_ids.empty ()) {
 			vector<string> result;
 			::split (shared_ids, result, ',');
-			vector<string>::iterator it = result.begin ();
-			for (; it != result.end (); ++it) {
-				_shared_with_ids.push_back (PBD::ID (*it));
+			for (string& it : result) {
+				_shared_with_ids.push_back (PBD::ID (it));
 			}
 		}
 	}
@@ -3395,11 +3394,11 @@ Playlist::uncombine (std::shared_ptr<Region> target)
 
 	// (4) add the constituent regions
 
-	for (vector<std::shared_ptr<Region> >::iterator i = originals.begin(); i != originals.end(); ++i) {
-		add_region ((*i), (*i)->position());
-		set_layer((*i), (*i)->layer());
-		if (!RegionFactory::region_by_id((*i)->id())) {
-			RegionFactory::map_add(*i);
+	for (std::shared_ptr<Region> & i : originals) {
+		add_region (i, i->position());
+		set_layer(i, i->layer());
+		if (!RegionFactory::region_by_id(i->id())) {
+			RegionFactory::map_add(i);
 		}
 	}
 

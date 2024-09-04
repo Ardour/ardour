@@ -69,10 +69,10 @@ Push2Menu::Push2Menu (Item* parent, std::vector<std::string> s)
 
 	_active_bg = new ArdourCanvas::Rectangle (this);
 
-	for (std::vector<std::string>::iterator si = s.begin(); si != s.end(); ++si) {
+	for (std::string& si : s) {
 		Text* t = new Text (this);
 		t->set_font_description (fd);
-		t->set (*si);
+		t->set (si);
 		_displays.push_back (t);
 	}
 
@@ -269,8 +269,8 @@ Push2Menu::set_text_color (Gtkmm2ext::Color c)
 {
 	_text_color = c;
 
-	for (std::vector<Text*>::iterator t = _displays.begin(); t != _displays.end(); ++t) {
-		(*t)->set_color (c);
+	for (Text*& t : _displays) {
+		t->set_color (c);
 	}
 
 }
@@ -294,7 +294,7 @@ Push2Menu::set_font_description (Pango::FontDescription fd)
 {
 	_font_description = fd;
 
-	for (std::vector<Text*>::iterator t = _displays.begin(); t != _displays.end(); ++t) {
-		(*t)->set_font_description (fd);
+	for (Text*& t : _displays) {
+		t->set_font_description (fd);
 	}
 }

@@ -172,7 +172,7 @@ PBD::list_debug_options ()
 
 	sort (options.begin(), options.end());
 
-	for (vector<string>::iterator i = options.begin(); i != options.end(); ++i) {
-                cout << "\t" << (*i) << endl;
+	for (string& i : options) {
+                cout << "\t" << i << endl;
 	}
 }

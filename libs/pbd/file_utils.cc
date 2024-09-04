@@ -345,9 +345,9 @@ copy_files(const std::string & from_path, const std::string & to_dir)
 	vector<string> files;
 	find_files_matching_filter (files, from_path, accept_all_files, 0, true, false);
 
-	for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
-		std::string from = Glib::build_filename (from_path, *i);
-		std::string to = Glib::build_filename (to_dir, *i);
+	for (string& i : files) {
+		std::string from = Glib::build_filename (from_path, i);
+		std::string to = Glib::build_filename (to_dir, i);
 		copy_file (from, to);
 	}
 }
@@ -359,9 +359,8 @@ copy_recurse(const std::string & from_path, const std::string & to_dir, bool pre
 	find_files_matching_filter (files, from_path, accept_all_files, 0, false, true, true);
 
 	const size_t prefix_len = from_path.size();
-	for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
-		std::string from = *i;
-		std::string to = Glib::build_filename (to_dir, (*i).substr(prefix_len));
+	for (string& from : files) {
+		std::string to = Glib::build_filename (to_dir, from.substr(prefix_len));
 		g_mkdir_with_parents (Glib::path_get_dirname (to).c_str(), 0755);
 		if (copy_file (from, to) && preseve_timestamps) {
 			GStatBuf sb;

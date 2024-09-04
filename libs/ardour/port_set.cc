@@ -108,10 +108,10 @@ PortSet::remove (std::shared_ptr<Port> port)
 		_all_ports.erase(i);
 	}
 
-	for (std::vector<PortVec>::iterator l = _ports.begin(); l != _ports.end(); ++l) {
-		PortVec::iterator i = find(l->begin(), l->end(), port);
-		if (i != l->end()) {
-			l->erase(i);
+	for (PortVec& l : _ports) {
+		PortVec::iterator i = find(l.begin(), l.end(), port);
+		if (i != l.end()) {
+			l.erase(i);
 			_count.set(port->type(), _count.get(port->type()) - 1);
 			return true;
 		}

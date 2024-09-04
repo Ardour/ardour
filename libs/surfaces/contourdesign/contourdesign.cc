@@ -169,8 +169,8 @@ ContourDesignControlProtocol::set_state (const XMLNode& node, int version)
 	string s;
 	node.get_property (X_("shuttle-speeds"), s);
 	istringstream is (s);
-	for (vector<double>::iterator it = _shuttle_speeds.begin (); it != _shuttle_speeds.end (); ++it) {
-		is >> *it;
+	for (double& it : _shuttle_speeds) {
+		is >> it;
 	}
 
 	node.get_property (X_("jog-distance"), _jog_distance.value);

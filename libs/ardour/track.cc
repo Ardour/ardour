@@ -297,8 +297,8 @@ Track::set_state (const XMLNode& node, int version)
 
 Track::FreezeRecord::~FreezeRecord ()
 {
-	for (vector<FreezeRecordProcessorInfo*>::iterator i = processor_info.begin(); i != processor_info.end(); ++i) {
-		delete *i;
+	for (FreezeRecordProcessorInfo*& i : processor_info) {
+		delete i;
 	}
 }
 

@@ -950,11 +950,11 @@ PortManager::reconnect_ports ()
 		std::vector<std::string> midi_ports;
 		get_physical_inputs (DataType::AUDIO, audio_ports);
 		get_physical_inputs (DataType::MIDI, midi_ports);
-		for (std::vector<std::string>::iterator p = audio_ports.begin (); p != audio_ports.end (); ++p) {
-			port_engine ().connect (*p, audio_port);
+		for (std::string& p : audio_ports) {
+			port_engine ().connect (p, audio_port);
 		}
-		for (std::vector<std::string>::iterator p = midi_ports.begin (); p != midi_ports.end (); ++p) {
-			port_engine ().connect (*p, midi_port);
+		for (std::string& p : midi_ports) {
+			port_engine ().connect (p, midi_port);
 		}
 	}
 
@@ -1063,12 +1063,12 @@ PortManager::update_input_ports (bool clear)
 	} else {
 		std::shared_ptr<AudioInputPorts const> aip = _audio_input_ports.reader ();
 		/* find new audio ports */
-		for (std::vector<std::string>::iterator p = audio_ports.begin (); p != audio_ports.end (); ++p) {
-			if (port_is_mine (*p) || !_backend->get_port_by_name (*p)) {
+		for (std::string& p : audio_ports) {
+			if (port_is_mine (p) || !_backend->get_port_by_name (p)) {
 				continue;
 			}
-			if (aip->find (*p) == aip->end ()) {
-				new_audio.push_back (*p);
+			if (aip->find (p) == aip->end ()) {
+				new_audio.push_back (p);
 			}
 		}
 
@@ -1081,17 +1081,17 @@ PortManager::update_input_ports (bool clear)
 
 		std::shared_ptr<MIDIInputPorts const> mip = _midi_input_ports.reader ();
 		/* find new MIDI ports */
-		for (std::vector<std::string>::iterator p = midi_ports.begin (); p != midi_ports.end (); ++p) {
-			if (port_is_mine (*p) || !_backend->get_port_by_name (*p)) {
+		for (std::string& p : midi_ports) {
+			if (port_is_mine (p) || !_backend->get_port_by_name (p)) {
 				continue;
 			}
 #ifdef HAVE_ALSA
-			if ((*p).find (X_("Midi Through")) != string::npos || (*p).find (X_("Midi-Through")) != string::npos) {
+			if (p.find (X_("Midi Through")) != string::npos || p.find (X_("Midi-Through")) != string::npos) {
 				continue;
 			}
 #endif
-			if (mip->find (*p) == mip->end ()) {
-				new_midi.push_back (*p);
+			if (mip->find (p) == mip->end ()) {
+				new_midi.push_back (p);
 			}
 		}
 
@@ -1379,11 +1379,11 @@ PortManager::silence_outputs (pframes_t nframes)
 {
 	std::vector<std::string> port_names;
 	if (get_ports ("", DataType::AUDIO, IsOutput, port_names)) {
-		for (std::vector<std::string>::iterator p = port_names.begin (); p != port_names.end (); ++p) {
-			if (!port_is_mine (*p)) {
+		for (std::string& p : port_names) {
+			if (!port_is_mine (p)) {
 				continue;
 			}
-			PortEngine::PortHandle ph = _backend->get_port_by_name (*p);
+			PortEngine::PortHandle ph = _backend->get_port_by_name (p);
 			if (!ph) {
 				continue;
 			}
@@ -1396,11 +1396,11 @@ PortManager::silence_outputs (pframes_t nframes)
 	}
 
 	if (get_ports ("", DataType::MIDI, IsOutput, port_names)) {
-		for (std::vector<std::string>::iterator p = port_names.begin (); p != port_names.end (); ++p) {
-			if (!port_is_mine (*p)) {
+		for (std::string& p : port_names) {
+			if (!port_is_mine (p)) {
 				continue;
 			}
-			PortEngine::PortHandle ph = _backend->get_port_by_name (*p);
+			PortEngine::PortHandle ph = _backend->get_port_by_name (p);
 			if (!ph) {
 				continue;
 			}
@@ -1585,14 +1585,14 @@ PortManager::get_configurable_midi_ports (vector<string>& copy, bool for_input)
 
 	std::vector<string> ports;
 	AudioEngine::instance ()->get_ports (string (), DataType::MIDI, flags, ports);
-	for (vector<string>::iterator p = ports.begin (); p != ports.end (); ++p) {
-		if (port_is_mine (*p) && !port_is_virtual_piano (*p)) {
+	for (string& p : ports) {
+		if (port_is_mine (p) && !port_is_virtual_piano (p)) {
 			continue;
 		}
-		if ((*p).find (X_("Midi Through")) != string::npos || (*p).find (X_("Midi-Through")) != string::npos) {
+		if (p.find (X_("Midi Through")) != string::npos || p.find (X_("Midi-Through")) != string::npos) {
 			continue;
 		}
-		copy.push_back (*p);
+		copy.push_back (p);
 	}
 }
 
@@ -1845,12 +1845,12 @@ PortManager::fill_midi_port_info_locked ()
 
 	std::vector<string> ports;
 	AudioEngine::instance ()->get_ports (string (), DataType::MIDI, IsOutput, ports);
-	for (vector<string>::iterator p = ports.begin (); p != ports.end (); ++p) {
-		if (port_is_mine (*p) && !port_is_virtual_piano (*p)) {
+	for (string& p : ports) {
+		if (port_is_mine (p) && !port_is_virtual_piano (p)) {
 			continue;
 		}
 
-		PortID             pid (_backend, DataType::MIDI, true, *p);
+		PortID             pid (_backend, DataType::MIDI, true, p);
 		PortInfo::iterator x = _port_info.find (pid);
 		if (x != _port_info.end ()) {
 			continue;
@@ -1858,14 +1858,14 @@ PortManager::fill_midi_port_info_locked ()
 
 		MidiPortFlags flags (MidiPortFlags (0));
 
-		if (port_is_control_only (*p)) {
+		if (port_is_control_only (p)) {
 			flags = MidiPortControl;
-		} else if (port_is_virtual_piano (*p)) {
+		} else if (port_is_virtual_piano (p)) {
 			flags = MidiPortFlags (MidiPortSelection | MidiPortMusic);
 		}
 
 #ifdef HAVE_ALSA
-		if ((*p).find (X_("Midi Through")) != string::npos || (*p).find (X_("Midi-Through")) != string::npos) {
+		if (p.find (X_("Midi Through")) != string::npos || p.find (X_("Midi-Through")) != string::npos) {
 			flags = MidiPortFlags (flags | MidiPortVirtual);
 		}
 #endif
@@ -1876,12 +1876,12 @@ PortManager::fill_midi_port_info_locked ()
 	}
 
 	AudioEngine::instance ()->get_ports (string (), DataType::MIDI, IsInput, ports);
-	for (vector<string>::iterator p = ports.begin (); p != ports.end (); ++p) {
-		if (port_is_mine (*p)) {
+	for (string& p : ports) {
+		if (port_is_mine (p)) {
 			continue;
 		}
 
-		PortID             pid (_backend, DataType::MIDI, false, *p);
+		PortID             pid (_backend, DataType::MIDI, false, p);
 		PortInfo::iterator x = _port_info.find (pid);
 		if (x != _port_info.end ()) {
 			continue;
@@ -1889,12 +1889,12 @@ PortManager::fill_midi_port_info_locked ()
 
 		MidiPortFlags flags (MidiPortFlags (0));
 
-		if (port_is_control_only (*p)) {
+		if (port_is_control_only (p)) {
 			flags = MidiPortControl;
 		}
 
 #ifdef HAVE_ALSA
-		if ((*p).find (X_("Midi Through")) != string::npos || (*p).find (X_("Midi-Through")) != string::npos) {
+		if (p.find (X_("Midi Through")) != string::npos || p.find (X_("Midi-Through")) != string::npos) {
 			flags = MidiPortFlags (flags | MidiPortVirtual);
 		}
 #endif

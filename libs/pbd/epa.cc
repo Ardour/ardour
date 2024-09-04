@@ -80,9 +80,8 @@ EnvironmentalProtectionAgency::save ()
                 vector<string> lines;
                 split (estr, lines, '\n');
 
-                for (vector<string>::iterator i = lines.begin(); i != lines.end(); ++i) {
+                for (string& estring : lines) {
 
-                        string estring = *i;
                         string::size_type equal = estring.find_first_of ('=');
 
                         if (equal == string::npos) {

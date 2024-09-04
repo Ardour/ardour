@@ -828,8 +828,7 @@ OSC_GUI::scan_preset_files ()
 		return;
 	}
 
-	for (std::vector<std::string>::iterator i = presets.begin(); i != presets.end(); ++i) {
-		std::string fullpath = *i;
+	for (std::string& fullpath : presets) {
 		//DeviceProfile dp; // has to be initial every loop or info from last added.
 
 		XMLTree tree;

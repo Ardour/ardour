@@ -135,10 +135,10 @@ LuaScripting::scan ()
 	vector<string> luascripts;
 	find_files_matching_pattern (luascripts, lua_search_path (), "*.lua");
 
-	for (vector<string>::iterator i = luascripts.begin(); i != luascripts.end (); ++i) {
-		LuaScriptInfoPtr lsi = scan_script (*i);
+	for (string& i : luascripts) {
+		LuaScriptInfoPtr lsi = scan_script (i);
 		if (!lsi) {
-			PBD::info << string_compose (_("Script '%1' has no valid descriptor."), *i) << endmsg;
+			PBD::info << string_compose (_("Script '%1' has no valid descriptor."), i) << endmsg;
 			continue;
 		}
 		switch (lsi->type) {

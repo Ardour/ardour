@@ -102,8 +102,8 @@ VBAPanner::~VBAPanner ()
 void
 VBAPanner::clear_signals ()
 {
-	for (vector<Signal*>::iterator i = _signals.begin (); i != _signals.end (); ++i) {
-		delete *i;
+	for (Signal*& i : _signals) {
+		delete i;
 	}
 	_signals.clear ();
 }
@@ -142,8 +142,7 @@ VBAPanner::update ()
 		double w                   = -(_pannable->pan_width_control->get_value ());
 		double signal_direction    = 1.0 - (_pannable->pan_azimuth_control->get_value () + (w / 2));
 		double grd_step_per_signal = w / (_signals.size () - 1);
-		for (vector<Signal*>::iterator s = _signals.begin (); s != _signals.end (); ++s) {
-			Signal* signal = *s;
+		for (Signal*& signal : _signals) {
 
 			int over = signal_direction;
 			over -= (signal_direction >= 0) ? 0 : 1;
@@ -237,9 +236,7 @@ VBAPanner::distribute (BufferSet& inbufs, BufferSet& obufs, gain_t gain_coeffici
 
 	for (s = _signals.begin (), n = 0; s != _signals.end (); ++s, ++n) {
 		Signal* signal (*s);
-
 		distribute_one (inbufs.get_audio (n), obufs, gain_coefficient, nframes, n);
-
 		memcpy (signal->outputs, signal->desired_outputs, sizeof (signal->outputs));
 	}
 }

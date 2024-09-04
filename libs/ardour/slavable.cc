@@ -130,8 +130,8 @@ Slavable::do_assign (VCAManager* manager)
 
 	if (!vcas.empty()) {
 
-		for (std::vector<std::shared_ptr<VCA> >::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-			assign (*v);
+		for (std::shared_ptr<VCA> & v : vcas) {
+			assign (v);
 		}
 
 		SlavableAutomationControlList scl = slavables ();

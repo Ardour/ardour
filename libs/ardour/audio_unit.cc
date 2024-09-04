@@ -1148,8 +1148,8 @@ AUPlugin::match_variable_io (ChanCount& in, ChanCount& aux_in, ChanCount& out)
 	if (DEBUG_ENABLED(DEBUG::AudioUnitConfig)) {
 		DEBUG_STR_DECL(a);
 		DEBUG_STR_APPEND(a, string_compose ("AU Initial I/O Config list for %1 n_cfg: %2, in-bus %4 out-bus: %5\n", name(), io_configs.size(), input_elements, output_elements));
-		for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
-			DEBUG_STR_APPEND(a, string_compose (" - I/O  %1 / %2\n", i->first, i->second));
+		for (pair<int,int> & i : io_configs) {
+			DEBUG_STR_APPEND(a, string_compose (" - I/O  %1 / %2\n", i.first, i.second));
 		}
 		DEBUG_TRACE (DEBUG::AudioUnitConfig, DEBUG_STR(a).str());
 	}
@@ -1191,8 +1191,8 @@ AUPlugin::match_variable_io (ChanCount& in, ChanCount& aux_in, ChanCount& out)
 	if (DEBUG_ENABLED(DEBUG::AudioUnitConfig) && outs_added) {
 		DEBUG_STR_DECL(a);
 		DEBUG_STR_APPEND(a, string_compose ("AU Final I/O Config list for %1 n_cfg: %2\n", name(), io_configs.size()));
-		for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
-			DEBUG_STR_APPEND(a, string_compose (" - I/O  %1 / %2\n", i->first, i->second));
+		for (pair<int,int> & i : io_configs) {
+			DEBUG_STR_APPEND(a, string_compose (" - I/O  %1 / %2\n", i.first, i.second));
 		}
 		DEBUG_TRACE (DEBUG::AudioUnitConfig, DEBUG_STR(a).str());
 	}
@@ -1267,10 +1267,10 @@ AUPlugin::match_variable_io (ChanCount& in, ChanCount& aux_in, ChanCount& out)
   }                                    \
 }
 
-	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
+	for (pair<int,int> & i : io_configs) {
 
-		int32_t possible_in = i->first;
-		int32_t possible_out = i->second;
+		int32_t possible_in = i.first;
+		int32_t possible_out = i.second;
 
 		DEBUG_TRACE (DEBUG::AudioUnitConfig, string_compose ("\tpossible in %1 possible out %2\n", possible_in, possible_out));
 
@@ -2318,9 +2318,9 @@ AUPlugin::find_presets ()
 		DEBUG_TRACE (DEBUG::AudioUnitConfig, "AU No Preset Files found for given plugin.\n");
 	}
 
-	for (vector<string>::iterator x = preset_files.begin(); x != preset_files.end(); ++x) {
+	for (string& x : preset_files) {
 
-		string path = *x;
+		string path = x;
 		string preset_name;
 
 		/* make an initial guess at the preset name using the path */
@@ -2434,8 +2434,8 @@ AUPluginInfo::get_presets (bool user_only) const
 	vector<string> preset_files;
 	find_files_matching_filter (preset_files, preset_search_path, au_preset_filter, const_cast<AUPluginInfo*>(this), true, true, true);
 
-	for (vector<string>::iterator x = preset_files.begin(); x != preset_files.end(); ++x) {
-		string path = *x;
+	for (string& x : preset_files) {
+		string path = x;
 		string preset_name;
 		preset_name = Glib::path_get_basename (path);
 		preset_name = preset_name.substr (0, preset_name.find_last_of ('.'));
