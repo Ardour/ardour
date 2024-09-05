@@ -123,8 +123,8 @@ EnvironmentalProtectionAgency::restore () const
 {
 		clear ();
 
-        for (map<string,string>::const_iterator i = e.begin(); i != e.end(); ++i) {
-                g_setenv (i->first.c_str(), i->second.c_str(), 1);
+        for (const std::pair<const string,string>& i : e) {
+                g_setenv (i.first.c_str(), i.second.c_str(), 1);
         }
 }
 

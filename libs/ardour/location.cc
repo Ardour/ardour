@@ -664,10 +664,8 @@ Location::get_state () const
 {
 	XMLNode *node = new XMLNode ("Location");
 
-	typedef map<string, string>::const_iterator CI;
-
-	for(CI m = cd_info.begin(); m != cd_info.end(); ++m){
-		node->add_child_nocopy(cd_info_node(m->first, m->second));
+	for (const std::pair<const string, string>& m : cd_info) {
+		node->add_child_nocopy(cd_info_node(m.first, m.second));
 	}
 
 	node->set_property ("id", id ());

@@ -162,10 +162,10 @@ CoreAudioBackend::enumerate_devices () const
 	std::map<size_t, std::string> devices;
 	_pcmio->duplex_device_list(devices);
 
-	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (_input_audio_device == "") _input_audio_device = i->second;
-		if (_output_audio_device == "") _output_audio_device = i->second;
-		_duplex_audio_device_status.push_back (DeviceStatus (i->second, true));
+	for (const std::pair<const size_t, std::string>& i : devices) {
+		if (_input_audio_device == "") _input_audio_device = i.second;
+		if (_output_audio_device == "") _output_audio_device = i.second;
+		_duplex_audio_device_status.push_back (DeviceStatus (i.second, true));
 	}
 	return _duplex_audio_device_status;
 }
@@ -178,9 +178,9 @@ CoreAudioBackend::enumerate_input_devices () const
 	_pcmio->input_device_list(devices);
 
 	_input_audio_device_status.push_back (DeviceStatus (get_standard_device_name(DeviceNone), true));
-	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (_input_audio_device == "") _input_audio_device = i->second;
-		_input_audio_device_status.push_back (DeviceStatus (i->second, true));
+	for (const std::pair<const size_t, std::string>& i : devices) {
+		if (_input_audio_device == "") _input_audio_device = i.second;
+		_input_audio_device_status.push_back (DeviceStatus (i.second, true));
 	}
 	return _input_audio_device_status;
 }
@@ -194,9 +194,9 @@ CoreAudioBackend::enumerate_output_devices () const
 	_pcmio->output_device_list(devices);
 
 	_output_audio_device_status.push_back (DeviceStatus (get_standard_device_name(DeviceNone), true));
-	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (_output_audio_device == "") _output_audio_device = i->second;
-		_output_audio_device_status.push_back (DeviceStatus (i->second, true));
+	for (const std::pair<const size_t, std::string>& i : devices) {
+		if (_output_audio_device == "") _output_audio_device = i.second;
+		_output_audio_device_status.push_back (DeviceStatus (i.second, true));
 	}
 	return _output_audio_device_status;
 }
@@ -761,9 +761,9 @@ CoreAudioBackend::name_to_id(std::string device_name, DeviceFilter filter) const
 			break;
 	}
 
-	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (i->second == device_name) {
-			device_id = i->first;
+	for (const std::pair<const size_t, std::string>& i : devices) {
+		if (i.second == device_name) {
+			device_id = i.first;
 			break;
 		}
 	}

@@ -474,20 +474,18 @@ LocalCandidatePYIN::getRemainingFeatures()
 
     // I stopped using Chris's map stuff below because I couldn't get my head around it
     //
-    // for (map<RealTime, map<int, float> >::const_iterator i =
-    //          featureValues.begin(); i != featureValues.end(); ++i) {
+    // for (const std::pair<const RealTime, map<int, float>>& i : featureValues) {
     //     Feature f;
     //     f.hasTimestamp = true;
-    //     f.timestamp = i->first;
+    //     f.timestamp = i.first;
     //     int nextCandidate = candidateActuals.begin()->second;
-    //     for (map<int, float>::const_iterator j =
-    //              i->second.begin(); j != i->second.end(); ++j) {
-    //         while (candidateActuals[j->first] > nextCandidate) {
+    //     for (const std::pair<const int, float>& j : i.second) {
+    //         while (candidateActuals[j.first] > nextCandidate) {
     //             f.values.push_back(0);
     //             ++nextCandidate;
     //         }
-    //         f.values.push_back(j->second);
-    //         nextCandidate = j->first + 1;
+    //         f.values.push_back(j.second);
+    //         nextCandidate = j.first + 1;
     //     }
     //     //!!! can't use labels?
     //     fs[0].push_back(f);

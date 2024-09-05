@@ -320,20 +320,16 @@ PortAudioIO::available_buffer_sizes(int device_id, std::vector<uint32_t>& buffer
 void
 PortAudioIO::input_device_list(std::map<int, std::string> &devices) const
 {
-	for (std::map<int, paDevice*>::const_iterator i = _input_devices.begin ();
-	     i != _input_devices.end ();
-	     ++i) {
-		devices.insert (std::pair<int, std::string>(i->first, Glib::locale_to_utf8(i->second->name)));
+	for (const std::pair<const int, paDevice*>& i : _input_devices) {
+		devices.insert (std::pair<int, std::string>(i.first, Glib::locale_to_utf8(i.second->name)));
 	}
 }
 
 void
 PortAudioIO::output_device_list(std::map<int, std::string> &devices) const
 {
-	for (std::map<int, paDevice*>::const_iterator i = _output_devices.begin ();
-	     i != _output_devices.end ();
-	     ++i) {
-		devices.insert (std::pair<int, std::string>(i->first, Glib::locale_to_utf8(i->second->name)));
+	for (const std::pair<const int, paDevice*>& i : _output_devices) {
+		devices.insert (std::pair<int, std::string>(i.first, Glib::locale_to_utf8(i.second->name)));
 	}
 }
 
@@ -469,13 +465,13 @@ PortAudioIO::get_default_output_device () const
 void
 PortAudioIO::clear_device_lists ()
 {
-	for (std::map<int, paDevice*>::const_iterator i = _input_devices.begin (); i != _input_devices.end(); ++i) {
-		delete i->second;
+	for (const std::pair<const int, paDevice*>& i : _input_devices) {
+		delete i.second;
 	}
 	_input_devices.clear();
 
-	for (std::map<int, paDevice*>::const_iterator i = _output_devices.begin (); i != _output_devices.end(); ++i) {
-		delete i->second;
+	for (const std::pair<const int, paDevice*>& i : _output_devices) {
+		delete i.second;
 	}
 	_output_devices.clear();
 }

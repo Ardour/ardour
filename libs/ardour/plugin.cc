@@ -376,9 +376,9 @@ Plugin::preset_by_label (const string& label)
 	}
 
 	// FIXME: O(n)
-	for (map<string, PresetRecord>::const_iterator i = _presets.begin(); i != _presets.end(); ++i) {
-		if (i->second.label == label) {
-			return &i->second;
+	for (const std::pair<const string, PresetRecord>& i : _presets) {
+		if (i.second.label == label) {
+			return &i.second;
 		}
 	}
 
@@ -493,8 +493,8 @@ Plugin::get_presets ()
 		_have_presets = true;
 	}
 
-	for (map<string, PresetRecord>::const_iterator i = _presets.begin(); i != _presets.end(); ++i) {
-		p.push_back (i->second);
+	for (const std::pair<const string, PresetRecord>& i : _presets) {
+		p.push_back (i.second);
 	}
 
 	std::sort (p.begin(), p.end());

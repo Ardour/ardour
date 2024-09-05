@@ -204,9 +204,9 @@ PortAudioBackend::enumerate_input_devices () const
 	std::map<int, std::string> input_devices;
 	_pcmio->input_device_list(input_devices);
 
-	for (std::map<int, std::string>::const_iterator i = input_devices.begin (); i != input_devices.end(); ++i) {
-		if (_input_audio_device == "") _input_audio_device = i->second;
-		_input_audio_device_status.push_back (DeviceStatus (i->second, true));
+	for (const std::pair<const int, std::string>& i : input_devices) {
+		if (_input_audio_device == "") _input_audio_device = i.second;
+		_input_audio_device_status.push_back (DeviceStatus (i.second, true));
 	}
 	return _input_audio_device_status;
 }
@@ -218,9 +218,9 @@ PortAudioBackend::enumerate_output_devices () const
 	std::map<int, std::string> output_devices;
 	_pcmio->output_device_list(output_devices);
 
-	for (std::map<int, std::string>::const_iterator i = output_devices.begin (); i != output_devices.end(); ++i) {
-		if (_output_audio_device == "") _output_audio_device = i->second;
-		_output_audio_device_status.push_back (DeviceStatus (i->second, true));
+	for (const std::pair<const int, std::string>& i : output_devices) {
+		if (_output_audio_device == "") _output_audio_device = i.second;
+		_output_audio_device_status.push_back (DeviceStatus (i.second, true));
 	}
 	return _output_audio_device_status;
 }
@@ -1027,9 +1027,9 @@ PortAudioBackend::name_to_id(std::string device_name) const {
 	_pcmio->input_device_list(devices);
 	_pcmio->output_device_list(devices);
 
-	for (std::map<int, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (i->second == device_name) {
-			device_id = i->first;
+	for (const std::pair<const int, std::string>& i : devices) {
+		if (i.second == device_name) {
+			device_id = i.first;
 			break;
 		}
 	}

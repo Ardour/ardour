@@ -2103,21 +2103,20 @@ VST3PI::synchronize_states ()
 void
 VST3PI::update_shadow_data ()
 {
-	std::map<uint32_t, Vst::ParamID>::const_iterator i;
-	for (i = _ctrl_index_id.begin (); i != _ctrl_index_id.end (); ++i) {
-		Vst::ParamValue v = _controller->getParamNormalized (i->second);
-		if (_shadow_data[i->first] != v) {
+	for (const std::pair<const uint32_t, Vst::ParamID>& i : _ctrl_index_id) {
+		Vst::ParamValue v = _controller->getParamNormalized (i.second);
+		if (_shadow_data[i.first] != v) {
 #if 0 // DEBUG
-			printf ("VST3PI::update_shadow_data %d: %f -> %f\n", i->first,
-					_shadow_data[i->first], _controller->getParamNormalized (i->second));
+			printf ("VST3PI::update_shadow_data %d: %f -> %f\n", i.first,
+					_shadow_data[i.first], _controller->getParamNormalized (i.second));
 #endif
 #if 1 // needed for set_program() changes to take effect, after kParamValuesChanged
 			int32 index;
-			_input_param_changes.addParameterData (i->second, index)->addPoint (0, v, index);
+			_input_param_changes.addParameterData (i.second, index)->addPoint (0, v, index);
 #endif
-			_shadow_data[i->first] = v;
-			_update_ctrl[i->first] = true;
-			OnParameterChange (ParamValueChanged, i->first, v); /* EMIT SIGNAL */
+			_shadow_data[i.first] = v;
+			_update_ctrl[i.first] = true;
+			OnParameterChange (ParamValueChanged, i.first, v); /* EMIT SIGNAL */
 		}
 	}
 }
@@ -2128,18 +2127,17 @@ VST3PI::update_contoller_param ()
 	/* GUI thread */
 	FUnknownPtr<Vst::IEditControllerHostEditing> host_editing (_controller);
 
-	std::map<uint32_t, Vst::ParamID>::const_iterator i;
-	for (i = _ctrl_index_id.begin (); i != _ctrl_index_id.end (); ++i) {
-		if (!_update_ctrl[i->first]) {
+	for (const std::pair<const uint32_t, Vst::ParamID>& i : _ctrl_index_id) {
+		if (!_update_ctrl[i.first]) {
 			continue;
 		}
-		_update_ctrl[i->first] = false;
-		if (host_editing && !parameter_is_automatable (i->first) && !parameter_is_readonly (i->first)) {
-			host_editing->beginEditFromHost (i->second);
+		_update_ctrl[i.first] = false;
+		if (host_editing && !parameter_is_automatable (i.first) && !parameter_is_readonly (i.first)) {
+			host_editing->beginEditFromHost (i.second);
 		}
-		_controller->setParamNormalized (i->second, _shadow_data[i->first]);
-		if (host_editing && !parameter_is_automatable (i->first) && !parameter_is_readonly (i->first)) {
-			host_editing->endEditFromHost (i->second);
+		_controller->setParamNormalized (i.second, _shadow_data[i.first]);
+		if (host_editing && !parameter_is_automatable (i.first) && !parameter_is_readonly (i.first)) {
+			host_editing->endEditFromHost (i.second);
 		}
 	}
 }

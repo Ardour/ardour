@@ -380,9 +380,9 @@ Surface::init_controls()
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init_controls: adding global buttons\n");
 	const map<Button::ID,GlobalButtonInfo>& global_buttons (_mcp.device_info().global_buttons());
 
-	for (map<Button::ID,GlobalButtonInfo>::const_iterator b = global_buttons.begin(); b != global_buttons.end(); ++b){
-		group = groups[b->second.group];
-		controls_by_device_independent_id[b->first] = Button::factory (*this, b->first, b->second.id, b->second.label, *group);
+	for (const std::pair<const Button::ID,GlobalButtonInfo>& b : global_buttons){
+		group = groups[b.second.group];
+		controls_by_device_independent_id[b.first] = Button::factory (*this, b.first, b.second.id, b.second.label, *group);
 	}
 }
 

@@ -112,11 +112,11 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 		_meter = dynamic_cast<Meter*> (Meter::factory (*_surface, index, "meter", *this));
 	}
 
-	for (map<Button::ID,StripButtonInfo>::const_iterator b = strip_buttons.begin(); b != strip_buttons.end(); ++b) {
-		DEBUG_RESULT_CAST (Button*, bb, dynamic_cast<Button*>, (Button::factory (*_surface, b->first, b->second.base_id + index, b->second.name, *this)));
+	for (const std::pair<const Button::ID,StripButtonInfo>& b : strip_buttons) {
+		DEBUG_RESULT_CAST (Button*, bb, dynamic_cast<Button*>, (Button::factory (*_surface, b.first, b.second.base_id + index, b.second.name, *this)));
 		DEBUG_TRACE (DEBUG::US2400, string_compose ("surface %1 strip %2 new button BID %3 id %4 from base %5\n",
 								   _surface->number(), index, Button::id_to_name (bb->bid()),
-								   bb->id(), b->second.base_id));
+								   bb->id(), b.second.base_id));
 	}
 
 	_trickle_counter = 0;
