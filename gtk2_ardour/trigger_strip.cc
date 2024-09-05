@@ -258,8 +258,6 @@ TriggerStrip::build_route_ops_menu ()
 			/* do not allow rename if the track is record-enabled */
 			items.back().set_sensitive (!is_track() || !track()->rec_enable_control()->get_value());
 		}
-
-		items.push_back (SeparatorElem());
 	}
 
 	if ((!_route->is_singleton () || !active)
@@ -268,11 +266,18 @@ TriggerStrip::build_route_ops_menu ()
 #endif
 	   )
 	{
+		if (active) {
+			items.push_back (SeparatorElem());
+		}
 		items.push_back (CheckMenuElem (_("Active")));
 		Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 		i->set_active (active);
 		i->set_sensitive (!_session->transport_rolling());
 		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active(), false));
+	}
+
+	/* Plugin / Processor related */
+	if (active) {
 		items.push_back (SeparatorElem());
 	}
 
@@ -286,12 +291,20 @@ TriggerStrip::build_route_ops_menu ()
 
 	uint32_t plugin_insert_cnt = 0;
 	_route->foreach_processor (boost::bind (RouteUI::help_count_plugins, _1, & plugin_insert_cnt));
-
 	if (active && plugin_insert_cnt > 0) {
 		items.push_back (MenuElem (_("Pin Connections..."), sigc::mem_fun (*this, &RouteUI::manage_pins)));
 	}
 
+	if (active) {
+		items.push_back (CheckMenuElem (_("Protect Against Denormals"), sigc::mem_fun (*this, &RouteUI::toggle_denormal_protection)));
+		denormal_menu_item = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+		denormal_menu_item->set_active (_route->denormal_protection());
+	}
+
+	/* MIDI */
+
 	if (active && (std::dynamic_pointer_cast<MidiTrack>(_route) || _route->the_instrument ())) {
+		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Patch Selector..."),
 					sigc::mem_fun(*this, &RouteUI::select_midi_patch)));
 	}
@@ -300,12 +313,7 @@ TriggerStrip::build_route_ops_menu ()
 		// TODO ..->n_audio() > 1 && separate_output_groups) hard to check here every time.
 		items.push_back (MenuElem (_("Fan out to Busses"), sigc::bind (sigc::mem_fun (*this, &RouteUI::fan_out), true, true)));
 		items.push_back (MenuElem (_("Fan out to Tracks"), sigc::bind (sigc::mem_fun (*this, &RouteUI::fan_out), false, true)));
-		items.push_back (SeparatorElem());
 	}
-
-	items.push_back (CheckMenuElem (_("Protect Against Denormals"), sigc::mem_fun (*this, &RouteUI::toggle_denormal_protection)));
-	denormal_menu_item = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
-	denormal_menu_item->set_active (_route->denormal_protection());
 
 	/* note that this relies on selection being shared across editor and
 	 * mixer (or global to the backend, in the future), which is the only

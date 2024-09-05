@@ -326,6 +326,7 @@ RouteTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	plist->add (ARDOUR::Properties::group_mute, true);
 	plist->add (ARDOUR::Properties::group_solo, true);
 
+	delete route_group_menu;
 	route_group_menu = new RouteGroupMenu (_session, plist);
 
 	gm.get_level_meter().signal_scroll_event().connect (sigc::mem_fun (*this, &RouteTimeAxisView::controls_ebox_scroll), false);
@@ -406,6 +407,7 @@ RouteTimeAxisView::route_group_click (GdkEventButton *ev)
 	WeakRouteList r;
 	r.push_back (route ());
 
+	route_group_menu->detach ();
 	route_group_menu->build (r);
 	if (ev->button == 1) {
 		Gtkmm2ext::anchored_menu_popup(route_group_menu->menu(),
@@ -630,28 +632,31 @@ RouteTimeAxisView::build_display_menu ()
 
 	TimeAxisView::build_display_menu ();
 
-	/* now fill it with our stuff */
+	bool active = _route->active ();
 
 	MenuList& items = display_menu->items();
 
-	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
+	/* now fill it with our stuff */
+	if (active) {
+		items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
 
-	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
+		items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
 
-	items.push_back (MenuElem (_("Inputs..."), sigc::mem_fun (*this, &RouteUI::edit_input_configuration)));
+		items.push_back (MenuElem (_("Inputs..."), sigc::mem_fun (*this, &RouteUI::edit_input_configuration)));
 
-	items.push_back (MenuElem (_("Outputs..."), sigc::mem_fun (*this, &RouteUI::edit_output_configuration)));
+		items.push_back (MenuElem (_("Outputs..."), sigc::mem_fun (*this, &RouteUI::edit_output_configuration)));
 
-	items.push_back (SeparatorElem());
+		items.push_back (SeparatorElem());
 
-	build_size_menu ();
-	items.push_back (MenuElem (_("Height"), *_size_menu));
-	items.push_back (SeparatorElem());
+		build_size_menu ();
+		items.push_back (MenuElem (_("Height"), *_size_menu));
+		items.push_back (SeparatorElem());
 
-	// Hook for derived classes to add type specific stuff
-	append_extra_display_menu_items ();
+		/* Hook for derived classes to add type specific stuff */
+		append_extra_display_menu_items ();
+	}
 
-	if (is_track()) {
+	if (active && is_track()) {
 
 		Menu* layers_menu = manage (new Menu);
 		MenuList &layers_items = layers_menu->items();
@@ -795,32 +800,34 @@ RouteTimeAxisView::build_display_menu ()
 		items.push_back (SeparatorElem());
 	}
 
-	route_group_menu->detach ();
 
-	WeakRouteList r;
-	for (TrackSelection::iterator i = _editor.get_selection().tracks.begin(); i != _editor.get_selection().tracks.end(); ++i) {
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-		if (rtv) {
-			r.push_back (rtv->route ());
+	if (active) {
+		WeakRouteList r;
+		for (TrackSelection::iterator i = _editor.get_selection().tracks.begin(); i != _editor.get_selection().tracks.end(); ++i) {
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+			if (rtv) {
+				r.push_back (rtv->route ());
+			}
 		}
+
+		if (r.empty ()) {
+			r.push_back (route ());
+		}
+
+		if (!_route->is_singleton ()) {
+			route_group_menu->detach ();
+			route_group_menu->build (r);
+			items.push_back (MenuElem (_("Group"), *route_group_menu->menu ()));
+		}
+
+		build_automation_action_menu (true);
+		items.push_back (MenuElem (_("Automation"), *automation_action_menu));
+		items.push_back (SeparatorElem());
 	}
 
-	if (r.empty ()) {
-		r.push_back (route ());
-	}
 
-	if (!_route->is_singleton ()) {
-		route_group_menu->build (r);
-		items.push_back (MenuElem (_("Group"), *route_group_menu->menu ()));
-	}
-
-	build_automation_action_menu (true);
-	items.push_back (MenuElem (_("Automation"), *automation_action_menu));
-
-	items.push_back (SeparatorElem());
-
-	int active = 0;
-	int inactive = 0;
+	int n_active = 0;
+	int n_inactive = 0;
 	bool always_active = false;
 	TrackSelection const & s = _editor.get_selection().tracks;
 	for (TrackSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
@@ -833,9 +840,9 @@ RouteTimeAxisView::build_display_menu ()
 		always_active |= r->route()->mixbus() != 0;
 #endif
 		if (r->route()->active()) {
-			++active;
+			++n_active;
 		} else {
-			++inactive;
+			++n_inactive;
 		}
 	}
 
@@ -876,10 +883,10 @@ RouteTimeAxisView::build_display_menu ()
 	items.push_back (CheckMenuElem (_("Active")));
 	i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 	bool click_sets_active = true;
-	if (active > 0 && inactive == 0) {
+	if (n_active > 0 && n_inactive == 0) {
 		i->set_active (true);
 		click_sets_active = false;
-	} else if (active > 0 && inactive > 0) {
+	} else if (n_active > 0 && n_inactive > 0) {
 		i->set_inconsistent (true);
 	}
 	i->set_sensitive(! _session->transport_rolling() && ! always_active);
@@ -888,7 +895,7 @@ RouteTimeAxisView::build_display_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), sigc::bind (sigc::mem_fun(_editor, &PublicEditor::hide_track_in_display), this, !_editor.get_selection().tracks.empty ())));
 
-	if (_route && !_route->is_singleton ()) {
+	if (active && _route && !_route->is_singleton ()) {
 		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Duplicate..."), boost::bind (&ARDOUR_UI::start_duplicate_routes, ARDOUR_UI::instance())));
 
