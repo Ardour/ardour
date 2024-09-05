@@ -886,7 +886,7 @@ RouteTimeAxisView::build_display_menu ()
 	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), click_sets_active, !_editor.get_selection().tracks.empty ()));
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Hide"), sigc::bind (sigc::mem_fun(_editor, &PublicEditor::hide_track_in_display), this, true)));
+	items.push_back (MenuElem (_("Hide"), sigc::bind (sigc::mem_fun(_editor, &PublicEditor::hide_track_in_display), this, !_editor.get_selection().tracks.empty ())));
 
 	if (_route && !_route->is_singleton ()) {
 		items.push_back (SeparatorElem());
