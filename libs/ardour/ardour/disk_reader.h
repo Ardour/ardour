@@ -22,7 +22,7 @@
 
 #include <atomic>
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "evoral/Curve.h"
 
@@ -210,8 +210,8 @@ private:
 	sampleoffset_t        _declick_offs;
 	bool                  _declick_enabled;
 	MidiNoteTracker      _tracker;
-	boost::optional<bool> _last_read_reversed;
-	boost::optional<bool> _last_read_loop;
+	std::optional<bool> _last_read_reversed;
+	std::optional<bool> _last_read_loop;
 
 	static samplecnt_t _chunk_samples;
 

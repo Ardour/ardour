@@ -325,7 +325,7 @@ Console1::spill_plugins (const int32_t plugin_index)
 
 	try {
 		ControllerButton* cb = get_button (ControllerID::MUTE);
-		boost::function<void ()> plugin_mapping = [=] () -> void { cb->set_led_state (!plugin_insert->enabled ()); };
+		std::function<void ()> plugin_mapping = [=] () -> void { cb->set_led_state (!plugin_insert->enabled ()); };
 		cb->set_plugin_action ([=] (uint32_t val) {
 			plugin_insert->enable (val == 0);
 			DEBUG_TRACE (DEBUG::Console1,
@@ -333,7 +333,7 @@ Console1::spill_plugins (const int32_t plugin_index)
 		});
 
 		plugin_insert->ActiveChanged.connect (
-		  plugin_connections, MISSING_INVALIDATOR, boost::bind (plugin_mapping), this);
+		  plugin_connections, MISSING_INVALIDATOR, std::bind (plugin_mapping), this);
 		plugin_insert->ActiveChanged ();
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("No ControllerButton found %1\n", n_controls));
@@ -387,7 +387,7 @@ Console1::spill_plugins (const int32_t plugin_index)
 				if (!swtch) {
 					try {
 						Encoder* e = get_encoder (ppm.controllerId);
-						boost::function<void (bool b, PBD::Controllable::GroupControlDisposition d)> plugin_mapping =
+						std::function<void (bool b, PBD::Controllable::GroupControlDisposition d)> plugin_mapping =
 						  [=] (bool b, PBD::Controllable::GroupControlDisposition d) -> void {
 							double v = parameterDescriptor.to_interface (c->get_value (), true);
 							e->set_value (v * 127);
@@ -404,7 +404,7 @@ Console1::spill_plugins (const int32_t plugin_index)
 							  string_compose ("->Encoder Plugin parameter %1: %2 - %3\n", n_controls, val, v));
 						});
 						c->Changed.connect (
-						  plugin_connections, MISSING_INVALIDATOR, boost::bind (plugin_mapping, _1, _2), this);
+						  plugin_connections, MISSING_INVALIDATOR, std::bind (plugin_mapping, _1, _2), this);
 						c->Changed (true, PBD::Controllable::GroupControlDisposition::UseGroup);
 						continue;
 					} catch (ControlNotFoundException const&) {
@@ -413,7 +413,7 @@ Console1::spill_plugins (const int32_t plugin_index)
 				} else {
 					try {
 						ControllerButton* cb = get_button (ppm.controllerId);
-						boost::function<void (bool b, PBD::Controllable::GroupControlDisposition d)> plugin_mapping =
+						std::function<void (bool b, PBD::Controllable::GroupControlDisposition d)> plugin_mapping =
 						  [=] (bool b, PBD::Controllable::GroupControlDisposition d) -> void {
 							cb->set_led_state (c->get_value ());
 							DEBUG_TRACE (DEBUG::Console1,
@@ -431,7 +431,7 @@ Console1::spill_plugins (const int32_t plugin_index)
 						});
 
 						c->Changed.connect (
-						  plugin_connections, MISSING_INVALIDATOR, boost::bind (plugin_mapping, _1, _2), this);
+						  plugin_connections, MISSING_INVALIDATOR, std::bind (plugin_mapping, _1, _2), this);
 						c->Changed (true, PBD::Controllable::GroupControlDisposition::UseGroup);
 						continue;
 					} catch (ControlNotFoundException const&) {

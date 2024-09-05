@@ -1295,10 +1295,10 @@ PortManager::cycle_start (pframes_t nframes, Session* s)
 	if (tl && fabs (Port::resample_ratio ()) != 1.0) {
 		for (auto const& p : *_cycle_ports) {
 			if (!(p.second->flags () & TransportSyncPort)) {
-				tl->push_back (boost::bind (&Port::cycle_start, p.second, nframes));
+				tl->push_back (std::bind (&Port::cycle_start, p.second, nframes));
 			}
 		}
-		tl->push_back (boost::bind (&PortManager::run_input_meters, this, nframes, s ? s->nominal_sample_rate () : 0));
+		tl->push_back (std::bind (&PortManager::run_input_meters, this, nframes, s ? s->nominal_sample_rate () : 0));
 		tl->process ();
 	} else {
 		for (auto const& p : *_cycle_ports) {
@@ -1321,7 +1321,7 @@ PortManager::cycle_end (pframes_t nframes, Session* s)
 	if (tl && fabs (Port::resample_ratio ()) != 1.0) {
 		for (auto const& p : *_cycle_ports) {
 			if (!(p.second->flags () & TransportSyncPort)) {
-				tl->push_back (boost::bind (&Port::cycle_end, p.second, nframes));
+				tl->push_back (std::bind (&Port::cycle_end, p.second, nframes));
 			}
 		}
 		tl->process ();
@@ -1439,7 +1439,7 @@ PortManager::cycle_end_fade_out (gain_t base_gain, gain_t gain_step, pframes_t n
 	if (tl && fabs (Port::resample_ratio ()) != 1.0) {
 		for (auto const& p : *_cycle_ports) {
 			if (!(p.second->flags () & TransportSyncPort)) {
-				tl->push_back (boost::bind (&Port::cycle_end, p.second, nframes));
+				tl->push_back (std::bind (&Port::cycle_end, p.second, nframes));
 			}
 		}
 		tl->process ();

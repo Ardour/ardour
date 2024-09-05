@@ -32,12 +32,14 @@
 
 namespace ARDOUR {
 
-struct MidiCursor : public boost::noncopyable {
+struct MidiCursor {
 	MidiCursor()  {}
+	MidiCursor(const MidiCursor&) = delete;
+	MidiCursor& operator=(const MidiCursor&) = delete;
 
 	void connect(PBD::Signal1<void, bool>& invalidated) {
 		connections.drop_connections();
-		invalidated.connect_same_thread (connections, boost::bind(&MidiCursor::invalidate, this, _1));
+		invalidated.connect_same_thread (connections, std::bind(&MidiCursor::invalidate, this, _1));
 	}
 
 

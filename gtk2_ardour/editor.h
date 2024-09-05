@@ -43,7 +43,7 @@
 #include <string>
 #include <vector>
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/layout.h>
@@ -644,7 +644,7 @@ private:
 	bool                 constructed;
 
 	// to keep track of the playhead position for control_scroll
-	boost::optional<samplepos_t> _control_scroll_target;
+	std::optional<samplepos_t> _control_scroll_target;
 
 	SelectionPropertiesBox*      _properties_box;
 
@@ -701,7 +701,7 @@ private:
 
 	void update_join_object_range_location (double);
 
-	boost::optional<float>  pre_notebook_shrink_pane_width;
+	std::optional<float>  pre_notebook_shrink_pane_width;
 
 	Gtk::VBox _editor_list_vbox;
 	Gtk::Notebook _the_notebook;

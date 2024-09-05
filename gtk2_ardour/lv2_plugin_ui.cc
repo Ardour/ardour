@@ -311,7 +311,7 @@ LV2PluginUI::LV2PluginUI(std::shared_ptr<PlugInsertBase> pib,
 
 	add_common_widgets (&_ardour_buttons_box);
 
-	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&LV2PluginUI::queue_port_update, this), gui_context ());
+	plugin->PresetLoaded.connect (*this, invalidator (*this), std::bind (&LV2PluginUI::queue_port_update, this), gui_context ());
 }
 
 void
@@ -468,7 +468,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 
 		if (_lv2->parameter_is_input(i)) {
 			assert (_controllables[i]);
-			_controllables[i]->Changed.connect (control_connections, invalidator (*this), boost::bind (&LV2PluginUI::control_changed, this, i), gui_context());
+			_controllables[i]->Changed.connect (control_connections, invalidator (*this), std::bind (&LV2PluginUI::control_changed, this, i), gui_context());
 			/* queue for first update ("push") to GUI */
 			_updates.insert (i);
 		}

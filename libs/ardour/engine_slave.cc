@@ -82,7 +82,7 @@ Engine_TransportMaster::ok() const
 }
 
 void
-Engine_TransportMaster::pre_process (pframes_t, samplepos_t, boost::optional<samplepos_t>)
+Engine_TransportMaster::pre_process (pframes_t, samplepos_t, std::optional<samplepos_t>)
 {
 	/* nothing to do */
 }

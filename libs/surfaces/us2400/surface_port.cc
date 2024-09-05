@@ -21,7 +21,6 @@
 #include <cerrno>
 
 #include <sigc++/sigc++.h>
-#include <boost/shared_array.hpp>
 
 #include "pbd/failed_constructor.h"
 

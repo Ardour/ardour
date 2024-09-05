@@ -18,7 +18,6 @@
  */
 
 #include <algorithm>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <cmath>
 #include <stdlib.h>
 
@@ -135,7 +134,7 @@ LowPass::proc (float* data, const uint32_t n_samples)
 	_z = z;
 	if (!isfinite_local (_z)) {
 		_z = 0;
-	} else if (!boost::math::isnormal (_z)) {
+	} else if (!std::isnormal (_z)) {
 		_z = 0;
 	}
 }
@@ -192,12 +191,12 @@ Biquad::run (float* data, const uint32_t n_samples)
 
 	if (!isfinite_local (_z1)) {
 		_z1 = 0;
-	} else if (!boost::math::isnormal (_z1)) {
+	} else if (!std::isnormal (_z1)) {
 		_z1 = 0;
 	}
 	if (!isfinite_local (_z2)) {
 		_z2 = 0;
-	} else if (!boost::math::isnormal (_z2)) {
+	} else if (!std::isnormal (_z2)) {
 		_z2 = 0;
 	}
 }

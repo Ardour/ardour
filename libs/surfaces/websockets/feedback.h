@@ -21,7 +21,6 @@
 
 #include <memory>
 
-#include <boost/unordered_map.hpp>
 #include <glibmm/threads.h>
 
 #include "pbd/abstract_ui.h"

@@ -99,11 +99,11 @@ PluginPresetsUI::PluginPresetsUI (std::shared_ptr<PluginInsert> insert)
 
 	std::shared_ptr<Plugin> plugin (_insert->plugin ());
 
-	plugin->PresetAdded.connect (_preset_connections, invalidator (*this), boost::bind (&PluginPresetsUI::update_preset_list, this), gui_context ());
-	plugin->PresetRemoved.connect (_preset_connections, invalidator (*this), boost::bind (&PluginPresetsUI::update_preset_list, this), gui_context ());
+	plugin->PresetAdded.connect (_preset_connections, invalidator (*this), std::bind (&PluginPresetsUI::update_preset_list, this), gui_context ());
+	plugin->PresetRemoved.connect (_preset_connections, invalidator (*this), std::bind (&PluginPresetsUI::update_preset_list, this), gui_context ());
 
-	plugin->PresetLoaded.connect (_preset_connections, invalidator (*this), boost::bind (&PluginPresetsUI::filter_presets, this), gui_context ());
-	plugin->PresetDirty.connect (_preset_connections, invalidator (*this), boost::bind (&PluginPresetsUI::filter_presets, this), gui_context ());
+	plugin->PresetLoaded.connect (_preset_connections, invalidator (*this), std::bind (&PluginPresetsUI::filter_presets, this), gui_context ());
+	plugin->PresetDirty.connect (_preset_connections, invalidator (*this), std::bind (&PluginPresetsUI::filter_presets, this), gui_context ());
 
 	update_preset_list ();
 }

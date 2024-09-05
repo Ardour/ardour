@@ -375,7 +375,7 @@ void EQSubview::setup_vpot(
 
 	//If a controllable was found, connect it up, and put the labels in the display.
 	if (pc) {
-		pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, boost::bind (&EQSubview::notify_change, this, std::weak_ptr<AutomationControl>(pc), global_strip_position, false), ui_context());
+		pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&EQSubview::notify_change, this, std::weak_ptr<AutomationControl>(pc), global_strip_position, false), ui_context());
 		vpot->set_control (pc);
 
 		if (!pot_id.empty()) {
@@ -512,7 +512,7 @@ void DynamicsSubview::setup_vpot(
 	pc = available[global_strip_position].first;
 	std::string pot_id = available[global_strip_position].second;
 
-	pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, boost::bind (&DynamicsSubview::notify_change, this, std::weak_ptr<AutomationControl>(pc), global_strip_position, false, true), ui_context());
+	pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&DynamicsSubview::notify_change, this, std::weak_ptr<AutomationControl>(pc), global_strip_position, false, true), ui_context());
 	vpot->set_control (pc);
 
 	if (!pot_id.empty()) {
@@ -612,7 +612,7 @@ void SendsSubview::setup_vpot(
 		return;
 	}
 
-	pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, boost::bind (&SendsSubview::notify_send_level_change, this, global_strip_position, false), ui_context());
+	pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&SendsSubview::notify_send_level_change, this, global_strip_position, false), ui_context());
 	vpot->set_control (pc);
 
 	pending_display[0] = PBD::short_version (_subview_stripable->send_name (global_strip_position), 6);
@@ -789,7 +789,7 @@ void TrackViewSubview::setup_vpot(
 	case 0:
 		pc = _subview_stripable->trim_control ();
 		if (pc) {
-			pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, boost::bind (&TrackViewSubview::notify_change, this, TrimAutomation, global_strip_position, false), ui_context());
+			pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&TrackViewSubview::notify_change, this, TrimAutomation, global_strip_position, false), ui_context());
 			pending_display[0] = "Trim";
 			notify_change (TrimAutomation, global_strip_position, true);
 		}
@@ -798,7 +798,7 @@ void TrackViewSubview::setup_vpot(
 		if (track) {
 			pc = track->monitoring_control();
 			if (pc) {
-				pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, boost::bind (&TrackViewSubview::notify_change, this, MonitoringAutomation, global_strip_position, false), ui_context());
+				pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&TrackViewSubview::notify_change, this, MonitoringAutomation, global_strip_position, false), ui_context());
 				pending_display[0] = "Mon";
 				notify_change (MonitoringAutomation, global_strip_position, true);
 			}
@@ -807,7 +807,7 @@ void TrackViewSubview::setup_vpot(
 	case 2:
 		pc = _subview_stripable->solo_isolate_control ();
 		if (pc) {
-			pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, boost::bind (&TrackViewSubview::notify_change, this, SoloIsolateAutomation, global_strip_position, false), ui_context());
+			pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&TrackViewSubview::notify_change, this, SoloIsolateAutomation, global_strip_position, false), ui_context());
 			notify_change (SoloIsolateAutomation, global_strip_position, true);
 			pending_display[0] = "S-Iso";
 		}
@@ -815,7 +815,7 @@ void TrackViewSubview::setup_vpot(
 	case 3:
 		pc = _subview_stripable->solo_safe_control ();
 		if (pc) {
-			pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, boost::bind (&TrackViewSubview::notify_change, this, SoloSafeAutomation, global_strip_position, false), ui_context());
+			pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&TrackViewSubview::notify_change, this, SoloSafeAutomation, global_strip_position, false), ui_context());
 			notify_change (SoloSafeAutomation, global_strip_position, true);
 			pending_display[0] = "S-Safe";
 		}
@@ -823,7 +823,7 @@ void TrackViewSubview::setup_vpot(
 	case 4:
 		pc = _subview_stripable->phase_control();
 		if (pc) {
-			pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, boost::bind (&TrackViewSubview::notify_change, this, PhaseAutomation, global_strip_position, false), ui_context());
+			pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&TrackViewSubview::notify_change, this, PhaseAutomation, global_strip_position, false), ui_context());
 			notify_change (PhaseAutomation, global_strip_position, true);
 			pending_display[0] = "Phase";
 		}
@@ -909,7 +909,7 @@ void PluginSubview::connect_processors_changed_signal()
 	std::shared_ptr<Route> route = std::dynamic_pointer_cast<Route> (_subview_stripable);
 	if (route)
 	{
-		route->processors_changed.connect(_subview_connections, MISSING_INVALIDATOR, boost::bind (&PluginSubview::handle_processors_changed, this), ui_context());
+		route->processors_changed.connect(_subview_connections, MISSING_INVALIDATOR, std::bind (&PluginSubview::handle_processors_changed, this), ui_context());
 	}
 }
 
@@ -1233,7 +1233,7 @@ void PluginEdit::setup_vpot(
 		return;
 	}
 
-	c->Changed.connect (_context.subview_connections(), MISSING_INVALIDATOR, boost::bind (&PluginEdit::notify_parameter_change, this, strip, vpot, pending_display, global_strip_position), ui_context());
+	c->Changed.connect (_context.subview_connections(), MISSING_INVALIDATOR, std::bind (&PluginEdit::notify_parameter_change, this, strip, vpot, pending_display, global_strip_position), ui_context());
 	vpot->set_control (c);
 	pending_display[0] = PluginSubviewState::shorten_display_text(c->desc().label, 6);
 	notify_parameter_change (strip, vpot, pending_display, global_strip_position);

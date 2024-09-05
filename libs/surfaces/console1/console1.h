@@ -311,8 +311,8 @@ private:
 	std::weak_ptr<ARDOUR::Stripable> pre_monitor_stripable;
 
 	void create_encoder (ControllerID id,
-	                     boost::function<void (uint32_t)> action,
-	                     boost::function<void (uint32_t)> shift_action = 0);
+	                     std::function<void (uint32_t)> action,
+	                     std::function<void (uint32_t)> shift_action = 0);
 
 	void setup_controls ();
 

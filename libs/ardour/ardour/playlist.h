@@ -36,7 +36,7 @@
 
 #include <sys/stat.h>
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <glib.h>
 
@@ -187,7 +187,7 @@ public:
 	virtual std::shared_ptr<Region> combine (const RegionList&, std::shared_ptr<Track>);
 	virtual void uncombine (std::shared_ptr<Region>);
 	void fade_range (std::list<TimelineRange>&);
-	void remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_gap, boost::function<void (timepos_t, timecnt_t)> gap_callback);
+	void remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_gap, std::function<void (timepos_t, timecnt_t)> gap_callback);
 
 	void shuffle (std::shared_ptr<Region>, int dir);
 
@@ -241,7 +241,7 @@ public:
 
 	samplepos_t find_next_transient (timepos_t const & position, int dir);
 
-	void foreach_region (boost::function<void(std::shared_ptr<Region>)>);
+	void foreach_region (std::function<void(std::shared_ptr<Region>)>);
 
 	XMLNode&    get_state () const;
 	virtual int set_state (const XMLNode&, int version);
@@ -472,7 +472,7 @@ private:
 	void coalesce_and_check_crossfades (std::list<Temporal::TimeRange>);
 	std::shared_ptr<RegionList> find_regions_at (timepos_t const &);
 
-	mutable boost::optional<std::pair<timepos_t, timepos_t> > _cached_extent;
+	mutable std::optional<std::pair<timepos_t, timepos_t> > _cached_extent;
 	timepos_t _end_space;  //this is used when we are pasting a range with extra space at the end
 	bool _playlist_shift_active;
 

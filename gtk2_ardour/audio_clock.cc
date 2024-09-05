@@ -130,7 +130,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &AudioClock::set_colors));
 	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &AudioClock::dpi_reset));
 
-	TempoMap::MapChanged.connect (tempo_map_connection, invalidator (*this), boost::bind (&AudioClock::tempo_map_changed, this), gui_context());
+	TempoMap::MapChanged.connect (tempo_map_connection, invalidator (*this), std::bind (&AudioClock::tempo_map_changed, this), gui_context());
 }
 
 AudioClock::~AudioClock ()
@@ -1369,8 +1369,8 @@ AudioClock::set_session (Session *s)
 			_limit_pos = timepos_t (limit_sec * _session->sample_rate());
 		}
 
-		Config->ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
-		_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
+		Config->ParameterChanged.connect (_session_connections, invalidator (*this), std::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
+		_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), std::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
 
 		/* try load v6 style settings (session file) */
 		XMLNode* node = _session->extra_xml (X_("ClockModes"));

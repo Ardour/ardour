@@ -138,8 +138,8 @@ AudioPlaylistSource::read_unlocked (Sample* dst, samplepos_t start, samplecnt_t 
 		to_zero = 0;
 	}
 
-	boost::scoped_array<float> sbuf(new float[to_read]);
-	boost::scoped_array<gain_t> gbuf(new gain_t[to_read]);
+	std::unique_ptr<float[]> sbuf(new float[to_read]);
+	std::unique_ptr<gain_t[]> gbuf(new gain_t[to_read]);
 
 	std::dynamic_pointer_cast<AudioPlaylist>(_playlist)->read (dst, sbuf.get(), gbuf.get(), timepos_t (start)+_playlist_offset, timecnt_t (to_read), _playlist_channel);
 

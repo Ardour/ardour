@@ -816,7 +816,7 @@ OptionEditor::OptionEditor (PBD::Configuration* c)
 	option_treeview.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &OptionEditor::treeview_row_selected));
 
 	/* Watch out for changes to parameters */
-	_config->ParameterChanged.connect (config_connection, invalidator (*this), boost::bind (&OptionEditor::parameter_changed, this, _1), gui_context());
+	_config->ParameterChanged.connect (config_connection, invalidator (*this), std::bind (&OptionEditor::parameter_changed, this, _1), gui_context());
 
 	search_entry.show ();
 	search_entry.set_text (_("Search here..."));

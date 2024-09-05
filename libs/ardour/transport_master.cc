@@ -78,8 +78,8 @@ TransportMaster::TransportMaster (SyncSource t, std::string const & name)
 {
 	register_properties ();
 
-	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect_same_thread (port_connection, boost::bind (&TransportMaster::connection_handler, this, _1, _2, _3, _4, _5));
-	ARDOUR::AudioEngine::instance()->Running.connect_same_thread (backend_connection, boost::bind (&TransportMaster::check_backend, this));
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect_same_thread (port_connection, std::bind (&TransportMaster::connection_handler, this, _1, _2, _3, _4, _5));
+	ARDOUR::AudioEngine::instance()->Running.connect_same_thread (backend_connection, std::bind (&TransportMaster::check_backend, this));
 }
 
 TransportMaster::~TransportMaster()
@@ -574,8 +574,8 @@ TransportMasterViaMIDI::set_session (Session* s)
 		return;
 	}
 
-	s->config.ParameterChanged.connect_same_thread (session_connections, boost::bind (&TransportMasterViaMIDI::parameter_changed, this, _1));
-	s->LatencyUpdated.connect_same_thread (session_connections, boost::bind (&TransportMasterViaMIDI::resync_latency, this, _1));
+	s->config.ParameterChanged.connect_same_thread (session_connections, std::bind (&TransportMasterViaMIDI::parameter_changed, this, _1));
+	s->LatencyUpdated.connect_same_thread (session_connections, std::bind (&TransportMasterViaMIDI::resync_latency, this, _1));
 }
 
 void

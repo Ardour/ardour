@@ -19,8 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/foreach.hpp>
-
 #include "gtkmm2ext/utils.h"
 
 #include "ardour/route_group.h"
@@ -197,7 +195,7 @@ RouteList
 MixerGroupTabs::selected_routes () const
 {
 	RouteList rl;
-	BOOST_FOREACH (AxisView* r, _mixer->selection().axes) {
+	for (AxisView* r : _mixer->selection().axes) {
 		std::shared_ptr<Route> rp = std::dynamic_pointer_cast<Route> (r->stripable());
 		if (rp) {
 			rl.push_back (rp);

@@ -29,7 +29,7 @@ MidiAutomationListBinder::MidiAutomationListBinder (MidiSource& s, Evoral::Param
 	: _source (&s)
 	, _parameter (p)
 {
-	_source->Destroyed.connect_same_thread (source_death_connection, boost::bind (&MidiAutomationListBinder::source_died, this));
+	_source->Destroyed.connect_same_thread (source_death_connection, std::bind (&MidiAutomationListBinder::source_died, this));
 }
 
 MidiAutomationListBinder::MidiAutomationListBinder (XMLNode* node, Session::SourceMap const & sources)

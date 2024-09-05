@@ -142,8 +142,8 @@ public:
 	void slide (iterator before, Temporal::timecnt_t const &  distance);
 	void shift (Temporal::timepos_t const & before, Temporal::timecnt_t const & distance);
 
-	void y_transform (boost::function<double(double)> callback);
-	void list_merge (ControlList const& other, boost::function<double(double, double)> callback);
+	void y_transform (std::function<double(double)> callback);
+	void list_merge (ControlList const& other, std::function<double(double, double)> callback);
 
 	/** Add an event to this list.
 	 *

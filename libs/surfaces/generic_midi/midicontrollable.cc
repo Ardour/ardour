@@ -150,7 +150,7 @@ MIDIControllable::set_controllable (std::shared_ptr<PBD::Controllable> c)
 	last_incoming = 256;
 
 	if (c) {
-		c->DropReferences.connect_same_thread (controllable_death_connection, boost::bind (&MIDIControllable::drop_controllable, this));
+		c->DropReferences.connect_same_thread (controllable_death_connection, std::bind (&MIDIControllable::drop_controllable, this));
 	}
 }
 
@@ -161,7 +161,7 @@ MIDIControllable::bind_remap (std::shared_ptr<ARDOUR::Stripable> s)
 	if (!s) {
 		return;
 	}
-	s->MappedControlsChanged.connect (controllable_remapped_connection, MISSING_INVALIDATOR, boost::bind (&MIDIControllable::lookup_controllable, this), _surface);
+	s->MappedControlsChanged.connect (controllable_remapped_connection, MISSING_INVALIDATOR, std::bind (&MIDIControllable::lookup_controllable, this), _surface);
 }
 
 void
@@ -178,7 +178,7 @@ void
 MIDIControllable::learn_about_external_control ()
 {
 	drop_external_control ();
-	_parser.any.connect_same_thread (midi_learn_connection, boost::bind (&MIDIControllable::midi_receiver, this, _1, _2, _3));
+	_parser.any.connect_same_thread (midi_learn_connection, std::bind (&MIDIControllable::midi_receiver, this, _1, _2, _3));
 }
 
 void
@@ -585,7 +585,7 @@ MIDIControllable::bind_rpn_value (channel_t chn, uint16_t rpn)
 	drop_external_control ();
 	control_rpn = rpn;
 	control_channel = chn;
-	_parser.channel_rpn[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::rpn_value_change, this, _1, _2, _3));
+	_parser.channel_rpn[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::rpn_value_change, this, _1, _2, _3));
 }
 
 void
@@ -595,7 +595,7 @@ MIDIControllable::bind_nrpn_value (channel_t chn, uint16_t nrpn)
 	drop_external_control ();
 	control_nrpn = nrpn;
 	control_channel = chn;
-	_parser.channel_nrpn[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::rpn_value_change, this, _1, _2, _3));
+	_parser.channel_nrpn[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::rpn_value_change, this, _1, _2, _3));
 }
 
 void
@@ -605,7 +605,7 @@ MIDIControllable::bind_nrpn_change (channel_t chn, uint16_t nrpn)
 	drop_external_control ();
 	control_nrpn = nrpn;
 	control_channel = chn;
-	_parser.channel_nrpn_change[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::rpn_change, this, _1, _2, _3));
+	_parser.channel_nrpn_change[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::rpn_change, this, _1, _2, _3));
 }
 
 void
@@ -615,7 +615,7 @@ MIDIControllable::bind_rpn_change (channel_t chn, uint16_t rpn)
 	drop_external_control ();
 	control_rpn = rpn;
 	control_channel = chn;
-	_parser.channel_rpn_change[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::nrpn_change, this, _1, _2, _3));
+	_parser.channel_rpn_change[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::nrpn_change, this, _1, _2, _3));
 }
 
 void
@@ -632,40 +632,40 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	int chn_i = chn;
 	switch (ev) {
 	case MIDI::off:
-		_parser.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
+		_parser.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
 
 		/* if this is a togglee, connect to noteOn as well,
 		   and we'll toggle back and forth between the two.
 		*/
 
 		if (_momentary) {
-			_parser.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[1], boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
+			_parser.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[1], std::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
 		}
 
 		_control_description = "MIDI control: NoteOff";
 		break;
 
 	case MIDI::on:
-		_parser.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
+		_parser.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
 		if (_momentary) {
-			_parser.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[1], boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
+			_parser.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[1], std::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
 		}
 		_control_description = "MIDI control: NoteOn";
 		break;
 
 	case MIDI::controller:
-		_parser.channel_controller[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_controller, this, _1, _2));
+		_parser.channel_controller[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::midi_sense_controller, this, _1, _2));
 		snprintf (buf, sizeof (buf), "MIDI control: Controller %d", control_additional);
 		_control_description = buf;
 		break;
 
 	case MIDI::program:
-		_parser.channel_program_change[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_program_change, this, _1, _2));
+		_parser.channel_program_change[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::midi_sense_program_change, this, _1, _2));
 		_control_description = "MIDI control: ProgramChange";
 		break;
 
 	case MIDI::pitchbend:
-		_parser.channel_pitchbend[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_pitchbend, this, _1, _2));
+		_parser.channel_pitchbend[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::midi_sense_pitchbend, this, _1, _2));
 		_control_description = "MIDI control: Pitchbend";
 		break;
 

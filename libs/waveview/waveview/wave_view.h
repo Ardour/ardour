@@ -23,8 +23,6 @@
 
 #include <memory>
 
-#include <boost/scoped_ptr.hpp>
-
 #include <glibmm/refptr.h>
 
 #include "ardour/types.h"
@@ -152,7 +150,7 @@ private:
 
 	std::shared_ptr<ARDOUR::AudioRegion> _region;
 
-	boost::scoped_ptr<WaveViewProperties> _props;
+	const std::unique_ptr<WaveViewProperties> _props;
 
 	mutable std::shared_ptr<WaveViewImage> _image;
 

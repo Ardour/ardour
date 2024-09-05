@@ -213,7 +213,7 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	}
 
 	if (_route->panner_shell()) {
-		_route->panner_shell()->Changed.connect (*this, invalidator (*this), boost::bind (&MidiTimeAxisView::ensure_pan_views, this, false), gui_context());
+		_route->panner_shell()->Changed.connect (*this, invalidator (*this), std::bind (&MidiTimeAxisView::ensure_pan_views, this, false), gui_context());
 	}
 
 	/* map current state of the route */
@@ -283,7 +283,7 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	_midi_controls_box.set_border_width (2);
 
 	/* this directly calls use_midnam_info() if there are midnam's already */
-	MIDI::Name::MidiPatchManager::instance().maybe_use (*this, invalidator (*this), boost::bind (&MidiTimeAxisView::use_midnam_info, this), gui_context());
+	MIDI::Name::MidiPatchManager::instance().maybe_use (*this, invalidator (*this), std::bind (&MidiTimeAxisView::use_midnam_info, this), gui_context());
 
 	controls_vbox.pack_start(_midi_controls_box, false, false);
 
@@ -1278,7 +1278,7 @@ MidiTimeAxisView::set_note_mode(NoteMode mode, bool apply_to_selection)
 {
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_midi_time_axis (
-			boost::bind (&MidiTimeAxisView::set_note_mode, _1, mode, false));
+			std::bind (&MidiTimeAxisView::set_note_mode, _1, mode, false));
 	} else {
 		if (_note_mode != mode || midi_track()->note_mode() != mode) {
 			_note_mode = mode;
@@ -1294,7 +1294,7 @@ MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay, bo
 {
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_midi_time_axis (
-			boost::bind (&MidiTimeAxisView::set_color_mode, _1, mode, force, redisplay, false));
+			std::bind (&MidiTimeAxisView::set_color_mode, _1, mode, force, redisplay, false));
 	} else {
 		if (_color_mode == mode && !force) {
 			return;
@@ -1321,7 +1321,7 @@ MidiTimeAxisView::set_note_range (MidiStreamView::VisibleNoteRange range, bool a
 {
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_midi_time_axis (
-			boost::bind (&MidiTimeAxisView::set_note_range, _1, range, false));
+			std::bind (&MidiTimeAxisView::set_note_range, _1, range, false));
 	} else {
 		if (!_ignore_signals) {
 			midi_view()->set_note_range(range);
@@ -1349,7 +1349,7 @@ MidiTimeAxisView::show_all_automation (bool apply_to_selection)
 
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_midi_time_axis (
-			boost::bind (&MidiTimeAxisView::show_all_automation, _1, false));
+			std::bind (&MidiTimeAxisView::show_all_automation, _1, false));
 	} else {
 		no_redraw = true; // unset in RouteTimeAxisView::show_all_automation
 		if (midi_track()) {
@@ -1398,7 +1398,7 @@ MidiTimeAxisView::show_existing_automation (bool apply_to_selection)
 {
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_midi_time_axis (
-			boost::bind (&MidiTimeAxisView::show_existing_automation, _1, false));
+			std::bind (&MidiTimeAxisView::show_existing_automation, _1, false));
 	} else {
 		if (midi_track()) {
 			const set<Evoral::Parameter> params = midi_track()->midi_playlist()->contained_automation();

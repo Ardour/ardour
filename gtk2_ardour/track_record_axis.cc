@@ -108,7 +108,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, std::shared_ptr<ARDOUR::Route> rt)
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&TrackRecordAxis::parameter_changed, this, _1), gui_context ());
 	s->config.ParameterChanged.connect (*this, invalidator (*this), ui_bind (&TrackRecordAxis::parameter_changed, this, _1), gui_context ());
 
-	PublicEditor::instance().playhead_cursor()->PositionChanged.connect (*this, invalidator (*this), boost::bind (&TrackSummary::playhead_position_changed, &_track_summary, _1), gui_context());
+	PublicEditor::instance().playhead_cursor()->PositionChanged.connect (*this, invalidator (*this), std::bind (&TrackSummary::playhead_position_changed, &_track_summary, _1), gui_context());
 
 	ResetAllPeakDisplays.connect (sigc::mem_fun (*this, &TrackRecordAxis::reset_peak_display));
 	ResetRoutePeakDisplays.connect (sigc::mem_fun (*this, &TrackRecordAxis::reset_route_peak_display));
@@ -671,14 +671,14 @@ TrackRecordAxis::TrackSummary::TrackSummary (std::shared_ptr<ARDOUR::Route> r)
 	_track = std::dynamic_pointer_cast<Track> (r);
 	assert (_track);
 
-	_track->PlaylistChanged.connect (_connections, invalidator (*this), boost::bind (&TrackSummary::playlist_changed, this), gui_context ());
-	_track->playlist()->ContentsChanged.connect (_playlist_connections, invalidator (*this), boost::bind (&TrackSummary::playlist_contents_changed, this), gui_context ());
-	_track->presentation_info().PropertyChanged.connect (_connections, invalidator (*this), boost::bind (&TrackSummary::property_changed, this, _1), gui_context ());
+	_track->PlaylistChanged.connect (_connections, invalidator (*this), std::bind (&TrackSummary::playlist_changed, this), gui_context ());
+	_track->playlist()->ContentsChanged.connect (_playlist_connections, invalidator (*this), std::bind (&TrackSummary::playlist_contents_changed, this), gui_context ());
+	_track->presentation_info().PropertyChanged.connect (_connections, invalidator (*this), std::bind (&TrackSummary::property_changed, this, _1), gui_context ());
 
-	_track->rec_enable_control()->Changed.connect (_connections, invalidator (*this), boost::bind (&TrackSummary::maybe_setup_rec_box, this), gui_context());
-	_track->session().TransportStateChange.connect (_connections, invalidator (*this), boost::bind (&TrackSummary::maybe_setup_rec_box, this), gui_context());
-	_track->session().TransportLooped.connect (_connections, invalidator (*this), boost::bind (&TrackSummary::maybe_setup_rec_box, this), gui_context());
-	_track->session().RecordStateChanged.connect (_connections, invalidator (*this), boost::bind (&TrackSummary::maybe_setup_rec_box, this), gui_context());
+	_track->rec_enable_control()->Changed.connect (_connections, invalidator (*this), std::bind (&TrackSummary::maybe_setup_rec_box, this), gui_context());
+	_track->session().TransportStateChange.connect (_connections, invalidator (*this), std::bind (&TrackSummary::maybe_setup_rec_box, this), gui_context());
+	_track->session().TransportLooped.connect (_connections, invalidator (*this), std::bind (&TrackSummary::maybe_setup_rec_box, this), gui_context());
+	_track->session().RecordStateChanged.connect (_connections, invalidator (*this), std::bind (&TrackSummary::maybe_setup_rec_box, this), gui_context());
 
 }
 
@@ -833,7 +833,7 @@ void
 TrackRecordAxis::TrackSummary::playlist_changed ()
 {
 	_playlist_connections.disconnect ();
-	_track->playlist()->ContentsChanged.connect (_playlist_connections, invalidator (*this), boost::bind (&TrackSummary::playlist_contents_changed, this), gui_context ());
+	_track->playlist()->ContentsChanged.connect (_playlist_connections, invalidator (*this), std::bind (&TrackSummary::playlist_contents_changed, this), gui_context ());
 	set_dirty ();
 }
 

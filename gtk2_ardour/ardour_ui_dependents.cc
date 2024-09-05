@@ -116,7 +116,7 @@ ARDOUR_UI::we_have_dependents ()
 
 	/* catch up on parameters */
 
-	boost::function<void (std::string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
+	std::function<void (std::string)> pc (std::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	Config->map_parameters (pc);
 
 	UIConfiguration::instance().reset_dpi ();

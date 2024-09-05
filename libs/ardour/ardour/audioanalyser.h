@@ -23,7 +23,6 @@
 
 #include <vector>
 #include <string>
-#include <boost/noncopyable.hpp>
 #include <vamp-hostsdk/Plugin.h>
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
@@ -33,13 +32,15 @@ namespace ARDOUR {
 class AudioReadable;
 class Session;
 
-class LIBARDOUR_API AudioAnalyser : public boost::noncopyable {
+class LIBARDOUR_API AudioAnalyser {
 
   public:
 	typedef Vamp::Plugin AnalysisPlugin;
 	typedef std::string AnalysisPluginKey;
 
 	AudioAnalyser (float sample_rate, AnalysisPluginKey key);
+	AudioAnalyser (const AudioAnalyser&) = delete;
+	AudioAnalyser& operator= (const AudioAnalyser&) = delete;
 	virtual ~AudioAnalyser();
 
 	/* analysis object should provide a run method

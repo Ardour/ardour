@@ -272,7 +272,7 @@ ArdourCtrlBase::set_controllable (std::shared_ptr<Controllable> c)
 
 	binding_proxy.set_controllable (c);
 
-	c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&ArdourCtrlBase::controllable_changed, this, false), gui_context());
+	c->Changed.connect (watch_connection, invalidator(*this), std::bind (&ArdourCtrlBase::controllable_changed, this, false), gui_context());
 
 	_normal = c->internal_to_interface(c->normal());
 

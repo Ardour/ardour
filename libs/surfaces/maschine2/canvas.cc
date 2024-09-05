@@ -49,7 +49,7 @@ Maschine2Canvas::Maschine2Canvas (Maschine2&m, M2Device* hw)
 	_width = hw->surface ()->get_width ();
 	_height = hw->surface ()->get_height ();
 
-	hw->vblank.connect_same_thread (vblank_connections, boost::bind (&Maschine2Canvas::expose, this));
+	hw->vblank.connect_same_thread (vblank_connections, std::bind (&Maschine2Canvas::expose, this));
 }
 
 Maschine2Canvas::~Maschine2Canvas ()

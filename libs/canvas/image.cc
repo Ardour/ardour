@@ -30,7 +30,7 @@ Image::Image (Canvas* canvas, Cairo::Format fmt, int width, int height)
 	, _height (height)
 	, _need_render (false)
 {
-	DataReady.connect (data_connections, MISSING_INVALIDATOR, boost::bind (&Image::accept_data, this), gui_context());
+	DataReady.connect (data_connections, MISSING_INVALIDATOR, std::bind (&Image::accept_data, this), gui_context());
 }
 
 Image::Image (Item* parent, Cairo::Format fmt, int width, int height)
@@ -40,7 +40,7 @@ Image::Image (Item* parent, Cairo::Format fmt, int width, int height)
 	, _height (height)
 	, _need_render (false)
 {
-	DataReady.connect (data_connections, MISSING_INVALIDATOR, boost::bind (&Image::accept_data, this), gui_context());
+	DataReady.connect (data_connections, MISSING_INVALIDATOR, std::bind (&Image::accept_data, this), gui_context());
 }
 
 void

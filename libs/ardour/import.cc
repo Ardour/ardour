@@ -40,10 +40,6 @@
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 
-#include <boost/scoped_array.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_array.hpp>
-
 #include "pbd/basename.h"
 #include "pbd/convert.h"
 
@@ -263,11 +259,11 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 		return;
 	}
 
-	boost::scoped_array<float> data(new float[nframes * channels]);
-	vector<boost::shared_array<Sample> > channel_data;
+	std::unique_ptr<float[]> data(new float[nframes * channels]);
+	vector<std::shared_ptr<Sample[]> > channel_data;
 
 	for (uint32_t n = 0; n < channels; ++n) {
-		channel_data.push_back(boost::shared_array<Sample>(new Sample[nframes]));
+		channel_data.push_back(std::shared_ptr<Sample[]>(new Sample[nframes]));
 	}
 
 	float gain = 1;
@@ -541,8 +537,7 @@ Session::deinterlace_midi_region (std::shared_ptr<MidiRegion> mr)
 		smf->session_saved(); //TODO:  should we just expose flush_midi() instead?
 
 		/* open the SMF file for reading */
-		boost::scoped_ptr<Evoral::SMF> smf_reader;
-		smf_reader.reset (new Evoral::SMF());
+		const std::unique_ptr<Evoral::SMF> smf_reader (new Evoral::SMF());
 		if (smf_reader->open (source_path)) {
 			throw Evoral::SMF::FileError (source_path);
 		}
@@ -643,7 +638,7 @@ Session::import_files (ImportStatus& status)
 		std::shared_ptr<ImportableSource> source;
 
 		const DataType type = SMFSource::safe_midi_file_extension (*p) ? DataType::MIDI : DataType::AUDIO;
-		boost::scoped_ptr<Evoral::SMF> smf_reader;
+		std::unique_ptr<Evoral::SMF> smf_reader;
 
 		if (type == DataType::AUDIO) {
 			try {

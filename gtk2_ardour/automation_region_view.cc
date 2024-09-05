@@ -67,7 +67,7 @@ AutomationRegionView::AutomationRegionView (ArdourCanvas::Container*            
 	group->raise_to_top();
 
 	trackview.editor().MouseModeChanged.connect(_mouse_mode_connection, invalidator (*this),
-	                                            boost::bind (&AutomationRegionView::mouse_mode_changed, this),
+	                                            std::bind (&AutomationRegionView::mouse_mode_changed, this),
 	                                            gui_context ());
 }
 
@@ -361,5 +361,5 @@ AutomationRegionView::make_merger()
 {
 	std::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);
 	std::shared_ptr<ARDOUR::AutomationControl> ac = std::dynamic_pointer_cast<ARDOUR::AutomationControl>(c);
-	return new MergeableLine (_line, ac, boost::bind (&AutomationRegionView::drawn_time_filter, this, _1), nullptr, nullptr);
+	return new MergeableLine (_line, ac, std::bind (&AutomationRegionView::drawn_time_filter, this, _1), nullptr, nullptr);
 }

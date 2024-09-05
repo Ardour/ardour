@@ -29,8 +29,6 @@
 #include <memory>
 #include <set>
 
-#include <boost/scoped_array.hpp>
-
 #include <glibmm/fileutils.h>
 #include <glibmm/threads.h>
 
@@ -468,7 +466,7 @@ void
 AudioRegion::connect_to_analysis_changed ()
 {
 	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-		(*i)->AnalysisChanged.connect_same_thread (*this, boost::bind (&AudioRegion::maybe_invalidate_transients, this));
+		(*i)->AnalysisChanged.connect_same_thread (*this, std::bind (&AudioRegion::maybe_invalidate_transients, this));
 	}
 }
 
@@ -486,7 +484,7 @@ AudioRegion::connect_to_header_position_offset_changed ()
 			unique_srcs.insert (*i);
 			std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource> (*i);
 			if (afs) {
-				afs->HeaderPositionOffsetChanged.connect_same_thread (*this, boost::bind (&AudioRegion::source_offset_changed, this));
+				afs->HeaderPositionOffsetChanged.connect_same_thread (*this, std::bind (&AudioRegion::source_offset_changed, this));
 			}
 		}
 	}
@@ -495,9 +493,9 @@ AudioRegion::connect_to_header_position_offset_changed ()
 void
 AudioRegion::listen_to_my_curves ()
 {
-	_envelope->StateChanged.connect_same_thread (*this, boost::bind (&AudioRegion::envelope_changed, this));
-	_fade_in->StateChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fade_in_changed, this));
-	_fade_out->StateChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fade_out_changed, this));
+	_envelope->StateChanged.connect_same_thread (*this, std::bind (&AudioRegion::envelope_changed, this));
+	_fade_in->StateChanged.connect_same_thread (*this, std::bind (&AudioRegion::fade_in_changed, this));
+	_fade_out->StateChanged.connect_same_thread (*this, std::bind (&AudioRegion::fade_out_changed, this));
 }
 
 void
@@ -730,8 +728,8 @@ AudioRegion::read_at (Sample*     buf,
 		_cache_tail  = 0;
 	}
 
-	boost::scoped_array<gain_t> gain_array;
-	boost::scoped_array<Sample> mixdown_array;
+	std::unique_ptr<gain_t[]> gain_array;
+	std::unique_ptr<Sample[]> mixdown_array;
 
 	// TODO optimize mono reader, w/o plugins -> old code
 	if (n_chn > 1 && _cache_start < _cache_end && internal_offset + suffix >= _cache_start && internal_offset + suffix + can_read <= _cache_end) {
@@ -2224,9 +2222,9 @@ AudioRegion::get_transients (AnalysisFeatureList& results)
 AudioIntervalResult
 AudioRegion::find_silence (Sample threshold, samplecnt_t min_length, samplecnt_t fade_length, InterThreadInfo& itt) const
 {
-	samplecnt_t const block_size = 64 * 1024;
-	boost::scoped_array<Sample> loudest (new Sample[block_size]);
-	boost::scoped_array<Sample> buf (new Sample[block_size]);
+	constexpr samplecnt_t block_size = 64 * 1024;
+	std::array<Sample, block_size> loudest;
+	std::array<Sample, block_size> buf;
 
 	assert (fade_length >= 0);
 	assert (min_length > 0);
@@ -2244,11 +2242,11 @@ AudioRegion::find_silence (Sample threshold, samplecnt_t min_length, samplecnt_t
 		samplecnt_t cur_samples = 0;
 		samplecnt_t const to_read = min (end - pos, block_size);
 		/* fill `loudest' with the loudest absolute sample at each instant, across all channels */
-		memset (loudest.get(), 0, sizeof (Sample) * block_size);
+		loudest.fill(0);
 
 		for (uint32_t n = 0; n < n_channels(); ++n) {
 
-			cur_samples = read_raw_internal (buf.get(), pos, to_read, n);
+			cur_samples = read_raw_internal (buf.data(), pos, to_read, n);
 			for (samplecnt_t i = 0; i < cur_samples; ++i) {
 				loudest[i] = max (loudest[i], abs (buf[i]));
 			}
@@ -2484,7 +2482,7 @@ AudioRegion::_add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<R
 						if (SessionEvent::has_per_thread_pool ()) {
 							send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
 						} else {
-							_session.butler ()->delegate (boost::bind (&AudioRegion::send_change, this, PropertyChange (Properties::region_fx)));
+							_session.butler ()->delegate (std::bind (&AudioRegion::send_change, this, PropertyChange (Properties::region_fx)));
 						}
 					}
 				});
@@ -2499,8 +2497,8 @@ AudioRegion::_add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<R
 				});
 	}
 
-	rfx->LatencyChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fx_latency_changed, this, false));
-	rfx->TailTimeChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fx_tail_changed, this, false));
+	rfx->LatencyChanged.connect_same_thread (*this, std::bind (&AudioRegion::fx_latency_changed, this, false));
+	rfx->TailTimeChanged.connect_same_thread (*this, std::bind (&AudioRegion::fx_tail_changed, this, false));
 	rfx->set_block_size (_session.get_block_size ());
 
 	if (from_set_state) {

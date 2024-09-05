@@ -434,7 +434,7 @@ Surface::toggle_master_monitor ()
 	} else { return; }
 
 	_master_fader->set_control (_master_stripable->gain_control());
-	_master_stripable->gain_control()->Changed.connect (master_connection, MISSING_INVALIDATOR, boost::bind (&Surface::master_gain_changed, this), ui_context());
+	_master_stripable->gain_control()->Changed.connect (master_connection, MISSING_INVALIDATOR, std::bind (&Surface::master_gain_changed, this), ui_context());
 	_last_master_gain_written = FLT_MAX;
 	master_gain_changed ();
 }
@@ -483,12 +483,12 @@ Surface::setup_master ()
 	}
 
 	_master_fader->set_control (_master_stripable->gain_control());
-	_master_stripable->gain_control()->Changed.connect (master_connection, MISSING_INVALIDATOR, boost::bind (&Surface::master_gain_changed, this), ui_context());
+	_master_stripable->gain_control()->Changed.connect (master_connection, MISSING_INVALIDATOR, std::bind (&Surface::master_gain_changed, this), ui_context());
 	_last_master_gain_written = FLT_MAX; /* some essentially impossible value */
 	master_gain_changed ();
 
 	if (_has_master_display) {
-		_master_stripable->PropertyChanged.connect (master_connection, MISSING_INVALIDATOR, boost::bind (&Surface::master_property_changed, this, _1), ui_context());
+		_master_stripable->PropertyChanged.connect (master_connection, MISSING_INVALIDATOR, std::bind (&Surface::master_property_changed, this, _1), ui_context());
 		show_master_name();
 	}
 }
@@ -695,20 +695,20 @@ Surface::connect_to_signals ()
 		MIDI::Parser* p = _port->input_port().parser();
 
 		/* Incoming sysex */
-		p->sysex.connect_same_thread (*this, boost::bind (&Surface::handle_midi_sysex, this, _1, _2, _3));
+		p->sysex.connect_same_thread (*this, std::bind (&Surface::handle_midi_sysex, this, _1, _2, _3));
 		/* V-Pot messages are Controller */
-		p->controller.connect_same_thread (*this, boost::bind (&Surface::handle_midi_controller_message, this, _1, _2));
+		p->controller.connect_same_thread (*this, std::bind (&Surface::handle_midi_controller_message, this, _1, _2));
 		/* Button messages are NoteOn */
-		p->note_on.connect_same_thread (*this, boost::bind (&Surface::handle_midi_note_on_message, this, _1, _2));
+		p->note_on.connect_same_thread (*this, std::bind (&Surface::handle_midi_note_on_message, this, _1, _2));
 		/* Button messages are NoteOn but libmidi++ sends note-on w/velocity = 0 as note-off so catch them too */
-		p->note_off.connect_same_thread (*this, boost::bind (&Surface::handle_midi_note_on_message, this, _1, _2));
+		p->note_off.connect_same_thread (*this, std::bind (&Surface::handle_midi_note_on_message, this, _1, _2));
 		/* Fader messages are Pitchbend */
 		uint32_t i;
 		for (i = 0; i < _mcp.device_info().strip_cnt(); i++) {
-			p->channel_pitchbend[i].connect_same_thread (*this, boost::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, i));
+			p->channel_pitchbend[i].connect_same_thread (*this, std::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, i));
 		}
 		// Master fader
-		p->channel_pitchbend[_mcp.device_info().strip_cnt()].connect_same_thread (*this, boost::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, _mcp.device_info().strip_cnt()));
+		p->channel_pitchbend[_mcp.device_info().strip_cnt()].connect_same_thread (*this, std::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, _mcp.device_info().strip_cnt()));
 
 		_connected = true;
 	}

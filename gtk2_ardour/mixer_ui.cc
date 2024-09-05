@@ -33,8 +33,6 @@
 #include <map>
 #include <sigc++/bind.h>
 
-#include <boost/foreach.hpp>
-
 #include <glibmm/threads.h>
 
 #include <gtkmm/accelmap.h>
@@ -163,8 +161,8 @@ Mixer_UI::Mixer_UI ()
 
 	_content.set_data ("ardour-bindings", bindings);
 
-	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::presentation_info_changed, this, _1), gui_context());
-	Route::FanOut.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::fan_out, this, _1, false, true), gui_context());
+	PresentationInfo::Change.connect (*this, invalidator (*this), std::bind (&Mixer_UI::presentation_info_changed, this, _1), gui_context());
+	Route::FanOut.connect (*this, invalidator (*this), std::bind (&Mixer_UI::fan_out, this, _1, false, true), gui_context());
 
 	scroller.set_can_default (true);
 	// set_default (scroller);
@@ -429,14 +427,14 @@ Mixer_UI::Mixer_UI ()
 		_monitor_section.tearoff().set_state (*mnode);
 	}
 
-	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_strip, this, _1), gui_context());
-	VCAMasterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_master, this, _1), gui_context());
-	FoldbackStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_foldback, this, _1), gui_context());
-	SurroundStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_surround_master, this, _1), gui_context());
+	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), std::bind (&Mixer_UI::remove_strip, this, _1), gui_context());
+	VCAMasterStrip::CatchDeletion.connect (*this, invalidator (*this), std::bind (&Mixer_UI::remove_master, this, _1), gui_context());
+	FoldbackStrip::CatchDeletion.connect (*this, invalidator (*this), std::bind (&Mixer_UI::remove_foldback, this, _1), gui_context());
+	SurroundStrip::CatchDeletion.connect (*this, invalidator (*this), std::bind (&Mixer_UI::remove_surround_master, this, _1), gui_context());
 
 	/* handle escape */
 
-	ARDOUR_UI::instance()->Escape.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::escape, this), gui_context());
+	ARDOUR_UI::instance()->Escape.connect (*this, invalidator (*this), std::bind (&Mixer_UI::escape, this), gui_context());
 
 #ifndef DEFER_PLUGIN_SELECTOR_LOAD
 	_plugin_selector = new PluginSelector (PluginManager::instance ());
@@ -444,11 +442,11 @@ Mixer_UI::Mixer_UI ()
 #error implement deferred Plugin-Favorite list
 #endif
 
-	PluginManager::instance ().PluginListChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
-	ARDOUR::Plugin::PresetsChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
+	PluginManager::instance ().PluginListChanged.connect (*this, invalidator (*this), std::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
+	ARDOUR::Plugin::PresetsChanged.connect (*this, invalidator (*this), std::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
 
-	PluginManager::instance ().PluginStatusChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::maybe_refill_favorite_plugins, this, PLM_Favorite), gui_context());
-	PluginManager::instance ().PluginStatsChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::maybe_refill_favorite_plugins, this, PLM_Recent), gui_context());
+	PluginManager::instance ().PluginStatusChanged.connect (*this, invalidator (*this), std::bind (&Mixer_UI::maybe_refill_favorite_plugins, this, PLM_Favorite), gui_context());
+	PluginManager::instance ().PluginStatsChanged.connect (*this, invalidator (*this), std::bind (&Mixer_UI::maybe_refill_favorite_plugins, this, PLM_Recent), gui_context());
 }
 
 Mixer_UI::~Mixer_UI ()
@@ -652,7 +650,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 						monitor_section_attached ();
 					}
 
-					route->DropReferences.connect (*this, invalidator(*this), boost::bind (&Mixer_UI::monitor_section_going_away, this), gui_context());
+					route->DropReferences.connect (*this, invalidator(*this), std::bind (&Mixer_UI::monitor_section_going_away, this), gui_context());
 
 					/* no regular strip shown for control out */
 
@@ -717,8 +715,8 @@ Mixer_UI::add_stripables (StripableList& slist)
 				strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 			}
 
-			(*s)->presentation_info().PropertyChanged.connect (*this, invalidator(*this), boost::bind (&Mixer_UI::stripable_property_changed, this, _1, std::weak_ptr<Stripable>(*s)), gui_context());
-			(*s)->PropertyChanged.connect (*this, invalidator(*this), boost::bind (&Mixer_UI::stripable_property_changed, this, _1, std::weak_ptr<Stripable>(*s)), gui_context());
+			(*s)->presentation_info().PropertyChanged.connect (*this, invalidator(*this), std::bind (&Mixer_UI::stripable_property_changed, this, _1, std::weak_ptr<Stripable>(*s)), gui_context());
+			(*s)->PropertyChanged.connect (*this, invalidator(*this), std::bind (&Mixer_UI::stripable_property_changed, this, _1, std::weak_ptr<Stripable>(*s)), gui_context());
 		}
 
 	} catch (const std::exception& e) {
@@ -1308,7 +1306,7 @@ Mixer_UI::set_session (Session* sess)
 
 #if 0
 	/* skip mapping all session-config vars, we only need one */
-	boost::function<void (string)> pc (boost::bind (&Mixer_UI::parameter_changed, this, _1));
+	std::function<void (string)> pc (std::bind (&Mixer_UI::parameter_changed, this, _1));
 	_session->config.map_parameters (pc);
 #else
 	parameter_changed ("show-group-tabs");
@@ -1316,21 +1314,21 @@ Mixer_UI::set_session (Session* sess)
 
 	initial_track_display ();
 
-	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::add_routes, this, _1), gui_context());
-	_session->route_group_added.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::add_route_group, this, _1), gui_context());
-	_session->route_group_removed.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::route_groups_changed, this), gui_context());
-	_session->route_groups_reordered.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::route_groups_changed, this), gui_context());
-	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::parameter_changed, this, _1), gui_context());
-	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::update_title, this), gui_context());
-	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::update_title, this), gui_context());
-	_session->SurroundMasterAddedOrRemoved.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::sync_surround_action, this), gui_context());
+	_session->RouteAdded.connect (_session_connections, invalidator (*this), std::bind (&Mixer_UI::add_routes, this, _1), gui_context());
+	_session->route_group_added.connect (_session_connections, invalidator (*this), std::bind (&Mixer_UI::add_route_group, this, _1), gui_context());
+	_session->route_group_removed.connect (_session_connections, invalidator (*this), std::bind (&Mixer_UI::route_groups_changed, this), gui_context());
+	_session->route_groups_reordered.connect (_session_connections, invalidator (*this), std::bind (&Mixer_UI::route_groups_changed, this), gui_context());
+	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), std::bind (&Mixer_UI::parameter_changed, this, _1), gui_context());
+	_session->DirtyChanged.connect (_session_connections, invalidator (*this), std::bind (&Mixer_UI::update_title, this), gui_context());
+	_session->StateSaved.connect (_session_connections, invalidator (*this), std::bind (&Mixer_UI::update_title, this), gui_context());
+	_session->SurroundMasterAddedOrRemoved.connect (_session_connections, invalidator (*this), std::bind (&Mixer_UI::sync_surround_action, this), gui_context());
 
-	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::add_masters, this, _1), gui_context());
-	_session->vca_manager().VCACreated.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::new_masters_created, this), gui_context());
+	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), std::bind (&Mixer_UI::add_masters, this, _1), gui_context());
+	_session->vca_manager().VCACreated.connect (_session_connections, invalidator (*this), std::bind (&Mixer_UI::new_masters_created, this), gui_context());
 
-	MixerScene::Change.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::update_scene_buttons, this), gui_context());
+	MixerScene::Change.connect (_session_connections, invalidator (*this), std::bind (&Mixer_UI::update_scene_buttons, this), gui_context());
 
-	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::parameter_changed, this, _1), gui_context ());
+	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&Mixer_UI::parameter_changed, this, _1), gui_context ());
 
 	route_groups_changed ();
 
@@ -2480,7 +2478,7 @@ Mixer_UI::add_route_group (RouteGroup* group)
 		focus = true;
 	}
 
-	group->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::route_group_property_changed, this, group, _1), gui_context());
+	group->PropertyChanged.connect (*this, invalidator (*this), std::bind (&Mixer_UI::route_group_property_changed, this, group, _1), gui_context());
 
 	if (focus) {
 		TreeViewColumn* col = group_display.get_column (0);
@@ -3667,7 +3665,7 @@ Mixer_UI::show_spill (std::shared_ptr<Stripable> s)
 	show_spill_change (s); /* EMIT SIGNAL */
 
 	if (s) {
-		s->DropReferences.connect (_spill_gone_connection, invalidator (*this), boost::bind (&Mixer_UI::spill_nothing, this), gui_context());
+		s->DropReferences.connect (_spill_gone_connection, invalidator (*this), std::bind (&Mixer_UI::spill_nothing, this), gui_context());
 		_group_tabs->set_sensitive (false);
 	} else {
 		_group_tabs->set_sensitive (true);
@@ -3774,7 +3772,7 @@ Mixer_UI::control_action (std::shared_ptr<T> (Stripable::*get_control)() const)
 
 	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(AxisView* r, _axis_targets) {
+	for (AxisView* r : _axis_targets) {
 		std::shared_ptr<Stripable> s = r->stripable();
 		if (s) {
 			ac = (s.get()->*get_control)();
@@ -3815,7 +3813,7 @@ Mixer_UI::selected_gaincontrols ()
 {
 	set_axis_targets_for_operation ();
 	ControllableSet rv;
-	BOOST_FOREACH(AxisView* r, _axis_targets) {
+	for (AxisView* r : _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			std::shared_ptr<GainControl> ac (ms->route()->gain_control());
@@ -3856,7 +3854,7 @@ Mixer_UI::unity_gain_action ()
 {
 	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(AxisView* r, _axis_targets) {
+	for (AxisView* r : _axis_targets) {
 		std::shared_ptr<Stripable> s = r->stripable();
 		if (s) {
 			std::shared_ptr<AutomationControl> ac = s->gain_control();
@@ -3872,7 +3870,7 @@ Mixer_UI::copy_processors ()
 {
 	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(AxisView* r, _axis_targets) {
+	for (AxisView* r : _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->copy_processors ();
@@ -3884,7 +3882,7 @@ Mixer_UI::cut_processors ()
 {
 	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(AxisView* r, _axis_targets) {
+	for (AxisView* r : _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->cut_processors ();
@@ -3896,7 +3894,7 @@ Mixer_UI::paste_processors ()
 {
 	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(AxisView* r, _axis_targets) {
+	for (AxisView* r : _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->paste_processors ();
@@ -3908,7 +3906,7 @@ Mixer_UI::select_all_processors ()
 {
 	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(AxisView* r, _axis_targets) {
+	for (AxisView* r : _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->select_all_processors ();
@@ -3920,7 +3918,7 @@ Mixer_UI::toggle_processors ()
 {
 	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(AxisView* r, _axis_targets) {
+	for (AxisView* r : _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->toggle_processors ();
@@ -3932,7 +3930,7 @@ Mixer_UI::ab_plugins ()
 {
 	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(AxisView* r, _axis_targets) {
+	for (AxisView* r : _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->ab_plugins ();
@@ -3944,7 +3942,7 @@ void
 Mixer_UI::vca_assign (std::shared_ptr<VCA> vca)
 {
 	set_axis_targets_for_operation ();
-	BOOST_FOREACH(AxisView* r, _axis_targets) {
+	for (AxisView* r : _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->vca_assign (vca);
@@ -3956,7 +3954,7 @@ void
 Mixer_UI::vca_unassign (std::shared_ptr<VCA> vca)
 {
 	set_axis_targets_for_operation ();
-	BOOST_FOREACH(AxisView* r, _axis_targets) {
+	for (AxisView* r : _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->vca_unassign (vca);

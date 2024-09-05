@@ -24,7 +24,6 @@
 
 #include <glibmm.h>
 
-#include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 
 #include "alsa_audiobackend.h"
@@ -1002,7 +1001,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 		boost::tokenizer<boost::char_separator<char> > devs (ext, sep);
 
-		BOOST_FOREACH (const std::string& tmp, devs) {
+		for (const std::string& tmp : devs) {
 			std::string            dev (tmp);
 			unsigned int           sr     = _samplerate;
 			unsigned int           spp    = _samples_per_period;
@@ -1140,14 +1139,14 @@ void*
 AlsaAudioBackend::alsa_process_thread (void* arg)
 {
 	ThreadData* td = reinterpret_cast<ThreadData*> (arg);
-	boost::function<void ()> f = td->f;
+	std::function<void ()> f = td->f;
 	delete td;
 	f ();
 	return 0;
 }
 
 int
-AlsaAudioBackend::create_process_thread (boost::function<void ()> func)
+AlsaAudioBackend::create_process_thread (std::function<void ()> func)
 {
 	pthread_t   thread_id;
 	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);
@@ -2106,7 +2105,7 @@ AlsaAudioBackend::add_slave (const char*            device,
 		PBD::error << string_compose (_("Failed to start slave device '%1'\n"), device) << endmsg;
 		goto errout;
 	}
-	s->UpdateLatency.connect_same_thread (s->latency_connection, boost::bind (&AlsaAudioBackend::update_latencies, this));
+	s->UpdateLatency.connect_same_thread (s->latency_connection, std::bind (&AlsaAudioBackend::update_latencies, this));
 	_slaves.push_back (s);
 	return true;
 
@@ -2133,7 +2132,7 @@ AlsaAudioBackend::AudioSlave::AudioSlave (
 	, halt (false)
 	, dead (false)
 {
-	Halted.connect_same_thread (_halted_connection, boost::bind (&AudioSlave::halted, this));
+	Halted.connect_same_thread (_halted_connection, std::bind (&AudioSlave::halted, this));
 }
 
 AlsaAudioBackend::AudioSlave::~AudioSlave ()
@@ -2393,8 +2392,8 @@ AlsaDeviceReservation::acquire_device (const char* device_name, bool silent)
 	argp[4] = 0;
 
 	_device_reservation = new ARDOUR::SystemExec (request_device_exe, argp);
-	_device_reservation->ReadStdout.connect_same_thread (_reservation_connection, boost::bind (&AlsaDeviceReservation::reservation_stdout, this, _1, _2));
-	_device_reservation->Terminated.connect_same_thread (_reservation_connection, boost::bind (&AlsaDeviceReservation::release_device, this));
+	_device_reservation->ReadStdout.connect_same_thread (_reservation_connection, std::bind (&AlsaDeviceReservation::reservation_stdout, this, _1, _2));
+	_device_reservation->Terminated.connect_same_thread (_reservation_connection, std::bind (&AlsaDeviceReservation::release_device, this));
 
 	if (_device_reservation->start (SystemExec::ShareWithParent)) {
 		if (!silent) {

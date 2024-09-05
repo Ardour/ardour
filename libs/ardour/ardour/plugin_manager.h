@@ -32,7 +32,6 @@
 #include <map>
 #include <string>
 #include <set>
-#include <boost/container/set.hpp>
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
@@ -65,13 +64,15 @@ struct AUv2DescStr;
 #endif
 
 
-class LIBARDOUR_API PluginManager : public boost::noncopyable {
+class LIBARDOUR_API PluginManager {
 public:
 	static PluginManager& instance();
 	static std::string auv2_scanner_bin_path;
 	static std::string vst2_scanner_bin_path;
 	static std::string vst3_scanner_bin_path;
 
+	PluginManager (const PluginManager&) = delete;
+	PluginManager& operator= (const PluginManager&) = delete;
 	~PluginManager ();
 
 	const ARDOUR::PluginInfoList& windows_vst_plugin_info ();
@@ -192,7 +193,7 @@ private:
 		}
 	};
 
-	typedef boost::container::set<PSLEPtr, PSLEPtrSort> PluginScanLog;
+	typedef std::set<PSLEPtr, PSLEPtrSort> PluginScanLog;
 	PluginScanLog _plugin_scan_log;
 
 	PSLEPtr scan_log_entry (PluginType const type, std::string const& path) {

@@ -104,7 +104,7 @@ WindowsVSTPluginUI::package (Gtk::Window& win)
 	VSTPluginUI::package (win);
 	_vst->state()->gtk_window_parent = (void*) (&win);
 
-	_vst->VSTSizeWindow.connect (_resize_connection, invalidator (*this), boost::bind (&WindowsVSTPluginUI::resize_callback, this), gui_context());
+	_vst->VSTSizeWindow.connect (_resize_connection, invalidator (*this), std::bind (&WindowsVSTPluginUI::resize_callback, this), gui_context());
 
 	resize_callback ();
 

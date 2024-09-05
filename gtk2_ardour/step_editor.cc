@@ -48,7 +48,7 @@ StepEditor::StepEditor (PublicEditor& e, std::shared_ptr<MidiTrack> t, MidiTimeA
 	step_edit_region_view = 0;
 
 	_track->PlaylistChanged.connect (*this, invalidator (*this),
-	                                 boost::bind (&StepEditor::playlist_changed, this),
+	                                 std::bind (&StepEditor::playlist_changed, this),
 	                                 gui_context());
 	playlist_changed ();
 }
@@ -433,7 +433,7 @@ StepEditor::playlist_changed ()
 {
 	step_edit_region_connection.disconnect ();
 	_track->playlist()->RegionRemoved.connect (step_edit_region_connection, invalidator (*this),
-	                                           boost::bind (&StepEditor::region_removed, this, _1),
+	                                           std::bind (&StepEditor::region_removed, this, _1),
 	                                           gui_context());
 }
 

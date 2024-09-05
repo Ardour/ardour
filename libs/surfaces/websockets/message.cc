@@ -20,7 +20,6 @@
 #include <iostream>
 #endif
 
-#include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <sstream>
@@ -62,7 +61,7 @@ NodeStateMessage::NodeStateMessage (void* buf, size_t len)
 
 		for (pt::ptree::iterator it = addr.begin (); it != addr.end (); ++it) {
 			// throws if datatype not uint32_t
-			_state.add_addr (boost::lexical_cast<uint32_t> (it->second.data ()));
+			_state.add_addr (static_cast<uint32_t> (stoul (it->second.data ())));
 		}
 
 		pt::ptree val = root.get_child ("val", pt::ptree ());
@@ -71,17 +70,17 @@ NodeStateMessage::NodeStateMessage (void* buf, size_t len)
 			std::string val = it->second.data ();
 
 			try {
-				_state.add_val (boost::lexical_cast<int> (val));
-			} catch (const boost::bad_lexical_cast&) {
+				_state.add_val (stoi (val));
+			} catch (...) {
 				try {
-					double d = boost::lexical_cast<double> (val);
+					double d = stod (val);
 					if (d >= JSON_INF) {
 						d = std::numeric_limits<double>::infinity ();
 					} else if (d <= -JSON_INF) {
 						d = -std::numeric_limits<double>::infinity ();
 					}
 					_state.add_val (d);
-				} catch (const boost::bad_lexical_cast&) {
+				} catch (...) {
 					if (val == "false") {
 						_state.add_val (false);
 					} else if (val == "true") {

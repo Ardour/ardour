@@ -314,7 +314,7 @@ Parser::trace (bool onoff, ostream *o, const string &prefix)
 	if (onoff) {
 		trace_stream = o;
 		trace_prefix = prefix;
-		any.connect_same_thread (trace_connection, boost::bind (&Parser::trace_event, this, _1, _2, _3, _4));
+		any.connect_same_thread (trace_connection, std::bind (&Parser::trace_event, this, _1, _2, _3, _4));
 	} else {
 		trace_prefix = "";
 		trace_stream = 0;
@@ -325,7 +325,7 @@ void
 Parser::scanner (unsigned char inbyte)
 {
 	bool statusbit;
-        boost::optional<int> edit_result;
+        std::optional<int> edit_result;
 
 	// cerr << "parse: " << hex << (int) inbyte << dec << " state = " << state << " msgindex = " << msgindex << " runnable = " << runnable << endl;
 
@@ -393,7 +393,7 @@ Parser::scanner (unsigned char inbyte)
 	}
 
 	if (rtmsg) {
-		boost::optional<int> res = edit (&inbyte, 1);
+		std::optional<int> res = edit (&inbyte, 1);
 
 		if (res.value_or (1) >= 0 && !_offline) {
 			realtime_msg (inbyte);
@@ -430,7 +430,7 @@ Parser::scanner (unsigned char inbyte)
 #endif
 		if (msgindex > 0) {
 
-			boost::optional<int> res = edit (msgbuf, msgindex);
+			std::optional<int> res = edit (msgbuf, msgindex);
 
 			if (res.value_or (1) >= 0) {
 				if (!possible_mmc (msgbuf, msgindex) || _mmc_forward) {

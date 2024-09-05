@@ -76,7 +76,7 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 	 */
 	override_opaqueness (false);
 
-	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
+	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, std::bind (&MidiRegion::model_changed, this));
 	model_changed ();
 	assert(_name.val().find("/") == string::npos);
 	assert(_type == DataType::MIDI);
@@ -87,7 +87,7 @@ MidiRegion::MidiRegion (std::shared_ptr<const MidiRegion> other)
 	, _ignore_shift (false)
 {
 	assert(_name.val().find("/") == string::npos);
-	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
+	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, std::bind (&MidiRegion::model_changed, this));
 	model_changed ();
 }
 
@@ -98,7 +98,7 @@ MidiRegion::MidiRegion (std::shared_ptr<const MidiRegion> other, timecnt_t const
 {
 
 	assert(_name.val().find("/") == string::npos);
-	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
+	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, std::bind (&MidiRegion::model_changed, this));
 	model_changed ();
 }
 
@@ -462,11 +462,11 @@ MidiRegion::model_changed ()
 
 	/* watch for changes to controls' AutoState */
 	midi_source()->AutomationStateChanged.connect_same_thread (
-		_model_connection, boost::bind (&MidiRegion::model_automation_state_changed, this, _1)
+		_model_connection, std::bind (&MidiRegion::model_automation_state_changed, this, _1)
 		);
 
-	model()->ContentsShifted.connect_same_thread (_model_shift_connection, boost::bind (&MidiRegion::model_shifted, this, _1));
-	model()->ContentsChanged.connect_same_thread (_model_changed_connection, boost::bind (&MidiRegion::model_contents_changed, this));
+	model()->ContentsShifted.connect_same_thread (_model_shift_connection, std::bind (&MidiRegion::model_shifted, this, _1));
+	model()->ContentsChanged.connect_same_thread (_model_changed_connection, std::bind (&MidiRegion::model_contents_changed, this));
 }
 
 void
@@ -643,5 +643,5 @@ MidiRegion::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
 
 	_model_changed_connection.disconnect ();
 	model()->ContentsChanged ();
-	model()->ContentsChanged.connect_same_thread (_model_changed_connection, boost::bind (&MidiRegion::model_contents_changed, this));
+	model()->ContentsChanged.connect_same_thread (_model_changed_connection, std::bind (&MidiRegion::model_contents_changed, this));
 }

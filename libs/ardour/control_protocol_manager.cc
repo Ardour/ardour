@@ -503,7 +503,7 @@ ControlProtocolManager::get_descriptor (string path)
 }
 
 void
-ControlProtocolManager::foreach_known_protocol (boost::function<void(const ControlProtocolInfo*)> method)
+ControlProtocolManager::foreach_known_protocol (std::function<void(const ControlProtocolInfo*)> method)
 {
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 		method (*i);

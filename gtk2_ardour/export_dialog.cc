@@ -126,7 +126,7 @@ ExportDialog::set_session (ARDOUR::Session* s)
 
 	_initialized = true;
 
-	_session->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&ExportDialog::parameter_changed, this, _1), gui_context());
+	_session->config.ParameterChanged.connect (*this, invalidator (*this), std::bind (&ExportDialog::parameter_changed, this, _1), gui_context());
 }
 
 void
@@ -369,12 +369,12 @@ ExportDialog::do_export (bool analysis_only)
 
 		handler->SoundcloudProgress.connect_same_thread(
 				*this,
-				boost::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3)
+				std::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3)
 				);
 #if 0
 		handler->SoundcloudProgress.connect(
 				*this, invalidator (*this),
-				boost::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3),
+				std::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3),
 				gui_context()
 				);
 #endif

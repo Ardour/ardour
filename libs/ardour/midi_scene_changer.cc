@@ -44,12 +44,12 @@ MIDISceneChanger::MIDISceneChanger (Session& s)
 
 {
 	/* catch any add/remove/clear etc. for all Locations */
-	_session.locations()->changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
-	_session.locations()->added.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
-	_session.locations()->removed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
+	_session.locations()->changed.connect_same_thread (*this, std::bind (&MIDISceneChanger::locations_changed, this));
+	_session.locations()->added.connect_same_thread (*this, std::bind (&MIDISceneChanger::locations_changed, this));
+	_session.locations()->removed.connect_same_thread (*this, std::bind (&MIDISceneChanger::locations_changed, this));
 
 	/* catch class-based signal that notifies of us changes in the scene change state of any Location */
-	Location::scene_changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
+	Location::scene_changed.connect_same_thread (*this, std::bind (&MIDISceneChanger::locations_changed, this));
 }
 
 MIDISceneChanger::~MIDISceneChanger ()
@@ -254,8 +254,8 @@ MIDISceneChanger::set_input_port (std::shared_ptr<MidiPort> mp)
 		 */
 
 		for (int channel = 0; channel < 16; ++channel) {
-			async->parser()->channel_bank_change[channel].connect_same_thread (incoming_connections, boost::bind (&MIDISceneChanger::bank_change_input, this, _1, _2, channel));
-			async->parser()->channel_program_change[channel].connect_same_thread (incoming_connections, boost::bind (&MIDISceneChanger::program_change_input, this, _1, _2, channel));
+			async->parser()->channel_bank_change[channel].connect_same_thread (incoming_connections, std::bind (&MIDISceneChanger::bank_change_input, this, _1, _2, channel));
+			async->parser()->channel_program_change[channel].connect_same_thread (incoming_connections, std::bind (&MIDISceneChanger::program_change_input, this, _1, _2, channel));
 		}
 	}
 }

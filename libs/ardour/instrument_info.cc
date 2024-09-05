@@ -77,7 +77,7 @@ InstrumentInfo::set_internal_instrument (std::shared_ptr<Processor> p)
 
 	std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (p);
 	if (pi && pi->plugin ()->has_midnam ()) {
-		pi->plugin()->UpdatedMidnam.connect_same_thread (_midnam_changed, boost::bind (&InstrumentInfo::emit_changed, this));
+		pi->plugin()->UpdatedMidnam.connect_same_thread (_midnam_changed, std::bind (&InstrumentInfo::emit_changed, this));
 	}
 }
 

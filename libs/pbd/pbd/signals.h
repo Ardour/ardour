@@ -35,12 +35,9 @@
 
 #include <glibmm/threads.h>
 
-#include <boost/noncopyable.hpp>
-#include <boost/bind.hpp>
 #include <boost/bind/protect.hpp>
-#include <boost/function.hpp>
 #include <boost/enable_shared_from_this.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/event_loop.h"
@@ -54,7 +51,11 @@
 #include <iostream>
 #endif
 
+using namespace std::placeholders;
+
 namespace PBD {
+
+// using namespace std::placeholders;
 
 class LIBPBD_API Connection;
 
@@ -144,7 +145,7 @@ template<typename R>
 class /*LIBPBD_API*/ OptionalLastValue
 {
 public:
-	typedef boost::optional<R> result_type;
+	typedef std::optional<R> result_type;
 
 	template <typename Iter>
 	result_type operator() (Iter first, Iter last) const {
@@ -193,19 +194,18 @@ private:
 	UnscopedConnection _c;
 };
 
-class LIBPBD_API ScopedConnectionList  : public boost::noncopyable
+class LIBPBD_API ScopedConnectionList
 {
   public:
-	ScopedConnectionList();
+	ScopedConnectionList ();
+	ScopedConnectionList (const ScopedConnectionList&) = delete;
+	ScopedConnectionList& operator= (const ScopedConnectionList&) = delete;
 	virtual ~ScopedConnectionList ();
 
 	void add_connection (const UnscopedConnection& c);
 	void drop_connections ();
 
   private:
-	/* this class is not copyable */
-	ScopedConnectionList(const ScopedConnectionList&);
-
 	/* Even though our signals code is thread-safe, this additional list of
 	   scoped connections needs to be protected in 2 cases:
 

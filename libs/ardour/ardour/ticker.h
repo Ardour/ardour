@@ -20,9 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/noncopyable.hpp>
-#include <boost/scoped_ptr.hpp>
-
 #include "pbd/signals.h"
 
 #include "ardour/libardour_visibility.h"
@@ -37,10 +34,12 @@ namespace ARDOUR
 class Session;
 class MidiPort;
 
-class LIBARDOUR_API MidiClockTicker : boost::noncopyable
+class LIBARDOUR_API MidiClockTicker
 {
 public:
 	MidiClockTicker (Session&);
+	MidiClockTicker (const MidiClockTicker&) = delete;
+	MidiClockTicker& operator= (const MidiClockTicker&) = delete;
 	virtual ~MidiClockTicker ();
 
 	void tick (samplepos_t, samplepos_t, pframes_t, samplecnt_t);

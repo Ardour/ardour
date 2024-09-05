@@ -123,7 +123,7 @@ TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	set_widget_colors ();
 
 	/* owner color changes (?) */
-	dynamic_cast<Stripable*> (tref.box->owner ())->presentation_info ().Change.connect (_owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
+	dynamic_cast<Stripable*> (tref.box->owner ())->presentation_info ().Change.connect (_owner_prop_connection, MISSING_INVALIDATOR, std::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
 
 	selection_change ();
 }

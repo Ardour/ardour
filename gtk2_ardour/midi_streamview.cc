@@ -185,7 +185,7 @@ MidiStreamView::add_region_view_internal (std::shared_ptr<Region> r, bool wait_f
 
 	/* catch regionview going away */
 	std::weak_ptr<Region> wr (region); // make this explicit
-	region->DropReferences.connect (*this, invalidator (*this), boost::bind (&MidiStreamView::remove_region_view, this, wr), gui_context());
+	region->DropReferences.connect (*this, invalidator (*this), std::bind (&MidiStreamView::remove_region_view, this, wr), gui_context());
 
 	RegionViewAdded (region_view);
 

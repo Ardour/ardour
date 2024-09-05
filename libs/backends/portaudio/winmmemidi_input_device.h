@@ -27,9 +27,6 @@
 
 #include <string>
 
-#include <boost/scoped_array.hpp>
-#include <boost/scoped_ptr.hpp>
-
 #include <pbd/ringbuffer.h>
 
 namespace ARDOUR {
@@ -96,8 +93,8 @@ private: // data
 	std::string m_name;
 
 	// can't use unique_ptr yet
-	boost::scoped_ptr<PBD::RingBuffer<uint8_t> > m_midi_buffer;
-	boost::scoped_array<uint8_t> m_sysex_buffer;
+	const std::unique_ptr<PBD::RingBuffer<uint8_t> > m_midi_buffer;
+	std::unique_ptr<uint8_t[]> m_sysex_buffer;
 };
 
 }

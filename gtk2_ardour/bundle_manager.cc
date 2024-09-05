@@ -385,7 +385,7 @@ BundleManager::add_bundle (std::shared_ptr<Bundle> b)
 	(*i)[_list_model_columns.name] = u->name ();
 	(*i)[_list_model_columns.bundle] = u;
 
-	u->Changed.connect (bundle_connections, invalidator (*this), boost::bind (&BundleManager::bundle_changed, this, _1, std::weak_ptr<UserBundle> (u)), gui_context());
+	u->Changed.connect (bundle_connections, invalidator (*this), std::bind (&BundleManager::bundle_changed, this, _1, std::weak_ptr<UserBundle> (u)), gui_context());
 }
 
 void

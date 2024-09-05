@@ -124,11 +124,11 @@ AutomationController::AutomationController(std::shared_ptr<AutomationControl> ac
 	_adjustment->signal_value_changed().connect(
 		sigc::mem_fun(*this, &AutomationController::value_adjusted));
 
-	ac->Changed.connect (_changed_connections, invalidator (*this), boost::bind (&AutomationController::display_effective_value, this), gui_context());
+	ac->Changed.connect (_changed_connections, invalidator (*this), std::bind (&AutomationController::display_effective_value, this), gui_context());
 	display_effective_value ();
 
 	if (ac->alist ()) {
-		ac->alist()->automation_state_changed.connect (_changed_connections, invalidator (*this), boost::bind (&AutomationController::automation_state_changed, this), gui_context());
+		ac->alist()->automation_state_changed.connect (_changed_connections, invalidator (*this), std::bind (&AutomationController::automation_state_changed, this), gui_context());
 		automation_state_changed ();
 	}
 

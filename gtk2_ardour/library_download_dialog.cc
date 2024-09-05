@@ -99,7 +99,7 @@ LibraryDownloadDialog::refill ()
 		_model->clear ();
 	}
 
-	lf.foreach_description (boost::bind (&LibraryDownloadDialog::add_library, this, _1));
+	lf.foreach_description (std::bind (&LibraryDownloadDialog::add_library, this, _1));
 }
 
 void
@@ -174,7 +174,7 @@ LibraryDownloadDialog::install (std::string const & path, Gtk::TreePath const & 
 	std::string destdir = Glib::path_get_dirname (path);
 
 	inflater = new Inflater (path,  destdir);
-	inflater->Progress.connect (install_connection, invalidator(*this), boost::bind (&LibraryDownloadDialog::install_progress, this, _1, path, treepath), gui_context());
+	inflater->Progress.connect (install_connection, invalidator(*this), std::bind (&LibraryDownloadDialog::install_progress, this, _1, path, treepath), gui_context());
 	inflater->start (); /* starts unpacking in a thread */
 }
 

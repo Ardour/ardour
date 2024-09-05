@@ -62,7 +62,7 @@ AsyncMIDIPort::~AsyncMIDIPort ()
 }
 
 void
-AsyncMIDIPort::set_timer (boost::function<MIDI::samplecnt_t (void)>& f)
+AsyncMIDIPort::set_timer (std::function<MIDI::samplecnt_t (void)>& f)
 {
 	timer = f;
 	have_timer = true;

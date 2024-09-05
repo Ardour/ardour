@@ -16,7 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <limits>
 #include <string>
@@ -95,8 +94,8 @@ TypedValue::operator int () const
 			return static_cast<int> (_d);
 		case String:
 			try {
-				return boost::lexical_cast<int> (_s);
-			} catch (const boost::bad_lexical_cast&) {
+				return stoi (_s);
+			} catch (...) {
 				return 0;
 			}
 		default:
@@ -115,8 +114,8 @@ TypedValue::operator double () const
 			return static_cast<double> (_i);
 		case String:
 			try {
-				return boost::lexical_cast<double> (_s);
-			} catch (const boost::bad_lexical_cast&) {
+				return stod (_s);
+			} catch (...) {
 				return 0;
 			}
 		default:
@@ -132,9 +131,9 @@ TypedValue::operator std::string () const
 		case Bool:
 			return _b ? "true" : "false";
 		case Int:
-			return boost::lexical_cast<std::string> (_i);
+			return std::to_string (_i);
 		case Double:
-			return boost::lexical_cast<std::string> (_d);
+			return std::to_string (_d);
 		default:
 			return "";
 	}

@@ -224,7 +224,7 @@ IO::remove_port (std::shared_ptr<Port> port, void* src)
 	ChanCount after = before;
 	after.set (port->type(), after.get (port->type()) - 1);
 
-	boost::optional<bool> const r = PortCountChanging (after); /* EMIT SIGNAL */
+	std::optional<bool> const r = PortCountChanging (after); /* EMIT SIGNAL */
 	if (r.value_or (false)) {
 		return -1;
 	}
@@ -296,7 +296,7 @@ IO::add_port (string destination, void* src, DataType type)
 	ChanCount after = before;
 	after.set (type, after.get (type) + 1);
 
-	boost::optional<bool> const r = PortCountChanging (after); /* EMIT SIGNAL */
+	std::optional<bool> const r = PortCountChanging (after); /* EMIT SIGNAL */
 	if (r.value_or (false)) {
 		return -1;
 	}
@@ -501,7 +501,7 @@ IO::reestablish_port_subscriptions ()
 {
 	_port_connections.drop_connections ();
 	for (auto const& p : *ports ()) {
-		p->ConnectedOrDisconnected.connect_same_thread (*this, boost::bind (&IO::connection_change, this, _1, _2));
+		p->ConnectedOrDisconnected.connect_same_thread (*this, std::bind (&IO::connection_change, this, _1, _2));
 	}
 }
 
@@ -1506,7 +1506,7 @@ IO::bundles_connected ()
 IO::UserBundleInfo::UserBundleInfo (IO* io, std::shared_ptr<UserBundle> b)
 {
 	bundle = b;
-	b->Changed.connect_same_thread (changed, boost::bind (&IO::bundle_changed, io, _1));
+	b->Changed.connect_same_thread (changed, std::bind (&IO::bundle_changed, io, _1));
 }
 
 std::string

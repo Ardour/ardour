@@ -227,8 +227,8 @@ RegionEditor::RegionEditor (Session* s, RegionView* rv)
 
 	bounds_changed (change);
 
-	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&RegionEditor::region_changed, this, _1), gui_context());
-	_region->RegionFxChanged.connect (region_connection, invalidator (*this), boost::bind (&RegionEditor::region_fx_changed, this), gui_context ());
+	_region->PropertyChanged.connect (state_connection, invalidator (*this), std::bind (&RegionEditor::region_changed, this, _1), gui_context());
+	_region->RegionFxChanged.connect (region_connection, invalidator (*this), std::bind (&RegionEditor::region_fx_changed, this), gui_context ());
 
 	spin_arrow_grab = false;
 
@@ -324,7 +324,7 @@ RegionEditor::connect_editor_events ()
 
 	audition_button.signal_toggled().connect (sigc::mem_fun(*this, &RegionEditor::audition_button_toggled));
 
-	_session->AuditionActive.connect (audition_connection, invalidator (*this), boost::bind (&RegionEditor::audition_state_changed, this, _1), gui_context());
+	_session->AuditionActive.connect (audition_connection, invalidator (*this), std::bind (&RegionEditor::audition_state_changed, this, _1), gui_context());
 }
 
 void

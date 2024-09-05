@@ -120,7 +120,7 @@ AudioTimeAxisView::set_route (std::shared_ptr<Route> rt)
 
 	if (_route->panner_shell()) {
 		_route->panner_shell()->Changed.connect (*this, invalidator (*this),
-		                                         boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
+		                                         std::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
 	}
 
 	/* map current state of the route */
@@ -220,7 +220,7 @@ void
 AudioTimeAxisView::show_all_automation (bool apply_to_selection)
 {
 	if (apply_to_selection) {
-		_editor.get_selection().tracks.foreach_audio_time_axis (boost::bind (&AudioTimeAxisView::show_all_automation, _1, false));
+		_editor.get_selection().tracks.foreach_audio_time_axis (std::bind (&AudioTimeAxisView::show_all_automation, _1, false));
 	} else {
 
 		no_redraw = true;
@@ -236,7 +236,7 @@ void
 AudioTimeAxisView::show_existing_automation (bool apply_to_selection)
 {
 	if (apply_to_selection) {
-		_editor.get_selection().tracks.foreach_audio_time_axis (boost::bind (&AudioTimeAxisView::show_existing_automation, _1, false));
+		_editor.get_selection().tracks.foreach_audio_time_axis (std::bind (&AudioTimeAxisView::show_existing_automation, _1, false));
 	} else {
 		no_redraw = true;
 
@@ -252,7 +252,7 @@ void
 AudioTimeAxisView::hide_all_automation (bool apply_to_selection)
 {
 	if (apply_to_selection) {
-		_editor.get_selection().tracks.foreach_audio_time_axis (boost::bind (&AudioTimeAxisView::hide_all_automation, _1, false));
+		_editor.get_selection().tracks.foreach_audio_time_axis (std::bind (&AudioTimeAxisView::hide_all_automation, _1, false));
 	} else {
 		no_redraw = true;
 

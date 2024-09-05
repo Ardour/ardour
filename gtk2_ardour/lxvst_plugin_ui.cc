@@ -92,7 +92,7 @@ LXVSTPluginUI::package (Gtk::Window& win)
 
 	/* Map the UI start and stop updating events to 'Map' events on the Window */
 
-	_vst->VSTSizeWindow.connect (_resize_connection, invalidator (*this), boost::bind (&LXVSTPluginUI::resize_callback, this), gui_context());
+	_vst->VSTSizeWindow.connect (_resize_connection, invalidator (*this), std::bind (&LXVSTPluginUI::resize_callback, this), gui_context());
 	return 0;
 }
 

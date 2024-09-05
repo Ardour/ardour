@@ -48,7 +48,6 @@
 #include <stdint.h>
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <glibmm/threads.h>
 
 #include <ltc.h>
@@ -301,7 +300,7 @@ public:
 	std::vector<std::string> get_paths_for_new_sources (bool allow_replacing, const std::string& import_file_path,
 	                                                    uint32_t channels, std::vector<std::string> const & smf_track_names);
 
-	int bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,std::string)> callback);
+	int bring_all_sources_into_session (std::function<void(uint32_t,uint32_t,std::string)> callback);
 
 	void process (pframes_t nframes);
 
@@ -717,7 +716,7 @@ public:
 	PBD::Signal0<void>             route_group_removed;
 	PBD::Signal0<void>             route_groups_reordered;
 
-	void foreach_route_group (boost::function<void(RouteGroup*)> f) {
+	void foreach_route_group (std::function<void(RouteGroup*)> f) {
 		for (std::list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
 			f (*i);
 		}
@@ -772,7 +771,7 @@ public:
 	samplepos_t audible_sample (bool* latent_locate = NULL) const;
 	samplepos_t requested_return_sample() const { return _requested_return_sample; }
 	void set_requested_return_sample(samplepos_t return_to);
-	boost::optional<samplepos_t> const & nominal_jack_transport_sample() { return _nominal_jack_transport_sample; }
+	std::optional<samplepos_t> const & nominal_jack_transport_sample() { return _nominal_jack_transport_sample; }
 
 	bool compute_audible_delta (samplepos_t& pos_and_delta) const;
 	samplecnt_t remaining_latency_preroll () const { return _remaining_latency_preroll; }
@@ -1055,7 +1054,7 @@ public:
 
 	/* s/w "RAID" management */
 
-	boost::optional<samplecnt_t> available_capture_duration();
+	std::optional<samplecnt_t> available_capture_duration();
 
 	/* I/O bundles */
 
@@ -1503,8 +1502,8 @@ private:
 	void add_surround_master ();
 	void remove_surround_master ();
 
-	boost::optional<bool> _vapor_available;
-	boost::optional<bool> _vapor_exportable;
+	std::optional<bool> _vapor_available;
+	std::optional<bool> _vapor_exportable;
 
 	void update_latency (bool playback);
 	void set_owned_port_public_latency (bool playback);
@@ -1620,7 +1619,7 @@ private:
 	bool                     loop_changing;
 	samplepos_t              last_loopend;
 
-	boost::scoped_ptr<SessionDirectory> _session_dir;
+	const std::unique_ptr<SessionDirectory> _session_dir;
 
 	void hookup_io ();
 	void graph_reordered (bool called_from_backend);
@@ -1843,7 +1842,7 @@ private:
 	struct timeval last_mmc_step;
 	double step_speed;
 
-	typedef boost::function<bool()> MidiTimeoutCallback;
+	typedef std::function<bool()> MidiTimeoutCallback;
 	typedef std::list<MidiTimeoutCallback> MidiTimeoutList;
 
 	MidiTimeoutList midi_timeouts;
@@ -2034,7 +2033,7 @@ public:
 
 	typedef std::map<PBD::ID,std::shared_ptr<Source> > SourceMap;
 
-	void foreach_source (boost::function<void( std::shared_ptr<Source> )> f) {
+	void foreach_source (std::function<void( std::shared_ptr<Source> )> f) {
 		Glib::Threads::Mutex::Lock ls (source_lock);
 		for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 			f ( (*i).second );
@@ -2276,7 +2275,7 @@ private:
 		get_rt_event (std::shared_ptr<RouteList const> rl, T targ, SessionEvent::RTeventCallback after, PBD::Controllable::GroupControlDisposition group_override,
 		              void (Session::*method) (std::shared_ptr<RouteList const>, T, PBD::Controllable::GroupControlDisposition)) {
 		SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
-		ev->rt_slot = boost::bind (method, this, rl, targ, group_override);
+		ev->rt_slot = std::bind (method, this, rl, targ, group_override);
 		ev->rt_return = after;
 		ev->event_loop = PBD::EventLoop::get_event_loop_for_thread ();
 
@@ -2288,7 +2287,7 @@ private:
 		get_rt_event (std::shared_ptr<RouteList const> rl, T1 t1arg, T2 t2arg, SessionEvent::RTeventCallback after, PBD::Controllable::GroupControlDisposition group_override,
 		              void (Session::*method) (std::shared_ptr<RouteList const>, T1, T2, PBD::Controllable::GroupControlDisposition)) {
 		SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
-		ev->rt_slot = boost::bind (method, this, rl, t1arg, t2arg, group_override);
+		ev->rt_slot = std::bind (method, this, rl, t1arg, t2arg, group_override);
 		ev->rt_return = after;
 		ev->event_loop = PBD::EventLoop::get_event_loop_for_thread ();
 
@@ -2298,7 +2297,7 @@ private:
 	/* specialized version realtime "apply to set of controls" operations */
 	SessionEvent* get_rt_event (std::shared_ptr<WeakAutomationControlList> cl, double arg, PBD::Controllable::GroupControlDisposition group_override) {
 		SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
-		ev->rt_slot = boost::bind (&Session::rt_set_controls, this, cl, arg, group_override);
+		ev->rt_slot = std::bind (&Session::rt_set_controls, this, cl, arg, group_override);
 		ev->rt_return = Session::rt_cleanup;
 		ev->event_loop = PBD::EventLoop::get_event_loop_for_thread ();
 
@@ -2393,7 +2392,7 @@ private:
 	CoreSelection* _selection;
 
 	bool _global_locate_pending;
-	boost::optional<samplepos_t> _nominal_jack_transport_sample;
+	std::optional<samplepos_t> _nominal_jack_transport_sample;
 
 	bool _had_destructive_tracks;
 

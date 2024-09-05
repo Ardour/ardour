@@ -30,8 +30,6 @@
 #include <string>
 #include <list>
 
-#include <boost/smart_ptr/scoped_ptr.hpp>
-
 #include <gtkmm/separator.h>
 
 #include "pbd/error.h"
@@ -164,7 +162,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	set_tooltip (inactive_label, _("This track is inactive. (right-click to activate)"));
 
 	{
-		boost::scoped_ptr<Gtk::Entry> an_entry (new FocusEntry);
+		const std::unique_ptr<Gtk::Entry> an_entry (new FocusEntry);
 		an_entry->set_name (X_("TrackNameEditor"));
 		Gtk::Requisition req = an_entry->size_request ();
 
@@ -635,7 +633,7 @@ void
 TimeAxisView::set_height_enum (Height h, bool apply_to_selection)
 {
 	if (apply_to_selection) {
-		_editor.get_selection().tracks.foreach_time_axis (boost::bind (&TimeAxisView::set_height_enum, _1, h, false));
+		_editor.get_selection().tracks.foreach_time_axis (std::bind (&TimeAxisView::set_height_enum, _1, h, false));
 	} else {
 		set_height (preset_height (h));
 	}

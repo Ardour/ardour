@@ -691,14 +691,14 @@ void*
 PulseAudioBackend::pulse_process_thread (void* arg)
 {
 	ThreadData*             td = reinterpret_cast<ThreadData*> (arg);
-	boost::function<void()> f  = td->f;
+	std::function<void()> f  = td->f;
 	delete td;
 	f ();
 	return 0;
 }
 
 int
-PulseAudioBackend::create_process_thread (boost::function<void()> func)
+PulseAudioBackend::create_process_thread (std::function<void()> func)
 {
 	pthread_t   thread_id;
 	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);

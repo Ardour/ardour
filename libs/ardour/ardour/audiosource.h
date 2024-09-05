@@ -25,13 +25,9 @@
 
 #include <memory>
 
-#include <boost/shared_array.hpp>
-
 #include <time.h>
 
 #include <glibmm/threads.h>
-#include <boost/function.hpp>
-#include <boost/scoped_array.hpp>
 
 #include "ardour/source.h"
 #include "ardour/ardour.h"
@@ -68,7 +64,7 @@ class LIBARDOUR_API AudioSource : virtual public Source, public ARDOUR::AudioRea
 			samplepos_t start, samplecnt_t cnt, double samples_per_visual_peak) const;
 
 	int  build_peaks ();
-	bool peaks_ready (boost::function<void()> callWhenReady, PBD::ScopedConnection** connection_created_if_not_ready, PBD::EventLoop* event_loop) const;
+	bool peaks_ready (std::function<void()> callWhenReady, PBD::ScopedConnection** connection_created_if_not_ready, PBD::EventLoop* event_loop) const;
 
 	mutable PBD::Signal0<void>  PeaksReady;
 	mutable PBD::Signal2<void,samplepos_t,samplepos_t>  PeakRangeReady;
@@ -110,8 +106,8 @@ class LIBARDOUR_API AudioSource : virtual public Source, public ARDOUR::AudioRea
 	   thread, or a lock around calls that use them.
 	*/
 
-	static std::vector<boost::shared_array<Sample> > _mixdown_buffers;
-	static std::vector<boost::shared_array<gain_t> > _gain_buffers;
+	static std::vector<std::shared_ptr<Sample[]> > _mixdown_buffers;
+	static std::vector<std::shared_ptr<gain_t[]> > _gain_buffers;
 	static Glib::Threads::Mutex    _level_buffer_lock;
 
 	std::string         _peakpath;
@@ -157,7 +153,7 @@ class LIBARDOUR_API AudioSource : virtual public Source, public ARDOUR::AudioRea
 	mutable double _last_scale;
 	mutable off_t _last_map_off;
 	mutable size_t  _last_raw_map_length;
-	mutable boost::scoped_array<PeakData> peak_cache;
+	mutable std::unique_ptr<PeakData[]> peak_cache;
 };
 
 }

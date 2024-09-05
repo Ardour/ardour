@@ -162,9 +162,9 @@ LCXLGUI::LCXLGUI (LaunchControlXL& p)
 
 	/* catch future changes to connection state */
 
-	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), boost::bind (&LCXLGUI::connection_handler, this), gui_context());
-	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), boost::bind (&LCXLGUI::connection_handler, this), gui_context());
-	lcxl.ConnectionChange.connect (_port_connections, invalidator (*this), boost::bind (&LCXLGUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), std::bind (&LCXLGUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), std::bind (&LCXLGUI::connection_handler, this), gui_context());
+	lcxl.ConnectionChange.connect (_port_connections, invalidator (*this), std::bind (&LCXLGUI::connection_handler, this), gui_context());
 }
 
 LCXLGUI::~LCXLGUI ()

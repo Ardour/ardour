@@ -474,7 +474,7 @@ vst3_save_cache_file (std::string const& module_path, XMLNode* root, bool verbos
 }
 
 bool
-ARDOUR::vst3_scan_and_cache (std::string const& module_path, std::string const& bundle_path, boost::function<void (std::string const&, std::string const&, VST3Info const&)> cb, bool verbose)
+ARDOUR::vst3_scan_and_cache (std::string const& module_path, std::string const& bundle_path, std::function<void (std::string const&, std::string const&, VST3Info const&)> cb, bool verbose)
 {
 	XMLNode* root = new XMLNode ("VST3Cache");
 	root->set_property ("version", ARDOUR_VST3_CACHE_FILE_VERSION);

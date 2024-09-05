@@ -90,8 +90,8 @@ DurationInfoBox::set_session (Session* s)
 		_rectime_connection.disconnect ();
 		return;
 	}
-	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&DurationInfoBox::rec_state_changed, this), gui_context());
-	_session->UpdateRouteRecordState.connect (_session_connections, invalidator (*this), boost::bind (&DurationInfoBox::update, this), gui_context());
+	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), std::bind (&DurationInfoBox::rec_state_changed, this), gui_context());
+	_session->UpdateRouteRecordState.connect (_session_connections, invalidator (*this), std::bind (&DurationInfoBox::update, this), gui_context());
 }
 
 void
@@ -185,8 +185,8 @@ XrunInfoBox::set_session (Session* s)
 		return;
 	}
 
-	_session->Xrun.connect (_session_connections, invalidator (*this), boost::bind (&XrunInfoBox::update, this), gui_context());
-	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&XrunInfoBox::update, this), gui_context());
+	_session->Xrun.connect (_session_connections, invalidator (*this), std::bind (&XrunInfoBox::update, this), gui_context());
+	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), std::bind (&XrunInfoBox::update, this), gui_context());
 }
 
 void
@@ -271,7 +271,7 @@ RemainInfoBox::set_session (Session* s)
 	}
 
 	_diskspace_connection = Timers::second_connect (sigc::mem_fun (*this, &RemainInfoBox::update));
-	_session->UpdateRouteRecordState.connect (_session_connections, invalidator (*this), boost::bind (&RemainInfoBox::update, this), gui_context());
+	_session->UpdateRouteRecordState.connect (_session_connections, invalidator (*this), std::bind (&RemainInfoBox::update, this), gui_context());
 }
 
 void
@@ -318,7 +318,7 @@ RemainInfoBox::render (Cairo::RefPtr<Cairo::Context> const& cr, cairo_rectangle_
 	}
 
 	samplecnt_t  sample_rate                 = _session->nominal_sample_rate ();
-	boost::optional<samplecnt_t> opt_samples = _session->available_capture_duration ();
+	std::optional<samplecnt_t> opt_samples = _session->available_capture_duration ();
 
 	Gtkmm2ext::set_source_rgb_a (cr, UIConfiguration::instance ().color ("widget:bg"), .7);
 

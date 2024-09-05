@@ -530,7 +530,7 @@ public:
 		return std::shared_ptr<RegionFxPlugin> ();
 	}
 
-	void foreach_plugin (boost::function<void(std::weak_ptr<RegionFxPlugin>)> method) const {
+	void foreach_plugin (std::function<void(std::weak_ptr<RegionFxPlugin>)> method) const {
 		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
 		for (auto const& i : _plugins) {
 			method (std::weak_ptr<RegionFxPlugin> (i));

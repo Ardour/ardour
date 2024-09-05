@@ -160,7 +160,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 
 		_cc_key[i].StateChanged.connect (sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::cc_key_changed), i));
 		_cc[i]->ValueChanged.connect_same_thread (_cc_connections,
-		                                          boost::bind (&VirtualKeyboardWindow::control_change_knob_event_handler, this, i, _1));
+		                                          std::bind (&VirtualKeyboardWindow::control_change_knob_event_handler, this, i, _1));
 
 		update_cc (i, default_cc[i]);
 	}
@@ -203,11 +203,11 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	/* GUI signals */
 
 	_pitch_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_slider_adjusted));
-	_pitchbend->ValueChanged.connect_same_thread (_cc_connections, boost::bind (&VirtualKeyboardWindow::pitch_bend_event_handler, this, _1));
+	_pitchbend->ValueChanged.connect_same_thread (_cc_connections, std::bind (&VirtualKeyboardWindow::pitch_bend_event_handler, this, _1));
 	_pitch_slider->StopGesture.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_bend_release));
 
 	_modwheel_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::modwheel_slider_adjusted));
-	_modwheel->ValueChanged.connect_same_thread (_cc_connections, boost::bind (&VirtualKeyboardWindow::control_change_event_handler, this, 1, _1));
+	_modwheel->ValueChanged.connect_same_thread (_cc_connections, std::bind (&VirtualKeyboardWindow::control_change_event_handler, this, 1, _1));
 
 	_piano_velocity.StateChanged.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_velocity_settings));
 	_piano_octave_key.StateChanged.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_octave_key));

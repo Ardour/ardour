@@ -18,8 +18,6 @@
  */
 #include <iostream>
 
-#include <boost/scoped_ptr.hpp>
-
 #include <glibmm/timer.h>
 
 #include "pbd/epa.h"
@@ -63,7 +61,7 @@ JackConnection::JackConnection (const std::string& arg1, const std::string& arg2
 	 */
 
         EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
-        boost::scoped_ptr<EnvironmentalProtectionAgency> current_epa;
+        std::unique_ptr<EnvironmentalProtectionAgency> current_epa;
 
         /* revert all environment settings back to whatever they were when
 	 * ardour started, because ardour's startup script may have reset
@@ -97,7 +95,7 @@ int
 JackConnection::open ()
 {
         EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
-        boost::scoped_ptr<EnvironmentalProtectionAgency> current_epa;
+        std::unique_ptr<EnvironmentalProtectionAgency> current_epa;
 	jack_status_t status;
 
 	close ();
