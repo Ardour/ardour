@@ -59,7 +59,7 @@
 
 static gint _exiting = 0;
 static std::vector<GtkMenuItem*> global_menu_items;
-static bool _modal_state = false;
+static gint _modal_state = 0;
 
 static guint
 gdk_quartz_keyval_to_ns_keyval (guint keyval)
@@ -585,7 +585,7 @@ idle_call_activate (gpointer data)
 }
 - (BOOL) validateMenuItem:(NSMenuItem*) menuItem
 {
-	if (_modal_state) {
+	if (_modal_state > 0) {
 		return false;
 	}
 
@@ -1468,7 +1468,7 @@ namespace Gtk {
 - (NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication *) app
 {
 	UNUSED_PARAMETER(app);
-	if (_modal_state) {
+	if (_modal_state > 0) {
 		return NSTerminateCancel;
 	}
 	Gtkmm2ext::Application::instance()->ShouldQuit ();
@@ -1480,14 +1480,18 @@ static void
 gdk_quartz_modal_notify (GdkWindow*, gboolean modal)
 {
 	/* this global will control sensitivity of our app menu items, via validateMenuItem */
-	_modal_state = modal;
+	if (modal) {
+		++_modal_state;
+	} else if (_modal_state > 0) {
+		--_modal_state;
+	}
 
 	/* Need to notify GTK that actions are insensitive where necessary */
 
 	for (auto & mitem : global_menu_items) {
 		GtkAction* act = gtk_activatable_get_related_action (GTK_ACTIVATABLE(mitem));
 		if (act) {
-			gtk_action_set_sensitive (act, !modal);
+			gtk_action_set_sensitive (act, 0 == _modal_state);
 		}
 	}
 }
