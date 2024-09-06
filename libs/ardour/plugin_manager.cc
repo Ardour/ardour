@@ -1835,7 +1835,7 @@ PluginManager::mac_vst_discover_from_path (string path, std::set<std::string>& s
 		return -1;
 	}
 
-	if (scanned_paths.find (path) != scanned_paths::end) {
+	if (scanned_paths.find (path) != scanned_paths.end ()) {
 		return 0;
 	}
 	scanned_paths.insert (path);
