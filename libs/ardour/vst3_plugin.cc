@@ -1670,7 +1670,6 @@ VST3PI::performEdit (Vst::ParamID id, Vst::ParamValue v)
 	if (idx != _ctrl_id_index.end ()) {
 		float value               = v;
 		_shadow_data[idx->second] = value;
-		_update_ctrl[idx->second] = true;
 		/* set_parameter_internal() is called via OnParameterChange */
 		value = _controller->normalizedParamToPlain (id, value);
 		OnParameterChange (ParamValueChanged, idx->second, value); /* EMIT SIGNAL */
