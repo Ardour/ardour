@@ -131,9 +131,6 @@ VST3Plugin::parameter_change_handler (VST3PI::ParameterChange t, uint32_t param,
 		case VST3PI::EndGesture:
 			Plugin::EndTouch (param);
 			break;
-		case VST3PI::ValueChange:
-			_parameter_queue.write_one (PV (param, value));
-			/* fallthrough */
 		case VST3PI::ParamValueChanged:
 			/* emit ParameterChangedExternally, mark preset dirty */
 			Plugin::parameter_changed_externally (param, value);
@@ -1676,7 +1673,7 @@ VST3PI::performEdit (Vst::ParamID id, Vst::ParamValue v)
 		_update_ctrl[idx->second] = true;
 		/* set_parameter_internal() is called via OnParameterChange */
 		value = _controller->normalizedParamToPlain (id, value);
-		OnParameterChange (ValueChange, idx->second, value); /* EMIT SIGNAL */
+		OnParameterChange (ParamValueChanged, idx->second, value); /* EMIT SIGNAL */
 	}
 	return kResultOk;
 }
