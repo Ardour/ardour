@@ -249,7 +249,7 @@ SurroundSend::add_pannable ()
 	_change_connections.drop_connections ();
 	for (auto const& c: _controls) {
 		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl>(c.second);
-		ac->Changed.connect_same_thread (_change_connections, [this](bool, PBD::Controllable::GroupControlDisposition) { PanChanged (); /* EMIT SIGNAL*/});
+		ac->Changed.connect_same_thread (_change_connections, [this](bool, PBD::Controllable::GroupControlDisposition, boost::optional<double>) { PanChanged (); /* EMIT SIGNAL*/});
 	}
 }
 

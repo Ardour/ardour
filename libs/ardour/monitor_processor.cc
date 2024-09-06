@@ -42,7 +42,7 @@ namespace ARDOUR {
                 bool newval = fabs (v) >= 0.5;
                 if (newval != _value) {
                         _value = newval;
-                        Changed (true, gcd); /* EMIT SIGNAL */
+                        Changed (true, gcd, v); /* EMIT SIGNAL */
                 }
         }
 }
@@ -112,7 +112,7 @@ MonitorProcessor::allocate_channels (uint32_t size)
 		/* update solo_cnt when Solo changes */
 		std::shared_ptr<Controllable> sc = _channels.back()->soloed_control;
 		std::weak_ptr<Controllable> wc (sc);
-		sc->Changed.connect_same_thread (*this, [this, wc](bool, PBD::Controllable::GroupControlDisposition)
+		sc->Changed.connect_same_thread (*this, [this, wc](bool, PBD::Controllable::GroupControlDisposition, boost::optional<double>)
 				{
 					std::shared_ptr<Controllable> ac = wc.lock ();
 					if (ac && ac->get_value () > 0) {

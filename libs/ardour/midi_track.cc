@@ -386,7 +386,7 @@ MidiTrack::update_controls (BufferSet const& bufs)
 			double old = control->get_double ();
 			control->set_double (ev.value(), timepos_t::zero (false), false);
 			if (old != ev.value()) {
-				control->Changed (false, Controllable::NoGroup);
+				control->Changed (false, Controllable::NoGroup, ev.value());
 			}
 		}
 	}

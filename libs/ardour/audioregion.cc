@@ -2473,7 +2473,7 @@ AudioRegion::_add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<R
 	for (auto& ec : acs) {
 		std::shared_ptr<AutomationControl> ac (std::dynamic_pointer_cast<AutomationControl>(ec));
 		std::weak_ptr<AutomationControl> wc (ac);
-		ec->Changed.connect_same_thread (*this, [this, wc] (bool, PBD::Controllable::GroupControlDisposition)
+		ec->Changed.connect_same_thread (*this, [this, wc] (bool, PBD::Controllable::GroupControlDisposition, boost::optional<double>)
 				{
 					std::shared_ptr<AutomationControl> ac = wc.lock ();
 					if (ac && ac->automation_playback ()) {

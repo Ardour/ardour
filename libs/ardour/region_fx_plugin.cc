@@ -152,7 +152,7 @@ public:
 			 */
 			actually_set_value (current, PBD::Controllable::NoGroup);
 		} else { // generic UI, LV2
-			Changed (true, Controllable::NoGroup);
+			Changed (true, Controllable::NoGroup, boost::none);
 		}
 		return true;
 	}
@@ -381,7 +381,7 @@ RegionFxPlugin::set_state (const XMLNode& node, int version)
 	for (auto const& i : _controls) {
 		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i.second);
 		if (ac) {
-			ac->Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+			ac->Changed (false, Controllable::NoGroup, boost::none); /* EMIT SIGNAL */
 		}
 	}
 
