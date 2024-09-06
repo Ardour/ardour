@@ -532,11 +532,11 @@ Plugin::set_parameter (uint32_t /* which */, float /* value */, sampleoffset_t /
 }
 
 void
-Plugin::parameter_changed_externally (uint32_t which, float /* value */)
+Plugin::parameter_changed_externally (uint32_t which, float value)
 {
 	_parameter_changed_since_last_preset = true;
 	_session.set_dirty ();
-	ParameterChangedExternally (which, get_parameter (which)); /* EMIT SIGNAL */
+	ParameterChangedExternally (which, value); /* EMIT SIGNAL */
 	PresetDirty (); /* EMIT SIGNAL */
 }
 
