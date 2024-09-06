@@ -790,15 +790,15 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 
 	/* first column: separate by group */
 	ostr << "<td>\n\n";
-	for (list<Bindings*>::const_iterator b = bindings.begin(); b != bindings.end(); ++b) {
-		(*b)->save_as_html (ostr, true);
+	for (Bindings* const& b : bindings) {
+		b->save_as_html (ostr, true);
 	}
 	ostr << "</td>\n\n";
 
 	//second column
 	ostr << "<td style=\"vertical-align:top\">\n\n";
-	for (list<Bindings*>::const_iterator b = bindings.begin(); b != bindings.end(); ++b) {
-		(*b)->save_as_html (ostr, false);
+	for (Bindings* const& b : bindings) {
+		b->save_as_html (ostr, false);
 	}
 	ostr << "</td>\n\n";
 

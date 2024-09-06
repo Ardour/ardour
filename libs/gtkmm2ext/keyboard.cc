@@ -825,10 +825,10 @@ Keyboard::store_keybindings (string const& path)
 
 	DEBUG_TRACE (DEBUG::Bindings, string_compose ("save bindings to %1\n", path));
 
-	for (list<Bindings*>::const_iterator b = Bindings::bindings.begin (); b != Bindings::bindings.end (); ++b) {
+	for (Bindings* const& b : Bindings::bindings) {
 		bnode = new XMLNode (X_("Bindings"));
-		bnode->set_property (X_("name"), (*b)->name ());
-		(*b)->save (*bnode);
+		bnode->set_property (X_("name"), b->name ());
+		b->save (*bnode);
 		node->add_child_nocopy (*bnode);
 	}
 

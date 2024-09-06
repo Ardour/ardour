@@ -845,9 +845,8 @@ static void
 dump_processors(const string& name, const list<std::shared_ptr<Processor> >& procs)
 {
 	cerr << name << " {" << endl;
-	for (list<std::shared_ptr<Processor> >::const_iterator p = procs.begin();
-			p != procs.end(); ++p) {
-		cerr << "\t" << (*p)->name() << " ID = " << (*p)->id() << " @ " << (*p) << endl;
+	for (const std::shared_ptr<Processor> & p : procs) {
+		cerr << "\t" << p->name() << " ID = " << p->id() << " @ " << p << endl;
 	}
 	cerr << "}" << endl;
 }

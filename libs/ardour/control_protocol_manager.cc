@@ -583,21 +583,20 @@ ControlProtocolManager::get_state () const
 	XMLNode* root = new XMLNode (state_node_name);
 	Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
 
-	for (list<ControlProtocolInfo*>::const_iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
-
-		if ((*i)->protocol) {
-			XMLNode& child_state ((*i)->protocol->get_state());
-			child_state.set_property (X_("active"), !(*i)->automatic);
-			delete ((*i)->state);
-			(*i)->state = new XMLNode (child_state);
+	for (ControlProtocolInfo* const& i : control_protocol_info) {
+		if (i->protocol) {
+			XMLNode& child_state (i->protocol->get_state());
+			child_state.set_property (X_("active"), !i->automatic);
+			delete (i->state);
+			i->state = new XMLNode (child_state);
 			root->add_child_nocopy (child_state);
-		} else if ((*i)->state) {
-			XMLNode* child_state = new XMLNode (*(*i)->state);
+		} else if (i->state) {
+			XMLNode* child_state = new XMLNode (*i->state);
 			child_state->set_property (X_("active"), false);
 			root->add_child_nocopy (*child_state);
 		} else {
 			XMLNode* child_state = new XMLNode (X_("Protocol"));
-			child_state->set_property (X_("name"), (*i)->name);
+			child_state->set_property (X_("name"), i->name);
 			child_state->set_property (X_("active"), false);
 			root->add_child_nocopy (*child_state);
 		}

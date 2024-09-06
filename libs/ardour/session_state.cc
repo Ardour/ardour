@@ -1297,8 +1297,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 	list<XMLNode*> midi_port_nodes = _midi_ports->get_midi_port_states();
 	if (!midi_port_nodes.empty()) {
 		XMLNode* midi_port_stuff = new XMLNode ("MIDIPorts");
-		for (list<XMLNode*>::const_iterator n = midi_port_nodes.begin(); n != midi_port_nodes.end(); ++n) {
-			midi_port_stuff->add_child_nocopy (**n);
+		for (XMLNode* const& n : midi_port_nodes) {
+			midi_port_stuff->add_child_nocopy (*n);
 		}
 		node->add_child_nocopy (*midi_port_stuff);
 	}
@@ -1535,8 +1535,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 	_playlists->add_state (node, save_template, !only_used_assets);
 
 	child = node->add_child ("RouteGroups");
-	for (list<RouteGroup *>::const_iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
-		child->add_child_nocopy ((*i)->get_state());
+	for (RouteGroup * const& i : _route_groups) {
+		child->add_child_nocopy (i->get_state());
 	}
 
 	if (_click_io) {
@@ -3261,19 +3261,14 @@ Session::possible_states () const
 RouteGroup*
 Session::new_route_group (const std::string& name)
 {
-	RouteGroup* rg = NULL;
-
-	for (std::list<RouteGroup*>::const_iterator i = _route_groups.begin (); i != _route_groups.end (); ++i) {
-		if ((*i)->name () == name) {
-			rg = *i;
-			break;
+	for (RouteGroup* const& rg : _route_groups) {
+		if (rg->name () == name) {
+			return rg;
 		}
 	}
 
-	if (!rg) {
-		rg = new RouteGroup (*this, name);
-		add_route_group (rg);
-	}
+	RouteGroup* rg = new RouteGroup (*this, name);
+	add_route_group (rg);
 	return (rg);
 }
 

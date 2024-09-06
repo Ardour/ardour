@@ -177,9 +177,9 @@ Box::size_request (Distance& w, Distance& h) const
 	DEBUG_TRACE (DEBUG::CanvasBox|DEBUG::CanvasSizeAllocate, string_compose ("size request for %1\n", this));
 	if (homogenous) {
 
-		for (std::list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
+		for (Item* const& i : _items) {
 			Distance iw, ih;
-			(*i)->size_request (iw, ih);
+			i->size_request (iw, ih);
 
 			largest_height = std::max (largest_height, ih);
 			largest_width = std::max (largest_width, iw);

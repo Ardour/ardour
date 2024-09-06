@@ -1004,9 +1004,7 @@ ExportProfileManager::check_config (std::shared_ptr<Warnings> warnings,
 	std::list<string> paths;
 	build_filenames (paths, filename, timespans, channel_config, format);
 
-	for (std::list<string>::const_iterator path_it = paths.begin (); path_it != paths.end (); ++path_it) {
-		string path = *path_it;
-
+	for (const string& path : paths) {
 		if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
 			warnings->conflicting_filenames.push_back (path);
 		}

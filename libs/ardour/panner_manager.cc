@@ -258,13 +258,11 @@ PannerManager::select_panner (ChanCount in, ChanCount out, std::string const uri
 PannerInfo*
 PannerManager::get_by_uri (std::string uri) const
 {
-	PannerInfo* pi = NULL;
-	for (list<PannerInfo*>::const_iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		if ((*p)->descriptor.panner_uri != uri) continue;
-		pi = (*p);
-		break;
+	for (PannerInfo* const& pi : panner_info) {
+		if (pi->descriptor.panner_uri != uri) continue;
+		return pi;
 	}
-	return pi;
+	return nullptr;
 }
 
 PannerUriMap
@@ -279,8 +277,8 @@ PannerManager::get_available_panners(uint32_t const a_in, uint32_t const a_out) 
 	}
 
 	/* get available panners for current configuration. */
-	for (list<PannerInfo*>::const_iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		PanPluginDescriptor const& d ((*p)->descriptor);
+	for (PannerInfo* const& p : panner_info) {
+		PanPluginDescriptor const& d (p->descriptor);
 		if (d.in != -1 && d.in != in) continue;
 		if (d.out != -1 && d.out != out) continue;
 		if (d.in == -1 && d.out == -1 && out <= 2) continue;

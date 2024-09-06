@@ -1426,11 +1426,9 @@ Playlist::duplicate_ranges (std::list<TimelineRange>& ranges, float times)
 	timepos_t min_pos = timepos_t::max (ranges.front().start().time_domain());
 	timepos_t max_pos = timepos_t (min_pos.time_domain());
 
-	for (std::list<TimelineRange>::const_iterator i = ranges.begin();
-	     i != ranges.end();
-	     ++i) {
-		min_pos = min (min_pos, (*i).start());
-		max_pos = max (max_pos, (*i).end());
+	for (const TimelineRange& i : ranges) {
+		min_pos = min (min_pos, i.start());
+		max_pos = max (max_pos, i.end());
 	}
 
 	timecnt_t offset = min_pos.distance (max_pos);
@@ -2403,9 +2401,8 @@ Playlist::state (bool full_state) const
 	node->set_property (X_("pgroup-id"), _pgroup_id);
 
 	string                        shared_ids;
-	list<PBD::ID>::const_iterator it = _shared_with_ids.begin ();
-	for (; it != _shared_with_ids.end (); ++it) {
-		shared_ids += "," + (*it).to_s ();
+	for (const PBD::ID& it : _shared_with_ids) {
+		shared_ids += "," + it.to_s ();
 	}
 	if (!shared_ids.empty ()) {
 		shared_ids.erase (0, 1);

@@ -137,10 +137,8 @@ Transform::operator()(std::shared_ptr<MidiModel> model,
 			// Clear stack and run program
 			ctx.stack     = std::stack<Variant>();
 			ctx.this_note = note;
-			for (std::list<Operation>::const_iterator o = _prog.ops.begin();
-			     o != _prog.ops.end();
-			     ++o) {
-				(*o).eval(ctx);
+			for (const Operation& o : _prog.ops) {
+				o.eval(ctx);
 			}
 
 			// Result is on top of the stack

@@ -4725,16 +4725,16 @@ Session::set_session_range_is_free (bool yn)
 void
 Session::playlist_ranges_moved (list<Temporal::RangeMove> const & ranges)
 {
-	for (list<Temporal::RangeMove>::const_iterator i = ranges.begin(); i != ranges.end(); ++i) {
-		maybe_update_session_range (i->from, i->to);
+	for (const Temporal::RangeMove& i : ranges) {
+		maybe_update_session_range (i.from, i.to);
 	}
 }
 
 void
 Session::playlist_regions_extended (list<Temporal::Range> const & ranges)
 {
-	for (list<Temporal::Range>::const_iterator i = ranges.begin(); i != ranges.end(); ++i) {
-		maybe_update_session_range (i->start(), i->end());
+	for (const Temporal::Range& i : ranges) {
+		maybe_update_session_range (i.start(), i.end());
 	}
 }
 
@@ -4769,8 +4769,8 @@ Session::destroy_sources (list<std::shared_ptr<Source> > const& srcs)
 {
 	set<std::shared_ptr<Region> > relevant_regions;
 
-	for (list<std::shared_ptr<Source> >::const_iterator s = srcs.begin(); s != srcs.end(); ++s) {
-		RegionFactory::get_regions_using_source (*s, relevant_regions);
+	for (const std::shared_ptr<Source> & s : srcs) {
+		RegionFactory::get_regions_using_source (s, relevant_regions);
 	}
 
 	for (set<std::shared_ptr<Region> >::iterator r = relevant_regions.begin(); r != relevant_regions.end();) {
@@ -4783,17 +4783,16 @@ Session::destroy_sources (list<std::shared_ptr<Source> > const& srcs)
 		r = relevant_regions.erase (r);
 	}
 
-	for (list<std::shared_ptr<Source> >::const_iterator s = srcs.begin(); s != srcs.end(); ++s) {
-
+	for (const std::shared_ptr<Source> & s : srcs) {
 		{
 			Glib::Threads::Mutex::Lock ls (source_lock);
 			/* remove from the main source list */
-			sources.erase ((*s)->id());
+			sources.erase (s->id());
 		}
 
-		(*s)->mark_for_remove ();
-		(*s)->drop_references ();
-		SourceRemoved (std::weak_ptr<Source> (*s)); /* EMIT SIGNAL */
+		s->mark_for_remove ();
+		s->drop_references ();
+		SourceRemoved (std::weak_ptr<Source> (s)); /* EMIT SIGNAL */
 	}
 
 	return 0;

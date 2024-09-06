@@ -149,9 +149,8 @@ UndoTransaction::get_state () const
 	node->set_property ("tv-usec", (int64_t)_timestamp.tv_usec);
 	node->set_property ("name", _name);
 
-	list<Command*>::const_iterator it;
-	for (it = actions.begin (); it != actions.end (); it++) {
-		node->add_child_nocopy ((*it)->get_state ());
+	for (Command* const& it : actions) {
+		node->add_child_nocopy (it->get_state ());
 	}
 
 	return *node;

@@ -134,11 +134,11 @@ MidnamTest::yamaha_PSRS900_patchfile_test()
     modename = modes.back();
     CPPUNIT_ASSERT_EQUAL(string("GM2"), modename);
 
-    for (list<string>::const_iterator modename = modes.begin(); modename != modes.end(); ++modename) {
+    for (const string& modename : modes) {
         std::shared_ptr<CustomDeviceMode> mode =
-                masterDeviceNames->custom_device_mode_by_name(*modename);
+                masterDeviceNames->custom_device_mode_by_name(modename);
 
-        CPPUNIT_ASSERT_EQUAL(*modename, mode->name());
+        CPPUNIT_ASSERT_EQUAL(modename, mode->name());
 
         string ns = mode->name();
 

@@ -362,10 +362,10 @@ Canvas::window_to_canvas (Duple const & d) const
 		in_window.y = 0;
 	}
 
-	for (list<ScrollGroup*>::const_iterator s = scrollers.begin(); s != scrollers.end(); ++s) {
+	for (ScrollGroup* const& s : scrollers) {
 
-		if ((*s)->covers_window (in_window)) {
-			sg = *s;
+		if (s->covers_window (in_window)) {
+			sg = s;
 
 			/* XXX January 22nd 2015: leaving this in place for now
 			 * but I think it fixes a bug that really should be
@@ -408,8 +408,8 @@ Canvas::canvas_to_window (Duple const & d, bool rounded) const
 	ScrollGroup* sg = 0;
 	Duple wd;
 
-	for (std::list<Item*>::const_iterator i = root_children.begin(); i != root_children.end(); ++i) {
-		if (((sg = dynamic_cast<ScrollGroup*>(*i)) != 0) && sg->covers_canvas (d)) {
+	for (Item* const& i : root_children) {
+		if (((sg = dynamic_cast<ScrollGroup*>(i)) != 0) && sg->covers_canvas (d)) {
 			break;
 		}
 	}

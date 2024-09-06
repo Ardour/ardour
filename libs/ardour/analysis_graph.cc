@@ -131,7 +131,7 @@ AnalysisGraph::analyze_range (std::shared_ptr<Route> route, std::shared_ptr<Audi
 	}
 	const samplecnt_t n_samples = _max_chunksize - (_max_chunksize % n_audio);
 
-	for (std::list<TimelineRange>::const_iterator j = range.begin(); j != range.end(); ++j) {
+	for (const TimelineRange& j : range) {
 
 		interleaver.reset (new Interleaver<Sample> ());
 		interleaver->init (n_audio, _max_chunksize);
@@ -139,14 +139,14 @@ AnalysisGraph::analyze_range (std::shared_ptr<Route> route, std::shared_ptr<Audi
 		chunker.reset (new Chunker<Sample> (n_samples));
 		analyser.reset (new Analyser (
 					_session->nominal_sample_rate(),
-					n_audio, n_samples, (*j).length_samples()));
+					n_audio, n_samples, j.length_samples()));
 
 		interleaver->add_output(chunker);
 		chunker->add_output (analyser);
 
 		samplecnt_t x = 0;
-		const samplecnt_t rlen = j->length().samples();
-		const samplepos_t rpos = j->start().samples();
+		const samplecnt_t rlen = j.length().samples();
+		const samplepos_t rpos = j.start().samples();
 
 		while (x < rlen) {
 			samplecnt_t chunk = std::min (_max_chunksize, rlen - x);
@@ -175,7 +175,7 @@ AnalysisGraph::analyze_range (std::shared_ptr<Route> route, std::shared_ptr<Audi
 					_session->nominal_sample_rate(),
 					100, false),
 				Timecode::timecode_format_sampletime (
-					(*j).end().samples(),
+					j.end().samples(),
 					_session->nominal_sample_rate(),
 					100, false)
 				);
