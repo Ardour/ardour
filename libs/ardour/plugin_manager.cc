@@ -1801,13 +1801,14 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 void
 PluginManager::mac_vst_refresh (bool cache_only)
 {
+	std::set<std::string> scanned_paths;
 	if (_mac_vst_plugin_info) {
 		_mac_vst_plugin_info->clear ();
 	} else {
 		_mac_vst_plugin_info = new ARDOUR::PluginInfoList();
 	}
 
-	mac_vst_discover_from_path ("~/Library/Audio/Plug-Ins/VST:/Library/Audio/Plug-Ins/VST", cache_only);
+	mac_vst_discover_from_path ("~/Library/Audio/Plug-Ins/VST:/Library/Audio/Plug-Ins/VST", scanned_paths, cache_only);
 	if (!cache_only) {
 		/* ensure that VST path is flushed to disk */
 		Config->save_state();
@@ -1824,7 +1825,7 @@ static bool mac_vst_filter (const string& str)
 }
 
 int
-PluginManager::mac_vst_discover_from_path (string path, bool cache_only)
+PluginManager::mac_vst_discover_from_path (string path, std::set<std::string>& scanned_paths, bool cache_only)
 {
 	vector<string> plugin_objects;
 	vector<string>::iterator x;
@@ -1833,6 +1834,11 @@ PluginManager::mac_vst_discover_from_path (string path, bool cache_only)
 		info << _("Disabled MacVST scan (safe mode)") << endmsg;
 		return -1;
 	}
+
+	if (scanned_paths.find (path) != scanned_paths::end) {
+		return 0;
+	}
+	scanned_paths.insert (path);
 
 	Searchpath paths (path);
 	/* customized version of run_functor_for_paths() */
@@ -1860,7 +1866,7 @@ PluginManager::mac_vst_discover_from_path (string path, bool cache_only)
 				}
 
 				/* recurse */
-				mac_vst_discover_from_path (fullpath, cache_only);
+				mac_vst_discover_from_path (fullpath, scanned_paths, cache_only);
 			}
 		} catch (Glib::FileError& err) { }
 	}
