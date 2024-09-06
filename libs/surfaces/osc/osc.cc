@@ -3274,9 +3274,7 @@ OSC::send_group_list (lo_address addr)
 
 	lo_message_add_string (reply, X_("none"));
 
-	std::list<RouteGroup*> groups = session->route_groups ();
-	for (std::list<RouteGroup *>::iterator i = groups.begin(); i != groups.end(); ++i) {
-		RouteGroup *rg = *i;
+	for (RouteGroup * const& rg : session->route_groups ()) {
 		lo_message_add_string (reply, rg->name().c_str());
 	}
 	lo_send_message (addr, X_("/group/list"), reply);

@@ -112,8 +112,8 @@ void
 UndoTransaction::clear ()
 {
 	_clearing = true;
-	for (list<Command*>::iterator i = actions.begin (); i != actions.end (); ++i) {
-		delete *i;
+	for (Command*& i : actions) {
+		delete i;
 	}
 	actions.clear ();
 	_clearing = false;
@@ -122,8 +122,8 @@ UndoTransaction::clear ()
 void
 UndoTransaction::operator() ()
 {
-	for (list<Command*>::iterator i = actions.begin (); i != actions.end (); ++i) {
-		(*(*i)) ();
+	for (Command*& i : actions) {
+		(*i) ();
 	}
 }
 
@@ -230,8 +230,8 @@ UndoHistory::add (UndoTransaction* const ut)
 	UndoList.push_back (ut);
 	/* Adding a transacrion makes the redo list meaningless. */
 	_clearing = true;
-	for (std::list<UndoTransaction*>::iterator i = RedoList.begin (); i != RedoList.end (); ++i) {
-		delete *i;
+	for (UndoTransaction*& i : RedoList) {
+		delete i;
 	}
 	RedoList.clear ();
 	_clearing = false;
@@ -309,8 +309,8 @@ void
 UndoHistory::clear_redo ()
 {
 	_clearing = true;
-	for (std::list<UndoTransaction*>::iterator i = RedoList.begin (); i != RedoList.end (); ++i) {
-		delete *i;
+	for (UndoTransaction*& i : RedoList) {
+		delete i;
 	}
 	RedoList.clear ();
 	_clearing = false;
@@ -322,8 +322,8 @@ void
 UndoHistory::clear_undo ()
 {
 	_clearing = true;
-	for (std::list<UndoTransaction*>::iterator i = UndoList.begin (); i != UndoList.end (); ++i) {
-		delete *i;
+	for (UndoTransaction*& i : UndoList) {
+		delete i;
 	}
 	UndoList.clear ();
 	_clearing = false;
@@ -351,8 +351,8 @@ UndoHistory::get_state (int32_t depth)
 	} else if (depth < 0) {
 		/* everything */
 
-		for (list<UndoTransaction*>::iterator it = UndoList.begin (); it != UndoList.end (); ++it) {
-			node->add_child_nocopy ((*it)->get_state ());
+		for (UndoTransaction*& it : UndoList) {
+			node->add_child_nocopy (it->get_state ());
 		}
 
 	} else {
@@ -364,8 +364,8 @@ UndoHistory::get_state (int32_t depth)
 			in_order.push_front (*it);
 		}
 
-		for (list<UndoTransaction*>::iterator it = in_order.begin (); it != in_order.end (); it++) {
-			node->add_child_nocopy ((*it)->get_state ());
+		for (UndoTransaction*& it : in_order) {
+			node->add_child_nocopy (it->get_state ());
 		}
 	}
 

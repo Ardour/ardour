@@ -307,8 +307,8 @@ AudioRegionImporter::prepare_region ()
 	prepare_sources();
 
 	// Create source list
-	for (std::list<string>::iterator it = filenames.begin(); it != filenames.end(); ++it) {
-		source_list.push_back (handler.get_source (*it));
+	for (string& it : filenames) {
+		source_list.push_back (handler.get_source (it));
 	}
 
 	// create region and update XML
@@ -344,9 +344,9 @@ AudioRegionImporter::prepare_sources ()
 	status.import_markers = false;
 
 	// Get sources that still need to be imported
-	for (std::list<string>::iterator it = filenames.begin(); it != filenames.end(); ++it) {
-		if (!handler.check_source (*it)) {
-			status.paths.push_back (*it);
+	for (string& it : filenames) {
+		if (!handler.check_source (it)) {
+			status.paths.push_back (it);
 			status.total++;
 		}
 	}
@@ -383,8 +383,8 @@ AudioRegionImporter::add_sources_to_session ()
 		return;
 	}
 
-	for (std::list<string>::iterator it = filenames.begin(); it != filenames.end(); ++it) {
-		session.add_source (handler.get_source (*it));
+	for (string& it : filenames) {
+		session.add_source (handler.get_source (it));
 	}
 }
 

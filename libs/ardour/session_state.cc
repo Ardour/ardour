@@ -3319,11 +3319,9 @@ Session::reorder_route_groups (list<RouteGroup*> groups)
 RouteGroup *
 Session::route_group_by_name (string name)
 {
-	list<RouteGroup *>::iterator i;
-
-	for (i = _route_groups.begin(); i != _route_groups.end(); ++i) {
-		if ((*i)->name() == name) {
-			return* i;
+	for (RouteGroup*& i : _route_groups) {
+		if (i->name() == name) {
+			return i;
 		}
 	}
 	return 0;

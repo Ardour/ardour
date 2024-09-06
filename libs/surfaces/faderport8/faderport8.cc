@@ -1228,11 +1228,11 @@ FaderPort8::assign_processor_ctrls ()
 	std::vector <ProcessorCtrl*> toggle_params;
 	std::vector <ProcessorCtrl*> slider_params;
 
-	for (std::list<ProcessorCtrl>::iterator i = _proc_params.begin(); i != _proc_params.end(); ++i) {
-		if ((*i).ac->toggled()) {
-			toggle_params.push_back (&(*i));
+	for (ProcessorCtrl& i : _proc_params) {
+		if (i.ac->toggled()) {
+			toggle_params.push_back (&i);
 		} else {
-			slider_params.push_back (&(*i));
+			slider_params.push_back (&i);
 		}
 	}
 

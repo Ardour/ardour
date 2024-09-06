@@ -746,8 +746,8 @@ Session::destroy ()
 	delete _all_route_group;
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
-	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
-		delete *i;
+	for (RouteGroup *& i : _route_groups) {
+		delete i;
 	}
 
 	if (click_data != default_click) {

@@ -673,9 +673,9 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 	std::string str;
 	// midi map has to be loaded first so learned binding can go on top
 	if (node.get_property ("binding", str)) {
-		for (list<MapInfo>::iterator x = map_info.begin(); x != map_info.end(); ++x) {
-			if (str == (*x).name) {
-				load_bindings ((*x).path);
+		for (MapInfo& x : map_info) {
+			if (str == x.name) {
+				load_bindings (x.path);
 				break;
 			}
 		}

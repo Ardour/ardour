@@ -51,8 +51,8 @@ PannerManager::PannerManager ()
 
 PannerManager::~PannerManager ()
 {
-	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		delete *p;
+	for (PannerInfo*& p : panner_info) {
+		delete p;
 	}
 }
 
@@ -176,30 +176,30 @@ PannerManager::select_panner (ChanCount in, ChanCount out, std::string const uri
 	uint32_t priority = 0;
 
 	/* look for user-preference -- check if channels match */
-	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		PanPluginDescriptor const& d ((*p)->descriptor);
+	for (PannerInfo*& p : panner_info) {
+		PanPluginDescriptor const& d (p->descriptor);
 		if (d.panner_uri != uri) continue;
 		if (d.in != nin && d.in != -1) continue;
 		if (d.out != nout && d.out != -1) continue;
-		return *p;
+		return p;
 	}
 
 	/* look for exact match first */
 
-	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		PanPluginDescriptor const& d ((*p)->descriptor);
+	for (PannerInfo*& p : panner_info) {
+		PanPluginDescriptor const& d (p->descriptor);
 
 		/* backward compat */
 		if (Stateful::loading_state_version < 6000 && d.panner_uri == "http://ardour.org/plugin/panner_2in2out") {
 			if (d.in == nin && d.out == nout) {
 				priority = 9999;
-				rv = *p;
+				rv = p;
 			}
 		}
 
 		if (d.in == nin && d.out == nout && d.priority > priority) {
 			priority = d.priority;
-			rv = *p;
+			rv = p;
 		}
 	}
 	if (rv) { return rv; }
@@ -215,24 +215,24 @@ PannerManager::select_panner (ChanCount in, ChanCount out, std::string const uri
 	 * in = -1 ; out = -1 // VBAP
 	 */
 
-	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		PanPluginDescriptor const& d ((*p)->descriptor);
+	for (PannerInfo*& p : panner_info) {
+		PanPluginDescriptor const& d (p->descriptor);
 
 		if (d.in == nin && d.out == -1 && d.priority > priority) {
 			priority = d.priority;
-			rv = *p;
+			rv = p;
 		}
 	}
 	if (rv) { return rv; }
 
 	/* no exact match, look for good fit on outputs and variable on inputs */
 	priority = 0;
-	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		PanPluginDescriptor const& d ((*p)->descriptor);
+	for (PannerInfo*& p : panner_info) {
+		PanPluginDescriptor const& d (p->descriptor);
 
 		if (d.in == -1 && d.out == nout && d.priority > priority) {
 			priority = d.priority;
-			rv = *p;
+			rv = p;
 		}
 	}
 	if (rv) { return rv; }
@@ -240,12 +240,12 @@ PannerManager::select_panner (ChanCount in, ChanCount out, std::string const uri
 
 	/* no exact match, look for variable fit on inputs and outputs */
 	priority = 0;
-	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		PanPluginDescriptor const& d ((*p)->descriptor);
+	for (PannerInfo*& p : panner_info) {
+		PanPluginDescriptor const& d (p->descriptor);
 
 		if (d.in == -1 && d.out == -1 && d.priority > priority) {
 			priority = d.priority;
-			rv = *p;
+			rv = p;
 		}
 	}
 	if (rv) { return rv; }

@@ -100,8 +100,8 @@ Canvas::scroll_to (Coord x, Coord y)
 	   becomes O(1) rather than O(N).
 	*/
 
-	for (list<ScrollGroup*>::iterator i = scrollers.begin(); i != scrollers.end(); ++i) {
-		(*i)->scroll_to (Duple (x, y));
+	for (ScrollGroup*& i : scrollers) {
+		i->scroll_to (Duple (x, y));
 	}
 
 	pick_current_item (0); // no current mouse position

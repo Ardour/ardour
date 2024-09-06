@@ -1060,9 +1060,9 @@ Bindings::get_all_actions (std::vector<std::string>& paths,
 Bindings*
 Bindings::get_bindings (string const& name)
 {
-	for (list<Bindings*>::iterator b = bindings.begin(); b != bindings.end(); b++) {
-		if ((*b)->name() == name) {
-			return *b;
+	for (Bindings*& b : bindings) {
+		if (b->name() == name) {
+			return b;
 		}
 	}
 
@@ -1072,8 +1072,8 @@ Bindings::get_bindings (string const& name)
 void
 Bindings::associate_all ()
 {
-	for (list<Bindings*>::iterator b = bindings.begin(); b != bindings.end(); b++) {
-		(*b)->associate ();
+	for (Bindings*& b : bindings) {
+		b->associate ();
 	}
 }
 

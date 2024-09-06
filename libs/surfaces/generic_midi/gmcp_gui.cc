@@ -141,8 +141,8 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 {
 	vector<string> popdowns;
 
-	for (list<GenericMidiControlProtocol::MapInfo>::iterator x = cp.map_info.begin(); x != cp.map_info.end(); ++x) {
-		popdowns.push_back (x->name);
+	for (GenericMidiControlProtocol::MapInfo& x : cp.map_info) {
+		popdowns.push_back (x.name);
 	}
 
 	sort (popdowns.begin(), popdowns.end(), less<string>());
@@ -272,9 +272,9 @@ GMCPGUI::binding_changed ()
 	} else if (str == _("Drop Bindings")) {
 		cp.drop_bindings ();
 	} else {
-		for (list<GenericMidiControlProtocol::MapInfo>::iterator x = cp.map_info.begin(); x != cp.map_info.end(); ++x) {
-			if (str == x->name) {
-				cp.load_bindings (x->path);
+		for (GenericMidiControlProtocol::MapInfo& x : cp.map_info) {
+			if (str == x.name) {
+				cp.load_bindings (x.path);
 				motorised_button.set_active (cp.motorised ());
 				threshold_adjustment.set_value (cp.threshold ());
 				break;

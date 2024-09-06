@@ -46,10 +46,8 @@ template<class K, class T> /*LIBPBD_API*/ void map_delete (std::map<K, T *> *m)
 #if defined(_CPP_LIST) || defined(_GLIBCXX_LIST) || defined(__SGI_STL_LIST)
 template<class T> /*LIBPBD_API*/ void list_delete (std::list<T *> *l)
 {
-	typename std::list<T *>::iterator i;
-
-	for (i = l->begin(); i != l->end(); i++) {
-		delete (*i);
+	for (T*& i : *l) {
+		delete i;
 	}
 
 	l->clear ();

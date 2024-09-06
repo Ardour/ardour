@@ -1057,9 +1057,8 @@ ExportProfileManager::build_filenames (std::list<std::string>& result, ExportFil
                                        TimespanListPtr timespans, ExportChannelConfigPtr channel_config,
                                        ExportFormatSpecPtr format)
 {
-	for (std::list<ExportTimespanPtr>::iterator timespan_it = timespans->begin ();
-	     timespan_it != timespans->end (); ++timespan_it) {
-		filename->set_timespan (*timespan_it);
+	for (ExportTimespanPtr& timespan_it : *timespans) {
+		filename->set_timespan (timespan_it);
 		filename->set_channel_config (channel_config);
 
 		if (channel_config->get_split ()) {

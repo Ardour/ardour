@@ -115,8 +115,8 @@ DnDTreeViewBase::on_drag_end (Glib::RefPtr<Gdk::DragContext> const & context) {
 void
 DnDTreeViewBase::add_drop_targets (list<TargetEntry>& targets)
 {
-	for (list<TargetEntry>::iterator i = targets.begin(); i != targets.end(); ++i) {
-		draggable.push_back (*i);
+	for (TargetEntry& i : targets) {
+		draggable.push_back (i);
 	}
 
 	enable_model_drag_source (draggable);

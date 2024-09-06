@@ -122,9 +122,8 @@ public:
 	{
 		std::list<T*> sorted_children;
 
-		std::list<Gtk::Widget*> widget_children = _internal_vbox.get_children ();
-		for (std::list<Gtk::Widget*>::iterator i = widget_children.begin(); i != widget_children.end(); ++i) {
-			T* c = child_from_widget (*i);
+		for (Gtk::Widget* const& i : _internal_vbox.get_children ()) {
+			T* c = child_from_widget (i);
 
 			if (c) {
 				sorted_children.push_back (c);
@@ -177,9 +176,9 @@ public:
 	{
 		_selection.clear ();
 
-		for (typename std::list<T*>::iterator i = _children.begin(); i != _children.end(); ++i) {
-			_internal_vbox.remove ((*i)->widget());
-			delete *i;
+		for (T*& i : _children) {
+			_internal_vbox.remove (i->widget());
+			delete i;
 		}
 
 		_children.clear ();
@@ -189,8 +188,8 @@ public:
 	void select_all ()
 	{
 		clear_selection ();
-		for (typename std::list<T*>::iterator i = _children.begin(); i != _children.end(); ++i) {
-			add_to_selection (*i);
+		for (T*& i : _children) {
+			add_to_selection (i);
 		}
 
 		SelectionChanged (); /* EMIT SIGNAL */
@@ -633,8 +632,8 @@ private:
 	{
 		std::list<T*> old_selection = _selection;
 		_selection.clear ();
-		for (typename std::list<T*>::iterator i = old_selection.begin(); i != old_selection.end(); ++i) {
-			setup_child_state (*i);
+		for (T*& i : old_selection) {
+			setup_child_state (i);
 		}
 	}
 

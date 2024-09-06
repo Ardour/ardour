@@ -190,8 +190,8 @@ Playlist::Playlist (std::shared_ptr<const Playlist> other, string namestr, bool 
 
 	in_set_state++;
 
-	for (list<std::shared_ptr<Region> >::iterator x = tmp.begin(); x != tmp.end(); ++x) {
-		add_region_internal ((*x), (*x)->position(), thawlist);
+	for (std::shared_ptr<Region> & x : tmp) {
+		add_region_internal (x, x->position(), thawlist);
 	}
 	thawlist.release ();
 
@@ -1438,9 +1438,9 @@ Playlist::duplicate_ranges (std::list<TimelineRange>& ranges, float times)
 	int count  = 1;
 	int itimes = (int)floor (times);
 	while (itimes--) {
-		for (list<TimelineRange>::iterator i = ranges.begin (); i != ranges.end (); ++i) {
-			std::shared_ptr<Playlist> pl = copy ((*i).start(), (*i).length ());
-			paste (pl, (*i).start() + (offset.scale (count)), 1.0f);
+		for (TimelineRange& i : ranges) {
+			std::shared_ptr<Playlist> pl = copy (i.start(), i.length ());
+			paste (pl, i.start() + (offset.scale (count)), 1.0f);
 		}
 		++count;
 	}

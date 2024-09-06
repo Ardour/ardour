@@ -86,16 +86,15 @@ public:
 
 	static void peek_a_boo (std::ostream& stream) {
 #ifdef HAVE_EXECINFO
-		typename std::list<thing_with_backtrace<T>*>::iterator x;
-		for (x = all.begin(); x != all.end(); ++x) {
+		for (thing_with_backtrace<T>*& x : all) {
 			char **strings;
 			size_t i;
 
-			strings = backtrace_symbols ((*x)->allocation_backtrace, (*x)->allocation_backtrace_size);
+			strings = backtrace_symbols (x->allocation_backtrace, x->allocation_backtrace_size);
 
 			if (strings) {
-				stream << "--- ALLOCATED SHARED_PTR @ " << (*x) << std::endl;
-				for (i = 0; i < (*x)->allocation_backtrace_size && i < 50U; i++) {
+				stream << "--- ALLOCATED SHARED_PTR @ " << x << std::endl;
+				for (i = 0; i < x->allocation_backtrace_size && i < 50U; i++) {
 					stream << strings[i] << std::endl;
 				}
 				free (strings);

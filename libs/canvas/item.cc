@@ -309,9 +309,9 @@ Item::set_position (Duple p)
 void
 Item::layout()
 {
-	for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
-		if ((*i)->resize_queued()) {
-			(*i)->layout ();
+	for (Item*& i : _items) {
+		if (i->resize_queued()) {
+			i->layout ();
 		}
 	}
 
@@ -370,13 +370,13 @@ Item::hide ()
 		   which is now hidden. So propagate away.
 		*/
 
-		for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
+		for (Item*& i : _items) {
 
-			if ((*i)->self_visible()) {
+			if (i->self_visible()) {
 				/* item was visible but is now hidden because
 				   we (its parent) are hidden
 				*/
-				(*i)->propagate_show_hide ();
+				i->propagate_show_hide ();
 			}
 		}
 
@@ -392,12 +392,12 @@ Item::show ()
 
 		_visible = true;
 
-		for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
-			if ((*i)->self_visible()) {
+		for (Item*& i : _items) {
+			if (i->self_visible()) {
 				/* item used to be hidden by us (its parent),
 				   but is now visible
 				*/
-				(*i)->propagate_show_hide ();
+				i->propagate_show_hide ();
 			}
 		}
 
