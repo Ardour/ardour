@@ -57,9 +57,7 @@ template<class T> /*LIBPBD_API*/ void list_delete (std::list<T *> *l)
 #if defined(_CPP_SLIST) || defined(_GLIBCXX_SLIST) || defined(__SGI_STL_SLIST)
 template<class T> /*LIBPBD_API*/ void slist_delete (std::slist<T *> *l)
 {
-	typename std::slist<T *>::iterator i;
-
-	for (i = l->begin(); i != l->end(); i++) {
+	for (T*& i : *l) {
 		delete (*i);
 	}
 
