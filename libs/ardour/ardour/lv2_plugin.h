@@ -255,7 +255,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		PORT_AUTOCTRL = 1 << 9,  ///< Event port supports auto:AutomationControl
 		PORT_CTRLED   = 1 << 10, ///< Port prop auto:AutomationControlled (can be self controlled)
 		PORT_CTRLER   = 1 << 11, ///< Port prop auto:AutomationController (can be self set)
-		PORT_NOAUTO   = 1 << 12  ///< Port don't allow to automate
+		PORT_NOAUTO   = 1 << 12, ///< Port don't allow to automate
+		PORT_OTHOPT   = 1 << 13  ///< Port of unknown data type with prop connectionOptional
 	} PortFlag;
 
 	typedef unsigned PortFlags;
