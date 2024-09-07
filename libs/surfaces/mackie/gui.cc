@@ -134,10 +134,13 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	row++;
 
 	vector<string> surfaces;
+	static_cast<void>(std::transform(
+		DeviceInfo::device_info.cbegin(),
+		DeviceInfo::device_info.cend(),
+		surfaces.begin(),
+		[] (const std::pair<const std::string, DeviceInfo>& i) { return i.first; }
+	));
 
-	for (std::map<std::string,DeviceInfo>::iterator i = DeviceInfo::device_info.begin(); i != DeviceInfo::device_info.end(); ++i) {
-		surfaces.push_back (i->first);
-	}
 	Gtkmm2ext::set_popdown_strings (_surface_combo, surfaces);
 	_surface_combo.signal_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::surface_combo_changed));
 
@@ -222,11 +225,16 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	row++;
 
 	vector<string> profiles;
+	static_cast<void>(std::transform(
+		DeviceProfile::device_profiles.cbegin(),
+		DeviceProfile::device_profiles.cend(),
+		profiles.begin(),
+		[] (const std::pair<const std::string, DeviceProfile>& i) {
+			 cerr << "add discovered profile " << i.first << endl;
+			 return i.first;
+		}
+	));
 
-	for (std::map<std::string,DeviceProfile>::iterator i = DeviceProfile::device_profiles.begin(); i != DeviceProfile::device_profiles.end(); ++i) {
-		cerr << "add discovered profile " << i->first << endl;
-		profiles.push_back (i->first);
-	}
 	Gtkmm2ext::set_popdown_strings (_profile_combo, profiles);
 	cerr << "set active profile from " << p.device_profile().name() << endl;
 	_profile_combo.set_active_text (p.device_profile().name());

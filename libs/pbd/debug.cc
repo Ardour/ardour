@@ -165,10 +165,9 @@ PBD::list_debug_options ()
 	cout << '\t' << X_("all") << endl;
 
 	vector<string> options;
-
-	for (map<const char*,DebugBits>::iterator i = _debug_bit_map().begin(); i != _debug_bit_map().end(); ++i) {
-		options.push_back (i->first);
-        }
+	static_cast<void>(std::transform(_debug_bit_map().cbegin(), _debug_bit_map().cend(), options.begin(), [] (const std::pair<const char*, DebugBits>& i) {
+		return i.first;
+	}));
 
 	sort (options.begin(), options.end());
 

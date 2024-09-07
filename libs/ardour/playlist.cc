@@ -858,17 +858,9 @@ Playlist::remove_region_internal (std::shared_ptr<Region> region, ThawList& thaw
 	}
 
 #if 0
-	for (set<std::shared_ptr<Region> >::iterator x = all_regions.begin(); x != all_regions.end(); ++x) {
-		if ((*x) == region) {
-			all_regions.erase (x);
-			break;
-		}
-	}
+	all_regions.erase (region);
 #else /* sync_all_regions_with_regions */
-	all_regions.clear ();
-	for (auto const& r: regions) {
-		all_regions.insert (r);
-	}
+	all_regions = std::set (regions.begin (), regions.end ());
 #endif
 
 	return -1;
@@ -3461,29 +3453,14 @@ Playlist::share_with (const PBD::ID& id)
 void
 Playlist::unshare_with (const PBD::ID& id)
 {
-	list<PBD::ID>::iterator it = _shared_with_ids.begin ();
-	while (it != _shared_with_ids.end ()) {
-		if (*it == id) {
-			_shared_with_ids.erase (it);
-			break;
-		}
-		++it;
-	}
+	list<PBD::ID>::iterator it = std::find (_shared_with_ids.begin (), _shared_with_ids.end (), id);
+	if (it != _shared_with_ids.end ()) _shared_with_ids.erase (it);
 }
 
 bool
 Playlist::shared_with (const PBD::ID& id) const
 {
-	bool                          shared = false;
-	list<PBD::ID>::const_iterator it     = _shared_with_ids.begin ();
-	while (it != _shared_with_ids.end () && !shared) {
-		if (*it == id) {
-			shared = true;
-		}
-		++it;
-	}
-
-	return shared;
+	return std::find(_shared_with_ids.cbegin(), _shared_with_ids.cend(), id) != _shared_with_ids.cend();
 }
 
 void

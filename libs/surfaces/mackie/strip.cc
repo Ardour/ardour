@@ -1196,8 +1196,6 @@ Strip::return_to_vpot_mode_display ()
 void
 Strip::next_pot_mode ()
 {
-	vector<AutomationType>::iterator i;
-
 	if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 		/* do not change vpot mode while in flipped mode */
 		DEBUG_TRACE (DEBUG::MackieControl, "not stepping pot mode - in flip mode\n");
@@ -1222,25 +1220,23 @@ Strip::next_pot_mode ()
 		return;
 	}
 
-	for (i = possible_pot_parameters.begin(); i != possible_pot_parameters.end(); ++i) {
-		if ((*i) == ac->parameter().type()) {
-			break;
-		}
-	}
+	auto pot_param = std::find_if(
+		possible_pot_parameters.begin(),
+		possible_pot_parameters.end(),
+		[&] (auto& i) { return i == ac->parameter().type(); }
+	);
 
 	/* move to the next mode in the list, or back to the start (which will
 	   also happen if the current mode is not in the current pot mode list)
 	*/
 
-	if (i != possible_pot_parameters.end()) {
-		++i;
+	if (pot_param != possible_pot_parameters.end()) {
+		++pot_param;
+	} else {
+		pot_param = possible_pot_parameters.begin();
 	}
 
-	if (i == possible_pot_parameters.end()) {
-		i = possible_pot_parameters.begin();
-	}
-
-	set_vpot_parameter (*i);
+	set_vpot_parameter (*pot_param);
 }
 
 void

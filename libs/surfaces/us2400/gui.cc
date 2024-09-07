@@ -126,11 +126,16 @@ US2400ProtocolGUI::US2400ProtocolGUI (US2400Protocol& p)
 	/* back to the boilerplate */
 
 	vector<string> profiles;
+	static_cast<void>(std::transform(
+		DeviceProfile::device_profiles.cbegin(),
+		DeviceProfile::device_profiles.cend(),
+		profiles.begin(),
+		[] (const std::pair<const std::string, DeviceProfile>& i) {
+			cerr << "add discovered profile " << i.first << endl;
+			return i.first;
+		}
+	));
 
-	for (std::map<std::string,DeviceProfile>::iterator i = DeviceProfile::device_profiles.begin(); i != DeviceProfile::device_profiles.end(); ++i) {
-		cerr << "add discovered profile " << i->first << endl;
-		profiles.push_back (i->first);
-	}
 	Gtkmm2ext::set_popdown_strings (_profile_combo, profiles);
 	cerr << "set active profile from " << p.device_profile().name() << endl;
 	_profile_combo.set_active_text (p.device_profile().name());

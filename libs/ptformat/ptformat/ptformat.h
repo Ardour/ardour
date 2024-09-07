@@ -183,27 +183,13 @@ public:
 	}
 
 	static bool regionexistsin(std::vector<region_t> const& reg, uint16_t index) {
-		std::vector<region_t>::const_iterator begin = reg.begin();
-		std::vector<region_t>::const_iterator finish = reg.end();
-
 		region_t r (index);
-
-		if (std::find(begin, finish, r) != finish) {
-			return true;
-		}
-		return false;
+		return std::find(reg.begin(), reg.end(), r) != reg.end();
 	}
 
 	static bool wavexistsin (std::vector<wav_t> const& wv, uint16_t index) {
-		std::vector<wav_t>::const_iterator begin = wv.begin();
-		std::vector<wav_t>::const_iterator finish = wv.end();
-
 		wav_t w (index);
-
-		if (std::find(begin, finish, w) != finish) {
-			return true;
-		}
-		return false;
+		return std::find(wv.begin(), wv.end(), w) != wv.end();
 	}
 
 	uint8_t version () const { return _version; }
