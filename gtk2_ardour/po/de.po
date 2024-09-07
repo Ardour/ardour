@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-07 10:57+0200\n"
-"PO-Revision-Date: 2024-09-07 11:47+0200\n"
+"POT-Creation-Date: 2024-09-07 17:33+0200\n"
+"PO-Revision-Date: 2024-09-07 17:43+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -3665,8 +3665,8 @@ msgid "Invert"
 msgstr "Invert"
 
 #: audio_region_editor.cc:63
-msgid "Pre-Fade Fx"
-msgstr "Pre-Fade FX"
+msgid "Fade before Fx"
+msgstr "Fade vor FX"
 
 #: audio_region_editor.cc:64
 msgid "Show on Touch"
@@ -3706,13 +3706,13 @@ msgstr "Invertiere die Signalpolarität (180° Phasendrehung)"
 
 #: audio_region_editor.cc:112
 msgid ""
-"Apply region effects before the region fades.\n"
-"This is useful if the effect(s) have tail, that would otherwise be faded out "
-"by the region fade (e.g. reverb, delay)"
+"Apply region effects after the region fade.\n"
+"This is useful if the effect(s) have tail, which would otherwise be faded "
+"out by the region fade (e.g. reverb, delay)"
 msgstr ""
-"Wende Regioneneffekte vor den Regionen-Fades an.\n"
-"Dies ist nützlich wenn die Effekte eine \"Fahne\" haben, die andernfalls auch "
-"ausgeblendet würde."
+"Wende Regioneneffekte nach dem Regionen-Fade an.\n"
+"Dies ist nützlich, wenn Effekte ausklingen sollen, was andernfalls"
+"ebenfalls ausgeblendet werden würde (z.B. Hall, Delay)."
 
 #: audio_region_editor.cc:113
 msgid ""
@@ -3720,8 +3720,8 @@ msgid ""
 "region-automation line is shown the editor, and edit mode is set to 'draw'."
 msgstr ""
 "Wenn ein Kontrollelement im UI des Regionen-X Plugins berührt wird, wird die "
-"entsprechende Regionen-Automationslinie im Editor angezeigt und der Editiermod"
-"us auf \"Zeichnen\" gesetzt."
+"entsprechende Regionen-Automationslinie im Editor angezeigt und der "
+"Editiermodus auf \"Zeichnen\" gesetzt."
 
 #: audio_region_editor.cc:127
 msgid "Calculating..."
@@ -7488,8 +7488,8 @@ msgid ""
 "Cut/Copy Section does not yet correctly include tempo/meter changes\n"
 "Do you still want to proceed?"
 msgstr ""
-"Das Ausschneiden/Kopieren eines Abschnitts beinhaltet (noch) keine Tempo/Takta"
-"rt-Änderungen\n"
+"Das Ausschneiden/Kopieren eines Abschnitts beinhaltet (noch) keine Tempo/"
+"Taktart-Änderungen\n"
 "Wollen Sie trotzdem fortfahren?"
 
 #: editor_ops.cc:2787
@@ -16286,8 +16286,8 @@ msgstr "Varispeed"
 #: rc_option_editor.cc:3840
 msgid "Marker Locate (MMC ffwd/rewd jumps to next/prior marker)"
 msgstr ""
-"Springe zu Marker (MMC Schnell-Vor/Rücklauf springt zu nächstem/vorigen Marker"
-")"
+"Springe zu Marker (MMC Schnell-Vor/Rücklauf springt zu nächstem/vorigen "
+"Marker)"
 
 #: rc_option_editor.cc:3846
 msgid "Show Transport Masters Window"
@@ -17345,9 +17345,8 @@ msgid ""
 "session-reload. Already automated parameters are retained."
 msgstr ""
 "Manche Plugins präsentieren eine unverhältnismäßig große Zahl von "
-"Kontrolleingängen. Diese Option begrenzt die als automatisierbar "
-"angezeigten Parameter, ohne die Gesamtanzahl der Kontrollelemente zu "
-"beschränken.\n"
+"Kontrolleingängen. Diese Option begrenzt die als automatisierbar angezeigten "
+"Parameter, ohne die Gesamtanzahl der Kontrollelemente zu beschränken.\n"
 "\n"
 "Dies verringert Verzögerungen im GUI und kürzt überlange Drop-down Listen "
 "bei Plugins mit sehr vielen Kontrollports.\n"
@@ -22044,5 +22043,4 @@ msgstr ""
 #: export_video_dialog.cc:815
 msgid "Input Video File"
 msgstr "Quell-Videodatei"
-
 
