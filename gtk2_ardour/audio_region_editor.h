@@ -74,8 +74,8 @@ private:
 	void show_on_touch_changed ();
 	void show_touched_automation (std::weak_ptr<PBD::Controllable>);
 
-	void pre_fade_fx_changed ();
-	void pre_fade_fx_toggle_changed ();
+	void fade_before_fx_changed ();
+	void fade_before_fx_toggle_changed ();
 
 	AudioRegionView*                     _arv;
 	std::shared_ptr<ARDOUR::AudioRegion> _audio_region;
@@ -87,7 +87,7 @@ private:
 	Gtk::Label        _polarity_label;
 	Gtk::CheckButton  _polarity_toggle;
 
-	Gtk::CheckButton  _pre_fade_fx_toggle;
+	Gtk::CheckButton  _fade_before_fx_toggle;
 
 	Gtk::Label _peak_amplitude_label;
 	Gtk::Entry _peak_amplitude;

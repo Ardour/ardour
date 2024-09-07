@@ -60,7 +60,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	, _audio_region (arv->audio_region ())
 	, gain_adjustment(accurate_coefficient_to_dB(fabsf (_audio_region->scale_amplitude())), -40.0, +40.0, 0.1, 1.0, 0)
 	, _polarity_toggle (_("Invert"))
-	, _pre_fade_fx_toggle (_("Pre-Fade Fx"))
+	, _fade_before_fx_toggle (_("Fade before Fx"))
 	, _show_on_touch (_("Show on Touch"))
 	, _peak_channel (false)
 {
@@ -95,7 +95,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	_polarity_label.set_alignment (1, 0.5);
 	_table.attach (_polarity_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	_table.attach (_polarity_toggle, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (_pre_fade_fx_toggle, 2, 3, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (_fade_before_fx_toggle, 2, 3, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	++_table_row;
 
 #ifndef NDEBUG  // disable region Fx for now
@@ -109,16 +109,16 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 #endif
 
 	UI::instance()->set_tip (_polarity_toggle, _("Invert the signal polarity (180deg phase shift)"));
-	UI::instance()->set_tip (_pre_fade_fx_toggle, _("Apply region effects before the region fades.\nThis is useful if the effect(s) have tail, that would otherwise be faded out by the region fade (e.g. reverb, delay)"));
+	UI::instance()->set_tip (_fade_before_fx_toggle, _("Apply region effects after the region fade.\nThis is useful if the effect(s) have tail, which would otherwise be faded out by the region fade (e.g. reverb, delay)"));
 	UI::instance()->set_tip (_show_on_touch, _("When touching a control in a region effect plugin UI, the corresponding region-automation line is shown the editor, and edit mode is set to 'draw'."));
 
 	gain_changed ();
-	pre_fade_fx_changed ();
+	fade_before_fx_changed ();
 	refill_region_line ();
 
 	gain_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
 	_polarity_toggle.signal_toggled().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
-	_pre_fade_fx_toggle.signal_toggled().connect (sigc::mem_fun (*this, &AudioRegionEditor::pre_fade_fx_toggle_changed));
+	_fade_before_fx_toggle.signal_toggled().connect (sigc::mem_fun (*this, &AudioRegionEditor::fade_before_fx_toggle_changed));
 	_show_on_touch.signal_toggled().connect (sigc::mem_fun (*this, &AudioRegionEditor::show_on_touch_changed));
 
 	arv->region_line_changed.connect ((sigc::mem_fun (*this, &AudioRegionEditor::refill_region_line)));
@@ -153,7 +153,7 @@ AudioRegionEditor::region_changed (const PBD::PropertyChange& what_changed)
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::fade_before_fx)) {
-		pre_fade_fx_changed ();
+		fade_before_fx_changed ();
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::start) || what_changed.contains (ARDOUR::Properties::length)) {
@@ -194,15 +194,15 @@ AudioRegionEditor::gain_adjustment_changed ()
 }
 
 void
-AudioRegionEditor::pre_fade_fx_changed ()
+AudioRegionEditor::fade_before_fx_changed ()
 {
-	_pre_fade_fx_toggle.set_active (_audio_region->fade_before_fx ());
+	_fade_before_fx_toggle.set_active (_audio_region->fade_before_fx ());
 }
 
 void
-AudioRegionEditor::pre_fade_fx_toggle_changed ()
+AudioRegionEditor::fade_before_fx_toggle_changed ()
 {
-	_audio_region->set_fade_before_fx (_pre_fade_fx_toggle.get_active ());
+	_audio_region->set_fade_before_fx (_fade_before_fx_toggle.get_active ());
 }
 
 void
