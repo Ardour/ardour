@@ -841,7 +841,9 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 			lilv_nodes_free(min_size_v);
 			lilv_nodes_free(buffer_types);
 			lilv_nodes_free(atom_supports);
-		} else if (!lilv_port_has_property(_impl->plugin, port, _world.lv2_connectionOptional)) {
+		} else if (lilv_port_has_property(_impl->plugin, port, _world.lv2_connectionOptional)) {
+			flags |= PORT_OTHOPT; // unknown data type but connection optional
+		} else {
 			error << string_compose(
 				"LV2: \"%1\" port %2 has no known data type",
 				lilv_node_as_string(_impl->name), i) << endmsg;
@@ -2997,6 +2999,8 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			}
 
 			buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
+		} else if(flags & PORT_OTHOPT) {
+			// Explicitely connect optional ports that we can not handle to NULL
 		} else {
 			continue;  // Control port, leave buffer alone
 		}
@@ -3456,6 +3460,8 @@ LV2Plugin::latency_compute_run()
 			ev_buffers.push_back (lv2_evbuf_new (buf_size, _uri_map.urids.atom_Chunk, _uri_map.urids.atom_Sequence));
 			void* buf = lv2_evbuf_get_buffer (ev_buffers.back ());
 			lilv_instance_connect_port(_impl->instance, port_index, buf);
+		} else if (flags & PORT_OTHOPT) {
+			lilv_instance_connect_port(_impl->instance, port_index, NULL);
 		}
 	}
 
@@ -3977,7 +3983,7 @@ LV2PluginInfo::discover (boost::function <void (std::string const&, PluginScanLo
 					count_ctrl_out++;
 				}
 			}
-			else if (!lilv_port_is_a(p, port, world.lv2_AudioPort) && !lilv_port_has_property(p, port, world.lv2_connectionOptional)) {
+			else if (!(lilv_port_is_a(p, port, world.lv2_AudioPort) || lilv_port_has_property(p, port, world.lv2_connectionOptional))) {
 				err = 1;
 				LilvNode* name = lilv_port_get_name(p, port);
 				cb (uri, PluginScanLogEntry::Error, string_compose (_("Port %1 ('%2') has no known data type"), i, lilv_node_as_string (name)), false);
