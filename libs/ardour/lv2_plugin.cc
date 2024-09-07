@@ -841,9 +841,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		} else if (lilv_port_has_property(_impl->plugin, port, _world.lv2_connectionOptional)) {
 			flags |= PORT_OTHOPT; // unknown data type but connection optional
 		} else {
-			error << string_compose(
-				"LV2: \"%1\" port %2 has no known data type",
-				lilv_node_as_string(_impl->name), i) << endmsg;
+			error << string_compose("LV2: \"%1\" port %2 has unsupported or unknown data type", lilv_node_as_string(_impl->name), i) << endmsg;
 			throw failed_constructor();
 		}
 
@@ -3956,7 +3954,7 @@ LV2PluginInfo::discover (boost::function <void (std::string const&, PluginScanLo
 				}
 
 				if (!lilv_nodes_contains(buffer_types, world.atom_Sequence)) {
-					cb (uri, PluginScanLogEntry::Error, _("Found Atom port without sequence support, ignored"), false);
+					cb (uri, PluginScanLogEntry::Error, _("Found Atom port without sequence support."), false);
 					/* ignore non-sequence Atom ports */
 					err = 1;
 				}
@@ -3980,10 +3978,13 @@ LV2PluginInfo::discover (boost::function <void (std::string const&, PluginScanLo
 					count_ctrl_out++;
 				}
 			}
-			else if (!(lilv_port_is_a(p, port, world.lv2_AudioPort) || lilv_port_has_property(p, port, world.lv2_connectionOptional))) {
+			else if (lilv_port_has_property(p, port, world.lv2_connectionOptional)) {
+				cb (uri, PluginScanLogEntry::OK, string_compose (_("Ignored optional port %1 ('%2') which has unsupported data type."), i, lilv_node_as_string (name)), false);
+			}
+			else if (!lilv_port_is_a(p, port, world.lv2_AudioPort)) {
 				err = 1;
 				LilvNode* name = lilv_port_get_name(p, port);
-				cb (uri, PluginScanLogEntry::Error, string_compose (_("Port %1 ('%2') has no known data type"), i, lilv_node_as_string (name)), false);
+				cb (uri, PluginScanLogEntry::Error, string_compose (_("Port %1 ('%2') has unsupported data type."), i, lilv_node_as_string (name)), false);
 				lilv_node_free(name);
 			}
 		}
