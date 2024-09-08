@@ -17,7 +17,13 @@
  */
 
 #include <iostream>
+
 #include "canvas/flag.h"
+
+#include "gtkmm2ext/keyboard.h"
+
+#include "editor.h"
+#include "midi_region_view.h"
 #include "sys_ex.h"
 #include "ui_config.h"
 
@@ -32,6 +38,7 @@ SysEx::SysEx (
 	double                      y,
 	ARDOUR::MidiModel::SysExPtr sysex)
 	: _sysex (sysex)
+	, _region (region)
 {
 	_flag = new ArdourCanvas::Flag (
 		parent,
@@ -41,37 +48,34 @@ SysEx::SysEx (
 		ArdourCanvas::Duple (x, y)
 		);
 
+	_flag->Event.connect (sigc::mem_fun (*this, &SysEx::event_handler));
+	_flag->set_font_description (UIConfiguration::instance ().get_SmallFont ());
 	_flag->set_text (text);
 }
 
 SysEx::~SysEx()
 {
-	/* do not delete flag because it was added to a parent/container which
-	   will delete it.
-	*/
-	_flag = 0;
+	delete _flag;
 }
 
 bool
 SysEx::event_handler (GdkEvent* ev)
 {
+	/* XXX: icky dcast */
+	Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view ().editor ());
+
+	if (!e->internal_editing ()) {
+		return false;
+	}
+
 	switch (ev->type) {
-	case GDK_BUTTON_PRESS:
-		if (ev->button.button == 3) {
-			return true;
-		}
-		break;
-
-	case GDK_SCROLL:
-		if (ev->scroll.direction == GDK_SCROLL_UP) {
-			return true;
-		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
-			return true;
-		}
-		break;
-
-	default:
-		break;
+		case GDK_BUTTON_PRESS:
+			if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
+				_region.delete_sysex (this);
+				return true;
+			}
+		default:
+			break;
 	}
 
 	return false;
