@@ -1356,9 +1356,14 @@ MidiRegionView::display_patch_changes ()
 {
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	uint16_t chn_mask = mtv->midi_track()->get_playback_channel_mask();
+	PatchChanges to_remove = _patch_changes;
 
 	for (uint8_t i = 0; i < 16; ++i) {
-		display_patch_changes_on_channel (i, chn_mask & (1 << i));
+		display_patch_changes_on_channel (i, chn_mask & (1 << i), to_remove);
+	}
+
+	for (auto const& i : to_remove) {
+		_patch_changes.erase (i.first);
 	}
 }
 
@@ -1366,8 +1371,9 @@ MidiRegionView::display_patch_changes ()
  * them `greyed-out' (as on an inactive channel)
  */
 void
-MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_channel)
+MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_channel, PatchChanges& to_remove)
 {
+
 	for (MidiModel::PatchChanges::const_iterator i = _model->patch_changes().begin(); i != _model->patch_changes().end(); ++i) {
 		std::shared_ptr<PatchChange> p;
 
@@ -1391,6 +1397,8 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 
 				p->show();
 		}
+
+		to_remove.erase (p->patch ());
 
 		} else {
 			add_canvas_patch_change (*i);
@@ -2037,18 +2045,6 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 	_patch_changes.insert (make_pair (patch, patch_change));
 }
 
-void
-MidiRegionView::remove_canvas_patch_change (PatchChange* pc)
-{
-	/* remove the canvas item */
-	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
-		if (x->second->patch() == pc->patch()) {
-			_patch_changes.erase (x);
-			break;
-		}
-	}
-}
-
 MIDI::Name::PatchPrimaryKey
 MidiRegionView::patch_change_to_patch_key (MidiModel::PatchChangePtr p)
 {
@@ -2102,7 +2098,6 @@ MidiRegionView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPri
 
 	_model->apply_diff_command_as_commit (*trackview.session(), c);
 
-	remove_canvas_patch_change (&pc);
 	display_patch_changes ();
 }
 
@@ -2180,7 +2175,6 @@ MidiRegionView::delete_patch_change (PatchChange* pc)
 	c->remove (pc->patch ());
 	_model->apply_diff_command_as_commit (*trackview.session(), c);
 
-	remove_canvas_patch_change (pc);
 	display_patch_changes ();
 }
 
