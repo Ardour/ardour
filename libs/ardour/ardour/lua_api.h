@@ -429,6 +429,13 @@ namespace ARDOUR { namespace LuaAPI {
 	std::list<std::shared_ptr< Evoral::Note<Temporal::Beats> > >
 		note_list (std::shared_ptr<ARDOUR::MidiModel>);
 
+	std::list<std::shared_ptr< Evoral::Event<Temporal::Beats> > >
+		sysex_list (std::shared_ptr<ARDOUR::MidiModel>);
+
+	std::list<std::shared_ptr< Evoral::PatchChange<Temporal::Beats> > >
+		patch_change_list (std::shared_ptr<ARDOUR::MidiModel>);
+
+
 } } /* namespace */
 
 namespace ARDOUR { namespace LuaOSC {
