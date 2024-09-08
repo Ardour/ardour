@@ -159,6 +159,7 @@ public:
 	/* Currently this class only supports changes of sys-ex time, but could be expanded */
 	class LIBARDOUR_API SysExDiffCommand : public DiffCommand {
 	public:
+		SysExDiffCommand (std::shared_ptr<MidiModel> m, const std::string& name) : DiffCommand (m, name) {}
 		SysExDiffCommand (std::shared_ptr<MidiModel> m, const XMLNode& node);
 
 		enum Property {
