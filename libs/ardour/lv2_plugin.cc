@@ -3979,6 +3979,7 @@ LV2PluginInfo::discover (boost::function <void (std::string const&, PluginScanLo
 				}
 			}
 			else if (lilv_port_has_property(p, port, world.lv2_connectionOptional)) {
+				LilvNode* name = lilv_port_get_name(p, port);
 				cb (uri, PluginScanLogEntry::OK, string_compose (_("Ignored optional port %1 ('%2') which has unsupported data type."), i, lilv_node_as_string (name)), false);
 			}
 			else if (!lilv_port_is_a(p, port, world.lv2_AudioPort)) {
