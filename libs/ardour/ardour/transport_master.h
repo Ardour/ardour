@@ -613,7 +613,7 @@ public:
 	void create_port ();
 
 private:
-	void parse_ltc (const pframes_t, const Sample* const, const samplecnt_t);
+	void parse_ltc (const pframes_t, Sample const*, samplecnt_t);
 	void process_ltc (samplepos_t const);
 	void init_dll (samplepos_t, int32_t);
 	bool detect_discontinuity (LTCFrameExt*, int, bool);
@@ -643,6 +643,17 @@ private:
 	PBD::ScopedConnection     port_connection;
 	PBD::ScopedConnectionList session_connections;
 	LatencyRange              ltc_slave_latency;
+
+
+	struct Biquad {
+		void reset () { z1 = z2 = 0;}
+		float  z1, z2;
+		double a1, a2, b0, b1, b2;
+	};
+
+	bool   _filter_enable;
+	Biquad _lpf;
+	Biquad _hpf;
 };
 
 class LIBARDOUR_API MIDIClock_TransportMaster : public TransportMaster, public TransportMasterViaMIDI
