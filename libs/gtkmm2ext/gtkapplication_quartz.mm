@@ -1477,8 +1477,10 @@ namespace Gtk {
 @end
 
 static void
-gdk_quartz_modal_notify (GdkWindow*, gboolean modal)
+gdk_quartz_modal_notify (GdkWindow* w, gboolean modal)
 {
+	printf ("modal notify on %p, modal = %d modal_state = %d\n", w, modal, modal_state);
+	PBD::stacktrace (std::cerr, 63);
 	/* this global will control sensitivity of our app menu items, via validateMenuItem */
 	if (modal) {
 		++_modal_state;
