@@ -256,7 +256,7 @@ TransportMastersWidget::rebuild ()
 			r->sclock_synced_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::sync_button_toggled));
 		}
 
-		r->tm->PropertyChanged.connect (r->property_change_connection, invalidator (*this), boost::bind (&TransportMastersWidget::Row::prop_change, r, _1), gui_context());
+		r->tm->PropertyChanged.connect (r->property_change_connection, invalidator (*r), boost::bind (&TransportMastersWidget::Row::prop_change, r, _1), gui_context());
 
 		PropertyChange all_change;
 		all_change.add (Properties::locked);
