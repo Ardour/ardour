@@ -84,14 +84,14 @@ Lollipop::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	/* the circle: clip to avoid weirdness at top and bottom of parent */
 
 	if (bounding_parent) {
-		context->save ();
 		Rect b (bounding_parent->item_to_window (bounding_parent->bounding_box()));
+		b = b.intersection (area);
+		context->save ();
 		context->rectangle (b.x0, b.y0, b.width(), b.height());
 		context->clip();
 	}
 
 	context->arc (p.x, p.y, _radius, 0.0 * (M_PI/180.0), 360.0 * (M_PI/180.0));
-
 
 	if (fill()) {
 		setup_fill_context (context);
