@@ -48,8 +48,6 @@
 #include <list>
 #include <cmath>
 
-#include <boost/utility.hpp>
-
 #include "pbd/xml++.h"
 #include <gtkmm/box.h>
 #include <gtkmm/frame.h>

@@ -23,8 +23,6 @@
 
 #include <vector>
 #include "ardour/chan_count.h"
-#include <boost/utility.hpp>
-
 namespace ARDOUR {
 
 class Port;

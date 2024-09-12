@@ -167,6 +167,8 @@ public:
 	Vst::ParamID index_to_id (uint32_t) const;
 
 	Glib::Threads::Mutex& process_lock () { return _process_lock; }
+	bool& component_is_synced () { return _restart_component_is_synced; }
+
 
 	enum ParameterChange { BeginGesture,
 	                       EndGesture,
@@ -180,7 +182,7 @@ public:
 
 	/* API for Ardour -- Setup/Processing */
 	uint32_t plugin_latency ();
-	uint32_t plugin_tail ();
+	uint32_t plugin_tailtime ();
 	bool     set_block_size (int32_t);
 	bool     activate ();
 	bool     deactivate ();
@@ -442,7 +444,7 @@ public:
 
 private:
 	samplecnt_t plugin_latency () const;
-	samplecnt_t plugin_tail () const;
+	samplecnt_t plugin_tailtime () const;
 	void        init ();
 	void        find_presets ();
 	void        forward_resize_view (int w, int h);

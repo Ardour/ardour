@@ -42,6 +42,7 @@ MIDISurface::MIDISurface (ARDOUR::Session& s, std::string const & namestr, std::
 	, AbstractUI<MidiSurfaceRequest> (namestr)
 	, with_pad_filter (use_pad_filter)
 	, _in_use (false)
+	, _data_required (false)
 	, port_name_prefix (port_prefix)
 	, _connection_state (ConnectionState (0))
 {
@@ -372,10 +373,10 @@ MIDISurface::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 		}
 
 		DEBUG_TRACE (DEBUG::MIDISurface, string_compose ("data available on %1\n", port->name()));
-		if (_in_use) {
+		if (_in_use || _data_required) {
 			samplepos_t now = AudioEngine::instance()->sample_time();
 			port->parse (now);
-		}
+		} 
 	}
 
 	return true;

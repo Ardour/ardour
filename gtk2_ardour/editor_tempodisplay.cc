@@ -202,6 +202,9 @@ Editor::reset_tempo_marks ()
 	TempoPoint const * prev_ts = 0;
 
 	for (auto & t : tempo_marks) {
+		if (entered_marker == t) {
+			entered_marker = 0;
+		}
 		delete t;
 	}
 

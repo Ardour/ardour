@@ -51,6 +51,7 @@
 #include "ardour/lv2_plugin.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/region_fx_plugin.h"
 #include "ardour/session.h"
 #include "lv2_plugin_ui.h"
 
@@ -85,7 +86,7 @@ extern VST3PluginUI* create_mac_vst3_gui (std::shared_ptr<ARDOUR::PlugInsertBase
 #include "ardour_window.h"
 #include "gui_thread.h"
 #include "keyboard.h"
-#include "latency_gui.h"
+#include "timectl_gui.h"
 #include "new_plugin_preset_dialog.h"
 #include "plugin_dspload_ui.h"
 #include "plugin_eq_gui.h"
@@ -537,6 +538,8 @@ PlugUIBase::PlugUIBase (std::shared_ptr<PlugInsertBase> pib)
 	, cpuload_expander (_("CPU Profile"))
 	, latency_gui (0)
 	, latency_dialog (0)
+	, tailtime_gui (0)
+	, tailtime_dialog (0)
 	, eqgui (0)
 	, stats_gui (0)
 	, preset_gui (0)
@@ -555,6 +558,7 @@ PlugUIBase::PlugUIBase (std::shared_ptr<PlugInsertBase> pib)
 	set_tooltip (_pin_management_button, _("Show Plugin Pin Management Dialog"));
 	set_tooltip (_bypass_button, _("Disable signal processing by the plugin"));
 	set_tooltip (_latency_button, _("Edit Plugin Delay/Latency Compensation"));
+	set_tooltip (_tailtime_button, _("Edit Plugin tail time"));
 	_no_load_preset = 0;
 
 	update_preset_list ();
@@ -564,6 +568,11 @@ PlugUIBase::PlugUIBase (std::shared_ptr<PlugInsertBase> pib)
 	_latency_button.add_elements (ArdourButton::Text);
 	_latency_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::latency_button_clicked));
 	set_latency_label ();
+
+	_tailtime_button.set_icon (ArdourIcon::TailTimeClock);
+	_tailtime_button.add_elements (ArdourButton::Text);
+	_tailtime_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::tailtime_button_clicked));
+	set_tailtime_label ();
 
 	_add_button.set_name ("generic button");
 	_add_button.set_icon (ArdourIcon::PsetAdd);
@@ -636,6 +645,11 @@ PlugUIBase::PlugUIBase (std::shared_ptr<PlugInsertBase> pib)
 		_pi->LatencyChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::set_latency_label, this), gui_context ());
 		automation_state_changed ();
 	}
+
+	shared_ptr<TailTime> tt = std::dynamic_pointer_cast<ARDOUR::TailTime> (_pib);
+	if (tt) {
+		tt->TailTimeChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::set_tailtime_label, this), gui_context ());
+	}
 }
 
 PlugUIBase::~PlugUIBase ()
@@ -645,6 +659,8 @@ PlugUIBase::~PlugUIBase ()
 	delete preset_gui;
 	delete latency_gui;
 	delete latency_dialog;
+	delete tailtime_gui;
+	delete tailtime_dialog;
 	delete preset_dialog;
 
 	delete _focus_out_image;
@@ -696,6 +712,9 @@ PlugUIBase::add_common_widgets (Gtk::HBox* b, bool with_focus)
 		b->pack_end (_pin_management_button, false, false);
 		b->pack_start (_latency_button, false, false, 4);
 	}
+	else if (std::dynamic_pointer_cast<ARDOUR::RegionFxPlugin> (_pib)) {
+		b->pack_start (_tailtime_button, false, false, 4);
+	}
 }
 
 void
@@ -709,13 +728,26 @@ PlugUIBase::set_latency_label ()
 
 	_latency_button.set_text (samples_as_time_string (l, sr, true));
 }
+void
+
+PlugUIBase::set_tailtime_label ()
+{
+	auto rfx = std::dynamic_pointer_cast<ARDOUR::RegionFxPlugin> (_pib); /* may be NULL */
+	if (!rfx) {
+		return;
+	}
+	samplecnt_t const l  = rfx->effective_tailtime ();
+	float const       sr = rfx->session ().sample_rate ();
+
+	_tailtime_button.set_text (samples_as_time_string (l, sr, true));
+}
 
 void
 PlugUIBase::latency_button_clicked ()
 {
 	assert (_pi);
 	if (!latency_gui) {
-		latency_gui    = new LatencyGUI (*(_pi.get ()), _pi->session ().sample_rate (), _pi->session ().get_block_size ());
+		latency_gui    = new TimeCtlGUI (*(_pi.get ()), _pi->session ().sample_rate (), _pi->session ().get_block_size ());
 		latency_dialog = new ArdourWindow (_("Edit Latency"));
 		/* use both keep-above and transient for to try cover as many
 		   different WM's as possible.
@@ -730,6 +762,29 @@ PlugUIBase::latency_button_clicked ()
 
 	latency_gui->refresh ();
 	latency_dialog->show_all ();
+}
+
+void
+PlugUIBase::tailtime_button_clicked ()
+{
+	auto rfx = std::dynamic_pointer_cast<ARDOUR::RegionFxPlugin> (_pib); /* may be NULL */
+	assert (rfx);
+	if (!tailtime_gui) {
+		tailtime_gui    = new TimeCtlGUI (*dynamic_cast<TailTime*>(rfx.get()), rfx->session ().sample_rate (), rfx->session ().get_block_size ());
+		tailtime_dialog = new ArdourWindow (_("Edit Tail Time"));
+		/* use both keep-above and transient for to try cover as many
+		   different WM's as possible.
+		*/
+		tailtime_dialog->set_keep_above (true);
+		Window* win = dynamic_cast<Window*> (_bypass_button.get_toplevel ());
+		if (win) {
+			tailtime_dialog->set_transient_for (*win);
+		}
+		tailtime_dialog->add (*tailtime_gui);
+	}
+
+	tailtime_gui->refresh ();
+	tailtime_dialog->show_all ();
 }
 
 void

@@ -1345,6 +1345,45 @@ icon_latency_clock (cairo_t* cr, const int width, const int height, const uint32
 }
 
 static void
+icon_tailtime_clock (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double d = std::min (x, y) * .4;
+	const double r = std::min (x, y) * .66;
+
+	const double lw = DEFAULT_LINE_WIDTH;
+	const double lc = fmod (lw * .5, 1.0);
+	const double x0 = rint (x) - lc;
+	const double yl = rint (y) - lc;
+
+	cairo_move_to (cr, x0, y - d);
+	cairo_line_to (cr, x0, y - r);
+	VECTORICONSTROKE (lw, fg_color);
+
+	cairo_move_to (cr, x0, y + d);
+	cairo_line_to (cr, x0, y + r);
+	VECTORICONSTROKE (lw, fg_color);
+
+	cairo_move_to (cr, x - d , yl);
+	cairo_line_to (cr, x - r,  yl);
+	VECTORICONSTROKE (lw, fg_color);
+
+	cairo_move_to (cr, x + d , yl);
+	cairo_line_to (cr, x + r,  yl);
+	VECTORICONSTROKE (lw, fg_color);
+
+	cairo_move_to (cr, x , y);
+	cairo_close_path (cr);
+	VECTORICONSTROKE (lw, fg_color);
+
+	cairo_arc (cr, x, y, r, 0, 2 * M_PI);
+	VECTORICONSTROKE (lw, fg_color);
+
+	//cairo_fill (cr);
+}
+
+static void
 icon_file_folder (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double x  = width * .5;
@@ -1688,6 +1727,9 @@ ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr
 			break;
 		case TrackWaveform:
 			icon_waveform (cr, width, height, fg_color);
+			break;
+		case TailTimeClock:
+			icon_tailtime_clock (cr, width, height, fg_color);
 			break;
 		case NoIcon:
 			rv = false;

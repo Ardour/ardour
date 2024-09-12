@@ -26,8 +26,6 @@
 #include <list>
 #include <string>
 
-#include <boost/enable_shared_from_this.hpp>
-
 #include "ardour/export_channel.h"
 #include "ardour/export_pointers.h"
 

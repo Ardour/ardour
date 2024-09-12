@@ -22,8 +22,6 @@
 #include <memory>
 #include <string>
 
-#include <boost/dynamic_bitset.hpp>
-
 #include "ardour/slavable_automation_control.h"
 #include "ardour/recordable.h"
 

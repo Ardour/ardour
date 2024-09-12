@@ -37,13 +37,183 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+class TimedReadOnlyControl : public ReadOnlyControl {
+public:
+	TimedReadOnlyControl (std::shared_ptr<Plugin> p, const ParameterDescriptor& desc, uint32_t pnum)
+		: ReadOnlyControl (p, desc, pnum)
+		, _flush (false)
+	{}
+
+	double get_parameter () const {
+		std::shared_ptr<Plugin> p = _plugin.lock();
+
+		if (!p) {
+			return 0;
+		}
+		samplepos_t when = p->session().audible_sample ();
+
+		Glib::Threads::Mutex::Lock lm (_history_mutex);
+		auto it = _history.lower_bound (when);
+		if (it != _history.begin ()) {
+			--it;
+		}
+		if (it == _history.end ()) {
+			return p->get_parameter (_parameter_num);
+		} else {
+			return it->second;
+		}
+	}
+
+	void flush () {
+		_flush = true;
+	}
+
+	void store_value (samplepos_t start, samplepos_t end) {
+		std::shared_ptr<Plugin> p = _plugin.lock();
+		if (!p) {
+			return;
+		}
+		double value = p->get_parameter (_parameter_num);
+		Glib::Threads::Mutex::Lock lm (_history_mutex);
+		if (_flush) {
+			_flush = false;
+			_history.clear ();
+		}
+		auto it = _history.lower_bound (start);
+		if (it != _history.begin ()) {
+			--it;
+			if (it->second == value) {
+				return;
+			}
+			assert (start > it->first);
+			if (start - it->first < 512) {
+				return;
+			}
+		}
+		_history[start] = value;
+
+		if (_history.size () > 2000 && std::distance (_history.begin(), it) > 1500) {
+			samplepos_t when = min (start, p->session().audible_sample ());
+			auto io = _history.lower_bound (when - p->session().sample_rate ());
+			if (std::distance (io, it) > 1) {
+				_history.erase (_history.begin(), io);
+			}
+		}
+	}
+
+private:
+	std::map<samplepos_t, double> _history;
+	mutable Glib::Threads::Mutex  _history_mutex;
+	bool                          _flush;
+};
+
+class TimedPluginControl : public PlugInsertBase::PluginControl
+{
+public:
+	TimedPluginControl (Session&                       s,
+			               PlugInsertBase*                 p,
+			               const Evoral::Parameter&        param,
+			               const ParameterDescriptor&      desc,
+			               std::shared_ptr<AutomationList> list,
+			               bool                            replay_param)
+		: PlugInsertBase::PluginControl (s, p, param, desc, list)
+		, _last_value (desc.lower - 1)
+		, _replay_param (replay_param)
+		, _flush (false)
+	{
+	}
+
+	double get_value (void) const
+	{
+		samplepos_t when = _session.audible_sample ();
+		Glib::Threads::Mutex::Lock lm (_history_mutex);
+		auto it = _history.lower_bound (when);
+		if (it != _history.begin ()) {
+			--it;
+		}
+		if (it == _history.end ()) {
+			return PlugInsertBase::PluginControl::get_value ();
+		} else {
+			return it->second;
+		}
+	}
+
+	bool maybe_emit_changed ()
+	{
+		double current = get_value ();
+		if (current == _last_value) {
+			return false;
+		}
+		_last_value = current;
+		if (_replay_param) { // AU, VST2
+			/* this is only called for automated parameters.
+			 * Next call to ::run() will set the actual value before
+			 * running the plugin (via automation_run).
+			 */
+			actually_set_value (current, PBD::Controllable::NoGroup);
+		} else { // generic UI, LV2
+			Changed (true, Controllable::NoGroup);
+		}
+		return true;
+	}
+
+	void flush () {
+		if (automation_playback ()) {
+			_flush = true;
+		} else {
+			Glib::Threads::Mutex::Lock lm (_history_mutex);
+			_history.clear ();
+		}
+	}
+
+	void store_value (samplepos_t start, samplepos_t end)
+	{
+		double value = PlugInsertBase::PluginControl::get_value ();
+		Glib::Threads::Mutex::Lock lm (_history_mutex);
+		if (_flush) {
+			_flush = false;
+			_history.clear ();
+		}
+		auto it = _history.lower_bound (start);
+		if (it != _history.begin ()) {
+			--it;
+			if (it->second == value) {
+				return;
+			}
+			assert (start > it->first);
+			if (start - it->first < 512) {
+				return;
+			}
+		}
+		_history[start] = value;
+
+		/* do not accumulate */
+		if (_history.size () > 2000 && std::distance (_history.begin(), it) > 1500) {
+			samplepos_t when = min (start, _session.audible_sample ());
+			auto io = _history.lower_bound (when - _session.sample_rate ());
+			if (std::distance (io, it) > 1) {
+				_history.erase (_history.begin(), io);
+			}
+		}
+	}
+
+private:
+	std::map<samplepos_t, double> _history;
+	mutable Glib::Threads::Mutex  _history_mutex;
+	double                        _last_value;
+	bool                          _replay_param;
+	bool                          _flush;
+};
+
 RegionFxPlugin::RegionFxPlugin (Session& s, Temporal::TimeDomain const td, std::shared_ptr<Plugin> plug)
 	: SessionObject (s, (plug ? plug->name () : string ("toBeRenamed")))
 	, TimeDomainProvider (td)
 	, _plugin_signal_latency (0)
 	, _configured (false)
 	, _no_inplace (false)
+	, _last_emit (0)
 	, _window_proxy (0)
+	, _state (0)
 {
 	_flush.store (0);
 
@@ -65,14 +235,22 @@ RegionFxPlugin::~RegionFxPlugin ()
 		std::dynamic_pointer_cast<AutomationControl>(i.second)->drop_references ();
 	}
 	_controls.clear ();
+
+	delete _state;
 }
 
 XMLNode&
 RegionFxPlugin::get_state () const
 {
+	if (_plugins.empty ()) {
+		assert (_state);
+		return *(new XMLNode (*_state));
+	}
+
 	XMLNode* node = new XMLNode (/*state_node_name*/ "RegionFXPlugin");
 
 	Latent::add_state (node);
+	TailTime::add_state (node);
 
 	node->set_property ("type", _plugins[0]->state_node_name ());
 	node->set_property ("unique-id", _plugins[0]->unique_id ());
@@ -125,7 +303,15 @@ RegionFxPlugin::set_state (const XMLNode& node, int version)
 		std::shared_ptr<Plugin> plugin = find_and_load_plugin (_session, node, type, unique_id, any_vst);
 
 		if (!plugin) {
-			return -1;
+			delete _state;
+			_state = new XMLNode (node);
+			string name;
+			if (node.get_property ("name", name)) {
+				set_name (name);
+			} else {
+				set_name ("Unknown Plugin");
+			}
+			return 0;
 		}
 
 		add_plugin (plugin);
@@ -198,7 +384,27 @@ RegionFxPlugin::set_state (const XMLNode& node, int version)
 			ac->Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 		}
 	}
+
+	Latent::set_state (node, version);
+	TailTime::set_state (node, version);
+
 	return 0;
+}
+
+PluginType
+RegionFxPlugin::type () const
+{
+	if (!_plugins.empty ()) {
+		return plugin ()->get_info ()->type;
+	}
+	if (_state) {
+		ARDOUR::PluginType type;
+		std::string        unique_id;
+		if (parse_plugin_type (*_state, type, unique_id)) {
+			return type;
+		}
+	}
+	return LXVST; /* whatever */
 }
 
 void
@@ -294,7 +500,19 @@ RegionFxPlugin::drop_references ()
 ARDOUR::samplecnt_t
 RegionFxPlugin::signal_latency () const
 {
+	if (_plugins.empty ()) {
+		return 0;
+	}
 	return _plugins.front ()->signal_latency ();
+}
+
+ARDOUR::samplecnt_t
+RegionFxPlugin::signal_tailtime () const
+{
+	if (_plugins.empty ()) {
+		return 0;
+	}
+	return _plugins.front ()->signal_tailtime ();
 }
 
 PlugInsertBase::UIElements
@@ -311,6 +529,18 @@ RegionFxPlugin::create_parameters ()
 	std::shared_ptr<Plugin> plugin = _plugins.front ();
 	set<Evoral::Parameter>  a      = _plugins.front ()->automatable ();
 
+	bool replay_param = false;
+	switch (_plugins.front ()->get_info ()->type) {
+		case AudioUnit:
+		case LXVST:
+		case MacVST:
+		case Windows_VST:
+			replay_param = true;
+			break;
+		default:
+			break;
+	}
+
 	for (uint32_t i = 0; i < plugin->parameter_count (); ++i) {
 		if (!plugin->parameter_is_control (i)) {
 			continue;
@@ -320,7 +550,7 @@ RegionFxPlugin::create_parameters ()
 		plugin->get_parameter_descriptor (i, desc);
 
 		if (!plugin->parameter_is_input (i)) {
-			_control_outputs[i] = std::shared_ptr<ReadOnlyControl> (new ReadOnlyControl (plugin, desc, i));
+			_control_outputs[i] = std::shared_ptr<TimedReadOnlyControl> (new TimedReadOnlyControl (plugin, desc, i));
 			continue;
 		}
 
@@ -328,7 +558,7 @@ RegionFxPlugin::create_parameters ()
 		const bool automatable = a.find(param) != a.end();
 
 		std::shared_ptr<AutomationList> list (new AutomationList (param, desc, *this));
-		std::shared_ptr<AutomationControl> c (new PluginControl (_session, this, param, desc, list));
+		std::shared_ptr<AutomationControl> c (new TimedPluginControl (_session, this, param, desc, list, replay_param));
 		if (!automatable) {
 			c->set_flag (Controllable::NotAutomatable);
 		}
@@ -451,6 +681,7 @@ RegionFxPlugin::parameter_changed_externally (uint32_t which, float val)
 std::string
 RegionFxPlugin::describe_parameter (Evoral::Parameter param)
 {
+	assert (!_plugins.empty ());
 	if (param.type () == PluginAutomation) {
 		return _plugins[0]->describe_parameter (param);
 	} else if (param.type () == PluginPropertyAutomation) {
@@ -483,6 +714,10 @@ RegionFxPlugin::end_touch (uint32_t param_id)
 bool
 RegionFxPlugin::can_reset_all_parameters ()
 {
+	if (_plugins.empty ()) {
+		return false;
+	}
+
 	bool                    all    = true;
 	uint32_t                params = 0;
 	std::shared_ptr<Plugin> plugin = _plugins.front ();
@@ -512,6 +747,8 @@ RegionFxPlugin::can_reset_all_parameters ()
 bool
 RegionFxPlugin::reset_parameters_to_default ()
 {
+	assert (!_plugins.empty ());
+
 	bool                    all    = true;
 	std::shared_ptr<Plugin> plugin = _plugins.front ();
 
@@ -549,11 +786,24 @@ void
 RegionFxPlugin::flush ()
 {
 	_flush.store (1);
+
+	for (auto const& i : _control_outputs) {
+		shared_ptr<TimedReadOnlyControl> toc = std::dynamic_pointer_cast<TimedReadOnlyControl>(i.second);
+		toc->flush ();
+	}
+	for (auto const& i : _controls) {
+		shared_ptr<TimedPluginControl> tpc = std::dynamic_pointer_cast<TimedPluginControl>(i.second);
+		tpc->flush ();
+	}
 }
 
 bool
 RegionFxPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
+	if (_plugins.empty ()) {
+		out = ChanCount::min (in, out);
+		return true;
+	}
 	return private_can_support_io_configuration (in, out).method != Impossible;
 }
 
@@ -706,6 +956,10 @@ RegionFxPlugin::configure_io (ChanCount in, ChanCount out)
 {
 	_configured_in  = in;
 	_configured_out = out;
+
+	if (_plugins.empty ()) {
+		return true;
+	}
 
 	ChanCount natural_input_streams  = _plugins[0]->get_info ()->n_inputs;
 	ChanCount natural_output_streams = _plugins[0]->get_info ()->n_outputs;
@@ -994,6 +1248,12 @@ RegionFxPlugin::find_next_event (timepos_t const& start, timepos_t const& end, E
 bool
 RegionFxPlugin::run (BufferSet& bufs, samplepos_t start, samplepos_t end, samplepos_t pos, pframes_t nframes, sampleoffset_t off)
 {
+	if (_plugins.empty ()) {
+		return true;
+	}
+
+	Glib::Threads::Mutex::Lock lp (_process_lock);
+
 	int canderef (1);
 	if (_flush.compare_exchange_strong (canderef,  0)) {
 		for (auto const& i : _plugins) {
@@ -1167,10 +1427,47 @@ RegionFxPlugin::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t
 		}
 	}
 
+	for (auto const& i : _control_outputs) {
+		shared_ptr<TimedReadOnlyControl> toc = std::dynamic_pointer_cast<TimedReadOnlyControl>(i.second);
+		toc->store_value (start + pos, end + pos);
+	}
+
+	for (auto const& i : _controls) {
+		shared_ptr<TimedPluginControl> tpc = std::dynamic_pointer_cast<TimedPluginControl>(i.second);
+		if (tpc->automation_playback ()) {
+			tpc->store_value (start + pos, end + pos);
+		}
+	}
+
 	const samplecnt_t l = effective_latency ();
 	if (_plugin_signal_latency != l) {
 		_plugin_signal_latency= l;
 		LatencyChanged (); /* EMIT SIGNAL */
 	}
+	const samplecnt_t t = effective_latency ();
+	if (_plugin_signal_tailtime != l) {
+		_plugin_signal_tailtime = t;
+		TailTimeChanged (); /* EMIT SIGNAL */
+	}
 	return true;
+}
+
+void
+RegionFxPlugin::maybe_emit_changed_signals () const
+{
+	if (!_session.transport_rolling ()) {
+		samplepos_t when = _session.audible_sample ();
+		if (_last_emit == when) {
+			return;
+		}
+		_last_emit = when;
+	}
+
+	Glib::Threads::Mutex::Lock lp (_process_lock);
+	for (auto const& i : _controls) {
+		shared_ptr<TimedPluginControl> tpc = std::dynamic_pointer_cast<TimedPluginControl>(i.second);
+		if (tpc->automation_playback ()) {
+			tpc->maybe_emit_changed ();
+		}
+	}
 }

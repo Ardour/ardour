@@ -840,7 +840,7 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 GenericPluginUI::ControlUI*
 GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
                                    const ParameterDescriptor&           desc,
-                                   std::shared_ptr<AutomationControl> mcontrol,
+                                   std::shared_ptr<AutomationControl>   mcontrol,
                                    float                                value,
                                    bool                                 is_input,
                                    bool                                 use_knob)
@@ -1273,9 +1273,9 @@ void
 GenericPluginUI::output_update ()
 {
 	for (vector<ControlUI*>::iterator i = output_controls.begin(); i != output_controls.end(); ++i) {
-		float val = plugin->get_parameter ((*i)->parameter().id());
 		char buf[32];
 		std::shared_ptr<ReadOnlyControl> c = _pib->control_output ((*i)->parameter().id());
+		float val = c->get_parameter ();
 		const std::string& str = ARDOUR::value_as_string(c->desc(), Variant(val));
 		size_t len = str.copy(buf, 31);
 		buf[len] = '\0';

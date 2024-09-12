@@ -20,8 +20,6 @@
 #include <cstdlib>
 #include <ctime>
 
-#include <boost/integer/common_factor.hpp>
-
 #include "pbd/compose.h"
 #include "pbd/i18n.h"
 

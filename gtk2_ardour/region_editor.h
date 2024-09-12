@@ -80,7 +80,7 @@ private:
 		Gtk::EventBox& action_widget () { return _fx_btn; }
 		Gtk::Widget& widget () { return _box; }
 		std::string drag_text () const { return name (); }
-		bool is_selectable() const { return true; }
+		bool is_selectable() const { return _selectable; }
 		bool can_copy_state (Gtkmm2ext::DnDVBoxChild*) const;
 		void set_visual_state (Gtkmm2ext::VisualState, bool);
 		bool drag_data_get (Glib::RefPtr<Gdk::DragContext> const, Gtk::SelectionData &);
@@ -93,6 +93,7 @@ private:
 		ArdourWidgets::ArdourButton             _fx_btn;
 		std::shared_ptr<ARDOUR::RegionFxPlugin> _rfx;
 		ARDOUR::PluginPresetPtr                 _plugin_preset_pointer;
+		bool                                    _selectable;
 	};
 
 	class RegionFxBox : public Gtk::VBox, public PluginInterestedObject //, public ARDOUR::SessionHandlePtr
@@ -108,6 +109,8 @@ private:
 		bool idle_delete_region_fx (std::weak_ptr<ARDOUR::RegionFxPlugin>);
 		void notify_plugin_load_fail (uint32_t cnt = 1);
 		bool on_key_press (GdkEventKey*);
+		void clear_automation (std::weak_ptr<ARDOUR::RegionFxPlugin>);
+		void update_controls ();
 
 		/* PluginInterestedObject */
 		bool use_plugins (SelectedPlugins const&);
@@ -129,6 +132,8 @@ private:
 		Gtk::EventBox                     _base;
 		bool                              _no_redisplay;
 		int                               _placement;
+
+		sigc::connection screen_update_connection;
 	};
 
 	std::shared_ptr<ARDOUR::Region> _region;

@@ -25,8 +25,6 @@
 
 #include <string>
 
-#include "boost/shared_ptr.hpp"
-
 #include "pbd/signals.h"
 
 #include "ardour/libardour_visibility.h"

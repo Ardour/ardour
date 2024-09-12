@@ -31,6 +31,7 @@
 
 #include "evoral/Control.h"
 #include "evoral/ControlList.h"
+#include "evoral/PatchChange.h"
 
 #include "ardour/amp.h"
 #include "ardour/async_midi_port.h"
@@ -268,6 +269,7 @@ CLASSKEYS(ARDOUR::LuaOSC::Address);
 CLASSKEYS(ARDOUR::LuaProc);
 CLASSKEYS(ARDOUR::LuaTableRef);
 CLASSKEYS(ARDOUR::MidiModel::NoteDiffCommand);
+CLASSKEYS(ARDOUR::MidiModel::SysExDiffCommand);
 CLASSKEYS(ARDOUR::MonitorProcessor);
 CLASSKEYS(ARDOUR::RouteGroup);
 CLASSKEYS(ARDOUR::ParameterDescriptor);
@@ -349,7 +351,9 @@ CLASSKEYS(std::shared_ptr<ARDOUR::Region>);
 CLASSKEYS(std::shared_ptr<ARDOUR::SessionPlaylists>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Track>);
 CLASSKEYS(std::shared_ptr<Evoral::ControlList>);
+CLASSKEYS(std::shared_ptr<Evoral::Event<Temporal::Beats> >);
 CLASSKEYS(std::shared_ptr<Evoral::Note<Temporal::Beats> >);
+CLASSKEYS(std::shared_ptr<Evoral::PatchChange<Temporal::Beats> >);
 CLASSKEYS(std::shared_ptr<Evoral::Sequence<Temporal::Beats> >);
 
 CLASSKEYS(std::shared_ptr<ARDOUR::Playlist>);
@@ -970,6 +974,18 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("off_velocity", &Evoral::Note<Temporal::Beats>::off_velocity)
 		.addFunction ("length", &Evoral::Note<Temporal::Beats>::length)
 		.addFunction ("channel", &Evoral::Note<Temporal::Beats>::channel)
+		.endClass ()
+
+		.beginWSPtrClass <Evoral::Event<Temporal::Beats> > ("EventPtr")
+		.addFunction ("time", &Evoral::Event<Temporal::Beats>::time)
+		.addFunction ("size", &Evoral::Event<Temporal::Beats>::size)
+		//.addFunction ("buffer", (uint8_t*) &Evoral::Event<Temporal::Beats>::buffer)
+		.endClass ()
+
+		.beginWSPtrClass <Evoral::PatchChange<Temporal::Beats> > ("PatchChangePtr")
+		.addFunction ("time", &Evoral::PatchChange<Temporal::Beats>::time)
+		.addFunction ("bank", &Evoral::PatchChange<Temporal::Beats>::bank)
+		.addFunction ("program", &Evoral::PatchChange<Temporal::Beats>::program)
 		.endClass ()
 
 		/* libevoral enums */
@@ -1638,10 +1654,12 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("has_transients", &Region::has_transients)
 		.addFunction ("transients", (AnalysisFeatureList (Region::*)())&Region::transients)
 
+#ifndef NDEBUG // disable region FX for now
 		.addFunction ("load_plugin", &Region::load_plugin)
 		.addFunction ("add_plugin", &Region::add_plugin)
 		.addFunction ("remove_plugin", &Region::add_plugin)
 		.addFunction ("nth_plugin", &Region::nth_plugin)
+#endif
 
 		/* editing operations */
 		.addFunction ("set_length", &Region::set_length)
@@ -1791,6 +1809,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("apply_command", (void (MidiModel::*)(Session*, PBD::Command*))&MidiModel::apply_diff_command_as_commit) /* deprecated: left here in case any extant scripts use apply_command */
 		.addFunction ("apply_diff_command_as_commit", (void (MidiModel::*)(Session*, PBD::Command*))&MidiModel::apply_diff_command_as_commit)
 		.addFunction ("new_note_diff_command", &MidiModel::new_note_diff_command)
+		.addFunction ("new_sysex_diff_command", &MidiModel::new_sysex_diff_command)
+		.addFunction ("new_patch_change_diff_command", &MidiModel::new_patch_change_diff_command)
 		.endClass ()
 
 		.beginNamespace ("MidiModel")
@@ -1800,6 +1820,16 @@ LuaBindings::common (lua_State* L)
 		.deriveClass<ARDOUR::MidiModel::NoteDiffCommand, ARDOUR::MidiModel::DiffCommand> ("NoteDiffCommand")
 		.addFunction ("add", &ARDOUR::MidiModel::NoteDiffCommand::add)
 		.addFunction ("remove", &ARDOUR::MidiModel::NoteDiffCommand::remove)
+		.endClass ()
+
+		.deriveClass<ARDOUR::MidiModel::SysExDiffCommand, ARDOUR::MidiModel::DiffCommand> ("NoteDiffCommand")
+		.addFunction ("change", &ARDOUR::MidiModel::SysExDiffCommand::change)
+		.addFunction ("remove", &ARDOUR::MidiModel::SysExDiffCommand::remove)
+		.endClass ()
+
+		.deriveClass<ARDOUR::MidiModel::PatchChangeDiffCommand, ARDOUR::MidiModel::DiffCommand> ("NoteDiffCommand")
+		.addFunction ("add", &ARDOUR::MidiModel::PatchChangeDiffCommand::add)
+		.addFunction ("remove", &ARDOUR::MidiModel::PatchChangeDiffCommand::remove)
 		.endClass ()
 
 		.endNamespace () /* ARDOUR::MidiModel */
@@ -2340,6 +2370,12 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginStdList <std::shared_ptr<Evoral::Note<Temporal::Beats> > > ("NotePtrList")
+		.endClass ()
+
+		.beginStdList <std::shared_ptr<Evoral::Event<Temporal::Beats> > > ("EventPtrList")
+		.endClass ()
+
+		.beginStdList <std::shared_ptr<Evoral::PatchChange<Temporal::Beats> > > ("PatchChangePtrList")
 		.endClass ()
 
 		.beginConstStdCPtrList <Evoral::ControlEvent> ("EventList")
@@ -3174,6 +3210,8 @@ LuaBindings::common (lua_State* L)
 		.addCFunction ("build_filename", ARDOUR::LuaAPI::build_filename)
 		.addFunction ("new_noteptr", ARDOUR::LuaAPI::new_noteptr)
 		.addFunction ("note_list", ARDOUR::LuaAPI::note_list)
+		.addFunction ("sysex_list", ARDOUR::LuaAPI::sysex_list)
+		.addFunction ("patch_change_list", ARDOUR::LuaAPI::patch_change_list)
 		.addCFunction ("sample_to_timecode", ARDOUR::LuaAPI::sample_to_timecode)
 		.addCFunction ("timecode_to_sample", ARDOUR::LuaAPI::timecode_to_sample)
 		.addFunction ("wait_for_process_callback", ARDOUR::LuaAPI::wait_for_process_callback)

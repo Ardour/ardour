@@ -178,6 +178,13 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ti
 	DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Playlist %1 read @ %2 for %3, channel %4, regions %5 mixdown @ %6 gain @ %7\n",
 							   name(), start.samples(), cnt.samples(), chan_n, regions.size(), mixdown_buffer, gain_buffer));
 
+	DEBUG_TRACE (DEBUG::AudioCacheRefill, string_compose ("Playlist '%1' chn: %2 from %3 to %4 [s] PH@ %5\n",
+				name (), chan_n,
+				std::setprecision (3), std::fixed,
+				start.samples() / (float)_session.sample_rate (),
+				(start.samples() + cnt.samples()) / (float)_session.sample_rate (),
+				_session.transport_sample () / (float)_session.sample_rate ()));
+
 	samplecnt_t const scnt (cnt.samples ());
 
 	/* optimizing this memset() away involves a lot of conditionals

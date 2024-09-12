@@ -529,7 +529,7 @@ timecnt_t
 AudioRegion::tail () const
 {
 	if (_fade_before_fx && has_region_fx ()) {
-		return timecnt_t (_session.sample_rate ()); // TODO use plugin API
+		return timecnt_t ((samplecnt_t)_fx_tail);
 	} else {
 		return timecnt_t (0);
 	}
@@ -609,6 +609,11 @@ AudioRegion::read_at (Sample*     buf,
 	/* We are reading data from this region into buf (possibly via mixdown_buffer).
 	   The caller has verified that we cover the desired section.
 	*/
+
+	DEBUG_TRACE (DEBUG::AudioCacheRefill, string_compose ("- Region '%1' chn: %2 from %3 to %4 [s]\n",
+				name(), chan_n,
+				std::setprecision (3), std::fixed,
+				pos / (float)_session.sample_rate (), (pos + cnt) / (float)_session.sample_rate ()));
 
 	/* See doc/region_read.svg for a drawing which might help to explain
 	   what is going on.
@@ -867,7 +872,19 @@ AudioRegion::read_at (Sample*     buf,
 
 		/* apply region FX to all channels */
 		if (have_fx) {
+#ifndef NDEBUG
+			microseconds_t t_start = get_microseconds ();
+#endif
 			const_cast<AudioRegion*>(this)->apply_region_fx (_readcache, offset + suffix, offset + suffix + n_proc, n_proc);
+#ifndef NDEBUG
+			if (DEBUG_ENABLED (DEBUG::AudioCacheRefill)) {
+				microseconds_t t_end = get_microseconds ();
+				int nsecs_per_sample = lrintf ((t_end - t_start) * 1000 / std::max<double> (1.0, n_proc * n_chn));
+				float load =  (t_end - t_start) / (10000.f * n_proc / (float) _session.sample_rate ());
+				DEBUG_TRACE (DEBUG::AudioCacheRefill, string_compose ("- RegionFx '%1' took %2 us, frames: %3, nchn: %4, ns/spl: %5 load: %6%%\n",
+							name (), (t_end - t_start), n_proc, n_chn, nsecs_per_sample, load));
+			}
+#endif
 		}
 
 		/* for mono regions without plugins, mixdown_buffer is valid as-is */
@@ -2483,7 +2500,7 @@ AudioRegion::_add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<R
 	}
 
 	rfx->LatencyChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fx_latency_changed, this, false));
-	rfx->plugin()->TailChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fx_tail_changed, this, false));
+	rfx->TailTimeChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fx_tail_changed, this, false));
 	rfx->set_block_size (_session.get_block_size ());
 
 	if (from_set_state) {
@@ -2531,6 +2548,7 @@ AudioRegion::remove_plugin (std::shared_ptr<RegionFxPlugin> fx)
 		send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
 	}
 	RegionFxChanged (); /* EMIT SIGNAL */
+	_session.set_dirty ();
 	return true;
 }
 
@@ -2570,7 +2588,7 @@ AudioRegion::fx_tail_changed (bool no_emit)
 {
 	uint32_t t = 0;
 	for (auto const& rfx : _plugins) {
-		t = max<uint32_t> (t, rfx->plugin()->effective_tail ());
+		t = max<uint32_t> (t, rfx->effective_tailtime ());
 	}
 	if (t == _fx_tail) {
 		return;

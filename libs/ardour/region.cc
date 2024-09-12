@@ -1579,12 +1579,20 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 		Glib::Threads::RWLock::WriterLock lm (_fx_lock);
 		bool changed = !_plugins.empty ();
 
+		for (auto const& rfx : _plugins) {
+			rfx->drop_references ();
+		}
+
 		_plugins.clear ();
 
 		for (auto const& child : node.children ()) {
 			if (child->name() == X_("RegionFXPlugin")) {
 				std::shared_ptr<RegionFxPlugin> rfx (new RegionFxPlugin (_session, time_domain ()));
-				rfx->set_state (*child, version);
+				if (rfx->set_state (*child, version)) {
+					PBD::warning << string_compose (_("Failed to load RegionFx Plugin for region `%1'"), name()) << endmsg;
+					// TODO replace w/stub, retain config
+					continue;
+				}
 				if (!_add_plugin (rfx, std::shared_ptr<RegionFxPlugin>(), true)) {
 					continue;
 				}
@@ -1592,6 +1600,7 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 				changed = true;
 			}
 		}
+		lm.release ();
 		if (changed) {
 			fx_latency_changed (true);
 			fx_tail_changed (true);
@@ -2414,7 +2423,11 @@ Region::load_plugin (ARDOUR::PluginType type, std::string const& name)
 bool
 Region::add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<RegionFxPlugin> pos)
 {
-	return _add_plugin (rfx, pos, false);
+	bool rv = _add_plugin (rfx, pos, false);
+	if (rv) {
+		_session.set_dirty ();
+	}
+	return rv;
 }
 
 void
@@ -2441,6 +2454,7 @@ Region::reorder_plugins (RegionFxList const& new_order)
 		oiter = _plugins.erase (oiter);
 	}
 	_plugins.insert (oiter, as_it_will_be.begin (), as_it_will_be.end ());
+	_session.set_dirty ();
 }
 
 void
@@ -2461,7 +2475,7 @@ Region::fx_tail_changed (bool)
 {
 	uint32_t t = 0;
 	for (auto const& rfx : _plugins) {
-		t = max<uint32_t> (t, rfx->plugin()->effective_tail ());
+		t = max<uint32_t> (t, rfx->effective_tailtime ());
 	}
 	if (t == _fx_tail) {
 		return;

@@ -26,8 +26,6 @@
 #include <algorithm>
 #include <unistd.h>
 
-#include <boost/algorithm/string/erase.hpp>
-
 #include "pbd/i18n.h"
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
@@ -1257,6 +1255,12 @@ Session::plan_master_strategy_engine (pframes_t nframes, double master_speed, sa
 	if (master_speed == 0) {
 
 		DEBUG_TRACE (DEBUG::Slave, "JACK transport: not moving\n");
+
+		if (!transport_stopped_or_stopping()) {
+			DEBUG_TRACE (DEBUG::Slave, "JACK Transport: jack is stopped, we are not, so stop ...\n");
+			TFSM_STOP (false, false);
+			return 1.0;
+		}
 
 		const samplecnt_t wlp = worst_latency_preroll_buffer_size_ceil ();
 

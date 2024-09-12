@@ -322,9 +322,7 @@ private:
 	/** details of the match currently being used */
 	Match _match;
 
-	/* ordered map [plugin instance ID] => ARDOUR::ChanMapping
-	 * TODO: consider replacing with boost::flat_map<> or std::vector<>.
-	 */
+	/* ordered map [plugin instance ID] => ARDOUR::ChanMapping */
 #if defined(_MSC_VER) /* && (_MSC_VER < 1900)
 	                   * Regarding the note (below) it was initially
 	                   * thought that this got fixed in VS2015 - but

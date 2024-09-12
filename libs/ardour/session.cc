@@ -44,8 +44,6 @@
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 
-#include <boost/algorithm/string/erase.hpp>
-
 #include "pbd/atomic.h"
 #include "pbd/basename.h"
 #include "pbd/convert.h"
@@ -5505,6 +5503,7 @@ Session::unload_io_plugin (std::shared_ptr<IOPlug> ioplugin)
 	}
 	IOPluginsChanged (); /* EMIT SIGNAL */
 	set_dirty();
+	_io_plugins.flush ();
 	return true;
 }
 

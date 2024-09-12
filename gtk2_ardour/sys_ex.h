@@ -35,6 +35,8 @@ public:
 		double                      y,
 		ARDOUR::MidiModel::SysExPtr sysex);
 
+	SysEx (SysEx const&) = delete;
+
 	~SysEx ();
 
 	void hide ();
@@ -43,12 +45,13 @@ public:
 	void set_height (ArdourCanvas::Distance h) { _flag->set_height (h); }
 
 	ArdourCanvas::Item& item() const { return *_flag; }
+	ARDOUR::MidiModel::SysExPtr sysex () const { return _sysex; }
 
 private:
 	bool event_handler (GdkEvent* ev);
-	SysEx(const SysEx& rhs){}
 	ArdourCanvas::Flag* _flag;
 	ARDOUR::MidiModel::SysExPtr _sysex;
+	MidiRegionView&             _region;
 };
 
 #endif /* __SYSEX_H__ */

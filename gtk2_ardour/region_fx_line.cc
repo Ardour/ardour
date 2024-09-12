@@ -30,6 +30,7 @@ RegionFxLine::RegionFxLine (std::string const& name, RegionView& r, ArdourCanvas
 	: AutomationLine (name, r.get_time_axis_view(), parent, l, d)
 	, _rv (r)
 {
+	terminal_points_can_slide = false;
 	init ();
 }
 
@@ -38,6 +39,7 @@ RegionFxLine::RegionFxLine (std::string const& name, RegionView& r, ArdourCanvas
 	, _rv (r)
 	, _ac (ac)
 {
+	terminal_points_can_slide = false;
 	init ();
 }
 
@@ -56,7 +58,7 @@ RegionFxLine::get_origin() const
 }
 
 void
-RegionFxLine::enable_autoation ()
+RegionFxLine::enable_automation ()
 {
 	std::shared_ptr<AutomationControl> ac = _ac.lock ();
 	if (ac) {
@@ -67,14 +69,14 @@ RegionFxLine::enable_autoation ()
 void
 RegionFxLine::end_drag (bool with_push, uint32_t final_index)
 {
-	enable_autoation ();
+	enable_automation ();
 	AutomationLine::end_drag (with_push, final_index);
 }
 
 void
 RegionFxLine::end_draw_merge ()
 {
-	enable_autoation ();
+	enable_automation ();
 	AutomationLine::end_draw_merge ();
 }
 

@@ -23,8 +23,6 @@
 
 #include <map>
 
-#include <boost/utility.hpp>
-
 #include <glibmm/threads.h>
 
 #ifdef HAVE_LV2_1_18_6

@@ -1843,8 +1843,12 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			switch (item_type) {
 			case RegionItem:
 			{
-				/* since we have FreehandLineDrag we can only get here after a drag, when no movement has happend */
-				assert (were_dragging);
+				/* since we have FreehandLineDrag we can only get here after a drag, when no movement has happend.
+				 * Except when a drag was aborted by pressing Esc.
+				 */
+				if (!were_dragging) {
+					return true;
+				}
 
 				AudioRegionView*      arv = dynamic_cast<AudioRegionView*> (clicked_regionview);
 				AutomationRegionView* atv = dynamic_cast<AutomationRegionView*> (clicked_regionview);

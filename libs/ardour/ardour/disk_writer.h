@@ -26,6 +26,7 @@
 #include <boost/optional.hpp>
 
 #include "ardour/disk_io.h"
+#include "ardour/event_ring_buffer.h"
 #include "ardour/midi_buffer.h"
 
 namespace ARDOUR
@@ -201,8 +202,8 @@ private:
 	/** A buffer that we use to put newly-arrived MIDI data in for
 	 * the GUI to read (so that it can update itself).
 	 */
-	MidiBuffer                   _gui_feed_buffer;
-	mutable Glib::Threads::Mutex _gui_feed_buffer_mutex;
+	mutable EventRingBuffer<samplepos_t> _gui_feed_fifo;
+	mutable Glib::Threads::Mutex         _gui_feed_reset_mutex;
 };
 
 } // namespace

@@ -400,31 +400,48 @@ Route::process_output_buffers (BufferSet& bufs,
 		return;
 	}
 
-	/* We should offset the route-owned ctrls by the given latency, however
-	 * this only affects Mute. Other route-owned controls (solo, polarity..)
-	 * are not automatable.
-	 *
-	 * Mute has its own issues since there's not a single mute-point,
-	 * but in general
-	 */
-	automation_run (start_sample, nframes);
-
 	if (_pannable) {
-		_pannable->automation_run (start_sample + _signal_latency, nframes);
+		/* this is only for the benfit of updating the UI.
+		 *
+		 * Panner's `::distribute_one_automated()` evalualte
+		 * a sample-accurate curve using start/end of the
+		 * delivery processor.
+		 */
+		_pannable->automation_run (start_sample, nframes);
 	}
+
+	const int speed = (is_auditioner() ? 1 : _session.transport_speed ());
+	assert (speed == -1 || speed == 0 || speed == 1);
+
+	const samplecnt_t output_latency = speed * _output_latency;
+	const samplecnt_t latency_offset = speed * (_signal_latency + _output_latency);
+
+	/* Mute is the only actual route-owned control (solo, solo safe, polarity
+	 * are not automatable).
+	 *
+	 * Here we offset mute automation to align to output/master bus
+	 * to be consistent with the fader. This applied to the
+	 * "Main outs" mute point.
+	 *
+	 * Other mute points in the middle of signal flow flow
+	 * will not be handled correctly. That would mean to add
+	 * _signal_latency - accumulated processor effective_latency() at mute mute
+	 */
+
+	automation_run (start_sample + output_latency, nframes);
 
 	/* figure out if we're going to use gain automation */
 	if (gain_automation_ok) {
 		_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
 		_amp->setup_gain_automation (
-				start_sample + _amp->output_latency (),
-				end_sample + _amp->output_latency (),
+				start_sample + _amp->output_latency () + output_latency,
+				end_sample + _amp->output_latency () + output_latency,
 				nframes);
 
 		_trim->set_gain_automation_buffer (_session.trim_automation_buffer ());
 		_trim->setup_gain_automation (
-				start_sample + _trim->output_latency (),
-				end_sample + _trim->output_latency (),
+				start_sample + _trim->output_latency () + output_latency,
+				end_sample + _trim->output_latency () + output_latency,
 				nframes);
 	}
 
@@ -438,18 +455,8 @@ Route::process_output_buffers (BufferSet& bufs,
 	 * -> at Time T= -15, the disk-reader reads sample T=0.
 	 * By the Time T=0 is reached (dt=15 later) that sample is audible.
 	 */
-
-	const double speed = (is_auditioner() ? 1.0 : _session.transport_speed ());
-
-	const sampleoffset_t latency_offset = _signal_latency + _output_latency;
-	if (speed < 0) {
-		/* when rolling backwards this can become negative */
-		start_sample -= latency_offset;
-		end_sample -= latency_offset;
-	} else {
-		start_sample += latency_offset;
-		end_sample += latency_offset;
-	}
+	start_sample += latency_offset;
+	end_sample += latency_offset;
 
 	/* Note: during initial pre-roll 'start_sample' as passed as argument can be negative.
 	 * Functions calling process_output_buffers() will set  "run_disk_reader"

@@ -35,7 +35,7 @@
 
 #include "context_menu_helper.h"
 #include "gui_thread.h"
-#include "latency_gui.h"
+#include "timectl_gui.h"
 #include "port_insert_ui.h"
 #include "timers.h"
 #include "utils.h"
@@ -282,7 +282,7 @@ PortInsertUI::edit_latency_button_clicked ()
 {
 	assert (_pi);
 	if (!_latency_gui) {
-		_latency_gui    = new LatencyGUI (*(_pi.get ()), _pi->session ().sample_rate (), _pi->session ().get_block_size ());
+		_latency_gui    = new TimeCtlGUI (*(_pi.get ()), _pi->session ().sample_rate (), _pi->session ().get_block_size ());
 		_latency_dialog = new ArdourWindow (_("Edit Latency"));
 		/* use both keep-above and transient for to try cover as many
 		   different WM's as possible.

@@ -213,6 +213,16 @@ Biquad::configure (double a1, double a2, double b0, double b1, double b2)
 }
 
 void
+Biquad::coefficients (double& a1, double& a2, double& b0, double& b1, double& b2) const
+{
+	a1 = _a1;
+	a2 = _a2;
+	b0 = _b0;
+	b1 = _b1;
+	b2 = _b2;
+}
+
+void
 Biquad::configure (Biquad const& other)
 {
 	_a1 = other._a1;

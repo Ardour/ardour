@@ -856,7 +856,7 @@ ExportReport::run ()
 {
 	do {
 		int i = ArdourDialog::run ();
-		if (i == Gtk::RESPONSE_DELETE_EVENT || i == RESPONSE_CLOSE) {
+		if (i == Gtk::RESPONSE_DELETE_EVENT || i == RESPONSE_CLOSE || i == RESPONSE_CANCEL) {
 			break;
 		}
 	} while (1);

@@ -256,6 +256,7 @@ libardour_sources = [
         'system_exec.cc',
         'revision.cc',
         'rt_midibuffer.cc',
+        'tailtime.cc',
         'template_utils.cc',
         'tempo_map_importer.cc',
         'thawlist.cc',

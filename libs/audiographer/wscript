@@ -28,7 +28,6 @@ def configure(conf):
     autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW3F', mandatory=True)
 
     # Boost headers
-    autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
     autowaf.check_header(conf, 'cxx', 'boost/format.hpp')
 
 def build(bld):

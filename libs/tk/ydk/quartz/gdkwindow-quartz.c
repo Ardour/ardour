@@ -23,6 +23,7 @@
 #include <Carbon/Carbon.h>
 
 #include "gdk.h"
+#include "gdkinternals.h"
 #include "gdkwindowimpl.h"
 #include "gdkprivate-quartz.h"
 #include "gdkscreen-quartz.h"
@@ -196,7 +197,15 @@ gdk_window_impl_quartz_finalize (GObject *object)
 {
   GdkWindowImplQuartz *impl = GDK_WINDOW_IMPL_QUARTZ (object);
 
-  check_grab_destroy (GDK_DRAWABLE_IMPL_QUARTZ (object)->wrapper);
+  GdkWindow *window = GDK_DRAWABLE_IMPL_QUARTZ (object)->wrapper;
+  GdkWindowObject *private = (GdkWindowObject*) window;
+
+  check_grab_destroy (window);
+
+  if (private->modal_hint && _gdk_modal_notify)
+    {
+      _gdk_modal_notify (GDK_DRAWABLE_IMPL_QUARTZ (object)->wrapper, false);
+    }
 
   if (impl->paint_clip_region)
     gdk_region_destroy (impl->paint_clip_region);
@@ -2385,11 +2394,19 @@ void
 gdk_window_set_modal_hint (GdkWindow *window,
 			   gboolean   modal)
 {
+  GdkWindowObject *private;
+
   if (GDK_WINDOW_DESTROYED (window) ||
       !WINDOW_IS_TOPLEVEL (window))
     return;
 
-  /* FIXME: Implement */
+  private = (GdkWindowObject*) window;
+
+  if (_gdk_modal_notify &&  private->modal_hint != modal) {
+	  _gdk_modal_notify (window, modal);
+  }
+
+  private->modal_hint = modal;
 }
 
 void

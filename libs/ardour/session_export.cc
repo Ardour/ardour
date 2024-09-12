@@ -173,6 +173,8 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 		/* get everyone to the right position */
 
 		std::shared_ptr<RouteList const> rl = routes.reader();
+		ARDOUR::ProcessThread* pt = new ProcessThread ();
+		pt->get_buffers ();
 
 		for (auto const& i : *rl) {
 			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
@@ -182,6 +184,8 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 				return -1;
 			}
 		}
+		pt->drop_buffers ();
+		delete pt;
 	}
 
 	/* we just did the core part of a locate call above, but

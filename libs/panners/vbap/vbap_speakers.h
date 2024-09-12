@@ -22,8 +22,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/utility.hpp>
-
 #include <pbd/signals.h>
 
 #include "ardour/panner.h"

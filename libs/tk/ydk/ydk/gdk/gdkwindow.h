@@ -406,7 +406,7 @@ void	      gdk_window_move_region           (GdkWindow       *window,
 						gint             dy);
 gboolean      gdk_window_ensure_native        (GdkWindow       *window);
 
-/* 
+/*
  * This allows for making shaped (partially transparent) windows
  * - cool feature, needed for Drag and Drag for example.
  *  The shape_mask can be the mask
@@ -507,6 +507,9 @@ GdkWindowTypeHint gdk_window_get_type_hint (GdkWindow        *window);
 gboolean      gdk_window_get_modal_hint   (GdkWindow       *window);
 void          gdk_window_set_modal_hint   (GdkWindow       *window,
                                            gboolean         modal);
+
+typedef void (*GdkWindowModalNotify)(GdkWindow*,gboolean);
+void          gdk_window_set_modal_notify (GdkWindowModalNotify);
 
 void gdk_window_set_skip_taskbar_hint (GdkWindow *window,
                                        gboolean   skips_taskbar);

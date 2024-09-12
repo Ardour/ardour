@@ -29,10 +29,12 @@
 #include "pbd/unwind.h"
 
 #include "ardour/latent.h"
+#include "ardour/rc_configuration.h"
+#include "ardour/tailtime.h"
 
 #include "gtkmm2ext/utils.h"
 
-#include "latency_gui.h"
+#include "timectl_gui.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
@@ -50,46 +52,66 @@ static const gchar *_unit_strings[] = {
 	0
 };
 
-std::vector<std::string> LatencyGUI::unit_strings;
+std::vector<std::string> TimeCtlGUI::unit_strings;
 
 std::string
-LatencyBarController::get_label (double&)
+TimeCtlBarController::get_label (double&)
 {
 	return ARDOUR_UI_UTILS::samples_as_time_string (
-			_latency_gui->adjustment.get_value(), _latency_gui->sample_rate, true);
+			_timectl_gui->adjustment.get_value(), _timectl_gui->sample_rate, true);
 }
 
 void
-LatencyGUIControllable::set_value (double v, PBD::Controllable::GroupControlDisposition group_override)
+TimeCtlGUIControllable::set_value (double v, PBD::Controllable::GroupControlDisposition group_override)
 {
-	_latency_gui->adjustment.set_value (v);
+	_timectl_gui->adjustment.set_value (v);
 }
 
 double
-LatencyGUIControllable::get_value () const
+TimeCtlGUIControllable::get_value () const
 {
-	return _latency_gui->adjustment.get_value ();
+	return _timectl_gui->adjustment.get_value ();
 }
 double
-LatencyGUIControllable::lower() const
+TimeCtlGUIControllable::lower() const
 {
-	return _latency_gui->adjustment.get_lower ();
+	return _timectl_gui->adjustment.get_lower ();
 }
 
 double
-LatencyGUIControllable::upper() const
+TimeCtlGUIControllable::upper() const
 {
-	return _latency_gui->adjustment.get_upper ();
+	return _timectl_gui->adjustment.get_upper ();
 }
 
-LatencyGUI::LatencyGUI (Latent& l, samplepos_t sr, samplepos_t psz)
-	: _latent (l)
+TimeCtlGUI::TimeCtlGUI (Latent& l, samplepos_t sr, samplepos_t psz)
+	: _latent (&l)
+	, _tailtime (0)
 	, sample_rate (sr)
 	, period_size (psz)
 	, _ignore_change (false)
 	, adjustment (0, 0.0, sample_rate, 1.0, sample_rate / 1000.0f) /* max 1 second, step by samples, page by msecs */
 	, bc (adjustment, this)
 	, reset_button (_("Reset"))
+{
+	init ();
+}
+
+TimeCtlGUI::TimeCtlGUI (TailTime& t, samplepos_t sr, samplepos_t psz)
+	: _latent (0)
+	, _tailtime (&t)
+	, sample_rate (sr)
+	, period_size (psz)
+	, _ignore_change (false)
+	, adjustment (0, 0.0, 20 * sample_rate, sample_rate / 1000.f, 1.0, sample_rate / 2.0f) /* max 20 second, step by msec, page by 0.5 sec */
+	, bc (adjustment, this)
+	, reset_button (_("Reset"))
+{
+	init ();
+}
+
+void
+TimeCtlGUI::init ()
 {
 	Widget* w;
 
@@ -116,17 +138,21 @@ LatencyGUI::LatencyGUI (Latent& l, samplepos_t sr, samplepos_t psz)
 	hbox2.pack_start (plus_button);
 	hbox2.pack_start (units_combo, true, true);
 
-	minus_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LatencyGUI::change_latency_from_button), -1));
-	plus_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LatencyGUI::change_latency_from_button), 1));
-	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &LatencyGUI::reset));
+	minus_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &TimeCtlGUI::change_from_button), -1));
+	plus_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &TimeCtlGUI::change_from_button), 1));
+	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &TimeCtlGUI::reset));
 
 	/* Limit value to adjustment range (max = sample_rate).
 	 * Otherwise if the signal_latency() is larger than the adjustment's max,
-	 * LatencyGUI::finish() would set the adjustment's max value as custom-latency.
+	 * TimeCtlGUI::finish() would set the adjustment's max value as custom-latency.
 	 */
-	adjustment.set_value (std::min (sample_rate, _latent.signal_latency ()));
+	if (_latent) {
+		adjustment.set_value (std::min (sample_rate, _latent->signal_latency ()));
+	} else if (_tailtime) {
+		adjustment.set_value (std::min (sample_rate, _tailtime->signal_tailtime ()));
+	}
 
-	adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &LatencyGUI::finish));
+	adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &TimeCtlGUI::finish));
 
 	bc.set_size_request (-1, 25);
 	bc.set_name (X_("ProcessorControlSlider"));
@@ -137,32 +163,46 @@ LatencyGUI::LatencyGUI (Latent& l, samplepos_t sr, samplepos_t psz)
 }
 
 void
-LatencyGUI::finish ()
+TimeCtlGUI::finish ()
 {
 	if (_ignore_change) {
 		return;
 	}
 	samplepos_t new_value = (samplepos_t) adjustment.get_value();
-	_latent.set_user_latency (new_value);
+	if (_latent) {
+		_latent->set_user_latency (new_value);
+	} else if (_tailtime) {
+		_tailtime->set_user_tailtime (new_value);
+	}
 }
 
 void
-LatencyGUI::reset ()
+TimeCtlGUI::reset ()
 {
-	_latent.unset_user_latency ();
-	PBD::Unwinder<bool> uw (_ignore_change, true);
-	adjustment.set_value (std::min (sample_rate, _latent.signal_latency ()));
+	if (_latent) {
+		_latent->unset_user_latency ();
+		PBD::Unwinder<bool> uw (_ignore_change, true);
+		adjustment.set_value (std::min (sample_rate, _latent->signal_latency ()));
+	} else if (_tailtime) {
+		_tailtime->unset_user_tailtime ();
+		PBD::Unwinder<bool> uw (_ignore_change, true);
+		adjustment.set_value (std::min<samplecnt_t> (Config->get_max_tail_samples (), _tailtime->signal_tailtime ()));
+	}
 }
 
 void
-LatencyGUI::refresh ()
+TimeCtlGUI::refresh ()
 {
 	PBD::Unwinder<bool> uw (_ignore_change, true);
-	adjustment.set_value (std::min (sample_rate, _latent.effective_latency ()));
+	if (_latent) {
+		adjustment.set_value (std::min (sample_rate, _latent->effective_latency ()));
+	} else if (_tailtime) {
+		adjustment.set_value (std::min<samplecnt_t> (Config->get_max_tail_samples (),_tailtime->effective_tailtime ()));
+	}
 }
 
 void
-LatencyGUI::change_latency_from_button (int dir)
+TimeCtlGUI::change_from_button (int dir)
 {
 	std::string unitstr = units_combo.get_active_text();
 	double shift = 0.0;

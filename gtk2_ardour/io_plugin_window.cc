@@ -16,8 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/shared_ptr.hpp>
-
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
 #include <gtkmm/scrolledwindow.h>

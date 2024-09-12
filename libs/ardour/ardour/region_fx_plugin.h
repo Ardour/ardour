@@ -43,7 +43,7 @@ namespace ARDOUR
 {
 class ReadOnlyControl;
 
-class LIBARDOUR_API RegionFxPlugin : public SessionObject, public PlugInsertBase, public Latent, public Temporal::TimeDomainProvider
+class LIBARDOUR_API RegionFxPlugin : public SessionObject, public PlugInsertBase, public Latent, public TailTime, public Temporal::TimeDomainProvider
 {
 public:
 	RegionFxPlugin (Session&, Temporal::TimeDomain const, std::shared_ptr<Plugin> = std::shared_ptr<Plugin> ());
@@ -61,22 +61,22 @@ public:
 
 	/* Latent */
 	samplecnt_t signal_latency () const;
+	/* TailTime */
+	samplecnt_t signal_tailtime () const;
 
 	/* PlugInsertBase */
 	uint32_t get_count () const
 	{
 		return _plugins.size ();
 	}
-	PluginType type () const
-	{
-		return plugin ()->get_info ()->type;
-	}
+	PluginType type () const;
+
 	std::shared_ptr<Plugin> plugin (uint32_t num = 0) const
 	{
 		if (num < _plugins.size ()) {
 			return _plugins[num];
 		} else {
-			return _plugins[0];
+			return std::shared_ptr<Plugin>();
 		}
 	}
 
@@ -90,6 +90,8 @@ public:
 
 	bool reset_parameters_to_default ();
 	bool can_reset_all_parameters ();
+
+	void maybe_emit_changed_signals () const;
 
 	std::string describe_parameter (Evoral::Parameter param);
 
@@ -174,7 +176,8 @@ private:
 	/** details of the match currently being used */
 	Match _match;
 
-	uint32_t _plugin_signal_latency;
+	samplecnt_t _plugin_signal_latency;
+	samplecnt_t _plugin_signal_tailtime;
 
 	typedef std::vector<std::shared_ptr<Plugin>> Plugins;
 	Plugins                                      _plugins;
@@ -189,11 +192,17 @@ private:
 	bool _configured;
 	bool _no_inplace;
 
+	mutable samplepos_t _last_emit;
+
 	typedef std::map<uint32_t, std::shared_ptr<ReadOnlyControl>> CtrlOutMap;
 	CtrlOutMap                                                   _control_outputs;
 
 	Gtkmm2ext::WindowProxy* _window_proxy;
 	std::atomic<int>        _flush;
+
+	XMLNode* _state;
+
+	mutable Glib::Threads::Mutex _process_lock;
 };
 
 } // namespace ARDOUR

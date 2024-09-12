@@ -423,6 +423,10 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					cerr << "underrun for " << _name << " Available samples: " << available << " required: " << disk_samples_to_consume << endl;
 #endif
 					DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 underrun in %2, total space = %3 vs %4\n", DEBUG_THREAD_SELF, name (), available, disk_samples_to_consume));
+					DEBUG_TRACE (DEBUG::AudioCacheRefill, string_compose ("DR '%1' underrun have %2 need %3 samples at pos %4\n",
+								name (), available, disk_samples_to_consume,
+								std::setprecision (3), std::fixed,
+								start_sample / (float)_session.sample_rate ()));
 					Underrun ();
 					return;
 				}

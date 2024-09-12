@@ -2,7 +2,6 @@
 #define AUDIOGRAPHER_PROCESS_CONTEXT_H
 
 #include <boost/static_assert.hpp>
-#include <boost/type_traits.hpp>
 #include <boost/format.hpp>
 
 #include "audiographer/visibility.h"

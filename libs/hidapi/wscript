@@ -50,6 +50,7 @@ def build(bld):
             obj.source     = 'mac/hid.c'
             obj.framework  = [ 'IOKit', 'CoreFoundation' ]
         else:
+            # with '-strict' this needs "-std=gnu99" to compile w/o warnings
             obj.source     = 'linux/hid.c'
             if re.search ("linux", sys.platform) != None:
                 obj.uselib = 'UDEV'

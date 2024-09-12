@@ -26,8 +26,6 @@
 #include <vector>
 #include <list>
 
-#include <boost/utility.hpp>
-
 #include "evoral/Parameter.h"
 
 #include "ardour/ardour.h"

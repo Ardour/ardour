@@ -19,8 +19,6 @@
 #ifndef _libardour_export_smf_writer_h_
 #define _libardour_export_smf_writer_h_
 
-#include <boost/shared_ptr.hpp>
-
 #include "evoral/SMF.h"
 
 #include "ardour/libardour_visibility.h"

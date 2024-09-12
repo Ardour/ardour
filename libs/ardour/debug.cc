@@ -29,6 +29,7 @@ using namespace std;
 
 PBD::DebugBits PBD::DEBUG::AudioEngine = PBD::new_debug_bit ("AudioEngine");
 PBD::DebugBits PBD::DEBUG::AudioPlayback = PBD::new_debug_bit ("audioplayback");
+PBD::DebugBits PBD::DEBUG::AudioCacheRefill = PBD::new_debug_bit ("audiocacherefill");
 PBD::DebugBits PBD::DEBUG::AudioUnitConfig = PBD::new_debug_bit ("AudioUnitConfig");
 PBD::DebugBits PBD::DEBUG::AudioUnitGUI = PBD::new_debug_bit ("AudioUnitGUI");
 PBD::DebugBits PBD::DEBUG::AudioUnitProcess = PBD::new_debug_bit ("AudioUnitProcess");
@@ -63,6 +64,7 @@ PBD::DebugBits PBD::DEBUG::LatencyIO = PBD::new_debug_bit ("latencyio");
 PBD::DebugBits PBD::DEBUG::LatencyRoute = PBD::new_debug_bit ("latencyroute");
 PBD::DebugBits PBD::DEBUG::LaunchControlXL = PBD::new_debug_bit("launchcontrolxl");
 PBD::DebugBits PBD::DEBUG::Launchpad = PBD::new_debug_bit ("launchpad");
+PBD::DebugBits PBD::DEBUG::Launchkey = PBD::new_debug_bit ("launchkey");
 PBD::DebugBits PBD::DEBUG::Layering = PBD::new_debug_bit ("layering");
 PBD::DebugBits PBD::DEBUG::MIDISurface = PBD::new_debug_bit ("midisurface");
 PBD::DebugBits PBD::DEBUG::MTC = PBD::new_debug_bit ("mtc");

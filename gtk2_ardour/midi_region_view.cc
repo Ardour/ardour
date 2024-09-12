@@ -927,7 +927,6 @@ MidiRegionView::clear_events ()
 		}
 	}
 
-
 	_note_group->clear (true);
 	_events.clear();
 	_patch_changes.clear();
@@ -1357,9 +1356,14 @@ MidiRegionView::display_patch_changes ()
 {
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	uint16_t chn_mask = mtv->midi_track()->get_playback_channel_mask();
+	PatchChanges to_remove = _patch_changes;
 
 	for (uint8_t i = 0; i < 16; ++i) {
-		display_patch_changes_on_channel (i, chn_mask & (1 << i));
+		display_patch_changes_on_channel (i, chn_mask & (1 << i), to_remove);
+	}
+
+	for (auto const& i : to_remove) {
+		_patch_changes.erase (i.first);
 	}
 }
 
@@ -1367,8 +1371,9 @@ MidiRegionView::display_patch_changes ()
  * them `greyed-out' (as on an inactive channel)
  */
 void
-MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_channel)
+MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_channel, PatchChanges& to_remove)
 {
+
 	for (MidiModel::PatchChanges::const_iterator i = _model->patch_changes().begin(); i != _model->patch_changes().end(); ++i) {
 		std::shared_ptr<PatchChange> p;
 
@@ -1392,6 +1397,8 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 
 				p->show();
 		}
+
+		to_remove.erase (p->patch ());
 
 		} else {
 			add_canvas_patch_change (*i);
@@ -1460,6 +1467,8 @@ MidiRegionView::display_sysexes()
 
 	const std::shared_ptr<MidiRegion> mregion (midi_region());
 
+	SysExes to_remove = _sys_exes;
+
 	for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
 		MidiModel::SysExPtr sysex_ptr = *i;
 		timepos_t time = timepos_t (sysex_ptr->time());
@@ -1490,11 +1499,12 @@ MidiRegionView::display_sysexes()
 
 		if (!sysex) {
 			sysex = std::shared_ptr<SysEx>(
-				new SysEx (*this, _note_group, text, height, x, 1.0, sysex_ptr));
+				new SysEx (*this, group, text, height, x, 1.0, sysex_ptr));
 			_sys_exes.insert (make_pair (sysex_ptr, sysex));
 		} else {
 			sysex->set_height (height);
 			sysex->item().set_position (ArdourCanvas::Duple (x, 1.0));
+			to_remove.erase (sysex_ptr);
 		}
 
 		// Show unless message is beyond the region bounds
@@ -1503,6 +1513,10 @@ MidiRegionView::display_sysexes()
 		} else {
 			sysex->show();
 		}
+	}
+
+	for (auto const& i : to_remove ) {
+		_sys_exes.erase (i.first);
 	}
 }
 
@@ -2031,18 +2045,6 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 	_patch_changes.insert (make_pair (patch, patch_change));
 }
 
-void
-MidiRegionView::remove_canvas_patch_change (PatchChange* pc)
-{
-	/* remove the canvas item */
-	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
-		if (x->second->patch() == pc->patch()) {
-			_patch_changes.erase (x);
-			break;
-		}
-	}
-}
-
 MIDI::Name::PatchPrimaryKey
 MidiRegionView::patch_change_to_patch_key (MidiModel::PatchChangePtr p)
 {
@@ -2096,7 +2098,6 @@ MidiRegionView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPri
 
 	_model->apply_diff_command_as_commit (*trackview.session(), c);
 
-	remove_canvas_patch_change (&pc);
 	display_patch_changes ();
 }
 
@@ -2174,7 +2175,6 @@ MidiRegionView::delete_patch_change (PatchChange* pc)
 	c->remove (pc->patch ());
 	_model->apply_diff_command_as_commit (*trackview.session(), c);
 
-	remove_canvas_patch_change (pc);
 	display_patch_changes ();
 }
 
@@ -4537,16 +4537,13 @@ MidiRegionView::edit_patch_change (PatchChange* pc)
 }
 
 void
-MidiRegionView::delete_sysex (SysEx* /*sysex*/)
+MidiRegionView::delete_sysex (SysEx* sysex)
 {
-	// CAIROCANVAS
-	// sysyex object doesn't have a pointer to a sysex event
-	// MidiModel::SysExDiffCommand* c = _model->new_sysex_diff_command (_("delete sysex"));
-	// c->remove (sysex->sysex());
-	// _model->apply_command (*trackview.session(), c);
+	MidiModel::SysExDiffCommand* c = _model->new_sysex_diff_command (_("delete sysex"));
+	c->remove (sysex->sysex ());
+	_model->apply_diff_command_as_commit (*trackview.session(), c);
 
-	//_sys_exes.clear ();
-	// display_sysexes();
+	display_sysexes();
 }
 
 std::string

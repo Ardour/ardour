@@ -132,7 +132,6 @@ public:
 	void paste_internal (Temporal::timepos_t const & pos, unsigned paste_count, float times, const MidiCutBuffer&);
 
 	void add_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr patch);
-	void remove_canvas_patch_change (PatchChange* pc);
 
 	/** Look up the given time and channel in the 'automation' and set keys accordingly.
 	 * @param time the time of the patch change event
@@ -541,7 +540,7 @@ public:
 	void maybe_select_by_position (GdkEventButton* ev, double x, double y);
 	void get_events (Events& e, Evoral::Sequence<Temporal::Beats>::NoteOperator op, uint8_t val, int chan_mask = 0);
 
-	void display_patch_changes_on_channel (uint8_t, bool);
+	void display_patch_changes_on_channel (uint8_t, bool, PatchChanges&);
 
 	void connect_to_diskstream ();
 	void data_recorded (std::weak_ptr<ARDOUR::MidiSource>);
