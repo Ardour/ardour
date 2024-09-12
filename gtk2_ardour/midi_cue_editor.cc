@@ -260,7 +260,7 @@ MidiCueEditor::build_canvas ()
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
 
 	bg = new CueMidiBackground (data_group);
-	_canvas_viewport->signal_size_allocate().connect (sigc::mem_fun(*this, &MidiCueEditor::canvas_allocate));
+	_canvas_viewport->signal_size_allocate().connect (sigc::mem_fun(*this, &MidiCueEditor::canvas_allocate), false);
 
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::Rectangle (data_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
@@ -324,6 +324,8 @@ MidiCueEditor::canvas_allocate (Gtk::Allocation alloc)
 {
 	_visible_canvas_width = alloc.get_width();
 	_visible_canvas_height = alloc.get_height();
+
+	std::cerr << "mce allocated " << alloc.get_width() << " x " << alloc.get_width() << " view = " << view << std::endl;
 
 	if (view) {
 		double timebars = n_timebars * timebar_height;

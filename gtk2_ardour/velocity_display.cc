@@ -74,7 +74,6 @@ VelocityDisplay::VelocityDisplay (EditingContext& ec, MidiViewBackground& backgr
 	base.set_outline_color (UIConfiguration::instance().color ("automation track outline"));
 	base.set_outline (true);
 	base.set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
-
 }
 
 VelocityDisplay::~VelocityDisplay ()
@@ -183,6 +182,10 @@ VelocityDisplay::add_note (NoteBase* nb)
 void
 VelocityDisplay::set_size_and_position (GhostEvent& gev)
 {
+	if (base.get().empty()) {
+		return;
+	}
+
 	ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (gev.item);
 	const double available_height = base.y1();
 	const double actual_height = ((dragging ? gev.velocity_while_editing : gev.event->note()->velocity()) / 127.0) * available_height;
@@ -190,21 +193,28 @@ VelocityDisplay::set_size_and_position (GhostEvent& gev)
 
 	if (gev.is_hit) {
 		/* compare to Hit::points , offset by w/2 */
-		l->set (ArdourCanvas::Duple (gev.event->x0() + (gev.event->x1() - gev.event->x0()) / 2, base.y1() - actual_height), actual_height, lollipop_radius * scale);
+		l->set (ArdourCanvas::Duple (gev.event->x0() + (gev.event->x1() - gev.event->x0()) / 2, base.height() - actual_height), actual_height, lollipop_radius * scale);
 	} else {
-		l->set (ArdourCanvas::Duple (gev.event->x0(), base.y1() - actual_height), actual_height, lollipop_radius * scale);
+		l->set (ArdourCanvas::Duple (gev.event->x0(), base.height() - actual_height), actual_height, lollipop_radius * scale);
+		std::cerr << "place loli @ " << ArdourCanvas::Duple (gev.event->x0(), base.height() - actual_height) << " h: " <<  actual_height << " r: " << lollipop_radius * scale << " of " << available_height
+		          << " ah " << actual_height << " from " << base.whoami() << " = " << base.get() << " bh " << base.height() << std::endl;
 	}
 }
 
 void
-VelocityDisplay::update_note (GhostEvent* gev)
+VelocityDisplay::update_note (NoteBase* nb)
 {
-	set_size_and_position (*gev);
-	gev->item->set_fill_color (gev->event->base_color());
+	GhostEvent* gev = GhostEvent::find (nb->note(), events, _optimization_iterator);
+
+	if (!gev) {
+		return;
+	}
+
+	update_ghost_event (gev);
 }
 
 void
-VelocityDisplay::update_hit (GhostEvent* gev)
+VelocityDisplay::update_ghost_event (GhostEvent* gev)
 {
 	set_size_and_position (*gev);
 	gev->item->set_fill_color (gev->event->base_color());
@@ -310,6 +320,7 @@ VelocityDisplay::y_position_to_velocity (double y) const
 void
 VelocityDisplay::note_selected (NoteBase* ev)
 {
+	std::cerr << "Look for event in " << events.size() << std::endl;
 	GhostEvent* gev = GhostEvent::find (ev->note(), events, _optimization_iterator);
 
 	if (!gev) {

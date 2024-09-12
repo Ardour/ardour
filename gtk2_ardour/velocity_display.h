@@ -47,8 +47,13 @@ class VelocityDisplay
 
 	void redisplay();
 	void add_note(NoteBase*);
-	void update_note (GhostEvent* note);
-	void update_hit (GhostEvent* hit);
+
+	void update_note (NoteBase*);
+
+	void update_ghost_event (GhostEvent*);
+	void update_note (GhostEvent* gev) { update_ghost_event (gev); }
+	void update_hit (GhostEvent* gev)  { update_ghost_event (gev); }
+
 	virtual void remove_note (NoteBase*) = 0;
 	void note_selected (NoteBase*);
 	void clear ();
