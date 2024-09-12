@@ -1590,14 +1590,14 @@ MidiView::note_in_region_range (const std::shared_ptr<NoteType> note, bool& visi
 }
 
 void
-MidiView::update_note (NoteBase* note, bool update_ghost_regions)
+MidiView::update_note (NoteBase* note)
 {
 	Note* sus = NULL;
 	Hit*  hit = NULL;
 	if ((sus = dynamic_cast<Note*>(note))) {
-		update_sustained(sus, update_ghost_regions);
+		update_sustained (sus);
 	} else if ((hit = dynamic_cast<Hit*>(note))) {
-		update_hit(hit, update_ghost_regions);
+		update_hit (hit);
 	}
 }
 
@@ -1606,7 +1606,7 @@ MidiView::update_note (NoteBase* note, bool update_ghost_regions)
  *  @param update_ghost_regions true to update the note in any ghost regions that we have, otherwise false.
  */
 void
-MidiView::update_sustained (Note* ev, bool update_ghost_regions)
+MidiView::update_sustained (Note* ev)
 {
 	const std::shared_ptr<ARDOUR::MidiRegion> mr = midi_region();
 	std::shared_ptr<NoteType> note = ev->note();
@@ -1696,7 +1696,7 @@ MidiView::update_sustained (Note* ev, bool update_ghost_regions)
 }
 
 void
-MidiView::update_hit (Hit* ev, bool update_ghost_regions)
+MidiView::update_hit (Hit* ev)
 {
 	std::shared_ptr<NoteType> note = ev->note();
 	const timepos_t note_time = _midi_region->source_beats_to_absolute_time (note->time());
@@ -2557,11 +2557,11 @@ MidiView::copy_selection (NoteBase* primary)
 		std::shared_ptr<NoteType> g (new NoteType (*((*i)->note())));
 		if (_midi_context.note_mode() == Sustained) {
 			Note* n = new Note (*this, _note_group, g);
-			update_sustained (n, false);
+			update_sustained (n);
 			note = n;
 		} else {
 			Hit* h = new Hit (*this, _note_group, 10, g);
-			update_hit (h, false);
+			update_hit (h);
 			note = h;
 		}
 
@@ -4023,7 +4023,7 @@ MidiView::update_ghost_note (double x, double y, uint32_t state)
 	_ghost_note->note()->set_channel (_midi_context.get_preferred_midi_channel ());
 	_ghost_note->note()->set_velocity (get_velocity_for_add (snapped_beats));
 
-	update_note (_ghost_note, false);
+	update_note (_ghost_note);
 
 	show_verbose_cursor (_ghost_note->note ());
 }
@@ -4469,8 +4469,6 @@ MidiView::get_draw_length_beats (timepos_t const & pos) const
 void
 MidiView::quantize_selected_notes ()
 {
-	std::cerr << "QSN!\n";
-
 	Quantize* quant = _editing_context.get_quantize_op ();
 
 	if (!quant) {

@@ -532,9 +532,9 @@ class MidiView : public virtual sigc::trackable
 	friend class VelocityDisplay;
 	void sync_velocity_drag (double factor);
 
-	void update_note (NoteBase*, bool update_ghost_regions = true);
-	void update_sustained (Note *, bool update_ghost_regions = true);
-	void update_hit (Hit *, bool update_ghost_regions = true);
+	void update_note (NoteBase*);
+	virtual void update_sustained (Note *);
+	virtual void update_hit (Hit *);
 
 	void create_ghost_note (double, double, uint32_t state);
 	void update_ghost_note (double, double, uint32_t state);

@@ -27,9 +27,11 @@
 
 #include "editing_context.h"
 #include "editor_drag.h"
+#include "hit.h"
 #include "keyboard.h"
 #include "midi_cue_view.h"
 #include "midi_cue_velocity.h"
+#include "note.h"
 #include "velocity_display.h"
 
 #include "pbd/i18n.h"
@@ -68,7 +70,12 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	CANVAS_DEBUG_NAME (automation_group, "cue automation group");
 
 	velocity_base = new ArdourCanvas::Rectangle (&parent);
+	CANVAS_DEBUG_NAME (velocity_base, "cue velocity base");
 	velocity_display = new MidiCueVelocityDisplay (editing_context(), midi_context(), *this, *velocity_base, 0x312244ff);
+
+	for (auto & ev : _events) {
+		velocity_display->add_note (ev.second);
+	}
 
 	set_extensible (true);
 	set_region (region);
@@ -83,8 +90,12 @@ MidiCueView::set_height (double h)
 
 	event_rect->set (ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, note_area_height));
 	midi_context().set_size (ArdourCanvas::COORD_MAX, note_area_height);
-	velocity_base->set (ArdourCanvas::Rect (0., note_area_height, ArdourCanvas::COORD_MAX, note_area_height + velocity_height));
-	automation_group->set (ArdourCanvas::Rect (0., note_area_height + velocity_height, ArdourCanvas::COORD_MAX, note_area_height + velocity_height + automation_height));
+
+	velocity_base->set_position (ArdourCanvas::Duple (0., note_area_height));
+	velocity_base->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, velocity_height));
+
+	automation_group->set_position (ArdourCanvas::Duple (0., note_area_height + velocity_height));
+	automation_group->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, automation_height));
 
 	view_changed ();
 }
@@ -193,5 +204,23 @@ MidiCueView::ghost_sync_selection (NoteBase* nb)
 {
 	if (velocity_display) {
 		velocity_display->note_selected (nb);
+	}
+}
+
+void
+MidiCueView::update_sustained (Note* n)
+{
+	MidiView::update_sustained (n);
+	if (velocity_display) {
+		velocity_display->update_note (n);
+	}
+}
+
+void
+MidiCueView::update_hit (Hit* h)
+{
+	MidiView::update_hit (h);
+	if (velocity_display) {
+		velocity_display->update_note (h);
 	}
 }

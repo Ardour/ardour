@@ -64,6 +64,10 @@ class MidiCueView : public MidiView
 	std::shared_ptr<Temporal::TempoMap const> tempo_map;
 	ArdourCanvas::Rectangle* event_rect;
 	uint32_t _slot_index;
+
+	void update_sustained (Note *);
+	void update_hit (Hit *);
+
 };
 
 
