@@ -6882,7 +6882,7 @@ gdk_window_show_internal (GdkWindow *window, gboolean raise)
 	_gdk_make_event (GDK_WINDOW (private), GDK_MAP, NULL, FALSE);
     }
 
-  if (!was_mapped && private->modal_hint) 
+  if (!was_mapped && _gdk_modal_notify && private->modal_hint) 
     _gdk_modal_notify (window, TRUE);
 
   if (!was_mapped || raise)
@@ -7316,7 +7316,7 @@ gdk_window_hide (GdkWindow *window)
       _gdk_synthesize_crossing_events_for_geometry_change (GDK_WINDOW (private->parent));
     }
 
-  if (was_mapped && private->modal_hint) 
+  if (was_mapped && _gdk_modal_notify && private->modal_hint) 
     _gdk_modal_notify (window, FALSE);
   
   /* Invalidate the rect */
