@@ -202,11 +202,6 @@ gdk_window_impl_quartz_finalize (GObject *object)
 
   check_grab_destroy (window);
 
-  if (private->modal_hint && _gdk_modal_notify)
-    {
-      _gdk_modal_notify (GDK_DRAWABLE_IMPL_QUARTZ (object)->wrapper, false);
-    }
-
   if (impl->paint_clip_region)
     gdk_region_destroy (impl->paint_clip_region);
 
@@ -2395,7 +2390,8 @@ gdk_window_set_modal_hint (GdkWindow *window,
 			   gboolean   modal)
 {
   GdkWindowObject *private;
-
+  gboolean is_mapped;
+  
   if (GDK_WINDOW_DESTROYED (window) ||
       !WINDOW_IS_TOPLEVEL (window))
     return;
@@ -2403,7 +2399,10 @@ gdk_window_set_modal_hint (GdkWindow *window,
   private = (GdkWindowObject*) window;
 
   if (_gdk_modal_notify &&  private->modal_hint != modal) {
-	  _gdk_modal_notify (window, modal);
+    gboolean is_mapped = GDK_WINDOW_IS_MAPPED (window);
+    if (is_mapped) {
+      _gdk_modal_notify (window, modal);
+    }
   }
 
   private->modal_hint = modal;
