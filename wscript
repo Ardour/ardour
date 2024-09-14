@@ -590,6 +590,9 @@ int main() { return 0; }''',
                 linker_flags.append('--stdlib=libstdc++')
             # Prevents visibility issues in standard headers
             conf.define("_DARWIN_C_SOURCE", 1)
+            # C++17 removes 'unary_function' and 'binary_function' this breaks older boost versions
+            # prior to boost 1.81.0
+            cxx_flags.append('-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION')
         else:
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
             cxx_flags.append('-DBOOST_BIND_GLOBAL_PLACEHOLDERS')
