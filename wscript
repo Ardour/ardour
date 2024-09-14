@@ -566,10 +566,16 @@ int main() { return 0; }''',
         cxx_flags.append('--stdlib=libc++')
         linker_flags.append('--stdlib=libc++')
 
-    if conf.options.cxx17 or conf.env['build_host'] in [ 'bigsur', 'monterey', 'ventura', 'sonoma' ]:
+    if conf.options.cxx17:
         conf.check_cxx(cxxflags=["-std=c++17"])
         cxx_flags.append('-std=c++17')
-    elif conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
+    elif conf.options.cxx11:
+        conf.check_cxx(cxxflags=["-std=c++11"])
+        cxx_flags.append('-std=c++11')
+    elif conf.env['build_host'] in [ 'bigsur', 'monterey', 'ventura', 'sonoma' ]:
+        conf.check_cxx(cxxflags=["-std=c++17"])
+        cxx_flags.append('-std=c++17')
+    elif conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
         conf.check_cxx(cxxflags=["-std=c++11"])
         cxx_flags.append('-std=c++11')
 
