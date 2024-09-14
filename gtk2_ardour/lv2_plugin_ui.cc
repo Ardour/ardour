@@ -475,6 +475,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 
 		if (_lv2->parameter_is_output(i) && is_update_wanted(i)) {
 			_output_ports.push_back (i);
+			_values_last_sent_to_ui[i] -= 1; // force update
 		}
 	}
 
