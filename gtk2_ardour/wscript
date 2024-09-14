@@ -438,7 +438,7 @@ def enoify (major, minor):
             return "\\n\\\"I Dormienti\\\"" # 1999
         if minor == 6:
             return "\\n\\\"Kite Stories\\\"" # 1999
-        if minor == 7:
+        if minor >= 7:
             return "\\n\\\"Sonora Portraits\\\"" # 1999 Compilation
     elif major == 9:
         if minor == 0:
