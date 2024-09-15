@@ -21,6 +21,7 @@ def configure(conf):
             autowaf.check_pkg(conf, 'libudev', uselib_store='UDEV', mandatory=False)
             if conf.is_defined('HAVE_UDEV'):
                 conf.define ('HAVE_HIDAPI', 1)
+            conf.define('_GNU_SOURCE', 1)
         else:
             print ("hidapi is not yet available for the given system")
 
