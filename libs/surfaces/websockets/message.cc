@@ -58,14 +58,16 @@ NodeStateMessage::NodeStateMessage (void* buf, size_t len)
 
 		_state = NodeState (root.get<std::string> ("node"));
 
-		pt::ptree addr = root.get_child ("addr", pt::ptree ());
+		pt::ptree addr = pt::ptree ();
+		addr = root.get_child ("addr", addr);
 
 		for (pt::ptree::iterator it = addr.begin (); it != addr.end (); ++it) {
 			// throws if datatype not uint32_t
 			_state.add_addr (boost::lexical_cast<uint32_t> (it->second.data ()));
 		}
 
-		pt::ptree val = root.get_child ("val", pt::ptree ());
+		pt::ptree val = pt::ptree ();
+		val = root.get_child ("val", val);
 
 		for (pt::ptree::iterator it = val.begin (); it != val.end (); ++it) {
 			std::string val = it->second.data ();
