@@ -1134,6 +1134,12 @@ ARDOUR_UI::process_snapshot_session_prompter (Prompter& prompter, bool switch_to
 
 	bool do_save = (snapname.length() != 0);
 
+	if (do_save && snapname == _session->snap_name ()) {
+		ArdourMessageDialog msg (_("The currently loaded session name cannot be used as new snapshot.\nJust save the session for this operation."));
+		msg.run ();
+		return false;
+	}
+
 	if (do_save) {
 		std::string const& illegal = Session::session_name_is_legal (snapname);
 		if (!illegal.empty()) {
