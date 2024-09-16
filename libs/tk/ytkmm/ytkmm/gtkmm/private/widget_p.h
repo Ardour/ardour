@@ -90,6 +90,9 @@ protected:
   static gboolean drag_motion_callback(GtkWidget* self, GdkDragContext* p0, gint p1, gint p2, guint p3);
   static gboolean drag_drop_callback(GtkWidget* self, GdkDragContext* p0, gint p1, gint p2, guint p3);
   static void drag_data_received_callback(GtkWidget* self, GdkDragContext* p0, gint p1, gint p2, GtkSelectionData* p3, guint p4, guint p5);
+  static gboolean touch_begin_callback(GtkWidget*, GdkEventTouch*);
+  static gboolean touch_update_callback(GtkWidget*, GdkEventTouch*);
+  static gboolean touch_end_callback(GtkWidget*, GdkEventTouch*);
 #ifdef GTKMM_ATKMM_ENABLED
 #ifndef GTKMM_DISABLE_DEPRECATED
 

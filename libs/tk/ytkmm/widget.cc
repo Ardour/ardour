@@ -3395,6 +3395,9 @@ void Widget_Class::class_init_function(void* g_class, void* class_data)
   klass->drag_motion = &drag_motion_callback;
   klass->drag_drop = &drag_drop_callback;
   klass->drag_data_received = &drag_data_received_callback;
+  klass->touch_begin_event = &touch_begin_callback;
+  klass->touch_update_event = &touch_update_callback;
+  klass->touch_end_event = &touch_end_callback;
 #ifdef GTKMM_ATKMM_ENABLED
 #ifndef GTKMM_DISABLE_DEPRECATED
 
@@ -4340,6 +4343,120 @@ gboolean Widget_Class::button_release_event_callback(GtkWidget* self, GdkEventBu
   // Call the original underlying C function:
   if(base && base->button_release_event)
     return (*base->button_release_event)(self, p0);
+
+  typedef gboolean RType;
+  return RType();
+}
+gboolean Widget_Class::touch_begin_callback(GtkWidget* self, GdkEventTouch* p0)
+{
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
+      Glib::ObjectBase::_get_current_wrapper((GObject*)self));
+
+  // Non-gtkmmproc-generated custom classes implicitly call the default
+  // Glib::ObjectBase constructor, which sets is_derived_. But gtkmmproc-
+  // generated classes can use this optimisation, which avoids the unnecessary
+  // parameter conversions if there is no possibility of the virtual function
+  // being overridden:
+  if(obj_base && obj_base->is_derived_())
+  {
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
+    {
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->on_touch_begin_event(p0));
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+    }
+  }
+
+  BaseClassType *const base = static_cast<BaseClassType*>(
+        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+    );
+
+  // Call the original underlying C function:
+  if(base && base->touch_begin_event)
+    return (*base->touch_begin_event)(self, p0);
+
+  typedef gboolean RType;
+  return RType();
+}
+gboolean Widget_Class::touch_update_callback(GtkWidget* self, GdkEventTouch* p0)
+{
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
+      Glib::ObjectBase::_get_current_wrapper((GObject*)self));
+
+  // Non-gtkmmproc-generated custom classes implicitly call the default
+  // Glib::ObjectBase constructor, which sets is_derived_. But gtkmmproc-
+  // generated classes can use this optimisation, which avoids the unnecessary
+  // parameter conversions if there is no possibility of the virtual function
+  // being overridden:
+  if(obj_base && obj_base->is_derived_())
+  {
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
+    {
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->on_touch_update_event(p0));
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+    }
+  }
+
+  BaseClassType *const base = static_cast<BaseClassType*>(
+        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+    );
+
+  // Call the original underlying C function:
+  if(base && base->touch_update_event)
+    return (*base->touch_update_event)(self, p0);
+
+  typedef gboolean RType;
+  return RType();
+}
+gboolean Widget_Class::touch_end_callback(GtkWidget* self, GdkEventTouch* p0)
+{
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
+      Glib::ObjectBase::_get_current_wrapper((GObject*)self));
+
+  // Non-gtkmmproc-generated custom classes implicitly call the default
+  // Glib::ObjectBase constructor, which sets is_derived_. But gtkmmproc-
+  // generated classes can use this optimisation, which avoids the unnecessary
+  // parameter conversions if there is no possibility of the virtual function
+  // being overridden:
+  if(obj_base && obj_base->is_derived_())
+  {
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
+    {
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->on_touch_end_event(p0));
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+    }
+  }
+
+  BaseClassType *const base = static_cast<BaseClassType*>(
+        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+    );
+
+  // Call the original underlying C function:
+  if(base && base->touch_end_event)
+    return (*base->touch_end_event)(self, p0);
 
   typedef gboolean RType;
   return RType();
@@ -7512,6 +7629,42 @@ bool Gtk::Widget::on_button_release_event(GdkEventButton* event)
 
   if(base && base->button_release_event)
     return (*base->button_release_event)(gobj(),event);
+
+  typedef bool RType;
+  return RType();
+}
+bool Gtk::Widget::on_touch_begin_event(GdkEventTouch* event)
+{
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(gobject_)) // Get the parent class of the object class (The original underlying C class).
+  );
+
+  if(base && base->touch_begin_event)
+    return (*base->touch_begin_event)(gobj(),event);
+
+  typedef bool RType;
+  return RType();
+}
+bool Gtk::Widget::on_touch_update_event(GdkEventTouch* event)
+{
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(gobject_)) // Get the parent class of the object class (The original underlying C class).
+  );
+
+  if(base && base->touch_update_event)
+    return (*base->touch_update_event)(gobj(),event);
+
+  typedef bool RType;
+  return RType();
+}
+bool Gtk::Widget::on_touch_end_event(GdkEventTouch* event)
+{
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(gobject_)) // Get the parent class of the object class (The original underlying C class).
+  );
+
+  if(base && base->touch_end_event)
+    return (*base->touch_end_event)(gobj(),event);
 
   typedef bool RType;
   return RType();
