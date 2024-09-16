@@ -50,6 +50,7 @@ typedef struct _GdkEventNoExpose    GdkEventNoExpose;
 typedef struct _GdkEventVisibility  GdkEventVisibility;
 typedef struct _GdkEventMotion	    GdkEventMotion;
 typedef struct _GdkEventButton	    GdkEventButton;
+typedef struct _GdkEventTouch	    GdkEventTouch;
 typedef struct _GdkEventScroll      GdkEventScroll;  
 typedef struct _GdkEventKey	    GdkEventKey;
 typedef struct _GdkEventFocus	    GdkEventFocus;
@@ -152,6 +153,9 @@ typedef enum
   GDK_OWNER_CHANGE      = 34,
   GDK_GRAB_BROKEN       = 35,
   GDK_DAMAGE            = 36,
+  GDK_TOUCH_BEGIN       = 37,
+  GDK_TOUCH_UPDATE      = 38,
+  GDK_TOUCH_END         = 39,
   GDK_EVENT_LAST        /* helper variable for decls */
 } GdkEventType;
 
@@ -181,6 +185,9 @@ typedef enum
   GDK_PROXIMITY_OUT_MASK	= 1 << 19,
   GDK_SUBSTRUCTURE_MASK		= 1 << 20,
   GDK_SCROLL_MASK               = 1 << 21,
+  GDK_TOUCH_BEGIN_MASK		= 1 << 22,
+  GDK_TOUCH_UPDATE_MASK		= 1 << 23,
+  GDK_TOUCH_END_MASK		= 1 << 24,
   GDK_ALL_EVENTS_MASK		= 0x3FFFFE
 } GdkEventMask;
 
@@ -322,6 +329,21 @@ struct _GdkEventButton
   guint state;
   guint button;
   GdkDevice *device;
+  gdouble x_root, y_root;
+};
+
+struct _GdkEventTouch
+{
+  GdkEventType type;
+  GdkWindow *window;
+  gint8 send_event;
+  guint32 time;
+  gdouble x;
+  gdouble y;
+  guint state;
+  guint sequence;
+  guint flags;
+  guint deviceid;
   gdouble x_root, y_root;
 };
 
@@ -500,6 +522,7 @@ union _GdkEvent
   GdkEventVisibility	    visibility;
   GdkEventMotion	    motion;
   GdkEventButton	    button;
+  GdkEventTouch 	    touch;
   GdkEventScroll            scroll;
   GdkEventKey		    key;
   GdkEventCrossing	    crossing;

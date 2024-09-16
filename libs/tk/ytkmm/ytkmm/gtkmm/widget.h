@@ -490,6 +490,9 @@ protected:
   virtual bool on_drag_drop(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time);
   /// This is a default handler for the signal signal_drag_data_received().
   virtual void on_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const SelectionData& selection_data, guint info, guint time);
+  virtual bool on_touch_begin_event(GdkEventTouch* event);
+  virtual bool on_touch_update_event(GdkEventTouch* event);
+  virtual bool on_touch_end_event(GdkEventTouch* event);
 #ifdef GTKMM_ATKMM_ENABLED
   /// This is a default handler for the signal signal_get_accessible().
   virtual Glib::RefPtr<Atk::Object> on_get_accessible();

@@ -726,6 +726,12 @@ struct _GtkWidgetClass
 					 GdkEventAny	     *event);
   gboolean (* window_state_event)	(GtkWidget	     *widget,
 					 GdkEventWindowState *event);
+  gboolean (* touch_begin_event)	(GtkWidget	     *widget,
+					 GdkEventTouch       *event);
+  gboolean (* touch_update_event)	(GtkWidget	     *widget,
+					 GdkEventTouch       *event);
+  gboolean (* touch_end_event)		(GtkWidget	     *widget,
+					 GdkEventTouch       *event);
   
   /* selection */
   void (* selection_get)           (GtkWidget          *widget,

@@ -9887,6 +9887,9 @@ static const guint type_masks[] = {
   0, /* GDK_OWNER_CHANGE = 34 */
   0, /* GDK_GRAB_BROKEN = 35 */
   0, /* GDK_DAMAGE = 36 */
+  GDK_TOUCH_BEGIN_MASK, /* GDK_TOUCH_BEGIN             = 37 */
+  GDK_TOUCH_UPDATE_MASK, /* GDK_TOUCH_UPDATE           = 38 */
+  GDK_TOUCH_END_MASK, /* GDK_TOUCH_END                 = 39 */
 };
 G_STATIC_ASSERT (G_N_ELEMENTS (type_masks) == GDK_EVENT_LAST);
 
@@ -9927,6 +9930,14 @@ is_motion_type (GdkEventType type)
   return type == GDK_MOTION_NOTIFY ||
 	 type == GDK_ENTER_NOTIFY ||
 	 type == GDK_LEAVE_NOTIFY;
+}
+
+static gboolean
+is_touch_type (GdkEventType type)
+{
+  return type == GDK_TOUCH_BEGIN ||
+	 type == GDK_TOUCH_UPDATE ||
+	 type == GDK_TOUCH_END;
 }
 
 static GdkWindowObject *
@@ -10873,6 +10884,19 @@ proxy_button_event (GdkEvent *source_event,
       event->scroll.delta_y = source_event->scroll.delta_y;
       return TRUE;
 
+    case GDK_TOUCH_BEGIN:
+    case GDK_TOUCH_UPDATE:
+    case GDK_TOUCH_END:
+      convert_toplevel_coords_to_window (event_win,
+					 toplevel_x, toplevel_y,
+					 &event->touch.x, &event->touch.y);
+      event->touch.sequence = source_event->touch.sequence;
+      event->touch.deviceid = source_event->touch.deviceid;
+      event->touch.x_root = source_event->touch.x_root;
+      event->touch.y_root = source_event->touch.y_root;
+      event->touch.state  = state;
+      return TRUE;
+
     default:
       return FALSE;
     }
@@ -11057,7 +11081,8 @@ _gdk_windowing_got_event (GdkDisplay *display,
     return;
 
   if (!(is_button_type (event->type) ||
-	is_motion_type (event->type)) ||
+	is_motion_type (event->type) ||
+	is_touch_type (event->type)) ||
       event_private->window_type == GDK_WINDOW_ROOT)
     return;
 
@@ -11145,6 +11170,9 @@ _gdk_windowing_got_event (GdkDisplay *display,
 					event,
 					serial);
   else if (is_button_type (event->type))
+    unlink_event = proxy_button_event (event,
+				       serial);
+  else if (is_touch_type (event->type))
     unlink_event = proxy_button_event (event,
 				       serial);
 
