@@ -1380,7 +1380,7 @@ MidiView::display_sysexes()
 		std::shared_ptr<SysEx> sysex = find_canvas_sys_ex (sysex_ptr);
 
 		if (!sysex) {
-			sysex = std::shared_ptr<SysEx>(new SysEx (_note_group, text, height, x, 1.0, sysex_ptr));
+			sysex = std::shared_ptr<SysEx>(new SysEx (*this, _note_group, text, height, x, 1.0, sysex_ptr));
 			_sys_exes.insert (make_pair (sysex_ptr, sysex));
 		} else {
 			sysex->set_height (height);
@@ -4300,16 +4300,13 @@ MidiView::edit_patch_change (PatchChange* pc)
 }
 
 void
-MidiView::delete_sysex (SysEx* /*sysex*/)
+MidiView::delete_sysex (SysEx* sysex)
 {
-	// CAIROCANVAS
-	// sysyex object doesn't have a pointer to a sysex event
-	// MidiModel::SysExDiffCommand* c = _model->new_sysex_diff_command (_("delete sysex"));
-	// c->remove (sysex->sysex());
-	// _model->apply_command (*trackview.session(), c);
+	MidiModel::SysExDiffCommand* c = _model->new_sysex_diff_command (_("delete sysex"));
+	c->remove (sysex->sysex ());
+	_model->apply_diff_command_as_commit (_editing_context.history(), c);
 
-	//_sys_exes.clear ();
-	// display_sysexes();
+	display_sysexes();
 }
 
 std::string
