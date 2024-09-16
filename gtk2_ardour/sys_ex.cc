@@ -23,13 +23,14 @@
 #include "gtkmm2ext/keyboard.h"
 
 #include "editor.h"
-#include "midi_region_view.h"
+#include "midi_view.h"
 #include "sys_ex.h"
 #include "ui_config.h"
 
 using namespace std;
 
 SysEx::SysEx (
+	MidiView&                   view,
 	ArdourCanvas::Container*    parent,
 	string&                     text,
 	double                      height,
@@ -37,7 +38,7 @@ SysEx::SysEx (
 	double                      y,
 	ARDOUR::MidiModel::SysExPtr sysex)
 	: _sysex (sysex)
-	, _region (region)
+	, _view (view)
 {
 	_flag = new ArdourCanvas::Flag (
 		parent,
@@ -60,21 +61,24 @@ SysEx::~SysEx()
 bool
 SysEx::event_handler (GdkEvent* ev)
 {
-	/* XXX: icky dcast */
-	Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view ().editor ());
-
-	if (!e->internal_editing ()) {
-		return false;
-	}
-
 	switch (ev->type) {
-		case GDK_BUTTON_PRESS:
-			if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
-				_region.delete_sysex (this);
-				return true;
-			}
-		default:
-			break;
+	case GDK_BUTTON_PRESS:
+		if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
+			_view.delete_sysex (this);
+			return true;
+		}
+		break;
+
+	case GDK_SCROLL:
+		if (ev->scroll.direction == GDK_SCROLL_UP) {
+			return true;
+		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
+			return true;
+		}
+		break;
+
+	default:
+		break;
 	}
 
 	return false;
