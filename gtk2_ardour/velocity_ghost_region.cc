@@ -117,3 +117,9 @@ VelocityGhostRegion::update_contents_height ()
 {
 	VelocityDisplay::redisplay ();
 }
+
+void
+VelocityGhostRegion::update_hit (GhostEvent* gev)
+{
+	update_note (gev);
+}
