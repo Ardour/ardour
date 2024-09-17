@@ -73,14 +73,14 @@ TriggerEntry::TriggerEntry (Item* item, TriggerStrip& s, TriggerReference tr)
 {
 	set_layout_sensitive (true); // why???
 
-	name = string_compose ("trigger %1", tr.slot);
+	name = string_compose ("trigger %1", tr.slot());
 
 	set_outline (false);
 
 	play_button = new ArdourCanvas::Rectangle (this);
 	play_button->set_outline (true);
 	play_button->set_fill (true);
-	play_button->name = string_compose ("playbutton %1", tr.slot);
+	play_button->name = string_compose ("playbutton %1", tr.slot());
 	play_button->show ();
 
 	follow_button = new ArdourCanvas::Rectangle (this);
@@ -124,7 +124,7 @@ TriggerEntry::TriggerEntry (Item* item, TriggerStrip& s, TriggerReference tr)
 	set_widget_colors ();
 
 	/* owner color changes (?) */
-	dynamic_cast<Stripable*> (tref.box->owner ())->presentation_info ().Change.connect (_owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
+	dynamic_cast<Stripable*> (tref.box()->owner ())->presentation_info ().Change.connect (_owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
 
 	selection_change ();
 }
@@ -501,7 +501,7 @@ TriggerEntry::set_widget_colors (TriggerEntry::EnteredState es)
 	color_t bg_col = UIConfiguration::instance ().color ("theme:bg");
 
 	//alternating darker bands
-	if ((tref.slot / 2) % 2 == 0) {
+	if ((tref.slot() / 2) % 2 == 0) {
 		bg_col = HSV (bg_col).darker (0.25).color ();
 	}
 
@@ -896,7 +896,7 @@ TriggerBoxUI::build ()
 		if (!t) {
 			break;
 		}
-		TriggerEntry* te = new TriggerEntry (this, _strip, TriggerReference (_triggerbox, n));
+		TriggerEntry* te = new TriggerEntry (this, _strip, TriggerReference (_triggerbox.shared_from_this(), n));
 
 		_slots.push_back (te);
 
