@@ -153,6 +153,7 @@ VelocityDisplay::clear ()
 		delete ev.second;
 	}
 	events.clear ();
+	_optimization_iterator = events.end();
 }
 
 void
