@@ -272,6 +272,7 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	ghost->set_height ();
 	ghost->set_duration (_region->length().samples() / samples_per_pixel);
 
+	std::cerr << "Adding " << _events.size() << " notes to ghost\n";
 	for (auto const & i : _events) {
 		ghost->add_note (i.second);
 	}
@@ -563,6 +564,75 @@ MidiRegionView::ghosts_view_changed ()
 	}
 }
 
+void
+MidiRegionView::clear_ghost_events()
+{
+	for (auto & ghost : ghosts) {
+
+		MidiGhostRegion* gr;
+
+		if ((gr = dynamic_cast<MidiGhostRegion*>(ghost)) != 0) {
+			gr->clear_events ();
+		}
+	}
+}
+
+void
+MidiRegionView::ghosts_model_changed()
+{
+	for (auto & ghost : ghosts) {
+
+		MidiGhostRegion* gr;
+
+		if ((gr = dynamic_cast<MidiGhostRegion*>(ghost)) != 0) {
+			if (!gr->trackview.hidden()) {
+				gr->model_changed ();
+			}
+		}
+	}
+}
+
+void
+MidiRegionView::ghost_remove_note (NoteBase* nb)
+{
+	for (auto & ghost : ghosts) {
+
+		MidiGhostRegion* gr;
+
+		if ((gr = dynamic_cast<MidiGhostRegion*>(ghost)) != 0) {
+			gr->remove_note (nb);
+		}
+	}
+}
+
+void
+MidiRegionView::ghost_add_note (NoteBase* nb)
+{
+	for (auto & ghost : ghosts) {
+
+		MidiGhostRegion* gr;
+
+		std::cerr << "GAN on " << ghost << std::endl;
+
+		if ((gr = dynamic_cast<MidiGhostRegion*>(ghost)) != 0) {
+			gr->add_note (nb);
+		}
+	}
+}
+
+void
+MidiRegionView::ghost_sync_selection (NoteBase* nb)
+{
+	for (auto & ghost : ghosts) {
+
+		MidiGhostRegion* gr;
+
+		if ((gr = dynamic_cast<MidiGhostRegion*>(ghost)) != 0) {
+			gr->note_selected (nb);
+		}
+	}
+}
+
 MidiRegionView::~MidiRegionView ()
 {
 	in_destructor = true;
@@ -606,19 +676,6 @@ MidiRegionView::set_selected (bool selected)
 	}
 
 	RegionView::set_selected (selected);
-}
-
-void
-MidiRegionView::ghost_sync_selection (NoteBase* ev)
-{
-	for (auto & ghost : ghosts) {
-
-		MidiGhostRegion* gr;
-
-		if ((gr = dynamic_cast<MidiGhostRegion*>(ghost)) != 0) {
-			gr->note_selected (ev);
-		}
-	}
 }
 
 uint32_t

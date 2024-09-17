@@ -68,6 +68,7 @@ VelocityDisplay::VelocityDisplay (EditingContext& ec, MidiViewBackground& backgr
 	, selected (false)
 	, _optimization_iterator (events.end())
 {
+	std::cerr << "new VD @ " << this << " view " << &view << std::endl;
 	base.set_data (X_("ghostregionview"), this);
 	base.Event.connect (sigc::mem_fun (*this, &VelocityDisplay::base_event));
 	base.set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
@@ -158,6 +159,7 @@ VelocityDisplay::clear ()
 void
 VelocityDisplay::add_note (NoteBase* nb)
 {
+	std::cerr << "Add new lolli\n";
 	ArdourCanvas::Lollipop* l = new ArdourCanvas::Lollipop (lolli_container);
 	l->set_bounding_parent (&base);
 
@@ -196,8 +198,6 @@ VelocityDisplay::set_size_and_position (GhostEvent& gev)
 		l->set (ArdourCanvas::Duple (gev.event->x0() + (gev.event->x1() - gev.event->x0()) / 2, base.height() - actual_height), actual_height, lollipop_radius * scale);
 	} else {
 		l->set (ArdourCanvas::Duple (gev.event->x0(), base.height() - actual_height), actual_height, lollipop_radius * scale);
-		std::cerr << "place loli @ " << ArdourCanvas::Duple (gev.event->x0(), base.height() - actual_height) << " h: " <<  actual_height << " r: " << lollipop_radius * scale << " of " << available_height
-		          << " ah " << actual_height << " from " << base.whoami() << " = " << base.get() << " bh " << base.height() << std::endl;
 	}
 }
 
@@ -320,7 +320,6 @@ VelocityDisplay::y_position_to_velocity (double y) const
 void
 VelocityDisplay::note_selected (NoteBase* ev)
 {
-	std::cerr << "Look for event in " << events.size() << std::endl;
 	GhostEvent* gev = GhostEvent::find (ev->note(), events, _optimization_iterator);
 
 	if (!gev) {

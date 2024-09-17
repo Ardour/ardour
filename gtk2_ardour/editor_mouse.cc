@@ -763,7 +763,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case VelocityBaseItem:
 		{
-			VelocityGhostRegion* grv = static_cast<VelocityGhostRegion*> (item->get_data ("ghostregionview"));
+			VelocityDisplay* vd = static_cast<VelocityDisplay*> (item->get_data ("ghostregionview"));
+			VelocityGhostRegion* grv = dynamic_cast<VelocityGhostRegion*> (vd);
+			std::cerr << "VBI with item " << item << " vd " << vd << " data for grv pointed at " << grv << std::endl;
 			if (grv) {
 				_drags->set (new VelocityLineDrag (*this, grv->base_item(), Temporal::BeatTime), event);
 			}
