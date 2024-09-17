@@ -23,6 +23,7 @@
 
 #include <atomic>
 #include <map>
+#include <memory>
 #include <vector>
 #include <string>
 #include <exception>
@@ -375,6 +376,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void* ui () const { return _ui; }
 
 	TriggerBox& box() const { return _box; }
+	std::shared_ptr<TriggerBox> boxptr() const;
 
 	double estimated_tempo() const { return _estimated_tempo; }
 
@@ -731,7 +733,7 @@ struct CueRecord {
 
 typedef PBD::RingBuffer<CueRecord> CueRecords;
 
-class LIBARDOUR_API TriggerBox : public Processor
+class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_from_this<TriggerBox>
 {
   public:
 
@@ -979,14 +981,18 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 class TriggerReference
 {
-public:
-	TriggerReference () : box (0), slot (0) {}
-	TriggerReference (ARDOUR::TriggerBox& b, uint32_t s) : box (&b), slot (s) {}
+ public:
+	TriggerReference () : _slot (0) {}
+	TriggerReference (std::shared_ptr<ARDOUR::TriggerBox> b, uint32_t s) : weak_box (b), _slot (s) {}
 
-	std::shared_ptr<ARDOUR::Trigger> trigger() const { assert (box); return box->trigger (slot); }
+	std::shared_ptr<ARDOUR::Trigger> trigger() const { std::shared_ptr<ARDOUR::TriggerBox> box (weak_box.lock()); return box ? box->trigger (_slot) : std::shared_ptr<ARDOUR::Trigger>(); }
+	void set (std::shared_ptr<ARDOUR::TriggerBox> b, uint32_t s) { weak_box = b; _slot = s; }
+	uint32_t slot() const { return _slot; }
+	std::shared_ptr<ARDOUR::TriggerBox> box() const { return weak_box.lock(); }
 
-	ARDOUR::TriggerBox* box;
-	uint32_t            slot;
+ private:
+	std::weak_ptr<ARDOUR::TriggerBox> weak_box;
+	uint32_t              _slot;
 };
 
 namespace Properties {

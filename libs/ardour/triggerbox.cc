@@ -268,6 +268,12 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	copy_to_ui_state ();
 }
 
+std::shared_ptr<TriggerBox>
+Trigger::boxptr() const
+{
+	return _box.shared_from_this();
+}
+
 void
 Trigger::request_trigger_delete (Trigger* t)
 {
@@ -5133,3 +5139,4 @@ TriggerBoxThread::delete_trigger (Trigger* t)
 {
 	delete t;
 }
+
