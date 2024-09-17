@@ -59,6 +59,7 @@
 #include "ardour/route_group.h"
 #include "ardour/selection.h"
 #include "ardour/session.h"
+#include "ardour/utils.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 
@@ -1026,7 +1027,7 @@ Mixer_UI::fan_out (std::weak_ptr<Route> wr, bool to_busses, bool group)
 		return;
 	}
 
-#define BUSNAME  pd.group_name + "(" + route->name () + ")"
+#define BUSNAME legalize_for_universal_path (pd.group_name + " (" + route->name () + ")")
 
 	/* count busses and channels/bus */
 	std::shared_ptr<Plugin> plugin = pi->plugin ();
