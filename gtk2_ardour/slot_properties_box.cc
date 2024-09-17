@@ -601,19 +601,25 @@ SlotPropertyTable::on_trigger_set ()
 void
 SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 {
+	std::shared_ptr<Trigger> trigr (trigger());
+
+	if (!trigr) {
+		return;
+	}
+
 	_ignore_changes = true;
 
-	int probability = trigger()->follow_action_probability();
+	int probability = trigr->follow_action_probability();
 
 	if (pc.contains (Properties::name)) {
-		_name_label.set_text (trigger()->name());
+		_name_label.set_text (trigr->name());
 	}
 	if (pc.contains (Properties::color)) {
-		_color_button.set_custom_led_color (trigger()->color());
+		_color_button.set_custom_led_color (trigr->color());
 	}
 
 	if (pc.contains (Properties::gain)) {
-		float gain = accurate_coefficient_to_dB(trigger()->gain());
+		float gain = accurate_coefficient_to_dB(trigr->gain());
 		if (gain != _gain_adjustment.get_value()) {
 			_gain_adjustment.set_value (gain);
 		}
@@ -626,47 +632,47 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 	}
 
 	if (pc.contains (Properties::quantization)) {
-		BBT_Offset bbo (trigger()->quantization());
+		BBT_Offset bbo (trigr->quantization());
 		_quantize_button.set_active (quantize_length_to_string (bbo));
 	}
 
 	if (pc.contains (Properties::follow_count)) {
-		_follow_count_adjustment.set_value (trigger()->follow_count());
+		_follow_count_adjustment.set_value (trigr->follow_count());
 	}
 
 	if (pc.contains (Properties::tempo_meter) || pc.contains (Properties::follow_length)) {
-		int metrum_numerator = trigger()->meter().divisions_per_bar();
-		int bar_beats = metrum_numerator * trigger()->follow_length().bars;
-		int beats = trigger()->follow_length().beats;
+		int metrum_numerator = trigr->meter().divisions_per_bar();
+		int bar_beats = metrum_numerator * trigr->follow_length().bars;
+		int beats = trigr->follow_length().beats;
 		_follow_length_adjustment.set_value (bar_beats+beats);
 	}
 
 	if (pc.contains (Properties::use_follow_length)) {
-		_use_follow_length_button.set_active_state(trigger()->use_follow_length() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		_use_follow_length_button.set_active_state(trigr->use_follow_length() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::legato)) {
-		_legato_button.set_active_state (trigger()->legato() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		_legato_button.set_active_state (trigr->legato() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::cue_isolated)) {
-		_isolate_button.set_active_state (trigger()->cue_isolated() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		_isolate_button.set_active_state (trigr->cue_isolated() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::allow_patch_changes)) {
-		_patch_button.set_sensitive(trigger()->allow_patch_changes());
-		_allow_button.set_active_state (trigger()->allow_patch_changes() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		_patch_button.set_sensitive(trigr->allow_patch_changes());
+		_allow_button.set_active_state (trigr->allow_patch_changes() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::launch_style)) {
-		_launch_style_button.set_active (launch_style_to_string (trigger()->launch_style()));
+		_launch_style_button.set_active (launch_style_to_string (trigr->launch_style()));
 	}
 
 	if (pc.contains (Properties::follow_action0)) {
-		_follow_left.set_text (follow_action_to_string (trigger()->follow_action0 (), true));
+		_follow_left.set_text (follow_action_to_string (trigr->follow_action0 (), true));
 
 		/* set widget sensitivity based on 'left' follow action */
-		bool follow_widgets_sensitive = trigger()->follow_action0 ().type != FollowAction::None;
+		bool follow_widgets_sensitive = trigr->follow_action0 ().type != FollowAction::None;
 		if (follow_widgets_sensitive) {
 			_follow_right.set_sensitive(true);
 			_follow_count_spinner.set_sensitive(true);
@@ -693,11 +699,11 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 	}
 
 	if (pc.contains (Properties::follow_action1)) {
-		_follow_right.set_text (follow_action_to_string (trigger()->follow_action1 (), true));
+		_follow_right.set_text (follow_action_to_string (trigr->follow_action1 (), true));
 	}
 
 	if (pc.contains (Properties::velocity_effect)) {
-		_velocity_adjustment.set_value (trigger()->velocity_effect());
+		_velocity_adjustment.set_value (trigr->velocity_effect());
 	}
 
 	if (pc.contains (Properties::follow_action_probability)) {
@@ -723,6 +729,8 @@ SlotPropertyWidget::SlotPropertyWidget ()
 SlotPropertyWindow::SlotPropertyWindow (TriggerReference tref)
 {
 	TriggerPtr trigger (tref.trigger());
+
+	assert (trigger);
 
 	set_title (string_compose (_("Trigger Slot: %1"), trigger->name()));
 

@@ -129,14 +129,14 @@ TriggerUI::~TriggerUI()
 void
 TriggerUI::trigger_swap (uint32_t n)
 {
-	if (n != tref.slot) {
+	if (n != tref.slot()) {
 		/* some other slot in the same box got swapped. we don't care */
 		return;
 	}
 	trigger_connections.drop_connections ();
 
 	trigger()->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
-	tref.box->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
+	tref.box()->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
 
 	trigger_changed (Properties::name);
 }
@@ -421,13 +421,13 @@ TriggerUI::trigger_midi_learn ()
 		return;
 	}
 
-	tref.box->begin_midi_learn (trigger()->index());
+	tref.box()->begin_midi_learn (trigger()->index());
 }
 
 void
 TriggerUI::trigger_midi_unlearn ()
 {
-	tref.box->midi_unlearn (trigger()->index());
+	tref.box()->midi_unlearn (trigger()->index());
 }
 
 void
@@ -627,10 +627,10 @@ TriggerUI::clear_trigger ()
 void
 TriggerUI::edit_trigger ()
 {
-	SlotPropertyWindow* tw      = static_cast<SlotPropertyWindow*> (trigger()->ui ());
+	SlotPropertyWindow* tw = static_cast<SlotPropertyWindow*> (trigger()->ui ());
 
 	if (!tw) {
-		tw = new SlotPropertyWindow (TriggerReference (trigger()->box(), trigger()->index()));
+		tw = new SlotPropertyWindow (TriggerReference (trigger()->boxptr(), trigger()->index()));
 		trigger()->set_ui (tw);
 	}
 
@@ -809,9 +809,9 @@ TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 	trigger_changed (TriggerBox::all_trigger_props());
 
 	trigger()->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
-	tref.box->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
+	tref.box()->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
 
-	tref.box->TriggerSwapped.connect (trigger_swap_connection, invalidator (*this), boost::bind (&TriggerUI::trigger_swap, this, _1), gui_context ());
+	tref.box()->TriggerSwapped.connect (trigger_swap_connection, invalidator (*this), boost::bind (&TriggerUI::trigger_swap, this, _1), gui_context ());
 
 	on_trigger_set();  //derived classes can do initialization here
 }
