@@ -5438,7 +5438,6 @@ Route::setup_invisible_processors ()
 				}
 				if (_disk_reader) {
 					new_processors.push_front (_disk_reader);
-					new_processors.begin();
 				}
 			}
 			break;
