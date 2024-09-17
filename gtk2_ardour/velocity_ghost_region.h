@@ -39,7 +39,11 @@ class VelocityGhostRegion : public MidiGhostRegion, public VelocityDisplay
 	~VelocityGhostRegion ();
 
 	void remove_note (NoteBase*);
-	ArdourCanvas::Rectangle& base_item() { return *base_rect; }
+	void add_note (NoteBase*);
+	void note_selected (NoteBase*);
+	void update_note (GhostEvent*);
+	ArdourCanvas::Rectangle& base_item();
+
 	void set_colors ();
   private:
 	bool base_event (GdkEvent*);

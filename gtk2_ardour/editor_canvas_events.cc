@@ -331,8 +331,6 @@ Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, Rou
 bool
 Editor::canvas_automation_track_event (GdkEvent *event, ArdourCanvas::Item* item, AutomationTimeAxisView *atv)
 {
-	std::cerr << "AT event\n";
-
 	if (atv->parameter().type() == MidiVelocityAutomation) {
 		/* no event handling for velocity tracks until we can make the
 		   automation control affect note velocity.

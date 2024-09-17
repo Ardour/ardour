@@ -59,14 +59,13 @@ GhostRegion::GhostRegion (RegionView& rv,
 	: parent_rv (rv)
 	, trackview (tv)
 	, source_trackview (source_tv)
-	, base_rect (0)
+	, group (new ArdourCanvas::Container (parent))
+	, base_rect (new ArdourCanvas::Rectangle (group))
 {
-	group = new ArdourCanvas::Container (parent);
 	CANVAS_DEBUG_NAME (group, "ghost region group");
 	group->set_position (ArdourCanvas::Duple (initial_pos, 0));
 
 	if (is_automation_ghost()) {
-		base_rect = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (base_rect, "ghost region rect");
 		base_rect->set_x0 (0);
 		base_rect->set_y0 (1.0);

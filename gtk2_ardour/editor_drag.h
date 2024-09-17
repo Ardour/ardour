@@ -86,7 +86,7 @@ class ControlPoint;
 class AudioRegionView;
 class AutomationLine;
 class AutomationTimeAxisView;
-class VelocityGhostRegion;
+class VelocityDisplay;
 
 /** Class to manage current drags */
 class DragManager
@@ -1589,7 +1589,7 @@ class LollipopDrag : public Drag
 	void setup_pointer_offset ();
 
   private:
-	VelocityGhostRegion*      _region;
+	VelocityDisplay*          _display;
 	ArdourCanvas::Lollipop*   _primary;
 };
 
@@ -1646,7 +1646,7 @@ class VelocityLineDrag : public FreehandLineDrag<Evoral::ControlList::OrderedPoi
 	void line_extended (ArdourCanvas::Duple const & from, ArdourCanvas::Duple const & to, ArdourCanvas::Rectangle const & r, double last_x);
 
  private:
-	VelocityGhostRegion* grv;
+	VelocityDisplay* vd;
 	bool drag_did_change;
 };
 

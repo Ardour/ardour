@@ -7212,7 +7212,7 @@ LollipopDrag::LollipopDrag (EditingContext& ec, ArdourCanvas::Item* l)
 	, _primary (dynamic_cast<ArdourCanvas::Lollipop*> (l))
 {
 	DEBUG_TRACE (DEBUG::Drags, "New LollipopDrag\n");
-	_region = reinterpret_cast<VelocityGhostRegion*> (_item->get_data ("ghostregionview"));
+	_display = reinterpret_cast<VelocityDisplay*> (_item->get_data ("ghostregionview"));
 }
 
 LollipopDrag::~LollipopDrag ()
@@ -7225,21 +7225,20 @@ LollipopDrag::start_grab (GdkEvent *ev, Gdk::Cursor* c)
 	Drag::start_grab (ev, c);
 
 	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("note")));
-	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&_region->parent_rv);
-	assert (mrv);
+	MidiView& view (_display->midi_view());
 
 	bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
 	bool extend = Keyboard::modifier_state_equals (ev->button.state, Keyboard::TertiaryModifier);
 
-	if (mrv->selection().find (note) == mrv->selection().end()) {
-		mrv->note_selected (note, add, extend);
+	if (view.selection().find (note) == view.selection().end()) {
+		view.note_selected (note, add, extend);
 	}
 }
 
 void
 LollipopDrag::motion (GdkEvent *ev, bool first_move)
 {
-	_region->drag_lolli (_primary, &ev->motion);
+	_display->drag_lolli (_primary, &ev->motion);
 }
 
 void
@@ -7249,12 +7248,10 @@ LollipopDrag::finished (GdkEvent *ev, bool did_move)
 		return;
 	}
 
-	int velocity = _region->y_position_to_velocity (_primary->y0());
+	int velocity = _display->y_position_to_velocity (_primary->y0());
 	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("note")));
-	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&_region->parent_rv);
-	assert (mrv);
 
-	mrv->set_velocity (note, velocity);
+	_display->midi_view().set_velocity (note, velocity);
 }
 
 void
@@ -7267,7 +7264,8 @@ void
 LollipopDrag::setup_pointer_offset ()
 {
 	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("note")));
-	_pointer_offset = _region->parent_rv.region()->source_beats_to_absolute_time (note->note()->time ()).distance (raw_grab_time ());
+#warning paul this needs to use some other math in the non-time axis view case
+	_pointer_offset = _display->midi_view().midi_region()->source_beats_to_absolute_time (note->note()->time ()).distance (raw_grab_time ());
 }
 
 /********/
@@ -7516,11 +7514,11 @@ AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 
 VelocityLineDrag::VelocityLineDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
 	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (ec, nullptr, r, time_domain)
-	, grv (static_cast<VelocityGhostRegion*> (r.get_data ("ghostregionview")))
+	, vd (static_cast<VelocityDisplay*> (r.get_data ("ghostregionview")))
 	, drag_did_change (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New VelocityLineDrag\n");
-	assert (grv);
+	assert (vd);
 }
 
 VelocityLineDrag::~VelocityLineDrag ()
@@ -7531,19 +7529,19 @@ void
 VelocityLineDrag::start_grab (GdkEvent* ev, Gdk::Cursor* c)
 {
 	FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint>::start_grab (ev, c);
-	grv->start_line_drag ();
+	vd->start_line_drag ();
 }
 
 void
 VelocityLineDrag::point_added (Duple const & d, ArdourCanvas::Rectangle const & r, double last_x)
 {
-	drag_did_change |= grv->line_draw_motion (d, r, last_x);
+	drag_did_change |= vd->line_draw_motion (d, r, last_x);
 }
 
 void
 VelocityLineDrag::line_extended (Duple const & from, Duple const & to, ArdourCanvas::Rectangle const & r, double last_x)
 {
-	drag_did_change |= grv->line_extended (from, to, r, last_x);
+	drag_did_change |= vd->line_extended (from, to, r, last_x);
 }
 
 void
@@ -7560,11 +7558,11 @@ VelocityLineDrag::finished (GdkEvent* event, bool motion_occured)
 	 * drawn_points
 	 */
 
-	grv->end_line_drag (drag_did_change);
+	vd->end_line_drag (drag_did_change);
 }
 
 void
 VelocityLineDrag::aborted (bool)
 {
-	grv->end_line_drag (false);
+	vd->end_line_drag (false);
 }

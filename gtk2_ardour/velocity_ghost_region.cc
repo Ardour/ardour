@@ -52,11 +52,18 @@ using namespace Temporal;
 VelocityGhostRegion::VelocityGhostRegion (MidiRegionView& mrv, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
 	: MidiGhostRegion (mrv, tv, source_tv, initial_unit_pos)
 	, VelocityDisplay (trackview.editor(), *mrv.midi_stream_view(), mrv, *base_rect, *_note_group, MidiGhostRegion::events, MidiGhostRegion::_outline)
+
 {
 }
 
 VelocityGhostRegion::~VelocityGhostRegion ()
 {
+}
+
+void
+VelocityGhostRegion::add_note (NoteBase* nb)
+{
+	VelocityDisplay::add_note (nb);
 }
 
 void
@@ -87,3 +94,20 @@ VelocityGhostRegion::lollevent (GdkEvent* ev, GhostEvent* gev)
 	return trackview.editor().canvas_velocity_event (ev, gev->item);
 }
 
+ArdourCanvas::Rectangle&
+VelocityGhostRegion::base_item()
+{
+	return VelocityDisplay::base_item();
+}
+
+void
+VelocityGhostRegion::update_note (GhostEvent* ev)
+{
+	VelocityDisplay::update_note (ev);
+}
+
+void
+VelocityGhostRegion::note_selected (NoteBase* nb)
+{
+	VelocityDisplay::note_selected (nb);
+}

@@ -72,7 +72,8 @@ class VelocityDisplay
 	void end_line_drag (bool did_change);
 
 	ArdourCanvas::Rectangle& base_item() { return base; }
-
+	MidiView& midi_view() const { return view; }
+	
   protected:
 	virtual bool lollevent (GdkEvent*, GhostEvent*) = 0;
 

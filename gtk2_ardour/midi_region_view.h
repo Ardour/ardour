@@ -152,11 +152,11 @@ public:
 
 	friend class EditNoteDialog;
 
-	void clear_ghost_events() {}
-	void ghosts_model_changed() {}
+	void clear_ghost_events();
+	void ghosts_model_changed();
 	void ghosts_view_changed();
-	void ghost_remove_note (NoteBase*) {}
-	void ghost_add_note (NoteBase*) {}
+	void ghost_remove_note (NoteBase*);
+	void ghost_add_note (NoteBase*);
 	void ghost_sync_selection (NoteBase*);
 
 	bool motion (GdkEventMotion*);
