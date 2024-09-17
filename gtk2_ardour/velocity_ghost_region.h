@@ -42,6 +42,8 @@ class VelocityGhostRegion : public MidiGhostRegion, public VelocityDisplay
 	void add_note (NoteBase*);
 	void note_selected (NoteBase*);
 	void update_note (GhostEvent*);
+	void update_contents_height ();
+
 	ArdourCanvas::Rectangle& base_item();
 
 	void set_colors ();

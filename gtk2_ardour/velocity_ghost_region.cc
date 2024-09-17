@@ -111,3 +111,9 @@ VelocityGhostRegion::note_selected (NoteBase* nb)
 {
 	VelocityDisplay::note_selected (nb);
 }
+
+void
+VelocityGhostRegion::update_contents_height ()
+{
+	VelocityDisplay::redisplay ();
+}

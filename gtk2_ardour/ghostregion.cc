@@ -428,4 +428,3 @@ MidiGhostRegion::model_changed ()
 		++i;
 	}
 }
-
