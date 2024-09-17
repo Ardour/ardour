@@ -88,6 +88,67 @@
 
 #define QS_YDK_RELEVANT_INPUT 0x4ff // = QS_KEY | QS_MOUSEMOVE | QS_MOUSEBUTTON | QS_POSTMESSAGE | QS_TIMER | QS_PAINT | QS_HOTKEY | QS_SENDMESSAGE | QS_RAWINPUT
 
+#ifndef WM_NCPOINTERUPDATE
+
+typedef DWORD  POINTER_INPUT_TYPE;
+typedef UINT32 POINTER_FLAGS;
+typedef UINT32 TOUCH_FLAGS;
+typedef UINT32 TOUCH_MASK;
+
+typedef enum _POINTER_BUTTON_CHANGE_TYPE
+{
+  POINTER_CHANGE_NONE,
+  POINTER_CHANGE_FIRSTBUTTON_DOWN,
+  POINTER_CHANGE_FIRSTBUTTON_UP,
+  POINTER_CHANGE_SECONDBUTTON_DOWN,
+  POINTER_CHANGE_SECONDBUTTON_UP,
+  POINTER_CHANGE_THIRDBUTTON_DOWN,
+  POINTER_CHANGE_THIRDBUTTON_UP,
+  POINTER_CHANGE_FOURTHBUTTON_DOWN,
+  POINTER_CHANGE_FOURTHBUTTON_UP,
+  POINTER_CHANGE_FIFTHBUTTON_DOWN,
+  POINTER_CHANGE_FIFTHBUTTON_UP
+} POINTER_BUTTON_CHANGE_TYPE;
+
+typedef struct _POINTER_INFO {
+  POINTER_INPUT_TYPE         pointerType;
+  UINT32                     pointerId;
+  UINT32                     frameId;
+  POINTER_FLAGS              pointerFlags;
+  HANDLE                     sourceDevice;
+  HWND                       hwndTarget;
+  POINT                      ptPixelLocation;
+  POINT                      ptHimetricLocation;
+  POINT                      ptPixelLocationRaw;
+  POINT                      ptHimetricLocationRaw;
+  DWORD                      dwTime;
+  UINT32                     historyCount;
+  INT32                      InputData;
+  DWORD                      dwKeyStates;
+  UINT64                     PerformanceCount;
+  POINTER_BUTTON_CHANGE_TYPE ButtonChangeType;
+} POINTER_INFO;
+
+typedef struct _POINTER_TOUCH_INFO {
+  POINTER_INFO pointerInfo;
+  TOUCH_FLAGS  touchFlags;
+  TOUCH_MASK   touchMask;
+  RECT         rcContact;
+  RECT         rcContactRaw;
+  UINT32       orientation;
+  UINT32       pressure;
+} POINTER_TOUCH_INFO;
+
+typedef BOOL (WINAPI *PFN_GetPointerType) (UINT32, POINTER_INPUT_TYPE*);
+typedef BOOL (WINAPI *PFN_GetPointerTouchInfo) (UINT32, POINTER_TOUCH_INFO*);
+
+#define GET_POINTERID_WPARAM(wParam) (LOWORD(wParam))
+
+#endif
+
+static PFN_GetPointerType      getPointerType      = 0;
+static PFN_GetPointerTouchInfo getPointerTouchInfo = 0;
+
 static gboolean gdk_event_translate (MSG        *msg,
 				     gint       *ret_valp);
 static void     handle_wm_paint     (MSG        *msg,
@@ -273,6 +334,11 @@ _gdk_win32_window_procedure (HWND   hwnd,
 void 
 _gdk_events_init (void)
 {
+  printf ("CHECK FOR Touch/Pointer API..\n");
+  getPointerType         = (PFN_GetPointerType)      GetProcAddress (GetModuleHandle ("user32.dll"), "GetPointerType");
+  getPointerTouchInfo    = (PFN_GetPointerTouchInfo) GetProcAddress (GetModuleHandle ("user32.dll"), "GetPointerTouchInfo");
+  printf ("Found GetPointerType = %p GetPointerTouchInfo = %p\n", getPointerType, getPointerTouchInfo);
+
   GSource *source;
 
 #if 0
@@ -811,6 +877,10 @@ _gdk_win32_print_event (const GdkEvent *event)
     CASE (GDK_SETTING);
     CASE (GDK_OWNER_CHANGE);
     CASE (GDK_GRAB_BROKEN);
+    CASE (GDK_TOUCH_BEGIN);
+    CASE (GDK_TOUCH_UPDATE);
+    CASE (GDK_TOUCH_END);
+    CASE (GDK_TOUCH_CANCEL);
 #undef CASE
     default: g_assert_not_reached ();
     }
@@ -935,6 +1005,7 @@ _gdk_win32_print_event (const GdkEvent *event)
       g_print ("%s: %s",
 	       _gdk_win32_window_state_to_string (event->window_state.changed_mask),
 	       _gdk_win32_window_state_to_string (event->window_state.new_window_state));
+      break;
     case GDK_SETTING:
       g_print ("%s: %s",
 	       (event->setting.action == GDK_SETTING_ACTION_NEW ? "NEW" :
@@ -942,11 +1013,23 @@ _gdk_win32_print_event (const GdkEvent *event)
 		 (event->setting.action == GDK_SETTING_ACTION_DELETED ? "DELETED" :
 		  "???"))),
 	       (event->setting.name ? event->setting.name : "NULL"));
+      break;
     case GDK_GRAB_BROKEN:
       g_print ("%s %s %p",
 	       (event->grab_broken.keyboard ? "KEYBOARD" : "POINTER"),
 	       (event->grab_broken.implicit ? "IMPLICIT" : "EXPLICIT"),
 	       (event->grab_broken.grab_window ? GDK_WINDOW_HWND (event->grab_broken.grab_window) : 0));
+      break;
+    case GDK_TOUCH_BEGIN:
+    case GDK_TOUCH_UPDATE:
+    case GDK_TOUCH_END:
+      g_print ("Touch %s %d (%.4g,%.4g) (%.4g,%.4g) ",
+					(event->any.type == GDK_TOUCH_BEGIN) ? "Begin" : (event->any.type == GDK_TOUCH_END) ? "End" : "Update",
+	       event->touch.sequence,
+	       event->touch.x, event->touch.y,
+	       event->touch.x_root, event->touch.y_root);
+    case GDK_TOUCH_CANCEL:
+      g_print ("Touch Cancel\n");
     default:
       /* Nothing */
       break;
@@ -1915,6 +1998,51 @@ generate_button_event (GdkEventType type,
   _gdk_win32_append_event (event);
 }
 
+static gboolean
+handle_wm_pointer (GdkEventType type, GdkWindow* window, MSG* msg)
+{
+  POINTER_INPUT_TYPE pointer_type;
+
+  if (!getPointerType || !getPointerTouchInfo)
+    {
+      return FALSE;
+    }
+  if (!getPointerType (GET_POINTERID_WPARAM (msg->wParam), &pointer_type))
+    {
+      printf ("getPointerType failed to translate event\n");
+      return FALSE;
+    }
+  if (pointer_type != 2 /* touch */)
+    {
+      printf ("Not A Touch event\n");
+      return FALSE;
+    }
+
+  POINTER_TOUCH_INFO touch_info;
+  if (!getPointerTouchInfo (GET_POINTERID_WPARAM (msg->wParam), &touch_info))
+    {
+			printf ("getPointerTouchInfo failed to translate event\n");
+      return FALSE;
+    }
+
+  GdkEvent *event = gdk_event_new (type);
+
+  event->touch.window   = window;
+  event->touch.time     = _gdk_win32_get_next_tick (msg->time);
+  event->touch.x        = (gint16) GET_X_LPARAM (msg->lParam);
+  event->touch.y        = (gint16) GET_Y_LPARAM (msg->lParam);
+  event->touch.x_root   = msg->pt.x + _gdk_offset_x;
+  event->touch.y_root   = msg->pt.y + _gdk_offset_y;
+  event->touch.state    = 0;
+  event->touch.sequence = GET_POINTERID_WPARAM (msg->wParam); // XXX ?
+  event->touch.flags    = 0; // XXX
+  event->touch.deviceid = 0; // XXX
+
+  printf ("getPointerTouchInfo at: %.1fx%.1f root: %1.fx%1.f\n", event->touch.x, event->touch.y, event->touch.x_root, event->touch.y_root);
+  _gdk_win32_append_event (event);
+}
+
+
 static void
 ensure_stacking_on_unminimize (MSG *msg)
 {
@@ -2679,6 +2807,21 @@ gdk_event_translate (MSG  *msg,
       _gdk_win32_append_event (event);
 
       return_val = TRUE;
+      break;
+
+    case 0x0246 /* WM_POINTERDOWN */:
+      printf ("Event WM_POINTERDOWN\n");
+      if (!handle_wm_pointer (GDK_TOUCH_BEGIN, window, msg)) {
+	// XXX -> generate_button_event ?
+      }
+      break;
+    case 0x0247 /* WM_POINTERUP */:
+      printf ("Event WM_POINTERUP\n");
+      handle_wm_pointer (GDK_TOUCH_END, window, msg);
+      break;
+    case 0x0245 /* WM_POINTERUPDATE */:
+      printf ("Event WM_POINTERUPDATE\n");
+      handle_wm_pointer (GDK_TOUCH_UPDATE, window, msg);
       break;
 
     case WM_NCMOUSEMOVE:
