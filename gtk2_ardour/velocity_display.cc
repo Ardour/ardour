@@ -68,7 +68,6 @@ VelocityDisplay::VelocityDisplay (EditingContext& ec, MidiViewBackground& backgr
 	, selected (false)
 	, _optimization_iterator (events.end())
 {
-	std::cerr << "new VD @ " << this << " view " << &view << std::endl;
 	base.set_data (X_("ghostregionview"), this);
 	base.Event.connect (sigc::mem_fun (*this, &VelocityDisplay::base_event));
 	base.set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
@@ -159,7 +158,6 @@ VelocityDisplay::clear ()
 void
 VelocityDisplay::add_note (NoteBase* nb)
 {
-	std::cerr << "Add new lolli\n";
 	ArdourCanvas::Lollipop* l = new ArdourCanvas::Lollipop (lolli_container);
 	l->set_bounding_parent (&base);
 
@@ -189,15 +187,15 @@ VelocityDisplay::set_size_and_position (GhostEvent& gev)
 	}
 
 	ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (gev.item);
-	const double available_height = base.y1();
+	const double available_height = base.height();
 	const double actual_height = ((dragging ? gev.velocity_while_editing : gev.event->note()->velocity()) / 127.0) * available_height;
 	const double scale  = UIConfiguration::instance ().get_ui_scale ();
 
 	if (gev.is_hit) {
 		/* compare to Hit::points , offset by w/2 */
-		l->set (ArdourCanvas::Duple (gev.event->x0() + (gev.event->x1() - gev.event->x0()) / 2, base.height() - actual_height), actual_height, lollipop_radius * scale);
+		l->set (ArdourCanvas::Duple (gev.event->x0() + (gev.event->x1() - gev.event->x0()) / 2, base.y1() - actual_height), actual_height, lollipop_radius * scale);
 	} else {
-		l->set (ArdourCanvas::Duple (gev.event->x0(), base.height() - actual_height), actual_height, lollipop_radius * scale);
+		l->set (ArdourCanvas::Duple (gev.event->x0(), base.y1() - actual_height), actual_height, lollipop_radius * scale);
 	}
 }
 
