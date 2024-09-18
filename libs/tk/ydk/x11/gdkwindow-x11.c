@@ -71,6 +71,10 @@
 #include <X11/extensions/Xdamage.h>
 #endif
 
+#ifdef HAVE_XINPUT2
+#include <X11/extensions/XInput2.h>
+#endif
+
 const int _gdk_event_mask_table[21] =
 {
   ExposureMask,
@@ -796,6 +800,24 @@ _gdk_window_impl_new (GdkWindow     *window,
 
   g_object_ref (window);
   _gdk_xid_table_insert (screen_x11->display, &draw_impl->xid, window);
+
+#ifdef HAVE_XINPUT2
+  GdkDisplayX11 *display_x11 = GDK_DISPLAY_X11 (gdk_drawable_get_display (window));
+  if (display_x11->touch_devices)
+    {
+      XIEventMask evmask;
+      unsigned char mask[XIMaskLen(XI_LASTEVENT)] = { 0 };
+      evmask.deviceid = XIAllDevices;
+      evmask.mask_len = sizeof(mask);
+      evmask.mask = mask;
+
+      XISetMask(evmask.mask, XI_TouchBegin);
+      XISetMask(evmask.mask, XI_TouchUpdate);
+      XISetMask(evmask.mask, XI_TouchEnd);
+
+      display_x11->xi.XISelectEvents (xdisplay, xid, &evmask, 1);
+    }
+#endif
 
   switch (GDK_WINDOW_TYPE (private))
     {

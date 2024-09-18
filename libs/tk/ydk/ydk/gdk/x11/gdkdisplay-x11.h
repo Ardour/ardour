@@ -36,6 +36,7 @@
 G_BEGIN_DECLS
 
 typedef struct _GdkDisplayX11 GdkDisplayX11;
+typedef struct _GdkXInput2Fn GdkXInput2Fn;
 typedef struct _GdkDisplayX11Class GdkDisplayX11Class;
 
 #define GDK_TYPE_DISPLAY_X11              (_gdk_display_x11_get_type())
@@ -51,6 +52,19 @@ typedef enum
   GDK_NO,
   GDK_YES
 } GdkTristate;
+
+#ifdef HAVE_XINPUT2
+#include <X11/extensions/XInput2.h>
+
+struct _GdkXInput2Fn
+{
+	int           (*XISelectEvents)(Display*, Window, XIEventMask*, int);
+	XIDeviceInfo* (*XIQueryDevice)(Display*, int, int*);
+	void          (*XIFreeDeviceInfo)(XIDeviceInfo*);
+	void* libxi;
+};
+
+#endif
 
 struct _GdkDisplayX11
 {
@@ -155,6 +169,12 @@ struct _GdkDisplayX11
 
   /* The offscreen window that has the pointer in it (if any) */
   GdkWindow *active_offscreen_window;
+
+#ifdef HAVE_XINPUT2
+	int xid_opcode;
+	GHashTable* touch_devices;
+	GdkXInput2Fn xi;
+#endif
 };
 
 struct _GdkDisplayX11Class
