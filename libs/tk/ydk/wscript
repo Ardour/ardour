@@ -164,6 +164,7 @@ def configure(conf):
             conf.check_cc(header_name='X11/extensions/Xinerama.h',
                           lib='Xinerama', uselib_store="XINERAMA", define_name='HAVE_XFREE_XINERAMA',
                           execute = False, mandatory=False)
+            autowaf.check_pkg(conf, 'xi', uselib_store='XINPUT2', mandatory=False, atleast_version='1.7.10')
 
 def build(bld):
     if not bld.is_defined('YTK'):
@@ -202,7 +203,7 @@ def build(bld):
         obj.ldflags          = '-limm32 -lole32 -lgdi32 -lcomdlg32 -lwinspool -lcomctl32 -luuid'
     else:
         obj.source    = libydk_sources + libydk_x11_sources
-        obj.uselib   += ' GIO-UNIX X11 XEXT XINERAMA RANDR'
+        obj.uselib   += ' GIO-UNIX X11 XEXT XINERAMA RANDR DL'
         obj.includes        += ['ydk/x11/gdk', 'ydk/gdk/x11']
         obj.export_includes += ['ydk/gdk']
         obj.export_includes += ['ydk/x11']
