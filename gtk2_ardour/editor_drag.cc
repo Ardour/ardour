@@ -352,6 +352,11 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	/* we set up x/y dragging constraints on first move */
 	_constraint_pressed = ArdourKeyboard::indicates_constraint (event->button.state);
 
+	/*  Note that pos is already adjusted for any timeline origin offset
+	 *  within the canvas. It reflects the true sample position of the event
+	 *  x coordinate.
+	 */
+
 	const samplepos_t pos = editing_context.canvas_event_sample (event, &_grab_x, &_grab_y);
 
 	if (_bounding_item) {
@@ -7271,11 +7276,12 @@ LollipopDrag::setup_pointer_offset ()
 /********/
 
 template<typename OrderedPointList, typename OrderedPoint>
-FreehandLineDrag<OrderedPointList,OrderedPoint>::FreehandLineDrag (EditingContext& ec, ArdourCanvas::Item* p, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
+FreehandLineDrag<OrderedPointList,OrderedPoint>::FreehandLineDrag (EditingContext& ec, ArdourCanvas::Item* p, ArdourCanvas::Rectangle& r, bool hbounded, Temporal::TimeDomain time_domain)
 	: Drag (ec, &r, time_domain, ec.get_trackview_group())
 	, parent (p)
 	, base_rect (r)
 	, dragging_line (nullptr)
+	, horizontally_bounded (hbounded)
 	, direction (0)
 	, edge_x (0)
 	, did_snap (false)
@@ -7310,7 +7316,6 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::motion (GdkEvent* ev, bool firs
 		  ...start_grab() already occurred so this is non-trivial */
 
 		/* Add a point correspding to the start of the drag */
-
 		maybe_add_point (ev, raw_grab_time(), true);
 	} else {
 		maybe_add_point (ev, _drags->current_pointer_time(), false);
@@ -7335,17 +7340,24 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 		did_snap = true;
 	}
 
-	double const pointer_x = editing_context.time_to_pixel (pos);
+	/* timeline_x is a pixel offset within the timeline; it is not an absolute
+	 * canvas coordinate.
+	 */
+
+	double const timeline_x = editing_context.time_to_pixel (pos);
 
 	ArdourCanvas::Rect r = base_rect.item_to_canvas (base_rect.get());
 
 	/* Adjust event coordinates to be relative to the base rectangle */
 
-	double x = pointer_x - r.x0;
+	double x = timeline_x;
+	if (horizontally_bounded) {
+		x -= r.x0;
+	}
 	double y = ev->motion.y - r.y0;
 
 	if (drawn_points.empty()) {
-		line_start_x = pointer_x;
+		line_start_x = editing_context.timeline_to_canvas (timeline_x);
 		line_start_y = y;
 	}
 
@@ -7366,7 +7378,7 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 	const bool straight_line = Keyboard::modifier_state_equals (ev->motion.state, Keyboard::PrimaryModifier);
 
 	if (direction > 0) {
-		if (x < r.width() && (straight_line || (pointer_x > edge_x) || (pointer_x == edge_x && ev->motion.y != last_pointer_y()))) {
+		if (x < r.width() && (straight_line || (timeline_x > edge_x) || (timeline_x == edge_x && ev->motion.y != last_pointer_y()))) {
 
 			if (straight_line && dragging_line->get().size() > 1) {
 				pop_point = true;
@@ -7377,7 +7389,7 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 
 
 	} else if (direction < 0) {
-		if (x >= 0. && (straight_line || (pointer_x < edge_x) || (pointer_x == edge_x && ev->motion.y != last_pointer_y()))) {
+		if (x >= 0. && (straight_line || (timeline_x < edge_x) || (timeline_x == edge_x && ev->motion.y != last_pointer_y()))) {
 
 			if (straight_line && dragging_line->get().size() > 1) {
 				pop_point = true;
@@ -7415,15 +7427,16 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 	}
 
 	if (child_call) {
+		x = editing_context.timeline_to_canvas (timeline_x);
 		if (straight_line && !first_move) {
-			line_extended (ArdourCanvas::Duple (line_start_x, line_start_y), ArdourCanvas::Duple (pointer_x, y), base_rect, first_move ? -1 : edge_x);
+			line_extended (ArdourCanvas::Duple (line_start_x, line_start_y), ArdourCanvas::Duple (x, y), base_rect, first_move ? -1 : edge_x);
 		} else {
-			point_added (ArdourCanvas::Duple (pointer_x, y), base_rect, first_move ? -1 : edge_x);
+			point_added (ArdourCanvas::Duple (x, y), base_rect, first_move ? -1 : edge_x);
 		}
 	}
 
 	if (add_point) {
-		edge_x = pointer_x;
+		edge_x = timeline_x;
 	}
 }
 
@@ -7473,8 +7486,8 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::mid_drag_key_event (GdkEventKey
 
 /**********************/
 
-AutomationDrawDrag::AutomationDrawDrag (EditingContext& ec, ArdourCanvas::Item* p, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
-	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (ec, p, r, time_domain)
+AutomationDrawDrag::AutomationDrawDrag (EditingContext& ec, ArdourCanvas::Item* p, ArdourCanvas::Rectangle& r, bool hbounded, Temporal::TimeDomain time_domain)
+	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (ec, p, r, hbounded, time_domain)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationDrawDrag\n");
 }
@@ -7512,8 +7525,8 @@ AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 
 /*****************/
 
-VelocityLineDrag::VelocityLineDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
-	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (ec, nullptr, r, time_domain)
+VelocityLineDrag::VelocityLineDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, bool hbounded, Temporal::TimeDomain time_domain)
+	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (ec, nullptr, r, hbounded, time_domain)
 	, vd (static_cast<VelocityDisplay*> (r.get_data ("ghostregionview")))
 	, drag_did_change (false)
 {

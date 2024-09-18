@@ -49,7 +49,6 @@ MidiCueVelocityDisplay::set_colors ()
 void
 MidiCueVelocityDisplay::remove_note (NoteBase* nb)
 {
-	std::cerr << "mcVD:remove\n";
 	GhostEvent::EventList::iterator f = events.find (nb->note());
 	if (f == events.end()) {
 		return;
@@ -64,12 +63,12 @@ MidiCueVelocityDisplay::remove_note (NoteBase* nb)
 bool
 MidiCueVelocityDisplay::base_event (GdkEvent* ev)
 {
-	return true; //  editing_context.canvas_velocity_base_event (ev, base_rect);
+	return editing_context.canvas_velocity_base_event (ev, &base);
 }
 
 bool
 MidiCueVelocityDisplay::lollevent (GdkEvent* ev, GhostEvent* gev)
 {
-	return true; // editing_context.canvas_velocity_event (ev, gev->item);
+	return editing_context.canvas_velocity_event (ev, gev->item);
 }
 

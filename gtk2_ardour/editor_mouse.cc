@@ -765,9 +765,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		{
 			VelocityDisplay* vd = static_cast<VelocityDisplay*> (item->get_data ("ghostregionview"));
 			VelocityGhostRegion* grv = dynamic_cast<VelocityGhostRegion*> (vd);
-			std::cerr << "VBI with item " << item << " vd " << vd << " data for grv pointed at " << grv << std::endl;
 			if (grv) {
-				_drags->set (new VelocityLineDrag (*this, grv->base_item(), Temporal::BeatTime), event);
+				_drags->set (new VelocityLineDrag (*this, grv->base_item(), true, Temporal::BeatTime), event);
 			}
 		}
 		return true;
@@ -1207,7 +1206,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			{
 				AutomationTimeAxisView* atv = static_cast<AutomationTimeAxisView*> (item->get_data ("trackview"));
 				if (atv) {
-					_drags->set (new AutomationDrawDrag (*this, nullptr, atv->base_item(), Temporal::AudioTime), event);
+					_drags->set (new AutomationDrawDrag (*this, nullptr, atv->base_item(), false, Temporal::AudioTime), event);
 				}
 			}
 			break;
@@ -1234,7 +1233,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			RegionView* rv;
 			if ((rv = dynamic_cast<RegionView*> (clicked_regionview))) {
 				ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (rv->get_canvas_frame());
-				_drags->set (new AutomationDrawDrag (*this, rv->get_canvas_group(), *r, Temporal::AudioTime), event);
+				_drags->set (new AutomationDrawDrag (*this, rv->get_canvas_group(), *r, true, Temporal::AudioTime), event);
 			}
 		}
 			break;

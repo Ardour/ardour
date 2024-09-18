@@ -254,6 +254,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	samplepos_t canvas_event_sample (GdkEvent const * event, double* pcx = nullptr, double* pcy = nullptr) const;
 
 	virtual bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
+	virtual bool canvas_velocity_base_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
+	virtual bool canvas_velocity_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 
 	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) const;
 	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) const;
