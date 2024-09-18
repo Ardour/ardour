@@ -41,6 +41,7 @@
 #include "note_base.h"
 #include "prh.h"
 #include "ui_config.h"
+#include "velocity_ghost_region.h"
 #include "verbose_cursor.h"
 
 #include "pbd/i18n.h"
@@ -400,6 +401,19 @@ MidiCueEditor::canvas_note_event (GdkEvent* event, ArdourCanvas::Item* item)
 	return typed_event (item, event, NoteItem);
 }
 
+bool
+MidiCueEditor::canvas_velocity_base_event (GdkEvent* event, ArdourCanvas::Item* item)
+{
+	return typed_event (item, event, VelocityBaseItem);
+}
+
+bool
+MidiCueEditor::canvas_velocity_event (GdkEvent* event, ArdourCanvas::Item* item)
+{
+	return typed_event (item, event, VelocityItem);
+}
+
+
 Gtk::Widget&
 MidiCueEditor::viewport()
 {
@@ -505,6 +519,17 @@ MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event
 				}
 			}
 			return true;
+
+		case VelocityItem:
+			_drags->set (new LollipopDrag (*this, item), event);
+			return true;
+			break;
+
+		case VelocityBaseItem:
+			_drags->set (new VelocityLineDrag (*this, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime), event);
+			return true;
+			break;
+
 		default:
 			break;
 		}

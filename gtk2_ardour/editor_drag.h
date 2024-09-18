@@ -1597,7 +1597,7 @@ template<typename OrderedPointList, typename OrderedPoint>
 class FreehandLineDrag : public Drag
 {
   public:
-	FreehandLineDrag (EditingContext&, ArdourCanvas::Item*, ArdourCanvas::Rectangle&, Temporal::TimeDomain);
+	FreehandLineDrag (EditingContext&, ArdourCanvas::Item*, ArdourCanvas::Rectangle&, bool, Temporal::TimeDomain);
 	~FreehandLineDrag ();
 
 	void motion (GdkEvent*, bool);
@@ -1612,6 +1612,7 @@ class FreehandLineDrag : public Drag
 	ArdourCanvas::Item* parent; /* we do not own this. If null, use base_rect as the parent */
 	ArdourCanvas::Rectangle& base_rect; /* we do not own this */
 	ArdourCanvas::PolyLine* dragging_line;
+	bool horizontally_bounded;
 	int direction;
 	int edge_x;
 	bool did_snap;
@@ -1626,7 +1627,7 @@ class FreehandLineDrag : public Drag
 class AutomationDrawDrag : public FreehandLineDrag<Evoral::ControlList::OrderedPoints, Evoral::ControlList::OrderedPoint>
 {
   public:
-	AutomationDrawDrag (EditingContext&, ArdourCanvas::Item*, ArdourCanvas::Rectangle&, Temporal::TimeDomain);
+	AutomationDrawDrag (EditingContext&, ArdourCanvas::Item*, ArdourCanvas::Rectangle&, bool, Temporal::TimeDomain);
 	~AutomationDrawDrag ();
 
 	void finished (GdkEvent*, bool);
@@ -1636,7 +1637,7 @@ class AutomationDrawDrag : public FreehandLineDrag<Evoral::ControlList::OrderedP
 class VelocityLineDrag : public FreehandLineDrag<Evoral::ControlList::OrderedPoints, Evoral::ControlList::OrderedPoint>
 {
   public:
-	VelocityLineDrag (EditingContext&, ArdourCanvas::Rectangle&, Temporal::TimeDomain);
+	VelocityLineDrag (EditingContext&, ArdourCanvas::Rectangle&, bool, Temporal::TimeDomain);
 	~VelocityLineDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
