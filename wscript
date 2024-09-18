@@ -150,7 +150,7 @@ clang_dict['xsaveintrin'] = ''
 clang_dict['xmmintrinsics'] = ''
 clang_dict['silence-unused-arguments'] = '-Qunused-arguments'
 clang_dict['extra-cxx-warnings'] = [ '-Woverloaded-virtual', '-Wno-mismatched-tags', '-Wno-cast-align', '-Wno-unused-local-typedefs', '-Wunneeded-internal-declaration' ]
-clang_dict['basic-warnings'] = [ '-Wall', '-Wpointer-arith', '-Wcast-qual', '-Wcast-align', '-Wno-unused-parameter', '-Wno-deprecated-declarations', '-Wno-deprecated-copy-with-user-provided-copy' ]
+clang_dict['basic-warnings'] = [ '-Wall', '-Wpointer-arith', '-Wcast-qual', '-Wcast-align', '-Wno-unused-parameter', '-Wno-deprecated-declarations' ]
 clang_dict['cxx-strict'] = [ '-ansi', '-Wnon-virtual-dtor', '-Woverloaded-virtual', '-fstrict-overflow' ]
 clang_dict['strict'] = ['-Wall', '-Wcast-align', '-Wextra', '-Wwrite-strings' ]
 clang_dict['generic-x86'] = [ '-arch', 'i386' ]
@@ -162,6 +162,12 @@ clang_darwin_dict = compiler_flags_dictionaries['clang'].copy()
 clang_darwin_dict['cxx-strict'] = [ '-ansi', '-Wnon-virtual-dtor', '-Woverloaded-virtual', ]
 clang_darwin_dict['full-optimization'] = [ '-O3', '-ffast-math']
 compiler_flags_dictionaries['clang-darwin'] = clang_darwin_dict
+
+# Xcode 15 does not like our boost version, producing warnings from almost every file
+clang15_darwin_dict = compiler_flags_dictionaries['clang-darwin'].copy()
+clang15_darwin_dict['basic-warnings'].append ("-Wno-deprecated-builtins")
+clang15_darwin_dict['basic-warnings'].append ("-Wno-deprecated-copy-with-user-provided-copy")
+compiler_flags_dictionaries['clang15-darwin'] = clang15_darwin_dict
 
 # Version stuff
 
@@ -408,9 +414,25 @@ int main() { return 0; }''',
                          execute   = False,
                          msg       = 'Checking for clang')
 
+
+    if platform == 'darwin' and is_clang:
+        is_clang15_darwin = conf.check_cxx(fragment = '''
+#if !defined __clang_major__ || __clang_major__ < 15
+#error
+#endif
+int main() { return 0; }''',
+                         features  = 'cxx',
+                         mandatory = False,
+                         execute   = False,
+                         msg       = 'Checking for clang >= 15')
+
+
     if is_clang:
         if platform == 'darwin':
-            compiler_name = 'clang-darwin'
+            if is_clang15_darwin:
+                compiler_name = 'clang15-darwin'
+            else:
+                compiler_name = 'clang-darwin'
         else:
             compiler_name = 'clang'
     elif conf.env['MSVC_COMPILER']:
@@ -736,9 +758,6 @@ int main() { return 0; }''',
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=110000",
                  "-mmacosx-version-min=11.0"))
         linker_flags.append("-mmacosx-version-min=11.0")
-        # Xcode 15 does not like our boost version, producing warnings from almost every file
-        # boost/type_traits/has_trivial_destructor.hpp:30:86: warning: builtin __has_trivial_destructor is deprecated; use __is_trivially_destructible instead 
-        flags_dict['basic-warnings'].append ("-Wno-deprecated-builtins")
 
     #
     # save off CPU element in an env
