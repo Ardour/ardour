@@ -326,8 +326,6 @@ MidiCueEditor::canvas_allocate (Gtk::Allocation alloc)
 	_visible_canvas_width = alloc.get_width();
 	_visible_canvas_height = alloc.get_height();
 
-	std::cerr << "mce allocated " << alloc.get_width() << " x " << alloc.get_width() << " view = " << view << std::endl;
-
 	if (view) {
 		double timebars = n_timebars * timebar_height;
 		view->set_height (alloc.get_height() - timebars);
