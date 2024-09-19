@@ -102,6 +102,10 @@ MidiCueView::set_height (double h)
 	automation_group->set_position (ArdourCanvas::Duple (0., note_area_height + velocity_height));
 	automation_group->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, automation_height));
 
+	if (automation_line) {
+		automation_line->set_height (automation_height);
+	}
+
 	view_changed ();
 }
 
@@ -278,8 +282,7 @@ MidiCueView::show_automation (Evoral::Parameter const & param)
 			                                             automation_group,
 			                                             ac->alist(),
 			                                             ac->desc());
-			automation_line->reset ();
-
+			automation_line->set_height (automation_group->get().height());
 		}
 
 		break;

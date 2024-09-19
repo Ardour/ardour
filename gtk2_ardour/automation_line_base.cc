@@ -1036,8 +1036,6 @@ AutomationLineBase::reset_callback (const Evoral::ControlList& events)
 	uint32_t pi = 0;
 	uint32_t np;
 
-	std::cerr << _name << ": ALB::reset callback with " << events.size() << std::endl;
-
 	if (events.empty()) {
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 			delete *i;
