@@ -554,7 +554,7 @@ Automatable::automation_list_automation_state_changed (Evoral::Parameter const& 
 std::shared_ptr<Evoral::Control>
 Automatable::control_factory(const Evoral::Parameter& param)
 {
-	Evoral::Control*                  control   = NULL;
+	Evoral::Control*                  control   = nullptr;
 	bool                              make_list = true;
 	ParameterDescriptor               desc(param);
 	std::shared_ptr<AutomationList> list;
