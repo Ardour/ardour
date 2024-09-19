@@ -29,6 +29,7 @@
 #include "editor_drag.h"
 #include "hit.h"
 #include "keyboard.h"
+#include "midi_cue_automation_line.h"
 #include "midi_cue_view.h"
 #include "midi_cue_velocity.h"
 #include "note.h"
@@ -46,6 +47,7 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
                           MidiViewBackground&      bg,
                           uint32_t                 basic_color)
 	: MidiView (mt, parent, ec, bg, basic_color)
+	, automation_line (nullptr)
 	, velocity_base (nullptr)
 	, velocity_display (nullptr)
 	, _slot_index (slot_index)
@@ -79,6 +81,9 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 
 	set_extensible (true);
 	set_region (region);
+
+	Evoral::Parameter fully_qualified_param (ARDOUR::MidiCCAutomation, 0, MIDI_CTL_MSB_MODWHEEL);
+	show_automation (fully_qualified_param);
 }
 
 void
@@ -222,5 +227,65 @@ MidiCueView::update_hit (Hit* h)
 	MidiView::update_hit (h);
 	if (velocity_display) {
 		velocity_display->update_note (h);
+	}
+}
+
+void
+MidiCueView::show_automation (Evoral::Parameter const & param)
+{
+	using namespace ARDOUR;
+
+	if (param.type() == NullAutomation) {
+		return;
+	}
+
+//	if (automation_line && automation_line->param() == param) {
+//		return;
+//	}
+
+	if (automation_line) {
+		delete automation_line;
+		automation_line = nullptr;
+	}
+
+	std::shared_ptr<AutomationControl> control;
+
+	switch (param.type()) {
+
+	case MidiCCAutomation:
+	case MidiPgmChangeAutomation:
+	case MidiPitchBenderAutomation:
+	case MidiChannelPressureAutomation:
+	case MidiNotePressureAutomation:
+	case MidiSystemExclusiveAutomation: {
+		/* These controllers are region "automation" - they are owned
+		 * by regions (and their MidiModels), not by the track. As a
+		 * result there is no AutomationList/Line for the track, but we create
+		 * a controller for the user to write immediate events, so the editor
+		 * can act as a control surface for the present MIDI controllers.
+		 *
+		 * TODO: Record manipulation of the controller to regions?
+		 */
+
+		std::shared_ptr<Evoral::Control> control = _midi_region->model()->control (param, true);
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (control);
+
+		if (ac) {
+			std::cerr << "found control, list contains " << ac->alist()->size() << std::endl;
+			automation_line = new MidiCueAutomationLine ("whatevs",
+			                                             _editing_context,
+			                                             *automation_group,
+			                                             automation_group,
+			                                             ac->alist(),
+			                                             ac->desc());
+			automation_line->reset ();
+
+		}
+
+		break;
+	}
+
+	default:
+		break;
 	}
 }

@@ -23,8 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_automation_line_base_h__
-#define __ardour_automation_line_base_h__
+#ifndef __gtk2_ardour_automation_line_base_h__
+#define __gtk2_ardour_automation_line_base_h__
 
 #include <vector>
 #include <list>
@@ -173,6 +173,8 @@ public:
 
 	double dt_to_dx (Temporal::timepos_t const &, Temporal::timecnt_t const &);
 
+	ARDOUR::ParameterDescriptor const & param() const { return _desc; }
+
 protected:
 
 	std::string    _name;
@@ -257,5 +259,5 @@ private:
 	friend class RegionFxLine;
 };
 
-#endif /* __ardour_automation_line_base_h__ */
+#endif /* __gtk2_ardour_automation_line_base_h__ */
 

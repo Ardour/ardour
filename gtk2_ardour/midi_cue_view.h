@@ -28,6 +28,7 @@
 #include "midi_view.h"
 
 class VelocityDisplay;
+class MidiCueAutomationLine;
 
 class MidiCueView : public MidiView
 {
@@ -52,12 +53,16 @@ class MidiCueView : public MidiView
 	void ghost_add_note (NoteBase*);
 	void ghost_sync_selection (NoteBase*);
 
+	void show_automation (Evoral::Parameter const & param);
+
 	ArdourCanvas::Item* drag_group() const;
 
   protected:
 	bool scroll (GdkEventScroll* ev);
 
 	ArdourCanvas::Rectangle* automation_group;
+	MidiCueAutomationLine*   automation_line;
+
 	ArdourCanvas::Rectangle* velocity_base;
 	VelocityDisplay* velocity_display;
 

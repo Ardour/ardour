@@ -111,10 +111,10 @@ AutomationLineBase::AutomationLineBase (const string&                   name,
 	, _desc (desc)
 {
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple(0, 1.5));
-	CANVAS_DEBUG_NAME (group, "region gain envelope group");
+	CANVAS_DEBUG_NAME (group, "automation line group");
 
 	line = new ArdourCanvas::PolyLine (group);
-	CANVAS_DEBUG_NAME (line, "region gain envelope line");
+	CANVAS_DEBUG_NAME (line, "automation line");
 	line->set_data ("line", this);
 	line->set_data ("drag-base", _drag_base);
 	line->set_outline_width (2.0);
@@ -1035,6 +1035,8 @@ AutomationLineBase::reset_callback (const Evoral::ControlList& events)
 	uint32_t vp = 0;
 	uint32_t pi = 0;
 	uint32_t np;
+
+	std::cerr << _name << ": ALB::reset callback with " << events.size() << std::endl;
 
 	if (events.empty()) {
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
