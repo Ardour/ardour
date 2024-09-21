@@ -19,9 +19,9 @@
 #ifndef __gtk2_ardour_midi_cue_automation_line_h__
 #define __gtk2_ardour_midi_cue_automation_line_h__
 
-#include "automation_line_base.h"
+#include "automation_line.h"
 
-class MidiCueAutomationLine : public AutomationLineBase
+class MidiCueAutomationLine : public AutomationLine
 {
   public:
 	MidiCueAutomationLine (const std::string&                      name,

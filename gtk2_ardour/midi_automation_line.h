@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "automation_line.h"
+#include "editor_automation_line.h"
 
 namespace ARDOUR {
 	class MidiRegion;
@@ -27,7 +27,7 @@ namespace ARDOUR {
 /** Stub class so that lines for MIDI AutomationRegionViews can use the correct
  *  MementoCommandBinder.
  */
-class MidiAutomationLine : public AutomationLine
+class MidiAutomationLine : public EditorAutomationLine
 {
 public:
 	MidiAutomationLine (const std::string&, TimeAxisView&, ArdourCanvas::Item&,

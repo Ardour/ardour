@@ -89,7 +89,7 @@
 #include "audio_region_view.h"
 #include "audio_streamview.h"
 #include "audio_time_axis.h"
-#include "automation_line_base.h"
+#include "automation_line.h"
 #include "automation_time_axis.h"
 #include "control_point.h"
 #include "debug.h"
@@ -4817,10 +4817,10 @@ Editor::cut_copy (CutCopyOp op)
 
 struct AutomationRecord {
 	AutomationRecord () : state (0) , line (nullptr) {}
-	AutomationRecord (XMLNode* s, const AutomationLineBase* l) : state (s) , line (l) {}
+	AutomationRecord (XMLNode* s, const AutomationLine* l) : state (s) , line (l) {}
 
 	XMLNode* state; ///< state before any operation
-	const AutomationLineBase* line; ///< line this came from
+	const AutomationLine* line; ///< line this came from
 	std::shared_ptr<Evoral::ControlList> copy; ///< copied events for the cut buffer
 };
 
@@ -4843,7 +4843,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
 	timepos_t earliest (earliest_time);
 
 	/* XXX: not ideal, as there may be more than one track involved in the point selection */
-	AutomationLine* line = dynamic_cast<AutomationLine*> (&selection->points.front()->line());
+	EditorAutomationLine* line = dynamic_cast<EditorAutomationLine*> (&selection->points.front()->line());
 	assert (line);
 	_last_cut_copy_source_track = &line->trackview;
 
@@ -4856,7 +4856,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
 
 	/* Go through all selected points, making an AutomationRecord for each distinct AutomationList */
 	for (auto & selected_point : selection->points) {
-		const AutomationLineBase& line (selected_point->line());
+		const AutomationLine& line (selected_point->line());
 		const std::shared_ptr<AutomationList> al   = line.the_list();
 		if (lists.find (al) == lists.end ()) {
 			/* We haven't seen this list yet, so make a record for it.  This includes
@@ -4909,7 +4909,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
 
 		/* Remove each selected point from its AutomationList */
 		for (auto & selected_point : selection->points) {
-			AutomationLineBase& line (selected_point->line ());
+			AutomationLine& line (selected_point->line ());
 			std::shared_ptr<AutomationList> al = line.the_list();
 
 			bool erase = true;

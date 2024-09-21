@@ -52,7 +52,7 @@ class RegionView;
 class Selectable;
 class EditingContext;
 class MidiRegionView;
-class AutomationLine;
+class EditorAutomationLine;
 class ControlPoint;
 
 

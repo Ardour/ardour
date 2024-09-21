@@ -84,7 +84,7 @@ class TempoMarker;
 class TempoCurve;
 class ControlPoint;
 class AudioRegionView;
-class AutomationLineBase;
+class AutomationLine;
 class AutomationTimeAxisView;
 class VelocityDisplay;
 
@@ -1250,7 +1250,7 @@ public:
 
 private:
 
-	AutomationLineBase* _line;
+	AutomationLine* _line;
 	double _fixed_grab_x;
 	double _fixed_grab_y;
 	double _cumulative_y_drag;
@@ -1487,7 +1487,7 @@ public:
 	}
 
 private:
-	void setup (std::list<std::shared_ptr<AutomationLineBase> > const &);
+	void setup (std::list<std::shared_ptr<AutomationLine> > const &);
 	double y_fraction (double global_y_position) const;
 	double value (std::shared_ptr<ARDOUR::AutomationList> list, Temporal::timepos_t const & x) const;
 
@@ -1495,7 +1495,7 @@ private:
 
 	/** A line that is part of the drag */
 	struct Line {
-		std::shared_ptr<AutomationLineBase> line; ///< the line
+		std::shared_ptr<AutomationLine> line; ///< the line
 		std::list<ControlPoint*> points; ///< points to drag on the line
 		std::pair<Temporal::timepos_t, Temporal::timepos_t> range; ///< the range of all points on the line, in session time
 		XMLNode* state; ///< the XML state node before the drag

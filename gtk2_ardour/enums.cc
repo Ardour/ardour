@@ -160,7 +160,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (SelectionItem);
 	REGISTER_ENUM (ControlPointItem);
 	REGISTER_ENUM (GainLineItem);
-	REGISTER_ENUM (AutomationLineItem);
+	REGISTER_ENUM (EditorAutomationLineItem);
 	REGISTER_ENUM (MeterMarkerItem);
 	REGISTER_ENUM (TempoCurveItem);
 	REGISTER_ENUM (TempoMarkerItem);

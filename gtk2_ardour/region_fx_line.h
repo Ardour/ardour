@@ -19,11 +19,11 @@
 #ifndef __ardour_gtk_region_fx_line_h__
 #define __ardour_gtk_region_fx_line_h__
 
-#include "automation_line.h"
+#include "editor_automation_line.h"
 
 class RegionView;
 
-class RegionFxLine : public AutomationLine
+class RegionFxLine : public EditorAutomationLine
 {
 public:
 	RegionFxLine (std::string const&, RegionView&, ArdourCanvas::Container&, std::shared_ptr<ARDOUR::AutomationList>, ARDOUR::ParameterDescriptor const&);

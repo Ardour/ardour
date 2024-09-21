@@ -60,7 +60,7 @@
 #include "gui_thread.h"
 #include "mergeable_line.h"
 #include "route_time_axis.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "paste_context.h"
 #include "public_editor.h"
 #include "selection.h"
@@ -340,8 +340,8 @@ AutomationTimeAxisView::add_contents (bool show_regions)
 
 		assert (_control);
 
-		std::shared_ptr<AutomationLine> line (
-			new AutomationLine (
+		std::shared_ptr<EditorAutomationLine> line (
+			new EditorAutomationLine (
 				ARDOUR::EventTypeMap::instance().to_symbol(_parameter),
 				*this,
 				*_canvas_display,
@@ -987,7 +987,7 @@ AutomationTimeAxisView::clear_lines ()
 }
 
 void
-AutomationTimeAxisView::add_line (std::shared_ptr<AutomationLine> line)
+AutomationTimeAxisView::add_line (std::shared_ptr<EditorAutomationLine> line)
 {
 	if (_control && line) {
 		assert(line->the_list() == _control->list());
@@ -1008,7 +1008,7 @@ AutomationTimeAxisView::add_line (std::shared_ptr<AutomationLine> line)
 	/* pick up the current state */
 	automation_state_changed ();
 
-	line->add_visibility (AutomationLine::Line);
+	line->add_visibility (EditorAutomationLine::Line);
 }
 
 bool
@@ -1084,10 +1084,10 @@ AutomationTimeAxisView::has_automation () const
 	return ( (_line && _line->npoints() > 0) || (_view && _view->has_automation()) );
 }
 
-list<std::shared_ptr<AutomationLineBase> >
+list<std::shared_ptr<AutomationLine> >
 AutomationTimeAxisView::lines () const
 {
-	list<std::shared_ptr<AutomationLineBase> > lines;
+	list<std::shared_ptr<AutomationLine> > lines;
 
 	if (_line) {
 		lines.push_back (_line);
@@ -1167,7 +1167,7 @@ AutomationTimeAxisView::parse_state_id (
 void
 AutomationTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
-	list<std::shared_ptr<AutomationLineBase> > lines;
+	list<std::shared_ptr<AutomationLine> > lines;
 
 	if (_line) {
 		cut_copy_clear_one (*_line, selection, op);
@@ -1179,7 +1179,7 @@ AutomationTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 }
 
 void
-AutomationTimeAxisView::cut_copy_clear_one (AutomationLineBase& line, Selection& selection, CutCopyOp op)
+AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& selection, CutCopyOp op)
 {
 	std::shared_ptr<Evoral::ControlList> what_we_got;
 	std::shared_ptr<AutomationList> alist (line.the_list());

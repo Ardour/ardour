@@ -43,7 +43,7 @@
 
 #include "audio_clip_editor.h"
 #include "audio_clock.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "control_point.h"
 #include "editor.h"
 #include "region_view.h"

@@ -621,7 +621,7 @@ StreamView::get_selectables (timepos_t const & start, timepos_t const & end, dou
 			if (_trackview.editor().internal_editing()) {
 				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
 				if (arv && arv->fx_line ()) {
-					/* Note: AutomationLine::get_selectables() uses trackview.current_height (),
+					/* Note: EditorAutomationLine::get_selectables() uses trackview.current_height (),
 					 * disregarding Stacked layer display height
 					 */
 					double const c = height; // child_height (); // XXX

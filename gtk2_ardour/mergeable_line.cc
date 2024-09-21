@@ -20,7 +20,7 @@
 
 #include "ardour/session.h"
 
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "editing_context.h"
 #include "mergeable_line.h"
 #include "route_time_axis.h"

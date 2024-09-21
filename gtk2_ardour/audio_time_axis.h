@@ -58,7 +58,7 @@ class Selection;
 class Selectable;
 class RegionView;
 class AudioRegionView;
-class AutomationLine;
+class EditorAutomationLine;
 class AutomationGainLine;
 class AutomationPanLine;
 class TimeSelection;

@@ -34,7 +34,7 @@
 
 #include "actions.h"
 #include "ardour_ui.h"
-#include "automation_line_base.h"
+#include "automation_line.h"
 #include "control_point.h"
 #include "edit_note_dialog.h"
 #include "editing_context.h"
@@ -2656,7 +2656,7 @@ EditingContext::get_draw_length_as_beats (bool& success, timepos_t const & posit
 void
 EditingContext::select_automation_line (GdkEventButton* event, ArdourCanvas::Item* item, ARDOUR::SelectionOperation op)
 {
-	AutomationLineBase* al = reinterpret_cast<AutomationLineBase*> (item->get_data ("line"));
+	AutomationLine* al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
 	std::list<Selectable*> selectables;
 	double mx = event->x;
 	double my = event->y;

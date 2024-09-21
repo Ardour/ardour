@@ -42,7 +42,7 @@
 #include "region_view.h"
 #include "midi_view_background.h"
 #include "time_axis_view_item.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "enums.h"
 
 namespace ARDOUR {

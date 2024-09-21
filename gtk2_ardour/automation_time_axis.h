@@ -54,8 +54,8 @@ class PublicEditor;
 class TimeSelection;
 class RegionSelection;
 class PointSelection;
-class AutomationLineBase;
 class AutomationLine;
+class EditorAutomationLine;
 class Selection;
 class Selectable;
 class AutomationStreamView;
@@ -92,11 +92,11 @@ public:
 
 	void clear_lines ();
 
-	/** @return Our AutomationLine, if this view has one, or 0 if it uses AutomationRegionViews */
-	std::shared_ptr<AutomationLine> line() { return _line; }
+	/** @return Our EditorAutomationLine, if this view has one, or 0 if it uses AutomationRegionViews */
+	std::shared_ptr<EditorAutomationLine> line() { return _line; }
 
-	/** @return All AutomationLines associated with this view */
-	std::list<std::shared_ptr<AutomationLineBase> > lines () const;
+	/** @return All EditorAutomationLines associated with this view */
+	std::list<std::shared_ptr<AutomationLine> > lines () const;
 
 	AutomationStreamView* automation_view() const { return _view; }
 
@@ -167,7 +167,7 @@ protected:
 	Evoral::Parameter _parameter;
 
 	ArdourCanvas::Rectangle* _base_rect;
-	std::shared_ptr<AutomationLine> _line;
+	std::shared_ptr<EditorAutomationLine> _line;
 
 	std::string _name;
 
@@ -194,7 +194,7 @@ protected:
 
 	bool _show_regions;
 
-	void add_line (std::shared_ptr<AutomationLine>);
+	void add_line (std::shared_ptr<EditorAutomationLine>);
 
 	void clear_clicked ();
 	void hide_clicked ();
@@ -203,7 +203,7 @@ protected:
 
 	void build_display_menu ();
 
-	void cut_copy_clear_one (AutomationLineBase&, Selection&, Editing::CutCopyOp);
+	void cut_copy_clear_one (AutomationLine&, Selection&, Editing::CutCopyOp);
 	bool paste_one (Temporal::timepos_t const &, unsigned, float times, const Selection&, ItemCounts& counts, bool greedy=false);
 	void route_going_away ();
 

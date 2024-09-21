@@ -45,7 +45,7 @@
 #include "audio_time_axis.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "control_point.h"
 #include "editor_regions.h"
 #include "editor_cursors.h"

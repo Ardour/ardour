@@ -25,7 +25,7 @@
 
 #include "region_view.h"
 #include "automation_time_axis.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "enums.h"
 #include "line_merger.h"
 
@@ -61,7 +61,7 @@ public:
 	inline AutomationTimeAxisView* automation_view() const
 		{ return dynamic_cast<AutomationTimeAxisView*>(&trackview); }
 
-	std::shared_ptr<AutomationLine> line() { return _line; }
+	std::shared_ptr<EditorAutomationLine> line() { return _line; }
 
 	// We are a ghost.  Meta ghosts?  Crazy talk.
 	virtual GhostRegion* add_ghost(TimeAxisView&) { return 0; }
@@ -91,7 +91,7 @@ protected:
 
 private:
 	Evoral::Parameter                   _parameter;
-	std::shared_ptr<AutomationLine>   _line;
+	std::shared_ptr<EditorAutomationLine>   _line;
 	PBD::ScopedConnection               _mouse_mode_connection;
 };
 

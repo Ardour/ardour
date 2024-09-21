@@ -544,7 +544,7 @@ MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event
 			return true;
 			break;
 
-		case AutomationLineItem: {
+		case EditorAutomationLineItem: {
 			ARDOUR::SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
 			select_automation_line (&event->button, item, op);
 			return true;
@@ -1525,7 +1525,7 @@ MidiCueEditor::which_canvas_cursor (ItemType type) const
 		case GainLineItem:
 			cursor = _cursors->cross_hair;
 			break;
-		case AutomationLineItem:
+		case EditorAutomationLineItem:
 			cursor = _cursors->cross_hair;
 			break;
 		case StartSelectionTrimItem:
@@ -1566,18 +1566,18 @@ MidiCueEditor::which_canvas_cursor (ItemType type) const
 bool
 MidiCueEditor::enter_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
 {
-	AutomationLine* al;
+	EditorAutomationLine* al;
 
 	choose_canvas_cursor_on_entry (item_type);
 
 	switch (item_type) {
 	case AutomationTrackItem:
 		/* item is the base rectangle */
-		al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
+		al = reinterpret_cast<EditorAutomationLine*> (item->get_data ("line"));
 		al->track_entered ();
 		break;
 
-	case AutomationLineItem:
+	case EditorAutomationLineItem:
 		{
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 
@@ -1596,7 +1596,7 @@ MidiCueEditor::enter_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType i
 bool
 MidiCueEditor::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
 {
-	AutomationLine* al;
+	EditorAutomationLine* al;
 
 	if (!_enter_stack.empty()) {
 		_enter_stack.pop_back();
@@ -1607,8 +1607,8 @@ MidiCueEditor::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType i
 		_verbose_cursor->hide ();
 		break;
 
-	case AutomationLineItem:
-		al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
+	case EditorAutomationLineItem:
+		al = reinterpret_cast<EditorAutomationLine*> (item->get_data ("line"));
 		{
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 			if (line) {

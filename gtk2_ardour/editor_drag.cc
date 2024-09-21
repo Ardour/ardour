@@ -4935,7 +4935,7 @@ ControlPointDrag::active (Editing::MouseMode m)
 	}
 
 	/* otherwise active if the point is on an automation line (ie not if its on a region gain line) */
-	return dynamic_cast<AutomationLineBase*> (&(_point->line ())) != 0;
+	return dynamic_cast<AutomationLine*> (&(_point->line ())) != 0;
 }
 
 LineDrag::LineDrag (Editor& e, ArdourCanvas::Item* i)
@@ -4962,7 +4962,7 @@ LineDrag::~LineDrag ()
 void
 LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 {
-	_line = reinterpret_cast<AutomationLineBase*> (_item->get_data ("line"));
+	_line = reinterpret_cast<AutomationLine*> (_item->get_data ("line"));
 	assert (_line);
 
 	_item = &_line->grab_item ();
@@ -6399,7 +6399,7 @@ AutomationRangeDrag::AutomationRangeDrag (EditingContext& ec, list<RegionView*> 
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationRangeDrag\n");
 
-	list<std::shared_ptr<AutomationLineBase>> lines;
+	list<std::shared_ptr<AutomationLine>> lines;
 
 	for (list<RegionView*>::const_iterator i = v.begin (); i != v.end (); ++i) {
 		if (AudioRegionView* audio_view = dynamic_cast<AudioRegionView*> (*i)) {
@@ -6414,16 +6414,16 @@ AutomationRangeDrag::AutomationRangeDrag (EditingContext& ec, list<RegionView*> 
 	setup (lines);
 }
 
-/** @param lines AutomationLines to drag.
- *  @param offset Offset from the session start to the points in the AutomationLines.
+/** @param lines EditorAutomationLines to drag.
+ *  @param offset Offset from the session start to the points in the EditorAutomationLines.
  */
 void
-AutomationRangeDrag::setup (list<std::shared_ptr<AutomationLineBase>> const& lines)
+AutomationRangeDrag::setup (list<std::shared_ptr<AutomationLine>> const& lines)
 {
 	/* find the lines that overlap the ranges being dragged */
-	list<std::shared_ptr<AutomationLineBase>>::const_iterator i = lines.begin ();
+	list<std::shared_ptr<AutomationLine>>::const_iterator i = lines.begin ();
 	while (i != lines.end ()) {
-		list<std::shared_ptr<AutomationLineBase>>::const_iterator j = i;
+		list<std::shared_ptr<AutomationLine>>::const_iterator j = i;
 		++j;
 
 		pair<timepos_t, timepos_t> r = (*i)->get_point_x_range ();
@@ -6458,7 +6458,7 @@ AutomationRangeDrag::setup (list<std::shared_ptr<AutomationLineBase>> const& lin
 		i = j;
 	}
 
-	/* Now ::lines contains the AutomationLines that somehow overlap our drag */
+	/* Now ::lines contains the EditorAutomationLines that somehow overlap our drag */
 }
 
 double
@@ -7306,7 +7306,7 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::motion (GdkEvent* ev, bool firs
 		dragging_line = new ArdourCanvas::PolyLine (parent ? parent : item());
 		dragging_line->set_ignore_events (true);
 		dragging_line->set_outline_width (2.0);
-		dragging_line->set_outline_color (UIConfiguration::instance().color ("automation line")); // XXX -> get color from AutomationLine
+		dragging_line->set_outline_color (UIConfiguration::instance().color ("automation line")); // XXX -> get color from EditorAutomationLine
 		dragging_line->raise_to_top ();
 
 		/* for freehand drawing, we only support left->right direction, for now. */
