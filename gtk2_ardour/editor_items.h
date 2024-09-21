@@ -35,7 +35,7 @@ enum ItemType {
 	SelectionItem,
 	ControlPointItem,
 	GainLineItem,
-	AutomationLineItem,
+	EditorAutomationLineItem,
 	MeterMarkerItem,
 	BBTMarkerItem,
 	TempoCurveItem,

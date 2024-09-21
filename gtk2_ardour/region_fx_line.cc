@@ -27,7 +27,7 @@
 using namespace ARDOUR;
 
 RegionFxLine::RegionFxLine (std::string const& name, RegionView& r, ArdourCanvas::Container& parent, std::shared_ptr<AutomationList> l, ParameterDescriptor const& d)
-	: AutomationLine (name, r.get_time_axis_view(), parent, l, d)
+	: EditorAutomationLine (name, r.get_time_axis_view(), parent, l, d)
 	, _rv (r)
 {
 	terminal_points_can_slide = false;
@@ -35,7 +35,7 @@ RegionFxLine::RegionFxLine (std::string const& name, RegionView& r, ArdourCanvas
 }
 
 RegionFxLine::RegionFxLine (std::string const& name, RegionView& r, ArdourCanvas::Container& parent, std::shared_ptr<ARDOUR::AutomationControl> ac)
-	: AutomationLine (name, r.get_time_axis_view(), parent, ac->alist (), ac->desc ())
+	: EditorAutomationLine (name, r.get_time_axis_view(), parent, ac->alist (), ac->desc ())
 	, _rv (r)
 	, _ac (ac)
 {
@@ -70,14 +70,14 @@ void
 RegionFxLine::end_drag (bool with_push, uint32_t final_index)
 {
 	enable_automation ();
-	AutomationLine::end_drag (with_push, final_index);
+	EditorAutomationLine::end_drag (with_push, final_index);
 }
 
 void
 RegionFxLine::end_draw_merge ()
 {
 	enable_automation ();
-	AutomationLine::end_draw_merge ();
+	EditorAutomationLine::end_draw_merge ();
 }
 
 void

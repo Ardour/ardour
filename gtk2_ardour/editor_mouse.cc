@@ -516,7 +516,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 		case GainLineItem:
 			if (eff_mouse_mode != MouseRange) {
-				AutomationLine* argl = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
+				EditorAutomationLine* argl = reinterpret_cast<EditorAutomationLine*> (item->get_data ("line"));
 
 				std::list<Selectable*> selectables;
 				uint32_t before, after;
@@ -559,7 +559,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 			}
 			break;
 
-		case AutomationLineItem:
+		case EditorAutomationLineItem:
 			if (eff_mouse_mode != MouseRange && eff_mouse_mode != MouseDraw) {
 				select_automation_line (&event->button, item, op);
 			}
@@ -857,7 +857,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			return true;
 			break;
 
-		case AutomationLineItem:
+		case EditorAutomationLineItem:
 			_drags->set (new LineDrag (*this, item), event);
 			return true;
 			break;
@@ -998,7 +998,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				return true;
 				break;
 
-			case AutomationLineItem:
+			case EditorAutomationLineItem:
 				_drags->set (new LineDrag (*this, item), event);
 				return true;
 				break;
@@ -1158,7 +1158,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 			}
 
-		case AutomationLineItem:
+		case EditorAutomationLineItem:
 			/* fallthrough */
 		case AutomationTrackItem:
 			{
@@ -1640,7 +1640,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case PlayheadCursorItem:
 		case MarkerItem:
 		case GainLineItem:
-		case AutomationLineItem:
+		case EditorAutomationLineItem:
 		case StartSelectionTrimItem:
 		case EndSelectionTrimItem:
 		case SelectionMarkerItem:
@@ -1918,7 +1918,7 @@ Editor::can_remove_control_point (ArdourCanvas::Item* item)
 		abort(); /*NOTREACHED*/
 	}
 
-	AutomationLineBase& line (control_point->line());
+	AutomationLine& line (control_point->line());
 	if (dynamic_cast<RegionFxLine*> (&line)) {
 		/* we shouldn't remove the first or last gain point in region gain lines */
 		if (line.is_last_point(*control_point) || line.is_first_point(*control_point)) {

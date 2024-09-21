@@ -109,7 +109,7 @@ class AudioClock;
 class AudioRegionView;
 class AudioStreamView;
 class AudioTimeAxisView;
-class AutomationLine;
+class EditorAutomationLine;
 class AutomationSelection;
 class AutomationTimeAxisView;
 class BundleManager;
@@ -1494,7 +1494,7 @@ private:
 	bool canvas_control_point_event (GdkEvent* event,ArdourCanvas::Item*, ControlPoint*);
 	bool canvas_velocity_event (GdkEvent* event,ArdourCanvas::Item*);
 	bool canvas_velocity_base_event (GdkEvent* event,ArdourCanvas::Item*);
-	bool canvas_line_event (GdkEvent* event,ArdourCanvas::Item*, AutomationLine*);
+	bool canvas_line_event (GdkEvent* event,ArdourCanvas::Item*, EditorAutomationLine*);
 	bool canvas_selection_rect_event (GdkEvent* event,ArdourCanvas::Item*, SelectionRect*);
 	bool canvas_selection_start_trim_event (GdkEvent* event,ArdourCanvas::Item*, SelectionRect*);
 	bool canvas_selection_end_trim_event (GdkEvent* event,ArdourCanvas::Item*, SelectionRect*);

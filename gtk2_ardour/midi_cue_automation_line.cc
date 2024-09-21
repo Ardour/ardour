@@ -29,7 +29,7 @@ MidiCueAutomationLine::MidiCueAutomationLine (const std::string&                
                                               ArdourCanvas::Rectangle*                drag_base,
                                               std::shared_ptr<ARDOUR::AutomationList> al,
                                               const ARDOUR::ParameterDescriptor&      desc)
-: AutomationLineBase (name, ec, parent, drag_base, al, desc)
+: AutomationLine (name, ec, parent, drag_base, al, desc)
 {
 	_drag_base->set_data ("line", this);
 	_drag_base->Event.connect (sigc::mem_fun (*this, &MidiCueAutomationLine::base_event_handler));
@@ -44,5 +44,5 @@ MidiCueAutomationLine::base_event_handler (GdkEvent* ev)
 bool
 MidiCueAutomationLine::event_handler (GdkEvent* ev)
 {
-	return _editing_context.typed_event (line, ev, AutomationLineItem);
+	return _editing_context.typed_event (line, ev, EditorAutomationLineItem);
 }

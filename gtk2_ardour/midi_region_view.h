@@ -39,7 +39,7 @@
 #include "midi_time_axis.h"
 #include "midi_view.h"
 #include "time_axis_view_item.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "enums.h"
 
 namespace ARDOUR {

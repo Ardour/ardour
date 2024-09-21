@@ -37,7 +37,7 @@
 #include "control_protocol/control_protocol.h"
 
 #include "audio_region_view.h"
-#include "automation_line_base.h"
+#include "automation_line.h"
 #include "debug.h"
 #include "gui_thread.h"
 #include "midi_cut_buffer.h"
@@ -540,7 +540,7 @@ Selection::add (std::shared_ptr<Evoral::ControlList> cl)
 	}
 
 	/* The original may change so we must store a copy (not a pointer) here.
-	 * e.g AutomationLine rewrites the list with gain mapping.
+	 * e.g EditorAutomationLine rewrites the list with gain mapping.
 	 * the downside is that we can't perform duplicate checks.
 	 * This code was changed in response to #6842
 	 */
@@ -1165,7 +1165,7 @@ Selection::get_state () const
 	}
 
 	for (auto & cp : points) {
-		AutomationLine* al = dynamic_cast<AutomationLine*> (&cp->line());
+		EditorAutomationLine* al = dynamic_cast<EditorAutomationLine*> (&cp->line());
 		assert (al);
 		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (&al->trackview);
 		if (atv) {
@@ -1315,7 +1315,7 @@ Selection::set_state (XMLNode const & node, int)
 				vector <ControlPoint *> cps;
 
 				if (stv) {
-					std::shared_ptr<AutomationLineBase> li = stv->automation_child_by_alist_id (alist_id);
+					std::shared_ptr<AutomationLine> li = stv->automation_child_by_alist_id (alist_id);
 					if (li) {
 						ControlPoint* cp = li->nth(view_index);
 						if (cp) {

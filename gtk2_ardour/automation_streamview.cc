@@ -129,7 +129,7 @@ AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, 
 
 	/* setup automation state for this region */
 	if (_automation_view.parameter().type() != MidiVelocityAutomation) {
-		std::shared_ptr<AutomationLine> line = dynamic_cast<AutomationRegionView*>(region_view)->line ();
+		std::shared_ptr<EditorAutomationLine> line = dynamic_cast<AutomationRegionView*>(region_view)->line ();
 		if (line && line->the_list()) {
 			line->the_list()->set_automation_state (automation_state ());
 		}
@@ -209,7 +209,7 @@ AutomationStreamView::automation_state () const
 		return _pending_automation_state;
 	}
 
-	std::shared_ptr<AutomationLine> line = ((AutomationRegionView*) region_views.front())->line ();
+	std::shared_ptr<EditorAutomationLine> line = ((AutomationRegionView*) region_views.front())->line ();
 	if (!line || !line->the_list()) {
 		return Off;
 	}
@@ -289,10 +289,10 @@ AutomationStreamView::set_selected_points (PointSelection& ps)
 	}
 }
 
-list<std::shared_ptr<AutomationLineBase> >
+list<std::shared_ptr<AutomationLine> >
 AutomationStreamView::get_lines () const
 {
-	list<std::shared_ptr<AutomationLineBase> > lines;
+	list<std::shared_ptr<AutomationLine> > lines;
 
 	for (auto const & rv : region_views) {
 		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (rv);

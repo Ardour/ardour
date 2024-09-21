@@ -1301,13 +1301,13 @@ AudioRegionView::update_envelope_visibility ()
 	}
 
 	if (trackview.editor().current_mouse_mode() == Editing::MouseDraw || trackview.editor().current_mouse_mode() == Editing::MouseContent ) {
-		_fx_line->set_visibility (AutomationLine::VisibleAspects(AutomationLine::ControlPoints|AutomationLine::Line));
+		_fx_line->set_visibility (EditorAutomationLine::VisibleAspects(EditorAutomationLine::ControlPoints|EditorAutomationLine::Line));
 		_fx_line->canvas_group().raise_to_top ();
 	} else if (UIConfiguration::instance().get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseRange ) {
-		_fx_line->set_visibility (AutomationLine::VisibleAspects(AutomationLine::Line));
+		_fx_line->set_visibility (EditorAutomationLine::VisibleAspects(EditorAutomationLine::Line));
 		_fx_line->canvas_group().raise_to_top ();
 	} else {
-		_fx_line->set_visibility (AutomationLine::VisibleAspects(0));
+		_fx_line->set_visibility (EditorAutomationLine::VisibleAspects(0));
 	}
 }
 

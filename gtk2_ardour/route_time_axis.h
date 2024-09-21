@@ -69,7 +69,7 @@ class Selection;
 class RegionSelection;
 class Selectable;
 class AutomationTimeAxisView;
-class AutomationLine;
+class EditorAutomationLine;
 class TimeSelection;
 class RouteGroupMenu;
 class ItemCounts;
@@ -201,13 +201,13 @@ protected:
 	std::shared_ptr<AutomationTimeAxisView>
 	find_atav_by_ctrl (std::shared_ptr<ARDOUR::AutomationControl>, bool route_owned_only = true);
 
-	std::shared_ptr<AutomationLine>
+	std::shared_ptr<EditorAutomationLine>
 	find_processor_automation_curve (std::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
 
 	void add_processor_automation_curve (std::shared_ptr<ARDOUR::Processor> r, Evoral::Parameter);
 	void add_existing_processor_automation_curves (std::weak_ptr<ARDOUR::Processor>);
 
-	std::shared_ptr<AutomationLineBase> automation_child_by_alist_id (PBD::ID);
+	std::shared_ptr<AutomationLine> automation_child_by_alist_id (PBD::ID);
 
 	void reset_processor_automation_curves ();
 
@@ -270,7 +270,7 @@ protected:
 
 	std::map<std::shared_ptr<PBD::Controllable>, Gtk::CheckMenuItem*> ctrl_item_map;
 
-	typedef std::vector<std::shared_ptr<AutomationLine> > ProcessorAutomationCurves;
+	typedef std::vector<std::shared_ptr<EditorAutomationLine> > ProcessorAutomationCurves;
 	ProcessorAutomationCurves processor_automation_curves;
 	/** parameter -> menu item map for the plugin automation menu */
 	ParameterMenuMap _subplugin_menu_map;

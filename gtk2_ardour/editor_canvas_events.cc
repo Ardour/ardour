@@ -47,9 +47,9 @@
 #include "audio_streamview.h"
 #include "audio_time_axis.h"
 #include "region_gain_line.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "automation_time_axis.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "control_point.h"
 #include "editor_drag.h"
 #include "midi_time_axis.h"
@@ -636,7 +636,7 @@ Editor::canvas_control_point_event (GdkEvent *event, ArdourCanvas::Item* item, C
 	case GDK_2BUTTON_PRESS:
 	case GDK_3BUTTON_PRESS:
 		clicked_control_point = cp;
-		clicked_axisview = &dynamic_cast<AutomationLine*> (&cp->line())->trackview;
+		clicked_axisview = &dynamic_cast<EditorAutomationLine*> (&cp->line())->trackview;
 		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		clicked_regionview = 0;
 		break;
@@ -660,7 +660,7 @@ Editor::canvas_velocity_base_event (GdkEvent *event, ArdourCanvas::Item* item)
 }
 
 bool
-Editor::canvas_line_event (GdkEvent *event, ArdourCanvas::Item* item, AutomationLine* al)
+Editor::canvas_line_event (GdkEvent *event, ArdourCanvas::Item* item, EditorAutomationLine* al)
 {
 	ItemType type;
 	RegionFxLine* rfl;
@@ -670,7 +670,7 @@ Editor::canvas_line_event (GdkEvent *event, ArdourCanvas::Item* item, Automation
 			clicked_regionview = &rfl->region_view ();
 		}
 	} else {
-		type = AutomationLineItem;
+		type = EditorAutomationLineItem;
 		if (event->type == GDK_BUTTON_PRESS) {
 			clicked_regionview = 0;
 		}

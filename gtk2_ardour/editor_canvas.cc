@@ -1262,7 +1262,7 @@ Editor::which_canvas_cursor(ItemType type) const
 		case GainLineItem:
 			cursor = _cursors->cross_hair;
 			break;
-		case AutomationLineItem:
+		case EditorAutomationLineItem:
 			cursor = _cursors->cross_hair;
 			break;
 		case StartSelectionTrimItem:
@@ -1431,7 +1431,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		break;
 
-	case AutomationLineItem:
+	case EditorAutomationLineItem:
 		if (mouse_mode == MouseDraw || mouse_mode == MouseObject) {
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 			if (line) {
@@ -1523,7 +1523,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	switch (item_type) {
 	case GainLineItem:
-	case AutomationLineItem:
+	case EditorAutomationLineItem:
 	case ControlPointItem:
 		/* these do not affect the current entered track state */
 		clear_entered_track = false;
@@ -1544,7 +1544,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 bool
 Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 {
-	AutomationLine* al;
+	EditorAutomationLine* al;
 	ArdourMarker *marker;
 	TempoMarker *t_marker;
 	MeterMarker *m_marker;
@@ -1563,8 +1563,8 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 		break;
 
 	case GainLineItem:
-	case AutomationLineItem:
-		al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
+	case EditorAutomationLineItem:
+		al = reinterpret_cast<EditorAutomationLine*> (item->get_data ("line"));
 		{
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 			if (line) {

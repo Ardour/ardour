@@ -25,7 +25,7 @@
 
 #include "public_editor.h"
 #include "stripable_time_axis.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 
 #include "pbd/i18n.h"
 
@@ -192,7 +192,7 @@ StripableTimeAxisView::automation_child(Evoral::Parameter param, PBD::ID)
 	}
 }
 
-std::shared_ptr<AutomationLineBase>
+std::shared_ptr<AutomationLine>
 StripableTimeAxisView::automation_child_by_alist_id (PBD::ID alist_id)
 {
 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
@@ -203,7 +203,7 @@ StripableTimeAxisView::automation_child_by_alist_id (PBD::ID alist_id)
 			}
 		}
 	}
-	return std::shared_ptr<AutomationLine> ();
+	return std::shared_ptr<EditorAutomationLine> ();
 }
 
 void

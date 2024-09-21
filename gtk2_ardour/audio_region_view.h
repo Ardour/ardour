@@ -41,7 +41,7 @@
 #include "line_merger.h"
 #include "region_view.h"
 #include "time_axis_view_item.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "enums.h"
 
 namespace ARDOUR {
@@ -221,7 +221,7 @@ protected:
 
 	void transients_changed();
 
-	AutomationLine::VisibleAspects automation_line_visibility () const;
+	EditorAutomationLine::VisibleAspects automation_line_visibility () const;
 	void redisplay (bool) {}
 
 private:

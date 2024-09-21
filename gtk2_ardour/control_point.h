@@ -29,7 +29,7 @@
 
 #include "selectable.h"
 
-class AutomationLineBase;
+class AutomationLine;
 class ControlPoint;
 class PointSelection;
 class TimeAxisView;
@@ -46,7 +46,7 @@ namespace ArdourCanvas {
 class ControlPoint : public Selectable
 {
 public:
-	ControlPoint (AutomationLineBase& al);
+	ControlPoint (AutomationLine& al);
 	ControlPoint (const ControlPoint&, bool dummy_arg_to_force_special_copy_constructor);
 	virtual ~ControlPoint ();
 
@@ -80,17 +80,17 @@ public:
 
 	ArdourCanvas::Item& item() const;
 
-	/* used from ~AutomationLine */
+	/* used from ~EditorAutomationLine */
 	void unset_item () { _item = 0 ; }
 
 	ARDOUR::AutomationList::iterator model() const { return _model; }
-	AutomationLineBase&              line()  const { return _line; }
+	AutomationLine&              line()  const { return _line; }
 
 	static PBD::Signal1<void, ControlPoint *> CatchDeletion;
 
 private:
 	ArdourCanvas::Rectangle *        _item;
-	AutomationLineBase&              _line;
+	AutomationLine&              _line;
 	ARDOUR::AutomationList::iterator _model;
 	uint32_t                         _view_index;
 	bool                             _can_slide;

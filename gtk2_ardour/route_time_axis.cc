@@ -1968,7 +1968,7 @@ RouteTimeAxisView::add_existing_processor_automation_curves (std::weak_ptr<Proce
 	for (set<Evoral::Parameter>::iterator i = existing.begin(); i != existing.end(); ++i) {
 
 		Evoral::Parameter param (*i);
-		std::shared_ptr<AutomationLine> al;
+		std::shared_ptr<EditorAutomationLine> al;
 
 		std::shared_ptr<AutomationControl> control = std::dynamic_pointer_cast<AutomationControl>(processor->control(*i, false));
 		if (!control || control->flags () & Controllable::HiddenControl) {
@@ -2227,7 +2227,7 @@ RouteTimeAxisView::processors_changed (RouteProcessorChange c)
 	}
 }
 
-std::shared_ptr<AutomationLine>
+std::shared_ptr<EditorAutomationLine>
 RouteTimeAxisView::find_processor_automation_curve (std::shared_ptr<Processor> processor, Evoral::Parameter what)
 {
 	ProcessorAutomationNode* pan;
@@ -2238,7 +2238,7 @@ RouteTimeAxisView::find_processor_automation_curve (std::shared_ptr<Processor> p
 		}
 	}
 
-	return std::shared_ptr<AutomationLine>();
+	return std::shared_ptr<EditorAutomationLine>();
 }
 
 void
@@ -2606,7 +2606,7 @@ RouteTimeAxisView::automation_child(Evoral::Parameter param, PBD::ID ctrl_id)
 	return std::shared_ptr<AutomationTimeAxisView>();
 }
 
-std::shared_ptr<AutomationLineBase>
+std::shared_ptr<AutomationLine>
 RouteTimeAxisView::automation_child_by_alist_id (PBD::ID alist_id)
 {
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {

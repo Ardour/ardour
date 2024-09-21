@@ -76,7 +76,7 @@
 #include "ardour/velocity_control.h"
 
 #include "ardour_message.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "automation_time_axis.h"
 #include "editor.h"
 #include "enums.h"
