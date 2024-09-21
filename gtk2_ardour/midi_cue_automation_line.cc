@@ -16,6 +16,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "canvas/rectangle.h"
+
+#include "editing_context.h"
+#include "editor_drag.h"
+#include "keyboard.h"
 #include "midi_cue_automation_line.h"
 
 MidiCueAutomationLine::MidiCueAutomationLine (const std::string&                      name,
@@ -26,10 +31,18 @@ MidiCueAutomationLine::MidiCueAutomationLine (const std::string&                
                                               const ARDOUR::ParameterDescriptor&      desc)
 : AutomationLineBase (name, ec, parent, drag_base, al, desc)
 {
+	_drag_base->set_data ("line", this);
+	_drag_base->Event.connect (sigc::mem_fun (*this, &MidiCueAutomationLine::base_event_handler));
 }
 
 bool
-MidiCueAutomationLine::event_handler (GdkEvent*)
+MidiCueAutomationLine::base_event_handler (GdkEvent* ev)
 {
-	return true;
+	return _editing_context.typed_event  (_drag_base, ev, AutomationTrackItem);
+}
+
+bool
+MidiCueAutomationLine::event_handler (GdkEvent* ev)
+{
+	return _editing_context.typed_event (line, ev, AutomationLineItem);
 }

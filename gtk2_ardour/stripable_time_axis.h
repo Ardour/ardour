@@ -38,7 +38,7 @@ public:
 	virtual void create_automation_child (const Evoral::Parameter& param, bool show) = 0;
 	virtual std::shared_ptr<AutomationTimeAxisView> automation_child (Evoral::Parameter param, PBD::ID ctrl_id = PBD::ID(0));
 
-	virtual std::shared_ptr<AutomationLine> automation_child_by_alist_id (PBD::ID);
+	virtual std::shared_ptr<AutomationLineBase> automation_child_by_alist_id (PBD::ID);
 
 	void request_redraw ();
 

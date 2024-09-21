@@ -394,6 +394,12 @@ MidiCueEditor::current_page_samples() const
 }
 
 bool
+MidiCueEditor::canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item* item, ControlPoint* cp)
+{
+	return typed_event (item, event, ControlPointItem);
+}
+
+bool
 MidiCueEditor::canvas_note_event (GdkEvent* event, ArdourCanvas::Item* item)
 {
 	return typed_event (item, event, NoteItem);
@@ -518,6 +524,11 @@ MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event
 			}
 			return true;
 
+		case ControlPointItem:
+			_drags->set (new ControlPointDrag (*this, item), event);
+			return true;
+			break;
+
 		case VelocityItem:
 			_drags->set (new LollipopDrag (*this, item), event);
 			return true;
@@ -527,6 +538,17 @@ MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event
 			_drags->set (new VelocityLineDrag (*this, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime), event);
 			return true;
 			break;
+
+		case AutomationTrackItem:
+			_drags->set (new AutomationDrawDrag (*this, nullptr, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime), event);
+			return true;
+			break;
+
+		case AutomationLineItem: {
+			ARDOUR::SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
+			select_automation_line (&event->button, item, op);
+			return true;
+		}
 
 		default:
 			break;
@@ -601,18 +623,6 @@ MidiCueEditor::motion_handler (ArdourCanvas::Item*, GdkEvent* event, bool from_a
 		return _drags->motion_handler (event, from_autoscroll);
 	}
 
-	return true;
-}
-
-bool
-MidiCueEditor::enter_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
-{
-	return true;
-}
-
-bool
-MidiCueEditor::leave_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
-{
 	return true;
 }
 
@@ -1454,4 +1464,166 @@ MidiCueEditor::escape ()
 	}
 
 	view->clear_note_selection ();
+}
+Gdk::Cursor*
+MidiCueEditor::which_track_cursor () const
+{
+	return _cursors->grabber;
+}
+
+Gdk::Cursor*
+MidiCueEditor::which_mode_cursor () const
+{
+	Gdk::Cursor* mode_cursor = MouseCursors::invalid_cursor ();
+
+	switch (mouse_mode) {
+	case Editing::MouseContent:
+		/* don't use mode cursor, pick a grabber cursor based on the item */
+		break;
+
+	case Editing::MouseDraw:
+		mode_cursor = _cursors->midi_pencil;
+		break;
+
+	default:
+		break;
+	}
+
+	return mode_cursor;
+}
+
+Gdk::Cursor*
+MidiCueEditor::which_trim_cursor (bool left_side) const
+{
+	abort ();
+	/*NOTREACHED*/
+	return nullptr;
+}
+
+
+Gdk::Cursor*
+MidiCueEditor::which_canvas_cursor (ItemType type) const
+{
+	Gdk::Cursor* cursor = which_mode_cursor ();
+
+	if (mouse_mode == Editing::MouseContent) {
+
+		/* find correct cursor to use in object/smart mode */
+		switch (type) {
+		case AutomationTrackItem:
+			cursor = which_track_cursor ();
+			break;
+		case PlayheadCursorItem:
+			cursor = _cursors->grabber;
+			break;
+		case SelectionItem:
+			cursor = _cursors->selector;
+			break;
+		case ControlPointItem:
+			cursor = _cursors->fader;
+			break;
+		case GainLineItem:
+			cursor = _cursors->cross_hair;
+			break;
+		case AutomationLineItem:
+			cursor = _cursors->cross_hair;
+			break;
+		case StartSelectionTrimItem:
+			cursor = _cursors->left_side_trim;
+			break;
+		case EndSelectionTrimItem:
+			cursor = _cursors->right_side_trim;
+			break;
+		case NoteItem:
+			cursor = _cursors->grabber_note;
+		default:
+			break;
+		}
+
+	} else if (mouse_mode == Editing::MouseDraw) {
+
+		/* ControlPointItem is not really specific to region gain mode
+		   but it is the same cursor so don't worry about this for now.
+		   The result is that we'll see the fader cursor if we enter
+		   non-region-gain-line control points while in MouseDraw
+		   mode, even though we can't edit them in this mode.
+		*/
+
+		switch (type) {
+		case ControlPointItem:
+			cursor = _cursors->fader;
+			break;
+		case NoteItem:
+			cursor = _cursors->grabber_note;
+		default:
+			break;
+		}
+	}
+
+	return cursor;
+}
+
+bool
+MidiCueEditor::enter_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
+{
+	AutomationLine* al;
+
+	choose_canvas_cursor_on_entry (item_type);
+
+	switch (item_type) {
+	case AutomationTrackItem:
+		/* item is the base rectangle */
+		al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
+		al->track_entered ();
+		break;
+
+	case AutomationLineItem:
+		{
+			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
+
+			if (line) {
+				line->set_outline_color (UIConfiguration::instance().color ("entered automation line"));
+			}
+		}
+		break;
+	default:
+		break;
+	}
+
+	return true;
+}
+
+bool
+MidiCueEditor::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
+{
+	AutomationLine* al;
+
+	if (!_enter_stack.empty()) {
+		_enter_stack.pop_back();
+	}
+
+	switch (item_type) {
+	case ControlPointItem:
+		_verbose_cursor->hide ();
+		break;
+
+	case AutomationLineItem:
+		al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
+		{
+			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
+			if (line) {
+				line->set_outline_color (al->get_line_color());
+			}
+		}
+		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			al->track_exited ();
+		}
+		break;
+
+	default:
+		break;
+	}
+
+
+	return true;
 }

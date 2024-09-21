@@ -31,6 +31,7 @@ class MidiCueAutomationLine : public AutomationLineBase
 	                       std::shared_ptr<ARDOUR::AutomationList> al,
 	                       const ARDOUR::ParameterDescriptor&      desc);
 
+	bool base_event_handler (GdkEvent*);
 	bool event_handler (GdkEvent*);
 };
 

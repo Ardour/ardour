@@ -33,6 +33,7 @@
 #include "midi_cue_view.h"
 #include "midi_cue_velocity.h"
 #include "note.h"
+#include "ui_config.h"
 #include "velocity_display.h"
 
 #include "pbd/i18n.h"
@@ -70,6 +71,7 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 
 	automation_group = new ArdourCanvas::Rectangle (&parent);
 	CANVAS_DEBUG_NAME (automation_group, "cue automation group");
+	automation_group->set_fill_color (UIConfiguration::instance().color ("midi automation track fill"));
 
 	velocity_base = new ArdourCanvas::Rectangle (&parent);
 	CANVAS_DEBUG_NAME (velocity_base, "cue velocity base");
@@ -275,7 +277,6 @@ MidiCueView::show_automation (Evoral::Parameter const & param)
 		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (control);
 
 		if (ac) {
-			std::cerr << "found control, list contains " << ac->alist()->size() << std::endl;
 			automation_line = new MidiCueAutomationLine ("whatevs",
 			                                             _editing_context,
 			                                             *automation_group,

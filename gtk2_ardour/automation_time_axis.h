@@ -54,6 +54,7 @@ class PublicEditor;
 class TimeSelection;
 class RegionSelection;
 class PointSelection;
+class AutomationLineBase;
 class AutomationLine;
 class Selection;
 class Selectable;
@@ -95,7 +96,7 @@ public:
 	std::shared_ptr<AutomationLine> line() { return _line; }
 
 	/** @return All AutomationLines associated with this view */
-	std::list<std::shared_ptr<AutomationLine> > lines () const;
+	std::list<std::shared_ptr<AutomationLineBase> > lines () const;
 
 	AutomationStreamView* automation_view() const { return _view; }
 
@@ -202,7 +203,7 @@ protected:
 
 	void build_display_menu ();
 
-	void cut_copy_clear_one (AutomationLine&, Selection&, Editing::CutCopyOp);
+	void cut_copy_clear_one (AutomationLineBase&, Selection&, Editing::CutCopyOp);
 	bool paste_one (Temporal::timepos_t const &, unsigned, float times, const Selection&, ItemCounts& counts, bool greedy=false);
 	void route_going_away ();
 
