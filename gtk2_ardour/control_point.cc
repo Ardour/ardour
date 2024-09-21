@@ -88,7 +88,7 @@ ControlPoint::~ControlPoint ()
 bool
 ControlPoint::event_handler (GdkEvent* event)
 {
-	return PublicEditor::instance().canvas_control_point_event (event, _item, this);
+	return _line.editing_context().canvas_control_point_event (event, _item, this);
 }
 
 void

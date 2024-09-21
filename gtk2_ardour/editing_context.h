@@ -59,6 +59,7 @@ namespace Temporal {
 
 class XMLNode;
 
+class ControlPoint;
 class CursorContext;
 class DragManager;
 class EditorCursor;
@@ -150,13 +151,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	bool follow_playhead () const { return _follow_playhead; }
 
 	virtual void instant_save() = 0;
-
-	/** Get the topmost enter context for the given item type.
-	 *
-	 * This is used to change the cursor associated with a given enter context,
-	 * which may not be on the top of the stack.
-	 */
-	virtual EnterContext* get_enter_context(ItemType type) = 0;
 
 	virtual void begin_selection_op_history () = 0;
 	virtual void begin_reversible_selection_op (std::string cmd_name) = 0;
@@ -256,6 +250,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_velocity_base_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_velocity_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
+	virtual bool canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item*, ControlPoint*) = 0;
 
 	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) const;
 	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) const;
@@ -315,6 +310,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual Selection& get_selection() const { return *selection; }
 	virtual Selection& get_cut_buffer () const { return *cut_buffer; }
 
+	void reset_point_selection ();
+
 	/** Set the mouse mode (gain, object, range, timefx etc.)
 	 * @param m Mouse mode (defined in editing_syms.h)
 	 * @param force Perform the effects of the change even if no change is required
@@ -329,8 +326,18 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	 * (defined in editing_syms.h)
 	 */
 	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
+	virtual Editing::MouseMode effective_mouse_mode () const { return mouse_mode; }
+
 	/** @return Whether the current mouse mode is an "internal" editing mode. */
 	virtual bool internal_editing() const = 0;
+
+	virtual bool get_smart_mode() const { return false; }
+
+	/** Push the appropriate enter/cursor context on item entry. */
+	void choose_canvas_cursor_on_entry (ItemType);
+
+	/** Update all enter cursors based on current settings. */
+	void update_all_enter_cursors ();
 
 	virtual Gdk::Cursor* get_canvas_cursor () const;
 	static MouseCursors const* cursors () {
@@ -387,6 +394,20 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	bool on_velocity_scroll_event (GdkEventScroll*);
 	void pre_render ();
+
+	void select_automation_line (GdkEventButton*, ArdourCanvas::Item*, ARDOUR::SelectionOperation);
+
+	/** Get the topmost enter context for the given item type.
+	 *
+	 * This is used to change the cursor associated with a given enter context,
+	 * which may not be on the top of the stack.
+	 */
+	virtual EnterContext* get_enter_context(ItemType type);
+
+	virtual Gdk::Cursor* which_track_cursor () const = 0;
+	virtual Gdk::Cursor* which_mode_cursor () const = 0;
+	virtual Gdk::Cursor* which_trim_cursor (bool left_side) const = 0;
+	virtual Gdk::Cursor* which_canvas_cursor (ItemType type) const = 0;
 
 	/** Undo some transactions.
 	 * @param n Number of transactions to undo.
@@ -652,6 +673,20 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	uint32_t autoscroll_cnt;
 	ArdourCanvas::Rect autoscroll_boundary;
 
+	bool _mouse_changed_selection;
+	ArdourMarker* entered_marker;
+	TimeAxisView* entered_track;
+	/** If the mouse is over a RegionView or one of its child canvas items, this is set up
+	    to point to the RegionView.  Otherwise it is 0.
+	*/
+	RegionView* entered_regionview;
+
+	bool clear_entered_track;
+
+	virtual void set_entered_track (TimeAxisView*) {};
+
+	std::vector<EnterContext> _enter_stack;
+
 	PBD::ScopedConnection escape_connection;
 	virtual void escape () {}
 
@@ -675,4 +710,3 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 
 #endif /* __ardour_midi_editing_context_h__ */
-

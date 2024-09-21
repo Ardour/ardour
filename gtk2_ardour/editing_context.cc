@@ -34,6 +34,8 @@
 
 #include "actions.h"
 #include "ardour_ui.h"
+#include "automation_line_base.h"
+#include "control_point.h"
 #include "edit_note_dialog.h"
 #include "editing_context.h"
 #include "editing_convert.h"
@@ -141,6 +143,11 @@ EditingContext::EditingContext (std::string const & name)
 	, autoscroll_horizontal_allowed (false)
 	, autoscroll_vertical_allowed (false)
 	, autoscroll_cnt (0)
+	, _mouse_changed_selection (false)
+	, entered_marker (nullptr)
+	, entered_track (nullptr)
+	, entered_regionview (nullptr)
+	, clear_entered_track (false)
 {
 	if (!button_bindings) {
 		button_bindings = new Bindings ("editor-mouse");
@@ -2645,4 +2652,100 @@ EditingContext::get_draw_length_as_beats (bool& success, timepos_t const & posit
 	success = false;
 	return Temporal::Beats();
 }
+
+void
+EditingContext::select_automation_line (GdkEventButton* event, ArdourCanvas::Item* item, ARDOUR::SelectionOperation op)
+{
+	AutomationLineBase* al = reinterpret_cast<AutomationLineBase*> (item->get_data ("line"));
+	std::list<Selectable*> selectables;
+	double mx = event->x;
+	double my = event->y;
+	bool press = (event->type == GDK_BUTTON_PRESS);
+
+	al->grab_item().canvas_to_item (mx, my);
+
+	uint32_t before, after;
+	samplecnt_t const  where = (samplecnt_t) floor (canvas_to_timeline (mx) * samples_per_pixel);
+
+	if (!al || !al->control_points_adjacent (where, before, after)) {
+		return;
+	}
+
+	selectables.push_back (al->nth (before));
+	selectables.push_back (al->nth (after));
+
+	switch (op) {
+	case SelectionSet:
+		if (press) {
+			selection->set (selectables);
+			_mouse_changed_selection = true;
+		}
+		break;
+	case SelectionAdd:
+		if (press) {
+			selection->add (selectables);
+			_mouse_changed_selection = true;
+		}
+		break;
+	case SelectionToggle:
+		if (press) {
+			selection->toggle (selectables);
+			_mouse_changed_selection = true;
+		}
+		break;
+	case SelectionExtend:
+		/* XXX */
+		break;
+	case SelectionRemove:
+		/* not relevant */
+		break;
+	}
+}
+
+/** Reset all selected points to the relevant default value */
+void
+EditingContext::reset_point_selection ()
+{
+	for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
+		ARDOUR::AutomationList::iterator j = (*i)->model ();
+		(*j)->value = (*i)->line().the_list()->descriptor ().normal;
+	}
+}
+
+EditingContext::EnterContext*
+EditingContext::get_enter_context(ItemType type)
+{
+	for (ssize_t i = _enter_stack.size() - 1; i >= 0; --i) {
+		if (_enter_stack[i].item_type == type) {
+			return &_enter_stack[i];
+		}
+	}
+	return NULL;
+}
+
+
+void
+EditingContext::choose_canvas_cursor_on_entry (ItemType type)
+{
+	if (_drags->active()) {
+		return;
+	}
+
+	Gdk::Cursor* cursor = which_canvas_cursor(type);
+
+	if (!_cursors->is_invalid (cursor)) {
+		// Push a new enter context
+		const EnterContext ctx = { type, CursorContext::create(*this, cursor) };
+		_enter_stack.push_back(ctx);
+	}
+}
+
+void
+EditingContext::update_all_enter_cursors ()
+{
+	for (auto & ec : _enter_stack) {
+		ec.cursor_ctx->change(which_canvas_cursor (ec.item_type));
+	}
+}
+
 

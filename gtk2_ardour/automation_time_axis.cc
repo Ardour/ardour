@@ -1084,10 +1084,10 @@ AutomationTimeAxisView::has_automation () const
 	return ( (_line && _line->npoints() > 0) || (_view && _view->has_automation()) );
 }
 
-list<std::shared_ptr<AutomationLine> >
+list<std::shared_ptr<AutomationLineBase> >
 AutomationTimeAxisView::lines () const
 {
-	list<std::shared_ptr<AutomationLine> > lines;
+	list<std::shared_ptr<AutomationLineBase> > lines;
 
 	if (_line) {
 		lines.push_back (_line);
@@ -1167,20 +1167,19 @@ AutomationTimeAxisView::parse_state_id (
 void
 AutomationTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
-	list<std::shared_ptr<AutomationLine> > lines;
-	if (_line) {
-		lines.push_back (_line);
-	} else if (_view) {
-		lines = _view->get_lines ();
-	}
+	list<std::shared_ptr<AutomationLineBase> > lines;
 
-	for (list<std::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
-		cut_copy_clear_one (**i, selection, op);
+	if (_line) {
+		cut_copy_clear_one (*_line, selection, op);
+	} else if (_view) {
+		for (auto & line : _view->get_lines ()) {
+			cut_copy_clear_one (*line, selection, op);
+		}
 	}
 }
 
 void
-AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& selection, CutCopyOp op)
+AutomationTimeAxisView::cut_copy_clear_one (AutomationLineBase& line, Selection& selection, CutCopyOp op)
 {
 	std::shared_ptr<Evoral::ControlList> what_we_got;
 	std::shared_ptr<AutomationList> alist (line.the_list());

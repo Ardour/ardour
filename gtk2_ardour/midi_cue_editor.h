@@ -68,6 +68,7 @@ class MidiCueEditor : public CueEditor
 	bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_velocity_base_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_velocity_event (GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item*, ControlPoint*);
 
 	int32_t get_grid_beat_divisions (Editing::GridType gt) const { return 1; }
 	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const { return 1; }
@@ -97,6 +98,11 @@ class MidiCueEditor : public CueEditor
 	bool autoscroll_active() const;
 
 	void midi_action (void (MidiView::*method)());
+
+	Gdk::Cursor* which_track_cursor () const;
+	Gdk::Cursor* which_mode_cursor () const;
+	Gdk::Cursor* which_trim_cursor (bool left_side) const;
+	Gdk::Cursor* which_canvas_cursor (ItemType type) const;
 
   protected:
 	void register_actions ();

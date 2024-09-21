@@ -174,6 +174,7 @@ public:
 	double dt_to_dx (Temporal::timepos_t const &, Temporal::timecnt_t const &);
 
 	ARDOUR::ParameterDescriptor const & param() const { return _desc; }
+	EditingContext& editing_context() const { return _editing_context; }
 
 protected:
 
@@ -194,7 +195,7 @@ protected:
 	/** true if we did a push at any point during the current drag */
 	bool    did_push;
 
-	EditingContext&             editing_context;
+	EditingContext&             _editing_context;
 	ArdourCanvas::Item&         _parent_group;
 	ArdourCanvas::Rectangle*    _drag_base;
 	ArdourCanvas::Container*    group;

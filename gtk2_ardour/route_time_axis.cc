@@ -2606,7 +2606,7 @@ RouteTimeAxisView::automation_child(Evoral::Parameter param, PBD::ID ctrl_id)
 	return std::shared_ptr<AutomationTimeAxisView>();
 }
 
-std::shared_ptr<AutomationLine>
+std::shared_ptr<AutomationLineBase>
 RouteTimeAxisView::automation_child_by_alist_id (PBD::ID alist_id)
 {
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
@@ -2615,10 +2615,9 @@ RouteTimeAxisView::automation_child_by_alist_id (PBD::ID alist_id)
 			if (!atv) {
 				continue;
 			}
-			list<std::shared_ptr<AutomationLine> > lines = atv->lines();
-			for (list<std::shared_ptr<AutomationLine> >::const_iterator li = lines.begin(); li != lines.end(); ++li) {
-				if ((*li)->the_list()->id() == alist_id) {
-					return *li;
+			for (auto & line : atv->lines()) {
+				if (line->the_list()->id() == alist_id) {
+					return line;
 				}
 			}
 		}

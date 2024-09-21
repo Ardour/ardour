@@ -192,15 +192,14 @@ StripableTimeAxisView::automation_child(Evoral::Parameter param, PBD::ID)
 	}
 }
 
-std::shared_ptr<AutomationLine>
+std::shared_ptr<AutomationLineBase>
 StripableTimeAxisView::automation_child_by_alist_id (PBD::ID alist_id)
 {
 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 		std::shared_ptr<AutomationTimeAxisView> atv (i->second);
-		std::list<std::shared_ptr<AutomationLine> > lines = atv->lines();
-		for (std::list<std::shared_ptr<AutomationLine> >::const_iterator li = lines.begin(); li != lines.end(); ++li) {
-			if ((*li)->the_list()->id() == alist_id) {
-				return *li;
+		for (auto & line : atv->lines()) {
+			if (line->the_list()->id() == alist_id) {
+				return line;;
 			}
 		}
 	}

@@ -207,7 +207,7 @@ protected:
 	void add_processor_automation_curve (std::shared_ptr<ARDOUR::Processor> r, Evoral::Parameter);
 	void add_existing_processor_automation_curves (std::weak_ptr<ARDOUR::Processor>);
 
-	std::shared_ptr<AutomationLine> automation_child_by_alist_id (PBD::ID);
+	std::shared_ptr<AutomationLineBase> automation_child_by_alist_id (PBD::ID);
 
 	void reset_processor_automation_curves ();
 

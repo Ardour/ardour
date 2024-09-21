@@ -330,7 +330,6 @@ AutomationRegionView::entered ()
 	}
 }
 
-
 void
 AutomationRegionView::exited ()
 {
@@ -338,6 +337,7 @@ AutomationRegionView::exited ()
 		_line->track_exited();
 	}
 }
+
 void
 AutomationRegionView::set_selected (bool yn)
 {

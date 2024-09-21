@@ -4775,8 +4775,8 @@ MarkerDrag::update_item (Location*)
 	/* noop */
 }
 
-ControlPointDrag::ControlPointDrag (Editor& e, ArdourCanvas::Item* i)
-	: EditorDrag (e, i, e.time_domain (), e.get_trackview_group(), false)
+ControlPointDrag::ControlPointDrag (EditingContext& e, ArdourCanvas::Item* i)
+	: Drag (e, i, e.time_domain (), e.get_trackview_group(), false)
 	, _fixed_grab_x (0.0)
 	, _fixed_grab_y (0.0)
 	, _cumulative_y_drag (0.0)
@@ -4787,7 +4787,7 @@ ControlPointDrag::ControlPointDrag (Editor& e, ArdourCanvas::Item* i)
 		_zero_gain_fraction = gain_to_slider_position_with_max (dB_to_coefficient (0.0), Config->get_max_gain ());
 	}
 
-	DEBUG_TRACE (DEBUG::Drags, "New ControlPointDrag\n");
+	DEBUG_TRACE (DEBUG::Drags, string_compose ("New ControlPointDrag @ %1\n", this));
 
 	_point = reinterpret_cast<ControlPoint*> (_item->get_data ("control_point"));
 	assert (_point);
@@ -4911,7 +4911,7 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (!movement_occurred) {
 		/* just a click */
 		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask (Keyboard::TertiaryModifier))) {
-			_editor.reset_point_selection ();
+			editing_context.reset_point_selection ();
 		}
 
 	} else {
@@ -4935,7 +4935,7 @@ ControlPointDrag::active (Editing::MouseMode m)
 	}
 
 	/* otherwise active if the point is on an automation line (ie not if its on a region gain line) */
-	return dynamic_cast<AutomationLine*> (&(_point->line ())) != 0;
+	return dynamic_cast<AutomationLineBase*> (&(_point->line ())) != 0;
 }
 
 LineDrag::LineDrag (Editor& e, ArdourCanvas::Item* i)
@@ -4962,7 +4962,7 @@ LineDrag::~LineDrag ()
 void
 LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 {
-	_line = reinterpret_cast<AutomationLine*> (_item->get_data ("line"));
+	_line = reinterpret_cast<AutomationLineBase*> (_item->get_data ("line"));
 	assert (_line);
 
 	_item = &_line->grab_item ();
@@ -6399,7 +6399,7 @@ AutomationRangeDrag::AutomationRangeDrag (EditingContext& ec, list<RegionView*> 
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationRangeDrag\n");
 
-	list<std::shared_ptr<AutomationLine>> lines;
+	list<std::shared_ptr<AutomationLineBase>> lines;
 
 	for (list<RegionView*>::const_iterator i = v.begin (); i != v.end (); ++i) {
 		if (AudioRegionView* audio_view = dynamic_cast<AudioRegionView*> (*i)) {
@@ -6418,12 +6418,12 @@ AutomationRangeDrag::AutomationRangeDrag (EditingContext& ec, list<RegionView*> 
  *  @param offset Offset from the session start to the points in the AutomationLines.
  */
 void
-AutomationRangeDrag::setup (list<std::shared_ptr<AutomationLine>> const& lines)
+AutomationRangeDrag::setup (list<std::shared_ptr<AutomationLineBase>> const& lines)
 {
 	/* find the lines that overlap the ranges being dragged */
-	list<std::shared_ptr<AutomationLine>>::const_iterator i = lines.begin ();
+	list<std::shared_ptr<AutomationLineBase>>::const_iterator i = lines.begin ();
 	while (i != lines.end ()) {
-		list<std::shared_ptr<AutomationLine>>::const_iterator j = i;
+		list<std::shared_ptr<AutomationLineBase>>::const_iterator j = i;
 		++j;
 
 		pair<timepos_t, timepos_t> r = (*i)->get_point_x_range ();

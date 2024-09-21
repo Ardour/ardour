@@ -5708,16 +5708,6 @@ Editor::duplicate_selection (float times)
 	}
 }
 
-/** Reset all selected points to the relevant default value */
-void
-Editor::reset_point_selection ()
-{
-	for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
-		ARDOUR::AutomationList::iterator j = (*i)->model ();
-		(*j)->value = (*i)->line().the_list()->descriptor ().normal;
-	}
-}
-
 void
 Editor::center_playhead ()
 {

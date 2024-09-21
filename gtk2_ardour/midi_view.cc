@@ -1753,8 +1753,6 @@ MidiView::add_note(const std::shared_ptr<NoteType> note, bool visible)
 		event = 0;
 	}
 
-	std::cerr << "add note, event " << event << std::endl;
-
 	if (event) {
 		ghost_add_note (event);
 

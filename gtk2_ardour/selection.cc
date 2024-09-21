@@ -1315,7 +1315,7 @@ Selection::set_state (XMLNode const & node, int)
 				vector <ControlPoint *> cps;
 
 				if (stv) {
-					std::shared_ptr<AutomationLine> li = stv->automation_child_by_alist_id (alist_id);
+					std::shared_ptr<AutomationLineBase> li = stv->automation_child_by_alist_id (alist_id);
 					if (li) {
 						ControlPoint* cp = li->nth(view_index);
 						if (cp) {

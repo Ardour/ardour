@@ -449,13 +449,6 @@ public:
 
 	void get_pointer_position (double &, double &) const;
 
-	/** Get the topmost enter context for the given item type.
-	 *
-	 * This is used to change the cursor associated with a given enter context,
-	 * which may not be on the top of the stack.
-	 */
-	EnterContext* get_enter_context(ItemType type);
-
 	TimeAxisView* stepping_axis_view () {
 		return _stepping_axis_view;
 	}
@@ -656,7 +649,6 @@ private:
 	ArdourMarker* find_marker_from_location_id (PBD::ID const&, bool) const;
 	TempoMarker* find_marker_for_tempo (Temporal::TempoPoint const &);
 	MeterMarker* find_marker_for_meter (Temporal::MeterPoint const &);
-	ArdourMarker* entered_marker;
 	bool _show_marker_lines;
 
 	typedef std::map<ARDOUR::Location*,LocationMarkers*> LocationMarkerMap;
@@ -724,7 +716,6 @@ private:
 
 	void button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type);
 	bool button_release_can_deselect;
-	bool _mouse_changed_selection;
 
 	void catch_vanishing_regionview (RegionView*);
 
@@ -777,12 +768,6 @@ private:
 	Gdk::Cursor* which_mode_cursor () const;
 	Gdk::Cursor* which_trim_cursor (bool left_side) const;
 	Gdk::Cursor* which_canvas_cursor (ItemType type) const;
-
-	/** Push the appropriate enter/cursor context on item entry. */
-	void choose_canvas_cursor_on_entry (ItemType);
-
-	/** Update all enter cursors based on current settings. */
-	void update_all_enter_cursors ();
 
 	ArdourCanvas::GtkCanvas* _track_canvas;
 	ArdourCanvas::GtkCanvasViewport* _track_canvas_viewport;
@@ -1137,7 +1122,6 @@ private:
 
 	/* EDITING OPERATIONS */
 
-	void reset_point_selection ();
 	void region_lock ();
 	void region_unlock ();
 	void toggle_region_lock ();
@@ -2070,15 +2054,6 @@ private:
 	gint track_height_step_timeout();
 	sigc::connection step_timeout;
 
-	TimeAxisView* entered_track;
-	/** If the mouse is over a RegionView or one of its child canvas items, this is set up
-	    to point to the RegionView.  Otherwise it is 0.
-	*/
-	RegionView*   entered_regionview;
-
-	std::vector<EnterContext> _enter_stack;
-
-	bool clear_entered_track;
 	bool left_track_canvas (GdkEventCrossing*);
 	bool entered_track_canvas (GdkEventCrossing*);
 	void set_entered_track (TimeAxisView*);

@@ -102,7 +102,7 @@ AutomationLineBase::AutomationLineBase (const string&                   name,
 	, have_reset_timeout (false)
 	, no_draw (false)
 	, _is_boolean (false)
-	, editing_context (ec)
+	, _editing_context (ec)
 	, _parent_group (parent)
 	, _drag_base (drag_base)
 	, _offset (0)
@@ -122,7 +122,7 @@ AutomationLineBase::AutomationLineBase (const string&                   name,
 
 	line->Event.connect (sigc::mem_fun (*this, &AutomationLineBase::event_handler));
 
-	editing_context.session()->register_with_memento_command_factory(alist->id(), this);
+	_editing_context.session()->register_with_memento_command_factory(alist->id(), this);
 
 	interpolation_changed (alist->interpolation ());
 
@@ -236,7 +236,7 @@ AutomationLineBase::control_point_box_size ()
 	} else if (_height > (guint32) TimeAxisView::preset_height (HeightNormal)) {
 		return rint (6.0 * uiscale);
 	}
-	return rint (4.0 * uiscale);
+	return rint (12.0 * uiscale);
 }
 
 void
@@ -311,9 +311,8 @@ AutomationLineBase::modify_points_y (std::vector<ControlPoint*> const& cps, doub
 	y = min (1.0, y);
 	y = _height - (y * _height);
 
-	editing_context.begin_reversible_command (_("automation event move"));
-	editing_context.session()->add_command (
-		new MementoCommand<AutomationList> (memento_command_binder(), &get_state(), 0));
+	_editing_context.begin_reversible_command (_("automation event move"));
+	_editing_context.add_command (new MementoCommand<AutomationList> (memento_command_binder(), &get_state(), 0));
 
 	alist->freeze ();
 	for (auto const& cp : cps) {
@@ -332,11 +331,10 @@ AutomationLineBase::modify_points_y (std::vector<ControlPoint*> const& cps, doub
 
 	update_pending = false;
 
-	editing_context.session()->add_command (
-		new MementoCommand<AutomationList> (memento_command_binder(), 0, &alist->get_state()));
+	_editing_context.add_command (new MementoCommand<AutomationList> (memento_command_binder(), 0, &alist->get_state()));
 
-	editing_context.commit_reversible_command ();
-	editing_context.session()->set_dirty ();
+	_editing_context.commit_reversible_command ();
+	_editing_context.session()->set_dirty ();
 }
 
 void
@@ -435,8 +433,7 @@ AutomationLineBase::string_to_fraction (string const & s) const
 void
 AutomationLineBase::start_drag_single (ControlPoint* cp, double x, float fraction)
 {
-	editing_context.session()->add_command (
-		new MementoCommand<AutomationList> (memento_command_binder(), &get_state(), 0));
+	_editing_context.add_command (new MementoCommand<AutomationList> (memento_command_binder(), &get_state(), 0));
 
 	_drag_points.clear ();
 	_drag_points.push_back (cp);
@@ -460,8 +457,7 @@ AutomationLineBase::start_drag_single (ControlPoint* cp, double x, float fractio
 void
 AutomationLineBase::start_drag_line (uint32_t i1, uint32_t i2, float fraction)
 {
-	editing_context.session()->add_command (
-		new MementoCommand<AutomationList> (memento_command_binder (), &get_state(), 0));
+	_editing_context.add_command (new MementoCommand<AutomationList> (memento_command_binder (), &get_state(), 0));
 
 	_drag_points.clear ();
 
@@ -479,8 +475,7 @@ AutomationLineBase::start_drag_line (uint32_t i1, uint32_t i2, float fraction)
 void
 AutomationLineBase::start_drag_multiple (list<ControlPoint*> cp, float fraction, XMLNode* state)
 {
-	editing_context.session()->add_command (
-		new MementoCommand<AutomationList> (memento_command_binder(), state, 0));
+	_editing_context.add_command (new MementoCommand<AutomationList> (memento_command_binder(), state, 0));
 
 	_drag_points = cp;
 	start_drag_common (0, fraction);
@@ -610,9 +605,9 @@ AutomationLineBase::dt_to_dx (timepos_t const & pos, timecnt_t const & dt)
 	/* convert a shift of pos by dt into an absolute timepos */
 	timepos_t const new_pos ((pos + dt + get_origin()).shift_earlier (offset()));
 	/* convert to pixels */
-	double px = editing_context.time_to_pixel_unrounded (new_pos);
+	double px = _editing_context.time_to_pixel_unrounded (new_pos);
 	/* convert back to pixels-relative-to-origin */
-	px -= editing_context.time_to_pixel_unrounded (get_origin());
+	px -= _editing_context.time_to_pixel_unrounded (get_origin());
 	return px;
 }
 
@@ -792,10 +787,9 @@ AutomationLineBase::end_drag (bool with_push, uint32_t final_index)
 		line->set_steps (line_points, is_stepped());
 	}
 
-	editing_context.session()->add_command (
-		new MementoCommand<AutomationList>(memento_command_binder (), 0, &alist->get_state()));
+	_editing_context.add_command (new MementoCommand<AutomationList>(memento_command_binder (), 0, &alist->get_state()));
 
-	editing_context.session()->set_dirty ();
+	_editing_context.session()->set_dirty ();
 	did_push = false;
 
 	contiguous_points.clear ();
@@ -827,7 +821,7 @@ AutomationLineBase::sync_model_with_view_point (ControlPoint& cp)
 	const timepos_t absolute_time = model_time + origin;
 
 	/* now convert to pixels relative to start of region, which matches view_x */
-	const double model_x = editing_context.time_to_pixel_unrounded (absolute_time) - editing_context.time_to_pixel_unrounded (origin);
+	const double model_x = _editing_context.time_to_pixel_unrounded (absolute_time) - _editing_context.time_to_pixel_unrounded (origin);
 
 	if (view_x != model_x) {
 
@@ -840,7 +834,7 @@ AutomationLineBase::sync_model_with_view_point (ControlPoint& cp)
 		 * pixel_to_sample() islinear only depending on zoom level.
 		 */
 
-		const timepos_t view_samples (editing_context.pixel_to_sample (view_x));
+		const timepos_t view_samples (_editing_context.pixel_to_sample (view_x));
 
 		/* measure distance from RegionView origin (this preserves time domain) */
 
@@ -880,7 +874,7 @@ AutomationLineBase::control_points_adjacent (double xval, uint32_t & before, uin
 	ControlPoint *acp = 0;
 	double unit_xval;
 
-	unit_xval = editing_context.sample_to_pixel_unrounded (xval);
+	unit_xval = _editing_context.sample_to_pixel_unrounded (xval);
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 
@@ -936,17 +930,16 @@ AutomationLineBase::is_first_point (ControlPoint& cp)
 void
 AutomationLineBase::remove_point (ControlPoint& cp)
 {
-	editing_context.begin_reversible_command (_("remove control point"));
+	_editing_context.begin_reversible_command (_("remove control point"));
 	XMLNode &before = alist->get_state();
 
-	editing_context.get_selection ().clear_points ();
+	_editing_context.get_selection ().clear_points ();
 	alist->erase (cp.model());
 
-	editing_context.session()->add_command(
-		new MementoCommand<AutomationList> (memento_command_binder (), &before, &alist->get_state()));
+	_editing_context.add_command (new MementoCommand<AutomationList> (memento_command_binder (), &before, &alist->get_state()));
 
-	editing_context.commit_reversible_command ();
-	editing_context.session()->set_dirty ();
+	_editing_context.commit_reversible_command ();
+	_editing_context.session()->set_dirty ();
 }
 
 /** Get selectable points within an area.
@@ -1109,7 +1102,7 @@ AutomationLineBase::reset_callback (const Evoral::ControlList& events)
 		 * zoom and scroll into account).
 		 */
 
-		double px = editing_context.duration_to_pixels_unrounded (tx);
+		double px = _editing_context.duration_to_pixels_unrounded (tx);
 		add_visible_control_point (vp, pi, px, ty, ai, np);
 		vp++;
 	}
@@ -1167,7 +1160,7 @@ AutomationLineBase::reset_callback (const Evoral::ControlList& events)
 		 * from the last point to the very end
 		 */
 
-		double px = editing_context.duration_to_pixels_unrounded (model_to_view_coord_x (_offset + _maximum_time));
+		double px = _editing_context.duration_to_pixels_unrounded (model_to_view_coord_x (_offset + _maximum_time));
 
 		if (control_points[control_points.size() - 1]->get_x() != px && following != e.end()) {
 			double ty = model_to_view_coord_y (e.unlocked_eval (_offset + _maximum_time));
@@ -1189,7 +1182,7 @@ AutomationLineBase::reset_callback (const Evoral::ControlList& events)
 		update_visibility ();
 	}
 
-	set_selected_points (editing_context.get_selection().points);
+	set_selected_points (_editing_context.get_selection().points);
 }
 
 void
@@ -1219,7 +1212,7 @@ AutomationLineBase::queue_reset ()
 {
 	/* this must be called from the GUI thread */
 
-	if (editing_context.session()->transport_rolling() && alist->automation_write()) {
+	if (_editing_context.session()->transport_rolling() && alist->automation_write()) {
 		/* automation write pass ... defer to a timeout */
 		/* redraw in 1/4 second */
 		if (!have_reset_timeout) {
@@ -1241,8 +1234,7 @@ AutomationLineBase::clear ()
 	XMLNode &before = alist->get_state();
 	alist->clear();
 
-	editing_context.session()->add_command (
-		new MementoCommand<AutomationList> (memento_command_binder (), &before, &alist->get_state()));
+	_editing_context.add_command (new MementoCommand<AutomationList> (memento_command_binder (), &before, &alist->get_state()));
 }
 
 void
