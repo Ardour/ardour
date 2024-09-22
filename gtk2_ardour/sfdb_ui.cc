@@ -111,6 +111,8 @@ string2miditracknamesource (string const & str)
 		return SMFTrackNumber;
 	} else if (str == _("by track name")) {
 		return SMFTrackName;
+	} else if (str == _("by file and track name")) {
+		return SMFFileAndTrackName;
 	} else if (str == _("by instrument name")) {
 		return SMFInstrumentName;
 	}
@@ -1981,6 +1983,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	str.clear ();
 	str.push_back (_("by track number"));
 	str.push_back (_("by track name"));
+	str.push_back (_("by file and track name"));
 	str.push_back (_("by instrument name"));
 	set_popdown_strings (midi_track_name_combo, str);
 	midi_track_name_combo.set_active_text (str.front());
