@@ -144,7 +144,7 @@ open_importable_source (const string& path, samplecnt_t samplerate, ARDOUR::SrcQ
 
 vector<string>
 Session::get_paths_for_new_sources (bool /*allow_replacing*/, const string& import_file_path, uint32_t channels,
-                                    vector<string> const & smf_names)
+                                    vector<string> const & smf_names, bool use_smf_file_names)
 
 {
 	vector<string> new_paths;
@@ -159,8 +159,12 @@ Session::get_paths_for_new_sources (bool /*allow_replacing*/, const string& impo
 		case DataType::MIDI:
 			if (channels > 1) {
 				assert (smf_names.size() == channels);
-				string mchn_name = string_compose ("%1.%2", basename, smf_names[n]);
-				filepath = new_midi_source_path (mchn_name);
+				if (use_smf_file_names) {
+					string mchn_name = string_compose ("%1.%2", basename, smf_names[n]);
+					filepath = new_midi_source_path (mchn_name);
+				} else {
+					filepath = new_midi_source_path (smf_names[n]);
+				}
 			} else {
 				filepath = new_midi_source_path (basename);
 			}
@@ -552,7 +556,7 @@ Session::deinterlace_midi_region (std::shared_ptr<MidiRegion> mr)
 		for (int i = 0; i<16; i++) {
 			smf_names.push_back(string_compose("-ch%1", i+1));
 		}
-		vector<string> new_paths = get_paths_for_new_sources (false, source_path, 16, smf_names);
+		vector<string> new_paths = get_paths_for_new_sources (false, source_path, 16, smf_names, true);
 
 		/* create source files and write 1 channel of midi data to each of them */
 		if (create_mono_sources_for_writing (new_paths, *this, sample_rate(), newfiles, 0, false)) {
@@ -635,6 +639,7 @@ Session::import_files (ImportStatus& status)
 	std::shared_ptr<SMFSource> smfs;
 	uint32_t num_channels = 0;
 	vector<string> smf_names;
+	bool smf_keep_filename = false;
 
 	status.sources.clear ();
 
@@ -689,6 +694,9 @@ Session::import_files (ImportStatus& status)
 							}
 						}
 						break;
+					case SMFFileAndTrackName:
+						smf_keep_filename = true;
+						/*FALLTHRU*/
 					case SMFTrackName:
 						if (status.split_midi_channels) {
 							vector<string> temp;
@@ -728,7 +736,7 @@ Session::import_files (ImportStatus& status)
 			continue;
 		}
 
-		vector<string> new_paths = get_paths_for_new_sources (status.replace_existing_source, *p, num_channels, smf_names);
+		vector<string> new_paths = get_paths_for_new_sources (status.replace_existing_source, *p, num_channels, smf_names, smf_keep_filename);
 		Sources newfiles;
 		samplepos_t natural_position = source ? source->natural_position() : 0;
 

@@ -2571,6 +2571,7 @@ LuaBindings::common (lua_State* L)
 		.beginNamespace ("MidiTrackNameSource")
 		.addConst ("SMFTrackNumber", ARDOUR::MidiTrackNameSource(SMFTrackNumber))
 		.addConst ("SMFTrackName", ARDOUR::MidiTrackNameSource(SMFTrackName))
+		.addConst ("SMFFileAndTrackName", ARDOUR::MidiTrackNameSource(SMFFileAndTrackName))
 		.addConst ("SMFInstrumentName", ARDOUR::MidiTrackNameSource(SMFInstrumentName))
 		.endNamespace ()
 

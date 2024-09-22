@@ -854,6 +854,7 @@ enum PlaylistDisposition {
 enum MidiTrackNameSource {
 	SMFTrackNumber,
 	SMFTrackName,
+	SMFFileAndTrackName,
 	SMFInstrumentName
 };
 
