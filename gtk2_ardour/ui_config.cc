@@ -315,7 +315,7 @@ UIConfiguration::color_file_name (bool use_my, bool with_version, bool fallback)
 	std::string rev (revision);
 	std::size_t pos = rev.find_first_of("-");
 
-	if (with_version && pos != string::npos && pos > 0) {
+	if (with_version && pos > 0) {
 		basename += "-";
 		basename += rev.substr (0, pos); // COLORFILE_VERSION - program major.minor
 	}
@@ -363,12 +363,6 @@ UIConfiguration::load_color_theme (bool allow_own)
 
 		if (find_file (sp, color_file_name (true, true), cfile)) {
 			found = true;
-		}
-
-		if (!found) {
-			if (find_file (sp, color_file_name (true, false), cfile)) {
-				found = true;
-			}
 		}
 	}
 
@@ -439,7 +433,7 @@ UIConfiguration::store_color_theme ()
 	root->add_child_nocopy (*parent);
 
 	XMLTree tree;
-	std::string colorfile = Glib::build_filename (user_config_directory(), color_file_name (true, true));;
+	std::string colorfile = Glib::build_filename (user_config_directory(), color_file_name (true, true));
 
 	tree.set_root (root);
 
