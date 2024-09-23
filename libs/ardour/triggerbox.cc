@@ -1279,71 +1279,6 @@ AudioTrigger::~AudioTrigger ()
 }
 
 void
-MIDITrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& bufs)
-{
-	RTMidiBufferBeats* pending = pending_rt_midibuffer.load();
-
-	if (!pending) {
-		return;
-	}
-
-	if (playing) {
-		MidiBuffer& mbuf (bufs.get_midi (0));
-		MidiStateTracker post_edit_state;
-
-		/* Get the new MIDI state at the current time, and resolve any
-		 * differences with the MIDI state held by the triggerbox we're
-		 * in.
-		 */
-
-		/* note: transition_beats is the time of the most recent
-		 * transition (e.g. loop point)
-		 */
-
-		Temporal::Beats p = time.beats() - transition_beats;
-
-		/* now determine the state at this time, which we need relative
-		 * to the start of the loop within the data.
-		 */
-
-		pending->track_state (p - loop_start, post_edit_state);
-		_box.tracker->resolve_diff (post_edit_state, mbuf, time.samples());
-	}
-
-	old_rt_midibuffer = rt_midibuffer.exchange (pending);
-	if (iter < rt_midibuffer.load()->size()) {
-		/* shutdown */
-	}
-
-	RTMidiBufferBeats* ort = rt_midibuffer.load ();
-
-	first_event_index = std::numeric_limits<uint32_t>::min();
-	last_event_index = std::numeric_limits<uint32_t>::max();
-
-	for (uint32_t n = 0; n < ort->size(); ++n) {
-		if (first_event_index == std::numeric_limits<uint32_t>::min()) {
-			if ((*ort)[n].timestamp <= loop_start) {
-				first_event_index = n;
-			} else {
-				break;
-			}
-		}
-	}
-
-	for (uint32_t n = 0; n < ort->size(); ++n) {
-		if (last_event_index == std::numeric_limits<uint32_t>::max()) {
-			if ((*ort)[n].timestamp >= loop_end) {
-				last_event_index = n; /* exclusive end */
-				break;
-			}
-		}
-	}
-
-	pending_rt_midibuffer = nullptr;
-}
-
-
-void
 AudioTrigger::set_stretch_mode (Trigger::StretchMode sm)
 {
 	if (_stretch_mode == sm) {
@@ -2260,6 +2195,89 @@ MIDITrigger::~MIDITrigger ()
 }
 
 void
+MIDITrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& bufs)
+{
+	RTMidiBufferBeats* pending = pending_rt_midibuffer.load();
+
+	if (!pending) {
+		return;
+	}
+
+	if (playing) {
+		MidiBuffer& mbuf (bufs.get_midi (0));
+		MidiStateTracker post_edit_state;
+
+		/* Get the new MIDI state at the current time, and resolve any
+		 * differences with the MIDI state held by the triggerbox we're
+		 * in.
+		 */
+
+		/* note: transition_beats is the time of the most recent
+		 * transition (e.g. loop point)
+		 */
+
+		Temporal::Beats p = time.beats() - transition_beats;
+
+		/* now determine the state at this time, which we need relative
+		 * to the start of the loop within the data.
+		 */
+
+		pending->track_state (p - loop_start, post_edit_state);
+		_box.tracker->resolve_diff (post_edit_state, mbuf, time.samples());
+	}
+
+	old_rt_midibuffer = rt_midibuffer.exchange (pending);
+	if (iter < rt_midibuffer.load()->size()) {
+		/* shutdown */
+	}
+
+	RTMidiBufferBeats* ort = rt_midibuffer.load ();
+
+	first_event_index = std::numeric_limits<uint32_t>::min();
+	last_event_index = std::numeric_limits<uint32_t>::max();
+
+	for (uint32_t n = 0; n < ort->size(); ++n) {
+		if (first_event_index == std::numeric_limits<uint32_t>::min()) {
+			if ((*ort)[n].timestamp <= loop_start) {
+				first_event_index = n;
+			} else {
+				break;
+			}
+		}
+	}
+
+	for (uint32_t n = 0; n < ort->size(); ++n) {
+		if (last_event_index == std::numeric_limits<uint32_t>::max()) {
+			if ((*ort)[n].timestamp >= loop_end) {
+				last_event_index = n; /* exclusive end */
+				break;
+			}
+		}
+	}
+
+	pending_rt_midibuffer = nullptr;
+}
+
+void
+MIDITrigger::arm ()
+{
+}
+
+void
+MIDITrigger::disarm ()
+{
+}
+
+void
+MIDITrigger::captured (SlotArmInfo& ai)
+{
+	RTMidiBufferBeats* rtmb = ai.midi_buf->convert ();
+	/* Note: the original MIDI buffer in ai is now invalid, all data has
+	 * been moved to rtmb.
+	 */
+}
+
+void
 MIDITrigger::set_used_channels (Evoral::SMF::UsedChannels used)
 {
 	if (ui_state.used_channels != used) {
@@ -2774,6 +2792,9 @@ MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loaded midi region, span is %2\n", name(), data_length));
 
+	/* This is being used as a kind of shorthand for "everything" which is
+	   pretty stupid
+	*/
 	send_property_change (ARDOUR::Properties::name);
 
 	return 0;

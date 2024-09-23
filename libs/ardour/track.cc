@@ -28,6 +28,7 @@
 #include "ardour/audiofilesource.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
+#include "ardour/cliprec.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
 #include "ardour/disk_reader.h"
@@ -89,6 +90,10 @@ Track::~Track ()
 	if (_disk_writer) {
 		_disk_writer.reset ();
 	}
+
+	if (_clip_recorder) {
+		_clip_recorder.reset ();
+	}
 }
 
 int
@@ -112,6 +117,9 @@ Track::init ()
 	_disk_writer.reset (new DiskWriter (_session, *this, name(), dflags));
 	_disk_writer->set_block_size (_session.get_block_size ());
 	_disk_writer->set_owner (this);
+
+	_clip_recorder.reset (new ClipRecProcessor (_session, *this, name(), data_type(), *this));
+	_clip_recorder->set_owner (this);
 
 	/* no triggerbox for the auditioner, to avoid visual clutter in
 	 * patchbays and elsewhere (or special-case code in those places)
@@ -987,6 +995,12 @@ Track::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 		if (_disk_writer) {
 			_disk_writer->set_state (node, version);
 			new_order.push_back (_disk_writer);
+			return true;
+		}
+	} else if (prop->value() == "cliprec") {
+		if (_clip_recorder) {
+			_clip_recorder->set_state (node, version);
+			new_order.push_back (_clip_recorder);
 			return true;
 		}
 	}

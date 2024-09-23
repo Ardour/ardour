@@ -43,6 +43,7 @@ ClipRecProcessor::ClipRecProcessor (Session& s, Track& t, std::string const & na
 	: DiskIOProcessor (s, t,name, DiskIOProcessor::Recordable, tdp)
 	, _data_type (dt)
 {
+	_display_to_user = false;
 }
 
 SlotArmInfo::SlotArmInfo (Trigger& s)
@@ -232,4 +233,28 @@ void
 ClipRecProcessor::configuration_changed ()
 {
 	/* nothing to do */
+}
+
+XMLNode&
+ClipRecProcessor::state () const
+{
+	XMLNode& node (DiskIOProcessor::state ());
+	node.set_property (X_("type"), X_("cliprec"));
+	return node;
+}
+
+int
+ClipRecProcessor::set_state (const XMLNode& node, int version)
+{
+	if (DiskIOProcessor::set_state (node, version)) {
+		return -1;
+	}
+
+	return 0;
+}
+
+std::string
+ClipRecProcessor::display_name () const
+{
+	return std::string (_("Cue Recorder"));
 }

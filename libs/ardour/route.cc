@@ -59,6 +59,7 @@
 #include "ardour/buffer.h"
 #include "ardour/buffer_set.h"
 #include "ardour/capturing_processor.h"
+#include "ardour/cliprec.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
 #include "ardour/disk_reader.h"
@@ -2803,6 +2804,9 @@ Route::set_state (const XMLNode& node, int version)
 
 	DiskIOPoint diop;
 	if (node.get_property (X_("disk-io-point"), diop)) {
+		if (_clip_recorder) {
+			_clip_recorder->set_display_to_user (diop == DiskIOCustom);
+		}
 		if (_disk_writer) {
 			_disk_writer->set_display_to_user (diop == DiskIOCustom);
 		}
@@ -3233,6 +3237,9 @@ Route::set_processor_state (const XMLNode& node, int version)
 		} else if (prop->value() == "diskwriter" && _disk_writer) {
 			_disk_writer->set_state (**niter, version);
 			new_order.push_back (_disk_writer);
+		} else if (prop->value() == "cliprec" && _clip_recorder) {
+			_clip_recorder->set_state (**niter, version);
+			new_order.push_back (_clip_recorder);
 		} else if (prop->value() == "triggerbox") {
 			if (!_triggerbox) {
 				_triggerbox.reset (new TriggerBox (_session, _default_type));
@@ -5421,7 +5428,7 @@ Route::setup_invisible_processors ()
 
 	/* DISK READER & WRITER (for Track objects) */
 
-	if (_disk_reader || _disk_writer) {
+	if (_disk_reader || _disk_writer || _clip_recorder) {
 		switch (_disk_io_point) {
 		case DiskIOPreFader:
 			if (trim != new_processors.end()) {
@@ -5468,6 +5475,9 @@ Route::setup_invisible_processors ()
 			new_processors.erase (reader_pos);
 			assert (writer_pos == find (new_processors.begin(), new_processors.end(), _disk_writer));
 			reader_pos = new_processors.insert (++writer_pos, _disk_reader);
+		}
+		if (_clip_recorder) {
+			new_processors.insert (reader_pos, _clip_recorder);
 		}
 	}
 
@@ -6086,6 +6096,10 @@ Route::set_disk_io_point (DiskIOPoint diop)
 		break;
 	default:
 		display = false;
+	}
+
+	if (_clip_recorder) {
+		_clip_recorder->set_display_to_user (display);
 	}
 
 	if (_disk_writer) {

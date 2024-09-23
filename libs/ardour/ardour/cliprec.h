@@ -51,15 +51,22 @@ class LIBARDOUR_API ClipRecProcessor : public DiskIOProcessor
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 
+	std::string display_name () const;
+
 	float buffer_load () const;
 	void adjust_buffering ();
 	void configuration_changed ();
+	int seek (samplepos_t, bool) { return 0; }
+	int add_channel_to (std::shared_ptr<ChannelList>, uint32_t how_many) { return 0; }
 
 	void arm_from_another_thread (Trigger& slot, samplepos_t, timecnt_t const & expected_duration, uint32_t chans);
 	void disarm();
 
 	bool armed() const { return (bool) _arm_info.load(); }
 	PBD::Signal0<void> ArmedChanged;
+
+	int set_state (const XMLNode&, int version);
+	XMLNode& state () const;
 
   private:
 	DataType _data_type;
