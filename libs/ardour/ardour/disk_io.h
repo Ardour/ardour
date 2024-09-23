@@ -161,7 +161,6 @@ protected:
 
 		/* used only by capture */
 		std::shared_ptr<AudioFileSource> write_source;
-		PBD::RingBufferNPT<CaptureTransition>* capture_transition_buf;
 
 		/* used in the butler thread only */
 		samplecnt_t curr_capture_cnt;

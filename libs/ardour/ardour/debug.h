@@ -115,6 +115,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits VSTCallbacks;
 		LIBARDOUR_API extern DebugBits WiimoteControl;
 		LIBARDOUR_API extern DebugBits Freesound;
+		LIBARDOUR_API extern DebugBits ClipRecording;
 
 	}
 }

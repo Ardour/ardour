@@ -97,9 +97,6 @@ DiskWriter::display_name () const
 void
 DiskWriter::WriterChannelInfo::resize (samplecnt_t bufsize)
 {
-	if (!capture_transition_buf) {
-		capture_transition_buf = new RingBufferNPT<CaptureTransition> (256);
-	}
 	delete wbuf;
 	wbuf = new RingBufferNPT<Sample> (bufsize);
 	/* touch memory to lock it */
