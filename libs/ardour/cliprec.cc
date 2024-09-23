@@ -22,6 +22,8 @@
 #include "pbd/semutils.h"
 #include "pbd/types_convert.h"
 
+#include "temporal/beats.h"
+
 #include "ardour/audio_buffer.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/butler.h"
@@ -50,6 +52,57 @@ ClipRecProcessor::ClipRecProcessor (Session& s, Track& t, std::string const & na
 	}
 }
 
+ClipRecProcessor::ArmInfo::ArmInfo (Trigger& s)
+	: slot (s)
+	, start (0)
+	, end (0)
+{
+}
+
+ClipRecProcessor::ArmInfo::~ArmInfo()
+{
+	for (auto & ab : audio_buf) {
+		delete ab;
+	}
+}
+
+void
+ClipRecProcessor::arm_from_another_thread (Trigger& slot, samplepos_t now, timecnt_t const & expected_duration, uint32_t chans)
+{
+	using namespace Temporal;
+
+	ArmInfo* ai = new ArmInfo (slot);
+	ai->midi_buf.reset (new RTMidiBuffer);
+
+	ai->midi_buf->resize (1024); // XXX Config->max_slot_midi_event_size
+
+	for (uint32_t n = 0; n < chans; ++n) {
+		ai->audio_buf.push_back (new Sample[10000]);
+	}
+
+	Beats start_b;
+	Beats end_b;
+	BBT_Argument t_bbt;
+	Beats t_beats;
+	samplepos_t t_samples;
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	Beats now_beats = tmap->quarters_at (now);
+
+	slot.compute_quantized_transition (now, now_beats, std::numeric_limits<Beats>::max(),
+	                                   t_bbt, t_beats, t_samples, tmap, slot.quantization());
+
+	ai->start = t_samples;
+	ai->end = tmap->sample_at (now_beats + Beats (16, 0));
+
+	set_armed (ai);
+}
+
+void
+ClipRecProcessor::disarm ()
+{
+	set_armed (nullptr);
+}
+
 void
 ClipRecProcessor::set_armed (ArmInfo* ai)
 {
@@ -60,7 +113,7 @@ ClipRecProcessor::set_armed (ArmInfo* ai)
 		return;
 	}
 
-	if (!yn) {
+	if (!ai) {
 		finish_recording ();
 		assert (currently_recording == this);
 		delete _arm_info;
@@ -200,60 +253,27 @@ ClipRecProcessor::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 	std::shared_ptr<ChannelList const> c = channels.reader();
 	ChannelList::const_iterator chan;
 	size_t n;
+	ArmInfo* ai = _arm_info.load();
 
-	if (!_arm_info.load()) {
+	if (!ai) {
 		return;
 	}
 
 	/* Audio */
-#if 0
+
 	if (n_buffers) {
 
 		/* AUDIO */
 
 		for (chan = c->begin(), n = 0; chan != c->end(); ++chan, ++n) {
-
-			ChannelInfo* chaninfo (*chan);
+			assert (ai->audio_buf.size() >= n);
 			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
-
-			chaninfo->wbuf->get_write_vector (&chaninfo->rw_vector);
-
-			if (nframes <= (samplecnt_t) chaninfo->rw_vector.len[0]) {
-
-				Sample *incoming = buf.data ();
-				memcpy (chaninfo->rw_vector.buf[0], incoming, sizeof (Sample) * nframes);
-
-			} else {
-
-				samplecnt_t total = chaninfo->rw_vector.len[0] + chaninfo->rw_vector.len[1];
-
-				if (nframes > total) {
-					DEBUG_TRACE (DEBUG::ClipRecording, string_compose ("%1 overrun in %2, rec_nframes = %3 total space = %4\n",
-					                                            DEBUG_THREAD_SELF, name(), nframes, total));
-					return;
-				}
-
-				Sample *incoming = buf.data ();
-				samplecnt_t first = chaninfo->rw_vector.len[0];
-
-				memcpy (chaninfo->rw_vector.buf[0], incoming, sizeof (Sample) * first);
-				memcpy (chaninfo->rw_vector.buf[1], incoming + first, sizeof (Sample) * (nframes - first));
-			}
-
-			chaninfo->wbuf->increment_write_ptr (nframes);
-
-			if (chaninfo->wbuf->read_space() > 10) {
-				_semaphore->signal ();
-			}
+			memcpy (buf.data(), ai->audio_buf[n], sizeof (Sample) * nframes);
 		}
 	}
-#endif
 
-#if 0
 	/* MIDI */
 
-
-	// Pump entire port buffer into the ring buffer (TODO: split cycles?)
 	MidiBuffer& buf    = bufs.get_midi (0);
 	MidiTrack* mt = dynamic_cast<MidiTrack*>(&_track);
 	MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
@@ -280,9 +300,9 @@ ClipRecProcessor::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		if (!skip_event && (!filter || !filter->filter(ev.buffer(), ev.size()))) {
 			const samplepos_t event_time = start_sample + ev.time();
-			rt_midibuffer->write (event_time,  ev.event_type(), ev.size(), ev.buffer());
+			ai->midi_buf->write (event_time,  ev.event_type(), ev.size(), ev.buffer());
+		}
 	}
-#endif
 }
 
 float

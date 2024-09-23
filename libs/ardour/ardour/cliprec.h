@@ -18,9 +18,7 @@
 
 #include <atomic>
 
-#ifndef __ardour_cliprec_h__
-#define __ardour_cliprec_h__
-
+#pragma once
 
 #include "pbd/ringbufferNPT.h"
 #include "pbd/signals.h"
@@ -40,6 +38,7 @@ namespace ARDOUR {
 class AudioFileSource;
 class Session;
 class Track;
+class Trigger;
 
 template<typename T> class MidiRingBuffer;
 
@@ -55,17 +54,24 @@ class LIBARDOUR_API ClipRecProcessor : public DiskIOProcessor
 	void configuration_changed ();
 
 	struct ArmInfo {
+		ArmInfo (Trigger& s);
+		~ArmInfo();
+
+		Trigger& slot;
 		Temporal::timepos_t start;
 		Temporal::timepos_t end;
+		std::shared_ptr<RTMidiBuffer> midi_buf; /* assumed large enough */
+		std::vector<Sample*> audio_buf; /* assumed large enough */
 	};
 
-	void set_armed (ArmInfo*);
+	void arm_from_another_thread (Trigger& slot, samplepos_t, timecnt_t const & expected_duration, uint32_t chans);
+	void disarm();
+
 	bool armed() const { return (bool) _arm_info.load(); }
 	PBD::Signal0<void> ArmedChanged;
 
   private:
 	std::atomic<ArmInfo*> _arm_info;
-	std::shared_ptr<RTMidiBuffer> rt_midibuffer;
 
 	/* private (to class) butler thread */
 
@@ -78,8 +84,7 @@ class LIBARDOUR_API ClipRecProcessor : public DiskIOProcessor
 	int pull_data ();
 	void start_recording ();
 	void finish_recording ();
+	void set_armed (ArmInfo*);
 };
 
 } /* namespace */
-
-#endif /* __ardour_cliprec_h__ */
