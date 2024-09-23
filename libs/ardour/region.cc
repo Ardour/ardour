@@ -126,7 +126,7 @@ Region::get_region_operation_group_id (uint64_t old_region_group, RegionOperatio
 
 	/* if a region group has not been assigned for this key, assign one */
 	if (_operation_rgroup_map.find (region_group_key) == _operation_rgroup_map.end ()) {
-		_operation_rgroup_map[region_group_key] = _next_group_id++;
+		_operation_rgroup_map[region_group_key] = ++_next_group_id;
 	}
 
 	return ((_operation_rgroup_map[region_group_key] << 4) | expl);
