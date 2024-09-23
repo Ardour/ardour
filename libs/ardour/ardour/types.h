@@ -74,6 +74,7 @@ class Route;
 class Region;
 class Playlist;
 class Stripable;
+class Trigger;
 class VCA;
 class AutomationControl;
 class SlavableAutomationControl;
@@ -982,7 +983,6 @@ enum SelectionOperation {
 	SelectionRemove,
 	SelectionExtend /* UI only operation, not core */
 };
-
 
 } // namespace ARDOUR
 

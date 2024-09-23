@@ -18,7 +18,6 @@
 
 #include "pbd/compose.h"
 #include "pbd/debug.h"
-#include "pbd/pthread_utils.h"
 #include "pbd/semutils.h"
 #include "pbd/types_convert.h"
 
@@ -31,35 +30,29 @@
 #include "ardour/debug.h"
 #include "ardour/midi_track.h"
 #include "ardour/session.h"
+#include "ardour/types.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Thread* ClipRecProcessor::_thread (0);
-bool ClipRecProcessor::thread_should_run (false);
-PBD::Semaphore* ClipRecProcessor::_semaphore (0);
 ClipRecProcessor* ClipRecProcessor::currently_recording (nullptr);
 
-ClipRecProcessor::ClipRecProcessor (Session& s, Track& t, std::string const & name, Temporal::TimeDomainProvider const & tdp)
+ClipRecProcessor::ClipRecProcessor (Session& s, Track& t, std::string const & name, DataType dt, Temporal::TimeDomainProvider const & tdp)
 	: DiskIOProcessor (s, t,name, DiskIOProcessor::Recordable, tdp)
+	, _data_type (dt)
 {
-	if (!_thread) {
-		thread_should_run = true;
-		_semaphore = new PBD::Semaphore (X_("cliprec"), 0);
-		_thread = PBD::Thread::create (&ClipRecProcessor::thread_work);
-	}
 }
 
-ClipRecProcessor::ArmInfo::ArmInfo (Trigger& s)
+SlotArmInfo::SlotArmInfo (Trigger& s)
 	: slot (s)
 	, start (0)
 	, end (0)
 {
 }
 
-ClipRecProcessor::ArmInfo::~ArmInfo()
+SlotArmInfo::~SlotArmInfo()
 {
 	for (auto & ab : audio_buf) {
 		delete ab;
@@ -71,13 +64,15 @@ ClipRecProcessor::arm_from_another_thread (Trigger& slot, samplepos_t now, timec
 {
 	using namespace Temporal;
 
-	ArmInfo* ai = new ArmInfo (slot);
-	ai->midi_buf.reset (new RTMidiBuffer);
+	SlotArmInfo* ai = new SlotArmInfo (slot);
 
-	ai->midi_buf->resize (1024); // XXX Config->max_slot_midi_event_size
-
-	for (uint32_t n = 0; n < chans; ++n) {
-		ai->audio_buf.push_back (new Sample[10000]);
+	if (_data_type == DataType::MIDI) {
+		ai->midi_buf.reset (new RTMidiBuffer);
+		ai->midi_buf->resize (1024); // XXX Config->max_slot_midi_event_size
+	} else {
+		for (uint32_t n = 0; n < chans; ++n) {
+			ai->audio_buf.push_back (new Sample[_session.sample_rate() * 30]); // XXX Config->max_slot_audio_duration
+		}
 	}
 
 	Beats start_b;
@@ -92,7 +87,7 @@ ClipRecProcessor::arm_from_another_thread (Trigger& slot, samplepos_t now, timec
 	                                   t_bbt, t_beats, t_samples, tmap, slot.quantization());
 
 	ai->start = t_samples;
-	ai->end = tmap->sample_at (now_beats + Beats (16, 0));
+	ai->end = tmap->sample_at (now_beats + Beats (16, 0)); // XXX slot duration/length
 
 	set_armed (ai);
 }
@@ -104,10 +99,12 @@ ClipRecProcessor::disarm ()
 }
 
 void
-ClipRecProcessor::set_armed (ArmInfo* ai)
+ClipRecProcessor::set_armed (SlotArmInfo* ai)
 {
+	/* Must disarm before rearming */
+
 	if ((bool) _arm_info.load() == (bool) ai) {
-		if (_arm_info.load()) {
+		if (ai) {
 			assert (currently_recording == this);
 		}
 		return;
@@ -130,102 +127,17 @@ ClipRecProcessor::set_armed (ArmInfo* ai)
 
 	_arm_info = ai;
 	currently_recording = this;
-	start_recording ();
 	ArmedChanged (); // EMIT SIGNAL
-}
-
-void
-ClipRecProcessor::start_recording ()
-{
 }
 
 void
 ClipRecProcessor::finish_recording ()
 {
-	/* XXXX do something */
-#if 0
-	std::shared_ptr<ChannelList const> c = channels.reader();
-	for (auto & chan : *c) {
-		Source::WriterLock lock((chan)->write_source->mutex());
-		(chan)->write_source->mark_streaming_write_completed (lock);
-		(chan)->write_source->done_with_peakfile_writes ();
-	}
-#endif
-}
+	SlotArmInfo* ai = _arm_info.load ();
+	assert (ai);
 
-void
-ClipRecProcessor::thread_work ()
-{
-	while (thread_should_run) {
-		_semaphore->wait ();
-		ClipRecProcessor* crp = currently_recording;
-		if (crp) {
-			(void) crp->pull_data ();
-		}
-	}
-}
-
-int
-ClipRecProcessor::pull_data ()
-{
-	int ret = 0;
-
-#if 0
-	uint32_t to_write;
-
-	RingBufferNPT<Sample>::rw_vector vector;
-
-	vector.buf[0] = 0;
-	vector.buf[1] = 0;
-
-	std::shared_ptr<ChannelList const> c = channels.reader();
-	for (ChannelList::const_iterator chan = c->begin(); chan != c->end(); ++chan) {
-
-		(*chan)->wbuf->get_read_vector (&vector);
-
-		if (vector.len[0] + vector.len[1] == 0) {
-			goto out;
-		}
-
-		to_write = vector.len[0];
-
-		if ((!(*chan)->write_source) || (*chan)->write_source->write (vector.buf[0], to_write) != to_write) {
-			// error << string_compose(_("AudioDiskstream %1: cannot write to disk"), id()) << endmsg;
-			return -1;
-		}
-
-		(*chan)->wbuf->increment_read_ptr (to_write);
-		// (*chan)->curr_capture_cnt += to_write;
-
-		to_write = vector.len[1];
-
-		DEBUG_TRACE (DEBUG::ClipRecording, string_compose ("%1 additional write of %2\n", name(), to_write));
-
-		if ((*chan)->write_source->write (vector.buf[1], to_write) != to_write) {
-			// error << string_compose(_("AudioDiskstream %1: cannot write to disk"), id()) << endmsg;
-			return -1;
-		}
-
-		(*chan)->wbuf->increment_read_ptr (to_write);
-		//(*chan)->curr_capture_cnt += to_write;
-	}
-
-	/* MIDI*/
-
-	if (_midi_write_source && _midi_buf) {
-
-		const samplecnt_t total = g_atomic_int_get (&_samples_pending_write);
-
-		if (total == 0 || _midi_buf->read_space() == 0)
-		    (!force_flush && (total < _chunk_samples) && _was_recording)) {
-			goto out;
-		}
-
-	}
-#endif
-
-  out:
-	return ret;
+	ai->slot.captured (*ai);
+	_arm_info = nullptr;
 }
 
 bool
@@ -253,7 +165,7 @@ ClipRecProcessor::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 	std::shared_ptr<ChannelList const> c = channels.reader();
 	ChannelList::const_iterator chan;
 	size_t n;
-	ArmInfo* ai = _arm_info.load();
+	SlotArmInfo* ai = _arm_info.load();
 
 	if (!ai) {
 		return;
@@ -308,24 +220,12 @@ ClipRecProcessor::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 float
 ClipRecProcessor::buffer_load () const
 {
-	std::shared_ptr<ChannelList const> c = channels.reader();
-
-	if (c->empty ()) {
-		return 1.0;
-	}
-
-	return (float) ((double) c->front()->wbuf->write_space()/
-			(double) c->front()->wbuf->bufsize());
+	return 1.0;
 }
 
 void
 ClipRecProcessor::adjust_buffering ()
 {
-	std::shared_ptr<ChannelList const> c = channels.reader();
-
-	for (ChannelList::const_iterator chan = c->begin(); chan != c->end(); ++chan) {
-		(*chan)->resize (_session.butler()->audio_capture_buffer_size());
-	}
 }
 
 void

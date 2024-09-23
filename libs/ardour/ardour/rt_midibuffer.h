@@ -144,5 +144,18 @@ class LIBARDOUR_API RTMidiBufferBase : public Evoral::EventSink<TimeType>
 
 typedef RTMidiBufferBase<samplepos_t,samplecnt_t> RTMidiBuffer;
 
+class Trigger;
+
+struct SlotArmInfo {
+	SlotArmInfo (Trigger& s);
+	~SlotArmInfo();
+
+	Trigger& slot;
+	Temporal::timepos_t start;
+	Temporal::timepos_t end;
+	std::shared_ptr<RTMidiBuffer> midi_buf; /* assumed large enough */
+	std::vector<Sample*> audio_buf; /* assumed large enough */
+};
+
 } // namespace ARDOUR
 
