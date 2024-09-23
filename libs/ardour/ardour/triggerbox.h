@@ -71,6 +71,7 @@ class Session;
 class AudioRegion;
 class MidiRegion;
 class TriggerBox;
+class SlotArmInfo;
 class SideChain;
 class MidiPort;
 
@@ -292,6 +293,10 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	timepos_t current_pos() const;
 	double position_as_fraction() const;
+
+	void captured (SlotArmInfo&);
+	void arm();
+	void disarm ();
 
 	Temporal::BBT_Argument compute_start (Temporal::TempoMap::SharedPtr const &, samplepos_t start, samplepos_t end, Temporal::BBT_Offset const & q, samplepos_t& start_samples, bool& will_start);
 	virtual timepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t, Temporal::Beats &) = 0;
