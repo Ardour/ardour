@@ -52,6 +52,12 @@ class LIBARDOUR_API RTMidiBufferBase : public Evoral::EventSink<TimeType>
 	RTMidiBufferBase ();
 	~RTMidiBufferBase ();
 
+	/* After calling convert(), this RTMidiBufferBase no longer owns or has
+	   a reference to any data. The data is all "moved" to the returned
+	   RTMidiBufferBase and timestamps modified to its time domain if nececssary.
+	*/
+	RTMidiBufferBase<Temporal::Beats,Temporal::Beats>* convert ();
+
 	void clear();
 	void resize(size_t);
 	size_t size() const { return _size; }
@@ -112,6 +118,8 @@ class LIBARDOUR_API RTMidiBufferBase : public Evoral::EventSink<TimeType>
 
   private:
 	friend struct WriteProtectRender;
+	/* any cousin of ours is a friend */
+	template<typename T, typename D> friend class RTMidiBufferBase;
 
 	/* The main store. Holds Items (timestamp+up to 3 bytes of data OR
 	 * offset into secondary storage below)
