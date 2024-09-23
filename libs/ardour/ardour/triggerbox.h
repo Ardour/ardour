@@ -294,9 +294,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	timepos_t current_pos() const;
 	double position_as_fraction() const;
 
-	void captured (SlotArmInfo&);
-	void arm();
-	void disarm ();
+	virtual void captured (SlotArmInfo&) {}
+	virtual void arm() {}
+	virtual void disarm () {}
 
 	Temporal::BBT_Argument compute_start (Temporal::TempoMap::SharedPtr const &, samplepos_t start, samplepos_t end, Temporal::BBT_Offset const & q, samplepos_t& start_samples, bool& will_start);
 	virtual timepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t, Temporal::Beats &) = 0;
@@ -578,6 +578,10 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
   public:
 	MIDITrigger (uint32_t index, TriggerBox&);
 	~MIDITrigger ();
+
+	void captured (SlotArmInfo&);
+	void arm();
+	void disarm ();
 
 	template<bool actually_run> pframes_t midi_run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample,
 	                                                Temporal::Beats const & start_beats, Temporal::Beats const & end_beats, pframes_t nframes, pframes_t offset, double bpm, pframes_t& quantize_offset);
