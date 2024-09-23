@@ -113,7 +113,6 @@ private:
 	samplecnt_t samples_written;
 	ARDOUR::SystemExec* _proc;
 	std::string _path;
-	std::vector<char> _tmpfile_path_buf;
 	int _tmp_fd;
 	gchar* _tmp_file;
 
