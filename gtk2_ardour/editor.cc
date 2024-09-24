@@ -5304,7 +5304,12 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 void
 Editor::set_loop_range (timepos_t const & start, timepos_t const & end, string cmd)
 {
-	if (!_session) return;
+	if (!_session) {
+		return;
+	}
+	if (_session->get_play_loop () && _session->actively_recording ()) {
+		return;
+	}
 
 	begin_reversible_command (cmd);
 
