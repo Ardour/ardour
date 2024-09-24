@@ -92,7 +92,6 @@ ARDOUR_UI::setup_tooltips ()
 	ArdourCanvas::Canvas::set_tooltip_timeout (Gtk::Settings::get_default()->property_gtk_tooltip_timeout ());
 
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
-	set_tip (record_mode_selector, _("<b>Layered</b>, new recordings will be added as regions on a layer atop existing regions.\n<b>SoundOnSound</b>, behaves like <i>Layered</i>, except underlying regions will be audible.\n<b>Non Layered</b>, the underlying region will be spliced and replaced with the newly recorded region."));
 	set_tip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 	parameter_changed("click-gain");
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
@@ -197,104 +196,6 @@ ARDOUR_UI::cue_rec_state_changed ()
 }
 
 void
-ARDOUR_UI::repack_transport_hbox ()
-{
-	if (time_info_box) {
-		if (time_info_box->get_parent()) {
-			transport_hbox.remove (*time_info_box);
-		}
-		if (UIConfiguration::instance().get_show_toolbar_selclock ()) {
-			transport_hbox.pack_start (*time_info_box, false, false);
-			time_info_box->show();
-		}
-	}
-
-	if (mini_timeline.get_parent()) {
-		transport_hbox.remove (mini_timeline);
-	}
-	if (UIConfiguration::instance().get_show_mini_timeline ()) {
-		transport_hbox.pack_start (mini_timeline, true, true);
-		mini_timeline.show();
-	}
-
-	if (editor_meter) {
-		if (editor_meter_table.get_parent()) {
-			transport_hbox.remove (editor_meter_table);
-		}
-		if (meterbox_spacer.get_parent()) {
-			transport_hbox.remove (meterbox_spacer);
-			transport_hbox.remove (meterbox_spacer2);
-		}
-
-		if (UIConfiguration::instance().get_show_editor_meter()) {
-			transport_hbox.pack_end (meterbox_spacer, false, false, 3);
-			transport_hbox.pack_end (editor_meter_table, false, false);
-			transport_hbox.pack_end (meterbox_spacer2, false, false, 1);
-			meterbox_spacer2.set_size_request (1, -1);
-			editor_meter_table.show();
-			meterbox_spacer.show();
-			meterbox_spacer2.show();
-		}
-	}
-
-	bool show_rec = UIConfiguration::instance().get_show_toolbar_recpunch ();
-	if (show_rec) {
-		punch_label.show ();
-		layered_label.show ();
-		punch_in_button.show ();
-		punch_out_button.show ();
-		record_mode_selector.show ();
-		recpunch_spacer.show ();
-	} else {
-		punch_label.hide ();
-		layered_label.hide ();
-		punch_in_button.hide ();
-		punch_out_button.hide ();
-		record_mode_selector.hide ();
-		recpunch_spacer.hide ();
-	}
-
-	bool show_pdc = UIConfiguration::instance().get_show_toolbar_latency ();
-	if (show_pdc) {
-		latency_disable_button.show ();
-		route_latency_value.show ();
-		io_latency_label.show ();
-		io_latency_value.show ();
-		latency_spacer.show ();
-	} else {
-		latency_disable_button.hide ();
-		route_latency_value.hide ();
-		io_latency_label.hide ();
-		io_latency_value.hide ();
-		latency_spacer.hide ();
-	}
-
-	bool show_cue = UIConfiguration::instance().get_show_toolbar_cuectrl ();
-	if (show_cue) {
-		_cue_rec_enable.show ();
-		_cue_play_enable.show ();
-		cuectrl_spacer.show ();
-	} else {
-		_cue_rec_enable.hide ();
-		_cue_play_enable.hide ();
-		cuectrl_spacer.hide ();
-	}
-
-	bool show_mnfo = UIConfiguration::instance().get_show_toolbar_monitor_info ();
-	if (show_mnfo) {
-		monitor_dim_button.show ();
-		monitor_mono_button.show ();
-		monitor_mute_button.show ();
-		monitor_spacer.show ();
-	} else {
-		monitor_dim_button.hide ();
-		monitor_mono_button.hide ();
-		monitor_mute_button.hide ();
-		monitor_spacer.hide ();
-	}
-}
-
-void
 ARDOUR_UI::update_clock_visibility ()
 {
 	if (ARDOUR::Profile->get_small_screen()) {
@@ -342,11 +243,6 @@ ARDOUR_UI::setup_transport ()
 	auto_return_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
 	follow_edits_button.set_related_action (act);
-
-	act = ActionManager::get_action ("Transport", "TogglePunchIn");
-	punch_in_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport", "TogglePunchOut");
-	punch_out_button.set_related_action (act);
 
 	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-dim-all"));
 	monitor_dim_button.set_related_action (act);
@@ -417,10 +313,6 @@ ARDOUR_UI::setup_transport ()
 	recorder_visibility_button.set_name (X_("page switch button"));
 	trigger_page_visibility_button.set_name (X_("page switch button"));
 
-	punch_in_button.set_name ("punch button");
-	punch_out_button.set_name ("punch button");
-	record_mode_selector.set_name ("record mode button");
-
 	latency_disable_button.set_name ("latency button");
 
 	monitor_dim_button.set_name ("monitor section dim");
@@ -438,13 +330,6 @@ ARDOUR_UI::setup_transport ()
 	/* and widget text */
 	auto_return_button.set_text(_("Auto Return"));
 	follow_edits_button.set_text(_("Follow Range"));
-	punch_in_button.set_text (S_("Punch|In"));
-	punch_out_button.set_text (S_("Punch|Out"));
-
-	record_mode_selector.AddMenuElem (MenuElem (record_mode_strings[(int)RecLayered], sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_record_mode), RecLayered)));
-	record_mode_selector.AddMenuElem (MenuElem (record_mode_strings[(int)RecNonLayered], sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_record_mode), RecNonLayered)));
-	record_mode_selector.AddMenuElem (MenuElem (record_mode_strings[(int)RecSoundOnSound], sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_record_mode), RecSoundOnSound)));
-	record_mode_selector.set_sizing_texts (record_mode_strings);
 
 	latency_disable_button.set_text (_("Disable PDC"));
 	io_latency_label.set_text (_("I/O Latency:"));
@@ -452,9 +337,6 @@ ARDOUR_UI::setup_transport ()
 	monitor_dim_button.set_text (_("Dim All"));
 	monitor_mono_button.set_text (_("Mono"));
 	monitor_mute_button.set_text (_("Mute All"));
-
-	punch_label.set_text (_("Punch:"));
-	layered_label.set_text (_("Rec:"));
 
 	/* and tooltips */
 
@@ -478,8 +360,6 @@ ARDOUR_UI::setup_transport ()
 	                                    string_compose (_("Left-Click to show the %1 window\n"
 	                                                      "Right-click to show more options"), trigger_page->name()));
 
-	Gtkmm2ext::UI::instance()->set_tip (punch_in_button, _("Start recording at auto-punch start"));
-	Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 
 	/* monitor section */
 	Gtkmm2ext::UI::instance()->set_tip (monitor_dim_button, _("Monitor section dim output"));
@@ -487,10 +367,6 @@ ARDOUR_UI::setup_transport ()
 	Gtkmm2ext::UI::instance()->set_tip (monitor_mute_button, _("Monitor section mute output"));
 
 	/* transport control size-group */
-
-	Glib::RefPtr<SizeGroup> punch_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
-	punch_button_size_group->add_widget (punch_in_button);
-	punch_button_size_group->add_widget (punch_out_button);
 
 	Glib::RefPtr<SizeGroup> monitor_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
 	monitor_button_size_group->add_widget (monitor_dim_button);
@@ -553,11 +429,6 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (mixer_visibility_button);
 	button_height_size_group->add_widget (prefs_visibility_button);
 
-	//punch section
-	button_height_size_group->add_widget (punch_in_button);
-	button_height_size_group->add_widget (punch_out_button);
-	button_height_size_group->add_widget (record_mode_selector);
-
 	// PDC
 	button_height_size_group->add_widget (latency_disable_button);
 
@@ -581,19 +452,6 @@ ARDOUR_UI::setup_transport ()
 
 	transport_table.attach (*application_bar, TCOL, 0, 2 , EXPAND|FILL, EXPAND|FILL, 3, 0);
 	++col;
-
-	transport_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-	++col;
-
-	transport_table.attach (punch_label, TCOL, 0, 1 , FILL, SHRINK, 3, 0);
-	transport_table.attach (layered_label, TCOL, 1, 2 , FILL, SHRINK, 3, 0);
-	++col;
-
-	transport_table.attach (punch_in_button,      col,      col + 1, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	transport_table.attach (punch_space,          col + 1,  col + 2, 0, 1 , FILL, SHRINK, 0, vpadding);
-	transport_table.attach (punch_out_button,     col + 2,  col + 3, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	transport_table.attach (record_mode_selector, col,      col + 3, 1, 2 , FILL, SHRINK, hpadding, vpadding);
-	col += 3;
 
 	transport_table.attach (recpunch_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
@@ -683,7 +541,6 @@ ARDOUR_UI::setup_transport ()
 	latency_switch_changed ();
 	session_latency_updated (true);
 
-	repack_transport_hbox ();
 	update_clock_visibility ();
 	/* desensitize */
 
@@ -786,13 +643,6 @@ ARDOUR_UI::error_alert_press (GdkEventButton* ev)
 	return !do_toggle;
 }
 
-void
-ARDOUR_UI::set_record_mode (RecordMode m)
-{
-	if (_session) {
-		_session->config.set_record_mode (m);
-	}
-}
 
 void
 ARDOUR_UI::solo_blink (bool onoff)

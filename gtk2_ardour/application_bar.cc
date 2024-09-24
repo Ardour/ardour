@@ -48,6 +48,7 @@
 #include "gtkmm2ext/application.h"
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/menu_elems.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
 
@@ -99,8 +100,9 @@ using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 using namespace Gtk;
 using namespace std;
+using namespace Gtk::Menu_Helpers;
 
-static const gchar *_record_mode_strings[] = {
+static const gchar *_record_mode_strings_[] = {
 	N_("Layered"),
 	N_("Non-Layered"),
 	N_("Snd on Snd"),
@@ -113,6 +115,7 @@ ApplicationBar::ApplicationBar ()
 	: _have_layout (false)
 	, _basic_ui (0)
 {
+	_record_mode_strings = I18N (_record_mode_strings_);
 }
 
 ApplicationBar::~ApplicationBar ()
@@ -142,6 +145,22 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	ssbox->pack_start (*_shuttle_box.vari_button(), false, false, 0);
 	ssbox->pack_start (*_shuttle_box.info_button(), false, false, 0);
 
+	_punch_label.set_text (_("Punch:"));
+	_layered_label.set_text (_("Rec:"));
+
+	_punch_in_button.set_text (S_("Punch|In"));
+	_punch_out_button.set_text (S_("Punch|Out"));
+
+	_record_mode_selector.AddMenuElem (MenuElem (_record_mode_strings[(int)RecLayered], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecLayered)));
+	_record_mode_selector.AddMenuElem (MenuElem (_record_mode_strings[(int)RecNonLayered], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecNonLayered)));
+	_record_mode_selector.AddMenuElem (MenuElem (_record_mode_strings[(int)RecSoundOnSound], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecSoundOnSound)));
+	_record_mode_selector.set_sizing_texts (_record_mode_strings);
+
+	act = ActionManager::get_action ("Transport", "TogglePunchIn");
+	_punch_in_button.set_related_action (act);
+	act = ActionManager::get_action ("Transport", "TogglePunchOut");
+	_punch_out_button.set_related_action (act);
+
 	int vpadding = 1;
 	int hpadding = 2;
 	int col = 0;
@@ -151,26 +170,163 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (*ssbox,         TCOL, 1, 2 , FILL,   SHRINK, 0, 0);
 	++col;
 
+	_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
 
+	_table.attach (_punch_label, TCOL, 0, 1 , FILL, SHRINK, 3, 0);
+	_table.attach (_layered_label, TCOL, 1, 2 , FILL, SHRINK, 3, 0);
+	++col;
+
+	_table.attach (_punch_in_button,      col,      col + 1, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	_table.attach (_punch_space,          col + 1,  col + 2, 0, 1 , FILL, SHRINK, 0, vpadding);
+	_table.attach (_punch_out_button,     col + 2,  col + 3, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	_table.attach (_record_mode_selector, col,      col + 3, 1, 2 , FILL, SHRINK, hpadding, vpadding);
+	col += 3;
 
 	_table.set_spacings (0);
 	_table.set_row_spacings (4);
 	_table.set_border_width (1);
-	_table.show_all();  //TODO: update visibility somewhere else
-	pack_start(_table, false, false);
+
+	_table.show_all (); // TODO: update visibility somewhere else
+	pack_start (_table, false, false);
 
 	/*sizing */
 	Glib::RefPtr<SizeGroup> button_height_size_group = ARDOUR_UI::instance()->button_height_size_group;
 	button_height_size_group->add_widget (_transport_ctrl.size_button ());
 	button_height_size_group->add_widget (_sync_button);
+	button_height_size_group->add_widget (_punch_in_button);
+	button_height_size_group->add_widget (_punch_out_button);
+	button_height_size_group->add_widget (_record_mode_selector);
+
+	Glib::RefPtr<SizeGroup> punch_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
+	punch_button_size_group->add_widget (_punch_in_button);
+	punch_button_size_group->add_widget (_punch_out_button);
+
+	/* tooltips */
+	Gtkmm2ext::UI::instance()->set_tip (_punch_in_button, _("Start recording at auto-punch start"));
+	Gtkmm2ext::UI::instance()->set_tip (_punch_out_button, _("Stop recording at auto-punch end"));
+	Gtkmm2ext::UI::instance()->set_tip (_record_mode_selector, _("<b>Layered</b>, new recordings will be added as regions on a layer atop existing regions.\n<b>SoundOnSound</b>, behaves like <i>Layered</i>, except underlying regions will be audible.\n<b>Non Layered</b>, the underlying region will be spliced and replaced with the newly recorded region."));
 
 	/* theming */
 	_sync_button.set_name ("transport active option button");
+	_punch_in_button.set_name ("punch button");
+	_punch_out_button.set_name ("punch button");
+	_record_mode_selector.set_name ("record mode button");
 
+	/* initialize */
 	set_transport_sensitivity (false);
+
+	if (_session) {
+		repack_transport_hbox ();
+	}
 }
 #undef PX_SCALE
 #undef TCOL
+
+
+void
+ApplicationBar::repack_transport_hbox ()
+{
+	if (!_have_layout) {
+		return;
+	}
+
+/*	if (time_info_box) {
+		if (time_info_box->get_parent()) {
+			transport_hbox.remove (*time_info_box);
+		}
+		if (UIConfiguration::instance().get_show_toolbar_selclock ()) {
+			transport_hbox.pack_start (*time_info_box, false, false);
+			time_info_box->show();
+		}
+	}
+
+	if (mini_timeline.get_parent()) {
+		transport_hbox.remove (mini_timeline);
+	}
+	if (UIConfiguration::instance().get_show_mini_timeline ()) {
+		transport_hbox.pack_start (mini_timeline, true, true);
+		mini_timeline.show();
+	}
+
+	if (editor_meter) {
+		if (editor_meter_table.get_parent()) {
+			transport_hbox.remove (editor_meter_table);
+		}
+		if (meterbox_spacer.get_parent()) {
+			transport_hbox.remove (meterbox_spacer);
+			transport_hbox.remove (meterbox_spacer2);
+		}
+
+		if (UIConfiguration::instance().get_show_editor_meter()) {
+			transport_hbox.pack_end (meterbox_spacer, false, false, 3);
+			transport_hbox.pack_end (editor_meter_table, false, false);
+			transport_hbox.pack_end (meterbox_spacer2, false, false, 1);
+			meterbox_spacer2.set_size_request (1, -1);
+			editor_meter_table.show();
+			meterbox_spacer.show();
+			meterbox_spacer2.show();
+		}
+	}
+*/
+	bool show_rec = UIConfiguration::instance().get_show_toolbar_recpunch ();
+	if (show_rec) {
+		_punch_label.show ();
+		_layered_label.show ();
+		_punch_in_button.show ();
+		_punch_out_button.show ();
+		_record_mode_selector.show ();
+//	_recpunch_spacer.show ();
+	} else {
+		_punch_label.hide ();
+		_layered_label.hide ();
+		_punch_in_button.hide ();
+		_punch_out_button.hide ();
+		_record_mode_selector.hide ();
+//		_recpunch_spacer.hide ();
+	}
+
+/*
+	bool show_pdc = UIConfiguration::instance().get_show_toolbar_latency ();
+	if (show_pdc) {
+		latency_disable_button.show ();
+		route_latency_value.show ();
+		io_latency_label.show ();
+		io_latency_value.show ();
+		latency_spacer.show ();
+	} else {
+		latency_disable_button.hide ();
+		route_latency_value.hide ();
+		io_latency_label.hide ();
+		io_latency_value.hide ();
+		latency_spacer.hide ();
+	}
+
+	bool show_cue = UIConfiguration::instance().get_show_toolbar_cuectrl ();
+	if (show_cue) {
+		_cue_rec_enable.show ();
+		_cue_play_enable.show ();
+		cuectrl_spacer.show ();
+	} else {
+		_cue_rec_enable.hide ();
+		_cue_play_enable.hide ();
+		cuectrl_spacer.hide ();
+	}
+
+	bool show_mnfo = UIConfiguration::instance().get_show_toolbar_monitor_info ();
+	if (show_mnfo) {
+		monitor_dim_button.show ();
+		monitor_mono_button.show ();
+		monitor_mute_button.show ();
+		monitor_spacer.show ();
+	} else {
+		monitor_dim_button.hide ();
+		monitor_mono_button.hide ();
+		monitor_mute_button.hide ();
+		monitor_spacer.hide ();
+	}
+*/
+}
 
 void
 ApplicationBar::set_session (Session *s)
@@ -196,6 +352,11 @@ ApplicationBar::set_session (Session *s)
 
 	_session->AuditionActive.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::auditioning_changed, this, _1), gui_context());
 	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::map_transport_state, this), gui_context());
+	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::parameter_changed, this, _1), gui_context());
+
+	//initialize all session config settings
+	std::function<void (std::string)> pc (std::bind (&ApplicationBar::parameter_changed, this, _1));
+	_session->config.map_parameters (pc);
 
 	_blink_connection = Timers::blink_connect (sigc::mem_fun(*this, &ApplicationBar::blink_handler));
 }
@@ -230,12 +391,10 @@ void
 ApplicationBar::parameter_changed (std::string p)
 {
 	if (p == "external-sync") {
-
 		if (!_session->config.get_external_sync()) {
 			_sync_button.set_text (S_("SyncSource|Int."));
 		} else {
 		}
-
 	} else if (p == "sync-source") {
 		if (_session) {
 			if (!_session->config.get_external_sync()) {
@@ -252,6 +411,57 @@ ApplicationBar::parameter_changed (std::string p)
 		} else {
 			UI::instance()->set_tip (_sync_button, _("External sync is not possible: video pull up/down is set"));
 		}
+	} else if (p == "primary-clock-delta-mode") {
+//		primary_clock->set_display_delta_mode(UIConfiguration::instance().get_primary_clock_delta_mode());
+	} else if (p == "secondary-clock-delta-mode") {
+//		secondary_clock->set_display_delta_mode(UIConfiguration::instance().get_secondary_clock_delta_mode());
+	} else if (p == "show-mini-timeline") {
+		repack_transport_hbox ();
+	} else if (p == "show-dsp-load-info") {
+		repack_transport_hbox ();
+	} else if (p == "show-disk-space-info") {
+		repack_transport_hbox ();
+	} else if (p == "show-toolbar-recpunch") {
+		repack_transport_hbox ();
+	} else if (p == "show-toolbar-monitoring") {
+		repack_transport_hbox ();
+	} else if (p == "show-toolbar-selclock") {
+		repack_transport_hbox ();
+	} else if (p == "show-toolbar-latency") {
+		repack_transport_hbox ();
+	} else if (p == "show-toolbar-cuectrl") {
+		repack_transport_hbox ();
+	} else if (p == "show-toolbar-monitor-info") {
+		repack_transport_hbox ();
+	} else if (p == "show-editor-meter") {
+		repack_transport_hbox ();
+	} else if (p == "show-secondary-clock") {
+//		update_clock_visibility ();
+	} else if (p == "action-table-columns") {
+/*		const uint32_t cols = UIConfiguration::instance().get_action_table_columns ();
+		for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
+			const int col = i / 2;
+			if (cols & (1<<col)) {
+				action_script_call_btn[i].show();
+			} else {
+				action_script_call_btn[i].hide();
+			}
+		}
+		if (cols == 0) {
+			scripts_spacer.hide ();
+		} else {
+			scripts_spacer.show ();
+		} */
+	} else if (p == "cue-behavior") {
+		CueBehavior cb (_session->config.get_cue_behavior());
+//		_cue_play_enable.set_active (cb & ARDOUR::FollowCues);
+	} else if (p == "record-mode") {
+		size_t m = _session->config.get_record_mode ();
+		assert (m < _record_mode_strings.size ());
+		_record_mode_selector.set_active (_record_mode_strings[m]);
+	} else if (p == "no-strobe") {
+//		stop_clocking ();
+//		start_clocking ();
 	}
 }
 
@@ -267,6 +477,14 @@ ApplicationBar::sync_button_clicked (GdkEventButton* ev)
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-transport-masters");
 	tact->set_active();
 	return true;
+}
+
+void
+ApplicationBar::set_record_mode (RecordMode m)
+{
+	if (_session) {
+		_session->config.set_record_mode (m);
+	}
 }
 
 void
@@ -313,19 +531,18 @@ ApplicationBar::map_transport_state ()
 {
 	_shuttle_box.map_transport_state ();
 
-/*	if (!_session) {
-		record_mode_selector.set_sensitive (false);
+	if (!_session) {
+		_record_mode_selector.set_sensitive (false);
 		return;
 	}
 
 	float sp = _session->transport_speed();
 
 	if (sp != 0.0f) {
-		record_mode_selector.set_sensitive (!_session->actively_recording ());
+		_record_mode_selector.set_sensitive (!_session->actively_recording ());
 	} else {
-		record_mode_selector.set_sensitive (true);
-		update_disk_space ();
+		_record_mode_selector.set_sensitive (true);
+//		update_disk_space ();
 	}
 
-*/
 }

@@ -522,7 +522,6 @@ private:
 	Gtk::HBox                transport_hbox;
 
 	ArdourWidgets::ArdourVSpacer* secondary_clock_spacer;
-	void repack_transport_hbox ();
 	void update_clock_visibility ();
 	void toggle_follow_edits ();
 
@@ -530,10 +529,6 @@ private:
 	XMLNode& get_transport_controllable_state ();
 
 	ApplicationBar *application_bar;
-
-	ArdourWidgets::ArdourButton   punch_in_button;
-	ArdourWidgets::ArdourButton   punch_out_button;
-	ArdourWidgets::ArdourDropdown record_mode_selector;
 
 	ArdourWidgets::ArdourVSpacer recpunch_spacer;
 	ArdourWidgets::ArdourVSpacer latency_spacer;
@@ -544,11 +539,6 @@ private:
 	ArdourWidgets::ArdourButton monitor_dim_button;
 	ArdourWidgets::ArdourButton monitor_mono_button;
 	ArdourWidgets::ArdourButton monitor_mute_button;
-
-	Gtk::Label   punch_label;
-	Gtk::Label   layered_label;
-
-	Gtk::Label   punch_space;
 
 	void toggle_external_sync ();
 	void toggle_time_master ();
@@ -609,8 +599,6 @@ private:
 	bool solo_alert_press (GdkEventButton* ev);
 	void audition_alert_clicked ();
 	bool error_alert_press (GdkEventButton *);
-
-	void set_record_mode (ARDOUR::RecordMode);
 
 	void big_clock_value_changed ();
 	void primary_clock_value_changed ();
@@ -834,8 +822,6 @@ private:
 	Glib::RefPtr<Gtk::ActionGroup> common_actions;
 
 	void editor_realized ();
-
-	std::vector<std::string> record_mode_strings;
 
 	void toggle_use_mmc ();
 	void toggle_send_mmc ();

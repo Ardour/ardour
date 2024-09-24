@@ -338,6 +338,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 	} else if (p == "sync-source") {
 
+		synchronize_sync_source_and_video_pullup ();
+		set_fps_timeout_connection ();
+
 	} else if (p == "follow-edits") {
 
 		ActionManager::map_some_state ("Transport", "ToggleFollowEdits", &UIConfiguration::get_follow_edits);
@@ -378,10 +381,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ActionManager::map_some_state ("Transport", "ToggleClick", &RCConfiguration::get_clicking);
 	} else if (p == "use-video-sync") {
 		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_use_video_sync));
-	} else if (p == "sync-source") {
-
-		synchronize_sync_source_and_video_pullup ();
-		set_fps_timeout_connection ();
 
 	} else if (p == "show-track-meters") {
 		if (editor) editor->toggle_meter_updating();
@@ -403,28 +402,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 	} else if (p == "waveform-gradient-depth") {
 		ArdourWaveView::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
-	} else if (p == "show-mini-timeline") {
-		repack_transport_hbox ();
-	} else if (p == "show-dsp-load-info") {
-		repack_transport_hbox ();
-	} else if (p == "show-disk-space-info") {
-		repack_transport_hbox ();
-	} else if (p == "show-toolbar-recpunch") {
-		repack_transport_hbox ();
-	} else if (p == "show-toolbar-monitoring") {
-		repack_transport_hbox ();
-	} else if (p == "show-toolbar-selclock") {
-		repack_transport_hbox ();
-	} else if (p == "show-toolbar-latency") {
-		repack_transport_hbox ();
-	} else if (p == "show-toolbar-cuectrl") {
-		repack_transport_hbox ();
-	} else if (p == "show-toolbar-monitor-info") {
-		repack_transport_hbox ();
-	} else if (p == "show-editor-meter") {
-		repack_transport_hbox ();
-	} else if (p == "show-secondary-clock") {
-		update_clock_visibility ();
 	} else if (p == "waveform-scale") {
 		ArdourWaveView::WaveView::set_global_logscaled (UIConfiguration::instance().get_waveform_scale() == Logarithmic);
 	} else if (p == "widget-prelight") {
@@ -457,10 +434,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "cue-behavior") {
 		CueBehavior cb (_session->config.get_cue_behavior());
 		_cue_play_enable.set_active (cb & ARDOUR::FollowCues);
-	} else if (p == "record-mode") {
-		size_t m = _session->config.get_record_mode ();
-		assert (m < record_mode_strings.size ());
-		record_mode_selector.set_active (record_mode_strings[m]);
 	} else if (p == "flat-buttons") {
 		bool flat = UIConfiguration::instance().get_flat_buttons();
 		if (ArdourButton::flat_buttons () != flat) {

@@ -288,8 +288,6 @@ ARDOUR_UI::set_session (Session *s)
 
 		_clear_editor_meter = true;
 		editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::editor_meter_peak_button_release), false);
-
-		repack_transport_hbox ();
 	}
 
 	update_title ();
