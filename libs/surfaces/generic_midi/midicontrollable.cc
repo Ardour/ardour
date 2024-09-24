@@ -327,6 +327,10 @@ MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /*is_on*/)
 void
 MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 {
+	if (control_additional != msg->controller_number) {
+		return;
+	}
+
 	if (!_controllable) {
 		if (lookup_controllable ()) {
 			return;
@@ -337,109 +341,106 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 
 	_surface->maybe_start_touch (_controllable);
 
-	if (control_additional == msg->controller_number) {
+	if (!_controllable->is_toggle()) {
+		if (get_encoder() == No_enc) {
+			float new_value = msg->value;
+			float max_value = max(last_controllable_value, new_value);
+			float min_value = min(last_controllable_value, new_value);
+			float range = max_value - min_value;
+			float threshold = (float) _surface->threshold ();
 
-		if (!_controllable->is_toggle()) {
-			if (get_encoder() == No_enc) {
-				float new_value = msg->value;
-				float max_value = max(last_controllable_value, new_value);
-				float min_value = min(last_controllable_value, new_value);
-				float range = max_value - min_value;
-				float threshold = (float) _surface->threshold ();
+			bool const in_sync = (
+				range < threshold &&
+				_controllable->get_value() <= midi_to_control(max_value) &&
+				_controllable->get_value() >= midi_to_control(min_value)
+				);
 
-				bool const in_sync = (
-					range < threshold &&
-					_controllable->get_value() <= midi_to_control(max_value) &&
-					_controllable->get_value() >= midi_to_control(min_value)
-					);
+			/* If the surface is not motorised, we try to prevent jumps when
+			   the MIDI controller and controllable are out of sync.
+			   There might be a better way of doing this.
+			*/
 
-				/* If the surface is not motorised, we try to prevent jumps when
-				   the MIDI controller and controllable are out of sync.
-				   There might be a better way of doing this.
-				*/
-
-				if (in_sync || _surface->motorised ()) {
-					_controllable->set_value (midi_to_control (new_value), Controllable::UseGroup);
-				}
-				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (float) midi_to_control(new_value), current_uri() ));
-
-				last_controllable_value = new_value;
-			} else {
-				uint32_t cur_val = control_to_midi(_controllable->get_value ());
-				int offset = (msg->value & 0x3f);
-				switch (get_encoder()) {
-					case Enc_L:
-						if (msg->value & 0x40) {
-							_controllable->set_value (midi_to_control (cur_val - offset), Controllable::UseGroup);
-						} else {
-							_controllable->set_value (midi_to_control (cur_val + offset + 1), Controllable::UseGroup);
-						}
-						break;
-					case Enc_R:
-						if (msg->value & 0x40) {
-							_controllable->set_value (midi_to_control (cur_val + offset + 1), Controllable::UseGroup);
-						} else {
-							_controllable->set_value (midi_to_control (cur_val - offset), Controllable::UseGroup);
-						}
-						break;
-					case Enc_2:
-						// 0x40 is max pos offset
-						if (msg->value > 0x40) {
-							_controllable->set_value (midi_to_control (cur_val - (0x7f - msg->value)), Controllable::UseGroup);
-						} else {
-							_controllable->set_value (midi_to_control (cur_val + msg->value + 1), Controllable::UseGroup);
-						}
-						break;
-					case Enc_B:
-						if (msg->value > 0x40) {
-							_controllable->set_value (midi_to_control (cur_val + offset + 1), Controllable::UseGroup);
-						} else if (msg->value < 0x40) {
-							_controllable->set_value (midi_to_control (cur_val - (0x40 - msg->value)), Controllable::UseGroup);
-						} // 0x40 = 0 do nothing
-						break;
-					default:
-						break;
-				}
-				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (int) cur_val, current_uri() ));
-
+			if (in_sync || _surface->motorised ()) {
+				_controllable->set_value (midi_to_control (new_value), Controllable::UseGroup);
 			}
-		} else {
+			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (float) midi_to_control(new_value), current_uri() ));
 
-			switch (get_ctltype()) {
-			case Ctl_Dial:
-				/* toggle value whenever direction of knob motion changes */
-				if (last_incoming > 127) {
-					/* relax ... first incoming message */
-				} else {
-					if (msg->value > last_incoming) {
-						_controllable->set_value (1.0, Controllable::UseGroup);
+			last_controllable_value = new_value;
+		} else {
+			uint32_t cur_val = control_to_midi(_controllable->get_value ());
+			int offset = (msg->value & 0x3f);
+			switch (get_encoder()) {
+				case Enc_L:
+					if (msg->value & 0x40) {
+						_controllable->set_value (midi_to_control (cur_val - offset), Controllable::UseGroup);
 					} else {
-						_controllable->set_value (0.0, Controllable::UseGroup);
+						_controllable->set_value (midi_to_control (cur_val + offset + 1), Controllable::UseGroup);
 					}
-					DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("dial Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
-				}
-				last_incoming = msg->value;
-				break;
-			case Ctl_Momentary:
-				/* toggle it if over 64, otherwise leave it alone. This behaviour that works with buttons which send a value > 64 each
-				 * time they are pressed.
-				 */
-				if (msg->value >= 0x40) {
-					_controllable->set_value (_controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
-					DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("toggle Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
-				}
-				break;
-			case Ctl_Toggle:
-				/* toggle if value is over 64, otherwise turn it off. This is behaviour designed for buttons which send a value > 64 when pressed,
-				   maintain state (i.e. they know they were pressed) and then send zero the next time.
-				*/
-				if (msg->value >= 0x40) {
-					_controllable->set_value (_controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
-				} else {
-					_controllable->set_value (0.0, Controllable::NoGroup);
-					DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 0  %2\n", (int) msg->controller_number, current_uri()));
 					break;
+				case Enc_R:
+					if (msg->value & 0x40) {
+						_controllable->set_value (midi_to_control (cur_val + offset + 1), Controllable::UseGroup);
+					} else {
+						_controllable->set_value (midi_to_control (cur_val - offset), Controllable::UseGroup);
+					}
+					break;
+				case Enc_2:
+					// 0x40 is max pos offset
+					if (msg->value > 0x40) {
+						_controllable->set_value (midi_to_control (cur_val - (0x7f - msg->value)), Controllable::UseGroup);
+					} else {
+						_controllable->set_value (midi_to_control (cur_val + msg->value + 1), Controllable::UseGroup);
+					}
+					break;
+				case Enc_B:
+					if (msg->value > 0x40) {
+						_controllable->set_value (midi_to_control (cur_val + offset + 1), Controllable::UseGroup);
+					} else if (msg->value < 0x40) {
+						_controllable->set_value (midi_to_control (cur_val - (0x40 - msg->value)), Controllable::UseGroup);
+					} // 0x40 = 0 do nothing
+					break;
+				default:
+					break;
+			}
+			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (int) cur_val, current_uri() ));
+
+		}
+	} else {
+
+		switch (get_ctltype()) {
+		case Ctl_Dial:
+			/* toggle value whenever direction of knob motion changes */
+			if (last_incoming > 127) {
+				/* relax ... first incoming message */
+			} else {
+				if (msg->value > last_incoming) {
+					_controllable->set_value (1.0, Controllable::UseGroup);
+				} else {
+					_controllable->set_value (0.0, Controllable::UseGroup);
 				}
+				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("dial Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
+			}
+			last_incoming = msg->value;
+			break;
+		case Ctl_Momentary:
+			/* toggle it if over 64, otherwise leave it alone. This behaviour that works with buttons which send a value > 64 each
+			 * time they are pressed.
+			 */
+			if (msg->value >= 0x40) {
+				_controllable->set_value (_controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
+				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("toggle Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
+			}
+			break;
+		case Ctl_Toggle:
+			/* toggle if value is over 64, otherwise turn it off. This is behaviour designed for buttons which send a value > 64 when pressed,
+			   maintain state (i.e. they know they were pressed) and then send zero the next time.
+			*/
+			if (msg->value >= 0x40) {
+				_controllable->set_value (_controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
+			} else {
+				_controllable->set_value (0.0, Controllable::NoGroup);
+				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 0  %2\n", (int) msg->controller_number, current_uri()));
+				break;
 			}
 		}
 	}
@@ -448,6 +449,10 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 void
 MIDIControllable::midi_sense_program_change (Parser &, MIDI::byte msg)
 {
+	if (msg != control_additional) {
+		return;
+	}
+
 	if (!_controllable) {
 		if (lookup_controllable ()) {
 			return;
@@ -458,16 +463,13 @@ MIDIControllable::midi_sense_program_change (Parser &, MIDI::byte msg)
 
 	_surface->maybe_start_touch (_controllable);
 
-	if (msg == control_additional) {
-
-		if (!_controllable->is_toggle()) {
-			_controllable->set_value (1.0, Controllable::UseGroup);
-			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value 1.0  %3\n", (int) msg, current_uri() ));
-		} else  {
-			float new_value = _controllable->get_value() > 0.5f ? 0.0f : 1.0f;
-			_controllable->set_value (new_value, Controllable::UseGroup);
-			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value %2  %3\n", (int) msg, (float) new_value, current_uri()));
-		}
+	if (!_controllable->is_toggle()) {
+		_controllable->set_value (1.0, Controllable::UseGroup);
+		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value 1.0  %3\n", (int) msg, current_uri() ));
+	} else  {
+		float new_value = _controllable->get_value() > 0.5f ? 0.0f : 1.0f;
+		_controllable->set_value (new_value, Controllable::UseGroup);
+		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value %2  %3\n", (int) msg, (float) new_value, current_uri()));
 	}
 
 	last_value = (MIDI::byte) (_controllable->get_value() * 127.0); // to prevent feedback fights
