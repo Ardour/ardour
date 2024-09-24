@@ -48,3 +48,5 @@
 	<Binding channel="10" pgm="13" action="Editor/playhead-to-edit"/>			<!--  -->
 	<Binding channel="10" pgm="14" action="Common/jump-forward-to-mark"/>		<!--  -->
 	<Binding channel="10" pgm="15" function="next-bank"/>						<!-- Next bank -->
+	
+	</ArdourMIDIBindings>
