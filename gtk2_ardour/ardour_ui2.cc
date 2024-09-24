@@ -65,6 +65,7 @@
 #include "main_clock.h"
 #include "mixer_ui.h"
 #include "recorder_ui.h"
+#include "application_bar.h" //TODO: move to each window
 #include "trigger_page.h"
 #include "utils.h"
 #include "time_info_box.h"
@@ -552,7 +553,6 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (*secondary_clock->left_btn());
 	button_height_size_group->add_widget (*secondary_clock->right_btn());
 
-	button_height_size_group->add_widget (transport_ctrl.size_button ());
 	button_height_size_group->add_widget (sync_button);
 	button_height_size_group->add_widget (auto_return_button);
 
@@ -597,7 +597,7 @@ ARDOUR_UI::setup_transport ()
 	int col = 0;
 #define TCOL col, col + 1
 
-	transport_table.attach (transport_ctrl, TCOL, 0, 1 , SHRINK, SHRINK, 0, 0);
+	transport_table.attach (*application_bar, TCOL, 0, 1 , SHRINK, SHRINK, 0, 0);
 	transport_table.attach (*ssbox, TCOL, 1, 2 , FILL, SHRINK, 0, 0);
 	++col;
 

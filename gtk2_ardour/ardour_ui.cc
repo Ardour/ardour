@@ -182,6 +182,7 @@
 #include "time_axis_view_item.h"
 #include "time_info_box.h"
 #include "timers.h"
+#include "application_bar.h" //TODO: remove this and put in Rec/Edit/Mix/Cue
 #include "transport_masters_dialog.h"
 #include "trigger_page.h"
 #include "triggerbox_ui.h"
@@ -439,8 +440,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	std::function<void (string)> pc (std::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	UIConfiguration::instance().map_parameters (pc);
 
-	transport_ctrl.setup (this);
-
 	ARDOUR::DiskWriter::Overrun.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::disk_overrun_handler, this), gui_context());
 	ARDOUR::DiskReader::Underrun.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::disk_underrun_handler, this), gui_context());
 
@@ -578,6 +577,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	_process_thread = new ProcessThread ();
 
 	ARDOUR::Port::set_connecting_blocked (ARDOUR_COMMAND_LINE::no_connect_ports);
+
+	application_bar = new ApplicationBar();  //TODO:  move this to Editor, Cue, Rec, Mix
 }
 
 GlobalPortMatrixWindow*
@@ -693,8 +694,6 @@ ARDOUR_UI::post_engine ()
 	if (setup_windows ()) {
 		throw failed_constructor (); // TODO catch me if you can
 	}
-
-	transport_ctrl.map_actions ();
 
 	/* Do this after setup_windows (), as that's when the _status_bar_visibility is created */
 	XMLNode* n = Config->extra_xml (X_("UI"));
