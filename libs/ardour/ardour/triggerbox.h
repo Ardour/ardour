@@ -759,6 +759,10 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	static void set_cue_recording (bool yn);
 	static PBD::Signal0<void> CueRecordingChanged;
 
+	void set_record_enabled (bool yn);
+	bool record_enabled() const { return _record_enabled; }
+	PBD::Signal0<void> RecEnableChanged;
+
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required);
 	void run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
@@ -907,6 +911,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	bool                     _locate_armed;
 	bool                     _cancel_locate_armed;
 	bool                     _fast_forwarding;
+	bool                     _record_enabled;
 
 	PBD::PCGRand _pcg;
 
