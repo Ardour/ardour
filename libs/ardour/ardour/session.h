@@ -1633,10 +1633,11 @@ private:
 	XMLTree*         state_tree;
 	StateOfTheState _state_of_the_state;
 
-	friend class    StateProtector;
-	std::atomic<int>  _suspend_save;
-	volatile bool      _save_queued;
-	volatile bool      _save_queued_pending;
+	friend class     StateProtector;
+	std::atomic<int> _suspend_save;
+	volatile bool    _save_queued;
+	volatile bool    _save_queued_pending;
+	bool             _no_save_signal;
 
 	Glib::Threads::Mutex save_state_lock;
 	Glib::Threads::Mutex save_source_lock;

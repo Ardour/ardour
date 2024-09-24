@@ -751,7 +751,9 @@ Session::remove_state (string snapshot_name)
 				xml_path, g_strerror (errno)) << endmsg;
 	}
 
-	StateSaved (snapshot_name); /* EMIT SIGNAL */
+	if (!_no_save_signal) {
+		StateSaved (snapshot_name); /* EMIT SIGNAL */
+	}
 }
 
 /** @param snapshot_name Name to save under, without .ardour / .pending prefix */
@@ -924,7 +926,9 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 			unset_dirty (/* EMIT SIGNAL */ true);
 		}
 
-		StateSaved (snapshot_name); /* EMIT SIGNAL */
+		if (!_no_save_signal) {
+			StateSaved (snapshot_name); /* EMIT SIGNAL */
+		}
 	}
 
 #ifndef NDEBUG
@@ -5544,11 +5548,18 @@ Session::save_as (SaveAs& saveas)
 
 		store_recent_sessions (_name, _path);
 
+		std::cerr << "Saveas, switch to: " << saveas.switch_to << std::endl;
+
 		if (!saveas.switch_to) {
+
+			std::cerr << "no switch to!\n";
 
 			/* save the new state */
 
-			save_state ("", false, false, !saveas.include_media);
+			{
+				PBD::Unwinder<bool> uw (_no_save_signal, true);
+				save_state ("", false, false, !saveas.include_media);
+			}
 
 			/* switch back to the way things were */
 
