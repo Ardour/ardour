@@ -418,7 +418,10 @@ Track::update_input_meter ()
 void
 Track::record_enable_changed (bool, Controllable::GroupControlDisposition)
 {
-	_disk_writer->set_record_enabled (_record_enable_control->get_value());
+	bool yn = _record_enable_control->get_value();
+
+	_disk_writer->set_record_enabled (yn);
+	_triggerbox->set_record_enabled (yn);
 }
 
 void

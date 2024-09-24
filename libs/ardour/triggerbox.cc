@@ -3270,6 +3270,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _locate_armed (false)
 	, _cancel_locate_armed (false)
 	, _fast_forwarding (false)
+	, _record_enabled (false)
 	, requests (1024)
 {
 	set_display_to_user (false);
@@ -3292,6 +3293,13 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 
 	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
 	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
+}
+
+void
+TriggerBox::set_record_enabled (bool yn)
+{
+	_record_enabled = yn;
+	RecEnableChanged (); /* EMIT SIGNAL */
 }
 
 void
