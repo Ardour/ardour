@@ -10848,6 +10848,30 @@ proxy_button_event (GdkEvent *source_event,
 				type, state,
 				NULL, serial);
 
+  /* multitouch grab */
+  if (type == GDK_TOUCH_BEGIN && !source_event->any.send_event)
+    {
+      GdkEventTouch* tev = (GdkEventTouch*) source_event;
+      if (!display->touch_grabs) {
+	display->touch_grabs = g_hash_table_new (g_direct_hash, NULL);
+      }
+      event_win = _gdk_window_find_descendant_at (toplevel_window, toplevel_x, toplevel_y, NULL, NULL);
+      g_hash_table_insert (display->touch_grabs, GUINT_TO_POINTER (tev->sequence), event_win);
+    }
+  else if (type == GDK_TOUCH_END && display->touch_grabs)
+    {
+      GdkEventTouch* tev = (GdkEventTouch*) source_event;
+      g_hash_table_remove (display->touch_grabs, GUINT_TO_POINTER (tev->sequence));
+    }
+  else if (type == GDK_TOUCH_UPDATE && display->touch_grabs)
+    {
+      GdkEventTouch* tev = (GdkEventTouch*) source_event;
+      void* w = g_hash_table_lookup (display->touch_grabs, GUINT_TO_POINTER (tev->sequence));
+      if (w) {
+	event_win = GDK_WINDOW (w);
+      }
+    }
+
   if (event_win == NULL || display->ignore_core_events)
     return TRUE;
 

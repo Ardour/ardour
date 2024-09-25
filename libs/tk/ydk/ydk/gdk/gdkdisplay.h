@@ -101,6 +101,8 @@ struct _GdkDisplay
   GdkKeyboardGrabInfo GSEAL (keyboard_grab);
   GdkPointerWindowInfo GSEAL (pointer_info);
 
+  GHashTable *GSEAL (touch_grabs);
+
   /* Last reported event time from server */
   guint32 GSEAL (last_event_time);
 };
