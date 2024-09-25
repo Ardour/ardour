@@ -508,7 +508,7 @@ midi:
 					}
 				} else {
 					if ((samplecnt_t)c->front ()->rbuf->write_space () >= _chunk_samples) {
-						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: write space = %2 of %3\n", name (), c->front ()->rbuf->write_space (),
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: write space = %2 chunk size = %3\n", name (), c->front ()->rbuf->write_space (),
 						                                            _chunk_samples));
 						butler_required = true;
 					}

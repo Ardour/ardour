@@ -190,7 +190,7 @@ Session::locate (samplepos_t target_sample, bool for_loop_end, bool force, bool 
 	 * changes in the value of _transport_sample.
 	 */
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1 ts = %7, for loop end %2 force %3 mmc %4\n",
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1 ts = %5, for loop end %2 force %3 mmc %4\n",
 	                                               target_sample, for_loop_end, force, with_mmc, _transport_sample));
 
 	if (!force && (_transport_sample == target_sample) && !for_loop_end) {
