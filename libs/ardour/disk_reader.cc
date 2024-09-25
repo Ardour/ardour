@@ -560,6 +560,7 @@ DiskReader::pending_overwrite () const
 void
 DiskReader::set_pending_overwrite (OverwriteReason why)
 {
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 set_pending_overwrite because %3%4%5\n", owner ()->name (), std::hex, why, std::dec));
 	std::shared_ptr<ChannelList const> c = channels.reader ();
 
 	/* called from audio thread, so we can use the read ptr and playback sample as we wish */
@@ -862,9 +863,10 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 		}
 	}
 
-	_pending_overwrite.store (OverwriteReason (0));
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("DiskReader::seek %1 %2 -> %3 refill=%4 pending_overwrite = %5\n",
+	                                            owner ()->name (), playback_sample, sample, complete_refill, _pending_overwrite.load ()));
 
-	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("DiskReader::seek %1 %2 -> %3 refill=%4\n", owner ()->name ().c_str (), playback_sample, sample, complete_refill));
+	_pending_overwrite.store (OverwriteReason (0));
 
 	const samplecnt_t distance = sample - playback_sample;
 	if (!complete_refill && can_internal_playback_seek (distance)) {

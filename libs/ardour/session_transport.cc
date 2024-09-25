@@ -202,9 +202,12 @@ Session::locate (samplepos_t target_sample, bool for_loop_end, bool force, bool 
 	// Update Timecode time
 	_transport_sample = target_sample;
 	_nominal_jack_transport_sample = boost::none;
-	// Bump seek counter so that any in-process locate in the butler
-	// thread(s?) can restart.
-	_seek_counter.fetch_add (1);
+
+	/* Note that loop wrap-around locates do not need to call "seek" */
+	if (force || !for_loop_end) {
+		/* Bump seek counter so that any in-process locate in the butler can restart */
+		_seek_counter.fetch_add (1);
+	}
 	_last_roll_or_reversal_location = target_sample;
 	if (!for_loop_end && !_exporting) {
 		_remaining_latency_preroll = worst_latency_preroll_buffer_size_ceil ();
@@ -1206,7 +1209,10 @@ Session::butler_transport_work (bool have_process_lock)
 		non_realtime_locate ();
 	}
 
-	if (ptw & PostTransportOverWrite) {
+	/* if we just performed a locate, buffers have been refilled.
+	 * This effectively has done the work of "PostTransportOverWrite" already.
+	 */
+	else if (ptw & PostTransportOverWrite) {
 		non_realtime_overwrite (on_entry, finished, (ptw & PostTransportLoopChanged));
 		if (!finished) {
 			(void) PBD::atomic_dec_and_test (_butler->should_do_transport_work);
