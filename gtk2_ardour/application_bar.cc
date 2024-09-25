@@ -115,6 +115,8 @@ ApplicationBar::ApplicationBar ()
 	: _have_layout (false)
 	, _basic_ui (0)
 	, _latency_disable_button (ArdourButton::led_default_elements)
+	, _auto_return_button (ArdourButton::led_default_elements)
+	, _follow_edits_button (ArdourButton::led_default_elements)
 {
 	_record_mode_strings = I18N (_record_mode_strings_);
 }
@@ -171,6 +173,14 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	set_size_request_to_display_given_text (_route_latency_value, "1000 spl", 0, 0);
 	set_size_request_to_display_given_text (_io_latency_value, "888.88 ms", 0, 0);
 
+	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
+	_auto_return_button.set_related_action (act);
+	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
+	_follow_edits_button.set_related_action (act);
+
+	_auto_return_button.set_text(_("Auto Return"));
+	_follow_edits_button.set_text(_("Follow Range"));
+
 	int vpadding = 1;
 	int hpadding = 2;
 	int col = 0;
@@ -209,6 +219,13 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (_latency_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
+	_table.attach (_follow_edits_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	_table.attach (_auto_return_button,  TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
+	++col;
+
+	_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
 	_table.set_spacings (0);
 	_table.set_row_spacings (4);
 	_table.set_border_width (1);
@@ -224,6 +241,8 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	button_height_size_group->add_widget (_punch_out_button);
 	button_height_size_group->add_widget (_record_mode_selector);
 	button_height_size_group->add_widget (_latency_disable_button);
+	button_height_size_group->add_widget (_follow_edits_button);
+	button_height_size_group->add_widget (_auto_return_button);
 
 	Glib::RefPtr<SizeGroup> punch_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
 	punch_button_size_group->add_widget (_punch_in_button);
@@ -234,6 +253,8 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	Gtkmm2ext::UI::instance()->set_tip (_punch_out_button, _("Stop recording at auto-punch end"));
 	Gtkmm2ext::UI::instance()->set_tip (_record_mode_selector, _("<b>Layered</b>, new recordings will be added as regions on a layer atop existing regions.\n<b>SoundOnSound</b>, behaves like <i>Layered</i>, except underlying regions will be audible.\n<b>Non Layered</b>, the underlying region will be spliced and replaced with the newly recorded region."));
 	Gtkmm2ext::UI::instance()->set_tip (_latency_disable_button, _("Disable all Plugin Delay Compensation. This results in the shortest delay from live input to output, but any paths with delay-causing plugins will sound later than those without."));
+	Gtkmm2ext::UI::instance()->set_tip (_auto_return_button, _("Return to last playback start when stopped"));
+	Gtkmm2ext::UI::instance()->set_tip (_follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 
 	/* theming */
 	_sync_button.set_name ("transport active option button");
@@ -241,6 +262,8 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_punch_out_button.set_name ("punch button");
 	_record_mode_selector.set_name ("record mode button");
 	_latency_disable_button.set_name ("latency button");
+	_auto_return_button.set_name ("transport option button");
+	_follow_edits_button.set_name ("transport option button");
 
 	/* indicate global latency compensation en/disable */
 	ARDOUR::Latent::DisableSwitchChanged.connect (_forever_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::latency_switch_changed, this), gui_context ());

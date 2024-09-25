@@ -91,8 +91,6 @@ ARDOUR_UI::setup_tooltips ()
 {
 	ArdourCanvas::Canvas::set_tooltip_timeout (Gtk::Settings::get_default()->property_gtk_tooltip_timeout ());
 
-	set_tip (auto_return_button, _("Return to last playback start when stopped"));
-	set_tip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 	parameter_changed("click-gain");
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	set_tip (auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
@@ -237,11 +235,6 @@ ARDOUR_UI::setup_transport ()
 	recorder_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-recorder-visibility")));
 	trigger_page_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-trigger-visibility")));
 
-	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
-	auto_return_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
-	follow_edits_button.set_related_action (act);
-
 	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-dim-all"));
 	monitor_dim_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-mono"));
@@ -281,9 +274,6 @@ ARDOUR_UI::setup_transport ()
 
 	/* setup widget style/name */
 
-	auto_return_button.set_name ("transport option button");
-	follow_edits_button.set_name ("transport option button");
-
 	solo_alert_button.set_name ("rude solo");
 	auditioning_alert_button.set_name ("rude audition");
 	feedback_alert_button.set_name ("feedback alert");
@@ -318,8 +308,6 @@ ARDOUR_UI::setup_transport ()
 	monitor_mute_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
 
 	/* and widget text */
-	auto_return_button.set_text(_("Auto Return"));
-	follow_edits_button.set_text(_("Follow Range"));
 
 	monitor_dim_button.set_text (_("Dim All"));
 	monitor_mono_button.set_text (_("Mono"));
@@ -401,13 +389,10 @@ ARDOUR_UI::setup_transport ()
 	monitor_box->pack_start (monitor_mute_button, true, true);
 
 	/* clock button size groups */
-	button_height_size_group->add_widget (follow_edits_button);
 	button_height_size_group->add_widget (*primary_clock->left_btn());
 	button_height_size_group->add_widget (*primary_clock->right_btn());
 	button_height_size_group->add_widget (*secondary_clock->left_btn());
 	button_height_size_group->add_widget (*secondary_clock->right_btn());
-
-	button_height_size_group->add_widget (auto_return_button);
 
 	//tab selections
 	button_height_size_group->add_widget (trigger_page_visibility_button);
@@ -435,13 +420,6 @@ ARDOUR_UI::setup_transport ()
 #define TCOL col, col + 1
 
 	transport_table.attach (*application_bar, TCOL, 0, 2 , EXPAND|FILL, EXPAND|FILL, 3, 0);
-	++col;
-
-	transport_table.attach (follow_edits_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	transport_table.attach (auto_return_button,  TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
-	++col;
-
-	transport_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	transport_table.attach (*primary_clock,              col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, 0);
