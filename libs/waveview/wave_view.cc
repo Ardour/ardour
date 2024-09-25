@@ -307,7 +307,7 @@ WaveView::get_item_and_draw_rect_in_window_coords (Rect const& canvas_rect, Rect
 	 */
 
 	double const width = region_length() / _props->samples_per_pixel;
-	item_rect = item_to_window (Rect (0.0, 0.0, width, _props->height));
+	item_rect = item_to_window (Rect (0.0, 0.0, width, _props->height), false);
 
 	/* Now lets get the intersection with the area we've been asked to draw */
 
@@ -318,6 +318,11 @@ WaveView::get_item_and_draw_rect_in_window_coords (Rect const& canvas_rect, Rect
 		return false;
 	}
 
+	item_rect.x0 = floor (item_rect.x0);
+	item_rect.x1 = ceil  (item_rect.x1);
+	item_rect.y0 = round (item_rect.y0);
+	item_rect.y1 = round (item_rect.y1);
+
 	/* draw_rect now defines the rectangle we need to update/render the waveview
 	 * into, in window coordinate space.
 	 *
@@ -325,7 +330,7 @@ WaveView::get_item_and_draw_rect_in_window_coords (Rect const& canvas_rect, Rect
 	 * and/or end.
 	 */
 	draw_rect.x0 = floor (draw_rect.x0);
-	draw_rect.x1 = floor (draw_rect.x1);
+	draw_rect.x1 = ceil (draw_rect.x1);
 
 	return true;
 }
