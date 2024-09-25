@@ -583,9 +583,9 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 
 		/* compute the rounded up sample position  */
 
-		samplepos_t current_stored_peak     = (samplepos_t) ceil (start / (double) samples_per_file_peak);
 		samplepos_t next_visual_peak        = (samplepos_t) ceil (start / samples_per_visual_peak);
 		double      next_visual_peak_sample = next_visual_peak * samples_per_visual_peak;
+		samplepos_t current_stored_peak     = (samplepos_t) ceil (next_visual_peak_sample / (double) samples_per_file_peak);
 
 		samplepos_t stored_peak_before_next_visual_peak = (samplepos_t) next_visual_peak_sample / samples_per_file_peak;
 		samplecnt_t nvisual_peaks = 0;
@@ -593,11 +593,11 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 
 		/* handle the case where the initial visual peak is on a pixel boundary */
 
-		current_stored_peak = min (current_stored_peak, stored_peak_before_next_visual_peak);
+		//current_stored_peak = min (current_stored_peak, stored_peak_before_next_visual_peak);
 
 		/* open ... close during out: handling */
 
-		off_t  map_off =  (uint32_t) (ceil (start / (double) samples_per_file_peak)) * sizeof(PeakData);
+		off_t  map_off =  (uint32_t) (current_stored_peak) * sizeof(PeakData);
 		off_t  read_map_off = map_off & ~(bufsize - 1);
 		off_t  map_delta = map_off - read_map_off;
 		size_t raw_map_length = chunksize * sizeof(PeakData);
