@@ -583,9 +583,10 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 
 		/* compute the rounded up sample position  */
 
-		samplepos_t current_stored_peak = (samplepos_t) ceil (start / (double) samples_per_file_peak);
-		samplepos_t next_visual_peak  = (samplepos_t) ceil (start / samples_per_visual_peak);
-		double     next_visual_peak_sample = next_visual_peak * samples_per_visual_peak;
+		samplepos_t current_stored_peak     = (samplepos_t) ceil (start / (double) samples_per_file_peak);
+		samplepos_t next_visual_peak        = (samplepos_t) ceil (start / samples_per_visual_peak);
+		double      next_visual_peak_sample = next_visual_peak * samples_per_visual_peak;
+
 		samplepos_t stored_peak_before_next_visual_peak = (samplepos_t) next_visual_peak_sample / samples_per_file_peak;
 		samplecnt_t nvisual_peaks = 0;
 		uint32_t i = 0;
@@ -603,6 +604,10 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		size_t map_length = (chunksize * sizeof(PeakData)) + map_delta;
 
 		if (_first_run || (_last_scale != samples_per_visual_peak) || (_last_map_off != map_off) || (_last_raw_map_length < raw_map_length)) {
+
+			/* offset between requested start, and first peak-file peak */
+			samplecnt_t start_offset = next_visual_peak_sample - start;
+
 			peak_cache.reset (new PeakData[npeaks]);
 			boost::scoped_array<PeakData> staging (new PeakData[chunksize]);
 
@@ -663,6 +668,22 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 				++nvisual_peaks;
 				next_visual_peak_sample = min ((double) start + cnt, (next_visual_peak_sample + samples_per_visual_peak));
 				stored_peak_before_next_visual_peak = (uint32_t) next_visual_peak_sample / samples_per_file_peak;
+			}
+
+			/* add data between start and sample corresponding to map_off */
+			if (start_offset > 0) {
+				boost::scoped_array<Sample> buf(new Sample[start_offset]);
+				samplecnt_t samples_read = read_unlocked (buf.get(), start, start_offset);
+				find_peaks (buf.get(), samples_read, &peak_cache[0].min, &peak_cache[0].max);
+			}
+
+			/* fix end, add data not covered by Peak File */
+			samplecnt_t last_sample_from_peakfile = current_stored_peak * samples_per_file_peak;
+			if (last_sample_from_peakfile < start + cnt && nvisual_peaks > 0) {
+				samplecnt_t to_read = start + cnt - last_sample_from_peakfile;
+				boost::scoped_array<Sample> buf(new Sample[to_read]);
+				samplecnt_t samples_read = read_unlocked (buf.get(), last_sample_from_peakfile, to_read);
+				find_peaks (buf.get(), samples_read, &peak_cache[nvisual_peaks - 1].min, &peak_cache[nvisual_peaks - 1].max);
 			}
 
 			if (zero_fill) {
