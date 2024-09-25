@@ -165,8 +165,7 @@ compiler_flags_dictionaries['clang-darwin'] = clang_darwin_dict
 
 # Xcode 15 does not like our boost version, producing warnings from almost every file
 clang15_darwin_dict = compiler_flags_dictionaries['clang-darwin'].copy()
-clang15_darwin_dict['basic-warnings'].append ("-Wno-deprecated-builtins")
-clang15_darwin_dict['basic-warnings'].append ("-Wno-deprecated-copy-with-user-provided-copy")
+clang15_darwin_dict['basic-warnings'] = clang15_darwin_dict['basic-warnings'] + ["-Wno-deprecated-builtins", "-Wno-deprecated-copy-with-user-provided-copy"]
 compiler_flags_dictionaries['clang15-darwin'] = clang15_darwin_dict
 
 # Version stuff
