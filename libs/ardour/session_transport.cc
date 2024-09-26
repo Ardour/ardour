@@ -674,7 +674,7 @@ Session::butler_completed_transport_work ()
 	ENSURE_PROCESS_THREAD;
 	PostTransportWork ptw = post_transport_work ();
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler done, RT cleanup for %1\n", enum_2_string (ptw)));
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("Butler done, RT cleanup for %1\n", enum_2_string (ptw)));
 
 	if (ptw & PostTransportAudition) {
 		if (auditioner && auditioner->auditioning()) {
@@ -1149,7 +1149,7 @@ Session::butler_transport_work (bool have_process_lock)
 	uint64_t before = g_get_monotonic_time();
 #endif
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler transport work, todo = [%1] (0x%3%4%5) at %2\n", enum_2_string (ptw), before, std::hex, ptw, std::dec));
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("Butler transport work, todo = [%1] (0x%3%4%5) twr = %6 @ %2\n", enum_2_string (ptw), before, std::hex, ptw, std::dec, on_entry));
 
 	if (ptw & PostTransportAdjustPlaybackBuffering) {
 		/* need to prevent concurrency with ARDOUR::Reader::run(),
@@ -1203,9 +1203,8 @@ Session::butler_transport_work (bool have_process_lock)
 		}
 	}
 
-
 	if (will_locate) {
-		DEBUG_TRACE (DEBUG::Transport, string_compose ("nonrealtime locate invoked from BTW (butler has done %1, rtlocs %2)\n", butler, rtlocates));
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("nonrealtime locate invoked from BTW (butler has done %1, rtlocs %2)\n", butler, rtlocates));
 		non_realtime_locate ();
 	}
 
@@ -1226,7 +1225,7 @@ Session::butler_transport_work (bool have_process_lock)
 
 	(void) PBD::atomic_dec_and_test (_butler->should_do_transport_work);
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose (X_("Butler transport work all done after %1 usecs @ %2 ptw %3 trw = %4\n"), g_get_monotonic_time() - before, _transport_sample, enum_2_string (post_transport_work()), _butler->transport_work_requested()));
+	DEBUG_TRACE (DEBUG::Butler, string_compose (X_("Butler transport work all done after %1 usecs tsp = %2 ptw [%3] trw = %4\n"), g_get_monotonic_time() - before, _transport_sample, enum_2_string (post_transport_work()), _butler->should_do_transport_work.load ()));
 }
 
 void

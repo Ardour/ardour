@@ -273,7 +273,7 @@ Butler::thread_work ()
 		RouteList rl_with_auditioner = *rl;
 		rl_with_auditioner.push_back (_session.the_auditioner ());
 
-		DEBUG_TRACE (DEBUG::Butler, string_compose ("butler starts refill loop, twr = %1\n", transport_work_requested ()));
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("butler starts refill loop, twr = %1\n", should_do_transport_work.load ()));
 
 		std::shared_ptr<IOTaskList> tl = _session.io_tasklist ();
 
@@ -413,8 +413,8 @@ Butler::flush_tracks_to_disk_normal (std::shared_ptr<RouteList const> rl, uint32
 void
 Butler::schedule_transport_work ()
 {
-	DEBUG_TRACE (DEBUG::Butler, "requesting more transport work\n");
 	should_do_transport_work.fetch_add (1);
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("requesting more transport work (now %1)\n", should_do_transport_work.load ()));
 	summon ();
 }
 
