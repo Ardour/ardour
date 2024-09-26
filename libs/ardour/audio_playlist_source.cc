@@ -151,7 +151,7 @@ AudioPlaylistSource::read_unlocked (Sample* dst, samplepos_t start, samplecnt_t 
 }
 
 samplecnt_t
-AudioPlaylistSource::write_unlocked (Sample *, samplecnt_t)
+AudioPlaylistSource::write_unlocked (Sample const *, samplecnt_t)
 {
 	fatal << string_compose (_("programming error: %1"), "AudioPlaylistSource::write() called - should be impossible") << endmsg;
 	abort(); /*NOTREACHED*/

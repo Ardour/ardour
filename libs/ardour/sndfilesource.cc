@@ -599,7 +599,7 @@ SndFileSource::read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) c
 }
 
 samplecnt_t
-SndFileSource::write_unlocked (Sample *data, samplecnt_t cnt)
+SndFileSource::write_unlocked (Sample const * data, samplecnt_t cnt)
 {
         if (open()) {
                 return 0; // failure
@@ -609,7 +609,7 @@ SndFileSource::write_unlocked (Sample *data, samplecnt_t cnt)
 }
 
 samplecnt_t
-SndFileSource::nondestructive_write_unlocked (Sample *data, samplecnt_t cnt)
+SndFileSource::nondestructive_write_unlocked (Sample const * data, samplecnt_t cnt)
 {
 	if (!writable()) {
 		warning << string_compose (_("attempt to write a non-writable audio file source (%1)"), _path) << endmsg;
@@ -736,7 +736,7 @@ SndFileSource::set_header_natural_position ()
 }
 
 samplecnt_t
-SndFileSource::write_float (Sample* data, samplepos_t sample_pos, samplecnt_t cnt)
+SndFileSource::write_float (Sample const * data, samplepos_t sample_pos, samplecnt_t cnt)
 {
 	if ((_info.format & SF_FORMAT_TYPEMASK ) == SF_FORMAT_FLAC) {
 		assert (_length == sample_pos);

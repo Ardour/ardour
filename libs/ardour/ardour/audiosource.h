@@ -55,7 +55,7 @@ class LIBARDOUR_API AudioSource : virtual public Source, public ARDOUR::AudioRea
 	virtual samplecnt_t available_peaks (double zoom) const;
 
 	virtual samplecnt_t read (Sample *dst, samplepos_t start, samplecnt_t cnt, int channel=0) const;
-	virtual samplecnt_t write (Sample *src, samplecnt_t cnt);
+	virtual samplecnt_t write (Sample const * src, samplecnt_t cnt);
 
 	virtual float sample_rate () const = 0;
 
@@ -117,21 +117,21 @@ class LIBARDOUR_API AudioSource : virtual public Source, public ARDOUR::AudioRea
 
 	int initialize_peakfile (const std::string& path, const bool in_session = false);
 	int build_peaks_from_scratch ();
-	int compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, samplecnt_t cnt,
+	int compute_and_write_peaks (Sample const * buf, samplecnt_t first_sample, samplecnt_t cnt,
 	bool force, bool intermediate_peaks_ready_signal);
 	void truncate_peakfile();
 
 	mutable off_t _peak_byte_max; // modified in compute_and_write_peak()
 
 	virtual samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const = 0;
-	virtual samplecnt_t write_unlocked (Sample *dst, samplecnt_t cnt) = 0;
+	virtual samplecnt_t write_unlocked (Sample const * dst, samplecnt_t cnt) = 0;
 	virtual std::string construct_peak_filepath (const std::string& audio_path, const bool in_session = false, const bool old_peak_name = false) const = 0;
 
 	virtual int read_peaks_with_fpp (PeakData *peaks,
 					 samplecnt_t npeaks, samplepos_t start, samplecnt_t cnt,
 					 double samples_per_visual_peak, samplecnt_t fpp) const;
 
-	int compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, samplecnt_t cnt,
+	int compute_and_write_peaks (Sample const * buf, samplecnt_t first_sample, samplecnt_t cnt,
 				     bool force, bool intermediate_peaks_ready_signal,
 				     samplecnt_t samples_per_peak);
 

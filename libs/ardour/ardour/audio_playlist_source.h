@@ -40,7 +40,7 @@ public:
 	bool clamped_at_unity () const { return false; }
 
 	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const;
-	samplecnt_t write_unlocked (Sample *src, samplecnt_t cnt);
+	samplecnt_t write_unlocked (Sample const * src, samplecnt_t cnt);
 
 	float sample_rate () const;
 	int setup_peakfile ();
