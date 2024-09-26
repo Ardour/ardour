@@ -1091,12 +1091,19 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 	assert (image_to_draw);
 
+	/* Calculate the sample that corresponds to the region-rectangle's left edge
+	 * in the editor at current zoom (see TimeAxisViewItem::set_position).
+	 */
+	double const           samples_per_pixel = _props->samples_per_pixel;
+	samplepos_t const      region_position   = _region->position().samples();
+	samplepos_t const      region_view_x     = round (round (region_position / samples_per_pixel) * samples_per_pixel);
+	ARDOUR::sampleoffset_t region_view_dx    = region_position - region_view_x;
+
 	/* compute the first pixel of the image that should be used when we
 	 * render the specified range.
 	 */
 
-	double image_origin_in_self_coordinates =
-	    (image_to_draw->props.get_sample_start () - _props->region_start) / _props->samples_per_pixel;
+	double image_origin_in_self_coordinates = (image_to_draw->props.get_sample_start () - _props->region_start + region_view_dx) / samples_per_pixel;
 
 	/* the image may only be a best-effort ... it may not span the entire
 	 * range requested, though it is guaranteed to cover the start. So
