@@ -1208,10 +1208,7 @@ Session::butler_transport_work (bool have_process_lock)
 		non_realtime_locate ();
 	}
 
-	/* if we just performed a locate, buffers have been refilled.
-	 * This effectively has done the work of "PostTransportOverWrite" already.
-	 */
-	else if (ptw & PostTransportOverWrite) {
+	if (ptw & PostTransportOverWrite) {
 		non_realtime_overwrite (on_entry, finished, (ptw & PostTransportLoopChanged));
 		if (!finished) {
 			(void) PBD::atomic_dec_and_test (_butler->should_do_transport_work);
