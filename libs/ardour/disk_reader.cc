@@ -560,7 +560,7 @@ DiskReader::pending_overwrite () const
 void
 DiskReader::set_pending_overwrite (OverwriteReason why)
 {
-	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 set_pending_overwrite because %3%4%5\n", owner ()->name (), std::hex, why, std::dec));
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 set_pending_overwrite because %2%3%4\n", owner ()->name (), std::hex, why, std::dec));
 	std::shared_ptr<ChannelList const> c = channels.reader ();
 
 	/* called from audio thread, so we can use the read ptr and playback sample as we wish */
