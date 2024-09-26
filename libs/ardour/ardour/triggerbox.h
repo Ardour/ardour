@@ -82,6 +82,7 @@ LIBARDOUR_API std::string cue_marker_name (int32_t);
 class Trigger;
 
 typedef std::shared_ptr<Trigger> TriggerPtr;
+typedef RTMidiBufferBase<Temporal::Beats,Temporal::Beats> RTMidiBufferBeats;
 
 class LIBARDOUR_API Trigger : public PBD::Stateful {
   public:
@@ -294,9 +295,11 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	timepos_t current_pos() const;
 	double position_as_fraction() const;
 
-	virtual void captured (SlotArmInfo&) {}
-	virtual void arm() {}
-	virtual void disarm () {}
+	virtual void captured (SlotArmInfo&, BufferSet&, samplepos_t capture_start) {}
+	virtual void arm();
+	virtual void disarm ();
+	bool armed() const { return _armed; }
+	PBD::Signal0<void> ArmChanged;
 
 	Temporal::BBT_Argument compute_start (Temporal::TempoMap::SharedPtr const &, samplepos_t start, samplepos_t end, Temporal::BBT_Offset const & q, samplepos_t& start_samples, bool& will_start);
 	virtual timepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t, Temporal::Beats &) = 0;
@@ -324,6 +327,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_region (std::shared_ptr<Region>, bool use_thread = true);
 	void clear_region ();
 	virtual int set_region_in_worker_thread (std::shared_ptr<Region>) = 0;
+	virtual int set_region_in_worker_thread_from_capture (std::shared_ptr<Region>) = 0;
 	std::shared_ptr<Region> region() const { return _region; }
 
 	uint32_t index() const { return _index; }
@@ -450,6 +454,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	gain_t                    _pending_velocity_gain;
 	gain_t                    _velocity_gain;
 	bool                      _cue_launched;
+	bool                      _armed;
 
 	/* these are only used by midi triggers but the ui_state API needs them */
 	Evoral::SMF::UsedChannels _used_channels;
@@ -525,6 +530,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	bool probably_oneshot () const;
 
 	int set_region_in_worker_thread (std::shared_ptr<Region>);
+	int set_region_in_worker_thread_from_capture (std::shared_ptr<Region>) { return 0; }
 	void jump_start ();
 	void jump_stop (BufferSet& bufs, pframes_t dest_offset);
 
@@ -579,7 +585,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	MIDITrigger (uint32_t index, TriggerBox&);
 	~MIDITrigger ();
 
-	void captured (SlotArmInfo&);
+	void captured (SlotArmInfo&, BufferSet&, samplepos_t capture_start);
 	void arm();
 	void disarm ();
 
@@ -605,6 +611,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void estimate_midi_patches ();
 
 	int set_region_in_worker_thread (std::shared_ptr<Region>);
+	int set_region_in_worker_thread_from_capture (std::shared_ptr<Region>);
 	void jump_start ();
 	void shutdown (BufferSet& bufs, pframes_t dest_offset);
 	void jump_stop (BufferSet& bufs, pframes_t dest_offset);
@@ -638,6 +645,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	std::vector<int> const & channel_map() const { return _channel_map; }
 
 	void check_edit_swap (timepos_t const &, bool playing, BufferSet&);
+	RTMidiBufferBeats const & rt_midi_buffer() const { return *rt_midibuffer.load(); }
 
   protected:
 	void retrigger ();
@@ -663,8 +671,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	uint32_t first_event_index;
 	uint32_t last_event_index;
 
-	typedef RTMidiBufferBase<Temporal::Beats,Temporal::Beats> RTMidiBufferBeats;
-
 	std::atomic<RTMidiBufferBeats*> rt_midibuffer;
 	std::atomic<RTMidiBufferBeats*> pending_rt_midibuffer;
 	std::atomic<RTMidiBufferBeats*> old_rt_midibuffer;
@@ -687,6 +693,7 @@ class LIBARDOUR_API TriggerBoxThread
 
 	void set_region (TriggerBox&, uint32_t slot, std::shared_ptr<Region>);
 	void request_delete_trigger (Trigger* t);
+	void request_build_source (Trigger* t);
 
 	void summon();
 	void stop();
@@ -699,7 +706,8 @@ class LIBARDOUR_API TriggerBoxThread
 	enum RequestType {
 		Quit,
 		SetRegion,
-		DeleteTrigger
+		DeleteTrigger,
+		BuildSourceAndRegion
 	};
 
 	struct Request {
@@ -711,7 +719,7 @@ class LIBARDOUR_API TriggerBoxThread
 		TriggerBox* box;
 		uint32_t slot;
 		std::shared_ptr<Region> region;
-		/* for DeleteTrigger */
+		/* for DeleteTrigger and BuildSourceAndRegion */
 		Trigger* trigger;
 
 		void* operator new (size_t);
@@ -727,6 +735,9 @@ class LIBARDOUR_API TriggerBoxThread
 	CrossThreadChannel _xthread;
 	void queue_request (Request*);
 	void delete_trigger (Trigger*);
+	void build_source (Trigger*);
+	void build_midi_source (MIDITrigger*);
+	void build_audio_source (AudioTrigger*);
 };
 
 struct CueRecord {
@@ -740,6 +751,18 @@ struct CueRecord {
 };
 
 typedef PBD::RingBuffer<CueRecord> CueRecords;
+
+struct SlotArmInfo {
+	SlotArmInfo (Trigger& s);
+	~SlotArmInfo();
+
+	Trigger& slot;
+	Temporal::timepos_t start;
+	Temporal::timepos_t end;
+	RTMidiBuffer* midi_buf; /* assumed large enough */
+	RTMidiBufferBeats* beats; /* will take over data allocated for midi_but */
+	std::vector<Sample*> audio_buf; /* assumed large enough */
+};
 
 class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_from_this<TriggerBox>
 {
@@ -762,6 +785,11 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	void set_record_enabled (bool yn);
 	bool record_enabled() const { return _record_enabled; }
 	PBD::Signal0<void> RecEnableChanged;
+
+	void arm_from_another_thread (Trigger& slot, samplepos_t, timecnt_t const & expected_duration, uint32_t chans);
+	void disarm();
+	bool armed() const { return (bool) _arm_info.load(); }
+	PBD::Signal0<void> ArmedChanged;
 
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required);
 	void run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes);
@@ -912,8 +940,13 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	bool                     _cancel_locate_armed;
 	bool                     _fast_forwarding;
 	bool                     _record_enabled;
+	samplepos_t               capture_start;
 
 	PBD::PCGRand _pcg;
+
+	void maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes);
+	void finish_recording (BufferSet& bufs);
+	void set_armed (SlotArmInfo*);
 
 	/* These four are accessed (read/write) only from process() context */
 
@@ -969,6 +1002,9 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	int handle_stopped_trigger (BufferSet& bufs, pframes_t dest_offset);
 
 	PBD::ScopedConnection stop_all_connection;
+	std::atomic<SlotArmInfo*> _arm_info;
+
+	static TriggerBox* currently_recording;
 
 	typedef  std::map<std::vector<uint8_t>,std::pair<int,int> > CustomMidiMap;
 	static CustomMidiMap _custom_midi_map;
@@ -1042,5 +1078,3 @@ DEFINE_ENUM_CONVERT(ARDOUR::FollowAction::Type);
 DEFINE_ENUM_CONVERT(ARDOUR::Trigger::LaunchStyle);
 DEFINE_ENUM_CONVERT(ARDOUR::Trigger::StretchMode);
 } /* namespace PBD */
-
-

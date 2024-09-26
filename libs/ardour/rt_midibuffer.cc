@@ -534,11 +534,9 @@ RTMidiBufferBase<TimeType,DistanceType>::track_state (TimeType when, MidiStateTr
 }
 
 template<class TimeType, class DistanceType>
-RTMidiBufferBase<Temporal::Beats,Temporal::Beats>*
-RTMidiBufferBase<TimeType,DistanceType>::convert()
+void
+RTMidiBufferBase<TimeType,DistanceType>::convert (RTMidiBufferBase<Temporal::Beats,Temporal::Beats>& beats)
 {
-	RTMidiBufferBase<Temporal::Beats,Temporal::Beats>* beats = new RTMidiBufferBase<Temporal::Beats,Temporal::Beats>();
-
 	/* Convert timestamps, taking advantage of the fact that beats and
 	 * samples are both 64 bit integers, and thus Item::timestamp is the
 	 * same size and type for both.
@@ -552,19 +550,19 @@ RTMidiBufferBase<TimeType,DistanceType>::convert()
 
 	/* Hand over all the data */
 
-	beats->_data = reinterpret_cast<RTMidiBufferBase<Temporal::Beats,Temporal::Beats>::Item*> (_data);
-	beats->_size = _size;
-	beats->_pool = _pool;
-	beats->_pool_size = _pool_size;
-	beats->_pool_size = _pool_size;
+	beats._data = reinterpret_cast<RTMidiBufferBase<Temporal::Beats,Temporal::Beats>::Item*> (_data);
+	beats._size = _size;
+	beats._capacity = _capacity;
+	beats._reversed = _reversed;
+	beats._pool = _pool;
+	beats._pool_size = _pool_size;
+	beats._pool_size = _pool_size;
 
 	_data = nullptr;
 	_pool = nullptr;
 	_size = 0;
 	_pool_size = 0;
 	_pool_capacity = 0;
-
-	return beats;
 }
 
 
