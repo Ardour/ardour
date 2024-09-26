@@ -596,10 +596,8 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 					if (trigger()->box().record_enabled()) {
 						/* this is a record button */
 						if (trigger()->armed()) {
-							std::cerr << "Disarm\n";
 							trigger()->disarm ();
 						} else {
-							std::cerr << "Arm\n";
 							trigger()->arm ();
 						}
 						return true;
