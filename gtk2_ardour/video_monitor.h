@@ -15,8 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __ardour_video_monitor_h__
-#define __ardour_video_monitor_h__
+#pragma once
 
 #include <string>
 
@@ -112,4 +111,3 @@ class VideoMonitor : public sigc::trackable , public ARDOUR::SessionHandlePtr, p
 #endif
 };
 
-#endif /* __ardour_video_monitor_h__ */

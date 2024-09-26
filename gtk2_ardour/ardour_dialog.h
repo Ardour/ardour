@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_dialog_h__
-#define __ardour_dialog_h__
+#pragma once
 
 #include <gtkmm/window.h>
 #include <gtkmm/dialog.h>
@@ -67,5 +66,4 @@ private:
 	static sigc::signal<void> CloseAllDialogs;
 };
 
-#endif // __ardour_dialog_h__
 

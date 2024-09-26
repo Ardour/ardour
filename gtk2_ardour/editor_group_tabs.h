@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_editor_group_tabs_h__
-#define __gtk_ardour_editor_group_tabs_h__
+#pragma once
 
 #include <gtkmm/menu.h>
 #include "group_tabs.h"
@@ -43,4 +42,3 @@ private:
 	}
 };
 
-#endif // __gtk_ardour_editor_group_tabs_h__

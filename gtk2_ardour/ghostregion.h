@@ -22,8 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_ghost_region_h__
-#define __ardour_gtk_ghost_region_h__
+#pragma once
 
 #include <vector>
 
@@ -137,4 +136,3 @@ public:
 	GhostEvent::EventList::iterator _optimization_iterator;
 };
 
-#endif /* __ardour_gtk_ghost_region_h__ */

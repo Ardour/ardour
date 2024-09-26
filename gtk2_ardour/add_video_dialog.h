@@ -15,8 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __gtk_ardour_add_video_dialog_h__
-#define __gtk_ardour_add_video_dialog_h__
+#pragma once
 
 #include <string>
 
@@ -126,4 +125,3 @@ private:
 	bool loaded_docroot;
 };
 
-#endif /* __gtk_ardour_add_video_dialog_h__ */

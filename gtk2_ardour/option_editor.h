@@ -22,8 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_option_editor_h__
-#define __gtk_ardour_option_editor_h__
+#pragma once
 
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/comboboxtext.h>
@@ -804,4 +803,3 @@ protected:
 	Gtk::HBox hpacker;
 };
 
-#endif /* __gtk_ardour_option_editor_h__ */

@@ -22,8 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_streamview_h__
-#define __ardour_streamview_h__
+#pragma once
 
 #include <list>
 #include <cmath>
@@ -198,5 +197,4 @@ protected:
 	void setup_new_rec_layer_time (std::shared_ptr<ARDOUR::Region>);
 };
 
-#endif /* __ardour_streamview_h__ */
 

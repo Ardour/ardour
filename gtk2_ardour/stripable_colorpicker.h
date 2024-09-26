@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtkardour_stripable_colorpicker_h__
-#define __gtkardour_stripable_colorpicker_h__
+#pragma once
 
 #include <memory>
 
@@ -65,4 +64,3 @@ private:
 	StripableColorDialog _color_picker;
 };
 
-#endif

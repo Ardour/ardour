@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_canvas_piano_roll_header_h__
-#define __ardour_canvas_piano_roll_header_h__
+#pragma once
 
 #include <pangomm/layout.h>
 #include <glibmm/refptr.h>
@@ -132,4 +131,3 @@ private:
 
 }
 
-#endif /* __ardour_piano_roll_header_h__ */

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_opts_h__
-#define __ardour_opts_h__
+#pragma once
 
 #include <string>
 
@@ -45,4 +44,3 @@ extern int32_t parse_opts (int argc, char *argv[]);
 
 }
 
-#endif /* __ardour_opts_h__ */

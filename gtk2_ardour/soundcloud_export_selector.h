@@ -3,8 +3,7 @@
 	Adapted for Ardour by Ben Loftis, March 2012
 
 *****************************************************************************/
-#ifndef __soundcloud_export_selector_h__
-#define __soundcloud_export_selector_h__
+#pragma once
 
 #include <string>
 #include <stdio.h>
@@ -46,4 +45,3 @@ private:
 
 };
 
-#endif // __soundcloud_export_selector_h__

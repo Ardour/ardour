@@ -23,8 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __audio_clock_h__
-#define __audio_clock_h__
+#pragma once
 
 #include <map>
 #include <vector>
@@ -259,4 +258,3 @@ private:
 	PBD::ScopedConnection tempo_map_connection;
 };
 
-#endif /* __audio_clock_h__ */

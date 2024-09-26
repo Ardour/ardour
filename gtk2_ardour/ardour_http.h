@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_http_h__
-#define __gtk_ardour_http_h__
+#pragma once
 
 #include <curl/curl.h>
 #include <string>
@@ -98,4 +97,3 @@ std::string http_get (const std::string& url, bool with_error_logging);
 
 } // namespace
 
-#endif /* __gtk_ardour_http_h__ */

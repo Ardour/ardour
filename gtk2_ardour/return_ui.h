@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_return_ui_h__
-#define __ardour_gtk_return_ui_h__
+#pragma once
 
 #include "gain_meter.h"
 #include "panner_ui.h"
@@ -72,5 +71,4 @@ class ReturnUIWindow : public ArdourWindow
 	PBD::ScopedConnection going_away_connection;
 };
 
-#endif /* __ardour_gtk_return_ui_h__ */
 

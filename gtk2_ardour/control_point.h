@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_control_point_h__
-#define __ardour_control_point_h__
+#pragma once
 
 #include <sys/types.h>
 #include <gdk/gdkevents.h>
@@ -104,5 +103,4 @@ private:
 };
 
 
-#endif /* __ardour_control_point_h__ */
 

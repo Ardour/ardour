@@ -23,8 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_gain_meter_h__
-#define __ardour_gtk_gain_meter_h__
+#pragma once
 
 #include <vector>
 #include <map>
@@ -264,5 +263,4 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	std::vector<ARDOUR::DataType> _types;
 };
 
-#endif /* __ardour_gtk_gain_meter_h__ */
 

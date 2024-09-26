@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_clock_group_h__
-#define __gtk_ardour_clock_group_h__
+#pragma once
 
 #include <set>
 #include <sigc++/signal.h>
@@ -45,4 +44,3 @@ private:
 	void one_clock_changed (AudioClock*);
 };
 
-#endif /* __gtk_ardour_clock_group_h__ */

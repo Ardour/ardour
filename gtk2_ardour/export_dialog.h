@@ -22,8 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __export_dialog_h__
-#define __export_dialog_h__
+#pragma once
 
 #include <string>
 #include <boost/scoped_ptr.hpp>
@@ -207,4 +206,3 @@ class StemExportDialog : public ExportDialog
 	void init_components ();
 };
 
-#endif /* __ardour_export_dialog_h__ */

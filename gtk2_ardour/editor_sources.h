@@ -15,8 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __gtk_ardour_editor_sources_h__
-#define __gtk_ardour_editor_sources_h__
+#pragma once
 
 #include "editor_component.h"
 #include "source_list_base.h"
@@ -43,4 +42,3 @@ private:
 	void drag_data_received (Glib::RefPtr<Gdk::DragContext> const&, gint, gint, Gtk::SelectionData const&, guint, guint);
 };
 
-#endif

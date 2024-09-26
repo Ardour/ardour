@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_crossfade_view_h__
-#define __gtk_ardour_crossfade_view_h__
+#pragma once
 
 #include <vector>
 #include "pbd/signals.h"
@@ -86,4 +85,3 @@ private:
 	void color_handler ();
 };
 
-#endif /* __gtk_ardour_crossfade_view_h__ */

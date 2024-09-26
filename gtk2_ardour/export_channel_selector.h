@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __export_channel_selector_h__
-#define __export_channel_selector_h__
+#pragma once
 
 #include <list>
 #include <memory>
@@ -298,4 +297,3 @@ class TrackExportChannelSelector : public ExportChannelSelector
 	bool _syncing_with_manager;
 };
 
-#endif /* __export_channel_selector_h__ */

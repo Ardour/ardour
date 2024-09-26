@@ -30,8 +30,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_midi_editing_context_h__
-#define __ardour_midi_editing_context_h__
+#pragma once
 
 #include "pbd/signals.h"
 
@@ -709,4 +708,3 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 };
 
 
-#endif /* __ardour_midi_editing_context_h__ */

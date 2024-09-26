@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_ambiguous_file_dialog_h__
-#define __gtk_ardour_ambiguous_file_dialog_h__
+#pragma once
 
 #include <gtkmm/radiobutton.h>
 #include "ardour_dialog.h"
@@ -38,4 +37,3 @@ private:
 	bool rb_button_press (GdkEventButton*);
 };
 
-#endif // __gtk_ardour_ambiguous_file_dialog_h__

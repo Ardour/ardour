@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_recorder_ui_h__
-#define __gtk_ardour_recorder_ui_h__
+#pragma once
 
 #include <list>
 #include <memory>
@@ -281,4 +280,3 @@ public:
 	std::list<TrackRecordAxis*> visible_recorders () const;
 };
 
-#endif /* __gtk_ardour_recorder_ui_h__ */

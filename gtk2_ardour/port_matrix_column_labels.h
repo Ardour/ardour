@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __port_matrix_column_labels_h__
-#define __port_matrix_column_labels_h__
+#pragma once
 
 #include <memory>
 
@@ -69,4 +68,3 @@ private:
 	uint32_t _overhang;
 };
 
-#endif

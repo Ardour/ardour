@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_dspstats_window_h__
-#define __ardour_dspstats_window_h__
+#pragma once
 
 
 #include "ardour_window.h"
@@ -41,5 +40,4 @@ private:
 	DspStatisticsGUI* ui;
 };
 
-#endif
 

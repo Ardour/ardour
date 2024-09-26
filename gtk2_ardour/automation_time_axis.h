@@ -23,8 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_automation_time_axis_h__
-#define __ardour_gtk_automation_time_axis_h__
+#pragma once
 
 #include <list>
 #include <memory>
@@ -242,4 +241,3 @@ private:
 	int set_state_2X (const XMLNode &, int);
 };
 
-#endif /* __ardour_gtk_automation_time_axis_h__ */

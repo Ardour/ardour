@@ -15,8 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __pt_import_selector_h__
-#define __pt_import_selector_h__
+#pragma once
 
 #include <string>
 #include <stdio.h>
@@ -50,4 +49,3 @@ private:
 	Gtk::Button ptimport_cancel_button;
 };
 
-#endif

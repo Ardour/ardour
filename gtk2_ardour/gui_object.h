@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_gui_object_h__
-#define __gtk_ardour_gui_object_h__
+#pragma once
 
 #include <map>
 #include <string>
@@ -74,4 +73,3 @@ public:
 	std::map <std::string, XMLNode*> object_map;
 };
 
-#endif /* __gtk_ardour_gui_object_h__ */

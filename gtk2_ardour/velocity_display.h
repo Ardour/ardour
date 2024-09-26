@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_velocity_display_h__
-#define __gtk_ardour_velocity_display_h__
+#pragma once
 
 #include "canvas/rectangle.h"
 #include "canvas/poly_line.h"
@@ -99,4 +98,3 @@ class VelocityDisplay
 	void sensitize_lollis ();
 };
 
-#endif /* __gtk_ardour_velocity_display_h__ */

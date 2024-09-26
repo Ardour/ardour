@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtkardour_io_selector_h__
-#define __gtkardour_io_selector_h__
+#pragma once
 
 #include "port_matrix.h"
 #include "ardour_window.h"
@@ -88,4 +87,3 @@ class IOSelectorWindow : public ArdourWindow
 	bool wm_delete (GdkEventAny*);
 };
 
-#endif /* __gtkardour_io_selector_h__ */

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_rc_option_editor_h__
-#define __gtk_ardour_rc_option_editor_h__
+#pragma once
 
 #include "widgets/tabbable.h"
 
@@ -90,5 +89,4 @@ private:
 	void edit_vst_path (std::string const&, std::string const&, sigc::slot<std::string>, sigc::slot<bool, std::string>);
 };
 
-#endif /* __gtk_ardour_rc_option_editor_h__ */
 

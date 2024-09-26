@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtkardour_port_insert_ui_h__
-#define __gtkardour_port_insert_ui_h__
+#pragma once
 
 #include "widgets/ardour_button.h"
 #include "widgets/stateful_button.h"
@@ -97,4 +96,3 @@ private:
 	PortInsertUI _portinsertui;
 };
 
-#endif /* __gtkardour_port_insert_ui_h__ */

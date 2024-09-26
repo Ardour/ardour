@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_grid_lines_h__
-#define __ardour_grid_lines_h__
+#pragma once
 
 #include "canvas/line_set.h"
 #include "canvas/ruler.h"
@@ -38,4 +37,3 @@ private:
 	ArdourCanvas::LineSet lines;
 };
 
-#endif /* __ardour_grid_lines_h__ */

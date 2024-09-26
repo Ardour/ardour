@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_panner_interface_h__
-#define __gtk_ardour_panner_interface_h__
+#pragma once
 
 #include <memory>
 
@@ -89,4 +88,3 @@ private:
 	PannerEditor* _editor;
 };
 
-#endif

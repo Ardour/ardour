@@ -21,8 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_axis_view_h__
-#define __ardour_gtk_axis_view_h__
+#pragma once
 
 #include <list>
 #include <boost/unordered_map.hpp>
@@ -137,4 +136,3 @@ protected:
 	mutable boost::unordered_map<std::string, std::string> property_hashtable;
 }; /* class AxisView */
 
-#endif /* __ardour_gtk_axis_view_h__ */
