@@ -549,6 +549,8 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	uint32_t channels () const { return data.size(); }
 
 	RubberBand::RubberBandStretcher* alloc_stretcher () const;
+	Sample const * audio_data (size_t n) const;
+	size_t data_length() const { return data.length; }
 
   protected:
 	void retrigger ();
