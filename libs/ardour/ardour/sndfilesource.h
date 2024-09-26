@@ -83,8 +83,8 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	void set_header_natural_position ();
 
 	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const;
-	samplecnt_t write_unlocked (Sample *dst, samplecnt_t cnt);
-	samplecnt_t write_float (Sample* data, samplepos_t pos, samplecnt_t cnt);
+	samplecnt_t write_unlocked (Sample const * dst, samplecnt_t cnt);
+	samplecnt_t write_float (Sample const * data, samplepos_t pos, samplecnt_t cnt);
 
   private:
 	SNDFILE* _sndfile;
@@ -97,7 +97,7 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	void file_closed ();
 
 	void set_natural_position (timepos_t const &);
-	samplecnt_t nondestructive_write_unlocked (Sample *dst, samplecnt_t cnt);
+	samplecnt_t nondestructive_write_unlocked (Sample const *src, samplecnt_t cnt);
 	PBD::ScopedConnection header_position_connection;
 };
 

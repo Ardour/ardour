@@ -51,7 +51,7 @@ public:
 protected:
 	void close ();
 	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const;
-	samplecnt_t write_unlocked (Sample */*dst*/, samplecnt_t /*cnt*/) { return 0; }
+	samplecnt_t write_unlocked (Sample const */*src*/, samplecnt_t /*cnt*/) { return 0; }
 
 	int read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos_t /*start*/, samplecnt_t /*cnt*/,
 				 double /*samples_per_unit*/, samplecnt_t /*fpp*/) const {

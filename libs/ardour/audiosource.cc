@@ -327,12 +327,12 @@ AudioSource::read (Sample *dst, samplepos_t start, samplecnt_t cnt, int /*channe
 }
 
 samplecnt_t
-AudioSource::write (Sample *dst, samplecnt_t cnt)
+AudioSource::write (Sample const * src, samplecnt_t cnt)
 {
 	WriterLock lm (_lock);
 	/* any write makes the file not removable */
 	_flags = Flag (_flags & ~Removable);
-	return write_unlocked (dst, cnt);
+	return write_unlocked (src, cnt);
 }
 
 int
@@ -918,14 +918,14 @@ AudioSource::done_with_peakfile_writes (bool done)
  * process. _lock MUST be held by caller.
 */
 int
-AudioSource::compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, samplecnt_t cnt,
+AudioSource::compute_and_write_peaks (Sample const * buf, samplecnt_t first_sample, samplecnt_t cnt,
 				      bool force, bool intermediate_peaks_ready)
 {
 	return compute_and_write_peaks (buf, first_sample, cnt, force, intermediate_peaks_ready, _FPP);
 }
 
 int
-AudioSource::compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, samplecnt_t cnt,
+AudioSource::compute_and_write_peaks (Sample const * buf, samplecnt_t first_sample, samplecnt_t cnt,
 				      bool force, bool intermediate_peaks_ready, samplecnt_t fpp)
 {
 	samplecnt_t to_do;

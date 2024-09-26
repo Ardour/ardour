@@ -55,7 +55,7 @@ class LIBARDOUR_API CoreAudioSource : public AudioFileSource {
   protected:
 	void close ();
 	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const;
-	samplecnt_t write_unlocked (Sample *, samplecnt_t) { return 0; }
+	samplecnt_t write_unlocked (Sample const * src, samplecnt_t) { return 0; }
 
   private:
 #ifdef COREAUDIO105

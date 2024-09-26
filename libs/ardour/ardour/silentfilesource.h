@@ -58,7 +58,7 @@ protected:
 		return cnt;
 	}
 
-	samplecnt_t write_unlocked (Sample */*dst*/, samplecnt_t /*cnt*/) { return 0; }
+	samplecnt_t write_unlocked (Sample const * /*src*/, samplecnt_t /*cnt*/) { return 0; }
 
 	void set_header_natural_position () {}
 
