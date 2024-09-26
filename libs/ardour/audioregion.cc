@@ -1021,11 +1021,14 @@ AudioRegion::read_at (Sample*     buf,
 			mix_buffers_no_gain (buf + fade_in_limit, mixdown_buffer + fade_in_limit, N);
 		}
 	}
+
 	samplecnt_t T = _cache_tail;
 	if (T > 0) {
 		T = min (T, can_read);
-			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Region %1 adding FX tail of %2 cut to_read %3 at %4 total len = %5 cnt was %6\n",
-			             name (), _cache_tail, T, to_read, to_read + T, cnt));
+		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Region %1 adding FX tail of %2 cut to_read %3 at %4 total len = %5 cnt was %6\n",
+		                                                   name (), _cache_tail, T, to_read, to_read + T, cnt));
+		/* limit (to_read + T) == cnt, some cases (e.g. loop) will ignore tail data */
+		T = min (T, cnt - to_read);
 		/* AudioPlaylist::read reads regions in reverse order, so we can add the tail here */
 		mix_buffers_no_gain (buf + to_read, mixdown_buffer + to_read, T);
 	}
