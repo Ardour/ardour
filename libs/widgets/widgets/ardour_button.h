@@ -124,6 +124,8 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
+	bool on_touch_begin_event (GdkEventTouch*);
+	bool on_touch_end_event (GdkEventTouch*);
 
 	void set_image (const Glib::RefPtr<Gdk::Pixbuf>&);
 

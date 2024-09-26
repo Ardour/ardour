@@ -103,6 +103,7 @@ ArdourButton::ArdourButton (Element e, bool toggle)
 	UIConfigurationBase::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 	/* This is not provided by gtkmm */
 	signal_grab_broken_event().connect (sigc::mem_fun (*this, &ArdourButton::on_grab_broken_event));
+	add_events (Gdk::TOUCH_BEGIN_MASK | Gdk::TOUCH_END_MASK);
 }
 
 ArdourButton::ArdourButton (const std::string& str, Element e, bool toggle)
@@ -154,6 +155,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e, bool toggle)
 	UIConfigurationBase::instance().DPIReset.connect (sigc::mem_fun (*this, &ArdourButton::on_name_changed));
 	/* This is not provided by gtkmm */
 	signal_grab_broken_event().connect (sigc::mem_fun (*this, &ArdourButton::on_grab_broken_event));
+	add_events (Gdk::TOUCH_BEGIN_MASK | Gdk::TOUCH_END_MASK);
 }
 
 ArdourButton::~ArdourButton()
@@ -941,6 +943,42 @@ void
 ArdourButton::set_led_left (bool yn)
 {
 	_led_left = yn;
+}
+
+bool
+ArdourButton::on_touch_begin_event (GdkEventTouch *ev)
+{
+	printf ("ArdourButton::on_touch_begin_event finger %d\n", ev->sequence);
+	focus_handler (this);
+
+	CairoWidget::set_dirty ();
+
+	if (!_act_on_release) {
+		if (_action) {
+			_action->activate ();
+		} else if (_auto_toggle) {
+			set_active (!get_active ());
+			signal_clicked ();
+		}
+	}
+	return true;
+}
+
+bool
+ArdourButton::on_touch_end_event (GdkEventTouch *ev)
+{
+	printf ("ArdourButton::on_touch_end_event finger: %d\n", ev->sequence);
+	CairoWidget::set_dirty ();
+
+	if (_act_on_release && _auto_toggle && !_action) {
+		set_active (!get_active ());
+	}
+	signal_clicked ();
+	if (_act_on_release && _action) {
+		_action->activate ();
+	}
+
+	return true;
 }
 
 bool
