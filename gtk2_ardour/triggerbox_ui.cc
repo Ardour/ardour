@@ -593,7 +593,17 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 		switch (ev->type) {
 			case GDK_BUTTON_PRESS:
 				if (ev->button.button == 1) {
-					if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
+					if (trigger()->box().record_enabled()) {
+						/* this is a record button */
+						if (trigger()->armed()) {
+							std::cerr << "Disarm\n";
+							trigger()->disarm ();
+						} else {
+							std::cerr << "Arm\n";
+							trigger()->arm ();
+						}
+						return true;
+					} else if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
 						trigger ()->box ().stop_all_immediately ();
 					} else {
 						trigger ()->box ().stop_all_quantized ();
