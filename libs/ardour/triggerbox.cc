@@ -1301,6 +1301,16 @@ AudioTrigger::~AudioTrigger ()
 	delete _stretcher;
 }
 
+Sample const *
+AudioTrigger::audio_data (size_t n) const
+{
+	if (n < data.size()) {
+		return data[n];
+	}
+
+	return nullptr;
+}
+
 void
 AudioTrigger::set_stretch_mode (Trigger::StretchMode sm)
 {
@@ -1586,7 +1596,6 @@ AudioTrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> 
 	return set_region_in_worker_thread_internal (r, true);
 }
 
-
 int
 AudioTrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 {
@@ -1615,6 +1624,10 @@ AudioTrigger::set_region_in_worker_thread_internal (std::shared_ptr<Region> r, b
 
 	if (!from_capture) {
 		load_data (ar);
+	}
+
+	if (from_capture) {
+		set_name (r->name());
 	}
 
 	estimate_tempo ();  /* NOTE: if this is an existing clip (D+D copy) then it will likely have a SD tempo, and that short-circuits minibpm for us */
@@ -2915,9 +2928,6 @@ MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 	loop_end = r->length ().beats();
 
 	data_length = loop_end - loop_start;
-
-
-	std::cerr << "Have a MIDI loop that is " << data_length << " long\n";
 
 	_follow_length = Temporal::BBT_Offset (0, data_length.get_beats(), 0);
 	set_length (timecnt_t (data_length));
@@ -5555,7 +5565,7 @@ TriggerBoxThread::build_source (Trigger* t)
 
 	if (mt) {
 		build_midi_source (mt);
-	} else if ((mt = dynamic_cast<MIDITrigger*> (t))) {
+	} else if ((at = dynamic_cast<AudioTrigger*> (t))) {
 		build_audio_source (at);
 	}
 }
@@ -5570,6 +5580,41 @@ TriggerBoxThread::build_audio_source (AudioTrigger* t)
 		std::shared_ptr<AudioSource> as = t->box().session().create_audio_source_for_session (t->channels(), trk->name(), c);
 		sources.push_back (as);
 	}
+
+	size_t n = 0;
+	for (auto & src : sources) {
+		Source::WriterLock lock (src->mutex());
+		src->mark_streaming_write_started (lock);
+		std::dynamic_pointer_cast<AudioSource>(src)->write (t->audio_data (n), t->data_length());
+		src->mark_streaming_write_completed (lock);
+		++n;
+	}
+
+	/* now build region */
+
+	PropertyList plist;
+	std::shared_ptr<FileSource> fs (std::dynamic_pointer_cast<FileSource> (sources.front()));
+	assert (fs);
+
+	std::string region_name = region_name_from_path (fs->path(), false, false);
+
+	plist.add (ARDOUR::Properties::start, timecnt_t (Temporal::BeatTime));
+	plist.add (ARDOUR::Properties::length, sources.front()->length ());
+	plist.add (ARDOUR::Properties::name, region_name);
+	plist.add (ARDOUR::Properties::layer, 0);
+	plist.add (ARDOUR::Properties::whole_file, true);
+	plist.add (ARDOUR::Properties::external, false);
+	plist.add (ARDOUR::Properties::opaque, true);
+
+	std::shared_ptr<Region> whole = RegionFactory::create (sources, plist);
+	std::cerr << "Created WF region " << whole->name() << std::endl;
+	/* ... and insert a discrete copy into the playlist*/
+	PropertyList plist2;
+	plist2.add (ARDOUR::Properties::whole_file, false);
+	std::shared_ptr<Region> copy (RegionFactory::create (whole, plist2));
+	std::cerr << "Created copy region " << whole->name() << std::endl;
+
+	t->set_region_in_worker_thread_from_capture (copy);
 }
 
 void
