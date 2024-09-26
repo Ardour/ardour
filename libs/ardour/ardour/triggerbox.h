@@ -295,7 +295,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	timepos_t current_pos() const;
 	double position_as_fraction() const;
 
-	virtual void captured (SlotArmInfo&, BufferSet&, samplepos_t capture_start) {}
+	virtual void captured (SlotArmInfo&, BufferSet&) {}
 	virtual void arm();
 	virtual void disarm ();
 	bool armed() const { return _armed; }
@@ -529,8 +529,10 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void io_change ();
 	bool probably_oneshot () const;
 
+	void captured (SlotArmInfo&, BufferSet&);
+
 	int set_region_in_worker_thread (std::shared_ptr<Region>);
-	int set_region_in_worker_thread_from_capture (std::shared_ptr<Region>) { return 0; }
+	int set_region_in_worker_thread_from_capture (std::shared_ptr<Region>);
 	void jump_start ();
 	void jump_stop (BufferSet& bufs, pframes_t dest_offset);
 
@@ -544,6 +546,9 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void start_and_roll_to (samplepos_t start, samplepos_t position, uint32_t cnt);
 
 	bool stretching () const;
+	uint32_t channels () const { return data.size(); }
+
+	RubberBand::RubberBandStretcher* alloc_stretcher () const;
 
   protected:
 	void retrigger ();
@@ -577,6 +582,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void estimate_tempo ();
 	void reset_stretcher ();
 	void _startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const &);
+	int set_region_in_worker_thread_internal (std::shared_ptr<Region> r, bool from_capture);
 };
 
 
@@ -585,7 +591,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	MIDITrigger (uint32_t index, TriggerBox&);
 	~MIDITrigger ();
 
-	void captured (SlotArmInfo&, BufferSet&, samplepos_t capture_start);
+	void captured (SlotArmInfo&, BufferSet&);
 	void arm();
 	void disarm ();
 
@@ -759,9 +765,11 @@ struct SlotArmInfo {
 	Trigger& slot;
 	Temporal::timepos_t start;
 	Temporal::timepos_t end;
+	samplecnt_t capture_length;
 	RTMidiBuffer* midi_buf; /* assumed large enough */
 	RTMidiBufferBeats* beats; /* will take over data allocated for midi_but */
 	std::vector<Sample*> audio_buf; /* assumed large enough */
+	RubberBand::RubberBandStretcher* stretcher;
 };
 
 class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_from_this<TriggerBox>
@@ -786,7 +794,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	bool record_enabled() const { return _record_enabled; }
 	PBD::Signal0<void> RecEnableChanged;
 
-	void arm_from_another_thread (Trigger& slot, samplepos_t, timecnt_t const & expected_duration, uint32_t chans);
+	void arm_from_another_thread (Trigger& slot, samplepos_t, uint32_t chans);
 	void disarm();
 	bool armed() const { return (bool) _arm_info.load(); }
 	PBD::Signal0<void> ArmedChanged;
@@ -940,7 +948,6 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	bool                     _cancel_locate_armed;
 	bool                     _fast_forwarding;
 	bool                     _record_enabled;
-	samplepos_t               capture_start;
 
 	PBD::PCGRand _pcg;
 
