@@ -160,7 +160,7 @@ SourceFactory::setup_peakfile (std::shared_ptr<Source> s, bool async)
 std::shared_ptr<Source>
 SourceFactory::createSilent (Session& s, const XMLNode& node, samplecnt_t nframes, float sr)
 {
-	Source*                   src = new SilentFileSource (s, node, nframes, sr);
+	Source* src = new SilentFileSource (s, node, nframes, sr);
 	std::shared_ptr<Source> ret (src);
 	BOOST_MARK_SOURCE (ret);
 	// no analysis data - the file is non-existent
