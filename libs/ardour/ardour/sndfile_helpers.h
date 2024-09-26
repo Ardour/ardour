@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __sndfile_helpers_h__
-#define __sndfile_helpers_h__
+#pragma once
 
 #include "ardour/types.h"
 
@@ -29,4 +28,3 @@ int sndfile_data_width (int format);
 std::string sndfile_major_format (int);
 std::string sndfile_minor_format (int);
 
-#endif /* __sndfile_helpers_h__ */

@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_luabindings_h__
-#define __ardour_luabindings_h__
+#pragma once
 
 #include "lua/lua.h"
 #include "ardour/libardour_visibility.h"
@@ -37,4 +36,3 @@ namespace ARDOUR {
 	} // namespace LuaBindings
 } // namespace ARDOUR
 
-#endif /* __ardour_luabindings_h__ */

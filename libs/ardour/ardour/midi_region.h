@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_midi_region_h__
-#define __ardour_midi_region_h__
+#pragma once
 
 #include <vector>
 
@@ -166,4 +165,3 @@ class LIBARDOUR_API MidiRegion : public Region
 } /* namespace ARDOUR */
 
 
-#endif /* __ardour_midi_region_h__ */

@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_recordable_h__
-#define __ardour_recordable_h__
+#pragma once
 
 namespace ARDOUR {
 
@@ -32,4 +31,3 @@ class Recordable {
 
 } /* namespace */
 
-#endif /* __ardour_recordable_h__ */

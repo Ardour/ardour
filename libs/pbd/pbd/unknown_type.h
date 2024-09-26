@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_unknown_type_h__
-#define __pbd_unknown_type_h__
+#pragma once
 
 #include <exception>
 
@@ -28,4 +27,3 @@ class /*LIBPBD_API*/ unknown_type : public std::exception {
 	virtual const char *what() const throw() { return "unknown type"; }
 };
 
-#endif /* __pbd_unknown_type_h__ */

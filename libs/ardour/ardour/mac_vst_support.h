@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __mac_vst_support_h__
-#define __mac_vst_support_h__
+#pragma once
 
 #include <setjmp.h>
 #include <signal.h>
@@ -35,4 +34,3 @@ LIBARDOUR_API extern int          mac_vst_unload (VSTHandle *);
 LIBARDOUR_API extern VSTState *   mac_vst_instantiate (VSTHandle *, audioMasterCallback, void *);
 LIBARDOUR_API extern void         mac_vst_close (VSTState*);
 
-#endif /* ____mac_vst_support_h__ */

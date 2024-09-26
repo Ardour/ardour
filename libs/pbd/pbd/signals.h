@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_signals_h__
-#define __pbd_signals_h__
+#pragma once
 
 #include <csignal>
 
@@ -227,4 +226,3 @@ class LIBPBD_API ScopedConnectionList  : public boost::noncopyable
 
 } /* namespace */
 
-#endif /* __pbd_signals_h__ */

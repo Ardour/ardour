@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_audio_source_h__
-#define __ardour_audio_source_h__
+#pragma once
 
 #include <memory>
 
@@ -162,4 +161,3 @@ class LIBARDOUR_API AudioSource : virtual public Source, public ARDOUR::AudioRea
 
 }
 
-#endif /* __ardour_audio_source_h__ */

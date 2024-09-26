@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __temporal_domain_swap_h__
-#define __temporal_domain_swap_h__
+#pragma once
 
 #include <set>
 
@@ -70,4 +69,3 @@ struct LIBTEMPORAL_API DomainBounceInfo
 
 }
 
-#endif /* __tmeporal_domain_swap_h__ */

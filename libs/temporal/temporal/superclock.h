@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_superclock_h__
-#define __ardour_superclock_h__
+#pragma once
 
 #include <stdint.h>
 
@@ -58,4 +57,3 @@ LIBTEMPORAL_API void set_superclock_ticks_per_second (superclock_t sc);
 
 #define TEMPORAL_SAMPLE_RATE (Temporal::most_recent_engine_sample_rate)
 
-#endif /* __ardour_superclock_h__ */

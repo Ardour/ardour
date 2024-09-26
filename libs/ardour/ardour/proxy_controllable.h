@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_proxy_controllable_h__
-#define __libardour_proxy_controllable_h__
+#pragma once
 
 #include <boost/function.hpp>
 
@@ -55,4 +54,3 @@ class LIBARDOUR_API ProxyControllable : public PBD::Controllable {
 
 } // namespace
 
-#endif /* __libardour_proxy_controllable_h__ */

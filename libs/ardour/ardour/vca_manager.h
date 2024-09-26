@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_vca_manager_h__
-#define __libardour_vca_manager_h__
+#pragma once
 
 #include <string>
 #include <list>
@@ -74,4 +73,3 @@ private:
 
 } // namespace
 
-#endif /* __libardour_vca_manager_h__ */

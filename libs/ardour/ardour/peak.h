@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_peak_h__
-#define __ardour_peak_h__
+#pragma once
 
 #include <cmath>
 #include "ardour/libardour_visibility.h"
@@ -34,4 +33,3 @@ default_compute_peak (const ARDOUR::Sample * const buf, ARDOUR::pframes_t nsampl
 	return current;
 }
 
-#endif /* __ardour_peak_h__ */

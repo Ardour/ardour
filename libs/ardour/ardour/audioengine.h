@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_audioengine_h__
-#define __ardour_audioengine_h__
+#pragma once
 
 #ifdef WAF_BUILD
 #include "libardour-config.h"
@@ -329,4 +328,3 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 
 } // namespace ARDOUR
 
-#endif /* __ardour_audioengine_h__ */

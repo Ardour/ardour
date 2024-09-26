@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_track_h__
-#define __ardour_track_h__
+#pragma once
 
 #include <boost/optional.hpp>
 #include <memory>
@@ -258,4 +257,3 @@ namespace PBD {
 	DEFINE_ENUM_CONVERT(ARDOUR::Track::FreezeState);
 }
 
-#endif /* __ardour_track_h__ */

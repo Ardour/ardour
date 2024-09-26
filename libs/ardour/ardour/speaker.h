@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_speaker_h__
-#define __libardour_speaker_h__
+#pragma once
 
 #include "pbd/cartesian.h"
 #include "pbd/signals.h"
@@ -50,4 +49,3 @@ private:
 
 } /* namespace */
 
-#endif /* __libardour_speaker_h__ */

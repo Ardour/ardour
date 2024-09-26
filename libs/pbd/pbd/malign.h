@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_malign_h__
-#define __pbd_malign_h__
+#pragma once
 
 #include <stdlib.h>
 
@@ -29,4 +28,3 @@ LIBPBD_API void cache_aligned_free (void* memptr);
 LIBPBD_API int  aligned_malloc (void** memptr, size_t size, size_t alignment);
 LIBPBD_API void aligned_free (void* memptr);
 
-#endif /* __pbd_malign_h__ */

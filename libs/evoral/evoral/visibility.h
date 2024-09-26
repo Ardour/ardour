@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libevoral_visibility_h__
-#define __libevoral_visibility_h__
+#pragma once
 
 #if defined(COMPILER_MSVC)
   #define LIBEVORAL_DLL_IMPORT __declspec(dllimport)
@@ -47,4 +46,3 @@
   #define     LIBEVORAL_LOCAL LIBEVORAL_DLL_LOCAL
 #endif
 
-#endif /* __libevoral_visibility_h__ */

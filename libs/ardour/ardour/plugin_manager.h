@@ -21,8 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_plugin_manager_h__
-#define __ardour_plugin_manager_h__
+#pragma once
 
 #ifdef WAF_BUILD
 #include "libardour-config.h"
@@ -372,5 +371,4 @@ private:
 
 } /* namespace ARDOUR */
 
-#endif /* __ardour_plugin_manager_h__ */
 

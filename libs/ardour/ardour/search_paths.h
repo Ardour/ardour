@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_search_paths_h__
-#define __libardour_search_paths_h__
+#pragma once
 
 #include "ardour/libardour_visibility.h"
 
@@ -138,4 +137,3 @@ namespace ARDOUR {
 
 } // namespace ARDOUR
 
-#endif /* __libardour_search_paths_h__ */

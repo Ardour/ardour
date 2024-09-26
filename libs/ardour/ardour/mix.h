@@ -16,8 +16,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __ardour_mix_h__
-#define __ardour_mix_h__
+#pragma once
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
@@ -106,4 +105,3 @@ LIBARDOUR_API void  default_mix_buffers_with_gain     (ARDOUR::Sample* dst, ARDO
 LIBARDOUR_API void  default_mix_buffers_no_gain       (ARDOUR::Sample* dst, ARDOUR::Sample const* src, ARDOUR::pframes_t nframes);
 LIBARDOUR_API void  default_copy_vector               (ARDOUR::Sample* dst, ARDOUR::Sample const* src, ARDOUR::pframes_t nframes);
 
-#endif /* __ardour_mix_h__ */

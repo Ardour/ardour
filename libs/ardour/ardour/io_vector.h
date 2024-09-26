@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_io_vector_h__
-#define __ardour_io_vector_h__
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -68,4 +67,3 @@ public:
 } // namespace ARDOUR
 
 
-#endif

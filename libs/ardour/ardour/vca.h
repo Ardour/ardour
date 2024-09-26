@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_vca_h__
-#define __ardour_vca_h__
+#pragma once
 
 #include <memory>
 #include <string>
@@ -166,4 +165,3 @@ class LIBARDOUR_API VCA : public Stripable,
 
 } /* namespace */
 
-#endif /* __ardour_vca_h__ */

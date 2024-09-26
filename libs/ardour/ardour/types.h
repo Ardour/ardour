@@ -28,8 +28,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_types_h__
-#define __ardour_types_h__
+#pragma once
 
 #include <bitset>
 #include <cstdint>
@@ -991,4 +990,3 @@ enum SelectionOperation {
 
 using ARDOUR::samplepos_t;
 
-#endif /* __ardour_types_h__ */

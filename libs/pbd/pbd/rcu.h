@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_rcu_h__
-#define __pbd_rcu_h__
+#pragma once
 
 #include <atomic>
 #include <mutex>
@@ -337,4 +336,3 @@ private:
 	std::shared_ptr<T> _copy;
 };
 
-#endif /* __pbd_rcu_h__ */

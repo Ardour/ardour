@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_scoped_file_descriptor_h__
-#define __libpbd_scoped_file_descriptor_h__
+#pragma once
 
 namespace PBD {
 
@@ -30,4 +29,3 @@ struct ScopedFileDescriptor {
 
 }
 
-#endif /* __libpbd_scoped_file_descriptor_h__ */

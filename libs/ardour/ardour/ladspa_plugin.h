@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_ladspa_plugin_h__
-#define __ardour_ladspa_plugin_h__
+#pragma once
 
 #include <set>
 #include <vector>
@@ -167,4 +166,3 @@ typedef std::shared_ptr<LadspaPluginInfo> LadspaPluginInfoPtr;
 
 } // namespace ARDOUR
 
-#endif /* __ardour_ladspa_plugin_h__ */

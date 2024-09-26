@@ -16,8 +16,7 @@
   Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __libtemporal_bbt_argument_h__
-#define __libtemporal_bbt_argument_h__
+#pragma once
 
 #include "temporal/bbt_time.h"
 #include "temporal/timeline.h"
@@ -51,4 +50,3 @@ LIBTEMPORAL_API std::ostream& operator<< (std::ostream& o, Temporal::BBT_Argumen
 
 }
 
-#endif /* __libtemporal_bbt_argument_h__ */

@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef  __libardour_async_midiport_h__
-#define  __libardour_async_midiport_h__
+#pragma once
 
 #include <string>
 #include <iostream>
@@ -108,4 +107,3 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 
 } // namespace ARDOUR
 
-#endif /* __libardour_async_midiport_h__ */

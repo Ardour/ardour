@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_vst_plugin_h__
-#define __ardour_vst_plugin_h__
+#pragma once
 
 #include <pbd/signals.h>
 #include "ardour/plugin.h"
@@ -143,4 +142,3 @@ protected:
 
 }
 
-#endif

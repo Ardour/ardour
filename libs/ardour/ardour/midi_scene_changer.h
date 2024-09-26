@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_midi_scene_changer_h__
-#define __libardour_midi_scene_changer_h__
+#pragma once
 
 #include <glibmm/threads.h>
 
@@ -82,4 +81,3 @@ class MIDISceneChanger : public SceneChanger
 
 } // namespace
 
-#endif /* __libardour_midi_scene_changer_h__ */

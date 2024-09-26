@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_solo_safe_control_h__
-#define __ardour_solo_safe_control_h__
+#pragma once
 
 #include <string>
 
@@ -52,4 +51,3 @@ class LIBARDOUR_API SoloSafeControl : public SlavableAutomationControl
 
 } /* namespace */
 
-#endif /* __libardour_solo_safe_control_h__ */

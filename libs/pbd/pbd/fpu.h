@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_fpu_h__
-#define __pbd_fpu_h__
+#pragma once
 
 #include "pbd/libpbd_visibility.h"
 
@@ -62,4 +61,3 @@ class LIBPBD_API FPU {
 
 }
 
-#endif /* __pbd_fpu_h__ */

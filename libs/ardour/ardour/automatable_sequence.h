@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_automatable_sequence_h__
-#define __ardour_automatable_sequence_h__
+#pragma once
 
 #include "evoral/Sequence.h"
 #include "ardour/automatable.h"
@@ -46,5 +45,4 @@ public:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_automatable_sequence_h__ */
 

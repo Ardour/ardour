@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_assert_h__
-#define __libpbd_assert_h__
+#pragma once
 
 /*  macro designed to handle cases like this:
 
@@ -36,4 +35,3 @@
 #define x_assert(VAR, EXPR) (void) (VAR)
 # endif
 
-#endif /* __libpbd_assert_h__ */

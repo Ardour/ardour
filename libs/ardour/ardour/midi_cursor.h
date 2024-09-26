@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_midi_cursor_h__
-#define __ardour_midi_cursor_h__
+#pragma once
 
 #include <set>
 
@@ -55,4 +54,3 @@ struct MidiCursor : public boost::noncopyable {
 
 }
 
-#endif /* __ardour_midi_cursor_h__ */

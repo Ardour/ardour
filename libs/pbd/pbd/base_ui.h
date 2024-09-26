@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_base_ui_h__
-#define __pbd_base_ui_h__
+#pragma once
 
 #include <string>
 #include <stdint.h>
@@ -125,4 +124,3 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 	void main_thread ();
 };
 
-#endif /* __pbd_base_ui_h__ */

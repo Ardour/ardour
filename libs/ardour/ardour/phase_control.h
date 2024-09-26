@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_phase_control_h__
-#define __ardour_phase_control_h__
+#pragma once
 
 #include <memory>
 #include <string>
@@ -68,4 +67,3 @@ class LIBARDOUR_API PhaseControl : public AutomationControl
 
 } /* namespace */
 
-#endif /* __libardour_phase_control_h__ */

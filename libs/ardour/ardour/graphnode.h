@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_graphnode_h__
-#define __ardour_graphnode_h__
+#pragma once
 
 #include <atomic>
 #include <list>
@@ -100,4 +99,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_route_group_specialized_h__
-#define __ardour_route_group_specialized_h__
+#pragma once
 
 #include "ardour/route_group.h"
 #include "ardour/track.h"
@@ -40,5 +39,4 @@ RouteGroup::apply (void (Track::*func)(T, PBD::Controllable::GroupControlDisposi
 
 } /* namespace ARDOUR */
 
-#endif /* __ardour_route_group_specialized_h__ */
 

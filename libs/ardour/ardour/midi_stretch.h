@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_midi_stretch_h__
-#define __ardour_midi_stretch_h__
+#pragma once
 
 #include "ardour/filter.h"
 #include "ardour/timefx_request.h"
@@ -38,4 +37,3 @@ class LIBARDOUR_API MidiStretch : public Filter {
 
 } /* namespace ARDOUR */
 
-#endif /* __ardour_midi_stretch_h__ */

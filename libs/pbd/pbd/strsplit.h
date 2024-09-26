@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_strplit_h__
-#define __pbd_strplit_h__
+#pragma once
 
 #include <string>
 #include <vector>
@@ -28,4 +27,3 @@
 LIBPBD_API extern void split (std::string, std::vector<std::string>&, char);
 LIBPBD_API extern void split (Glib::ustring, std::vector<Glib::ustring>&, char);
 
-#endif // __pbd_strplit_h__

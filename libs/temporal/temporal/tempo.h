@@ -16,8 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __temporal_tempo_h__
-#define __temporal_tempo_h__
+#pragma once
 
 #include <list>
 #include <string>
@@ -1296,4 +1295,3 @@ LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::MusicTimeP
 LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::TempoMetric const &);
 }
 
-#endif /* __temporal_tempo_h__ */

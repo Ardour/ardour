@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_chan_mapping_h__
-#define __ardour_chan_mapping_h__
+#pragma once
 
 #include <map>
 #include <cassert>
@@ -140,5 +139,4 @@ private:
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanMapping& m);
 
-#endif // __ardour_chan_mapping_h__
 

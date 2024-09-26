@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_gui_thread_h__
-#define __ardour_gtk_gui_thread_h__
+#pragma once
 
 #include <cstdlib>
 #include <gtkmm2ext/gtk_ui.h>
@@ -33,4 +32,3 @@
 
 #define invalidator(x) PBD::EventLoop::__invalidator ((x), __FILE__, __LINE__)
 
-#endif /* __ardour_gtk_gui_thread_h__ */

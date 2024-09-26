@@ -21,8 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_region_factory_h__
-#define __ardour_region_factory_h__
+#pragma once
 
 #include <glibmm/threads.h>
 #include <map>
@@ -172,4 +171,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_region_factory_h__  */

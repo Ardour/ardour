@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_presentation_info_h__
-#define __libardour_presentation_info_h__
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -305,4 +304,3 @@ namespace std {
 std::ostream& operator<<(std::ostream& o, ARDOUR::PresentationInfo const& rid);
 }
 
-#endif /* __libardour_presentation_info_h__ */

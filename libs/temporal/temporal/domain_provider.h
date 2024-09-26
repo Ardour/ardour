@@ -16,8 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __temporal_domain_provider_h__
-#define __temporal_domain_provider_h__
+#pragma once
 
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
@@ -99,4 +98,3 @@ class TimeDomainProvider  {
 
 }
 
-#endif /* __temporal_domain_provider_h__ */

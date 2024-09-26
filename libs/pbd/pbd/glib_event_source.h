@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_glib_event_source_h__
-#define __libpbd_glib_event_source_h__
+#pragma once
 
 #include <boost/function.hpp>
 
@@ -47,4 +46,3 @@ class LIBPBD_API GlibEventLoopCallback
 	boost::function<void()> _callback;
 };
 
-#endif /* __libpbd_glib_event_source_h__ */

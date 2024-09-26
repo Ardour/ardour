@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_logcurve_h__
-#define __ardour_logcurve_h__
+#pragma once
 
 #include "pbd/fastlog.h"
 #include <glibmm/threads.h>
@@ -128,6 +127,5 @@ class LIBARDOUR_API LogCurveOut : public LogCurve
 
 } // namespace ARDOUR
 
-#endif /* __ardour_logcurve_h__ */
 
 

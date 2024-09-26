@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_auto_bundle_h__
-#define __ardour_auto_bundle_h__
+#pragma once
 
 #include <vector>
 #include <glibmm/threads.h>
@@ -43,4 +42,3 @@ class LIBARDOUR_API AutoBundle : public Bundle {
 
 }
 
-#endif /* __ardour_auto_bundle_h__ */

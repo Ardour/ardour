@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_tailtime_h__
-#define __ardour_tailtime_h__
+#pragma once
 
 #include "pbd/signals.h"
 
@@ -65,5 +64,4 @@ private:
 } /* namespace */
 
 
-#endif /* __ardour_tailtime_h__*/
 

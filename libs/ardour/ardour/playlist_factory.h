@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_playlist_factory_h__
-#define __ardour_playlist_factory_h__
+#pragma once
 
 #include "ardour/playlist.h"
 
@@ -42,4 +41,3 @@ class LIBARDOUR_API PlaylistFactory {
 
 }
 
-#endif /* __ardour_playlist_factory_h__  */

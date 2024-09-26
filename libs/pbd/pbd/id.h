@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_id_h__
-#define __pbd_id_h__
+#pragma once
 
 #include <stdint.h>
 #include <string>
@@ -79,4 +78,3 @@ class LIBPBD_API ID {
 
 LIBPBD_API std::ostream& operator<< (std::ostream& ostr, const PBD::ID&);
 
-#endif /* __pbd_id_h__ */

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_property_basics_h__
-#define __libpbd_property_basics_h__
+#pragma once
 
 #include <glib.h>
 #include <set>
@@ -177,4 +176,3 @@ namespace std {
 ostream& operator<< (std::ostream& os, PBD::PropertyChange const & pc);
 }
 
-#endif /* __libpbd_property_basics_h__ */

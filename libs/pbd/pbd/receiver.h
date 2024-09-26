@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libmisc_receiver_h__
-#define __libmisc_receiver_h__
+#pragma once
 
 #include <vector>
 
@@ -44,4 +43,3 @@ class LIBPBD_API Receiver : public sigc::trackable
 	PBD::ScopedConnectionList connections;
 };
 
-#endif  // __libmisc_receiver_h__

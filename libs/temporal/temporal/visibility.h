@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libtimecode_visibility_h__
-#define __libtimecode_visibility_h__
+#pragma once
 
 #if defined(COMPILER_MSVC)
   #define LIBTEMPORAL_DLL_IMPORT __declspec(dllimport)
@@ -42,4 +41,3 @@
 #endif
 #define LIBTEMPORAL_LOCAL LIBTEMPORAL_DLL_LOCAL
 
-#endif /* __libtimecode_visibility_h__ */

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_lxvst_plugin_h__
-#define __ardour_lxvst_plugin_h__
+#pragma once
 
 #include "ardour/vst_plugin.h"
 
@@ -51,4 +50,3 @@ class LIBARDOUR_API LXVSTPluginInfo : public VSTPluginInfo
 
 } // namespace ARDOUR
 
-#endif /* __ardour_lxvst_plugin_h__ */

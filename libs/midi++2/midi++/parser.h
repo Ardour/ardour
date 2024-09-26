@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef  __midi_parse_h__
-#define  __midi_parse_h__
+#pragma once
 
 #include <string>
 #include <iostream>
@@ -199,5 +198,4 @@ class LIBMIDIPP_API Parser {
 
 } // namespace MIDI
 
-#endif   // __midi_parse_h__
 
