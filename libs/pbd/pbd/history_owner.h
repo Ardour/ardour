@@ -1,5 +1,4 @@
-#ifndef __libpbd_history_owner_h__
-#define __libpbd_history_owner_h__
+#pragma once
 
 #include <string>
 #include <vector>
@@ -101,4 +100,3 @@ class LIBPBD_API HistoryOwner
 
 } /* namespace PBD */
 
-#endif /* __libpbd_history_owner_h__ */

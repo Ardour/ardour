@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_ca_importable_source_h__
-#define __ardour_ca_importable_source_h__
+#pragma once
 
 #include "pbd/failed_constructor.h"
 #include "ardour/libardour_visibility.h"
@@ -56,4 +55,3 @@ class LIBARDOUR_API CAImportableSource : public ImportableSource {
 
 }
 
-#endif /* __ardour_ca_importable_source_h__ */

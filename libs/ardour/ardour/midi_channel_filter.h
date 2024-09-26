@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_channel_filter_h__
-#define __ardour_channel_filter_h__
+#pragma once
 
 #include <atomic>
 #include <cstdint>
@@ -95,4 +94,3 @@ private:
 
 } /* namespace ARDOUR */
 
-#endif /* __ardour_channel_filter_h__ */

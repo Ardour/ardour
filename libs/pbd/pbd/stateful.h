@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_stateful_h__
-#define __pbd_stateful_h__
+#pragma once
 
 #include <atomic>
 #include <string>
@@ -149,4 +148,3 @@ class LIBPBD_API Stateful {
 
 } // namespace PBD
 
-#endif /* __pbd_stateful_h__ */

@@ -23,8 +23,7 @@
 //#define USE_TLSF // use TLSF instead of ReallocPool
 //#define USE_MALLOC // or plain OS provided realloc (no mlock) -- if USE_TLSF isn't defined
 
-#ifndef __ardour_luaproc_h__
-#define __ardour_luaproc_h__
+#pragma once
 
 #include <set>
 #include <vector>
@@ -246,4 +245,3 @@ typedef std::shared_ptr<LuaPluginInfo> LuaPluginInfoPtr;
 
 } // namespace ARDOUR
 
-#endif // __ardour_luaproc_h__

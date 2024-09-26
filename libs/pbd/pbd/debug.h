@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_debug_h__
-#define __libpbd_debug_h__
+#pragma once
 
 #include <bitset>
 #include <stdint.h>
@@ -117,5 +116,4 @@ namespace PBD {
 #define DEBUG_RESULT_CAST(type,var,cast_expr,...) __VA_ARGS__
 #define DEBUG_ASSIGN(var,expr)
 #endif
-#endif /* __libpbd_debug_h__ */
 

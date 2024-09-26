@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_rt_midi_buffer_h__
-#define __ardour_rt_midi_buffer_h__
+#pragma once
 
 #include <map>
 
@@ -147,4 +146,3 @@ typedef RTMidiBufferBase<samplepos_t,samplecnt_t> RTMidiBuffer;
 
 } // namespace ARDOUR
 
-#endif // __ardour_rt_midi_buffer_h__

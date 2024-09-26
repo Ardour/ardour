@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_session_playlists_h__
-#define __ardour_session_playlists_h__
+#pragma once
 
 #include <memory>
 #include <set>
@@ -100,4 +99,3 @@ private:
 
 }
 
-#endif

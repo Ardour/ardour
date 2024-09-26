@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_audioanalyser_h__
-#define __ardour_audioanalyser_h__
+#pragma once
 
 #include <vector>
 #include <string>
@@ -72,4 +71,3 @@ class LIBARDOUR_API AudioAnalyser : public boost::noncopyable {
 
 } /* namespace */
 
-#endif /* __ardour_audioanalyser_h__ */

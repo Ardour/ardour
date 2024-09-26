@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_monitorable_h__
-#define __ardour_monitorable_h__
+#pragma once
 
 #include "ardour/types.h"
 
@@ -32,4 +31,3 @@ class Monitorable {
 
 } /* namespace */
 
-#endif /* __ardour_monitorable_h__ */

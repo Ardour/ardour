@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_stateful_diff_command_h__
-#define __pbd_stateful_diff_command_h__
+#pragma once
 
 #include <memory>
 
@@ -54,4 +53,3 @@ private:
 
 }; // namespace PBD
 
-#endif /* __pbd_stateful_diff_command_h__ */

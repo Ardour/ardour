@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __lib_pbd_memento_command_h__
-#define __lib_pbd_memento_command_h__
+#pragma once
 
 #include <iostream>
 
@@ -174,4 +173,3 @@ protected:
 	PBD::ScopedConnection _binder_death_connection;
 };
 
-#endif // __lib_pbd_memento_h__

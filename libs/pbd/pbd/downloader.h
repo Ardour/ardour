@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_downloader_h__
-#define __libpbd_downloader_h__
+#pragma once
 
 #include <atomic>
 #include <string>
@@ -66,4 +65,3 @@ class LIBPBD_API Downloader {
 
 } /* namespace */
 
-#endif

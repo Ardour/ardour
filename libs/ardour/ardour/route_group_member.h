@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_route_group_member_h__
-#define __libardour_route_group_member_h__
+#pragma once
 
 #include "ardour/libardour_visibility.h"
 #include "pbd/controllable.h"
@@ -51,4 +50,3 @@ class LIBARDOUR_API RouteGroupMember
 
 }
 
-#endif /* __libardour_route_group_member_h__ */

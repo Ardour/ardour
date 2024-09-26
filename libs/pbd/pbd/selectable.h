@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __selectable_h__
-#define __selectable_h__
+#pragma once
 
 #include <list>
 #include <string>
@@ -99,4 +98,3 @@ class LIBPBD_API Selector {
 } /* namespace */
 
 
-#endif // __selectable_h__

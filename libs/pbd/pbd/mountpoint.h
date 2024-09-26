@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_mountpoint_h__
-#define __pbd_mountpoint_h__
+#pragma once
 
 #include <string>
 
@@ -25,4 +24,3 @@
 
 LIBPBD_API std::string mountpoint (std::string path);
 
-#endif // __pbd_mountpoint_h__

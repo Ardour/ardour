@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_automation_event_h__
-#define __ardour_automation_event_h__
+#pragma once
 
 #include <atomic>
 #include <cstdint>
@@ -147,4 +146,3 @@ private:
 
 } // namespace
 
-#endif /* __ardour_automation_event_h__ */

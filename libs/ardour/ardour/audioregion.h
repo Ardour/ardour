@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_audio_region_h__
-#define __ardour_audio_region_h__
+#pragma once
 
 #include <atomic>
 #include <vector>
@@ -301,4 +300,3 @@ extern "C" {
 	LIBARDOUR_API uint32_t sourcefile_length_from_c (void *arg, double);
 }
 
-#endif /* __ardour_audio_region_h__ */

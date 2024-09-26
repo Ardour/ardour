@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_transport_master_manager_h__
-#define __ardour_transport_master_manager_h__
+#pragma once
 
 #include <string>
 
@@ -132,4 +131,3 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 
 } // namespace ARDOUR
 
-#endif /* __ardour_transport_master_manager_h__ */

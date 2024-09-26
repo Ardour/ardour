@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_properties_h__
-#define __pbd_properties_h__
+#pragma once
 
 #include <string>
 #include <list>
@@ -481,4 +480,3 @@ private:
 #include "pbd/property_list_impl.h"
 #include "pbd/property_basics_impl.h"
 
-#endif /* __pbd_properties_h__ */

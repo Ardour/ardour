@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __midipp_mmc_h_h__
-#define __midipp_mmc_h_h__
+#pragma once
 
 #include "temporal/time.h"
 
@@ -306,4 +305,3 @@ private:
 
 } // namespace MIDI
 
-#endif /* __midipp_mmc_h_h__ */

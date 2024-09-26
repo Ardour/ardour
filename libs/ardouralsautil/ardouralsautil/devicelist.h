@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardouralsautil_devicelist_h__
-#define __libardouralsautil_devicelist_h__
+#pragma once
 
 #include <string>
 #include <map>
@@ -34,4 +33,3 @@ namespace ARDOUR {
 	int card_to_num(const char* device_name);
 
 }
-#endif

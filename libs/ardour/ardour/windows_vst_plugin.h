@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_windows_vst_plugin_h__
-#define __ardour_windows_vst_plugin_h__
+#pragma once
 
 #include "ardour/vst_plugin.h"
 
@@ -53,4 +52,3 @@ public:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_vst_plugin_h__ */

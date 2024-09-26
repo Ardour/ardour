@@ -22,8 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __sndfile_source_h__
-#define __sndfile_source_h__
+#pragma once
 
 #include <sndfile.h>
 
@@ -104,5 +103,4 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 
 } // namespace ARDOUR
 
-#endif /* __sndfile_source_h__ */
 

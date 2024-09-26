@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_timing_h__
-#define __libpbd_timing_h__
+#pragma once
 
 #include <glib.h>
 
@@ -323,4 +322,3 @@ private:
 
 } // namespace PBD
 
-#endif // __libpbd_timing_h__

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_midi_ring_buffer_h__
-#define __ardour_midi_ring_buffer_h__
+#pragma once
 
 #include <iostream>
 #include <algorithm>
@@ -100,5 +99,4 @@ MidiRingBuffer<T>::read_contents(uint32_t size, uint8_t* buf)
 
 } // namespace ARDOUR
 
-#endif // __ardour_midi_ring_buffer_h__
 

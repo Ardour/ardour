@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_replace_all_h__
-#define __pbd_replace_all_h__
+#pragma once
 
 #include <string>
 
@@ -26,4 +25,3 @@
 LIBPBD_API int replace_all (std::string& str, const std::string& target, const std::string& replacement);
 LIBPBD_API std::string poor_mans_glob (std::string path);
 
-#endif // __pbd_replace_all_h__

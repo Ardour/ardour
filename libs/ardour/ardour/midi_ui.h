@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_midi_ui_h__
-#define __libardour_midi_ui_h__
+#pragma once
 
 #include <list>
 
@@ -69,4 +68,3 @@ class LIBARDOUR_API MidiControlUI : public AbstractUI<MidiUIRequest>
 
 }
 
-#endif /* __libardour_midi_ui_h__ */

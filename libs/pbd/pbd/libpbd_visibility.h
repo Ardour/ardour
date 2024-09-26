@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_libpbd_visibility_h__
-#define __libpbd_libpbd_visibility_h__
+#pragma once
 
 #if defined(COMPILER_MSVC)
   #define LIBPBD_DLL_IMPORT __declspec(dllimport)
@@ -55,4 +54,3 @@
   #define LIBPBD_LOCAL LIBPBD_DLL_LOCAL
 #endif
 
-#endif /* __libpbd_libpbd_visibility_h__ */

@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_io_h__
-#define __ardour_io_h__
+#pragma once
 
 #include <string>
 #include <vector>
@@ -255,4 +254,3 @@ namespace PBD {
 	DEFINE_ENUM_CONVERT (ARDOUR::IO::Direction)
 }
 
-#endif /*__ardour_io_h__ */

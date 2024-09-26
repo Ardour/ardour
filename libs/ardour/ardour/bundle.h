@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_bundle_h__
-#define __ardour_bundle_h__
+#pragma once
 
 #include <memory>
 #include <string>
@@ -183,4 +182,3 @@ public:
 
 std::ostream & operator<< (std::ostream & o, ARDOUR::Bundle const &);
 
-#endif /* __ardour_bundle_h__ */

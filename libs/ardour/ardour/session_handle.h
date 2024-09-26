@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_session_handle_h__
-#define __libardour_session_handle_h__
+#pragma once
 
 #include "pbd/signals.h"
 
@@ -57,4 +56,3 @@ class LIBARDOUR_API SessionHandlePtr
 
 } /* namespace */
 
-#endif /* __libardour_session_handle_h__ */

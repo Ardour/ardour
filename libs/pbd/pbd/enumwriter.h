@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_enumwriter_h__
-#define __pbd_enumwriter_h__
+#pragma once
 
 #include <map>
 #include <string>
@@ -97,4 +96,3 @@ class LIBPBD_API EnumWriter {
 #define enum_2_string(e) (PBD::EnumWriter::instance().write (typeid(e).name(), e))
 #define string_2_enum(str,e) (PBD::EnumWriter::instance().read (typeid(e).name(), (str)))
 
-#endif /*  __pbd_enumwriter_h__ */

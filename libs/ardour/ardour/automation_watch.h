@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_automation_watch_h__
-#define __ardour_automation_watch_h__
+#pragma once
 
 #include <memory>
 #include <set>
@@ -70,4 +69,3 @@ private:
 
 } /* namespace */
 
-#endif // __ardour_automation_watch_h__

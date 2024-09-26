@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_triggerbox_h__
-#define __ardour_triggerbox_h__
+#pragma once
 
 #include <pthread.h>
 
@@ -1031,4 +1030,3 @@ DEFINE_ENUM_CONVERT(ARDOUR::Trigger::StretchMode);
 } /* namespace PBD */
 
 
-#endif /* __ardour_triggerbox_h__ */

@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_failed_constructor_h__
-#define __pbd_failed_constructor_h__
+#pragma once
 
 #include <exception>
 
@@ -28,4 +27,3 @@ class LIBPBD_API failed_constructor : public std::exception {
 	virtual const char *what() const throw() { return "failed constructor"; }
 };
 
-#endif /* __pbd_failed_constructor_h__ */

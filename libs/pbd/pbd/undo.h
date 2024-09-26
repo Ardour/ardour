@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __lib_pbd_undo_h__
-#define __lib_pbd_undo_h__
+#pragma once
 
 #include <list>
 #include <map>
@@ -146,4 +145,3 @@ private:
 
 } /* namespace */
 
-#endif /* __lib_pbd_undo_h__ */

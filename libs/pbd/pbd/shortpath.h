@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_shortpath_h__
-#define __pbd_shortpath_h__
+#pragma once
 
 #include <glibmm/ustring.h>
 
@@ -25,4 +24,3 @@
 
 LIBPBD_API Glib::ustring short_path (const Glib::ustring& path, Glib::ustring::size_type target_characters);
 
-#endif /* __pbd_shortpath_h__ */

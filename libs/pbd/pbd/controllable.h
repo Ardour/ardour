@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_controllable_h__
-#define __pbd_controllable_h__
+#pragma once
 
 #include <memory>
 #include <string>
@@ -201,4 +200,3 @@ private:
 
 }
 
-#endif /* __pbd_controllable_h__ */

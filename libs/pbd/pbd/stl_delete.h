@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libmisc_stl_delete_h__
-#define __libmisc_stl_delete_h__
+#pragma once
 
 #include "pbd/libpbd_visibility.h"
 
@@ -86,4 +85,3 @@ template<class T> void /*LIBPBD_API*/ set_delete (std::set<T *> *sset)
 }
 #endif // _CPP_SET || _GLIBCXX_SET || __SGI_STL_SET
 
-#endif // __libmisc_stl_delete_h__

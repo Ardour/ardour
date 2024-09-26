@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_analysis_graph_h__
-#define __ardour_analysis_graph_h__
+#pragma once
 
 #include <map>
 #include <memory>
@@ -82,4 +81,3 @@ class LIBARDOUR_API AnalysisGraph {
 		AnalysisPtr     analyser;
 };
 } // namespace ARDOUR
-#endif

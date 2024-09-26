@@ -19,8 +19,7 @@
  */
 
 
-#ifndef __ardour_filename_extensions_h__
-#define __ardour_filename_extensions_h__
+#pragma once
 
 #include "ardour/libardour_visibility.h"
 
@@ -41,4 +40,3 @@ namespace ARDOUR {
 	LIBARDOUR_API extern const char* const advanced_authoring_format_suffix;
 }
 
-#endif

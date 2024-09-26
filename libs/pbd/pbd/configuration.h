@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_configuration_h__
-#define __libpbd_configuration_h__
+#pragma once
 
 #include <map>
 #include <string>
@@ -55,4 +54,3 @@ class LIBPBD_API Configuration : public PBD::Stateful
 
 } // namespace PBD
 
-#endif /* __libpbd_configuration_h__ */

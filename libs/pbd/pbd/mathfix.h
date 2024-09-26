@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_mathfix_h__
-#define __pbd_mathfix_h__
+#pragma once
 
 /* this is necessary to support older releases of OSX where
    they moved around some of the standard math functions
@@ -29,4 +28,3 @@
 #endif
 
 
-#endif

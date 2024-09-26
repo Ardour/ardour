@@ -5,8 +5,7 @@
  * terms of the Do What The Fuck You Want To Public License, Version 2,
  * as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
  */
-#ifndef __pbd_fastlog_h__
-#define __pbd_fastlog_h__
+#pragma once
 
 #include <math.h> /* for HUGE_VAL */
 
@@ -45,4 +44,3 @@ static inline float fast_log10 (const float val)
 
 static inline float minus_infinity(void) { return -HUGE_VAL; }
 
-#endif /* __pbd_fastlog_h__ */

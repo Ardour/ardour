@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_chan_count_h__
-#define __ardour_chan_count_h__
+#pragma once
 
 #include <cassert>
 #include <ostream>
@@ -216,5 +215,4 @@ private:
 
 LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanCount& c);
 
-#endif // __ardour_chan_count_h__
 

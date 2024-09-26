@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_configuration_variable_h__
-#define __libpbd_configuration_variable_h__
+#pragma once
 
 #include <string>
 
@@ -170,4 +169,3 @@ class /*LIBPBD_API*/ ConfigVariableWithMutation<std::string> : public ConfigVari
 
 }
 
-#endif /* __libpbd_configuration_variable_h__ */

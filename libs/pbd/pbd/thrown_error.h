@@ -15,8 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __qm_thrown_error_h__
-#define __qm_thrown_error_h__
+#pragma once
 
 #include "pbd/libpbd_visibility.h"
 #include "transmitter.h"
@@ -33,6 +32,5 @@ class LIBPBD_API ThrownError : public Transmitter {
 	virtual void deliver () = 0;
 };
 
-#endif // __qm_thrown_error_h__
 
 

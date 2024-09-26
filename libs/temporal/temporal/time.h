@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __timecode_time_h__
-#define __timecode_time_h__
+#pragma once
 
 #include <cmath>
 #include <inttypes.h>
@@ -166,4 +165,3 @@ sample_to_timecode (
 
 extern LIBTEMPORAL_API std::ostream& operator<< (std::ostream& ostr, const Timecode::Time& t);
 
-#endif // __timecode_time_h__

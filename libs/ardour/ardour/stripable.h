@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_stripable_h__
-#define __libardour_stripable_h__
+#pragma once
 
 #include <cstdint>
 #include <memory>
@@ -192,4 +191,3 @@ class LIBARDOUR_API Stripable : public SessionObject,
 
 }
 
-#endif /* __libardour_stripable_h__ */

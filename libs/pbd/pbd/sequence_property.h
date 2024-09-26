@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_sequence_property_h__
-#define __libpbd_sequence_property_h__
+#pragma once
 
 #include <iostream>
 
@@ -368,4 +367,3 @@ private:
 
 }
 
-#endif /* __libpbd_sequence_property_h__ */

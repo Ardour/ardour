@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_session_object_h__
-#define __ardour_session_object_h__
+#pragma once
 
 #include <string>
 #include "pbd/statefuldestructible.h"
@@ -72,4 +71,3 @@ class LIBARDOUR_API SessionObject : public SessionHandleRef, public PBD::Statefu
 
 } // namespace ARDOUR
 
-#endif /*__ardour_io_h__ */

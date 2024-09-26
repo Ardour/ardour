@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_surround_send_h__
-#define __ardour_surround_send_h__
+#pragma once
 
 #include "ardour/processor.h"
 #include "ardour/send.h"
@@ -104,4 +103,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_surround_send_h__ */

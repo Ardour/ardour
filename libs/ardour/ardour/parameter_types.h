@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_parameter_types_h__
-#define __ardour_parameter_types_h__
+#pragma once
 
 #include <stdint.h>
 
@@ -92,5 +91,4 @@ parameter_is_midi(Evoral::ParameterType t)
 
 }  // namespace ARDOUR
 
-#endif /* __ardour_parameter_types_h__ */
 

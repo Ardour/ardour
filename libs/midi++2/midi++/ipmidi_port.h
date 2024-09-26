@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef  __libmidi_ipmidi_port_h__
-#define  __libmidi_ipmidi_port_h__
+#pragma once
 
 #include <string>
 #include <iostream>
@@ -87,4 +86,3 @@ private:
 
 } // namespace MIDI
 
-#endif // __libmidi_ipmidi_port_h__

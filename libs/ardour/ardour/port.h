@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_port_h__
-#define __ardour_port_h__
+#pragma once
 
 #ifdef WAF_BUILD
 #include "libardour-config.h"
@@ -228,4 +227,3 @@ private:
 
 }
 
-#endif /* __ardour_port_h__ */

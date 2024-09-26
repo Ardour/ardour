@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_disk_writer_h__
-#define __ardour_disk_writer_h__
+#pragma once
 
 #include <atomic>
 #include <list>
@@ -208,4 +207,3 @@ private:
 
 } // namespace
 
-#endif /* __ardour_disk_writer_h__ */

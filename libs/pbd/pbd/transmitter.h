@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libmisc_transmitter_h__
-#define __libmisc_transmitter_h__
+#pragma once
 
 #include <sstream>
 #include <iostream>
@@ -105,4 +104,3 @@ endmsg (std::ostream &ostr)
 
 extern "C" { LIBPBD_API void pbd_c_error (const char *); }
 
-#endif // __libmisc_transmitter_h__

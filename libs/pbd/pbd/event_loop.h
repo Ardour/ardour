@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_event_loop_h__
-#define __pbd_event_loop_h__
+#pragma once
 
 #include <atomic>
 #include <string>
@@ -140,4 +139,3 @@ private:
 
 #define MISSING_INVALIDATOR nullptr // used to mark places where we fail to provide an invalidator
 
-#endif /* __pbd_event_loop_h__ */

@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_transient_detector_h__
-#define __ardour_transient_detector_h__
+#pragma once
 
 #include "ardour/audioanalyser.h"
 
@@ -54,4 +53,3 @@ protected:
 
 } /* namespace */
 
-#endif /* __ardour_audioanalyser_h__ */

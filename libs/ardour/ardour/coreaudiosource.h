@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __coreaudio_source_h__
-#define __coreaudio_source_h__
+#pragma once
 
 #ifdef COREAUDIO105
 #include "CAAudioFile.h"
@@ -72,5 +71,4 @@ class LIBARDOUR_API CoreAudioSource : public AudioFileSource {
 
 }; /* namespace ARDOUR */
 
-#endif /* __coreaudio_source_h__ */
 

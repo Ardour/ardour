@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_soloable_h__
-#define __ardour_soloable_h__
+#pragma once
 
 #include <stdint.h>
 
@@ -36,4 +35,3 @@ class Soloable {
 
 } /* namespace */
 
-#endif /* __ardour_soloable_h__ */

@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_silentfilesource_h__
-#define __ardour_silentfilesource_h__
+#pragma once
 
 #include <cstring>
 #include "ardour/audiofilesource.h"
@@ -74,5 +73,4 @@ protected:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_audiofilesource_h__ */
 

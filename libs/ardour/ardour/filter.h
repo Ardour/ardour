@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_filter_h__
-#define __ardour_filter_h__
+#pragma once
 
 #include <vector>
 
@@ -53,4 +52,3 @@ class LIBARDOUR_API Filter {
 
 } /* namespace */
 
-#endif /* __ardour_filter_h__ */

@@ -16,8 +16,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef __libardour_step_sequencer_h__
-#define __libardour_step_sequencer_h__
+#pragma once
 
 #include <vector>
 #include <unistd.h>
@@ -351,4 +350,3 @@ class StepSequencer : public PBD::Stateful
 
 } /* namespace */
 
-#endif /* __libardour_step_sequencer_h__ */

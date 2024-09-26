@@ -29,8 +29,7 @@
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
 
-#ifndef __libardour_ticker_h__
-#define __libardour_ticker_h__
+#pragma once
 
 namespace ARDOUR
 {
@@ -69,4 +68,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif /* __libardour_ticker_h__ */
