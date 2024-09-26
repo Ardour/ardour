@@ -52,19 +52,38 @@ IOTaskList::IOTaskList (uint32_t n_threads)
 
 	pthread_attr_t     attr;
 	struct sched_param parm;
-	parm.sched_priority = pbd_absolute_rt_priority (SCHED_RR, pbd_pthread_priority (THREAD_IO));
 
   pthread_attr_init (&attr);
-#ifdef PLATFORM_WINDOWS
-  pthread_attr_setschedpolicy (&attr, SCHED_OTHER);
-#else
-  pthread_attr_setschedpolicy (&attr, SCHED_RR);
-#endif
-  pthread_attr_setschedparam (&attr, &parm);
-  pthread_attr_setscope (&attr, PTHREAD_SCOPE_SYSTEM);
-  pthread_attr_setinheritsched (&attr, PTHREAD_EXPLICIT_SCHED);
 
-	DEBUG_TRACE (PBD::DEBUG::IOTaskList, string_compose ("IOTaskList starting %1 threads with priority = %2\n", _n_threads, parm.sched_priority));
+	bool use_sched_param = true;
+	int  policy          = SCHED_RR;
+
+	const char* p = getenv ("ARDOUR_IO_SCHED");
+	if (p) {
+		int pi = atoi (p);
+		if (pi < 0) {
+			policy = SCHED_RR;
+		} else if (pi > 0) {
+			policy = SCHED_FIFO;
+		} else {
+			use_sched_param = false;
+		}
+	}
+
+	if (use_sched_param) {
+		parm.sched_priority = pbd_absolute_rt_priority (SCHED_RR, pbd_pthread_priority (THREAD_IO));
+#ifdef PLATFORM_WINDOWS
+		pthread_attr_setschedpolicy (&attr, SCHED_OTHER);
+#else
+		pthread_attr_setschedpolicy (&attr, policy);
+#endif
+		pthread_attr_setschedparam (&attr, &parm);
+		pthread_attr_setscope (&attr, PTHREAD_SCOPE_SYSTEM);
+		pthread_attr_setinheritsched (&attr, PTHREAD_EXPLICIT_SCHED);
+		DEBUG_TRACE (PBD::DEBUG::IOTaskList, string_compose ("IOTaskList starting %1 threads with priority = %2, policy = %3\n", _n_threads, parm.sched_priority, policy));
+	} else {
+		DEBUG_TRACE (PBD::DEBUG::IOTaskList, string_compose ("IOTaskList starting %1 threads with default priority.\n", _n_threads));
+	}
 
 	_workers.resize (_n_threads);
 	for (uint32_t i = 0; i < _n_threads; ++i) {
