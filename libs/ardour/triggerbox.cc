@@ -37,9 +37,10 @@
 #include "temporal/tempo.h"
 
 #include "ardour/async_midi_port.h"
-#include "ardour/auditioner.h"
+#include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
+#include "ardour/auditioner.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/debug.h"
 #include "ardour/import_status.h"
@@ -287,7 +288,8 @@ void
 Trigger::arm ()
 {
 	std::cerr << "T::arm\n";
-	_box.arm_from_another_thread (*this, _box.session().transport_sample(), timecnt_t::max (Temporal::AudioTime), 0);
+	/* XXX get audio channel count somehow */
+	_box.arm_from_another_thread (*this, _box.session().transport_sample(), 2);
 	_armed = true;
 	ArmChanged(); /* EMIT SIGNAL */
 }
@@ -1578,11 +1580,25 @@ AudioTrigger::natural_length() const
 	}
 	return timepos_t (Temporal::BeatTime);
 }
+int
+AudioTrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> r)
+{
+	return set_region_in_worker_thread_internal (r, true);
+}
+
 
 int
 AudioTrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 {
-	assert (!active());
+	return set_region_in_worker_thread_internal (r, false);
+}
+
+int
+AudioTrigger::set_region_in_worker_thread_internal (std::shared_ptr<Region> r, bool from_capture)
+{
+	if (!from_capture) {
+		assert (!active());
+	}
 
 	std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (r);
 
@@ -1597,7 +1613,9 @@ AudioTrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 		return 0;
 	}
 
-	load_data (ar);
+	if (!from_capture) {
+		load_data (ar);
+	}
 
 	estimate_tempo ();  /* NOTE: if this is an existing clip (D+D copy) then it will likely have a SD tempo, and that short-circuits minibpm for us */
 
@@ -1795,18 +1813,16 @@ AudioTrigger::reset_stretcher ()
 	to_drop = 0;
 }
 
-void
-AudioTrigger::setup_stretcher ()
+RubberBand::RubberBandStretcher*
+AudioTrigger::alloc_stretcher () const
 {
 	using namespace RubberBand;
 	using namespace Temporal;
 
-	if (!_region) {
-		return;
-	}
+	AudioTrack const * trk = static_cast<AudioTrack*> (_box.owner());
+	assert (trk);
 
-	std::shared_ptr<AudioRegion> ar (std::dynamic_pointer_cast<AudioRegion> (_region));
-	const uint32_t nchans = std::min (_box.input_streams().n_audio(), ar->n_channels());
+	const uint32_t nchans = trk->input()->n_ports().n_audio();
 
 	//map our internal enum to a rubberband option
 	RubberBandStretcher::Option ro = RubberBandStretcher::Option (0);
@@ -1816,11 +1832,15 @@ AudioTrigger::setup_stretcher ()
 		case Trigger::Smooth : ro = RubberBandStretcher::OptionTransientsSmooth; break;
 	}
 
-	RubberBandStretcher::Options options = RubberBandStretcher::Option (RubberBandStretcher::OptionProcessRealTime |
-	                                                                    ro);
+	RubberBandStretcher::Options options = RubberBandStretcher::Option (RubberBandStretcher::OptionProcessRealTime | ro);
+	return new RubberBandStretcher (_box.session().sample_rate(), nchans, options, 1.0, 1.0);
+}
 
+void
+AudioTrigger::setup_stretcher ()
+{
 	delete _stretcher;
-	_stretcher = new RubberBandStretcher (_box.session().sample_rate(), nchans, options, 1.0, 1.0);
+	_stretcher = alloc_stretcher ();
 	_stretcher->setMaxProcessSize (rb_blocksize);
 }
 
@@ -1831,6 +1851,41 @@ AudioTrigger::drop_data ()
 		delete [] d;
 	}
 	data.clear ();
+}
+
+void
+AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
+{
+	data.clear ();
+	data.length = ai.capture_length;
+
+	for (auto & s : ai.audio_buf) {
+		data.push_back (s);
+	}
+
+	ai.audio_buf.clear (); /* data now owned by us, not SlotArmInfo */
+
+	/* follow length will get set when we build the region, and
+	   call estimate_tempo(), which hopefully happens before
+	   this finishes playing.
+	*/
+	set_length (timecnt_t (data.length));
+
+	/* adopt the previously allocated stretcher, with a ratio of 1.0 (no stretch) */
+
+	delete _stretcher;
+	_stretcher = ai.stretcher;
+	_stretcher->setMaxProcessSize (rb_blocksize);
+	_stretcher->setTimeRatio (1.0);
+
+	ai.stretcher = nullptr;
+	delete &ai; // XXX delete is not RT-safe
+
+	_box.queue_explict (index());
+	TriggerBox::worker->request_build_source (this);
+
+	_armed = false;
+	ArmChanged(); /* EMIT SIGNAL */
 }
 
 int
@@ -1878,9 +1933,11 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
                          Temporal::Beats const & start, Temporal::Beats const & end,
                          pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t& quantize_offset)
 {
-	std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion>(_region);
-	/* We do not modify the I/O of our parent route, so we process only min (bufs.n_audio(),region.channels()) */
-	const uint32_t nchans = (in_process_context ? std::min (bufs.count().n_audio(), ar->n_channels()) : ar->n_channels());
+	AudioTrack const * trk = static_cast<AudioTrack*> (_box.owner());
+	assert (trk);
+	uint32_t nchans = trk->input()->n_ports().n_audio();
+	/* We do not modify the I/O of our parent route, so we process only min * (bufs.n_audio(), input_channels) */
+	nchans = (in_process_context ? std::min (bufs.count().n_audio(), nchans) : nchans);
 	int avail = 0;
 	BufferSet* scratch;
 	std::unique_ptr<BufferSet> scratchp;
@@ -2294,7 +2351,7 @@ MIDITrigger::disarm ()
 }
 
 void
-MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs, samplepos_t capture_start)
+MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 {
 	if (ai.midi_buf->size() == 0) {
 		_armed = false;
@@ -2303,7 +2360,7 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs, samplepos_t capture_sta
 		return;
 	}
 
-	ai.midi_buf->shift (-capture_start);
+	ai.midi_buf->shift (-ai.start.samples());
 	ai.midi_buf->convert (*ai.beats);
 
 	/* Note: the original MIDI buffer in ai is now invalid, all data has
@@ -3301,8 +3358,10 @@ SlotArmInfo::SlotArmInfo (Trigger& s)
 	: slot (s)
 	, start (0)
 	, end (0)
+	, capture_length (0)
 	, midi_buf (nullptr)
 	, beats (nullptr)
+	, stretcher (nullptr)
 {
 }
 
@@ -3310,9 +3369,10 @@ SlotArmInfo::~SlotArmInfo()
 {
 	delete midi_buf;
 	delete beats;
+	delete stretcher;
 
 	for (auto & ab : audio_buf) {
-		delete ab;
+		delete [] ab;
 	}
 }
 
@@ -3383,7 +3443,6 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _cancel_locate_armed (false)
 	, _fast_forwarding (false)
 	, _record_enabled (false)
-	, capture_start (0)
 	, requests (1024)
 	, _arm_info (nullptr)
 {
@@ -3410,7 +3469,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 }
 
 void
-TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, timecnt_t const & expected_duration, uint32_t chans)
+TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t chans)
 {
 	using namespace Temporal;
 
@@ -3424,6 +3483,9 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, timecnt_t c
 		for (uint32_t n = 0; n < chans; ++n) {
 			ai->audio_buf.push_back (new Sample[_session.sample_rate() * 30]); // XXX Config->max_slot_audio_duration
 		}
+		AudioTrigger* at = dynamic_cast<AudioTrigger*> (&slot);
+		assert (at);
+		ai->stretcher = at->alloc_stretcher ();
 	}
 
 	Beats start_b;
@@ -3438,14 +3500,12 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, timecnt_t c
 	                                   t_bbt, t_beats, t_samples, tmap, slot.quantization());
 
 	ai->start = t_samples;
-	ai->end = tmap->sample_at (now_beats + Beats (16, 0)); // XXX slot duration/length
 
 	if (currently_recording) {
 		currently_recording->disarm ();
 		currently_recording = nullptr;
 	}
 
-	currently_recording = this;
 	_arm_info = ai;
 }
 
@@ -3460,40 +3520,86 @@ TriggerBox::finish_recording (BufferSet& bufs)
 {
 	SlotArmInfo* ai = _arm_info.load();
 	assert (ai);
-	ai->slot.captured (*ai, bufs, capture_start);
+	ai->slot.captured (*ai, bufs);
 	_arm_info = nullptr;
 	currently_recording = nullptr;
-	capture_start = 0;
 }
 
 void
 TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes)
 {
+	using namespace Temporal;
+
 	const size_t n_buffers = bufs.count().n_audio();
 	SlotArmInfo* ai = _arm_info.load();
+	pframes_t offset = 0;
+	bool reached_end = false;
 
 	if (!ai) {
 		return;
 	}
 
+	std::cerr << "slot armed " << ai->slot.armed() << " CR " << currently_recording << " ss " << start_sample << " es " << end_sample << " our end " << ai->end.samples() << std::endl;
+
 	if (!ai->slot.armed() && (currently_recording == this)) {
+		if (!ai->end) {
+			/* disarmed: compute end */
+			Beats start_b;
+			Beats end_b;
+			BBT_Argument t_bbt;
+			Beats t_beats;
+			samplepos_t t_samples;
+			TempoMap::SharedPtr tmap (TempoMap::use());
+			Beats now_beats = tmap->quarters_at (timepos_t (start_sample));
+
+			ai->slot.compute_quantized_transition (start_sample, now_beats, std::numeric_limits<Beats>::max(),
+			                                       t_bbt, t_beats, t_samples, tmap, ai->slot.quantization());
+			std::cerr << "disarm noticed at " << start_sample << " quantized by " << ai->slot.quantization() << " to " << t_samples << std::endl;
+			ai->end = t_samples;
+			return;
+		}
+	}
+
+	if (speed == 0. && currently_recording == this) {
+		/* We stopped the transport, so just stop immediately (no quantization) */
+		std::cerr << "stopped, wrap it up\n";
 		finish_recording (bufs);
 		return;
 	}
 
 	if (speed <= 0.) {
-		std::cerr << "not moving\n";
+		/* we stopped or reversed, but were not recording. Nothing to do here */
+		std::cerr << "less than stopped\n";
 		return;
 	}
 
-	if (start_sample < ai->start.samples()) {
-		std::cerr << "waiting to capture\n";
+	if (ai->end.samples() != 0 && (start_sample > ai->end.samples())) {
+		std::cerr << "passed us by!\n";
 		return;
 	}
 
-	capture_start = ai->start.samples();
+	if (start_sample < ai->start.samples() && end_sample < ai->start.samples() ) {
+		std::cerr << "not at " << ai->start.samples() << std::endl;
+		/* Have not yet reached the start of capture */
+		return;
+	}
 
-	std::cerr << "capturing from " << capture_start << std::endl;
+	std::cerr << "start at " << ai->start.samples() << " vs " << start_sample << " .. " << end_sample << std::endl;
+
+	if (ai->start.samples() >= start_sample && ai->start.samples() < end_sample) {
+		/* Let's get going */
+		offset = ai->start.samples() - start_sample;
+		nframes -= offset;
+		currently_recording = this;
+		std::cerr << "start capturing, offset " << offset << " nf " << nframes << std::endl;
+	}
+
+	if ((ai->end.samples() != 0) && (start_sample <= ai->end.samples() && ai->end.samples() < end_sample)) {
+		/* we're going to stop */
+		nframes -= (end_sample - ai->end.samples());
+		std::cerr << "going to stop after handling " << nframes << std::endl;
+		reached_end = true;
+	}
 
 	/* Audio */
 
@@ -3504,8 +3610,11 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		for (size_t n = 0; n < n_buffers; ++n) {
 			assert (ai->audio_buf.size() >= n);
 			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
-			memcpy (buf.data(), ai->audio_buf[n], sizeof (Sample) * nframes);
+			memcpy (ai->audio_buf[n], buf.data() + offset, sizeof (Sample) * nframes);
 		}
+
+		/* This count is used only for audio */
+		ai->capture_length += nframes;
 	}
 
 	/* MIDI */
@@ -3539,9 +3648,14 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 
 		if (!skip_event && (!filter || !filter->filter(ev.buffer(), ev.size()))) {
 			const samplepos_t event_time = start_sample + ev.time();
-			std::cerr << "\twritten to midi rt buf\n";
-			ai->midi_buf->write (event_time,  ev.event_type(), ev.size(), ev.buffer());
+			if (!ai->end || (event_time < ai->end.samples())) {
+				ai->midi_buf->write (event_time,  ev.event_type(), ev.size(), ev.buffer());
+			}
 		}
+	}
+
+	if (reached_end) {
+		finish_recording (bufs);
 	}
 }
 
@@ -4884,9 +4998,9 @@ TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		pframes_t frames_covered;
 
 
-		std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (_currently_playing->region());
-		if (ar) {
-			max_chans = std::max (ar->n_channels(), max_chans);
+		AudioTrack const * trk = static_cast<AudioTrack*> (_owner);
+		if (trk) {
+			max_chans = std::max (trk->input()->n_ports().n_audio(), max_chans);
 		}
 
 		/* Quantize offset will generally be zero, but if non-zero, it
@@ -5437,9 +5551,24 @@ TriggerBoxThread::build_source (Trigger* t)
 {
 	std::cerr << "Build source!\n";
 	MIDITrigger* mt = dynamic_cast<MIDITrigger*> (t);
+	AudioTrigger* at;
 
 	if (mt) {
 		build_midi_source (mt);
+	} else if ((mt = dynamic_cast<MIDITrigger*> (t))) {
+		build_audio_source (at);
+	}
+}
+
+void
+TriggerBoxThread::build_audio_source (AudioTrigger* t)
+{
+	Track* trk = static_cast<Track*> (t->box().owner());
+	SourceList sources;
+
+	for (uint32_t c = 0; c < t->channels(); ++c) {
+		std::shared_ptr<AudioSource> as = t->box().session().create_audio_source_for_session (t->channels(), trk->name(), c);
+		sources.push_back (as);
 	}
 }
 
@@ -5449,8 +5578,6 @@ TriggerBoxThread::build_midi_source (MIDITrigger* t)
 	Track* trk = static_cast<Track*> (t->box().owner());
 	std::shared_ptr<MidiSource> ms = t->box().session().create_midi_source_for_session (trk->name());
 	assert (ms);
-
-	std::cerr << "Created new source from rtmb, called " << ms->name() << std::endl;
 
 	RTMidiBufferBeats const & rtmb = t->rt_midi_buffer();
 
