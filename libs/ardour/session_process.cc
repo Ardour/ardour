@@ -911,7 +911,8 @@ Session::process_event (SessionEvent* ev)
 
 		/* except locates, which we have the capability to handle */
 
-		if (ev->type != SessionEvent::Locate) {
+		if (ev->type != SessionEvent::Locate && ev->type != SessionEvent::AutoLoop) {
+			DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("Postponing and moving event to immediate queue: %1 @ %2\n", enum_2_string (ev->type), _transport_sample));
 			immediate_events.insert (immediate_events.end(), ev);
 			_remove_event (ev);
 			return;
