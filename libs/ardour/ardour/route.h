@@ -72,7 +72,6 @@ namespace ARDOUR {
 class Amp;
 class BeatBox;
 class DelayLine;
-class ClipRecProcessor;
 class Delivery;
 class DiskReader;
 class DiskWriter;
@@ -628,7 +627,6 @@ protected:
 	std::shared_ptr<Pannable>         _pannable;
 	std::shared_ptr<DiskReader>       _disk_reader;
 	std::shared_ptr<DiskWriter>       _disk_writer;
-	std::shared_ptr<ClipRecProcessor> _clip_recorder;
 #ifdef HAVE_BEATBOX
 	std::shared_ptr<BeatBox>       _beatbox;
 #endif

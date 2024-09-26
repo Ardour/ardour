@@ -56,7 +56,7 @@ class LIBARDOUR_API RTMidiBufferBase : public Evoral::EventSink<TimeType>
 	   a reference to any data. The data is all "moved" to the returned
 	   RTMidiBufferBase and timestamps modified to its time domain if nececssary.
 	*/
-	RTMidiBufferBase<Temporal::Beats,Temporal::Beats>* convert ();
+	void convert (RTMidiBufferBase<Temporal::Beats,Temporal::Beats>&);
 
 	void clear();
 	void resize(size_t);
@@ -106,9 +106,6 @@ class LIBARDOUR_API RTMidiBufferBase : public Evoral::EventSink<TimeType>
 	 */
 
 	void shift (DistanceType distance) {
-		if (_size == 0) {
-			return;
-		}
 		for (size_t n = 0; n < _size; ++n) {
 			_data[n].timestamp += distance;
 		}
@@ -151,19 +148,6 @@ class LIBARDOUR_API RTMidiBufferBase : public Evoral::EventSink<TimeType>
 };
 
 typedef RTMidiBufferBase<samplepos_t,samplecnt_t> RTMidiBuffer;
-
-class Trigger;
-
-struct SlotArmInfo {
-	SlotArmInfo (Trigger& s);
-	~SlotArmInfo();
-
-	Trigger& slot;
-	Temporal::timepos_t start;
-	Temporal::timepos_t end;
-	std::shared_ptr<RTMidiBuffer> midi_buf; /* assumed large enough */
-	std::vector<Sample*> audio_buf; /* assumed large enough */
-};
 
 } // namespace ARDOUR
 
