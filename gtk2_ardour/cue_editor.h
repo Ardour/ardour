@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_cue_editor_h__
-#define __gtk_ardour_cue_editor_h__
+#pragma once
 
 #include "pbd/history_owner.h"
 
@@ -114,4 +113,3 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner, public sigc::
 	void do_redo (uint32_t n);
 };
 
-#endif /* __gtk_ardour_cue_editor_h__ */

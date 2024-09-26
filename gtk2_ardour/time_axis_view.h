@@ -24,8 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_time_axis_h__
-#define __ardour_gtk_time_axis_h__
+#pragma once
 
 #include <vector>
 #include <list>
@@ -334,4 +333,3 @@ private:
 
 }; /* class TimeAxisView */
 
-#endif /* __ardour_gtk_time_axis_h__ */

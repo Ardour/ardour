@@ -25,8 +25,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_public_editor_h__
-#define __gtk_ardour_public_editor_h__
+#pragma once
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
@@ -495,4 +494,3 @@ public:
 	}
 };
 
-#endif // __gtk_ardour_public_editor_h__

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __export_preset_selector_h__
-#define __export_preset_selector_h__
+#pragma once
 
 #include <sigc++/signal.h>
 
@@ -84,4 +83,3 @@ private:
 	sigc::connection select_connection;
 };
 
-#endif

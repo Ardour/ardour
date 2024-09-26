@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __export_format_dialog_h__
-#define __export_format_dialog_h__
+#pragma once
 
 #include "ardour/types.h"
 #include "ardour/export_format_manager.h"
@@ -412,4 +411,3 @@ private:
 
 };
 
-#endif /* __export_format_dialog_h__ */

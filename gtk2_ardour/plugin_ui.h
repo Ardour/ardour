@@ -22,8 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_plugin_ui_h__
-#define __ardour_plugin_ui_h__
+#pragma once
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
@@ -411,4 +410,3 @@ extern VSTPluginUI* create_mac_vst_gui (std::shared_ptr<ARDOUR::PlugInsertBase>)
 extern PlugUIBase* create_au_gui (std::shared_ptr<ARDOUR::PlugInsertBase>, Gtk::VBox**);
 #endif
 
-#endif /* __ardour_plugin_ui_h__ */

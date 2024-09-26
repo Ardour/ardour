@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_ruler_h__
+#pragma once
 #define __gtk_ardour_ruler _h__
 
 #include <string>
@@ -49,4 +49,3 @@ private:
 	void connect_action (Gtk::CheckButton& button, std::string const &action_name_part);
 };
 
-#endif /* __gtk_ardour_add_route_dialog_h__ */

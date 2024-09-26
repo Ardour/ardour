@@ -22,8 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_tempo_dialog_h__
-#define __ardour_gtk_tempo_dialog_h__
+#pragma once
 
 #include <gtkmm/entry.h>
 #include <gtkmm/frame.h>
@@ -179,4 +178,3 @@ private:
 	Gtk::Entry   when_bar_entry;
 };
 
-#endif /* __ardour_gtk_tempo_dialog_h__ */

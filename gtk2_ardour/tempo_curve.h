@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_tempo_curve_h__
-#define __gtk_ardour_tempo_curve_h__
+#pragma once
 
 #include <string>
 #include <glib.h>
@@ -89,4 +88,3 @@ private:
 	ArdourCanvas::Text*   _start_text;
 	ArdourCanvas::Text*   _end_text;
 };
-#endif /* __gtk_ardour_tempo_curve_h__ */

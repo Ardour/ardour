@@ -34,8 +34,7 @@
 
 *****************************************************************************/
 
-#ifndef __gtk_ardour_sfdb_freesound_mootcher_h__
-#define __gtk_ardour_sfdb_freesound_mootcher_h__
+#pragma once
 
 #include <string>
 #include <stdio.h>
@@ -131,4 +130,3 @@ private:
 	struct curl_slist *custom_headers;
 };
 
-#endif // __gtk_ardour_sfdb_freesound_mootcher_h__

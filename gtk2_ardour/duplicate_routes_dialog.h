@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_duplicate_route_dialog_h__
-#define __gtk_ardour_duplicate_route_dialog_h__
+#pragma once
 
 #include <gtkmm/entry.h>
 #include <gtkmm/box.h>
@@ -67,4 +66,3 @@ private:
 	Gtk::ComboBoxText insert_at_combo;
 };
 
-#endif /* __gtk_ardour_duplicate_route_dialog_h__ */

@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtkardour_plugin_pin_dialog_h__
-#define __gtkardour_plugin_pin_dialog_h__
+#pragma once
 
 #include <gtkmm/drawingarea.h>
 
@@ -267,4 +266,3 @@ private:
 	bool _height_mapped;
 };
 
-#endif

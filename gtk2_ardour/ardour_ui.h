@@ -30,8 +30,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gui_h__
-#define __ardour_gui_h__
+#pragma once
 
 #include <time.h>
 
@@ -952,4 +951,3 @@ private:
 	PBD::ScopedConnectionList clock_state_connection;
 };
 
-#endif /* __ardour_gui_h__ */

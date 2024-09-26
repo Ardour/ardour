@@ -31,8 +31,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_editor_h__
-#define __ardour_editor_h__
+#pragma once
 
 #include <sys/time.h>
 
@@ -2338,4 +2337,3 @@ private:
 	friend class RhythmFerret;
 };
 
-#endif /* __ardour_editor_h__ */

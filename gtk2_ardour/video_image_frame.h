@@ -16,8 +16,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __ardour_video_image_frame_h__
-#define __ardour_video_image_frame_h__
+#pragma once
 
 #include <string>
 #include <glib.h>
@@ -104,4 +103,3 @@ class VideoImageFrame : public sigc::trackable
 
 };
 
-#endif /* __ardour_video_image_frame_h__ */

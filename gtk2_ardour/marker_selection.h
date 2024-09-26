@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_marker_selection_h__
-#define __ardour_gtk_marker_selection_h__
+#pragma once
 
 #include <list>
 
@@ -30,4 +29,3 @@ class MarkerSelection : public std::list<ArdourMarker*>
 	void range (Temporal::timepos_t& start, Temporal::timepos_t& end);
 };
 
-#endif /* __ardour_gtk_marker_selection_h__ */

@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_editor_cursors_h__
-#define __gtk_ardour_editor_cursors_h__
+#pragma once
 
 #include "pbd/signals.h"
 #include "ardour/types.h"
@@ -62,4 +61,3 @@ private:
 	samplepos_t           _current_sample;
 };
 
-#endif // __gtk_ardour_editor_cursors_h__

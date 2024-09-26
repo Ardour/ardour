@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_plugin_dspload_window_h__
-#define __ardour_plugin_dspload_window_h__
+#pragma once
 
 #include <memory>
 
@@ -70,5 +69,4 @@ private:
 	PBD::ScopedConnectionList _processor_connections;
 	PBD::ScopedConnectionList _route_connections;
 };
-#endif
 

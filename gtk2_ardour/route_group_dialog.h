@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_route_group_dialog_h__
-#define __gtk_ardour_route_group_dialog_h__
+#pragma once
 
 #include <gtkmm/dialog.h>
 #include <gtkmm/entry.h>
@@ -67,4 +66,3 @@ private:
 	PBD::ScopedConnection _group_connection;
 };
 
-#endif

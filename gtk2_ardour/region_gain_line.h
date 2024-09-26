@@ -22,8 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_region_gain_line_h__
-#define __ardour_gtk_region_gain_line_h__
+#pragma once
 
 #include "ardour/ardour.h"
 
@@ -53,4 +52,3 @@ private:
 	AudioRegionView& arv;
 };
 
-#endif /* __ardour_gtk_region_gain_line_h__ */

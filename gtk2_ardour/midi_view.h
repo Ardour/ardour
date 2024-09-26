@@ -22,8 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_midi_view_h__
-#define __gtk_ardour_midi_view_h__
+#pragma once
 
 #include <string>
 #include <vector>
@@ -643,4 +642,3 @@ class MidiView : public virtual sigc::trackable
 };
 
 
-#endif /* __gtk_ardour_midi_view_h__ */

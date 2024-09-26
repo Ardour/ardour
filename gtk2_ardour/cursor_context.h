@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_cursor_context_h__
-#define __ardour_gtk_cursor_context_h__
+#pragma once
 
 #include <memory>
 
@@ -72,4 +71,3 @@ private:
 	CursorContext(EditingContext&, Gdk::Cursor* cursor);
 };
 
-#endif /* __ardour_gtk_cursor_context_h__ */

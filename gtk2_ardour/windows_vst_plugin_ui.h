@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __windows_vst_plugin_ui_h__
-#define __windows_vst_plugin_ui_h__
+#pragma once
 
 #include "pbd/signals.h"
 #include "vst_plugin_ui.h"

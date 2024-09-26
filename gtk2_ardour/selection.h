@@ -22,8 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_selection_h__
-#define __ardour_gtk_selection_h__
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -252,4 +251,3 @@ private:
 
 bool operator==(const Selection& a, const Selection& b);
 
-#endif /* __ardour_gtk_selection_h__ */
