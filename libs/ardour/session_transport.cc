@@ -1203,9 +1203,11 @@ Session::butler_transport_work (bool have_process_lock)
 		}
 	}
 
-	if (will_locate) {
+	if (will_locate && transport_locating ()) {
 		DEBUG_TRACE (DEBUG::Butler, string_compose ("nonrealtime locate invoked from BTW (butler has done %1, rtlocs %2)\n", butler, rtlocates));
 		non_realtime_locate ();
+	} else if (will_locate) {
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("skip nonrealtime locate (butler has done %1, rtlocs %2) ts = %3\n", butler, rtlocates, _transport_fsm->current_state()));
 	}
 
 	if (ptw & PostTransportOverWrite) {
