@@ -146,7 +146,13 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 
 	/* Timespan management */
 
-	static void* start_timespan_bg (void*);
+	void timespan_thread_wakeup ();
+
+	static void*     _timespan_thread_run (void*);
+	pthread_t        _timespan_thread;
+	std::atomic<int> _timespan_thread_active;
+	pthread_mutex_t  _timespan_mutex;
+	pthread_cond_t   _timespan_cond;
 
 	int  start_timespan ();
 	int  process_timespan (samplecnt_t samples);

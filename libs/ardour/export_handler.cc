@@ -25,6 +25,7 @@
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 #include <glibmm/convert.h>
+#include <pthread.h>
 
 #include "pbd/convert.h"
 
@@ -121,6 +122,12 @@ ExportHandler::ExportHandler (Session & session)
   , cue_tracknum (0)
   , cue_indexnum (0)
 {
+	pthread_mutex_init (&_timespan_mutex, 0);
+	pthread_cond_init (&_timespan_cond, 0);
+	_timespan_thread_active.store (1);
+	if (pthread_create (&_timespan_thread, NULL, _timespan_thread_run, this)) {
+		_timespan_thread_active.store (0);
+	}
 }
 
 ExportHandler::~ExportHandler ()
@@ -130,6 +137,56 @@ ExportHandler::~ExportHandler ()
 		session.surround_master ()->surround_return ()->finalize_export ();
 	}
 	graph_builder->cleanup (export_status->aborted () );
+
+	pthread_mutex_lock (&_timespan_mutex);
+	_timespan_thread_active.store (0);
+	pthread_cond_signal (&_timespan_cond);
+	pthread_mutex_unlock (&_timespan_mutex);
+
+	void *status;
+	pthread_join (_timespan_thread, &status);
+
+	pthread_cond_destroy (&_timespan_cond);
+	pthread_mutex_destroy (&_timespan_mutex);
+}
+
+void*
+ExportHandler::_timespan_thread_run (void* me)
+{
+	char name[64];
+	snprintf (name, 64, "Export-TS-%p", (void*)DEBUG_THREAD_SELF);
+	pthread_set_name (name);
+	ExportHandler* self = static_cast<ExportHandler*> (me);
+
+	SessionEvent::create_per_thread_pool (name, 512);
+	PBD::notify_event_loops_about_thread_creation (pthread_self(), name, 512);
+
+	pthread_mutex_lock (&self->_timespan_mutex);
+	while (self->_timespan_thread_active.load ()) {
+		pthread_cond_wait (&self->_timespan_cond, &self->_timespan_mutex);
+		if (!self->_timespan_thread_active.load ()) {
+			break;
+		} else {
+			Temporal::TempoMap::fetch ();
+			self->process_connection.disconnect ();
+			Glib::Threads::Mutex::Lock l (self->export_status->lock());
+			DiskReader::allocate_working_buffers ();
+			self->start_timespan ();
+			DiskReader::free_working_buffers ();
+		}
+	}
+	pthread_mutex_unlock (&self->_timespan_mutex);
+	pthread_exit (0);
+	return 0;
+}
+
+void
+ExportHandler::timespan_thread_wakeup ()
+{
+	if (pthread_mutex_trylock (&_timespan_mutex) == 0) {
+		pthread_cond_signal (&_timespan_cond);
+		pthread_mutex_unlock (&_timespan_mutex);
+	}
 }
 
 /** Add an export to the `to-do' list */
@@ -372,22 +429,6 @@ ExportHandler::command_output(std::string output, size_t size)
 	info << output << endmsg;
 }
 
-void*
-ExportHandler::start_timespan_bg (void* eh)
-{
-	char name[64];
-	snprintf (name, 64, "Export-TS-%p", (void*)DEBUG_THREAD_SELF);
-	pthread_set_name (name);
-	ExportHandler* self = static_cast<ExportHandler*> (eh);
-	self->process_connection.disconnect ();
-	Glib::Threads::Mutex::Lock l (self->export_status->lock());
-	SessionEvent::create_per_thread_pool (name, 512);
-	DiskReader::allocate_working_buffers ();
-	self->start_timespan ();
-	DiskReader::free_working_buffers ();
-	return 0;
-}
-
 void
 ExportHandler::finish_timespan ()
 {
@@ -543,9 +584,7 @@ ExportHandler::finish_timespan ()
 	/* finish timespan is called in freewheeling rt-context,
 	 * we cannot start a new export from here */
 	assert (AudioEngine::instance()->freewheeling ());
-	pthread_t tid;
-	pthread_create (&tid, NULL, ExportHandler::start_timespan_bg, this);
-	pthread_detach (tid);
+	timespan_thread_wakeup ();
 }
 
 void
