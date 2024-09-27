@@ -1199,7 +1199,7 @@ Session::emit_thread_start ()
 	}
 	_rt_thread_active = true;
 
-	if (pthread_create (&_rt_emit_thread, NULL, emit_thread, this)) {
+	if (pthread_create_and_store ("SessionSignals", &_rt_emit_thread, emit_thread, this, 0)) {
 		_rt_thread_active = false;
 	}
 }
@@ -1225,9 +1225,7 @@ void *
 Session::emit_thread (void *arg)
 {
 	Session *s = static_cast<Session *>(arg);
-	pthread_set_name ("SessionSignals");
 	s->emit_thread_run ();
-	pthread_exit (0);
 	return 0;
 }
 

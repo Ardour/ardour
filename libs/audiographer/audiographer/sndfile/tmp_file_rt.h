@@ -138,7 +138,6 @@ class TmpFileRt
 		TmpFileRt *d = static_cast<TmpFileRt *>(arg);
 		pthread_set_name ("ExportDiskIO");
 		d->disk_thread ();
-		pthread_exit (0);
 		return 0;
 	}
 
@@ -158,7 +157,7 @@ class TmpFileRt
 		pthread_mutex_init (&_disk_thread_lock, 0);
 		pthread_cond_init  (&_data_ready, 0);
 
-		if (pthread_create (&_thread_id, NULL, _disk_thread, this)) {
+		if (pthread_create_and_store ("ExportDiskIO", &_thread_id, _disk_thread, this, 0)) {
 			_capture = false;
 			if (SndfileWriter<T>::throw_level (ThrowStrict)) {
 				throw Exception (*this, "Cannot create export disk writer");

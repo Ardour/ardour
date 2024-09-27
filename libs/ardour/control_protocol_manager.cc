@@ -185,7 +185,7 @@ ControlProtocolManager::set_session (Session* s)
 					usb_hotplug_cb, this,
 					&_hpcp)) {
 			_hotplug_thread_run = true;
-			if (pthread_create (&_hotplug_thread, NULL, usb_hotplug_thread, this)) {
+			if (pthread_create_and_store ("Ctrl USB Hotplug", &_hotplug_thread, usb_hotplug_thread, this, 0)) {
 				_hotplug_thread_run = false;
 			}
 		}

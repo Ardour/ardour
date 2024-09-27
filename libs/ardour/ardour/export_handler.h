@@ -30,6 +30,7 @@
 #include <boost/operators.hpp>
 
 #include "pbd/gstdio_compat.h"
+#include "pbd/pthread_utils.h"
 
 #include "ardour/export_pointers.h"
 #include "ardour/session.h"
@@ -149,7 +150,7 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 	void timespan_thread_wakeup ();
 
 	static void*     _timespan_thread_run (void*);
-	pthread_t        _timespan_thread;
+	PBD::Thread*     _timespan_thread;
 	std::atomic<int> _timespan_thread_active;
 	pthread_mutex_t  _timespan_mutex;
 	pthread_cond_t   _timespan_cond;

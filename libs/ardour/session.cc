@@ -7845,8 +7845,10 @@ Session::auto_connect_thread_start ()
 	lx.release ();
 
 	_ac_thread_active.store (1);
-	if (pthread_create (&_auto_connect_thread, NULL, auto_connect_thread, this)) {
+	if (pthread_create_and_store ("AutoConnect", &_auto_connect_thread, auto_connect_thread, this, 0)) {
 		_ac_thread_active.store (0);
+		fatal << "Cannot create 'session auto connect' thread" << endmsg;
+		abort(); /* NOTREACHED*/
 	}
 }
 
@@ -7881,9 +7883,7 @@ void *
 Session::auto_connect_thread (void *arg)
 {
 	Session *s = static_cast<Session *>(arg);
-	pthread_set_name (X_("autoconnect"));
 	s->auto_connect_thread_run ();
-	pthread_exit (0);
 	return 0;
 }
 

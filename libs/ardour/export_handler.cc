@@ -25,7 +25,6 @@
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 #include <glibmm/convert.h>
-#include <pthread.h>
 
 #include "pbd/convert.h"
 
@@ -125,7 +124,8 @@ ExportHandler::ExportHandler (Session & session)
 	pthread_mutex_init (&_timespan_mutex, 0);
 	pthread_cond_init (&_timespan_cond, 0);
 	_timespan_thread_active.store (1);
-	if (pthread_create (&_timespan_thread, NULL, _timespan_thread_run, this)) {
+	_timespan_thread = PBD::Thread::create (boost::bind (_timespan_thread_run, this), "ExportHandler");
+	if (!_timespan_thread) {
 		_timespan_thread_active.store (0);
 		fatal << "Cannot create export handler helper thread" << endmsg;
 		abort(); /* NOTREACHED*/
@@ -145,8 +145,7 @@ ExportHandler::~ExportHandler ()
 	pthread_cond_signal (&_timespan_cond);
 	pthread_mutex_unlock (&_timespan_mutex);
 
-	void *status;
-	pthread_join (_timespan_thread, &status);
+	_timespan_thread->join ();
 
 	pthread_cond_destroy (&_timespan_cond);
 	pthread_mutex_destroy (&_timespan_mutex);
@@ -155,13 +154,10 @@ ExportHandler::~ExportHandler ()
 void*
 ExportHandler::_timespan_thread_run (void* me)
 {
-	char name[64];
-	snprintf (name, 64, "Export-TS-%p", (void*)DEBUG_THREAD_SELF);
-	pthread_set_name (name);
 	ExportHandler* self = static_cast<ExportHandler*> (me);
 
-	SessionEvent::create_per_thread_pool (name, 512);
-	PBD::notify_event_loops_about_thread_creation (pthread_self(), name, 512);
+	SessionEvent::create_per_thread_pool ("ExportHandler", 512);
+	PBD::notify_event_loops_about_thread_creation (pthread_self(), "ExportHandler", 512);
 
 	pthread_mutex_lock (&self->_timespan_mutex);
 	while (self->_timespan_thread_active.load ()) {
@@ -178,7 +174,6 @@ ExportHandler::_timespan_thread_run (void* me)
 		}
 	}
 	pthread_mutex_unlock (&self->_timespan_mutex);
-	pthread_exit (0);
 	return 0;
 }
 
