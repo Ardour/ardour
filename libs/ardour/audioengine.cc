@@ -678,7 +678,6 @@ void
 AudioEngine::do_reset_backend()
 {
 	SessionEvent::create_per_thread_pool (X_("Backend reset processing thread"), 1024);
-	pthread_set_name ("EngineWatchdog");
 
 	Glib::Threads::Mutex::Lock guard (_reset_request_lock);
 
@@ -739,7 +738,6 @@ void
 AudioEngine::do_devicelist_update()
 {
 	SessionEvent::create_per_thread_pool (X_("Device list update processing thread"), 512);
-	pthread_set_name ("DeviceList");
 
 	Glib::Threads::Mutex::Lock guard (_devicelist_update_lock);
 
@@ -769,13 +767,13 @@ AudioEngine::start_hw_event_processing()
 	if (_hw_reset_event_thread == 0) {
 		_hw_reset_request_count.store (0);
 		_stop_hw_reset_processing.store (0);
-		_hw_reset_event_thread = PBD::Thread::create (boost::bind (&AudioEngine::do_reset_backend, this));
+		_hw_reset_event_thread = PBD::Thread::create (boost::bind (&AudioEngine::do_reset_backend, this), "EngineWatchdog");
 	}
 
 	if (_hw_devicelist_update_thread == 0) {
 		_hw_devicelist_update_count.store (0);
 		_stop_hw_devicelist_processing.store (0);
-		_hw_devicelist_update_thread = PBD::Thread::create (boost::bind (&AudioEngine::do_devicelist_update, this));
+		_hw_devicelist_update_thread = PBD::Thread::create (boost::bind (&AudioEngine::do_devicelist_update, this), "DeviceList");
 	}
 }
 

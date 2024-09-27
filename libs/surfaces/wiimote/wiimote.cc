@@ -154,8 +154,6 @@ WiimoteControlProtocol::thread_init ()
 {
 	DEBUG_TRACE (DEBUG::WiimoteControl, "WiimoteControlProtocol::thread_init init\n");
 
-	pthread_set_name (X_("wiimote"));
-
 	// allow to make requests to the GUI and RT thread(s)
 	PBD::notify_event_loops_about_thread_creation (pthread_self (), X_("wiimote"), 2048);
 	BasicUI::register_thread ("wiimote");

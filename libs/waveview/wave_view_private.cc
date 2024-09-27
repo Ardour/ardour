@@ -405,7 +405,7 @@ WaveViewDrawingThread::start ()
 {
 	assert (!_thread);
 
-	_thread = PBD::Thread::create (&WaveViewThreads::thread_proc);
+	_thread = PBD::Thread::create (&WaveViewThreads::thread_proc, "WaveViewDrawing");
 }
 
 void
@@ -477,8 +477,6 @@ WaveViewThreads::thread_proc ()
 void
 WaveViewThreads::_thread_proc ()
 {
-	pthread_set_name ("WaveViewDrawing");
-
 	while (true) {
 
 		_queue_mutex.lock ();

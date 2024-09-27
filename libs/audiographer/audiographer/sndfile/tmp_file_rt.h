@@ -136,7 +136,6 @@ class TmpFileRt
 	static void * _disk_thread (void *arg)
 	{
 		TmpFileRt *d = static_cast<TmpFileRt *>(arg);
-		pthread_set_name ("ExportDiskIO");
 		d->disk_thread ();
 		return 0;
 	}

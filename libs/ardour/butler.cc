@@ -141,7 +141,7 @@ Butler::start_thread ()
 
 	should_run = false;
 
-	if (pthread_create_and_store ("disk butler", &thread, _thread_work, this)) {
+	if (pthread_create_and_store ("butler", &thread, _thread_work, this)) {
 		error << _("Session: could not create butler thread") << endmsg;
 		return -1;
 	}
@@ -171,7 +171,6 @@ void*
 Butler::_thread_work (void* arg)
 {
 	SessionEvent::create_per_thread_pool ("butler events", 4096);
-	pthread_set_name (X_("butler"));
 	/* get thread buffers for RegionFx */
 	ARDOUR::ProcessThread* pt = new ProcessThread ();
 	pt->get_buffers ();

@@ -65,8 +65,6 @@ static void
 peak_thread_work ()
 {
 	SessionEvent::create_per_thread_pool (X_("PeakFile Builder "), 64);
-	pthread_set_name ("PeakFileBuilder");
-
 	while (true) {
 		SourceFactory::peak_building_lock.lock ();
 
@@ -119,7 +117,7 @@ SourceFactory::init ()
 	}
 	peak_thread_run = true;
 	for (int n = 0; n < 2; ++n) {
-		peak_thread_pool.push_back (PBD::Thread::create (&peak_thread_work));
+		peak_thread_pool.push_back (PBD::Thread::create (&peak_thread_work, string_compose ("PeakFileBuilder-%1", n)));
 	}
 }
 

@@ -4879,7 +4879,7 @@ TriggerBoxThread::TriggerBoxThread ()
 	: requests (1024)
 	, _xthread (true)
 {
-	if (pthread_create_and_store ("triggerbox thread", &thread, _thread_work, this)) {
+	if (pthread_create_and_store ("TriggerBox Worker", &thread, _thread_work, this)) {
 		error << _("Session: could not create triggerbox thread") << endmsg;
 		throw failed_constructor ();
 	}
@@ -4897,15 +4897,12 @@ void *
 TriggerBoxThread::_thread_work (void* arg)
 {
 	SessionEvent::create_per_thread_pool ("tbthread events", 4096);
-	pthread_set_name (X_("tbthread"));
 	return ((TriggerBoxThread *) arg)->thread_work ();
 }
 
 void *
 TriggerBoxThread::thread_work ()
 {
-	pthread_set_name (X_("Trigger Worker"));
-
 	while (true) {
 
 		char msg;

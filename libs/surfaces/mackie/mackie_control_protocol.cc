@@ -194,8 +194,6 @@ MackieControlProtocol::~MackieControlProtocol()
 void
 MackieControlProtocol::thread_init ()
 {
-	pthread_set_name (event_loop_name().c_str());
-
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), event_loop_name(), 2048);
 	ARDOUR::SessionEvent::create_per_thread_pool (event_loop_name(), 128);
 
