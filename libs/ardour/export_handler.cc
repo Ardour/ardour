@@ -127,6 +127,8 @@ ExportHandler::ExportHandler (Session & session)
 	_timespan_thread_active.store (1);
 	if (pthread_create (&_timespan_thread, NULL, _timespan_thread_run, this)) {
 		_timespan_thread_active.store (0);
+		fatal << "Cannot create export handler helper thread" << endmsg;
+		abort(); /* NOTREACHED*/
 	}
 }
 
