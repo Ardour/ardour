@@ -423,10 +423,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		 * least large enough for all the data in the audio file. if it
 		 * is too short, assume that a crash or other error truncated
 		 * it, and rebuild it from scratch.
-		 *
-		 * XXX this may not work for destructive recording, but we
-		 * might decided to get rid of that anyway.
-		 *
 		 */
 
 		const off_t expected_file_size = (_length.samples() / (double) samples_per_file_peak) * sizeof (PeakData);
@@ -590,10 +586,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		samplepos_t stored_peak_before_next_visual_peak = (samplepos_t) next_visual_peak_sample / samples_per_file_peak;
 		samplecnt_t nvisual_peaks = 0;
 		uint32_t i = 0;
-
-		/* handle the case where the initial visual peak is on a pixel boundary */
-
-		//current_stored_peak = min (current_stored_peak, stored_peak_before_next_visual_peak);
 
 		/* open ... close during out: handling */
 
