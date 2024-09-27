@@ -28,6 +28,8 @@
 #include <dlfcn.h>
 #endif
 
+#include "pbd/compose.h"
+#include "pbd/debug.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/pthread_utils.h"
 
@@ -47,10 +49,10 @@ DECLARE_DEFAULT_COMPARISONS (pthread_t) // Needed for 'DECLARE_DEFAULT_COMPARISO
 
 using namespace std;
 
-typedef std::list<pthread_t>        ThreadMap;
-static ThreadMap                    all_threads;
-static pthread_mutex_t              thread_map_lock = PTHREAD_MUTEX_INITIALIZER;
-static Glib::Threads::Private<char> thread_name (free);
+typedef std::map<pthread_t, std::string> ThreadMap;
+static ThreadMap                         all_threads;
+static pthread_mutex_t                   thread_map_lock = PTHREAD_MUTEX_INITIALIZER;
+static Glib::Threads::Private<char>      thread_name (free);
 
 namespace PBD
 {
@@ -94,6 +96,8 @@ fake_thread_start (void* arg)
 	/* name will be deleted by the default handler for GStaticPrivate, when the thread exits */
 	pthread_set_name (ts->name.c_str ());
 
+	DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Started: '%1'\n", ts->name));
+
 	/* we don't need this object anymore */
 	delete ts;
 
@@ -103,13 +107,13 @@ fake_thread_start (void* arg)
 	/* cleanup */
 	pthread_mutex_lock (&thread_map_lock);
 
-	for (ThreadMap::iterator i = all_threads.begin (); i != all_threads.end (); ++i) {
-		if (pthread_equal ((*i), pthread_self ())) {
-			all_threads.erase (i);
+	for (auto const& t : all_threads) {
+		if (pthread_equal (t.first, pthread_self ())) {
+			DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Terminated: '%1'\n", t.second));
+			all_threads.erase (t.first);
 			break;
 		}
 	}
-
 	pthread_mutex_unlock (&thread_map_lock);
 
 	/* done */
@@ -132,7 +136,7 @@ pthread_create_and_store (string name, pthread_t* thread, void* (*start_routine)
 
 	if ((ret = pthread_create (thread, &default_attr, fake_thread_start, ts)) == 0) {
 		pthread_mutex_lock (&thread_map_lock);
-		all_threads.push_back (*thread);
+		all_threads[*thread] = name;
 		pthread_mutex_unlock (&thread_map_lock);
 	}
 
@@ -171,10 +175,12 @@ void
 pthread_kill_all (int signum)
 {
 	pthread_mutex_lock (&thread_map_lock);
-	for (ThreadMap::iterator i = all_threads.begin (); i != all_threads.end (); ++i) {
-		if (!pthread_equal ((*i), pthread_self ())) {
-			pthread_kill ((*i), signum);
+	for (auto const& t : all_threads) {
+		if (pthread_equal (t.first, pthread_self ())) {
+			continue;
 		}
+		DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Kill: '%1'\n", t.second));
+		pthread_kill (t.first, signum);
 	}
 	all_threads.clear ();
 	pthread_mutex_unlock (&thread_map_lock);
@@ -184,16 +190,12 @@ void
 pthread_cancel_all ()
 {
 	pthread_mutex_lock (&thread_map_lock);
-
-	for (ThreadMap::iterator i = all_threads.begin (); i != all_threads.end ();) {
-		ThreadMap::iterator nxt = i;
-		++nxt;
-
-		if (!pthread_equal ((*i), pthread_self ())) {
-			pthread_cancel ((*i));
+	for (auto const& t : all_threads) {
+		if (pthread_equal (t.first, pthread_self ())) {
+			continue;
 		}
-
-		i = nxt;
+		DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Cancel: '%1'\n", t.second));
+		pthread_cancel (t.first);
 	}
 	all_threads.clear ();
 	pthread_mutex_unlock (&thread_map_lock);
@@ -203,9 +205,9 @@ void
 pthread_cancel_one (pthread_t thread)
 {
 	pthread_mutex_lock (&thread_map_lock);
-	for (ThreadMap::iterator i = all_threads.begin (); i != all_threads.end (); ++i) {
-		if (pthread_equal ((*i), thread)) {
-			all_threads.erase (i);
+	for (auto const& t : all_threads) {
+		if (pthread_equal (t.first, thread)) {
+			all_threads.erase (t.first);
 			break;
 		}
 	}
