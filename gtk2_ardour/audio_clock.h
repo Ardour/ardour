@@ -76,9 +76,10 @@ public:
 	virtual void set (Temporal::timepos_t const &, bool force = false);
 	void set_duration (Temporal::timecnt_t const &, bool force = false);
 
+	virtual	void set_mode (Mode);
+
 	void set_from_playhead ();
 	void locate ();
-	void set_mode (Mode);
 
 	void copy_text_to_clipboard () const;
 
