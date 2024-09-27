@@ -1281,6 +1281,19 @@ Trigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position, Tri
 
 /*--------------------*/
 
+void
+AudioTrigger::AudioData::alloc (samplecnt_t cnt, uint32_t nchans)
+{
+	clear ();
+	reserve (nchans);
+	for (uint32_t n = 0; n < nchans; ++n) {
+		push_back (new Sample[cnt]);
+	}
+	length = 0;
+	capacity = cnt;
+
+}
+
 AudioTrigger::AudioTrigger (uint32_t n, TriggerBox& b)
 	: Trigger (n, b)
 	, _stretcher (0)
@@ -1910,8 +1923,9 @@ AudioTrigger::load_data (std::shared_ptr<AudioRegion> ar)
 	drop_data ();
 
 	try {
+		data.alloc (data.length, nchans);
+
 		for (uint32_t n = 0; n < nchans; ++n) {
-			data.push_back (new Sample[data.length]);
 			ar->read (data[n], 0, data.length, n);
 		}
 
@@ -3490,9 +3504,7 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 		ai->midi_buf->resize (1024); // XXX Config->max_slot_midi_event_size
 		ai->beats = new RTMidiBufferBeats;
 	} else {
-		for (uint32_t n = 0; n < chans; ++n) {
-			ai->audio_buf.push_back (new Sample[_session.sample_rate() * 30]); // XXX Config->max_slot_audio_duration
-		}
+		ai->audio_buf.alloc (_session.sample_rate() * 30, chans); // XXX Config->max_slot_audio_duration
 		AudioTrigger* at = dynamic_cast<AudioTrigger*> (&slot);
 		assert (at);
 		ai->stretcher = at->alloc_stretcher ();
@@ -3620,7 +3632,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		for (size_t n = 0; n < n_buffers; ++n) {
 			assert (ai->audio_buf.size() >= n);
 			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
-			memcpy (ai->audio_buf[n], buf.data() + offset, sizeof (Sample) * nframes);
+			ai->audio_buf.append (buf.data() + offset, nframes, n);
 		}
 
 		/* This count is used only for audio */
@@ -5583,10 +5595,7 @@ TriggerBoxThread::build_audio_source (AudioTrigger* t)
 
 	size_t n = 0;
 	for (auto & src : sources) {
-		Source::WriterLock lock (src->mutex());
-		src->mark_streaming_write_started (lock);
 		std::dynamic_pointer_cast<AudioSource>(src)->write (t->audio_data (n), t->data_length());
-		src->mark_streaming_write_completed (lock);
 		++n;
 	}
 
