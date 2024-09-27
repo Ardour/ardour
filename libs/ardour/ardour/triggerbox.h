@@ -549,6 +549,41 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	uint32_t channels () const { return data.size(); }
 
 	RubberBand::RubberBandStretcher* alloc_stretcher () const;
+
+	struct AudioData : std::vector<Sample*> {
+		samplecnt_t length;
+		samplecnt_t capacity;
+
+		AudioData () : length (0), capacity (0) {}
+
+		samplecnt_t append (Sample const * src, samplecnt_t cnt, uint32_t chan) {
+			if (chan >= size()) {
+				return -1;
+			}
+			if (length + cnt >= capacity) {
+				return -1;
+			}
+			samplecnt_t to_copy = std::min (cnt, (capacity - length));
+			memcpy (at(chan), src, cnt * sizeof (Sample));
+			return to_copy;
+		}
+
+		samplecnt_t read (Sample * dst, samplecnt_t offset, samplecnt_t cnt, uint32_t chan) {
+			if (chan >= size()) {
+				return -1;
+			}
+			if (offset + cnt > length) {
+				return -1;
+			}
+			samplecnt_t to_copy = std::min (cnt, (length - (offset + cnt)));
+			memcpy (dst, at (chan) + offset, to_copy * sizeof (Sample));
+			return to_copy;
+		}
+
+		void alloc (samplecnt_t cnt, uint32_t nchans);
+	};
+
+
 	Sample const * audio_data (size_t n) const;
 	size_t data_length() const { return data.length; }
 
@@ -556,13 +591,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void retrigger ();
 
   private:
-	struct Data : std::vector<Sample*> {
-		samplecnt_t length;
-
-		Data () : length (0) {}
-	};
-
-	Data        data;
+	AudioData        data;
 	RubberBand::RubberBandStretcher*  _stretcher;
 	samplepos_t _start_offset;
 
@@ -770,7 +799,7 @@ struct SlotArmInfo {
 	samplecnt_t capture_length;
 	RTMidiBuffer* midi_buf; /* assumed large enough */
 	RTMidiBufferBeats* beats; /* will take over data allocated for midi_but */
-	std::vector<Sample*> audio_buf; /* assumed large enough */
+	AudioTrigger::AudioData audio_buf;
 	RubberBand::RubberBandStretcher* stretcher;
 };
 
