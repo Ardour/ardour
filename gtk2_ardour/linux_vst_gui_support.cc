@@ -26,7 +26,6 @@
 #include <libgen.h>
 #include <assert.h>
 
-#include <pthread.h>
 #include <signal.h>
 #include <glib.h>
 #include <glibmm/timer.h>
@@ -42,7 +41,6 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <sys/time.h>
 
 struct ERect{
@@ -319,9 +317,8 @@ any Xevents to all the UI callbacks plugins 'may' have registered on their
 windows, that is if they don't manage their own UIs **/
 
 static void*
-gui_event_loop (void* ptr)
+gui_event_loop (void*)
 {
-	pthread_set_name ("LXVSTEventLoop");
 	VSTState* vstfx;
 	int LXVST_sched_timer_interval = 40; //ms, 25fps
 	XEvent event;
@@ -509,20 +506,6 @@ int vstfx_init (void* ptr)
 	assert (gui_state == -1);
 	pthread_mutex_init (&plugin_mutex, NULL);
 
-	int thread_create_result;
-
-	pthread_attr_t thread_attributes;
-
-	/*Init the attribs to defaults*/
-
-	pthread_attr_init (&thread_attributes);
-
-	/*Make sure the thread is joinable - this should be the default anyway -
-	so we can join to it on vstfx_exit*/
-
-	pthread_attr_setdetachstate (&thread_attributes, PTHREAD_CREATE_JOINABLE);
-
-
 	/*This is where we need to open a connection to X, and start the GUI thread*/
 
 	/*Open our connection to X - all linuxVST plugin UIs handled by the LXVST engine
@@ -546,7 +529,7 @@ int vstfx_init (void* ptr)
 
 	/*Create the thread - use default attrs for now, don't think we need anything special*/
 
-	thread_create_result = pthread_create (&LXVST_gui_event_thread, &thread_attributes, gui_event_loop, NULL);
+	int thread_create_result = pthread_create_and_store ("LXVSTEventLoop", &LXVST_gui_event_thread, gui_event_loop, NULL, 0);
 
 	if (thread_create_result != 0)
 	{

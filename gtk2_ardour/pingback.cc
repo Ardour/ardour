@@ -97,7 +97,6 @@ build_query_string (ArdourCurl::HttpGet const & h)
 static void*
 _pingback (void *arg)
 {
-	pthread_set_name ("Pingback");
 	ArdourCurl::HttpGet h;
 
 	//initialize curl
@@ -177,7 +176,7 @@ void pingback (const string& version, const string& announce_path)
 	ping_call* cm = new ping_call (version, announce_path);
 	pthread_t thread;
 
-	pthread_create_and_store ("pingback", &thread, _pingback, cm);
+	pthread_create_and_store ("Pingback", &thread, _pingback, cm);
 }
 
 }
