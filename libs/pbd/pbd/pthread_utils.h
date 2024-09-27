@@ -97,7 +97,7 @@ namespace PBD {
 
 	class LIBPBD_API Thread {
 		public:
-		static Thread* create (boost::function<void ()> const&, std::string const& name = "");
+		static Thread* create (boost::function<void ()> const&, std::string const& name);
 		static Thread* self ();
 		void join ();
 		bool caller_is_self () const;

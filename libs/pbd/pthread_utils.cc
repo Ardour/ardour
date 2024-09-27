@@ -486,6 +486,12 @@ PBD::Thread::Thread (boost::function<void ()> const& slot, std::string const& na
 	if (pthread_create (&_t, &thread_attributes, _run, this)) {
 		throw failed_constructor ();
 	}
+
+	if (_joinable) {
+		pthread_mutex_lock (&thread_map_lock);
+		all_threads[_t] = name;
+		pthread_mutex_unlock (&thread_map_lock);
+	}
 }
 
 void*
@@ -494,7 +500,21 @@ PBD::Thread::_run (void* arg) {
 	if (!self->_name.empty ()) {
 		pthread_set_name (self->_name.c_str ());
 	}
+
+	DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Started: '%1'\n", self->_name));
+
 	self->_slot ();
+
+	/* cleanup */
+	pthread_mutex_lock (&thread_map_lock);
+	for (auto const& t : all_threads) {
+		if (pthread_equal (t.first, pthread_self ())) {
+			DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Terminated: '%1'\n", t.second));
+			all_threads.erase (t.first);
+			break;
+		}
+	}
+	pthread_mutex_unlock (&thread_map_lock);
 
 	pthread_exit (0);
 	return 0;
