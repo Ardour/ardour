@@ -384,10 +384,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 	} else if (p == "show-track-meters") {
 		if (editor) editor->toggle_meter_updating();
-	} else if (p == "primary-clock-delta-mode") {
-		primary_clock->set_display_delta_mode(UIConfiguration::instance().get_primary_clock_delta_mode());
-	} else if (p == "secondary-clock-delta-mode") {
-		secondary_clock->set_display_delta_mode(UIConfiguration::instance().get_secondary_clock_delta_mode());
 	} else if (p == "super-rapid-clock-update") {
 		if (_session) {
 			stop_clocking ();

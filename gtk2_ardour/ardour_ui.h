@@ -310,10 +310,11 @@ public:
 
 	GUIObjectState* gui_object_state;
 
-	MainClock* primary_clock;
-	MainClock* secondary_clock;
-	void focus_on_clock ();
+	MainClock* primary_clock;    //this clock is the canonical PrimaryClock, whose mode is reflected to all other clocks with PrimaryClock disposition.
+	MainClock* secondary_clock;  //this clock is the canonical SecondaryClock, whose mode is reflected to all other clocks with PrimaryClock disposition
 	AudioClock*   big_clock;
+
+	void focus_on_clock ();
 
 	VideoTimeLine *video_timeline;
 
@@ -586,10 +587,6 @@ private:
 	bool solo_alert_press (GdkEventButton* ev);
 	void audition_alert_clicked ();
 	bool error_alert_press (GdkEventButton *);
-
-	void big_clock_value_changed ();
-	void primary_clock_value_changed ();
-	void secondary_clock_value_changed ();
 
 	/* menu bar and associated stuff */
 
