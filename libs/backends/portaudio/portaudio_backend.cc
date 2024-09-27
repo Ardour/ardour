@@ -856,7 +856,7 @@ static void* freewheel_thread(void* arg)
 bool
 PortAudioBackend::start_freewheel_process_thread ()
 {
-	if (pthread_create(&_pthread_freewheel, NULL, freewheel_thread, this)) {
+	if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &_pthread_freewheel, freewheel_thread, this)) {
 		DEBUG_AUDIO("Failed to create main audio thread\n");
 		return false;
 	}

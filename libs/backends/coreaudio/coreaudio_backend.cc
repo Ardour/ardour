@@ -605,7 +605,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		return PortReconnectError;
 	}
 
-	if (pthread_create (&_freeewheel_thread, NULL, pthread_freewheel, this))
+	if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &_freeewheel_thread, pthread_freewheel, this))
 	{
 		PBD::error << _("CoreAudioBackend: failed to create process thread.") << endmsg;
 		delete _pcmio; _pcmio = 0;

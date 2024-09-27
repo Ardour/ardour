@@ -1385,7 +1385,7 @@ AlsaAudioBackend::midi_device_thread ()
 bool
 AlsaAudioBackend::listen_for_midi_device_changes ()
 {
-	if (pthread_create (&_midi_device_thread_id, NULL, _midi_device_thread, this)) {
+	if (pbd_pthread_create (PBD_RT_STACKSIZE_HELP, &_midi_device_thread_id, _midi_device_thread, this)) {
 		return false;
 	}
 	return true;
