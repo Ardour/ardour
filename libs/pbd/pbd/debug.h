@@ -39,7 +39,7 @@
 
 namespace PBD {
 
-	typedef std::bitset<128> DebugBits;
+	typedef std::bitset<192> DebugBits;
 
 	LIBPBD_API extern DebugBits debug_bits;
 	LIBPBD_API DebugBits new_debug_bit (const char* name);
@@ -64,6 +64,7 @@ namespace PBD {
 		LIBPBD_API extern DebugBits UndoHistory;
 		LIBPBD_API extern DebugBits Timing;
 		LIBPBD_API extern DebugBits Threads;
+		LIBPBD_API extern DebugBits ThreadName;
 		LIBPBD_API extern DebugBits Locale;
 		LIBPBD_API extern DebugBits StringConvert;
 		LIBPBD_API extern DebugBits DebugTimestamps;

@@ -61,6 +61,7 @@ DebugBits PBD::DEBUG::Configuration = PBD::new_debug_bit ("configuration");
 DebugBits PBD::DEBUG::UndoHistory = PBD::new_debug_bit ("undohistory");
 DebugBits PBD::DEBUG::Timing = PBD::new_debug_bit ("timing");
 DebugBits PBD::DEBUG::Threads = PBD::new_debug_bit ("threads");
+DebugBits PBD::DEBUG::ThreadName = PBD::new_debug_bit ("threadname");
 DebugBits PBD::DEBUG::Locale = PBD::new_debug_bit ("locale");
 DebugBits PBD::DEBUG::StringConvert = PBD::new_debug_bit ("stringconvert");
 DebugBits PBD::DEBUG::DebugTimestamps = PBD::new_debug_bit ("debugtimestamps");
@@ -103,7 +104,7 @@ PBD::new_debug_bit (const char* name)
 void
 PBD::debug_only_print (const char* prefix, string str)
 {
-	if ((PBD::debug_bits & DEBUG::Threads).any()) {
+	if ((PBD::debug_bits & DEBUG::ThreadName).any()) {
 		printf ("0x%lx (%s) ", (intptr_t) DEBUG_THREAD_SELF, pthread_name());
 	}
 
