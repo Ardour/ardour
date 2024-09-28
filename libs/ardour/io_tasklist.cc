@@ -146,8 +146,8 @@ IOTaskList::_worker_thread (void* me)
 
 #ifdef HAVE_IOPRIO
 	/* compare to Butler::_thread_work */
-  // ioprio_set (IOPRIO_WHO_PROCESS, 0 /*calling thread*/, IOPRIO_PRIO_VALUE (IOPRIO_CLASS_RT, 4))
-  syscall (SYS_ioprio_set, 1, 0, (1 << 13) | 4);
+	// ioprio_set (IOPRIO_WHO_PROCESS, 0 /*calling thread*/, IOPRIO_PRIO_VALUE (IOPRIO_CLASS_RT, 4))
+	syscall (SYS_ioprio_set, 1, 0, (1 << 13) | 4);
 #endif
 
 	self->io_thread ();
