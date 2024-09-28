@@ -74,6 +74,42 @@ PBD::notify_event_loops_about_thread_creation (pthread_t thread, const std::stri
 	ThreadCreatedWithRequestSize (thread, emitting_thread_name, request_count);
 }
 
+static size_t
+pbd_stack_size ()
+{
+	size_t rv = 0;
+#if !defined PLATFORM_WINDOWS && defined __GLIBC__
+
+	size_t pt_min_stack = 16384;
+
+#ifdef PTHREAD_STACK_MIN
+	pt_min_stack = PTHREAD_STACK_MIN;
+#endif
+
+	void* handle = dlopen (NULL, RTLD_LAZY);
+
+	/* This function is internal (it has a GLIBC_PRIVATE) version, but
+	 * available via weak symbol, or dlsym, and returns
+	 *
+	 * GLRO(dl_pagesize) + __static_tls_size + PTHREAD_STACK_MIN
+	 */
+
+	size_t (*__pthread_get_minstack) (const pthread_attr_t* attr) =
+	    (size_t (*) (const pthread_attr_t*))dlsym (handle, "__pthread_get_minstack");
+
+	if (__pthread_get_minstack != NULL) {
+		pthread_attr_t attr;
+		pthread_attr_init (&attr);
+		rv = __pthread_get_minstack (&attr);
+		assert (rv >= pt_min_stack);
+		rv -= pt_min_stack;
+		pthread_attr_destroy (&attr);
+	}
+	dlclose (handle);
+#endif
+	return rv;
+}
+
 struct ThreadStartWithName {
 	void* (*thread_work) (void*);
 	void*       arg;
@@ -129,7 +165,7 @@ pthread_create_and_store (string name, pthread_t* thread, void* (*start_routine)
 	/* set default stack size to sensible default for memlocking */
 	pthread_attr_init (&default_attr);
 	if (stacklimit > 0) {
-		pthread_attr_setstacksize (&default_attr, stacklimit);
+		pthread_attr_setstacksize (&default_attr, stacklimit + pbd_stack_size ());
 	}
 
 	ThreadStartWithName* ts = new ThreadStartWithName (start_routine, arg, name);
@@ -216,42 +252,6 @@ pthread_cancel_one (pthread_t thread)
 	pthread_mutex_unlock (&thread_map_lock);
 }
 
-static size_t
-pbd_stack_size ()
-{
-	size_t rv = 0;
-#if !defined PLATFORM_WINDOWS && defined __GLIBC__
-
-	size_t pt_min_stack = 16384;
-
-#ifdef PTHREAD_STACK_MIN
-	pt_min_stack = PTHREAD_STACK_MIN;
-#endif
-
-	void* handle = dlopen (NULL, RTLD_LAZY);
-
-	/* This function is internal (it has a GLIBC_PRIVATE) version, but
-	 * available via weak symbol, or dlsym, and returns
-	 *
-	 * GLRO(dl_pagesize) + __static_tls_size + PTHREAD_STACK_MIN
-	 */
-
-	size_t (*__pthread_get_minstack) (const pthread_attr_t* attr) =
-	    (size_t (*) (const pthread_attr_t*))dlsym (handle, "__pthread_get_minstack");
-
-	if (__pthread_get_minstack != NULL) {
-		pthread_attr_t attr;
-		pthread_attr_init (&attr);
-		rv = __pthread_get_minstack (&attr);
-		assert (rv >= pt_min_stack);
-		rv -= pt_min_stack;
-		pthread_attr_destroy (&attr);
-	}
-	dlclose (handle);
-#endif
-	return rv;
-}
-
 int
 pbd_pthread_create (
 		const size_t stacksize,
@@ -263,7 +263,9 @@ pbd_pthread_create (
 
 	pthread_attr_t attr;
 	pthread_attr_init (&attr);
-	pthread_attr_setstacksize (&attr, stacksize + pbd_stack_size ());
+	if (stacksize > 0) {
+		pthread_attr_setstacksize (&attr, stacksize + pbd_stack_size ());
+	}
 	rv = pthread_create (thread, &attr, start_routine, arg);
 	pthread_attr_destroy (&attr);
 	return rv;
@@ -358,7 +360,9 @@ pbd_realtime_pthread_create (
 	pthread_attr_setschedparam (&attr, &parm);
 	pthread_attr_setscope (&attr, PTHREAD_SCOPE_SYSTEM);
 	pthread_attr_setinheritsched (&attr, PTHREAD_EXPLICIT_SCHED);
-	pthread_attr_setstacksize (&attr, stacksize + pbd_stack_size ());
+	if (stacksize > 0) {
+		pthread_attr_setstacksize (&attr, stacksize + pbd_stack_size ());
+	}
 	rv = pthread_create (thread, &attr, start_routine, arg);
 	pthread_attr_destroy (&attr);
 	return rv;
