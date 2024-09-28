@@ -1281,6 +1281,13 @@ Trigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position, Tri
 
 /*--------------------*/
 
+AudioTrigger::AudioData::~AudioData ()
+{
+	for (auto & s : *this) {
+		delete [] s;
+	}
+}
+
 void
 AudioTrigger::AudioData::alloc (samplecnt_t cnt, uint32_t nchans)
 {
@@ -1292,6 +1299,21 @@ AudioTrigger::AudioData::alloc (samplecnt_t cnt, uint32_t nchans)
 	length = 0;
 	capacity = cnt;
 
+}
+
+samplecnt_t
+AudioTrigger::AudioData::append (Sample const * src, samplecnt_t cnt, uint32_t chan)
+{
+	if (chan >= size()) {
+		return -1;
+	}
+	if (length >= capacity) {
+		return -1;
+	}
+	samplecnt_t to_copy = std::min (cnt, (capacity - length));
+	memcpy (at(chan), src, cnt * sizeof (Sample));
+	length += cnt;
+	return to_copy;
 }
 
 AudioTrigger::AudioTrigger (uint32_t n, TriggerBox& b)
@@ -1882,12 +1904,22 @@ AudioTrigger::drop_data ()
 void
 AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
 {
+	if (ai.audio_buf.length == 0) {
+		/* Nothing captured */
+		_armed = false;
+		ArmChanged (); /* EMIT SIGNAL */
+		delete &ai;
+		return;
+	}
+
 	data.clear ();
-	data.length = ai.capture_length;
 
 	for (auto & s : ai.audio_buf) {
 		data.push_back (s);
 	}
+	data.length = ai.audio_buf.length;
+	data.capacity = ai.audio_buf.capacity;
+	std::cerr << "captured " << data.length << std::endl;
 
 	ai.audio_buf.clear (); /* data now owned by us, not SlotArmInfo */
 
@@ -3382,7 +3414,6 @@ SlotArmInfo::SlotArmInfo (Trigger& s)
 	: slot (s)
 	, start (0)
 	, end (0)
-	, capture_length (0)
 	, midi_buf (nullptr)
 	, beats (nullptr)
 	, stretcher (nullptr)
@@ -3584,42 +3615,34 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 
 	if (speed == 0. && currently_recording == this) {
 		/* We stopped the transport, so just stop immediately (no quantization) */
-		std::cerr << "stopped, wrap it up\n";
 		finish_recording (bufs);
 		return;
 	}
 
 	if (speed <= 0.) {
 		/* we stopped or reversed, but were not recording. Nothing to do here */
-		std::cerr << "less than stopped\n";
 		return;
 	}
 
 	if (ai->end.samples() != 0 && (start_sample > ai->end.samples())) {
-		std::cerr << "passed us by!\n";
 		return;
 	}
 
 	if (start_sample < ai->start.samples() && end_sample < ai->start.samples() ) {
-		std::cerr << "not at " << ai->start.samples() << std::endl;
 		/* Have not yet reached the start of capture */
 		return;
 	}
-
-	std::cerr << "start at " << ai->start.samples() << " vs " << start_sample << " .. " << end_sample << std::endl;
 
 	if (ai->start.samples() >= start_sample && ai->start.samples() < end_sample) {
 		/* Let's get going */
 		offset = ai->start.samples() - start_sample;
 		nframes -= offset;
 		currently_recording = this;
-		std::cerr << "start capturing, offset " << offset << " nf " << nframes << std::endl;
 	}
 
 	if ((ai->end.samples() != 0) && (start_sample <= ai->end.samples() && ai->end.samples() < end_sample)) {
 		/* we're going to stop */
 		nframes -= (end_sample - ai->end.samples());
-		std::cerr << "going to stop after handling " << nframes << std::endl;
 		reached_end = true;
 	}
 
@@ -3634,9 +3657,6 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
 			ai->audio_buf.append (buf.data() + offset, nframes, n);
 		}
-
-		/* This count is used only for audio */
-		ai->capture_length += nframes;
 	}
 
 	/* MIDI */
@@ -3645,10 +3665,6 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 	Track* trk = static_cast<Track*> (_owner);
 	MidiTrack* mt = dynamic_cast<MidiTrack*>(trk);
 	MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
-
-	if (buf.size()) {
-		std::cerr << "GOT " << buf.size() << "MIDI events\n";
-	}
 
 	for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 		Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
@@ -5571,7 +5587,6 @@ TriggerBoxThread::delete_trigger (Trigger* t)
 void
 TriggerBoxThread::build_source (Trigger* t)
 {
-	std::cerr << "Build source!\n";
 	MIDITrigger* mt = dynamic_cast<MIDITrigger*> (t);
 	AudioTrigger* at;
 
@@ -5602,10 +5617,17 @@ TriggerBoxThread::build_audio_source (AudioTrigger* t)
 	/* now build region */
 
 	PropertyList plist;
-	std::shared_ptr<FileSource> fs (std::dynamic_pointer_cast<FileSource> (sources.front()));
+	std::shared_ptr<FileSource> fs;
+
+	for (auto & src : sources) {
+		fs = std::dynamic_pointer_cast<FileSource> (src);
+		fs->mark_immutable ();
+	}
+
+	fs = std::dynamic_pointer_cast<FileSource> (sources.front());
 	assert (fs);
 
-	std::string region_name = region_name_from_path (fs->path(), false, false);
+	std::string region_name = region_name_from_path (fs->path(), true, false);
 
 	plist.add (ARDOUR::Properties::start, timecnt_t (Temporal::BeatTime));
 	plist.add (ARDOUR::Properties::length, sources.front()->length ());
@@ -5616,14 +5638,13 @@ TriggerBoxThread::build_audio_source (AudioTrigger* t)
 	plist.add (ARDOUR::Properties::opaque, true);
 
 	std::shared_ptr<Region> whole = RegionFactory::create (sources, plist);
-	std::cerr << "Created WF region " << whole->name() << std::endl;
 	/* ... and insert a discrete copy into the playlist*/
 	PropertyList plist2;
 	plist2.add (ARDOUR::Properties::whole_file, false);
 	std::shared_ptr<Region> copy (RegionFactory::create (whole, plist2));
 	std::cerr << "Created copy region " << whole->name() << std::endl;
 
-	t->set_region_in_worker_thread_from_capture (copy);
+ 	t->set_region_in_worker_thread_from_capture (copy);
 }
 
 void
@@ -5647,7 +5668,6 @@ TriggerBoxThread::build_midi_source (MIDITrigger* t)
 			ms->append_event_beats (lock, ev);
 		}
 		ms->mark_streaming_write_completed (lock);
-		std::cerr << "Filled with data, now loading model\n";
 		ms->load_model (lock);
 	}
 
@@ -5660,7 +5680,7 @@ TriggerBoxThread::build_midi_source (MIDITrigger* t)
 
 	sources.push_back (ms);
 
-	std::string region_name = region_name_from_path (fs->path(), false, false);
+	std::string region_name = region_name_from_path (fs->path(), true, false);
 
 	plist.add (ARDOUR::Properties::start, timecnt_t (Temporal::BeatTime));
 	plist.add (ARDOUR::Properties::length, ms->length ());
@@ -5671,12 +5691,10 @@ TriggerBoxThread::build_midi_source (MIDITrigger* t)
 	plist.add (ARDOUR::Properties::opaque, true);
 
 	std::shared_ptr<Region> whole = RegionFactory::create (sources, plist);
-	std::cerr << "Created WF region " << whole->name() << std::endl;
 	/* ... and insert a discrete copy into the playlist*/
 	PropertyList plist2;
 	plist2.add (ARDOUR::Properties::whole_file, false);
 	std::shared_ptr<Region> copy (RegionFactory::create (whole, plist2));
-	std::cerr << "Created copy region " << whole->name() << std::endl;
 
 	t->set_region_in_worker_thread_from_capture (copy);
 }
