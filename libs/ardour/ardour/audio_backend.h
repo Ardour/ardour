@@ -164,7 +164,7 @@ public:
 	/** Return true if the backed is JACK */
 	virtual bool is_jack () const { return false; }
 
-	virtual int client_real_time_priority () { return PBD_RT_PRI_PROC; }
+	virtual int client_real_time_priority () { return 0; }
 
 	/* Discovering devices and parameters */
 

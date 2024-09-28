@@ -1067,6 +1067,12 @@ AudioEngine::start (bool for_latency)
 		return -1;
 	}
 
+	if (_backend->is_realtime ()) {
+		pbd_set_engine_rt_priority (_backend->client_real_time_priority ());
+	} else {
+		pbd_set_engine_rt_priority (0);
+	}
+
 	_running = true;
 
 	if (_session) {
@@ -1188,38 +1194,6 @@ AudioEngine::get_dsp_load() const
 		return 0.0;
 	}
 	return _backend->dsp_load ();
-}
-
-bool
-AudioEngine::is_realtime() const
-{
-	if (!_backend) {
-		return false;
-	}
-
-	return _backend->is_realtime();
-}
-
-int
-AudioEngine::client_real_time_priority ()
-{
-	if (!_backend) {
-		assert (0);
-		return PBD_RT_PRI_PROC;
-	}
-	if (!_backend->is_realtime ()) {
-		/* this is only an issue with the Dummy backend.
-		 * - with JACK, we require rt permissions.
-		 * - with ALSA/PulseAudio this can only happen if rt permissions
-		 *   are n/a. Other attempts to get rt will fail likewise.
-		 *
-		 * perhaps:
-		 * TODO: use is_realtime () ? PBD_SCHED_FIFO : PBD_SCHED_OTHER
-		 */
-		return PBD_RT_PRI_PROC; // XXX
-	}
-
-	return _backend->client_real_time_priority();
 }
 
 void

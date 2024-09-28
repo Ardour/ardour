@@ -53,6 +53,7 @@ typedef std::map<pthread_t, std::string> ThreadMap;
 static ThreadMap                         all_threads;
 static pthread_mutex_t                   thread_map_lock = PTHREAD_MUTEX_INITIALIZER;
 static Glib::Threads::Private<char>      thread_name (free);
+static int                               base_priority_relative_to_max = -20;
 
 namespace PBD
 {
@@ -272,6 +273,19 @@ pbd_pthread_create (
 	return rv;
 }
 
+void
+pbd_set_engine_rt_priority (int p)
+{
+	/* this is mainly for JACK's benefit */
+	const int p_max = sched_get_priority_max (SCHED_FIFO);
+	const int p_min = sched_get_priority_min (SCHED_FIFO);
+	if (p <= 0 || p <= p_min + 10 || p > p_max) {
+		base_priority_relative_to_max = -20;
+	} else {
+		base_priority_relative_to_max =  p - p_max;
+	}
+}
+
 int
 pbd_pthread_priority (PBDThreadClass which)
 {
@@ -292,11 +306,11 @@ pbd_pthread_priority (PBDThreadClass which)
 			return -13;
 	}
 #else
-	int base = -20;
+	int base = base_priority_relative_to_max;
 	const char* p = getenv ("ARDOUR_SCHED_PRI");
 	if (p && *p) {
 		base = atoi (p);
-		if (base > -5 && base < 5) {
+		if (base > -5 || base < -85) {
 			base = -20;
 		}
 	}
@@ -309,6 +323,8 @@ pbd_pthread_priority (PBDThreadClass which)
 		default:
 		case THREAD_PROC:
 			return base - 2;
+		case THREAD_CTRL:
+			return base - 3;
 		case THREAD_IO:
 			return base - 10;
 	}
@@ -322,23 +338,12 @@ pbd_absolute_rt_priority (int policy, int priority)
 	const int p_min = sched_get_priority_min (policy); // Linux: 1
 	const int p_max = sched_get_priority_max (policy); // Linux: 99
 
-	if (priority == 0) {
-		assert (0);
-		priority = (p_min + p_max) / 2;
-	} else if (priority > 0) {
-		/* value relative to minium */
-		priority += p_min - 1;
-	} else {
-		/* value relative maximum */
-		priority += p_max + 1;
-	}
+	/* priority is relative to the max */
+	assert (priority < 0);
+	priority += p_max + 1;
 
-	if (priority > p_max) {
-		priority = p_max;
-	}
-	if (priority < p_min) {
-		priority = p_min;
-	}
+	priority = std::min (p_max, priority);
+	priority = std::max (p_min, priority);
 	return priority;
 }
 
