@@ -3592,8 +3592,6 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		return;
 	}
 
-	std::cerr << "slot armed " << ai->slot.armed() << " CR " << currently_recording << " ss " << start_sample << " es " << end_sample << " our end " << ai->end.samples() << std::endl;
-
 	if (!ai->slot.armed() && (currently_recording == this)) {
 		if (!ai->end) {
 			/* disarmed: compute end */
