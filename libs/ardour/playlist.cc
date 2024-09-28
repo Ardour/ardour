@@ -3413,17 +3413,14 @@ Playlist::fade_range (list<TimelineRange>& ranges)
 {
 	ThawList thawlist;
 	RegionReadLock rlock (this);
-	for (list<TimelineRange>::iterator r = ranges.begin(); r != ranges.end(); ) {
-		list<TimelineRange>::iterator tmpr = r;
-		++tmpr;
-		for (RegionList::const_iterator i = regions.begin (); i != regions.end ();) {
-			RegionList::const_iterator tmpi = i;
-			++tmpi;
-			thawlist.add (*i);
-			(*i)->fade_range ((*r).start().samples(), (*r).end().samples());
-			i = tmpi;
+	/* add regions only once, not for each range */
+	for (auto const& r : regions) {
+		thawlist.add (r);
+	}
+	for (auto const& t: ranges) {
+		for (auto const& r : regions) {
+			r->fade_range (t.start().samples(), t.end().samples());
 		}
-		r = tmpr;
 	}
 	rlock.release ();
 	thawlist.release ();
