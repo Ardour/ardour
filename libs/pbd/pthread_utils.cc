@@ -266,6 +266,7 @@ pbd_pthread_create (
 	if (stacksize > 0) {
 		pthread_attr_setstacksize (&attr, stacksize + pbd_stack_size ());
 	}
+	DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Start Non-RT Thread stacksize = 0x%1%2\n", std::hex, stacksize));
 	rv = pthread_create (thread, &attr, start_routine, arg);
 	pthread_attr_destroy (&attr);
 	return rv;
@@ -363,6 +364,7 @@ pbd_realtime_pthread_create (
 	if (stacksize > 0) {
 		pthread_attr_setstacksize (&attr, stacksize + pbd_stack_size ());
 	}
+	DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Start Realtime Thread policy = %1 priority = %2 stacksize = 0x%3%4\n", policy, priority, std::hex, stacksize));
 	rv = pthread_create (thread, &attr, start_routine, arg);
 	pthread_attr_destroy (&attr);
 	return rv;
