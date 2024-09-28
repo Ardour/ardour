@@ -1310,7 +1310,6 @@ RouteTimeAxisView::find_next_region_boundary (timepos_t const & pos, int32_t dir
 void
 RouteTimeAxisView::fade_range (TimeSelection& selection)
 {
-	std::shared_ptr<Playlist> what_we_got;
 	std::shared_ptr<Track> tr = track ();
 	std::shared_ptr<Playlist> playlist;
 
@@ -1328,11 +1327,7 @@ RouteTimeAxisView::fade_range (TimeSelection& selection)
 
 	playlist->fade_range (time);
 
-	vector<Command*> cmds;
-	playlist->rdiff (cmds);
-	_session->add_commands (cmds);
-	_session->add_command (new StatefulDiffCommand (playlist));
-
+	playlist->rdiff_and_add_command (_session);
 }
 
 void
