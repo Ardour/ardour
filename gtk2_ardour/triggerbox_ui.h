@@ -56,6 +56,8 @@ public:
 	ArdourCanvas::Rectangle* follow_button;
 	ArdourCanvas::Text*      name_text;
 
+	void box_rec_enable_changed ();
+
 	void draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float size, float scale) const;
 	void draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, ARDOUR::FollowAction const & icon, float size, float scale) const;
 
@@ -83,8 +85,6 @@ public:
 private:
 	TriggerStrip& _strip;
 	bool   _grabbed;
-	double _poly_size;
-	double _poly_margin;
 
 	int  _drag_start_x;
 	int  _drag_start_y;
@@ -102,8 +102,10 @@ private:
 
 	void owner_prop_change (PBD::PropertyChange const&);
 	void owner_color_changed ();
+	void rec_enable_change ();
 
 	PBD::ScopedConnection _owner_prop_connection;
+	PBD::ScopedConnectionList _rec_enable_connections;
 };
 
 class TriggerBoxUI : public ArdourCanvas::Rectangle
