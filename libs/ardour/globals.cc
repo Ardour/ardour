@@ -815,7 +815,8 @@ ARDOUR::init_post_engine (uint32_t start_cnt)
 		}
 	}
 
-	BaseUI::set_thread_priority (pbd_absolute_rt_priority (PBD_SCHED_FIFO, PBD_RT_PRI_CTRL));
+	/* set/update thread priority relative to backend's [jack_]client_real_time_priority */
+	BaseUI::set_thread_priority (PBD_RT_PRI_CTRL);
 
 	TransportMasterManager::instance ().restart ();
 }
