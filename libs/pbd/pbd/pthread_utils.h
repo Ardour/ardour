@@ -57,6 +57,7 @@
 # define PBD_RT_PRI_MAIN pbd_pthread_priority (THREAD_MAIN)
 # define PBD_RT_PRI_MIDI pbd_pthread_priority (THREAD_MIDI)
 # define PBD_RT_PRI_PROC pbd_pthread_priority (THREAD_PROC)
+# define PBD_RT_PRI_CTRL pbd_pthread_priority (THREAD_CTRL)
 
 LIBPBD_API int  pthread_create_and_store (std::string name, pthread_t  *thread, void * (*start_routine)(void *), void * arg, uint32_t stacklimit = 0x80000 /*512kB*/);
 LIBPBD_API void pthread_cancel_one (pthread_t thread);
@@ -65,10 +66,13 @@ LIBPBD_API void pthread_kill_all (int signum);
 LIBPBD_API const char* pthread_name ();
 LIBPBD_API void pthread_set_name (const char* name);
 
+LIBPBD_API void pbd_set_engine_rt_priority (int);
+
 enum PBDThreadClass {
 	THREAD_MAIN, // main audio I/O thread
 	THREAD_MIDI, // MIDI I/O threads
 	THREAD_PROC, // realtime worker
+	THREAD_CTRL, // Automation watch, BaseUI
 	THREAD_IO    // non-realtime I/O
 };
 

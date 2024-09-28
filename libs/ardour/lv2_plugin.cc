@@ -607,7 +607,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	static const int32_t _min_block_length = 1;   // may happen during split-cycles
 	static const int32_t _max_block_length = 8192; // max possible (with all engines and during export)
 	static const int32_t rt_policy = PBD_SCHED_FIFO;
-	static const int32_t rt_priority = pbd_absolute_rt_priority (PBD_SCHED_FIFO, AudioEngine::instance()->client_real_time_priority () - 1);
+	static const int32_t rt_priority = pbd_absolute_rt_priority (PBD_SCHED_FIFO, PBD_RT_PRI_PROC);
 	static const int32_t hw_concurrency = how_many_dsp_threads ();
 	/* Consider updating max-block-size whenever the buffersize changes.
 	 * It requires re-instantiating the plugin (which is a non-realtime operation),

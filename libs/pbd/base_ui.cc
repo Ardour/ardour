@@ -50,7 +50,7 @@ using namespace PBD;
 using namespace Glib;
 
 uint64_t BaseUI::rt_bit = 1;
-int BaseUI::_thread_priority = PBD_RT_PRI_PROC - 1;
+int BaseUI::_thread_priority = PBD_RT_PRI_CTRL;
 
 BaseUI::RequestType BaseUI::CallSlot = BaseUI::new_request_type();
 BaseUI::RequestType BaseUI::Quit = BaseUI::new_request_type();
