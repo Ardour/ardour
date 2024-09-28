@@ -555,31 +555,9 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 		samplecnt_t capacity;
 
 		AudioData () : length (0), capacity (0) {}
+		~AudioData ();
 
-		samplecnt_t append (Sample const * src, samplecnt_t cnt, uint32_t chan) {
-			if (chan >= size()) {
-				return -1;
-			}
-			if (length + cnt >= capacity) {
-				return -1;
-			}
-			samplecnt_t to_copy = std::min (cnt, (capacity - length));
-			memcpy (at(chan), src, cnt * sizeof (Sample));
-			return to_copy;
-		}
-
-		samplecnt_t read (Sample * dst, samplecnt_t offset, samplecnt_t cnt, uint32_t chan) {
-			if (chan >= size()) {
-				return -1;
-			}
-			if (offset + cnt > length) {
-				return -1;
-			}
-			samplecnt_t to_copy = std::min (cnt, (length - (offset + cnt)));
-			memcpy (dst, at (chan) + offset, to_copy * sizeof (Sample));
-			return to_copy;
-		}
-
+		samplecnt_t append (Sample const * src, samplecnt_t cnt, uint32_t chan);
 		void alloc (samplecnt_t cnt, uint32_t nchans);
 	};
 
@@ -796,7 +774,6 @@ struct SlotArmInfo {
 	Trigger& slot;
 	Temporal::timepos_t start;
 	Temporal::timepos_t end;
-	samplecnt_t capture_length;
 	RTMidiBuffer* midi_buf; /* assumed large enough */
 	RTMidiBufferBeats* beats; /* will take over data allocated for midi_but */
 	AudioTrigger::AudioData audio_buf;
