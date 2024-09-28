@@ -369,7 +369,7 @@ pbd_realtime_pthread_create (
 	if (stacksize > 0) {
 		pthread_attr_setstacksize (&attr, stacksize + pbd_stack_size ());
 	}
-	DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Start Realtime Thread policy = %1 priority = %2 stacksize = 0x%3%4\n", policy, priority, std::hex, stacksize));
+	DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Start Realtime Thread policy = %1 priority = %2 stacksize = 0x%3%4\n", policy, parm.sched_priority, std::hex, stacksize));
 	rv = pthread_create (thread, &attr, start_routine, arg);
 	pthread_attr_destroy (&attr);
 	return rv;
@@ -381,6 +381,8 @@ pbd_set_thread_priority (pthread_t thread, const int policy, int priority)
 	struct sched_param param;
 	memset (&param, 0, sizeof (param));
 	param.sched_priority = pbd_absolute_rt_priority (policy, priority);
+
+	DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Change '%1' to policy = %2 priority = %3\n", pthread_name(), policy, param.sched_priority));
 
 	return pthread_setschedparam (thread, SCHED_FIFO, &param);
 }
