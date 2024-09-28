@@ -80,7 +80,7 @@ TriggerEntry::TriggerEntry (Item* item, TriggerStrip& s, TriggerReference tr)
 	play_button = new ArdourCanvas::Rectangle (this);
 	play_button->set_outline (true);
 	play_button->set_fill (true);
-	play_button->name = string_compose ("playbutton %1", tr.slot());
+	play_button->name = string_compose ("playbutton %1", tref.slot());
 	play_button->show ();
 
 	follow_button = new ArdourCanvas::Rectangle (this);
@@ -103,6 +103,8 @@ TriggerEntry::TriggerEntry (Item* item, TriggerStrip& s, TriggerReference tr)
 
 	/* this will trigger a call to on_trigger_changed() */
 	set_trigger (tr);
+
+	trigger()->ArmChanged.connect (_rec_enable_connections, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::rec_enable_change, this), gui_context());
 
 	/* DnD Source */
 	GtkCanvas* gtkcanvas = static_cast<GtkCanvas*> (canvas ());
@@ -127,10 +129,17 @@ TriggerEntry::TriggerEntry (Item* item, TriggerStrip& s, TriggerReference tr)
 	dynamic_cast<Stripable*> (tref.box()->owner ())->presentation_info ().Change.connect (_owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
 
 	selection_change ();
+	tref.box()->RecEnableChanged.connect (_rec_enable_connections, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::rec_enable_change, this), gui_context());
 }
 
 TriggerEntry::~TriggerEntry ()
 {
+}
+
+void
+TriggerEntry::rec_enable_change ()
+{
+	redraw ();
 }
 
 void
@@ -166,10 +175,8 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 	follow_button->set (ArdourCanvas::Rect (width - height, 0, width, height));
 
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
-	_poly_margin       = 2. * scale;
-	_poly_size         = height - 2 * _poly_margin;
-
-	float font_margin = 2. * scale;
+	double _poly_margin = 2. * scale;
+	double font_margin = 2. * scale;
 
 	name_text->size_allocate (ArdourCanvas::Rect (0, 0, width, height - font_margin * 2));
 	float tleft = height;                                                 // make room for the play button
@@ -274,14 +281,30 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 	bool active = trigger ()->active ();
 
 	if (!trigger ()->region ()) {
-		/* no content in this slot, it is only a Stop button */
-		context->move_to (margin, margin);
-		context->rel_line_to (size, 0);
-		context->rel_line_to (0, size);
-		context->rel_line_to (-size, 0);
-		context->rel_line_to (0, -size);
-		set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
-		context->stroke ();
+		if (tref.box()->record_enabled()) {
+
+			context->arc (margin + size/2., margin + size/2., size/2., 0., 360.0 * (M_PI/180.0));
+
+			if (trigger()->armed()) {
+				set_source_rgba (context, UIConfiguration::instance ().color ("record enable button: fill active"));
+				context->fill ();
+			} else {
+				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
+				context->fill_preserve ();
+				set_source_rgba (context, UIConfiguration::instance ().color ("record enable button: fill active"));
+				context->stroke ();
+			}
+
+		} else {
+			/* no content in this slot, it is only a Stop button */
+			context->move_to (margin, margin);
+			context->rel_line_to (size, 0);
+			context->rel_line_to (0, size);
+			context->rel_line_to (-size, 0);
+			context->rel_line_to (0, -size);
+			set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
+			context->stroke ();
+		}
 		return;
 	}
 
