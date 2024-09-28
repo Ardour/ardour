@@ -234,9 +234,9 @@ AudioRegion::register_properties ()
 	, _fade_before_fx (Properties::fade_before_fx, other->_fade_before_fx) \
 	, _scale_amplitude (Properties::scale_amplitude, other->_scale_amplitude) \
 	, _fade_in (Properties::fade_in, std::shared_ptr<AutomationList> (new AutomationList (*other->_fade_in.val()))) \
-	, _inverse_fade_in (Properties::fade_in, std::shared_ptr<AutomationList> (new AutomationList (*other->_inverse_fade_in.val()))) \
-	, _fade_out (Properties::fade_in, std::shared_ptr<AutomationList> (new AutomationList (*other->_fade_out.val()))) \
-	, _inverse_fade_out (Properties::fade_in, std::shared_ptr<AutomationList> (new AutomationList (*other->_inverse_fade_out.val())))
+	, _inverse_fade_in (Properties::inverse_fade_in, std::shared_ptr<AutomationList> (new AutomationList (*other->_inverse_fade_in.val()))) \
+	, _fade_out (Properties::fade_out, std::shared_ptr<AutomationList> (new AutomationList (*other->_fade_out.val()))) \
+	, _inverse_fade_out (Properties::inverse_fade_out, std::shared_ptr<AutomationList> (new AutomationList (*other->_inverse_fade_out.val())))
 /* a Session will reset these to its chosen defaults by calling AudioRegion::set_default_fade() */
 
 void
