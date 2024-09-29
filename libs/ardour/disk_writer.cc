@@ -109,8 +109,9 @@ DiskWriter::WriterChannelInfo::resize (samplecnt_t bufsize)
 int
 DiskWriter::add_channel_to (std::shared_ptr<ChannelList> c, uint32_t how_many)
 {
+	samplecnt_t bufsz = std::max<samplecnt_t> (_chunk_samples * 2, _session.butler()->audio_capture_buffer_size());
 	while (how_many--) {
-		c->push_back (new WriterChannelInfo (_session.butler()->audio_capture_buffer_size()));
+		c->push_back (new WriterChannelInfo (bufsz));
 		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: new writer channel, write space = %2 read = %3\n",
 		                                            name(),
 		                                            c->back()->wbuf->write_space(),
@@ -1386,8 +1387,9 @@ DiskWriter::adjust_buffering ()
 {
 	std::shared_ptr<ChannelList const> c = channels.reader();
 
+	samplecnt_t bufsz = std::max<samplecnt_t> (_chunk_samples * 2, _session.butler()->audio_capture_buffer_size());
 	for (auto const chan : *c) {
-		chan->resize (_session.butler()->audio_capture_buffer_size());
+		chan->resize (bufsz);
 	}
 }
 

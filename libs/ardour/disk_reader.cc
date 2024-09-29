@@ -113,8 +113,9 @@ DiskReader::ReaderChannelInfo::resize_preloop (samplecnt_t bufsize)
 int
 DiskReader::add_channel_to (std::shared_ptr<ChannelList> c, uint32_t how_many)
 {
+	samplecnt_t bufsz = std::max<samplecnt_t> (_chunk_samples * 2, _session.butler ()->audio_playback_buffer_size ());
 	while (how_many--) {
-		c->push_back (new ReaderChannelInfo (_session.butler ()->audio_playback_buffer_size (), loop_fade_length));
+		c->push_back (new ReaderChannelInfo (bufsz, loop_fade_length));
 		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("'%1': new reader channel, write space = %2 read = %3\n",
 		                                            name (),
 		                                            c->back ()->rbuf->write_space (),
@@ -236,8 +237,10 @@ DiskReader::adjust_buffering ()
 {
 	std::shared_ptr<ChannelList const> c = channels.reader ();
 
+	samplecnt_t bufsz = std::max<samplecnt_t> (_chunk_samples * 2, _session.butler ()->audio_playback_buffer_size ());
+
 	for (auto const& chan : *c) {
-		chan->resize (_session.butler ()->audio_playback_buffer_size ());
+		chan->resize (bufsz);
 	}
 }
 
