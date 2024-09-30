@@ -1131,15 +1131,15 @@ US2400Protocol::notify_record_state_changed ()
 			LedState ls;
 
 			switch (session->record_status()) {
-			case Session::Disabled:
+			case Disabled:
 				DEBUG_TRACE (DEBUG::US2400, "record state changed to disabled, LED off\n");
 				ls = off;
 				break;
-			case Session::Recording:
+			case Recording:
 				DEBUG_TRACE (DEBUG::US2400, "record state changed to recording, LED on\n");
 				ls = on;
 				break;
-			case Session::Enabled:
+			case Enabled:
 				DEBUG_TRACE (DEBUG::US2400, "record state changed to enabled, LED flashing\n");
 				ls = flashing;
 				break;

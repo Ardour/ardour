@@ -799,7 +799,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	static PBD::Signal0<void> CueRecordingChanged;
 
 	void set_record_enabled (bool yn);
-	bool record_enabled() const { return _record_enabled; }
+	RecordState record_enabled() const { return _record_state; }
 	PBD::Signal0<void> RecEnableChanged;
 
 	void arm_from_another_thread (Trigger& slot, samplepos_t, uint32_t chans);
@@ -955,7 +955,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	bool                     _locate_armed;
 	bool                     _cancel_locate_armed;
 	bool                     _fast_forwarding;
-	bool                     _record_enabled;
+	RecordState              _record_state;
 
 	PBD::PCGRand _pcg;
 
@@ -1018,8 +1018,6 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 
 	PBD::ScopedConnection stop_all_connection;
 	std::atomic<SlotArmInfo*> _arm_info;
-
-	static TriggerBox* currently_recording;
 
 	typedef  std::map<std::vector<uint8_t>,std::pair<int,int> > CustomMidiMap;
 	static CustomMidiMap _custom_midi_map;

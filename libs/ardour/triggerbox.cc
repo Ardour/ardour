@@ -3433,7 +3433,6 @@ CueRecords TriggerBox::cue_records (256);
 std::atomic<bool> TriggerBox::_cue_recording (false);
 PBD::Signal0<void> TriggerBox::CueRecordingChanged;
 bool TriggerBox::roll_requested = false;
-TriggerBox* TriggerBox::currently_recording (nullptr);
 bool TriggerBox::_learning = false;
 TriggerBox::CustomMidiMap TriggerBox::_custom_midi_map;
 std::pair<int,int> TriggerBox::learning_for;
@@ -3490,7 +3489,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _locate_armed (false)
 	, _cancel_locate_armed (false)
 	, _fast_forwarding (false)
-	, _record_enabled (false)
+	, _record_state (Disabled)
 	, requests (1024)
 	, _arm_info (nullptr)
 {
@@ -3547,12 +3546,8 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 
 	ai->start = t_samples;
 
-	if (currently_recording) {
-		currently_recording->disarm ();
-		currently_recording = nullptr;
-	}
-
 	_arm_info = ai;
+	_record_state = Enabled;
 }
 
 void
@@ -3567,7 +3562,7 @@ TriggerBox::finish_recording (BufferSet& bufs)
 	assert (ai);
 	ai->slot.captured (*ai, bufs);
 	_arm_info = nullptr;
-	currently_recording = nullptr;
+	_record_state = Disabled;
 }
 
 void
@@ -3584,7 +3579,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 	pframes_t offset = 0;
 	bool reached_end = false;
 
-	if (!ai->slot.armed() && (currently_recording == this)) {
+	if (!ai->slot.armed()) {
 		if (!ai->end) {
 			/* disarmed: compute end */
 			Beats start_b;
@@ -3602,7 +3597,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		}
 	}
 
-	if (speed == 0. && currently_recording == this) {
+	if (speed == 0.) {
 		/* We stopped the transport, so just stop immediately (no quantization) */
 		finish_recording (bufs);
 		return;
@@ -3626,7 +3621,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		/* Let's get going */
 		offset = ai->start.samples() - start_sample;
 		nframes -= offset;
-		currently_recording = this;
+		_record_state = Recording;
 	}
 
 	if ((ai->end.samples() != 0) && (start_sample <= ai->end.samples() && ai->end.samples() < end_sample)) {
@@ -3691,7 +3686,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 void
 TriggerBox::set_record_enabled (bool yn)
 {
-	_record_enabled = yn;
+	_record_state = yn ? Enabled : Disabled;
 	RecEnableChanged (); /* EMIT SIGNAL */
 }
 
