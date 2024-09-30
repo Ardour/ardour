@@ -306,20 +306,20 @@ TransportControlUI::blink_rec_enable (bool onoff)
 		return;
 	}
 
-	Session::RecordState const r = _session->record_status ();
+	RecordState const r = _session->record_status ();
 	bool const h = _session->have_rec_enabled_track ();
 
 	if (UIConfiguration::instance().get_no_strobe()) {
 		onoff = true;
 	}
 
-	if (r == Session::Enabled || (r == Session::Recording && !h)) {
+	if (r == Enabled || (r == Recording && !h)) {
 		if (onoff) {
 			rec_button.set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
 			rec_button.set_active_state (Gtkmm2ext::Off);
 		}
-	} else if (r == Session::Recording && h) {
+	} else if (r == Recording && h) {
 		rec_button.set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		rec_button.unset_active_state ();
