@@ -849,6 +849,10 @@ ApplicationBar::set_session (Session *s)
 		_action_script_call_btn[i].set_sizing_text ("88");
 		_action_script_call_btn[i].set_no_show_all ();
 	}
+
+	if (_have_layout) {
+		repack_transport_hbox();
+	}
 }
 
 void
@@ -989,9 +993,6 @@ ApplicationBar::parameter_changed (std::string p)
 		size_t m = _session->config.get_record_mode ();
 		assert (m < _record_mode_strings.size ());
 		_record_mode_selector.set_active (_record_mode_strings[m]);
-	} else if (p == "no-strobe") {
-//		stop_clocking ();
-//		start_clocking ();
 	}
 }
 
@@ -1122,9 +1123,7 @@ ApplicationBar::map_transport_state ()
 		_record_mode_selector.set_sensitive (!_session->actively_recording ());
 	} else {
 		_record_mode_selector.set_sensitive (true);
-//		update_disk_space ();
 	}
-
 }
 
 void
