@@ -63,5 +63,6 @@ private:
 
 	bool               _have_layout;
 	BasicUI*           _basic_ui;
+	Gtk::Table         _table;
 	TransportControlUI _transport_ctrl;
 };

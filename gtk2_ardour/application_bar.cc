@@ -126,7 +126,21 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_transport_ctrl.setup (ARDOUR_UI::instance ());
 	_transport_ctrl.map_actions ();
 
-	pack_start(_transport_ctrl, false, false);
+	int vpadding = 1;
+	int hpadding = 2;
+	int col = 0;
+#define TCOL col, col + 1
+
+	_table.attach (_transport_ctrl, TCOL, 0, 1 , SHRINK, SHRINK, 0, 0);
+//	_table.attach (*ssbox,         TCOL, 1, 2 , FILL,   SHRINK, 0, 0);
+	++col;
+
+
+
+	_table.set_spacings (0);
+	_table.set_row_spacings (4);
+	_table.set_border_width (1);
+	pack_start(_table, false, false);
 }
 
 void
