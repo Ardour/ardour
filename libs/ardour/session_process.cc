@@ -348,6 +348,9 @@ Session::calc_preroll_subcycle (samplecnt_t ns) const
 {
 	std::shared_ptr<RouteList const> r = routes.reader ();
 	for (auto const& i : *r) {
+		if (!i->active ()) {
+			continue;
+		}
 		samplecnt_t route_offset = i->playback_latency ();
 		if (_remaining_latency_preroll > route_offset + ns) {
 			/* route will no-roll for complete pre-roll cycle */
