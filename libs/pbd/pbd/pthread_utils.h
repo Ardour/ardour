@@ -92,7 +92,7 @@ LIBPBD_API int pbd_realtime_pthread_create (
 		void *arg);
 
 LIBPBD_API int  pbd_absolute_rt_priority (int policy, int priority);
-LIBPBD_API int  pbd_set_thread_priority (pthread_t, const int policy, int priority);
+LIBPBD_API int  pbd_set_thread_priority (pthread_t, int policy, int priority);
 LIBPBD_API bool pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns, bool main);
 
 namespace PBD {

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2002-2015 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2007-2009 David Robillard <d@drobilla.net>
- * Copyright (C) 2015-2018 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2024 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -293,17 +293,15 @@ pbd_pthread_priority (PBDThreadClass which)
 #ifdef PLATFORM_WINDOWS
 	switch (which) {
 		case THREAD_MAIN:
-			return -1;
+			return -1; // THREAD_PRIORITY_TIME_CRITICAL (15)
 		case THREAD_MIDI:
-			return -2;
-		default:
 		case THREAD_PROC:
-			return -2;
+		case THREAD_CTRL:
+		default:
+			return -14;  // THREAD_PRIORITY_HIGHEST (2)
 		case THREAD_IO:
-			/* https://github.com/mingw-w64/mingw-w64/blob/master/mingw-w64-libraries/winpthreads/src/sched.c
-			 * -> THREAD_PRIORITY_HIGHEST
-			 */
-			return -13;
+			/* https://github.com/mingw-w64/mingw-w64/blob/master/mingw-w64-libraries/winpthreads/src/sched.c */
+			return -15; // THREAD_PRIORITY_ABOVE_NORMAL (1)
 	}
 #else
 	int base = base_priority_relative_to_max;
@@ -335,8 +333,8 @@ int
 pbd_absolute_rt_priority (int policy, int priority)
 {
 	/* POSIX requires a spread of at least 32 steps between min..max */
-	const int p_min = sched_get_priority_min (policy); // Linux: 1
-	const int p_max = sched_get_priority_max (policy); // Linux: 99
+	const int p_min = sched_get_priority_min (policy); // Linux: 1   Windows -15
+	const int p_max = sched_get_priority_max (policy); // Linux: 99  Windows +15
 
 	/* priority is relative to the max */
 	assert (priority < 0);
@@ -376,8 +374,12 @@ pbd_realtime_pthread_create (
 }
 
 int
-pbd_set_thread_priority (pthread_t thread, const int policy, int priority)
+pbd_set_thread_priority (pthread_t thread, int policy, int priority)
 {
+#if defined PLATFORM_WINDOWS
+	policy = SCHED_OTHER;
+#endif
+
 	struct sched_param param;
 	memset (&param, 0, sizeof (param));
 	param.sched_priority = pbd_absolute_rt_priority (policy, priority);
