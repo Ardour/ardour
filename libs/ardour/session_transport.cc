@@ -2142,10 +2142,13 @@ Session::transport_will_roll_forwards () const
 }
 
 double
-Session::transport_speed() const
+Session::transport_speed (bool incl_preroll) const
 {
 	if (_transport_fsm->transport_speed() != _transport_fsm->transport_speed()) {
 		// cerr << "\n\n!!TS " << _transport_fsm->transport_speed() << " TFSM::speed " << _transport_fsm->transport_speed() << " via " << _transport_fsm->current_state() << endl;
+	}
+	if (incl_preroll) {
+		return _transport_fsm->transport_speed();
 	}
 	return _count_in_samples > 0 ? 0. : _transport_fsm->transport_speed();
 }

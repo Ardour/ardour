@@ -811,7 +811,7 @@ public:
 
 	double engine_speed() const { return _engine_speed; }
 	double actual_speed() const;
-	double transport_speed() const;
+	double transport_speed (bool incl_preroll = false) const;
 	/** @return true if the transport state (TFSM) is stopped */
 	bool   transport_stopped() const;
 	/** @return true if the transport state (TFSM) is stopped or stopping */

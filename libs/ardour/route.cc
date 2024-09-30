@@ -410,7 +410,7 @@ Route::process_output_buffers (BufferSet& bufs,
 		_pannable->automation_run (start_sample, nframes);
 	}
 
-	const int speed = (is_auditioner() ? 1 : _session.transport_speed ());
+	const int speed = (is_auditioner() ? 1 : _session.transport_speed (true));
 	assert (speed == -1 || speed == 0 || speed == 1);
 
 	const samplecnt_t output_latency = speed * _output_latency;
@@ -4050,7 +4050,7 @@ Route::latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_
 		return nframes;
 	}
 	if (!_disk_reader) {
-		if (_session.transport_speed() < 0) {
+		if (_session.transport_speed (true) < 0) {
 			start_sample += latency_preroll;
 			end_sample   += latency_preroll;
 		} else {
@@ -4060,12 +4060,12 @@ Route::latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_
 		return nframes;
 	}
 
-	if (latency_preroll > playback_latency ()) {
+	if (latency_preroll >= playback_latency ()) {
 		no_roll_unlocked (nframes, start_sample - latency_preroll, end_sample - latency_preroll, false);
 		return 0;
 	}
 
-	if (_session.transport_speed() < 0) {
+	if (_session.transport_speed (true) < 0) {
 		start_sample += latency_preroll;
 		end_sample   += latency_preroll;
 	} else {
