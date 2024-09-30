@@ -3030,7 +3030,7 @@ VST3PI::setContextInfoValue (FIDString id, double value)
 			return kInvalidArgument; // send index out of bounds
 		}
 	} else {
-		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::setContextInfoValue<double>: unsupported ID\n");
+		DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::setContextInfoValue<double>: unsupported ID %1\n", id));
 		return kInvalidArgument;
 	}
 	return kResultOk;
@@ -3071,7 +3071,7 @@ VST3PI::setContextInfoValue (FIDString id, int32 value)
 			s->session ().set_control (ac, value != 0 ? 1 : 0, Controllable::NoGroup);
 		}
 	} else {
-		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::setContextInfoValue<int>: unsupported ID\n");
+		DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::setContextInfoValue<int>: unsupported ID %1\n", id));
 		return kNotImplemented;
 	}
 	return kResultOk;
@@ -3101,6 +3101,7 @@ VST3PI::beginEditContextInfoValue (FIDString id)
 	}
 	std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 	if (!ac) {
+		DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::beginEditContextInfoValue %1 -- invalid AC\n", id));
 		return kInvalidArgument;
 	}
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::beginEditContextInfoValue %1\n", id));
@@ -3117,6 +3118,7 @@ VST3PI::endEditContextInfoValue (FIDString id)
 	}
 	std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 	if (!ac) {
+		DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::endEditContextInfoValue %1 -- invalid AC\n", id));
 		return kInvalidArgument;
 	}
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::endEditContextInfoValue %1\n", id));
