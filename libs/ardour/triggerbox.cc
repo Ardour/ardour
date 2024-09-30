@@ -3425,10 +3425,6 @@ SlotArmInfo::~SlotArmInfo()
 	delete midi_buf;
 	delete beats;
 	delete stretcher;
-
-	for (auto & ab : audio_buf) {
-		delete [] ab;
-	}
 }
 
 Temporal::BBT_Offset TriggerBox::_assumed_trigger_duration (4, 0, 0);
