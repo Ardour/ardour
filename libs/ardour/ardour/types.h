@@ -984,6 +984,13 @@ enum SelectionOperation {
 	SelectionExtend /* UI only operation, not core */
 };
 
+enum RecordState {
+	Disabled = 0,
+	Enabled = 1,
+	Recording = 2
+};
+
+
 } // namespace ARDOUR
 
 /* for now, break the rules and use "using" to make this "global" */

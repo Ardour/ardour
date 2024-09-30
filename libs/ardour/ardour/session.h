@@ -211,12 +211,6 @@ class LIBARDOUR_API Session : public PBD::HistoryOwner,
                               public Temporal::TimeDomainProvider
 {
 public:
-	enum RecordState {
-		Disabled = 0,
-		Enabled = 1,
-		Recording = 2
-	};
-
 	/* a new session might have non-empty mix_template, an existing session should always have an empty one.
 	   the bus profile can be null if no master out bus is required.
 	*/

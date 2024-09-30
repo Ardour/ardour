@@ -3162,9 +3162,9 @@ LuaBindings::common (lua_State* L)
 		.beginNamespace ("Session")
 
 		.beginNamespace ("RecordState")
-		.addConst ("Disabled", ARDOUR::Session::RecordState(Session::Disabled))
-		.addConst ("Enabled", ARDOUR::Session::RecordState(Session::Enabled))
-		.addConst ("Recording", ARDOUR::Session::RecordState(Session::Recording))
+		.addConst ("Disabled", ARDOUR::RecordState(ARDOUR::Disabled))
+		.addConst ("Enabled", ARDOUR::RecordState(ARDOUR::Enabled))
+		.addConst ("Recording", ARDOUR::RecordState(ARDOUR::Recording))
 		.endNamespace ()
 
 		.endNamespace () // end Session enums
