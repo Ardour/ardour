@@ -47,6 +47,7 @@
 
 #include "gtkmm2ext/application.h"
 #include "gtkmm2ext/doi.h"
+#include "gtkmm2ext/utils.h"
 
 #include "widgets/prompter.h"
 

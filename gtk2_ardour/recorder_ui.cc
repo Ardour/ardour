@@ -53,6 +53,7 @@
 #include "actions.h"
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
+#include "audio_clock.h"
 #include "gui_thread.h"
 #include "instrument_selector.h"
 #include "public_editor.h"
@@ -1838,7 +1839,7 @@ RecorderUI::RecRuler::render (Cairo::RefPtr<Cairo::Context> const& cr, cairo_rec
 
 		char buf[32];
 		int lw, lh;
-		AudioClock::print_minsec (when, buf, sizeof (buf), _session->sample_rate (), 0);
+		AudioClock::AudioClock::print_minsec (when, buf, sizeof (buf), _session->sample_rate (), 0);
 		_layout->set_text (string(buf).substr(1));
 		_layout->get_pixel_size (lw, lh);
 

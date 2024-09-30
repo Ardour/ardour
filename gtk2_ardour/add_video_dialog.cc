@@ -22,6 +22,7 @@
 #include <sigc++/bind.h>
 #include <curl/curl.h>
 
+#include <gtkmm/alignment.h>
 #include <gtkmm/box.h>
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/scrolledwindow.h>

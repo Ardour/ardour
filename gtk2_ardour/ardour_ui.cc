@@ -180,7 +180,6 @@
 #include "splash.h"
 #include "template_dialog.h"
 #include "time_axis_view_item.h"
-#include "time_info_box.h"
 #include "timers.h"
 #include "application_bar.h" //TODO: remove this and put in Rec/Edit/Mix/Cue
 #include "transport_masters_dialog.h"

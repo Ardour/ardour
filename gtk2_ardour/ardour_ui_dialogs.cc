@@ -70,7 +70,6 @@
 #include "meter_patterns.h"
 #include "monitor_section.h"
 #include "midi_tracer.h"
-#include "mini_timeline.h"
 #include "mixer_ui.h"
 #include "plugin_dspload_window.h"
 #include "plugin_manager_ui.h"
@@ -84,7 +83,6 @@
 #include "speaker_dialog.h"
 #include "splash.h"
 #include "sfdb_ui.h"
-#include "time_info_box.h"
 #include "timers.h"
 #include "application_bar.h"  //TODO: remove
 #include "transport_masters_dialog.h"

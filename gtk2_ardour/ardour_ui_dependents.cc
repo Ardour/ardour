@@ -54,7 +54,6 @@
 #include "keyeditor.h"
 #include "rc_option_editor.h"
 #include "route_params_ui.h"
-#include "time_info_box.h"
 #include "trigger_ui.h"
 #include "step_entry.h"
 #include "opts.h"

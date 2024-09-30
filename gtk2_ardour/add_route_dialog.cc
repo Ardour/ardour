@@ -26,6 +26,8 @@
 #include <cmath>
 
 #include <sigc++/bind.h>
+
+#include <gtkmm/alignment.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/separator.h>

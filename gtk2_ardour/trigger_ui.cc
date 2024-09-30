@@ -40,6 +40,7 @@
 #include "ardour/triggerbox.h"
 
 #include "gtkmm2ext/colors.h"
+#include <gtkmm2ext/utils.h>
 
 #include "slot_properties_box.h"
 

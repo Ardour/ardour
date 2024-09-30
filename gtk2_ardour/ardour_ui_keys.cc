@@ -42,6 +42,8 @@
 #include "public_editor.h"
 #include "virtual_keyboard_window.h"
 
+#include "gtkmm2ext/utils.h"
+
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtkmm2ext;

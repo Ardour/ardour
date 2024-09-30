@@ -89,7 +89,6 @@
 #include "ardour_window.h"
 #include "editing.h"
 #include "enums.h"
-#include "mini_timeline.h"
 #include "shuttle_control.h"
 #include "startup_fsm.h"
 #include "transport_control.h"

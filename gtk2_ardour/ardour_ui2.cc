@@ -68,7 +68,6 @@
 #include "application_bar.h" //TODO: move to each window
 #include "trigger_page.h"
 #include "utils.h"
-#include "time_info_box.h"
 #include "midi_tracer.h"
 #include "global_port_matrix.h"
 #include "location_ui.h"
