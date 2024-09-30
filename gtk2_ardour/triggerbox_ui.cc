@@ -42,7 +42,6 @@
 #include "canvas/polygon.h"
 #include "canvas/text.h"
 
-#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/utils.h"
 
 #include "ardour_ui.h"
@@ -139,7 +138,18 @@ TriggerEntry::~TriggerEntry ()
 void
 TriggerEntry::rec_enable_change ()
 {
+	set_play_button_tooltip ();
 	redraw ();
+}
+
+void
+TriggerEntry::set_play_button_tooltip ()
+{
+	if (tref.box()->record_enabled()) {
+		play_button->set_tooltip (_("Record into this clip\nRight-click to select Launch Options for this clip"));
+	} else {
+		play_button->set_tooltip (_("Stop other clips on this track.\nRight-click to select Launch Options for this clip"));
+	}
 }
 
 void
@@ -283,13 +293,13 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 	if (!trigger ()->region ()) {
 		if (tref.box()->record_enabled()) {
 
-			context->arc (margin + size/2., margin + size/2., size/2., 0., 360.0 * (M_PI/180.0));
+			context->arc (margin + (size * 0.75), margin + (size * 0.75), (size * 0.75), 0., 360.0 * (M_PI/180.0));
 
 			if (trigger()->armed()) {
 				set_source_rgba (context, UIConfiguration::instance ().color ("record enable button: fill active"));
 				context->fill ();
 			} else {
-				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
+				set_source_rgba (context, bg_color());
 				context->fill_preserve ();
 				set_source_rgba (context, UIConfiguration::instance ().color ("record enable button: fill active"));
 				context->stroke ();
@@ -493,11 +503,10 @@ TriggerEntry::on_trigger_changed (PropertyChange const& change)
 	if (change.contains (ARDOUR::Properties::name)) {
 		if (trigger ()->region ()) {
 			name_text->set (short_version (trigger ()->name (), 16));
-			play_button->set_tooltip (_("Launch this clip\nRight-click to select Launch Options for this clip"));
 		} else {
 			name_text->set ("");
-			play_button->set_tooltip (_("Stop other clips on this track.\nRight-click to select Launch Options for this clip"));
 		}
+		set_play_button_tooltip ();
 	}
 
 	set_widget_colors (); //depending on the state, this might change a color and queue a redraw
@@ -518,16 +527,23 @@ TriggerEntry::on_trigger_changed (PropertyChange const& change)
 	}
 }
 
-void
-TriggerEntry::set_widget_colors (TriggerEntry::EnteredState es)
+Color
+TriggerEntry::bg_color() const
 {
-	color_t bg_col = UIConfiguration::instance ().color ("theme:bg");
+	Color bg_col = UIConfiguration::instance ().color ("theme:bg");
 
 	//alternating darker bands
 	if ((tref.slot() / 2) % 2 == 0) {
 		bg_col = HSV (bg_col).darker (0.25).color ();
 	}
 
+	return bg_col;
+}
+
+void
+TriggerEntry::set_widget_colors (TriggerEntry::EnteredState es)
+{
+	color_t bg_col = bg_color ();
 	set_fill_color (bg_col);
 
 	//child widgets highlight when entered

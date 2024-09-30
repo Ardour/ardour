@@ -28,6 +28,8 @@
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 
+#include "gtkmm2ext/colors.h"
+
 #include "fitted_canvas_widget.h"
 
 #include "trigger_ui.h"
@@ -103,6 +105,8 @@ private:
 	void owner_prop_change (PBD::PropertyChange const&);
 	void owner_color_changed ();
 	void rec_enable_change ();
+	void set_play_button_tooltip ();
+	Gtkmm2ext::Color bg_color () const;
 
 	PBD::ScopedConnection _owner_prop_connection;
 	PBD::ScopedConnectionList _rec_enable_connections;
