@@ -1389,12 +1389,12 @@ RouteUI::blink_rec_display (bool blinkOn)
 
 	if (track()->rec_enable_control()->get_value()) {
 		switch (_session->record_status ()) {
-			case Session::Recording:
+			case Recording:
 				rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
 				break;
 
-			case Session::Disabled:
-			case Session::Enabled:
+			case Disabled:
+			case Enabled:
 				if (!UIConfiguration::instance().get_no_strobe() && UIConfiguration::instance().get_blink_rec_arm()) {
 					rec_enable_button->set_active_state ( blinkOn ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off );
 				} else {
