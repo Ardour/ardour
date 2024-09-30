@@ -287,7 +287,6 @@ Trigger::request_trigger_delete (Trigger* t)
 void
 Trigger::arm ()
 {
-	std::cerr << "T::arm\n";
 	/* XXX get audio channel count somehow */
 	_box.arm_from_another_thread (*this, _box.session().transport_sample(), 2);
 	_armed = true;
@@ -297,7 +296,6 @@ Trigger::arm ()
 void
 Trigger::disarm ()
 {
-	std::cerr << "T::disarm\n";
 	_box.disarm ();
 	_armed = false;
 	ArmChanged(); /* EMIT SIGNAL */
@@ -1919,7 +1917,6 @@ AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
 	}
 	data.length = ai.audio_buf.length;
 	data.capacity = ai.audio_buf.capacity;
-	std::cerr << "captured " << data.length << std::endl;
 
 	ai.audio_buf.clear (); /* data now owned by us, not SlotArmInfo */
 
@@ -3561,7 +3558,6 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 void
 TriggerBox::disarm ()
 {
-	std::cerr << "TB::disarm\n";
 }
 
 void
@@ -3579,14 +3575,14 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 {
 	using namespace Temporal;
 
-	const size_t n_buffers = bufs.count().n_audio();
 	SlotArmInfo* ai = _arm_info.load();
-	pframes_t offset = 0;
-	bool reached_end = false;
 
 	if (!ai) {
 		return;
 	}
+
+	pframes_t offset = 0;
+	bool reached_end = false;
 
 	if (!ai->slot.armed() && (currently_recording == this)) {
 		if (!ai->end) {
@@ -3601,7 +3597,6 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 
 			ai->slot.compute_quantized_transition (start_sample, now_beats, std::numeric_limits<Beats>::max(),
 			                                       t_bbt, t_beats, t_samples, tmap, ai->slot.quantization());
-			std::cerr << "disarm noticed at " << start_sample << " quantized by " << ai->slot.quantization() << " to " << t_samples << std::endl;
 			ai->end = t_samples;
 			return;
 		}
@@ -3642,13 +3637,15 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 
 	/* Audio */
 
+	const size_t n_buffers = bufs.count().n_audio();
+
 	if (n_buffers) {
 
 		/* AUDIO */
 
 		for (size_t n = 0; n < n_buffers; ++n) {
 			assert (ai->audio_buf.size() >= n);
-			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
+			AudioBuffer& buf (bufs.get_audio (n));
 			ai->audio_buf.append (buf.data() + offset, nframes, n);
 		}
 	}
@@ -5636,9 +5633,10 @@ TriggerBoxThread::build_audio_source (AudioTrigger* t)
 	PropertyList plist2;
 	plist2.add (ARDOUR::Properties::whole_file, false);
 	std::shared_ptr<Region> copy (RegionFactory::create (whole, plist2));
-	std::cerr << "Created copy region " << whole->name() << std::endl;
 
  	t->set_region_in_worker_thread_from_capture (copy);
+	/* make it loop */
+	t->set_follow_action0 (FollowAction::Again);
 }
 
 void
