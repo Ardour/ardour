@@ -23,6 +23,10 @@
 #include <stdint.h>
 #include <string>
 
+#ifdef PLATFORM_WINDOWS
+#include <windows.h>
+#endif
+
 #if !defined PLATFORM_WINDOWS && defined __GLIBC__
 #include <climits>
 #include <dlfcn.h>
@@ -54,6 +58,49 @@ static ThreadMap                         all_threads;
 static pthread_mutex_t                   thread_map_lock = PTHREAD_MUTEX_INITIALIZER;
 static Glib::Threads::Private<char>      thread_name (free);
 static int                               base_priority_relative_to_max = -20;
+
+#ifdef PLATFORM_WINDOWS
+static
+std::string GetLastErrorAsString()
+{
+	DWORD err = ::GetLastError();
+	if(err == 0) {
+		return std::string ();
+	}
+
+	LPSTR buf   = nullptr;
+	size_t size = FormatMessageA (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+	                              NULL, err, MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&buf, 0, NULL);
+
+	std::string rv (buf, size);
+	LocalFree (buf);
+	return rv;
+}
+
+static bool
+set_win_set_realtime_policy (pthread_t thread, int priority)
+{
+	if (priority < 12) {
+		return false;
+	}
+	bool ok = false;
+
+	if (SetPriorityClass (GetCurrentProcess (), 0x00000100 /* REALTIME_PRIORITY_CLASS */)) {
+		/* see https://learn.microsoft.com/en-us/windows/win32/procthread/scheduling-priorities */
+		ok = SetThreadPriority (pthread_gethandle (thread), priority);
+		DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Using Windows RT thread class. set priority: %1\n", ok ? "OK" : GetLastErrorAsString ()));
+	} else {
+		DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Cannot use Windows RT thread class: %1\n", GetLastErrorAsString ()));
+		ok = SetPriorityClass (GetCurrentProcess (), 0x00000080 /* HIGH_PRIORITY_CLASS */);
+		DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Using Windows high priority thread class: %1\n", ok ? "OK" : GetLastErrorAsString ()));
+		if (ok) {
+			ok = SetThreadPriority (pthread_gethandle (thread), priority);
+			DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Set Windows high thread priority: %1\n", ok ? "OK" : GetLastErrorAsString ()));
+		}
+	}
+	return ok;
+}
+#endif
 
 namespace PBD
 {
@@ -370,6 +417,12 @@ pbd_realtime_pthread_create (
 	DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Start Realtime Thread policy = %1 priority = %2 stacksize = 0x%3%4\n", policy, parm.sched_priority, std::hex, stacksize));
 	rv = pthread_create (thread, &attr, start_routine, arg);
 	pthread_attr_destroy (&attr);
+
+#ifdef PLATFORM_WINDOWS
+	if (0 == rv && thread && parm.sched_priority >= 12) {
+		set_win_set_realtime_policy (*thread, parm.sched_priority);
+	}
+#endif
 	return rv;
 }
 
@@ -385,6 +438,14 @@ pbd_set_thread_priority (pthread_t thread, int policy, int priority)
 	param.sched_priority = pbd_absolute_rt_priority (policy, priority);
 
 	DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Change '%1' to policy = %2 priority = %3\n", pthread_name(), policy, param.sched_priority));
+
+#ifdef PLATFORM_WINDOWS
+	if (thread && param.sched_priority >= 12) {
+		if (set_win_set_realtime_policy (thread, param.sched_priority)) {
+			return 0;
+		}
+	}
+#endif
 
 	return pthread_setschedparam (thread, SCHED_FIFO, &param);
 }
