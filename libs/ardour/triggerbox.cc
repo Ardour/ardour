@@ -3547,7 +3547,6 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 	ai->start = t_samples;
 
 	_arm_info = ai;
-	_record_state = Enabled;
 }
 
 void
@@ -3562,7 +3561,6 @@ TriggerBox::finish_recording (BufferSet& bufs)
 	assert (ai);
 	ai->slot.captured (*ai, bufs);
 	_arm_info = nullptr;
-	_record_state = Disabled;
 }
 
 void
@@ -3597,13 +3595,11 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		}
 	}
 
-	if (speed == 0.) {
-		/* We stopped the transport, so just stop immediately (no quantization) */
-		finish_recording (bufs);
-		return;
-	}
-
 	if (speed <= 0.) {
+		if (_record_state == Recording) {
+			/* We stopped the transport, so just stop immediately (no quantization) */
+			finish_recording (bufs);
+		}
 		/* we stopped or reversed, but were not recording. Nothing to do here */
 		return;
 	}
