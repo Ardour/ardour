@@ -61,6 +61,8 @@ ArdourFader::ArdourFader (Gtk::Adjustment& adj, int orientation, int fader_lengt
 {
 	update_unity_position ();
 
+	add_events (Gdk::TOUCH_UPDATE_MASK);
+
 	if (_orien == VERT) {
 		CairoWidget::set_size_request(_girth, _span);
 	} else {
@@ -462,6 +464,18 @@ ArdourFader::on_motion_notify_event (GdkEventMotion* ev)
 	}
 
 	return true;
+}
+
+bool
+ArdourFader::on_touch_update_event (GdkEventTouch* ev)
+{
+  GdkEventMotion mev;
+  mev.window = ev->window;
+  mev.time   = ev->time;
+  mev.x      = ev->x;
+  mev.y      = ev->y;
+  mev.state  = 0;
+  return ArdourFader::on_motion_notify_event (&mev);
 }
 
 /** @return pixel offset of the current value from the right or bottom of the fader */
