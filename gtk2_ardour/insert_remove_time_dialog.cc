@@ -89,7 +89,7 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 		_intersected_combo.append (_("stay in position"));
 		_intersected_combo.append (_("move"));
 		_intersected_combo.append (_("be split"));
-		_intersected_combo.set_active (0);
+		_intersected_combo.set_active (2);
 		table->attach (_intersected_combo, 1, 2, 2, 3);
 	}
 
