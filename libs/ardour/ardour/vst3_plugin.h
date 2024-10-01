@@ -359,6 +359,10 @@ private:
 	bool _no_kMono;
 	/* work around yabridge threading */
 	bool _restart_component_is_synced;
+	/* work around PSL calls during set_owner,
+	 * while the route holds a processor lock
+	 */
+	std::atomic<bool> _in_set_owner;
 };
 
 } // namespace Steinberg

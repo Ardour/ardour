@@ -158,7 +158,7 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	 * In Ardour, these are user-created sends that connect to user-created
 	 * Aux busses.
 	 */
-	virtual std::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const = 0;
+	virtual std::shared_ptr<AutomationControl> send_level_controllable (uint32_t n, bool locked = false) const = 0;
 	virtual std::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const = 0;
 	virtual std::shared_ptr<AutomationControl> send_pan_azimuth_controllable (uint32_t n) const = 0;
 	virtual std::shared_ptr<AutomationControl> send_pan_azimuth_enable_controllable (uint32_t n) const = 0;

@@ -1195,6 +1195,7 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 	, _rpc_queue (RouteProcessorChange::NoProcessorChange, false)
 	, _no_kMono (false)
 	, _restart_component_is_synced (false)
+	, _in_set_owner (false)
 {
 	using namespace std;
 	IPluginFactory* factory = m->factory ();
@@ -1835,9 +1836,13 @@ VST3PI::set_owner (SessionObject* o)
 		return;
 	}
 
+	_in_set_owner.store (true);
+
 	if (!setup_psl_info_handler ()) {
 		setup_info_listener ();
 	}
+
+	_in_set_owner.store (false);
 }
 
 void
@@ -2809,7 +2814,7 @@ VST3PI::automation_state_changed (uint32_t port, AutoState s, std::weak_ptr<Auto
 /* ****************************************************************************/
 
 static std::shared_ptr<AutomationControl>
-lookup_ac (SessionObject* o, FIDString id)
+lookup_ac (SessionObject* o, FIDString id, bool locked = false)
 {
 	Stripable* s = dynamic_cast<Stripable*> (o);
 	if (!s) {
@@ -2842,8 +2847,8 @@ lookup_ac (SessionObject* o, FIDString id)
 		 * recurive locks (deadlock, or double unlock crash).
 		 */
 		int send_id = atoi (id + strlen (ContextInfo::kSendLevel));
-		if (s->send_enable_controllable (send_id)) {
-			return s->send_level_controllable (send_id);
+		if (send_id >=0 && s->send_enable_controllable (send_id)) {
+			return s->send_level_controllable (send_id, locked);
 		}
 #endif
 	}
@@ -2967,6 +2972,7 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 		value = 2.0; // Config->get_max_gain();
 #ifdef MIXBUS
 		if (s->send_enable_controllable (0)) {
+			assert (s->send_level_controllable (0));
 			value = s->send_level_controllable (0)->upper (); // pow (10.0, .05 *  15.0);
 		}
 #endif
@@ -2983,11 +2989,12 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 			value = 0.5; // center
 		}
 	} else if (0 == strncmp (id, ContextInfo::kSendLevel, strlen (ContextInfo::kSendLevel))) {
-		std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id, _in_set_owner.load ());
 		if (ac) {
 			value = ac->get_value (); // gain cofficient
 			psl_subscribe_to (ac, id);
 		} else {
+			value = 0;
 			DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<double> invalid AC %1\n", id));
 			return kInvalidArgument; // send index out of bounds
 		}
@@ -3023,7 +3030,7 @@ VST3PI::setContextInfoValue (FIDString id, double value)
 			ac->set_value (ac->interface_to_internal (value, true), PBD::Controllable::NoGroup);
 		}
 	} else if (0 == strncmp (id, ContextInfo::kSendLevel, strlen (ContextInfo::kSendLevel))) {
-		std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id, _in_set_owner.load ());
 		if (ac) {
 			ac->set_value (value, Controllable::NoGroup);
 		} else {

@@ -553,7 +553,7 @@ public:
 	std::shared_ptr<AutomationControl> mapped_control (enum WellKnownCtrl, uint32_t band = 0) const;
 	std::shared_ptr<ReadOnlyControl>   mapped_output (enum WellKnownData) const;
 
-	std::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const;
+	std::shared_ptr<AutomationControl> send_level_controllable (uint32_t n, bool locked = false) const;
 	std::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const;
 	std::shared_ptr<AutomationControl> send_pan_azimuth_controllable (uint32_t n) const;
 	std::shared_ptr<AutomationControl> send_pan_azimuth_enable_controllable (uint32_t n) const;

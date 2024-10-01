@@ -5927,8 +5927,15 @@ Route::send_pan_azimuth_controllable (uint32_t n) const
 }
 
 std::shared_ptr<AutomationControl>
-Route::send_level_controllable (uint32_t n) const
+Route::send_level_controllable (uint32_t n, bool locked) const
 {
+	if (locked) {
+		/* calling thread has a WriterLock (_processor_lock)
+		 * we cannot call nth_send()
+		 */
+		return std::shared_ptr<AutomationControl>();
+	}
+
 	std::shared_ptr<Send> s = std::dynamic_pointer_cast<Send>(nth_send (n));
 	if (s) {
 		return s->gain_control ();

@@ -134,7 +134,7 @@ class LIBARDOUR_API VCA : public Stripable,
 	uint32_t eq_band_cnt () const { return 0; }
 	std::string eq_band_name (uint32_t) const { return std::string(); }
 
-	std::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const { return std::shared_ptr<AutomationControl>(); }
+	std::shared_ptr<AutomationControl> send_level_controllable (uint32_t n, bool locked = false) const { return std::shared_ptr<AutomationControl>(); }
 	std::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const { return std::shared_ptr<AutomationControl>(); }
 	std::shared_ptr<AutomationControl> send_pan_azimuth_controllable (uint32_t n) const { return std::shared_ptr<AutomationControl>(); }
 	std::shared_ptr<AutomationControl> send_pan_azimuth_enable_controllable (uint32_t n) const { return std::shared_ptr<AutomationControl>(); }
