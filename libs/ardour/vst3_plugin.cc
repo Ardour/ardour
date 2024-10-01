@@ -2964,12 +2964,12 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 	if (0 == strcmp (id, ContextInfo::kMaxVolume)) {
 		value = s->gain_control ()->upper ();
 	} else if (0 == strcmp (id, ContextInfo::kMaxSendLevel)) {
+		value = 2.0; // Config->get_max_gain();
 #ifdef MIXBUS
-		if (s->send_level_controllable (0)) {
+		if (s->send_enable_controllable (0)) {
 			value = s->send_level_controllable (0)->upper (); // pow (10.0, .05 *  15.0);
 		}
 #endif
-		value = 2.0; // Config->get_max_gain();
 	} else if (0 == strcmp (id, ContextInfo::kVolume)) {
 		std::shared_ptr<AutomationControl> ac = s->gain_control ();
 		value                                   = ac->get_value (); // gain coefficient  0..2 (1.0 = 0dB)
