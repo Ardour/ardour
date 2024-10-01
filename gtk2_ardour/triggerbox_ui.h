@@ -91,6 +91,7 @@ private:
 	int  _drag_start_x;
 	int  _drag_start_y;
 	bool _drag_active;
+	bool  rec_blink_on;
 
 	bool event (GdkEvent*);
 	void drag_begin (Glib::RefPtr<Gdk::DragContext> const&);
@@ -107,6 +108,8 @@ private:
 	void rec_enable_change ();
 	void set_play_button_tooltip ();
 	Gtkmm2ext::Color bg_color () const;
+	void blink_rec_enable (bool);
+	sigc::connection rec_blink_connection;
 
 	PBD::ScopedConnection _owner_prop_connection;
 	PBD::ScopedConnectionList _rec_enable_connections;
