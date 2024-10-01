@@ -69,6 +69,7 @@ TriggerEntry::TriggerEntry (Item* item, TriggerStrip& s, TriggerReference tr)
 	, _strip (s)
 	, _grabbed (false)
 	, _drag_active (false)
+	, rec_blink_on (false)
 {
 	set_layout_sensitive (true); // why???
 
@@ -104,6 +105,7 @@ TriggerEntry::TriggerEntry (Item* item, TriggerStrip& s, TriggerReference tr)
 	set_trigger (tr);
 
 	trigger()->ArmChanged.connect (_rec_enable_connections, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::rec_enable_change, this), gui_context());
+	tref.box()->RecEnableChanged.connect (_rec_enable_connections, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::rec_enable_change, this), gui_context());
 
 	/* DnD Source */
 	GtkCanvas* gtkcanvas = static_cast<GtkCanvas*> (canvas ());
@@ -128,7 +130,7 @@ TriggerEntry::TriggerEntry (Item* item, TriggerStrip& s, TriggerReference tr)
 	dynamic_cast<Stripable*> (tref.box()->owner ())->presentation_info ().Change.connect (_owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
 
 	selection_change ();
-	tref.box()->RecEnableChanged.connect (_rec_enable_connections, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::rec_enable_change, this), gui_context());
+	rec_enable_change ();
 }
 
 TriggerEntry::~TriggerEntry ()
@@ -138,16 +140,39 @@ TriggerEntry::~TriggerEntry ()
 void
 TriggerEntry::rec_enable_change ()
 {
+	switch (tref.box()->record_enabled()) {
+	case Recording:
+		break;
+	case Enabled:
+		if (!UIConfiguration::instance().get_no_strobe() && trigger()->armed()) {
+			rec_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &TriggerEntry::blink_rec_enable));
+		}
+		break;
+	case Disabled:
+		rec_blink_connection.disconnect ();
+		break;
+	}
+
 	set_play_button_tooltip ();
+	redraw ();
+}
+
+void
+TriggerEntry::blink_rec_enable (bool onoff)
+{
+	rec_blink_on = onoff;
 	redraw ();
 }
 
 void
 TriggerEntry::set_play_button_tooltip ()
 {
-	if (tref.box()->record_enabled()) {
+	switch (tref.box()->record_enabled()) {
+	case Recording:
+	case Enabled:
 		play_button->set_tooltip (_("Record into this clip\nRight-click to select Launch Options for this clip"));
-	} else {
+		break;
+	default:
 		play_button->set_tooltip (_("Stop other clips on this track.\nRight-click to select Launch Options for this clip"));
 	}
 }
@@ -291,22 +316,30 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 	bool active = trigger ()->active ();
 
 	if (!trigger ()->region ()) {
-		if (tref.box()->record_enabled()) {
 
-			context->arc (margin + (size * 0.75), margin + (size * 0.75), (size * 0.75), 0., 360.0 * (M_PI/180.0));
+		bool solid = false;
+		context->arc (margin + (size * 0.75), margin + (size * 0.75), (size * 0.75), 0., 360.0 * (M_PI/180.0));
 
+		switch (tref.box()->record_enabled()) {
+		case Enabled:
 			if (trigger()->armed()) {
-				set_source_rgba (context, UIConfiguration::instance ().color ("record enable button: fill active"));
-				context->fill ();
+				solid = rec_blink_on;
 			} else {
-				set_source_rgba (context, bg_color());
-				context->fill_preserve ();
-				set_source_rgba (context, UIConfiguration::instance ().color ("record enable button: fill active"));
-				context->stroke ();
+				solid = false;
 			}
+			break;
 
-		} else {
-			/* no content in this slot, it is only a Stop button */
+		case Recording:
+			if (trigger()->armed()) {
+				solid = true;
+			} else {
+				solid = false;
+			}
+			break;
+
+		case Disabled:
+			/* not recording and no content in this slot, it is only a Stop button */
+			std::cerr << tref.box() << " => Disabled!\n";
 			context->move_to (margin, margin);
 			context->rel_line_to (size, 0);
 			context->rel_line_to (0, size);
@@ -314,7 +347,19 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 			context->rel_line_to (0, -size);
 			set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
 			context->stroke ();
+			return;
 		}
+
+		if (solid) {
+			set_source_rgba (context, UIConfiguration::instance ().color ("record enable button: fill active"));
+			context->fill ();
+		} else {
+			set_source_rgba (context, bg_color());
+			context->fill_preserve ();
+			set_source_rgba (context, UIConfiguration::instance ().color ("record enable button: fill active"));
+			context->stroke ();
+		}
+
 		return;
 	}
 
