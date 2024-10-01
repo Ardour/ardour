@@ -43,6 +43,8 @@ DECLARE_DEFAULT_COMPARISONS (pthread_t) // Needed for 'DECLARE_DEFAULT_COMPARISO
                                         // if the type of object being contained has no appropriate comparison operators
                                         // defined (specifically, if operators '<' and '==' are undefined). This seems
                                         // to be the case with ptw32 'pthread_t' which is a simple struct.
+
+#define pthread_gethandle  pthread_getw32threadhandle_np
 #endif
 
 #ifdef __APPLE__
@@ -440,7 +442,7 @@ pbd_set_thread_priority (pthread_t thread, int policy, int priority)
 	DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Change '%1' to policy = %2 priority = %3\n", pthread_name(), policy, param.sched_priority));
 
 #ifdef PLATFORM_WINDOWS
-	if (thread && param.sched_priority >= 12) {
+	if (is_pthread_active (thread) && param.sched_priority >= 12) {
 		if (set_win_set_realtime_policy (thread, param.sched_priority)) {
 			return 0;
 		}
