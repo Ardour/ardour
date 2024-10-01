@@ -55,6 +55,7 @@ protected:
 
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	bool on_motion_notify_event (GdkEventMotion*);
+	bool on_touch_update_event (GdkEventTouch*);
 
 	void on_state_changed (Gtk::StateType);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);

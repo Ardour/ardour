@@ -62,6 +62,8 @@ public:
 protected:
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
+	bool on_touch_begin_event (GdkEventTouch*);
+	bool on_touch_end_event (GdkEventTouch*);
 	bool on_enter_notify_event (GdkEventCrossing* ev);
 	bool on_leave_notify_event (GdkEventCrossing* ev);
 	bool on_scroll_event (GdkEventScroll* ev);
