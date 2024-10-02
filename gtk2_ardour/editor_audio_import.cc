@@ -1115,7 +1115,7 @@ Editor::finish_bringing_in_material (std::shared_ptr<Region> region,
 		if (mode == ImportAsTrigger) {
 			std::shared_ptr<Region> copy (RegionFactory::create (region, true));
 			for (int s = 0; s < TriggerBox::default_triggers_per_box; ++s) {
-				if (!existing_track->triggerbox ()->trigger (s)->region ()) {
+				if (!existing_track->triggerbox ()->trigger (s)->playable ()) {
 					existing_track->triggerbox ()->set_from_selection (s, copy);
 #if 1 /* assume drop from sidebar */
 					ARDOUR_UI_UTILS::copy_patch_changes (_session->the_auditioner (), existing_track->triggerbox ()->trigger (s));

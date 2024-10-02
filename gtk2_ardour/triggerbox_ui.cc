@@ -315,7 +315,7 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 
 	bool active = trigger ()->active ();
 
-	if (!trigger ()->region ()) {
+	if (!trigger ()->playable ()) {
 
 		bool solid = false;
 		context->arc (margin + (size * 0.75), margin + (size * 0.75), (size * 0.75), 0., 360.0 * (M_PI/180.0));
@@ -533,7 +533,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 	}
 
 	/* follow-action icon */
-	if (trigger ()->region () && trigger ()->will_follow ()) {
+	if (trigger ()->playable () && trigger ()->will_follow ()) {
 		context->set_identity_matrix ();
 		context->translate (self.x0, self.y0 - 0.5);
 		context->translate (width - height, 0); // right side of the widget
@@ -546,7 +546,7 @@ void
 TriggerEntry::on_trigger_changed (PropertyChange const& change)
 {
 	if (change.contains (ARDOUR::Properties::name)) {
-		if (trigger ()->region ()) {
+		if (trigger ()->playable ()) {
 			name_text->set (short_version (trigger ()->name (), 16));
 		} else {
 			name_text->set ("");
@@ -672,7 +672,7 @@ TriggerEntry::name_button_event (GdkEvent* ev)
 bool
 TriggerEntry::play_button_event (GdkEvent* ev)
 {
-	if (!trigger ()->region ()) {
+	if (!trigger ()->playable ()) {
 		/* empty slot; this is just a stop button */
 		switch (ev->type) {
 			case GDK_BUTTON_PRESS:
@@ -781,7 +781,7 @@ TriggerEntry::follow_button_event (GdkEvent* ev)
 bool
 TriggerEntry::event (GdkEvent* ev)
 {
-	if (!trigger ()->region ()) {
+	if (!trigger ()->playable ()) {
 		return false;
 	}
 
@@ -877,7 +877,7 @@ TriggerEntry::drag_begin (Glib::RefPtr<Gdk::DragContext> const& context)
 		/* ctx leaves scope, cr is destroyed, and pixmap surface is flush()ed */
 	}
 
-	std::shared_ptr<Region> region = trigger ()->region ();
+	std::shared_ptr<Region> region = trigger ()->the_region ();
 	if (region) {
 		PublicEditor::instance ().pbdid_dragged_dt = region->data_type ();
 	} else {
@@ -905,7 +905,7 @@ TriggerEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::Selecti
 		return;
 	}
 	if (data.get_target () == "x-ardour/region.pbdid") {
-		std::shared_ptr<Region> region = trigger ()->region ();
+		std::shared_ptr<Region> region = trigger ()->the_region ();
 		if (region) {
 			data.set (data.get_target (), region->id ().to_s ());
 		}
@@ -1100,8 +1100,8 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 			Trigger::UIState *state = new Trigger::UIState();
 			source->get_ui_state(*state);
 			std::shared_ptr<Trigger::UIState> state_p (state);
-			_triggerbox.enqueue_trigger_state_for_region(source->region(), state_p);
-			_triggerbox.set_from_selection (n, source->region());
+			_triggerbox.enqueue_trigger_state_for_region(source->the_region(), state_p);
+			_triggerbox.set_from_selection (n, source->the_region());
 			context->drag_finish (true, false, time);
 		} else {
 			context->drag_finish (false, false, time);

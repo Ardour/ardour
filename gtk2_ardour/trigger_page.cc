@@ -404,15 +404,15 @@ TriggerPage::selection_changed ()
 
 		_slot_prop_box.set_slot (ref);
 		_slot_prop_box.show ();
-		if (trigger->region ()) {
-			if (trigger->region ()->data_type () == DataType::AUDIO) {
+		if (trigger->the_region ()) {
+			if (trigger->the_region ()->data_type () == DataType::AUDIO) {
 				_audio_trig_box.set_trigger (ref);
 				_audio_trig_box.show ();
 			} else {
 				_midi_trig_box.set_trigger (ref);
 				_midi_trig_box.show ();
 
-				std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (trigger->region());
+				std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (trigger->the_region());
 				if (mr) {
 					std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (entry->strip().stripable());
 					_midi_editor->set_region (mt, ref.slot(), mr);
