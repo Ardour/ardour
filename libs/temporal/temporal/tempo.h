@@ -263,7 +263,9 @@ class LIBTEMPORAL_API Tempo {
 	superclock_t _end_superclocks_per_note_type;
 	int8_t       _note_type;
 	bool         _locked_to_meter; /* XXX name has unclear meaning with nutempo */
-	bool         _continuing;
+	bool         _continuing; /* true if our effective end tempo is defined
+	                           * by the following tempo in the TempoMap;
+	                           * false if we use our own end tempo. */
 
 	static inline superclock_t double_npm_to_scpn (double npm) { return (superclock_t) llround ((60./npm) * superclock_ticks_per_second()); }
 
@@ -348,8 +350,8 @@ class /*LIBTEMPORAL_API*/ MeterPoint : public Meter, public meter_hook, public v
 };
 
 /* A TempoPoint is a combination of a Tempo with a Point. However, if the temp
- * is ramped, then at some point we will need to compute the ramp coefficients
- * (c-per-quarter and c-per-superclock) and store them so that we can compute
+ * is ramped, then at some point we will need to compute the ramp coefficient
+ * (_omega) and store it so that we can compute tempo-at-time and
  * time-at-quarter-note on demand.
  */
 
