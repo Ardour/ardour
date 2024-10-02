@@ -1262,7 +1262,7 @@ LaunchPadX::trigger_property_change (PropertyChange pc, Trigger* t)
 		MidiByteArray msg;
 		std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + x);
 
-		if (!r || !t->region()) {
+		if (!r || !t->playable()) {
 			msg.push_back (0x90);
 			msg.push_back (pid);
 			msg.push_back (0x0);
@@ -1337,7 +1337,7 @@ LaunchPadX::map_triggerbox (int x)
 
 		TriggerPtr t = session->trigger_at (xp, yp);
 
-		if (!t || !t->region()) {
+		if (!t || !t->playable()) {
 			msg[2] = 0x0;
 		} else {
 			msg[2] = palette_index;

@@ -1049,7 +1049,7 @@ LaunchKey4::trigger_property_change (PropertyChange pc, Trigger* t)
 void
 LaunchKey4::trigger_pad_light (Pad& pad, std::shared_ptr<Route> r, Trigger* t)
 {
-	if (!r || !t || !t->region()) {
+	if (!r || !t || !t->playable()) {
 		unlight_pad (pad.id);
 		return;
 	}

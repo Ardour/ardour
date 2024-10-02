@@ -889,7 +889,7 @@ BasicUI::trigger_display_at (int x, int y)
 		ARDOUR::TriggerPtr current = tb->currently_playing ();
 		TriggerPtr tp = tb->trigger (_tbank_start_row + y);
 		if (tp) {
-			if (!tp->region()) {
+			if (!tp->playable()) {
 				disp.state = -1;
 			} else if (tp == current) {
 				disp.state = 1;
