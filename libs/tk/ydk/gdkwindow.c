@@ -10911,6 +10911,28 @@ proxy_button_event (GdkEvent *source_event,
     case GDK_TOUCH_BEGIN:
     case GDK_TOUCH_UPDATE:
     case GDK_TOUCH_END:
+    #if 0  /* emulate button event */
+      if (source_event->touch.flags & 0x20000) {
+        if (type == GDK_TOUCH_UPDATE) {
+          return FALSE;
+        }
+        convert_toplevel_coords_to_window (event_win,
+                                           toplevel_x, toplevel_y,
+                                           &event->button.x, &event->button.y);
+
+        event->button.type   = type == GDK_TOUCH_BEGIN ? GDK_BUTTON_PRESS : GDK_BUTTON_RELEASE;
+        event->button.time   = source_event->touch.time;
+        event->button.x_root = source_event->touch.x_root;
+        event->button.y_root = source_event->touch.y_root;
+        event->button.axes   = NULL;
+        event->button.state  = 0;
+        event->button.button = 1;
+        event->button.device = display->core_pointer;
+        //if (type == GDK_BUTTON_PRESS) _gdk_event_button_generate (display, event);
+        return TRUE;
+      }
+      #endif
+
       convert_toplevel_coords_to_window (event_win,
 					 toplevel_x, toplevel_y,
 					 &event->touch.x, &event->touch.y);
