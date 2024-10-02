@@ -3812,7 +3812,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	pos = c->time;
 	cnt = 0;
 
-	if (!trig->region()) {
+	if (!trig->playable()) {
 		fast_forward_nothing_to_do ();
 		return;
 	}
@@ -4030,7 +4030,7 @@ TriggerBox::maybe_swap_pending (uint32_t slot)
 	if (p) {
 
 		if (p == Trigger::MagicClearPointerValue) {
-			if (all_triggers[slot]->region()) {
+			if (all_triggers[slot]->playable()) {
 				if (_active_slots) {
 					_active_slots--;
 				}
@@ -4040,7 +4040,7 @@ TriggerBox::maybe_swap_pending (uint32_t slot)
 			}
 			all_triggers[slot]->clear_region ();
 		} else {
-			if (!all_triggers[slot]->region()) {
+			if (!all_triggers[slot]->playable()) {
 				if (_active_slots == 0) {
 					empty_changed = true;
 				}
@@ -4129,7 +4129,7 @@ TriggerBox::deep_sources (std::set<std::shared_ptr<Source> >& sources)
 	Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
 
 	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
-		std::shared_ptr<Region> r (trigger(n)->region ());
+		std::shared_ptr<Region> r (trigger(n)->the_region ());
 		if (r) {
 			r->deep_sources (sources);
 		}
@@ -4142,7 +4142,7 @@ TriggerBox::used_regions (std::set<std::shared_ptr<Region> >& regions)
 	Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
 
 	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
-		std::shared_ptr<Region> r (trigger(n)->region ());
+		std::shared_ptr<Region> r (trigger(n)->the_region ());
 		if (r) {
 			regions.insert (r);
 		}
@@ -4322,7 +4322,7 @@ void
 TriggerBox::bang_trigger_at (Triggers::size_type row, float velocity)
 {
 	TriggerPtr t = trigger(row);
-	if (t && t->region()) {
+	if (t && t->playable()) {
 		t->bang (velocity);
 	} else {
 		/* by convention, an empty slot is effectively a STOP button */
@@ -4334,7 +4334,7 @@ void
 TriggerBox::unbang_trigger_at (Triggers::size_type row)
 {
 	TriggerPtr t = trigger(row);
-	if (t && t->region()) {
+	if (t && t->playable()) {
 		t->unbang();
 	} else {
 		/* you shouldn't be able to unbang an empty slot; but if this somehow happens we'll just treat it as a */
@@ -4758,7 +4758,7 @@ TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("tb noticed active scene %1\n", _active_scene));
 		if (_active_scene < (int32_t) all_triggers.size()) {
 			if (!all_triggers[_active_scene]->cue_isolated()) {
-				if (all_triggers[_active_scene]->region()) {
+				if (all_triggers[_active_scene]->playable()) {
 					all_triggers[_active_scene]->bang ();
 				} else {
 					stop_all_quantized ();  //empty slot, this should work as a Stop for the running clips
@@ -5095,12 +5095,12 @@ TriggerBox::determine_next_trigger (uint32_t current)
 	/* count number of triggers that can actually be run (i.e. they have a region) */
 
 	for (uint32_t n = 0; n < all_triggers.size(); ++n) {
-		if (all_triggers[n]->region()) {
+		if (all_triggers[n]->playable()) {
 			runnable++;
 		}
 	}
 
-	if (runnable == 0 || !all_triggers[current]->region()) {
+	if (runnable == 0 || !all_triggers[current]->playable()) {
 		return -1;
 	}
 
@@ -5161,7 +5161,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 				break;
 			}
 
-			if (all_triggers[n]->region() && !all_triggers[n]->active()) {
+			if (all_triggers[n]->playable() && !all_triggers[n]->active()) {
 				return n;
 			}
 		}
@@ -5180,7 +5180,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 				break;
 			}
 
-			if (all_triggers[n]->region() && !all_triggers[n]->active ()) {
+			if (all_triggers[n]->playable() && !all_triggers[n]->active ()) {
 				return n;
 			}
 		}
@@ -5188,14 +5188,14 @@ TriggerBox::determine_next_trigger (uint32_t current)
 
 	case FollowAction::FirstTrigger:
 		for (n = 0; n < all_triggers.size(); ++n) {
-			if (all_triggers[n]->region() && !all_triggers[n]->active ()) {
+			if (all_triggers[n]->playable() && !all_triggers[n]->active ()) {
 				return n;
 			}
 		}
 		break;
 	case FollowAction::LastTrigger:
 		for (int i = all_triggers.size() - 1; i >= 0; --i) {
-			if (all_triggers[i]->region() && !all_triggers[i]->active ()) {
+			if (all_triggers[i]->playable() && !all_triggers[i]->active ()) {
 				return i;
 			}
 		}
@@ -5203,7 +5203,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 
 	case FollowAction::JumpTrigger:
 		for (std::size_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
-			if (fa.targets.test (n) && all_triggers[n]->region()) {
+			if (fa.targets.test (n) && all_triggers[n]->playable()) {
 				possible_targets.push_back (n);
 			}
 		}
@@ -5280,7 +5280,7 @@ TriggerBox::set_state (const XMLNode& node, int version)
 				all_triggers.push_back (trig);
 				trig->set_state (**t, version);
 			}
-			if (trig->region ()) {
+			if (trig->playable ()) {
 				_active_slots++;
 			}
 		}

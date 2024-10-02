@@ -328,7 +328,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void clear_region ();
 	virtual int set_region_in_worker_thread (std::shared_ptr<Region>) = 0;
 	virtual int set_region_in_worker_thread_from_capture (std::shared_ptr<Region>) = 0;
-	std::shared_ptr<Region> region() const { return _region; }
+	std::shared_ptr<Region> the_region() const { return _region; }
+	virtual bool playable() const = 0;
 
 	uint32_t index() const { return _index; }
 
@@ -509,6 +510,8 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 		return audio_run<true> (bufs, start_sample, end_sample, start, end, nframes, dest_offset, bpm, quantize_offset);
 	}
 
+	bool playable() const { return data.length; }
+
 	StretchMode stretch_mode() const { return _stretch_mode; }
 	void set_stretch_mode (StretchMode);
 
@@ -599,6 +602,8 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
   public:
 	MIDITrigger (uint32_t index, TriggerBox&);
 	~MIDITrigger ();
+
+	bool playable() const { return rt_midibuffer.load(); }
 
 	void captured (SlotArmInfo&, BufferSet&);
 	void arm();

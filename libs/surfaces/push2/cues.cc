@@ -432,7 +432,7 @@ CueLayout::viewport_changed ()
 				std::shared_ptr<Push2::Pad> pad = _p2.pad_by_xy (n, y);
 				if (tb && tb->active()) {
 					TriggerPtr tp = tb->trigger (y);
-					if (tp && tp->region()) {
+					if (tp && tp->playable()) {
 						/* trigger in slot */
 						pad->set_color (color);
 						tp->PropertyChanged.connect (_trig_connections[n * 8 + y], invalidator (*this), boost::bind (&CueLayout::trigger_property_change, this, _1, n, y), &_p2);
@@ -780,7 +780,7 @@ CueLayout::set_pad_color_from_trigger_state (int col, std::shared_ptr<Push2::Pad
 		return;
 	}
 
-	if (trig->region()) {
+	if (trig->playable()) {
 
 		if (trig->active()) {
 
