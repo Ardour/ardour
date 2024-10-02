@@ -2250,6 +2250,33 @@ gdk_event_translate (GdkDisplay *display,
 	  window = gdk_window_lookup_for_display (display, xev->event);
 	  g_object_ref (window);
 
+#if 0 // XXX doing this here causes a _gdk_display_pointer_grab, and subsequent touch events are directed there
+           if (xev->flags & 0x20000) {
+             /* first touch */
+             event->button.type   = GDK_BUTTON_PRESS;
+             event->button.window = window;
+             event->button.time   = xev->time;
+             event->button.x      = xev->event_x;
+             event->button.y      = xev->event_y;
+             event->button.x_root = xev->root_x;
+             event->button.y_root = xev->root_y;
+             event->button.axes   = NULL;
+             event->button.state  = 0;
+             event->button.button = 1;
+             event->button.device = display->core_pointer;
+             switch (xevent->xcookie.evtype) {
+               case XI_TouchBegin:
+                 event->touch.type = GDK_BUTTON_PRESS;
+                 break;
+               case XI_TouchEnd:
+                 event->touch.type = GDK_BUTTON_RELEASE;
+                 break;
+               default:
+                 return FALSE;
+                 break;
+             }
+           } else {
+#endif
 	  event->touch.window   = window;
 	  event->touch.time     = xev->time;
 	  event->touch.x        = xev->event_x;
@@ -2275,6 +2302,9 @@ gdk_event_translate (GdkDisplay *display,
 	      return FALSE;
 	      break;
 	  }
+#if 0
+           }
+#endif
 
 	  if (!set_screen_from_root (display, event, xev->root)) {
 	    return_val = FALSE;
