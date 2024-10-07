@@ -28,6 +28,7 @@
 #include "widgets/pane.h"
 #include "widgets/tabbable.h"
 
+#include "application_bar.h"
 #include "audio_region_operations_box.h"
 #include "audio_region_properties_box.h"
 #include "audio_trigger_properties_box.h"
@@ -103,6 +104,8 @@ private:
 	gint start_updating ();
 	gint stop_updating ();
 	void fast_update_strips ();
+
+	ApplicationBar _application_bar;
 
 	Gtkmm2ext::Bindings* bindings;
 	ArdourWidgets::VPane _content;

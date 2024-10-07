@@ -42,6 +42,7 @@
 #include "ardour/stripable.h"
 
 #include "actions.h"
+#include "application_bar.h"
 #include "ardour_ui.h"
 #include "editor.h"
 #include "gui_thread.h"
@@ -256,6 +257,7 @@ TriggerPage::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
+	_application_bar.set_session (_session);
 	_cue_box.set_session (s);
 	_trigger_clip_picker.set_session (s);
 	_master.set_session (s);

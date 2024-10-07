@@ -1280,6 +1280,8 @@ Mixer_UI::set_session (Session* sess)
 
 	_group_tabs->set_session (sess);
 
+	_application_bar.set_session (_session);
+
 	update_scene_buttons();
 
 	RefPtr<ToggleAction> surround_action = ActionManager::get_toggle_action (X_("Mixer"), "ToggleSurroundMaster");

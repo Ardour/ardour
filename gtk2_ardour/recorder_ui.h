@@ -43,10 +43,10 @@
 #include "widgets/pane.h"
 #include "widgets/tabbable.h"
 
+#include "application_bar.h"
 #include "input_port_monitor.h"
 #include "rec_info_box.h"
 #include "shuttle_control.h"
-#include "transport_control_ui.h"
 
 namespace ARDOUR {
 	class SoloMuteRelease;
@@ -99,7 +99,6 @@ private:
 	void tra_name_edit (TrackRecordAxis*, bool);
 	void update_rec_table_layout ();
 	void update_spacer_width (Gtk::Allocation&, TrackRecordAxis*);
-	void tabbed_changed (bool);
 
 	void set_connections (std::string const&);
 	void port_connected_or_disconnected (std::string, std::string);
@@ -154,7 +153,7 @@ private:
 	DurationInfoBox              _duration_info_box;
 	XrunInfoBox                  _xrun_info_box;
 	RemainInfoBox                _remain_info_box;
-	TransportControlUI           _transport_ctrl;
+	ApplicationBar               _application_bar;
 	Glib::RefPtr<Gtk::SizeGroup> _toolbar_button_height;
 	Glib::RefPtr<Gtk::SizeGroup> _toolbar_recarm_width;
 	Glib::RefPtr<Gtk::SizeGroup> _toolbar_monitoring_width;

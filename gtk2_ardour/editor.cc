@@ -1225,6 +1225,7 @@ Editor::set_session (Session *t)
 	 * before the visible state has been loaded from instant.xml */
 	_leftmost_sample = session_gui_extents().first.samples();
 
+	_application_bar.set_session (_session);
 	nudge_clock->set_session (_session);
 	_summary->set_session (_session);
 	_group_tabs->set_session (_session);

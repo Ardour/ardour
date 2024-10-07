@@ -55,6 +55,7 @@
 #include "widgets/tabbable.h"
 #include "widgets/ardour_dropdown.h"
 
+#include "application_bar.h"
 #include "axis_provider.h"
 #include "enums.h"
 #include "monitor_section.h"
@@ -333,6 +334,8 @@ private:
 	Gtk::Menu *track_menu;
 	void track_column_click (gint);
 	void build_track_menu ();
+
+	ApplicationBar _application_bar;
 
 	MonitorSection   _monitor_section;
 	PluginSelector* _plugin_selector;

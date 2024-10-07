@@ -66,6 +66,7 @@
 #include "widgets/ardour_spacer.h"
 #include "widgets/pane.h"
 
+#include "application_bar.h"
 #include "ardour_dialog.h"
 #include "public_editor.h"
 #include "editing.h"
@@ -773,6 +774,7 @@ private:
 	Gdk::Cursor* which_trim_cursor (bool left_side) const;
 	Gdk::Cursor* which_canvas_cursor (ItemType type) const;
 
+	ApplicationBar           _application_bar;
 	ArdourCanvas::GtkCanvas* _track_canvas;
 	ArdourCanvas::GtkCanvasViewport* _track_canvas_viewport;
 
