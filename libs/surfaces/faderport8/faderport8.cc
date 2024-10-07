@@ -465,7 +465,7 @@ FaderPort8::connection_handler (std::string name1, std::string name2)
 	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (std::shared_ptr<ARDOUR::Port>(_output_port)->name());
 
 	if (ni == name1 || ni == name2) {
-		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connection notify %1 and %2\n", name1, name2));
+		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connection notify inputs '%1' and '%2'\n", name1, name2));
 		if (_input_port->connected ()) {
 			if (_connection_state & InputConnected) {
 				return false;
@@ -475,7 +475,7 @@ FaderPort8::connection_handler (std::string name1, std::string name2)
 			_connection_state &= ~InputConnected;
 		}
 	} else if (no == name1 || no == name2) {
-		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connection notify %1 and %2\n", name1, name2));
+		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connection notify outputs '%1' and '%2'\n", name1, name2));
 		if (_output_port->connected ()) {
 			if (_connection_state & OutputConnected) {
 				return false;
@@ -486,7 +486,7 @@ FaderPort8::connection_handler (std::string name1, std::string name2)
 		}
 	} else {
 #ifdef VERBOSE_DEBUG
-		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connections between %1 and %2 changed, but I ignored it\n", name1, name2));
+		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connections between '%1' and '%2' changed, but I ignored it\n", name1, name2));
 #endif
 		/* not our ports */
 		return false;
