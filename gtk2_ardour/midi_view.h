@@ -43,6 +43,7 @@
 #include "time_axis_view_item.h"
 #include "editor_automation_line.h"
 #include "enums.h"
+#include "line_merger.h"
 
 namespace ARDOUR {
 	class MidiRegion;
@@ -75,7 +76,7 @@ class VelocityGhostRegion;
 class EditingContext;
 class PasteContext;
 
-class MidiView : public virtual sigc::trackable
+class MidiView : public virtual sigc::trackable, public LineMerger
 {
   public:
 	typedef Evoral::Note<Temporal::Beats> NoteType;

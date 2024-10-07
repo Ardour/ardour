@@ -132,6 +132,8 @@ public:
 
 	void set_visibility_note_range (MidiViewBackground::VisibleNoteRange, bool);
 
+	MergeableLine* make_merger ();
+
   protected:
 	void reset_width_dependent_items (double pixel_width);
 	void parameter_changed (std::string const & p);

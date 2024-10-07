@@ -26,7 +26,7 @@
 
 #include "ardour/types.h"
 
-class EditorAutomationLine;
+class AutomationLine;
 class RouteTimeAxisView;
 class EditingContext;
 
@@ -38,7 +38,7 @@ class AutomationControl;
 class MergeableLine
 {
    public:
-	MergeableLine (std::shared_ptr<EditorAutomationLine> l, std::shared_ptr<ARDOUR::AutomationControl> c,
+	MergeableLine (std::shared_ptr<AutomationLine> l, std::shared_ptr<ARDOUR::AutomationControl> c,
 	               std::function<Temporal::timepos_t(Temporal::timepos_t const &)> tf,
 	               std::function<void(ARDOUR::AutoState)> asc,
 	               std::function<void()> ctc)
@@ -53,7 +53,7 @@ class MergeableLine
 	void merge_drawn_line (EditingContext& e, ARDOUR::Session& s, Evoral::ControlList::OrderedPoints& points, bool thin);
 
   private:
-	std::shared_ptr<EditorAutomationLine> _line;
+	std::shared_ptr<AutomationLine> _line;
 	std::shared_ptr<ARDOUR::AutomationControl> _control;
 	std::function<Temporal::timepos_t(Temporal::timepos_t const &)> time_filter;
 	std::function<void(ARDOUR::AutoState)> automation_state_callback;

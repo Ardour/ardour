@@ -101,7 +101,7 @@ MergeableLine::merge_drawn_line (EditingContext& e, Session& s, Evoral::ControlL
 
 	XMLNode& after = list->get_state();
 	e.begin_reversible_command (_("draw automation"));
-	s.add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));
+	e.add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));
 
 	_line->end_draw_merge ();
 
