@@ -339,7 +339,6 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 
 		case Disabled:
 			/* not recording and no content in this slot, it is only a Stop button */
-			std::cerr << tref.box() << " => Disabled!\n";
 			context->move_to (margin, margin);
 			context->rel_line_to (size, 0);
 			context->rel_line_to (0, size);
