@@ -510,9 +510,9 @@ MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event
 {
 	NoteBase* note = nullptr;
 
-	if (mouse_mode == Editing::MouseContent) {
-		switch (item_type) {
-		case NoteItem:
+	switch (item_type) {
+	case NoteItem:
+		if (mouse_mode == Editing::MouseContent) {
 			/* Existing note: allow trimming/motion */
 			if ((note = reinterpret_cast<NoteBase*> (item->get_data ("notebase")))) {
 				if (note->big_enough_to_trim() && note->mouse_near_ends()) {
@@ -523,47 +523,51 @@ MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event
 					_drags->set (nd, event);
 				}
 			}
-			return true;
-
-		case ControlPointItem:
-			_drags->set (new ControlPointDrag (*this, item), event);
-			return true;
-			break;
-
-		case VelocityItem:
-			_drags->set (new LollipopDrag (*this, item), event);
-			return true;
-			break;
-
-		case VelocityBaseItem:
-			_drags->set (new VelocityLineDrag (*this, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime), event);
-			return true;
-			break;
-
-		case AutomationTrackItem:
-			switch (mouse_mode) {
-			case Editing::MouseContent:
-				/* rubberband drag to select automation points */
-				// _drags->set (new EditorRubberbandSelectDrag (*this, item), event);
-				break;
-			case Editing::MouseDraw:
-				_drags->set (new AutomationDrawDrag (*this, nullptr, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime), event);
-				break;
-			default:
-				break;
-			}
-			return true;
-			break;
-
-		case EditorAutomationLineItem: {
-			ARDOUR::SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
-			select_automation_line (&event->button, item, op);
-			return true;
 		}
+		return true;
 
+	case ControlPointItem:
+		if (mouse_mode == Editing::MouseContent) {
+			_drags->set (new ControlPointDrag (*this, item), event);
+		}
+		return true;
+		break;
+
+	case VelocityItem:
+		if (mouse_mode == Editing::MouseContent) {
+			_drags->set (new LollipopDrag (*this, item), event);
+		}
+		return true;
+		break;
+
+	case VelocityBaseItem:
+		_drags->set (new VelocityLineDrag (*this, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime), event);
+		return true;
+		break;
+
+	case AutomationTrackItem:
+		switch (mouse_mode) {
+		case Editing::MouseContent:
+			/* rubberband drag to select automation points */
+			_drags->set (new EditorRubberbandSelectDrag (*this, item), event);
+			break;
+		case Editing::MouseDraw:
+			_drags->set (new AutomationDrawDrag (*this, nullptr, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime), event);
+			break;
 		default:
 			break;
 		}
+		return true;
+		break;
+
+	case EditorAutomationLineItem: {
+		ARDOUR::SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
+		select_automation_line (&event->button, item, op);
+		return true;
+	}
+
+	default:
+		break;
 	}
 
 	return false;

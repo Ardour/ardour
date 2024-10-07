@@ -29,6 +29,7 @@
 #include "editor_drag.h"
 #include "hit.h"
 #include "keyboard.h"
+#include "mergeable_line.h"
 #include "midi_cue_automation_line.h"
 #include "midi_cue_view.h"
 #include "midi_cue_velocity.h"
@@ -48,7 +49,6 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
                           MidiViewBackground&      bg,
                           uint32_t                 basic_color)
 	: MidiView (mt, parent, ec, bg, basic_color)
-	, automation_line (nullptr)
 	, velocity_base (nullptr)
 	, velocity_display (nullptr)
 	, _slot_index (slot_index)
@@ -72,6 +72,7 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	automation_group = new ArdourCanvas::Rectangle (&parent);
 	CANVAS_DEBUG_NAME (automation_group, "cue automation group");
 	automation_group->set_fill_color (UIConfiguration::instance().color ("midi automation track fill"));
+	automation_group->set_data ("linemerger", this);
 
 	velocity_base = new ArdourCanvas::Rectangle (&parent);
 	CANVAS_DEBUG_NAME (velocity_base, "cue velocity base");
@@ -249,10 +250,8 @@ MidiCueView::show_automation (Evoral::Parameter const & param)
 //		return;
 //	}
 
-	if (automation_line) {
-		delete automation_line;
-		automation_line = nullptr;
-	}
+	automation_line.reset ();
+	automation_control.reset ();
 
 	std::shared_ptr<AutomationControl> control;
 
@@ -274,18 +273,17 @@ MidiCueView::show_automation (Evoral::Parameter const & param)
 		 */
 
 		std::shared_ptr<Evoral::Control> control = _midi_region->model()->control (param, true);
-		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (control);
+		automation_control = std::dynamic_pointer_cast<AutomationControl> (control);
 
-		if (ac) {
-			automation_line = new MidiCueAutomationLine ("whatevs",
-			                                             _editing_context,
-			                                             *automation_group,
-			                                             automation_group,
-			                                             ac->alist(),
-			                                             ac->desc());
+		if (automation_control) {
+			automation_line.reset (new MidiCueAutomationLine ("whatevs",
+			                                                  _editing_context,
+			                                                  *automation_group,
+			                                                  automation_group,
+			                                                  automation_control->alist(),
+			                                                  automation_control->desc()));
 			automation_line->set_height (automation_group->get().height());
 		}
-
 		break;
 	}
 
@@ -299,7 +297,15 @@ MidiCueView::selectable_owners()
 {
 	std::list<SelectableOwner*> sl;
 	if (automation_line) {
-		sl.push_back (automation_line);
+		sl.push_back (automation_line.get());
 	}
 	return sl;
+}
+
+MergeableLine*
+MidiCueView::make_merger ()
+{
+	return new MergeableLine (automation_line, automation_control,
+	                          [this](Temporal::timepos_t const& t) { return t; },
+	                          nullptr, nullptr);
 }

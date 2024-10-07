@@ -57,12 +57,14 @@ class MidiCueView : public MidiView
 	ArdourCanvas::Item* drag_group() const;
 
 	std::list<SelectableOwner*> selectable_owners();
+	MergeableLine* make_merger ();
 
   protected:
 	bool scroll (GdkEventScroll* ev);
 
 	ArdourCanvas::Rectangle* automation_group;
-	MidiCueAutomationLine*   automation_line;
+	std::shared_ptr<MidiCueAutomationLine>   automation_line;
+	std::shared_ptr<ARDOUR::AutomationControl> automation_control;
 
 	ArdourCanvas::Rectangle* velocity_base;
 	VelocityDisplay* velocity_display;

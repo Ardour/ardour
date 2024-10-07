@@ -63,11 +63,11 @@ class PublicEditor;
 class EditorAutomationLine : public AutomationLine
 {
 public:
-	EditorAutomationLine (const std::string&                                 name,
-	                TimeAxisView&                                      tv,
-	                ArdourCanvas::Item&                                parent,
-	                std::shared_ptr<ARDOUR::AutomationList>            al,
-	                const ARDOUR::ParameterDescriptor&                 desc);
+	EditorAutomationLine (const std::string&                name,
+	                TimeAxisView&                           tv,
+	                ArdourCanvas::Item&                     parent,
+	                std::shared_ptr<ARDOUR::AutomationList> al,
+	                const ARDOUR::ParameterDescriptor&      desc);
 
 
 	virtual ~EditorAutomationLine ();

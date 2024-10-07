@@ -756,3 +756,9 @@ MidiRegionView::set_visibility_note_range (MidiViewBackground::VisibleNoteRange 
 {
 	dynamic_cast<MidiTimeAxisView*>(&trackview)->set_visibility_note_range (vnr, from_selection);
 }
+
+MergeableLine*
+MidiRegionView::make_merger ()
+{
+	return nullptr;
+}
