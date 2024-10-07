@@ -84,6 +84,7 @@ MidiCueEditor::MidiCueEditor()
 
 	_snapped_cursor = new EditorCursor (*this, X_("snapped"));
 
+	set_mouse_mode (Editing::MouseContent, true);
 }
 
 MidiCueEditor::~MidiCueEditor ()
@@ -655,7 +656,7 @@ MidiCueEditor::set_mouse_mode (Editing::MouseMode m, bool force)
 		return;
 	}
 
-	mouse_mode = m;
+	EditingContext::set_mouse_mode (m, force);
 }
 
 void
