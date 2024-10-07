@@ -581,7 +581,7 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
  *  @param result Filled in with selectable things.
  */
 void
-StreamView::get_selectables (timepos_t const & start, timepos_t const & end, double top, double bottom, list<Selectable*>& results, bool within)
+StreamView::_get_selectables (timepos_t const & start, timepos_t const & end, double top, double bottom, list<Selectable*>& results, bool within)
 {
 	layer_t min_layer = 0;
 	layer_t max_layer = 0;

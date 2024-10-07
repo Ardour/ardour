@@ -63,7 +63,6 @@ public:
 	MidiStreamView (MidiTimeAxisView&);
 	~MidiStreamView ();
 
-	void get_inverted_selectables (Selection&, std::list<Selectable* >& results);
 	void get_regions_with_selected_data (RegionSelection&);
 
 	void set_layer_display (LayerDisplay);

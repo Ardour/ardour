@@ -45,6 +45,8 @@
 #include "canvas/container.h"
 #include "canvas/poly_line.h"
 
+#include "selectable.h"
+
 namespace ArdourCanvas {
 	class Rectangle;
 }
@@ -54,12 +56,11 @@ class ControlPoint;
 class PointSelection;
 class TimeAxisView;
 class AutomationTimeAxisView;
-class Selectable;
 class Selection;
 class EditingContext;
 
 /** A GUI representation of an ARDOUR::AutomationList */
-class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
+class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible, public SelectableOwner
 {
 public:
 	enum VisibleAspects {
@@ -87,7 +88,7 @@ public:
 	void set_fill (bool f) { _fill = f; } // owner needs to call set_height
 
 	void set_selected_points (PointSelection const &);
-	void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<Selectable*>&);
+	void _get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<Selectable*>&, bool within);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
 	virtual void remove_point (ControlPoint&);

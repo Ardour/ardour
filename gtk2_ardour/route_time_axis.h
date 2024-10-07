@@ -98,7 +98,7 @@ public:
 	void selection_click (GdkEventButton*);
 	void set_selected_points (PointSelection&);
 	void set_selected_regionviews (RegionSelection&);
-	void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double top, double bot, std::list<Selectable *>&, bool within = false);
+	void _get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double top, double bot, std::list<Selectable *>&, bool within);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>&);
 	void get_regionviews_at_or_after (Temporal::timepos_t const &, RegionSelection&);
 

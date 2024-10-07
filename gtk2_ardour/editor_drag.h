@@ -1319,12 +1319,11 @@ public:
 class EditorRubberbandSelectDrag : public RubberbandSelectDrag
 {
 public:
-	EditorRubberbandSelectDrag (Editor&, ArdourCanvas::Item *);
+	EditorRubberbandSelectDrag (EditingContext&, ArdourCanvas::Item *);
 
 	void select_things (int, Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, bool);
 	void deselect_things ();
   private:
-	Editor& editor;
 };
 
 /** A RubberbandSelectDrag for selecting MIDI notes */

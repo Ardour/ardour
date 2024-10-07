@@ -6119,7 +6119,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			switch (editing_context.current_mouse_mode()) {
 				case MouseObject:
 					/* find the two markers on either side and then make the selection from it */
-					editing_context.select_all_within (start, end, 0.0f, FLT_MAX, _editor.track_views, SelectionSet, false);
+					editing_context.select_all_within (start, end, 0.0f, FLT_MAX, _editor.selectable_owners(), SelectionSet, false);
 					break;
 
 				case MouseRange:
@@ -6790,9 +6790,8 @@ MidiVerticalSelectDrag::deselect_things ()
 	/* XXX */
 }
 
-EditorRubberbandSelectDrag::EditorRubberbandSelectDrag (Editor& e, ArdourCanvas::Item* i)
+EditorRubberbandSelectDrag::EditorRubberbandSelectDrag (EditingContext& e, ArdourCanvas::Item* i)
 	: RubberbandSelectDrag (e, i)
-	, editor (e)
 {
 }
 
@@ -6807,7 +6806,7 @@ EditorRubberbandSelectDrag::select_things (int button_state, timepos_t const& x1
 	SelectionOperation op = ArdourKeyboard::selection_type (button_state);
 
 	editing_context.begin_reversible_selection_op (X_("rubberband selection"));
-	editing_context.select_all_within (x1, x2.decrement (), y1, y2, editor.track_views, op, false);
+	editing_context.select_all_within (x1, x2.decrement (), y1, y2, editing_context.selectable_owners(), op, false);
 	editing_context.commit_reversible_selection_op ();
 }
 

@@ -541,7 +541,17 @@ MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event
 			break;
 
 		case AutomationTrackItem:
-			_drags->set (new AutomationDrawDrag (*this, nullptr, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime), event);
+			switch (mouse_mode) {
+			case Editing::MouseContent:
+				/* rubberband drag to select automation points */
+				// _drags->set (new EditorRubberbandSelectDrag (*this, item), event);
+				break;
+			case Editing::MouseDraw:
+				_drags->set (new AutomationDrawDrag (*this, nullptr, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime), event);
+				break;
+			default:
+				break;
+			}
 			return true;
 			break;
 
@@ -1627,4 +1637,14 @@ MidiCueEditor::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType i
 
 
 	return true;
+}
+
+std::list<SelectableOwner*>
+MidiCueEditor::selectable_owners()
+{
+	if (view) {
+		return view->selectable_owners();
+	}
+
+	return std::list<SelectableOwner*> ();
 }
