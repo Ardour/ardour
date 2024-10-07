@@ -218,6 +218,8 @@ public:
 	bool get_selection_extents (Temporal::timepos_t &start, Temporal::timepos_t &end) const;  // the time extents of the current selection, whether Range, Region(s), Control Points, or Notes
 	Selection& get_cut_buffer() const { return *cut_buffer; }
 
+	std::list<SelectableOwner*> selectable_owners();
+
 	void get_regionviews_at_or_after (Temporal::timepos_t const &, RegionSelection&);
 
 	void set_selection (std::list<Selectable*>, ARDOUR::SelectionOperation);
@@ -1874,7 +1876,7 @@ private:
 
 	/* object rubberband select process */
 
-	void select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, TrackViewList const &, ARDOUR::SelectionOperation, bool);
+	void select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<SelectableOwner*> const &, ARDOUR::SelectionOperation, bool);
 
 	EditorRouteGroups* _route_groups;
 	EditorRoutes*      _routes;

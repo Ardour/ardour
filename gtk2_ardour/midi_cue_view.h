@@ -56,6 +56,8 @@ class MidiCueView : public MidiView
 
 	ArdourCanvas::Item* drag_group() const;
 
+	std::list<SelectableOwner*> selectable_owners();
+
   protected:
 	bool scroll (GdkEventScroll* ev);
 

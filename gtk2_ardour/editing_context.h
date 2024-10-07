@@ -70,6 +70,7 @@ class VerboseCursor;
 class TrackViewList;
 class Selection;
 class SelectionMemento;
+class SelectableOwner;
 
 class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 {
@@ -110,9 +111,11 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	bool drag_active () const;
 	bool preview_video_drag_active () const;
 
+	virtual std::list<SelectableOwner*> selectable_owners() = 0;
+
 	virtual ArdourCanvas::Duple upper_left() const { return ArdourCanvas::Duple (0, 0); }
 
-	virtual void select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, TrackViewList const &, ARDOUR::SelectionOperation, bool) = 0;
+	virtual void select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<SelectableOwner*> const &, ARDOUR::SelectionOperation, bool) = 0;
 	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const = 0;
 	virtual void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const = 0;
 	virtual StripableTimeAxisView* get_stripable_time_axis_by_id (const PBD::ID& id) const = 0;

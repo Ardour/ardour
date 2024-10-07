@@ -55,6 +55,7 @@
 #include "axis_view.h"
 #include "enums.h"
 #include "editing.h"
+#include "selectable.h"
 
 namespace ARDOUR {
 	class Session;
@@ -81,7 +82,6 @@ class TimeSelection;
 class PointSelection;
 class TimeAxisViewItem;
 class Selection;
-class Selectable;
 class RegionView;
 class GhostRegion;
 class StreamView;
@@ -94,7 +94,7 @@ class PasteContext;
  * This class provides the basic LHS controls and display methods. This should be
  * extended to create functional time-axis based views.
  */
-class TimeAxisView : public virtual AxisView
+class TimeAxisView : public virtual AxisView, public SelectableOwner
 {
 private:
 	enum NamePackingBits {
@@ -207,8 +207,8 @@ public:
 
 	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);
 
-	virtual void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t  const &, double, double, std::list<Selectable*>&, bool within = false);
-	virtual void get_inverted_selectables (Selection&, std::list<Selectable *>& results);
+	void _get_selectables (Temporal::timepos_t const &, Temporal::timepos_t  const &, double, double, std::list<Selectable*>&, bool within);
+	void get_inverted_selectables (Selection&, std::list<Selectable *>& results);
 	virtual void get_regionviews_at_or_after (Temporal::timepos_t const &, RegionSelection&) {}
 
 	void add_ghost (RegionView*);

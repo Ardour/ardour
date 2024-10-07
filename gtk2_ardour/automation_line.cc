@@ -950,7 +950,7 @@ AutomationLine::remove_point (ControlPoint& cp)
  *  @param result Filled in with selectable things; in this case, ControlPoints.
  */
 void
-AutomationLine::get_selectables (timepos_t const & start, timepos_t const & end, double botfrac, double topfrac, list<Selectable*>& results)
+AutomationLine::_get_selectables (timepos_t const & start, timepos_t const & end, double botfrac, double topfrac, list<Selectable*>& results, bool /*within*/)
 {
 	/* convert fractions to display coordinates with 0 at the top of the track */
 	double const bot_track = (1 - topfrac) * _height; // this should StreamView::child_height () for RegionGain

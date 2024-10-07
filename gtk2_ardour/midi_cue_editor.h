@@ -98,6 +98,8 @@ class MidiCueEditor : public CueEditor
 
 	void midi_action (void (MidiView::*method)());
 
+	std::list<SelectableOwner*> selectable_owners();
+
 	Gdk::Cursor* which_track_cursor () const;
 	Gdk::Cursor* which_mode_cursor () const;
 	Gdk::Cursor* which_trim_cursor (bool left_side) const;

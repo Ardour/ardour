@@ -917,7 +917,7 @@ AutomationTimeAxisView::paste_one (timepos_t const & pos, unsigned paste_count, 
 }
 
 void
-AutomationTimeAxisView::get_selectables (timepos_t const & start, timepos_t const & end, double top, double bot, list<Selectable*>& results, bool /*within*/)
+AutomationTimeAxisView::_get_selectables (timepos_t const & start, timepos_t const & end, double top, double bot, list<Selectable*>& results, bool /*within*/)
 {
 	if (!_line && !_view) {
 		return;

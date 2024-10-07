@@ -293,3 +293,13 @@ MidiCueView::show_automation (Evoral::Parameter const & param)
 		break;
 	}
 }
+
+std::list<SelectableOwner*>
+MidiCueView::selectable_owners()
+{
+	std::list<SelectableOwner*> sl;
+	if (automation_line) {
+		sl.push_back (automation_line);
+	}
+	return sl;
+}

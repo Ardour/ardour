@@ -18,8 +18,13 @@
  */
 
 #pragma once
+#include <list>
 
 #include <sigc++/signal.h>
+
+#include "temporal/timeline.h"
+
+class Selection;
 
 class Selectable : public virtual sigc::trackable
 {
@@ -44,3 +49,16 @@ protected:
 	bool _selected;
 };
 
+class SelectableOwner
+{
+  public:
+	SelectableOwner() {}
+	virtual ~SelectableOwner() {}
+
+	void get_selectables (Temporal::timepos_t const & start, Temporal::timepos_t  const & end, double x, double y, std::list<Selectable*>& sl, bool within = false) {
+		_get_selectables (start, end, x, y, sl, within);
+	}
+
+	virtual void _get_selectables (Temporal::timepos_t const &, Temporal::timepos_t  const &, double, double, std::list<Selectable*>&, bool within) = 0;
+	virtual void get_inverted_selectables (Selection&, std::list<Selectable *>& results) = 0;
+};
