@@ -508,6 +508,8 @@ public:
 	void remove_region_marker (ARDOUR::CueMarker&);
 	void make_region_markers_global (bool as_cd_markers);
 
+	bool rb_click (GdkEvent*, Temporal::timepos_t const &);
+
 protected:
 	void map_transport_state ();
 	void map_position_change (samplepos_t);
@@ -2338,4 +2340,3 @@ private:
 	friend class EditorRoutes;
 	friend class RhythmFerret;
 };
-
