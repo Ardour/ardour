@@ -1016,16 +1016,13 @@ void
 LocationUI::map_locations (const Locations::LocationList& locations)
 {
 	Locations::LocationList::iterator i;
-	gint n;
 	int mark_n = 0;
 	Locations::LocationList temp = locations;
 	LocationSortByStart cmp;
 
 	temp.sort (cmp);
 
-	for (n = 0, i = temp.begin(); i != temp.end(); ++n, ++i) {
-
-		Location* location = *i;
+	for (auto & location : temp) {
 
 		if (location->is_mark()) {
 			LocationEditRow* erow = manage (new LocationEditRow (_session, location, mark_n));
