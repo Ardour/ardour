@@ -4060,7 +4060,7 @@ Route::latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_
 		return nframes;
 	}
 
-	if (latency_preroll >= playback_latency ()) {
+	if (latency_preroll > playback_latency ()) {
 		no_roll_unlocked (nframes, start_sample - latency_preroll, end_sample - latency_preroll, false);
 		return 0;
 	}
