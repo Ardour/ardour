@@ -568,5 +568,7 @@ RTMidiBufferBase<TimeType,DistanceType>::convert (RTMidiBufferBase<Temporal::Bea
 
 
 // Explicit instantiation
+namespace ARDOUR {
 template class RTMidiBufferBase<samplepos_t,samplecnt_t>;
 template class RTMidiBufferBase<Temporal::Beats,Temporal::Beats>;
+}
