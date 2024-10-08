@@ -575,8 +575,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		 * to avoid confusion, I'll refer to the requested peaks as visual_peaks and the peakfile peaks as stored_peaks
 		 */
 
-		const samplecnt_t chunksize = (samplecnt_t) expected_peaks; // we read all the peaks we need in one hit.
-
 		/* compute the rounded up sample position  */
 
 		samplepos_t next_visual_peak        = (samplepos_t) ceil (start / samples_per_visual_peak);
@@ -589,11 +587,18 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 
 		/* open ... close during out: handling */
 
-		off_t  map_off =  (uint32_t) (current_stored_peak) * sizeof(PeakData);
+		off_t  map_off      =  (uint32_t) (current_stored_peak) * sizeof(PeakData);
 		off_t  read_map_off = map_off & ~(bufsize - 1);
-		off_t  map_delta = map_off - read_map_off;
+		off_t  map_delta    = map_off - read_map_off;
+
+		samplecnt_t max_chunk = (statbuf.st_size - read_map_off - map_delta) / sizeof(PeakData);
+		samplecnt_t chunksize = std::min<samplecnt_t> (expected_peaks, max_chunk);
+
 		size_t raw_map_length = chunksize * sizeof(PeakData);
-		size_t map_length = (chunksize * sizeof(PeakData)) + map_delta;
+		size_t map_length     = raw_map_length + map_delta;
+
+		assert (read_map_off + (off_t)map_length <= statbuf.st_size);
+		assert (read_map_off + map_delta + (off_t)raw_map_length <= statbuf.st_size);
 
 		if (_first_run || (_last_scale != samples_per_visual_peak) || (_last_map_off != map_off) || (_last_raw_map_length < raw_map_length)) {
 
