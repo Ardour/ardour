@@ -313,6 +313,7 @@ if test -n "$PACKAGE_GDB"; then
 	cp -r ${SRCCACHE}/gdb12 $DESTDIR/gdb12
 	cat > $DESTDIR/debug.bat << EOF
 set PYTHONPATH=%~dp0\gdb12\python3.10
+set PATH=%~dp0\gdb12\;%PATH%
 cd bin
 ..\\gdb12\\gdb.exe -ex "set logging overwrite on" -ex "set height 0" -ex "set logging file %UserProfile%\\${PRODUCT_NAME}-debug.log" -ex "set logging enabled on" -ex "target exec ${PRODUCT_EXE}" -ex "run"
 EOF
