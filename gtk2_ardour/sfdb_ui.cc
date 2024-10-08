@@ -1401,18 +1401,18 @@ SoundFileBrowser::handle_freesound_results(std::string theString) {
 
 			double duration_seconds = atof (duration);
 			double h, m, s;
-			char duration_hhmmss[16];
+			char duration_hhmmss[32];
 			if (duration_seconds > 99 * 60 * 60) {
 				strcpy(duration_hhmmss, ">99h");
 			} else {
 				s = modf(duration_seconds/60, &m) * 60;
 				m = modf(m/60, &h) * 60;
 				if (h > 0) {
-					sprintf(duration_hhmmss, "%2.fh:%02.fm:%04.1fs", h, m, s);
+					snprintf(duration_hhmmss, sizeof (duration), "%2.fh:%02.fm:%04.1fs", h, m, s);
 				} else if (m > 0) {
-					sprintf(duration_hhmmss, "%2.fm:%04.1fs", m, s);
+					snprintf(duration_hhmmss, sizeof (duration), "%2.fm:%04.1fs", m, s);
 				} else {
-					sprintf(duration_hhmmss, "%4.1fs", s);
+					snprintf(duration_hhmmss, sizeof (duration), "%4.1fs", s);
 				}
 			}
 
