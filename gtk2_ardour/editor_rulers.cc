@@ -466,7 +466,6 @@ Editor::update_ruler_visibility ()
 	 */
 
 	double tbpos = 0.0;
-	double tbgpos = 0.0;
 	double old_unit_pos;
 
 #ifdef __APPLE__
@@ -488,7 +487,7 @@ Editor::update_ruler_visibility ()
 		minsec_ruler->show();
 		minsec_label.show();
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
+
 		visible_timebars++;
 		have_timebar = true;
 	} else {
@@ -504,7 +503,6 @@ Editor::update_ruler_visibility ()
 		timecode_ruler->show();
 		timecode_label.show();
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
 		visible_timebars++;
 		have_timebar = true;
 	} else {
@@ -520,7 +518,6 @@ Editor::update_ruler_visibility ()
 		samples_ruler->show();
 		samples_label.show();
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
 		visible_timebars++;
 		have_timebar = true;
 	} else {
@@ -536,7 +533,6 @@ Editor::update_ruler_visibility ()
 		bbt_ruler->show();
 		bbt_label.show();
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
 		visible_timebars++;
 		have_timebar = true;
 	} else {
@@ -552,7 +548,6 @@ Editor::update_ruler_visibility ()
 		tempo_group->show();
 		tempo_label.show();
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
 		tempo_group->hide();
@@ -567,7 +562,6 @@ Editor::update_ruler_visibility ()
 		meter_group->show();
 		meter_label.show();
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
 		meter_group->hide();
@@ -585,7 +579,6 @@ Editor::update_ruler_visibility ()
 		range_marker_bar->set_outline(false);
 
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
 		range_marker_group->hide();
@@ -603,7 +596,6 @@ Editor::update_ruler_visibility ()
 		marker_bar->set_outline(false);
 
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
 		marker_group->hide();
@@ -621,7 +613,6 @@ Editor::update_ruler_visibility ()
 		section_marker_bar->set_outline(false);
 
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
 		visible_timebars++;
 		update_marker_display();
 	} else {
@@ -638,7 +629,6 @@ Editor::update_ruler_visibility ()
 		videotl_group->show();
 		videotl_label.show();
 		tbpos += timebar_height * videotl_bar_height;
-		tbgpos += timebar_height * videotl_bar_height;
 		visible_timebars+=videotl_bar_height;
 		queue_visual_videotimeline_update();
 	} else {
@@ -1084,78 +1074,6 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 	if (distance (grid.begin(), grid.end()) == 0) {
 		return;
 	}
-
-	/* we can accent certain lines depending on the user's Grid choice */
-	/* for example, even in a 4/4 meter we can draw a grid with triplet-feel */
-	/* and in this case you will want the accents on '3s' not '2s' */
-	uint32_t bbt_divisor = 2;
-
-	switch (_grid_type) {
-	case GridTypeBeatDiv3:
-		bbt_divisor = 3;
-		break;
-	case GridTypeBeatDiv5:
-		bbt_divisor = 5;
-		break;
-	case GridTypeBeatDiv6:
-		bbt_divisor = 3;
-		break;
-	case GridTypeBeatDiv7:
-		bbt_divisor = 7;
-		break;
-	case GridTypeBeatDiv10:
-		bbt_divisor = 5;
-		break;
-	case GridTypeBeatDiv12:
-		bbt_divisor = 3;
-		break;
-	case GridTypeBeatDiv14:
-		bbt_divisor = 7;
-		break;
-	case GridTypeBeatDiv16:
-		break;
-	case GridTypeBeatDiv20:
-		bbt_divisor = 5;
-		break;
-	case GridTypeBeatDiv24:
-		bbt_divisor = 6;
-		break;
-	case GridTypeBeatDiv28:
-		bbt_divisor = 7;
-		break;
-	case GridTypeBeatDiv32:
-		break;
-	default:
-		bbt_divisor = 2;
-		break;
-	}
-
-	uint32_t bbt_beat_subdivision = 1;
-	switch (bbt_ruler_scale) {
-	case bbt_show_quarters:
-		bbt_beat_subdivision = 1;
-		break;
-	case bbt_show_eighths:
-		bbt_beat_subdivision = 1;
-		break;
-	case bbt_show_sixteenths:
-		bbt_beat_subdivision = 2;
-		break;
-	case bbt_show_thirtyseconds:
-		bbt_beat_subdivision = 4;
-		break;
-	case bbt_show_sixtyfourths:
-		bbt_beat_subdivision = 8;
-		break;
-	case bbt_show_onetwentyeighths:
-		bbt_beat_subdivision = 16;
-		break;
-	default:
-		bbt_beat_subdivision = 1;
-		break;
-	}
-
-	bbt_beat_subdivision *= bbt_divisor;
 
 	switch (bbt_ruler_scale) {
 
