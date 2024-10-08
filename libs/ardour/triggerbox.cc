@@ -3803,7 +3803,8 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	 * cue is precisely at the transport position, there is nothing to do
 	 */
 
-	if (c == cues.rend() || (c->cue == CueRecord::stop_all) | (c->time == transport_position)) {
+
+	if (c == cues.rend() || (c->cue == CueRecord::stop_all) || (c->time == transport_position)) {
 		fast_forward_nothing_to_do ();
 		return;
 	}
