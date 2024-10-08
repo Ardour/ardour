@@ -2591,3 +2591,29 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		abort_tempo_mapping ();  /* NOTREACHED */
 	}
 }
+
+bool
+Editor::rb_click (GdkEvent* event, timepos_t const & where)
+{
+	bool                    do_deselect = true;
+	MidiTimeAxisView*       mtv;
+	AutomationTimeAxisView* atv;
+
+	if ((mtv = dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) != 0) {
+		/* MIDI track */
+		if (get_selection().empty () && current_mouse_mode() == MouseDraw) {
+
+			/* nothing selected */
+
+			const timepos_t pos (where.beats ());
+			const timecnt_t len = pos.distance (max (timepos_t::zero (Temporal::BeatTime), timepos_t (pos.beats () + Beats (1, 0))));
+			mtv->add_region (pos, len, true);
+			do_deselect = false;
+		}
+	} else if ((atv = dynamic_cast<AutomationTimeAxisView*> (clicked_axisview)) != 0) {
+		atv->add_automation_event (event, where, event->button.y, false);
+		do_deselect = false;
+	}
+
+	return do_deselect;
+}

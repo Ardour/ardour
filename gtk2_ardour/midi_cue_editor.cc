@@ -1652,3 +1652,9 @@ MidiCueEditor::selectable_owners()
 
 	return std::list<SelectableOwner*> ();
 }
+
+bool
+MidiCueEditor::rb_click (GdkEvent*, timepos_t const &)
+{
+	return false;
+}

@@ -100,6 +100,8 @@ class MidiCueEditor : public CueEditor
 
 	std::list<SelectableOwner*> selectable_owners();
 
+	bool rb_click (GdkEvent*, Temporal::timepos_t const &);
+
 	Gdk::Cursor* which_track_cursor () const;
 	Gdk::Cursor* which_mode_cursor () const;
 	Gdk::Cursor* which_trim_cursor (bool left_side) const;

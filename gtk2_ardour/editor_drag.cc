@@ -5306,27 +5306,9 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 		do_select_things (event, false);
 
 	} else {
-		Editor* editor = dynamic_cast<Editor*> (&editing_context);
-		assert (editor);
-
 		/* just a click */
 
-		bool                    do_deselect = true;
-		MidiTimeAxisView*       mtv;
-		AutomationTimeAxisView* atv;
-
-		if ((mtv = dynamic_cast<MidiTimeAxisView*> (editor->clicked_axisview)) != 0) {
-			/* MIDI track */
-			if (editing_context.get_selection().empty () && editing_context.current_mouse_mode() == MouseDraw) {
-				/* nothing selected */
-				add_midi_region (mtv, true);
-				do_deselect = false;
-			}
-		} else if ((atv = dynamic_cast<AutomationTimeAxisView*> (editor->clicked_axisview)) != 0) {
-			timepos_t where = grab_time ();
-			atv->add_automation_event (event, where, event->button.y, false);
-			do_deselect = false;
-		}
+		bool do_deselect = editing_context.rb_click (event, grab_time());
 
 		/* do not deselect if Primary or Tertiary (toggle-select or
 		 * extend-select are pressed.

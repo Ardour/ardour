@@ -421,6 +421,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	 */
 	void redo (uint32_t n = 1) { do_redo (n); }
 
+	virtual bool rb_click (GdkEvent*, Temporal::timepos_t const &) = 0;
+
 	virtual void history_changed() = 0;
 	static void update_undo_redo_actions (PBD::UndoHistory const &);
 
