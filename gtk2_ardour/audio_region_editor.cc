@@ -98,6 +98,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	_table.attach (_fade_before_fx_toggle, 2, 3, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	++_table_row;
 
+#ifndef NDEBUG  // disable region Fx for now
 	_region_line_label.set_name ("AudioRegionEditorLabel");
 	_region_line_label.set_text (_("Region Line:"));
 	_region_line_label.set_alignment (1, 0.5);
@@ -105,6 +106,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	_table.attach (_region_line, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	_table.attach (_show_on_touch, 2, 3, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	++_table_row;
+#endif
 
 	UI::instance()->set_tip (_polarity_toggle, _("Invert the signal polarity (180deg phase shift)"));
 	UI::instance()->set_tip (_fade_before_fx_toggle, _("Apply region effects after the region fade.\nThis is useful if the effect(s) have tail, which would otherwise be faded out by the region fade (e.g. reverb, delay)"));
