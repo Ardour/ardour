@@ -4411,7 +4411,7 @@ Mixer_UI::toggle_surround_master ()
 	if (want_sm) {
 		_session->config.set_use_surround_master (true);
 	} else {
-		ArdourMessageDialog md (_("Disabling surround master will delete all existing surround panner state.\nThis cannot be undonoe. Proceed anyway?"), false, MESSAGE_QUESTION, BUTTONS_YES_NO);
+		ArdourMessageDialog md (_("Disabling surround master will delete all existing surround panner state.\nThis cannot be undone. Proceed anyway?"), false, MESSAGE_QUESTION, BUTTONS_YES_NO);
 		if (md.run () == RESPONSE_YES) {
 			_session->config.set_use_surround_master (false);
 		}
