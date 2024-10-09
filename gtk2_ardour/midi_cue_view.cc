@@ -313,7 +313,8 @@ MidiCueView::make_merger ()
 bool
 MidiCueView::automation_rb_click (GdkEvent* event, Temporal::timepos_t const & pos)
 {
-	automation_line->add (automation_control, event, pos, 0.5, true);
+	bool with_guard_points = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
+	automation_line->add (automation_control, event, pos, event->button.y, with_guard_points);
 	return false;
 }
 
