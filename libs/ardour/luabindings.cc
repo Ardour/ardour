@@ -1654,12 +1654,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("has_transients", &Region::has_transients)
 		.addFunction ("transients", (AnalysisFeatureList (Region::*)())&Region::transients)
 
-#ifndef NDEBUG // disable region FX for now
 		.addFunction ("load_plugin", &Region::load_plugin)
 		.addFunction ("add_plugin", &Region::add_plugin)
 		.addFunction ("remove_plugin", &Region::add_plugin)
 		.addFunction ("nth_plugin", &Region::nth_plugin)
-#endif
 
 		/* editing operations */
 		.addFunction ("set_length", &Region::set_length)
