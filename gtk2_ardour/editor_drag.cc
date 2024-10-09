@@ -4938,8 +4938,8 @@ ControlPointDrag::active (Editing::MouseMode m)
 	return dynamic_cast<AutomationLine*> (&(_point->line ())) != 0;
 }
 
-LineDrag::LineDrag (Editor& e, ArdourCanvas::Item* i)
-	: EditorDrag (e, i, e.time_domain (), e.get_trackview_group())
+LineDrag::LineDrag (EditingContext& e, ArdourCanvas::Item* i, std::function<void(GdkEvent*,timepos_t const &,double)> cf)
+	: Drag (e, i, e.time_domain (), e.get_trackview_group())
 	, _line (0)
 	, _fixed_grab_x (0.0)
 	, _fixed_grab_y (0.0)
@@ -4947,6 +4947,7 @@ LineDrag::LineDrag (Editor& e, ArdourCanvas::Item* i)
 	, _before (0)
 	, _after (0)
 	, have_command (false)
+	, click_functor (cf)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New LineDrag\n");
 }
@@ -5049,27 +5050,10 @@ LineDrag::finished (GdkEvent* event, bool movement_occurred)
 			editing_context.commit_reversible_command ();
 			have_command = false;
 		}
+
 	} else {
-		/* add a new control point on the line */
 
-		AutomationTimeAxisView* atv;
-
-		if ((atv = dynamic_cast<AutomationTimeAxisView*> (_editor.clicked_axisview)) != 0) {
-			timepos_t where = grab_time ();
-
-			double cx = 0;
-			double cy = _fixed_grab_y;
-
-			_line->grab_item ().item_to_canvas (cx, cy);
-
-			atv->add_automation_event (event, where, cy, false);
-		} else if (dynamic_cast<AudioTimeAxisView*> (_editor.clicked_axisview) != 0) {
-			AudioRegionView* arv;
-
-			if ((arv = dynamic_cast<AudioRegionView*> (_editor.clicked_regionview)) != 0) {
-				arv->add_gain_point_event (&arv->fx_line ()->grab_item (), event, false);
-			}
-		}
+		click_functor (event, grab_time(), _fixed_grab_y);
 	}
 }
 

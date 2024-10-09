@@ -509,6 +509,7 @@ public:
 	void make_region_markers_global (bool as_cd_markers);
 
 	bool rb_click (GdkEvent*, Temporal::timepos_t const &);
+	void line_drag_click (GdkEvent*, Temporal::timepos_t const &, double);
 
 protected:
 	void map_transport_state ();

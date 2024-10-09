@@ -1233,10 +1233,10 @@ private:
 };
 
 /** Gain or automation line drag */
-class LineDrag : public EditorDrag
+class LineDrag : public Drag
 {
 public:
-	LineDrag (Editor&e, ArdourCanvas::Item *i);
+	LineDrag (EditingContext &e, ArdourCanvas::Item *i, std::function<void(GdkEvent*,Temporal::timepos_t const &,double)>);
 	~LineDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -1257,6 +1257,7 @@ private:
 	uint32_t _before;
 	uint32_t _after;
 	bool    have_command;
+	std::function<void(GdkEvent*,Temporal::timepos_t const &,double)> click_functor;
 };
 
 /** Transient feature line drags*/

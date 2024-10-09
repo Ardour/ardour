@@ -563,6 +563,13 @@ MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event
 	case EditorAutomationLineItem: {
 		ARDOUR::SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
 		select_automation_line (&event->button, item, op);
+		switch (mouse_mode) {
+		case Editing::MouseContent:
+			_drags->set (new LineDrag (*this, item, [&](GdkEvent* ev,timepos_t const & pos, double) { view->line_drag_click (ev, pos); }), event);
+			break;
+		default:
+			break;
+		}
 		return true;
 	}
 
