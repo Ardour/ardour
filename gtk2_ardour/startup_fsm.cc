@@ -91,7 +91,7 @@ StartupFSM::StartupFSM (EngineControl& amd)
 	 * WaitingForSessionPath: if the previous two conditions are not true
 	 */
 
-	if (string (VERSIONSTRING).find (".pre0") != string::npos) {
+	if (true || string (VERSIONSTRING).find (".pre0") != string::npos) {
 		string fn = Glib::build_filename (user_config_directory(), ".i_swear_that_i_will_heed_the_guidelines_stated_in_the_pre_release_dialog");
 		if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
 			set_state (WaitingForPreRelease);
@@ -986,11 +986,17 @@ StartupFSM::show_pre_release_dialog ()
 	pre_release_dialog->add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
 	Label* label = manage (new Label);
+/*
 	label->set_markup (string_compose (_("<span size=\"x-large\" weight=\"bold\">Welcome to this pre-release build of %1 %2</span>\n\n\
 <span size=\"large\">There are still several issues and bugs to be worked on,\n\
 as well as general workflow improvements, before this can be considered\n\
 release software. So, a few guidelines:\n\
-\n\
+*/
+	label->set_markup (string_compose (_("<span size=\"x-large\" weight=\"bold\">Welcome to this very-much-not-ready build of %1 %2</span>\n\n\
+<span size=\"large\">This is still very much a work-in-progress and many pre-existing\n\
+editing features may be broken. In addition the functionality of the MIDI clip editing\n\
+on the cue page is rapidly evolving, but if you are seeing this message it is not\n\
+considered finished at this time.\n\
 1) Please do <b>NOT</b> use this software with the expectation that it is stable or reliable\n\
    though it may be so, depending on your workflow.\n\
 2) Please wait for a helpful writeup of new features.\n\
