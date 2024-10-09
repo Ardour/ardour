@@ -8,3 +8,5 @@ MimeType=application/x-ardour;
 Type=Application
 Categories=AudioVideo;Audio;AudioEditing;X-Recorders;X-Multitrack;X-Jack;
 StartupWMClass=Ardour
+X-NSM-Capable=true
+X-NSM-Exec=@ARDOUR_EXEC@
