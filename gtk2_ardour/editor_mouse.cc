@@ -848,7 +848,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			return true;
 
 		case GainLineItem:
-			_drags->set (new LineDrag (*this, item), event);
+			_drags->set (new LineDrag (*this, item, [&](GdkEvent* ev,timepos_t const & pos, double y) { line_drag_click (ev, pos, y); }), event);
 			return true;
 			break;
 
@@ -858,7 +858,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case EditorAutomationLineItem:
-			_drags->set (new LineDrag (*this, item), event);
+			_drags->set (new LineDrag (*this, item, [&](GdkEvent* ev,timepos_t const & pos, double y) { line_drag_click (ev, pos, y); }), event);
 			return true;
 			break;
 
@@ -999,7 +999,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 
 			case EditorAutomationLineItem:
-				_drags->set (new LineDrag (*this, item), event);
+				_drags->set (new LineDrag (*this, item, [&](GdkEvent* ev,timepos_t const & pos, double y) { line_drag_click (ev, pos, y); }), event);
 				return true;
 				break;
 
@@ -1062,7 +1062,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case MouseDraw:
 		switch (item_type) {
 		case GainLineItem:
-			_drags->set (new LineDrag (*this, item), event);
+			_drags->set (new LineDrag (*this, item, [&](GdkEvent* ev,timepos_t const & pos, double y) { line_drag_click (ev, pos, y); }), event);
 			return true;
 
 		case ControlPointItem:
@@ -2616,4 +2616,23 @@ Editor::rb_click (GdkEvent* event, timepos_t const & where)
 	}
 
 	return do_deselect;
+}
+
+void
+Editor::line_drag_click (GdkEvent* event, timepos_t const & where, double y)
+{
+	AutomationTimeAxisView* atv;
+
+	if ((atv = dynamic_cast<AutomationTimeAxisView*> (clicked_axisview)) != 0) {
+
+		atv->add_automation_event (event, where, y, false);
+
+	} else if (dynamic_cast<AudioTimeAxisView*> (clicked_axisview) != 0) {
+
+		AudioRegionView* arv;
+
+		if ((arv = dynamic_cast<AudioRegionView*> (clicked_regionview)) != 0) {
+			arv->add_gain_point_event (&arv->fx_line ()->grab_item (), event, false);
+		}
+	}
 }

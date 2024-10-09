@@ -318,3 +318,9 @@ MidiCueView::automation_rb_click (GdkEvent* event, Temporal::timepos_t const & p
 	return false;
 }
 
+void
+MidiCueView::line_drag_click (GdkEvent* event, Temporal::timepos_t const & pos)
+{
+}
+
+

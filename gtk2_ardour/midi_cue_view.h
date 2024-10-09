@@ -60,6 +60,7 @@ class MidiCueView : public MidiView
 	MergeableLine* make_merger ();
 
 	bool automation_rb_click (GdkEvent*, Temporal::timepos_t const &);
+	void line_drag_click (GdkEvent*, Temporal::timepos_t const &);
 
   protected:
 	bool scroll (GdkEventScroll* ev);
