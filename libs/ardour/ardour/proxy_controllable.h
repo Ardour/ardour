@@ -40,7 +40,7 @@ class LIBARDOUR_API ProxyControllable : public PBD::Controllable {
 		, _getter (getter)
 	{}
 
-	void set_value (double v, PBD::Controllable::GroupControlDisposition gcd) { if (_setter (v)) { Changed (true, gcd); /* EMIT SIGNAL */ } }
+	void set_value (double v, PBD::Controllable::GroupControlDisposition gcd) { if (_setter (v)) { Changed (true, gcd, v); /* EMIT SIGNAL */ } }
 	double get_value () const { return _getter (); }
 
 	std::string get_user_string () const {

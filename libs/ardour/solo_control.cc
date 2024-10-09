@@ -100,7 +100,7 @@ SoloControl::mod_solo_by_others_downstream (int32_t delta)
 
 	set_mute_master_solo ();
 	_transition_into_solo = 0;
-	Changed (false, Controllable::UseGroup); /* EMIT SIGNAL */
+	Changed (false, Controllable::UseGroup, boost::none); /* EMIT SIGNAL */
 }
 
 void
@@ -155,7 +155,7 @@ SoloControl::mod_solo_by_others_upstream (int32_t delta)
 
 	set_mute_master_solo ();
 	_transition_into_solo = 0;
-	Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+	Changed (false, Controllable::NoGroup, boost::none); /* EMIT SIGNAL */
 }
 
 void
@@ -217,7 +217,7 @@ SoloControl::clear_all_solo_state ()
 	_transition_into_solo = 0; /* Session does not need to propagate */
 
 	if (change) {
-		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+		Changed (false, Controllable::NoGroup, boost::none); /* EMIT SIGNAL */
 	}
 }
 
@@ -293,7 +293,7 @@ SoloControl::master_changed (bool /*from self*/, GroupControlDisposition, std::w
 
 	if (send_signal) {
 		set_mute_master_solo ();
-		Changed (false, Controllable::UseGroup);
+		Changed (false, Controllable::UseGroup, boost::none);
 	}
 
 }
@@ -311,7 +311,7 @@ SoloControl::post_add_master (std::shared_ptr<AutomationControl> m)
 
 		if (!self_soloed() && !get_boolean_masters()) {
 			_transition_into_solo = 1;
-			Changed (false, Controllable::NoGroup);
+			Changed (false, Controllable::NoGroup, boost::none);
 		}
 	}
 }

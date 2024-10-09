@@ -140,7 +140,7 @@ Amp::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t /*end_sample*/,
 			/* see note in PluginInsert::connect_and_run ()
 			 * set_value_unchecked() won't emit a signal since the value is effectively unchanged
 			 */
-			_gain_control->Changed (false, PBD::Controllable::NoGroup);
+			_gain_control->Changed (false, PBD::Controllable::NoGroup, boost::none);
 
 		} else if (target_gain != GAIN_COEFF_UNITY) {
 

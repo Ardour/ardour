@@ -53,7 +53,7 @@ MuteControl::post_add_master (std::shared_ptr<AutomationControl> m)
 
 		if (!muted_by_self() && !get_boolean_masters()) {
 			_muteable.mute_master()->set_muted_by_masters (true);
-			Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+			Changed (false, Controllable::NoGroup, boost::none); /* EMIT SIGNAL */
 		}
 	}
 }
@@ -71,7 +71,7 @@ MuteControl::pre_remove_master (std::shared_ptr<AutomationControl> m)
 	if (m->get_value() && get_boolean_masters() == 1) {
 		_muteable.mute_master()->set_muted_by_masters (false);
 		if (!muted_by_self()) {
-			Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+			Changed (false, Controllable::NoGroup, boost::none); /* EMIT SIGNAL */
 		}
 	}
 }
@@ -142,7 +142,7 @@ MuteControl::set_mute_points (MuteMaster::MutePoint mp)
 	_muteable.mute_points_changed (); /* EMIT SIGNAL */
 
 	if (_muteable.mute_master()->muted_by_self()) {
-		Changed (true, Controllable::UseGroup); /* EMIT SIGNAL */
+		Changed (true, Controllable::UseGroup, boost::none); /* EMIT SIGNAL */
 	}
 }
 
@@ -202,16 +202,16 @@ MuteControl::automation_run (samplepos_t start, pframes_t len)
 		 */
 		if (muted_by_self () != mute) {
 			set_value_unchecked (mute ? 1. : 0.);
-			Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+			Changed (false, Controllable::NoGroup, boost::none); /* EMIT SIGNAL */
 		}
 		return;
 	}
 
 	if (mute && !muted()) {
 		set_value_unchecked (1.0);  // mute
-		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+		Changed (false, Controllable::NoGroup, boost::none); /* EMIT SIGNAL */
 	} else if (!mute && muted()) {
 		set_value_unchecked (0.0);  // unmute
-		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+		Changed (false, Controllable::NoGroup, boost::none); /* EMIT SIGNAL */
 	}
 }

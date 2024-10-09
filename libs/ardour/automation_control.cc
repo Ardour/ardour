@@ -227,7 +227,7 @@ AutomationControl::actually_set_value (double value, PBD::Controllable::GroupCon
 		<< " (was " << old_value << ") @ " << this << std::endl;
 #endif
 
-		Changed (true, gcd);
+		Changed (true, gcd, value);
 		if (!al || !al->automation_playback ()) {
 			_session.set_dirty ();
 		}
@@ -238,7 +238,7 @@ void
 AutomationControl::set_list (std::shared_ptr<Evoral::ControlList> list)
 {
 	Control::set_list (list);
-	Changed (true, Controllable::NoGroup);
+	Changed (true, Controllable::NoGroup, boost::none);
 }
 
 void
@@ -264,7 +264,7 @@ AutomationControl::set_automation_state (AutoState as)
 					Control::set_double (val, timepos_t (_session.current_start ().beats()), true);
 					Control::set_double (val, timepos_t (_session.current_end ().beats()), true);
 				}
-				Changed (true, Controllable::NoGroup);
+				Changed (true, Controllable::NoGroup, val);
 			}
 			if (!touching()) {
 				AutomationWatch::instance().remove_automation_watch (std::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
@@ -278,7 +278,7 @@ AutomationControl::set_automation_state (AutoState as)
 			}
 		} else {
 			AutomationWatch::instance().remove_automation_watch (std::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
-			Changed (false, Controllable::NoGroup);
+			Changed (false, Controllable::NoGroup, val);
 		}
 	}
 }

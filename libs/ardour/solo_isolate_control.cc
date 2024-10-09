@@ -84,7 +84,7 @@ SoloIsolateControl::mod_solo_isolated_by_upstream (int32_t delta)
 	}
 
 	if (solo_isolated() != old) {
-		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+		Changed (false, Controllable::NoGroup, boost::none); /* EMIT SIGNAL */
 	}
 }
 
@@ -133,7 +133,7 @@ SoloIsolateControl::set_solo_isolated (bool yn, Controllable::GroupControlDispos
 
 	/* XXX should we back-propagate as well? (April 2010: myself and chris goddard think not) */
 
-	Changed (true, group_override); /* EMIT SIGNAL */
+	Changed (true, group_override, boost::none); /* EMIT SIGNAL */
 }
 
 

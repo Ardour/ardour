@@ -2810,7 +2810,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			AutomationCtrlPtr c = get_automation_control (_bpm_control_port_index);
 			if (c && c->ac) {
 				/* may be NULL for replicated instances - only one custom UI/ctrl */
-				c->ac->Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+				c->ac->Changed (false, Controllable::NoGroup, boost::none); /* EMIT SIGNAL */
 			}
 		}
 

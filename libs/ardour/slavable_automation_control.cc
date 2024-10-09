@@ -293,7 +293,7 @@ SlavableAutomationControl::master_changed (bool /*from_self*/, GroupControlDispo
 
 	update_boolean_masters_records (m);
 	if (send_signal) {
-		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+		Changed (false, Controllable::NoGroup, boost::none); /* EMIT SIGNAL */
 	}
 }
 
@@ -596,7 +596,7 @@ SlavableAutomationControl::boolean_automation_run (samplepos_t start, pframes_t 
 		 change = boolean_automation_run_locked (start, len);
 	}
 	if (change) {
-		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+		Changed (false, Controllable::NoGroup, boost::none); /* EMIT SIGNAL */
 	}
 	return change;
 }

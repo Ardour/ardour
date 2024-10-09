@@ -61,7 +61,7 @@ public:
 		T newval = (T) v;
 		if (newval != _value) {
 			_value = std::max (_lower, std::min (_upper, newval));
-			Changed (true, gcd); /* EMIT SIGNAL */
+			Changed (true, gcd, v); /* EMIT SIGNAL */
 		}
 	}
 
@@ -84,7 +84,7 @@ public:
 	MPControl& operator=(const T& v) {
 		if (v != _value) {
 			_value = std::max (_lower, std::min (_upper, v));
-			Changed (true, PBD::Controllable::UseGroup); /* EMIT SIGNAL */
+			Changed (true, PBD::Controllable::UseGroup, boost::none); /* EMIT SIGNAL */ // FIXME(bonsembiante): I don't know if here I should use _value or boost:none
 		}
 		return *this;
 	}

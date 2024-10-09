@@ -1019,7 +1019,7 @@ ProcessorEntry::Control::Control (ProcessorEntry& e,std::shared_ptr<AutomationCo
 
 		_button.signal_clicked.connect (sigc::mem_fun (*this, &Control::button_clicked));
 		_button.signal_led_clicked.connect (sigc::mem_fun (*this, &Control::button_clicked_event));
-		c->Changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_changed, this), gui_context ());
+		c->Changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_changed, this, _3), gui_context ());
 		if (c->alist ()) {
 			c->alist()->automation_state_changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_automation_state_changed, this), gui_context());
 			control_automation_state_changed ();
@@ -1056,15 +1056,16 @@ ProcessorEntry::Control::Control (ProcessorEntry& e,std::shared_ptr<AutomationCo
 		_slider.signal_button_release_event().connect (sigc::mem_fun(*this, &Control::button_released));
 
 		_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Control::slider_adjusted));
-		c->Changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_changed, this), gui_context ());
+		c->Changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_changed, this, _3), gui_context ());
 		if (c->alist ()) {
 			c->alist()->automation_state_changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_automation_state_changed, this), gui_context());
 			control_automation_state_changed ();
 		}
 	}
 
-	control_changed ();
-	set_tooltip ();
+	double control_value = c->get_value();
+	control_changed (control_value);
+	set_tooltip (control_value);
 
 	/* We're providing our own PersistentTooltip */
 	set_no_tooltip_whatsoever (_slider);
@@ -1075,14 +1076,15 @@ ProcessorEntry::Control::~Control ()
 }
 
 void
-ProcessorEntry::Control::set_tooltip ()
+ProcessorEntry::Control::set_tooltip (double control_value)
 {
 	std::shared_ptr<AutomationControl> c = _control.lock ();
 
 	if (!c) {
 		return;
 	}
-	std::string tt = _name + ": " + ARDOUR::value_as_string (c->desc(), c->get_value ());
+
+	std::string tt = _name + ": " + ARDOUR::value_as_string (c->desc(), control_value);
 	string sm = Gtkmm2ext::markup_escape_text (tt);
 	_slider_persistant_tooltip.set_tip (sm);
 	ArdourWidgets::set_tooltip (_button, Gtkmm2ext::markup_escape_text (sm));
@@ -1101,8 +1103,10 @@ ProcessorEntry::Control::slider_adjusted ()
 		return;
 	}
 
-	c->set_value ( c->interface_to_internal(_adjustment.get_value (), true) , Controllable::NoGroup);
-	set_tooltip ();
+	double control_value = c->interface_to_internal(_adjustment.get_value (), true);
+
+	c->set_value (control_value , Controllable::NoGroup);
+	set_tooltip (control_value);
 }
 
 void
@@ -1146,9 +1150,11 @@ ProcessorEntry::Control::button_clicked ()
 
 	bool const n = _button.get_active ();
 
-	c->set_value (n ? 0 : 1, Controllable::NoGroup);
+	double control_value = n ? 0 : 1;
+
+	c->set_value (control_value, Controllable::NoGroup);
 	_button.set_active (!n);
-	set_tooltip ();
+	set_tooltip (control_value);
 }
 
 void
@@ -1175,23 +1181,27 @@ ProcessorEntry::Control::control_automation_state_changed ()
 }
 
 void
-ProcessorEntry::Control::control_changed ()
+ProcessorEntry::Control::control_changed (boost::optional<double> control_value)
 {
 	std::shared_ptr<AutomationControl> c = _control.lock ();
 	if (!c) {
 		return;
 	}
 
+	if (control_value == boost::none) {
+		control_value = boost::optional<double> (c->get_value());
+	}
+
 	_ignore_ui_adjustment = true;
 
 	if (c->toggled ()) {
-		_button.set_active (c->get_value() > 0.5);
+		_button.set_active (control_value.value() > 0.5);
 	} else {
 		// Note: the _slider watches the controllable by itself
-		const double nval = c->internal_to_interface (c->get_value (), true);
+		const double nval = c->internal_to_interface (control_value.value(), true);
 		if (_adjustment.get_value() != nval) {
 			_adjustment.set_value (nval);
-			set_tooltip ();
+			set_tooltip (nval);
 		}
 	}
 
