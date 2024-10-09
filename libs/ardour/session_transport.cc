@@ -76,10 +76,12 @@ using namespace Temporal;
 #ifdef NDEBUG
 # define ENSURE_PROCESS_THREAD do {} while (0)
 #else
+static const char* ENSURE_PROCESS_THREAD_failed = "ENSURE_PROCESS_THREAD failed ";
 # define ENSURE_PROCESS_THREAD                        \
   do {                                                \
     if (!AudioEngine::instance()->in_process_thread() \
-        && !loading ()) {                              \
+        && !loading ()) {                             \
+      std::cerr << ENSURE_PROCESS_THREAD_failed;      \
       PBD::stacktrace (std::cerr, 30);                \
     }                                                 \
   } while (0)

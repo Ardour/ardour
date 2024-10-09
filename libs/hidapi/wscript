@@ -35,6 +35,7 @@ def build(bld):
     autowaf.ensure_visible_symbols (obj, False)
     obj.export_includes    = ['hidapi']
     obj.includes           = ['hidapi']
+    obj.defines            = ['_POSIX_C_SOURCE=200809L']
     obj.name               = 'hidapi'
     obj.target             = 'hidapi'
     obj.vnum               = HIDAPI_VERSION
@@ -51,7 +52,6 @@ def build(bld):
             obj.source     = 'mac/hid.c'
             obj.framework  = [ 'IOKit', 'CoreFoundation' ]
         else:
-            # with '-strict' this needs "-std=gnu99" to compile w/o warnings
             obj.source     = 'linux/hid.c'
             if re.search ("linux", sys.platform) != None:
                 obj.uselib = 'UDEV'

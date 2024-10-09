@@ -4354,7 +4354,6 @@ These settings will only take effect after %1 is restarted.\n\
 	}
 
 	string prog (PROGRAM_NAME);
-	boost::algorithm::to_lower (prog);
 	mm->add (SoftwareMonitoring, string_compose (_("%1"), prog));
 	mm->add (ExternalMonitoring, _("Audio Hardware"));
 
