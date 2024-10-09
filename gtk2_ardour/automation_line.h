@@ -177,6 +177,8 @@ public:
 	ARDOUR::ParameterDescriptor const & param() const { return _desc; }
 	EditingContext& editing_context() const { return _editing_context; }
 
+	void add (std::shared_ptr<ARDOUR::AutomationControl>, GdkEvent*, Temporal::timepos_t const &, double y, bool with_guard_points);
+
 protected:
 
 	std::string    _name;

@@ -1286,7 +1286,7 @@ private:
 class RubberbandSelectDrag : public Drag
 {
 public:
-	RubberbandSelectDrag (EditingContext&, ArdourCanvas::Item *);
+	RubberbandSelectDrag (EditingContext&, ArdourCanvas::Item *, std::function<bool(GdkEvent*,Temporal::timepos_t const &)> click_functor);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -1307,35 +1307,24 @@ public:
 	 *  @param y2 The bottom of the rectangle in trackview coordinates.
 	 *  @param drag_in_progress true if the drag is currently happening.
 	 */
-	virtual void select_things (int button_state, Temporal::timepos_t const & x1, Temporal::timepos_t const & x2, double y1, double y2, bool drag_in_progress) = 0;
-
-	virtual void deselect_things () = 0;
+	virtual void select_things (int button_state, Temporal::timepos_t const & x1, Temporal::timepos_t const & x2, double y1, double y2, bool drag_in_progress);
+	virtual void deselect_things ();
 
   protected:
 	bool _vertical_only;
-};
-
-/** A general editor RubberbandSelectDrag (for regions, automation points etc.) */
-class EditorRubberbandSelectDrag : public RubberbandSelectDrag
-{
-public:
-	EditorRubberbandSelectDrag (EditingContext&, ArdourCanvas::Item *);
-
-	void select_things (int, Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, bool);
-	void deselect_things ();
-  private:
+	std::function<bool(GdkEvent*,Temporal::timepos_t const &)> click_functor;
 };
 
 /** A RubberbandSelectDrag for selecting MIDI notes */
 class MidiRubberbandSelectDrag : public RubberbandSelectDrag
 {
-public:
+  public:
 	MidiRubberbandSelectDrag (EditingContext&, MidiView *);
 
 	void select_things (int, Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, bool);
 	void deselect_things ();
 
-private:
+  private:
 	MidiView* _midi_view;
 };
 

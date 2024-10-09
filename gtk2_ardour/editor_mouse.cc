@@ -865,19 +865,19 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case StreamItem:
 			/* in the past, we created a new midi region here, but perhaps that is best left to the Draw mode */
 			/* .. now we allow for rubberband selection (region gain) */
-			_drags->set (new EditorRubberbandSelectDrag (*this, item), event);
+			_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return this->rb_click (ev, pos); }), event);
 			return true;
 			break;
 
 		case AutomationTrackItem:
 			/* rubberband drag to select automation points */
-			_drags->set (new EditorRubberbandSelectDrag (*this, item), event);
+			_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return this->rb_click (ev, pos); }), event);
 			return true;
 			break;
 
 		case RegionItem:
 			/* rubberband drag to select region gain points */
-			_drags->set (new EditorRubberbandSelectDrag (*this, item), event);
+			_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return this->rb_click (ev, pos); }), event);
 			return true;
 			break;
 
@@ -890,7 +890,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)) &&
 		    event->type == GDK_BUTTON_PRESS) {
 
-			_drags->set (new EditorRubberbandSelectDrag (*this, get_trackview_group()), event);
+			_drags->set (new RubberbandSelectDrag (*this, get_trackview_group(), [&](GdkEvent* ev, timepos_t const & pos) { return this->rb_click (ev, pos); }), event);
 
 		} else if (event->type == GDK_BUTTON_PRESS) {
 
@@ -1004,7 +1004,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 
 			case StreamItem:
-				_drags->set (new EditorRubberbandSelectDrag (*this, item), event);
+				_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return this->rb_click (ev, pos); }), event);
 				return true;
 
 			case AutomationTrackItem:
@@ -1032,7 +1032,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					}
 				} else {
 					/* rubberband drag to select automation points */
-					_drags->set (new EditorRubberbandSelectDrag (*this, item), event);
+					_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return this->rb_click (ev, pos); }), event);
 				}
 				break;
 			}

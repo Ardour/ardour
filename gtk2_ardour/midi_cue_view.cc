@@ -309,3 +309,11 @@ MidiCueView::make_merger ()
 	                          [this](Temporal::timepos_t const& t) { return t; },
 	                          nullptr, nullptr);
 }
+
+bool
+MidiCueView::automation_rb_click (GdkEvent* event, Temporal::timepos_t const & pos)
+{
+	automation_line->add (automation_control, event, pos, 0.5, true);
+	return false;
+}
+

@@ -59,6 +59,8 @@ class MidiCueView : public MidiView
 	std::list<SelectableOwner*> selectable_owners();
 	MergeableLine* make_merger ();
 
+	bool automation_rb_click (GdkEvent*, Temporal::timepos_t const &);
+
   protected:
 	bool scroll (GdkEventScroll* ev);
 
