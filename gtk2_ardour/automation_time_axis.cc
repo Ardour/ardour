@@ -797,56 +797,7 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, timepos_t const &
 		return;
 	}
 
-	std::shared_ptr<AutomationList> list = _line->the_list ();
-
-	if (list->in_write_pass()) {
-		/* do not allow the GUI to add automation events during an
-		   automation write pass.
-		*/
-		return;
-	}
-
-	timepos_t when (pos);
-	_editor.snap_to_with_modifier (when, event);
-
-	if (UIConfiguration::instance().get_new_automation_points_on_lane() || _control->list()->size () == 0) {
-		if (_control->list()->size () == 0) {
-			y = _control->get_value ();
-		} else {
-			y = _control->list()->eval (when);
-		}
-	} else {
-		double x = 0;
-		_line->grab_item().canvas_to_item (x, y);
-		/* compute vertical fractional position */
-		y = 1.0 - (y / _line->height());
-		/* map using line */
-		_line->view_to_model_coord_y (y);
-	}
-
-	XMLNode& before = list->get_state();
-	std::list<Selectable*> results;
-
-	if (list->editor_add (when, y, with_guard_points)) {
-
-		if (_control->automation_state () == ARDOUR::Off) {
-			set_automation_state (ARDOUR::Play);
-		}
-
-		if (UIConfiguration::instance().get_automation_edit_cancels_auto_hide () && _control == _session->recently_touched_controllable ()) {
-			RouteTimeAxisView::signal_ctrl_touched (false);
-		}
-
-		XMLNode& after = list->get_state();
-		_editor.begin_reversible_command (_("add automation event"));
-		_session->add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));
-
-		_line->get_selectables (when, when, 0.0, 1.0, results);
-		_editor.get_selection ().set (results);
-
-		_editor.commit_reversible_command ();
-		_session->set_dirty ();
-	}
+	_line->add (_control, event, pos, y, with_guard_points);
 }
 
 bool

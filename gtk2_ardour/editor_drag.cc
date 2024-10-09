@@ -5163,9 +5163,10 @@ FeatureLineDrag::aborted (bool)
 	//_line->reset ();
 }
 
-RubberbandSelectDrag::RubberbandSelectDrag (EditingContext& ec, ArdourCanvas::Item* i)
+RubberbandSelectDrag::RubberbandSelectDrag (EditingContext& ec, ArdourCanvas::Item* i, std::function<bool(GdkEvent*,timepos_t const &)> cf)
 	: Drag (ec, i, ec.time_domain (), ec.get_trackview_group())
 	, _vertical_only (false)
+	, click_functor (cf)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RubberbandSelectDrag\n");
 }
@@ -5308,7 +5309,7 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 	} else {
 		/* just a click */
 
-		bool do_deselect = editing_context.rb_click (event, grab_time());
+		bool do_deselect = click_functor (event, grab_time());
 
 		/* do not deselect if Primary or Tertiary (toggle-select or
 		 * extend-select are pressed.
@@ -5322,6 +5323,35 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	editing_context.rubberband_rect->hide ();
+}
+
+void
+RubberbandSelectDrag::select_things (int button_state, timepos_t const& x1, timepos_t const& x2, double y1, double y2, bool drag_in_progress)
+{
+	if (drag_in_progress) {
+		/* We just want to select things at the end of the drag, not during it */
+		return;
+	}
+
+	SelectionOperation op = ArdourKeyboard::selection_type (button_state);
+
+	editing_context.begin_reversible_selection_op (X_("rubberband selection"));
+	editing_context.select_all_within (x1, x2.decrement (), y1, y2, editing_context.selectable_owners(), op, false);
+	editing_context.commit_reversible_selection_op ();
+}
+
+void
+RubberbandSelectDrag::deselect_things ()
+{
+	editing_context.begin_reversible_selection_op (X_("Clear Selection (rubberband)"));
+
+	editing_context.get_selection().clear_tracks ();
+	editing_context.get_selection().clear_regions ();
+	editing_context.get_selection().clear_points ();
+	editing_context.get_selection().clear_lines ();
+	editing_context.get_selection().clear_midi_notes ();
+
+	editing_context.commit_reversible_selection_op ();
 }
 
 void
@@ -6727,7 +6757,7 @@ PatchChangeDrag::setup_pointer_offset ()
 }
 
 MidiRubberbandSelectDrag::MidiRubberbandSelectDrag (EditingContext& ec, MidiView* mv)
-	: RubberbandSelectDrag (ec, mv->drag_group ())
+	: RubberbandSelectDrag (ec, mv->drag_group (), [](GdkEvent*,timepos_t const&) { return true; })
 	, _midi_view (mv)
 {
 }
@@ -6747,7 +6777,7 @@ MidiRubberbandSelectDrag::deselect_things ()
 }
 
 MidiVerticalSelectDrag::MidiVerticalSelectDrag (EditingContext& ec, MidiView* mv)
-	: RubberbandSelectDrag (ec, mv->drag_group ())
+	: RubberbandSelectDrag (ec, mv->drag_group (), [](GdkEvent*,timepos_t const &) { return true; })
 	, _midi_view (mv)
 {
 	_vertical_only = true;
@@ -6770,40 +6800,6 @@ void
 MidiVerticalSelectDrag::deselect_things ()
 {
 	/* XXX */
-}
-
-EditorRubberbandSelectDrag::EditorRubberbandSelectDrag (EditingContext& e, ArdourCanvas::Item* i)
-	: RubberbandSelectDrag (e, i)
-{
-}
-
-void
-EditorRubberbandSelectDrag::select_things (int button_state, timepos_t const& x1, timepos_t const& x2, double y1, double y2, bool drag_in_progress)
-{
-	if (drag_in_progress) {
-		/* We just want to select things at the end of the drag, not during it */
-		return;
-	}
-
-	SelectionOperation op = ArdourKeyboard::selection_type (button_state);
-
-	editing_context.begin_reversible_selection_op (X_("rubberband selection"));
-	editing_context.select_all_within (x1, x2.decrement (), y1, y2, editing_context.selectable_owners(), op, false);
-	editing_context.commit_reversible_selection_op ();
-}
-
-void
-EditorRubberbandSelectDrag::deselect_things ()
-{
-	editing_context.begin_reversible_selection_op (X_("Clear Selection (rubberband)"));
-
-	editing_context.get_selection().clear_tracks ();
-	editing_context.get_selection().clear_regions ();
-	editing_context.get_selection().clear_points ();
-	editing_context.get_selection().clear_lines ();
-	editing_context.get_selection().clear_midi_notes ();
-
-	editing_context.commit_reversible_selection_op ();
 }
 
 NoteCreateDrag::NoteCreateDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv)

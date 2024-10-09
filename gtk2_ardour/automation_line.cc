@@ -1512,3 +1512,59 @@ AutomationLine::set_offset (timepos_t const & off)
 	_offset = off;
 	reset ();
 }
+
+void
+AutomationLine::add (std::shared_ptr<AutomationControl> control, GdkEvent* event, timepos_t const & pos, double y, bool with_guard_points)
+{
+	if (alist->in_write_pass()) {
+		/* do not allow the GUI to add automation events during an
+		   automation write pass.
+		*/
+		return;
+	}
+
+	timepos_t when (pos);
+	Session* session (_editing_context.session());
+
+	_editing_context.snap_to_with_modifier (when, event);
+
+	if (UIConfiguration::instance().get_new_automation_points_on_lane() || control->list()->size () == 0) {
+		if (control->list()->size () == 0) {
+			y = control->get_value ();
+		} else {
+			y = control->list()->eval (when);
+		}
+	} else {
+		double x = 0;
+		grab_item().canvas_to_item (x, y);
+		/* compute vertical fractional position */
+		y = 1.0 - (y / height());
+		/* map using line */
+		view_to_model_coord_y (y);
+	}
+
+	XMLNode& before = alist->get_state();
+	std::list<Selectable*> results;
+
+	if (alist->editor_add (when, y, with_guard_points)) {
+
+		if (control->automation_state () == ARDOUR::Off) {
+#warning paul make this work again .. call back to ATV or similar
+			// set_automation_state (ARDOUR::Play);
+		}
+
+		if (UIConfiguration::instance().get_automation_edit_cancels_auto_hide () && control == session->recently_touched_controllable ()) {
+			RouteTimeAxisView::signal_ctrl_touched (false);
+		}
+
+		XMLNode& after = alist->get_state();
+		_editing_context.begin_reversible_command (_("add automation event"));
+		_editing_context.add_command (new MementoCommand<ARDOUR::AutomationList> (*alist.get (), &before, &after));
+
+		get_selectables (when, when, 0.0, 1.0, results);
+		_editing_context.get_selection ().set (results);
+
+		_editing_context.commit_reversible_command ();
+		session->set_dirty ();
+	}
+}
