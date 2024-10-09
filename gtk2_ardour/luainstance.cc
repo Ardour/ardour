@@ -357,9 +357,9 @@ class PangoLayout {
 
 namespace LuaSignal {
 
-#define STATIC(name,c,p) else if (!strcmp(type, #name)) {return name;}
-#define SESSION(name,c,p) else if (!strcmp(type, #name)) {return name;}
-#define ENGINE(name,c,p) else if (!strcmp(type, #name)) {return name;}
+#define STATIC(name,c) else if (!strcmp(type, #name)) {return name;}
+#define SESSION(name,c) else if (!strcmp(type, #name)) {return name;}
+#define ENGINE(name,c) else if (!strcmp(type, #name)) {return name;}
 
 LuaSignal
 str2luasignal (const std::string &str) {
@@ -375,9 +375,9 @@ str2luasignal (const std::string &str) {
 #undef SESSION
 #undef ENGINE
 
-#define STATIC(name,c,p) N_(#name),
-#define SESSION(name,c,p) N_(#name),
-#define ENGINE(name,c,p) N_(#name),
+#define STATIC(name,c) N_(#name),
+#define SESSION(name,c) N_(#name),
+#define ENGINE(name,c) N_(#name),
 const char *luasignalstr[] = {
 #	include "luasignal_syms.h"
 	0
@@ -546,9 +546,9 @@ void
 LuaInstance::register_hooks (lua_State* L)
 {
 
-#define ENGINE(name,c,p) .addConst (stringify(name), (LuaSignal::LuaSignal)LuaSignal::name)
-#define STATIC(name,c,p) .addConst (stringify(name), (LuaSignal::LuaSignal)LuaSignal::name)
-#define SESSION(name,c,p) .addConst (stringify(name), (LuaSignal::LuaSignal)LuaSignal::name)
+#define ENGINE(name,c) .addConst (stringify(name), (LuaSignal::LuaSignal)LuaSignal::name)
+#define STATIC(name,c) .addConst (stringify(name), (LuaSignal::LuaSignal)LuaSignal::name)
+#define SESSION(name,c) .addConst (stringify(name), (LuaSignal::LuaSignal)LuaSignal::name)
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("LuaSignal")
 #		include "luasignal_syms.h"
@@ -2365,9 +2365,9 @@ LuaCallback::reconnect_object (T obj)
 {
 	for (uint32_t i = 0; i < LuaSignal::LAST_SIGNAL; ++i) {
 		if (_signals[i]) {
-#define ENGINE(n,c,p) else if (i == LuaSignal::n) { connect_ ## p (LuaSignal::n, AudioEngine::instance(), &(AudioEngine::instance()->c)); }
-#define SESSION(n,c,p) else if (i == LuaSignal::n) { if (_session) { connect_ ## p (LuaSignal::n, _session, &(_session->c)); } }
-#define STATIC(n,c,p) else if (i == LuaSignal::n) { connect_ ## p (LuaSignal::n, obj, c); }
+#define ENGINE(n,c) else if (i == LuaSignal::n) { connect (LuaSignal::n, AudioEngine::instance(), &(AudioEngine::instance()->c)); }
+#define SESSION(n,c) else if (i == LuaSignal::n) { if (_session) { connect (LuaSignal::n, _session, &(_session->c)); } }
+#define STATIC(n,c) else if (i == LuaSignal::n) { connect (LuaSignal::n, obj, c); }
 			if (0) {}
 #			include "luasignal_syms.h"
 			else {
@@ -2381,112 +2381,25 @@ LuaCallback::reconnect_object (T obj)
 	}
 }
 
-template <typename T, typename S> void
-LuaCallback::connect_0 (enum LuaSignal::LuaSignal ls, T ref, S *signal) {
+template <typename T, typename... C> void
+LuaCallback::connect (enum LuaSignal::LuaSignal ls, T ref, PBD::Signal<void(C...)> *signal) {
 	signal->connect (
-			_connections, invalidator (*this),
-			boost::bind (&LuaCallback::proxy_0<T>, this, ls, ref),
-			gui_context());
+	        _connections,
+	        invalidator (*this),
+	        [=] (C... a) { return proxy(ls, ref, a...); },
+	        gui_context());
 }
 
-template <typename T, typename C1> void
-LuaCallback::connect_1 (enum LuaSignal::LuaSignal ls, T ref, PBD::Signal1<void, C1> *signal) {
-	signal->connect (
-			_connections, invalidator (*this),
-			boost::bind (&LuaCallback::proxy_1<T, C1>, this, ls, ref, _1),
-			gui_context());
-}
-
-template <typename T, typename C1, typename C2> void
-LuaCallback::connect_2 (enum LuaSignal::LuaSignal ls, T ref, PBD::Signal2<void, C1, C2> *signal) {
-	signal->connect (
-			_connections, invalidator (*this),
-			boost::bind (&LuaCallback::proxy_2<T, C1, C2>, this, ls, ref, _1, _2),
-			gui_context());
-}
-
-template <typename T, typename C1, typename C2, typename C3> void
-LuaCallback::connect_3 (enum LuaSignal::LuaSignal ls, T ref, PBD::Signal3<void, C1, C2, C3> *signal) {
-	signal->connect (
-			_connections, invalidator (*this),
-			boost::bind (&LuaCallback::proxy_3<T, C1, C2, C3>, this, ls, ref, _1, _2, _3),
-			gui_context());
-}
-
-template <typename T, typename C1, typename C2, typename C3, typename C4> void
-LuaCallback::connect_4 (enum LuaSignal::LuaSignal ls, T ref, PBD::Signal4<void, C1, C2, C3, C4> *signal) {
-	signal->connect (
-			_connections, invalidator (*this),
-			boost::bind (&LuaCallback::proxy_4<T, C1, C2, C3, C4>, this, ls, ref, _1, _2, _3, _4),
-			gui_context());
-}
-
-template <typename T> void
-LuaCallback::proxy_0 (enum LuaSignal::LuaSignal ls, T ref) {
+template <typename T, typename... C> void
+LuaCallback::proxy (enum LuaSignal::LuaSignal ls, T ref, C... a) {
 	bool ok = true;
 	{
-		const luabridge::LuaRef& rv ((*_lua_call)((int)ls, ref));
+		const luabridge::LuaRef& rv ((*_lua_call)((int)ls, ref, a...));
 		if (! rv.cast<bool> ()) {
 			ok = false;
 		}
 	}
 	/* destroy LuaRef ^^ first before calling drop_callback() */
-	if (!ok) {
-		drop_callback (); /* EMIT SIGNAL */
-	}
-}
-
-template <typename T, typename C1> void
-LuaCallback::proxy_1 (enum LuaSignal::LuaSignal ls, T ref, C1 a1) {
-	bool ok = true;
-	{
-		const luabridge::LuaRef& rv ((*_lua_call)((int)ls, ref, a1));
-		if (! rv.cast<bool> ()) {
-			ok = false;
-		}
-	}
-	if (!ok) {
-		drop_callback (); /* EMIT SIGNAL */
-	}
-}
-
-template <typename T, typename C1, typename C2> void
-LuaCallback::proxy_2 (enum LuaSignal::LuaSignal ls, T ref, C1 a1, C2 a2) {
-	bool ok = true;
-	{
-		const luabridge::LuaRef& rv ((*_lua_call)((int)ls, ref, a1, a2));
-		if (! rv.cast<bool> ()) {
-			ok = false;
-		}
-	}
-	if (!ok) {
-		drop_callback (); /* EMIT SIGNAL */
-	}
-}
-
-template <typename T, typename C1, typename C2, typename C3> void
-LuaCallback::proxy_3 (enum LuaSignal::LuaSignal ls, T ref, C1 a1, C2 a2, C3 a3) {
-	bool ok = true;
-	{
-		const luabridge::LuaRef& rv ((*_lua_call)((int)ls, ref, a1, a2, a3));
-		if (! rv.cast<bool> ()) {
-			ok = false;
-		}
-	}
-	if (!ok) {
-		drop_callback (); /* EMIT SIGNAL */
-	}
-}
-
-template <typename T, typename C1, typename C2, typename C3, typename C4> void
-LuaCallback::proxy_4 (enum LuaSignal::LuaSignal ls, T ref, C1 a1, C2 a2, C3 a3, C4 a4) {
-	bool ok = true;
-	{
-		const luabridge::LuaRef& rv ((*_lua_call)((int)ls, ref, a1, a2, a3, a4));
-		if (! rv.cast<bool> ()) {
-			ok = false;
-		}
-	}
 	if (!ok) {
 		drop_callback (); /* EMIT SIGNAL */
 	}
