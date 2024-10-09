@@ -272,6 +272,7 @@ AudioRegion::send_change (const PropertyChange& what_changed)
 	our_interests.add (Properties::envelope);
 	our_interests.add (Properties::fade_in);
 	our_interests.add (Properties::fade_out);
+	our_interests.add (Properties::start);
 
 	if (what_changed.contains (our_interests)) {
 		_invalidated.exchange (true);
