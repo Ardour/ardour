@@ -779,8 +779,7 @@ struct SlotArmInfo {
 	Trigger& slot;
 	Temporal::timepos_t start;
 	Temporal::timepos_t end;
-	RTMidiBuffer* midi_buf; /* assumed large enough */
-	RTMidiBufferBeats* beats; /* will take over data allocated for midi_but */
+	RTMidiBufferBeats* midi_buf;
 	AudioTrigger::AudioData audio_buf;
 	RubberBand::RubberBandStretcher* stretcher;
 };

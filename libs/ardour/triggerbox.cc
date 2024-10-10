@@ -2416,27 +2416,24 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 		return;
 	}
 
-	ai.midi_buf->shift (-ai.start.samples());
-	ai.midi_buf->convert (*ai.beats);
-
 	/* Note: the original MIDI buffer in ai is now invalid, all data has
 	 * been moved to rtmb.
 	 */
 
-	old_rt_midibuffer = rt_midibuffer.exchange (ai.beats);
+	old_rt_midibuffer = rt_midibuffer.exchange (ai.midi_buf);
 
 	loop_start = Temporal::Beats();
-	loop_end = (*ai.beats)[ai.beats->size()-1].timestamp;
+	loop_end = (*ai.midi_buf)[ai.midi_buf->size()-1].timestamp;
 	data_length = loop_end;
 	_follow_length = Temporal::BBT_Offset (0, data_length.get_beats(), 0);
 	set_length (timecnt_t (data_length));
 	iter = 0;
 	first_event_index = 0;
-	last_event_index = ai.beats->size();
+	last_event_index = ai.midi_buf->size();
 	_follow_action0 = FollowAction::Again;
 
-	/* Mark ai.beats as null so that it is not deleted */
-	ai.beats = nullptr;
+	/* Mark ai.midi_buf as null so that it is not deleted */
+	ai.midi_buf = nullptr;
 	delete &ai;
 
 	/* start playing */
@@ -3412,7 +3409,6 @@ SlotArmInfo::SlotArmInfo (Trigger& s)
 	, start (0)
 	, end (0)
 	, midi_buf (nullptr)
-	, beats (nullptr)
 	, stretcher (nullptr)
 {
 }
@@ -3420,7 +3416,6 @@ SlotArmInfo::SlotArmInfo (Trigger& s)
 SlotArmInfo::~SlotArmInfo()
 {
 	delete midi_buf;
-	delete beats;
 	delete stretcher;
 }
 
@@ -3523,9 +3518,8 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 	SlotArmInfo* ai = new SlotArmInfo (slot);
 
 	if (_data_type == DataType::MIDI) {
-		ai->midi_buf = new RTMidiBuffer;
+		ai->midi_buf = new RTMidiBufferBeats;
 		ai->midi_buf->resize (1024); // XXX Config->max_slot_midi_event_size
-		ai->beats = new RTMidiBufferBeats;
 	} else {
 		ai->audio_buf.alloc (_session.sample_rate() * 30, chans); // XXX Config->max_slot_audio_duration
 		AudioTrigger* at = dynamic_cast<AudioTrigger*> (&slot);
@@ -3647,6 +3641,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 	Track* trk = static_cast<Track*> (_owner);
 	MidiTrack* mt = dynamic_cast<MidiTrack*>(trk);
 	MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
+	TempoMap::SharedPtr tmap (TempoMap::use());
 
 	for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 		Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
@@ -3667,9 +3662,9 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		}
 
 		if (!skip_event && (!filter || !filter->filter(ev.buffer(), ev.size()))) {
-			const samplepos_t event_time = start_sample + ev.time();
+			const samplepos_t event_time (start_sample + ev.time() - ai->start.samples());
 			if (!ai->end || (event_time < ai->end.samples())) {
-				ai->midi_buf->write (event_time,  ev.event_type(), ev.size(), ev.buffer());
+				ai->midi_buf->write (tmap->quarters_at_sample (event_time),  ev.event_type(), ev.size(), ev.buffer());
 			}
 		}
 	}
