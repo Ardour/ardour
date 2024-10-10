@@ -3633,7 +3633,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 
 	/* Audio */
 
-	const size_t n_buffers = bufs.count().n_audio();
+	size_t n_buffers = bufs.count().n_audio();
 
 	if (n_buffers) {
 
@@ -3646,38 +3646,49 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		}
 	}
 
-	/* MIDI */
+	n_buffers = bufs.count().n_midi();
+	bool send_signal = false;
 
-	MidiBuffer& buf    = bufs.get_midi (0);
-	Track* trk = static_cast<Track*> (_owner);
-	MidiTrack* mt = dynamic_cast<MidiTrack*>(trk);
-	MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
-	TempoMap::SharedPtr tmap (TempoMap::use());
+	if (n_buffers) {
 
-	for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
-		Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
-		if (ev.time() > nframes) {
-			break;
-		}
+		/* MIDI */
 
-		bool skip_event = false;
+		MidiBuffer& buf    = bufs.get_midi (0);
+		Track* trk = static_cast<Track*> (_owner);
+		MidiTrack* mt = dynamic_cast<MidiTrack*>(trk);
+		MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
+		TempoMap::SharedPtr tmap (TempoMap::use());
 
-		if (mt) {
-			/* skip injected immediate/out-of-band events */
-			MidiBuffer const& ieb (mt->immediate_event_buffer());
-			for (MidiBuffer::const_iterator j = ieb.begin(); j != ieb.end(); ++j) {
-				if (*j == ev) {
-					skip_event = true;
+		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
+			Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
+			if (ev.time() > nframes) {
+				break;
+			}
+
+			bool skip_event = false;
+
+			if (mt) {
+				/* skip injected immediate/out-of-band events */
+				MidiBuffer const& ieb (mt->immediate_event_buffer());
+				for (MidiBuffer::const_iterator j = ieb.begin(); j != ieb.end(); ++j) {
+					if (*j == ev) {
+						skip_event = true;
+					}
+				}
+			}
+
+			if (!skip_event && (!filter || !filter->filter(ev.buffer(), ev.size()))) {
+				const samplepos_t event_time (start_sample + ev.time() - ai->start.samples());
+				if (!ai->end || (event_time < ai->end.samples())) {
+					ai->midi_buf->write (tmap->quarters_at_sample (event_time),  ev.event_type(), ev.size(), ev.buffer());
+					send_signal = true;
 				}
 			}
 		}
+	}
 
-		if (!skip_event && (!filter || !filter->filter(ev.buffer(), ev.size()))) {
-			const samplepos_t event_time (start_sample + ev.time() - ai->start.samples());
-			if (!ai->end || (event_time < ai->end.samples())) {
-				ai->midi_buf->write (tmap->quarters_at_sample (event_time),  ev.event_type(), ev.size(), ev.buffer());
-			}
-		}
+	if (send_signal) {
+		Captured(); /* EMIT SIGNAL */
 	}
 
 	if (reached_end) {
@@ -5632,7 +5643,7 @@ TriggerBoxThread::build_audio_source (AudioTrigger* t)
 	plist2.add (ARDOUR::Properties::whole_file, false);
 	std::shared_ptr<Region> copy (RegionFactory::create (whole, plist2));
 
- 	t->set_region_in_worker_thread_from_capture (copy);
+	t->set_region_in_worker_thread_from_capture (copy);
 	/* make it loop */
 	t->set_follow_action0 (FollowAction::Again);
 }

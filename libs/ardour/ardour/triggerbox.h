@@ -966,6 +966,8 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	void maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes);
 	void finish_recording (BufferSet& bufs);
 	void set_armed (SlotArmInfo*);
+	SlotArmInfo* capture_info() const { return _arm_info; }
+	PBD::Signal0<void> Captured;
 
 	/* These four are accessed (read/write) only from process() context */
 
