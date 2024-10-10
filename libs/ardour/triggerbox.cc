@@ -3519,9 +3519,9 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 
 	if (_data_type == DataType::MIDI) {
 		ai->midi_buf = new RTMidiBufferBeats;
-		ai->midi_buf->resize (1024); // XXX Config->max_slot_midi_event_size
+		ai->midi_buf->resize (Config->get_max_midi_clip_size());
 	} else {
-		ai->audio_buf.alloc (_session.sample_rate() * 30, chans); // XXX Config->max_slot_audio_duration
+		ai->audio_buf.alloc ((samplecnt_t) round (_session.sample_rate() * Config->get_max_audio_clip_duration()), chans);
 		AudioTrigger* at = dynamic_cast<AudioTrigger*> (&slot);
 		assert (at);
 		ai->stretcher = at->alloc_stretcher ();

@@ -295,3 +295,6 @@ CONFIG_VARIABLE (bool, show_video_server_dialog, "show-video-server-dialog", fal
 CONFIG_VARIABLE (float, export_preroll, "export-preroll", 2.0) // seconds
 CONFIG_VARIABLE (float, export_silence_threshold, "export-silence-threshold", -90) // dB
 CONFIG_VARIABLE (float, ppqn_factor_for_export, "ppqn-factor-for-export", 1) // Temporal::ticks_per_beat
+
+CONFIG_VARIABLE (float, max_midi_clip_size, "max-midi-clip-size", 1024) // number of MIDI events
+CONFIG_VARIABLE (float, max_audio_clip_duration, "max-audio-clip-duration" , 30.) // seconds
