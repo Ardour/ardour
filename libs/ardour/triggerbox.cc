@@ -36,6 +36,7 @@
 
 #include "temporal/tempo.h"
 
+#include "ardour/amp.h"
 #include "ardour/async_midi_port.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
@@ -1912,11 +1913,21 @@ AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
 
 	data.clear ();
 
-	for (auto & s : ai.audio_buf) {
-		data.push_back (s);
-	}
 	data.length = ai.audio_buf.length;
 	data.capacity = ai.audio_buf.capacity;
+
+	/* This AudioBuffer does not own any data, it is just a shell to make
+	   using Amp::apply_gain() possible.
+	*/
+	AudioBuffer buf (0);
+	const samplecnt_t fade_duration = std::min (_box.session().sample_rate()/4, data.length/2);
+
+	for (auto & s : ai.audio_buf) {
+		data.push_back (s);
+		buf.set_data (s, data.length);
+		Amp::apply_gain (buf,  _box.session().sample_rate(), fade_duration, 0., 1., 0);
+		Amp::apply_gain (buf,  _box.session().sample_rate(), fade_duration, 1., 0., data.length - fade_duration);
+	}
 
 	ai.audio_buf.clear (); /* data now owned by us, not SlotArmInfo */
 
