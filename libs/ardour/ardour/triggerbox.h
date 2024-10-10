@@ -510,7 +510,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 		return audio_run<true> (bufs, start_sample, end_sample, start, end, nframes, dest_offset, bpm, quantize_offset);
 	}
 
-	bool playable() const { return data.length; }
+	bool playable() const { return data.length || _region; }
 
 	StretchMode stretch_mode() const { return _stretch_mode; }
 	void set_stretch_mode (StretchMode);
@@ -603,7 +603,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	MIDITrigger (uint32_t index, TriggerBox&);
 	~MIDITrigger ();
 
-	bool playable() const { return rt_midibuffer.load(); }
+	bool playable() const { return rt_midibuffer.load() || _region; }
 
 	void captured (SlotArmInfo&, BufferSet&);
 	void arm();
