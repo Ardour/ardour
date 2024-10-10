@@ -734,7 +734,8 @@ AudioRegion::read_at (Sample*     buf,
 	boost::scoped_array<gain_t> gain_array;
 	boost::scoped_array<Sample> mixdown_array;
 
-	// TODO optimize mono reader, w/o plugins -> old code
+	bool nofx = false; // apply region fades at the end
+
 	if (n_chn > 1 && _cache_start < _cache_end && internal_offset + suffix >= _cache_start && internal_offset + suffix + can_read <= _cache_end) {
 		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Region '%1' channel: %2 copy from cache %3 - %4 to_read: %5 can_read: %6\n",
 		             name(), chan_n, internal_offset + suffix, internal_offset + suffix + can_read, to_read, can_read));
@@ -747,10 +748,38 @@ AudioRegion::read_at (Sample*     buf,
 		lm.release ();
 
 		samplecnt_t    n_read = to_read; //< data to read from disk
-		samplecnt_t    n_proc = to_read; //< silence pad data to process
-		samplepos_t    n_tail = 0; // further silence pad, read tail from FX
-		samplepos_t    readat = pos;
 		sampleoffset_t offset = internal_offset;
+
+		/* don't use cache when there are no region FX */
+		if (!have_fx) {
+			cl.release ();
+			if (read_from_sources (_sources, lsamples, mixdown_buffer, pos, n_read, chan_n) != to_read) {
+				return 0;
+			}
+
+			/* APPLY REGULAR GAIN CURVES AND SCALING TO mixdown_buffer */
+			if (envelope_active())  {
+				_envelope->curve().get_vector (timepos_t (offset), timepos_t (offset + n_read), gain_buffer, n_read);
+
+				if (_scale_amplitude != 1.0f) {
+					for (samplecnt_t n = 0; n < n_read; ++n) {
+						mixdown_buffer[n] *= gain_buffer[n] * _scale_amplitude;
+					}
+				} else {
+					for (samplecnt_t n = 0; n < n_read; ++n) {
+						mixdown_buffer[n] *= gain_buffer[n];
+					}
+				}
+			} else if (_scale_amplitude != 1.0f) {
+				apply_gain_to_buffer (mixdown_buffer, n_read, _scale_amplitude);
+			}
+			nofx = true;
+			goto endread;
+		}
+
+		samplecnt_t n_proc = to_read; //< silence pad data to process
+		samplepos_t n_tail = 0; // further silence pad, read tail from FX
+		samplepos_t readat = pos;
 
 		if (tsamples > 0 && cnt >= esamples) {
 			n_tail = can_read - n_read;
@@ -800,7 +829,7 @@ AudioRegion::read_at (Sample*     buf,
 			 */
 
 			if (read_from_sources (_sources, lsamples, mixdown_buffer, readat, n_read, chn) != n_read) {
-				return 0; // XXX
+				return 0;
 			}
 
 			/* APPLY REGULAR GAIN CURVES AND SCALING TO mixdown_buffer */
@@ -908,6 +937,7 @@ AudioRegion::read_at (Sample*     buf,
 		_cache_tail  = n_tail;
 		cl.release ();
 	}
+endread:
 
 	/* APPLY FADES TO THE DATA IN mixdown_buffer AND MIX THE RESULTS INTO
 	 * buf. The key things to realize here: (1) the fade being applied is
@@ -954,7 +984,7 @@ AudioRegion::read_at (Sample*     buf,
 			_fade_in->curve().get_vector (timepos_t (internal_offset), timepos_t (internal_offset + fade_in_limit), gain_buffer, fade_in_limit);
 		}
 
-		if (!_fade_before_fx) {
+		if (!_fade_before_fx || nofx) {
 			/* Mix our newly-read data in, with the fade */
 			for (samplecnt_t n = 0; n < fade_in_limit; ++n) {
 				buf[n] += mixdown_buffer[n] * gain_buffer[n];
@@ -999,7 +1029,7 @@ AudioRegion::read_at (Sample*     buf,
 			_fade_out->curve().get_vector (timepos_t (curve_offset), timepos_t (curve_offset + fade_out_limit), gain_buffer, fade_out_limit);
 		}
 
-		if (!_fade_before_fx) {
+		if (!_fade_before_fx || nofx) {
 			/* Mix our newly-read data with whatever was already there, with the fade out applied to our data.  */
 			for (samplecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
 				buf[m] += mixdown_buffer[m] * gain_buffer[n];
@@ -2541,6 +2571,13 @@ AudioRegion::remove_plugin (std::shared_ptr<RegionFxPlugin> fx)
 		return false;
 	}
 	_plugins.erase (i);
+
+	if (_plugins.empty ()) {
+		Glib::Threads::Mutex::Lock cl (_cache_lock);
+		_cache_start = _cache_end = -1;
+		_cache_tail  = 0;
+		_readcache.clear ();
+	}
 
 	lm.release ();
 
