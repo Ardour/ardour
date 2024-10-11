@@ -76,7 +76,7 @@ IOTaskList::IOTaskList (uint32_t n_threads)
 
 	_workers.resize (_n_threads);
 	for (uint32_t i = 0; i < _n_threads; ++i) {
-		if (!use_rt || pbd_realtime_pthread_create (policy, THREAD_IO, 0, &_workers[i], &_worker_thread, this)) {
+		if (!use_rt || pbd_realtime_pthread_create (policy, PBD_RT_PRI_IOFX, 0, &_workers[i], &_worker_thread, this)) {
 			if (use_rt && i == 0) {
 				PBD::warning << _("IOTaskList: cannot acquire realtime permissions.") << endmsg;
 			}

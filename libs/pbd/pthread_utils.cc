@@ -348,7 +348,7 @@ pbd_pthread_priority (PBDThreadClass which)
 		case THREAD_CTRL:
 		default:
 			return -14;  // THREAD_PRIORITY_HIGHEST (2)
-		case THREAD_IO:
+		case THREAD_IOFX:
 			/* https://github.com/mingw-w64/mingw-w64/blob/master/mingw-w64-libraries/winpthreads/src/sched.c */
 			return -15; // THREAD_PRIORITY_ABOVE_NORMAL (1)
 	}
@@ -372,7 +372,7 @@ pbd_pthread_priority (PBDThreadClass which)
 			return base - 2;
 		case THREAD_CTRL:
 			return base - 3;
-		case THREAD_IO:
+		case THREAD_IOFX:
 			return base - 10;
 	}
 #endif
