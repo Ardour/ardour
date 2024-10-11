@@ -45,6 +45,7 @@
 #include "evoral/PatchChange.h"
 #include "evoral/SMF.h"
 
+#include "ardour/event_ring_buffer.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/processor.h"
@@ -777,8 +778,10 @@ struct SlotArmInfo {
 	~SlotArmInfo();
 
 	Trigger& slot;
-	Temporal::timepos_t start;
-	Temporal::timepos_t end;
+	Temporal::Beats start_beats;
+	samplepos_t start_samples;
+	Temporal::Beats end_beats;
+	samplepos_t end_samples;
 	RTMidiBufferBeats* midi_buf;
 	AudioTrigger::AudioData audio_buf;
 	RubberBand::RubberBandStretcher* stretcher;
@@ -931,7 +934,11 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	void send_property_change (PBD::PropertyChange pc);
 	static PBD::Signal2<void,PBD::PropertyChange,int> TriggerBoxPropertyChange;
 
+	std::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
+
 	void dump (std::ostream &) const;
+
+	PBD::Signal0<void> Captured;
 
   private:
 	struct Requests {
@@ -966,8 +973,6 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	void maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes);
 	void finish_recording (BufferSet& bufs);
 	void set_armed (SlotArmInfo*);
-	SlotArmInfo* capture_info() const { return _arm_info; }
-	PBD::Signal0<void> Captured;
 
 	/* These four are accessed (read/write) only from process() context */
 
@@ -1024,6 +1029,12 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 
 	PBD::ScopedConnection stop_all_connection;
 	std::atomic<SlotArmInfo*> _arm_info;
+
+	/** A buffer that we use to put newly-arrived MIDI data in for
+	 * the GUI to read (so that it can update itself).
+	 */
+	mutable EventRingBuffer<samplepos_t> _gui_feed_fifo;
+	mutable Glib::Threads::Mutex         _gui_feed_reset_mutex;
 
 	typedef  std::map<std::vector<uint8_t>,std::pair<int,int> > CustomMidiMap;
 	static CustomMidiMap _custom_midi_map;

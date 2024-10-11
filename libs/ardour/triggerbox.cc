@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <memory>
 #include <sstream>
+#include <vector>
 
 #include <glibmm.h>
 
@@ -3417,8 +3418,8 @@ Trigger::make_property_quarks ()
 
 SlotArmInfo::SlotArmInfo (Trigger& s)
 	: slot (s)
-	, start (0)
-	, end (0)
+	, start_samples (0)
+	, end_samples (0)
 	, midi_buf (nullptr)
 	, stretcher (nullptr)
 {
@@ -3498,6 +3499,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _record_state (Disabled)
 	, requests (1024)
 	, _arm_info (nullptr)
+	, _gui_feed_fifo (std::min<size_t> (64000, std::max<size_t> (s.sample_rate() / 10, 2 * AudioEngine::instance()->raw_buffer_size (DataType::MIDI))))
 {
 	set_display_to_user (false);
 
@@ -3549,7 +3551,8 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 	slot.compute_quantized_transition (now, now_beats, std::numeric_limits<Beats>::max(),
 	                                   t_bbt, t_beats, t_samples, tmap, slot.quantization());
 
-	ai->start = t_samples;
+	ai->start_samples = t_samples;
+	ai->start_beats = t_beats;
 
 	_arm_info = ai;
 }
@@ -3583,7 +3586,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 	bool reached_end = false;
 
 	if (!ai->slot.armed()) {
-		if (!ai->end) {
+		if (!ai->end_samples) {
 			/* disarmed: compute end */
 			Beats start_b;
 			Beats end_b;
@@ -3595,7 +3598,8 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 
 			ai->slot.compute_quantized_transition (start_sample, now_beats, std::numeric_limits<Beats>::max(),
 			                                       t_bbt, t_beats, t_samples, tmap, ai->slot.quantization());
-			ai->end = t_samples;
+			ai->end_samples = t_samples;
+			ai->end_beats = t_beats;
 			return;
 		}
 	}
@@ -3609,25 +3613,25 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		return;
 	}
 
-	if (ai->end.samples() != 0 && (start_sample > ai->end.samples())) {
+	if (ai->end_samples != 0 && (start_sample > ai->end_samples)) {
 		return;
 	}
 
-	if (start_sample < ai->start.samples() && end_sample < ai->start.samples() ) {
+	if (start_sample < ai->start_samples && end_sample < ai->start_samples) {
 		/* Have not yet reached the start of capture */
 		return;
 	}
 
-	if (ai->start.samples() >= start_sample && ai->start.samples() < end_sample) {
+	if (ai->start_samples >= start_sample && ai->start_samples < end_sample) {
 		/* Let's get going */
-		offset = ai->start.samples() - start_sample;
+		offset = ai->start_samples - start_sample;
 		nframes -= offset;
 		_record_state = Recording;
 	}
 
-	if ((ai->end.samples() != 0) && (start_sample <= ai->end.samples() && ai->end.samples() < end_sample)) {
+	if ((ai->end_samples != 0) && (start_sample <= ai->end_samples && ai->end_samples < end_sample)) {
 		/* we're going to stop */
-		nframes -= (end_sample - ai->end.samples());
+		nframes -= (end_sample - ai->end_samples);
 		reached_end = true;
 	}
 
@@ -3678,9 +3682,16 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 			}
 
 			if (!skip_event && (!filter || !filter->filter(ev.buffer(), ev.size()))) {
-				const samplepos_t event_time (start_sample + ev.time() - ai->start.samples());
-				if (!ai->end || (event_time < ai->end.samples())) {
-					ai->midi_buf->write (tmap->quarters_at_sample (event_time),  ev.event_type(), ev.size(), ev.buffer());
+				const samplepos_t event_time (start_sample + ev.time());
+				if (!ai->end_samples || (event_time < ai->end_samples)) {
+					/* First write (to an * * RTMidiBufferBeats) uses beat time.
+					 * Second write (to a FIFO) uses sample time.
+					 *
+					 * Both are relative to where we
+					 * started capturing.
+					 */
+					ai->midi_buf->write (tmap->quarters_at_sample (event_time) - ai->start_beats,  ev.event_type(), ev.size(), ev.buffer());
+					_gui_feed_fifo.write (event_time - ai->start_samples, Evoral::MIDI_EVENT, ev.size(), ev.buffer());
 					send_signal = true;
 				}
 			}
@@ -3688,6 +3699,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 	}
 
 	if (send_signal) {
+		std::cerr << "SEND CAPTURED\n";
 		Captured(); /* EMIT SIGNAL */
 	}
 
@@ -5698,4 +5710,22 @@ TriggerBoxThread::build_midi_source (MIDITrigger* t)
 	std::shared_ptr<Region> copy (RegionFactory::create (whole, plist2));
 
 	t->set_region_in_worker_thread_from_capture (copy);
+}
+
+std::shared_ptr<MidiBuffer>
+TriggerBox::get_gui_feed_buffer () const
+{
+	Glib::Threads::Mutex::Lock lm (_gui_feed_reset_mutex);
+	std::shared_ptr<MidiBuffer> b (new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI)));
+
+	std::vector<MIDI::byte> buffer (_gui_feed_fifo.capacity());
+	samplepos_t        time;
+	Evoral::EventType  type;
+	uint32_t           size;
+
+	while (_gui_feed_fifo.read (&time, &type, &size, &buffer[0])) {
+		b->push_back (time, type, size, &buffer[0]);
+	}
+
+	return b;
 }
