@@ -58,7 +58,7 @@
     <ColorAlias name="audio bus base" alias="widget:blue darker"/>
     <ColorAlias name="audio master bus base" alias="neutral:backgroundest"/>
     <ColorAlias name="audio track base" alias="neutral:background"/>
-    <ColorAlias name="automation line" alias="midi meter 52"/>
+    <ColorAlias name="automation line" alias="neutral:backgroundest"/>
     <ColorAlias name="automation track outline" alias="theme:bg1"/>
     <ColorAlias name="big clock active: background" alias="neutral:backgroundest"/>
     <ColorAlias name="big clock active: cursor" alias="theme:contrasting alt"/>
@@ -324,7 +324,7 @@
     <ColorAlias name="pluginui toggle: fill" alias="widget:bg"/>
     <ColorAlias name="pluginui toggle: fill active" alias="alert:green"/>
     <ColorAlias name="preference highlight" alias="alert:yellow"/>
-    <ColorAlias name="processor automation line" alias="theme:bg1"/>
+    <ColorAlias name="processor automation line" alias="neutral:backgroundest"/>
     <ColorAlias name="processor auxfeedback: fill" alias="theme:contrasting alt"/>
     <ColorAlias name="processor auxfeedback: led active" alias="alert:green"/>
     <ColorAlias name="processor control button: fill" alias="neutral:background"/>
