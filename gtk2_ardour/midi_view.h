@@ -339,6 +339,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	EditingContext& editing_context() const { return _editing_context; }
 	MidiViewBackground& midi_context() const { return _midi_context; }
 
+	void clip_data_recorded ();
+
 	virtual void select_self (bool add) {}
 	virtual void unselect_self () {}
 	void select_self () { select_self (false); }

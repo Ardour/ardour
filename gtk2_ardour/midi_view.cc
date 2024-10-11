@@ -4174,6 +4174,68 @@ MidiView::set_step_edit_cursor_width (Temporal::Beats beats)
 	}
 }
 
+void
+MidiView::clip_data_recorded ()
+{
+	std::shared_ptr<TriggerBox> tb = _midi_track->triggerbox();
+	assert (tb);
+
+	std::shared_ptr<MidiBuffer> buf = tb->get_gui_feed_buffer();
+
+	for (MidiBuffer::iterator i = buf->begin(); i != buf->end(); ++i) {
+		const Evoral::Event<MidiBuffer::TimeType>& ev = *i;
+
+		if (ev.is_channel_event()) {
+			if (get_channel_mode() == FilterChannels) {
+				if (((uint16_t(1) << ev.channel()) & get_selected_channels()) == 0) {
+					continue;
+				}
+			}
+		}
+
+		/* ev.time() is in MidiBuffer::TimeType i.e. samples
+
+		   we want to convert to beats relative to source start.
+		*/
+
+		Temporal::Beats const time_beats = timepos_t (ev.time()).beats();
+
+		if (ev.type() == MIDI_CMD_NOTE_ON) {
+
+			std::shared_ptr<NoteType> note (new NoteType (ev.channel(), time_beats, std::numeric_limits<Temporal::Beats>::max() - time_beats, ev.note(), ev.velocity()));
+
+			assert (note->end_time() == std::numeric_limits<Temporal::Beats>::max());
+
+			NoteBase* nb = add_note (note, true);
+			nb->item()->set_fill_color (UIConfiguration::instance().color ("recording note"));
+			nb->item()->set_outline_color (UIConfiguration::instance().color ("recording note"));
+
+			/* fix up our note range */
+			if (ev.note() < _midi_context.lowest_note()) {
+				set_note_range (ev.note(), _midi_context.highest_note());
+			} else if (ev.note() > _midi_context.highest_note()) {
+				set_note_range (_midi_context.lowest_note(), ev.note());
+			}
+
+		} else if (ev.type() == MIDI_CMD_NOTE_OFF) {
+
+			// XXX WAS resolve_note (ev.note (), time_beats);
+			uint8_t note = ev.note ();
+			Temporal::Beats end_time = time_beats;
+
+			if (_active_notes && _active_notes[note]) {
+				/* Set note length so update_note() works.  Note this is a local note
+				   for recording, not from a model, so we can safely mess with it. */
+				_active_notes[note]->note()->set_length (end_time - _active_notes[note]->note()->time());
+
+				_active_notes[note]->set_x1 (_editing_context.sample_to_pixel (timepos_t (ev.time ()).samples()));
+				_active_notes[note]->set_outline_all ();
+				_active_notes[note] = 0;
+			}
+		}
+	}
+}
+
 /** Called when a diskstream on our track has received some data.  Update the view, if applicable.
  *  @param w Source that the data will end up in.
  */

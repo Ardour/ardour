@@ -17,6 +17,7 @@
  */
 
 #include "ardour/midi_region.h"
+#include "ardour/midi_track.h"
 #include "ardour/smf_source.h"
 
 #include "canvas/box.h"
@@ -34,6 +35,7 @@
 #include "ardour_ui.h"
 #include "editor_cursors.h"
 #include "editor_drag.h"
+#include "gui_thread.h"
 #include "keyboard.h"
 #include "midi_cue_background.h"
 #include "midi_cue_editor.h"
@@ -429,6 +431,24 @@ Gtk::Widget&
 MidiCueEditor::toolbox ()
 {
 	return _toolbox;
+}
+
+void
+MidiCueEditor::data_captured ()
+{
+	if (view) {
+		view->clip_data_recorded();
+	}
+}
+
+void
+MidiCueEditor::set_box (std::shared_ptr<ARDOUR::TriggerBox> b)
+{
+	capture_connection.disconnect ();
+	if (b) {
+		std::cerr << "Bix set to " << b->order() << std::endl;
+		b->Captured.connect (capture_connection, invalidator (*this), boost::bind (&MidiCueEditor::data_captured, this), gui_context());
+	}
 }
 
 void

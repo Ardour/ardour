@@ -73,6 +73,7 @@ class MidiCueEditor : public CueEditor
 	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const { return 1; }
 
 	void set_region (std::shared_ptr<ARDOUR::MidiTrack>, uint32_t slot_index, std::shared_ptr<ARDOUR::MidiRegion>);
+	void set_box (std::shared_ptr<ARDOUR::TriggerBox>);
 
 	ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
 	ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const { return cursor_scroll_group; }
@@ -203,6 +204,9 @@ class MidiCueEditor : public CueEditor
 
 	void visual_changer (const VisualChange&);
 	void bindings_changed ();
+
+	void data_captured ();
+	PBD::ScopedConnection capture_connection;
 };
 
 

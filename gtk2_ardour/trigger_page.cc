@@ -396,23 +396,33 @@ TriggerPage::selection_changed ()
 
 	_parameter_box.hide ();
 
+	std::cerr << "here, st = " << selection.triggers.size() << std::endl;
+
 	if (!selection.triggers.empty ()) {
 		TriggerSelection ts      = selection.triggers;
 		TriggerEntry*    entry   = *ts.begin ();
 		TriggerReference ref     = entry->trigger_reference ();
 		TriggerPtr       trigger = entry->trigger ();
+		std::shared_ptr<TriggerBox> box = ref.box();
 
 		_slot_prop_box.set_slot (ref);
 		_slot_prop_box.show ();
-		if (trigger->the_region ()) {
-			if (trigger->the_region ()->data_type () == DataType::AUDIO) {
+
+		if (box->data_type () == DataType::AUDIO) {
+			if (trigger->the_region()) {
 				_audio_trig_box.set_trigger (ref);
 				_audio_trig_box.show ();
-			} else {
-				_midi_trig_box.set_trigger (ref);
-				_midi_trig_box.show ();
+			}
+		} else {
+			_midi_trig_box.set_trigger (ref);
+			_midi_trig_box.show ();
+
+			_midi_editor->set_box (ref.box());
+
+			if (trigger->the_region()) {
 
 				std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (trigger->the_region());
+
 				if (mr) {
 					std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (entry->strip().stripable());
 					_midi_editor->set_region (mt, ref.slot(), mr);
