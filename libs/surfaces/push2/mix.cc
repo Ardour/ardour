@@ -543,13 +543,9 @@ MixLayout::switch_bank (uint32_t base)
 	/* work backwards so we can tell if we should actually switch banks */
 
 	std::shared_ptr<Stripable> s[8];
-	uint32_t different = 0;
 
 	for (int n = 0; n < 8; ++n) {
 		s[n] = _session.get_remote_nth_stripable (base+n, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-		if (s[n] != _stripable[n]) {
-			different++;
-		}
 	}
 
 	if (!s[0]) {
