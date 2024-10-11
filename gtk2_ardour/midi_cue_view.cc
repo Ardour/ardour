@@ -306,7 +306,7 @@ MergeableLine*
 MidiCueView::make_merger ()
 {
 	return new MergeableLine (automation_line, automation_control,
-	                          [this](Temporal::timepos_t const& t) { return t; },
+	                          [](Temporal::timepos_t const& t) { return t; },
 	                          nullptr, nullptr);
 }
 
