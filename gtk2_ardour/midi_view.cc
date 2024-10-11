@@ -111,8 +111,7 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
                     EditingContext&            ec,
                     MidiViewBackground&        bg,
                     uint32_t                   basic_color)
-	: _midi_track (mt)
-	, _editing_context (ec)
+	: _editing_context (ec)
 	, _midi_context (bg)
 	, _active_notes (0)
 	, _note_group (new ArdourCanvas::Container (&parent))
@@ -137,14 +136,12 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	, note_splitting (false)
 	, _extensible (false)
 {
-	init ();
+	init (mt);
 }
 
 
 MidiView::MidiView (MidiView const & other)
-	: sigc::trackable ()
-	, _midi_track (other._midi_track)
-	, _editing_context (other.editing_context())
+	: _editing_context (other.editing_context())
 	, _midi_context (other.midi_context())
 	, _midi_region (other.midi_region())
 	, _active_notes(0)
@@ -169,18 +166,31 @@ MidiView::MidiView (MidiView const & other)
 	, split_tuple (0)
 	, note_splitting (false)
 {
-	init ();
+	init (other._midi_track);
 }
 
 void
-MidiView::init ()
+MidiView::init (std::shared_ptr<MidiTrack> mt)
 {
-	_midi_track->DropReferences.connect (track_going_away_connection, invalidator (*this), boost::bind (&MidiView::track_going_away, this), gui_context());
+	if (mt) {
+		set_track (mt);
+	}
+
 	_patch_change_outline = UIConfiguration::instance().color ("midi patch change outline");
 	_patch_change_fill = UIConfiguration::instance().color_mod ("midi patch change fill", "midi patch change fill");
 
 	_note_group->raise_to_top();
 	EditingContext::DropDownKeys.connect (sigc::mem_fun (*this, &MidiView::drop_down_keys));
+}
+
+void
+MidiView::set_track (std::shared_ptr<MidiTrack> mt)
+{
+	_midi_track = mt;
+
+	if (_midi_track) {
+		_midi_track->DropReferences.connect (track_going_away_connection, invalidator (*this), boost::bind (&MidiView::track_going_away, this), gui_context());
+	}
 }
 
 void
@@ -214,8 +224,10 @@ MidiView::set_region (std::shared_ptr<MidiRegion> mr)
 void
 MidiView::set_model (std::shared_ptr<MidiModel> m)
 {
-	_model = m;
+	assert (_midi_track);
 	assert (_model);
+
+	_model = m;
 
 	//set_height (trackview.current_height());
 
@@ -767,6 +779,10 @@ MidiView::velocity_edit ()
 void
 MidiView::show_list_editor ()
 {
+	if (!_midi_track) {
+		return;
+	}
+
 	if (!_list_editor) {
 		_list_editor = new MidiListEditor (_editing_context.session(), midi_region(), _midi_track);
 	}
@@ -1247,6 +1263,10 @@ MidiView::view_changed()
 void
 MidiView::display_patch_changes ()
 {
+	if (!_midi_track) {
+		return;
+	}
+
 	uint16_t chn_mask = _midi_track->get_playback_channel_mask();
 
 	for (uint8_t i = 0; i < 16; ++i) {
@@ -1536,7 +1556,7 @@ MidiView::extend_active_notes()
 void
 MidiView::play_midi_note(std::shared_ptr<NoteType> note)
 {
-	if (_no_sound_notes || !UIConfiguration::instance().get_sound_midi_notes()) {
+	if (!_midi_track || _no_sound_notes || !UIConfiguration::instance().get_sound_midi_notes()) {
 		return;
 	}
 
@@ -1557,7 +1577,7 @@ MidiView::start_playing_midi_note(std::shared_ptr<NoteType> note)
 void
 MidiView::start_playing_midi_chord (vector<std::shared_ptr<NoteType> > notes)
 {
-	if (_no_sound_notes || !UIConfiguration::instance().get_sound_midi_notes()) {
+	if (!_midi_track || _no_sound_notes || !UIConfiguration::instance().get_sound_midi_notes()) {
 		return;
 	}
 
@@ -1825,6 +1845,10 @@ MidiView::step_sustain (Temporal::Beats beats)
 void
 MidiView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 {
+	if (!_midi_track) {
+		return;
+	}
+
 	timecnt_t off (_midi_region->source_beats_to_region_time (patch->time()), _midi_region->position());
 	const double x = _editing_context.duration_to_pixels (off);
 	double const height = _midi_context.contents_height();
@@ -3556,6 +3580,9 @@ MidiView::note_left (NoteBase*)
 void
 MidiView::patch_entered (PatchChange* p)
 {
+	if (!_midi_track) {
+		return;
+	}
 	ostringstream s;
 	s << _("Bank ") << (p->patch()->bank() + MIDI_BP_ZERO) << '\n'
 	  << _midi_track->instrument_info().get_patch_name_without (p->patch()->bank(), p->patch()->program(), p->patch()->channel()) << '\n'
@@ -3632,6 +3659,10 @@ MidiView::get_fill_color() const
 void
 MidiView::midi_channel_mode_changed ()
 {
+	if (!_midi_track) {
+		return;
+	}
+
 	uint16_t mask = _midi_track->get_playback_channel_mask();
 	ChannelMode mode = _midi_track->get_playback_channel_mode ();
 
@@ -3855,6 +3886,10 @@ struct EventNoteTimeEarlyFirstComparator {
 void
 MidiView::goto_next_note (bool add_to_selection)
 {
+	if (!_midi_track) {
+		return;
+	}
+
 	bool use_next = false;
 
 	uint16_t const channel_mask = _midi_track->get_playback_channel_mask();
@@ -3907,6 +3942,10 @@ MidiView::goto_next_note (bool add_to_selection)
 void
 MidiView::goto_previous_note (bool add_to_selection)
 {
+	if (!_midi_track) {
+		return;
+	}
+
 	bool use_next = false;
 
 	uint16_t const channel_mask = _midi_track->get_playback_channel_mask ();
@@ -4080,6 +4119,10 @@ MidiView::drop_down_keys ()
 void
 MidiView::maybe_select_by_position (GdkEventButton* ev, double /*x*/, double y)
 {
+	if (!_midi_track) {
+		return;
+	}
+
 	/* XXX: This is dead code.  What was it for? */
 
 	double note = y_to_note(y);
@@ -4177,6 +4220,15 @@ MidiView::set_step_edit_cursor_width (Temporal::Beats beats)
 void
 MidiView::clip_data_recorded ()
 {
+	if (!_midi_track) {
+		return;
+	}
+
+	if (!_active_notes) {
+		/* we aren't actively being recorded to */
+		return;
+	}
+
 	std::shared_ptr<TriggerBox> tb = _midi_track->triggerbox();
 	assert (tb);
 
@@ -4242,6 +4294,10 @@ MidiView::clip_data_recorded ()
 void
 MidiView::data_recorded (std::weak_ptr<MidiSource> w)
 {
+	if (!_midi_track) {
+		return;
+	}
+
 	if (!_active_notes) {
 		/* we aren't actively being recorded to */
 		return;
@@ -4344,6 +4400,10 @@ MidiView::trim_front_ending ()
 void
 MidiView::edit_patch_change (PatchChange* pc)
 {
+	if (!_midi_track) {
+		return;
+	}
+
 	PatchChangeDialog d (_editing_context.session(), *pc->patch (), _midi_track->instrument_info(), Gtk::Stock::APPLY, true, true, _midi_region);
 
 	int response = d.run();
@@ -4374,6 +4434,10 @@ MidiView::delete_sysex (SysEx* sysex)
 std::string
 MidiView::get_note_name (std::shared_ptr<NoteType> n, uint8_t note_value) const
 {
+	if (!_midi_track) {
+		return string();
+	}
+
 	using namespace MIDI::Name;
 	std::string name;
 
@@ -4486,12 +4550,18 @@ MidiView::get_velocity_for_add (MidiModel::TimeType time) const
 ChannelMode
 MidiView::get_channel_mode () const
 {
+	if (!_midi_track) {
+		return AllChannels;;
+	}
 	return _midi_track->get_playback_channel_mode();
 }
 
 uint16_t
 MidiView::get_selected_channels () const
 {
+	if (!_midi_track) {
+		return 0;
+	}
 	return _midi_track->get_playback_channel_mask();
 }
 

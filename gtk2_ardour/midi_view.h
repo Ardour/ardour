@@ -119,6 +119,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	virtual std::string get_modifier_name() const;
 
 	void set_region (std::shared_ptr<ARDOUR::MidiRegion>);
+	void set_track (std::shared_ptr<ARDOUR::MidiTrack>);
 	void set_model (std::shared_ptr<ARDOUR::MidiModel>);
 
 	NoteBase* add_note(const std::shared_ptr<NoteType> note, bool visible);
@@ -347,7 +348,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	virtual void select_self_uniquely () {}
 
   protected:
-	void init ();
+	void init (std::shared_ptr<ARDOUR::MidiTrack>);
 	virtual void region_resized (const PBD::PropertyChange&);
 
 	void set_flags (XMLNode *);
