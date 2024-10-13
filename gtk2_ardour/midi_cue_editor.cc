@@ -78,6 +78,8 @@ MidiCueEditor::MidiCueEditor()
 
 	_toolbox.pack_start (viewport(), true, true);
 
+	view = new MidiCueView (nullptr, 0, *data_group, *this, *bg, 0xff0000ff);
+
 	_verbose_cursor = new VerboseCursor (*this);
 
 	// _playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event, X_("playhead"));
@@ -329,12 +331,9 @@ MidiCueEditor::canvas_allocate (Gtk::Allocation alloc)
 	_visible_canvas_width = alloc.get_width();
 	_visible_canvas_height = alloc.get_height();
 
-	if (view) {
-		double timebars = n_timebars * timebar_height;
-		view->set_height (alloc.get_height() - timebars);
-	} else {
-		bg->set_size (alloc.get_width(), alloc.get_height());
-	}
+	double timebars = n_timebars * timebar_height;
+	view->set_height (alloc.get_height() - timebars);
+	bg->set_size (alloc.get_width(), alloc.get_height());
 }
 
 timepos_t
@@ -444,26 +443,42 @@ MidiCueEditor::data_captured ()
 void
 MidiCueEditor::set_box (std::shared_ptr<ARDOUR::TriggerBox> b)
 {
-	capture_connection.disconnect ();
+	capture_connections.drop_connections ();
 	if (b) {
-		std::cerr << "Bix set to " << b->order() << std::endl;
-		b->Captured.connect (capture_connection, invalidator (*this), boost::bind (&MidiCueEditor::data_captured, this), gui_context());
+		b->Captured.connect (capture_connections, invalidator (*this), boost::bind (&MidiCueEditor::data_captured, this), gui_context());
+		/* Don't bind a shared_ptr<TriggerBox> within the lambda */
+		TriggerBox* tb (b.get());
+		b->RecEnableChanged.connect (capture_connections, invalidator (*this), [&, tb]() { rec_enable_change (tb); }, gui_context());
 	}
 }
 
 void
-MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, uint32_t slot_index, std::shared_ptr<ARDOUR::MidiRegion> r)
+MidiCueEditor::rec_enable_change (ARDOUR::TriggerBox* b)
 {
-	delete view;
-	view = nullptr;
+	if (b->record_enabled()) {
+		view->begin_write();
+	} else {
+		view->end_write ();
+	}
+}
 
-	if (!t || !r) {
+void
+MidiCueEditor::set_track (std::shared_ptr<ARDOUR::MidiTrack> t)
+{
+	view->set_track (t);
+}
+
+void
+MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
+{
+	if (!r) {
 		bg->set_view (nullptr);
 		prh->set_view (nullptr);
+#warning paul unset view model
 		return;
 	}
 
-	view = new MidiCueView (t, r, slot_index, *data_group, *this, *bg, 0xff0000ff);
+	view->set_region (r);
 
 	bg->set_view (view);
 	prh->set_view (view);

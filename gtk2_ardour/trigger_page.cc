@@ -387,16 +387,14 @@ TriggerPage::selection_changed ()
 {
 	Selection& selection (Editor::instance ().get_selection ());
 
+	/* hide everything */
+
 	_slot_prop_box.hide ();
-
 	_audio_trig_box.hide ();
-
 	_midi_trig_box.hide ();
 	_midi_editor->viewport().hide ();
 
 	_parameter_box.hide ();
-
-	std::cerr << "here, st = " << selection.triggers.size() << std::endl;
 
 	if (!selection.triggers.empty ()) {
 		TriggerSelection ts      = selection.triggers;
@@ -419,17 +417,22 @@ TriggerPage::selection_changed ()
 
 			_midi_editor->set_box (ref.box());
 
+			std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (entry->strip().stripable());
+			assert (mt);
+			_midi_editor->set_track (mt);
+
 			if (trigger->the_region()) {
 
 				std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (trigger->the_region());
 
 				if (mr) {
-					std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (entry->strip().stripable());
-					_midi_editor->set_region (mt, ref.slot(), mr);
-					_midi_editor->viewport().show ();
+					_midi_editor->set_region (mr);
 				}
 			}
+
+			_midi_editor->viewport().show ();
 		}
+
 		_parameter_box.show ();
 	}
 }

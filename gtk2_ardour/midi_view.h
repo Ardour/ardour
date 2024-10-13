@@ -643,6 +643,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void join_notes_on_channel (int channel);
 
 	void add_split_notes ();
+	void region_update_sustained (Note *, double&, double&, double&, double&);
+	void clip_capture_update_sustained (Note *, double&, double&, double&, double&);
 };
 
 

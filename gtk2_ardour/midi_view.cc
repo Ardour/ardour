@@ -141,7 +141,8 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 
 
 MidiView::MidiView (MidiView const & other)
-	: _editing_context (other.editing_context())
+	: sigc::trackable (other)
+	, _editing_context (other.editing_context())
 	, _midi_context (other.midi_context())
 	, _midi_region (other.midi_region())
 	, _active_notes(0)
@@ -190,6 +191,12 @@ MidiView::set_track (std::shared_ptr<MidiTrack> mt)
 
 	if (_midi_track) {
 		_midi_track->DropReferences.connect (track_going_away_connection, invalidator (*this), boost::bind (&MidiView::track_going_away, this), gui_context());
+
+		if (_midi_track->triggerbox()->record_enabled()) {
+			begin_write ();
+		} else {
+			end_write ();
+		}
 	}
 }
 
@@ -1516,6 +1523,7 @@ MidiView::apply_note_range (uint8_t min, uint8_t max, bool force)
 void
 MidiView::begin_write()
 {
+	std::cerr << "MV::begin write\n";
 	if (_active_notes) {
 		delete[] _active_notes;
 	}
@@ -1531,8 +1539,9 @@ MidiView::begin_write()
 void
 MidiView::end_write()
 {
+	std::cerr << "MV::end write\n";
 	delete[] _active_notes;
-	_active_notes = 0;
+	_active_notes = nullptr;
 	_marked_for_selection.clear();
 	_marked_for_velocity.clear();
 }
@@ -1593,6 +1602,9 @@ MidiView::start_playing_midi_chord (vector<std::shared_ptr<NoteType> > notes)
 bool
 MidiView::note_in_region_time_range (const std::shared_ptr<NoteType> note) const
 {
+	if (!_midi_region) {
+		return true;
+	}
 	const std::shared_ptr<ARDOUR::MidiRegion> midi_reg = midi_region();
 	return  (timepos_t (note->time()) >= _midi_region->start()) && (timepos_t (note->time()) < _midi_region->start() + _midi_region->length());
 }
@@ -1600,6 +1612,10 @@ MidiView::note_in_region_time_range (const std::shared_ptr<NoteType> note) const
 bool
 MidiView::note_in_region_range (const std::shared_ptr<NoteType> note, bool& visible) const
 {
+	if (!_midi_region) {
+		return true;
+	}
+
 	const std::shared_ptr<ARDOUR::MidiRegion> midi_reg = midi_region();
 
 	const bool outside = !note_in_region_time_range (note);
@@ -1628,62 +1644,14 @@ MidiView::update_note (NoteBase* note)
 void
 MidiView::update_sustained (Note* ev)
 {
-	const std::shared_ptr<ARDOUR::MidiRegion> mr = midi_region();
 	std::shared_ptr<NoteType> note = ev->note();
-	const timepos_t note_start (note->time());
-	timepos_t note_end (note->end_time());
+	double x0, x1, y0, y1;
 
-	/* The note is drawn as a child item of this region view, so its
-	 * coordinate system is relative to the region view. This means that x0
-	 * and x1 are pixel offsets relative to beginning of the region (view)
-	 */
-
-	/* compute absolute time where the start of the source is
-	 */
-
-	const timepos_t session_source_start = _midi_region->source_position();
-
-	/* this computes the number of samples from the start of the region of the start of the
-	 * note. We add the source start to get to the absolute time of the
-	 * note, then subtract the start of the region
-	 */
-
-	const samplepos_t note_start_samples = _midi_region->position().distance ((note_start + session_source_start)).samples();
-
-	const double x0 = _editing_context.sample_to_pixel (note_start_samples);
-	double x1;
-
-	const double y0 = 1 + floor(note_to_y(note->note()));
-	double y1;
-
-	if (note->length() == Temporal::Beats()) {
-
-		/* special case actual zero-length notes */
-
-		x1 = x0 + 1.;
-
-	} else if (note->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
-
-		/* normal note */
-
-		const Temporal::Beats source_end ((_midi_region->start() + _midi_region->length()).beats());
-
-		if (!_extensible && note->end_time() > source_end) {
-			note_end = timepos_t (source_end);
-		}
-
-		const samplepos_t note_end_samples = _midi_region->position().distance ((session_source_start + note_end)).samples();
-
-		x1 = std::max(1., _editing_context.sample_to_pixel (note_end_samples));
-
+	if (_midi_region) {
+		region_update_sustained (ev, x0, x1, y0, y1);
 	} else {
-
-		/* nascent note currently being recorded, noteOff has not yet arrived */
-
-		x1 = std::max(1., _editing_context.duration_to_pixels (_midi_region->length()));
+		clip_capture_update_sustained (ev, x0, x1, y0, y1);
 	}
-
-	y1 = y0 + std::max(1., floor(note_height()) - 1);
 
 	ev->set (ArdourCanvas::Rect (x0, y0, x1, y1));
 	ev->set_velocity (note->velocity()/127.0);
@@ -1713,7 +1681,110 @@ MidiView::update_sustained (Note* ev)
 	const uint32_t base_col = ev->base_color();
 	ev->set_fill_color (base_col);
 	ev->set_outline_color (ev->calculate_outline(base_col, ev->selected()));
+
 }
+
+void
+MidiView::clip_capture_update_sustained (Note *ev, double& x0, double& x1, double& y0, double& y1)
+{
+	std::shared_ptr<NoteType> note = ev->note();
+	const timepos_t note_start (note->time());
+	timepos_t note_end (note->end_time());
+
+	x0 = _editing_context.sample_to_pixel (note_start.samples());
+	y0 = 1 + floor(note_to_y(note->note()));
+
+	if (note->length() == Temporal::Beats()) {
+
+		/* special case actual zero-length notes */
+
+		x1 = x0 + 1.;
+
+	} else if (note->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
+
+		/* normal note */
+
+#warning paul make this use the distance captured so far
+		const Temporal::Beats source_end (4,0);
+
+		if (!_extensible && note->end_time() > source_end) {
+			note_end = timepos_t (source_end);
+		}
+
+#warning paul this needs to use the correct part of the tempo map, which will start at SlotArmInfo::start_samples
+		const samplepos_t note_end_samples = note_end.samples();
+
+		x1 = std::max(1., _editing_context.sample_to_pixel (note_end_samples));
+
+	} else {
+
+		/* nascent note currently being recorded, noteOff has not yet arrived */
+
+#warning paul make this use the distance captured so far
+		x1 = std::max(1., _editing_context.duration_to_pixels (timecnt_t (Temporal::Beats (1, 0))));
+	}
+
+	y1 = y0 + std::max(1., floor(note_height()) - 1);
+}
+
+void
+MidiView::region_update_sustained (Note *ev, double& x0, double& x1, double& y0, double& y1)
+{
+	const std::shared_ptr<ARDOUR::MidiRegion> mr = midi_region();
+	std::shared_ptr<NoteType> note = ev->note();
+	const timepos_t note_start (note->time());
+	timepos_t note_end (note->end_time());
+
+	/* The note is drawn as a child item of this region view, so its
+	 * coordinate system is relative to the region view. This means that x0
+	 * and x1 are pixel offsets relative to beginning of the region (view)
+	 */
+
+	/* compute absolute time where the start of the source is
+	 */
+
+	const timepos_t session_source_start = _midi_region->source_position();
+
+	/* this computes the number of samples from the start of the region of the start of the
+	 * note. We add the source start to get to the absolute time of the
+	 * note, then subtract the start of the region
+	 */
+
+	const samplepos_t note_start_samples = _midi_region->position().distance ((note_start + session_source_start)).samples();
+
+	x0 = _editing_context.sample_to_pixel (note_start_samples);
+	y0 = 1 + floor(note_to_y(note->note()));
+
+	if (note->length() == Temporal::Beats()) {
+
+		/* special case actual zero-length notes */
+
+		x1 = x0 + 1.;
+
+	} else if (note->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
+
+		/* normal note */
+
+		const Temporal::Beats source_end ((_midi_region->start() + _midi_region->length()).beats());
+
+		if (!_extensible && note->end_time() > source_end) {
+			note_end = timepos_t (source_end);
+		}
+
+		const samplepos_t note_end_samples = _midi_region->position().distance ((session_source_start + note_end)).samples();
+
+		x1 = std::max(1., _editing_context.sample_to_pixel (note_end_samples));
+
+	} else {
+
+		/* nascent note currently being recorded, noteOff has not yet arrived */
+
+		x1 = std::max(1., _editing_context.duration_to_pixels (_midi_region->length()));
+	}
+
+	y1 = y0 + std::max(1., floor(note_height()) - 1);
+}
+
 
 void
 MidiView::update_hit (Hit* ev)
@@ -4220,6 +4291,8 @@ MidiView::set_step_edit_cursor_width (Temporal::Beats beats)
 void
 MidiView::clip_data_recorded ()
 {
+	std::cerr << "cd recorded, mt " << _midi_track << std::endl;
+
 	if (!_midi_track) {
 		return;
 	}

@@ -33,7 +33,6 @@ class MidiCueView : public MidiView
 {
   public:
 	MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
-	             std::shared_ptr<ARDOUR::MidiRegion> region,
 	             uint32_t                    slot_index,
 	             ArdourCanvas::Item&         parent,
 	             EditingContext&             ec,

@@ -42,7 +42,6 @@
 using namespace Gtkmm2ext;
 
 MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
-                          std::shared_ptr<ARDOUR::MidiRegion> region,
                           uint32_t                 slot_index,
                           ArdourCanvas::Item&      parent,
                           EditingContext&          ec,
@@ -83,7 +82,6 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	}
 
 	set_extensible (true);
-	set_region (region);
 
 	Evoral::Parameter fully_qualified_param (ARDOUR::MidiCCAutomation, 0, MIDI_CTL_MSB_MODWHEEL);
 	show_automation (fully_qualified_param);
@@ -241,6 +239,10 @@ void
 MidiCueView::show_automation (Evoral::Parameter const & param)
 {
 	using namespace ARDOUR;
+
+	if (!_midi_region) {
+		return;
+	}
 
 	if (param.type() == NullAutomation) {
 		return;
