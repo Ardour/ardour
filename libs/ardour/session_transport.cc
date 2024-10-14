@@ -73,18 +73,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Temporal;
 
-#ifdef NDEBUG
-# define ENSURE_PROCESS_THREAD do {} while (0)
-#else
-# define ENSURE_PROCESS_THREAD                        \
-  do {                                                \
-    if (!AudioEngine::instance()->in_process_thread() \
-        && !loading ()) {                              \
-      PBD::stacktrace (std::cerr, 30);                \
-    }                                                 \
-  } while (0)
-#endif
-
+#define ENSURE_PROCESS_THREAD do {} while (0)
 
 #define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
 #define TFSM_ROLL() { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StartTransport)); }
