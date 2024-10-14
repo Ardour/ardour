@@ -195,6 +195,48 @@ def fetch_tarball_revision_date():
 
         return rev, date
 
+def parse_macos_version(version):
+    # The [.] matches to the dot after the major version, "." would match any character
+    if re.search ("^[0-7][.]", version) is not None:
+        return 'panther'
+    elif re.search ("^8[.]", version) is not None:
+        return 'tiger'
+    elif re.search ("^9[.]", version) is not None:
+        return 'leopard'
+    elif re.search ("^10[.]", version) is not None:
+        return 'snowleopard'
+    elif re.search ("^11[.]", version) is not None:
+        return 'lion'
+    elif re.search ("^12[.]", version) is not None:
+        return 'mountainlion'
+    elif re.search ("^13[.]", version) is not None:
+        return 'mavericks'
+    elif re.search ("^14[.]", version) is not None:
+        return 'yosemite'
+    elif re.search ("^15[.]", version) is not None:
+        return 'el_capitan'
+    elif re.search ("^16[.]", version) is not None:
+        return 'sierra'
+    elif re.search ("^17[.]", version) is not None:
+        return 'high_sierra'
+    elif re.search ("^18[.]", version) is not None:
+        return 'mojave'
+    elif re.search ("^19[.]", version) is not None:
+        return 'catalina'
+    elif re.search ("^20[.]", version) is not None:
+        return 'bigsur'
+    elif re.search ("^21[.]", version) is not None:
+        return 'monterey'
+    elif re.search ("^22[.]", version) is not None:
+        return 'ventura'
+    elif re.search ("^23[.]", version) is not None:
+        return 'sonoma'
+    elif re.search ("^24[.]", version) is not None:
+        return 'sequoia'
+    else:
+        return 'sequoia'
+
+
 def set_version (from_file = False):
     def sanitize(s):
         # round-trip to remove anything in the string that is not encodable in
@@ -470,75 +512,12 @@ int main() { return 0; }''',
 
     # OSX
     if platform == 'darwin':
-        if re.search ("^13[.]", version) is not None:
-            conf.env['build_host'] = 'mavericks'
-        elif re.search ("^14[.]", version) is not None:
-            conf.env['build_host'] = 'yosemite'
-        elif re.search ("^15[.]", version) is not None:
-            conf.env['build_host'] = 'el_capitan'
-        elif re.search ("^16[.]", version) is not None:
-            conf.env['build_host'] = 'sierra'
-        elif re.search ("^17[.]", version) is not None:
-            conf.env['build_host'] = 'high_sierra'
-        elif re.search ("^18[.]", version) is not None:
-            conf.env['build_host'] = 'mojave'
-        elif re.search ("^19[.]", version) is not None:
-            conf.env['build_host'] = 'catalina'
-        elif re.search ("^20[.]", version) is not None:
-            conf.env['build_host'] = 'bigsur'
-        elif re.search ("^21[.]", version) is not None:
-            conf.env['build_host'] = 'monterey'
-        elif re.search ("^22[.]", version) is not None:
-            conf.env['build_host'] = 'ventura'
-        elif re.search ("^23[.]", version) is not None:
-            conf.env['build_host'] = 'sonoma'
-        elif re.search ("^24[.]", version) is not None:
-            conf.env['build_host'] = 'sequoia'
-        else:
-            conf.env['build_host'] = 'irrelevant'
+        conf.env['build_host'] = parse_macos_version (version)
 
     # Autodetect
     if opt.dist_target == 'auto':
         if platform == 'darwin':
-            # The [.] matches to the dot after the major version, "." would match any character
-            if re.search ("^[0-7][.]", version) is not None:
-                conf.env['build_target'] = 'panther'
-            elif re.search ("^8[.]", version) is not None:
-                conf.env['build_target'] = 'tiger'
-            elif re.search ("^9[.]", version) is not None:
-                conf.env['build_target'] = 'leopard'
-            elif re.search ("^10[.]", version) is not None:
-                conf.env['build_target'] = 'snowleopard'
-            elif re.search ("^11[.]", version) is not None:
-                conf.env['build_target'] = 'lion'
-            elif re.search ("^12[.]", version) is not None:
-                conf.env['build_target'] = 'mountainlion'
-            elif re.search ("^13[.]", version) is not None:
-                conf.env['build_target'] = 'mavericks'
-            elif re.search ("^14[.]", version) is not None:
-                conf.env['build_target'] = 'yosemite'
-            elif re.search ("^15[.]", version) is not None:
-                conf.env['build_target'] = 'el_capitan'
-            elif re.search ("^16[.]", version) is not None:
-                conf.env['build_target'] = 'sierra'
-            elif re.search ("^17[.]", version) is not None:
-                conf.env['build_target'] = 'high_sierra'
-            elif re.search ("^18[.]", version) is not None:
-                conf.env['build_target'] = 'mojave'
-            elif re.search ("^19[.]", version) is not None:
-                conf.env['build_target'] = 'catalina'
-            elif re.search ("^20[.]", version) is not None:
-                conf.env['build_target'] = 'bigsur'
-            elif re.search ("^21[.]", version) is not None:
-                conf.env['build_target'] = 'monterey'
-            elif re.search ("^22[.]", version) is not None:
-                conf.env['build_target'] = 'ventura'
-            elif re.search ("^23[.]", version) is not None:
-                conf.env['build_target'] = 'sonoma'
-            elif re.search ("^24[.]", version) is not None:
-                conf.env['build_target'] = 'sequoia'
-            else:
-                conf.env['build_target'] = 'catalina'
+            conf.env['build_target'] = parse_macos_version (version)
         else:
             match = re.search(
                     "(?P<cpu>i[0-6]86|x86_64|powerpc|ppc|ppc64|arm|s390x?)",
