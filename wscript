@@ -748,9 +748,9 @@ int main() { return 0; }''',
 
     elif conf.env['build_target'] in ['bigsur'] and not opt.arm64:
         compiler_flags.extend(
-                ("-DMAC_OS_X_VERSION_MAX_ALLOWED=101100",
-                 "-mmacosx-version-min=10.11"))
-        linker_flags.append("-mmacosx-version-min=10.11")
+                ("-DMAC_OS_X_VERSION_MAX_ALLOWED=101300",
+                 "-mmacosx-version-min=10.13"))
+        linker_flags.append("-mmacosx-version-min=10.13")
 
     elif conf.env['build_target'] in ['bigsur', 'monterey', 'ventura', 'sonoma', 'sequoia']:
         compiler_flags.extend(
