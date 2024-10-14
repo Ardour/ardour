@@ -57,6 +57,8 @@ SliderController::SliderController (Gtk::Adjustment *adj, std::shared_ptr<PBD::C
 			_spin_adj.set_page_increment(_ctrl->interface_to_internal(adj->get_page_increment()) - _ctrl->lower ());
 		}
 
+		ctrl_adjusted ();
+
 		adj->signal_value_changed().connect (sigc::mem_fun(*this, &SliderController::ctrl_adjusted));
 		_spin_adj.signal_value_changed().connect (sigc::mem_fun(*this, &SliderController::spin_adjusted));
 
