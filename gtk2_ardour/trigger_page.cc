@@ -280,6 +280,7 @@ TriggerPage::set_session (Session* s)
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&TriggerPage::parameter_changed, this, _1), gui_context ());
 
 	Editor::instance ().get_selection ().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerPage::selection_changed));
+	Trigger::TriggerArmChanged.connect (*this, invalidator (*this), boost::bind (&TriggerPage::rec_enable_changed, this, _1), gui_context());
 
 	initial_track_display ();
 
@@ -380,6 +381,56 @@ TriggerPage::clear_selected_slot ()
 	}
 	TriggerPtr trigger = ts.front ()->trigger ();
 	trigger->set_region (std::shared_ptr<Region>());
+}
+
+void
+TriggerPage::rec_enable_changed (Trigger const * trigger)
+{
+	/* hide everything */
+
+	_slot_prop_box.hide ();
+	_audio_trig_box.hide ();
+	_midi_trig_box.hide ();
+	_midi_editor->viewport().hide ();
+
+	_parameter_box.hide ();
+
+	TriggerBox& box = trigger->box();
+	TriggerReference ref (trigger->boxptr(), trigger->index());
+
+	_slot_prop_box.set_slot (ref);
+	_slot_prop_box.show ();
+
+	if (box.data_type () == DataType::AUDIO) {
+		if (trigger->the_region()) {
+			_audio_trig_box.set_trigger (ref);
+			_audio_trig_box.show ();
+		}
+	} else {
+		_midi_trig_box.set_trigger (ref);
+		_midi_trig_box.show ();
+
+		_midi_editor->set_box (trigger->boxptr());
+
+		Stripable* st = dynamic_cast<Stripable*> (box.owner());
+		assert (st);
+		std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (st->shared_from_this());
+		assert (mt);
+		_midi_editor->set_track (mt);
+
+		if (trigger->the_region()) {
+
+			std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (trigger->the_region());
+
+			if (mr) {
+				_midi_editor->set_region (mr);
+			}
+		}
+
+		_midi_editor->viewport().show ();
+	}
+
+	_parameter_box.show ();
 }
 
 void
