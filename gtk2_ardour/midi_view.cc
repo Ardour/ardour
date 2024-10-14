@@ -218,6 +218,7 @@ void
 MidiView::set_region (std::shared_ptr<MidiRegion> mr)
 {
 	_midi_region = mr;
+
 	if (!_midi_region) {
 		region_going_away ();
 		return;
@@ -1287,6 +1288,10 @@ MidiView::display_patch_changes ()
 void
 MidiView::display_patch_changes_on_channel (uint8_t channel, bool active_channel)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	for (MidiModel::PatchChanges::const_iterator i = _model->patch_changes().begin(); i != _model->patch_changes().end(); ++i) {
 		std::shared_ptr<PatchChange> p;
 
@@ -1320,6 +1325,10 @@ MidiView::display_patch_changes_on_channel (uint8_t channel, bool active_channel
 void
 MidiView::update_patch_changes ()
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	for (PatchChanges::iterator p = _patch_changes.begin(); p != _patch_changes.end(); ++p) {
 
 		std::shared_ptr<PatchChange> pc (p->second);
@@ -1344,6 +1353,10 @@ MidiView::update_patch_changes ()
 void
 MidiView::display_sysexes()
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	bool have_periodic_system_messages = false;
 	bool display_periodic_messages = true;
 
@@ -1426,6 +1439,10 @@ MidiView::display_sysexes()
 void
 MidiView::update_sysexes ()
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	double height = _midi_context.contents_height();
 
 	for (SysExes::iterator s = _sys_exes.begin(); s != _sys_exes.end(); ++s) {
@@ -1551,6 +1568,10 @@ MidiView::end_write()
 void
 MidiView::extend_active_notes()
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	if (!_active_notes) {
 		return;
 	}
@@ -1730,7 +1751,8 @@ MidiView::clip_capture_update_sustained (Note *ev, double& x0, double& x1, doubl
 void
 MidiView::region_update_sustained (Note *ev, double& x0, double& x1, double& y0, double& y1)
 {
-	const std::shared_ptr<ARDOUR::MidiRegion> mr = midi_region();
+	assert (_midi_region);
+
 	std::shared_ptr<NoteType> note = ev->note();
 	const timepos_t note_start (note->time());
 	timepos_t note_end (note->end_time());
@@ -1789,6 +1811,10 @@ MidiView::region_update_sustained (Note *ev, double& x0, double& x1, double& y0,
 void
 MidiView::update_hit (Hit* ev)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	std::shared_ptr<NoteType> note = ev->note();
 	const timepos_t note_time = _midi_region->source_beats_to_absolute_time (note->time());
 
@@ -1877,6 +1903,10 @@ void
 MidiView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
                                Temporal::Beats pos, Temporal::Beats len)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	std::shared_ptr<NoteType> new_note (new NoteType (channel, pos, len, number, velocity));
 
 	/* potentially extend region to hold new note */
@@ -1916,7 +1946,7 @@ MidiView::step_sustain (Temporal::Beats beats)
 void
 MidiView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 {
-	if (!_midi_track) {
+	if (!_midi_track || !_midi_region) {
 		return;
 	}
 
@@ -2052,6 +2082,10 @@ MidiView::change_patch_change (MidiModel::PatchChangePtr old_change, const Evora
 void
 MidiView::add_patch_change (timecnt_t const & t, Evoral::PatchChange<Temporal::Beats> const & patch)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	string name = _("add patch change");
 
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (name);
@@ -2196,6 +2230,10 @@ MidiView::select_all_notes ()
 void
 MidiView::select_range (timepos_t const & start, timepos_t const & end)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	PBD::Unwinder<bool> uw (_no_sound_notes, true);
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		timepos_t t = _midi_region->source_beats_to_absolute_time (i->first->time());
@@ -2208,6 +2246,10 @@ MidiView::select_range (timepos_t const & start, timepos_t const & end)
 void
 MidiView::extend_selection ()
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	if (_selection.empty()) {
 		return;
 	}
@@ -2423,6 +2465,10 @@ MidiView::note_deselected(NoteBase* ev)
 void
 MidiView::update_drag_selection(timepos_t const & start, timepos_t const & end, double gy0, double gy1, bool extend)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	// Convert to local coordinates
 	const double     y  = _midi_context.y_position();
 	const double     x0 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, _midi_region->region_relative_position (start).samples()));
@@ -2563,6 +2609,10 @@ MidiView::earliest_in_selection ()
 void
 MidiView::move_selection (timecnt_t const & dx_qn, double dy, double cumulative_dy)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	typedef vector<std::shared_ptr<NoteType> > PossibleChord;
 	PossibleChord to_play;
 	Temporal::Beats earliest = earliest_in_selection();
@@ -2673,6 +2723,10 @@ MidiView::copy_selection (NoteBase* primary)
 void
 MidiView::move_copies (timecnt_t const & dx_qn, double dy, double cumulative_dy)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	typedef vector<std::shared_ptr<NoteType> > PossibleChord;
 	PossibleChord to_play;
 	Temporal::Beats earliest = earliest_in_selection();
@@ -2855,6 +2909,9 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 timecnt_t
 MidiView::snap_pixel_to_time (double x, bool ensure_snap)
 {
+	if (!_midi_region) {
+		return timecnt_t (Beats (0,0));
+	}
 	return _editing_context.snap_relative_time_to_relative_time (_midi_region->position(), timecnt_t (_editing_context.pixel_to_sample (x)), ensure_snap);
 }
 
@@ -2871,12 +2928,18 @@ MidiView::snap_to_pixel(double x, bool ensure_snap)
 double
 MidiView::get_position_pixels()
 {
+	if (!_midi_region) {
+		return 0.;
+	}
 	return _editing_context.time_to_pixel(_midi_region->position());
 }
 
 double
 MidiView::get_end_position_pixels()
 {
+	if (!_midi_region) {
+		return 0.;
+	}
 	return _editing_context.time_to_pixel (_midi_region->end());
 }
 
@@ -2932,6 +2995,10 @@ MidiView::begin_resizing (bool /*at_front*/)
 void
 MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	bool cursor_set = false;
 	bool const ensure_snap = _editing_context.snap_mode () != SnapMagnetic;
 
@@ -3047,6 +3114,10 @@ MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 void
 MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	_note_diff_command = _model->new_note_diff_command (_("resize notes"));  /* we are a subcommand, so we don't want to use start_note_diff() which begins a new command */
 
 	/* XX why doesn't snap_pixel_to_sample() handle this properly? */
@@ -3511,6 +3582,10 @@ MidiView::transpose (bool up, bool fine, bool allow_smush)
 void
 MidiView::change_note_lengths (bool fine, bool shorter, Temporal::Beats delta, bool start, bool end)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	if (!delta) {
 		if (fine) {
 			delta = Temporal::Beats::ticks (Temporal::ticks_per_beat / 128);
@@ -3545,6 +3620,10 @@ MidiView::change_note_lengths (bool fine, bool shorter, Temporal::Beats delta, b
 void
 MidiView::nudge_notes (bool forward, bool fine)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	if (_selection.empty()) {
 		return;
 	}
@@ -3816,11 +3895,15 @@ MidiView::selection_as_cut_buffer () const
 void
 MidiView::duplicate_selection ()
 {
-	_editing_context.begin_reversible_command (_("duplicate notes"));
+	if (!_midi_region) {
+		return;
+	}
 
 	if (_selection.empty()) {
 		return;
 	}
+
+	_editing_context.begin_reversible_command (_("duplicate notes"));
 
 	/* find last selection position */
 	timepos_t dup_pos = timepos_t (Temporal::BeatTime);
@@ -3888,6 +3971,10 @@ MidiView::paste (timepos_t const & pos, const ::Selection& selection, PasteConte
 void
 MidiView::paste_internal (timepos_t const & pos, unsigned paste_count, float times, const MidiCutBuffer& mcb)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	if (mcb.empty()) {
 		return;
 	}
@@ -4090,6 +4177,10 @@ MidiView::selection_as_notelist (Notes& selected, bool allow_all_if_none_selecte
 void
 MidiView::update_ghost_note (double x, double y, uint32_t state)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	assert (_ghost_note);
 	x = _editing_context.canvas_to_timeline (x);
 	x = std::max (0.0, x);
@@ -4259,6 +4350,10 @@ MidiView::show_step_edit_cursor (Temporal::Beats pos)
 void
 MidiView::move_step_edit_cursor (Temporal::Beats pos)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	_step_edit_cursor_position = pos;
 
 	if (_step_edit_cursor) {
@@ -4279,6 +4374,10 @@ MidiView::hide_step_edit_cursor ()
 void
 MidiView::set_step_edit_cursor_width (Temporal::Beats beats)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	_step_edit_cursor_width = beats;
 
 	if (_step_edit_cursor) {
@@ -4367,6 +4466,10 @@ MidiView::clip_data_recorded ()
 void
 MidiView::data_recorded (std::weak_ptr<MidiSource> w)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	if (!_midi_track) {
 		return;
 	}
@@ -4464,6 +4567,10 @@ MidiView::trim_front_starting ()
 void
 MidiView::trim_front_ending ()
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	if (_midi_region->start().is_negative()) {
 		/* Trim drag made start time -ve; fix this */
 		midi_region()->fix_negative_start ();
@@ -4473,6 +4580,10 @@ MidiView::trim_front_ending ()
 void
 MidiView::edit_patch_change (PatchChange* pc)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	if (!_midi_track) {
 		return;
 	}
