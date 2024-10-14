@@ -396,6 +396,7 @@ pbd_absolute_rt_priority (int policy, int priority)
 
 int
 pbd_realtime_pthread_create (
+		std::string const& debug_name,
 		const int policy, int priority, const size_t stacksize,
 		pthread_t* thread,
 		void* (*start_routine) (void*),
@@ -416,7 +417,7 @@ pbd_realtime_pthread_create (
 	if (stacksize > 0) {
 		pthread_attr_setstacksize (&attr, stacksize + pbd_stack_size ());
 	}
-	DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Start Realtime Thread policy = %1 priority = %2 stacksize = 0x%3%4\n", policy, parm.sched_priority, std::hex, stacksize));
+	DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Start RT Thread: '%1' policy = %2 priority = %3 stacksize = 0x%4%5\n", debug_name, policy, parm.sched_priority, std::hex, stacksize));
 	rv = pthread_create (thread, &attr, start_routine, arg);
 	pthread_attr_destroy (&attr);
 

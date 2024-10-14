@@ -87,6 +87,7 @@ LIBPBD_API int pbd_pthread_create (
 
 
 LIBPBD_API int pbd_realtime_pthread_create (
+		std::string const& debug_name,
 		const int policy, int priority, const size_t stacksize,
 		pthread_t *thread,
 		void *(*start_routine) (void *),

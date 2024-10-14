@@ -952,7 +952,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	_run = true;
 	_port_change_flag.store (0);
 
-	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_PROC,
+	if (pbd_realtime_pthread_create ("ALSA Main", PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_PROC,
 	                                 &_main_thread, pthread_process, this)) {
 		if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &_main_thread, pthread_process, this)) {
 			PBD::error << _("AlsaAudioBackend: failed to create process thread.") << endmsg;
@@ -1152,7 +1152,7 @@ AlsaAudioBackend::create_process_thread (boost::function<void ()> func)
 	pthread_t   thread_id;
 	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);
 
-	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_PROC, PBD_RT_STACKSIZE_PROC, &thread_id, alsa_process_thread, td)) {
+	if (pbd_realtime_pthread_create ("ALSA Proc", PBD_SCHED_FIFO, PBD_RT_PRI_PROC, PBD_RT_STACKSIZE_PROC, &thread_id, alsa_process_thread, td)) {
 		if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &thread_id, alsa_process_thread, td)) {
 			PBD::error << _("AudioEngine: cannot create process thread.") << endmsg;
 			return -1;

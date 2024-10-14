@@ -829,7 +829,7 @@ CoreAudioBackend::create_process_thread (boost::function<void()> func)
 	}
 #endif
 
-	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_PROC, PBD_RT_STACKSIZE_PROC,
+	if (pbd_realtime_pthread_create ("CoreAudio Proc", PBD_SCHED_FIFO, PBD_RT_PRI_PROC, PBD_RT_STACKSIZE_PROC,
 	                              &thread_id, coreaudio_process_thread, td)) {
 		if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &thread_id, coreaudio_process_thread, td)) {
 			PBD::error << _("AudioEngine: cannot create process thread.") << endmsg;

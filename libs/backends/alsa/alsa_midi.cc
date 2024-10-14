@@ -73,7 +73,7 @@ static void * pthread_process (void *arg)
 int
 AlsaMidiIO::start ()
 {
-	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MIDI, PBD_RT_STACKSIZE_HELP,
+	if (pbd_realtime_pthread_create ("ALSA MIDI", PBD_SCHED_FIFO, PBD_RT_PRI_MIDI, PBD_RT_STACKSIZE_HELP,
 				&_main_thread, pthread_process, this))
 	{
 		if (pbd_pthread_create (PBD_RT_STACKSIZE_HELP, &_main_thread, pthread_process, this)) {
