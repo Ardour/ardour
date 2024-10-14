@@ -301,6 +301,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void disarm ();
 	bool armed() const { return _armed; }
 	PBD::Signal0<void> ArmChanged;
+	static PBD::Signal1<void,Trigger const *> TriggerArmChanged;
 
 	Temporal::BBT_Argument compute_start (Temporal::TempoMap::SharedPtr const &, samplepos_t start, samplepos_t end, Temporal::BBT_Offset const & q, samplepos_t& start_samples, bool& will_start);
 	virtual timepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t, Temporal::Beats &) = 0;
@@ -808,6 +809,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	void set_record_enabled (bool yn);
 	RecordState record_enabled() const { return _record_state; }
 	PBD::Signal0<void> RecEnableChanged;
+	static PBD::Signal0<void> TriggerRecEnableChanged;
 
 	void arm_from_another_thread (Trigger& slot, samplepos_t, uint32_t chans);
 	void disarm();

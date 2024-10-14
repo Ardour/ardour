@@ -210,6 +210,7 @@ FollowAction::to_string () const
 
 Trigger * const Trigger::MagicClearPointerValue = (Trigger*) 0xfeedface;
 PBD::Signal2<void,PropertyChange,Trigger*> Trigger::TriggerPropertyChange;
+PBD::Signal1<void,Trigger const *> Trigger::TriggerArmChanged;
 
 Trigger::Trigger (uint32_t n, TriggerBox& b)
 	: _launch_style (Properties::launch_style, OneShot)
@@ -293,6 +294,7 @@ Trigger::arm ()
 	_box.arm_from_another_thread (*this, _box.session().transport_sample(), 2);
 	_armed = true;
 	ArmChanged(); /* EMIT SIGNAL */
+	TriggerArmChanged (this);
 }
 
 void
