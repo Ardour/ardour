@@ -289,7 +289,7 @@ Trigger::request_trigger_delete (Trigger* t)
 void
 Trigger::arm ()
 {
-	/* XXX get audio channel count somehow */
+#warning paul need channel count here, somehow
 	_box.arm_from_another_thread (*this, _box.session().transport_sample(), 2);
 	_armed = true;
 	ArmChanged(); /* EMIT SIGNAL */
