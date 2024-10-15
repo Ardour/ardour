@@ -3556,6 +3556,12 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 	ai->start_samples = t_samples;
 	ai->start_beats = t_beats;
 
+	if (_data_type == DataType::AUDIO) {
+		ai->captured = timecnt_t (timepos_t (0), timepos_t (0));
+	} else {
+		ai->captured = timecnt_t::from_ticks (0, timepos_t (Beats()));
+	}
+
 	_arm_info = ai;
 }
 
@@ -3650,10 +3656,11 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 			AudioBuffer& buf (bufs.get_audio (n));
 			ai->audio_buf.append (buf.data() + offset, nframes, n);
 		}
+
+		ai->captured += timecnt_t (start_sample, timepos_t (ai->start_samples));
 	}
 
 	n_buffers = bufs.count().n_midi();
-	bool send_signal = false;
 
 	if (n_buffers) {
 
@@ -3694,16 +3701,15 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 					 */
 					ai->midi_buf->write (tmap->quarters_at_sample (event_time) - ai->start_beats,  ev.event_type(), ev.size(), ev.buffer());
 					_gui_feed_fifo.write (event_time - ai->start_samples, Evoral::MIDI_EVENT, ev.size(), ev.buffer());
-					send_signal = true;
 				}
 			}
 		}
+
+		timecnt_t dur = tmap->convert_duration (timecnt_t (nframes), timepos_t (start_sample), Temporal::BeatTime);
+		ai->captured += dur;
 	}
 
-	if (send_signal) {
-		std::cerr << "SEND CAPTURED\n";
-		Captured(); /* EMIT SIGNAL */
-	}
+	Captured (ai->captured); /* EMIT SIGNAL */
 
 	if (reached_end) {
 		finish_recording (bufs);
@@ -3714,6 +3720,13 @@ void
 TriggerBox::set_record_enabled (bool yn)
 {
 	_record_state = yn ? Enabled : Disabled;
+
+	if (_record_state == Disabled) {
+		for (auto & trig : all_triggers) {
+			trig->disarm ();
+		}
+	}
+
 	RecEnableChanged (); /* EMIT SIGNAL */
 }
 

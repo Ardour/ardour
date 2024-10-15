@@ -783,6 +783,7 @@ struct SlotArmInfo {
 	samplepos_t start_samples;
 	Temporal::Beats end_beats;
 	samplepos_t end_samples;
+	Temporal::timecnt_t captured;
 	RTMidiBufferBeats* midi_buf;
 	AudioTrigger::AudioData audio_buf;
 	RubberBand::RubberBandStretcher* stretcher;
@@ -940,7 +941,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 
 	void dump (std::ostream &) const;
 
-	PBD::Signal0<void> Captured;
+	PBD::Signal1<void,timecnt_t> Captured;
 
   private:
 	struct Requests {
