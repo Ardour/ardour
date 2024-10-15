@@ -807,6 +807,10 @@ MidiView::show_list_editor ()
 void
 MidiView::create_note_at (timepos_t const & t, double y, Temporal::Beats length, uint32_t state, bool shift_snap)
 {
+	if (!_model) {
+		return;
+	}
+
 	if (length < Temporal::Beats::one_tick()) {
 		return;
 	}
@@ -866,6 +870,10 @@ MidiView::display_model (std::shared_ptr<MidiModel> model)
 void
 MidiView::start_note_diff_command (string name)
 {
+	if (!_model) {
+		return;
+	}
+
 	if (!_note_diff_command) {
 		_editing_context.begin_reversible_command (name);
 		_note_diff_command = _model->new_note_diff_command (name);
@@ -920,6 +928,10 @@ void
 MidiView::apply_note_diff (bool as_subcommand, bool was_copy)
 {
 	if (!_note_diff_command) {
+		return;
+	}
+
+	if (!_model) {
 		return;
 	}
 
@@ -1022,6 +1034,10 @@ MidiView::find_canvas_sys_ex (MidiModel::SysExPtr s)
 void
 MidiView::get_events (Events& e, Evoral::Sequence<Temporal::Beats>::NoteOperator op, uint8_t val, int chan_mask)
 {
+	if (!_model) {
+		return;
+	}
+
 	MidiModel::Notes notes;
 	_model->get_notes (notes, op, val, chan_mask);
 
@@ -1059,6 +1075,8 @@ MidiView::redisplay (bool view_only)
 void
 MidiView::model_changed()
 {
+	assert (_model);
+
 	if (!display_is_enabled()) {
 		return;
 	}
@@ -1292,6 +1310,10 @@ MidiView::display_patch_changes_on_channel (uint8_t channel, bool active_channel
 		return;
 	}
 
+	if (!_model) {
+		return;
+	}
+
 	for (MidiModel::PatchChanges::const_iterator i = _model->patch_changes().begin(); i != _model->patch_changes().end(); ++i) {
 		std::shared_ptr<PatchChange> p;
 
@@ -1354,6 +1376,10 @@ void
 MidiView::display_sysexes()
 {
 	if (!_midi_region) {
+		return;
+	}
+
+	if (!_model) {
 		return;
 	}
 
@@ -1546,8 +1572,9 @@ MidiView::begin_write()
 	}
 	_active_notes = new Note*[128];
 	for (unsigned i = 0; i < 128; ++i) {
-		_active_notes[i] = 0;
+		_active_notes[i] = nullptr;
 	}
+	active_note_end = timecnt_t (Temporal::BeatTime);
 }
 
 
@@ -1557,10 +1584,11 @@ void
 MidiView::end_write()
 {
 	std::cerr << "MV::end write\n";
-	delete[] _active_notes;
+	delete [] _active_notes;
 	_active_notes = nullptr;
 	_marked_for_selection.clear();
 	_marked_for_velocity.clear();
+	active_note_end = timecnt_t (Temporal::BeatTime);
 }
 
 /** Extend active notes to rightmost edge of region (if length is changed)
@@ -1572,16 +1600,27 @@ MidiView::extend_active_notes()
 		return;
 	}
 
+	extend_active_notes (_midi_region->length());
+}
+
+void
+MidiView::extend_active_notes (timecnt_t const & duration)
+{
+	if (!_midi_region) {
+		return;
+	}
+
 	if (!_active_notes) {
 		return;
 	}
 
-	for (unsigned i = 0; i < 128; ++i) {
+	for (int i = 0; i < 128; ++i) {
 		if (_active_notes[i]) {
-			_active_notes[i]->set_x1 (_editing_context.duration_to_pixels (_midi_region->length()));
+			_active_notes[i]->set_x1 (_editing_context.duration_to_pixels (duration));
 		}
 	}
 }
+
 
 void
 MidiView::play_midi_note(std::shared_ptr<NoteType> note)
@@ -1679,13 +1718,17 @@ MidiView::update_sustained (Note* ev)
 
 	if (note->end_time() == std::numeric_limits<Temporal::Beats>::max())  {
 		if (_active_notes && note->note() < 128) {
-			Note* const old_rect = _active_notes[note->note()];
-			if (old_rect) {
+			Note* const old_nb = _active_notes[note->note()];
+			if (old_nb && (old_nb != ev)) {
 				/* There is an active note on this key, so we have a stuck
-				   note.  Finish the old rectangle here. */
-				old_rect->set_x1 (x1);
-				old_rect->set_outline_all ();
+				   note.  Finish the old rectangle here.
+				*/
+				old_nb->set_x1 (x1);
+				old_nb->set_outline_all ();
 			}
+			/* XXX we now leak old_nb if it was set since there are
+			 * no other references to it, plus it will remain on-screen
+			 */
 			_active_notes[note->note()] = ev;
 		}
 		/* outline all but right edge */
@@ -1725,27 +1768,21 @@ MidiView::clip_capture_update_sustained (Note *ev, double& x0, double& x1, doubl
 
 		/* normal note */
 
-#warning paul make this use the distance captured so far
-		const Temporal::Beats source_end (4,0);
-
-		if (!_extensible && note->end_time() > source_end) {
-			note_end = timepos_t (source_end);
+		timepos_t ane = active_note_end.end();
+		if (note_end > ane) {
+			note_end = ane;
 		}
 
-#warning paul this needs to use the correct part of the tempo map, which will start at SlotArmInfo::start_samples
-		const samplepos_t note_end_samples = note_end.samples();
-
-		x1 = std::max(1., _editing_context.sample_to_pixel (note_end_samples));
+		x1 = x0 + std::max (1., _editing_context.duration_to_pixels (note_start.distance (note_end)));
 
 	} else {
 
 		/* nascent note currently being recorded, noteOff has not yet arrived */
 
-#warning paul make this use the distance captured so far
-		x1 = std::max(1., _editing_context.duration_to_pixels (timecnt_t (Temporal::Beats (1, 0))));
+		x1 = x0 + std::max (1., _editing_context.duration_to_pixels (note_start.distance (active_note_end.end())));
 	}
 
-	y1 = y0 + std::max(1., floor(note_height()) - 1);
+	y1 = y0 + std::max (1., floor(note_height()) - 1);
 }
 
 void
@@ -1998,6 +2035,12 @@ patch_applies (const ARDOUR::MidiModel::constPatchChangePtr pc, Temporal::Beats 
 void
 MidiView::get_patch_key_at (Temporal::Beats time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const
 {
+	if (!_model) {
+		key.set_bank(0);
+		key.set_program(0);
+		return;
+	}
+
 	// The earliest event not before time
 	MidiModel::PatchChanges::iterator i = _model->patch_change_lower_bound (time);
 
@@ -2020,6 +2063,10 @@ MidiView::get_patch_key_at (Temporal::Beats time, uint8_t channel, MIDI::Name::P
 void
 MidiView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPrimaryKey& new_patch)
 {
+	if (!_model) {
+		return;
+	}
+
 	string name = _("alter patch change");
 
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (name);
@@ -2042,6 +2089,10 @@ MidiView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPrimaryKe
 void
 MidiView::change_patch_change (MidiModel::PatchChangePtr old_change, const Evoral::PatchChange<Temporal::Beats> & new_change)
 {
+	if (!_model) {
+		return;
+	}
+
 	string name = _("alter patch change");
 
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (name);
@@ -2086,6 +2137,10 @@ MidiView::add_patch_change (timecnt_t const & t, Evoral::PatchChange<Temporal::B
 		return;
 	}
 
+	if (!_model) {
+		return;
+	}
+
 	string name = _("add patch change");
 
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (name);
@@ -2103,6 +2158,10 @@ MidiView::add_patch_change (timecnt_t const & t, Evoral::PatchChange<Temporal::B
 void
 MidiView::move_patch_change (PatchChange& pc, Temporal::Beats t)
 {
+	if (!_model) {
+		return;
+	}
+
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("move patch change"));
 	c->change_time (pc.patch (), t);
 	_model->apply_diff_command_as_commit (_editing_context.history(), c);
@@ -2113,6 +2172,10 @@ MidiView::move_patch_change (PatchChange& pc, Temporal::Beats t)
 void
 MidiView::delete_patch_change (PatchChange* pc)
 {
+	if (!_model) {
+		return;
+	}
+
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("delete patch change"));
 	c->remove (pc->patch ());
 	_model->apply_diff_command_as_commit (_editing_context.history(), c);
@@ -2316,6 +2379,10 @@ MidiView::select_notes (list<Evoral::event_id_t> notes, bool allow_audition)
 void
 MidiView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend)
 {
+	if (!_model) {
+		return;
+	}
+
 	uint8_t low_note = 127;
 	uint8_t high_note = 0;
 	MidiModel::Notes& notes (_model->notes());
@@ -2389,6 +2456,10 @@ MidiView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool ad
 void
 MidiView::toggle_matching_notes (uint8_t notenum, uint16_t channel_mask)
 {
+	if (!_model) {
+		return;
+	}
+
 	MidiModel::Notes& notes (_model->notes());
 	_optimization_iterator = _events.begin();
 
@@ -3115,6 +3186,10 @@ void
 MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap)
 {
 	if (!_midi_region) {
+		return;
+	}
+
+	if (!_model) {
 		return;
 	}
 
@@ -3860,6 +3935,10 @@ MidiView::cut_copy_clear (Editing::CutCopyOp op)
 		return;
 	}
 
+	if (!_model) {
+		return;
+	}
+
 	bool as_subcommand = false;
 
 	/* Editor::cut_copy already started an undo operation,
@@ -3975,6 +4054,10 @@ MidiView::paste_internal (timepos_t const & pos, unsigned paste_count, float tim
 		return;
 	}
 
+	if (!_model) {
+		return;
+	}
+
 	if (mcb.empty()) {
 		return;
 	}
@@ -4048,6 +4131,10 @@ MidiView::goto_next_note (bool add_to_selection)
 		return;
 	}
 
+	if (!_model) {
+		return;
+	}
+
 	bool use_next = false;
 
 	uint16_t const channel_mask = _midi_track->get_playback_channel_mask();
@@ -4101,6 +4188,10 @@ void
 MidiView::goto_previous_note (bool add_to_selection)
 {
 	if (!_midi_track) {
+		return;
+	}
+
+	if (!_model) {
 		return;
 	}
 
@@ -4388,10 +4479,8 @@ MidiView::set_step_edit_cursor_width (Temporal::Beats beats)
 }
 
 void
-MidiView::clip_data_recorded ()
+MidiView::clip_data_recorded (timecnt_t const & total_duration)
 {
-	std::cerr << "cd recorded, mt " << _midi_track << std::endl;
-
 	if (!_midi_track) {
 		return;
 	}
@@ -4399,6 +4488,14 @@ MidiView::clip_data_recorded ()
 	if (!_active_notes) {
 		/* we aren't actively being recorded to */
 		return;
+	}
+
+	if (_active_notes) {
+		for (int n = 0; n < 128; ++n) {
+			if (_active_notes[n]) {
+				update_sustained (_active_notes[n]);
+			}
+		}
 	}
 
 	std::shared_ptr<TriggerBox> tb = _midi_track->triggerbox();
@@ -4428,8 +4525,6 @@ MidiView::clip_data_recorded ()
 
 			std::shared_ptr<NoteType> note (new NoteType (ev.channel(), time_beats, std::numeric_limits<Temporal::Beats>::max() - time_beats, ev.note(), ev.velocity()));
 
-			assert (note->end_time() == std::numeric_limits<Temporal::Beats>::max());
-
 			NoteBase* nb = add_note (note, true);
 			nb->item()->set_fill_color (UIConfiguration::instance().color ("recording note"));
 			nb->item()->set_outline_color (UIConfiguration::instance().color ("recording note"));
@@ -4454,10 +4549,12 @@ MidiView::clip_data_recorded ()
 
 				_active_notes[note]->set_x1 (_editing_context.sample_to_pixel (timepos_t (ev.time ()).samples()));
 				_active_notes[note]->set_outline_all ();
-				_active_notes[note] = 0;
+				_active_notes[note] = nullptr;
 			}
 		}
 	}
+
+	active_note_end = total_duration;
 }
 
 /** Called when a diskstream on our track has received some data.  Update the view, if applicable.
@@ -4546,7 +4643,7 @@ MidiView::data_recorded (std::weak_ptr<MidiSource> w)
 				// Much simpler to just use ev.time() which is already the absolute position (in sample-time)
 				_active_notes[note]->set_x1 (_editing_context.sample_to_pixel ((src->time_since_capture_start (timepos_t (ev.time ()))).samples()));
 				_active_notes[note]->set_outline_all ();
-				_active_notes[note] = 0;
+				_active_notes[note] = nullptr;
 			}
 		}
 
@@ -4608,6 +4705,10 @@ MidiView::edit_patch_change (PatchChange* pc)
 void
 MidiView::delete_sysex (SysEx* sysex)
 {
+	if (!_model) {
+		return;
+	}
+
 	MidiModel::SysExDiffCommand* c = _model->new_sysex_diff_command (_("delete sysex"));
 	c->remove (sysex->sysex ());
 	_model->apply_diff_command_as_commit (_editing_context.history(), c);
@@ -4666,6 +4767,10 @@ MidiView::show_verbose_cursor (string const & text, double xoffset, double yoffs
 uint8_t
 MidiView::get_channel_for_add (MidiModel::TimeType time) const
 {
+	if (!_model) {
+		return 0;
+	}
+
 	/* first, use the user-specified channel in the editor */
 	if (_editing_context.draw_channel() != Editing::DRAW_CHAN_AUTO) {
 		return _editing_context.draw_channel();
@@ -4692,6 +4797,10 @@ MidiView::get_channel_for_add (MidiModel::TimeType time) const
 uint8_t
 MidiView::get_velocity_for_add (MidiModel::TimeType time) const
 {
+	if (!_model) {
+		return 0;
+	}
+
 	if (_editing_context.draw_velocity() != Editing::DRAW_VEL_AUTO) {
 		return _editing_context.draw_velocity();
 	}
@@ -4735,7 +4844,7 @@ ChannelMode
 MidiView::get_channel_mode () const
 {
 	if (!_midi_track) {
-		return AllChannels;;
+		return AllChannels;
 	}
 	return _midi_track->get_playback_channel_mode();
 }

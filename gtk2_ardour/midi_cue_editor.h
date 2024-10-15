@@ -207,8 +207,11 @@ class MidiCueEditor : public CueEditor
 	void bindings_changed ();
 
 	void rec_enable_change (ARDOUR::TriggerBox*);
-	void data_captured ();
+	void data_captured (Temporal::timecnt_t);
+	bool idle_data_captured ();
+	std::atomic<int> idle_update_queued;
 	PBD::ScopedConnectionList capture_connections;
+	Temporal::timecnt_t data_capture_duration;
 };
 
 

@@ -173,9 +173,10 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	 */
 	void display_sysexes();
 
-	void begin_write();
-	void end_write();
-	void extend_active_notes();
+	void begin_write ();
+	void end_write ();
+	void extend_active_notes ();
+	void extend_active_notes (Temporal::timecnt_t const &);
 
 	virtual void begin_drag_edit (std::string const & why);
 	void end_drag_edit ();
@@ -340,7 +341,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	EditingContext& editing_context() const { return _editing_context; }
 	MidiViewBackground& midi_context() const { return _midi_context; }
 
-	void clip_data_recorded ();
+	void clip_data_recorded (Temporal::timecnt_t const &);
 
 	virtual void select_self (bool add) {}
 	virtual void unselect_self () {}
@@ -492,6 +493,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	PatchChanges                         _patch_changes;
 	SysExes                              _sys_exes;
 	Note**                               _active_notes;
+	Temporal::timecnt_t                   active_note_end;
 	ArdourCanvas::Container*             _note_group;
 	ARDOUR::MidiModel::NoteDiffCommand*  _note_diff_command;
 	NoteBase*                            _ghost_note;

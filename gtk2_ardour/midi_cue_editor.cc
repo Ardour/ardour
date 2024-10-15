@@ -80,6 +80,9 @@ MidiCueEditor::MidiCueEditor()
 
 	view = new MidiCueView (nullptr, 0, *data_group, *this, *bg, 0xff0000ff);
 
+	bg->set_view (view);
+	prh->set_view (view);
+
 	_verbose_cursor = new VerboseCursor (*this);
 
 	// _playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event, X_("playhead"));
@@ -433,19 +436,33 @@ MidiCueEditor::toolbox ()
 }
 
 void
-MidiCueEditor::data_captured ()
+MidiCueEditor::data_captured (timecnt_t total_duration)
+{
+	data_capture_duration = total_duration;
+
+	if (!idle_update_queued.exchange (1)) {
+		Glib::signal_idle().connect (sigc::mem_fun (*this, &MidiCueEditor::idle_data_captured));
+	}
+}
+
+bool
+MidiCueEditor::idle_data_captured ()
 {
 	if (view) {
-		view->clip_data_recorded();
+		view->clip_data_recorded (data_capture_duration);
 	}
+	idle_update_queued.store (0);
+	return false;
 }
 
 void
 MidiCueEditor::set_box (std::shared_ptr<ARDOUR::TriggerBox> b)
 {
 	capture_connections.drop_connections ();
+	idle_update_queued.store (0);
+
 	if (b) {
-		b->Captured.connect (capture_connections, invalidator (*this), boost::bind (&MidiCueEditor::data_captured, this), gui_context());
+		b->Captured.connect (capture_connections, invalidator (*this), boost::bind (&MidiCueEditor::data_captured, this, _1), gui_context());
 		/* Don't bind a shared_ptr<TriggerBox> within the lambda */
 		TriggerBox* tb (b.get());
 		b->RecEnableChanged.connect (capture_connections, invalidator (*this), [&, tb]() { rec_enable_change (tb); }, gui_context());
@@ -472,16 +489,11 @@ void
 MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 {
 	if (!r) {
-		bg->set_view (nullptr);
-		prh->set_view (nullptr);
-#warning paul unset view model
+		view->set_region (nullptr);
 		return;
 	}
 
 	view->set_region (r);
-
-	bg->set_view (view);
-	prh->set_view (view);
 
 	double w, h;
 	prh->size_request (w, h);
