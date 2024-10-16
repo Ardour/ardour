@@ -423,7 +423,7 @@ ExportDialog::show_progress ()
 		for (auto const& x : _files_to_reimport) {
 			timepos_t pos (x.first);
 			Editing::ImportDisposition disposition = Editing::ImportDistinctFiles;
-			editor.do_import (x.second, disposition, Editing::ImportAsTrack, SrcBest, SMFTrackNumber, SMFTempoIgnore, pos);
+			editor.do_import (x.second, disposition, Editing::ImportAsTrack, SrcBest, SMFFileAndTrackName, SMFTempoIgnore, pos);
 		}
 	}
 
