@@ -76,6 +76,7 @@ while [ $# -gt 0 ] ; do
 		STRIP=all ;
 		WITH_NLS=1 ;
 		APPNAME=LiveTrax ;
+		EXENAME=LiveTrax ;
 		shift ;;
 	--vbm)
 		VBM=1
