@@ -2727,7 +2727,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			for (Controls::const_iterator li = controls().begin(); li != controls().end(); ++li) {
 				std::shared_ptr<PBD::Controllable> c = std::dynamic_pointer_cast<PBD::Controllable> (li->second);
 				if (c) {
-					c->Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+					c->Changed (false, Controllable::NoGroup, boost::none); /* EMIT SIGNAL */
 				}
 			}
 

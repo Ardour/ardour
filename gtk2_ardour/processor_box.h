@@ -232,10 +232,10 @@ private:
 		void slider_adjusted ();
 		void button_clicked ();
 		void button_clicked_event (GdkEventButton *);
-		void control_changed ();
+		void control_changed (boost::optional<double> control_value);
 		void control_automation_state_changed ();
 		std::string state_id () const;
-		void set_tooltip ();
+		void set_tooltip (double control_value);
 
 		void start_touch (int);
 		void end_touch (int);

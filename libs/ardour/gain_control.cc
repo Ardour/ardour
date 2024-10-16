@@ -123,7 +123,7 @@ GainControl::post_add_master (std::shared_ptr<AutomationControl> m)
 {
 	if (m->get_value() == 0) {
 		/* master is at -inf, which forces this ctrl to -inf on assignment */
-		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+		Changed (false, Controllable::NoGroup, boost::none); /* EMIT SIGNAL */
 	}
 }
 

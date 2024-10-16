@@ -345,13 +345,13 @@ GainControlGroup::set_group_value (std::shared_ptr<AutomationControl> control, d
 		if (factor > 0.0f) {
 			factor = get_max_factor (factor);
 			if (factor == 0.0f) {
-				control->Changed (true, Controllable::ForGroup); /* EMIT SIGNAL */
+				control->Changed (true, Controllable::ForGroup, val); /* EMIT SIGNAL */
 				return;
 			}
 		} else {
 			factor = get_min_factor (factor);
 			if (factor == 0.0f) {
-				control->Changed (true, Controllable::ForGroup); /* EMIT SIGNAL */
+				control->Changed (true, Controllable::ForGroup, val); /* EMIT SIGNAL */
 				return;
 			}
 		}

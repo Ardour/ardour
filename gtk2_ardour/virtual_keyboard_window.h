@@ -58,7 +58,7 @@ public:
 	{
 		if (v != _value) {
 			_value = std::max (_lower, std::min (_upper, v));
-			Changed (true, gcd);        /* EMIT SIGNAL */
+			Changed (true, gcd, v);        /* EMIT SIGNAL */
 			ValueChanged ((int)_value); /* EMIT SIGNAL */
 		}
 	}

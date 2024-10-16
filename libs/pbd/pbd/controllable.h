@@ -147,7 +147,7 @@ public:
 	static PBD::Signal1<void, std::weak_ptr<PBD::Controllable> > GUIFocusChanged;
 	static PBD::Signal1<void, std::weak_ptr<PBD::Controllable> > ControlTouched;
 
-	PBD::Signal2<void,bool,PBD::Controllable::GroupControlDisposition> Changed;
+	PBD::Signal3<void,bool,PBD::Controllable::GroupControlDisposition,boost::optional<double>> Changed;
 
 	int set_state (const XMLNode&, int version);
 	virtual XMLNode& get_state () const;
