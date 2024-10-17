@@ -233,7 +233,7 @@ void
 MidiView::set_model (std::shared_ptr<MidiModel> m)
 {
 	assert (_midi_track);
-	assert (_model);
+	assert (_midi_region);
 
 	_model = m;
 
