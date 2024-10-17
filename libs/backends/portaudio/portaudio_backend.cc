@@ -119,12 +119,6 @@ PortAudioBackend::name () const
 }
 
 bool
-PortAudioBackend::is_realtime () const
-{
-	return true;
-}
-
-bool
 PortAudioBackend::requires_driver_selection() const
 {
 	// we could do this but implementation would need changing

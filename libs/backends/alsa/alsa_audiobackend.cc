@@ -99,12 +99,6 @@ AlsaAudioBackend::name () const
 	return X_("ALSA");
 }
 
-bool
-AlsaAudioBackend::is_realtime () const
-{
-	return true;
-}
-
 std::vector<AudioBackend::DeviceStatus>
 AlsaAudioBackend::enumerate_devices () const
 {

@@ -1067,11 +1067,7 @@ AudioEngine::start (bool for_latency)
 		return -1;
 	}
 
-	if (_backend->is_realtime ()) {
-		pbd_set_engine_rt_priority (_backend->client_real_time_priority ());
-	} else {
-		pbd_set_engine_rt_priority (0);
-	}
+	pbd_set_engine_rt_priority (_backend->client_real_time_priority ());
 
 	_running = true;
 

@@ -110,12 +110,6 @@ DummyAudioBackend::name () const
 	return X_("Dummy"); // internal name
 }
 
-bool
-DummyAudioBackend::is_realtime () const
-{
-	return false;
-}
-
 std::vector<AudioBackend::DeviceStatus>
 DummyAudioBackend::enumerate_devices () const
 {

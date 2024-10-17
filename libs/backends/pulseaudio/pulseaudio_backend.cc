@@ -332,12 +332,6 @@ PulseAudioBackend::name () const
 	return X_("PulseAudio");
 }
 
-bool
-PulseAudioBackend::is_realtime () const
-{
-	return true;
-}
-
 std::vector<AudioBackend::DeviceStatus>
 PulseAudioBackend::enumerate_devices () const
 {

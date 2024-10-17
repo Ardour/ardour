@@ -125,7 +125,6 @@ class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
 		/* AUDIOBACKEND API */
 
 		std::string name () const;
-		bool is_realtime () const;
 
 		bool use_separate_input_and_output_devices () const { return true; }
 		bool match_input_output_devices_or_none () const { return false; }

@@ -106,13 +106,6 @@ JACKAudioBackend::available() const
 }
 
 bool
-JACKAudioBackend::is_realtime () const
-{
-	GET_PRIVATE_JACK_POINTER_RET (_priv_jack,false);
-	return jack_is_realtime (_priv_jack);
-}
-
-bool
 JACKAudioBackend::requires_driver_selection() const
 {
 	return true;
@@ -882,6 +875,8 @@ int
 JACKAudioBackend::client_real_time_priority ()
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
+	if (!jack_is_realtime (_priv_jack))
+		return 0;
 	return jack_client_real_time_priority (_priv_jack);
 }
 

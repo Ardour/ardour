@@ -149,15 +149,10 @@ public:
 	 */
 	virtual std::string name () const = 0;
 
-	/** Return true if the callback from the underlying mechanism/API
-	 * (CoreAudio, JACK, ASIO etc.) occurs in a thread subject to realtime
-	 * constraints. Return false otherwise.
-	 */
-	virtual bool is_realtime () const = 0;
-
-	/** Return true if the backed is JACK */
+	/** Return true if the backend is JACK */
 	virtual bool is_jack () const { return false; }
 
+	/** Return the priority to be set with pbd_set_engine_rt_priority. */
 	virtual int client_real_time_priority () { return 0; }
 
 	/* Discovering devices and parameters */

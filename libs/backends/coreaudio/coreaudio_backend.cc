@@ -149,12 +149,6 @@ CoreAudioBackend::name () const
 	return X_("CoreAudio");
 }
 
-bool
-CoreAudioBackend::is_realtime () const
-{
-	return true;
-}
-
 std::vector<AudioBackend::DeviceStatus>
 CoreAudioBackend::enumerate_devices () const
 {

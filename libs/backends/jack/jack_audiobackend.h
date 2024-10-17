@@ -58,7 +58,6 @@ class JACKAudioBackend : public AudioBackend {
 
 	std::string name() const;
 	void* private_handle() const;
-	bool is_realtime () const;
 
 	bool is_jack () const { return true; }
 
