@@ -277,19 +277,19 @@ MidiCueEditor::build_canvas ()
 	double w, h;
 	prh->size_request (w, h);
 
-	prh->set_position (Duple (0., n_timebars * timebar_height));
-	data_group->set_position (ArdourCanvas::Duple (w, timebar_height * n_timebars));
-
 	_timeline_origin = w;
-	h_scroll_group->set_position (Duple (w, 0.));
+
+	prh->set_position (Duple (0., n_timebars * timebar_height));
+	data_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
+	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
+	h_scroll_group->set_position (Duple (_timeline_origin, 0.));
 
 	_verbose_cursor = new VerboseCursor (*this);
 
 	// _playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event, X_("playhead"));
 	_playhead_cursor = new EditorCursor (*this, X_("playhead"));
 	_playhead_cursor->set_sensitive (UIConfiguration::instance().get_sensitize_playhead());
-
-	_snapped_cursor = new EditorCursor (*this, X_("snapped"));
+	_playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
 
 	_canvas->set_name ("MidiCueCanvas");
 	_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
@@ -445,6 +445,9 @@ MidiCueEditor::data_captured (timecnt_t total_duration)
 	if (!idle_update_queued.exchange (1)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &MidiCueEditor::idle_data_captured));
 	}
+
+	samplepos_t pos = data_capture_duration.end().samples();
+	_playhead_cursor->set_position (pos);
 }
 
 bool
