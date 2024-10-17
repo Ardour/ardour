@@ -187,10 +187,8 @@ RegionEditor::RegionEditor (Session* s, RegionView* rv)
 	_table.attach (_sources, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
 	++_table_row;
 
-#ifndef NDEBUG // disable region FX for now
 	_table.attach (region_fx_label, 2, 3, 0, 1, Gtk::FILL, Gtk::FILL);
 	_table.attach (_region_fx_box,  2, 3, 1, _table_row + 2, Gtk::FILL, Gtk::FILL);
-#endif
 
 	get_vbox()->pack_start (_table, true, true);
 
@@ -232,13 +230,11 @@ RegionEditor::RegionEditor (Session* s, RegionView* rv)
 
 	spin_arrow_grab = false;
 
-#ifndef NDEBUG // disable region FX for now
 	/* for now only audio region effects are supported */
 	if (std::dynamic_pointer_cast<AudioRegion> (_region)) {
 		region_fx_label.show ();
 		_region_fx_box.show ();
 	}
-#endif
 
 	connect_editor_events ();
 }
