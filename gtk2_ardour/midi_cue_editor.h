@@ -137,6 +137,7 @@ class MidiCueEditor : public CueEditor
 	void on_samples_per_pixel_changed ();
 
  private:
+	std::shared_ptr<ARDOUR::MidiTrack> _track;
 	ArdourCanvas::GtkCanvasViewport* _canvas_viewport;
 	ArdourCanvas::GtkCanvas* _canvas;
 
@@ -202,6 +203,10 @@ class MidiCueEditor : public CueEditor
 	bool autoscroll_canvas ();
 	void start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary);
 	void stop_canvas_autoscroll ();
+
+	sigc::connection _update_connection;
+	PBD::ScopedConnection track_connection;
+	void maybe_update ();
 
 	void visual_changer (const VisualChange&);
 	void bindings_changed ();

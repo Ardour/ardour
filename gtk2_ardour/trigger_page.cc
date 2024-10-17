@@ -466,8 +466,6 @@ TriggerPage::selection_changed ()
 			_midi_trig_box.set_trigger (ref);
 			_midi_trig_box.show ();
 
-			_midi_editor->set_box (ref.box());
-
 			std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (entry->strip().stripable());
 			assert (mt);
 			_midi_editor->set_track (mt);

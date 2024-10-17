@@ -42,6 +42,7 @@
 #include "midi_cue_view.h"
 #include "note_base.h"
 #include "prh.h"
+#include "timers.h"
 #include "ui_config.h"
 #include "velocity_ghost_region.h"
 #include "verbose_cursor.h"
@@ -308,6 +309,25 @@ MidiCueEditor::bindings_changed ()
 	_canvas->set_data (X_("ardour-bindings"), midi_bindings);
 }
 
+void
+MidiCueEditor::maybe_update ()
+{
+	if (!_track) {
+		return;
+	}
+
+	ARDOUR::TriggerPtr trigger = _track->triggerbox()->currently_playing ();
+	if (!trigger) {
+		_playhead_cursor->set_position (0);
+	} else {
+		if (trigger->active ()) {
+			_playhead_cursor->set_position (trigger->current_pos().samples());
+		} else {
+			_playhead_cursor->set_position (0);
+		}
+	}
+}
+
 bool
 MidiCueEditor::canvas_enter_leave (GdkEventCrossing* ev)
 {
@@ -487,7 +507,20 @@ MidiCueEditor::rec_enable_change (ARDOUR::TriggerBox* b)
 void
 MidiCueEditor::set_track (std::shared_ptr<ARDOUR::MidiTrack> t)
 {
+	_track = t;
+
 	view->set_track (t);
+
+	_update_connection.disconnect ();
+	capture_connections.drop_connections ();
+
+	if (t) {
+		set_box (t->triggerbox());
+		_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &MidiCueEditor::maybe_update));
+		_track->DropReferences.connect (track_connection, invalidator (*this), boost::bind (&MidiCueEditor::set_track, this, nullptr), gui_context());
+	} else {
+		set_box (nullptr);
+	}
 }
 
 void
@@ -1711,4 +1744,3 @@ MidiCueEditor::selectable_owners()
 
 	return std::list<SelectableOwner*> ();
 }
-
