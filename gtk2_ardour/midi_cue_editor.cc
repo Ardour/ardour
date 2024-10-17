@@ -78,19 +78,6 @@ MidiCueEditor::MidiCueEditor()
 
 	_toolbox.pack_start (viewport(), true, true);
 
-	view = new MidiCueView (nullptr, 0, *data_group, *this, *bg, 0xff0000ff);
-
-	bg->set_view (view);
-	prh->set_view (view);
-
-	_verbose_cursor = new VerboseCursor (*this);
-
-	// _playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event, X_("playhead"));
-	_playhead_cursor = new EditorCursor (*this, X_("playhead"));
-	_playhead_cursor->set_sensitive (UIConfiguration::instance().get_sensitize_playhead());
-
-	_snapped_cursor = new EditorCursor (*this, X_("snapped"));
-
 	set_mouse_mode (Editing::MouseContent, true);
 }
 
@@ -280,6 +267,13 @@ MidiCueEditor::build_canvas ()
 
 	prh = new ArdourCanvas::PianoRollHeader (v_scroll_group, *bg);
 
+	view = new MidiCueView (nullptr, 0, *data_group, *this, *bg, 0xff0000ff);
+
+	bg->set_view (view);
+	prh->set_view (view);
+
+	/* This must be called after prh and bg have had their view set */
+
 	double w, h;
 	prh->size_request (w, h);
 
@@ -288,6 +282,14 @@ MidiCueEditor::build_canvas ()
 
 	_timeline_origin = w;
 	h_scroll_group->set_position (Duple (w, 0.));
+
+	_verbose_cursor = new VerboseCursor (*this);
+
+	// _playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event, X_("playhead"));
+	_playhead_cursor = new EditorCursor (*this, X_("playhead"));
+	_playhead_cursor->set_sensitive (UIConfiguration::instance().get_sensitize_playhead());
+
+	_snapped_cursor = new EditorCursor (*this, X_("snapped"));
 
 	_canvas->set_name ("MidiCueCanvas");
 	_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
