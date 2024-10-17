@@ -177,7 +177,7 @@ protected:
 private:
 	Mixer_UI ();
 	static Mixer_UI*     _instance;
-	Gtk::VBox            _content;
+
 	Gtk::HBox             global_hpacker;
 	Gtk::VBox             global_vpacker;
 	Gtk::ScrolledWindow   scroller;
@@ -210,7 +210,6 @@ private:
 	Gtk::Label            vca_label;
 	Gtk::EventBox         vca_scroller_base;
 	Gtk::HBox             out_packer;
-	ArdourWidgets::HPane  list_hpane;
 
 	Gtk::EventBox         _mixer_scene_spacer;
 	Gtk::Frame            _mixer_scene_frame;

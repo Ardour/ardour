@@ -81,6 +81,8 @@ private:
 	void pi_property_changed (PBD::PropertyChange const&);
 	void stripable_property_changed (PBD::PropertyChange const&, std::weak_ptr<ARDOUR::Stripable>);
 
+	void showhide_att_bottom (bool);
+
 	void rec_state_changed ();
 	void rec_state_clicked ();
 
@@ -108,9 +110,8 @@ private:
 	ApplicationBar _application_bar;
 
 	Gtkmm2ext::Bindings* bindings;
-	ArdourWidgets::VPane _content;
 
-	ArdourWidgets::HPane _pane_upper;
+	ArdourWidgets::VPane _pane;
 	Gtk::HBox            _strip_group_box;
 	Gtk::ScrolledWindow  _strip_scroller;
 	Gtk::HBox            _strip_packer;
@@ -118,7 +119,6 @@ private:
 	Gtk::Alignment       _cue_area_frame;
 	Gtk::VBox            _cue_area_box;
 	Gtk::HBox            _parameter_box;
-	Gtk::VBox            _sidebar_vbox;
 	Gtk::Notebook        _sidebar_notebook;
 	TriggerClipPicker    _trigger_clip_picker;
 	TriggerSourceList    _trigger_source_list;
@@ -128,6 +128,8 @@ private:
 	CueBoxWidget       _cue_box;
 	FittedCanvasWidget _master_widget;
 	CueMaster          _master;
+
+	bool _show_bottom_pane;
 
 	SlotPropertiesBox _slot_prop_box;
 

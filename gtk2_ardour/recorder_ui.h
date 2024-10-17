@@ -126,7 +126,6 @@ private:
 	static int calc_columns (int child_width, int parent_width);
 
 	Gtkmm2ext::Bindings*  bindings;
-	Gtk::VBox            _content;
 	Gtk::HBox            _toolbar;
 	Gtk::Table           _button_table;
 	ArdourWidgets::VPane _pane;

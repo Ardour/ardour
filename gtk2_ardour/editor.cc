@@ -229,7 +229,7 @@ static const gchar *_rb_opt_strings[] = {
 #endif
 
 Editor::Editor ()
-	: PublicEditor (global_hpacker)
+	: PublicEditor ()
 	, editor_mixer_strip_width (Wide)
 	, constructed (false)
 	, _properties_box (0)
@@ -660,23 +660,13 @@ Editor::Editor ()
 	_summary_hbox.pack_start (*summary_arrows_right, false, false);
 
 	editor_summary_pane.add (_summary_hbox);
-	edit_pane.set_check_divider_position (true);
-	edit_pane.add (editor_summary_pane);
 	_editor_list_vbox.pack_start (_the_notebook);
 	_editor_list_vbox.pack_start (*_properties_box, false, false, 0);
-	edit_pane.add (_editor_list_vbox);
-	edit_pane.set_child_minsize (_editor_list_vbox, 30); /* rough guess at width of notebook tabs */
 
-	edit_pane.set_drag_cursor (*_cursors->expand_left_right);
+	content_right_pane.set_drag_cursor (*_cursors->expand_left_right);
 	editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
 
 	float fract;
-	if (!settings || !settings->get_property ("edit-horizontal-pane-pos", fract) || fract > 1.0) {
-		/* initial allocation is 90% to canvas, 10% to notebook */
-		fract = 0.90;
-	}
-	edit_pane.set_divider (0, fract);
-
 	if (!settings || !settings->get_property ("edit-vertical-pane-pos", fract) || fract > 1.0) {
 		/* initial allocation is 90% to canvas, 10% to summary */
 		fract = 0.90;
@@ -686,20 +676,6 @@ Editor::Editor ()
 	global_vpacker.set_spacing (0);
 	global_vpacker.set_border_width (0);
 
-	/* the next three EventBoxes provide the ability for their child widgets to have a background color.  That is all. */
-
-	Gtk::EventBox* ebox = manage (new Gtk::EventBox); // a themeable box
-	ebox->set_name("EditorWindow");
-	ebox->add (ebox_hpacker);
-
-	Gtk::EventBox* epane_box = manage (new EventBoxExt); // a themeable box
-	epane_box->set_name("EditorWindow");
-	epane_box->add (edit_pane);
-
-	Gtk::EventBox* epane_box2 = manage (new EventBoxExt); // a themeable box
-	epane_box2->set_name("EditorWindow");
-	epane_box2->add (global_vpacker);
-
 	ArdourWidgets::ArdourDropShadow *toolbar_shadow = manage (new (ArdourWidgets::ArdourDropShadow));
 	toolbar_shadow->set_size_request (-1, 4);
 	toolbar_shadow->set_mode(ArdourWidgets::ArdourDropShadow::DropShadowBoth);
@@ -707,16 +683,21 @@ Editor::Editor ()
 	toolbar_shadow->show();
 
 	global_vpacker.pack_start (*toolbar_shadow, false, false);
-	global_vpacker.pack_start (*ebox, false, false);
-	global_vpacker.pack_start (*epane_box, true, true);
-	global_hpacker.pack_start (*epane_box2, true, true);
+	global_vpacker.pack_start (editor_summary_pane, true, true);
+
+	/* pack all the main pieces into appropriate containers from _tabbable
+	 */
+	content_app_bar.add (_application_bar);
+	content_att_right.add (_editor_list_vbox);
+	content_toolbar.add (ebox_hpacker);
+	content_innermost_hbox.add (global_vpacker);
 
 	/* need to show the "contents" widget so that notebook will show if tab is switched to
 	 */
 
-	global_hpacker.show ();
+	content_hbox.show ();
 	ebox_hpacker.show();
-	ebox->show();
+	global_vpacker.show();
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 
@@ -2329,7 +2310,6 @@ Editor::get_state () const
 
 	node->add_child_nocopy (Tabbable::get_state());
 
-	node->set_property("edit-horizontal-pane-pos", edit_pane.get_divider ());
 	node->set_property("notebook-shrunk", _notebook_shrunk);
 	node->set_property("edit-vertical-pane-pos", editor_summary_pane.get_divider());
 
@@ -5511,7 +5491,7 @@ Editor::session_going_away ()
 
 	if (current_mixer_strip) {
 		if (current_mixer_strip->get_parent() != 0) {
-			global_hpacker.remove (*current_mixer_strip);
+			content_att_left.remove ();
 		}
 		delete current_mixer_strip;
 		current_mixer_strip = 0;
@@ -5660,16 +5640,16 @@ Editor::notebook_tab_clicked (GdkEventButton* ev, Gtk::Widget* page)
 
 		if (_notebook_shrunk) {
 			if (pre_notebook_shrink_pane_width) {
-				edit_pane.set_divider (0, *pre_notebook_shrink_pane_width);
+				content_right_pane.set_divider (0, *pre_notebook_shrink_pane_width);
 			}
 			_notebook_shrunk = false;
 		} else {
-			pre_notebook_shrink_pane_width = edit_pane.get_divider();
+			pre_notebook_shrink_pane_width = content_right_pane.get_divider();
 
 			/* this expands the LHS of the edit pane to cover the notebook
 			   PAGE but leaves the tabs visible.
 			 */
-			edit_pane.set_divider (0, edit_pane.get_divider() + page->get_width());
+			content_right_pane.set_divider (0, content_right_pane.get_divider() + page->get_width());
 			_notebook_shrunk = true;
 		}
 	}
@@ -5709,7 +5689,7 @@ Editor::ui_parameter_changed (string parameter)
 		}
 		_cursors->set_cursor_set (UIConfiguration::instance().get_icon_set());
 		_cursor_stack.push_back(_cursors->grabber);
-		edit_pane.set_drag_cursor (*_cursors->expand_left_right);
+		content_right_pane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
 		editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
 
 	} else if (parameter == "sensitize-playhead") {

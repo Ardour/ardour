@@ -589,7 +589,6 @@ private:
 	void add_notebook_page (std::string const&, Gtk::Widget&);
 	bool notebook_tab_clicked (GdkEventButton*, Gtk::Widget*);
 
-	ArdourWidgets::HPane edit_pane;
 	ArdourWidgets::VPane editor_summary_pane;
 
 	Gtk::EventBox meter_base;
@@ -766,7 +765,6 @@ private:
 	void timeaxisview_deleted (TimeAxisView*);
 	void add_vcas (ARDOUR::VCAList&);
 
-	Gtk::HBox global_hpacker;
 	Gtk::VBox global_vpacker;
 
 	Gdk::Cursor* which_track_cursor () const;

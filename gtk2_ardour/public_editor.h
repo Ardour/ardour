@@ -126,7 +126,7 @@ using ARDOUR::samplecnt_t;
 class PublicEditor : public EditingContext, public ArdourWidgets::Tabbable
 {
 public:
-	PublicEditor (Gtk::Widget& content);
+	PublicEditor ();
 	virtual ~PublicEditor ();
 
 	/** @return Singleton PublicEditor instance */

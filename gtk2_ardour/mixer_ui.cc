@@ -55,6 +55,7 @@
 #include "ardour/monitor_control.h"
 #include "ardour/panner_shell.h"
 #include "ardour/plugin_manager.h"
+#include "ardour/profile.h"
 #include "ardour/route_group.h"
 #include "ardour/selection.h"
 #include "ardour/session.h"
@@ -132,7 +133,7 @@ Mixer_UI::instance ()
 }
 
 Mixer_UI::Mixer_UI ()
-	: Tabbable (_("Mixer"), X_("mixer"), &_content)
+	: Tabbable (_("Mixer"), X_("mixer"))
 	, plugin_search_clear_button (X_("Clear"))
 	, _mixer_scene_release (0)
 	, no_track_list_redisplay (false)
@@ -161,7 +162,7 @@ Mixer_UI::Mixer_UI ()
 	Glib::RefPtr<ToggleAction> fb_act = ActionManager::get_toggle_action ("Mixer", "ToggleFoldbackStrip");
 	fb_act->set_sensitive (false);
 
-	_content.set_data ("ardour-bindings", bindings);
+	contents().set_data ("ardour-bindings", bindings);
 
 	PresentationInfo::Change.connect (*this, invalidator (*this), std::bind (&Mixer_UI::presentation_info_changed, this, _1), gui_context());
 	Route::FanOut.connect (*this, invalidator (*this), std::bind (&Mixer_UI::fan_out, this, _1, false, true), gui_context());
@@ -375,27 +376,26 @@ Mixer_UI::Mixer_UI ()
 	global_hpacker.pack_start (inner_pane, true, true);
 	global_hpacker.pack_start (out_packer, false, false);
 
-	list_hpane.set_check_divider_position (true);
-	list_hpane.add (list_vpacker);
-	list_hpane.add (global_hpacker);
-	list_hpane.set_child_minsize (list_vpacker, 30);
-
 	rhs_pane1.set_divider (0, .6);
 	rhs_pane2.set_divider (0, .7);
-	list_hpane.set_divider (0, .2);
 	inner_pane.set_divider (0, .8);
 
 	rhs_pane1.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
 	rhs_pane2.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
-	list_hpane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
 	inner_pane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
 
-	_content.pack_start (list_hpane, true, true);
+	content_app_bar.add (_application_bar);
+	content_innermost_hbox.add (global_hpacker);
+
+	if (!Profile->get_mixbus ()) {
+		content_att_left.add (list_vpacker);
+	} else {
+		content_att_right.add (list_vpacker);
+	}
 
 	update_title ();
 
-	_content.show ();
-	_content.set_name ("MixerWindow");
+	contents().set_name ("MixerWindow");
 
 	global_hpacker.show();
 	scroller.show();
@@ -420,7 +420,6 @@ Mixer_UI::Mixer_UI ()
 	vca_label.show();
 	vca_scroller_base.show();
 	out_packer.show();
-	list_hpane.show();
 	group_display.show();
 	favorite_plugins_display.show();
 
@@ -1483,7 +1482,7 @@ Mixer_UI::stop_updating ()
 void
 Mixer_UI::fast_update_strips ()
 {
-	if (!UIConfiguration::instance().get_no_strobe() && _content.get_mapped () && _session) {
+	if (!UIConfiguration::instance().get_no_strobe() && contents().get_mapped () && _session) {
 		for (auto & s : strips) {
 			s->fast_update ();
 		}
@@ -2648,11 +2647,6 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 	}
 	rhs_pane2.set_divider (0, fract);
 
-	if (!node.get_property ("mixer-list-hpane-pos", fract) || fract > 1.0) {
-		fract = 0.2f;
-	}
-	list_hpane.set_divider (0, fract);
-
 	if (!node.get_property ("mixer-inner-pane-pos", fract) || fract > 1.0) {
 		fract = 0.8f;
 	}
@@ -2699,7 +2693,6 @@ Mixer_UI::get_state () const
 
 	node->set_property (X_("mixer-rhs-pane1-pos"), rhs_pane1.get_divider());
 	node->set_property (X_("mixer-rhs_pane2-pos"), rhs_pane2.get_divider());
-	node->set_property (X_("mixer-list-hpane-pos"), list_hpane.get_divider());
 	node->set_property (X_("mixer-inner-pane-pos"),  inner_pane.get_divider());
 
 	node->set_property ("narrow-strips", (_strip_width == Narrow));
@@ -3024,7 +3017,7 @@ Mixer_UI::strip_by_x (int x)
 	for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
 		int x1, x2, y;
 
-		(*i)->translate_coordinates (_content, 0, 0, x1, y);
+		(*i)->translate_coordinates (contents(), 0, 0, x1, y);
 		x2 = x1 + (*i)->get_width();
 
 		if (x >= x1 && x <= x2) {
