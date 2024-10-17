@@ -1673,6 +1673,7 @@ bool
 MidiView::note_in_region_range (const std::shared_ptr<NoteType> note, bool& visible) const
 {
 	if (!_midi_region) {
+		visible = true;
 		return true;
 	}
 
