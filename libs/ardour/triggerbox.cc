@@ -303,6 +303,7 @@ Trigger::disarm ()
 	_box.disarm ();
 	_armed = false;
 	ArmChanged(); /* EMIT SIGNAL */
+	TriggerArmChanged (this);
 }
 
 void
@@ -5427,6 +5428,10 @@ TriggerBox::realtime_handle_transport_stopped ()
 	Processor::realtime_handle_transport_stopped ();
 	stop_all ();
 	_currently_playing = 0;
+
+	for (auto & trig : all_triggers) {
+		trig->disarm ();
+	}
 }
 
 void
