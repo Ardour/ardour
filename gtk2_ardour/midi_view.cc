@@ -1565,10 +1565,12 @@ MidiView::begin_write()
 	   XXX this should not happen.
 	*/
 
-	for (unsigned i = 0; i < 128; ++i) {
-		delete _active_notes[i];
+	if (_active_notes) {
+		for (unsigned i = 0; i < 128; ++i) {
+			delete _active_notes[i];
+		}
+		delete [] _active_notes;
 	}
-	delete [] _active_notes;
 
 	/* reallocate */
 
@@ -1585,11 +1587,12 @@ MidiView::begin_write()
 void
 MidiView::end_write()
 {
-	for (unsigned i = 0; i < 128; ++i) {
-		delete _active_notes[i];
+	if (_active_notes) {
+		for (unsigned i = 0; i < 128; ++i) {
+			delete _active_notes[i];
+		}
+		delete [] _active_notes;
 	}
-
-	delete [] _active_notes;
 
 	_active_notes = nullptr;
 	_marked_for_selection.clear();
