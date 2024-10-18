@@ -49,15 +49,15 @@ public:
 		return _current_sample;
 	}
 
-	ArdourCanvas::Arrow& track_canvas_item () {
-		return *_track_canvas_item;
+	ArdourCanvas::Arrow& canvas_item () {
+		return *_canvas_item;
 	}
 
 	PBD::Signal1<void, samplepos_t> PositionChanged;
 
 private:
 	EditingContext&       _editor;
-	ArdourCanvas::Arrow*  _track_canvas_item;
+	ArdourCanvas::Arrow*  _canvas_item;
 	samplepos_t           _current_sample;
 };
 

@@ -1318,10 +1318,10 @@ Editor::set_session (Session *t)
 
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
 
-	_playhead_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
+	_playhead_cursor->canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
 	_playhead_cursor->show ();
 
-	_snapped_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
+	_snapped_cursor->canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
 	_snapped_cursor->set_color (UIConfiguration::instance().color ("edit point"));
 
 	boost::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));

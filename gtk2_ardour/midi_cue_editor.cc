@@ -291,6 +291,7 @@ MidiCueEditor::build_canvas ()
 	_playhead_cursor = new EditorCursor (*this, X_("playhead"));
 	_playhead_cursor->set_sensitive (UIConfiguration::instance().get_sensitize_playhead());
 	_playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
+	_playhead_cursor->canvas_item().raise_to_top();
 
 	_canvas->set_name ("MidiCueCanvas");
 	_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
@@ -313,6 +314,11 @@ void
 MidiCueEditor::maybe_update ()
 {
 	if (!_track) {
+		return;
+	}
+
+	if (_track->rec_enable_control()->get_value()) {
+		/* data recorded will handle it */
 		return;
 	}
 
@@ -357,8 +363,9 @@ MidiCueEditor::canvas_allocate (Gtk::Allocation alloc)
 	_visible_canvas_height = alloc.get_height();
 
 	double timebars = n_timebars * timebar_height;
+	bg->set_size (alloc.get_width(), alloc.get_height() - timebars);
 	view->set_height (alloc.get_height() - timebars);
-	bg->set_size (alloc.get_width(), alloc.get_height());
+	prh->set (ArdourCanvas::Rect (0, 0, prh->x1(), view->midi_context().height()));
 }
 
 timepos_t
@@ -473,6 +480,12 @@ MidiCueEditor::data_captured (timecnt_t total_duration)
 bool
 MidiCueEditor::idle_data_captured ()
 {
+	double where = duration_to_pixels (data_capture_duration);
+
+	if (where > _visible_canvas_width * 0.80) {
+		set_samples_per_pixel (samples_per_pixel * 1.5);
+	}
+
 	if (view) {
 		view->clip_data_recorded (data_capture_duration);
 	}
@@ -532,13 +545,6 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 	}
 
 	view->set_region (r);
-
-	double w, h;
-	prh->size_request (w, h);
-	_timeline_origin = w;
-	prh->set_position (Duple (0., n_timebars * timebar_height));
-	data_group->set_position (ArdourCanvas::Duple (w, timebar_height * n_timebars));
-	h_scroll_group->set_position (Duple (w, 0.));
 
 	/* Compute zoom level to show entire source plus some margin if possible */
 
@@ -808,7 +814,7 @@ MidiCueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sa
 	bool provided = false;
 	std::shared_ptr<Temporal::TempoMap> tmap;
 
-	if (view) {
+	if (view && view->midi_region()) {
 		std::shared_ptr<SMFSource> smf (std::dynamic_pointer_cast<SMFSource> (view->midi_region()->midi_source()));
 
 		if (smf) {

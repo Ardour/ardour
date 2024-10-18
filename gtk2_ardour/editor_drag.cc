@@ -378,7 +378,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	if (!UIConfiguration::instance ().get_preview_video_frame_on_drag ()) {
 		_preview_video = false;
 	}
-	if (_hide_snapped_cursor) {
+	if (_hide_snapped_cursor && editing_context.snapped_cursor()) {
 		editing_context.snapped_cursor ()->hide ();
 	}
 
@@ -3899,7 +3899,7 @@ TempoEndDrag::aborted (bool moved)
 }
 
 CursorDrag::CursorDrag (Editor& e, EditorCursor& c, bool s)
-	: EditorDrag (e, &c.track_canvas_item (), e.time_domain (), nullptr)
+	: EditorDrag (e, &c.canvas_item (), e.time_domain (), nullptr)
 	, _cursor (c)
 	, _stop (s)
 	, _grab_zoom (0.0)
@@ -3957,7 +3957,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 
 	/* grab the track canvas item as well */
 
-	_cursor.track_canvas_item ().grab ();
+	_cursor.canvas_item ().grab ();
 
 	if (s) {
 		if (_was_rolling && _stop) {
@@ -4044,7 +4044,7 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	_editor._dragging_playhead = false;
 
-	_cursor.track_canvas_item ().ungrab ();
+	_cursor.canvas_item ().ungrab ();
 
 	if (!movement_occurred && _stop) {
 		return;
@@ -4065,7 +4065,7 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 CursorDrag::aborted (bool)
 {
-	_cursor.track_canvas_item ().ungrab ();
+	_cursor.canvas_item ().ungrab ();
 
 	if (_editor._dragging_playhead) {
 		editing_context.session ()->request_resume_timecode_transmission ();

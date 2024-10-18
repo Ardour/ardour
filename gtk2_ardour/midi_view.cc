@@ -182,6 +182,7 @@ MidiView::init (std::shared_ptr<MidiTrack> mt)
 
 	_note_group->raise_to_top();
 	EditingContext::DropDownKeys.connect (sigc::mem_fun (*this, &MidiView::drop_down_keys));
+	_midi_context.NoteRangeChanged.connect (sigc::mem_fun (*this, &MidiView::view_changed));
 }
 
 void
@@ -1233,17 +1234,10 @@ MidiView::view_changed()
 
 	if (_active_notes) {
 		// Currently recording
-		const samplecnt_t zoom = _editing_context.get_current_zoom();
-		if (zoom != _last_display_zoom) {
-			/* Update resolved canvas notes to reflect changes in zoom without
-			   touching model.  Leave active notes (with length max) alone since
-			   they are being extended. */
-			for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-				if (i->second->note()->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
-					update_note(i->second);
-				}
+		for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
+			if (i->second->note()->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
+				update_note (i->second);
 			}
-			_last_display_zoom = zoom;
 		}
 		return;
 	}
@@ -1886,6 +1880,8 @@ MidiView::add_note(const std::shared_ptr<NoteType> note, bool visible)
 {
 	NoteBase* event = 0;
 
+	_midi_context.maybe_extend_note_range (note->note());
+
 	if (_midi_context.note_mode() == Sustained) {
 
 		Note* ev_rect = new Note (*this, _note_group, note); // XXX may leak
@@ -1933,7 +1929,6 @@ MidiView::add_note(const std::shared_ptr<NoteType> note, bool visible)
 		}
 	}
 
-	_midi_context.maybe_extend_note_range (note->note());
 	return event;
 }
 
