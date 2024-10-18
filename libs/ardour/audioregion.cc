@@ -29,8 +29,6 @@
 #include <memory>
 #include <set>
 
-#include <boost/scoped_array.hpp>
-
 #include <glibmm/fileutils.h>
 #include <glibmm/threads.h>
 
@@ -731,8 +729,8 @@ AudioRegion::read_at (Sample*     buf,
 		_cache_tail  = 0;
 	}
 
-	boost::scoped_array<gain_t> gain_array;
-	boost::scoped_array<Sample> mixdown_array;
+	std::unique_ptr<gain_t[]> gain_array;
+	std::unique_ptr<Sample[]> mixdown_array;
 
 	bool nofx = false; // apply region fades at the end
 
@@ -2258,9 +2256,9 @@ AudioRegion::get_transients (AnalysisFeatureList& results)
 AudioIntervalResult
 AudioRegion::find_silence (Sample threshold, samplecnt_t min_length, samplecnt_t fade_length, InterThreadInfo& itt) const
 {
-	samplecnt_t const block_size = 64 * 1024;
-	boost::scoped_array<Sample> loudest (new Sample[block_size]);
-	boost::scoped_array<Sample> buf (new Sample[block_size]);
+	constexpr samplecnt_t block_size = 64 * 1024;
+	std::unique_ptr<Sample[]> loudest (new Sample[block_size]);
+	std::unique_ptr<Sample[]> buf (new Sample[block_size]);
 
 	assert (fade_length >= 0);
 	assert (min_length > 0);

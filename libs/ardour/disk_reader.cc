@@ -17,8 +17,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/smart_ptr/scoped_array.hpp>
-
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
 #include "pbd/playback_buffer.h"
@@ -723,9 +721,9 @@ DiskReader::overwrite_existing_audio ()
 		chunk2_cnt = to_overwrite - chunk1_cnt;
 	}
 
-	boost::scoped_array<Sample> sum_buffer (new Sample[to_overwrite]);
-	boost::scoped_array<Sample> mixdown_buffer (new Sample[to_overwrite]);
-	boost::scoped_array<float>  gain_buffer (new float[to_overwrite]);
+	std::unique_ptr<Sample[]> sum_buffer (new Sample[to_overwrite]);
+	std::unique_ptr<Sample[]> mixdown_buffer (new Sample[to_overwrite]);
+	std::unique_ptr<float[]>  gain_buffer (new float[to_overwrite]);
 	uint32_t                    n   = 0;
 	bool                        ret = true;
 	samplepos_t                 start = overwrite_sample;
@@ -1136,11 +1134,14 @@ DiskReader::do_refill_with_alloc (bool partial_fill, bool reversed)
 	 * samples would be 1M samples. But we might use 16 or 14 bit samples,
 	 * in which case 4MB is more samples than that. Therefore size this for
 	 * the smallest sample value .. 4MB = 2M samples (16 bit).
+	 *
+	 * Note, we cannot use std::array<> here since stack-size is limited.
 	 */
 
-	boost::scoped_array<Sample> sum_buf (new Sample[2 * 1048576]);
-	boost::scoped_array<Sample> mix_buf (new Sample[2 * 1048576]);
-	boost::scoped_array<float>  gain_buf (new float[2 * 1048576]);
+	constexpr size_t chunksize = 2 * 1048576;
+	std::unique_ptr<Sample[]> sum_buf (new Sample[chunksize]);
+	std::unique_ptr<Sample[]> mix_buf (new Sample[chunksize]);
+	std::unique_ptr<float[]>  gain_buf (new float[chunksize]);
 
 	return refill_audio (sum_buf.get (), mix_buf.get (), gain_buf.get (), (partial_fill ? _chunk_samples : 0), reversed);
 }
@@ -1993,8 +1994,8 @@ DiskReader::setup_preloop_buffer ()
 	}
 
 	Location*                   loc = _loop_location;
-	boost::scoped_array<Sample> mix_buf (new Sample[loop_fade_length]);
-	boost::scoped_array<Sample> gain_buf (new Sample[loop_fade_length]);
+	std::unique_ptr<Sample[]> mix_buf (new Sample[loop_fade_length]);
+	std::unique_ptr<Sample[]> gain_buf (new Sample[loop_fade_length]);
 	const timepos_t             read_start = timepos_t (loc->start_sample () - loop_declick_out.fade_length);
 	const timecnt_t             read_cnt   = timecnt_t (loop_declick_out.fade_length);
 

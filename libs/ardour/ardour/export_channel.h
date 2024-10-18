@@ -26,8 +26,6 @@
 #include <memory>
 #include <set>
 
-#include <boost/scoped_array.hpp>
-
 #include "pbd/ringbuffer.h"
 #include "pbd/signals.h"
 
@@ -103,7 +101,7 @@ public:
 private:
 	PortSet                                             ports;
 	samplecnt_t                                         _buffer_size;
-	boost::scoped_array<Sample>                         _buffer;
+	std::unique_ptr<Sample[]>                           _buffer;
 	mutable AudioBuffer                                 _buf;
 	std::list<std::shared_ptr<PBD::RingBuffer<Sample>>> _delaylines;
 };
@@ -182,8 +180,8 @@ private:
 	samplepos_t region_start;
 	samplepos_t position;
 
-	boost::scoped_array<Sample> mixdown_buffer;
-	boost::scoped_array<Sample> gain_buffer;
+	std::unique_ptr<Sample[]> mixdown_buffer;
+	std::unique_ptr<Sample[]> gain_buffer;
 
 	PBD::ScopedConnection export_connection;
 };
