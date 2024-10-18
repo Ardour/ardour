@@ -113,7 +113,7 @@ public:
 	/** Emitted in the GUI thread when a button is pressed over the level meter;
 	 *  return true if the event is handled.
 	 */
-	PBD::Signal1<bool, GdkEventButton *> LevelMeterButtonPress;
+	PBD::Signal<bool(GdkEventButton *)> LevelMeterButtonPress;
 
 	static std::string meterpt_string (ARDOUR::MeterPoint);
 	static std::string astate_string (ARDOUR::AutoState);

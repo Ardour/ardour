@@ -103,7 +103,7 @@ using namespace std;
 using namespace ArdourMeter;
 
 MixerStrip* MixerStrip::_entered_mixer_strip;
-PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
+PBD::Signal<void(MixerStrip*)> MixerStrip::CatchDeletion;
 
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 

@@ -67,7 +67,7 @@ using namespace ArdourCanvas;
 
 static const int32_t sync_mark_width = 9;
 
-PBD::Signal1<void,RegionView*> RegionView::RegionViewGoingAway;
+PBD::Signal<void(RegionView*)> RegionView::RegionViewGoingAway;
 
 RegionView::RegionView (ArdourCanvas::Container*                 parent,
                         TimeAxisView&                            tv,

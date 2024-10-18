@@ -56,7 +56,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace std;
 
-PBD::Signal1<void, TriggerStrip*> TriggerStrip::CatchDeletion;
+PBD::Signal<void(TriggerStrip*)> TriggerStrip::CatchDeletion;
 
 TriggerStrip::TriggerStrip (Session* s, std::shared_ptr<ARDOUR::Route> rt)
 	: SessionHandlePtr (s)

@@ -127,7 +127,7 @@ public:
 
 	virtual void update_coverage_frame (LayerDisplay);
 
-	static PBD::Signal1<void,RegionView*> RegionViewGoingAway;
+	static PBD::Signal<void(RegionView*)> RegionViewGoingAway;
 
 	/** Called when a front trim is about to begin */
 	virtual void trim_front_starting () {}

@@ -80,7 +80,7 @@ public:
 
 	virtual ~ArdourMarker ();
 
-	static PBD::Signal1<void,ArdourMarker*> CatchDeletion;
+	static PBD::Signal<void(ArdourMarker*)> CatchDeletion;
 
 	static void setup_sizes (const double timebar_height);
 

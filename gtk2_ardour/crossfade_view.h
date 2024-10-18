@@ -59,7 +59,7 @@ public:
 	bool visible() const { return _visible; }
 	void set_valid (bool yn);
 
-	static PBD::Signal1<void,CrossfadeView*> CatchDeletion;
+	static PBD::Signal<void(CrossfadeView*)> CatchDeletion;
 
 	void fake_hide ();
 	void hide ();

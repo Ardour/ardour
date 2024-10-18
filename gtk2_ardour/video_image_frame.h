@@ -59,7 +59,7 @@ class VideoImageFrame : public sigc::trackable
 	std::string get_video_filename ()   {return video_filename;}
 
 	void http_download_done (char *);
-	PBD::Signal0<void> ImgChanged;
+	PBD::Signal<void()> ImgChanged;
 
 	protected:
 

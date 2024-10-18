@@ -67,10 +67,10 @@ public:
 	bool has_port (std::string const &) const;
 
 	/** The bundle list has changed in some way; a bundle has been added or removed, or the list cleared etc. */
-	PBD::Signal0<void> Changed;
+	PBD::Signal<void()> Changed;
 
 	/** An individual bundle on our list has changed in some way */
-	PBD::Signal1<void,ARDOUR::Bundle::Change> BundleChanged;
+	PBD::Signal<void(ARDOUR::Bundle::Change)> BundleChanged;
 
 	struct BundleRecord {
 	    std::shared_ptr<ARDOUR::Bundle> bundle;
@@ -132,10 +132,10 @@ public:
 	bool empty () const;
 
 	/** The group list has changed in some way; a group has been added or removed, or the list cleared etc. */
-	PBD::Signal0<void> Changed;
+	PBD::Signal<void()> Changed;
 
 	/** A bundle in one of our groups has changed */
-	PBD::Signal1<void,ARDOUR::Bundle::Change> BundleChanged;
+	PBD::Signal<void(ARDOUR::Bundle::Change)> BundleChanged;
 
 private:
 	bool port_has_prefix (std::string const &, std::string const &) const;

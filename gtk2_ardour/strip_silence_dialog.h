@@ -98,7 +98,7 @@ private:
 	Glib::Threads::Mutex _lock; ///< lock held while the thread is doing work
 	Glib::Threads::Cond  _run_cond; ///< condition to wake the thread
 	bool _thread_should_finish; ///< true if the thread should terminate
-	PBD::Signal0<void> Completed; ///< emitted when a silence detection has completed
+	PBD::Signal<void()> Completed; ///< emitted when a silence detection has completed
 	PBD::ScopedConnection _completed_connection;
 	ARDOUR::InterThreadInfo _interthread_info;
 

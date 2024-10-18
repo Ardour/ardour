@@ -86,9 +86,9 @@ public:
 	/** signal emitted when mootcher reports progress updates during download.
 	 * The parameters are current and total numbers of bytes downloaded.
 	 */
-	PBD::Signal2<void, double, double> Progress;
+	PBD::Signal<void(double, double)> Progress;
 	/** signal emitted when the mootcher has finished downloading. */
-	PBD::Signal0<void> Finished;
+	PBD::Signal<void()> Finished;
 
 
 private:

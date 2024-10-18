@@ -85,7 +85,7 @@ public:
 	ARDOUR::AutomationList::iterator model() const { return _model; }
 	AutomationLine&              line()  const { return _line; }
 
-	static PBD::Signal1<void, ControlPoint *> CatchDeletion;
+	static PBD::Signal<void(ControlPoint *)> CatchDeletion;
 
 private:
 	ArdourCanvas::Rectangle *        _item;

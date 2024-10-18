@@ -1540,8 +1540,8 @@ private:
 		return _track_selection_change_without_scroll;
 	}
 
-	PBD::Signal0<void> EditorFreeze;
-	PBD::Signal0<void> EditorThaw;
+	PBD::Signal<void()> EditorFreeze;
+	PBD::Signal<void()> EditorThaw;
 
 	Temporal::TempoMap::WritableSharedPtr begin_tempo_map_edit ();
 	void abort_tempo_map_edit ();
@@ -2304,8 +2304,8 @@ private:
 	void update_mark_and_range_visibility ();
 	void show_marker_type (MarkerBarType);
 	void show_range_type (RangeBarType);
-	PBD::Signal0<void> VisibleMarkersChanged;
-	PBD::Signal0<void> VisibleRangesChanged;
+	PBD::Signal<void()> VisibleMarkersChanged;
+	PBD::Signal<void()> VisibleRangesChanged;
 
 	friend class RegionMoveDrag;
 	friend class TrimDrag;

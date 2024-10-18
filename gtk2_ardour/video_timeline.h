@@ -141,8 +141,8 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	VideoMonitor *vmonitor;
 	bool reopen_vmonitor;
 
-	PBD::Signal0<void> VtlUpdate;
-	PBD::Signal1<void,std::string> GuiUpdate;
+	PBD::Signal<void()> VtlUpdate;
+	PBD::Signal<void(std::string)> GuiUpdate;
 	void gui_update (const std::string &);
 
 	PBD::ScopedConnection sessionsave;

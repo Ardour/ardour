@@ -257,7 +257,7 @@ public:
 	   need to respond to Escape in some way (e.g. break drag, clear
 	   selection, etc) should connect to and handle this.
 	*/
-	PBD::Signal0<void> Escape;
+	PBD::Signal<void()> Escape;
 
 	PublicEditor&	  the_editor() { return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }

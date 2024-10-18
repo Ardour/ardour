@@ -61,9 +61,9 @@ using namespace Gtkmm2ext;
 using namespace std;
 using namespace ArdourMeter;
 
-PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
-PBD::Signal0<void> MeterStrip::MetricChanged;
-PBD::Signal0<void> MeterStrip::ConfigurationChanged;
+PBD::Signal<void(MeterStrip*)> MeterStrip::CatchDeletion;
+PBD::Signal<void()> MeterStrip::MetricChanged;
+PBD::Signal<void()> MeterStrip::ConfigurationChanged;
 
 #define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * UIConfiguration::instance().get_ui_scale()))
 

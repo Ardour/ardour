@@ -139,9 +139,9 @@ public:
 	}
 
 	/** The delivery that we are handling the level for with our fader has changed */
-	PBD::Signal1<void, std::weak_ptr<ARDOUR::Delivery> > DeliveryChanged;
+	PBD::Signal<void(std::weak_ptr<ARDOUR::Delivery> )> DeliveryChanged;
 
-	static PBD::Signal1<void, FoldbackStrip*> CatchDeletion;
+	static PBD::Signal<void(FoldbackStrip*)> CatchDeletion;
 
 	void route_active_changed ();
 

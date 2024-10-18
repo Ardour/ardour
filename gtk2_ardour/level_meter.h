@@ -66,8 +66,8 @@ public:
 	void set_max_audio_meter_count (uint32_t cnt = 0);
 
 	/** Emitted in the GUI thread when a button is pressed over the meter */
-	PBD::Signal1<bool, GdkEventButton *> ButtonPress;
-	PBD::Signal1<bool, GdkEventButton *> ButtonRelease;
+	PBD::Signal<bool(GdkEventButton *)> ButtonPress;
+	PBD::Signal<bool(GdkEventButton *)> ButtonRelease;
 
 protected:
 	virtual void mtr_pack(Gtk::Widget &w) = 0;

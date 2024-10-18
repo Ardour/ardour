@@ -50,7 +50,7 @@ public:
 	void fast_update ();
 	void hide_spacer (bool);
 
-	static PBD::Signal1<void, SurroundStrip*> CatchDeletion;
+	static PBD::Signal<void(SurroundStrip*)> CatchDeletion;
 
 private:
 	void init ();

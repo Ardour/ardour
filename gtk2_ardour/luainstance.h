@@ -59,7 +59,7 @@ public:
 	const std::string& name () const { return _name; }
 	ActionHook signals () const { return _signals; }
 	bool lua_slot (std::string&, std::string&, ActionHook&, ARDOUR::LuaScriptParamList&);
-	PBD::Signal0<void> drop_callback;
+	PBD::Signal<void()> drop_callback;
 
 protected:
 	void session_going_away ();
@@ -138,10 +138,10 @@ public:
 	bool lua_slot (const PBD::ID&, std::string&, std::string&, ActionHook&, ARDOUR::LuaScriptParamList&);
 	sigc::signal<void,PBD::ID,std::string,ActionHook> SlotChanged;
 
-	static PBD::Signal0<void> LuaTimerS; // deci-seconds (Timer every 1s)
-	static PBD::Signal0<void> LuaTimerDS; // deci-seconds (Timer every .1s)
-	static PBD::Signal0<void> SetSession; // emitted when a session is loaded
-	static PBD::Signal0<void> SelectionChanged; // emitted when editor selection changes
+	static PBD::Signal<void()> LuaTimerS; // deci-seconds (Timer every 1s)
+	static PBD::Signal<void()> LuaTimerDS; // deci-seconds (Timer every .1s)
+	static PBD::Signal<void()> SetSession; // emitted when a session is loaded
+	static PBD::Signal<void()> SelectionChanged; // emitted when editor selection changes
 
 private:
 	LuaInstance();

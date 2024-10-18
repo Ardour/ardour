@@ -70,8 +70,8 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace std;
 
-PBD::Signal1<void, TrackRecordAxis*> TrackRecordAxis::CatchDeletion;
-PBD::Signal2<void, TrackRecordAxis*, bool> TrackRecordAxis::EditNextName;
+PBD::Signal<void(TrackRecordAxis*)> TrackRecordAxis::CatchDeletion;
+PBD::Signal<void(TrackRecordAxis*, bool)> TrackRecordAxis::EditNextName;
 
 #define PX_SCALE(pxmin, dflt) rint (std::max ((double)pxmin, (double)dflt* UIConfiguration::instance ().get_ui_scale ()))
 

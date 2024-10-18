@@ -100,7 +100,7 @@ class MidiViewBackground : public virtual ViewBackground
 	virtual void record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t) = 0;
 
 	virtual void set_size (double w, double h) {}
-	PBD::Signal0<void> HeightChanged;
+	PBD::Signal<void()> HeightChanged;
 
   protected:
 	bool                      _range_dirty;

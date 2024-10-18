@@ -69,7 +69,7 @@ public:
 	virtual void init () = 0;
 	void handle_dirty_description ();
 
-	PBD::Signal0<void> TemplatesImported;
+	PBD::Signal<void()> TemplatesImported;
 
 protected:
 	TemplateManager ();

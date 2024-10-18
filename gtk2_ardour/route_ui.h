@@ -345,7 +345,7 @@ private:
 	 *  by a click on the `Sends' button.  The parameter is the route that the sends are
 	 *  to, or 0 if no route is now in this mode.
 	 */
-	static PBD::Signal1<void, std::shared_ptr<ARDOUR::Route> > BusSendDisplayChanged;
+	static PBD::Signal<void(std::shared_ptr<ARDOUR::Route> )> BusSendDisplayChanged;
 
 	static std::weak_ptr<ARDOUR::Route> _showing_sends_to;
 

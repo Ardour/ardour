@@ -167,10 +167,10 @@ public:
 	 * during \ref encode \ref transcode and \ref extract_audio
 	 * The parameters are current and last video-frame.
 	 */
-	PBD::Signal2<void, ARDOUR::samplecnt_t, ARDOUR::samplecnt_t> Progress;
+	PBD::Signal<void(ARDOUR::samplecnt_t, ARDOUR::samplecnt_t)> Progress;
 
 	/** signal emitted when the transcoder process terminates. */
-	PBD::Signal1<void, int> Finished;
+	PBD::Signal<void(int)> Finished;
 
 protected:
 	bool probe ();

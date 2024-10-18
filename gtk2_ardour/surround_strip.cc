@@ -51,7 +51,7 @@ using namespace Gtk;
 
 #define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))
 
-PBD::Signal1<void, SurroundStrip*> SurroundStrip::CatchDeletion;
+PBD::Signal<void(SurroundStrip*)> SurroundStrip::CatchDeletion;
 
 SurroundStrip::SurroundStrip (Mixer_UI& mx, Session* s, std::shared_ptr<Route> r)
 	: SessionHandlePtr (s)

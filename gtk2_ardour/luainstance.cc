@@ -537,10 +537,10 @@ lua_translate_order (RouteDialogs::InsertAt place)
 
 using namespace ARDOUR;
 
-PBD::Signal0<void> LuaInstance::LuaTimerS;
-PBD::Signal0<void> LuaInstance::LuaTimerDS;
-PBD::Signal0<void> LuaInstance::SetSession;
-PBD::Signal0<void> LuaInstance::SelectionChanged;
+PBD::Signal<void()> LuaInstance::LuaTimerS;
+PBD::Signal<void()> LuaInstance::LuaTimerDS;
+PBD::Signal<void()> LuaInstance::SetSession;
+PBD::Signal<void()> LuaInstance::SelectionChanged;
 
 void
 LuaInstance::register_hooks (lua_State* L)

@@ -353,8 +353,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	static sigc::signal<void> DropDownKeys;
 
-	PBD::Signal0<void> SnapChanged;
-	PBD::Signal0<void> MouseModeChanged;
+	PBD::Signal<void()> SnapChanged;
+	PBD::Signal<void()> MouseModeChanged;
 
 	/* MIDI actions, proxied to selected MidiRegionView(s) */
 	ARDOUR::Quantize* get_quantize_op ();

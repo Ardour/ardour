@@ -88,7 +88,7 @@ uint32_t TimeAxisView::button_height = 0;
 uint32_t TimeAxisView::extra_height = 0;
 int const TimeAxisView::_max_order = 512;
 unsigned int TimeAxisView::name_width_px = 100;
-PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
+PBD::Signal<void(TimeAxisView*)> TimeAxisView::CatchDeletion;
 Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::controls_meters_size_group = Glib::RefPtr<Gtk::SizeGroup>();
 Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::midi_scroomer_size_group = Glib::RefPtr<Gtk::SizeGroup>();
 

@@ -100,7 +100,7 @@ private:
 	void signal_peak_thread ();
 	pthread_t _peak_amplitude_thread_handle;
 	void peak_amplitude_found (double);
-	PBD::Signal1<void, double> PeakAmplitudeFound;
+	PBD::Signal<void(double)> PeakAmplitudeFound;
 	PBD::ScopedConnection _peak_amplitude_connection;
 	CrossThreadChannel _peak_channel;
 };

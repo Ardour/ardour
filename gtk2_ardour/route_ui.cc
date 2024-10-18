@@ -99,7 +99,7 @@ using namespace PBD;
 using namespace std;
 
 uint32_t RouteUI::_max_invert_buttons = 3;
-PBD::Signal1<void, std::shared_ptr<Route> > RouteUI::BusSendDisplayChanged;
+PBD::Signal<void(std::shared_ptr<Route> )> RouteUI::BusSendDisplayChanged;
 std::weak_ptr<Route> RouteUI::_showing_sends_to;
 std::string RouteUI::program_port_prefix;
 

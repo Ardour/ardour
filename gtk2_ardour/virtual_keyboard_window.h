@@ -75,7 +75,7 @@ public:
 	double upper () const { return _upper; }
 	double normal () const { return _normal; }
 
-	PBD::Signal1<void, int> ValueChanged;
+	PBD::Signal<void(int)> ValueChanged;
 
 protected:
 	double _lower;

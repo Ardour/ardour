@@ -64,7 +64,7 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace Gtkmm2ext;
 
-PBD::Signal1<void,ArdourMarker*> ArdourMarker::CatchDeletion;
+PBD::Signal<void(ArdourMarker*)> ArdourMarker::CatchDeletion;
 
 static double marker_height = 13.0;
 

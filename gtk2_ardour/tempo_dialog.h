@@ -135,7 +135,7 @@ private:
 	MidiPortCols                 _midi_port_cols;
 	Glib::RefPtr<Gtk::ListStore> _midi_port_list;
 
-	PBD::Signal1<void, int64_t>         _midi_tap_signal;
+	PBD::Signal<void(int64_t)>         _midi_tap_signal;
 	std::shared_ptr<MIDI::Parser>       _midi_tap_parser;
 	std::shared_ptr<ARDOUR::MidiPort>   _midi_tap_port;
 	PBD::ScopedConnection               _parser_connection;

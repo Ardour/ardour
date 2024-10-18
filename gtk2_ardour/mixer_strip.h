@@ -135,9 +135,9 @@ public:
 	sigc::signal<void> WidthChanged;
 
 	/** The delivery that we are handling the level for with our fader has changed */
-	PBD::Signal1<void, std::weak_ptr<ARDOUR::Delivery> > DeliveryChanged;
+	PBD::Signal<void(std::weak_ptr<ARDOUR::Delivery> )> DeliveryChanged;
 
-	static PBD::Signal1<void,MixerStrip*> CatchDeletion;
+	static PBD::Signal<void(MixerStrip*)> CatchDeletion;
 
 	std::string state_id() const;
 

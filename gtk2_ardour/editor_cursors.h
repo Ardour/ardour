@@ -53,7 +53,7 @@ public:
 		return *_canvas_item;
 	}
 
-	PBD::Signal1<void, samplepos_t> PositionChanged;
+	PBD::Signal<void(samplepos_t)> PositionChanged;
 
 private:
 	EditingContext&       _editor;

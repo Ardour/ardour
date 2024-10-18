@@ -31,7 +31,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal1<void, ControlPoint *> ControlPoint::CatchDeletion;
+PBD::Signal<void(ControlPoint *)> ControlPoint::CatchDeletion;
 
 ControlPoint::ControlPoint (AutomationLine& al)
 	: _line (al)

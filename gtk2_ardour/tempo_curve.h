@@ -42,7 +42,7 @@ public:
 	TempoCurve (PublicEditor& editor, ArdourCanvas::Item &, guint32 rgba, Temporal::TempoPoint const & temp, bool handle_events , ArdourCanvas::Distance marker_width);
 	~TempoCurve ();
 
-	static PBD::Signal1<void,TempoCurve*> CatchDeletion;
+	static PBD::Signal<void(TempoCurve*)> CatchDeletion;
 
 	static void setup_sizes (const double timebar_height);
 

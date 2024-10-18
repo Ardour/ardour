@@ -370,7 +370,7 @@ FoldbackSend::remove_me ()
 
 /* ****************************************************************************/
 
-PBD::Signal1<void, FoldbackStrip*> FoldbackStrip::CatchDeletion;
+PBD::Signal<void(FoldbackStrip*)> FoldbackStrip::CatchDeletion;
 
 FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, std::shared_ptr<Route> rt)
 	: SessionHandlePtr (sess)

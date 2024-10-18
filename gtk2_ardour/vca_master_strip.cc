@@ -49,7 +49,7 @@ using namespace Gtk;
 using namespace PBD;
 using std::string;
 
-PBD::Signal1<void,VCAMasterStrip*> VCAMasterStrip::CatchDeletion;
+PBD::Signal<void(VCAMasterStrip*)> VCAMasterStrip::CatchDeletion;
 
 static bool no_propagate (GdkEventButton*) { return false; }
 
