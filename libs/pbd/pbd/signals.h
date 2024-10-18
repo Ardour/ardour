@@ -172,66 +172,6 @@ class Signal;
 template <typename R, typename... A>
 class Signal<R(A...)> : public SignalWithCombiner<DefaultCombiner<R>, R(A...)> {};
 
-template <typename R, typename C = DefaultCombiner<R>>
-class
-#ifndef NDEBUG
-[[deprecated("Use Signal<R(A...)> or SignalWithCombiner<C, R(A...)> if you need a specific combiner instead.")]]
-#endif
-Signal0 : public SignalWithCombiner<C, R()> {};
-
-template <typename R>
-class Signal0<R> : public Signal<R()> {};
-
-template <typename R, typename A1, typename C = DefaultCombiner<R>>
-class
-#ifndef NDEBUG
-[[deprecated("Use Signal<R(A...)> or SignalWithCombiner<C, R(A...)> if you need a specific combiner instead.")]]
-#endif
-Signal1 : public SignalWithCombiner<C, R(A1)> {};
-
-template <typename R, typename A1>
-class Signal1<R, A1> : public Signal<R(A1)> {};
-
-template <typename R, typename A1, typename A2, typename C = DefaultCombiner<R>>
-class
-#ifndef NDEBUG
-[[deprecated("Use Signal<R(A...)> or SignalWithCombiner<C, R(A...)> if you need a specific combiner instead.")]]
-#endif
-Signal2 : public SignalWithCombiner<C, R(A1, A2)> {};
-
-template <typename R, typename A1, typename A2>
-class Signal2<R, A1, A2> : public Signal<R(A1, A2)> {};
-
-template <typename R, typename A1, typename A2, typename A3, typename C = DefaultCombiner<R>>
-class
-#ifndef NDEBUG
-[[deprecated("Use Signal<R(A...)> or SignalWithCombiner<C, R(A...)> if you need a specific combiner instead.")]]
-#endif
-Signal3 : public SignalWithCombiner<C, R(A1, A2, A3)> {};
-
-template <typename R, typename A1, typename A2, typename A3>
-class Signal3<R, A1, A2, A3> : public Signal<R(A1, A2, A3)> {};
-
-template <typename R, typename A1, typename A2, typename A3, typename A4, typename C = DefaultCombiner<R>>
-class
-#ifndef NDEBUG
-[[deprecated("Use Signal<R(A...)> or SignalWithCombiner<C, R(A...)> if you need a specific combiner instead.")]]
-#endif
-Signal4 : public SignalWithCombiner<C, R(A1, A2, A3, A4)> {};
-
-template <typename R, typename A1, typename A2, typename A3, typename A4>
-class Signal4<R, A1, A2, A3, A4> : public Signal<R(A1, A2, A3, A4)> {};
-
-template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5, typename C = DefaultCombiner<R>>
-class
-#ifndef NDEBUG
-[[deprecated("Use Signal<R(A...)> or SignalWithCombiner<C, R(A...)> if you need a specific combiner instead.")]]
-#endif
-Signal5 : public SignalWithCombiner<C, R(A1, A2, A3, A4, A5)> {};
-
-template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5>
-class Signal5<R, A1, A2, A3, A4, A5> : public Signal<R(A1, A2, A3, A4, A5)> {};
-
 class LIBPBD_API Connection : public std::enable_shared_from_this<Connection>
 {
 public:
