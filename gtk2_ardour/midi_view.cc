@@ -1560,9 +1560,18 @@ MidiView::apply_note_range (uint8_t min, uint8_t max, bool force)
 void
 MidiView::begin_write()
 {
-	if (_active_notes) {
-		delete [] _active_notes;
+	/* delete any lingering active notes, just in case.
+
+	   XXX this should not happen.
+	*/
+
+	for (unsigned i = 0; i < 128; ++i) {
+		delete _active_notes[i];
 	}
+	delete [] _active_notes;
+
+	/* reallocate */
+
 	_active_notes = new Note*[128];
 	for (unsigned i = 0; i < 128; ++i) {
 		_active_notes[i] = nullptr;
@@ -1576,7 +1585,12 @@ MidiView::begin_write()
 void
 MidiView::end_write()
 {
+	for (unsigned i = 0; i < 128; ++i) {
+		delete _active_notes[i];
+	}
+
 	delete [] _active_notes;
+
 	_active_notes = nullptr;
 	_marked_for_selection.clear();
 	_marked_for_velocity.clear();
