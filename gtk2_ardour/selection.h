@@ -27,8 +27,6 @@
 #include <memory>
 #include <vector>
 
-#include <boost/noncopyable.hpp>
-
 #include <sigc++/signal.h>
 
 #include "pbd/signals.h"
