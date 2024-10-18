@@ -62,6 +62,7 @@ IOTaskList::IOTaskList (uint32_t n_threads)
 		case 2:
 			use_rt = true;
 			policy = SCHED_RR;
+			break;
 		default:
 			use_rt = false;
 			policy = SCHED_OTHER;
