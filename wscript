@@ -197,12 +197,8 @@ def fetch_tarball_revision_date():
 
 def parse_macos_version(version):
     # The [.] matches to the dot after the major version, "." would match any character
-    if re.search ("^[0-7][.]", version) is not None:
-        return 'panther'
-    elif re.search ("^8[.]", version) is not None:
-        return 'tiger'
-    elif re.search ("^9[.]", version) is not None:
-        return 'leopard'
+    if re.search ("^[0-9][.]", version) is not None:
+        return 'ancient'
     elif re.search ("^10[.]", version) is not None:
         return 'snowleopard'
     elif re.search ("^11[.]", version) is not None:
@@ -513,6 +509,9 @@ int main() { return 0; }''',
     # OSX
     if platform == 'darwin':
         conf.env['build_host'] = parse_macos_version (version)
+        if conf.env['build_host'] in [ 'ancient', 'snowleopard', 'lion', 'mountainlion', 'mavericks', 'yosemite', 'el_capitan', 'sierra' ]:
+            print("macOS build host is too old, macOS 10.13 or later is required")
+            sys.exit (1)
 
     # Autodetect
     if opt.dist_target == 'auto':
@@ -530,13 +529,6 @@ int main() { return 0; }''',
                 conf.env['build_target'] = 'none'
     else:
         conf.env['build_target'] = opt.dist_target
-
-    if conf.env['build_target'] == 'snowleopard':
-        #
-        # stupid OS X 10.6 has a bug in math.h that prevents llrint and friends
-        # from being visible.
-        #
-        compiler_flags.append ('-U__STRICT_ANSI__')
 
     if not opt.no_fpu_optimization:
         if conf.env['build_target'] == 'armhf' or conf.env['build_target'] == 'aarch64':
@@ -566,32 +558,19 @@ int main() { return 0; }''',
                            errmsg    = 'Not supported',
                            define_name = 'FPU_AVX_FMA_SUPPORT')
 
-    if opt.use_libcpp or conf.env['build_host'] in [ 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
+    if opt.use_libcpp or conf.env['build_host'] in [ 'high_sierra', 'mojave', 'catalina' ]:
         cxx_flags.append('--stdlib=libc++')
         linker_flags.append('--stdlib=libc++')
 
-    if conf.options.cxx17:
+    if conf.options.cxx17 or platform == "darwin":
         conf.check_cxx(cxxflags=["-std=c++17"])
         cxx_flags.append('-std=c++17')
-    elif conf.options.cxx11:
-        conf.check_cxx(cxxflags=["-std=c++11"])
-        cxx_flags.append('-std=c++11')
-    elif conf.env['build_host'] in [ 'bigsur', 'monterey', 'ventura', 'sonoma', 'sequoia' ]:
-        conf.check_cxx(cxxflags=["-std=c++17"])
-        cxx_flags.append('-std=c++17')
-    elif conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
-        conf.check_cxx(cxxflags=["-std=c++11"])
-        cxx_flags.append('-std=c++11')
 
-    if conf.options.cxx11 or conf.options.cxx17 or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' , 'bigsur', 'monterey', 'ventura', 'sonoma', 'sequoia' ]:
+    if conf.options.cxx17 or platform == "darwin":
         if platform == "darwin":
             # Mavericks and later changed the syntax to be used when including Carbon headers,
             # from requiring a full path to requiring just the header name.
             cxx_flags.append('-DCARBON_FLAT_HEADERS')
-
-            if not opt.use_libcpp and not conf.env['build_host'] in [ 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina', 'bigsur', 'monterey', 'ventura', 'sonoma', 'sequoia' ]:
-                cxx_flags.append('--stdlib=libstdc++')
-                linker_flags.append('--stdlib=libstdc++')
             # Prevents visibility issues in standard headers
             conf.define("_DARWIN_C_SOURCE", 1)
             # C++17 removes 'unary_function' and 'binary_function' this breaks older boost versions
@@ -601,7 +580,7 @@ int main() { return 0; }''',
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
             cxx_flags.append('-DBOOST_BIND_GLOBAL_PLACEHOLDERS')
 
-    if (is_clang and platform == "darwin") or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' , 'bigsur',  'monterey', 'ventura', 'sonoma', 'sequoia' ]:
+    if (is_clang and platform == "darwin"):
         # Silence warnings about the non-existing osx clang compiler flags
         # -compatibility_version and -current_version.  These are Waf
         # generated and not needed with clang
@@ -690,52 +669,25 @@ int main() { return 0; }''',
             compiler_flags.append("-DLXVST_32BIT")
 
     #
-    # a single way to test if we're on OS X
+    # Set Apple Compatibility flags
     #
-
-    if conf.env['build_target'] in ['panther', 'tiger', 'leopard' ]:
-        # force tiger or later, to avoid issues on PPC which defaults
-        # back to 10.1 if we don't tell it otherwise.
-
-        compiler_flags.extend(
-                ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1040",
-                 '-mmacosx-version-min=10.4'))
-
-    elif conf.env['build_target'] in [ 'snowleopard' ]:
-        compiler_flags.extend(
-                ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1060",
-                 '-mmacosx-version-min=10.6'))
-        linker_flags.append("-mmacosx-version-min=10.6")
-
-    elif conf.env['build_target'] in [ 'lion', 'mountainlion' ]:
-        compiler_flags.extend(
-                ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1070",
-                 '-mmacosx-version-min=10.7'))
-        linker_flags.append("-mmacosx-version-min=10.7")
-
-    elif conf.env['build_target'] in [ 'mavericks' ]:
-        compiler_flags.extend(
-                ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
-                 "-mmacosx-version-min=10.8"))
-        linker_flags.append("-mmacosx-version-min=10.8")
-
-    elif conf.env['build_target'] in ['yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
-        compiler_flags.extend(
-                ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
-                 "-mmacosx-version-min=10.9"))
-        linker_flags.append("-mmacosx-version-min=10.9")
-
-    elif conf.env['build_target'] in ['bigsur'] and not opt.arm64:
-        compiler_flags.extend(
-                ("-DMAC_OS_X_VERSION_MAX_ALLOWED=101300",
-                 "-mmacosx-version-min=10.13"))
-        linker_flags.append("-mmacosx-version-min=10.13")
-
-    elif conf.env['build_target'] in ['bigsur', 'monterey', 'ventura', 'sonoma', 'sequoia']:
-        compiler_flags.extend(
-                ("-DMAC_OS_X_VERSION_MAX_ALLOWED=110000",
-                 "-mmacosx-version-min=11.0"))
-        linker_flags.append("-mmacosx-version-min=11.0")
+    if sys.platform == 'darwin':
+        # special case our BigSur Intel builder
+        if conf.env['build_target'] in ['bigsur'] and not opt.arm64:
+            compiler_flags.extend(
+                    ("-DMAC_OS_X_VERSION_MAX_ALLOWED=101300",
+                     "-mmacosx-version-min=10.13"))
+            linker_flags.append("-mmacosx-version-min=10.13")
+        elif conf.env['build_target'] in ['high_sierra', 'mojave', 'catalina']:
+            compiler_flags.extend(
+                    ("-DMAC_OS_X_VERSION_MAX_ALLOWED=101300",
+                     "-mmacosx-version-min=10.13"))
+            linker_flags.append("-mmacosx-version-min=10.13")
+        else:
+            compiler_flags.extend(
+                    ("-DMAC_OS_X_VERSION_MAX_ALLOWED=110000",
+                     "-mmacosx-version-min=11.0"))
+            linker_flags.append("-mmacosx-version-min=11.0")
 
     #
     # save off CPU element in an env
@@ -973,8 +925,6 @@ def options(opt):
                     help='Additional include directory where shared libraries can be found (split multiples with commas)')
     opt.add_option('--noconfirm', action='store_true', default=False, dest='noconfirm',
                     help='Do not ask questions that require confirmation during the build')
-    opt.add_option('--cxx11', action='store_true', default=False, dest='cxx11',
-                    help='Turn on c++11 compiler flags (-std=c++11)')
     opt.add_option('--cxx17', action='store_true', default=False, dest='cxx17',
                     help='Turn on c++17 compiler flags (-std=c++17)')
     opt.add_option('--use-libc++', action='store_true', default=False, dest='use_libcpp',
@@ -1284,7 +1234,7 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
         conf.env.append_value('CFLAGS', '-DCOMPILER_MINGW')
         conf.env.append_value('CXXFLAGS', '-DPLATFORM_WINDOWS')
         conf.env.append_value('CXXFLAGS', '-DCOMPILER_MINGW')
-        if conf.options.cxx11 or conf.options.cxx17:
+        if conf.options.cxx17:
             conf.env.append_value('CFLAGS', '-D_USE_MATH_DEFINES')
             conf.env.append_value('CXXFLAGS', '-D_USE_MATH_DEFINES')
             conf.env.append_value('CFLAGS', '-DWIN32')
@@ -1510,10 +1460,10 @@ int main () { __int128 x = 0; return 0; }
     set_compiler_flags (conf, Options.options)
 
     if sys.platform == 'darwin':
-        if conf.env['build_host'] not in [ 'mojave', 'catalina', 'bigsur', 'monterey', 'ventura', 'sonoma', 'sequoia']:
+        if conf.env['build_host'] in [ 'high_sierra' ]:
             conf.env.append_value('CXXFLAGS_OSX', '-F/System/Library/Frameworks')
-
-        conf.env.append_value('CXXFLAGS_OSX', '-F/Library/Frameworks')
+        else:
+            conf.env.append_value('CXXFLAGS_OSX', '-F/Library/Frameworks')
 
     if sys.platform == 'darwin':
         sub_config_and_use(conf, 'libs/appleutility')
