@@ -386,6 +386,13 @@ TriggerPage::clear_selected_slot ()
 void
 TriggerPage::rec_enable_changed (Trigger const * trigger)
 {
+	assert (trigger);
+
+	if (!trigger->armed()) {
+		_midi_editor->trigger_rec_enable_change (*trigger);
+		return;
+	}
+
 	/* hide everything */
 
 	_slot_prop_box.hide ();
@@ -406,7 +413,9 @@ TriggerPage::rec_enable_changed (Trigger const * trigger)
 			_audio_trig_box.set_trigger (ref);
 			_audio_trig_box.show ();
 		}
+
 	} else {
+
 		_midi_trig_box.set_trigger (ref);
 		_midi_trig_box.show ();
 

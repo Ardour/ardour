@@ -86,6 +86,9 @@ class MidiCueEditor : public CueEditor
 	Editing::MouseMode current_mouse_mode () const;
 	bool internal_editing() const;
 
+	void box_rec_enable_change (ARDOUR::TriggerBox const &);
+	void trigger_rec_enable_change (ARDOUR::Trigger const &);
+
 	double timebar_height;
 	size_t n_timebars;
 
@@ -211,7 +214,6 @@ class MidiCueEditor : public CueEditor
 	void visual_changer (const VisualChange&);
 	void bindings_changed ();
 
-	void rec_enable_change (ARDOUR::TriggerBox*);
 	void data_captured (Temporal::timecnt_t);
 	bool idle_data_captured ();
 	std::atomic<int> idle_update_queued;

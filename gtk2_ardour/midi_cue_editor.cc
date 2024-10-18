@@ -318,11 +318,12 @@ MidiCueEditor::maybe_update ()
 	}
 
 	if (_track->rec_enable_control()->get_value()) {
-		/* data recorded will handle it */
+		/* ::data_captured() will handle it */
 		return;
 	}
 
 	ARDOUR::TriggerPtr trigger = _track->triggerbox()->currently_playing ();
+
 	if (!trigger) {
 		_playhead_cursor->set_position (0);
 	} else {
@@ -503,14 +504,24 @@ MidiCueEditor::set_box (std::shared_ptr<ARDOUR::TriggerBox> b)
 		b->Captured.connect (capture_connections, invalidator (*this), boost::bind (&MidiCueEditor::data_captured, this, _1), gui_context());
 		/* Don't bind a shared_ptr<TriggerBox> within the lambda */
 		TriggerBox* tb (b.get());
-		b->RecEnableChanged.connect (capture_connections, invalidator (*this), [&, tb]() { rec_enable_change (tb); }, gui_context());
+		b->RecEnableChanged.connect (capture_connections, invalidator (*this), [&, tb]() { box_rec_enable_change (*tb); }, gui_context());
 	}
 }
 
 void
-MidiCueEditor::rec_enable_change (ARDOUR::TriggerBox* b)
+MidiCueEditor::box_rec_enable_change (ARDOUR::TriggerBox const & b)
 {
-	if (b->record_enabled()) {
+	if (b.record_enabled()) {
+		view->begin_write();
+	} else {
+		view->end_write ();
+	}
+}
+
+void
+MidiCueEditor::trigger_rec_enable_change (ARDOUR::Trigger const & t)
+{
+	if (t.armed()) {
 		view->begin_write();
 	} else {
 		view->end_write ();

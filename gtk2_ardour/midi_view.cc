@@ -1560,9 +1560,8 @@ MidiView::apply_note_range (uint8_t min, uint8_t max, bool force)
 void
 MidiView::begin_write()
 {
-	std::cerr << "MV::begin write\n";
 	if (_active_notes) {
-		delete[] _active_notes;
+		delete [] _active_notes;
 	}
 	_active_notes = new Note*[128];
 	for (unsigned i = 0; i < 128; ++i) {
@@ -1577,7 +1576,6 @@ MidiView::begin_write()
 void
 MidiView::end_write()
 {
-	std::cerr << "MV::end write\n";
 	delete [] _active_notes;
 	_active_notes = nullptr;
 	_marked_for_selection.clear();
