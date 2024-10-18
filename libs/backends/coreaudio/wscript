@@ -30,6 +30,5 @@ def build(bld):
 
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
-                   'ARDOURBACKEND_DLL_EXPORTS',
-                   'COREAUDIO_108'
+                   'ARDOURBACKEND_DLL_EXPORTS'
                   ]
