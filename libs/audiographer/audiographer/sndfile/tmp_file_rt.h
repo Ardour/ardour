@@ -6,6 +6,7 @@
 
 #include <glib.h>
 
+#include "pbd/compose.h"
 #include "pbd/gstdio_compat.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/ringbuffer.h"
@@ -63,15 +64,16 @@ class TmpFileRt
 		SndfileWriter<T>::check_flags (*this, c);
 
 		if (SndfileWriter<T>::throw_level (ThrowStrict) && c.channels() != SndfileHandle::channels()) {
-			throw Exception (*this, boost::str (boost::format
-				("Wrong number of channels given to process(), %1% instead of %2%")
-				% c.channels() % SndfileHandle::channels()));
+			throw Exception (*this, string_compose
+					("Wrong number of channels given to process(), %1 instead of %2",
+					 c.channels(), SndfileHandle::channels()));
 		}
 
 		if (SndfileWriter<T>::throw_level (ThrowProcess) && _rb.write_space() < (size_t) c.samples()) {
-			throw Exception (*this, boost::str (boost::format
-				("Could not write data to ringbuffer/output file (%1%)")
-				% SndfileHandle::strError()));
+			throw Exception (*this, string_compose
+					("Could not write data to ringbuffer/output file (%1)",
+					 SndfileHandle::strError()));
+
 		}
 
 		_rb.write (c.data(), c.samples());

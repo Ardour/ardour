@@ -8,11 +8,11 @@
 #include <glibmm/threadpool.h>
 #include <glibmm/timeval.h>
 #include <sigc++/slot.h>
-#include <boost/format.hpp>
 
 #include <glib.h>
 
 #include "pbd/atomic.h"
+#include "pbd/compose.h"
 
 #include "audiographer/visibility.h"
 #include "audiographer/source.h"
@@ -28,10 +28,7 @@ class /*LIBAUDIOGRAPHER_API*/ ThreaderException : public Exception
   public:
 	template<typename T>
 	ThreaderException (T const & thrower, std::exception const & e)
-		: Exception (thrower,
-			boost::str ( boost::format
-			("\n\t- Dynamic type: %1%\n\t- what(): %2%")
-			% DebugUtils::demangled_name (e) % e.what() ))
+		: Exception (thrower, string_compose ("\n\t- Dynamic type: %1\n\t- what(): %2", DebugUtils::demangled_name (e), e.what()))
 	{ }
 };
 
