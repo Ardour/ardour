@@ -73,10 +73,10 @@ class LIBARDOUR_API ElementImporter
 	bool broken () { return _broken; }
 
 	/// Signal that requests for anew name
-	static PBD::Signal2<std::pair<bool, std::string>,std::string, std::string> Rename;
+	static PBD::Signal<std::pair<bool, std::string>(std::string, std::string)> Rename;
 
 	/// Signal for ok/cancel prompting
-	static PBD::Signal1<bool,std::string> Prompt;
+	static PBD::Signal<bool(std::string)> Prompt;
 
   protected:
 

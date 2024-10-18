@@ -63,7 +63,7 @@ using namespace PBD;
 
 ControlProtocolManager* ControlProtocolManager::_instance = 0;
 const string ControlProtocolManager::state_node_name = X_("ControlProtocols");
-PBD::Signal1<void,StripableNotificationListPtr> ControlProtocolManager::StripableSelectionChanged;
+PBD::Signal<void(StripableNotificationListPtr)> ControlProtocolManager::StripableSelectionChanged;
 
 #ifdef HAVE_USB
 static int

@@ -73,7 +73,7 @@ class SndfileWriter
 
 	using Sink<T>::process;
 
-	PBD::Signal1<void, std::string> FileWritten;
+	PBD::Signal<void(std::string)> FileWritten;
 
   protected:
 	/// SndfileHandle has to be constructed directly by deriving classes

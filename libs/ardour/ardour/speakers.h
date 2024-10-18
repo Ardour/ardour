@@ -54,7 +54,7 @@ public:
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
-	PBD::Signal0<void> Changed;
+	PBD::Signal<void()> Changed;
 
 protected:
 	std::vector<Speaker>  _speakers;

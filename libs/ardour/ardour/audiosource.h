@@ -69,8 +69,8 @@ class LIBARDOUR_API AudioSource : virtual public Source, public ARDOUR::AudioRea
 	int  build_peaks ();
 	bool peaks_ready (boost::function<void()> callWhenReady, PBD::ScopedConnection** connection_created_if_not_ready, PBD::EventLoop* event_loop) const;
 
-	mutable PBD::Signal0<void>  PeaksReady;
-	mutable PBD::Signal2<void,samplepos_t,samplepos_t>  PeakRangeReady;
+	mutable PBD::Signal<void()>  PeaksReady;
+	mutable PBD::Signal<void(samplepos_t,samplepos_t)>  PeakRangeReady;
 
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);

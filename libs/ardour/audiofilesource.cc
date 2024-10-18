@@ -72,7 +72,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
 
-PBD::Signal0<void> AudioFileSource::HeaderPositionOffsetChanged;
+PBD::Signal<void()> AudioFileSource::HeaderPositionOffsetChanged;
 samplecnt_t         AudioFileSource::header_position_offset = 0;
 
 /* XXX maybe this too */

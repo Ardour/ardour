@@ -102,7 +102,7 @@ class LIBARDOUR_API Stripable : public SessionObject,
 
 	/* gui's call this for their own purposes. */
 
-	PBD::Signal2<void,std::string,void*> gui_changed;
+	PBD::Signal<void(std::string,void*)> gui_changed;
 
 	/* *************************************************************
 	 * Pure interface begins here
@@ -148,7 +148,7 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	/* ACs mapped to any control have changed. API user is to drop references,
 	 * and query mapped ctrl again
 	 */
-	PBD::Signal0<void> MappedControlsChanged;
+	PBD::Signal<void()> MappedControlsChanged;
 
 	/* "well-known" controls for sends to well-known busses in this route. Any or all may
 	 * be null.

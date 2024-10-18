@@ -58,7 +58,7 @@ class M2Device
 		virtual void write (hid_device*, M2Contols*) = 0;
 		virtual Cairo::RefPtr<Cairo::ImageSurface> surface () = 0;
 
-		PBD::Signal0<bool> vblank;
+		PBD::Signal<bool()> vblank;
 
 	protected:
 		void bump_blink () {

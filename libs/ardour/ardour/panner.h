@@ -103,7 +103,7 @@ public:
 	virtual void reset () = 0;
 
 	/* azimut, width or elevation updated -> recalc signal_position ->  emit Changed */
-	PBD::Signal0<void> SignalPositionChanged;
+	PBD::Signal<void()> SignalPositionChanged;
 
 	/**
 	 *  Pan some input buffers to a number of output buffers.

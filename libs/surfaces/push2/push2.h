@@ -312,7 +312,7 @@ class Push2 : public MIDISurface
 	int set_state (const XMLNode & node, int version);
 
 	int pad_note (int row, int col) const;
-	PBD::Signal0<void> PadChange;
+	PBD::Signal<void()> PadChange;
 
 	void update_selection_color ();
 
@@ -406,7 +406,7 @@ class Push2 : public MIDISurface
 	                    RowInterval       row_interval,
 	                    bool              inkey);
 
-	PBD::Signal0<void> ScaleChange;
+	PBD::Signal<void()> ScaleChange;
 
 	MusicalMode::Type mode() const { return  _mode; }
 	NoteGridOrigin note_grid_origin() { return _note_grid_origin; }
@@ -438,7 +438,7 @@ class Push2 : public MIDISurface
 
 	PressureMode pressure_mode () const { return _pressure_mode; }
 	void set_pressure_mode (PressureMode);
-	PBD::Signal1<void,PressureMode> PressureModeChange;
+	PBD::Signal<void(PressureMode)> PressureModeChange;
 
 	libusb_device_handle* usb_handle() const { return _handle; }
 

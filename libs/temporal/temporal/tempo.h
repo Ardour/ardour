@@ -982,7 +982,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API void dump (std::ostream&) const;
 
-	LIBTEMPORAL_API static PBD::Signal0<void> MapChanged;
+	LIBTEMPORAL_API static PBD::Signal<void()> MapChanged;
 
 	LIBTEMPORAL_API XMLNode& get_state() const;
 

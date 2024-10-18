@@ -116,16 +116,16 @@ public:
 	bool swap_solo_mute;
 	bool create_mapping_stubs;
 
-	PBD::Signal0<void> ConnectionChange;
+	PBD::Signal<void()> ConnectionChange;
 
 	/* Timer Events */
-	PBD::Signal1<void, bool> BlinkIt;
-	PBD::Signal0<void> Periodic;
+	PBD::Signal<void(bool)> BlinkIt;
+	PBD::Signal<void()> Periodic;
 
 	/* Local Signals */
-	PBD::Signal0<void> BankChange;
-	PBD::Signal1<void, bool> ShiftChange;
-	PBD::Signal1<void, bool> PluginStateChange;
+	PBD::Signal<void()> BankChange;
+	PBD::Signal<void(bool)> ShiftChange;
+	PBD::Signal<void(bool)> PluginStateChange;
 
 	enum ControllerID
 	{

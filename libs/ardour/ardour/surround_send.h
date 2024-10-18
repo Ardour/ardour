@@ -41,8 +41,8 @@ public:
 
 	uint32_t n_pannables () const;
 
-	PBD::Signal0<void> NPannablesChanged;
-	PBD::Signal0<void> PanChanged;
+	PBD::Signal<void()> NPannablesChanged;
+	PBD::Signal<void()> PanChanged;
 
 	/* Route/processor interface */
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) { return in == out; }

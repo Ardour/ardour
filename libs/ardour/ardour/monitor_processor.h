@@ -157,7 +157,7 @@ public:
 
 	bool monitor_active () const { return _monitor_active; }
 
-	PBD::Signal0<void> Changed;
+	PBD::Signal<void()> Changed;
 
 	std::shared_ptr<PBD::Controllable> channel_cut_control (uint32_t) const;
 	std::shared_ptr<PBD::Controllable> channel_dim_control (uint32_t) const;

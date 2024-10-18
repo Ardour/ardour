@@ -83,8 +83,8 @@ public:
 		return _zero_latency;
 	}
 
-	static PBD::Signal0<void> DisableSwitchChanged;
-	PBD::Signal0<void> LatencyChanged;
+	static PBD::Signal<void()> DisableSwitchChanged;
+	PBD::Signal<void()> LatencyChanged;
 
 protected:
 	int  set_state (const XMLNode& node, int version);

@@ -50,7 +50,7 @@ public:
 	void unset_user_tailtime ();
 	void set_user_tailtime (samplecnt_t val);
 
-	PBD::Signal0<void> TailTimeChanged;
+	PBD::Signal<void()> TailTimeChanged;
 
 protected:
 	int  set_state (const XMLNode& node, int version);

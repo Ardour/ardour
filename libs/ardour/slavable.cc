@@ -36,7 +36,7 @@ using namespace PBD;
 using namespace ARDOUR;
 
 std::string Slavable::xml_node_name = X_("Slavable");
-PBD::Signal1<void,VCAManager*> Slavable::Assign; /* signal sent once
+PBD::Signal<void(VCAManager*)> Slavable::Assign; /* signal sent once
                                                   * assignment is possible */
 
 Slavable::Slavable ()

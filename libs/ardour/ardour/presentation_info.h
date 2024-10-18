@@ -260,7 +260,7 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	/* for things concerned about *any* PresentationInfo.
 	 */
 
-	static PBD::Signal1<void,PBD::PropertyChange const &> Change;
+	static PBD::Signal<void(PBD::PropertyChange const &)> Change;
 	static void send_static_change (const PBD::PropertyChange&);
 
 	static void make_property_quarks ();

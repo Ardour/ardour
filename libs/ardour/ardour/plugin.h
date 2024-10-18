@@ -213,17 +213,17 @@ public:
 	virtual bool has_inline_display () { return false; }
 	virtual bool inline_display_in_gui () { return false; }
 	virtual Display_Image_Surface* render_inline_display (uint32_t, uint32_t) { return NULL; }
-	PBD::Signal0<void> QueueDraw;
+	PBD::Signal<void()> QueueDraw;
 
 	virtual bool has_midnam () { return false; }
 	virtual bool read_midnam () { return false; }
 	virtual std::string midnam_model () { return ""; }
-	PBD::Signal0<void> UpdateMidnam;
-	PBD::Signal0<void> UpdatedMidnam;
+	PBD::Signal<void()> UpdateMidnam;
+	PBD::Signal<void()> UpdatedMidnam;
 
 	virtual bool knows_bank_patch () { return false; }
 	virtual uint32_t bank_patch (uint8_t chn) { return UINT32_MAX; }
-	PBD::Signal1<void, uint8_t> BankPatchChange;
+	PBD::Signal<void(uint8_t)> BankPatchChange;
 
 	struct PresetRecord {
 		PresetRecord () : valid (false) { }
@@ -289,22 +289,22 @@ public:
 	virtual int first_user_preset_index () const { return 0; }
 
 	/** Emitted when a preset is added or removed, respectively */
-	PBD::Signal0<void> PresetAdded;
-	PBD::Signal0<void> PresetRemoved;
+	PBD::Signal<void()> PresetAdded;
+	PBD::Signal<void()> PresetRemoved;
 
 	/** Emitted when any preset has been changed */
-	static PBD::Signal3<void, std::string, Plugin*, bool> PresetsChanged;
+	static PBD::Signal<void(std::string, Plugin*, bool)> PresetsChanged;
 
 	/** Emitted when a preset has been loaded */
-	PBD::Signal0<void> PresetLoaded;
+	PBD::Signal<void()> PresetLoaded;
 
 	/** Emitted when a parameter is altered in a way that may have
 	 *  changed the settings with respect to any loaded preset.
 	 */
-	PBD::Signal0<void> PresetDirty;
+	PBD::Signal<void()> PresetDirty;
 
 	/** Emitted for preset-load to set a control-port */
-	PBD::Signal2<void, uint32_t, float> PresetPortSetValue;
+	PBD::Signal<void(uint32_t, float)> PresetPortSetValue;
 
 	/** @return true if plugin has a custom plugin GUI */
 	virtual bool has_editor () const = 0;
@@ -312,7 +312,7 @@ public:
 	/** Emitted when a parameter is altered by something outside of our
 	 * control, most typically a Plugin GUI/editor
 	 */
-	PBD::Signal2<void, uint32_t, float> ParameterChangedExternally;
+	PBD::Signal<void(uint32_t, float)> ParameterChangedExternally;
 
 	virtual bool reconfigure_io (ChanCount /*in*/, ChanCount /*aux_in*/, ChanCount /*out*/) { return true; }
 	virtual bool match_variable_io (ChanCount& /*in*/, ChanCount& /*aux_in*/, ChanCount& /*out*/) { return false; }
@@ -377,10 +377,10 @@ public:
 	virtual void announce_property_values () {}
 
 	/** Emitted when a property is changed in the plugin. */
-	PBD::Signal2<void, uint32_t, Variant> PropertyChanged;
+	PBD::Signal<void(uint32_t, Variant)> PropertyChanged;
 
-	PBD::Signal1<void, uint32_t> StartTouch;
-	PBD::Signal1<void, uint32_t> EndTouch;
+	PBD::Signal<void(uint32_t)> StartTouch;
+	PBD::Signal<void(uint32_t)> EndTouch;
 
 protected:
 	friend class PluginInsert;

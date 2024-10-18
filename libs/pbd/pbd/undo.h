@@ -130,9 +130,9 @@ public:
 
 	void set_depth (uint32_t);
 
-	PBD::Signal0<void> Changed;
-	PBD::Signal0<void> BeginUndoRedo;
-	PBD::Signal0<void> EndUndoRedo;
+	PBD::Signal<void()> Changed;
+	PBD::Signal<void()> BeginUndoRedo;
+	PBD::Signal<void()> EndUndoRedo;
 
 private:
 	bool                        _clearing;

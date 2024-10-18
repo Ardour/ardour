@@ -63,7 +63,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 const string                 IO::state_node_name = "IO";
-PBD::Signal1<void,ChanCount> IO::PortCountChanged;
+PBD::Signal<void(ChanCount)> IO::PortCountChanged;
 
 static std::string
 legalize_io_name (std::string n)

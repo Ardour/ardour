@@ -48,7 +48,7 @@ using namespace PBD;
 using namespace std;
 
 ARDOUR::samplecnt_t   DiskReader::_chunk_samples = default_chunk_samples ();
-PBD::Signal0<void>    DiskReader::Underrun;
+PBD::Signal<void()>    DiskReader::Underrun;
 thread_local Sample*  DiskReader::_sum_buffer     = 0;
 thread_local Sample*  DiskReader::_mixdown_buffer = 0;
 thread_local gain_t*  DiskReader::_gain_buffer    = 0;

@@ -137,7 +137,7 @@ class LIBARDOUR_API Bundle : public PBD::ScopedConnectionList
 		DirectionChanged = 0x10 ///< the direction (whether ports are inputs or outputs) has changed
 	};
 
-	PBD::Signal1<void,Change> Changed;
+	PBD::Signal<void(Change)> Changed;
 
   protected:
 

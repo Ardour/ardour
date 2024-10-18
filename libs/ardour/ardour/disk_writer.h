@@ -79,7 +79,7 @@ public:
 	AlignStyle alignment_style () const { return _alignment_style; }
 	void       set_align_style (AlignStyle, bool force = false);
 
-	PBD::Signal0<void> AlignmentStyleChanged;
+	PBD::Signal<void()> AlignmentStyleChanged;
 
 	bool configure_io (ChanCount in, ChanCount out);
 
@@ -103,7 +103,7 @@ public:
 
 	int seek (samplepos_t sample, bool complete_refill);
 
-	static PBD::Signal0<void> Overrun;
+	static PBD::Signal<void()> Overrun;
 
 	void set_note_mode (NoteMode m);
 
@@ -111,10 +111,10 @@ public:
 	 *  Parameter is the source that it is destined for.
 	 *  A caller can get a copy of the data with get_gui_feed_buffer ()
 	 */
-	PBD::Signal1<void, std::weak_ptr<MidiSource> > DataRecorded;
+	PBD::Signal<void(std::weak_ptr<MidiSource> )> DataRecorded;
 
-	PBD::Signal0<void> RecordEnableChanged;
-	PBD::Signal0<void> RecordSafeChanged;
+	PBD::Signal<void()> RecordEnableChanged;
+	PBD::Signal<void()> RecordSafeChanged;
 
 	void transport_looped (samplepos_t transport_sample);
 	void transport_stopped_wallclock (struct tm&, time_t, bool abort);

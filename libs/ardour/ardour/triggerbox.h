@@ -300,8 +300,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void arm();
 	virtual void disarm ();
 	bool armed() const { return _armed; }
-	PBD::Signal0<void> ArmChanged;
-	static PBD::Signal1<void,Trigger const *> TriggerArmChanged;
+	PBD::Signal<void()> ArmChanged;
+	static PBD::Signal<void(Trigger const *)> TriggerArmChanged;
 
 	Temporal::BBT_Argument compute_start (Temporal::TempoMap::SharedPtr const &, samplepos_t start, samplepos_t end, Temporal::BBT_Offset const & q, samplepos_t& start_samples, bool& will_start);
 	virtual timepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t, Temporal::Beats &) = 0;
@@ -431,7 +431,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	virtual void check_edit_swap (timepos_t const & time, bool playing, BufferSet& bufs) {}
 
-	static PBD::Signal2<void,PBD::PropertyChange,Trigger*> TriggerPropertyChange;
+	static PBD::Signal<void(PBD::PropertyChange,Trigger*)> TriggerPropertyChange;
 
   protected:
 	struct UIRequests {
@@ -805,17 +805,17 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	static CueRecords cue_records;
 	static bool cue_recording () { return _cue_recording; }
 	static void set_cue_recording (bool yn);
-	static PBD::Signal0<void> CueRecordingChanged;
+	static PBD::Signal<void()> CueRecordingChanged;
 
 	void set_record_enabled (bool yn);
 	RecordState record_enabled() const { return _record_state; }
-	PBD::Signal0<void> RecEnableChanged;
-	static PBD::Signal0<void> TriggerRecEnableChanged;
+	PBD::Signal<void()> RecEnableChanged;
+	static PBD::Signal<void()> TriggerRecEnableChanged;
 
 	void arm_from_another_thread (Trigger& slot, samplepos_t, uint32_t chans);
 	void disarm();
 	bool armed() const { return (bool) _arm_info.load(); }
-	PBD::Signal0<void> ArmedChanged;
+	PBD::Signal<void()> ArmedChanged;
 
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required);
 	void run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes);
@@ -823,7 +823,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	bool configure_io (ChanCount in, ChanCount out);
 
 	bool empty() const { return _active_slots == 0; }
-	PBD::Signal0<void> EmptyStatusChanged;
+	PBD::Signal<void()> EmptyStatusChanged;
 
 	int32_t order() const { return _order; }
 	void set_order(int32_t n);
@@ -891,7 +891,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	/* valid only within the ::run() call tree */
 	int32_t active_scene() const { return _active_scene; }
 
-	PBD::Signal1<void,uint32_t> TriggerSwapped;
+	PBD::Signal<void(uint32_t)> TriggerSwapped;
 
 	enum TriggerMidiMapMode {
 		AbletonPush,
@@ -935,13 +935,13 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	static PBD::PropertyChange all_trigger_props();
 
 	void send_property_change (PBD::PropertyChange pc);
-	static PBD::Signal2<void,PBD::PropertyChange,int> TriggerBoxPropertyChange;
+	static PBD::Signal<void(PBD::PropertyChange,int)> TriggerBoxPropertyChange;
 
 	std::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
 	void dump (std::ostream &) const;
 
-	PBD::Signal1<void,timecnt_t> Captured;
+	PBD::Signal<void(timecnt_t)> Captured;
 
   private:
 	struct Requests {
@@ -1051,7 +1051,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 
 	static bool _learning;
 	static std::pair<int,int> learning_for;
-	static PBD::Signal0<void> TriggerMIDILearned;
+	static PBD::Signal<void()> TriggerMIDILearned;
 
 	static void init_pool();
 

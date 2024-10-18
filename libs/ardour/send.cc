@@ -51,8 +51,8 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-PBD::Signal0<void> LatentSend::ChangedLatency;
-PBD::Signal0<void> LatentSend::QueueUpdate;
+PBD::Signal<void()> LatentSend::ChangedLatency;
+PBD::Signal<void()> LatentSend::QueueUpdate;
 
 LatentSend::LatentSend ()
 		: _delay_in (0)

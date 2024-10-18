@@ -40,7 +40,7 @@ public:
 		return _mute_master;
 	}
 
-	PBD::Signal0<void> mute_points_changed;
+	PBD::Signal<void()> mute_points_changed;
 
 protected:
 	std::shared_ptr<MuteMaster> _mute_master;

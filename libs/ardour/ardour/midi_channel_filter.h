@@ -85,8 +85,8 @@ public:
 		return _mode_mask.load() & 0x0000FFFF;
 	}
 
-	PBD::Signal0<void> ChannelMaskChanged;
-	PBD::Signal0<void> ChannelModeChanged;
+	PBD::Signal<void()> ChannelMaskChanged;
+	PBD::Signal<void()> ChannelModeChanged;
 
 private:
 	std::atomic<uint32_t> _mode_mask;  ///< 16 bits mode, 16 bits mask

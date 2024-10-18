@@ -246,20 +246,20 @@ public:
 	virtual int set_state (const XMLNode&, int version);
 	XMLNode&    get_template ();
 
-	PBD::Signal1<void, bool>                     InUse;
-	PBD::Signal0<void>                           ContentsChanged;
-	PBD::Signal1<void, std::weak_ptr<Region> > RegionAdded;
-	PBD::Signal1<void, std::weak_ptr<Region> > RegionRemoved;
-	PBD::Signal0<void>                           NameChanged;
-	PBD::Signal0<void>                           LayeringChanged;
+	PBD::Signal<void(bool)>                     InUse;
+	PBD::Signal<void()>                           ContentsChanged;
+	PBD::Signal<void(std::weak_ptr<Region> )> RegionAdded;
+	PBD::Signal<void(std::weak_ptr<Region> )> RegionRemoved;
+	PBD::Signal<void()>                           NameChanged;
+	PBD::Signal<void()>                           LayeringChanged;
 
 	/** Emitted when regions have moved (not when regions have only been trimmed) */
-	PBD::Signal2<void,std::list< Temporal::RangeMove> const &, bool> RangesMoved;
+	PBD::Signal<void(std::list< Temporal::RangeMove> const &, bool)> RangesMoved;
 
 	/** Emitted when regions are extended; the ranges passed are the new extra time ranges
 	    that these regions now occupy.
 	*/
-	PBD::Signal1<void,std::list< Temporal::Range> const &> RegionsExtended;
+	PBD::Signal<void(std::list< Temporal::Range> const &)> RegionsExtended;
 
 	static std::string bump_name (std::string old_name, Session&);
 

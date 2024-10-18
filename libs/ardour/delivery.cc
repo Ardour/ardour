@@ -50,7 +50,7 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-PBD::Signal0<void>            Delivery::PannersLegal;
+PBD::Signal<void()>            Delivery::PannersLegal;
 bool                          Delivery::panners_legal = false;
 
 /* deliver to an existing IO object */

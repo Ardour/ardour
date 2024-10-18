@@ -261,14 +261,14 @@ public:
 
 	void end_unnamed_status () const;
 
-	PBD::Signal0<void> DirtyChanged;
+	PBD::Signal<void()> DirtyChanged;
 
 	const SessionDirectory& session_directory () const { return *(_session_dir.get()); }
 
-	static PBD::Signal1<void,std::string> Dialog;
+	static PBD::Signal<void(std::string)> Dialog;
 
-	PBD::Signal0<void> BatchUpdateStart;
-	PBD::Signal0<void> BatchUpdateEnd;
+	PBD::Signal<void()> BatchUpdateStart;
+	PBD::Signal<void()> BatchUpdateEnd;
 
 	int ensure_subdirs ();
 
@@ -417,24 +417,24 @@ public:
 
 	void maybe_write_autosave ();
 
-	PBD::Signal1<void, int> SurroundObjectCountChanged;
+	PBD::Signal<void(int)> SurroundObjectCountChanged;
 
 	/* Emitted when all i/o connections are complete */
 
-	PBD::Signal0<void> IOConnectionsComplete;
+	PBD::Signal<void()> IOConnectionsComplete;
 
 	/* Record status signals */
 
-	PBD::Signal0<void> RecordStateChanged; /* signals changes in recording state (i.e. are we recording) */
+	PBD::Signal<void()> RecordStateChanged; /* signals changes in recording state (i.e. are we recording) */
 	/* XXX may 2015: paul says: it isn't clear to me that this has semantics that cannot be inferrred
 	   from the previous signal and session state.
 	*/
-	PBD::Signal0<void> RecordArmStateChanged; /* signals changes in recording arming */
+	PBD::Signal<void()> RecordArmStateChanged; /* signals changes in recording arming */
 
-	PBD::Signal0<void> UpdateRouteRecordState; /* signals potential change in route recording arming */
+	PBD::Signal<void()> UpdateRouteRecordState; /* signals potential change in route recording arming */
 
 	/* Emited when session is loaded */
-	PBD::Signal0<void> SessionLoaded;
+	PBD::Signal<void()> SessionLoaded;
 
 	/* Transport mechanism signals */
 
@@ -445,38 +445,38 @@ public:
 	 *  - start (from the process thread)
 	 *  - engine halted
 	 */
-	PBD::Signal0<void> TransportStateChange;
+	PBD::Signal<void()> TransportStateChange;
 
-	PBD::Signal1<void,samplepos_t> PositionChanged; /* sent after any non-sequential motion */
-	PBD::Signal1<void,samplepos_t> Xrun;
-	PBD::Signal0<void> TransportLooped;
+	PBD::Signal<void(samplepos_t)> PositionChanged; /* sent after any non-sequential motion */
+	PBD::Signal<void(samplepos_t)> Xrun;
+	PBD::Signal<void()> TransportLooped;
 
 	/** emitted when a locate has occurred */
-	PBD::Signal0<void> Located;
+	PBD::Signal<void()> Located;
 
-	PBD::Signal1<void,RouteList&> RouteAdded;
+	PBD::Signal<void(RouteList&)> RouteAdded;
 	/** Emitted when a property of one of our route groups changes.
 	 *  The parameter is the RouteGroup that has changed.
 	 */
-	PBD::Signal1<void, RouteGroup *> RouteGroupPropertyChanged;
+	PBD::Signal<void(RouteGroup *)> RouteGroupPropertyChanged;
 	/** Emitted when a route is added to one of our route groups.
 	 *  First parameter is the RouteGroup, second is the route.
 	 */
-	PBD::Signal2<void, RouteGroup *, std::weak_ptr<Route> > RouteAddedToRouteGroup;
+	PBD::Signal<void(RouteGroup *, std::weak_ptr<Route> )> RouteAddedToRouteGroup;
 	/** Emitted when a route is removed from one of our route groups.
 	 *  First parameter is the RouteGroup, second is the route.
 	 */
-	PBD::Signal2<void, RouteGroup *, std::weak_ptr<Route> > RouteRemovedFromRouteGroup;
+	PBD::Signal<void(RouteGroup *, std::weak_ptr<Route> )> RouteRemovedFromRouteGroup;
 
 	/** Emitted when a foldback send is created or deleted
 	 */
-	PBD::Signal0<void> FBSendsChanged;
+	PBD::Signal<void()> FBSendsChanged;
 
 	/* Step Editing status changed */
-	PBD::Signal1<void,bool> StepEditStatusChange;
+	PBD::Signal<void(bool)> StepEditStatusChange;
 
 	/* Timecode state signals */
-	PBD::Signal0<void> MtcOrLtcInputPortChanged;
+	PBD::Signal<void()> MtcOrLtcInputPortChanged;
 
 	void queue_event (SessionEvent*);
 
@@ -542,9 +542,9 @@ public:
 
 	Locations *locations() { return _locations; }
 
-	PBD::Signal1<void,Location*>    auto_loop_location_changed;
-	PBD::Signal1<void,Location*>    auto_punch_location_changed;
-	PBD::Signal0<void>              locations_modified;
+	PBD::Signal<void(Location*)>    auto_loop_location_changed;
+	PBD::Signal<void(Location*)>    auto_punch_location_changed;
+	PBD::Signal<void()>              locations_modified;
 
 	void set_auto_punch_location (Location *);
 	void set_auto_loop_location (Location *);
@@ -560,7 +560,7 @@ public:
 	samplecnt_t worst_latency_preroll () const;
 	samplecnt_t worst_latency_preroll_buffer_size_ceil () const;
 
-	PBD::Signal1<void, bool> LatencyUpdated;
+	PBD::Signal<void(bool)> LatencyUpdated;
 
 	struct SaveAs {
 		std::string new_parent_folder;  /* parent folder where new session folder will be created */
@@ -583,7 +583,7 @@ public:
 		 * Handler should return true for save-as to continue, or false
 		 * to stop (and remove all evidence of partial save-as).
 		 */
-		PBD::Signal3<bool,float,int64_t,int64_t> Progress;
+		PBD::Signal<bool(float,int64_t,int64_t)> Progress;
 
 		/* if save_as() returns non-zero, this string will indicate the reason why.
 		 */
@@ -632,8 +632,8 @@ public:
 	void set_nsm_state (bool state) { _under_nsm_control = state; }
 	bool save_default_options ();
 
-	PBD::Signal1<void,std::string> StateSaved;
-	PBD::Signal0<void> StateReady;
+	PBD::Signal<void(std::string)> StateSaved;
+	PBD::Signal<void()> StateReady;
 
 	/* emitted when session needs to be saved due to some internal
 	 * event or condition (i.e. not in response to a user request).
@@ -643,12 +643,12 @@ public:
 	 *
 	 * Argument is the snapshot name to use when saving.
 	 */
-	PBD::Signal1<void,std::string> SaveSessionRequested;
+	PBD::Signal<void(std::string)> SaveSessionRequested;
 
 	/* emitted during a session save to allow other entities to add state, via
 	 * extra XML, to the session state
 	 */
-	PBD::Signal0<void> SessionSaveUnderway;
+	PBD::Signal<void()> SessionSaveUnderway;
 
 	std::vector<std::string> possible_states() const;
 	static std::vector<std::string> possible_states (std::string path);
@@ -710,9 +710,9 @@ public:
 	RouteGroup* route_group_by_name (std::string);
 	RouteGroup& all_route_group() const;
 
-	PBD::Signal1<void,RouteGroup*> route_group_added;
-	PBD::Signal0<void>             route_group_removed;
-	PBD::Signal0<void>             route_groups_reordered;
+	PBD::Signal<void(RouteGroup*)> route_group_added;
+	PBD::Signal<void()>             route_group_removed;
+	PBD::Signal<void()>             route_groups_reordered;
 
 	void foreach_route_group (boost::function<void(RouteGroup*)> f) {
 		for (std::list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
@@ -800,8 +800,8 @@ public:
 	samplecnt_t convert_to_samples (AnyTime const & position);
 	samplecnt_t any_duration_to_samples (samplepos_t position, AnyTime const & duration);
 
-	static PBD::Signal1<void, samplepos_t> StartTimeChanged;
-	static PBD::Signal1<void, samplepos_t> EndTimeChanged;
+	static PBD::Signal<void(samplepos_t)> StartTimeChanged;
+	static PBD::Signal<void(samplepos_t)> EndTimeChanged;
 
 	void   request_sync_source (std::shared_ptr<TransportMaster>);
 	bool   synced_to_engine() const;
@@ -829,7 +829,7 @@ public:
 
 	bool punch_is_possible () const;
 	bool loop_is_possible () const;
-	PBD::Signal0<void> PunchLoopConstraintChange;
+	PBD::Signal<void()> PunchLoopConstraintChange;
 
 	void maybe_update_tempo_from_midiclock_tempo (float bpm);
 
@@ -857,8 +857,8 @@ public:
 
 	int start_audio_export (samplepos_t position, bool realtime = false, bool region_export = false);
 
-	PBD::Signal1<int, samplecnt_t> ProcessExport;
-	static PBD::Signal4<void, std::string, std::string, bool, samplepos_t> Exported;
+	PBD::Signal<int(samplecnt_t)> ProcessExport;
+	static PBD::Signal<void(std::string, std::string, bool, samplepos_t)> Exported;
 
 	void add_source (std::shared_ptr<Source>);
 	void remove_source (std::weak_ptr<Source>, bool drop_references = true);
@@ -878,26 +878,26 @@ public:
 	    0 for "yes, delete this playlist",
 	    1 for "no, don't delete this playlist".
 	*/
-	static PBD::Signal1<int,std::shared_ptr<Playlist> >  AskAboutPlaylistDeletion;
+	static PBD::Signal<int(std::shared_ptr<Playlist> )>  AskAboutPlaylistDeletion;
 
 	/** handlers should return 0 for "ignore the rate mismatch",
 	    !0 for "do not use this session"
 	*/
-	static PBD::Signal2<int, samplecnt_t, samplecnt_t> AskAboutSampleRateMismatch;
+	static PBD::Signal<int(samplecnt_t, samplecnt_t)> AskAboutSampleRateMismatch;
 
 	/** non interactive message */
-	static PBD::Signal2<void, samplecnt_t, samplecnt_t> NotifyAboutSampleRateMismatch;
+	static PBD::Signal<void(samplecnt_t, samplecnt_t)> NotifyAboutSampleRateMismatch;
 
 	/** handlers should return !0 for use pending state, 0 for ignore it.
 	 */
-	static PBD::Signal0<int> AskAboutPendingState;
+	static PBD::Signal<int()> AskAboutPendingState;
 
 	/** after loading a session, once all ports have been created and connected
 	 * signal is emitted to let objects that need to do some housekeeping
 	 * post-connect.
 	 */
 
-	static PBD::Signal0<void> AfterConnect;
+	static PBD::Signal<void()> AfterConnect;
 
 	std::shared_ptr<AudioFileSource> create_audio_source_for_session (
 		size_t, std::string const &, uint32_t);
@@ -923,7 +923,7 @@ public:
 	void cancel_audition ();
 	bool is_auditioning () const;
 
-	PBD::Signal1<void,bool> AuditionActive;
+	PBD::Signal<void(bool)> AuditionActive;
 
 	/* session script */
 	void register_lua_function (const std::string&, const std::string&, const LuaScriptParamList&);
@@ -932,10 +932,10 @@ public:
 	uint32_t registered_lua_function_count () const { return _n_lua_scripts; }
 	void scripts_changed (); // called from lua, updates _n_lua_scripts
 
-	PBD::Signal0<void> LuaScriptsChanged;
+	PBD::Signal<void()> LuaScriptsChanged;
 
 	/* I/O Plugin */
-	PBD::Signal0<void> IOPluginsChanged;
+	PBD::Signal<void()> IOPluginsChanged;
 
 	void load_io_plugin (std::shared_ptr<IOPlug>);
 	bool unload_io_plugin (std::shared_ptr<IOPlug>);
@@ -986,15 +986,15 @@ public:
 
 	void set_exclusive_input_active (std::shared_ptr<RouteList> rt, bool onoff, bool flip_others = false);
 
-	PBD::Signal1<void,bool> SoloActive;
-	PBD::Signal0<void> SoloChanged;
-	PBD::Signal0<void> MuteChanged;
-	PBD::Signal0<void> IsolatedChanged;
-	PBD::Signal0<void> MonitorChanged;
-	PBD::Signal0<void> MonitorBusAddedOrRemoved;
-	PBD::Signal0<void> SurroundMasterAddedOrRemoved;
+	PBD::Signal<void(bool)> SoloActive;
+	PBD::Signal<void()> SoloChanged;
+	PBD::Signal<void()> MuteChanged;
+	PBD::Signal<void()> IsolatedChanged;
+	PBD::Signal<void()> MonitorChanged;
+	PBD::Signal<void()> MonitorBusAddedOrRemoved;
+	PBD::Signal<void()> SurroundMasterAddedOrRemoved;
 
-	PBD::Signal0<void> session_routes_reconnected;
+	PBD::Signal<void()> session_routes_reconnected;
 
 	/* monitor/master out */
 	int add_master_bus (ChanCount const&);
@@ -1060,7 +1060,7 @@ public:
 	void remove_bundle (std::shared_ptr<Bundle>);
 	std::shared_ptr<Bundle> bundle_by_name (std::string) const;
 
-	PBD::Signal0<void> BundleAddedOrRemoved;
+	PBD::Signal<void()> BundleAddedOrRemoved;
 
 	void midi_panic ();
 
@@ -1149,7 +1149,7 @@ public:
 		float opt
 		);
 
-	static PBD::Signal0<void> SendFeedback;
+	static PBD::Signal<void()> SendFeedback;
 
 	/* Speakers */
 
@@ -1236,12 +1236,12 @@ public:
 	    processing path.  Until it is fixed (by the user) some (unspecified)
 	    routes will not be run.
 	*/
-	static PBD::Signal0<void> FeedbackDetected;
+	static PBD::Signal<void()> FeedbackDetected;
 
 	/** Emitted when a graph sort has successfully completed, which means
 	    that it has no feedback cycles.
 	*/
-	static PBD::Signal0<void> SuccessfulGraphSort;
+	static PBD::Signal<void()> SuccessfulGraphSort;
 
 	/* handlers can return an integer value:
 	   0: config.set_audio_search_path() or config.set_midi_search_path() was used
@@ -1252,19 +1252,19 @@ public:
 	   -1: just mark this one missing
 	   any other value: as -1
 	*/
-	static PBD::Signal3<int,Session*,std::string,DataType> MissingFile;
+	static PBD::Signal<int(Session*,std::string,DataType)> MissingFile;
 
 	void set_missing_file_replacement (const std::string& mfr) {
 		_missing_file_replacement = mfr;
 	}
 
 	/** Emitted when the session wants Ardour to quit */
-	static PBD::Signal0<void> Quit;
+	static PBD::Signal<void()> Quit;
 
 	/** Emitted when Ardour is asked to load a session in an older session
 	 * format, and makes a backup copy.
 	 */
-	static PBD::Signal2<void,std::string,std::string> VersionMismatch;
+	static PBD::Signal<void(std::string,std::string)> VersionMismatch;
 
 	SceneChanger* scene_changer() const { return _scene_changer; }
 
@@ -1963,8 +1963,8 @@ private:
 public:
 
 	/* Emited when a new source is added to the session */
-	PBD::Signal1< void, std::weak_ptr<Source> > SourceAdded;
-	PBD::Signal1< void, std::weak_ptr<Source> > SourceRemoved;
+	PBD::Signal< void(std::weak_ptr<Source> )> SourceAdded;
+	PBD::Signal< void(std::weak_ptr<Source> )> SourceRemoved;
 
 	typedef std::map<PBD::ID,std::shared_ptr<Source> > SourceMap;
 

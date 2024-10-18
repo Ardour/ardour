@@ -116,7 +116,7 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 	/** signal emitted when soundcloud export reports progress updates during upload.
 	 * The parameters are total and current bytes downloaded, and the current filename
 	 */
-	PBD::Signal3<void, double, double, std::string> SoundcloudProgress;
+	PBD::Signal<void(double, double, std::string)> SoundcloudProgress;
 
 	/* upload credentials & preferences */
 	std::string soundcloud_username;

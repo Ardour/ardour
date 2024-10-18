@@ -64,8 +64,8 @@ public:
 	XMLNode& get_state () const;
 	int      set_state (const XMLNode&, int version);
 
-	PBD::Signal0<void> PannableChanged; /* Pannable changed -- l*/
-	PBD::Signal0<void> Changed; /* panner and/or outputs count and/or bypass state changed */
+	PBD::Signal<void()> PannableChanged; /* Pannable changed -- l*/
+	PBD::Signal<void()> Changed; /* panner and/or outputs count and/or bypass state changed */
 
 	std::shared_ptr<Panner> panner() const { return _panner; }
 	std::shared_ptr<Pannable> pannable() const { return _panlinked ? _pannable_route : _pannable_internal; }

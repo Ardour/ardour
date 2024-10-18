@@ -377,9 +377,9 @@ public:
 	samplecnt_t signal_latency() const { return _signal_latency; }
 	samplecnt_t playback_latency (bool incl_downstream = false) const;
 
-	PBD::Signal0<void> active_changed;
-	PBD::Signal0<void> denormal_protection_changed;
-	PBD::Signal0<void> comment_changed;
+	PBD::Signal<void()> active_changed;
+	PBD::Signal<void()> denormal_protection_changed;
+	PBD::Signal<void()> comment_changed;
 
 	bool is_track();
 
@@ -388,7 +388,7 @@ public:
 	 * nubers < 0 indicate busses
 	 * zero is reserved for unnumbered special busses.
 	 * */
-	PBD::Signal0<void> track_number_changed;
+	PBD::Signal<void()> track_number_changed;
 	int64_t track_number() const { return _track_number; }
 
 	void set_track_number(int64_t tn) {
@@ -405,23 +405,23 @@ public:
 	};
 
 	/** ask GUI about port-count, fan-out when adding instrument */
-	static PBD::Signal3<int, std::shared_ptr<Route>, std::shared_ptr<PluginInsert>, PluginSetupOptions > PluginSetup;
+	static PBD::Signal<int(std::shared_ptr<Route>, std::shared_ptr<PluginInsert>, PluginSetupOptions )> PluginSetup;
 
 	/** used to signal the GUI to fan-out (track-creation) */
-	static PBD::Signal1<void, std::weak_ptr<Route> > FanOut;
+	static PBD::Signal<void(std::weak_ptr<Route> )> FanOut;
 
 	/** the processors have changed; the parameter indicates what changed */
-	PBD::Signal1<void,RouteProcessorChange> processors_changed;
-	PBD::Signal1<void,void*> record_enable_changed;
+	PBD::Signal<void(RouteProcessorChange)> processors_changed;
+	PBD::Signal<void(void*)> record_enable_changed;
 	/** a processor's latency has changed
 	 * (emitted from PluginInsert::latency_changed)
 	 */
-	PBD::Signal0<void> processor_latency_changed;
+	PBD::Signal<void()> processor_latency_changed;
 	/** the metering point has changed */
-	PBD::Signal0<void> meter_change;
+	PBD::Signal<void()> meter_change;
 
 	/** Emitted with the process lock held */
-	PBD::Signal0<void>       io_changed;
+	PBD::Signal<void()>       io_changed;
 
 	/* stateful */
 	XMLNode& get_state() const;
@@ -436,7 +436,7 @@ public:
 
 	int save_as_template (const std::string& path, const std::string& name, const std::string& description );
 
-	PBD::Signal1<void,void*> SelectedChanged;
+	PBD::Signal<void(void*)> SelectedChanged;
 
 	int add_aux_send (std::shared_ptr<Route>, std::shared_ptr<Processor>);
 	int add_foldback_send (std::shared_ptr<Route>, bool post_fader);

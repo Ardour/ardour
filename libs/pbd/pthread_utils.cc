@@ -106,7 +106,7 @@ set_win_set_realtime_policy (pthread_t thread, int priority)
 
 namespace PBD
 {
-	PBD::Signal3<void, pthread_t, std::string, uint32_t> ThreadCreatedWithRequestSize;
+	PBD::Signal<void(pthread_t, std::string, uint32_t)> ThreadCreatedWithRequestSize;
 }
 
 using namespace PBD;

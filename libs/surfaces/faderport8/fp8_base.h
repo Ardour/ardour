@@ -123,12 +123,12 @@ public:
 	}
 
 	/* modifier keys */
-	PBD::Signal1<void, bool> ShiftButtonChange;
-	PBD::Signal1<void, bool> ARMButtonChange;
+	PBD::Signal<void(bool)> ShiftButtonChange;
+	PBD::Signal<void(bool)> ARMButtonChange;
 
 	/* timer events */
-	PBD::Signal1<void, bool> BlinkIt;
-	PBD::Signal0<void> Periodic;
+	PBD::Signal<void(bool)> BlinkIt;
+	PBD::Signal<void()> Periodic;
 
 private:
 	void sysexhdr (std::vector<uint8_t>& d)

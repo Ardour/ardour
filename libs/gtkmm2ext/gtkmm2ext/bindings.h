@@ -165,7 +165,7 @@ class LIBGTKMM2EXT_API Bindings {
 	static void associate_all ();
 	static void save_all_bindings_as_html (std::ostream&);
 
-	static PBD::Signal1<void,Bindings*> BindingsChanged;
+	static PBD::Signal<void(Bindings*)> BindingsChanged;
 
 	struct DragsBlockBindings {
 		DragsBlockBindings() { Bindings::_drag_active++; }

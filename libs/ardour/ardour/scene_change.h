@@ -42,8 +42,8 @@ class SceneChange : public PBD::Stateful
         bool active () const { return _active; }
         void set_active (bool);
 
-        PBD::Signal0<void> ColorChanged;
-        PBD::Signal0<void> ActiveChanged;
+        PBD::Signal<void()> ColorChanged;
+        PBD::Signal<void()> ActiveChanged;
 
     protected:
         /* derived classes are responsible for serializing & deserializing this value */

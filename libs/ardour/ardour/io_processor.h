@@ -72,8 +72,8 @@ public:
 
 	virtual bool feeds (std::shared_ptr<Route> other) const;
 
-	PBD::Signal2<void,IOProcessor*,bool>     AutomationPlaybackChanged;
-	PBD::Signal2<void,IOProcessor*,uint32_t> AutomationChanged;
+	PBD::Signal<void(IOProcessor*,bool)>     AutomationPlaybackChanged;
+	PBD::Signal<void(IOProcessor*,uint32_t)> AutomationChanged;
 
 	XMLNode& state () const;
 	int set_state (const XMLNode&, int version);

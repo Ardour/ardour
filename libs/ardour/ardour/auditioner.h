@@ -70,7 +70,7 @@ public:
 
 	virtual ChanCount input_streams () const;
 
-	PBD::Signal2<void, ARDOUR::samplecnt_t, ARDOUR::samplecnt_t> AuditionProgress;
+	PBD::Signal<void(ARDOUR::samplecnt_t, ARDOUR::samplecnt_t)> AuditionProgress;
 
 	/* Track */
 	int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);

@@ -21,7 +21,7 @@ public:
 		Fred ();
 	}
 
-	PBD::Signal0<void> Fred;
+	PBD::Signal<void()> Fred;
 };
 
 static int N = 0;

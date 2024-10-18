@@ -29,7 +29,7 @@
 using namespace PBD;
 using namespace ARDOUR;
 
-PBD::Signal0<void> MixerScene::Change;
+PBD::Signal<void()> MixerScene::Change;
 
 MixerScene::MixerScene (Session& s)
 	: SessionHandleRef (s)

@@ -55,15 +55,15 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Temporal;
 
-PBD::Signal1<void,Location*> Location::name_changed;
-PBD::Signal1<void,Location*> Location::end_changed;
-PBD::Signal1<void,Location*> Location::start_changed;
-PBD::Signal1<void,Location*> Location::flags_changed;
-PBD::Signal1<void,Location*> Location::lock_changed;
-PBD::Signal1<void,Location*> Location::cue_change;
-PBD::Signal1<void,Location*> Location::scene_changed;
-PBD::Signal1<void,Location*> Location::time_domain_changed;
-PBD::Signal1<void,Location*> Location::changed;
+PBD::Signal<void(Location*)> Location::name_changed;
+PBD::Signal<void(Location*)> Location::end_changed;
+PBD::Signal<void(Location*)> Location::start_changed;
+PBD::Signal<void(Location*)> Location::flags_changed;
+PBD::Signal<void(Location*)> Location::lock_changed;
+PBD::Signal<void(Location*)> Location::cue_change;
+PBD::Signal<void(Location*)> Location::scene_changed;
+PBD::Signal<void(Location*)> Location::time_domain_changed;
+PBD::Signal<void(Location*)> Location::changed;
 
 Location::Location (Session& s)
 	: SessionHandleRef (s)

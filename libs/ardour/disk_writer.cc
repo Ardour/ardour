@@ -45,7 +45,7 @@ using namespace PBD;
 using namespace std;
 
 ARDOUR::samplecnt_t DiskWriter::_chunk_samples = DiskWriter::default_chunk_samples ();
-PBD::Signal0<void> DiskWriter::Overrun;
+PBD::Signal<void()> DiskWriter::Overrun;
 
 DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, t, X_("recorder:") + str, f, Temporal::TimeDomainProvider (Config->get_default_automation_time_domain()))

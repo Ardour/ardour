@@ -63,8 +63,8 @@ public:
 	std::string describe_parameter (Evoral::Parameter);
 	std::set<Evoral::Parameter> automatable() const;
 
-	PBD::Signal0<void> LoadPresetProgram;
-	PBD::Signal0<void> VSTSizeWindow;
+	PBD::Signal<void()> LoadPresetProgram;
+	PBD::Signal<void()> VSTSizeWindow;
 
 	bool parameter_is_audio (uint32_t) const { return false; }
 	bool parameter_is_control (uint32_t) const { return true; }

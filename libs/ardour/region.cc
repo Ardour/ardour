@@ -92,7 +92,7 @@ namespace ARDOUR {
 	}
 }
 
-PBD::Signal2<void,std::shared_ptr<ARDOUR::RegionList>,const PropertyChange&> Region::RegionsPropertyChanged;
+PBD::Signal<void(std::shared_ptr<ARDOUR::RegionList>,const PropertyChange&)> Region::RegionsPropertyChanged;
 
 /* these static values are used by Region Groups to assign a group-id across the scope of an operation that might span many function calls */
 uint64_t Region::_retained_group_id = 0;

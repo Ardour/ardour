@@ -31,11 +31,11 @@ class M2PadInterface
 		virtual ~M2PadInterface () {}
 
 		/* user API */
-		PBD::Signal1<void, float> pressed;
-		PBD::Signal0<void> released;
-		PBD::Signal1<void, float> aftertouch;
-		PBD::Signal2<void, float, bool> event;
-		PBD::Signal1<void, float> changed;
+		PBD::Signal<void(float)> pressed;
+		PBD::Signal<void()> released;
+		PBD::Signal<void(float)> aftertouch;
+		PBD::Signal<void(float, bool)> event;
+		PBD::Signal<void(float)> changed;
 
 		virtual uint16_t value () const { return 0; }
 		virtual float pressure () const { return 0.f; }

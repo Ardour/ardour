@@ -87,10 +87,10 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state () const;
 
-        PBD::Signal1<void,ControlProtocolInfo*> ProtocolStatusChange;
+        PBD::Signal<void(ControlProtocolInfo*)> ProtocolStatusChange;
 
         void stripable_selection_changed (ARDOUR::StripableNotificationListPtr);
-        static PBD::Signal1<void,ARDOUR::StripableNotificationListPtr> StripableSelectionChanged;
+        static PBD::Signal<void(ARDOUR::StripableNotificationListPtr)> StripableSelectionChanged;
 
   private:
 	ControlProtocolManager ();

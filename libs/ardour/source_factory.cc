@@ -52,7 +52,7 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-PBD::Signal1<void, std::shared_ptr<Source>> SourceFactory::SourceCreated;
+PBD::Signal<void(std::shared_ptr<Source>)> SourceFactory::SourceCreated;
 Glib::Threads::Cond                           SourceFactory::PeaksToBuild;
 Glib::Threads::Mutex                          SourceFactory::peak_building_lock;
 std::list<std::weak_ptr<AudioSource>>       SourceFactory::files_with_peaks;

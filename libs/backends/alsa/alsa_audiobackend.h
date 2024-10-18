@@ -393,7 +393,7 @@ class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
 				std::vector<BackendPortPtr> inputs;
 				std::vector<BackendPortPtr> outputs;
 
-				PBD::Signal0<void> UpdateLatency;
+				PBD::Signal<void()> UpdateLatency;
 				PBD::ScopedConnection latency_connection;
 
 			protected:

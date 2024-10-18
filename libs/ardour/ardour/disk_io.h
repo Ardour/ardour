@@ -87,8 +87,8 @@ public:
 	bool slaved() const      { return _slaved; }
 	void set_slaved(bool yn) { _slaved = yn; }
 
-	PBD::Signal0<void>            SpeedChanged;
-	PBD::Signal0<void>            ReverseChanged;
+	PBD::Signal<void()>            SpeedChanged;
+	PBD::Signal<void()>            ReverseChanged;
 
 	int set_state (const XMLNode&, int version);
 

@@ -69,7 +69,7 @@ public:
 
 	LIBARDOUR_API int set_state (const XMLNode&, int version);
 
-	PBD::Signal0<void> AlignmentStyleChanged;
+	PBD::Signal<void()> AlignmentStyleChanged;
 
 	LIBARDOUR_API float buffer_load () const;
 
@@ -96,7 +96,7 @@ public:
 	LIBARDOUR_API void internal_playback_seek (sampleoffset_t distance);
 	LIBARDOUR_API int  seek (samplepos_t sample, bool complete_refill = false);
 
-	LIBARDOUR_API static PBD::Signal0<void> Underrun;
+	LIBARDOUR_API static PBD::Signal<void()> Underrun;
 
 	LIBARDOUR_API void playlist_modified ();
 	LIBARDOUR_API void reset_tracker ();

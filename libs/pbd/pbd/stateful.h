@@ -96,7 +96,7 @@ class LIBPBD_API Stateful {
 	virtual PropertyList* property_factory (const XMLNode&) const;
 
 	/* How stateful's notify of changes to their properties */
-	PBD::Signal1<void,const PropertyChange&> PropertyChanged;
+	PBD::Signal<void(const PropertyChange&)> PropertyChanged;
 
 	static int current_state_version;
 	static int loading_state_version;

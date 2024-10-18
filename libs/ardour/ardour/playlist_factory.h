@@ -31,7 +31,7 @@ class Session;
 class LIBARDOUR_API PlaylistFactory {
 
   public:
-	static PBD::Signal1<void,std::shared_ptr<Playlist>> PlaylistCreated;
+	static PBD::Signal<void(std::shared_ptr<Playlist>)> PlaylistCreated;
 
 	static std::shared_ptr<Playlist> create (Session&, const XMLNode&, bool hidden = false);
 	static std::shared_ptr<Playlist> create (DataType type, Session&, std::string name, bool hidden = false);

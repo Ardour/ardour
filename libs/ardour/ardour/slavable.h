@@ -53,14 +53,14 @@ public:
 	virtual void assign (std::shared_ptr<VCA>);
 	void unassign (std::shared_ptr<VCA>);
 
-	PBD::Signal2<void,std::shared_ptr<VCA>,bool> AssignmentChange;
+	PBD::Signal<void(std::shared_ptr<VCA>,bool)> AssignmentChange;
 
 	virtual std::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter&) = 0;
 
 	static std::string xml_node_name;
 
 	/* signal sent VCAManager once assignment is possible */
-	static PBD::Signal1<void,VCAManager*> Assign;
+	static PBD::Signal<void(VCAManager*)> Assign;
 
 	std::vector<std::shared_ptr<VCA> > masters (VCAManager*) const;
 

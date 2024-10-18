@@ -89,7 +89,7 @@ public:
 
 	void set_automation_state (AutoState);
 	AutoState automation_state() const;
-	PBD::Signal1<void, AutoState> automation_state_changed;
+	PBD::Signal<void(AutoState)> automation_state_changed;
 
 	bool automation_playback() const {
 		return (_state & Play) || ((_state & (Touch | Latch)) && !touching());
@@ -98,9 +98,9 @@ public:
 		return ((_state & Write) || ((_state & (Touch | Latch)) && touching()));
 	}
 
-	PBD::Signal0<void> StateChanged;
+	PBD::Signal<void()> StateChanged;
 
-	static PBD::Signal1<void,AutomationList*> AutomationListCreated;
+	static PBD::Signal<void(AutomationList*)> AutomationListCreated;
 
 	void start_write_pass (timepos_t const & when);
 	void write_pass_finished (timepos_t const & when, double thinning_factor=0.0);

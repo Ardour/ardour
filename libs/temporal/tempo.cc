@@ -49,7 +49,7 @@ std::string Meter::xml_node_name = X_("Meter");
 
 SerializedRCUManager<TempoMap> TempoMap::_map_mgr (0);
 thread_local TempoMap::SharedPtr TempoMap::_tempo_map_p;
-PBD::Signal0<void> TempoMap::MapChanged;
+PBD::Signal<void()> TempoMap::MapChanged;
 
 #ifndef NDEBUG
 #define TEMPO_MAP_ASSERT(expr) TempoMap::map_assert(expr, #expr, __FILE__, __LINE__)

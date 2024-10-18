@@ -49,7 +49,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal1<void,AutomationList *> AutomationList::AutomationListCreated;
+PBD::Signal<void(AutomationList *)> AutomationList::AutomationListCreated;
 
 #if 0
 static void dumpit (const AutomationList& al, string prefix = "")

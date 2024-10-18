@@ -139,7 +139,7 @@ public:
 	double amplitude_above_axis () const;
 
 	static void set_clip_level (double dB);
-	static PBD::Signal0<void> ClipLevelChanged;
+	static PBD::Signal<void()> ClipLevelChanged;
 
 	static void start_drawing_thread ();
 	static void stop_drawing_thread ();
@@ -204,7 +204,7 @@ private:
 	static bool _global_show_waveform_clipping;
 	static double _global_clip_level;
 
-	static PBD::Signal0<void> VisualPropertiesChanged;
+	static PBD::Signal<void()> VisualPropertiesChanged;
 
 	void handle_visual_property_change ();
 	void handle_clip_level_change ();

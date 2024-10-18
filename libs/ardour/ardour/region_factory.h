@@ -64,7 +64,7 @@ public:
 	 * itself, to permit dynamic_cast<> to be used to
 	 * infer the type of Region.
 	 */
-	static PBD::Signal1<void, std::shared_ptr<Region> > CheckNewRegion;
+	static PBD::Signal<void(std::shared_ptr<Region> )> CheckNewRegion;
 
 	/** create a "pure copy" of Region \p other */
 	static std::shared_ptr<Region> create (std::shared_ptr<const Region> other, bool announce, bool fork = false, ThawList* tl = 0);

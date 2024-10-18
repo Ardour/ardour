@@ -46,11 +46,11 @@ class MIDISceneChanger : public SceneChanger
 
 	/** Signal emitted whenever any relevant MIDI input is detected.
 	 */
-	PBD::Signal0<void> MIDIInputActivity;
+	PBD::Signal<void()> MIDIInputActivity;
 
 	/** Signal emitted whenever any relevant MIDI output is sent.
 	 */
-	PBD::Signal0<void> MIDIOutputActivity;
+	PBD::Signal<void()> MIDIOutputActivity;
 
     private:
 	typedef std::multimap<samplepos_t,std::shared_ptr<MIDISceneChange> > Scenes;

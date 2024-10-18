@@ -99,7 +99,7 @@ LIBPBD_API bool pbd_mach_set_realtime_policy (pthread_t thread_id, double period
 
 namespace PBD {
 	LIBPBD_API extern void notify_event_loops_about_thread_creation (pthread_t, const std::string&, int requests = 256);
-	LIBPBD_API extern PBD::Signal3<void,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
+	LIBPBD_API extern PBD::Signal<void(pthread_t,std::string,uint32_t)> ThreadCreatedWithRequestSize;
 
 	class LIBPBD_API Thread {
 		public:

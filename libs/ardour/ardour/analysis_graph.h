@@ -58,7 +58,7 @@ class LIBARDOUR_API AnalysisGraph {
 		bool canceled () const { return _canceled; }
 
 		void set_total_samples (samplecnt_t p) { _samples_end = p; }
-		PBD::Signal2<void, samplecnt_t, samplecnt_t> Progress;
+		PBD::Signal<void(samplecnt_t, samplecnt_t)> Progress;
 
 	private:
 		ARDOUR::Session* _session;

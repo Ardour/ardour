@@ -202,7 +202,7 @@ class Encoder : public Controller
 	boost::function<void (uint32_t val)> plugin_action;
 	boost::function<void (uint32_t val)> plugin_shift_action;
 
-	PBD::Signal1<void, uint32_t>* plugin_signal;
+	PBD::Signal<void(uint32_t)>* plugin_signal;
 };
 
 }

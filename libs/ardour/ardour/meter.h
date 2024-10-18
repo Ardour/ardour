@@ -85,7 +85,7 @@ public:
 	void      set_meter_type (MeterType t);
 	MeterType meter_type () const { return _meter_type; }
 
-	PBD::Signal1<void, MeterType> MeterTypeChanged;
+	PBD::Signal<void(MeterType)> MeterTypeChanged;
 
 protected:
 	XMLNode& state () const;

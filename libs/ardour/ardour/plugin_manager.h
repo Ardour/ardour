@@ -168,19 +168,19 @@ public:
 	/** plugins were added to or removed from one of the PluginInfoLists
 	 * This implies PluginScanLogChanged.
 	 */
-	PBD::Signal0<void> PluginListChanged;
+	PBD::Signal<void()> PluginListChanged;
 
 	/** Plugin Statistics (use-count, recently-used) changed */
-	PBD::Signal0<void> PluginStatsChanged;
+	PBD::Signal<void()> PluginStatsChanged;
 
 	/** Plugin ScanLog changed */
-	PBD::Signal0<void> PluginScanLogChanged;
+	PBD::Signal<void()> PluginScanLogChanged;
 
 	/** A single plugin's Hidden/Favorite status changed */
-	PBD::Signal3<void, ARDOUR::PluginType, std::string, PluginStatusType> PluginStatusChanged; //PluginType t, string id, string tag
+	PBD::Signal<void(ARDOUR::PluginType, std::string, PluginStatusType)> PluginStatusChanged; //PluginType t, string id, string tag
 
 	/** A single plugin's Tags status changed */
-	PBD::Signal3<void, ARDOUR::PluginType, std::string, std::string> PluginTagChanged; //PluginType t, string id, string tag
+	PBD::Signal<void(ARDOUR::PluginType, std::string, std::string)> PluginTagChanged; //PluginType t, string id, string tag
 
 private:
 	typedef std::shared_ptr<PluginScanLogEntry> PSLEPtr;

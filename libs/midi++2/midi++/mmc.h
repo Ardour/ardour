@@ -45,7 +45,7 @@ class MachineControlCommand;
 class LIBMIDIPP_API MachineControl
 {
   public:
-	typedef PBD::Signal1<void,MachineControl&> MMCSignal;
+	typedef PBD::Signal<void(MachineControl&)> MMCSignal;
 
 	enum Command {
 		cmdStop = 0x1,
@@ -154,28 +154,28 @@ class LIBMIDIPP_API MachineControl
 	MMCSignal Wait;
 	MMCSignal Resume;
 
-	PBD::Signal0<void> SPPStart;
-	PBD::Signal0<void> SPPContinue;
-	PBD::Signal0<void> SPPStop;
+	PBD::Signal<void()> SPPStart;
+	PBD::Signal<void()> SPPContinue;
+	PBD::Signal<void()> SPPStop;
 
 	/* The second argument is the shuttle speed, the third is
 	   true if the direction is "forwards", false for "reverse"
 	*/
 
-	PBD::Signal3<void,MachineControl&,float,bool> Shuttle;
+	PBD::Signal<void(MachineControl&,float,bool)> Shuttle;
 
 	/* The second argument specifies the desired track record enabled
 	   status.
 	*/
 
-	PBD::Signal3<void,MachineControl &,size_t,bool>
+	PBD::Signal<void(MachineControl &,size_t,bool)>
 		                             TrackRecordStatusChange;
 
 	/* The second argument specifies the desired track record enabled
 	   status.
 	*/
 
-	PBD::Signal3<void,MachineControl &,size_t,bool>
+	PBD::Signal<void(MachineControl &,size_t,bool)>
 		                             TrackMuteChange;
 
 	/* The second argument points to a byte array containing
@@ -183,11 +183,11 @@ class LIBMIDIPP_API MachineControl
 	   format (5 bytes, roughly: hrs/mins/secs/frames/subframes)
 	*/
 
-	PBD::Signal2<void,MachineControl &, const byte *> Locate;
+	PBD::Signal<void(MachineControl &, const byte *)> Locate;
 
 	/* The second argument is the number of steps to jump */
 
-	PBD::Signal2<void,MachineControl &, int> Step;
+	PBD::Signal<void(MachineControl &, int)> Step;
 
 #define MMC_NTRACKS 48
 

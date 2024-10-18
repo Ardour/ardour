@@ -116,7 +116,7 @@ public:
 	int set_automation_xml_state (const XMLNode&, Evoral::Parameter default_param);
 	XMLNode& get_automation_xml_state() const;
 
-	PBD::Signal0<void> AutomationStateChanged;
+	PBD::Signal<void()> AutomationStateChanged;
 
 	void start_domain_bounce (Temporal::DomainBounceInfo&);
 	void finish_domain_bounce (Temporal::DomainBounceInfo&);

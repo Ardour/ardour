@@ -36,8 +36,8 @@ public:
 	virtual ~FP8ButtonInterface () {}
 
 	/* user API */
-	PBD::Signal0<void> pressed;
-	PBD::Signal0<void> released;
+	PBD::Signal<void()> pressed;
+	PBD::Signal<void()> released;
 
 	virtual bool is_pressed () const { return false; }
 	virtual bool is_active () const { return false; }
@@ -197,8 +197,8 @@ public:
 		: FP8ButtonBase (b)
 	{}
 
-	PBD::Signal1<void, bool> ActiveChanged;
-	PBD::Signal0<void> ColourChanged;
+	PBD::Signal<void(bool)> ActiveChanged;
+	PBD::Signal<void()> ColourChanged;
 
 	uint32_t color () const { return _rgba; }
 
@@ -373,7 +373,7 @@ public:
 		_hold_connection.disconnect ();
 	}
 
-	PBD::Signal1<void, bool> StateChange;
+	PBD::Signal<void(bool)> StateChange;
 
 	void set_active (bool a)
 	{

@@ -75,7 +75,7 @@ class TimeDomainProvider  {
 		}
 	}
 
-	mutable PBD::Signal0<void> TimeDomainChanged;
+	mutable PBD::Signal<void()> TimeDomainChanged;
 
 	virtual void time_domain_changed() {
 		/* Forward a time domain change to children */

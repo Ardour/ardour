@@ -45,8 +45,8 @@ using namespace std;
 
 const string DiskIOProcessor::state_node_name = X_("DiskIOProcessor");
 
-// PBD::Signal0<void> DiskIOProcessor::DiskOverrun;
-// PBD::Signal0<void>  DiskIOProcessor::DiskUnderrun;
+// PBD::Signal<void()> DiskIOProcessor::DiskOverrun;
+// PBD::Signal<void()>  DiskIOProcessor::DiskUnderrun;
 
 DiskIOProcessor::DiskIOProcessor (Session& s, Track& t, string const & str, Flag f, Temporal::TimeDomainProvider const & tdp)
 	: Processor (s, str, tdp)

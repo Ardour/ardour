@@ -105,7 +105,7 @@ public:
 
 	using Sink<T>::process;
 
-	PBD::Signal1<void, std::string> FileWritten;
+	PBD::Signal<void(std::string)> FileWritten;
 
 private:
 	CmdPipeWriter (CmdPipeWriter const & other) {}

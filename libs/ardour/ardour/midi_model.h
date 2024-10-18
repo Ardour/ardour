@@ -312,8 +312,8 @@ public:
 	XMLNode& get_state() const;
 	int set_state(const XMLNode&) { return 0; }
 
-	PBD::Signal0<void> ContentsChanged;
-	PBD::Signal1<void, Temporal::timecnt_t> ContentsShifted;
+	PBD::Signal<void()> ContentsChanged;
+	PBD::Signal<void(Temporal::timecnt_t)> ContentsShifted;
 
 	std::shared_ptr<Evoral::Note<TimeType> > find_note (NotePtr);
 	PatchChangePtr find_patch_change (Evoral::event_id_t);

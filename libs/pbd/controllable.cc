@@ -32,10 +32,10 @@
 using namespace PBD;
 using namespace std;
 
-PBD::Signal1<bool, std::weak_ptr<PBD::Controllable> > Controllable::StartLearning;
-PBD::Signal1<void, std::weak_ptr<PBD::Controllable> > Controllable::StopLearning;
-PBD::Signal1<void, std::weak_ptr<PBD::Controllable> > Controllable::GUIFocusChanged;
-PBD::Signal1<void, std::weak_ptr<PBD::Controllable> > Controllable::ControlTouched;
+PBD::Signal<bool(std::weak_ptr<PBD::Controllable> )> Controllable::StartLearning;
+PBD::Signal<void(std::weak_ptr<PBD::Controllable> )> Controllable::StopLearning;
+PBD::Signal<void(std::weak_ptr<PBD::Controllable> )> Controllable::GUIFocusChanged;
+PBD::Signal<void(std::weak_ptr<PBD::Controllable> )> Controllable::ControlTouched;
 
 Glib::Threads::RWLock Controllable::registry_lock;
 Controllable::Controllables Controllable::registry;

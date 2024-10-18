@@ -217,7 +217,7 @@ public:
 
 	ExportFormatSpecPtr get_new_format (ExportFormatSpecPtr original);
 
-	PBD::Signal0<void> FormatListChanged;
+	PBD::Signal<void()> FormatListChanged;
 
 private:
 	FormatStateList formats;

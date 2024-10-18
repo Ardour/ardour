@@ -39,9 +39,9 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal0<void> Port::PortDrop;
-PBD::Signal0<void> Port::PortSignalDrop;
-PBD::Signal0<void> Port::ResamplerQualityChanged;
+PBD::Signal<void()> Port::PortDrop;
+PBD::Signal<void()> Port::PortSignalDrop;
+PBD::Signal<void()> Port::ResamplerQualityChanged;
 
 bool         Port::_connecting_blocked = false;
 pframes_t    Port::_global_port_buffer_offset = 0;

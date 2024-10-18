@@ -45,7 +45,7 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 
 list<Bindings*> Bindings::bindings; /* global. Gulp */
-PBD::Signal1<void,Bindings*> Bindings::BindingsChanged;
+PBD::Signal<void(Bindings*)> Bindings::BindingsChanged;
 int Bindings::_drag_active = 0;
 
 template <typename IteratorValueType>

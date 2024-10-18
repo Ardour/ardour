@@ -42,7 +42,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-PBD::Signal1<void, std::shared_ptr<Region> > RegionFactory::CheckNewRegion;
+PBD::Signal<void(std::shared_ptr<Region> )> RegionFactory::CheckNewRegion;
 Glib::Threads::Mutex                           RegionFactory::region_map_lock;
 RegionFactory::RegionMap                       RegionFactory::region_map;
 PBD::ScopedConnectionList*                     RegionFactory::region_list_connections = 0;

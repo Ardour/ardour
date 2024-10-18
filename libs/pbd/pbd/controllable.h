@@ -138,15 +138,15 @@ public:
 
 	virtual std::string get_user_string() const { return std::string(); }
 
-	PBD::Signal0<void> LearningFinished;
+	PBD::Signal<void()> LearningFinished;
 
-	static PBD::Signal1<bool, std::weak_ptr<PBD::Controllable> > StartLearning;
-	static PBD::Signal1<void, std::weak_ptr<PBD::Controllable> > StopLearning;
+	static PBD::Signal<bool(std::weak_ptr<PBD::Controllable> )> StartLearning;
+	static PBD::Signal<void(std::weak_ptr<PBD::Controllable> )> StopLearning;
 
-	static PBD::Signal1<void, std::weak_ptr<PBD::Controllable> > GUIFocusChanged;
-	static PBD::Signal1<void, std::weak_ptr<PBD::Controllable> > ControlTouched;
+	static PBD::Signal<void(std::weak_ptr<PBD::Controllable> )> GUIFocusChanged;
+	static PBD::Signal<void(std::weak_ptr<PBD::Controllable> )> ControlTouched;
 
-	PBD::Signal2<void,bool,PBD::Controllable::GroupControlDisposition> Changed;
+	PBD::Signal<void(bool,PBD::Controllable::GroupControlDisposition)> Changed;
 
 	int set_state (const XMLNode&, int version);
 	virtual XMLNode& get_state () const;
@@ -154,7 +154,7 @@ public:
 	std::string name() const { return _name; }
 
 	bool touching () const { return _touching; }
-	PBD::Signal0<void> TouchChanged;
+	PBD::Signal<void()> TouchChanged;
 
 	bool is_toggle() const { return _flags & Toggle; }
 	bool is_gain_like() const { return _flags & GainLike; }

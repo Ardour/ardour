@@ -66,7 +66,7 @@ public:
 	inline const Parameter& parameter() const { return _parameter; }
 
 	/** Emitted when the our ControlList is marked dirty */
-	PBD::Signal0<void> ListMarkedDirty;
+	PBD::Signal<void()> ListMarkedDirty;
 
 protected:
 	Parameter                      _parameter;

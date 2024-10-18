@@ -183,12 +183,12 @@ public:
 
 	void time_domain_changed ();
 
-	PBD::Signal0<void> FreezeChange;
-	PBD::Signal0<void> PlaylistChanged;
-	PBD::Signal0<void> PlaylistAdded;
-	PBD::Signal0<void> SpeedChanged;
-	PBD::Signal0<void> AlignmentStyleChanged;
-	PBD::Signal0<void> ChanCountChanged;
+	PBD::Signal<void()> FreezeChange;
+	PBD::Signal<void()> PlaylistChanged;
+	PBD::Signal<void()> PlaylistAdded;
+	PBD::Signal<void()> SpeedChanged;
+	PBD::Signal<void()> AlignmentStyleChanged;
+	PBD::Signal<void()> ChanCountChanged;
 
 protected:
 	XMLNode& state (bool save_template) const;

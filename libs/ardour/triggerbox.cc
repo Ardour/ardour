@@ -209,8 +209,8 @@ FollowAction::to_string () const
 
 
 Trigger * const Trigger::MagicClearPointerValue = (Trigger*) 0xfeedface;
-PBD::Signal2<void,PropertyChange,Trigger*> Trigger::TriggerPropertyChange;
-PBD::Signal1<void,Trigger const *> Trigger::TriggerArmChanged;
+PBD::Signal<void(PropertyChange,Trigger*)> Trigger::TriggerPropertyChange;
+PBD::Signal<void(Trigger const *)> Trigger::TriggerArmChanged;
 
 Trigger::Trigger (uint32_t n, TriggerBox& b)
 	: _launch_style (Properties::launch_style, OneShot)
@@ -3441,18 +3441,18 @@ std::atomic<int> TriggerBox::active_trigger_boxes (0);
 TriggerBoxThread* TriggerBox::worker = 0;
 CueRecords TriggerBox::cue_records (256);
 std::atomic<bool> TriggerBox::_cue_recording (false);
-PBD::Signal0<void> TriggerBox::CueRecordingChanged;
+PBD::Signal<void()> TriggerBox::CueRecordingChanged;
 bool TriggerBox::roll_requested = false;
 bool TriggerBox::_learning = false;
 TriggerBox::CustomMidiMap TriggerBox::_custom_midi_map;
 std::pair<int,int> TriggerBox::learning_for;
-PBD::Signal0<void> TriggerBox::TriggerMIDILearned;
+PBD::Signal<void()> TriggerBox::TriggerMIDILearned;
 
 std::shared_ptr<MIDI::Parser> TriggerBox::input_parser;
 PBD::ScopedConnectionList TriggerBox::static_connections;
 PBD::ScopedConnection TriggerBox::midi_input_connection;
 std::shared_ptr<MidiPort> TriggerBox::current_input;
-PBD::Signal2<void,PBD::PropertyChange,int> TriggerBox::TriggerBoxPropertyChange;
+PBD::Signal<void(PBD::PropertyChange,int)> TriggerBox::TriggerBoxPropertyChange;
 
 typedef std::map <std::shared_ptr<Region>, std::shared_ptr<Trigger::UIState>> RegionStateMap;
 RegionStateMap enqueued_state_map;

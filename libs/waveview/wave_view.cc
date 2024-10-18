@@ -68,8 +68,8 @@ WaveView::Shape WaveView::_global_shape = WaveView::Normal;
 bool WaveView::_global_show_waveform_clipping = true;
 double WaveView::_global_clip_level = 0.98853;
 
-PBD::Signal0<void> WaveView::VisualPropertiesChanged;
-PBD::Signal0<void> WaveView::ClipLevelChanged;
+PBD::Signal<void()> WaveView::VisualPropertiesChanged;
+PBD::Signal<void()> WaveView::ClipLevelChanged;
 
 /* NO_THREAD_WAVEVIEWS is defined by the top level wscript
  * if --no-threaded-waveviws is provided at the configure step.

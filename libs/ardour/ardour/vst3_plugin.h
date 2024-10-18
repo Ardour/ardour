@@ -100,7 +100,7 @@ public:
 	IPlugView* view ();
 	void       close_view ();
 	void       update_contoller_param ();
-	PBD::Signal2<void, int, int> OnResizeView;
+	PBD::Signal<void(int, int)> OnResizeView;
 
 	tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) SMTG_OVERRIDE;
 	uint32  PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
@@ -178,7 +178,7 @@ public:
 	                       ParamValueChanged
 	                     };
 
-	PBD::Signal3<void, ParameterChange, uint32_t, float> OnParameterChange;
+	PBD::Signal<void(ParameterChange, uint32_t, float)> OnParameterChange;
 
 	/* API for Ardour -- Setup/Processing */
 	uint32_t plugin_latency ();
@@ -444,7 +444,7 @@ public:
 	void                  close_view ();
 	void                  update_contoller_param ();
 
-	PBD::Signal2<void, int, int> OnResizeView;
+	PBD::Signal<void(int, int)> OnResizeView;
 
 private:
 	samplecnt_t plugin_latency () const;

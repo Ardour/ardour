@@ -72,7 +72,7 @@ public:
 	size_t master_controller_count () const;
 	uint16_t channels_for_control_list (std::string const& ctrl_name_list) const;
 
-	PBD::Signal0<void> Changed;
+	PBD::Signal<void()> Changed;
 
 	bool have_custom_plugin_info () const;
 

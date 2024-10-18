@@ -47,7 +47,7 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace std;
 
-PBD::Signal1<void, pframes_t> InternalSend::CycleStart;
+PBD::Signal<void(pframes_t)> InternalSend::CycleStart;
 
 InternalSend::InternalSend (Session&                      s,
                             std::shared_ptr<Pannable>   p,

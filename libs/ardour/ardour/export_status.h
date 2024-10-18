@@ -53,7 +53,7 @@ class LIBARDOUR_API ExportStatus {
 	}
 	Glib::Threads::Mutex& lock () { return _run_lock; }
 
-	PBD::Signal1<void,TransportRequestSource> Finished;
+	PBD::Signal<void(TransportRequestSource)> Finished;
 	void finish (TransportRequestSource);
 
 	void cleanup ();

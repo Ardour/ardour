@@ -77,7 +77,7 @@ using namespace PBD;
 
 namespace ARDOUR { class AudioEngine; }
 
-PBD::Signal3<void, std::string, Plugin*, bool> Plugin::PresetsChanged;
+PBD::Signal<void(std::string, Plugin*, bool)> Plugin::PresetsChanged;
 
 bool
 PluginInfo::needs_midi_input () const

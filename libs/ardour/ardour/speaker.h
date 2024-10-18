@@ -40,7 +40,7 @@ public:
 	int id;
 
 	/** emitted when this speaker's position has changed */
-	PBD::Signal0<void> PositionChanged;
+	PBD::Signal<void()> PositionChanged;
 
 private:
 	PBD::CartesianVector _coords;

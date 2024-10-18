@@ -60,7 +60,7 @@ public:
 	void set_can_pan (bool yn);
 	uint32_t pan_outs () const;
 
-	static PBD::Signal1<void, pframes_t> CycleStart;
+	static PBD::Signal<void(pframes_t)> CycleStart;
 
 protected:
 	XMLNode& state() const;

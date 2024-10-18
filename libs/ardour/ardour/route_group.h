@@ -145,9 +145,9 @@ public:
 	std::shared_ptr<RouteList> route_list() { return routes; }
 
 	/** Emitted when a route has been added to this group */
-	PBD::Signal2<void, RouteGroup *, std::weak_ptr<ARDOUR::Route> > RouteAdded;
+	PBD::Signal<void(RouteGroup *, std::weak_ptr<ARDOUR::Route> )> RouteAdded;
 	/** Emitted when a route has been removed from this group */
-	PBD::Signal2<void, RouteGroup *, std::weak_ptr<ARDOUR::Route> > RouteRemoved;
+	PBD::Signal<void(RouteGroup *, std::weak_ptr<ARDOUR::Route> )> RouteRemoved;
 
 	XMLNode& get_state () const;
 

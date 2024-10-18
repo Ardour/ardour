@@ -143,32 +143,32 @@ public:
 	 * locations at once.
 	 */
 
-	static PBD::Signal1<void,Location*> name_changed;
-	static PBD::Signal1<void,Location*> end_changed;
-	static PBD::Signal1<void,Location*> start_changed;
-	static PBD::Signal1<void,Location*> flags_changed;
-	static PBD::Signal1<void,Location*> lock_changed;
-	static PBD::Signal1<void,Location*> cue_change;
-	static PBD::Signal1<void,Location*> scene_changed;
-	static PBD::Signal1<void,Location*> time_domain_changed; /* unused */
+	static PBD::Signal<void(Location*)> name_changed;
+	static PBD::Signal<void(Location*)> end_changed;
+	static PBD::Signal<void(Location*)> start_changed;
+	static PBD::Signal<void(Location*)> flags_changed;
+	static PBD::Signal<void(Location*)> lock_changed;
+	static PBD::Signal<void(Location*)> cue_change;
+	static PBD::Signal<void(Location*)> scene_changed;
+	static PBD::Signal<void(Location*)> time_domain_changed; /* unused */
 
 	/* this is sent only when both start and end change at the same time */
-	static PBD::Signal1<void,Location*> changed;
+	static PBD::Signal<void(Location*)> changed;
 
 	/* these are member signals for objects that care only about
 	 * changes to this object
 	 */
 
-	PBD::Signal0<void> Changed;
+	PBD::Signal<void()> Changed;
 
-	PBD::Signal0<void> NameChanged;
-	PBD::Signal0<void> EndChanged;
-	PBD::Signal0<void> StartChanged;
-	PBD::Signal0<void> FlagsChanged;
-	PBD::Signal0<void> LockChanged;
-	PBD::Signal0<void> CueChanged;
-	PBD::Signal0<void> SceneChanged; /* unused */
-	PBD::Signal0<void> TimeDomainChanged;
+	PBD::Signal<void()> NameChanged;
+	PBD::Signal<void()> EndChanged;
+	PBD::Signal<void()> StartChanged;
+	PBD::Signal<void()> FlagsChanged;
+	PBD::Signal<void()> LockChanged;
+	PBD::Signal<void()> CueChanged;
+	PBD::Signal<void()> SceneChanged; /* unused */
+	PBD::Signal<void()> TimeDomainChanged;
 
 	/* CD Track / CD-Text info */
 
@@ -334,15 +334,15 @@ public:
 
 	void time_domain_changed ();
 
-	PBD::Signal1<void,Location*> current_changed;
+	PBD::Signal<void(Location*)> current_changed;
 
 	/* Objects that care about individual addition and removal of Locations should connect to added/removed.
 	 * If an object additionally cares about potential mass clearance of Locations, they should connect to changed.
 	 */
 
-	PBD::Signal1<void,Location*> added;
-	PBD::Signal1<void,Location*> removed;
-	PBD::Signal0<void> changed; /* emitted when any action that could have added/removed more than 1 location actually removed 1 or more */
+	PBD::Signal<void(Location*)> added;
+	PBD::Signal<void(Location*)> removed;
+	PBD::Signal<void()> changed; /* emitted when any action that could have added/removed more than 1 location actually removed 1 or more */
 
 	template<class T> void apply (T& obj, void (T::*method)(const LocationList&)) const {
 		/* We don't want to hold the lock while the given method runs, so take a copy

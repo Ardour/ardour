@@ -60,7 +60,7 @@ class LIBARDOUR_API VCA : public Stripable,
 	XMLNode& get_state() const;
 	int set_state (XMLNode const&, int version);
 
-	PBD::Signal0<void> Drop; /* signal to slaves to drop control by this VCA */
+	PBD::Signal<void()> Drop; /* signal to slaves to drop control by this VCA */
 
 	/* Slavable API */
 

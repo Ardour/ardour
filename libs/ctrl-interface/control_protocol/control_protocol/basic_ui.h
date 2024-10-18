@@ -62,7 +62,7 @@ class LIBCONTROLCP_API BasicUI {
 	void loop_toggle ();
 	void loop_location (Temporal::timepos_t const & start, Temporal::timepos_t const & end);
 	void access_action ( std::string action_path );
-	static PBD::Signal2<void,std::string,std::string> AccessAction;
+	static PBD::Signal<void(std::string,std::string)> AccessAction;
 	void goto_zero ();
 	void goto_start (bool and_roll = false);
 	void goto_end ();

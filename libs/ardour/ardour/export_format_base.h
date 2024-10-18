@@ -126,8 +126,8 @@ class LIBARDOUR_API ExportFormatBase {
 			: _selected (false), _compatible (true) { }
 		~SelectableCompatible () {}
 
-		PBD::Signal1<void,bool> SelectChanged;
-		PBD::Signal1<void,bool> CompatibleChanged;
+		PBD::Signal<void(bool)> SelectChanged;
+		PBD::Signal<void(bool)> CompatibleChanged;
 
 		bool selected () const { return _selected; }
 		bool compatible () const { return _compatible; }

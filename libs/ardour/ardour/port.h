@@ -141,12 +141,12 @@ public:
 	void decrement_internal_connections ();
 
 
-	PBD::Signal1<void,bool> MonitorInputChanged;
-	PBD::Signal3<void,std::shared_ptr<Port>,std::shared_ptr<Port>, bool > ConnectedOrDisconnected;
+	PBD::Signal<void(bool)> MonitorInputChanged;
+	PBD::Signal<void(std::shared_ptr<Port>,std::shared_ptr<Port>, bool )> ConnectedOrDisconnected;
 
-	static PBD::Signal0<void> PortDrop;
-	static PBD::Signal0<void> PortSignalDrop;
-	static PBD::Signal0<void> ResamplerQualityChanged;
+	static PBD::Signal<void()> PortDrop;
+	static PBD::Signal<void()> PortSignalDrop;
+	static PBD::Signal<void()> ResamplerQualityChanged;
 
 	static void set_varispeed_ratio (double s); //< varispeed playback
 	static bool set_engine_ratio (double session, double engine); //< SR mismatch

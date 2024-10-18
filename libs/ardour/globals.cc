@@ -155,11 +155,11 @@ mix_buffers_with_gain_t ARDOUR::mix_buffers_with_gain = 0;
 mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain   = 0;
 copy_vector_t           ARDOUR::copy_vector           = 0;
 
-PBD::Signal1<void, std::string>                    ARDOUR::BootMessage;
-PBD::Signal3<void, std::string, std::string, bool> ARDOUR::PluginScanMessage;
-PBD::Signal1<void, int>                            ARDOUR::PluginScanTimeout;
-PBD::Signal0<void>                                 ARDOUR::GUIIdle;
-PBD::Signal3<bool, std::string, std::string, int>  ARDOUR::CopyConfigurationFiles;
+PBD::Signal<void(std::string)>                    ARDOUR::BootMessage;
+PBD::Signal<void(std::string, std::string, bool)> ARDOUR::PluginScanMessage;
+PBD::Signal<void(int)>                            ARDOUR::PluginScanTimeout;
+PBD::Signal<void()>                                 ARDOUR::GUIIdle;
+PBD::Signal<bool(std::string, std::string, int)>  ARDOUR::CopyConfigurationFiles;
 
 std::map<std::string, bool> ARDOUR::reserved_io_names;
 

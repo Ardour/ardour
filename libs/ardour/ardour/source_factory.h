@@ -40,7 +40,7 @@ public:
 	static void init ();
 	static void terminate ();
 
-	static PBD::Signal1<void, std::shared_ptr<Source>> SourceCreated;
+	static PBD::Signal<void(std::shared_ptr<Source>)> SourceCreated;
 
 	static std::shared_ptr<Source> create (Session&, const XMLNode& node, bool async = false);
 	static std::shared_ptr<Source> createSilent (Session&, const XMLNode& node, samplecnt_t, float sample_rate);

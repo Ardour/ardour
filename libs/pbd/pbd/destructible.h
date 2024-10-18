@@ -27,8 +27,8 @@ class LIBPBD_API Destructible {
 public:
 	virtual ~Destructible () { Destroyed(); }
 
-	PBD::Signal0<void> Destroyed;
-	PBD::Signal0<void> DropReferences;
+	PBD::Signal<void()> Destroyed;
+	PBD::Signal<void()> DropReferences;
 
 	virtual void drop_references () { DropReferences();  }
 };

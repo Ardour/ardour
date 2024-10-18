@@ -214,11 +214,11 @@ public:
 	DitherTypePtr   get_selected_dither_type ();
 
 	/* Proxies for signals from sample formats and dither types */
-	PBD::Signal2<void, bool, WeakSampleFormatPtr> SampleFormatSelectChanged;
-	PBD::Signal2<void, bool, WeakSampleFormatPtr> SampleFormatCompatibleChanged;
+	PBD::Signal<void(bool, WeakSampleFormatPtr)> SampleFormatSelectChanged;
+	PBD::Signal<void(bool, WeakSampleFormatPtr)> SampleFormatCompatibleChanged;
 
-	PBD::Signal2<void, bool, WeakDitherTypePtr> DitherTypeSelectChanged;
-	PBD::Signal2<void, bool, WeakDitherTypePtr> DitherTypeCompatibleChanged;
+	PBD::Signal<void(bool, WeakDitherTypePtr)> DitherTypeSelectChanged;
+	PBD::Signal<void(bool, WeakDitherTypePtr)> DitherTypeCompatibleChanged;
 
 	static std::string get_sample_format_name (ExportFormatBase::SampleFormat format);
 

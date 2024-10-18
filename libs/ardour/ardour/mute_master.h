@@ -75,7 +75,7 @@ public:
 
 	void set_muted_by_masters (bool);
 
-	PBD::Signal0<void> MutePointChanged;
+	PBD::Signal<void()> MutePointChanged;
 
 	XMLNode& get_state() const;
 	int set_state(const XMLNode&, int version);

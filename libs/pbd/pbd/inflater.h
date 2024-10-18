@@ -40,7 +40,7 @@ class LIBPBD_API Inflater : public PBD::FileArchive , public PBD::Progress
 	bool running() const { return thread != 0; }
 	int  status() const { return _status; }
 
-	PBD::Signal1<void, float> Progress;
+	PBD::Signal<void(float)> Progress;
 
 private:
 	PBD::Thread* thread;

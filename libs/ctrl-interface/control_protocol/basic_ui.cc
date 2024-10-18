@@ -41,7 +41,7 @@
 using namespace ARDOUR;
 using namespace Temporal;
 
-PBD::Signal2<void,std::string,std::string> BasicUI::AccessAction;
+PBD::Signal<void(std::string,std::string)> BasicUI::AccessAction;
 
 BasicUI::BasicUI (Session& s)
 	: session (&s),

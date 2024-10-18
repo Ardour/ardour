@@ -101,7 +101,7 @@ class CC121 : public ARDOUR::ControlProtocol, public AbstractUI<CC121Request> {
 
 	void thread_init ();
 
-	PBD::Signal0<void> ConnectionChange;
+	PBD::Signal<void()> ConnectionChange;
 
 	std::shared_ptr<ARDOUR::Port> input_port();
 	std::shared_ptr<ARDOUR::Port> output_port();

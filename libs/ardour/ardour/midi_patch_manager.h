@@ -61,7 +61,7 @@ public:
 		return *_manager;
 	}
 
-	PBD::Signal0<void> PatchesChanged;
+	PBD::Signal<void()> PatchesChanged;
 
 	bool add_custom_midnam (const std::string& id, char const*);
 	bool update_custom_midnam (const std::string& id, char const*);

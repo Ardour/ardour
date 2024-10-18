@@ -367,7 +367,7 @@ public:
 	XMLNode& get_state() const;
 	int set_state(const XMLNode &node, int version);
 
-	PBD::Signal0<void> ConnectionChange;
+	PBD::Signal<void()> ConnectionChange;
 
 	std::shared_ptr<ARDOUR::Port> input_port();
 	std::shared_ptr<ARDOUR::Port> output_port();

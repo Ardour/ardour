@@ -44,7 +44,7 @@ class LIBPBD_API Configuration : public PBD::Stateful
 	virtual XMLNode & get_variables (std::string const & nodename) const = 0;
 	virtual void set_variables (XMLNode const &) = 0;
 
-	PBD::Signal1<void,std::string> ParameterChanged;
+	PBD::Signal<void(std::string)> ParameterChanged;
 
 	typedef std::vector<std::string> Metadata;
 

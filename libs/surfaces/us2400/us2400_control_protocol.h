@@ -98,8 +98,8 @@ class US2400Protocol
 	const US2400::DeviceInfo& device_info() const { return _device_info; }
 	US2400::DeviceProfile& device_profile() { return _device_profile; }
 
-	PBD::Signal0<void> DeviceChanged;
-	PBD::Signal1<void,std::shared_ptr<US2400::Surface> > ConnectionChange;
+	PBD::Signal<void()> DeviceChanged;
+	PBD::Signal<void(std::shared_ptr<US2400::Surface> )> ConnectionChange;
 
         void device_ready ();
 

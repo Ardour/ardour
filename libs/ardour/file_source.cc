@@ -56,7 +56,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
 
-PBD::Signal2<int,std::string,std::vector<std::string> > FileSource::AmbiguousFileName;
+PBD::Signal<int(std::string,std::vector<std::string> )> FileSource::AmbiguousFileName;
 
 FileSource::FileSource (Session& session, DataType type, const string& path, const string& origin, Source::Flag flag)
 	: Source(session, type, path, flag)

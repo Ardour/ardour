@@ -159,39 +159,39 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	   (the regular process() call to session->process() is not made)
 	*/
 
-	PBD::Signal1<void, pframes_t> Freewheel;
+	PBD::Signal<void(pframes_t)> Freewheel;
 
-	PBD::Signal0<void> Xrun;
+	PBD::Signal<void()> Xrun;
 
 	/** this signal is emitted if the sample rate changes */
-	PBD::Signal1<void, samplecnt_t> SampleRateChanged;
+	PBD::Signal<void(samplecnt_t)> SampleRateChanged;
 
 	/** this signal is emitted if the buffer size changes */
-	PBD::Signal1<void, pframes_t> BufferSizeChanged;
+	PBD::Signal<void(pframes_t)> BufferSizeChanged;
 
 	/** this signal is emitted if the device cannot operate properly */
-	PBD::Signal0<void> DeviceError;
+	PBD::Signal<void()> DeviceError;
 
 	/* this signal is emitted if the device list changed */
 
-	PBD::Signal0<void> DeviceListChanged;
+	PBD::Signal<void()> DeviceListChanged;
 
 	/* this signal is sent if the backend ever disconnects us */
 
-	PBD::Signal1<void,const char*> Halted;
+	PBD::Signal<void(const char*)> Halted;
 
 	/* these two are emitted when the engine itself is
 	   started and stopped
 	*/
 
-	PBD::Signal1<void,uint32_t> Running;
-	PBD::Signal0<void> Stopped;
+	PBD::Signal<void(uint32_t)> Running;
+	PBD::Signal<void()> Stopped;
 
 	/* these two are emitted when a device reset is initiated/finished
 	 */
 
-	PBD::Signal0<void> DeviceResetStarted;
-	PBD::Signal0<void> DeviceResetFinished;
+	PBD::Signal<void()> DeviceResetStarted;
+	PBD::Signal<void()> DeviceResetFinished;
 
 	static AudioEngine* instance() { return _instance; }
 	static void destroy();
@@ -242,7 +242,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	 * value.
 	 */
 
-	PBD::Signal0<void> BecameSilent;
+	PBD::Signal<void()> BecameSilent;
 	void reset_silence_countdown ();
 
 	void add_pending_port_deletion (Port*);

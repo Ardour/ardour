@@ -50,11 +50,11 @@ namespace ARDOUR {
 	class AudioEngine;
 	class Session;
 
-	extern LIBARDOUR_API PBD::Signal1<void,std::string> BootMessage;
-	extern LIBARDOUR_API PBD::Signal3<void,std::string,std::string,bool> PluginScanMessage;
-	extern LIBARDOUR_API PBD::Signal1<void,int> PluginScanTimeout;
-	extern LIBARDOUR_API PBD::Signal0<void> GUIIdle;
-	extern LIBARDOUR_API PBD::Signal3<bool,std::string,std::string,int> CopyConfigurationFiles;
+	extern LIBARDOUR_API PBD::Signal<void(std::string)> BootMessage;
+	extern LIBARDOUR_API PBD::Signal<void(std::string,std::string,bool)> PluginScanMessage;
+	extern LIBARDOUR_API PBD::Signal<void(int)> PluginScanTimeout;
+	extern LIBARDOUR_API PBD::Signal<void()> GUIIdle;
+	extern LIBARDOUR_API PBD::Signal<bool(std::string,std::string,int)> CopyConfigurationFiles;
 	extern LIBARDOUR_API std::map<std::string, bool> reserved_io_names;
 	extern LIBARDOUR_API float ui_scale_factor;
 

@@ -148,7 +148,7 @@ public:
 	 * IOChange contains ConfigurationChanged.  In other cases,
 	 * the process lock status is undefined.
 	 */
-	PBD::Signal2<void, IOChange, void *> changed;
+	PBD::Signal<void(IOChange, void *)> changed;
 
 	XMLNode& get_state () const;
 
@@ -179,9 +179,9 @@ public:
 	 *  can attach to this, and return `true' if they want to prevent
 	 *  the change from happening.
 	 */
-	PBD::Signal1<bool, ChanCount, BoolCombiner> PortCountChanging;
+	PBD::SignalWithCombiner<BoolCombiner, bool(ChanCount)> PortCountChanging;
 
-	static PBD::Signal1<void, ChanCount> PortCountChanged; // emitted when the number of ports changes
+	static PBD::Signal<void(ChanCount)> PortCountChanged; // emitted when the number of ports changes
 
 	static std::string name_from_state (const XMLNode&);
 	static void set_name_in_state (XMLNode&, const std::string&);

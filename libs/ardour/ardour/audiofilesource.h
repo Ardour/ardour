@@ -78,7 +78,7 @@ public:
 	static void set_bwf_serial_number (int);
 	static void set_header_position_offset (samplecnt_t offset);
 
-	static PBD::Signal0<void> HeaderPositionOffsetChanged;
+	static PBD::Signal<void()> HeaderPositionOffsetChanged;
 
 protected:
 	/** Constructor to be called for existing external-to-session files */

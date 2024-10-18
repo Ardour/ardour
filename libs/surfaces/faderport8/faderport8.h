@@ -78,7 +78,7 @@ public:
 	bool  has_editor () const { return true; }
 	void* get_gui () const;
 	void  tear_down_gui ();
-	PBD::Signal0<void> ConnectionChange;
+	PBD::Signal<void()> ConnectionChange;
 
 	void set_button_action (FP8Controls::ButtonId, bool, std::string const&);
 	std::string get_button_action (FP8Controls::ButtonId, bool);

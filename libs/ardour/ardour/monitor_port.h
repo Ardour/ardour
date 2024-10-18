@@ -47,7 +47,7 @@ public:
 	void set_active_monitors (std::list <std::string> const&);
 	void clear_ports (bool instantly);
 
-	PBD::Signal2<void, std::string, bool> MonitorInputChanged;
+	PBD::Signal<void(std::string, bool)> MonitorInputChanged;
 
 protected:
 	friend class PortManager;

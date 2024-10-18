@@ -111,9 +111,9 @@ public:
 
 	static void make_property_quarks ();
 
-	static PBD::Signal2<void,std::shared_ptr<RegionList>, const PBD::PropertyChange&> RegionsPropertyChanged;
+	static PBD::Signal<void(std::shared_ptr<RegionList>, const PBD::PropertyChange&)> RegionsPropertyChanged;
 
-	PBD::Signal0<void> RegionFxChanged;
+	PBD::Signal<void()> RegionFxChanged;
 
 	typedef std::map <PBD::PropertyChange, RegionList> ChangeMap;
 

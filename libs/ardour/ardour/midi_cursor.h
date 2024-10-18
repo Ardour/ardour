@@ -34,7 +34,7 @@ namespace ARDOUR {
 struct MidiCursor : public boost::noncopyable {
 	MidiCursor()  {}
 
-	void connect(PBD::Signal1<void, bool>& invalidated) {
+	void connect(PBD::Signal<void(bool)>& invalidated) {
 		connections.drop_connections();
 		invalidated.connect_same_thread (connections, boost::bind(&MidiCursor::invalidate, this, _1));
 	}

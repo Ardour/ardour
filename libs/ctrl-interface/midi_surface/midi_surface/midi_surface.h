@@ -80,7 +80,7 @@ class MIDISurface : public ARDOUR::ControlProtocol
 
 	std::list<std::shared_ptr<ARDOUR::Bundle> > bundles ();
 
-	PBD::Signal0<void> ConnectionChange;
+	PBD::Signal<void()> ConnectionChange;
 
 	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
 

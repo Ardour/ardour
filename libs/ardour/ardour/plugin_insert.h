@@ -264,10 +264,10 @@ public:
 		out = _configured_out;
 	}
 
-	PBD::Signal2<void,BufferSet*, BufferSet*> AnalysisDataGathered;
-	PBD::Signal0<void> PluginIoReConfigure;
-	PBD::Signal0<void> PluginMapChanged;
-	PBD::Signal0<void> PluginConfigChanged;
+	PBD::Signal<void(BufferSet*, BufferSet*)> AnalysisDataGathered;
+	PBD::Signal<void()> PluginIoReConfigure;
+	PBD::Signal<void()> PluginMapChanged;
+	PBD::Signal<void()> PluginConfigChanged;
 protected:
 	XMLNode& state () const;
 
