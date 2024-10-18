@@ -104,8 +104,8 @@ TriggerEntry::TriggerEntry (Item* item, TriggerStrip& s, TriggerReference tr)
 	/* this will trigger a call to on_trigger_changed() */
 	set_trigger (tr);
 
-	trigger()->ArmChanged.connect (_rec_enable_connections, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::rec_enable_change, this), gui_context());
-	tref.box()->RecEnableChanged.connect (_rec_enable_connections, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::rec_enable_change, this), gui_context());
+	trigger()->ArmChanged.connect (_rec_enable_connections, MISSING_INVALIDATOR, std::bind (&TriggerEntry::rec_enable_change, this), gui_context());
+	tref.box()->RecEnableChanged.connect (_rec_enable_connections, MISSING_INVALIDATOR, std::bind (&TriggerEntry::rec_enable_change, this), gui_context());
 
 	/* DnD Source */
 	GtkCanvas* gtkcanvas = static_cast<GtkCanvas*> (canvas ());
@@ -127,7 +127,7 @@ TriggerEntry::TriggerEntry (Item* item, TriggerStrip& s, TriggerReference tr)
 	set_widget_colors ();
 
 	/* owner color changes (?) */
-	dynamic_cast<Stripable*> (tref.box()->owner ())->presentation_info ().Change.connect (_owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
+	dynamic_cast<Stripable*> (tref.box()->owner ())->presentation_info ().Change.connect (_owner_prop_connection, MISSING_INVALIDATOR, std::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
 
 	selection_change ();
 	rec_enable_change ();

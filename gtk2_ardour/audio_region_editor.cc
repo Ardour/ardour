@@ -124,7 +124,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	_peak_amplitude.property_editable() = false;
 	_peak_amplitude.set_text (_("Calculating..."));
 
-	PeakAmplitudeFound.connect (_peak_amplitude_connection, invalidator (*this), boost::bind (&AudioRegionEditor::peak_amplitude_found, this, _1), gui_context ());
+	PeakAmplitudeFound.connect (_peak_amplitude_connection, invalidator (*this), std::bind (&AudioRegionEditor::peak_amplitude_found, this, _1), gui_context ());
 
 	char name[64];
 	snprintf (name, 64, "peak amplitude-%p", this);
@@ -266,7 +266,7 @@ AudioRegionEditor::show_on_touch_changed ()
 		_ctrl_touched_connection.disconnect ();
 		return;
 	}
-	Controllable::ControlTouched.connect (_ctrl_touched_connection, invalidator (*this), boost::bind (&AudioRegionEditor::show_touched_automation, this, _1), gui_context ());
+	Controllable::ControlTouched.connect (_ctrl_touched_connection, invalidator (*this), std::bind (&AudioRegionEditor::show_touched_automation, this, _1), gui_context ());
 }
 
 void

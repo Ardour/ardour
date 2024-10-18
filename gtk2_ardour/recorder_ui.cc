@@ -294,17 +294,17 @@ RecorderUI::RecorderUI ()
 	_content.set_data ("ardour-bindings", bindings);
 
 	/* subscribe to signals */
-	AudioEngine::instance ()->Running.connect (_engine_connections, invalidator (*this), boost::bind (&RecorderUI::start_updating, this), gui_context ());
-	AudioEngine::instance ()->Stopped.connect (_engine_connections, invalidator (*this), boost::bind (&RecorderUI::stop_updating, this), gui_context ());
-	AudioEngine::instance ()->Halted.connect (_engine_connections, invalidator (*this), boost::bind (&RecorderUI::stop_updating, this), gui_context ());
-	AudioEngine::instance ()->PortConnectedOrDisconnected.connect (_engine_connections, invalidator (*this), boost::bind (&RecorderUI::port_connected_or_disconnected, this, _2, _4), gui_context ());
-	AudioEngine::instance ()->PortPrettyNameChanged.connect (_engine_connections, invalidator (*this), boost::bind (&RecorderUI::port_pretty_name_changed, this, _1), gui_context ());
-	AudioEngine::instance ()->PhysInputChanged.connect (_engine_connections, invalidator (*this), boost::bind (&RecorderUI::add_or_remove_io, this, _1, _2, _3), gui_context ());
+	AudioEngine::instance ()->Running.connect (_engine_connections, invalidator (*this), std::bind (&RecorderUI::start_updating, this), gui_context ());
+	AudioEngine::instance ()->Stopped.connect (_engine_connections, invalidator (*this), std::bind (&RecorderUI::stop_updating, this), gui_context ());
+	AudioEngine::instance ()->Halted.connect (_engine_connections, invalidator (*this), std::bind (&RecorderUI::stop_updating, this), gui_context ());
+	AudioEngine::instance ()->PortConnectedOrDisconnected.connect (_engine_connections, invalidator (*this), std::bind (&RecorderUI::port_connected_or_disconnected, this, _2, _4), gui_context ());
+	AudioEngine::instance ()->PortPrettyNameChanged.connect (_engine_connections, invalidator (*this), std::bind (&RecorderUI::port_pretty_name_changed, this, _1), gui_context ());
+	AudioEngine::instance ()->PhysInputChanged.connect (_engine_connections, invalidator (*this), std::bind (&RecorderUI::add_or_remove_io, this, _1, _2, _3), gui_context ());
 
-	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&RecorderUI::presentation_info_changed, this, _1), gui_context());
-	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RecorderUI::parameter_changed, this, _1), gui_context ());
+	PresentationInfo::Change.connect (*this, invalidator (*this), std::bind (&RecorderUI::presentation_info_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&RecorderUI::parameter_changed, this, _1), gui_context ());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RecorderUI::parameter_changed));
-	//ARDOUR_UI::instance()->Escape.connect (*this, invalidator (*this), boost::bind (&RecorderUI::escape, this), gui_context());
+	//ARDOUR_UI::instance()->Escape.connect (*this, invalidator (*this), std::bind (&RecorderUI::escape, this), gui_context());
 
 	/* init */
 	update_title ();
@@ -421,21 +421,21 @@ RecorderUI::set_session (Session* s)
 	XMLNode* node = ARDOUR_UI::instance()->recorder_settings();
 	set_state (*node, Stateful::loading_state_version);
 
-	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&RecorderUI::update_title, this), gui_context ());
-	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&RecorderUI::update_title, this), gui_context ());
+	_session->DirtyChanged.connect (_session_connections, invalidator (*this), std::bind (&RecorderUI::update_title, this), gui_context ());
+	_session->StateSaved.connect (_session_connections, invalidator (*this), std::bind (&RecorderUI::update_title, this), gui_context ());
 
-	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&RecorderUI::add_routes, this, _1), gui_context ());
-	TrackRecordAxis::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RecorderUI::remove_route, this, _1), gui_context ());
-	TrackRecordAxis::EditNextName.connect (*this, invalidator (*this), boost::bind (&RecorderUI::tra_name_edit, this, _1, _2), gui_context ());
+	_session->RouteAdded.connect (_session_connections, invalidator (*this), std::bind (&RecorderUI::add_routes, this, _1), gui_context ());
+	TrackRecordAxis::CatchDeletion.connect (*this, invalidator (*this), std::bind (&RecorderUI::remove_route, this, _1), gui_context ());
+	TrackRecordAxis::EditNextName.connect (*this, invalidator (*this), std::bind (&RecorderUI::tra_name_edit, this, _1, _2), gui_context ());
 
-	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&RecorderUI::parameter_changed, this, _1), gui_context ());
+	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), std::bind (&RecorderUI::parameter_changed, this, _1), gui_context ());
 
-	Region::RegionsPropertyChanged.connect (*this, invalidator (*this), boost::bind (&RecorderUI::regions_changed, this, _1, _2), gui_context());
-	_session->StartTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&RecorderUI::gui_extents_changed, this), gui_context());
-	_session->EndTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&RecorderUI::gui_extents_changed, this), gui_context());
-	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&RecorderUI::update_sensitivity, this), gui_context());
-	_session->UpdateRouteRecordState.connect (_session_connections, invalidator (*this), boost::bind (&RecorderUI::update_recordstate, this), gui_context());
-	_session->IOPluginsChanged.connect (_session_connections, invalidator (*this), boost::bind (&RecorderUI::io_plugins_changed, this), gui_context());
+	Region::RegionsPropertyChanged.connect (*this, invalidator (*this), std::bind (&RecorderUI::regions_changed, this, _1, _2), gui_context());
+	_session->StartTimeChanged.connect (_session_connections, invalidator (*this), std::bind (&RecorderUI::gui_extents_changed, this), gui_context());
+	_session->EndTimeChanged.connect (_session_connections, invalidator (*this), std::bind (&RecorderUI::gui_extents_changed, this), gui_context());
+	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), std::bind (&RecorderUI::update_sensitivity, this), gui_context());
+	_session->UpdateRouteRecordState.connect (_session_connections, invalidator (*this), std::bind (&RecorderUI::update_recordstate, this), gui_context());
+	_session->IOPluginsChanged.connect (_session_connections, invalidator (*this), std::bind (&RecorderUI::io_plugins_changed, this), gui_context());
 
 	/* map_parameters */
 	parameter_changed ("show-group-tabs");
@@ -622,7 +622,7 @@ RecorderUI::start_updating ()
 	_meter_area.queue_resize ();
 
 	MonitorPort& mp (AudioEngine::instance()->monitor_port ());
-	mp.MonitorInputChanged.connect (_monitor_connection, invalidator (*this), boost::bind (&RecorderUI::update_monitorstate, this, _1, _2), gui_context());
+	mp.MonitorInputChanged.connect (_monitor_connection, invalidator (*this), std::bind (&RecorderUI::update_monitorstate, this, _1, _2), gui_context());
 
 	const bool en      = _session ? true : false;
 	const bool have_ms = Config->get_use_monitor_bus();
@@ -658,7 +658,7 @@ RecorderUI::add_or_remove_io (DataType dt, vector<string> ports, bool add)
 	if (_input_ports.empty () && add) {
 		_monitor_connection.disconnect ();
 		MonitorPort& mp (AudioEngine::instance()->monitor_port ());
-		mp.MonitorInputChanged.connect (_monitor_connection, invalidator (*this), boost::bind (&RecorderUI::update_monitorstate, this, _1, _2), gui_context());
+		mp.MonitorInputChanged.connect (_monitor_connection, invalidator (*this), std::bind (&RecorderUI::update_monitorstate, this, _1, _2), gui_context());
 	}
 
 	if (add) {
@@ -700,7 +700,7 @@ RecorderUI::io_plugin_add (std::shared_ptr<IOPlug> p)
 	PortManager::AudioInputPorts const& aip (p->audio_input_ports ());
 	PortManager::MIDIInputPorts const& mip (p->midi_input_ports ());
 	_ioplugins.insert (p);
-	p->DropReferences.connect (_going_away_connections, invalidator (*this), boost::bind (&RecorderUI::io_plugin_going_away, this, std::weak_ptr<IOPlug>(p)), gui_context ());
+	p->DropReferences.connect (_going_away_connections, invalidator (*this), std::bind (&RecorderUI::io_plugin_going_away, this, std::weak_ptr<IOPlug>(p)), gui_context ());
 	for (auto i = aip.begin (); i != aip.end (); ++i) {
 		_input_ports[i->first] = std::shared_ptr<RecorderUI::InputPort> (new InputPort (i->first, DataType::AUDIO, this, _vertical, true));
 		set_connections (i->first);

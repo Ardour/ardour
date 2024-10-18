@@ -188,27 +188,27 @@ Strip::set_stripable (std::shared_ptr<Stripable> r, bool /*with_messages*/)
 	_solo->set_control (_stripable->solo_control());
 	_mute->set_control (_stripable->mute_control());
 
-	_stripable->solo_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
-	_stripable->mute_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_mute_changed, this), ui_context());
+	_stripable->solo_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_solo_changed, this), ui_context());
+	_stripable->mute_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_mute_changed, this), ui_context());
 
 	std::shared_ptr<AutomationControl> pan_control = _stripable->pan_azimuth_control();
 	if (pan_control) {
-		pan_control->Changed.connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
+		pan_control->Changed.connect(stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
 	}
 
 	pan_control = _stripable->pan_width_control();
 	if (pan_control) {
-		pan_control->Changed.connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_width_changed, this, false), ui_context());
+		pan_control->Changed.connect(stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_panner_width_changed, this, false), ui_context());
 	}
 
-	_stripable->gain_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_gain_changed, this, false), ui_context());
-	_stripable->PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_property_changed, this, _1), ui_context());
-	_stripable->presentation_info().PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_property_changed, this, _1), ui_context());
+	_stripable->gain_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_gain_changed, this, false), ui_context());
+	_stripable->PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_property_changed, this, _1), ui_context());
+	_stripable->presentation_info().PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_property_changed, this, _1), ui_context());
 
 	// TODO this works when a currently-banked stripable is made inactive, but not
 	// when a stripable is activated which should be currently banked.
 
-	_stripable->DropReferences.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_stripable_deleted, this), ui_context());
+	_stripable->DropReferences.connect (stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_stripable_deleted, this), ui_context());
 
 	/* setup legal VPot modes for this stripable */
 
@@ -793,7 +793,7 @@ Strip::setup_trackview_vpot (std::shared_ptr<Stripable> r)
 		return;
 	}
 
-	r->MappedControlsChanged.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::subview_mode_changed, this), ui_context());
+	r->MappedControlsChanged.connect (subview_connections, MISSING_INVALIDATOR, std::bind (&Strip::subview_mode_changed, this), ui_context());
 
 	std::shared_ptr<AutomationControl> pc;
 	std::shared_ptr<Track> track = std::dynamic_pointer_cast<Track> (r);
@@ -948,7 +948,7 @@ Strip::setup_trackview_vpot (std::shared_ptr<Stripable> r)
 
 	if (pc) {  //control found; set our knob to watch for changes in it
 		_vpot->set_control (pc);
-		pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_vpot_change, this), ui_context());
+		pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_vpot_change, this), ui_context());
 	} else {  //no control, just set the knob to "empty"
 		_vpot->reset_control ();
 	}

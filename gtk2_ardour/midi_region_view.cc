@@ -166,7 +166,7 @@ MidiRegionView::init (bool /*wfd*/)
 
 	_note_group->parent()->raise_to_top();
 
-	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
 }
 
@@ -224,7 +224,7 @@ MidiRegionView::connect_to_diskstream ()
 {
 	midi_view()->midi_track()->DataRecorded.connect(
 		*this, invalidator(*this),
-		boost::bind (&MidiRegionView::data_recorded, this, _1),
+		std::bind (&MidiRegionView::data_recorded, this, _1),
 		gui_context());
 }
 

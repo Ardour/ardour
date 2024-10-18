@@ -28,7 +28,7 @@ RTTaskList::RTTaskList (std::shared_ptr<Graph> process_graph)
 }
 
 void
-RTTaskList::push_back (boost::function<void ()> fn)
+RTTaskList::push_back (std::function<void ()> fn)
 {
 	_tasks.push_back (RTTask (_graph.get(), fn));
 }

@@ -28,8 +28,6 @@
 #include <iostream>
 #include <map>
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
 
 #include "ardour/types.h" // required for operators used in pbd/configuration_variable.h
 #include "ardour/types_convert.h"
@@ -64,7 +62,7 @@ public:
 	int load_defaults ();
 	int load_color_theme (bool allow_own);
 
-	void     map_parameters (boost::function<void (std::string)>&);
+	void     map_parameters (std::function<void (std::string)>&);
 	int      set_state (const XMLNode&, int version);
 	XMLNode& get_state () const;
 	XMLNode& get_variables (std::string const &) const;

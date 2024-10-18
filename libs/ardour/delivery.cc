@@ -74,7 +74,7 @@ Delivery::Delivery (Session& s, std::shared_ptr<IO> io, std::shared_ptr<Pannable
 	_display_to_user = false;
 
 	if (_output) {
-		_output->changed.connect_same_thread (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
+		_output->changed.connect_same_thread (*this, std::bind (&Delivery::output_changed, this, _1, _2));
 	}
 }
 
@@ -98,7 +98,7 @@ Delivery::Delivery (Session& s, std::shared_ptr<Pannable> pannable, std::shared_
 	_display_to_user = false;
 
 	if (_output) {
-		_output->changed.connect_same_thread (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
+		_output->changed.connect_same_thread (*this, std::bind (&Delivery::output_changed, this, _1, _2));
 	}
 }
 
@@ -494,7 +494,7 @@ Delivery::reset_panner ()
 
 	} else {
 		panner_legal_c.disconnect ();
-		PannersLegal.connect_same_thread (panner_legal_c, boost::bind (&Delivery::panners_became_legal, this));
+		PannersLegal.connect_same_thread (panner_legal_c, std::bind (&Delivery::panners_became_legal, this));
 	}
 }
 

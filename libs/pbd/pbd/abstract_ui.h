@@ -59,7 +59,7 @@ public:
 	virtual ~AbstractUI();
 
 	void register_thread (pthread_t, std::string, uint32_t num_requests);
-	bool call_slot (EventLoop::InvalidationRecord*, const boost::function<void()>&);
+	bool call_slot (EventLoop::InvalidationRecord*, const std::function<void()>&);
 	Glib::Threads::RWLock& slot_invalidation_rwlock() { return request_buffer_map_lock; }
 
 	Glib::Threads::RWLock request_buffer_map_lock;

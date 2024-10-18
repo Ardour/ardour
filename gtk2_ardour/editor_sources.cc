@@ -68,8 +68,8 @@ EditorSources::EditorSources (Editor* e)
 
 	_change_connection = _display.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &EditorSources::selection_changed));
 
-	e->EditorFreeze.connect (_editor_freeze_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::freeze_tree_model, this), gui_context ());
-	e->EditorThaw.connect (_editor_thaw_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::thaw_tree_model, this), gui_context ());
+	e->EditorFreeze.connect (_editor_freeze_connection, MISSING_INVALIDATOR, std::bind (&EditorSources::freeze_tree_model, this), gui_context ());
+	e->EditorThaw.connect (_editor_thaw_connection, MISSING_INVALIDATOR, std::bind (&EditorSources::thaw_tree_model, this), gui_context ());
 }
 
 void

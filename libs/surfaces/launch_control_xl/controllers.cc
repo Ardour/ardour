@@ -60,104 +60,104 @@ LaunchControlXL::build_maps ()
 		id_knob_map.insert (std::make_pair (knob->id(), knob));
 
 	if (!device_mode()) {	/* mixer mode */
-		MAKE_KNOB (SendA1, 13, 0, RedFull, RedLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendA, this, 0)));
-		MAKE_KNOB (SendA2, 14, 1, YellowFull, YellowLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendA, this, 1)));
-		MAKE_KNOB (SendA3, 15, 2, GreenFull, GreenLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendA, this, 2)));
-		MAKE_KNOB (SendA4, 16, 3, AmberFull, AmberLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendA, this, 3)));
-		MAKE_KNOB (SendA5, 17, 4, RedFull, RedLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendA, this, 4)));
-		MAKE_KNOB (SendA6, 18, 5, YellowFull, YellowLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendA, this, 5)));
-		MAKE_KNOB (SendA7, 19, 6, GreenFull, GreenLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendA, this, 6)));
-		MAKE_KNOB (SendA8, 20, 7, AmberFull, AmberLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendA, this, 7)));
+		MAKE_KNOB (SendA1, 13, 0, RedFull, RedLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendA, this, 0)));
+		MAKE_KNOB (SendA2, 14, 1, YellowFull, YellowLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendA, this, 1)));
+		MAKE_KNOB (SendA3, 15, 2, GreenFull, GreenLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendA, this, 2)));
+		MAKE_KNOB (SendA4, 16, 3, AmberFull, AmberLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendA, this, 3)));
+		MAKE_KNOB (SendA5, 17, 4, RedFull, RedLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendA, this, 4)));
+		MAKE_KNOB (SendA6, 18, 5, YellowFull, YellowLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendA, this, 5)));
+		MAKE_KNOB (SendA7, 19, 6, GreenFull, GreenLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendA, this, 6)));
+		MAKE_KNOB (SendA8, 20, 7, AmberFull, AmberLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendA, this, 7)));
 
-		MAKE_KNOB (SendB1, 29, 8, RedFull, RedLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendB, this, 0)));
-		MAKE_KNOB (SendB2, 30, 9, YellowFull, YellowLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendB, this, 1)));
-		MAKE_KNOB (SendB3, 31, 10, GreenFull, GreenLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendB, this, 2)));
-		MAKE_KNOB (SendB4, 32, 11, AmberFull, AmberLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendB, this, 3)));
-		MAKE_KNOB (SendB5, 33, 12, RedFull, RedLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendB, this, 4)));
-		MAKE_KNOB (SendB6, 34, 13, YellowFull, YellowLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendB, this, 5)));
-		MAKE_KNOB (SendB7, 35, 14, GreenFull, GreenLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendB, this, 6)));
-		MAKE_KNOB (SendB8, 36, 15, AmberFull, AmberLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_sendB, this, 7)));
+		MAKE_KNOB (SendB1, 29, 8, RedFull, RedLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendB, this, 0)));
+		MAKE_KNOB (SendB2, 30, 9, YellowFull, YellowLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendB, this, 1)));
+		MAKE_KNOB (SendB3, 31, 10, GreenFull, GreenLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendB, this, 2)));
+		MAKE_KNOB (SendB4, 32, 11, AmberFull, AmberLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendB, this, 3)));
+		MAKE_KNOB (SendB5, 33, 12, RedFull, RedLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendB, this, 4)));
+		MAKE_KNOB (SendB6, 34, 13, YellowFull, YellowLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendB, this, 5)));
+		MAKE_KNOB (SendB7, 35, 14, GreenFull, GreenLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendB, this, 6)));
+		MAKE_KNOB (SendB8, 36, 15, AmberFull, AmberLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_sendB, this, 7)));
 
-		MAKE_KNOB (Pan1, 49, 16, RedFull, RedLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_pan, this, 0)));
-		MAKE_KNOB (Pan2, 50, 17, YellowFull, YellowLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_pan, this, 1)));
-		MAKE_KNOB (Pan3, 51, 18, GreenFull, GreenLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_pan, this, 2)));
-		MAKE_KNOB (Pan4, 52, 19, AmberFull, AmberLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_pan, this, 3)));
-		MAKE_KNOB (Pan5, 53, 20, RedFull, RedLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_pan, this, 4)));
-		MAKE_KNOB (Pan6, 54, 21, YellowFull, YellowLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_pan, this, 5)));
-		MAKE_KNOB (Pan7, 55, 22, GreenFull, GreenLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_pan, this, 6)));
-		MAKE_KNOB (Pan8, 56, 23, AmberFull, AmberLow, boost::function<void ()> (boost::bind (&LaunchControlXL::knob_pan, this, 7)));
+		MAKE_KNOB (Pan1, 49, 16, RedFull, RedLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_pan, this, 0)));
+		MAKE_KNOB (Pan2, 50, 17, YellowFull, YellowLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_pan, this, 1)));
+		MAKE_KNOB (Pan3, 51, 18, GreenFull, GreenLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_pan, this, 2)));
+		MAKE_KNOB (Pan4, 52, 19, AmberFull, AmberLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_pan, this, 3)));
+		MAKE_KNOB (Pan5, 53, 20, RedFull, RedLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_pan, this, 4)));
+		MAKE_KNOB (Pan6, 54, 21, YellowFull, YellowLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_pan, this, 5)));
+		MAKE_KNOB (Pan7, 55, 22, GreenFull, GreenLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_pan, this, 6)));
+		MAKE_KNOB (Pan8, 56, 23, AmberFull, AmberLow, std::function<void ()> (std::bind (&LaunchControlXL::knob_pan, this, 7)));
 
 	} else {	/* device mode */
 
 #ifdef MIXBUS // from here Mixbus Standard + 32C
-		MAKE_DM_KNOB (SendB5, 33, 12, RedFull, RedLow, boost::function<void ()>
-				(boost::bind (&LaunchControlXL::dm_trim, this, SendB5)),
-				boost::bind(&LaunchControlXL::dm_check_trim, this));
-		MAKE_DM_KNOB (SendB6, 34, 13, GreenFull, GreenLow, boost::function<void ()>
-				(boost::bind (&LaunchControlXL::dm_mb_comp, this, SendB6, CompMakeup)),
-				boost::bind(&LaunchControlXL::dm_mb_comp_enabled,this));
-		MAKE_DM_KNOB (SendB8, 36, 15, GreenFull, GreenLow, boost::function<void ()>
-				(boost::bind (&LaunchControlXL::dm_mb_comp, this, SendB8, CompMode)),
-				boost::bind(&LaunchControlXL::dm_mb_comp_enabled, this));
+		MAKE_DM_KNOB (SendB5, 33, 12, RedFull, RedLow, std::function<void ()>
+				(std::bind (&LaunchControlXL::dm_trim, this, SendB5)),
+				std::bind(&LaunchControlXL::dm_check_trim, this));
+		MAKE_DM_KNOB (SendB6, 34, 13, GreenFull, GreenLow, std::function<void ()>
+				(std::bind (&LaunchControlXL::dm_mb_comp, this, SendB6, CompMakeup)),
+				std::bind(&LaunchControlXL::dm_mb_comp_enabled,this));
+		MAKE_DM_KNOB (SendB8, 36, 15, GreenFull, GreenLow, std::function<void ()>
+				(std::bind (&LaunchControlXL::dm_mb_comp, this, SendB8, CompMode)),
+				std::bind(&LaunchControlXL::dm_mb_comp_enabled, this));
 
 		/* Pan Knobs -> Sends */
 		for (uint8_t i = 0; i < 8; ++i) {
-			MAKE_DM_KNOB (static_cast<KnobID>(i + 16), (i + 49), (i + 16), GreenLow, YellowLow, boost::function<void()>
-				(boost::bind (&LaunchControlXL::dm_mb_sends, this, static_cast<KnobID>(i + 16))),
-				boost::function<uint8_t ()> (boost::bind(&LaunchControlXL::dm_mb_check_send_knob, this, static_cast<KnobID>(i + 16))));
+			MAKE_DM_KNOB (static_cast<KnobID>(i + 16), (i + 49), (i + 16), GreenLow, YellowLow, std::function<void()>
+				(std::bind (&LaunchControlXL::dm_mb_sends, this, static_cast<KnobID>(i + 16))),
+				std::function<uint8_t ()> (std::bind(&LaunchControlXL::dm_mb_check_send_knob, this, static_cast<KnobID>(i + 16))));
 		}
 
 		if (first_selected_stripable() && (first_selected_stripable()->is_master() || first_selected_stripable()->mixbus())) {
-			MAKE_DM_KNOB (SendA1, 13, 0, AmberFull, AmberLow, boost::function<void ()>
-					(boost::bind (&LaunchControlXL::dm_mb_eq, this, SendA1, true, 0)),
-					boost::function<uint8_t ()> (boost::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 0)));
-			MAKE_DM_KNOB (SendA2, 14, 1, AmberFull, AmberLow, boost::function<void ()>
-					(boost::bind (&LaunchControlXL::dm_mb_eq, this, SendA2, true, 1)),
-					boost::function<uint8_t ()> (boost::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 1)));
-			MAKE_DM_KNOB (SendA3, 15, 2, AmberFull, AmberLow, boost::function<void ()>
-					(boost::bind (&LaunchControlXL::dm_mb_eq, this, SendA3, true, 2)),
-					boost::function<uint8_t ()> (boost::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 2)));
-			MAKE_DM_KNOB (SendA6, 18, 5, RedLow, RedLow, boost::function<void ()>
-					(boost::bind (&LaunchControlXL::dm_pan_width, this, SendA6)),
-					boost::bind(&LaunchControlXL::dm_check_pan_width, this));
-			MAKE_DM_KNOB (SendA7, 19, 6, AmberLow, AmberLow, boost::function<void ()>
-					(boost::bind (&LaunchControlXL::dm_mb_tapedrive, this, SendA7)),
-					boost::bind(&LaunchControlXL::dm_mb_has_tapedrive, this));
+			MAKE_DM_KNOB (SendA1, 13, 0, AmberFull, AmberLow, std::function<void ()>
+					(std::bind (&LaunchControlXL::dm_mb_eq, this, SendA1, true, 0)),
+					std::function<uint8_t ()> (std::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 0)));
+			MAKE_DM_KNOB (SendA2, 14, 1, AmberFull, AmberLow, std::function<void ()>
+					(std::bind (&LaunchControlXL::dm_mb_eq, this, SendA2, true, 1)),
+					std::function<uint8_t ()> (std::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 1)));
+			MAKE_DM_KNOB (SendA3, 15, 2, AmberFull, AmberLow, std::function<void ()>
+					(std::bind (&LaunchControlXL::dm_mb_eq, this, SendA3, true, 2)),
+					std::function<uint8_t ()> (std::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 2)));
+			MAKE_DM_KNOB (SendA6, 18, 5, RedLow, RedLow, std::function<void ()>
+					(std::bind (&LaunchControlXL::dm_pan_width, this, SendA6)),
+					std::bind(&LaunchControlXL::dm_check_pan_width, this));
+			MAKE_DM_KNOB (SendA7, 19, 6, AmberLow, AmberLow, std::function<void ()>
+					(std::bind (&LaunchControlXL::dm_mb_tapedrive, this, SendA7)),
+					std::bind(&LaunchControlXL::dm_mb_has_tapedrive, this));
 		} else {
-			MAKE_DM_KNOB (SendA1, 13, 0, AmberFull, AmberLow, boost::function<void ()>
-			              (boost::bind (&LaunchControlXL::dm_mb_eq, this, SendA1, false, 0)),
-			              boost::bind(&LaunchControlXL::dm_mb_eq_freq_enabled, this));
-			MAKE_DM_KNOB (SendA2, 14, 1, AmberFull, AmberLow, boost::function<void ()>
-			              (boost::bind (&LaunchControlXL::dm_mb_eq, this, SendA2, true, 0)),
-			              boost::function<uint8_t ()> (boost::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 0)));
-			MAKE_DM_KNOB (SendA3, 15, 2, YellowLow, AmberLow, boost::function<void ()>
-			              (boost::bind (&LaunchControlXL::dm_mb_eq, this, SendA3, false, 1)),
-			              boost::bind(&LaunchControlXL::dm_mb_eq_freq_enabled, this));
-			MAKE_DM_KNOB (SendA4, 16, 3, YellowLow, AmberLow, boost::function<void ()>
-			              (boost::bind (&LaunchControlXL::dm_mb_eq, this, SendA4, true, 1)),
-			              boost::function<uint8_t ()> (boost::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 1)));
-			MAKE_DM_KNOB (SendA5, 17, 4, AmberFull, AmberLow, boost::function<void ()>
-			              (boost::bind (&LaunchControlXL::dm_mb_eq, this, SendA5, false, 2)),
-			              boost::bind(&LaunchControlXL::dm_mb_eq_freq_enabled, this));
-			MAKE_DM_KNOB (SendA6, 18, 5, AmberFull, AmberLow, boost::function<void ()>
-			              (boost::bind (&LaunchControlXL::dm_mb_eq, this, SendA6, true, 2)),
-			              boost::function<uint8_t ()> (boost::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 2)));
-			MAKE_DM_KNOB (SendA7, 19, 6, YellowLow, AmberLow, boost::function<void ()>
-			              (boost::bind (&LaunchControlXL::dm_mb_eq, this, SendA7, false, 3)),
-			              boost::bind(&LaunchControlXL::dm_mb_eq_freq_enabled, this));
-			MAKE_DM_KNOB (SendA8, 20, 7, YellowLow, AmberLow, boost::function<void ()>
-			              (boost::bind (&LaunchControlXL::dm_mb_eq, this, SendA8, true, 3)),
-			              boost::function<uint8_t ()> (boost::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 3)));
+			MAKE_DM_KNOB (SendA1, 13, 0, AmberFull, AmberLow, std::function<void ()>
+			              (std::bind (&LaunchControlXL::dm_mb_eq, this, SendA1, false, 0)),
+			              std::bind(&LaunchControlXL::dm_mb_eq_freq_enabled, this));
+			MAKE_DM_KNOB (SendA2, 14, 1, AmberFull, AmberLow, std::function<void ()>
+			              (std::bind (&LaunchControlXL::dm_mb_eq, this, SendA2, true, 0)),
+			              std::function<uint8_t ()> (std::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 0)));
+			MAKE_DM_KNOB (SendA3, 15, 2, YellowLow, AmberLow, std::function<void ()>
+			              (std::bind (&LaunchControlXL::dm_mb_eq, this, SendA3, false, 1)),
+			              std::bind(&LaunchControlXL::dm_mb_eq_freq_enabled, this));
+			MAKE_DM_KNOB (SendA4, 16, 3, YellowLow, AmberLow, std::function<void ()>
+			              (std::bind (&LaunchControlXL::dm_mb_eq, this, SendA4, true, 1)),
+			              std::function<uint8_t ()> (std::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 1)));
+			MAKE_DM_KNOB (SendA5, 17, 4, AmberFull, AmberLow, std::function<void ()>
+			              (std::bind (&LaunchControlXL::dm_mb_eq, this, SendA5, false, 2)),
+			              std::bind(&LaunchControlXL::dm_mb_eq_freq_enabled, this));
+			MAKE_DM_KNOB (SendA6, 18, 5, AmberFull, AmberLow, std::function<void ()>
+			              (std::bind (&LaunchControlXL::dm_mb_eq, this, SendA6, true, 2)),
+			              std::function<uint8_t ()> (std::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 2)));
+			MAKE_DM_KNOB (SendA7, 19, 6, YellowLow, AmberLow, std::function<void ()>
+			              (std::bind (&LaunchControlXL::dm_mb_eq, this, SendA7, false, 3)),
+			              std::bind(&LaunchControlXL::dm_mb_eq_freq_enabled, this));
+			MAKE_DM_KNOB (SendA8, 20, 7, YellowLow, AmberLow, std::function<void ()>
+			              (std::bind (&LaunchControlXL::dm_mb_eq, this, SendA8, true, 3)),
+			              std::function<uint8_t ()> (std::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 3)));
 		}
-			MAKE_DM_KNOB (SendB1, 29, 8, YellowFull, AmberLow, boost::function<void ()>
-			              (boost::bind (&LaunchControlXL::dm_mb_flt_frq, this, SendB1, true)),
-			              boost::bind(&LaunchControlXL::dm_mb_flt_enabled, this));
-			MAKE_DM_KNOB (SendB2, 30, 9, YellowFull, AmberLow, boost::function<void ()>
-			              (boost::bind (&LaunchControlXL::dm_mb_flt_frq, this, SendB2, false)),
-			              boost::bind(&LaunchControlXL::dm_mb_flt_enabled, this));
-			MAKE_DM_KNOB (SendB4, 32, 11, RedLow, AmberLow, boost::function<void ()>
-			              (boost::bind (&LaunchControlXL::dm_pan_azi, this, SendB4)),
-			              boost::bind(&LaunchControlXL::dm_check_pan_azi, this));
+			MAKE_DM_KNOB (SendB1, 29, 8, YellowFull, AmberLow, std::function<void ()>
+			              (std::bind (&LaunchControlXL::dm_mb_flt_frq, this, SendB1, true)),
+			              std::bind(&LaunchControlXL::dm_mb_flt_enabled, this));
+			MAKE_DM_KNOB (SendB2, 30, 9, YellowFull, AmberLow, std::function<void ()>
+			              (std::bind (&LaunchControlXL::dm_mb_flt_frq, this, SendB2, false)),
+			              std::bind(&LaunchControlXL::dm_mb_flt_enabled, this));
+			MAKE_DM_KNOB (SendB4, 32, 11, RedLow, AmberLow, std::function<void ()>
+			              (std::bind (&LaunchControlXL::dm_pan_azi, this, SendB4)),
+			              std::bind(&LaunchControlXL::dm_check_pan_azi, this));
 
 #else // from here Ardour
 #endif
@@ -174,16 +174,16 @@ LaunchControlXL::build_maps ()
 
 	if (!device_mode()) {	/* mix mode */
 		for (uint8_t i = 0; i < 8; ++i) {
-			MAKE_FADER(static_cast<FaderID>(i), i+77, boost::function<void()>
-				(boost::bind (&LaunchControlXL::fader, this, i)));
+			MAKE_FADER(static_cast<FaderID>(i), i+77, std::function<void()>
+				(std::bind (&LaunchControlXL::fader, this, i)));
 		}
 
 	} else {	/* device mode */
-		MAKE_FADER(Fader1, 77,  boost::function<void()>
-			(boost::bind (&LaunchControlXL::dm_fader, this, Fader1)));
+		MAKE_FADER(Fader1, 77,  std::function<void()>
+			(std::bind (&LaunchControlXL::dm_fader, this, Fader1)));
 #ifdef MIXBUS
-		MAKE_FADER(Fader2, 78,  boost::function<void()>
-			(boost::bind (&LaunchControlXL::dm_mb_comp_thresh, this, Fader2)));
+		MAKE_FADER(Fader2, 78,  std::function<void()>
+			(std::bind (&LaunchControlXL::dm_mb_comp_thresh, this, Fader2)));
 #endif
 	}
 
@@ -194,22 +194,22 @@ LaunchControlXL::build_maps ()
 
 	#define MAKE_TRACK_BUTTON_PRESS(i,nn,index,c_on,c_off,p,check) \
 		note_button.reset (new TrackButton ((i), (nn), (index), (c_on), (c_off), (p), \
-		boost::bind(&LaunchControlXL::relax, this), boost::bind(&LaunchControlXL::relax, this), (check), (*this))); \
+		std::bind(&LaunchControlXL::relax, this), std::bind(&LaunchControlXL::relax, this), (check), (*this))); \
 		nn_note_button_map.insert (std::make_pair (note_button->note_number(), note_button)); \
 		id_note_button_map.insert (std::make_pair (note_button->id(), note_button))
 	#define MAKE_CTRL_BUTTON_PRESS(i,nn,index,c_on,c_off,p,check) \
 		note_button.reset (new TrackButton ((i), (nn), (index), (c_on), (c_off),  (p), \
-		boost::bind(&LaunchControlXL::relax, this), boost::bind(&LaunchControlXL::relax, this), (check), (*this))); \
+		std::bind(&LaunchControlXL::relax, this), std::bind(&LaunchControlXL::relax, this), (check), (*this))); \
 		nn_note_button_map.insert (std::make_pair (note_button->note_number(), note_button)); \
 		id_note_button_map.insert (std::make_pair (note_button->id(), note_button))
 	#define MAKE_SELECT_BUTTON_PRESS(i,cc,index,p) \
 		controller_button.reset (new SelectButton ((i), (cc), (index), (p), \
-		boost::bind(&LaunchControlXL::relax, this), boost::bind(&LaunchControlXL::relax, this), (*this))); \
+		std::bind(&LaunchControlXL::relax, this), std::bind(&LaunchControlXL::relax, this), (*this))); \
 		cc_controller_button_map.insert (std::make_pair (controller_button->controller_number(), controller_button)); \
 		id_controller_button_map.insert (std::make_pair (controller_button->id(), controller_button))
 	#define MAKE_TRACK_STATE_BUTTON_PRESS(i,nn,index,p) \
 		note_button.reset (new TrackStateButton ((i), (nn), (index), (p), \
-		boost::bind(&LaunchControlXL::relax, this), boost::bind(&LaunchControlXL::relax, this), (*this))); \
+		std::bind(&LaunchControlXL::relax, this), std::bind(&LaunchControlXL::relax, this), (*this))); \
 		nn_note_button_map.insert (std::make_pair (note_button->note_number(), note_button)); \
 		id_note_button_map.insert (std::make_pair (note_button->id(), note_button))
 		#define MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(i,nn,index, p,r,l) \
@@ -221,29 +221,29 @@ LaunchControlXL::build_maps ()
 	if (!device_mode()) {	/* mixer mode */
 		for (uint8_t i = 0; i < 4; ++i) {
 			MAKE_TRACK_BUTTON_PRESS(static_cast<ButtonID>(i), i+41, i+24, YellowFull, YellowLow,
-				boost::function<void()>	(boost::bind (&LaunchControlXL::button_track_focus, this, i)),
-				boost::function<uint8_t()> (boost::bind (&LaunchControlXL::dm_check_dummy, this, dev_nonexistant)));
+				std::function<void()>	(std::bind (&LaunchControlXL::button_track_focus, this, i)),
+				std::function<uint8_t()> (std::bind (&LaunchControlXL::dm_check_dummy, this, dev_nonexistant)));
 		}
 
 		for (uint8_t i = 0; i < 4; ++i) {
 			MAKE_TRACK_BUTTON_PRESS(static_cast<ButtonID>(i+4), i+57, i+28, YellowFull, YellowLow,
-				boost::function<void()>	(boost::bind (&LaunchControlXL::button_track_focus, this, i+4)),
-				boost::function<uint8_t()> (boost::bind (&LaunchControlXL::dm_check_dummy, this, dev_nonexistant)));
+				std::function<void()>	(std::bind (&LaunchControlXL::button_track_focus, this, i+4)),
+				std::function<uint8_t()> (std::bind (&LaunchControlXL::dm_check_dummy, this, dev_nonexistant)));
 		}
 
 	} else {		/* device mode */
 #ifdef MIXBUS
 		for (uint8_t i = 0; i < 4; ++i) {
 			MAKE_TRACK_BUTTON_PRESS(static_cast<ButtonID>(i), i+41, i+24, GreenFull, YellowLow,
-				boost::function<void()>	(boost::bind (&LaunchControlXL::dm_mb_send_switch, this, static_cast<ButtonID>(i))),
-				boost::function<uint8_t()> (boost::bind (&LaunchControlXL::dm_mb_check_send_button, this, i)));
+				std::function<void()>	(std::bind (&LaunchControlXL::dm_mb_send_switch, this, static_cast<ButtonID>(i))),
+				std::function<uint8_t()> (std::bind (&LaunchControlXL::dm_mb_check_send_button, this, i)));
 
 		}
 
 		for (uint8_t i = 0; i < 4; ++i) {
 			MAKE_TRACK_BUTTON_PRESS(static_cast<ButtonID>(i+4), i+57, i+28, GreenFull, YellowLow,
-				boost::function<void()>	(boost::bind (&LaunchControlXL::dm_mb_send_switch, this, static_cast<ButtonID>(i+4))),
-				boost::function<uint8_t()> (boost::bind (&LaunchControlXL::dm_mb_check_send_button, this, i+4)));
+				std::function<void()>	(std::bind (&LaunchControlXL::dm_mb_send_switch, this, static_cast<ButtonID>(i+4))),
+				std::function<uint8_t()> (std::bind (&LaunchControlXL::dm_mb_check_send_button, this, i+4)));
 		}
 #endif
 	}
@@ -252,36 +252,36 @@ LaunchControlXL::build_maps ()
 		/* Control Buttons in mix mode change their color dynamically so we won't set them here */
 		for (uint8_t i = 0; i < 4; ++i) {
 			MAKE_CTRL_BUTTON_PRESS(static_cast<ButtonID>(i+8), i+73, i+32, Off, Off,
-				boost::function<void()>	(boost::bind (&LaunchControlXL::button_press_track_control, this, i)),
-				boost::function<uint8_t()> (boost::bind (&LaunchControlXL::dm_check_dummy, this, dev_nonexistant)));
+				std::function<void()>	(std::bind (&LaunchControlXL::button_press_track_control, this, i)),
+				std::function<uint8_t()> (std::bind (&LaunchControlXL::dm_check_dummy, this, dev_nonexistant)));
 		}
 
 		for (uint8_t i = 0; i < 4; ++i) {
 			MAKE_CTRL_BUTTON_PRESS(static_cast<ButtonID>(i+12), i+89, i+36, Off, Off,
-				boost::function<void()>	(boost::bind (&LaunchControlXL::button_press_track_control, this, i+4)),
-				boost::function<uint8_t()> (boost::bind (&LaunchControlXL::dm_check_dummy, this, dev_nonexistant)));
+				std::function<void()>	(std::bind (&LaunchControlXL::button_press_track_control, this, i+4)),
+				std::function<uint8_t()> (std::bind (&LaunchControlXL::dm_check_dummy, this, dev_nonexistant)));
 		}
 
 	} else { /*device mode */
 #ifdef MIXBUS // from here Mixbus Standard + 32C
-		MAKE_CTRL_BUTTON_PRESS(Control1, 73, 32, YellowFull, YellowLow, (boost::bind (&LaunchControlXL::dm_mute_switch, this)),
-			boost::bind (&LaunchControlXL::dm_mute_enabled, this));
-		MAKE_CTRL_BUTTON_PRESS(Control2, 74, 33, GreenFull, GreenLow, (boost::bind (&LaunchControlXL::dm_solo_switch, this)),
-			boost::bind (&LaunchControlXL::dm_solo_enabled, this));
-		MAKE_CTRL_BUTTON_PRESS(Control3, 75, 34, AmberFull, AmberLow, (boost::bind (&LaunchControlXL::dm_mb_eq_switch, this)),
-			boost::function<uint8_t()> (boost::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 0)));
+		MAKE_CTRL_BUTTON_PRESS(Control1, 73, 32, YellowFull, YellowLow, (std::bind (&LaunchControlXL::dm_mute_switch, this)),
+			std::bind (&LaunchControlXL::dm_mute_enabled, this));
+		MAKE_CTRL_BUTTON_PRESS(Control2, 74, 33, GreenFull, GreenLow, (std::bind (&LaunchControlXL::dm_solo_switch, this)),
+			std::bind (&LaunchControlXL::dm_solo_enabled, this));
+		MAKE_CTRL_BUTTON_PRESS(Control3, 75, 34, AmberFull, AmberLow, (std::bind (&LaunchControlXL::dm_mb_eq_switch, this)),
+			std::function<uint8_t()> (std::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 0)));
 		MAKE_CTRL_BUTTON_PRESS(Control4, 76, 35, AmberFull, AmberLow,
-			boost::function<void()> (boost::bind (&LaunchControlXL::dm_mb_eq_shape_switch, this, 0)),
-			boost::function<uint8_t()> (boost::bind(&LaunchControlXL::dm_mb_eq_shape_enabled, this, 0 )));
+			std::function<void()> (std::bind (&LaunchControlXL::dm_mb_eq_shape_switch, this, 0)),
+			std::function<uint8_t()> (std::bind(&LaunchControlXL::dm_mb_eq_shape_enabled, this, 0 )));
 		MAKE_CTRL_BUTTON_PRESS(Control5, 89, 36, AmberFull, AmberLow,
-			boost::function<void()> (boost::bind (&LaunchControlXL::dm_mb_eq_shape_switch, this, 3)),
-			boost::function<uint8_t()> (boost::bind(&LaunchControlXL::dm_mb_eq_shape_enabled, this, 3 )));
-		MAKE_CTRL_BUTTON_PRESS(Control6, 90, 37, YellowFull, YellowLow, (boost::bind (&LaunchControlXL::dm_mb_flt_switch, this)),
-			boost::bind(&LaunchControlXL::dm_mb_flt_enabled, this));
-		MAKE_CTRL_BUTTON_PRESS(Control7, 91, 38, GreenFull, GreenLow, (boost::bind (&LaunchControlXL::dm_mb_master_assign_switch, this)),
-			boost::bind(&LaunchControlXL::dm_mb_master_assign_enabled, this));
-		MAKE_CTRL_BUTTON_PRESS(Control8, 92, 39, GreenFull, GreenLow, (boost::bind (&LaunchControlXL::dm_mb_comp_switch, this)),
-			boost::bind(&LaunchControlXL::dm_mb_comp_enabled, this));
+			std::function<void()> (std::bind (&LaunchControlXL::dm_mb_eq_shape_switch, this, 3)),
+			std::function<uint8_t()> (std::bind(&LaunchControlXL::dm_mb_eq_shape_enabled, this, 3 )));
+		MAKE_CTRL_BUTTON_PRESS(Control6, 90, 37, YellowFull, YellowLow, (std::bind (&LaunchControlXL::dm_mb_flt_switch, this)),
+			std::bind(&LaunchControlXL::dm_mb_flt_enabled, this));
+		MAKE_CTRL_BUTTON_PRESS(Control7, 91, 38, GreenFull, GreenLow, (std::bind (&LaunchControlXL::dm_mb_master_assign_switch, this)),
+			std::bind(&LaunchControlXL::dm_mb_master_assign_enabled, this));
+		MAKE_CTRL_BUTTON_PRESS(Control8, 92, 39, GreenFull, GreenLow, (std::bind (&LaunchControlXL::dm_mb_comp_switch, this)),
+			std::bind(&LaunchControlXL::dm_mb_comp_enabled, this));
 #else // Ardour
 #endif
 	}
@@ -289,38 +289,38 @@ LaunchControlXL::build_maps ()
 	/* Select and Mode Buttons on the right side */
 
 	/* Sends Select buttons are independent of mode */
-	MAKE_SELECT_BUTTON_PRESS(SelectUp, 104, 44, boost::function<void()> (boost::bind (&LaunchControlXL::send_bank_switch, this, false)));
-	MAKE_SELECT_BUTTON_PRESS(SelectDown, 105, 45,  boost::function<void()> (boost::bind (&LaunchControlXL::send_bank_switch, this, true)));
+	MAKE_SELECT_BUTTON_PRESS(SelectUp, 104, 44, std::function<void()> (std::bind (&LaunchControlXL::send_bank_switch, this, false)));
+	MAKE_SELECT_BUTTON_PRESS(SelectDown, 105, 45,  std::function<void()> (std::bind (&LaunchControlXL::send_bank_switch, this, true)));
 
 	/* Device Button needs to be always there */
 	MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(Device, 105, 40,
-		boost::bind (&LaunchControlXL::relax, this) ,
-		boost::bind (&LaunchControlXL::button_device, this),
-	        boost::bind (&LaunchControlXL::button_device_long_press, this));
+		std::bind (&LaunchControlXL::relax, this) ,
+		std::bind (&LaunchControlXL::button_device, this),
+	        std::bind (&LaunchControlXL::button_device_long_press, this));
 
 
 	/* Cancel all mute / solo is available in both modes */
 
 	MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(Mute, 106, 41,
-			boost::bind (&LaunchControlXL::relax, this) ,
-			boost::bind (&LaunchControlXL::button_mute, this),
-	        boost::bind (&LaunchControlXL::button_mute_long_press, this));
+			std::bind (&LaunchControlXL::relax, this) ,
+			std::bind (&LaunchControlXL::button_mute, this),
+	        std::bind (&LaunchControlXL::button_mute_long_press, this));
 
 	MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(Solo, 107, 42,
-			boost::bind (&LaunchControlXL::relax, this) ,
-			boost::bind (&LaunchControlXL::button_solo, this),
-	        boost::bind (&LaunchControlXL::button_solo_long_press, this));
+			std::bind (&LaunchControlXL::relax, this) ,
+			std::bind (&LaunchControlXL::button_solo, this),
+	        std::bind (&LaunchControlXL::button_solo_long_press, this));
 
 
 	if (!device_mode()) {	/* mixer mode */
-		MAKE_SELECT_BUTTON_PRESS(SelectLeft, 106, 46, boost::bind (&LaunchControlXL::button_select_left, this));
-		MAKE_SELECT_BUTTON_PRESS(SelectRight, 107, 47, boost::bind (&LaunchControlXL::button_select_right, this));
+		MAKE_SELECT_BUTTON_PRESS(SelectLeft, 106, 46, std::bind (&LaunchControlXL::button_select_left, this));
+		MAKE_SELECT_BUTTON_PRESS(SelectRight, 107, 47, std::bind (&LaunchControlXL::button_select_right, this));
 
-		MAKE_TRACK_STATE_BUTTON_PRESS(Record, 108, 43, boost::bind (&LaunchControlXL::button_record, this));
+		MAKE_TRACK_STATE_BUTTON_PRESS(Record, 108, 43, std::bind (&LaunchControlXL::button_record, this));
 
 	} else {	/* device mode */
-		MAKE_SELECT_BUTTON_PRESS(SelectLeft, 106, 46,  boost::bind (&LaunchControlXL::dm_select_prev_strip, this));
-		MAKE_SELECT_BUTTON_PRESS(SelectRight, 107, 47,  boost::bind (&LaunchControlXL::dm_select_next_strip, this));
+		MAKE_SELECT_BUTTON_PRESS(SelectLeft, 106, 46,  std::bind (&LaunchControlXL::dm_select_prev_strip, this));
+		MAKE_SELECT_BUTTON_PRESS(SelectRight, 107, 47,  std::bind (&LaunchControlXL::dm_select_next_strip, this));
 	}
 }
 

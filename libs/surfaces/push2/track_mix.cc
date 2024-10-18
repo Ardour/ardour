@@ -467,22 +467,22 @@ TrackMixLayout::set_stripable (std::shared_ptr<Stripable> s)
 
 	if (_stripable) {
 
-		_stripable->DropReferences.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::drop_stripable, this), &_p2);
+		_stripable->DropReferences.connect (_stripable_connections, invalidator (*this), std::bind (&TrackMixLayout::drop_stripable, this), &_p2);
 
-		_stripable->PropertyChanged.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::stripable_property_change, this, _1), &_p2);
-		_stripable->presentation_info().PropertyChanged.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::stripable_property_change, this, _1), &_p2);
+		_stripable->PropertyChanged.connect (_stripable_connections, invalidator (*this), std::bind (&TrackMixLayout::stripable_property_change, this, _1), &_p2);
+		_stripable->presentation_info().PropertyChanged.connect (_stripable_connections, invalidator (*this), std::bind (&TrackMixLayout::stripable_property_change, this, _1), &_p2);
 
-		_stripable->solo_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_mute_change, this), &_p2);
-		_stripable->mute_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_mute_change, this), &_p2);
-		_stripable->solo_isolate_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_iso_change, this), &_p2);
-		_stripable->solo_safe_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_safe_change, this), &_p2);
+		_stripable->solo_control()->Changed.connect (_stripable_connections, invalidator (*this), std::bind (&TrackMixLayout::solo_mute_change, this), &_p2);
+		_stripable->mute_control()->Changed.connect (_stripable_connections, invalidator (*this), std::bind (&TrackMixLayout::solo_mute_change, this), &_p2);
+		_stripable->solo_isolate_control()->Changed.connect (_stripable_connections, invalidator (*this), std::bind (&TrackMixLayout::solo_iso_change, this), &_p2);
+		_stripable->solo_safe_control()->Changed.connect (_stripable_connections, invalidator (*this), std::bind (&TrackMixLayout::solo_safe_change, this), &_p2);
 
 		if (_stripable->rec_enable_control()) {
-			_stripable->rec_enable_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::rec_enable_change, this), &_p2);
+			_stripable->rec_enable_control()->Changed.connect (_stripable_connections, invalidator (*this), std::bind (&TrackMixLayout::rec_enable_change, this), &_p2);
 		}
 
 		if (_stripable->monitoring_control()) {
-			_stripable->monitoring_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::monitoring_change, this), &_p2);
+			_stripable->monitoring_control()->Changed.connect (_stripable_connections, invalidator (*this), std::bind (&TrackMixLayout::monitoring_change, this), &_p2);
 		}
 
 		_knobs[0]->set_controllable (_stripable->gain_control());

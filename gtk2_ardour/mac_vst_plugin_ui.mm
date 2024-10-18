@@ -81,7 +81,7 @@ MacVSTPluginUI::MacVSTPluginUI (std::shared_ptr<PlugInsertBase> pib, std::shared
 	pack_start (low_box, true, true);
 	low_box.show ();
 
-	vst->LoadPresetProgram.connect (_program_connection, invalidator (*this), boost::bind (&MacVSTPluginUI::set_program, this), gui_context());
+	vst->LoadPresetProgram.connect (_program_connection, invalidator (*this), std::bind (&MacVSTPluginUI::set_program, this), gui_context());
 
 	_ns_view = [[NSView new] retain];
 

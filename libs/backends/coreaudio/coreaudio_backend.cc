@@ -803,7 +803,7 @@ CoreAudioBackend::coreaudio_process_thread (void *arg)
 	}
 #endif
 
-	boost::function<void ()> f = td->f;
+	std::function<void ()> f = td->f;
 	f ();
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
@@ -816,7 +816,7 @@ CoreAudioBackend::coreaudio_process_thread (void *arg)
 }
 
 int
-CoreAudioBackend::create_process_thread (boost::function<void()> func)
+CoreAudioBackend::create_process_thread (std::function<void()> func)
 {
 	pthread_t   thread_id;
 	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC, 1e9 * _samples_per_period / _samplerate);

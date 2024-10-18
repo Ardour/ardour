@@ -289,8 +289,8 @@ SoundFileBox::set_session(Session* s)
 	} else {
 		auditioner_connections.drop_connections();
 		if (_session->the_auditioner()) {
-			_session->AuditionActive.connect(auditioner_connections, invalidator (*this), boost::bind (&SoundFileBox::audition_active, this, _1), gui_context());
-			_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), boost::bind (&SoundFileBox::audition_progress, this, _1, _2), gui_context());
+			_session->AuditionActive.connect(auditioner_connections, invalidator (*this), std::bind (&SoundFileBox::audition_active, this, _1), gui_context());
+			_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), std::bind (&SoundFileBox::audition_progress, this, _1, _2), gui_context());
 		}
 	}
 }

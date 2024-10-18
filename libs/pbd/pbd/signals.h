@@ -34,9 +34,7 @@
 
 #include <glibmm/threads.h>
 
-#include <boost/bind.hpp>
 #include <boost/bind/protect.hpp>
-#include <boost/function.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <optional>
 
@@ -51,6 +49,8 @@
 #include "pbd/stacktrace.h"
 #include <iostream>
 #endif
+
+using namespace std::placeholders;
 
 namespace PBD {
 
@@ -109,7 +109,7 @@ class SignalWithCombiner<Combiner, R(A...)> : public SignalBase
 {
 public:
 
-	typedef boost::function<R(A...)> slot_function_type;
+	typedef std::function<R(A...)> slot_function_type;
 
 private:
 
@@ -119,7 +119,7 @@ private:
 
 public:
 
-	static void compositor (typename boost::function<void(A...)> f,
+	static void compositor (typename std::function<void(A...)> f,
 	                        EventLoop* event_loop,
 	                        EventLoop::InvalidationRecord* ir, A... a);
 
@@ -296,11 +296,11 @@ class LIBPBD_API ScopedConnectionList
 
 template <typename Combiner, typename R, typename... A>
 void
-SignalWithCombiner<Combiner, R(A...)>::compositor (typename boost::function<void(A...)> f,
+SignalWithCombiner<Combiner, R(A...)>::compositor (typename std::function<void(A...)> f,
                                                    EventLoop* event_loop,
                                                    EventLoop::InvalidationRecord* ir, A... a)
 {
-	event_loop->call_slot (ir, boost::bind (f, a...));
+	event_loop->call_slot (ir, std::bind (f, a...));
 }
 
 template <typename Combiner, typename R, typename... A>

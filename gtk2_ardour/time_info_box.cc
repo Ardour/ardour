@@ -138,7 +138,7 @@ TimeInfoBox::TimeInfoBox (std::string state_node_name, bool with_punch)
 	Editor::instance().get_selection().TimeChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 	Editor::instance().get_selection().RegionsChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 
-	Editor::instance().MouseModeChanged.connect (editor_connections, invalidator(*this), boost::bind (&TimeInfoBox::track_mouse_mode, this), gui_context());
+	Editor::instance().MouseModeChanged.connect (editor_connections, invalidator(*this), std::bind (&TimeInfoBox::track_mouse_mode, this), gui_context());
 }
 
 TimeInfoBox::~TimeInfoBox ()
@@ -227,7 +227,7 @@ TimeInfoBox::set_session (Session* s)
 		punch_changed (punch);
 
 		_session->auto_punch_location_changed.connect (_session_connections, MISSING_INVALIDATOR,
-				boost::bind (&TimeInfoBox::punch_location_changed, this, _1), gui_context());
+				std::bind (&TimeInfoBox::punch_location_changed, this, _1), gui_context());
 	}
 }
 
@@ -305,7 +305,7 @@ TimeInfoBox::selection_changed ()
 			}
 			for (PlaylistSet::iterator ps = playlists.begin(); ps != playlists.end(); ++ps) {
 				(*ps)->ContentsChanged.connect (region_property_connections, invalidator (*this),
-								boost::bind (&TimeInfoBox::region_selection_changed, this), gui_context());
+								std::bind (&TimeInfoBox::region_selection_changed, this), gui_context());
 			}
 			region_selection_changed ();
 		}
@@ -366,8 +366,8 @@ TimeInfoBox::watch_punch (Location* punch)
 	assert (with_punch_clock);
 	punch_connections.drop_connections ();
 
-	punch->start_changed.connect (punch_connections, MISSING_INVALIDATOR, boost::bind (&TimeInfoBox::punch_changed, this, _1), gui_context());
-	punch->end_changed.connect (punch_connections, MISSING_INVALIDATOR, boost::bind (&TimeInfoBox::punch_changed, this, _1), gui_context());
+	punch->start_changed.connect (punch_connections, MISSING_INVALIDATOR, std::bind (&TimeInfoBox::punch_changed, this, _1), gui_context());
+	punch->end_changed.connect (punch_connections, MISSING_INVALIDATOR, std::bind (&TimeInfoBox::punch_changed, this, _1), gui_context());
 
 	punch_changed (punch);
 }

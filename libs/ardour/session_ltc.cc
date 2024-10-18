@@ -85,8 +85,8 @@ Session::ltc_tx_initialize()
 	ltc_prev_cycle = -1;
 	ltc_tx_reset();
 	ltc_tx_resync_latency (true);
-	Xrun.connect_same_thread (ltc_tx_connections, boost::bind (&Session::ltc_tx_reset, this));
-	LatencyUpdated.connect_same_thread (ltc_tx_connections, boost::bind (&Session::ltc_tx_resync_latency, this, _1));
+	Xrun.connect_same_thread (ltc_tx_connections, std::bind (&Session::ltc_tx_reset, this));
+	LatencyUpdated.connect_same_thread (ltc_tx_connections, std::bind (&Session::ltc_tx_resync_latency, this, _1));
 	restarting = false;
 }
 

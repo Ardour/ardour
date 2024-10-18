@@ -501,7 +501,7 @@ MidiCueEditor::set_box (std::shared_ptr<ARDOUR::TriggerBox> b)
 	idle_update_queued.store (0);
 
 	if (b) {
-		b->Captured.connect (capture_connections, invalidator (*this), boost::bind (&MidiCueEditor::data_captured, this, _1), gui_context());
+		b->Captured.connect (capture_connections, invalidator (*this), std::bind (&MidiCueEditor::data_captured, this, _1), gui_context());
 		/* Don't bind a shared_ptr<TriggerBox> within the lambda */
 		TriggerBox* tb (b.get());
 		b->RecEnableChanged.connect (capture_connections, invalidator (*this), [&, tb]() { box_rec_enable_change (*tb); }, gui_context());
@@ -541,7 +541,7 @@ MidiCueEditor::set_track (std::shared_ptr<ARDOUR::MidiTrack> t)
 	if (t) {
 		set_box (t->triggerbox());
 		_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &MidiCueEditor::maybe_update));
-		_track->DropReferences.connect (track_connection, invalidator (*this), boost::bind (&MidiCueEditor::set_track, this, nullptr), gui_context());
+		_track->DropReferences.connect (track_connection, invalidator (*this), std::bind (&MidiCueEditor::set_track, this, nullptr), gui_context());
 	} else {
 		set_box (nullptr);
 	}

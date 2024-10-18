@@ -137,7 +137,7 @@ ArdourMixerStrip::ArdourMixerStrip (std::shared_ptr<ARDOUR::Stripable> stripable
 		if (insert) {
 			_plugins[plugin_id] = std::shared_ptr<ArdourMixerPlugin> (new ArdourMixerPlugin (insert));
 			insert->DropReferences.connect (*_plugins[plugin_id], MISSING_INVALIDATOR,
-			                                boost::bind (&ArdourMixerStrip::on_drop_plugin, this, plugin_id), event_loop);
+			                                std::bind (&ArdourMixerStrip::on_drop_plugin, this, plugin_id), event_loop);
 		}
 	}
 }
@@ -297,7 +297,7 @@ ArdourMixer::start ()
 	for (StripableList::iterator it = strips.begin (); it != strips.end (); ++it) {
 		_strips[strip_id] = std::shared_ptr<ArdourMixerStrip> (new ArdourMixerStrip (*it, event_loop ()));
 		(*it)->DropReferences.connect (*_strips[strip_id], MISSING_INVALIDATOR,
-		                               boost::bind (&ArdourMixer::on_drop_strip, this, strip_id), event_loop ());
+		                               std::bind (&ArdourMixer::on_drop_strip, this, strip_id), event_loop ());
 		strip_id++;
 	}
 

@@ -96,7 +96,7 @@ class MyEventLoop : public sigc::trackable, public EventLoop
 			run_loop_thread = Glib::Threads::Thread::self();
 		}
 
-		bool call_slot (InvalidationRecord*, const boost::function<void()>& f) {
+		bool call_slot (InvalidationRecord*, const std::function<void()>& f) {
 			if (Glib::Threads::Thread::self() == run_loop_thread) {
 				f ();
 			}

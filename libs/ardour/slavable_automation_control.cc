@@ -198,7 +198,7 @@ SlavableAutomationControl::add_master (std::shared_ptr<AutomationControl> m)
 			   avoiding holding a reference to the control in the binding
 			   itself.
 			*/
-			m->DropReferences.connect_same_thread (res.first->second.dropped_connection, boost::bind (&SlavableAutomationControl::master_going_away, this, std::weak_ptr<AutomationControl>(m)));
+			m->DropReferences.connect_same_thread (res.first->second.dropped_connection, std::bind (&SlavableAutomationControl::master_going_away, this, std::weak_ptr<AutomationControl>(m)));
 
 			/* Store the connection inside the MasterRecord, so
 			   that when we destroy it, the connection is destroyed
@@ -216,7 +216,7 @@ SlavableAutomationControl::add_master (std::shared_ptr<AutomationControl> m)
 			   because the change came from the master.
 			*/
 
-			m->Changed.connect_same_thread (res.first->second.changed_connection, boost::bind (&SlavableAutomationControl::master_changed, this, _1, _2, std::weak_ptr<AutomationControl>(m)));
+			m->Changed.connect_same_thread (res.first->second.changed_connection, std::bind (&SlavableAutomationControl::master_changed, this, _1, _2, std::weak_ptr<AutomationControl>(m)));
 		}
 	}
 
@@ -370,12 +370,12 @@ SlavableAutomationControl::remove_master (std::shared_ptr<AutomationControl> m)
 		if (_list) {
 			XMLNode* before = &alist ()->get_state ();
 			if (master->automation_playback () && master->list()) {
-				_list->list_merge (*master->list().get(), boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, _2));
+				_list->list_merge (*master->list().get(), std::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, _2));
 				printf ("y-t %s  %f\n", name().c_str(), list_ratio);
-				_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, list_ratio));
+				_list->y_transform (std::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, list_ratio));
 			} else {
 				// do we need to freeze/thaw the list? probably no: iterators & positions don't change
-				_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, master_ratio));
+				_list->y_transform (std::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, master_ratio));
 			}
 			XMLNode* after = &alist ()->get_state ();
 			if (*before != *after) {
@@ -448,11 +448,11 @@ SlavableAutomationControl::clear_masters ()
 				XMLNode* before = &alist ()->get_state ();
 				if (!masters.empty()) {
 					for (AutomationControlList::const_iterator m = masters.begin(); m != masters.end(); ++m) {
-						_list->list_merge (*(*m)->list().get(), boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, _2));
+						_list->list_merge (*(*m)->list().get(), std::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, _2));
 					}
-					_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, list_ratio));
+					_list->y_transform (std::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, list_ratio));
 				} else {
-					_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, master_ratio));
+					_list->y_transform (std::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, master_ratio));
 				}
 				XMLNode* after = &alist ()->get_state ();
 				if (*before != *after) {

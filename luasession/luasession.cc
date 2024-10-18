@@ -109,7 +109,7 @@ public:
 		run_loop_thread = Glib::Threads::Thread::self ();
 	}
 
-	bool call_slot (InvalidationRecord* ir, const boost::function<void ()>& f)
+	bool call_slot (InvalidationRecord* ir, const std::function<void ()>& f)
 	{
 		if (Glib::Threads::Thread::self () == run_loop_thread) {
 			cout << string_compose ("%1/%2 direct dispatch of call slot via functor @ %3, invalidation %4\n", event_loop_name (), pthread_name (), &f, ir);
@@ -450,7 +450,7 @@ setup_lua ()
 
 	AudioEngine::instance ()->stop ();
 
-	AudioEngine::instance ()->Halted.connect_same_thread (engine_connections, boost::bind (&engine_halted, _1));
+	AudioEngine::instance ()->Halted.connect_same_thread (engine_connections, std::bind (&engine_halted, _1));
 }
 
 static int

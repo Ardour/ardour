@@ -290,13 +290,13 @@ MidiPatchManager::load_midnams ()
 void
 MidiPatchManager::load_midnams_in_thread ()
 {
-	_midnam_load_thread = PBD::Thread::create (boost::bind (&MidiPatchManager::load_midnams, this), "MIDNAMLoader");
+	_midnam_load_thread = PBD::Thread::create (std::bind (&MidiPatchManager::load_midnams, this), "MIDNAMLoader");
 }
 
 void
 MidiPatchManager::maybe_use (PBD::ScopedConnectionList& cl,
                              PBD::EventLoop::InvalidationRecord* ir,
-                             const boost::function<void()> & midnam_info_method,
+                             const std::function<void()> & midnam_info_method,
                              PBD::EventLoop* event_loop)
 {
 	{

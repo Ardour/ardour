@@ -104,7 +104,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 
 	std::string    get_last_backend_error () const { return _last_backend_error_string; }
 
-	int            create_process_thread (boost::function<void()> func);
+	int            create_process_thread (std::function<void()> func);
 	int            join_process_threads ();
 	bool           in_process_thread ();
 	uint32_t       process_thread_count ();

@@ -128,7 +128,7 @@ US2400Protocol::US2400Protocol (Session& session)
 		_last_bank[i] = 0;
 	}
 
-	PresentationInfo::Change.connect (gui_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_presentation_info_changed, this, _1), this);
+	PresentationInfo::Change.connect (gui_connections, MISSING_INVALIDATOR, std::bind (&US2400Protocol::notify_presentation_info_changed, this, _1), this);
 
 	_instance = this;
 
@@ -627,20 +627,20 @@ void
 US2400Protocol::connect_session_signals()
 {
 	// receive routes added
-	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_routes_added, this, _1), this);
+	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, std::bind (&US2400Protocol::notify_routes_added, this, _1), this);
 	// receive VCAs added
-	session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_vca_added, this, _1), this);
+	session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, std::bind (&US2400Protocol::notify_vca_added, this, _1), this);
 
 	// receive record state toggled
-	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_record_state_changed, this), this);
+	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, std::bind (&US2400Protocol::notify_record_state_changed, this), this);
 	// receive transport state changed
-	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_transport_state_changed, this), this);
-	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_loop_state_changed, this), this);
+	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, std::bind (&US2400Protocol::notify_transport_state_changed, this), this);
+	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, std::bind (&US2400Protocol::notify_loop_state_changed, this), this);
 	// receive punch-in and punch-out
-	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_parameter_changed, this, _1), this);
-	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_parameter_changed, this, _1), this);
+	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, std::bind (&US2400Protocol::notify_parameter_changed, this, _1), this);
+	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, std::bind (&US2400Protocol::notify_parameter_changed, this, _1), this);
 	// receive rude solo changed
-	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_solo_active_changed, this, _1), this);
+	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, std::bind (&US2400Protocol::notify_solo_active_changed, this, _1), this);
 
 	// make sure remote id changed signals reach here
 	// see also notify_stripable_added
@@ -703,7 +703,7 @@ US2400Protocol::set_device (const string& device_name, bool force)
 	   loop, not in the thread where the
 	   PortConnectedOrDisconnected signal is emitted.
 	*/
-	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::connection_handler, this, _1, _2, _3, _4, _5), this);
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, std::bind (&US2400Protocol::connection_handler, this, _1, _2, _3, _4, _5), this);
 
 	if (create_surfaces ()) {
 		return -1;
@@ -1441,7 +1441,7 @@ US2400Protocol::set_subview_mode (SubViewMode sm, std::shared_ptr<Stripable> r)
 		/* Catch the current subview stripable going away */
 		if (_subview_stripable) {
 			_subview_stripable->DropReferences.connect (subview_stripable_connections, MISSING_INVALIDATOR,
-			                                            boost::bind (&US2400Protocol::notify_subview_stripable_deleted, this),
+			                                            std::bind (&US2400Protocol::notify_subview_stripable_deleted, this),
 			                                            this);
 		}
 	}

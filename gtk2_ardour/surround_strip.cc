@@ -237,7 +237,7 @@ SurroundStrip::init ()
 
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &SurroundStrip::parameter_changed));
 
-	//PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&SurroundStrip::presentation_info_changed, this, _1), gui_context ());
+	//PresentationInfo::Change.connect (*this, invalidator (*this), std::bind (&SurroundStrip::presentation_info_changed, this, _1), gui_context ());
 }
 
 void
@@ -307,9 +307,9 @@ SurroundStrip::set_route (std::shared_ptr<Route> r)
 	/* set up metering */
 	_route->set_meter_type (MeterPeak0dB);
 
-	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&SurroundStrip::setup_comment_button, this), gui_context ());
+	_route->comment_changed.connect (route_connections, invalidator (*this), std::bind (&SurroundStrip::setup_comment_button, this), gui_context ());
 
-	_route->gain_control ()->MasterStatusChange.connect (route_connections, invalidator (*this), boost::bind (&SurroundStrip::update_spacers, this), gui_context());
+	_route->gain_control ()->MasterStatusChange.connect (route_connections, invalidator (*this), std::bind (&SurroundStrip::update_spacers, this), gui_context());
 
 	/* now force an update of all the various elements */
 	name_changed ();

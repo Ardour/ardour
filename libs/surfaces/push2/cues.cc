@@ -151,7 +151,7 @@ CueLayout::CueLayout (Push2& p, Session & s, std::string const & name)
 		_clip_label_text.push_back (t);
 	}
 
-	_session.RouteAdded.connect (_session_connections, invalidator(*this), boost::bind (&CueLayout::viewport_changed, this), &_p2);
+	_session.RouteAdded.connect (_session_connections, invalidator(*this), std::bind (&CueLayout::viewport_changed, this), &_p2);
 }
 
 CueLayout::~CueLayout ()
@@ -375,8 +375,8 @@ CueLayout::viewport_changed ()
 		std::shared_ptr<Push2::Button> lower_button = _p2.lower_button_by_column (n);
 
 		if (r) {
-			_route[n]->DropReferences.connect (_route_connections, invalidator (*this), boost::bind (&CueLayout::viewport_changed, this), &_p2);
-			_route[n]->presentation_info().PropertyChanged.connect (_route_connections, invalidator (*this), boost::bind (&CueLayout::route_property_change, this, _1, n), &_p2);
+			_route[n]->DropReferences.connect (_route_connections, invalidator (*this), std::bind (&CueLayout::viewport_changed, this), &_p2);
+			_route[n]->presentation_info().PropertyChanged.connect (_route_connections, invalidator (*this), std::bind (&CueLayout::route_property_change, this, _1, n), &_p2);
 
 			std::string shortname = short_version (r->name(), 10);
 			_lower_text[n]->set (shortname);
@@ -425,7 +425,7 @@ CueLayout::viewport_changed ()
 			std::shared_ptr<TriggerBox> tb = r->triggerbox ();
 
 			if (tb) {
-				tb->PropertyChanged.connect (_route_connections, invalidator (*this), boost::bind (&CueLayout::triggerbox_property_change, this, _1, n), &_p2);
+				tb->PropertyChanged.connect (_route_connections, invalidator (*this), std::bind (&CueLayout::triggerbox_property_change, this, _1, n), &_p2);
 			}
 
 			for (int y = 0; y < 8; ++y) {
@@ -435,7 +435,7 @@ CueLayout::viewport_changed ()
 					if (tp && tp->playable()) {
 						/* trigger in slot */
 						pad->set_color (color);
-						tp->PropertyChanged.connect (_trig_connections[n * 8 + y], invalidator (*this), boost::bind (&CueLayout::trigger_property_change, this, _1, n, y), &_p2);
+						tp->PropertyChanged.connect (_trig_connections[n * 8 + y], invalidator (*this), std::bind (&CueLayout::trigger_property_change, this, _1, n, y), &_p2);
 
 					} else {
 						/* no trigger */

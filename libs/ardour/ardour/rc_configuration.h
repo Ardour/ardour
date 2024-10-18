@@ -42,7 +42,7 @@ class LIBARDOUR_API RCConfiguration : public PBD::Configuration
 	RCConfiguration();
 	~RCConfiguration();
 
-	void map_parameters (boost::function<void (std::string)>&);
+	void map_parameters (std::function<void (std::string)>&);
 	int set_state (XMLNode const &, int version);
 	XMLNode& get_state () const;
 	XMLNode& get_variables (std::string const & nodename) const;

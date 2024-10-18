@@ -153,31 +153,31 @@ PortMatrix::init ()
 
 	for (int i = 0; i < 2; ++i) {
 		/* watch for the content of _ports[] changing */
-		_ports[i].Changed.connect (_changed_connections, invalidator (*this), boost::bind (&PortMatrix::setup, this), gui_context());
+		_ports[i].Changed.connect (_changed_connections, invalidator (*this), std::bind (&PortMatrix::setup, this), gui_context());
 
 		/* and for bundles in _ports[] changing */
-		_ports[i].BundleChanged.connect (_bundle_changed_connections, invalidator (*this), boost::bind (&PortMatrix::setup, this), gui_context());
+		_ports[i].BundleChanged.connect (_bundle_changed_connections, invalidator (*this), std::bind (&PortMatrix::setup, this), gui_context());
 	}
 
 	/* Part 2: notice when things have changed that require our subclass to clear and refill _ports[] */
 
 	/* watch for routes being added or removed */
-	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::routes_changed, this), gui_context());
+	_session->RouteAdded.connect (_session_connections, invalidator (*this), std::bind (&PortMatrix::routes_changed, this), gui_context());
 
 	/* and also bundles */
-	_session->BundleAddedOrRemoved.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
+	_session->BundleAddedOrRemoved.connect (_session_connections, invalidator (*this), std::bind (&PortMatrix::setup_global_ports, this), gui_context());
 
 	/* and also ports */
-	_session->engine().PortRegisteredOrUnregistered.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
+	_session->engine().PortRegisteredOrUnregistered.connect (_session_connections, invalidator (*this), std::bind (&PortMatrix::setup_global_ports, this), gui_context());
 
-	_session->engine().PortPrettyNameChanged.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_all_ports, this), gui_context());
+	_session->engine().PortPrettyNameChanged.connect (_session_connections, invalidator (*this), std::bind (&PortMatrix::setup_all_ports, this), gui_context());
 
 	/* watch for route order keys changing, which changes the order of things in our global ports list(s) */
-	PresentationInfo::Change.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports_proxy, this), gui_context());
+	PresentationInfo::Change.connect (_session_connections, invalidator (*this), std::bind (&PortMatrix::setup_global_ports_proxy, this), gui_context());
 
 	/* Part 3: other stuff */
 
-	_session->engine().PortConnectedOrDisconnected.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::port_connected_or_disconnected, this), gui_context ());
+	_session->engine().PortConnectedOrDisconnected.connect (_session_connections, invalidator (*this), std::bind (&PortMatrix::port_connected_or_disconnected, this), gui_context ());
 
 	_hscroll.signal_value_changed().connect (sigc::mem_fun (*this, &PortMatrix::hscroll_changed));
 	_vscroll.signal_value_changed().connect (sigc::mem_fun (*this, &PortMatrix::vscroll_changed));
@@ -195,8 +195,8 @@ PortMatrix::reconnect_to_routes ()
 
 	std::shared_ptr<RouteList const> routes = _session->get_routes ();
 	for (auto const& i : *routes) {
-		i->processors_changed.connect (_route_connections, invalidator (*this), boost::bind (&PortMatrix::route_processors_changed, this, _1), gui_context());
-		i->DropReferences.connect (_route_connections, invalidator (*this), boost::bind (&PortMatrix::routes_changed, this), gui_context());
+		i->processors_changed.connect (_route_connections, invalidator (*this), std::bind (&PortMatrix::route_processors_changed, this, _1), gui_context());
+		i->DropReferences.connect (_route_connections, invalidator (*this), std::bind (&PortMatrix::routes_changed, this), gui_context());
 	}
 }
 

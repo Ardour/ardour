@@ -191,7 +191,7 @@ MidiView::set_track (std::shared_ptr<MidiTrack> mt)
 	_midi_track = mt;
 
 	if (_midi_track) {
-		_midi_track->DropReferences.connect (track_going_away_connection, invalidator (*this), boost::bind (&MidiView::track_going_away, this), gui_context());
+		_midi_track->DropReferences.connect (track_going_away_connection, invalidator (*this), std::bind (&MidiView::track_going_away, this), gui_context());
 
 		if (_midi_track->triggerbox()->record_enabled()) {
 			begin_write ();
@@ -225,7 +225,7 @@ MidiView::set_region (std::shared_ptr<MidiRegion> mr)
 		return;
 	}
 
-	_midi_region->DropReferences.connect (region_going_away_connection, invalidator (*this), boost::bind (&MidiView::region_going_away, this), gui_context());
+	_midi_region->DropReferences.connect (region_going_away_connection, invalidator (*this), std::bind (&MidiView::region_going_away, this), gui_context());
 
 	set_model (_midi_region->midi_source (0)->model());
 }
@@ -253,21 +253,21 @@ MidiView::set_model (std::shared_ptr<MidiModel> m)
 
 	connections_requiring_model.drop_connections ();
 
-	_model->ContentsChanged.connect (connections_requiring_model, invalidator (*this), boost::bind (&MidiView::model_changed, this), gui_context());
+	_model->ContentsChanged.connect (connections_requiring_model, invalidator (*this), std::bind (&MidiView::model_changed, this), gui_context());
 
 	_midi_track->playback_filter().ChannelModeChanged.connect (connections_requiring_model, invalidator (*this),
-	                                                                         boost::bind (&MidiView::midi_channel_mode_changed, this),
+	                                                                         std::bind (&MidiView::midi_channel_mode_changed, this),
 	                                                                         gui_context ());
 
 	_midi_track->instrument_info().Changed.connect (connections_requiring_model, invalidator (*this),
-	                                   boost::bind (&MidiView::instrument_settings_changed, this), gui_context());
+	                                   std::bind (&MidiView::instrument_settings_changed, this), gui_context());
 
 	_editing_context.SnapChanged.connect (connections_requiring_model, invalidator(*this),
-	                                       boost::bind (&MidiView::snap_changed, this),
+	                                       std::bind (&MidiView::snap_changed, this),
 	                                       gui_context());
 
 	_editing_context.MouseModeChanged.connect (connections_requiring_model, invalidator (*this),
-	                                            boost::bind (&MidiView::mouse_mode_changed, this),
+	                                            std::bind (&MidiView::mouse_mode_changed, this),
 	                                            gui_context ());
 
 	model_changed ();

@@ -303,7 +303,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &AutomationTimeAxisView::color_handler));
 
 	_stripable->DropReferences.connect (
-		_stripable_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::route_going_away, this), gui_context ()
+		_stripable_connections, invalidator (*this), std::bind (&AutomationTimeAxisView::route_going_away, this), gui_context ()
 		);
 
 	set_velocity_mode (_velocity_mode, true);
@@ -944,11 +944,11 @@ AutomationTimeAxisView::add_line (std::shared_ptr<EditorAutomationLine> line)
 		assert(line->the_list() == _control->list());
 
 		_control->alist()->automation_state_changed.connect (
-			_list_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::automation_state_changed, this), gui_context()
+			_list_connections, invalidator (*this), std::bind (&AutomationTimeAxisView::automation_state_changed, this), gui_context()
 			);
 
 		_control->alist()->InterpolationChanged.connect (
-			_list_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::interpolation_changed, this, _1), gui_context()
+			_list_connections, invalidator (*this), std::bind (&AutomationTimeAxisView::interpolation_changed, this, _1), gui_context()
 			);
 	}
 
@@ -1243,6 +1243,6 @@ AutomationTimeAxisView::set_selected_regionviews (RegionSelection& rs)
 MergeableLine*
 AutomationTimeAxisView::make_merger ()
 {
-	return new MergeableLine (_line, _control, nullptr, boost::bind (&AutomationTimeAxisView::set_automation_state, this, _1), boost::bind (RouteTimeAxisView::signal_ctrl_touched, false));
+	return new MergeableLine (_line, _control, nullptr, std::bind (&AutomationTimeAxisView::set_automation_state, this, _1), std::bind (RouteTimeAxisView::signal_ctrl_touched, false));
 }
 

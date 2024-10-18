@@ -40,7 +40,7 @@ PluginWindowProxy::PluginWindowProxy (std::string const& name, std::string const
 	if (!p) {
 		return;
 	}
-	p->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&PluginWindowProxy::plugin_going_away, this), gui_context ());
+	p->DropReferences.connect (*this, MISSING_INVALIDATOR, std::bind (&PluginWindowProxy::plugin_going_away, this), gui_context ());
 }
 
 PluginWindowProxy::~PluginWindowProxy ()

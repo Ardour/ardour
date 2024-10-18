@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <boost/function.hpp>
 
 #include <glib.h>
 #include <glibmm/main.h>
@@ -27,7 +26,7 @@
 class LIBPBD_API GlibEventLoopCallback
 {
   public:
-	GlibEventLoopCallback (boost::function<void()> callback);
+	GlibEventLoopCallback (std::function<void()> callback);
 	~GlibEventLoopCallback();
 
 	static gboolean c_prepare (GSource*, gint* timeout);
@@ -43,6 +42,6 @@ class LIBPBD_API GlibEventLoopCallback
 
 	GSourceWithParent* gsource;
 	GSourceFuncs funcs;
-	boost::function<void()> _callback;
+	std::function<void()> _callback;
 };
 

@@ -172,8 +172,8 @@ TriggerPage::TriggerPage ()
 	_content.set_data ("ardour-bindings", bindings);
 
 	/* subscribe to signals */
-	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&TriggerPage::parameter_changed, this, _1), gui_context ());
-	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&TriggerPage::pi_property_changed, this, _1), gui_context ());
+	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&TriggerPage::parameter_changed, this, _1), gui_context ());
+	PresentationInfo::Change.connect (*this, invalidator (*this), std::bind (&TriggerPage::pi_property_changed, this, _1), gui_context ());
 
 	/* init */
 	update_title ();
@@ -271,16 +271,16 @@ TriggerPage::set_session (Session* s)
 	XMLNode* node = ARDOUR_UI::instance ()->trigger_page_settings ();
 	set_state (*node, Stateful::loading_state_version);
 
-	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&TriggerPage::update_title, this), gui_context ());
-	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&TriggerPage::update_title, this), gui_context ());
+	_session->DirtyChanged.connect (_session_connections, invalidator (*this), std::bind (&TriggerPage::update_title, this), gui_context ());
+	_session->StateSaved.connect (_session_connections, invalidator (*this), std::bind (&TriggerPage::update_title, this), gui_context ());
 
-	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&TriggerPage::add_routes, this, _1), gui_context ());
-	TriggerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&TriggerPage::remove_route, this, _1), gui_context ());
+	_session->RouteAdded.connect (_session_connections, invalidator (*this), std::bind (&TriggerPage::add_routes, this, _1), gui_context ());
+	TriggerStrip::CatchDeletion.connect (*this, invalidator (*this), std::bind (&TriggerPage::remove_route, this, _1), gui_context ());
 
-	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&TriggerPage::parameter_changed, this, _1), gui_context ());
+	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), std::bind (&TriggerPage::parameter_changed, this, _1), gui_context ());
 
 	Editor::instance ().get_selection ().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerPage::selection_changed));
-	Trigger::TriggerArmChanged.connect (*this, invalidator (*this), boost::bind (&TriggerPage::rec_enable_changed, this, _1), gui_context());
+	Trigger::TriggerArmChanged.connect (*this, invalidator (*this), std::bind (&TriggerPage::rec_enable_changed, this, _1), gui_context());
 
 	initial_track_display ();
 
@@ -521,8 +521,8 @@ TriggerPage::add_routes (RouteList& rl)
 		TriggerStrip* ts = new TriggerStrip (_session, *r);
 		_strips.push_back (ts);
 
-		(*r)->presentation_info ().PropertyChanged.connect (*this, invalidator (*this), boost::bind (&TriggerPage::stripable_property_changed, this, _1, std::weak_ptr<Stripable> (*r)), gui_context ());
-		(*r)->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&TriggerPage::stripable_property_changed, this, _1, std::weak_ptr<Stripable> (*r)), gui_context ());
+		(*r)->presentation_info ().PropertyChanged.connect (*this, invalidator (*this), std::bind (&TriggerPage::stripable_property_changed, this, _1, std::weak_ptr<Stripable> (*r)), gui_context ());
+		(*r)->PropertyChanged.connect (*this, invalidator (*this), std::bind (&TriggerPage::stripable_property_changed, this, _1, std::weak_ptr<Stripable> (*r)), gui_context ());
 		ts->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &TriggerPage::strip_button_release_event), ts));
 	}
 	redisplay_track_list ();

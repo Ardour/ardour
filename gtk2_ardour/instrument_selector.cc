@@ -40,7 +40,7 @@ InstrumentSelector::InstrumentSelector (InstrumentListDisposition disp)
 {
 	refill ();
 
-	PluginManager::instance ().PluginListChanged.connect (_update_connection, invalidator (*this), boost::bind (&InstrumentSelector::refill, this), gui_context());
+	PluginManager::instance ().PluginListChanged.connect (_update_connection, invalidator (*this), std::bind (&InstrumentSelector::refill, this), gui_context());
 	DropPluginInfoPtr.connect (sigc::mem_fun (*this, &InstrumentSelector::drop_plugin_ptr));
 }
 

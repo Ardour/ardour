@@ -24,7 +24,6 @@
 #include <list>
 #include <memory>
 
-#include <boost/function.hpp>
 
 #include "pbd/pool.h"
 #include "pbd/ringbuffer.h"
@@ -107,11 +106,11 @@ public:
 
 	/* 5 members to handle a multi-group event handled in RT context */
 
-	typedef boost::function<void (SessionEvent*)> RTeventCallback;
+	typedef std::function<void (SessionEvent*)> RTeventCallback;
 
 	std::shared_ptr<AutomationControlList> controls; /* apply to */
 	std::shared_ptr<RouteList> routes;     /* apply to */
-	boost::function<void (void)> rt_slot;    /* what to call in RT context */
+	std::function<void (void)> rt_slot;    /* what to call in RT context */
 	RTeventCallback              rt_return;  /* called after rt_slot, with this event as an argument */
 	PBD::EventLoop*              event_loop;
 
@@ -166,7 +165,7 @@ public:
 
 	virtual void queue_event (SessionEvent *ev) = 0;
 	void clear_events (SessionEvent::Type type);
-	void clear_events (SessionEvent::Type type, boost::function<void (void)> after);
+	void clear_events (SessionEvent::Type type, std::function<void (void)> after);
 
 protected:
 	PBD::RingBuffer<SessionEvent*> pending_events;

@@ -186,7 +186,7 @@ EditingContext::EditingContext (std::string const & name)
 
 	/* handle escape */
 
-	ARDOUR_UI::instance()->Escape.connect (escape_connection, MISSING_INVALIDATOR, boost::bind (&EditingContext::escape, this), gui_context());
+	ARDOUR_UI::instance()->Escape.connect (escape_connection, MISSING_INVALIDATOR, std::bind (&EditingContext::escape, this), gui_context());
 }
 
 EditingContext::~EditingContext()
@@ -2132,13 +2132,13 @@ EditingContext::register_mouse_mode_actions ()
 	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionManager::create_action_group (bindings, group_name);
 	RadioAction::Group mouse_mode_group;
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), boost::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseObject));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), boost::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseRange));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), boost::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseDraw));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), boost::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseTimeFX));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), boost::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseGrid));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), boost::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseContent));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), boost::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseCut));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseObject));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseRange));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseDraw));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseTimeFX));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseGrid));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseContent));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseCut));
 
 	add_mouse_mode_actions (mouse_mode_actions);
 }

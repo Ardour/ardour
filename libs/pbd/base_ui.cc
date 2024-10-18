@@ -121,7 +121,7 @@ BaseUI::run ()
 	attach_request_source ();
 
 	Glib::Threads::Mutex::Lock lm (_run_lock);
-	_run_loop_thread = PBD::Thread::create (boost::bind (&BaseUI::main_thread, this), string_compose ("UI:%1", event_loop_name ()));
+	_run_loop_thread = PBD::Thread::create (std::bind (&BaseUI::main_thread, this), string_compose ("UI:%1", event_loop_name ()));
 	_running.wait (_run_lock);
 }
 

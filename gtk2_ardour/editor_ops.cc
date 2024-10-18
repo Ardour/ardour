@@ -9152,7 +9152,7 @@ Editor::unlock ()
 void
 Editor::bring_in_callback (Gtk::Label* label, uint32_t n, uint32_t total, string name)
 {
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&Editor::update_bring_in_message, this, label, n, total, name));
+	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), std::bind (&Editor::update_bring_in_message, this, label, n, total, name));
 }
 
 void
@@ -9184,7 +9184,7 @@ Editor::bring_all_sources_into_session ()
 
 	cerr << " Do it\n";
 
-	_session->bring_all_sources_into_session (boost::bind (&Editor::bring_in_callback, this, &msg, _1, _2, _3));
+	_session->bring_all_sources_into_session (std::bind (&Editor::bring_in_callback, this, &msg, _1, _2, _3));
 }
 
 void
@@ -9208,9 +9208,9 @@ Editor::toggle_all_existing_automation ()
 	}
 
 	if (!some_automation_shown) {
-		tvl.foreach_stripable_time_axis (boost::bind (&StripableTimeAxisView::show_existing_automation, _1, false));
+		tvl.foreach_stripable_time_axis (std::bind (&StripableTimeAxisView::show_existing_automation, _1, false));
 	} else {
-		tvl.foreach_stripable_time_axis (boost::bind (&StripableTimeAxisView::hide_all_automation, _1, false));
+		tvl.foreach_stripable_time_axis (std::bind (&StripableTimeAxisView::hide_all_automation, _1, false));
 	}
 }
 
@@ -9237,10 +9237,10 @@ Editor::toggle_layer_display ()
 
 	if (seen_stacked && seen_overlaid) {
 		/* inconsistent current display - go to overlaid */
-		tvl.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_layer_display, _1, Overlaid));
+		tvl.foreach_route_time_axis (std::bind (&RouteTimeAxisView::set_layer_display, _1, Overlaid));
 
 	} else {
-		tvl.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::toggle_layer_display, _1));
+		tvl.foreach_route_time_axis (std::bind (&RouteTimeAxisView::toggle_layer_display, _1));
 	}
 
 }
@@ -9249,14 +9249,14 @@ void
 Editor::layer_display_overlaid ()
 {
 	TrackViewList & tvl (selection->tracks.empty() ? track_views : selection->tracks);
-	tvl.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_layer_display, _1, Overlaid));
+	tvl.foreach_route_time_axis (std::bind (&RouteTimeAxisView::set_layer_display, _1, Overlaid));
 }
 
 void
 Editor::layer_display_stacked ()
 {
 	TrackViewList & tvl (selection->tracks.empty() ? track_views : selection->tracks);
-	tvl.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_layer_display, _1, Stacked));
+	tvl.foreach_route_time_axis (std::bind (&RouteTimeAxisView::set_layer_display, _1, Stacked));
 }
 
 void
@@ -9640,10 +9640,10 @@ Editor::remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_ga
 		 */
 
 		if (markers_too && (*i == first_selected_playlist)) {
-			boost::function<void (timepos_t, timecnt_t)> callback (boost::bind (&Editor::remove_gap_marker_callback, this, _1, _2));
+			std::function<void (timepos_t, timecnt_t)> callback (std::bind (&Editor::remove_gap_marker_callback, this, _1, _2));
 			(*i)->remove_gaps (gap_threshold, leave_gap, callback);
 		} else {
-			boost::function<void (timepos_t, timecnt_t)> callback (boost::bind (gap_marker_callback_relax, _1, _2));
+			std::function<void (timepos_t, timecnt_t)> callback (std::bind (gap_marker_callback_relax, _1, _2));
 			(*i)->remove_gaps (gap_threshold, leave_gap, callback);
 		}
 

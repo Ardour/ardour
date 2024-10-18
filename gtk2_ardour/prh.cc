@@ -84,7 +84,7 @@ PianoRollHeader::PianoRollHeader (Item* parent, MidiViewBackground& bg)
 	}
 
 	resize ();
-	bg.HeightChanged.connect (height_connection, MISSING_INVALIDATOR, boost::bind (&PianoRollHeader::resize, this), gui_context());
+	bg.HeightChanged.connect (height_connection, MISSING_INVALIDATOR, std::bind (&PianoRollHeader::resize, this), gui_context());
 
 	/* draw vertical lines on both sides of the rectangle */
 	set_fill (false);

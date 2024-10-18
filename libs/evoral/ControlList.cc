@@ -300,7 +300,7 @@ ControlList::extend_to (timepos_t const& end)
 }
 
 void
-ControlList::y_transform (boost::function<double (double)> callback)
+ControlList::y_transform (std::function<double (double)> callback)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
@@ -313,7 +313,7 @@ ControlList::y_transform (boost::function<double (double)> callback)
 }
 
 void
-ControlList::list_merge (ControlList const& other, boost::function<double (double, double)> callback)
+ControlList::list_merge (ControlList const& other, std::function<double (double, double)> callback)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);

@@ -1172,7 +1172,7 @@ Session::compute_stop_limit () const
 /* dedicated thread for signal emission.
  *
  * while sending cross-thread signals from the process thread
- * is fine in general, PBD::Signal's use of boost::function and
+ * is fine in general, PBD::Signal's use of std::function and
  * boost:bind can produce a vast overhead which is not
  * acceptable for low latency.
  *

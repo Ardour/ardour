@@ -182,7 +182,7 @@ PluginUIWindow::PluginUIWindow (std::shared_ptr<PlugInsertBase> pib,
 	set_name ("PluginEditor");
 	add_events (Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
 
-	pib->DropReferences.connect (death_connection, invalidator (*this), boost::bind (&PluginUIWindow::plugin_going_away, this), gui_context ());
+	pib->DropReferences.connect (death_connection, invalidator (*this), std::bind (&PluginUIWindow::plugin_going_away, this), gui_context ());
 
 	gint h = _pluginui->get_preferred_height ();
 	gint w = _pluginui->get_preferred_width ();
@@ -604,7 +604,7 @@ PlugUIBase::PlugUIBase (std::shared_ptr<PlugInsertBase> pib)
 	_bypass_button.signal_button_release_event ().connect (sigc::mem_fun (*this, &PlugUIBase::bypass_button_release), false);
 
 	if (_pi) {
-		_pi->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&PlugUIBase::processor_active_changed, this, std::weak_ptr<Processor> (_pi)), gui_context ());
+		_pi->ActiveChanged.connect (active_connection, invalidator (*this), std::bind (&PlugUIBase::processor_active_changed, this, std::weak_ptr<Processor> (_pi)), gui_context ());
 		_bypass_button.set_active (!_pi->enabled ());
 	} else {
 		_bypass_button.set_sensitive (false);
@@ -632,23 +632,23 @@ PlugUIBase::PlugUIBase (std::shared_ptr<PlugInsertBase> pib)
 	cpuload_expander.property_expanded ().signal_changed ().connect (sigc::mem_fun (*this, &PlugUIBase::toggle_cpuload_display));
 	cpuload_expander.set_expanded (false);
 
-	_pib->DropReferences.connect (death_connection, invalidator (*this), boost::bind (&PlugUIBase::plugin_going_away, this), gui_context ());
+	_pib->DropReferences.connect (death_connection, invalidator (*this), std::bind (&PlugUIBase::plugin_going_away, this), gui_context ());
 
 	if (_pib->ui_elements () & PlugInsertBase::PluginPreset) {
-		plugin->PresetAdded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
-		plugin->PresetRemoved.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
-		plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::update_preset, this), gui_context ());
-		plugin->PresetDirty.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::update_preset_modified, this), gui_context ());
+		plugin->PresetAdded.connect (*this, invalidator (*this), std::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
+		plugin->PresetRemoved.connect (*this, invalidator (*this), std::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
+		plugin->PresetLoaded.connect (*this, invalidator (*this), std::bind (&PlugUIBase::update_preset, this), gui_context ());
+		plugin->PresetDirty.connect (*this, invalidator (*this), std::bind (&PlugUIBase::update_preset_modified, this), gui_context ());
 	}
 	if (_pi && _pi->ui_elements () != PlugInsertBase::NoGUIToolbar) {
-		_pi->AutomationStateChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::automation_state_changed, this), gui_context ());
-		_pi->LatencyChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::set_latency_label, this), gui_context ());
+		_pi->AutomationStateChanged.connect (*this, invalidator (*this), std::bind (&PlugUIBase::automation_state_changed, this), gui_context ());
+		_pi->LatencyChanged.connect (*this, invalidator (*this), std::bind (&PlugUIBase::set_latency_label, this), gui_context ());
 		automation_state_changed ();
 	}
 
 	shared_ptr<TailTime> tt = std::dynamic_pointer_cast<ARDOUR::TailTime> (_pib);
 	if (tt) {
-		tt->TailTimeChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::set_tailtime_label, this), gui_context ());
+		tt->TailTimeChanged.connect (*this, invalidator (*this), std::bind (&PlugUIBase::set_tailtime_label, this), gui_context ());
 	}
 }
 

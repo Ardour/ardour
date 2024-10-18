@@ -532,7 +532,7 @@ pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns, bool main)
 }
 
 PBD::Thread*
-PBD::Thread::create (boost::function<void ()> const& slot, std::string const& name)
+PBD::Thread::create (std::function<void ()> const& slot, std::string const& name)
 {
 	try {
 		return new PBD::Thread (slot, name);
@@ -554,7 +554,7 @@ PBD::Thread::Thread ()
 	_t = pthread_self ();
 }
 
-PBD::Thread::Thread (boost::function<void ()> const& slot, std::string const& name)
+PBD::Thread::Thread (std::function<void ()> const& slot, std::string const& name)
 	: _name (name)
 	, _slot (slot)
 	, _joinable (true)

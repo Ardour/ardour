@@ -127,11 +127,11 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	number_label.set_alignment(.5, .5);
 	number_label.set_fallthrough_to_parent (true);
 
-	sess->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::parameter_changed, this, _1), gui_context());
+	sess->config.ParameterChanged.connect (*this, invalidator (*this), std::bind (&RouteTimeAxisView::parameter_changed, this, _1), gui_context());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::parameter_changed));
 
 	Controllable::ControlTouched.connect (
-			ctrl_touched_connection, invalidator (*this), boost::bind (&RouteTimeAxisView::show_touched_automation, this, _1), gui_context ()
+			ctrl_touched_connection, invalidator (*this), std::bind (&RouteTimeAxisView::show_touched_automation, this, _1), gui_context ()
     );
 
 	parameter_changed ("editor-stereo-only-meters");
@@ -225,9 +225,9 @@ RouteTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	}
 
 	_route->meter_change.connect (*this, invalidator (*this), bind (&RouteTimeAxisView::meter_changed, this), gui_context());
-	_route->input()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
-	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
-	_route->track_number_changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::label_view, this), gui_context());
+	_route->input()->changed.connect (*this, invalidator (*this), std::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
+	_route->output()->changed.connect (*this, invalidator (*this), std::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
+	_route->track_number_changed.connect (*this, invalidator (*this), std::bind (&RouteTimeAxisView::label_view, this), gui_context());
 
 	if (ARDOUR::Profile->get_mixbus()) {
 		controls_table.attach (*mute_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
@@ -300,7 +300,7 @@ RouteTimeAxisView::set_route (std::shared_ptr<Route> rt)
 
 	_y_position = -1;
 
-	_route->processors_changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::processors_changed, this, _1), gui_context());
+	_route->processors_changed.connect (*this, invalidator (*this), std::bind (&RouteTimeAxisView::processors_changed, this, _1), gui_context());
 
 	if (is_track()) {
 
@@ -309,10 +309,10 @@ RouteTimeAxisView::set_route (std::shared_ptr<Route> rt)
 			set_layer_display (layer_display);
 		}
 
-		track()->FreezeChange.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::map_frozen, this), gui_context());
-		track()->SpeedChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::speed_changed, this), gui_context());
+		track()->FreezeChange.connect (*this, invalidator (*this), std::bind (&RouteTimeAxisView::map_frozen, this), gui_context());
+		track()->SpeedChanged.connect (*this, invalidator (*this), std::bind (&RouteTimeAxisView::speed_changed, this), gui_context());
 
-		track()->ChanCountChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::chan_count_changed, this), gui_context());
+		track()->ChanCountChanged.connect (*this, invalidator (*this), std::bind (&RouteTimeAxisView::chan_count_changed, this), gui_context());
 
 		/* pick up the correct freeze state */
 		map_frozen ();
@@ -894,7 +894,7 @@ RouteTimeAxisView::build_display_menu ()
 
 	if (active && _route && !_route->is_singleton ()) {
 		items.push_back (SeparatorElem());
-		items.push_back (MenuElem (_("Duplicate..."), boost::bind (&ARDOUR_UI::start_duplicate_routes, ARDOUR_UI::instance())));
+		items.push_back (MenuElem (_("Duplicate..."), std::bind (&ARDOUR_UI::start_duplicate_routes, ARDOUR_UI::instance())));
 
 		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Remove"), sigc::mem_fun(_editor, &PublicEditor::remove_tracks)));
@@ -1102,7 +1102,7 @@ RouteTimeAxisView::set_align_choice (RadioMenuItem* mitem, AlignChoice choice, b
 	}
 
 	if (apply_to_selection) {
-		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_align_choice, _1, mitem, choice, false));
+		_editor.get_selection().tracks.foreach_route_time_axis (std::bind (&RouteTimeAxisView::set_align_choice, _1, mitem, choice, false));
 	} else {
 		if (track ()) {
 			track()->set_align_choice (choice);
@@ -1113,7 +1113,7 @@ RouteTimeAxisView::set_align_choice (RadioMenuItem* mitem, AlignChoice choice, b
 void
 RouteTimeAxisView::speed_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteTimeAxisView::reset_samples_per_pixel, this));
+	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), std::bind (&RouteTimeAxisView::reset_samples_per_pixel, this));
 }
 
 void
@@ -1618,7 +1618,7 @@ void
 RouteTimeAxisView::show_all_automation (bool apply_to_selection)
 {
 	if (apply_to_selection) {
-		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::show_all_automation, _1, false));
+		_editor.get_selection().tracks.foreach_route_time_axis (std::bind (&RouteTimeAxisView::show_all_automation, _1, false));
 	} else {
 		no_redraw = true;
 
@@ -1648,7 +1648,7 @@ void
 RouteTimeAxisView::show_existing_automation (bool apply_to_selection)
 {
 	if (apply_to_selection) {
-		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::show_existing_automation, _1, false));
+		_editor.get_selection().tracks.foreach_route_time_axis (std::bind (&RouteTimeAxisView::show_existing_automation, _1, false));
 	} else {
 		no_redraw = true;
 
@@ -1769,7 +1769,7 @@ void
 RouteTimeAxisView::hide_all_automation (bool apply_to_selection)
 {
 	if (apply_to_selection) {
-		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::hide_all_automation, _1, false));
+		_editor.get_selection().tracks.foreach_route_time_axis (std::bind (&RouteTimeAxisView::hide_all_automation, _1, false));
 	} else {
 		no_redraw = true;
 		StripableTimeAxisView::hide_all_automation ();
@@ -2179,10 +2179,10 @@ RouteTimeAxisView::processors_changed (RouteProcessorChange c)
 		if (pi && pi->plugin ()->has_midnam ()) {
 			midnam_connection.drop_connections ();
 			the_instrument->DropReferences.connect (midnam_connection, invalidator (*this),
-					boost::bind (&RouteTimeAxisView::drop_instrument_ref, this),
+					std::bind (&RouteTimeAxisView::drop_instrument_ref, this),
 					gui_context());
 			pi->plugin()->UpdateMidnam.connect (midnam_connection, invalidator (*this),
-					boost::bind (&RouteTimeAxisView::reread_midnam, this),
+					std::bind (&RouteTimeAxisView::reread_midnam, this),
 					gui_context());
 
 			reread_midnam ();

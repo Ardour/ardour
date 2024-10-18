@@ -131,7 +131,7 @@ OSC::OSC (Session& s, uint32_t port)
 {
 	_instance = this;
 
-	session->Exported.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::session_exported, this, _1, _2), this);
+	session->Exported.connect (*this, MISSING_INVALIDATOR, std::bind (&OSC::session_exported, this, _1, _2), this);
 }
 
 OSC::~OSC()
@@ -267,11 +267,11 @@ OSC::start ()
 
 	// catch track reordering
 	// receive routes added
-	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_routes_added, this, _1), this);
+	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, std::bind (&OSC::notify_routes_added, this, _1), this);
 	// receive VCAs added
-	session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_vca_added, this, _1), this);
+	session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, std::bind (&OSC::notify_vca_added, this, _1), this);
 	// order changed
-	PresentationInfo::Change.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
+	PresentationInfo::Change.connect (session_connections, MISSING_INVALIDATOR, std::bind (&OSC::recalcbanks, this), this);
 
 	_select = ControlProtocol::first_selected_stripable();
 	if(!_select) {
@@ -1406,7 +1406,7 @@ OSC::clear_devices ()
 	link_sets.clear ();
 	_ports.clear ();
 
-	PresentationInfo::Change.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
+	PresentationInfo::Change.connect (session_connections, MISSING_INVALIDATOR, std::bind (&OSC::recalcbanks, this), this);
 
 	observer_busy = false;
 	tick = true;
@@ -4779,7 +4779,7 @@ OSC::_strip_select2 (std::shared_ptr<Stripable> s, OSCSurface *sur, lo_address a
 	} while (sends);
 	sur->nsends = nsends;
 
-	s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
+	s->DropReferences.connect (*this, MISSING_INVALIDATOR, std::bind (&OSC::recalcbanks, this), this);
 
 	OSCSelectObserver* so = dynamic_cast<OSCSelectObserver*>(sur->sel_obs);
 	if (sur->feedback[13]) {
@@ -4812,7 +4812,7 @@ OSC::_strip_select2 (std::shared_ptr<Stripable> s, OSCSurface *sur, lo_address a
 	string address = lo_address_get_url (addr);
 	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route>(s);
 	if (r) {
-		r->processors_changed.connect  (sur->proc_connection, MISSING_INVALIDATOR, boost::bind (&OSC::processor_changed, this, address), this);
+		r->processors_changed.connect  (sur->proc_connection, MISSING_INVALIDATOR, std::bind (&OSC::processor_changed, this, address), this);
 		_sel_plugin (sur->plugin_id, addr);
 	}
 
@@ -6374,7 +6374,7 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 			if (aux == n+1) {
 				// aux must be at least one
 
-				stp->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::_cue_set, this, aux, addr), this);
+				stp->DropReferences.connect (*this, MISSING_INVALIDATOR, std::bind (&OSC::_cue_set, this, aux, addr), this);
 				// make a list of stripables with sends that go to this bus
 				s->sends = cue_get_sorted_stripables(stp, aux, addr);
 				if (s->cue_obs) {
@@ -6729,7 +6729,7 @@ OSC::cue_get_sorted_stripables(std::shared_ptr<Stripable> aux, uint32_t id, lo_a
 	std::shared_ptr<Route> aux_rt = std::dynamic_pointer_cast<Route> (aux);
 	for (auto const& s : aux_rt->signal_sources (true)) {
 		sorted.push_back (s);
-		s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::_cue_set, this, id, addr), this);
+		s->DropReferences.connect (*this, MISSING_INVALIDATOR, std::bind (&OSC::_cue_set, this, id, addr), this);
 	}
 	sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());
 

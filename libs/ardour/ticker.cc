@@ -50,7 +50,7 @@ MidiClockTicker::MidiClockTicker (Session& s)
 	, _transport_pos (-1)
 {
 	resync_latency (true);
-	_session.LatencyUpdated.connect_same_thread (_latency_connection, boost::bind (&MidiClockTicker::resync_latency, this, _1));
+	_session.LatencyUpdated.connect_same_thread (_latency_connection, std::bind (&MidiClockTicker::resync_latency, this, _1));
 }
 
 MidiClockTicker::~MidiClockTicker ()

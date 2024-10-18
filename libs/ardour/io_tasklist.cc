@@ -101,7 +101,7 @@ IOTaskList::~IOTaskList ()
 }
 
 void
-IOTaskList::push_back (boost::function<void ()> fn)
+IOTaskList::push_back (std::function<void ()> fn)
 {
 	_tasks.push_back (fn);
 }
@@ -171,7 +171,7 @@ IOTaskList::io_thread ()
 		Temporal::TempoMap::fetch ();
 
 		while (1) {
-			boost::function<void()> fn;
+			std::function<void()> fn;
 			Glib::Threads::Mutex::Lock lm (_tasks_mutex);
 			if (_tasks.empty ()) {
 				break;

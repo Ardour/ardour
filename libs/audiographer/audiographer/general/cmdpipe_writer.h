@@ -42,7 +42,7 @@ public:
 		} else if (proc->start (ARDOUR::SystemExec::ShareWithParent)) {
 			throw ARDOUR::ExportFailed ("External encoder (ffmpeg) cannot be started.");
 		}
-		proc->Terminated.connect_same_thread (exec_connections, boost::bind (&CmdPipeWriter::encode_complete, this));
+		proc->Terminated.connect_same_thread (exec_connections, std::bind (&CmdPipeWriter::encode_complete, this));
 	}
 
 	virtual ~CmdPipeWriter () {

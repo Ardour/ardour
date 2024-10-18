@@ -156,7 +156,7 @@ class M2ToggleButton : public M2Button
 		: M2Button ()
 		, _active (false)
 		{
-			changed.connect_same_thread (changed_connection, boost::bind (&M2ToggleButton::change_event, this, _1));
+			changed.connect_same_thread (changed_connection, std::bind (&M2ToggleButton::change_event, this, _1));
 		}
 
 		PBD::Signal<void(bool)> toggled;
@@ -182,7 +182,7 @@ class M2ToggleHoldButton : public M2Button
 		, _active (false)
 		, _active_on_release (false)
 		{
-			changed.connect_same_thread (changed_connection, boost::bind (&M2ToggleHoldButton::change_event, this, _1));
+			changed.connect_same_thread (changed_connection, std::bind (&M2ToggleHoldButton::change_event, this, _1));
 		}
 
 		PBD::Signal<void(bool)> toggled;

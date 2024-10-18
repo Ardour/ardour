@@ -113,7 +113,7 @@ RouteProcessorSelection::add (AxisView* r, bool with_groups)
 		shp.session()->selection().select_stripable_and_maybe_group (r->stripable(), SelectionAdd, with_groups);
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
-			ms->CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RouteProcessorSelection::remove, this, _1, false), gui_context());
+			ms->CatchDeletion.connect (*this, invalidator (*this), std::bind (&RouteProcessorSelection::remove, this, _1, false), gui_context());
 		}
 	}
 }

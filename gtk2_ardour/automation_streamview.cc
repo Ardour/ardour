@@ -125,7 +125,7 @@ AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, 
 	display_region (region_view);
 
 	/* catch regionview going away */
-	region->DropReferences.connect (*this, invalidator (*this), boost::bind (&AutomationStreamView::remove_region_view, this, std::weak_ptr<Region>(region)), gui_context());
+	region->DropReferences.connect (*this, invalidator (*this), std::bind (&AutomationStreamView::remove_region_view, this, std::weak_ptr<Region>(region)), gui_context());
 
 	/* setup automation state for this region */
 	if (_automation_view.parameter().type() != MidiVelocityAutomation) {

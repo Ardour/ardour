@@ -26,7 +26,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include <boost/function.hpp>
 
 #include "ardour/audioengine.h"
 #include "ardour/libardour_visibility.h"
@@ -784,7 +783,7 @@ public:
 	 *
 	 * @param func process function to run
 	 */
-	virtual int create_process_thread (boost::function<void()> func) = 0;
+	virtual int create_process_thread (std::function<void()> func) = 0;
 
 	/** Wait for all processing threads to exit.
 	 *

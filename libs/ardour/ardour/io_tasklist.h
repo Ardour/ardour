@@ -20,7 +20,6 @@
 #define _ardour_io_tasklist_h_
 
 #include <atomic>
-#include <boost/function.hpp>
 #include <vector>
 #include <glibmm/threads.h>
 
@@ -39,14 +38,14 @@ public:
 
 	/** process tasks in list in parallel, wait for them to complete */
 	void process ();
-	void push_back (boost::function<void ()> fn);
+	void push_back (std::function<void ()> fn);
 
 private:
 	static void* _worker_thread (void*);
 
 	void io_thread ();
 
-	std::vector<boost::function<void ()>> _tasks;
+	std::vector<std::function<void ()>> _tasks;
 
 	uint32_t               _n_threads;
 	std::atomic<uint32_t>  _n_workers;

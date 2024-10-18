@@ -305,7 +305,7 @@ RCConfiguration::set_variables (const XMLNode& node)
 
 }
 void
-RCConfiguration::map_parameters (boost::function<void (std::string)>& functor)
+RCConfiguration::map_parameters (std::function<void (std::string)>& functor)
 {
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL

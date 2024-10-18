@@ -66,7 +66,7 @@ TriggerStrip::TriggerStrip (Session* s, std::shared_ptr<ARDOUR::Route> rt)
 	, _tmaster_widget (-1, 16)
 	, input_button (true)
 	, output_button (false)
-	, _processor_box (s, boost::bind (&TriggerStrip::plugin_selector, this), _pb_selection, 0)
+	, _processor_box (s, std::bind (&TriggerStrip::plugin_selector, this), _pb_selection, 0)
 	, _trigger_display (*this, -1., TriggerBox::default_triggers_per_box * 16.)
 	, _panners (s)
 	, _level_meter (s)
@@ -221,13 +221,13 @@ TriggerStrip::set_route (std::shared_ptr<Route> rt)
 	delete _route_ops_menu;
 	_route_ops_menu = 0;
 
-	_route->input ()->changed.connect (*this, invalidator (*this), boost::bind (&TriggerStrip::io_changed, this), gui_context ());
-	_route->output ()->changed.connect (*this, invalidator (*this), boost::bind (&TriggerStrip::io_changed, this), gui_context ());
-	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&TriggerStrip::io_changed, this), gui_context ());
+	_route->input ()->changed.connect (*this, invalidator (*this), std::bind (&TriggerStrip::io_changed, this), gui_context ());
+	_route->output ()->changed.connect (*this, invalidator (*this), std::bind (&TriggerStrip::io_changed, this), gui_context ());
+	_route->io_changed.connect (route_connections, invalidator (*this), std::bind (&TriggerStrip::io_changed, this), gui_context ());
 
 	if (_route->panner_shell ()) {
 		update_panner_choices ();
-		_route->panner_shell ()->Changed.connect (route_connections, invalidator (*this), boost::bind (&TriggerStrip::connect_to_pan, this), gui_context ());
+		_route->panner_shell ()->Changed.connect (route_connections, invalidator (*this), std::bind (&TriggerStrip::connect_to_pan, this), gui_context ());
 	}
 
 	_panners.set_panner (_route->main_outs ()->panner_shell (), _route->main_outs ()->panner ());
@@ -300,7 +300,7 @@ TriggerStrip::build_route_ops_menu ()
 	}
 
 	uint32_t plugin_insert_cnt = 0;
-	_route->foreach_processor (boost::bind (RouteUI::help_count_plugins, _1, & plugin_insert_cnt));
+	_route->foreach_processor (std::bind (RouteUI::help_count_plugins, _1, & plugin_insert_cnt));
 	if (active && plugin_insert_cnt > 0) {
 		items.push_back (MenuElem (_("Pin Connections..."), sigc::mem_fun (*this, &RouteUI::manage_pins)));
 	}
@@ -386,7 +386,7 @@ TriggerStrip::connect_to_pan ()
 
 	std::shared_ptr<Pannable> p = _route->pannable ();
 
-	p->automation_state_changed.connect (_panstate_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_state_changed, &_panners), gui_context ());
+	p->automation_state_changed.connect (_panstate_connection, invalidator (*this), std::bind (&PannerUI::pan_automation_state_changed, &_panners), gui_context ());
 
 	if (_panners._panner == 0) {
 		_panners.panshell_changed ();

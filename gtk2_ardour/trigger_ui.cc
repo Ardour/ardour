@@ -135,8 +135,8 @@ TriggerUI::trigger_swap (uint32_t n)
 	}
 	trigger_connections.drop_connections ();
 
-	trigger()->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
-	tref.box()->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
+	trigger()->PropertyChanged.connect (trigger_connections, invalidator (*this), std::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
+	tref.box()->PropertyChanged.connect (trigger_connections, invalidator (*this), std::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
 
 	trigger_changed (Properties::name);
 }
@@ -808,10 +808,10 @@ TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 
 	trigger_changed (TriggerBox::all_trigger_props());
 
-	trigger()->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
-	tref.box()->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
+	trigger()->PropertyChanged.connect (trigger_connections, invalidator (*this), std::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
+	tref.box()->PropertyChanged.connect (trigger_connections, invalidator (*this), std::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
 
-	tref.box()->TriggerSwapped.connect (trigger_swap_connection, invalidator (*this), boost::bind (&TriggerUI::trigger_swap, this, _1), gui_context ());
+	tref.box()->TriggerSwapped.connect (trigger_swap_connection, invalidator (*this), std::bind (&TriggerUI::trigger_swap, this, _1), gui_context ());
 
 	on_trigger_set();  //derived classes can do initialization here
 }

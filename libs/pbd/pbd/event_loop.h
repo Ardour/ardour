@@ -23,8 +23,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <boost/function.hpp>
-#include <boost/bind.hpp> /* we don't need this here, but anything calling call_slot() probably will, so this is convenient */
 #include <stdint.h>
 #include <pthread.h>
 #include <glibmm/threads.h>
@@ -78,7 +76,7 @@ public:
 	struct BaseRequestObject {
 		RequestType             type;
 		InvalidationRecord*     invalidation;
-		boost::function<void()> the_slot;
+		std::function<void()> the_slot;
 
 		BaseRequestObject() : invalidation (0) {}
 		~BaseRequestObject() {
@@ -88,7 +86,7 @@ public:
 		}
 	};
 
-	virtual bool call_slot (InvalidationRecord*, const boost::function<void()>&) = 0;
+	virtual bool call_slot (InvalidationRecord*, const std::function<void()>&) = 0;
 	virtual Glib::Threads::RWLock& slot_invalidation_rwlock() = 0;
 
 	std::string event_loop_name() const { return _name; }

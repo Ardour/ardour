@@ -8,7 +8,7 @@ CueEditor::CueEditor (std::string const & name)
 	: EditingContext (name)
 	, HistoryOwner (X_("cue-editor"))
 {
-	_history.Changed.connect (history_connection, invalidator (*this), boost::bind (&CueEditor::history_changed, this), gui_context());
+	_history.Changed.connect (history_connection, invalidator (*this), std::bind (&CueEditor::history_changed, this), gui_context());
 }
 
 CueEditor::~CueEditor ()

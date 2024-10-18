@@ -93,7 +93,7 @@ namespace ARDOUR {
 	 * copy should take place.
 	 */
 	LIBARDOUR_API void check_for_old_configuration_files ();
-	LIBARDOUR_API int handle_old_configuration_files (boost::function<bool (std::string const&, std::string const&, int)> ui_handler);
+	LIBARDOUR_API int handle_old_configuration_files (std::function<bool (std::string const&, std::string const&, int)> ui_handler);
 
 	LIBARDOUR_API void reset_performance_meters (Session*);
 }

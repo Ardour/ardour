@@ -112,8 +112,8 @@ WiimoteControlProtocol::start ()
 	DEBUG_TRACE (DEBUG::WiimoteControl, "WiimoteControlProtocol::start init\n");
 
 	// update LEDs whenever the transport or recording state changes
-	session->TransportStateChange.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&WiimoteControlProtocol::update_led_state, this), this);
-	session->RecordStateChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&WiimoteControlProtocol::update_led_state, this), this);
+	session->TransportStateChange.connect (session_connections, MISSING_INVALIDATOR, std::bind (&WiimoteControlProtocol::update_led_state, this), this);
+	session->RecordStateChanged.connect (session_connections, MISSING_INVALIDATOR, std::bind (&WiimoteControlProtocol::update_led_state, this), this);
 
 	// start the Wiimote control UI; it will run in its own thread context
 	BaseUI::run ();

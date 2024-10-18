@@ -63,17 +63,17 @@ Pannable::Pannable (Session& s, Temporal::TimeDomainProvider const & tdp)
 
 	/* all controls change state together */
 
-	pan_azimuth_control->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&Pannable::control_auto_state_changed, this, _1));
-	pan_elevation_control->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&Pannable::control_auto_state_changed, this, _1));
-	pan_width_control->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&Pannable::control_auto_state_changed, this, _1));
-	pan_frontback_control->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&Pannable::control_auto_state_changed, this, _1));
-	pan_lfe_control->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&Pannable::control_auto_state_changed, this, _1));
+	pan_azimuth_control->alist()->automation_state_changed.connect_same_thread (*this, std::bind (&Pannable::control_auto_state_changed, this, _1));
+	pan_elevation_control->alist()->automation_state_changed.connect_same_thread (*this, std::bind (&Pannable::control_auto_state_changed, this, _1));
+	pan_width_control->alist()->automation_state_changed.connect_same_thread (*this, std::bind (&Pannable::control_auto_state_changed, this, _1));
+	pan_frontback_control->alist()->automation_state_changed.connect_same_thread (*this, std::bind (&Pannable::control_auto_state_changed, this, _1));
+	pan_lfe_control->alist()->automation_state_changed.connect_same_thread (*this, std::bind (&Pannable::control_auto_state_changed, this, _1));
 
-	pan_azimuth_control->Changed.connect_same_thread (*this, boost::bind (&Pannable::value_changed, this));
-	pan_elevation_control->Changed.connect_same_thread (*this, boost::bind (&Pannable::value_changed, this));
-	pan_width_control->Changed.connect_same_thread (*this, boost::bind (&Pannable::value_changed, this));
-	pan_frontback_control->Changed.connect_same_thread (*this, boost::bind (&Pannable::value_changed, this));
-	pan_lfe_control->Changed.connect_same_thread (*this, boost::bind (&Pannable::value_changed, this));
+	pan_azimuth_control->Changed.connect_same_thread (*this, std::bind (&Pannable::value_changed, this));
+	pan_elevation_control->Changed.connect_same_thread (*this, std::bind (&Pannable::value_changed, this));
+	pan_width_control->Changed.connect_same_thread (*this, std::bind (&Pannable::value_changed, this));
+	pan_frontback_control->Changed.connect_same_thread (*this, std::bind (&Pannable::value_changed, this));
+	pan_lfe_control->Changed.connect_same_thread (*this, std::bind (&Pannable::value_changed, this));
 
 	pan_azimuth_control->add_visually_linked_control (pan_width_control);
 	pan_azimuth_control->add_visually_linked_control (pan_elevation_control);

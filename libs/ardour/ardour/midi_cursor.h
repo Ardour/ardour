@@ -38,7 +38,7 @@ struct MidiCursor {
 
 	void connect(PBD::Signal<void(bool)>& invalidated) {
 		connections.drop_connections();
-		invalidated.connect_same_thread (connections, boost::bind(&MidiCursor::invalidate, this, _1));
+		invalidated.connect_same_thread (connections, std::bind(&MidiCursor::invalidate, this, _1));
 	}
 
 

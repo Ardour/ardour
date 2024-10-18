@@ -106,7 +106,7 @@ public:
 
 	static uint32_t nregions ();
 
-	static void foreach_region (boost::function<void (std::shared_ptr<Region>)> f)
+	static void foreach_region (std::function<void (std::shared_ptr<Region>)> f)
 	{
 		Glib::Threads::Mutex::Lock ls (region_map_lock);
 		for (RegionMap::const_iterator i = region_map.begin (); i != region_map.end (); ++i) {

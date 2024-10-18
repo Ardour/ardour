@@ -19,9 +19,11 @@
 
 #pragma once
 
-#include <boost/function.hpp>
+
+#include <functional>
 
 #include "pbd/controllable.h"
+#include "ardour/libardour_visibility.h"
 
 namespace ARDOUR {
 
@@ -32,8 +34,8 @@ namespace ARDOUR {
 class LIBARDOUR_API ProxyControllable : public PBD::Controllable {
   public:
 	ProxyControllable (const std::string& name, PBD::Controllable::Flag flags,
-			   boost::function1<bool,double> setter,
-			   boost::function0<double> getter)
+			   std::function<bool (double)> setter,
+			   std::function<double ()> getter)
 		: PBD::Controllable (name, flags)
 		, _setter (setter)
 		, _getter (getter)
@@ -48,8 +50,8 @@ class LIBARDOUR_API ProxyControllable : public PBD::Controllable {
 	}
 
   private:
-	boost::function1<bool,double> _setter;
-	boost::function0<double> _getter;
+	std::function<bool (double)> _setter;
+	std::function<double ()>     _getter;
 };
 
 } // namespace

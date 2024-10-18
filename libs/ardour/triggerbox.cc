@@ -2943,7 +2943,7 @@ MIDITrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> r
 	set_name (mr->name());
 
 	_model = mr->model();
-	_model->ContentsChanged.connect_same_thread (content_connection, boost::bind (&MIDITrigger::model_contents_changed, this));
+	_model->ContentsChanged.connect_same_thread (content_connection, std::bind (&MIDITrigger::model_contents_changed, this));
 
 	/* we've changed some of our internal values; we need to update our queued UIState or they will be lost when UIState is applied */
 	copy_to_ui_state ();
@@ -2978,7 +2978,7 @@ MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 	set_name (mr->name());
 
 	_model = mr->model();
-	_model->ContentsChanged.connect_same_thread (content_connection, boost::bind (&MIDITrigger::model_contents_changed, this));
+	_model->ContentsChanged.connect_same_thread (content_connection, std::bind (&MIDITrigger::model_contents_changed, this));
 	loop_start = r->start ().beats();
 	loop_end = r->length ().beats();
 
@@ -3470,8 +3470,8 @@ void
 TriggerBox::static_init (Session & s)
 {
 	input_parser = std::shared_ptr<MIDI::Parser>(new MIDI::Parser); /* leak */
-	Config->ParameterChanged.connect_same_thread (static_connections, boost::bind (&TriggerBox::static_parameter_changed, _1));
-	input_parser->any.connect_same_thread (midi_input_connection, boost::bind (&TriggerBox::midi_input_handler, _1, _2, _3, _4));
+	Config->ParameterChanged.connect_same_thread (static_connections, std::bind (&TriggerBox::static_parameter_changed, _1));
+	input_parser->any.connect_same_thread (midi_input_connection, std::bind (&TriggerBox::midi_input_handler, _1, _2, _3, _4));
 	std::dynamic_pointer_cast<MidiPort> (s.trigger_input_port())->set_trace (input_parser);
 	std::string const& dtip (Config->get_default_trigger_input_port());
 	if (!dtip.empty () && s.engine().get_port_by_name (dtip)) {
@@ -3522,8 +3522,8 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 		pending.push_back (std::atomic<Trigger*>(0));
 	}
 
-	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
-	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
+	Config->ParameterChanged.connect_same_thread (*this, std::bind (&TriggerBox::parameter_changed, this, _1));
+	_session.config.ParameterChanged.connect_same_thread (*this, std::bind (&TriggerBox::parameter_changed, this, _1));
 }
 
 void

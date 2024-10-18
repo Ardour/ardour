@@ -435,7 +435,7 @@ lua_forkexec (lua_State *L)
 	args[argc] = 0;
 
 	ARDOUR::SystemExec* x = new ARDOUR::SystemExec (args[0], args, true);
-	x->Terminated.connect (_luaexecs, MISSING_INVALIDATOR, boost::bind (&reaper, x), gui_context());
+	x->Terminated.connect (_luaexecs, MISSING_INVALIDATOR, std::bind (&reaper, x), gui_context());
 
 	if (x->start()) {
 		reaper (x);
@@ -1563,7 +1563,7 @@ LuaInstance::set_state (const XMLNode& node)
 			try {
 				LuaCallbackPtr p (new LuaCallback (_session, *(*n)));
 				_callbacks.insert (std::make_pair(p->id(), p));
-				p->drop_callback.connect (_slotcon, MISSING_INVALIDATOR, boost::bind (&LuaInstance::unregister_lua_slot, this, p->id()), gui_context());
+				p->drop_callback.connect (_slotcon, MISSING_INVALIDATOR, std::bind (&LuaInstance::unregister_lua_slot, this, p->id()), gui_context());
 				SlotChanged (p->id(), p->name(), p->signals()); /* EMIT SIGNAL */
 			} catch (luabridge::LuaException const& e) {
 #ifndef NDEBUG
@@ -1949,7 +1949,7 @@ LuaInstance::register_lua_slot (const std::string& name, const std::string& scri
 	try {
 		LuaCallbackPtr p (new LuaCallback (_session, name, script, ah, args));
 		_callbacks.insert (std::make_pair(p->id(), p));
-		p->drop_callback.connect (_slotcon, MISSING_INVALIDATOR, boost::bind (&LuaInstance::unregister_lua_slot, this, p->id()), gui_context());
+		p->drop_callback.connect (_slotcon, MISSING_INVALIDATOR, std::bind (&LuaInstance::unregister_lua_slot, this, p->id()), gui_context());
 		SlotChanged (p->id(), p->name(), p->signals()); /* EMIT SIGNAL */
 		set_dirty ();
 		return true;

@@ -589,7 +589,7 @@ ARDOUR::check_for_old_configuration_files ()
 }
 
 int
-ARDOUR::handle_old_configuration_files (boost::function<bool(std::string const&, std::string const&, int)> ui_handler)
+ARDOUR::handle_old_configuration_files (std::function<bool(std::string const&, std::string const&, int)> ui_handler)
 {
 	if (have_old_configuration_files) {
 		int current_version = atoi (X_(PROGRAM_VERSION));
@@ -787,7 +787,7 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 
 	MIDI::Name::MidiPatchManager::instance ().load_midnams_in_thread ();
 
-	Config->ParameterChanged.connect_same_thread (config_connection, boost::bind (&config_changed, _1));
+	Config->ParameterChanged.connect_same_thread (config_connection, std::bind (&config_changed, _1));
 
 	libardour_initialized = true;
 

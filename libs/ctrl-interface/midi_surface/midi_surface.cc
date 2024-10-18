@@ -59,9 +59,9 @@ MIDISurface::port_setup ()
 	ports_acquire ();
 
 	if (!input_port_name().empty() || !output_port_name().empty()) {
-		ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&MIDISurface::port_registration_handler, this), this);
+		ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_connections, MISSING_INVALIDATOR, std::bind (&MIDISurface::port_registration_handler, this), this);
 	}
-	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&MIDISurface::connection_handler, this, _1, _2, _3, _4, _5), this);
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, std::bind (&MIDISurface::connection_handler, this, _1, _2, _3, _4, _5), this);
 
 	port_registration_handler ();
 }
@@ -105,7 +105,7 @@ MIDISurface::ports_acquire ()
 	 */
 
 	if (with_pad_filter) {
-		std::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->add_shadow_port (string_compose (_("%1 Pads"), port_name_prefix), boost::bind (&MIDISurface::pad_filter, this, _1, _2));
+		std::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->add_shadow_port (string_compose (_("%1 Pads"), port_name_prefix), std::bind (&MIDISurface::pad_filter, this, _1, _2));
 		std::shared_ptr<MidiPort> shadow_port = std::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->shadow_port();
 
 		if (shadow_port) {
@@ -396,17 +396,17 @@ MIDISurface::connect_to_port_parser (MIDI::Port& port)
 	DEBUG_TRACE (DEBUG::MIDISurface, string_compose ("Connecting to signals on port %1 using parser %2\n", port.name(), p));
 
 	/* Incoming sysex */
-	p->sysex.connect_same_thread (*this, boost::bind (&MIDISurface::handle_midi_sysex, this, _1, _2, _3));
+	p->sysex.connect_same_thread (*this, std::bind (&MIDISurface::handle_midi_sysex, this, _1, _2, _3));
 	/* V-Pot messages are Controller */
-	p->controller.connect_same_thread (*this, boost::bind (&MIDISurface::handle_midi_controller_message, this, _1, _2));
+	p->controller.connect_same_thread (*this, std::bind (&MIDISurface::handle_midi_controller_message, this, _1, _2));
 	/* Button messages are NoteOn */
-	p->note_on.connect_same_thread (*this, boost::bind (&MIDISurface::handle_midi_note_on_message, this, _1, _2));
+	p->note_on.connect_same_thread (*this, std::bind (&MIDISurface::handle_midi_note_on_message, this, _1, _2));
 	/* Button messages are NoteOn but libmidi++ sends note-on w/velocity = 0 as note-off so catch them too */
-	p->note_off.connect_same_thread (*this, boost::bind (&MIDISurface::handle_midi_note_off_message, this, _1, _2));
+	p->note_off.connect_same_thread (*this, std::bind (&MIDISurface::handle_midi_note_off_message, this, _1, _2));
 	/* Fader messages are Pitchbend */
-	p->channel_pitchbend[0].connect_same_thread (*this, boost::bind (&MIDISurface::handle_midi_pitchbend_message, this, _1, _2));
+	p->channel_pitchbend[0].connect_same_thread (*this, std::bind (&MIDISurface::handle_midi_pitchbend_message, this, _1, _2));
 
-	p->poly_pressure.connect_same_thread (*this, boost::bind (&MIDISurface::handle_midi_polypressure_message, this, _1, _2));
+	p->poly_pressure.connect_same_thread (*this, std::bind (&MIDISurface::handle_midi_polypressure_message, this, _1, _2));
 }
 
 void
@@ -424,20 +424,20 @@ void
 MIDISurface::connect_session_signals()
 {
 	// receive routes added
-	//session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_routes_added, this, _1), this);
+	//session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, std::bind (&MackieControlProtocol::notify_routes_added, this, _1), this);
 	// receive VCAs added
-	//session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MIDISurface::notify_vca_added, this, _1), this);
+	//session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, std::bind (&MIDISurface::notify_vca_added, this, _1), this);
 
 	// receive record state toggled
-	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MIDISurface::notify_record_state_changed, this), this);
+	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, std::bind (&MIDISurface::notify_record_state_changed, this), this);
 	// receive transport state changed
-	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MIDISurface::notify_transport_state_changed, this), this);
-	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MIDISurface::notify_loop_state_changed, this), this);
+	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, std::bind (&MIDISurface::notify_transport_state_changed, this), this);
+	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, std::bind (&MIDISurface::notify_loop_state_changed, this), this);
 	// receive punch-in and punch-out
-	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MIDISurface::notify_parameter_changed, this, _1), this);
-	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MIDISurface::notify_parameter_changed, this, _1), this);
+	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, std::bind (&MIDISurface::notify_parameter_changed, this, _1), this);
+	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, std::bind (&MIDISurface::notify_parameter_changed, this, _1), this);
 	// receive rude solo changed
-	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MIDISurface::notify_solo_active_changed, this, _1), this);
+	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, std::bind (&MIDISurface::notify_solo_active_changed, this, _1), this);
 }
 
 XMLNode&

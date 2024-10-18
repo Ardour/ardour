@@ -1422,7 +1422,7 @@ DiskReader::playlist_ranges_moved (list<Temporal::RangeMove> const& movements, b
 	}
 
 	/* move processor automation */
-	_track.foreach_processor (boost::bind (&DiskReader::move_processor_automation, this, _1, movements));
+	_track.foreach_processor (std::bind (&DiskReader::move_processor_automation, this, _1, movements));
 }
 
 void

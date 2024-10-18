@@ -23,7 +23,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/function.hpp>
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
 #include "pbd/configuration_variable.h"
@@ -38,7 +37,7 @@ class LIBPBD_API Configuration : public PBD::Stateful
 	Configuration() {}
 	virtual ~Configuration() {}
 
-	virtual void map_parameters (boost::function<void (std::string)>&) = 0;
+	virtual void map_parameters (std::function<void (std::string)>&) = 0;
 	virtual int set_state (XMLNode const &, int) = 0;
 	virtual XMLNode & get_state () const = 0;
 	virtual XMLNode & get_variables (std::string const & nodename) const = 0;

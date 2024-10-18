@@ -101,7 +101,7 @@ Session::pre_export ()
 	_export_xruns = 0;
 	_exporting = true;
 	export_status->set_running (true);
-	export_status->Finished.connect_same_thread (*this, boost::bind (&Session::finalize_audio_export, this, _1));
+	export_status->Finished.connect_same_thread (*this, std::bind (&Session::finalize_audio_export, this, _1));
 
 	/* disable MMC output early */
 
@@ -223,7 +223,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 		export_status->stop = false;
 		process_function = &Session::process_export_fw;
 		/* this is required for ExportGraphBuilder::Intermediate::start_post_processing */
-		_engine.Freewheel.connect_same_thread (export_freewheel_connection, boost::bind (&Session::process_export_fw, this, _1));
+		_engine.Freewheel.connect_same_thread (export_freewheel_connection, std::bind (&Session::process_export_fw, this, _1));
 		reset_xrun_count ();
 		return 0;
 	} else {
@@ -234,7 +234,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 		_realtime_export = false;
 		_export_rolling = true;
 		export_status->stop = false;
-		_engine.Freewheel.connect_same_thread (export_freewheel_connection, boost::bind (&Session::process_export_fw, this, _1));
+		_engine.Freewheel.connect_same_thread (export_freewheel_connection, std::bind (&Session::process_export_fw, this, _1));
 		reset_xrun_count ();
 		return _engine.freewheel (true);
 	}

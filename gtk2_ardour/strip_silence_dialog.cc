@@ -130,7 +130,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	progress_idle_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &StripSilenceDialog::idle_update_progress));
 
 	/* Create a thread which runs while the dialogue is open to compute the silence regions */
-	Completed.connect (_completed_connection, invalidator(*this), boost::bind (&StripSilenceDialog::update, this), gui_context ());
+	Completed.connect (_completed_connection, invalidator(*this), std::bind (&StripSilenceDialog::update, this), gui_context ());
 	_thread_should_finish = false;
 	pthread_create_and_store ("SilenceDetect", &_thread, StripSilenceDialog::_detection_thread_work, this, 0);
 

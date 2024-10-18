@@ -89,7 +89,7 @@ Pannerbalance::Pannerbalance (std::shared_ptr<Pannable> p)
 	/* RIGHT SIGNAL */
 	pos_interp[1] = pos[1] = desired_pos[1];
 
-	_pannable->pan_azimuth_control->Changed.connect_same_thread (*this, boost::bind (&Pannerbalance::update, this));
+	_pannable->pan_azimuth_control->Changed.connect_same_thread (*this, std::bind (&Pannerbalance::update, this));
 }
 
 Pannerbalance::~Pannerbalance ()

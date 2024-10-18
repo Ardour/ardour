@@ -27,7 +27,6 @@
 
 #include <glibmm/threads.h>
 
-#include <boost/function.hpp>
 
 #include "pbd/signals.h"
 
@@ -57,7 +56,7 @@ public:
 	uint32_t source_use_count (std::shared_ptr<const Source> src) const;
 	uint32_t region_use_count (std::shared_ptr<Region> region) const;
 	template<class T> void foreach (T *obj, void (T::*func)(std::shared_ptr<Playlist>));
-	void foreach (boost::function<void(std::shared_ptr<const Playlist>)> functor, bool incl_unused = true);
+	void foreach (std::function<void(std::shared_ptr<const Playlist>)> functor, bool incl_unused = true);
 	void get (std::vector<std::shared_ptr<Playlist> >&) const;
 	void unassigned (std::list<std::shared_ptr<Playlist> > & list);
 	void destroy_region (std::shared_ptr<Region>);
@@ -86,7 +85,7 @@ private:
 	void find_equivalent_playlist_regions (std::shared_ptr<Region>, std::vector<std::shared_ptr<Region> >& result);
 	void update_after_tempo_map_change ();
 	void add_state (XMLNode*, bool save_template, bool include_unused) const;
-	bool maybe_delete_unused (boost::function<int(std::shared_ptr<Playlist>)>);
+	bool maybe_delete_unused (std::function<int(std::shared_ptr<Playlist>)>);
 	int load (Session &, const XMLNode&);
 	int load_unused (Session &, const XMLNode&);
 	std::shared_ptr<Playlist> XMLPlaylistFactory (Session &, const XMLNode&);

@@ -63,16 +63,16 @@ MidiModel::MidiModel (MidiSource& s)
 	: AutomatableSequence<TimeType> (s.session(), Temporal::TimeDomainProvider (Temporal::BeatTime))
 	, _midi_source (s)
 {
-	_midi_source.InterpolationChanged.connect_same_thread (_midi_source_connections, boost::bind (&MidiModel::source_interpolation_changed, this, _1, _2));
-	_midi_source.AutomationStateChanged.connect_same_thread (_midi_source_connections, boost::bind (&MidiModel::source_automation_state_changed, this, _1, _2));
+	_midi_source.InterpolationChanged.connect_same_thread (_midi_source_connections, std::bind (&MidiModel::source_interpolation_changed, this, _1, _2));
+	_midi_source.AutomationStateChanged.connect_same_thread (_midi_source_connections, std::bind (&MidiModel::source_automation_state_changed, this, _1, _2));
 }
 
 MidiModel::MidiModel (MidiModel const & other, MidiSource & s)
 	: AutomatableSequence<TimeType> (other)
 	, _midi_source (s)
 {
-	_midi_source.InterpolationChanged.connect_same_thread (_midi_source_connections, boost::bind (&MidiModel::source_interpolation_changed, this, _1, _2));
-	_midi_source.AutomationStateChanged.connect_same_thread (_midi_source_connections, boost::bind (&MidiModel::source_automation_state_changed, this, _1, _2));
+	_midi_source.InterpolationChanged.connect_same_thread (_midi_source_connections, std::bind (&MidiModel::source_interpolation_changed, this, _1, _2));
+	_midi_source.AutomationStateChanged.connect_same_thread (_midi_source_connections, std::bind (&MidiModel::source_automation_state_changed, this, _1, _2));
 }
 
 MidiModel::NoteDiffCommand*
@@ -606,7 +606,7 @@ MidiModel::NoteDiffCommand::set_state (const XMLNode& diff_command, int /*versio
 	if (added_notes) {
 		XMLNodeList notes = added_notes->children();
 		transform(notes.begin(), notes.end(), back_inserter(_added_notes),
-		          boost::bind (&NoteDiffCommand::unmarshal_note, this, _1));
+		          std::bind (&NoteDiffCommand::unmarshal_note, this, _1));
 	}
 
 
@@ -617,7 +617,7 @@ MidiModel::NoteDiffCommand::set_state (const XMLNode& diff_command, int /*versio
 	if (removed_notes) {
 		XMLNodeList notes = removed_notes->children();
 		transform(notes.begin(), notes.end(), back_inserter(_removed_notes),
-		          boost::bind (&NoteDiffCommand::unmarshal_note, this, _1));
+		          std::bind (&NoteDiffCommand::unmarshal_note, this, _1));
 	}
 
 
@@ -630,7 +630,7 @@ MidiModel::NoteDiffCommand::set_state (const XMLNode& diff_command, int /*versio
 	if (changed_notes) {
 		XMLNodeList notes = changed_notes->children();
 		transform (notes.begin(), notes.end(), back_inserter(_changes),
-		           boost::bind (&NoteDiffCommand::unmarshal_change, this, _1));
+		           std::bind (&NoteDiffCommand::unmarshal_change, this, _1));
 
 	}
 
@@ -658,21 +658,21 @@ MidiModel::NoteDiffCommand::get_state () const
 
 	XMLNode* changes = diff_command->add_child(DIFF_NOTES_ELEMENT);
 	for_each(_changes.cbegin(), _changes.cend(),
-	         boost::bind (
-		         boost::bind (&XMLNode::add_child_nocopy, changes, _1),
-		         boost::bind (&NoteDiffCommand::marshal_change, this, _1)));
+	         std::bind (
+		         std::bind (&XMLNode::add_child_nocopy, changes, _1),
+		         std::bind (&NoteDiffCommand::marshal_change, this, _1)));
 
 	XMLNode* added_notes = diff_command->add_child(ADDED_NOTES_ELEMENT);
 	for_each(_added_notes.cbegin(), _added_notes.cend(),
-	         boost::bind(
-		         boost::bind (&XMLNode::add_child_nocopy, added_notes, _1),
-		         boost::bind (&NoteDiffCommand::marshal_note, this, _1)));
+	         std::bind(
+		         std::bind (&XMLNode::add_child_nocopy, added_notes, _1),
+		         std::bind (&NoteDiffCommand::marshal_note, this, _1)));
 
 	XMLNode* removed_notes = diff_command->add_child(REMOVED_NOTES_ELEMENT);
 	for_each(_removed_notes.cbegin(), _removed_notes.cend(),
-	         boost::bind (
-		         boost::bind (&XMLNode::add_child_nocopy, removed_notes, _1),
-		         boost::bind (&NoteDiffCommand::marshal_note, this, _1)));
+	         std::bind (
+		         std::bind (&XMLNode::add_child_nocopy, removed_notes, _1),
+		         std::bind (&NoteDiffCommand::marshal_note, this, _1)));
 
 	/* if this command had side-effects, store that state too
 	 */
@@ -680,9 +680,9 @@ MidiModel::NoteDiffCommand::get_state () const
 	if (!side_effect_removals.empty()) {
 		XMLNode* side_effect_notes = diff_command->add_child(SIDE_EFFECT_REMOVALS_ELEMENT);
 		for_each(side_effect_removals.begin(), side_effect_removals.end(),
-		         boost::bind (
-			         boost::bind (&XMLNode::add_child_nocopy, side_effect_notes, _1),
-			         boost::bind (&NoteDiffCommand::marshal_note, this, _1)));
+		         std::bind (
+			         std::bind (&XMLNode::add_child_nocopy, side_effect_notes, _1),
+			         std::bind (&NoteDiffCommand::marshal_note, this, _1)));
 	}
 
 	return *diff_command;
@@ -843,7 +843,7 @@ MidiModel::SysExDiffCommand::set_state (const XMLNode& diff_command, int /*versi
 	if (changed_sysexes) {
 		XMLNodeList sysexes = changed_sysexes->children();
 		transform (sysexes.begin(), sysexes.end(), back_inserter (_changes),
-		           boost::bind (&SysExDiffCommand::unmarshal_change, this, _1));
+		           std::bind (&SysExDiffCommand::unmarshal_change, this, _1));
 
 	}
 
@@ -858,9 +858,9 @@ MidiModel::SysExDiffCommand::get_state () const
 
 	XMLNode* changes = diff_command->add_child(DIFF_SYSEXES_ELEMENT);
 	for_each (_changes.begin(), _changes.end(),
-	          boost::bind (
-		          boost::bind (&XMLNode::add_child_nocopy, changes, _1),
-		          boost::bind (&SysExDiffCommand::marshal_change, this, _1)));
+	          std::bind (
+		          std::bind (&XMLNode::add_child_nocopy, changes, _1),
+		          std::bind (&SysExDiffCommand::marshal_change, this, _1)));
 
 	return *diff_command;
 }
@@ -1175,21 +1175,21 @@ MidiModel::PatchChangeDiffCommand::set_state (const XMLNode& diff_command, int /
 	XMLNode* added = diff_command.child (ADDED_PATCH_CHANGES_ELEMENT);
 	if (added) {
 		XMLNodeList p = added->children ();
-		transform (p.begin(), p.end(), back_inserter (_added), boost::bind (&PatchChangeDiffCommand::unmarshal_patch_change, this, _1));
+		transform (p.begin(), p.end(), back_inserter (_added), std::bind (&PatchChangeDiffCommand::unmarshal_patch_change, this, _1));
 	}
 
 	_removed.clear ();
 	XMLNode* removed = diff_command.child (REMOVED_PATCH_CHANGES_ELEMENT);
 	if (removed) {
 		XMLNodeList p = removed->children ();
-		transform (p.begin(), p.end(), back_inserter (_removed), boost::bind (&PatchChangeDiffCommand::unmarshal_patch_change, this, _1));
+		transform (p.begin(), p.end(), back_inserter (_removed), std::bind (&PatchChangeDiffCommand::unmarshal_patch_change, this, _1));
 	}
 
 	_changes.clear ();
 	XMLNode* changed = diff_command.child (DIFF_PATCH_CHANGES_ELEMENT);
 	if (changed) {
 		XMLNodeList p = changed->children ();
-		transform (p.begin(), p.end(), back_inserter (_changes), boost::bind (&PatchChangeDiffCommand::unmarshal_change, this, _1));
+		transform (p.begin(), p.end(), back_inserter (_changes), std::bind (&PatchChangeDiffCommand::unmarshal_change, this, _1));
 	}
 
 	return 0;
@@ -1203,25 +1203,25 @@ MidiModel::PatchChangeDiffCommand::get_state () const
 
 	XMLNode* added = diff_command->add_child (ADDED_PATCH_CHANGES_ELEMENT);
 	for_each (_added.cbegin(), _added.cend(),
-		  boost::bind (
-			  boost::bind (&XMLNode::add_child_nocopy, added, _1),
-			  boost::bind (&PatchChangeDiffCommand::marshal_patch_change, this, _1)
+		  std::bind (
+			  std::bind (&XMLNode::add_child_nocopy, added, _1),
+			  std::bind (&PatchChangeDiffCommand::marshal_patch_change, this, _1)
 			  )
 		);
 
 	XMLNode* removed = diff_command->add_child (REMOVED_PATCH_CHANGES_ELEMENT);
 	for_each (_removed.cbegin(), _removed.cend(),
-		  boost::bind (
-			  boost::bind (&XMLNode::add_child_nocopy, removed, _1),
-			  boost::bind (&PatchChangeDiffCommand::marshal_patch_change, this, _1)
+		  std::bind (
+			  std::bind (&XMLNode::add_child_nocopy, removed, _1),
+			  std::bind (&PatchChangeDiffCommand::marshal_patch_change, this, _1)
 			  )
 		);
 
 	XMLNode* changes = diff_command->add_child (DIFF_PATCH_CHANGES_ELEMENT);
 	for_each (_changes.cbegin(), _changes.cend(),
-		  boost::bind (
-			  boost::bind (&XMLNode::add_child_nocopy, changes, _1),
-			  boost::bind (&PatchChangeDiffCommand::marshal_change, this, _1)
+		  std::bind (
+			  std::bind (&XMLNode::add_child_nocopy, changes, _1),
+			  std::bind (&PatchChangeDiffCommand::marshal_change, this, _1)
 			  )
 		);
 

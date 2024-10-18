@@ -124,7 +124,7 @@ ExportHandler::ExportHandler (Session & session)
 	pthread_mutex_init (&_timespan_mutex, 0);
 	pthread_cond_init (&_timespan_cond, 0);
 	_timespan_thread_active.store (1);
-	_timespan_thread = PBD::Thread::create (boost::bind (_timespan_thread_run, this), "ExportHandler");
+	_timespan_thread = PBD::Thread::create (std::bind (_timespan_thread_run, this), "ExportHandler");
 	if (!_timespan_thread) {
 		_timespan_thread_active.store (0);
 		fatal << "Cannot create export handler helper thread" << endmsg;
@@ -285,7 +285,7 @@ ExportHandler::start_timespan ()
 	/* start export */
 
 	post_processing = false;
-	session.ProcessExport.connect_same_thread (process_connection, boost::bind (&ExportHandler::process, this, _1));
+	session.ProcessExport.connect_same_thread (process_connection, std::bind (&ExportHandler::process, this, _1));
 	process_position = current_timespan->get_start();
 
 	if (!region_export && !current_timespan->vapor ().empty () && session.surround_master ()) {
@@ -528,7 +528,7 @@ ExportHandler::finish_timespan ()
 
 			ARDOUR::SystemExec *se = new ARDOUR::SystemExec(fmt->command(), subs, true);
 			info << "Post-export command line : {" << se->to_s () << "}" << endmsg;
-			se->ReadStdout.connect_same_thread(command_connection, boost::bind(&ExportHandler::command_output, this, _1, _2));
+			se->ReadStdout.connect_same_thread(command_connection, std::bind(&ExportHandler::command_output, this, _1, _2));
 			int ret = se->start (SystemExec::MergeWithStdin);
 			if (ret == 0) {
 				// successfully started

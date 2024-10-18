@@ -444,7 +444,7 @@ auv2_save_cache_file (CAComponentDescription& desc, XMLNode* root, bool verbose)
 }
 
 bool
-ARDOUR::auv2_scan_and_cache (CAComponentDescription& desc, boost::function<void (CAComponentDescription const&, AUv2Info const&)> cb, bool verbose)
+ARDOUR::auv2_scan_and_cache (CAComponentDescription& desc, std::function<void (CAComponentDescription const&, AUv2Info const&)> cb, bool verbose)
 {
 	XMLNode* root = new XMLNode ("AUv2Cache");
 	root->set_property ("version", 2);

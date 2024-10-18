@@ -115,11 +115,11 @@ Send::Send (Session& s, std::shared_ptr<Pannable> p, std::shared_ptr<MuteMaster>
 	}
 
 	if (panner_shell()) {
-		panner_shell()->Changed.connect_same_thread (*this, boost::bind (&Send::panshell_changed, this));
-		panner_shell()->PannableChanged.connect_same_thread (*this, boost::bind (&Send::pannable_changed, this));
+		panner_shell()->Changed.connect_same_thread (*this, std::bind (&Send::panshell_changed, this));
+		panner_shell()->PannableChanged.connect_same_thread (*this, std::bind (&Send::pannable_changed, this));
 	}
 	if (_output) {
-		_output->changed.connect_same_thread (*this, boost::bind (&Send::snd_output_changed, this, _1, _2));
+		_output->changed.connect_same_thread (*this, std::bind (&Send::snd_output_changed, this, _1, _2));
 	}
 }
 
