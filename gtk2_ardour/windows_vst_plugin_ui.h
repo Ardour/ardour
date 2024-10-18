@@ -43,4 +43,3 @@ private:
 
 	PBD::ScopedConnection _resize_connection;
 };
-#endif
