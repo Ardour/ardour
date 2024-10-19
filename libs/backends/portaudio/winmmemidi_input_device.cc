@@ -21,6 +21,7 @@
 #include "winmmemidi_input_device.h"
 
 #include <stdexcept>
+#include <cassert>
 #include <cmath>
 
 #include "pbd/compose.h"
