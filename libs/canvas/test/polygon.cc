@@ -29,7 +29,7 @@ PolygonTest::bounding_box ()
 	/* should now have a bounding box around those points,
 	   taking into account default line width
 	*/
-	boost::optional<Rect> bbox = polygon.bounding_box ();
+	std::optional<Rect> bbox = polygon.bounding_box ();
 	CPPUNIT_ASSERT (bbox.is_initialized ());
 	CPPUNIT_ASSERT (bbox.value().x0 == -6.25);
 	CPPUNIT_ASSERT (bbox.value().x1 ==  6.25);

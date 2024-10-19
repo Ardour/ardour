@@ -23,7 +23,7 @@
 #include <set>
 #include <vector>
 
-#include <boost/optional.hpp>
+#include <optional>
 #include <glibmm/threads.h>
 
 #include "pbd/search_path.h"
@@ -328,8 +328,8 @@ private:
 	std::set<Evoral::Parameter> _ac_subscriptions;
 	bool                        _add_to_selection;
 
-	boost::optional<uint32_t> _plugin_latency;
-	boost::optional<uint32_t> _plugin_tail;
+	std::optional<uint32_t> _plugin_latency;
+	std::optional<uint32_t> _plugin_tail;
 
 	int _n_bus_in;
 	int _n_bus_out;
@@ -486,7 +486,7 @@ public:
 	bool                              is_instrument () const;
 	PBD::Searchpath                   preset_search_path () const;
 
-	boost::optional<bool>             has_editor;
+	std::optional<bool>             has_editor;
 
 	std::shared_ptr<VST3PluginModule> m;
 };

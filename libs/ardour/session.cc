@@ -5815,13 +5815,13 @@ Session::graph_reordered (bool called_from_backend)
 /** @return Number of samples that there is disk space available to write,
  *  if known.
  */
-boost::optional<samplecnt_t>
+std::optional<samplecnt_t>
 Session::available_capture_duration ()
 {
 	Glib::Threads::Mutex::Lock lm (space_lock);
 
 	if (_total_free_4k_blocks_uncertain) {
-		return boost::optional<samplecnt_t> ();
+		return std::optional<samplecnt_t> ();
 	}
 
 	float sample_bytes_on_disk = 4.0; // keep gcc happy

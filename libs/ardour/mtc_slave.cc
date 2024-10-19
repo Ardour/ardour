@@ -125,7 +125,7 @@ MTC_TransportMaster::set_session (Session* s)
 }
 
 void
-MTC_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now, boost::optional<samplepos_t> session_pos)
+MTC_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now, std::optional<samplepos_t> session_pos)
 {
 	/* Read and parse incoming MIDI */
 

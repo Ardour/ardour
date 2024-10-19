@@ -224,7 +224,7 @@ IO::remove_port (std::shared_ptr<Port> port, void* src)
 	ChanCount after = before;
 	after.set (port->type(), after.get (port->type()) - 1);
 
-	boost::optional<bool> const r = PortCountChanging (after); /* EMIT SIGNAL */
+	std::optional<bool> const r = PortCountChanging (after); /* EMIT SIGNAL */
 	if (r.value_or (false)) {
 		return -1;
 	}
@@ -296,7 +296,7 @@ IO::add_port (string destination, void* src, DataType type)
 	ChanCount after = before;
 	after.set (type, after.get (type) + 1);
 
-	boost::optional<bool> const r = PortCountChanging (after); /* EMIT SIGNAL */
+	std::optional<bool> const r = PortCountChanging (after); /* EMIT SIGNAL */
 	if (r.value_or (false)) {
 		return -1;
 	}

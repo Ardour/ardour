@@ -978,7 +978,7 @@ Session::load_state (string snapshot_name, bool from_template)
 
 		/* there is pending state from a crashed capture attempt */
 
-		boost::optional<int> r = AskAboutPendingState();
+		std::optional<int> r = AskAboutPendingState();
 		if (r.value_or (1)) {
 			state_was_pending = true;
 		} else {
@@ -1717,7 +1717,7 @@ Session::set_state (const XMLNode& node, int version)
 		bool reconfigured = false;
 
 		while (!AudioEngine::instance()->running () || _base_sample_rate != AudioEngine::instance()->sample_rate ()) {
-			boost::optional<int> r = AskAboutSampleRateMismatch (_base_sample_rate, _current_sample_rate);
+			std::optional<int> r = AskAboutSampleRateMismatch (_base_sample_rate, _current_sample_rate);
 			int rv = r.value_or (0);
 			if (rv == 0 && AudioEngine::instance()->running ()) {
 				/* continue with rate mismatch */
@@ -3482,7 +3482,7 @@ struct RegionCounter {
 int
 Session::ask_about_playlist_deletion (std::shared_ptr<Playlist> p)
 {
-	boost::optional<int> r = AskAboutPlaylistDeletion (p);
+	std::optional<int> r = AskAboutPlaylistDeletion (p);
 	return r.value_or (1);
 }
 
@@ -5296,7 +5296,7 @@ Session::save_as (SaveAs& saveas)
 
 					/* tell someone "X percent, file M of N"; M is one-based */
 
-					boost::optional<bool> res = saveas.Progress (fraction, cnt, all);
+					std::optional<bool> res = saveas.Progress (fraction, cnt, all);
 
 					if (res) {
 						keep_going = *res;

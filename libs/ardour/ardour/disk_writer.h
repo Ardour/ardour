@@ -22,7 +22,7 @@
 #include <atomic>
 #include <list>
 #include <vector>
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "ardour/disk_io.h"
 #include "ardour/event_ring_buffer.h"
@@ -171,7 +171,7 @@ private:
 
 	samplepos_t get_capture_start_sample_locked (uint32_t n = 0) const;
 
-	boost::optional<samplepos_t> _capture_start_sample;
+	std::optional<samplepos_t> _capture_start_sample;
 
 	samplecnt_t   _capture_captured;
 	bool          _was_recording;

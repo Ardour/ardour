@@ -46,7 +46,6 @@
  * Apple's MacTypes.h and BarController.
  */
 
-#include <boost/none.hpp>
 
 #include <sigc++/bind.h>
 
@@ -1018,7 +1017,7 @@ Editor::deferred_control_scroll (samplepos_t /*target*/)
 {
 	_session->request_locate (*_control_scroll_target);
 	/* reset for next stream */
-	_control_scroll_target = boost::none;
+	_control_scroll_target = std::nullopt;
 	_dragging_playhead = false;
 	return false;
 }

@@ -190,7 +190,7 @@ Session::locate (samplepos_t target_sample, bool for_loop_end, bool force, bool 
 
 	// Update Timecode time
 	_transport_sample = target_sample;
-	_nominal_jack_transport_sample = boost::none;
+	_nominal_jack_transport_sample = std::nullopt;
 
 	/* Note that loop wrap-around locates do not need to call "seek" */
 	if (force || !for_loop_end) {

@@ -23,7 +23,7 @@ GroupTest::bounding_box ()
 	c.set_outline_width (0);
 	Rectangle d (canvas.root(), Rect (33, 33, 64, 64));
 	d.set_outline_width (0);
-	boost::optional<Rect> bbox = canvas.root()->bounding_box ();
+	std::optional<Rect> bbox = canvas.root()->bounding_box ();
 
 	/* check the bounding box */
 	CPPUNIT_ASSERT (bbox.is_initialized ());
@@ -51,7 +51,7 @@ GroupTest::null_bounding_box ()
 
 	Group empty (canvas.root());
 
-	boost::optional<Rect> bbox = empty.bounding_box ();
+	std::optional<Rect> bbox = empty.bounding_box ();
 	CPPUNIT_ASSERT (!bbox.is_initialized ());
 }
 
@@ -116,7 +116,7 @@ GroupTest::children_changing ()
 	a.set_outline_width (0);
 
 	/* Check that initial bbox */
-	boost::optional<Rect> bbox = canvas.root()->bounding_box ();
+	std::optional<Rect> bbox = canvas.root()->bounding_box ();
 	CPPUNIT_ASSERT (bbox.is_initialized ());
 	CPPUNIT_ASSERT (bbox.value().x0 == 0);
 	CPPUNIT_ASSERT (bbox.value().y0 == 0);
@@ -156,7 +156,7 @@ GroupTest::grandchildren_changing ()
 	a.set_outline_width (0);
 
 	/* Check the initial bboxes */
-	boost::optional<Rect> bbox = canvas.root()->bounding_box ();
+	std::optional<Rect> bbox = canvas.root()->bounding_box ();
 	CPPUNIT_ASSERT (bbox.is_initialized ());
 	CPPUNIT_ASSERT (bbox.value().x0 == 0);
 	CPPUNIT_ASSERT (bbox.value().y0 == 0);
@@ -276,7 +276,7 @@ GroupTest::torture_add_items_at_point ()
 		}
 
 		for (list<Item*>::iterator j = rectangles.begin(); j != rectangles.end(); ++j) {
-			boost::optional<Rect> bbox = (*j)->bounding_box ();
+			std::optional<Rect> bbox = (*j)->bounding_box ();
 			assert (bbox);
 			if (bbox.value().contains (test)) {
 				items_B.push_back (*j);

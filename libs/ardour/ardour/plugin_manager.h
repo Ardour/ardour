@@ -31,7 +31,6 @@
 #include <map>
 #include <string>
 #include <set>
-#include <boost/container/set.hpp>
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
@@ -193,7 +192,7 @@ private:
 		}
 	};
 
-	typedef boost::container::set<PSLEPtr, PSLEPtrSort> PluginScanLog;
+	typedef std::set<PSLEPtr, PSLEPtrSort> PluginScanLog;
 	PluginScanLog _plugin_scan_log;
 
 	PSLEPtr scan_log_entry (PluginType const type, std::string const& path) {

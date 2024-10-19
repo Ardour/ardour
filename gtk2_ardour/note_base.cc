@@ -252,7 +252,7 @@ NoteBase::set_mouse_fractions (GdkEvent* ev)
 		return;
 	}
 
-	boost::optional<ArdourCanvas::Rect> bbox = _item->bounding_box ();
+	std::optional<ArdourCanvas::Rect> bbox = _item->bounding_box ();
 	assert (bbox);
 
 	_item->canvas_to_item (ix, iy);

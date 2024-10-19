@@ -1,7 +1,7 @@
 #ifndef __gtk2_ardour_ghost_event_h__
 #define __gtk2_ardour_ghost_event_h__
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <sigc++/trackable.h>
 
 #include "evoral/Note.h"
@@ -28,7 +28,7 @@ class GhostEvent : public sigc::trackable
 
 	/* must match typedef in NoteBase */
 	typedef Evoral::Note<Temporal::Beats> NoteType;
-	typedef boost::unordered_map<std::shared_ptr<NoteType>, GhostEvent* > EventList;
+	typedef std::unordered_map<std::shared_ptr<NoteType>, GhostEvent* > EventList;
 
 	static GhostEvent* find (std::shared_ptr<NoteType> parent, EventList& events, EventList::iterator& opti);
 };

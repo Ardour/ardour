@@ -19,7 +19,6 @@
 
 #include <sstream>
 
-#include <boost/none.hpp>
 
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
@@ -104,7 +103,7 @@ TransportFSM::hard_stop ()
 {
 	_motion_state = Stopped;
 	_last_locate.target = max_samplepos;
-	current_roll_after_locate_status = boost::none;
+	current_roll_after_locate_status = std::nullopt;
 	_direction_state = Forwards;
 	_transport_speed = 0;
 	_reverse_after_declick = 0;
@@ -484,7 +483,7 @@ TransportFSM::start_playback ()
 	DEBUG_TRACE (DEBUG::TFSMEvents, "start_playback\n");
 
 	_last_locate.target = max_samplepos;
-	current_roll_after_locate_status = boost::none;
+	current_roll_after_locate_status = std::nullopt;
 
 	if (most_recently_requested_speed == std::numeric_limits<double>::max()) {
 		/* we started rolling without ever setting speed; that's an implicit
@@ -504,7 +503,7 @@ TransportFSM::stop_playback (Event const & s)
 	DEBUG_TRACE (DEBUG::TFSMEvents, "stop_playback\n");
 
 	_last_locate.target = max_samplepos;
-	current_roll_after_locate_status = boost::none;
+	current_roll_after_locate_status = std::nullopt;
 
 	api->stop_transport (s.abort_capture, s.clear_state);
 }
@@ -684,7 +683,7 @@ bool
 TransportFSM::should_roll_after_locate () const
 {
 	bool roll = current_roll_after_locate_status.value_or (api->should_roll_after_locate ());
-	current_roll_after_locate_status = boost::none; // used it
+	current_roll_after_locate_status = std::nullopt; // used it
 
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("should_roll_after_locate() ? %1\n", roll));
 	return roll;
@@ -695,7 +694,7 @@ TransportFSM::roll_after_locate () const
 {
 	bool for_loop = _last_locate.for_loop_end;
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("rolling after locate, was for_loop ? %1\n", for_loop));
-	current_roll_after_locate_status = boost::none;
+	current_roll_after_locate_status = std::nullopt;
 
 	if (most_recently_requested_speed == std::numeric_limits<double>::max()) {
 		/* we started rolling without ever setting speed; that's an implicit

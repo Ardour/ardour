@@ -28,7 +28,7 @@
 #include <vector>
 #include <stdint.h>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include <sigc++/signal.h>
 
@@ -478,9 +478,9 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	uint8_t get_velocity_for_add (ARDOUR::MidiModel::TimeType time) const;
 	uint8_t get_channel_for_add (ARDOUR::MidiModel::TimeType time) const;
 
-	typedef boost::unordered_map<std::shared_ptr<NoteType>, NoteBase*>                             Events;
-	typedef boost::unordered_map<ARDOUR::MidiModel::PatchChangePtr, std::shared_ptr<PatchChange> > PatchChanges;
-	typedef boost::unordered_map<ARDOUR::MidiModel::constSysExPtr, std::shared_ptr<SysEx> >        SysExes;
+	typedef std::unordered_map<std::shared_ptr<NoteType>, NoteBase*>                             Events;
+	typedef std::unordered_map<ARDOUR::MidiModel::PatchChangePtr, std::shared_ptr<PatchChange> > PatchChanges;
+	typedef std::unordered_map<ARDOUR::MidiModel::constSysExPtr, std::shared_ptr<SysEx> >        SysExes;
 	typedef std::vector<NoteBase*> CopyDragEvents;
 
 	std::shared_ptr<ARDOUR::MidiTrack>   _midi_track;
