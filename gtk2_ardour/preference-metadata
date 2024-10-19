@@ -623,7 +623,6 @@
    osc open sound control
 [use-plugin-own-gui]
    plugins GUI editor prefer use own
-[use-tranzport]
 [use-vst3]
    plugins vst3
 [use-windows-vst]
