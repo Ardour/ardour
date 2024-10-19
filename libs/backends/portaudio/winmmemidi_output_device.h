@@ -26,6 +26,7 @@
 #include <pthread.h>
 
 #include <string>
+#include <memory>
 
 #include <pbd/ringbuffer.h>
 
