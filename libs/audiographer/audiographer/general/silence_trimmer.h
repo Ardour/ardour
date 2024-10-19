@@ -8,6 +8,7 @@
 #include "audiographer/exception.h"
 #include "audiographer/utils/listed_source.h"
 
+#include <cmath>
 #include <cstring>
 
 namespace AudioGrapher {
