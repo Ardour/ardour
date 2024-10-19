@@ -609,7 +609,7 @@ void
 TransportFSM::start_locate_after_declick ()
 {
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("start_locate_after_declick, have crals ? %1 roll will be %2\n", (bool) current_roll_after_locate_status,
-	                                                current_roll_after_locate_status ? current_roll_after_locate_status.get() : compute_should_roll (_last_locate.ltd)));
+	                                                current_roll_after_locate_status.value_or (compute_should_roll (_last_locate.ltd))));
 
 	/* we only get here because a locate request arrived while we were rolling. We declicked and that is now finished */
 
@@ -683,14 +683,8 @@ TransportFSM::schedule_butler_for_transport_work () const
 bool
 TransportFSM::should_roll_after_locate () const
 {
-	bool roll;
-
-	if (current_roll_after_locate_status) {
-		roll = current_roll_after_locate_status.get();
-		current_roll_after_locate_status = boost::none; // used it
-	} else {
-		roll = api->should_roll_after_locate ();
-	}
+	bool roll = current_roll_after_locate_status.value_or (api->should_roll_after_locate ());
+	current_roll_after_locate_status = boost::none; // used it
 
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("should_roll_after_locate() ? %1\n", roll));
 	return roll;

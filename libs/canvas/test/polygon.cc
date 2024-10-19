@@ -31,10 +31,10 @@ PolygonTest::bounding_box ()
 	*/
 	boost::optional<Rect> bbox = polygon.bounding_box ();
 	CPPUNIT_ASSERT (bbox.is_initialized ());
-	CPPUNIT_ASSERT (bbox.get().x0 == -6.25);
-	CPPUNIT_ASSERT (bbox.get().x1 ==  6.25);
-	CPPUNIT_ASSERT (bbox.get().y0 == -6.25);
-	CPPUNIT_ASSERT (bbox.get().y1 ==  6.25);
+	CPPUNIT_ASSERT (bbox.value().x0 == -6.25);
+	CPPUNIT_ASSERT (bbox.value().x1 ==  6.25);
+	CPPUNIT_ASSERT (bbox.value().y0 == -6.25);
+	CPPUNIT_ASSERT (bbox.value().y1 ==  6.25);
 
 	/* and its parent group should have noticed and adjusted
 	   its bounding box
@@ -42,8 +42,8 @@ PolygonTest::bounding_box ()
 
 	bbox = group.bounding_box ();
 	CPPUNIT_ASSERT (bbox.is_initialized ());
-	CPPUNIT_ASSERT (bbox.get().x0 == -6.25);
-	CPPUNIT_ASSERT (bbox.get().x1 ==  6.25);
-	CPPUNIT_ASSERT (bbox.get().y0 == -6.25);
-	CPPUNIT_ASSERT (bbox.get().y1 ==  6.25);
+	CPPUNIT_ASSERT (bbox.value().x0 == -6.25);
+	CPPUNIT_ASSERT (bbox.value().x1 ==  6.25);
+	CPPUNIT_ASSERT (bbox.value().y0 == -6.25);
+	CPPUNIT_ASSERT (bbox.value().y1 ==  6.25);
 }

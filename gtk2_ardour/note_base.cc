@@ -260,16 +260,16 @@ NoteBase::set_mouse_fractions (GdkEvent* ev)
 	/* hmm, something wrong here. w2i should give item-local coordinates
 	   but it doesn't. for now, finesse this.
 	*/
-	ix = ix - bbox.get().x0;
-	iy = iy - bbox.get().y0;
+	ix = ix - bbox.value().x0;
+	iy = iy - bbox.value().y0;
 
 	/* fraction of width/height */
 	double xf;
 	double yf;
 	bool notify = false;
 
-	xf = ix / bbox.get().width ();
-	yf = iy / bbox.get().height ();
+	xf = ix / bbox.value().width ();
+	yf = iy / bbox.value().height ();
 
 	if (xf != _mouse_x_fraction || yf != _mouse_y_fraction) {
 		notify = true;

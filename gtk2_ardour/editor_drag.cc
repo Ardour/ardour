@@ -1397,7 +1397,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 					ArdourCanvas::Rect                  bbox;
 
 					if (obbox) {
-						bbox = obbox.get ();
+						bbox = obbox.value ();
 					}
 
 					last_track_bottom_edge += bbox.height ();
@@ -5124,7 +5124,7 @@ FeatureLineDrag::motion (GdkEvent*, bool)
 
 	boost::optional<ArdourCanvas::Rect> bbox = _line->bounding_box ();
 	assert (bbox);
-	_line->set (ArdourCanvas::Duple (cx, 2.0), ArdourCanvas::Duple (cx, bbox.get ().height ()));
+	_line->set (ArdourCanvas::Duple (cx, 2.0), ArdourCanvas::Duple (cx, bbox.value ().height ()));
 
 	float* pos = new float;
 	*pos       = cx;
