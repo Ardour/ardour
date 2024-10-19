@@ -804,14 +804,14 @@ AudioSource::build_peaks_from_scratch ()
 		samplecnt_t cnt = _length.samples();
 
 		_peaks_built = false;
-		std::array<Sample, bufsize> buf;
+		std::unique_ptr<Sample[]> buf (new Sample[bufsize]);
 
 		while (cnt) {
 
 			samplecnt_t samples_to_read = min (bufsize, cnt);
 			samplecnt_t samples_read;
 
-			if ((samples_read = read_unlocked (buf.data(), current_sample, samples_to_read)) != samples_to_read) {
+			if ((samples_read = read_unlocked (buf.get(), current_sample, samples_to_read)) != samples_to_read) {
 				error << string_compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;
 				done_with_peakfile_writes (false);
 				goto out;
@@ -826,7 +826,7 @@ AudioSource::build_peaks_from_scratch ()
 				goto out;
 			}
 
-			if (compute_and_write_peaks (buf.data(), current_sample, samples_read, true, false, _FPP)) {
+			if (compute_and_write_peaks (buf.get(), current_sample, samples_read, true, false, _FPP)) {
 				break;
 			}
 
