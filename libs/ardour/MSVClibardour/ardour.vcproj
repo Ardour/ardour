@@ -2350,7 +2350,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\ardour\rc_configuration_vars.h"
+				RelativePath="..\ardour\rc_configuration_vars.inc.h"
 				>
 			</File>
 			<File
@@ -2458,7 +2458,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\ardour\session_configuration_vars.h"
+				RelativePath="..\ardour\session_configuration_vars.inc.h"
 				>
 			</File>
 			<File

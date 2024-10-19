@@ -84,8 +84,8 @@ UIConfiguration::UIConfiguration ()
 #undef  UI_CONFIG_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,name,val) var (name,val),
 #define CANVAS_FONT_VARIABLE(var,name) var (name),
-#include "ui_config_vars.h"
-#include "canvas_vars.h"
+#include "ui_config_vars.inc.h"
+#include "canvas_vars.inc.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_FONT_VARIABLE
 
@@ -101,7 +101,7 @@ UIConfiguration::UIConfiguration ()
 #undef  UI_CONFIG_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,name,value) _my_variables.insert (std::make_pair ((name), &(var)));
 #define CANVAS_FONT_VARIABLE(var,name) /* no need for metadata for these */
-#include "ui_config_vars.h"
+#include "ui_config_vars.inc.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_FONT_VARIABLE
 
@@ -222,7 +222,7 @@ UIConfiguration::map_parameters (std::function<void (std::string)>& functor)
 {
 #undef  UI_CONFIG_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,Name,value) functor (Name);
-#include "ui_config_vars.h"
+#include "ui_config_vars.inc.h"
 #undef  UI_CONFIG_VARIABLE
 }
 
@@ -572,8 +572,8 @@ UIConfiguration::get_variables (std::string const & node_name) const
 #undef  CANVAS_FONT_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,Name,value) if (node->name() == "UI") { var.add_to_node (*node); }
 #define CANVAS_FONT_VARIABLE(var,Name) if (node->name() == "Canvas") { var.add_to_node (*node); }
-#include "ui_config_vars.h"
-#include "canvas_vars.h"
+#include "ui_config_vars.inc.h"
+#include "canvas_vars.inc.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_FONT_VARIABLE
 
@@ -707,8 +707,8 @@ UIConfiguration::set_variables (const XMLNode& node)
 #undef  UI_CONFIG_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,name,val) if (var.set_from_node (node)) { ParameterChanged (name); }
 #define CANVAS_FONT_VARIABLE(var,name)        if (var.set_from_node (node)) { ParameterChanged (name); }
-#include "ui_config_vars.h"
-#include "canvas_vars.h"
+#include "ui_config_vars.inc.h"
+#include "canvas_vars.inc.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_FONT_VARIABLE
 }
@@ -867,4 +867,4 @@ UIConfiguration::color_to_hex_string_no_alpha (Gtkmm2ext::Color c)
 	return buf;
 }
 
-#include "configuration_metadata.h"
+#include "configuration_metadata.inc.h"

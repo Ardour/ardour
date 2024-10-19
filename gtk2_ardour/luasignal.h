@@ -24,7 +24,7 @@ namespace LuaSignal {
 #define SESSION(name,c) name,
 
 	enum LuaSignal {
-#		include "luasignal_syms.h"
+#		include "luasignal_syms.inc.h"
 		LAST_SIGNAL
 	};
 

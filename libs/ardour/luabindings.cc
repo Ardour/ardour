@@ -3006,7 +3006,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_" # var, &RCConfiguration::set_##var) \
 		.addProperty (#var, &RCConfiguration::get_##var, &RCConfiguration::set_##var)
 
-#include "ardour/rc_configuration_vars.h"
+#include "ardour/rc_configuration_vars.inc.h"
 
 #undef CONFIG_VARIABLE
 #undef CONFIG_VARIABLE_SPECIAL
@@ -3025,7 +3025,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_" # var, &SessionConfiguration::set_##var) \
 		.addProperty (#var, &SessionConfiguration::get_##var, &SessionConfiguration::set_##var)
 
-#include "ardour/session_configuration_vars.h"
+#include "ardour/session_configuration_vars.inc.h"
 
 #undef CONFIG_VARIABLE
 #undef CONFIG_VARIABLE_SPECIAL

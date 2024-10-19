@@ -1606,7 +1606,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\canvas_vars.h"
+				RelativePath="..\gtk2_ardour\canvas_vars.inc.h"
 				>
 			</File>
 			<File
@@ -1682,7 +1682,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\editing_syms.h"
+				RelativePath="..\gtk2_ardour\editing_syms.inc.h"
 				>
 			</File>
 			<File
@@ -1942,7 +1942,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\luasignal_syms.h"
+				RelativePath="..\gtk2_ardour\luasignal_syms.inc.h"
 				>
 			</File>
 			<File
@@ -2610,7 +2610,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\ui_config_vars.h"
+				RelativePath="..\gtk2_ardour\ui_config_vars.inc.h"
 				>
 			</File>
 			<File

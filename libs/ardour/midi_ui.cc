@@ -43,7 +43,7 @@ using namespace Glib;
 
 MidiControlUI* MidiControlUI::_instance = 0;
 
-#include "pbd/abstract_ui.cc"  /* instantiate the template */
+#include "pbd/abstract_ui.inc.cc" /* instantiate the template */
 
 MidiControlUI::MidiControlUI (Session& s)
 	: AbstractUI<MidiUIRequest> (X_("midiUI"))

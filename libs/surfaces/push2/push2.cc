@@ -74,7 +74,7 @@ using namespace Glib;
 using namespace ArdourSurface;
 using namespace Gtkmm2ext;
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 #define ABLETON 0x2982
 #define PUSH2   0x1967

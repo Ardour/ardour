@@ -98,7 +98,7 @@ using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 #include "pbd/i18n.h"
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 const int MACKIE_NAMESPACE::MackieControlProtocol::MODIFIER_OPTION = 0x1;
 const int MACKIE_NAMESPACE::MackieControlProtocol::MODIFIER_CONTROL = 0x2;
