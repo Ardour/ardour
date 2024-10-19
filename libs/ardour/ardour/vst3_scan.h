@@ -19,6 +19,7 @@
 #ifndef _ardour_vst3_scan_h_
 #define _ardour_vst3_scan_h_
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>

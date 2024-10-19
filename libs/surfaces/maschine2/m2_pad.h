@@ -22,6 +22,8 @@
 #include <stdint.h>
 #include "pbd/signals.h"
 
+#include <cmath>
+
 namespace ArdourSurface {
 
 class M2PadInterface
@@ -106,7 +108,7 @@ class M2Pad : public M2PadInterface
 					released (); /* EMIT SIGNAL */
 					event (_pressure, true); /* EMIT SIGNAL */
 				} else {
-					if (fabsf (_last - _pressure) > mindelta) {
+					if (std::fabsf (_last - _pressure) > mindelta) {
 						_last = _pressure;
 						aftertouch (_pressure); /* EMIT SIGNAL */
 						event (_pressure, false); /* EMIT SIGNAL */

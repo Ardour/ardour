@@ -19,6 +19,8 @@
 #ifndef timer_h
 #define timer_h
 
+#include <cstdint>
+
 #ifdef _WIN32
 #include "windows.h"
 #else

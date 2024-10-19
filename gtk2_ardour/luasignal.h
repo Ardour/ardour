@@ -17,6 +17,9 @@
  */
 #ifndef _luasignal_h_
 #define _luasignal_h_
+
+#include <string>
+
 namespace LuaSignal {
 
 #define ENGINE(name,c) name,

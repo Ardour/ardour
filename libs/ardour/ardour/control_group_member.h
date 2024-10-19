@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <memory>
+
 namespace ARDOUR {
 
 class ControlGroup;

@@ -23,6 +23,8 @@
 #define EVORAL_SMF_HPP
 
 #include <glibmm/threads.h>
+
+#include <memory>
 #include <set>
 
 #include "evoral/visibility.h"

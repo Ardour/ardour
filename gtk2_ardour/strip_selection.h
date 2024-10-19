@@ -24,5 +24,5 @@
 
 class MixerStrip;
 
-struct MixerStripSelection : list<MixerStrip*> {};
+struct MixerStripSelection : std::list<MixerStrip*> {};
 

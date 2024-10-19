@@ -23,6 +23,8 @@
 #include "pbd/fastlog.h"
 #include <glibmm/threads.h>
 
+#include <cstdint>
+
 namespace ARDOUR {
 
 class LIBARDOUR_API LogCurve {

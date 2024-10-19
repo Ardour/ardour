@@ -22,6 +22,8 @@
 
 #include "ardour/libardour_visibility.h"
 
+#include <memory>
+
 namespace ARDOUR {
 
 template<typename T>
