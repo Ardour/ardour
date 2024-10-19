@@ -44,7 +44,7 @@ public:
 		get_vbox()->pack_start (*cancel_button, Gtk::PACK_SHRINK);
 	}
 
-	void update_progress (samplecnt_t c, samplecnt_t t) {
+	void update_progress (ARDOUR::samplecnt_t c, ARDOUR::samplecnt_t t) {
 		pbar->set_fraction ((float) c / (float) t);
 		// see also ARDOUR_UI::gui_idle_handler();
 		int timeout = 30;

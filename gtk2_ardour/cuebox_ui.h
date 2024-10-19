@@ -22,6 +22,7 @@
 
 #include <gtkmm/window.h>
 #include <gtkmm/colorselection.h>
+#include <gtkmm/menu.h>
 
 #include "pbd/properties.h"
 

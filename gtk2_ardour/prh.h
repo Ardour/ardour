@@ -26,6 +26,8 @@
 
 #include "canvas/rectangle.h"
 
+#include <gtkmm/adjustment.h>
+
 namespace ARDOUR {
 	class MidiTrack;
 }

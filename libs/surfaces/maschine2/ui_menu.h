@@ -24,6 +24,7 @@
 
 #include "pbd/signals.h"
 #include "canvas/container.h"
+#include "canvas/rectangle.h"
 
 namespace ArdourCanvas {
 	class Text;

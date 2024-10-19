@@ -26,6 +26,8 @@
  *  Held centrally by the Editor because some cursors are used in several places.
  */
 
+#include <gdkmm/cursor.h>
+
 #include <string>
 
 class MouseCursors

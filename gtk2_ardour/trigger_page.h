@@ -31,6 +31,7 @@
 #include "audio_region_operations_box.h"
 #include "audio_region_properties_box.h"
 #include "audio_trigger_properties_box.h"
+#include "axis_provider.h"
 #include "cuebox_ui.h"
 #include "fitted_canvas_widget.h"
 #include "midi_region_operations_box.h"

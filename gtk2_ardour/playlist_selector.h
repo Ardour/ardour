@@ -28,6 +28,8 @@
 #include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
 
+#include "widgets/ardour_button.h"
+
 #include "ardour/playlist.h"
 #include "ardour/session_handle.h"
 #include "ardour_dialog.h"

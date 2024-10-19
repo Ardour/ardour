@@ -25,6 +25,7 @@
 #include <gtkmm/alignment.h>
 #include <gtkmm/box.h>
 #include <gtkmm/drawingarea.h>
+#include <gtkmm/entry.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/sizegroup.h>

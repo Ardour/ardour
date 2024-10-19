@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "mixer_strip.h"
+
 #include <list>
 
 class MixerStrip;

@@ -31,6 +31,8 @@
 
 #include "ardour_window.h"
 #include "audio_clock.h"
+#include "region_view.h"
+#include "time_axis_view.h"
 
 class PublicEditor;
 

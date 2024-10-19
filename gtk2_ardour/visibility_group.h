@@ -21,6 +21,8 @@
 #define __ardour_visibility_group__
 
 #include <gtkmm/liststore.h>
+#include <gtkmm/widget.h>
+
 #include "pbd/signals.h"
 
 class XMLNode;

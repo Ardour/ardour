@@ -19,6 +19,8 @@
 #ifndef __osc_osccueobserver_h__
 #define __osc_osccueobserver_h__
 
+#include "osc.h"
+
 #include <string>
 #include <memory>
 

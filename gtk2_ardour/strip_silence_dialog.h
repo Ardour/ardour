@@ -19,11 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <glibmm/threads.h>
+#include <gtkmm/progressbar.h>
 #include <gtkmm/spinbutton.h>
 #include <glibmm/threads.h>
 
 #include <pbd/xml++.h>
 
+#include "ardour/interthread_info.h"
 #include "ardour/types.h"
 #include "ardour_dialog.h"
 #include "progress_reporter.h"

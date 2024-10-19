@@ -18,11 +18,9 @@
 
 #pragma once
 
-#include "port_matrix_component.h"
+#include "ardour/bundle.h"
 
-namespace ARDOUR {
-	class BundleChannel;
-}
+#include "port_matrix_component.h"
 
 class PortMatrixLabels : public PortMatrixComponent
 {

@@ -26,6 +26,8 @@
 
 #include "pbd/statefuldestructible.h"
 
+#include <gtkmm/action.h>
+
 #include "gtkmm2ext/visibility.h"
 
 namespace Gtk {

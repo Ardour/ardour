@@ -26,6 +26,7 @@
 #include <gtkmm/menu.h>
 
 #include "ardour/data_type.h"
+#include "ardour/types.h"
 
 #include "widgets/ardour_button.h"
 

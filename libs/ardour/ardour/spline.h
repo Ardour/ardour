@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "ardour/libardour_visibility.h"
+
 #include <cstdint>
 
 #ifdef __cplusplus

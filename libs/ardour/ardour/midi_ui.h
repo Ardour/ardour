@@ -25,6 +25,8 @@
 #include "pbd/abstract_ui.h"
 #include "pbd/signals.h"
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
 class Session;

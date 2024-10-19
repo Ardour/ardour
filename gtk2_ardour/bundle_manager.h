@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/treeview.h>

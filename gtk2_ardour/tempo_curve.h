@@ -27,6 +27,7 @@
 #include "ardour/ardour.h"
 #include "pbd/signals.h"
 
+#include "canvas/container.h"
 #include "canvas/types.h"
 #include "canvas/framed_curve.h"
 #include "canvas/text.h"

@@ -22,6 +22,7 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/label.h>
+#include <gtkmm/spinbutton.h>
 #include <gtkmm/table.h>
 
 #include "ardour/ardour.h"

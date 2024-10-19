@@ -40,6 +40,7 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/combobox.h>
+#include <gtkmm/comboboxtext.h>
 
 #include "temporal/domain_provider.h"
 

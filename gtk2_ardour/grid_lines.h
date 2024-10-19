@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "canvas/container.h"
 #include "canvas/line_set.h"
 #include "canvas/ruler.h"
 #include "ardour/tempo.h"

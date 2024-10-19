@@ -28,10 +28,12 @@
 #include "pbd/signals.h"
 
 #include "temporal/beats.h"
+#include "temporal/timeline.h"
 
 namespace ARDOUR {
 class MidiTrack;
 class MidiRegion;
+class Region;
 }
 
 class MidiRegionView;

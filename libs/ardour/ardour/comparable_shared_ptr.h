@@ -22,6 +22,8 @@
 
 #include "ardour/libardour_visibility.h"
 
+#include <boost/operators.hpp>
+
 #include <memory>
 
 namespace ARDOUR {
