@@ -27,7 +27,6 @@
 #include "audio_clock.h"
 
 namespace ARDOUR {
-	class BeatsSamplesConverter;
 	class Session;
 	class InstrumentInfo;
 }

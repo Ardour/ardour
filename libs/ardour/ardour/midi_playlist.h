@@ -44,7 +44,6 @@ class                         Beats;
 namespace ARDOUR
 {
 
-class BeatsSamplesConverter;
 class MidiChannelFilter;
 class MidiRegion;
 class Session;

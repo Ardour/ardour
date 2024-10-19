@@ -1324,10 +1324,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\tempo_lines.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\time_axis_view.cc"
 				>
 			</File>
@@ -1643,10 +1639,6 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\crossfade_edit.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\crossfade_view.h"
 				>
 			</File>
 			<File
@@ -2535,10 +2527,6 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\tempo_dialog.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\tempo_lines.h"
 				>
 			</File>
 			<File
