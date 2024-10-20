@@ -482,7 +482,7 @@ std::vector<std::string>
 PulseAudioBackend::enumerate_midi_options () const
 {
 	std::vector<std::string> midi_options;
-	midi_options.push_back (get_standard_device_name (DeviceNone));
+	midi_options.push_back (get_none_device_name ());
 	return midi_options;
 }
 
@@ -501,7 +501,7 @@ PulseAudioBackend::set_midi_option (const std::string& opt)
 std::string
 PulseAudioBackend::midi_option () const
 {
-	return get_standard_device_name (DeviceNone);
+	return get_none_device_name ();
 }
 
 /* External control app */

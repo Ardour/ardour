@@ -1146,7 +1146,7 @@ EngineControl::get_default_device (const string&         current_device_name,
 	using namespace ARDOUR;
 
 	string default_device_name =
-	    AudioBackend::get_standard_device_name (AudioBackend::DeviceDefault);
+	    AudioBackend::get_default_device_name ();
 
 	vector<string>::const_iterator i;
 
@@ -1158,7 +1158,7 @@ EngineControl::get_default_device (const string&         current_device_name,
 	}
 
 	string none_device_name =
-	    AudioBackend::get_standard_device_name (AudioBackend::DeviceNone);
+	    AudioBackend::get_none_device_name ();
 
 	// Use the first device that isn't "None"
 	for (i = available_devices.begin (); i != available_devices.end (); ++i) {
@@ -1581,7 +1581,7 @@ EngineControl::input_device_changed ()
 
 	std::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance ()->current_backend ();
 	if (backend && backend->match_input_output_devices_or_none ()) {
-		const std::string& dev_none = ARDOUR::AudioBackend::get_standard_device_name (ARDOUR::AudioBackend::DeviceNone);
+		const std::string& dev_none = ARDOUR::AudioBackend::get_none_device_name ();
 
 		if (get_output_device_name () != dev_none && get_input_device_name () != dev_none && get_input_device_name () != get_output_device_name ()) {
 			block_changed_signals ();
@@ -1603,7 +1603,7 @@ EngineControl::output_device_changed ()
 	DEBUG_ECONTROL ("output_device_changed");
 	std::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance ()->current_backend ();
 	if (backend && backend->match_input_output_devices_or_none ()) {
-		const std::string& dev_none = ARDOUR::AudioBackend::get_standard_device_name (ARDOUR::AudioBackend::DeviceNone);
+		const std::string& dev_none = ARDOUR::AudioBackend::get_none_device_name ();
 
 		if (get_input_device_name () != dev_none && get_input_device_name () != dev_none && get_input_device_name () != get_output_device_name ()) {
 			block_changed_signals ();

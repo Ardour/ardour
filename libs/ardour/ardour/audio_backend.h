@@ -131,12 +131,8 @@ public:
 
 	static std::string get_error_string (ErrorCode);
 
-	enum StandardDeviceName {
-		DeviceNone,
-		DeviceDefault
-	};
-
-	static std::string get_standard_device_name (StandardDeviceName);
+	static std::string get_none_device_name ();
+	static std::string get_default_device_name ();
 
 	/** Return the AudioBackendInfo object from which this backend
 	 * was constructed.
@@ -232,7 +228,7 @@ public:
 	 * of allowing one to be "None".
 	 *
 	 * ie. Input Device must match Output Device, except if either of them
-	 * is get_standard_device_name (DeviceNone).
+	 * is get_none_device_name ().
 	 */
 	virtual bool match_input_output_devices_or_none () const
 	{

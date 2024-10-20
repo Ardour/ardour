@@ -428,7 +428,7 @@ PortAudioBackend::enumerate_midi_options () const
 {
 	if (_midi_options.empty()) {
 		_midi_options.push_back (winmme_driver_name);
-		_midi_options.push_back (get_standard_device_name(DeviceNone));
+		_midi_options.push_back (get_none_device_name ());
 	}
 	return _midi_options;
 }
@@ -436,7 +436,7 @@ PortAudioBackend::enumerate_midi_options () const
 int
 PortAudioBackend::set_midi_option (const std::string& opt)
 {
-	if (opt != get_standard_device_name(DeviceNone) && opt != winmme_driver_name) {
+	if (opt != get_none_device_name () && opt != winmme_driver_name) {
 		return -1;
 	}
 	DEBUG_MIDI (string_compose ("Setting midi option to %1\n", opt));
@@ -1220,7 +1220,7 @@ PortAudioBackend::register_system_audio_ports()
 int
 PortAudioBackend::register_system_midi_ports (std::string const& device)
 {
-	if (_midi_driver_option == get_standard_device_name(DeviceNone)) {
+	if (_midi_driver_option == get_none_device_name ()) {
 		DEBUG_MIDI("No MIDI backend selected, not system midi ports available\n");
 		return 0;
 	}
