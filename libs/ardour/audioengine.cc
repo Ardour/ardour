@@ -1015,7 +1015,7 @@ AudioEngine::drop_backend ()
 }
 
 std::shared_ptr<AudioBackend>
-AudioEngine::set_backend (const std::string& name, const std::string& arg1, const std::string& session_id)
+AudioEngine::set_backend (const std::string& name, const std::string& client_name, const std::string& session_id)
 {
 	BackendMap::iterator b = _backends.find (name);
 
@@ -1026,7 +1026,7 @@ AudioEngine::set_backend (const std::string& name, const std::string& arg1, cons
 	drop_backend ();
 
 	try {
-		if (b->second->instantiate (arg1, session_id)) {
+		if (b->second->instantiate (client_name, session_id)) {
 			throw failed_constructor ();
 		}
 

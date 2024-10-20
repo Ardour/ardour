@@ -44,11 +44,11 @@ namespace ARDOUR
 struct LIBARDOUR_API AudioBackendInfo {
 	const char* name;
 
-	/** Using arg1 and session_id, initialize this audiobackend.
+	/** Using client_name and session_id, initialize this audiobackend.
 	 *
 	 * Returns zero on success, non-zero otherwise.
 	 */
-	int (*instantiate) (const std::string& arg1, const std::string& session_id);
+	int (*instantiate) (const std::string& client_name, const std::string& session_id);
 
 	/** Release all resources associated with this audiobackend */
 	int (*deinstantiate) (void);

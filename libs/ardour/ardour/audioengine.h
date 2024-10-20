@@ -71,7 +71,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	int discover_backends();
 	std::vector<const AudioBackendInfo*> available_backends() const;
 	std::string current_backend_name () const;
-	std::shared_ptr<AudioBackend> set_backend (const std::string& name, const std::string& arg1, const std::string& session_id);
+	std::shared_ptr<AudioBackend> set_backend (const std::string& name, const std::string& client_name, const std::string& session_id);
 	std::shared_ptr<AudioBackend> current_backend() const { return _backend; }
 	bool setup_required () const;
 	bool is_jack () const;

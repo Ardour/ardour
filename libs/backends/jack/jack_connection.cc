@@ -50,9 +50,9 @@ static void jack_halted_info_callback (jack_status_t code, const char* reason, v
 }
 
 
-JackConnection::JackConnection (const std::string& arg1, const std::string& session_id)
+JackConnection::JackConnection (const std::string& client_name, const std::string& session_id)
 	: _jack (0)
-	, _client_name (arg1)
+	, _client_name (client_name)
 	, _session_id (session_id)
 	, _probed_buffer_size (0)
 	, _probed_sample_rate (0)
