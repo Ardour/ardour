@@ -50,10 +50,10 @@ static void jack_halted_info_callback (jack_status_t code, const char* reason, v
 }
 
 
-JackConnection::JackConnection (const std::string& arg1, const std::string& arg2)
+JackConnection::JackConnection (const std::string& arg1, const std::string& session_id)
 	: _jack (0)
 	, _client_name (arg1)
-	, session_uuid (arg2)
+	, _session_id (session_id)
 	, _probed_buffer_size (0)
 	, _probed_sample_rate (0)
 {
@@ -116,7 +116,7 @@ JackConnection::open ()
 	get_jack_server_dir_paths (dirs);
 	set_path_env_for_jack_autostart (dirs);
 
-	if ((_jack = jack_client_open (_client_name.c_str(), JackSessionID, &status, session_uuid.c_str())) == 0) {
+	if ((_jack = jack_client_open (_client_name.c_str(), JackSessionID, &status, _session_id.c_str())) == 0) {
 		return -1;
 	}
 

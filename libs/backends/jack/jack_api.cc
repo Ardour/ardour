@@ -25,7 +25,7 @@ static std::shared_ptr<JACKAudioBackend> backend;
 static std::shared_ptr<JackConnection> jack_connection;
 
 static std::shared_ptr<AudioBackend> backend_factory (AudioEngine& ae);
-static int  instantiate (const std::string& arg1, const std::string& arg2);
+static int  instantiate (const std::string& arg1, const std::string& session_id);
 static int  deinstantiate ();
 static bool already_configured ();
 static bool available ();
@@ -58,10 +58,10 @@ backend_factory (AudioEngine& ae)
 }
 
 static int
-instantiate (const std::string& arg1, const std::string& arg2)
+instantiate (const std::string& arg1, const std::string& session_id)
 {
 	try {
-		jack_connection.reset (new JackConnection (arg1, arg2));
+		jack_connection.reset (new JackConnection (arg1, session_id));
 		backend.reset ();
 	} catch (...) {
 		return -1;

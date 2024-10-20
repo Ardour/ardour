@@ -1084,7 +1084,7 @@ PulseAudioBackend::main_process_thread ()
 static std::shared_ptr<PulseAudioBackend> _instance;
 
 static std::shared_ptr<AudioBackend> backend_factory (AudioEngine& e);
-static int instantiate (const std::string& arg1, const std::string& /* arg2 */);
+static int instantiate (const std::string& arg1, const std::string& /* session_id */);
 static int  deinstantiate ();
 static bool already_configured ();
 static bool available ();
@@ -1108,7 +1108,7 @@ backend_factory (AudioEngine& e)
 }
 
 static int
-instantiate (const std::string& arg1, const std::string& /* arg2 */)
+instantiate (const std::string& arg1, const std::string& /* session_id */)
 {
 	s_instance_name = arg1;
 	return 0;
