@@ -78,7 +78,7 @@ class JACKAudioBackend : public AudioBackend {
 	int set_device_name (const std::string&);
 	int set_sample_rate (float);
 	int set_buffer_size (uint32_t);
-	int set_peridod_size (uint32_t);
+	int set_period_size (uint32_t);
 	int set_interleaved (bool yn);
 	int set_systemic_input_latency (uint32_t);
 	int set_systemic_output_latency (uint32_t);

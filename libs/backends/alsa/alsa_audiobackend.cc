@@ -384,7 +384,7 @@ AlsaAudioBackend::set_sample_rate (float sr)
 }
 
 int
-AlsaAudioBackend::set_peridod_size (uint32_t n)
+AlsaAudioBackend::set_period_size (uint32_t n)
 {
 	if (n == 0) {
 		return -1;

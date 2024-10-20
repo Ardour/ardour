@@ -291,7 +291,7 @@ public:
 	/** Set the period size to be used.
 	 * must be called before starting the backend.
 	 */
-	virtual int set_peridod_size (uint32_t)
+	virtual int set_period_size (uint32_t)
 	{
 		return -1;
 	}

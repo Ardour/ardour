@@ -2489,7 +2489,7 @@ EngineControl::push_state_to_backend (bool start)
 		error << string_compose (_("Cannot set buffer size to %1"), get_buffer_size ()) << endmsg;
 		return 1;
 	}
-	if (change_nperiods && backend->set_peridod_size (get_nperiods ())) {
+	if (change_nperiods && backend->set_period_size (get_nperiods ())) {
 		error << string_compose (_("Cannot set periods to %1"), get_nperiods ()) << endmsg;
 		return 1;
 	}

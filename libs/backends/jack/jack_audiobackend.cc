@@ -262,7 +262,7 @@ JACKAudioBackend::set_sample_rate (float sr)
 }
 
 int
-JACKAudioBackend::set_peridod_size (uint32_t nperiods)
+JACKAudioBackend::set_period_size (uint32_t nperiods)
 {
 	if (!available()) {
 		_target_num_periods = nperiods;
