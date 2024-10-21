@@ -92,16 +92,16 @@ typedef SSIZE_T ssize_t;
 	(uri->scheme_t != URI_SCHEME_T_FILE && \
 	 !(uri->opts & URI_OPT_IGNORE_FRAGMENT))
 
-#define URI_SET_STR(str, start, end)                                   \
-                                                                       \
-	str = malloc (sizeof (char) * (uint32_t) ((end - start) + 1)); \
-                                                                       \
-	if (!str) {                                                    \
-		error ("Out of memory");                               \
-		goto err;                                              \
-	}                                                              \
-                                                                       \
-	snprintf (str, (uint32_t) (end - start) + 1, "%s", start);
+#define URI_SET_STR(str, start, end)                                  \
+                                                                      \
+	str = malloc (sizeof (char) * (uint32_t)((end - start) + 1)); \
+                                                                      \
+	if (!str) {                                                   \
+		error ("Out of memory");                              \
+		goto err;                                             \
+	}                                                             \
+                                                                      \
+	snprintf (str, (uint32_t)(end - start) + 1, "%s", start);
 
 static char*
 uriDecodeString (char* src, char* dst);
@@ -787,7 +787,7 @@ uriIsIPv6 (const char* s, size_t size, char** err)
 					if (!IS_DIGIT (*(s + i))) {
 						loopback = -1;
 					} else {
-						loopback += (*(s + i) - '0'); //atoi(*(s+i));
+						loopback += (*(s + i) - '0'); // atoi(*(s+i));
 					}
 				}
 

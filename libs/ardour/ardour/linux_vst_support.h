@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __vstfx_h__
-#define __vstfx_h__
+#pragma once
 
 #include <setjmp.h>
 #include <signal.h>
@@ -52,4 +51,3 @@ LIBARDOUR_API extern void         vstfx_destroy_editor (VSTState *);
 
 LIBARDOUR_API extern void         vstfx_event_loop_remove_plugin (VSTState *);
 
-#endif /* __vstfx_h__ */

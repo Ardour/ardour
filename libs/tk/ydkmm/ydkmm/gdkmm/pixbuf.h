@@ -311,7 +311,7 @@ protected:
    * image data from a server-side drawable to a client-side RGB(A) buffer.
    * This allows you to efficiently read individual pixels on the client side.
    *
-   * If the drawable @src has no colormap (See Gdk::Drawable::get_colormap()),
+   * If the drawable \p src has no colormap (See Gdk::Drawable::get_colormap()),
    * then a suitable colormap must be specified. Otherwise, you may use the
    * constructor that takes no colormap argument.
    * Typically a Gdk::Window or a pixmap created by passing a Gdk:Window
@@ -349,8 +349,6 @@ protected:
    * @param src_y Source Y coordinate within drawable.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newin{2,12}
    */
    Pixbuf(const Glib::RefPtr<Drawable>& src, const Glib::RefPtr<Colormap>& cmap,
          int src_x, int src_y, int width, int height);
@@ -362,8 +360,6 @@ protected:
    * @param src_y Source Y coordinate within drawable.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newin{2,12}
    */
    Pixbuf(const Glib::RefPtr<Drawable>& src,
          int src_x, int src_y, int width, int height);
@@ -384,8 +380,6 @@ protected:
    * @param src_y Source Y coordinate within the image.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newin{2,12}
    */
   Pixbuf(const Glib::RefPtr<Image>& src, const Glib::RefPtr<Colormap>& cmap,
          int src_x, int src_y, int width, int height);
@@ -397,8 +391,6 @@ protected:
    * @param src_y Source Y coordinate within the image.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newinp212
    */
   Pixbuf(const Glib::RefPtr<Image>& src,
          int src_x, int src_y, int width, int height);
@@ -441,7 +433,7 @@ public:
    * image data from a server-side drawable to a client-side RGB(A) buffer.
    * This allows you to efficiently read individual pixels on the client side.
    *
-   * If the drawable @src has no colormap (See Gdk::Drawable::get_colormap()),
+   * If the drawable \p src has no colormap (See Gdk::Drawable::get_colormap()),
    * then a suitable colormap must be specified. Otherwise, you may use the
    * constructor that takes no colormap argument.
    * Typically a Gdk::Window or a pixmap created by passing a Gdk:Window
@@ -479,8 +471,6 @@ public:
    * @param src_y Source Y coordinate within drawable.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newin{2,12}
    */
   
   static Glib::RefPtr<Pixbuf> create(const Glib::RefPtr<Drawable>& src, const Glib::RefPtr<Colormap>& cmap, int src_x, int src_y, int width, int height);
@@ -493,8 +483,6 @@ public:
    * @param src_y Source Y coordinate within drawable.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newin{2,12}
    */
   
   static Glib::RefPtr<Pixbuf> create(const Glib::RefPtr<Drawable>& src, int src_x, int src_y, int width, int height);
@@ -508,8 +496,6 @@ public:
    * @param src_y Source Y coordinate within the image.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newin{2,12}
    */
   
   static Glib::RefPtr<Pixbuf> create(const Glib::RefPtr<Image>& src, const Glib::RefPtr<Colormap>& cmap, int src_x, int src_y, int width, int height);
@@ -522,8 +508,6 @@ public:
    * @param src_y Source Y coordinate within the image.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newinp212
    */
   
   static Glib::RefPtr<Pixbuf> create(const Glib::RefPtr<Image>& src, int src_x, int src_y, int width, int height);
@@ -683,7 +667,7 @@ public:
    * TThe list of all writable formats can be determined by using get_formats() with
    * Gdk::PixbufFormat::is_writable().
    *
-   * The @a option_keys and @option_values, if not empty, should contain pairs of strings that modify the save parameters.
+   * The @a option_keys and \p option_values, if not empty, should contain pairs of strings that modify the save parameters.
    * For example,  "quality", "100".
    *
    * Currently only a few parameters exist. JPEG images can be saved with a "quality" parameter;

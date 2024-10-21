@@ -3,14 +3,13 @@
 
 #include <string>
 
-#include <boost/format.hpp>
-
 #include "audiographer/flag_debuggable.h"
 #include "audiographer/sink.h"
 #include "audiographer/types.h"
 #include "audiographer/sndfile/sndfile_base.h"
 #include "audiographer/broadcast_info.h"
 
+#include "pbd/compose.h"
 #include "pbd/signals.h"
 
 namespace AudioGrapher
@@ -51,18 +50,21 @@ class SndfileWriter
 		check_flags (*this, c);
 
 		if (throw_level (ThrowStrict) && c.channels() != channels()) {
-			throw Exception (*this, boost::str (boost::format
-				("Wrong number of channels given to process(), %1% instead of %2%")
-				% c.channels() % channels()));
+			throw Exception (*this, string_compose
+					("Wrong number of channels given to process(), %1 instead of %2",
+					c.channels(), channels()));
 		}
 
 		samplecnt_t const written = write (c.data(), c.samples());
 		samples_written += written;
 
 		if (throw_level (ThrowProcess) && written != c.samples()) {
-			throw Exception (*this, boost::str (boost::format
-				("Could not write data to output file (%1%)")
-				% strError()));
+			std::stringstream reason;
+			reason << "Could not write data to output file ("
+			       << strError()
+			       << ")";
+
+			throw Exception (*this, reason.str());
 		}
 
 		if (c.has_flag(ProcessContext<T>::EndOfInput)) {
@@ -73,7 +75,7 @@ class SndfileWriter
 
 	using Sink<T>::process;
 
-	PBD::Signal1<void, std::string> FileWritten;
+	PBD::Signal<void(std::string)> FileWritten;
 
   protected:
 	/// SndfileHandle has to be constructed directly by deriving classes
@@ -85,8 +87,12 @@ class SndfileWriter
 	virtual void init()
 	{
 		if (SF_ERR_NO_ERROR != SndfileHandle::error ()) {
-			throw Exception (*this, boost::str (boost::format
-						("Could not create output file (%1%)") % path));
+			std::stringstream reason;
+			reason << "Could not write data to output file ("
+			       << path
+			       << ")";
+
+			throw Exception (*this, reason.str());
 		}
 		samples_written = 0;
 		add_supported_flag (ProcessContext<T>::EndOfInput);

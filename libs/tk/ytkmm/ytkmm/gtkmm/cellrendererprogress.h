@@ -43,7 +43,6 @@ namespace Gtk
 /** Renders numbers as progress bars.
  *
  * @ingroup TreeView
- * @newin{2,6}
  */
 
 class CellRendererProgress : public CellRenderer

@@ -12,7 +12,7 @@ TypesTest::intersect ()
 	{
 		Rect a (0, 0, 1024, 1024);
 		Rect b (0, 0, 512, 512);
-		boost::optional<Rect> c = a.intersection (b);
+		std::optional<Rect> c = a.intersection (b);
 
 		CPPUNIT_ASSERT (c.is_initialized ());
 		CPPUNIT_ASSERT (c->x0 == 0);
@@ -24,7 +24,7 @@ TypesTest::intersect ()
 	{
 		Rect a (0, 0, 512, 512);
 		Rect b (513, 513, 1024, 1024);
-		boost::optional<Rect> c = a.intersection (b);
+		std::optional<Rect> c = a.intersection (b);
 
 		CPPUNIT_ASSERT (!c.is_initialized ());
 	}

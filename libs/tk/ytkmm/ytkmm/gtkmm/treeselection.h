@@ -225,8 +225,6 @@ public:
   
   /** Returns the number of rows that have been selected in @a tree.
    * 
-   * @newin{2,2}
-   * 
    * @return The number of rows selected.
    */
   int count_selected_rows() const;
@@ -298,7 +296,7 @@ public:
   
   /** Selects the specified iterator.
    * 
-   * @param iter The Gtk::TreeIter to be selected.
+   * @param row The Gtk::TreeModel::Row to be selected.
    */
   void select(const TreeModel::Row& row);
   
@@ -319,8 +317,6 @@ public:
   
   /** Unselects a range of nodes, determined by @a start_path and @a end_path
    * inclusive.
-   * 
-   * @newin{2,2}
    * 
    * @param start_path The initial node of the range.
    * @param end_path The initial node of the range.

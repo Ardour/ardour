@@ -120,8 +120,6 @@ public:
   
   /** Determines whether the plug is embedded in a socket.
    * 
-   * @newin{2,14}
-   * 
    * @return <tt>true</tt> if the plug is embedded in a socket.
    */
   bool get_embedded() const;
@@ -129,15 +127,11 @@ public:
   
   /** Retrieves the socket the plug is embedded in.
    * 
-   * @newin{2,14}
-   * 
    * @return The window of the socket, or <tt>0</tt>.
    */
   Glib::RefPtr<Gdk::Window> get_socket_window();
   
   /** Retrieves the socket the plug is embedded in.
-   * 
-   * @newin{2,14}
    * 
    * @return The window of the socket, or <tt>0</tt>.
    */

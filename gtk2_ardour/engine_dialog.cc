@@ -27,8 +27,6 @@
 #include <map>
 #include <vector>
 
-#include <boost/scoped_ptr.hpp>
-
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/locale_guard.h"
@@ -321,16 +319,16 @@ EngineControl::EngineControl ()
 	set_tooltip (try_autostart_button,
 	             string_compose (_("Always try these settings when starting %1, if the same device is available"), PROGRAM_NAME));
 
-	ARDOUR::Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&EngineControl::config_parameter_changed, this, _1), gui_context ());
+	ARDOUR::Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&EngineControl::config_parameter_changed, this, _1), gui_context ());
 
 	/* Pick up any existing audio setup configuration, if appropriate */
 
 	XMLNode* audio_setup = ARDOUR::Config->extra_xml ("AudioMIDISetup");
 
-	ARDOUR::AudioEngine::instance ()->Running.connect (running_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_running, this), gui_context ());
-	ARDOUR::AudioEngine::instance ()->Stopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context ());
-	ARDOUR::AudioEngine::instance ()->Halted.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context ());
-	ARDOUR::AudioEngine::instance ()->DeviceListChanged.connect (devicelist_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::device_list_changed, this), gui_context ());
+	ARDOUR::AudioEngine::instance ()->Running.connect (running_connection, MISSING_INVALIDATOR, std::bind (&EngineControl::engine_running, this), gui_context ());
+	ARDOUR::AudioEngine::instance ()->Stopped.connect (stopped_connection, MISSING_INVALIDATOR, std::bind (&EngineControl::engine_stopped, this), gui_context ());
+	ARDOUR::AudioEngine::instance ()->Halted.connect (stopped_connection, MISSING_INVALIDATOR, std::bind (&EngineControl::engine_stopped, this), gui_context ());
+	ARDOUR::AudioEngine::instance ()->DeviceListChanged.connect (devicelist_connection, MISSING_INVALIDATOR, std::bind (&EngineControl::device_list_changed, this), gui_context ());
 
 	config_parameter_changed ("try-autostart-engine");
 	config_parameter_changed ("monitoring-model");
@@ -2863,6 +2861,9 @@ EngineControl::on_latency_expand ()
 		lbl_midi_system.hide ();
 		midi_option_combo.hide ();
 		midi_devices_button.hide ();
+		if (!UIConfiguration::instance().get_allow_to_resize_engine_dialog ()) {
+			resize (1, 1); // shrink window
+		}
 	}
 }
 

@@ -464,15 +464,11 @@ public:
    * option set, then the last column gets all extra space.  By default, every
    * column is created with this <tt>false</tt>.
    * 
-   * @newin{2,4}
-   * 
    * @param expand <tt>true</tt> if the column should take available extra space, <tt>false</tt> if not.
    */
   void set_expand(bool expand =  true);
   
   /** Return <tt>true</tt> if the column expands to take any available space.
-   * 
-   * @newin{2,4}
    * 
    * @return <tt>true</tt>, if the column expands.
    */
@@ -685,8 +681,6 @@ public:
   /** Sets the current keyboard focus to be at @a cell, if the column contains
    * 2 or more editable and activatable cells.
    * 
-   * @newin{2,2}
-   * 
    * @param cell A Gtk::CellRenderer.
    */
   void focus_cell(CellRenderer& cell);
@@ -706,8 +700,6 @@ public:
   
   /** Flags the column, and the cell renderers added to this column, to have
    * their sizes renegotiated.
-   * 
-   * @newin{2,8}
    */
   void queue_resize();
 
@@ -715,8 +707,6 @@ public:
   /** Returns the Gtk::TreeView wherein @a tree_column has been inserted.
    * If @a column is currently not inserted in any tree view, <tt>0</tt> is
    * returned.
-   * 
-   * @newin{2,12}
    * 
    * @return The tree view wherein @a column has
    * been inserted if any, <tt>0</tt> otherwise.
@@ -726,8 +716,6 @@ public:
   /** Returns the Gtk::TreeView wherein @a tree_column has been inserted.
    * If @a column is currently not inserted in any tree view, <tt>0</tt> is
    * returned.
-   * 
-   * @newin{2,12}
    * 
    * @return The tree view wherein @a column has
    * been inserted if any, <tt>0</tt> otherwise.

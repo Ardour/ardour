@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_input_port_monitor_h__
-#define __gtk_ardour_input_port_monitor_h__
+#pragma once
 
 #include <gtkmm/box.h>
 #include <gtkmm/alignment.h>
@@ -134,4 +133,3 @@ private:
 	Orientation               _orientation;
 };
 
-#endif

@@ -53,7 +53,6 @@ namespace Gtk
  * for this use case.
  *
  * @ingroup Widgets
- * @newin{2,12}
  */
 
 class ScaleButton : public Button
@@ -120,15 +119,11 @@ public:
   /** Sets the icons to be used by the scale button.
    * For details, see the Gtk::ScaleButton::property_icons() property.
    * 
-   * @newin{2,12}
-   * 
    * @param icons A <tt>0</tt>-terminated array of icon names.
    */
   void set_icons(const Glib::StringArrayHandle& icons);
   
   /** Gets the current value of the scale button.
-   * 
-   * @newin{2,12}
    * 
    * @return Current value of the scale button.
    */
@@ -139,8 +134,6 @@ public:
    * inside them. The scale button emits the Gtk::ScaleButton::signal_value_changed()
    * signal if the value changes.
    * 
-   * @newin{2,12}
-   * 
    * @param value New value of the scale button.
    */
   void set_value(double value);
@@ -150,8 +143,6 @@ public:
 
   /** Gets the Gtk::Adjustment associated with the Gtk::ScaleButton's scale.
    * See Gtk::Range::get_adjustment() for details.
-   * 
-   * @newin{2,12}
    * 
    * @return The adjustment associated with the scale.
    */
@@ -166,8 +157,6 @@ public:
   /** Gets the Gtk::Adjustment associated with the Gtk::ScaleButton's scale.
    * See Gtk::Range::get_adjustment() for details.
    * 
-   * @newin{2,12}
-   * 
    * @return The adjustment associated with the scale.
    */
   Gtk::Adjustment* get_adjustment() const;
@@ -178,8 +167,6 @@ public:
    * for the Gtk::ScaleButton's scale.
    * See Gtk::Range::set_adjustment() for details.
    * 
-   * @newin{2,12}
-   * 
    * @param adjustment A Gtk::Adjustment.
    */
   void set_adjustment(Gtk::Adjustment& adjustment);
@@ -188,8 +175,6 @@ public:
   
   /** Gets the orientation of the Gtk::ScaleButton's popup window.
    * 
-   * @newin{2,14}
-   * 
    * Deprecated: 2.16: Use Gtk::Orientable::get_orientation() instead.
    * 
    * @return The Gtk::ScaleButton's orientation.
@@ -197,8 +182,6 @@ public:
   Orientation get_orientation();
   
   /** Sets the orientation of the Gtk::ScaleButton's popup window.
-   * 
-   * @newin{2,14}
    * 
    * Deprecated: 2.16: Use Gtk::Orientable::set_orientation() instead.
    * 
@@ -209,15 +192,11 @@ public:
   
   /** Retrieves the plus button of the Gtk::ScaleButton.
    * 
-   * @newin{2,14}
-   * 
    * @return The plus button of the Gtk::ScaleButton.
    */
   Widget* get_plus_button();
   
   /** Retrieves the plus button of the Gtk::ScaleButton.
-   * 
-   * @newin{2,14}
    * 
    * @return The plus button of the Gtk::ScaleButton.
    */
@@ -225,15 +204,11 @@ public:
   
   /** Retrieves the minus button of the Gtk::ScaleButton.
    * 
-   * @newin{2,14}
-   * 
    * @return The minus button of the Gtk::ScaleButton.
    */
   Widget* get_minus_button();
   
   /** Retrieves the minus button of the Gtk::ScaleButton.
-   * 
-   * @newin{2,14}
    * 
    * @return The minus button of the Gtk::ScaleButton.
    */
@@ -241,15 +216,11 @@ public:
   
   /** Retrieves the popup of the Gtk::ScaleButton.
    * 
-   * @newin{2,14}
-   * 
    * @return The popup of the Gtk::ScaleButton.
    */
   Gtk::Widget* get_popup();
   
   /** Retrieves the popup of the Gtk::ScaleButton.
-   * 
-   * @newin{2,14}
    * 
    * @return The popup of the Gtk::ScaleButton.
    */

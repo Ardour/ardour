@@ -35,7 +35,7 @@ SourceListBase::set_session (ARDOUR::Session* s)
 {
 	RegionListBase::set_session (s);
 	if (s) {
-		s->SourceRemoved.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&SourceListBase::remove_weak_source, this, _1), gui_context ());
+		s->SourceRemoved.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&SourceListBase::remove_weak_source, this, _1), gui_context ());
 	}
 }
 

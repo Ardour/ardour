@@ -647,7 +647,7 @@ ARDOUR::LuaAPI::wait_for_process_callback (size_t n_cycles, int64_t timeout_ms)
 	size_t cnt = 0;
 	ScopedConnection c;
 
-	InternalSend::CycleStart.connect_same_thread (c, boost::bind (&proc_cycle_start, &cnt));
+	InternalSend::CycleStart.connect_same_thread (c, std::bind (&proc_cycle_start, &cnt));
 	while (cnt <= n_cycles) {
 		Glib::usleep (1000);
 		if (timeout_ms > 0) {
@@ -1158,6 +1158,32 @@ LuaAPI::note_list (std::shared_ptr<MidiModel> mm)
 	return note_ptr_list;
 }
 
+std::list<std::shared_ptr<Evoral::Event<Temporal::Beats> > >
+LuaAPI::sysex_list (std::shared_ptr<MidiModel> mm)
+{
+	typedef std::shared_ptr<Evoral::Event<Temporal::Beats> > SysExPtr;
+
+	std::list<SysExPtr> event_ptr_list;
+
+	for (auto const& i : mm->sysexes ()) {
+		event_ptr_list.push_back (i);
+	}
+	return event_ptr_list;
+}
+
+std::list<std::shared_ptr<Evoral::PatchChange<Temporal::Beats> > >
+LuaAPI::patch_change_list (std::shared_ptr<MidiModel> mm)
+{
+	typedef std::shared_ptr<Evoral::PatchChange<Temporal::Beats> > PatchChangePtr;
+
+	std::list<PatchChangePtr> patch_change_ptr_list;
+
+	for (auto const& i : mm->patch_changes ()) {
+		patch_change_ptr_list.push_back (i);
+	}
+	return patch_change_ptr_list;
+}
+
 /* ****************************************************************************/
 
 const samplecnt_t LuaAPI::Rubberband::_bufsize = 256;
@@ -1216,7 +1242,7 @@ LuaAPI::Rubberband::set_mapping (luabridge::LuaRef tbl)
 samplecnt_t
 LuaAPI::Rubberband::read (Sample* buf, samplepos_t pos, samplecnt_t cnt, int channel) const
 {
-	return _region->master_read_at (buf, NULL, NULL, _read_offset + pos, cnt, channel);
+	return _region->master_read_at (buf, _read_offset + pos, cnt, channel);
 }
 
 static void null_deleter (LuaAPI::Rubberband*) {}

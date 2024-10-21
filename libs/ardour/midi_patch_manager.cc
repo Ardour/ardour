@@ -275,7 +275,6 @@ MidiPatchManager::load_midnams ()
 	*/
 
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), "midi-patch-manager", 8);
-	pthread_set_name ("MIDNAMLoader");
 
 	{
 		PBD::Unwinder<bool> npc (no_patch_changed_messages, true);
@@ -291,13 +290,13 @@ MidiPatchManager::load_midnams ()
 void
 MidiPatchManager::load_midnams_in_thread ()
 {
-	_midnam_load_thread = PBD::Thread::create (boost::bind (&MidiPatchManager::load_midnams, this));
+	_midnam_load_thread = PBD::Thread::create (std::bind (&MidiPatchManager::load_midnams, this), "MIDNAMLoader");
 }
 
 void
 MidiPatchManager::maybe_use (PBD::ScopedConnectionList& cl,
                              PBD::EventLoop::InvalidationRecord* ir,
-                             const boost::function<void()> & midnam_info_method,
+                             const std::function<void()> & midnam_info_method,
                              PBD::EventLoop* event_loop)
 {
 	{

@@ -28,10 +28,15 @@
 #include "canvas/text.h"
 
 #include "note_base.h"
-#include "public_editor.h"
+#include "editing_context.h"
 #include "editing_syms.h"
 #include "keyboard.h"
-#include "midi_region_view.h"
+#include "midi_view.h"
+
+/* clang-format off */
+// Include last, when GRIDTYPE has been defined by editing.h via midi_region_view.h
+#include "editing_syms.h"
+/* clang-format on */
 
 using namespace std;
 using namespace Gtkmm2ext;
@@ -61,7 +66,7 @@ NoteBase::set_colors ()
 	color_modifier = UIConfiguration::instance().modifier ("midi note");
 }
 
-NoteBase::NoteBase(MidiRegionView& region, bool with_events, const std::shared_ptr<NoteType> note)
+NoteBase::NoteBase(MidiView& region, bool with_events, const std::shared_ptr<NoteType> note)
 	: _region(region)
 	, _item (0)
 	, _text(0)
@@ -183,7 +188,7 @@ NoteBase::set_selected(bool selected)
 uint32_t
 NoteBase::base_color ()
 {
-	return base_color (_note->velocity(), _region.color_mode(), _region.midi_stream_view()->get_region_color(), _note->channel(), selected());
+	return base_color (_note->velocity(), _region.midi_context().color_mode(), _region.midi_context().region_color(), _note->channel(), selected());
 }
 
 uint32_t
@@ -247,7 +252,7 @@ NoteBase::set_mouse_fractions (GdkEvent* ev)
 		return;
 	}
 
-	boost::optional<ArdourCanvas::Rect> bbox = _item->bounding_box ();
+	std::optional<ArdourCanvas::Rect> bbox = _item->bounding_box ();
 	assert (bbox);
 
 	_item->canvas_to_item (ix, iy);
@@ -255,16 +260,16 @@ NoteBase::set_mouse_fractions (GdkEvent* ev)
 	/* hmm, something wrong here. w2i should give item-local coordinates
 	   but it doesn't. for now, finesse this.
 	*/
-	ix = ix - bbox.get().x0;
-	iy = iy - bbox.get().y0;
+	ix = ix - bbox.value().x0;
+	iy = iy - bbox.value().y0;
 
 	/* fraction of width/height */
 	double xf;
 	double yf;
 	bool notify = false;
 
-	xf = ix / bbox.get().width ();
-	yf = iy / bbox.get().height ();
+	xf = ix / bbox.value().width ();
+	yf = iy / bbox.value().height ();
 
 	if (xf != _mouse_x_fraction || yf != _mouse_y_fraction) {
 		notify = true;
@@ -288,11 +293,24 @@ NoteBase::set_mouse_fractions (GdkEvent* ev)
 bool
 NoteBase::event_handler (GdkEvent* ev)
 {
-	PublicEditor& editor = _region.get_time_axis_view().editor();
+	EditingContext& editor = _region.editing_context();
 	if (!editor.internal_editing()) {
 		return false;
 	}
 
+#warning paul fix this pianorule issue
+#if 0
+	/* notebase has a MidiView not a RegionView so get_time_axis_view() Is
+	missing etc.
+	*/
+	if (_region.get_time_axis_view ().layer_display () == Stacked) {
+		/* only allow edting notes in the topmost layer */
+		if (_region.region()->layer() != _region.region()->playlist()->top_layer ()) {
+			/* this stll allows the draw tool to work, and edit cursor is updated */
+			return false;
+		}
+	}
+#endif
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
 		_region.note_entered (this);

@@ -50,7 +50,7 @@ MidiClockTicker::MidiClockTicker (Session& s)
 	, _transport_pos (-1)
 {
 	resync_latency (true);
-	_session.LatencyUpdated.connect_same_thread (_latency_connection, boost::bind (&MidiClockTicker::resync_latency, this, _1));
+	_session.LatencyUpdated.connect_same_thread (_latency_connection, std::bind (&MidiClockTicker::resync_latency, this, _1));
 }
 
 MidiClockTicker::~MidiClockTicker ()
@@ -218,8 +218,8 @@ out:
 double
 MidiClockTicker::one_ppqn_in_samples (samplepos_t transport_position) const
 {
-	Tempo const & tempo (TempoMap::use()->metric_at (timepos_t (transport_position)).tempo());
-	const double samples_per_quarter_note = tempo.samples_per_quarter_note (_session.nominal_sample_rate());
+	TempoPoint const & tempo (TempoMap::use()->metric_at (timepos_t (transport_position)).tempo());
+	const double samples_per_quarter_note = superclock_to_samples (tempo.superclocks_per_note_type_at (timepos_t (transport_position)), _session.nominal_sample_rate());
 	return samples_per_quarter_note / 24.0;
 }
 

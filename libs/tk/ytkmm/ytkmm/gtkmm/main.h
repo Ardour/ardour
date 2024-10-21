@@ -138,13 +138,11 @@ public:
    * standard C++.  (You might need to use const_cast<>, though.)
    *
    * This function automatically generates nicely formatted
-   * <option>--help</option> output. Note that your program will
+   * <tt>--help</tt> output. Note that your program will
    * be terminated after writing out the help output.
    *
    * @param argc a reference to the number of command line arguments.
    * @param argv a reference to the array of command line arguments.
-   * @parameter_string a string which is displayed in the first line of <option>--help</option> output,
-   * after <literal><replaceable>programname</replaceable> [OPTION...]</literal>
    * @param option_context A Glib::OptionContext containing Glib::OptionGroups which described the command-line arguments taken by your program.
    *
    * @throw Glib::OptionError

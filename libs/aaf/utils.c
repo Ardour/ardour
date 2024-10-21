@@ -263,7 +263,7 @@ laaf_util_build_path (const char* sep, const char* first, ...)
 
 		int written = snprintf (str + offset, len - offset, "%s%.*s",
 		                        ((element_count == 0 && has_leading_sep) || (element_count > 0)) ? sep : "",
-		                        (uint32_t) (arglen - argstart),
+		                        (uint32_t)(arglen - argstart),
 		                        arg + argstart);
 
 		if (written < 0 || (size_t)written >= (len - offset)) {

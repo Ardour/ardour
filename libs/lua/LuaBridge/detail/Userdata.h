@@ -361,8 +361,8 @@ template <class T>
 class UserdataValue : public Userdata
 {
 private:
-  UserdataValue <T> (UserdataValue <T> const&);
-  UserdataValue <T> operator= (UserdataValue <T> const&);
+  UserdataValue (UserdataValue<T> const&);
+  UserdataValue<T> operator= (UserdataValue<T> const&);
 
   char m_storage [sizeof (T)];
 

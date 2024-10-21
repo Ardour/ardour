@@ -187,16 +187,12 @@ public:
   /** Retrieves the window of the plug. Use this to check if the plug has
    * been created inside of the socket.
    * 
-   * @newin{2,14}
-   * 
    * @return The window of the plug if available, or <tt>0</tt>.
    */
   Glib::RefPtr<Gdk::Window> get_plug_window();
   
   /** Retrieves the window of the plug. Use this to check if the plug has
    * been created inside of the socket.
-   * 
-   * @newin{2,14}
    * 
    * @return The window of the plug if available, or <tt>0</tt>.
    */

@@ -155,8 +155,6 @@ public:
   
   /** Returns whether @a child should appear in a secondary group of children.
    * 
-   * @newin{2,4}
-   * 
    * @param child A child of @a widget.
    * @return Whether @a child should appear in a secondary group of children.
    */
@@ -283,9 +281,6 @@ public:
  *
  * The layout/spacing can then be altered by the programmer, or if desired,
  * by the user to alter the 'feel' of a program to a small degree.
- *
- * The HButtonBox widget looks like this:
- * @image html hbuttonbox1.png
  *
  * @ingroup Widgets
  * @ingroup Containers

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_vst_types_h__
-#define __ardour_vst_types_h__
+#pragma once
 
 #include <pthread.h>
 #include "ardour/libardour_visibility.h"
@@ -139,4 +138,3 @@ LIBARDOUR_API extern void vststate_maybe_set_program (VSTState* state);
 }
 #endif
 
-#endif

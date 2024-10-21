@@ -337,7 +337,7 @@ if ($make_accelmap) {
     # merge in the "fixed" bindings that are not defined by the argument given to this program
     # this covers things like the step editor, monitor and processor box bindings
 
-    foreach $hardcoded_bindings ("mixer.bindings", "step_editing.bindings", "monitor.bindings", "processor_box.bindings", "trigger.bindings") {
+    foreach $hardcoded_bindings ("mixer.bindings", "step_editing.bindings", "monitor.bindings", "processor_box.bindings", "trigger.bindings", "pianoroll.bindings") {
 	$path = File::Spec->catfile (dirname ($ARGV[0]), $hardcoded_bindings);
 	open HARDCODED, "<", $path or die $!;
 	while (<HARDCODED>) {

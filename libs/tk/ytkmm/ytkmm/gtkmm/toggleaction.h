@@ -179,14 +179,10 @@ public:
 
   
   /** Emits the "toggled" signal on the toggle action.
-   * 
-   * @newin{2,4}
    */
   void toggled();
   
   /** Sets the checked state on the toggle action.
-   * 
-   * @newin{2,4}
    * 
    * @param is_active Whether the action should be checked or not.
    */
@@ -194,15 +190,11 @@ public:
   
   /** Returns the checked state of the toggle action.
    * 
-   * @newin{2,4}
-   * 
    * @return The checked state of the toggle action.
    */
   bool get_active() const;
   
   /** Sets whether the action should have proxies like a radio action.
-   * 
-   * @newin{2,4}
    * 
    * @param draw_as_radio Whether the action should have proxies like a radio 
    * action.
@@ -210,8 +202,6 @@ public:
   void set_draw_as_radio(bool draw_as_radio =  true);
   
   /** Returns whether the action should have proxies like a radio action.
-   * 
-   * @newin{2,4}
    * 
    * @return Whether the action should have proxies like a radio action.
    */

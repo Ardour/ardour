@@ -16,8 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __libpbd_integer_division_h__
-#define __libpbd_integer_division_h__
+#pragma once
 
 #include <cstdint>
 
@@ -122,4 +121,3 @@ int64_t muldiv_floor (int64_t v, int64_t n, int64_t d)
 }
 } /* namespace */
 
-#endif /* __libpbd_integer_division_h___ */

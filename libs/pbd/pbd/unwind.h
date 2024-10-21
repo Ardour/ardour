@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_unwinder_h__
-#define __libpbd_unwinder_h__
+#pragma once
 
 #include "pbd/libpbd_visibility.h"
 
@@ -46,4 +45,3 @@ class /*LIBPBD_API*/ ExceptionSafeIncDec {
 
 }
 
-#endif /* __libpbd_unwinder_h__ */

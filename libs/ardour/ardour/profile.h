@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_profile_h__
-#define __ardour_profile_h__
+#pragma once
 
 #include <boost/dynamic_bitset.hpp>
 #include <stdint.h>
@@ -32,6 +31,7 @@ public:
 		SmallScreen,
 		SinglePackage,
 		Mixbus,
+		LiveTrax,
 		LastElement,
 	};
 
@@ -43,6 +43,9 @@ public:
 
     bool get_mixbus() const { return bits[Mixbus]; }
     void set_mixbus() { bits[Mixbus] = true; }
+
+    bool get_livetrax() const { return bits[LiveTrax]; }
+    void set_livetrax() { bits[LiveTrax] = true; }
 
     void set_single_package () { bits[SinglePackage] = true; }
     bool get_single_package () const { return bits[SinglePackage]; }
@@ -56,4 +59,3 @@ LIBARDOUR_API extern RuntimeProfile* Profile;
 
 }; // namespace ARDOUR
 
-#endif /* __ardour_profile_h__ */

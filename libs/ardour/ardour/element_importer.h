@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_element_importer_h__
-#define __ardour_element_importer_h__
+#pragma once
 
 #include <string>
 #include <utility>
@@ -74,10 +73,10 @@ class LIBARDOUR_API ElementImporter
 	bool broken () { return _broken; }
 
 	/// Signal that requests for anew name
-	static PBD::Signal2<std::pair<bool, std::string>,std::string, std::string> Rename;
+	static PBD::Signal<std::pair<bool, std::string>(std::string, std::string)> Rename;
 
 	/// Signal for ok/cancel prompting
-	static PBD::Signal1<bool,std::string> Prompt;
+	static PBD::Signal<bool(std::string)> Prompt;
 
   protected:
 
@@ -132,4 +131,3 @@ class LIBARDOUR_API ElementImporter
 
 } // namespace ARDOUR
 
-#endif

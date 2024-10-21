@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_uuid_h__
-#define __pbd_uuid_h__
+#pragma once
 
 #include <string>
 #include <boost/uuid/uuid.hpp>
@@ -49,4 +48,3 @@ class LIBPBD_API UUID : public boost::uuids::uuid {
 
 } // namespace PBD
 
-#endif // __pbd_uuid_h__

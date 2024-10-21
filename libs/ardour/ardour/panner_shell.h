@@ -18,16 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_panner_shell_h__
-#define __ardour_panner_shell_h__
+#pragma once
 
 #include <cmath>
 #include <cassert>
 #include <vector>
 #include <string>
 #include <iostream>
-
-#include <boost/noncopyable.hpp>
 
 #include "pbd/cartesian.h"
 
@@ -65,8 +62,8 @@ public:
 	XMLNode& get_state () const;
 	int      set_state (const XMLNode&, int version);
 
-	PBD::Signal0<void> PannableChanged; /* Pannable changed -- l*/
-	PBD::Signal0<void> Changed; /* panner and/or outputs count and/or bypass state changed */
+	PBD::Signal<void()> PannableChanged; /* Pannable changed -- l*/
+	PBD::Signal<void()> Changed; /* panner and/or outputs count and/or bypass state changed */
 
 	std::shared_ptr<Panner> panner() const { return _panner; }
 	std::shared_ptr<Pannable> pannable() const { return _panlinked ? _pannable_route : _pannable_internal; }
@@ -107,4 +104,3 @@ public:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_panner_shell_h__ */

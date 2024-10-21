@@ -49,9 +49,6 @@ namespace Gtk
  * information about toggle/check buttons.  The important signal,
  * signal_toggled() is also inherited from Gtk::ToggleButton.
  *
- * The CheckButton widget looks like this:
- * @image html checkbutton1.png
- *
  * @ingroup Widgets
  */
 

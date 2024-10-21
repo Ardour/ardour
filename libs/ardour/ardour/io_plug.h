@@ -95,6 +95,9 @@ public:
 	virtual bool get_stats (PBD::microseconds_t&, PBD::microseconds_t&, double&, double&) const;
 	virtual void clear_stats ();
 
+	ChanMapping input_map (uint32_t num) const;
+	ChanMapping output_map (uint32_t num) const;
+
 	/* ControlSet */
 	std::shared_ptr<Evoral::Control> control_factory (const Evoral::Parameter& id);
 
@@ -107,37 +110,6 @@ public:
 
 protected:
 	std::string describe_parameter (Evoral::Parameter);
-
-	/** A control that manipulates a plugin parameter (control port). */
-	struct PluginControl : public AutomationControl
-	{
-		PluginControl (IOPlug*                    p,
-		               Evoral::Parameter const&   param,
-		               ParameterDescriptor const& desc);
-
-		double get_value () const;
-		void catch_up_with_external_value (double val);
-		XMLNode& get_state() const;
-		std::string get_user_string() const;
-	private:
-		void actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
-		IOPlug* _iop;
-	};
-
-	/** A control that manipulates a plugin property (message). */
-	struct PluginPropertyControl : public AutomationControl
-	{
-		PluginPropertyControl (IOPlug*                    p,
-		                       Evoral::Parameter const&   param,
-		                       ParameterDescriptor const& desc);
-
-		double get_value () const;
-		XMLNode& get_state() const;
-	private:
-		void actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
-		IOPlug* _iop;
-		Variant _value;
-	};
 
 private:
 	/* disallow copy construction */

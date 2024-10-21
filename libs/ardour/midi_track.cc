@@ -91,10 +91,10 @@ MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	, _input_active (true)
 	, _restore_pgm_on_load (true)
 {
-	_session.SessionLoaded.connect_same_thread (*this, boost::bind (&MidiTrack::restore_controls, this));
+	_session.SessionLoaded.connect_same_thread (*this, std::bind (&MidiTrack::restore_controls, this));
 
-	_playback_filter.ChannelModeChanged.connect_same_thread (*this, boost::bind (&Track::playlist_modified, this));
-	_playback_filter.ChannelMaskChanged.connect_same_thread (*this, boost::bind (&Track::playlist_modified, this));
+	_playback_filter.ChannelModeChanged.connect_same_thread (*this, std::bind (&Track::playlist_modified, this));
+	_playback_filter.ChannelMaskChanged.connect_same_thread (*this, std::bind (&Track::playlist_modified, this));
 }
 
 MidiTrack::~MidiTrack ()
@@ -114,12 +114,12 @@ MidiTrack::init ()
 	_velocity_control.reset (new VelocityControl (_session));
 	add_control (_velocity_control);
 
-	_input->changed.connect_same_thread (*this, boost::bind (&MidiTrack::track_input_active, this, _1, _2));
+	_input->changed.connect_same_thread (*this, std::bind (&MidiTrack::track_input_active, this, _1, _2));
 
 	_disk_writer->set_note_mode (_note_mode);
 	_disk_reader->reset_tracker ();
 
-	_disk_writer->DataRecorded.connect_same_thread (*this, boost::bind (&MidiTrack::data_recorded, this, _1));
+	_disk_writer->DataRecorded.connect_same_thread (*this, std::bind (&MidiTrack::data_recorded, this, _1));
 
 #ifdef HAVE_BEATBOX
 	_beatbox.reset (new BeatBox (_session));
@@ -229,7 +229,7 @@ MidiTrack::set_state (const XMLNode& node, int version)
 
 	if (_session.loading ()) {
 		_session.StateReady.connect_same_thread (
-			*this, boost::bind (&MidiTrack::set_state_part_two, this));
+			*this, std::bind (&MidiTrack::set_state_part_two, this));
 	} else {
 		set_state_part_two ();
 	}
@@ -475,9 +475,8 @@ MidiTrack::non_realtime_locate (samplepos_t spos)
 void
 MidiTrack::push_midi_input_to_step_edit_ringbuffer (samplecnt_t nframes)
 {
-	PortSet& ports (_input->ports());
-
-	for (PortSet::iterator p = ports.begin(DataType::MIDI); p != ports.end(DataType::MIDI); ++p) {
+	std::shared_ptr<PortSet> ports (_input->ports());
+	for (PortSet::iterator p = ports->begin (DataType::MIDI); p != ports->end (DataType::MIDI); ++p) {
 
 		Buffer& b (p->get_buffer (nframes));
 		const MidiBuffer* const mb = dynamic_cast<MidiBuffer*>(&b);
@@ -781,7 +780,7 @@ MidiTrack::MidiControl::actually_set_value (double val, PBD::Controllable::Group
 void
 MidiTrack::set_step_editing (bool yn)
 {
-	if (_session.record_status() != Session::Disabled) {
+	if (_session.record_status() != Disabled) {
 		return;
 	}
 
@@ -874,9 +873,8 @@ MidiTrack::map_input_active (bool yn)
 		return;
 	}
 
-	PortSet& ports (_input->ports());
-
-	for (PortSet::iterator p = ports.begin(DataType::MIDI); p != ports.end(DataType::MIDI); ++p) {
+	std::shared_ptr<PortSet> ports (_input->ports());
+	for (PortSet::iterator p = ports->begin (DataType::MIDI); p != ports->end (DataType::MIDI); ++p) {
 		std::shared_ptr<MidiPort> mp = std::dynamic_pointer_cast<MidiPort> (*p);
 		if (yn != mp->input_active()) {
 			mp->set_input_active (yn);
@@ -947,10 +945,8 @@ MidiTrack::monitoring_changed (bool self, Controllable::GroupControlDisposition 
 	 * port level.
 	 */
 
-	PortSet& ports (_output->ports());
-
-	for (PortSet::iterator p = ports.begin(); p != ports.end(); ++p) {
-		std::shared_ptr<MidiPort> mp = std::dynamic_pointer_cast<MidiPort> (*p);
+	for (auto const& p : *_output->ports()) {
+		std::shared_ptr<MidiPort> mp = std::dynamic_pointer_cast<MidiPort> (p);
 		if (mp) {
 			mp->require_resolve ();
 		}

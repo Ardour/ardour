@@ -45,6 +45,7 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/gtk_ui.h"
 
+#include "widgets/slider_controller.h"
 #include "widgets/tooltips.h"
 
 #include "pbd/fastlog.h"
@@ -133,7 +134,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 
 	level_meter = new LevelMeterHBox(_session);
 
-	level_meter->ButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&GainMeterBase::level_meter_button_press, this, _1));
+	level_meter->ButtonPress.connect_same_thread (_level_meter_connection, std::bind (&GainMeterBase::level_meter_button_press, this, _1));
 	meter_metric_area.signal_button_press_event().connect (sigc::mem_fun (*this, &GainMeterBase::level_meter_button_press));
 	meter_metric_area.add_events (Gdk::BUTTON_PRESS_MASK);
 
@@ -257,7 +258,7 @@ GainMeterBase::set_controls (std::shared_ptr<Stripable> s,
 
 	if (amp) {
 		amp->ConfigurationChanged.connect (
-			model_connections, invalidator (*this), boost::bind (&GainMeterBase::setup_gain_adjustment, this), gui_context ()
+			model_connections, invalidator (*this), std::bind (&GainMeterBase::setup_gain_adjustment, this), gui_context ()
 			);
 	}
 
@@ -283,12 +284,12 @@ GainMeterBase::set_controls (std::shared_ptr<Stripable> s,
 		connections.push_back (gain_automation_state_button.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
 		connections.push_back (ChangeGainAutomationState.connect (sigc::mem_fun(*this, &GainMeterBase::set_gain_astate)));
 
-		_control->alist()->automation_state_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::gain_automation_state_changed, this), gui_context());
+		_control->alist()->automation_state_changed.connect (model_connections, invalidator (*this), std::bind (&GainMeter::gain_automation_state_changed, this), gui_context());
 
 		gain_automation_state_changed ();
 	}
 
-	_control->Changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeterBase::gain_changed, this), gui_context());
+	_control->Changed.connect (model_connections, invalidator (*this), std::bind (&GainMeterBase::gain_changed, this), gui_context());
 
 	gain_changed ();
 	show_gain ();
@@ -313,6 +314,11 @@ GainMeterBase::set_gain_astate (AutoState as)
 		_control->set_automation_state (as);
 		_session->set_dirty ();
 	}
+}
+
+CairoWidget&
+GainMeterBase::get_gain_slider() const {
+	return *gain_slider;
 }
 
 void
@@ -372,6 +378,13 @@ GainMeterBase::setup_meters (int len)
 		meter_channels = _meter->input_streams().n_total();
 	} else if (route()) {
 		meter_channels = route()->shared_peak_meter()->input_streams().n_total();
+	}
+
+	if (len == 0) {
+		assert (gain_slider);
+		Gtk::Requisition sz;
+		sz = gain_slider->size_request ();
+		len = gain_slider->orientation () == FaderWidget::VERT ? sz.height : sz.width;
 	}
 
 	switch (_width) {
@@ -676,7 +689,7 @@ void
 GainMeterBase::update_gain_sensitive ()
 {
 	bool x = !(_control->alist()->automation_state() & Play);
-	static_cast<ArdourWidgets::SliderController*>(gain_slider)->set_sensitive (x);
+	gain_slider->set_sensitive (x);
 }
 
 gint
@@ -730,7 +743,7 @@ GainMeterBase::set_route_group_meter_point (Route& route, MeterPoint mp)
 	RouteGroup* route_group;
 
 	if ((route_group = route.route_group ()) != 0) {
-		route_group->foreach_route (boost::bind (&Route::set_meter_point, _1, mp));
+		route_group->foreach_route (std::bind (&Route::set_meter_point, _1, mp));
 	} else {
 		route.set_meter_point (mp);
 	}
@@ -1032,10 +1045,10 @@ GainMeter::set_controls (std::shared_ptr<Stripable> s,
 
 	if (_meter) {
 		_meter->ConfigurationChanged.connect (
-			model_connections, invalidator (*this), boost::bind (&GainMeter::meter_configuration_changed, this, _1), gui_context()
+			model_connections, invalidator (*this), std::bind (&GainMeter::meter_configuration_changed, this, _1), gui_context()
 			);
 		_meter->MeterTypeChanged.connect (
-			model_connections, invalidator (*this), boost::bind (&GainMeter::redraw_metrics, this), gui_context()
+			model_connections, invalidator (*this), std::bind (&GainMeter::redraw_metrics, this), gui_context()
 			);
 
 		meter_configuration_changed (_meter->input_streams ());
@@ -1043,7 +1056,7 @@ GainMeter::set_controls (std::shared_ptr<Stripable> s,
 
 
 	if (route()) {
-		route()->active_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::route_active_changed, this), gui_context ());
+		route()->active_changed.connect (model_connections, invalidator (*this), std::bind (&GainMeter::route_active_changed, this), gui_context ());
 	}
 
 	hbox.pack_start (meter_hbox, true, true);

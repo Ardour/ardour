@@ -29,8 +29,7 @@ using namespace ARDOUR;
 using ArdourCanvas::Coord;
 using ArdourCanvas::Duple;
 
-Note::Note (
-	MidiRegionView& region, ArdourCanvas::Item* parent, const std::shared_ptr<NoteType> note, bool with_events)
+Note::Note (MidiView& region, ArdourCanvas::Item* parent, const std::shared_ptr<NoteType> note, bool with_events)
 	: NoteBase (region, with_events, note)
 	, _visual_note (new ArdourCanvas::Note (parent))
 {

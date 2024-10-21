@@ -111,6 +111,8 @@ Ruler::set_second_font_description (Pango::FontDescription fd)
 void
 Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 {
+	// std::cerr << whoami() << " ruler render " << _lower << " .. " << _upper << "\n";
+
 	if (_lower == _upper) {
 		/* nothing to draw */
 		return;
@@ -169,6 +171,10 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 
 			pos.x = round (m->position/_metric->units_per_pixel) + self.x0;
 			pos.y = self.y1; /* bottom edge */
+
+			if (pos.x < 0) {
+				continue;
+			}
 
 			if (fd != last_font_description) {
 				layout->set_font_description (*fd);

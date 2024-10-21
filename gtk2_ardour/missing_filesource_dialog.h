@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_missing_filesource_dialog_h__
-#define __gtk_ardour_missing_filesource_dialog_h__
+#pragma once
 
 #include <list>
 #include <string>
@@ -37,4 +36,3 @@ public:
 	MissingFileSourceDialog (Gtk::Window&, ARDOUR::Session*, std::list<std::string> const &, ARDOUR::DataType);
 };
 
-#endif

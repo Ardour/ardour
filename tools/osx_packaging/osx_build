@@ -14,14 +14,18 @@ fi
 mkdir -p "$CACHEDIR"
 
 MIXBUS=
-MIXBUS32C=
+VBM=
 WITH_HARVID=1
+WITH_XJADEO=1
 WITH_HARRISON_LV2=
+WITH_HARRISON_VBM=
 WITH_COMMERCIAL_X42_LV2=
 WITH_GRATIS_X42_LV2=
+WITH_GMSYNTH=
 STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=1
+X42PLUGINS="x42-autotune x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner"
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
@@ -41,27 +45,38 @@ while [ $# -gt 0 ] ; do
 		WITH_HARRISON_LV2=1 ;
 		WITH_COMMERCIAL_X42_LV2=1
 		WITH_GRATIS_X42_LV2=1
-		STRIP= ;
+		WITH_GMSYNTH=1
 		PRODUCT_PKG_DIR=Mixbus;
 		APPNAME=Mixbus ;
 		BUNDLENAME=Mixbus${major_version} ;
 		lower_case_appname=mixbus;
 		BUNDLE_ID_BASE=com.harrisonconsoles
 		shift ;;
-	--mixbus32c) MIXBUS=1;
-		MIXBUS32C=1;
+	--livetrax)
+		LIVETRAX=1 ;
+		WITH_XJADEO= ;
+		APPNAME=LiveTrax ;
+		PRODUCT_PKG_DIR=LiveTrax;
+		BUNDLENAME=LiveTrax${major_version} ;
+		lower_case_appname=livetrax;
+		BUNDLE_ID_BASE=com.harrisonconsoles
+		shift ;;
+	--vbm)
+		VBM=1
 		WITH_HARRISON_LV2=1 ;
+		WITH_HARRISON_VBM=1 ;
 		WITH_COMMERCIAL_X42_LV2=1
 		WITH_GRATIS_X42_LV2=1
 		STRIP= ;
-		PRODUCT_PKG_DIR=Mixbus32C;
-		lower_case_appname=mixbus32c;
-		BUNDLE_ID_BASE=com.harrisonconsoles
-		APPNAME=Mixbus32C ;
-		BUNDLENAME=Mixbus32C-${major_version} ;
+		PRODUCT_PKG_DIR=MixbusVBM;
+		lower_case_appname=mixbusvbm;
+		APPNAME=MixbusVBM ;
+		BUNDLENAME=MixbusVBM${major_version} ;
+		X42PLUGINS="$X42PLUGINS x42-testsignal x42-nodelay"
 		shift ;;
 	--public)
 		WITH_HARRISON_LV2=1 ;
+		WITH_GMSYNTH=1
 		PRODUCT_PKG_DIR=Ardour;
 		APPNAME=Ardour ;
 		BUNDLENAME=Ardour${major_version} ;
@@ -73,7 +88,7 @@ while [ $# -gt 0 ] ; do
 	# specific build flags
 	#
 
-	--noharvid) WITH_HARVID= ; shift ;;
+	--noharvid) shift ;;
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--no-nls) WITH_NLS= ; shift ;;
@@ -171,9 +186,12 @@ mkdir -p $ExportFormats
 mkdir -p $Etc
 mkdir -p $MackieControl
 mkdir -p $OSC
-mkdir -p $PatchFiles
 mkdir -p $LuaScripts
 mkdir -p $Themes
+
+if test -z "$VBM"; then
+mkdir -p $PatchFiles
+fi
 
 EXECUTABLE=${BUNDLENAME}
 
@@ -230,10 +248,12 @@ MAIN_EXECUTABLE=$EXECUTABLE
 
 echo "Copying ardour executable ...."
 cp $BUILD_ROOT/gtk2_ardour/ardour-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
-if test x$MIXBUS32C != x ; then
-	cp  Mixbus32C.icns $Resources/appIcon.icns
-elif test x$MIXBUS != x ; then
+if test x$MIXBUS != x ; then
 	cp  Mixbus.icns $Resources/appIcon.icns
+elif test x$LIVETRAX != x ; then
+	cp  LiveTrax.icns $Resources/appIcon.icns
+elif test x$VBM != x ; then
+	cp  MixbusVBM.icns $Resources/appIcon.icns
 else
 	cp  Ardour.icns $Resources/appIcon.icns
 fi
@@ -346,9 +366,11 @@ done
 
 # MIDNAM Patch Files
 # got to be careful with names here
-for x in $BUILD_ROOT/../share/patchfiles/*.midnam ; do
-	cp "$x" $PatchFiles
-done
+if test -z "$VBM"; then
+	for x in $BUILD_ROOT/../share/patchfiles/*.midnam ; do
+		cp "$x" $PatchFiles
+	done
+fi
 
 # Lua Script Files
 # got to be careful with names here
@@ -430,15 +452,17 @@ chmod +x $Frameworks/ardour-util.sh
 
 # session-utils
 HAVE_SESSION_UTILS=false
-for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; do
-	BN=$(basename $file)
-	cp $file $Frameworks/
-	if test x$STRIP = xall ; then
-		strip -s $Frameworks/${BN}
-	fi
-	cp -R $Frameworks/ardour-util.sh ${APPROOT}/MacOS/${BN}
-	HAVE_SESSION_UTILS=true
-done
+if test -d $BUILD_ROOT/session_utils/; then
+	for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; do
+		BN=$(basename $file)
+		cp $file $Frameworks/
+		if test x$STRIP = xall ; then
+			strip -s $Frameworks/${BN}
+		fi
+		cp -R $Frameworks/ardour-util.sh ${APPROOT}/MacOS/${BN}
+		HAVE_SESSION_UTILS=true
+	done
+fi
 
 if test -x $BUILD_ROOT/luasession/luasession; then
 	BN=${lower_case_appname}${major_version}-lua
@@ -463,6 +487,7 @@ else
 STDCPP=
 fi
 
+echo "Stripping symbols and architectures."
 while [ true ] ; do
 	missing=false
 	for file in $APPROOT/MacOS/* $Frameworks/* $Panners/*.dylib $Backends/*.dylib $Surfaces/*.dylib $GTK_ENGINE_DIR/*.dylib ; do
@@ -513,6 +538,10 @@ cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Resources
 cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Resources
 cp $BUILD_ROOT/gtk2_ardour/clearlooks.rc $Resources
 
+if test -n "$LIVETRAX"; then
+	cp $BUILD_ROOT/gtk2_ardour/livetrax.keys $Resources
+fi
+
 # Copied directly from source tree
 
 mkdir ${Resources}/icons
@@ -528,16 +557,11 @@ cp ../../gtk2_ardour/resources/${PRODUCT_PKG_DIR}-* ${Resources}/resources/
 # Themes: only install those named for this app
 cp ../../gtk2_ardour/themes/*-${lower_case_appname}.colors $Themes
 
-# go through and recursively remove any .svn dirs in the bundle
-for svndir in `find $APPDIR -name .svn -type dir`; do
-	rm -rf $svndir
-done
-
 # remove temp session utils start script
 rm $Frameworks/ardour-util.sh
 
 # install bundled LV2s to <app>/Contents/lib/LV2/
-cp -R $BUILD_ROOT/libs/LV2 $Frameworks/
+cp -R $BUILD_ROOT/libs/LV2 $Frameworks/ || true
 
 # lv2 core, classifications
 for file in $GTKSTACK_ROOT/lib/lv2/*.lv2; do
@@ -634,19 +658,12 @@ mkdir $PRODUCT_PKG_DIR
 DMGWINBOTTOM=440
 DMGBACKGROUND=dmgbg
 
-if [ x$MIXBUS != x ] ; then
-
-	# Mixbus packaging
-
-	echo "Creating Mixbus packaging directory"
-	mv $APPDIR $PRODUCT_PKG_DIR/
+if test -n "$MIXBUS" -o -n "$LIVETRAX" -o -n "$VBM" ; then
 	DMGBACKGROUND=dmgbgMB
-else
-
-	echo "Creating $APPNAME packaging directory"
-	mv $APPDIR $PRODUCT_PKG_DIR/
-
 fi
+
+echo "Creating $APPNAME packaging directory"
+mv $APPDIR $PRODUCT_PKG_DIR/
 
 ################################################################################
 # from here on $PRODUCT_PKG_DIR/ prefix is needed
@@ -698,29 +715,37 @@ if test x$WITH_HARRISON_LV2 != x ; then
 		"${CACHEDIR}/${HARRISONLV2}.${OSX_BENSID}.zip"
 fi
 
+if test x$WITH_HARRISON_VBM != x ; then
+	curl -s -S --fail -#  \
+		-z "${CACHEDIR}/harrison_vbm.${OSX_BENSID}.zip" \
+		-o "${CACHEDIR}/harrison_vbm.${OSX_BENSID}.zip" \
+		"${HARRISONDSPURL}/harrison_vbm.${OSX_BENSID}.zip"
+
+	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
+	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
+		"${CACHEDIR}/harrison_vbm.${OSX_BENSID}.zip"
+fi
+
 if test x$WITH_HARVID != x ; then
-	echo "installing video tools.."
-	if test $OSX_ARCH = ppc; then
-		# EOL
-		HARVID_VERSION=v0.8.2
-		XJADEO_VERSION=v0.8.8
-	else
-		HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
-		XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
-	fi
-	echo "copying harvid and xjadeo ..."
+	echo "installing harvid..."
+	HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
 
 	rsync -Pa \
 		rsync://ardour.org/video-tools/harvid-${HARVID_ARCH}-${HARVID_VERSION}.tgz \
 		"$CACHEDIR/harvid-${HARVID_ARCH}-${HARVID_VERSION}.tgz"
 
-	rsync -Pa \
-		rsync://ardour.org/video-tools/jadeo${XJADEO_ARCH}-${XJADEO_VERSION:1}.dmg \
-		"$CACHEDIR/jadeo${XJADEO_ARCH}-${XJADEO_VERSION:1}.dmg"
-
 	tar -x -z \
 		-C $PRODUCT_PKG_DIR/$APPROOT \
 		-f "$CACHEDIR/harvid-${HARVID_ARCH}-${HARVID_VERSION}.tgz" || exit 1
+fi
+
+if test x$WITH_XJADEO != x ; then
+	echo "installing video monitor.."
+	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
+
+	rsync -Pa \
+		rsync://ardour.org/video-tools/jadeo${XJADEO_ARCH}-${XJADEO_VERSION:1}.dmg \
+		"$CACHEDIR/jadeo${XJADEO_ARCH}-${XJADEO_VERSION:1}.dmg"
 
 	JADEO=$(hdiutil attach "$CACHEDIR/jadeo${XJADEO_ARCH}-${XJADEO_VERSION:1}.dmg" | grep Apple_HFS | grep dev/ | cut -f 3)
 	cp -r "${JADEO}/Jadeo.app" "$PRODUCT_PKG_DIR/"
@@ -741,9 +766,11 @@ if test x$WITH_HARVID != x ; then
 	DMGBACKGROUND=${DMGBACKGROUND}xj
 fi
 
+echo "Using image '$DMGBACKGROUND' for the DMG.\n"
+
 ################################################################################
 ### Mixbus plugins, etc
-if true; then
+if test x$WITH_GMSYNTH != x ; then
 	echo "Bundling General MIDI Synth LV2"
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
@@ -775,7 +802,17 @@ if test x$WITH_GRATIS_X42_LV2 != x ; then
 	echo "Adding gratis x42 plugins"
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
-	for proj in x42-autotune x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner; do
+	for proj in $X42PLUGINS; do
+
+		if test -n "$VBM"; then
+			if test "$proj" = "setBfree"; then
+				continue
+			fi
+			if test "$proj" = "x42-avldrums"; then
+				continue
+			fi
+		fi
+
 		X42_VERSION=$(curl -s -S http://${OSX_X42URI}/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://${OSX_X42URI}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
@@ -828,7 +865,7 @@ if test -n "$MIXBUS"; then
 		bsdtar -C "${PRODUCT_PKG_DIR}/${MediaClips}" -xf \
 			"${CACHEDIR}/MixbusBundledMedia.zip"
 	fi
-else
+elif test -z "$LIVETRAX" -a -z "$VBM" ; then
 	echo "Fetching Ardour bundled content"
 	curl -s -S --fail -#  \
 		-z "${CACHEDIR}/ArdourBundledMedia.zip" \
@@ -922,9 +959,12 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 	find ${PRODUCT_PKG_DIR}/${APPROOT}/lib -type f -print0 | xargs -0 -I {} -P 7 codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}"
 
 	find ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS -name "${lower_case_appname}${major_version}-*" -print0 | xargs -0 -I {} -P 7 codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}"
-	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/ffmpeg_harvid
-	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/ffprobe_harvid
-	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/harvid
+
+	if test x$WITH_HARVID != x ; then
+		codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/ffmpeg_harvid
+		codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/ffprobe_harvid
+		codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/harvid
+	fi
 
 	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/${MAIN_EXECUTABLE}
 
@@ -949,7 +989,9 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 
 		rm $ZIP_PATH
 	fi
+fi
 
+if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" -a -n "$WITH_XJADEO"; then
 	#############
 	## Sign Jadeo
 

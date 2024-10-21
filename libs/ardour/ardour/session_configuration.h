@@ -18,12 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_session_configuration_h__
-#define __ardour_session_configuration_h__
+#pragma once
 
 #include <map>
 #include <string>
 
+#include "ardour/types.h"
 #include "pbd/configuration.h"
 
 namespace ARDOUR {
@@ -33,7 +33,7 @@ class LIBARDOUR_API SessionConfiguration : public PBD::Configuration
 public:
 	SessionConfiguration ();
 
-	void map_parameters (boost::function<void (std::string)>&);
+	void map_parameters (std::function<void (std::string)>&);
 	int set_state (XMLNode const &, int version);
 	XMLNode& get_state () const;
 	XMLNode& get_variables (std::string const & nodename) const;
@@ -44,6 +44,7 @@ public:
 
 	/* define accessor methods */
 
+	/* clang-format off */
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(Type,var,name,value) \
@@ -55,11 +56,13 @@ public:
 #include "ardour/session_configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
+	/* clang-format on */
 
   private:
 
 	/* declare variables */
 
+	/* clang-format off */
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(Type,var,name,value) PBD::ConfigVariable<Type> var;
@@ -67,6 +70,7 @@ public:
 #include "ardour/session_configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
+	/* clang-format on */
 
 	int foo;
 
@@ -75,4 +79,3 @@ public:
 
 }
 
-#endif

@@ -53,9 +53,6 @@ namespace Gtk
  * from Gtk::Misc, it can be padded and/or aligned, to fill exactly the
  * space the programmer desires.
  *
- * The Arrow widget looks like this:
- * @image html arrow1.png
- *
  * @ingroup Widgets
  */
 

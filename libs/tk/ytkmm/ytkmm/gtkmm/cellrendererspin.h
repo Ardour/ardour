@@ -55,7 +55,6 @@ namespace Gtk
  * signal. 
  *
  * @ingroup TreeView
- * @newin{2,12}
  */
 
 class CellRendererSpin : public CellRendererText

@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_filesource_h__
-#define __ardour_filesource_h__
+#pragma once
 
 #include <list>
 #include <string>
@@ -86,7 +85,7 @@ public:
 	virtual void set_path (const std::string&);
 	void replace_file (const std::string&);
 
-	static PBD::Signal2<int,std::string,std::vector<std::string> > AmbiguousFileName;
+	static PBD::Signal<int(std::string,std::vector<std::string> )> AmbiguousFileName;
 
 	void existence_check ();
 	virtual void prevent_deletion ();
@@ -119,5 +118,4 @@ public:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_filesource_h__ */
 

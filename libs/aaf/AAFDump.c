@@ -131,7 +131,7 @@ aaf_dump_TaggedValueSet (AAF_Data* aafd, aafObject* ObjCollection, const char* p
 		                  ANSI_COLOR_DARKGREY (log),
 		                  (name) ? name : "<unknown>",
 		                  ANSI_COLOR_RESET (log),
-		                  (name) ? (size_t) (34 - (int)strlen (name)) : (size_t) (34 - strlen ("<unknown>")), " ",
+		                  (name) ? (size_t)(34 - (int)strlen (name)) : (size_t)(34 - strlen ("<unknown>")), " ",
 		                  ANSI_COLOR_DARKGREY (log),
 		                  aaft_TypeIDToText (&indirect->TypeDef),
 		                  ANSI_COLOR_RESET (log),

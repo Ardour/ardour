@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_buffer_set_h__
-#define __ardour_buffer_set_h__
+#pragma once
 
 #ifdef WAF_BUILD
 #include "libardour-config.h"
@@ -41,7 +40,6 @@ struct _VstMidiEvent;
 typedef struct _VstMidiEvent VstMidiEvent;
 #endif
 
-typedef struct LV2_Evbuf_Impl LV2_Evbuf;
 
 namespace ARDOUR {
 
@@ -49,6 +47,8 @@ class Buffer;
 class AudioBuffer;
 class MidiBuffer;
 class PortSet;
+
+struct LV2_Evbuf;
 
 /** A set of buffers of various types.
  *
@@ -71,8 +71,8 @@ public:
 
 	void clear();
 
-	void attach_buffers (PortSet& ports);
-	void get_backend_port_addresses (PortSet &, samplecnt_t);
+	void attach_buffers (PortSet const& ports);
+	void get_backend_port_addresses (PortSet&, samplecnt_t);
 
 	/* the capacity here is a size_t and has a different interpretation depending
 	   on the DataType of the buffers. for audio, its a sample count. for MIDI
@@ -81,6 +81,9 @@ public:
 
 	void ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capacity);
 	void ensure_buffers(const ChanCount& chns, size_t buffer_capacity);
+
+	/* Returns true if Buffer::silent_data() is true for all buffers */
+	bool silent_data() const;
 
 	const ChanCount& available() const { return _available; }
 	ChanCount&       available()       { return _available; }
@@ -225,4 +228,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif // __ardour_buffer_set_h__

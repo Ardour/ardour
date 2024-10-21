@@ -137,9 +137,7 @@ protected:
    * mark with right gravity (when you type, the cursor stays on the right
    * side of the text you're typing).
 
-   * @param name mark name.
    * @param left_gravity Whether the mark should have left gravity.
-   * @newin{2,12}
    */
   explicit TextMark(bool left_gravity = true);
 
@@ -154,7 +152,6 @@ protected:
 
    * @param name mark name.
    * @param left_gravity Whether the mark should have left gravity.
-   * @newin{2,12}
    */
     explicit TextMark(const Glib::ustring& name, bool left_gravity =  true);
 
@@ -169,11 +166,9 @@ public:
    * right of newly-inserted text. The standard left-to-right cursor is a 
    * mark with right gravity (when you type, the cursor stays on the right
    * side of the text you're typing).
-
-   * @param name mark name.
+	 *
    * @param left_gravity Whether the mark should have left gravity.
    * @result A RefPtr to a new text mark.
-   * @newin{2,12}
    */
   
   static Glib::RefPtr<TextMark> create(bool left_gravity =  true);
@@ -191,7 +186,6 @@ public:
    * @param name mark name.
    * @param left_gravity Whether the mark should have left gravity.
    * @result A RefPtr to a new text mark.
-   * @newin{2,12}
    */
   
   static Glib::RefPtr<TextMark> create(const Glib::ustring& name, bool left_gravity =  true);

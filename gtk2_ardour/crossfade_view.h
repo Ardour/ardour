@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_crossfade_view_h__
-#define __gtk_ardour_crossfade_view_h__
+#pragma once
 
 #include <vector>
 #include "pbd/signals.h"
@@ -60,7 +59,7 @@ public:
 	bool visible() const { return _visible; }
 	void set_valid (bool yn);
 
-	static PBD::Signal1<void,CrossfadeView*> CatchDeletion;
+	static PBD::Signal<void(CrossfadeView*)> CatchDeletion;
 
 	void fake_hide ();
 	void hide ();
@@ -86,4 +85,3 @@ private:
 	void color_handler ();
 };
 
-#endif /* __gtk_ardour_crossfade_view_h__ */

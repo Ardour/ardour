@@ -258,16 +258,53 @@ Session::mmc_step (MIDI::MachineControl &/*mmc*/, int steps)
 void
 Session::mmc_rewind (MIDI::MachineControl &/*mmc*/)
 {
+	if (actively_recording()) {
+		return;
+	}
+
 	if (Config->get_mmc_control ()) {
-		request_transport_speed(-Config->get_max_transport_speed());
+		switch (Config->get_mmc_fast_wind_op ()) {
+			case (FastWindOff):
+				//nothing
+			break;
+			case (FastWindVarispeed):
+				request_transport_speed (-Config->get_max_transport_speed());
+				request_roll (TRS_MMC);
+			break;
+			case (FastWindLocate):
+				timepos_t pos = locations()->first_mark_before (timepos_t (transport_sample()-1), false);
+				if (pos != timepos_t::max (Temporal::AudioTime)) {
+					request_locate (pos.samples());
+				}
+			break;
+		}
 	}
 }
 
 void
 Session::mmc_fast_forward (MIDI::MachineControl &/*mmc*/)
 {
+	if (actively_recording()) {
+		return;
+	}
+
 	if (Config->get_mmc_control ()) {
-		request_transport_speed (Config->get_max_transport_speed());
+		switch (Config->get_mmc_fast_wind_op ()) {
+			case (FastWindOff):
+				//nothing
+			break;
+			case (FastWindVarispeed):
+				request_transport_speed (Config->get_max_transport_speed());
+				request_roll (TRS_MMC);
+			break;
+			case (FastWindLocate):
+				timepos_t pos = locations()->first_mark_after (timepos_t (transport_sample()+1), false);
+				if (pos != timepos_t::max (Temporal::AudioTime)) {
+					request_locate (pos.samples());
+				}
+
+			break;
+		}
 	}
 }
 
@@ -744,7 +781,8 @@ Session::disconnect_port_for_rewire (std::string const& port) const
 	bool keep_ctrl = mpf & MidiPortControl;
 
 	vector<string> port_connections;
-	AudioEngine::instance()->get_connections (port, port_connections);
+	AudioEngine::instance()->get_connections (port, port_connections, false);
+
 	for (vector<string>::iterator i = port_connections.begin(); i != port_connections.end(); ++i) {
 
 		/* test if (*i) is a control-surface input port */
@@ -763,6 +801,10 @@ Session::disconnect_port_for_rewire (std::string const& port) const
 void
 Session::rewire_selected_midi (std::shared_ptr<MidiTrack> new_midi_target)
 {
+	if (actively_recording()) {
+		return;
+	}
+
 	if (!new_midi_target) {
 		return;
 	}
@@ -805,6 +847,10 @@ Session::rewire_selected_midi (std::shared_ptr<MidiTrack> new_midi_target)
 void
 Session::rewire_midi_selection_ports ()
 {
+	if (actively_recording()) {
+		return;
+	}
+
 	if (!Config->get_midi_input_follows_selection()) {
 		return;
 	}

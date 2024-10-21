@@ -98,7 +98,7 @@ Downloader::start ()
 
 	_cancel = false;
 	_status = 0; /* unknown at this point */
-	return 0 != (thread = PBD::Thread::create (boost::bind (&Downloader::download, this)));
+	return 0 != (thread = PBD::Thread::create (std::bind (&Downloader::download, this), "Downloader"));
 }
 
 void

@@ -157,7 +157,7 @@ public:
 #endif
 
 	struct Controller {
-		Controller(uint8_t cn,  uint8_t val, boost::function<void ()> action)
+		Controller(uint8_t cn,  uint8_t val, std::function<void ()> action)
 		: _controller_number(cn)
 		, _value(val)
 		, action_method(action) {}
@@ -171,7 +171,7 @@ public:
 		uint8_t _value;
 
 		public:
-		boost::function<void ()> action_method;
+		std::function<void ()> action_method;
 	};
 
 	struct LED {
@@ -203,8 +203,8 @@ public:
 	};
 
 	struct Button {
-		Button(ButtonID id, boost::function<void ()> press, boost::function<void ()> release,
-				boost::function<void ()> long_press)
+		Button(ButtonID id, std::function<void ()> press, std::function<void ()> release,
+				std::function<void ()> long_press)
 			: press_method(press)
 			, release_method(release)
 			, long_press_method(long_press),
@@ -214,9 +214,9 @@ public:
 
 		ButtonID id() const { return _id; }
 
-		boost::function<void ()> press_method;
-		boost::function<void ()> release_method;
-		boost::function<void ()> long_press_method;
+		std::function<void ()> press_method;
+		std::function<void ()> release_method;
+		std::function<void ()> long_press_method;
 
 		sigc::connection timeout_connection;
 
@@ -226,9 +226,9 @@ public:
 
 	struct ControllerButton : public Button {
 		ControllerButton(ButtonID id, uint8_t cn,
-				boost::function<void ()> press,
-				boost::function<void ()> release,
-				boost::function<void ()> long_release)
+				std::function<void ()> press,
+				std::function<void ()> release,
+				std::function<void ()> long_release)
 			: Button(id, press, release, long_release), _controller_number(cn) {}
 
 
@@ -241,9 +241,9 @@ public:
 
 	struct NoteButton : public Button {
 		NoteButton(ButtonID id, uint8_t cn,
-				boost::function<void ()> press,
-				boost::function<void ()> release,
-				boost::function<void ()> release_long)
+				std::function<void ()> press,
+				std::function<void ()> release,
+				std::function<void ()> release_long)
 			: Button(id, press, release, release_long), _note_number(cn) {}
 
 		uint8_t note_number() const { return _note_number; }
@@ -254,10 +254,10 @@ public:
 
 	struct TrackButton : public NoteButton, public MultiColorLED {
 		TrackButton(ButtonID id, uint8_t nn, uint8_t index, LEDColor c_on, LEDColor c_off,
-				boost::function<void ()> press,
-				boost::function<void ()> release,
-				boost::function<void ()> release_long,
-				boost::function<uint8_t ()> check,
+				std::function<void ()> press,
+				std::function<void ()> release,
+				std::function<void ()> release_long,
+				std::function<uint8_t ()> check,
 				LaunchControlXL& l)
 			: NoteButton(id, nn, press, release, release_long)
 			, MultiColorLED(index, Off, l)
@@ -272,7 +272,7 @@ public:
 		LEDColor color_disabled() const { return _color_disabled; }
 		void set_color_enabled (LEDColor c_on) { _color_enabled = c_on; }
 		void set_color_disabled (LEDColor c_off) { _color_disabled = c_off; }
-		boost::function<uint8_t ()> check_method;
+		std::function<uint8_t ()> check_method;
 
 
 		MidiByteArray state_msg(bool light = true) const;
@@ -284,9 +284,9 @@ public:
 
 	struct SelectButton : public ControllerButton, public LED {
 		SelectButton(ButtonID id, uint8_t cn, uint8_t index,
-				boost::function<void ()> press,
-				boost::function<void ()> release,
-				boost::function<void ()> long_release,
+				std::function<void ()> press,
+				std::function<void ()> release,
+				std::function<void ()> long_release,
 				LaunchControlXL& l)
 			: ControllerButton(id, cn, press, release, long_release), LED(index, RedFull, l) {}
 
@@ -296,9 +296,9 @@ public:
 
 	struct TrackStateButton : public NoteButton, public LED {
 		TrackStateButton(ButtonID id, uint8_t nn, uint8_t index,
-				boost::function<void ()> press,
-				boost::function<void ()> release,
-				boost::function<void ()> release_long,
+				std::function<void ()> press,
+				std::function<void ()> release,
+				std::function<void ()> release_long,
 				LaunchControlXL& l)
 			: NoteButton(id, nn, press, release, release_long)
 			, LED(index, YellowLow, l) {}
@@ -307,7 +307,7 @@ public:
 	};
 
 	struct Fader : public Controller {
-		Fader(FaderID id, uint8_t cn, boost::function<void ()> action)
+		Fader(FaderID id, uint8_t cn, std::function<void ()> action)
 			: Controller(cn, 0, action), _id(id) {} // minimal value
 
 		FaderID id() const { return _id; }
@@ -319,7 +319,7 @@ public:
 	};
 
 	struct Knob : public Controller, public MultiColorLED {
-		Knob(KnobID id, uint8_t cn, uint8_t index, LEDColor c_on, LEDColor c_off, boost::function<void ()> action,
+		Knob(KnobID id, uint8_t cn, uint8_t index, LEDColor c_on, LEDColor c_off, std::function<void ()> action,
 			LaunchControlXL &l)
 			: Controller(cn, 64, action)
 			, MultiColorLED(index, Off, l)
@@ -327,8 +327,8 @@ public:
 			, _color_enabled (c_on)
 			, _color_disabled (c_off) {} // knob 50/50 value
 
-		Knob(KnobID id, uint8_t cn, uint8_t index, LEDColor c_on, LEDColor c_off, boost::function<void ()> action,
-			boost::function<uint8_t ()> check, LaunchControlXL &l)
+		Knob(KnobID id, uint8_t cn, uint8_t index, LEDColor c_on, LEDColor c_off, std::function<void ()> action,
+			std::function<uint8_t ()> check, LaunchControlXL &l)
 			: Controller(cn, 64, action)
 			, MultiColorLED(index, Off, l)
 			, check_method(check)
@@ -341,7 +341,7 @@ public:
 		KnobID id() const { return _id; }
 		LEDColor color_enabled() const { return _color_enabled; }
 		LEDColor color_disabled() const { return _color_disabled; }
-		boost::function<uint8_t ()> check_method;
+		std::function<uint8_t ()> check_method;
 
 		MidiByteArray state_msg(bool light = true) const;
 
@@ -367,7 +367,7 @@ public:
 	XMLNode& get_state() const;
 	int set_state(const XMLNode &node, int version);
 
-	PBD::Signal0<void> ConnectionChange;
+	PBD::Signal<void()> ConnectionChange;
 
 	std::shared_ptr<ARDOUR::Port> input_port();
 	std::shared_ptr<ARDOUR::Port> output_port();

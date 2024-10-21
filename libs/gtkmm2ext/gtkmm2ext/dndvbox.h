@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#pragma once
+
 #include <gtkmm/window.h>
 #include <gtkmm/box.h>
 
@@ -249,6 +251,7 @@ public:
 	sigc::signal<void, DnDVBox*, T*, Glib::RefPtr<Gdk::DragContext> const & > DropFromAnotherBox;
 	sigc::signal<void, Gtk::SelectionData const &, T*, Glib::RefPtr<Gdk::DragContext> const & > DropFromExternal;
 	sigc::signal<void> SelectionChanged;
+	sigc::signal<void,T&> SelectionAdded;
 
 private:
 
@@ -625,10 +628,12 @@ private:
 
 	void add_to_selection (T* child)
 	{
-		if ( !child->is_selectable() )
+		if (!child->is_selectable()) {
 			return;
+		}
 		_selection.push_back (child);
 		setup_child_state (child);
+		SelectionAdded (*child); /* EMIT SIGNAL */
 	}
 
 	void remove_from_selection (T* child)

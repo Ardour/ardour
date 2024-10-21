@@ -61,6 +61,7 @@ DebugBits PBD::DEBUG::Configuration = PBD::new_debug_bit ("configuration");
 DebugBits PBD::DEBUG::UndoHistory = PBD::new_debug_bit ("undohistory");
 DebugBits PBD::DEBUG::Timing = PBD::new_debug_bit ("timing");
 DebugBits PBD::DEBUG::Threads = PBD::new_debug_bit ("threads");
+DebugBits PBD::DEBUG::ThreadName = PBD::new_debug_bit ("threadname");
 DebugBits PBD::DEBUG::Locale = PBD::new_debug_bit ("locale");
 DebugBits PBD::DEBUG::StringConvert = PBD::new_debug_bit ("stringconvert");
 DebugBits PBD::DEBUG::DebugTimestamps = PBD::new_debug_bit ("debugtimestamps");
@@ -103,7 +104,7 @@ PBD::new_debug_bit (const char* name)
 void
 PBD::debug_only_print (const char* prefix, string str)
 {
-	if ((PBD::debug_bits & DEBUG::Threads).any()) {
+	if ((PBD::debug_bits & DEBUG::ThreadName).any()) {
 		printf ("0x%lx (%s) ", (intptr_t) DEBUG_THREAD_SELF, pthread_name());
 	}
 
@@ -132,7 +133,6 @@ PBD::parse_debug_options (const char* str)
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep (",");
 	tokenizer tokens (in_str, sep);
-	DebugBits bits;
 
 	for (tokenizer::iterator tok_iter = tokens.begin(); tok_iter != tokens.end(); ++tok_iter) {
 		if (*tok_iter == "list") {
@@ -148,14 +148,12 @@ PBD::parse_debug_options (const char* str)
 		for (map<const char*,DebugBits>::iterator i = _debug_bit_map().begin(); i != _debug_bit_map().end(); ++i) {
 			const char* cstr = (*tok_iter).c_str();
 
-                        if (strncasecmp (cstr, i->first, strlen (cstr)) == 0) {
-	                        bits |= i->second;
-	                        cout << string_compose (X_("Debug flag '%1' set\n"), i->first);
-                        }
-                }
+			if (strncasecmp (cstr, i->first, strlen (cstr)) == 0) {
+				debug_bits |= i->second;
+				cout << string_compose (X_("Debug flag '%1' set\n"), i->first);
+			}
+		}
 	}
-
-	debug_bits = bits;
 
 	return 0;
 }

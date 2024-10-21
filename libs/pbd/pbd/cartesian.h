@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_cartesian_h__
-#define __libpbd_cartesian_h__
+#pragma once
 
 #include <cfloat>
 #include <cmath>
@@ -103,4 +102,3 @@ inline void CartesianVector::angular (AngularVector& a) const {
 
 }
 
-#endif /* __libpbd_cartesian_h__ */

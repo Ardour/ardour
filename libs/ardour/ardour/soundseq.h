@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __soundseq_h__
-#define __soundseq_h__
+#pragma once
 
 #include "edl.h"
 
@@ -46,7 +45,6 @@ class LIBARDOUR_API SoundPlaylist : public EDL::Playlist {
 
 } /* namespace ARDOUR */
 
-#endif /* __soundseq_h__ */
 
 
 

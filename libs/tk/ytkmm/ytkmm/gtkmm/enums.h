@@ -1694,8 +1694,6 @@ public:
    * @param height Location to store icon height.
    * @param settings A Gtk::Settings object, used to determine which set of user preferences to used.
    * @result true if size was a valid size. 
-   *
-   * @newin{2,14}
    */
   static bool lookup(IconSize size, int& width, int& height, const Glib::RefPtr<Gtk::Settings>& settings);
 

@@ -116,16 +116,16 @@ public:
 	bool swap_solo_mute;
 	bool create_mapping_stubs;
 
-	PBD::Signal0<void> ConnectionChange;
+	PBD::Signal<void()> ConnectionChange;
 
 	/* Timer Events */
-	PBD::Signal1<void, bool> BlinkIt;
-	PBD::Signal0<void> Periodic;
+	PBD::Signal<void(bool)> BlinkIt;
+	PBD::Signal<void()> Periodic;
 
 	/* Local Signals */
-	PBD::Signal0<void> BankChange;
-	PBD::Signal1<void, bool> ShiftChange;
-	PBD::Signal1<void, bool> PluginStateChange;
+	PBD::Signal<void()> BankChange;
+	PBD::Signal<void(bool)> ShiftChange;
+	PBD::Signal<void(bool)> PluginStateChange;
 
 	enum ControllerID
 	{
@@ -311,8 +311,8 @@ private:
 	std::weak_ptr<ARDOUR::Stripable> pre_monitor_stripable;
 
 	void create_encoder (ControllerID id,
-	                     boost::function<void (uint32_t)> action,
-	                     boost::function<void (uint32_t)> shift_action = 0);
+	                     std::function<void (uint32_t)> action,
+	                     std::function<void (uint32_t)> shift_action = 0);
 
 	void setup_controls ();
 

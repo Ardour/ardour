@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_graphnode_h__
-#define __ardour_graphnode_h__
+#pragma once
 
 #include <atomic>
 #include <list>
@@ -60,6 +59,7 @@ public:
 
 	node_set_t const& activation_set (GraphChain const* const g) const;
 	int               init_refcount (GraphChain const* const g) const;
+	void              flush_graph_activision_rcu ();
 
 protected:
 	friend struct GraphChain;
@@ -99,4 +99,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif

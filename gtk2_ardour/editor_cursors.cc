@@ -29,53 +29,53 @@
 #include "canvas/scroll_group.h"
 
 #include "editor_cursors.h"
-#include "editor.h"
+#include "editing_context.h"
 
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 
-EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callback)(GdkEvent*,ArdourCanvas::Item*), std::string const & name)
+EditorCursor::EditorCursor (EditingContext& ed, bool (EditingContext::*callback)(GdkEvent*,ArdourCanvas::Item*), std::string const & name)
 	: _editor (ed)
-	, _track_canvas_item (new ArdourCanvas::Arrow (_editor.get_cursor_scroll_group()))
+	, _canvas_item (new ArdourCanvas::Arrow (_editor.get_cursor_scroll_group()))
 {
-	CANVAS_DEBUG_NAME (_track_canvas_item, string_compose ("track canvas editor cursor <%1>", name));
+	CANVAS_DEBUG_NAME (_canvas_item, string_compose ("track canvas editor cursor <%1>", name));
 
-	_track_canvas_item->set_show_head (0, true);
-	_track_canvas_item->set_head_height (0, 9);
-	_track_canvas_item->set_head_width (0, 16);
-	_track_canvas_item->set_head_outward (0, false);
-	_track_canvas_item->set_show_head (1, false); // head only
-	_track_canvas_item->set_data ("cursor", this);
+	_canvas_item->set_show_head (0, true);
+	_canvas_item->set_head_height (0, 9);
+	_canvas_item->set_head_width (0, 16);
+	_canvas_item->set_head_outward (0, false);
+	_canvas_item->set_show_head (1, false); // head only
+	_canvas_item->set_data ("cursor", this);
 
-	_track_canvas_item->Event.connect (sigc::bind (sigc::mem_fun (ed, callback), _track_canvas_item));
+	_canvas_item->Event.connect (sigc::bind (sigc::mem_fun (ed, callback), _canvas_item));
 
-	_track_canvas_item->set_y1 (ArdourCanvas::COORD_MAX);
+	_canvas_item->set_y1 (ArdourCanvas::COORD_MAX);
 
-	_track_canvas_item->set_x (0);
+	_canvas_item->set_x (0);
 
 	_current_sample = 1; /* force redraw at 0 */
 }
 
-EditorCursor::EditorCursor (Editor& ed, std::string const & name)
+EditorCursor::EditorCursor (EditingContext& ed, std::string const & name)
 	: _editor (ed)
-	, _track_canvas_item (new ArdourCanvas::Arrow (_editor.get_hscroll_group()))
+	, _canvas_item (new ArdourCanvas::Arrow (_editor.get_hscroll_group()))
 {
-	CANVAS_DEBUG_NAME (_track_canvas_item, string_compose ("track canvas cursor <%1>", name));
+	CANVAS_DEBUG_NAME (_canvas_item, string_compose ("track canvas cursor <%1>", name));
 
-	_track_canvas_item->set_show_head (0, false);
-	_track_canvas_item->set_show_head (1, false);
-	_track_canvas_item->set_y1 (ArdourCanvas::COORD_MAX);
-	_track_canvas_item->set_ignore_events (true);
+	_canvas_item->set_show_head (0, false);
+	_canvas_item->set_show_head (1, false);
+	_canvas_item->set_y1 (ArdourCanvas::COORD_MAX);
+	_canvas_item->set_ignore_events (true);
 
-	_track_canvas_item->set_x (0);
+	_canvas_item->set_x (0);
 
 	_current_sample = 1; /* force redraw at 0 */
 }
 
 EditorCursor::~EditorCursor ()
 {
-	delete _track_canvas_item;
+	delete _canvas_item;
 }
 
 void
@@ -87,8 +87,8 @@ EditorCursor::set_position (samplepos_t sample)
 
 	const double new_pos = _editor.sample_to_pixel (sample);
 
-	if (new_pos != _track_canvas_item->x ()) {
-		_track_canvas_item->set_x (new_pos);
+	if (new_pos != _canvas_item->x ()) {
+		_canvas_item->set_x (new_pos);
 	}
 
 	_current_sample = sample;
@@ -97,23 +97,23 @@ EditorCursor::set_position (samplepos_t sample)
 void
 EditorCursor::show ()
 {
-	_track_canvas_item->show ();
+	_canvas_item->show ();
 }
 
 void
 EditorCursor::hide ()
 {
-	_track_canvas_item->hide ();
+	_canvas_item->hide ();
 }
 
 void
 EditorCursor::set_color (Gtkmm2ext::Color color)
 {
-	_track_canvas_item->set_color (color);
+	_canvas_item->set_color (color);
 }
 
 void
 EditorCursor::set_sensitive (bool yn)
 {
-	_track_canvas_item->set_ignore_events (!yn);
+	_canvas_item->set_ignore_events (!yn);
 }

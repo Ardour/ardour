@@ -268,6 +268,8 @@ protected:
 	ARDOUR::SoloMuteRelease* _solo_release;
 	ARDOUR::SoloMuteRelease* _mute_release;
 
+	ArdourWindow* _comment_window;
+
 private:
 	void invert_menu_toggled (uint32_t);
 	bool invert_press (GdkEventButton*);
@@ -322,7 +324,6 @@ private:
 	PlaylistSelector*  _playlist_selector;
 
 	Gtk::Menu*     _record_menu;
-	ArdourWindow*  _comment_window;
 	Gtk::TextView* _comment_area;
 
 	Gtk::CheckMenuItem* _step_edit_item;
@@ -344,7 +345,7 @@ private:
 	 *  by a click on the `Sends' button.  The parameter is the route that the sends are
 	 *  to, or 0 if no route is now in this mode.
 	 */
-	static PBD::Signal1<void, std::shared_ptr<ARDOUR::Route> > BusSendDisplayChanged;
+	static PBD::Signal<void(std::shared_ptr<ARDOUR::Route> )> BusSendDisplayChanged;
 
 	static std::weak_ptr<ARDOUR::Route> _showing_sends_to;
 

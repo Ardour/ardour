@@ -1345,6 +1345,45 @@ icon_latency_clock (cairo_t* cr, const int width, const int height, const uint32
 }
 
 static void
+icon_tailtime_clock (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double d = std::min (x, y) * .4;
+	const double r = std::min (x, y) * .66;
+
+	const double lw = DEFAULT_LINE_WIDTH;
+	const double lc = fmod (lw * .5, 1.0);
+	const double x0 = rint (x) - lc;
+	const double yl = rint (y) - lc;
+
+	cairo_move_to (cr, x0, y - d);
+	cairo_line_to (cr, x0, y - r);
+	VECTORICONSTROKE (lw, fg_color);
+
+	cairo_move_to (cr, x0, y + d);
+	cairo_line_to (cr, x0, y + r);
+	VECTORICONSTROKE (lw, fg_color);
+
+	cairo_move_to (cr, x - d , yl);
+	cairo_line_to (cr, x - r,  yl);
+	VECTORICONSTROKE (lw, fg_color);
+
+	cairo_move_to (cr, x + d , yl);
+	cairo_line_to (cr, x + r,  yl);
+	VECTORICONSTROKE (lw, fg_color);
+
+	cairo_move_to (cr, x , y);
+	cairo_close_path (cr);
+	VECTORICONSTROKE (lw, fg_color);
+
+	cairo_arc (cr, x, y, r, 0, 2 * M_PI);
+	VECTORICONSTROKE (lw, fg_color);
+
+	//cairo_fill (cr);
+}
+
+static void
 icon_file_folder (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double x  = width * .5;
@@ -1380,14 +1419,153 @@ icon_file_folder (cairo_t* cr, const int width, const int height, const uint32_t
 #if 1
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
 	cairo_set_line_join (cr, CAIRO_LINE_JOIN_BEVEL);
-  Gtkmm2ext::set_source_rgba (cr, fg_color);
-  cairo_set_line_width (cr, lw);
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
+	cairo_set_line_width (cr, lw);
 	cairo_stroke (cr);
 #else
 	VECTORICONSTROKE (lw, fg_color);
 #endif
 }
 
+static void
+icon_lock (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x  = width * .5;
+	const double y  = height * .5;
+
+	const double lw = DEFAULT_LINE_WIDTH;
+	const double lc = fmod (lw * .5, 1.0);
+
+	const double x0 = rint (x) - lc;
+	const double y0 = rint (y + std::min (x, y) * .15) - lc;
+
+	const double r = std::min (x, y) * .4;
+
+	const double ww = rint (std::min (x, y) * .55);
+	const double hh = rint (std::min (x, y) * .40);
+
+	cairo_rectangle (cr, x0 - ww, y0 - hh, 2 * ww, 2 * hh);
+	VECTORICONSTROKE (lw, fg_color);
+
+	cairo_arc (cr, x0 + lc, y0 - hh + lc, r, 1.0 * M_PI, 2.0 * M_PI);
+	VECTORICONSTROKE (lw, fg_color);
+
+	cairo_move_to (cr, x0, y0);
+	cairo_close_path (cr);
+	cairo_set_line_width (cr, 1.75 * lw);
+	cairo_stroke (cr);
+}
+
+static void
+icon_mixer (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double wh = .75 * std::min (x, y);
+	const double lw = DEFAULT_LINE_WIDTH;
+	const double lc = fmod (lw * .5, 1.0);
+
+	const double x0 = rint (x - wh * .6) - lc;
+	const double x1 = rint (x) - lc;
+	const double x2 = rint (x + wh * .6) - lc;
+
+	const double h  = wh * .80 - lw;
+	const double y0 = rint (y - h * .5) - lc;
+	const double y1 = rint (y + h * .5) - lc;
+	const double y2 = rint (y + h * .0) - lc;
+
+	const double ww  = 1.5 * lw;
+
+	cairo_move_to (cr, x0, y - h);
+	cairo_line_to (cr, x0, y + h);
+
+	cairo_move_to (cr, x1, y - h);
+	cairo_line_to (cr, x1, y + h);
+
+	cairo_move_to (cr, x2, y - h);
+	cairo_line_to (cr, x2, y + h);
+
+	VECTORICONSTROKE (lw, (fg_color & 0xffffff00) + 0xaa);
+
+	cairo_move_to (cr, x0 - ww, y0);
+	cairo_line_to (cr, x0 + ww, y0);
+
+	cairo_move_to (cr, x1 - ww, y1);
+	cairo_line_to (cr, x1 + ww, y1);
+
+	cairo_move_to (cr, x2 - ww, y2);
+	cairo_line_to (cr, x2 + ww, y2);
+
+	VECTORICONSTROKE (lw * 2.2, fg_color);
+}
+
+static void
+icon_meters (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double wh = std::min (x, y);
+	const double dx = .25 * wh;
+
+	const double lw = DEFAULT_LINE_WIDTH;
+	const double lc = fmod (lw * .5, 1.0);
+
+	const double h = wh * .8;
+	const int m = floor (h / lw);
+	const double dy = rint (2 * h / m);
+	const double y0 = rint (y + lw - 0.5 * m * dy);
+
+	for (int i = 0; i < m ; ++i) {
+
+		cairo_move_to (cr, x - 3 * dx + lw, y0 + i * dy - lc);
+		cairo_line_to (cr, x - 1 * dx - lw, y0 + i * dy - lc);
+
+		if (i > m - 4) {
+		cairo_move_to (cr, x - 1 * dx + lw, y0 + i * dy - lc);
+		cairo_line_to (cr, x + 1 * dx - lw, y0 + i * dy - lc);
+		}
+
+		if (i > m - 6) {
+		cairo_move_to (cr, x + 1 * dx + lw, y0 + i * dy - lc);
+		cairo_line_to (cr, x + 3 * dx - lw, y0 + i * dy - lc);
+		}
+	}
+
+	VECTORICONSTROKE (lw, fg_color);
+}
+
+static void
+icon_waveform (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double wh = std::min (x, y);
+
+	const double lw = DEFAULT_LINE_WIDTH;
+	const double lc = fmod (lw * .5, 1.0);
+
+	const int m = floor (1.6 * wh - lw);
+	const double x0 = rint (x + 1 - 0.5 * m);
+
+	// for i=0,60 do print (string.format ("%.2f, ", (math.random(1,100)/100) * (math.random(1,100)/100))) end
+	static const float wave[] = {
+		0.12, 0.40, 0.28, 0.21, 0.25, 0.57, 0.57, 0.41, 0.33, 0.63,
+		0.11, 0.89, 0.13, 0.29, 0.18, 0.24, 0.10, 0.05, 0.24, 0.15,
+		0.01, 0.39, 0.93, 0.27, 0.28, 0.07, 0.15, 0.12, 0.10, 0.13,
+		0.08, 0.03, 0.04, 0.59, 0.64, 0.49, 0.01, 0.04, 0.01, 0.39,
+		0.44, 0.01, 0.21, 0.12, 0.06, 0.07, 0.01, 0.11, 0.07, 0.33,
+		0.38, 0.24, 0.16, 0.64, 0.17, 0.05, 0.24, 0.07, 0.04, 0.35,
+	};
+
+	static const int p = sizeof(wave)/sizeof (float);
+
+	for (int i = 0; i < m; ++i) {
+		double dy = (wh * .8) * wave[i % p] * sqrt(sin (M_PI * i / m));
+		cairo_move_to (cr, x0 + i - lc, y - dy);
+		cairo_line_to (cr, x0 + i - lc, y + dy);
+	}
+	VECTORICONSTROKE (lw, fg_color);
+}
 
 /*****************************************************************************/
 
@@ -1537,6 +1715,21 @@ ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr
 			break;
 		case Folder:
 			icon_file_folder (cr, width, height, fg_color);
+			break;
+		case Lock:
+			icon_lock (cr, width, height, fg_color);
+			break;
+		case Mixer:
+			icon_mixer (cr, width, height, fg_color);
+			break;
+		case Meters:
+			icon_meters (cr, width, height, fg_color);
+			break;
+		case TrackWaveform:
+			icon_waveform (cr, width, height, fg_color);
+			break;
+		case TailTimeClock:
+			icon_tailtime_clock (cr, width, height, fg_color);
 			break;
 		case NoIcon:
 			rv = false;

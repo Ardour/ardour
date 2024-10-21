@@ -177,6 +177,7 @@ CONFIG_VARIABLE (float, shuttle_speed_factor, "shuttle-speed-factor", 1.0f) // u
 CONFIG_VARIABLE (float, shuttle_speed_threshold, "shuttle-speed-threshold", 5.0f) // used for MMC shuttle
 CONFIG_VARIABLE (ShuttleUnits, shuttle_units, "shuttle-units", Percentage)
 CONFIG_VARIABLE (float, shuttle_max_speed, "shuttle-max-speed", 8.0f)
+CONFIG_VARIABLE (FastWindOp, mmc_fast_wind_op, "mmc-fast-wind-op", FastWindVarispeed)
 CONFIG_VARIABLE (bool, locate_while_waiting_for_sync, "locate-while-waiting-for-sync", false)
 CONFIG_VARIABLE (bool, disable_disarm_during_roll, "disable-disarm-during-roll", false)
 CONFIG_VARIABLE (AutoReturnTarget, auto_return_target_list, "auto-return-target-list", AutoReturnTarget(LastLocate|RangeSelectionStart|Loop|RegionSelectionStart))
@@ -221,6 +222,8 @@ CONFIG_VARIABLE (std::string, sample_lib_path, "sample-lib-path", "") /* custom 
 CONFIG_VARIABLE (bool, allow_special_bus_removal, "allow-special-bus-removal", false)
 CONFIG_VARIABLE (int32_t, processor_usage, "processor-usage", -1)
 CONFIG_VARIABLE (int32_t, cpu_dma_latency, "cpu-dma-latency", -1) /* >=0 to enable */
+CONFIG_VARIABLE (int32_t, io_thread_count, "io-thread-count", -2)
+CONFIG_VARIABLE (int32_t, io_thread_policy, "io-thread-policy", 0)
 CONFIG_VARIABLE (gain_t, max_gain, "max-gain", 2.0) /* +6.0dB */
 CONFIG_VARIABLE (uint32_t, max_recent_sessions, "max-recent-sessions", 10)
 CONFIG_VARIABLE (uint32_t, max_recent_templates, "max-recent-templates", 10)
@@ -229,6 +232,9 @@ CONFIG_VARIABLE (samplecnt_t, range_location_minimum, "range-location-minimum", 
 CONFIG_VARIABLE (EditMode, edit_mode, "edit-mode", Slide)
 CONFIG_VARIABLE (RippleMode, ripple_mode, "ripple-mode", RippleSelected)
 CONFIG_VARIABLE (Temporal::TimeDomain, default_automation_time_domain, "default-automation-time-domain", Temporal::BeatTime)
+
+CONFIG_VARIABLE (bool, mark_at_pgm_change, "mark-at-pgm-change", true)
+CONFIG_VARIABLE (bool, locate_to_pgm_change, "locate-to-pgm-change", true)
 
 /* plugin related */
 
@@ -250,6 +256,9 @@ CONFIG_VARIABLE (bool, setup_sidechain, "setup-sidechain", false)
 CONFIG_VARIABLE (uint32_t, plugin_scan_timeout, "plugin-scan-timeout", 150) /* deci-seconds */
 CONFIG_VARIABLE (uint32_t, limit_n_automatables, "limit-n-automatables", 512)
 CONFIG_VARIABLE (uint32_t, plugin_cache_version, "plugin-cache-version", 0)
+
+CONFIG_VARIABLE (float, tail_duration_sec, "tail-duration-sec", 2.0)
+CONFIG_VARIABLE (uint32_t, max_tail_samples, "max-tail-samples", 0xffffffff) // aka kInfiniteTail
 
 /* custom user plugin paths */
 CONFIG_VARIABLE (std::string, plugin_path_vst, "plugin-path-vst", "@default@")
@@ -286,3 +295,6 @@ CONFIG_VARIABLE (bool, show_video_server_dialog, "show-video-server-dialog", fal
 CONFIG_VARIABLE (float, export_preroll, "export-preroll", 2.0) // seconds
 CONFIG_VARIABLE (float, export_silence_threshold, "export-silence-threshold", -90) // dB
 CONFIG_VARIABLE (float, ppqn_factor_for_export, "ppqn-factor-for-export", 1) // Temporal::ticks_per_beat
+
+CONFIG_VARIABLE (float, max_midi_clip_size, "max-midi-clip-size", 1024) // number of MIDI events
+CONFIG_VARIABLE (float, max_audio_clip_duration, "max-audio-clip-duration" , 30.) // seconds

@@ -31,7 +31,7 @@
 #include "widgets/ardour_button.h"
 
 #include "audio_clock.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "control_point.h"
 #include "editor.h"
 #include "region_view.h"
@@ -80,7 +80,7 @@ MidiRegionPropertiesBox::set_region (std::shared_ptr<Region> r)
 {
 	RegionPropertiesBox::set_region (r);
 
-	_region->PropertyChanged.connect (midi_state_connection, invalidator (*this), boost::bind (&MidiRegionPropertiesBox::region_changed, this, _1), gui_context ());
+	_region->PropertyChanged.connect (midi_state_connection, invalidator (*this), std::bind (&MidiRegionPropertiesBox::region_changed, this, _1), gui_context ());
 }
 
 void

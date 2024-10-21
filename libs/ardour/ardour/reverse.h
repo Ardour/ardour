@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_reverse_h__
-#define __ardour_reverse_h__
+#pragma once
 
 #include "ardour/filter.h"
 
@@ -34,4 +33,3 @@ class LIBARDOUR_API Reverse : public Filter {
 
 } /* namespace */
 
-#endif /* __ardour_reverse_h__ */

@@ -116,8 +116,6 @@ public:
   /** Returns whether the event box has a visible window.
    * See set_visible_window() for details.
    * 
-   * @newin{2,4}
-   * 
    * @return <tt>true</tt> if the event box window is visible.
    */
   bool get_visible_window() const;
@@ -143,7 +141,7 @@ public:
    * you want to set the background to a different color or
    * draw on it.
    * 
-   * <note>
+   * \note
    * There is one unexpected issue for an invisible event box that has its
    * window below the child. (See set_above_child().)
    * Since the input-only window is not an ancestor window of any windows
@@ -153,12 +151,10 @@ public:
    * mask for the descendant window (see Gtk::Widget::add_events()),  
    * it won't be received by the event box. 
    * 
+	 * \note
    * This problem doesn't occur for visible event boxes, because in
    * that case, the event box window is actually the ancestor of the
    * descendant windows, not just at the same place on the screen.
-   * </note>
-   * 
-   * @newin{2,4}
    * 
    * @param visible_window Boolean value.
    */
@@ -167,8 +163,6 @@ public:
   /** Returns whether the event box window is above or below the
    * windows of its child. See set_above_child() for
    * details.
-   * 
-   * @newin{2,4}
    * 
    * @return <tt>true</tt> if the event box window is above the window
    * of its child.
@@ -182,8 +176,6 @@ public:
    * to its parents.
    * 
    * The default is to keep the window below the child.
-   * 
-   * @newin{2,4}
    * 
    * @param above_child <tt>true</tt> if the event box window is above the windows of its child.
    */

@@ -96,7 +96,7 @@ class MyEventLoop : public sigc::trackable, public EventLoop
 			run_loop_thread = Glib::Threads::Thread::self();
 		}
 
-		bool call_slot (InvalidationRecord*, const boost::function<void()>& f) {
+		bool call_slot (InvalidationRecord*, const std::function<void()>& f) {
 			if (Glib::Threads::Thread::self() == run_loop_thread) {
 				f ();
 			}
@@ -140,9 +140,6 @@ static Session * _load_session (string dir, string state)
 		std::cerr << "Cannot create Audio/MIDI engine\n";
 		::exit (EXIT_FAILURE);
 	}
-
-	engine->set_input_channels (256);
-	engine->set_output_channels (256);
 
 	float sr;
 	SampleFormat sf;
@@ -209,9 +206,6 @@ SessionUtils::create_session (string dir, string state, float sample_rate)
 		std::cerr << "Cannot create Audio/MIDI engine\n";
 		::exit (EXIT_FAILURE);
 	}
-
-	engine->set_input_channels (256);
-	engine->set_output_channels (256);
 
 	if (engine->set_sample_rate (sample_rate)) {
 		std::cerr << "Cannot set session's samplerate.\n";

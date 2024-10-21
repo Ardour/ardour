@@ -59,7 +59,6 @@ write_callback (void* buffer, size_t size, size_t nmemb, void* d)
 static void*
 get_url (void* arg)
 {
-	pthread_set_name ("FileArchiveURL");
 	FileArchive::Request* r = (FileArchive::Request*) arg;
 	CURL* curl;
 
@@ -328,7 +327,10 @@ std::vector<std::string>
 FileArchive::contents_url ()
 {
 	_req.mp.reset ();
-	pthread_create (&_tid, NULL, get_url, (void*)&_req);
+
+	if (pthread_create_and_store ("FileArchiveHTTP", &_tid, get_url, (void*)&_req, 0)) {
+		return std::vector<std::string> ();
+	}
 
 	struct archive* a = setup_archive ();
 	archive_read_open (a, (void*)&_req.mp, NULL, ar_read, NULL);
@@ -359,7 +361,9 @@ int
 FileArchive::extract_url ()
 {
 	_req.mp.reset ();
-	pthread_create (&_tid, NULL, get_url, (void*)&_req);
+	if (pthread_create_and_store ("FileArchiveHTTP", &_tid, get_url, (void*)&_req)) {
+		return -1;
+	}
 	struct archive* a = setup_archive ();
 	archive_read_open (a, (void*)&_req.mp, NULL, ar_read, NULL);
 	int rv = do_extract (a);

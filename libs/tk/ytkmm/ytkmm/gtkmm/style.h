@@ -647,8 +647,6 @@ public:
    * it depends on the Gtk::Style and might change when a theme
    * switch occurs.
    * 
-   * @newin{2,10}
-   * 
    * @param color_name The name of the logical color to look up.
    * @param color The Gdk::Color to fill in.
    * @return <tt>true</tt> if the mapping was found.
@@ -677,8 +675,6 @@ public:
   /** Queries the value of a style property corresponding to a
    * widget class is in the given style.
    * 
-   * @newin{2,16}
-   * 
    * @param widget_type The Type of a descendant of Gtk::Widget.
    * @param property_name The name of the style property to get.
    * @param value A Value where the value of the property being
@@ -692,8 +688,6 @@ public:
    * @param widget_type the GType of a descendant of GtkWidget.
    * @param property_name The name of the style property to get.
    * @param value: An output parameter in which  the value of the property being queried will be stored.
-   *
-   * @newin{2,16}
    */
   template <class PropertyType>
   void get_style_property(GType widget_type, const Glib::ustring& property_name, PropertyType& value) const;

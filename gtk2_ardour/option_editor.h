@@ -22,8 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_option_editor_h__
-#define __gtk_ardour_option_editor_h__
+#pragma once
 
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/comboboxtext.h>
@@ -38,8 +37,6 @@
 #include <gtkmm/window.h>
 
 #include "pbd/configuration.h"
-
-#include "widgets/slider_controller.h"
 
 #include "actions.h"
 #include "ardour_window.h"
@@ -64,6 +61,7 @@
 
 namespace ArdourWidgets {
 	class Frame;
+	class HSliderController;
 }
 
 class OptionEditorPage;
@@ -601,7 +599,7 @@ public:
 	void set_state_from_config ();
 	void add_to_page (OptionEditorPage *);
 
-	Gtk::Widget& tip_widget() { return *_db_slider; }
+	Gtk::Widget& tip_widget();
 
 private:
 	void db_changed ();
@@ -805,4 +803,3 @@ protected:
 	Gtk::HBox hpacker;
 };
 
-#endif /* __gtk_ardour_option_editor_h__ */

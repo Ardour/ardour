@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <memory>
 #include <sstream>
+#include <vector>
 
 #include <glibmm.h>
 
@@ -36,16 +37,22 @@
 
 #include "temporal/tempo.h"
 
+#include "ardour/amp.h"
 #include "ardour/async_midi_port.h"
-#include "ardour/auditioner.h"
+#include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
+#include "ardour/auditioner.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/debug.h"
 #include "ardour/import_status.h"
 #include "ardour/midi_buffer.h"
+#include "ardour/midi_channel_filter.h"
+#include "ardour/midi_cursor.h"
 #include "ardour/midi_model.h"
+#include "ardour/midi_state_tracker.h"
 #include "ardour/midi_region.h"
+#include "ardour/midi_track.h"
 #include "ardour/minibpm.h"
 #include "ardour/port.h"
 #include "ardour/region_factory.h"
@@ -202,7 +209,8 @@ FollowAction::to_string () const
 
 
 Trigger * const Trigger::MagicClearPointerValue = (Trigger*) 0xfeedface;
-PBD::Signal2<void,PropertyChange,Trigger*> Trigger::TriggerPropertyChange;
+PBD::Signal<void(PropertyChange,Trigger*)> Trigger::TriggerPropertyChange;
+PBD::Signal<void(Trigger const *)> Trigger::TriggerArmChanged;
 
 Trigger::Trigger (uint32_t n, TriggerBox& b)
 	: _launch_style (Properties::launch_style, OneShot)
@@ -236,6 +244,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _pending_velocity_gain (1.0)
 	, _velocity_gain (1.0)
 	, _cue_launched (false)
+	, _armed (false)
 	, _used_channels (Evoral::SMF::UsedChannels())
 	, _estimated_tempo (0.)
 	, _segment_tempo (0.)
@@ -266,10 +275,35 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	copy_to_ui_state ();
 }
 
+std::shared_ptr<TriggerBox>
+Trigger::boxptr() const
+{
+	return _box.shared_from_this();
+}
+
 void
 Trigger::request_trigger_delete (Trigger* t)
 {
 	TriggerBox::worker->request_delete_trigger (t);
+}
+
+void
+Trigger::arm ()
+{
+#warning paul need channel count here, somehow
+	_box.arm_from_another_thread (*this, _box.session().transport_sample(), 2);
+	_armed = true;
+	ArmChanged(); /* EMIT SIGNAL */
+	TriggerArmChanged (this);
+}
+
+void
+Trigger::disarm ()
+{
+	_box.disarm ();
+	_armed = false;
+	ArmChanged(); /* EMIT SIGNAL */
+	TriggerArmChanged (this);
 }
 
 void
@@ -673,7 +707,7 @@ Trigger::set_region_internal (std::shared_ptr<Region> r)
 	 * them in playlists either.
 	 */
 
-	if (r->whole_file ()) {
+	if (r && r->whole_file ()) {
 		_region = RegionFactory::create (r, r->derive_properties ());
 	} else {
 		_region = r;
@@ -1250,6 +1284,41 @@ Trigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position, Tri
 
 /*--------------------*/
 
+AudioTrigger::AudioData::~AudioData ()
+{
+	for (auto & s : *this) {
+		delete [] s;
+	}
+}
+
+void
+AudioTrigger::AudioData::alloc (samplecnt_t cnt, uint32_t nchans)
+{
+	clear ();
+	reserve (nchans);
+	for (uint32_t n = 0; n < nchans; ++n) {
+		push_back (new Sample[cnt]);
+	}
+	length = 0;
+	capacity = cnt;
+
+}
+
+samplecnt_t
+AudioTrigger::AudioData::append (Sample const * src, samplecnt_t cnt, uint32_t chan)
+{
+	if (chan >= size()) {
+		return -1;
+	}
+	if (length >= capacity) {
+		return -1;
+	}
+	samplecnt_t to_copy = std::min (cnt, (capacity - length));
+	memcpy (at(chan) + length, src, cnt * sizeof (Sample));
+	length += cnt;
+	return to_copy;
+}
+
 AudioTrigger::AudioTrigger (uint32_t n, TriggerBox& b)
 	: Trigger (n, b)
 	, _stretcher (0)
@@ -1268,6 +1337,16 @@ AudioTrigger::~AudioTrigger ()
 {
 	drop_data ();
 	delete _stretcher;
+}
+
+Sample const *
+AudioTrigger::audio_data (size_t n) const
+{
+	if (n < data.size()) {
+		return data[n];
+	}
+
+	return nullptr;
 }
 
 void
@@ -1549,11 +1628,24 @@ AudioTrigger::natural_length() const
 	}
 	return timepos_t (Temporal::BeatTime);
 }
+int
+AudioTrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> r)
+{
+	return set_region_in_worker_thread_internal (r, true);
+}
 
 int
 AudioTrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 {
-	assert (!active());
+	return set_region_in_worker_thread_internal (r, false);
+}
+
+int
+AudioTrigger::set_region_in_worker_thread_internal (std::shared_ptr<Region> r, bool from_capture)
+{
+	if (!from_capture) {
+		assert (!active());
+	}
 
 	std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (r);
 
@@ -1568,7 +1660,13 @@ AudioTrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 		return 0;
 	}
 
-	load_data (ar);
+	if (!from_capture) {
+		load_data (ar);
+	}
+
+	if (from_capture) {
+		set_name (r->name());
+	}
 
 	estimate_tempo ();  /* NOTE: if this is an existing clip (D+D copy) then it will likely have a SD tempo, and that short-circuits minibpm for us */
 
@@ -1766,18 +1864,16 @@ AudioTrigger::reset_stretcher ()
 	to_drop = 0;
 }
 
-void
-AudioTrigger::setup_stretcher ()
+RubberBand::RubberBandStretcher*
+AudioTrigger::alloc_stretcher () const
 {
 	using namespace RubberBand;
 	using namespace Temporal;
 
-	if (!_region) {
-		return;
-	}
+	AudioTrack const * trk = static_cast<AudioTrack*> (_box.owner());
+	assert (trk);
 
-	std::shared_ptr<AudioRegion> ar (std::dynamic_pointer_cast<AudioRegion> (_region));
-	const uint32_t nchans = std::min (_box.input_streams().n_audio(), ar->n_channels());
+	const uint32_t nchans = trk->input()->n_ports().n_audio();
 
 	//map our internal enum to a rubberband option
 	RubberBandStretcher::Option ro = RubberBandStretcher::Option (0);
@@ -1787,11 +1883,15 @@ AudioTrigger::setup_stretcher ()
 		case Trigger::Smooth : ro = RubberBandStretcher::OptionTransientsSmooth; break;
 	}
 
-	RubberBandStretcher::Options options = RubberBandStretcher::Option (RubberBandStretcher::OptionProcessRealTime |
-	                                                                    ro);
+	RubberBandStretcher::Options options = RubberBandStretcher::Option (RubberBandStretcher::OptionProcessRealTime | ro);
+	return new RubberBandStretcher (_box.session().sample_rate(), nchans, options, 1.0, 1.0);
+}
 
+void
+AudioTrigger::setup_stretcher ()
+{
 	delete _stretcher;
-	_stretcher = new RubberBandStretcher (_box.session().sample_rate(), nchans, options, 1.0, 1.0);
+	_stretcher = alloc_stretcher ();
 	_stretcher->setMaxProcessSize (rb_blocksize);
 }
 
@@ -1804,6 +1904,60 @@ AudioTrigger::drop_data ()
 	data.clear ();
 }
 
+void
+AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
+{
+	if (ai.audio_buf.length == 0) {
+		/* Nothing captured */
+		_armed = false;
+		ArmChanged (); /* EMIT SIGNAL */
+		delete &ai;
+		return;
+	}
+
+	data.clear ();
+
+	data.length = ai.audio_buf.length;
+	data.capacity = ai.audio_buf.capacity;
+
+	/* This AudioBuffer does not own any data, it is just a shell to make
+	   using Amp::apply_gain() possible.
+	*/
+	AudioBuffer buf (0);
+	const samplecnt_t fade_duration = std::min (_box.session().sample_rate()/4, data.length/2);
+
+	for (auto & s : ai.audio_buf) {
+		data.push_back (s);
+		buf.set_data (s, data.length);
+		Amp::apply_gain (buf,  _box.session().sample_rate(), fade_duration, 0., 1., 0);
+		Amp::apply_gain (buf,  _box.session().sample_rate(), fade_duration, 1., 0., data.length - fade_duration);
+	}
+
+	ai.audio_buf.clear (); /* data now owned by us, not SlotArmInfo */
+
+	/* follow length will get set when we build the region, and
+	   call estimate_tempo(), which hopefully happens before
+	   this finishes playing.
+	*/
+	set_length (timecnt_t (data.length));
+
+	/* adopt the previously allocated stretcher, with a ratio of 1.0 (no stretch) */
+
+	delete _stretcher;
+	_stretcher = ai.stretcher;
+	_stretcher->setMaxProcessSize (rb_blocksize);
+	_stretcher->setTimeRatio (1.0);
+
+	ai.stretcher = nullptr;
+	delete &ai; // XXX delete is not RT-safe
+
+	_box.queue_explict (index());
+	TriggerBox::worker->request_build_source (this);
+
+	_armed = false;
+	ArmChanged(); /* EMIT SIGNAL */
+}
+
 int
 AudioTrigger::load_data (std::shared_ptr<AudioRegion> ar)
 {
@@ -1813,8 +1967,9 @@ AudioTrigger::load_data (std::shared_ptr<AudioRegion> ar)
 	drop_data ();
 
 	try {
+		data.alloc (data.length, nchans);
+
 		for (uint32_t n = 0; n < nchans; ++n) {
-			data.push_back (new Sample[data.length]);
 			ar->read (data[n], 0, data.length, n);
 		}
 
@@ -1849,9 +2004,11 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
                          Temporal::Beats const & start, Temporal::Beats const & end,
                          pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t& quantize_offset)
 {
-	std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion>(_region);
-	/* We do not modify the I/O of our parent route, so we process only min (bufs.n_audio(),region.channels()) */
-	const uint32_t nchans = (in_process_context ? std::min (bufs.count().n_audio(), ar->n_channels()) : ar->n_channels());
+	AudioTrack const * trk = static_cast<AudioTrack*> (_box.owner());
+	assert (trk);
+	uint32_t nchans = trk->input()->n_ports().n_audio();
+	/* We do not modify the I/O of our parent route, so we process only min * (bufs.n_audio(), input_channels) */
+	nchans = (in_process_context ? std::min (bufs.count().n_audio(), nchans) : nchans);
 	int avail = 0;
 	BufferSet* scratch;
 	std::unique_ptr<BufferSet> scratchp;
@@ -2174,6 +2331,11 @@ MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	, last_event_samples (0)
 	, _start_offset (0, 0, 0)
 	, _legato_offset (0, 0, 0)
+	, first_event_index (0)
+	, last_event_index (0)
+	, rt_midibuffer (nullptr)
+	, pending_rt_midibuffer (nullptr)
+	, old_rt_midibuffer (nullptr)
 	, map_change (false)
 {
 	_channel_map.assign (16, -1);
@@ -2181,6 +2343,122 @@ MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 
 MIDITrigger::~MIDITrigger ()
 {
+}
+
+void
+MIDITrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& bufs)
+{
+	RTMidiBufferBeats* pending = pending_rt_midibuffer.load();
+
+	if (!pending) {
+		return;
+	}
+
+	if (playing) {
+		MidiBuffer& mbuf (bufs.get_midi (0));
+		MidiStateTracker post_edit_state;
+
+		/* Get the new MIDI state at the current time, and resolve any
+		 * differences with the MIDI state held by the triggerbox we're
+		 * in.
+		 */
+
+		/* note: transition_beats is the time of the most recent
+		 * transition (e.g. loop point)
+		 */
+
+		Temporal::Beats p = time.beats() - transition_beats;
+
+		/* now determine the state at this time, which we need relative
+		 * to the start of the loop within the data.
+		 */
+
+		pending->track_state (p - loop_start, post_edit_state);
+		_box.tracker->resolve_diff (post_edit_state, mbuf, time.samples());
+	}
+
+	old_rt_midibuffer = rt_midibuffer.exchange (pending);
+	if (iter < rt_midibuffer.load()->size()) {
+		/* shutdown */
+	}
+
+	RTMidiBufferBeats* ort = rt_midibuffer.load ();
+
+	first_event_index = std::numeric_limits<uint32_t>::min();
+	last_event_index = std::numeric_limits<uint32_t>::max();
+
+	for (uint32_t n = 0; n < ort->size(); ++n) {
+		if (first_event_index == std::numeric_limits<uint32_t>::min()) {
+			if ((*ort)[n].timestamp <= loop_start) {
+				first_event_index = n;
+			} else {
+				break;
+			}
+		}
+	}
+
+	for (uint32_t n = 0; n < ort->size(); ++n) {
+		if (last_event_index == std::numeric_limits<uint32_t>::max()) {
+			if ((*ort)[n].timestamp >= loop_end) {
+				last_event_index = n; /* exclusive end */
+				break;
+			}
+		}
+	}
+
+	pending_rt_midibuffer = nullptr;
+}
+
+void
+MIDITrigger::arm ()
+{
+	Trigger::arm ();
+}
+
+void
+MIDITrigger::disarm ()
+{
+	Trigger::disarm ();
+}
+
+void
+MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
+{
+	if (ai.midi_buf->size() == 0) {
+		_armed = false;
+		ArmChanged(); /* EMIT SIGNAL */
+		delete &ai;
+		return;
+	}
+
+	/* Note: the original MIDI buffer in ai is now invalid, all data has
+	 * been moved to rtmb.
+	 */
+
+	old_rt_midibuffer = rt_midibuffer.exchange (ai.midi_buf);
+
+	loop_start = Temporal::Beats();
+	loop_end = (*ai.midi_buf)[ai.midi_buf->size()-1].timestamp;
+	data_length = loop_end;
+	_follow_length = Temporal::BBT_Offset (0, data_length.get_beats(), 0);
+	set_length (timecnt_t (data_length));
+	iter = 0;
+	first_event_index = 0;
+	last_event_index = ai.midi_buf->size();
+	_follow_action0 = FollowAction::Again;
+
+	/* Mark ai.midi_buf as null so that it is not deleted */
+	ai.midi_buf = nullptr;
+	delete &ai;
+
+	/* start playing */
+	_box.queue_explict (index());
+
+	/* Meanwhile, build a new source and region from the data now in rt_midibuffer */
+	TriggerBox::worker->request_build_source (this);
+
+	_armed = false;
+	ArmChanged(); /* EMIT SIGNAL */
 }
 
 void
@@ -2651,8 +2929,10 @@ MIDITrigger::estimate_midi_patches ()
 }
 
 int
-MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
+MIDITrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> r)
 {
+	assert (r);
+
 	std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (r);
 
 	if (!mr) {
@@ -2661,10 +2941,60 @@ MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 
 	set_region_internal (r);
 	set_name (mr->name());
-	data_length = mr->length().beats();
+
+	_model = mr->model();
+	_model->ContentsChanged.connect_same_thread (content_connection, std::bind (&MIDITrigger::model_contents_changed, this));
+
+	/* we've changed some of our internal values; we need to update our queued UIState or they will be lost when UIState is applied */
+	copy_to_ui_state ();
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loaded midi region, span is %2\n", name(), data_length));
+
+	/* This is being used as a kind of shorthand for "everything" which is
+	   pretty stupid
+	*/
+	send_property_change (ARDOUR::Properties::name);
+
+	return 0;
+}
+
+int
+MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
+{
+	if (!r) {
+		set_region_internal (r);
+		content_connection.disconnect ();
+		_model.reset ();
+		return 0;
+	}
+
+	std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (r);
+
+	if (!mr) {
+		return -1;
+	}
+
+	set_region_internal (r);
+	set_name (mr->name());
+
+	_model = mr->model();
+	_model->ContentsChanged.connect_same_thread (content_connection, std::bind (&MIDITrigger::model_contents_changed, this));
+	loop_start = r->start ().beats();
+	loop_end = r->length ().beats();
+
+	data_length = loop_end - loop_start;
+
 	_follow_length = Temporal::BBT_Offset (0, data_length.get_beats(), 0);
-	set_length (mr->length());
-	model = mr->model ();
+	set_length (timecnt_t (data_length));
+
+	RTMidiBufferBeats* rtmb = new RTMidiBufferBeats;
+
+	{
+		MidiModel::ReadLock lm (_model->read_lock());
+		_model->render (lm, *rtmb);
+	}
+
+	pending_rt_midibuffer = rtmb;
 
 	estimate_midi_patches ();
 
@@ -2673,6 +3003,9 @@ MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loaded midi region, span is %2\n", name(), data_length));
 
+	/* This is being used as a kind of shorthand for "everything" which is
+	   pretty stupid
+	*/
 	send_property_change (ARDOUR::Properties::name);
 
 	return 0;
@@ -2687,11 +3020,11 @@ MIDITrigger::retrigger ()
 
 	/* XXX need to deal with bar offsets */
 	// const Temporal::BBT_Offset o = _start_offset + _legato_offset;
-	iter = model->begin();
+	iter = first_event_index;
 	_legato_offset = Temporal::BBT_Offset ();
 	last_event_beats = Temporal::Beats();
 	last_event_samples = 0;
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2, ts = %3\n", _index, iter->time(), transition_beats));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to start, ts = %2\n", _index, transition_beats));
 }
 
 void
@@ -2706,12 +3039,13 @@ MIDITrigger::tempo_map_changed ()
 	 * on an active trigger.
 	 */
 
-	iter = model->begin();
+	iter = first_event_index;
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	const timepos_t region_start_time = _region->start();
 	const Temporal::Beats region_start = region_start_time.beats();
+	RTMidiBufferBeats* rtmb (rt_midibuffer.load());
 
-	while (iter != model->end()) {
+	while (iter < rtmb->size()) {
 
 		/* Find the first event whose sample time is equal-to or
 		 * greater than the last played event sample. That is the
@@ -2722,7 +3056,9 @@ MIDITrigger::tempo_map_changed ()
 		 * one.
 		 */
 
-		const Temporal::Beats iter_timeline_beats = transition_beats + ((*iter).time() - region_start);
+		RTMidiBufferBeats::Item const & item ((*rtmb)[iter]);
+		// const Temporal::Beats iter_timeline_beats =
+		Temporal::Beats iter_timeline_beats = transition_beats + (item.timestamp - region_start);
 		samplepos_t iter_timeline_samples = tmap->sample_at (iter_timeline_beats);
 
 		if (iter_timeline_samples >= last_event_samples) {
@@ -2732,12 +3068,32 @@ MIDITrigger::tempo_map_changed ()
 		++iter;
 	}
 
-	if (iter != model->end()) {
+	if (iter < rtmb->size()) {
 		Temporal::Beats elen_ignored;
 		(void) compute_end (tmap, _transition_bbt, transition_samples, elen_ignored);
 	}
 
 	map_change = true;
+}
+
+void
+MIDITrigger::model_contents_changed ()
+{
+	RTMidiBufferBeats * rtmb (new RTMidiBufferBeats);
+
+	_model->render (_model->read_lock(), *rtmb);
+
+	/* Clean up a previous RT midi buffer swap */
+
+	RTMidiBufferBeats* old = old_rt_midibuffer.load();
+	if (old) {
+		delete old;
+		old_rt_midibuffer = nullptr;
+	}
+
+	/* And set it. RT thread will find this and do what needs to be done */
+
+	pending_rt_midibuffer.store (rtmb);
 }
 
 template<bool in_process_context>
@@ -2746,9 +3102,11 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
                        Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
                        pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t& quantize_offset)
 {
-	MidiBuffer* mb (in_process_context? &bufs.get_midi (0) : 0);
+	assert (rt_midibuffer);
+
+	MidiBuffer* mb (in_process_context? &bufs.get_midi (0) : nullptr);
 	typedef Evoral::Event<MidiModel::TimeType> MidiEvent;
-	const timepos_t region_start_time = _region->start();
+	const timepos_t region_start_time = _region ? _region->start() : timepos_t::zero (Temporal::BeatTime);
 	const Temporal::Beats region_start = region_start_time.beats();
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 
@@ -2758,8 +3116,9 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 	quantize_offset = 0;
 	maybe_compute_next_transition (start_sample, start_beats, end_beats, nframes, quantize_offset);
 	const pframes_t orig_nframes = nframes;
+	RTMidiBufferBeats* rtmb (rt_midibuffer.load());
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2\n", name(), enum_2_string (_state)));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2 iter @ %3 total %4\n", name(), enum_2_string (_state), iter, rtmb->size()));
 
 	switch (_state) {
 	case Stopped:
@@ -2775,37 +3134,50 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 	Temporal::Beats last_event_timeline_beats = final_beat; /* will indicate "done" if there is nothing to do */
 
-	while (iter != model->end() && !_playout) {
+	while (iter < rtmb->size() && !_playout) {
 
-		MidiEvent const & event (*iter);
-
+		RTMidiBufferBeats::Item const & item ((*rtmb)[iter]);
+		std::cerr << "Looking at event #" << iter << " @ " << item.timestamp << " transition was " << transition_beats << " rs " << region_start << std::endl;
 		/* Event times are in beats, relative to start of source
-		 * file. We need to convert to region-relative time, and then
+		 * file. We need to conv+ert to region-relative time, and then
 		 * a session timeline time, which is defined by the time at
 		 * which we last transitioned (in this case, to being active)
 		 */
 
-		Temporal::Beats maybe_last_event_timeline_beats = transition_beats + (event.time() - region_start);
-
+		Temporal::Beats maybe_last_event_timeline_beats = transition_beats + (item.timestamp - region_start);
 
 		/* check that the event is within the bounds for this run() call */
 
 		if (maybe_last_event_timeline_beats < start_beats) {
+			std::cerr << "out1\n";
+			break;
+		}
+
+		if (iter >= last_event_index) {
+			iter = rtmb->size();
+			std::cerr << "out2\n";
 			break;
 		}
 
 		if (maybe_last_event_timeline_beats > final_beat) {
-			iter = model->end();
+			iter = rtmb->size();
+			std::cerr << "out3\n";
 			break;
 		}
 
 		if (maybe_last_event_timeline_beats >= end_beats) {
+			std::cerr << "out4\n";
 			break;
 		}
 
 		/* Now get the sample position of the event, on the timeline */
 
 		const samplepos_t timeline_samples = tmap->sample_at (maybe_last_event_timeline_beats);
+
+		std::cerr << "Plays at " << timeline_samples << std::endl;
+
+		uint32_t evsize;
+		uint8_t const * buf = rtmb->bytes (item, evsize);
 
 		if (in_process_context) { /* compile-time const expr */
 
@@ -2864,7 +3236,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 			assert (buffer_samples >= 0);
 
-			Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, event.size(), const_cast<uint8_t*>(event.buffer()), false);
+			Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, evsize, const_cast<uint8_t*>(buf), false);
 
 			if (_gain != 1.0f && ev.is_note()) {
 				ev.scale_velocity (_gain);
@@ -2900,9 +3272,9 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 			mb->insert_event (ev);
 		}
 
-		_box.tracker->track (event.buffer());
+		_box.tracker->track (buf);
 
-		last_event_beats = event.time();
+		last_event_beats = item.timestamp;
 		last_event_timeline_beats = maybe_last_event_timeline_beats;
 
 		++iter;
@@ -2914,7 +3286,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		_box.tracker->resolve_notes (*mb, nframes-1);
 	}
 
-	if (iter == model->end()) {
+	if (iter >= rtmb->size()) {
 
 		/* We reached the end */
 
@@ -2922,8 +3294,8 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		/* "final_beat" is an inclusive end of the trigger, not
 		 * exclusive, so we must use <= here. That is, any last event
-		 * (remember, iter == model->end() here, so we have already read
-		 * through the entire MIDI model) that is up to AND INCLUDING
+		 * (remember, iter == rt_midibuffer->size() here, so we have already read
+		 * through the entire RTMidiBuffer) that is up to AND INCLUDING
 		 * final_beat counts as "haven't reached the end".
 		 */
 
@@ -2981,7 +3353,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		/* we didn't reach the end of the MIDI data, ergo we covered
 		   the entire timespan passed into us.
 		*/
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 did not reach end, nframes left at %2, next event is %3\n", index(), nframes, *iter));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 did not reach end, nframes left at %2, next event is %3\n", index(), nframes, iter));
 		nframes = 0;
 	}
 
@@ -3047,6 +3419,21 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for queued = %1\n", Properties::queued.property_id));
 }
 
+SlotArmInfo::SlotArmInfo (Trigger& s)
+	: slot (s)
+	, start_samples (0)
+	, end_samples (0)
+	, midi_buf (nullptr)
+	, stretcher (nullptr)
+{
+}
+
+SlotArmInfo::~SlotArmInfo()
+{
+	delete midi_buf;
+	delete stretcher;
+}
+
 Temporal::BBT_Offset TriggerBox::_assumed_trigger_duration (4, 0, 0);
 TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::Custom);
 int TriggerBox::_first_midi_note = 60;
@@ -3054,18 +3441,18 @@ std::atomic<int> TriggerBox::active_trigger_boxes (0);
 TriggerBoxThread* TriggerBox::worker = 0;
 CueRecords TriggerBox::cue_records (256);
 std::atomic<bool> TriggerBox::_cue_recording (false);
-PBD::Signal0<void> TriggerBox::CueRecordingChanged;
+PBD::Signal<void()> TriggerBox::CueRecordingChanged;
 bool TriggerBox::roll_requested = false;
 bool TriggerBox::_learning = false;
 TriggerBox::CustomMidiMap TriggerBox::_custom_midi_map;
 std::pair<int,int> TriggerBox::learning_for;
-PBD::Signal0<void> TriggerBox::TriggerMIDILearned;
+PBD::Signal<void()> TriggerBox::TriggerMIDILearned;
 
 std::shared_ptr<MIDI::Parser> TriggerBox::input_parser;
 PBD::ScopedConnectionList TriggerBox::static_connections;
 PBD::ScopedConnection TriggerBox::midi_input_connection;
 std::shared_ptr<MidiPort> TriggerBox::current_input;
-PBD::Signal2<void,PBD::PropertyChange,int> TriggerBox::TriggerBoxPropertyChange;
+PBD::Signal<void(PBD::PropertyChange,int)> TriggerBox::TriggerBoxPropertyChange;
 
 typedef std::map <std::shared_ptr<Region>, std::shared_ptr<Trigger::UIState>> RegionStateMap;
 RegionStateMap enqueued_state_map;
@@ -3083,8 +3470,8 @@ void
 TriggerBox::static_init (Session & s)
 {
 	input_parser = std::shared_ptr<MIDI::Parser>(new MIDI::Parser); /* leak */
-	Config->ParameterChanged.connect_same_thread (static_connections, boost::bind (&TriggerBox::static_parameter_changed, _1));
-	input_parser->any.connect_same_thread (midi_input_connection, boost::bind (&TriggerBox::midi_input_handler, _1, _2, _3, _4));
+	Config->ParameterChanged.connect_same_thread (static_connections, std::bind (&TriggerBox::static_parameter_changed, _1));
+	input_parser->any.connect_same_thread (midi_input_connection, std::bind (&TriggerBox::midi_input_handler, _1, _2, _3, _4));
 	std::dynamic_pointer_cast<MidiPort> (s.trigger_input_port())->set_trace (input_parser);
 	std::string const& dtip (Config->get_default_trigger_input_port());
 	if (!dtip.empty () && s.engine().get_port_by_name (dtip)) {
@@ -3101,7 +3488,7 @@ TriggerBox::send_property_change (PBD::PropertyChange pc)
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
 	: Processor (s, _("TriggerBox"), Temporal::TimeDomainProvider (Temporal::BeatTime))
-	, tracker (dt == DataType::MIDI ? new MidiStateTracker : 0)
+	, tracker (dt == DataType::MIDI ? new MidiStateTracker : nullptr)
 	, _data_type (dt)
 	, _order (-1)
 	, explicit_queue (64)
@@ -3112,7 +3499,10 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _locate_armed (false)
 	, _cancel_locate_armed (false)
 	, _fast_forwarding (false)
+	, _record_state (Disabled)
 	, requests (1024)
+	, _arm_info (nullptr)
+	, _gui_feed_fifo (std::min<size_t> (64000, std::max<size_t> (s.sample_rate() / 10, 2 * AudioEngine::instance()->raw_buffer_size (DataType::MIDI))))
 {
 	set_display_to_user (false);
 
@@ -3132,8 +3522,213 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 		pending.push_back (std::atomic<Trigger*>(0));
 	}
 
-	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
-	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
+	Config->ParameterChanged.connect_same_thread (*this, std::bind (&TriggerBox::parameter_changed, this, _1));
+	_session.config.ParameterChanged.connect_same_thread (*this, std::bind (&TriggerBox::parameter_changed, this, _1));
+}
+
+void
+TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t chans)
+{
+	using namespace Temporal;
+
+	SlotArmInfo* ai = new SlotArmInfo (slot);
+
+	if (_data_type == DataType::MIDI) {
+		ai->midi_buf = new RTMidiBufferBeats;
+		ai->midi_buf->resize (Config->get_max_midi_clip_size());
+	} else {
+		ai->audio_buf.alloc ((samplecnt_t) round (_session.sample_rate() * Config->get_max_audio_clip_duration()), chans);
+		AudioTrigger* at = dynamic_cast<AudioTrigger*> (&slot);
+		assert (at);
+		ai->stretcher = at->alloc_stretcher ();
+	}
+
+	Beats start_b;
+	Beats end_b;
+	BBT_Argument t_bbt;
+	Beats t_beats;
+	samplepos_t t_samples;
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	Beats now_beats = tmap->quarters_at (timepos_t (now));
+
+	slot.compute_quantized_transition (now, now_beats, std::numeric_limits<Beats>::max(),
+	                                   t_bbt, t_beats, t_samples, tmap, slot.quantization());
+
+	ai->start_samples = t_samples;
+	ai->start_beats = t_beats;
+
+	if (_data_type == DataType::AUDIO) {
+		ai->captured = timecnt_t (timepos_t (0), timepos_t (0));
+	} else {
+		ai->captured = timecnt_t::from_ticks (0, timepos_t (Beats()));
+	}
+
+	_arm_info = ai;
+}
+
+void
+TriggerBox::disarm ()
+{
+}
+
+void
+TriggerBox::finish_recording (BufferSet& bufs)
+{
+	SlotArmInfo* ai = _arm_info.load();
+	assert (ai);
+	ai->slot.captured (*ai, bufs);
+	_arm_info = nullptr;
+}
+
+void
+TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes)
+{
+	using namespace Temporal;
+
+	SlotArmInfo* ai = _arm_info.load();
+
+	if (!ai) {
+		return;
+	}
+
+	pframes_t offset = 0;
+	bool reached_end = false;
+
+	if (!ai->slot.armed()) {
+		if (!ai->end_samples) {
+			/* disarmed: compute end */
+			Beats start_b;
+			Beats end_b;
+			BBT_Argument t_bbt;
+			Beats t_beats;
+			samplepos_t t_samples;
+			TempoMap::SharedPtr tmap (TempoMap::use());
+			Beats now_beats = tmap->quarters_at (timepos_t (start_sample));
+
+			ai->slot.compute_quantized_transition (start_sample, now_beats, std::numeric_limits<Beats>::max(),
+			                                       t_bbt, t_beats, t_samples, tmap, ai->slot.quantization());
+			ai->end_samples = t_samples;
+			ai->end_beats = t_beats;
+			return;
+		}
+	}
+
+	if (speed <= 0.) {
+		if (_record_state == Recording) {
+			/* We stopped the transport, so just stop immediately (no quantization) */
+			finish_recording (bufs);
+		}
+		/* we stopped or reversed, but were not recording. Nothing to do here */
+		return;
+	}
+
+	if (ai->end_samples != 0 && (start_sample > ai->end_samples)) {
+		return;
+	}
+
+	if (start_sample < ai->start_samples && end_sample < ai->start_samples) {
+		/* Have not yet reached the start of capture */
+		return;
+	}
+
+	if (ai->start_samples >= start_sample && ai->start_samples < end_sample) {
+		/* Let's get going */
+		offset = ai->start_samples - start_sample;
+		nframes -= offset;
+		_record_state = Recording;
+	}
+
+	if ((ai->end_samples != 0) && (start_sample <= ai->end_samples && ai->end_samples < end_sample)) {
+		/* we're going to stop */
+		nframes -= (end_sample - ai->end_samples);
+		reached_end = true;
+	}
+
+	/* Audio */
+
+	size_t n_buffers = bufs.count().n_audio();
+
+	if (n_buffers) {
+
+		/* AUDIO */
+
+		for (size_t n = 0; n < n_buffers; ++n) {
+			assert (ai->audio_buf.size() >= n);
+			AudioBuffer& buf (bufs.get_audio (n));
+			ai->audio_buf.append (buf.data() + offset, nframes, n);
+		}
+
+		ai->captured += timecnt_t (start_sample, timepos_t (ai->start_samples));
+	}
+
+	n_buffers = bufs.count().n_midi();
+
+	if (n_buffers) {
+
+		/* MIDI */
+
+		MidiBuffer& buf    = bufs.get_midi (0);
+		Track* trk = static_cast<Track*> (_owner);
+		MidiTrack* mt = dynamic_cast<MidiTrack*>(trk);
+		MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
+		TempoMap::SharedPtr tmap (TempoMap::use());
+
+		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
+			Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
+			if (ev.time() > nframes) {
+				break;
+			}
+
+			bool skip_event = false;
+
+			if (mt) {
+				/* skip injected immediate/out-of-band events */
+				MidiBuffer const& ieb (mt->immediate_event_buffer());
+				for (MidiBuffer::const_iterator j = ieb.begin(); j != ieb.end(); ++j) {
+					if (*j == ev) {
+						skip_event = true;
+					}
+				}
+			}
+
+			if (!skip_event && (!filter || !filter->filter(ev.buffer(), ev.size()))) {
+				const samplepos_t event_time (start_sample + ev.time());
+				if (!ai->end_samples || (event_time < ai->end_samples)) {
+					/* First write (to an * * RTMidiBufferBeats) uses beat time.
+					 * Second write (to a FIFO) uses sample time.
+					 *
+					 * Both are relative to where we
+					 * started capturing.
+					 */
+					ai->midi_buf->write (tmap->quarters_at_sample (event_time) - ai->start_beats,  ev.event_type(), ev.size(), ev.buffer());
+					_gui_feed_fifo.write (event_time - ai->start_samples, Evoral::MIDI_EVENT, ev.size(), ev.buffer());
+				}
+			}
+		}
+
+		timecnt_t dur = tmap->convert_duration (timecnt_t (nframes), timepos_t (start_sample), Temporal::BeatTime);
+		ai->captured += dur;
+	}
+
+	Captured (ai->captured); /* EMIT SIGNAL */
+
+	if (reached_end) {
+		finish_recording (bufs);
+	}
+}
+
+void
+TriggerBox::set_record_enabled (bool yn)
+{
+	_record_state = yn ? Enabled : Disabled;
+
+	if (_record_state == Disabled) {
+		for (auto & trig : all_triggers) {
+			trig->disarm ();
+		}
+	}
+
+	RecEnableChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -3253,7 +3848,8 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	 * cue is precisely at the transport position, there is nothing to do
 	 */
 
-	if (c == cues.rend() || (c->cue == CueRecord::stop_all) | (c->time == transport_position)) {
+
+	if (c == cues.rend() || (c->cue == CueRecord::stop_all) || (c->time == transport_position)) {
 		fast_forward_nothing_to_do ();
 		return;
 	}
@@ -3262,7 +3858,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	pos = c->time;
 	cnt = 0;
 
-	if (!trig->region()) {
+	if (!trig->playable()) {
 		fast_forward_nothing_to_do ();
 		return;
 	}
@@ -3480,7 +4076,7 @@ TriggerBox::maybe_swap_pending (uint32_t slot)
 	if (p) {
 
 		if (p == Trigger::MagicClearPointerValue) {
-			if (all_triggers[slot]->region()) {
+			if (all_triggers[slot]->playable()) {
 				if (_active_slots) {
 					_active_slots--;
 				}
@@ -3490,7 +4086,7 @@ TriggerBox::maybe_swap_pending (uint32_t slot)
 			}
 			all_triggers[slot]->clear_region ();
 		} else {
-			if (!all_triggers[slot]->region()) {
+			if (!all_triggers[slot]->playable()) {
 				if (_active_slots == 0) {
 					empty_changed = true;
 				}
@@ -3579,7 +4175,7 @@ TriggerBox::deep_sources (std::set<std::shared_ptr<Source> >& sources)
 	Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
 
 	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
-		std::shared_ptr<Region> r (trigger(n)->region ());
+		std::shared_ptr<Region> r (trigger(n)->the_region ());
 		if (r) {
 			r->deep_sources (sources);
 		}
@@ -3592,7 +4188,7 @@ TriggerBox::used_regions (std::set<std::shared_ptr<Region> >& regions)
 	Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
 
 	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
-		std::shared_ptr<Region> r (trigger(n)->region ());
+		std::shared_ptr<Region> r (trigger(n)->the_region ());
 		if (r) {
 			regions.insert (r);
 		}
@@ -3644,7 +4240,7 @@ TriggerBox::set_from_path (uint32_t slot, std::string const & path)
 		status.replace_existing_source = false;
 		status.split_midi_channels = false;
 		status.import_markers = false;
-		status.midi_track_name_source = ARDOUR::SMFTrackNumber;
+		status.midi_track_name_source = ARDOUR::SMFFileAndTrackName;
 
 		_session.import_files (status);
 
@@ -3772,7 +4368,7 @@ void
 TriggerBox::bang_trigger_at (Triggers::size_type row, float velocity)
 {
 	TriggerPtr t = trigger(row);
-	if (t && t->region()) {
+	if (t && t->playable()) {
 		t->bang (velocity);
 	} else {
 		/* by convention, an empty slot is effectively a STOP button */
@@ -3784,7 +4380,7 @@ void
 TriggerBox::unbang_trigger_at (Triggers::size_type row)
 {
 	TriggerPtr t = trigger(row);
-	if (t && t->region()) {
+	if (t && t->playable()) {
 		t->unbang();
 	} else {
 		/* you shouldn't be able to unbang an empty slot; but if this somehow happens we'll just treat it as a */
@@ -4129,6 +4725,38 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		return;
 	}
 
+	const Location* const loop_loc = _loop_location;
+
+	if (!loop_loc) {
+		run_cycle (bufs, start_sample, end_sample, speed, nframes);
+	} else {
+		const samplepos_t loop_start = loop_loc->start_sample ();
+		const samplepos_t loop_end   = loop_loc->end_sample ();
+		const samplecnt_t looplen    = loop_end - loop_start;
+
+		samplecnt_t remain    = nframes;
+		samplepos_t start_pos = start_sample;
+
+		while (remain > 0) {
+			if (start_pos >= loop_end) {
+				sampleoffset_t start_off = (start_pos - loop_start) % looplen;
+				start_pos = loop_start + start_off;
+			}
+
+			samplecnt_t move = std::min ((samplecnt_t)nframes, loop_end - start_pos);
+
+			run_cycle (bufs, start_pos, start_pos + move, speed, move);
+
+			remain -= move;
+			start_pos += move;
+		}
+	}
+}
+
+void
+TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes)
+{
+
 #ifndef NDEBUG
 	{
 		Temporal::TempoMap::SharedPtr __tmap (Temporal::TempoMap::use());
@@ -4139,6 +4767,8 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("**** Triggerbox::run() for %6, ss %1 es %2 sb %3 eb %4 bpm %5 nf %7\n", start_sample, end_sample, __start_beats, __end_beats, __bpm, order(), nframes));
 	}
 #endif
+
+	maybe_capture (bufs, start_sample, end_sample, speed, nframes);
 
 	bool allstop = _requests.stop_all.exchange (false);
 	bool    was_recorded;
@@ -4174,14 +4804,19 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("tb noticed active scene %1\n", _active_scene));
 		if (_active_scene < (int32_t) all_triggers.size()) {
 			if (!all_triggers[_active_scene]->cue_isolated()) {
-				if (all_triggers[_active_scene]->region()) {
+				if (all_triggers[_active_scene]->playable()) {
 					all_triggers[_active_scene]->bang ();
 				} else {
 					stop_all_quantized ();  //empty slot, this should work as a Stop for the running clips
+
 					//TODO:  can we set a flag so the UI reports that we are stopping?
 				}
 			}
 		}
+	}
+
+	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+		all_triggers[n]->check_edit_swap (timepos_t (start_sample), _currently_playing == all_triggers[n], bufs);
 	}
 
 	/* STEP FOUR: handle any incoming requests from the GUI or other
@@ -4429,9 +5064,9 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		pframes_t frames_covered;
 
 
-		std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (_currently_playing->region());
-		if (ar) {
-			max_chans = std::max (ar->n_channels(), max_chans);
+		AudioTrack const * trk = static_cast<AudioTrack*> (_owner);
+		if (trk) {
+			max_chans = std::max (trk->input()->n_ports().n_audio(), max_chans);
 		}
 
 		/* Quantize offset will generally be zero, but if non-zero, it
@@ -4506,12 +5141,12 @@ TriggerBox::determine_next_trigger (uint32_t current)
 	/* count number of triggers that can actually be run (i.e. they have a region) */
 
 	for (uint32_t n = 0; n < all_triggers.size(); ++n) {
-		if (all_triggers[n]->region()) {
+		if (all_triggers[n]->playable()) {
 			runnable++;
 		}
 	}
 
-	if (runnable == 0 || !all_triggers[current]->region()) {
+	if (runnable == 0 || !all_triggers[current]->playable()) {
 		return -1;
 	}
 
@@ -4572,7 +5207,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 				break;
 			}
 
-			if (all_triggers[n]->region() && !all_triggers[n]->active()) {
+			if (all_triggers[n]->playable() && !all_triggers[n]->active()) {
 				return n;
 			}
 		}
@@ -4591,7 +5226,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 				break;
 			}
 
-			if (all_triggers[n]->region() && !all_triggers[n]->active ()) {
+			if (all_triggers[n]->playable() && !all_triggers[n]->active ()) {
 				return n;
 			}
 		}
@@ -4599,14 +5234,14 @@ TriggerBox::determine_next_trigger (uint32_t current)
 
 	case FollowAction::FirstTrigger:
 		for (n = 0; n < all_triggers.size(); ++n) {
-			if (all_triggers[n]->region() && !all_triggers[n]->active ()) {
+			if (all_triggers[n]->playable() && !all_triggers[n]->active ()) {
 				return n;
 			}
 		}
 		break;
 	case FollowAction::LastTrigger:
 		for (int i = all_triggers.size() - 1; i >= 0; --i) {
-			if (all_triggers[i]->region() && !all_triggers[i]->active ()) {
+			if (all_triggers[i]->playable() && !all_triggers[i]->active ()) {
 				return i;
 			}
 		}
@@ -4614,7 +5249,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 
 	case FollowAction::JumpTrigger:
 		for (std::size_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
-			if (fa.targets.test (n) && all_triggers[n]->region()) {
+			if (fa.targets.test (n) && all_triggers[n]->playable()) {
 				possible_targets.push_back (n);
 			}
 		}
@@ -4691,7 +5326,7 @@ TriggerBox::set_state (const XMLNode& node, int version)
 				all_triggers.push_back (trig);
 				trig->set_state (**t, version);
 			}
-			if (trig->region ()) {
+			if (trig->playable ()) {
 				_active_slots++;
 			}
 		}
@@ -4793,6 +5428,10 @@ TriggerBox::realtime_handle_transport_stopped ()
 	Processor::realtime_handle_transport_stopped ();
 	stop_all ();
 	_currently_playing = 0;
+
+	for (auto & trig : all_triggers) {
+		trig->disarm ();
+	}
 }
 
 void
@@ -4846,7 +5485,7 @@ TriggerBoxThread::TriggerBoxThread ()
 	: requests (1024)
 	, _xthread (true)
 {
-	if (pthread_create_and_store ("triggerbox thread", &thread, _thread_work, this)) {
+	if (pthread_create_and_store ("TriggerBox Worker", &thread, _thread_work, this)) {
 		error << _("Session: could not create triggerbox thread") << endmsg;
 		throw failed_constructor ();
 	}
@@ -4864,15 +5503,12 @@ void *
 TriggerBoxThread::_thread_work (void* arg)
 {
 	SessionEvent::create_per_thread_pool ("tbthread events", 4096);
-	pthread_set_name (X_("tbthread"));
 	return ((TriggerBoxThread *) arg)->thread_work ();
 }
 
 void *
 TriggerBoxThread::thread_work ()
 {
-	pthread_set_name (X_("Trigger Worker"));
-
 	while (true) {
 
 		char msg;
@@ -4895,6 +5531,9 @@ TriggerBoxThread::thread_work ()
 					break;
 				case DeleteTrigger:
 					delete_trigger (req->trigger);
+					break;
+				case BuildSourceAndRegion:
+					build_source (req->trigger);
 					break;
 				default:
 					break;
@@ -4964,7 +5603,149 @@ TriggerBoxThread::request_delete_trigger (Trigger* t)
 }
 
 void
+TriggerBoxThread::request_build_source (Trigger* t)
+{
+	TriggerBoxThread::Request* req = new TriggerBoxThread::Request (BuildSourceAndRegion);
+	req->trigger  = t;
+	queue_request (req);
+}
+
+void
 TriggerBoxThread::delete_trigger (Trigger* t)
 {
 	delete t;
+}
+
+void
+TriggerBoxThread::build_source (Trigger* t)
+{
+	MIDITrigger* mt = dynamic_cast<MIDITrigger*> (t);
+	AudioTrigger* at;
+
+	if (mt) {
+		build_midi_source (mt);
+	} else if ((at = dynamic_cast<AudioTrigger*> (t))) {
+		build_audio_source (at);
+	}
+}
+
+void
+TriggerBoxThread::build_audio_source (AudioTrigger* t)
+{
+	Track* trk = static_cast<Track*> (t->box().owner());
+	SourceList sources;
+
+	for (uint32_t c = 0; c < t->channels(); ++c) {
+		std::shared_ptr<AudioSource> as = t->box().session().create_audio_source_for_session (t->channels(), trk->name(), c);
+		sources.push_back (as);
+	}
+
+	size_t n = 0;
+	for (auto & src : sources) {
+		std::dynamic_pointer_cast<AudioSource>(src)->write (t->audio_data (n), t->data_length());
+		++n;
+	}
+
+	/* now build region */
+
+	PropertyList plist;
+	std::shared_ptr<FileSource> fs;
+
+	for (auto & src : sources) {
+		fs = std::dynamic_pointer_cast<FileSource> (src);
+		fs->mark_immutable ();
+	}
+
+	fs = std::dynamic_pointer_cast<FileSource> (sources.front());
+	assert (fs);
+
+	std::string region_name = region_name_from_path (fs->path(), true, false);
+
+	plist.add (ARDOUR::Properties::start, timecnt_t (Temporal::BeatTime));
+	plist.add (ARDOUR::Properties::length, sources.front()->length ());
+	plist.add (ARDOUR::Properties::name, region_name);
+	plist.add (ARDOUR::Properties::layer, 0);
+	plist.add (ARDOUR::Properties::whole_file, true);
+	plist.add (ARDOUR::Properties::external, false);
+	plist.add (ARDOUR::Properties::opaque, true);
+
+	std::shared_ptr<Region> whole = RegionFactory::create (sources, plist);
+	/* ... and insert a discrete copy into the playlist*/
+	PropertyList plist2;
+	plist2.add (ARDOUR::Properties::whole_file, false);
+	std::shared_ptr<Region> copy (RegionFactory::create (whole, plist2));
+
+	t->set_region_in_worker_thread_from_capture (copy);
+	/* make it loop */
+	t->set_follow_action0 (FollowAction::Again);
+}
+
+void
+TriggerBoxThread::build_midi_source (MIDITrigger* t)
+{
+	Track* trk = static_cast<Track*> (t->box().owner());
+	std::shared_ptr<MidiSource> ms = t->box().session().create_midi_source_for_session (trk->name());
+	assert (ms);
+
+	RTMidiBufferBeats const & rtmb = t->rt_midi_buffer();
+
+	{
+		MidiSource::WriterLock lock (ms->mutex());
+		ms->mark_streaming_midi_write_started (lock, Sustained);
+		for (size_t n = 0; n < rtmb.size(); ++n) {
+			RTMidiBufferBeats::Item const & item (rtmb[n]);
+			uint32_t sz;
+			uint8_t const * const b = rtmb.bytes (item, sz);
+			Evoral::Event<Temporal::Beats> ev (Evoral::MIDI_EVENT, item.timestamp, sz, b);
+
+			ms->append_event_beats (lock, ev);
+		}
+		ms->mark_streaming_write_completed (lock);
+		ms->load_model (lock);
+	}
+
+	/* now build region */
+
+	PropertyList plist;
+	SourceList sources;
+	std::shared_ptr<FileSource> fs (std::dynamic_pointer_cast<FileSource> (ms));
+	assert (fs);
+
+	sources.push_back (ms);
+
+	std::string region_name = region_name_from_path (fs->path(), true, false);
+
+	plist.add (ARDOUR::Properties::start, timecnt_t (Temporal::BeatTime));
+	plist.add (ARDOUR::Properties::length, ms->length ());
+	plist.add (ARDOUR::Properties::name, region_name);
+	plist.add (ARDOUR::Properties::layer, 0);
+	plist.add (ARDOUR::Properties::whole_file, true);
+	plist.add (ARDOUR::Properties::external, false);
+	plist.add (ARDOUR::Properties::opaque, true);
+
+	std::shared_ptr<Region> whole = RegionFactory::create (sources, plist);
+	/* ... and insert a discrete copy into the playlist*/
+	PropertyList plist2;
+	plist2.add (ARDOUR::Properties::whole_file, false);
+	std::shared_ptr<Region> copy (RegionFactory::create (whole, plist2));
+
+	t->set_region_in_worker_thread_from_capture (copy);
+}
+
+std::shared_ptr<MidiBuffer>
+TriggerBox::get_gui_feed_buffer () const
+{
+	Glib::Threads::Mutex::Lock lm (_gui_feed_reset_mutex);
+	std::shared_ptr<MidiBuffer> b (new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI)));
+
+	std::vector<MIDI::byte> buffer (_gui_feed_fifo.capacity());
+	samplepos_t        time;
+	Evoral::EventType  type;
+	uint32_t           size;
+
+	while (_gui_feed_fifo.read (&time, &type, &size, &buffer[0])) {
+		b->push_back (time, type, size, &buffer[0]);
+	}
+
+	return b;
 }

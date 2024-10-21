@@ -21,13 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_region_h__
-#define __ardour_region_h__
+#pragma once
 
 #include <memory>
 #include <vector>
-
-#include <boost/utility.hpp>
 
 #include "temporal/domain_swap.h"
 #include "temporal/timeline.h"
@@ -79,11 +76,14 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string>       tags;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint64_t>          reg_group;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              contents; // type doesn't matter here, used for signal only
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              region_fx; // type doesn't matter here, used for signal only
 };
 
 class Playlist;
 class Filter;
 class ExportSpecification;
+class Plugin;
+class RegionFxPlugin;
 
 enum LIBARDOUR_API RegionEditState {
 	EditChangesNothing = 0,
@@ -107,10 +107,13 @@ class LIBARDOUR_API Region
 {
 public:
 	typedef std::vector<std::shared_ptr<Source> > SourceList;
+	typedef std::list<std::shared_ptr<RegionFxPlugin>> RegionFxList;
 
 	static void make_property_quarks ();
 
-	static PBD::Signal2<void,std::shared_ptr<RegionList>, const PBD::PropertyChange&> RegionsPropertyChanged;
+	static PBD::Signal<void(std::shared_ptr<RegionList>, const PBD::PropertyChange&)> RegionsPropertyChanged;
+
+	PBD::Signal<void()> RegionFxChanged;
 
 	typedef std::map <PBD::PropertyChange, RegionList> ChangeMap;
 
@@ -138,6 +141,8 @@ public:
 	timecnt_t length ()    const { return _length.val(); }
 	timepos_t end()        const;
 	timepos_t nt_last()    const { return end().decrement(); }
+
+	virtual timecnt_t tail () const { return timecnt_t (0); }
 
 	timepos_t source_position () const;
 	timecnt_t source_relative_position (Temporal::timepos_t const &) const;
@@ -295,8 +300,8 @@ public:
 	 *  OverlapEnd:      the range overlaps the end of this region.
 	 *  OverlapExternal: the range overlaps all of this region.
 	 */
-	Temporal::OverlapType coverage (timepos_t const & start, timepos_t const & end) const {
-		return Temporal::coverage_exclusive_ends (position(), nt_last(), start, end);
+	Temporal::OverlapType coverage (timepos_t const & start, timepos_t const & end, bool with_tail = false) const {
+		return Temporal::coverage_exclusive_ends (position(), with_tail ? nt_last() + tail() : nt_last(), start, end);
 	}
 
 	bool exact_equivalent (std::shared_ptr<const Region>) const;
@@ -503,6 +508,34 @@ public:
 	void move_cue_marker (CueMarker const &, timepos_t const & region_relative_position);
 	void rename_cue_marker (CueMarker&, std::string const &);
 
+	/* Region Fx */
+	bool load_plugin (ARDOUR::PluginType type, std::string const& name);
+	bool add_plugin (std::shared_ptr<RegionFxPlugin>, std::shared_ptr<RegionFxPlugin> pos = std::shared_ptr<RegionFxPlugin> ());
+	virtual bool remove_plugin (std::shared_ptr<RegionFxPlugin>) { return false; }
+	virtual void reorder_plugins (RegionFxList const&);
+
+	bool has_region_fx () const {
+		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		return !_plugins.empty ();
+	}
+
+	std::shared_ptr<RegionFxPlugin> nth_plugin (uint32_t n) const {
+		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		for (auto const& i : _plugins) {
+			if (0 == n--) {
+				return i;
+			}
+		}
+		return std::shared_ptr<RegionFxPlugin> ();
+	}
+
+	void foreach_plugin (std::function<void(std::weak_ptr<RegionFxPlugin>)> method) const {
+		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		for (auto const& i : _plugins) {
+			method (std::weak_ptr<RegionFxPlugin> (i));
+		}
+	}
+
 protected:
 	virtual XMLNode& state () const;
 
@@ -528,8 +561,11 @@ protected:
 	}
 
 protected:
+	virtual bool _add_plugin (std::shared_ptr<RegionFxPlugin>, std::shared_ptr<RegionFxPlugin>, bool) { return false; }
+	virtual void fx_latency_changed (bool no_emit);
+	virtual void fx_tail_changed (bool no_emit);
 
-	void send_change (const PBD::PropertyChange&);
+	virtual void send_change (const PBD::PropertyChange&);
 	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 	virtual void set_position_internal (timepos_t const & pos);
 	virtual void set_length_internal (timecnt_t const &);
@@ -545,6 +581,11 @@ protected:
 	timepos_t len_as_tpos () const { return timepos_t((samplepos_t)_length.val().samples()); }
 
 	DataType _type;
+
+	mutable Glib::Threads::RWLock _fx_lock;
+	uint32_t                      _fx_latency;
+	uint32_t                      _fx_tail;
+	RegionFxList                  _plugins;
 
 	PBD::Property<bool>      _sync_marked;
 	PBD::Property<bool>      _left_of_split;
@@ -637,4 +678,3 @@ private:
 
 } /* namespace ARDOUR */
 
-#endif /* __ardour_region_h__ */

@@ -257,7 +257,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	//set_position (start, this);
 
 	group->Event.connect (sigc::mem_fun (*this, &TimeAxisViewItem::canvas_group_event));
-	//Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&TimeAxisViewItem::parameter_changed, this, _1), gui_context ());
+	//Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&TimeAxisViewItem::parameter_changed, this, _1), gui_context ());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &TimeAxisViewItem::parameter_changed));
 }
 
@@ -618,7 +618,7 @@ TimeAxisViewItem::get_canvas_frame()
 }
 
 ArdourCanvas::Item*
-TimeAxisViewItem::get_canvas_group()
+TimeAxisViewItem::get_canvas_group() const
 {
 	return group;
 }

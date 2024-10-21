@@ -17,8 +17,7 @@
 
 */
 
-#ifndef __ardour_beatbox_h__
-#define __ardour_beatbox_h__
+#pragma once
 
 #include <algorithm>
 #include <vector>
@@ -71,4 +70,3 @@ class BeatBox : public ARDOUR::Processor {
 
 } /* namespace */
 
-#endif /* __ardour_beatbox_h__ */

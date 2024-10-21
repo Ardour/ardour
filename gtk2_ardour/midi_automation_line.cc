@@ -38,7 +38,7 @@ MidiAutomationLine::MidiAutomationLine (
 	std::shared_ptr<ARDOUR::AutomationList>               list,
 	std::shared_ptr<ARDOUR::MidiRegion>                   region,
 	Evoral::Parameter                                       parameter)
-	: AutomationLine (name, tav, parent, list, parameter)
+	: EditorAutomationLine (name, tav, parent, list, parameter)
 	, _region (region)
 	, _parameter (parameter)
 {
@@ -72,26 +72,26 @@ MidiAutomationLine::get_verbose_cursor_string (double fraction) const
 	using namespace MIDI::Name;
 
 	if (_parameter.type() != ARDOUR::MidiCCAutomation) {
-		return AutomationLine::get_verbose_cursor_string(fraction);
+		return EditorAutomationLine::get_verbose_cursor_string(fraction);
 	}
 
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(trackview.get_parent());
 	if (!mtv) {
-		return AutomationLine::get_verbose_cursor_string(fraction);
+		return EditorAutomationLine::get_verbose_cursor_string(fraction);
 	}
 
 	const uint8_t channel = mtv->get_preferred_midi_channel();
 	std::shared_ptr<const ValueNameList> value_names = mtv->route()->instrument_info().value_name_list_by_control (channel, _parameter.id());
 
 	if (!value_names) {
-		return AutomationLine::get_verbose_cursor_string(fraction);
+		return EditorAutomationLine::get_verbose_cursor_string(fraction);
 	}
 
 	const uint16_t cc_value = floor(std::max(std::min(fraction * 127.0, 127.0), 0.0));
 
 	std::shared_ptr<const Value> value = value_names->max_value_below(cc_value);
 	if (!value) {
-		return AutomationLine::get_verbose_cursor_string(fraction);
+		return EditorAutomationLine::get_verbose_cursor_string(fraction);
 	}
 
 	return value->name();

@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_trigger_page_h__
-#define __gtk_ardour_trigger_page_h__
+#pragma once
 
 #include <gtkmm/box.h>
 
@@ -34,7 +33,6 @@
 #include "audio_trigger_properties_box.h"
 #include "cuebox_ui.h"
 #include "fitted_canvas_widget.h"
-#include "midi_clip_editor.h"
 #include "midi_region_operations_box.h"
 #include "midi_region_properties_box.h"
 #include "midi_trigger_properties_box.h"
@@ -47,6 +45,7 @@
 #include "trigger_master.h"
 
 class TriggerStrip;
+class MidiCueEditor;
 
 class TriggerPage : public ArdourWidgets::Tabbable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList, public AxisViewProvider
 {
@@ -97,6 +96,7 @@ private:
 	AxisView* axis_view_by_control (std::shared_ptr<ARDOUR::AutomationControl>) const;
 
 	void                      selection_changed ();
+	void                      rec_enable_changed (ARDOUR::Trigger const *);
 	PBD::ScopedConnectionList editor_connections;
 
 	gint start_updating ();
@@ -104,7 +104,7 @@ private:
 	void fast_update_strips ();
 
 	Gtkmm2ext::Bindings* bindings;
-	Gtk::VBox            _content;
+	ArdourWidgets::VPane _content;
 
 	ArdourWidgets::HPane _pane_upper;
 	Gtk::HBox            _strip_group_box;
@@ -133,14 +133,12 @@ private:
 #if REGION_PROPERTIES_BOX_TODO
 	AudioRegionOperationsBox  _audio_ops_box;
 	AudioClipEditorBox        _audio_trim_box;
-
-	MidiRegionOperationsBox  _midi_ops_box;
-	MidiClipEditorBox        _midi_trim_box;
 #endif
+
+	MidiCueEditor*           _midi_editor;
 
 	RouteProcessorSelection  _selection;
 	std::list<TriggerStrip*> _strips;
 	sigc::connection         _fast_screen_update_connection;
 };
 
-#endif /* __gtk_ardour_trigger_page_h__ */

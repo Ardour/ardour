@@ -64,6 +64,7 @@
 #include "editing.h"
 #include "enums_convert.h"
 #include "actions.h"
+#include "meter_patterns.h"
 #include "meterbridge.h"
 #include "luawindow.h"
 #include "mixer_ui.h"
@@ -500,6 +501,12 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (main_actions, X_("ToggleLatencyCompensation"), _("Disable Latency Compensation"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_latency_switch));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_toggle_action (main_actions, X_("ResetAllPeakDisplays"), _("Reset Mixer Meter Peaks"), []() { ArdourMeter::ResetAllPeakDisplays (); });
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (main_actions, X_("ResetMeterPeakHold"), _("Reset All Meter Peak Hold"), []() { ArdourMeter::ResetAllPeakDisplays (); ActionManager::get_action ("Recorder", "reset-input-peak-hold")->activate (); });
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (main_actions, X_("MonitorMenu"), _("Monitor Section")); /* just the submenu item */
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -574,6 +581,14 @@ ARDOUR_UI::install_dependent_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (common_actions, "jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*editor, &PublicEditor::jump_forward_to_mark));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (common_actions, "jump-backward-to-location-mark", _("Jump to Previous Location Mark"),
+	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_backward_to_mark_flagged), Location::Flags (0), Location::Flags (0), Location::IsMark));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (common_actions, "jump-forward-to-location-mark", _("Jump to Next Location Mark"),
+	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_forward_to_mark_flagged), Location::Flags (0), Location::Flags (0), Location::IsMark));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	for (int i = 1; i <= 9; ++i) {

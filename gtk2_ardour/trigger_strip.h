@@ -33,6 +33,7 @@
 #include "automation_controller.h"
 #include "axis_view.h"
 #include "fitted_canvas_widget.h"
+#include "io_button.h"
 #include "level_meter.h"
 #include "panner_ui.h"
 #include "processor_box.h"
@@ -63,7 +64,7 @@ public:
 
 	void fast_update ();
 
-	static PBD::Signal1<void, TriggerStrip*> CatchDeletion;
+	static PBD::Signal<void(TriggerStrip*)> CatchDeletion;
 
 protected:
 	void self_delete ();
@@ -125,6 +126,8 @@ private:
 	FittedCanvasWidget _tmaster_widget;
 	TriggerMaster*     _tmaster;
 
+	IOButton                                input_button;
+	IOButton                                output_button;
 	ArdourWidgets::ArdourButton             _name_button;
 	ProcessorBox                            _processor_box;
 	TriggerBoxWidget                        _trigger_display;

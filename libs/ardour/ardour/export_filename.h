@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_export_filename_h__
-#define __ardour_export_filename_h__
+#pragma once
 
 #include <memory>
 #include <string>
@@ -129,4 +128,3 @@ class LIBARDOUR_API ExportFilename {
 
 } // namespace ARDOUR
 
-#endif /* __ardour_export_filename_h__ */

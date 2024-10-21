@@ -21,7 +21,7 @@
 
 using namespace ARDOUR;
 
-RTTask::RTTask (Graph* g, boost::function<void ()> const& fn)
+RTTask::RTTask (Graph* g, std::function<void ()> const& fn)
 	: _f (fn)
 	, _graph (g)
 {

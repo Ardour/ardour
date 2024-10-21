@@ -50,7 +50,7 @@ class AccelGroup;
 /** A drop-down menu consisting of Gtk::MenuItem objects which can be navigated and activated by the user to perform application functions.
  * Menus are normally placed inside a Gtk::MenuBar or another MenuItem as a sub menu.
  * A Menu can also be popped up, for instance as a right-click context menu, by calling the popup() method.
- * .
+ *
  * @ingroup Widgets
  * @ingroup Menus
  */
@@ -135,7 +135,7 @@ public:
    * The @a activate_time  parameter should be the time stamp of the event that
    * initiated the popup. If such an event is not available, use
    * gtk_get_current_event_time() instead.
-   * @param func A position_calc_slot supplied function used to position the menu, or <tt>0</tt>.
+   * @param position_calc_slot A function used to position the menu, or <tt>0</tt>.
    * @param button The mouse button which was pressed to initiate the event.
    * @param activate_time The time at which the activation event occurred.
    */
@@ -226,8 +226,6 @@ public:
   
   /** Retrieves the accelerator path set on the menu.
    * 
-   * @newin{2,14}
-   * 
    * @return The accelerator path set on the menu.
    */
   Glib::ustring get_accel_path() const;
@@ -278,8 +276,6 @@ public:
   
   /** Sets the Gdk::Screen on which the menu will be displayed.
    * 
-   * @newin{2,2}
-   * 
    * @param screen A Gdk::Screen, or <tt>0</tt> if the screen should be
    * determined by the widget the menu is attached to.
    */
@@ -293,8 +289,6 @@ public:
    * (Columns and rows are indexed from zero).
    * 
    * Note that this function is not related to detach().
-   * 
-   * @newin{2,4}
    * 
    * @param child A Gtk::MenuItem.
    * @param left_attach The column number to attach the left side of the item to.
@@ -314,16 +308,12 @@ public:
    * by a Gtk::MenuPositionFunc, since, for very long menus, these coordinates 
    * may extend beyond the monitor boundaries or even the screen boundaries. 
    * 
-   * @newin{2,4}
-   * 
    * @param monitor_num The number of the monitor on which the menu should
    * be popped up.
    */
   void set_monitor(int monitor_num);
   
   /** Retrieves the number of the monitor on which to show the menu.
-   * 
-   * @newin{2,14}
    * 
    * @return The number of the monitor on which the menu should
    * be popped up or -1, if no monitor has been set.
@@ -336,16 +326,12 @@ public:
   /** Sets whether the menu should reserve space for drawing toggles 
    * or icons, regardless of their actual presence.
    * 
-   * @newin{2,18}
-   * 
    * @param reserve_toggle_size Whether to reserve size for toggles.
    */
   void set_reserve_toggle_size(bool reserve_toggle_size =  true);
   
   /** Returns whether the menu reserves space for toggles and
    * icons, regardless of their actual presence.
-   * 
-   * @newin{2,18}
    * 
    * @return Whether the menu reserves toggle space.
    */
@@ -475,9 +461,7 @@ protected:
   //TODO: What does "attach" actually mean here? murrayc
   /** Attaches the menu to the widget.
    * 
-   * param @attach_widget: the Widget that the menu will be attached to.
-   *
-   * @newin{2,10}
+   * @param attach_widget: the Widget that the menu will be attached to.
    */
   void attach_to_widget(Widget& attach_widget);
 

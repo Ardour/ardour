@@ -47,7 +47,7 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace std;
 
-PBD::Signal1<void, pframes_t> InternalSend::CycleStart;
+PBD::Signal<void(pframes_t)> InternalSend::CycleStart;
 
 InternalSend::InternalSend (Session&                      s,
                             std::shared_ptr<Pannable>   p,
@@ -68,8 +68,8 @@ InternalSend::InternalSend (Session&                      s,
 
 	init_gain ();
 
-	_send_from->DropReferences.connect_same_thread (source_connection, boost::bind (&InternalSend::send_from_going_away, this));
-	CycleStart.connect_same_thread (*this, boost::bind (&InternalSend::cycle_start, this, _1));
+	_send_from->DropReferences.connect_same_thread (source_connection, std::bind (&InternalSend::send_from_going_away, this));
+	CycleStart.connect_same_thread (*this, std::bind (&InternalSend::cycle_start, this, _1));
 }
 
 InternalSend::~InternalSend ()
@@ -175,9 +175,9 @@ InternalSend::use_target (std::shared_ptr<Route> sendto, bool update_name)
 
 	target_connections.drop_connections ();
 
-	_send_to->DropReferences.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_going_away, this));
-	_send_to->PropertyChanged.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_property_changed, this, _1));
-	_send_to->io_changed.connect_same_thread (target_connections, boost::bind (&InternalSend::target_io_changed, this));
+	_send_to->DropReferences.connect_same_thread (target_connections, std::bind (&InternalSend::send_to_going_away, this));
+	_send_to->PropertyChanged.connect_same_thread (target_connections, std::bind (&InternalSend::send_to_property_changed, this, _1));
+	_send_to->io_changed.connect_same_thread (target_connections, std::bind (&InternalSend::target_io_changed, this));
 
 	return 0;
 }
@@ -424,7 +424,7 @@ InternalSend::set_state (const XMLNode& node, int version)
 		 */
 
 		if (_session.loading()) {
-			Session::AfterConnect.connect_same_thread (connect_c, boost::bind (&InternalSend::after_connect, this));
+			Session::AfterConnect.connect_same_thread (connect_c, std::bind (&InternalSend::after_connect, this));
 		} else {
 			after_connect ();
 		}

@@ -35,6 +35,10 @@ typedef smf_struct smf_t;
 typedef smf_track_struct smf_track_t;
 typedef smf_tempo_struct smf_tempo_t;
 
+namespace Temporal {
+	class TempoMap;
+}
+
 namespace Evoral {
 
 /** Standard Midi File.
@@ -135,6 +139,8 @@ public:
 	typedef std::vector<MarkerAt> Markers;
 	Markers const & markers() const { return _markers; }
 	void load_markers ();
+
+	std::shared_ptr<Temporal::TempoMap> tempo_map (bool& provided) const;
 
   private:
 	smf_t*       _smf;

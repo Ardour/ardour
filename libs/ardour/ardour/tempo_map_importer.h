@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_tempo_map_importer_h__
-#define __ardour_tempo_map_importer_h__
+#pragma once
 
 #include <memory>
 
@@ -58,4 +57,3 @@ class LIBARDOUR_API TempoMapImporter : public ElementImporter
 
 } // namespace ARDOUR
 
-#endif

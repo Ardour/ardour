@@ -215,7 +215,7 @@ public:
    * appended to the end of the dialog's action area. The button widget is 
    * returned, but usually you don't need it.
    * 
-   * @param button_text Text of button, or stock ID.
+   * @param stock_id Text of button, or stock ID.
    * @param response_id Response ID for the button.
    * @return The button widget that was added.
    */
@@ -241,8 +241,6 @@ public:
   /** Gets the widget button that uses the given response ID in the action area
    * of a dialog.
    * 
-   * @newin{2,20}
-   * 
    * @param response_id The response ID used by the @a dialog widget.
    * @return The @a widget button that uses the given @a response_id, or <tt>0</tt>.
    */
@@ -251,8 +249,6 @@ public:
   /** Gets the widget button that uses the given response ID in the action area
    * of a dialog.
    * 
-   * @newin{2,20}
-   * 
    * @param response_id The response ID used by the @a dialog widget.
    * @return The @a widget button that uses the given @a response_id, or <tt>0</tt>.
    */
@@ -260,8 +256,6 @@ public:
   
   /** Gets the response id of a widget in the action area
    * of a dialog.
-   * 
-   * @newin{2,8}
    * 
    * @param widget A widget in the action area of @a dialog.
    * @return The response id of @a widget, or Gtk::RESPONSE_NONE
@@ -292,11 +286,9 @@ public:
    * about alternative button order. 
    * 
    * If you need to use this function, you should probably connect
-   * to the ::notify:gtk-alternative-button-order signal on the
+   * to the notify:gtk-alternative-button-order signal on the
    * Gtk::Settings object associated to @a screen, in order to be 
    * notified if the button order setting changes.
-   * 
-   * @newin{2,6}
    * 
    * @param screen A Gdk::Screen, or <tt>0</tt> to use the default screen.
    * @return Whether the alternative button order should be used.
@@ -308,17 +300,14 @@ public:
    * the order of the response ids in @a new_order.
    *
    * By default, GTK+ dialogs use the button order advocated by the Gnome
-   * <ulink url="http://developer.gnome.org/projects/gup/hig/2.0/">Human
-   * Interface Guidelines</ulink> with the affirmative button at the far
+   * Human Interface Guidelines with the affirmative button at the far
    * right, and the cancel button left of it. But the builtin GTK+ dialogs
-   * and #GtkMessageDialog<!-- -->s do provide an alternative button order,
+   * and #GtkMessageDialog do provide an alternative button order,
    * which is more suitable on some platforms, e.g. Windows.
    *
    * Use this function after adding all the buttons to your dialog
    *
    * @param new_order an array of response ids of the dialog's buttons.
-   *
-   * @newinp26
    */
   void set_alternative_button_order_from_array(const Glib::ArrayHandle<int>& new_order);
   
@@ -370,15 +359,11 @@ public:
   
   /** Returns the action area of @a dialog.
    * 
-   * @newin{2,14}
-   * 
    * @return The action area.
    */
   ButtonBox* get_action_area();
   
   /** Returns the action area of @a dialog.
-   * 
-   * @newin{2,14}
    * 
    * @return The action area.
    */
@@ -389,15 +374,11 @@ public:
   
   /** Returns the content area of @a dialog.
    * 
-   * @newin{2,14}
-   * 
    * @return The content area Gtk::VBox.
    */
   VBox* get_vbox();
   
   /** Returns the content area of @a dialog.
-   * 
-   * @newin{2,14}
    * 
    * @return The content area Gtk::VBox.
    */

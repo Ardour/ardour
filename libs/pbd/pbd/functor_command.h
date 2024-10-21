@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __lib_pbd_functor_command_h__
-#define __lib_pbd_functor_command_h__
+#pragma once
 
 #include <iostream>
 #include <sstream>
@@ -114,5 +113,4 @@ FunctorCommand<obj_type, arg_type>::functor_map;
 
 };
 
-#endif // __lib_pbd_functor_command_h__
 

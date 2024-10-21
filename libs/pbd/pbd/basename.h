@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_basename_h__
-#define __libpbd_basename_h__
+#pragma once
 
 #include <glibmm/ustring.h>
 
@@ -28,4 +27,3 @@ namespace PBD {
 	LIBPBD_API Glib::ustring basename_nosuffix (Glib::ustring);
 }
 
-#endif  /* __libpbd_basename_h__ */

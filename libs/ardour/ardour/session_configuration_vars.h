@@ -92,6 +92,7 @@ CONFIG_VARIABLE (bool, show_monitor_on_meterbridge, "show-monitor-on-meterbridge
 CONFIG_VARIABLE (bool, show_name_on_meterbridge, "show-name-on-meterbridge", true)
 CONFIG_VARIABLE (bool, show_fader_on_meterbridge, "show-fader-on-meterbridge", false)
 CONFIG_VARIABLE (uint32_t, meterbridge_label_height,  "meterbridge-label-height", 0)
+CONFIG_VARIABLE (bool, show_master_bus_comment_on_load, "show-master-bus-comment-on-load", false)
 
 /* If the user changes the session default_time_domain, we also stash that in rc_config as a global preference,
      where it is used to initialize the session timebase menu during new session creation

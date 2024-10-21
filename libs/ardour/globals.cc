@@ -155,11 +155,11 @@ mix_buffers_with_gain_t ARDOUR::mix_buffers_with_gain = 0;
 mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain   = 0;
 copy_vector_t           ARDOUR::copy_vector           = 0;
 
-PBD::Signal1<void, std::string>                    ARDOUR::BootMessage;
-PBD::Signal3<void, std::string, std::string, bool> ARDOUR::PluginScanMessage;
-PBD::Signal1<void, int>                            ARDOUR::PluginScanTimeout;
-PBD::Signal0<void>                                 ARDOUR::GUIIdle;
-PBD::Signal3<bool, std::string, std::string, int>  ARDOUR::CopyConfigurationFiles;
+PBD::Signal<void(std::string)>                    ARDOUR::BootMessage;
+PBD::Signal<void(std::string, std::string, bool)> ARDOUR::PluginScanMessage;
+PBD::Signal<void(int)>                            ARDOUR::PluginScanTimeout;
+PBD::Signal<void()>                                 ARDOUR::GUIIdle;
+PBD::Signal<bool(std::string, std::string, int)>  ARDOUR::CopyConfigurationFiles;
 
 std::map<std::string, bool> ARDOUR::reserved_io_names;
 
@@ -589,7 +589,7 @@ ARDOUR::check_for_old_configuration_files ()
 }
 
 int
-ARDOUR::handle_old_configuration_files (boost::function<bool(std::string const&, std::string const&, int)> ui_handler)
+ARDOUR::handle_old_configuration_files (std::function<bool(std::string const&, std::string const&, int)> ui_handler)
 {
 	if (have_old_configuration_files) {
 		int current_version = atoi (X_(PROGRAM_VERSION));
@@ -688,6 +688,14 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 
 	Profile = new RuntimeProfile;
 
+	if (g_getenv ("MIXBUS")) {
+		ARDOUR::Profile->set_mixbus ();
+	}
+
+#ifdef LIVETRAX
+	ARDOUR::Profile->set_livetrax ();
+#endif
+
 #ifdef WINDOWS_VST_SUPPORT
 	if (Config->get_use_windows_vst () && fst_init (0)) {
 		return false;
@@ -727,9 +735,13 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 	 * buffers (for plugin-analysis, auditioner updates) but not
 	 * concurrently.
 	 *
-	 * In theory (hw + 3) should be sufficient, let's add one for luck.
+	 * Last but not least, the butler needs one for RegionFX for
+	 * each I/O thread (up to hardware_concurrency) and one for itself
+	 * (butler's main thread).
+	 *
+	 * In theory (2 * hw + 4) should be sufficient, let's add one for luck.
 	 */
-	BufferManager::init (hardware_concurrency () + 4);
+	BufferManager::init (hardware_concurrency () * 2 + 5);
 
 	PannerManager::instance ().discover_panners ();
 
@@ -775,7 +787,7 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 
 	MIDI::Name::MidiPatchManager::instance ().load_midnams_in_thread ();
 
-	Config->ParameterChanged.connect_same_thread (config_connection, boost::bind (&config_changed, _1));
+	Config->ParameterChanged.connect_same_thread (config_connection, std::bind (&config_changed, _1));
 
 	libardour_initialized = true;
 
@@ -803,7 +815,8 @@ ARDOUR::init_post_engine (uint32_t start_cnt)
 		}
 	}
 
-	BaseUI::set_thread_priority (pbd_absolute_rt_priority (PBD_SCHED_FIFO, AudioEngine::instance()->client_real_time_priority () - 2));
+	/* set/update thread priority relative to backend's [jack_]client_real_time_priority */
+	BaseUI::set_thread_priority (PBD_RT_PRI_CTRL);
 
 	TransportMasterManager::instance ().restart ();
 }
@@ -1015,7 +1028,7 @@ ARDOUR::get_available_sync_options ()
 	vector<SyncSource> ret;
 
 	std::shared_ptr<AudioBackend> backend = AudioEngine::instance ()->current_backend ();
-	if (backend && backend->name () == "JACK") {
+	if (backend && backend->is_jack ()) {
 		ret.push_back (Engine);
 	}
 

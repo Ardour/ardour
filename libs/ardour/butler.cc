@@ -24,6 +24,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#ifdef HAVE_IOPRIO
+#include <sys/syscall.h>
+#endif
+
 #ifndef PLATFORM_WINDOWS
 #include <poll.h>
 #endif
@@ -40,6 +44,7 @@
 #include "ardour/disk_io.h"
 #include "ardour/disk_reader.h"
 #include "ardour/io.h"
+#include "ardour/io_tasklist.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
 
@@ -64,7 +69,7 @@ Butler::Butler (Session& s)
 	SessionEvent::pool->set_trash (&pool_trash);
 
 	/* catch future changes to parameters */
-	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Butler::config_changed, this, _1));
+	Config->ParameterChanged.connect_same_thread (*this, std::bind (&Butler::config_changed, this, _1));
 }
 
 Butler::~Butler ()
@@ -76,7 +81,7 @@ void
 Butler::map_parameters ()
 {
 	/* use any current ones that we care about */
-	boost::function<void (std::string)> ff (boost::bind (&Butler::config_changed, this, _1));
+	std::function<void (std::string)> ff (std::bind (&Butler::config_changed, this, _1));
 	Config->map_parameters (ff);
 }
 
@@ -136,7 +141,7 @@ Butler::start_thread ()
 
 	should_run = false;
 
-	if (pthread_create_and_store ("disk butler", &thread, _thread_work, this)) {
+	if (pthread_create_and_store ("butler", &thread, _thread_work, this)) {
 		error << _("Session: could not create butler thread") << endmsg;
 		return -1;
 	}
@@ -166,8 +171,17 @@ void*
 Butler::_thread_work (void* arg)
 {
 	SessionEvent::create_per_thread_pool ("butler events", 4096);
-	pthread_set_name (X_("butler"));
-	return ((Butler*)arg)->thread_work ();
+	/* get thread buffers for RegionFx */
+	ARDOUR::ProcessThread* pt = new ProcessThread ();
+	pt->get_buffers ();
+	DiskReader::allocate_working_buffers ();
+
+	void* rv = ((Butler*)arg)->thread_work ();
+
+	DiskReader::free_working_buffers ();
+	pt->drop_buffers ();
+	delete pt;
+	return rv;
 }
 
 void*
@@ -176,6 +190,13 @@ Butler::thread_work ()
 	uint32_t            err                   = 0;
 	bool                disk_work_outstanding = false;
 	RouteList::iterator i;
+
+#ifdef HAVE_IOPRIO
+	// ioprio_set (IOPRIO_WHO_PROCESS, 0 /*calling thread*/, IOPRIO_PRIO_VALUE (IOPRIO_CLASS_RT, 4))
+	if (0 != syscall (SYS_ioprio_set, 1, 0, (1 << 13) | 4)) {
+		info << _("Cannot set I/O Priority for disk read/write thread") << endmsg;
+	}
+#endif
 
 	while (true) {
 		DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 butler main loop, disk work outstanding ? %2 @ %3\n", DEBUG_THREAD_SELF, disk_work_outstanding, g_get_monotonic_time ()));
@@ -251,7 +272,9 @@ Butler::thread_work ()
 		RouteList rl_with_auditioner = *rl;
 		rl_with_auditioner.push_back (_session.the_auditioner ());
 
-		DEBUG_TRACE (DEBUG::Butler, string_compose ("butler starts refill loop, twr = %1\n", transport_work_requested ()));
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("butler starts refill loop, twr = %1\n", should_do_transport_work.load ()));
+
+		std::shared_ptr<IOTaskList> tl = _session.io_tasklist ();
 
 		for (i = rl_with_auditioner.begin (); !transport_work_requested () && should_run && i != rl_with_auditioner.end (); ++i) {
 			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
@@ -267,23 +290,28 @@ Butler::thread_work ()
 				// DEBUG_TRACE (DEBUG::Butler, string_compose ("butler skips inactive track %1\n", tr->name()));
 				continue;
 			}
-			// DEBUG_TRACE (DEBUG::Butler, string_compose ("butler refills %1, playback load = %2\n", tr->name(), tr->playback_buffer_load()));
-			switch (tr->do_refill ()) {
-				case 0:
-					//DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill done %1\n", tr->name()));
-					break;
 
-				case 1:
-					DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill unfinished %1\n", tr->name ()));
-					disk_work_outstanding = true;
-					break;
-
-				default:
-					error << string_compose (_("Butler read ahead failure on dstream %1"), (*i)->name ()) << endmsg;
-					std::cerr << string_compose (_("Butler read ahead failure on dstream %1"), (*i)->name ()) << std::endl;
-					break;
-			}
+			tl->push_back ([tr, &disk_work_outstanding]() {
+				switch (tr->do_refill ()) {
+					case 0:
+						//DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill done %1\n", tr->name()));
+						break;
+					case 1:
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill unfinished %1\n", tr->name ()));
+						disk_work_outstanding = true;
+						break;
+					default:
+						error << string_compose (_("Butler read ahead failure on dstream %1"), tr->name ()) << endmsg;
+#ifndef NDEBUG
+						std::cerr << string_compose (_("Butler read ahead failure on dstream %1"), tr->name ()) << std::endl;
+#endif
+						break;
+				}
+			});
 		}
+
+		tl->process ();
+		tl.reset ();
 
 		if (i != rl_with_auditioner.begin () && i != rl_with_auditioner.end ()) {
 			/* we didn't get to all the streams */
@@ -369,7 +397,9 @@ Butler::flush_tracks_to_disk_normal (std::shared_ptr<RouteList const> rl, uint32
 			default:
 				errors++;
 				error << string_compose (_("Butler write-behind failure on dstream %1"), (*i)->name ()) << endmsg;
+#ifndef NDEBUG
 				std::cerr << string_compose (_("Butler write-behind failure on dstream %1"), (*i)->name ()) << std::endl;
+#endif
 				/* don't break - try to flush all streams in case they
 			   are split across disks.
 			*/
@@ -382,8 +412,8 @@ Butler::flush_tracks_to_disk_normal (std::shared_ptr<RouteList const> rl, uint32
 void
 Butler::schedule_transport_work ()
 {
-	DEBUG_TRACE (DEBUG::Butler, "requesting more transport work\n");
 	should_do_transport_work.fetch_add (1);
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("requesting more transport work (now %1)\n", should_do_transport_work.load ()));
 	summon ();
 }
 

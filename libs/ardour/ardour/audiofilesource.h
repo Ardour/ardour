@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_audiofilesource_h__
-#define __ardour_audiofilesource_h__
+#pragma once
 
 #include <exception>
 #include <time.h>
@@ -79,7 +78,7 @@ public:
 	static void set_bwf_serial_number (int);
 	static void set_header_position_offset (samplecnt_t offset);
 
-	static PBD::Signal0<void> HeaderPositionOffsetChanged;
+	static PBD::Signal<void()> HeaderPositionOffsetChanged;
 
 protected:
 	/** Constructor to be called for existing external-to-session files */
@@ -117,5 +116,4 @@ protected:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_audiofilesource_h__ */
 

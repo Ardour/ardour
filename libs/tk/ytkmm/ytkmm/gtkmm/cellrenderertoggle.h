@@ -144,15 +144,11 @@ public:
   /** Returns whether the cell renderer is activatable. See
    * set_activatable().
    * 
-   * @newin{2,18}
-   * 
    * @return <tt>true</tt> if the cell renderer is activatable.
    */
   bool get_activatable() const;
   
   /** Makes the cell renderer activatable.
-   * 
-   * @newin{2,18}
    * 
    * @param setting The value to set.
    */

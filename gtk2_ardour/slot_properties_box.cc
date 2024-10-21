@@ -49,6 +49,7 @@
 #include "trigger_ui.h"
 #include "utils.h"
 
+#include "audio_clip_editor.h"
 #include "audio_region_properties_box.h"
 #include "audio_trigger_properties_box.h"
 #include "audio_region_operations_box.h"
@@ -56,7 +57,7 @@
 #include "midi_trigger_properties_box.h"
 #include "midi_region_properties_box.h"
 #include "midi_region_operations_box.h"
-#include "midi_clip_editor.h"
+#include "midi_cue_editor.h"
 
 #include "slot_properties_box.h"
 
@@ -600,19 +601,25 @@ SlotPropertyTable::on_trigger_set ()
 void
 SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 {
+	std::shared_ptr<Trigger> trigr (trigger());
+
+	if (!trigr) {
+		return;
+	}
+
 	_ignore_changes = true;
 
-	int probability = trigger()->follow_action_probability();
+	int probability = trigr->follow_action_probability();
 
 	if (pc.contains (Properties::name)) {
-		_name_label.set_text (trigger()->name());
+		_name_label.set_text (trigr->name());
 	}
 	if (pc.contains (Properties::color)) {
-		_color_button.set_custom_led_color (trigger()->color());
+		_color_button.set_custom_led_color (trigr->color());
 	}
 
 	if (pc.contains (Properties::gain)) {
-		float gain = accurate_coefficient_to_dB(trigger()->gain());
+		float gain = accurate_coefficient_to_dB(trigr->gain());
 		if (gain != _gain_adjustment.get_value()) {
 			_gain_adjustment.set_value (gain);
 		}
@@ -625,47 +632,47 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 	}
 
 	if (pc.contains (Properties::quantization)) {
-		BBT_Offset bbo (trigger()->quantization());
+		BBT_Offset bbo (trigr->quantization());
 		_quantize_button.set_active (quantize_length_to_string (bbo));
 	}
 
 	if (pc.contains (Properties::follow_count)) {
-		_follow_count_adjustment.set_value (trigger()->follow_count());
+		_follow_count_adjustment.set_value (trigr->follow_count());
 	}
 
 	if (pc.contains (Properties::tempo_meter) || pc.contains (Properties::follow_length)) {
-		int metrum_numerator = trigger()->meter().divisions_per_bar();
-		int bar_beats = metrum_numerator * trigger()->follow_length().bars;
-		int beats = trigger()->follow_length().beats;
+		int metrum_numerator = trigr->meter().divisions_per_bar();
+		int bar_beats = metrum_numerator * trigr->follow_length().bars;
+		int beats = trigr->follow_length().beats;
 		_follow_length_adjustment.set_value (bar_beats+beats);
 	}
 
 	if (pc.contains (Properties::use_follow_length)) {
-		_use_follow_length_button.set_active_state(trigger()->use_follow_length() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		_use_follow_length_button.set_active_state(trigr->use_follow_length() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::legato)) {
-		_legato_button.set_active_state (trigger()->legato() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		_legato_button.set_active_state (trigr->legato() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::cue_isolated)) {
-		_isolate_button.set_active_state (trigger()->cue_isolated() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		_isolate_button.set_active_state (trigr->cue_isolated() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::allow_patch_changes)) {
-		_patch_button.set_sensitive(trigger()->allow_patch_changes());
-		_allow_button.set_active_state (trigger()->allow_patch_changes() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		_patch_button.set_sensitive(trigr->allow_patch_changes());
+		_allow_button.set_active_state (trigr->allow_patch_changes() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::launch_style)) {
-		_launch_style_button.set_active (launch_style_to_string (trigger()->launch_style()));
+		_launch_style_button.set_active (launch_style_to_string (trigr->launch_style()));
 	}
 
 	if (pc.contains (Properties::follow_action0)) {
-		_follow_left.set_text (follow_action_to_string (trigger()->follow_action0 (), true));
+		_follow_left.set_text (follow_action_to_string (trigr->follow_action0 (), true));
 
 		/* set widget sensitivity based on 'left' follow action */
-		bool follow_widgets_sensitive = trigger()->follow_action0 ().type != FollowAction::None;
+		bool follow_widgets_sensitive = trigr->follow_action0 ().type != FollowAction::None;
 		if (follow_widgets_sensitive) {
 			_follow_right.set_sensitive(true);
 			_follow_count_spinner.set_sensitive(true);
@@ -692,11 +699,11 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 	}
 
 	if (pc.contains (Properties::follow_action1)) {
-		_follow_right.set_text (follow_action_to_string (trigger()->follow_action1 (), true));
+		_follow_right.set_text (follow_action_to_string (trigr->follow_action1 (), true));
 	}
 
 	if (pc.contains (Properties::velocity_effect)) {
-		_velocity_adjustment.set_value (trigger()->velocity_effect());
+		_velocity_adjustment.set_value (trigr->velocity_effect());
 	}
 
 	if (pc.contains (Properties::follow_action_probability)) {
@@ -723,6 +730,8 @@ SlotPropertyWindow::SlotPropertyWindow (TriggerReference tref)
 {
 	TriggerPtr trigger (tref.trigger());
 
+	assert (trigger);
+
 	set_title (string_compose (_("Trigger Slot: %1"), trigger->name()));
 
 	SlotPropertiesBox* slot_prop_box = manage (new SlotPropertiesBox ());
@@ -736,27 +745,31 @@ SlotPropertyWindow::SlotPropertyWindow (TriggerReference tref)
 	int col = 0;
 	table->attach(*slot_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
 
-	if (trigger->region()) {
-		if (trigger->region()->data_type() == DataType::AUDIO) {
+	if (trigger->the_region()) {
+		if (trigger->the_region()->data_type() == DataType::AUDIO) {
 			_trig_box = manage(new AudioTriggerPropertiesBox ());
 			_ops_box = manage(new AudioRegionOperationsBox ());
 			_trim_box = manage(new AudioClipEditorBox ());
 
 			_trig_box->set_trigger (tref);
+			_trim_box->set_region(trigger->the_region(), tref);
+			_ops_box->set_session(&trigger->the_region()->session());
+
+			table->attach(*_trig_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+			table->attach(*_ops_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+			table->attach(*_trim_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+
 		} else {
 			_trig_box = manage(new MidiTriggerPropertiesBox ());
-			_ops_box = manage(new MidiRegionOperationsBox ());
-			_trim_box = manage(new MidiClipEditorBox ());
-
 			_trig_box->set_trigger (tref);
+
+			_midi_editor = new MidiCueEditor;
+
+			std::cerr << "here\n";
+
+			table->attach(*_trig_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+			table->attach(_midi_editor->viewport(),   col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
 		}
-
-		_trim_box->set_region(trigger->region(), tref);
-		_ops_box->set_session(&trigger->region()->session());
-
-		table->attach(*_trig_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-		table->attach(*_trim_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-		table->attach(*_ops_box,   col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
 	}
 
 	add (*table);

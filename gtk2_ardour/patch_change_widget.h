@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtkardour_patch_change_widget_h__
-#define __gtkardour_patch_change_widget_h__
+#pragma once
 
 #include <gtkmm/box.h>
 #include <gtkmm/notebook.h>
@@ -212,4 +211,3 @@ private:
 	PatchChangeWidget     w;
 };
 
-#endif

@@ -114,8 +114,6 @@ public:
   /** Returns whether @a item is drawn as a line, or just blank. 
    * See set_draw().
    * 
-   * @newin{2,4}
-   * 
    * @return <tt>true</tt> if @a item is drawn as a line, or just blank.
    */
   bool get_draw() const;
@@ -123,8 +121,6 @@ public:
   /** Whether @a item is drawn as a vertical line, or just blank.
    * Setting this to <tt>false</tt> along with Gtk::ToolItem::set_expand() is useful
    * to create an item that forces following items to the end of the toolbar.
-   * 
-   * @newin{2,4}
    * 
    * @param draw Whether @a item is drawn as a vertical line.
    */

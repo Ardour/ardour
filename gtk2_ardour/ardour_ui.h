@@ -30,8 +30,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gui_h__
-#define __ardour_gui_h__
+#pragma once
 
 #include <time.h>
 
@@ -47,8 +46,6 @@
 
 #include <list>
 #include <cmath>
-
-#include <boost/utility.hpp>
 
 #include "pbd/xml++.h"
 #include <gtkmm/box.h>
@@ -260,7 +257,7 @@ public:
 	   need to respond to Escape in some way (e.g. break drag, clear
 	   selection, etc) should connect to and handle this.
 	*/
-	PBD::Signal0<void> Escape;
+	PBD::Signal<void()> Escape;
 
 	PublicEditor&	  the_editor() { return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }
@@ -274,8 +271,6 @@ public:
 	void show_plugin_manager();
 
 	void reset_focus (Gtk::Widget*);
-
-	static PublicEditor* _instance;
 
 	/** Emitted frequently with the audible sample, false, and the edit point as
 	 *  parameters respectively.
@@ -956,4 +951,3 @@ private:
 	PBD::ScopedConnectionList clock_state_connection;
 };
 
-#endif /* __ardour_gui_h__ */

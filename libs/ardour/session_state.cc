@@ -145,6 +145,7 @@
 #include "ardour/user_bundle.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
+#include "ardour/wrong_program.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -201,16 +202,16 @@ Session::pre_engine_init (string fullpath)
 	_speakers->setup_default_speakers (2);
 
 	_solo_cut_control.reset (new ProxyControllable (_("solo cut control (dB)"), PBD::Controllable::GainLike,
-				boost::bind (&RCConfiguration::set_solo_mute_gain, Config, _1),
-				boost::bind (&RCConfiguration::get_solo_mute_gain, Config)));
+				std::bind (&RCConfiguration::set_solo_mute_gain, Config, _1),
+				std::bind (&RCConfiguration::get_solo_mute_gain, Config)));
 	add_controllable (_solo_cut_control);
 
 	/* These are all static "per-class" signals */
 
-	SourceFactory::SourceCreated.connect_same_thread (*this, boost::bind (&Session::add_source, this, _1));
-	PlaylistFactory::PlaylistCreated.connect_same_thread (*this, boost::bind (&Session::add_playlist, this, _1));
-	AutomationList::AutomationListCreated.connect_same_thread (*this, boost::bind (&Session::add_automation_list, this, _1));
-	IO::PortCountChanged.connect_same_thread (*this, boost::bind (&Session::ensure_buffers, this, _1));
+	SourceFactory::SourceCreated.connect_same_thread (*this, std::bind (&Session::add_source, this, _1));
+	PlaylistFactory::PlaylistCreated.connect_same_thread (*this, std::bind (&Session::add_playlist, this, _1));
+	AutomationList::AutomationListCreated.connect_same_thread (*this, std::bind (&Session::add_automation_list, this, _1));
+	IO::PortCountChanged.connect_same_thread (*this, std::bind (&Session::ensure_buffers, this, _1));
 
 	/* stop IO objects from doing stuff until we're ready for them */
 
@@ -235,14 +236,14 @@ Session::post_engine_init ()
 	msc->set_input_port (std::dynamic_pointer_cast<MidiPort>(scene_input_port()));
 	msc->set_output_port (std::dynamic_pointer_cast<MidiPort>(scene_output_port()));
 
-	boost::function<samplecnt_t(void)> timer_func (boost::bind (&Session::audible_sample, this, (bool*)(0)));
+	std::function<samplecnt_t(void)> timer_func (std::bind (&Session::audible_sample, this, (bool*)(0)));
 	std::dynamic_pointer_cast<AsyncMIDIPort>(scene_input_port())->set_timer (timer_func);
 
 	setup_midi_machine_control ();
 
 	/* setup MTC generator */
 	mtc_tx_resync_latency (true);
-	LatencyUpdated.connect_same_thread (*this, boost::bind (&Session::mtc_tx_resync_latency, this, _1));
+	LatencyUpdated.connect_same_thread (*this, std::bind (&Session::mtc_tx_resync_latency, this, _1));
 
 	if (_butler->start_thread()) {
 		error << _("Butler did not start") << endmsg;
@@ -257,8 +258,8 @@ Session::post_engine_init ()
 	setup_click_sounds (0);
 	setup_midi_control ();
 
-	_engine.Halted.connect_same_thread (*this, boost::bind (&Session::engine_halted, this));
-	_engine.Xrun.connect_same_thread (*this, boost::bind (&Session::xrun_recovery, this));
+	_engine.Halted.connect_same_thread (*this, std::bind (&Session::engine_halted, this));
+	_engine.Xrun.connect_same_thread (*this, std::bind (&Session::xrun_recovery, this));
 
 
 	try {
@@ -269,10 +270,9 @@ Session::post_engine_init ()
 
 		/* crossfades require sample rate knowledge */
 
-		_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this, true));
-		_engine.MidiSelectionPortsChanged.connect_same_thread (*this, boost::bind (&Session::rewire_midi_selection_ports, this));
+		_engine.GraphReordered.connect_same_thread (*this, std::bind (&Session::graph_reordered, this, true));
+		_engine.MidiSelectionPortsChanged.connect_same_thread (*this, std::bind (&Session::rewire_midi_selection_ports, this));
 
-		DiskReader::allocate_working_buffers();
 		refresh_disk_space ();
 
 		/* we're finally ready to call set_state() ... all objects have
@@ -304,8 +304,8 @@ Session::post_engine_init ()
 
 		/* ENGINE */
 
-		boost::function<void (std::string)> ff (boost::bind (&Session::config_changed, this, _1, false));
-		boost::function<void (std::string)> ft (boost::bind (&Session::config_changed, this, _1, true));
+		std::function<void (std::string)> ff (std::bind (&Session::config_changed, this, _1, false));
+		std::function<void (std::string)> ft (std::bind (&Session::config_changed, this, _1, true));
 
 		Config->map_parameters (ff);
 		config.map_parameters (ft);
@@ -355,7 +355,7 @@ Session::post_engine_init ()
 		 * could start talking to surfaces if they want to.
 		 */
 
-		ControlProtocolManager::instance().midi_connectivity_established ();
+		ControlProtocolManager::instance().midi_connectivity_established (true);
 
 		if (_is_new && !no_auto_connect()) {
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock());
@@ -368,9 +368,9 @@ Session::post_engine_init ()
 
 		initialize_latencies ();
 
-		_locations->added.connect_same_thread (*this, boost::bind (&Session::location_added, this, _1));
-		_locations->removed.connect_same_thread (*this, boost::bind (&Session::location_removed, this, _1));
-		_locations->changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
+		_locations->added.connect_same_thread (*this, std::bind (&Session::location_added, this, _1));
+		_locations->removed.connect_same_thread (*this, std::bind (&Session::location_removed, this, _1));
+		_locations->changed.connect_same_thread (*this, std::bind (&Session::locations_changed, this));
 
 		if (synced_to_engine()) {
 			_engine.transport_stop ();
@@ -384,6 +384,9 @@ Session::post_engine_init ()
 	} catch (ProcessorException const & e) {
 		error << e.what() << endmsg;
 		return -8;
+	} catch (WrongProgram const & wp) {
+		error << wp.what() << endmsg;
+		return -9;
 	} catch (std::exception const & e) {
 		error << _("Unexpected exception during session setup: ") << e.what() << endmsg;
 		return -6;
@@ -404,8 +407,6 @@ Session::post_engine_init ()
 	/* Can't do this until the trigger input MIDI port is set up */
 	TriggerBox::static_init (*this);
 
-	set_clean ();
-
 	/* Now, finally, we can [ask the butler to] fill the playback buffers */
 
 	BootMessage (_("Filling playback buffers"));
@@ -418,9 +419,9 @@ Session::post_engine_init ()
 void
 Session::session_loaded ()
 {
-	SessionLoaded();
-
 	set_clean ();
+
+	SessionLoaded();
 
 	if (_is_new) {
 		save_state ("");
@@ -750,7 +751,9 @@ Session::remove_state (string snapshot_name)
 				xml_path, g_strerror (errno)) << endmsg;
 	}
 
-	StateSaved (snapshot_name); /* EMIT SIGNAL */
+	if (!_no_save_signal) {
+		StateSaved (snapshot_name); /* EMIT SIGNAL */
+	}
 }
 
 /** @param snapshot_name Name to save under, without .ardour / .pending prefix */
@@ -923,7 +926,9 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 			unset_dirty (/* EMIT SIGNAL */ true);
 		}
 
-		StateSaved (snapshot_name); /* EMIT SIGNAL */
+		if (!_no_save_signal) {
+			StateSaved (snapshot_name); /* EMIT SIGNAL */
+		}
 	}
 
 #ifndef NDEBUG
@@ -973,7 +978,7 @@ Session::load_state (string snapshot_name, bool from_template)
 
 		/* there is pending state from a crashed capture attempt */
 
-		boost::optional<int> r = AskAboutPendingState();
+		std::optional<int> r = AskAboutPendingState();
 		if (r.value_or (1)) {
 			state_was_pending = true;
 		} else {
@@ -1180,7 +1185,7 @@ void
 Session::collect_sources_of_this_snapshot (set<std::shared_ptr<Source>>& s, bool incl_unused) const
 {
 	_playlists->sync_all_regions_with_regions ();
-	_playlists->foreach (boost::bind (merge_all_sources, _1, &s), incl_unused);
+	_playlists->foreach (std::bind (merge_all_sources, _1, &s), incl_unused);
 
 	std::shared_ptr<RouteList const> rl = routes.reader();
 	for (auto const& r : *rl) {
@@ -1216,7 +1221,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 	child = node->add_child ("ProgramVersion");
 	child->set_property("created-with", created_with);
 
-	std::string modified_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
+	modified_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 	child->set_property("modified-with", modified_with);
 
 	/* store configuration settings */
@@ -1712,7 +1717,7 @@ Session::set_state (const XMLNode& node, int version)
 		bool reconfigured = false;
 
 		while (!AudioEngine::instance()->running () || _base_sample_rate != AudioEngine::instance()->sample_rate ()) {
-			boost::optional<int> r = AskAboutSampleRateMismatch (_base_sample_rate, _current_sample_rate);
+			std::optional<int> r = AskAboutSampleRateMismatch (_base_sample_rate, _current_sample_rate);
 			int rv = r.value_or (0);
 			if (rv == 0 && AudioEngine::instance()->running ()) {
 				/* continue with rate mismatch */
@@ -1781,6 +1786,13 @@ Session::set_state (const XMLNode& node, int version)
 	created_with = "unknown";
 	if ((child = find_named_node (node, "ProgramVersion")) != 0) {
 		child->get_property (X_("created-with"), created_with);
+
+ 		child->get_property (X_("modified-with"), modified_with);
+#if 0
+		if (modified_with.rfind (PROGRAM_NAME, 0) != 0) {
+			throw WrongProgram (modified_with);
+		}
+#endif
 	}
 
 	setup_raid_path(_session_dir->root_path());
@@ -2080,7 +2092,7 @@ Session::set_state (const XMLNode& node, int version)
 			std::shared_ptr<IOPlug> iop = std::make_shared<IOPlug>(*this);
 			if (0 == iop->set_state (**n, version)) {
 				iopl->push_back (iop);
-				iop->LatencyChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, this, true, false));
+				iop->LatencyChanged.connect_same_thread (*this, std::bind (&Session::update_latency_compensation, this, true, false));
 			} else {
 				/* TODO Unknown I/O Plugin, retain state */
 			}
@@ -2159,7 +2171,7 @@ Session::load_routes (const XMLNode& node, int version)
 		std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (*r);
 		bool is_midi_route = (*r)->n_inputs().n_midi() > 0 && (*r)->n_inputs().n_midi() > 0;
 		if (mt || is_midi_route) {
-			(*r)->output()->changed.connect_same_thread (*this, boost::bind (&Session::midi_output_change_handler, this, _1, _2, std::weak_ptr<Route>(*r)));
+			(*r)->output()->changed.connect_same_thread (*this, std::bind (&Session::midi_output_change_handler, this, _1, _2, std::weak_ptr<Route>(*r)));
 		}
 	}
 
@@ -3273,9 +3285,9 @@ Session::add_route_group (RouteGroup* g)
 	_route_groups.push_back (g);
 	route_group_added (g); /* EMIT SIGNAL */
 
-	g->RouteAdded.connect_same_thread (*this, boost::bind (&Session::route_added_to_route_group, this, _1, _2));
-	g->RouteRemoved.connect_same_thread (*this, boost::bind (&Session::route_removed_from_route_group, this, _1, _2));
-	g->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::route_group_property_changed, this, g));
+	g->RouteAdded.connect_same_thread (*this, std::bind (&Session::route_added_to_route_group, this, _1, _2));
+	g->RouteRemoved.connect_same_thread (*this, std::bind (&Session::route_removed_from_route_group, this, _1, _2));
+	g->PropertyChanged.connect_same_thread (*this, std::bind (&Session::route_group_property_changed, this, g));
 
 	set_dirty ();
 }
@@ -3323,158 +3335,6 @@ RouteGroup&
 Session::all_route_group() const
 {
 	return *_all_route_group;
-}
-
-void
-Session::add_commands (vector<Command*> const & cmds)
-{
-	for (vector<Command*>::const_iterator i = cmds.begin(); i != cmds.end(); ++i) {
-		add_command (*i);
-	}
-}
-
-void
-Session::add_command (Command* const cmd)
-{
-	assert (_current_trans);
-	if (!_current_trans) {
-		error << "Attempted to add an UNDO command without a current transaction.  ignoring command (" << cmd->name() <<  ")" << endl;
-		return;
-	}
-	DEBUG_TRACE (DEBUG::UndoHistory,
-	    string_compose ("Current Undo Transaction %1, adding command: %2\n",
-	                    _current_trans->name (),
-	                    cmd->name ()));
-	_current_trans->add_command (cmd);
-}
-
-PBD::StatefulDiffCommand*
-Session::add_stateful_diff_command (std::shared_ptr<PBD::StatefulDestructible> sfd)
-{
-	PBD::StatefulDiffCommand* cmd = new PBD::StatefulDiffCommand (sfd);
-	add_command (cmd);
-	return cmd;
-}
-
-void
-Session::begin_reversible_command (const string& name)
-{
-	begin_reversible_command (g_quark_from_string (name.c_str ()));
-}
-
-/** Begin a reversible command using a GQuark to identify it.
- *  begin_reversible_command() and commit_reversible_command() calls may be nested,
- *  but there must be as many begin...()s as there are commit...()s.
- */
-void
-Session::begin_reversible_command (GQuark q)
-{
-	if (_current_trans) {
-#ifndef NDEBUG
-		cerr << "An UNDO transaction was started while a prior command was underway. Aborting command (" << g_quark_to_string (q) << ") and prior (" << _current_trans->name() << ")" << "\n";
-#else
-		PBD::warning << "An UNDO transaction was started while a prior command was underway. Aborting command (" << g_quark_to_string (q) << ") and prior (" << _current_trans->name() << ")" << endmsg;
-#endif
-		abort_reversible_command();
-		assert (false);
-		return;
-	}
-
-	/* If nested begin/commit pairs are used, we create just one UndoTransaction
-	   to hold all the commands that are committed.  This keeps the order of
-	   commands correct in the history.
-	*/
-
-	if (_current_trans == 0) {
-		DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("Begin Reversible Command, new transaction: %1\n", g_quark_to_string (q)));
-
-		/* start a new transaction */
-		assert (_current_trans_quarks.empty ());
-		_current_trans = new UndoTransaction();
-		_current_trans->set_name (g_quark_to_string (q));
-	} else {
-		DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("Begin Reversible Command, current transaction: %1\n", _current_trans->name ()));
-	}
-
-	_current_trans_quarks.push_front (q);
-}
-
-void
-Session::abort_reversible_command ()
-{
-	if (!_current_trans) {
-		return;
-	}
-	DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("Abort Reversible Command: %1\n", _current_trans->name ()));
-	_current_trans->clear();
-	delete _current_trans;
-	_current_trans = nullptr;
-	_current_trans_quarks.clear();
-}
-
-bool
-Session::abort_empty_reversible_command ()
-{
-	if (!collected_undo_commands ()) {
-		abort_reversible_command ();
-		return true;
-	}
-	return false;
-}
-
-void
-Session::commit_reversible_command (Command *cmd)
-{
-	assert (_current_trans);
-	assert (!_current_trans_quarks.empty ());
-	if (!_current_trans) {
-		return;
-	}
-
-	struct timeval now;
-
-	if (cmd) {
-		DEBUG_TRACE (DEBUG::UndoHistory,
-		    string_compose ("Current Undo Transaction %1, adding command: %2\n",
-		                    _current_trans->name (),
-		                    cmd->name ()));
-		_current_trans->add_command (cmd);
-	}
-
-	DEBUG_TRACE (DEBUG::UndoHistory,
-	    string_compose ("Commit Reversible Command, current transaction: %1\n",
-	                    _current_trans->name ()));
-
-	_current_trans_quarks.pop_front ();
-
-	if (!_current_trans_quarks.empty ()) {
-		DEBUG_TRACE (DEBUG::UndoHistory,
-		    string_compose ("Commit Reversible Command, transaction is not "
-		                    "top-level, current transaction: %1\n",
-		                    _current_trans->name ()));
-		/* the transaction we're committing is not the top-level one */
-		return;
-	}
-
-	if (_current_trans->empty()) {
-		/* no commands were added to the transaction, so just get rid of it */
-		DEBUG_TRACE (DEBUG::UndoHistory,
-		    string_compose ("Commit Reversible Command, No commands were "
-		                    "added to current transaction: %1\n",
-		                    _current_trans->name ()));
-		delete _current_trans;
-		_current_trans = nullptr;
-		return;
-	}
-
-	gettimeofday (&now, 0);
-	_current_trans->set_timestamp (now);
-
-	DEBUG_TRACE (DEBUG::UndoHistory,
-	             string_compose ("Commit Reversible Command, add to history %1\n",
-	                             _current_trans->name ()));
-	_history.add (_current_trans);
-	_current_trans = nullptr;
 }
 
 static bool
@@ -3622,7 +3482,7 @@ struct RegionCounter {
 int
 Session::ask_about_playlist_deletion (std::shared_ptr<Playlist> p)
 {
-	boost::optional<int> r = AskAboutPlaylistDeletion (p);
+	std::optional<int> r = AskAboutPlaylistDeletion (p);
 	return r.value_or (1);
 }
 
@@ -3777,7 +3637,7 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	/* consider deleting all unused playlists */
 
-	if (_playlists->maybe_delete_unused (boost::bind (Session::ask_about_playlist_deletion, _1))) {
+	if (_playlists->maybe_delete_unused (std::bind (Session::ask_about_playlist_deletion, _1))) {
 		ret = 0;
 		goto out;
 	}
@@ -3941,8 +3801,6 @@ Session::cleanup_sources (CleanupReport& rep)
 			unused.push_back (spath);
 		}
 	}
-
-	cerr << "Actually unused: " << unused.size() << endl;
 
 	if (unused.empty()) {
 		/* Nothing to do */
@@ -4569,7 +4427,7 @@ Session::config_changed (std::string p, bool ours)
 		bool have_ms = _monitor_out ? true : false;
 		if (loading ()) {
 			/* When loading an existing session, the config "use-monitor-bus"
-			 * is ignored. Instead the sesion-state (xml) will have added the
+			 * is ignored. Instead the session-state (xml) will have added the
 			 * "monitor-route" and restored its state (and connections)
 			 * if the session has a monitor-section.
 			 * Update the config to reflect this.
@@ -4598,7 +4456,7 @@ Session::config_changed (std::string p, bool ours)
 		bool have_sm = _surround_master ? true : false;
 		if (loading ()) {
 			/* When loading an existing session, the config "use-surround-master"
-			 * is ignored. Instead the sesion-state (xml) will have added the
+			 * is ignored. Instead the session-state (xml) will have added the
 			 * "surround-master" and restored its state (and connections)
 			 * if the session has a surround master..
 			 * Update the config to reflect this.
@@ -4633,7 +4491,6 @@ Session::config_changed (std::string p, bool ours)
 		}
 	} else if (p == "default-time-domain") {
 		Temporal::TimeDomain td = config.get_default_time_domain ();
-		std::cerr << "Setting time domain\n";
 		set_time_domain (td);
 		Config->set_preferred_time_domain(td);  /* sync the global default time domain to this newly chosen one */
 	}
@@ -4667,25 +4524,25 @@ Session::setup_midi_machine_control ()
 
 	_mmc->set_ports (mmc_in, mmc_out);
 
-	_mmc->Play.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
-	_mmc->DeferredPlay.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
-	_mmc->Stop.connect_same_thread (*this, boost::bind (&Session::mmc_stop, this, _1));
-	_mmc->FastForward.connect_same_thread (*this, boost::bind (&Session::mmc_fast_forward, this, _1));
-	_mmc->Rewind.connect_same_thread (*this, boost::bind (&Session::mmc_rewind, this, _1));
-	_mmc->Pause.connect_same_thread (*this, boost::bind (&Session::mmc_pause, this, _1));
-	_mmc->RecordPause.connect_same_thread (*this, boost::bind (&Session::mmc_record_pause, this, _1));
-	_mmc->RecordStrobe.connect_same_thread (*this, boost::bind (&Session::mmc_record_strobe, this, _1));
-	_mmc->RecordExit.connect_same_thread (*this, boost::bind (&Session::mmc_record_exit, this, _1));
-	_mmc->Locate.connect_same_thread (*this, boost::bind (&Session::mmc_locate, this, _1, _2));
-	_mmc->Step.connect_same_thread (*this, boost::bind (&Session::mmc_step, this, _1, _2));
-	_mmc->Shuttle.connect_same_thread (*this, boost::bind (&Session::mmc_shuttle, this, _1, _2, _3));
-	_mmc->TrackRecordStatusChange.connect_same_thread (*this, boost::bind (&Session::mmc_record_enable, this, _1, _2, _3));
+	_mmc->Play.connect_same_thread (*this, std::bind (&Session::mmc_deferred_play, this, _1));
+	_mmc->DeferredPlay.connect_same_thread (*this, std::bind (&Session::mmc_deferred_play, this, _1));
+	_mmc->Stop.connect_same_thread (*this, std::bind (&Session::mmc_stop, this, _1));
+	_mmc->FastForward.connect_same_thread (*this, std::bind (&Session::mmc_fast_forward, this, _1));
+	_mmc->Rewind.connect_same_thread (*this, std::bind (&Session::mmc_rewind, this, _1));
+	_mmc->Pause.connect_same_thread (*this, std::bind (&Session::mmc_pause, this, _1));
+	_mmc->RecordPause.connect_same_thread (*this, std::bind (&Session::mmc_record_pause, this, _1));
+	_mmc->RecordStrobe.connect_same_thread (*this, std::bind (&Session::mmc_record_strobe, this, _1));
+	_mmc->RecordExit.connect_same_thread (*this, std::bind (&Session::mmc_record_exit, this, _1));
+	_mmc->Locate.connect_same_thread (*this, std::bind (&Session::mmc_locate, this, _1, _2));
+	_mmc->Step.connect_same_thread (*this, std::bind (&Session::mmc_step, this, _1, _2));
+	_mmc->Shuttle.connect_same_thread (*this, std::bind (&Session::mmc_shuttle, this, _1, _2, _3));
+	_mmc->TrackRecordStatusChange.connect_same_thread (*this, std::bind (&Session::mmc_record_enable, this, _1, _2, _3));
 
 	/* also handle MIDI SPP because its so common */
 
-	_mmc->SPPStart.connect_same_thread (*this, boost::bind (&Session::spp_start, this));
-	_mmc->SPPContinue.connect_same_thread (*this, boost::bind (&Session::spp_continue, this));
-	_mmc->SPPStop.connect_same_thread (*this, boost::bind (&Session::spp_stop, this));
+	_mmc->SPPStart.connect_same_thread (*this, std::bind (&Session::spp_start, this));
+	_mmc->SPPContinue.connect_same_thread (*this, std::bind (&Session::spp_continue, this));
+	_mmc->SPPStop.connect_same_thread (*this, std::bind (&Session::spp_stop, this));
 }
 
 std::shared_ptr<Controllable>
@@ -5091,7 +4948,7 @@ typedef std::vector<std::shared_ptr<FileSource> > SeveralFileSources;
 typedef std::map<std::string,SeveralFileSources> SourcePathMap;
 
 int
-Session::bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,string)> callback)
+Session::bring_all_sources_into_session (std::function<void(uint32_t,uint32_t,string)> callback)
 {
 	uint32_t total = 0;
 	uint32_t n = 0;
@@ -5439,7 +5296,7 @@ Session::save_as (SaveAs& saveas)
 
 					/* tell someone "X percent, file M of N"; M is one-based */
 
-					boost::optional<bool> res = saveas.Progress (fraction, cnt, all);
+					std::optional<bool> res = saveas.Progress (fraction, cnt, all);
 
 					if (res) {
 						keep_going = *res;
@@ -5530,7 +5387,7 @@ Session::save_as (SaveAs& saveas)
 		save_default_options ();
 
 		if (saveas.copy_media && saveas.copy_external) {
-			if (bring_all_sources_into_session (boost::bind (&Session::save_as_bring_callback, this, _1, _2, _3))) {
+			if (bring_all_sources_into_session (std::bind (&Session::save_as_bring_callback, this, _1, _2, _3))) {
 				throw Glib::FileError (Glib::FileError::NO_SPACE_LEFT, "consolidate failed");
 			}
 		}
@@ -5539,11 +5396,18 @@ Session::save_as (SaveAs& saveas)
 
 		store_recent_sessions (_name, _path);
 
+		std::cerr << "Saveas, switch to: " << saveas.switch_to << std::endl;
+
 		if (!saveas.switch_to) {
+
+			std::cerr << "no switch to!\n";
 
 			/* save the new state */
 
-			save_state ("", false, false, !saveas.include_media);
+			{
+				PBD::Unwinder<bool> uw (_no_save_signal, true);
+				save_state ("", false, false, !saveas.include_media);
+			}
 
 			/* switch back to the way things were */
 

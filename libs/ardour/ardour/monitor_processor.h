@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_monitor_processor_h__
-#define __ardour_monitor_processor_h__
+#pragma once
 
 #include <algorithm>
 #include <iostream>
@@ -158,7 +157,7 @@ public:
 
 	bool monitor_active () const { return _monitor_active; }
 
-	PBD::Signal0<void> Changed;
+	PBD::Signal<void()> Changed;
 
 	std::shared_ptr<PBD::Controllable> channel_cut_control (uint32_t) const;
 	std::shared_ptr<PBD::Controllable> channel_dim_control (uint32_t) const;
@@ -236,4 +235,3 @@ private:
 
 } /* namespace */
 
-#endif /* __ardour_monitor_processor_h__ */

@@ -44,7 +44,7 @@ typedef struct _GdkPangoRendererPrivate GdkPangoRendererPrivate;
 /**
  * GdkPangoRenderer:
  *
- * #GdkPangoRenderer is a subclass of #PangoRenderer used for rendering
+ * GdkPangoRenderer is a subclass of PangoRenderer used for rendering
  * Pango objects into GDK drawables. The default renderer for a particular
  * screen is obtained with gdk_pango_renderer_get_default(); Pango
  * functions like pango_renderer_draw_layout() and

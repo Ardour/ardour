@@ -70,21 +70,21 @@ struct _GtkMessageDialogClass
 
 /**
  * GtkButtonsType:
- * @GTK_BUTTONS_NONE: no buttons at all
- * @GTK_BUTTONS_OK: an OK button
- * @GTK_BUTTONS_CLOSE: a Close button
- * @GTK_BUTTONS_CANCEL: a Cancel button
- * @GTK_BUTTONS_YES_NO: Yes and No buttons
- * @GTK_BUTTONS_OK_CANCEL: OK and Cancel buttons
+ * @param GTK_BUTTONS_NONE: no buttons at all
+ * @param GTK_BUTTONS_OK: an OK button
+ * @param GTK_BUTTONS_CLOSE: a Close button
+ * @param GTK_BUTTONS_CANCEL: a Cancel button
+ * @param GTK_BUTTONS_YES_NO: Yes and No buttons
+ * @param GTK_BUTTONS_OK_CANCEL: OK and Cancel buttons
  *
  * Prebuilt sets of buttons for the dialog. If
  * none of these choices are appropriate, simply use %GTK_BUTTONS_NONE
  * then call gtk_dialog_add_buttons().
- * <note>
+ *
+ * \note
  *  Please note that %GTK_BUTTONS_OK, %GTK_BUTTONS_YES_NO
- *  and %GTK_BUTTONS_OK_CANCEL are discouraged by the
- *  <ulink url="http://library.gnome.org/devel/hig-book/stable/">GNOME HIG</ulink>.
- * </note>
+ *  and %GTK_BUTTONS_OK_CANCEL are discouraged by the GNOME HIG.
+ *
  */
 typedef enum
 {

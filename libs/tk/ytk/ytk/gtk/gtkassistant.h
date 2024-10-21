@@ -43,14 +43,14 @@ G_BEGIN_DECLS
 
 /**
  * GtkAssistantPageType:
- * @GTK_ASSISTANT_PAGE_CONTENT: The page has regular contents.
- * @GTK_ASSISTANT_PAGE_INTRO: The page contains an introduction to the
+ * @param GTK_ASSISTANT_PAGE_CONTENT: The page has regular contents.
+ * @param GTK_ASSISTANT_PAGE_INTRO: The page contains an introduction to the
  *  assistant task.
- * @GTK_ASSISTANT_PAGE_CONFIRM: The page lets the user confirm or deny the
+ * @param GTK_ASSISTANT_PAGE_CONFIRM: The page lets the user confirm or deny the
  *  changes.
- * @GTK_ASSISTANT_PAGE_SUMMARY: The page informs the user of the changes
+ * @param GTK_ASSISTANT_PAGE_SUMMARY: The page informs the user of the changes
  *  done.
- * @GTK_ASSISTANT_PAGE_PROGRESS: Used for tasks that take a long time to
+ * @param GTK_ASSISTANT_PAGE_PROGRESS: Used for tasks that take a long time to
  *  complete, blocks the assistant until the page is marked as complete.
  *
  * An enum for determining the page role inside the #GtkAssistant. It's
@@ -107,8 +107,8 @@ struct _GtkAssistantClass
 
 /**
  * GtkAssistantPageFunc:
- * @current_page: The page number used to calculate the next page.
- * @data: user data.
+ * @param current_page: The page number used to calculate the next page.
+ * @param data: user data.
  *
  * A function used by gtk_assistant_set_forward_page_func() to know which
  * is the next page given a current one. It's called both for computing the

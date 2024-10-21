@@ -69,6 +69,9 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 		ForceFlat = 0x20,
 	};
 
+	static Tweaks default_tweaks;
+	static void set_default_tweaks (Tweaks t) { default_tweaks = t; }
+
 	Tweaks tweaks() const { return _tweaks; }
 	void set_tweaks (Tweaks);
 

@@ -232,6 +232,44 @@ ARDOUR::bump_name_number (const std::string& name)
 	return newname;
 }
 
+string
+ARDOUR::bump_name_abc (const std::string& name)
+{
+	/* A, B, C, .. Z,  A1, B1, .. Z1, A2 .. Z2, A3 .. */
+	static char const* abc = _("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+	if (name.empty ()) {
+		return {abc[0]};
+	}
+
+	/* check first char */
+	char first = toupper (name[0]);
+
+	char const* end = abc + strlen (abc);
+	char const* pos = std::find (abc, end, first);
+
+	/* first char is not in the given set. Start over */
+	if (pos == end) {
+		return {abc[0]};
+	}
+
+	++pos;
+	if (pos != end) {
+		string rv = name;
+		rv[0] = *pos;
+		return rv;
+	}
+
+	/* find number */
+	size_t num = 0;
+	if (name.length () > 1) {
+		num = strtol (name.c_str() + 1, (char **)NULL, 10);
+	}
+	++num;
+
+	return string_compose ("%1%2", abc[0], num);
+}
+
+
 XMLNode *
 ARDOUR::find_named_node (const XMLNode& node, string name)
 {
@@ -609,7 +647,13 @@ ARDOUR::native_header_format_extension (HeaderFormat hf, const DataType& type)
         case RF64:
         case RF64_WAV:
         case MBWF:
-                return ".rf64";
+	        /* our goal when using RF64 is to be able to fall back to a
+	           regular RIFF/WAV if the data size is small enough. Rather than
+	           confuse people in the common case where this happens by having
+	           files named "foo.rf64", deal with the common case as ".wav" and
+	           leave potential confusion for the actual RF64 files.
+	        */
+	        return ".wav";
         }
 
         fatal << string_compose (_("programming error: unknown native header format: %1"), hf);
@@ -694,6 +738,25 @@ ARDOUR::how_many_dsp_threads ()
         }
 
         return num_threads;
+}
+
+uint32_t
+ARDOUR::how_many_io_threads ()
+{
+	int num_cpu = hardware_concurrency();
+	int pu = Config->get_io_thread_count ();
+	uint32_t num_threads = max (num_cpu - 2, 2);
+	if (pu < 0) {
+		if (-pu < num_cpu) {
+			num_threads = num_cpu + pu;
+		}
+	} else if (pu == 0) {
+		num_threads = num_cpu;
+
+	} else {
+		num_threads = min (num_cpu, pu);
+	}
+	return num_threads;
 }
 
 double

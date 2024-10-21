@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_position_types_h__
-#define __libpbd_position_types_h__
+#pragma once
 
 #include <cstdlib>
 #include <stdint.h>
@@ -130,4 +129,3 @@ extern void setup_enum_writer ();
 
 std::ostream& operator<< (std::ostream& o, Temporal::ratio_t const & r);
 
-#endif /* __libpbd_position_types_h__ */

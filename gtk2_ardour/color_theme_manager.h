@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_color_manager_h__
-#define __ardour_gtk_color_manager_h__
+#pragma once
 
 #include <gtkmm/treeview.h>
 #include <gtkmm/treestore.h>
@@ -164,4 +163,3 @@ private:
 
 };
 
-#endif /* __ardour_gtk_color_manager_h__ */

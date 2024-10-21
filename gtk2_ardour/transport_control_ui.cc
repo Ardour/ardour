@@ -38,7 +38,7 @@ using namespace ArdourWidgets;
 
 TransportControlUI::TransportControlUI ()
 {
-	Config->ParameterChanged.connect (config_connection, MISSING_INVALIDATOR, boost::bind (&TransportControlUI::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (config_connection, MISSING_INVALIDATOR, std::bind (&TransportControlUI::parameter_changed, this, _1), gui_context());
 }
 
 void
@@ -178,11 +178,11 @@ TransportControlUI::set_session (ARDOUR::Session *s)
 		return;
 	}
 
-	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&TransportControlUI::parameter_changed, this, _1), gui_context());
-	_session->StepEditStatusChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&TransportControlUI::step_edit_status_change, this, _1), gui_context());
-	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&TransportControlUI::map_transport_state, this), gui_context());
-	_session->auto_loop_location_changed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&TransportControlUI::set_loop_sensitivity, this), gui_context ());
-	_session->PunchLoopConstraintChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&TransportControlUI::set_loop_sensitivity, this), gui_context ());
+	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&TransportControlUI::parameter_changed, this, _1), gui_context());
+	_session->StepEditStatusChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&TransportControlUI::step_edit_status_change, this, _1), gui_context());
+	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&TransportControlUI::map_transport_state, this), gui_context());
+	_session->auto_loop_location_changed.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&TransportControlUI::set_loop_sensitivity, this), gui_context ());
+	_session->PunchLoopConstraintChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&TransportControlUI::set_loop_sensitivity, this), gui_context ());
 
 	rec_button.set_sensitive (true);
 }
@@ -306,20 +306,20 @@ TransportControlUI::blink_rec_enable (bool onoff)
 		return;
 	}
 
-	Session::RecordState const r = _session->record_status ();
+	RecordState const r = _session->record_status ();
 	bool const h = _session->have_rec_enabled_track ();
 
 	if (UIConfiguration::instance().get_no_strobe()) {
 		onoff = true;
 	}
 
-	if (r == Session::Enabled || (r == Session::Recording && !h)) {
+	if (r == Enabled || (r == Recording && !h)) {
 		if (onoff) {
 			rec_button.set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
 			rec_button.set_active_state (Gtkmm2ext::Off);
 		}
-	} else if (r == Session::Recording && h) {
+	} else if (r == Recording && h) {
 		rec_button.set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		rec_button.unset_active_state ();

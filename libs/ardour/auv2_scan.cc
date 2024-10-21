@@ -37,15 +37,6 @@
 
 #undef nil
 
-#ifdef COREAUDIO105
-#define ArdourComponent Component
-#define ArdourDescription ComponentDescription
-#define ArdourFindNext FindNextComponent
-#else
-#define ArdourComponent AudioComponent
-#define ArdourDescription AudioComponentDescription
-#define ArdourFindNext AudioComponentFindNext
-#endif
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
@@ -157,41 +148,18 @@ ARDOUR::auv2_stringify_descriptor (CAComponentDescription const& desc)
 }
 
 static void
-#ifdef COREAUDIO105
-get_names (CAComponentDescription& comp_desc, std::string& name, std::string& maker)
-#else
-get_names (ArdourComponent& comp, std::string& name, std::string& maker)
-#endif
+get_names (AudioComponent& comp, std::string& name, std::string& maker)
 {
 	CFStringRef itemName = NULL;
 	// Marc Poirier-style item name
-#ifdef COREAUDIO105
-	CAComponent auComponent (comp_desc);
-	if (auComponent.IsValid()) {
-		CAComponentDescription dummydesc;
-		Handle nameHandle = NewHandle(sizeof(void*));
-		if (nameHandle != NULL) {
-			OSErr err = GetComponentInfo(auComponent.Comp(), &dummydesc, nameHandle, NULL, NULL);
-			if (err == noErr) {
-				ConstStr255Param nameString = (ConstStr255Param) (*nameHandle);
-				if (nameString != NULL) {
-					itemName = CFStringCreateWithPascalString(kCFAllocatorDefault, nameString, CFStringGetSystemEncoding());
-				}
-			}
-			DisposeHandle(nameHandle);
-		}
-	}
-#else
 	assert (comp);
 	AudioComponentCopyName (comp, &itemName);
-#endif
 
 	// if Marc-style fails, do the original way
 	if (itemName == NULL) {
-#ifndef COREAUDIO105
 		CAComponentDescription comp_desc;
 		AudioComponentGetDescription (comp, &comp_desc);
-#endif
+
 		CFStringRef compTypeString = UTCreateStringForOSType(comp_desc.componentType);
 		CFStringRef compSubTypeString = UTCreateStringForOSType(comp_desc.componentSubType);
 		CFStringRef compManufacturerString = UTCreateStringForOSType(comp_desc.componentManufacturer);
@@ -228,7 +196,7 @@ get_names (ArdourComponent& comp, std::string& name, std::string& maker)
 }
 
 static void
-auv2_plugin_info (ArdourComponent& comp, CAComponentDescription& desc, std::vector<ARDOUR::AUv2Info>& rv, bool verbose)
+auv2_plugin_info (AudioComponent& comp, CAComponentDescription& desc, std::vector<ARDOUR::AUv2Info>& rv, bool verbose)
 {
 	ARDOUR::AUv2Info info;
 
@@ -264,20 +232,12 @@ auv2_plugin_info (ArdourComponent& comp, CAComponentDescription& desc, std::vect
 	}
 	info.id = ARDOUR::auv2_stringify_descriptor (desc);
 
-#ifdef COREAUDIO105
-	get_names (desc, info.name, info.creator);
-#else
 	get_names (comp, info.name, info.creator);
-#endif
 
 	CAComponent cacomp (desc);
 
 	UInt32 version;
-#ifdef COREAUDIO105
-	if (cacomp.GetResourceVersion (version) != noErr)
-#else
 	if (cacomp.GetVersion (version) != noErr)
-#endif
 	{
 		info.version = 0;
 	}
@@ -386,7 +346,7 @@ auv2_plugin_info (ArdourComponent& comp, CAComponentDescription& desc, std::vect
 static bool
 discover_auv2 (CAComponentDescription& desc, std::vector<ARDOUR::AUv2Info>& rv, bool verbose)
 {
-	ArdourComponent comp = ArdourFindNext (NULL, &desc);
+	AudioComponent comp = AudioComponentFindNext (NULL, &desc);
 
 	if (comp == NULL) {
 		error << ("AU was not found.") << endmsg;
@@ -395,11 +355,7 @@ discover_auv2 (CAComponentDescription& desc, std::vector<ARDOUR::AUv2Info>& rv, 
 
 	while (comp != NULL) {
 		CAComponentDescription temp;
-#ifdef COREAUDIO105
-		GetComponentInfo (comp, &temp, NULL, NULL, NULL);
-#else
 		AudioComponentGetDescription (comp, &temp);
-#endif
 		info << ("Component loaded") << endmsg;
 
 		assert (temp.componentType == desc.componentType);
@@ -408,7 +364,7 @@ discover_auv2 (CAComponentDescription& desc, std::vector<ARDOUR::AUv2Info>& rv, 
 
 		auv2_plugin_info (comp, desc, rv, verbose);
 
-		comp = ArdourFindNext (comp, &desc);
+		comp = AudioComponentFindNext (comp, &desc);
 		assert (comp == NULL);
 	}
 
@@ -488,7 +444,7 @@ auv2_save_cache_file (CAComponentDescription& desc, XMLNode* root, bool verbose)
 }
 
 bool
-ARDOUR::auv2_scan_and_cache (CAComponentDescription& desc, boost::function<void (CAComponentDescription const&, AUv2Info const&)> cb, bool verbose)
+ARDOUR::auv2_scan_and_cache (CAComponentDescription& desc, std::function<void (CAComponentDescription const&, AUv2Info const&)> cb, bool verbose)
 {
 	XMLNode* root = new XMLNode ("AUv2Cache");
 	root->set_property ("version", 2);
@@ -521,28 +477,20 @@ ARDOUR::auv2_scan_and_cache (CAComponentDescription& desc, boost::function<void 
 static void
 index_components (std::vector<ARDOUR::AUv2DescStr>& rv, CAComponentDescription &desc)
 {
-	ArdourComponent comp = 0;
+	AudioComponent comp = 0;
 	do {
 		CAComponentDescription temp;
-		comp = ArdourFindNext (comp, &desc);
+		comp = AudioComponentFindNext (comp, &desc);
 
 		if (!comp) {
 			break;
 		}
 
-#ifdef COREAUDIO105
-		GetComponentInfo (comp, &temp, NULL, NULL, NULL);
-#else
 		AudioComponentGetDescription (comp, &temp);
-#endif
 
 		CAComponent cacomp (desc);
 		UInt32 version;
-#ifdef COREAUDIO105
-		if (cacomp.GetResourceVersion (version) != noErr)
-#else
 		if (cacomp.GetVersion (version) != noErr)
-#endif
 		{
 			version = 0;
 			//continue;

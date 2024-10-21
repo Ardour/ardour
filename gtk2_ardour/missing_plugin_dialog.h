@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_missing_plugin_dialog_h__
-#define __gtk_ardour_missing_plugin_dialog_h__
+#pragma once
 
 #include <string>
 #include "ardour_dialog.h"
@@ -33,4 +32,3 @@ public:
 	MissingPluginDialog (Gtk::Window&, ARDOUR::Session*, std::list<std::string> const &, bool);
 };
 
-#endif /* __gtk_ardour_missing_plugin_dialog_h__ */

@@ -56,7 +56,7 @@ public:
 	std::string state_id() const;
 	std::shared_ptr<ARDOUR::VCA> vca() const { return _vca; }
 
-	static PBD::Signal1<void,VCAMasterStrip*> CatchDeletion;
+	static PBD::Signal<void(VCAMasterStrip*)> CatchDeletion;
 
 	bool marked_for_display () const;
 	bool set_marked_for_display (bool);

@@ -69,10 +69,10 @@ struct _GtkSizeGroupClass
 
 /**
  * GtkSizeGroupMode:
- * @GTK_SIZE_GROUP_NONE: group has no effect
- * @GTK_SIZE_GROUP_HORIZONTAL: group affects horizontal requisition
- * @GTK_SIZE_GROUP_VERTICAL: group affects vertical requisition
- * @GTK_SIZE_GROUP_BOTH: group affects both horizontal and vertical requisition
+ * @param GTK_SIZE_GROUP_NONE: group has no effect
+ * @param GTK_SIZE_GROUP_HORIZONTAL: group affects horizontal requisition
+ * @param GTK_SIZE_GROUP_VERTICAL: group affects vertical requisition
+ * @param GTK_SIZE_GROUP_BOTH: group affects both horizontal and vertical requisition
  *
  * The mode of the size group determines the directions in which the size
  * group affects the requested sizes of its component widgets.

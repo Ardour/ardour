@@ -108,23 +108,17 @@ public:
  
   /** Returns the Gdk::Screen object associated with @a invisible
    * 
-   * @newin{2,2}
-   * 
    * @return The associated Gdk::Screen.
    */
   Glib::RefPtr<Gdk::Screen> get_screen();
   
   /** Returns the Gdk::Screen object associated with @a invisible
    * 
-   * @newin{2,2}
-   * 
    * @return The associated Gdk::Screen.
    */
   Glib::RefPtr<const Gdk::Screen> get_screen() const;
   
   /** Sets the Gdk::Screen where the Gtk::Invisible object will be displayed.
-   * 
-   * @newin{2,2}
    * 
    * @param screen A Gdk::Screen.
    */

@@ -588,12 +588,12 @@ LadspaPlugin::connect_and_run (BufferSet& bufs,
 				const uint32_t buf_index = in_map.get(DataType::AUDIO, audio_in_index++, &valid);
 				connect_port(port_index,
 				             valid ? bufs.get_audio(buf_index).data(offset)
-				                   : silent_bufs.get_audio(0).data(offset));
+				                   : silent_bufs.get_audio(0).data(0));
 			} else if (LADSPA_IS_PORT_OUTPUT(port_descriptor(port_index))) {
 				const uint32_t buf_index = out_map.get(DataType::AUDIO, audio_out_index++, &valid);
 				connect_port(port_index,
 				             valid ? bufs.get_audio(buf_index).data(offset)
-				                   : scratch_bufs.get_audio(0).data(offset));
+				                   : scratch_bufs.get_audio(0).data(0));
 			}
 		}
 	}

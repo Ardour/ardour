@@ -27,6 +27,10 @@
 
 #include "evoral/Note.h"
 
+namespace Temporal {
+	class Beats;
+}
+
 namespace ARDOUR {
 	class MidiTrack;
 }
@@ -40,13 +44,11 @@ public:
 
 	void add (std::shared_ptr<NoteType>);
 	void play ();
-	void on ();
-	void off ();
-	void clear ();
-
-	static bool _off (NotePlayer*);
 
 private:
+	void on ();
+	void off ();
+	static bool _off (NotePlayer*);
 	typedef std::vector< std::shared_ptr<NoteType> > Notes;
 
 	std::shared_ptr<ARDOUR::MidiTrack> track;

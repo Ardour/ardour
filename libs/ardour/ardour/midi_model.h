@@ -21,15 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_midi_model_h__
-#define __ardour_midi_model_h__
+#pragma once
 
 #include <deque>
 #include <map>
 #include <queue>
 #include <utility>
 
-#include <boost/utility.hpp>
 #include <glibmm/threads.h>
 
 #include "pbd/command.h"
@@ -45,10 +43,14 @@
 #include "evoral/Note.h"
 #include "evoral/Sequence.h"
 
+namespace PBD {
+	class HistoryOwner;
+}
+
 namespace ARDOUR {
 
-class Session;
 class MidiSource;
+class MidiStateTracker;
 
 /** This is a higher level (than MidiBuffer) model of MIDI data, with separate
  * representations for notes (instead of just unassociated note on/off events)
@@ -62,6 +64,7 @@ public:
 	typedef Temporal::Beats TimeType;
 
 	MidiModel (MidiSource&);
+	MidiModel (MidiModel const & other, MidiSource&);
 
 	class LIBARDOUR_API DiffCommand : public PBD::Command {
 	public:
@@ -160,6 +163,7 @@ public:
 	/* Currently this class only supports changes of sys-ex time, but could be expanded */
 	class LIBARDOUR_API SysExDiffCommand : public DiffCommand {
 	public:
+		SysExDiffCommand (std::shared_ptr<MidiModel> m, const std::string& name) : DiffCommand (m, name) {}
 		SysExDiffCommand (std::shared_ptr<MidiModel> m, const XMLNode& node);
 
 		enum Property {
@@ -275,22 +279,22 @@ public:
 	 * This STARTS and COMMITS an undo command.
 	 * The command will constitute one item on the undo stack.
 	 */
-	void apply_diff_command_as_commit (Session& session, PBD::Command* cmd);
+	void apply_diff_command_as_commit (PBD::HistoryOwner&, PBD::Command* cmd);
 
-	void apply_diff_command_as_commit (Session* session, PBD::Command* cmd) { if (session) { apply_diff_command_as_commit (*session, cmd); } }
+	void apply_diff_command_as_commit (PBD::HistoryOwner* history, PBD::Command* cmd) { if (history) { apply_diff_command_as_commit (*history, cmd); } }
 
 	/** Add a command as part of a larger reversible transaction
 	 *
 	 * Ownership of cmd is taken, it must not be deleted by the caller.
 	 * The command will be incorporated into the current command.
 	 */
-	void apply_diff_command_as_subcommand (Session& session, PBD::Command* cmd);
+	void apply_diff_command_as_subcommand (PBD::HistoryOwner&, PBD::Command* cmd);
 
 	/** Apply the midi diff, but without any effect on undo
 	 *
 	 * Ownership of cmd is not changed.
 	 */
-	void apply_diff_command_only (Session& session, PBD::Command* cmd);
+	void apply_diff_command_only (PBD::Command* cmd);
 
 	bool sync_to_source (const Source::WriterLock& source_lock);
 
@@ -308,8 +312,8 @@ public:
 	XMLNode& get_state() const;
 	int set_state(const XMLNode&) { return 0; }
 
-	PBD::Signal0<void> ContentsChanged;
-	PBD::Signal1<void, Temporal::timecnt_t> ContentsShifted;
+	PBD::Signal<void()> ContentsChanged;
+	PBD::Signal<void(Temporal::timecnt_t)> ContentsShifted;
 
 	std::shared_ptr<Evoral::Note<TimeType> > find_note (NotePtr);
 	PatchChangePtr find_patch_change (Evoral::event_id_t);
@@ -323,6 +327,9 @@ public:
 
 	void insert_silence_at_start (TimeType);
 	void transpose (NoteDiffCommand *, const NotePtr, int);
+
+	void track_state (timepos_t const & when, MidiStateTracker&) const;
+	void render (const ReadLock& lock, Evoral::EventSink<Temporal::Beats>& dst);
 
   protected:
 	int resolve_overlaps_unlocked (const NotePtr, void* arg = 0);
@@ -371,5 +378,4 @@ private:
 
 } /* namespace ARDOUR */
 
-#endif /* __ardour_midi_model_h__ */
 

@@ -159,7 +159,6 @@ typedef struct {
   int dx, dy; /* The amount that the source was moved to reach dest_region */
 } GdkWindowRegionMove;
 
-
 /* Global info */
 
 static GdkGC *gdk_window_create_gc      (GdkDrawable     *drawable,
@@ -6883,6 +6882,9 @@ gdk_window_show_internal (GdkWindow *window, gboolean raise)
 	_gdk_make_event (GDK_WINDOW (private), GDK_MAP, NULL, FALSE);
     }
 
+  if (!was_mapped && _gdk_modal_notify && private->modal_hint) 
+    _gdk_modal_notify (window, TRUE);
+
   if (!was_mapped || raise)
     {
       recompute_visible_regions (private, TRUE, FALSE);
@@ -7314,6 +7316,9 @@ gdk_window_hide (GdkWindow *window)
       _gdk_synthesize_crossing_events_for_geometry_change (GDK_WINDOW (private->parent));
     }
 
+  if (was_mapped && _gdk_modal_notify && private->modal_hint) 
+    _gdk_modal_notify (window, FALSE);
+  
   /* Invalidate the rect */
   if (was_mapped)
     gdk_window_invalidate_in_parent (private);
@@ -11408,6 +11413,11 @@ gdk_window_get_height (GdkWindow *window)
   return height;
 }
 
+void
+gdk_window_set_modal_notify (void (*modal_notify)(GdkWindow*,gboolean))
+{
+	_gdk_modal_notify = modal_notify;
+}
 
 #define __GDK_WINDOW_C__
 #include "gdkaliasdef.c"

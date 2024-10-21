@@ -73,6 +73,11 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		PowerOnOff,
 		ShadedPlusSign,
 		Folder,
+		Lock,
+		Mixer,
+		Meters,
+		TrackWaveform,
+		TailTimeClock,
 		NoIcon //< Last
 	};
 

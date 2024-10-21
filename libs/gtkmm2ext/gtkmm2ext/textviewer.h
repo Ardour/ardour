@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_gtkmm_textviewer_h__
-#define __pbd_gtkmm_textviewer_h__
+#pragma once
 
 #include <string>
 
@@ -59,4 +58,3 @@ class LIBGTKMM2EXT_API TextViewer : public Gtk::Window, public Transmitter
 
 } /* namespace */
 
-#endif  // __pbd_gtkmm_textviewer_h__

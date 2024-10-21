@@ -49,9 +49,14 @@ using namespace PBD;
 static const char* localedir = LOCALEDIR;
 
 static string             backend_client_name;
-static string             backend_name = "JACK";
 static CrossThreadChannel xthread (true);
 static TestReceiver       test_receiver;
+
+#if ! (defined(__APPLE__) || defined(PLATFORM_WINDOWS))
+static string backend_name = "JACK/Pipewire";
+#else
+static string backend_name = "JACK";
+#endif
 
 /** @param dir Session directory.
  *  @param state Session state file, without .ardour suffix.
@@ -257,8 +262,8 @@ main (int argc, char* argv[])
 	}
 
 	PBD::ScopedConnectionList con;
-	BasicUI::AccessAction.connect_same_thread (con, boost::bind (&access_action, _1, _2));
-	AudioEngine::instance ()->Halted.connect_same_thread (con, boost::bind (&engine_halted, _1));
+	BasicUI::AccessAction.connect_same_thread (con, std::bind (&access_action, _1, _2));
+	AudioEngine::instance ()->Halted.connect_same_thread (con, std::bind (&engine_halted, _1));
 
 #ifndef PLATFORM_WINDOWS
 	signal (SIGINT, wearedone);

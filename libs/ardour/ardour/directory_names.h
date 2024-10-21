@@ -20,8 +20,7 @@
  */
 
 
-#ifndef __ardour_directory_names_h__
-#define __ardour_directory_names_h__
+#pragma once
 
 #include "ardour/libardour_visibility.h"
 
@@ -57,4 +56,3 @@ namespace ARDOUR {
 
 };
 
-#endif

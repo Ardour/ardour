@@ -62,9 +62,9 @@ public:
 	void fast_update ();
 	std::shared_ptr<ARDOUR::Route> route() { return _route; }
 
-	static PBD::Signal1<void,MeterStrip*> CatchDeletion;
-	static PBD::Signal0<void> MetricChanged;
-	static PBD::Signal0<void> ConfigurationChanged;
+	static PBD::Signal<void(MeterStrip*)> CatchDeletion;
+	static PBD::Signal<void()> MetricChanged;
+	static PBD::Signal<void()> ConfigurationChanged;
 
 	void reset_peak_display ();
 	void reset_route_peak_display (ARDOUR::Route*);

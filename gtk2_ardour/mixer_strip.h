@@ -135,9 +135,9 @@ public:
 	sigc::signal<void> WidthChanged;
 
 	/** The delivery that we are handling the level for with our fader has changed */
-	PBD::Signal1<void, std::weak_ptr<ARDOUR::Delivery> > DeliveryChanged;
+	PBD::Signal<void(std::weak_ptr<ARDOUR::Delivery> )> DeliveryChanged;
 
-	static PBD::Signal1<void,MixerStrip*> CatchDeletion;
+	static PBD::Signal<void(MixerStrip*)> CatchDeletion;
 
 	std::string state_id() const;
 
@@ -192,7 +192,6 @@ private:
 	ProcessorBox processor_box;
 	GainMeter    gpm;
 	PannerUI     panners;
-	TriggerBoxWidget trigger_display;
 
 	Glib::RefPtr<Gtk::SizeGroup> button_size_group;
 
@@ -239,11 +238,6 @@ private:
 	Gtk::Menu* _master_volume_menu;
 	ArdourWidgets::ArdourButton* _loudess_analysis_button;
 	std::shared_ptr<AutomationController> _volume_controller;
-
-	void trim_start_touch (int);
-	void trim_end_touch (int);
-
-	std::shared_ptr<ARDOUR::ControlGroup> _touch_control_group;
 
 	void setup_comment_button ();
 
@@ -317,8 +311,8 @@ private:
 	 *  the RC option editor.
 	 */
 	VisibilityGroup _visibility;
-	boost::optional<bool> override_solo_visibility () const;
-	boost::optional<bool> override_rec_mon_visibility () const;
+	std::optional<bool> override_solo_visibility () const;
+	std::optional<bool> override_rec_mon_visibility () const;
 
 	PBD::ScopedConnectionList _config_connection;
 

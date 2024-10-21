@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_export_graph_builder_h__
-#define __ardour_export_graph_builder_h__
+#pragma once
 
 #include "ardour/export_handler.h"
 #include "ardour/export_analysis.h"
@@ -180,7 +179,7 @@ class LIBARDOUR_API ExportGraphBuilder
 
 		FileSpec           config;
 		int                data_width;
-		boost::ptr_list<Encoder> children;
+		std::list<Encoder> children;
 
 		NormalizerPtr   normalizer;
 		LimiterPtr      limiter;
@@ -229,7 +228,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		ThreaderPtr     threader;
 
 		LoudnessReaderPtr    loudness_reader;
-		boost::ptr_list<SFC> children;
+		std::list<SFC> children;
 
 		PBD::ScopedConnectionList post_processing_connection;
 	};
@@ -322,4 +321,3 @@ class LIBARDOUR_API ExportGraphBuilder
 
 } // namespace ARDOUR
 
-#endif /* __ardour_export_graph_builder_h__ */

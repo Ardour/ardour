@@ -48,19 +48,19 @@ typedef struct _GtkRecentManagerPrivate GtkRecentManagerPrivate;
 
 /**
  * GtkRecentData:
- * @display_name: a UTF-8 encoded string, containing the name of the recently
+ * @param display_name: a UTF-8 encoded string, containing the name of the recently
  *   used resource to be displayed, or %NULL;
- * @description: a UTF-8 encoded string, containing a short description of
+ * @param description: a UTF-8 encoded string, containing a short description of
  *   the resource, or %NULL;
- * @mime_type: the MIME type of the resource;
- * @app_name: the name of the application that is registering this recently
+ * @param mime_type: the MIME type of the resource;
+ * @param app_name: the name of the application that is registering this recently
  *   used resource;
- * @app_exec: command line used to launch this resource; may contain the
+ * @param app_exec: command line used to launch this resource; may contain the
  *   "&percnt;f" and "&percnt;u" escape characters which will be expanded
  *   to the resource file path and URI respectively when the command line
  *   is retrieved;
- * @groups: a vector of strings containing groups names;
- * @is_private: whether this resource should be displayed only by the
+ * @param groups: a vector of strings containing groups names;
+ * @param is_private: whether this resource should be displayed only by the
  *   applications that have registered it or not.
  *
  * Meta-data to be passed to gtk_recent_manager_add_full() when
@@ -105,18 +105,18 @@ struct _GtkRecentManagerClass
 
 /**
  * GtkRecentManagerError:
- * @GTK_RECENT_MANAGER_ERROR_NOT_FOUND: the URI specified does not exists in
+ * @param GTK_RECENT_MANAGER_ERROR_NOT_FOUND: the URI specified does not exists in
  *   the recently used resources list.
- * @GTK_RECENT_MANAGER_ERROR_INVALID_URI: the URI specified is not valid.
- * @GTK_RECENT_MANAGER_ERROR_INVALID_ENCODING: the supplied string is not
+ * @param GTK_RECENT_MANAGER_ERROR_INVALID_URI: the URI specified is not valid.
+ * @param GTK_RECENT_MANAGER_ERROR_INVALID_ENCODING: the supplied string is not
  *   UTF-8 encoded.
- * @GTK_RECENT_MANAGER_ERROR_NOT_REGISTERED: no application has registered
+ * @param GTK_RECENT_MANAGER_ERROR_NOT_REGISTERED: no application has registered
  *   the specified item.
- * @GTK_RECENT_MANAGER_ERROR_READ: failure while reading the recently used
+ * @param GTK_RECENT_MANAGER_ERROR_READ: failure while reading the recently used
  *   resources file.
- * @GTK_RECENT_MANAGER_ERROR_WRITE: failure while writing the recently used
+ * @param GTK_RECENT_MANAGER_ERROR_WRITE: failure while writing the recently used
  *   resources file.
- * @GTK_RECENT_MANAGER_ERROR_UNKNOWN: unspecified error.
+ * @param GTK_RECENT_MANAGER_ERROR_UNKNOWN: unspecified error.
  *
  * Error codes for GtkRecentManager operations
  **/

@@ -106,8 +106,6 @@ public:
   
   /** Gets the singleton Gdk::DisplayManager object.
    * 
-   * @newin{2,2}
-   * 
    * @return The global Gdk::DisplayManager singleton; gdk_parse_pargs(),
    * gdk_init(), or gdk_init_check() must have been called first.
    */
@@ -115,16 +113,12 @@ public:
   
   /** Gets the default Gdk::Display.
    * 
-   * @newin{2,2}
-   * 
    * @return A Gdk::Display, or <tt>0</tt> if there is no default
    * display.
    */
   Glib::RefPtr<Display> get_default_display();
   
   /** Gets the default Gdk::Display.
-   * 
-   * @newin{2,2}
    * 
    * @return A Gdk::Display, or <tt>0</tt> if there is no default
    * display.
@@ -134,16 +128,12 @@ public:
   
   /** Sets @a display as the default display.
    * 
-   * @newin{2,2}
-   * 
    * @param display A Gdk::Display.
    */
   void set_default_display(const Glib::RefPtr<Display>& display);
 
   
   /** List all currently open displays.
-   * 
-   * @newin{2,2}
    * 
    * @return A list of Gdk::Display objects.
    */
@@ -165,8 +155,6 @@ public:
 
   
   /** The display_opened signal is emitted when a display is opened.
-   *
-   * @newin{2,2}
    *
    * @param display the opened display
    *

@@ -156,7 +156,7 @@ LibraryFetcher::add (std::string const & root_dir)
 }
 
 void
-LibraryFetcher::foreach_description (boost::function<void (LibraryDescription)> f)
+LibraryFetcher::foreach_description (std::function<void (LibraryDescription)> f)
 {
 	for (auto ld : _descriptions) {
 		f (ld);

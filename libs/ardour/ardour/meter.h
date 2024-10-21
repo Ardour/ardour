@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_meter_h__
-#define __ardour_meter_h__
+#pragma once
 
 #include <atomic>
 #include <vector>
@@ -86,7 +85,7 @@ public:
 	void      set_meter_type (MeterType t);
 	MeterType meter_type () const { return _meter_type; }
 
-	PBD::Signal1<void, MeterType> MeterTypeChanged;
+	PBD::Signal<void(MeterType)> MeterTypeChanged;
 
 protected:
 	XMLNode& state () const;
@@ -119,4 +118,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif // __ardour_meter_h__

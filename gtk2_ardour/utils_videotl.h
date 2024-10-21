@@ -19,8 +19,7 @@
  *  @brief common functions used for video-file im/export
  */
 
-#ifndef __gtk_ardour_video_utils_h__
-#define __gtk_ardour_video_utils_h__
+#pragma once
 
 #include <string>
 
@@ -55,4 +54,3 @@ bool video_query_info (
 		);
 };
 
-#endif /* __gtk_ardour_video_utils_h__ */

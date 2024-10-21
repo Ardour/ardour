@@ -45,9 +45,6 @@ namespace Gtk
 
 /** Convenient file chooser window.
  *
- * A FileChooserDialog looks like this:
- * @image html filechooserdialog1.png
- *
  * @ingroup Dialogs
  */
 

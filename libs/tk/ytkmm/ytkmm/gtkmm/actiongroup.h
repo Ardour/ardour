@@ -107,8 +107,6 @@ public:
   
   /** Gets the name of the action group.
    * 
-   * @newin{2,4}
-   * 
    * @return The name of the action group.
    */
   Glib::ustring get_name() const;
@@ -119,15 +117,11 @@ public:
    * they are sensitive (see get_sensitive()) and their group
    * is sensitive.
    * 
-   * @newin{2,4}
-   * 
    * @return <tt>true</tt> if the group is sensitive.
    */
   bool get_sensitive() const;
   
   /** Changes the sensitivity of @a action_group
-   * 
-   * @newin{2,4}
    * 
    * @param sensitive New sensitivity.
    */
@@ -138,15 +132,11 @@ public:
    * they are visible (see get_visible()) and their group
    * is visible.
    * 
-   * @newin{2,4}
-   * 
    * @return <tt>true</tt> if the group is visible.
    */
   bool get_visible() const;
   
   /** Changes the visible of @a action_group.
-   * 
-   * @newin{2,4}
    * 
    * @param visible New visiblity.
    */
@@ -155,16 +145,12 @@ public:
   
   /** Looks up an action in the action group by name.
    * 
-   * @newin{2,4}
-   * 
    * @param action_name The name of the action.
    * @return The action, or <tt>0</tt> if no action by that name exists.
    */
   Glib::RefPtr<Action> get_action(const Glib::ustring& action_name);
   
   /** Looks up an action in the action group by name.
-   * 
-   * @newin{2,4}
    * 
    * @param action_name The name of the action.
    * @return The action, or <tt>0</tt> if no action by that name exists.
@@ -174,15 +160,11 @@ public:
   
   /** Lists the actions in the action group.
    * 
-   * @newin{2,4}
-   * 
    * @return An allocated list of the action objects in the action group.
    */
   Glib::ListHandle< Glib::RefPtr<Action> > get_actions();
   
   /** Lists the actions in the action group.
-   * 
-   * @newin{2,4}
    * 
    * @return An allocated list of the action objects in the action group.
    */
@@ -205,8 +187,6 @@ public:
   
   /** Removes an action object from the action group.
    * 
-   * @newin{2,4}
-   * 
    * @param action An action.
    */
   void remove(const Glib::RefPtr<Action>& action);
@@ -216,9 +196,7 @@ public:
   /** Translates a string using the specified translate_func(). This
    * is mainly intended for language bindings.
    * 
-   * @newin{2,6}
-   * 
-   * @param string A string.
+   * @param str A string.
    * @return The translation of @a string.
    */
   Glib::ustring translate_string(const Glib::ustring& str) const;
@@ -262,7 +240,7 @@ public:
    * @param action the action
    * @param proxy the proxy
    *
-   * @par Slot Prototype:
+   * \par Slot Prototype:
    * <tt>void on_my_%disconnect_proxy(const Glib::RefPtr<Action>& action, Widget* proxy)</tt>
    *
    */
@@ -270,15 +248,15 @@ public:
   Glib::SignalProxy2< void,const Glib::RefPtr<Action>&,Widget* > signal_disconnect_proxy();
 
   
-  /** The pre_activate signal is emitted just before the @action in the
+  /** The pre_activate signal is emitted just before the \p action in the
    * action_group is activated
    *
    * This is intended for UIManager to proxy the signal and provide global
    * notification just before any action is activated.
    *
-   * @action the action
+   * @param action the action
    *
-   * @par Slot Prototype:
+   * \par Slot Prototype:
    * <tt>void on_my_%pre_activate(const Glib::RefPtr<Action>& action)</tt>
    *
    */
@@ -286,15 +264,15 @@ public:
   Glib::SignalProxy1< void,const Glib::RefPtr<Action>& > signal_pre_activate();
 
   
-  /** The post_activate signal is emitted just after the @action in the
-   * @action_group is activated
+  /** The post_activate signal is emitted just after the \p action in the
+   * \p action_group is activated
    *
    * This is intended for UIManager to proxy the signal and provide global
    * notification just after any action is activated.
    *
    * @param action the action
    *
-   * @par Slot Prototype:
+   * \par Slot Prototype:
    * <tt>void on_my_%post_activate(const Glib::RefPtr<Action>& action)</tt>
    *
    */

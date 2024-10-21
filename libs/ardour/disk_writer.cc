@@ -45,7 +45,7 @@ using namespace PBD;
 using namespace std;
 
 ARDOUR::samplecnt_t DiskWriter::_chunk_samples = DiskWriter::default_chunk_samples ();
-PBD::Signal0<void> DiskWriter::Overrun;
+PBD::Signal<void()> DiskWriter::Overrun;
 
 DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, t, X_("recorder:") + str, f, Temporal::TimeDomainProvider (Config->get_default_automation_time_domain()))
@@ -60,7 +60,7 @@ DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcesso
 	, _accumulated_capture_offset (0)
 	, _transport_looped (false)
 	, _transport_loop_sample (0)
-	, _gui_feed_buffer(AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
+	, _gui_feed_fifo (min<size_t> (64000, max<size_t> (s.sample_rate() / 10, 2 * AudioEngine::instance()->raw_buffer_size (DataType::MIDI))))
 {
 	DiskIOProcessor::init ();
 	_xruns.reserve (128);
@@ -97,9 +97,6 @@ DiskWriter::display_name () const
 void
 DiskWriter::WriterChannelInfo::resize (samplecnt_t bufsize)
 {
-	if (!capture_transition_buf) {
-		capture_transition_buf = new RingBufferNPT<CaptureTransition> (256);
-	}
 	delete wbuf;
 	wbuf = new RingBufferNPT<Sample> (bufsize);
 	/* touch memory to lock it */
@@ -109,8 +106,9 @@ DiskWriter::WriterChannelInfo::resize (samplecnt_t bufsize)
 int
 DiskWriter::add_channel_to (std::shared_ptr<ChannelList> c, uint32_t how_many)
 {
+	samplecnt_t bufsz = std::max<samplecnt_t> (_chunk_samples * 2, _session.butler()->audio_capture_buffer_size());
 	while (how_many--) {
-		c->push_back (new WriterChannelInfo (_session.butler()->audio_capture_buffer_size()));
+		c->push_back (new WriterChannelInfo (bufsz));
 		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: new writer channel, write space = %2 read = %3\n",
 		                                            name(),
 		                                            c->back()->wbuf->write_space(),
@@ -535,7 +533,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			if (_midi_write_source) {
 				assert (_capture_start_sample);
 
-				timepos_t start (_capture_start_sample.get());
+				timepos_t start (_capture_start_sample.value());
 
 				if (time_domain() != Temporal::AudioTime) {
 					start = timepos_t (start.beats());
@@ -684,25 +682,18 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			_samples_pending_write.fetch_add ((int) nframes);
 
 			if (buf.size() != 0) {
-				Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex, Glib::Threads::TRY_LOCK);
-
-				if (lm.locked ()) {
-					/* Copy this data into our GUI feed buffer and tell the GUI
-					   that it can read it if it likes.
-					*/
-					_gui_feed_buffer.clear ();
-
-					for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
-						/* This may fail if buf is larger than _gui_feed_buffer, but it's not really
-						 * the end of the world if it does.
-						 */
-						samplepos_t mpos = (*i).time() + start_sample - _accumulated_capture_offset;
-						if (mpos >= _first_recordable_sample) {
-							_gui_feed_buffer.push_back (mpos, Evoral::MIDI_EVENT, (*i).size(), (*i).buffer());
-						}
+				/* Copy this data into our GUI feed buffer and tell the GUI
+				 * that it can read it if it likes.
+				*/
+				for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
+					/* This may fail if buf is larger than _gui_feed_fifo, but it's not really
+					 * the end of the world if it does.
+					 */
+					samplepos_t mpos = (*i).time() + start_sample - _accumulated_capture_offset;
+					if (mpos >= _first_recordable_sample) {
+						_gui_feed_fifo.write (mpos, Evoral::MIDI_EVENT, (*i).size(), (*i).buffer());
 					}
 				}
-
 			}
 
 			if (cnt) {
@@ -807,10 +798,18 @@ DiskWriter::finish_capture (std::shared_ptr<ChannelList const> c)
 std::shared_ptr<MidiBuffer>
 DiskWriter::get_gui_feed_buffer () const
 {
+	Glib::Threads::Mutex::Lock lm (_gui_feed_reset_mutex);
 	std::shared_ptr<MidiBuffer> b (new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI)));
 
-	Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex);
-	b->copy (_gui_feed_buffer);
+	vector<MIDI::byte> buffer (_gui_feed_fifo.capacity());
+	samplepos_t        time;
+	Evoral::EventType  type;
+	uint32_t           size;
+
+	while (_gui_feed_fifo.read (&time, &type, &size, &buffer[0])) {
+		b->push_back (time, type, size, &buffer[0]);
+	}
+
 	return b;
 }
 
@@ -1191,6 +1190,11 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 	finish_capture (c);
 
+	{
+		Glib::Threads::Mutex::Lock lm (_gui_feed_reset_mutex);
+		_gui_feed_fifo.reset ();
+	}
+
 	/* butler is already stopped, but there may be work to do
 	   to flush remaining data to disk.
 	*/
@@ -1380,8 +1384,9 @@ DiskWriter::adjust_buffering ()
 {
 	std::shared_ptr<ChannelList const> c = channels.reader();
 
+	samplecnt_t bufsz = std::max<samplecnt_t> (_chunk_samples * 2, _session.butler()->audio_capture_buffer_size());
 	for (auto const chan : *c) {
-		chan->resize (_session.butler()->audio_capture_buffer_size());
+		chan->resize (bufsz);
 	}
 }
 

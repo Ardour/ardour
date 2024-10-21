@@ -121,7 +121,7 @@ public:
   Glib::ustring get_active_text() const;
 
   /** Set the currently-chosen item if it matches the specified text.
-   * @text The text of the item that should be selected.
+   * @param text The text of the item that should be selected.
    */
   void set_active_text(const Glib::ustring& text);
 
@@ -135,7 +135,7 @@ public:
   void remove_all();
   
   /** Remove the specified item if it is in the drop-down menu.
-   * @text The text of the item that should be removed.
+   * @param text The text of the item that should be removed.
    */
   void remove_text(const Glib::ustring& text);
 

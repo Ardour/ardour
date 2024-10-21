@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_audio_buffer_h__
-#define __ardour_audio_buffer_h__
+#pragma once
 
 #include <cstring>
 
@@ -41,6 +40,8 @@ public:
 	 * @param offset start offset
 	 */
 	void silence (samplecnt_t len, samplecnt_t offset = 0);
+
+	bool silent_data() const;
 
 	/** Copy samples from src array starting at src_offset into self starting at dst_offset
 	 * @param src array to read from
@@ -266,4 +267,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif // __ardour_audio_audio_buffer_h__

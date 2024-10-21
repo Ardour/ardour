@@ -36,11 +36,13 @@
 #include "ardour/audioregion.h"
 #include "ardour/debug.h"
 #include "ardour/filter.h"
+#include "ardour/lua_api.h"
 #include "ardour/playlist.h"
 #include "ardour/playlist_source.h"
 #include "ardour/profile.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
+#include "ardour/region_fx_plugin.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
 #include "ardour/tempo.h"
@@ -82,6 +84,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<std::string> tags;
 		PBD::PropertyDescriptor<uint64_t> reg_group;
 		PBD::PropertyDescriptor<bool> contents;
+		PBD::PropertyDescriptor<bool> region_fx;
 
 /* these properties are used as a convenience for announcing changes to state, but aren't stored as properties */
 		PBD::PropertyDescriptor<Temporal::TimeDomain> time_domain;
@@ -89,7 +92,7 @@ namespace ARDOUR {
 	}
 }
 
-PBD::Signal2<void,std::shared_ptr<ARDOUR::RegionList>,const PropertyChange&> Region::RegionsPropertyChanged;
+PBD::Signal<void(std::shared_ptr<ARDOUR::RegionList>,const PropertyChange&)> Region::RegionsPropertyChanged;
 
 /* these static values are used by Region Groups to assign a group-id across the scope of an operation that might span many function calls */
 uint64_t Region::_retained_group_id = 0;
@@ -123,7 +126,7 @@ Region::get_region_operation_group_id (uint64_t old_region_group, RegionOperatio
 
 	/* if a region group has not been assigned for this key, assign one */
 	if (_operation_rgroup_map.find (region_group_key) == _operation_rgroup_map.end ()) {
-		_operation_rgroup_map[region_group_key] = _next_group_id++;
+		_operation_rgroup_map[region_group_key] = ++_next_group_id;
 	}
 
 	return ((_operation_rgroup_map[region_group_key] << 4) | expl);
@@ -184,6 +187,8 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for tags = %1\n",	Properties::tags.property_id));
 	Properties::contents.property_id = g_quark_from_static_string (X_("contents"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for contents = %1\n",	Properties::contents.property_id));
+	Properties::region_fx.property_id = g_quark_from_static_string (X_("region-fx"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for region-fx = %1\n",	Properties::region_fx.property_id));
 	Properties::time_domain.property_id = g_quark_from_static_string (X_("time_domain"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for time_domain = %1\n",	Properties::time_domain.property_id));
 	Properties::reg_group.property_id = g_quark_from_static_string (X_("rgroup"));
@@ -290,6 +295,8 @@ Region::register_properties ()
 Region::Region (Session& s, timepos_t const & start, timecnt_t const & length, const string& name, DataType type)
 	: SessionObject(s, name)
 	, _type (type)
+	, _fx_latency (0)
+	, _fx_tail (0)
 	, REGION_DEFAULT_STATE (start,length)
 	, _last_length (length)
 	, _first_edit (EditChangesNothing)
@@ -305,6 +312,8 @@ Region::Region (Session& s, timepos_t const & start, timecnt_t const & length, c
 Region::Region (const SourceList& srcs)
 	: SessionObject(srcs.front()->session(), "toBeRenamed")
 	, _type (srcs.front()->type())
+	, _fx_latency (0)
+	, _fx_tail (0)
 	, REGION_DEFAULT_STATE(_type == DataType::MIDI ? timepos_t (Temporal::Beats()) : timepos_t::from_superclock (0),
 	                       _type == DataType::MIDI ? timecnt_t (Temporal::Beats()) : timecnt_t::from_superclock (0))
 	, _last_length (_type == DataType::MIDI ? timecnt_t (Temporal::Beats()) : timecnt_t::from_superclock (0))
@@ -313,8 +322,6 @@ Region::Region (const SourceList& srcs)
 	, _changemap (0)
 {
 	register_properties ();
-
-	_type = srcs.front()->type();
 
 	use_sources (srcs);
 
@@ -326,6 +333,8 @@ Region::Region (const SourceList& srcs)
 Region::Region (std::shared_ptr<const Region> other)
 	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
+	, _fx_latency (0)
+	, _fx_tail (0)
 	, REGION_COPY_STATE (other)
 	, _last_length (other->_last_length)
 	, _first_edit (EditChangesNothing)
@@ -384,6 +393,8 @@ Region::Region (std::shared_ptr<const Region> other)
 Region::Region (std::shared_ptr<const Region> other, timecnt_t const & offset)
 	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
+	, _fx_latency (0)
+	, _fx_tail (0)
 	, REGION_COPY_STATE (other)
 	, _last_length (other->_last_length)
 	, _first_edit (EditChangesNothing)
@@ -429,6 +440,8 @@ Region::Region (std::shared_ptr<const Region> other, timecnt_t const & offset)
 Region::Region (std::shared_ptr<const Region> other, const SourceList& srcs)
 	: SessionObject (other->session(), other->name())
 	, _type (srcs.front()->type())
+	, _fx_latency (0)
+	, _fx_tail (0)
 	, REGION_COPY_STATE (other)
 	, _last_length (other->_last_length)
 	, _first_edit (EditChangesID)
@@ -1014,34 +1027,35 @@ Region::modify_front_unchecked (timepos_t const & npos, bool reset_fade)
 		source_zero = timepos_t (source_position().time_domain()); // its actually negative, but this will work for us
 	}
 
-	if (new_position < last) { /* can't trim it zero or negative length */
-
-		timecnt_t newlen (_length);
-		timepos_t np = new_position;
-
-		if (!can_trim_start_before_source_start ()) {
-			/* can't trim it back past where source position zero is located */
-			np = max (np, source_zero);
-		}
-
-		if (np > position()) {
-			newlen = length() - (position().distance (np));
-		} else {
-			newlen = length() + (np.distance (position()));
-		}
-
-		trim_to_internal (np, newlen);
-
-		if (reset_fade) {
-			_right_of_split = true;
-		}
-
-		if (!property_changes_suspended()) {
-			recompute_at_start ();
-		}
-
-		maybe_invalidate_transients ();
+	if (new_position >= last) { /* can't trim it zero or negative length */
+		return;
 	}
+
+	timecnt_t newlen (_length);
+	timepos_t np = new_position;
+
+	if (!can_trim_start_before_source_start ()) {
+		/* can't trim it back past where source position zero is located */
+		np = max (np, source_zero);
+	}
+
+	if (np > position()) {
+		newlen = length() - (position().distance (np));
+	} else {
+		newlen = length() + (np.distance (position()));
+	}
+
+	trim_to_internal (np, newlen);
+
+	if (reset_fade) {
+		_right_of_split = true;
+	}
+
+	if (!property_changes_suspended()) {
+		recompute_at_start ();
+	}
+
+	maybe_invalidate_transients ();
 }
 
 void
@@ -1447,6 +1461,13 @@ Region::state () const
 		node->add_child_copy (*_extra_xml);
 	}
 
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		for (auto const & p : _plugins) {
+			node->add_child_nocopy (p->get_state ());
+		}
+	}
+
 	return *node;
 }
 
@@ -1518,7 +1539,9 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 		   match.
 		*/
 		if ((length().time_domain() == Temporal::AudioTime) && (_sources.front()->length().time_domain() == Temporal::AudioTime) && (length().distance() > _sources.front()->length())) {
-			_length = timecnt_t (start().distance (_sources.front()->length()), _length.val().position());
+			std::cerr << "Region " << _name << " has length " << _length.val().str() << " which is longer than its (first?) source's length of " << _sources.front()->length().str() << std::endl;
+			throw failed_constructor();
+			// _length = timecnt_t (start().distance (_sources.front()->length()), _length.val().position());
 		}
 	}
 
@@ -1550,6 +1573,40 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 	// saved property is invalid, region-transients are not saved
 	if (_user_transients.size() == 0){
 		_valid_transients = false;
+	}
+
+	{
+		Glib::Threads::RWLock::WriterLock lm (_fx_lock);
+		bool changed = !_plugins.empty ();
+
+		for (auto const& rfx : _plugins) {
+			rfx->drop_references ();
+		}
+
+		_plugins.clear ();
+
+		for (auto const& child : node.children ()) {
+			if (child->name() == X_("RegionFXPlugin")) {
+				std::shared_ptr<RegionFxPlugin> rfx (new RegionFxPlugin (_session, time_domain ()));
+				if (rfx->set_state (*child, version)) {
+					PBD::warning << string_compose (_("Failed to load RegionFx Plugin for region `%1'"), name()) << endmsg;
+					// TODO replace w/stub, retain config
+					continue;
+				}
+				if (!_add_plugin (rfx, std::shared_ptr<RegionFxPlugin>(), true)) {
+					continue;
+				}
+				_plugins.push_back (rfx);
+				changed = true;
+			}
+		}
+		lm.release ();
+		if (changed) {
+			fx_latency_changed (true);
+			fx_tail_changed (true);
+			send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
+			RegionFxChanged (); /* EMIT SIGNAL */
+		}
 	}
 
 	return 0;
@@ -2095,13 +2152,13 @@ Region::subscribe_to_source_drop ()
 	for (auto const& i : _sources) {
 		if (unique_srcs.find (i) == unique_srcs.end ()) {
 			unique_srcs.insert (i);
-			i->DropReferences.connect_same_thread (_source_deleted_connections, boost::bind (&Region::source_deleted, this, std::weak_ptr<Source>(i)));
+			i->DropReferences.connect_same_thread (_source_deleted_connections, std::bind (&Region::source_deleted, this, std::weak_ptr<Source>(i)));
 		}
 	}
 	for (auto const& i : _master_sources) {
 		if (unique_srcs.find (i) == unique_srcs.end ()) {
 			unique_srcs.insert (i);
-			i->DropReferences.connect_same_thread (_source_deleted_connections, boost::bind (&Region::source_deleted, this, std::weak_ptr<Source>(i)));
+			i->DropReferences.connect_same_thread (_source_deleted_connections, std::bind (&Region::source_deleted, this, std::weak_ptr<Source>(i)));
 		}
 	}
 }
@@ -2346,4 +2403,82 @@ Region::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
 	_length = tc->second;
 
 	send_change (Properties::length);
+}
+
+bool
+Region::load_plugin (ARDOUR::PluginType type, std::string const& name)
+{
+	PluginInfoPtr pip = LuaAPI::new_plugin_info (name, type);
+	if (!pip) {
+		return false;
+	}
+	PluginPtr p (pip->load (_session));
+	if (!p) {
+		return false;
+	}
+	std::shared_ptr<RegionFxPlugin> rfx (new RegionFxPlugin (_session, time_domain (), p));
+	return add_plugin (rfx);
+}
+
+bool
+Region::add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<RegionFxPlugin> pos)
+{
+	bool rv = _add_plugin (rfx, pos, false);
+	if (rv) {
+		_session.set_dirty ();
+	}
+	return rv;
+}
+
+void
+Region::reorder_plugins (RegionFxList const& new_order)
+{
+	Glib::Threads::RWLock::WriterLock lm (_fx_lock);
+
+	RegionFxList                 as_it_will_be;
+	RegionFxList::iterator       oiter = _plugins.begin ();
+	RegionFxList::const_iterator niter = new_order.begin ();
+
+	while (niter != new_order.end ()) {
+		if (oiter == _plugins.end ()) {
+			as_it_will_be.insert (as_it_will_be.end (), niter, new_order.end ());
+			while (niter != new_order.end ()) {
+				++niter;
+			}
+			break;
+		}
+		if (find (new_order.begin (), new_order.end (), *oiter) != new_order.end ()) {
+			as_it_will_be.push_back (*niter);
+			++niter;
+		}
+		oiter = _plugins.erase (oiter);
+	}
+	_plugins.insert (oiter, as_it_will_be.begin (), as_it_will_be.end ());
+	_session.set_dirty ();
+}
+
+void
+Region::fx_latency_changed (bool)
+{
+	uint32_t l = 0;
+	for (auto const& rfx : _plugins) {
+		l += rfx->effective_latency ();
+	}
+	if (l == _fx_latency) {
+		return;
+	}
+	_fx_latency = l;
+}
+
+void
+Region::fx_tail_changed (bool)
+{
+	uint32_t t = 0;
+	for (auto const& rfx : _plugins) {
+		t = max<uint32_t> (t, rfx->effective_tailtime ());
+	}
+	if (t == _fx_tail) {
+		return;
+	}
+	_fx_tail = t;
 }

@@ -128,8 +128,6 @@ public:
   /** Creates a new Expander.
    *
    * The Expander has an empty label.
-   *
-   * @newin{2,4}
    */
   Expander();
 
@@ -143,8 +141,6 @@ public:
    *
    * @param label The string for the label describing the Expander.
    * @param mnemonic Wether the label may contain underscores to set up accelerators.
-
-   * @newin{2,4}
    */
   explicit Expander(const Glib::ustring& label, bool mnemonic = false);
   //gtkmmproc error: gkt_expander_new_with_mnemonic : ignored method defs lookup failed
@@ -153,8 +149,6 @@ public:
   /** Sets the state of the expander. Set to <tt>true</tt>, if you want
    * the child widget to be revealed, and <tt>false</tt> if you want the
    * child widget to be hidden.
-   * 
-   * @newin{2,4}
    * 
    * @param expanded Whether the child widget is revealed.
    */
@@ -165,8 +159,6 @@ public:
    * 
    * See set_expanded().
    * 
-   * @newin{2,4}
-   * 
    * @return The current state of the expander.
    */
   bool get_expanded() const;
@@ -175,15 +167,11 @@ public:
   /** Sets the spacing field of @a expander, which is the number of pixels to
    * place between expander and the child.
    * 
-   * @newin{2,4}
-   * 
    * @param spacing Distance between the expander and child in pixels.
    */
   void set_spacing(int spacing);
   
   /** Gets the value set by set_spacing().
-   * 
-   * @newin{2,4}
    * 
    * @return Spacing between the expander and child.
    */
@@ -193,8 +181,6 @@ public:
   /** Sets the text of the label of the expander to @a label.
    * 
    * This will also clear any previously set labels.
-   * 
-   * @newin{2,4}
    * 
    * @param label A string.
    */
@@ -212,8 +198,6 @@ public:
    * be avoided by fetching the label text directly from the label
    * widget.
    * 
-   * @newin{2,4}
-   * 
    * @return The text of the label widget. This string is owned
    * by the widget and must not be modified or freed.
    */
@@ -223,16 +207,12 @@ public:
   /** If true, an underline in the text of the expander label indicates
    * the next character should be used for the mnemonic accelerator key.
    * 
-   * @newin{2,4}
-   * 
    * @param use_underline <tt>true</tt> if underlines in the text indicate mnemonics.
    */
   void set_use_underline(bool use_underline =  true);
   
   /** Returns whether an embedded underline in the expander label indicates a
    * mnemonic. See set_use_underline().
-   * 
-   * @newin{2,4}
    * 
    * @return <tt>true</tt> if an embedded underline in the expander label
    * indicates the mnemonic accelerator keys.
@@ -243,8 +223,6 @@ public:
   /** Sets whether the text of the label contains markup in Pango's text markup
    * language. See Gtk::Label::set_markup().
    * 
-   * @newin{2,4}
-   * 
    * @param use_markup <tt>true</tt> if the label's text should be parsed for markup.
    */
   void set_use_markup(bool use_markup =  true);
@@ -252,8 +230,6 @@ public:
   /** Returns whether the label's text is interpreted as marked up with
    * the Pango text markup
    * language. See set_use_markup().
-   * 
-   * @newin{2,4}
    * 
    * @return <tt>true</tt> if the label's text will be parsed for markup.
    */
@@ -263,16 +239,12 @@ public:
   /** Set the label widget for the expander. This is the widget
    * that will appear embedded alongside the expander arrow.
    * 
-   * @newin{2,4}
-   * 
    * @param label_widget The new label widget.
    */
   void set_label_widget(Widget& label_widget);
   
   /** Retrieves the label widget for the frame. See
    * set_label_widget().
-   * 
-   * @newin{2,4}
    * 
    * @return The label widget,
    * or <tt>0</tt> if there is none.
@@ -281,8 +253,6 @@ public:
   
   /** Retrieves the label widget for the frame. See
    * set_label_widget().
-   * 
-   * @newin{2,4}
    * 
    * @return The label widget,
    * or <tt>0</tt> if there is none.
@@ -293,8 +263,6 @@ public:
   /** Sets whether the label widget should fill all available horizontal space
    * allocated to @a expander.
    * 
-   * @newin{2,22}
-   * 
    * @param label_fill <tt>true</tt> if the label should should fill all available horizontal
    * space.
    */
@@ -302,8 +270,6 @@ public:
   
   /** Returns whether the label widget will fill all available horizontal
    * space allocated to @a expander.
-   * 
-   * @newin{2,22}
    * 
    * @return <tt>true</tt> if the label widget will fill all available horizontal
    * space.

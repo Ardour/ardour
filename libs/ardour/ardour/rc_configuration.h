@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_rc_configuration_h__
-#define __ardour_rc_configuration_h__
+#pragma once
 
 #include <map>
 #include <string>
@@ -43,7 +42,7 @@ class LIBARDOUR_API RCConfiguration : public PBD::Configuration
 	RCConfiguration();
 	~RCConfiguration();
 
-	void map_parameters (boost::function<void (std::string)>&);
+	void map_parameters (std::function<void (std::string)>&);
 	int set_state (XMLNode const &, int version);
 	XMLNode& get_state () const;
 	XMLNode& get_variables (std::string const & nodename) const;
@@ -100,4 +99,3 @@ LIBARDOUR_API extern gain_t speed_quietning; /* see comment in configuration.cc 
 
 } // namespace ARDOUR
 
-#endif /* __ardour_configuration_h__ */

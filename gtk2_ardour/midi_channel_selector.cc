@@ -347,10 +347,10 @@ MidiChannelSelectorWindow::MidiChannelSelectorWindow (std::shared_ptr<MidiTrack>
 	playback_mask_changed ();
 	capture_mask_changed ();
 
-	track->playback_filter().ChannelMaskChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&MidiChannelSelectorWindow::playback_mask_changed, this), gui_context());
-	track->playback_filter().ChannelModeChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&MidiChannelSelectorWindow::playback_mode_changed, this), gui_context());
-	track->capture_filter().ChannelMaskChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&MidiChannelSelectorWindow::capture_mask_changed, this), gui_context());
-	track->capture_filter().ChannelModeChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&MidiChannelSelectorWindow::capture_mode_changed, this), gui_context());
+	track->playback_filter().ChannelMaskChanged.connect (*this, MISSING_INVALIDATOR, std::bind (&MidiChannelSelectorWindow::playback_mask_changed, this), gui_context());
+	track->playback_filter().ChannelModeChanged.connect (*this, MISSING_INVALIDATOR, std::bind (&MidiChannelSelectorWindow::playback_mode_changed, this), gui_context());
+	track->capture_filter().ChannelMaskChanged.connect (*this, MISSING_INVALIDATOR, std::bind (&MidiChannelSelectorWindow::capture_mask_changed, this), gui_context());
+	track->capture_filter().ChannelModeChanged.connect (*this, MISSING_INVALIDATOR, std::bind (&MidiChannelSelectorWindow::capture_mode_changed, this), gui_context());
 }
 
 MidiChannelSelectorWindow::~MidiChannelSelectorWindow()

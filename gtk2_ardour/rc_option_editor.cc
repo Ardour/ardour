@@ -1380,13 +1380,13 @@ protected:
 		AudioEngine::instance()->PortRegisteredOrUnregistered.connect (
 				_engine_connection,
 				invalidator (*this),
-				boost::bind (&PortSelectOption::update_port_combo, this),
+				std::bind (&PortSelectOption::update_port_combo, this),
 				gui_context());
 
 		AudioEngine::instance()->PortPrettyNameChanged.connect (
 				_engine_connection,
 				invalidator (*this),
-				boost::bind (&PortSelectOption::update_port_combo, this),
+				std::bind (&PortSelectOption::update_port_combo, this),
 				gui_context());
 	}
 
@@ -1612,7 +1612,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
 			m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
-					boost::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1), gui_context());
+					std::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1), gui_context());
 
 			_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::view_changed));
 			_view.signal_button_press_event().connect_notify (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked));
@@ -2104,15 +2104,15 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 
 			AudioEngine::instance()->PortRegisteredOrUnregistered.connect (connections,
 					invalidator (*this),
-					boost::bind (&MidiPortOptions::refill, this),
+					std::bind (&MidiPortOptions::refill, this),
 					gui_context());
 			AudioEngine::instance()->MidiPortInfoChanged.connect (connections,
 					invalidator (*this),
-					boost::bind (&MidiPortOptions::refill, this),
+					std::bind (&MidiPortOptions::refill, this),
 					gui_context());
 			AudioEngine::instance()->MidiSelectionPortsChanged.connect (connections,
 					invalidator (*this),
-					boost::bind (&MidiPortOptions::refill, this),
+					std::bind (&MidiPortOptions::refill, this),
 					gui_context());
 		}
 
@@ -3739,6 +3739,20 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Transport"), psc);
 
 
+	bo = new BoolOption ("mark-at-pgm-change",
+	                     _("Create a marker when a MIDI program change is received (and RECORDING)"),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mark_at_pgm_change),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mark_at_pgm_change)
+	                     );
+	add_option (_("Transport"), bo);
+
+	bo = new BoolOption ("locate-to-pgm-change",
+	                     _("Locate to the next matching scene marker when a MIDI program change is received (and NOT recording)"),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::get_locate_to_pgm_change),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::set_locate_to_pgm_change)
+	                     );
+	add_option (_("Transport"), bo);
+
 	add_option (_("Transport"), new OptionEditorHeading (_("Looping")));
 
 	bo = new BoolOption (
@@ -3814,6 +3828,17 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_receive_device_id),
 		     0, 127, 1, 10
 		     ));
+
+	ComboOption<FastWindOp> *mtc_op = new ComboOption<FastWindOp> (
+		     "mmc-fast-wind-op",
+		     _("MMC Fast-wind behavior"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_fast_wind_op),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_fast_wind_op)
+		     );
+	mtc_op->add (FastWindOff, _("Off (MMC fast-forward+rewind are ignored)"));
+	mtc_op->add (FastWindVarispeed, _("Varispeed"));
+	mtc_op->add (FastWindLocate, _("Marker Locate (MMC ffwd/rewd jumps to next/prior marker)"));
+	add_option (_("Transport/Chase"), mtc_op);
 
 	add_option (_("Transport/Chase"), new OptionEditorHeading (_("Transport Masters")));
 
@@ -4329,7 +4354,6 @@ These settings will only take effect after %1 is restarted.\n\
 	}
 
 	string prog (PROGRAM_NAME);
-	boost::algorithm::to_lower (prog);
 	mm->add (SoftwareMonitoring, string_compose (_("%1"), prog));
 	mm->add (ExternalMonitoring, _("Audio Hardware"));
 
@@ -4906,6 +4930,40 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("Performance"), new BufferingOptions (_rc_config));
 
+	if (hwcpus > 1) {
+		ComboOption<int32_t>* procs = new ComboOption<int32_t> (
+				"io-thread-count",
+				_("Disk I/O threads"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_io_thread_count),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_io_thread_count)
+				);
+
+		procs->add (-2, _("all but two processor"));
+		procs->add (-1, _("all but one processor"));
+		procs->add (0, _("all available processors"));
+
+		for (uint32_t i = 1; i <= hwcpus; ++i) {
+			procs->add (i, string_compose (P_("%1 processor", "%1 processors", i), i));
+		}
+
+		procs->set_note (string_compose (_("This setting will only take effect when %1 is restarted."), PROGRAM_NAME));
+
+		add_option (_("Performance"), procs);
+
+#ifndef PLATFORM_WINDOWS
+		ComboOption<int32_t>* iotp = new ComboOption<int32_t> (
+		     "io-thread-policy",
+		     _("Disk I/O thread scheduling policy"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_io_thread_policy),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_io_thread_policy)
+		     );
+		iotp->add (0, _("No priority"));
+		iotp->add (1, _("Realtime (FIFO)"));
+		iotp->add (1, _("Realtime (Round Robin)"));
+		add_option (_("Performance"), iotp);
+#endif
+	}
+
 	/* Image cache size */
 	add_option (_("Performance"), new OptionEditorHeading (_("Memory Usage")));
 
@@ -4957,7 +5015,7 @@ These settings will only take effect after %1 is restarted.\n\
 	lna->add (999, _("999 parameters"));
 	add_option (_("Performance"), lna);
 	Gtkmm2ext::UI::instance()->set_tip (lna->tip_widget(),
-					    _("Some Plugins expose an unreasonable amount of control-inputs. This option limits the number of parameters that can are listed as automatable without restricting the number of total controls.\n\nThis reduces lag in the GUI and shortens excessively long drop-down lists for plugins with a large number of control ports.\n\nNote: This only affects newly added plugins and is applied to plugin on session-reload. Already automated parameters are retained."));
+					    _("Some Plugins expose an unreasonable amount of control-inputs. This option limits the number of parameters that are listed as automatable without restricting the number of total controls.\n\nThis reduces lag in the GUI and shortens excessively long drop-down lists for plugins with a large number of control ports.\n\nNote: This only affects newly added plugins and is applied to plugin on session-reload. Already automated parameters are retained."));
 
 	/* VIDEO Timeline */
 	add_option (_("Video"), new OptionEditorHeading (_("Video Server")));

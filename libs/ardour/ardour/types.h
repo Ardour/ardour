@@ -28,8 +28,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_types_h__
-#define __ardour_types_h__
+#pragma once
 
 #include <bitset>
 #include <cstdint>
@@ -75,6 +74,7 @@ class Route;
 class Region;
 class Playlist;
 class Stripable;
+class Trigger;
 class VCA;
 class AutomationControl;
 class SlavableAutomationControl;
@@ -505,6 +505,12 @@ enum MonitorChoice {
 	MonitorCue = 0x3,
 };
 
+enum FastWindOp {
+	FastWindOff = 0,
+	FastWindVarispeed = 0x1,  //rewind/ffwd commands will varispeed the transport (incl reverse playback)
+	FastWindLocate = 0x2,     //rewind/ffwd commands will jump to next/prior marker
+};
+
 enum MonitorState {
 	MonitoringSilence = 0x0,
 	MonitoringInput = 0x2,
@@ -848,6 +854,7 @@ enum PlaylistDisposition {
 enum MidiTrackNameSource {
 	SMFTrackNumber,
 	SMFTrackName,
+	SMFFileAndTrackName,
 	SMFInstrumentName
 };
 
@@ -969,10 +976,24 @@ struct ProcessedRanges {
 	ProcessedRanges() : start { 0, 0 }, end { 0, 0 }, cnt (0) {}
 };
 
+enum SelectionOperation {
+	SelectionSet,
+	SelectionAdd,
+	SelectionToggle,
+	SelectionRemove,
+	SelectionExtend /* UI only operation, not core */
+};
+
+enum RecordState {
+	Disabled = 0,
+	Enabled = 1,
+	Recording = 2
+};
+
+
 } // namespace ARDOUR
 
 /* for now, break the rules and use "using" to make this "global" */
 
 using ARDOUR::samplepos_t;
 
-#endif /* __ardour_types_h__ */

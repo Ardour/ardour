@@ -137,7 +137,7 @@ RouteGroup::RouteGroup (Session& s, const string &n)
 	add_property (_monitoring);
 	add_property (_group_master_number);
 
-	s.SurroundMasterAddedOrRemoved.connect_same_thread (*this, boost::bind (&RouteGroup::update_surround_sends, this));
+	s.SurroundMasterAddedOrRemoved.connect_same_thread (*this, std::bind (&RouteGroup::update_surround_sends, this));
 }
 
 RouteGroup::~RouteGroup ()
@@ -199,7 +199,7 @@ RouteGroup::add (std::shared_ptr<Route> r)
 	}
 
 	r->set_route_group (this);
-	r->DropReferences.connect_same_thread (*this, boost::bind (&RouteGroup::remove_when_going_away, this, std::weak_ptr<Route> (r)));
+	r->DropReferences.connect_same_thread (*this, std::bind (&RouteGroup::remove_when_going_away, this, std::weak_ptr<Route> (r)));
 
 	std::shared_ptr<VCA> vca (group_master.lock());
 
@@ -353,7 +353,7 @@ RouteGroup::set_state (const XMLNode& node, int version)
 		std::shared_ptr<Route> r = _session.route_by_id (subgroup_id);
 		if (r) {
 			_subgroup_bus = r;
-			_subgroup_bus->DropReferences.connect_same_thread (*this, boost::bind (&RouteGroup::unset_subgroup_bus, this));
+			_subgroup_bus->DropReferences.connect_same_thread (*this, std::bind (&RouteGroup::unset_subgroup_bus, this));
 		}
 	}
 
@@ -691,7 +691,7 @@ RouteGroup::make_subgroup (bool aux, Placement placement)
 
 	_subgroup_bus = rl.front();
 	_subgroup_bus->set_name (_name);
-	_subgroup_bus->DropReferences.connect_same_thread (*this, boost::bind (&RouteGroup::unset_subgroup_bus, this));
+	_subgroup_bus->DropReferences.connect_same_thread (*this, std::bind (&RouteGroup::unset_subgroup_bus, this));
 
 	if (aux) {
 

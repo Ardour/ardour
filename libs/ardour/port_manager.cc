@@ -749,7 +749,7 @@ PortManager::physically_connected (const string& port_name)
 }
 
 int
-PortManager::get_connections (const string& port_name, std::vector<std::string>& s)
+PortManager::get_connections (const string& port_name, std::vector<std::string>& s, bool process_context_safe)
 {
 	if (!_backend) {
 		s.clear ();
@@ -763,7 +763,7 @@ PortManager::get_connections (const string& port_name, std::vector<std::string>&
 		return 0;
 	}
 
-	return _backend->get_connections (handle, s);
+	return _backend->get_connections (handle, s, process_context_safe);
 }
 
 int
@@ -886,7 +886,7 @@ PortManager::reestablish_ports ()
 		set_pretty_names (port_names, DataType::MIDI, false);
 	}
 
-	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->current_backend_name () == X_("JACK")) {
+	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->is_jack ()) {
 		port_engine ().register_port (X_("physical_audio_input_monitor_enable"), DataType::AUDIO, ARDOUR::PortFlags (IsInput | IsTerminal | Hidden));
 		port_engine ().register_port (X_("physical_midi_input_monitor_enable"), DataType::MIDI, ARDOUR::PortFlags (IsInput | IsTerminal | Hidden));
 	}
@@ -943,7 +943,7 @@ PortManager::reconnect_ports ()
 		}
 	}
 
-	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->current_backend_name () == X_("JACK")) {
+	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->is_jack ()) {
 		std::string const        audio_port = AudioEngine::instance ()->make_port_name_non_relative (X_("physical_audio_input_monitor_enable"));
 		std::string const        midi_port  = AudioEngine::instance ()->make_port_name_non_relative (X_("physical_midi_input_monitor_enable"));
 		std::vector<std::string> audio_ports;
@@ -1145,7 +1145,7 @@ PortManager::update_input_ports (bool clear)
 #endif
 			mpw->insert (make_pair (*p, MIDIInputPort (32)));
 
-			if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->current_backend_name () == X_("JACK")) {
+			if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->is_jack ()) {
 				physical_midi_connection_list.push_back (*p);
 			}
 		}
@@ -1158,6 +1158,9 @@ PortManager::update_input_ports (bool clear)
 		 * do this when called from ::reestablish_ports()
 		 * "JACK: Cannot connect ports owned by inactive clients"
 		 */
+		/* .. but take the opportunity to clear out dead wood */
+		_audio_input_ports.flush ();
+		_midi_input_ports.flush ();
 		return;
 	}
 
@@ -1292,10 +1295,10 @@ PortManager::cycle_start (pframes_t nframes, Session* s)
 	if (tl && fabs (Port::resample_ratio ()) != 1.0) {
 		for (auto const& p : *_cycle_ports) {
 			if (!(p.second->flags () & TransportSyncPort)) {
-				tl->push_back (boost::bind (&Port::cycle_start, p.second, nframes));
+				tl->push_back (std::bind (&Port::cycle_start, p.second, nframes));
 			}
 		}
-		tl->push_back (boost::bind (&PortManager::run_input_meters, this, nframes, s ? s->nominal_sample_rate () : 0));
+		tl->push_back (std::bind (&PortManager::run_input_meters, this, nframes, s ? s->nominal_sample_rate () : 0));
 		tl->process ();
 	} else {
 		for (auto const& p : *_cycle_ports) {
@@ -1318,7 +1321,7 @@ PortManager::cycle_end (pframes_t nframes, Session* s)
 	if (tl && fabs (Port::resample_ratio ()) != 1.0) {
 		for (auto const& p : *_cycle_ports) {
 			if (!(p.second->flags () & TransportSyncPort)) {
-				tl->push_back (boost::bind (&Port::cycle_end, p.second, nframes));
+				tl->push_back (std::bind (&Port::cycle_end, p.second, nframes));
 			}
 		}
 		tl->process ();
@@ -1436,7 +1439,7 @@ PortManager::cycle_end_fade_out (gain_t base_gain, gain_t gain_step, pframes_t n
 	if (tl && fabs (Port::resample_ratio ()) != 1.0) {
 		for (auto const& p : *_cycle_ports) {
 			if (!(p.second->flags () & TransportSyncPort)) {
-				tl->push_back (boost::bind (&Port::cycle_end, p.second, nframes));
+				tl->push_back (std::bind (&Port::cycle_end, p.second, nframes));
 			}
 		}
 		tl->process ();
@@ -1534,7 +1537,7 @@ PortManager::port_is_virtual_piano (std::string const& name)
 bool
 PortManager::port_is_physical_input_monitor_enable (std::string const& name)
 {
-	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->current_backend_name () == X_("JACK")) {
+	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->is_jack ()) {
 		if (ends_with (name, X_(":physical_midi_input_monitor_enable"))) {
 			return true;
 		}

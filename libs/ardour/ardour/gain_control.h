@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gain_control_h__
-#define __ardour_gain_control_h__
+#pragma once
 
 #include <memory>
 #include <string>
@@ -44,8 +43,8 @@ class LIBARDOUR_API GainControl : public SlavableAutomationControl {
 protected:
 	void post_add_master (std::shared_ptr<AutomationControl>);
 	bool get_masters_curve_locked (samplepos_t, samplepos_t, float*, samplecnt_t) const;
+	void actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
 };
 
 } /* namespace */
 
-#endif /* __ardour_gain_control_h__ */

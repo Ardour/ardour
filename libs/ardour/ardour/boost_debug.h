@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_boost_debug_h__
-#define __libardour_boost_debug_h__
+#pragma once
 
 #include "pbd/boost_debug.h"
 
@@ -45,4 +44,3 @@
 #define BOOST_SHOW_POINTERS()
 #endif
 
-#endif /* __libardour_boost_debug_h__ */

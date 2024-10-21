@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_io_h__
-#define __ardour_io_h__
+#pragma once
 
 #include <string>
 #include <vector>
@@ -31,6 +30,7 @@
 
 #include "pbd/fastlog.h"
 #include "pbd/undo.h"
+#include "pbd/rcu.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/controllable.h"
 #include "pbd/enum_convert.h"
@@ -131,31 +131,24 @@ public:
 	void set_public_port_latencies (samplecnt_t value, bool playback) const;
 	void set_public_port_latency_from_connections () const;
 
-	PortSet& ports() { return _ports; }
-	const PortSet& ports() const { return _ports; }
+	std::shared_ptr<PortSet> ports ();
+	std::shared_ptr<PortSet const> ports () const;
 
 	bool has_port (std::shared_ptr<Port>) const;
 
-	std::shared_ptr<Port> nth (uint32_t n) const {
-		if (n < _ports.num_ports()) {
-			return _ports.port(n);
-		} else {
-			return std::shared_ptr<Port> ();
-		}
-	}
-
+	std::shared_ptr<Port> nth (uint32_t n) const;
 	std::shared_ptr<Port> port_by_name (const std::string& str) const;
 
 	std::shared_ptr<AudioPort> audio(uint32_t n) const;
 	std::shared_ptr<MidiPort>  midi(uint32_t n) const;
 
-	const ChanCount& n_ports ()  const { return _ports.count(); }
+	const ChanCount& n_ports () const;
 
 	/* The process lock will be held on emission of this signal if
 	 * IOChange contains ConfigurationChanged.  In other cases,
 	 * the process lock status is undefined.
 	 */
-	PBD::Signal2<void, IOChange, void *> changed;
+	PBD::Signal<void(IOChange, void *)> changed;
 
 	XMLNode& get_state () const;
 
@@ -186,9 +179,9 @@ public:
 	 *  can attach to this, and return `true' if they want to prevent
 	 *  the change from happening.
 	 */
-	PBD::Signal1<bool, ChanCount, BoolCombiner> PortCountChanging;
+	PBD::SignalWithCombiner<BoolCombiner, bool(ChanCount)> PortCountChanging;
 
-	static PBD::Signal1<void, ChanCount> PortCountChanged; // emitted when the number of ports changes
+	static PBD::Signal<void(ChanCount)> PortCountChanged; // emitted when the number of ports changes
 
 	static std::string name_from_state (const XMLNode&);
 	static void set_name_in_state (XMLNode&, const std::string&);
@@ -212,8 +205,7 @@ protected:
 	bool     _sendish;
 
 private:
-	mutable Glib::Threads::RWLock _io_lock;
-	PortSet   _ports;
+	SerializedRCUManager<PortSet> _ports;
 
 	void reestablish_port_subscriptions ();
 	PBD::ScopedConnectionList _port_connections;
@@ -244,8 +236,8 @@ private:
 
 	int ensure_ports_locked (ChanCount, bool clear, bool& changed);
 
-	std::string build_legal_port_name (DataType type);
-	int32_t find_port_hole (const char* base);
+	std::string build_legal_port_name (std::shared_ptr<PortSet const>, DataType type);
+	int32_t find_port_hole (std::shared_ptr<PortSet const>, const char* base);
 
 	void setup_bundle ();
 	std::string bundle_channel_name (uint32_t, uint32_t, DataType) const;
@@ -262,4 +254,3 @@ namespace PBD {
 	DEFINE_ENUM_CONVERT (ARDOUR::IO::Direction)
 }
 
-#endif /*__ardour_io_h__ */

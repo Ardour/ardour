@@ -42,45 +42,45 @@ typedef struct _GtkBuildableIface GtkBuildableIface;
 
 /**
  * GtkBuildableIface:
- * @g_iface: the parent class
- * @set_name: Stores the name attribute given in the GtkBuilder UI definition.
+ * @param g_iface: the parent class
+ * @param set_name: Stores the name attribute given in the GtkBuilder UI definition.
  *  #GtkWidget stores the name as object data. Implement this method if your
  *  object has some notion of "name" and it makes sense to map the XML name
  *  attribute to it.
- * @get_name: The getter corresponding to @set_name. Implement this
- *  if you implement @set_name.
- * @add_child: Adds a child. The @type parameter can be used to
+ * @param get_name: The getter corresponding to \p set_name. Implement this
+ *  if you implement \p set_name.
+ * @param add_child: Adds a child. The \p type parameter can be used to
  *  differentiate the kind of child. #GtkContainer implements this
  *  to add add a child widget to the container, #GtkNotebook uses
- *  the @type to distinguish between page labels (of type "page-label")
+ *  the \p type to distinguish between page labels (of type "page-label")
  *  and normal children.
- * @set_buildable_property: Sets a property of a buildable object.
+ * @param set_buildable_property: Sets a property of a buildable object.
  *  It is normally not necessary to implement this, g_object_set_property()
  *  is used by default. #GtkWindow implements this to delay showing itself
  *  (i.e. setting the #GtkWidget:visible property) until the whole interface
  *  is created.
- * @construct_child: Constructs a child of a buildable that has been
+ * @param construct_child: Constructs a child of a buildable that has been
  *  specified as "constructor" in the UI definition. #GtkUIManager implements
  *  this to reference to a widget created in a &lt;ui&gt; tag which is outside
  *  of the normal GtkBuilder UI definition hierarchy.  A reference to the
  *  constructed object is returned and becomes owned by the caller.
- * @custom_tag_start: Implement this if the buildable needs to parse
+ * @param custom_tag_start: Implement this if the buildable needs to parse
  *  content below &lt;child&gt;. To handle an element, the implementation
- *  must fill in the @parser structure and @user_data and return %TRUE.
+ *  must fill in the \p parser structure and \p user_data and return %TRUE.
  *  #GtkWidget implements this to parse keyboard accelerators specified
  *  in &lt;accelerator&gt; elements. #GtkContainer implements it to map
  *  properties defined via &lt;packing&gt; elements to child properties.
- *  Note that @user_data must be freed in @custom_tag_end or @custom_finished.
- * @custom_tag_end: Called for the end tag of each custom element that is
- *  handled by the buildable (see @custom_tag_start).
- * @custom_finished: Called for each custom tag handled by the buildable
- *  when the builder finishes parsing (see @custom_tag_start)
- * @parser_finished: Called when a builder finishes the parsing
+ *  Note that \p user_data must be freed in \p custom_tag_end or \p custom_finished.
+ * @param custom_tag_end: Called for the end tag of each custom element that is
+ *  handled by the buildable (see \p custom_tag_start).
+ * @param custom_finished: Called for each custom tag handled by the buildable
+ *  when the builder finishes parsing (see \p custom_tag_start)
+ * @param parser_finished: Called when a builder finishes the parsing
  *  of a UI definition. It is normally not necessary to implement this,
  *  unless you need to perform special cleanup actions. #GtkWindow sets
  *  the #GtkWidget:visible property here.
- * @get_internal_child: Returns an internal child of a buildable.
- *  #GtkDialog implements this to give access to its @vbox, making
+ * @param get_internal_child: Returns an internal child of a buildable.
+ *  #GtkDialog implements this to give access to its \p vbox, making
  *  it possible to add children to the vbox in a UI definition.
  *  Implement this if the buildable has internal children that may
  *  need to be accessed from a UI definition.

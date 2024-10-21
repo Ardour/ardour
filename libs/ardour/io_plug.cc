@@ -170,7 +170,9 @@ IOPlug::set_state (const XMLNode& node, int version)
 	XMLNodeIterator niter;
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == _plugin->state_node_name ()) {
+		if ((*niter)->name() == _plugin->state_node_name ()
+		   || (any_vst && ((*niter)->name() == "lxvst" || (*niter)->name() == "windows-vst" || (*niter)->name() == "mac-vst"))
+			 ) {
 			_plugin->set_state (**niter, version);
 			break;
 		}
@@ -253,8 +255,9 @@ IOPlug::setup ()
 	 }
 
 	 _plugin->reconfigure_io (_n_in, aux_in, _n_out);
-	 _plugin->ParameterChangedExternally.connect_same_thread (*this, boost::bind (&IOPlug::parameter_changed_externally, this, _1, _2));
+	 _plugin->ParameterChangedExternally.connect_same_thread (*this, std::bind (&IOPlug::parameter_changed_externally, this, _1, _2));
 	 _plugin->activate ();
+	 _plugin->set_insert (this, 0);
 }
 
 samplecnt_t
@@ -269,14 +272,14 @@ IOPlug::set_public_latency (bool playback)
 	/* Step1: set private port latency
 	 * compare to Route::set_private_port_latencies, Route::update_port_latencies
 	 */
-	PortSet& from = playback ? _output->ports () : _input->ports ();
-	PortSet& to   = playback ? _input->ports () : _output->ports ();
+	std::shared_ptr<PortSet> from = playback ? _output->ports () : _input->ports ();
+	std::shared_ptr<PortSet> to   = playback ? _input->ports () : _output->ports ();
 
 	LatencyRange all_connections;
 	all_connections.min = ~((pframes_t) 0);
 	all_connections.max = 0;
 
-	for (auto const& p : from) {
+	for (auto const& p : *from) {
 		if (!p->connected ()) {
 			continue;
 		}
@@ -292,14 +295,14 @@ IOPlug::set_public_latency (bool playback)
 	}
 
 	/* set the "from" port latencies to the max/min range of all their connections */
-	for (auto const& p : from) {
+	for (auto const& p : *from) {
 		p->set_private_latency_range (all_connections, playback);
 	}
 
 	all_connections.min += _plugin_signal_latency;
 	all_connections.max += _plugin_signal_latency;
 
-	for (auto const& p : to) {
+	for (auto const& p : *to) {
 		p->set_private_latency_range (all_connections, playback);
 	}
 
@@ -336,7 +339,7 @@ IOPlug::create_parameters ()
 
 		Evoral::Parameter param (PluginAutomation, 0, i);
 
-		std::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc));
+		std::shared_ptr<AutomationControl> c (new PluginControl (_session, this, param, desc));
 		c->set_flag (Controllable::NotAutomatable);
 		add_control (c);
 
@@ -351,12 +354,12 @@ IOPlug::create_parameters ()
 		if (desc.datatype == Variant::NOTHING) {
 			continue;
 		}
-		std::shared_ptr<AutomationControl> c (new PluginPropertyControl (this, param, desc));
+		std::shared_ptr<AutomationControl> c (new PluginPropertyControl (_session, this, param, desc));
 		c->set_flag (Controllable::NotAutomatable);
 		add_control (c);
 	}
 
-	_plugin->PresetPortSetValue.connect_same_thread (*this, boost::bind (&IOPlug::preset_load_set_value, this, _1, _2));
+	_plugin->PresetPortSetValue.connect_same_thread (*this, std::bind (&IOPlug::preset_load_set_value, this, _1, _2));
 }
 
 void
@@ -434,6 +437,26 @@ IOPlug::ensure_io ()
 	return true;
 }
 
+ChanMapping
+IOPlug::input_map (uint32_t num) const
+{
+	if (num == 1) {
+		return ChanMapping (_n_in);
+	} else {
+		return ChanMapping ();
+	}
+}
+
+ChanMapping
+IOPlug::output_map (uint32_t num) const
+{
+	if (num == 1) {
+		return ChanMapping (_n_out);
+	} else {
+		return ChanMapping ();
+	}
+}
+
 void
 IOPlug::process ()
 {
@@ -481,7 +504,6 @@ IOPlug::connect_and_run (samplepos_t start, pframes_t n_samples)
 		}
 	}
 
-	PortSet& ports (_output->ports());
 	if (_pre) {
 		canderef = 1;
 		const bool reset       = _reset_meters.compare_exchange_strong (canderef, 0);
@@ -588,7 +610,7 @@ std::string
 IOPlug::describe_parameter (Evoral::Parameter param)
 {
 	if (param.type() == PluginAutomation) {
-		_plugin->describe_parameter (param);
+		return _plugin->describe_parameter (param);
 	} else if (param.type() == PluginPropertyAutomation) {
 		return string_compose ("Property %1", URIMap::instance ().id_to_uri (param.id()));
 	}
@@ -654,105 +676,4 @@ IOPlug::reset_parameters_to_default ()
 		ac->set_value (dflt, Controllable::NoGroup);
 	}
 	return all;
-}
-
-/* ****************************************************************************/
-
-IOPlug::PluginControl::PluginControl (IOPlug*                     p,
-                                      Evoral::Parameter const&    param,
-                                      ParameterDescriptor const&  desc)
-	: AutomationControl (p->session (), param, desc, std::shared_ptr<AutomationList> (), p->describe_parameter (param))
-	, _iop (p)
-{
-}
-
-void
-IOPlug::PluginControl::actually_set_value (double user_val, PBD::Controllable::GroupControlDisposition group_override)
-{
-	_iop->plugin ()->set_parameter (parameter().id(), user_val, 0);
-
-	AutomationControl::actually_set_value (user_val, group_override);
-}
-
-void
-IOPlug::PluginControl::catch_up_with_external_value (double user_val)
-{
-	AutomationControl::actually_set_value (user_val, Controllable::NoGroup);
-}
-
-XMLNode&
-IOPlug::PluginControl::get_state () const
-{
-	XMLNode& node (AutomationControl::get_state());
-	node.set_property ("parameter", parameter().id());
-
-	std::shared_ptr<LV2Plugin> lv2plugin = std::dynamic_pointer_cast<LV2Plugin> (_iop->plugin ());
-	if (lv2plugin) {
-		node.set_property ("symbol", lv2plugin->port_symbol (parameter().id()));
-	}
-
-	return node;
-}
-
-double
-IOPlug::PluginControl::get_value () const
-{
-	std::shared_ptr<Plugin> plugin = _iop->plugin ();
-
-	if (!plugin) {
-		return 0.0;
-	}
-
-	return plugin->get_parameter (parameter().id());
-}
-
-std::string
-IOPlug::PluginControl::get_user_string () const
-{
-	std::shared_ptr<Plugin> plugin = _iop->plugin (0);
-	if (plugin) {
-		std::string pp;
-		if (plugin->print_parameter (parameter().id(), pp) && pp.size () > 0) {
-			return pp;
-		}
-	}
-	return AutomationControl::get_user_string ();
-}
-
-IOPlug::PluginPropertyControl::PluginPropertyControl (IOPlug*                    p,
-                                                      Evoral::Parameter const&   param,
-                                                      ParameterDescriptor const& desc)
-	: AutomationControl (p->session(), param, desc )
-	, _iop (p)
-{
-}
-
-void
-IOPlug::PluginPropertyControl::actually_set_value (double user_val, Controllable::GroupControlDisposition gcd)
-{
-	const Variant value(_desc.datatype, user_val);
-	if (value.type() == Variant::NOTHING) {
-		return;
-	}
-
-	_iop->plugin ()->set_property (parameter().id(), value);
-
-	_value = value;
-
-	AutomationControl::actually_set_value (user_val, gcd);
-}
-
-XMLNode&
-IOPlug::PluginPropertyControl::get_state () const
-{
-	XMLNode& node (AutomationControl::get_state());
-	node.set_property ("property", parameter ().id ());
-	node.remove_property ("value");
-	return node;
-}
-
-double
-IOPlug::PluginPropertyControl::get_value () const
-{
-	return _value.to_double();
 }

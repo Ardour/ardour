@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_internal_send_h__
-#define __ardour_internal_send_h__
+#pragma once
 
 #include "ardour/ardour.h"
 #include "ardour/send.h"
@@ -61,7 +60,7 @@ public:
 	void set_can_pan (bool yn);
 	uint32_t pan_outs () const;
 
-	static PBD::Signal1<void, pframes_t> CycleStart;
+	static PBD::Signal<void(pframes_t)> CycleStart;
 
 protected:
 	XMLNode& state() const;
@@ -90,4 +89,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_send_h__ */

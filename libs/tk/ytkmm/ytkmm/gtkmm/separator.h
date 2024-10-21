@@ -133,9 +133,6 @@ protected:
  * This widget has no window and receives no configuration events.
  * It should be considered a leaf widget.
  *
- * A VSeparator widget looks like this:
- * @image html vseparator1.png
- *
  * @ingroup Widgets
  */
 
@@ -204,9 +201,6 @@ public:
  * Filler widget used to separate widgets with a visible line.
  * This widget has no window and receives no configuration events.
  * It should be considered a leaf widget.
- *
- * The HSeparator widget looks like this:
- * @image html hseparator1.png
  *
  * @ingroup Widgets
  */

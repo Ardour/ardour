@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_latent_h__
-#define __ardour_latent_h__
+#pragma once
 
 #include "pbd/signals.h"
 
@@ -84,8 +83,8 @@ public:
 		return _zero_latency;
 	}
 
-	static PBD::Signal0<void> DisableSwitchChanged;
-	PBD::Signal0<void> LatencyChanged;
+	static PBD::Signal<void()> DisableSwitchChanged;
+	PBD::Signal<void()> LatencyChanged;
 
 protected:
 	int  set_state (const XMLNode& node, int version);
@@ -101,4 +100,3 @@ private:
 } /* namespace */
 
 
-#endif /* __ardour_latent_h__*/

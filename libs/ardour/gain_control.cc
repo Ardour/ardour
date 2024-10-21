@@ -108,6 +108,17 @@ GainControl::inc_gain (gain_t factor)
 }
 
 void
+GainControl::actually_set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
+{
+	const double max_factor = _desc.from_interface (1.0);
+	const double min_factor = _desc.from_interface (0.0);
+
+	value = std::max (min_factor, std::min (value, max_factor));
+
+	SlavableAutomationControl::actually_set_value (value, gcd);
+}
+
+void
 GainControl::post_add_master (std::shared_ptr<AutomationControl> m)
 {
 	if (m->get_value() == 0) {

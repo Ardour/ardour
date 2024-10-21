@@ -212,12 +212,10 @@ public:
    */
   double get_blue_p() const;
 
-  /** Get a textual specification of color in the hexadecimal form #rrrrggggbbbb,
+  /** Get a textual specification of color in the hexadecimal form <tt>rrrrggggbbbb</tt>,
    * where r, g and b are hex digits representing the red, green and blue components respectively.
    *
    * @result The string representation.
-   *
-   * @newin{2,14}
    */
   Glib::ustring to_string() const;
 

@@ -304,8 +304,11 @@ public:
 
   /** Use get_value(const TreeModelColumn<>& column) unless
    * you do not know the column type at compile-time.
+	 *
    * If the @a data output argument is of an inappropriate C++ type then this might fail at runtime.
+	 *
    * @param column The number of the column whose value you want to change.
+   * @param data The column type of the given colomn.
    * @result data An output argument which will contain the value of this column of this row.
    */
   template <class ColumnType>

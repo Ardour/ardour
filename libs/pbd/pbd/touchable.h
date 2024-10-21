@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_touchable_h__
-#define __pbd_touchable_h__
+#pragma once
 
 #include "pbd/libpbd_visibility.h"
 
@@ -87,4 +86,3 @@ class /*LIBPBD_API*/ DynamicTouchable2 : public Touchable
 	T3 arg2;
 };
 
-#endif // __pbd_touchable_h__

@@ -16,8 +16,7 @@
   Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __libtemporal_bbt_time_h__
-#define __libtemporal_bbt_time_h__
+#pragma once
 
 #include <ostream>
 #include <istream>
@@ -429,4 +428,3 @@ inline Temporal::BBT_Offset string_to (std::string const & str)
 
 } /* end namespace PBD */
 
-#endif /* __libtemporal_bbt_time_h__ */

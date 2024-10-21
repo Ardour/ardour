@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_strip_selection_h__
-#define __ardour_gtk_strip_selection_h__
+#pragma once
 
 #include <list>
 
@@ -27,4 +26,3 @@ class MixerStrip;
 
 struct MixerStripSelection : list<MixerStrip*> {};
 
-#endif /* __ardour_gtk_strip_selection_h__ */

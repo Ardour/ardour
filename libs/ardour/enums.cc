@@ -86,6 +86,7 @@ setup_enum_writer ()
 	Placement _Placement;
 	MonitorModel _MonitorModel;
 	MonitorChoice _MonitorChoice;
+	FastWindOp _FastWindOp;
 	MonitorState _MonitorState;
 	PFLPosition _PFLPosition;
 	AFLPosition _AFLPosition;
@@ -101,7 +102,7 @@ setup_enum_writer ()
 	SyncSource _SyncSource;
 	TransportRequestType _TransportRequestType;
 	ShuttleUnits _ShuttleUnits;
-	Session::RecordState _Session_RecordState;
+	RecordState _RecordState;
 	SessionEvent::Type _SessionEvent_Type;
 	SessionEvent::Action _SessionEvent_Action;
 	TimecodeFormat _Session_TimecodeFormat;
@@ -380,6 +381,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (DeltaOriginMarker);
 	REGISTER (_ClockDeltaMode);
 
+	REGISTER_ENUM (FastWindOff);
+	REGISTER_ENUM (FastWindVarispeed);
+	REGISTER_ENUM (FastWindLocate);
+	REGISTER (_FastWindOp);
+
 	REGISTER_ENUM (DenormalNone);
 	REGISTER_ENUM (DenormalFTZ);
 	REGISTER_ENUM (DenormalDAZ);
@@ -465,10 +471,10 @@ setup_enum_writer ()
 	REGISTER_ENUM (Semitones);
 	REGISTER (_ShuttleUnits);
 
-	REGISTER_CLASS_ENUM (Session, Disabled);
-	REGISTER_CLASS_ENUM (Session, Enabled);
-	REGISTER_CLASS_ENUM (Session, Recording);
-	REGISTER (_Session_RecordState);
+	REGISTER_ENUM (Disabled);
+	REGISTER_ENUM (Enabled);
+	REGISTER_ENUM (Recording);
+	REGISTER (_RecordState);
 
 	REGISTER_CLASS_ENUM (SessionEvent, SetTransportSpeed);
 	REGISTER_CLASS_ENUM (SessionEvent, SetDefaultPlaySpeed);
@@ -612,6 +618,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Location, IsXrun);
 	REGISTER_CLASS_ENUM (Location, IsCueMarker);
 	REGISTER_CLASS_ENUM (Location, IsSection);
+	REGISTER_CLASS_ENUM (Location, IsScene);
 	REGISTER_BITS (_Location_Flags);
 
 	REGISTER_CLASS_ENUM (Track, NoFreeze);
@@ -731,6 +738,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Delivery, Main);
 	REGISTER_CLASS_ENUM (Delivery, Aux);
 	REGISTER_CLASS_ENUM (Delivery, Foldback);
+	REGISTER_CLASS_ENUM (Delivery, DirectOuts);
 	REGISTER_BITS (_Delivery_Role);
 
 	REGISTER_CLASS_ENUM (MuteMaster, PreFader);

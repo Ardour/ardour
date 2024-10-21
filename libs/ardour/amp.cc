@@ -73,7 +73,7 @@ Amp::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Amp::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t nframes, bool)
+Amp::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t /*end_sample*/, double /*speed*/, pframes_t nframes, bool)
 {
 	if (!check_active()) {
 		/* disregard potentially prepared gain-automation. */
@@ -129,6 +129,8 @@ Amp::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sampl
 
 	} else { /* manual (scalar) gain */
 
+		_gain_control->automation_run (start_sample, nframes);
+
 		gain_t const target_gain = _gain_control->get_value();
 
 		if (fabsf (_current_gain - target_gain) >= GAIN_COEFF_DELTA) {
@@ -168,10 +170,14 @@ Amp::apply_gain (BufferSet& bufs, samplecnt_t sample_rate, samplecnt_t nframes, 
 		return target;
 	}
 
-	/* Apply Audio Gain first, calculate target LFP'ed gain coefficient
+	/* Apply Audio Gain first, calculate 1 pole IIR time constant
 	 *
-	 * Low pass filter coefficient: 1.0 - e^(-2.0 * π * f / 48000) f in Hz.
-	 * for f << SR,  approx a ~= 6.2 * f / SR;
+	 * H(z) = a / (1 - (1 - a)  z^-1)
+	 * a = -y + sqrt (y^2 + 2y); y = 1 - cos (w) ;  w = 2 * π f/SR
+	 * a ~= 1.0 - e^(-2.0 * π * f / SR)
+	 *
+	 * and for very small w (f << SR)
+	 * a ~= 6.2 * f / SR;
 	 */
 	const gain_t a = 156.825f / (gain_t)sample_rate; // 25 Hz LPF
 
@@ -380,7 +386,7 @@ Amp::setup_gain_automation (samplepos_t start_sample, samplepos_t end_sample, sa
 
 		_apply_gain_automation = _gain_control->get_masters_curve ( start_sample, end_sample, _gain_automation_buffer, nframes);
 
-		if (start_sample != _current_automation_sample && _session.bounce_processing ()) {
+		if (start_sample != _current_automation_sample) {
 			_current_gain = _gain_automation_buffer[0];
 		}
 		_current_automation_sample = end_sample;

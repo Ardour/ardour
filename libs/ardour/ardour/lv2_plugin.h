@@ -28,7 +28,6 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <boost/enable_shared_from_this.hpp>
 
 #include "temporal/tempo.h"
 
@@ -46,7 +45,6 @@
 #define PATH_MAX 1024
 #endif
 
-typedef struct LV2_Evbuf_Impl LV2_Evbuf;
 
 namespace ARDOUR {
 
@@ -59,6 +57,7 @@ const void* lv2plugin_get_port_value(const char* port_symbol,
 
 class AudioEngine;
 class Session;
+struct LV2_Evbuf;
 
 class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 {
@@ -154,6 +153,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	void add_slave (std::shared_ptr<Plugin>, bool);
 	void remove_slave (std::shared_ptr<Plugin>);
+	void set_non_realtime (bool);
 
 	bool write_from_ui(uint32_t       index,
 	                   uint32_t       protocol,
@@ -226,6 +226,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	double        _current_bpm;
 	double        _prev_time_scale;  ///< previous Port::speed_ratio
 	PBD::ID       _insert_id;
+	bool          _non_realtime;
 	std::string   _plugin_state_dir;
 	uint32_t      _bpm_control_port_index;
 	uint32_t      _patch_port_in_index;
@@ -254,7 +255,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		PORT_AUTOCTRL = 1 << 9,  ///< Event port supports auto:AutomationControl
 		PORT_CTRLED   = 1 << 10, ///< Port prop auto:AutomationControlled (can be self controlled)
 		PORT_CTRLER   = 1 << 11, ///< Port prop auto:AutomationController (can be self set)
-		PORT_NOAUTO   = 1 << 12  ///< Port don't allow to automate
+		PORT_NOAUTO   = 1 << 12, ///< Port don't allow to automate
+		PORT_OTHOPT   = 1 << 13  ///< Port of unknown data type with prop connectionOptional
 	} PortFlag;
 
 	typedef unsigned PortFlags;
@@ -408,7 +410,7 @@ public:
 	LV2PluginInfo (const char* plugin_uri);
 	~LV2PluginInfo ();
 
-	static PluginInfoList* discover (boost::function <void (std::string const&, PluginScanLogEntry::PluginScanResult, std::string const&, bool)> cb);
+	static PluginInfoList* discover (std::function <void (std::string const&, PluginScanLogEntry::PluginScanResult, std::string const&, bool)> cb);
 
 	PluginPtr load (Session& session);
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;

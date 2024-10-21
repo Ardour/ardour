@@ -33,6 +33,8 @@
 
 #include "libsmf/smf.h"
 
+#include "temporal/tempo.h"
+
 #include "evoral/Event.h"
 #include "evoral/SMF.h"
 #include "evoral/midi_util.h"
@@ -695,6 +697,56 @@ SMF::load_markers ()
 			_markers.push_back (MarkerAt (marker, event->time_pulses));
 		}
 	}
+}
+
+std::shared_ptr<Temporal::TempoMap>
+SMF::tempo_map (bool& provided) const
+{
+	/* cannot create an empty TempoMap, so create one with "default" single
+	   values for tempo and meter, then overwrite them.
+	*/
+
+	std::shared_ptr<Temporal::TempoMap> new_map (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
+	const size_t ntempos = num_tempos ();
+
+	if (ntempos == 0) {
+		provided = false;
+		return new_map;
+	}
+
+	Temporal::Meter last_meter (4, 4);
+	bool have_initial_meter = false;
+
+	for (size_t n = 0; n < ntempos; ++n) {
+
+		Evoral::SMF::Tempo* t = nth_tempo (n);
+		assert (t);
+
+		Temporal::Tempo tempo (t->tempo(), 32.0 / (double) t->notes_per_note);
+		Temporal::Meter meter (t->numerator, t->denominator);
+
+		Temporal::BBT_Argument bbt; /* 1|1|0 which is correct for the no-meter case */
+
+		if (have_initial_meter) {
+
+			bbt = new_map->bbt_at (Temporal::timepos_t (Temporal::Beats (int_div_round (t->time_pulses, (size_t) ppqn()), 0)));
+			new_map->set_tempo (tempo, bbt);
+
+			if (!(meter == last_meter)) {
+				new_map->set_meter (meter, bbt);
+			}
+
+		} else {
+			new_map->set_meter (meter, bbt);
+			new_map->set_tempo (tempo, bbt);
+			have_initial_meter = true;
+		}
+
+		last_meter = meter;
+	}
+
+	provided = true;
+	return new_map;
 }
 
 } // namespace Evoral

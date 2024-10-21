@@ -77,16 +77,14 @@ namespace Gtk
 {
 
 
-/**  .
- * Renders a keyboard accelerator in a cell
+/** Renders a keyboard accelerator in a cell
  *
  * Gtk::CellRendererAccel displays a keyboard accelerator 
- * (i.e. a key combination like <Control>-a).
+ * (i.e. a key combination like Ctrl+a).
  * If the cell renderer is editable, the accelerator can be changed by 
  * simply typing the new combination.
  *
  * @ingroup TreeView
- * @newin{2,10}
  */
 
 class CellRendererAccel : public CellRendererText

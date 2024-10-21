@@ -196,16 +196,12 @@ public:
    * that will be displayed in the file selector user interface if
    * there is a selectable list of filters.
    * 
-   * @newin{2,4}
-   * 
    * @param name The human-readable-name for the filter, or <tt>0</tt>
    * to remove any existing name.
    */
   void set_name(const Glib::ustring& name);
   
   /** Gets the human-readable name for the filter. See set_name().
-   * 
-   * @newin{2,4}
    * 
    * @return The human-readable name of the filter,
    * or <tt>0</tt>. This value is owned by GTK+ and must not
@@ -216,15 +212,11 @@ public:
   
   /** Adds a rule allowing a given mime type to @a filter.
    * 
-   * @newin{2,4}
-   * 
    * @param mime_type Name of a MIME type.
    */
   void add_mime_type(const Glib::ustring& mime_type);
   
   /** Adds a rule allowing a shell style glob to a filter.
-   * 
-   * @newin{2,4}
    * 
    * @param pattern A shell style glob.
    */
@@ -232,8 +224,6 @@ public:
   
   /** Adds a rule allowing image files in the formats supported
    * by GdkPixbuf.
-   * 
-   * @newin{2,6}
    */
   void add_pixbuf_formats();
 
@@ -259,8 +249,6 @@ public:
    * This function will not typically be used by applications; it
    * is intended principally for use in the implementation of
    * Gtk::FileChooser.
-   * 
-   * @newin{2,4}
    * 
    * @return Bitfield of flags indicating needed fields when
    * calling filter().

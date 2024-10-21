@@ -279,9 +279,6 @@ public:
 
 /** This dialog allows the user to select a color.
  *
- * A ColorSelectionDialog looks like this:
- * @image html colorselectiondialog1.png
- *
  * @ingroup Dialogs
  */
 
@@ -348,15 +345,11 @@ public:
 
   /** Retrieves the Gtk::ColorSelection widget embedded in the dialog.
    * 
-   * @newin{2,14}
-   * 
    * @return The embedded Gtk::ColorSelection.
    */
   ColorSelection* get_color_selection();
   
   /** Retrieves the Gtk::ColorSelection widget embedded in the dialog.
-   * 
-   * @newin{2,14}
    * 
    * @return The embedded Gtk::ColorSelection.
    */

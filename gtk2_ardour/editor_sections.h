@@ -19,7 +19,7 @@
 #ifndef _gtk_ardour_editor_sections_h_
 #define _gtk_ardour_editor_sections_h_
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include "ardour/location.h"
 #include "ardour/session_handle.h"
@@ -108,7 +108,7 @@ private:
 		Gtk::TreeModelColumn<Temporal::timepos_t> end;
 	};
 
-	typedef boost::unordered_map<ARDOUR::Location*, Gtk::TreeModel::iterator> LocationRowMap;
+	typedef std::unordered_map<ARDOUR::Location*, Gtk::TreeModel::iterator> LocationRowMap;
 
 	Columns                      _columns;
 	Glib::RefPtr<Gtk::ListStore> _model;

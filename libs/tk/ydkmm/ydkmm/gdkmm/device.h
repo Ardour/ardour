@@ -183,24 +183,20 @@ public:
   /** If @a index has a valid keyval, this function will
    * fill in @a keyval and @a modifiers with the keyval settings.
    * 
-   * @newin{2,22}
-   * 
    * @param index The index of the macro button to get.
    * @param keyval Return value for the keyval.
    * @param modifiers Return value for modifiers.
    */
-  void get_key(guint index_, guint& keyval, ModifierType& modifiers) const;
+  void get_key(guint index, guint& keyval, ModifierType& modifiers) const;
   
-  void set_key(guint index_, guint keyval, ModifierType modifiers);
+  void set_key(guint index, guint keyval, ModifierType modifiers);
   
   /** Returns the axis use for @a index.
-   * 
-   * @newin{2,22}
    * 
    * @param index The index of the axis.
    * @return A Gdk::AxisUse specifying how the axis is used.
    */
-  AxisUse get_axis_use(guint index_) const;
+  AxisUse get_axis_use(guint index) const;
   
   void set_axis_use(guint index_, AxisUse use);
   
@@ -243,15 +239,11 @@ public:
   
   /** Determines the name of the device.
    * 
-   * @newin{2,22}
-   * 
    * @return A name.
    */
   Glib::ustring get_name() const;
   
   /** Determines the type of the device.
-   * 
-   * @newin{2,22}
    * 
    * @return A Gdk::InputSource.
    */
@@ -259,15 +251,11 @@ public:
   
   /** Determines the mode of the device.
    * 
-   * @newin{2,22}
-   * 
    * @return A Gdk::InputSource.
    */
   InputMode get_mode() const;
   
   /** Determines whether the pointer follows device motion.
-   * 
-   * @newin{2,22}
    * 
    * @return <tt>true</tt> if the pointer follows device motion.
    */
@@ -275,8 +263,6 @@ public:
 
   
   /** Gets the number of axes of a device.
-   * 
-   * @newin{2,22}
    * 
    * @return The number of axes of @a device.
    */

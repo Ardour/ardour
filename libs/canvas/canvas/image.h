@@ -105,7 +105,7 @@ private:
     mutable Cairo::RefPtr<Cairo::Surface> _surface;
 
     void accept_data ();
-    PBD::Signal0<void> DataReady;
+    PBD::Signal<void()> DataReady;
     PBD::ScopedConnectionList data_connections;
 };
 

@@ -196,7 +196,10 @@ main (int argc, char** argv)
 
 	sq = ceil (sqrt (ArdourIcon::NoIcon + 3));
 
-	cairo_surface_t* cs = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 2 * bd + wh * sq, 2 * bd + wh * sq);
+	int w = sq;
+	int h = ceil ((ArdourIcon::NoIcon + 3.0) / sq);
+
+	cairo_surface_t* cs = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 2 * bd + wh * w, 2 * bd + wh * h);
 	cairo_t*         cr = cairo_create (cs);
 
 	Gtkmm2ext::set_source_rgba (cr, bg_color);
@@ -214,7 +217,7 @@ main (int argc, char** argv)
 	if (bd > 0) {
 		Gtkmm2ext::set_source_rgba (cr, fg_color);
 		cairo_set_line_width (cr, 1);
-		cairo_rectangle (cr, bd - .5, bd - .5, 1 + wh * sq, 1 + wh * sq);
+		cairo_rectangle (cr, bd - .5, bd - .5, 1 + wh * w, 1 + wh * h);
 		cairo_stroke (cr);
 		cairo_set_font_size (cr, fs);
 		for (int rc = 0; rc < sq; ++rc) {
@@ -227,6 +230,10 @@ main (int argc, char** argv)
 					rint (.5 * (bd  + extents.height))
 					);
 			cairo_show_text (cr, tmp);
+
+			if (rc >= h) {
+				continue;
+			}
 
 			snprintf (tmp, sizeof(tmp), "%d", rc + 1);
 			cairo_text_extents (cr, tmp, &extents);

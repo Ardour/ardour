@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_analysis_window_h__
-#define __ardour_analysis_window_h__
+#pragma once
 
 #include <glibmm.h>
 #include <glibmm/refptr.h>
@@ -115,6 +114,4 @@ private:
 
 	friend class FFTGraph;
 };
-
-#endif // __ardour_analysis_window_h
 

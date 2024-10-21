@@ -48,9 +48,6 @@ namespace Gtk
  * After constructing the first RadioButton in a group, use get_group() and provide this Group to the constructors ot the other RadioButtons in the same group.
  * To remove a Gtk::RadioButton from one group and make it part of a new one, use set_group().
  *
- * The RadioButton widget looks like this:
- * @image html radiobutton1.png
- *
  * @ingroup Widgets
  */
 

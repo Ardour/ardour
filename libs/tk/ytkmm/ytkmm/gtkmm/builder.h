@@ -104,8 +104,6 @@ namespace Gtk
  * When one of these objects is created, the XML file is read, and the interface 
  * is created. The Gtk::Builder object then provides an interface for accessing the 
  * widgets in the interface by the names assigned to them inside the UI description.
- *
- * @newin{2,12}
  */
 
 class Builder : public Glib::Object
@@ -174,8 +172,6 @@ public:
    * @param filename the name of the file to parse.
    * @result A new Builder object, or a null pointer if an error occurred.
    * @throws BuilderError, Glib::MarkupError, Glib::FileError
-   *
-   * @newin{2,12}
    */
   static Glib::RefPtr<Builder> create_from_file(const std::string& filename);
 
@@ -189,8 +185,6 @@ public:
    * @param object_id The object to build.
    * @result A new Builder object, or a null pointer if an error occurred.
    * @throws BuilderError, Glib::MarkupError, Glib::FileError
-   *
-   * @newin{2,14}
    */
   static Glib::RefPtr<Builder> create_from_file(const std::string& filename, const Glib::ustring& object_id);
   //This is just to avoid the ambiguous call when using a string literal, 
@@ -205,8 +199,6 @@ public:
    * @param object_id The object to build.
    * @result A new Builder object, or a null pointer if an error occurred.
    * @throws BuilderError, Glib::MarkupError, Glib::FileError
-   *
-   * @newin{2,16}
    */
   static Glib::RefPtr<Builder> create_from_file(const std::string& filename, const char* object_id);
   /** Parses a file containing a GtkBuilder UI definition, building only the requested objects.
@@ -219,8 +211,6 @@ public:
    * @param object_ids The objects to build.
    * @result A new Builder object, or a null pointer if an error occurred.
    * @throws BuilderError, Glib::MarkupError, Glib::FileError
-   *
-   * @newin{2,14}
    */
   static Glib::RefPtr<Builder> create_from_file(const std::string& filename, const Glib::StringArrayHandle& object_ids);
 
@@ -229,8 +219,6 @@ public:
    * @param buffer: the string to parse
    * @result A new Builder object, or a null pointer if an error occurred.
    * @throws BuilderError, Glib::MarkupError
-   *
-   * @newin{2,12}
    */
   static Glib::RefPtr<Builder> create_from_string(const Glib::ustring& buffer);
   //This is just to avoid the ambiguous call when using a string literal, 
@@ -241,8 +229,6 @@ public:
    * @param object_id The object to build.
    * @result A new Builder object, or a null pointer if an error occurred.
    * @throws BuilderError, Glib::MarkupError
-   *
-   * @newin{2,16}
    */
   static Glib::RefPtr<Builder> create_from_string(const Glib::ustring& buffer, const char* object_id);
 
@@ -252,8 +238,6 @@ public:
    * @param object_id The object to build.
    * @result A new Builder object, or a null pointer if an error occurred.
    * @throws BuilderError, Glib::MarkupError
-   *
-   * @newin{2,14}
    */
   static Glib::RefPtr<Builder> create_from_string(const Glib::ustring& buffer, const Glib::ustring& object_id);
 
@@ -267,8 +251,6 @@ public:
    * @param object_ids The objects to build.
    * @result A new Builder object, or a null pointer if an error occurred.
    * @throws BuilderError, Glib::MarkupError
-   *
-   * @newin{2,14}
    */
   static Glib::RefPtr<Builder> create_from_string(const Glib::ustring& buffer, const Glib::StringArrayHandle& object_ids);
   
@@ -276,11 +258,9 @@ public:
   /** Parses a file containing a GtkBuilder UI definition, 
    * and merges it with the current contents of the builder.
    *
-   * @param buffer The file to parse.
+   * @param filename The file to parse.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError, Glib::MarkupError
-   *
-   * @newin{2,14}
    */
   bool add_from_file(const std::string& filename);
 
@@ -294,12 +274,10 @@ public:
    * its child (for instance a GtkTreeView that depends on its
    * GtkTreeModel), you have to explicitely list all of them.
    *
-   * @param buffer The file to parse.
-   * @param The object to build.
+   * @param filename The file to parse.
+   * @param object_id The object to build.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError, Glib::MarkupError
-   *
-   * @newin{2,16}
    */
   bool add_from_file(const std::string& filename, const char* object_id);
 
@@ -311,12 +289,10 @@ public:
    * its child (for instance a GtkTreeView that depends on its
    * GtkTreeModel), you have to explicitely list all of them.
    *
-   * @param buffer The file to parse.
-   * @param The object to build.
+   * @param filename The file to parse.
+   * @param object_id The object to build.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError, Glib::MarkupError
-   *
-   * @newin{2,14}
    */
   bool add_from_file(const std::string& filename, const Glib::ustring& object_id);
 
@@ -329,13 +305,10 @@ public:
    * Error from the Gtk::BUILDER_ERROR, MARKUP_ERROR or FILE_ERROR 
    * domain.
    * 
-   * <note>
+   * \note
    * If you are adding an object that depends on an object that is not 
    * its child (for instance a Gtk::TreeView that depends on its
    * Gtk::TreeModel), you have to explicitely list all of them in @a object_ids. 
-   * </note>
-   * 
-   * @newin{2,14}
    * 
    * @param filename The name of the file to parse.
    * @param object_ids Nul-terminated array of objects to build.
@@ -351,8 +324,6 @@ public:
    * @param buffer The string to parse.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError
-   *
-   * @newin{2,12}
    */
   bool add_from_string(const Glib::ustring& buffer);
 
@@ -361,11 +332,9 @@ public:
    * and merges it with the current contents of the builder.
    *
    * @param buffer The string to parse.
-   * @param The object to build.
+   * @param object_id The object to build.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError
-   *
-   * @newin{2,16}
    */
   bool add_from_string(const Glib::ustring& buffer, const char* object_id);
 
@@ -374,11 +343,9 @@ public:
    * and merges it with the current contents of the builder.
    *
    * @param buffer The string to parse.
-   * @param The object to build.
+   * @param object_id The object to build.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError
-   *
-   * @newin{2,14}
    */
   bool add_from_string(const Glib::ustring& buffer, const Glib::ustring& object_id);
 
@@ -387,11 +354,9 @@ public:
    * and merges it with the current contents of the builder.
    *
    * @param buffer The string to parse.
-   * @param The objects to build.
+   * @param object_ids The objects to build.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError
-   *
-   * @newin{2,14}
    */
   bool add_from_string(const Glib::ustring& buffer, const Glib::StringArrayHandle& object_ids);
   
@@ -400,11 +365,9 @@ public:
    * and merges it with the current contents of the builder.
    *
    * @param buffer The string to parse.
-   * @param length The length of @a buffer (may be -1 if @buffer is nul-terminated).
+   * @param length The length of @a buffer (may be -1 if \p buffer is nul-terminated).
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError
-   *
-   * @newin{2,12}
    */
   bool add_from_string(const char* buffer, gsize length);
 
@@ -412,8 +375,6 @@ public:
   
   /** Gets the object named @a name. Note that this function does not
    * increment the reference count of the returned object. 
-   * 
-   * @newin{2,12}
    * 
    * @param name Name of object to get.
    * @return The object named @a name or <tt>0</tt> if
@@ -437,7 +398,7 @@ public:
    * container widget.
    *
    * @param name The name of the widget.
-   * @retval widget A pointer to the widget, or <tt>0</tt> on failure.
+   * @param widget A pointer to the widget, or <tt>0</tt> on failure.
    */
   template <class T_Widget> inline
   void get_widget(const Glib::ustring& name, T_Widget*& widget)
@@ -466,7 +427,7 @@ public:
    * @endcode
    *
    * @param name The name of the widget.
-   * @retval widget A pointer to the widget, or <tt>0</tt> on failure.
+   * @param widget A pointer to the widget, or <tt>0</tt> on failure.
    */
   template <class T_Widget> inline
   void get_widget_derived(const Glib::ustring& name, T_Widget*& widget)
@@ -517,15 +478,11 @@ public:
   /** Sets the translation domain of @a builder. 
    * See Gtk::Builder::property_translation_domain().
    * 
-   * @newin{2,12}
-   * 
    * @param domain The translation domain or <tt>0</tt>.
    */
   void set_translation_domain(const Glib::ustring& domain);
   
   /** Gets the translation domain of @a builder.
-   * 
-   * @newin{2,12}
    * 
    * @return The translation domain. This string is owned
    * by the builder object and must not be modified or freed.

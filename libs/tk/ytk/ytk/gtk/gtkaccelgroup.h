@@ -68,9 +68,9 @@ typedef gboolean (*GtkAccelGroupActivate) (GtkAccelGroup  *accel_group,
 
 /**
  * GtkAccelGroupFindFunc:
- * @key: 
- * @closure: 
- * @data: 
+ * @param key: 
+ * @param closure: 
+ * @param data: 
  * 
  * Since: 2.2
  */

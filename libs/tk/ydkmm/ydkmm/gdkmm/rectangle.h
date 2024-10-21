@@ -102,7 +102,7 @@ public:
    * For instance: rect.intersect(src2).join(src3);
    *
    * @param src2 The rectangle with which to calculate the intersection with this rectangle.
-   * @param rectangles_interesect This will be set to true if the rectangles intersect.
+   * @param rectangles_intersect This will be set to true if the rectangles intersect.
    * @returns A reference to this rectangle.
    */
   Rectangle& intersect(const Rectangle& src2, bool& rectangles_intersect);

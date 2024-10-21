@@ -70,6 +70,11 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	color_handler ();
 }
 
+AudioStreamView::~AudioStreamView ()
+{
+	undisplay_track ();
+}
+
 int
 AudioStreamView::set_amplitude_above_axis (gdouble app)
 {
@@ -151,7 +156,7 @@ AudioStreamView::add_region_view_internal (std::shared_ptr<Region> r, bool wait_
 
 	/* catch region going away */
 
-	r->DropReferences.connect (*this, invalidator (*this), boost::bind (&AudioStreamView::remove_region_view, this, std::weak_ptr<Region> (r)), gui_context());
+	r->DropReferences.connect (*this, invalidator (*this), std::bind (&AudioStreamView::remove_region_view, this, std::weak_ptr<Region> (r)), gui_context());
 
 	RegionViewAdded (region_view);
 
@@ -212,7 +217,7 @@ AudioStreamView::setup_rec_box ()
 		// cerr << "\trolling\n";
 
 		if (!rec_active &&
-		    _trackview.session()->record_status() == Session::Recording &&
+		    _trackview.session()->record_status() == Recording &&
 		    _trackview.track()->rec_enable_control()->get_value()) {
 			if (_trackview.audio_track()->mode() == Normal && UIConfiguration::instance().get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
 
@@ -229,7 +234,7 @@ AudioStreamView::setup_rec_box ()
 						sources.push_back (src);
 						src->PeakRangeReady.connect (rec_data_ready_connections,
 						                             invalidator (*this),
-						                             boost::bind (&AudioStreamView::rec_peak_range_ready, this, _1, _2, std::weak_ptr<Source>(src)),
+						                             std::bind (&AudioStreamView::rec_peak_range_ready, this, _1, _2, std::weak_ptr<Source>(src)),
 						                             gui_context());
 					}
 				}
@@ -265,7 +270,7 @@ AudioStreamView::setup_rec_box ()
 			create_rec_box(sample_pos, 0);
 
 		} else if (rec_active &&
-		           (_trackview.session()->record_status() != Session::Recording ||
+		           (_trackview.session()->record_status() != Recording ||
 		            !_trackview.track()->rec_enable_control()->get_value())) {
 			screen_update_connection.disconnect();
 			rec_active = false;
@@ -470,8 +475,8 @@ AudioStreamView::set_selected_points (PointSelection& points)
 {
 	for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv && arv->get_gain_line ()) {
-			arv->get_gain_line ()->set_selected_points (points);
+		if (arv && arv->fx_line ()) {
+			arv->fx_line ()->set_selected_points (points);
 		}
 	}
 }

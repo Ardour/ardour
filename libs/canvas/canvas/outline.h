@@ -23,8 +23,6 @@
 
 #include <stdint.h>
 
-#include <boost/noncopyable.hpp>
-
 #include "canvas/visibility.h"
 #include "canvas/types.h"
 
@@ -32,10 +30,12 @@ namespace ArdourCanvas {
 
 class Item;
 
-class LIBCANVAS_API Outline : public boost::noncopyable
+class LIBCANVAS_API Outline
 {
 public:
 	Outline (Item& self);
+	Outline (const Outline&) = delete;
+	Outline& operator= (const Outline&) = delete;
 	virtual ~Outline() {}
 
 	Gtkmm2ext::Color outline_color () const {

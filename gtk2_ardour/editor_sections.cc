@@ -96,14 +96,14 @@ EditorSections::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
-		_session->locations ()->added.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::location_changed, this, _1), gui_context ());
-		_session->locations ()->removed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::location_changed, this, _1), gui_context ());
-		_session->locations ()->changed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::queue_redisplay, this), gui_context ());
+		_session->locations ()->added.connect (_session_connections, invalidator (*this), std::bind (&EditorSections::location_changed, this, _1), gui_context ());
+		_session->locations ()->removed.connect (_session_connections, invalidator (*this), std::bind (&EditorSections::location_changed, this, _1), gui_context ());
+		_session->locations ()->changed.connect (_session_connections, invalidator (*this), std::bind (&EditorSections::queue_redisplay, this), gui_context ());
 
-		Location::start_changed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::location_changed, this, _1), gui_context ());
-		Location::end_changed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::location_changed, this, _1), gui_context ());
-		Location::flags_changed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::queue_redisplay, this), gui_context ());
-		Location::name_changed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::location_changed, this, _1), gui_context ());
+		Location::start_changed.connect (_session_connections, invalidator (*this), std::bind (&EditorSections::location_changed, this, _1), gui_context ());
+		Location::end_changed.connect (_session_connections, invalidator (*this), std::bind (&EditorSections::location_changed, this, _1), gui_context ());
+		Location::flags_changed.connect (_session_connections, invalidator (*this), std::bind (&EditorSections::queue_redisplay, this), gui_context ());
+		Location::name_changed.connect (_session_connections, invalidator (*this), std::bind (&EditorSections::location_changed, this, _1), gui_context ());
 	}
 
 	redisplay ();
@@ -228,6 +228,10 @@ EditorSections::scroll_row_timeout ()
 void
 EditorSections::update_time_selection ()
 {
+	if (!_session) {
+		return;
+	}
+
 	_view.get_selection ()->unselect_all ();
 
 	Selection& selection (PublicEditor::instance ().get_selection ());
@@ -256,6 +260,14 @@ EditorSections::update_time_selection ()
 void
 EditorSections::selection_changed ()
 {
+	if (!_session) {
+		return;
+	}
+
+	if (PublicEditor::instance ().drag_active ()) {
+		return;
+	}
+
 	TreeView::Selection::ListHandle_Path rows = _view.get_selection ()->get_selected_rows ();
 	if (rows.empty ()) {
 		return;
@@ -354,7 +366,14 @@ EditorSections::drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int 
 		path.push_back (_model->children ().size () - 1);
 	}
 
-	context->drag_status (context->get_suggested_action (), time);
+	Gdk::DragAction suggested_action = context->get_suggested_action ();
+
+	/* default to move, unless the user hold ctrl */
+	if (context->get_actions () & Gdk::ACTION_MOVE) {
+		suggested_action = Gdk::ACTION_MOVE;
+	}
+
+	context->drag_status (suggested_action, time);
 
 	_view.set_drag_dest_row (path, pos);
 	_view.drag_highlight ();
@@ -386,7 +405,7 @@ EditorSections::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& contex
 	SectionOperation op = CopyPasteSection;
 	timepos_t        to (0);
 
-	if ((context->get_suggested_action () == Gdk::ACTION_MOVE)) {
+	if ((context->get_selected_action () == Gdk::ACTION_MOVE)) {
 		op = CutPasteSection;
 	}
 

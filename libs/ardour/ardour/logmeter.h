@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_log_meter_h__
-#define __ardour_gtk_log_meter_h__
+#pragma once
 
 #include "ardour/dB.h"
 
@@ -168,4 +167,3 @@ meter_deflect_k (float db, float krange)
 	}
 }
 
-#endif /* __ardour_gtk_log_meter_h__ */

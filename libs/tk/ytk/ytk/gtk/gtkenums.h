@@ -210,11 +210,11 @@ typedef enum
 
 /**
  * GtkMessageType:
- * @GTK_MESSAGE_INFO: Informational message
- * @GTK_MESSAGE_WARNING: Nonfatal warning message
- * @GTK_MESSAGE_QUESTION: Question requiring a choice
- * @GTK_MESSAGE_ERROR: Fatal error message
- * @GTK_MESSAGE_OTHER: None of the above, doesn't get an icon
+ * @param GTK_MESSAGE_INFO: Informational message
+ * @param GTK_MESSAGE_WARNING: Nonfatal warning message
+ * @param GTK_MESSAGE_QUESTION: Question requiring a choice
+ * @param GTK_MESSAGE_ERROR: Fatal error message
+ * @param GTK_MESSAGE_OTHER: None of the above, doesn't get an icon
  *
  * The type of message being displayed in the dialog.
  */

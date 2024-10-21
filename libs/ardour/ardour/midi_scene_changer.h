@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_midi_scene_changer_h__
-#define __libardour_midi_scene_changer_h__
+#pragma once
 
 #include <glibmm/threads.h>
 
@@ -47,11 +46,11 @@ class MIDISceneChanger : public SceneChanger
 
 	/** Signal emitted whenever any relevant MIDI input is detected.
 	 */
-	PBD::Signal0<void> MIDIInputActivity;
+	PBD::Signal<void()> MIDIInputActivity;
 
 	/** Signal emitted whenever any relevant MIDI output is sent.
 	 */
-	PBD::Signal0<void> MIDIOutputActivity;
+	PBD::Signal<void()> MIDIOutputActivity;
 
     private:
 	typedef std::multimap<samplepos_t,std::shared_ptr<MIDISceneChange> > Scenes;
@@ -82,4 +81,3 @@ class MIDISceneChanger : public SceneChanger
 
 } // namespace
 
-#endif /* __libardour_midi_scene_changer_h__ */

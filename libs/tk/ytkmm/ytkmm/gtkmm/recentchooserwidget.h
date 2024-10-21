@@ -47,8 +47,6 @@ namespace Gtk
  * Note that RecentChooserWidget does not have any methods of its own.
  * Instead, you should use the functions that work on a RecentChooser.
  *
- * @newin{2,10}
- *
  * @ingroup RecentFiles
  */
 

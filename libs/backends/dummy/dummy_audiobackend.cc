@@ -179,18 +179,6 @@ DummyAudioBackend::available_buffer_sizes (const std::string&) const
 	return bs;
 }
 
-uint32_t
-DummyAudioBackend::available_input_channel_count (const std::string&) const
-{
-	return 128;
-}
-
-uint32_t
-DummyAudioBackend::available_output_channel_count (const std::string&) const
-{
-	return 128;
-}
-
 bool
 DummyAudioBackend::can_change_sample_rate_when_running () const
 {
@@ -296,20 +284,6 @@ DummyAudioBackend::set_interleaved (bool yn)
 }
 
 int
-DummyAudioBackend::set_input_channels (uint32_t cc)
-{
-	_n_inputs = cc;
-	return 0;
-}
-
-int
-DummyAudioBackend::set_output_channels (uint32_t cc)
-{
-	_n_outputs = cc;
-	return 0;
-}
-
-int
 DummyAudioBackend::set_systemic_input_latency (uint32_t sl)
 {
 	_systemic_input_latency = sl;
@@ -346,18 +320,6 @@ bool
 DummyAudioBackend::interleaved () const
 {
 	return false;
-}
-
-uint32_t
-DummyAudioBackend::input_channels () const
-{
-	return _n_inputs;
-}
-
-uint32_t
-DummyAudioBackend::output_channels () const
-{
-	return _n_outputs;
 }
 
 uint32_t
@@ -469,7 +431,7 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 	_port_change_flag.store (0);
 
 	bool ok = _realtime;
-	if (_realtime && pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_PROC, &_main_thread, pthread_process, this)) {
+	if (_realtime && pbd_realtime_pthread_create ("Dummy Main", PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_PROC, &_main_thread, pthread_process, this)) {
 		PBD::warning << _("DummyAudioBackend: failed to acquire realtime permissions.") << endmsg;
 		ok = false;
 	}
@@ -555,19 +517,19 @@ void *
 DummyAudioBackend::dummy_process_thread (void *arg)
 {
 	ThreadData* td = reinterpret_cast<ThreadData*> (arg);
-	boost::function<void ()> f = td->f;
+	std::function<void ()> f = td->f;
 	delete td;
 	f ();
 	return 0;
 }
 
 int
-DummyAudioBackend::create_process_thread (boost::function<void()> func)
+DummyAudioBackend::create_process_thread (std::function<void()> func)
 {
 	pthread_t   thread_id;
 	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);
 
-	bool ok = _realtime && 0 == pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_PROC, PBD_RT_STACKSIZE_PROC, &thread_id, dummy_process_thread, td);
+	bool ok = _realtime && 0 == pbd_realtime_pthread_create ("Dummy Proc", PBD_SCHED_FIFO, PBD_RT_PRI_PROC, PBD_RT_STACKSIZE_PROC, &thread_id, dummy_process_thread, td);
 	if (!ok && pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &thread_id, dummy_process_thread, td)) {
 		PBD::error << _("AudioEngine: cannot create process thread.") << endmsg;
 		return -1;
@@ -884,7 +846,7 @@ DummyAudioBackend::set_latency_range (PortEngine::PortHandle port_handle, bool f
 {
 	BackendPortPtr port = std::dynamic_pointer_cast<BackendPort> (port_handle);
 	if (!valid_port (port)) {
-		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "DummyPort::set_latency_range (): invalid port.");
+		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "DummyAudioBackend::set_latency_range (): invalid port.");
 		return;
 	}
 	port->set_latency_range (latency_range, for_playback);
@@ -896,7 +858,7 @@ DummyAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool f
 	LatencyRange r;
 	BackendPortPtr port = std::dynamic_pointer_cast<BackendPort> (port_handle);
 	if (!valid_port (port)) {
-		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "DummyPort::get_latency_range (): invalid port.");
+		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "DummyAudioBackend::get_latency_range (): invalid port.");
 		r.min = 0;
 		r.max = 0;
 		return r;

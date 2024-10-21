@@ -733,8 +733,8 @@ TrackExportChannelSelector::sync_with_manager_state ()
 					PortExportChannel::PortSet route_ports;
 					PortExportChannel::PortSet intersection;
 
-					PortSet& ps (route->output()->ports ());
-					for (PortSet::audio_iterator p = ps.audio_begin (); p != ps.audio_end (); ++p) {
+					std::shared_ptr<PortSet> ps (route->output()->ports ());
+					for (PortSet::audio_iterator p = ps->audio_begin (); p != ps->audio_end (); ++p) {
 						route_ports.insert (*p);
 					}
 

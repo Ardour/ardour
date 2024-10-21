@@ -468,11 +468,11 @@ typedef struct aafiAudioClip {
 	 */
 
 	/*
-	  * set with CompoMob's SourceClip::StartTime. In the case of an OperationGroup(AudioChannelCombiner),
-		* There is one SourceClip per audio channel. So even though it's very unlikely, there could possibly
-		* be one essence_offset per channel.
-	  * Value is in edit unit, edit rate definition is aafiAudioTrack->edit_rate
-	  */
+	 * set with CompoMob's SourceClip::StartTime. In the case of an OperationGroup(AudioChannelCombiner),
+	 * There is one SourceClip per audio channel. So even though it's very unlikely, there could possibly
+	 * be one essence_offset per channel.
+	 * Value is in edit unit, edit rate definition is aafiAudioTrack->edit_rate
+	 */
 	aafPosition_t essence_offset;
 
 	aafiMetaData* metadata;
@@ -1060,7 +1060,7 @@ aafi_freeMarkers (aafiMarker** aafi);
 void
 aafi_freeMetadata (aafiMetaData** CommentList);
 
-void
+aafiAudioEssencePointer*
 aafi_freeAudioEssencePointer (aafiAudioEssencePointer* audioEssenceGroupEntry);
 
 void

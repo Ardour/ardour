@@ -31,9 +31,11 @@
 
 namespace ARDOUR {
 
-class LIBARDOUR_API MonitorPort : public boost::noncopyable
+class LIBARDOUR_API MonitorPort
 {
 public:
+	MonitorPort (const MonitorPort&) = delete;
+	MonitorPort& operator= (const MonitorPort&) = delete;
 	~MonitorPort ();
 
 	void set_buffer_size (pframes_t);
@@ -47,7 +49,7 @@ public:
 	void set_active_monitors (std::list <std::string> const&);
 	void clear_ports (bool instantly);
 
-	PBD::Signal2<void, std::string, bool> MonitorInputChanged;
+	PBD::Signal<void(std::string, bool)> MonitorInputChanged;
 
 protected:
 	friend class PortManager;

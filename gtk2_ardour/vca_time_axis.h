@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_vca_time_axis_h__
-#define __ardour_vca_time_axis_h__
+#pragma once
 
 #include "widgets/ardour_button.h"
 
@@ -101,4 +100,3 @@ private:
 	StripableColorDialog _color_picker;
 };
 
-#endif /* __ardour_vca_time_axis_h__ */

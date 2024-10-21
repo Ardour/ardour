@@ -21,8 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_marker_h__
-#define __gtk_ardour_marker_h__
+#pragma once
 
 #include <string>
 #include <glib.h>
@@ -81,7 +80,7 @@ public:
 
 	virtual ~ArdourMarker ();
 
-	static PBD::Signal1<void,ArdourMarker*> CatchDeletion;
+	static PBD::Signal<void(ArdourMarker*)> CatchDeletion;
 
 	static void setup_sizes (const double timebar_height);
 
@@ -248,4 +247,3 @@ class BBTMarker : public MetricMarker
 	MeterMarker* meter_marker;
 };
 
-#endif /* __gtk_ardour_marker_h__ */

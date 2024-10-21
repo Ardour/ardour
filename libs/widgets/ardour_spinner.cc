@@ -56,7 +56,7 @@ ArdourSpinner::ArdourSpinner (std::shared_ptr<PBD::Controllable> c, Gtk::Adjustm
 
 	_spin_adj.signal_value_changed().connect (sigc::mem_fun(*this, &ArdourSpinner::spin_adjusted));
 	adj->signal_value_changed().connect (sigc::mem_fun(*this, &ArdourSpinner::ctrl_adjusted));
-	c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&ArdourSpinner::controllable_changed, this), gui_context());
+	c->Changed.connect (watch_connection, invalidator(*this), std::bind (&ArdourSpinner::controllable_changed, this), gui_context());
 
 #if 0
 	// this assume the "upper" value needs most space.

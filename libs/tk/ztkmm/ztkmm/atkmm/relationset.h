@@ -149,7 +149,6 @@ public:
    * of that type. If it is does contain a relation of that typea the target
    * is added to the relation.
    * 
-   * @newin{1,9}
    * @param relationship An Atk::RelationType.
    * @param target An Atk::Object.
    */

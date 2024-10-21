@@ -68,16 +68,6 @@
 #include <Carbon/Carbon.h>
 #endif
 
-#ifdef COREAUDIO105
-#define ArdourComponent Component
-#define ArdourDescription ComponentDescription
-#define ArdourFindNext FindNextComponent
-#else
-#define ArdourComponent AudioComponent
-#define ArdourDescription AudioComponentDescription
-#define ArdourFindNext AudioComponentFindNext
-#endif
-
 #include "pbd/i18n.h"
 
 using namespace std;
@@ -279,8 +269,7 @@ get_preset_name_in_plist (CFPropertyListRef plist)
 //--------------------------------------------------------------------------
 // general implementation for ComponentDescriptionsMatch() and ComponentDescriptionsMatch_Loosely()
 // if inIgnoreType is true, then the type code is ignored in the ComponentDescriptions
-Boolean ComponentDescriptionsMatch_General(const ArdourDescription * inComponentDescription1, const ArdourDescription * inComponentDescription2, Boolean inIgnoreType);
-Boolean ComponentDescriptionsMatch_General(const ArdourDescription * inComponentDescription1, const ArdourDescription * inComponentDescription2, Boolean inIgnoreType)
+Boolean ComponentDescriptionsMatch_General(const AudioComponentDescription * inComponentDescription1, const AudioComponentDescription * inComponentDescription2, Boolean inIgnoreType)
 {
 	if ( (inComponentDescription1 == NULL) || (inComponentDescription2 == NULL) )
 		return FALSE;
@@ -302,21 +291,16 @@ Boolean ComponentDescriptionsMatch_General(const ArdourDescription * inComponent
 //--------------------------------------------------------------------------
 // general implementation for ComponentAndDescriptionMatch() and ComponentAndDescriptionMatch_Loosely()
 // if inIgnoreType is true, then the type code is ignored in the ComponentDescriptions
-Boolean ComponentAndDescriptionMatch_General(ArdourComponent inComponent, const ArdourDescription * inComponentDescription, Boolean inIgnoreType);
-Boolean ComponentAndDescriptionMatch_General(ArdourComponent inComponent, const ArdourDescription * inComponentDescription, Boolean inIgnoreType)
+Boolean ComponentAndDescriptionMatch_General(AudioComponent inComponent, const AudioComponentDescription * inComponentDescription, Boolean inIgnoreType)
 {
 	OSErr status;
-	ArdourDescription desc;
+	AudioComponentDescription desc;
 
 	if ( (inComponent == NULL) || (inComponentDescription == NULL) )
 		return FALSE;
 
 	// get the ComponentDescription of the input Component
-#ifdef COREAUDIO105
-	status = GetComponentInfo(inComponent, &desc, NULL, NULL, NULL);
-#else
 	status = AudioComponentGetDescription (inComponent, &desc);
-#endif
 	if (status != noErr)
 		return FALSE;
 
@@ -328,28 +312,28 @@ Boolean ComponentAndDescriptionMatch_General(ArdourComponent inComponent, const 
 // determine if 2 ComponentDescriptions are basically equal
 // (by that, I mean that the important identifying values are compared,
 // but not the ComponentDescription flags)
-Boolean ComponentDescriptionsMatch(const ArdourDescription * inComponentDescription1, const ArdourDescription * inComponentDescription2)
+Boolean ComponentDescriptionsMatch(const AudioComponentDescription * inComponentDescription1, const AudioComponentDescription * inComponentDescription2)
 {
 	return ComponentDescriptionsMatch_General(inComponentDescription1, inComponentDescription2, FALSE);
 }
 
 //--------------------------------------------------------------------------
 // determine if 2 ComponentDescriptions have matching sub-type and manufacturer codes
-Boolean ComponentDescriptionsMatch_Loose(const ArdourDescription * inComponentDescription1, const ArdourDescription * inComponentDescription2)
+Boolean ComponentDescriptionsMatch_Loose(const AudioComponentDescription * inComponentDescription1, const AudioComponentDescription * inComponentDescription2)
 {
 	return ComponentDescriptionsMatch_General(inComponentDescription1, inComponentDescription2, TRUE);
 }
 
 //--------------------------------------------------------------------------
 // determine if a ComponentDescription basically matches that of a particular Component
-Boolean ComponentAndDescriptionMatch(ArdourComponent inComponent, const ArdourDescription * inComponentDescription)
+Boolean ComponentAndDescriptionMatch(AudioComponent inComponent, const AudioComponentDescription * inComponentDescription)
 {
 	return ComponentAndDescriptionMatch_General(inComponent, inComponentDescription, FALSE);
 }
 
 //--------------------------------------------------------------------------
 // determine if a ComponentDescription matches only the sub-type and manufacturer codes of a particular Component
-Boolean ComponentAndDescriptionMatch_Loosely(ArdourComponent inComponent, const ArdourDescription * inComponentDescription)
+Boolean ComponentAndDescriptionMatch_Loosely(AudioComponent inComponent, const AudioComponentDescription * inComponentDescription)
 {
 	return ComponentAndDescriptionMatch_General(inComponent, inComponentDescription, TRUE);
 }
@@ -360,6 +344,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, std::shared_ptr<CACom
 	, comp (_comp)
 	, unit (new CAAudioUnit)
 	, initialized (false)
+	, process_offline (false)
 	, _last_nframes (0)
 	, _requires_fixed_size_buffers (false)
 	, buffers (0)
@@ -401,6 +386,7 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, comp (other.get_comp())
 	, unit (new CAAudioUnit)
 	, initialized (false)
+	, process_offline (false)
 	, _last_nframes (0)
 	, _requires_fixed_size_buffers (false)
 	, buffers (0)
@@ -869,6 +855,33 @@ AUPlugin::requires_fixed_size_buffers() const
 	return _requires_fixed_size_buffers;
 }
 
+void
+AUPlugin::set_non_realtime (bool yn)
+{
+	if (process_offline == yn) {
+		return;
+	}
+	process_offline = yn;
+
+	bool was_initialized = initialized;
+	if (initialized) {
+		deactivate ();
+	}
+
+	OSErr err;
+	UInt32 isOffline = yn ? 1 : 0;
+	if ((err = unit->SetProperty (/*kAudioUnitProperty_OfflineRender*/ 37, kAudioUnitScope_Global, 0, &isOffline, sizeof (isOffline))) != noErr) {
+		info << string_compose (_("AU: cannot set offline rendering(err = %1)"), err) << endmsg;
+	}
+	if (yn) {
+		UInt32 numSamples = _session.get_block_size();
+		unit->SetProperty (/*kAudioUnitOfflineProperty_InputSize*/ 3020, kAudioUnitScope_Global, 0, &numSamples, sizeof(numSamples));
+	}
+
+	if (was_initialized) {
+		activate ();
+	}
+}
 
 int
 AUPlugin::set_block_size (pframes_t nframes)
@@ -886,6 +899,10 @@ AUPlugin::set_block_size (pframes_t nframes)
 				      0, &numSamples, sizeof (numSamples))) != noErr) {
 		error << string_compose (_("AU: cannot set max samples (err = %1)"), err) << endmsg;
 		return -1;
+	}
+
+	if (process_offline) {
+		unit->SetProperty (/*kAudioUnitOfflineProperty_InputSize*/ 3020, kAudioUnitScope_Global, 0, &numSamples, sizeof(numSamples));
 	}
 
 	if (was_initialized) {
@@ -1417,7 +1434,7 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 		if (valid) {
 			ioData->mBuffers[i].mData = input_buffers->get_audio (idx).data (cb_offsets[bus] + input_offset);
 		} else {
-			ioData->mBuffers[i].mData = silent_bufs.get_audio(0).data (cb_offsets[bus] + input_offset);
+			ioData->mBuffers[i].mData = silent_bufs.get_audio(0).data (0);
 		}
 	}
 	cb_offsets[bus] += inNumberSamples;
@@ -1536,7 +1553,7 @@ AUPlugin::connect_and_run (BufferSet& bufs,
 				if (valid) {
 					buffers->mBuffers[i].mData = bufs.get_audio (idx).data (offset);
 				} else {
-					buffers->mBuffers[i].mData = scratch_bufs.get_audio(0).data(offset);
+					buffers->mBuffers[i].mData = scratch_bufs.get_audio(0).data(0);
 				}
 			}
 		}
@@ -2141,10 +2158,10 @@ GetDictionarySInt32Value(CFDictionaryRef inAUStateDictionary, CFStringRef inDict
 }
 
 static OSStatus
-GetAUComponentDescriptionFromStateData(CFPropertyListRef inAUStateData, ArdourDescription * outComponentDescription)
+GetAUComponentDescriptionFromStateData(CFPropertyListRef inAUStateData, AudioComponentDescription * outComponentDescription)
 {
 	CFDictionaryRef auStateDictionary;
-	ArdourDescription tempDesc = {0,0,0,0,0};
+	AudioComponentDescription tempDesc = {0,0,0,0,0};
 	SInt32 versionValue;
 	Boolean gotValue;
 
@@ -2222,11 +2239,11 @@ static bool au_preset_filter (const string& str, void* arg)
 }
 
 static bool
-check_and_get_preset_name (ArdourComponent component, const string& pathstr, string& preset_name)
+check_and_get_preset_name (AudioComponent component, const string& pathstr, string& preset_name)
 {
 	OSStatus status;
 	CFPropertyListRef plist;
-	ArdourDescription presetDesc;
+	AudioComponentDescription presetDesc;
 	bool ret = false;
 
 	plist = load_property_list (pathstr);

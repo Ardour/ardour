@@ -627,7 +627,6 @@ public:
   
   /** Get the bounding box for text within the specified range.
    * 
-   * @newin{1,3}
    * @param start_offset The offset of the first text character for which boundary 
    * information is required.
    * @param end_offset The offset of the text character after the last character 
@@ -639,7 +638,6 @@ public:
   
   /** Get the ranges of text in the specified bounding box.
    * 
-   * @newin{1,3}
    * @param rect An AtkTextRectagle giving the dimensions of the bounding box.
    * @param coord_type Specify whether coordinates are relative to the screen or widget window.
    * @param x_clip_type Specify the horizontal clip type.

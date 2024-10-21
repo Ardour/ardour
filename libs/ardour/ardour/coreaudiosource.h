@@ -19,14 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __coreaudio_source_h__
-#define __coreaudio_source_h__
+#pragma once
 
-#ifdef COREAUDIO105
-#include "CAAudioFile.h"
-#else
 #include "CAExtAudioFile.h"
-#endif
+
 #include "ardour/audiofilesource.h"
 #include <string>
 
@@ -56,14 +52,10 @@ class LIBARDOUR_API CoreAudioSource : public AudioFileSource {
   protected:
 	void close ();
 	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const;
-	samplecnt_t write_unlocked (Sample *, samplecnt_t) { return 0; }
+	samplecnt_t write_unlocked (Sample const * src, samplecnt_t) { return 0; }
 
   private:
-#ifdef COREAUDIO105
-	mutable CAAudioFile af;
-#else
 	mutable CAExtAudioFile af;
-#endif
 	uint16_t n_channels;
 
 	void init_cafile ();
@@ -72,5 +64,4 @@ class LIBARDOUR_API CoreAudioSource : public AudioFileSource {
 
 }; /* namespace ARDOUR */
 
-#endif /* __coreaudio_source_h__ */
 

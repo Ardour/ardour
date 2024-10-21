@@ -137,8 +137,6 @@ public:
    * 
    * Note that reusing the same cell renderer is not supported. 
    * 
-   * @newin{2,4}
-   * 
    * @param cell A Gtk::CellRenderer.
    * @param expand <tt>true</tt> if @a cell is to be given extra space allocated to @a cell_layout.
    */
@@ -150,8 +148,6 @@ public:
    * 
    * Note that reusing the same cell renderer is not supported. 
    * 
-   * @newin{2,4}
-   * 
    * @param cell A Gtk::CellRenderer.
    * @param expand <tt>true</tt> if @a cell is to be given extra space allocated to @a cell_layout.
    */
@@ -161,24 +157,18 @@ public:
   /** Return value: a list of cell renderers.
    * 
    * @return A list of cell renderers.
-   * 
-   * @newin{2,12}.
    */
   Glib::ListHandle<CellRenderer*> get_cells();
   
   /** Return value: a list of cell renderers.
    * 
    * @return A list of cell renderers.
-   * 
-   * @newin{2,12}.
    */
   Glib::ListHandle<const CellRenderer*> get_cells() const;
 
   
   /** Unsets all the mappings on all renderers on @a cell_layout and
    * removes all renderers from @a cell_layout.
-   * 
-   * @newin{2,4}
    */
   void clear();
 
@@ -190,8 +180,6 @@ public:
    * parameter on @a cell to be set from the value. So for example if column 2
    * of the model contains strings, you could have the "text" attribute of a
    * Gtk::CellRendererText get its values from column 2.
-   * 
-   * @newin{2,4}
    * 
    * @param cell A Gtk::CellRenderer.
    * @param attribute An attribute on the renderer.
@@ -212,8 +200,6 @@ public:
   /** Clears all existing attributes previously set with
    * set_attributes().
    * 
-   * @newin{2,4}
-   * 
    * @param cell A Gtk::CellRenderer to clear the attribute mapping on.
    */
   void clear_attributes(CellRenderer& cell);
@@ -221,8 +207,6 @@ public:
   
   /** Re-inserts @a cell at @a position. Note that @a cell has already to be packed
    * into @a cell_layout for this to function properly.
-   * 
-   * @newin{2,4}
    * 
    * @param cell A Gtk::CellRenderer to reorder.
    * @param position New position to insert @a cell at.

@@ -26,8 +26,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_utils_h__
-#define __ardour_gtk_utils_h__
+#pragma once
 
 #include <string>
 #include <cmath>
@@ -123,4 +122,3 @@ bool convert_drop_to_paths (std::vector<std::string>&, const Gtk::SelectionData&
 void format_position (ARDOUR::Session*, Temporal::timepos_t const& pos, char* buf, size_t bufsize, bool onoff = true);
 
 } // namespace
-#endif /* __ardour_gtk_utils_h__ */

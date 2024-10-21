@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_smf_source_h__
-#define __ardour_smf_source_h__
+#pragma once
 
 #include <cstdio>
 #include <time.h>
@@ -79,6 +78,8 @@ public:
 	/** Query the smf file for its channel info */
 	SMF::UsedChannels used_midi_channels();
 
+	void render (const ReaderLock& lock, Evoral::EventSink<Temporal::Beats>& dst);
+
   protected:
 	void close ();
 	void flush_midi (const WriterLock& lock);
@@ -116,4 +117,3 @@ public:
 
 }; /* namespace ARDOUR */
 
-#endif /* __ardour_smf_source_h__ */

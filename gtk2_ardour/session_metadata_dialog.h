@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __session_metadata_dialog_h__
-#define __session_metadata_dialog_h__
+#pragma once
 
 #include <memory>
 
@@ -343,4 +342,3 @@ class SessionMetadataImporter : public SessionMetadataDialog<SessionMetadataSetI
 
 };
 
-#endif

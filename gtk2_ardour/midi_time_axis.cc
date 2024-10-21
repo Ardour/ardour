@@ -76,7 +76,7 @@
 #include "ardour/velocity_control.h"
 
 #include "ardour_message.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "automation_time_axis.h"
 #include "editor.h"
 #include "enums.h"
@@ -122,18 +122,18 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	, RouteTimeAxisView (ed, sess, canvas)
 	, _ignore_signals(false)
 	, _asked_all_automation(false)
-	, _piano_roll_header(0)
+	, _piano_roll_header(nullptr)
 	, _note_mode(Sustained)
 	, _note_mode_item(0)
-	, _percussion_mode_item(0)
+	, _percussion_mode_item(nullptr)
 	, _color_mode(MeterColors)
-	, _meter_color_mode_item(0)
-	, _channel_color_mode_item(0)
+	, _meter_color_mode_item(nullptr)
+	, _channel_color_mode_item(nullptr)
 	, _track_color_mode_item(0)
-	, _channel_selector (0)
-	, _step_edit_item (0)
-	, controller_menu (0)
-	, _step_editor (0)
+	, _channel_selector (nullptr)
+	, _step_edit_item (nullptr)
+	, controller_menu (nullptr)
+	, _step_editor (nullptr)
 	, velocity_menu_item (nullptr)
 {
 	_midnam_model_selector.disable_scrolling();
@@ -164,7 +164,9 @@ MidiTimeAxisView::parameter_changed (string const & param)
 void
 MidiTimeAxisView::set_note_highlight (uint8_t note)
 {
-	_piano_roll_header->set_note_highlight (note);
+	if (_piano_roll_header) {
+		_piano_roll_header->set_note_highlight (note);
+	}
 }
 
 void
@@ -213,7 +215,7 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	}
 
 	if (_route->panner_shell()) {
-		_route->panner_shell()->Changed.connect (*this, invalidator (*this), boost::bind (&MidiTimeAxisView::ensure_pan_views, this, false), gui_context());
+		_route->panner_shell()->Changed.connect (*this, invalidator (*this), std::bind (&MidiTimeAxisView::ensure_pan_views, this, false), gui_context());
 	}
 
 	/* map current state of the route */
@@ -283,7 +285,7 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	_midi_controls_box.set_border_width (2);
 
 	/* this directly calls use_midnam_info() if there are midnam's already */
-	MIDI::Name::MidiPatchManager::instance().maybe_use (*this, invalidator (*this), boost::bind (&MidiTimeAxisView::use_midnam_info, this), gui_context());
+	MIDI::Name::MidiPatchManager::instance().maybe_use (*this, invalidator (*this), std::bind (&MidiTimeAxisView::use_midnam_info, this), gui_context());
 
 	controls_vbox.pack_start(_midi_controls_box, false, false);
 
@@ -358,13 +360,20 @@ MidiTimeAxisView::first_idle ()
 
 MidiTimeAxisView::~MidiTimeAxisView ()
 {
+	delete _view;
+	_view = nullptr;
+
 	delete _channel_selector;
+	_channel_selector = nullptr;
 
 	delete _piano_roll_header;
-	_piano_roll_header = 0;
+	_piano_roll_header = nullptr;
 
 	delete controller_menu;
+	controller_menu = nullptr;
+
 	delete _step_editor;
+	_step_editor = nullptr;
 }
 
 void
@@ -737,12 +746,12 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 
 	range_items.push_back (
 		MenuElem (_("Show Full Range"),
-		          sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
+		          sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::set_visibility_note_range),
 		                      MidiStreamView::FullRange, true)));
 
 	range_items.push_back (
 		MenuElem (_("Fit Contents"),
-		          sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
+		          sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::set_visibility_note_range),
 		                      MidiStreamView::ContentsRange, true)));
 
 	items.push_back (MenuElem (_("Note Range"), *range_menu));
@@ -1278,7 +1287,7 @@ MidiTimeAxisView::set_note_mode(NoteMode mode, bool apply_to_selection)
 {
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_midi_time_axis (
-			boost::bind (&MidiTimeAxisView::set_note_mode, _1, mode, false));
+			std::bind (&MidiTimeAxisView::set_note_mode, _1, mode, false));
 	} else {
 		if (_note_mode != mode || midi_track()->note_mode() != mode) {
 			_note_mode = mode;
@@ -1294,7 +1303,7 @@ MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay, bo
 {
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_midi_time_axis (
-			boost::bind (&MidiTimeAxisView::set_color_mode, _1, mode, force, redisplay, false));
+			std::bind (&MidiTimeAxisView::set_color_mode, _1, mode, force, redisplay, false));
 	} else {
 		if (_color_mode == mode && !force) {
 			return;
@@ -1317,14 +1326,14 @@ MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay, bo
 }
 
 void
-MidiTimeAxisView::set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection)
+MidiTimeAxisView::set_visibility_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection)
 {
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_midi_time_axis (
-			boost::bind (&MidiTimeAxisView::set_note_range, _1, range, false));
+			std::bind (&MidiTimeAxisView::set_visibility_note_range, _1, range, false));
 	} else {
 		if (!_ignore_signals) {
-			midi_view()->set_note_range(range);
+			midi_view()->set_note_visibility_range_style (range);
 		}
 	}
 }
@@ -1349,7 +1358,7 @@ MidiTimeAxisView::show_all_automation (bool apply_to_selection)
 
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_midi_time_axis (
-			boost::bind (&MidiTimeAxisView::show_all_automation, _1, false));
+			std::bind (&MidiTimeAxisView::show_all_automation, _1, false));
 	} else {
 		no_redraw = true; // unset in RouteTimeAxisView::show_all_automation
 		if (midi_track()) {
@@ -1398,7 +1407,7 @@ MidiTimeAxisView::show_existing_automation (bool apply_to_selection)
 {
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_midi_time_axis (
-			boost::bind (&MidiTimeAxisView::show_existing_automation, _1, false));
+			std::bind (&MidiTimeAxisView::show_existing_automation, _1, false));
 	} else {
 		if (midi_track()) {
 			const set<Evoral::Parameter> params = midi_track()->midi_playlist()->contained_automation();

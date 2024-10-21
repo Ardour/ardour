@@ -29,6 +29,7 @@ widgets_sources = [
         'binding_proxy.cc',
         'eventboxext.cc',
         'choice.cc',
+        'fader_widget.cc',
         'fastmeter.cc',
         'frame.cc',
         'focus_entry.cc',

@@ -56,8 +56,6 @@ namespace Gtk
 /** Activatable widgets can be connected to a Gtk::Action and reflect the state 
  * of the action. An Activatable can also provide feedback through its action, 
  * as it is responsible for activating the related action.
- *
- * @newin{2,16}
  */
 
 class Activatable : public Glib::Interface
@@ -139,11 +137,10 @@ public:
    * method is called when the related Gtk::Action properties change
    * and registers to the action's proxy list.
    * 
-   * <note>Be careful to call this before setting the local
+   * \note
+	 * Be careful to call this before setting the local
    * copy of the Gtk::Action property, since this function uses 
-   * gtk_activatable_get_action() to retrieve the previous action</note>
-   * 
-   * @newin{2,16}
+   * gtk_activatable_get_action() to retrieve the previous action
    * 
    * @param action The Gtk::Action to set.
    */
@@ -151,15 +148,11 @@ public:
   
   /** Gets the related Gtk::Action for @a activatable.
    * 
-   * @newin{2,16}
-   * 
    * @return The related Gtk::Action if one is set.
    */
   Glib::RefPtr<Action> get_related_action();
   
   /** Gets the related Gtk::Action for @a activatable.
-   * 
-   * @newin{2,16}
    * 
    * @return The related Gtk::Action if one is set.
    */
@@ -168,8 +161,6 @@ public:
   /** Gets whether this activatable should reset its layout
    * and appearance when setting the related action or when
    * the action changes appearance.
-   * 
-   * @newin{2,16}
    * 
    * @return Whether @a activatable uses its actions appearance.
    */
@@ -180,18 +171,15 @@ public:
    * or unset and by the implementing class when
    * Gtk::Activatable::signal_use_action_appearance() changes.
    * 
-   * @newin{2,16}
-   * 
    * @param action The related Gtk::Action or <tt>0</tt>.
    */
   void sync_action_properties(const Glib::RefPtr<Action>& action);
   
   /** Sets the related action on the @a activatable object.
    * 
-   * <note>Gtk::Activatable implementors need to handle the Gtk::Activatable::property_related_action()
-   * property and call do_set_related_action() when it changes.</note>
-   * 
-   * @newin{2,16}
+   * \note
+	 * Gtk::Activatable implementors need to handle the Gtk::Activatable::property_related_action()
+   * property and call do_set_related_action() when it changes.
    * 
    * @param action The Gtk::Action to set.
    */
@@ -200,12 +188,11 @@ public:
   /** Sets whether this activatable should reset its layout and appearance
    * when setting the related action or when the action changes appearance
    * 
-   * <note>Gtk::Activatable implementors need to handle the
+   * \note
+	 * Gtk::Activatable implementors need to handle the
    * Gtk::Activatable::property_use_action_appearance() property and call
    * sync_action_properties() to update @a activatable
-   * if needed.</note>
-   * 
-   * @newin{2,16}
+   * if needed.
    * 
    * @param use_appearance Whether to use the actions appearance.
    */

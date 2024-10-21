@@ -57,8 +57,6 @@ namespace Gtk
  * subclasses of a common base class (e.g GtkBox/GtkHBox/GtkVBox and 
  * GtkScale/GtkHScale/GtkVScale). GtkOrientable is more flexible in that it 
  * allows the orientation to be changed at runtime, allowing the widgets to 'flip'.
- *
- * @newin{2,16}
  */
 
 class Orientable : public Glib::Interface
@@ -131,15 +129,11 @@ public:
   
   /** Sets the orientation of the @a orientable.
    * 
-   * @newin{2,16}
-   * 
    * @param orientation The orientable's new orientation.
    */
   void set_orientation(Orientation orientation);
   
   /** Retrieves the orientation of the @a orientable.
-   * 
-   * @newin{2,16}
    * 
    * @return The orientation of the @a orientable.
    */

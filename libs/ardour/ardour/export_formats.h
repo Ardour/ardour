@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_export_formats_h__
-#define __ardour_export_formats_h__
+#pragma once
 
 #include <list>
 #include <memory>
@@ -215,11 +214,11 @@ public:
 	DitherTypePtr   get_selected_dither_type ();
 
 	/* Proxies for signals from sample formats and dither types */
-	PBD::Signal2<void, bool, WeakSampleFormatPtr> SampleFormatSelectChanged;
-	PBD::Signal2<void, bool, WeakSampleFormatPtr> SampleFormatCompatibleChanged;
+	PBD::Signal<void(bool, WeakSampleFormatPtr)> SampleFormatSelectChanged;
+	PBD::Signal<void(bool, WeakSampleFormatPtr)> SampleFormatCompatibleChanged;
 
-	PBD::Signal2<void, bool, WeakDitherTypePtr> DitherTypeSelectChanged;
-	PBD::Signal2<void, bool, WeakDitherTypePtr> DitherTypeCompatibleChanged;
+	PBD::Signal<void(bool, WeakDitherTypePtr)> DitherTypeSelectChanged;
+	PBD::Signal<void(bool, WeakDitherTypePtr)> DitherTypeCompatibleChanged;
 
 	static std::string get_sample_format_name (ExportFormatBase::SampleFormat format);
 
@@ -435,4 +434,3 @@ public:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_export_formats__ */

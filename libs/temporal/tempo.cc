@@ -49,7 +49,7 @@ std::string Meter::xml_node_name = X_("Meter");
 
 SerializedRCUManager<TempoMap> TempoMap::_map_mgr (0);
 thread_local TempoMap::SharedPtr TempoMap::_tempo_map_p;
-PBD::Signal0<void> TempoMap::MapChanged;
+PBD::Signal<void()> TempoMap::MapChanged;
 
 #ifndef NDEBUG
 #define TEMPO_MAP_ASSERT(expr) TempoMap::map_assert(expr, #expr, __FILE__, __LINE__)
@@ -3619,7 +3619,7 @@ TempoMap::remove_time (timepos_t const & pos, timecnt_t const & duration)
 	}
 
 	if (last_meter && !meter_after) {
-		last_tempo->set (start, last_meter->beats(), last_meter->bbt());
+		last_meter->set (start, last_meter->beats(), last_meter->bbt());
 		moved = true;
 	}
 

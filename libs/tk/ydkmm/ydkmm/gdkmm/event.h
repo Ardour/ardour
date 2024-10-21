@@ -341,8 +341,6 @@ public:
    * have been allocated by GTK+, for instance, by
    * copy().
    * 
-   * @newin{2,2}
-   * 
    * @param screen A Gdk::Screen.
    */
   void set_screen(const Glib::RefPtr<Screen>& screen);
@@ -355,8 +353,6 @@ public:
    * to which <tt>event->motion.x_root</tt> and
    * <tt>event->motion.y_root</tt> are relative.
    * 
-   * @newin{2,2}
-   * 
    * @return The screen for the event.
    */
   Glib::RefPtr<Screen> get_screen();
@@ -368,8 +364,6 @@ public:
    * that is, the screen which has the root window 
    * to which <tt>event->motion.x_root</tt> and
    * <tt>event->motion.y_root</tt> are relative.
-   * 
-   * @newin{2,2}
    * 
    * @return The screen for the event.
    */

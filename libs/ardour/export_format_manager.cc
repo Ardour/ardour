@@ -251,14 +251,14 @@ ExportFormatManager::add_compatibility (ExportFormatCompatibilityPtr ptr)
 {
 	compatibilities.push_back (ptr);
 	ptr->SelectChanged.connect_same_thread (*this,
-	                                        boost::bind (&ExportFormatManager::change_compatibility_selection,
+	                                        std::bind (&ExportFormatManager::change_compatibility_selection,
 	                                                     this, _1, WeakExportFormatCompatibilityPtr (ptr)));
 }
 
 void
 ExportFormatManager::add_quality (QualityPtr ptr)
 {
-	ptr->SelectChanged.connect_same_thread (*this, boost::bind (&ExportFormatManager::change_quality_selection, this, _1, WeakQualityPtr (ptr)));
+	ptr->SelectChanged.connect_same_thread (*this, std::bind (&ExportFormatManager::change_quality_selection, this, _1, WeakQualityPtr (ptr)));
 	qualities.push_back (ptr);
 }
 
@@ -266,7 +266,7 @@ void
 ExportFormatManager::add_format (ExportFormatPtr ptr)
 {
 	formats.push_back (ptr);
-	ptr->SelectChanged.connect_same_thread (*this, boost::bind (&ExportFormatManager::change_format_selection, this, _1, WeakExportFormatPtr (ptr)));
+	ptr->SelectChanged.connect_same_thread (*this, std::bind (&ExportFormatManager::change_format_selection, this, _1, WeakExportFormatPtr (ptr)));
 	universal_set = universal_set->get_union (*ptr);
 
 	/* Encoding options */
@@ -274,15 +274,15 @@ ExportFormatManager::add_format (ExportFormatPtr ptr)
 	std::shared_ptr<HasSampleFormat> hsf;
 
 	if ((hsf = std::dynamic_pointer_cast<HasSampleFormat> (ptr))) {
-		hsf->SampleFormatSelectChanged.connect_same_thread (*this, boost::bind (&ExportFormatManager::change_sample_format_selection, this, _1, _2));
-		hsf->DitherTypeSelectChanged.connect_same_thread (*this, boost::bind (&ExportFormatManager::change_dither_type_selection, this, _1, _2));
+		hsf->SampleFormatSelectChanged.connect_same_thread (*this, std::bind (&ExportFormatManager::change_sample_format_selection, this, _1, _2));
+		hsf->DitherTypeSelectChanged.connect_same_thread (*this, std::bind (&ExportFormatManager::change_dither_type_selection, this, _1, _2));
 	}
 }
 
 void
 ExportFormatManager::add_sample_rate (SampleRatePtr ptr)
 {
-	ptr->SelectChanged.connect_same_thread (*this, boost::bind (&ExportFormatManager::change_sample_rate_selection, this, _1, WeakSampleRatePtr (ptr)));
+	ptr->SelectChanged.connect_same_thread (*this, std::bind (&ExportFormatManager::change_sample_rate_selection, this, _1, WeakSampleRatePtr (ptr)));
 	sample_rates.push_back (ptr);
 }
 

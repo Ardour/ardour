@@ -77,7 +77,6 @@ RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 	SourceList        nsrcs;
 	int               ret         = -1;
 	const samplecnt_t bufsize     = 8192;
-	gain_t*           gain_buffer = 0;
 	Sample**          buffers     = 0;
 	char              suffix[32];
 	string            new_name;
@@ -201,8 +200,7 @@ RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 		goto out;
 	}
 
-	gain_buffer = new gain_t[bufsize];
-	buffers     = new float*[channels];
+	buffers = new float*[channels];
 
 	for (uint32_t i = 0; i < channels; ++i) {
 		buffers[i] = new float[bufsize];
@@ -225,8 +223,6 @@ RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 				                region->start_sample () + region->position_sample ();
 
 				this_read = region->master_read_at (buffers[i],
-				                                    buffers[i],
-				                                    gain_buffer,
 				                                    this_position,
 				                                    this_time,
 				                                    i);
@@ -262,8 +258,6 @@ RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 				                region->start_sample () + region->position_sample ();
 
 				this_read = region->master_read_at (buffers[i],
-				                                    buffers[i],
-				                                    gain_buffer,
 				                                    this_position,
 				                                    this_time,
 				                                    i);
@@ -376,8 +370,6 @@ RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 	}
 
 out:
-
-	delete[] gain_buffer;
 
 	if (buffers) {
 		for (uint32_t i = 0; i < channels; ++i) {

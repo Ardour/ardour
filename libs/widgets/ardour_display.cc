@@ -123,7 +123,7 @@ ArdourDisplay::set_controllable (std::shared_ptr<Controllable> c)
 
 	binding_proxy.set_controllable (c);
 
-	c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&ArdourDisplay::controllable_changed, this), gui_context());
+	c->Changed.connect (watch_connection, invalidator(*this), std::bind (&ArdourDisplay::controllable_changed, this), gui_context());
 
 	controllable_changed();
 }

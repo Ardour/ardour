@@ -52,13 +52,11 @@ namespace Gtk
  * which can be shown by widgets such as Gtk::RecentChooserDialog or 
  * Gtk::RecentChooserMenu.
  * To construct a submenu showing recently used files, use a 
- * Gtk::RecentAction as the action for a <menuitem>. To construct a menu 
+ * Gtk::RecentAction as the action for a menuitem. To construct a menu 
  * toolbutton showing the recently used files in the popup menu, use a 
- * Gtk::RecentAction as the action for a <toolitem> element.
+ * Gtk::RecentAction as the action for a toolitem element.
  *
  * See also the methods in the RecentChooser base class.
- *
- * @newin{2,12}
  *
  * @ingroup RecentFiles
  */
@@ -146,8 +144,6 @@ public:
 
   /** Returns the value set by Gtk::RecentChooserMenu::set_show_numbers().
    * 
-   * @newin{2,12}
-   * 
    * @return <tt>true</tt> if numbers should be shown.
    */
   bool get_show_numbers();
@@ -156,8 +152,6 @@ public:
    * widgets representing @a action. The numbers are shown to provide
    * a unique character for a mnemonic to be used inside the menu item's
    * label. Only the first ten items get a number to avoid clashes.
-   * 
-   * @newin{2,12}
    * 
    * @param show_numbers <tt>true</tt> if the shown items should be numbered.
    */

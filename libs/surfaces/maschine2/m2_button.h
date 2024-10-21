@@ -32,9 +32,9 @@ class M2ButtonInterface
 		virtual ~M2ButtonInterface () {}
 
 		/* user API */
-		PBD::Signal1<void, bool> changed;
-		PBD::Signal0<void> pressed;
-		PBD::Signal0<void> released;
+		PBD::Signal<void(bool)> changed;
+		PBD::Signal<void()> pressed;
+		PBD::Signal<void()> released;
 
 		virtual void set_blinking (bool) {}
 		virtual void set_color (uint32_t rgba) {}
@@ -156,10 +156,10 @@ class M2ToggleButton : public M2Button
 		: M2Button ()
 		, _active (false)
 		{
-			changed.connect_same_thread (changed_connection, boost::bind (&M2ToggleButton::change_event, this, _1));
+			changed.connect_same_thread (changed_connection, std::bind (&M2ToggleButton::change_event, this, _1));
 		}
 
-		PBD::Signal1<void, bool> toggled;
+		PBD::Signal<void(bool)> toggled;
 		bool active () const { return _active; }
 
 	protected:
@@ -182,10 +182,10 @@ class M2ToggleHoldButton : public M2Button
 		, _active (false)
 		, _active_on_release (false)
 		{
-			changed.connect_same_thread (changed_connection, boost::bind (&M2ToggleHoldButton::change_event, this, _1));
+			changed.connect_same_thread (changed_connection, std::bind (&M2ToggleHoldButton::change_event, this, _1));
 		}
 
-		PBD::Signal1<void, bool> toggled;
+		PBD::Signal<void(bool)> toggled;
 		bool active () const { return _active; }
 		void unset_active_on_release () { if (is_pressed ()) { _active_on_release = false; } }
 

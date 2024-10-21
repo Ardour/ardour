@@ -16,25 +16,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_gui_thread_h__
-#define __ardour_gtk_gui_thread_h__
+#pragma once
 
 #include <cstdlib>
 #include <gtkmm2ext/gtk_ui.h>
-#include <boost/bind.hpp>
 #include <boost/bind/protect.hpp>
 
 #include "gtkmm2ext/visibility.h"
 
-namespace sigc {
-	struct trackable;
-}
-
 #define ENSURE_GUI_THREAD(obj,method, ...) if (!Gtkmm2ext::UI::instance()->caller_is_self()) { abort (); }
 
 #define gui_context() Gtkmm2ext::UI::instance() /* a UICallback-derived object that specifies the event loop for GUI signal handling */
-#define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
+#define ui_bind(f, ...) boost::protect (std::bind (f, __VA_ARGS__))
 
 #define invalidator(x) PBD::EventLoop::__invalidator ((x), __FILE__, __LINE__)
 
-#endif /* __ardour_gtk_gui_thread_h__ */

@@ -108,7 +108,7 @@ WindowsVSTPluginInfo::get_presets (bool user_only) const
 {
 	std::vector<Plugin::PresetRecord> p;
 
-	if (!Config->get_use_lxvst()) {
+	if (!Config->get_use_windows_vst()) {
 		return p;
 	}
 

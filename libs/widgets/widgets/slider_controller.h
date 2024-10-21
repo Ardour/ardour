@@ -29,6 +29,7 @@
 #include <gtkmm/adjustment.h>
 #include <gtkmm/spinbutton.h>
 
+#include "widgets/fader_widget.h"
 #include "widgets/ardour_fader.h"
 #include "widgets/binding_proxy.h"
 #include "widgets/visibility.h"
@@ -39,10 +40,10 @@ namespace PBD {
 
 namespace ArdourWidgets {
 
-class LIBWIDGETS_API SliderController : public ArdourWidgets::ArdourFader
+class LIBWIDGETS_API SliderController : virtual public ArdourWidgets::FaderWidget
 {
 public:
-	SliderController (Gtk::Adjustment* adj, std::shared_ptr<PBD::Controllable> mc, int orientation, int, int);
+	SliderController (Gtk::Adjustment* adj, std::shared_ptr<PBD::Controllable> mc, int orien);
 
 	virtual ~SliderController () {}
 
@@ -65,13 +66,13 @@ protected:
 	bool _spin_ignore;
 };
 
-class LIBWIDGETS_API VSliderController : public SliderController
+class LIBWIDGETS_API VSliderController : public SliderController, public ArdourFader
 {
 public:
 	VSliderController (Gtk::Adjustment *adj, std::shared_ptr<PBD::Controllable> mc, int, int);
 };
 
-class LIBWIDGETS_API HSliderController : public SliderController
+class LIBWIDGETS_API HSliderController : public SliderController, public ArdourFader
 {
 public:
 	HSliderController (Gtk::Adjustment *adj, std::shared_ptr<PBD::Controllable> mc, int, int);

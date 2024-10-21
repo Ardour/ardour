@@ -46,6 +46,6 @@ Receiver::listen_to (Transmitter &transmitter)
 	   anonymous namespace which causes ambiguity with sigc++ (and will also
 	   do so with std::placeholder in the C++11 future
 	*/
-	transmitter.sender().connect_same_thread (connections, boost::bind (&Receiver::receive, this, boost::arg<1>(), boost::arg<2>()));
+	transmitter.sender().connect_same_thread (connections, std::bind (&Receiver::receive, this, std::placeholders::_1, std::placeholders::_2));
 
 }

@@ -48,9 +48,6 @@ class Menu;
  *
  * A simple setable widget for holding a Glib::ustring.
  *
- * The Label widget looks like this:
- * @image html label1.png
- *
  * @ingroup Widgets
  */
 
@@ -160,12 +157,13 @@ public:
   /** Sets a Pango::AttrList; the attributes in the list are applied to the
    * label text. 
    * 
-   * <note>The attributes set with this function will be applied
+   * \note
+	 * The attributes set with this function will be applied
    * and merged with any other attributes previously effected by way
    * of the Gtk::Label::property_use_underline() or Gtk::Label::property_use_markup() properties.
    * While it is not recommended to mix markup strings with manually set
    * attributes, if you must; know that the attributes will be applied
-   * to the label after the markup string is parsed.</note>
+   * to the label after the markup string is parsed.
    * 
    * @param attrs A Pango::AttrList.
    */
@@ -329,15 +327,11 @@ public:
   /** Sets the mode used to ellipsize (add an ellipsis: "...") to the text 
    * if there is not enough space to render the entire string.
    * 
-   * @newin{2,6}
-   * 
    * @param mode A Pango::EllipsizeMode.
    */
   void set_ellipsize(Pango::EllipsizeMode mode);
   
   /** Returns the ellipsizing position of the label. See set_ellipsize().
-   * 
-   * @newin{2,6}
    * 
    * @return Pango::EllipsizeMode.
    */
@@ -346,16 +340,12 @@ public:
   
   /** Sets the desired width in characters of @a label to @a n_chars.
    * 
-   * @newin{2,6}
-   * 
    * @param n_chars The new desired width, in characters.
    */
   void set_width_chars(int n_chars);
   
   /** Retrieves the desired width of @a label, in characters. See
    * set_width_chars().
-   * 
-   * @newin{2,6}
    * 
    * @return The width of the label in characters.
    */
@@ -364,16 +354,12 @@ public:
   
   /** Sets the desired maximum width in characters of @a label to @a n_chars.
    * 
-   * @newin{2,6}
-   * 
    * @param n_chars The new desired maximum width, in characters.
    */
   void set_max_width_chars(int n_chars);
   
   /** Retrieves the desired maximum width of @a label, in characters. See
    * set_width_chars().
-   * 
-   * @newin{2,6}
    * 
    * @return The maximum width of the label in characters.
    */
@@ -407,15 +393,11 @@ public:
    * the line wrapping is done. The default is Pango::WRAP_WORD which means
    * wrap on word boundaries.
    * 
-   * @newin{2,10}
-   * 
    * @param wrap_mode The line wrapping mode.
    */
   void set_line_wrap_mode(Pango::WrapMode wrap_mode);
   
   /** Returns line wrap mode used by the label. See set_line_wrap_mode().
-   * 
-   * @newin{2,10}
    * 
    * @return <tt>true</tt> if the lines of the label are automatically wrapped.
    */
@@ -439,8 +421,6 @@ public:
    * setting for the label is ignored if the label is selectable,
    * wrapped, or ellipsized.
    * 
-   * @newin{2,6}
-   * 
    * @param angle The angle that the baseline of the label makes with
    * the horizontal, in degrees, measured counterclockwise.
    */
@@ -448,8 +428,6 @@ public:
   
   /** Gets the angle of rotation for the label. See
    * set_angle().
-   * 
-   * @newin{2,6}
    * 
    * @return The angle of rotation for the label.
    */
@@ -518,15 +496,11 @@ public:
   
   /** Sets whether the label is in single line mode.
    * 
-   * @newin{2,6}
-   * 
    * @param single_line_mode <tt>true</tt> if the label should be in single line mode.
    */
   void set_single_line_mode(bool single_line_mode =  true);
   
   /** Returns whether the label is in single line mode.
-   * 
-   * @newin{2,6}
    * 
    * @return <tt>true</tt> when the label is in single line mode.
    */
@@ -541,8 +515,6 @@ public:
    * This function is intended for use in a Gtk::Label::signal_activate_link() handler
    * or for use in a Gtk::Widget::signal_query_tooltip() handler.
    * 
-   * @newin{2,18}
-   * 
    * @return The currently active URI. The string is owned by GTK+ and must
    * not be freed or modified.
    */
@@ -552,16 +524,12 @@ public:
   /** Sets whether the label should keep track of clicked
    * links (and use a different color for them).
    * 
-   * @newin{2,18}
-   * 
    * @param track_links <tt>true</tt> to track visited links.
    */
   void set_track_visited_links(bool track_links =  true);
   
   /** Returns whether the label is currently keeping track
    * of clicked links.
-   * 
-   * @newin{2,18}
    * 
    * @return <tt>true</tt> if clicked links are remembered.
    */

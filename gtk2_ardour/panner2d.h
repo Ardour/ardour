@@ -48,10 +48,6 @@ namespace Gtk {
 	class CheckMenuItem;
 }
 
-namespace Pango {
-	class Container;
-}
-
 class Panner2dWindow;
 
 class Panner2d : public Gtk::DrawingArea

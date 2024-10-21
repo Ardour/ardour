@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_atomic_h__
-#define __libpbd_atomic_h__
+#pragma once
 
 #include <atomic>
 
@@ -31,4 +30,3 @@ void atomic_inc (std::atomic<T>& aval) { (void) aval.fetch_add (1); }
 
 }
 
-#endif /* __libpbd_atomic_h__ */

@@ -29,7 +29,7 @@
 #include "ardour/session.h"
 
 #include "audio_clock.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "control_point.h"
 #include "editor.h"
 #include "region_view.h"
@@ -128,7 +128,7 @@ RegionPropertiesBox::set_region (std::shared_ptr<Region> r)
 	PBD::PropertyChange interesting_stuff;
 	region_changed (interesting_stuff);
 
-	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&RegionPropertiesBox::region_changed, this, _1), gui_context ());
+	_region->PropertyChanged.connect (state_connection, invalidator (*this), std::bind (&RegionPropertiesBox::region_changed, this, _1), gui_context ());
 }
 
 void

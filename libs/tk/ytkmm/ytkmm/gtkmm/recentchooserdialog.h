@@ -50,11 +50,6 @@ namespace Gtk
  * Note that RecentChooserDialog does not have any methods of its own.
  * Instead, you should use the functions that work on a RecentChooser.
  *
- * A RecentChooserDialog looks like this:
- * @image html recentchooserdialog1.png
- *
- * @newin{2,10}
- *
  * @ingroup RecentFiles
  */
 

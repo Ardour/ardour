@@ -178,7 +178,7 @@ GenericPluginUI::GenericPluginUI (std::shared_ptr<PlugInsertBase> pib, bool scro
 	main_contents.pack_start (settings_box, false, false);
 
 	if (_pi) {
-		_pi->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&GenericPluginUI::processor_active_changed, this, std::weak_ptr<Processor>(_pi)), gui_context());
+		_pi->ActiveChanged.connect (active_connection, invalidator (*this), std::bind (&GenericPluginUI::processor_active_changed, this, std::weak_ptr<Processor>(_pi)), gui_context());
 		_bypass_button.set_active (!_pi->enabled());
 	} else {
 		_bypass_button.set_sensitive (false);
@@ -385,7 +385,7 @@ GenericPluginUI::build ()
 		 * AutomationControl has only support for numeric values currently.
 		 * The only case is Variant::PATH for now */
 		plugin->PropertyChanged.connect(*this, invalidator(*this),
-				boost::bind(&GenericPluginUI::path_property_changed, this, _1, _2),
+				std::bind(&GenericPluginUI::path_property_changed, this, _1, _2),
 				gui_context());
 
 		/* and query current property value */
@@ -410,7 +410,7 @@ GenericPluginUI::build ()
 	automation_latch_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Latch));
 
 	/* XXX This is a workaround for AutomationControl not knowing about preset loads */
-	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&GenericPluginUI::update_input_displays, this), gui_context ());
+	plugin->PresetLoaded.connect (*this, invalidator (*this), std::bind (&GenericPluginUI::update_input_displays, this), gui_context ());
 }
 
 
@@ -666,12 +666,12 @@ GenericPluginUI::build_midi_table ()
 
 	_pib->plugin()->BankPatchChange.connect (
 			midi_connections, invalidator (*this),
-			boost::bind (&GenericPluginUI::midi_bank_patch_change, this, _1),
+			std::bind (&GenericPluginUI::midi_bank_patch_change, this, _1),
 			gui_context());
 
 	_pib->plugin()->UpdatedMidnam.connect (
 			midi_connections, invalidator (*this),
-			boost::bind (&GenericPluginUI::midi_refill_patches, this),
+			std::bind (&GenericPluginUI::midi_refill_patches, this),
 			gui_context());
 }
 
@@ -840,7 +840,7 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 GenericPluginUI::ControlUI*
 GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
                                    const ParameterDescriptor&           desc,
-                                   std::shared_ptr<AutomationControl> mcontrol,
+                                   std::shared_ptr<AutomationControl>   mcontrol,
                                    float                                value,
                                    bool                                 is_input,
                                    bool                                 use_knob)
@@ -1015,7 +1015,10 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		}
 
 
-		if (!_pi || mcontrol->flags () & Controllable::NotAutomatable) {
+		if (!_pi) {
+			control_ui->automate_button.set_no_show_all ();
+			control_ui->automate_button.hide ();
+		} else if (mcontrol->flags () & Controllable::NotAutomatable) {
 			control_ui->automate_button.set_sensitive (false);
 			set_tooltip(control_ui->automate_button, _("This control cannot be automated"));
 		} else {
@@ -1026,7 +1029,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			mcontrol->alist()->automation_state_changed.connect (
 					control_connections,
 					invalidator (*this),
-					boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui),
+					std::bind (&GenericPluginUI::automation_state_changed, this, control_ui),
 					gui_context());
 			input_controls_with_automation.push_back (control_ui);
 		}
@@ -1111,7 +1114,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 	if (mcontrol) {
 		mcontrol->Changed.connect(control_connections, invalidator(*this),
-		                          boost::bind(&GenericPluginUI::ui_parameter_changed,
+		                          std::bind(&GenericPluginUI::ui_parameter_changed,
 		                                      this, control_ui),
 		                          gui_context());
 	}
@@ -1186,7 +1189,7 @@ GenericPluginUI::ui_parameter_changed (ControlUI* cui)
 {
 	if (!cui->update_pending) {
 		cui->update_pending = true;
-		Gtkmm2ext::UI::instance()->call_slot (MISSING_INVALIDATOR, boost::bind (&GenericPluginUI::update_control_display, this, cui));
+		Gtkmm2ext::UI::instance()->call_slot (MISSING_INVALIDATOR, std::bind (&GenericPluginUI::update_control_display, this, cui));
 	}
 }
 
@@ -1270,9 +1273,9 @@ void
 GenericPluginUI::output_update ()
 {
 	for (vector<ControlUI*>::iterator i = output_controls.begin(); i != output_controls.end(); ++i) {
-		float val = plugin->get_parameter ((*i)->parameter().id());
 		char buf[32];
 		std::shared_ptr<ReadOnlyControl> c = _pib->control_output ((*i)->parameter().id());
+		float val = c->get_parameter ();
 		const std::string& str = ARDOUR::value_as_string(c->desc(), Variant(val));
 		size_t len = str.copy(buf, 31);
 		buf[len] = '\0';

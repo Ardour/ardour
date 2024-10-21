@@ -60,7 +60,7 @@ public:
 	uint32_t nplay (void) const { return _pcmi.nplay (); }
 	uint32_t ncapt (void) const { return _pcmi.ncapt (); }
 
-	PBD::Signal0<void> Halted;
+	PBD::Signal<void()> Halted;
 
 protected:
 	virtual void update_latencies (uint32_t, uint32_t) = 0;

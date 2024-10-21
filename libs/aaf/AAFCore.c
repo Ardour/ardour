@@ -1951,8 +1951,8 @@ retrieveProperty (AAF_Data* aafd, aafObject* Obj, aafPropertyDef* Def, aafProper
 	Prop->sf = p->_storedForm;
 
 	/*
-		TODO Prop->len / Prop->val ---> retrieveStrongReference() retrieveStrongReferenceSet() retrieveStrongReferenceVector()
-		only used to retrieve node name ? There could be a better approach.
+	        TODO Prop->len / Prop->val ---> retrieveStrongReference() retrieveStrongReferenceSet() retrieveStrongReferenceVector()
+	        only used to retrieve node name ? There could be a better approach.
 	 */
 
 	Prop->len = p->_length;
@@ -2127,18 +2127,18 @@ getNodeProperties (AAF_Data* aafd, cfbNode* Node)
 	 */
 
 	/*
-	uint32_t prop_sz = sizeof(aafPropertyIndexHeader_t);
+	        uint32_t prop_sz = sizeof(aafPropertyIndexHeader_t);
 
-	uint32_t i = 0;
+	        uint32_t i = 0;
 
-	for ( i = 0; i < ((aafPropertyIndexHeader_t*)stream)->_entryCount; i++ )
-		prop_sz += (((aafPropertyIndexEntry_t*)(stream+((sizeof(aafPropertyIndexEntry_t)*i)+sizeof(aafPropertyIndexHeader_t))))->_length) + sizeof(aafPropertyIndexEntry_t);
+	        for ( i = 0; i < ((aafPropertyIndexHeader_t*)stream)->_entryCount; i++ )
+	                prop_sz += (((aafPropertyIndexEntry_t*)(stream+((sizeof(aafPropertyIndexEntry_t)*i)+sizeof(aafPropertyIndexHeader_t))))->_length) + sizeof(aafPropertyIndexEntry_t);
 
-	if ( prop_sz != stream_sz )
-		warning( L"Stream length (%lu Bytes) does not match property length (%u Bytes).",
-			stream_sz,
-			prop_sz );
-*/
+	        if ( prop_sz != stream_sz )
+	                warning( L"Stream length (%lu Bytes) does not match property length (%u Bytes).",
+	                        stream_sz,
+	                        prop_sz );
+	*/
 
 	return stream;
 }

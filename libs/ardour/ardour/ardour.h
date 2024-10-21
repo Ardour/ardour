@@ -21,8 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_ardour_h__
-#define __ardour_ardour_h__
+#pragma once
 
 #include <map>
 #include <string>
@@ -51,11 +50,11 @@ namespace ARDOUR {
 	class AudioEngine;
 	class Session;
 
-	extern LIBARDOUR_API PBD::Signal1<void,std::string> BootMessage;
-	extern LIBARDOUR_API PBD::Signal3<void,std::string,std::string,bool> PluginScanMessage;
-	extern LIBARDOUR_API PBD::Signal1<void,int> PluginScanTimeout;
-	extern LIBARDOUR_API PBD::Signal0<void> GUIIdle;
-	extern LIBARDOUR_API PBD::Signal3<bool,std::string,std::string,int> CopyConfigurationFiles;
+	extern LIBARDOUR_API PBD::Signal<void(std::string)> BootMessage;
+	extern LIBARDOUR_API PBD::Signal<void(std::string,std::string,bool)> PluginScanMessage;
+	extern LIBARDOUR_API PBD::Signal<void(int)> PluginScanTimeout;
+	extern LIBARDOUR_API PBD::Signal<void()> GUIIdle;
+	extern LIBARDOUR_API PBD::Signal<bool(std::string,std::string,int)> CopyConfigurationFiles;
 	extern LIBARDOUR_API std::map<std::string, bool> reserved_io_names;
 	extern LIBARDOUR_API float ui_scale_factor;
 
@@ -94,10 +93,9 @@ namespace ARDOUR {
 	 * copy should take place.
 	 */
 	LIBARDOUR_API void check_for_old_configuration_files ();
-	LIBARDOUR_API int handle_old_configuration_files (boost::function<bool (std::string const&, std::string const&, int)> ui_handler);
+	LIBARDOUR_API int handle_old_configuration_files (std::function<bool (std::string const&, std::string const&, int)> ui_handler);
 
 	LIBARDOUR_API void reset_performance_meters (Session*);
 }
 
-#endif /* __ardour_ardour_h__ */
 

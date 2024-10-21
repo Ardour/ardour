@@ -27,7 +27,7 @@ function factory ()
 			return
 		end
 
-		local mloc = loc:first_mark_at(mpos, Temporal.timecnt_t(0))
+		local mloc = loc:mark_at(mpos, Temporal.timecnt_t(0), 0)
 		if not mloc then
 			-- no marker found at that location
 			return

@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_session_route_h__
-#define __ardour_session_route_h__
+#pragma once
 
 #include <iostream>
 
@@ -124,4 +123,3 @@ Session::foreach_route (void (Route::*method)(A1, A2), A1 arg1, A2 arg2)
 
 } /* namespace */
 
-#endif /* __ardour_session_route_h__ */

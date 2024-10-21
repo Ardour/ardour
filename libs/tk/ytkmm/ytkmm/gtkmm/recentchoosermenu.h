@@ -50,8 +50,6 @@ namespace Gtk
  * Note that RecentChooserMenu does not have any methods of its own. Instead,
  * you should use the functions that work on a RecentChooser.
  *
- * @newin{2,10}
- *
  * @ingroup RecentFiles
  */
 
@@ -123,15 +121,11 @@ public:
    * be used inside ten menu item's label.  Only the first the items
    * get a number to avoid clashes.
    * 
-   * @newin{2,10}
-   * 
    * @param show_numbers Whether to show numbers.
    */
   void set_show_numbers(bool show_numbers =  true);
   
   /** Returns the value set by set_show_numbers().
-   * 
-   * @newin{2,10}
    * 
    * @return <tt>true</tt> if numbers should be shown.
    */

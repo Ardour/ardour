@@ -281,8 +281,6 @@ public:
    * with Gtk::Widget::set_style().
    *
    * @param settings a Gtk::Settings
-   *
-   * @newin{2,4}
    */
   static void reset_styles(const Glib::RefPtr<Settings>& settings);
 

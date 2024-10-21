@@ -23,8 +23,7 @@
  * https://tracker.ardour.org/view.php?id=6575
  */
 
-#ifndef __pbd_gstdio_compat_h__
-#define __pbd_gstdio_compat_h__
+#pragma once
 
 #include <glib/gstdio.h>
 
@@ -86,4 +85,3 @@ pbd_g_stat(const gchar* filename, GStatBufW64* buf)
 #  define g_lstat pbd_g_stat
 #endif
 
-#endif /* __pbd_gstdio_compat_h__ */

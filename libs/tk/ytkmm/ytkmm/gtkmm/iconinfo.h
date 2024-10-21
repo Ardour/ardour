@@ -103,8 +103,6 @@ public:
    * the same base size as the larger icons to which
    * they are attached.
    * 
-   * @newin{2,4}
-   * 
    * @return The base size, or 0, if no base
    * size is known for the icon.
    */
@@ -115,8 +113,6 @@ public:
    * to Gtk::IconTheme::lookup_icon(), there may be
    * no filename if a builtin icon is returned; in this
    * case, you should use get_builtin_pixbuf().
-   * 
-   * @newin{2,4}
    * 
    * @return The filename for the icon, or <tt>0</tt>
    * if get_builtin_pixbuf() should
@@ -129,8 +125,6 @@ public:
    * Gtk::ICON_LOOKUP_USE_BUILTIN to
    * Gtk::IconTheme::lookup_icon().
    * 
-   * @newin{2,4}
-   * 
    * @return The built-in image pixbuf, or <tt>0</tt>.
    * The returned image must not be modified.
    */
@@ -140,8 +134,6 @@ public:
    * GTK+ to use built in icon images, you must pass the
    * Gtk::ICON_LOOKUP_USE_BUILTIN to
    * Gtk::IconTheme::lookup_icon().
-   * 
-   * @newin{2,4}
    * 
    * @return The built-in image pixbuf, or <tt>0</tt>.
    * The returned image must not be modified.
@@ -159,8 +151,6 @@ public:
    * by passing the Gtk::ICON_LOOKUP_FORCE_SIZE flag when obtaining
    * the Gtk::IconInfo. If this flag has been specified, the pixbuf
    * returned by this function will be scaled to the exact size.
-   * 
-   * @newin{2,4}
    * 
    * @return The rendered icon; this may be a newly
    * created icon or a new reference to an internal icon, so you must
@@ -184,8 +174,6 @@ public:
    * This function is provided primarily to allow compatibility wrappers
    * for older API's, and is not expected to be useful for applications.
    * 
-   * @newin{2,4}
-   * 
    * @param raw_coordinates Whether the coordinates of embedded rectangles
    * and attached points should be returned in their original
    * (unscaled) form.
@@ -198,8 +186,6 @@ public:
    * See set_raw_coordinates() for further
    * information about the coordinate system.
    * 
-   * @newin{2,4}
-   * 
    * @param rectangle Gdk::Rectangle in which to store embedded
    * rectangle coordinates; coordinates are only stored
    * when this function returns <tt>true</tt>.
@@ -211,8 +197,6 @@ public:
   /** Gets the display name for an icon. A display name is a
    * string to be used in place of the icon name in a user
    * visible context like a list of icons.
-   * 
-   * @newin{2,4}
    * 
    * @return The display name for the icon or <tt>0</tt>, if
    * the icon doesn't have a specified display name. This value

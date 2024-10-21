@@ -125,8 +125,6 @@ public:
   /** Locks are added and removed using lock() and
    * unlock().
    * 
-   * @newin{2,14}
-   * 
    * @return <tt>true</tt> if there are 1 or more locks on the @a accel_group,
    * <tt>false</tt> otherwise.
    */
@@ -134,8 +132,6 @@ public:
   
   /** Gets a Gdk::ModifierType representing the mask for this
    *  @a accel_group. For example, Gdk::CONTROL_MASK, Gdk::SHIFT_MASK, etc.
-   * 
-   * @newin{2,14}
    * 
    * @return The modifier mask for this accel group.
    */
@@ -192,8 +188,6 @@ public:
   
   /** Converts an accelerator keyval and modifier mask into a string 
    * which can be used to represent the accelerator to the user. 
-   * 
-   * @newin{2,6}
    * 
    * @param accelerator_key Accelerator keyval.
    * @param accelerator_mods Accelerator modifier mask.

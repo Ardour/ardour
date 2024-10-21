@@ -17,15 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_event_loop_h__
-#define __pbd_event_loop_h__
+#pragma once
 
 #include <atomic>
 #include <string>
 #include <vector>
 #include <map>
-#include <boost/function.hpp>
-#include <boost/bind.hpp> /* we don't need this here, but anything calling call_slot() probably will, so this is convenient */
 #include <stdint.h>
 #include <pthread.h>
 #include <glibmm/threads.h>
@@ -79,7 +76,7 @@ public:
 	struct BaseRequestObject {
 		RequestType             type;
 		InvalidationRecord*     invalidation;
-		boost::function<void()> the_slot;
+		std::function<void()> the_slot;
 
 		BaseRequestObject() : invalidation (0) {}
 		~BaseRequestObject() {
@@ -89,7 +86,7 @@ public:
 		}
 	};
 
-	virtual bool call_slot (InvalidationRecord*, const boost::function<void()>&) = 0;
+	virtual bool call_slot (InvalidationRecord*, const std::function<void()>&) = 0;
 	virtual Glib::Threads::RWLock& slot_invalidation_rwlock() = 0;
 
 	std::string event_loop_name() const { return _name; }
@@ -140,4 +137,3 @@ private:
 
 #define MISSING_INVALIDATOR nullptr // used to mark places where we fail to provide an invalidator
 
-#endif /* __pbd_event_loop_h__ */

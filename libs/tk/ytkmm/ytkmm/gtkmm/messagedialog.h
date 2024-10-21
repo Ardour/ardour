@@ -90,9 +90,6 @@ namespace Gtk
  * Gtk::MessageDialog from Gtk::Dialog without too much effort, but
  * Gtk::MessageDialog saves typing.
  *
- * A MessageDialog looks like this:
- * @image html messagedialog1.png
- *
  * @ingroup Dialogs
  */
 
@@ -158,23 +155,17 @@ public:
 
   /** Sets the dialog's image to @a image.
    * 
-   * @newin{2,10}
-   * 
    * @param image The image.
    */
   void set_image(Widget& image);
   
   /** Gets the dialog's image.
    * 
-   * @newin{2,14}
-   * 
    * @return The dialog's image.
    */
   Widget* get_image();
   
   /** Gets the dialog's image.
-   * 
-   * @newin{2,14}
    * 
    * @return The dialog's image.
    */
@@ -187,8 +178,6 @@ public:
    * up with the Pango text markup
    * language.
    * 
-   * @newin{2,4}
-   * 
    * @deprecated Use set_message(string, true).
    * 
    * @param str Markup string (see Pango markup format).
@@ -199,7 +188,7 @@ public:
 
   /** Sets the primary text of the message dialog.
    *
-   * @param text The message.
+   * @param message The message.
    * @param use_markup Whether @a message contains pango markup.
    */
   void set_message(const Glib::ustring& message, bool use_markup = false);
@@ -207,8 +196,6 @@ public:
 
   /** Sets the secondary text of the message dialog.
    * Note that setting a secondary text makes the primary text become bold, unless you have provided explicit markup.
-   *
-   * @newin{2,6}.
    *
    * @param text The message.
    * @param use_markup Whether @a message contains pango markup.
@@ -223,8 +210,6 @@ public:
    * languages).  See Gtk::Dialog::get_content_area() for the corresponding
    * function in the parent Gtk::Dialog.
    * 
-   * @newin{2,22}
-   * 
    * @return A Gtk::VBox corresponding to the
    * "message area" in the @a message_dialog.
    */
@@ -236,8 +221,6 @@ public:
    * on the right side of the dialog's image (or on the left for right-to-left
    * languages).  See Gtk::Dialog::get_content_area() for the corresponding
    * function in the parent Gtk::Dialog.
-   * 
-   * @newin{2,22}
    * 
    * @return A Gtk::VBox corresponding to the
    * "message area" in the @a message_dialog.

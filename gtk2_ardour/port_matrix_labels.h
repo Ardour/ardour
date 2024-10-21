@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __port_matrix_labels_h__
-#define __port_matrix_labels_h__
+#pragma once
 
 #include "port_matrix_component.h"
 
@@ -46,4 +45,3 @@ private:
 	std::vector<ARDOUR::BundleChannel> _channel_highlights;
 };
 
-#endif

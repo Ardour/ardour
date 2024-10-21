@@ -31,7 +31,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal1<void, ControlPoint *> ControlPoint::CatchDeletion;
+PBD::Signal<void(ControlPoint *)> ControlPoint::CatchDeletion;
 
 ControlPoint::ControlPoint (AutomationLine& al)
 	: _line (al)
@@ -88,7 +88,7 @@ ControlPoint::~ControlPoint ()
 bool
 ControlPoint::event_handler (GdkEvent* event)
 {
-	return PublicEditor::instance().canvas_control_point_event (event, _item, this);
+	return _line.editing_context().canvas_control_point_event (event, _item, this);
 }
 
 void

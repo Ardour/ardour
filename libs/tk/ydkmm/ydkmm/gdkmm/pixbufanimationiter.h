@@ -112,8 +112,6 @@ public:
    * conveniently takes a timeout in milliseconds, so you can use a timeout
    * to schedule the next update.
    * 
-   * @newin{2,14}
-   * 
    * @return Delay time in milliseconds (thousandths of a second).
    */
   int get_delay_time() const;
@@ -128,8 +126,6 @@ public:
    * advance(). Copy the pixbuf to keep it, with 
    * Gdk::Pixbuf::copy() as it may get recycled as you advance the iterator.
    * 
-   * @newin{2,14}
-   * 
    * @return The pixbuf to be displayed.
    */
   Glib::RefPtr<Gdk::Pixbuf> get_pixbuf();
@@ -143,8 +139,6 @@ public:
    * advance(). Copy the pixbuf to keep it, with 
    * Gdk::Pixbuf::copy() as it may get recycled as you advance the iterator.
    * 
-   * @newin{2,14}
-   * 
    * @return The pixbuf to be displayed.
    */
   Glib::RefPtr<const Gdk::Pixbuf> get_pixbuf() const;
@@ -155,8 +149,6 @@ public:
    * for an area of the frame currently streaming in to the loader. So if
    * you're on the currently loading frame, you need to redraw the screen for
    * the updated area.
-   * 
-   * @newin{2,14}
    * 
    * @return <tt>true</tt> if the frame we're on is partially loaded, or the last frame.
    */
@@ -183,8 +175,6 @@ public:
    * if <tt>true</tt>, you need to call get_pixbuf() and update the
    * display with the new pixbuf.
    * 
-   * @newin{2,14}
-   * 
    * @param current_time Current time.
    * @return <tt>true</tt> if the image may need updating.
    */
@@ -197,8 +187,6 @@ public:
    * display, assuming the display had been rendered prior to advancing;
    * if true, you need to call get_pixbuf() and update the
    * display with the new pixbuf.
-   *
-   * @newin{2,14}
    *
    * @return true if the image may need updating.
    */

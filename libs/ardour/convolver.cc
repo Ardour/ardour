@@ -49,7 +49,7 @@ Convolution::Convolution (Session& session, uint32_t n_in, uint32_t n_out)
     , _n_inputs (n_in)
     , _n_outputs (n_out)
 {
-	AudioEngine::instance ()->BufferSizeChanged.connect_same_thread (*this, boost::bind (&Convolution::restart, this));
+	AudioEngine::instance ()->BufferSizeChanged.connect_same_thread (*this, std::bind (&Convolution::restart, this));
 }
 
 bool
@@ -169,7 +169,7 @@ Convolution::restart ()
 	}
 
 	if (rv == 0) {
-		rv = _convproc.start_process (pbd_absolute_rt_priority (PBD_SCHED_FIFO, AudioEngine::instance ()->client_real_time_priority () - 1), PBD_SCHED_FIFO);
+		rv = _convproc.start_process (pbd_absolute_rt_priority (PBD_SCHED_FIFO, PBD_RT_PRI_PROC), PBD_SCHED_FIFO);
 	}
 
 	assert (rv == 0); // bail out in debug builds

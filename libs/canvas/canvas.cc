@@ -673,7 +673,7 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 	}
 
 	if (_current_item) {
-		DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("CURRENT ITEM %1/%2\n", _new_current_item->whatami(), _current_item->name));
+		DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("CURRENT ITEM %1/%2\n", _current_item->whatami(), _current_item->name));
 	} else {
 		DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, "--- no current item\n");
 	}
@@ -1426,7 +1426,7 @@ void
 GtkCanvas::ungrab ()
 {
 	/* XXX: should this be doing gdk_pointer_ungrab? */
-	_grabbed_item = 0;
+	_grabbed_item = nullptr;
 }
 
 /** Set keyboard focus on an item, so that all keyboard events are sent to that item until the focus

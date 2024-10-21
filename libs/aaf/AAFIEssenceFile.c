@@ -888,3 +888,44 @@ externalAudioDataReaderCallback (unsigned char* buf, size_t offset, size_t reqle
 
 	return byteRead;
 }
+
+aafiAudioEssencePointer*
+aafi_audioEssencePointer_exists_before (AAF_Iface* aafi, aafiAudioEssencePointer* audioEssencePointerList)
+{
+	aafiAudioTrack*   at = NULL;
+	aafiTimelineItem* ai = NULL;
+	aafiAudioClip*    ac = NULL;
+
+	aafiAudioEssencePointer* aep1 = NULL;
+	aafiAudioEssencePointer* aep2 = NULL;
+
+	AAFI_foreachAudioTrack (aafi, at)
+	{
+		AAFI_foreachTrackItem (at, ai)
+		{
+			if (ai->type != AAFI_AUDIO_CLIP) {
+				continue;
+			}
+
+			ac   = (aafiAudioClip*)ai->data;
+			aep1 = audioEssencePointerList;
+
+			int found = 1;
+
+			AAFI_foreachEssencePointer (ac->essencePointerList, aep2)
+			{
+				if (!aep1 || aep1->essenceFile != aep2->essenceFile || aep1->essenceChannel != aep2->essenceChannel) {
+					found = 0;
+					break;
+				}
+				aep1 = aep1->next;
+			}
+
+			if (found && aep1 == NULL) {
+				return ac->essencePointerList;
+			}
+		}
+	}
+
+	return NULL;
+}

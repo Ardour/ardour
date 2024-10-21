@@ -177,15 +177,11 @@ public:
   
   /** Obtains the first child of the paned widget.
    * 
-   * @newin{2,4}
-   * 
    * @return First child, or <tt>0</tt> if it is not set.
    */
   Widget* get_child1();
   
   /** Obtains the first child of the paned widget.
-   * 
-   * @newin{2,4}
    * 
    * @return First child, or <tt>0</tt> if it is not set.
    */
@@ -194,15 +190,11 @@ public:
   
   /** Obtains the second child of the paned widget.
    * 
-   * @newin{2,4}
-   * 
    * @return Second child, or <tt>0</tt> if it is not set.
    */
   Widget* get_child2();
   
   /** Obtains the second child of the paned widget.
-   * 
-   * @newin{2,4}
    * 
    * @return Second child, or <tt>0</tt> if it is not set.
    */
@@ -214,8 +206,6 @@ public:
    * enables the callback to distinguish between the window
    * of the paned, a child and the handle.
    * 
-   * @newin{2,20}
-   * 
    * @return The paned's handle window.
    */
   Glib::RefPtr<Gdk::Window> get_handle_window();
@@ -224,8 +214,6 @@ public:
    * useful when handling button or motion events because it
    * enables the callback to distinguish between the window
    * of the paned, a child and the handle.
-   * 
-   * @newin{2,20}
    * 
    * @return The paned's handle window.
    */

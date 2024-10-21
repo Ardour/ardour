@@ -102,9 +102,6 @@ namespace Gtk
  * the bar, optional text can be displayed along with the bar, and the step
  * size used in activity mode can be set. 
  *
- * The ProgressBar widget looks like this:
- * @image html progressbar1.png
- *
  * @ingroup Widgets
  */
 
@@ -236,16 +233,12 @@ public:
   /** Sets the mode used to ellipsize (add an ellipsis: "...") the text 
    * if there is not enough space to render the entire string.
    * 
-   * @newin{2,6}
-   * 
    * @param mode A Pango::EllipsizeMode.
    */
   void set_ellipsize(Pango::EllipsizeMode mode);
   
   /** Returns the ellipsizing position of the progressbar. 
    * See set_ellipsize().
-   * 
-   * @newin{2,6}
    * 
    * @return Pango::EllipsizeMode.
    */

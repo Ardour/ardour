@@ -55,6 +55,9 @@ aafi_parse_audio_essence (AAF_Iface* aafi, aafiAudioEssenceFile* audioEssenceFil
 int
 aafi_build_unique_audio_essence_name (AAF_Iface* aafi, aafiAudioEssenceFile* audioEssenceFile);
 
+aafiAudioEssencePointer*
+aafi_audioEssencePointer_exists_before (AAF_Iface* aafi, aafiAudioEssencePointer* audioEssencePointerList);
+
 /**
  * @}
  */

@@ -47,9 +47,9 @@
 #include "audio_streamview.h"
 #include "audio_time_axis.h"
 #include "region_gain_line.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "automation_time_axis.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "control_point.h"
 #include "editor_drag.h"
 #include "midi_time_axis.h"
@@ -152,7 +152,7 @@ bool
 Editor::canvas_scroll_event (GdkEventScroll *event, bool from_canvas)
 {
 	if (from_canvas) {
-		boost::optional<ArdourCanvas::Rect> rulers = _time_markers_group->bounding_box();
+		std::optional<ArdourCanvas::Rect> rulers = _time_markers_group->bounding_box();
 		if (rulers && rulers->contains (Duple (event->x, event->y))) {
 			return canvas_ruler_event ((GdkEvent*) event, timecode_ruler, TimecodeRulerItem);
 		}
@@ -200,50 +200,6 @@ Editor::track_canvas_motion_notify_event (GdkEventMotion */*event*/)
 	/* keep those motion events coming */
 	_track_canvas->get_pointer (x, y);
 	return false;
-}
-
-bool
-Editor::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType type)
-{
-	if (!session () || session()->loading () || session()->deletion_in_progress ()) {
-		return false;
-	}
-
-	gint ret = FALSE;
-
-	switch (event->type) {
-	case GDK_BUTTON_PRESS:
-	case GDK_2BUTTON_PRESS:
-	case GDK_3BUTTON_PRESS:
-		ret = button_press_handler (item, event, type);
-		break;
-	case GDK_BUTTON_RELEASE:
-		ret = button_release_handler (item, event, type);
-		break;
-	case GDK_MOTION_NOTIFY:
-		ret = motion_handler (item, event);
-		break;
-
-	case GDK_ENTER_NOTIFY:
-		ret = enter_handler (item, event, type);
-		break;
-
-	case GDK_LEAVE_NOTIFY:
-		ret = leave_handler (item, event, type);
-		break;
-
-	case GDK_KEY_PRESS:
-		ret = key_press_handler (item, event, type);
-		break;
-
-	case GDK_KEY_RELEASE:
-		ret = key_release_handler (item, event, type);
-		break;
-
-	default:
-		break;
-	}
-	return ret;
 }
 
 bool
@@ -680,7 +636,7 @@ Editor::canvas_control_point_event (GdkEvent *event, ArdourCanvas::Item* item, C
 	case GDK_2BUTTON_PRESS:
 	case GDK_3BUTTON_PRESS:
 		clicked_control_point = cp;
-		clicked_axisview = &cp->line().trackview;
+		clicked_axisview = &dynamic_cast<EditorAutomationLine*> (&cp->line())->trackview;
 		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		clicked_regionview = 0;
 		break;
@@ -704,17 +660,17 @@ Editor::canvas_velocity_base_event (GdkEvent *event, ArdourCanvas::Item* item)
 }
 
 bool
-Editor::canvas_line_event (GdkEvent *event, ArdourCanvas::Item* item, AutomationLine* al)
+Editor::canvas_line_event (GdkEvent *event, ArdourCanvas::Item* item, EditorAutomationLine* al)
 {
 	ItemType type;
-	AudioRegionGainLine* gl;
-	if ((gl = dynamic_cast<AudioRegionGainLine*> (al)) != 0) {
+	RegionFxLine* rfl;
+	if ((rfl = dynamic_cast<RegionFxLine*> (al)) != 0) {
 		type = GainLineItem;
 		if (event->type == GDK_BUTTON_PRESS) {
-			clicked_regionview = &gl->region_view ();
+			clicked_regionview = &rfl->region_view ();
 		}
 	} else {
-		type = AutomationLineItem;
+		type = EditorAutomationLineItem;
 		if (event->type == GDK_BUTTON_PRESS) {
 			clicked_regionview = 0;
 		}
@@ -1180,7 +1136,7 @@ Editor::section_rect_event (GdkEvent* ev, Location* loc, ArdourCanvas::Rectangle
 				MenuList& items (section_box_menu.items());
 				items.clear ();
 
-				items.push_back (MenuElem (_("New Arrangement Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
+				items.push_back (MenuElem (_("New Arrangement Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::add_location_mark_with_flag), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
 				items.push_back (MenuElem (_("Select Arrangement Section"), sigc::bind (sigc::mem_fun(*_sections, &EditorSections::select), l)));
 #if 0
 				items.push_back (SeparatorElem());
@@ -1210,7 +1166,7 @@ Editor::canvas_section_box_event (GdkEvent *event)
 		case GDK_BUTTON_PRESS:
 			if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
 			   && event->button.button == 1) {
-				_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
+				_drags->set (new CursorDrag (*this, *_playhead_cursor, false), event);
 			}
 			/*fallthrough*/
 		case GDK_2BUTTON_PRESS:
@@ -1477,7 +1433,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 
 		if ((std::dynamic_pointer_cast<AudioRegion> (region_copy) != 0 && dynamic_cast<AudioTimeAxisView*> (rtav) != 0) ||
 		    (std::dynamic_pointer_cast<MidiRegion> (region_copy) != 0 && dynamic_cast<MidiTimeAxisView*> (rtav) != 0)) {
-			_drags->set (new RegionInsertDrag (this, region_copy, rtav, timepos_t (pos), drag_time_domain (region_copy.get())), &event);
+			_drags->set (new RegionInsertDrag (*this, region_copy, rtav, timepos_t (pos), drag_time_domain (region_copy.get())), &event);
 			_drags->end_grab (&event);
 		}
 	}

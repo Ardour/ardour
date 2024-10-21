@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_processor_selection_h__
-#define __ardour_gtk_processor_selection_h__
+#pragma once
 
 #include <vector>
 
@@ -83,4 +82,3 @@ class ProcessorSelection : public PBD::ScopedConnectionList, public sigc::tracka
 
 bool operator==(const ProcessorSelection& a, const ProcessorSelection& b);
 
-#endif /* __ardour_gtk_processor_selection_h__ */

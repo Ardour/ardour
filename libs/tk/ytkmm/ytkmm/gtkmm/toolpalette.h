@@ -124,8 +124,6 @@ namespace Gtk
  * target widget. Then get_drag_item() can be used to get the dragged item in
  * the "drag-data-received" signal handler of the drag target.
  *
- * @newin{2,20}
- *
  * @ingroup Widgets
  * @ingroup Containers
  */
@@ -195,8 +193,6 @@ public:
    * If position is 0 the group will become the first child, if position is
    * -1 it will become the last child.
    * 
-   * @newin{2,20}
-   * 
    * @param group A Gtk::ToolItemGroup which is a child of palette.
    * @param position A new index for group.
    */
@@ -205,16 +201,12 @@ public:
   /** Sets whether the group should be exclusive or not.
    * If an exclusive group is expanded all other groups are collapsed.
    * 
-   * @newin{2,20}
-   * 
    * @param group A Gtk::ToolItemGroup which is a child of palette.
    * @param exclusive Whether the group should be exclusive or not.
    */
   void set_exclusive(ToolItemGroup& group, bool exclusive);
   
   /** Sets whether the group should be given extra space.
-   * 
-   * @newin{2,20}
    * 
    * @param group A Gtk::ToolItemGroup which is a child of palette.
    * @param expand Whether the group should be given extra space.
@@ -225,8 +217,6 @@ public:
   /** Gets the position of @a group in @a palette as index.
    * See set_group_position().
    * 
-   * @newin{2,20}
-   * 
    * @param group A Gtk::ToolItemGroup.
    * @return The index of group or -1 if @a group is not a child of @a palette.
    */
@@ -234,8 +224,6 @@ public:
   
   /** Gets whether @a group is exclusive or not.
    * See set_exclusive().
-   * 
-   * @newin{2,20}
    * 
    * @param group A Gtk::ToolItemGroup which is a child of palette.
    * @return <tt>true</tt> if @a group is exclusive.
@@ -245,8 +233,6 @@ public:
   /** Gets whether group should be given extra space.
    * See set_expand().
    * 
-   * @newin{2,20}
-   * 
    * @param group A Gtk::ToolItemGroup which is a child of palette.
    * @return <tt>true</tt> if group should be given extra space, <tt>false</tt> otherwise.
    */
@@ -255,8 +241,6 @@ public:
   
   /** Sets the size of icons in the tool palette.
    * 
-   * @newin{2,20}
-   * 
    * @param icon_size The Gtk::IconSize that icons in the tool
    * palette shall have.
    */
@@ -264,14 +248,10 @@ public:
   
   /** Unsets the tool palette icon size set with set_icon_size(),
    * so that user preferences will be used to determine the icon size.
-   * 
-   * @newin{2,20}
    */
   void unset_icon_size();
   
   /** Sets the style (text, icons or both) of items in the tool palette.
-   * 
-   * @newin{2,20}
    * 
    * @param style The Gtk::ToolbarStyle that items in the tool palette shall have.
    */
@@ -279,8 +259,6 @@ public:
   
   /** Unsets a toolbar style set with set_style(),
    * so that user preferences will be used to determine the toolbar style.
-   * 
-   * @newin{2,20}
    */
   void unset_style();
 
@@ -288,15 +266,11 @@ public:
   /** Gets the size of icons in the tool palette.
    * See set_icon_size().
    * 
-   * @newin{2,20}
-   * 
    * @return The Gtk::IconSize of icons in the tool palette.
    */
   IconSize get_icon_size() const;
   
   /** Gets the style (icons, text or both) of items in the tool palette.
-   * 
-   * @newin{2,20}
    * 
    * @return The Gtk::ToolbarStyle of items in the tool palette.
    */
@@ -306,8 +280,6 @@ public:
   /** Gets the item at position (x, y).
    * See get_drop_group().
    * 
-   * @newin{2,20}
-   * 
    * @param x The x position.
    * @param y The y position.
    * @return The Gtk::ToolItem at position or <tt>0</tt> if there is no such item.
@@ -316,8 +288,6 @@ public:
   
   /** Gets the item at position (x, y).
    * See get_drop_group().
-   * 
-   * @newin{2,20}
    * 
    * @param x The x position.
    * @param y The y position.
@@ -330,8 +300,6 @@ public:
 
   /** Gets the group at position (x, y).
    * 
-   * @newin{2,20}
-   * 
    * @param x The x position.
    * @param y The y position.
    * @return The Gtk::ToolItemGroup at position or <tt>0</tt>
@@ -340,8 +308,6 @@ public:
   ToolItemGroup* get_drop_group(int x, int y);
   
   /** Gets the group at position (x, y).
-   * 
-   * @newin{2,20}
    * 
    * @param x The x position.
    * @param y The y position.
@@ -354,8 +320,6 @@ public:
   /** Get the dragged item from the selection.
    * This could be a Gtk::ToolItem or a Gtk::ToolItemGroup.
    * 
-   * @newin{2,20}
-   * 
    * @param selection A Gtk::SelectionData.
    * @return The dragged item in selection.
    */
@@ -363,8 +327,6 @@ public:
   
   /** Get the dragged item from the selection.
    * This could be a Gtk::ToolItem or a Gtk::ToolItemGroup.
-   * 
-   * @newin{2,20}
    * 
    * @param selection A Gtk::SelectionData.
    * @return The dragged item in selection.
@@ -377,8 +339,6 @@ public:
    * on button 1 and button 3 press with copy and move actions.
    * See Gtk::DragSource::set().
    * 
-   * @newin{2,20}
-   * 
    * @param targets The Gtk::ToolPaletteDragTarget<!-- -->s
    * which the widget should support.
    */
@@ -387,8 +347,6 @@ public:
   /** Sets @a palette as drag source (see set_drag_source())
    * and sets @a widget as a drag destination for drags from @a palette.
    * See gtk_drag_dest_set().
-   * 
-   * @newin{2,20}
    * 
    * @param widget A Gtk::Widget which should be a drag destination for @a palette.
    * @param flags The flags that specify what actions GTK+ should take for drops
@@ -402,15 +360,11 @@ public:
   
   /** Gets the horizontal adjustment of the tool palette.
    * 
-   * @newin{2,20}
-   * 
    * @return The horizontal adjustment of @a palette.
    */
   Adjustment* get_hadjustment();
   
   /** Gets the horizontal adjustment of the tool palette.
-   * 
-   * @newin{2,20}
    * 
    * @return The horizontal adjustment of @a palette.
    */
@@ -418,15 +372,11 @@ public:
   
   /** Gets the vertical adjustment of the tool palette.
    * 
-   * @newin{2,20}
-   * 
    * @return The vertical adjustment of @a palette.
    */
   Adjustment* get_vadjustment();
   
   /** Gets the vertical adjustment of the tool palette.
-   * 
-   * @newin{2,20}
    * 
    * @return The vertical adjustment of @a palette.
    */
@@ -435,15 +385,11 @@ public:
 
   /** Gets the target entry for a dragged Gtk::ToolItem.
    * 
-   * @newin{2,20}
-   * 
    * @return The Gtk::TargetEntry for a dragged item.
    */
   static TargetEntry get_drag_target_item();
   
   /** Get the target entry for a dragged Gtk::ToolItemGroup.
-   * 
-   * @newin{2,20}
    * 
    * @return The Gtk::TargetEntry for a dragged group.
    */

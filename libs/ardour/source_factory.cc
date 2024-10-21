@@ -52,7 +52,7 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-PBD::Signal1<void, std::shared_ptr<Source>> SourceFactory::SourceCreated;
+PBD::Signal<void(std::shared_ptr<Source>)> SourceFactory::SourceCreated;
 Glib::Threads::Cond                           SourceFactory::PeaksToBuild;
 Glib::Threads::Mutex                          SourceFactory::peak_building_lock;
 std::list<std::weak_ptr<AudioSource>>       SourceFactory::files_with_peaks;
@@ -65,8 +65,6 @@ static void
 peak_thread_work ()
 {
 	SessionEvent::create_per_thread_pool (X_("PeakFile Builder "), 64);
-	pthread_set_name ("PeakFileBuilder");
-
 	while (true) {
 		SourceFactory::peak_building_lock.lock ();
 
@@ -119,7 +117,7 @@ SourceFactory::init ()
 	}
 	peak_thread_run = true;
 	for (int n = 0; n < 2; ++n) {
-		peak_thread_pool.push_back (PBD::Thread::create (&peak_thread_work));
+		peak_thread_pool.push_back (PBD::Thread::create (&peak_thread_work, string_compose ("PeakFileBuilder-%1", n)));
 	}
 }
 
@@ -162,7 +160,7 @@ SourceFactory::setup_peakfile (std::shared_ptr<Source> s, bool async)
 std::shared_ptr<Source>
 SourceFactory::createSilent (Session& s, const XMLNode& node, samplecnt_t nframes, float sr)
 {
-	Source*                   src = new SilentFileSource (s, node, nframes, sr);
+	Source* src = new SilentFileSource (s, node, nframes, sr);
 	std::shared_ptr<Source> ret (src);
 	BOOST_MARK_SOURCE (ret);
 	// no analysis data - the file is non-existent

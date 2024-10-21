@@ -67,7 +67,7 @@ using namespace ArdourCanvas;
 
 static const int32_t sync_mark_width = 9;
 
-PBD::Signal1<void,RegionView*> RegionView::RegionViewGoingAway;
+PBD::Signal<void(RegionView*)> RegionView::RegionViewGoingAway;
 
 RegionView::RegionView (ArdourCanvas::Container*                 parent,
                         TimeAxisView&                            tv,
@@ -236,7 +236,8 @@ RegionView::init (bool wfd)
 	/* derived class calls set_height () including RegionView::set_height() in ::init() */
 	//set_height (trackview.current_height());
 
-	_region->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::region_changed, this, _1), gui_context());
+	_region->PropertyChanged.connect (*this, invalidator (*this), std::bind (&RegionView::region_changed, this, _1), gui_context());
+	_region->RegionFxChanged.connect (*this, invalidator (*this), std::bind (&RegionView::region_renamed, this), gui_context());
 
 	/* derived class calls set_colors () including RegionView::set_colors() in ::init() */
 	//set_colors ();
@@ -749,7 +750,7 @@ void
 RegionView::show_region_editor ()
 {
 	if (!editor) {
-		editor = new RegionEditor (trackview.session(), region());
+		editor = new RegionEditor (trackview.session(), this);
 	}
 
 	editor->present ();
@@ -790,6 +791,9 @@ RegionView::make_name () const
 
 	if (_region->muted()) {
 		str = std::string(u8"\U0001F507") + str; // SPEAKER WITH CANCELLATION STROKE
+	}
+	if (_region->has_region_fx()) {
+		str = str + " (Fx)";
 	}
 
 	return str;
@@ -959,17 +963,22 @@ RegionView::set_height (double h)
 	}
 }
 
+void
+RegionView::clear_coverage_frame ()
+{
+	for (auto& i : _coverage_frame) {
+		delete i;
+	}
+	_coverage_frame.clear ();
+}
+
 /** Remove old coverage frame and make new ones, if we're in a LayerDisplay mode
  *  which uses them. */
 void
 RegionView::update_coverage_frame (LayerDisplay d)
 {
 	/* remove old coverage frame */
-	for (auto& i : _coverage_frame) {
-		delete i;
-	}
-
-	_coverage_frame.clear ();
+	clear_coverage_frame ();
 
 	if (d != Stacked) {
 		/* don't do coverage frame unless we're in stacked mode */
@@ -1137,40 +1146,6 @@ RegionView::move_contents (timecnt_t const & distance)
 	}
 	_region->move_start (distance);
 	region_changed (PropertyChange (ARDOUR::Properties::start));
-}
-
-
-/** Snap a time offset within our region using the current snap settings.
- *  @param x Time offset from this region's position.
- *  @param ensure_snap whether to ignore snap_mode (in the case of SnapOff) and magnetic snap.
- *  Used when inverting snap mode logic with key modifiers, or snap distance calculation.
- *  @return Snapped time offset from this region's position.
- */
-timecnt_t
-RegionView::snap_region_time_to_region_time (timecnt_t const & x, bool ensure_snap) const
-{
-	PublicEditor& editor = trackview.editor();
-	/* x is region relative, convert it to global absolute time */
-	timepos_t const session_pos = _region->position() + x;
-
-	/* try a snap in either direction */
-	timepos_t snapped = session_pos;
-	editor.snap_to (snapped, Temporal::RoundNearest, SnapToAny_Visual, ensure_snap);
-
-	/* if we went off the beginning of the region, snap forwards */
-	if (snapped < _region->position ()) {
-		snapped = session_pos;
-		editor.snap_to (snapped, Temporal::RoundUpAlways, SnapToAny_Visual, ensure_snap);
-	}
-
-	/* back to region relative */
-	return _region->region_relative_position (snapped);
-}
-
-timecnt_t
-RegionView::region_relative_distance (timecnt_t const & duration, Temporal::TimeDomain domain)
-{
-	return Temporal::TempoMap::use()->convert_duration (duration, _region->position(), domain);
 }
 
 void

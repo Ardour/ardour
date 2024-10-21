@@ -128,8 +128,6 @@ namespace Gtk
  * see RecentChooser::add_filter(), but it is also possible to
  * manually use a filter on a file with filter().
  *
- * @newin{2,10}
- *
  * @ingroup RecentFiles
  */
 
@@ -195,16 +193,12 @@ public:
    * that will be displayed in the recently used resources selector
    * user interface if there is a selectable list of filters.
    * 
-   * @newin{2,10}
-   * 
    * @param name Then human readable name of @a filter.
    */
   void set_name(const Glib::ustring& name);
   
   /** Gets the human-readable name for the filter.
    * See set_name().
-   * 
-   * @newin{2,10}
    * 
    * @return The name of the filter, or <tt>0</tt>.  The returned string
    * is owned by the filter object and should not be freed.
@@ -214,8 +208,6 @@ public:
   
   /** Adds a rule that allows resources based on their registered MIME type.
    * 
-   * @newin{2,10}
-   * 
    * @param mime_type A MIME type.
    */
   void add_mime_type(const Glib::ustring& mime_type);
@@ -223,23 +215,17 @@ public:
   /** Adds a rule that allows resources based on a pattern matching their
    * display name.
    * 
-   * @newin{2,10}
-   * 
    * @param pattern A file pattern.
    */
   void add_pattern(const Glib::ustring& pattern);
   
   /** Adds a rule allowing image files in the formats supported
    * by GdkPixbuf.
-   * 
-   * @newin{2,10}
    */
   void add_pixbuf_formats();
   
   /** Adds a rule that allows resources based on the name of the application
    * that has registered them.
-   * 
-   * @newin{2,10}
    * 
    * @param application An application name.
    */
@@ -248,16 +234,12 @@ public:
   /** Adds a rule that allows resources based on the name of the group
    * to which they belong
    * 
-   * @newin{2,10}
-   * 
    * @param group A group name.
    */
   void add_group(const Glib::ustring& group);
   
   /** Adds a rule that allows resources based on their age - that is, the number
    * of days elapsed since they were last modified.
-   * 
-   * @newin{2,10}
    * 
    * @param days Number of days.
    */
@@ -302,8 +284,6 @@ public:
    * This function will not typically be used by applications; it
    * is intended principally for use in the implementation of
    * Gtk::RecentChooser.
-   * 
-   * @newin{2,10}
    * 
    * @return Bitfield of flags indicating needed fields when
    * calling filter().

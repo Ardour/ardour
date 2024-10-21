@@ -142,15 +142,11 @@ public:
   /** Sets the Gtk::Menu that is popped up when the user clicks on the arrow.
    * If @a menu is <tt>0</tt>, the arrow button becomes insensitive.
    * 
-   * @newin{2,6}
-   * 
    * @param menu The Gtk::Menu associated with Gtk::MenuToolButton.
    */
   void set_menu(Menu& menu);
   
   /** Gets the Gtk::Menu associated with Gtk::MenuToolButton.
-   * 
-   * @newin{2,6}
    * 
    * @return The Gtk::Menu associated
    * with Gtk::MenuToolButton.
@@ -158,8 +154,6 @@ public:
   Menu* get_menu();
   
   /** Gets the Gtk::Menu associated with Gtk::MenuToolButton.
-   * 
-   * @newin{2,6}
    * 
    * @return The Gtk::Menu associated
    * with Gtk::MenuToolButton.
@@ -172,8 +166,6 @@ public:
   /** Sets the Gtk::Tooltips object to be used for arrow button which
    * pops up the menu. See Gtk::ToolItem::set_tooltip() for setting
    * a tooltip on the whole Gtk::MenuToolButton.
-   * 
-   * @newin{2,6}
    * 
    * Deprecated: 2.12: Use set_arrow_tooltip_text()
    * instead.
@@ -192,8 +184,6 @@ public:
    * pops up the menu.  See Gtk::ToolItem::set_tooltip() for setting a tooltip
    * on the whole Gtk::MenuToolButton.
    * 
-   * @newin{2,12}
-   * 
    * @param text Text to be used as tooltip text for button's arrow button.
    */
   void set_arrow_tooltip_text(const Glib::ustring& text);
@@ -201,8 +191,6 @@ public:
   /** Sets the tooltip markup text to be used as tooltip for the arrow button
    * which pops up the menu.  See Gtk::ToolItem::set_tooltip() for setting a
    * tooltip on the whole Gtk::MenuToolButton.
-   * 
-   * @newin{2,12}
    * 
    * @param markup Markup text to be used as tooltip text for button's arrow button.
    */

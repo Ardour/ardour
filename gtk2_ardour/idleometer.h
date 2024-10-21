@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_idle_o_meter_h__
-#define __ardour_idle_o_meter_h__
+#pragma once
 
 #include <gtkmm/label.h>
 #include "ardour_dialog.h"
@@ -55,5 +54,4 @@ private:
 	double _var_m, _var_s;
 	sigc::connection _idle_connection;
 };
-#endif
 

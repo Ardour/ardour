@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_session_metadata_h__
-#define __ardour_session_metadata_h__
+#pragma once
 
 #include <string>
 
@@ -162,4 +161,3 @@ class LIBARDOUR_API SessionMetadata : public PBD::StatefulDestructible
 
 } // namespace ARDOUR
 
-#endif // __ardour_session_metadata_h__

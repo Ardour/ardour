@@ -4,7 +4,6 @@
 #include <string>
 
 #include <glib.h>
-#include <boost/format.hpp>
 
 #include "audiographer/flag_debuggable.h"
 #include "audiographer/sink.h"
@@ -43,7 +42,7 @@ public:
 		} else if (proc->start (ARDOUR::SystemExec::ShareWithParent)) {
 			throw ARDOUR::ExportFailed ("External encoder (ffmpeg) cannot be started.");
 		}
-		proc->Terminated.connect_same_thread (exec_connections, boost::bind (&CmdPipeWriter::encode_complete, this));
+		proc->Terminated.connect_same_thread (exec_connections, std::bind (&CmdPipeWriter::encode_complete, this));
 	}
 
 	virtual ~CmdPipeWriter () {
@@ -70,8 +69,7 @@ public:
 		check_flags (*this, c);
 
 		if (_tmp_fd < 0 && (!_proc || !_proc->is_running())) {
-			throw Exception (*this, boost::str (boost::format
-						("Target encoder process is not running")));
+			throw Exception (*this, "Target encoder process is not running");
 		}
 
 		const size_t bytes_per_sample = sizeof (T);
@@ -85,8 +83,7 @@ public:
 		samples_written += written;
 
 		if (throw_level (ThrowProcess) && written != c.samples()) {
-			throw Exception (*this, boost::str (boost::format
-						("Could not write data to output file")));
+			throw Exception (*this, "Could not write data to output file");
 		}
 
 		if (c.has_flag(ProcessContext<T>::EndOfInput)) {
@@ -105,7 +102,7 @@ public:
 
 	using Sink<T>::process;
 
-	PBD::Signal1<void, std::string> FileWritten;
+	PBD::Signal<void(std::string)> FileWritten;
 
 private:
 	CmdPipeWriter (CmdPipeWriter const & other) {}
@@ -113,7 +110,6 @@ private:
 	samplecnt_t samples_written;
 	ARDOUR::SystemExec* _proc;
 	std::string _path;
-	std::vector<char> _tmpfile_path_buf;
 	int _tmp_fd;
 	gchar* _tmp_file;
 

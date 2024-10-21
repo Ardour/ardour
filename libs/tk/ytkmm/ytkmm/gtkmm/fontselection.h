@@ -127,16 +127,12 @@ public:
   /** This returns the Gtk::TreeView that lists font families, for
    * example, 'Sans', 'Serif', etc.
    * 
-   * @newin{2,14}
-   * 
    * @return A Gtk::Widget that is part of @a fontsel.
    */
   TreeView* get_family_list();
   
   /** This returns the Gtk::TreeView that lists font families, for
    * example, 'Sans', 'Serif', etc.
-   * 
-   * @newin{2,14}
    * 
    * @return A Gtk::Widget that is part of @a fontsel.
    */
@@ -146,16 +142,12 @@ public:
   /** This returns the Gtk::TreeView which lists all styles available for
    * the selected font. For example, 'Regular', 'Bold', etc.
    * 
-   * @newin{2,14}
-   * 
    * @return A Gtk::Widget that is part of @a fontsel.
    */
   TreeView* get_face_list();
   
   /** This returns the Gtk::TreeView which lists all styles available for
    * the selected font. For example, 'Regular', 'Bold', etc.
-   * 
-   * @newin{2,14}
    * 
    * @return A Gtk::Widget that is part of @a fontsel.
    */
@@ -165,16 +157,12 @@ public:
   /** This returns the Gtk::Entry used to allow the user to edit the font
    * number manually instead of selecting it from the list of font sizes.
    * 
-   * @newin{2,14}
-   * 
    * @return A Gtk::Widget that is part of @a fontsel.
    */
   Entry* get_size_entry();
   
   /** This returns the Gtk::Entry used to allow the user to edit the font
    * number manually instead of selecting it from the list of font sizes.
-   * 
-   * @newin{2,14}
    * 
    * @return A Gtk::Widget that is part of @a fontsel.
    */
@@ -183,15 +171,11 @@ public:
   
   /** This returns the Gtk::TreeeView used to list font sizes.
    * 
-   * @newin{2,14}
-   * 
    * @return A Gtk::Widget that is part of @a fontsel.
    */
   TreeView* get_size_list();
   
   /** This returns the Gtk::TreeeView used to list font sizes.
-   * 
-   * @newin{2,14}
    * 
    * @return A Gtk::Widget that is part of @a fontsel.
    */
@@ -200,15 +184,11 @@ public:
   
   /** This returns the Gtk::Entry used to display the font as a preview.
    * 
-   * @newin{2,14}
-   * 
    * @return A Gtk::Widget that is part of @a fontsel.
    */
   Entry* get_preview_entry();
   
   /** This returns the Gtk::Entry used to display the font as a preview.
-   * 
-   * @newin{2,14}
    * 
    * @return A Gtk::Widget that is part of @a fontsel.
    */
@@ -216,8 +196,6 @@ public:
 
   
   /** Gets the Pango::FontFamily representing the selected font family.
-   * 
-   * @newin{2,14}
    * 
    * @return A Pango::FontFamily representing the
    * selected font family. Font families are a collection of font
@@ -227,8 +205,6 @@ public:
   Glib::RefPtr<Pango::FontFamily> get_family();
   
   /** Gets the Pango::FontFamily representing the selected font family.
-   * 
-   * @newin{2,14}
    * 
    * @return A Pango::FontFamily representing the
    * selected font family. Font families are a collection of font
@@ -241,8 +217,6 @@ public:
   /** Gets the Pango::FontFace representing the selected font group
    * details (i.e.\ family, slant, weight, width, etc).
    * 
-   * @newin{2,14}
-   * 
    * @return A Pango::FontFace representing the
    * selected font group details. The returned object is owned by
    *  @a fontsel and must not be modified or freed.
@@ -252,8 +226,6 @@ public:
   /** Gets the Pango::FontFace representing the selected font group
    * details (i.e.\ family, slant, weight, width, etc).
    * 
-   * @newin{2,14}
-   * 
    * @return A Pango::FontFace representing the
    * selected font group details. The returned object is owned by
    *  @a fontsel and must not be modified or freed.
@@ -262,8 +234,6 @@ public:
 
   
   /** The selected font size.
-   * 
-   * @newin{2,14}
    * 
    * @return A n integer representing the selected font size,
    * or -1 if no font size is selected.
@@ -311,7 +281,7 @@ public:
    * 
    * @param text The text to display in the preview area.
    */
-  void set_preview_text(const Glib::ustring& fontname);
+  void set_preview_text(const Glib::ustring& text);
 
   //TODO: Remove these accessors when we can break ABI.
   //They probably all return null now anyway.
@@ -381,9 +351,6 @@ public:
 /** A dialog box for selecting fonts.
  *
  * The Gtk::FontSelectionDialog widget is a dialog box for selecting a font.
- *
- * A FontSelectionDialog looks like this:
- * @image html fontselectiondialog1.png
  *
  * @ingroup Dialogs
  */
@@ -483,12 +450,10 @@ public:
    * 
    * @param text The text to display in the preview area.
    */
-  void set_preview_text(const Glib::ustring& fontname);
+  void set_preview_text(const Glib::ustring& text);
 
   
   /** Gets the 'OK' button.
-   * 
-   * @newin{2,14}
    * 
    * @return The Gtk::Widget used in the dialog
    * for the 'OK' button.
@@ -496,8 +461,6 @@ public:
   Button* get_ok_button();
   
   /** Gets the 'OK' button.
-   * 
-   * @newin{2,14}
    * 
    * @return The Gtk::Widget used in the dialog
    * for the 'OK' button.
@@ -507,16 +470,12 @@ public:
   
   /** Gets the 'Cancel' button.
    * 
-   * @newin{2,14}
-   * 
    * @return The Gtk::Widget used in the dialog
    * for the 'Cancel' button.
    */
   Button* get_cancel_button();
   
   /** Gets the 'Cancel' button.
-   * 
-   * @newin{2,14}
    * 
    * @return The Gtk::Widget used in the dialog
    * for the 'Cancel' button.
@@ -526,8 +485,6 @@ public:
   
   /** Obtains a button. The button doesn't have any function.
    * 
-   * @newin{2,14}
-   * 
    * Deprecated: 2.16: Don't use this function.
    * 
    * @return A Gtk::Widget.
@@ -535,8 +492,6 @@ public:
   Button* get_apply_button();
   
   /** Obtains a button. The button doesn't have any function.
-   * 
-   * @newin{2,14}
    * 
    * Deprecated: 2.16: Don't use this function.
    * 

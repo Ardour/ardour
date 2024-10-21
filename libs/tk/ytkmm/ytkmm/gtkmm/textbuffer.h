@@ -428,8 +428,6 @@ public:
    * @param interactive Whether the deletion is caused by user interaction.
    * @param default_editable Whether the buffer is editable by default.
    * @result An iterator to the location where text was deleted, if the buffer was modified.
-   *
-   * @newin{2,6}
    */
   iterator backspace(const iterator& iter, bool interactive = true, bool default_editable = true);
   
@@ -533,8 +531,6 @@ public:
    * 
    * Emits the "mark-set" signal as notification of the mark's initial
    * placement.
-   * 
-   * @newin{2,12}
    * 
    * @param mark The mark to add.
    * @param where Location to place mark.
@@ -784,8 +780,6 @@ public:
   
   /** Indicates whether the buffer has some text currently selected.
    * 
-   * @newin{2,10}
-   * 
    * @return <tt>true</tt> if the there is text selected.
    */
   bool get_has_selection() const;
@@ -857,8 +851,6 @@ public:
    * to be recalculated. This function moves them as a unit, which can
    * be optimized.
    * 
-   * @newin{2,4}
-   * 
    * @param ins Where to put the "insert" mark.
    * @param bound Where to put the "selection_bound" mark.
    */
@@ -898,8 +890,6 @@ public:
    * using Gtk::TargetList::add_rich_text_targets() and
    * Gtk::TargetList::add_text_targets().
    * 
-   * @newin{2,10}
-   * 
    * @return The Gtk::TargetList.
    */
   Glib::RefPtr<TargetList> get_copy_target_list() const;
@@ -909,8 +899,6 @@ public:
    * added with %info values from the Gtk::TextBufferTargetInfo enum,
    * using Gtk::TargetList::add_rich_text_targets() and
    * Gtk::TargetList::add_text_targets().
-   * 
-   * @newin{2,10}
    * 
    * @return The Gtk::TargetList.
    */
@@ -948,8 +936,6 @@ public:
    * identifier != <tt>0</tt> here, since the <tt>0</tt> tagset requires the
    * receiving buffer to deal with with pasting of arbitrary tags.
    * 
-   * @newin{2,10}
-   * 
    * @param tagset_name An optional tagset name, on <tt>0</tt>.
    * @return The Gdk::Atom that corresponds to the
    * newly registered format's mime-type.
@@ -965,8 +951,6 @@ public:
    * format with the passed @a buffer. See
    * register_serialize_tagset() for details.
    * 
-   * @newin{2,10}
-   * 
    * @param tagset_name An optional tagset name, on <tt>0</tt>.
    * @return The Gdk::Atom that corresponds to the
    * newly registered format's mime-type.
@@ -978,8 +962,6 @@ public:
    * registered using register_serialize_format() or
    * register_serialize_tagset()
    * 
-   * @newin{2,10}
-   * 
    * @param format A Gdk::Atom representing a registered rich text format.
    */
   void unregister_serialize_format(const Glib::ustring& format);
@@ -987,8 +969,6 @@ public:
   /** This function unregisters a rich text format that was previously
    * registered using register_deserialize_format() or
    * register_deserialize_tagset().
-   * 
-   * @newin{2,10}
    * 
    * @param format A Gdk::Atom representing a registered rich text format.
    */
@@ -1013,8 +993,6 @@ public:
    * tags from these buffers, because you know that your application can
    * handle the newly created tags.
    * 
-   * @newin{2,10}
-   * 
    * @param format A Gdk::Atom representing a registered rich text format.
    * @param can_create_tags Whether deserializing this format may create tags.
    */
@@ -1022,8 +1000,6 @@ public:
   
   /** This functions returns the value set with
    * deserialize_set_can_create_tags()
-   * 
-   * @newin{2,10}
    * 
    * @param format A Gdk::Atom representing a registered rich text format.
    * @return Whether deserializing this format may create tags.

@@ -157,8 +157,6 @@ public:
    * this can be used to indent the child widget towards the right by adding
    * padding on the left.
    * 
-   * @newin{2,4}
-   * 
    * @param padding_top The padding at the top of the widget.
    * @param padding_bottom The padding at the bottom of the widget.
    * @param padding_left The padding at the left of the widget.
@@ -168,8 +166,6 @@ public:
   
   /** Gets the padding on the different sides of the widget.
    * See set_padding().
-   * 
-   * @newin{2,4}
    * 
    * @param padding_top Location to store the padding for the top of the widget, or <tt>0</tt>.
    * @param padding_bottom Location to store the padding for the bottom of the widget, or <tt>0</tt>.

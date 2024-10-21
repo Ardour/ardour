@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libmidi_libmidi_visibility_h__
-#define __libmidi_libmidi_visibility_h__
+#pragma once
 
 #if defined(COMPILER_MSVC)
   #define LIBMIDIPP_DLL_IMPORT __declspec(dllimport)
@@ -41,4 +40,3 @@
   #define    LIBMIDIPP_LOCAL LIBMIDIPP_DLL_LOCAL
 #endif
 
-#endif /* __libmidi_libmidi_visibility_h__ */

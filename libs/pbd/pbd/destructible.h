@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_destructible_h__
-#define __pbd_destructible_h__
+#pragma once
 
 #include "pbd/signals.h"
 #include "pbd/libpbd_visibility.h"
@@ -28,12 +27,11 @@ class LIBPBD_API Destructible {
 public:
 	virtual ~Destructible () { Destroyed(); }
 
-	PBD::Signal0<void> Destroyed;
-	PBD::Signal0<void> DropReferences;
+	PBD::Signal<void()> Destroyed;
+	PBD::Signal<void()> DropReferences;
 
 	virtual void drop_references () { DropReferences();  }
 };
 
 }
 
-#endif /* __pbd_destructible_h__ */

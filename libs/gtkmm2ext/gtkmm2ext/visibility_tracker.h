@@ -23,7 +23,7 @@
 
 #include "gtkmm2ext/visibility.h"
 
-namespace GTK {
+namespace Gtk {
 	class Window;
 }
 

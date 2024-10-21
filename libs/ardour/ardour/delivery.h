@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_delivery_h__
-#define __ardour_delivery_h__
+#pragma once
 
 #include <string>
 
@@ -56,10 +55,14 @@ public:
 		/* aux - internal send used to deliver to any bus, by user request */
 		Aux    = 0x10,
 		/* foldback - internal send used only to deliver to a personal monitor bus */
-		Foldback = 0x20
+		Foldback = 0x20,
+		/* direct outs - used only with LiveTrax, delivers to master bus */
+		DirectOuts = 0x40
 	};
 
-	static bool role_requires_output_ports (Role r) { return r == Main || r == Send || r == Insert; }
+	static bool role_from_xml (const XMLNode&, Role&);
+
+	static bool role_requires_output_ports (Role r) { return r == Main || r == Send || r == Insert || r == DirectOuts; }
 
 	bool does_routing() const { return true; }
 
@@ -93,7 +96,7 @@ public:
 
 	BufferSet& output_buffers() { return *_output_buffers; }
 
-	PBD::Signal0<void> MuteChange;
+	PBD::Signal<void()> MuteChange;
 
 	int set_state (const XMLNode&, int version);
 
@@ -150,7 +153,7 @@ private:
 	std::shared_ptr<AutomationControl> _polarity_control;
 
 	static bool panners_legal;
-	static PBD::Signal0<void> PannersLegal;
+	static PBD::Signal<void()> PannersLegal;
 
 	void panners_became_legal ();
 	PBD::ScopedConnection panner_legal_c;
@@ -162,5 +165,4 @@ private:
 
 } // namespace ARDOUR
 
-#endif // __ardour__h__
 

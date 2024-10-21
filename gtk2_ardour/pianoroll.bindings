@@ -1,0 +1,8 @@
+<Bindings name="Pianoroll">
+  <Press>
+    <Binding key="d" action="MIDICueEditor/set-mouse-mode-draw" group="pianoroll"/>
+    <Binding key="e" action="MIDICueEditor/set-mouse-mode-content" group="pianoroll"/>
+    <Binding key="equal" action="MIDICueEditor/zoom-in" group="pianoroll"/>
+    <Binding key="minus" action="MIDICueEditor/zoom-in" group="pianoroll"/>
+  </Press>
+</Bindings>

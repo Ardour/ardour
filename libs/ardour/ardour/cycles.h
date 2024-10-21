@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_cycles_h__
-#define __ardour_cycles_h__
+#pragma once
 
 #include <stdint.h>
 
@@ -252,4 +251,3 @@ static inline cycles_t get_cycles(void)
 
 #endif
 
-#endif /* __ardour_cycles_h__ */

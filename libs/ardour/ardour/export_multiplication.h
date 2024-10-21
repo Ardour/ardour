@@ -54,7 +54,7 @@
 		bool selected () const { return _selected; }
 		void select (bool value);
 
-		PBD::Signal1<void,bool> SelectChanged;
+		PBD::Signal<void(bool)> SelectChanged;
 
 	  protected:
 
@@ -169,7 +169,7 @@
 	void split_node (GraphNode * node, float position);
 	void remove_node (GraphNode * node);
 
-	PBD::Signal0<void> GraphChanged;
+	PBD::Signal<void()> GraphChanged;
 
   private:
 

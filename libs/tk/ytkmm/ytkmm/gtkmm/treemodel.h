@@ -390,8 +390,6 @@ public:
  /** Emits the "rows_reordered" signal on the tree model.  This should be called by
   * custom models when their rows have been reordered. This method overload is for nodes whose
   * path has a depth of 0.
-  * @newin{2,10}
-  *
   * @param path A tree path pointing to the tree node whose children have been reordered.
   * @param new_order An array of integers mapping the current position of each child
   * to its old position before the re-ordering, i.e. @a new_order<literal>[newpos] = oldpos.
@@ -416,8 +414,6 @@ public:
   /** Generates a string representation of the iter. This string is a ':'
    * separated list of numbers. For example, "4:10:0:3" would be an
    * acceptable return value for this string.
-   * 
-   * @newin{2,2}
    * 
    * @param iter An Gtk::TreeIter.
    * @return The string.

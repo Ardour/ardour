@@ -77,6 +77,8 @@
 #include "ardour/types.h"
 #include "ardour/value_as_string.h"
 
+#include "control_protocol/control_protocol.h"
+
 #include "LuaBridge/LuaBridge.h"
 
 #include "actions.h"
@@ -236,9 +238,9 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, std::shared_ptr<Processor>
 		routing_icon.hide();
 		output_routing_icon.hide();
 
-		_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
-		_processor->PropertyChanged.connect (name_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
-		_processor->ConfigurationChanged.connect (config_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_configuration_changed, this, _1, _2), gui_context());
+		_processor->ActiveChanged.connect (active_connection, invalidator (*this), std::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
+		_processor->PropertyChanged.connect (name_connection, invalidator (*this), std::bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
+		_processor->ConfigurationChanged.connect (config_connection, invalidator (*this), std::bind (&ProcessorEntry::processor_configuration_changed, this, _1, _2), gui_context());
 
 		const uint32_t limit_inline_controls = UIConfiguration::instance().get_max_inline_controls ();
 
@@ -636,8 +638,8 @@ ProcessorEntry::name (Width w) const
 
 		if (send->remove_on_disconnect ()) {
 			// assume it's a sidechain, find pretty name of connected port(s)
-			PortSet& ps (send->output ()->ports ());
-			for (PortSet::iterator i = ps.begin (); i != ps.end () && pretty_ok; ++i) {
+			shared_ptr<PortSet const> ps (send->output ()->ports ());
+			for (auto i = ps->begin (); i != ps->end () && pretty_ok; ++i) {
 				vector<string> connections;
 				if (i->get_connections (connections)) {
 					vector<string>::const_iterator ci;
@@ -1017,9 +1019,9 @@ ProcessorEntry::Control::Control (ProcessorEntry& e,std::shared_ptr<AutomationCo
 
 		_button.signal_clicked.connect (sigc::mem_fun (*this, &Control::button_clicked));
 		_button.signal_led_clicked.connect (sigc::mem_fun (*this, &Control::button_clicked_event));
-		c->Changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_changed, this), gui_context ());
+		c->Changed.connect (_connections, invalidator (*this), std::bind (&Control::control_changed, this), gui_context ());
 		if (c->alist ()) {
-			c->alist()->automation_state_changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_automation_state_changed, this), gui_context());
+			c->alist()->automation_state_changed.connect (_connections, invalidator (*this), std::bind (&Control::control_automation_state_changed, this), gui_context());
 			control_automation_state_changed ();
 		}
 
@@ -1054,9 +1056,9 @@ ProcessorEntry::Control::Control (ProcessorEntry& e,std::shared_ptr<AutomationCo
 		_slider.signal_button_release_event().connect (sigc::mem_fun(*this, &Control::button_released));
 
 		_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Control::slider_adjusted));
-		c->Changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_changed, this), gui_context ());
+		c->Changed.connect (_connections, invalidator (*this), std::bind (&Control::control_changed, this), gui_context ());
 		if (c->alist ()) {
-			c->alist()->automation_state_changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_automation_state_changed, this), gui_context());
+			c->alist()->automation_state_changed.connect (_connections, invalidator (*this), std::bind (&Control::control_automation_state_changed, this), gui_context());
 			control_automation_state_changed ();
 		}
 	}
@@ -1257,13 +1259,13 @@ PluginInsertProcessorEntry::PluginInsertProcessorEntry (ProcessorBox* b, std::sh
 	, _plugin_insert (p)
 {
 	p->PluginIoReConfigure.connect (
-		_iomap_connection, invalidator (*this), boost::bind (&PluginInsertProcessorEntry::iomap_changed, this), gui_context()
+		_iomap_connection, invalidator (*this), std::bind (&PluginInsertProcessorEntry::iomap_changed, this), gui_context()
 		);
 	p->PluginMapChanged.connect (
-		_iomap_connection, invalidator (*this), boost::bind (&PluginInsertProcessorEntry::iomap_changed, this), gui_context()
+		_iomap_connection, invalidator (*this), std::bind (&PluginInsertProcessorEntry::iomap_changed, this), gui_context()
 		);
 	p->PluginConfigChanged.connect (
-		_iomap_connection, invalidator (*this), boost::bind (&PluginInsertProcessorEntry::iomap_changed, this), gui_context()
+		_iomap_connection, invalidator (*this), std::bind (&PluginInsertProcessorEntry::iomap_changed, this), gui_context()
 		);
 }
 
@@ -1933,7 +1935,7 @@ static std::list<Gtk::TargetEntry> drag_targets_noplugin()
 	return tmp;
 }
 
-ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelector*()> get_plugin_selector,
+ProcessorBox::ProcessorBox (ARDOUR::Session* sess, std::function<PluginSelector*()> get_plugin_selector,
 			    ProcessorSelection& psel, MixerStrip* parent, bool owner_is_mixer)
 	: _parent_strip (parent)
 	, _owner_is_mixer (owner_is_mixer)
@@ -1956,6 +1958,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	 */
 
 	processor_display.set_data ("ardour-bindings", bindings);
+	processor_display.SelectionAdded.connect (sigc::mem_fun (*this, &ProcessorBox::selection_added));
 
 	_width = Wide;
 	processor_menu = 0;
@@ -1987,7 +1990,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 
 	if (parent) {
 		parent->DeliveryChanged.connect (
-			_mixer_strip_connections, invalidator (*this), boost::bind (&ProcessorBox::mixer_strip_delivery_changed, this, _1), gui_context ()
+			_mixer_strip_connections, invalidator (*this), std::bind (&ProcessorBox::mixer_strip_delivery_changed, this, _1), gui_context ()
 			);
 	}
 
@@ -2021,15 +2024,15 @@ ProcessorBox::set_route (std::shared_ptr<Route> r)
 	_route = r;
 
 	_route->processors_changed.connect (
-		_route_connections, invalidator (*this), boost::bind (&ProcessorBox::route_processors_changed, this, _1), gui_context()
+		_route_connections, invalidator (*this), std::bind (&ProcessorBox::route_processors_changed, this, _1), gui_context()
 		);
 
 	_route->DropReferences.connect (
-		_route_connections, invalidator (*this), boost::bind (&ProcessorBox::route_going_away, this), gui_context()
+		_route_connections, invalidator (*this), std::bind (&ProcessorBox::route_going_away, this), gui_context()
 		);
 
 	_route->PropertyChanged.connect (
-		_route_connections, invalidator (*this), boost::bind (&ProcessorBox::route_property_changed, this, _1), gui_context()
+		_route_connections, invalidator (*this), std::bind (&ProcessorBox::route_property_changed, this, _1), gui_context()
 		);
 
 	redisplay_processors ();
@@ -2714,7 +2717,6 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 		ret = true;
 
 	} else if (processor && ev->button == 1 && selected) {
-
 		// this is purely informational but necessary for route params UI
 		ProcessorSelected (processor); // emit
 
@@ -4725,11 +4727,11 @@ ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* b
 	if (!p) {
 		return;
 	}
-	p->DropReferences.connect (going_away_connection, MISSING_INVALIDATOR, boost::bind (&ProcessorWindowProxy::processor_going_away, this), gui_context());
+	p->DropReferences.connect (going_away_connection, MISSING_INVALIDATOR, std::bind (&ProcessorWindowProxy::processor_going_away, this), gui_context());
 
-	p->ToggleUI.connect (gui_connections, invalidator (*this), boost::bind (&ProcessorWindowProxy::show_the_right_window, this, false), gui_context());
-	p->ShowUI.connect (gui_connections, invalidator (*this), boost::bind (&ProcessorWindowProxy::show_the_right_window, this, true), gui_context());
-	p->HideUI.connect (gui_connections, invalidator (*this), boost::bind (&ProcessorWindowProxy::hide, this), gui_context());
+	p->ToggleUI.connect (gui_connections, invalidator (*this), std::bind (&ProcessorWindowProxy::show_the_right_window, this, false), gui_context());
+	p->ShowUI.connect (gui_connections, invalidator (*this), std::bind (&ProcessorWindowProxy::show_the_right_window, this, true), gui_context());
+	p->HideUI.connect (gui_connections, invalidator (*this), std::bind (&ProcessorWindowProxy::hide, this), gui_context());
 
 	std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (p);
 	if (pi) {
@@ -4903,7 +4905,7 @@ PluginPinWindowProxy::PluginPinWindowProxy(std::string const &name, std::weak_pt
 	if (!p) {
 		return;
 	}
-	p->DropReferences.connect (going_away_connection, MISSING_INVALIDATOR, boost::bind (&PluginPinWindowProxy::processor_going_away, this), gui_context());
+	p->DropReferences.connect (going_away_connection, MISSING_INVALIDATOR, std::bind (&PluginPinWindowProxy::processor_going_away, this), gui_context());
 }
 
 PluginPinWindowProxy::~PluginPinWindowProxy()
@@ -4956,4 +4958,18 @@ void
 ProcessorBox::load_bindings ()
 {
 	bindings = Bindings::get_bindings (X_("Processor Box"));
+}
+
+void
+ProcessorBox::selection_added (ProcessorEntry& pe)
+{
+	std::shared_ptr<Processor> proc = pe.processor ();
+	std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (proc);
+	if (pi) {
+		/* be explicit here about the fact that we're using a weak
+		   pointer, even though we probably don't need to be.
+		*/
+		std::weak_ptr<PluginInsert> wpi = pi;
+		ControlProtocol::PluginSelected (wpi);
+	}
 }

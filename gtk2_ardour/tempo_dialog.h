@@ -22,8 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_tempo_dialog_h__
-#define __ardour_gtk_tempo_dialog_h__
+#pragma once
 
 #include <gtkmm/entry.h>
 #include <gtkmm/frame.h>
@@ -136,7 +135,7 @@ private:
 	MidiPortCols                 _midi_port_cols;
 	Glib::RefPtr<Gtk::ListStore> _midi_port_list;
 
-	PBD::Signal1<void, int64_t>         _midi_tap_signal;
+	PBD::Signal<void(int64_t)>         _midi_tap_signal;
 	std::shared_ptr<MIDI::Parser>       _midi_tap_parser;
 	std::shared_ptr<ARDOUR::MidiPort>   _midi_tap_port;
 	PBD::ScopedConnection               _parser_connection;
@@ -179,4 +178,3 @@ private:
 	Gtk::Entry   when_bar_entry;
 };
 
-#endif /* __ardour_gtk_tempo_dialog_h__ */

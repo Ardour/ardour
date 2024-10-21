@@ -214,6 +214,12 @@ aafi_release (AAF_Iface** aafi)
 		aafi_freeAudioTracks (&(*aafi)->Audio->Tracks);
 		aafi_freeAudioEssences (&(*aafi)->Audio->essenceFiles);
 
+		aafiAudioEssencePointer* essencePointer = (*aafi)->Audio->essencePointerList;
+
+		while (essencePointer) {
+			essencePointer = aafi_freeAudioEssencePointer (essencePointer);
+		}
+
 		free ((*aafi)->Audio);
 	}
 
@@ -358,7 +364,7 @@ aafi_convertUnit (aafPosition_t value, aafRational_t* valueEditRate, aafRational
 		return 0;
 	}
 
-	return (aafPosition_t) ((double)value * (destEditRateFloat / valueEditRateFloat));
+	return (aafPosition_t)((double)value * (destEditRateFloat / valueEditRateFloat));
 }
 
 uint64_t
@@ -391,7 +397,7 @@ aafi_convertUnitUint64 (aafPosition_t value, aafRational_t* valueEditRate, aafRa
 		return 0;
 	}
 
-	return (uint64_t) ((double)value * (destEditRateFloat / valueEditRateFloat));
+	return (uint64_t)((double)value * (destEditRateFloat / valueEditRateFloat));
 }
 
 int
@@ -506,8 +512,8 @@ aafi_applyGainOffset (AAF_Iface* aafi, aafiAudioGain** gain, aafiAudioGain* offs
 			 * is the same accross all gains in file. Thus, we devide both gain numbers
 			 * by offset denominator, so we fit inside uint32_t.
 			 */
-			(*gain)->value[i].numerator   = (int32_t) (((int64_t) (*gain)->value[i].numerator * (int64_t)offset->value[0].numerator) / (int64_t)offset->value[0].denominator);
-			(*gain)->value[i].denominator = (int32_t) (((int64_t) (*gain)->value[i].denominator * (int64_t)offset->value[0].denominator) / (int64_t)offset->value[0].denominator);
+			(*gain)->value[i].numerator   = (int32_t)(((int64_t)(*gain)->value[i].numerator * (int64_t)offset->value[0].numerator) / (int64_t)offset->value[0].denominator);
+			(*gain)->value[i].denominator = (int32_t)(((int64_t)(*gain)->value[i].denominator * (int64_t)offset->value[0].denominator) / (int64_t)offset->value[0].denominator);
 			// debug( "Setting (*gain)->value[%i] = %i/%i * %i/%i",
 			// 	i,
 			// 	(*gain)->value[i].numerator,
@@ -798,10 +804,10 @@ aafi_newAudioEssencePointer (AAF_Iface* aafi, aafiAudioEssencePointer** list, aa
 		last->next = essencePointer;
 	} else {
 		*list = essencePointer;
-
-		essencePointer->aafiNext        = aafi->Audio->essencePointerList;
-		aafi->Audio->essencePointerList = essencePointer;
 	}
+
+	essencePointer->aafiNext        = aafi->Audio->essencePointerList;
+	aafi->Audio->essencePointerList = essencePointer;
 
 	return *list;
 }
@@ -985,8 +991,6 @@ aafi_freeAudioClip (aafiAudioClip* audioClip)
 	aafi_freeAudioGain (audioClip->automation);
 	aafi_freeMetadata (&(audioClip->metadata));
 
-	aafi_freeAudioEssencePointer (audioClip->essencePointerList);
-
 	free (audioClip);
 }
 
@@ -1042,16 +1046,14 @@ aafi_freeMetadata (aafiMetaData** CommentList)
 	*CommentList = NULL;
 }
 
-void
+aafiAudioEssencePointer*
 aafi_freeAudioEssencePointer (aafiAudioEssencePointer* essencePointer)
 {
-	aafiAudioEssencePointer* next = NULL;
+	aafiAudioEssencePointer* next = essencePointer->aafiNext;
 
-	while (essencePointer) {
-		next = essencePointer->next;
-		free (essencePointer);
-		essencePointer = next;
-	}
+	free (essencePointer);
+
+	return next;
 }
 
 void

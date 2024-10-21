@@ -67,14 +67,14 @@ MiniTimeline::MiniTimeline ()
 
 	set_name ("minitimeline");
 
-	Location::cue_change.connect (marker_connection, invalidator (*this), boost::bind (&MiniTimeline::update_minitimeline, this), gui_context ());
-	Location::name_changed.connect (marker_connection, invalidator (*this), boost::bind (&MiniTimeline::update_minitimeline, this), gui_context ());
-	Location::end_changed.connect (marker_connection, invalidator (*this), boost::bind (&MiniTimeline::update_minitimeline, this), gui_context ());
-	Location::start_changed.connect (marker_connection, invalidator (*this), boost::bind (&MiniTimeline::update_minitimeline, this), gui_context ());
-	Location::changed.connect (marker_connection, invalidator (*this), boost::bind (&MiniTimeline::update_minitimeline, this), gui_context ());
-	Location::flags_changed.connect (marker_connection, invalidator (*this), boost::bind (&MiniTimeline::update_minitimeline, this), gui_context ());
+	Location::cue_change.connect (marker_connection, invalidator (*this), std::bind (&MiniTimeline::update_minitimeline, this), gui_context ());
+	Location::name_changed.connect (marker_connection, invalidator (*this), std::bind (&MiniTimeline::update_minitimeline, this), gui_context ());
+	Location::end_changed.connect (marker_connection, invalidator (*this), std::bind (&MiniTimeline::update_minitimeline, this), gui_context ());
+	Location::start_changed.connect (marker_connection, invalidator (*this), std::bind (&MiniTimeline::update_minitimeline, this), gui_context ());
+	Location::changed.connect (marker_connection, invalidator (*this), std::bind (&MiniTimeline::update_minitimeline, this), gui_context ());
+	Location::flags_changed.connect (marker_connection, invalidator (*this), std::bind (&MiniTimeline::update_minitimeline, this), gui_context ());
 
-	Temporal::TempoMap::MapChanged.connect (tempo_map_connection, invalidator (*this), boost::bind (&MiniTimeline::update_minitimeline, this), gui_context());
+	Temporal::TempoMap::MapChanged.connect (tempo_map_connection, invalidator (*this), std::bind (&MiniTimeline::update_minitimeline, this), gui_context());
 
 	ArdourWidgets::set_tooltip (*this,
 			string_compose (_("<b>Navigation Timeline</b>. Use left-click to locate to time position or marker; scroll-wheel to jump, hold %1 for fine grained and %2 + %3 for extra-fine grained control. Right-click to set display range. The display unit is defined by the primary clock."),
@@ -115,19 +115,19 @@ MiniTimeline::set_session (Session* s)
 
 	_session->config.ParameterChanged.connect (session_connection,
 			invalidator (*this),
-			boost::bind (&MiniTimeline::parameter_changed, this, _1), gui_context()
+			std::bind (&MiniTimeline::parameter_changed, this, _1), gui_context()
 			);
 	_session->locations()->added.connect (session_connection,
 			invalidator (*this),
-			boost::bind (&MiniTimeline::update_minitimeline, this), gui_context()
+			std::bind (&MiniTimeline::update_minitimeline, this), gui_context()
 			);
 	_session->locations()->removed.connect (session_connection,
 			invalidator (*this),
-			boost::bind (&MiniTimeline::update_minitimeline, this), gui_context()
+			std::bind (&MiniTimeline::update_minitimeline, this), gui_context()
 			);
 	_session->locations()->changed.connect (session_connection,
 			invalidator (*this),
-			boost::bind (&MiniTimeline::update_minitimeline, this), gui_context()
+			std::bind (&MiniTimeline::update_minitimeline, this), gui_context()
 			);
 
 	_jumplist.clear ();
@@ -609,7 +609,7 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			timepos_t rounded = timepos_t (tmap->quarters_at (tmap->round_to_bar (tmap->bbt_at (timepos_t(when)))));
 			when = tmap->sample_at(rounded);
 		}
-		
+
 		double xpos = width * .5 + (when - phead) * _px_per_sample;
 
 		// TODO round to nearest display TC in +/- 1px

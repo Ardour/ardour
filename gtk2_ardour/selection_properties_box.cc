@@ -29,7 +29,7 @@
 #include "ardour/session.h"
 
 #include "audio_clock.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "control_point.h"
 #include "editor.h"
 #include "region_view.h"
@@ -106,7 +106,7 @@ SelectionPropertiesBox::SelectionPropertiesBox ()
 	Editor::instance().get_selection().TriggersChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
 
 	/* maybe we care about mouse mode?? */
-	Editor::instance().MouseModeChanged.connect (editor_connections, invalidator(*this), boost::bind (&SelectionPropertiesBox::track_mouse_mode, this), gui_context());
+	Editor::instance().MouseModeChanged.connect (editor_connections, invalidator(*this), std::bind (&SelectionPropertiesBox::track_mouse_mode, this), gui_context());
 
 	selection_changed();
 }

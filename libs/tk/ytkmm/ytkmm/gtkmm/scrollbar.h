@@ -145,9 +145,6 @@ protected:
  * adjustment of the scrollbar. If not specified, one will be created for
  * you. See Gtk::Adjustment for details.
  *
- * A VScrollbar widget looks like this:
- * @image html vscrollbar1.png
- *
  * @ingroup Widgets
  */
 
@@ -220,9 +217,6 @@ public:
  * A Gtk::Adjustment may may be passed to the constructor  to handle the
  * adjustment of the scrollbar. If not specified, one will be created for
  * you. See Gtk::Adjustment for details.
- *
- * The HScrollbar widget looks like this:
- * @image html hscrollbar1.png
  *
  * @ingroup Widgets
  */

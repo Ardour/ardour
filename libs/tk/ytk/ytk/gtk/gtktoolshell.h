@@ -45,15 +45,15 @@ typedef struct _GtkToolShellIface      GtkToolShellIface;
 
 /**
  * GtkToolShellIface:
- * @get_icon_size:        mandatory implementation of gtk_tool_shell_get_icon_size().
- * @get_orientation:      mandatory implementation of gtk_tool_shell_get_orientation().
- * @get_style:            mandatory implementation of gtk_tool_shell_get_style().
- * @get_relief_style:     optional implementation of gtk_tool_shell_get_relief_style().
- * @rebuild_menu:         optional implementation of gtk_tool_shell_rebuild_menu().
- * @get_text_orientation: optional implementation of gtk_tool_shell_get_text_orientation().
- * @get_text_alignment:   optional implementation of gtk_tool_shell_get_text_alignment().
- * @get_ellipsize_mode:   optional implementation of gtk_tool_shell_get_ellipsize_mode().
- * @get_text_size_group:  optional implementation of gtk_tool_shell_get_text_size_group().
+ * @param get_icon_size:        mandatory implementation of gtk_tool_shell_get_icon_size().
+ * @param get_orientation:      mandatory implementation of gtk_tool_shell_get_orientation().
+ * @param get_style:            mandatory implementation of gtk_tool_shell_get_style().
+ * @param get_relief_style:     optional implementation of gtk_tool_shell_get_relief_style().
+ * @param rebuild_menu:         optional implementation of gtk_tool_shell_rebuild_menu().
+ * @param get_text_orientation: optional implementation of gtk_tool_shell_get_text_orientation().
+ * @param get_text_alignment:   optional implementation of gtk_tool_shell_get_text_alignment().
+ * @param get_ellipsize_mode:   optional implementation of gtk_tool_shell_get_ellipsize_mode().
+ * @param get_text_size_group:  optional implementation of gtk_tool_shell_get_text_size_group().
  *
  * Virtual function table for the #GtkToolShell interface.
  */

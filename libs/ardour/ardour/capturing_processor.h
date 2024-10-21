@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_capturing_processor_h__
-#define __ardour_capturing_processor_h__
+#pragma once
 
 #include "ardour/fixed_delay.h"
 #include "ardour/processor.h"
@@ -56,4 +55,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif // __ardour_capturing_processor_h__

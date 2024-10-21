@@ -18,8 +18,7 @@
  */
 
 
-#ifndef __ardour_session_utils_h__
-#define __ardour_session_utils_h__
+#pragma once
 
 #include <string>
 
@@ -33,4 +32,3 @@ namespace ARDOUR {
 
 };
 
-#endif

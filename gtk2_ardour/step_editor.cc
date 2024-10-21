@@ -48,7 +48,7 @@ StepEditor::StepEditor (PublicEditor& e, std::shared_ptr<MidiTrack> t, MidiTimeA
 	step_edit_region_view = 0;
 
 	_track->PlaylistChanged.connect (*this, invalidator (*this),
-	                                 boost::bind (&StepEditor::playlist_changed, this),
+	                                 std::bind (&StepEditor::playlist_changed, this),
 	                                 gui_context());
 	playlist_changed ();
 }
@@ -284,8 +284,8 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Tem
 	/* make sure its visible on the vertical axis */
 
 	if (pitch < msv->lowest_note() || pitch > msv->highest_note()) {
-		msv->update_note_range (pitch);
-		msv->set_note_range (MidiStreamView::ContentsRange);
+		msv->maybe_extend_note_range (pitch);
+		msv->set_note_visibility_range_style (MidiStreamView::ContentsRange);
 	}
 
 	/* make sure its visible on the horizontal axis */
@@ -433,7 +433,7 @@ StepEditor::playlist_changed ()
 {
 	step_edit_region_connection.disconnect ();
 	_track->playlist()->RegionRemoved.connect (step_edit_region_connection, invalidator (*this),
-	                                           boost::bind (&StepEditor::region_removed, this, _1),
+	                                           std::bind (&StepEditor::region_removed, this, _1),
 	                                           gui_context());
 }
 

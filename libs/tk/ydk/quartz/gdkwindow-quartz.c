@@ -23,6 +23,7 @@
 #include <Carbon/Carbon.h>
 
 #include "gdk.h"
+#include "gdkinternals.h"
 #include "gdkwindowimpl.h"
 #include "gdkprivate-quartz.h"
 #include "gdkscreen-quartz.h"
@@ -196,7 +197,10 @@ gdk_window_impl_quartz_finalize (GObject *object)
 {
   GdkWindowImplQuartz *impl = GDK_WINDOW_IMPL_QUARTZ (object);
 
-  check_grab_destroy (GDK_DRAWABLE_IMPL_QUARTZ (object)->wrapper);
+  GdkWindow *window = GDK_DRAWABLE_IMPL_QUARTZ (object)->wrapper;
+  GdkWindowObject *private = (GdkWindowObject*) window;
+
+  check_grab_destroy (window);
 
   if (impl->paint_clip_region)
     gdk_region_destroy (impl->paint_clip_region);
@@ -2365,6 +2369,10 @@ gdk_window_set_type_hint (GdkWindow        *window,
   [impl->toplevel setHasShadow: window_type_hint_to_shadow (hint)];
   [impl->toplevel setLevel: window_type_hint_to_level (hint)];
   [impl->toplevel setHidesOnDeactivate: window_type_hint_to_hides_on_deactivate (hint)];
+
+	bool allow_minimize_and_maximize = window_type_hint_to_level (hint) != NSFloatingWindowLevel;
+	[[impl->toplevel standardWindowButton:NSWindowMiniaturizeButton] setEnabled:allow_minimize_and_maximize];
+	[[impl->toplevel standardWindowButton:NSWindowZoomButton] setEnabled:allow_minimize_and_maximize];
 }
 
 GdkWindowTypeHint
@@ -2381,11 +2389,23 @@ void
 gdk_window_set_modal_hint (GdkWindow *window,
 			   gboolean   modal)
 {
+  GdkWindowObject *private;
+  gboolean is_mapped;
+  
   if (GDK_WINDOW_DESTROYED (window) ||
       !WINDOW_IS_TOPLEVEL (window))
     return;
 
-  /* FIXME: Implement */
+  private = (GdkWindowObject*) window;
+
+  if (_gdk_modal_notify &&  private->modal_hint != modal) {
+    gboolean is_mapped = GDK_WINDOW_IS_MAPPED (window);
+    if (is_mapped) {
+      _gdk_modal_notify (window, modal);
+    }
+  }
+
+  private->modal_hint = modal;
 }
 
 void

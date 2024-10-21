@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_microseconds_h__
-#define __libpbd_microseconds_h__
+#pragma once
 
 #include <inttypes.h>
 
@@ -31,4 +30,3 @@ namespace PBD {
 	void microsecond_timer_init ();
 }
 
-#endif /* __libpbd_microseconds_h__ */

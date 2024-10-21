@@ -197,7 +197,7 @@ LuaScriptManager::set_session (ARDOUR::Session *s)
 		return;
 	}
 
-	_session->LuaScriptsChanged.connect (_session_script_connection,  invalidator (*this), boost::bind (&LuaScriptManager::setup_session_scripts, this), gui_context());
+	_session->LuaScriptsChanged.connect (_session_script_connection,  invalidator (*this), std::bind (&LuaScriptManager::setup_session_scripts, this), gui_context());
 	setup_session_scripts ();
 }
 

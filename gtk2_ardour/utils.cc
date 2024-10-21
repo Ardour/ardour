@@ -770,7 +770,9 @@ string
 ARDOUR_UI_UTILS::rate_as_string (float r)
 {
 	char buf[32];
-	if (fmod (r, 1000.0f)) {
+	if (fmod (r, 100.0f)) {
+		snprintf (buf, sizeof (buf), "%.2f kHz", r / 1000.0);
+	} else if (fmod (r, 1000.0f)) {
 		snprintf (buf, sizeof (buf), "%.1f kHz", r / 1000.0);
 	} else {
 		snprintf (buf, sizeof (buf), "%.0f kHz", r / 1000.0);

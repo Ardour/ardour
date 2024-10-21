@@ -180,16 +180,12 @@ public:
   /** Sets whether unmapped widgets should be ignored when
    * calculating the size.
    * 
-   * @newin{2,8}
-   * 
    * @param ignore_hidden Whether unmapped widgets should be ignored
    * when calculating the size.
    */
   void set_ignore_hidden(bool ignore_hidden =  true);
   
   /** Returns if invisible widgets are ignored when calculating the size.
-   * 
-   * @newin{2,8}
    * 
    * @return <tt>true</tt> if invisible widgets are ignored.
    */
@@ -218,16 +214,12 @@ public:
   
   /** Returns the list of widgets associated with @a size_group.
    * 
-   * @newin{2,10}
-   * 
    * @return A SList of
    * widgets. The list is owned by GTK+ and should not be modified.
    */
   Glib::SListHandle<Widget*> get_widgets();
   
   /** Returns the list of widgets associated with @a size_group.
-   * 
-   * @newin{2,10}
    * 
    * @return A SList of
    * widgets. The list is owned by GTK+ and should not be modified.

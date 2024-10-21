@@ -21,8 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_region_view_h__
-#define __gtk_ardour_region_view_h__
+#pragma once
 
 #ifdef interface
 #undef interface
@@ -36,7 +35,7 @@
 #include "canvas/fwd.h"
 
 #include "time_axis_view_item.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "enums.h"
 #include "marker.h"
 
@@ -101,12 +100,13 @@ public:
 	virtual void exited () {}
 
 	bool display_enabled() const;
-	void redisplay (bool view_only = true) {
-		_redisplay (view_only);
+	virtual void redisplay (bool) = 0;
+	void redisplay () {
+		redisplay (true);
 	}
 
 	virtual void tempo_map_changed () {
-		_redisplay (true);
+		redisplay (true);
 	}
 
 	struct DisplaySuspender {
@@ -127,7 +127,7 @@ public:
 
 	virtual void update_coverage_frame (LayerDisplay);
 
-	static PBD::Signal1<void,RegionView*> RegionViewGoingAway;
+	static PBD::Signal<void(RegionView*)> RegionViewGoingAway;
 
 	/** Called when a front trim is about to begin */
 	virtual void trim_front_starting () {}
@@ -238,6 +238,8 @@ private:
 
 	void update_cue_markers ();
 
+	void clear_coverage_frame ();
+
 	struct ViewCueMarker {
 		ArdourMarker* view_marker;
 		ARDOUR::CueMarker     model_marker;
@@ -249,7 +251,6 @@ private:
 	typedef std::list<ViewCueMarker*> ViewCueMarkers;
 	ViewCueMarkers _cue_markers;
 	bool _cue_markers_visible;
-	virtual void _redisplay (bool) = 0;
 
   private:
 	friend struct DisplaySuspender;
@@ -258,4 +259,3 @@ private:
 
 };
 
-#endif /* __gtk_ardour_region_view_h__ */

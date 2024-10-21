@@ -15,8 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __ardour_video_monitor_h__
-#define __ardour_video_monitor_h__
+#pragma once
 
 #include <string>
 
@@ -72,7 +71,7 @@ class VideoMonitor : public sigc::trackable , public ARDOUR::SessionHandlePtr, p
 	bool synced_by_manual_seeks() { return sync_by_manual_seek; }
 
 	sigc::signal<void> Terminated;
-	PBD::Signal1<void,std::string> UiState;
+	PBD::Signal<void(std::string)> UiState;
 	void send_cmd (int what, int param);
 
 #if 1
@@ -106,10 +105,9 @@ class VideoMonitor : public sigc::trackable , public ARDOUR::SessionHandlePtr, p
 	int knownstate;
 	int osdmode;
 
-	PBD::Signal1<void, unsigned int> XJKeyEvent;
+	PBD::Signal<void(unsigned int)> XJKeyEvent;
 #if 1
 	bool debug_enable;
 #endif
 };
 
-#endif /* __ardour_video_monitor_h__ */
