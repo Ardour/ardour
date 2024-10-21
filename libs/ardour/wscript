@@ -741,7 +741,7 @@ def i18n_func(bld):
                        'Paul Davis')
 
 def i18n_pot_func(bld):
-    autowaf.build_i18n(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
+    autowaf.build_i18n_pot(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
                        'Paul Davis')
 
 def i18n_po_func(bld):
