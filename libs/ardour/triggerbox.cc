@@ -290,8 +290,20 @@ Trigger::request_trigger_delete (Trigger* t)
 void
 Trigger::arm ()
 {
-#warning paul need channel count here, somehow
-	_box.arm_from_another_thread (*this, _box.session().transport_sample(), 2);
+	/* trigger arming is mutually exclusive within a given TriggerBox */
+
+	_box.disarm_all ();
+
+	Track* trk = static_cast<Track*> (_box.owner());
+	int chns;
+
+	if (trk->data_type() == DataType::AUDIO) {
+		chns = dynamic_cast<AudioTrack*> (trk)->input()->n_ports().n_audio();
+	} else {
+		chns = 0;
+	}
+
+	_box.arm_from_another_thread (*this, _box.session().transport_sample(), chns);
 	_armed = true;
 	ArmChanged(); /* EMIT SIGNAL */
 	TriggerArmChanged (this);
@@ -3569,6 +3581,16 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 void
 TriggerBox::disarm ()
 {
+	delete _arm_info;
+	_arm_info = nullptr;
+}
+
+void
+TriggerBox::disarm_all ()
+{
+	for (auto & t : all_triggers) {
+		t->disarm ();
+	}
 }
 
 void
