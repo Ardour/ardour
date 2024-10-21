@@ -974,6 +974,7 @@ def i18n_func(bld):
                        'Paul Davis')
     appdata_i18n_pot(bld)
     appdata_i18n_po(bld)
+    appdata_i18n_mo(bld)
 
 def i18n_pot_func(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
