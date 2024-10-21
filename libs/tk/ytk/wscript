@@ -314,14 +314,14 @@ def build(bld):
             lang = os.path.basename(mo.srcpath()).replace('.mo', '')
             bld.install_as(os.path.join(bld.env['LOCALEDIR'], lang, 'LC_MESSAGES', I18N_PACKAGE + bld.env['MAJOR'] + '.mo'),
                            mo)
-def i18n(bld):
+def i18n_func(bld):
     autowaf.build_i18n(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)
 
-def i18n_pot(bld):
+def i18n_pot_func(bld):
     autowaf.build_i18n(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)
 
-def i18n_po(bld):
+def i18n_po_func(bld):
     autowaf.build_i18n_po(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)
 
-def i18n_mo(bld):
+def i18n_mo_func(bld):
     autowaf.build_i18n_mo(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)
