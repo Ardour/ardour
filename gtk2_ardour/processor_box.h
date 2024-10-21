@@ -461,7 +461,7 @@ public:
 	void edit_processor (std::shared_ptr<ARDOUR::Processor>);
 	void generic_edit_processor (std::shared_ptr<ARDOUR::Processor>);
 
-	void update_gui_object_state (ProcessorEntry *);
+	void update_gui_object_state (ProcessorEntry *, bool emit = false);
 
 	sigc::signal<void,std::shared_ptr<ARDOUR::Processor> > ProcessorSelected;
 	sigc::signal<void,std::shared_ptr<ARDOUR::Processor> > ProcessorUnselected;
