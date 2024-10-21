@@ -1100,6 +1100,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> patch_change; /* type not important */
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> channel_map; /* type not important */
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> used_channels; /* type not important */
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> region; /* type not important */
 
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> tempo_meter; /* only used to transmit changes, not storage */
 }

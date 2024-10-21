@@ -97,6 +97,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> patch_change;  /* only to transmit updates, not storage */
 		PBD::PropertyDescriptor<bool> channel_map;  /* only to transmit updates, not storage */
 		PBD::PropertyDescriptor<bool> used_channels;  /* only to transmit updates, not storage */
+		PBD::PropertyDescriptor<bool> region;  /* only to transmit updates, not storage */
 	}
 }
 
