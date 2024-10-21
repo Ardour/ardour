@@ -318,7 +318,7 @@ def i18n_func(bld):
     autowaf.build_i18n(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)
 
 def i18n_pot_func(bld):
-    autowaf.build_i18n(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)
+    autowaf.build_i18n_pot(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)
 
 def i18n_po_func(bld):
     autowaf.build_i18n_po(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)
