@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Len Ovens <len@ovenwerks.net>
+ * Copyright (C) 2024 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,12 +91,12 @@ OSCCueObserver::refresh_strip (std::shared_ptr<ARDOUR::Stripable> new_strip, Sor
 	_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::name_changed, this,_1, 0), OSC::instance());
 	name_changed (ARDOUR::Properties::name, 0);
 
-	_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_change_message, this, X_("/cue/mute"), 0, _strip->mute_control()), OSC::instance());
+	_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_change_message, this, X_("/cue/mute"), 0, std::weak_ptr<Controllable>(_strip->mute_control())), OSC::instance());
 	send_change_message (X_("/cue/mute"), 0, _strip->mute_control());
 
 	gain_timeout.push_back (0);
 	_last_gain[0] = -1; // unused
-	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_gain_message, this, 0, _strip->gain_control(), false), OSC::instance());
+	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_gain_message, this, 0, std::weak_ptr<Controllable>(_strip->gain_control()), false), OSC::instance());
 	send_gain_message (0, _strip->gain_control(), true);
 
 	send_init ();
@@ -163,13 +164,14 @@ OSCCueObserver::send_init()
 			if (send->gain_control()) {
 				gain_timeout.push_back (0);
 				_last_gain[i + 1] = -1.0;
-				send->gain_control()->Changed.connect (send_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_gain_message, this, i + 1, send->gain_control(), false), OSC::instance());
+				send->gain_control()->Changed.connect (send_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_gain_message, this, i + 1, std::weak_ptr<Controllable>(send->gain_control()), false), OSC::instance());
 				send_gain_message (i + 1, send->gain_control(), true);
 			}
 
 			std::shared_ptr<Processor> proc = std::dynamic_pointer_cast<Processor> (send);
-				proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_enabled_message, this, X_("/cue/send/enable"), i + 1, proc), OSC::instance());
-				send_enabled_message (X_("/cue/send/enable"), i + 1, proc);
+			std::weak_ptr<Processor> wproc (proc);
+			proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_enabled_message, this, X_("/cue/send/enable"), i + 1, wproc), OSC::instance());
+			send_enabled_message (X_("/cue/send/enable"), i + 1, wproc);
 		}
 	}
 
@@ -218,8 +220,12 @@ OSCCueObserver::name_changed (const PBD::PropertyChange& what_changed, uint32_t 
 }
 
 void
-OSCCueObserver::send_change_message (string path, uint32_t id, std::shared_ptr<Controllable> controllable)
+OSCCueObserver::send_change_message (string path, uint32_t id, std::weak_ptr<Controllable> weak_controllable)
 {
+	std::shared_ptr<Controllable> controllable = weak_controllable.lock ();
+	if (!controllable) {
+		return;
+	}
 	if (id) {
 		path = string_compose("%1/%2", path, id);
 	}
@@ -228,8 +234,12 @@ OSCCueObserver::send_change_message (string path, uint32_t id, std::shared_ptr<C
 }
 
 void
-OSCCueObserver::send_gain_message (uint32_t id,  std::shared_ptr<Controllable> controllable, bool force)
+OSCCueObserver::send_gain_message (uint32_t id,  std::weak_ptr<Controllable> weak_controllable, bool force)
 {
+	std::shared_ptr<Controllable> controllable = weak_controllable.lock ();
+	if (!controllable) {
+		return;
+	}
 	if (_last_gain[id] != controllable->get_value()) {
 		_last_gain[id] = controllable->get_value();
 	} else {
@@ -247,8 +257,12 @@ OSCCueObserver::send_gain_message (uint32_t id,  std::shared_ptr<Controllable> c
 }
 
 void
-OSCCueObserver::send_enabled_message (std::string path, uint32_t id, std::shared_ptr<ARDOUR::Processor> proc)
+OSCCueObserver::send_enabled_message (std::string path, uint32_t id, std::weak_ptr<ARDOUR::Processor> weak_proc)
 {
+	std::shared_ptr<ARDOUR::Processor> proc = weak_proc.lock ();
+	if (!proc) {
+		return;
+	}
 	if (id) {
 		_osc.float_message_with_id (path, id, (float) proc->enabled(), true, addr);
 	} else {
