@@ -2440,7 +2440,6 @@ void
 MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 {
 	if (ai.midi_buf->size() == 0) {
-		std::cerr << "nothing recorded\n";
 		_armed = false;
 		ArmChanged(); /* EMIT SIGNAL */
 		delete &ai;
@@ -2471,7 +2470,6 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 	_box.queue_explict (index());
 
 	/* Meanwhile, build a new source and region from the data now in rt_midibuffer */
-	std::cerr << "request source ...\n";
 
 	_armed = false;
 	ArmChanged(); /* EMIT SIGNAL */
@@ -2952,8 +2950,6 @@ MIDITrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> r
 {
 	assert (r);
 
-	std::cerr << "SRIWTFC " << r->name() << std::endl;
-
 	std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (r);
 
 	if (!mr) {
@@ -2971,10 +2967,6 @@ MIDITrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> r
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loaded midi region, span is %2\n", name(), data_length));
 
-	/* This is being used as a kind of shorthand for "everything" which is
-	   pretty stupid
-	*/
-	std::cerr << "send region change\n";
 	send_property_change (ARDOUR::Properties::region);
 
 	return 0;
@@ -3606,7 +3598,6 @@ TriggerBox::disarm_all ()
 void
 TriggerBox::finish_recording (BufferSet& bufs)
 {
-	std::cerr << "FR!\n";
 	SlotArmInfo* ai = _arm_info.load();
 	assert (ai);
 
