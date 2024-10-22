@@ -94,7 +94,7 @@ OSCCueObserver::refresh_strip (std::shared_ptr<ARDOUR::Stripable> new_strip, Sor
 	send_change_message (X_("/cue/mute"), 0, _strip->mute_control());
 
 	gain_timeout.push_back (0);
-	_last_gain.push_back (-1.0);
+	_last_gain[0] = -1; // unused
 	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_gain_message, this, 0, _strip->gain_control(), false), OSC::instance());
 	send_gain_message (0, _strip->gain_control(), true);
 
@@ -162,7 +162,7 @@ OSCCueObserver::send_init()
 
 			if (send->gain_control()) {
 				gain_timeout.push_back (0);
-				_last_gain.push_back (-1.0);
+				_last_gain[i + 1] = -1.0;
 				send->gain_control()->Changed.connect (send_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_gain_message, this, i + 1, send->gain_control(), false), OSC::instance());
 				send_gain_message (i + 1, send->gain_control(), true);
 			}
