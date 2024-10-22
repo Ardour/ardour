@@ -1970,7 +1970,7 @@ AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
 	ArmChanged(); /* EMIT SIGNAL */
 	TriggerArmChanged (this);
 
-	TriggerBox::worker->request_build_source (this, timecnt_t (data.length));
+	TriggerBox::worker->request_build_source (this);
 }
 
 int
@@ -2477,7 +2477,7 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 	ArmChanged(); /* EMIT SIGNAL */
 	TriggerArmChanged (this);
 
-	TriggerBox::worker->request_build_source (this, timecnt_t (data_length));
+	TriggerBox::worker->request_build_source (this);
 }
 
 void
