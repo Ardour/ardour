@@ -419,23 +419,7 @@ TriggerPage::rec_enable_changed (Trigger const * trigger)
 		_midi_trig_box.set_trigger (ref);
 		_midi_trig_box.show ();
 
-		_midi_editor->set_box (trigger->boxptr());
-
-		Stripable* st = dynamic_cast<Stripable*> (box.owner());
-		assert (st);
-		std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (st->shared_from_this());
-		assert (mt);
-		_midi_editor->set_track (mt);
-
-		if (trigger->the_region()) {
-
-			std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (trigger->the_region());
-
-			if (mr) {
-				_midi_editor->set_region (mr);
-			}
-		}
-
+		_midi_editor->set (ref);
 		_midi_editor->viewport().show ();
 	}
 
@@ -475,19 +459,7 @@ TriggerPage::selection_changed ()
 			_midi_trig_box.set_trigger (ref);
 			_midi_trig_box.show ();
 
-			std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (entry->strip().stripable());
-			assert (mt);
-			_midi_editor->set_track (mt);
-
-			if (trigger->the_region()) {
-
-				std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (trigger->the_region());
-
-				if (mr) {
-					_midi_editor->set_region (mr);
-				}
-			}
-
+			_midi_editor->set (ref);
 			_midi_editor->viewport().show ();
 		}
 

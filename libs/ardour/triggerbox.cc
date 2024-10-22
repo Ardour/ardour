@@ -127,6 +127,7 @@ TriggerBox::all_trigger_props()
 	all.add(Properties::patch_change);
 	all.add(Properties::channel_map);
 	all.add(Properties::used_channels);
+	all.add(Properties::region);
 
 	return all;
 }
@@ -313,7 +314,6 @@ Trigger::arm ()
 void
 Trigger::disarm ()
 {
-	_box.disarm ();
 	_armed = false;
 	ArmChanged(); /* EMIT SIGNAL */
 	TriggerArmChanged (this);
@@ -1965,10 +1965,12 @@ AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
 	delete &ai; // XXX delete is not RT-safe
 
 	_box.queue_explict (index());
-	TriggerBox::worker->request_build_source (this);
 
 	_armed = false;
 	ArmChanged(); /* EMIT SIGNAL */
+	TriggerArmChanged (this);
+
+	TriggerBox::worker->request_build_source (this, timecnt_t (data.length));
 }
 
 int
@@ -2438,6 +2440,7 @@ void
 MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 {
 	if (ai.midi_buf->size() == 0) {
+		std::cerr << "nothing recorded\n";
 		_armed = false;
 		ArmChanged(); /* EMIT SIGNAL */
 		delete &ai;
@@ -2468,10 +2471,13 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 	_box.queue_explict (index());
 
 	/* Meanwhile, build a new source and region from the data now in rt_midibuffer */
-	TriggerBox::worker->request_build_source (this);
+	std::cerr << "request source ...\n";
 
 	_armed = false;
 	ArmChanged(); /* EMIT SIGNAL */
+	TriggerArmChanged (this);
+
+	TriggerBox::worker->request_build_source (this, timecnt_t (data_length));
 }
 
 void
@@ -2946,6 +2952,8 @@ MIDITrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> r
 {
 	assert (r);
 
+	std::cerr << "SRIWTFC " << r->name() << std::endl;
+
 	std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (r);
 
 	if (!mr) {
@@ -2966,7 +2974,8 @@ MIDITrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> r
 	/* This is being used as a kind of shorthand for "everything" which is
 	   pretty stupid
 	*/
-	send_property_change (ARDOUR::Properties::name);
+	std::cerr << "send region change\n";
+	send_property_change (ARDOUR::Properties::region);
 
 	return 0;
 }
@@ -3597,10 +3606,16 @@ TriggerBox::disarm_all ()
 void
 TriggerBox::finish_recording (BufferSet& bufs)
 {
+	std::cerr << "FR!\n";
 	SlotArmInfo* ai = _arm_info.load();
 	assert (ai);
+
+	/* This transfers responsibility for the SlotArmInfo object to the
+	   trigger
+	*/
 	ai->slot.captured (*ai, bufs);
 	_arm_info = nullptr;
+	_record_state = Disabled;
 }
 
 void

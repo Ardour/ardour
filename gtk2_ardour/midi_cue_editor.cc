@@ -495,20 +495,6 @@ MidiCueEditor::idle_data_captured ()
 }
 
 void
-MidiCueEditor::set_box (std::shared_ptr<ARDOUR::TriggerBox> b)
-{
-	capture_connections.drop_connections ();
-	idle_update_queued.store (0);
-
-	if (b) {
-		b->Captured.connect (capture_connections, invalidator (*this), std::bind (&MidiCueEditor::data_captured, this, _1), gui_context());
-		/* Don't bind a shared_ptr<TriggerBox> within the lambda */
-		TriggerBox* tb (b.get());
-		b->RecEnableChanged.connect (capture_connections, invalidator (*this), [&, tb]() { box_rec_enable_change (*tb); }, gui_context());
-	}
-}
-
-void
 MidiCueEditor::box_rec_enable_change (ARDOUR::TriggerBox const & b)
 {
 	if (b.record_enabled()) {
@@ -525,61 +511,6 @@ MidiCueEditor::trigger_rec_enable_change (ARDOUR::Trigger const & t)
 		view->begin_write();
 	} else {
 		view->end_write ();
-	}
-}
-
-void
-MidiCueEditor::set_track (std::shared_ptr<ARDOUR::MidiTrack> t)
-{
-	_track = t;
-
-	view->set_track (t);
-
-	_update_connection.disconnect ();
-	capture_connections.drop_connections ();
-
-	if (t) {
-		set_box (t->triggerbox());
-		_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &MidiCueEditor::maybe_update));
-		_track->DropReferences.connect (track_connection, invalidator (*this), std::bind (&MidiCueEditor::set_track, this, nullptr), gui_context());
-	} else {
-		set_box (nullptr);
-	}
-}
-
-void
-MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
-{
-	if (!r) {
-		view->set_region (nullptr);
-		return;
-	}
-
-	view->set_region (r);
-
-	/* Compute zoom level to show entire source plus some margin if possible */
-
-	Temporal::timecnt_t duration = Temporal::timecnt_t (r->midi_source()->length().beats());
-
-	bool provided = false;
-	std::shared_ptr<Temporal::TempoMap> map;
-	std::shared_ptr<SMFSource> smf (std::dynamic_pointer_cast<SMFSource> (r->midi_source()));
-
-	if (smf) {
-		map = smf->tempo_map (provided);
-	}
-
-	if (!provided) {
-		map.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
-	}
-
-	{
-		EditingContext::TempoMapScope tms (*this, map);
-		double width = bg->width();
-		samplecnt_t samples = duration.samples();
-
-		samplecnt_t spp = floor (samples / width);
-		reset_zoom (spp);
 	}
 }
 
@@ -1760,4 +1691,99 @@ MidiCueEditor::selectable_owners()
 	}
 
 	return std::list<SelectableOwner*> ();
+}
+
+void
+MidiCueEditor::trigger_prop_change (PBD::PropertyChange const & what_changed)
+{
+	if (what_changed.contains (Properties::region)) {
+		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (ref.trigger()->the_region());
+		if (mr) {
+			set_region (mr);
+		}
+	}
+}
+
+void
+MidiCueEditor::set (TriggerReference & tref)
+{
+	_update_connection.disconnect ();
+	object_connections.drop_connections ();
+
+	ref = tref;
+
+	idle_update_queued.store (0);
+
+	ref.box()->Captured.connect (object_connections, invalidator (*this), std::bind (&MidiCueEditor::data_captured, this, _1), gui_context());
+	/* Don't bind a shared_ptr<TriggerBox> within the lambda */
+	TriggerBox* tb (ref.box().get());
+	tb->RecEnableChanged.connect (object_connections, invalidator (*this), [&, tb]() { box_rec_enable_change (*tb); }, gui_context());
+
+	Stripable* st = dynamic_cast<Stripable*> (ref.box()->owner());
+	assert (st);
+	_track = std::dynamic_pointer_cast<MidiTrack> (st->shared_from_this());
+	assert (_track);
+
+	view->set_track (_track);
+
+	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &MidiCueEditor::maybe_update));
+	_track->DropReferences.connect (object_connections, invalidator (*this), std::bind (&MidiCueEditor::unset, this), gui_context());
+	ref.trigger()->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&MidiCueEditor::trigger_prop_change, this, _1), gui_context());
+
+	if (ref.trigger()->the_region()) {
+
+		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (ref.trigger()->the_region());
+
+		if (mr) {
+			set_region (mr);
+		}
+	}
+}
+
+void
+MidiCueEditor::unset ()
+{
+	_update_connection.disconnect();
+	object_connections.drop_connections ();
+	_track.reset ();
+	view->set_region (nullptr);
+	ref = TriggerReference ();
+}
+
+void
+MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
+{
+	if (!r) {
+		view->set_region (nullptr);
+		return;
+	}
+
+	view->set_region (r);
+
+	/* Compute zoom level to show entire source plus some margin if possible */
+
+	Temporal::timecnt_t duration = Temporal::timecnt_t (r->midi_source()->length().beats());
+
+	std::cerr << "new region: " << duration << std::endl;
+
+	bool provided = false;
+	std::shared_ptr<Temporal::TempoMap> map;
+	std::shared_ptr<SMFSource> smf (std::dynamic_pointer_cast<SMFSource> (r->midi_source()));
+
+	if (smf) {
+		map = smf->tempo_map (provided);
+	}
+
+	if (!provided) {
+		map.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
+	}
+
+	{
+		EditingContext::TempoMapScope tms (*this, map);
+		double width = bg->width();
+		samplecnt_t samples = duration.samples();
+		std::cerr << "new spp from " << samples << " / " << width << std::endl;
+		samplecnt_t spp = floor (samples / width);
+		reset_zoom (spp);
+	}
 }

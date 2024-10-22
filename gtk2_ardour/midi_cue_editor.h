@@ -72,9 +72,8 @@ class MidiCueEditor : public CueEditor
 	int32_t get_grid_beat_divisions (Editing::GridType gt) const { return 1; }
 	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const { return 1; }
 
+	void set (ARDOUR::TriggerReference&);
 	void set_region (std::shared_ptr<ARDOUR::MidiRegion>);
-	void set_box (std::shared_ptr<ARDOUR::TriggerBox>);
-	void set_track (std::shared_ptr<ARDOUR::MidiTrack>);
 
 	ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
 	ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const { return cursor_scroll_group; }
@@ -140,6 +139,7 @@ class MidiCueEditor : public CueEditor
 	void on_samples_per_pixel_changed ();
 
  private:
+	ARDOUR::TriggerReference ref;
 	std::shared_ptr<ARDOUR::MidiTrack> _track;
 	ArdourCanvas::GtkCanvasViewport* _canvas_viewport;
 	ArdourCanvas::GtkCanvas* _canvas;
@@ -208,8 +208,11 @@ class MidiCueEditor : public CueEditor
 	void stop_canvas_autoscroll ();
 
 	sigc::connection _update_connection;
-	PBD::ScopedConnection track_connection;
+	PBD::ScopedConnectionList object_connections;
 	void maybe_update ();
+	void trigger_prop_change (PBD::PropertyChange const &);
+
+	void unset ();
 
 	void visual_changer (const VisualChange&);
 	void bindings_changed ();
@@ -217,7 +220,6 @@ class MidiCueEditor : public CueEditor
 	void data_captured (Temporal::timecnt_t);
 	bool idle_data_captured ();
 	std::atomic<int> idle_update_queued;
-	PBD::ScopedConnectionList capture_connections;
 	Temporal::timecnt_t data_capture_duration;
 };
 
