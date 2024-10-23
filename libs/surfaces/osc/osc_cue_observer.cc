@@ -94,7 +94,7 @@ OSCCueObserver::refresh_strip (std::shared_ptr<ARDOUR::Stripable> new_strip, Sor
 	_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_change_message, this, X_("/cue/mute"), 0, std::weak_ptr<Controllable>(_strip->mute_control())), OSC::instance());
 	send_change_message (X_("/cue/mute"), 0, _strip->mute_control());
 
-	gain_timeout.push_back (0);
+	gain_timeout[0] = 0;
 	_last_gain[0] = -1; // unused
 	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_gain_message, this, 0, std::weak_ptr<Controllable>(_strip->gain_control()), false), OSC::instance());
 	send_gain_message (0, _strip->gain_control(), true);
@@ -162,7 +162,7 @@ OSCCueObserver::send_init()
 
 
 			if (send->gain_control()) {
-				gain_timeout.push_back (0);
+				gain_timeout[i + 1] = 0;
 				_last_gain[i + 1] = -1.0;
 				send->gain_control()->Changed.connect (send_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_gain_message, this, i + 1, std::weak_ptr<Controllable>(send->gain_control()), false), OSC::instance());
 				send_gain_message (i + 1, send->gain_control(), true);
@@ -246,10 +246,8 @@ OSCCueObserver::send_gain_message (uint32_t id,  std::weak_ptr<Controllable> wea
 		return;
 	}
 	if (id) {
-		_osc.text_message_with_id (X_("/cue/send/name"), id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), true, addr);
 		_osc.float_message_with_id (X_("/cue/send/fader"), id, controllable->internal_to_interface (controllable->get_value()), true, addr);
 	} else {
-		_osc.text_message (X_("/cue/name"), string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), addr);
 		_osc.float_message (X_("/cue/fader"), controllable->internal_to_interface (controllable->get_value()), addr);
 	}
 
