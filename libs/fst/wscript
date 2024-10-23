@@ -3,9 +3,6 @@ import os
 import sys
 import re
 
-# needed for code used from libardour
-I18N_PACKAGE = 'ardour'
-
 def options(opt):
     pass
 
@@ -22,7 +19,7 @@ def build(bld):
         obj.defines   = [
             'VST3_SCANNER_APP',
             'VERSIONSTRING="' + bld.env['VERSION'] + '"',
-            'PACKAGE="' + I18N_PACKAGE + bld.env['MAJOR'] + '"',
+            'PACKAGE="' + bld.env['INTERNAL_NAME'] + '"',
             'LIBARDOUR="' + bld.env['INTERNAL_NAME'] + '"',
             'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
             ]
@@ -64,7 +61,7 @@ def build(bld):
             '_POSIX_SOURCE',
             'USE_WS_PREFIX',
             'VST_SCANNER_APP',
-            'PACKAGE="' + I18N_PACKAGE + bld.env['MAJOR'] + '"',
+            'PACKAGE="' + bld.env['INTERNAL_NAME'] + '"',
             'LIBARDOUR="' + bld.env['INTERNAL_NAME'] + '"',
             'VERSIONSTRING="' + bld.env['VERSION'] + '"',
             ]
