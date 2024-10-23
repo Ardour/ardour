@@ -26,6 +26,7 @@
 #include "evoral/Event.h"
 
 using namespace std;
+using namespace std::placeholders;
 
 namespace Evoral {
 

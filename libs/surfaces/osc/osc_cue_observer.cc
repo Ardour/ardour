@@ -17,8 +17,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "boost/lambda/lambda.hpp"
-
 #include "pbd/control_math.h"
 
 #include "ardour/track.h"
