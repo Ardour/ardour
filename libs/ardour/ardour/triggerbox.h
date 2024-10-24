@@ -715,7 +715,7 @@ class LIBARDOUR_API TriggerBoxThread
 
 	void set_region (TriggerBox&, uint32_t slot, std::shared_ptr<Region>);
 	void request_delete_trigger (Trigger* t);
-	void request_build_source (Trigger* t);
+	void request_build_source (Trigger* t, Temporal::timecnt_t const & duration);
 
 	void summon();
 	void stop();
@@ -743,6 +743,7 @@ class LIBARDOUR_API TriggerBoxThread
 		std::shared_ptr<Region> region;
 		/* for DeleteTrigger and BuildSourceAndRegion */
 		Trigger* trigger;
+		Temporal::timecnt_t duration;
 
 		void* operator new (size_t);
 		void  operator delete (void* ptr, size_t);
@@ -757,9 +758,9 @@ class LIBARDOUR_API TriggerBoxThread
 	CrossThreadChannel _xthread;
 	void queue_request (Request*);
 	void delete_trigger (Trigger*);
-	void build_source (Trigger*);
-	void build_midi_source (MIDITrigger*);
-	void build_audio_source (AudioTrigger*);
+	void build_source (Trigger*, Temporal::timecnt_t const & duration);
+	void build_midi_source (MIDITrigger*, Temporal::timecnt_t const &);
+	void build_audio_source (AudioTrigger*, Temporal::timecnt_t const &);
 };
 
 struct CueRecord {
@@ -783,7 +784,7 @@ struct SlotArmInfo {
 	samplepos_t start_samples;
 	Temporal::Beats end_beats;
 	samplepos_t end_samples;
-	Temporal::timecnt_t captured;
+	samplecnt_t captured;
 	RTMidiBufferBeats* midi_buf;
 	AudioTrigger::AudioData audio_buf;
 	RubberBand::RubberBandStretcher* stretcher;
@@ -942,7 +943,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 
 	void dump (std::ostream &) const;
 
-	PBD::Signal<void(timecnt_t)> Captured;
+	PBD::Signal<void(samplecnt_t)> Captured;
 
   private:
 	struct Requests {

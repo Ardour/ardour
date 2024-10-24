@@ -145,7 +145,7 @@ public:
 	void ensure_input_monitoring (bool);
 	std::list<std::shared_ptr<Source> > & last_capture_sources ();
 	std::string steal_write_source_name ();
-	void reset_write_sources (bool, bool force = false);
+	void reset_write_sources ();
 	float playback_buffer_load () const;
 	float capture_buffer_load () const;
 	int do_refill ();

@@ -123,7 +123,7 @@ DiskWriter::set_write_source_name (string const & str)
 {
 	_write_source_name = str;
 
-	reset_write_sources (false);
+	reset_write_sources ();
 
 	return true;
 }
@@ -390,7 +390,7 @@ DiskWriter::set_state (const XMLNode& node, int version)
 	node.get_property (X_("record-safe"), rec_safe);
 	_record_safe.store (rec_safe);
 
-	reset_write_sources (false, true);
+	reset_write_sources ();
 
 	return 0;
 }
@@ -1072,7 +1072,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 }
 
 void
-DiskWriter::reset_write_sources (bool mark_write_complete, bool /*force*/)
+DiskWriter::reset_write_sources ()
 {
 	std::shared_ptr<ChannelList const> c = channels.reader();
 	uint32_t n = 0;
@@ -1087,12 +1087,6 @@ DiskWriter::reset_write_sources (bool mark_write_complete, bool /*force*/)
 
 		if (chan->write_source) {
 
-			if (mark_write_complete) {
-				Source::WriterLock lock(chan->write_source->mutex());
-				chan->write_source->mark_streaming_write_completed (lock);
-				chan->write_source->done_with_peakfile_writes ();
-			}
-
 			if (chan->write_source->removable()) {
 				chan->write_source->mark_for_remove ();
 				chan->write_source->drop_references ();
@@ -1105,13 +1099,6 @@ DiskWriter::reset_write_sources (bool mark_write_complete, bool /*force*/)
 
 		if (record_enabled()) {
 			capturing_sources.push_back (chan->write_source);
-		}
-	}
-
-	if (_midi_write_source) {
-		if (mark_write_complete) {
-			Source::WriterLock lm(_midi_write_source->mutex());
-			_midi_write_source->mark_streaming_write_completed (lm);
 		}
 	}
 
@@ -1186,7 +1173,6 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	ChannelList::const_iterator chan;
 	std::shared_ptr<ChannelList const> c = channels.reader();
 	uint32_t n = 0;
-	bool mark_write_completed = false;
 
 	finish_capture (c);
 
@@ -1315,7 +1301,11 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 			total_capture += timecnt_t ((*ci)->samples);
 		}
 
-		_midi_write_source->mark_midi_streaming_write_completed (source_lock, Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, total_capture.beats());
+		/* XXX we need to consider snapping the duration up to the next
+		 * beat/bar here
+		 */
+
+		_midi_write_source->mark_midi_streaming_write_completed (source_lock, Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, timecnt_t (total_capture));
 	}
 
 	_last_capture_sources.insert (_last_capture_sources.end(), audio_srcs.begin(), audio_srcs.end());
@@ -1325,10 +1315,8 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	_track.use_captured_sources (audio_srcs, capture_info);
 	_track.use_captured_sources (midi_srcs, capture_info);
 
-	mark_write_completed = true;
-
   out:
-	reset_write_sources (mark_write_completed);
+	reset_write_sources ();
 
 	for (vector<CaptureInfo*>::iterator ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 		delete *ci;
@@ -1457,7 +1445,7 @@ DiskWriter::configure_io (ChanCount in, ChanCount out)
 	}
 
 	if (record_enabled() || changed) {
-		reset_write_sources (false, true);
+		reset_write_sources ();
 	}
 
 	return true;
@@ -1472,7 +1460,7 @@ DiskWriter::use_playlist (DataType dt, std::shared_ptr<Playlist> playlist)
 		return -1;
 	}
 	if (reset_ws) {
-		reset_write_sources (false, true);
+		reset_write_sources ();
 	}
 	return 0;
 }

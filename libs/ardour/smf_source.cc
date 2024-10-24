@@ -462,6 +462,7 @@ void
 SMFSource::update_length (timepos_t const & dur)
 {
 	assert (!_length || (_length.time_domain() == dur.time_domain()));
+	Evoral::SMF::set_duration (dur.beats());
 	_length = dur;
 }
 
@@ -470,7 +471,7 @@ void
 SMFSource::append_event_beats (const WriterLock&   lock,
                                const Evoral::Event<Temporal::Beats>& ev)
 {
-	if (!_writing || ev.size() == 0)  {
+	if (!_writing || ev.size() == 0 || ev.is_realtime())  {
 		return;
 	}
 
@@ -516,7 +517,7 @@ SMFSource::append_event_beats (const WriterLock&   lock,
 	const Temporal::Beats delta_time_beats = time - _last_ev_time_beats;
 	const uint32_t      delta_time_ticks = delta_time_beats.to_ticks(ppqn());
 
-	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
+	Evoral::SMF::append_event_delta (delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_beats = time;
 	_flags = Source::Flag (_flags & ~Empty);
 	_flags = Source::Flag (_flags & ~Missing);
@@ -528,7 +529,7 @@ SMFSource::append_event_samples (const WriterLock& lock,
                                 const Evoral::Event<samplepos_t>&  ev,
                                 samplepos_t                        position)
 {
-	if (!_writing || ev.size() == 0)  {
+	if (!_writing || ev.size() == 0 || ev.is_realtime())  {
 		return;
 	}
 
@@ -622,15 +623,15 @@ SMFSource::mark_streaming_midi_write_started (const WriterLock& lock, NoteMode m
 }
 
 void
-SMFSource::mark_streaming_write_completed (const WriterLock& lock)
+SMFSource::mark_streaming_write_completed (const WriterLock& lm, Temporal::timecnt_t const & duration)
 {
-	mark_midi_streaming_write_completed (lock, Evoral::Sequence<Temporal::Beats>::DeleteStuckNotes);
+	mark_midi_streaming_write_completed (lm, Evoral::Sequence<Temporal::Beats>::DeleteStuckNotes, duration);
 }
 
 void
-SMFSource::mark_midi_streaming_write_completed (const WriterLock& lm, Evoral::Sequence<Temporal::Beats>::StuckNoteOption stuck_notes_option, Temporal::Beats when)
+SMFSource::mark_midi_streaming_write_completed (const WriterLock& lm, Evoral::Sequence<Temporal::Beats>::StuckNoteOption stuck_notes_option, Temporal::timecnt_t const & duration)
 {
-	MidiSource::mark_midi_streaming_write_completed (lm, stuck_notes_option, when);
+	MidiSource::mark_midi_streaming_write_completed (lm, stuck_notes_option, duration);
 
 	if (!writable()) {
 		warning << string_compose ("attempt to write to unwritable SMF file %1", _path) << endmsg;
@@ -638,10 +639,11 @@ SMFSource::mark_midi_streaming_write_completed (const WriterLock& lm, Evoral::Se
 	}
 
 	if (_model) {
-		_model->set_edited(false);
+		_model->set_edited (false);
 	}
 
 	try {
+		Evoral::SMF::set_duration (duration.beats());
 		Evoral::SMF::end_write (_path);
 	} catch (std::exception & e) {
 		error << string_compose (_("Exception while writing %1, file may be corrupt/unusable"), _path) << endmsg;
@@ -812,6 +814,7 @@ SMFSource::load_model_unlocked (bool force_reload)
 	}
 
 	_num_channels = _used_channels.size();
+	_length = duration();
 
 	eventlist.sort(compare_eventlist);
 

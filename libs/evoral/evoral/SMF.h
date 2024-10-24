@@ -96,6 +96,9 @@ public:
 
 	int smf_format () const;
 
+	void set_duration (Temporal::Beats const &);
+	Temporal::Beats duration() const;
+
 	int num_channels () const { return _num_channels; }
 	typedef std::bitset<16> UsedChannels;
 	UsedChannels const& used_channels () const { return _used_channels; }

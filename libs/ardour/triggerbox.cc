@@ -1966,6 +1966,8 @@ AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
 
 	_box.queue_explict (index());
 
+	TriggerBox::worker->request_build_source (this, timecnt_t (data.length));
+
 	_armed = false;
 	ArmChanged(); /* EMIT SIGNAL */
 	TriggerArmChanged (this);
@@ -2452,8 +2454,11 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 
 	old_rt_midibuffer = rt_midibuffer.exchange (ai.midi_buf);
 
+	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+	timecnt_t dur = tmap->convert_duration (timecnt_t (ai.captured), timepos_t (ai.start_samples), Temporal::BeatTime);
+
 	loop_start = Temporal::Beats();
-	loop_end = (*ai.midi_buf)[ai.midi_buf->size()-1].timestamp;
+	loop_end = dur.beats();
 	data_length = loop_end;
 	_follow_length = Temporal::BBT_Offset (0, data_length.get_beats(), 0);
 	set_length (timecnt_t (data_length));
@@ -2470,6 +2475,9 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 	_box.queue_explict (index());
 
 	/* Meanwhile, build a new source and region from the data now in rt_midibuffer */
+
+	// std::cerr << "capture done, ask for a source of length " << loop_end.str() << std::endl;
+	TriggerBox::worker->request_build_source (this, timecnt_t (loop_end));
 
 	_armed = false;
 	ArmChanged(); /* EMIT SIGNAL */
@@ -3437,6 +3445,7 @@ SlotArmInfo::SlotArmInfo (Trigger& s)
 	: slot (s)
 	, start_samples (0)
 	, end_samples (0)
+	, captured (0)
 	, midi_buf (nullptr)
 	, stretcher (nullptr)
 {
@@ -3571,11 +3580,9 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 	ai->start_samples = t_samples;
 	ai->start_beats = t_beats;
 
-	if (_data_type == DataType::AUDIO) {
-		ai->captured = timecnt_t (timepos_t (0), timepos_t (0));
-	} else {
-		ai->captured = timecnt_t::from_ticks (0, timepos_t (Beats()));
-	}
+	// std::cerr << "Will start at " << t_beats.str() << std::endl;
+
+	ai->captured = 0;
 
 	_arm_info = ai;
 }
@@ -3638,7 +3645,8 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 			                                       t_bbt, t_beats, t_samples, tmap, ai->slot.quantization());
 			ai->end_samples = t_samples;
 			ai->end_beats = t_beats;
-			return;
+
+			//std::cerr << "will end at " << t_beats.str() << " samples " << ai->start_samples << " .. " << ai->end_samples << " = " << (ai->end_samples - ai->start_samples) << std::endl;
 		}
 	}
 
@@ -3665,12 +3673,14 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		offset = ai->start_samples - start_sample;
 		nframes -= offset;
 		_record_state = Recording;
+		// std::cerr << "Hit start @ " << ai->start_samples << " within " << start_sample << " ... " << end_sample << " offset will be " << offset << " nf " << nframes << std::endl;
 	}
 
 	if ((ai->end_samples != 0) && (start_sample <= ai->end_samples && ai->end_samples < end_sample)) {
 		/* we're going to stop */
 		nframes -= (end_sample - ai->end_samples);
 		reached_end = true;
+		// std::cerr << "Hit end @ " << ai->end_samples << " within " << start_sample << " ... " << end_sample << " nf " << nframes << std::endl;
 	}
 
 	/* Audio */
@@ -3686,8 +3696,6 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 			AudioBuffer& buf (bufs.get_audio (n));
 			ai->audio_buf.append (buf.data() + offset, nframes, n);
 		}
-
-		ai->captured += timecnt_t (start_sample, timepos_t (ai->start_samples));
 	}
 
 	n_buffers = bufs.count().n_midi();
@@ -3734,10 +3742,10 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 				}
 			}
 		}
-
-		timecnt_t dur = tmap->convert_duration (timecnt_t (nframes), timepos_t (start_sample), Temporal::BeatTime);
-		ai->captured += dur;
 	}
+
+	ai->captured += nframes;
+	//std::cerr << "Captured " << nframes << " total " << ai->captured << std::endl;
 
 	Captured (ai->captured); /* EMIT SIGNAL */
 
@@ -5562,7 +5570,7 @@ TriggerBoxThread::thread_work ()
 					delete_trigger (req->trigger);
 					break;
 				case BuildSourceAndRegion:
-					build_source (req->trigger);
+					build_source (req->trigger, req->duration);
 					break;
 				default:
 					break;
@@ -5632,10 +5640,11 @@ TriggerBoxThread::request_delete_trigger (Trigger* t)
 }
 
 void
-TriggerBoxThread::request_build_source (Trigger* t)
+TriggerBoxThread::request_build_source (Trigger* t, Temporal::timecnt_t const & len)
 {
 	TriggerBoxThread::Request* req = new TriggerBoxThread::Request (BuildSourceAndRegion);
 	req->trigger  = t;
+	req->duration = len;
 	queue_request (req);
 }
 
@@ -5646,20 +5655,20 @@ TriggerBoxThread::delete_trigger (Trigger* t)
 }
 
 void
-TriggerBoxThread::build_source (Trigger* t)
+TriggerBoxThread::build_source (Trigger* t, Temporal::timecnt_t const & duration)
 {
 	MIDITrigger* mt = dynamic_cast<MIDITrigger*> (t);
 	AudioTrigger* at;
 
 	if (mt) {
-		build_midi_source (mt);
+		build_midi_source (mt, duration);
 	} else if ((at = dynamic_cast<AudioTrigger*> (t))) {
-		build_audio_source (at);
+		build_audio_source (at, duration);
 	}
 }
 
 void
-TriggerBoxThread::build_audio_source (AudioTrigger* t)
+TriggerBoxThread::build_audio_source (AudioTrigger* t, Temporal::timecnt_t const & duration)
 {
 	Track* trk = static_cast<Track*> (t->box().owner());
 	SourceList sources;
@@ -5710,7 +5719,7 @@ TriggerBoxThread::build_audio_source (AudioTrigger* t)
 }
 
 void
-TriggerBoxThread::build_midi_source (MIDITrigger* t)
+TriggerBoxThread::build_midi_source (MIDITrigger* t, Temporal::timecnt_t const & duration)
 {
 	Track* trk = static_cast<Track*> (t->box().owner());
 	std::shared_ptr<MidiSource> ms = t->box().session().create_midi_source_for_session (trk->name());
@@ -5729,7 +5738,7 @@ TriggerBoxThread::build_midi_source (MIDITrigger* t)
 
 			ms->append_event_beats (lock, ev);
 		}
-		ms->mark_streaming_write_completed (lock);
+		ms->mark_streaming_write_completed (lock, duration);
 		ms->load_model (lock);
 	}
 

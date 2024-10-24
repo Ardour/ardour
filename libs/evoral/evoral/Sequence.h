@@ -316,6 +316,8 @@ public:
 	uint8_t lowest_note()  const { return _lowest_note; }
 	uint8_t highest_note() const { return _highest_note; }
 
+	Time duration() const { return _duration; }
+	void set_duration (Time const &);
 
 protected:
 	bool                   _edited;
@@ -370,6 +372,11 @@ private:
 
 	uint8_t _lowest_note;
 	uint8_t _highest_note;
+
+	Time    _duration;
+	bool    _explicit_duration;
+
+	void update_duration_unlocked (Time const &, bool can_shorten = false);
 };
 
 

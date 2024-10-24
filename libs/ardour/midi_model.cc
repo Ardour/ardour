@@ -1244,15 +1244,15 @@ MidiModel::write_to (std::shared_ptr<MidiSource>     source,
 {
 	ReadLock lock (read_lock()); /* Sequence read-lock */
 
-	source->drop_model(source_lock);
+	source->drop_model (source_lock);
 	/* as of March 2022 or long before , the note mode argument does nothing */
 	source->mark_streaming_midi_write_started (source_lock, Sustained);
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
-		source->append_event_beats(source_lock, *i);
+		source->append_event_beats (source_lock, *i);
 	}
 
-	source->mark_streaming_write_completed(source_lock);
+	source->mark_streaming_write_completed (source_lock, timecnt_t (duration()));
 
 	/* no call to set_edited() because writing to "newsrc" doesn't remove
 	 * the need to write to "our own" source in ::sync_to_source()
@@ -1284,7 +1284,7 @@ MidiModel::sync_to_source (const Source::WriterLock& source_lock)
 		_midi_source.append_event_beats(source_lock, *i);
 	}
 
-	_midi_source.mark_streaming_write_completed (source_lock);
+	_midi_source.mark_streaming_write_completed (source_lock, timecnt_t (duration()));
 
 	set_edited (false);
 
@@ -1300,10 +1300,10 @@ MidiModel::sync_to_source (const Source::WriterLock& source_lock)
  */
 bool
 MidiModel::write_section_to (std::shared_ptr<MidiSource>     source,
-                             const Source::WriterLock&         source_lock,
-                             TimeType                          begin_time,
-                             TimeType                          end_time,
-                             bool                              offset_events)
+                             const Source::WriterLock&       source_lock,
+                             TimeType                        begin_time,
+                             TimeType                        end_time,
+                             bool                            offset_events)
 {
 	ReadLock lock(read_lock());
 	MidiNoteTracker mst;
@@ -1348,7 +1348,11 @@ MidiModel::write_section_to (std::shared_ptr<MidiSource>     source,
 	}
 	mst.resolve_notes (*source, source_lock, end_time);
 
-	source->mark_streaming_write_completed(source_lock);
+	/* the new source will have precisely the length given by begin_time
+	 * and end_time. That might not be quite right in some cases.
+	 */
+
+	source->mark_streaming_write_completed (source_lock, timecnt_t (end_time - begin_time));
 
 	set_edited(false);
 

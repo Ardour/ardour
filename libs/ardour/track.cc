@@ -592,9 +592,9 @@ Track::steal_write_source_name()
 }
 
 void
-Track::reset_write_sources (bool r, bool force)
+Track::reset_write_sources ()
 {
-	_disk_writer->reset_write_sources (r, force);
+	_disk_writer->reset_write_sources ();
 }
 
 float

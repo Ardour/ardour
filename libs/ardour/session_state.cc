@@ -2687,14 +2687,14 @@ Session::get_sources_as_xml ()
 }
 
 void
-Session::reset_write_sources (bool mark_write_complete, bool force)
+Session::reset_write_sources ()
 {
 	std::shared_ptr<RouteList const> rl = routes.reader();
 	for (auto const& i : *rl) {
 		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
 		if (tr) {
 			_state_of_the_state = StateOfTheState (_state_of_the_state | InCleanup);
-			tr->reset_write_sources(mark_write_complete, force);
+			tr->reset_write_sources ();
 			_state_of_the_state = StateOfTheState (_state_of_the_state & ~InCleanup);
 		}
 	}
@@ -5442,7 +5442,7 @@ Session::save_as (SaveAs& saveas)
 
 			/* ensure that all existing tracks reset their current capture source paths
 			 */
-			reset_write_sources (true, true);
+			reset_write_sources ();
 
 			/* creating new write sources marks the session as
 			   dirty. If the new session is empty, then

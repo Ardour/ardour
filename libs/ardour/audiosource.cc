@@ -1150,7 +1150,7 @@ AudioSource::available_peaks (double zoom_factor) const
 }
 
 void
-AudioSource::mark_streaming_write_completed (const WriterLock& lock)
+AudioSource::mark_streaming_write_completed (const WriterLock& lock, Temporal::timecnt_t const &)
 {
 	Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
 

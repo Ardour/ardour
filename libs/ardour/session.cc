@@ -2411,7 +2411,7 @@ Session::set_sample_rate (samplecnt_t frames_per_second)
 	sync_time_vars();
 
 	clear_clicks ();
-	reset_write_sources (false);
+	reset_write_sources ();
 
 	DiskReader::alloc_loop_declick (nominal_sample_rate());
 	Location* loc = _locations->auto_loop_location ();
@@ -6123,7 +6123,7 @@ Session::reset_native_file_format ()
 		if (tr) {
 			/* don't save state as we do this, there's no point */
 			_state_of_the_state = StateOfTheState (_state_of_the_state | InCleanup);
-			tr->reset_write_sources (false);
+			tr->reset_write_sources ();
 			_state_of_the_state = StateOfTheState (_state_of_the_state & ~InCleanup);
 		}
 	}
@@ -6468,6 +6468,10 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 		time (&now);
 		xnow = localtime (&now);
 
+		/* XXX we may want to round this up to the next beat or bar */
+
+		const timecnt_t duration (end - start);
+
 		for (vector<std::shared_ptr<Source> >::iterator src=srcs.begin(); src != srcs.end(); ++src) {
 			std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource>(*src);
 			std::shared_ptr<MidiSource> ms;
@@ -6479,9 +6483,9 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 				plist.add (Properties::start, timepos_t (0));
 			} else if ((ms = std::dynamic_pointer_cast<MidiSource>(*src))) {
 				Source::WriterLock lock (ms->mutex());
-				ms->mark_streaming_write_completed(lock);
+				ms->mark_streaming_write_completed (lock, duration);
 				plist.add (Properties::start, timepos_t (Beats()));
-		}
+			}
 		}
 
 		/* construct a whole-file region to represent the bounced material */

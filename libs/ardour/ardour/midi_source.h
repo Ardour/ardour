@@ -138,7 +138,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 
 	virtual void mark_streaming_midi_write_started (const WriterLock& lock, NoteMode mode);
 	virtual void mark_streaming_write_started (const WriterLock& lock);
-	virtual void mark_streaming_write_completed (const WriterLock& lock);
+	virtual void mark_streaming_write_completed (const WriterLock& lock, Temporal::timecnt_t const & duration);
 
 	/** Mark write starting with the given time parameters.
 	 *
@@ -160,7 +160,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	virtual void mark_midi_streaming_write_completed (
 		const WriterLock&                                  lock,
 		Evoral::Sequence<Temporal::Beats>::StuckNoteOption stuck_option,
-		Temporal::Beats                                    when = Temporal::Beats());
+		Temporal::timecnt_t const &                        when);
 
 	virtual void session_saved();
 
