@@ -302,7 +302,6 @@ ARDOUR_UI::setup_windows ()
 	/* now add the transport sample to the top of main window */
 
 	main_vpacker.pack_start ( *spacer, false, false);
-	main_vpacker.pack_start (transport_frame, false, false);
 	main_vpacker.pack_start (_tabs, true, true);
 
 	setup_transport();
@@ -320,7 +319,6 @@ ARDOUR_UI::setup_windows ()
 	 */
 
 	_main_window.add (main_vpacker);
-	transport_frame.show_all ();
 
 	apply_window_settings (true);
 

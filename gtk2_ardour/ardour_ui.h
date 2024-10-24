@@ -523,8 +523,7 @@ private:
 
 	/* Transport Control */
 
-	Gtk::Table               transport_table;
-	Gtk::Frame               transport_frame;
+	Gtk::Table               tabbables_table;
 
 	void toggle_follow_edits ();
 

@@ -231,28 +231,6 @@ ARDOUR_UI::setup_transport ()
 
 	/* transport control size-group */
 
-	/* and now the layout... */
-
-	/* top level packing */
-	transport_table.set_spacings (0);
-	transport_table.set_row_spacings (4);
-	transport_table.set_border_width (1);
-
-	transport_frame.set_name ("TransportFrame");
-	transport_frame.set_shadow_type (Gtk::SHADOW_NONE);
-
-	/* An event box to hold the table. We use this because we want specific
-	   control over the background color, and without this event box,
-	   nothing inside the transport_frame actually draws a background. We
-	   would therefore end up seeing the background of the parent widget,
-	   which is probably some default color. Adding the EventBox adds a
-	   widget that will draw the background, using a style based on
-	   the parent, "TransportFrame".
-	*/
-	Gtk::EventBox* ebox = manage (new Gtk::EventBox);
-	transport_frame.add (*ebox);
-	ebox->add (transport_table);
-
 	//tab selections
 	button_height_size_group->add_widget (trigger_page_visibility_button);
 	button_height_size_group->add_widget (recorder_visibility_button);
@@ -261,18 +239,19 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (prefs_visibility_button);
 
 	/* and the main table layout */
-	int vpadding = 1;
-	int hpadding = 2;
+	int vpadding = 3;
+	int hpadding = 3;
 	int col = 0;
 #define TCOL col, col + 1
 
-	transport_table.attach (recorder_visibility_button,     TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	transport_table.attach (trigger_page_visibility_button, TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
+	tabbables_table.attach (recorder_visibility_button,     TCOL, 0, 1 , FILL, FILL, hpadding, vpadding);
+	tabbables_table.attach (trigger_page_visibility_button, TCOL, 1, 2 , FILL, FILL, hpadding, vpadding);
 	++col;
-	transport_table.attach (editor_visibility_button,       TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	transport_table.attach (mixer_visibility_button,        TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
+	tabbables_table.attach (editor_visibility_button,       TCOL, 0, 1 , FILL, FILL, hpadding, vpadding);
+	tabbables_table.attach (mixer_visibility_button,        TCOL, 1, 2 , FILL, FILL, hpadding, vpadding);
 	++col;
 
+	tabbables_table.show_all ();
 }
 #undef PX_SCALE
 #undef TCOL

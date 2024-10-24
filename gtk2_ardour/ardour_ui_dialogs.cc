@@ -625,7 +625,17 @@ ARDOUR_UI::tabs_page_removed (Widget*, guint)
 void
 ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 {
+	if (tabbables_table.get_parent ()) {
+		editor->tab_btn_box ().remove ();
+		mixer->tab_btn_box ().remove ();
+		recorder->tab_btn_box ().remove ();
+		trigger_page->tab_btn_box ().remove ();
+	}
+
+	//pack the tabbables selector in this tab, and set button sensitivity appropriately
 	if (editor && (page == (guint) _tabs.page_num (editor->contents()))) {
+
+		editor->tab_btn_box ().add (tabbables_table);
 
 		editor_visibility_button.set_active_state (Gtkmm2ext::ImplicitActive);
 
@@ -648,6 +658,8 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 		EditingContext::switch_editing_context (editor);
 
 	} else if (mixer && (page == (guint) _tabs.page_num (mixer->contents()))) {
+
+		mixer->tab_btn_box ().add (tabbables_table);
 
 		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {
 			editor_visibility_button.set_active_state (Gtkmm2ext::Off);
@@ -689,6 +701,8 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 
 	} else if (page == (guint) _tabs.page_num (recorder->contents())) {
 
+		recorder->tab_btn_box ().add (tabbables_table);
+
 		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {
 			editor_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
@@ -708,6 +722,8 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 		}
 
 	} else if (page == (guint) _tabs.page_num (trigger_page->contents())) {
+
+		trigger_page->tab_btn_box ().add (tabbables_table);
 
 		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {
 			editor_visibility_button.set_active_state (Gtkmm2ext::Off);
