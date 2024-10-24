@@ -155,12 +155,17 @@ public:
 	bool     is_channel_event()    const { return (0x80 <= type()) && (type() <= 0xE0); }
 	bool     is_smf_meta_event()   const { return _buf[0] == 0xFF; }
 	bool     is_sysex()            const { return _buf[0] == 0xF0 || _buf[0] == 0xF7; }
-	bool     is_spp()              const { return _buf[0] == 0xF2 && size() == 1; }
 	bool     is_mtc_quarter()      const { return _buf[0] == 0xF1 && size() == 1; }
+	bool     is_spp()              const { return _buf[0] == 0xF2 && size() == 1; }
+	bool     is_song()              const { return _buf[0] == 0xF3 && size() == 1; }
+	bool     is_tune()              const { return _buf[0] == 0xF6 && size() == 1; }
+	bool     is_eox()              const { return _buf[0] == 0xF7 && size() == 1; }
+	bool     is_clock()            const { return _buf[0] == 0xF8 && size() == 1; }
+	bool     is_tick()             const { return _buf[0] == 0xF9 && size() == 1; }
 	bool     is_mtc_full()         const { return (size() == 10 &&
 	                                               _buf[0] == 0xF0 && _buf[1] == 0x7F &&
 	                                               _buf[3] == 0x01 && _buf[4] == 0x01); }
-
+	bool     is_realtime()        const { return is_mtc_full() || ((_buf[0] >= 0xF1 && _buf[0] <= 0xfe) && size() == 1); }
 	uint8_t  note()               const { return _buf[1]; }
 	uint8_t  velocity()           const { return _buf[2]; }
 	uint8_t  poly_note()          const { return _buf[1]; }
