@@ -217,10 +217,11 @@ class MidiCueEditor : public CueEditor
 	void visual_changer (const VisualChange&);
 	void bindings_changed ();
 
-	void data_captured (Temporal::timecnt_t);
+	void data_captured (samplecnt_t);
 	bool idle_data_captured ();
 	std::atomic<int> idle_update_queued;
-	Temporal::timecnt_t data_capture_duration;
+	PBD::ScopedConnectionList capture_connections;
+	samplecnt_t data_capture_duration;
 };
 
 

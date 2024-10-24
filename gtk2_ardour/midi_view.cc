@@ -4498,7 +4498,7 @@ MidiView::set_step_edit_cursor_width (Temporal::Beats beats)
 }
 
 void
-MidiView::clip_data_recorded (timecnt_t const & total_duration)
+MidiView::clip_data_recorded (samplecnt_t total_duration)
 {
 	if (!_midi_track) {
 		return;
@@ -4573,7 +4573,7 @@ MidiView::clip_data_recorded (timecnt_t const & total_duration)
 		}
 	}
 
-	active_note_end = total_duration;
+	active_note_end = timecnt_t (total_duration);
 }
 
 /** Called when a diskstream on our track has received some data.  Update the view, if applicable.

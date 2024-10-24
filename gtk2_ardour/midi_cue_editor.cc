@@ -466,7 +466,7 @@ MidiCueEditor::toolbox ()
 }
 
 void
-MidiCueEditor::data_captured (timecnt_t total_duration)
+MidiCueEditor::data_captured (samplecnt_t total_duration)
 {
 	data_capture_duration = total_duration;
 
@@ -474,14 +474,13 @@ MidiCueEditor::data_captured (timecnt_t total_duration)
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &MidiCueEditor::idle_data_captured));
 	}
 
-	samplepos_t pos = data_capture_duration.end().samples();
-	_playhead_cursor->set_position (pos);
+	_playhead_cursor->set_position (data_capture_duration);
 }
 
 bool
 MidiCueEditor::idle_data_captured ()
 {
-	double where = duration_to_pixels (data_capture_duration);
+	double where = sample_to_pixel_unrounded (data_capture_duration);
 
 	if (where > _visible_canvas_width * 0.80) {
 		set_samples_per_pixel (samples_per_pixel * 1.5);

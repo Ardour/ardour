@@ -797,7 +797,6 @@ TriggerUI::trigger_changed (PropertyChange const& what)
 	on_trigger_changed(what);
 }
 
-
 void
 TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 {
