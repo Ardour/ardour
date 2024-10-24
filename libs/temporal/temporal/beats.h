@@ -91,7 +91,7 @@ public:
 
 	/** Create from ticks at a given rate.
 	 *
-	 * Note this can also be used to create from frames by setting ppqn to the
+	 * Note this can also be used to create from samples by setting ppqn to the
 	 * number of samples per beat.  Note the resulting Beats will, like all
 	 * others, have the default PPQN, so this is a potentially lossy
 	 * conversion.
