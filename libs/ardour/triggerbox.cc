@@ -1971,8 +1971,6 @@ AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
 	_armed = false;
 	ArmChanged(); /* EMIT SIGNAL */
 	TriggerArmChanged (this);
-
-	TriggerBox::worker->request_build_source (this);
 }
 
 int
@@ -2482,8 +2480,6 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 	_armed = false;
 	ArmChanged(); /* EMIT SIGNAL */
 	TriggerArmChanged (this);
-
-	TriggerBox::worker->request_build_source (this);
 }
 
 void
