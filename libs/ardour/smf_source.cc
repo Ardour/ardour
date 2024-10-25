@@ -740,7 +740,11 @@ SMFSource::load_model_unlocked (bool force_reload)
 	std::list< std::pair< Evoral::Event<Temporal::Beats>*, gint > > eventlist;
 
 	for (unsigned i = 1; i <= num_tracks(); ++i) {
-		if (seek_to_track(i)) continue;
+		if (seek_to_track(i)) {
+			continue;
+		}
+
+		std::cerr << "Now loading track " << i << std::endl;
 
 		time = 0;
 		have_event_id = false;
