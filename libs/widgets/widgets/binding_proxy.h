@@ -25,6 +25,8 @@
 
 #include "pbd/signals.h"
 
+#include "gdk/gdkevents.h"
+
 #include "widgets/visibility.h"
 
 namespace PBD {

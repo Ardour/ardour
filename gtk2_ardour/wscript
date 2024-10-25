@@ -156,7 +156,7 @@ gtk2_ardour_sources = [
         'main.cc',
         'main_clock.cc',
         'marker.cc',
-    	'mergeable_line.cc',
+        'mergeable_line.cc',
         'midi_automation_line.cc',
         'midi_channel_dialog.cc',
         'midi_channel_selector.cc',
@@ -876,7 +876,7 @@ def build(bld):
         obj.stdin = 'livetrax.menus.in'
     else:
         obj.stdin = 'ardour.menus.in'
-    obj.stdout = 'ardour.menus'        
+    obj.stdout = 'ardour.menus'
     bld.install_files (bld.env['CONFDIR'], 'ardour.menus')
 
     # Freedesktop
@@ -968,26 +968,27 @@ def build(bld):
             bld.install_as (os.path.join(os.path.normpath(bld.env['LOCALEDIR']), lang, 'LC_MESSAGES', I18N_PACKAGE + '.mo'),
                             mo)
 
-def i18n(bld):
+def i18n_func(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
     autowaf.build_i18n(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                        'Paul Davis')
     appdata_i18n_pot(bld)
     appdata_i18n_po(bld)
+    appdata_i18n_mo(bld)
 
-def i18n_pot(bld):
+def i18n_pot_func(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
     autowaf.build_i18n_pot(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                            'Paul Davis')
     appdata_i18n_pot(bld)
 
-def i18n_po(bld):
+def i18n_po_func(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
     autowaf.build_i18n_po(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                           'Paul Davis')
     appdata_i18n_po(bld)
 
-def i18n_mo(bld):
+def i18n_mo_func(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
     autowaf.build_i18n_mo(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                           'Paul Davis')
@@ -995,7 +996,7 @@ def i18n_mo(bld):
 def appdata_i18n_pot(bld):
     potfile = os.path.join(bld.top_dir, 'gtk2_ardour', 'appdata',
             'ardour.appdata.pot')
-    if bld.cmd == 'i18n_pot':
+    if bld.cmd in ('i18n_pot', 'i18n'):
         Logs.info('Generating pot file from Ardour appdata')
         itsfile = os.path.join(bld.top_dir, 'tools', 'as-metainfo.its')
         adsource = os.path.join(bld.top_dir, 'gtk2_ardour',

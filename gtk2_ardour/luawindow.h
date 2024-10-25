@@ -40,6 +40,8 @@
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
 
+#include "ardour_window.h"
+
 class LuaWindow :
 	public ArdourWindow,
 	public PBD::ScopedConnectionList

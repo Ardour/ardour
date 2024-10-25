@@ -12,9 +12,9 @@ def configure(conf):
 def build(bld):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
-	lppro.cc
-	interface.cc
-	gui.cc
+        lppro.cc
+        interface.cc
+        gui.cc
     '''
     obj.defines      = [ 'PACKAGE="ardour_launchpad_pro"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]

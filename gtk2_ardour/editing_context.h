@@ -315,7 +315,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void reset_point_selection ();
 
 	/** Set the mouse mode (gain, object, range, timefx etc.)
-	 * @param m Mouse mode (defined in editing_syms.h)
+	 * @param m Mouse mode (defined in editing_syms.inc.h)
 	 * @param force Perform the effects of the change even if no change is required
 	 * (ie even if the current mouse mode is equal to @p m)
 	 */
@@ -325,7 +325,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	 */
 	virtual void step_mouse_mode (bool next) = 0;
 	/** @return The current mouse mode (gain, object, range, timefx etc.)
-	 * (defined in editing_syms.h)
+	 * (defined in editing_syms.inc.h)
 	 */
 	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
 	virtual Editing::MouseMode effective_mouse_mode () const { return mouse_mode; }

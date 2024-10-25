@@ -89,7 +89,7 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner, public sigc::
 	 */
 	void step_mouse_mode (bool next);
 	/** @return The current mouse mode (gain, object, range, timefx etc.)
-	 * (defined in editing_syms.h)
+	 * (defined in editing_syms.inc.h)
 	 */
 	Editing::MouseMode current_mouse_mode () const;
 	/** cue editors are *always* used for internal editing */

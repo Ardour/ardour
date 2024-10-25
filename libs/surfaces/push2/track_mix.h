@@ -21,7 +21,10 @@
 
 #include <vector>
 
+#include "pbd/property_basics.h"
+
 #include "layout.h"
+#include "push2.h"
 
 namespace ARDOUR {
 	class Stripable;

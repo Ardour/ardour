@@ -22,6 +22,9 @@
 #include "ardour/route_group.h"
 #include "ardour/session_handle.h"
 
+#include <gtkmm/menu.h>
+#include <gtkmm/radiomenuitem.h>
+
 class RouteGroupDialog;
 
 class RouteGroupMenu : public ARDOUR::SessionHandlePtr

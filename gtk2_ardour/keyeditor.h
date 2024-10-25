@@ -22,6 +22,7 @@
 
 #include <string>
 
+#include <gtkmm/action.h>
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/scrolledwindow.h>

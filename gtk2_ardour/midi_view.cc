@@ -236,7 +236,17 @@ MidiView::set_model (std::shared_ptr<MidiModel> m)
 	assert (_midi_track);
 	assert (_midi_region);
 
+	clear_events ();
+	connections_requiring_model.drop_connections ();
+
 	_model = m;
+
+	if (!_model) {
+		std::cerr << "no model!\n";
+		return;
+	}
+
+	std::cerr << "model set to " << _model << std::endl;
 
 	//set_height (trackview.current_height());
 
@@ -250,8 +260,6 @@ MidiView::set_model (std::shared_ptr<MidiModel> m)
 	set_colors ();
 	reset_width_dependent_items (_pixel_width);
 */
-
-	connections_requiring_model.drop_connections ();
 
 	_model->ContentsChanged.connect (connections_requiring_model, invalidator (*this), std::bind (&MidiView::model_changed, this), gui_context());
 
@@ -849,9 +857,8 @@ MidiView::clear_events ()
 {
 	// clear selection without signaling or trying to change state of event objects
 	_selection.clear ();
-
 	clear_ghost_events ();
-
+	/* This will delete all the NoteBase* in the _events map */
 	_note_group->clear (true);
 	_events.clear();
 	_patch_changes.clear();
@@ -863,8 +870,6 @@ void
 MidiView::display_model (std::shared_ptr<MidiModel> model)
 {
 	set_model (_model);
-	/* Don't signal as nobody else needs to know until selection has been altered. */
-	clear_events();
 	model_changed ();
 }
 
@@ -1099,12 +1104,14 @@ MidiView::model_changed()
 		return;
 	}
 
-	if (!_model) {
-		return;
+	for (_optimization_iterator = _events.begin(); _optimization_iterator != _events.end(); ++_optimization_iterator) {
+		_optimization_iterator->second->invalidate ();
 	}
 
-	for (_optimization_iterator = _events.begin(); _optimization_iterator != _events.end(); ++_optimization_iterator) {
-		_optimization_iterator->second->invalidate();
+	/* note that _optimization_iterator now points to _events.end() */
+
+	if (!_model) {
+		return;
 	}
 
 	bool empty_when_starting = _events.empty();
@@ -1588,6 +1595,7 @@ void
 MidiView::end_write()
 {
 	if (_active_notes) {
+		std::cerr << "active notes deleted in end_write\n";
 		for (unsigned i = 0; i < 128; ++i) {
 			delete _active_notes[i];
 		}
@@ -2271,7 +2279,7 @@ MidiView::clear_selection_internal ()
 	DEBUG_TRACE(DEBUG::Selection, "MRV::clear_selection_internal\n");
 
 	for (auto & sel : _selection) {
-		sel->set_selected(false);
+		sel->set_selected (false);
 		sel->hide_velocity();
 		ghost_sync_selection (sel);
 	}

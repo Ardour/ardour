@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 inline static void clamp_to_0_127(uint8_t &val)
 {
 	if ((127 < val) && (val < 192)) {

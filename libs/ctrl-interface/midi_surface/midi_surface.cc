@@ -35,7 +35,7 @@ using namespace ARDOUR;
 using namespace Glib;
 using namespace PBD;
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 MIDISurface::MIDISurface (ARDOUR::Session& s, std::string const & namestr, std::string const & port_prefix, bool use_pad_filter)
 	: ControlProtocol (s, namestr)

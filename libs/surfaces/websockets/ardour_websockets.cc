@@ -32,7 +32,7 @@
 using namespace ARDOUR;
 using namespace ArdourSurface;
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 ArdourWebsockets::ArdourWebsockets (Session& s)
     : ControlProtocol (s, X_ (surface_name))

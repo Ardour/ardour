@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <unistd.h>
+
 namespace PBD {
 
 struct ScopedFileDescriptor {

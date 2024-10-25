@@ -22,6 +22,8 @@
 
 #include "gtkmm2ext/visibility.h"
 
+#include <glib.h>
+
 namespace Gtk {
 	class Widget;
 }

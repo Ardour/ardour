@@ -97,6 +97,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> patch_change;  /* only to transmit updates, not storage */
 		PBD::PropertyDescriptor<bool> channel_map;  /* only to transmit updates, not storage */
 		PBD::PropertyDescriptor<bool> used_channels;  /* only to transmit updates, not storage */
+		PBD::PropertyDescriptor<bool> region;  /* only to transmit updates, not storage */
 	}
 }
 
@@ -126,6 +127,7 @@ TriggerBox::all_trigger_props()
 	all.add(Properties::patch_change);
 	all.add(Properties::channel_map);
 	all.add(Properties::used_channels);
+	all.add(Properties::region);
 
 	return all;
 }
@@ -290,8 +292,20 @@ Trigger::request_trigger_delete (Trigger* t)
 void
 Trigger::arm ()
 {
-#warning paul need channel count here, somehow
-	_box.arm_from_another_thread (*this, _box.session().transport_sample(), 2);
+	/* trigger arming is mutually exclusive within a given TriggerBox */
+
+	_box.disarm_all ();
+
+	Track* trk = static_cast<Track*> (_box.owner());
+	int chns;
+
+	if (trk->data_type() == DataType::AUDIO) {
+		chns = dynamic_cast<AudioTrack*> (trk)->input()->n_ports().n_audio();
+	} else {
+		chns = 0;
+	}
+
+	_box.arm_from_another_thread (*this, _box.session().transport_sample(), chns);
 	_armed = true;
 	ArmChanged(); /* EMIT SIGNAL */
 	TriggerArmChanged (this);
@@ -300,7 +314,6 @@ Trigger::arm ()
 void
 Trigger::disarm ()
 {
-	_box.disarm ();
 	_armed = false;
 	ArmChanged(); /* EMIT SIGNAL */
 	TriggerArmChanged (this);
@@ -1952,10 +1965,12 @@ AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
 	delete &ai; // XXX delete is not RT-safe
 
 	_box.queue_explict (index());
-	TriggerBox::worker->request_build_source (this);
 
 	_armed = false;
 	ArmChanged(); /* EMIT SIGNAL */
+	TriggerArmChanged (this);
+
+	TriggerBox::worker->request_build_source (this);
 }
 
 int
@@ -2455,10 +2470,12 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 	_box.queue_explict (index());
 
 	/* Meanwhile, build a new source and region from the data now in rt_midibuffer */
-	TriggerBox::worker->request_build_source (this);
 
 	_armed = false;
 	ArmChanged(); /* EMIT SIGNAL */
+	TriggerArmChanged (this);
+
+	TriggerBox::worker->request_build_source (this);
 }
 
 void
@@ -2950,10 +2967,7 @@ MIDITrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> r
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loaded midi region, span is %2\n", name(), data_length));
 
-	/* This is being used as a kind of shorthand for "everything" which is
-	   pretty stupid
-	*/
-	send_property_change (ARDOUR::Properties::name);
+	send_property_change (ARDOUR::Properties::region);
 
 	return 0;
 }
@@ -3569,6 +3583,16 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 void
 TriggerBox::disarm ()
 {
+	delete _arm_info;
+	_arm_info = nullptr;
+}
+
+void
+TriggerBox::disarm_all ()
+{
+	for (auto & t : all_triggers) {
+		t->disarm ();
+	}
 }
 
 void
@@ -3576,8 +3600,13 @@ TriggerBox::finish_recording (BufferSet& bufs)
 {
 	SlotArmInfo* ai = _arm_info.load();
 	assert (ai);
+
+	/* This transfers responsibility for the SlotArmInfo object to the
+	   trigger
+	*/
 	ai->slot.captured (*ai, bufs);
 	_arm_info = nullptr;
+	_record_state = Disabled;
 }
 
 void

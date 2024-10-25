@@ -30,6 +30,8 @@
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/window_proxy.h"
 
+#include "ardour/session_handle.h"
+
 class XMLNode;
 
 namespace Gtk {

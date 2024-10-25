@@ -16,22 +16,6 @@ from waflib.Tools.compiler_cxx import cxx_compiler
 c_compiler['darwin'] = ['gcc', 'clang' ]
 cxx_compiler['darwin'] = ['g++', 'clang++' ]
 
-class i18n(BuildContext):
-    cmd = 'i18n'
-    fun = 'i18n'
-
-class i18n_pot(BuildContext):
-    cmd = 'i18n_pot'
-    fun = 'i18n_pot'
-
-class i18n_po(BuildContext):
-    cmd = 'i18n_po'
-    fun = 'i18n_po'
-
-class i18n_mo(BuildContext):
-    cmd = 'i18n_mo'
-    fun = 'i18n_mo'
-
 compiler_flags_dictionaries= {
     'gcc' : {
         # Flags required when building a debug build
@@ -784,8 +768,6 @@ int main() { return 0; }''',
     compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
     compiler_flags.append ('-DPROGRAM_VERSION="' + PROGRAM_VERSION + '"')
 
-    conf.env['PROGRAM_NAME'] = Options.options.program_name
-
     if opt.debug:
         conf.env.append_value('CFLAGS', debug_flags)
         conf.env.append_value('CXXFLAGS', debug_flags)
@@ -806,9 +788,9 @@ int main() { return 0; }''',
     conf.env.append_value('CXXFLAGS', cxx_flags)
     conf.env.append_value('LINKFLAGS', linker_flags)
 
-def create_resource_file(icon):
+def create_resource_file(name):
     try:
-        text = 'IDI_ICON1 ICON DISCARDABLE "icons/' + icon + '.ico"\n'
+        text = 'IDI_ICON1 ICON DISCARDABLE "icons/' + name + '.ico"\n'
         o = open('gtk2_ardour/windows_icon.rc', 'w')
         o.write(text)
         o.close()
@@ -900,8 +882,6 @@ def options(opt):
                     help="Run tests after build")
     opt.add_option('--single-tests', action='store_true', default=False, dest='single_tests',
                     help="Build a single executable for each unit test")
-    #opt.add_option('--tranzport', action='store_true', default=False, dest='tranzport',
-    # help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
     opt.add_option('--maschine', action='store_true', default=False, dest='maschine',
                     help='Compile with support for NI-Maschine')
     opt.add_option('--generic', action='store_true', default=False, dest='generic',
@@ -984,6 +964,8 @@ def configure(conf):
         # lazy approach: just use major version 2.X.X
         if itstool != "itstool" or version[0] < "2":
             conf.fatal("--freedesktop requires itstool > 2.0.0 to translate files.")
+
+    conf.env['PROGRAM_NAME'] = Options.options.program_name or 'Ardour'
 
     conf.env['VERSION'] = VERSION
     conf.env['MAJOR'] = MAJOR
@@ -1348,8 +1330,6 @@ int main () { __int128 x = 0; return 0; }
         conf.env['RUN_TESTS'] = opts.run_tests
     if opts.single_tests:
         conf.env['SINGLE_TESTS'] = opts.single_tests
-    #if opts.tranzport:
-    #    conf.env['TRANZPORT'] = 1
     if not opts.no_windows_vst:
         if Options.options.dist_target == 'mingw':
             conf.define('WINDOWS_VST_SUPPORT', 1)
@@ -1558,7 +1538,6 @@ const char* const ardour_config_info = "\\n\\
 #    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
     write_config_text('Threaded WaveViews',    not opts.no_threaded_waveviews)
     write_config_text('Translation',           not opts.no_nls)
-#    write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
     write_config_text('Use LLD linker',        opts.use_lld)
     write_config_text('VST3 support',          conf.is_defined('VST3_SUPPORT'))
@@ -1653,17 +1632,36 @@ def build(bld):
     if bld.env['RUN_TESTS']:
         bld.add_post_fun(test)
 
-def i18n(bld):
-    print(bld.env)
+# The following i18n command implementations need a BuildContext (with .env),
+# and we thus create BuildContext subclasses that define the `cmd` command to
+# execute the `fun` function (which often will recurse).
+
+class _i18n_build_context(BuildContext):
+    cmd = 'i18n'
+    fun = 'i18n_func'
+
+def i18n_func(bld):
     bld.recurse (i18n_children)
 
-def i18n_pot(bld):
+class _i18n_pot_build_context(BuildContext):
+    cmd = 'i18n_pot'
+    fun = 'i18n_pot_func'
+
+def i18n_pot_func(bld):
     bld.recurse (i18n_children)
 
-def i18n_po(bld):
+class _i18n_po_build_context(BuildContext):
+    cmd = 'i18n_po'
+    fun = 'i18n_po_func'
+
+def i18n_po_func(bld):
     bld.recurse (i18n_children)
 
-def i18n_mo(bld):
+class _i18n_mo_build_context(BuildContext):
+    cmd = 'i18n_mo'
+    fun = 'i18n_mo_func'
+
+def i18n_mo_func(bld):
     bld.recurse (i18n_children)
 
 def tarball(bld):

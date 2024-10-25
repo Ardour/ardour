@@ -18,7 +18,7 @@
 
 #include <optional>
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 #include "pbd/controllable.h"
 #include "pbd/i18n.h"
 

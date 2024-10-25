@@ -26,7 +26,9 @@
 #include <string>
 #include <iostream>
 
+#include "evoral/Parameter.h"
 #include "pbd/cartesian.h"
+#include "temporal/domain_provider.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"

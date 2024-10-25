@@ -41,6 +41,7 @@ class ViewBackground
 	virtual ~ViewBackground ();
 
 	virtual double height() const { return 0.; }
+	virtual double width() const { return 0.; }
 	virtual double contents_height() const { return 0.; }
 
 	/** @return y position, or -1 if hidden */

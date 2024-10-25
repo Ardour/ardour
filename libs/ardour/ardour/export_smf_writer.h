@@ -25,6 +25,8 @@
 #include "ardour/midi_state_tracker.h"
 #include "ardour/types.h"
 
+#include <memory>
+
 namespace ARDOUR
 {
 class MidiBuffer;

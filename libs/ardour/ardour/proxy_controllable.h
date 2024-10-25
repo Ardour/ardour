@@ -23,6 +23,8 @@
 #include <functional>
 
 #include "pbd/controllable.h"
+
+#include "ardour/dB.h"
 #include "ardour/libardour_visibility.h"
 
 namespace ARDOUR {

@@ -18,6 +18,10 @@
 
 #pragma once
 
+#include "ardour/libardour_visibility.h"
+
+#include <memory>
+
 namespace ARDOUR {
 
 class ControlGroup;

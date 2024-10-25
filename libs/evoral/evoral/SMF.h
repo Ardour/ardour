@@ -23,6 +23,8 @@
 #define EVORAL_SMF_HPP
 
 #include <glibmm/threads.h>
+
+#include <memory>
 #include <set>
 
 #include "evoral/visibility.h"
@@ -37,6 +39,7 @@ typedef smf_tempo_struct smf_tempo_t;
 
 namespace Temporal {
 	class TempoMap;
+	class Beats;
 }
 
 namespace Evoral {
@@ -87,6 +90,7 @@ public:
 	void end_write(std::string const &);
 
 	void flush() {};
+	void set_length (Temporal::Beats const &);
 
 	double round_to_file_precision (double val) const;
 

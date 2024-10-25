@@ -34,9 +34,6 @@ def configure(conf):
 
     autowaf.set_recursive()
 
-    #if Options.options.tranzport and conf.is_defined('HAVE_USB'):
-    #    conf.define('BUILD_TRANZPORT', 1)
-
     if conf.is_defined('HAVE_USB'):
         children += [ 'push2' ]
         children += [ 'contourdesign' ]
@@ -86,8 +83,6 @@ def build(bld):
 
     if bld.is_defined('BUILD_WIIMOTE'):
         bld.recurse('wiimote')
-    if bld.is_defined('BUILD_TRANZPORT'):
-        bld.recurse('tranzport')
     if bld.is_defined('HAVE_USB'):
         bld.recurse('push2')
         bld.recurse('contourdesign')

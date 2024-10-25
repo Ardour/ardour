@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
 class LIBARDOUR_API Movable {

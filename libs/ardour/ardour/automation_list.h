@@ -43,7 +43,6 @@
 namespace ARDOUR {
 
 class AutomationList;
-class BeatsSamplesConverter;
 
 /** A SharedStatefulProperty for AutomationLists */
 class LIBARDOUR_API AutomationListProperty : public PBD::SharedStatefulProperty<AutomationList>

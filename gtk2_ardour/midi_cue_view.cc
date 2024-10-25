@@ -95,7 +95,7 @@ MidiCueView::set_height (double h)
 	double automation_height = h - note_area_height - velocity_height;
 
 	event_rect->set (ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, note_area_height));
-	midi_context().set_size (ArdourCanvas::COORD_MAX, note_area_height);
+	midi_context().set_size (midi_context().width(), note_area_height);
 
 	velocity_base->set_position (ArdourCanvas::Duple (0., note_area_height));
 	velocity_base->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, velocity_height));

@@ -28,7 +28,7 @@ static inline float
 default_compute_peak (const ARDOUR::Sample * const buf, ARDOUR::pframes_t nsamples, float current)
 {
 	for (ARDOUR::pframes_t i = 0; i < nsamples; ++i) {
-		current = f_max (current, fabsf (buf[i]));
+		current = ARDOUR::f_max (current, fabsf (buf[i]));
 	}
 	return current;
 }

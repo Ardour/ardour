@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "pbd/demangle.h"
+#include "pbd/pool.h"
 
 #include "ardour/debug.h"
 #include "ardour/types.h"

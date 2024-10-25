@@ -29,13 +29,13 @@
 
 #include "note_base.h"
 #include "editing_context.h"
-#include "editing_syms.h"
+#include "editing_syms.inc.h"
 #include "keyboard.h"
 #include "midi_view.h"
 
 /* clang-format off */
 // Include last, when GRIDTYPE has been defined by editing.h via midi_region_view.h
-#include "editing_syms.h"
+#include "editing_syms.inc.h"
 /* clang-format on */
 
 using namespace std;

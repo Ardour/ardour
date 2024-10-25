@@ -24,6 +24,8 @@
 #include <cairomm/surface.h>
 #include "pbd/signals.h"
 
+#include <cmath>
+
 namespace ArdourSurface {
 
 class M2Contols;
@@ -63,7 +65,7 @@ class M2Device
 	protected:
 		void bump_blink () {
 			_blink_counter = (_blink_counter + 1) % 12;
-			_blink_shade = fabsf (1.f - _blink_counter / 6.f);
+			_blink_shade = std::fabsf (1.f - _blink_counter / 6.f);
 		}
 
 		uint32_t _splashcnt;

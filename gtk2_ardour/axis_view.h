@@ -33,6 +33,7 @@
 #include "pbd/xml++.h"
 #include "pbd/signals.h"
 
+#include "ardour/automation_control.h"
 #include "ardour/session_handle.h"
 
 #include "gui_object.h"

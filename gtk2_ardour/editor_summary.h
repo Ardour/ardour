@@ -21,7 +21,11 @@
 
 #pragma once
 
+#include "ardour/session_handle.h"
+#include "ardour/types.h"
 #include "gtkmm2ext/cairo_widget.h"
+#include "pbd/property_basics.h"
+
 #include "editor_component.h"
 
 namespace ARDOUR {
@@ -29,6 +33,8 @@ namespace ARDOUR {
 }
 
 class Editor;
+class RegionView;
+class RouteTimeAxisView;
 
 /** Class to provide a visual summary of the contents of an editor window; represents
  *  the whole session as a set of lines, one per region view.

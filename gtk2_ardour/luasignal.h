@@ -17,6 +17,9 @@
  */
 #ifndef _luasignal_h_
 #define _luasignal_h_
+
+#include <string>
+
 namespace LuaSignal {
 
 #define ENGINE(name,c) name,
@@ -24,7 +27,7 @@ namespace LuaSignal {
 #define SESSION(name,c) name,
 
 	enum LuaSignal {
-#		include "luasignal_syms.h"
+#		include "luasignal_syms.inc.h"
 		LAST_SIGNAL
 	};
 

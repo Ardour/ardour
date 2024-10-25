@@ -1,6 +1,7 @@
 #ifndef __gtk2_ardour_ghost_event_h__
 #define __gtk2_ardour_ghost_event_h__
 
+#include <memory>
 #include <unordered_map>
 #include <sigc++/trackable.h>
 

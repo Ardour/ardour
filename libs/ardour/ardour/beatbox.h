@@ -30,7 +30,7 @@
 #include "pbd/ringbuffer.h"
 
 #include "temporal/bbt_time.h"
-#include "temporal/superclock.h
+#include "temporal/superclock.h"
 
 #include "ardour/midi_state_tracker.h"
 #include "ardour/processor.h"

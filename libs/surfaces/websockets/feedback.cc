@@ -20,7 +20,7 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 #include "feedback.h"
 #include "transport.h"

@@ -23,6 +23,8 @@
 
 #include <gtkmm/window.h>
 #include <gtkmm/box.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/label.h>
 
 #include "gtkmm2ext/visibility.h"
 #include "gtkmm2ext/widget_state.h"

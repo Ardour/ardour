@@ -300,7 +300,11 @@ RegionFxPlugin::set_state (const XMLNode& node, int version)
 	node.get_property ("count", count);
 
 	if (_plugins.empty()) {
-		std::shared_ptr<Plugin> plugin = find_and_load_plugin (_session, node, type, unique_id, any_vst);
+		std::shared_ptr<Plugin> plugin;
+
+		if (!_session.get_disable_all_loaded_plugins ()) {
+			plugin = find_and_load_plugin (_session, node, type, unique_id, any_vst);
+		}
 
 		if (!plugin) {
 			delete _state;

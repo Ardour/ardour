@@ -28,8 +28,10 @@
 
 #include "pbd/controllable.h"
 #include "pbd/stateful.h"
-#include "ardour/types.h"
+
 #include "ardour/processor.h"
+#include "ardour/route_group.h"
+#include "ardour/types.h"
 
 #include "osc.h"
 

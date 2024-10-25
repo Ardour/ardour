@@ -19,6 +19,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 #include <iostream>
 
 #include "pbd/ringbufferNPT.h"

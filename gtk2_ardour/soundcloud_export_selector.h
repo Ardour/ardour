@@ -19,6 +19,8 @@
 #include <gtkmm/progressbar.h>
 #include <gtkmm/table.h>
 
+#include "ardour/session_handle.h"
+
 class SoundcloudExportSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
 public:

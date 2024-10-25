@@ -19,6 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#pragma once
+
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/comboboxtext.h>
 
@@ -27,7 +30,6 @@
 #include "audio_clock.h"
 
 namespace ARDOUR {
-	class BeatsSamplesConverter;
 	class Session;
 	class InstrumentInfo;
 }

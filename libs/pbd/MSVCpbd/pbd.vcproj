@@ -697,10 +697,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\pbd\functor_command.h"
-				>
-			</File>
-			<File
 				RelativePath="..\msvc\getopt.h"
 				>
 			</File>

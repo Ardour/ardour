@@ -814,6 +814,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 
 	void arm_from_another_thread (Trigger& slot, samplepos_t, uint32_t chans);
 	void disarm();
+	void disarm_all();
 	bool armed() const { return (bool) _arm_info.load(); }
 	PBD::Signal<void()> ArmedChanged;
 
@@ -1099,6 +1100,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> patch_change; /* type not important */
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> channel_map; /* type not important */
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> used_channels; /* type not important */
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> region; /* type not important */
 
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> tempo_meter; /* only used to transmit changes, not storage */
 }

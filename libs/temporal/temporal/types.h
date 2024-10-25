@@ -18,7 +18,9 @@
 
 #pragma once
 
+#include <cassert>
 #include <cstdlib>
+#include <ostream>
 #include <stdint.h>
 
 #include "pbd/integer_division.h"

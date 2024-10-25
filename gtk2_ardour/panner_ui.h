@@ -49,6 +49,7 @@ namespace ARDOUR {
 }
 
 namespace Gtk {
+	class CheckMenuItem;
 	class Menu;
 	class Menuitem;
 }

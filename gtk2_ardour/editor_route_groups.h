@@ -20,12 +20,17 @@
 
 #pragma once
 
+#include <gtkmm/box.h>
+#include <gtkmm/colorselection.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
 
 #include "editor_component.h"
+
+#include "ardour/route_group.h"
+#include "ardour/session_handle.h"
 
 class EditorRouteGroups : public EditorComponent, public ARDOUR::SessionHandlePtr
 {
