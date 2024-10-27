@@ -380,6 +380,7 @@ LuaProc::load_script ()
 				_param_desc[pn].logarithmic  = lr["logarithmic"].isBoolean () && (lr["logarithmic"]).cast<bool> ();
 				_param_desc[pn].integer_step = lr["integer"].isBoolean () && (lr["integer"]).cast<bool> ();
 				_param_desc[pn].sr_dependent = lr["ratemult"].isBoolean () && (lr["ratemult"]).cast<bool> ();
+				_param_desc[pn].inline_ctrl  = lr["inline"].isBoolean () && (lr["inline"]).cast<bool> ();
 				_param_desc[pn].enumeration  = lr["enum"].isBoolean () && (lr["enum"]).cast<bool> ();
 
 				if (lr["bypass"].isBoolean () && (lr["bypass"]).cast<bool> ()) {
@@ -1094,6 +1095,7 @@ LuaProc::get_parameter_descriptor (uint32_t port, ParameterDescriptor& desc) con
 	desc.integer_step = d.integer_step;
 	desc.sr_dependent = d.sr_dependent;
 	desc.enumeration  = d.enumeration;
+	desc.inline_ctrl  = d.inline_ctrl;
 	desc.unit         = d.unit;
 	desc.label        = d.label;
 	desc.scale_points = d.scale_points;
