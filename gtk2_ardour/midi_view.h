@@ -503,7 +503,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	Temporal::Beats                      _step_edit_cursor_width;
 	Temporal::Beats                      _step_edit_cursor_position;
 	NoteBase*                            _channel_selection_scoped_note;
-
+	bool                                 _needs_active_notes_for_rec_enabled_track;
 	MouseState _mouse_state;
 	int _pressed_button;
 

@@ -113,13 +113,14 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
                     uint32_t                   basic_color)
 	: _editing_context (ec)
 	, _midi_context (bg)
-	, _active_notes (0)
+	, _active_notes (nullptr)
 	, _note_group (new ArdourCanvas::Container (&parent))
 	, _note_diff_command (nullptr)
 	, _ghost_note(0)
 	, _step_edit_cursor (0)
 	, _step_edit_cursor_width (1, 0)
 	, _channel_selection_scoped_note (0)
+	, _needs_active_notes_for_rec_enabled_track (false)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _optimization_iterator (_events.end())
@@ -139,19 +140,19 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	init (mt);
 }
 
-
 MidiView::MidiView (MidiView const & other)
 	: sigc::trackable (other)
 	, _editing_context (other.editing_context())
 	, _midi_context (other.midi_context())
 	, _midi_region (other.midi_region())
-	, _active_notes(0)
+	, _active_notes (nullptr)
 	, _note_group (new ArdourCanvas::Container (other._note_group->parent()))
 	, _note_diff_command (0)
 	, _ghost_note(0)
 	, _step_edit_cursor (0)
 	, _step_edit_cursor_width (1, 0)
 	, _channel_selection_scoped_note (0)
+	, _needs_active_notes_for_rec_enabled_track (false)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _optimization_iterator (_events.end())
@@ -193,7 +194,7 @@ MidiView::set_track (std::shared_ptr<MidiTrack> mt)
 	if (_midi_track) {
 		_midi_track->DropReferences.connect (track_going_away_connection, invalidator (*this), std::bind (&MidiView::track_going_away, this), gui_context());
 
-		if (_midi_track->triggerbox()->record_enabled()) {
+		if (_needs_active_notes_for_rec_enabled_track && _midi_track->triggerbox()->record_enabled()) {
 			begin_write ();
 		} else {
 			end_write ();
