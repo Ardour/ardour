@@ -353,6 +353,7 @@ Session::Session (AudioEngine &eng,
 	, _pending_cue (-1)
 	, _active_cue (-1)
 	, tb_with_filled_slots (0)
+	, _global_quantization (Config->get_default_quantization())
 {
 	_suspend_save.store (0);
 	_playback_load.store (0);

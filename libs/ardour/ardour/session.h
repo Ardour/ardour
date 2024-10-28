@@ -1341,6 +1341,10 @@ public:
 	void start_domain_bounce (Temporal::DomainBounceInfo&);
 	void finish_domain_bounce (Temporal::DomainBounceInfo&);
 
+	AnyTime global_quantization() const { return _global_quantization; }
+	void set_global_quantization (AnyTime const &);
+	PBD::Signal<void()> QuantizationChanged;
+
 protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
@@ -2347,6 +2351,8 @@ private:
 	void handle_slots_empty_status (std::weak_ptr<Route> const &);
 
 	void time_domain_changed ();
+
+	AnyTime _global_quantization;
 };
 
 
