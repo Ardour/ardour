@@ -230,7 +230,7 @@ SessionEventManager::merge_event (SessionEvent* ev)
 
 	/* try to handle immediate events right here */
 
-	if (ev->type == SessionEvent::Locate || ev->type == SessionEvent::LocateRoll) {
+	if (ev->type == SessionEvent::Locate || ev->type == SessionEvent::LocateRoll || ev->type == SessionEvent::EndRoll) {
 		/* remove any existing Locates that are waiting to execute */
 		_clear_event_type (ev->type);
 	}
