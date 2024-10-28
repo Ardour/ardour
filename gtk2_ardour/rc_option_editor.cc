@@ -3753,6 +3753,14 @@ These settings will only take effect after %1 is restarted.\n\
 	                     );
 	add_option (_("Transport"), bo);
 
+
+	bo = new BoolOption ("stop-on-grid",
+	                     _("Stop transport using the current grid (if any)"),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_on_grid),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_on_grid)
+	                     );
+	add_option (_("Transport"), bo);
+
 	add_option (_("Transport"), new OptionEditorHeading (_("Looping")));
 
 	bo = new BoolOption (
