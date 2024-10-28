@@ -300,8 +300,6 @@ public:
 	bool edited() const      { return _edited; }
 	void set_edited(bool yn) { _edited = yn; }
 
-	bool overlaps (const NotePtr& ev,
-	               const NotePtr& ignore_this_note) const;
 	bool contains (const NotePtr& ev) const;
 
 	bool add_note_unlocked (const NotePtr note, void* arg = 0);
@@ -337,7 +335,6 @@ protected:
 private:
 	friend class const_iterator;
 
-	bool overlaps_unlocked (const NotePtr& ev, const NotePtr& ignore_this_note) const;
 	bool contains_unlocked (const NotePtr& ev) const;
 
 	void append_note_on_unlocked(const Event<Time>& event, Evoral::event_id_t);
