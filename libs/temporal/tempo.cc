@@ -360,6 +360,17 @@ Meter::round_to_bar (Temporal::BBT_Time const & bbt) const
 }
 
 Temporal::BBT_Time
+Meter::round_up_to_bar (Temporal::BBT_Time const & bbt) const
+{
+	if (bbt.beats == 1 && bbt.ticks == 0) {
+		/* on bar, do not round up */
+		return bbt;
+	}
+
+	return BBT_Time (bbt.bars+1, 1, 0);
+}
+
+Temporal::BBT_Time
 Meter::round_up_to_beat_div (Temporal::BBT_Time const & bbt, int beat_div) const
 {
 	Temporal::BBT_Time b = bbt.round_up_to_beat_div (beat_div);
