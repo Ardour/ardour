@@ -683,14 +683,14 @@ Editor::Editor ()
 	toolbar_shadow->show();
 
 	global_vpacker.pack_start (*toolbar_shadow, false, false);
-	global_vpacker.pack_start (editor_summary_pane, true, true);
+	global_vpacker.pack_start (ebox_hpacker, true, true);
 
 	/* pack all the main pieces into appropriate containers from _tabbable
 	 */
 	content_app_bar.add (_application_bar);
 	content_att_right.add (_editor_list_vbox);
-	content_toolbar.add (ebox_hpacker);
-	content_innermost_hbox.add (global_vpacker);
+	content_toolbar.add (global_vpacker);
+	content_innermost_hbox.add (editor_summary_pane);
 
 	/* need to show the "contents" widget so that notebook will show if tab is switched to
 	 */
