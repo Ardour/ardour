@@ -101,6 +101,11 @@ RecorderUI::RecorderUI ()
 	load_bindings ();
 	register_actions ();
 
+	content_right_pane.remove(content_right_vbox);
+	left_attachment_button.set_sensitive(false);
+	bottom_attachment_button.set_sensitive(false);
+	right_attachment_button.set_sensitive(false);
+
 	/* monitoring */
 	_auto_input_button.set_related_action (ActionManager::get_action ("Transport", "ToggleAutoInput"));
 	_auto_input_button.set_name ("transport option button");

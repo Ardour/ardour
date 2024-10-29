@@ -164,6 +164,13 @@ Mixer_UI::Mixer_UI ()
 
 	contents().set_data ("ardour-bindings", bindings);
 
+	if (!Profile->get_mixbus ()) {
+		right_attachment_button.set_sensitive(false);
+	} else {
+		left_attachment_button.set_sensitive(false);
+	}
+	bottom_attachment_button.set_sensitive(false);
+
 	PresentationInfo::Change.connect (*this, invalidator (*this), std::bind (&Mixer_UI::presentation_info_changed, this, _1), gui_context());
 	Route::FanOut.connect (*this, invalidator (*this), std::bind (&Mixer_UI::fan_out, this, _1, false, true), gui_context());
 
@@ -2295,23 +2302,6 @@ Mixer_UI::route_group_property_changed (RouteGroup* group, const PropertyChange&
 }
 
 void
-Mixer_UI::toggle_mixer_list ()
-{
-	Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleMixerList");
-	showhide_mixer_list (act->get_active());
-}
-
-void
-Mixer_UI::showhide_mixer_list (bool yn)
-{
-	if (yn) {
-		list_vpacker.show ();
-	} else {
-		list_vpacker.hide ();
-	}
-}
-
-void
 Mixer_UI::toggle_monitor_section ()
 {
 	Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleMonitorSection");
@@ -3714,7 +3704,23 @@ Mixer_UI::register_actions ()
 	ActionManager::register_action (group, "toggle-midi-input-active", _("Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"),
 	                           sigc::bind (sigc::mem_fun (*this, &Mixer_UI::toggle_midi_input_active), false));
 
-	ActionManager::register_toggle_action (group, X_("ToggleMixerList"), _("Mixer: Show Mixer List"), sigc::mem_fun (*this, &Mixer_UI::toggle_mixer_list));
+	/* attachments visibility (editor-mixer-strip, bottom properties, sidebar list) */
+
+	RefPtr<Action> act;
+	if (!Profile->get_mixbus ()) {
+		act = ActionManager::register_toggle_action (group, "ToggleMixerList", _("(Mixer) Show Sidebar List"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
+		left_attachment_button.set_related_action (act);
+		act = ActionManager::register_toggle_action (group, "ToggleMixerStrip", _("(Mixer) Show Sidebar Strip"), []{});
+		content_right_pane.remove(content_right_vbox);
+	} else {
+		act = ActionManager::register_toggle_action (group, "ToggleMixerList", _("(Mixer) Show Sidebar List"), sigc::mem_fun (*this, &Tabbable::att_right_button_toggled));
+		right_attachment_button.set_related_action (act);
+		act = ActionManager::register_toggle_action (group, "ToggleMixerStrip", _("(Mixer) Show Sidebar Strip"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
+		left_attachment_button.set_related_action (act);
+	}
+
+	act = ActionManager::register_toggle_action (group, "ToggleMixerProps", _("(Mixer) Show Properties Bottom"), sigc::mem_fun (*this, &Tabbable::att_bottom_button_toggled));
+	bottom_attachment_button.set_related_action (act);
 
 	ActionManager::register_toggle_action (group, X_("ToggleVCAPane"), _("Mixer: Show VCAs"), sigc::mem_fun (*this, &Mixer_UI::toggle_vcas));
 

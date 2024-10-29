@@ -77,6 +77,8 @@ TriggerPage::TriggerPage ()
 	load_bindings ();
 	register_actions ();
 
+	left_attachment_button.set_sensitive(false);
+
 	/* Match TriggerStrip::_name_button height */
 	ArdourButton* spacer = manage (new ArdourButton (ArdourButton::Text));
 	spacer->set_name ("mixer strip button");
@@ -845,6 +847,14 @@ void
 TriggerPage::register_actions ()
 {
 	Glib::RefPtr<ActionGroup> trigger_actions = ActionManager::create_action_group (bindings, X_("Cues"));
+
+	/* attachments visibility (editor-mixer-strip, bottom properties, sidebar list) */
+
+	Glib::RefPtr<Action> act = ActionManager::register_toggle_action (trigger_actions, "ToggleTriggerList", _("(Cue Page) Show Sidebar List"), sigc::mem_fun (*this, &Tabbable::att_right_button_toggled));
+	right_attachment_button.set_related_action (act);
+
+	act = ActionManager::register_toggle_action (trigger_actions, "ToggleTriggerProps", _("(Cue Page) Show Properties Bottom"), sigc::mem_fun (*this, &Tabbable::att_bottom_button_toggled));
+	bottom_attachment_button.set_related_action (act);
 
 	ActionManager::register_action (trigger_actions, "clear-trigger-slot", _("Clear Selected Slot"), sigc::mem_fun (*this, &TriggerPage::clear_selected_slot));
 	ActionManager::register_action (trigger_actions, "clear-trigger-slot-alt", _("Clear Selected Slot"), sigc::mem_fun (*this, &TriggerPage::clear_selected_slot));

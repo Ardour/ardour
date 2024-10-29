@@ -182,8 +182,19 @@ Editor::register_actions ()
 	*/
 	ActionManager::register_action (editor_actions, "lock", S_("Session|Lock"), sigc::mem_fun (*this, &Editor::lock));
 
-	toggle_reg_sens (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Editor::editor_mixer_button_toggled));
-	toggle_reg_sens (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Editor::editor_list_button_toggled));
+	/* attachments visibility (editor-mixer-strip, bottom properties, sidebar list) */
+
+	act = ActionManager::register_toggle_action (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Tabbable::att_right_button_toggled));
+	ActionManager::session_sensitive_actions.push_back (act);
+	right_attachment_button.set_related_action (act);
+
+	act = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
+	ActionManager::session_sensitive_actions.push_back (act);
+	left_attachment_button.set_related_action (act);
+
+	act = ActionManager::register_toggle_action (editor_actions, "show-editor-props", _("Show Editor Properties Box"), sigc::mem_fun (*this, &Tabbable::att_bottom_button_toggled));
+	ActionManager::session_sensitive_actions.push_back (act);
+	bottom_attachment_button.set_related_action (act);
 
 	reg_sens (editor_actions, "playhead-to-next-region-boundary", _("Playhead to Next Region Boundary"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_to_next_region_boundary), true));
 	reg_sens (editor_actions, "playhead-to-next-region-boundary-noselection", _("Playhead to Next Region Boundary (No Track Selection)"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_to_next_region_boundary), false));

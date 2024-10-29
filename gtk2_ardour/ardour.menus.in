@@ -631,6 +631,12 @@
       <menuitem action='show-marker-lines'/>
 
       <separator/>
+      <menuitem action='ToggleTriggerList'/>
+      <menuitem action='ToggleTriggerProps'/>
+
+      <separator/>
+      <menuitem action='ToggleMixerStrip'/>
+      <menuitem action='ToggleMixerProps'/>
       <menuitem action='ToggleMixerList'/>
 #ifdef MIXBUS
       <menuitem action='ToggleMixbusPane'/>

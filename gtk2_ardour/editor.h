@@ -301,7 +301,7 @@ public:
 	void maybe_add_mixer_strip_width (XMLNode&) const;
 	void show_editor_mixer (bool yn);
 	void create_editor_mixer ();
-	void show_editor_list (bool yn);
+	void showhide_att_left (bool);
 	void set_selected_mixer_strip (TimeAxisView&);
 	void mixer_strip_width_changed ();
 	void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false);
@@ -1735,11 +1735,6 @@ private:
 	void redisplay_grid (bool immediate_redraw);
 
 	/* toolbar */
-
-	Gtk::ToggleButton editor_mixer_button;
-	Gtk::ToggleButton editor_list_button;
-	void editor_mixer_button_toggled ();
-	void editor_list_button_toggled ();
 
 	ArdourWidgets::ArdourButton   zoom_in_button;
 	ArdourWidgets::ArdourButton   zoom_out_button;

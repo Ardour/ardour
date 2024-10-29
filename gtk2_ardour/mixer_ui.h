@@ -148,6 +148,9 @@ public:
 	Gtkmm2ext::Bindings*  bindings;
 
 	void toggle_mixer_list ();
+	void toggle_mixer_strip ();
+	void toggle_mixer_props ();
+
 	void showhide_mixer_list (bool yn);
 
 	void toggle_surround_master ();

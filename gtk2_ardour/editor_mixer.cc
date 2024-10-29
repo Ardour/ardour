@@ -60,23 +60,9 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 
 void
-Editor::editor_mixer_button_toggled ()
+Editor::showhide_att_left (bool yn)
 {
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
-	if (act) {
-		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
-		show_editor_mixer (tact->get_active());
-	}
-}
-
-void
-Editor::editor_list_button_toggled ()
-{
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-list"));
-	if (act) {
-		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
-		show_editor_list (tact->get_active());
-	}
+	show_editor_mixer (yn);
 }
 
 void

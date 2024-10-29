@@ -10,5 +10,9 @@
      <Binding key="F8" action="Cues/trigger-cue-7"/>
      <Binding key="Delete" action="Cues/clear-trigger-slot"/>
      <Binding key="BackSpace" action="Cues/clear-trigger-slot-alt"/>
+
+
+    <Binding key="Tertiary-l" action="Cues/ToggleTriggerList" group="Window Visibility"/>
+    <Binding key="Tertiary-p" action="Cues/ToggleTriggerProps" group="Window Visibility"/>
   </Press>
 </Bindings>
