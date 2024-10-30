@@ -95,3 +95,9 @@ ExportSMFWriter::process (MidiBuffer const& buf, sampleoffset_t off, samplecnt_t
 		_pos += n_samples;
 	}
 }
+
+Temporal::Beats
+ExportSMFWriter::duration() const
+{
+	return std::numeric_limits<Temporal::Beats>::max ();
+}

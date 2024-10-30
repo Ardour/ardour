@@ -462,8 +462,13 @@ void
 SMFSource::update_length (timepos_t const & dur)
 {
 	assert (!_length || (_length.time_domain() == dur.time_domain()));
-	Evoral::SMF::set_duration (dur.beats());
 	_length = dur;
+}
+
+Temporal::Beats
+SMFSource::duration() const
+{
+	return _length.beats ();
 }
 
 /** Append an event with a timestamp in beats */
@@ -643,7 +648,7 @@ SMFSource::mark_midi_streaming_write_completed (const WriterLock& lm, Evoral::Se
 	}
 
 	try {
-		Evoral::SMF::set_duration (duration.beats());
+		update_length (duration.distance());
 		Evoral::SMF::end_write (_path);
 	} catch (std::exception & e) {
 		error << string_compose (_("Exception while writing %1, file may be corrupt/unusable"), _path) << endmsg;

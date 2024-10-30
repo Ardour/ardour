@@ -81,6 +81,8 @@ public:
 
 	void render (const ReaderLock& lock, Evoral::EventSink<Temporal::Beats>& dst);
 
+	Temporal::Beats duration() const;
+
   protected:
 	void close ();
 	void flush_midi (const WriterLock& lock);

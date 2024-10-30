@@ -38,6 +38,7 @@ public:
 	~ExportSMFWriter ();
 
 	int init (std::string const& path, samplepos_t);
+	Temporal::Beats duration() const;
 
 	void process (MidiBuffer const&, sampleoffset_t, samplecnt_t, bool);
 

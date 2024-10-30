@@ -516,15 +516,24 @@ SMF::end_write (string const & path)
 		return;
 	}
 
-
-
-
 	FILE* f = g_fopen (path.c_str(), "w+b");
 	if (f == 0) {
 		throw FileError (path);
 	}
 
-	if (smf_save(_smf, f) != 0) {
+	Temporal::Beats b = duration();
+
+	if (b != std::numeric_limits<Temporal::Beats>::max()) {
+
+		int64_t their_pulses = b.to_ticks (_smf->ppqn);
+
+		for (uint16_t n = 0; n < _smf->number_of_tracks; ++n) {
+			smf_track_t* trk = smf_get_track_by_number (_smf, n+1);
+			(void) smf_track_add_eot_pulses (trk, their_pulses);
+		}
+	}
+
+	if (smf_save (_smf, f) != 0) {
 		fclose(f);
 		throw FileError (path);
 	}
@@ -532,23 +541,8 @@ SMF::end_write (string const & path)
 	fclose(f);
 }
 
-void
-SMF::set_duration (Temporal::Beats const & b)
-{
-	if (!_smf) {
-		return;
-	}
-
-	size_t their_pulses = b.to_ticks (ppqn());
-
-	for (uint16_t n = 0; n < _smf->number_of_tracks; ++n) {
-		smf_track_t* trk = smf_get_track_by_number (_smf, n+1);
-		(void) smf_track_add_eot_pulses (trk, their_pulses);
-	}
-}
-
 Temporal::Beats
-SMF::duration () const
+SMF::file_duration () const
 {
 	if (!_smf) {
 		return Temporal::Beats();
