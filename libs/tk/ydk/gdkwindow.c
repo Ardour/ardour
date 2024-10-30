@@ -10861,6 +10861,10 @@ proxy_button_event (GdkEvent *source_event,
   else if (type == GDK_TOUCH_END && display->touch_grabs)
     {
       GdkEventTouch* tev = (GdkEventTouch*) source_event;
+      void* w = g_hash_table_lookup (display->touch_grabs, GUINT_TO_POINTER (tev->sequence));
+      if (w) {
+	event_win = GDK_WINDOW (w);
+      }
       g_hash_table_remove (display->touch_grabs, GUINT_TO_POINTER (tev->sequence));
     }
   else if (type == GDK_TOUCH_UPDATE && display->touch_grabs)

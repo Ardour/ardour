@@ -1427,6 +1427,11 @@ rewrite_event_for_grabs (GdkEvent *event)
 	return NULL;
       break;
 
+    case GDK_TOUCH_BEGIN:
+    case GDK_TOUCH_END:
+    case GDK_TOUCH_UPDATE:
+      return NULL;
+
     default:
       return NULL;
     }
@@ -1599,7 +1604,6 @@ gtk_main_do_event (GdkEvent *event)
     case GDK_BUTTON_PRESS:
     case GDK_2BUTTON_PRESS:
     case GDK_3BUTTON_PRESS:
-    case GDK_TOUCH_BEGIN:
       gtk_propagate_event (grab_widget, event);
       break;
 
@@ -1637,11 +1641,15 @@ gtk_main_do_event (GdkEvent *event)
       /* else fall through */
     case GDK_MOTION_NOTIFY:
     case GDK_BUTTON_RELEASE:
-    case GDK_TOUCH_UPDATE:
-    case GDK_TOUCH_END:
     case GDK_PROXIMITY_IN:
     case GDK_PROXIMITY_OUT:
       gtk_propagate_event (grab_widget, event);
+      break;
+
+    case GDK_TOUCH_BEGIN:
+    case GDK_TOUCH_UPDATE:
+    case GDK_TOUCH_END:
+      gtk_propagate_event (event_widget, event);
       break;
       
     case GDK_ENTER_NOTIFY:
