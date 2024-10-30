@@ -73,6 +73,8 @@ public:
 	void spill_port (std::string const&);
 	void add_track (std::string const&);
 
+	void focus_on_clock();
+
 private:
 	void load_bindings ();
 	void register_actions ();

@@ -2535,6 +2535,12 @@ Mixer_UI::set_strip_width (Width w, bool save)
 	}
 }
 
+void
+Mixer_UI::focus_on_clock()
+{
+	_application_bar.focus_on_clock();
+}
+
 int
 Mixer_UI::set_state (const XMLNode& node, int version)
 {

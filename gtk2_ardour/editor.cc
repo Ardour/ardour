@@ -2147,6 +2147,12 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 	instant_save ();
 }
 
+void
+Editor::focus_on_clock()
+{
+	_application_bar.focus_on_clock();
+}
+
 int
 Editor::set_state (const XMLNode& node, int version)
 {

@@ -1054,7 +1054,20 @@ ARDOUR_UI::on_theme_changed ()
 void
 ARDOUR_UI::focus_on_clock ()
 {
-	// TODO cast to a tabbable and call focus_on_clock to its clock
+	// TODO: how do we handle detached windows?  Use WindowManager?
+	
+	if (editor->tabbed() && _tabs.get_current_page() == _tabs.page_num (editor->contents())) {
+		editor->focus_on_clock ();
+	}
+	if (mixer->tabbed() && _tabs.get_current_page() == _tabs.page_num (mixer->contents())) {
+		mixer->focus_on_clock ();
+	}
+	if (recorder->tabbed() && _tabs.get_current_page() == _tabs.page_num (recorder->contents())) {
+		recorder->focus_on_clock ();
+	}
+	if (trigger_page->tabbed() && _tabs.get_current_page() == _tabs.page_num (trigger_page->contents())) {
+		trigger_page->focus_on_clock ();
+	}
 }
 
 bool

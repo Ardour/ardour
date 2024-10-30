@@ -144,6 +144,8 @@ public:
 
 	void register_actions ();
 
+	void focus_on_clock();
+
 	void load_bindings ();
 	Gtkmm2ext::Bindings*  bindings;
 

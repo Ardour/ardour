@@ -406,7 +406,6 @@ public:
 
 	virtual MixerStrip* get_current_mixer_strip () const = 0;
 
-
 	virtual Temporal::TempoMap::WritableSharedPtr begin_tempo_map_edit () = 0;
 	virtual void abort_tempo_map_edit () = 0;
 	void commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr& map, bool with_update = false) {
@@ -448,6 +447,8 @@ public:
 	virtual void mid_track_drag (GdkEventMotion*, Gtk::Widget&) = 0;
 	virtual void end_track_drag () = 0;
 	virtual bool track_dragging() const = 0;
+
+	virtual void focus_on_clock() = 0;
 
 	/// Singleton instance, set up by Editor::Editor()
 

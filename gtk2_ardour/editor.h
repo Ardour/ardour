@@ -512,6 +512,8 @@ public:
 	bool rb_click (GdkEvent*, Temporal::timepos_t const &);
 	void line_drag_click (GdkEvent*, Temporal::timepos_t const &, double);
 
+	void focus_on_clock();
+
 protected:
 	void map_transport_state ();
 	void map_position_change (samplepos_t);

@@ -64,6 +64,8 @@ public:
 
 	RouteProcessorSelection& selection() { return _selection; }
 
+	void focus_on_clock();
+
 private:
 	void load_bindings ();
 	void register_actions ();
