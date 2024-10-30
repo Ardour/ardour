@@ -303,6 +303,7 @@ Editor::tempo_map_changed ()
 
 	 reset_metric_marks ();
 	 update_tempo_based_rulers ();
+	 update_section_rects();
 	 update_all_marker_lanes ();
 	 maybe_draw_grid_lines ();
 }
