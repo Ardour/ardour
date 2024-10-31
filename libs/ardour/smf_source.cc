@@ -462,6 +462,11 @@ void
 SMFSource::update_length (timepos_t const & dur)
 {
 	assert (!_length || (_length.time_domain() == dur.time_domain()));
+
+	if (_model) {
+		_model->set_duration (dur.beats());
+	}
+
 	_length = dur;
 }
 
@@ -648,7 +653,7 @@ SMFSource::mark_midi_streaming_write_completed (const WriterLock& lm, Evoral::Se
 	}
 
 	try {
-		update_length (duration.distance());
+		update_length (timepos_t (duration.beats()));
 		Evoral::SMF::end_write (_path);
 	} catch (std::exception & e) {
 		error << string_compose (_("Exception while writing %1, file may be corrupt/unusable"), _path) << endmsg;
@@ -823,7 +828,6 @@ SMFSource::load_model_unlocked (bool force_reload)
 	}
 
 	_num_channels = _used_channels.size();
-	_length = duration();
 
 	eventlist.sort(compare_eventlist);
 
@@ -833,7 +837,14 @@ SMFSource::load_model_unlocked (bool force_reload)
 		delete it->first;
 	}
 
-        // cerr << "----SMF-SRC-----\n";
+	/* Length ought to be based on data in the file (TrkEnd meta-event, not
+	   the final true event.
+	*/
+
+	_length = file_duration();
+	_model->set_duration (_length.beats());
+
+	// cerr << "----SMF-SRC-----\n";
         // _playback_buf->dump (cerr);
         // cerr << "----------------\n";
 
