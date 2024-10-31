@@ -1269,9 +1269,7 @@ MidiModel::write_to (std::shared_ptr<MidiSource>     source,
 bool
 MidiModel::sync_to_source (const Source::WriterLock& source_lock)
 {
-	ReadLock lock(read_lock());
-
-	std::cerr << "SYNC " << _midi_source.name() << " from model\n";
+	ReadLock lock (read_lock());
 
 	/* Invalidate and store active notes, which will be picked up by the iterator
 	   on the next roll if time progresses linearly. */
