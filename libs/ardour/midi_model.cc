@@ -1275,7 +1275,7 @@ MidiModel::sync_to_source (const Source::WriterLock& source_lock)
 
 	/* Invalidate and store active notes, which will be picked up by the iterator
 	   on the next roll if time progresses linearly. */
-	_midi_source.invalidate(source_lock);
+	_midi_source.invalidate (source_lock);
 
 	/* as of March 2022 or long before , the note mode argument does nothing */
 	_midi_source.mark_streaming_midi_write_started (source_lock, Sustained);
