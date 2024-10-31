@@ -461,6 +461,8 @@ SMFSource::write_unlocked (const WriterLock&            lock,
 void
 SMFSource::update_length (timepos_t const & dur)
 {
+	/* no time domain switching here */
+
 	assert (!_length || (_length.time_domain() == dur.time_domain()));
 
 	if (_model) {
