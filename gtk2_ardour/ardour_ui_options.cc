@@ -323,7 +323,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ActionManager::map_some_state ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
 
 		if (!_session->config.get_external_sync()) {
-			sync_button.set_text (S_("SyncSource|Int."));
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (true);
@@ -338,19 +337,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 
 	} else if (p == "sync-source") {
-
-		/* app parameter (RC config) */
-
-		if (_session) {
-			if (!_session->config.get_external_sync()) {
-				sync_button.set_text (S_("SyncSource|Int."));
-			} else {
-				sync_button.set_text (TransportMasterManager::instance().current()->display_name());
-			}
-		} else {
-			/* changing sync source without a session is unlikely/impossible , except during startup */
-			sync_button.set_text (TransportMasterManager::instance().current()->display_name());
-		}
 
 	} else if (p == "follow-edits") {
 
@@ -566,12 +552,8 @@ ARDOUR_UI::synchronize_sync_source_and_video_pullup ()
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
 
-	if (!act) {
+	if (!act || !_session) {
 		return;
-	}
-
-	if (!_session) {
-		goto just_label;
 	}
 
 	if (_session->config.get_video_pullup() == 0.0f) {
@@ -585,17 +567,4 @@ ARDOUR_UI::synchronize_sync_source_and_video_pullup ()
 			act->set_sensitive (true);
 		}
 	}
-
-	/* XXX should really be able to set the video pull up
-	   action to insensitive/sensitive, but there is no action.
-	   FIXME
-	*/
-
-  just_label:
-	if (act->get_sensitive ()) {
-		set_tip (sync_button, _("Enable/Disable external positional sync"));
-	} else {
-		set_tip (sync_button, _("Sync to JACK is not possible: video pull up/down is set"));
-	}
-
 }

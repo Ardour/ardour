@@ -392,6 +392,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		_exit (EXIT_SUCCESS);
 	}
 
+	button_height_size_group = SizeGroup::create (Gtk::SIZE_GROUP_VERTICAL);
 
 	if (theArdourUI == 0) {
 		theArdourUI = this;
@@ -971,9 +972,6 @@ ARDOUR_UI::set_transport_controllable_state (const XMLNode& node)
 	if (node.get_property ("rec", str)) {
 		rec_controllable->set_id (str);
 	}
-	if (node.get_property ("shuttle", str)) {
-		shuttle_box.controllable()->set_id (str);
-	}
 }
 
 XMLNode&
@@ -988,7 +986,6 @@ ARDOUR_UI::get_transport_controllable_state ()
 	node->set_property (X_("auto-loop"), auto_loop_controllable->id());
 	node->set_property (X_("play-selection"), play_selection_controllable->id());
 	node->set_property (X_("rec"), rec_controllable->id());
-	node->set_property (X_("shuttle"), shuttle_box.controllable()->id());
 
 	return *node;
 }
@@ -2171,8 +2168,6 @@ ARDOUR_UI::map_transport_state ()
 		return;
 	}
 
-	shuttle_box.map_transport_state ();
-
 	float sp = _session->transport_speed();
 
 	if (sp != 0.0f) {
@@ -2189,15 +2184,10 @@ ARDOUR_UI::map_transport_state ()
 void
 ARDOUR_UI::blink_handler (bool blink_on)
 {
-	sync_blink (blink_on);
-
 	if (UIConfiguration::instance().get_no_strobe() || !UIConfiguration::instance().get_blink_alert_indicators()) {
 		blink_on = true;
 	}
 	error_blink (blink_on);
-	solo_blink (blink_on);
-	audition_blink (blink_on);
-	feedback_blink (blink_on);
 }
 
 void

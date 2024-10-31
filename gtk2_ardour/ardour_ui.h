@@ -61,6 +61,7 @@
 #include <gtkmm/notebook.h>
 #include <gtkmm/button.h>
 #include <gtkmm/togglebutton.h>
+#include <gtkmm/sizegroup.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/menubar.h>
 #include <gtkmm/textbuffer.h>
@@ -304,6 +305,8 @@ public:
 	void halt_on_xrun_message ();
 	void xrun_handler (samplepos_t);
 	void create_xrun_marker (samplepos_t);
+
+	Glib::RefPtr<Gtk::SizeGroup> button_height_size_group;
 
 	GUIObjectState* gui_object_state;
 
@@ -561,7 +564,6 @@ private:
 	Gtk::Label io_latency_label;
 	Gtk::Label io_latency_value;
 
-	ShuttleControl     shuttle_box;
 	MiniTimeline       mini_timeline;
 	TimeInfoBox*       time_info_box;
 
@@ -571,7 +573,6 @@ private:
 
 	ArdourWidgets::ArdourButton auto_return_button;
 	ArdourWidgets::ArdourButton follow_edits_button;
-	ArdourWidgets::ArdourButton sync_button;
 
 	ArdourWidgets::ArdourButton auditioning_alert_button;
 	ArdourWidgets::ArdourButton solo_alert_button;
@@ -595,7 +596,6 @@ private:
 
 	void cancel_solo ();
 	void solo_blink (bool);
-	void sync_blink (bool);
 	void audition_blink (bool);
 	void feedback_blink (bool);
 	void error_blink (bool);
@@ -675,7 +675,6 @@ private:
 	void edit_metadata ();
 	void import_metadata ();
 
-	void set_transport_sensitivity (bool);
 	void set_punch_sensitivity ();
 
 	//stuff for ProTools-style numpad
@@ -871,7 +870,6 @@ private:
 	int ambiguous_file (std::string file, std::vector<std::string> hits);
 
 	bool click_button_clicked (GdkEventButton *);
-	bool sync_button_clicked (GdkEventButton *);
 
 	VisibilityGroup _status_bar_visibility;
 

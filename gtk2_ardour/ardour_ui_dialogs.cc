@@ -157,7 +157,6 @@ ARDOUR_UI::set_session (Session *s)
 
 	AutomationWatch::instance().set_session (s);
 
-	shuttle_box.set_session (s);
 	mini_timeline.set_session (s);
 	time_info_box->set_session (s);
 

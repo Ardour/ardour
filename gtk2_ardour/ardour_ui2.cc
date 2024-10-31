@@ -323,12 +323,6 @@ ARDOUR_UI::setup_transport ()
 	RefPtr<Action> act;
 	/* setup actions */
 
-	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
-	sync_button.set_related_action (act);
-	sync_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::sync_button_clicked), false);
-
-	sync_button.set_sizing_text (S_("LogestSync|M-Clk"));
-
 	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
 	act = ActionManager::get_action (X_("Main"), X_("cancel-solo"));
 	solo_alert_button.set_related_action (act);
@@ -441,8 +435,6 @@ ARDOUR_UI::setup_transport ()
 	monitor_mono_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
 	monitor_mute_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
 
-	sync_button.set_name ("transport active option button");
-
 	/* and widget text */
 	auto_return_button.set_text(_("Auto Return"));
 	follow_edits_button.set_text(_("Follow Range"));
@@ -546,14 +538,12 @@ ARDOUR_UI::setup_transport ()
 	monitor_box->pack_start (monitor_mute_button, true, true);
 
 	/* clock button size groups */
-	Glib::RefPtr<SizeGroup> button_height_size_group = SizeGroup::create (Gtk::SIZE_GROUP_VERTICAL);
 	button_height_size_group->add_widget (follow_edits_button);
 	button_height_size_group->add_widget (*primary_clock->left_btn());
 	button_height_size_group->add_widget (*primary_clock->right_btn());
 	button_height_size_group->add_widget (*secondary_clock->left_btn());
 	button_height_size_group->add_widget (*secondary_clock->right_btn());
 
-	button_height_size_group->add_widget (sync_button);
 	button_height_size_group->add_widget (auto_return_button);
 
 	//tab selections
@@ -583,22 +573,13 @@ ARDOUR_UI::setup_transport ()
 	clock2_size_group->add_widget (*secondary_clock->left_btn());
 	clock2_size_group->add_widget (*secondary_clock->right_btn());
 
-	/* sub-layout for Sync | Shuttle (grow) */
-	HBox* ssbox = manage (new HBox);
-	ssbox->set_spacing (PX_SCALE(2));
-	ssbox->pack_start (sync_button, false, false, 0);
-	ssbox->pack_start (shuttle_box, true, true, 0);
-	ssbox->pack_start (*shuttle_box.vari_button(), false, false, 0);
-	ssbox->pack_start (*shuttle_box.info_button(), false, false, 0);
-
 	/* and the main table layout */
 	int vpadding = 1;
 	int hpadding = 2;
 	int col = 0;
 #define TCOL col, col + 1
 
-	transport_table.attach (*application_bar, TCOL, 0, 1 , SHRINK, SHRINK, 0, 0);
-	transport_table.attach (*ssbox, TCOL, 1, 2 , FILL, SHRINK, 0, 0);
+	transport_table.attach (*application_bar, TCOL, 0, 2 , EXPAND|FILL, EXPAND|FILL, 3, 0);
 	++col;
 
 	transport_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
@@ -710,12 +691,9 @@ ARDOUR_UI::setup_transport ()
 	feedback_alert_button.set_visual_state (Gtkmm2ext::NoVisualState);
 	auditioning_alert_button.set_sensitive (false);
 	auditioning_alert_button.set_visual_state (Gtkmm2ext::NoVisualState);
-
-	set_transport_sensitivity (false);
 }
 #undef PX_SCALE
 #undef TCOL
-
 
 void
 ARDOUR_UI::latency_switch_changed ()
@@ -773,7 +751,6 @@ ARDOUR_UI::_auditioning_changed (bool onoff)
 	if (!onoff) {
 		auditioning_alert_button.set_visual_state (Gtkmm2ext::NoVisualState);
 	}
-	set_transport_sensitivity (!onoff);
 }
 
 void
@@ -832,29 +809,6 @@ ARDOUR_UI::solo_blink (bool onoff)
 		}
 	} else {
 		solo_alert_button.set_active (false);
-	}
-}
-
-void
-ARDOUR_UI::sync_blink (bool onoff)
-{
-	if (_session == 0 || !_session->config.get_external_sync()) {
-		/* internal sync */
-		sync_button.set_active (false);
-		return;
-	}
-
-	if (!_session->transport_locked()) {
-		/* not locked, so blink on and off according to the onoff argument */
-
-		if (onoff) {
-			sync_button.set_active (true);
-		} else {
-			sync_button.set_active (false);
-		}
-	} else {
-		/* locked */
-		sync_button.set_active (true);
 	}
 }
 
@@ -924,12 +878,6 @@ ARDOUR_UI::error_blink (bool onoff)
 			error_alert_button.set_custom_led_color(0x333333ff); // gray
 			break;
 	}
-}
-void
-ARDOUR_UI::set_transport_sensitivity (bool yn)
-{
-	ActionManager::set_sensitive (ActionManager::transport_sensitive_actions, yn);
-	shuttle_box.set_sensitive (yn);
 }
 
 void
@@ -1002,19 +950,6 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 
 	show_tabbable (rc_option_editor);
 	rc_option_editor->set_current_page (_("Metronome"));
-	return true;
-}
-
-bool
-ARDOUR_UI::sync_button_clicked (GdkEventButton* ev)
-{
-	if (ev->button != 3) {
-		/* this handler is just for button-3 clicks */
-		return false;
-	}
-
-	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-transport-masters");
-	tact->set_active();
 	return true;
 }
 

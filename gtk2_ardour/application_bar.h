@@ -61,8 +61,25 @@ public:
 private:
 	void on_parent_changed (Gtk::Widget*);
 
-	bool               _have_layout;
-	BasicUI*           _basic_ui;
-	Gtk::Table         _table;
-	TransportControlUI _transport_ctrl;
+	bool sync_button_clicked (GdkEventButton*);
+	void parameter_changed (std::string);
+
+	void map_transport_state ();
+	void set_transport_sensitivity (bool);
+
+	void auditioning_changed (bool);
+	void _auditioning_changed (bool);
+
+	/* blinking alerts */
+	void sync_blink (bool);
+	void blink_handler (bool);
+
+	bool                        _have_layout;
+	BasicUI*                    _basic_ui;
+	Gtk::Table                  _table;
+	TransportControlUI          _transport_ctrl;
+	ShuttleControl              _shuttle_box;
+	ArdourWidgets::ArdourButton _sync_button;
+
+	sigc::connection _blink_connection;
 };
