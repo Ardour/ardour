@@ -168,6 +168,11 @@ static gboolean gdk_event_dispatch (GSource     *source,
 
 static GList *client_filters;	/* Filters for client messages */
 
+static GList *touch_mapper = NULL;
+
+static int last_touch_x[32];
+static int last_touch_y[32];
+
 static HCURSOR p_grab_cursor;
 
 static GSourceFuncs event_funcs = {
@@ -229,6 +234,40 @@ track_mouse_event (DWORD dwFlags,
     GDK_NOTE (EVENTS, g_print(" (TrackMouseEvent %p)", hwnd));
   else if (dwFlags == TME_CANCEL)
     GDK_NOTE (EVENTS, g_print(" (cancel TrackMouseEvent %p)", hwnd));
+}
+
+static int
+touch_idx_lookup (DWORD id)
+{
+  GList* g = g_list_find (touch_mapper, GUINT_TO_POINTER(id));
+  if (!g) {
+    return -1;
+  }
+  return g_list_position (touch_mapper, g);
+}
+
+static int
+touch_idx_map (DWORD id)
+{
+  GList* g = g_list_find (touch_mapper, GUINT_TO_POINTER(G_MAXUINT));
+  if (!g) {
+    touch_mapper = g_list_append (touch_mapper, GUINT_TO_POINTER(id));
+  } else {
+    g->data = GUINT_TO_POINTER(id);
+  }
+  return touch_idx_lookup (id);
+}
+
+static int
+touch_idx_unmap (DWORD id)
+{
+  GList* g = g_list_find (touch_mapper, GUINT_TO_POINTER(id));
+  if (!g) {
+    return -1;
+  }
+  int rv = g_list_position (touch_mapper, g);
+  g->data = GUINT_TO_POINTER(G_MAXULONG);
+  return rv;
 }
 
 gulong
@@ -2021,24 +2060,75 @@ handle_wm_pointer (GdkEventType type, GdkWindow* window, MSG* msg)
   POINTER_TOUCH_INFO touch_info;
   if (!getPointerTouchInfo (GET_POINTERID_WPARAM (msg->wParam), &touch_info))
     {
-			printf ("getPointerTouchInfo failed to translate event\n");
+      printf ("getPointerTouchInfo failed to translate event\n");
       return FALSE;
     }
 
+  /* Touch positions are in screen coordinates, convert
+   * them to Window coordidates
+   */
+  POINT point;
+  point.x = GET_X_LPARAM (msg->lParam);
+  point.y = GET_Y_LPARAM (msg->lParam);
+
+  int touch_sequence = 0;
+  switch (type)
+    {
+      case GDK_TOUCH_BEGIN:
+	touch_sequence = touch_idx_map (GET_POINTERID_WPARAM (msg->wParam));
+	break;
+      case GDK_TOUCH_END:
+	touch_sequence = touch_idx_unmap (GET_POINTERID_WPARAM (msg->wParam));
+	break;
+      case GDK_TOUCH_UPDATE:
+	touch_sequence = touch_idx_lookup (GET_POINTERID_WPARAM (msg->wParam));
+	break;
+      default:
+	return FALSE;
+    }
+
+  // printf ("TOUCH %d SEQ %d %x | %d = %d | %d = %d\n", type, touch_sequence, GET_POINTERID_WPARAM (msg->wParam), (int)point.x, last_touch_x[touch_sequence], (int)point.y, last_touch_y[touch_sequence]);
+
+  /* Dear Aliens, we're sorry to limit multitouch to 30 fingers */
+  if (touch_sequence < 0 || touch_sequence > 31)
+    {
+      return FALSE;
+    }
+
+
+  /* Windows periodically sends WM_POINTERUPDATE updates.
+   * If a finger has not moved, do not create a GDK event.
+   */
+  if (type == GDK_TOUCH_UPDATE
+      && (int)point.x == last_touch_x[touch_sequence]
+      && (int)point.y == last_touch_y[touch_sequence])
+    {
+      return FALSE;
+    }
+
+  last_touch_x[touch_sequence] = (int)point.x;
+  last_touch_y[touch_sequence] = (int)point.y;
+
+  /* first single touch is already handled by Windows as mouse event */
+  if (touch_sequence == 0) {
+    return TRUE;
+  }
+
+  ScreenToClient (msg->hwnd, &point);
   GdkEvent *event = gdk_event_new (type);
 
   event->touch.window   = window;
   event->touch.time     = _gdk_win32_get_next_tick (msg->time);
-  event->touch.x        = (gint16) GET_X_LPARAM (msg->lParam);
-  event->touch.y        = (gint16) GET_Y_LPARAM (msg->lParam);
+  event->touch.x        = (gint16) point.x;
+  event->touch.y        = (gint16) point.y;
   event->touch.x_root   = msg->pt.x + _gdk_offset_x;
   event->touch.y_root   = msg->pt.y + _gdk_offset_y;
   event->touch.state    = 0;
-  event->touch.sequence = GET_POINTERID_WPARAM (msg->wParam); // XXX ?
-  event->touch.flags    = 0; // XXX
-  event->touch.deviceid = 0; // XXX
+  event->touch.sequence = GET_POINTERID_WPARAM (msg->wParam); // or touch_sequence + 1
+  event->touch.flags    = 0; // touch_sequence == 0 ? 0x20000 : 0;
+  event->touch.deviceid = 0;
 
-  printf ("getPointerTouchInfo at: %.1fx%.1f root: %1.fx%1.f\n", event->touch.x, event->touch.y, event->touch.x_root, event->touch.y_root);
+  printf ("getPointerTouchInfo type = %d at: %.1fx%.1f root: %1.fx%1.f seq=%d\n", type, event->touch.x, event->touch.y, event->touch.x_root, event->touch.y_root, touch_sequence);
   _gdk_win32_append_event (event);
 }
 
@@ -2810,17 +2900,12 @@ gdk_event_translate (MSG  *msg,
       break;
 
     case 0x0246 /* WM_POINTERDOWN */:
-      printf ("Event WM_POINTERDOWN\n");
-      if (!handle_wm_pointer (GDK_TOUCH_BEGIN, window, msg)) {
-	// XXX -> generate_button_event ?
-      }
+      handle_wm_pointer (GDK_TOUCH_BEGIN, window, msg);
       break;
     case 0x0247 /* WM_POINTERUP */:
-      printf ("Event WM_POINTERUP\n");
       handle_wm_pointer (GDK_TOUCH_END, window, msg);
       break;
     case 0x0245 /* WM_POINTERUPDATE */:
-      printf ("Event WM_POINTERUPDATE\n");
       handle_wm_pointer (GDK_TOUCH_UPDATE, window, msg);
       break;
 
