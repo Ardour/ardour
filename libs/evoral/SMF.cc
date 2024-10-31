@@ -529,11 +529,11 @@ SMF::end_write (string const & path)
 
 		for (uint16_t n = 0; n < _smf->number_of_tracks; ++n) {
 			smf_track_t* trk = smf_get_track_by_number (_smf, n+1);
-			(void) smf_track_add_eot_pulses (trk, their_pulses);
+			 (void) smf_track_add_eot_pulses (trk, their_pulses);
 		}
 	}
 
-	if (smf_save (_smf, f) != 0) {
+	if (smf_save(_smf, f) != 0) {
 		fclose(f);
 		throw FileError (path);
 	}
