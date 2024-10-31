@@ -1211,45 +1211,6 @@ Sequence<Time>::contains_unlocked (const NotePtr& note) const
 }
 
 template<typename Time>
-bool
-Sequence<Time>::overlaps (const NotePtr& note, const NotePtr& without) const
-{
-	ReadLock lock (read_lock());
-	return overlaps_unlocked (note, without);
-}
-
-template<typename Time>
-bool
-Sequence<Time>::overlaps_unlocked (const NotePtr& note, const NotePtr& without) const
-{
-	Time sa = note->time();
-	Time ea  = note->end_time();
-
-	const Pitches& p (pitches (note->channel()));
-	NotePtr search_note(new Note<Time>(0, Time(), Time(), note->note()));
-
-	for (typename Pitches::const_iterator i = p.lower_bound (search_note);
-	     i != p.end() && (*i)->note() == note->note(); ++i) {
-
-		if (without && (**i) == *without) {
-			continue;
-		}
-
-		Time sb = (*i)->time();
-		Time eb = (*i)->end_time();
-
-		if (((sb > sa) && (eb <= ea)) ||
-		    ((eb >= sa) && (eb <= ea)) ||
-		    ((sb > sa) && (sb <= ea)) ||
-		    ((sa >= sb) && (sa <= eb) && (ea <= eb))) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-template<typename Time>
 void
 Sequence<Time>::set_notes (const typename Sequence<Time>::Notes& n)
 {
