@@ -919,7 +919,6 @@ _gdk_win32_print_event (const GdkEvent *event)
     CASE (GDK_TOUCH_BEGIN);
     CASE (GDK_TOUCH_UPDATE);
     CASE (GDK_TOUCH_END);
-    CASE (GDK_TOUCH_CANCEL);
 #undef CASE
     default: g_assert_not_reached ();
     }
