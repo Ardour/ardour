@@ -1573,6 +1573,8 @@ MidiView::begin_write()
 	   XXX this should not happen.
 	*/
 
+	clear_events ();
+
 	if (_active_notes) {
 		for (unsigned i = 0; i < 128; ++i) {
 			delete _active_notes[i];
