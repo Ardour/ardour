@@ -292,6 +292,12 @@ Trigger::request_trigger_delete (Trigger* t)
 void
 Trigger::arm ()
 {
+	if (_box.record_enabled() == Recording) {
+		return;
+	}
+
+	std::cerr << "try to arm " << _box.order() << ':' << index() << std::endl;
+
 	/* trigger arming is mutually exclusive within a given TriggerBox */
 
 	_box.disarm_all ();
