@@ -1066,8 +1066,6 @@ _gdk_win32_print_event (const GdkEvent *event)
 	       event->touch.sequence,
 	       event->touch.x, event->touch.y,
 	       event->touch.x_root, event->touch.y_root);
-    case GDK_TOUCH_CANCEL:
-      g_print ("Touch Cancel\n");
     default:
       /* Nothing */
       break;
