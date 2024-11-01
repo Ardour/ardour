@@ -496,11 +496,6 @@ MidiCueEditor::idle_data_captured ()
 void
 MidiCueEditor::box_rec_enable_change (ARDOUR::TriggerBox const & b)
 {
-	if (b.record_enabled()) {
-		view->begin_write();
-	} else {
-		view->end_write ();
-	}
 }
 
 void
