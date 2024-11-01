@@ -308,7 +308,7 @@ Trigger::arm ()
 	_box.arm_from_another_thread (*this, _box.session().transport_sample(), chns);
 	_armed = true;
 	ArmChanged(); /* EMIT SIGNAL */
-	TriggerArmChanged (this);
+	TriggerArmChanged (this); /* EMIT SIGNAL */
 }
 
 void
