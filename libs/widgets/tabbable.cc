@@ -280,7 +280,6 @@ void
 Tabbable::detach ()
 {
 	show_own_window (true);
-	signal_tabbed_changed (false);
 }
 
 void
@@ -315,8 +314,6 @@ Tabbable::attach ()
 	_parent_notebook->set_tab_detachable (*_contents);
 	_parent_notebook->set_tab_reorderable (*_contents);
 	_parent_notebook->set_current_page (_parent_notebook->page_num (*_contents));
-
-	signal_tabbed_changed (true);
 
 	_contents->show ();
 
@@ -415,7 +412,6 @@ Tabbable::set_state (const XMLNode& node, int version)
 
 	if (_visible) {
 		show_own_window (true);
-		signal_tabbed_changed (false);
 	}
 
 	XMLNodeList children = node.children ();
@@ -437,7 +433,6 @@ Tabbable::set_state (const XMLNode& node, int version)
 		} else {
 			/* this does nothing if not tabbed */
 			hide_tab ();
-			signal_tabbed_changed (false);
 		}
 	}
 

@@ -100,8 +100,6 @@ protected:
 
 	bool delete_event_handler (GdkEventAny *ev);
 
-	sigc::signal1<void, bool> signal_tabbed_changed;
-
 	/* This is the heirarchy of a Tabbable's widget packing.
 	 * The end result is to provide 8(ish) event-boxen where the tab can put its contents
 	 * Please maintain the indention here so the hierarchy is visible
