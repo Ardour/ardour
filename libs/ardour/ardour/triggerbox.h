@@ -72,7 +72,7 @@ class Session;
 class AudioRegion;
 class MidiRegion;
 class TriggerBox;
-class SlotArmInfo;
+struct SlotArmInfo;
 class SideChain;
 class MidiPort;
 
