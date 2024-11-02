@@ -296,8 +296,6 @@ Trigger::arm ()
 		return;
 	}
 
-	std::cerr << "try to arm " << _box.order() << ':' << index() << std::endl;
-
 	/* trigger arming is mutually exclusive within a given TriggerBox */
 
 	_box.disarm_all ();
@@ -3615,7 +3613,6 @@ TriggerBox::finish_recording (BufferSet& bufs)
 	*/
 	ai->slot.captured (*ai, bufs);
 	_arm_info = nullptr;
-	std::cerr << "finish, ai null\n";
 	_record_state = Enabled;
 }
 
