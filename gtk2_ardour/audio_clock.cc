@@ -2387,7 +2387,10 @@ AudioClock::dpi_reset ()
 	 */
 	first_width = 0;
 	first_height = 0;
-	queue_resize ();
+
+	if (get_realized ()) {
+		queue_resize ();
+	}
 }
 
 void

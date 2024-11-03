@@ -116,7 +116,9 @@ DurationInfoBox::dpi_reset ()
 	_layout_value->get_pixel_size (wv, hv);
 	_width  = 8 + wv;
 	_height = 4 + hv;
-	queue_resize ();
+	if (get_realized ()) {
+		queue_resize ();
+	}
 }
 
 void
@@ -198,7 +200,9 @@ XrunInfoBox::dpi_reset ()
 	_layout_value->get_pixel_size (wv, hv);
 	_width  = 8 + wv;
 	_height = 8 + hv;
-	queue_resize ();
+	if (get_realized ()) {
+		queue_resize ();
+	}
 }
 
 void
@@ -291,7 +295,9 @@ RemainInfoBox::dpi_reset ()
 	_width  = 8 + std::max (wl, wv);
 	_height = 2 + hv + 2 + hl + 2;
 
-	queue_resize ();
+	if (get_realized ()) {
+		queue_resize ();
+	}
 }
 
 void
