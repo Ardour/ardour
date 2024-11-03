@@ -23,10 +23,14 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#ifndef COMPILER_MSVC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-copy"
 #include <glibmm.h>
 #pragma GCC diagnostic pop
+#else
+#include <glibmm.h>
+#endif
 
 namespace Gtk
 {
