@@ -84,10 +84,14 @@ extern const int gtkmm_major_version;
 extern const int gtkmm_minor_version;
 extern const int gtkmm_micro_version;
 
+#ifndef COMPILER_MSVC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-copy"
 #include <glibmm.h>
 #pragma GCC diagnostic pop
+#else
+#include <glibmm.h>
+#endif
 #include <giomm.h>
 #include <gdkmm.h>
 
