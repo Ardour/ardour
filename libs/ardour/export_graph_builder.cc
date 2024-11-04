@@ -796,9 +796,9 @@ ExportGraphBuilder::Intermediate::Intermediate (ExportGraphBuilder & parent, Fil
 	int format = ExportFormatBase::F_RAW | ExportFormatBase::SF_Float;
 
 	if (parent._realtime) {
-		tmp_file.reset (new TmpFileRt<float> (&tmpfile_path_buf[0], format, channels, config.format->sample_rate()));
+		tmp_file.reset (new TmpFileRt<float> (tmpfile_path_buf.data (), format, channels, config.format->sample_rate()));
 	} else {
-		tmp_file.reset (new TmpFileSync<float> (&tmpfile_path_buf[0], format, channels, config.format->sample_rate()));
+		tmp_file.reset (new TmpFileSync<float> (tmpfile_path_buf.data (), format, channels, config.format->sample_rate()));
 	}
 
 	tmp_file->FileWritten.connect_same_thread (post_processing_connection,
