@@ -118,9 +118,9 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	virtual GhostRegion* add_ghost (TimeAxisView&) { return nullptr; }
 	virtual std::string get_modifier_name() const;
 
-	void set_region (std::shared_ptr<ARDOUR::MidiRegion>);
-	void set_track (std::shared_ptr<ARDOUR::MidiTrack>);
-	void set_model (std::shared_ptr<ARDOUR::MidiModel>);
+	virtual void set_region (std::shared_ptr<ARDOUR::MidiRegion>);
+	virtual void set_track (std::shared_ptr<ARDOUR::MidiTrack>);
+	virtual void set_model (std::shared_ptr<ARDOUR::MidiModel>);
 
 	NoteBase* add_note(const std::shared_ptr<NoteType> note, bool visible);
 

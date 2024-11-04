@@ -112,6 +112,7 @@ public:
 	{ return midi_view()->midi_view(); }
 
 	void set_height (double);
+	void set_model (std::shared_ptr<ARDOUR::MidiModel>);
 
 	inline ARDOUR::ColorMode color_mode() const { return midi_view()->color_mode(); }
 

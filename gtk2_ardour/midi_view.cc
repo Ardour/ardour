@@ -251,17 +251,6 @@ MidiView::set_model (std::shared_ptr<MidiModel> m)
 
 	//set_height (trackview.current_height());
 
-#warning paul pianorule needs these fixed
-/* XXXX
-	region_muted ();
-	region_sync_changed ();
-	region_resized (ARDOUR::bounds_change);
-	//region_locked ();
-
-	set_colors ();
-	reset_width_dependent_items (_pixel_width);
-*/
-
 	_model->ContentsChanged.connect (connections_requiring_model, invalidator (*this), std::bind (&MidiView::model_changed, this), gui_context());
 
 	_midi_track->playback_filter().ChannelModeChanged.connect (connections_requiring_model, invalidator (*this),

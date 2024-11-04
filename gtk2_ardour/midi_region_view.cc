@@ -170,6 +170,20 @@ MidiRegionView::init (bool /*wfd*/)
 	connect_to_diskstream ();
 }
 
+void
+MidiRegionView::set_model (std::shared_ptr<ARDOUR::MidiModel> model)
+{
+	MidiView::set_model (model);
+
+	region_muted ();
+	region_sync_changed ();
+	region_resized (ARDOUR::bounds_change);
+	region_locked ();
+
+	set_colors ();
+	reset_width_dependent_items (_pixel_width);
+}
+
 bool
 MidiRegionView::display_is_enabled () const
 {
@@ -642,24 +656,8 @@ MidiRegionView::~MidiRegionView ()
 void
 MidiRegionView::reset_width_dependent_items (double pixel_width)
 {
-	RegionView::reset_width_dependent_items(pixel_width);
-
-	view_changed ();
-
-	bool hide_all = false;
-	PatchChanges::iterator x = _patch_changes.begin();
-	if (x != _patch_changes.end()) {
-		hide_all = x->second->width() >= _pixel_width;
-	}
-
-	if (hide_all) {
-		for (; x != _patch_changes.end(); ++x) {
-			x->second->hide();
-		}
-	}
-
-	move_step_edit_cursor (_step_edit_cursor_position);
-	set_step_edit_cursor_width (_step_edit_cursor_width);
+	MidiView::reset_width_dependent_items (pixel_width);
+	RegionView::reset_width_dependent_items (pixel_width);
 }
 
 void
