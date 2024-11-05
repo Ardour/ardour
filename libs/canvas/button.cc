@@ -66,6 +66,12 @@ Button::Button (Canvas* canvas, std::string const & str, Pango::FontDescription 
 {
 	_label->set_font_description (font_description);
 	_label->set (str);
+
+	Rect r = _label->bounding_box();
+
+	width = r.width();
+	height = r.height();
+
 	init ();
 }
 
@@ -78,14 +84,18 @@ Button::Button (Item* parent, std::string const & str, Pango::FontDescription co
 {
 	_label->set_font_description (font_description);
 	_label->set (str);
+
+	Rect r = _label->bounding_box();
+
+	width = r.width();
+	height = r.height();
+
 	init ();
 }
 
 void
 Button::init ()
 {
-	add (_label);
-
 	Event.connect (sigc::mem_fun (*this, &Button::event_handler));
 	_label->Event.connect (sigc::mem_fun (*this, &Button::event_handler));
 
