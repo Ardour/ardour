@@ -23,6 +23,7 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "canvas/box.h"
 #include "canvas/button.h"
 #include "canvas/debug.h"
 
@@ -85,12 +86,34 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	}
 
 
-	button_bar = new ArdourCanvas::Rectangle (&parent);
+	button_bar = new ArdourCanvas::Box (&parent, ArdourCanvas::Box::Horizontal);
 	CANVAS_DEBUG_NAME (button_bar, "button bar");
-	velocity_button = new ArdourCanvas::Button (button_bar, _("Velocity"), Pango::FontDescription ("Sans 9"));
-	velocity_button->text()->set_fill_color (UIConfiguration::instance().color ("play head"));
-	velocity_button->text()->set_outline_color (UIConfiguration::instance().color ("play head"));
+	button_bar->set_spacing (12.);
+	/* Right-side padding only */
+	button_bar->set_padding (0., 0., 0., 24.);
+	button_bar->set_margin (5., 5., 5., 5.);
+
+	Pango::FontDescription button_font = UIConfiguration::instance().get_NormalFont();
+
+	velocity_button = new ArdourCanvas::Button (button_bar, _("Velocity"), button_font);
+	velocity_button->text()->set_color (UIConfiguration::instance().color ("neutral:foreground"));
 	CANVAS_DEBUG_NAME (velocity_button, "velocity button");
+
+	bender_button = new ArdourCanvas::Button (button_bar, _("Bender"), button_font);
+	bender_button->text()->set_color (UIConfiguration::instance().color ("neutral:foreground"));
+	CANVAS_DEBUG_NAME (bender_button, "bender button");
+
+	pressure_button = new ArdourCanvas::Button (button_bar, _("Pressure"), button_font);
+	pressure_button->text()->set_color (UIConfiguration::instance().color ("neutral:foreground"));
+	CANVAS_DEBUG_NAME (pressure_button, "pressure button");
+
+	expression_button = new ArdourCanvas::Button (button_bar, _("Expression"), button_font);
+	expression_button->text()->set_color (UIConfiguration::instance().color ("neutral:foreground"));
+	CANVAS_DEBUG_NAME (expression_button, "expression button");
+
+	modulation_button = new ArdourCanvas::Button (button_bar, _("Modulation"), button_font);
+	modulation_button->text()->set_color (UIConfiguration::instance().color ("neutral:foreground"));
+	CANVAS_DEBUG_NAME (modulation_button, "modulation button");
 
 	set_extensible (true);
 
@@ -102,9 +125,12 @@ void
 MidiCueView::set_height (double h)
 {
 	double note_area_height = ceil (h / 2.);
-	double button_bar_height = 18; /* needs to be font dependent */
 	double velocity_height = ceil ((h - note_area_height) / 2.);
-	double automation_height = h - note_area_height - velocity_height - button_bar_height;
+
+	double bbw, bbh;
+	button_bar->size_request (bbw, bbh);
+
+	double automation_height = h - note_area_height - velocity_height - bbh;
 
 	event_rect->set (ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, note_area_height));
 	midi_context().set_size (midi_context().width(), note_area_height);
@@ -115,8 +141,7 @@ MidiCueView::set_height (double h)
 	automation_group->set_position (ArdourCanvas::Duple (0., note_area_height + velocity_height));
 	automation_group->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, automation_height));
 
-	button_bar->set_position (ArdourCanvas::Duple (0., note_area_height + velocity_height + automation_height));
-	button_bar->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, button_bar_height));
+	button_bar->size_allocate (ArdourCanvas::Rect (0., note_area_height + velocity_height + automation_height, ArdourCanvas::COORD_MAX, note_area_height + velocity_height + automation_height + bbh));
 
 	if (automation_line) {
 		automation_line->set_height (automation_height);
@@ -339,5 +364,3 @@ void
 MidiCueView::line_drag_click (GdkEvent* event, Temporal::timepos_t const & pos)
 {
 }
-
-
