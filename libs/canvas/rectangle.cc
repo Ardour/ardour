@@ -163,11 +163,15 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 void
 Rectangle::size_request (double& w, double& h) const
 {
-	if (_requested_width || _requested_width) {
+	if (_requested_width > 0.) {
 		w = _requested_width;
-		h = _requested_height;
 	} else {
 		w = _rect.width();
+	}
+
+	if (_requested_height > 0.) {
+		h = _requested_height;
+	} else {
 		h = _rect.height();
 	}
 }
