@@ -414,6 +414,7 @@ Box::add (Item* i)
 	}
 
 	Item::add (i);
+	i->set_layout_sensitive (true);
 	queue_resize ();
 }
 
@@ -425,6 +426,7 @@ Box::add_front (Item* i)
 	}
 
 	Item::add_front (i);
+	i->set_layout_sensitive (true);
 	queue_resize ();
 }
 
