@@ -650,7 +650,7 @@ Item::size_request (double& w, double& h) const
 	Rect r (bounding_box());
 
 	w = _requested_width < 0 ? r.width()  : _requested_width;
-	h = _requested_width < 0 ? r.height() : _requested_height;
+	h = _requested_height < 0 ? r.height() : _requested_height;
 }
 
 void
