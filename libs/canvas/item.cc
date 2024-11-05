@@ -1337,10 +1337,8 @@ Item::set_layout_sensitive (bool yn)
 {
 	_layout_sensitive = yn;
 
-	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
-		if (!(*i)->layout_sensitive()) {
-			(*i)->set_layout_sensitive (yn);
-		}
+	for (auto & item : _items) {
+		item->set_layout_sensitive (yn);
 	}
 }
 
