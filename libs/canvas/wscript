@@ -20,6 +20,7 @@ canvas_sources = [
         'arc.cc',
         'arrow.cc',
         'box.cc',
+        'button.cc',
         'canvas.cc',
         'circle.cc',
         'container.cc',
