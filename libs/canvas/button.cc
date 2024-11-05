@@ -101,6 +101,8 @@ Button::init ()
 
 	Rect r = _label->bounding_box ();
 	_label->set_position (Duple ((width - r.width())/2.0, (height - r.height())/2.0));
+
+	set_size_request (width, height);
 }
 
 void
@@ -129,9 +131,16 @@ void
 Button::set_label (std::string const & str)
 {
 	_label->set (str);
-	/* move to recenter */
+
 	Rect r = _label->bounding_box ();
+
+	/* alter our own size request to fit text + padding */
+	set_size_request (r.width(), r.height());
+
+	/* move to recenter */
+
 	_label->set_position (Duple ((width - r.width())/2.0, (height - r.height())/2.0));
+
 	redraw ();
 }
 
