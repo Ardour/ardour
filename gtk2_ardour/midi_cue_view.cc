@@ -23,6 +23,7 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "canvas/button.h"
 #include "canvas/debug.h"
 
 #include "editing_context.h"
@@ -83,6 +84,14 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 		velocity_display->add_note (ev.second);
 	}
 
+
+	button_bar = new ArdourCanvas::Rectangle (&parent);
+	CANVAS_DEBUG_NAME (button_bar, "button bar");
+	velocity_button = new ArdourCanvas::Button (button_bar, _("Velocity"), Pango::FontDescription ("Sans 9"));
+	velocity_button->text()->set_fill_color (UIConfiguration::instance().color ("play head"));
+	velocity_button->text()->set_outline_color (UIConfiguration::instance().color ("play head"));
+	CANVAS_DEBUG_NAME (velocity_button, "velocity button");
+
 	set_extensible (true);
 
 	Evoral::Parameter fully_qualified_param (ARDOUR::MidiCCAutomation, 0, MIDI_CTL_MSB_MODWHEEL);
@@ -93,8 +102,9 @@ void
 MidiCueView::set_height (double h)
 {
 	double note_area_height = ceil (h / 2.);
+	double button_bar_height = 18; /* needs to be font dependent */
 	double velocity_height = ceil ((h - note_area_height) / 2.);
-	double automation_height = h - note_area_height - velocity_height;
+	double automation_height = h - note_area_height - velocity_height - button_bar_height;
 
 	event_rect->set (ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, note_area_height));
 	midi_context().set_size (midi_context().width(), note_area_height);
@@ -104,6 +114,9 @@ MidiCueView::set_height (double h)
 
 	automation_group->set_position (ArdourCanvas::Duple (0., note_area_height + velocity_height));
 	automation_group->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, automation_height));
+
+	button_bar->set_position (ArdourCanvas::Duple (0., note_area_height + velocity_height + automation_height));
+	button_bar->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, button_bar_height));
 
 	if (automation_line) {
 		automation_line->set_height (automation_height);

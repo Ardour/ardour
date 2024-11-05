@@ -29,6 +29,10 @@
 class VelocityDisplay;
 class MidiCueAutomationLine;
 
+namespace ArdourCanvas {
+	class Button;
+}
+
 class MidiCueView : public MidiView
 {
   public:
@@ -70,6 +74,9 @@ class MidiCueView : public MidiView
 
 	ArdourCanvas::Rectangle* velocity_base;
 	VelocityDisplay* velocity_display;
+
+	ArdourCanvas::Rectangle* button_bar;
+	ArdourCanvas::Button*    velocity_button;
 
 	std::shared_ptr<Temporal::TempoMap const> tempo_map;
 	ArdourCanvas::Rectangle* event_rect;
