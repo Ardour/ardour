@@ -192,7 +192,7 @@ TranscodeFfmpeg::probe ()
 						PARSE_FRACTIONAL_FPS (timebase)
 					} else if (key == X_("timecode") && m_duration == 0 && m_fps > 0) {
 						int  h, m, s;
-						char f[32];
+						char f[33];
 						if (sscanf (i->at (16).c_str (), "%d:%d:%d:%32s", &h, &m, &s, f) == 4) {
 							m_duration = (ARDOUR::samplecnt_t)floor (m_fps * (h * 3600.0 + m * 60.0 + s * 1.0 + atoi (f) / pow ((double)10, (int)strlen (f))));
 						}
