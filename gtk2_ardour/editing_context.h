@@ -567,7 +567,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	QuantizeDialog* quantize_dialog;
 
-	friend class TempoMapScope;
+	friend struct TempoMapScope;
 	virtual std::shared_ptr<Temporal::TempoMap const> start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>);
 	virtual void end_local_tempo_map (std::shared_ptr<Temporal::TempoMap const>) { /* no-op by default */ }
 
