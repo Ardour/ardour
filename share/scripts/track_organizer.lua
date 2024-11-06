@@ -56,7 +56,7 @@ function factory () return function ()
            type = "dropdown", key = t:name() .. ' g',  col = 1, colspan = 1, title = "", values = pl, default = interrogate(t)
        }) --group
        table.insert(dialog_options, {
-           type = "entry",    key = t:name() .. ' cm', col = 2, colspan = 1, default = t:comment(), title = ""
+           type = "textarea",    key = t:name() .. ' cm', col = 2, colspan = 1, default = t:comment(), title = ""
        }) --comment
        table.insert(dialog_options, {
            type = "dropdown", key = t:name() .. ' c',  col = 3, colspan = 1, title = "", values = rbow, default = find_color(t)
