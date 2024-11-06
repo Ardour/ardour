@@ -37,13 +37,17 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 
-Tabbable::Tabbable (Gtk::Widget& w, const string& visible_name, string const & nontranslatable_name, bool tabbed_by_default)
+Tabbable::Tabbable (const string& visible_name, string const & nontranslatable_name, Widget* w, bool tabbed_by_default)
 	: WindowProxy (visible_name, nontranslatable_name)
-	, _contents (w)
 	, _parent_notebook (0)
 	, tab_requested_by_state (tabbed_by_default)
 {
-	default_layout ();
+	if (w) {
+		_contents = w;
+	} else {
+		_contents = &_content_vbox;
+		default_layout ();
+	}
 }
 
 Tabbable::~Tabbable ()
@@ -119,13 +123,13 @@ Tabbable::use_own_window (bool and_pack_it)
 	Gtk::Window* win = get (true);
 
 	if (and_pack_it) {
-		Gtk::Container* parent = _contents.get_parent();
+		Gtk::Container* parent = _contents->get_parent();
 		if (parent) {
-			_contents.hide ();
-			parent->remove (_contents);
+			_contents->hide ();
+			parent->remove (*_contents);
 		}
-		_own_notebook.append_page (_contents);
-		_contents.show ();
+		_own_notebook.append_page (*_contents);
+		_contents->show ();
 	}
 
 	return win;
@@ -179,7 +183,7 @@ Tabbable::get (bool create)
 void
 Tabbable::show_own_window (bool and_pack_it)
 {
-	Gtk::Widget* parent = _contents.get_parent();
+	Gtk::Widget* parent = _contents->get_parent();
 	Gtk::Allocation alloc;
 
 	if (parent) {
@@ -231,7 +235,7 @@ void
 Tabbable::change_visibility ()
 {
 	if (tabbed()) {
-		_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
+		_parent_notebook->set_current_page (_parent_notebook->page_num (*_contents));
 		return;
 	}
 
@@ -299,22 +303,22 @@ Tabbable::attach ()
 
 		save_pos_and_size ();
 
-		_contents.hide ();
-		_contents.get_parent()->remove (_contents);
+		_contents->hide ();
+		_contents->get_parent()->remove (*_contents);
 
 		/* leave the window around */
 
 		_window->hide ();
 	}
 
-	_parent_notebook->append_page (_contents);
-	_parent_notebook->set_tab_detachable (_contents);
-	_parent_notebook->set_tab_reorderable (_contents);
-	_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
+	_parent_notebook->append_page (*_contents);
+	_parent_notebook->set_tab_detachable (*_contents);
+	_parent_notebook->set_tab_reorderable (*_contents);
+	_parent_notebook->set_current_page (_parent_notebook->page_num (*_contents));
 
 	signal_tabbed_changed (true);
 
-	_contents.show ();
+	_contents->show ();
 
 	/* have to force this on, which is semantically correct, since
 	 * the user has effectively asked for it.
@@ -339,7 +343,7 @@ Tabbable::tabbed () const
 		return false;
 	}
 
-	if (_parent_notebook && (_parent_notebook->page_num (_contents) >= 0)) {
+	if (_parent_notebook && (_parent_notebook->page_num (*_contents) >= 0)) {
 		return true;
 	}
 
@@ -350,8 +354,8 @@ void
 Tabbable::hide_tab ()
 {
 	if (tabbed()) {
-		_contents.hide();
-		_parent_notebook->remove_page (_contents);
+		_contents->hide();
+		_parent_notebook->remove_page (*_contents);
 		StateChange (*this);
 	}
 }
@@ -360,12 +364,12 @@ void
 Tabbable::show_tab ()
 {
 	if (!window_visible() && _parent_notebook) {
-		if (_contents.get_parent() == 0) {
+		if (_contents->get_parent() == 0) {
 			tab_requested_by_state = true;
 			add_to_notebook (*_parent_notebook);
 		}
-		_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
-		_contents.show ();
+		_parent_notebook->set_current_page (_parent_notebook->page_num (*_contents));
+		_contents->show ();
 		current_toplevel()->present ();
 	}
 }

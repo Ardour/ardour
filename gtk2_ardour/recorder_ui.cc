@@ -78,7 +78,7 @@ using namespace Menu_Helpers;
 #define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))
 
 RecorderUI::RecorderUI ()
-	: Tabbable (_content, _("Recorder"), X_("recorder"))
+	: Tabbable (_("Recorder"), X_("recorder"), &_content)
 	, _toolbar_sep (1.0)
 	, _btn_rec_all (_("All"))
 	, _btn_rec_none (_("None"))

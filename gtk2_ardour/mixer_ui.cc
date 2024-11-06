@@ -132,7 +132,7 @@ Mixer_UI::instance ()
 }
 
 Mixer_UI::Mixer_UI ()
-	: Tabbable (_content, _("Mixer"), X_("mixer"))
+	: Tabbable (_("Mixer"), X_("mixer"), &_content)
 	, plugin_search_clear_button (X_("Clear"))
 	, _mixer_scene_release (0)
 	, no_track_list_redisplay (false)

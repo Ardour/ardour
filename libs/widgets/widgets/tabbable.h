@@ -48,7 +48,7 @@ namespace ArdourWidgets {
 class LIBWIDGETS_API Tabbable : public Gtkmm2ext::WindowProxy
 {
 public:
-	Tabbable (Gtk::Widget&, const std::string& user_visible_name, std::string const & untranslated_name, bool tabbed_by_default = true);
+	Tabbable (const std::string& user_visible_name, std::string const & untranslated_name, Gtk::Widget* top = NULL, bool tabbed_by_default = true);
 	~Tabbable ();
 
 	void add_to_notebook (Gtk::Notebook& notebook);
@@ -58,7 +58,7 @@ public:
 	void attach ();
 	void detach ();
 
-	Gtk::Widget& contents() const { return _contents; }
+	Gtk::Widget& contents() const { return *_contents; }
 
 	/* this is where ArdourUI packs the tab switchers
 	 * (record/cues/edit/mix) into my toolbar area,
@@ -127,7 +127,6 @@ protected:
 	EventBoxExt         content_att_bottom;         /* a placeholder for the property box, if you want one */
 	/* clang-format on */
 
-
 	/* visibility controls */
 	ArdourWidgets::ArdourButton left_attachment_button;
 	ArdourWidgets::ArdourButton right_attachment_button;
@@ -143,7 +142,7 @@ private:
 	void window_unmapped ();
 
 	Gtk::VBox      _content_vbox; /* this is the root widget for a full-featured tabbable, which contains:  */
-	Gtk::Widget&   _contents; /* for most Tabbables this will be content_vbox;  but rc_options, for example, does something different. */
+	Gtk::Widget*   _contents; /* for most Tabbables this will be content_vbox;  but rc_options, for example, does something different. */
 	Gtk::Notebook  _own_notebook;
 	Gtk::Notebook* _parent_notebook;
 	bool            tab_requested_by_state;

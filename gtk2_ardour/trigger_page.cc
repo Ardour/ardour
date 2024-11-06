@@ -65,7 +65,7 @@ using namespace Gtk;
 using namespace std;
 
 TriggerPage::TriggerPage ()
-	: Tabbable (_content, _("Cues"), X_("trigger"))
+	: Tabbable (_("Cues"), X_("trigger"), &_content)
 	, _cue_area_frame (0.5, 0, 1.0, 0)
 	, _cue_box (16, 16 * TriggerBox::default_triggers_per_box)
 	, _master_widget (16, 16)
