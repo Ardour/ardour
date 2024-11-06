@@ -355,7 +355,7 @@ def configure(conf):
             features  = 'c',
             mandatory = False,
             execute   = False,
-            fragment = "#include <sys/syscall.h>\nint main () { syscall(SYS_ioprio_set, 1, 0, 8192); return 0; }")
+            fragment = "#include <unistd.h>\n#include <sys/syscall.h>\nint main () { syscall(SYS_ioprio_set, 1, 0, 8192); return 0; }")
 
     if have_sys_ioprio:
             conf.define('HAVE_IOPRIO', 1)
