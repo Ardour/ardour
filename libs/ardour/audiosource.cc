@@ -932,6 +932,7 @@ AudioSource::compute_and_write_peaks (Sample const * buf, samplecnt_t first_samp
 	samplecnt_t samples_done;
 	const size_t blocksize = (128 * 1024);
 	off_t first_peak_byte;
+	std::unique_ptr<Sample[]> buf2;
 
 	if (-1 == _peakfile_fd) {
 		if (prepare_for_peakfile_writes ()) {
@@ -991,7 +992,7 @@ AudioSource::compute_and_write_peaks (Sample const * buf, samplecnt_t first_samp
 		/* make a new contiguous buffer containing leftovers and the new stuff */
 
 		to_do = cnt + peak_leftover_cnt;
-		std::unique_ptr<Sample[]> buf2(new Sample[to_do]);
+		buf2.reset(new Sample[to_do]);
 
 		/* the remnants */
 		memcpy (buf2.get(), peak_leftovers, peak_leftover_cnt * sizeof (Sample));
