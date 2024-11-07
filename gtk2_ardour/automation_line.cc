@@ -225,6 +225,19 @@ AutomationLine::hide ()
 	set_visibility (AutomationLine::VisibleAspects (_visible & ~Line));
 }
 
+void
+AutomationLine::hide_all ()
+{
+	set_visibility (AutomationLine::VisibleAspects (0));
+}
+
+void
+AutomationLine::show ()
+{
+	/* hide everything */
+	set_visibility (AutomationLine::VisibleAspects (~0));
+}
+
 double
 AutomationLine::control_point_box_size ()
 {

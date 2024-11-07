@@ -44,6 +44,9 @@ class VelocityDisplay
 	VelocityDisplay (EditingContext&, MidiViewBackground&, MidiView&, ArdourCanvas::Rectangle& base_rect, ArdourCanvas::Container&, GhostEvent::EventList& el, Gtkmm2ext::Color oc);
 	virtual ~VelocityDisplay ();
 
+	void hide ();
+	void show ();
+
 	void redisplay();
 	void add_note(NoteBase*);
 

@@ -20,6 +20,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
 #include "ardour/triggerbox.h"
+#include "ardour/types.h"
 
 #include "gtkmm2ext/utils.h"
 
@@ -41,6 +42,7 @@
 
 #include "pbd/i18n.h"
 
+using namespace ARDOUR;
 using namespace Gtkmm2ext;
 
 MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
@@ -50,7 +52,6 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
                           MidiViewBackground&      bg,
                           uint32_t                 basic_color)
 	: MidiView (mt, parent, ec, bg, basic_color)
-	, velocity_base (nullptr)
 	, velocity_display (nullptr)
 	, _slot_index (slot_index)
 {
@@ -77,14 +78,13 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	automation_group->set_fill_color (UIConfiguration::instance().color ("midi automation track fill"));
 	automation_group->set_data ("linemerger", this);
 
-	velocity_base = new ArdourCanvas::Rectangle (&parent);
-	CANVAS_DEBUG_NAME (velocity_base, "cue velocity base");
-	velocity_display = new MidiCueVelocityDisplay (editing_context(), midi_context(), *this, *velocity_base, 0x312244ff);
+	velocity_display = new MidiCueVelocityDisplay (editing_context(), midi_context(), *this, *automation_group, 0x312244ff);
 
 	for (auto & ev : _events) {
 		velocity_display->add_note (ev.second);
 	}
 
+	velocity_display->hide ();
 
 	button_bar = new ArdourCanvas::Box (&parent, ArdourCanvas::Box::Horizontal);
 	CANVAS_DEBUG_NAME (button_bar, "button bar");
@@ -115,36 +115,37 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	modulation_button->text()->set_color (UIConfiguration::instance().color ("neutral:foreground"));
 	CANVAS_DEBUG_NAME (modulation_button, "modulation button");
 
+	velocity_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueView::automation_button_event), ARDOUR::MidiVelocityAutomation, 0));
+	pressure_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueView::automation_button_event), ARDOUR::MidiChannelPressureAutomation, 0));
+	bender_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueView::automation_button_event), ARDOUR::MidiPitchBenderAutomation, 0));
+	modulation_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueView::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL));
+	expression_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueView::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION));
+
 	set_extensible (true);
 
-	Evoral::Parameter fully_qualified_param (ARDOUR::MidiCCAutomation, 0, MIDI_CTL_MSB_MODWHEEL);
-	show_automation (fully_qualified_param);
+	Evoral::Parameter fully_qualified_param (ARDOUR::MidiVelocityAutomation, 0, 0);
+	update_automation_display (fully_qualified_param, SelectionSet);
 }
 
 void
 MidiCueView::set_height (double h)
 {
-	double note_area_height = ceil (h / 2.);
-	double velocity_height = ceil ((h - note_area_height) / 2.);
-
 	double bbw, bbh;
 	button_bar->size_request (bbw, bbh);
 
-	double automation_height = h - note_area_height - velocity_height - bbh;
+	double note_area_height = ceil ((h - bbh) / 2.);
+	double automation_height = ceil (h - bbh - note_area_height);
 
 	event_rect->set (ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, note_area_height));
 	midi_context().set_size (midi_context().width(), note_area_height);
 
-	velocity_base->set_position (ArdourCanvas::Duple (0., note_area_height));
-	velocity_base->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, velocity_height));
-
-	automation_group->set_position (ArdourCanvas::Duple (0., note_area_height + velocity_height));
+	automation_group->set_position (ArdourCanvas::Duple (0., note_area_height));
 	automation_group->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, automation_height));
 
-	button_bar->size_allocate (ArdourCanvas::Rect (0., note_area_height + velocity_height + automation_height, ArdourCanvas::COORD_MAX, note_area_height + velocity_height + automation_height + bbh));
+	button_bar->size_allocate (ArdourCanvas::Rect (0., note_area_height + automation_height, ArdourCanvas::COORD_MAX, note_area_height + automation_height + bbh));
 
-	if (automation_line) {
-		automation_line->set_height (automation_height);
+	for (auto & ads : automation_map) {
+		ads.second.set_height (automation_height);
 	}
 
 	view_changed ();
@@ -275,8 +276,31 @@ MidiCueView::update_hit (Hit* h)
 	}
 }
 
+bool
+MidiCueView::automation_button_event (GdkEvent* ev, Evoral::ParameterType type, int id)
+{
+	SelectionOperation op = ArdourKeyboard::selection_type (ev->button.state);
+
+	switch (ev->type) {
+	case GDK_BUTTON_RELEASE:
+		automation_button_click (type, id, op);
+		break;
+	default:
+		break;
+	}
+
+	return false;
+}
+
 void
-MidiCueView::show_automation (Evoral::Parameter const & param)
+MidiCueView::automation_button_click (Evoral::ParameterType type, int id, SelectionOperation op)
+{
+#warning paul allow channel selection (2nd param)
+	update_automation_display (Evoral::Parameter (type, 0, id), op);
+}
+
+void
+MidiCueView::update_automation_display (Evoral::Parameter const & param, SelectionOperation op)
 {
 	using namespace ARDOUR;
 
@@ -284,52 +308,82 @@ MidiCueView::show_automation (Evoral::Parameter const & param)
 		return;
 	}
 
-	if (param.type() == NullAutomation) {
-		return;
-	}
-
-//	if (automation_line && automation_line->param() == param) {
-//		return;
-//	}
-
-	automation_line.reset ();
-	automation_control.reset ();
-
-	std::shared_ptr<AutomationControl> control;
-
 	switch (param.type()) {
-
 	case MidiCCAutomation:
 	case MidiPgmChangeAutomation:
 	case MidiPitchBenderAutomation:
 	case MidiChannelPressureAutomation:
 	case MidiNotePressureAutomation:
-	case MidiSystemExclusiveAutomation: {
-		/* These controllers are region "automation" - they are owned
-		 * by regions (and their MidiModels), not by the track. As a
-		 * result there is no AutomationList/Line for the track, but we create
-		 * a controller for the user to write immediate events, so the editor
-		 * can act as a control surface for the present MIDI controllers.
-		 *
-		 * TODO: Record manipulation of the controller to regions?
-		 */
+	case MidiSystemExclusiveAutomation:
+	case MidiVelocityAutomation:
+		break;
+	default:
+		return;
+	}
 
-		std::shared_ptr<Evoral::Control> control = _midi_region->model()->control (param, true);
-		automation_control = std::dynamic_pointer_cast<AutomationControl> (control);
+	CueAutomationMap::iterator i = automation_map.find (param);
+	AutomationDisplayState* ads = nullptr;
 
-		if (automation_control) {
+	if (i != automation_map.end()) {
+
+		ads = &i->second;
+
+	} else {
+
+		if (param.type() == MidiVelocityAutomation) {
+
+		} else {
+
+			std::shared_ptr<Evoral::Control> control = _midi_region->model()->control (param, true);
+			automation_control = std::dynamic_pointer_cast<AutomationControl> (control);
+
+			if (!automation_control) {
+				return;
+			}
+
 			automation_line.reset (new MidiCueAutomationLine ("whatevs",
 			                                                  _editing_context,
 			                                                  *automation_group,
 			                                                  automation_group,
 			                                                  automation_control->alist(),
 			                                                  automation_control->desc()));
-			automation_line->set_height (automation_group->get().height());
+			AutomationDisplayState cad (automation_control, automation_line, true);
+
+			auto res = automation_map.insert (std::make_pair (param, cad));
+
+			ads = &((*res.first).second);
 		}
-		break;
 	}
 
-	default:
+	std::cerr << "sad " << op << " param " << enum_2_string (param.type()) << std::endl;
+
+	switch (op) {
+	case SelectionSet:
+		/* hide the rest */
+		for (auto & as : automation_map) {
+			as.second.hide ();
+		}
+		/*FALLTHRU*/
+	case SelectionAdd:
+		ads->set_height (automation_group->get().height());
+		ads->show ();
+		break;
+
+	case SelectionRemove:
+		ads->hide ();
+		break;
+
+	case SelectionToggle:
+		if (ads->visible) {
+			ads->hide ();
+		} else {
+			ads->set_height (automation_group->get().height());
+			ads->show ();
+		}
+		return;
+
+	case SelectionExtend:
+		/* undefined in this context */
 		break;
 	}
 }
@@ -363,4 +417,39 @@ MidiCueView::automation_rb_click (GdkEvent* event, Temporal::timepos_t const & p
 void
 MidiCueView::line_drag_click (GdkEvent* event, Temporal::timepos_t const & pos)
 {
+}
+
+MidiCueView::AutomationDisplayState::~AutomationDisplayState()
+{
+	delete velocity_display;
+}
+
+void
+MidiCueView::AutomationDisplayState::hide ()
+{
+	if (velocity_display) {
+		velocity_display->hide ();
+	} else if (line) {
+		line->hide_all ();
+	}
+}
+
+void
+MidiCueView::AutomationDisplayState::show ()
+{
+	if (velocity_display) {
+		velocity_display->show ();
+	} else if (line) {
+		line->show ();
+	}
+}
+
+void
+MidiCueView::AutomationDisplayState::set_height (double h)
+{
+	if (velocity_display) {
+		// velocity_display->set_height (h);
+	} else if (line) {
+		line->set_height (h);
+	}
 }

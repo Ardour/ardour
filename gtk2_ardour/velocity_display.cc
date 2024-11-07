@@ -430,3 +430,19 @@ VelocityDisplay::set_selected (bool yn)
 		base.parent()->raise_to_top ();
 	}
 }
+
+void
+VelocityDisplay::hide ()
+{
+	if (lolli_container) {
+		lolli_container->hide ();
+	}
+}
+
+void
+VelocityDisplay::show ()
+{
+	if (lolli_container) {
+		lolli_container->hide ();
+	}
+}

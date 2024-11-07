@@ -24,6 +24,10 @@
 
 #pragma once
 
+#include <map>
+
+#include "ardour/types.h"
+
 #include "midi_view.h"
 
 class VelocityDisplay;
@@ -56,7 +60,7 @@ class MidiCueView : public MidiView
 	void ghost_add_note (NoteBase*);
 	void ghost_sync_selection (NoteBase*);
 
-	void show_automation (Evoral::Parameter const & param);
+	void update_automation_display (Evoral::Parameter const & param, ARDOUR::SelectionOperation);
 
 	ArdourCanvas::Item* drag_group() const;
 
@@ -70,11 +74,37 @@ class MidiCueView : public MidiView
 	bool scroll (GdkEventScroll* ev);
 
 	ArdourCanvas::Rectangle* automation_group;
-	std::shared_ptr<MidiCueAutomationLine>   automation_line;
-	std::shared_ptr<ARDOUR::AutomationControl> automation_control;
 
-	ArdourCanvas::Rectangle* velocity_base;
+	typedef std::shared_ptr<MidiCueAutomationLine>  CueAutomationLine;
+	typedef std::shared_ptr<ARDOUR::AutomationControl>  CueAutomationControl;
+
+	struct AutomationDisplayState {
+
+		AutomationDisplayState (CueAutomationControl ctl, CueAutomationLine ln, bool vis)
+			: control (ctl), line (ln), velocity_display (nullptr), visible (vis) {}
+		AutomationDisplayState (VelocityDisplay& vdisp, bool vis)
+			: control (nullptr), velocity_display (&vdisp), visible (vis) {}
+
+		~AutomationDisplayState();
+
+		CueAutomationControl control;
+		CueAutomationLine line;
+		VelocityDisplay* velocity_display;
+		bool visible;
+
+		void hide ();
+		void show ();
+		void set_height (double);
+	};
+
+	typedef std::map<Evoral::Parameter, AutomationDisplayState> CueAutomationMap;
+
+	CueAutomationMap automation_map;
+	AutomationDisplayState* active_automation;
+
 	VelocityDisplay* velocity_display;
+	CueAutomationLine automation_line;
+	CueAutomationControl automation_control;
 
 	ArdourCanvas::Box*    button_bar;
 	ArdourCanvas::Button* velocity_button;
@@ -90,6 +120,6 @@ class MidiCueView : public MidiView
 	void update_sustained (Note *);
 	void update_hit (Hit *);
 
+	bool automation_button_event (GdkEvent*, Evoral::ParameterType type, int id);
+	void automation_button_click (Evoral::ParameterType type, int id, ARDOUR::SelectionOperation);
 };
-
-

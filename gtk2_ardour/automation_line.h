@@ -118,6 +118,8 @@ public:
 	void remove_visibility (VisibleAspects);
 
 	void hide ();
+	void hide_all ();
+	void show ();
 	void set_height (guint32);
 
 	bool get_uses_gain_mapping () const;
