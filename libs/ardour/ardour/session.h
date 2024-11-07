@@ -1982,7 +1982,7 @@ public:
 	ARDOUR::CueMarkers pending_source_markers; // source markers created while recording
 
 private:
-	void reset_write_sources ();
+	void reset_write_sources (bool mark_write_complete);
 	SourceMap sources;
 
 	int load_sources (const XMLNode& node);

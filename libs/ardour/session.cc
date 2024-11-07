@@ -2412,7 +2412,7 @@ Session::set_sample_rate (samplecnt_t frames_per_second)
 	sync_time_vars();
 
 	clear_clicks ();
-	reset_write_sources ();
+	reset_write_sources (false);
 
 	DiskReader::alloc_loop_declick (nominal_sample_rate());
 	Location* loc = _locations->auto_loop_location ();
@@ -6124,7 +6124,7 @@ Session::reset_native_file_format ()
 		if (tr) {
 			/* don't save state as we do this, there's no point */
 			_state_of_the_state = StateOfTheState (_state_of_the_state | InCleanup);
-			tr->reset_write_sources ();
+			tr->reset_write_sources (false);
 			_state_of_the_state = StateOfTheState (_state_of_the_state & ~InCleanup);
 		}
 	}

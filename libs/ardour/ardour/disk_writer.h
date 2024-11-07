@@ -74,7 +74,7 @@ public:
 
 	std::string steal_write_source_name ();
 	int use_new_write_source (DataType, uint32_t n = 0);
-	void reset_write_sources ();
+	void reset_write_sources (bool mark_write_complete);
 
 	AlignStyle alignment_style () const { return _alignment_style; }
 	void       set_align_style (AlignStyle, bool force = false);
