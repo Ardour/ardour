@@ -584,11 +584,12 @@ void
 MonitorSection::set_session (Session* s)
 {
 	RouteUI::set_session (s);
-	insert_box->set_session (_session);
 
 	Glib::RefPtr<ActionGroup> global_monitor_actions = ActionManager::get_action_group (X_("Monitor Section"));
 
 	if (_session) {
+
+		insert_box->set_session (_session);
 
 		/* These are not actually dependent on the Session, but they
 		 * need to be set after construction, not during, and

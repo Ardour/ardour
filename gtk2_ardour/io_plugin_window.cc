@@ -93,12 +93,13 @@ void
 IOPluginWindow::set_session (Session* s)
 {
 	ArdourWindow::set_session (s);
-	_box_pre.set_session (s);
-	_box_post.set_session (s);
 
 	if (!_session) {
 		return;
 	}
+
+	_box_pre.set_session (s);
+	_box_post.set_session (s);
 	refill ();
 	_session->IOPluginsChanged.connect (_session_connections, invalidator (*this), std::bind (&IOPluginWindow::refill, this), gui_context ());
 }

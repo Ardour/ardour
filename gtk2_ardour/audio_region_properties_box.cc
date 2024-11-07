@@ -112,6 +112,10 @@ RegionPropertiesBox::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
+	if (s) {
+		return;
+	}
+
 	length_clock.set_session (s);
 	start_clock.set_session (s);
 }

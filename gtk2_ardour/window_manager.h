@@ -153,6 +153,9 @@ public:
 
 	void set_session(ARDOUR::Session *s) {
 		SessionHandlePtr::set_session (s);
+		if (!s) {
+			return;
+		}
 		ARDOUR::SessionHandlePtr* sp = session_handle ();
 		if (sp) {
 			sp->set_session (s);
@@ -206,6 +209,9 @@ public:
 
 	void set_session(ARDOUR::Session *s) {
 		SessionHandlePtr::set_session (s);
+		if (!s) {
+			return;
+		}
 		ARDOUR::SessionHandlePtr* sp = session_handle ();
 		if (sp) {
 			sp->set_session (s);

@@ -197,6 +197,10 @@ AudioTriggerPropertiesBox::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
+	if (!s) {
+		return;
+	}
+
 	_length_clock.set_session (s);
 	_start_clock.set_session (s);
 }

@@ -1193,7 +1193,6 @@ void
 Editor::set_session (Session *t)
 {
 	SessionHandlePtr::set_session (t);
-	_trigger_clip_picker.set_session (_session);
 
 	section_marker_bar->clear (true);
 
@@ -1206,6 +1205,7 @@ Editor::set_session (Session *t)
 	 * before the visible state has been loaded from instant.xml */
 	_leftmost_sample = session_gui_extents().first.samples();
 
+	_trigger_clip_picker.set_session (_session);
 	_application_bar.set_session (_session);
 	nudge_clock->set_session (_session);
 	_summary->set_session (_session);
@@ -5507,8 +5507,6 @@ Editor::session_going_away ()
 		delete *i;
 	}
 	track_views.clear ();
-
-	nudge_clock->set_session (0);
 
 	/* clear tempo/meter rulers */
 	remove_metric_marks ();

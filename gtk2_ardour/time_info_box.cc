@@ -206,18 +206,20 @@ TimeInfoBox::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
-	selection_start->set_session (s);
-	selection_end->set_session (s);
-	selection_length->set_session (s);
+	if (s) {
+		selection_start->set_session (s);
+		selection_end->set_session (s);
+		selection_length->set_session (s);
+	}
 
 	if (!with_punch_clock) {
 		return;
 	}
 
-	punch_start->set_session (s);
-	punch_end->set_session (s);
-
 	if (s) {
+		punch_start->set_session (s);
+		punch_end->set_session (s);
+
 		Location* punch = s->locations()->auto_punch_location ();
 
 		if (punch) {

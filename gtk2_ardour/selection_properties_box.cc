@@ -133,6 +133,10 @@ SelectionPropertiesBox::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
+	if (!s) {
+		return;
+	}
+
 	_time_info_box->set_session(s);
 
 #if SELECTION_PROPERTIES_BOX_TODO

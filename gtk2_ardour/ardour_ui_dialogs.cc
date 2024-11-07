@@ -125,7 +125,6 @@ ARDOUR_UI::set_session (Session *s)
 	update_sample_rate ();
 
 	if (!_session) {
-		WM::Manager::instance().set_session (s);
 		/* Session option editor cannot exist across change-of-session */
 		session_option_editor.drop_window ();
 		/* Ditto for AddVideoDialog */
@@ -305,8 +304,6 @@ ARDOUR_UI::unload_session (bool hide_stuff, bool force_unload)
 	fps_connection.disconnect();
 
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
-
-	WM::Manager::instance().set_session ((ARDOUR::Session*) 0);
 
 	if (ARDOUR_UI::instance()->video_timeline) {
 		ARDOUR_UI::instance()->video_timeline->close_session();

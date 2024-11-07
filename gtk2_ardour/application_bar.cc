@@ -784,6 +784,7 @@ ApplicationBar::set_session (Session *s)
 
 	if (_basic_ui) {
 		delete _basic_ui;
+		_basic_ui = 0;
 	}
 
 	map_transport_state ();

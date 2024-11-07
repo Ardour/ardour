@@ -214,6 +214,7 @@ LocationEditRow::set_session (Session *sess)
 	SessionHandlePtr::set_session (sess);
 
 	if (!_session) {
+		set_location (0);
 		return;
 	}
 
@@ -1130,12 +1131,12 @@ LocationUI::set_session(ARDOUR::Session* s)
 		Location::start_changed.connect (_session_connections, invalidator (*this), std::bind (&LocationUI::start_changed, this, _1), gui_context());
 
 		_clock_group->set_clock_mode (clock_mode_from_session_instant_xml ());
+
+		loop_edit_row.set_session (s);
+		punch_edit_row.set_session (s);
 	} else {
 		_mode_set = false;
 	}
-
-	loop_edit_row.set_session (s);
-	punch_edit_row.set_session (s);
 
 	refresh_location_list ();
 }
@@ -1151,12 +1152,6 @@ LocationUI::session_going_away()
 
 	loc_children.clear();
 	range_children.clear();
-
-	loop_edit_row.set_session (0);
-	loop_edit_row.set_location (0);
-
-	punch_edit_row.set_session (0);
-	punch_edit_row.set_location (0);
 
 	_mode_set = false;
 
@@ -1240,8 +1235,10 @@ void
 LocationUIWindow::set_session (Session *s)
 {
 	ArdourWindow::set_session (s);
-	_ui.set_session (s);
-	_ui.show_all ();
+	if (s) {
+		_ui.set_session (s);
+		_ui.show_all ();
+	}
 }
 
 void

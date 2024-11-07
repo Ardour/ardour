@@ -1278,15 +1278,15 @@ void
 Mixer_UI::set_session (Session* sess)
 {
 	SessionHandlePtr::set_session (sess);
-	_monitor_section.set_session (sess);
 
-	if (_plugin_selector) {
-		_plugin_selector->set_session (_session);
+	if (sess) {
+		_monitor_section.set_session (sess);
+		_group_tabs->set_session (sess);
+		_application_bar.set_session (_session);
+		if (_plugin_selector) {
+			_plugin_selector->set_session (_session);
+		}
 	}
-
-	_group_tabs->set_session (sess);
-
-	_application_bar.set_session (_session);
 
 	update_scene_buttons();
 

@@ -191,6 +191,9 @@ void
 Manager::set_session (ARDOUR::Session* s)
 {
 	SessionHandlePtr::set_session (s);
+	if (!s) {
+		return;
+	}
 	for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
 		(*i)->set_session(s);
 	}

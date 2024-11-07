@@ -272,9 +272,9 @@ void
 ShuttleControl::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
-	_vari_dialog.set_session (_session);
 
 	if (_session) {
+		_vari_dialog.set_session (_session);
 		_session->add_controllable (_controllable);
 		_info_button.set_session (s);
 		_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ShuttleControl::parameter_changed, this, _1), gui_context());

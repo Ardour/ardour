@@ -5113,6 +5113,9 @@ void
 RCOptionEditor::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
+	if (!s) {
+		return;
+	}
 	_transport_masters_widget.set_session (s);
 }
 

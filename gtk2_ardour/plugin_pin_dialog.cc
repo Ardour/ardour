@@ -2162,6 +2162,9 @@ void
 PluginPinDialog::set_session (ARDOUR::Session *s)
 {
 	SessionHandlePtr::set_session (s);
+	if (!s) {
+		return;
+	}
 	for (PluginPinWidgetList::iterator i = ppw.begin(); i != ppw.end(); ++i) {
 		(*i)->set_session (s);
 	}

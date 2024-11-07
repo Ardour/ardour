@@ -302,6 +302,11 @@ TriggerPage::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
+	if (!_session) {
+		_selection.clear ();
+		return;
+	}
+
 	_application_bar.set_session (_session);
 	_cue_box.set_session (s);
 	_trigger_clip_picker.set_session (s);
@@ -309,11 +314,6 @@ TriggerPage::set_session (Session* s)
 	_trigger_source_list.set_session (s);
 	_trigger_region_list.set_session (s);
 	_trigger_route_list.set_session (s);
-
-	if (!_session) {
-		_selection.clear ();
-		return;
-	}
 
 	XMLNode* node = ARDOUR_UI::instance ()->trigger_page_settings ();
 	set_state (*node, Stateful::loading_state_version);

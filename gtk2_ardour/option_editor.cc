@@ -730,7 +730,9 @@ void
 ClockOption::set_session (Session* s)
 {
 	_session = s;
-	_clock.set_session (s);
+	if (s) {
+		_clock.set_session (s);
+	}
 }
 
 /*--------------------------*/

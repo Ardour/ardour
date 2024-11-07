@@ -928,6 +928,7 @@ PortMatrix::notebook_page_selected (GtkNotebookPage *, guint)
 void
 PortMatrix::session_going_away ()
 {
+	SessionHandlePtr::session_going_away ();
 	_session = 0;
 }
 

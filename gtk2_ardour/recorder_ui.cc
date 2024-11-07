@@ -396,13 +396,6 @@ RecorderUI::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
-	_ruler.set_session (s);
-	_duration_info_box.set_session (s);
-	_xrun_info_box.set_session (s);
-	_remain_info_box.set_session (s);
-	_application_bar.set_session (s);
-	_rec_group_tabs->set_session (s);
-
 	update_sensitivity ();
 
 	if (!_session) {
@@ -410,6 +403,13 @@ RecorderUI::set_session (Session* s)
 		_visible_recorders.clear ();
 		return;
 	}
+
+	_ruler.set_session (s);
+	_duration_info_box.set_session (s);
+	_xrun_info_box.set_session (s);
+	_remain_info_box.set_session (s);
+	_application_bar.set_session (s);
+	_rec_group_tabs->set_session (s);
 
 	XMLNode* node = ARDOUR_UI::instance()->recorder_settings();
 	set_state (*node, Stateful::loading_state_version);

@@ -108,7 +108,12 @@ class CueBoxWidget : public FittedCanvasWidget, public ARDOUR::SessionHandlePtr
 public:
 	CueBoxWidget (float w, float h);
 
-	void set_session (ARDOUR::Session* s) {ui->set_session(s); SessionHandlePtr::set_session(s);}
+	void set_session (ARDOUR::Session* s) {
+		SessionHandlePtr::set_session(s);
+		if (s) {
+			ui->set_session(s);
+		}
+	}
 
 	void on_map ();
 	void on_unmap ();

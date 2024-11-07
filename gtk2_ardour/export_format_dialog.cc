@@ -354,12 +354,13 @@ void
 ExportFormatDialog::set_session (ARDOUR::Session* s)
 {
 	SessionHandlePtr::set_session (s);
-	silence_start_clock.set_session (s);
-	silence_end_clock.set_session (s);
 
 	if (!_session) {
 		return;
 	}
+
+	silence_start_clock.set_session (s);
+	silence_end_clock.set_session (s);
 
 	update_clock (silence_start_clock, silence_start);
 	update_clock (silence_end_clock, silence_end);
