@@ -81,7 +81,8 @@ static const GDebugKey gdk_debug_keys[] = {
   {"multihead",	    GDK_DEBUG_MULTIHEAD},
   {"xinerama",	    GDK_DEBUG_XINERAMA},
   {"draw",	    GDK_DEBUG_DRAW},
-  {"eventloop",	    GDK_DEBUG_EVENTLOOP}
+  {"eventloop",	    GDK_DEBUG_EVENTLOOP},
+  {"touch",    	    GDK_DEBUG_TOUCH}
 };
 
 static const int gdk_ndebug_keys = G_N_ELEMENTS (gdk_debug_keys);

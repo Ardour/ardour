@@ -373,10 +373,16 @@ _gdk_win32_window_procedure (HWND   hwnd,
 void 
 _gdk_events_init (void)
 {
-  printf ("CHECK FOR Touch/Pointer API..\n");
+#ifdef G_ENABLE_DEBUG
+  if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
+    g_message ("CHECK FOR Touch/Pointer API..\n");
+#endif
   getPointerType         = (PFN_GetPointerType)      GetProcAddress (GetModuleHandle ("user32.dll"), "GetPointerType");
   getPointerTouchInfo    = (PFN_GetPointerTouchInfo) GetProcAddress (GetModuleHandle ("user32.dll"), "GetPointerTouchInfo");
-  printf ("Found GetPointerType = %p GetPointerTouchInfo = %p\n", getPointerType, getPointerTouchInfo);
+#ifdef G_ENABLE_DEBUG
+  if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
+    g_message ("Found GetPointerType = %p GetPointerTouchInfo = %p\n", getPointerType, getPointerTouchInfo);
+#endif
 
   GSource *source;
 
@@ -2045,19 +2051,28 @@ handle_wm_pointer (GdkEventType type, GdkWindow* window, MSG* msg)
     }
   if (!getPointerType (GET_POINTERID_WPARAM (msg->wParam), &pointer_type))
     {
-      printf ("getPointerType failed to translate event\n");
+#ifdef G_ENABLE_DEBUG
+      if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
+	g_message ("getPointerType failed to translate event\n");
+#endif
       return FALSE;
     }
   if (pointer_type != 2 /* touch */)
     {
-      printf ("Not A Touch event\n");
+#ifdef G_ENABLE_DEBUG
+      if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
+	g_message ("Not A Touch event\n");
+#endif
       return FALSE;
     }
 
   POINTER_TOUCH_INFO touch_info;
   if (!getPointerTouchInfo (GET_POINTERID_WPARAM (msg->wParam), &touch_info))
     {
-      printf ("getPointerTouchInfo failed to translate event\n");
+#ifdef G_ENABLE_DEBUG
+      if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
+	g_message ("getPointerTouchInfo failed to translate event\n");
+#endif
       return FALSE;
     }
 
@@ -2125,7 +2140,10 @@ handle_wm_pointer (GdkEventType type, GdkWindow* window, MSG* msg)
   event->touch.flags    = 0; // touch_sequence == 0 ? 0x20000 : 0;
   event->touch.deviceid = 0;
 
-  printf ("getPointerTouchInfo type = %d at: %.1fx%.1f root: %1.fx%1.f seq=%d\n", type, event->touch.x, event->touch.y, event->touch.x_root, event->touch.y_root, touch_sequence);
+#ifdef G_ENABLE_DEBUG
+  if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
+    g_message ("getPointerTouchInfo type = %d at: %.1fx%.1f root: %1.fx%1.f seq=%d\n", type, event->touch.x, event->touch.y, event->touch.x_root, event->touch.y_root, touch_sequence);
+#endif
   _gdk_win32_append_event (event);
 }
 

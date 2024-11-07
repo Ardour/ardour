@@ -92,7 +92,8 @@ typedef enum {
   GDK_DEBUG_MULTIHEAD	  = 1 <<12,
   GDK_DEBUG_XINERAMA	  = 1 <<13,
   GDK_DEBUG_DRAW	  = 1 <<14,
-  GDK_DEBUG_EVENTLOOP     = 1 <<15
+  GDK_DEBUG_EVENTLOOP     = 1 <<15,
+  GDK_DEBUG_TOUCH         = 1 <<16
 } GdkDebugFlag;
 
 #ifndef GDK_DISABLE_DEPRECATED

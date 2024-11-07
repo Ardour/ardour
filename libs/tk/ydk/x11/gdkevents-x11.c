@@ -263,7 +263,10 @@ _gdk_events_init (GdkDisplay *display)
   int firstevent, firsterror;
   if (display_x11->xi.libxi && XQueryExtension (display_x11->xdisplay, "XInputExtension", &display_x11->xid_opcode, &firstevent, &firsterror))
   {
-    printf ("CHECK FOR TOUCHSCREENs\n");
+#ifdef G_ENABLE_DEBUG
+    if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
+      g_message ("CHECK FOR TOUCHSCREENs\n");
+#endif
 
     int n_devices;
     XIDeviceInfo* info;
@@ -290,7 +293,10 @@ _gdk_events_init (GdkDisplay *display)
 	}
       }
       if (direct_touch) {
-	printf ("XI: touch-device id=%d name='%s' ntouch: %d\n", dev->deviceid, dev->name, classInfo->num_touches);
+#ifdef G_ENABLE_DEBUG
+	if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
+	  g_message ("XI: touch-device id=%d name='%s' ntouch: %d\n", dev->deviceid, dev->name, classInfo->num_touches);
+#endif
 	if (!display_x11->touch_devices) {
 	  display_x11->touch_devices = g_hash_table_new (g_direct_hash, NULL);
 	}
@@ -2246,7 +2252,10 @@ gdk_event_translate (GdkDisplay *display,
           && display_x11->touch_devices && g_hash_table_lookup (display_x11->touch_devices, GUINT_TO_POINTER (((XIDeviceEvent *)xevent->xcookie.data)->deviceid)))
 	{
 	  XIDeviceEvent *xev = (XIDeviceEvent *) xevent->xcookie.data;
-	  printf ("TOUCH dev=%d src=%d | dt: %u flags: %x\n", xev->deviceid, xev->sourceid, xev->detail, xev->flags);
+#ifdef G_ENABLE_DEBUG
+	  if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
+	    g_message ("TOUCH dev=%d src=%d | dt: %u flags: %x\n", xev->deviceid, xev->sourceid, xev->detail, xev->flags);
+#endif
 	  window = gdk_window_lookup_for_display (display, xev->event);
 	  g_object_ref (window);
 
