@@ -51,6 +51,8 @@ namespace ARDOUR {
 	class RouteGroup;
 }
 
+#define MAX_LUA_ACTION_BUTTONS 12
+
 class ApplicationBar : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
 public:
@@ -103,7 +105,10 @@ private:
 	void reset_route_peak_display (ARDOUR::Route*);
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
-	bool  editor_meter_peak_button_release (GdkEventButton*);
+	bool editor_meter_peak_button_release (GdkEventButton*);
+
+	bool bind_lua_action_script (GdkEventButton*, int);
+	void action_script_changed (int i, const std::string&);
 
 	/* blinking alerts */
 	void sync_blink (bool);
@@ -151,6 +156,8 @@ private:
 	LevelMeterHBox *              _editor_meter;
 	ArdourWidgets::ArdourVSpacer  _meterbox_spacer;
 	Gtk::HBox                     _meterbox_spacer2;
+	ArdourWidgets::ArdourVSpacer  _scripts_spacer;
+	ArdourWidgets::ArdourButton   _action_script_call_btn[MAX_LUA_ACTION_BUTTONS];
 
 	bool _feedback_exists;
 	bool _ambiguous_latency;

@@ -263,10 +263,6 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (mixer_visibility_button);
 	button_height_size_group->add_widget (prefs_visibility_button);
 
-	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
-		button_height_size_group->add_widget (action_script_call_btn[i]);
-	}
-
 	/* and the main table layout */
 	int vpadding = 1;
 	int hpadding = 2;
@@ -274,17 +270,6 @@ ARDOUR_UI::setup_transport ()
 #define TCOL col, col + 1
 
 	transport_table.attach (*application_bar, TCOL, 0, 2 , EXPAND|FILL, EXPAND|FILL, 3, 0);
-	++col;
-
-	/* lua script action buttons */
-	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
-		const int r = i % 2;
-		const int c = col + i / 2;
-		transport_table.attach (action_script_call_btn[i], c, c + 1, r, r + 1, FILL, SHRINK, 1, vpadding);
-	}
-	col += MAX_LUA_ACTION_BUTTONS / 2;
-
-	transport_table.attach (scripts_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	transport_table.attach (recorder_visibility_button,     TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);

@@ -412,21 +412,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ArdourWaveView::WaveView::set_image_cache_size (UIConfiguration::instance().get_waveform_cache_size() * 1048576);
 	} else if (p == "use-wm-visibility") {
 		VisibilityTracker::set_use_window_manager_visibility (UIConfiguration::instance().get_use_wm_visibility());
-	} else if (p == "action-table-columns") {
-		const uint32_t cols = UIConfiguration::instance().get_action_table_columns ();
-		for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
-			const int col = i / 2;
-			if (cols & (1<<col)) {
-				action_script_call_btn[i].show();
-			} else {
-				action_script_call_btn[i].hide();
-			}
-		}
-		if (cols == 0) {
-			scripts_spacer.hide ();
-		} else {
-			scripts_spacer.show ();
-		}
 	} else if (p == "flat-buttons") {
 		bool flat = UIConfiguration::instance().get_flat_buttons();
 		if (ArdourButton::flat_buttons () != flat) {

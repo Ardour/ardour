@@ -195,7 +195,6 @@ namespace ArdourWidgets {
 }
 
 #define MAX_LUA_ACTION_SCRIPTS 32
-#define MAX_LUA_ACTION_BUTTONS 12
 
 class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr, public TransportControlProvider
 {
@@ -529,15 +528,11 @@ private:
 
 	ApplicationBar *application_bar;
 
-	ArdourWidgets::ArdourVSpacer scripts_spacer;
-
 	void toggle_external_sync ();
 	void toggle_time_master ();
 	void toggle_video_sync ();
 
 	ArdourWidgets::ArdourButton error_alert_button;
-
-	ArdourWidgets::ArdourButton action_script_call_btn[MAX_LUA_ACTION_BUTTONS];
 
 	void blink_handler (bool);
 	sigc::connection blink_connection;
@@ -854,9 +849,6 @@ private:
 
 	void escape ();
 	void close_current_dialog ();
-
-	bool bind_lua_action_script (GdkEventButton*, int);
-	void action_script_changed (int i, const std::string&);
 
 	void ask_about_scratch_deletion ();
 	bool nsm_first_session_opened;
