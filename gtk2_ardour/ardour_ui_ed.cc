@@ -1054,9 +1054,7 @@ ARDOUR_UI::on_theme_changed ()
 void
 ARDOUR_UI::focus_on_clock ()
 {
-	if (application_bar) {
-		application_bar->focus_on_clock ();
-	}
+	// TODO cast to a tabbable and call focus_on_clock to its clock
 }
 
 bool

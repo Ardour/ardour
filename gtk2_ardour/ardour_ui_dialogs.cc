@@ -84,7 +84,6 @@
 #include "splash.h"
 #include "sfdb_ui.h"
 #include "timers.h"
-#include "application_bar.h"  //TODO: remove
 #include "transport_masters_dialog.h"
 #include "trigger_page.h"
 #include "virtual_keyboard_window.h"
@@ -121,8 +120,6 @@ ARDOUR_UI::set_session (Session *s)
 	} else {
 		ActionManager::set_sensitive (ActionManager::range_sensitive_actions, false);
 	}
-
-	application_bar->set_session (s);
 
 	update_path_label ();
 	update_sample_rate ();
