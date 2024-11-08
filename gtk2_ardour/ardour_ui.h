@@ -521,7 +521,6 @@ private:
 	Gtk::Frame               transport_frame;
 	Gtk::HBox                transport_hbox;
 
-	ArdourWidgets::ArdourVSpacer* secondary_clock_spacer;
 	void update_clock_visibility ();
 	void toggle_follow_edits ();
 

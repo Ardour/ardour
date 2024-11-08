@@ -201,16 +201,10 @@ ARDOUR_UI::update_clock_visibility ()
 		secondary_clock->show();
 		secondary_clock->left_btn()->show();
 		secondary_clock->right_btn()->show();
-		if (secondary_clock_spacer) {
-			secondary_clock_spacer->show();
-		}
 	} else {
 		secondary_clock->hide();
 		secondary_clock->left_btn()->hide();
 		secondary_clock->right_btn()->hide();
-		if (secondary_clock_spacer) {
-			secondary_clock_spacer->hide();
-		}
 	}
 }
 
@@ -421,28 +415,6 @@ ARDOUR_UI::setup_transport ()
 
 	transport_table.attach (*application_bar, TCOL, 0, 2 , EXPAND|FILL, EXPAND|FILL, 3, 0);
 	++col;
-
-	transport_table.attach (*primary_clock,              col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, 0);
-	transport_table.attach (*primary_clock->left_btn(),  col,     col + 1, 1, 2 , FILL, SHRINK, hpadding, 0);
-	transport_table.attach (*primary_clock->right_btn(), col + 1, col + 2, 1, 2 , FILL, SHRINK, hpadding, 0);
-	col += 2;
-
-	transport_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-	++col;
-
-	if (!ARDOUR::Profile->get_small_screen()) {
-		transport_table.attach (*secondary_clock,              col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, 0);
-		transport_table.attach (*secondary_clock->left_btn(),  col,     col + 1, 1, 2 , FILL, SHRINK, hpadding, 0);
-		transport_table.attach (*secondary_clock->right_btn(), col + 1, col + 2, 1, 2 , FILL, SHRINK, hpadding, 0);
-		secondary_clock->set_no_show_all (true);
-		secondary_clock->left_btn()->set_no_show_all (true);
-		secondary_clock->right_btn()->set_no_show_all (true);
-		col += 2;
-
-		secondary_clock_spacer = manage (new ArdourVSpacer ());
-		transport_table.attach (*secondary_clock_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-		++col;
-	}
 
 	transport_table.attach (*alert_box, TCOL, 0, 2, SHRINK, EXPAND|FILL, hpadding, 0);
 	++col;

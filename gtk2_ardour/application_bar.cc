@@ -117,6 +117,7 @@ ApplicationBar::ApplicationBar ()
 	, _latency_disable_button (ArdourButton::led_default_elements)
 	, _auto_return_button (ArdourButton::led_default_elements)
 	, _follow_edits_button (ArdourButton::led_default_elements)
+	, _secondary_clock_spacer (0)
 {
 	_record_mode_strings = I18N (_record_mode_strings_);
 }
@@ -226,6 +227,28 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
+	_table.attach (*(ARDOUR_UI::instance()->primary_clock),              col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, 0);
+	_table.attach (*(ARDOUR_UI::instance()->primary_clock)->left_btn(),  col,     col + 1, 1, 2 , FILL, SHRINK, hpadding, 0);
+	_table.attach (*(ARDOUR_UI::instance()->primary_clock)->right_btn(), col + 1, col + 2, 1, 2 , FILL, SHRINK, hpadding, 0);
+	col += 2;
+
+	_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
+	if (!ARDOUR::Profile->get_small_screen()) {
+		_table.attach (*(ARDOUR_UI::instance()->secondary_clock),              col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, 0);
+		_table.attach (*(ARDOUR_UI::instance()->secondary_clock)->left_btn(),  col,     col + 1, 1, 2 , FILL, SHRINK, hpadding, 0);
+		_table.attach (*(ARDOUR_UI::instance()->secondary_clock)->right_btn(), col + 1, col + 2, 1, 2 , FILL, SHRINK, hpadding, 0);
+		(ARDOUR_UI::instance()->secondary_clock)->set_no_show_all (true);
+		(ARDOUR_UI::instance()->secondary_clock)->left_btn()->set_no_show_all (true);
+		(ARDOUR_UI::instance()->secondary_clock)->right_btn()->set_no_show_all (true);
+		col += 2;
+
+		_secondary_clock_spacer = manage (new ArdourVSpacer ());
+		_table.attach (*_secondary_clock_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+		++col;
+	}
+
 	_table.set_spacings (0);
 	_table.set_row_spacings (4);
 	_table.set_border_width (1);
@@ -269,6 +292,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	ARDOUR::Latent::DisableSwitchChanged.connect (_forever_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::latency_switch_changed, this), gui_context ());
 
 	/* initialize */
+	update_clock_visibility ();
 	set_transport_sensitivity (false);
 	latency_switch_changed ();
 	session_latency_updated (true);
@@ -438,6 +462,24 @@ ApplicationBar::latency_switch_changed ()
 }
 
 void
+ApplicationBar::update_clock_visibility ()
+{
+	if (ARDOUR::Profile->get_small_screen()) {
+		_secondary_clock_spacer->hide();
+		return;
+	}
+	if (UIConfiguration::instance().get_show_secondary_clock ()) {
+		if (_secondary_clock_spacer) {
+			_secondary_clock_spacer->show();
+		}
+	} else {
+		if (_secondary_clock_spacer) {
+			_secondary_clock_spacer->hide();
+		}
+	}
+}
+
+void
 ApplicationBar::session_latency_updated (bool for_playback)
 {
 	if (!for_playback) {
@@ -536,7 +578,7 @@ ApplicationBar::parameter_changed (std::string p)
 	} else if (p == "show-editor-meter") {
 		repack_transport_hbox ();
 	} else if (p == "show-secondary-clock") {
-//		update_clock_visibility ();
+		update_clock_visibility ();
 	} else if (p == "action-table-columns") {
 /*		const uint32_t cols = UIConfiguration::instance().get_action_table_columns ();
 		for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {

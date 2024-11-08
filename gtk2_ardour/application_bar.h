@@ -78,6 +78,8 @@ private:
 	void latency_switch_changed ();
 	void session_latency_updated (bool);
 
+	void update_clock_visibility ();
+
 	/* blinking alerts */
 	void sync_blink (bool);
 	void blink_handler (bool);
@@ -102,6 +104,7 @@ private:
 	Gtk::Label                    _io_latency_value;
 	ArdourWidgets::ArdourButton   _auto_return_button;
 	ArdourWidgets::ArdourButton   _follow_edits_button;
+	ArdourWidgets::ArdourVSpacer* _secondary_clock_spacer;
 
 	std::vector<std::string> _record_mode_strings;
 
