@@ -280,7 +280,6 @@ ARDOUR_UI::setup_windows ()
 		return -1;
 	}
 
-	time_info_box = new TimeInfoBox ("ToolbarTimeInfo", false);
 	/* all other dialogs are created conditionally */
 
 	we_have_dependents ();

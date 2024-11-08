@@ -157,9 +157,6 @@ ARDOUR_UI::set_session (Session *s)
 
 	AutomationWatch::instance().set_session (s);
 
-	mini_timeline.set_session (s);
-	time_info_box->set_session (s);
-
 	primary_clock->set_session (s);
 	secondary_clock->set_session (s);
 	big_clock->set_session (s);
@@ -231,57 +228,9 @@ ARDOUR_UI::set_session (Session *s)
 
 	second_connection = Timers::second_connect (sigc::mem_fun(*this, &ARDOUR_UI::every_second));
 	point_one_second_connection = Timers::rapid_connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_one_seconds));
-	point_zero_something_second_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_zero_something_seconds));
 	set_fps_timeout_connection();
 
 	update_format ();
-
-	if (editor_meter_table.get_parent()) {
-		transport_hbox.remove (editor_meter_table);
-	}
-
-	if (editor_meter) {
-		editor_meter_table.remove(*editor_meter);
-		delete editor_meter;
-		editor_meter = 0;
-	}
-
-	if (editor_meter_table.get_parent()) {
-		transport_hbox.remove (editor_meter_table);
-	}
-	if (editor_meter_peak_display.get_parent ()) {
-		editor_meter_table.remove (editor_meter_peak_display);
-	}
-
-	if (_session &&
-	    _session->master_out() &&
-	    _session->master_out()->n_outputs().n(DataType::AUDIO) > 0) {
-
-		editor_meter = new LevelMeterHBox(_session);
-		editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
-		editor_meter->clear_meters();
-		editor_meter->setup_meters (30, 10, 6);
-		editor_meter->show();
-
-		editor_meter_table.set_spacings(3);
-		editor_meter_table.attach(*editor_meter,             0,1, 0,1, FILL, EXPAND|FILL, 0, 1);
-		editor_meter_table.attach(editor_meter_peak_display, 0,1, 1,2, FILL, SHRINK, 0, 0);
-
-		editor_meter->show();
-		editor_meter_peak_display.show();
-
-		ArdourMeter::ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_peak_display));
-		ArdourMeter::ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_route_peak_display));
-		ArdourMeter::ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_group_peak_display));
-
-		editor_meter_peak_display.set_name ("meterbridge peakindicator");
-		editor_meter_peak_display.set_can_focus (false);
-		editor_meter_peak_display.set_size_request (-1, std::max (5.f, std::min (12.f, rintf (8.f * UIConfiguration::instance().get_ui_scale()))) );
-		editor_meter_peak_display.set_corner_radius (1.0);
-
-		_clear_editor_meter = true;
-		editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::editor_meter_peak_button_release), false);
-	}
 
 	update_title ();
 }
@@ -358,15 +307,7 @@ ARDOUR_UI::unload_session (bool hide_stuff, bool force_unload)
 
 	second_connection.disconnect ();
 	point_one_second_connection.disconnect ();
-	point_zero_something_second_connection.disconnect();
 	fps_connection.disconnect();
-
-	if (editor_meter) {
-		editor_meter_table.remove(*editor_meter);
-		delete editor_meter;
-		editor_meter = 0;
-		editor_meter_peak_display.hide();
-	}
 
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
 
@@ -1079,15 +1020,6 @@ ARDOUR_UI::tabbed_window_state_event_handler (GdkEventWindowState* ev, void* obj
 	}
 #endif
 
-	return false;
-}
-
-bool
-ARDOUR_UI::editor_meter_peak_button_release (GdkEventButton* ev)
-{
-	if (ev->button == 1) {
-		ArdourMeter::ResetAllPeakDisplays ();
-	}
 	return false;
 }
 

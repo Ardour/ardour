@@ -381,10 +381,6 @@ public:
 	void get_process_buffers ();
 	void drop_process_buffers ();
 
-	void reset_peak_display ();
-	void reset_route_peak_display (ARDOUR::Route*);
-	void reset_group_peak_display (ARDOUR::RouteGroup*);
-
 	void show_library_download_window();
 
 	const std::string& announce_string() const { return _announce_string; }
@@ -526,7 +522,6 @@ private:
 
 	Gtk::Table               transport_table;
 	Gtk::Frame               transport_frame;
-	Gtk::HBox                transport_hbox;
 
 	void toggle_follow_edits ();
 
@@ -541,24 +536,9 @@ private:
 	void toggle_time_master ();
 	void toggle_video_sync ();
 
-	MiniTimeline       mini_timeline;
-	TimeInfoBox*       time_info_box;
-
-
-	ArdourWidgets::ArdourVSpacer      meterbox_spacer;
-	Gtk::HBox                         meterbox_spacer2;
-
 	ArdourWidgets::ArdourButton error_alert_button;
 
 	ArdourWidgets::ArdourButton action_script_call_btn[MAX_LUA_ACTION_BUTTONS];
-
-	Gtk::Table editor_meter_table;
-	ArdourWidgets::ArdourButton editor_meter_peak_display;
-	LevelMeterHBox *            editor_meter;
-
-	bool  _clear_editor_meter;
-	bool  _editor_meter_peaked;
-	bool  editor_meter_peak_button_release (GdkEventButton*);
 
 	void blink_handler (bool);
 	sigc::connection blink_connection;
@@ -607,11 +587,9 @@ private:
 
 	void every_second ();
 	void every_point_one_seconds ();
-	void every_point_zero_something_seconds ();
 
 	sigc::connection second_connection;
 	sigc::connection point_one_second_connection;
-	sigc::connection point_zero_something_second_connection;
 	sigc::connection fps_connection;
 
 	void set_fps_timeout_connection ();

@@ -298,12 +298,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _shared_popup_menu (0)
 	, _basic_ui (0)
 	, startup_fsm (0)
-	, time_info_box (0)
 	, error_alert_button ( ArdourButton::just_led_default_elements )
-	, editor_meter_peak_display()
-	, editor_meter(0)
-	, _clear_editor_meter( true)
-	, _editor_meter_peaked (false)
 	, _numpad_locate_happening (false)
 	, _session_is_new (false)
 	, last_key_press_time (0)
@@ -850,7 +845,6 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete primary_clock; primary_clock = 0;
 		delete secondary_clock; secondary_clock = 0;
 		delete _process_thread; _process_thread = 0;
-		delete time_info_box; time_info_box = 0;
 		delete meterbridge; meterbridge = 0;
 		delete duplicate_routes_dialog; duplicate_routes_dialog = 0;
 		delete trigger_page; trigger_page = 0;
@@ -1047,7 +1041,6 @@ If you still wish to quit, please use the\n\n\
 
 		second_connection.disconnect ();
 		point_one_second_connection.disconnect ();
-		point_zero_something_second_connection.disconnect();
 		fps_connection.disconnect();
 	}
 
@@ -1154,32 +1147,6 @@ void
 ARDOUR_UI::every_point_one_seconds ()
 {
 	if (editor) editor->build_region_boundary_cache();
-}
-
-void
-ARDOUR_UI::every_point_zero_something_seconds ()
-{
-	// august 2007: actual update frequency: 25Hz (40ms), not 100Hz
-
-	if (editor_meter && UIConfiguration::instance().get_show_editor_meter() && editor_meter_peak_display.get_mapped ()) {
-
-		if (_clear_editor_meter) {
-			editor_meter->clear_meters();
-			editor_meter_peak_display.set_active_state (Gtkmm2ext::Off);
-			_clear_editor_meter = false;
-			_editor_meter_peaked = false;
-		}
-
-		if (!UIConfiguration::instance().get_no_strobe()) {
-			const float mpeak = editor_meter->update_meters();
-			const bool peaking = mpeak > UIConfiguration::instance().get_meter_peak();
-
-			if (!_editor_meter_peaked && peaking) {
-				editor_meter_peak_display.set_active_state (Gtkmm2ext::ExplicitActive);
-				_editor_meter_peaked = true;
-			}
-		}
-	}
 }
 
 void
@@ -3000,31 +2967,6 @@ ARDOUR_UI::midi_panic ()
 {
 	if (_session) {
 		_session->midi_panic();
-	}
-}
-
-void
-ARDOUR_UI::reset_peak_display ()
-{
-	if (!_session || !_session->master_out() || !editor_meter) return;
-	_clear_editor_meter = true;
-}
-
-void
-ARDOUR_UI::reset_group_peak_display (RouteGroup* group)
-{
-	if (!_session || !_session->master_out()) return;
-	if (group == _session->master_out()->route_group()) {
-		reset_peak_display ();
-	}
-}
-
-void
-ARDOUR_UI::reset_route_peak_display (Route* route)
-{
-	if (!_session || !_session->master_out()) return;
-	if (_session->master_out().get() == route) {
-		reset_peak_display ();
 	}
 }
 

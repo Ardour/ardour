@@ -125,14 +125,23 @@ ApplicationBar::ApplicationBar ()
 	, _feedback_alert_button (_("Feedback"))
 	, _cue_rec_enable (_("Rec Cues"), ArdourButton::led_default_elements)
 	, _cue_play_enable (_("Play Cues"), ArdourButton::led_default_elements)
+	, _time_info_box (0)
+	, _editor_meter_peak_display()
+	, _editor_meter(0)
 	, _feedback_exists (false)
 	, _ambiguous_latency (false)
+	, _clear_editor_meter (true)
+	, _editor_meter_peaked (false)
 {
 	_record_mode_strings = I18N (_record_mode_strings_);
+
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &ApplicationBar::parameter_changed));
 }
 
 ApplicationBar::~ApplicationBar ()
 {
+	delete _time_info_box;
+	_time_info_box = 0;
 }
 
 void
@@ -228,6 +237,8 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_cue_rec_enable.signal_clicked.connect(sigc::mem_fun(*this, &ApplicationBar::cue_rec_state_clicked));
 	_cue_play_enable.signal_clicked.connect(sigc::mem_fun(*this, &ApplicationBar::cue_ffwd_state_clicked));
 
+	_time_info_box = new TimeInfoBox ("ToolbarTimeInfo", false);
+
 	int vpadding = 1;
 	int hpadding = 2;
 	int col = 0;
@@ -311,12 +322,17 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (_cue_play_enable, TCOL, 1, 2 , FILL, FILL, 3, 0);
 	++col;
 
+	/* editor-meter, mini-timeline and selection clock are options in the transport_hbox */
+	_transport_hbox.set_spacing (3);
+	_table.attach (_transport_hbox, TCOL, 0, 2, EXPAND|FILL, EXPAND|FILL, hpadding, 0);
+	++col;
+
 	_table.set_spacings (0);
 	_table.set_row_spacings (4);
 	_table.set_border_width (1);
 
 	_table.show_all (); // TODO: update visibility somewhere else
-	pack_start (_table, false, false);
+	pack_start (_table, true, true);
 
 	/*sizing */
 	Glib::RefPtr<SizeGroup> button_height_size_group = ARDOUR_UI::instance()->button_height_size_group;
@@ -369,6 +385,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	Gtkmm2ext::UI::instance()->set_tip (_monitor_mute_button, _("Monitor section mute output"));
 	Gtkmm2ext::UI::instance()->set_tip (_cue_rec_enable, _("<b>When enabled</b>, triggering Cues will result in Cue Markers added to the timeline"));
 	Gtkmm2ext::UI::instance()->set_tip (_cue_play_enable, _("<b>When enabled</b>, Cue Markers will trigger the associated Cue when passed on the timeline"));
+	Gtkmm2ext::UI::instance()->set_tip (_editor_meter_peak_display, _("Reset All Peak Meters"));
 
 	/* theming */
 	_sync_button.set_name ("transport active option button");
@@ -440,44 +457,44 @@ ApplicationBar::repack_transport_hbox ()
 		return;
 	}
 
-/*	if (time_info_box) {
-		if (time_info_box->get_parent()) {
-			transport_hbox.remove (*time_info_box);
+	if (_time_info_box) {
+		if (_time_info_box->get_parent()) {
+			_transport_hbox.remove (*_time_info_box);
 		}
 		if (UIConfiguration::instance().get_show_toolbar_selclock ()) {
-			transport_hbox.pack_start (*time_info_box, false, false);
-			time_info_box->show();
+			_transport_hbox.pack_start (*_time_info_box, false, false);
+			_time_info_box->show();
 		}
 	}
 
-	if (mini_timeline.get_parent()) {
-		transport_hbox.remove (mini_timeline);
+	if (_mini_timeline.get_parent()) {
+		_transport_hbox.remove (_mini_timeline);
 	}
 	if (UIConfiguration::instance().get_show_mini_timeline ()) {
-		transport_hbox.pack_start (mini_timeline, true, true);
-		mini_timeline.show();
+		_transport_hbox.pack_start (_mini_timeline, true, true);
+		_mini_timeline.show();
 	}
 
-	if (editor_meter) {
-		if (editor_meter_table.get_parent()) {
-			transport_hbox.remove (editor_meter_table);
+	if (_editor_meter) {
+		if (_editor_meter_table.get_parent()) {
+			_transport_hbox.remove (_editor_meter_table);
 		}
-		if (meterbox_spacer.get_parent()) {
-			transport_hbox.remove (meterbox_spacer);
-			transport_hbox.remove (meterbox_spacer2);
+		if (_meterbox_spacer.get_parent()) {
+			_transport_hbox.remove (_meterbox_spacer);
+			_transport_hbox.remove (_meterbox_spacer2);
 		}
 
 		if (UIConfiguration::instance().get_show_editor_meter()) {
-			transport_hbox.pack_end (meterbox_spacer, false, false, 3);
-			transport_hbox.pack_end (editor_meter_table, false, false);
-			transport_hbox.pack_end (meterbox_spacer2, false, false, 1);
-			meterbox_spacer2.set_size_request (1, -1);
-			editor_meter_table.show();
-			meterbox_spacer.show();
-			meterbox_spacer2.show();
+			_transport_hbox.pack_end (_meterbox_spacer, false, false, 3);
+			_transport_hbox.pack_end (_editor_meter_table, false, false);
+			_transport_hbox.pack_end (_meterbox_spacer2, false, false, 1);
+			_meterbox_spacer2.set_size_request (1, -1);
+			_editor_meter_table.show();
+			_meterbox_spacer.show();
+			_meterbox_spacer2.show();
 		}
 	}
-*/
+
 	bool show_rec = UIConfiguration::instance().get_show_toolbar_recpunch ();
 	if (show_rec) {
 		_punch_label.show ();
@@ -485,26 +502,25 @@ ApplicationBar::repack_transport_hbox ()
 		_punch_in_button.show ();
 		_punch_out_button.show ();
 		_record_mode_selector.show ();
-//	_recpunch_spacer.show ();
+		_recpunch_spacer.show ();
 	} else {
 		_punch_label.hide ();
 		_layered_label.hide ();
 		_punch_in_button.hide ();
 		_punch_out_button.hide ();
 		_record_mode_selector.hide ();
-//		_recpunch_spacer.hide ();
+		_recpunch_spacer.hide ();
 	}
 
-/*
 	bool show_pdc = UIConfiguration::instance().get_show_toolbar_latency ();
 	if (show_pdc) {
-		latency_disable_button.show ();
+		_latency_disable_button.show ();
 		_route_latency_value.show ();
 		_io_latency_label.show ();
 		_io_latency_value.show ();
 		_latency_spacer.show ();
 	} else {
-		latency_disable_button.hide ();
+		_latency_disable_button.hide ();
 		_route_latency_value.hide ();
 		_io_latency_label.hide ();
 		_io_latency_value.hide ();
@@ -515,26 +531,25 @@ ApplicationBar::repack_transport_hbox ()
 	if (show_cue) {
 		_cue_rec_enable.show ();
 		_cue_play_enable.show ();
-		cuectrl_spacer.show ();
+		_cuectrl_spacer.show ();
 	} else {
 		_cue_rec_enable.hide ();
 		_cue_play_enable.hide ();
-		cuectrl_spacer.hide ();
+		_cuectrl_spacer.hide ();
 	}
 
 	bool show_mnfo = UIConfiguration::instance().get_show_toolbar_monitor_info ();
 	if (show_mnfo) {
-		monitor_dim_button.show ();
-		monitor_mono_button.show ();
-		monitor_mute_button.show ();
-		monitor_spacer.show ();
+		_monitor_dim_button.show ();
+		_monitor_mono_button.show ();
+		_monitor_mute_button.show ();
+		_monitor_spacer.show ();
 	} else {
-		monitor_dim_button.hide ();
-		monitor_mono_button.hide ();
-		monitor_mute_button.hide ();
-		monitor_spacer.hide ();
+		_monitor_dim_button.hide ();
+		_monitor_mono_button.hide ();
+		_monitor_mute_button.hide ();
+		_monitor_spacer.hide ();
 	}
-*/
 }
 
 void
@@ -654,6 +669,8 @@ ApplicationBar::set_session (Session *s)
 		_shuttle_box.set_session (s);
 		_primary_clock.set_session (s);
 		_secondary_clock.set_session (s);
+		_mini_timeline.set_session (s);
+		_time_info_box->set_session (s);
 	}
 
 	if (_basic_ui) {
@@ -663,7 +680,15 @@ ApplicationBar::set_session (Session *s)
 	map_transport_state ();
 
 	if (!_session) {
+		_point_zero_something_second_connection.disconnect();
 		_blink_connection.disconnect ();
+
+		if (_editor_meter) {
+			_editor_meter_table.remove(*_editor_meter);
+			delete _editor_meter;
+			_editor_meter = 0;
+			_editor_meter_peak_display.hide();
+		}
 
 		return;
 	}
@@ -686,7 +711,53 @@ ApplicationBar::set_session (Session *s)
 
 	_solo_alert_button.set_active (_session->soloing());
 
+	if (_editor_meter_table.get_parent()) {
+		_transport_hbox.remove (_editor_meter_table);
+	}
+	if (_editor_meter) {
+		_editor_meter_table.remove(*_editor_meter);
+		delete _editor_meter;
+		_editor_meter = 0;
+	}
+	if (_editor_meter_table.get_parent()) {
+		_transport_hbox.remove (_editor_meter_table);
+	}
+	if (_editor_meter_peak_display.get_parent ()) {
+		_editor_meter_table.remove (_editor_meter_peak_display);
+	}
+	if (_session &&
+	    _session->master_out() &&
+	    _session->master_out()->n_outputs().n(DataType::AUDIO) > 0) {
+
+		_editor_meter = new LevelMeterHBox(_session);
+		_editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
+		_editor_meter->clear_meters();
+		_editor_meter->setup_meters (30, 10, 6);
+		_editor_meter->show();
+
+		_editor_meter_table.set_spacings(3);
+		_editor_meter_table.attach(*_editor_meter,             0,1, 0,1, FILL, EXPAND|FILL, 0, 1);
+		_editor_meter_table.attach(_editor_meter_peak_display, 0,1, 1,2, FILL, SHRINK, 0, 0);
+
+		_editor_meter->show();
+		_editor_meter_peak_display.show();
+
+		ArdourMeter::ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &ApplicationBar::reset_peak_display));
+		ArdourMeter::ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &ApplicationBar::reset_route_peak_display));
+		ArdourMeter::ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &ApplicationBar::reset_group_peak_display));
+
+		_editor_meter_peak_display.set_name ("meterbridge peakindicator");
+		_editor_meter_peak_display.set_can_focus (false);
+		_editor_meter_peak_display.set_size_request (-1, std::max (5.f, std::min (12.f, rintf (8.f * UIConfiguration::instance().get_ui_scale()))) );
+		_editor_meter_peak_display.set_corner_radius (1.0);
+
+		_clear_editor_meter = true;
+		_editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ApplicationBar::editor_meter_peak_button_release), false);
+	}
+
 	_blink_connection = Timers::blink_connect (sigc::mem_fun(*this, &ApplicationBar::blink_handler));
+
+	_point_zero_something_second_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &ApplicationBar::every_point_zero_something_seconds));
 }
 
 void
@@ -874,6 +945,16 @@ ApplicationBar::set_record_mode (RecordMode m)
 	}
 }
 
+bool
+ApplicationBar::editor_meter_peak_button_release (GdkEventButton* ev)
+{
+	if (ev->button == 1) {
+		ArdourMeter::ResetAllPeakDisplays ();
+	}
+	return false;
+}
+
+
 void
 ApplicationBar::sync_blink (bool onoff)
 {
@@ -894,6 +975,32 @@ ApplicationBar::sync_blink (bool onoff)
 	} else {
 		/* locked */
 		_sync_button.set_active (true);
+	}
+}
+
+void
+ApplicationBar::every_point_zero_something_seconds ()
+{
+	// august 2007: actual update frequency: 25Hz (40ms), not 100Hz
+
+	if (_editor_meter && UIConfiguration::instance().get_show_editor_meter() && _editor_meter_peak_display.get_mapped ()) {
+
+		if (_clear_editor_meter) {
+			_editor_meter->clear_meters();
+			_editor_meter_peak_display.set_active_state (Gtkmm2ext::Off);
+			_clear_editor_meter = false;
+			_editor_meter_peaked = false;
+		}
+
+		if (!UIConfiguration::instance().get_no_strobe()) {
+			const float mpeak = _editor_meter->update_meters();
+			const bool peaking = mpeak > UIConfiguration::instance().get_meter_peak();
+
+			if (!_editor_meter_peaked && peaking) {
+				_editor_meter_peak_display.set_active_state (Gtkmm2ext::ExplicitActive);
+				_editor_meter_peaked = true;
+			}
+		}
 	}
 }
 
@@ -929,4 +1036,29 @@ ApplicationBar::map_transport_state ()
 //		update_disk_space ();
 	}
 
+}
+
+void
+ApplicationBar::reset_peak_display ()
+{
+	if (!_session || !_session->master_out() || !_editor_meter) return;
+	_clear_editor_meter = true;
+}
+
+void
+ApplicationBar::reset_group_peak_display (RouteGroup* group)
+{
+	if (!_session || !_session->master_out()) return;
+	if (group == _session->master_out()->route_group()) {
+		reset_peak_display ();
+	}
+}
+
+void
+ApplicationBar::reset_route_peak_display (Route* route)
+{
+	if (!_session || !_session->master_out()) return;
+	if (_session->master_out().get() == route) {
+		reset_peak_display ();
+	}
 }

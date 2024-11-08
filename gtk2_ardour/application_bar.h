@@ -79,6 +79,7 @@ private:
 	void session_latency_updated (bool);
 
 	void update_clock_visibility ();
+	void every_point_zero_something_seconds ();
 
 	void solo_blink (bool);
 	void audition_blink (bool);
@@ -97,6 +98,12 @@ private:
 	void cue_ffwd_state_clicked ();
 	void cue_rec_state_changed ();
 	void cue_rec_state_clicked ();
+
+	void reset_peak_display ();
+	void reset_route_peak_display (ARDOUR::Route*);
+	void reset_group_peak_display (ARDOUR::RouteGroup*);
+
+	bool  editor_meter_peak_button_release (GdkEventButton*);
 
 	/* blinking alerts */
 	void sync_blink (bool);
@@ -136,12 +143,23 @@ private:
 	ArdourWidgets::ArdourVSpacer  _cuectrl_spacer;
 	ArdourWidgets::ArdourButton   _cue_rec_enable;
 	ArdourWidgets::ArdourButton   _cue_play_enable;
+	Gtk::HBox                     _transport_hbox;
+	MiniTimeline                  _mini_timeline;
+	TimeInfoBox*                  _time_info_box;
+	Gtk::Table                    _editor_meter_table;
+	ArdourWidgets::ArdourButton   _editor_meter_peak_display;
+	LevelMeterHBox *              _editor_meter;
+	ArdourWidgets::ArdourVSpacer  _meterbox_spacer;
+	Gtk::HBox                     _meterbox_spacer2;
 
 	bool _feedback_exists;
 	bool _ambiguous_latency;
+	bool _clear_editor_meter;
+	bool _editor_meter_peaked;
 
 	std::vector<std::string> _record_mode_strings;
 
 	sigc::connection          _blink_connection;
 	PBD::ScopedConnectionList _forever_connections;
+	sigc::connection          _point_zero_something_second_connection;
 };
