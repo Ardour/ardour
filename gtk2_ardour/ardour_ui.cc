@@ -298,8 +298,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _shared_popup_menu (0)
 	, _basic_ui (0)
 	, startup_fsm (0)
-	, _cue_rec_enable (_("Rec Cues"), ArdourButton::led_default_elements)
-	, _cue_play_enable (_("Play Cues"), ArdourButton::led_default_elements)
 	, time_info_box (0)
 	, error_alert_button ( ArdourButton::just_led_default_elements )
 	, editor_meter_peak_display()
@@ -427,9 +425,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	ARDOUR::DiskReader::Underrun.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::disk_underrun_handler, this), gui_context());
 
 	ARDOUR::Session::VersionMismatch.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::session_format_mismatch, this, _1, _2), gui_context());
-
-	TriggerBox::CueRecordingChanged.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::cue_rec_state_changed, this), gui_context ());
-	cue_rec_state_changed();
 
 	/* handle dialog requests */
 

@@ -427,9 +427,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		} else {
 			scripts_spacer.show ();
 		}
-	} else if (p == "cue-behavior") {
-		CueBehavior cb (_session->config.get_cue_behavior());
-		_cue_play_enable.set_active (cb & ARDOUR::FollowCues);
 	} else if (p == "flat-buttons") {
 		bool flat = UIConfiguration::instance().get_flat_buttons();
 		if (ArdourButton::flat_buttons () != flat) {

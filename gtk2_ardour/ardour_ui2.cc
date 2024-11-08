@@ -94,8 +94,6 @@ ARDOUR_UI::setup_tooltips ()
 	parameter_changed("click-gain");
 	set_tip (editor_meter_peak_display, _("Reset All Peak Meters"));
 	set_tip (error_alert_button, _("Show Error Log and acknowledge warnings"));
-	set_tip (_cue_rec_enable, _("<b>When enabled</b>, triggering Cues will result in Cue Markers added to the timeline"));
-	set_tip (_cue_play_enable, _("<b>When enabled</b>, Cue Markers will trigger the associated Cue when passed on the timeline"));
 
 	synchronize_sync_source_and_video_pullup ();
 
@@ -166,27 +164,6 @@ bool drag_failed (const Glib::RefPtr<Gdk::DragContext>& context, DragResult resu
 }
 
 void
-ARDOUR_UI::cue_rec_state_clicked ()
-{
-	TriggerBox::set_cue_recording(!TriggerBox::cue_recording());
-}
-
-void
-ARDOUR_UI::cue_ffwd_state_clicked ()
-{
-	if (editor) {
-		editor->toggle_cue_behavior ();
-	}
-}
-
-void
-ARDOUR_UI::cue_rec_state_changed ()
-{
-	_cue_rec_enable.set_active_state( TriggerBox::cue_recording() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
-	//Config->get_cue_behavior()
-}
-
-void
 ARDOUR_UI::setup_transport ()
 {
 	RefPtr<Action> act;
@@ -215,12 +192,6 @@ ARDOUR_UI::setup_transport ()
 	prefs_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), rc_option_editor));
 	recorder_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), recorder));
 	trigger_page_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), trigger_page));
-
-	_cue_rec_enable.set_name ("record enable button");
-	_cue_rec_enable.signal_clicked.connect(sigc::mem_fun(*this, &ARDOUR_UI::cue_rec_state_clicked));
-
-	_cue_play_enable.set_name ("transport option button");
-	_cue_play_enable.signal_clicked.connect(sigc::mem_fun(*this, &ARDOUR_UI::cue_ffwd_state_clicked));
 
 	/* catch context clicks so that we can show a menu on these buttons */
 
@@ -305,13 +276,6 @@ ARDOUR_UI::setup_transport ()
 #define TCOL col, col + 1
 
 	transport_table.attach (*application_bar, TCOL, 0, 2 , EXPAND|FILL, EXPAND|FILL, 3, 0);
-	++col;
-
-	transport_table.attach (cuectrl_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-	++col;
-
-	transport_table.attach (_cue_rec_enable, TCOL, 0, 1 , FILL, FILL, 3, 0);
-	transport_table.attach (_cue_play_enable, TCOL, 1, 2 , FILL, FILL, 3, 0);
 	++col;
 
 	/* editor-meter, mini-timeline and selection clock are options in the transport_hbox */

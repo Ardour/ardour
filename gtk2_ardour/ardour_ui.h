@@ -499,10 +499,6 @@ private:
 	void session_dirty_changed ();
 	void update_title ();
 
-	void cue_rec_state_changed ();
-	void cue_rec_state_clicked ();
-	void cue_ffwd_state_clicked ();
-
 	void map_transport_state ();
 	int32_t do_engine_start ();
 
@@ -540,14 +536,10 @@ private:
 	ApplicationBar *application_bar;
 
 	ArdourWidgets::ArdourVSpacer scripts_spacer;
-	ArdourWidgets::ArdourVSpacer cuectrl_spacer;
 
 	void toggle_external_sync ();
 	void toggle_time_master ();
 	void toggle_video_sync ();
-
-	ArdourWidgets::ArdourButton  _cue_rec_enable;
-	ArdourWidgets::ArdourButton  _cue_play_enable;
 
 	MiniTimeline       mini_timeline;
 	TimeInfoBox*       time_info_box;

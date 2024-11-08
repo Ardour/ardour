@@ -123,6 +123,8 @@ ApplicationBar::ApplicationBar ()
 	, _auditioning_alert_button (_("Audition"))
 	, _solo_alert_button (_("Solo"))
 	, _feedback_alert_button (_("Feedback"))
+	, _cue_rec_enable (_("Rec Cues"), ArdourButton::led_default_elements)
+	, _cue_play_enable (_("Play Cues"), ArdourButton::led_default_elements)
 	, _feedback_exists (false)
 	, _ambiguous_latency (false)
 {
@@ -223,6 +225,9 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_monitor_mono_button.set_text (_("Mono"));
 	_monitor_mute_button.set_text (_("Mute All"));
 
+	_cue_rec_enable.signal_clicked.connect(sigc::mem_fun(*this, &ApplicationBar::cue_rec_state_clicked));
+	_cue_play_enable.signal_clicked.connect(sigc::mem_fun(*this, &ApplicationBar::cue_ffwd_state_clicked));
+
 	int vpadding = 1;
 	int hpadding = 2;
 	int col = 0;
@@ -299,6 +304,13 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (*monitor_box, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
+	_table.attach (_cuectrl_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
+	_table.attach (_cue_rec_enable, TCOL, 0, 1 , FILL, FILL, 3, 0);
+	_table.attach (_cue_play_enable, TCOL, 1, 2 , FILL, FILL, 3, 0);
+	++col;
+
 	_table.set_spacings (0);
 	_table.set_row_spacings (4);
 	_table.set_border_width (1);
@@ -355,6 +367,8 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	Gtkmm2ext::UI::instance()->set_tip (_monitor_dim_button, _("Monitor section dim output"));
 	Gtkmm2ext::UI::instance()->set_tip (_monitor_mono_button, _("Monitor section mono output"));
 	Gtkmm2ext::UI::instance()->set_tip (_monitor_mute_button, _("Monitor section mute output"));
+	Gtkmm2ext::UI::instance()->set_tip (_cue_rec_enable, _("<b>When enabled</b>, triggering Cues will result in Cue Markers added to the timeline"));
+	Gtkmm2ext::UI::instance()->set_tip (_cue_play_enable, _("<b>When enabled</b>, Cue Markers will trigger the associated Cue when passed on the timeline"));
 
 	/* theming */
 	_sync_button.set_name ("transport active option button");
@@ -389,10 +403,16 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 
 	_feedback_alert_button.set_sizing_text (_("Feedgeek")); //< longest of "Feedback" and "No Align", include descender
 
+	_cue_rec_enable.set_name ("record enable button");
+	_cue_play_enable.set_name ("transport option button");
+
 	/* indicate global latency compensation en/disable */
 	ARDOUR::Latent::DisableSwitchChanged.connect (_forever_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::latency_switch_changed, this), gui_context ());
 	ARDOUR::Session::FeedbackDetected.connect (_forever_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::feedback_detected, this), gui_context ());
 	ARDOUR::Session::SuccessfulGraphSort.connect (_forever_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::successful_graph_sort, this), gui_context ());
+
+	TriggerBox::CueRecordingChanged.connect (_forever_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::cue_rec_state_changed, this), gui_context ());
+	cue_rec_state_changed();
 
 	/* initialize */
 	update_clock_visibility ();
@@ -802,7 +822,7 @@ ApplicationBar::parameter_changed (std::string p)
 		} */
 	} else if (p == "cue-behavior") {
 		CueBehavior cb (_session->config.get_cue_behavior());
-//		_cue_play_enable.set_active (cb & ARDOUR::FollowCues);
+		_cue_play_enable.set_active (cb & ARDOUR::FollowCues);
 	} else if (p == "record-mode") {
 		size_t m = _session->config.get_record_mode ();
 		assert (m < _record_mode_strings.size ());
@@ -825,6 +845,25 @@ ApplicationBar::sync_button_clicked (GdkEventButton* ev)
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-transport-masters");
 	tact->set_active();
 	return true;
+}
+
+void
+ApplicationBar::cue_ffwd_state_clicked ()
+{
+	PublicEditor::instance().toggle_cue_behavior ();
+}
+
+void
+ApplicationBar::cue_rec_state_clicked ()
+{
+	TriggerBox::set_cue_recording(!TriggerBox::cue_recording());
+}
+
+void
+ApplicationBar::cue_rec_state_changed ()
+{
+	_cue_rec_enable.set_active_state( TriggerBox::cue_recording() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	//Config->get_cue_behavior()
 }
 
 void

@@ -94,6 +94,10 @@ private:
 	bool solo_alert_press (GdkEventButton* ev);
 	void audition_alert_clicked ();
 
+	void cue_ffwd_state_clicked ();
+	void cue_rec_state_changed ();
+	void cue_rec_state_clicked ();
+
 	/* blinking alerts */
 	void sync_blink (bool);
 	void blink_handler (bool);
@@ -129,6 +133,9 @@ private:
 	ArdourWidgets::ArdourButton   _monitor_dim_button;
 	ArdourWidgets::ArdourButton   _monitor_mono_button;
 	ArdourWidgets::ArdourButton   _monitor_mute_button;
+	ArdourWidgets::ArdourVSpacer  _cuectrl_spacer;
+	ArdourWidgets::ArdourButton   _cue_rec_enable;
+	ArdourWidgets::ArdourButton   _cue_play_enable;
 
 	bool _feedback_exists;
 	bool _ambiguous_latency;
