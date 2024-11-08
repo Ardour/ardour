@@ -312,6 +312,8 @@ ARDOUR_UI::setup_windows ()
 	/* set DPI before realizing widgets */
 	UIConfiguration::instance().reset_dpi ();
 
+	ActionsReady (); // EMIT SIGNAL
+
 	_main_window.signal_delete_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::main_window_delete_event));
 
 	/* pack the main vpacker into the main window and show everything

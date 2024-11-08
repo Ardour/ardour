@@ -263,6 +263,11 @@ public:
 
 	static ARDOUR_UI *instance () { return theArdourUI; }
 
+	/* signal emitted when all windows (editor, mixer/monitor, recorder and cues)
+	   have published their actions to the ActionManager
+	*/
+	PBD::Signal<void()> ActionsReady;
+
 	/* signal emitted when escape key is pressed. All UI components that
 	   need to respond to Escape in some way (e.g. break drag, clear
 	   selection, etc) should connect to and handle this.

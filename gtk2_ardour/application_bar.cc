@@ -136,6 +136,7 @@ ApplicationBar::ApplicationBar ()
 	_record_mode_strings = I18N (_record_mode_strings_);
 
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &ApplicationBar::parameter_changed));
+	ARDOUR_UI::instance()->ActionsReady.connect (_forever_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::ui_actions_ready, this), gui_context ());
 }
 
 ApplicationBar::~ApplicationBar ()
@@ -154,8 +155,6 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_transport_ctrl.map_actions ();
 
 	/* sync_button */
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
-	_sync_button.set_related_action (act);
 	_sync_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ApplicationBar::sync_button_clicked), false);
 	_sync_button.set_sizing_text (S_("LogestSync|M-Clk"));
 
@@ -178,32 +177,14 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_record_mode_selector.AddMenuElem (MenuElem (_record_mode_strings[(int)RecSoundOnSound], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecSoundOnSound)));
 	_record_mode_selector.set_sizing_texts (_record_mode_strings);
 
-	act = ActionManager::get_action ("Transport", "TogglePunchIn");
-	_punch_in_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport", "TogglePunchOut");
-	_punch_out_button.set_related_action (act);
-
-	act = ActionManager::get_action ("Main", "ToggleLatencyCompensation");
-	_latency_disable_button.set_related_action (act);
-
 	_latency_disable_button.set_text (_("Disable PDC"));
 	_io_latency_label.set_text (_("I/O Latency:"));
 
 	set_size_request_to_display_given_text (_route_latency_value, "1000 spl", 0, 0);
 	set_size_request_to_display_given_text (_io_latency_value, "888.88 ms", 0, 0);
 
-	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
-	_auto_return_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
-	_follow_edits_button.set_related_action (act);
-
 	_auto_return_button.set_text(_("Auto Return"));
 	_follow_edits_button.set_text(_("Follow Range"));
-
-	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
-	act = ActionManager::get_action (X_("Main"), X_("cancel-solo"));
-	_solo_alert_button.set_related_action (act);
-	_auditioning_alert_button.signal_clicked.connect (sigc::mem_fun(*this,&ApplicationBar::audition_alert_clicked));
 
 	/* alert box sub-group */
 	VBox* alert_box = manage (new VBox);
@@ -229,6 +210,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 
 	_cue_rec_enable.signal_clicked.connect(sigc::mem_fun(*this, &ApplicationBar::cue_rec_state_clicked));
 	_cue_play_enable.signal_clicked.connect(sigc::mem_fun(*this, &ApplicationBar::cue_ffwd_state_clicked));
+	_auditioning_alert_button.signal_clicked.connect (sigc::mem_fun(*this,&ApplicationBar::audition_alert_clicked));
 
 	_time_info_box = new TimeInfoBox ("ToolbarTimeInfo", false);
 
@@ -457,6 +439,69 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 }
 #undef PX_SCALE
 #undef TCOL
+
+void
+ApplicationBar::ui_actions_ready ()
+{
+	_blink_connection = Timers::blink_connect (sigc::mem_fun(*this, &ApplicationBar::blink_handler));
+
+	_point_zero_something_second_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &ApplicationBar::every_point_zero_something_seconds));
+
+	LuaInstance::instance()->ActionChanged.connect (sigc::mem_fun (*this, &ApplicationBar::action_script_changed));
+
+	Glib::RefPtr<Action> act;
+
+	ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
+	_sync_button.set_related_action (act);
+
+	act = ActionManager::get_action ("Transport", "TogglePunchIn");
+	_punch_in_button.set_related_action (act);
+	act = ActionManager::get_action ("Transport", "TogglePunchOut");
+	_punch_out_button.set_related_action (act);
+
+	act = ActionManager::get_action ("Main", "ToggleLatencyCompensation");
+	_latency_disable_button.set_related_action (act);
+
+	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
+	_auto_return_button.set_related_action (act);
+	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
+	_follow_edits_button.set_related_action (act);
+
+	_auto_return_button.set_text(_("Auto Return"));
+	_follow_edits_button.set_text(_("Follow Range"));
+
+	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
+	act = ActionManager::get_action (X_("Main"), X_("cancel-solo"));
+	_solo_alert_button.set_related_action (act);
+
+	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-dim-all"));
+	_monitor_dim_button.set_related_action (act);
+	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-mono"));
+	_monitor_mono_button.set_related_action (act);
+	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-cut-all"));
+	_monitor_mute_button.set_related_action (act);
+
+	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
+		std::string const a = string_compose (X_("script-%1"), i + 1);
+		Glib::RefPtr<Action> act = ActionManager::get_action(X_("LuaAction"), a.c_str());
+		assert (act);
+		_action_script_call_btn[i].set_name ("lua action button");
+		_action_script_call_btn[i].set_text (string_compose ("%1%2", std::hex, i+1));
+		_action_script_call_btn[i].set_related_action (act);
+		_action_script_call_btn[i].signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &ApplicationBar::bind_lua_action_script), i), false);
+		if (act->get_sensitive ()) {
+			_action_script_call_btn[i].set_visual_state (Gtkmm2ext::VisualState (_action_script_call_btn[i].visual_state() & ~Gtkmm2ext::Insensitive));
+		} else {
+			_action_script_call_btn[i].set_visual_state (Gtkmm2ext::VisualState (_action_script_call_btn[i].visual_state() | Gtkmm2ext::Insensitive));
+		}
+		_action_script_call_btn[i].set_sizing_text ("88");
+		_action_script_call_btn[i].set_no_show_all ();
+	}
+
+	if (_session && _have_layout) {
+		repack_transport_hbox();
+	}
+}
 
 void
 ApplicationBar::repack_transport_hbox ()
@@ -817,37 +862,6 @@ ApplicationBar::set_session (Session *s)
 
 		_clear_editor_meter = true;
 		_editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ApplicationBar::editor_meter_peak_button_release), false);
-	}
-
-	_blink_connection = Timers::blink_connect (sigc::mem_fun(*this, &ApplicationBar::blink_handler));
-
-	_point_zero_something_second_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &ApplicationBar::every_point_zero_something_seconds));
-
-	LuaInstance::instance()->ActionChanged.connect (sigc::mem_fun (*this, &ApplicationBar::action_script_changed));
-
-	Glib::RefPtr<Action> act;
-	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-dim-all"));
-	_monitor_dim_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-mono"));
-	_monitor_mono_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-cut-all"));
-	_monitor_mute_button.set_related_action (act);
-
-	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
-		std::string const a = string_compose (X_("script-%1"), i + 1);
-		Glib::RefPtr<Action> act = ActionManager::get_action(X_("LuaAction"), a.c_str());
-		assert (act);
-		_action_script_call_btn[i].set_name ("lua action button");
-		_action_script_call_btn[i].set_text (string_compose ("%1%2", std::hex, i+1));
-		_action_script_call_btn[i].set_related_action (act);
-		_action_script_call_btn[i].signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &ApplicationBar::bind_lua_action_script), i), false);
-		if (act->get_sensitive ()) {
-			_action_script_call_btn[i].set_visual_state (Gtkmm2ext::VisualState (_action_script_call_btn[i].visual_state() & ~Gtkmm2ext::Insensitive));
-		} else {
-			_action_script_call_btn[i].set_visual_state (Gtkmm2ext::VisualState (_action_script_call_btn[i].visual_state() | Gtkmm2ext::Insensitive));
-		}
-		_action_script_call_btn[i].set_sizing_text ("88");
-		_action_script_call_btn[i].set_no_show_all ();
 	}
 
 	if (_have_layout) {

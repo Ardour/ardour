@@ -69,6 +69,7 @@ private:
 	bool sync_button_clicked (GdkEventButton*);
 
 	void parameter_changed (std::string);
+	void ui_actions_ready ();
 
 	void repack_transport_hbox ();
 
