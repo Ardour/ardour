@@ -52,6 +52,7 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
                           MidiViewBackground&      bg,
                           uint32_t                 basic_color)
 	: MidiView (mt, parent, ec, bg, basic_color)
+	, active_automation (nullptr)
 	, velocity_display (nullptr)
 	, _slot_index (slot_index)
 {
@@ -77,14 +78,6 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	CANVAS_DEBUG_NAME (automation_group, "cue automation group");
 	automation_group->set_fill_color (UIConfiguration::instance().color ("midi automation track fill"));
 	automation_group->set_data ("linemerger", this);
-
-	velocity_display = new MidiCueVelocityDisplay (editing_context(), midi_context(), *this, *automation_group, 0x312244ff);
-
-	for (auto & ev : _events) {
-		velocity_display->add_note (ev.second);
-	}
-
-	velocity_display->hide ();
 
 	button_bar = new ArdourCanvas::Box (&parent, ArdourCanvas::Box::Horizontal);
 	CANVAS_DEBUG_NAME (button_bar, "button bar");
@@ -123,8 +116,14 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 
 	set_extensible (true);
 
-	Evoral::Parameter fully_qualified_param (ARDOUR::MidiVelocityAutomation, 0, 0);
-	update_automation_display (fully_qualified_param, SelectionSet);
+	/* show velocity by default */
+
+	update_automation_display (Evoral::Parameter (MidiVelocityAutomation, 0, 0), SelectionSet);
+}
+
+MidiCueView::~MidiCueView ()
+{
+	delete velocity_display;
 }
 
 void
@@ -330,24 +329,44 @@ MidiCueView::update_automation_display (Evoral::Parameter const & param, Selecti
 
 	} else {
 
+		if (op == SelectionRemove) {
+			/* remove it, but it doesn't exist yet, no worries */
+			return;
+		}
+
 		if (param.type() == MidiVelocityAutomation) {
+
+
+			if (!velocity_display) {
+
+				/* Create and add to automation display map */
+
+				velocity_display = new MidiCueVelocityDisplay (editing_context(), midi_context(), *this, *automation_group, 0x312244ff);
+				auto res = automation_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiVelocityAutomation, 0, 0), AutomationDisplayState (*velocity_display, true)));
+
+				ads = &((*res.first).second);
+
+				for (auto & ev : _events) {
+					velocity_display->add_note (ev.second);
+				}
+			}
 
 		} else {
 
 			std::shared_ptr<Evoral::Control> control = _midi_region->model()->control (param, true);
-			automation_control = std::dynamic_pointer_cast<AutomationControl> (control);
+			CueAutomationControl ac = std::dynamic_pointer_cast<AutomationControl> (control);
 
-			if (!automation_control) {
+			if (!ac) {
 				return;
 			}
 
-			automation_line.reset (new MidiCueAutomationLine ("whatevs",
-			                                                  _editing_context,
-			                                                  *automation_group,
-			                                                  automation_group,
-			                                                  automation_control->alist(),
-			                                                  automation_control->desc()));
-			AutomationDisplayState cad (automation_control, automation_line, true);
+			CueAutomationLine line (new MidiCueAutomationLine (ARDOUR::EventTypeMap::instance().to_symbol (param),
+			                                                   _editing_context,
+			                                                   *automation_group,
+			                                                   automation_group,
+			                                                   ac->alist(),
+			                                                   ac->desc()));
+			AutomationDisplayState cad (ac, line, true);
 
 			auto res = automation_map.insert (std::make_pair (param, cad));
 
@@ -355,7 +374,7 @@ MidiCueView::update_automation_display (Evoral::Parameter const & param, Selecti
 		}
 	}
 
-	std::cerr << "sad " << op << " param " << enum_2_string (param.type()) << std::endl;
+	std::cerr << "sad " << op << " param " << ARDOUR::EventTypeMap::instance().to_symbol (param) << std::endl;
 
 	switch (op) {
 	case SelectionSet:
@@ -367,18 +386,26 @@ MidiCueView::update_automation_display (Evoral::Parameter const & param, Selecti
 	case SelectionAdd:
 		ads->set_height (automation_group->get().height());
 		ads->show ();
+		active_automation = ads;
 		break;
 
 	case SelectionRemove:
 		ads->hide ();
+		if (active_automation == ads) {
+			active_automation = nullptr;
+		}
 		break;
 
 	case SelectionToggle:
 		if (ads->visible) {
 			ads->hide ();
+			if (active_automation == ads) {
+				active_automation = nullptr;
+			}
 		} else {
 			ads->set_height (automation_group->get().height());
 			ads->show ();
+			active_automation = ads;
 		}
 		return;
 
@@ -392,8 +419,8 @@ std::list<SelectableOwner*>
 MidiCueView::selectable_owners()
 {
 	std::list<SelectableOwner*> sl;
-	if (automation_line) {
-		sl.push_back (automation_line.get());
+	if (active_automation && active_automation->line) {
+		sl.push_back (active_automation->line.get());
 	}
 	return sl;
 }
@@ -401,16 +428,24 @@ MidiCueView::selectable_owners()
 MergeableLine*
 MidiCueView::make_merger ()
 {
-	return new MergeableLine (automation_line, automation_control,
-	                          [](Temporal::timepos_t const& t) { return t; },
-	                          nullptr, nullptr);
+	if (active_automation && active_automation->line) {
+		return new MergeableLine (active_automation->line, active_automation->control,
+		                          [](Temporal::timepos_t const& t) { return t; },
+		                          nullptr, nullptr);
+	}
+
+	return nullptr;
 }
 
 bool
 MidiCueView::automation_rb_click (GdkEvent* event, Temporal::timepos_t const & pos)
 {
+	if (!active_automation || !active_automation->control || !active_automation->line) {
+		return false;
+	}
+
 	bool with_guard_points = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
-	automation_line->add (automation_control, event, pos, event->button.y, with_guard_points);
+	active_automation->line->add (active_automation->control, event, pos, event->button.y, with_guard_points);
 	return false;
 }
 
@@ -421,27 +456,33 @@ MidiCueView::line_drag_click (GdkEvent* event, Temporal::timepos_t const & pos)
 
 MidiCueView::AutomationDisplayState::~AutomationDisplayState()
 {
-	delete velocity_display;
+	/* We do not own the velocity_display */
 }
 
 void
 MidiCueView::AutomationDisplayState::hide ()
 {
 	if (velocity_display) {
+		std::cerr << "hide vdisp\n";
 		velocity_display->hide ();
 	} else if (line) {
+		std::cerr << "hide line\n";
 		line->hide_all ();
 	}
+	visible = false;
 }
 
 void
 MidiCueView::AutomationDisplayState::show ()
 {
 	if (velocity_display) {
+		std::cerr << "show vdisp\n";
 		velocity_display->show ();
 	} else if (line) {
+		std::cerr << "show line\n";
 		line->show ();
 	}
+	visible = true;
 }
 
 void
@@ -451,5 +492,22 @@ MidiCueView::AutomationDisplayState::set_height (double h)
 		// velocity_display->set_height (h);
 	} else if (line) {
 		line->set_height (h);
+	}
+}
+
+void
+MidiCueView::automation_entry ()
+{
+	if (active_automation && active_automation->line) {
+		active_automation->line->track_entered ();
+	}
+}
+
+
+void
+MidiCueView::automation_leave ()
+{
+	if (active_automation && active_automation->line) {
+		active_automation->line->track_entered ();
 	}
 }

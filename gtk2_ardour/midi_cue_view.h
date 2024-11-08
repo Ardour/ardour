@@ -49,6 +49,8 @@ class MidiCueView : public MidiView
 	             uint32_t                    basic_color
 		);
 
+	~MidiCueView();
+
 	bool canvas_event (GdkEvent*);
 	void set_samples_per_pixel (double);
 	void set_height (double);
@@ -70,6 +72,9 @@ class MidiCueView : public MidiView
 	bool automation_rb_click (GdkEvent*, Temporal::timepos_t const &);
 	void line_drag_click (GdkEvent*, Temporal::timepos_t const &);
 
+	void automation_entry();
+	void automation_leave ();
+
   protected:
 	bool scroll (GdkEventScroll* ev);
 
@@ -83,7 +88,7 @@ class MidiCueView : public MidiView
 		AutomationDisplayState (CueAutomationControl ctl, CueAutomationLine ln, bool vis)
 			: control (ctl), line (ln), velocity_display (nullptr), visible (vis) {}
 		AutomationDisplayState (VelocityDisplay& vdisp, bool vis)
-			: control (nullptr), velocity_display (&vdisp), visible (vis) {}
+			: control (nullptr), line (nullptr), velocity_display (&vdisp), visible (vis) {}
 
 		~AutomationDisplayState();
 
@@ -103,8 +108,6 @@ class MidiCueView : public MidiView
 	AutomationDisplayState* active_automation;
 
 	VelocityDisplay* velocity_display;
-	CueAutomationLine automation_line;
-	CueAutomationControl automation_control;
 
 	ArdourCanvas::Box*    button_bar;
 	ArdourCanvas::Button* velocity_button;

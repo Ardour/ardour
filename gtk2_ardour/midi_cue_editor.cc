@@ -1622,8 +1622,9 @@ MidiCueEditor::enter_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType i
 	switch (item_type) {
 	case AutomationTrackItem:
 		/* item is the base rectangle */
-		al = reinterpret_cast<EditorAutomationLine*> (item->get_data ("line"));
-		al->track_entered ();
+		if (view) {
+			view->automation_entry ();
+		}
 		break;
 
 	case EditorAutomationLineItem:
@@ -1665,7 +1666,7 @@ MidiCueEditor::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType i
 			}
 		}
 		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-			al->track_exited ();
+			view->automation_leave ();
 		}
 		break;
 

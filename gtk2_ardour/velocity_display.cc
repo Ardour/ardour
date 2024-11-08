@@ -436,13 +436,16 @@ VelocityDisplay::hide ()
 {
 	if (lolli_container) {
 		lolli_container->hide ();
+		lolli_container->set_ignore_events (true);
 	}
+
 }
 
 void
 VelocityDisplay::show ()
 {
 	if (lolli_container) {
-		lolli_container->hide ();
+		lolli_container->show ();
+		lolli_container->set_ignore_events (false);
 	}
 }
