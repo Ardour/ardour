@@ -58,6 +58,8 @@ public:
 
 	void set_session (ARDOUR::Session *);
 
+	void focus_on_clock ();
+
 private:
 	void on_parent_changed (Gtk::Widget*);
 
@@ -104,6 +106,8 @@ private:
 	Gtk::Label                    _io_latency_value;
 	ArdourWidgets::ArdourButton   _auto_return_button;
 	ArdourWidgets::ArdourButton   _follow_edits_button;
+	TransportClock                _primary_clock;
+	TransportClock                _secondary_clock;
 	ArdourWidgets::ArdourVSpacer* _secondary_clock_spacer;
 
 	std::vector<std::string> _record_mode_strings;

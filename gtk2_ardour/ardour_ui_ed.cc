@@ -54,6 +54,7 @@
 #include "widgets/tearoff.h"
 #include "widgets/tooltips.h"
 
+#include "application_bar.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "audio_clock.h"
@@ -1053,8 +1054,8 @@ ARDOUR_UI::on_theme_changed ()
 void
 ARDOUR_UI::focus_on_clock ()
 {
-	if (primary_clock) {
-		primary_clock->focus ();
+	if (application_bar) {
+		application_bar->focus_on_clock ();
 	}
 }
 

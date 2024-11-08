@@ -95,8 +95,6 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	set_tip (auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
 	set_tip (feedback_alert_button, _("When lit, there is a ports connection issue, leading to feedback loop or ambiguous alignment.\nThis is caused by connecting an output back to some input (feedback), or by multiple connections from a source to the same output via different paths (ambiguous latency, record alignment)."));
-	set_tip (primary_clock, _("<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
-	set_tip (secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	set_tip (editor_meter_peak_display, _("Reset All Peak Meters"));
 	set_tip (error_alert_button, _("Show Error Log and acknowledge warnings"));
 	set_tip (_cue_rec_enable, _("<b>When enabled</b>, triggering Cues will result in Cue Markers added to the timeline"));
@@ -189,23 +187,6 @@ ARDOUR_UI::cue_rec_state_changed ()
 {
 	_cue_rec_enable.set_active_state( TriggerBox::cue_recording() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	//Config->get_cue_behavior()
-}
-
-void
-ARDOUR_UI::update_clock_visibility ()
-{
-	if (ARDOUR::Profile->get_small_screen()) {
-		return;
-	}
-	if (UIConfiguration::instance().get_show_secondary_clock ()) {
-		secondary_clock->show();
-		secondary_clock->left_btn()->show();
-		secondary_clock->right_btn()->show();
-	} else {
-		secondary_clock->hide();
-		secondary_clock->left_btn()->hide();
-		secondary_clock->right_btn()->hide();
-	}
 }
 
 void
@@ -376,12 +357,6 @@ ARDOUR_UI::setup_transport ()
 	monitor_box->pack_start (monitor_dim_button, true, true);
 	monitor_box->pack_start (monitor_mute_button, true, true);
 
-	/* clock button size groups */
-	button_height_size_group->add_widget (*primary_clock->left_btn());
-	button_height_size_group->add_widget (*primary_clock->right_btn());
-	button_height_size_group->add_widget (*secondary_clock->left_btn());
-	button_height_size_group->add_widget (*secondary_clock->right_btn());
-
 	//tab selections
 	button_height_size_group->add_widget (trigger_page_visibility_button);
 	button_height_size_group->add_widget (recorder_visibility_button);
@@ -392,14 +367,6 @@ ARDOUR_UI::setup_transport ()
 	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
 		button_height_size_group->add_widget (action_script_call_btn[i]);
 	}
-
-	Glib::RefPtr<SizeGroup> clock1_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
-	clock1_size_group->add_widget (*primary_clock->left_btn());
-	clock1_size_group->add_widget (*primary_clock->right_btn());
-
-	Glib::RefPtr<SizeGroup> clock2_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
-	clock2_size_group->add_widget (*secondary_clock->left_btn());
-	clock2_size_group->add_widget (*secondary_clock->right_btn());
 
 	/* and the main table layout */
 	int vpadding = 1;
@@ -449,8 +416,6 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (mixer_visibility_button,        TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	++col;
 
-	/* initialize */
-	update_clock_visibility ();
 	/* desensitize */
 
 	feedback_alert_button.set_sensitive (false);

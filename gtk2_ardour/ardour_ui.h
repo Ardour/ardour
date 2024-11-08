@@ -522,7 +522,6 @@ private:
 	Gtk::Frame               transport_frame;
 	Gtk::HBox                transport_hbox;
 
-	void update_clock_visibility ();
 	void toggle_follow_edits ();
 
 	void set_transport_controllable_state (const XMLNode&);

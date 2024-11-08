@@ -117,6 +117,8 @@ ApplicationBar::ApplicationBar ()
 	, _latency_disable_button (ArdourButton::led_default_elements)
 	, _auto_return_button (ArdourButton::led_default_elements)
 	, _follow_edits_button (ArdourButton::led_default_elements)
+	, _primary_clock  (X_("primary"), X_("transport"), MainClock::PrimaryClock)
+	, _secondary_clock (X_("secondary"), X_("secondary"), MainClock::SecondaryClock)
 	, _secondary_clock_spacer (0)
 {
 	_record_mode_strings = I18N (_record_mode_strings_);
@@ -227,18 +229,18 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
-	_table.attach (*(ARDOUR_UI::instance()->primary_clock),              col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, 0);
-	_table.attach (*(ARDOUR_UI::instance()->primary_clock)->left_btn(),  col,     col + 1, 1, 2 , FILL, SHRINK, hpadding, 0);
-	_table.attach (*(ARDOUR_UI::instance()->primary_clock)->right_btn(), col + 1, col + 2, 1, 2 , FILL, SHRINK, hpadding, 0);
+	_table.attach (_primary_clock,                col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, 0);
+	_table.attach (*(_primary_clock.left_btn()),  col,     col + 1, 1, 2 , FILL, SHRINK, hpadding, 0);
+	_table.attach (*(_primary_clock.right_btn()), col + 1, col + 2, 1, 2 , FILL, SHRINK, hpadding, 0);
 	col += 2;
 
 	_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	if (!ARDOUR::Profile->get_small_screen()) {
-		_table.attach (*(ARDOUR_UI::instance()->secondary_clock),              col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, 0);
-		_table.attach (*(ARDOUR_UI::instance()->secondary_clock)->left_btn(),  col,     col + 1, 1, 2 , FILL, SHRINK, hpadding, 0);
-		_table.attach (*(ARDOUR_UI::instance()->secondary_clock)->right_btn(), col + 1, col + 2, 1, 2 , FILL, SHRINK, hpadding, 0);
+		_table.attach (_secondary_clock,                col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, 0);
+		_table.attach (*(_secondary_clock.left_btn()),  col,     col + 1, 1, 2 , FILL, SHRINK, hpadding, 0);
+		_table.attach (*(_secondary_clock.right_btn()), col + 1, col + 2, 1, 2 , FILL, SHRINK, hpadding, 0);
 		(ARDOUR_UI::instance()->secondary_clock)->set_no_show_all (true);
 		(ARDOUR_UI::instance()->secondary_clock)->left_btn()->set_no_show_all (true);
 		(ARDOUR_UI::instance()->secondary_clock)->right_btn()->set_no_show_all (true);
@@ -267,9 +269,23 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	button_height_size_group->add_widget (_follow_edits_button);
 	button_height_size_group->add_widget (_auto_return_button);
 
+	/* clock button size groups */
+	button_height_size_group->add_widget (*_primary_clock.left_btn());
+	button_height_size_group->add_widget (*_primary_clock.right_btn());
+	button_height_size_group->add_widget (*_secondary_clock.left_btn());
+	button_height_size_group->add_widget (*_secondary_clock.right_btn());
+
 	Glib::RefPtr<SizeGroup> punch_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
 	punch_button_size_group->add_widget (_punch_in_button);
 	punch_button_size_group->add_widget (_punch_out_button);
+
+	Glib::RefPtr<SizeGroup> clock1_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
+	clock1_size_group->add_widget (*_primary_clock.left_btn());
+	clock1_size_group->add_widget (*_primary_clock.right_btn());
+
+	Glib::RefPtr<SizeGroup> clock2_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
+	clock2_size_group->add_widget (*_secondary_clock.left_btn());
+	clock2_size_group->add_widget (*_secondary_clock.right_btn());
 
 	/* tooltips */
 	Gtkmm2ext::UI::instance()->set_tip (_punch_in_button, _("Start recording at auto-punch start"));
@@ -278,6 +294,8 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	Gtkmm2ext::UI::instance()->set_tip (_latency_disable_button, _("Disable all Plugin Delay Compensation. This results in the shortest delay from live input to output, but any paths with delay-causing plugins will sound later than those without."));
 	Gtkmm2ext::UI::instance()->set_tip (_auto_return_button, _("Return to last playback start when stopped"));
 	Gtkmm2ext::UI::instance()->set_tip (_follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
+	Gtkmm2ext::UI::instance()->set_tip (_primary_clock, _("<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
+	Gtkmm2ext::UI::instance()->set_tip (_secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 
 	/* theming */
 	_sync_button.set_name ("transport active option button");
@@ -413,8 +431,12 @@ ApplicationBar::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
 
-	_transport_ctrl.set_session (s);
-	_shuttle_box.set_session (s);
+	if (s) {
+		_transport_ctrl.set_session (s);
+		_shuttle_box.set_session (s);
+		_primary_clock.set_session (s);
+		_secondary_clock.set_session (s);
+	}
 
 	if (_basic_ui) {
 		delete _basic_ui;
@@ -462,20 +484,25 @@ ApplicationBar::latency_switch_changed ()
 }
 
 void
+ApplicationBar::focus_on_clock ()
+{
+	_primary_clock.focus ();
+}
+
+void
 ApplicationBar::update_clock_visibility ()
 {
 	if (ARDOUR::Profile->get_small_screen()) {
-		_secondary_clock_spacer->hide();
 		return;
 	}
 	if (UIConfiguration::instance().get_show_secondary_clock ()) {
-		if (_secondary_clock_spacer) {
-			_secondary_clock_spacer->show();
-		}
+		_secondary_clock.show();
+		_secondary_clock.left_btn()->show();
+		_secondary_clock.right_btn()->show();
 	} else {
-		if (_secondary_clock_spacer) {
-			_secondary_clock_spacer->hide();
-		}
+		_secondary_clock.hide();
+		_secondary_clock.left_btn()->hide();
+		_secondary_clock.right_btn()->hide();
 	}
 }
 
