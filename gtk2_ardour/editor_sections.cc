@@ -284,13 +284,13 @@ EditorSections::selection_changed ()
 			/* OK */
 			break;
 		case Editing::MouseObject:
-			if (ActionManager::get_toggle_action ("MouseMode", "set-mouse-mode-object-range")->get_active ()) {
+			if (ActionManager::get_toggle_action (PublicEditor::instance().editor_name().c_str(), "set-mouse-mode-object-range")->get_active ()) {
 				/* smart mode; OK */
 				break;
 			}
 			/*fallthrough*/
 		default:
-			Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (X_("MouseMode"), X_("set-mouse-mode-range"));
+			Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (PublicEditor::instance().editor_name().c_str(), X_("set-mouse-mode-range"));
 			ract->set_active (true);
 			break;
 	}

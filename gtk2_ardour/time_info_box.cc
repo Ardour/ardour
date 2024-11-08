@@ -313,11 +313,7 @@ TimeInfoBox::selection_changed ()
 
 	case Editing::MouseRange:
 		if (selection.time.empty()) {
-			/* XXX we really ought to be calling
-			   ::get_mouse_mode_action() here but there is no actual
-			   mouse emode enum for smart mode (object-range).
-			*/
-			Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (PublicEditor::instance().editor_name(), "set-mouse-mode-object-range");
+			Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (PublicEditor::instance().editor_name().c_str(), "set-mouse-mode-object-range");
 
 			if (tact->get_active() &&  !selection.regions.empty()) {
 				/* show selected regions */
