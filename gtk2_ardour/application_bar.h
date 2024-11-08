@@ -75,6 +75,9 @@ private:
 
 	void set_record_mode (ARDOUR::RecordMode);
 
+	void latency_switch_changed ();
+	void session_latency_updated (bool);
+
 	/* blinking alerts */
 	void sync_blink (bool);
 	void blink_handler (bool);
@@ -91,8 +94,15 @@ private:
 	ArdourWidgets::ArdourButton   _punch_in_button;
 	ArdourWidgets::ArdourButton   _punch_out_button;
 	ArdourWidgets::ArdourDropdown _record_mode_selector;
+	ArdourWidgets::ArdourVSpacer  _recpunch_spacer;
+	ArdourWidgets::ArdourVSpacer  _latency_spacer;
+	ArdourWidgets::ArdourButton   _latency_disable_button;
+	Gtk::Label                    _route_latency_value;
+	Gtk::Label                    _io_latency_label;
+	Gtk::Label                    _io_latency_value;
 
 	std::vector<std::string> _record_mode_strings;
 
-	sigc::connection _blink_connection;
+	sigc::connection          _blink_connection;
+	PBD::ScopedConnectionList _forever_connections;
 };

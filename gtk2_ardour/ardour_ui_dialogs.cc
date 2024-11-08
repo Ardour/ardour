@@ -216,9 +216,6 @@ ARDOUR_UI::set_session (Session *s)
 	_session->locations()->removed.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::session_parameter_changed, this, _1), gui_context ());
 
-	_session->LatencyUpdated.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::session_latency_updated, this, _1), gui_context());
-	session_latency_updated (true);
-
 	/* Clocks are on by default after we are connected to a session, so show that here.
 	*/
 

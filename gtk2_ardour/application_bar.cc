@@ -114,6 +114,7 @@ static const gchar *_record_mode_strings_[] = {
 ApplicationBar::ApplicationBar ()
 	: _have_layout (false)
 	, _basic_ui (0)
+	, _latency_disable_button (ArdourButton::led_default_elements)
 {
 	_record_mode_strings = I18N (_record_mode_strings_);
 }
@@ -161,6 +162,15 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	act = ActionManager::get_action ("Transport", "TogglePunchOut");
 	_punch_out_button.set_related_action (act);
 
+	act = ActionManager::get_action ("Main", "ToggleLatencyCompensation");
+	_latency_disable_button.set_related_action (act);
+
+	_latency_disable_button.set_text (_("Disable PDC"));
+	_io_latency_label.set_text (_("I/O Latency:"));
+
+	set_size_request_to_display_given_text (_route_latency_value, "1000 spl", 0, 0);
+	set_size_request_to_display_given_text (_io_latency_value, "888.88 ms", 0, 0);
+
 	int vpadding = 1;
 	int hpadding = 2;
 	int col = 0;
@@ -183,6 +193,22 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (_record_mode_selector, col,      col + 3, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	col += 3;
 
+	_table.attach (_recpunch_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
+	_table.attach (_latency_disable_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	_table.attach (_io_latency_label, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, 0);
+	++col;
+	_table.attach (_route_latency_value, TCOL, 0, 1 , SHRINK, EXPAND|FILL, hpadding, 0);
+	_table.attach (_io_latency_value, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, 0);
+	++col;
+
+	_route_latency_value.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
+	_io_latency_value.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
+
+	_table.attach (_latency_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
 	_table.set_spacings (0);
 	_table.set_row_spacings (4);
 	_table.set_border_width (1);
@@ -197,6 +223,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	button_height_size_group->add_widget (_punch_in_button);
 	button_height_size_group->add_widget (_punch_out_button);
 	button_height_size_group->add_widget (_record_mode_selector);
+	button_height_size_group->add_widget (_latency_disable_button);
 
 	Glib::RefPtr<SizeGroup> punch_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
 	punch_button_size_group->add_widget (_punch_in_button);
@@ -206,15 +233,22 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	Gtkmm2ext::UI::instance()->set_tip (_punch_in_button, _("Start recording at auto-punch start"));
 	Gtkmm2ext::UI::instance()->set_tip (_punch_out_button, _("Stop recording at auto-punch end"));
 	Gtkmm2ext::UI::instance()->set_tip (_record_mode_selector, _("<b>Layered</b>, new recordings will be added as regions on a layer atop existing regions.\n<b>SoundOnSound</b>, behaves like <i>Layered</i>, except underlying regions will be audible.\n<b>Non Layered</b>, the underlying region will be spliced and replaced with the newly recorded region."));
+	Gtkmm2ext::UI::instance()->set_tip (_latency_disable_button, _("Disable all Plugin Delay Compensation. This results in the shortest delay from live input to output, but any paths with delay-causing plugins will sound later than those without."));
 
 	/* theming */
 	_sync_button.set_name ("transport active option button");
 	_punch_in_button.set_name ("punch button");
 	_punch_out_button.set_name ("punch button");
 	_record_mode_selector.set_name ("record mode button");
+	_latency_disable_button.set_name ("latency button");
+
+	/* indicate global latency compensation en/disable */
+	ARDOUR::Latent::DisableSwitchChanged.connect (_forever_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::latency_switch_changed, this), gui_context ());
 
 	/* initialize */
 	set_transport_sensitivity (false);
+	latency_switch_changed ();
+	session_latency_updated (true);
 
 	if (_session) {
 		repack_transport_hbox ();
@@ -222,7 +256,6 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 }
 #undef PX_SCALE
 #undef TCOL
-
 
 void
 ApplicationBar::repack_transport_hbox ()
@@ -290,16 +323,16 @@ ApplicationBar::repack_transport_hbox ()
 	bool show_pdc = UIConfiguration::instance().get_show_toolbar_latency ();
 	if (show_pdc) {
 		latency_disable_button.show ();
-		route_latency_value.show ();
-		io_latency_label.show ();
-		io_latency_value.show ();
-		latency_spacer.show ();
+		_route_latency_value.show ();
+		_io_latency_label.show ();
+		_io_latency_value.show ();
+		_latency_spacer.show ();
 	} else {
 		latency_disable_button.hide ();
-		route_latency_value.hide ();
-		io_latency_label.hide ();
-		io_latency_value.hide ();
-		latency_spacer.hide ();
+		_route_latency_value.hide ();
+		_io_latency_label.hide ();
+		_io_latency_value.hide ();
+		_latency_spacer.hide ();
 	}
 
 	bool show_cue = UIConfiguration::instance().get_show_toolbar_cuectrl ();
@@ -353,10 +386,14 @@ ApplicationBar::set_session (Session *s)
 	_session->AuditionActive.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::auditioning_changed, this, _1), gui_context());
 	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::map_transport_state, this), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::parameter_changed, this, _1), gui_context());
+	_session->LatencyUpdated.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::session_latency_updated, this, _1), gui_context());
 
 	//initialize all session config settings
 	std::function<void (std::string)> pc (std::bind (&ApplicationBar::parameter_changed, this, _1));
 	_session->config.map_parameters (pc);
+
+	/* initialize */
+	session_latency_updated (true);
 
 	_blink_connection = Timers::blink_connect (sigc::mem_fun(*this, &ApplicationBar::blink_handler));
 }
@@ -366,6 +403,46 @@ ApplicationBar::set_transport_sensitivity (bool yn)
 {
 	ActionManager::set_sensitive (ActionManager::transport_sensitive_actions, yn);
 	_shuttle_box.set_sensitive (yn);
+}
+
+void
+ApplicationBar::latency_switch_changed ()
+{
+	bool pdc_off = ARDOUR::Latent::zero_latency ();
+	if (_latency_disable_button.get_active() != pdc_off) {
+		_latency_disable_button.set_active (pdc_off);
+	}
+}
+
+void
+ApplicationBar::session_latency_updated (bool for_playback)
+{
+	if (!for_playback) {
+		/* latency updates happen in pairs, in the following order:
+		 *  - for capture
+		 *  - for playback
+		 */
+		return;
+	}
+
+	if (!_session) {
+		_route_latency_value.set_text ("--");
+		_io_latency_value.set_text ("--");
+	} else {
+		samplecnt_t wrl = _session->worst_route_latency ();
+		samplecnt_t iol = _session->io_latency ();
+		float rate      = _session->nominal_sample_rate ();
+
+		_route_latency_value.set_text (samples_as_time_string (wrl, rate));
+
+		if (_session->engine().check_for_ambiguous_latency (true)) {
+//			_ambiguous_latency = true;
+			_io_latency_value.set_markup ("<span background=\"red\" foreground=\"white\">ambiguous</span>");
+		} else {
+//			_ambiguous_latency = false;
+			_io_latency_value.set_text (samples_as_time_string (iol, rate));
+		}
+	}
 }
 
 

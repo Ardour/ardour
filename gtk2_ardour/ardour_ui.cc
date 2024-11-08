@@ -299,7 +299,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _basic_ui (0)
 	, startup_fsm (0)
 	, secondary_clock_spacer (0)
-	, latency_disable_button (ArdourButton::led_default_elements)
 	, _cue_rec_enable (_("Rec Cues"), ArdourButton::led_default_elements)
 	, _cue_play_enable (_("Play Cues"), ArdourButton::led_default_elements)
 	, time_info_box (0)
@@ -351,7 +350,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, have_disk_speed_dialog_displayed (false)
 	, _status_bar_visibility (X_("status-bar"))
 	, _feedback_exists (false)
-	, _ambiguous_latency (false)
 	, _log_not_acknowledged (LogLevelNone)
 	, duplicate_routes_dialog (0)
 	, editor_visibility_button (S_("Window|Edit"))
@@ -463,9 +461,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	ARDOUR::Session::FeedbackDetected.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::feedback_detected, this), gui_context ());
 	ARDOUR::Session::SuccessfulGraphSort.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::successful_graph_sort, this), gui_context ());
-
-	/* indicate global latency compensation en/disable */
-	ARDOUR::Latent::DisableSwitchChanged.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::latency_switch_changed, this), gui_context ());
 
 	/* handle requests to deal with missing files */
 

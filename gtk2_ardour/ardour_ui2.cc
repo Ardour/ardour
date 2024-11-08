@@ -104,8 +104,6 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (_cue_rec_enable, _("<b>When enabled</b>, triggering Cues will result in Cue Markers added to the timeline"));
 	set_tip (_cue_play_enable, _("<b>When enabled</b>, Cue Markers will trigger the associated Cue when passed on the timeline"));
 
-	set_tip (latency_disable_button, _("Disable all Plugin Delay Compensation. This results in the shortest delay from live input to output, but any paths with delay-causing plugins will sound later than those without."));
-
 	synchronize_sync_source_and_video_pullup ();
 
 	editor->setup_tooltips ();
@@ -251,12 +249,6 @@ ARDOUR_UI::setup_transport ()
 	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-cut-all"));
 	monitor_mute_button.set_related_action (act);
 
-	act = ActionManager::get_action ("Main", "ToggleLatencyCompensation");
-	latency_disable_button.set_related_action (act);
-
-	set_size_request_to_display_given_text (route_latency_value, "1000 spl", 0, 0);
-	set_size_request_to_display_given_text (io_latency_value, "888.88 ms", 0, 0);
-
 	/* connect signals */
 	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (primary_clock, &MainClock::set), false));
 	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (secondary_clock, &MainClock::set), false));
@@ -313,8 +305,6 @@ ARDOUR_UI::setup_transport ()
 	recorder_visibility_button.set_name (X_("page switch button"));
 	trigger_page_visibility_button.set_name (X_("page switch button"));
 
-	latency_disable_button.set_name ("latency button");
-
 	monitor_dim_button.set_name ("monitor section dim");
 	monitor_mono_button.set_name ("monitor section mono");
 	monitor_mute_button.set_name ("mute button");
@@ -330,9 +320,6 @@ ARDOUR_UI::setup_transport ()
 	/* and widget text */
 	auto_return_button.set_text(_("Auto Return"));
 	follow_edits_button.set_text(_("Follow Range"));
-
-	latency_disable_button.set_text (_("Disable PDC"));
-	io_latency_label.set_text (_("I/O Latency:"));
 
 	monitor_dim_button.set_text (_("Dim All"));
 	monitor_mono_button.set_text (_("Mono"));
@@ -429,9 +416,6 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (mixer_visibility_button);
 	button_height_size_group->add_widget (prefs_visibility_button);
 
-	// PDC
-	button_height_size_group->add_widget (latency_disable_button);
-
 	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
 		button_height_size_group->add_widget (action_script_call_btn[i]);
 	}
@@ -451,22 +435,6 @@ ARDOUR_UI::setup_transport ()
 #define TCOL col, col + 1
 
 	transport_table.attach (*application_bar, TCOL, 0, 2 , EXPAND|FILL, EXPAND|FILL, 3, 0);
-	++col;
-
-	transport_table.attach (recpunch_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-	++col;
-
-	transport_table.attach (latency_disable_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	transport_table.attach (io_latency_label, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, 0);
-	++col;
-	transport_table.attach (route_latency_value, TCOL, 0, 1 , SHRINK, EXPAND|FILL, hpadding, 0);
-	transport_table.attach (io_latency_value, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, 0);
-	++col;
-
-	route_latency_value.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
-	io_latency_value.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
-
-	transport_table.attach (latency_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	transport_table.attach (follow_edits_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
@@ -538,9 +506,6 @@ ARDOUR_UI::setup_transport ()
 	++col;
 
 	/* initialize */
-	latency_switch_changed ();
-	session_latency_updated (true);
-
 	update_clock_visibility ();
 	/* desensitize */
 
@@ -551,46 +516,6 @@ ARDOUR_UI::setup_transport ()
 }
 #undef PX_SCALE
 #undef TCOL
-
-void
-ARDOUR_UI::latency_switch_changed ()
-{
-	bool pdc_off = ARDOUR::Latent::zero_latency ();
-	if (latency_disable_button.get_active() != pdc_off) {
-		latency_disable_button.set_active (pdc_off);
-	}
-}
-
-void
-ARDOUR_UI::session_latency_updated (bool for_playback)
-{
-	if (!for_playback) {
-		/* latency updates happen in pairs, in the following order:
-		 *  - for capture
-		 *  - for playback
-		 */
-		return;
-	}
-
-	if (!_session) {
-		route_latency_value.set_text ("--");
-		io_latency_value.set_text ("--");
-	} else {
-		samplecnt_t wrl = _session->worst_route_latency ();
-		samplecnt_t iol = _session->io_latency ();
-		float rate      = _session->nominal_sample_rate ();
-
-		route_latency_value.set_text (samples_as_time_string (wrl, rate));
-
-		if (_session->engine().check_for_ambiguous_latency (true)) {
-			_ambiguous_latency = true;
-			io_latency_value.set_markup ("<span background=\"red\" foreground=\"white\">ambiguous</span>");
-		} else {
-			_ambiguous_latency = false;
-			io_latency_value.set_text (samples_as_time_string (iol, rate));
-		}
-	}
-}
 
 void
 ARDOUR_UI::soloing_changed (bool onoff)
