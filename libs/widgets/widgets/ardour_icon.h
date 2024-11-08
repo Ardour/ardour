@@ -78,6 +78,9 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		Meters,
 		TrackWaveform,
 		TailTimeClock,
+		AttachmentLeft,
+		AttachmentRight,
+		AttachmentBottom,
 		NoIcon //< Last
 	};
 

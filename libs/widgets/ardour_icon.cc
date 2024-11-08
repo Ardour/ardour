@@ -1567,6 +1567,81 @@ icon_waveform (cairo_t* cr, const int width, const int height, const uint32_t fg
 	VECTORICONSTROKE (lw, fg_color);
 }
 
+/*****************************************************************************
+ * Attachment pane icons
+ */
+
+static void
+icon_attachment_left (cairo_t* cr, const int width, const int height, const Gtkmm2ext::ActiveState state, const uint32_t fg_color)
+{
+	const int wh = std::min (width, height);
+	cairo_rectangle (cr,
+	                 (width - wh)  * .5 + wh * .2,
+	                 (height - wh) * .5 + wh * .2,
+	                 wh * .6, wh * .6);
+
+	VECTORICONSTROKE (DEFAULT_LINE_WIDTH, fg_color);
+
+	cairo_rectangle (cr,
+	                 (width - wh)  * .5 + wh * .2,
+	                 (height - wh) * .5 + wh * .2,
+	                 wh * .21, wh * .6);
+
+	if (state == Gtkmm2ext::ExplicitActive) {
+		cairo_fill (cr);
+	} else {
+		VECTORICONSTROKE (DEFAULT_LINE_WIDTH, fg_color);
+	}
+}
+
+static void
+icon_attachment_right (cairo_t* cr, const int width, const int height, const Gtkmm2ext::ActiveState state, const uint32_t fg_color)
+{
+	const int wh = std::min (width, height);
+	cairo_rectangle (cr,
+	                 (width - wh)  * .5 + wh * .2,
+	                 (height - wh) * .5 + wh * .2,
+	                 wh * .6, wh * .6);
+
+	VECTORICONSTROKE (DEFAULT_LINE_WIDTH, fg_color);
+
+	cairo_rectangle (cr,
+	                 (width - wh)  * .5 + wh * .59,
+	                 (height - wh) * .5 + wh * .2,
+	                 wh * .21, wh * .6);
+
+	if (state == Gtkmm2ext::ExplicitActive) {
+		cairo_fill (cr);
+	} else {
+		VECTORICONSTROKE (DEFAULT_LINE_WIDTH, fg_color);
+	}
+}
+
+static void
+icon_attachment_bottom (cairo_t* cr, const int width, const int height, const Gtkmm2ext::ActiveState state, const uint32_t fg_color)
+{
+	const int wh = std::min (width, height);
+	cairo_rectangle (cr,
+	                 (width - wh)  * .5 + wh * .2,
+	                 (height - wh) * .5 + wh * .2,
+	                 wh * .6, wh * .6);
+
+	VECTORICONSTROKE (DEFAULT_LINE_WIDTH, fg_color);
+
+	cairo_rectangle (cr,
+	                 (width - wh)  * .5 + wh * .2,
+	                 (height - wh) * .5 + wh * .59,
+	                 wh * .6, wh * .21);
+
+	if (state == Gtkmm2ext::ExplicitActive) {
+		cairo_fill (cr);
+	} else {
+		VECTORICONSTROKE (DEFAULT_LINE_WIDTH, fg_color);
+	}
+}
+
+
+
 /*****************************************************************************/
 
 bool
@@ -1730,6 +1805,15 @@ ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr
 			break;
 		case TailTimeClock:
 			icon_tailtime_clock (cr, width, height, fg_color);
+			break;
+		case AttachmentLeft:
+			icon_attachment_left (cr, width, height, state, fg_color);
+			break;
+		case AttachmentRight:
+			icon_attachment_right (cr, width, height, state, fg_color);
+			break;
+		case AttachmentBottom:
+			icon_attachment_bottom (cr, width, height, state, fg_color);
 			break;
 		case NoIcon:
 			rv = false;
