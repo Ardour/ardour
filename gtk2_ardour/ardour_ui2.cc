@@ -92,9 +92,6 @@ ARDOUR_UI::setup_tooltips ()
 	ArdourCanvas::Canvas::set_tooltip_timeout (Gtk::Settings::get_default()->property_gtk_tooltip_timeout ());
 
 	parameter_changed("click-gain");
-	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
-	set_tip (auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
-	set_tip (feedback_alert_button, _("When lit, there is a ports connection issue, leading to feedback loop or ambiguous alignment.\nThis is caused by connecting an output back to some input (feedback), or by multiple connections from a source to the same output via different paths (ambiguous latency, record alignment)."));
 	set_tip (editor_meter_peak_display, _("Reset All Peak Meters"));
 	set_tip (error_alert_button, _("Show Error Log and acknowledge warnings"));
 	set_tip (_cue_rec_enable, _("<b>When enabled</b>, triggering Cues will result in Cue Markers added to the timeline"));
@@ -196,9 +193,6 @@ ARDOUR_UI::setup_transport ()
 	/* setup actions */
 
 	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
-	act = ActionManager::get_action (X_("Main"), X_("cancel-solo"));
-	solo_alert_button.set_related_action (act);
-	auditioning_alert_button.signal_clicked.connect (sigc::mem_fun(*this,&ARDOUR_UI::audition_alert_clicked));
 	error_alert_button.signal_button_release_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::error_alert_press), false);
 	act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
 	error_alert_button.set_related_action(act);
@@ -210,6 +204,7 @@ ARDOUR_UI::setup_transport ()
 	recorder_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-recorder-visibility")));
 	trigger_page_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-trigger-visibility")));
 
+	application_bar = new ApplicationBar ();  //TODO:  move this to Editor, Cue, Rec, Mix   //TODO: all transport, ui and monitor actions need to be instantiated before this
 	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-dim-all"));
 	monitor_dim_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-mono"));
@@ -242,21 +237,6 @@ ARDOUR_UI::setup_transport ()
 	trigger_page_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("trigger")), false);
 
 	/* setup widget style/name */
-
-	solo_alert_button.set_name ("rude solo");
-	auditioning_alert_button.set_name ("rude audition");
-	feedback_alert_button.set_name ("feedback alert");
-	error_alert_button.set_name ("error alert");
-
-	solo_alert_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
-	auditioning_alert_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
-	feedback_alert_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
-
-	solo_alert_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
-	auditioning_alert_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
-	feedback_alert_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
-
-	feedback_alert_button.set_sizing_text (_("Facdbeek")); //< longest of "Feedback" and "No Align"
 
 	editor_visibility_button.set_name (X_("page switch button"));
 	mixer_visibility_button.set_name (X_("page switch button"));
@@ -339,15 +319,6 @@ ARDOUR_UI::setup_transport ()
 	transport_frame.add (*ebox);
 	ebox->add (transport_table);
 
-	/* alert box sub-group */
-	VBox* alert_box = manage (new VBox);
-	alert_box->set_homogeneous (true);
-	alert_box->set_spacing (1);
-	alert_box->set_border_width (0);
-	alert_box->pack_start (solo_alert_button, true, true);
-	alert_box->pack_start (auditioning_alert_button, true, true);
-	alert_box->pack_start (feedback_alert_button, true, true);
-
 	/* monitor section sub-group */
 	VBox* monitor_box = manage (new VBox);
 	monitor_box->set_homogeneous (true);
@@ -375,12 +346,6 @@ ARDOUR_UI::setup_transport ()
 #define TCOL col, col + 1
 
 	transport_table.attach (*application_bar, TCOL, 0, 2 , EXPAND|FILL, EXPAND|FILL, 3, 0);
-	++col;
-
-	transport_table.attach (*alert_box, TCOL, 0, 2, SHRINK, EXPAND|FILL, hpadding, 0);
-	++col;
-
-	transport_table.attach (monitor_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	transport_table.attach (*monitor_box, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
@@ -416,47 +381,9 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (mixer_visibility_button,        TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	++col;
 
-	/* desensitize */
-
-	feedback_alert_button.set_sensitive (false);
-	feedback_alert_button.set_visual_state (Gtkmm2ext::NoVisualState);
-	auditioning_alert_button.set_sensitive (false);
-	auditioning_alert_button.set_visual_state (Gtkmm2ext::NoVisualState);
 }
 #undef PX_SCALE
 #undef TCOL
-
-void
-ARDOUR_UI::soloing_changed (bool onoff)
-{
-	if (solo_alert_button.get_active() != onoff) {
-		solo_alert_button.set_active (onoff);
-	}
-}
-
-void
-ARDOUR_UI::_auditioning_changed (bool onoff)
-{
-	auditioning_alert_button.set_active (onoff);
-	auditioning_alert_button.set_sensitive (onoff);
-	if (!onoff) {
-		auditioning_alert_button.set_visual_state (Gtkmm2ext::NoVisualState);
-	}
-}
-
-void
-ARDOUR_UI::auditioning_changed (bool onoff)
-{
-	UI::instance()->call_slot (MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::_auditioning_changed, this, onoff));
-}
-
-void
-ARDOUR_UI::audition_alert_clicked ()
-{
-	if (_session) {
-		_session->cancel_audition();
-	}
-}
 
 bool
 ARDOUR_UI::error_alert_press (GdkEventButton* ev)
@@ -475,69 +402,6 @@ ARDOUR_UI::error_alert_press (GdkEventButton* ev)
 	}
 	// maybe fall through to to button toggle
 	return !do_toggle;
-}
-
-
-void
-ARDOUR_UI::solo_blink (bool onoff)
-{
-	if (_session == 0) {
-		return;
-	}
-
-	if (_session->soloing() || _session->listening()) {
-		if (onoff) {
-			solo_alert_button.set_active (true);
-		} else {
-			solo_alert_button.set_active (false);
-		}
-	} else {
-		solo_alert_button.set_active (false);
-	}
-}
-
-void
-ARDOUR_UI::audition_blink (bool onoff)
-{
-	if (_session == 0) {
-		return;
-	}
-
-	if (_session->is_auditioning()) {
-		if (onoff) {
-			auditioning_alert_button.set_active (true);
-		} else {
-			auditioning_alert_button.set_active (false);
-		}
-	} else {
-		auditioning_alert_button.set_active (false);
-	}
-}
-
-void
-ARDOUR_UI::feedback_blink (bool onoff)
-{
-	if (_feedback_exists) {
-		feedback_alert_button.set_active (true);
-		feedback_alert_button.set_text (_("Feedback"));
-		if (onoff) {
-			feedback_alert_button.reset_fixed_colors ();
-		} else {
-			feedback_alert_button.set_active_color (UIConfigurationBase::instance().color ("feedback alert: alt active", NULL));
-		}
-	} else if (_ambiguous_latency && !UIConfiguration::instance().get_show_toolbar_latency ()) {
-		feedback_alert_button.set_text (_("No Align"));
-		feedback_alert_button.set_active (true);
-		if (onoff) {
-			feedback_alert_button.reset_fixed_colors ();
-		} else {
-			feedback_alert_button.set_active_color (UIConfigurationBase::instance().color ("feedback alert: alt active", NULL));
-		}
-	} else {
-		feedback_alert_button.set_text (_("Feedback"));
-		feedback_alert_button.reset_fixed_colors ();
-		feedback_alert_button.set_active (false);
-	}
 }
 
 void

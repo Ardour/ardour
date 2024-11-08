@@ -193,8 +193,6 @@ ARDOUR_UI::set_session (Session *s)
 	ActionManager::set_sensitive (ActionManager::point_selection_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::playlist_selection_sensitive_actions, false);
 
-	solo_alert_button.set_active (_session->soloing());
-
 	setup_session_options ();
 
 	blink_connection = Timers::blink_connect (sigc::mem_fun(*this, &ARDOUR_UI::blink_handler));
@@ -210,8 +208,6 @@ ARDOUR_UI::set_session (Session *s)
 	_session->auto_punch_location_changed.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::set_punch_sensitivity, this), gui_context ());
 
 	_session->Xrun.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::xrun_handler, this, _1), gui_context());
-	_session->SoloActive.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::soloing_changed, this, _1), gui_context());
-	_session->AuditionActive.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::auditioning_changed, this, _1), gui_context());
 	_session->locations()->added.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
 	_session->locations()->removed.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::session_parameter_changed, this, _1), gui_context ());

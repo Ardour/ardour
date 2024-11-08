@@ -120,6 +120,11 @@ ApplicationBar::ApplicationBar ()
 	, _primary_clock  (X_("primary"), X_("transport"), MainClock::PrimaryClock)
 	, _secondary_clock (X_("secondary"), X_("secondary"), MainClock::SecondaryClock)
 	, _secondary_clock_spacer (0)
+	, _auditioning_alert_button (_("Audition"))
+	, _solo_alert_button (_("Solo"))
+	, _feedback_alert_button (_("Feedback"))
+	, _feedback_exists (false)
+	, _ambiguous_latency (false)
 {
 	_record_mode_strings = I18N (_record_mode_strings_);
 }
@@ -183,6 +188,20 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 
 	_auto_return_button.set_text(_("Auto Return"));
 	_follow_edits_button.set_text(_("Follow Range"));
+
+	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
+	act = ActionManager::get_action (X_("Main"), X_("cancel-solo"));
+	_solo_alert_button.set_related_action (act);
+	_auditioning_alert_button.signal_clicked.connect (sigc::mem_fun(*this,&ApplicationBar::audition_alert_clicked));
+
+	/* alert box sub-group */
+	VBox* alert_box = manage (new VBox);
+	alert_box->set_homogeneous (true);
+	alert_box->set_spacing (1);
+	alert_box->set_border_width (0);
+	alert_box->pack_start (_solo_alert_button, true, true);
+	alert_box->pack_start (_auditioning_alert_button, true, true);
+	alert_box->pack_start (_feedback_alert_button, true, true);
 
 	int vpadding = 1;
 	int hpadding = 2;
@@ -251,6 +270,12 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 		++col;
 	}
 
+	_table.attach (*alert_box, TCOL, 0, 2, SHRINK, EXPAND|FILL, hpadding, 0);
+	++col;
+
+	_table.attach (_monitor_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
 	_table.set_spacings (0);
 	_table.set_row_spacings (4);
 	_table.set_border_width (1);
@@ -296,6 +321,9 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	Gtkmm2ext::UI::instance()->set_tip (_follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 	Gtkmm2ext::UI::instance()->set_tip (_primary_clock, _("<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	Gtkmm2ext::UI::instance()->set_tip (_secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
+	Gtkmm2ext::UI::instance()->set_tip (_solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
+	Gtkmm2ext::UI::instance()->set_tip (_auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
+	Gtkmm2ext::UI::instance()->set_tip (_feedback_alert_button, _("When lit, there is a ports connection issue, leading to feedback loop or ambiguous alignment.\nThis is caused by connecting an output back to some input (feedback), or by multiple connections from a source to the same output via different paths (ambiguous latency, record alignment)."));
 
 	/* theming */
 	_sync_button.set_name ("transport active option button");
@@ -305,15 +333,36 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_latency_disable_button.set_name ("latency button");
 	_auto_return_button.set_name ("transport option button");
 	_follow_edits_button.set_name ("transport option button");
+	_solo_alert_button.set_name ("rude solo");
+	_auditioning_alert_button.set_name ("rude audition");
+	_feedback_alert_button.set_name ("feedback alert");
+
+	_solo_alert_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
+	_auditioning_alert_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
+	_feedback_alert_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
+
+	_solo_alert_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
+	_auditioning_alert_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
+	_feedback_alert_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
+
+	_feedback_alert_button.set_sizing_text (_("Feedgeek")); //< longest of "Feedback" and "No Align", include descender
 
 	/* indicate global latency compensation en/disable */
 	ARDOUR::Latent::DisableSwitchChanged.connect (_forever_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::latency_switch_changed, this), gui_context ());
+	ARDOUR::Session::FeedbackDetected.connect (_forever_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::feedback_detected, this), gui_context ());
+	ARDOUR::Session::SuccessfulGraphSort.connect (_forever_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::successful_graph_sort, this), gui_context ());
 
 	/* initialize */
 	update_clock_visibility ();
 	set_transport_sensitivity (false);
 	latency_switch_changed ();
 	session_latency_updated (true);
+
+	/* desensitize */
+	_feedback_alert_button.set_sensitive (false);
+	_feedback_alert_button.set_visual_state (Gtkmm2ext::NoVisualState);
+	_auditioning_alert_button.set_sensitive (false);
+	_auditioning_alert_button.set_visual_state (Gtkmm2ext::NoVisualState);
 
 	if (_session) {
 		repack_transport_hbox ();
@@ -427,6 +476,113 @@ ApplicationBar::repack_transport_hbox ()
 }
 
 void
+ApplicationBar::feedback_detected ()
+{
+	_feedback_exists = true;
+}
+
+void
+ApplicationBar::successful_graph_sort ()
+{
+	_feedback_exists = false;
+}
+
+void
+ApplicationBar::soloing_changed (bool onoff)
+{
+	if (_solo_alert_button.get_active() != onoff) {
+		_solo_alert_button.set_active (onoff);
+	}
+}
+
+void
+ApplicationBar::_auditioning_changed (bool onoff)
+{
+	_auditioning_alert_button.set_active (onoff);
+	_auditioning_alert_button.set_sensitive (onoff);
+	if (!onoff) {
+		_auditioning_alert_button.set_visual_state (Gtkmm2ext::NoVisualState);
+	}
+	set_transport_sensitivity (!onoff);
+}
+
+void
+ApplicationBar::auditioning_changed (bool onoff)
+{
+	UI::instance()->call_slot (MISSING_INVALIDATOR, std::bind (&ApplicationBar::_auditioning_changed, this, onoff));
+}
+
+void
+ApplicationBar::audition_alert_clicked ()
+{
+	if (_session) {
+		_session->cancel_audition();
+	}
+}
+
+void
+ApplicationBar::solo_blink (bool onoff)
+{
+	if (_session == 0) {
+		return;
+	}
+
+	if (_session->soloing() || _session->listening()) {
+		if (onoff) {
+			_solo_alert_button.set_active (true);
+		} else {
+			_solo_alert_button.set_active (false);
+		}
+	} else {
+		_solo_alert_button.set_active (false);
+	}
+}
+
+void
+ApplicationBar::audition_blink (bool onoff)
+{
+	if (_session == 0) {
+		return;
+	}
+
+	if (_session->is_auditioning()) {
+		if (onoff) {
+			_auditioning_alert_button.set_active (true);
+		} else {
+			_auditioning_alert_button.set_active (false);
+		}
+	} else {
+		_auditioning_alert_button.set_active (false);
+	}
+}
+
+void
+ApplicationBar::feedback_blink (bool onoff)
+{
+	if (_feedback_exists) {
+		_feedback_alert_button.set_active (true);
+		_feedback_alert_button.set_text (_("Feedback"));
+		if (onoff) {
+			_feedback_alert_button.reset_fixed_colors ();
+		} else {
+			_feedback_alert_button.set_active_color (UIConfigurationBase::instance().color ("feedback alert: alt active", NULL));
+		}
+	} else if (_ambiguous_latency && !UIConfiguration::instance().get_show_toolbar_latency ()) {
+		_feedback_alert_button.set_text (_("No Align"));
+		_feedback_alert_button.set_active (true);
+		if (onoff) {
+			_feedback_alert_button.reset_fixed_colors ();
+		} else {
+			_feedback_alert_button.set_active_color (UIConfigurationBase::instance().color ("feedback alert: alt active", NULL));
+		}
+	} else {
+		_feedback_alert_button.set_text (_("Feedback"));
+		_feedback_alert_button.reset_fixed_colors ();
+		_feedback_alert_button.set_active (false);
+	}
+}
+
+void
 ApplicationBar::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
@@ -456,6 +612,8 @@ ApplicationBar::set_session (Session *s)
 	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::map_transport_state, this), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::parameter_changed, this, _1), gui_context());
 	_session->LatencyUpdated.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::session_latency_updated, this, _1), gui_context());
+	_session->SoloActive.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::soloing_changed, this, _1), gui_context());
+	_session->AuditionActive.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::auditioning_changed, this, _1), gui_context());
 
 	//initialize all session config settings
 	std::function<void (std::string)> pc (std::bind (&ApplicationBar::parameter_changed, this, _1));
@@ -463,6 +621,8 @@ ApplicationBar::set_session (Session *s)
 
 	/* initialize */
 	session_latency_updated (true);
+
+	_solo_alert_button.set_active (_session->soloing());
 
 	_blink_connection = Timers::blink_connect (sigc::mem_fun(*this, &ApplicationBar::blink_handler));
 }
@@ -528,33 +688,14 @@ ApplicationBar::session_latency_updated (bool for_playback)
 		_route_latency_value.set_text (samples_as_time_string (wrl, rate));
 
 		if (_session->engine().check_for_ambiguous_latency (true)) {
-//			_ambiguous_latency = true;
+			_ambiguous_latency = true;
 			_io_latency_value.set_markup ("<span background=\"red\" foreground=\"white\">ambiguous</span>");
 		} else {
-//			_ambiguous_latency = false;
+			_ambiguous_latency = false;
 			_io_latency_value.set_text (samples_as_time_string (iol, rate));
 		}
 	}
 }
-
-
-void
-ApplicationBar::_auditioning_changed (bool onoff)
-{
-//	auditioning_alert_button.set_active (onoff);
-//	auditioning_alert_button.set_sensitive (onoff);
-//	if (!onoff) {
-//		auditioning_alert_button.set_visual_state (Gtkmm2ext::NoVisualState);
-//	}
-	set_transport_sensitivity (!onoff);
-}
-
-void
-ApplicationBar::auditioning_changed (bool onoff)
-{
-	UI::instance()->call_slot (MISSING_INVALIDATOR, std::bind (&ApplicationBar::_auditioning_changed, this, onoff));
-}
-
 
 void
 ApplicationBar::parameter_changed (std::string p)
@@ -680,15 +821,12 @@ ApplicationBar::blink_handler (bool blink_on)
 {
 	sync_blink (blink_on);
 
-#if 0
 	if (UIConfiguration::instance().get_no_strobe() || !UIConfiguration::instance().get_blink_alert_indicators()) {
 		blink_on = true;
 	}
-	error_blink (blink_on);
 	solo_blink (blink_on);
 	audition_blink (blink_on);
 	feedback_blink (blink_on);
-#endif
 }
 
 void

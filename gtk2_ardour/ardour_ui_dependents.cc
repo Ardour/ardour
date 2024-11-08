@@ -118,8 +118,6 @@ ARDOUR_UI::we_have_dependents ()
 
 	std::function<void (std::string)> pc (std::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	Config->map_parameters (pc);
-
-	UIConfiguration::instance().reset_dpi ();
 }
 
 void
@@ -331,6 +329,9 @@ ARDOUR_UI::setup_windows ()
 	setup_transport();
 	build_menu_bar ();
 	setup_tooltips ();
+
+	/* set DPI before realizing widgets */
+	UIConfiguration::instance().reset_dpi ();
 
 	_main_window.signal_delete_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::main_window_delete_event));
 

@@ -38,6 +38,7 @@
 #include "startup_fsm.h"
 #include "transport_control.h"
 #include "transport_control_ui.h"
+#include "main_clock.h"
 #include "visibility_group.h"
 #include "window_manager.h"
 
@@ -72,15 +73,26 @@ private:
 	void map_transport_state ();
 	void set_transport_sensitivity (bool);
 
-	void auditioning_changed (bool);
-	void _auditioning_changed (bool);
-
 	void set_record_mode (ARDOUR::RecordMode);
 
 	void latency_switch_changed ();
 	void session_latency_updated (bool);
 
 	void update_clock_visibility ();
+
+	void solo_blink (bool);
+	void audition_blink (bool);
+	void feedback_blink (bool);
+
+	void soloing_changed (bool);
+	void auditioning_changed (bool);
+	void _auditioning_changed (bool);
+
+	void feedback_detected ();
+	void successful_graph_sort ();
+
+	bool solo_alert_press (GdkEventButton* ev);
+	void audition_alert_clicked ();
 
 	/* blinking alerts */
 	void sync_blink (bool);
@@ -109,6 +121,14 @@ private:
 	TransportClock                _primary_clock;
 	TransportClock                _secondary_clock;
 	ArdourWidgets::ArdourVSpacer* _secondary_clock_spacer;
+	ArdourWidgets::ArdourButton   _auditioning_alert_button;
+	ArdourWidgets::ArdourButton   _solo_alert_button;
+	ArdourWidgets::ArdourButton   _feedback_alert_button;
+	Gtk::VBox                     _alert_box;
+	ArdourWidgets::ArdourVSpacer  _monitor_spacer;
+
+	bool _feedback_exists;
+	bool _ambiguous_latency;
 
 	std::vector<std::string> _record_mode_strings;
 

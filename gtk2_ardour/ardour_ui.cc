@@ -301,9 +301,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _cue_rec_enable (_("Rec Cues"), ArdourButton::led_default_elements)
 	, _cue_play_enable (_("Play Cues"), ArdourButton::led_default_elements)
 	, time_info_box (0)
-	, auditioning_alert_button (_("Audition"))
-	, solo_alert_button (_("Solo"))
-	, feedback_alert_button (_("Feedback"))
 	, error_alert_button ( ArdourButton::just_led_default_elements )
 	, editor_meter_peak_display()
 	, editor_meter(0)
@@ -346,7 +343,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, last_peak_grab (0)
 	, have_disk_speed_dialog_displayed (false)
 	, _status_bar_visibility (X_("status-bar"))
-	, _feedback_exists (false)
 	, _log_not_acknowledged (LogLevelNone)
 	, duplicate_routes_dialog (0)
 	, editor_visibility_button (S_("Window|Edit"))
@@ -454,11 +450,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	ARDOUR::Session::Quit.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::finish, this), gui_context ());
 
-	/* tell the user about feedback */
-
-	ARDOUR::Session::FeedbackDetected.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::feedback_detected, this), gui_context ());
-	ARDOUR::Session::SuccessfulGraphSort.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::successful_graph_sort, this), gui_context ());
-
 	/* handle requests to deal with missing files */
 
 	ARDOUR::Session::MissingFile.connect_same_thread (forever_connections, std::bind (&ARDOUR_UI::missing_file, this, _1, _2, _3));
@@ -561,8 +552,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	_process_thread = new ProcessThread ();
 
 	ARDOUR::Port::set_connecting_blocked (ARDOUR_COMMAND_LINE::no_connect_ports);
-
-	application_bar = new ApplicationBar();  //TODO:  move this to Editor, Cue, Rec, Mix
 }
 
 GlobalPortMatrixWindow*
@@ -3009,18 +2998,6 @@ void
 ARDOUR_UI::drop_process_buffers ()
 {
 	_process_thread->drop_buffers ();
-}
-
-void
-ARDOUR_UI::feedback_detected ()
-{
-	_feedback_exists = true;
-}
-
-void
-ARDOUR_UI::successful_graph_sort ()
-{
-	_feedback_exists = false;
 }
 
 void

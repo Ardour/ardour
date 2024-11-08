@@ -238,6 +238,16 @@ public:
 	RCOptionEditor* get_rc_option_editor() { return rc_option_editor; }
 	void show_tabbable (ArdourWidgets::Tabbable*);
 
+	enum ArdourLogLevel {
+		LogLevelNone = 0,
+		LogLevelInfo,
+		LogLevelWarning,
+		LogLevelError
+	};
+
+	ArdourLogLevel log_not_acknowledged () const { return _log_not_acknowledged; }
+	void set_log_not_acknowledged (const ArdourLogLevel lvl) { _log_not_acknowledged =lvl; }
+
 	void start_session_load (bool create_new);
 	void session_dialog_response_handler (int response, SessionDialog* session_dialog);
 	void build_session_from_dialog (SessionDialog&, std::string const& session_name, std::string const& session_path, std::string const& session_template, Temporal::TimeDomain domain);
@@ -529,7 +539,6 @@ private:
 
 	ApplicationBar *application_bar;
 
-	ArdourWidgets::ArdourVSpacer monitor_spacer;
 	ArdourWidgets::ArdourVSpacer scripts_spacer;
 	ArdourWidgets::ArdourVSpacer cuectrl_spacer;
 
@@ -551,14 +560,9 @@ private:
 	ArdourWidgets::ArdourVSpacer      meterbox_spacer;
 	Gtk::HBox                         meterbox_spacer2;
 
-	ArdourWidgets::ArdourButton auditioning_alert_button;
-	ArdourWidgets::ArdourButton solo_alert_button;
-	ArdourWidgets::ArdourButton feedback_alert_button;
 	ArdourWidgets::ArdourButton error_alert_button;
 
 	ArdourWidgets::ArdourButton action_script_call_btn[MAX_LUA_ACTION_BUTTONS];
-
-	Gtk::VBox alert_box;
 
 	Gtk::Table editor_meter_table;
 	ArdourWidgets::ArdourButton editor_meter_peak_display;
@@ -572,21 +576,11 @@ private:
 	sigc::connection blink_connection;
 
 	void cancel_solo ();
-	void solo_blink (bool);
-	void audition_blink (bool);
-	void feedback_blink (bool);
 	void error_blink (bool);
 
 	void set_flat_buttons();
 
-	void soloing_changed (bool);
-	void auditioning_changed (bool);
-	void _auditioning_changed (bool);
-
-	bool solo_alert_press (GdkEventButton* ev);
-	void audition_alert_clicked ();
 	bool error_alert_press (GdkEventButton *);
-
 	/* menu bar and associated stuff */
 
 	Gtk::MenuBar* menu_bar;
@@ -849,21 +843,9 @@ private:
 
 	void toggle_latency_switch ();
 	void latency_switch_changed ();
-	void feedback_detected ();
 
 	ArdourWidgets::ArdourButton             midi_panic_button;
 	void                     midi_panic ();
-
-	void successful_graph_sort ();
-	bool _feedback_exists;
-	bool _ambiguous_latency;
-
-	enum ArdourLogLevel {
-		LogLevelNone = 0,
-		LogLevelInfo,
-		LogLevelWarning,
-		LogLevelError
-	};
 
 	ArdourLogLevel _log_not_acknowledged;
 
