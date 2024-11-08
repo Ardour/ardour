@@ -126,6 +126,9 @@ private:
 	ArdourWidgets::ArdourButton   _feedback_alert_button;
 	Gtk::VBox                     _alert_box;
 	ArdourWidgets::ArdourVSpacer  _monitor_spacer;
+	ArdourWidgets::ArdourButton   _monitor_dim_button;
+	ArdourWidgets::ArdourButton   _monitor_mono_button;
+	ArdourWidgets::ArdourButton   _monitor_mute_button;
 
 	bool _feedback_exists;
 	bool _ambiguous_latency;

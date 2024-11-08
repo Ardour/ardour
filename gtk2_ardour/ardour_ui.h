@@ -542,10 +542,6 @@ private:
 	ArdourWidgets::ArdourVSpacer scripts_spacer;
 	ArdourWidgets::ArdourVSpacer cuectrl_spacer;
 
-	ArdourWidgets::ArdourButton monitor_dim_button;
-	ArdourWidgets::ArdourButton monitor_mono_button;
-	ArdourWidgets::ArdourButton monitor_mute_button;
-
 	void toggle_external_sync ();
 	void toggle_time_master ();
 	void toggle_video_sync ();

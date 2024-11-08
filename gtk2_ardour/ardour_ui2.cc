@@ -205,12 +205,6 @@ ARDOUR_UI::setup_transport ()
 	trigger_page_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-trigger-visibility")));
 
 	application_bar = new ApplicationBar ();  //TODO:  move this to Editor, Cue, Rec, Mix   //TODO: all transport, ui and monitor actions need to be instantiated before this
-	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-dim-all"));
-	monitor_dim_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-mono"));
-	monitor_mono_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-cut-all"));
-	monitor_mute_button.set_related_action (act);
 
 	/* connect signals */
 	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (primary_clock, &MainClock::set), false));
@@ -244,23 +238,7 @@ ARDOUR_UI::setup_transport ()
 	recorder_visibility_button.set_name (X_("page switch button"));
 	trigger_page_visibility_button.set_name (X_("page switch button"));
 
-	monitor_dim_button.set_name ("monitor section dim");
-	monitor_mono_button.set_name ("monitor section mono");
-	monitor_mute_button.set_name ("mute button");
-
-	monitor_dim_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
-	monitor_mono_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
-	monitor_mute_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
-
-	monitor_dim_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
-	monitor_mono_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
-	monitor_mute_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
-
 	/* and widget text */
-
-	monitor_dim_button.set_text (_("Dim All"));
-	monitor_mono_button.set_text (_("Mono"));
-	monitor_mute_button.set_text (_("Mute All"));
 
 	/* and tooltips */
 
@@ -285,17 +263,7 @@ ARDOUR_UI::setup_transport ()
 	                                                      "Right-click to show more options"), trigger_page->name()));
 
 
-	/* monitor section */
-	Gtkmm2ext::UI::instance()->set_tip (monitor_dim_button, _("Monitor section dim output"));
-	Gtkmm2ext::UI::instance()->set_tip (monitor_mono_button, _("Monitor section mono output"));
-	Gtkmm2ext::UI::instance()->set_tip (monitor_mute_button, _("Monitor section mute output"));
-
 	/* transport control size-group */
-
-	Glib::RefPtr<SizeGroup> monitor_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
-	monitor_button_size_group->add_widget (monitor_dim_button);
-	monitor_button_size_group->add_widget (monitor_mono_button);
-	monitor_button_size_group->add_widget (monitor_mute_button);
 
 	/* and now the layout... */
 
@@ -319,15 +287,6 @@ ARDOUR_UI::setup_transport ()
 	transport_frame.add (*ebox);
 	ebox->add (transport_table);
 
-	/* monitor section sub-group */
-	VBox* monitor_box = manage (new VBox);
-	monitor_box->set_homogeneous (true);
-	monitor_box->set_spacing (1);
-	monitor_box->set_border_width (0);
-	monitor_box->pack_start (monitor_mono_button, true, true);
-	monitor_box->pack_start (monitor_dim_button, true, true);
-	monitor_box->pack_start (monitor_mute_button, true, true);
-
 	//tab selections
 	button_height_size_group->add_widget (trigger_page_visibility_button);
 	button_height_size_group->add_widget (recorder_visibility_button);
@@ -346,9 +305,6 @@ ARDOUR_UI::setup_transport ()
 #define TCOL col, col + 1
 
 	transport_table.attach (*application_bar, TCOL, 0, 2 , EXPAND|FILL, EXPAND|FILL, 3, 0);
-	++col;
-
-	transport_table.attach (*monitor_box, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	transport_table.attach (cuectrl_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);

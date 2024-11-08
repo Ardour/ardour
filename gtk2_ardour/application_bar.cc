@@ -203,6 +203,26 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	alert_box->pack_start (_auditioning_alert_button, true, true);
 	alert_box->pack_start (_feedback_alert_button, true, true);
 
+	/* monitor section sub-group */
+	VBox* monitor_box = manage (new VBox);
+	monitor_box->set_homogeneous (true);
+	monitor_box->set_spacing (1);
+	monitor_box->set_border_width (0);
+	monitor_box->pack_start (_monitor_mono_button, true, true);
+	monitor_box->pack_start (_monitor_dim_button, true, true);
+	monitor_box->pack_start (_monitor_mute_button, true, true);
+
+	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-dim-all"));
+	_monitor_dim_button.set_related_action (act);
+	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-mono"));
+	_monitor_mono_button.set_related_action (act);
+	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-cut-all"));
+	_monitor_mute_button.set_related_action (act);
+
+	_monitor_dim_button.set_text (_("Dim All"));
+	_monitor_mono_button.set_text (_("Mono"));
+	_monitor_mute_button.set_text (_("Mute All"));
+
 	int vpadding = 1;
 	int hpadding = 2;
 	int col = 0;
@@ -276,6 +296,9 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (_monitor_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
+	_table.attach (*monitor_box, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
 	_table.set_spacings (0);
 	_table.set_row_spacings (4);
 	_table.set_border_width (1);
@@ -312,6 +335,11 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	clock2_size_group->add_widget (*_secondary_clock.left_btn());
 	clock2_size_group->add_widget (*_secondary_clock.right_btn());
 
+	Glib::RefPtr<SizeGroup> monitor_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
+	monitor_button_size_group->add_widget (_monitor_dim_button);
+	monitor_button_size_group->add_widget (_monitor_mono_button);
+	monitor_button_size_group->add_widget (_monitor_mute_button);
+
 	/* tooltips */
 	Gtkmm2ext::UI::instance()->set_tip (_punch_in_button, _("Start recording at auto-punch start"));
 	Gtkmm2ext::UI::instance()->set_tip (_punch_out_button, _("Stop recording at auto-punch end"));
@@ -324,6 +352,9 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	Gtkmm2ext::UI::instance()->set_tip (_solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	Gtkmm2ext::UI::instance()->set_tip (_auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
 	Gtkmm2ext::UI::instance()->set_tip (_feedback_alert_button, _("When lit, there is a ports connection issue, leading to feedback loop or ambiguous alignment.\nThis is caused by connecting an output back to some input (feedback), or by multiple connections from a source to the same output via different paths (ambiguous latency, record alignment)."));
+	Gtkmm2ext::UI::instance()->set_tip (_monitor_dim_button, _("Monitor section dim output"));
+	Gtkmm2ext::UI::instance()->set_tip (_monitor_mono_button, _("Monitor section mono output"));
+	Gtkmm2ext::UI::instance()->set_tip (_monitor_mute_button, _("Monitor section mute output"));
 
 	/* theming */
 	_sync_button.set_name ("transport active option button");
@@ -336,6 +367,17 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_solo_alert_button.set_name ("rude solo");
 	_auditioning_alert_button.set_name ("rude audition");
 	_feedback_alert_button.set_name ("feedback alert");
+	_monitor_dim_button.set_name ("monitor section dim");
+	_monitor_mono_button.set_name ("monitor section mono");
+	_monitor_mute_button.set_name ("mute button");
+
+	_monitor_dim_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
+	_monitor_mono_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
+	_monitor_mute_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
+
+	_monitor_dim_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
+	_monitor_mono_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
+	_monitor_mute_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
 
 	_solo_alert_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
 	_auditioning_alert_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
