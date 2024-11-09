@@ -61,12 +61,13 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	virtual ~ArdourButton ();
 
 	enum Tweaks {
-		Square = 0x1,
-		TrackHeader = 0x2,
-		OccasionalText = 0x4,
-		OccasionalLED = 0x8,
-		ForceBoxy = 0x10,
-		ForceFlat = 0x20,
+		Square         = 0x01,
+		TrackHeader    = 0x02,
+		OccasionalText = 0x04,
+		OccasionalLED  = 0x08,
+		ForceBoxy      = 0x10,
+		ForceFlat      = 0x20,
+		ExpandtoSquare = 0x40,
 	};
 
 	static Tweaks default_tweaks;
@@ -202,6 +203,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 
 	uint32_t outline_color;
 
+	std::optional<int> _squaresize;
 
 	cairo_pattern_t* convex_pattern;
 	cairo_pattern_t* concave_pattern;

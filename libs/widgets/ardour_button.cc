@@ -763,7 +763,10 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		req->width  = wh;
 		req->height = wh;
 	}
-	else if (_tweaks & Square) {
+	else if (_tweaks & (Square | ExpandtoSquare)) {
+		if (_squaresize.has_value ()) {
+			req->width = std::max (req->width, _squaresize.value ());
+		}
 		// currerntly unused (again)
 		if (req->width < req->height)
 			req->width = req->height;
@@ -1074,6 +1077,15 @@ ArdourButton::on_size_allocate (Allocation& alloc)
 		/* re-center text */
 		//_layout->get_pixel_size (_text_width, _text_height);
 	}
+	if (_tweaks & ExpandtoSquare && alloc.get_width () != alloc.get_height ()) {
+		if (!_squaresize.has_value ()) {
+			_squaresize = std::max (alloc.get_width (), alloc.get_height ());
+			queue_resize ();
+		} else {
+			/* allow widget to shink next time */
+			_squaresize.reset ();
+		}
+	}
 }
 
 void
@@ -1334,6 +1346,7 @@ ArdourButton::set_tweaks (Tweaks t)
 {
 	if (_tweaks != t) {
 		_tweaks = t;
+		_squaresize.reset ();
 		if (get_realized()) {
 			queue_resize ();
 		}
