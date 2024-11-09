@@ -65,6 +65,18 @@ Tabbable::default_layout ()
 	right_attachment_button.set_text (_("Right"));
 	bottom_attachment_button.set_text (_("Btm"));
 
+	left_attachment_button.set_icon (ArdourIcon::AttachmentLeft);
+	right_attachment_button.set_icon (ArdourIcon::AttachmentRight);
+	bottom_attachment_button.set_icon (ArdourIcon::AttachmentBottom);
+
+	left_attachment_button.set_name ("lock button"); // XXX re-use netural "fill active" bg style of "lock"
+	right_attachment_button.set_name ("lock button");  // TODO create dedicate button style
+	bottom_attachment_button.set_name ("lock button");
+
+	left_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
+	right_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
+	bottom_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
+
 	content_attachment_hbox.set_border_width(3);
 	content_attachment_hbox.set_spacing(3);
 	content_attachment_hbox.pack_end (right_attachment_button, false, false);
