@@ -501,9 +501,7 @@ MidiCueEditor::box_rec_enable_change (ARDOUR::TriggerBox const & b)
 void
 MidiCueEditor::trigger_rec_enable_change (ARDOUR::Trigger const & t)
 {
-	if (t.armed()) {
-		view->begin_write();
-	} else {
+	if (!t.armed()) {
 		view->end_write ();
 	}
 }

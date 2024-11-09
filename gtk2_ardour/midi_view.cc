@@ -193,12 +193,6 @@ MidiView::set_track (std::shared_ptr<MidiTrack> mt)
 
 	if (_midi_track) {
 		_midi_track->DropReferences.connect (track_going_away_connection, invalidator (*this), std::bind (&MidiView::track_going_away, this), gui_context());
-
-		if (_needs_active_notes_for_rec_enabled_track && _midi_track->triggerbox()->record_enabled()) {
-			begin_write ();
-		} else {
-			end_write ();
-		}
 	}
 }
 
@@ -4497,8 +4491,7 @@ MidiView::clip_data_recorded (samplecnt_t total_duration)
 	}
 
 	if (!_active_notes) {
-		/* we aren't actively being recorded to */
-		return;
+		begin_write ();
 	}
 
 	if (_active_notes) {
