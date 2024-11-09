@@ -20,6 +20,7 @@
     <Option name="font-scale" value="102400"/>
   </UI>
   <Canvas>
+    <Option name="very small font" value="@FONT_VERYSMALL@"/>
     <Option name="small font" value="@FONT_SMALL@"/>
     <Option name="smaller font" value="@FONT_SMALLER@"/>
     <Option name="normal font" value="@FONT_NORMAL@"/>

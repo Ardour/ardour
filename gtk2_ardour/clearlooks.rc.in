@@ -290,7 +290,12 @@ style "status_bar_box"
         bg[NORMAL] = @background
 }
 
-style "very_small_text"
+style "smaller_text"
+{
+	font_name = "@FONTFAMILY@ @FONT_VERYSMALL@"
+}
+
+style "smaller_text"
 {
 	font_name = "@FONTFAMILY@ @FONT_SMALLER@"
 }
@@ -386,7 +391,7 @@ style "verbose_canvas_cursor" = "big_bold_text"
 {
 }
 
-style "marker_text" = "small text"
+style "marker_text" = "small_text"
 {
 }
 
@@ -400,7 +405,7 @@ style "midi_tracer_textview" = "medium_monospace_text"
 
 }
 
-style "time_axis_view_item_name" = "very small text"
+style "time_axis_view_item_name" = "smaller_text"
 {
 }
 
@@ -409,7 +414,7 @@ style "midi_tracer_textview" = "medium_monospace_text"
 
 }
 
-style "time_axis_view_item_name" = "very small text"
+style "time_axis_view_item_name" = "smaller_text"
 {
 }
 style "contrasting_popup" = "medium_monospace_text"
@@ -506,15 +511,15 @@ style "meterbridge_label" = "small_text"
 {
 }
 
-style "midi_device" = "very_small_text"
+style "midi_device" = "smaller_text"
 {
 }
 
-style "solo_isolate" = "very_small_text"
+style "solo_isolate" = "smaller_text"
 {
 }
 
-style "solo_safe" = "very_small_text"
+style "solo_safe" = "smaller_text"
 {
 }
 
@@ -547,7 +552,7 @@ style "midi_channel_selector_button"
 	fg[ACTIVE] = @light_text_on_dark
 }
 
-style "shuttle_control" = "very_small_text"
+style "shuttle_control" = "smaller_text"
 {
 	fg[NORMAL] = @control_text2
 	fg[ACTIVE] = @control_text2
@@ -606,7 +611,7 @@ style "font_scale_slider" = "default"
   bg[NORMAL] = shade(1.4, @background)
 }
 
-style "very_small_bright_when_active" = "very_small_text"
+style "very_small_bright_when_active" = "smaller_text"
 {
 	fg[NORMAL] = @foreground
 	bg[NORMAL] = @background
@@ -761,14 +766,14 @@ style "small_red_on_black_entry"  = "small_bold_text"
 	bg[ACTIVE] = @bases
 }
 
-style "audio_bus_base" = "very_small_text"
+style "audio_bus_base" = "smaller_text"
 {
 	fg[NORMAL] = @foreground
 	bg[NORMAL] = @audio_bus
 	bg[ACTIVE] = @background
 }
 
-style "foldback_bus_base" = "very_small_text"
+style "foldback_bus_base" = "smaller_text"
 {
 	fg[NORMAL] = @foreground
 	bg[NORMAL] = @foldback_bg
@@ -933,7 +938,7 @@ style "plugin_slider"
 	text[PRELIGHT] = @texts
 }
 
-style "processor_control_button"  = "very_small_text"
+style "processor_control_button"  = "smaller_text"
 {
 }
 
@@ -961,7 +966,7 @@ style "inspector_track_list_display" = "track_list_display"
 
 }
 
-style "processor_list" = "very_small_text"
+style "processor_list" = "smaller_text"
 {
 	bg[NORMAL] = @bases
 	bg[ACTIVE] = shade (1.8, @fg_selected)
@@ -1002,7 +1007,7 @@ style "selected_strip_frame"
 	bg[NORMAL] = darker(@bright_indicator)
 }
 
-style "flashing_alert" = "very_small_text"
+style "flashing_alert" = "smaller_text"
 {
 	GtkButton::child-displacement-x = 0
 	GtkButton::child-displacement-y = 0

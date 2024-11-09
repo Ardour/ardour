@@ -22,8 +22,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-CANVAS_FONT_VARIABLE(SmallFont, "small font")
+CANVAS_FONT_VARIABLE(VerySmallFont, "very small font")
 CANVAS_FONT_VARIABLE(SmallerFont, "smaller font")
+CANVAS_FONT_VARIABLE(SmallFont, "small font")
 CANVAS_FONT_VARIABLE(NormalFont, "normal font")
 CANVAS_FONT_VARIABLE(BigFont, "big font")
 CANVAS_FONT_VARIABLE(LargeFont, "large font")

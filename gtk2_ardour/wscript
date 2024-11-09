@@ -769,6 +769,7 @@ def build(bld):
     if sys.platform == 'darwin':
         basefont = ""
         font_sizes = {
+                'VERYSMALL' : '7',
                 'SMALLER' : '9',
                 'SMALL' : '10',
                 'NORMAL' : '11',
@@ -786,6 +787,7 @@ def build(bld):
     else: # Linux/X11 & Windows fonts
         basefont = '' # unspecified - use system defaults
         font_sizes = {
+                'VERYSMALL' : '8',
                 'SMALLER' : '6',
                 'SMALL' : '7',
                 'NORMAL' : '8',
