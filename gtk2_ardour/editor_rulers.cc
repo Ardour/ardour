@@ -134,7 +134,11 @@ Editor::initialize_rulers ()
 {
 	ruler_grabbed_widget = 0;
 
-	Pango::FontDescription font (UIConfiguration::instance().get_SmallerFont());
+#ifdef __APPLE__
+	Pango::FontDescription font (UIConfiguration::instance().get_VerySmallFont());
+#else
+	Pango::FontDescription font (UIConfiguration::instance().get_SmallFont());
+#endif
 	Pango::FontDescription larger_font (UIConfiguration::instance().get_SmallBoldFont());
 
 	_timecode_metric = new TimecodeMetric (this);
