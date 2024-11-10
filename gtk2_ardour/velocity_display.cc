@@ -203,12 +203,15 @@ VelocityDisplay::set_size_and_position (GhostEvent& gev)
 void
 VelocityDisplay::update_note (NoteBase* nb)
 {
-	GhostEvent* gev = GhostEvent::find (nb->note(), events, _optimization_iterator);
+	auto iter = events.end();
+
+	GhostEvent* gev = GhostEvent::find (nb->note(), events, iter);
 
 	if (!gev) {
 		return;
 	}
 
+	_optimization_iterator = iter;
 	update_ghost_event (gev);
 }
 
@@ -319,7 +322,9 @@ VelocityDisplay::y_position_to_velocity (double y) const
 void
 VelocityDisplay::note_selected (NoteBase* ev)
 {
-	GhostEvent* gev = GhostEvent::find (ev->note(), events, _optimization_iterator);
+	auto ignore_optiter = events.end();
+
+	GhostEvent* gev = GhostEvent::find (ev->note(), events, ignore_optiter);
 
 	if (!gev) {
 		return;
