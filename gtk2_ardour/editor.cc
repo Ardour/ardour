@@ -2236,6 +2236,15 @@ Editor::set_state (const XMLNode& node, int version)
 		tact->set_active (yn);
 	}
 
+	yn = false;
+	node.get_property ("show-editor-props", yn);
+	{
+		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-props"));
+		/* do it twice to force the change */
+		tact->set_active (!yn);
+		tact->set_active (yn);
+	}
+
 	int32_t el_page;
 	if (node.get_property (X_("editor-list-page"), el_page)) {
 		_the_notebook.set_current_page (el_page);
@@ -2340,6 +2349,9 @@ Editor::get_state () const
 
 	tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-list"));
 	node->set_property (X_("show-editor-list"), tact->get_active());
+
+	tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-props"));
+	node->set_property (X_("show-editor-props"), tact->get_active());
 
 	node->set_property (X_("editor-list-page"), _the_notebook.get_current_page ());
 
