@@ -95,6 +95,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Container* canvas_g
 
 StreamView::~StreamView ()
 {
+	undisplay_track ();
 	delete canvas_rect;
 }
 
