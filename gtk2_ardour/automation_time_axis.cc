@@ -110,7 +110,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	, _automatable (a)
 	, _parameter (p)
 	, _base_rect (new ArdourCanvas::Rectangle (_canvas_display))
-	, _view (show_regions ? new AutomationStreamView (*this) : 0)
+	, _view (show_regions ? new AutomationStreamView (*this) : nullptr)
 	, auto_dropdown ()
 	, _show_regions (show_regions)
 	, _velocity_mode (VelocityModeLollipops)
