@@ -19,21 +19,28 @@
 
 #include "pbd/demangle.h"
 
-#if defined(__GLIBCXX__)
+#if defined(__GLIBCXX__) || defined(__APPLE__)
 #include <cxxabi.h>
+#endif
+
+#ifdef __APPLE__
+#include <sstream>
 #endif
 
 std::string
 PBD::demangle_symbol (const std::string& mangled_symbol)
 {
-#if defined(__GLIBCXX__)
+#if defined(__GLIBCXX__) || defined(__APPLE__)
 
 	try {
 		int status;
 		char* realname = abi::__cxa_demangle (mangled_symbol.c_str(), 0, 0, &status);
-		std::string demangled_symbol (realname);
-		free (realname);
-		return demangled_symbol;
+		if (!status) {
+			std::string demangled_symbol (realname);
+			free (realname);
+			return demangled_symbol;
+		}
+		return mangled_symbol;
 	} catch (...) {
 		/* may happen if realname == NULL */
 	}
@@ -50,6 +57,29 @@ PBD::demangle_symbol (const std::string& mangled_symbol)
 std::string
 PBD::demangle (std::string const& str)
 {
+#ifdef __APPLE__
+
+	std::string foo;
+	std::string symbol;
+	std::stringstream sstr (str);
+
+	/* format is:
+
+	       [ DIGITS  LIBRARY_NAME  ADDRESS SYMBOL OFFSET ]
+
+	   We just need symbol. If this was speed-critical code, we'd likely
+	   use C style code to get symbol, but it's not.
+	*/
+
+	sstr >> foo;
+	sstr >> foo;
+	sstr >> foo;
+	sstr >> symbol;
+
+	return demangle_symbol (symbol);
+
+#else
+
 	std::string::size_type const b = str.find_first_of ("(");
 
 	if (b == std::string::npos) {
@@ -68,4 +98,5 @@ PBD::demangle (std::string const& str)
 	std::string const symbol = str.substr (b + 1, p - b - 1);
 
 	return demangle_symbol (symbol);
+#endif
 }
