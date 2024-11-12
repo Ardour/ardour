@@ -2036,6 +2036,7 @@ EditingContext::set_canvas_cursor (Gdk::Cursor* cursor)
 		   For now, drop down and use C API
 		*/
 		gdk_window_set_cursor (win->gobj(), cursor ? cursor->gobj() : 0);
+		gdk_flush ();
 	}
 }
 
@@ -2043,6 +2044,12 @@ size_t
 EditingContext::push_canvas_cursor (Gdk::Cursor* cursor)
 {
 	if (!_cursors->is_invalid (cursor)) {
+		if (!_cursor_stack.empty()) {
+			if (cursor == _cursor_stack.back()) {
+				return _cursor_stack.size() - 1;
+			}
+		}
+
 		_cursor_stack.push_back (cursor);
 		set_canvas_cursor (cursor);
 	}
@@ -2059,7 +2066,7 @@ EditingContext::pop_canvas_cursor ()
 		}
 
 		_cursor_stack.pop_back();
-		if (_cursor_stack.back()) {
+		if (!_cursor_stack.empty()) {
 			/* Popped to an existing cursor, we're done.  Otherwise, the
 			   context that created this cursor has been destroyed, so we need
 			   to skip to the next down the stack. */
