@@ -37,6 +37,7 @@
 #include "gui_thread.h"
 #include "midi_view.h"
 #include "midi_view_background.h"
+#include "mouse_cursors.h"
 #include "prh.h"
 #include "editing_context.h"
 #include "ui_config.h"
@@ -630,21 +631,19 @@ PianoRollHeader::motion_handler (GdkEventMotion* ev)
 
 	if (!_scroomer_drag && ev->x < _scroomer_size){
 
-		Gdk::Cursor m_Cursor;
-		double scroomer_top = max(1.0, (1.0 - ((_adj.get_value()+_adj.get_page_size()) / 127.0)) * get().height());
+		double scroomer_top = max (1.0, (1.0 - ((_adj.get_value()+_adj.get_page_size()) / 127.0)) * get().height());
 		double scroomer_bottom = (1.0 - (_adj.get_value () / 127.0)) * get().height();
+		double edge = 5. * UIConfiguration::instance().get_ui_scale();
 
-		if (evd.y > scroomer_top - 5 && evd.y < scroomer_top + 5){
-			m_Cursor = Gdk::Cursor (Gdk::TOP_SIDE);
-			_view->editing_context().push_canvas_cursor (&m_Cursor);
+		if (evd.y > scroomer_top - 5 && evd.y < scroomer_top + edge){
+			_view->editing_context().push_canvas_cursor (_view->editing_context().cursors()->resize_top);
 			_scroomer_state = TOP;
-		} else if (evd.y > scroomer_bottom - 5 && evd.y < scroomer_bottom + 5){
-			m_Cursor = Gdk::Cursor (Gdk::BOTTOM_SIDE);
-			_view->editing_context().push_canvas_cursor (&m_Cursor);
+		} else if (evd.y > scroomer_bottom - edge && evd.y < scroomer_bottom + edge){
+			_view->editing_context().push_canvas_cursor (_view->editing_context().cursors()->resize_bottom);
 			_scroomer_state = BOTTOM;
 		} else {
+			_view->editing_context().push_canvas_cursor (_view->editing_context().cursors()->grabber);
 			_scroomer_state = MOVE;
-			_view->editing_context().pop_canvas_cursor ();
 		}
 	}
 
