@@ -209,9 +209,25 @@ EditingContext::EditingContext (std::string const & name)
 	/* handle escape */
 
 	ARDOUR_UI::instance()->Escape.connect (escape_connection, MISSING_INVALIDATOR, std::bind (&EditingContext::escape, this), gui_context());
+
+	Config->ParameterChanged.connect (parameter_connections, MISSING_INVALIDATOR, std::bind (&EditingContext::parameter_changed, this, _1), gui_context());
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &EditingContext::ui_parameter_changed));
 }
 
 EditingContext::~EditingContext()
+{
+}
+
+void
+EditingContext::ui_parameter_changed (string parameter)
+{
+	if (parameter == "sound-midi-note") {
+	}
+}
+
+
+void
+EditingContext::parameter_changed (string parameter)
 {
 }
 

@@ -744,9 +744,6 @@ Editor::Editor ()
 	Session::AskAboutPlaylistDeletion.connect_same_thread (*this, std::bind (&Editor::playlist_deletion_dialog, this, _1));
 	Route::PluginSetup.connect_same_thread (*this, std::bind (&Editor::plugin_setup, this, _1, _2, _3));
 
-	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&Editor::parameter_changed, this, _1), gui_context());
-	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &Editor::ui_parameter_changed));
-
 	TimeAxisView::CatchDeletion.connect (*this, invalidator (*this), std::bind (&Editor::timeaxisview_deleted, this, _1), gui_context());
 
 	_ignore_region_action = false;
@@ -5672,6 +5669,8 @@ Editor::zoom_vertical_modifier_released()
 void
 Editor::ui_parameter_changed (string parameter)
 {
+	EditingContext::ui_parameter_changed (parameter);
+
 	if (parameter == "icon-set") {
 		while (!_cursor_stack.empty()) {
 			_cursor_stack.pop_back();

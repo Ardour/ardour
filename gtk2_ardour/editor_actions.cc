@@ -1097,7 +1097,7 @@ Editor::marker_click_behavior_chosen (Editing::MarkerClickBehavior m)
 void
 Editor::parameter_changed (std::string p)
 {
-	ENSURE_GUI_THREAD (*this, &Editor::parameter_changed, p)
+	EditingContext::parameter_changed (p);
 
 	if (p == "auto-loop") {
 		update_loop_range_view ();

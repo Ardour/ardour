@@ -686,6 +686,10 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	uint32_t autoscroll_cnt;
 	ArdourCanvas::Rect autoscroll_boundary;
 
+	PBD::ScopedConnectionList parameter_connections;
+	virtual void parameter_changed (std::string);
+	virtual void ui_parameter_changed (std::string);
+
 	bool _mouse_changed_selection;
 	ArdourMarker* entered_marker;
 	TimeAxisView* entered_track;
