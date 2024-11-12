@@ -1610,8 +1610,6 @@ MidiCueEditor::which_canvas_cursor (ItemType type) const
 bool
 MidiCueEditor::enter_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
 {
-	EditorAutomationLine* al;
-
 	choose_canvas_cursor_on_entry (item_type);
 
 	switch (item_type) {
