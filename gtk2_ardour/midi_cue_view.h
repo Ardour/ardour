@@ -44,6 +44,7 @@ class MidiCueView : public MidiView
 	MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	             uint32_t                    slot_index,
 	             ArdourCanvas::Item&         parent,
+	             ArdourCanvas::Item&         noscroll_parent,
 	             EditingContext&             ec,
 	             MidiViewBackground&         bg,
 	             uint32_t                    basic_color

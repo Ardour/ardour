@@ -48,6 +48,7 @@ using namespace Gtkmm2ext;
 MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
                           uint32_t                 slot_index,
                           ArdourCanvas::Item&      parent,
+                          ArdourCanvas::Item&      noscroll_parent,
                           EditingContext&          ec,
                           MidiViewBackground&      bg,
                           uint32_t                 basic_color)
@@ -79,7 +80,7 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	automation_group->set_fill_color (UIConfiguration::instance().color ("midi automation track fill"));
 	automation_group->set_data ("linemerger", this);
 
-	button_bar = new ArdourCanvas::Box (&parent, ArdourCanvas::Box::Horizontal);
+	button_bar = new ArdourCanvas::Box (&noscroll_parent, ArdourCanvas::Box::Horizontal);
 	CANVAS_DEBUG_NAME (button_bar, "button bar");
 	button_bar->set_spacing (12.);
 	/* Right-side padding only */
