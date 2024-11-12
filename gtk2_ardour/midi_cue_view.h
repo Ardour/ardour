@@ -35,7 +35,6 @@ class MidiCueAutomationLine;
 
 namespace ArdourCanvas {
 	class Box;
-	class Button;
 }
 
 class MidiCueView : public MidiView
@@ -110,20 +109,10 @@ class MidiCueView : public MidiView
 
 	VelocityDisplay* velocity_display;
 
-	ArdourCanvas::Box*    button_bar;
-	ArdourCanvas::Button* velocity_button;
-	ArdourCanvas::Button* bender_button;
-	ArdourCanvas::Button* pressure_button;
-	ArdourCanvas::Button* expression_button;
-	ArdourCanvas::Button* modulation_button;
-
 	std::shared_ptr<Temporal::TempoMap const> tempo_map;
 	ArdourCanvas::Rectangle* event_rect;
 	uint32_t _slot_index;
 
 	void update_sustained (Note *);
 	void update_hit (Hit *);
-
-	bool automation_button_event (GdkEvent*, Evoral::ParameterType type, int id);
-	void automation_button_click (Evoral::ParameterType type, int id, ARDOUR::SelectionOperation);
 };

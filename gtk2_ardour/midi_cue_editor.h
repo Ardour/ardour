@@ -171,11 +171,20 @@ class MidiCueEditor : public CueEditor
 
 	Gtk::VBox     _toolbox;
 
+	Gtk::HBox                    button_bar;
+	ArdourWidgets::ArdourButton* velocity_button;
+	ArdourWidgets::ArdourButton* bender_button;
+	ArdourWidgets::ArdourButton* pressure_button;
+	ArdourWidgets::ArdourButton* expression_button;
+	ArdourWidgets::ArdourButton* modulation_button;
+
 	CueMidiBackground* bg;
 	MidiCueView* view;
 
 	void build_canvas ();
 	void canvas_allocate (Gtk::Allocation);
+	void build_upper_toolbar ();
+	void build_lower_toolbar ();
 
 	RegionSelection region_selection();
 
@@ -199,7 +208,6 @@ class MidiCueEditor : public CueEditor
 	BBTMetric bbt_metric;
 
 	bool canvas_pre_event (GdkEvent*);
-	void setup_toolbar ();
 
 	/* autoscrolling */
 
@@ -222,6 +230,9 @@ class MidiCueEditor : public CueEditor
 	std::atomic<int> idle_update_queued;
 	PBD::ScopedConnectionList capture_connections;
 	samplecnt_t data_capture_duration;
+
+	bool automation_button_event (GdkEventButton*, Evoral::ParameterType type, int id);
+	void automation_button_click (Evoral::ParameterType type, int id, ARDOUR::SelectionOperation);
 };
 
 

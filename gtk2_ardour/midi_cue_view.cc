@@ -78,40 +78,6 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	automation_group->set_fill_color (UIConfiguration::instance().color ("midi automation track fill"));
 	automation_group->set_data ("linemerger", this);
 
-	button_bar = new ArdourCanvas::Box (&noscroll_parent, ArdourCanvas::Box::Horizontal);
-	CANVAS_DEBUG_NAME (button_bar, "button bar");
-	button_bar->set_spacing (12.);
-	/* Right-side padding only */
-	button_bar->set_padding (0., 0., 0., 24.);
-	button_bar->set_margin (5., 5., 5., 5.);
-
-	Pango::FontDescription button_font = UIConfiguration::instance().get_NormalFont();
-
-	velocity_button = new ArdourCanvas::Button (button_bar, _("Velocity"), button_font);
-	velocity_button->text()->set_color (UIConfiguration::instance().color ("neutral:foreground"));
-	CANVAS_DEBUG_NAME (velocity_button, "velocity button");
-
-	bender_button = new ArdourCanvas::Button (button_bar, _("Bender"), button_font);
-	bender_button->text()->set_color (UIConfiguration::instance().color ("neutral:foreground"));
-	CANVAS_DEBUG_NAME (bender_button, "bender button");
-
-	pressure_button = new ArdourCanvas::Button (button_bar, _("Pressure"), button_font);
-	pressure_button->text()->set_color (UIConfiguration::instance().color ("neutral:foreground"));
-	CANVAS_DEBUG_NAME (pressure_button, "pressure button");
-
-	expression_button = new ArdourCanvas::Button (button_bar, _("Expression"), button_font);
-	expression_button->text()->set_color (UIConfiguration::instance().color ("neutral:foreground"));
-	CANVAS_DEBUG_NAME (expression_button, "expression button");
-
-	modulation_button = new ArdourCanvas::Button (button_bar, _("Modulation"), button_font);
-	modulation_button->text()->set_color (UIConfiguration::instance().color ("neutral:foreground"));
-	CANVAS_DEBUG_NAME (modulation_button, "modulation button");
-
-	velocity_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueView::automation_button_event), ARDOUR::MidiVelocityAutomation, 0));
-	pressure_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueView::automation_button_event), ARDOUR::MidiChannelPressureAutomation, 0));
-	bender_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueView::automation_button_event), ARDOUR::MidiPitchBenderAutomation, 0));
-	modulation_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueView::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL));
-	expression_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueView::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION));
 
 	set_extensible (true);
 
@@ -128,19 +94,14 @@ MidiCueView::~MidiCueView ()
 void
 MidiCueView::set_height (double h)
 {
-	double bbw, bbh;
-	button_bar->size_request (bbw, bbh);
-
-	double note_area_height = ceil ((h - bbh) / 2.);
-	double automation_height = ceil (h - bbh - note_area_height);
+	double note_area_height = ceil (h / 2.);
+	double automation_height = ceil (h - note_area_height);
 
 	event_rect->set (ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, note_area_height));
 	midi_context().set_size (midi_context().width(), note_area_height);
 
 	automation_group->set_position (ArdourCanvas::Duple (0., note_area_height));
 	automation_group->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, automation_height));
-
-	button_bar->size_allocate (ArdourCanvas::Rect (0., note_area_height + automation_height, ArdourCanvas::COORD_MAX, note_area_height + automation_height + bbh));
 
 	for (auto & ads : automation_map) {
 		ads.second.set_height (automation_height);
@@ -272,29 +233,6 @@ MidiCueView::update_hit (Hit* h)
 	if (velocity_display) {
 		velocity_display->update_note (h);
 	}
-}
-
-bool
-MidiCueView::automation_button_event (GdkEvent* ev, Evoral::ParameterType type, int id)
-{
-	SelectionOperation op = ArdourKeyboard::selection_type (ev->button.state);
-
-	switch (ev->type) {
-	case GDK_BUTTON_RELEASE:
-		automation_button_click (type, id, op);
-		break;
-	default:
-		break;
-	}
-
-	return false;
-}
-
-void
-MidiCueView::automation_button_click (Evoral::ParameterType type, int id, SelectionOperation op)
-{
-#warning paul allow channel selection (2nd param)
-	update_automation_display (Evoral::Parameter (type, 0, id), op);
 }
 
 void

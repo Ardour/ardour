@@ -74,10 +74,9 @@ MidiCueEditor::MidiCueEditor()
 	build_grid_type_menu ();
 	build_draw_midi_menus();
 
+	build_upper_toolbar ();
 	build_canvas ();
-	setup_toolbar ();
-
-	_toolbox.pack_start (viewport(), true, true);
+	build_lower_toolbar ();
 
 	set_mouse_mode (Editing::MouseContent, true);
 }
@@ -126,7 +125,33 @@ MidiCueEditor::canvas_pre_event (GdkEvent* ev)
 }
 
 void
-MidiCueEditor::setup_toolbar ()
+MidiCueEditor::build_lower_toolbar ()
+{
+	velocity_button = new ArdourButton (_("Velocity"), ArdourButton::Text, true);
+	bender_button = new ArdourButton (_("Bender"), ArdourButton::Text, true);
+	pressure_button = new ArdourButton (_("Pressure"), ArdourButton::Text, true);
+	expression_button = new ArdourButton (_("Expression"), ArdourButton::Text, true);
+	modulation_button = new ArdourButton (_("Modulation"), ArdourButton::Text, true);
+
+	// button_bar.set_homogeneous (true);
+	button_bar.set_spacing (6);
+	button_bar.set_border_width (6);
+	button_bar.pack_start (*velocity_button, false, false);
+	button_bar.pack_start (*bender_button, false, false);
+	button_bar.pack_start (*pressure_button, false, false);
+	button_bar.pack_start (*modulation_button, false, false);
+
+	velocity_button->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiVelocityAutomation, 0), false);
+	pressure_button->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiChannelPressureAutomation, 0), false);
+	bender_button->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiPitchBenderAutomation, 0), false);
+	modulation_button->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL), false);
+	expression_button->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION), false);
+
+	_toolbox.pack_start (button_bar, false, false);
+}
+
+void
+MidiCueEditor::build_upper_toolbar ()
 {
 	Gtk::HBox* mode_box = manage(new Gtk::HBox);
 	mode_box->set_border_width (2);
@@ -298,6 +323,8 @@ MidiCueEditor::build_canvas ()
 	_canvas->set_name ("MidiCueCanvas");
 	_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
 	_canvas->set_can_focus ();
+
+	_toolbox.pack_start (*_canvas_viewport, true, true);
 
 	bindings_changed ();
 }
@@ -1775,3 +1802,29 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 		reset_zoom (spp);
 	}
 }
+
+bool
+MidiCueEditor::automation_button_event (GdkEventButton* ev, Evoral::ParameterType type, int id)
+{
+	SelectionOperation op = ArdourKeyboard::selection_type (ev->state);
+
+	switch (ev->type) {
+	case GDK_BUTTON_RELEASE:
+		automation_button_click (type, id, op);
+		break;
+	default:
+		break;
+	}
+
+	return false;
+}
+
+void
+MidiCueEditor::automation_button_click (Evoral::ParameterType type, int id, SelectionOperation op)
+{
+#warning paul allow channel selection (2nd param)
+	if (view)  {
+		view->update_automation_display (Evoral::Parameter (type, 0, id), op);
+	}
+}
+
