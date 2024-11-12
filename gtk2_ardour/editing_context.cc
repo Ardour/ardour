@@ -61,6 +61,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace Temporal;
+using namespace ArdourWidgets;
 using std::string;
 
 sigc::signal<void> EditingContext::DropDownKeys;
@@ -118,11 +119,15 @@ EditingContext::EditingContext (std::string const & name)
 	, _grid_type (GridTypeBeat)
 	, _snap_mode (SnapOff)
 	, _timeline_origin (0.)
+	, play_note_selection_button (_("Ear"), ArdourButton::Text, true)
+	, follow_playhead_button (_("F"), ArdourButton::Text, true)
+	, full_zoom_button (_("<->"), ArdourButton::Text)
 	, _drags (new DragManager (this))
 	, _leftmost_sample (0)
 	, _playhead_cursor (nullptr)
 	, _snapped_cursor (nullptr)
 	, _follow_playhead (false)
+	, visible_channel_label (_("MIDI|Channel"))
 	, selection (new Selection (this, true))
 	, cut_buffer (new Selection (this, false))
 	, _selection_memento (new SelectionMemento())
@@ -149,6 +154,8 @@ EditingContext::EditingContext (std::string const & name)
 	, entered_regionview (nullptr)
 	, clear_entered_track (false)
 {
+	using namespace Gtk::Menu_Helpers;
+
 	if (!button_bindings) {
 		button_bindings = new Bindings ("editor-mouse");
 
@@ -183,6 +190,21 @@ EditingContext::EditingContext (std::string const & name)
 	set_tooltip (draw_channel_selector, _("Note Channel to Draw (AUTO uses the nearest note's channel)"));
 	set_tooltip (grid_type_selector, _("Grid Mode"));
 	set_tooltip (snap_mode_button, _("Snap Mode\n\nRight-click to visit Snap preferences."));
+
+	set_tooltip (play_note_selection_button, _("Play notes when selected"));
+	set_tooltip (follow_playhead_button, _("Scroll automatically to keep playhead visible"));
+	/* Leave tip for full zoom button to derived class */
+	set_tooltip (visible_channel_selector, _("Select visible MIDI channel"));
+
+	play_note_selection_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::play_note_selection_clicked));
+	follow_playhead_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::follow_playhead_clicked));
+	full_zoom_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::full_zoom_clicked));
+
+	for (int i = 0; i < 16; i++) {
+		char buf[4];
+		sprintf(buf, "%d", i+1);
+		visible_channel_selector.AddMenuElem (MenuElem (buf, [this,i]() { EditingContext::set_visible_channel (i); }));
+	}
 
 	/* handle escape */
 
@@ -2758,4 +2780,12 @@ EditingContext::update_all_enter_cursors ()
 	}
 }
 
+void
+EditingContext::play_note_selection_clicked ()
+{
+}
 
+void
+EditingContext::follow_playhead_clicked ()
+{
+}

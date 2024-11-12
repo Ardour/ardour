@@ -490,6 +490,17 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void snap_mode_chosen (Editing::SnapMode);
 	void grid_type_chosen (Editing::GridType);
 
+	ArdourWidgets::ArdourButton play_note_selection_button;
+	ArdourWidgets::ArdourButton follow_playhead_button;
+	ArdourWidgets::ArdourButton full_zoom_button;
+	Gtk::Label visible_channel_label;
+	ArdourWidgets::ArdourDropdown visible_channel_selector;
+
+	virtual void play_note_selection_clicked();
+	virtual void follow_playhead_clicked ();
+	virtual void full_zoom_clicked() {};
+	virtual void set_visible_channel (int) {}
+
 	DragManager* _drags;
 
 	ArdourWidgets::ArdourButton snap_mode_button;

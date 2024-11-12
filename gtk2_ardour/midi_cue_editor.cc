@@ -31,6 +31,8 @@
 #include "gtkmm2ext/actions.h"
 
 #include "widgets/ardour_button.h"
+#include "widgets/ardour_dropdown.h"
+#include "widgets/tooltips.h"
 
 #include "ardour_ui.h"
 #include "editor_cursors.h"
@@ -153,6 +155,8 @@ MidiCueEditor::build_lower_toolbar ()
 void
 MidiCueEditor::build_upper_toolbar ()
 {
+	using namespace Gtk::Menu_Helpers;
+
 	Gtk::HBox* mode_box = manage(new Gtk::HBox);
 	mode_box->set_border_width (2);
 	mode_box->set_spacing(2);
@@ -194,11 +198,26 @@ MidiCueEditor::build_upper_toolbar ()
 	_toolbar_inner->pack_start (grid_box, false, false);
 	_toolbar_inner->pack_start (draw_box, false, false);
 
+	set_tooltip (full_zoom_button, _("Zoom to full clip"));
+
+	_toolbar_outer->set_border_width (6);
+	_toolbar_outer->set_spacing (12);
+	_toolbar_outer->pack_start (visible_channel_label, false, false);
+	_toolbar_outer->pack_start (visible_channel_selector, false, false);
+	_toolbar_outer->pack_start (play_note_selection_button, false, false);
+	_toolbar_outer->pack_start (follow_playhead_button, false, false);
+	_toolbar_outer->pack_start (full_zoom_button, false, false);
 	_toolbar_outer->pack_start (*_toolbar_inner, true, false);
+
 	_toolbox.pack_start (*_toolbar_outer, false, false);
 
 	Bindings* pr_bindings = Bindings::get_bindings (X_("Pianoroll"));
 	_toolbox.set_data (X_("ardour-bindings"), pr_bindings);
+}
+
+void
+MidiCueEditor::set_visible_channel (int n)
+{
 }
 
 void

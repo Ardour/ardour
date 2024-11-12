@@ -109,6 +109,8 @@ class MidiCueEditor : public CueEditor
 	Gdk::Cursor* which_trim_cursor (bool left_side) const;
 	Gdk::Cursor* which_canvas_cursor (ItemType type) const;
 
+	void set_visible_channel (int chan);
+
   protected:
 	void register_actions ();
 
@@ -233,6 +235,8 @@ class MidiCueEditor : public CueEditor
 
 	bool automation_button_event (GdkEventButton*, Evoral::ParameterType type, int id);
 	void automation_button_click (Evoral::ParameterType type, int id, ARDOUR::SelectionOperation);
+
+	int _visible_channel;
 };
 
 
