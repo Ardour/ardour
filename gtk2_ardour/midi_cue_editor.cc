@@ -141,11 +141,11 @@ MidiCueEditor::build_lower_toolbar ()
 	button_bar.pack_start (*pressure_button, false, false);
 	button_bar.pack_start (*modulation_button, false, false);
 
-	velocity_button->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiVelocityAutomation, 0), false);
-	pressure_button->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiChannelPressureAutomation, 0), false);
-	bender_button->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiPitchBenderAutomation, 0), false);
-	modulation_button->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL), false);
-	expression_button->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION), false);
+	velocity_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiVelocityAutomation, 0), false);
+	pressure_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiChannelPressureAutomation, 0), false);
+	bender_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiPitchBenderAutomation, 0), false);
+	modulation_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL), false);
+	expression_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION), false);
 
 	_toolbox.pack_start (button_bar, false, false);
 }

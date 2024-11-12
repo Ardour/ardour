@@ -56,6 +56,7 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	, active_automation (nullptr)
 	, velocity_display (nullptr)
 	, _slot_index (slot_index)
+	, _height (0.)
 {
 	CANVAS_DEBUG_NAME (_note_group, X_("note group for MIDI cue"));
 
@@ -80,10 +81,6 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 
 
 	set_extensible (true);
-
-	/* show velocity by default */
-
-	update_automation_display (Evoral::Parameter (MidiVelocityAutomation, 0, 0), SelectionSet);
 }
 
 MidiCueView::~MidiCueView ()
@@ -94,8 +91,18 @@ MidiCueView::~MidiCueView ()
 void
 MidiCueView::set_height (double h)
 {
-	double note_area_height = ceil (h / 2.);
-	double automation_height = ceil (h - note_area_height);
+	_height = h;
+
+	double note_area_height;
+	double automation_height;
+
+	if (automation_map.empty()) {
+		note_area_height = h;
+		automation_height = 0.;
+	} else {
+		note_area_height = ceil (h / 2.);
+		automation_height = ceil (h - note_area_height);
+	}
 
 	event_rect->set (ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, note_area_height));
 	midi_context().set_size (midi_context().width(), note_area_height);
@@ -350,6 +357,8 @@ MidiCueView::update_automation_display (Evoral::Parameter const & param, Selecti
 		/* undefined in this context */
 		break;
 	}
+
+	set_height (_height);
 }
 
 std::list<SelectableOwner*>

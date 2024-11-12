@@ -115,4 +115,6 @@ class MidiCueView : public MidiView
 
 	void update_sustained (Note *);
 	void update_hit (Hit *);
+
+	double _height;
 };
