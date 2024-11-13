@@ -28,58 +28,35 @@
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
+#include "widgets/ardour_button.h"
+
 #include "gtkmm2ext/cairo_packer.h"
 
-namespace ARDOUR {
+#include "region_editor.h"
+#include "audio_clock.h"
+
+namespace ARDOUR
+{
 	class Session;
 	class Location;
 }
 
-class TimeInfoBox;
-
-class MultiRegionPropertiesBox;
-
-class SlotPropertiesBox;
-
-class AudioRegionPropertiesBox;
-class MidiRegionPropertiesBox;
-
-class AudioRegionOperationsBox;
-class MidiRegionOperationsBox;
-
-class RoutePropertiesBox;
-
-class SelectionPropertiesBox : public Gtk::HBox, public ARDOUR::SessionHandlePtr
+class RoutePropertiesBox : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
 public:
-	SelectionPropertiesBox ();
-	~SelectionPropertiesBox ();
+	RoutePropertiesBox ();
+	~RoutePropertiesBox ();
 
-	void set_session (ARDOUR::Session*);
+	virtual void set_route (std::shared_ptr<ARDOUR::Route>);
 
-	PBD::ScopedConnectionList editor_connections;
-
-private:
-	Gtk::Table table;
+protected:
+	std::shared_ptr<ARDOUR::Region> _route;
 
 	Gtk::Label _header_label;
 
-	TimeInfoBox* _time_info_box;
+private:
+	void property_changed (const PBD::PropertyChange& what_changed);
 
-	MultiRegionPropertiesBox* _mregions_prop_box;
-
-	AudioRegionPropertiesBox* _audio_prop_box;
-	MidiRegionPropertiesBox* _midi_prop_box;
-
-	AudioRegionOperationsBox* _audio_ops_box;
-	MidiRegionOperationsBox* _midi_ops_box;
-
-	SlotPropertiesBox* _slot_prop_box;
-
-	RoutePropertiesBox* _route_prop_box;
-
-	void selection_changed ();
-
-	void track_mouse_mode ();
+	PBD::ScopedConnection state_connection;
 };
 

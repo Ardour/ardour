@@ -46,6 +46,8 @@
 
 #include "slot_properties_box.h"
 
+#include "audio_route_properties_box.h"
+
 #include "selection_properties_box.h"
 
 #include "pbd/i18n.h"
@@ -65,11 +67,9 @@ SelectionPropertiesBox::SelectionPropertiesBox ()
 	_time_info_box = new TimeInfoBox ("EditorTimeInfo", true);
 	pack_start(*_time_info_box, false, false, 0);
 
-#if SELECTION_PROPERTIES_BOX_TODO
 	/* Region ops (mute/unmute), for multiple-Region selections */
 	_mregions_prop_box = new MultiRegionPropertiesBox ();
 	pack_start(*_mregions_prop_box, false, false, 0);
-
 
 	/* MIDI Region props, for Clips */
 	_midi_prop_box = new MidiRegionPropertiesBox ();
@@ -79,7 +79,6 @@ SelectionPropertiesBox::SelectionPropertiesBox ()
 	_audio_prop_box = new AudioRegionPropertiesBox ();
 	pack_start(*_audio_prop_box, false, false, 0);
 
-
 	/* MIDI Region ops (transpose, quantize), for only-midi selections */
 	_midi_ops_box = new MidiRegionOperationsBox ();
 	pack_start(*_midi_ops_box, false, false, 0);
@@ -88,11 +87,62 @@ SelectionPropertiesBox::SelectionPropertiesBox ()
 	_audio_ops_box = new AudioRegionOperationsBox ();
 	pack_start(*_audio_ops_box, false, false, 0);
 
-
 	/* SLOT properties, for Trigger slot selections */
 	_slot_prop_box = new SlotPropertiesBox ();
 	pack_start(*_slot_prop_box, false, false, 0);
-#endif
+
+	/* ROUTE properties, for Track selections */
+	_route_prop_box = new RoutePropertiesBox ();
+	pack_start(*_route_prop_box, false, false, 0);
+
+	_time_info_box->set_no_show_all();
+	_mregions_prop_box->set_no_show_all();
+	_audio_prop_box->set_no_show_all();
+	_midi_ops_box->set_no_show_all();
+	_audio_ops_box->set_no_show_all();
+	_slot_prop_box->set_no_show_all();
+	_route_prop_box->set_no_show_all();
+}
+
+SelectionPropertiesBox::~SelectionPropertiesBox ()
+{
+	delete _time_info_box;
+
+	delete _mregions_prop_box;
+
+	delete _slot_prop_box;
+
+	delete _midi_ops_box;
+	delete _audio_ops_box;
+
+	delete _midi_prop_box;
+	delete _audio_prop_box;
+
+	delete _route_prop_box;  //todo: split into midi/audio
+}
+
+void
+SelectionPropertiesBox::set_session (Session* s)
+{
+	SessionHandlePtr::set_session (s);
+
+	if (!s) {
+		return;
+	}
+
+	_time_info_box->set_session(s);
+
+	_mregions_prop_box->set_session(s);
+
+	_midi_prop_box->set_session(s);
+	_audio_prop_box->set_session(s);
+
+	_midi_ops_box->set_session(s);
+	_audio_ops_box->set_session(s);
+
+	_slot_prop_box->set_session(s);
+
+	_route_prop_box->set_session(s);
 
 	/* watch for any change in our selection, so we can show an appropriate property editor */
 	Editor::instance().get_selection().TracksChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
@@ -111,47 +161,6 @@ SelectionPropertiesBox::SelectionPropertiesBox ()
 	selection_changed();
 }
 
-SelectionPropertiesBox::~SelectionPropertiesBox ()
-{
-	delete _time_info_box;
-
-#if SELECTION_PROPERTIES_BOX_TODO
-	delete _mregions_prop_box;
-
-	delete _slot_prop_box;
-
-	delete _midi_ops_box;
-	delete _audio_ops_box;
-
-	delete _midi_prop_box;
-	delete _audio_prop_box;
-#endif
-}
-
-void
-SelectionPropertiesBox::set_session (Session* s)
-{
-	SessionHandlePtr::set_session (s);
-
-	if (!s) {
-		return;
-	}
-
-	_time_info_box->set_session(s);
-
-#if SELECTION_PROPERTIES_BOX_TODO
-	_mregions_prop_box->set_session(s);
-
-	_midi_prop_box->set_session(s);
-	_audio_prop_box->set_session(s);
-
-	_midi_ops_box->set_session(s);
-	_audio_ops_box->set_session(s);
-
-	_slot_prop_box->set_session(s);
-#endif
-}
-
 void
 SelectionPropertiesBox::track_mouse_mode ()
 {
@@ -165,7 +174,6 @@ SelectionPropertiesBox::selection_changed ()
 
 	_time_info_box->hide();
 
-#if SELECTION_PROPERTIES_BOX_TODO
 	_mregions_prop_box->hide();
 
 	_midi_ops_box->hide();
@@ -175,7 +183,8 @@ SelectionPropertiesBox::selection_changed ()
 	_audio_prop_box->hide();
 
 	_slot_prop_box->hide();
-#endif
+
+	_route_prop_box->hide();
 
 	_header_label.hide();
 
@@ -183,6 +192,16 @@ SelectionPropertiesBox::selection_changed ()
 		_time_info_box->show();
 		_header_label.set_text(_("Range Properties (Press ESC to Deselect All)"));
 		_header_label.show();
+	}
+
+	if (!selection.tracks.empty()) {
+		_route_prop_box->show();
+		TimeAxisView *tav = *(selection.tracks.begin());
+		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(tav);
+		_route_prop_box->set_route(rtav->route());
+		_header_label.set_text(_("Track Properties (Press ESC to Deselect All)"));
+		_header_label.hide();
+
 	}
 
 #if SELECTION_PROPERTIES_BOX_TODO
@@ -215,8 +234,10 @@ SelectionPropertiesBox::selection_changed ()
 	if (found_audio_regions && ! found_midi_regions) {
 		_audio_ops_box->show();
 	}
+#endif
 
 	std::shared_ptr<ARDOUR::Region> selected_region = std::shared_ptr<ARDOUR::Region>();
+	RegionView *selected_regionview = NULL;
 
 	if (!selection.triggers.empty()) {
 		TriggerSelection ts = selection.triggers;
@@ -227,21 +248,21 @@ SelectionPropertiesBox::selection_changed ()
 		_slot_prop_box->set_slot(ref);
 		_slot_prop_box->show();
 
-		selected_region = ref.trigger()->region();
+//		selected_region = ref.trigger()->region();
 	} else if (selection.regions.size()==1)  {
-		selected_region = (*(selection.regions.begin()))->region();
+		selected_regionview = *(selection.regions.begin());
 	}
 
-	if (selected_region) {
+#if 0 // TODO pack region-properties here
+	if (selected_regionview) {
+		std::shared_ptr<ARDOUR::Region> r = selected_regionview->region();
 		//region properties
-		if (selected_region->data_type() == DataType::MIDI) {
-			_midi_prop_box->set_region(selected_region);
+		if (r && r->data_type() == DataType::MIDI) {
+			_midi_prop_box->set_regionview(selected_regionview);
 			_midi_prop_box->show();
-			_midi_ops_box->show();
-		} else  {
-			_audio_prop_box->set_region(selected_region);
+		} else if (r) {
+			_audio_prop_box->set_regionview(selected_regionview);  //retains a SessionHandler reference somewhere @robin
 			_audio_prop_box->show();
-			_audio_ops_box->show();
 		}
 	}
 #endif

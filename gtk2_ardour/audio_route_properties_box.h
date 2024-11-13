@@ -28,58 +28,18 @@
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
+#include "widgets/ardour_button.h"
+
 #include "gtkmm2ext/cairo_packer.h"
 
-namespace ARDOUR {
-	class Session;
-	class Location;
-}
+#include "route_properties_box.h"
 
-class TimeInfoBox;
-
-class MultiRegionPropertiesBox;
-
-class SlotPropertiesBox;
-
-class AudioRegionPropertiesBox;
-class MidiRegionPropertiesBox;
-
-class AudioRegionOperationsBox;
-class MidiRegionOperationsBox;
-
-class RoutePropertiesBox;
-
-class SelectionPropertiesBox : public Gtk::HBox, public ARDOUR::SessionHandlePtr
+class AudioRoutePropertiesBox : public RoutePropertiesBox
 {
 public:
-	SelectionPropertiesBox ();
-	~SelectionPropertiesBox ();
-
-	void set_session (ARDOUR::Session*);
-
-	PBD::ScopedConnectionList editor_connections;
+	AudioRoutePropertiesBox ();
+	~AudioRoutePropertiesBox ();
 
 private:
-	Gtk::Table table;
 
-	Gtk::Label _header_label;
-
-	TimeInfoBox* _time_info_box;
-
-	MultiRegionPropertiesBox* _mregions_prop_box;
-
-	AudioRegionPropertiesBox* _audio_prop_box;
-	MidiRegionPropertiesBox* _midi_prop_box;
-
-	AudioRegionOperationsBox* _audio_ops_box;
-	MidiRegionOperationsBox* _midi_ops_box;
-
-	SlotPropertiesBox* _slot_prop_box;
-
-	RoutePropertiesBox* _route_prop_box;
-
-	void selection_changed ();
-
-	void track_mouse_mode ();
 };
-
