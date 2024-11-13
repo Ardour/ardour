@@ -7540,3 +7540,81 @@ VelocityLineDrag::aborted (bool)
 {
 	vd->end_line_drag (false);
 }
+
+ClipStartDrag::ClipStartDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Temporal::timepos_t const & os)
+	: Drag (ec, &r, os.time_domain(), nullptr, false)
+	, dragging_rect (&r)
+	, original_start (os)
+{
+}
+
+ClipStartDrag::~ClipStartDrag ()
+{
+}
+
+void
+ClipStartDrag::start_grab (GdkEvent* ev,Gdk::Cursor* c)
+{
+	Drag::start_grab (ev, c);
+}
+
+bool
+ClipStartDrag::end_grab (GdkEvent* ev)
+{
+	Drag::end_grab (ev);
+	return false;
+}
+
+void
+ClipStartDrag::motion (GdkEvent*, bool)
+{
+}
+
+void
+ClipStartDrag::finished (GdkEvent*, bool)
+{
+}
+
+void
+ClipStartDrag::aborted (bool)
+{
+}
+
+ClipEndDrag::ClipEndDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Temporal::timepos_t const & oe)
+	: Drag (ec, &r, oe.time_domain(), nullptr, false)
+	, dragging_rect (&r)
+	, original_end (oe)
+{
+}
+
+ClipEndDrag::~ClipEndDrag ()
+{
+}
+
+void
+ClipEndDrag::start_grab (GdkEvent* ev,Gdk::Cursor* c)
+{
+	Drag::start_grab (ev, c);
+}
+
+bool
+ClipEndDrag::end_grab (GdkEvent* ev)
+{
+	Drag::end_grab (ev);
+	return false;
+}
+
+void
+ClipEndDrag::motion (GdkEvent*, bool)
+{
+}
+
+void
+ClipEndDrag::finished (GdkEvent*, bool)
+{
+}
+
+void
+ClipEndDrag::aborted (bool)
+{
+}

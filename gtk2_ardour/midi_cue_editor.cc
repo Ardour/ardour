@@ -1793,6 +1793,8 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 	}
 
 	view->set_region (r);
+	view->show_start (true);
+	view->show_end (true);
 
 	/* Compute zoom level to show entire source plus some margin if possible */
 
@@ -1815,7 +1817,8 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 	{
 		EditingContext::TempoMapScope tms (*this, map);
 		double width = bg->width();
-		samplecnt_t samples = duration.samples();
+		/* make it 20% wider than we need */
+		samplecnt_t samples = (samplecnt_t) floor (1.2 * duration.samples());
 		std::cerr << "new spp from " << samples << " / " << width << std::endl;
 		samplecnt_t spp = floor (samples / width);
 		reset_zoom (spp);

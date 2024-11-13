@@ -1640,6 +1640,39 @@ class VelocityLineDrag : public FreehandLineDrag<Evoral::ControlList::OrderedPoi
 	bool drag_did_change;
 };
 
+class ClipStartDrag : public Drag
+{
+  public:
+	ClipStartDrag (EditingContext&, ArdourCanvas::Rectangle &, Temporal::timepos_t const &);
+	~ClipStartDrag ();
 
+	void start_grab (GdkEvent*,Gdk::Cursor*);
+	bool end_grab (GdkEvent*);
+	void motion (GdkEvent*, bool);
+	void finished (GdkEvent*, bool);
+	void aborted (bool);
+
+  private:
+	ArdourCanvas::Rectangle* dragging_rect;
+	Temporal::timepos_t original_start;
+};
+
+class ClipEndDrag : public Drag
+{
+  public:
+	ClipEndDrag (EditingContext&, ArdourCanvas::Rectangle &, Temporal::timepos_t const &);
+	~ClipEndDrag ();
+
+	void start_grab (GdkEvent*,Gdk::Cursor*);
+	bool end_grab (GdkEvent*);
+	void motion (GdkEvent*, bool);
+	void finished (GdkEvent*, bool);
+	void aborted (bool);
+
+  private:
+	ArdourCanvas::Rectangle* dragging_rect;
+	Temporal::timepos_t original_end;
+
+};
 
 #endif /* __gtk2_ardour_editor_drag_h_ */

@@ -122,6 +122,8 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	, _channel_selection_scoped_note (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
+	, _start_boundary_rect (nullptr)
+	, _end_boundary_rect (nullptr)
 	, _optimization_iterator (_events.end())
 	, _list_editor (nullptr)
 	, _no_sound_notes (false)
@@ -182,6 +184,52 @@ MidiView::init (std::shared_ptr<MidiTrack> mt)
 	_note_group->raise_to_top();
 	EditingContext::DropDownKeys.connect (sigc::mem_fun (*this, &MidiView::drop_down_keys));
 	_midi_context.NoteRangeChanged.connect (sigc::mem_fun (*this, &MidiView::view_changed));
+}
+
+void
+MidiView::show_start (bool yn)
+{
+	if (!yn) {
+		delete _start_boundary_rect;
+		_start_boundary_rect = nullptr;
+		return;
+	}
+
+	if (!_midi_region) {
+		return;
+	}
+
+	if (!_start_boundary_rect) {
+		_start_boundary_rect = new ArdourCanvas::Rectangle (_note_group->parent());
+		_start_boundary_rect->set_fill_color (0xff000087);
+		_start_boundary_rect->set_outline_color (0xff0000ff);
+	}
+
+	double width = _editing_context.sample_to_pixel (_midi_region->start().samples());
+	_start_boundary_rect->set (ArdourCanvas::Rect (0., 0., width, height()));
+}
+
+void
+MidiView::show_end (bool yn)
+{
+	if (!yn) {
+		delete _end_boundary_rect;
+		_end_boundary_rect = nullptr;
+		return;
+	}
+
+	if (!_midi_region) {
+		return;
+	}
+
+	if (!_end_boundary_rect) {
+		_end_boundary_rect = new ArdourCanvas::Rectangle (_note_group->parent());
+		_end_boundary_rect->set_fill_color (0xff000087);
+		_end_boundary_rect->set_outline_color (0xff0000ff);
+	}
+
+	double offset = _editing_context.sample_to_pixel ((_midi_region->start() + _midi_region->length()).samples());
+	_end_boundary_rect->set (ArdourCanvas::Rect (offset, 0., ArdourCanvas::COORD_MAX, height()));
 }
 
 void

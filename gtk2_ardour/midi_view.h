@@ -348,6 +348,9 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void select_self () { select_self (false); }
 	virtual void select_self_uniquely () {}
 
+	void show_start (bool yn);
+	void show_end (bool yn);
+
   protected:
 	void init (std::shared_ptr<ARDOUR::MidiTrack>);
 	virtual void region_resized (const PBD::PropertyChange&);
@@ -505,6 +508,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	NoteBase*                            _channel_selection_scoped_note;
 	MouseState _mouse_state;
 	int _pressed_button;
+	ArdourCanvas::Rectangle*             _start_boundary_rect;
+	ArdourCanvas::Rectangle*             _end_boundary_rect;
 
 	/** Currently selected NoteBase objects */
 	Selection _selection;
