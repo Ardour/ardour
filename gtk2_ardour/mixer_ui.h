@@ -153,8 +153,6 @@ public:
 	void toggle_mixer_strip ();
 	void toggle_mixer_props ();
 
-	void showhide_mixer_list (bool yn);
-
 	void toggle_surround_master ();
 
 	void toggle_monitor_section ();
