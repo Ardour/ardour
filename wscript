@@ -387,6 +387,7 @@ children = [
         'headless',
         'luasession',
         'session_utils',
+        'cocoatea',
         # shared helper binaries (plugin-scanner, exec-wrapper)
         'libs/fst',
         'libs/vfork',
