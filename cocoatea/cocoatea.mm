@@ -22,8 +22,8 @@ main (int argc, char* argv[])
 	[[NSApplication sharedApplication] activateIgnoringOtherApps : YES ];
 	[win makeKeyAndOrderFront:win];
 
-	NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-	NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:view selector:@selector(timedUpdate) userInfo:nil repeats:YES];
+	[NSRunLoop currentRunLoop];
+	[NSTimer scheduledTimerWithTimeInterval:0.1 target:view selector:@selector(timedUpdate) userInfo:nil repeats:YES];
 
 	[[NSApplication sharedApplication] run];
 
