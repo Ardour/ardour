@@ -451,7 +451,7 @@ ApplicationBar::ui_actions_ready ()
 
 	Glib::RefPtr<Action> act;
 
-	ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
+	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
 	_sync_button.set_related_action (act);
 
 	act = ActionManager::get_action ("Transport", "TogglePunchIn");
@@ -947,6 +947,7 @@ ApplicationBar::parameter_changed (std::string p)
 		if (!_session->config.get_external_sync()) {
 			_sync_button.set_text (S_("SyncSource|Int."));
 		} else {
+			_sync_button.set_text (TransportMasterManager::instance().current()->display_name());
 		}
 	} else if (p == "sync-source") {
 		if (_session) {
