@@ -78,9 +78,9 @@ Tabbable::default_layout ()
 	right_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
 	bottom_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
 
-	left_attachment_button.set_sensitive (0 != (_panelayout & (PaneLeft | AttLeft))); // Editor Mixer
+	left_attachment_button.set_sensitive (0 != (_panelayout & (PaneLeft | AttLeft)));
 	right_attachment_button.set_sensitive (0 != (_panelayout & PaneRight));
-	bottom_attachment_button.set_sensitive (0 != (_panelayout & PaneBottom));
+	bottom_attachment_button.set_sensitive (0 != (_panelayout & AttBottom));
 
 	content_attachment_hbox.set_border_width(3);
 	content_attachment_hbox.set_spacing(3);

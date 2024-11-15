@@ -49,13 +49,13 @@ class LIBWIDGETS_API Tabbable : public Gtkmm2ext::WindowProxy
 {
 public:
 	enum PaneLayout {
-		NoPanes      = 0x0,
-		PaneLeft     = 0x1,
-		PaneRight    = 0x2,
-		PaneBottom   = 0x4,
+		NoPanes      = 0x0, ///< disable all attachment buttons, do not pack any panes or attachments
+		PaneLeft     = 0x1, ///< left side attachment is a resizable pane
+		PaneRight    = 0x2, ///< pack a resizable Pane on the right-side
+		AttBottom    = 0x4, ///< bottom is a fixed size EBox attachment
 		PaneLeftBtm  = 0x5,
 		PaneRightBtm = 0x6,
-		AttLeft      = 0x8,
+		AttLeft      = 0x8, ///< if PaneLeft is not set, pack a fixed size Ebox on the left (Editor-Mixer)
 	};
 
 	Tabbable (const std::string& user_visible_name, std::string const & untranslated_name, Gtk::Widget* top = NULL, bool tabbed_by_default = true, PaneLayout pl = PaneRightBtm);
@@ -111,9 +111,54 @@ protected:
 	bool delete_event_handler (GdkEventAny *ev);
 
 	/* This is the heirarchy of a Tabbable's widget packing.
-	 * The end result is to provide 8(ish) event-boxen where the tab can put its contents
-	 * Please maintain the indention here so the hierarchy is visible
-	*/
+	 *
+	 * The end result is to provide 7 event-boxes (marked with a $) where the tab can put its contents.
+	 *
+	 * +--_content_vbox----------------------------------------------------------------------------------+
+	 * |                                                                                                 |
+	 * | /--toolbar_frame------------------------------------------------------------------------------\ |
+	 * | | +--content_header_hbox--------------------------------------------------------------------+ | |
+	 * | | |                                                                                         | | |
+	 * | | | +--content_app_bar--------------------+  +--attachment_hbox--+  +--content_tabbables--+ | | |
+	 * | | | $                              (EBOX) |  |    (internal)     |  $              (EBOX) | | | |
+	 * | | | |  MAIN APPLICATION BAR               |  | (attachment btns) |  | PAGE SWITCHER BTN   | | | |
+	 * | | | |                                     |  |                   |  |                     | | | |
+	 * | | | +-------------------------------------+  +-------------------+  +---------------------+ | | |
+	 * | | |                                                                                         | | |
+	 * | | +-----------------------------------------------------------------------------------------+ | |
+	 * | \---------------------------------------------------------------------------------------------/ |
+	 * |                                                                                                 |
+	 * | +--content_hbox--OR--content_left_pane--------------------------------------------------------+ |
+	 * | |                                                                                             | |
+	 * | | +--att_left--+   +--content_midlevel_vbox-------------------------------------------------+ | |
+	 * | | $     (EBOX) |   | +--content_right_pane------------------------------------------------+ | | |
+	 * | | |            |   | | +--content_inner_vbox-----------------+   +--content_right_vbox--+ | | | |
+	 * | | |  O         |   | | |                                     |   |                      | | | | |
+	 * | | |  P   S     |   | | | +--content_toolbar----------------+ |   | +--att_right-------+ | | | | |
+	 * | | |  T   I     |   | | | $    OPTIONAL TOOLBAR      (EBOX) | |   | $           (EBOX) | | | | | |
+	 * | | |  I   D     |   | | | +---------------------------------+ |<->| |                  | | | | | |
+	 * | | |  O   E     |<->| | |                                     | P | |  OPTIONAL        | | | | | |
+	 * | | |  N   B     | O | | | +--content_innermost_hbox---------+ | A | |  SIDEBAR         | | | | | |
+	 * | | |  A   A     | P | | | $                          (HBOX) | | N | |                  | | | | | |
+	 * | | |  L   R     | T | | | |                                 | | E | |                  | | | | | |
+	 * | | |            | . | | | |    !!  MAIN PAGE CONTENT  !!    | |<->| |  (LIST)          | | | | | |
+	 * | | |            | P | | | |                                 | |   | |                  | | | | | |
+	 * | | |            | A | | | |                                 | |   | |                  | | | | | |
+	 * | | |            | N | | | +---------------------------------+ |   | +------------------+ | | | | |
+	 * | | |  (STRIP)   | E | | +-------------------------------------+   +----------------------+ | | | |
+	 * | | |            |<->| +--------------------------------------------------------------------+ | | |
+	 * | | |            |   |                                                                        | | |
+	 * | | |            |   | +-content_att_bottom-------------------------------------------------+ | | |
+	 * | | |            |   | $                                                             (EBOX) | | | |
+	 * | | |            |   | |   OPTIONAL BOTTOM (PROPERTIES)                                     | | | |
+	 * | | |            |   | |                                                                    | | | |
+	 * | | |            |   | +--------------------------------------------------------------------+ | | |
+	 * | | +------------+   +------------------------------------------------------------------------+ | |
+	 * | +---------------------------------------------------------------------------------------------+ |
+	 * |                                                                                                 |
+	 * +-------------------------------------------------------------------------------------------------+
+	 *
+	 */
 
 	/* clang-format off */
 	/*            _content_vbox                      * toplevel
