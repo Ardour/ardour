@@ -48,7 +48,17 @@ namespace ArdourWidgets {
 class LIBWIDGETS_API Tabbable : public Gtkmm2ext::WindowProxy
 {
 public:
-	Tabbable (const std::string& user_visible_name, std::string const & untranslated_name, Gtk::Widget* top = NULL, bool tabbed_by_default = true);
+	enum PaneLayout {
+		NoPanes      = 0x0,
+		PaneLeft     = 0x1,
+		PaneRight    = 0x2,
+		PaneBottom   = 0x4,
+		PaneLeftBtm  = 0x5,
+		PaneRightBtm = 0x6,
+		AttLeft      = 0x8,
+	};
+
+	Tabbable (const std::string& user_visible_name, std::string const & untranslated_name, Gtk::Widget* top = NULL, bool tabbed_by_default = true, PaneLayout pl = PaneRightBtm);
 	~Tabbable ();
 
 	void add_to_notebook (Gtk::Notebook& notebook);
@@ -113,6 +123,7 @@ protected:
 	Gtk::EventBox     content_attachments;          /* a placeholder the (strip, list, props) visibility buttons for this tab */
 	Gtk::HBox           content_attachment_hbox;
 	EventBoxExt       content_tabbables;            /* a placeholder for the tabbable switching buttons (used by ArdourUI) */
+	HPane           content_left_pane;
 	Gtk::HBox       content_hbox;
 	EventBoxExt       content_att_left;             /* a placeholder for the mixer strip, if you want one */
 	Gtk::VBox         content_midlevel_vbox;
@@ -144,6 +155,7 @@ private:
 	Gtk::Notebook  _own_notebook;
 	Gtk::Notebook* _parent_notebook;
 	bool            tab_requested_by_state;
+	PaneLayout     _panelayout;
 
 };
 

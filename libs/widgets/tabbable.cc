@@ -37,10 +37,11 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 
-Tabbable::Tabbable (const string& visible_name, string const & nontranslatable_name, Widget* w, bool tabbed_by_default)
+Tabbable::Tabbable (const string& visible_name, string const & nontranslatable_name, Widget* w, bool tabbed_by_default, PaneLayout pl)
 	: WindowProxy (visible_name, nontranslatable_name)
 	, _parent_notebook (0)
 	, tab_requested_by_state (tabbed_by_default)
+	, _panelayout (pl)
 {
 	if (w) {
 		_contents = w;
@@ -77,6 +78,10 @@ Tabbable::default_layout ()
 	right_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
 	bottom_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
 
+	left_attachment_button.set_sensitive (0 != (_panelayout & (PaneLeft | AttLeft))); // Editor Mixer
+	right_attachment_button.set_sensitive (0 != (_panelayout & PaneRight));
+	bottom_attachment_button.set_sensitive (0 != (_panelayout & PaneBottom));
+
 	content_attachment_hbox.set_border_width(3);
 	content_attachment_hbox.set_spacing(3);
 	content_attachment_hbox.pack_end (right_attachment_button, false, false);
@@ -95,26 +100,41 @@ Tabbable::default_layout ()
 	toolbar_frame->add (content_header_hbox);
 
 	_content_vbox.pack_start (*toolbar_frame, false, false);
-	_content_vbox.pack_start (content_hbox, true, true);
 
-	content_hbox.pack_start (content_att_left, false, false);
-	content_hbox.pack_start (content_midlevel_vbox, true, true);
+	if (_panelayout & PaneLeft) {
+		_content_vbox.pack_start (content_left_pane, true, true);
+		content_left_pane.add (content_att_left);
+		content_left_pane.add (content_midlevel_vbox);
+	} else {
+		_content_vbox.pack_start (content_hbox, true, true);
+		content_hbox.pack_start (content_att_left, false, false);
+		content_hbox.pack_start (content_midlevel_vbox, true, true);
+	}
 
 	content_midlevel_vbox.pack_start (content_right_pane, true, true);
 	content_midlevel_vbox.pack_start (content_att_bottom, false, false);
 
 	content_right_pane.add (content_inner_vbox);
-	content_right_pane.add (content_right_vbox);
 
-	//TODO: menu switcher here?
-	content_right_vbox.pack_start (content_att_right, true, true);
+	if (_panelayout & PaneRight) {
+		content_right_pane.add (content_right_vbox);
+		content_right_vbox.pack_start (content_att_right, true, true);
+	}
 
 	content_inner_vbox.pack_start (content_toolbar, false, false);
 	content_inner_vbox.pack_start (content_innermost_hbox, true, true);
 
-	content_right_pane.set_child_minsize (content_att_right, 160); /* rough guess at width of notebook tabs */
+	if (_panelayout & PaneRight) {
+		content_right_pane.set_child_minsize (content_att_right, 160); /* rough guess at width of notebook tabs */
+	}
 	content_right_pane.set_check_divider_position (true);
 	content_right_pane.set_divider (0, 0.85);
+
+	if (_panelayout & PaneLeft) {
+		content_left_pane.set_child_minsize (content_att_left, 80);
+	}
+	content_left_pane.set_check_divider_position (true);
+	content_left_pane.set_divider (0, 0.15);
 
 	_content_vbox.show_all();
 }
@@ -408,7 +428,8 @@ Tabbable::get_state() const
 
 	node.set_property (X_("tabbed"),  tabbed());
 
-	node.set_property (string_compose("%1%2", _menu_name, X_("-listpane-pos")).c_str(), content_right_pane.get_divider ());
+	node.set_property (string_compose("%1%2", _menu_name, X_("-rightpane-pos")).c_str(), content_right_pane.get_divider ());
+	node.set_property (string_compose("%1%2", _menu_name, X_("-leftpane-pos")).c_str(), content_left_pane.get_divider ());
 
 	return node;
 }
@@ -432,9 +453,13 @@ Tabbable::set_state (const XMLNode& node, int version)
 	if (window_node) {
 		window_node->get_property (X_("tabbed"), tab_requested_by_state);
 		float fract;
-		if ( window_node->get_property (string_compose("%1%2", _menu_name, X_("-listpane-pos")).c_str(), fract) ) {
+		if ( window_node->get_property (string_compose("%1%2", _menu_name, X_("-rightpane-pos")).c_str(), fract) ) {
 			fract = std::max (.05f, std::min (.95f, fract));
 			content_right_pane.set_divider (0, fract);
+		}
+		if ( window_node->get_property (string_compose("%1%2", _menu_name, X_("-leftpane-pos")).c_str(), fract) ) {
+			fract = std::max (.05f, std::min (.95f, fract));
+			content_left_pane.set_divider (0, fract);
 		}
 	}
 
