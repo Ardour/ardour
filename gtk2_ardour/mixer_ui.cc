@@ -133,7 +133,7 @@ Mixer_UI::instance ()
 }
 
 Mixer_UI::Mixer_UI ()
-	: Tabbable (_("Mixer"), X_("mixer"))
+	: Tabbable (_("Mixer"), X_("mixer"), NULL, true, Profile->get_mixbus () ? Tabbable::PaneRightBtm : Tabbable::PaneLeft)
 	, plugin_search_clear_button (X_("Clear"))
 	, _mixer_scene_release (0)
 	, no_track_list_redisplay (false)
@@ -163,13 +163,6 @@ Mixer_UI::Mixer_UI ()
 	fb_act->set_sensitive (false);
 
 	contents().set_data ("ardour-bindings", bindings);
-
-	if (!Profile->get_mixbus ()) {
-		right_attachment_button.set_sensitive(false);
-	} else {
-		left_attachment_button.set_sensitive(false);
-	}
-	bottom_attachment_button.set_sensitive(false);
 
 	PresentationInfo::Change.connect (*this, invalidator (*this), std::bind (&Mixer_UI::presentation_info_changed, this, _1), gui_context());
 	Route::FanOut.connect (*this, invalidator (*this), std::bind (&Mixer_UI::fan_out, this, _1, false, true), gui_context());
@@ -415,7 +408,7 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_scroller.show();
 	group_display_vbox.show();
 	group_display_frame.show();
-	favorite_plugins_frame.show();
+	favorite_plugins_frame.show_all();
 	rhs_pane1.show();
 	rhs_pane2.show();
 	strip_packer.show();
@@ -3717,7 +3710,6 @@ Mixer_UI::register_actions ()
 		act = ActionManager::register_toggle_action (group, "ToggleMixerList", _("(Mixer) Show Sidebar List"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
 		left_attachment_button.set_related_action (act);
 		act = ActionManager::register_toggle_action (group, "ToggleMixerStrip", _("(Mixer) Show Sidebar Strip"), []{});
-		content_right_pane.remove(content_right_vbox);
 	} else {
 		act = ActionManager::register_toggle_action (group, "ToggleMixerList", _("(Mixer) Show Sidebar List"), sigc::mem_fun (*this, &Tabbable::att_right_button_toggled));
 		right_attachment_button.set_related_action (act);

@@ -78,7 +78,7 @@ using namespace Menu_Helpers;
 #define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))
 
 RecorderUI::RecorderUI ()
-	: Tabbable (_("Recorder"), X_("recorder"))
+	: Tabbable (_("Recorder"), X_("recorder"), NULL, true, Tabbable::NoPanes)
 	, _toolbar_sep (1.0)
 	, _btn_rec_all (_("All"))
 	, _btn_rec_none (_("None"))
@@ -100,11 +100,6 @@ RecorderUI::RecorderUI ()
 
 	load_bindings ();
 	register_actions ();
-
-	content_right_pane.remove(content_right_vbox);
-	left_attachment_button.set_sensitive(false);
-	bottom_attachment_button.set_sensitive(false);
-	right_attachment_button.set_sensitive(false);
 
 	/* monitoring */
 	_auto_input_button.set_related_action (ActionManager::get_action ("Transport", "ToggleAutoInput"));

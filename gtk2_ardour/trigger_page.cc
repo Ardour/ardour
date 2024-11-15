@@ -77,8 +77,6 @@ TriggerPage::TriggerPage ()
 	load_bindings ();
 	register_actions ();
 
-	left_attachment_button.set_sensitive(false);
-
 	/* Match TriggerStrip::_name_button height */
 	ArdourButton* spacer = manage (new ArdourButton (ArdourButton::Text));
 	spacer->set_name ("mixer strip button");
