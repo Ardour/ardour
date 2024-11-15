@@ -761,10 +761,6 @@ int main() { return 0; }''',
         compiler_flags.append ('-DMIXBUS')
         conf.define('MIXBUS', 1)
 
-    if Options.options.program_name.lower() == "mixbus32c":
-        conf.define('MIXBUS32C', 1)
-        compiler_flags.append ('-DMIXBUS32C')
-
     compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
     compiler_flags.append ('-DPROGRAM_VERSION="' + PROGRAM_VERSION + '"')
 
