@@ -49,13 +49,14 @@ class LIBWIDGETS_API Tabbable : public Gtkmm2ext::WindowProxy
 {
 public:
 	enum PaneLayout {
-		NoPanes      = 0x0, ///< disable all attachment buttons, do not pack any panes or attachments
-		PaneLeft     = 0x1, ///< left side attachment is a resizable pane
-		PaneRight    = 0x2, ///< pack a resizable Pane on the right-side
-		AttBottom    = 0x4, ///< bottom is a fixed size EBox attachment
-		PaneLeftBtm  = 0x5,
-		PaneRightBtm = 0x6,
-		AttLeft      = 0x8, ///< if PaneLeft is not set, pack a fixed size Ebox on the left (Editor-Mixer)
+		NoPanes      = 0x00, ///< disable all attachment buttons, do not pack any panes or attachments
+		PaneLeft     = 0x01, ///< left side attachment is a resizable pane
+		PaneRight    = 0x02, ///< pack a resizable Pane on the right-side
+		PaneBottom   = 0x04, ///< bottom Ebox is a resizable Pane
+		AttLeft      = 0x08, ///< if PaneLeft is not set, pack a fixed size Ebox on the left (Editor-Mixer)
+		AttBottom    = 0x10, ///< bottom is a fixed size EBox attachment
+		PaneLeftBtm  = 0x11,
+		PaneRightBtm = 0x12,
 	};
 
 	Tabbable (const std::string& user_visible_name, std::string const & untranslated_name, Gtk::Widget* top = NULL, bool tabbed_by_default = true, PaneLayout pl = PaneRightBtm);
@@ -130,7 +131,7 @@ protected:
 	 * |                                                                                                 |
 	 * | +--content_hbox--OR--content_left_pane--------------------------------------------------------+ |
 	 * | |                                                                                             | |
-	 * | | +--att_left--+   +--content_midlevel_vbox-------------------------------------------------+ | |
+	 * | | +--att_left--+   +--content_midlevel_vbox--OR-content_midlevel_vpane----------------------+ | |
 	 * | | $     (EBOX) |   | +--content_right_pane------------------------------------------------+ | | |
 	 * | | |            |   | | +--content_inner_vbox-----------------+   +--content_right_vbox--+ | | | |
 	 * | | |  O         |   | | |                                     |   |                      | | | | |
@@ -147,7 +148,8 @@ protected:
 	 * | | |            | N | | | +---------------------------------+ |   | +------------------+ | | | | |
 	 * | | |  (STRIP)   | E | | +-------------------------------------+   +----------------------+ | | | |
 	 * | | |            |<->| +--------------------------------------------------------------------+ | | |
-	 * | | |            |   |                                                                        | | |
+	 * | | |            |   |                          🡅  OPTIONAL  🡅                                | | |
+	 * | | |            |   |                          🡇    PANE    🡇                                | | |
 	 * | | |            |   | +-content_att_bottom-------------------------------------------------+ | | |
 	 * | | |            |   | $                                                             (EBOX) | | | |
 	 * | | |            |   | |   OPTIONAL BOTTOM (PROPERTIES)                                     | | | |
@@ -171,6 +173,7 @@ protected:
 	HPane           content_left_pane;
 	Gtk::HBox       content_hbox;
 	EventBoxExt       content_att_left;             /* a placeholder for the mixer strip, if you want one */
+	VPane             content_midlevel_vpane;
 	Gtk::VBox         content_midlevel_vbox;
 	HPane               content_right_pane;
 	Gtk::VBox             content_inner_vbox;

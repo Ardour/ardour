@@ -80,7 +80,7 @@ Tabbable::default_layout ()
 
 	left_attachment_button.set_sensitive (0 != (_panelayout & (PaneLeft | AttLeft)));
 	right_attachment_button.set_sensitive (0 != (_panelayout & PaneRight));
-	bottom_attachment_button.set_sensitive (0 != (_panelayout & AttBottom));
+	bottom_attachment_button.set_sensitive (0 != (_panelayout & (PaneBottom | AttBottom)));
 
 	content_attachment_hbox.set_border_width(3);
 	content_attachment_hbox.set_spacing(3);
@@ -101,18 +101,25 @@ Tabbable::default_layout ()
 
 	_content_vbox.pack_start (*toolbar_frame, false, false);
 
+	Widget* midlevel = 0 == (_panelayout & PaneBottom) ? (Widget*)&content_midlevel_vbox : (Widget*)&content_midlevel_vpane;
+
 	if (_panelayout & PaneLeft) {
 		_content_vbox.pack_start (content_left_pane, true, true);
 		content_left_pane.add (content_att_left);
-		content_left_pane.add (content_midlevel_vbox);
+		content_left_pane.add (*midlevel);
 	} else {
 		_content_vbox.pack_start (content_hbox, true, true);
 		content_hbox.pack_start (content_att_left, false, false);
-		content_hbox.pack_start (content_midlevel_vbox, true, true);
+		content_hbox.pack_start (*midlevel, true, true);
 	}
 
-	content_midlevel_vbox.pack_start (content_right_pane, true, true);
-	content_midlevel_vbox.pack_start (content_att_bottom, false, false);
+	if (_panelayout & PaneBottom) {
+		content_midlevel_vpane.add (content_right_pane);
+		content_midlevel_vpane.add (content_att_bottom);
+	} else {
+		content_midlevel_vbox.pack_start (content_right_pane, true, true);
+		content_midlevel_vbox.pack_start (content_att_bottom, false, false);
+	}
 
 	content_right_pane.add (content_inner_vbox);
 
@@ -135,6 +142,12 @@ Tabbable::default_layout ()
 	}
 	content_left_pane.set_check_divider_position (true);
 	content_left_pane.set_divider (0, 0.15);
+
+	if (_panelayout & PaneBottom) {
+		content_midlevel_vpane.set_child_minsize (content_right_pane, 300);
+	}
+	content_midlevel_vpane.set_check_divider_position (true);
+	content_midlevel_vpane.set_divider (0, 0.85);
 
 	_content_vbox.show_all();
 }
@@ -428,8 +441,15 @@ Tabbable::get_state() const
 
 	node.set_property (X_("tabbed"),  tabbed());
 
-	node.set_property (string_compose("%1%2", _menu_name, X_("-rightpane-pos")).c_str(), content_right_pane.get_divider ());
-	node.set_property (string_compose("%1%2", _menu_name, X_("-leftpane-pos")).c_str(), content_left_pane.get_divider ());
+	if (_panelayout & PaneRight) {
+		node.set_property (string_compose("%1%2", _menu_name, X_("-rightpane-pos")).c_str(), content_right_pane.get_divider ());
+	}
+	if (_panelayout & PaneLeft) {
+		node.set_property (string_compose("%1%2", _menu_name, X_("-leftpane-pos")).c_str(), content_left_pane.get_divider ());
+	}
+	if (_panelayout & PaneBottom) {
+		node.set_property (string_compose("%1%2", _menu_name, X_("-bottompane-pos")).c_str(), content_midlevel_vpane.get_divider ());
+	}
 
 	return node;
 }
@@ -460,6 +480,10 @@ Tabbable::set_state (const XMLNode& node, int version)
 		if ( window_node->get_property (string_compose("%1%2", _menu_name, X_("-leftpane-pos")).c_str(), fract) ) {
 			fract = std::max (.05f, std::min (.95f, fract));
 			content_left_pane.set_divider (0, fract);
+		}
+		if ( window_node->get_property (string_compose("%1%2", _menu_name, X_("-bottompane-pos")).c_str(), fract) ) {
+			fract = std::max (.05f, std::min (.95f, fract));
+			content_midlevel_vpane.set_divider (0, fract);
 		}
 	}
 
