@@ -55,11 +55,9 @@ public:
 		PaneBottom   = 0x04, ///< bottom Ebox is a resizable Pane
 		AttLeft      = 0x08, ///< if PaneLeft is not set, pack a fixed size Ebox on the left (Editor-Mixer)
 		AttBottom    = 0x10, ///< bottom is a fixed size EBox attachment
-		PaneLeftBtm  = 0x11,
-		PaneRightBtm = 0x12,
 	};
 
-	Tabbable (const std::string& user_visible_name, std::string const & untranslated_name, Gtk::Widget* top = NULL, bool tabbed_by_default = true, PaneLayout pl = PaneRightBtm);
+	Tabbable (const std::string& user_visible_name, std::string const & untranslated_name, Gtk::Widget* top = NULL, bool tabbed_by_default = true, PaneLayout pl = PaneRight);
 	~Tabbable ();
 
 	void add_to_notebook (Gtk::Notebook& notebook);
