@@ -8,11 +8,13 @@
 int
 main (int argc, char* argv[])
 {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
 	NSRect rect = NSMakeRect (100, 100, 500, 500);
 	NSRect frameRect = NSMakeRect (10, 10, 480, 480);
 
 	NSWindow* win = [[NSWindow alloc] initWithContentRect:rect
-	                styleMask:NSBorderlessWindowMask
+	                styleMask:NSWindowStyleMaskClosable
 	                backing:NSBackingStoreBuffered
 	                defer:NO];
 
@@ -26,6 +28,9 @@ main (int argc, char* argv[])
 	[NSTimer scheduledTimerWithTimeInterval:0.1 target:view selector:@selector(timedUpdate) userInfo:nil repeats:YES];
 
 	[[NSApplication sharedApplication] run];
+
+
+	[pool release];
 
 	return 0;
 }
