@@ -113,7 +113,6 @@ private:
 
 	Gtkmm2ext::Bindings* bindings;
 
-	ArdourWidgets::VPane _pane;
 	Gtk::HBox            _strip_group_box;
 	Gtk::ScrolledWindow  _strip_scroller;
 	Gtk::HBox            _strip_packer;

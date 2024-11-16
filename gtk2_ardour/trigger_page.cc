@@ -66,7 +66,7 @@ using namespace Gtk;
 using namespace std;
 
 TriggerPage::TriggerPage ()
-	: Tabbable (_("Cues"), X_("trigger"))
+	: Tabbable (_("Cues"), X_("trigger"), NULL, true, Tabbable::PaneLayout (Tabbable::PaneRight | Tabbable::PaneBottom))
 	, _cue_area_frame (0.5, 0, 1.0, 0)
 	, _cue_box (16, 16 * TriggerBox::default_triggers_per_box)
 	, _master_widget (16, 16)
@@ -151,19 +151,12 @@ TriggerPage::TriggerPage ()
 	table->show_all ();
 
 	_parameter_box.pack_start (*table);
-	_parameter_box.set_no_show_all ();
+	_parameter_box.show ();
 
 	/* Top-level Layout */
 	content_app_bar.add (_application_bar);
-	content_innermost_hbox.add (_pane);
-
-	_pane.add (_strip_group_box);
-	/* we cannot `content_midlevel_vbox.remove(_content_att_bottom)` and add it to the _pane
-	 * because visibility updates are not propagated upward, and the pane will not collapse
-	 * when the _parameter_box is hidden
-	 */
-	_pane.add (_parameter_box);
-
+	content_innermost_hbox.add (_strip_group_box);
+	content_att_bottom.add (_parameter_box);
 	content_att_right.add (_sidebar_notebook);
 
 	/* Show all */
@@ -224,9 +217,9 @@ TriggerPage::showhide_att_bottom (bool yn)
 	_show_bottom_pane = yn;
 
 	if (!_show_bottom_pane) {
-		_parameter_box.hide ();
+		Tabbable::showhide_att_bottom (false);
 	} else if (!Editor::instance ().get_selection ().triggers.empty ()) {
-		_parameter_box.show ();
+		Tabbable::showhide_att_bottom (true);
 	}
 }
 
@@ -445,7 +438,7 @@ TriggerPage::rec_enable_changed (Trigger const * trigger)
 	_midi_trig_box.hide ();
 	_midi_editor->viewport().hide ();
 
-	_parameter_box.hide ();
+	Tabbable::showhide_att_bottom (false);
 
 	TriggerBox& box = trigger->box();
 	TriggerReference ref (trigger->boxptr(), trigger->index());
@@ -469,7 +462,7 @@ TriggerPage::rec_enable_changed (Trigger const * trigger)
 	}
 
 	if (_show_bottom_pane) {
-		_parameter_box.show ();
+		Tabbable::showhide_att_bottom (true);
 	}
 }
 
@@ -485,7 +478,7 @@ TriggerPage::selection_changed ()
 	_midi_trig_box.hide ();
 	_midi_editor->viewport().hide ();
 
-	_parameter_box.hide ();
+	Tabbable::showhide_att_bottom (false);
 
 	if (!selection.triggers.empty ()) {
 		TriggerSelection ts      = selection.triggers;
@@ -511,7 +504,7 @@ TriggerPage::selection_changed ()
 		}
 
 		if (_show_bottom_pane) {
-			_parameter_box.show ();
+			Tabbable::showhide_att_bottom (true);
 		}
 	}
 }
