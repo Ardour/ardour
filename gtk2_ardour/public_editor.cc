@@ -33,7 +33,7 @@ ARDOUR::DataType PublicEditor::pbdid_dragged_dt = ARDOUR::DataType::NIL;
 
 PublicEditor::PublicEditor ()
 	: EditingContext (X_("Editor"))
-	, Tabbable (_("Editor"), X_("editor"), NULL, true, Tabbable::PaneLayout (Tabbable::AttLeft | Tabbable::PaneRightBtm))
+	, Tabbable (_("Editor"), X_("editor"), NULL, true, Tabbable::PaneLayout (Tabbable::AttLeft | Tabbable::AttBottom | Tabbable::PaneRight))
 {
 	_suspend_route_redisplay_counter.store (0);
 }

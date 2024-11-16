@@ -133,7 +133,7 @@ Mixer_UI::instance ()
 }
 
 Mixer_UI::Mixer_UI ()
-	: Tabbable (_("Mixer"), X_("mixer"), NULL, true, Profile->get_mixbus () ? Tabbable::PaneRightBtm : Tabbable::PaneLeft)
+	: Tabbable (_("Mixer"), X_("mixer"), NULL, true, Profile->get_mixbus () ? Tabbable::PaneLayout (Tabbable::AttBottom | Tabbable::PaneRight) : Tabbable::PaneLeft)
 	, plugin_search_clear_button (X_("Clear"))
 	, _mixer_scene_release (0)
 	, no_track_list_redisplay (false)
