@@ -19,8 +19,6 @@
  */
 
 #include <vector>
-#include "boost/lambda/lambda.hpp"
-
 #include "pbd/control_math.h"
 
 #include "ardour/session.h"
