@@ -104,4 +104,3 @@ private:
 	PBD::ScopedConnection _peak_amplitude_connection;
 	CrossThreadChannel _peak_channel;
 };
-

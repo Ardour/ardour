@@ -122,8 +122,6 @@ public:
 	void update_transient(float old_pos, float new_pos);
 	void remove_transient(float pos);
 
-	void show_region_editor ();
-
 	void     set_frame_color ();
 	uint32_t get_fill_color () const;
 

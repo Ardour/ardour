@@ -1814,17 +1814,6 @@ AudioRegionView::update_coverage_frame (LayerDisplay d)
 }
 
 void
-AudioRegionView::show_region_editor ()
-{
-	if (editor == 0) {
-		editor = new AudioRegionEditor (trackview.session(), this);
-	}
-
-	editor->present ();
-	editor->show_all();
-}
-
-void
 AudioRegionView::transients_changed ()
 {
 	AnalysisFeatureList analysis_features;

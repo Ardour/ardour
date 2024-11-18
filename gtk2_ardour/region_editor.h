@@ -41,12 +41,12 @@
 #include "gtkmm2ext/dndtreeview.h"
 #include "gtkmm2ext/dndvbox.h"
 
+#include "widgets/frame.h"
+
 #include "pbd/signals.h"
 
 #include "audio_clock.h"
-#include "ardour_dialog.h"
 #include "plugin_interest.h"
-#include "region_editor.h"
 
 namespace ARDOUR {
 	class Region;
@@ -57,7 +57,7 @@ namespace ARDOUR {
 class RegionView;
 class ClockGroup;
 
-class RegionEditor : public ArdourDialog
+class RegionEditor : public ArdourWidgets::Frame, public ARDOUR::SessionHandlePtr
 {
 public:
 	RegionEditor (ARDOUR::Session*, RegionView*);
@@ -186,7 +186,6 @@ private:
 	gint breleased (GdkEventButton* ev, Gtk::SpinButton* but, void (RegionEditor::*pmf)());
 
 	bool on_delete_event (GdkEventAny *);
-	void handle_response (int);
 
 	bool spin_arrow_grab;
 
@@ -195,4 +194,3 @@ private:
 
 	void set_clock_mode_from_primary ();
 };
-

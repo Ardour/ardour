@@ -5,6 +5,7 @@
  * Copyright (C) 2010-2012 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2014-2015 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2024 Ben Loftis <ben.loftis@harrisonaudio.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +65,7 @@ using namespace std;
 using namespace Gtkmm2ext;
 
 RegionEditor::RegionEditor (Session* s, RegionView* rv)
-	: ArdourDialog (_("Region"))
+	: SessionHandlePtr (s)
 	, _table (9, 3)
 	, _table_row (0)
 	, _region (rv->region ())
@@ -81,8 +82,6 @@ RegionEditor::RegionEditor (Session* s, RegionView* rv)
 	, _region_fx_box (_region)
 	, _sources (1)
 {
-	set_session (s);
-
 	switch (_region->time_domain()) {
 	case Temporal::AudioTime:
 		/* XXX check length of region and choose samples or minsec */
@@ -190,16 +189,7 @@ RegionEditor::RegionEditor (Session* s, RegionView* rv)
 	_table.attach (region_fx_label, 2, 3, 0, 1, Gtk::FILL, Gtk::FILL);
 	_table.attach (_region_fx_box,  2, 3, 1, _table_row + 2, Gtk::FILL, Gtk::FILL);
 
-	get_vbox()->pack_start (_table, true, true);
-
-	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
-
-	set_name ("RegionEditorWindow");
-	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
-
-	signal_response().connect (sigc::mem_fun (*this, &RegionEditor::handle_response));
-
-	set_title (string_compose (_("Region '%1'"), _region->name()));
+	add (_table);
 
 	for (uint32_t i = 0; i < _region->sources().size(); ++i) {
 		_sources.append (_region->source(i)->name());
@@ -241,6 +231,7 @@ RegionEditor::RegionEditor (Session* s, RegionView* rv)
 
 RegionEditor::~RegionEditor ()
 {
+	remove (); /* unpack and unmap table */
 	delete _clock_group;
 }
 
@@ -498,12 +489,6 @@ RegionEditor::on_delete_event (GdkEventAny*)
 	bounds_changed (change);
 
 	return true;
-}
-
-void
-RegionEditor::handle_response (int)
-{
-	hide ();
 }
 
 /* ****************************************************************************/

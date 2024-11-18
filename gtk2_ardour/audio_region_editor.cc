@@ -130,8 +130,6 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	snprintf (name, 64, "peak amplitude-%p", this);
 	pthread_create_and_store (name, &_peak_amplitude_thread_handle, _peak_amplitude_thread, this);
 	signal_peak_thread ();
-
-
 }
 
 AudioRegionEditor::~AudioRegionEditor ()
@@ -357,5 +355,4 @@ void
 AudioRegionEditor::on_unmap ()
 {
 	_show_on_touch.set_active (false);
-	ArdourDialog::on_unmap ();
 }
