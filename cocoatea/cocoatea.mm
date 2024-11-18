@@ -47,7 +47,6 @@ main (int argc, char* argv[])
 	[[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
 	[win makeKeyAndOrderFront:win];
 
-	[NSRunLoop currentRunLoop];
 	[NSTimer scheduledTimerWithTimeInterval:0.02 target:view selector:@selector(timedUpdate) userInfo:nil repeats:YES];
 
 	[[NSApplication sharedApplication] run];
