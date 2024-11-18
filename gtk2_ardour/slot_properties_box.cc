@@ -50,13 +50,8 @@
 #include "utils.h"
 
 #include "audio_clip_editor.h"
-#include "audio_region_properties_box.h"
 #include "audio_trigger_properties_box.h"
-#include "audio_region_operations_box.h"
 
-#include "midi_trigger_properties_box.h"
-#include "midi_region_properties_box.h"
-#include "midi_region_operations_box.h"
 #include "midi_cue_editor.h"
 
 #include "slot_properties_box.h"
@@ -722,70 +717,4 @@ SlotPropertyWidget::SlotPropertyWidget ()
 	ui = new SlotPropertyTable ();
 	pack_start(*ui);
 	ui->show();
-}
-
-/* ------------ */
-
-SlotPropertyWindow::SlotPropertyWindow (TriggerReference tref)
-{
-	TriggerPtr trigger (tref.trigger());
-
-	assert (trigger);
-
-	set_title (string_compose (_("Trigger Slot: %1"), trigger->name()));
-
-	SlotPropertiesBox* slot_prop_box = manage (new SlotPropertiesBox ());
-	slot_prop_box->set_slot (tref);
-
-	Gtk::Table* table = manage (new Gtk::Table);
-	table->set_homogeneous (false);
-	table->set_spacings (16);
-	table->set_border_width (8);
-
-	int col = 0;
-	table->attach(*slot_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-
-	if (trigger->the_region()) {
-		if (trigger->the_region()->data_type() == DataType::AUDIO) {
-			_trig_box = manage(new AudioTriggerPropertiesBox ());
-			_ops_box = manage(new AudioRegionOperationsBox ());
-			_trim_box = manage(new AudioClipEditorBox ());
-
-			_trig_box->set_trigger (tref);
-			_trim_box->set_region(trigger->the_region(), tref);
-			_ops_box->set_session(&trigger->the_region()->session());
-
-			table->attach(*_trig_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-			table->attach(*_ops_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-			table->attach(*_trim_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-
-		} else {
-			_trig_box = manage(new MidiTriggerPropertiesBox ());
-			_trig_box->set_trigger (tref);
-
-			_midi_editor = new MidiCueEditor;
-
-			std::cerr << "here\n";
-
-			table->attach(*_trig_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-			table->attach(_midi_editor->viewport(),   col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-		}
-	}
-
-	add (*table);
-	table->show_all();
-}
-
-bool
-SlotPropertyWindow::on_key_press_event (GdkEventKey* ev)
-{
-	Gtk::Window& main_window (ARDOUR_UI::instance()->main_window());
-	return ARDOUR_UI_UTILS::relay_key_press (ev, &main_window);
-}
-
-bool
-SlotPropertyWindow::on_key_release_event (GdkEventKey* ev)
-{
-	Gtk::Window& main_window (ARDOUR_UI::instance()->main_window());
-	return ARDOUR_UI_UTILS::relay_key_press (ev, &main_window);
 }

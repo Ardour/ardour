@@ -166,19 +166,3 @@ private:
 
 	SlotPropertyWidget* _triggerwidget;
 };
-
-/* XXX probably for testing only */
-
-class SlotPropertyWindow : public Gtk::Window
-{
-    public:
-	SlotPropertyWindow (ARDOUR::TriggerReference);
-
-	bool on_key_press_event (GdkEventKey*);
-	bool on_key_release_event (GdkEventKey*);
-
-	TriggerPropertiesBox *_trig_box;
-	RegionOperationsBox *_ops_box;
-	ClipEditorBox *_trim_box;
-	MidiCueEditor* _midi_editor;
-};

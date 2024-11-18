@@ -628,14 +628,6 @@ TriggerUI::clear_trigger ()
 void
 TriggerUI::edit_trigger ()
 {
-	SlotPropertyWindow* tw = static_cast<SlotPropertyWindow*> (trigger()->ui ());
-
-	if (!tw) {
-		tw = new SlotPropertyWindow (TriggerReference (trigger()->boxptr(), trigger()->index()));
-		trigger()->set_ui (tw);
-	}
-
-	tw->present ();
 }
 
 void
