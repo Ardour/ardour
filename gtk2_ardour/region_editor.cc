@@ -514,7 +514,7 @@ drag_targets ()
 
 RegionEditor::RegionFxBox::RegionFxBox (std::shared_ptr<ARDOUR::Region> r)
 	: _region (r)
-	, _display (drop_targets ())
+	, _display (drop_targets (), Gdk::ACTION_COPY | Gdk::ACTION_MOVE)
 	, _no_redisplay (false)
 	, _placement (-1)
 {
@@ -535,6 +535,7 @@ RegionEditor::RegionFxBox::RegionFxBox (std::shared_ptr<ARDOUR::Region> r)
 	_display.Reordered.connect (sigc::mem_fun (*this, &RegionFxBox::reordered));
 	_display.DropFromAnotherBox.connect (sigc::mem_fun (*this, &RegionFxBox::object_drop));
 	_display.DropFromExternal.connect (sigc::mem_fun (*this, &RegionFxBox::plugin_drop));
+	_display.DragRefuse.connect (sigc::mem_fun (*this, &RegionFxBox::drag_refuse));
 
 	_display.signal_key_press_event ().connect (sigc::mem_fun (*this, &RegionFxBox::on_key_press), false);
 
@@ -890,6 +891,13 @@ RegionEditor::RegionFxBox::delete_dragged_plugins (Region::RegionFxList const& f
 		}
 	}
 	redisplay_plugins ();
+}
+
+bool
+RegionEditor::RegionFxBox::drag_refuse (Gtkmm2ext::DnDVBox<RegionFxEntry>* source, RegionFxEntry*)
+{
+	RegionFxBox* other = reinterpret_cast<RegionFxBox*> (source->get_data ("regionfxbox"));
+	return (other && other->_region == _region);
 }
 
 void

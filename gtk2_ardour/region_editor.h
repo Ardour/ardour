@@ -124,6 +124,7 @@ private:
 		void plugin_drop (Gtk::SelectionData const&, RegionFxEntry*, Glib::RefPtr<Gdk::DragContext> const&);
 		void object_drop (Gtkmm2ext::DnDVBox<RegionFxEntry>*, RegionFxEntry*, Glib::RefPtr<Gdk::DragContext> const&);
 		void delete_dragged_plugins (std::list<std::shared_ptr<ARDOUR::RegionFxPlugin>> const&);
+		bool drag_refuse (Gtkmm2ext::DnDVBox<RegionFxEntry>*, RegionFxEntry*);
 
 		std::shared_ptr<ARDOUR::RegionFxPlugin> find_drop_position (RegionFxEntry*);
 
