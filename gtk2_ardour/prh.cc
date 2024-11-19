@@ -636,14 +636,20 @@ PianoRollHeader::motion_handler (GdkEventMotion* ev)
 		double edge = 5. * UIConfiguration::instance().get_ui_scale();
 
 		if (evd.y > scroomer_top - 5 && evd.y < scroomer_top + edge){
-			_view->editing_context().push_canvas_cursor (_view->editing_context().cursors()->resize_top);
-			_scroomer_state = TOP;
+			if (_scroomer_state != TOP) {
+				_view->editing_context().push_canvas_cursor (_view->editing_context().cursors()->resize_top);
+				_scroomer_state = TOP;
+			}
 		} else if (evd.y > scroomer_bottom - edge && evd.y < scroomer_bottom + edge){
-			_view->editing_context().push_canvas_cursor (_view->editing_context().cursors()->resize_bottom);
-			_scroomer_state = BOTTOM;
+			if (_scroomer_state != BOTTOM) {
+				_view->editing_context().push_canvas_cursor (_view->editing_context().cursors()->resize_bottom);
+				_scroomer_state = BOTTOM;
+			}
 		} else {
-			_view->editing_context().push_canvas_cursor (_view->editing_context().cursors()->grabber);
-			_scroomer_state = MOVE;
+			if (_scroomer_state != MOVE) {
+				_view->editing_context().push_canvas_cursor (_view->editing_context().cursors()->grabber);
+				_scroomer_state = MOVE;
+			}
 		}
 	}
 
