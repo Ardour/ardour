@@ -34,8 +34,13 @@ main (int argc, char* argv[])
 	NSRect rect = NSMakeRect (100, 100, 1800, 399);
 	NSRect frameRect = NSMakeRect (0, 0, 1800, 399);
 
+	NSUInteger style_mask = (NSTitledWindowMask |
+	                         NSClosableWindowMask |
+	                         NSMiniaturizableWindowMask |
+	                         NSResizableWindowMask);
+
 	NSWindow* win = [[NSWindow alloc] initWithContentRect:rect
-	                styleMask:NSWindowStyleMaskClosable
+	                styleMask:style_mask
 	                backing:NSBackingStoreBuffered
 	                defer:NO];
 
