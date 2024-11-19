@@ -2082,12 +2082,6 @@ size_t
 EditingContext::push_canvas_cursor (Gdk::Cursor* cursor)
 {
 	if (!_cursors->is_invalid (cursor)) {
-		if (!_cursor_stack.empty()) {
-			if (cursor == _cursor_stack.back()) {
-				return _cursor_stack.size() - 1;
-			}
-		}
-
 		_cursor_stack.push_back (cursor);
 		set_canvas_cursor (cursor);
 	}
