@@ -122,12 +122,12 @@ EditingContext::EditingContext (std::string const & name)
 	, play_note_selection_button (_("Ear"), ArdourButton::Text, true)
 	, follow_playhead_button (_("F"), ArdourButton::Text, true)
 	, full_zoom_button (_("<->"), ArdourButton::Text)
+	, visible_channel_label (_("MIDI|Channel"))
 	, _drags (new DragManager (this))
 	, _leftmost_sample (0)
 	, _playhead_cursor (nullptr)
 	, _snapped_cursor (nullptr)
 	, _follow_playhead (false)
-	, visible_channel_label (_("MIDI|Channel"))
 	, selection (new Selection (this, true))
 	, cut_buffer (new Selection (this, false))
 	, _selection_memento (new SelectionMemento())
@@ -2099,7 +2099,7 @@ EditingContext::pop_canvas_cursor ()
 {
 	while (true) {
 		if (_cursor_stack.size() <= 1) {
-			PBD::error << "attempt to pop default cursor" << endmsg;
+			set_canvas_cursor (nullptr);
 			return;
 		}
 

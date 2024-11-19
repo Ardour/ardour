@@ -537,11 +537,8 @@ Editor::Editor ()
 
 	_group_tabs->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::control_layout_scroll), false);
 
-	_cursors = new MouseCursors;
-	_cursors->set_cursor_set (UIConfiguration::instance().get_icon_set());
-
 	/* Push default cursor to ever-present bottom of cursor stack. */
-	push_canvas_cursor(_cursors->grabber);
+	push_canvas_cursor (nullptr);
 
 	ArdourCanvas::GtkCanvas* time_pad = manage (new ArdourCanvas::GtkCanvas ());
 
