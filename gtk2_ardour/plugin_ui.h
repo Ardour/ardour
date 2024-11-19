@@ -219,7 +219,7 @@ private:
 class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 {
 public:
-	GenericPluginUI (std::shared_ptr<ARDOUR::PlugInsertBase> plug, bool scrollable=false);
+	GenericPluginUI (std::shared_ptr<ARDOUR::PlugInsertBase> plug, bool scrollable = false, bool ctrls_only = false);
 	~GenericPluginUI ();
 
 	gint get_preferred_height () { return prefheight; }
@@ -236,6 +236,7 @@ private:
 
 	gint prefheight;
 	bool is_scrollable;
+	bool want_ctrl_only;
 
 	struct MeterInfo {
 		ArdourWidgets::FastMeter* meter;
