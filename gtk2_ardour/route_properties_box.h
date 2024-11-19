@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2021 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2024 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2024 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,27 +20,21 @@
 
 #pragma once
 
-#include <map>
+#include <vector>
 
 #include <gtkmm/box.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
+#include <gtkmm/scrolledwindow.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
-#include "widgets/ardour_button.h"
-
-#include "gtkmm2ext/cairo_packer.h"
-
-#include "region_editor.h"
-#include "audio_clock.h"
-
-namespace ARDOUR
-{
+namespace ARDOUR {
+	class Route;
+	class Processor;
 	class Session;
-	class Location;
 }
+
+class GenericPluginUI;
 
 class RoutePropertiesBox : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
@@ -47,16 +42,23 @@ public:
 	RoutePropertiesBox ();
 	~RoutePropertiesBox ();
 
-	virtual void set_route (std::shared_ptr<ARDOUR::Route>);
-
-protected:
-	std::shared_ptr<ARDOUR::Region> _route;
-
-	Gtk::Label _header_label;
+	void set_route (std::shared_ptr<ARDOUR::Route>);
 
 private:
 	void property_changed (const PBD::PropertyChange& what_changed);
+	void session_going_away ();
+	void drop_route ();
+	void drop_plugin_uis ();
+	void refill_processors ();
+	void add_processor_to_display (std::weak_ptr<ARDOUR::Processor> w);
 
-	PBD::ScopedConnection state_connection;
+	Gtk::ScrolledWindow _scroller;
+	Gtk::HBox           _box;
+
+	std::shared_ptr<ARDOUR::Route> _route;
+	std::vector <GenericPluginUI*> _proc_uis;
+
+	PBD::ScopedConnectionList _processor_connections;
+	PBD::ScopedConnectionList _route_connections;
 };
 
