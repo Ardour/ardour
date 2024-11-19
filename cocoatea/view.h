@@ -1,8 +1,14 @@
+#pragma once
+
 #include <AppKit/AppKit.h>
 
-@interface CTView : NSView
-{
+class Meter;
 
+@interface MeterView : NSView
+{
+	Meter* meter;
 }
+
+-(void)setMeter: (Meter*) meter;
 
 @end
