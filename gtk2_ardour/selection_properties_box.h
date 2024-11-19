@@ -27,6 +27,7 @@
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
+#include "widgets/eventboxext.h"
 
 namespace ARDOUR {
 	class Session;
@@ -48,10 +49,14 @@ private:
 	void init ();
 	void selection_changed ();
 	void track_mouse_mode ();
+	void delete_region_editor ();
 
 	TimeInfoBox*                _time_info_box;
 	RoutePropertiesBox*         _route_prop_box;
+	ArdourWidgets::EventBoxExt  _region_editor_box;
+	RegionEditor*               _region_editor;
 
+	PBD::ScopedConnection _region_connection;
 	PBD::ScopedConnection _editor_connection;
 };
 

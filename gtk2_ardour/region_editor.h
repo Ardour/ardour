@@ -63,6 +63,8 @@ public:
 	RegionEditor (ARDOUR::Session*, RegionView*);
 	virtual ~RegionEditor ();
 
+	std::shared_ptr<ARDOUR::Region> region () const { return _region; }
+
 protected:
 	virtual void region_changed (const PBD::PropertyChange&);
 	virtual void region_fx_changed ();
