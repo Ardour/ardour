@@ -385,7 +385,7 @@ Mixer_UI::Mixer_UI ()
 	inner_pane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
 
 	content_app_bar.add (_application_bar);
-	content_innermost_hbox.add (global_hpacker);
+	content_main.add (global_hpacker);
 
 	if (!Profile->get_mixbus ()) {
 		content_att_left.add (list_vpacker);

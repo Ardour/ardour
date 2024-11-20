@@ -195,8 +195,8 @@ RecorderUI::RecorderUI ()
 	/* Top-level VBox */
 	content_app_bar.add (_application_bar);
 	//content_att_right.add (_editor_list_vbox); // TODO
-	content_toolbar.add(_toolbar);
-	content_innermost_hbox.add (_pane);
+	content_main_top.add (_toolbar);
+	content_main.add (_pane);
 
 	/* button_table setup is similar to transport_table in ardour_ui */
 	int vpadding = 1;

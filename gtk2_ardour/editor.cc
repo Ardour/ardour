@@ -682,8 +682,8 @@ Editor::Editor ()
 	content_app_bar.add (_application_bar);
 	content_att_right.add (_editor_list_vbox);
 	content_att_bottom.add (*_properties_box);
-	content_toolbar.add (global_vpacker);
-	content_innermost_hbox.add (editor_summary_pane);
+	content_main_top.add (global_vpacker);
+	content_main.add (editor_summary_pane);
 
 	/* need to show the "contents" widget so that notebook will show if tab is switched to
 	 */

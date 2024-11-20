@@ -155,7 +155,7 @@ TriggerPage::TriggerPage ()
 
 	/* Top-level Layout */
 	content_app_bar.add (_application_bar);
-	content_innermost_hbox.add (_strip_group_box);
+	content_main.add (_strip_group_box);
 	content_att_bottom.add (_parameter_box);
 	content_att_right.add (_sidebar_notebook);
 

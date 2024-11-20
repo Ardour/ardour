@@ -127,18 +127,18 @@ protected:
 	 * | | +-----------------------------------------------------------------------------------------+ | |
 	 * | \---------------------------------------------------------------------------------------------/ |
 	 * |                                                                                                 |
-	 * | +--content_hbox--OR--content_left_pane--------------------------------------------------------+ |
+	 * | +--content_hbox--OR--content_left_pane--(EXPAND|FILL)-----------------------------------------+ |
 	 * | |                                                                                             | |
-	 * | | +--att_left--+   +--content_midlevel_vbox--OR-content_midlevel_vpane----------------------+ | |
-	 * | | $     (EBOX) |   | +--content_right_pane------------------------------------------------+ | | |
+	 * | | +--att_left--+   +--content_midlevel_vbox--OR-content_midlevel_vpane--(EXPAND|FILL)-------+ | |
+	 * | | $     (EBOX) |   | +--content_right_pane--(EXPAND|FILL)---------------------------------+ | | |
 	 * | | |            |   | | +--content_inner_vbox-----------------+   +--content_right_vbox--+ | | | |
 	 * | | |  O         |   | | |                                     |   |                      | | | | |
-	 * | | |  P   S     |   | | | +--content_toolbar----------------+ |   | +--att_right-------+ | | | | |
+	 * | | |  P   S     |   | | | +--content_main_top---------------+ |   | +--att_right-------+ | | | | |
 	 * | | |  T   I     |   | | | $    OPTIONAL TOOLBAR      (EBOX) | |   | $           (EBOX) | | | | | |
 	 * | | |  I   D     |   | | | +---------------------------------+ |<->| |                  | | | | | |
 	 * | | |  O   E     |<->| | |                                     | P | |  OPTIONAL        | | | | | |
-	 * | | |  N   B     | O | | | +--content_innermost_hbox---------+ | A | |  SIDEBAR         | | | | | |
-	 * | | |  A   A     | P | | | $                          (HBOX) | | N | |                  | | | | | |
+	 * | | |  N   B     | O | | | +--content_main--(EXPAND|FILL)----+ | A | |  SIDEBAR         | | | | | |
+	 * | | |  A   A     | P | | | $                          (EBOX) | | N | |                  | | | | | |
 	 * | | |  L   R     | T | | | |                                 | | E | |                  | | | | | |
 	 * | | |            | . | | | |    !!  MAIN PAGE CONTENT  !!    | |<->| |  (LIST)          | | | | | |
 	 * | | |            | P | | | |                                 | |   | |                  | | | | | |
@@ -161,25 +161,25 @@ protected:
 	 */
 
 	/* clang-format off */
-	/*            _content_vbox                      * toplevel
-	 *             toolbar_frame                     * the frame is managed in the implementation */
+	/*            _content_vbox                   * toplevel
+	 *             toolbar_frame                  * the frame is managed in the implementation */
 	Gtk::HBox       content_header_hbox;
-	EventBoxExt       content_app_bar;              /* a placeholder for the transport bar, if you want one */
-	Gtk::EventBox     content_attachments;          /* a placeholder the (strip, list, props) visibility buttons for this tab */
+	EventBoxExt       content_app_bar;           /* a placeholder for the transport bar, if you want one */
+	Gtk::EventBox     content_attachments;       /* a placeholder the (strip, list, props) visibility buttons for this tab */
 	Gtk::HBox           content_attachment_hbox;
-	EventBoxExt       content_tabbables;            /* a placeholder for the tabbable switching buttons (used by ArdourUI) */
+	EventBoxExt       content_tabbables;         /* a placeholder for the tabbable switching buttons (used by ArdourUI) */
 	HPane           content_left_pane;
 	Gtk::HBox       content_hbox;
-	EventBoxExt       content_att_left;             /* a placeholder for the mixer strip, if you want one */
+	EventBoxExt       content_att_left;          /* a placeholder for the mixer strip, if you want one */
 	VPane             content_midlevel_vpane;
 	Gtk::VBox         content_midlevel_vbox;
 	HPane               content_right_pane;
 	Gtk::VBox             content_inner_vbox;
-	EventBoxExt             content_toolbar;        /* a placeholder for the content-specific toolbar, if you want one */
-	EventBoxExt             content_innermost_hbox; /* a placeholder for the innermost content (recorder, cues, editor, mixer) */
+	EventBoxExt             content_main_top;    /* a placeholder for the content-specific toolbar, if you want one */
+	EventBoxExt             content_main;        /* a placeholder for the innermost content (recorder, cues, editor, mixer) */
 	Gtk::VBox             content_right_vbox;
-	EventBoxExt           content_att_right;        /* a placeholder for the sidebar list, if you want one */
-	EventBoxExt         content_att_bottom;         /* a placeholder for the property box, if you want one */
+	EventBoxExt           content_att_right;     /* a placeholder for the sidebar list, if you want one */
+	EventBoxExt         content_att_bottom;      /* a placeholder for the property box, if you want one */
 	/* clang-format on */
 
 	/* visibility controls */

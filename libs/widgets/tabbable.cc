@@ -128,8 +128,8 @@ Tabbable::default_layout ()
 		content_right_vbox.pack_start (content_att_right, true, true);
 	}
 
-	content_inner_vbox.pack_start (content_toolbar, false, false);
-	content_inner_vbox.pack_start (content_innermost_hbox, true, true);
+	content_inner_vbox.pack_start (content_main_top, false, false);
+	content_inner_vbox.pack_start (content_main, true, true);
 
 	if (_panelayout & PaneRight) {
 		content_right_pane.set_child_minsize (content_att_right, 160); /* rough guess at width of notebook tabs */
