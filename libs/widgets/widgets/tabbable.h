@@ -176,7 +176,7 @@ protected:
 	HPane               content_right_pane;
 	Gtk::VBox             content_inner_vbox;
 	EventBoxExt             content_toolbar;        /* a placeholder for the content-specific toolbar, if you want one */
-	Gtk::HBox               content_innermost_hbox; /* a placeholder for the innermost content (recorder, cues, editor, mixer) */
+	EventBoxExt             content_innermost_hbox; /* a placeholder for the innermost content (recorder, cues, editor, mixer) */
 	Gtk::VBox             content_right_vbox;
 	EventBoxExt           content_att_right;        /* a placeholder for the sidebar list, if you want one */
 	EventBoxExt         content_att_bottom;         /* a placeholder for the property box, if you want one */
