@@ -5681,7 +5681,7 @@ Editor::ui_parameter_changed (string parameter)
 			_cursor_stack.pop_back();
 		}
 		_cursors->set_cursor_set (UIConfiguration::instance().get_icon_set());
-		_cursor_stack.push_back(_cursors->grabber);
+		_cursor_stack.push_back(nullptr);
 		content_right_pane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
 		editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
 
