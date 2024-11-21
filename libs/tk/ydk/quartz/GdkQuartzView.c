@@ -696,6 +696,7 @@
   NSInteger count;
   int i;
   GdkRegion *region;
+  gboolean full_draw;
 
   if (GDK_WINDOW_DESTROYED (gdk_window))
     return;
@@ -705,6 +706,22 @@
 
   if (NSEqualRects (rect, NSZeroRect))
     return;
+
+
+  /* Quartz/CoreGraphics/something on macOS causes occasional/periodic drawRect
+   * calls with a "dirty" rect that covers the entire NSView. As of 11/2024,
+   * this seems to be caused by how much of the NSView is redrawn in a given
+   * interval. The lower layers really do invalidate the contents of any
+   * backing store, so if we do not obey the drawRect call, portions of the
+   * window will remain undrawn.
+   */
+
+  if (NSContainsRect (rect, [self bounds])) {
+	  full_draw = TRUE;
+	  printf ("full draw seen!\n");
+  } else {
+	  full_draw = FALSE;
+  }
 
   if (!GDK_WINDOW_IS_MAPPED (gdk_window) && ((gdk_quartz_osx_version() >= GDK_OSX_LEOPARD) && [self wantsLayer]))
     {
@@ -732,7 +749,7 @@
       return;
     }
 
-  if (!impl->needs_display_region || gdk_quartz_get_use_cocoa_invalidation()) {
+  if (!impl->needs_display_region || gdk_quartz_get_use_cocoa_invalidation() || full_draw) {
     [self getRectsBeingDrawn: &drawn_rects count: &count];
     region = gdk_region_new ();
 
