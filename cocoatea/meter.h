@@ -15,6 +15,7 @@ struct Meter {
 	double a;
 	double level;
 	NSView* view;
+	bool draw_queued;
 
 	Meter (NSView* view, double ax, double ay, double aw, double ah, double ar, double ag, double ab, double aa);
 

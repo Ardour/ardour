@@ -9,6 +9,7 @@
 #include "view.h"
 
 extern std::vector<Meter*> meters;
+extern int queued_draws;
 
 @implementation CTView
 
@@ -48,33 +49,42 @@ extern std::vector<Meter*> meters;
 
 -(void)drawRect: (NSRect)rect
 {
+
+	if (NSContainsRect (rect, [self bounds])) {
+		printf ("full redraw, queued = %d\n", queued_draws);
+	}
+
 #if 0
 	if (rect.size.width != 10 && rect.size.height != 50) {
-		printf ("%g, %g %g x %g\n", rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+		NSRect me = [self bounds];
+		printf ("%g, %g %g x %g vs %g, %g %g x %g\n",
+		        rect.origin.x, rect.origin.y, rect.size.width, rect.size.height, 
+		        me.origin.x, me.origin.y, me.size.width, me.size.height);
 	}
 #endif
-	CGContextRef cg = [[NSGraphicsContext currentContext] CGContext];
 
-	for (auto & m : meters) {
-		m->draw (cg);
-	}
 
+#if 0
 	const NSRect *drawn_rects;
 	long count;
 	int i;
 
 	[self getRectsBeingDrawn: &drawn_rects count: &count];
 
-#if 0
 	printf ("%ld rects to draw\n", count);
+
 	for (i = 0; i < count; i++) {
-		//printf ("\trect %d: %g, %g %g x %g\n", i, drawn_rects[i].origin.x, drawn_rects[i].origin.y, drawn_rects[i].size.width, drawn_rects[i].size.height);
-		//CGContextSetRGBFillColor (cg, 1.0, 0.0, 0.0, 1.0); 
-		CGContextSetRGBStrokeColor (cg, 1.0, 1.0, 1.0, 1.0);
-		//CGContextFillRect (cg, drawn_rects[i]);
-		CGContextStrokeRect (cg, drawn_rects[i]);
+		printf ("\trect %d: %g, %g %g x %g\n", i, drawn_rects[i].origin.x, drawn_rects[i].origin.y, drawn_rects[i].size.width, drawn_rects[i].size.height);
 	}
 #endif
+
+	CGContextRef cg = [[NSGraphicsContext currentContext] CGContext];
+
+	for (auto & m : meters) {
+		m->draw (cg);
+	}
+
+	queued_draws = 0;
 }
 
 -(void)windowWillClose:(NSNotification *)notification

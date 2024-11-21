@@ -2,6 +2,8 @@
 #include "meter.h"
 #include "view.h"
 
+int queued_draws = 0;
+
 Meter::Meter (NSView* v, double ax, double ay, double aw, double ah, double ar, double ag, double ab, double aa)
 	: x (ax)
 	, y (ay)
@@ -13,6 +15,7 @@ Meter::Meter (NSView* v, double ax, double ay, double aw, double ah, double ar, 
 	, a (aa)
 	, level (0.)
 	, view (v)
+	, draw_queued (true)
 {
 }
 
@@ -22,6 +25,11 @@ Meter::draw (CGContextRef cg)
 	NSRect bbox = NSMakeRect (x, y, width, height);
 
 	if (! [view needsToDrawRect:bbox]) {
+		draw_queued = false;
+		return;
+	}
+
+	if (!draw_queued) {
 		return;
 	}
 
@@ -34,11 +42,15 @@ Meter::draw (CGContextRef cg)
 
 	CGContextSetRGBFillColor (cg, 0, 0., 0., 1.0);
 	CGContextFillRect (cg, NSMakeRect (x, y, width, fill_height));
+
+	draw_queued = false;
 }
 
 void
 Meter::set_level (double f)
 {
 	level = f;
+	queued_draws++;
+	draw_queued = true;
 	[view setNeedsDisplayInRect:NSMakeRect (x, y, width, height)];
 }
