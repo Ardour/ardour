@@ -187,7 +187,8 @@ def build(bld):
     if sys.platform == 'darwin':
         obj.source   = libydk_sources + libydk_quartz_sources
         obj.cflags   += ['-xobjective-c']
-        obj.uselib   += ' OSX' # -framework Cocoa -framework CoreFoundation -framework ApplicationServices
+        obj.uselib   += ' LO OSX' # -framework Cocoa -framework CoreFoundation -framework ApplicationServices
+        obj.defines  += [ 'MACOSCTOUCH' ] # USE during development to indicate TOUCH SCREEN CHANGE
         obj.includes += ['ydk/quartz', 'ydk/quartz/gdk', 'ydk/gdk/quartz']
         obj.export_includes += ['ydk/gdk']
         obj.export_includes += ['ydk/quartz']

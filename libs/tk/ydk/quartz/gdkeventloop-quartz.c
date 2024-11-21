@@ -180,6 +180,103 @@ static gint select_thread_wakeup_pipe[2];
 /* Run loop source used to wake up the main thread */
 static CFRunLoopSourceRef select_main_thread_source;
 
+
+#ifdef MACOSCTOUCH
+#include <lo/lo.h>
+
+static GPollFD   osc_event_poll_fd;
+static lo_server osc_server;
+
+static void osc_error_callback(int num, const char *m, const char *path)
+{
+#ifdef G_ENABLE_DEBUG
+  if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
+    g_message ("liblo server error %d in path %s: %s\n", num, path, m);
+#endif
+}
+
+static gboolean
+osc_event_check (GSource* source)
+{
+  return (osc_event_poll_fd.revents & osc_event_poll_fd.events) != 0;
+}
+
+static gboolean
+osc_event_dispatch (GSource* source, GSourceFunc callback, gpointer user_data)
+{
+  GDK_THREADS_ENTER ();
+
+  if (osc_event_poll_fd.revents & G_IO_IN)
+    {
+      callback (user_data);
+    }
+
+  gboolean rv = (osc_event_poll_fd.revents & ~(G_IO_IN | G_IO_PRI)) ? G_SOURCE_REMOVE : G_SOURCE_CONTINUE;
+
+  GDK_THREADS_LEAVE ();
+  return rv;;
+}
+
+static void
+osc_event_finalize (GSource* source)
+{
+  lo_server_free (osc_server);
+}
+
+static gboolean
+osc_input_handler (gpointer user_data)
+{
+  lo_server_recv (osc_server);
+}
+
+static GSourceFuncs osc_event_funcs = {
+  NULL,
+  osc_event_check,
+  osc_event_dispatch,
+  osc_event_finalize
+};
+
+/* ***************************************************************************
+ * OSC Callbacks
+ */
+
+int
+test_callback (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data)
+{
+  printf ("test_callback\n");
+#if 0 // TODO ->  libs/tk/ydk/quartz//gdkevents-quartz.c 
+
+  GdkEvent* event = gdk_event_new (GDK_TOUCH_BEGIN);
+  event->touch.window   = NULL;
+  event->touch.time     = 0;
+  event->touch.x        = 0.0;
+  event->touch.y        = 0.0;
+  event->touch.x_root   = 0;
+  event->touch.y_root   = 0;
+  event->touch.state    = 0;
+  event->touch.sequence = 0;
+  event->touch.flags    = 0;
+  event->touch.deviceid = 0;
+
+  append_event (event, TRUE);
+#endif
+  return 0;
+}
+
+int
+osc_catchall (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data)
+{
+#ifdef G_ENABLE_DEBUG
+  if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
+    g_message ("Unhandled OSC message %s %s\n", path, types);
+#endif
+  return 1; // unhandled
+}
+
+/* ***************************************************************************/
+#endif
+
+
 static void
 select_thread_set_state (SelectThreadState new_state)
 {
@@ -1026,6 +1123,37 @@ _gdk_quartz_event_loop_init (void)
   g_source_set_priority (source, GDK_PRIORITY_EVENTS);
   g_source_set_can_recurse (source, TRUE);
   g_source_attach (source, NULL);
+
+#ifdef MACOSCTOUCH
+  osc_server = lo_server_new ("7777", osc_error_callback);
+  //osc_server = lo_server_new_from_url ("osc.udp://127.0.0.1:7777", osc_error_callback);
+
+  if (osc_server)
+    {
+#ifdef G_ENABLE_DEBUG
+      if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
+	{
+	  char* urlstr = lo_server_get_url (osc_server);
+	  g_message ("OSC server: %s\n", urlstr);
+	  free (urlstr);
+	}
+#endif
+
+      lo_server_add_method (osc_server, "/test", "", test_callback, NULL);
+      lo_server_add_method (osc_server, 0, 0, osc_catchall, NULL);
+
+      GSource *osc_source;
+      osc_event_poll_fd.events = G_IO_IN | G_IO_HUP | G_IO_ERR;
+      osc_event_poll_fd.fd = lo_server_get_socket_fd (osc_server);
+      osc_source = g_source_new (&osc_event_funcs, sizeof (GSource));
+      g_source_set_callback (osc_source, osc_input_handler, osc_server, NULL);
+      g_source_set_name (osc_source, "GDK Quartz OSC events");
+      g_source_add_poll (osc_source, &osc_event_poll_fd);
+      g_source_set_priority (osc_source, GDK_PRIORITY_EVENTS);
+      g_source_set_can_recurse (osc_source, TRUE);
+      g_source_attach (osc_source, NULL);
+    }
+#endif
 
   old_poll_func = g_main_context_get_poll_func (NULL);
   g_main_context_set_poll_func (NULL, poll_func);
