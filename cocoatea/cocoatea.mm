@@ -47,6 +47,7 @@ main (int argc, char* argv[])
 	CTView* view = [[CTView alloc] initWithFrame:frameRect];
 
 	layout (view);
+	[view setWantsLayer:NO];
 
 	[win setContentView:view];
 	[[NSApplication sharedApplication] activateIgnoringOtherApps:YES];

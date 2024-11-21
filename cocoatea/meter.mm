@@ -13,14 +13,14 @@ Meter::Meter (NSView* v, double ax, double ay, double aw, double ah, double ar, 
 	, g (ag)
 	, b (ab)
 	, a (aa)
-	, level (0.)
+	, level ((random() % 100) / 100.)
 	, view (v)
 	, draw_queued (true)
 {
 }
 
 void
-Meter::draw (CGContextRef cg)
+Meter::draw (CGContextRef cg, bool required)
 {
 	NSRect bbox = NSMakeRect (x, y, width, height);
 
@@ -29,8 +29,8 @@ Meter::draw (CGContextRef cg)
 		return;
 	}
 
-	if (!draw_queued) {
-		return;
+	if (!draw_queued && !required) {
+		// return;
 	}
 
 	CGContextSetRGBStrokeColor (cg, 1., 1., 1., 1.);

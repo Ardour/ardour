@@ -20,5 +20,5 @@ struct Meter {
 	Meter (NSView* view, double ax, double ay, double aw, double ah, double ar, double ag, double ab, double aa);
 
 	void set_level (double);
-	void draw (CGContextRef);
+	void draw (CGContextRef, bool required);
 };
