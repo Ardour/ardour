@@ -1088,6 +1088,7 @@ fi
 
 osascript << EOF
   tell application "Finder"
+    close every window
     activate
     tell disk "${DISKNAME}"
       open
@@ -1125,6 +1126,8 @@ osascript << EOF
 EOF
 
 chmod -Rf go-w "${MNTPATH}"
+sync
+sleep 1
 sync
 
 set -e
