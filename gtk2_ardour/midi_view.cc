@@ -124,6 +124,7 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	, _pressed_button(0)
 	, _start_boundary_rect (nullptr)
 	, _end_boundary_rect (nullptr)
+	, _show_source (false)
 	, _optimization_iterator (_events.end())
 	, _list_editor (nullptr)
 	, _no_sound_notes (false)
@@ -155,6 +156,9 @@ MidiView::MidiView (MidiView const & other)
 	, _channel_selection_scoped_note (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
+	, _start_boundary_rect (nullptr)
+	, _end_boundary_rect (nullptr)
+	, _show_source (false)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, _no_sound_notes (false)
@@ -201,11 +205,26 @@ MidiView::show_start (bool yn)
 
 	if (!_start_boundary_rect) {
 		_start_boundary_rect = new ArdourCanvas::Rectangle (_note_group->parent());
-		_start_boundary_rect->set_fill_color (0xff000087);
-		_start_boundary_rect->set_outline_color (0xff0000ff);
+		_start_boundary_rect->set_fill_color (0x00ff0043);
+		_start_boundary_rect->set_outline_color (0x00ff00ff);
+	}
+
+	size_start_rect ();
+}
+
+void
+MidiView::size_start_rect ()
+{
+	if (!_midi_region) {
+		return;
+	}
+
+	if (!_start_boundary_rect) {
+		return;
 	}
 
 	double width = _editing_context.sample_to_pixel (_midi_region->start().samples());
+	std::cerr << "start is " << _midi_region->start() << " aka " << width << std::endl;
 	_start_boundary_rect->set (ArdourCanvas::Rect (0., 0., width, height()));
 }
 
@@ -224,12 +243,28 @@ MidiView::show_end (bool yn)
 
 	if (!_end_boundary_rect) {
 		_end_boundary_rect = new ArdourCanvas::Rectangle (_note_group->parent());
-		_end_boundary_rect->set_fill_color (0xff000087);
+		_end_boundary_rect->set_fill_color (0xff000043);
 		_end_boundary_rect->set_outline_color (0xff0000ff);
 	}
 
+
+	size_end_rect ();
+}
+
+void
+MidiView::size_end_rect ()
+{
+	if (!_midi_region) {
+		return;
+	}
+
+	if (!_end_boundary_rect) {
+		return;
+	}
+
 	double offset = _editing_context.sample_to_pixel ((_midi_region->start() + _midi_region->length()).samples());
-	_end_boundary_rect->set (ArdourCanvas::Rect (offset, 0., ArdourCanvas::COORD_MAX, height()));
+	std::cerr << "end starts at " << (_midi_region->start() + _midi_region->length()).beats().str() << " aka " << offset << " from " << (_midi_region->start() + _midi_region->length()).samples() << std::endl;
+	_end_boundary_rect->set (ArdourCanvas::Rect (offset, 0., offset + 10., height()));
 }
 
 void
@@ -1155,6 +1190,8 @@ MidiView::model_changed()
 
 	NoteBase* cne;
 
+	std::cerr << "Now looking at a model with " << notes.size() << std::endl;
+
 	if (_midi_context.visibility_range_style() == MidiViewBackground::ContentsRange) {
 
 		uint8_t low_note = std::numeric_limits<uint8_t>::max();
@@ -1315,6 +1352,9 @@ MidiView::view_changed()
 
 	update_sysexes();
 	update_patch_changes ();
+
+	size_start_rect ();
+	size_end_rect ();
 }
 
 void
@@ -1711,6 +1751,10 @@ MidiView::start_playing_midi_chord (vector<std::shared_ptr<NoteType> > notes)
 bool
 MidiView::note_in_region_time_range (const std::shared_ptr<NoteType> note) const
 {
+	if (_show_source) {
+		return true;
+	}
+
 	if (!_midi_region) {
 		return true;
 	}
@@ -1757,7 +1801,7 @@ MidiView::update_sustained (Note* ev)
 	std::shared_ptr<NoteType> note = ev->note();
 	double x0, x1, y0, y1;
 
-	if (_midi_region) {
+	if (_midi_region && !_show_source) {
 		region_update_sustained (ev, x0, x1, y0, y1);
 	} else {
 		clip_capture_update_sustained (ev, x0, x1, y0, y1);
@@ -1859,7 +1903,7 @@ MidiView::region_update_sustained (Note *ev, double& x0, double& x1, double& y0,
 	 * note, then subtract the start of the region
 	 */
 
-	const samplepos_t note_start_samples = _midi_region->position().distance ((note_start + session_source_start)).samples();
+	const samplepos_t note_start_samples = 
 
 	x0 = _editing_context.sample_to_pixel (note_start_samples);
 	y0 = 1 + floor(note_to_y(note->note()));

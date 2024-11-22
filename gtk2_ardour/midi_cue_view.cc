@@ -79,7 +79,7 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	automation_group->set_fill_color (UIConfiguration::instance().color ("midi automation track fill"));
 	automation_group->set_data ("linemerger", this);
 
-
+	_show_source = true;
 	set_extensible (true);
 }
 

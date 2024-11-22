@@ -163,6 +163,7 @@ void
 CueEditor::set_samples_per_pixel (samplecnt_t n)
 {
 	samples_per_pixel = n;
+	std::cerr << "zoom changed to " << samples_per_pixel << std::endl;
 	ZoomChanged(); /* EMIT SIGNAL */
 }
 

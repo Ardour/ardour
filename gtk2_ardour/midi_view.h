@@ -233,7 +233,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	 */
 	virtual bool note_in_region_range(const std::shared_ptr<NoteType> note, bool& visible) const;
 	/* Test if a note is withing this region's time range. Return true if so */
-	bool note_in_region_time_range(const std::shared_ptr<NoteType> note) const;
+	virtual bool note_in_region_time_range(const std::shared_ptr<NoteType> note) const;
 
 	/** Get the region position in pixels relative to session. */
 	double get_position_pixels();
@@ -506,10 +506,11 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	Temporal::Beats                      _step_edit_cursor_width;
 	Temporal::Beats                      _step_edit_cursor_position;
 	NoteBase*                            _channel_selection_scoped_note;
-	MouseState _mouse_state;
-	int _pressed_button;
+	MouseState                           _mouse_state;
+	int                                  _pressed_button;
 	ArdourCanvas::Rectangle*             _start_boundary_rect;
 	ArdourCanvas::Rectangle*             _end_boundary_rect;
+	bool                                 _show_source;
 
 	/** Currently selected NoteBase objects */
 	Selection _selection;
@@ -651,6 +652,9 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void add_split_notes ();
 	void region_update_sustained (Note *, double&, double&, double&, double&);
 	void clip_capture_update_sustained (Note *, double&, double&, double&, double&);
+
+	void size_start_rect ();
+	void size_end_rect ();
 };
 
 
