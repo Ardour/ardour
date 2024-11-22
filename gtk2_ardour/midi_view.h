@@ -655,6 +655,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	void size_start_rect ();
 	void size_end_rect ();
+	virtual void add_control_points_to_selection (Temporal::timepos_t const &, Temporal::timepos_t const &, double y0, double y1) {}
 };
 
 

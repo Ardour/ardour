@@ -2658,31 +2658,7 @@ MidiView::update_drag_selection(timepos_t const & start, timepos_t const & end, 
 		}
 	}
 
-	typedef RouteTimeAxisView::AutomationTracks ATracks;
-	typedef std::list<Selectable*>              Selectables;
-
-
-#warning paul fix me MRV/MV
-#if 0
-/* Add control points to selection. */
-	const ATracks& atracks = midi_view()->automation_tracks();
-	Selectables    selectables;
-	_editing_context.get_selection().clear_points();
-
-	timepos_t st (start);
-	timepos_t et (end);
-
-	for (ATracks::const_iterator a = atracks.begin(); a != atracks.end(); ++a) {
-		a->second->get_selectables (st, et, gy0, gy1, selectables);
-		for (Selectables::const_iterator s = selectables.begin(); s != selectables.end(); ++s) {
-			ControlPoint* cp = dynamic_cast<ControlPoint*>(*s);
-			if (cp) {
-				_editing_context.get_selection().add(cp);
-			}
-		}
-		a->second->set_selected_points(_editing_context.get_selection().points);
-	}
-#endif
+	add_control_points_to_selection (start, end, gy0, gy1);
 }
 
 void

@@ -142,6 +142,7 @@ public:
 	void color_handler ();
 	void region_resized (const PBD::PropertyChange&);
 	bool canvas_group_event (GdkEvent*);
+	void add_control_points_to_selection (Temporal::timepos_t const &, Temporal::timepos_t const &, double y0, double y1);
 
   private:
 
