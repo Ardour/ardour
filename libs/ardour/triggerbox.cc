@@ -2401,31 +2401,44 @@ MIDITrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& b
 		/* shutdown */
 	}
 
-	RTMidiBufferBeats* ort = rt_midibuffer.load ();
-
-	first_event_index = std::numeric_limits<uint32_t>::min();
-	last_event_index = std::numeric_limits<uint32_t>::max();
-
-	for (uint32_t n = 0; n < ort->size(); ++n) {
-		if (first_event_index == std::numeric_limits<uint32_t>::min()) {
-			if ((*ort)[n].timestamp <= loop_start) {
-				first_event_index = n;
-			} else {
-				break;
-			}
-		}
-	}
-
-	for (uint32_t n = 0; n < ort->size(); ++n) {
-		if (last_event_index == std::numeric_limits<uint32_t>::max()) {
-			if ((*ort)[n].timestamp >= loop_end) {
-				last_event_index = n; /* exclusive end */
-				break;
-			}
-		}
-	}
+	setup_event_indices ();
 
 	pending_rt_midibuffer = nullptr;
+}
+
+void
+MIDITrigger::setup_event_indices ()
+{
+	RTMidiBufferBeats* rt = rt_midibuffer.load ();
+
+	assert (rt->size() > 0);
+
+	if (rt->size() == 1) {
+		first_event_index = 0;
+		last_event_index = 1;
+		return;
+	}
+
+	first_event_index = 0;
+	last_event_index = std::numeric_limits<uint32_t>::max();
+
+	for (uint32_t n = 0; n < rt->size(); ++n) {
+		if ((first_event_index == 0) && ((*rt)[n].timestamp >= loop_start)) {
+			/* first one at or after the loop start */
+			first_event_index = n;
+		}
+
+		if ((last_event_index == std::numeric_limits<uint32_t>::max()) && ((*rt)[n].timestamp > loop_end)) {
+			/* first one at or after the loop end */
+			last_event_index = n; /* exclusive end */
+		}
+	}
+
+	if (last_event_index == std::numeric_limits<uint32_t>::max()) {
+		last_event_index = rt->size();
+	}
+
+	DEBUG_TRACE (DEBUG::Triggers, "%1/%2 first index %3 last index %4 of %5\n", _box.order(), index(), first_event_index, last_event_index, rt->size());
 }
 
 void
@@ -2465,9 +2478,9 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 	_follow_length = Temporal::BBT_Offset (0, data_length.get_beats(), 0);
 	set_length (timecnt_t (data_length));
 	iter = 0;
-	first_event_index = 0;
-	last_event_index = ai.midi_buf->size();
 	_follow_action0 = FollowAction::Again;
+
+	setup_event_indices ();
 
 	/* Mark ai.midi_buf as null so that it is not deleted */
 	ai.midi_buf = nullptr;
@@ -3002,7 +3015,7 @@ MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 	_model = mr->model();
 	_model->ContentsChanged.connect_same_thread (content_connection, std::bind (&MIDITrigger::model_contents_changed, this));
 	loop_start = r->start ().beats();
-	loop_end = r->length ().beats();
+	loop_end = r->end ().beats();
 
 	data_length = loop_end - loop_start;
 
@@ -3160,6 +3173,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		RTMidiBufferBeats::Item const & item ((*rtmb)[iter]);
 		std::cerr << "Looking at event #" << iter << " @ " << item.timestamp << " transition was " << transition_beats << " rs " << region_start << std::endl;
+
 		/* Event times are in beats, relative to start of source
 		 * file. We need to conv+ert to region-relative time, and then
 		 * a session timeline time, which is defined by the time at

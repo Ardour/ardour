@@ -703,6 +703,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	int load_data (std::shared_ptr<MidiRegion>);
 	void compute_and_set_length ();
 	void _startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const &);
+	void setup_event_indices ();
 };
 
 class LIBARDOUR_API TriggerBoxThread
