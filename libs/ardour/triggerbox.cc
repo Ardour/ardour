@@ -2438,7 +2438,7 @@ MIDITrigger::setup_event_indices ()
 		last_event_index = rt->size();
 	}
 
-	DEBUG_TRACE (DEBUG::Triggers, "%1/%2 first index %3 last index %4 of %5\n", _box.order(), index(), first_event_index, last_event_index, rt->size());
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 first index %3 last index %4 of %5\n", _box.order(), index(), first_event_index, last_event_index, rt->size()));
 }
 
 void
