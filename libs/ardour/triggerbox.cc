@@ -1720,7 +1720,7 @@ AudioTrigger::set_region_in_worker_thread_internal (std::shared_ptr<Region> r, b
 	/* we've changed our internal values; we need to update our queued UIState or they will be lost when UIState is applied */
 	copy_to_ui_state ();
 
-	send_property_change (ARDOUR::Properties::name);
+	send_property_change (ARDOUR::Properties::region);
 
 	return 0;
 }
