@@ -766,7 +766,7 @@ if test x$WITH_XJADEO != x ; then
 	DMGBACKGROUND=${DMGBACKGROUND}xj
 fi
 
-echo "Using image '$DMGBACKGROUND' for the DMG.\n"
+echo "Using image '$DMGBACKGROUND' for the DMG."
 
 ################################################################################
 ### Mixbus plugins, etc
