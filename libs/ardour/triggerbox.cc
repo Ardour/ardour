@@ -3038,10 +3038,7 @@ MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loaded midi region, span is %2\n", name(), data_length));
 
-	/* This is being used as a kind of shorthand for "everything" which is
-	   pretty stupid
-	*/
-	send_property_change (ARDOUR::Properties::name);
+	send_property_change (ARDOUR::Properties::region);
 
 	return 0;
 }
