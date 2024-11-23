@@ -3014,6 +3014,12 @@ MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 
 	_model = mr->model();
 	_model->ContentsChanged.connect_same_thread (content_connection, std::bind (&MIDITrigger::model_contents_changed, this));
+
+
+	/* Note that in theory we may be able to get loop start/end from the
+	 * SMF file and it could different from the data start/end
+	 */
+
 	loop_start = r->start ().beats();
 	loop_end = r->end ().beats();
 
