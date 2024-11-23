@@ -655,6 +655,9 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	void size_start_rect ();
 	void size_end_rect ();
+	bool start_boundary_event (GdkEvent*);
+	bool end_boundary_event (GdkEvent*);
+
 	virtual void add_control_points_to_selection (Temporal::timepos_t const &, Temporal::timepos_t const &, double y0, double y1) {}
 };
 

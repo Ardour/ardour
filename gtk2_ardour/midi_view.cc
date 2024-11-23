@@ -207,9 +207,17 @@ MidiView::show_start (bool yn)
 		_start_boundary_rect = new ArdourCanvas::Rectangle (_note_group->parent());
 		_start_boundary_rect->set_fill_color (0x00ff0043);
 		_start_boundary_rect->set_outline_color (0x00ff00ff);
+
+		_start_boundary_rect->Event.connect (sigc::mem_fun (*this, &MidiView::start_boundary_event));
 	}
 
 	size_start_rect ();
+}
+
+bool
+MidiView::start_boundary_event (GdkEvent* ev)
+{
+	return _editing_context.typed_event (_start_boundary_rect, ev, ClipStartItem);
 }
 
 void
@@ -245,10 +253,17 @@ MidiView::show_end (bool yn)
 		_end_boundary_rect = new ArdourCanvas::Rectangle (_note_group->parent());
 		_end_boundary_rect->set_fill_color (0xff000043);
 		_end_boundary_rect->set_outline_color (0xff0000ff);
+
+		_end_boundary_rect->Event.connect (sigc::mem_fun (*this, &MidiView::end_boundary_event));
 	}
 
-
 	size_end_rect ();
+}
+
+bool
+MidiView::end_boundary_event (GdkEvent* ev)
+{
+	return _editing_context.typed_event (_end_boundary_rect, ev, ClipEndItem);
 }
 
 void

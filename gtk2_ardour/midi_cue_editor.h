@@ -68,6 +68,8 @@ class MidiCueEditor : public CueEditor
 	bool canvas_velocity_base_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_velocity_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item*, ControlPoint*);
+	bool canvas_cue_start_event (GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_cue_end_event (GdkEvent* event, ArdourCanvas::Item*);
 
 	int32_t get_grid_beat_divisions (Editing::GridType gt) const { return 1; }
 	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const { return 1; }

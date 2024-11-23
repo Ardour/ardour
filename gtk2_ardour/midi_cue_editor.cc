@@ -495,6 +495,17 @@ MidiCueEditor::canvas_velocity_event (GdkEvent* event, ArdourCanvas::Item* item)
 	return typed_event (item, event, VelocityItem);
 }
 
+bool
+MidiCueEditor::canvas_cue_start_event (GdkEvent* event, ArdourCanvas::Item* item)
+{
+	return typed_event (item, event, ClipStartItem);
+}
+
+bool
+MidiCueEditor::canvas_cue_end_event (GdkEvent* event, ArdourCanvas::Item* item)
+{
+	return typed_event (item, event, ClipEndItem);
+}
 
 Gtk::Widget&
 MidiCueEditor::viewport()
@@ -639,6 +650,24 @@ MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event
 			break;
 		}
 		return true;
+	}
+
+	case ClipStartItem: {
+		ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (item);
+		if (r) {
+			_drags->set (new ClipStartDrag (*this, *r, timepos_t (BeatTime)), event);
+		}
+		return true;
+		break;
+	}
+
+	case ClipEndItem: {
+		ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (item);
+		if (r) {
+			_drags->set (new ClipEndDrag (*this, *r, timepos_t (BeatTime)), event);
+		}
+		return true;
+		break;
 	}
 
 	default:
@@ -1849,4 +1878,3 @@ MidiCueEditor::automation_button_click (Evoral::ParameterType type, int id, Sele
 		view->update_automation_display (Evoral::Parameter (type, 0, id), op);
 	}
 }
-

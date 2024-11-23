@@ -7546,6 +7546,7 @@ ClipStartDrag::ClipStartDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Te
 	, dragging_rect (&r)
 	, original_start (os)
 {
+	std::cerr << "CSD!\n";
 }
 
 ClipStartDrag::~ClipStartDrag ()
@@ -7568,11 +7569,13 @@ ClipStartDrag::end_grab (GdkEvent* ev)
 void
 ClipStartDrag::motion (GdkEvent*, bool)
 {
+	std::cerr << "clip start drag\n";
 }
 
 void
 ClipStartDrag::finished (GdkEvent*, bool)
 {
+	std::cerr << "clip start drag ALL DONE\n";
 }
 
 void
