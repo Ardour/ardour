@@ -401,6 +401,11 @@ GenericPluginUI::build ()
 		if (has_descriptive_presets ()) {
 			preset_gui = new PluginPresetsUI (_pi); // XXX
 			hpacker.pack_start (*preset_gui, true, true);
+			if (is_scrollable) {
+				preset_gui->show_all ();
+				GtkRequisition request = preset_gui->size_request();
+				prefheight = std::max (prefheight, request.height);
+			}
 		}
 	} else {
 		automatic_layout (control_uis);
@@ -663,6 +668,12 @@ GenericPluginUI::build_midi_table ()
 		midi_pgmsel.push_back (cui);
 		pgm_table->attach (*manage (new Label (string_compose ("C%1:", (int)(chn + 1)), ALIGN_END)), col, col + 1, row, row+1, FILL, SHRINK);
 		pgm_table->attach (*cui, col + 1, col + 2, row, row+1, SHRINK, SHRINK);
+	}
+
+	if (is_scrollable) {
+		frame->show_all ();
+		GtkRequisition request = frame->size_request();
+		prefheight = std::max (prefheight, request.height);
 	}
 
 	_pib->plugin ()->read_midnam();
