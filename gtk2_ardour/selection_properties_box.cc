@@ -138,10 +138,16 @@ SelectionPropertiesBox::selection_changed ()
 		_time_info_box->hide ();
 	}
 
+	bool show_route_properties = false;
 	if (!selection.tracks.empty ()) {
 		TimeAxisView *tav = selection.tracks.front ();
 		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(tav);
-		_route_prop_box->set_route (rtav->route());
+		if (rtav) {
+			_route_prop_box->set_route (rtav->route());
+			show_route_properties = true;
+		}
+	}
+	if (show_route_properties) {
 		_route_prop_box->show();
 	} else {
 		_route_prop_box->hide();
