@@ -64,6 +64,10 @@ using namespace PBD;
 using namespace std;
 using namespace Gtkmm2ext;
 
+Glib::RefPtr<Gtk::ActionGroup> RegionEditor::RegionFxBox::rfx_box_actions;
+Gtkmm2ext::Bindings*           RegionEditor::RegionFxBox::bindings = 0;
+RegionEditor::RegionFxBox*     RegionEditor::RegionFxBox::current_rfx_box = 0;
+
 RegionEditor::RegionEditor (Session* s, RegionView* rv)
 	: SessionHandlePtr (s)
 	, _table (9, 3)
@@ -512,12 +516,41 @@ drag_targets ()
 	return tmp;
 }
 
+void
+RegionEditor::RegionFxBox::load_bindings ()
+{
+	bindings = Bindings::get_bindings (X_("RegionFx Box"));
+}
+
+void
+RegionEditor::RegionFxBox::register_actions ()
+{
+	load_bindings ();
+
+	rfx_box_actions = ActionManager::create_action_group (bindings, X_("RegionFxMenu"));
+
+	ActionManager::register_action (rfx_box_actions, X_("delete"), _("Delete"), sigc::ptr_fun (RegionEditor::RegionFxBox::static_delete));
+	ActionManager::register_action (rfx_box_actions, X_("backspace"), _("Delete"), sigc::ptr_fun (RegionEditor::RegionFxBox::static_delete));
+}
+
+void
+RegionEditor::RegionFxBox::static_delete ()
+{
+	if (current_rfx_box) {
+		current_rfx_box->delete_selected ();
+	}
+}
+
 RegionEditor::RegionFxBox::RegionFxBox (std::shared_ptr<ARDOUR::Region> r)
 	: _region (r)
 	, _display (drop_targets (), Gdk::ACTION_COPY | Gdk::ACTION_MOVE)
 	, _no_redisplay (false)
 	, _placement (-1)
 {
+	if (!rfx_box_actions) {
+		register_actions ();
+	}
+
 	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	_scroller.set_name ("ProcessorScroller");
 	_scroller.add (_display);
@@ -526,6 +559,7 @@ RegionEditor::RegionFxBox::RegionFxBox (std::shared_ptr<ARDOUR::Region> r)
 	_display.set_can_focus ();
 	_display.set_name ("ProcessorList");
 	_display.set_data ("regionfxbox", this);
+	_display.set_data ("ardour-bindings", bindings);
 	_display.set_size_request (104, -1); // TODO UI scale
 	_display.set_spacing (0);
 
@@ -537,7 +571,8 @@ RegionEditor::RegionFxBox::RegionFxBox (std::shared_ptr<ARDOUR::Region> r)
 	_display.DropFromExternal.connect (sigc::mem_fun (*this, &RegionFxBox::plugin_drop));
 	_display.DragRefuse.connect (sigc::mem_fun (*this, &RegionFxBox::drag_refuse));
 
-	_display.signal_key_press_event ().connect (sigc::mem_fun (*this, &RegionFxBox::on_key_press), false);
+	_display.signal_enter_notify_event().connect (sigc::mem_fun(*this, &RegionFxBox::enter_notify), false);
+	_display.signal_leave_notify_event().connect (sigc::mem_fun(*this, &RegionFxBox::leave_notify), false);
 
 	screen_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &RegionFxBox::update_controls));
 
@@ -719,21 +754,27 @@ RegionEditor::RegionFxBox::fxe_button_release_event (GdkEventButton* ev, RegionF
 	return false;
 }
 
-bool
-RegionEditor::RegionFxBox::on_key_press (GdkEventKey* ev)
+void
+RegionEditor::RegionFxBox::delete_selected ()
 {
-	switch (ev->keyval) {
-		case GDK_KEY_Delete:
-			break;
-		case GDK_KEY_BackSpace:
-			break;
-		default:
-			return false;
-	}
 	for (auto const& i : _display.selection (true)) {
 		queue_delete_region_fx (std::weak_ptr<RegionFxPlugin> (i->region_fx_plugin ()));
 	}
-	return true;
+}
+
+bool
+RegionEditor::RegionFxBox::enter_notify (GdkEventCrossing* ev)
+{
+	_display.grab_focus ();
+	current_rfx_box = this;
+	return false;
+}
+
+bool
+RegionEditor::RegionFxBox::leave_notify (GdkEventCrossing* ev)
+{
+	current_rfx_box = 0;
+	return false;
 }
 
 void

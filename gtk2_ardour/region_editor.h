@@ -38,6 +38,7 @@
 #include <gtkmm/listviewtext.h>
 #include <gtkmm/scrolledwindow.h>
 
+#include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/dndtreeview.h"
 #include "gtkmm2ext/dndvbox.h"
 
@@ -104,14 +105,24 @@ private:
 		void redisplay_plugins ();
 
 	private:
+		static void register_actions();
+		static void load_bindings ();
+		static void static_delete ();
+
+		static Glib::RefPtr<Gtk::ActionGroup> rfx_box_actions;
+		static Gtkmm2ext::Bindings*           bindings;
+		static RegionFxBox*                   current_rfx_box;
+
 		void add_fx_to_display (std::weak_ptr<ARDOUR::RegionFxPlugin>);
 		void show_plugin_gui (std::weak_ptr<ARDOUR::RegionFxPlugin>, bool custom_ui = true);
 		void queue_delete_region_fx (std::weak_ptr<ARDOUR::RegionFxPlugin>);
 		bool idle_delete_region_fx (std::weak_ptr<ARDOUR::RegionFxPlugin>);
 		void notify_plugin_load_fail (uint32_t cnt = 1);
-		bool on_key_press (GdkEventKey*);
+		bool enter_notify (GdkEventCrossing*);
+		bool leave_notify (GdkEventCrossing*);
 		void clear_automation (std::weak_ptr<ARDOUR::RegionFxPlugin>);
 		void update_controls ();
+		void delete_selected ();
 
 		/* PluginInterestedObject */
 		bool use_plugins (SelectedPlugins const&);
