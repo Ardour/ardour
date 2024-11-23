@@ -4366,6 +4366,18 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "native-file-header-format") {
 
+#ifndef HAVE_RF64_RIFF
+		switch (config.get_native_file_header_format ()) {
+			case MBWF:
+				/* fallthrough */
+			case RF64_WAV:
+				config.set_native_file_header_format (RF64);
+				return;
+			default:
+				break;
+		}
+#endif
+
 		if (!first_file_header_format_reset) {
 			reset_native_file_format ();
 		}
