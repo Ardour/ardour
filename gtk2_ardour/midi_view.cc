@@ -1903,7 +1903,7 @@ MidiView::region_update_sustained (Note *ev, double& x0, double& x1, double& y0,
 	 * note, then subtract the start of the region
 	 */
 
-	const samplepos_t note_start_samples = 
+	const samplepos_t note_start_samples = _midi_region->position().distance ((note_start + session_source_start)).samples();
 
 	x0 = _editing_context.sample_to_pixel (note_start_samples);
 	y0 = 1 + floor(note_to_y(note->note()));
