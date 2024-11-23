@@ -72,6 +72,9 @@ RoutePropertiesBox::session_going_away ()
 void
 RoutePropertiesBox::set_route (std::shared_ptr<Route> r)
 {
+	if (r == _route) {
+		return;
+	}
 	assert (r);
 	_route = r;
 	_route_connections.drop_connections ();
