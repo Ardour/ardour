@@ -720,6 +720,8 @@ Trigger::clear_region ()
 void
 Trigger::set_region_internal (std::shared_ptr<Region> r)
 {
+	region_connection.disconnect ();
+	
 	/* No whole file regions in the triggerbox, just like we do not allow
 	 * them in playlists either.
 	 */
@@ -728,6 +730,18 @@ Trigger::set_region_internal (std::shared_ptr<Region> r)
 		_region = RegionFactory::create (r, r->derive_properties ());
 	} else {
 		_region = r;
+	}
+
+	if (_region) {
+		_region->PropertyChanged.connect_same_thread (region_connection, std::bind (&Trigger::region_property_change, this, _1));
+	}
+}
+
+void
+Trigger::region_property_change (PropertyChange const & what_changed)
+{
+	if (what_changed.contains (Properties::start) || what_changed.contains (Properties::length)) {
+		bounds_changed (_region->start(), _region->end());
 	}
 }
 
@@ -2353,8 +2367,8 @@ MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	, first_event_index (0)
 	, last_event_index (0)
 	, rt_midibuffer (nullptr)
-	, pending_rt_midibuffer (nullptr)
-	, old_rt_midibuffer (nullptr)
+	, pending_swap (nullptr)
+	, old_pending_swap (nullptr)
 	, map_change (false)
 {
 	_channel_map.assign (16, -1);
@@ -2367,43 +2381,60 @@ MIDITrigger::~MIDITrigger ()
 void
 MIDITrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& bufs)
 {
-	RTMidiBufferBeats* pending = pending_rt_midibuffer.load();
+	/* NOTE: this method runs synchronously with respect to the process
+	   cycle. The trigger will not be in ::run() while we execute this.
+
+	   On the other hand, another (UI) thread could be queing another
+	   pending swap.
+	*/
+
+	PendingSwap* pending = pending_swap.exchange (nullptr);
+	RTMidiBufferBeats* old_rtmb = nullptr;
 
 	if (!pending) {
 		return;
 	}
 
-	if (playing) {
-		MidiBuffer& mbuf (bufs.get_midi (0));
-		MidiStateTracker post_edit_state;
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 noticed pending swap\n", _box.order(), index()));
 
-		/* Get the new MIDI state at the current time, and resolve any
-		 * differences with the MIDI state held by the triggerbox we're
-		 * in.
-		 */
+	if (pending->rt_midibuffer) {
+		if (playing) {
 
-		/* note: transition_beats is the time of the most recent
-		 * transition (e.g. loop point)
-		 */
+			MidiBuffer& mbuf (bufs.get_midi (0));
+			MidiStateTracker post_edit_state;
 
-		Temporal::Beats p = time.beats() - transition_beats;
+			/* Get the new MIDI state at the current time, and resolve any
+			 * differences with the MIDI state held by the triggerbox we're
+			 * in.
+			 */
 
-		/* now determine the state at this time, which we need relative
-		 * to the start of the loop within the data.
-		 */
+			/* note: transition_beats is the time of the most recent
+			 * transition (e.g. loop point)
+			 */
 
-		pending->track_state (p - loop_start, post_edit_state);
-		_box.tracker->resolve_diff (post_edit_state, mbuf, time.samples());
+			Temporal::Beats p = time.beats() - transition_beats;
+
+			/* now determine the state at this time, which we need relative
+			 * to the start of the loop within the data.
+			 */
+
+			pending->rt_midibuffer->track_state (p - _play_start, post_edit_state);
+			_box.tracker->resolve_diff (post_edit_state, mbuf, time.samples());
+		}
+
+		if (pending->rt_midibuffer) {
+			old_rtmb = rt_midibuffer.exchange (pending->rt_midibuffer);
+		}
+
+		if (iter < rt_midibuffer.load()->size()) {
+			/* shutdown */
+		}
 	}
 
-	old_rt_midibuffer = rt_midibuffer.exchange (pending);
-	if (iter < rt_midibuffer.load()->size()) {
-		/* shutdown */
-	}
+	adjust_bounds (pending->play_start, pending->play_end, pending->length, false);
 
-	setup_event_indices ();
-
-	pending_rt_midibuffer = nullptr;
+	pending->rt_midibuffer = old_rtmb;
+	old_pending_swap.store (pending);
 }
 
 void
@@ -2423,12 +2454,12 @@ MIDITrigger::setup_event_indices ()
 	last_event_index = std::numeric_limits<uint32_t>::max();
 
 	for (uint32_t n = 0; n < rt->size(); ++n) {
-		if ((first_event_index == 0) && ((*rt)[n].timestamp >= loop_start)) {
+		if ((first_event_index == 0) && ((*rt)[n].timestamp >= _play_start)) {
 			/* first one at or after the loop start */
 			first_event_index = n;
 		}
 
-		if ((last_event_index == std::numeric_limits<uint32_t>::max()) && ((*rt)[n].timestamp > loop_end)) {
+		if ((last_event_index == std::numeric_limits<uint32_t>::max()) && ((*rt)[n].timestamp > _play_end)) {
 			/* first one at or after the loop end */
 			last_event_index = n; /* exclusive end */
 		}
@@ -2439,6 +2470,32 @@ MIDITrigger::setup_event_indices ()
 	}
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 first index %3 last index %4 of %5\n", _box.order(), index(), first_event_index, last_event_index, rt->size()));
+}
+
+void 
+MIDITrigger::adjust_bounds (Temporal::Beats const & start, Temporal::Beats const & end, Temporal::Beats const & length, bool from_region)
+{
+	if (!from_region && _region) {
+		_region->set_length (timecnt_t (length, timepos_t (start)));
+	}
+
+	_play_start = start;
+	_play_end = end;
+
+	/* Note that in theory we may be able to get loop start/end from the
+	 * SMF and it could different from the data start/end
+	 */
+
+	_loop_start = start;
+	_loop_end = end;
+
+	data_length = length;
+	_follow_length = Temporal::BBT_Offset (0, length.get_beats(), 0);
+	set_length (timecnt_t (length));
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 new bounds %3..%4 %5..%6 len %7 of %7\n", _box.order(), index(), _play_start, _play_end, _loop_start, _loop_end, length, rt_midibuffer.load()->size()));
+
+	setup_event_indices ();
 }
 
 void
@@ -2467,20 +2524,16 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 	 * been moved to rtmb.
 	 */
 
-	old_rt_midibuffer = rt_midibuffer.exchange (ai.midi_buf);
+#warning what to do about the old RT midi buffer
+	// old_rt_midibuffer = rt_midibuffer.exchange (ai.midi_buf);
 
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	timecnt_t dur = tmap->convert_duration (timecnt_t (ai.captured), timepos_t (ai.start_samples), Temporal::BeatTime);
 
-	loop_start = Temporal::Beats();
-	loop_end = dur.beats();
-	data_length = loop_end;
-	_follow_length = Temporal::BBT_Offset (0, data_length.get_beats(), 0);
-	set_length (timecnt_t (data_length));
+	adjust_bounds (Temporal::Beats(), dur.beats(), dur.beats(), false);
+
 	iter = 0;
 	_follow_action0 = FollowAction::Again;
-
-	setup_event_indices ();
 
 	/* Mark ai.midi_buf as null so that it is not deleted */
 	ai.midi_buf = nullptr;
@@ -2491,8 +2544,8 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 
 	/* Meanwhile, build a new source and region from the data now in rt_midibuffer */
 
-	// std::cerr << "capture done, ask for a source of length " << loop_end.str() << std::endl;
-	TriggerBox::worker->request_build_source (this, timecnt_t (loop_end));
+	// std::cerr << "capture done, ask for a source of length " << dur.beats().str() << std::endl;
+	TriggerBox::worker->request_build_source (this, timecnt_t (dur.beats()));
 
 	_armed = false;
 	ArmChanged(); /* EMIT SIGNAL */
@@ -2980,8 +3033,14 @@ MIDITrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> r
 	set_region_internal (r);
 	set_name (mr->name());
 
+	/* We do not need to call adjust_bounds() here because the values were
+	 * set (and have not changed) when ::captured() was called.
+	 */
+
 	_model = mr->model();
 	_model->ContentsChanged.connect_same_thread (content_connection, std::bind (&MIDITrigger::model_contents_changed, this));
+
+	estimate_midi_patches ();
 
 	/* we've changed some of our internal values; we need to update our queued UIState or they will be lost when UIState is applied */
 	copy_to_ui_state ();
@@ -3015,27 +3074,15 @@ MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 	_model = mr->model();
 	_model->ContentsChanged.connect_same_thread (content_connection, std::bind (&MIDITrigger::model_contents_changed, this));
 
+	_play_start = _region->start().beats ();
+	_play_end = _region->end().beats ();
+	_loop_start = _play_start;
+	_loop_end = _play_end;
+	data_length = _play_end - _play_start;
 
-	/* Note that in theory we may be able to get loop start/end from the
-	 * SMF file and it could different from the data start/end
-	 */
+	model_contents_changed ();
 
-	loop_start = r->start ().beats();
-	loop_end = r->end ().beats();
-
-	data_length = loop_end - loop_start;
-
-	_follow_length = Temporal::BBT_Offset (0, data_length.get_beats(), 0);
-	set_length (timecnt_t (data_length));
-
-	RTMidiBufferBeats* rtmb = new RTMidiBufferBeats;
-
-	{
-		MidiModel::ReadLock lm (_model->read_lock());
-		_model->render (lm, *rtmb);
-	}
-
-	pending_rt_midibuffer = rtmb;
+	/* bounds will be reset when pending request is swapped in from RT thread */
 
 	estimate_midi_patches ();
 
@@ -3117,21 +3164,52 @@ MIDITrigger::tempo_map_changed ()
 void
 MIDITrigger::model_contents_changed ()
 {
-	RTMidiBufferBeats * rtmb (new RTMidiBufferBeats);
+	PendingSwap* pending = new PendingSwap;
+	pending->rt_midibuffer = new RTMidiBufferBeats;
 
-	_model->render (_model->read_lock(), *rtmb);
+	pending->play_start = _play_start;
+	pending->play_end = _play_end;
+	pending->loop_start = _loop_start;
+	pending->loop_end = _loop_end;
+	pending->length = data_length;
 
-	/* Clean up a previous RT midi buffer swap */
-
-	RTMidiBufferBeats* old = old_rt_midibuffer.load();
-	if (old) {
-		delete old;
-		old_rt_midibuffer = nullptr;
-	}
+	_model->render (_model->read_lock(), *pending->rt_midibuffer);
 
 	/* And set it. RT thread will find this and do what needs to be done */
 
-	pending_rt_midibuffer.store (rtmb);
+	pending_swap.store (pending);
+
+	/* Clean up a previous RT midi buffer swap */
+
+	PendingSwap* old = old_pending_swap.exchange (nullptr);
+
+	if (old) {
+		delete old;
+	}
+}
+
+void
+MIDITrigger::bounds_changed (Temporal::timepos_t const & start, Temporal::timepos_t const & end)
+{
+	PendingSwap* pending = new PendingSwap;
+
+	pending->play_start = start.beats();
+	pending->play_end = end.beats();
+	pending->loop_start = pending->play_start;
+	pending->loop_end = pending->play_end;
+	pending->length = pending->play_end - pending->play_start;
+
+	/* And set it. RT thread will find this and do what needs to be done */
+
+	pending_swap.store (pending);
+
+	/* Clean up a previous RT midi buffer swap (if there is one) */
+
+	PendingSwap* old = old_pending_swap.exchange (nullptr);
+
+	if (old) {
+		delete old;
+	}
 }
 
 template<bool in_process_context>

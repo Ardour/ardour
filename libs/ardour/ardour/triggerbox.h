@@ -433,6 +433,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	static PBD::Signal<void(PBD::PropertyChange,Trigger*)> TriggerPropertyChange;
 
+	void region_property_change (PBD::PropertyChange const &);
+	virtual void bounds_changed (Temporal::timepos_t const & start, Temporal::timepos_t const & end) {}
+
   protected:
 	struct UIRequests {
 		std::atomic<bool> stop;
@@ -489,6 +492,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	Temporal::BBT_Offset      _nxt_quantization;
 	std::atomic<Trigger*>     _pending;
 	std::atomic<unsigned int>  last_property_generation;
+	PBD::ScopedConnection      region_connection;
 
 	void when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset);
 	void set_region_internal (std::shared_ptr<Region>);
@@ -669,6 +673,13 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void check_edit_swap (timepos_t const &, bool playing, BufferSet&);
 	RTMidiBufferBeats const & rt_midi_buffer() const { return *rt_midibuffer.load(); }
 
+	void bounds_changed (Temporal::timepos_t const & start, Temporal::timepos_t const & end);
+
+	Temporal::Beats play_start() const { return _play_start; }
+	Temporal::Beats play_end() const { return _play_end; }
+	Temporal::Beats loop_start() const { return _loop_start; }
+	Temporal::Beats loop_end() const { return _loop_end; }
+
   protected:
 	void retrigger ();
 
@@ -688,15 +699,30 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	PBD::ScopedConnection content_connection;
 	void model_contents_changed();
 
-	Temporal::Beats loop_start;
-	Temporal::Beats loop_end;
+	Temporal::Beats _play_start;
+	Temporal::Beats _play_end;
+	Temporal::Beats _loop_start;
+	Temporal::Beats _loop_end;
 	uint32_t first_event_index;
 	uint32_t last_event_index;
 
 	std::atomic<RTMidiBufferBeats*> rt_midibuffer;
-	std::atomic<RTMidiBufferBeats*> pending_rt_midibuffer;
-	std::atomic<RTMidiBufferBeats*> old_rt_midibuffer;
-	uint32_t       iter;
+	uint32_t iter; /* index into the above RTMidiBufferBeats for current playback */
+
+	struct PendingSwap {
+		RTMidiBufferBeats* rt_midibuffer;
+		Temporal::Beats play_start;
+		Temporal::Beats play_end;
+		Temporal::Beats loop_start;
+		Temporal::Beats loop_end;
+		Temporal::Beats length;
+
+		PendingSwap() : rt_midibuffer (nullptr) {}
+		~PendingSwap() { delete rt_midibuffer; }
+	};
+
+	std::atomic<PendingSwap*> pending_swap;
+	std::atomic<PendingSwap*> old_pending_swap;
 
 	bool         map_change;
 
@@ -704,6 +730,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void compute_and_set_length ();
 	void _startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const &);
 	void setup_event_indices ();
+	void adjust_bounds (Temporal::Beats const & start, Temporal::Beats const & end, Temporal::Beats const & length, bool from_region);
 };
 
 class LIBARDOUR_API TriggerBoxThread
