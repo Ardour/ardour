@@ -127,7 +127,7 @@ RoutePropertiesBox::add_processor_to_display (std::weak_ptr<Processor> w)
 	}
 #ifdef MIXBUS
 	if (std::dynamic_pointer_cast<PluginInsert> (pib)->is_channelstrip ()) {
-		continue;
+		return;
 	}
 #endif
 	GenericPluginUI* plugin_ui = new GenericPluginUI (pib, true, true);
