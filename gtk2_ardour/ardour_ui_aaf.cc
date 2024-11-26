@@ -590,16 +590,21 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 			}
 
 			int   essenceError = 0;
-			char* essenceName  = aafAudioClip->essencePointerList->essenceFile->name;
+			char* essenceName  = NULL;
 
 			AAFI_foreachEssencePointer (aafAudioClip->essencePointerList, aafAudioEssencePtr)
 			{
 				struct aafiAudioEssenceFile* audioEssenceFile = aafAudioEssencePtr->essenceFile;
 
 				if (!audioEssenceFile) {
-					PBD::error << string_compose (_ ("AAF: Could not create new region for clip '%1': Missing audio essence"), audioEssenceFile->unique_name) << endmsg;
+					/* should not happen */
+					PBD::error << _ ("AAF: Audio essence pointer is missing an audio essence file entry") << endmsg;
 					essenceError++;
 					continue;
+				}
+
+				if (!essenceName) {
+					essenceName = aafAudioClip->essencePointerList->essenceFile->name;
 				}
 
 				if (audioEssenceFile->is_embedded) {
