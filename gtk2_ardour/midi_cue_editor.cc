@@ -371,7 +371,7 @@ MidiCueEditor::maybe_update ()
 		_playhead_cursor->set_position (0);
 	} else {
 		if (trigger->active ()) {
-			_playhead_cursor->set_position (trigger->current_pos().samples());
+			_playhead_cursor->set_position (trigger->current_pos().samples() + trigger->the_region()->start().samples());
 		} else {
 			_playhead_cursor->set_position (0);
 		}
