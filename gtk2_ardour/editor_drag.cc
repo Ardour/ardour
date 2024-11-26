@@ -7593,9 +7593,10 @@ ClipStartDrag::finished (GdkEvent* event, bool movement_occured)
 		return;
 	}
 
-	Temporal::Beats b (random() % 12, 0);
-	std::cerr << "set start @ " << b.str() << std::endl;
-	mce.set_trigger_start (timepos_t (b));
+	timepos_t pos = adjusted_current_time (event);
+	editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+	std::cerr << "drag to " << pos.beats().str() << std::endl;
+	mce.set_trigger_start (pos);
 }
 
 void
