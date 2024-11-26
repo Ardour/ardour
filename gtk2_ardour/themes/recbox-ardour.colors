@@ -91,6 +91,8 @@
     <ColorAlias name="crossfade line" alias="neutral:backgroundest"/>
     <ColorAlias name="cue editor start rect fill" alias="neutral:midground"/>
     <ColorAlias name="cue editor start rect outline" alias="alert:orange"/>
+    <ColorAlias name="cue editor end rect fill" alias="neutral:midground"/>
+    <ColorAlias name="cue editor end rect outline" alias="alert:orange"/>
     <ColorAlias name="edit point" alias="alert:blue"/>
     <ColorAlias name="entered automation line" alias="widget:orange"/>
     <ColorAlias name="entered gain line" alias="widget:orange"/>
