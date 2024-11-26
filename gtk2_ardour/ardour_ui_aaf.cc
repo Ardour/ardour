@@ -166,7 +166,7 @@ import_sndfile_as_region (Session* s, struct aafiAudioEssencePointer* aafAudioEs
 				status.paths.push_back (aafAudioEssencePtr->essenceFile->original_file_path);
 
 			channelCount++;
-			PBD::info << string_compose ("AAF: Preparing to import clip channel %1: %2\n", channelCount, aafAudioEssencePtr->essenceFile->unique_name);
+			PBD::info << string_compose ("AAF: Preparing to import clip channel %1 of '%2'", channelCount, aafAudioEssencePtr->essenceFile->unique_name);
 		}
 
 		s->import_files (status);
@@ -609,7 +609,7 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 
 				if (audioEssenceFile->is_embedded) {
 					if (aafi_extractAudioEssenceFile (aafi, audioEssenceFile, AAFI_EXTRACT_DEFAULT, media_cache_path.c_str (), 0, 0, NULL, NULL) < 0) {
-						PBD::error << string_compose ("AAF: Could not extract audio file '%1' from AAF.", audioEssenceFile->unique_name) << endmsg;
+						PBD::error << string_compose ("AAF: Could not extract audio file '%1' from AAF", audioEssenceFile->unique_name) << endmsg;
 						essenceError++;
 						continue;
 					}
@@ -621,12 +621,12 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 			}
 
 			if (essenceError) {
-				PBD::error << string_compose ("AAF: Error parsing audio essence pointerlist : %1\n", essenceName);
+				PBD::error << string_compose ("AAF: Error parsing audio essence pointerlist '%1'", essenceName);
 				continue;
 			}
 
 			if (!import_sndfile_as_region (_session, aafAudioClip->essencePointerList, SrcBest, pos, &oneClipSources, import_status, source_regions)) {
-				PBD::error << string_compose ("AAF: Could not import '%1' to session.", essenceName) << endmsg;
+				PBD::error << string_compose ("AAF: Could not import audio file(s) '%1' to session", essenceName) << endmsg;
 				continue;
 			} else {
 				AAFI_foreachEssencePointer (aafAudioClip->essencePointerList, aafAudioEssencePtr)
