@@ -7576,7 +7576,7 @@ ClipStartDrag::motion (GdkEvent* event, bool first_move)
 	double pix = current_pointer_x();
 	double crx1 = dragging_rect->item_to_canvas (Duple (r.x1, 0.)).x;
 
-	if (pix > 0.) {
+	if (pix > editing_context.timeline_origin()) {
 		r.x1 = dragging_rect->parent()->canvas_to_item (Duple (pix, 0.0)).x;
 	} else {
 		r.x1 = r.x0 + 1.;
