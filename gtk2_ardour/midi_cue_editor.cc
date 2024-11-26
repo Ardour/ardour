@@ -507,6 +507,12 @@ MidiCueEditor::canvas_cue_end_event (GdkEvent* event, ArdourCanvas::Item* item)
 	return typed_event (item, event, ClipEndItem);
 }
 
+void
+MidiCueEditor::set_trigger_start (Temporal::timepos_t const & p)
+{
+	ref.trigger()->the_region()->set_start (p);
+}
+
 Gtk::Widget&
 MidiCueEditor::viewport()
 {
@@ -655,7 +661,7 @@ MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event
 	case ClipStartItem: {
 		ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (item);
 		if (r) {
-			_drags->set (new ClipStartDrag (*this, *r, timepos_t (BeatTime)), event);
+			_drags->set (new ClipStartDrag (*this, *r, *this), event);
 		}
 		return true;
 		break;

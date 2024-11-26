@@ -70,6 +70,7 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "mergeable_line.h"
+#include "midi_cue_editor.h"
 #include "midi_region_view.h"
 #include "midi_selection.h"
 #include "midi_time_axis.h"
@@ -7541,12 +7542,13 @@ VelocityLineDrag::aborted (bool)
 	vd->end_line_drag (false);
 }
 
-ClipStartDrag::ClipStartDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Temporal::timepos_t const & os)
-	: Drag (ec, &r, os.time_domain(), nullptr, false)
+ClipStartDrag::ClipStartDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, MidiCueEditor& m)
+	: Drag (ec, &r, Temporal::BeatTime, nullptr, false)
+	, mce (m)
 	, dragging_rect (&r)
-	, original_start (os)
+	, original_rect (r.get())
+	, _cumulative_dx (0)
 {
-	std::cerr << "CSD!\n";
 }
 
 ClipStartDrag::~ClipStartDrag ()
@@ -7567,20 +7569,39 @@ ClipStartDrag::end_grab (GdkEvent* ev)
 }
 
 void
-ClipStartDrag::motion (GdkEvent*, bool)
+ClipStartDrag::motion (GdkEvent* event, bool first_move)
 {
-	std::cerr << "clip start drag\n";
+	double dx = current_pointer_x () - last_pointer_x ();
+	_cumulative_dx += dx;
+
+	ArdourCanvas::Rect r (original_rect);
+
+	if (_cumulative_dx > r.x1) {
+		r.x1 = r.x1 + _cumulative_dx;
+	} else {
+		r.x1 = r.x0 + 1.;
+	}
+
+	dragging_rect->set (r);
 }
 
 void
-ClipStartDrag::finished (GdkEvent*, bool)
+ClipStartDrag::finished (GdkEvent* event, bool movement_occured)
 {
-	std::cerr << "clip start drag ALL DONE\n";
+	if (!movement_occured) {
+		dragging_rect->set (original_rect);
+		return;
+	}
+
+	Temporal::Beats b (random() % 12, 0);
+	std::cerr << "set start @ " << b.str() << std::endl;
+	mce.set_trigger_start (timepos_t (b));
 }
 
 void
 ClipStartDrag::aborted (bool)
 {
+	dragging_rect->set (original_rect);
 }
 
 ClipEndDrag::ClipEndDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Temporal::timepos_t const & oe)

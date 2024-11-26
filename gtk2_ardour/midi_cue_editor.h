@@ -113,6 +113,11 @@ class MidiCueEditor : public CueEditor
 
 	void set_visible_channel (int chan);
 
+	void set_trigger_start (Temporal::timepos_t const &);
+	void set_trigger_end (Temporal::timepos_t const &);
+	void set_trigger_length (Temporal::timecnt_t const &);
+	void set_trigger_bounds (Temporal::timepos_t const &, Temporal::timepos_t const &);
+
   protected:
 	void register_actions ();
 

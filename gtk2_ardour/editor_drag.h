@@ -70,6 +70,7 @@ class EditingContext;
 class Editor;
 class EditorCursor;
 class TimeAxisView;
+class MidiCueEditor;
 class MidiTimeAxisView;
 class Drag;
 class NoteBase;
@@ -1643,7 +1644,7 @@ class VelocityLineDrag : public FreehandLineDrag<Evoral::ControlList::OrderedPoi
 class ClipStartDrag : public Drag
 {
   public:
-	ClipStartDrag (EditingContext&, ArdourCanvas::Rectangle &, Temporal::timepos_t const &);
+	ClipStartDrag (EditingContext&, ArdourCanvas::Rectangle &, MidiCueEditor& m);
 	~ClipStartDrag ();
 
 	void start_grab (GdkEvent*,Gdk::Cursor*);
@@ -1653,8 +1654,10 @@ class ClipStartDrag : public Drag
 	void aborted (bool);
 
   private:
+	MidiCueEditor& mce;
 	ArdourCanvas::Rectangle* dragging_rect;
-	Temporal::timepos_t original_start;
+	ArdourCanvas::Rect original_rect;
+	double _cumulative_dx;
 };
 
 class ClipEndDrag : public Drag
