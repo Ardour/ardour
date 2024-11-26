@@ -89,6 +89,7 @@ GenericPluginUI::GenericPluginUI (std::shared_ptr<PlugInsertBase> pib, bool scro
 	, automation_menu (0)
 	, is_scrollable(scrollable)
 	, want_ctrl_only(ctrls_only)
+	, _empty (true)
 	, _plugin_pianokeyboard_expander (_("MIDI Keyboard (audition only)"))
 	, _piano (0)
 	, _piano_velocity (*manage (new Adjustment (100, 1, 127, 1, 16)))
@@ -401,6 +402,7 @@ GenericPluginUI::build ()
 		if (has_descriptive_presets ()) {
 			preset_gui = new PluginPresetsUI (_pi); // XXX
 			hpacker.pack_start (*preset_gui, true, true);
+			_empty = false;
 			if (is_scrollable) {
 				preset_gui->show_all ();
 				GtkRequisition request = preset_gui->size_request();
@@ -624,6 +626,9 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 		box->pack_start (*cui, false, false);
 	}
 
+	if (i > 0) {
+		_empty = false;
+	}
 	if (is_scrollable && i > 0) {
 		prefheight = 30 * i * UIConfiguration::instance().get_ui_scale();
 	}
@@ -637,6 +642,7 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 		delete button_table;
 	} else {
 		button_table->show_all ();
+		_empty = false;
 	}
 
 	if (!output_table->children().empty()) {
@@ -646,6 +652,7 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 		frame->add (*output_table);
 		hpacker.pack_end (*frame, true, true);
 		output_table->show_all ();
+		_empty = false;
 	} else {
 		delete output_table;
 	}
@@ -653,6 +660,7 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	if (!want_ctrl_only && plugin->has_inline_display () && plugin->inline_display_in_gui ()) {
 		PluginDisplay* pd = manage (new PluginDisplay (plugin, 300));
 		hpacker.pack_end (*pd, true, true);
+		_empty = false;
 	}
 	show_all();
 
@@ -690,6 +698,8 @@ GenericPluginUI::build_midi_table ()
 		pgm_table->attach (*manage (new Label (string_compose ("C%1:", (int)(chn + 1)), ALIGN_END)), col, col + 1, row, row+1, FILL, SHRINK);
 		pgm_table->attach (*cui, col + 1, col + 2, row, row+1, SHRINK, SHRINK);
 	}
+
+	_empty = false;
 
 	if (is_scrollable) {
 		frame->show_all ();

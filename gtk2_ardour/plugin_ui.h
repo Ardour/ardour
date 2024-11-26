@@ -223,6 +223,7 @@ public:
 
 	gint get_preferred_height () { return prefheight; }
 	gint get_preferred_width () { return -1; }
+	bool empty () const { return _empty; }
 
 	bool start_updating(GdkEventAny*);
 	bool stop_updating(GdkEventAny*);
@@ -236,6 +237,7 @@ private:
 	gint prefheight;
 	bool is_scrollable;
 	bool want_ctrl_only;
+	bool _empty;
 
 	struct MeterInfo {
 		ArdourWidgets::FastMeter* meter;
