@@ -7571,13 +7571,13 @@ ClipStartDrag::end_grab (GdkEvent* ev)
 void
 ClipStartDrag::motion (GdkEvent* event, bool first_move)
 {
-	double dx = current_pointer_x () - last_pointer_x ();
-	_cumulative_dx += dx;
-
 	ArdourCanvas::Rect r (original_rect);
 
-	if (_cumulative_dx > r.x1) {
-		r.x1 = r.x1 + _cumulative_dx;
+	double pix = current_pointer_x();
+	double crx1 = dragging_rect->item_to_canvas (Duple (r.x1, 0.)).x;
+
+	if (pix > 0.) {
+		r.x1 = dragging_rect->parent()->canvas_to_item (Duple (pix, 0.0)).x;
 	} else {
 		r.x1 = r.x0 + 1.;
 	}
