@@ -252,8 +252,9 @@ MidiView::show_end (bool yn)
 
 	if (!_end_boundary_rect) {
 		_end_boundary_rect = new ArdourCanvas::Rectangle (_note_group->parent());
-		_end_boundary_rect->set_fill_color (0xff000043);
-		_end_boundary_rect->set_outline_color (0xff0000ff);
+		_end_boundary_rect->set_outline_what (ArdourCanvas::Rectangle::LEFT);
+		_end_boundary_rect->set_fill_color (UIConfiguration::instance().color_mod ("cue editor end rect fill", "cue boundary alpha"));
+		_end_boundary_rect->set_outline_color (UIConfiguration::instance().color ("cue editor end rect outline"));
 
 		_end_boundary_rect->Event.connect (sigc::mem_fun (*this, &MidiView::end_boundary_event));
 	}
@@ -280,7 +281,7 @@ MidiView::size_end_rect ()
 
 	double offset = _editing_context.sample_to_pixel ((_midi_region->start() + _midi_region->length()).samples());
 	std::cerr << "end starts at " << (_midi_region->start() + _midi_region->length()).beats().str() << " aka " << offset << " from " << (_midi_region->start() + _midi_region->length()).samples() << std::endl;
-	_end_boundary_rect->set (ArdourCanvas::Rect (offset, 0., offset + 10., height()));
+	_end_boundary_rect->set (ArdourCanvas::Rect (offset, 0., ArdourCanvas::COORD_MAX, height()));
 }
 
 void

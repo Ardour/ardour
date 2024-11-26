@@ -1657,13 +1657,12 @@ class ClipStartDrag : public Drag
 	MidiCueEditor& mce;
 	ArdourCanvas::Rectangle* dragging_rect;
 	ArdourCanvas::Rect original_rect;
-	double _cumulative_dx;
 };
 
 class ClipEndDrag : public Drag
 {
   public:
-	ClipEndDrag (EditingContext&, ArdourCanvas::Rectangle &, Temporal::timepos_t const &);
+	ClipEndDrag (EditingContext&, ArdourCanvas::Rectangle &, MidiCueEditor& m);
 	~ClipEndDrag ();
 
 	void start_grab (GdkEvent*,Gdk::Cursor*);
@@ -1673,9 +1672,9 @@ class ClipEndDrag : public Drag
 	void aborted (bool);
 
   private:
+	MidiCueEditor& mce;
 	ArdourCanvas::Rectangle* dragging_rect;
-	Temporal::timepos_t original_end;
-
+	ArdourCanvas::Rect original_rect;
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */

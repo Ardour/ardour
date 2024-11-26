@@ -7547,7 +7547,6 @@ ClipStartDrag::ClipStartDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Mi
 	, mce (m)
 	, dragging_rect (&r)
 	, original_rect (r.get())
-	, _cumulative_dx (0)
 {
 }
 
@@ -7595,7 +7594,6 @@ ClipStartDrag::finished (GdkEvent* event, bool movement_occured)
 
 	timepos_t pos = adjusted_current_time (event);
 	editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
-	std::cerr << "drag to " << pos.beats().str() << std::endl;
 	mce.set_trigger_start (pos);
 }
 
@@ -7605,10 +7603,11 @@ ClipStartDrag::aborted (bool)
 	dragging_rect->set (original_rect);
 }
 
-ClipEndDrag::ClipEndDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Temporal::timepos_t const & oe)
-	: Drag (ec, &r, oe.time_domain(), nullptr, false)
+ClipEndDrag::ClipEndDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, MidiCueEditor& m)
+	: Drag (ec, &r, Temporal::BeatTime, nullptr, false)
+	, mce (m)
 	, dragging_rect (&r)
-	, original_end (oe)
+	, original_rect (r.get())
 {
 }
 
@@ -7632,14 +7631,35 @@ ClipEndDrag::end_grab (GdkEvent* ev)
 void
 ClipEndDrag::motion (GdkEvent*, bool)
 {
+	ArdourCanvas::Rect r (original_rect);
+
+	double pix = current_pointer_x();
+	double crx1 = dragging_rect->item_to_canvas (Duple (r.x0, 0.)).x;
+
+	if (pix > editing_context.timeline_origin()) {
+		r.x0 = dragging_rect->parent()->canvas_to_item (Duple (pix, 0.0)).x;
+	} else {
+		r.x0 = r.x1 - 1.;
+	}
+
+	dragging_rect->set (r);
 }
 
 void
-ClipEndDrag::finished (GdkEvent*, bool)
+ClipEndDrag::finished (GdkEvent* event, bool movement_occured)
 {
+	if (!movement_occured) {
+		dragging_rect->set (original_rect);
+		return;
+	}
+
+	timepos_t pos = adjusted_current_time (event);
+	editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+	mce.set_trigger_end (pos);
 }
 
 void
 ClipEndDrag::aborted (bool)
 {
+	dragging_rect->set (original_rect);
 }
