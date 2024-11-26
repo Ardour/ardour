@@ -205,8 +205,9 @@ MidiView::show_start (bool yn)
 
 	if (!_start_boundary_rect) {
 		_start_boundary_rect = new ArdourCanvas::Rectangle (_note_group->parent());
-		_start_boundary_rect->set_fill_color (0x00ff0043);
-		_start_boundary_rect->set_outline_color (0x00ff00ff);
+		_start_boundary_rect->set_outline_what (ArdourCanvas::Rectangle::RIGHT);
+		_start_boundary_rect->set_fill_color (UIConfiguration::instance().color_mod ("cue editor start rect fill", "cue boundary alpha"));
+		_start_boundary_rect->set_outline_color (UIConfiguration::instance().color ("cue editor start rect outline"));
 
 		_start_boundary_rect->Event.connect (sigc::mem_fun (*this, &MidiView::start_boundary_event));
 	}
