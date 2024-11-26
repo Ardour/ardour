@@ -721,7 +721,7 @@ void
 Trigger::set_region_internal (std::shared_ptr<Region> r)
 {
 	region_connection.disconnect ();
-	
+
 	/* No whole file regions in the triggerbox, just like we do not allow
 	 * them in playlists either.
 	 */
@@ -740,7 +740,10 @@ Trigger::set_region_internal (std::shared_ptr<Region> r)
 void
 Trigger::region_property_change (PropertyChange const & what_changed)
 {
+	//std::cerr << "region prop change\n";
 	if (what_changed.contains (Properties::start) || what_changed.contains (Properties::length)) {
+		//std::cerr << "bounds changed\n";
+		//PBD::stacktrace (std::cerr, 23);
 		bounds_changed (_region->start(), _region->end());
 	}
 }
@@ -2395,7 +2398,7 @@ MIDITrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& b
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 noticed pending swap\n", _box.order(), index()));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 noticed pending swap @ %3\n", _box.order(), index(), pending));
 
 	if (pending->rt_midibuffer) {
 		if (playing) {
@@ -2431,7 +2434,7 @@ MIDITrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& b
 		}
 	}
 
-	adjust_bounds (pending->play_start, pending->play_end, pending->length, false);
+	adjust_bounds (pending->play_start, pending->play_end, pending->length, true);
 
 	pending->rt_midibuffer = old_rtmb;
 	old_pending_swap.store (pending);
@@ -3177,6 +3180,7 @@ MIDITrigger::model_contents_changed ()
 
 	/* And set it. RT thread will find this and do what needs to be done */
 
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 pushed pending swap @ %3 for model contents change\n", _box.order(), index(), pending));
 	pending_swap.store (pending);
 
 	/* Clean up a previous RT midi buffer swap */
@@ -3201,6 +3205,7 @@ MIDITrigger::bounds_changed (Temporal::timepos_t const & start, Temporal::timepo
 
 	/* And set it. RT thread will find this and do what needs to be done */
 
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 pushed pending swap @ %3 for bounds change\n", _box.order(), index(), pending));
 	pending_swap.store (pending);
 
 	/* Clean up a previous RT midi buffer swap (if there is one) */
