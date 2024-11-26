@@ -37,6 +37,7 @@
 #include "port_insert_ui.h"
 #include "route_properties_box.h"
 #include "timers.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -126,7 +127,7 @@ RoutePropertiesBox::add_processor_to_display (std::weak_ptr<Processor> w)
 		return;
 	}
 #ifdef MIXBUS
-	if (std::dynamic_pointer_cast<PluginInsert> (pib)->is_channelstrip ()) {
+	if (std::dynamic_pointer_cast<PluginInsert> (pib)->channelstrip () != Processor::None) {
 		return;
 	}
 #endif
@@ -137,6 +138,7 @@ RoutePropertiesBox::add_processor_to_display (std::weak_ptr<Processor> w)
 	ArdourWidgets::Frame* frame = new ArdourWidgets::Frame ();
 	frame->set_label (p->display_name ());
 	frame->add (*plugin_ui);
+	frame->set_padding (0);
 	_box.pack_start (*frame, false, false);
 	plugin_ui->show ();
 }
@@ -154,12 +156,13 @@ RoutePropertiesBox::refill_processors ()
 	if (_proc_uis.empty ()) {
 		_scroller.hide ();
 	} else {
-		int h = 60;
+		float ui_scale = std::max<float> (1.f, UIConfiguration::instance().get_ui_scale());
+		int h = 100 * ui_scale;
 		for (auto const& ui : _proc_uis) {
-			h = std::max<int> (h, ui->get_preferred_height () + /* frame label */ 22);
+			h = std::max<int> (h, ui->get_preferred_height () + /* frame label */ 30 * ui_scale);
 		}
-		h = std::min<int> (h, 300);
-		_scroller.set_size_request (-1, h);
+		h = std::min<int> (h, 300 * ui_scale);
+		_box.set_size_request (-1, h);
 		_scroller.show_all ();
 	}
 }

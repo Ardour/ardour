@@ -45,7 +45,6 @@
 #include <gtkmm/menu.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/socket.h>
-#include <gtkmm/table.h>
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/viewport.h>
 
@@ -284,10 +283,6 @@ private:
 		ControlUI (const Evoral::Parameter& param);
 		~ControlUI ();
 
-		/* layout */
-		Gtk::Table* knobtable;
-		int x0, x1, y0, y1;
-
 		bool short_autostate; // modify with set_short_autostate below
 	};
 
@@ -308,8 +303,7 @@ private:
 	                             const ARDOUR::ParameterDescriptor&           desc,
 	                             std::shared_ptr<ARDOUR::AutomationControl> mcontrol,
 	                             float                                        value,
-	                             bool                                         is_input,
-	                             bool                                         use_knob = false);
+	                             bool                                         is_input);
 
 	void ui_parameter_changed (ControlUI* cui);
 	void update_control_display (ControlUI* cui);
