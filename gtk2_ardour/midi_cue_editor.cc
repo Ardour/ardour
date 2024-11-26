@@ -510,7 +510,7 @@ MidiCueEditor::canvas_cue_end_event (GdkEvent* event, ArdourCanvas::Item* item)
 void
 MidiCueEditor::set_trigger_start (Temporal::timepos_t const & p)
 {
-	ref.trigger()->the_region()->set_start (p);
+	ref.trigger()->the_region()->trim_front (p);
 }
 
 Gtk::Widget&
