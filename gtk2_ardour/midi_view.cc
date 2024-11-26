@@ -304,6 +304,7 @@ MidiView::region_going_away ()
 	_midi_region.reset ();
 	_model.reset ();
 	connections_requiring_model.drop_connections();
+	region_connections.drop_connections ();
 }
 
 void
@@ -316,7 +317,8 @@ MidiView::set_region (std::shared_ptr<MidiRegion> mr)
 		return;
 	}
 
-	_midi_region->DropReferences.connect (region_going_away_connection, invalidator (*this), std::bind (&MidiView::region_going_away, this), gui_context());
+	_midi_region->DropReferences.connect (region_connections, invalidator (*this), std::bind (&MidiView::region_going_away, this), gui_context());
+	_midi_region->PropertyChanged.connect (region_connections, invalidator (*this), std::bind (&MidiView::region_resized, this, _1), gui_context());
 
 	set_model (_midi_region->midi_source (0)->model());
 }
@@ -1597,7 +1599,14 @@ MidiView::~MidiView ()
 void
 MidiView::region_resized (const PropertyChange& what_changed)
 {
-	// XXX RegionView::region_resized(what_changed); // calls RegionView::set_duration()
+	PropertyChange interests;
+	interests.add (ARDOUR::Properties::start);
+	interests.add (ARDOUR::Properties::length);
+
+	if (what_changed.contains (interests)) {
+		size_start_rect ();
+		size_end_rect ();
+	}
 }
 
 void

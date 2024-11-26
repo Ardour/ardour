@@ -452,7 +452,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	PBD::ScopedConnectionList connections_requiring_model;
 	PBD::ScopedConnection track_going_away_connection;
-	PBD::ScopedConnection region_going_away_connection;
+	PBD::ScopedConnectionList region_connections;
 	void track_going_away ();
 	void region_going_away ();
 
