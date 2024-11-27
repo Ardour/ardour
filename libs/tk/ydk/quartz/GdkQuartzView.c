@@ -27,8 +27,14 @@
 
 @implementation GdkQuartzView
 
+static int showInvalidation = 0;
+
 -(id)initWithFrame: (NSRect)frameRect
 {
+#ifndef NDEBUG
+  showInvalidation = (int) g_getenv ("GDK_SHOW_QUARTZ_INVALIDATION");
+#endif
+
   if ((self = [super initWithFrame: frameRect]))
     {
       markedRange = NSMakeRange (NSNotFound, 0);
@@ -697,6 +703,10 @@
   int i;
   GdkRegion *region;
   gboolean full_draw;
+#ifndef NDEBUG
+  CGContextRef cg;
+  double r, g, b;
+#endif
 
   if (GDK_WINDOW_DESTROYED (gdk_window))
     return;
@@ -749,32 +759,45 @@
       return;
     }
 
-  if (!impl->needs_display_region || gdk_quartz_get_use_cocoa_invalidation() || full_draw) {
-    [self getRectsBeingDrawn: &drawn_rects count: &count];
-    region = gdk_region_new ();
+    if (!impl->needs_display_region || gdk_quartz_get_use_cocoa_invalidation() || full_draw) {
+       gint nrects;
+       GdkRectangle* rects;
+       [self getRectsBeingDrawn: &drawn_rects count: &count];
+       // printf ("quartz says there are %d rects\n", count);
+       region = gdk_region_new ();
 
-    for (i = 0; i < count; i++)
-      {
-	gdk_rect.x = drawn_rects[i].origin.x;
-	gdk_rect.y = drawn_rects[i].origin.y;
-	gdk_rect.width = drawn_rects[i].size.width;
-	gdk_rect.height = drawn_rects[i].size.height;
+#ifndef NDEBUG
+       if (showInvalidation) {
+	       r = 1.0;
+	       g = 0.0;
+	       b = 0.0;
+       }
+#endif
 
-	gdk_region_union_with_rect (region, &gdk_rect);
+       for (i = 0; i < count; i++) {
+	 gdk_rect.x = drawn_rects[i].origin.x;
+	 gdk_rect.y = drawn_rects[i].origin.y;
+	 gdk_rect.width = drawn_rects[i].size.width;
+	 gdk_rect.height = drawn_rects[i].size.height;
+
+	 gdk_region_union_with_rect (region, &gdk_rect);
+       }
+    } else {
+	    gint nrects;
+	    GdkRectangle* rects;
+
+#ifndef NDEBUG
+       if (showInvalidation) {
+	       r = 0.0;
+	       g = 1.0;
+	       b = 0.0;
+       }
+#endif
+       region = impl->needs_display_region;
     }
-  } else {
-    region = impl->needs_display_region;
-  }
 
-#if 0
-  gint nrects;
-  GdkRectangle* rects;
-
-  gdk_region_get_rectangles (region, &rects, &nrects);
-  printf ("%p drawRect with %d rects\n", impl, nrects);
-  for (gint n = 0; n < nrects; ++n) {
-    printf ("\t%d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
-  }
+#ifndef NDEBUG
+    GdkRegion* copy = gdk_region_copy (region);
 #endif
 
   impl->in_paint_rect_count++;
@@ -782,12 +805,53 @@
   _gdk_window_process_updates_recurse (gdk_window, region);
   impl->in_paint_rect_count--;
 
-  if (impl->needs_display_region)
-    {
-      impl->needs_display_region = NULL;
-    }
+
+#ifndef NDEBUG
+  if (showInvalidation) {
+	  gint nrects;
+	  GdkRectangle* rects;
+
+	  [NSGraphicsContext saveGraphicsState];
+	  cg = [[NSGraphicsContext currentContext] CGContext];
+
+	  CGContextSetRGBFillColor (cg, 0.4, 0., 0.3, 0.2);
+
+	  /* The GDK process updates call tree will have removed child window
+	   * areas from the expose region. This will show up whatever is left
+	   */
+
+	  gdk_region_get_rectangles (region, &rects, &nrects);
+	  // printf ("%p leftover %d rects after expose\n", impl, nrects);
+	  for (gint n = 0; n < nrects; ++n) {
+		  CGContextFillRect (cg, NSMakeRect(rects[n].x, rects[n].y, rects[n].width, rects[n].height));
+		  // printf ("\t%d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
+	  }
+
+	  /* Now draw the rectangles making up the region where the process
+	   * updates call tree should have drawn ("exposed"). Quartz-driven redraws will
+	   * use a red line; GDK-driven redraws will use a green line.
+	   */
+
+	  CGContextSetLineWidth (cg, 1.);
+	  CGContextSetRGBStrokeColor (cg, r, g, b, 1.);
+
+	  gdk_region_get_rectangles (copy, &rects, &nrects);
+	  // printf ("%p drawRect with %d rects in %p (region from gdk? %d)\n", impl, nrects, region, region == impl->needs_display_region);
+	  for (gint n = 0; n < nrects; ++n) {
+		  CGContextStrokeRect (cg, NSMakeRect(rects[n].x, rects[n].y, rects[n].width, rects[n].height));
+		  // printf ("\t%d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
+	  }
+
+	  [NSGraphicsContext restoreGraphicsState];
+  }
+#endif
+
+  impl->needs_display_region = NULL;
 
   gdk_region_destroy (region);
+#ifndef NDEBUG
+  gdk_region_destroy (copy);
+#endif
 
   if (needsInvalidateShadow)
     {
