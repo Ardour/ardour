@@ -51,12 +51,17 @@ private:
 	void drop_plugin_uis ();
 	void refill_processors ();
 	void add_processor_to_display (std::weak_ptr<ARDOUR::Processor> w);
+	void idle_refill_processors ();
+
+	static int _idle_refill_processors (gpointer);
 
 	Gtk::ScrolledWindow _scroller;
 	Gtk::HBox           _box;
 
 	std::shared_ptr<ARDOUR::Route> _route;
 	std::vector <GenericPluginUI*> _proc_uis;
+
+	int _idle_refill_processors_id;
 
 	PBD::ScopedConnectionList _processor_connections;
 	PBD::ScopedConnectionList _route_connections;

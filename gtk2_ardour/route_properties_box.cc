@@ -46,6 +46,7 @@ using namespace ARDOUR;
 using namespace ArdourWidgets;
 
 RoutePropertiesBox::RoutePropertiesBox ()
+	: _idle_refill_processors_id (-1)
 {
 	_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
 	_scroller.add (_box);
@@ -80,7 +81,7 @@ RoutePropertiesBox::set_route (std::shared_ptr<Route> r)
 	_route = r;
 	_route_connections.drop_connections ();
 
-	_route->processors_changed.connect (_route_connections, invalidator (*this), std::bind (&RoutePropertiesBox::refill_processors, this), gui_context());
+	_route->processors_changed.connect (_route_connections, invalidator (*this), std::bind (&RoutePropertiesBox::idle_refill_processors, this), gui_context());
 	_route->PropertyChanged.connect (_route_connections, invalidator (*this), std::bind (&RoutePropertiesBox::property_changed, this, _1), gui_context ());
 	_route->DropReferences.connect (_route_connections, invalidator (*this), std::bind (&RoutePropertiesBox::drop_route, this), gui_context());
 	refill_processors ();
@@ -132,7 +133,11 @@ RoutePropertiesBox::add_processor_to_display (std::weak_ptr<Processor> w)
 	}
 #endif
 	GenericPluginUI* plugin_ui = new GenericPluginUI (pib, true, true);
-	pib->DropReferences.connect (_processor_connections, invalidator (*this), std::bind (&RoutePropertiesBox::refill_processors, this), gui_context());
+	if (plugin_ui->empty ()) {
+		delete plugin_ui;
+		return;
+	}
+	//pib->DropReferences.connect (_processor_connections, invalidator (*this), std::bind (&RoutePropertiesBox::refill_processors, this), gui_context());
 	_proc_uis.push_back (plugin_ui);
 
 	ArdourWidgets::Frame* frame = new ArdourWidgets::Frame ();
@@ -141,6 +146,21 @@ RoutePropertiesBox::add_processor_to_display (std::weak_ptr<Processor> w)
 	frame->set_padding (0);
 	_box.pack_start (*frame, false, false);
 	plugin_ui->show ();
+}
+
+int
+RoutePropertiesBox::_idle_refill_processors (gpointer arg)
+{
+	static_cast<RoutePropertiesBox*>(arg)->refill_processors ();
+	return 0;
+}
+
+void
+RoutePropertiesBox::idle_refill_processors ()
+{
+	if (_idle_refill_processors_id) {
+		_idle_refill_processors_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE + 10, _idle_refill_processors, this, NULL);
+	}
 }
 
 void
@@ -165,4 +185,5 @@ RoutePropertiesBox::refill_processors ()
 		_box.set_size_request (-1, h);
 		_scroller.show_all ();
 	}
+	_idle_refill_processors_id = -1;
 }
