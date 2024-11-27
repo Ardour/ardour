@@ -178,6 +178,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	virtual void set_selected_midi_region_view (MidiRegionView&);
 
+	virtual void temporal_zoom_step (bool zoom_out) = 0;
 	samplecnt_t get_current_zoom () const { return samples_per_pixel; }
 
 	double timeline_origin() const { return _timeline_origin; }

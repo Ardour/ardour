@@ -1816,6 +1816,12 @@ MidiCueEditor::set (TriggerReference & tref)
 }
 
 void
+MidiCueEditor::temporal_zoom_step (bool zoom_out)
+{
+	std::cerr << "MCE: zoom step out ? " << zoom_out << std::endl;
+}
+
+void
 MidiCueEditor::unset ()
 {
 	_update_connection.disconnect();

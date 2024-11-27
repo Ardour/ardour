@@ -2713,12 +2713,12 @@ Editor::setup_toolbar ()
 
 	zoom_in_button.set_name ("zoom button");
 	zoom_in_button.set_icon (ArdourIcon::ZoomIn);
-	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-in"));
+	act = ActionManager::get_action (X_("Editing"), X_("temporal-zoom-in"));
 	zoom_in_button.set_related_action (act);
 
 	zoom_out_button.set_name ("zoom button");
 	zoom_out_button.set_icon (ArdourIcon::ZoomOut);
-	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-out"));
+	act = ActionManager::get_action (X_("Editing"), X_("temporal-zoom-out"));
 	zoom_out_button.set_related_action (act);
 
 	zoom_out_full_button.set_name ("zoom button");
