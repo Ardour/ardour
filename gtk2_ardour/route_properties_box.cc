@@ -98,6 +98,10 @@ RoutePropertiesBox::drop_route ()
 	drop_plugin_uis ();
 	_route.reset ();
 	_route_connections.drop_connections ();
+	if (_idle_refill_processors_id >= 0) {
+		g_source_destroy (g_main_context_find_source_by_id (NULL, _idle_refill_processors_id));
+		_idle_refill_processors_id = -1;
+	}
 }
 
 void
@@ -158,7 +162,7 @@ RoutePropertiesBox::_idle_refill_processors (gpointer arg)
 void
 RoutePropertiesBox::idle_refill_processors ()
 {
-	if (_idle_refill_processors_id) {
+	if (_idle_refill_processors_id < 0) {
 		_idle_refill_processors_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE + 10, _idle_refill_processors, this, NULL);
 	}
 }
@@ -172,6 +176,12 @@ RoutePropertiesBox::refill_processors ()
 	drop_plugin_uis ();
 
 	assert (_route);
+
+	if (!_route) {
+		_idle_refill_processors_id = -1;
+		return;
+	}
+
 	_route->foreach_processor (sigc::mem_fun (*this, &RoutePropertiesBox::add_processor_to_display));
 	if (_proc_uis.empty ()) {
 		_scroller.hide ();
