@@ -224,8 +224,15 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	double time_to_pixel (Temporal::timepos_t const & pos) const;
 	double time_to_pixel_unrounded (Temporal::timepos_t const & pos) const;
 
+	double time_delta_to_pixel (Temporal::timepos_t const& start, Temporal::timepos_t const& end) const;
+
+	/* deprecated, prefer time_delta_to_pixel
+	 * first taking the duation and then rounding leads to different results:
+	 * duration_to_pixels (start.distance(end)) != time_to_pixel (end) - time_to_pixel (start)
+	 */
 	double duration_to_pixels (Temporal::timecnt_t const & pos) const;
 	double duration_to_pixels_unrounded (Temporal::timecnt_t const & pos) const;
+
 	samplecnt_t pixel_duration_to_samples (double pixels) const {
 		return pixels * samples_per_pixel;
 	}

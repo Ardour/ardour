@@ -1328,6 +1328,12 @@ EditingContext::time_to_pixel_unrounded (timepos_t const & pos) const
 }
 
 double
+EditingContext::time_delta_to_pixel (timepos_t const& start, timepos_t const& end) const
+{
+	return sample_to_pixel (end.samples()) - sample_to_pixel (start.samples ());
+}
+
+double
 EditingContext::duration_to_pixels (timecnt_t const & dur) const
 {
 	return sample_to_pixel (dur.samples());
