@@ -1033,7 +1033,7 @@ RegionView::update_coverage_frame (LayerDisplay d)
 
 	if (cr) {
 		/* finish off the last rectangle */
-		cr->set_x1 (trackview.editor().duration_to_pixels (position.distance (end)));
+		cr->set_x1 (trackview.editor().time_delta_to_pixel (position, end));
 	}
 
 	if (frame_handle_start) {

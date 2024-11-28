@@ -799,10 +799,7 @@ TimeAxisViewItem::set_samples_per_pixel (double fpp)
 	samples_per_pixel = fpp;
 	set_position (this->get_position(), this);
 
-	double end_pixel = trackview.editor().time_to_pixel (time_position + get_duration());
-	double first_pixel = trackview.editor().time_to_pixel (time_position);
-
-	reset_width_dependent_items (end_pixel - first_pixel);
+	reset_width_dependent_items (trackview.editor().time_delta_to_pixel (time_position, time_position + get_duration()));
 }
 
 void
