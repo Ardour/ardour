@@ -2424,6 +2424,14 @@ LuaBindings::common (lua_State* L)
 		// TODO add uint32_t cast, add operator==  !=
 		.endClass()
 
+		/* libardour class-enums */
+		.beginClass <AnyTime> ("AnyTime")
+		.addConstructor <void (*) (std::string)> ()
+		.addFunction ("str", &AnyTime::str)
+		.addFunction ("not_zero", &AnyTime::not_zero)
+		//.addData ("type", &AnyTime::type)
+		.endClass()
+
 		/* libardour enums */
 		.beginNamespace ("PluginType")
 		.addFunction ("name", &PluginManager::plugin_type_name)
@@ -2538,6 +2546,12 @@ LuaBindings::common (lua_State* L)
 		.addConst ("MonitoringInput", ARDOUR::MonitorState(MonitoringInput))
 		.addConst ("MonitoringDisk", ARDOUR::MonitorState(MonitoringDisk))
 		.addConst ("MonitoringCue", ARDOUR::MonitorState(MonitoringCue))
+		.endNamespace ()
+
+		.beginNamespace ("FastWindOp")
+		.addConst ("FastWindOff", ARDOUR::FastWindOp(FastWindOff))
+		.addConst ("FastWindVarispeed", ARDOUR::FastWindOp(FastWindVarispeed))
+		.addConst ("FastWindLocate", ARDOUR::FastWindOp(FastWindLocate))
 		.endNamespace ()
 
 		.beginNamespace ("MutePoint")
