@@ -2652,6 +2652,12 @@ AudioRegion::apply_region_fx (BufferSet& bufs, samplepos_t start_sample, samplep
 		return;
 	}
 
+	ProcessThread* pt = 0;
+	if (!ProcessThread::have_thread_buffers ()) {
+		pt = new ProcessThread ();
+		pt->get_buffers ();
+	}
+
 	pframes_t block_size = _session.get_block_size ();
 	if (_fx_block_size != block_size) {
 		_fx_block_size = block_size;
@@ -2677,7 +2683,7 @@ AudioRegion::apply_region_fx (BufferSet& bufs, samplepos_t start_sample, samplep
 				lm.release ();
 				/* this triggers a re-read */
 				const_cast<AudioRegion*>(this)->remove_plugin (rfx);
-				return;
+				goto out;
 			}
 			remain -= run;
 			offset += run;
@@ -2698,4 +2704,10 @@ AudioRegion::apply_region_fx (BufferSet& bufs, samplepos_t start_sample, samplep
 	}
 	_fx_pos = end_sample;
 	_fx_latent_read = false;
+
+out:
+	if (pt) {
+		pt->drop_buffers ();
+		delete pt;
+	}
 }
