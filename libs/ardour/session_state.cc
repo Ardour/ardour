@@ -179,7 +179,7 @@ Session::pre_engine_init (string fullpath)
 	   definition.
 	*/
 
-	timerclear (&last_mmc_step);
+	_last_mmc_step = 0;
 	_processing_prohibited.store (0);
 	_record_status.store (Disabled);
 	_playback_load.store (100);
