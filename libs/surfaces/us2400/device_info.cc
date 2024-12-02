@@ -334,8 +334,7 @@ DeviceInfo::reload_device_info ()
 		return;
 	}
 
-	for (vector<string>::iterator i = devinfos.begin(); i != devinfos.end(); ++i) {
-		string fullpath = *i;
+	for (string& fullpath : devinfos) {
 		DeviceInfo di; // has to be initial every loop or info from last added.
 
 		XMLTree tree;

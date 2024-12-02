@@ -93,12 +93,12 @@ Speakers::operator= (const Speakers& s)
 void
 Speakers::dump_speakers (ostream& o)
 {
-	for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
-		o << "Speaker " << (*i).id << " @ "
-		  << (*i).coords().x << ", " << (*i).coords().y << ", " << (*i).coords().z
-		  << " azimuth " << (*i).angles().azi
-		  << " elevation " << (*i).angles().ele
-		  << " distance " << (*i).angles().length
+	for (Speaker& i : _speakers) {
+		o << "Speaker " << i.id << " @ "
+		  << i.coords().x << ", " << i.coords().y << ", " << i.coords().z
+		  << " azimuth " << i.angles().azi
+		  << " elevation " << i.angles().ele
+		  << " distance " << i.angles().length
 		  << endl;
 	}
 }
@@ -138,9 +138,9 @@ Speakers::remove_speaker (int id)
 void
 Speakers::move_speaker (int id, const AngularVector& new_position)
 {
-	for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
-		if ((*i).id == id) {
-			(*i).move (new_position);
+	for (Speaker& i : _speakers) {
+		if (i.id == id) {
+			i.move (new_position);
 			update ();
 			break;
 		}
@@ -246,12 +246,12 @@ Speakers::get_state () const
 {
         XMLNode* node = new XMLNode (X_("Speakers"));
 
-        for (vector<Speaker>::const_iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
+        for (const Speaker& i : _speakers) {
                 XMLNode* speaker = new XMLNode (X_("Speaker"));
 
-                speaker->set_property (X_("azimuth"), (*i).angles().azi);
-                speaker->set_property (X_("elevation"), (*i).angles().ele);
-                speaker->set_property (X_("distance"), (*i).angles().length);
+                speaker->set_property (X_("azimuth"), i.angles().azi);
+                speaker->set_property (X_("elevation"), i.angles().ele);
+                speaker->set_property (X_("distance"), i.angles().length);
 
                 node->add_child_nocopy (*speaker);
         }

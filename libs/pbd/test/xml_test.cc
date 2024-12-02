@@ -73,9 +73,7 @@ XMLTest::testXMLFilenameEncoding ()
 	// on Windows and that writing the xml files should be successful for all
 	// the filenames in the test data set but it should also work for other
 	// platforms as well
-	for (vector<string>::iterator i = i18n_files.begin (); i != i18n_files.end ();
-	     ++i) {
-		string input_path = *i;
+	for (string& input_path : i18n_files) {
 		string output_filename = Glib::path_get_basename (input_path);
 		string output_path = Glib::build_filename (output_dir, output_filename);
 

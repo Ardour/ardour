@@ -56,8 +56,8 @@ PathsDialog::PathsDialog (Gtk::Window& parent, std::string title, std::string cu
 	paths_list_view.set_column_title(0,"Path");
 
 	std::vector <std::string> a = PBD::parse_path(current_paths);
-	for(vector<std::string>::const_iterator i = a.begin(); i != a.end(); ++i) {
-		paths_list_view.append(*i);
+	for (const std::string& i : a) {
+		paths_list_view.append(i);
 	}
 
 	paths_list_view.get_selection()->signal_changed().connect (mem_fun (*this, &PathsDialog::selection_changed));
@@ -166,7 +166,7 @@ PathsDialog::set_default() {
 
 	paths_list_view.clear_items();
 	std::vector <std::string> a = PBD::parse_path(_default_paths);
-	for(vector<std::string>::const_iterator i = a.begin(); i != a.end(); ++i) {
-		paths_list_view.append(*i);
+	for (const std::string& i : a) {
+		paths_list_view.append(i);
 	}
 }

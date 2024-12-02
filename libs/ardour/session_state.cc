@@ -439,8 +439,8 @@ Session::raid_path () const
 {
 	Searchpath raid_search_path;
 
-	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		raid_search_path += (*i).path;
+	for (const space_and_path& i : session_dirs) {
+		raid_search_path += i.path;
 	}
 
 	return raid_search_path.to_string ();
@@ -480,8 +480,8 @@ Session::setup_raid_path (string path)
 bool
 Session::path_is_within_session (const std::string& path)
 {
-	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		if (PBD::path_is_within (i->path, path)) {
+	for (const space_and_path& i : session_dirs) {
+		if (PBD::path_is_within (i.path, path)) {
 			return true;
 		}
 	}
@@ -1297,8 +1297,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 	list<XMLNode*> midi_port_nodes = _midi_ports->get_midi_port_states();
 	if (!midi_port_nodes.empty()) {
 		XMLNode* midi_port_stuff = new XMLNode ("MIDIPorts");
-		for (list<XMLNode*>::const_iterator n = midi_port_nodes.begin(); n != midi_port_nodes.end(); ++n) {
-			midi_port_stuff->add_child_nocopy (**n);
+		for (XMLNode* const& n : midi_port_nodes) {
+			midi_port_stuff->add_child_nocopy (*n);
 		}
 		node->add_child_nocopy (*midi_port_stuff);
 	}
@@ -1535,8 +1535,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 	_playlists->add_state (node, save_template, !only_used_assets);
 
 	child = node->add_child ("RouteGroups");
-	for (list<RouteGroup *>::const_iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
-		child->add_child_nocopy ((*i)->get_state());
+	for (RouteGroup * const& i : _route_groups) {
+		child->add_child_nocopy (i->get_state());
 	}
 
 	if (_click_io) {
@@ -2949,21 +2949,21 @@ Session::refresh_disk_space ()
 	_total_free_4k_blocks = 0;
 	_total_free_4k_blocks_uncertain = false;
 
-	for (vector<space_and_path>::iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+	for (space_and_path& i : session_dirs) {
 #if defined(__NetBSD__)
 		struct statvfs statfsbuf;
 
-		statvfs (i->path.c_str(), &statfsbuf);
+		statvfs (i.path.c_str(), &statfsbuf);
 #else
 		struct statfs statfsbuf;
 
-		statfs (i->path.c_str(), &statfsbuf);
+		statfs (i.path.c_str(), &statfsbuf);
 #endif
 		double const scale = statfsbuf.f_bsize / 4096.0;
 
 		/* See if this filesystem is read-only */
 		struct statvfs statvfsbuf;
-		statvfs (i->path.c_str(), &statvfsbuf);
+		statvfs (i.path.c_str(), &statvfsbuf);
 
 		/* f_bavail can be 0 if it is undefined for whatever
 		   filesystem we are looking at; Samba shares mounted
@@ -2971,27 +2971,25 @@ Session::refresh_disk_space ()
 		*/
 		if (statfsbuf.f_bavail == 0) {
 			/* block count unknown */
-			i->blocks = 0;
-			i->blocks_unknown = true;
+			i.blocks = 0;
+			i.blocks_unknown = true;
 		} else if (statvfsbuf.f_flag & ST_RDONLY) {
 			/* read-only filesystem */
-			i->blocks = 0;
-			i->blocks_unknown = false;
+			i.blocks = 0;
+			i.blocks_unknown = false;
 		} else {
 			/* read/write filesystem with known space */
-			i->blocks = (uint32_t) floor (statfsbuf.f_bavail * scale);
-			i->blocks_unknown = false;
+			i.blocks = (uint32_t) floor (statfsbuf.f_bavail * scale);
+			i.blocks_unknown = false;
 		}
 
-		_total_free_4k_blocks += i->blocks;
-		if (i->blocks_unknown) {
+		_total_free_4k_blocks += i.blocks;
+		if (i.blocks_unknown) {
 			_total_free_4k_blocks_uncertain = true;
 		}
 	}
 #elif defined PLATFORM_WINDOWS
 	vector<string> scanned_volumes;
-	vector<string>::iterator j;
-	vector<space_and_path>::iterator i;
 	DWORD nSectorsPerCluster, nBytesPerSector,
 	      nFreeClusters, nTotalClusters;
 	char disk_drive[4];
@@ -2999,8 +2997,8 @@ Session::refresh_disk_space ()
 
 	_total_free_4k_blocks = 0;
 
-	for (i = session_dirs.begin(); i != session_dirs.end(); i++) {
-		strncpy (disk_drive, (*i).path.c_str(), 3);
+	for (space_and_path& i : session_dirs) {
+		strncpy (disk_drive, i.path.c_str(), 3);
 		disk_drive[3] = 0;
 		strupr(disk_drive);
 
@@ -3011,8 +3009,8 @@ Session::refresh_disk_space ()
 			int64_t nFreeBytes = nBytesPerCluster * (int64_t)nFreeClusters;
 			i->blocks = (uint32_t)(nFreeBytes / 4096);
 
-			for (j = scanned_volumes.begin(); j != scanned_volumes.end(); j++) {
-				if (0 == j->compare(disk_drive)) {
+			for (string& j : scanned_volumes) {
+				if (0 == j.compare(disk_drive)) {
 					volume_found = true;
 					break;
 				}
@@ -3020,7 +3018,7 @@ Session::refresh_disk_space ()
 
 			if (!volume_found) {
 				scanned_volumes.push_back(disk_drive);
-				_total_free_4k_blocks += i->blocks;
+				_total_free_4k_blocks += i.blocks;
 			}
 		}
 	}
@@ -3263,19 +3261,14 @@ Session::possible_states () const
 RouteGroup*
 Session::new_route_group (const std::string& name)
 {
-	RouteGroup* rg = NULL;
-
-	for (std::list<RouteGroup*>::const_iterator i = _route_groups.begin (); i != _route_groups.end (); ++i) {
-		if ((*i)->name () == name) {
-			rg = *i;
-			break;
+	for (RouteGroup* const& rg : _route_groups) {
+		if (rg->name () == name) {
+			return rg;
 		}
 	}
 
-	if (!rg) {
-		rg = new RouteGroup (*this, name);
-		add_route_group (rg);
-	}
+	RouteGroup* rg = new RouteGroup (*this, name);
+	add_route_group (rg);
 	return (rg);
 }
 
@@ -3321,11 +3314,9 @@ Session::reorder_route_groups (list<RouteGroup*> groups)
 RouteGroup *
 Session::route_group_by_name (string name)
 {
-	list<RouteGroup *>::iterator i;
-
-	for (i = _route_groups.begin(); i != _route_groups.end(); ++i) {
-		if ((*i)->name() == name) {
-			return* i;
+	for (RouteGroup*& i : _route_groups) {
+		if (i->name() == name) {
+			return i;
 		}
 	}
 	return 0;
@@ -3455,14 +3446,14 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 	this_snapshot_path = Glib::build_filename (_path, legalize_for_path (_current_snapshot_name));
 	this_snapshot_path += statefile_suffix;
 
-	for (vector<string>::iterator i = state_files.begin(); i != state_files.end(); ++i) {
+	for (string& i : state_files) {
 
-		if (exclude_this_snapshot && *i == this_snapshot_path) {
+		if (exclude_this_snapshot && i == this_snapshot_path) {
 			continue;
 
 		}
 
-		if (find_all_sources (*i, result) < 0) {
+		if (find_all_sources (i, result) < 0) {
 			return -1;
 		}
 	}
@@ -3612,7 +3603,6 @@ Session::cleanup_sources (CleanupReport& rep)
 	vector<string> candidates;
 	vector<string> unused;
 	set<string> sources_used_by_all_snapshots;
-	string spath;
 	int ret = -1;
 	string tmppath1;
 	string tmppath2;
@@ -3669,8 +3659,8 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	/* build a list of all the possible audio directories for the session */
 
-	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		SessionDirectory sdir ((*i).path);
+	for (const space_and_path& i : session_dirs) {
+		SessionDirectory sdir (i.path);
 		asp += sdir.sound_path();
 	}
 	audio_path += asp.to_string();
@@ -3678,8 +3668,8 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	/* build a list of all the possible midi directories for the session */
 
-	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		SessionDirectory sdir ((*i).path);
+	for (const space_and_path& i : session_dirs) {
+		SessionDirectory sdir (i.path);
 		msp += sdir.midi_path();
 	}
 	midi_path += msp.to_string();
@@ -3778,15 +3768,14 @@ Session::cleanup_sources (CleanupReport& rep)
 	cerr << "Candidates: " << candidates.size() << endl;
 	cerr << "Used by others: " << sources_used_by_all_snapshots.size() << endl;
 
-	for (vector<string>::iterator x = candidates.begin(); x != candidates.end(); ++x) {
+	for (string& spath : candidates) {
 
 		bool used = false;
-		spath = *x;
 
-		for (set<string>::iterator i = sources_used_by_all_snapshots.begin(); i != sources_used_by_all_snapshots.end(); ++i) {
+		for (const string& i : sources_used_by_all_snapshots) {
 
 			tmppath1 = canonical_path (spath);
-			tmppath2 = canonical_path ((*i));
+			tmppath2 = canonical_path (i);
 
 
 			if (tmppath1 == tmppath2) {
@@ -3810,7 +3799,7 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	/* now try to move all unused files into the "dead" directory(ies) */
 
-	for (vector<string>::iterator x = unused.begin(); x != unused.end(); ++x) {
+	for (string& x : unused) {
 		GStatBuf statbuf;
 
 		string newpath;
@@ -3820,18 +3809,18 @@ Session::cleanup_sources (CleanupReport& rep)
 		 * on whichever filesystem it was already on.
 		 */
 
-		if ((*x).find ("/sounds/") != string::npos) {
+		if (x.find ("/sounds/") != string::npos) {
 
 			/* old school, go up 1 level */
 
-			newpath = Glib::path_get_dirname (*x);      // "sounds"
+			newpath = Glib::path_get_dirname (x);      // "sounds"
 			newpath = Glib::path_get_dirname (newpath); // "session-name"
 
 		} else {
 
 			/* new school, go up 4 levels */
 
-			newpath = Glib::path_get_dirname (*x);      // "audiofiles" or "midifiles"
+			newpath = Glib::path_get_dirname (x);      // "audiofiles" or "midifiles"
 			newpath = Glib::path_get_dirname (newpath); // "session-name"
 			newpath = Glib::path_get_dirname (newpath); // "interchange"
 			newpath = Glib::path_get_dirname (newpath); // "session-dir"
@@ -3844,7 +3833,7 @@ Session::cleanup_sources (CleanupReport& rep)
 			return -1;
 		}
 
-		newpath = Glib::build_filename (newpath, Glib::path_get_basename ((*x)));
+		newpath = Glib::build_filename (newpath, Glib::path_get_basename (x));
 
 		if (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS)) {
 
@@ -3872,15 +3861,15 @@ Session::cleanup_sources (CleanupReport& rep)
 
 		}
 
-		if ((g_stat ((*x).c_str(), &statbuf) != 0) || (::g_rename ((*x).c_str(), newpath.c_str()) != 0)) {
-			error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"), (*x),
+		if ((g_stat (x.c_str(), &statbuf) != 0) || (::g_rename (x.c_str(), newpath.c_str()) != 0)) {
+			error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"), x,
 					newpath, g_strerror (errno)) << endmsg;
 			continue;
 		}
 
 		/* see if there an easy to find peakfile for this file, and remove it.  */
 
-		string base = Glib::path_get_basename (*x);
+		string base = Glib::path_get_basename (x);
 		base += "%A"; /* this is what we add for the channel suffix of all native files,
 									 * or for the first channel of embedded files. it will miss
 									 * some peakfiles for other channels
@@ -3897,7 +3886,7 @@ Session::cleanup_sources (CleanupReport& rep)
 			}
 		}
 
-		rep.paths.push_back (*x);
+		rep.paths.push_back (x);
 		rep.space += statbuf.st_size;
 	}
 
@@ -3926,13 +3915,8 @@ Session::cleanup_trash_sources (CleanupReport& rep)
 {
 	// FIXME: needs adaptation for MIDI
 
-	vector<space_and_path>::iterator i;
-	string dead_dir;
-
-	for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-
-		dead_dir = Glib::build_filename ((*i).path, dead_dir_name);
-
+	for (space_and_path& i : session_dirs) {
+		string dead_dir = Glib::build_filename (i.path, dead_dir_name);
 		clear_directory (dead_dir, &rep.space, &rep.paths);
 	}
 
@@ -4642,9 +4626,9 @@ Session::rename (const std::string& new_name)
 	 * already exist ...
 	 */
 
-	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+	for (const space_and_path& i : session_dirs) {
 
-		oldstr = (*i).path;
+		oldstr = i.path;
 
 		/* this is a stupid hack because Glib::path_get_dirname() is
 		 * lexical-only, and so passing it /a/b/c/ gives a different
@@ -4668,11 +4652,11 @@ Session::rename (const std::string& new_name)
 
 	first = true;
 
-	for (vector<space_and_path>::iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+	for (space_and_path& i : session_dirs) {
 
 		vector<string> v;
 
-		oldstr = (*i).path;
+		oldstr = i.path;
 
 		/* this is a stupid hack because Glib::path_get_dirname() is
 		 * lexical-only, and so passing it /a/b/c/ gives a different
@@ -4693,8 +4677,8 @@ Session::rename (const std::string& new_name)
 
 		/* Reset path in "session dirs" */
 
-		(*i).path = newstr;
-		(*i).blocks = 0;
+		i.path = newstr;
+		i.blocks = 0;
 
 		/* reset primary SessionDirectory object */
 
@@ -5103,7 +5087,7 @@ Session::save_as (SaveAs& saveas)
 
 	/* get total size */
 
-	for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
+	for (const space_and_path& sd : session_dirs) {
 
 		/* need to clear this because
 		 * find_files_matching_filter() is cumulative
@@ -5111,13 +5095,13 @@ Session::save_as (SaveAs& saveas)
 
 		files.clear ();
 
-		find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
+		find_files_matching_filter (files, sd.path, accept_all_files, 0, false, true, true);
 
 		all += files.size();
 
-		for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
+		for (string& i : files) {
 			GStatBuf gsb;
-			g_stat ((*i).c_str(), &gsb);
+			g_stat (i.c_str(), &gsb);
 			total_bytes += gsb.st_size;
 		}
 	}
@@ -5152,7 +5136,7 @@ Session::save_as (SaveAs& saveas)
 		 * and copy files from there to target.
 		 */
 
-		for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
+		for (const space_and_path& sd : session_dirs) {
 
 			/* need to clear this because
 			 * find_files_matching_filter() is cumulative
@@ -5160,11 +5144,11 @@ Session::save_as (SaveAs& saveas)
 
 			files.clear ();
 
-			const size_t prefix_len = (*sd).path.size();
+			const size_t prefix_len = sd.path.size();
 
 			/* Work just on the files within this session dir */
 
-			find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
+			find_files_matching_filter (files, sd.path, accept_all_files, 0, false, true, true);
 
 			/* add dir separator to protect against collisions with
 			 * track names (e.g. track named "audiofiles" or
@@ -5181,9 +5165,7 @@ Session::save_as (SaveAs& saveas)
 			   implementing ::save_as().
 			*/
 
-			for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
-
-				std::string from = *i;
+			for (string& from : files) {
 
 #ifdef __APPLE__
 				string filename = Glib::path_get_basename (from);
@@ -5199,7 +5181,7 @@ Session::save_as (SaveAs& saveas)
 
 					if (saveas.include_media && saveas.copy_media) {
 
-						string to = make_new_media_path (*i, to_dir, new_folder);
+						string to = make_new_media_path (from, to_dir, new_folder);
 
 						info << "media file copying from " << from << " to " << to << endmsg;
 
@@ -5221,7 +5203,7 @@ Session::save_as (SaveAs& saveas)
 
 					if (saveas.include_media) {
 
-						string to = make_new_media_path (*i, to_dir, new_folder);
+						string to = make_new_media_path (from, to_dir, new_folder);
 
 						info << "media file copying from " << from << " to " << to << endmsg;
 
@@ -5252,8 +5234,8 @@ Session::save_as (SaveAs& saveas)
 
 					bool do_copy = true;
 
-					for (vector<string>::iterator v = do_not_copy_extensions.begin(); v != do_not_copy_extensions.end(); ++v) {
-						if ((from.length() > (*v).length()) && (from.find (*v) == from.length() - (*v).length())) {
+					for (string& v : do_not_copy_extensions) {
+						if ((from.length() > v.length()) && (from.find (v) == from.length() - v.length())) {
 							/* end of filename matches extension, do not copy file */
 							do_copy = false;
 							break;
@@ -5383,8 +5365,8 @@ Session::save_as (SaveAs& saveas)
 			*/
 
 			if (internal_file_cnt) {
-				for (vector<string>::iterator s = old_search_path[DataType::AUDIO].begin(); s != old_search_path[DataType::AUDIO].end(); ++s) {
-					ensure_search_path_includes (*s, DataType::AUDIO);
+				for (string& s : old_search_path[DataType::AUDIO]) {
+					ensure_search_path_includes (s, DataType::AUDIO);
 				}
 
 				/* we do not do this for MIDI because we copy
@@ -5545,8 +5527,8 @@ Session::archive_session (const std::string& dest,
 
 	/* ensure that session-path is included in search-path */
 	bool ok = false;
-	for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
-		if ((*sd).path == old_path) {
+	for (const space_and_path& sd : session_dirs) {
+		if (sd.path == old_path) {
 			ok = true;
 		}
 	}
@@ -5789,23 +5771,21 @@ Session::archive_session (const std::string& dest,
 	}
 
 	/* index files relevant for this session */
-	for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
+	for (const space_and_path& sd : session_dirs) {
 		vector<string> files;
 
-		size_t prefix_len = (*sd).path.size();
-		if (prefix_len > 0 && (*sd).path.at (prefix_len - 1) != G_DIR_SEPARATOR) {
+		size_t prefix_len = sd.path.size();
+		if (prefix_len > 0 && sd.path.at (prefix_len - 1) != G_DIR_SEPARATOR) {
 			++prefix_len;
 		}
 
-		find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
+		find_files_matching_filter (files, sd.path, accept_all_files, 0, false, true, true);
 
 		static const std::string audiofile_dir_string = string (sound_dir_name) + G_DIR_SEPARATOR;
 		static const std::string videofile_dir_string = string (video_dir_name) + G_DIR_SEPARATOR;
 		static const std::string midifile_dir_string  = string (midi_dir_name)  + G_DIR_SEPARATOR;
 
-		for (vector<string>::const_iterator i = files.begin (); i != files.end (); ++i) {
-			std::string from = *i;
-
+		for (const string& from : files) {
 #ifdef __APPLE__
 			string filename = Glib::path_get_basename (from);
 			std::transform (filename.begin(), filename.end(), filename.begin(), ::toupper);
@@ -5822,14 +5802,14 @@ Session::archive_session (const std::string& dest,
 				filemap[from] = make_new_media_path (from, name, name);
 			} else {
 				bool do_copy = true;
-				for (vector<string>::iterator v = blacklist_dirs.begin(); v != blacklist_dirs.end(); ++v) {
-					if (from.find (*v) != string::npos) {
+				for (string& v : blacklist_dirs) {
+					if (from.find (v) != string::npos) {
 						do_copy = false;
 						break;
 					}
 				}
-				for (vector<string>::iterator v = do_not_copy_extensions.begin(); v != do_not_copy_extensions.end(); ++v) {
-					if ((from.length() > (*v).length()) && (from.find (*v) == from.length() - (*v).length())) {
+				for (string& v : do_not_copy_extensions) {
+					if ((from.length() > v.length()) && (from.find (v) == from.length() - v.length())) {
 						do_copy = false;
 						break;
 					}
@@ -5869,14 +5849,14 @@ Session::archive_session (const std::string& dest,
 	find_files_matching_filter (extra_files, to_dir, accept_all_files, 0, false, true, true);
 	for (auto const& from : extra_files) {
 		bool do_copy = true;
-		for (vector<string>::iterator v = blacklist_dirs.begin(); v != blacklist_dirs.end(); ++v) {
-			if (from.find (*v) != string::npos) {
+		for (string& v : blacklist_dirs) {
+			if (from.find (v) != string::npos) {
 				do_copy = false;
 				break;
 			}
 		}
-		for (vector<string>::iterator v = do_not_copy_extensions.begin(); v != do_not_copy_extensions.end(); ++v) {
-			if ((from.length() > (*v).length()) && (from.find (*v) == from.length() - (*v).length())) {
+		for (string& v : do_not_copy_extensions) {
+			if ((from.length() > v.length()) && (from.find (v) == from.length() - v.length())) {
 				do_copy = false;
 				break;
 			}
@@ -5896,17 +5876,17 @@ out:
 	config.set_audio_search_path (old_config_search_path[DataType::AUDIO]);
 	config.set_midi_search_path (old_config_search_path[DataType::MIDI]);
 
-	for (std::map<std::shared_ptr<AudioFileSource>, std::string>::iterator i = orig_origin.begin (); i != orig_origin.end (); ++i) {
-		i->first->set_origin (i->second);
+	for (auto& orig : orig_origin) {
+		orig.first->set_origin (orig.second);
 	}
-	for (std::map<std::shared_ptr<AudioFileSource>, std::string>::iterator i = orig_sources.begin (); i != orig_sources.end (); ++i) {
-		i->first->replace_file (i->second);
+	for (auto& orig : orig_sources) {
+		orig.first->replace_file (orig.second);
 	}
-	for (std::map<std::shared_ptr<AudioFileSource>, float>::iterator i = orig_gain.begin (); i != orig_gain.end (); ++i) {
-		i->first->set_gain (i->second, true);
+	for (auto& orig : orig_gain) {
+		orig.first->set_gain (orig.second, true);
 	}
-	for (std::map<std::shared_ptr<AudioFileSource>, uint16_t>::iterator i = orig_channel.begin (); i != orig_channel.end (); ++i) {
-		i->first->set_channel (i->second);
+	for (auto& orig : orig_channel) {
+		orig.first->set_channel (orig.second);
 	}
 
 	if (0 == rv && !(progress && progress->cancelled ())) {

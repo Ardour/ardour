@@ -505,11 +505,9 @@ TempoTest::tempoAtPulseTest ()
 	TempoSection* tB = 0;
 	TempoSection* tC = 0;
 
-	list<MetricSection*>::iterator i;
-
-	for (i = map._metrics.begin(); i != map._metrics.end(); ++i) {
+	for (MetricSection*& i : map) {
 		TempoSection* t;
-		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+		if ((t = dynamic_cast<TempoSection*> (i)) != 0) {
 			if (!tA) {
 				tA = t;
 				continue;
@@ -582,11 +580,10 @@ TempoTest::tempoFundamentalsTest ()
 	TempoSection* tC = 0;
 	TempoSection* tD = 0;
 	TempoSection* tE = 0;
-	list<MetricSection*>::iterator i;
 
-	for (i = map._metrics.begin(); i != map._metrics.end(); ++i) {
+	for (MetricSection*& i : map) {
 		TempoSection* t;
-		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+		if ((t = dynamic_cast<TempoSection*> (i)) != 0) {
 			if (!tA) {
 				tA = t;
 				continue;

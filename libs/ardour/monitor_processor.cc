@@ -233,8 +233,8 @@ MonitorProcessor::set_state (const XMLNode& node, int version)
 
 	solo_cnt = 0;
 
-	for (vector<ChannelRecord*>::const_iterator x = _channels.begin(); x != _channels.end(); ++x) {
-		if ((*x)->soloed) {
+	for (ChannelRecord* const& x : _channels) {
+		if (x->soloed) {
 			solo_cnt++;
 		}
 	}

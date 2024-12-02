@@ -80,9 +80,8 @@ EnvironmentalProtectionAgency::save ()
                 vector<string> lines;
                 split (estr, lines, '\n');
 
-                for (vector<string>::iterator i = lines.begin(); i != lines.end(); ++i) {
+                for (string& estring : lines) {
 
-                        string estring = *i;
                         string::size_type equal = estring.find_first_of ('=');
 
                         if (equal == string::npos) {
@@ -123,8 +122,8 @@ EnvironmentalProtectionAgency::restore () const
 {
 		clear ();
 
-        for (map<string,string>::const_iterator i = e.begin(); i != e.end(); ++i) {
-                g_setenv (i->first.c_str(), i->second.c_str(), 1);
+        for (const std::pair<const string,string>& i : e) {
+                g_setenv (i.first.c_str(), i.second.c_str(), 1);
         }
 }
 
@@ -142,15 +141,15 @@ EnvironmentalProtectionAgency::clear () const
 		ecopy.push_back (environ[i]);
 	}
 
-	for (vector<string>::const_iterator e = ecopy.begin(); e != ecopy.end(); ++e) {
-                string::size_type equal = (*e).find_first_of ('=');
+	for (const string& e : ecopy) {
+                string::size_type equal = e.find_first_of ('=');
 
                 if (equal == string::npos) {
                         /* say what? an environ value without = ? */
                         continue;
                 }
 
-                string var_name = (*e).substr (0, equal);
+                string var_name = e.substr (0, equal);
                 g_unsetenv(var_name.c_str());
         }
 }

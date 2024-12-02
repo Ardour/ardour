@@ -163,8 +163,8 @@ class /*LIBGTKMM2EXT_API*/ DnDTreeView : public DnDTreeViewBase
 		} else {
 			/* some kind of target type, usually 'object_type' added by the app,
 			 * which will be handled by a signal handler */
-			for (std::list<Gtk::TargetEntry>::const_iterator i = draggable.begin(); i != draggable.end (); ++i) {
-				if (selection_data.get_target() == (*i).get_target()) {
+			for (const Gtk::TargetEntry& i : draggable) {
+				if (selection_data.get_target() == i.get_target()) {
 					signal_drop (context, selection_data);
 					context->drag_finish (true, false, time);
 					break;

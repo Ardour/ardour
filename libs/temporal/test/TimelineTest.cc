@@ -26,8 +26,8 @@ TimelineTest::createTest()
 	uint32_t lessthan = 0;
 	uint32_t greaterthan = 0;
 
-	for (vector<timepos_t>::iterator t = times.begin(); t != times.end(); ++t) {
-		if ((*t) + timepos_t (random() % 20207) < timepos_t (2299307)) {
+	for (timepos_t& t : times) {
+		if (t + timepos_t (random() % 20207) < timepos_t (2299307)) {
 			lessthan++;
 		} else {
 			greaterthan++;

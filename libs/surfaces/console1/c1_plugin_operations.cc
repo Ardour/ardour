@@ -151,9 +151,9 @@ Console1::create_mapping (const std::shared_ptr<Processor> proc, const std::shar
 	int32_t n_controls = -1;
 
 	set<Evoral::Parameter> p = proc->what_can_be_automated ();
-	for (set<Evoral::Parameter>::iterator j = p.begin (); j != p.end (); ++j) {
+	for (const Evoral::Parameter& j : p) {
 		++n_controls;
-		std::string n = proc->describe_parameter (*j);
+		std::string n = proc->describe_parameter (j);
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("Plugin parameter %1: %2\n", n_controls, n));
 		if (n == "hidden") {
 			continue;
@@ -355,9 +355,9 @@ Console1::spill_plugins (const int32_t plugin_index)
 
 	set<Evoral::Parameter> p = proc->what_can_be_automated ();
 
-	for (set<Evoral::Parameter>::iterator j = p.begin (); j != p.end (); ++j) {
+	for (const Evoral::Parameter& j : p) {
 		++n_controls;
-		std::string n = proc->describe_parameter (*j);
+		std::string n = proc->describe_parameter (j);
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("Plugin parameter %1: %2\n", n_controls, n));
 		if (n == "hidden") {
 			continue;

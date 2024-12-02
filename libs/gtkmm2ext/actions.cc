@@ -174,18 +174,18 @@ ActionManager::set_sensitive (vector<RefPtr<Action> >& actions, bool state)
 {
 	// if actions weren't disabled
 	if (!actions_disabled) {
-		for (vector<RefPtr<Action> >::iterator i = actions.begin(); i != actions.end(); ++i) {
-			(*i)->set_sensitive (state);
+		for (RefPtr<Action> & i : actions) {
+			i->set_sensitive (state);
 		}
 	}
 	else {
 		// actions were disabled
 		// so we should just set necessary action's states in action_states_to_restore
-		for (vector<RefPtr<Action> >::iterator i = actions.begin(); i != actions.end(); ++i) {
+		for (RefPtr<Action> & i : actions) {
 			// go through action_states_to_restore and set state of actions
 			for (ActionStates::iterator j = action_states_to_restore.begin(); j != action_states_to_restore.end(); ++j) {
 				// all actions should have their individual name, so we can use it for comparison
-				if (gtk_action_get_name ((*j).action) == (*i)->get_name ()) {
+				if (gtk_action_get_name ((*j).action) == i->get_name ()) {
 					(*j).sensitive = state;
 				}
 			}

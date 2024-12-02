@@ -499,8 +499,8 @@ Push2::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 
 	if (ev->value) {
 		/* any press cancels any pending long press timeouts */
-		for (std::set<ButtonID>::iterator x = _buttons_down.begin(); x != _buttons_down.end(); ++x) {
-			std::shared_ptr<Button> bb = _id_button_map[*x];
+		for (const ButtonID& x : _buttons_down) {
+			std::shared_ptr<Button> bb = _id_button_map[x];
 			bb->timeout_connection.disconnect ();
 		}
 	}

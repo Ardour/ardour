@@ -162,10 +162,10 @@ CoreAudioBackend::enumerate_devices () const
 	std::map<size_t, std::string> devices;
 	_pcmio->duplex_device_list(devices);
 
-	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (_input_audio_device == "") _input_audio_device = i->second;
-		if (_output_audio_device == "") _output_audio_device = i->second;
-		_duplex_audio_device_status.push_back (DeviceStatus (i->second, true));
+	for (const std::pair<const size_t, std::string>& i : devices) {
+		if (_input_audio_device == "") _input_audio_device = i.second;
+		if (_output_audio_device == "") _output_audio_device = i.second;
+		_duplex_audio_device_status.push_back (DeviceStatus (i.second, true));
 	}
 	return _duplex_audio_device_status;
 }
@@ -178,9 +178,9 @@ CoreAudioBackend::enumerate_input_devices () const
 	_pcmio->input_device_list(devices);
 
 	_input_audio_device_status.push_back (DeviceStatus (get_standard_device_name(DeviceNone), true));
-	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (_input_audio_device == "") _input_audio_device = i->second;
-		_input_audio_device_status.push_back (DeviceStatus (i->second, true));
+	for (const std::pair<const size_t, std::string>& i : devices) {
+		if (_input_audio_device == "") _input_audio_device = i.second;
+		_input_audio_device_status.push_back (DeviceStatus (i.second, true));
 	}
 	return _input_audio_device_status;
 }
@@ -194,9 +194,9 @@ CoreAudioBackend::enumerate_output_devices () const
 	_pcmio->output_device_list(devices);
 
 	_output_audio_device_status.push_back (DeviceStatus (get_standard_device_name(DeviceNone), true));
-	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (_output_audio_device == "") _output_audio_device = i->second;
-		_output_audio_device_status.push_back (DeviceStatus (i->second, true));
+	for (const std::pair<const size_t, std::string>& i : devices) {
+		if (_output_audio_device == "") _output_audio_device = i.second;
+		_output_audio_device_status.push_back (DeviceStatus (i.second, true));
 	}
 	return _output_audio_device_status;
 }
@@ -334,8 +334,8 @@ CoreAudioBackend::set_buffer_size (uint32_t bs)
 	if (_run) {
 		pbd_mach_set_realtime_policy (_main_thread, 1e9 * bs / _samplerate, true);
 	}
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
-		pbd_mach_set_realtime_policy (*i, 1e9 * bs / _samplerate, false);
+	for (const pthread_t& i : _threads) {
+		pbd_mach_set_realtime_policy (i, 1e9 * bs / _samplerate, false);
 	}
 	return 0;
 }
@@ -761,9 +761,9 @@ CoreAudioBackend::name_to_id(std::string device_name, DeviceFilter filter) const
 			break;
 	}
 
-	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (i->second == device_name) {
-			device_id = i->first;
+	for (const std::pair<const size_t, std::string>& i : devices) {
+		if (i.second == device_name) {
+			device_id = i.first;
 			break;
 		}
 	}
@@ -847,10 +847,10 @@ CoreAudioBackend::join_process_threads ()
 {
 	int rv = 0;
 
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
+	for (const pthread_t& i : _threads)
 	{
 		void *status;
-		if (pthread_join (*i, &status)) {
+		if (pthread_join (i, &status)) {
 			PBD::error << _("AudioEngine: cannot terminate process thread.") << endmsg;
 			rv -= 1;
 		}
@@ -866,9 +866,9 @@ CoreAudioBackend::in_process_thread ()
 		return true;
 	}
 
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
+	for (const pthread_t& i : _threads)
 	{
-		if (pthread_equal (*i, pthread_self ()) != 0) {
+		if (pthread_equal (i, pthread_self ()) != 0) {
 			return true;
 		}
 	}
@@ -1243,8 +1243,8 @@ CoreAudioBackend::pre_process ()
 void
 CoreAudioBackend::reset_midi_parsers ()
 {
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
-		std::shared_ptr<CoreMidiPort> port = std::dynamic_pointer_cast<CoreMidiPort>(*it);
+	for (const BackendPortPtr& it : _system_midi_in) {
+		std::shared_ptr<CoreMidiPort> port = std::dynamic_pointer_cast<CoreMidiPort>(it);
 		if (port) {
 			port->reset_parser ();
 		}
@@ -1317,11 +1317,11 @@ CoreAudioBackend::freewheel_thread ()
 		/* Freewheelin' */
 
 		// clear input buffers
-		for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
-			memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
+		for (const BackendPortPtr& it : _system_inputs) {
+			memset (it->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 		}
-		for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
-			static_cast<CoreMidiBuffer*>((*it)->get_buffer(0))->clear ();
+		for (const BackendPortPtr& it : _system_midi_in) {
+			static_cast<CoreMidiBuffer*>(it->get_buffer(0))->clear ();
 		}
 
 		_last_process_start = 0;
@@ -1421,8 +1421,8 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	}
 
 	/* clear output buffers */
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
-		memset ((*it)->get_buffer (n_samples), 0, n_samples * sizeof (Sample));
+	for (const BackendPortPtr& it : _system_outputs) {
+		memset (it->get_buffer (n_samples), 0, n_samples * sizeof (Sample));
 	}
 
 	if (engine.process_callback (n_samples)) {
@@ -1434,8 +1434,8 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	}
 
 	/* mixdown midi */
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-		(*it)->get_buffer(0);
+	for (const BackendPortPtr& it : _system_midi_out) {
+		it->get_buffer(0);
 	}
 
 	/* queue outgoing midi */
@@ -1661,11 +1661,8 @@ void* CoreMidiPort::get_buffer (pframes_t /* nframes */)
 {
 	if (is_input ()) {
 		(_buffer[_bufperiod]).clear ();
-		const std::set<BackendPortPtr>& connections = get_connections ();
-		for (std::set<BackendPortPtr>::const_iterator i = connections.begin ();
-		     i != connections.end ();
-		     ++i) {
-			const CoreMidiBuffer * src = std::dynamic_pointer_cast<const CoreMidiPort>(*i)->const_buffer ();
+		for (const BackendPortPtr& i : get_connections ()) {
+			const CoreMidiBuffer * src = std::dynamic_pointer_cast<const CoreMidiPort>(i)->const_buffer ();
 			for (CoreMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
 				(_buffer[_bufperiod]).push_back (*it);
 			}

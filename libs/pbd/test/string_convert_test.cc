@@ -97,9 +97,9 @@ static std::vector<std::string> get_supported_locales ()
 
 	std::cerr << std::endl << "Original locale: " << m_orig_locale << std::endl;
 
-	for (std::vector<std::string>::const_iterator it = locales.begin(); it != locales.end(); ++it) {
+	for (const std::string& it : locales) {
 
-		const char* locale = it->c_str();
+		const char* locale = it.c_str();
 		const char* new_locale = setlocale (LC_ALL, locale);
 
 		if (new_locale == NULL) {
@@ -107,10 +107,10 @@ static std::vector<std::string> get_supported_locales ()
 			continue;
 		}
 
-		if (*it != new_locale) {
+		if (it != new_locale) {
 			// Setting the locale may be successful but locale has a different
 			// (or longer) name.
-			if (it->empty()) {
+			if (it.empty()) {
 				std::cerr << "User preferred locale is : " << new_locale << std::endl;
 			} else {
 				std::cerr << "locale : " << locale << ", has name : " << new_locale << std::endl;
@@ -119,7 +119,7 @@ static std::vector<std::string> get_supported_locales ()
 
 		std::cerr << "Adding locale : " << new_locale << " to test locales" << std::endl;
 
-		supported_locales.push_back (*it);
+		supported_locales.push_back (it);
 	}
 
 	if (setlocale (LC_ALL, m_orig_locale) == NULL) {
@@ -139,10 +139,10 @@ static std::vector<std::string> get_test_locales ()
 static bool get_locale_with_comma_decimal_mark (std::string& locale_str) {
 	std::vector<std::string> locales = get_test_locales ();
 
-	for (std::vector<std::string>::const_iterator it = locales.begin(); it != locales.end(); ++it) {
-		LocaleGuard guard (*it);
+	for (const std::string& it : locales) {
+		LocaleGuard guard (it);
 		if (check_decimal_mark_is_comma ()) {
-			locale_str = *it;
+			locale_str = it;
 			return true;
 		}
 	}
@@ -168,10 +168,8 @@ test_function_for_locales (TestFunctionType test_func)
 {
 	const std::vector<std::string> locales = get_test_locales();
 
-	for (std::vector<std::string>::const_iterator ci = locales.begin ();
-	     ci != locales.end ();
-	     ++ci) {
-		LocaleGuard guard (*ci);
+	for (const std::string& ci : locales) {
+		LocaleGuard guard (ci);
 		test_func ();
 	}
 }
@@ -428,20 +426,18 @@ _test_infinity_conversion ()
 	// Check string -> float for all supported string representations of "INFINITY"
 	std::vector<std::string> pos_inf_strings = _pos_infinity_strings ();
 
-	for (std::vector<std::string>::const_iterator i = pos_inf_strings.begin ();
-	     i != pos_inf_strings.end (); ++i) {
+	for (const std::string& i : pos_inf_strings) {
 		FloatType pos_infinity_arg;
-		CPPUNIT_ASSERT (string_to<FloatType> (*i, pos_infinity_arg));
+		CPPUNIT_ASSERT (string_to<FloatType> (i, pos_infinity_arg));
 		CPPUNIT_ASSERT_EQUAL (pos_infinity_arg, pos_infinity);
 	}
 
 	// Check string -> float for all supported string representations of "-INFINITY"
 	std::vector<std::string> neg_inf_strings = _neg_infinity_strings ();
 
-	for (std::vector<std::string>::const_iterator i = neg_inf_strings.begin ();
-	     i != neg_inf_strings.end (); ++i) {
+	for (const std::string& i : neg_inf_strings) {
 		FloatType neg_infinity_arg;
-		CPPUNIT_ASSERT (string_to<FloatType> (*i, neg_infinity_arg));
+		CPPUNIT_ASSERT (string_to<FloatType> (i, neg_infinity_arg));
 		CPPUNIT_ASSERT_EQUAL (neg_infinity_arg, neg_infinity);
 	}
 

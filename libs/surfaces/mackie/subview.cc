@@ -99,18 +99,10 @@ Subview::~Subview()
 void
 Subview::reset_all_vpot_controls()
 {
-	for (std::vector<Pot*>::iterator iter = _strip_vpots_over_all_surfaces.begin(); iter != _strip_vpots_over_all_surfaces.end(); ) {
-		std::vector<Pot*>::iterator tmp;
-
-		tmp = iter;
-		++tmp;
-
-		if (*iter != 0)
-		{
-			(*iter)->set_control (std::shared_ptr<AutomationControl>());
+	for (Pot*& p : _strip_vpots_over_all_surfaces) {
+		if (p != 0) {
+			p->set_control (std::shared_ptr<AutomationControl>());
 		}
-
-		iter = tmp;
 	}
 }
 

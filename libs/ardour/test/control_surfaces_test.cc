@@ -36,32 +36,32 @@ ControlSurfacesTest::instantiateAndTeardownTest ()
 	_session->new_audio_track (1, 2, NULL, 1, "Test", PresentationInfo::max_order, Normal);
 
 	ControlProtocolManager& m = ControlProtocolManager::instance ();
-	for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
+	for (ControlProtocolInfo*& i : m.control_protocol_info) {
 #if 1
 		/* Push2 needs libcanvas -- which needs pango, which needs a screen
 		 * IA__gdk_pango_context_get_for_screen: assertion 'GDK_IS_SCREEN (screen)' failed
 		 */
-		if (!strcmp ((*i)->descriptor->id, "uri://ardour.org/surfaces/push2:0")) {
+		if (!strcmp (i->descriptor->id, "uri://ardour.org/surfaces/push2:0")) {
 			continue;
 		}
 #endif
 		// The WebSockets control surface replaces the global event loop, causing
 		// crashes in later tests once it is deactivates. Until that is fixed, skip
 		// it.
-		if (!strcmp ((*i)->descriptor->id, "uri://ardour.org/surfaces/ardour_websockets:0")) {
+		if (!strcmp (i->descriptor->id, "uri://ardour.org/surfaces/ardour_websockets:0")) {
 			continue;
 		}
 
-		std::cout << "ControlSurfacesTest: " << (*i)->name << "\n";
-		if ((*i)->protocol && (*i)->protocol->active()) {
+		std::cout << "ControlSurfacesTest: " << i->name << "\n";
+		if (i->protocol && i->protocol->active()) {
 			/* may already be active because of user preferences */
-			m.deactivate (**i);
+			m.deactivate (*i);
 		}
 
-		m.activate (**i);
-		m.activate (**i); // should be a NO-OP, prints a warning
+		m.activate (*i);
+		m.activate (*i); // should be a NO-OP, prints a warning
 
-		m.deactivate (**i);
-		m.deactivate (**i); // should be a NO-OP
+		m.deactivate (*i);
+		m.deactivate (*i); // should be a NO-OP
 	}
 }

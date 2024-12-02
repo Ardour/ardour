@@ -114,8 +114,8 @@ Convolution::restart ()
 	_offset    = 0;
 	_max_size  = 0;
 
-	for (std::vector<ImpData>::const_iterator i = _impdata.begin (); i != _impdata.end (); ++i) {
-		_max_size = std::max (_max_size, (uint32_t)i->readable_length_samples ());
+	for (const ImpData& i : _impdata) {
+		_max_size = std::max (_max_size, (uint32_t)i.readable_length_samples ());
 	}
 
 	int rv = _convproc.configure (
@@ -127,18 +127,18 @@ Convolution::restart ()
 	    /*Convproc::MAXPART*/ n_part,
 	    /*density 0 = auto, i/o dependent */ 0);
 
-	for (std::vector<ImpData>::const_iterator i = _impdata.begin (); i != _impdata.end (); ++i) {
+	for (const ImpData& i : _impdata) {
 		uint32_t pos = 0;
 
-		const float    ir_gain  = i->gain;
-		const uint32_t ir_delay = i->delay;
-		const uint32_t ir_len   = i->readable_length_samples ();
+		const float    ir_gain  = i.gain;
+		const uint32_t ir_delay = i.delay;
+		const uint32_t ir_len   = i.readable_length_samples ();
 
 		while (true) {
 			float ir[8192];
 
 			samplecnt_t to_read = std::min ((uint32_t)8192, ir_len - pos);
-			samplecnt_t ns      = i->read (ir, pos, to_read);
+			samplecnt_t ns      = i.read (ir, pos, to_read);
 
 			if (ns == 0) {
 				break;
@@ -151,7 +151,7 @@ Convolution::restart ()
 			}
 
 			rv = _convproc.impdata_create (
-			    /*i/o map */ i->c_in, i->c_out,
+			    /*i/o map */ i.c_in, i.c_out,
 			    /*stride, de-interleave */ 1,
 			    ir,
 			    ir_delay + pos, ir_delay + pos + ns);

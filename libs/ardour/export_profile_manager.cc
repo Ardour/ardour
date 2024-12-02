@@ -212,8 +212,8 @@ ExportProfileManager::load_presets ()
 {
 	vector<std::string> found = find_file (string_compose (X_("*%1"), export_preset_suffix));
 
-	for (vector<std::string>::iterator it = found.begin (); it != found.end (); ++it) {
-		load_preset_from_disk (*it);
+	for (std::string& it : found) {
+		load_preset_from_disk (it);
 	}
 }
 
@@ -766,8 +766,8 @@ ExportProfileManager::load_formats ()
 {
 	vector<std::string> found = find_file (string_compose ("*%1", export_format_suffix));
 
-	for (vector<std::string>::iterator it = found.begin (); it != found.end (); ++it) {
-		load_format_from_disk (*it);
+	for (std::string& it : found) {
+		load_format_from_disk (it);
 	}
 }
 
@@ -1004,9 +1004,7 @@ ExportProfileManager::check_config (std::shared_ptr<Warnings> warnings,
 	std::list<string> paths;
 	build_filenames (paths, filename, timespans, channel_config, format);
 
-	for (std::list<string>::const_iterator path_it = paths.begin (); path_it != paths.end (); ++path_it) {
-		string path = *path_it;
-
+	for (const string& path : paths) {
 		if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
 			warnings->conflicting_filenames.push_back (path);
 		}
@@ -1057,9 +1055,8 @@ ExportProfileManager::build_filenames (std::list<std::string>& result, ExportFil
                                        TimespanListPtr timespans, ExportChannelConfigPtr channel_config,
                                        ExportFormatSpecPtr format)
 {
-	for (std::list<ExportTimespanPtr>::iterator timespan_it = timespans->begin ();
-	     timespan_it != timespans->end (); ++timespan_it) {
-		filename->set_timespan (*timespan_it);
+	for (ExportTimespanPtr& timespan_it : *timespans) {
+		filename->set_timespan (timespan_it);
 		filename->set_channel_config (channel_config);
 
 		if (channel_config->get_split ()) {

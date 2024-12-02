@@ -1189,17 +1189,16 @@ OSC::get_surfaces ()
 		PBD::info << string_compose ("	Global Observer: %1\n", sur->global_obs != NULL ? "yes" : "NO");
 	}
 	PBD::info << string_compose ("\nList of LinkSets (%1):\n", link_sets.size());
-	std::map<uint32_t, LinkSet>::iterator it;
-	for (it = link_sets.begin(); it != link_sets.end(); it++) {
-		if (!(*it).first) {
+	for (auto& ls : link_sets) {
+		if (!ls.first) {
 			continue;
 		}
 		uint32_t devices = 0;
-		LinkSet* set = &(*it).second;
+		LinkSet* set = &ls.second;
 		if (set->urls.size()) {
 			devices = set->urls.size() - 1;
 		}
-		PBD::info << string_compose ("\n  Linkset %1 has %2 devices and sees %3 strips\n", (*it).first, devices, set->strips.size());
+		PBD::info << string_compose ("\n  Linkset %1 has %2 devices and sees %3 strips\n", ls.first, devices, set->strips.size());
 		PBD::info << string_compose ("	Bank size: %1   Current bank: %2   Strip Types: %3\n", set->banksize, set->bank, set->strip_types.to_ulong());
 		PBD::info << string_compose ("	Auto bank sizing: %1 Linkset not ready flag: %2\n", set->autobank, set->not_ready);
 		PBD::info << string_compose ("	Use Custom: %1 Number of Custom Strips: %2\n", set->custom_mode, set->custom_strips.size ());
@@ -3275,9 +3274,7 @@ OSC::send_group_list (lo_address addr)
 
 	lo_message_add_string (reply, X_("none"));
 
-	std::list<RouteGroup*> groups = session->route_groups ();
-	for (std::list<RouteGroup *>::iterator i = groups.begin(); i != groups.end(); ++i) {
-		RouteGroup *rg = *i;
+	for (RouteGroup * const& rg : session->route_groups ()) {
 		lo_message_add_string (reply, rg->name().c_str());
 	}
 	lo_send_message (addr, X_("/group/list"), reply);

@@ -100,8 +100,8 @@ Canvas::scroll_to (Coord x, Coord y)
 	   becomes O(1) rather than O(N).
 	*/
 
-	for (list<ScrollGroup*>::iterator i = scrollers.begin(); i != scrollers.end(); ++i) {
-		(*i)->scroll_to (Duple (x, y));
+	for (ScrollGroup*& i : scrollers) {
+		i->scroll_to (Duple (x, y));
 	}
 
 	pick_current_item (0); // no current mouse position
@@ -362,10 +362,10 @@ Canvas::window_to_canvas (Duple const & d) const
 		in_window.y = 0;
 	}
 
-	for (list<ScrollGroup*>::const_iterator s = scrollers.begin(); s != scrollers.end(); ++s) {
+	for (ScrollGroup* const& s : scrollers) {
 
-		if ((*s)->covers_window (in_window)) {
-			sg = *s;
+		if (s->covers_window (in_window)) {
+			sg = s;
 
 			/* XXX January 22nd 2015: leaving this in place for now
 			 * but I think it fixes a bug that really should be
@@ -408,8 +408,8 @@ Canvas::canvas_to_window (Duple const & d, bool rounded) const
 	ScrollGroup* sg = 0;
 	Duple wd;
 
-	for (std::list<Item*>::const_iterator i = root_children.begin(); i != root_children.end(); ++i) {
-		if (((sg = dynamic_cast<ScrollGroup*>(*i)) != 0) && sg->covers_canvas (d)) {
+	for (Item* const& i : root_children) {
+		if (((sg = dynamic_cast<ScrollGroup*>(i)) != 0) && sg->covers_canvas (d)) {
 			break;
 		}
 	}
@@ -635,13 +635,9 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 	   first item is the upper-most item that can be chosen as _current_item.
 	*/
 
-	vector<Item const *>::const_iterator i;
 	list<Item const *> within_items;
 
-	for (i = items.begin(); i != items.end(); ++i) {
-
-		Item const * possible_item = *i;
-
+	for (Item const * const possible_item : items) {
 		/* We ignore invisible items, containers and items that ignore events */
 
 		if (!possible_item->visible() || possible_item->ignore_events() || dynamic_cast<ArdourCanvas::Container const *>(possible_item) != 0) {
@@ -816,18 +812,18 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 	leave_event.detail = GDK_NOTIFY_VIRTUAL;
 	enter_event.detail = GDK_NOTIFY_VIRTUAL;
 
-	for (vector<Item*>::iterator it = items_to_leave_virtual.begin(); it != items_to_leave_virtual.end(); ++it) {
-		if (!(*it)->ignore_events()) {
-			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("leave %1/%2\n", (*it)->whatami(), (*it)->name));
-			(*it)->Event ((GdkEvent*)&leave_event);
+	for (Item*& it : items_to_leave_virtual) {
+		if (!it->ignore_events()) {
+			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("leave %1/%2\n", it->whatami(), it->name));
+			it->Event ((GdkEvent*)&leave_event);
 		}
 	}
 
-	for (vector<Item*>::iterator it = items_to_enter_virtual.begin(); it != items_to_enter_virtual.end(); ++it) {
-		if (!(*it)->ignore_events()) {
-			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("enter %1/%2\n", (*it)->whatami(), (*it)->name));
-			(*it)->Event ((GdkEvent*)&enter_event);
-			// std::cerr << "enter " << (*it)->whatami() << '/' << (*it)->name << std::endl;
+	for (Item*& it : items_to_enter_virtual) {
+		if (!it->ignore_events()) {
+			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("enter %1/%2\n", it->whatami(), it->name));
+			it->Event ((GdkEvent*)&enter_event);
+			// std::cerr << "enter " << it->whatami() << '/' << it->name << std::endl;
 		}
 	}
 

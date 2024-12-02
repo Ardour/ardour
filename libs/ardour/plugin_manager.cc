@@ -709,8 +709,8 @@ PluginManager::clear_vst_cache ()
 		string dn = Glib::build_filename (ARDOUR::user_cache_directory(), "vst");
 		vector<string> v2i_files;
 		find_files_matching_regex (v2i_files, dn, "\\.v2i$", false);
-		for (vector<string>::iterator i = v2i_files.begin(); i != v2i_files.end (); ++i) {
-			::g_unlink(i->c_str());
+		for (string& i : v2i_files) {
+			::g_unlink(i.c_str());
 		}
 	}
 	Config->set_plugin_cache_version (0);
@@ -738,8 +738,8 @@ PluginManager::clear_au_cache ()
 	string dn = Glib::build_filename (ARDOUR::user_cache_directory(), "auv2");
 	vector<string> a2i_files;
 	find_files_matching_regex (a2i_files, dn, "\\.a2i$", false);
-	for (vector<string>::iterator i = a2i_files.begin(); i != a2i_files.end (); ++i) {
-		::g_unlink(i->c_str());
+	for (string& i : a2i_files) {
+		::g_unlink(i.c_str());
 	}
 	Config->set_plugin_cache_version (0);
 	Config->save_state();
@@ -839,9 +839,6 @@ void
 PluginManager::add_lrdf_presets(string domain)
 {
 #ifdef HAVE_LRDF
-	vector<string> presets;
-	vector<string>::iterator x;
-
 #ifdef PLATFORM_WINDOWS
 	string path = Glib::build_filename (ARDOUR::user_cache_directory (), domain, "rdf");
 #else
@@ -851,10 +848,11 @@ PluginManager::add_lrdf_presets(string domain)
 	string path = Glib::build_filename (Glib::get_home_dir (), "." + domain, "rdf");
 #endif
 
+	vector<string> presets;
 	find_files_matching_filter (presets, path, rdf_filter, 0, false, true);
 
-	for (x = presets.begin(); x != presets.end (); ++x) {
-		const string uri (Glib::filename_to_uri(*x));
+	for (string& x : presets) {
+		const string uri (Glib::filename_to_uri(x));
 #ifndef NDEBUG
 		info << string_compose (_("Reading RDF %1"), uri) << endmsg;
 #endif
@@ -870,15 +868,13 @@ void
 PluginManager::add_lrdf_data (Searchpath const& path)
 {
 #ifdef HAVE_LRDF
-	vector<string> rdf_files;
-	vector<string>::iterator x;
-
 	info << "add_lrdf_data '" << path.to_string () << "'" << endmsg;
 
+	vector<string> rdf_files;
 	find_files_matching_filter (rdf_files, path, rdf_filter, 0, false, true);
 
-	for (x = rdf_files.begin(); x != rdf_files.end (); ++x) {
-		const string uri (Glib::filename_to_uri(*x));
+	for (string& x : rdf_files) {
+		const string uri (Glib::filename_to_uri(x));
 		info << "read rdf_file '" << uri << "'" << endmsg;
 
 		if (lrdf_read_file(uri.c_str())) {
@@ -1842,8 +1838,8 @@ PluginManager::mac_vst_discover_from_path (string path, std::set<std::string>& s
 
 	Searchpath paths (path);
 	/* customized version of run_functor_for_paths() */
-	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
-		string expanded_path = path_expand (*i);
+	for (const string& i : paths) {
+		string expanded_path = path_expand (i);
 		if (!Glib::file_test (expanded_path, Glib::FILE_TEST_IS_DIR)) continue;
 		try {
 			Glib::Dir dir(expanded_path);
@@ -1958,8 +1954,8 @@ PluginManager::clear_vst3_cache ()
 # endif
 	vector<string> v3i_files;
 	find_files_matching_regex (v3i_files, dn, "\\.v3i$", false);
-	for (vector<string>::iterator i = v3i_files.begin(); i != v3i_files.end (); ++i) {
-		::g_unlink(i->c_str());
+	for (string& i : v3i_files) {
+		::g_unlink(i.c_str());
 	}
 	Config->set_plugin_cache_version (0);
 	Config->save_state();
@@ -2800,8 +2796,7 @@ PluginManager::load_tags ()
 	vector<std::string> tmp;
 	find_files_matching_pattern (tmp, plugin_metadata_search_path (), "plugin_tags");
 
-	for (vector<std::string>::const_reverse_iterator p = tmp.rbegin ();
-			p != (vector<std::string>::const_reverse_iterator)tmp.rend(); ++p) {
+	for (vector<std::string>::const_reverse_iterator p = tmp.rbegin (); p != tmp.rend (); ++p) {
 		std::string path = *p;
 		info << string_compose (_("Loading plugin meta data file %1"), path) << endmsg;
 		if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
@@ -2957,11 +2952,11 @@ PluginManager::get_all_tags (TagFilter tag_filter) const
 		}
 
 		/* maybe add the tags we've found */
-		for (vector<string>::iterator t = tags.begin(); t != tags.end(); ++t) {
+		for (string& t : tags) {
 			/* if this tag isn't already in the list, add it */
-			vector<string>::iterator i = find (ret.begin(), ret.end(), *t);
+			vector<string>::iterator i = find (ret.begin(), ret.end(), t);
 			if (i == ret.end()) {
-				ret.push_back (*t);
+				ret.push_back (t);
 			}
 		}
 	}

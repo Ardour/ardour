@@ -283,8 +283,9 @@ Port::disconnect_all ()
 		/* a cheaper, less hacky way to do boost::shared_from_this() ...
 		 */
 		std::shared_ptr<Port> pself = port_manager->get_port_by_name (name());
-		for (vector<string>::const_iterator c = connections.begin(); c != connections.end() && pself; ++c) {
-			std::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (*c);
+		for (const string& c : connections) {
+			if (!pself) break;
+			std::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (c);
 			if (pother) {
 				pother->erase_connection (_name);
 				ConnectedOrDisconnected (pself, pother, false); // emit signal
@@ -577,15 +578,15 @@ Port::collect_latency_from_backend (LatencyRange& range, bool playback) const
 	                                               name(), connections.size(),
 	                                               playback ? "PLAYBACK" : "CAPTURE"));
 
-	for (vector<string>::const_iterator c = connections.begin(); c != connections.end(); ++c) {
-		PortEngine::PortHandle ph = port_engine.get_port_by_name (*c);
+	for (const string& c : connections) {
+		PortEngine::PortHandle ph = port_engine.get_port_by_name (c);
 		if (!ph) {
 			continue;
 		}
 
 		LatencyRange lr = port_engine.get_latency_range (ph, playback);
 
-		if (!AudioEngine::instance()->port_is_mine (*c)) {
+		if (!AudioEngine::instance()->port_is_mine (c)) {
 			if (externally_connected () && 0 == (_flags & TransportSyncPort) && sends_output () == playback) {
 				if (type () == DataType::AUDIO) {
 					lr.min += (_resampler_latency);
@@ -596,7 +597,7 @@ Port::collect_latency_from_backend (LatencyRange& range, bool playback) const
 
 		DEBUG_TRACE (DEBUG::LatencyIO, string_compose (
 					"\t%1 <-> %2 : latter has latency range %3 .. %4\n",
-					name(), *c, lr.min, lr.max));
+					name(), c, lr.min, lr.max));
 
 		range.min = min (range.min, lr.min);
 		range.max = max (range.max, lr.max);
@@ -621,18 +622,17 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 		                                               name(), connections.size(),
 		                                               playback ? "PLAYBACK" : "CAPTURE"));
 
-		for (vector<string>::const_iterator c = connections.begin();
-				c != connections.end(); ++c) {
+		for (const string& c : connections) {
 
 			LatencyRange lr;
 
-			if (!AudioEngine::instance()->port_is_mine (*c)) {
+			if (!AudioEngine::instance()->port_is_mine (c)) {
 
 				/* port belongs to some other port-system client, use
 				 * the port engine to lookup its latency information.
 				 */
 
-				PortEngine::PortHandle remote_port = port_engine.get_port_by_name (*c);
+				PortEngine::PortHandle remote_port = port_engine.get_port_by_name (c);
 
 				if (remote_port) {
 					lr = port_engine.get_latency_range (remote_port, playback);
@@ -645,7 +645,7 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 
 					DEBUG_TRACE (DEBUG::LatencyIO, string_compose (
 								"\t%1 <-> %2 : latter has latency range %3 .. %4\n",
-								name(), *c, lr.min, lr.max));
+								name(), c, lr.min, lr.max));
 
 					range.min = min (range.min, lr.min);
 					range.max = max (range.max, lr.max);
@@ -660,12 +660,12 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 				 * latency compensation.
 				 */
 
-				std::shared_ptr<Port> remote_port = AudioEngine::instance()->get_port_by_name (*c);
+				std::shared_ptr<Port> remote_port = AudioEngine::instance()->get_port_by_name (c);
 				if (remote_port) {
 					lr = remote_port->private_latency_range (playback);
 					DEBUG_TRACE (DEBUG::LatencyIO, string_compose (
 								"\t%1 <-LOCAL-> %2 : latter has private latency range %3 .. %4\n",
-								name(), *c, lr.min, lr.max));
+								name(), c, lr.min, lr.max));
 
 					range.min = min (range.min, lr.min);
 					range.max = max (range.max, lr.max);

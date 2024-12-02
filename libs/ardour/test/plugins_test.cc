@@ -38,9 +38,9 @@ PluginsTest::test ()
 
 	cout << "Number of Ladspa paths found: " << ladspa_paths.size () << endl;
 
-	for (vector<std::string>::iterator i = ladspa_paths.begin (); i != ladspa_paths.end(); ++i)
+	for (std::string& i : ladspa_paths)
 	{
-		cout << "LADSPA search path includes: " << *i << endl;
+		cout << "LADSPA search path includes: " << i << endl;
 	}
 
 	const PluginInfoList& ladspa_list = pm.ladspa_plugin_info ();

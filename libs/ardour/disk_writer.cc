@@ -1308,8 +1308,8 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 		*/
 
 		timecnt_t total_capture (0, timepos_t (capture_info.front()->start));
-		for (vector<CaptureInfo*>::iterator ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
-			total_capture += timecnt_t ((*ci)->samples);
+		for (CaptureInfo*& ci : capture_info) {
+			total_capture += timecnt_t (ci->samples);
 		}
 
 		/* XXX we need to consider snapping the duration up to the next
@@ -1331,8 +1331,8 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
   out:
 	reset_write_sources (mark_write_completed);
 
-	for (vector<CaptureInfo*>::iterator ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
-		delete *ci;
+	for (CaptureInfo*& ci : capture_info) {
+		delete ci;
 	}
 
 	capture_info.clear ();

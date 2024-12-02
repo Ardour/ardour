@@ -236,22 +236,22 @@ MonitorPort::set_active_monitors (std::list<std::string> const& pl)
 			removals.push_back (i->first);
 		}
 		/* add ports */
-		for (std::list<std::string>::const_iterator i = pl.begin (); i != pl.end (); ++i) {
-			std::pair<MonitorPorts::iterator, bool> it = mp->insert (make_pair (*i, std::shared_ptr<MonitorInfo> (new MonitorInfo ())));
+		for (const std::string& i : pl) {
+			std::pair<MonitorPorts::iterator, bool> it = mp->insert (make_pair (i, std::shared_ptr<MonitorInfo> (new MonitorInfo ())));
 			if (!it.second && !it.first->second->remove) {
 				/* already present */
 				continue;
 			}
 			it.first->second->remove = false;
-			additions.push_back (*i);
+			additions.push_back (i);
 		}
 	}
 
-	for (std::list<std::string>::const_iterator i = removals.begin (); i != removals.end (); ++i) {
-		MonitorInputChanged (*i, false); /* EMIT SIGNAL */
+	for (const std::string& i : removals) {
+		MonitorInputChanged (i, false); /* EMIT SIGNAL */
 	}
-	for (std::list<std::string>::const_iterator i = additions.begin (); i != additions.end (); ++i) {
-		MonitorInputChanged (*i, true); /* EMIT SIGNAL */
+	for (const std::string& i : additions) {
+		MonitorInputChanged (i, true); /* EMIT SIGNAL */
 	}
 	if (!removals.empty () || !additions.empty ()) {
 		AudioEngine::instance()->session ()->SoloChanged (); /* EMIT SIGNAL */

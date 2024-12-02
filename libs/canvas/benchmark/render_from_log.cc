@@ -28,8 +28,8 @@ public:
 
 		list<Rect> const & renders = canvas.renders ();
 
-		for (list<Rect>::const_iterator i = renders.begin(); i != renders.end(); ++i) {
-			canvas.render_to_image (*i);
+		for (const Rect& i : renders) {
+			canvas.render_to_image (i);
 		}
 	}
 

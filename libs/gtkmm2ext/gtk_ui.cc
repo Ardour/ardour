@@ -536,12 +536,12 @@ UI::dump_errors (std::ostream& ostr, size_t limit)
 	}
 
 	if (first) {
-		for (list<string>::const_iterator i = error_stack.begin(); i != error_stack.end(); ++i) {
+		for (const string& i : error_stack) {
 			if (first) {
 				ostr << endl << X_("Log Messages:") << endl;
 				first = false;
 			}
-			ostr << *i << endl;
+			ostr << i << endl;
 			if (limit > 0) {
 				if (--limit == 0) {
 					ostr << "..." << endl;

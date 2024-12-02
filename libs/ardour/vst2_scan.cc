@@ -499,22 +499,22 @@ vstfx_info_from_plugin (VSTHandle* h, VSTState* vstfx, vector<ARDOUR::VST2Info>&
 		PBD::info << "Found " << ids.size() << " Plugin(s) in shell)" << endmsg;
 	}
 
-	for (vector< pair<int, string> >::iterator x = ids.begin (); x != ids.end (); ++x) {
-		id = (*x).first;
+	for (pair<int, string> & x : ids) {
+		id = x.first;
 		if (id == 0) {
 			if (verbose) {
-				PBD::info << string_compose (_("Skipping VST2 Shell ID: '%1' Name: '%2'"), id, (*x).second) << endmsg;
+				PBD::info << string_compose (_("Skipping VST2 Shell ID: '%1' Name: '%2'"), id, x.second) << endmsg;
 			}
 			continue;
 		}
 		/* recurse vstfx_get_info() */
 		vstfx_current_loading_id = id;
 		if (verbose) {
-			PBD::info << string_compose (_("Instantiating VST2 Shell ID: '%1' Name: '%2'"), ARDOUR::vst2_id_to_str(id), (*x).second) << endmsg;
+			PBD::info << string_compose (_("Instantiating VST2 Shell ID: '%1' Name: '%2'"), ARDOUR::vst2_id_to_str(id), x.second) << endmsg;
 		}
 		vstfx = vst2_instantiate (h, type);
 		if (!vstfx) {
-			PBD::warning << string_compose (_("Error scanning VST2 Shell ID: '%1' Name: '%2'"), ARDOUR::vst2_id_to_str(id), (*x).second) << endmsg;
+			PBD::warning << string_compose (_("Error scanning VST2 Shell ID: '%1' Name: '%2'"), ARDOUR::vst2_id_to_str(id), x.second) << endmsg;
 			continue;
 		}
 		vstfx_info_from_plugin (h, vstfx, rv, type, verbose);
@@ -689,9 +689,9 @@ ARDOUR::vst2_scan_and_cache (std::string const& path, ARDOUR::PluginType type, s
 			delete root;
 			return false;
 		}
-		for (std::vector<VST2Info>::const_iterator i = nfo.begin(); i != nfo.end(); ++i) {
-			cb (path, type, *i);
-			root->add_child_nocopy (i->state ());
+		for (const VST2Info& i : nfo) {
+			cb (path, type, i);
+			root->add_child_nocopy (i.state ());
 		}
 	} catch (...) {
 		PBD::warning << string_compose (_("Cannot load VST plugin '%1'"), path) << endmsg;

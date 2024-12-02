@@ -221,8 +221,8 @@ unsigned
 ExportGraphBuilder::get_postprocessing_cycle_count() const
 {
 	unsigned max = 0;
-	for (std::list<Intermediate *>::const_iterator it = intermediates.begin(); it != intermediates.end(); ++it) {
-		max = std::max(max, (*it)->get_postprocessing_cycle_count());
+	for (Intermediate * const& it : intermediates) {
+		max = std::max(max, it->get_postprocessing_cycle_count());
 	}
 	return max;
 }

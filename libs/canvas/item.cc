@@ -309,9 +309,9 @@ Item::set_position (Duple p)
 void
 Item::layout()
 {
-	for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
-		if ((*i)->resize_queued()) {
-			(*i)->layout ();
+	for (Item*& i : _items) {
+		if (i->resize_queued()) {
+			i->layout ();
 		}
 	}
 
@@ -370,13 +370,13 @@ Item::hide ()
 		   which is now hidden. So propagate away.
 		*/
 
-		for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
+		for (Item*& i : _items) {
 
-			if ((*i)->self_visible()) {
+			if (i->self_visible()) {
 				/* item was visible but is now hidden because
 				   we (its parent) are hidden
 				*/
-				(*i)->propagate_show_hide ();
+				i->propagate_show_hide ();
 			}
 		}
 
@@ -392,12 +392,12 @@ Item::show ()
 
 		_visible = true;
 
-		for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
-			if ((*i)->self_visible()) {
+		for (Item*& i : _items) {
+			if (i->self_visible()) {
 				/* item used to be hidden by us (its parent),
 				   but is now visible
 				*/
-				(*i)->propagate_show_hide ();
+				i->propagate_show_hide ();
 			}
 		}
 
@@ -666,7 +666,7 @@ Item::set_size_request (double w, double h)
 }
 
 void
-Item::set_size_request_to_display_given_text (const std::vector<std::string>& strings, gint hpadding, gint vpadding)
+Item::set_size_request_to_display_given_text (std::vector<std::string> strings, gint hpadding, gint vpadding)
 {
 	Glib::RefPtr<Pango::Context> context = _canvas->get_pango_context();
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
@@ -675,8 +675,6 @@ Item::set_size_request_to_display_given_text (const std::vector<std::string>& st
 	int width_max = 0;
 	int height_max = 0;
 
-	vector<string> copy;
-	const vector<string>* to_use;
 	vector<string>::const_iterator i;
 
 	for (i = strings.begin(); i != strings.end(); ++i) {
@@ -687,16 +685,12 @@ Item::set_size_request_to_display_given_text (const std::vector<std::string>& st
 	}
 
 	if (i == strings.end()) {
-		/* make a copy of the strings then add one that has a descender */
-		copy = strings;
-		copy.push_back ("g");
-		to_use = &copy;
-	} else {
-		to_use = &strings;
+		/* Add a string that has a descender */
+		strings.push_back ("g");
 	}
 
-	for (vector<string>::const_iterator i = to_use->begin(); i != to_use->end(); ++i) {
-		layout->set_text (*i);
+	for (const string& i : strings) {
+		layout->set_text (i);
 		layout->get_pixel_size (width, height);
 		width_max = max (width_max,width);
 		height_max = max (height_max, height);
@@ -893,29 +887,29 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 
 	++render_depth;
 
-	for (std::vector<Item*>::const_iterator i = items.begin(); i != items.end(); ++i) {
+	for (Item* const& i : items) {
 
-		if (!(*i)->visible ()) {
+		if (!i->visible ()) {
 #ifdef CANVAS_DEBUG
 			if (_canvas->debug_render() || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-				cerr << _canvas->render_indent() << "Item " << (*i)->whoami() << " invisible - skipped\n";
+				cerr << _canvas->render_indent() << "Item " << i->whoami() << " invisible - skipped\n";
 			}
 #endif
 			continue;
 		}
 
-		Rect item_bbox = (*i)->bounding_box ();
+		Rect item_bbox = i->bounding_box ();
 
 		if (!item_bbox) {
 #ifdef CANVAS_DEBUG
 			if (_canvas->debug_render() || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-				cerr << _canvas->render_indent() << "Item " << (*i)->whoami() << " empty - skipped\n";
+				cerr << _canvas->render_indent() << "Item " << i->whoami() << " empty - skipped\n";
 			}
 #endif
 			continue;
 		}
 
-		Rect item = (*i)->item_to_window (item_bbox, false);
+		Rect item = i->item_to_window (item_bbox, false);
 		Rect d = item.intersection (area);
 
 		if (d) {
@@ -923,12 +917,12 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 			if (draw.width() && draw.height()) {
 #ifdef CANVAS_DEBUG
 				if (_canvas->debug_render() || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-					if (dynamic_cast<Container*>(*i) == 0) {
+					if (dynamic_cast<Container*>(i) == 0) {
 						cerr << _canvas->render_indent() << "render "
 						     << ' '
-						     << (*i)
+						     << i
 						     << ' '
-						     << (*i)->whoami()
+						     << i->whoami()
 						     << " item "
 						     << item_bbox
 						     << " window = "
@@ -944,7 +938,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 				if (_canvas->item_save_restore) {
 					context->save();
 				}
-				(*i)->render (area, context);
+				i->render (area, context);
 				if (_canvas->item_save_restore) {
 					context->restore();
 				}
@@ -955,7 +949,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 
 #ifdef CANVAS_DEBUG
 			if (_canvas->debug_render() || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-				cerr << string_compose ("%1skip render of %2, no intersection between %3 and %4\n", _canvas->render_indent(), (*i)->whoami(), item, area);
+				cerr << string_compose ("%1skip render of %2, no intersection between %3 and %4\n", _canvas->render_indent(), i->whoami(), item, area);
 			}
 #endif
 
@@ -974,27 +968,26 @@ Item::prepare_for_render_children (Rect const & area) const
 	}
 
 	ensure_lut ();
-	std::vector<Item*> items = _lut->get (area);
 
-	for (std::vector<Item*>::const_iterator i = items.begin(); i != items.end(); ++i) {
+	for (Item* const& i : _lut->get (area)) {
 
-		if (!(*i)->visible ()) {
+		if (!i->visible ()) {
 			continue;
 		}
 
-		Rect item_bbox = (*i)->bounding_box ();
+		Rect item_bbox = i->bounding_box ();
 
 		if (!item_bbox) {
 			continue;
 		}
 
-		Rect item = (*i)->item_to_window (item_bbox, false);
+		Rect item = i->item_to_window (item_bbox, false);
 		Rect d = item.intersection (area);
 
 		if (d) {
 			Rect draw = d;
 			if (draw.width() && draw.height()) {
-				(*i)->prepare_for_render (area);
+				i->prepare_for_render (area);
 			}
 
 		} else {

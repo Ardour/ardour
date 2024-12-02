@@ -195,8 +195,8 @@ std::vector<std::string>
 DummyAudioBackend::enumerate_drivers () const
 {
 	std::vector<std::string> speed_drivers;
-	for (std::vector<DriverSpeed>::const_iterator it = _driver_speed.begin () ; it != _driver_speed.end (); ++it) {
-		speed_drivers.push_back (it->name);
+	for (const DriverSpeed& it : _driver_speed) {
+		speed_drivers.push_back (it.name);
 	}
 	return speed_drivers;
 }
@@ -204,9 +204,9 @@ DummyAudioBackend::enumerate_drivers () const
 std::string
 DummyAudioBackend::driver_name () const
 {
-	for (std::vector<DriverSpeed>::const_iterator it = _driver_speed.begin () ; it != _driver_speed.end (); ++it) {
-		if (rintf (1e6f * _speedup) == rintf (1e6f * it->speedup)) {
-			return it->name;
+	for (const DriverSpeed& it : _driver_speed) {
+		if (rintf (1e6f * _speedup) == rintf (1e6f * it.speedup)) {
+			return it.name;
 		}
 	}
 	assert (0);
@@ -216,10 +216,10 @@ DummyAudioBackend::driver_name () const
 int
 DummyAudioBackend::set_driver (const std::string& d)
 {
-	for (std::vector<DriverSpeed>::const_iterator it = _driver_speed.begin () ; it != _driver_speed.end (); ++it) {
-		if (d == it->name) {
-			_speedup = it->speedup;
-			_realtime = it->realtime;
+	for (const DriverSpeed& it : _driver_speed) {
+		if (d == it.name) {
+			_speedup = it.speedup;
+			_realtime = it.realtime;
 			return 0;
 		}
 	}
@@ -257,19 +257,19 @@ DummyAudioBackend::set_buffer_size (uint32_t bs)
 	 */
 	LatencyRange lr;
 	lr.min = lr.max = _systemic_input_latency;
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
-		set_latency_range (*it, false, lr);
+	for (const BackendPortPtr& it : _system_inputs) {
+		set_latency_range (it, false, lr);
 	}
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
-		set_latency_range (*it, false, lr);
+	for (const BackendPortPtr& it : _system_midi_in) {
+		set_latency_range (it, false, lr);
 	}
 
 	lr.min = lr.max = _systemic_output_latency;
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
-		set_latency_range (*it, true, lr);
+	for (const BackendPortPtr& it : _system_outputs) {
+		set_latency_range (it, true, lr);
 	}
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-		set_latency_range (*it, true, lr);
+	for (const BackendPortPtr& it : _system_midi_out) {
+		set_latency_range (it, true, lr);
 	}
 
 	engine.buffer_size_change (bs);
@@ -544,10 +544,10 @@ DummyAudioBackend::join_process_threads ()
 {
 	int rv = 0;
 
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
+	for (const pthread_t& i : _threads)
 	{
 		void *status;
-		if (pthread_join (*i, &status)) {
+		if (pthread_join (i, &status)) {
 			PBD::error << _("AudioEngine: cannot terminate process thread.") << endmsg;
 			rv -= 1;
 		}
@@ -563,9 +563,9 @@ DummyAudioBackend::in_process_thread ()
 		return true;
 	}
 
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
+	for (const pthread_t& i : _threads)
 	{
-		if (pthread_equal (*i, pthread_self ()) != 0) {
+		if (pthread_equal (i, pthread_self ()) != 0) {
 			return true;
 		}
 	}
@@ -921,11 +921,11 @@ DummyAudioBackend::main_process_thread ()
 		}
 
 		// re-set input buffers, generate on demand.
-		for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
-			std::dynamic_pointer_cast<DummyPort>(*it)->next_period ();
+		for (const BackendPortPtr& it : _system_inputs) {
+			std::dynamic_pointer_cast<DummyPort>(it)->next_period ();
 		}
-		for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
-			std::dynamic_pointer_cast<DummyPort>(*it)->next_period ();
+		for (const BackendPortPtr& it : _system_midi_in) {
+			std::dynamic_pointer_cast<DummyPort>(it)->next_period ();
 		}
 
 		if (engine.process_callback (samples_per_period)) {
@@ -1869,11 +1869,8 @@ void* DummyMidiPort::get_buffer (pframes_t n_samples)
 {
 	if (is_input ()) {
 		_buffer.clear ();
-		const std::set<BackendPortPtr>& connections = get_connections ();
-		for (std::set<BackendPortPtr>::const_iterator i = connections.begin ();
-				i != connections.end ();
-				++i) {
-			std::shared_ptr<DummyMidiPort> source = std::dynamic_pointer_cast<DummyMidiPort>(*i);
+		for (const BackendPortPtr& i : get_connections ()) {
+			std::shared_ptr<DummyMidiPort> source = std::dynamic_pointer_cast<DummyMidiPort>(i);
 			if (source->is_physical() && source->is_terminal()) {
 				source->get_buffer(n_samples); // generate signal.
 			}

@@ -477,9 +477,9 @@ FileArchive::create (const std::string& srcdir, CompressionLevel compression_lev
 
 	std::map<std::string, std::string> filemap;
 
-	for (std::vector<std::string>::const_iterator f = files.begin (); f != files.end (); ++f) {
-		assert (f->size () > p_len);
-		filemap[*f] = f->substr (p_len);
+	for (const std::string& f : files) {
+		assert (f.size () > p_len);
+		filemap[f] = f.substr (p_len);
 	}
 
 	return create (filemap, compression_level);
@@ -498,9 +498,9 @@ FileArchive::create (const std::map<std::string, std::string>& filemap, Compress
 	size_t read_bytes = 0;
 	size_t total_bytes = 0;
 
-	for (std::map<std::string, std::string>::const_iterator f = filemap.begin (); f != filemap.end (); ++f) {
+	for (const std::pair<const std::string, std::string>& f : filemap) {
 		GStatBuf statbuf;
-		if (g_stat (f->first.c_str(), &statbuf)) {
+		if (g_stat (f.first.c_str(), &statbuf)) {
 			continue;
 		}
 		total_bytes += statbuf.st_size;
@@ -531,10 +531,10 @@ FileArchive::create (const std::map<std::string, std::string>& filemap, Compress
 	  const int64_t archive_start_time = g_get_monotonic_time();
 #endif
 
-	for (std::map<std::string, std::string>::const_iterator f = filemap.begin (); f != filemap.end (); ++f) {
+	for (const std::pair<const std::string, std::string>& f : filemap) {
 		char buf[8192];
-		const char* filepath = f->first.c_str ();
-		const char* filename = f->second.c_str ();
+		const char* filepath = f.first.c_str ();
+		const char* filename = f.second.c_str ();
 
 		GStatBuf statbuf;
 		if (g_stat (filepath, &statbuf)) {

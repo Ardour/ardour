@@ -790,15 +790,15 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 
 	/* first column: separate by group */
 	ostr << "<td>\n\n";
-	for (list<Bindings*>::const_iterator b = bindings.begin(); b != bindings.end(); ++b) {
-		(*b)->save_as_html (ostr, true);
+	for (Bindings* const& b : bindings) {
+		b->save_as_html (ostr, true);
 	}
 	ostr << "</td>\n\n";
 
 	//second column
 	ostr << "<td style=\"vertical-align:top\">\n\n";
-	for (list<Bindings*>::const_iterator b = bindings.begin(); b != bindings.end(); ++b) {
-		(*b)->save_as_html (ostr, false);
+	for (Bindings* const& b : bindings) {
+		b->save_as_html (ostr, false);
 	}
 	ostr << "</td>\n\n";
 
@@ -887,25 +887,25 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 				ostr << "<h3>" << gm->first << "</h3>\n";
 			}
 
-			for (vector<KeybindingMap::const_iterator>::const_iterator k = gm->second.begin(); k != gm->second.end(); ++k) {
+			for (const KeybindingMap::const_iterator& k : gm->second) {
 
-				if ((*k)->first.name().empty()) {
+				if (k->first.name().empty()) {
 					continue;
 				}
 
 				RefPtr<Action> action;
 
-				if ((*k)->second.action) {
-					action = (*k)->second.action;
+				if (k->second.action) {
+					action = k->second.action;
 				} else {
-					action = ActionManager::get_action ((*k)->second.action_name, false);
+					action = ActionManager::get_action (k->second.action_name, false);
 				}
 
 				if (!action) {
 					continue;
 				}
 
-				string key_name = (*k)->first.native_short_name ();
+				string key_name = k->first.native_short_name ();
 				replace_all (key_name, X_("KP_"), X_("Numpad "));
 				replace_all (key_name, X_("nabla"), X_("Tab"));
 
@@ -1039,13 +1039,13 @@ Bindings::get_all_actions (std::vector<std::string>& paths,
 	std::vector<Glib::RefPtr<Action> > relevant_actions;
 	ActionManager::get_actions (this, relevant_actions);
 
-	for (vector<Glib::RefPtr<Action> >::const_iterator act = relevant_actions.begin(); act != relevant_actions.end(); ++act) {
+	for (const Glib::RefPtr<Action> & act : relevant_actions) {
 
-		paths.push_back ((*act)->get_accel_path());
-		labels.push_back ((*act)->get_label());
-		tooltips.push_back ((*act)->get_tooltip());
+		paths.push_back (act->get_accel_path());
+		labels.push_back (act->get_label());
+		tooltips.push_back (act->get_tooltip());
 
-		ReverseMap::iterator r = rmap.find (*act);
+		ReverseMap::iterator r = rmap.find (act);
 
 		if (r != rmap.end()) {
 			keys.push_back (r->second.display_label());
@@ -1053,16 +1053,16 @@ Bindings::get_all_actions (std::vector<std::string>& paths,
 			keys.push_back (string());
 		}
 
-		actions.push_back (*act);
+		actions.push_back (act);
 	}
 }
 
 Bindings*
 Bindings::get_bindings (string const& name)
 {
-	for (list<Bindings*>::iterator b = bindings.begin(); b != bindings.end(); b++) {
-		if ((*b)->name() == name) {
-			return *b;
+	for (Bindings*& b : bindings) {
+		if (b->name() == name) {
+			return b;
 		}
 	}
 
@@ -1072,8 +1072,8 @@ Bindings::get_bindings (string const& name)
 void
 Bindings::associate_all ()
 {
-	for (list<Bindings*>::iterator b = bindings.begin(); b != bindings.end(); b++) {
-		(*b)->associate ();
+	for (Bindings*& b : bindings) {
+		b->associate ();
 	}
 }
 

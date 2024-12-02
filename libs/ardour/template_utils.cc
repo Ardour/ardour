@@ -97,12 +97,12 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 		return;
 	}
 
-	for (vector<string>::iterator i = templates.begin(); i != templates.end(); ++i) {
-		string file = session_template_dir_to_file (*i);
+	for (string& i : templates) {
+		string file = session_template_dir_to_file (i);
 
 		TemplateInfo rti;
-		rti.name = Glib::path_get_basename (*i);
-		rti.path = *i;
+		rti.name = Glib::path_get_basename (i);
+		rti.path = i;
 
 		if (read_xml) {
 
@@ -155,9 +155,7 @@ find_route_templates (vector<TemplateInfo>& template_names)
 		return;
 	}
 
-	for (vector<string>::iterator i = templates.begin(); i != templates.end(); ++i) {
-		string fullpath = *i;
-
+	for (string& fullpath : templates) {
 		XMLTree tree;
 
 		if (!tree.read (fullpath.c_str())) {

@@ -190,8 +190,8 @@ Playlist::Playlist (std::shared_ptr<const Playlist> other, string namestr, bool 
 
 	in_set_state++;
 
-	for (list<std::shared_ptr<Region> >::iterator x = tmp.begin(); x != tmp.end(); ++x) {
-		add_region_internal ((*x), (*x)->position(), thawlist);
+	for (std::shared_ptr<Region> & x : tmp) {
+		add_region_internal (x, x->position(), thawlist);
 	}
 	thawlist.release ();
 
@@ -576,18 +576,13 @@ Playlist::notify_region_added (std::shared_ptr<Region> r)
 void
 Playlist::flush_notifications (bool from_undo)
 {
-	set<std::shared_ptr<Region> >::iterator s;
-	bool regions_changed = false;
-
 	if (in_flush) {
 		return;
 	}
 
 	in_flush = true;
 
-	if (!pending_bounds.empty () || !pending_removes.empty () || !pending_adds.empty ()) {
-		regions_changed = true;
-	}
+	bool regions_changed = !pending_bounds.empty () || !pending_removes.empty () || !pending_adds.empty ();
 
 	/* XXX: it'd be nice if we could use pending_bounds for
 	   RegionsExtended and RegionsMoved.
@@ -610,17 +605,17 @@ Playlist::flush_notifications (bool from_undo)
 	}
 
 	std::shared_ptr<RegionList> rl (new RegionList);
-	for (s = pending_removes.begin (); s != pending_removes.end (); ++s) {
-		crossfade_ranges.push_back ((*s)->range ());
-		RegionRemoved (std::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
-		rl->push_back (*s);
+	for (const std::shared_ptr<Region>& s : pending_removes) {
+		crossfade_ranges.push_back (s->range ());
+		RegionRemoved (std::weak_ptr<Region> (s)); /* EMIT SIGNAL */
+		rl->push_back (s);
 	}
 	if (rl->size () > 0) {
 		Region::RegionsPropertyChanged (rl, Properties::hidden);
 	}
 
-	for (s = pending_adds.begin (); s != pending_adds.end (); ++s) {
-		crossfade_ranges.push_back ((*s)->range ());
+	for (const std::shared_ptr<Region>& s : pending_adds) {
+		crossfade_ranges.push_back (s->range ());
 		/* don't emit RegionAdded signal until relayering is done,
 		   so that the region is fully setup by the time
 		   anyone hears that its been added
@@ -636,10 +631,10 @@ Playlist::flush_notifications (bool from_undo)
 		ContentsChanged (); /* EMIT SIGNAL */
 	}
 
-	for (s = pending_adds.begin (); s != pending_adds.end (); ++s) {
-		(*s)->clear_changes ();
-		RegionAdded (std::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
-		RegionFactory::CheckNewRegion (*s);         /* EMIT SIGNAL */
+	for (const std::shared_ptr<Region>& s : pending_adds) {
+		s->clear_changes ();
+		RegionAdded (std::weak_ptr<Region> (s)); /* EMIT SIGNAL */
+		RegionFactory::CheckNewRegion (s);         /* EMIT SIGNAL */
 	}
 
 	if ((regions_changed && !in_set_state) || pending_layering) {
@@ -1431,11 +1426,9 @@ Playlist::duplicate_ranges (std::list<TimelineRange>& ranges, float times)
 	timepos_t min_pos = timepos_t::max (ranges.front().start().time_domain());
 	timepos_t max_pos = timepos_t (min_pos.time_domain());
 
-	for (std::list<TimelineRange>::const_iterator i = ranges.begin();
-	     i != ranges.end();
-	     ++i) {
-		min_pos = min (min_pos, (*i).start());
-		max_pos = max (max_pos, (*i).end());
+	for (const TimelineRange& i : ranges) {
+		min_pos = min (min_pos, i.start());
+		max_pos = max (max_pos, i.end());
 	}
 
 	timecnt_t offset = min_pos.distance (max_pos);
@@ -1443,9 +1436,9 @@ Playlist::duplicate_ranges (std::list<TimelineRange>& ranges, float times)
 	int count  = 1;
 	int itimes = (int)floor (times);
 	while (itimes--) {
-		for (list<TimelineRange>::iterator i = ranges.begin (); i != ranges.end (); ++i) {
-			std::shared_ptr<Playlist> pl = copy ((*i).start(), (*i).length ());
-			paste (pl, (*i).start() + (offset.scale (count)), 1.0f);
+		for (TimelineRange& i : ranges) {
+			std::shared_ptr<Playlist> pl = copy (i.start(), i.length ());
+			paste (pl, i.start() + (offset.scale (count)), 1.0f);
 		}
 		++count;
 	}
@@ -1569,9 +1562,7 @@ Playlist::RemoveFromSoloSelectedList (const Region* r)
 bool
 Playlist::SoloSelectedListIncludes (const Region* r)
 {
-	std::set<const Region*>::iterator i = _soloSelectedRegions.find (r);
-
-	return (i != _soloSelectedRegions.end ());
+	return _soloSelectedRegions.find (r) != _soloSelectedRegions.end ();
 }
 
 bool
@@ -2325,9 +2316,8 @@ Playlist::set_state (const XMLNode& node, int version)
 		if (!shared_ids.empty ()) {
 			vector<string> result;
 			::split (shared_ids, result, ',');
-			vector<string>::iterator it = result.begin ();
-			for (; it != result.end (); ++it) {
-				_shared_with_ids.push_back (PBD::ID (*it));
+			for (string& it : result) {
+				_shared_with_ids.push_back (PBD::ID (it));
 			}
 		}
 	}
@@ -2411,9 +2401,8 @@ Playlist::state (bool full_state) const
 	node->set_property (X_("pgroup-id"), _pgroup_id);
 
 	string                        shared_ids;
-	list<PBD::ID>::const_iterator it = _shared_with_ids.begin ();
-	for (; it != _shared_with_ids.end (); ++it) {
-		shared_ids += "," + (*it).to_s ();
+	for (const PBD::ID& it : _shared_with_ids) {
+		shared_ids += "," + it.to_s ();
 	}
 	if (!shared_ids.empty ()) {
 		shared_ids.erase (0, 1);
@@ -3401,11 +3390,11 @@ Playlist::uncombine (std::shared_ptr<Region> target)
 
 	// (4) add the constituent regions
 
-	for (vector<std::shared_ptr<Region> >::iterator i = originals.begin(); i != originals.end(); ++i) {
-		add_region ((*i), (*i)->position());
-		set_layer((*i), (*i)->layer());
-		if (!RegionFactory::region_by_id((*i)->id())) {
-			RegionFactory::map_add(*i);
+	for (std::shared_ptr<Region> & i : originals) {
+		add_region (i, i->position());
+		set_layer(i, i->layer());
+		if (!RegionFactory::region_by_id(i->id())) {
+			RegionFactory::map_add(i);
 		}
 	}
 

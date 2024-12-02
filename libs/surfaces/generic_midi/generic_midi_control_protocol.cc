@@ -203,9 +203,7 @@ GenericMidiControlProtocol::reload_maps ()
 		return;
 	}
 
-	for (vector<string>::iterator i = midi_maps.begin(); i != midi_maps.end(); ++i) {
-		string fullpath = *i;
-
+	for (string& fullpath : midi_maps) {
 		XMLTree tree;
 
 		if (!tree.read (fullpath.c_str())) {
@@ -675,9 +673,9 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 	std::string str;
 	// midi map has to be loaded first so learned binding can go on top
 	if (node.get_property ("binding", str)) {
-		for (list<MapInfo>::iterator x = map_info.begin(); x != map_info.end(); ++x) {
-			if (str == (*x).name) {
-				load_bindings ((*x).path);
+		for (MapInfo& x : map_info) {
+			if (str == x.name) {
+				load_bindings (x.path);
 				break;
 			}
 		}

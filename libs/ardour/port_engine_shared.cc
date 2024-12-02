@@ -147,8 +147,8 @@ BackendPort::is_connected (BackendPortHandle port) const
 
 bool BackendPort::is_physically_connected () const
 {
-	for (std::set<BackendPortPtr>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
-		if ((*it)->is_physical ()) {
+	for (const BackendPortPtr& it : _connections) {
+		if (it->is_physical ()) {
 			return true;
 		}
 	}
@@ -166,9 +166,9 @@ BackendPort::set_latency_range (const LatencyRange &latency_range, bool for_play
 
 	lr = latency_range;
 
-	for (std::set<BackendPortPtr>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
-		if ((*it)->is_physical ()) {
-			(*it)->update_connected_latency (is_input ());
+	for (const BackendPortPtr& it : _connections) {
+		if (it->is_physical ()) {
+			it->update_connected_latency (is_input ());
 		}
 	}
 }
@@ -178,9 +178,9 @@ BackendPort::update_connected_latency (bool for_playback)
 {
 	LatencyRange lr;
 	lr.min = lr.max = 0;
-	for (std::set<BackendPortPtr>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
+	for (const BackendPortPtr& it : _connections) {
 		LatencyRange l;
-		l = (*it)->latency_range (for_playback);
+		l = it->latency_range (for_playback);
 		lr.min = std::max (lr.min, l.min);
 		lr.max = std::max (lr.max, l.max);
 	}
@@ -804,8 +804,8 @@ PortEngineSharedImpl::get_connections (PortEngine::PortHandle port_handle, std::
 
 	const std::set<BackendPortPtr>& connected_ports = port->get_connections ();
 
-	for (std::set<BackendPortPtr>::const_iterator i = connected_ports.begin (); i != connected_ports.end (); ++i) {
-		names.push_back ((*i)->name ());
+	for (const BackendPortPtr& i : connected_ports) {
+		names.push_back (i->name ());
 	}
 
 	return (int)names.size ();
@@ -814,18 +814,18 @@ PortEngineSharedImpl::get_connections (PortEngine::PortHandle port_handle, std::
 void
 PortEngineSharedImpl::update_system_port_latencies ()
 {
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
-		(*it)->update_connected_latency (true);
+	for (const BackendPortPtr& it : _system_inputs) {
+		it->update_connected_latency (true);
 	}
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
-		(*it)->update_connected_latency (false);
+	for (const BackendPortPtr& it : _system_outputs) {
+		it->update_connected_latency (false);
 	}
 
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
-		(*it)->update_connected_latency (true);
+	for (const BackendPortPtr& it : _system_midi_in) {
+		it->update_connected_latency (true);
 	}
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-		(*it)->update_connected_latency (false);
+	for (const BackendPortPtr& it : _system_midi_out) {
+		it->update_connected_latency (false);
 	}
 }
 

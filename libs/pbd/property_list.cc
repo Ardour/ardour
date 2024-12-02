@@ -37,8 +37,8 @@ PropertyList::PropertyList (PropertyList const & other)
 	if (_property_owner) {
 		/* make our own copies of the properties */
 		clear ();
-		for (std::map<PropertyID, PropertyBase*>::const_iterator i = other.begin(); i != other.end(); ++i) {
-			insert (std::make_pair (i->first, i->second->clone ()));
+		for (const std::pair<const PropertyID, PropertyBase*>& i : other) {
+			insert (std::make_pair (i.first, i.second->clone ()));
 		}
 	}
 }

@@ -108,8 +108,8 @@ AudioLibrary::set_tags (string member, vector<string> tags)
 
 	lrdf_remove_uri_matches (file_uri.c_str());
 
-	for (vector<string>::iterator i = tags.begin(); i != tags.end(); ++i) {
-		lrdf_add_triple (src.c_str(), file_uri.c_str(), TAG, (*i).c_str(), lrdf_literal);
+	for (string& i : tags) {
+		lrdf_add_triple (src.c_str(), file_uri.c_str(), TAG, i.c_str(), lrdf_literal);
 	}
 #endif
 }
@@ -153,12 +153,11 @@ AudioLibrary::search_members_and (vector<string>& members, const vector<string>&
 	lrdf_statement* old = 0;
 	head = &pattern;
 
-	vector<string>::const_iterator i;
-	for (i = tags.begin(); i != tags.end(); ++i){
+	for (const string& i : tags) {
 		pattern = new lrdf_statement;
 		pattern->subject = const_cast<char*>("?");
 		pattern->predicate = const_cast<char*>(TAG);
-		pattern->object = strdup((*i).c_str());
+		pattern->object = strdup(i.c_str());
 		pattern->next = old;
 
 		old = pattern;

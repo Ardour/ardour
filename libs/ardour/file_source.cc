@@ -251,9 +251,9 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
                         goto out;
                 }
 
-                for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
+                for (string& i : dirs) {
 
-                        fullpath = Glib::build_filename (*i, path);
+                        fullpath = Glib::build_filename (i, path);
 
                         if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
                                 keeppath = fullpath;
@@ -269,7 +269,7 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 
 		vector<string> de_duped_hits;
 
-		for (vector<string>::iterator i = hits.begin(); i != hits.end(); ++i) {
+		for (vector<string>::iterator i = dirs.begin(); i != hits.end(); ++i) {
 
 			vector<string>::iterator j = i;
 			++j;
@@ -376,9 +376,9 @@ FileSource::find_2X (Session& s, DataType type, const string& path, bool must_ex
 
 		cnt = 0;
 
-		for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
+		for (string& i : dirs) {
 
-                        fullpath = Glib::build_filename (*i, pathstr);
+			fullpath = Glib::build_filename (i, pathstr);
 
 			/* i (paul) made a nasty design error by using ':' as a special character in
 			   Ardour 0.99 .. this hack tries to make things sort of work.
@@ -402,7 +402,7 @@ FileSource::find_2X (Session& s, DataType type, const string& path, bool must_ex
 						 */
 
 						string shorter = pathstr.substr (0, pos);
-                                                fullpath = Glib::build_filename (*i, shorter);
+                                                fullpath = Glib::build_filename (i, shorter);
 
 						if (Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 							chan = atoi (pathstr.substr (pos+1));

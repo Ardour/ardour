@@ -32,9 +32,8 @@ AudioEngineTest::test_backends ()
 
 	CPPUNIT_ASSERT (backends.size () != 0);
 
-	for (std::vector<AudioBackendInfo const *>::const_iterator i = backends.begin();
-		i != backends.end(); ++i) {
-		print_audio_backend_info(*i);
+	for (AudioBackendInfo const *& const i : backends) {
+		print_audio_backend_info(i);
 	}
 }
 

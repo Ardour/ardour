@@ -64,9 +64,9 @@ PBD::Progress::set_progress (float p)
 
 	float overall = 0;
 	float factor = 1;
-	for (list<Level>::iterator i = _stack.begin(); i != _stack.end(); ++i) {
-		factor *= i->allocation;
-		overall += i->normalised * factor;
+	for (Level& i : _stack) {
+		factor *= i.allocation;
+		overall += i.normalised * factor;
 	}
 
 	set_overall_progress (overall);

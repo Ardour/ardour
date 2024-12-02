@@ -64,8 +64,8 @@ VBAPSpeakers::update ()
 
 	_speakers = _parent->speakers ();
 
-	for (vector<Speaker>::const_iterator i = _speakers.begin (); i != _speakers.end (); ++i) {
-		if ((*i).angles ().ele != 0.0) {
+	for (const Speaker& i : _speakers) {
+		if (i.angles ().ele != 0.0) {
 			dim = 3;
 			break;
 		}
@@ -103,12 +103,12 @@ VBAPSpeakers::choose_speaker_triplets (struct ls_triplet_chain** ls_triplets)
 	 */
 
 #if 0 // DEVEL/DEBUG
-	for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
-		cout << "Speaker " << (*i).id << " @ "
-		  << (*i).coords().x << ", " << (*i).coords().y << ", " << (*i).coords().z
-		  << " azimuth " << (*i).angles().azi
-		  << " elevation " << (*i).angles().ele
-		  << " distance " << (*i).angles().length
+	for (Speaker& i : _speakers) {
+		cout << "Speaker " << i.id << " @ "
+		  << i.coords().x << ", " << i.coords().y << ", " << i.coords().z
+		  << " azimuth " << i.angles().azi
+		  << " elevation " << i.angles().ele
+		  << " distance " << i.angles().length
 		  << endl;
 	}
 #endif

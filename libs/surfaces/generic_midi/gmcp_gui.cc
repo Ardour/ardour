@@ -141,8 +141,8 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 {
 	vector<string> popdowns;
 
-	for (list<GenericMidiControlProtocol::MapInfo>::iterator x = cp.map_info.begin(); x != cp.map_info.end(); ++x) {
-		popdowns.push_back (x->name);
+	for (GenericMidiControlProtocol::MapInfo& x : cp.map_info) {
+		popdowns.push_back (x.name);
 	}
 
 	sort (popdowns.begin(), popdowns.end(), less<string>());
@@ -272,9 +272,9 @@ GMCPGUI::binding_changed ()
 	} else if (str == _("Drop Bindings")) {
 		cp.drop_bindings ();
 	} else {
-		for (list<GenericMidiControlProtocol::MapInfo>::iterator x = cp.map_info.begin(); x != cp.map_info.end(); ++x) {
-			if (str == x->name) {
-				cp.load_bindings (x->path);
+		for (GenericMidiControlProtocol::MapInfo& x : cp.map_info) {
+			if (str == x.name) {
+				cp.load_bindings (x.path);
 				motorised_button.set_active (cp.motorised ());
 				threshold_adjustment.set_value (cp.threshold ());
 				break;
@@ -379,12 +379,12 @@ GMCPGUI::build_midi_port_list (vector<string> const & ports, bool for_input)
 	row[midi_port_columns.full_name] = string();
 	row[midi_port_columns.short_name] = _("Disconnected");
 
-	for (vector<string>::const_iterator p = ports.begin(); p != ports.end(); ++p) {
+	for (const string& p : ports) {
 		row = *store->append ();
-		row[midi_port_columns.full_name] = *p;
-		std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*p);
+		row[midi_port_columns.full_name] = p;
+		std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (p);
 		if (pn.empty ()) {
-			pn = (*p).substr ((*p).find (':') + 1);
+			pn = p.substr (p.find (':') + 1);
 		}
 		row[midi_port_columns.short_name] = pn;
 	}

@@ -36,10 +36,10 @@ Legatize::operator()(std::shared_ptr<ARDOUR::MidiModel> model,
 {
 	MidiModel::NoteDiffCommand* cmd = new MidiModel::NoteDiffCommand(model, name ());
 
-	for (std::vector<Legatize::Notes>::iterator s = seqs.begin(); s != seqs.end(); ++s) {
-		for (Legatize::Notes::iterator i = (*s).begin(); i != (*s).end();) {
+	for (Legatize::Notes& s : seqs) {
+		for (Legatize::Notes::iterator i = s.begin(); i != s.end();) {
 			Legatize::Notes::iterator next = i;
-			if (++next == (*s).end()) {
+			if (++next == s.end()) {
 				break;
 			}
 

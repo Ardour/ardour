@@ -3659,11 +3659,11 @@ LV2World::load_bundled_plugins(bool verbose)
 
 		vector<string> plugin_objects;
 		find_paths_matching_filter (plugin_objects, ARDOUR::lv2_bundled_search_path(), lv2_filter, 0, true, true, true);
-		for ( vector<string>::iterator x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
+		for (string& x : plugin_objects) {
 #ifdef PLATFORM_WINDOWS
-			string uri = "file:///" + *x + "/";
+			string uri = "file:///" + x + "/";
 #else
-			string uri = "file://" + *x + "/";
+			string uri = "file://" + x + "/";
 #endif
 			LilvNode *node = lilv_new_uri(world, uri.c_str());
 			lilv_world_load_bundle(world, node);

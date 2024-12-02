@@ -50,9 +50,9 @@ EventLoop::~EventLoop ()
 {
 	trash.sort();
 	trash.unique();
-	for (std::list<InvalidationRecord*>::iterator r = trash.begin(); r != trash.end(); ++r) {
-		if (!(*r)->in_use ()) {
-			delete *r;
+	for (InvalidationRecord*& r : trash) {
+		if (!r->in_use ()) {
+			delete r;
 		}
 	}
 	trash.clear ();

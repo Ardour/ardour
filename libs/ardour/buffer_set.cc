@@ -69,11 +69,11 @@ void
 BufferSet::clear()
 {
 	if (!_is_mirror) {
-		for (std::vector<BufferVec>::iterator i = _buffers.begin(); i != _buffers.end(); ++i) {
-			for (BufferVec::iterator j = (*i).begin(); j != (*i).end(); ++j) {
+		for (BufferVec& i : _buffers) {
+			for (BufferVec::iterator j = i.begin(); j != i.end(); ++j) {
 				delete *j;
 			}
-			(*i).clear();
+			i.clear();
 		}
 	}
 	_buffers.clear();
@@ -485,8 +485,8 @@ BufferSet::merge_from (const BufferSet& in, samplecnt_t nframes)
 void
 BufferSet::silence (samplecnt_t nframes, samplecnt_t offset)
 {
-	for (std::vector<BufferVec>::iterator i = _buffers.begin(); i != _buffers.end(); ++i) {
-		for (BufferVec::iterator b = i->begin(); b != i->end(); ++b) {
+	for (BufferVec& i : _buffers) {
+		for (BufferVec::iterator b = i.begin(); b != i.end(); ++b) {
 			(*b)->silence (nframes, offset);
 		}
 	}

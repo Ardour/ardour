@@ -290,10 +290,9 @@ Analyser::result (bool ptr_only)
 			float p = features[0][0].values[0];
 			if (p > _result.truepeak) { _result.truepeak = p; }
 
-			for (std::vector<float>::const_iterator i = features[1][0].values.begin();
-					i != features[1][0].values.end(); ++i) {
-				/* re-scale - silence stripping: pk = (*i) * peaks / _pos; */
-				const samplecnt_t pk = (*i) * _n_samples / (_pos * _spp);
+			for (const float& i : features[1][0].values) {
+				/* re-scale - silence stripping: pk = i * peaks / _pos; */
+				const samplecnt_t pk = i * _n_samples / (_pos * _spp);
 				const unsigned int cc = c & cmask;
 				_result.truepeakpos[cc].insert (pk);
 			}

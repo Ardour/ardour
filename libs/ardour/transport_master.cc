@@ -305,10 +305,9 @@ TransportMaster::get_state () const
 
 		if (_port->get_connections (connections)) {
 
-			std::vector<std::string>::const_iterator ci;
 			std::sort (connections.begin(), connections.end());
 
-			for (ci = connections.begin(); ci != connections.end(); ++ci) {
+			for (const std::string& ci : connections) {
 
 				/* if its a connection to our own port,
 				   return only the port name, not the
@@ -319,7 +318,7 @@ TransportMaster::get_state () const
 
 				XMLNode* cnode = new XMLNode (X_("Connection"));
 
-				cnode->set_property (X_("other"), AudioEngine::instance()->make_port_name_relative (*ci));
+				cnode->set_property (X_("other"), AudioEngine::instance()->make_port_name_relative (ci));
 				pnode->add_child_nocopy (*cnode);
 			}
 		}

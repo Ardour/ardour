@@ -328,10 +328,10 @@ ARDOUR::topological_sort (GraphNodeList& nodes, GraphEdges& edges)
 		queue.pop_front ();
 		nodes.push_back (r);
 		set<GraphVertex> e = remaining_edges.from (r);
-		for (set<GraphVertex>::iterator i = e.begin(); i != e.end(); ++i) {
-			remaining_edges.remove (r, *i);
-			if (remaining_edges.has_none_to (*i)) {
-				queue.push_back (*i);
+		for (const GraphVertex& i : e) {
+			remaining_edges.remove (r, i);
+			if (remaining_edges.has_none_to (i)) {
+				queue.push_back (i);
 			}
 		}
 	}

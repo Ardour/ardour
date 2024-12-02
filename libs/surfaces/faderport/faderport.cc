@@ -837,17 +837,17 @@ FaderPort::Button::set_state (XMLNode const& node)
 	state_pairs.push_back (make_pair (string ("shift"), ShiftDown));
 	state_pairs.push_back (make_pair (string ("long"), LongPress));
 
-	for (vector<state_pair_t>::const_iterator sp = state_pairs.begin(); sp != state_pairs.end(); ++sp) {
+	for (const state_pair_t& sp : state_pairs) {
 
-		string propname = sp->first + X_("-press");
+		string propname = sp.first + X_("-press");
 		string value;
 		if (node.get_property (propname.c_str(), value)) {
-			set_action (value, true, sp->second);
+			set_action (value, true, sp.second);
 		}
 
-		propname = sp->first + X_("-release");
+		propname = sp.first + X_("-release");
 		if (node.get_property (propname.c_str(), value)) {
-			set_action (value, false, sp->second);
+			set_action (value, false, sp.second);
 		}
 	}
 
@@ -872,16 +872,16 @@ FaderPort::Button::get_state () const
 	state_pairs.push_back (make_pair (string ("shift"), ShiftDown));
 	state_pairs.push_back (make_pair (string ("long"), LongPress));
 
-	for (vector<state_pair_t>::const_iterator sp = state_pairs.begin(); sp != state_pairs.end(); ++sp) {
-		if ((x = on_press.find (sp->second)) != on_press.end()) {
+	for (const state_pair_t& sp : state_pairs) {
+		if ((x = on_press.find (sp.second)) != on_press.end()) {
 			if (x->second.type == NamedAction) {
-				node->set_property (string (sp->first + X_("-press")).c_str(), x->second.action_name);
+				node->set_property (string (sp.first + X_("-press")).c_str(), x->second.action_name);
 			}
 		}
 
-		if ((x = on_release.find (sp->second)) != on_release.end()) {
+		if ((x = on_release.find (sp.second)) != on_release.end()) {
 			if (x->second.type == NamedAction) {
-				node->set_property (string (sp->first + X_("-release")).c_str(), x->second.action_name);
+				node->set_property (string (sp.first + X_("-release")).c_str(), x->second.action_name);
 			}
 		}
 	}

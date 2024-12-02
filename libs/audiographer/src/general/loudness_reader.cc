@@ -88,8 +88,8 @@ LoudnessReader::reset ()
 		_ebur_plugin->reset ();
 	}
 
-	for (std::vector<Vamp::Plugin*>::iterator it = _dbtp_plugins.begin (); it != _dbtp_plugins.end(); ++it) {
-		(*it)->reset ();
+	for (Vamp::Plugin*& it : _dbtp_plugins) {
+		it->reset ();
 	}
 }
 

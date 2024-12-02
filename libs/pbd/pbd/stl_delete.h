@@ -26,10 +26,8 @@
 #if defined(_CPP_VECTOR) || defined(_GLIBCXX_VECTOR) || defined(__SGI_STL_VECTOR) || defined(_LIBCPP_VECTOR)
 template<class T> /*LIBPBD_API*/ void vector_delete (std::vector<T *> *vec)
 {
-	typename std::vector<T *>::iterator i;
-
-	for (i = vec->begin(); i != vec->end(); i++) {
-		delete *i;
+	for (T*& i : vec) {
+		delete i;
 	}
 	vec->clear ();
 }
@@ -38,10 +36,8 @@ template<class T> /*LIBPBD_API*/ void vector_delete (std::vector<T *> *vec)
 #if defined(_CPP_MAP) || defined(_GLIBCXX_MAP) || defined(__SGI_STL_MAP)
 template<class K, class T> /*LIBPBD_API*/ void map_delete (std::map<K, T *> *m)
 {
-	typename std::map<K, T *>::iterator i;
-
-	for (i = m->begin(); i != m->end(); i++) {
-		delete (*i).second;
+	for (auto& i : *m) {
+		delete i.second;
 	}
 	m->clear ();
 }
@@ -50,10 +46,8 @@ template<class K, class T> /*LIBPBD_API*/ void map_delete (std::map<K, T *> *m)
 #if defined(_CPP_LIST) || defined(_GLIBCXX_LIST) || defined(__SGI_STL_LIST)
 template<class T> /*LIBPBD_API*/ void list_delete (std::list<T *> *l)
 {
-	typename std::list<T *>::iterator i;
-
-	for (i = l->begin(); i != l->end(); i++) {
-		delete (*i);
+	for (T*& i : *l) {
+		delete i;
 	}
 
 	l->clear ();
@@ -63,9 +57,7 @@ template<class T> /*LIBPBD_API*/ void list_delete (std::list<T *> *l)
 #if defined(_CPP_SLIST) || defined(_GLIBCXX_SLIST) || defined(__SGI_STL_SLIST)
 template<class T> /*LIBPBD_API*/ void slist_delete (std::slist<T *> *l)
 {
-	typename std::slist<T *>::iterator i;
-
-	for (i = l->begin(); i != l->end(); i++) {
+	for (T*& i : *l) {
 		delete (*i);
 	}
 
@@ -76,10 +68,8 @@ template<class T> /*LIBPBD_API*/ void slist_delete (std::slist<T *> *l)
 #if defined(_CPP_SET) || defined(_GLIBCXX_SET) || defined(__SGI_STL_SET)
 template<class T> void /*LIBPBD_API*/ set_delete (std::set<T *> *sset)
 {
-	typename std::set<T *>::iterator i;
-
-	for (i = sset->begin(); i != sset->end(); i++) {
-		delete *i;
+	for (T* const& i : sset) {
+		delete i;
 	}
 	sset->erase (sset->begin(), sset->end());
 }

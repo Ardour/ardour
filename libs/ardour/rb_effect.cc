@@ -347,17 +347,17 @@ RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 
 	/* now reset ancestral data for each new region */
 
-	for (vector<std::shared_ptr<Region> >::iterator x = results.begin (); x != results.end (); ++x) {
-		(*x)->set_ancestral_data (timepos_t (read_start),
-		                          timecnt_t (read_duration, timepos_t (read_start)),
-		                          stretch,
-		                          shift);
-		(*x)->set_master_sources (region->master_sources ());
+	for (std::shared_ptr<Region> & x : results) {
+		x->set_ancestral_data (timepos_t (read_start),
+		                       timecnt_t (read_duration, timepos_t (read_start)),
+		                       stretch,
+		                       shift);
+		x->set_master_sources (region->master_sources ());
 		/* multiply the old (possibly previously stretched) region length by the extra
 		 * stretch this time around to get its new length. this is a non-music based edit atm.
 		 */
-		(*x)->set_length_unchecked ((*x)->length ().scale (tsr.time_fraction));
-		(*x)->set_whole_file (true);
+		x->set_length_unchecked (x->length ().scale (tsr.time_fraction));
+		x->set_whole_file (true);
 	}
 
 	/* stretch region gain envelope */

@@ -51,8 +51,8 @@ PannerManager::PannerManager ()
 
 PannerManager::~PannerManager ()
 {
-	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		delete *p;
+	for (PannerInfo*& p : panner_info) {
+		delete p;
 	}
 }
 
@@ -101,8 +101,8 @@ PannerManager::discover_panners ()
 
 	find_files_matching_filter (panner_modules, panner_search_path(), panner_filter, 0, false, true, true);
 
-	for (vector<std::string>::iterator i = panner_modules.begin(); i != panner_modules.end(); ++i) {
-		panner_discover (*i);
+	for (std::string& i : panner_modules) {
+		panner_discover (i);
 	}
 }
 
@@ -176,30 +176,30 @@ PannerManager::select_panner (ChanCount in, ChanCount out, std::string const uri
 	uint32_t priority = 0;
 
 	/* look for user-preference -- check if channels match */
-	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		PanPluginDescriptor const& d ((*p)->descriptor);
+	for (PannerInfo*& p : panner_info) {
+		PanPluginDescriptor const& d (p->descriptor);
 		if (d.panner_uri != uri) continue;
 		if (d.in != nin && d.in != -1) continue;
 		if (d.out != nout && d.out != -1) continue;
-		return *p;
+		return p;
 	}
 
 	/* look for exact match first */
 
-	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		PanPluginDescriptor const& d ((*p)->descriptor);
+	for (PannerInfo*& p : panner_info) {
+		PanPluginDescriptor const& d (p->descriptor);
 
 		/* backward compat */
 		if (Stateful::loading_state_version < 6000 && d.panner_uri == "http://ardour.org/plugin/panner_2in2out") {
 			if (d.in == nin && d.out == nout) {
 				priority = 9999;
-				rv = *p;
+				rv = p;
 			}
 		}
 
 		if (d.in == nin && d.out == nout && d.priority > priority) {
 			priority = d.priority;
-			rv = *p;
+			rv = p;
 		}
 	}
 	if (rv) { return rv; }
@@ -215,24 +215,24 @@ PannerManager::select_panner (ChanCount in, ChanCount out, std::string const uri
 	 * in = -1 ; out = -1 // VBAP
 	 */
 
-	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		PanPluginDescriptor const& d ((*p)->descriptor);
+	for (PannerInfo*& p : panner_info) {
+		PanPluginDescriptor const& d (p->descriptor);
 
 		if (d.in == nin && d.out == -1 && d.priority > priority) {
 			priority = d.priority;
-			rv = *p;
+			rv = p;
 		}
 	}
 	if (rv) { return rv; }
 
 	/* no exact match, look for good fit on outputs and variable on inputs */
 	priority = 0;
-	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		PanPluginDescriptor const& d ((*p)->descriptor);
+	for (PannerInfo*& p : panner_info) {
+		PanPluginDescriptor const& d (p->descriptor);
 
 		if (d.in == -1 && d.out == nout && d.priority > priority) {
 			priority = d.priority;
-			rv = *p;
+			rv = p;
 		}
 	}
 	if (rv) { return rv; }
@@ -240,12 +240,12 @@ PannerManager::select_panner (ChanCount in, ChanCount out, std::string const uri
 
 	/* no exact match, look for variable fit on inputs and outputs */
 	priority = 0;
-	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		PanPluginDescriptor const& d ((*p)->descriptor);
+	for (PannerInfo*& p : panner_info) {
+		PanPluginDescriptor const& d (p->descriptor);
 
 		if (d.in == -1 && d.out == -1 && d.priority > priority) {
 			priority = d.priority;
-			rv = *p;
+			rv = p;
 		}
 	}
 	if (rv) { return rv; }
@@ -258,13 +258,11 @@ PannerManager::select_panner (ChanCount in, ChanCount out, std::string const uri
 PannerInfo*
 PannerManager::get_by_uri (std::string uri) const
 {
-	PannerInfo* pi = NULL;
-	for (list<PannerInfo*>::const_iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		if ((*p)->descriptor.panner_uri != uri) continue;
-		pi = (*p);
-		break;
+	for (PannerInfo* const& pi : panner_info) {
+		if (pi->descriptor.panner_uri != uri) continue;
+		return pi;
 	}
-	return pi;
+	return nullptr;
 }
 
 PannerUriMap
@@ -279,8 +277,8 @@ PannerManager::get_available_panners(uint32_t const a_in, uint32_t const a_out) 
 	}
 
 	/* get available panners for current configuration. */
-	for (list<PannerInfo*>::const_iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		PanPluginDescriptor const& d ((*p)->descriptor);
+	for (PannerInfo* const& p : panner_info) {
+		PanPluginDescriptor const& d (p->descriptor);
 		if (d.in != -1 && d.in != in) continue;
 		if (d.out != -1 && d.out != out) continue;
 		if (d.in == -1 && d.out == -1 && out <= 2) continue;

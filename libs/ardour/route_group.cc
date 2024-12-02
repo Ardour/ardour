@@ -338,8 +338,8 @@ RouteGroup::set_state (const XMLNode& node, int version)
 		vector<string> ids;
 		split (str.str(), ids, ' ');
 
-		for (vector<string>::iterator i = ids.begin(); i != ids.end(); ++i) {
-			PBD::ID id (*i);
+		for (string& i : ids) {
+			PBD::ID id (i);
 			std::shared_ptr<Route> r = _session.route_by_id (id);
 
 			if (r) {

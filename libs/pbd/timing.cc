@@ -36,10 +36,10 @@ get_min_max_avg_total (const std::vector<microseconds_t>& values, microseconds_t
 	min = std::numeric_limits<microseconds_t>::max();
 	max = 0; avg = 0;
 
-	for (std::vector<microseconds_t>::const_iterator ci = values.begin(); ci != values.end(); ++ci) {
-		total += *ci;
-		min = std::min (min, *ci);
-		max = std::max (max, *ci);
+	for (const microseconds_t& ci : values) {
+		total += ci;
+		min = std::min (min, ci);
+		max = std::max (max, ci);
 	}
 
 	avg = total / values.size();

@@ -426,8 +426,8 @@ CoreSelection::clear_stripables ()
 
 		PropertyChange pc (Properties::selected);
 
-		for (std::vector<std::shared_ptr<Stripable> >::iterator ss = s.begin(); ss != s.end(); ++ss) {
-			(*ss)->presentation_info().PropertyChanged (pc);
+		for (std::shared_ptr<Stripable> & ss : s) {
+			ss->presentation_info().PropertyChanged (pc);
 		}
 
 	}

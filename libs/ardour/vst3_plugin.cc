@@ -1052,16 +1052,16 @@ VST3Plugin::find_presets ()
 	std::vector<std::string> preset_files;
 	find_paths_matching_filter (preset_files, psp, vst3_preset_filter, 0, false, true, false);
 
-	for (std::vector<std::string>::iterator i = preset_files.begin (); i != preset_files.end (); ++i) {
-		bool        is_user     = PBD::path_is_within (psp.front (), *i);
-		std::string preset_name = PBD::basename_nosuffix (*i);
+	for (std::string& i : preset_files) {
+		bool        is_user     = PBD::path_is_within (psp.front (), i);
+		std::string preset_name = PBD::basename_nosuffix (i);
 		std::string uri         = string_compose (X_("VST3-S:%1:%2"), unique_id (), preset_name);
 		if (_presets.find (uri) != _presets.end ()) {
 			continue;
 		}
 		PresetRecord r (uri, preset_name, is_user);
 		_presets.insert (make_pair (uri, r));
-		_preset_uri_map[uri] = *i;
+		_preset_uri_map[uri] = i;
 	}
 }
 
@@ -1117,9 +1117,9 @@ VST3PluginInfo::get_presets (bool user_only) const
 	std::vector<std::string> preset_files;
 	find_paths_matching_filter (preset_files, psp, vst3_preset_filter, 0, false, true, false);
 
-	for (std::vector<std::string>::iterator i = preset_files.begin (); i != preset_files.end (); ++i) {
-		bool        is_user     = PBD::path_is_within (psp.front (), *i);
-		std::string preset_name = PBD::basename_nosuffix (*i);
+	for (std::string& i : preset_files) {
+		bool        is_user     = PBD::path_is_within (psp.front (), i);
+		std::string preset_name = PBD::basename_nosuffix (i);
 		std::string uri         = string_compose (X_("VST3-S:%1:%2"), unique_id, preset_name);
 		if (!is_user) {
 			continue;
@@ -2103,21 +2103,20 @@ VST3PI::synchronize_states ()
 void
 VST3PI::update_shadow_data ()
 {
-	std::map<uint32_t, Vst::ParamID>::const_iterator i;
-	for (i = _ctrl_index_id.begin (); i != _ctrl_index_id.end (); ++i) {
-		Vst::ParamValue v = _controller->getParamNormalized (i->second);
-		if (_shadow_data[i->first] != v) {
+	for (const std::pair<const uint32_t, Vst::ParamID>& i : _ctrl_index_id) {
+		Vst::ParamValue v = _controller->getParamNormalized (i.second);
+		if (_shadow_data[i.first] != v) {
 #if 0 // DEBUG
-			printf ("VST3PI::update_shadow_data %d: %f -> %f\n", i->first,
-					_shadow_data[i->first], _controller->getParamNormalized (i->second));
+			printf ("VST3PI::update_shadow_data %d: %f -> %f\n", i.first,
+					_shadow_data[i.first], _controller->getParamNormalized (i.second));
 #endif
 #if 1 // needed for set_program() changes to take effect, after kParamValuesChanged
 			int32 index;
-			_input_param_changes.addParameterData (i->second, index)->addPoint (0, v, index);
+			_input_param_changes.addParameterData (i.second, index)->addPoint (0, v, index);
 #endif
-			_shadow_data[i->first] = v;
-			_update_ctrl[i->first] = true;
-			OnParameterChange (ParamValueChanged, i->first, v); /* EMIT SIGNAL */
+			_shadow_data[i.first] = v;
+			_update_ctrl[i.first] = true;
+			OnParameterChange (ParamValueChanged, i.first, v); /* EMIT SIGNAL */
 		}
 	}
 }
@@ -2128,18 +2127,17 @@ VST3PI::update_contoller_param ()
 	/* GUI thread */
 	FUnknownPtr<Vst::IEditControllerHostEditing> host_editing (_controller);
 
-	std::map<uint32_t, Vst::ParamID>::const_iterator i;
-	for (i = _ctrl_index_id.begin (); i != _ctrl_index_id.end (); ++i) {
-		if (!_update_ctrl[i->first]) {
+	for (const std::pair<const uint32_t, Vst::ParamID>& i : _ctrl_index_id) {
+		if (!_update_ctrl[i.first]) {
 			continue;
 		}
-		_update_ctrl[i->first] = false;
-		if (host_editing && !parameter_is_automatable (i->first) && !parameter_is_readonly (i->first)) {
-			host_editing->beginEditFromHost (i->second);
+		_update_ctrl[i.first] = false;
+		if (host_editing && !parameter_is_automatable (i.first) && !parameter_is_readonly (i.first)) {
+			host_editing->beginEditFromHost (i.second);
 		}
-		_controller->setParamNormalized (i->second, _shadow_data[i->first]);
-		if (host_editing && !parameter_is_automatable (i->first) && !parameter_is_readonly (i->first)) {
-			host_editing->endEditFromHost (i->second);
+		_controller->setParamNormalized (i.second, _shadow_data[i.first]);
+		if (host_editing && !parameter_is_automatable (i.first) && !parameter_is_readonly (i.first)) {
+			host_editing->endEditFromHost (i.second);
 		}
 	}
 }

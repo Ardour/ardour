@@ -128,19 +128,17 @@ Transform::operator()(std::shared_ptr<MidiModel> model,
 
 	Command* cmd = new Command(model, name());
 
-	for (std::vector<Notes>::iterator s = seqs.begin(); s != seqs.end(); ++s) {
+	for (Notes& s : seqs) {
 		Context ctx;
-		ctx.n_notes = (*s).size();
-		for (Notes::const_iterator i = (*s).begin(); i != (*s).end(); ++i) {
+		ctx.n_notes = s.size();
+		for (Notes::const_iterator i = s.begin(); i != s.end(); ++i) {
 			const NotePtr note = *i;
 
 			// Clear stack and run program
 			ctx.stack     = std::stack<Variant>();
 			ctx.this_note = note;
-			for (std::list<Operation>::const_iterator o = _prog.ops.begin();
-			     o != _prog.ops.end();
-			     ++o) {
-				(*o).eval(ctx);
+			for (const Operation& o : _prog.ops) {
+				o.eval(ctx);
 			}
 
 			// Result is on top of the stack

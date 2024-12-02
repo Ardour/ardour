@@ -132,9 +132,9 @@ Quantize::operator () (std::shared_ptr<MidiModel> model,
 
 	MidiModel::NoteDiffCommand* cmd = new MidiModel::NoteDiffCommand (model, "quantize");
 
-	for (std::vector<Evoral::Sequence<Temporal::Beats>::Notes>::iterator s = seqs.begin(); s != seqs.end(); ++s) {
+	for (Evoral::Sequence<Temporal::Beats>::Notes& s : seqs) {
 
-		for (Evoral::Sequence<MidiModel::TimeType>::Notes::iterator i = (*s).begin(); i != (*s).end(); ++i) {
+		for (Evoral::Sequence<MidiModel::TimeType>::Notes::iterator i = s.begin(); i != s.end(); ++i) {
 
 			/* compute new start + end points WITHOUT the offset
 			 * caused by the start of the model (see above).

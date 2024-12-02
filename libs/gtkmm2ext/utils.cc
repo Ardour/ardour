@@ -380,12 +380,10 @@ Gtkmm2ext::anchored_menu_popup (Gtk::Menu* const menu,
 void
 Gtkmm2ext::set_popdown_strings (Gtk::ComboBoxText& cr, const vector<string>& strings)
 {
-	vector<string>::const_iterator i;
-
 	cr.clear ();
 
-	for (i = strings.begin(); i != strings.end(); ++i) {
-		cr.append (*i);
+	for (const string& i : strings) {
+		cr.append (i);
 	}
 }
 
@@ -578,12 +576,11 @@ Gtkmm2ext::physical_screen_width (Glib::RefPtr<Gdk::Window> win)
 void
 Gtkmm2ext::container_clear (Gtk::Container& c, bool and_delete)
 {
-	list<Gtk::Widget*> children = c.get_children();
-	for (list<Gtk::Widget*>::iterator child = children.begin(); child != children.end(); ++child) {
-		(*child)->hide ();
-		c.remove (**child);
+	for (Gtk::Widget* const& child : c.get_children()) {
+		child->hide ();
+		c.remove (*child);
 		if (and_delete) {
-			delete *child;
+			delete child;
 		}
 	}
 }

@@ -84,10 +84,10 @@ run_functor_for_paths (vector<string>& result,
                        bool recurse,
                        set<string>& scanned_paths)
 {
-	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+	for (const string& i : paths) {
 		try
 		{
-			string expanded_path = path_expand (*i);
+			string expanded_path = path_expand (i);
 
 			DEBUG_TRACE (DEBUG::FileUtils,
 					string_compose("Find files in expanded path: %1\n", expanded_path));
@@ -345,9 +345,9 @@ copy_files(const std::string & from_path, const std::string & to_dir)
 	vector<string> files;
 	find_files_matching_filter (files, from_path, accept_all_files, 0, true, false);
 
-	for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
-		std::string from = Glib::build_filename (from_path, *i);
-		std::string to = Glib::build_filename (to_dir, *i);
+	for (string& i : files) {
+		std::string from = Glib::build_filename (from_path, i);
+		std::string to = Glib::build_filename (to_dir, i);
 		copy_file (from, to);
 	}
 }
@@ -359,9 +359,8 @@ copy_recurse(const std::string & from_path, const std::string & to_dir, bool pre
 	find_files_matching_filter (files, from_path, accept_all_files, 0, false, true, true);
 
 	const size_t prefix_len = from_path.size();
-	for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
-		std::string from = *i;
-		std::string to = Glib::build_filename (to_dir, (*i).substr(prefix_len));
+	for (string& from : files) {
+		std::string to = Glib::build_filename (to_dir, from.substr(prefix_len));
 		g_mkdir_with_parents (Glib::path_get_dirname (to).c_str(), 0755);
 		if (copy_file (from, to) && preseve_timestamps) {
 			GStatBuf sb;
@@ -551,22 +550,21 @@ remove_directory_internal (const string& dir, size_t* size, vector<string>* path
 
 	get_paths (tmp_paths, dir, just_remove_files, true);
 
-	for (vector<string>::const_iterator i = tmp_paths.begin();
-			i != tmp_paths.end(); ++i) {
+	for (const string& i : tmp_paths) {
 
-		if (g_stat (i->c_str(), &statbuf) && g_lstat (i->c_str(), &statbuf)) {
+		if (g_stat (i.c_str(), &statbuf) && g_lstat (i.c_str(), &statbuf)) {
 			continue;
 		}
 
-		if (::g_remove (i->c_str())) {
-			error << string_compose (_("cannot remove path %1 (%2)"), *i, strerror (errno))
+		if (::g_remove (i.c_str())) {
+			error << string_compose (_("cannot remove path %1 (%2)"), i, strerror (errno))
 				<< endmsg;
 			ret = 1;
 			continue;
 		}
 
 		if (paths) {
-			paths->push_back (Glib::path_get_basename(*i));
+			paths->push_back (Glib::path_get_basename(i));
 		}
 
 		// statbuf.st_size is off_t

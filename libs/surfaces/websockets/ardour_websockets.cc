@@ -96,9 +96,8 @@ ArdourWebsockets::start ()
 	/* startup the event loop thread */
 	BaseUI::run ();
 
-	for (std::vector<SurfaceComponent*>::iterator it = _components.begin ();
-	     it != _components.end (); ++it) {
-		int rc = (*it)->start ();
+	for (SurfaceComponent*& it : _components) {
+		int rc = it->start ();
 		if (rc != 0) {
 			BaseUI::quit ();
 			return -1;
@@ -113,9 +112,8 @@ ArdourWebsockets::start ()
 int
 ArdourWebsockets::stop ()
 {
-	for (std::vector<SurfaceComponent*>::iterator it = _components.begin ();
-	     it != _components.end (); ++it) {
-		(*it)->stop ();
+	for (SurfaceComponent*& it : _components) {
+		it->stop ();
 	}
 
 	BaseUI::quit ();

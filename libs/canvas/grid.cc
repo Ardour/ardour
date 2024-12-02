@@ -210,19 +210,19 @@ Grid::reposition_children ()
 	Rect uniform_cell_size;
 
 	if (homogenous) {
-		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
+		for (Item*& i : _items) {
 
-			if (*i == bg || (collapse_on_hide && !(*i)->visible())) {
+			if (i == bg || (collapse_on_hide && !i->visible())) {
 				continue;
 			}
 
-			Rect bb = (*i)->bounding_box();
+			Rect bb = i->bounding_box();
 
 			if (!bb) {
 				continue;
 			}
 
-			CoordsByItem::const_iterator c = coords_by_item.find (*i);
+			CoordsByItem::const_iterator c = coords_by_item.find (i);
 
 			uniform_cell_size.x1 = max (uniform_cell_size.x1, (bb.width()/c->second.col_span));
 			uniform_cell_size.y1 = max (uniform_cell_size.y1, (bb.height()/c->second.row_span));
@@ -236,37 +236,37 @@ Grid::reposition_children ()
 			row_dimens[n] = uniform_cell_size.height();
 		}
 
-		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
+		for (Item*& i : _items) {
 
-			if (*i == bg || (collapse_on_hide && !(*i)->visible())) {
+			if (i == bg || (collapse_on_hide && !i->visible())) {
 				/* bg rect is not a normal child */
 				continue;
 			}
 
-			CoordsByItem::const_iterator c = coords_by_item.find (*i);
+			CoordsByItem::const_iterator c = coords_by_item.find (i);
 
 			Rect r = uniform_cell_size;
 			r.x1 *= c->second.col_span;
 			r.y1 *= c->second.row_span;
 
-			(*i)->size_allocate (r);
+			i->size_allocate (r);
 		}
 
 	} else {
-		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
+		for (Item*& i : _items) {
 
-			if (*i == bg || (collapse_on_hide && !(*i)->visible())) {
+			if (i == bg || (collapse_on_hide && !i->visible())) {
 				/* bg rect is not a normal child */
 				continue;
 			}
 
-			Rect bb = (*i)->bounding_box();
+			Rect bb = i->bounding_box();
 
 			if (!bb) {
 				continue;
 			}
 
-			CoordsByItem::const_iterator c = coords_by_item.find (*i);
+			CoordsByItem::const_iterator c = coords_by_item.find (i);
 
 			const double per_col_width = bb.width() / c->second.col_span;
 			const double per_row_height = bb.height() / c->second.row_span;
@@ -317,8 +317,8 @@ Grid::reposition_children ()
 	 * given the width of all rows or columns before it.
 	 */
 
-	for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
-		CoordsByItem::const_iterator c = coords_by_item.find (*i);
+	for (Item*& i : _items) {
+		CoordsByItem::const_iterator c = coords_by_item.find (i);
 
 		if (c == coords_by_item.end()) {
 			continue;
@@ -328,7 +328,7 @@ Grid::reposition_children ()
 		 * they become visible again.
 		 */
 
-		(*i)->set_position (Duple (col_dimens[c->second.x], row_dimens[c->second.y]));
+		i->set_position (Duple (col_dimens[c->second.x], row_dimens[c->second.y]));
 	}
 
 	set_bbox_dirty ();

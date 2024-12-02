@@ -888,13 +888,13 @@ int
 LuaTableRef::get (lua_State* L)
 {
 	luabridge::LuaRef rv (luabridge::newTable (L));
-	for (std::vector<LuaTableEntry>::const_iterator i = _data.begin (); i != _data.end (); ++i) {
-		switch ((*i).keytype) {
+	for (const LuaTableEntry& i : _data) {
+		switch (i.keytype) {
 			case LUA_TSTRING:
-				assign (&rv, i->k_s, *i);
+				assign (&rv, i.k_s, i);
 				break;
 			case LUA_TNUMBER:
-				assign (&rv, i->k_n, *i);
+				assign (&rv, i.k_n, i);
 				break;
 		}
 	}
@@ -1396,14 +1396,14 @@ LuaAPI::Rubberband::finalize ()
 
 	/* this is the same as RBEffect::finish, Filter::finish */
 	SourceList sl;
-	for (std::vector<std::shared_ptr<AudioSource> >::iterator i = _asrc.begin (); i != _asrc.end (); ++i) {
-		std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource> (*i);
+	for (std::shared_ptr<AudioSource> & i : _asrc) {
+		std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource> (i);
 		assert (afs);
 		afs->done_with_peakfile_writes ();
 		afs->update_header (_region->position_sample (), *now, xnow);
 		afs->mark_immutable ();
-		Analyser::queue_source_for_analysis (*i, false);
-		sl.push_back (*i);
+		Analyser::queue_source_for_analysis (i, false);
+		sl.push_back (i);
 	}
 
 	/* create a new region */
@@ -1437,8 +1437,8 @@ void
 LuaAPI::Rubberband::cleanup (bool abort)
 {
 	if (abort) {
-		for (std::vector<std::shared_ptr<AudioSource> >::iterator i = _asrc.begin (); i != _asrc.end (); ++i) {
-			(*i)->mark_for_remove ();
+		for (std::shared_ptr<AudioSource> & i : _asrc) {
+			i->mark_for_remove ();
 		}
 	}
 	_asrc.clear ();

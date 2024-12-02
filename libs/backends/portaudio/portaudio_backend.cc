@@ -204,9 +204,9 @@ PortAudioBackend::enumerate_input_devices () const
 	std::map<int, std::string> input_devices;
 	_pcmio->input_device_list(input_devices);
 
-	for (std::map<int, std::string>::const_iterator i = input_devices.begin (); i != input_devices.end(); ++i) {
-		if (_input_audio_device == "") _input_audio_device = i->second;
-		_input_audio_device_status.push_back (DeviceStatus (i->second, true));
+	for (const std::pair<const int, std::string>& i : input_devices) {
+		if (_input_audio_device == "") _input_audio_device = i.second;
+		_input_audio_device_status.push_back (DeviceStatus (i.second, true));
 	}
 	return _input_audio_device_status;
 }
@@ -218,9 +218,9 @@ PortAudioBackend::enumerate_output_devices () const
 	std::map<int, std::string> output_devices;
 	_pcmio->output_device_list(output_devices);
 
-	for (std::map<int, std::string>::const_iterator i = output_devices.begin (); i != output_devices.end(); ++i) {
-		if (_output_audio_device == "") _output_audio_device = i->second;
-		_output_audio_device_status.push_back (DeviceStatus (i->second, true));
+	for (const std::pair<const int, std::string>& i : output_devices) {
+		if (_output_audio_device == "") _output_audio_device = i.second;
+		_output_audio_device_status.push_back (DeviceStatus (i.second, true));
 	}
 	return _output_audio_device_status;
 }
@@ -461,10 +461,8 @@ PortAudioBackend::enumerate_midi_devices () const
 		device_info = _midiio->get_device_info ();
 	}
 
-	for (std::vector<MidiDeviceInfo*>::const_iterator i = device_info.begin();
-	     i != device_info.end();
-	     ++i) {
-		midi_device_status.push_back(DeviceStatus((*i)->device_name, true));
+	for (MidiDeviceInfo*& const i : device_info) {
+		midi_device_status.push_back(DeviceStatus(i->device_name, true));
 	}
 	return midi_device_status;
 }
@@ -477,10 +475,8 @@ PortAudioBackend::midi_device_info (const std::string& device_name) const
 	if (_midi_driver_option == winmme_driver_name) {
 		dev_info = _midiio->get_device_info();
 
-		for (std::vector<MidiDeviceInfo*>::const_iterator i = dev_info.begin();
-		     i != dev_info.end();
-		     ++i) {
-			if ((*i)->device_name == device_name) {
+		for (MidiDeviceInfo*& const i : dev_info) {
+			if (i->device_name == device_name) {
 				return *i;
 			}
 		}
@@ -1027,9 +1023,9 @@ PortAudioBackend::name_to_id(std::string device_name) const {
 	_pcmio->input_device_list(devices);
 	_pcmio->output_device_list(devices);
 
-	for (std::map<int, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (i->second == device_name) {
-			device_id = i->first;
+	for (const std::pair<const int, std::string>& i : devices) {
+		if (i.second == device_name) {
+			device_id = i.first;
 			break;
 		}
 	}
@@ -1120,10 +1116,10 @@ PortAudioBackend::join_process_threads ()
 {
 	int rv = 0;
 
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
+	for (const pthread_t& i : _threads)
 	{
 		void *status;
-		if (pthread_join (*i, &status)) {
+		if (pthread_join (i, &status)) {
 			DEBUG_AUDIO("Cannot terminate process thread.");
 			rv -= 1;
 		}
@@ -1144,9 +1140,9 @@ PortAudioBackend::in_process_thread ()
 			return true;
 		}
 	}
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
+	for (const pthread_t& i : _threads)
 	{
-		if (pthread_equal (*i, pthread_self ()) != 0) {
+		if (pthread_equal (i, pthread_self ()) != 0) {
 			return true;
 		}
 	}
@@ -1229,20 +1225,17 @@ PortAudioBackend::register_system_midi_ports (std::string const& device)
 
 	const std::vector<WinMMEMidiInputDevice*> inputs = _midiio->get_inputs();
 
-	for (std::vector<WinMMEMidiInputDevice*>::const_iterator i = inputs.begin ();
-	     i != inputs.end ();
-	     ++i) {
-
-		if (!device.empty () && device != (*i)->name()) {
+	for (WinMMEMidiInputDevice* const& i : *inputs) {
+		if (!device.empty () && device != i->name()) {
 			continue;
 		}
 
-		MidiDeviceInfo* info = _midiio->get_device_info((*i)->name());
+		MidiDeviceInfo* info = _midiio->get_device_info(i->name());
 		if (!info || !info->enable) {
 			continue;
 		}
 
-		std::string port_name = "system:midi_capture_" + (*i)->name();
+		std::string port_name = "system:midi_capture_" + i->name();
 		PortPtr p = add_port (port_name, DataType::MIDI, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 
 		if (!p) {
@@ -1253,7 +1246,7 @@ PortAudioBackend::register_system_midi_ports (std::string const& device)
 		set_latency_range (p, false, lr);
 
 		std::shared_ptr<PortMidiPort> midi_port = std::dynamic_pointer_cast<PortMidiPort>(p);
-		midi_port->set_hw_port_name ((*i)->name());
+		midi_port->set_hw_port_name (i->name());
 		midi_clear (midi_port->get_buffer(0));
 		_system_midi_in.push_back (midi_port);
 		DEBUG_MIDI (string_compose ("Registered MIDI input port: %1\n", port_name));
@@ -1261,19 +1254,16 @@ PortAudioBackend::register_system_midi_ports (std::string const& device)
 
 	const std::vector<WinMMEMidiOutputDevice*> outputs = _midiio->get_outputs();
 
-	for (std::vector<WinMMEMidiOutputDevice*>::const_iterator i = outputs.begin ();
-	     i != outputs.end ();
-	     ++i) {
-
-		if (!device.empty () && device != (*i)->name()) {
+	for (WinMMEMidiOutputDevice* const& i : *outputs) {
+		if (!device.empty () && device != i->name()) {
 			continue;
 		}
-		MidiDeviceInfo* info = _midiio->get_device_info((*i)->name());
+		MidiDeviceInfo* info = _midiio->get_device_info(i->name());
 		if (!info || !info->enable) {
 			continue;
 		}
 
-		std::string port_name = "system:midi_playback_" + (*i)->name();
+		std::string port_name = "system:midi_playback_" + i->name();
 		PortPtr p = add_port (port_name, DataType::MIDI, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 
 		if (!p) {
@@ -1285,7 +1275,7 @@ PortAudioBackend::register_system_midi_ports (std::string const& device)
 
 		std::shared_ptr<PortMidiPort> midi_port = std::dynamic_pointer_cast<PortMidiPort>(p);
 		midi_port->set_n_periods(2);
-		midi_port->set_hw_port_name ((*i)->name());
+		midi_port->set_hw_port_name (i->name());
 		midi_clear (midi_port->get_buffer(0));
 		_system_midi_out.push_back (midi_port);
 		DEBUG_MIDI (string_compose ("Registered MIDI output port: %1\n", port_name));
@@ -1296,24 +1286,24 @@ PortAudioBackend::register_system_midi_ports (std::string const& device)
 void
 PortAudioBackend::update_systemic_midi_latencies ()
 {
-	for (std::vector<BackendPortPtr>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-		MidiDeviceInfo* info = _midiio->get_device_info((*it)->hw_port_name());
+	for (BackendPortPtr& it : _system_midi_out) {
+		MidiDeviceInfo* info = _midiio->get_device_info(it->hw_port_name());
 		if (!info) {
 			continue;
 		}
 		LatencyRange lr;
 		lr.min = lr.max = (_measure_latency ? 0 : info->systemic_output_latency);
-		set_latency_range (*it, true, lr);
+		set_latency_range (it, true, lr);
 	}
 
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
-		MidiDeviceInfo* info = _midiio->get_device_info((*it)->hw_port_name());
+	for (const BackendPortPtr& it : _system_midi_in) {
+		MidiDeviceInfo* info = _midiio->get_device_info(it->hw_port_name());
 		if (!info) {
 			continue;
 		}
 		LatencyRange lr;
 		lr.min = lr.max = (_measure_latency ? 0 : info->systemic_input_latency);
-		set_latency_range (*it, false, lr);
+		set_latency_range (it, false, lr);
 	}
 	update_latencies ();
 }
@@ -1591,10 +1581,8 @@ PortAudioBackend::blocking_process_main(const float* interleaved_input_data,
 	process_incoming_midi ();
 
 	/* clear output buffers */
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin();
-	     it != _system_outputs.end();
-	     ++it) {
-		memset((*it)->get_buffer(_samples_per_period),
+	for (const BackendPortPtr& it : _system_outputs) {
+		memset(it->get_buffer(_samples_per_period),
 		       0,
 		       _samples_per_period * sizeof(Sample));
 	}
@@ -1668,10 +1656,8 @@ bool
 PortAudioBackend::blocking_process_freewheel()
 {
 	// zero audio input buffers
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin();
-	     it != _system_inputs.end();
-	     ++it) {
-		memset((*it)->get_buffer(_samples_per_period),
+	for (const BackendPortPtr& it : _system_inputs) {
+		memset(it->get_buffer(_samples_per_period),
 		       0,
 		       _samples_per_period * sizeof(Sample));
 	}
@@ -1685,10 +1671,8 @@ PortAudioBackend::blocking_process_freewheel()
 	}
 
 	// drop all outgoing MIDI messages
-	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_out.begin();
-	     it != _system_midi_out.end();
-	     ++it) {
-		void* bptr = (*it)->get_buffer(0);
+	for (const BackendPortPtr& it : _system_midi_out) {
+		void* bptr = it->get_buffer(0);
 		midi_clear(bptr);
 	}
 
@@ -1737,10 +1721,8 @@ void
 PortAudioBackend::process_outgoing_midi ()
 {
 	/* mixdown midi */
-	for (std::vector<BackendPortPtr>::iterator it = _system_midi_out.begin();
-	     it != _system_midi_out.end();
-	     ++it) {
-		std::dynamic_pointer_cast<PortMidiPort>(*it)->next_period();
+	for (BackendPortPtr& it : _system_midi_out) {
+		std::dynamic_pointer_cast<PortMidiPort>(it)->next_period();
 	}
 	/* queue outgoing midi */
 	uint32_t i = 0;
@@ -1918,10 +1900,8 @@ void* PortMidiPort::get_buffer (pframes_t /* nframes */)
 {
 	if (is_input ()) {
 		(_buffer[_bufperiod]).clear ();
-		for (std::set<BackendPortPtr>::const_iterator i = get_connections ().begin ();
-				i != get_connections ().end ();
-				++i) {
-			const PortMidiBuffer * src = std::dynamic_pointer_cast<const PortMidiPort>(*i)->const_buffer ();
+		for (const BackendPortPtr& i : get_connections ()) {
+			const PortMidiBuffer * src = std::dynamic_pointer_cast<const PortMidiPort>(i)->const_buffer ();
 			for (PortMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
 				(_buffer[_bufperiod]).push_back (*it);
 			}

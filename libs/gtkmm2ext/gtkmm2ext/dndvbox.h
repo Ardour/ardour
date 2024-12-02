@@ -122,9 +122,8 @@ public:
 	{
 		std::list<T*> sorted_children;
 
-		std::list<Gtk::Widget*> widget_children = _internal_vbox.get_children ();
-		for (std::list<Gtk::Widget*>::iterator i = widget_children.begin(); i != widget_children.end(); ++i) {
-			T* c = child_from_widget (*i);
+		for (Gtk::Widget* const& i : _internal_vbox.get_children ()) {
+			T* c = child_from_widget (i);
 
 			if (c) {
 				sorted_children.push_back (c);
@@ -141,9 +140,9 @@ public:
 		} else {
 			/* simple insertion-sort */
 			std::list<T*> rv;
-			for (typename std::list<T*>::const_iterator i = _children.begin(); i != _children.end(); ++i) {
-				if (selected (*i)) {
-					rv.push_back (*i);
+			for (T* const& i : _children) {
+				if (selected (i)) {
+					rv.push_back (i);
 				}
 			}
 			return rv;
@@ -177,9 +176,9 @@ public:
 	{
 		_selection.clear ();
 
-		for (typename std::list<T*>::iterator i = _children.begin(); i != _children.end(); ++i) {
-			_internal_vbox.remove ((*i)->widget());
-			delete *i;
+		for (T*& i : _children) {
+			_internal_vbox.remove (i->widget());
+			delete i;
 		}
 
 		_children.clear ();
@@ -189,8 +188,8 @@ public:
 	void select_all ()
 	{
 		clear_selection ();
-		for (typename std::list<T*>::iterator i = _children.begin(); i != _children.end(); ++i) {
-			add_to_selection (*i);
+		for (T*& i : _children) {
+			add_to_selection (i);
 		}
 
 		SelectionChanged (); /* EMIT SIGNAL */
@@ -557,23 +556,22 @@ private:
 
 					bool selecting = false;
 					bool done = false;
-					for (typename std::list<T*>::const_iterator i = _children.begin(); i != _children.end(); ++i) {
-
-						bool const was_selected = selected (*i);
+					for (T* const& i : _children) {
+						bool const was_selected = selected (i);
 
 						if (selecting && !was_selected) {
-							add_to_selection (*i);
+							add_to_selection (i);
 						}
 
 						if (!selecting && !done) {
-							if (selected (*i)) {
+							if (selected (i)) {
 								selecting = true;
-							} else if (*i == child) {
+							} else if (i == child) {
 								selecting = true;
 								add_to_selection (child);
 							}
 						} else if (selecting) {
-							if (was_selected || *i == child) {
+							if (was_selected || i == child) {
 								selecting = false;
 								done = true;
 							}
@@ -633,8 +631,8 @@ private:
 	{
 		std::list<T*> old_selection = _selection;
 		_selection.clear ();
-		for (typename std::list<T*>::iterator i = old_selection.begin(); i != old_selection.end(); ++i) {
-			setup_child_state (*i);
+		for (T*& i : old_selection) {
+			setup_child_state (i);
 		}
 	}
 
@@ -660,16 +658,11 @@ private:
 
 	T* child_from_widget (Gtk::Widget const * w) const
 	{
-		typename std::list<T*>::const_iterator i = _children.begin();
-		while (i != _children.end() && &(*i)->widget() != w) {
-			++i;
+		for (T* const& i : _children) {
+			if (&i->widget() == w) return i;
 		}
 
-		if (i == _children.end()) {
-			return 0;
-		}
-
-		return *i;
+		return 0;
 	}
 
 	Gtk::VBox _internal_vbox;
