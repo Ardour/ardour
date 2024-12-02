@@ -1453,7 +1453,8 @@ private:
 	void unlock ();
 	Gtk::Dialog* lock_dialog;
 
-	struct timeval last_event_time;
+	int64_t _last_event_time;
+
 	bool generic_event_handler (GdkEvent*);
 	bool lock_timeout_callback ();
 	void start_lock_event_timing ();

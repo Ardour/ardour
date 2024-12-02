@@ -323,7 +323,7 @@ Editor::Editor ()
 	, pending_keyboard_selection_start (0)
 	, ignore_gui_changes (false)
 	, lock_dialog (0)
-	, last_event_time { 0, 0 }
+	, _last_event_time (g_get_monotonic_time ())
 	, _dragging_playhead (false)
 	, ignore_map_change (false)
 	, _stationary_playhead (false)
@@ -1047,7 +1047,7 @@ Editor::generic_event_handler (GdkEvent* ev)
 	case GDK_KEY_PRESS:
 	case GDK_KEY_RELEASE:
 		if (contents().get_mapped()) {
-			gettimeofday (&last_event_time, 0);
+			_last_event_time = g_get_monotonic_time ();
 		}
 		break;
 
@@ -1078,13 +1078,9 @@ Editor::generic_event_handler (GdkEvent* ev)
 bool
 Editor::lock_timeout_callback ()
 {
-	struct timeval now, delta;
+	int64_t dt = g_get_monotonic_time () - _last_event_time;
 
-	gettimeofday (&now, 0);
-
-	timersub (&now, &last_event_time, &delta);
-
-	if (delta.tv_sec > (time_t) UIConfiguration::instance().get_lock_gui_after_seconds()) {
+	if (dt * 1e-6 > UIConfiguration::instance().get_lock_gui_after_seconds()) {
 		lock ();
 		/* don't call again. Returning false will effectively
 		   disconnect us from the timer callback.
