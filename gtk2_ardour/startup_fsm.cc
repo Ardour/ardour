@@ -437,7 +437,7 @@ void
 StartupFSM::show_session_dialog (bool new_session_required)
 {
 	set_state (WaitingForSessionPath);
-	session_dialog = new SessionDialog (new_session_required, session_name, session_path, session_template, false);
+	session_dialog = new SessionDialog (new_session_required ? SessionDialog::New : SessionDialog::Recent, session_name, session_path, session_template, false);
 	current_dialog_connection = session_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), NewSessionDialog));
 	session_dialog->set_position (WIN_POS_CENTER);
 	session_dialog->present ();
