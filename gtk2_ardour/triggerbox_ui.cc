@@ -501,7 +501,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 
 	if (trigger ()->cue_isolated ()) {
 		/* left shadow */
-		context->set_identity_matrix ();
+		context->save ();
 		context->translate (self.x0, self.y0 - 0.5);
 		Cairo::RefPtr<Cairo::LinearGradient> l_shadow = Cairo::LinearGradient::create (0, 0, scale * 12, 0);
 		l_shadow->add_color_stop_rgba (0.0, 0.0, 0.0, 0.0, 0.8);
@@ -509,7 +509,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 		context->set_source (l_shadow);
 		context->rectangle (0, 0, scale * 12, height);
 		context->fill ();
-		context->set_identity_matrix ();
+		context->restore ();
 	}
 
 	if (false /*tref.slot == 1*/) {
@@ -524,20 +524,20 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 
 	/* launch icon */
 	{
-		context->set_identity_matrix ();
+		context->save ();
 		context->translate (self.x0, self.y0 - 0.5);
 		context->translate (0, 0); // left side of the widget
 		draw_launch_icon (context, height, scale);
-		context->set_identity_matrix ();
+		context->restore ();
 	}
 
 	/* follow-action icon */
 	if (trigger ()->playable () && trigger ()->will_follow ()) {
-		context->set_identity_matrix ();
+		context->save ();
 		context->translate (self.x0, self.y0 - 0.5);
 		context->translate (width - height, 0); // right side of the widget
 		draw_follow_icon (context, trigger ()->follow_action0 (), height, scale);
-		context->set_identity_matrix ();
+		context->restore ();
 	}
 }
 
@@ -862,7 +862,6 @@ TriggerEntry::drag_begin (Glib::RefPtr<Gdk::DragContext> const& context)
 		/* inverse offset, because ::render() translates coordinates itself */
 		ArdourCanvas::Rect self (item_to_window (_rect));
 		ctx->translate (-self.x0, -self.y0);
-		/* save context because ::render() calls set_identity_matrix () */
 		ctx->save ();
 		render (self, ctx);
 		ctx->restore ();

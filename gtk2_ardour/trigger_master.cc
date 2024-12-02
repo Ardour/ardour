@@ -87,7 +87,7 @@ Loopster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 		return;
 	}
 
-	context->set_identity_matrix ();
+	context->save ();
 	context->translate (self.x0, self.y0);
 
 	float size = _rect.height ();
@@ -110,7 +110,7 @@ Loopster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 	context->stroke ();
 
 	context->set_line_width (1);
-	context->set_identity_matrix ();
+	context->restore ();
 }
 
 TriggerMaster::TriggerMaster (Item* parent)
