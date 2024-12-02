@@ -557,8 +557,9 @@ GtkCanvas::GtkCanvas ()
 
 	/* these are the events we want to know about */
 	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK |
-		    Gdk::SCROLL_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK |
-		    Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
+	            Gdk::SCROLL_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK |
+	            Gdk::TOUCH_BEGIN_MASK | Gdk::TOUCH_UPDATE_MASK | Gdk::TOUCH_END_MASK |
+	            Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
 }
 
 void
@@ -616,39 +617,8 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 
 	/* find the items at the given window position */
 
-	vector<Item const *> items;
-	_root.add_items_at_point (point, items);
-
-	DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("%1 covers %2 items\n", point, items.size()));
-
-#ifndef NDEBUG
-	if (DEBUG_ENABLED(PBD::DEBUG::CanvasEnterLeave)) {
-		for (auto const & item : items) {
-			std::cerr << "\tItem " << item->whoami() << " ignore events ? " << item->ignore_events() << " vis ? " << item->visible() << std::endl;
-		}
-	}
-#endif
-
-	/* put all items at point that are event-sensitive and visible and NOT
-	   groups into within_items. Note that items is sorted from bottom to
-	   top, but we're going to reverse that for within_items so that its
-	   first item is the upper-most item that can be chosen as _current_item.
-	*/
-
-	vector<Item const *>::const_iterator i;
 	list<Item const *> within_items;
-
-	for (i = items.begin(); i != items.end(); ++i) {
-
-		Item const * possible_item = *i;
-
-		/* We ignore invisible items, containers and items that ignore events */
-
-		if (!possible_item->visible() || possible_item->ignore_events() || dynamic_cast<ArdourCanvas::Container const *>(possible_item) != 0) {
-			continue;
-		}
-		within_items.push_front (possible_item);
-	}
+	get_items_enclosing(point, within_items);
 
 	DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("after filtering insensitive + containers, we have  %1 items\n", within_items.size()));
 
@@ -678,6 +648,42 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 		DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, "--- no current item\n");
 	}
 
+}
+
+
+/** Given @p point (a position in window coordinates)
+ *  return a list of items in order top to bottom.
+ */
+void
+GtkCanvas::get_items_enclosing (Duple const & point, list<Item const *> &enclosing_items)
+{
+	/* find the items at the given window position */
+	vector<Item const*> items;
+	_root.add_items_at_point (point, items);
+
+	DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("%1 covers %2 items\n", point, items.size()));
+
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(PBD::DEBUG::CanvasEnterLeave)) {
+		for (auto const& item : items) {
+			std::cerr << "\tItem " << item->whoami() << " ignore events ? " << item->ignore_events() << " vis ? " << item->visible() << std::endl;
+		}
+	}
+#endif
+
+	/* put all items at point that are event-sensitive and visible and NOT
+	 * groups into enclosing_items. Note that items is sorted from bottom to
+	 * top, but we're going to reverse that for enclosing_items so that its
+	 * first item is the upper-most item that can be chosen as _current_item.
+	 */
+
+	for (auto const& possible_item : items) {
+		/* We ignore invisible items, containers and items that ignore events */
+		if (!possible_item->visible() || possible_item->ignore_events() || dynamic_cast<ArdourCanvas::Container const *>(possible_item) != 0) {
+			continue;
+		}
+		enclosing_items.push_front (possible_item);
+	}
 }
 
 /** Deliver a series of enter & leave events based on the pointer position being at window
@@ -851,8 +857,26 @@ bool
 GtkCanvas::deliver_event (GdkEvent* event)
 {
 	/* Point in in canvas coordinate space */
-
 	const Item* event_item;
+
+	/* touch events require a separate path with no pre-light, and a 'grab' for each finger (i.e. sequence) */
+	if (event->type == GDK_TOUCH_BEGIN || event->type == GDK_TOUCH_UPDATE || event->type == GDK_TOUCH_END ) {
+		int touchp = event->touch.sequence;
+		std::map<int, Item*>::iterator ei = _touched_item.find (touchp);
+		if (ei == _touched_item.end ()) {
+			return false;
+		}
+		event_item = ei->second;
+		if (event_item && !event_item->ignore_events () && event_item->Event (event)) {
+			/* this item has just handled the event */
+			DEBUG_TRACE (
+				PBD::DEBUG::CanvasEvents,
+				string_compose ("canvas touch event handled by %1 %2\n", event_item->whatami(), event_item->name.empty() ? "[unknown]" : event_item->name)
+				);
+			return true;
+		}
+		return false;
+	}
 
 	if (_grabbed_item) {
 		/* we have a grabbed item, so everything gets sent there */
@@ -1277,6 +1301,66 @@ GtkCanvas::on_motion_notify_event (GdkEventMotion* ev)
 	*/
 
 	return deliver_event (reinterpret_cast<GdkEvent*> (&copy));
+}
+
+bool
+GtkCanvas::on_touch_begin_event (GdkEventTouch *ev)
+{
+std::cout << "GtkCanvas::on_touch_begin\n" << std::endl;
+
+	/* translate event coordinates from window to canvas */
+
+	GdkEvent copy = *((GdkEvent*)ev);
+	Duple winpos  = Duple (ev->x, ev->y);
+	Duple where   = window_to_canvas (winpos);
+
+	copy.touch.x = where.x;
+	copy.touch.y = where.y;
+
+	/* Coordinates in the event will be canvas coordinates, correctly adjusted
+	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
+	*/
+
+	std::list<Item const*> within_items;
+	get_items_enclosing (winpos, within_items);
+
+	if (!within_items.empty()) {
+		_touched_item[ev->sequence] = const_cast<Item*> (within_items.front());
+	}
+
+	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas scroll @ %1, %2 => %3\n", ev->x, ev->y, where));
+	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
+}
+
+bool
+GtkCanvas::on_touch_update_event (GdkEventTouch* ev)
+{
+	GdkEvent copy = *((GdkEvent*)ev);
+	Duple winpos  = Duple (ev->x, ev->y);
+	Duple where   = window_to_canvas (winpos);
+
+	copy.touch.x = where.x;
+	copy.touch.y = where.y;
+
+	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
+}
+
+bool
+GtkCanvas::on_touch_end_event (GdkEventTouch *ev)
+{
+	GdkEvent copy = *((GdkEvent*)ev);
+	Duple winpos  = Duple (ev->x, ev->y);
+	Duple where   = window_to_canvas (winpos);
+
+	copy.touch.x = where.x;
+	copy.touch.y = where.y;
+
+	bool ret = deliver_event (reinterpret_cast<GdkEvent*>(&copy));
+
+	/* remove "GRAB" */
+	_touched_item.erase (ev->sequence);
+
+	return ret;
 }
 
 bool

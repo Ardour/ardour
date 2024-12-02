@@ -269,6 +269,9 @@ protected:
 	bool on_button_press_event (GdkEventButton *);
 	bool on_button_release_event (GdkEventButton* event);
 	bool on_motion_notify_event (GdkEventMotion *);
+	bool on_touch_begin_event (GdkEventTouch *);
+	bool on_touch_update_event (GdkEventTouch* event);
+	bool on_touch_end_event (GdkEventTouch *);
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
@@ -282,6 +285,8 @@ protected:
 	bool motion_notify_handler (GdkEventMotion *);
 	bool deliver_event (GdkEvent *);
 	void deliver_enter_leave (Duple const & point, int state);
+
+	void get_items_enclosing (Duple const& point, std::list<Item const*>& enclosing_items);
 
 	void pick_current_item (int state);
 	void pick_current_item (Duple const &, int state);
@@ -299,6 +304,9 @@ private:
 	Item * _grabbed_item;
 	/** the item that currently has key focus or 0 */
 	Item * _focused_item;
+
+	/** for multitouch: the item(s) that have been touched (effectively a GRAB) */
+	std::map<int, Item*> _touched_item;
 
 	bool _single_exposure;
 	bool _use_image_surface;
