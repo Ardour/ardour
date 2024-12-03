@@ -22,6 +22,7 @@
 #include <gtkmm/notebook.h>
 #include <gtkmm/window.h>
 #include <gtkmm/stock.h>
+#include <gtkmm/table.h>
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/gtk_ui.h"
@@ -74,13 +75,10 @@ Tabbable::default_layout ()
 	right_attachment_button.set_name ("lock button");  // TODO create dedicate button style
 	bottom_attachment_button.set_name ("lock button");
 
+#ifdef MIXBUS
 	left_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
 	right_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
 	bottom_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
-
-	left_attachment_button.set_sensitive (0 != (_panelayout & (PaneLeft | AttLeft)));
-	right_attachment_button.set_sensitive (0 != (_panelayout & PaneRight));
-	bottom_attachment_button.set_sensitive (0 != (_panelayout & (PaneBottom | AttBottom)));
 
 	content_attachment_hbox.set_border_width(3);
 	content_attachment_hbox.set_spacing(3);
@@ -88,6 +86,24 @@ Tabbable::default_layout ()
 	content_attachment_hbox.pack_end (bottom_attachment_button, false, false);
 	content_attachment_hbox.pack_end (left_attachment_button, false, false);
 	content_attachments.add (content_attachment_hbox);
+#else
+	Gtk::Table* atta_table = manage(new Gtk::Table);
+	atta_table->set_spacings (3);
+	atta_table->attach (left_attachment_button,   0, 1, 0, 1, Gtk::SHRINK, Gtk::EXPAND|FILL);
+	atta_table->attach (right_attachment_button,  1, 2, 0, 1, Gtk::SHRINK, Gtk::EXPAND|FILL);
+	atta_table->attach (bottom_attachment_button, 0, 2, 1, 2, Gtk::FILL,   Gtk::EXPAND|FILL);
+
+	left_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
+	right_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
+
+	content_attachment_hbox.set_border_width(3);
+	content_attachment_hbox.pack_end (*atta_table, true, true);
+	content_attachments.add (content_attachment_hbox);
+#endif
+
+	left_attachment_button.set_sensitive (0 != (_panelayout & (PaneLeft | AttLeft)));
+	right_attachment_button.set_sensitive (0 != (_panelayout & PaneRight));
+	bottom_attachment_button.set_sensitive (0 != (_panelayout & (PaneBottom | AttBottom)));
 
 	content_header_hbox.pack_start (content_app_bar, true, true);
 	content_header_hbox.pack_start (content_attachments, false, false);
