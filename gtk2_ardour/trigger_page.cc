@@ -77,15 +77,22 @@ TriggerPage::TriggerPage ()
 	load_bindings ();
 	register_actions ();
 
-	/* Match TriggerStrip::_name_button height */
+	/* Match TriggerStrip::input_button height */
 	ArdourButton* spacer = manage (new ArdourButton (ArdourButton::Text));
 	spacer->set_name ("mixer strip button");
 	spacer->set_sensitive (false);
 	spacer->set_text (" ");
 
+	/* Match TriggerStrip::_name_button height */
+	ArdourButton* spacer2 = manage (new ArdourButton (ArdourButton::Text));
+	spacer2->set_name ("mixer strip button");
+	spacer2->set_sensitive (false);
+	spacer2->set_text (" ");
+
 	/* left-side, fixed-size cue-box */
 	_cue_area_box.set_spacing (2);
 	_cue_area_box.pack_start (*spacer, Gtk::PACK_SHRINK);
+	_cue_area_box.pack_start (*spacer2, Gtk::PACK_SHRINK);
 	_cue_area_box.pack_start (_cue_box, Gtk::PACK_SHRINK);
 	_cue_area_box.pack_start (_master_widget, Gtk::PACK_SHRINK);
 
@@ -93,7 +100,7 @@ TriggerPage::TriggerPage ()
 	 * use Alignment instead of Frame with SHADOW_IN (2px)
 	 * +1px padding for _strip_scroller frame -> 3px top padding
 	 */
-	_cue_area_frame.set_padding (3, 1, 1, 1);
+	_cue_area_frame.set_padding (4, 1, 1, 1);
 	_cue_area_frame.add (_cue_area_box);
 
 	_strip_scroller.add (_strip_packer);
