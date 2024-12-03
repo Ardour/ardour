@@ -10,8 +10,5 @@
 #include <cairo.h>
 
 GE_INTERNAL void clearlooks_register_style_classic (ClearlooksStyleFunctions *functions);
-GE_INTERNAL void clearlooks_register_style_glossy  (ClearlooksStyleFunctions *functions);
-GE_INTERNAL void clearlooks_register_style_gummy  (ClearlooksStyleFunctions *functions);
-GE_INTERNAL void clearlooks_register_style_inverted (ClearlooksStyleFunctions *functions);
 
 #endif /* CLEARLOOKS_DRAW_H */
