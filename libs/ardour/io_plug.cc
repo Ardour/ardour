@@ -145,7 +145,7 @@ IOPlug::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	bool any_vst;
+	bool any_vst = false;
 	_plugin = find_and_load_plugin (_session, node, type, unique_id, any_vst);
 
 	if (!_plugin) {

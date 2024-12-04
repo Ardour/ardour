@@ -294,7 +294,7 @@ RegionFxPlugin::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	bool any_vst;
+	bool any_vst = false;
 
 	uint32_t count = 1;
 	node.get_property ("count", count);
