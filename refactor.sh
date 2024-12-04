@@ -1,0 +1,22 @@
+#!/bin/sed -f
+s/strip_button_toggled/att_left_button_toggled/
+s/list_button_toggled/att_right_button_toggled/
+s/props_button_toggled/att_bottom_button_toggled/
+s/showhide_sidebar_strip/showhide_att_left/
+s/showhide_sidebar_list/showhide_att_right/
+s/showhide_btm_props/showhide_att_bottom/
+s/content_transport_ebox/content_app_bar/
+s/content_strip_ebox/contents_att_left/
+s/content_list_vbox/content_right_vbox/
+s/content_list_ebox/content_att_right/
+s/content_attachments_ebox/content_attachments/
+s/content_tabbables_ebox/content_tabbables/
+s/content_toolbar_ebox/content_toolbar/
+s/content_list_pane/content_right_pane/
+s/content_innermost_ebox/content_innermost_hbox/
+s/content_props_ebox/content_att_bottom/
+s/_transport_table/_table/g
+s/TransportBar/ApplicationBar/g
+s/strip_attachment_button/left_attachment_button/
+s/list_attachment_button/right_attachment_button/
+s/prop_attachment_button/bottom_attachment_button/

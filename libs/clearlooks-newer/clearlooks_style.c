@@ -909,7 +909,7 @@ clearlooks_style_draw_slider (DRAW_ARGS, GtkOrientation orientation)
 		ScrollBarParameters scrollbar;
 
 		clearlooks_set_widget_parameters (widget, style, state_type, &params);
-		params.corners = CR_CORNER_NONE;
+		//params.corners = CR_CORNER_NONE;
 
 		scrollbar.has_color  = FALSE;
 		scrollbar.horizontal = (orientation == GTK_ORIENTATION_HORIZONTAL);
@@ -925,6 +925,8 @@ clearlooks_style_draw_slider (DRAW_ARGS, GtkOrientation orientation)
 		{
 			ge_gdk_color_to_cairo (&clearlooks_style->scrollbar_color, &scrollbar.color);
 			scrollbar.has_color = TRUE;
+		} else {
+			scrollbar.color = colors->bg[0];
 		}
 
 		STYLE_FUNCTION(draw_scrollbar_slider) (cr, colors, &params, &scrollbar,
