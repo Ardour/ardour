@@ -132,11 +132,13 @@ TriggerStrip::init ()
 	_name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	_name_button.signal_size_allocate ().connect (sigc::mem_fun (*this, &TriggerStrip::name_button_resized));
 
+	_trigger_ebox.add (_trigger_display);
+
 	/* strip layout */
 	global_vpacker.set_spacing (2);
 	global_vpacker.pack_start (input_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_name_button, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (_trigger_display, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (_trigger_ebox, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_tmaster_widget, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_processor_box, true, true);
 	global_vpacker.pack_start (_panners, Gtk::PACK_SHRINK);
@@ -171,6 +173,7 @@ TriggerStrip::init ()
 	/* Visibility */
 	_tmaster_widget.show ();
 	_name_button.show ();
+	_trigger_ebox.show ();
 	_trigger_display.show ();
 	_processor_box.show ();
 	_level_meter.show ();
