@@ -81,6 +81,8 @@ MiniTimeline::MiniTimeline ()
 				Gtkmm2ext::Keyboard::primary_modifier_name(),
 				Gtkmm2ext::Keyboard::primary_modifier_name (),
 				Gtkmm2ext::Keyboard::secondary_modifier_name ()));
+
+	set_colors ();
 }
 
 MiniTimeline::~MiniTimeline ()
