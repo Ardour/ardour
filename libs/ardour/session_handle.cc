@@ -34,6 +34,14 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+SessionHandlePtr::SessionHandlePtr ()
+	: _session (0)
+#ifdef TRACE_SETSESSION_NULL
+	, _gone_away_emitted (false)
+#endif
+{
+}
+
 SessionHandlePtr::SessionHandlePtr (Session* s)
 	: _session (s)
 #ifdef TRACE_SETSESSION_NULL
