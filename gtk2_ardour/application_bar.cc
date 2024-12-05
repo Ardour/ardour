@@ -236,7 +236,10 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	++col;
 
 	_table.attach (_latency_disable_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	_table.attach (_route_latency_value, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, 0);
 	++col;
+
+	_route_latency_value.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 
 	_table.attach (_latency_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
@@ -557,9 +560,11 @@ ApplicationBar::repack_transport_hbox ()
 	bool show_pdc = UIConfiguration::instance().get_show_toolbar_latency ();
 	if (show_pdc) {
 		_latency_disable_button.show ();
+		_route_latency_value.show ();
 		_latency_spacer.show ();
 	} else {
 		_latency_disable_button.hide ();
+		_route_latency_value.hide ();
 		_latency_spacer.hide ();
 	}
 
@@ -680,7 +685,7 @@ ApplicationBar::feedback_blink (bool onoff)
 		} else {
 			_feedback_alert_button.set_active_color (UIConfigurationBase::instance().color ("feedback alert: alt active", NULL));
 		}
-	} else if (_ambiguous_latency) {
+	} else if (_ambiguous_latency && !UIConfiguration::instance().get_show_toolbar_latency ()) {
 		_feedback_alert_button.set_text (_("No Align"));
 		_feedback_alert_button.set_active (true);
 		if (onoff) {
@@ -895,17 +900,20 @@ ApplicationBar::update_clock_visibility ()
 void
 ApplicationBar::session_latency_updated (bool for_playback)
 {
-	if (!for_playback || !_session) {
+	if (!for_playback) {
 		/* latency updates happen in pairs, in the following order:
 		 *  - for capture
 		 *  - for playback
 		 */
 		return;
 	}
-	if (_session->engine().check_for_ambiguous_latency (true)) {
-		_ambiguous_latency = true;
+
+	if (!_session) {
+		_route_latency_value.set_text ("--");
 	} else {
-		_ambiguous_latency = false;
+		samplecnt_t wrl = _session->worst_route_latency ();
+		float rate      = _session->nominal_sample_rate ();
+		_route_latency_value.set_text (samples_as_time_string (wrl, rate));
 	}
 }
 
