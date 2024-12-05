@@ -130,9 +130,6 @@ private:
 	ArdourWidgets::ArdourVSpacer  _recpunch_spacer;
 	ArdourWidgets::ArdourVSpacer  _latency_spacer;
 	ArdourWidgets::ArdourButton   _latency_disable_button;
-	Gtk::Label                    _route_latency_value;
-	Gtk::Label                    _io_latency_label;
-	Gtk::Label                    _io_latency_value;
 	ArdourWidgets::ArdourButton   _auto_return_button;
 	ArdourWidgets::ArdourButton   _follow_edits_button;
 	TransportClock                _primary_clock;

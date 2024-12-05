@@ -178,10 +178,6 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_record_mode_selector.set_sizing_texts (_record_mode_strings);
 
 	_latency_disable_button.set_text (_("Disable PDC"));
-	_io_latency_label.set_text (_("I/O Latency:"));
-
-	set_size_request_to_display_given_text (_route_latency_value, "1000 spl", 0, 0);
-	set_size_request_to_display_given_text (_io_latency_value, "888.88 ms", 0, 0);
 
 	_auto_return_button.set_text(_("Auto Return"));
 	_follow_edits_button.set_text(_("Follow Range"));
@@ -240,14 +236,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	++col;
 
 	_table.attach (_latency_disable_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	_table.attach (_io_latency_label, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, 0);
 	++col;
-	_table.attach (_route_latency_value, TCOL, 0, 1 , SHRINK, EXPAND|FILL, hpadding, 0);
-	_table.attach (_io_latency_value, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, 0);
-	++col;
-
-	_route_latency_value.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
-	_io_latency_value.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 
 	_table.attach (_latency_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
@@ -568,15 +557,9 @@ ApplicationBar::repack_transport_hbox ()
 	bool show_pdc = UIConfiguration::instance().get_show_toolbar_latency ();
 	if (show_pdc) {
 		_latency_disable_button.show ();
-		_route_latency_value.show ();
-		_io_latency_label.show ();
-		_io_latency_value.show ();
 		_latency_spacer.show ();
 	} else {
 		_latency_disable_button.hide ();
-		_route_latency_value.hide ();
-		_io_latency_label.hide ();
-		_io_latency_value.hide ();
 		_latency_spacer.hide ();
 	}
 
@@ -697,7 +680,7 @@ ApplicationBar::feedback_blink (bool onoff)
 		} else {
 			_feedback_alert_button.set_active_color (UIConfigurationBase::instance().color ("feedback alert: alt active", NULL));
 		}
-	} else if (_ambiguous_latency && !UIConfiguration::instance().get_show_toolbar_latency ()) {
+	} else if (_ambiguous_latency) {
 		_feedback_alert_button.set_text (_("No Align"));
 		_feedback_alert_button.set_active (true);
 		if (onoff) {
@@ -912,31 +895,17 @@ ApplicationBar::update_clock_visibility ()
 void
 ApplicationBar::session_latency_updated (bool for_playback)
 {
-	if (!for_playback) {
+	if (!for_playback || !_session) {
 		/* latency updates happen in pairs, in the following order:
 		 *  - for capture
 		 *  - for playback
 		 */
 		return;
 	}
-
-	if (!_session) {
-		_route_latency_value.set_text ("--");
-		_io_latency_value.set_text ("--");
+	if (_session->engine().check_for_ambiguous_latency (true)) {
+		_ambiguous_latency = true;
 	} else {
-		samplecnt_t wrl = _session->worst_route_latency ();
-		samplecnt_t iol = _session->io_latency ();
-		float rate      = _session->nominal_sample_rate ();
-
-		_route_latency_value.set_text (samples_as_time_string (wrl, rate));
-
-		if (_session->engine().check_for_ambiguous_latency (true)) {
-			_ambiguous_latency = true;
-			_io_latency_value.set_markup ("<span background=\"red\" foreground=\"white\">ambiguous</span>");
-		} else {
-			_ambiguous_latency = false;
-			_io_latency_value.set_text (samples_as_time_string (iol, rate));
-		}
+		_ambiguous_latency = false;
 	}
 }
 
