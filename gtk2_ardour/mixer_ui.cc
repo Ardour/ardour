@@ -3717,8 +3717,10 @@ Mixer_UI::register_actions ()
 		left_attachment_button.set_related_action (act);
 	}
 
+#ifdef MIXBUS
 	act = ActionManager::register_toggle_action (group, "ToggleMixerProps", _("(Mixer) Show Properties Bottom"), sigc::mem_fun (*this, &Tabbable::att_bottom_button_toggled));
 	bottom_attachment_button.set_related_action (act);
+#endif
 
 	ActionManager::register_toggle_action (group, X_("ToggleVCAPane"), _("Mixer: Show VCAs"), sigc::mem_fun (*this, &Mixer_UI::toggle_vcas));
 
