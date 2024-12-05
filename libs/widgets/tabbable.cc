@@ -88,15 +88,18 @@ Tabbable::default_layout ()
 	content_attachments.add (content_attachment_hbox);
 #else
 	Gtk::Table* atta_table = manage(new Gtk::Table);
-	atta_table->set_spacings (3);
-	atta_table->attach (left_attachment_button,   0, 1, 0, 1, Gtk::SHRINK, Gtk::EXPAND|FILL);
-	atta_table->attach (right_attachment_button,  1, 2, 0, 1, Gtk::SHRINK, Gtk::EXPAND|FILL);
-	atta_table->attach (bottom_attachment_button, 0, 2, 1, 2, Gtk::FILL,   Gtk::EXPAND|FILL);
+	atta_table->set_homogeneous ();
+	atta_table->set_spacings (0);
+	atta_table->set_row_spacings (3);
+	atta_table->set_border_width (0);
+	atta_table->attach (left_attachment_button,   0, 1, 0, 1, Gtk::SHRINK, Gtk::EXPAND|FILL, 1, 2);
+	atta_table->attach (right_attachment_button,  1, 2, 0, 1, Gtk::SHRINK, Gtk::EXPAND|FILL, 1, 2);
+	atta_table->attach (bottom_attachment_button, 0, 2, 1, 2, Gtk::FILL,   Gtk::EXPAND|FILL, 1, 2);
 
 	left_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
 	right_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
 
-	content_attachment_hbox.set_border_width(3);
+	content_attachment_hbox.set_border_width(1);
 	content_attachment_hbox.pack_end (*atta_table, true, true);
 	content_attachments.add (content_attachment_hbox);
 #endif
