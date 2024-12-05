@@ -564,6 +564,10 @@ private:
 	Gtk::Label   timecode_format_label;
 	void update_timecode_format ();
 
+	Gtk::Label   latency_info_label;
+	Gtk::Label   pdc_info_label;
+	void session_latency_updated (bool);
+
 	Gtk::Label  dsp_load_label;
 	void update_cpu_load ();
 

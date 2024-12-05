@@ -584,6 +584,7 @@ ARDOUR_UI::engine_running (uint32_t cnt)
 	update_cpu_load ();
 	update_sample_rate ();
 	update_timecode_format ();
+	session_latency_updated (true);
 	update_peak_thread_work ();
 	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, true);
 	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, false);
@@ -1441,6 +1442,35 @@ ARDOUR_UI::update_timecode_format ()
 		timecode_format_label.set_markup (label + _("n/a"));
 	}
 
+}
+
+void
+ARDOUR_UI::session_latency_updated (bool for_playback)
+{
+	if (!for_playback) {
+		/* latency updates happen in pairs, in the following order:
+		 *  - for capture
+		 *  - for playback
+		 */
+		return;
+	}
+
+	if (!_session) {
+		pdc_info_label.set_text ("PDC: --");
+		latency_info_label.set_text ("I/O Latency: --");
+	} else {
+		samplecnt_t wrl = _session->worst_route_latency ();
+		samplecnt_t iol = _session->io_latency ();
+		float rate      = _session->nominal_sample_rate ();
+
+		pdc_info_label.set_text (string_compose ("PDC: %1", samples_as_time_string (wrl, rate)));
+
+		if (_session->engine().check_for_ambiguous_latency (true)) {
+			latency_info_label.set_markup ("I/O Latency: <span background=\"red\" foreground=\"white\">ambiguous</span>");
+		} else {
+			latency_info_label.set_text (string_compose ("I/O Latency: %1", samples_as_time_string (iol, rate)));
+		}
+	}
 }
 
 gint

@@ -779,17 +779,21 @@ ARDOUR_UI::build_menu_bar ()
 	ev->show ();
 
 	EventBox* ev_dsp = manage (new EventBox);
+	EventBox* ev_pdc = manage (new EventBox);
 	EventBox* ev_path = manage (new EventBox);
 	EventBox* ev_name = manage (new EventBox);
 	EventBox* ev_audio = manage (new EventBox);
 	EventBox* ev_format = manage (new EventBox);
+	EventBox* ev_latency = manage (new EventBox);
 	EventBox* ev_timecode = manage (new EventBox);
 
 	ev_dsp->set_name ("MainMenuBar");
+	ev_pdc->set_name ("MainMenuBar");
 	ev_path->set_name ("MainMenuBar");
 	ev_name->set_name ("MainMenuBar");
 	ev_audio->set_name ("MainMenuBar");
 	ev_format->set_name ("MainMenuBar");
+	ev_latency->set_name ("MainMenuBar");
 	ev_timecode->set_name ("MainMenuBar");
 
 	Gtk::HBox* hbox = manage (new Gtk::HBox);
@@ -811,16 +815,20 @@ ARDOUR_UI::build_menu_bar ()
 	format_label.set_use_markup ();
 
 	ev_dsp->add (dsp_load_label);
+	ev_pdc->add (pdc_info_label);
 	ev_path->add (session_path_label);
 	ev_name->add (snapshot_name_label);
 	ev_audio->add (sample_rate_label);
 	ev_format->add (format_label);
+	ev_latency->add (latency_info_label);
 	ev_timecode->add (timecode_format_label);
 
 	ev_dsp->show ();
+	ev_pdc->show ();
 	ev_path->show ();
 	ev_audio->show ();
 	ev_format->show ();
+	ev_latency->show ();
 	ev_timecode->show ();
 
 #ifdef __APPLE__
@@ -836,6 +844,8 @@ ARDOUR_UI::build_menu_bar ()
 	hbox->pack_end (disk_space_label, false, false, 6);
 	hbox->pack_end (*ev_audio, false, false, 6);
 	hbox->pack_end (*ev_timecode, false, false, 6);
+	hbox->pack_end (*ev_pdc, false, false, 6);
+	hbox->pack_end (*ev_latency, false, false, 6);
 	hbox->pack_end (*ev_format, false, false, 6);
 	hbox->pack_end (peak_thread_work_label, false, false, 6);
 	hbox->pack_end (*ev_name, false, false, 6);
@@ -850,6 +860,8 @@ ARDOUR_UI::build_menu_bar ()
 	_status_bar_visibility.add (&snapshot_name_label   ,X_("Name"),      _("Snapshot Name and Modified Indicator"), false);
 	_status_bar_visibility.add (&peak_thread_work_label,X_("Peakfile"),  _("Active Peak-file Work"), false);
 	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), false);
+	_status_bar_visibility.add (&latency_info_label,    X_("Latency"),   _("Total I/O Latency"), !Profile->get_small_screen());
+	_status_bar_visibility.add (&pdc_info_label,        X_("PDC"),       _("Plugin Latency"), !Profile->get_small_screen());
 	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), false);
 	_status_bar_visibility.add (&sample_rate_label,     X_("Audio"),     _("Audio"), true);
 	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), !Profile->get_small_screen());
