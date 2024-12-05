@@ -65,7 +65,7 @@ class RegionSelection;
 class CrossfadeView;
 class Selection;
 
-class StreamView : public sigc::trackable, public PBD::ScopedConnectionList, public virtual ViewBackground, public SelectableOwner
+class StreamView : public PBD::ScopedConnectionList, public virtual ViewBackground, public SelectableOwner
 {
 public:
 	virtual ~StreamView ();

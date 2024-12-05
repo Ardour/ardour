@@ -34,7 +34,7 @@ namespace ArdourCanvas {
 /** A class that provides limited context for a View
  */
 
-class ViewBackground
+class ViewBackground : public sigc::trackable
 {
   public:
 	ViewBackground ();
