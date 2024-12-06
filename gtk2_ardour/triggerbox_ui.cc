@@ -1128,6 +1128,7 @@ TriggerBoxWidget::TriggerBoxWidget (TriggerStrip& s, float w, float h)
 	, ui (nullptr)
 	, _strip (s)
 {
+	use_intermediate_surface (false);
 	set_background_color (UIConfiguration::instance ().color (X_("theme:bg")));
 }
 
