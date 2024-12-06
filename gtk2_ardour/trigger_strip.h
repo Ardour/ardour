@@ -29,7 +29,6 @@
 #include "ardour/types.h"
 
 #include "widgets/ardour_button.h"
-#include "widgets/eventboxext.h"
 
 #include "automation_controller.h"
 #include "axis_view.h"
@@ -131,7 +130,6 @@ private:
 	IOButton                                output_button;
 	ArdourWidgets::ArdourButton             _name_button;
 	ProcessorBox                            _processor_box;
-	ArdourWidgets::EventBoxExt              _trigger_ebox;
 	TriggerBoxWidget                        _trigger_display;
 	PannerUI                                _panners;
 	LevelMeterVBox                          _level_meter;
