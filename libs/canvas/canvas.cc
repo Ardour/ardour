@@ -562,6 +562,16 @@ GtkCanvas::GtkCanvas ()
 	            Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
 }
 
+GtkCanvas::~GtkCanvas ()
+{
+	_in_dtor = true;
+#ifdef __APPLE__
+	if (_nsglview) {
+		Gtkmm2ext::nsglview_destroy (_nsglview);
+	}
+#endif
+}
+
 void
 GtkCanvas::set_single_exposure (bool yn)
 {

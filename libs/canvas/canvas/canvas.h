@@ -218,7 +218,7 @@ class LIBCANVAS_API GtkCanvas : public Canvas, public Gtk::EventBox, public Gtkm
 {
 public:
 	GtkCanvas ();
-	~GtkCanvas () { _in_dtor = true ; }
+	~GtkCanvas ();
 
 	void use_nsglview (bool retina = true);
 

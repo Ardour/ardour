@@ -397,6 +397,14 @@ Gtkmm2ext::nsglview_create (Gtkmm2ext::CairoCanvas* canvas, bool use_backing_sca
 }
 
 void
+Gtkmm2ext::nsglview_destroy (void* glv)
+{
+	ArdourCanvasOpenGLView* gl_view = (ArdourCanvasOpenGLView*) glv;
+	[gl_view removeFromSuperview];
+	[gl_view release];
+}
+
+void
 Gtkmm2ext::nsglview_overlay (void* glv, GdkWindow* window)
 {
 	ArdourCanvasOpenGLView* gl_view = (ArdourCanvasOpenGLView*) glv;
