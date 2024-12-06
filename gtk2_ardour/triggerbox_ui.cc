@@ -1128,7 +1128,6 @@ TriggerBoxWidget::TriggerBoxWidget (TriggerStrip& s, float w, float h)
 	, ui (nullptr)
 	, _strip (s)
 {
-	use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
 	set_background_color (UIConfiguration::instance ().color (X_("theme:bg")));
 }
 
