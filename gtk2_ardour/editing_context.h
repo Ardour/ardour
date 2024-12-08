@@ -342,6 +342,15 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	/** Push the appropriate enter/cursor context on item entry. */
 	void choose_canvas_cursor_on_entry (ItemType);
 
+	struct CursorRAII {
+		CursorRAII (EditingContext& e, Gdk::Cursor* new_cursor)
+			: ec (e), old_cursor (ec.get_canvas_cursor ()) { ec.set_canvas_cursor (new_cursor); }
+		~CursorRAII () { ec.set_canvas_cursor (old_cursor); }
+
+		EditingContext& ec;
+		Gdk::Cursor* old_cursor;
+	};
+
 	virtual Gdk::Cursor* get_canvas_cursor () const;
 	static MouseCursors const* cursors () {
 		return _cursors;

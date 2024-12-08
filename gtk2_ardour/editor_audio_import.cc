@@ -574,7 +574,7 @@ Editor::import_sndfiles (vector<string>            paths,
 	import_status.track = track;
 	import_status.replace = replace;
 
-	set_canvas_cursor (_cursors->wait);
+	CursorRAII cr (*this, _cursors->wait);
 
 	/* start import thread for this spec. this will ultimately call Session::import_files()
 	   which, if successful, will add the files as regions to the region list. its up to us
@@ -636,7 +636,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 	/* skip periodic saves while importing */
 	Session::StateProtector sp (_session);
 
-	set_canvas_cursor (_cursors->wait);
+	CursorRAII cr (*this, _cursors->wait);
 
 	for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
 
