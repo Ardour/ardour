@@ -106,12 +106,6 @@ CueEditor::instant_save()
 {
 }
 
-EditingContext::EnterContext*
-CueEditor::get_enter_context(ItemType type)
-{
-	return nullptr;
-}
-
 void
 CueEditor::begin_selection_op_history ()
 {

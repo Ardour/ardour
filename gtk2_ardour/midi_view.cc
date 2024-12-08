@@ -507,7 +507,7 @@ MidiView::button_press (GdkEventButton* ev)
 	MouseMode m = _editing_context.current_mouse_mode();
 
 	if (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
-		_press_cursor_ctx = CursorContext::create(_editing_context, _editing_context.cursors()->midi_pencil);
+		_editing_context.set_canvas_cursor (_editing_context.cursors()->midi_pencil);
 	}
 
 	if (_mouse_state != SelectTouchDragging) {
@@ -3948,14 +3948,13 @@ MidiView::note_mouse_position (float x_fraction, float /*y_fraction*/, bool can_
 	Editing::MouseMode mm = _editing_context.current_mouse_mode();
 	bool trimmable = (mm == MouseContent || mm == MouseTimeFX || mm == MouseDraw);
 
-	EditingContext::EnterContext* ctx = _editing_context.get_enter_context(NoteItem);
-	if (can_set_cursor && ctx) {
+	if (can_set_cursor) {
 		if (trimmable && x_fraction > 0.0 && x_fraction < 0.2) {
-			ctx->cursor_ctx->change(_editing_context.cursors()->left_side_trim);
+			_editing_context.set_canvas_cursor (_editing_context.cursors()->left_side_trim);
 		} else if (trimmable && x_fraction >= 0.8 && x_fraction < 1.0) {
-			ctx->cursor_ctx->change(_editing_context.cursors()->right_side_trim);
+			_editing_context.set_canvas_cursor (_editing_context.cursors()->right_side_trim);
 		} else {
-			ctx->cursor_ctx->change(_editing_context.cursors()->grabber_note);
+			_editing_context.set_canvas_cursor (_editing_context.cursors()->grabber_note);
 		}
 	}
 }

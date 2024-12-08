@@ -4379,7 +4379,7 @@ Editor::freeze_route ()
 
 	pthread_create_and_store (X_("freezer"), &itt.thread, _freeze_thread, this, 0);
 
-	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
+	set_canvas_cursor (_cursors->wait);
 
 	while (!itt.done && !itt.cancel) {
 		gtk_main_iteration ();
@@ -5921,8 +5921,7 @@ Editor::normalize_region ()
 		return;
 	}
 
-	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
-	gdk_flush ();
+	set_canvas_cursor (_cursors->wait);
 
 	/* XXX: should really only count audio regions here */
 	int const regions = rs.size ();
@@ -6201,10 +6200,8 @@ Editor::fork_regions_from_unselected ()
 		return;
 	}
 
-	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
+	set_canvas_cursor (_cursors->wait);
 	bool in_command = false;
-
-	gdk_flush ();
 
 	/* find the set of all MidiSources associated with the selected regions */
 	std::set<std::shared_ptr<MidiSource> > sources_list;
@@ -6281,10 +6278,8 @@ Editor::fork_selected_regions ()
 		return;
 	}
 
-	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
+	set_canvas_cursor (_cursors->wait);
 	bool in_command = false;
-
-	gdk_flush ();
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
 		RegionSelection::iterator tmp = r;
@@ -6365,10 +6360,8 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 		return;
 	}
 
-	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
+	set_canvas_cursor (_cursors->wait);
 	bool in_command = false;
-
-	gdk_flush ();
 
 	int n = 0;
 	int const N = rs.size ();

@@ -56,7 +56,6 @@
 
 #include "ardour_message.h"
 #include "ardour_ui.h"
-#include "cursor_context.h"
 #include "editor.h"
 #include "sfdb_ui.h"
 #include "editing.h"
@@ -575,8 +574,7 @@ Editor::import_sndfiles (vector<string>            paths,
 	import_status.track = track;
 	import_status.replace = replace;
 
-	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
-	gdk_flush ();
+	set_canvas_cursor (_cursors->wait);
 
 	/* start import thread for this spec. this will ultimately call Session::import_files()
 	   which, if successful, will add the files as regions to the region list. its up to us
@@ -638,8 +636,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 	/* skip periodic saves while importing */
 	Session::StateProtector sp (_session);
 
-	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
-	gdk_flush ();
+	set_canvas_cursor (_cursors->wait);
 
 	for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
 

@@ -384,11 +384,7 @@ Editor::reset_controls_layout_height (int32_t h)
 bool
 Editor::track_canvas_map_handler (GdkEventAny* /*ev*/)
 {
-	if (!_cursor_stack.empty()) {
-		set_canvas_cursor (get_canvas_cursor());
-	} else {
-		PBD::error << "cursor stack is empty" << endmsg;
-	}
+	set_canvas_cursor (get_canvas_cursor());
 	return false;
 }
 
@@ -1549,10 +1545,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	TempoMarker *t_marker;
 	MeterMarker *m_marker;
 	bool ret = true;
-
-	if (!_enter_stack.empty()) {
-		_enter_stack.pop_back();
-	}
 
 	switch (item_type) {
 	case GridZoneItem:

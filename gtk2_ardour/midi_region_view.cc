@@ -382,7 +382,7 @@ MidiRegionView::button_press (GdkEventButton* ev)
 	MouseMode m = _editing_context.current_mouse_mode();
 
 	if (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
-		_press_cursor_ctx = CursorContext::create(_editing_context, _editing_context.cursors()->midi_pencil);
+		_editing_context.set_canvas_cursor (_editing_context.cursors()->midi_pencil);
 	}
 
 	if (_mouse_state != SelectTouchDragging) {

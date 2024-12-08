@@ -1728,10 +1728,6 @@ MidiCueEditor::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType i
 {
 	EditorAutomationLine* al;
 
-	if (!_enter_stack.empty()) {
-		_enter_stack.pop_back();
-	}
-
 	switch (item_type) {
 	case ControlPointItem:
 		_verbose_cursor->hide ();

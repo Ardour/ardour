@@ -51,13 +51,6 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner, public sigc::
 
 	void instant_save();
 
-	/** Get the topmost enter context for the given item type.
-	 *
-	 * This is used to change the cursor associated with a given enter context,
-	 * which may not be on the top of the stack.
-	 */
-	EnterContext* get_enter_context(ItemType type);
-
 	void begin_selection_op_history ();
 	void begin_reversible_selection_op (std::string cmd_name);
 	void commit_reversible_selection_op ();

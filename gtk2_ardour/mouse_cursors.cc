@@ -129,7 +129,9 @@ MouseCursors::make_cursor (const char* name, int hotspot_x, int hotspot_y)
 	}
 
 	Glib::RefPtr<Gdk::Pixbuf> p (::get_icon (name, _cursor_set));
-	return new Gdk::Cursor (Gdk::Display::get_default(), p, hotspot_x, hotspot_y);
+	Gdk::Cursor* c = new Gdk::Cursor (Gdk::Display::get_default(), p, hotspot_x, hotspot_y);
+	cursors.push_back (c);
+	return c;
 }
 
 void
@@ -218,3 +220,16 @@ MouseCursors::create_invalid()
 	Gdk::Color c;
 	_invalid = new Gdk::Cursor (bits, bits, c, c, 0, 0);
 }
+
+Gdk::Cursor*
+MouseCursors::from_gdk_cursor (GdkCursor* gc)
+{
+	for (auto & c : cursors) {
+		if (c->gobj() == gc) {
+			return c;
+		}
+	}
+
+	return nullptr;
+}
+

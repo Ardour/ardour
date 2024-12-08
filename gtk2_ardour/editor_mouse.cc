@@ -301,8 +301,6 @@ Editor::mouse_mode_toggled (MouseMode m)
 		get_selection().clear_regions ();
 	}
 
-	update_all_enter_cursors ();
-
 	MouseModeChanged (); /* EMIT SIGNAL */
 
 	if ((was_internal && !internal_editing()) ||
@@ -2385,9 +2383,8 @@ Editor::update_join_object_range_location (double y)
 
 		_join_object_range_state = c <= 0.5 ? JOIN_OBJECT_RANGE_RANGE : JOIN_OBJECT_RANGE_OBJECT;
 
-		Editor::EnterContext* ctx = get_enter_context(RegionItem);
-		if (_join_object_range_state != old && ctx) {
-			ctx->cursor_ctx->change(which_track_cursor());
+		if (_join_object_range_state != old) {
+			set_canvas_cursor (which_track_cursor());
 		}
 
 	} else if (entered_track) {
@@ -2419,9 +2416,8 @@ Editor::update_join_object_range_location (double y)
 			_join_object_range_state = JOIN_OBJECT_RANGE_OBJECT;
 		}
 
-		Editor::EnterContext* ctx = get_enter_context(StreamItem);
-		if (_join_object_range_state != old && ctx) {
-			ctx->cursor_ctx->change(which_track_cursor());
+		if (_join_object_range_state != old) {
+			set_canvas_cursor (which_track_cursor());
 		}
 	}
 }

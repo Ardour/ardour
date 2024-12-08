@@ -332,11 +332,7 @@ Drag::swap_grab (ArdourCanvas::Item* new_item, Gdk::Cursor* cursor, uint32_t /*t
 	_item->ungrab ();
 	_item = new_item;
 
-	if (!_cursor_ctx) {
-		_cursor_ctx = CursorContext::create (editing_context, cursor);
-	} else {
-		_cursor_ctx->change (cursor);
-	}
+	editing_context.set_canvas_cursor (cursor);
 
 	_item->grab ();
 }
@@ -392,7 +388,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	if (!editing_context.cursors ()->is_invalid (cursor)) {
 		/* CAIROCANVAS need a variant here that passes *cursor */
-		_cursor_ctx = CursorContext::create (editing_context, cursor);
+		editing_context.set_canvas_cursor (cursor);
 	}
 
 	if (editing_context.session () && editing_context.session ()->transport_rolling ()) {
@@ -425,7 +421,6 @@ Drag::end_grab (GdkEvent* event)
 	finished (event, _starting_point_passed);
 
 	editing_context.verbose_cursor ()->hide ();
-	_cursor_ctx.reset ();
 
 	return _starting_point_passed;
 }

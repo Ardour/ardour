@@ -537,8 +537,7 @@ Editor::Editor ()
 
 	_group_tabs->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::control_layout_scroll), false);
 
-	/* Push default cursor to ever-present bottom of cursor stack. */
-	push_canvas_cursor (nullptr);
+	set_canvas_cursor (nullptr);
 
 	ArdourCanvas::GtkCanvas* time_pad = manage (new ArdourCanvas::GtkCanvas ());
 
@@ -2094,8 +2093,6 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 	if (str != edit_point_selector.get_text ()) {
 		edit_point_selector.set_text (str);
 	}
-
-	update_all_enter_cursors();
 
 	if (!force && !changed) {
 		return;
@@ -5673,11 +5670,7 @@ Editor::ui_parameter_changed (string parameter)
 	EditingContext::ui_parameter_changed (parameter);
 
 	if (parameter == "icon-set") {
-		while (!_cursor_stack.empty()) {
-			_cursor_stack.pop_back();
-		}
 		_cursors->set_cursor_set (UIConfiguration::instance().get_icon_set());
-		_cursor_stack.push_back(nullptr);
 		content_right_pane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
 		editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
 

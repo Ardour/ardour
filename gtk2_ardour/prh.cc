@@ -637,17 +637,17 @@ PianoRollHeader::motion_handler (GdkEventMotion* ev)
 
 		if (evd.y > scroomer_top - 5 && evd.y < scroomer_top + edge){
 			if (_scroomer_state != TOP) {
-				_view->editing_context().push_canvas_cursor (_view->editing_context().cursors()->resize_top);
+				_view->editing_context().set_canvas_cursor (_view->editing_context().cursors()->resize_top);
 				_scroomer_state = TOP;
 			}
 		} else if (evd.y > scroomer_bottom - edge && evd.y < scroomer_bottom + edge){
 			if (_scroomer_state != BOTTOM) {
-				_view->editing_context().push_canvas_cursor (_view->editing_context().cursors()->resize_bottom);
+				_view->editing_context().set_canvas_cursor (_view->editing_context().cursors()->resize_bottom);
 				_scroomer_state = BOTTOM;
 			}
 		} else {
 			if (_scroomer_state != MOVE) {
-				_view->editing_context().push_canvas_cursor (_view->editing_context().cursors()->grabber);
+				_view->editing_context().set_canvas_cursor (_view->editing_context().cursors()->grabber);
 				_scroomer_state = MOVE;
 			}
 		}
@@ -870,7 +870,7 @@ PianoRollHeader::leave_handler (GdkEventCrossing*)
 {
 	if (!_scroomer_drag){
 		if (_view) {
-			_view->editing_context().pop_canvas_cursor ();
+			/* XXX we used to pop the cursor stack here */
 		}
 	}
 	invalidate_note_range(_highlighted_note, _highlighted_note);

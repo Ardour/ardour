@@ -2065,8 +2065,13 @@ EditingContext::set_horizontal_position (double p)
 Gdk::Cursor*
 EditingContext::get_canvas_cursor () const
 {
-	/* The top of the cursor stack is always the currently visible cursor. */
-	return _cursor_stack.back();
+	Glib::RefPtr<Gdk::Window> win = get_canvas_viewport()->get_window();
+
+	if (win) {
+		return _cursors->from_gdk_cursor (gdk_window_get_cursor (win->gobj()));
+	}
+
+	return nullptr;
 }
 
 void
@@ -2084,36 +2089,6 @@ EditingContext::set_canvas_cursor (Gdk::Cursor* cursor)
 		*/
 		gdk_window_set_cursor (win->gobj(), cursor ? cursor->gobj() : 0);
 		gdk_flush ();
-	}
-}
-
-size_t
-EditingContext::push_canvas_cursor (Gdk::Cursor* cursor)
-{
-	if (!_cursors->is_invalid (cursor)) {
-		_cursor_stack.push_back (cursor);
-		set_canvas_cursor (cursor);
-	}
-	return _cursor_stack.size() - 1;
-}
-
-void
-EditingContext::pop_canvas_cursor ()
-{
-	while (true) {
-		if (_cursor_stack.size() <= 1) {
-			set_canvas_cursor (nullptr);
-			return;
-		}
-
-		_cursor_stack.pop_back();
-		if (!_cursor_stack.empty()) {
-			/* Popped to an existing cursor, we're done.  Otherwise, the
-			   context that created this cursor has been destroyed, so we need
-			   to skip to the next down the stack. */
-			set_canvas_cursor (_cursor_stack.back());
-			return;
-		}
 	}
 }
 
@@ -2763,18 +2738,6 @@ EditingContext::reset_point_selection ()
 	}
 }
 
-EditingContext::EnterContext*
-EditingContext::get_enter_context(ItemType type)
-{
-	for (ssize_t i = _enter_stack.size() - 1; i >= 0; --i) {
-		if (_enter_stack[i].item_type == type) {
-			return &_enter_stack[i];
-		}
-	}
-	return NULL;
-}
-
-
 void
 EditingContext::choose_canvas_cursor_on_entry (ItemType type)
 {
@@ -2782,20 +2745,11 @@ EditingContext::choose_canvas_cursor_on_entry (ItemType type)
 		return;
 	}
 
-	Gdk::Cursor* cursor = which_canvas_cursor(type);
+	Gdk::Cursor* cursor = which_canvas_cursor (type);
 
 	if (!_cursors->is_invalid (cursor)) {
 		// Push a new enter context
-		const EnterContext ctx = { type, CursorContext::create(*this, cursor) };
-		_enter_stack.push_back(ctx);
-	}
-}
-
-void
-EditingContext::update_all_enter_cursors ()
-{
-	for (auto & ec : _enter_stack) {
-		ec.cursor_ctx->change(which_canvas_cursor (ec.item_type));
+		set_canvas_cursor (cursor);
 	}
 }
 

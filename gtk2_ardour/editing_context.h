@@ -75,12 +75,6 @@ class SelectableOwner;
 class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 {
  public:
-	/** Context for mouse entry (stored in a stack). */
-	struct EnterContext {
-		ItemType                       item_type;
-		std::shared_ptr<CursorContext> cursor_ctx;
-	};
-
 	EditingContext (std::string const &);
 	~EditingContext ();
 
@@ -348,9 +342,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	/** Push the appropriate enter/cursor context on item entry. */
 	void choose_canvas_cursor_on_entry (ItemType);
 
-	/** Update all enter cursors based on current settings. */
-	void update_all_enter_cursors ();
-
 	virtual Gdk::Cursor* get_canvas_cursor () const;
 	static MouseCursors const* cursors () {
 		return _cursors;
@@ -399,22 +390,12 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual ArdourCanvas::GtkCanvasViewport* get_canvas_viewport() const = 0;
 	virtual ArdourCanvas::GtkCanvas* get_canvas() const = 0;
 
-	virtual size_t push_canvas_cursor (Gdk::Cursor*);
-	virtual void pop_canvas_cursor ();
-
 	virtual void mouse_mode_toggled (Editing::MouseMode) = 0;
 
 	bool on_velocity_scroll_event (GdkEventScroll*);
 	void pre_render ();
 
 	void select_automation_line (GdkEventButton*, ArdourCanvas::Item*, ARDOUR::SelectionOperation);
-
-	/** Get the topmost enter context for the given item type.
-	 *
-	 * This is used to change the cursor associated with a given enter context,
-	 * which may not be on the top of the stack.
-	 */
-	virtual EnterContext* get_enter_context(ItemType type);
 
 	virtual Gdk::Cursor* which_track_cursor () const = 0;
 	virtual Gdk::Cursor* which_mode_cursor () const = 0;
@@ -437,16 +418,13 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	static EditingContext* current_editing_context();
 	static void switch_editing_context(EditingContext*);
 
+	virtual void set_canvas_cursor (Gdk::Cursor*);
+
   protected:
 	std::string _name;
 
 	static Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 	static Glib::RefPtr<Gtk::ActionGroup> _common_actions;
-
-	/* Cursor stuff.  Do not use directly, use via CursorContext. */
-	friend class CursorContext;
-	std::vector<Gdk::Cursor*> _cursor_stack;
-	virtual void set_canvas_cursor (Gdk::Cursor*);
 
 	Editing::GridType  pre_internal_grid_type;
 	Editing::SnapMode  pre_internal_snap_mode;
@@ -711,8 +689,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	bool clear_entered_track;
 
 	virtual void set_entered_track (TimeAxisView*) {};
-
-	std::vector<EnterContext> _enter_stack;
 
 	PBD::ScopedConnection escape_connection;
 	virtual void escape () {}
