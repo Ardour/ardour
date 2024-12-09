@@ -247,7 +247,6 @@ Editor::Editor ()
 	, _popup_region_menu_item (0)
 	, _track_canvas (0)
 	, _track_canvas_viewport (0)
-	, within_track_canvas (false)
 	, _region_peak_cursor (0)
 	, tempo_group (0)
 	, meter_group (0)
@@ -3379,31 +3378,6 @@ Editor::set_zoom_focus (ZoomFocus f)
 }
 
 void
-Editor::cycle_zoom_focus ()
-{
-	switch (zoom_focus) {
-	case ZoomFocusLeft:
-		set_zoom_focus (ZoomFocusRight);
-		break;
-	case ZoomFocusRight:
-		set_zoom_focus (ZoomFocusCenter);
-		break;
-	case ZoomFocusCenter:
-		set_zoom_focus (ZoomFocusPlayhead);
-		break;
-	case ZoomFocusPlayhead:
-		set_zoom_focus (ZoomFocusMouse);
-		break;
-	case ZoomFocusMouse:
-		set_zoom_focus (ZoomFocusEdit);
-		break;
-	case ZoomFocusEdit:
-		set_zoom_focus (ZoomFocusLeft);
-		break;
-	}
-}
-
-void
 Editor::set_marker_click_behavior (MarkerClickBehavior m)
 {
 	if (marker_click_behavior != m) {
@@ -4062,7 +4036,7 @@ Editor::sort_track_selection (TrackViewList& sel)
 }
 
 timepos_t
-Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_menu, bool from_outside_canvas)
+Editor::_get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_menu, bool from_outside_canvas)
 {
 	bool ignored;
 	timepos_t where;

@@ -20,6 +20,7 @@
 
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
+#include "pbd/unwind.h"
 
 #include "ardour/legatize.h"
 #include "ardour/midi_region.h"
@@ -112,6 +113,7 @@ Glib::RefPtr<Gtk::Action> EditingContext::alternate_alternate_redo_action;
 EditingContext::EditingContext (std::string const & name)
 	: rubberband_rect (0)
 	, _name (name)
+	, within_track_canvas (false)
 	, pre_internal_grid_type (GridTypeBeat)
 	, pre_internal_snap_mode (SnapOff)
 	, internal_grid_type (GridTypeBeat)
@@ -2762,3 +2764,392 @@ void
 EditingContext::follow_playhead_clicked ()
 {
 }
+
+void
+EditingContext::cycle_zoom_focus ()
+{
+	switch (zoom_focus) {
+	case ZoomFocusLeft:
+		set_zoom_focus (ZoomFocusRight);
+		break;
+	case ZoomFocusRight:
+		set_zoom_focus (ZoomFocusCenter);
+		break;
+	case ZoomFocusCenter:
+		set_zoom_focus (ZoomFocusPlayhead);
+		break;
+	case ZoomFocusPlayhead:
+		set_zoom_focus (ZoomFocusMouse);
+		break;
+	case ZoomFocusMouse:
+		set_zoom_focus (ZoomFocusEdit);
+		break;
+	case ZoomFocusEdit:
+		set_zoom_focus (ZoomFocusLeft);
+		break;
+	}
+}
+
+void
+EditingContext::temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale)
+{
+	PBD::Unwinder<Editing::ZoomFocus> zf (zoom_focus, Editing::ZoomFocusMouse);
+	temporal_zoom_step_scale (zoom_out, scale);
+}
+
+void
+EditingContext::temporal_zoom_step_mouse_focus (bool zoom_out)
+{
+	temporal_zoom_step_mouse_focus_scale (zoom_out, 2.0);
+}
+
+void
+EditingContext::temporal_zoom_step (bool zoom_out)
+{
+	temporal_zoom_step_scale (zoom_out, 2.0);
+}
+
+void
+EditingContext::temporal_zoom_step_scale (bool zoom_out, double scale)
+{
+	ENSURE_GUI_THREAD (*this, &EditingContext::temporal_zoom_step, zoom_out, scale)
+
+	samplecnt_t nspp = samples_per_pixel;
+
+	if (zoom_out) {
+		nspp *= scale;
+		if (nspp == samples_per_pixel) {
+			nspp *= 2.0;
+		}
+	} else {
+		nspp /= scale;
+		if (nspp == samples_per_pixel) {
+			nspp /= 2.0;
+		}
+	}
+
+	//zoom-behavior-tweaks
+	//limit our maximum zoom to the session gui extents value
+	std::pair<timepos_t, timepos_t> ext = max_zoom_extent();
+	samplecnt_t session_extents_pp = (ext.second.samples() - ext.first.samples())  / _visible_canvas_width;
+	if (nspp > session_extents_pp) {
+		nspp = session_extents_pp;
+	}
+
+	temporal_zoom (nspp);
+}
+
+void
+EditingContext::temporal_zoom (samplecnt_t spp)
+{
+	if (!_session) {
+		return;
+	}
+
+	samplepos_t current_page = current_page_samples();
+	samplepos_t current_leftmost = _leftmost_sample;
+	samplepos_t current_rightmost;
+	samplepos_t current_center;
+	samplepos_t new_page_size;
+	samplepos_t half_page_size;
+	samplepos_t leftmost_after_zoom = 0;
+	samplepos_t where;
+	bool in_track_canvas;
+	bool use_mouse_sample = true;
+	samplecnt_t nspp;
+	double l;
+
+	if (spp == samples_per_pixel) {
+		return;
+	}
+
+	// Imposing an arbitrary limit to zoom out as too much zoom out produces
+	// segfaults for lack of memory. If somebody decides this is not high enough I
+	// believe it can be raisen to higher values but some limit must be in place.
+	//
+	// This constant represents 1 day @ 48kHz on a 1600 pixel wide display
+	// all of which is used for the editor track displays. The whole day
+	// would be 4147200000 samples, so 2592000 samples per pixel.
+
+	nspp = std::min (spp, (samplecnt_t) 2592000);
+	nspp = std::max ((samplecnt_t) 1, nspp);
+
+	new_page_size = (samplepos_t) floor (_visible_canvas_width * nspp);
+	half_page_size = new_page_size / 2;
+
+	Editing::ZoomFocus zf = effective_zoom_focus();
+
+	switch (zf) {
+	case ZoomFocusLeft:
+		leftmost_after_zoom = current_leftmost;
+		break;
+
+	case ZoomFocusRight:
+		current_rightmost = _leftmost_sample + current_page;
+		if (current_rightmost < new_page_size) {
+			leftmost_after_zoom = 0;
+		} else {
+			leftmost_after_zoom = current_rightmost - new_page_size;
+		}
+		break;
+
+	case ZoomFocusCenter:
+		current_center = current_leftmost + (current_page/2);
+		if (current_center < half_page_size) {
+			leftmost_after_zoom = 0;
+		} else {
+			leftmost_after_zoom = current_center - half_page_size;
+		}
+		break;
+
+	case ZoomFocusPlayhead:
+		/* centre playhead */
+		l = _session->transport_sample() - (new_page_size * 0.5);
+
+		if (l < 0) {
+			leftmost_after_zoom = 0;
+		} else if (l > max_samplepos) {
+			leftmost_after_zoom = max_samplepos - new_page_size;
+		} else {
+			leftmost_after_zoom = (samplepos_t) l;
+		}
+		break;
+
+	case ZoomFocusMouse:
+		/* try to keep the mouse over the same point in the display */
+
+		if (_drags->active()) {
+			where = _drags->current_pointer_sample ();
+		} else if (!mouse_sample (where, in_track_canvas)) {
+			use_mouse_sample = false;
+		}
+
+		if (use_mouse_sample) {
+			l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
+
+			if (l < 0) {
+				leftmost_after_zoom = 0;
+			} else if (l > max_samplepos) {
+				leftmost_after_zoom = max_samplepos - new_page_size;
+			} else {
+				leftmost_after_zoom = (samplepos_t) l;
+			}
+		} else {
+			/* use playhead instead */
+			where = _session->transport_sample();
+
+			if (where < half_page_size) {
+				leftmost_after_zoom = 0;
+			} else {
+				leftmost_after_zoom = where - half_page_size;
+			}
+		}
+		break;
+
+	case ZoomFocusEdit:
+		/* try to keep the edit point in the same place */
+		where = get_preferred_edit_position ().samples();
+		{
+			double l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
+
+			if (l < 0) {
+				leftmost_after_zoom = 0;
+			} else if (l > max_samplepos) {
+				leftmost_after_zoom = max_samplepos - new_page_size;
+			} else {
+				leftmost_after_zoom = (samplepos_t) l;
+			}
+		}
+		break;
+
+	}
+
+	// leftmost_after_zoom = min (leftmost_after_zoom, _session->current_end_sample());
+
+	reposition_and_zoom (leftmost_after_zoom, nspp);
+}
+
+void
+EditingContext::calc_extra_zoom_edges (samplepos_t &start, samplepos_t &end)
+{
+	/* this func helps make sure we leave a little space
+	   at each end of the editor so that the zoom doesn't fit the region
+	   precisely to the screen.
+	*/
+
+	GdkScreen* screen = gdk_screen_get_default ();
+	const gint pixwidth = gdk_screen_get_width (screen);
+	const gint mmwidth = gdk_screen_get_width_mm (screen);
+	const double pix_per_mm = (double) pixwidth/ (double) mmwidth;
+	const double one_centimeter_in_pixels = pix_per_mm * 10.0;
+
+	const samplepos_t range = end - start;
+	const samplecnt_t new_fpp = (samplecnt_t) ceil ((double) range / (double) _visible_canvas_width);
+	const samplepos_t extra_samples = (samplepos_t) floor (one_centimeter_in_pixels * new_fpp);
+
+	if (start > extra_samples) {
+		start -= extra_samples;
+	} else {
+		start = 0;
+	}
+
+	if (max_samplepos - extra_samples > end) {
+		end += extra_samples;
+	} else {
+		end = max_samplepos;
+	}
+}
+
+
+void
+EditingContext::temporal_zoom_by_sample (samplepos_t start, samplepos_t end)
+{
+	if (!_session) return;
+
+	if ((start == 0 && end == 0) || end < start) {
+		return;
+	}
+
+	samplepos_t range = end - start;
+
+	const samplecnt_t new_fpp = (samplecnt_t) ceil ((double) range / (double) _visible_canvas_width);
+
+	samplepos_t new_page = range;
+	samplepos_t middle = (samplepos_t) floor ((double) start + ((double) range / 2.0f));
+	samplepos_t new_leftmost = (samplepos_t) floor ((double) middle - ((double) new_page / 2.0f));
+
+	if (new_leftmost > middle) {
+		new_leftmost = 0;
+	}
+
+	if (new_leftmost < 0) {
+		new_leftmost = 0;
+	}
+
+	reposition_and_zoom (new_leftmost, new_fpp);
+}
+
+void
+EditingContext::temporal_zoom_to_sample (bool coarser, samplepos_t sample)
+{
+	if (!_session) {
+		return;
+	}
+
+	samplecnt_t range_before = sample - _leftmost_sample;
+	samplecnt_t new_spp;
+
+	if (coarser) {
+		if (samples_per_pixel <= 1) {
+			new_spp = 2;
+		} else {
+			new_spp = samples_per_pixel + (samples_per_pixel/2);
+		}
+		range_before += range_before/2;
+	} else {
+		if (samples_per_pixel >= 1) {
+			new_spp = samples_per_pixel - (samples_per_pixel/2);
+		} else {
+			/* could bail out here since we cannot zoom any finer,
+			   but leave that to the equality test below
+			*/
+			new_spp = samples_per_pixel;
+		}
+
+		range_before -= range_before/2;
+	}
+
+	if (new_spp == samples_per_pixel)  {
+		return;
+	}
+
+	/* zoom focus is automatically taken as @p sample when this
+	   method is used.
+	*/
+
+	samplepos_t new_leftmost = sample - (samplepos_t)range_before;
+
+	if (new_leftmost > sample) {
+		new_leftmost = 0;
+	}
+
+	if (new_leftmost < 0) {
+		new_leftmost = 0;
+	}
+
+	reposition_and_zoom (new_leftmost, new_spp);
+}
+
+bool
+EditingContext::mouse_sample (samplepos_t& where, bool& in_track_canvas) const
+{
+	/* gdk_window_get_pointer() has X11's XQueryPointer semantics in that it only
+	 * pays attentions to subwindows. this means that menu windows are ignored, and
+	 * if the pointer is in a menu, the return window from the call will be the
+	 * the regular subwindow *under* the menu.
+	 *
+	 * this matters quite a lot if the pointer is moving around in a menu that overlaps
+	 * the track canvas because we will believe that we are within the track canvas
+	 * when we are not. therefore, we track enter/leave events for the track canvas
+	 * and allow that to override the result of gdk_window_get_pointer().
+	 */
+
+	if (!within_track_canvas) {
+		return false;
+	}
+
+	int x, y;
+	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<EditingContext*>(this)->get_canvas()->get_window();
+
+	if (!canvas_window) {
+		return false;
+	}
+
+	Glib::RefPtr<const Gdk::Window> pointer_window = Gdk::Display::get_default()->get_window_at_pointer (x, y);
+
+	if (!pointer_window) {
+		return false;
+	}
+
+	if (pointer_window != canvas_window) {
+		in_track_canvas = false;
+		return false;
+	}
+
+	in_track_canvas = true;
+
+	GdkEvent event;
+	event.type = GDK_BUTTON_RELEASE;
+	event.button.x = x;
+	event.button.y = y;
+
+	where = window_event_sample (&event, 0, 0);
+
+	return true;
+}
+
+samplepos_t
+EditingContext::window_event_sample (GdkEvent const * event, double* pcx, double* pcy) const
+{
+	ArdourCanvas::Duple d;
+
+	if (!gdk_event_get_coords (event, &d.x, &d.y)) {
+		return 0;
+	}
+
+	/* event coordinates are in window units, so convert to canvas
+	 */
+
+	d = get_canvas()->window_to_canvas (d);
+
+	if (pcx) {
+		*pcx = d.x;
+	}
+
+	if (pcy) {
+		*pcy = d.y;
+	}
+
+	return pixel_to_sample (d.x);
+}
+

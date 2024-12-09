@@ -274,13 +274,6 @@ public:
 
 	bool process_midi_export_dialog (MidiExportDialog& dialog, std::shared_ptr<ARDOUR::MidiRegion> midi_region);
 
-	void               set_zoom_focus (Editing::ZoomFocus);
-	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
-	void               cycle_zoom_focus ();
-	void temporal_zoom_step (bool zoom_out);
-	void temporal_zoom_step_scale (bool zoom_out, double scale);
-	void temporal_zoom_step_mouse_focus (bool zoom_out);
-	void temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale);
 	void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top);
 	void tav_zoom_step (bool coarser);
 	void tav_zoom_smooth (bool coarser, bool force_all);
@@ -376,10 +369,6 @@ public:
 	void reposition_and_zoom (samplepos_t, double);
 
 	void reset_x_origin_to_follow_playhead ();
-
-	Temporal::timepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE,
-	                                                 bool use_context_click = false,
-	                                                 bool from_outside_canvas = false);
 
 	void toggle_meter_updating();
 
@@ -514,6 +503,13 @@ public:
 
 	void focus_on_clock();
 
+	void set_zoom_focus (Editing::ZoomFocus);
+	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
+
+	void temporal_zoom_selection (Editing::ZoomAxis);
+	void temporal_zoom_session ();
+	void temporal_zoom_extents ();
+
 protected:
 	void map_transport_state ();
 	void map_position_change (samplepos_t);
@@ -528,6 +524,8 @@ protected:
 
 	void do_undo (uint32_t n);
 	void do_redo (uint32_t n);
+
+	Temporal::timepos_t _get_preferred_edit_position (Editing::EditIgnoreOption, bool use_context_click, bool from_outside_canvas);
 
 private:
 
@@ -777,8 +775,6 @@ private:
 	ApplicationBar           _application_bar;
 	ArdourCanvas::GtkCanvas* _track_canvas;
 	ArdourCanvas::GtkCanvasViewport* _track_canvas_viewport;
-
-	bool within_track_canvas;
 
 	RegionPeakCursor* _region_peak_cursor;
 
@@ -1241,14 +1237,6 @@ private:
 
 	void group_selected_regions ();
 	void ungroup_selected_regions ();
-
-	void calc_extra_zoom_edges(samplepos_t &start, samplepos_t &end);
-	void temporal_zoom_selection (Editing::ZoomAxis);
-	void temporal_zoom_session ();
-	void temporal_zoom_extents ();
-	void temporal_zoom (samplecnt_t samples_per_pixel);
-	void temporal_zoom_by_sample (samplepos_t start, samplepos_t end);
-	void temporal_zoom_to_sample (bool coarser, samplepos_t sample);
 
 	std::shared_ptr<ARDOUR::Playlist> current_playlist () const;
 	void insert_source_list_selection (float times);
@@ -1799,6 +1787,8 @@ private:
 	Gtk::HBox _box;
 
 	//zoom focus menu stuff
+	Editing::ZoomFocus effective_zoom_focus() const;
+
 	ArdourWidgets::ArdourDropdown	zoom_focus_selector;
 	void zoom_focus_selection_done (Editing::ZoomFocus);
 	void build_zoom_focus_menu ();
@@ -1989,15 +1979,6 @@ private:
 	void duplicate_range (bool with_dialog);
 	void duplicate_regions (float times);
 
-	/** computes the timeline sample (sample) of an event whose coordinates
-	 * are in window units (pixels, no scroll offset).
-	 */
-	samplepos_t window_event_sample (GdkEvent const*, double* px = 0, double* py = 0) const;
-
-	/* returns false if mouse pointer is not in track or marker canvas
-	 */
-	bool mouse_sample (samplepos_t&, bool& in_track_canvas) const;
-
 	TimeFXDialog* current_timefx;
 	static void* timefx_thread (void* arg);
 	void do_timefx (bool fixed_end);
@@ -2061,6 +2042,8 @@ private:
 	void set_entered_track (TimeAxisView*);
 	void set_entered_regionview (RegionView*);
 	gint left_automation_track ();
+
+	std::pair<Temporal::timepos_t,Temporal::timepos_t> max_zoom_extent() const { return session_gui_extents(); }
 
 	void reset_canvas_action_sensitivity (bool);
 	void set_gain_envelope_visibility ();

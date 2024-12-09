@@ -146,6 +146,12 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	/** @return true if the editor is following the playhead */
 	bool follow_playhead () const { return _follow_playhead; }
 
+	Temporal::timepos_t get_preferred_edit_position (Editing::EditIgnoreOption eio = Editing::EDIT_IGNORE_NONE,
+	                                                 bool use_context_click = false,
+	                                                 bool from_outside_canvas = false) {
+		return _get_preferred_edit_position (eio, use_context_click, from_outside_canvas);
+	}
+
 	virtual void instant_save() = 0;
 
 	virtual void begin_selection_op_history () = 0;
@@ -172,8 +178,17 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	virtual void set_selected_midi_region_view (MidiRegionView&);
 
-	virtual void temporal_zoom_step (bool zoom_out) = 0;
 	samplecnt_t get_current_zoom () const { return samples_per_pixel; }
+
+	void temporal_zoom_step (bool zoom_out);
+	void temporal_zoom_step_scale (bool zoom_out, double scale);
+	void temporal_zoom_step_mouse_focus (bool zoom_out);
+	void temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale);
+
+	void calc_extra_zoom_edges(samplepos_t &start, samplepos_t &end);
+	void temporal_zoom (samplecnt_t samples_per_pixel);
+	void temporal_zoom_by_sample (samplepos_t start, samplepos_t end);
+	void temporal_zoom_to_sample (bool coarser, samplepos_t sample);
 
 	double timeline_origin() const { return _timeline_origin; }
 
@@ -309,6 +324,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
 	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
+	void cycle_zoom_focus ();
+
 	virtual void reposition_and_zoom (samplepos_t, double) = 0;
 
 	sigc::signal<void> ZoomChanged;
@@ -429,8 +446,18 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	virtual void set_canvas_cursor (Gdk::Cursor*);
 
+	/** computes the timeline sample (sample) of an event whose coordinates
+	 * are in window units (pixels, no scroll offset).
+	 */
+	samplepos_t window_event_sample (GdkEvent const*, double* px = 0, double* py = 0) const;
+
+	/* returns false if mouse pointer is not in track or marker canvas
+	 */
+	bool mouse_sample (samplepos_t&, bool& in_track_canvas) const;
+
   protected:
 	std::string _name;
+	bool within_track_canvas;
 
 	static Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 	static Glib::RefPtr<Gtk::ActionGroup> _common_actions;
@@ -531,6 +558,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	samplecnt_t        samples_per_pixel;
 	Editing::ZoomFocus zoom_focus;
+	virtual Editing::ZoomFocus effective_zoom_focus() const { return zoom_focus; }
 
 	Temporal::timepos_t _snap_to_bbt (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,
@@ -699,6 +727,12 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	virtual void set_entered_track (TimeAxisView*) {};
 
+	virtual std::pair<Temporal::timepos_t,Temporal::timepos_t> max_zoom_extent() const = 0;
+
+	virtual Temporal::timepos_t _get_preferred_edit_position (Editing::EditIgnoreOption,
+	                                                          bool use_context_click,
+	                                                          bool from_outside_canvas) = 0;
+
 	PBD::ScopedConnection escape_connection;
 	virtual void escape () {}
 
@@ -719,5 +753,3 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	static EditingContext* _current_editing_context;
 
 };
-
-

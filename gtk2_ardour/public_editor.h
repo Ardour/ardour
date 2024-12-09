@@ -290,7 +290,6 @@ public:
 	virtual samplepos_t leftmost_sample() const = 0;
 	virtual samplecnt_t current_page_samples() const = 0;
 	virtual double visible_canvas_height () const = 0;
-	virtual void temporal_zoom_step (bool coarser) = 0;
 	virtual void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top = false) = 0;
 	virtual void override_visible_track_count () = 0;
 	virtual void scroll_tracks_down_line () = 0;
@@ -306,7 +305,6 @@ public:
 	virtual void remove_last_capture () = 0;
 	virtual void maximise_editing_space () = 0;
 	virtual void restore_editing_space () = 0;
-	virtual Temporal::timepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE, bool from_context_menu = false, bool from_outside_canvas = false) = 0;
 	virtual void toggle_meter_updating() = 0;
 	virtual void split_regions_at (Temporal::timepos_t const &, RegionSelection&) = 0;
 	virtual void split_region_at_points (std::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;

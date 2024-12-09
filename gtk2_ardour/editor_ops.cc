@@ -1853,219 +1853,6 @@ Editor::tav_zoom_smooth (bool coarser, bool force_all)
 	}
 }
 
-void
-Editor::temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale)
-{
-	PBD::Unwinder<Editing::ZoomFocus> zf (zoom_focus, Editing::ZoomFocusMouse);
-	temporal_zoom_step_scale (zoom_out, scale);
-}
-
-void
-Editor::temporal_zoom_step_mouse_focus (bool zoom_out)
-{
-	temporal_zoom_step_mouse_focus_scale (zoom_out, 2.0);
-}
-
-void
-Editor::temporal_zoom_step (bool zoom_out)
-{
-	temporal_zoom_step_scale (zoom_out, 2.0);
-}
-
-void
-Editor::temporal_zoom_step_scale (bool zoom_out, double scale)
-{
-	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_step, zoom_out, scale)
-
-	samplecnt_t nspp = samples_per_pixel;
-
-	if (zoom_out) {
-		nspp *= scale;
-		if (nspp == samples_per_pixel) {
-			nspp *= 2.0;
-		}
-	} else {
-		nspp /= scale;
-		if (nspp == samples_per_pixel) {
-			nspp /= 2.0;
-		}
-	}
-
-	//zoom-behavior-tweaks
-	//limit our maximum zoom to the session gui extents value
-	std::pair<timepos_t, timepos_t> ext = session_gui_extents();
-	samplecnt_t session_extents_pp = (ext.second.samples() - ext.first.samples())  / _visible_canvas_width;
-	if (nspp > session_extents_pp) {
-		nspp = session_extents_pp;
-	}
-
-	temporal_zoom (nspp);
-}
-
-void
-Editor::temporal_zoom (samplecnt_t spp)
-{
-	if (!_session) {
-		return;
-	}
-
-	samplepos_t current_page = current_page_samples();
-	samplepos_t current_leftmost = _leftmost_sample;
-	samplepos_t current_rightmost;
-	samplepos_t current_center;
-	samplepos_t new_page_size;
-	samplepos_t half_page_size;
-	samplepos_t leftmost_after_zoom = 0;
-	samplepos_t where;
-	bool in_track_canvas;
-	bool use_mouse_sample = true;
-	samplecnt_t nspp;
-	double l;
-
-	if (spp == samples_per_pixel) {
-		return;
-	}
-
-	// Imposing an arbitrary limit to zoom out as too much zoom out produces
-	// segfaults for lack of memory. If somebody decides this is not high enough I
-	// believe it can be raisen to higher values but some limit must be in place.
-	//
-	// This constant represents 1 day @ 48kHz on a 1600 pixel wide display
-	// all of which is used for the editor track displays. The whole day
-	// would be 4147200000 samples, so 2592000 samples per pixel.
-
-	nspp = min (spp, (samplecnt_t) 2592000);
-	nspp = max ((samplecnt_t) 1, nspp);
-
-	new_page_size = (samplepos_t) floor (_visible_canvas_width * nspp);
-	half_page_size = new_page_size / 2;
-
-	Editing::ZoomFocus zf = zoom_focus;
-
-	if (zf == ZoomFocusEdit && _edit_point == EditAtMouse) {
-		zf = ZoomFocusMouse;
-	}
-
-	switch (zf) {
-	case ZoomFocusLeft:
-		leftmost_after_zoom = current_leftmost;
-		break;
-
-	case ZoomFocusRight:
-		current_rightmost = _leftmost_sample + current_page;
-		if (current_rightmost < new_page_size) {
-			leftmost_after_zoom = 0;
-		} else {
-			leftmost_after_zoom = current_rightmost - new_page_size;
-		}
-		break;
-
-	case ZoomFocusCenter:
-		current_center = current_leftmost + (current_page/2);
-		if (current_center < half_page_size) {
-			leftmost_after_zoom = 0;
-		} else {
-			leftmost_after_zoom = current_center - half_page_size;
-		}
-		break;
-
-	case ZoomFocusPlayhead:
-		/* centre playhead */
-		l = _playhead_cursor->current_sample () - (new_page_size * 0.5);
-
-		if (l < 0) {
-			leftmost_after_zoom = 0;
-		} else if (l > max_samplepos) {
-			leftmost_after_zoom = max_samplepos - new_page_size;
-		} else {
-			leftmost_after_zoom = (samplepos_t) l;
-		}
-		break;
-
-	case ZoomFocusMouse:
-		/* try to keep the mouse over the same point in the display */
-
-		if (_drags->active()) {
-			where = _drags->current_pointer_sample ();
-		} else if (!mouse_sample (where, in_track_canvas)) {
-			use_mouse_sample = false;
-		}
-
-		if (use_mouse_sample) {
-			l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
-
-			if (l < 0) {
-				leftmost_after_zoom = 0;
-			} else if (l > max_samplepos) {
-				leftmost_after_zoom = max_samplepos - new_page_size;
-			} else {
-				leftmost_after_zoom = (samplepos_t) l;
-			}
-		} else {
-			/* use playhead instead */
-			where = _playhead_cursor->current_sample ();
-
-			if (where < half_page_size) {
-				leftmost_after_zoom = 0;
-			} else {
-				leftmost_after_zoom = where - half_page_size;
-			}
-		}
-		break;
-
-	case ZoomFocusEdit:
-		/* try to keep the edit point in the same place */
-		where = get_preferred_edit_position ().samples();
-		{
-			double l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
-
-			if (l < 0) {
-				leftmost_after_zoom = 0;
-			} else if (l > max_samplepos) {
-				leftmost_after_zoom = max_samplepos - new_page_size;
-			} else {
-				leftmost_after_zoom = (samplepos_t) l;
-			}
-		}
-		break;
-
-	}
-
-	// leftmost_after_zoom = min (leftmost_after_zoom, _session->current_end_sample());
-
-	reposition_and_zoom (leftmost_after_zoom, nspp);
-}
-
-void
-Editor::calc_extra_zoom_edges(samplepos_t &start, samplepos_t &end)
-{
-	/* this func helps make sure we leave a little space
-	   at each end of the editor so that the zoom doesn't fit the region
-	   precisely to the screen.
-	*/
-
-	GdkScreen* screen = gdk_screen_get_default ();
-	const gint pixwidth = gdk_screen_get_width (screen);
-	const gint mmwidth = gdk_screen_get_width_mm (screen);
-	const double pix_per_mm = (double) pixwidth/ (double) mmwidth;
-	const double one_centimeter_in_pixels = pix_per_mm * 10.0;
-
-	const samplepos_t range = end - start;
-	const samplecnt_t new_fpp = (samplecnt_t) ceil ((double) range / (double) _visible_canvas_width);
-	const samplepos_t extra_samples = (samplepos_t) floor (one_centimeter_in_pixels * new_fpp);
-
-	if (start > extra_samples) {
-		start -= extra_samples;
-	} else {
-		start = 0;
-	}
-
-	if (max_samplepos - extra_samples > end) {
-		end += extra_samples;
-	} else {
-		end = max_samplepos;
-	}
-}
 
 bool
 Editor::get_selection_extents (timepos_t &start, timepos_t &end) const
@@ -2106,205 +1893,6 @@ Editor::get_selection_extents (timepos_t &start, timepos_t &end) const
 
 	return ret;
 }
-
-
-void
-Editor::temporal_zoom_selection (Editing::ZoomAxis axes)
-{
-	if (!selection) return;
-
-	if (selection->regions.empty() && selection->time.empty()) {
-		if (axes == Horizontal || axes == Both) {
-			temporal_zoom_step(true);
-		}
-		if (axes == Vertical || axes == Both) {
-			if (!track_views.empty()) {
-
-				TrackViewList tvl;
-
-				//implicit hack: by extending the top & bottom check outside the current view limits, we include the trackviews immediately above & below what is visible
-				const double top = vertical_adjustment.get_value() - 10;
-				const double btm = top + _visible_canvas_height + 10;
-
-				for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
-					if ((*iter)->covered_by_y_range (top, btm)) {
-						tvl.push_back(*iter);
-					}
-				}
-
-				fit_tracks (tvl);
-			}
-		}
-		return;
-	}
-
-	//ToDo:  if notes are selected, zoom to that
-
-	//ToDo:  if control points are selected, zoom to that
-
-	if (axes == Horizontal || axes == Both) {
-
-		timepos_t start, end;
-		if (get_selection_extents (start, end)) {
-			samplepos_t s = start.samples();
-			samplepos_t e = end.samples();
-			calc_extra_zoom_edges (s, e);
-			temporal_zoom_by_sample (s, e);
-		}
-	}
-
-	if (axes == Vertical || axes == Both) {
-		fit_selection ();
-	}
-
-	//normally, we don't do anything "automatic" to the user's selection.
-	//but in this case, we will clear the selection after a zoom-to-selection.
-	selection->clear();
-}
-
-void
-Editor::temporal_zoom_session ()
-{
-	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_session)
-
-	if (_session) {
-		samplecnt_t start = _session->current_start_sample();
-		samplecnt_t end = _session->current_end_sample();
-
-		if (_session->actively_recording ()) {
-			samplepos_t cur = _playhead_cursor->current_sample ();
-			if (cur > end) {
-				/* recording beyond the end marker; zoom out
-				 * by 5 seconds more so that if 'follow
-				 * playhead' is active we don't immediately
-				 * scroll.
-				 */
-				end = cur + _session->sample_rate() * 5;
-			}
-		}
-
-		if ((start == 0 && end == 0) || end < start) {
-			return;
-		}
-
-		calc_extra_zoom_edges(start, end);
-
-		temporal_zoom_by_sample (start, end);
-	}
-}
-
-void
-Editor::temporal_zoom_extents ()
-{
-	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_extents)
-
-	if (_session) {
-		std::pair<timepos_t, timepos_t> ext = session_gui_extents (false);  //in this case we want to zoom to the extents explicitly; ignore the users prefs for extra padding
-
-		samplecnt_t start = ext.first.samples();
-		samplecnt_t end = ext.second.samples();
-
-		if (_session->actively_recording ()) {
-			samplepos_t cur = _playhead_cursor->current_sample ();
-			if (cur > end) {
-				/* recording beyond the end marker; zoom out
-				 * by 5 seconds more so that if 'follow
-				 * playhead' is active we don't immediately
-				 * scroll.
-				 */
-				end = cur + _session->sample_rate() * 5;
-			}
-		}
-
-		if ((start == 0 && end == 0) || end < start) {
-			return;
-		}
-
-		calc_extra_zoom_edges(start, end);
-
-		temporal_zoom_by_sample (start, end);
-	}
-}
-
-void
-Editor::temporal_zoom_by_sample (samplepos_t start, samplepos_t end)
-{
-	if (!_session) return;
-
-	if ((start == 0 && end == 0) || end < start) {
-		return;
-	}
-
-	samplepos_t range = end - start;
-
-	const samplecnt_t new_fpp = (samplecnt_t) ceil ((double) range / (double) _visible_canvas_width);
-
-	samplepos_t new_page = range;
-	samplepos_t middle = (samplepos_t) floor ((double) start + ((double) range / 2.0f));
-	samplepos_t new_leftmost = (samplepos_t) floor ((double) middle - ((double) new_page / 2.0f));
-
-	if (new_leftmost > middle) {
-		new_leftmost = 0;
-	}
-
-	if (new_leftmost < 0) {
-		new_leftmost = 0;
-	}
-
-	reposition_and_zoom (new_leftmost, new_fpp);
-}
-
-void
-Editor::temporal_zoom_to_sample (bool coarser, samplepos_t sample)
-{
-	if (!_session) {
-		return;
-	}
-
-	samplecnt_t range_before = sample - _leftmost_sample;
-	samplecnt_t new_spp;
-
-	if (coarser) {
-		if (samples_per_pixel <= 1) {
-			new_spp = 2;
-		} else {
-			new_spp = samples_per_pixel + (samples_per_pixel/2);
-		}
-		range_before += range_before/2;
-	} else {
-		if (samples_per_pixel >= 1) {
-			new_spp = samples_per_pixel - (samples_per_pixel/2);
-		} else {
-			/* could bail out here since we cannot zoom any finer,
-			   but leave that to the equality test below
-			*/
-			new_spp = samples_per_pixel;
-		}
-
-		range_before -= range_before/2;
-	}
-
-	if (new_spp == samples_per_pixel)  {
-		return;
-	}
-
-	/* zoom focus is automatically taken as @p sample when this
-	   method is used.
-	*/
-
-	samplepos_t new_leftmost = sample - (samplepos_t)range_before;
-
-	if (new_leftmost > sample) {
-		new_leftmost = 0;
-	}
-
-	if (new_leftmost < 0) {
-		new_leftmost = 0;
-	}
-
-	reposition_and_zoom (new_leftmost, new_spp);
-}
-
 
 bool
 Editor::choose_new_marker_name(string &name, bool is_range) {
@@ -9803,4 +9391,132 @@ Editor::ripple_marks (std::shared_ptr<Playlist> target_playlist, timepos_t at, t
 	/* do not move locked markers, do notify */
 	_session->locations()->ripple (at, distance, false);
 	_session->add_command (new MementoCommand<Locations> (*_session->locations(), &before, &_session->locations()->get_state()));
+}
+
+Editing::ZoomFocus
+Editor::effective_zoom_focus() const
+{
+	if (zoom_focus == ZoomFocusEdit && _edit_point == EditAtMouse) {
+		return ZoomFocusMouse;
+	}
+
+	return zoom_focus;
+}
+
+void
+Editor::temporal_zoom_selection (Editing::ZoomAxis axes)
+{
+	if (!selection) return;
+
+	if (selection->regions.empty() && selection->time.empty()) {
+		if (axes == Horizontal || axes == Both) {
+			temporal_zoom_step(true);
+		}
+		if (axes == Vertical || axes == Both) {
+			if (!track_views.empty()) {
+
+				TrackViewList tvl;
+
+				//implicit hack: by extending the top & bottom check outside the current view limits, we include the trackviews immediately above & below what is visible
+				const double top = vertical_adjustment.get_value() - 10;
+				const double btm = top + _visible_canvas_height + 10;
+
+				for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+					if ((*iter)->covered_by_y_range (top, btm)) {
+						tvl.push_back(*iter);
+					}
+				}
+
+				fit_tracks (tvl);
+			}
+		}
+		return;
+	}
+
+	//ToDo:  if notes are selected, zoom to that
+
+	//ToDo:  if control points are selected, zoom to that
+
+	if (axes == Horizontal || axes == Both) {
+
+		timepos_t start, end;
+		if (get_selection_extents (start, end)) {
+			samplepos_t s = start.samples();
+			samplepos_t e = end.samples();
+			calc_extra_zoom_edges (s, e);
+			temporal_zoom_by_sample (s, e);
+		}
+	}
+
+	if (axes == Vertical || axes == Both) {
+		fit_selection ();
+	}
+
+	//normally, we don't do anything "automatic" to the user's selection.
+	//but in this case, we will clear the selection after a zoom-to-selection.
+	selection->clear();
+}
+
+void
+Editor::temporal_zoom_session ()
+{
+	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_session)
+
+	if (_session) {
+		samplecnt_t start = _session->current_start_sample();
+		samplecnt_t end = _session->current_end_sample();
+
+		if (_session->actively_recording ()) {
+			samplepos_t cur = _playhead_cursor->current_sample ();
+			if (cur > end) {
+				/* recording beyond the end marker; zoom out
+				 * by 5 seconds more so that if 'follow
+				 * playhead' is active we don't immediately
+				 * scroll.
+				 */
+				end = cur + _session->sample_rate() * 5;
+			}
+		}
+
+		if ((start == 0 && end == 0) || end < start) {
+			return;
+		}
+
+		calc_extra_zoom_edges(start, end);
+
+		temporal_zoom_by_sample (start, end);
+	}
+}
+
+void
+Editor::temporal_zoom_extents ()
+{
+	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_extents)
+
+	if (_session) {
+		std::pair<timepos_t, timepos_t> ext = session_gui_extents (false);  //in this case we want to zoom to the extents explicitly; ignore the users prefs for extra padding
+
+		samplecnt_t start = ext.first.samples();
+		samplecnt_t end = ext.second.samples();
+
+		if (_session->actively_recording ()) {
+			samplepos_t cur = _playhead_cursor->current_sample ();
+			if (cur > end) {
+				/* recording beyond the end marker; zoom out
+				 * by 5 seconds more so that if 'follow
+				 * playhead' is active we don't immediately
+				 * scroll.
+				 */
+				end = cur + _session->sample_rate() * 5;
+			}
+		}
+
+		if ((start == 0 && end == 0) || end < start) {
+			return;
+		}
+
+		calc_extra_zoom_edges(start, end);
+
+		temporal_zoom_by_sample (start, end);
+	}
 }

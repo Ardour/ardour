@@ -242,3 +242,21 @@ CueEditor::history_changed ()
 	update_undo_redo_actions (_history);
 }
 
+std::pair<Temporal::timepos_t,Temporal::timepos_t>
+CueEditor::max_zoom_extent() const
+{
+	return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (Temporal::Beats (32, 0)));
+}
+
+Temporal::timepos_t
+CueEditor::_get_preferred_edit_position (Editing::EditIgnoreOption ignore, bool from_context_menu, bool from_outside_canvas)
+{
+	samplepos_t where;
+	bool in_track_canvas = false;
+
+	if (!mouse_sample (where, in_track_canvas)) {
+		return Temporal::timepos_t (0);
+	}
+
+	return Temporal::timepos_t (where);
+}
