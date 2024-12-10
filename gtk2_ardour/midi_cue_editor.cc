@@ -312,7 +312,7 @@ MidiCueEditor::build_canvas ()
 
 	prh = new ArdourCanvas::PianoRollHeader (v_scroll_group, *bg);
 
-	view = new MidiCueView (nullptr, 0, *data_group, *no_scroll_group, *this, *bg, 0xff0000ff);
+	view = new MidiCueView (nullptr, *data_group, *no_scroll_group, *this, *bg, 0xff0000ff);
 
 	bg->set_view (view);
 	prh->set_view (view);

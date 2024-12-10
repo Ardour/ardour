@@ -46,7 +46,6 @@ using namespace ARDOUR;
 using namespace Gtkmm2ext;
 
 MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
-                          uint32_t                 slot_index,
                           ArdourCanvas::Item&      parent,
                           ArdourCanvas::Item&      noscroll_parent,
                           EditingContext&          ec,
@@ -55,7 +54,6 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	: MidiView (mt, parent, ec, bg, basic_color)
 	, active_automation (nullptr)
 	, velocity_display (nullptr)
-	, _slot_index (slot_index)
 	, _height (0.)
 {
 	CANVAS_DEBUG_NAME (_note_group, X_("note group for MIDI cue"));

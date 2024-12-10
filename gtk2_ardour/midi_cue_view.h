@@ -41,7 +41,6 @@ class MidiCueView : public MidiView
 {
   public:
 	MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
-	             uint32_t                    slot_index,
 	             ArdourCanvas::Item&         parent,
 	             ArdourCanvas::Item&         noscroll_parent,
 	             EditingContext&             ec,
@@ -111,7 +110,6 @@ class MidiCueView : public MidiView
 
 	std::shared_ptr<Temporal::TempoMap const> tempo_map;
 	ArdourCanvas::Rectangle* event_rect;
-	uint32_t _slot_index;
 
 	void update_sustained (Note *);
 	void update_hit (Hit *);
