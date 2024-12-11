@@ -58,7 +58,6 @@ class MidiCueEditor : public CueEditor
 
 	double visible_canvas_width() const { return _visible_canvas_width; }
 	samplecnt_t current_page_samples() const;
-	void temporal_zoom_step (bool zoom_out);
 
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const {}
 
