@@ -9396,11 +9396,11 @@ Editor::ripple_marks (std::shared_ptr<Playlist> target_playlist, timepos_t at, t
 Editing::ZoomFocus
 Editor::effective_zoom_focus() const
 {
-	if (zoom_focus == ZoomFocusEdit && _edit_point == EditAtMouse) {
+	if (_zoom_focus == ZoomFocusEdit && _edit_point == EditAtMouse) {
 		return ZoomFocusMouse;
 	}
 
-	return zoom_focus;
+	return _zoom_focus;
 }
 
 void

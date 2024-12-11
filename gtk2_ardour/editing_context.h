@@ -322,9 +322,10 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void set_samples_per_pixel (samplecnt_t);
 	virtual void on_samples_per_pixel_changed () {}
 
+	virtual void cycle_zoom_focus ();
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
-	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
-	void cycle_zoom_focus ();
+	Editing::ZoomFocus zoom_focus () const { return _zoom_focus; }
+	sigc::signal<void> ZoomFocusChanged;
 
 	virtual void reposition_and_zoom (samplepos_t, double) = 0;
 
@@ -557,8 +558,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	VerboseCursor* _verbose_cursor;
 
 	samplecnt_t        samples_per_pixel;
-	Editing::ZoomFocus zoom_focus;
-	virtual Editing::ZoomFocus effective_zoom_focus() const { return zoom_focus; }
+	Editing::ZoomFocus _zoom_focus;
+	virtual Editing::ZoomFocus effective_zoom_focus() const { return _zoom_focus; }
 
 	Temporal::timepos_t _snap_to_bbt (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,

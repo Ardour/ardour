@@ -2161,8 +2161,8 @@ Editor::set_state (const XMLNode& node, int version)
 
 	node.get_property ("mixer-width", editor_mixer_strip_width);
 
-	node.get_property ("zoom-focus", zoom_focus);
-	zoom_focus_selection_done (zoom_focus);
+	node.get_property ("zoom-focus", _zoom_focus);
+	zoom_focus_selection_done (_zoom_focus);
 
 	node.get_property ("marker-click-behavior", marker_click_behavior);
 	marker_click_behavior_selection_done (marker_click_behavior);
@@ -2312,7 +2312,7 @@ Editor::get_state () const
 
 	maybe_add_mixer_strip_width (*node);
 
-	node->set_property ("zoom-focus", zoom_focus);
+	node->set_property ("zoom-focus", _zoom_focus);
 
 	node->set_property ("edit-point", _edit_point);
 	node->set_property ("visible-track-count", _visible_track_count);
@@ -3371,9 +3371,10 @@ Editor::set_zoom_focus (ZoomFocus f)
 		zoom_focus_selector.set_text (str);
 	}
 
-	if (zoom_focus != f) {
-		zoom_focus = f;
+	if (_zoom_focus != f) {
+		_zoom_focus = f;
 		instant_save ();
+		ZoomFocusChanged (); /* EMIT SIGNAL */
 	}
 }
 
@@ -3817,7 +3818,7 @@ Editor::current_visual_state (bool with_tracks)
 	vs->y_position = vertical_adjustment.get_value();
 	vs->samples_per_pixel = samples_per_pixel;
 	vs->_leftmost_sample = _leftmost_sample;
-	vs->zoom_focus = zoom_focus;
+	vs->zoom_focus = _zoom_focus;
 
 	if (with_tracks) {
 		vs->gui_state->set_state (ARDOUR_UI::instance()->gui_object_state->get_state());

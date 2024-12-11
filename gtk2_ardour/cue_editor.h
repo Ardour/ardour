@@ -71,7 +71,6 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner, public sigc::
 	double get_y_origin () const;
 
 	void set_zoom_focus (Editing::ZoomFocus);
-	Editing::ZoomFocus get_zoom_focus () const;
 	samplecnt_t get_current_zoom () const;
 	void set_samples_per_pixel (samplecnt_t);
 	void reposition_and_zoom (samplepos_t, double);

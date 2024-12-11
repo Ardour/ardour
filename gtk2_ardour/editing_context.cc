@@ -135,7 +135,7 @@ EditingContext::EditingContext (std::string const & name)
 	, _selection_memento (new SelectionMemento())
 	, _verbose_cursor (nullptr)
 	, samples_per_pixel (2048)
-	, zoom_focus (ZoomFocusPlayhead)
+	, _zoom_focus (ZoomFocusPlayhead)
 	, bbt_ruler_scale (bbt_show_many)
 	, bbt_bars (0)
 	, bbt_bar_helper_on (0)
@@ -2768,7 +2768,7 @@ EditingContext::follow_playhead_clicked ()
 void
 EditingContext::cycle_zoom_focus ()
 {
-	switch (zoom_focus) {
+	switch (_zoom_focus) {
 	case ZoomFocusLeft:
 		set_zoom_focus (ZoomFocusRight);
 		break;
@@ -2793,7 +2793,7 @@ EditingContext::cycle_zoom_focus ()
 void
 EditingContext::temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale)
 {
-	PBD::Unwinder<Editing::ZoomFocus> zf (zoom_focus, Editing::ZoomFocusMouse);
+	PBD::Unwinder<Editing::ZoomFocus> zf (_zoom_focus, Editing::ZoomFocusMouse);
 	temporal_zoom_step_scale (zoom_out, scale);
 }
 

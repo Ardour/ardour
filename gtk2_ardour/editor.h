@@ -504,7 +504,6 @@ public:
 	void focus_on_clock();
 
 	void set_zoom_focus (Editing::ZoomFocus);
-	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
 
 	void temporal_zoom_selection (Editing::ZoomAxis);
 	void temporal_zoom_session ();

@@ -9,6 +9,8 @@ CueEditor::CueEditor (std::string const & name)
 	, HistoryOwner (X_("cue-editor"))
 {
 	_history.Changed.connect (history_connection, invalidator (*this), std::bind (&CueEditor::history_changed, this), gui_context());
+
+	set_zoom_focus (Editing::ZoomFocusMouse);
 }
 
 CueEditor::~CueEditor ()
@@ -143,21 +145,24 @@ CueEditor::get_y_origin () const
 }
 
 void
-CueEditor::set_zoom_focus (Editing::ZoomFocus)
+CueEditor::set_zoom_focus (Editing::ZoomFocus zf)
 {
-}
+	using namespace Editing;
 
-Editing::ZoomFocus
-CueEditor::get_zoom_focus () const
-{
-	return Editing::ZoomFocusMouse;
+	if (zf == ZoomFocusPlayhead) {
+		return;
+	}
+
+	if (_zoom_focus != zf) {
+		_zoom_focus = zf;
+		ZoomFocusChanged (); /* EMIT SIGNAL */
+	}
 }
 
 void
 CueEditor::set_samples_per_pixel (samplecnt_t n)
 {
 	samples_per_pixel = n;
-	std::cerr << "zoom changed to " << samples_per_pixel << std::endl;
 	ZoomChanged(); /* EMIT SIGNAL */
 }
 
