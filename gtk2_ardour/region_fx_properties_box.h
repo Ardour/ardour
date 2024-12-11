@@ -1,6 +1,4 @@
 /*
- * Copyright (C) 2021 Paul Davis <paul@linuxaudiosystems.com>
- * Copyright (C) 2024 Ben Loftis <ben@harrisonconsoles.com>
  * Copyright (C) 2024 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,43 +18,44 @@
 
 #pragma once
 
+#include <vector>
+
 #include <gtkmm/box.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
+#include <gtkmm/scrolledwindow.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
 namespace ARDOUR {
-	class Session;
+	class RegionFxPlugin;
+	class Region;
 }
 
-class TimeInfoBox;
-class RegionEditor;
-class RegionFxPropertiesBox;
-class RoutePropertiesBox;
+class GenericPluginUI;
 
-class SelectionPropertiesBox : public Gtk::HBox, public ARDOUR::SessionHandlePtr
+class RegionFxPropertiesBox : public Gtk::HBox
 {
 public:
-	SelectionPropertiesBox ();
-	~SelectionPropertiesBox ();
-
-	void set_session (ARDOUR::Session*);
+	RegionFxPropertiesBox (std::shared_ptr<ARDOUR::Region>);
+	~RegionFxPropertiesBox ();
 
 private:
-	void init ();
-	void selection_changed ();
-	void track_mouse_mode ();
-	void delete_region_editor ();
+	void drop_plugin_uis ();
+	void redisplay_plugins ();
+	void add_fx_to_display (std::weak_ptr<ARDOUR::RegionFxPlugin>);
+	void idle_redisplay_plugins ();
 
-	TimeInfoBox*           _time_info_box;
-	RoutePropertiesBox*    _route_prop_box;
-	Gtk::HBox              _region_editor_box;
-	RegionEditor*          _region_editor;
-	RegionFxPropertiesBox* _region_fx_box;
+	static int _idle_redisplay_processors (gpointer);
 
-	PBD::ScopedConnection _region_connection;
-	PBD::ScopedConnection _editor_connection;
+	Gtk::ScrolledWindow _scroller;
+	Gtk::HBox           _box;
+
+	std::shared_ptr<ARDOUR::Region> _region;
+	std::vector <GenericPluginUI*>  _proc_uis;
+
+	int _idle_redisplay_plugins_id;
+
+	PBD::ScopedConnectionList _processor_connections;
+	PBD::ScopedConnection     _region_connection;
+		sigc::connection screen_update_connection;
 };
-

@@ -28,6 +28,7 @@
 #include "audio_region_editor.h"
 #include "audio_region_view.h"
 #include "editor.h"
+#include "region_fx_properties_box.h"
 #include "region_view.h"
 #include "route_properties_box.h"
 #include "selection_properties_box.h"
@@ -42,6 +43,7 @@ using std::max;
 
 SelectionPropertiesBox::SelectionPropertiesBox ()
 	: _region_editor (nullptr)
+	, _region_fx_box (nullptr)
 {
 	init ();
 
@@ -50,11 +52,12 @@ SelectionPropertiesBox::SelectionPropertiesBox ()
 
 	pack_start(*_time_info_box, false, false, 0);
 	pack_start(*_route_prop_box, true, true, 0);
-	pack_start(_region_editor_box, false, false, 0);
+	pack_start(_region_editor_box, true, true, 0);
 
 	_time_info_box->set_no_show_all ();
 	_route_prop_box->set_no_show_all ();
 	_region_editor_box.set_no_show_all ();
+	_region_editor_box.set_spacing (4);
 
 	_time_info_box->hide ();
 	_route_prop_box->hide ();
@@ -65,6 +68,7 @@ SelectionPropertiesBox::~SelectionPropertiesBox ()
 	delete _time_info_box;
 	delete _route_prop_box;
 	delete _region_editor;
+	delete _region_fx_box;
 }
 
 void
@@ -114,9 +118,13 @@ SelectionPropertiesBox::delete_region_editor ()
 	if (!_region_editor) {
 		return;
 	}
-	_region_editor_box.remove ();
+	assert (_region_fx_box);
+	_region_editor_box.remove (*_region_editor);
+	_region_editor_box.remove (*_region_fx_box);
 	delete _region_editor;
+	delete _region_fx_box;
 	_region_editor = nullptr;
+	_region_fx_box = nullptr;
 	_region_editor_box.hide ();
 }
 
@@ -168,7 +176,10 @@ SelectionPropertiesBox::selection_changed ()
 			_region_editor->set_padding (4);
 			_region_editor->set_edge_color (0x000000ff); // black
 			_region_editor->show_all ();
-			_region_editor_box.add (*_region_editor);
+			_region_editor_box.pack_start (*_region_editor, false, false);
+
+			_region_fx_box = new RegionFxPropertiesBox (rv->region ());
+			_region_editor_box.pack_start (*_region_fx_box);
 			rv->RegionViewGoingAway.connect_same_thread (_region_connection, std::bind (&SelectionPropertiesBox::delete_region_editor, this));
 		}
 		_region_editor_box.show ();
