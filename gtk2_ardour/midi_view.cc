@@ -208,6 +208,7 @@ MidiView::show_start (bool yn)
 		_start_boundary_rect->set_outline_what (ArdourCanvas::Rectangle::RIGHT);
 		_start_boundary_rect->set_fill_color (UIConfiguration::instance().color_mod ("cue editor start rect fill", "cue boundary alpha"));
 		_start_boundary_rect->set_outline_color (UIConfiguration::instance().color ("cue editor start rect outline"));
+		CANVAS_DEBUG_NAME (_start_boundary_rect, "start boundary rect");
 
 		_start_boundary_rect->Event.connect (sigc::mem_fun (*this, &MidiView::start_boundary_event));
 	}
@@ -255,6 +256,7 @@ MidiView::show_end (bool yn)
 		_end_boundary_rect->set_outline_what (ArdourCanvas::Rectangle::LEFT);
 		_end_boundary_rect->set_fill_color (UIConfiguration::instance().color_mod ("cue editor end rect fill", "cue boundary alpha"));
 		_end_boundary_rect->set_outline_color (UIConfiguration::instance().color ("cue editor end rect outline"));
+		CANVAS_DEBUG_NAME (_end_boundary_rect, "end boundary rect");
 
 		_end_boundary_rect->Event.connect (sigc::mem_fun (*this, &MidiView::end_boundary_event));
 	}
