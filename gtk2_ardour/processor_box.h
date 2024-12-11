@@ -523,6 +523,7 @@ private:
 
 	void plugin_drop (Gtk::SelectionData const &, ProcessorEntry* position, Glib::RefPtr<Gdk::DragContext> const & context);
 	void object_drop (Gtkmm2ext::DnDVBox<ProcessorEntry> *, ProcessorEntry *, Glib::RefPtr<Gdk::DragContext> const &);
+	bool drag_refuse (Gtkmm2ext::DnDVBox<ProcessorEntry> *, ProcessorEntry *);
 
 	Width _width;
 	bool  _redisplay_pending;
