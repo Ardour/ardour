@@ -150,7 +150,7 @@ CueEditor::set_zoom_focus (Editing::ZoomFocus)
 Editing::ZoomFocus
 CueEditor::get_zoom_focus () const
 {
-	return Editing::ZoomFocusPlayhead;
+	return Editing::ZoomFocusMouse;
 }
 
 void
