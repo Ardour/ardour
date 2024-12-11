@@ -1739,7 +1739,7 @@ EditingContext::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType
 		return false;
 	}
 
-	gint ret = FALSE;
+	bool ret = false;
 
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
