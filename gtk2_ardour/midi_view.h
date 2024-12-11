@@ -351,6 +351,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void show_start (bool yn);
 	void show_end (bool yn);
 
+	virtual bool canvas_group_event(GdkEvent* ev);
+
   protected:
 	void init (std::shared_ptr<ARDOUR::MidiTrack>);
 	virtual void region_resized (const PBD::PropertyChange&);
@@ -447,7 +449,6 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	virtual void ghost_add_note (NoteBase*) {}
 	virtual void ghost_sync_selection (NoteBase*) {}
 
-	virtual bool canvas_group_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
 
 	PBD::ScopedConnectionList connections_requiring_model;

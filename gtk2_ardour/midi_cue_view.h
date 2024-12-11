@@ -50,7 +50,6 @@ class MidiCueView : public MidiView
 
 	~MidiCueView();
 
-	bool canvas_event (GdkEvent*);
 	void set_samples_per_pixel (double);
 	void set_height (double);
 

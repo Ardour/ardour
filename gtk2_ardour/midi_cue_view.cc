@@ -65,10 +65,11 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 
 	event_rect = new ArdourCanvas::Rectangle (&parent);
 	event_rect->set (ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 10.));
-	event_rect->Event.connect (sigc::mem_fun (*this, &MidiCueView::canvas_event));
 	event_rect->set_fill (false);
 	event_rect->set_outline (false);
 	CANVAS_DEBUG_NAME (event_rect, "cue event rect");
+
+	parent.Event.connect (sigc::mem_fun (*this, &MidiView::canvas_group_event));
 
 	_note_group->raise_to_top ();
 
@@ -119,12 +120,6 @@ ArdourCanvas::Item*
 MidiCueView::drag_group () const
 {
 	return event_rect;
-}
-
-bool
-MidiCueView::canvas_event (GdkEvent* ev)
-{
-	return MidiView::canvas_group_event (ev);
 }
 
 bool
