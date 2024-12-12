@@ -79,6 +79,8 @@ MouseCursors::~MouseCursors ()
 void
 MouseCursors::drop_all ()
 {
+	cursors.clear ();
+
 	delete cross_hair; cross_hair = 0;
 	delete scissors; scissors = 0;
 	delete trimmer; trimmer = 0;
