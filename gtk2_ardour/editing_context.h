@@ -319,7 +319,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void reset_x_origin (samplepos_t);
 	void reset_y_origin (double);
 	void reset_zoom (samplecnt_t);
-	void set_samples_per_pixel (samplecnt_t);
+	virtual void set_samples_per_pixel (samplecnt_t) = 0;
 	virtual void on_samples_per_pixel_changed () {}
 
 	virtual void cycle_zoom_focus ();
@@ -599,6 +599,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	uint32_t count_bars (Temporal::Beats const & start, Temporal::Beats const & end) const;
 	void compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper);
 
+	double _track_canvas_width;
 	double _visible_canvas_width;
 	double _visible_canvas_height; ///< height of the visible area of the track canvas
 

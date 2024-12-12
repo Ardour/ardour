@@ -412,6 +412,8 @@ MidiCueEditor::canvas_allocate (Gtk::Allocation alloc)
 	bg->set_size (alloc.get_width(), alloc.get_height() - timebars);
 	view->set_height (alloc.get_height() - timebars);
 	prh->set (ArdourCanvas::Rect (0, 0, prh->x1(), view->midi_context().height()));
+
+	_track_canvas_width = _visible_canvas_width - prh->x1();
 }
 
 timepos_t

@@ -139,6 +139,7 @@ EditingContext::EditingContext (std::string const & name)
 	, bbt_ruler_scale (bbt_show_many)
 	, bbt_bars (0)
 	, bbt_bar_helper_on (0)
+	, _track_canvas_width (0)
 	, _visible_canvas_width (0)
 	, _visible_canvas_height (0)
 	, quantize_dialog (nullptr)
@@ -2874,7 +2875,7 @@ EditingContext::temporal_zoom (samplecnt_t spp)
 	nspp = std::min (spp, (samplecnt_t) 2592000);
 	nspp = std::max ((samplecnt_t) 1, nspp);
 
-	new_page_size = (samplepos_t) floor (_visible_canvas_width * nspp);
+	new_page_size = (samplepos_t) floor (_track_canvas_width * nspp);
 	half_page_size = new_page_size / 2;
 
 	Editing::ZoomFocus zf = effective_zoom_focus();
@@ -2925,6 +2926,7 @@ EditingContext::temporal_zoom (samplecnt_t spp)
 		}
 
 		if (use_mouse_sample) {
+
 			l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
 
 			if (l < 0) {
@@ -3150,6 +3152,6 @@ EditingContext::window_event_sample (GdkEvent const * event, double* pcx, double
 		*pcy = d.y;
 	}
 
-	return pixel_to_sample (d.x);
+	return pixel_to_sample (canvas_to_timeline (d.x));
 }
 
