@@ -203,15 +203,25 @@ MouseCursors::set_cursor_set (const std::string& name)
 	}
 
 	cross_hair = new Cursor (CROSSHAIR);
+	cursors.push_back (cross_hair);
 	trimmer =  new Cursor (SB_H_DOUBLE_ARROW);
+	cursors.push_back (trimmer);
 	time_fx = new Cursor (SIZING);
+	cursors.push_back (time_fx);
 	wait = new Cursor (WATCH);
+	cursors.push_back (wait);
 	timebar = new Cursor(LEFT_PTR);
+	cursors.push_back (timebar);
 	midi_pencil = new Cursor (PENCIL);
+	cursors.push_back (midi_pencil);
 	midi_select = new Cursor (CENTER_PTR);
+	cursors.push_back (midi_select);
 	midi_resize = new Cursor (SIZING);
+	cursors.push_back (midi_resize);
 	midi_erase = new Cursor (DRAPED_BOX);
+	cursors.push_back (midi_erase);
 	up_down = new Cursor (SB_V_DOUBLE_ARROW);
+	cursors.push_back (up_down);
 }
 
 void
