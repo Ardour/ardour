@@ -1228,6 +1228,8 @@ GtkCanvas::on_button_press_event (GdkEventButton* ev)
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
 
+	gdk_pointer_grab (ev->window,false, GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK), NULL,NULL,ev->time);
+
 	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas button press %1 @ %2, %3 => %4\n", ev->button, ev->x, ev->y, where));
 	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
 }
@@ -1249,6 +1251,8 @@ GtkCanvas::on_button_release_event (GdkEventButton* ev)
 
 	copy.button.x = where.x;
 	copy.button.y = where.y;
+
+	gdk_pointer_ungrab (GDK_CURRENT_TIME);
 
 	/* Coordinates in the event will be canvas coordinates, correctly adjusted
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
@@ -1338,7 +1342,7 @@ std::cout << "GtkCanvas::on_touch_begin\n" << std::endl;
 		_touched_item[ev->sequence] = const_cast<Item*> (within_items.front());
 	}
 
-	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas scroll @ %1, %2 => %3\n", ev->x, ev->y, where));
+	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas touch begin @ %1 x %2 => %3 items %4\n", ev->x, ev->y, where, within_items.size()));
 	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
 }
 
@@ -1352,6 +1356,7 @@ GtkCanvas::on_touch_update_event (GdkEventTouch* ev)
 	copy.touch.x = where.x;
 	copy.touch.y = where.y;
 
+	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas touch update @ %1 x %2 => %3\n", ev->x, ev->y, where));
 	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
 }
 
