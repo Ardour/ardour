@@ -951,37 +951,46 @@ ArdourButton::set_led_left (bool yn)
 bool
 ArdourButton::on_touch_begin_event (GdkEventTouch *ev)
 {
-	printf ("ArdourButton::on_touch_begin_event finger %d\n", ev->sequence);
-	focus_handler (this);
-
-	CairoWidget::set_dirty ();
-
-	if (!_act_on_release) {
-		if (_action) {
-			_action->activate ();
-		} else if (_auto_toggle) {
-			set_active (!get_active ());
-			signal_clicked ();
-		}
-	}
-	return true;
+	/* Emulate button event to trigger RouteUI
+	 * signal_button_press_event().connect (..) callbacks
+	 */
+	GdkEventButton bev;
+	bev.type    = GDK_BUTTON_PRESS;
+	bev.button  = 1;
+	bev.window  = ev->window;
+	bev.time    = ev->time;
+	bev.x       = ev->x;
+	bev.y       = ev->y;
+	bev.x_root  = ev->x_root;
+	bev.y_root  = ev->y_root;
+	bev.state   = 0;
+	bev.axes    = NULL;
+	bev.device  = NULL;
+	_hovering   = true;
+	return event ((GdkEvent*)&bev);
 }
 
 bool
 ArdourButton::on_touch_end_event (GdkEventTouch *ev)
 {
-	printf ("ArdourButton::on_touch_end_event finger: %d\n", ev->sequence);
-	CairoWidget::set_dirty ();
+	/* Emulate button event to trigger RouteUI
+	 * signal_button_release_event().connect (..) callbacks
+	 */
+	GdkEventButton bev;
+	bev.type    = GDK_BUTTON_RELEASE;
+	bev.button  = 1;
+	bev.window  = ev->window;
+	bev.time    = ev->time;
+	bev.x       = ev->x;
+	bev.y       = ev->y;
+	bev.x_root  = ev->x_root;
+	bev.y_root  = ev->y_root;
+	bev.state   = 0;
+	bev.axes    = NULL;
+	bev.device  = NULL;
 
-	if (_act_on_release && _auto_toggle && !_action) {
-		set_active (!get_active ());
-	}
-	signal_clicked ();
-	if (_act_on_release && _action) {
-		_action->activate ();
-	}
-
-	return true;
+	_hovering   = false;
+	return event ((GdkEvent*)&bev);
 }
 
 bool
