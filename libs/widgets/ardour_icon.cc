@@ -80,6 +80,34 @@ ardour_icon_set_source_inv_rgba (cairo_t* cr, uint32_t color)
 	                       ((color >> 0) & 0xff) / 255.0);
 }
 
+static float inv_gamma_srgb (const float v) {
+	if (v <= 0.04045) {
+		return v / 12.92;
+	} else {
+		return pow(((v + 0.055) / (1.055)), 2.4);
+	}
+}
+
+static float gamma_srgb (float v) {
+	if (v <= 0.0031308) {
+		v *= 12.92;
+	} else {
+		v = 1.055 * powf (v, 1.0 / 2.4) - 0.055;
+	}
+	return v;
+}
+
+static bool
+is_dark (uint32_t c)
+{
+	const float rY = 0.212655;
+	const float gY = 0.715158;
+	const float bY = 0.072187;
+	double r, g, b, a;
+	Gtkmm2ext::color_to_rgba (c, r, g, b, a);
+	return gamma_srgb (rY * inv_gamma_srgb (r) + gY * inv_gamma_srgb(g) + bY * inv_gamma_srgb (b)) < 0.5;
+}
+
 /*****************************************************************************
  * Tool Icons.
  * Foreground is always white, compatible with small un-blurred rendering.
@@ -1534,6 +1562,83 @@ icon_meters (cairo_t* cr, const int width, const int height, const uint32_t fg_c
 	VECTORICONSTROKE (lw, fg_color);
 }
 
+/** tape reel (rec) */
+static void icon_tape_reel (cairo_t *cr, const int width, const int height, const uint32_t fg_color, const Gtkmm2ext::ActiveState state)
+{
+	const double x = width * .5;
+	const double y = height * .5;
+	const double r = std::min (x, y) * .6;
+	const double slit = .11 * M_PI;
+	cairo_translate (cr, x, y);
+
+	cairo_arc (cr, 0, 0, r, 0, 2 * M_PI);
+	if (state == Gtkmm2ext::ExplicitActive) {
+		Gtkmm2ext::set_source_rgba (cr, fg_color);
+	}
+	else if (state == Gtkmm2ext::ImplicitActive) {
+		cairo_set_source_rgba (cr, 1.0, .1, .1, 1.0);
+	}
+	else {
+		cairo_set_source_rgba (cr, .9, .3, .3, 1.0);
+	}
+	cairo_fill_preserve (cr);
+
+	if (is_dark (fg_color) && state == Gtkmm2ext::ExplicitActive) {
+		cairo_set_source_rgba (cr, 1, 1, 1, .5);
+	} else {
+		cairo_set_source_rgba (cr, .0, .0, .0, .5);
+	}
+	cairo_set_line_width (cr, 1);
+	cairo_stroke (cr);
+
+	cairo_save (cr);
+
+	if (is_dark (fg_color) && state == Gtkmm2ext::ExplicitActive) {
+		cairo_set_source_rgba (cr, 1., .97, .97, 1.0);
+	} else {
+		cairo_set_source_rgba (cr, .15, .07, .07, 1.0);
+	}
+
+	cairo_rotate (cr, -.5 * M_PI);
+	cairo_move_to (cr, 0, 0);
+	cairo_arc (cr, 0, 0, r *.85, -slit, slit);
+	cairo_line_to (cr, 0, 0);
+	cairo_close_path (cr);
+
+	cairo_fill (cr);
+	cairo_rotate (cr, 2. * M_PI / 3.);
+
+	cairo_move_to (cr, 0, 0);
+	cairo_arc (cr, 0, 0, r *.85, -slit, slit);
+	cairo_line_to (cr, 0, 0);
+	cairo_close_path (cr);
+	cairo_fill (cr);
+
+	cairo_rotate (cr, 2. * M_PI / 3.);
+	cairo_move_to (cr, 0, 0);
+	cairo_arc (cr, 0, 0, r *.85, -slit, slit);
+	cairo_line_to (cr, 0, 0);
+	cairo_close_path (cr);
+	cairo_fill (cr);
+
+	cairo_restore (cr);
+
+	cairo_arc (cr, 0, 0, r * .3, 0, 2 * M_PI);
+	if (state == Gtkmm2ext::ExplicitActive) {
+		Gtkmm2ext::set_source_rgba (cr, fg_color);
+	}
+	else if (state == Gtkmm2ext::ImplicitActive) {
+		cairo_set_source_rgba (cr, 1.0, .1, .1, 1.0);
+	}
+	else {
+		cairo_set_source_rgba (cr, .9, .3, .3, 1.0);
+	}
+	cairo_fill (cr);
+	cairo_set_source_rgba (cr, .0, .0, .0, 1.0);
+	cairo_arc (cr, 0, 0, r *.15, 0, 2 * M_PI); // hole in the middle
+	cairo_fill (cr);
+}
+
 static void
 icon_waveform (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
@@ -1799,6 +1904,9 @@ ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr
 			break;
 		case Meters:
 			icon_meters (cr, width, height, fg_color);
+			break;
+		case TapeReel:
+			icon_tape_reel (cr, width, height, fg_color, state);
 			break;
 		case TrackWaveform:
 			icon_waveform (cr, width, height, fg_color);
