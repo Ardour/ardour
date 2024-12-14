@@ -195,11 +195,13 @@ EditingContext::EditingContext (std::string const & name)
 	set_tooltip (snap_mode_button, _("Snap Mode\n\nRight-click to visit Snap preferences."));
 
 	set_tooltip (play_note_selection_button, _("Play notes when selected"));
+	set_tooltip (note_mode_button, _("Switch between sustained and percussive mode"));
 	set_tooltip (follow_playhead_button, _("Scroll automatically to keep playhead visible"));
 	/* Leave tip for full zoom button to derived class */
 	set_tooltip (visible_channel_selector, _("Select visible MIDI channel"));
 
 	play_note_selection_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::play_note_selection_clicked));
+	note_mode_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::note_mode_clicked));
 	follow_playhead_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::follow_playhead_clicked));
 	full_zoom_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::full_zoom_clicked));
 

@@ -112,6 +112,9 @@ class MidiCueEditor : public CueEditor
 	Gdk::Cursor* which_canvas_cursor (ItemType type) const;
 
 	void set_visible_channel (int chan);
+	void note_mode_clicked();
+	ARDOUR::NoteMode note_mode() const { return _note_mode; }
+	void set_note_mode (ARDOUR::NoteMode);
 
 	void set_trigger_start (Temporal::timepos_t const &);
 	void set_trigger_end (Temporal::timepos_t const &);
@@ -244,6 +247,9 @@ class MidiCueEditor : public CueEditor
 	void automation_button_click (Evoral::ParameterType type, int id, ARDOUR::SelectionOperation);
 
 	int _visible_channel;
+
+	ARDOUR::NoteMode _note_mode;
+	sigc::signal<void> NoteModeChanged;
 };
 
 

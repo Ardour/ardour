@@ -306,3 +306,9 @@ MidiViewBackground::update_data_note_range (uint8_t min, uint8_t max)
 	}
 	return dirty;
 }
+
+void
+MidiViewBackground::set_note_mode (ARDOUR::NoteMode nm)
+{
+	_note_mode = nm;
+}

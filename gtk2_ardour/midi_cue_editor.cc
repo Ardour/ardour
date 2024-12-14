@@ -65,6 +65,7 @@ MidiCueEditor::MidiCueEditor()
 	, bg (nullptr)
 	, view (nullptr)
 	, bbt_metric (*this)
+	, _note_mode (Sustained)
 {
 	mouse_mode = Editing::MouseContent;
 	autoscroll_vertical_allowed = false;
@@ -205,6 +206,7 @@ MidiCueEditor::build_upper_toolbar ()
 	_toolbar_outer->pack_start (visible_channel_label, false, false);
 	_toolbar_outer->pack_start (visible_channel_selector, false, false);
 	_toolbar_outer->pack_start (play_note_selection_button, false, false);
+	_toolbar_outer->pack_start (note_mode_button, false, false);
 	_toolbar_outer->pack_start (follow_playhead_button, false, false);
 	_toolbar_outer->pack_start (full_zoom_button, false, false);
 	_toolbar_outer->pack_start (*_toolbar_inner, true, false);
@@ -1888,5 +1890,32 @@ MidiCueEditor::automation_button_click (Evoral::ParameterType type, int id, Sele
 #warning paul allow channel selection (2nd param)
 	if (view)  {
 		view->update_automation_display (Evoral::Parameter (type, 0, id), op);
+	}
+}
+
+void
+MidiCueEditor::note_mode_clicked ()
+{
+	assert (bg);
+
+	if (bg->note_mode() == Sustained) {
+		set_note_mode (Percussive);
+	} else {
+		set_note_mode (Sustained);
+	}
+}
+
+void
+MidiCueEditor::set_note_mode (NoteMode nm)
+{
+	assert (bg);
+
+	if (nm != bg->note_mode()) {
+		bg->set_note_mode (nm);
+		if (bg->note_mode() == Percussive) {
+			note_mode_button.set_active (true);
+		} else {
+			note_mode_button.set_active (false);
+		}
 	}
 }
