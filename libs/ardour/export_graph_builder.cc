@@ -380,6 +380,13 @@ ExportGraphBuilder::Encoder::add_child (FileSpec const & new_config)
 	filenames.push_back (new_config.filename);
 }
 
+ExportGraphBuilder::Encoder::~Encoder ()
+{
+	if (pipe_writer) {
+		pipe_writer->flush ();
+	}
+}
+
 void
 ExportGraphBuilder::Encoder::destroy_writer (bool delete_out_file)
 {
