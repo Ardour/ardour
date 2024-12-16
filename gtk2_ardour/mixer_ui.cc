@@ -100,6 +100,14 @@
 
 #define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))
 
+#ifndef N_MIXER_SCENE_BTNS
+# ifdef MIXBUS
+# define N_MIXER_SCENE_BTNS 12
+# else
+# define N_MIXER_SCENE_BTNS 8
+# endif
+#endif
+
 using namespace ARDOUR;
 using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
@@ -315,7 +323,7 @@ Mixer_UI::Mixer_UI ()
 	_mixer_scene_table.set_homogeneous(false);
 
 	for (int column = 0; column < 1; ++column) {
-		for (int row = 0; row < 8; ++row) {
+		for (int row = 0; row < N_MIXER_SCENE_BTNS; ++row) {
 			int col       = column * 2;
 			int scn_index = col * 2 + row;
 
