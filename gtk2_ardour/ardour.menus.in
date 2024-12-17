@@ -636,7 +636,9 @@
 
       <separator/>
       <menuitem action='ToggleMixerStrip'/>
+#ifdef MIXBUS
       <menuitem action='ToggleMixerProps'/>
+#endif
       <menuitem action='ToggleMixerList'/>
 #ifdef MIXBUS
       <menuitem action='ToggleMixbusPane'/>
