@@ -5806,6 +5806,10 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 		/* just a click, no pointer movement.
 		 */
 
+		if (was_double_click ()) {
+			// TODO - show editor property pane (time selection) ?
+		}
+
 		if (_operation == SelectionExtend) {
 			if (_time_selection_at_start) {
 				timepos_t pos   = adjusted_current_time (event, false);

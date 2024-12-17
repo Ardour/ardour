@@ -1909,7 +1909,12 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 void
 Editor::edit_region (RegionView* rv)
 {
-	rv->show_region_editor ();
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-props"));
+	if (tact->get_active ()) {
+		rv->show_region_editor ();
+	}
+	tact->set_active (true);
+	// TODO  _properties_box->lock/show_region (rv->region ())
 }
 
 void
