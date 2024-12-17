@@ -1909,11 +1909,7 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 void
 Editor::edit_region (RegionView* rv)
 {
-	if (UIConfiguration::instance().get_use_double_click_to_zoom_to_selection()) {
-		temporal_zoom_selection (Both);
-	} else {
-		rv->show_region_editor ();
-	}
+	rv->show_region_editor ();
 }
 
 void

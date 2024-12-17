@@ -3229,14 +3229,6 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("Editor"),
 		    new BoolOption (
-			    "use-double-click-to-zoom-to-selection",
-			    _("Double click zooms to selection"),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_double_click_to_zoom_to_selection),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_double_click_to_zoom_to_selection)
-			    ));
-
-	add_option (_("Editor"),
-		    new BoolOption (
 			    "update-editor-during-summary-drag",
 			    _("Update editor window during drags of the summary"),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_update_editor_during_summary_drag),

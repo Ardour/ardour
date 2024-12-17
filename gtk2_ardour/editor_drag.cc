@@ -5806,13 +5806,6 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 		/* just a click, no pointer movement.
 		 */
 
-		if (was_double_click ()) {
-			if (UIConfiguration::instance ().get_use_double_click_to_zoom_to_selection ()) {
-				_editor.temporal_zoom_selection (Both);
-				return;
-			}
-		}
-
 		if (_operation == SelectionExtend) {
 			if (_time_selection_at_start) {
 				timepos_t pos   = adjusted_current_time (event, false);
