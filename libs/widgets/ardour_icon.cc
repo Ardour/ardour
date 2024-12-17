@@ -1524,7 +1524,10 @@ icon_mixer (cairo_t* cr, const int width, const int height, const uint32_t fg_co
 	cairo_move_to (cr, x2 - ww, y2);
 	cairo_line_to (cr, x2 + ww, y2);
 
-	VECTORICONSTROKE (lw * 2.2, fg_color);
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
+	cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
+	cairo_set_line_width (cr, sqrt(lw * 4));
+	cairo_stroke (cr);
 }
 
 static void
