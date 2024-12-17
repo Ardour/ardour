@@ -2155,6 +2155,10 @@ not match the configuration of this track.");
 bool
 ProcessorBox::drag_refuse (DnDVBox<ProcessorEntry>* source, ProcessorEntry*)
 {
+	if (!source) {
+		/* handle drag from sidebar */
+		return false;
+	}
 	ProcessorBox* other = reinterpret_cast<ProcessorBox*> (source->get_data ("processorbox"));
 	return (other && other->_route == _route);
 }

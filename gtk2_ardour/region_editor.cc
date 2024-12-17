@@ -937,6 +937,9 @@ RegionEditor::RegionFxBox::delete_dragged_plugins (Region::RegionFxList const& f
 bool
 RegionEditor::RegionFxBox::drag_refuse (Gtkmm2ext::DnDVBox<RegionFxEntry>* source, RegionFxEntry*)
 {
+	if (!source) {
+		return false;
+	}
 	RegionFxBox* other = reinterpret_cast<RegionFxBox*> (source->get_data ("regionfxbox"));
 	return (other && other->_region == _region);
 }
