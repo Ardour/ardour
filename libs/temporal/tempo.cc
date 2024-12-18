@@ -907,7 +907,7 @@ TempoMap::copy ( timepos_t const & start, timepos_t const & end)
 TempoMapCutBuffer*
 TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, bool ripple)
 {
-	if (n_tempos() == 1 && n_meters() == 1) {
+	if (!copy && (n_tempos() == 1 && n_meters() == 1)) {
 		return nullptr;
 	}
 
