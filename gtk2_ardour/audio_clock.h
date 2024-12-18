@@ -201,6 +201,8 @@ private:
 	void on_size_request (Gtk::Requisition* req);
 	bool on_motion_notify_event (GdkEventMotion *ev);
 	bool on_focus_out_event (GdkEventFocus*);
+	bool on_enter_notify_event (GdkEventCrossing*);
+	bool on_leave_notify_event (GdkEventCrossing*);
 
 	void set_slave_info ();
 	void set_timecode (Temporal::timepos_t const &);
@@ -255,6 +257,8 @@ private:
 
 	double xscale;
 	double yscale;
+
+	bool _hovering;
 
 	PBD::ScopedConnection tempo_map_connection;
 };

@@ -101,6 +101,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, drag_field (Field (0))
 	, xscale (1.0)
 	, yscale (1.0)
+	, _hovering (false)
 {
 	if (editable) {
 		set_can_focus ();
@@ -327,6 +328,16 @@ AudioClock::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 				cairo_fill (cr);
 			}
 		}
+	}
+
+	if (UIConfigurationBase::instance().get_widget_prelight() && (_hovering || editing)) {
+		if (corner_radius) {
+			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), corner_radius);
+		} else {
+			cairo_rectangle (cr, 0, 0, get_width(), get_height());
+		}
+		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.12);
+		cairo_fill (cr);
 	}
 }
 
@@ -1750,6 +1761,28 @@ AudioClock::on_button_release_event (GdkEventButton *ev)
 	}
 
 	return false;
+}
+
+bool
+AudioClock::on_enter_notify_event (GdkEventCrossing* ev)
+{
+	if (UIConfigurationBase::instance().get_widget_prelight() && editable && !_off) {
+		_hovering = true;
+		CairoWidget::set_dirty ();
+	}
+	return CairoWidget::on_enter_notify_event (ev);
+}
+
+bool
+AudioClock::on_leave_notify_event (GdkEventCrossing* ev)
+{
+	_hovering = false;
+
+	if (UIConfigurationBase::instance().get_widget_prelight()) {
+		CairoWidget::set_dirty ();
+  }
+
+	return CairoWidget::on_leave_notify_event (ev);
 }
 
 bool
