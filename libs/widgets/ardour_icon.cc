@@ -691,7 +691,12 @@ icon_transport_metronom (cairo_t* cr, const int width, const int height)
 {
 	const double x  = width * .5;
 	const double y  = height * .5;
-	const double wh = .95 * std::min (x, y);
+	double wh = std::min (x, y);
+	if (wh > 15) {
+		wh *= 0.68; // = 0.55 / 0.8 (height icon_transport_stop/play = 0.55)
+	} else {
+		wh *= 0.88; // match icon_transport_ck rect height
+	}
 	const double h  = wh * .80;
 	const double w  = wh * .55;
 	const double lw = w * .34;
