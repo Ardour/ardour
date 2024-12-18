@@ -117,7 +117,7 @@ MainClock::build_ops_menu ()
 }
 
 void
-MainClock::set (timepos_t const & when, bool force)
+MainClock::set (timepos_t const & when, bool force, bool round_to_beat)
 {
 	if (!AudioEngine::instance()->session()) {
 		_delta_mode = NoDelta;

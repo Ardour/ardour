@@ -38,7 +38,7 @@ public:
 	ARDOUR::ClockDeltaMode display_delta_mode () {return _delta_mode;}
 	void set_display_delta_mode (ARDOUR::ClockDeltaMode m);
 
-	void set (Temporal::timepos_t const &, bool force = false);
+	void set (Temporal::timepos_t const &, bool force = false, bool round_to_beat = false);
 	sigc::signal<bool, ARDOUR::ClockDeltaMode> change_display_delta_mode_signal;
 
 	sigc::signal<void> CanonicalClockChanged;

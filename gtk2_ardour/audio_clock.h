@@ -73,7 +73,7 @@ public:
 	void focus ();
 
 	/* overridden by MainClock */
-	virtual void set (Temporal::timepos_t const &, bool force = false);
+	virtual void set (Temporal::timepos_t const &, bool force = false, bool round_to_beat = false);
 	void set_duration (Temporal::timecnt_t const &, bool force = false);
 
 	virtual	void set_mode (Mode);

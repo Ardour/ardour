@@ -931,7 +931,7 @@ AudioClock::set_duration (Temporal::timecnt_t const & dur, bool force)
 }
 
 void
-AudioClock::set (timepos_t const & w, bool force)
+AudioClock::set (timepos_t const & w, bool force, bool round_to_beat)
 {
 	is_duration = false;
 
@@ -961,6 +961,11 @@ AudioClock::set (timepos_t const & w, bool force)
 			break;
 
 		case BBT:
+			if (round_to_beat) {
+				TempoMap::SharedPtr tmap (TempoMap::use());
+				Temporal::BBT_Argument BBT = tmap->round_to_bar (tmap->bbt_at (when));
+				when = Temporal::timepos_t::from_superclock (tmap->superclock_at(BBT));
+			}
 			set_bbt (timecnt_t (when));
 			btn_en = true;
 			break;
@@ -1825,6 +1830,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 
 	Field f = index_to_field (index);
 	timepos_t step;
+	timecnt_t beat = timecnt_t (Temporal::Beats (1, 0));
 
 	switch (ev->direction) {
 
@@ -1837,7 +1843,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 			if (is_duration) {
 				AudioClock::set_duration (current_duration() + step, true); // XXX step is too small ?!
 			} else {
-				AudioClock::set (last_when() + step, true);
+				AudioClock::set (last_when() + step, true, step > beat);
 			}
 			ValueChanged (); /* EMIT_SIGNAL */
 		}
@@ -1856,7 +1862,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 			} else if (!_negative_allowed && last_when() < step) {
 				AudioClock::set (timepos_t (), true);
 			} else {
-				AudioClock::set (last_when().earlier (step), true);
+				AudioClock::set (last_when().earlier (step), true, step > beat);
 			}
 
 			ValueChanged (); /* EMIT_SIGNAL */
@@ -1888,6 +1894,7 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 
 		timepos_t pos = last_when ();
 		timepos_t step = get_incremental_step (drag_field, pos);
+		timecnt_t beat = timecnt_t (Temporal::Beats (1, 0));
 
 		step *= fabs (drag_accum);
 
@@ -1898,9 +1905,9 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 					AudioClock::set_duration (current_duration () - step, false);
 				}
 			} else if (!step.is_zero () && (step < pos)) {
-				AudioClock::set (pos.earlier (step), false);
+				AudioClock::set (pos.earlier (step), false, step > beat);
 			} else {
-				AudioClock::set (timepos_t () , false);
+				AudioClock::set (timepos_t (), false);
 			}
 
 		} else if (is_duration) {
@@ -1908,7 +1915,7 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 			AudioClock::set_duration (current_duration () + step, false);
 		} else {
 			/* negative so upward motion .. increment clock */
-			AudioClock::set (pos + step, false);
+			AudioClock::set (pos + step, false, step > beat);
 		}
 
 
