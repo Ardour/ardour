@@ -376,13 +376,11 @@ Plugin::preset_by_label (const string& label)
 	}
 
 	// FIXME: O(n)
-	for (map<string, PresetRecord>::const_iterator i = _presets.begin(); i != _presets.end(); ++i) {
-		if (i->second.label == label) {
-			return &i->second;
-		}
-	}
+	auto i = std::find_if (_presets.cbegin (), _presets.cend (), [&] (const auto& sp) {
+		return sp.second.label == label;
+	});
 
-	return 0;
+	return i != _presets.cend () ? &i->second : 0;
 }
 
 const Plugin::PresetRecord *
@@ -485,17 +483,21 @@ Plugin::resolve_midi ()
 vector<Plugin::PresetRecord>
 Plugin::get_presets ()
 {
-	vector<PresetRecord> p;
-
 	if (!_have_presets) {
 		_presets.clear ();
 		find_presets ();
 		_have_presets = true;
 	}
 
-	for (map<string, PresetRecord>::const_iterator i = _presets.begin(); i != _presets.end(); ++i) {
-		p.push_back (i->second);
-	}
+	vector<PresetRecord> p;
+	static_cast<void> (std::transform (
+		_presets.cbegin (),
+		_presets.cend (),
+		p.begin (),
+		[] (const std::pair<const string, PresetRecord>& i) {
+			return i.second;
+		}
+	));
 
 	std::sort (p.begin(), p.end());
 

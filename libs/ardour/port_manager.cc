@@ -1063,14 +1063,16 @@ PortManager::update_input_ports (bool clear)
 	} else {
 		std::shared_ptr<AudioInputPorts const> aip = _audio_input_ports.reader ();
 		/* find new audio ports */
-		for (std::vector<std::string>::iterator p = audio_ports.begin (); p != audio_ports.end (); ++p) {
-			if (port_is_mine (*p) || !_backend->get_port_by_name (*p)) {
-				continue;
+		static_cast<void> (std::copy_if (
+			audio_ports.cbegin (),
+			audio_ports.cend (),
+			new_audio.begin (),
+			[&] (const std::string& p) {
+				return !port_is_mine (p)
+                                     && _backend->get_port_by_name (p)
+                                     && aip->find (p) == aip->end ();
 			}
-			if (aip->find (*p) == aip->end ()) {
-				new_audio.push_back (*p);
-			}
-		}
+		));
 
 		/* find stale audio ports */
 		for (auto const& p : *aip) {
@@ -1081,19 +1083,20 @@ PortManager::update_input_ports (bool clear)
 
 		std::shared_ptr<MIDIInputPorts const> mip = _midi_input_ports.reader ();
 		/* find new MIDI ports */
-		for (std::vector<std::string>::iterator p = midi_ports.begin (); p != midi_ports.end (); ++p) {
-			if (port_is_mine (*p) || !_backend->get_port_by_name (*p)) {
-				continue;
-			}
+		static_cast<void> (std::copy_if (
+			midi_ports.cbegin (),
+			midi_ports.cend (),
+			new_audio.begin (),
+			[&, this] (const std::string& p) {
+				return !port_is_mine (p)
+				    && _backend->get_port_by_name (p)
 #ifdef HAVE_ALSA
-			if ((*p).find (X_("Midi Through")) != string::npos || (*p).find (X_("Midi-Through")) != string::npos) {
-				continue;
-			}
+				    && p.find (X_("Midi Through")) == string::npos
+				    && p.find (X_("Midi-Through")) == string::npos
 #endif
-			if (mip->find (*p) == mip->end ()) {
-				new_midi.push_back (*p);
+				    && mip->find (p) == mip->end ();
 			}
-		}
+		));
 
 		/* find stale audio ports */
 		for (auto const& p : *mip) {
@@ -1585,15 +1588,16 @@ PortManager::get_configurable_midi_ports (vector<string>& copy, bool for_input)
 
 	std::vector<string> ports;
 	AudioEngine::instance ()->get_ports (string (), DataType::MIDI, flags, ports);
-	for (vector<string>::iterator p = ports.begin (); p != ports.end (); ++p) {
-		if (port_is_mine (*p) && !port_is_virtual_piano (*p)) {
-			continue;
+	static_cast<void> (std::copy_if (
+		ports.cbegin (),
+		ports.cend (),
+		copy.end (),
+		[this] (const string& p) {
+			return !(port_is_mine (p) && !port_is_virtual_piano (p))
+			    && p.find (X_("Midi Through")) == string::npos
+			    && p.find (X_("Midi-Through")) == string::npos;
 		}
-		if ((*p).find (X_("Midi Through")) != string::npos || (*p).find (X_("Midi-Through")) != string::npos) {
-			continue;
-		}
-		copy.push_back (*p);
-	}
+	));
 }
 
 void

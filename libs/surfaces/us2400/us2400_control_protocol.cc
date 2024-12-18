@@ -649,14 +649,10 @@ US2400Protocol::connect_session_signals()
 void
 US2400Protocol::set_profile (const string& profile_name)
 {
-	map<string,DeviceProfile>::iterator d = DeviceProfile::device_profiles.find (profile_name);
-
-	if (d == DeviceProfile::device_profiles.end()) {
-		_device_profile = DeviceProfile (profile_name);
-		return;
-	}
-
-	_device_profile = d->second;
+	auto device_profile = DeviceProfile::device_profiles.find (profile_name);
+	_device_profile = device_profile == DeviceProfile::device_profiles.end()
+		? DeviceProfile (profile_name)
+		: device_profile->second;
 }
 
 int
