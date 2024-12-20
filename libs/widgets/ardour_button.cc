@@ -290,7 +290,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		build_patterns ();
 	}
 
-	if ( active_state() == Gtkmm2ext::ExplicitActive ) {
+	if (active_state() == Gtkmm2ext::ExplicitActive) {
 		text_color = text_active_color;
 		led_color = led_active_color;
 	} else {
@@ -394,9 +394,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		cairo_rectangle (cr, x, y, _pixbuf->get_width(), _pixbuf->get_height());
 		gdk_cairo_set_source_pixbuf (cr, _pixbuf->gobj(), x, y);
 		cairo_fill (cr);
-	}
-	else /* VectorIcon, IconRenderCallback are exclusive to Pixbuf Icons */
-	if (_elements & (VectorIcon | IconRenderCallback)) {
+	} else if (_elements & (VectorIcon | IconRenderCallback)) { /* VectorIcon, IconRenderCallback are exclusive to Pixbuf Icons */
 		int vw = get_width();
 		int vh = get_height();
 		cairo_save (cr);
@@ -602,8 +600,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	}
 
 	// if requested, show hovering
-	if (UIConfigurationBase::instance().get_widget_prelight()
-			&& !((visual_state() & Gtkmm2ext::Insensitive))) {
+	if (UIConfigurationBase::instance().get_widget_prelight() && !((visual_state() & Gtkmm2ext::Insensitive))) {
 		if (_hovering) {
 			rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
 			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
@@ -1039,6 +1036,7 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 	if (ev->button == 1 && _hovering && (_elements & Indicator) && _led_rect && _distinct_led_click) {
 		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width &&
 		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
+			std::cerr << "LED click\n";
 			signal_led_clicked(ev); /* EMIT SIGNAL */
 			return true;
 		}
