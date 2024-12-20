@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <map>
+
 #include <gtkmm/adjustment.h>
 
 #include "canvas/ruler.h"
@@ -189,6 +191,12 @@ class MidiCueEditor : public CueEditor
 	ArdourWidgets::ArdourButton* pressure_button;
 	ArdourWidgets::ArdourButton* expression_button;
 	ArdourWidgets::ArdourButton* modulation_button;
+	ArdourWidgets::ArdourDropdown* cc_dropdown1;
+	ArdourWidgets::ArdourDropdown* cc_dropdown2;
+	ArdourWidgets::ArdourDropdown* cc_dropdown3;
+
+	typedef std::map<Evoral::Parameter,ArdourWidgets::ArdourButton*> ParameterButtonMap;
+	ParameterButtonMap parameter_button_map;
 
 	CueMidiBackground* bg;
 	MidiCueView* view;
@@ -244,12 +252,15 @@ class MidiCueEditor : public CueEditor
 	samplecnt_t data_capture_duration;
 
 	bool automation_button_event (GdkEventButton*, Evoral::ParameterType type, int id);
-	void automation_button_click (Evoral::ParameterType type, int id, ARDOUR::SelectionOperation);
+	bool automation_button_click (Evoral::ParameterType type, int id, ARDOUR::SelectionOperation);
+	void automation_led_click (GdkEventButton*, Evoral::ParameterType type, int id);
 
 	int _visible_channel;
 
 	ARDOUR::NoteMode _note_mode;
 	sigc::signal<void> NoteModeChanged;
+
+	void automation_state_changed ();
 };
 
 

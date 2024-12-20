@@ -130,11 +130,36 @@ MidiCueEditor::canvas_pre_event (GdkEvent* ev)
 void
 MidiCueEditor::build_lower_toolbar ()
 {
-	velocity_button = new ArdourButton (_("Velocity"), ArdourButton::Text, true);
-	bender_button = new ArdourButton (_("Bender"), ArdourButton::Text, true);
-	pressure_button = new ArdourButton (_("Pressure"), ArdourButton::Text, true);
-	expression_button = new ArdourButton (_("Expression"), ArdourButton::Text, true);
-	modulation_button = new ArdourButton (_("Modulation"), ArdourButton::Text, true);
+	ArdourButton::Element elements = ArdourButton::Element (ArdourButton::Text|ArdourButton::Indicator|ArdourButton::Edge|ArdourButton::Body);
+
+	velocity_button = new ArdourButton (_("Velocity"), elements);
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiVelocityAutomation), velocity_button));
+	bender_button = new ArdourButton (_("Bender"), elements);
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiPitchBenderAutomation), bender_button));
+	pressure_button = new ArdourButton (_("Pressure"), elements);
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiChannelPressureAutomation), pressure_button));
+	expression_button = new ArdourButton (_("Expression"), elements);
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION), expression_button));
+	modulation_button = new ArdourButton (_("Modulation"), elements);
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL), modulation_button));
+	cc_dropdown1 = new ArdourDropdown (elements);
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_GENERAL_PURPOSE1), cc_dropdown1));
+	cc_dropdown2 = new ArdourDropdown (elements);
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_GENERAL_PURPOSE2), cc_dropdown2));
+	cc_dropdown3 = new ArdourDropdown (elements);
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_GENERAL_PURPOSE3), cc_dropdown3));
+
+	cc_dropdown1->set_text (string_compose (_("CC%1"), MIDI_CTL_MSB_GENERAL_PURPOSE1));
+	cc_dropdown2->set_text (string_compose (_("CC%1"), MIDI_CTL_MSB_GENERAL_PURPOSE2));
+	cc_dropdown3->set_text (string_compose (_("CC%1"), MIDI_CTL_MSB_GENERAL_PURPOSE3));
+
+	for (ParameterButtonMap::iterator i = parameter_button_map.begin(); i != parameter_button_map.end(); ++i) {
+		i->second->set_active_color (0xff0000ff);
+		i->second->set_distinct_led_click (true);
+		i->second->set_led_left (true);
+		i->second->set_act_on_release (false);
+		i->second->set_fallthrough_to_parent (true);
+	}
 
 	// button_bar.set_homogeneous (true);
 	button_bar.set_spacing (6);
@@ -143,12 +168,21 @@ MidiCueEditor::build_lower_toolbar ()
 	button_bar.pack_start (*bender_button, false, false);
 	button_bar.pack_start (*pressure_button, false, false);
 	button_bar.pack_start (*modulation_button, false, false);
+	button_bar.pack_start (*cc_dropdown1, false, false);
+	button_bar.pack_start (*cc_dropdown2, false, false);
+	button_bar.pack_start (*cc_dropdown3, false, false);
 
-	velocity_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiVelocityAutomation, 0), false);
-	pressure_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiChannelPressureAutomation, 0), false);
-	bender_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiPitchBenderAutomation, 0), false);
-	modulation_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL), false);
-	expression_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION), false);
+	velocity_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiVelocityAutomation, 0));
+	pressure_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiChannelPressureAutomation, 0));
+	bender_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiPitchBenderAutomation, 0));
+	modulation_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL));
+	expression_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION));
+
+	velocity_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_led_click), ARDOUR::MidiVelocityAutomation, 0));
+	pressure_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_led_click), ARDOUR::MidiChannelPressureAutomation, 0));
+	bender_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_led_click), ARDOUR::MidiPitchBenderAutomation, 0));
+	modulation_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_led_click), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL));
+	expression_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_led_click), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION));
 
 	_toolbox.pack_start (button_bar, false, false);
 }
@@ -315,6 +349,7 @@ MidiCueEditor::build_canvas ()
 	prh = new ArdourCanvas::PianoRollHeader (v_scroll_group, *bg);
 
 	view = new MidiCueView (nullptr, *data_group, *no_scroll_group, *this, *bg, 0xff0000ff);
+	view->AutomationStateChange.connect (sigc::mem_fun (*this, &MidiCueEditor::automation_state_changed));
 
 	bg->set_view (view);
 	prh->set_view (view);
@@ -1871,12 +1906,24 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 bool
 MidiCueEditor::automation_button_event (GdkEventButton* ev, Evoral::ParameterType type, int id)
 {
+	if (ev->button != 1) {
+		return false;
+	}
+
 	SelectionOperation op = ArdourKeyboard::selection_type (ev->state);
 
 	switch (ev->type) {
 	case GDK_BUTTON_RELEASE:
-		automation_button_click (type, id, op);
-		break;
+		if (view)  {
+			Evoral::Parameter param (type, 0, id);
+
+			if (view->is_visible_automation (param) && (op == SelectionSet)) {
+				op = SelectionToggle;
+			}
+
+			view->update_automation_display (param, op);
+		}
+		return true;
 	default:
 		break;
 	}
@@ -1885,11 +1932,41 @@ MidiCueEditor::automation_button_event (GdkEventButton* ev, Evoral::ParameterTyp
 }
 
 void
-MidiCueEditor::automation_button_click (Evoral::ParameterType type, int id, SelectionOperation op)
+MidiCueEditor::automation_led_click (GdkEventButton* ev, Evoral::ParameterType type, int id)
 {
 #warning paul allow channel selection (2nd param)
+	if (ev->button != 1) {
+		return;
+	}
+
 	if (view)  {
-		view->update_automation_display (Evoral::Parameter (type, 0, id), op);
+		view->set_active_automation (Evoral::Parameter (type, 0, id));
+	}
+}
+
+void
+MidiCueEditor::automation_state_changed ()
+{
+	assert (view);
+
+	for (ParameterButtonMap::iterator i = parameter_button_map.begin(); i != parameter_button_map.end(); ++i) {
+		std::string str (ARDOUR::EventTypeMap::instance().to_symbol (i->first));
+
+		/* Indicate visible automation state with selected/not-selected visual state */
+
+		if (view->is_visible_automation (i->first)) {
+			i->second->set_visual_state (Gtkmm2ext::Selected);
+		} else {
+			i->second->set_visual_state (Gtkmm2ext::NoVisualState);
+		}
+
+		/* Indicate active automation state with explicit widget active state (LED) */
+
+		if (view->is_active_automation (i->first)) {
+			i->second->set_active_state (Gtkmm2ext::ExplicitActive);
+		} else {
+			i->second->set_active_state (Gtkmm2ext::Off);
+		}
 	}
 }
 

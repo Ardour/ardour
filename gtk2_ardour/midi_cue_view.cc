@@ -303,6 +303,8 @@ MidiCueView::update_automation_display (Evoral::Parameter const & param, Selecti
 			                                                   automation_group,
 			                                                   ac->alist(),
 			                                                   ac->desc()));
+			line->set_line_color ("midi line inactive");
+
 			AutomationDisplayState cad (ac, line, true);
 
 			auto res = automation_map.insert (std::make_pair (param, cad));
@@ -311,25 +313,26 @@ MidiCueView::update_automation_display (Evoral::Parameter const & param, Selecti
 		}
 	}
 
-	std::cerr << "sad " << op << " param " << ARDOUR::EventTypeMap::instance().to_symbol (param) << std::endl;
-
 	switch (op) {
 	case SelectionSet:
 		/* hide the rest */
 		for (auto & as : automation_map) {
 			as.second.hide ();
 		}
-		/*FALLTHRU*/
+		ads->set_height (automation_group->get().height());
+		ads->show ();
+		internal_set_active_automation (param);
+		break;
+
 	case SelectionAdd:
 		ads->set_height (automation_group->get().height());
 		ads->show ();
-		active_automation = ads;
 		break;
 
 	case SelectionRemove:
 		ads->hide ();
 		if (active_automation == ads) {
-			active_automation = nullptr;
+			unset_active_automation ();
 		}
 		break;
 
@@ -337,14 +340,14 @@ MidiCueView::update_automation_display (Evoral::Parameter const & param, Selecti
 		if (ads->visible) {
 			ads->hide ();
 			if (active_automation == ads) {
-				active_automation = nullptr;
+				unset_active_automation ();
 			}
 		} else {
 			ads->set_height (automation_group->get().height());
 			ads->show ();
-			active_automation = ads;
+			internal_set_active_automation (param);
 		}
-		return;
+		break;
 
 	case SelectionExtend:
 		/* undefined in this context */
@@ -353,6 +356,72 @@ MidiCueView::update_automation_display (Evoral::Parameter const & param, Selecti
 
 	set_height (_height);
 }
+
+void
+MidiCueView::set_active_automation (Evoral::Parameter const & param)
+{
+	if (!internal_set_active_automation (param)) {
+		update_automation_display (param, SelectionSet);
+	}
+}
+
+void
+MidiCueView::unset_active_automation ()
+{
+	for (CueAutomationMap::iterator i = automation_map.begin(); i != automation_map.end(); ++i) {
+		i->second.line->set_line_color ("midi line inactive");
+	}
+
+	active_automation = nullptr;
+	AutomationStateChange(); /* EMIT SIGNAL */
+}
+
+bool
+MidiCueView::internal_set_active_automation (Evoral::Parameter const & param)
+{
+	bool exists = false;
+
+	for (CueAutomationMap::iterator i = automation_map.begin(); i != automation_map.end(); ++i) {
+		if (i->first == param) {
+			i->second.line->set_line_color ("gain line");
+			active_automation = &i->second;
+			exists = true;
+		} else {
+			i->second.line->set_line_color ("midi line inactive");
+		}
+	}
+
+	if (exists) {
+		AutomationStateChange(); /* EMIT SIGNAL */
+	}
+
+	return exists;
+}
+
+bool
+MidiCueView::is_active_automation (Evoral::Parameter const & param) const
+{
+	CueAutomationMap::const_iterator i = automation_map.find (param);
+
+	if (i == automation_map.end()) {
+		return false;
+	}
+
+	return (&i->second == active_automation);
+}
+
+bool
+MidiCueView::is_visible_automation (Evoral::Parameter const & param) const
+{
+	CueAutomationMap::const_iterator i = automation_map.find (param);
+
+	if (i == automation_map.end()) {
+		return false;
+	}
+
+	return (i->second.visible);
+}
+
 
 std::list<SelectableOwner*>
 MidiCueView::selectable_owners()
@@ -368,6 +437,8 @@ MergeableLine*
 MidiCueView::make_merger ()
 {
 	if (active_automation && active_automation->line) {
+		std::cerr << "Mergable will use active automation @ " << active_automation << std::endl;
+
 		return new MergeableLine (active_automation->line, active_automation->control,
 		                          [](Temporal::timepos_t const& t) { return t; },
 		                          nullptr, nullptr);
@@ -402,10 +473,8 @@ void
 MidiCueView::AutomationDisplayState::hide ()
 {
 	if (velocity_display) {
-		std::cerr << "hide vdisp\n";
 		velocity_display->hide ();
 	} else if (line) {
-		std::cerr << "hide line\n";
 		line->hide_all ();
 	}
 	visible = false;
@@ -415,10 +484,8 @@ void
 MidiCueView::AutomationDisplayState::show ()
 {
 	if (velocity_display) {
-		std::cerr << "show vdisp\n";
 		velocity_display->show ();
 	} else if (line) {
-		std::cerr << "show line\n";
 		line->show ();
 	}
 	visible = true;

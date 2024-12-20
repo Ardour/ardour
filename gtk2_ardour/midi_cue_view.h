@@ -61,6 +61,9 @@ class MidiCueView : public MidiView
 	void ghost_sync_selection (NoteBase*);
 
 	void update_automation_display (Evoral::Parameter const & param, ARDOUR::SelectionOperation);
+	void set_active_automation (Evoral::Parameter const &);
+	bool is_active_automation (Evoral::Parameter const &) const;
+	bool is_visible_automation (Evoral::Parameter const &) const;
 
 	ArdourCanvas::Item* drag_group() const;
 
@@ -72,6 +75,8 @@ class MidiCueView : public MidiView
 
 	void automation_entry();
 	void automation_leave ();
+
+	sigc::signal<void> AutomationStateChange;
 
   protected:
 	bool scroll (GdkEventScroll* ev);
@@ -114,4 +119,7 @@ class MidiCueView : public MidiView
 	void update_hit (Hit *);
 
 	double _height;
+
+	bool internal_set_active_automation (Evoral::Parameter const &);
+	void unset_active_automation ();
 };
