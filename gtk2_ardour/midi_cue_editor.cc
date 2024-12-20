@@ -254,6 +254,8 @@ MidiCueEditor::build_upper_toolbar ()
 void
 MidiCueEditor::set_visible_channel (int n)
 {
+	_visible_channel = n;
+	visible_channel_label.set_text (string_compose (_("MIDI Channel %1"), _visible_channel + 1));
 }
 
 void
@@ -1901,6 +1903,8 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 		samplecnt_t spp = floor (samples / width);
 		reset_zoom (spp);
 	}
+
+	set_visible_channel (0);
 }
 
 bool
@@ -1915,7 +1919,7 @@ MidiCueEditor::automation_button_event (GdkEventButton* ev, Evoral::ParameterTyp
 	switch (ev->type) {
 	case GDK_BUTTON_RELEASE:
 		if (view)  {
-			Evoral::Parameter param (type, 0, id);
+			Evoral::Parameter param (type, _visible_channel, id);
 
 			if (view->is_visible_automation (param) && (op == SelectionSet)) {
 				op = SelectionToggle;
@@ -1934,13 +1938,12 @@ MidiCueEditor::automation_button_event (GdkEventButton* ev, Evoral::ParameterTyp
 void
 MidiCueEditor::automation_led_click (GdkEventButton* ev, Evoral::ParameterType type, int id)
 {
-#warning paul allow channel selection (2nd param)
 	if (ev->button != 1) {
 		return;
 	}
 
 	if (view)  {
-		view->set_active_automation (Evoral::Parameter (type, 0, id));
+		view->set_active_automation (Evoral::Parameter (type, _visible_channel, id));
 	}
 }
 

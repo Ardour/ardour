@@ -261,6 +261,7 @@ class MidiCueEditor : public CueEditor
 	sigc::signal<void> NoteModeChanged;
 
 	void automation_state_changed ();
+
 };
 
 

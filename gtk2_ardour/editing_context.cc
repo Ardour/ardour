@@ -208,7 +208,7 @@ EditingContext::EditingContext (std::string const & name)
 	for (int i = 0; i < 16; i++) {
 		char buf[4];
 		sprintf(buf, "%d", i+1);
-		visible_channel_selector.AddMenuElem (MenuElem (buf, [this,i]() { EditingContext::set_visible_channel (i); }));
+		visible_channel_selector.AddMenuElem (MenuElem (buf, [this,i]() { set_visible_channel (i); }));
 	}
 
 	/* handle escape */
