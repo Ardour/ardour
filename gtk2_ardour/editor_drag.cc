@@ -7476,8 +7476,10 @@ AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 	FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint>::finished (event, motion_occured);
 
 	MergeableLine* ml = lm->make_merger();
-	ml->merge_drawn_line (editing_context, *editing_context.session(), drawn_points, !did_snap);
-	delete ml;
+	if (ml) {
+		ml->merge_drawn_line (editing_context, *editing_context.session(), drawn_points, !did_snap);
+		delete ml;
+	}
 }
 
 /*****************/

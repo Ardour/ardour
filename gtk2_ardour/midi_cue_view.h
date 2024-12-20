@@ -61,6 +61,7 @@ class MidiCueView : public MidiView
 	void ghost_sync_selection (NoteBase*);
 
 	void update_automation_display (Evoral::Parameter const & param, ARDOUR::SelectionOperation);
+	void swap_automation_channel (int);
 	void set_active_automation (Evoral::Parameter const &);
 	bool is_active_automation (Evoral::Parameter const &) const;
 	bool is_visible_automation (Evoral::Parameter const &) const;

@@ -236,6 +236,43 @@ MidiCueView::update_hit (Hit* h)
 }
 
 void
+MidiCueView::swap_automation_channel (int new_channel)
+{
+	std::vector<Evoral::Parameter> new_params;
+	Evoral::Parameter active (0, 0, 0);
+	bool have_active = false;
+
+	/* Make a note of what was visible, but use the new channel */
+
+	for (CueAutomationMap::iterator i = automation_map.begin(); i != automation_map.end(); ++i) {
+		if (i->second.visible) {
+			Evoral::Parameter param (i->first.type(), new_channel, i->first.id());
+			new_params.push_back (param);
+			if (&i->second == active_automation) {
+				active = param;
+				have_active = true;
+			}
+		}
+	}
+
+	/* Drop the old */
+
+	automation_map.clear ();
+
+	/* Create the new */
+
+	for (auto const & p : new_params) {
+		update_automation_display (p, SelectionAdd);
+	}
+
+	if (have_active) {
+		set_active_automation (active);
+	} else {
+		unset_active_automation ();
+	}
+}
+
+void
 MidiCueView::update_automation_display (Evoral::Parameter const & param, SelectionOperation op)
 {
 	using namespace ARDOUR;

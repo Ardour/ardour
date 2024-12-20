@@ -256,6 +256,10 @@ MidiCueEditor::set_visible_channel (int n)
 {
 	_visible_channel = n;
 	visible_channel_label.set_text (string_compose (_("MIDI Channel %1"), _visible_channel + 1));
+
+	if (view) {
+		view->swap_automation_channel (n);
+	}
 }
 
 void
