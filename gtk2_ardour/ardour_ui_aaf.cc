@@ -226,12 +226,12 @@ import_sndfile_as_region (Session* s, struct aafiAudioEssencePointer* aafAudioEs
 }
 
 static std::shared_ptr<Region>
-create_region (vector<std::shared_ptr<Region>> source_regions, aafiAudioClip* aafAudioClip, SourceList& oneClipSources, aafPosition_t clipOffset, aafRational_t samplerate_r)
+create_region (vector<std::shared_ptr<Region>> source_regions, AAF_Iface* aafi, aafiAudioClip* aafAudioClip, SourceList& oneClipSources, aafPosition_t clipOffset, aafRational_t samplerate_r)
 {
 	string unique_file_name = aafAudioClip->essencePointerList->essenceFile->unique_name; // XXX
 
 	aafPosition_t clipPos       = aafi_convertUnit (aafAudioClip->pos, aafAudioClip->track->edit_rate, &samplerate_r);
-	aafPosition_t clipLen       = aafi_convertUnit (aafAudioClip->len, aafAudioClip->track->edit_rate, &samplerate_r);
+	aafPosition_t clipLen       = aafi_getClipLength (aafi, aafAudioClip, &samplerate_r, NULL);
 	aafPosition_t essenceOffset = aafi_convertUnit (aafAudioClip->essence_offset, aafAudioClip->track->edit_rate, &samplerate_r);
 
 	PropertyList proplist;
@@ -642,7 +642,7 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 				continue;
 			}
 
-			std::shared_ptr<Region> region = create_region (source_regions, aafAudioClip, *oneClipSources, sessionStart, samplerate_r);
+			std::shared_ptr<Region> region = create_region (source_regions, aafi, aafAudioClip, *oneClipSources, sessionStart, samplerate_r);
 
 			if (!region) {
 				error << string_compose (_ ("AAF: Could not create new region for clip '%1'"), essenceName) << endmsg;
