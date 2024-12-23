@@ -513,6 +513,43 @@ laaf_util_file_exists (const char* filepath)
 	return 0;
 }
 
+FILE*
+laaf_util_fopen_utf8 (const char* filepath, const char* mode)
+{
+	FILE* fp = NULL;
+
+	if (!filepath) {
+		return NULL;
+	}
+
+#ifdef _WIN32
+	wchar_t* wfile = laaf_util_windows_utf8toutf16 (filepath);
+
+	if (!wfile) {
+		// error( "Unable to convert filepath to wide string : %s", cfbd->file );
+		return NULL;
+	}
+
+	const wchar_t* wmode = NULL;
+
+	if (strcmp (mode, "rb") == 0) {
+		wmode = L"rb";
+	} else if (strcmp (mode, "wb") == 0) {
+		wmode = L"wb";
+	} else {
+		return NULL;
+	}
+
+	fp = _wfopen (wfile, wmode);
+
+	free (wfile);
+#else
+	fp    = fopen (filepath, mode);
+#endif
+
+	return fp;
+}
+
 static int
 utf8CodeLen (const uint16_t* u16Code)
 {
