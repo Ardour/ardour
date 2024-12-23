@@ -458,22 +458,7 @@ cfb_openFile (CFB_Data* cfbd)
 		return -1;
 	}
 
-#ifdef _WIN32
-
-	wchar_t* wfile = laaf_util_windows_utf8toutf16 (cfbd->file);
-
-	if (!wfile) {
-		error ("Unable to convert filepath to wide string : %s", cfbd->file);
-		return -1;
-	}
-
-	cfbd->fp = _wfopen (wfile, L"rb");
-
-	free (wfile);
-
-#else
-	cfbd->fp    = fopen (cfbd->file, "rb");
-#endif
+	cfbd->fp = laaf_util_fopen_utf8 (cfbd->file, "rb");
 
 	if (!cfbd->fp) {
 		error ("%s.", strerror (errno));
