@@ -628,7 +628,7 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 	/* find the items at the given window position */
 
 	list<Item const *> within_items;
-	get_items_enclosing(point, within_items);
+	get_items_enclosing (point, within_items);
 
 	DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("after filtering insensitive + containers, we have  %1 items\n", within_items.size()));
 
