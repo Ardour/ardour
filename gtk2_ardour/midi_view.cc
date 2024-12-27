@@ -561,8 +561,6 @@ MidiView::button_press (GdkEventButton* ev)
 bool
 MidiView::button_release (GdkEventButton* ev)
 {
-	double event_x, event_y;
-
 	if (ev->button != 1) {
 		return false;
 	}
