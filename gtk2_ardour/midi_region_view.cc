@@ -308,7 +308,7 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 		return RegionView::canvas_group_event (ev);
 	}
 
-	return MidiView::canvas_group_event (ev);
+	return MidiView::midi_canvas_group_event (ev);
 }
 
 bool

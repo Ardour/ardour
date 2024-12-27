@@ -272,6 +272,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual bool canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item*, ControlPoint*) = 0;
 	virtual bool canvas_cue_start_event (GdkEvent* event, ArdourCanvas::Item*) { return true; }
 	virtual bool canvas_cue_end_event (GdkEvent* event, ArdourCanvas::Item*) { return true; }
+	virtual bool canvas_bg_event (GdkEvent* event, ArdourCanvas::Item*) { return true; }
 
 	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) const;
 	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) const;

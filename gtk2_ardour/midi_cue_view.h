@@ -123,4 +123,6 @@ class MidiCueView : public MidiView
 
 	bool internal_set_active_automation (Evoral::Parameter const &);
 	void unset_active_automation ();
+
+	bool midi_canvas_group_event (GdkEvent*);
 };

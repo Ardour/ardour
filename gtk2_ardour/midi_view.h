@@ -374,7 +374,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void show_start (bool yn);
 	void show_end (bool yn);
 
-	virtual bool canvas_group_event(GdkEvent* ev);
+	virtual bool midi_canvas_group_event(GdkEvent* ev);
 
   protected:
 	void init (std::shared_ptr<ARDOUR::MidiTrack>);

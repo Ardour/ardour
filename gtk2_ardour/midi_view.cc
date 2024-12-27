@@ -369,7 +369,7 @@ MidiView::set_model (std::shared_ptr<MidiModel> m)
 }
 
 bool
-MidiView::canvas_group_event (GdkEvent* ev)
+MidiView::midi_canvas_group_event (GdkEvent* ev)
 {
 	//For now, move the snapped cursor aside so it doesn't bother you during internal editing
 	//_editing_context.set_snapped_cursor_position(_midi_region->position());

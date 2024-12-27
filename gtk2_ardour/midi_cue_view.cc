@@ -69,7 +69,7 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	event_rect->set_outline (false);
 	CANVAS_DEBUG_NAME (event_rect, "cue event rect");
 
-	parent.Event.connect (sigc::mem_fun (*this, &MidiView::canvas_group_event));
+	event_rect->Event.connect (sigc::mem_fun (*this, &MidiCueView::midi_canvas_group_event));
 
 	_note_group->raise_to_top ();
 
@@ -85,6 +85,14 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 MidiCueView::~MidiCueView ()
 {
 	delete velocity_display;
+}
+
+bool
+MidiCueView::midi_canvas_group_event (GdkEvent* ev)
+{
+	MidiView::midi_canvas_group_event (ev);
+
+	_editing_context.canvas_bg_event (ev, event_rect);
 }
 
 void

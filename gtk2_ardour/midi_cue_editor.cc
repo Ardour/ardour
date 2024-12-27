@@ -519,6 +519,12 @@ MidiCueEditor::current_page_samples() const
 }
 
 bool
+MidiCueEditor::canvas_bg_event (GdkEvent* event, ArdourCanvas::Item* item)
+{
+	return typed_event (item, event, RegionItem);
+}
+
+bool
 MidiCueEditor::canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item* item, ControlPoint* cp)
 {
 	return typed_event (item, event, ControlPointItem);
