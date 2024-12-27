@@ -346,6 +346,11 @@ Drag::set_grab_button_anyway (GdkEvent* ev)
 void
 Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
+	if (event->type != GDK_BUTTON_PRESS) {
+		fatal << "Drag started with non-button-press event (" << event_type_string (event->type) << ')' << endmsg;
+		/*NOTREACHED*/
+	}
+
 	/* we set up x/y dragging constraints on first move */
 	_constraint_pressed = ArdourKeyboard::indicates_constraint (event->button.state);
 
