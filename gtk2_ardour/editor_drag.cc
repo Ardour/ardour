@@ -7642,7 +7642,7 @@ ClipEndDrag::motion (GdkEvent*, bool)
 		r.x0 = r.x1 - 1.;
 	}
 
-	dragging_rect->set (r);
+	dragging_rect->set_position (ArdourCanvas::Duple (r.x0, 0.0));
 }
 
 void
