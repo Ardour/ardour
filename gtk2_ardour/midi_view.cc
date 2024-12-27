@@ -116,15 +116,15 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	, _active_notes (nullptr)
 	, _note_group (new ArdourCanvas::Container (&parent))
 	, _note_diff_command (nullptr)
-	, _ghost_note(0)
-	, _step_edit_cursor (0)
+	, _ghost_note (nullptr)
+	, _step_edit_cursor (nullptr)
 	, _step_edit_cursor_width (1, 0)
 	, _channel_selection_scoped_note (0)
-	, _mouse_state(None)
-	, _pressed_button(0)
 	, _start_boundary_rect (nullptr)
 	, _end_boundary_rect (nullptr)
 	, _show_source (false)
+	, selection_drag (nullptr)
+	, draw_drag (nullptr)
 	, _optimization_iterator (_events.end())
 	, _list_editor (nullptr)
 	, _no_sound_notes (false)
@@ -150,15 +150,15 @@ MidiView::MidiView (MidiView const & other)
 	, _active_notes (nullptr)
 	, _note_group (new ArdourCanvas::Container (other._note_group->parent()))
 	, _note_diff_command (0)
-	, _ghost_note(0)
-	, _step_edit_cursor (0)
+	, _ghost_note (nullptr)
+	, _step_edit_cursor (nullptr)
 	, _step_edit_cursor_width (1, 0)
 	, _channel_selection_scoped_note (0)
-	, _mouse_state(None)
-	, _pressed_button(0)
 	, _start_boundary_rect (nullptr)
 	, _end_boundary_rect (nullptr)
 	, _show_source (false)
+	, selection_drag (nullptr)
+	, draw_drag (nullptr)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, _no_sound_notes (false)
@@ -486,9 +486,9 @@ MidiView::mouse_mode_changed ()
 void
 MidiView::enter_internal (uint32_t state)
 {
-	if (_editing_context.current_mouse_mode() == MouseDraw && _mouse_state != AddDragging) {
+	if (_editing_context.current_mouse_mode() == MouseDraw && !draw_drag) {
 		// Show ghost note under pencil
-		create_ghost_note(_last_event_x, _last_event_y, state);
+		create_ghost_note (_last_event_x, _last_event_y, state);
 	}
 }
 
@@ -509,37 +509,51 @@ MidiView::button_press (GdkEventButton* ev)
 
 	MouseMode m = _editing_context.current_mouse_mode();
 
-	if (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
+	if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
+
 		_editing_context.set_canvas_cursor (_editing_context.cursors()->midi_pencil);
-	}
 
-	if (_mouse_state != SelectTouchDragging) {
-
-		_pressed_button = ev->button;
-
-
-		if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
-
-			if (_midi_context.note_mode() == Percussive) {
-				_editing_context.drags()->set (new HitCreateDrag (_editing_context, drag_group(), this), (GdkEvent *) ev);
-			} else {
-				_editing_context.drags()->set (new NoteCreateDrag (_editing_context, drag_group(), this), (GdkEvent *) ev);
-			}
-
-			_mouse_state = AddDragging;
-			remove_ghost_note ();
-			hide_verbose_cursor ();
+		if (_midi_context.note_mode() == Percussive) {
+			draw_drag = new HitCreateDrag (_editing_context, drag_group(), this);
+			_editing_context.drags()->set (draw_drag, (GdkEvent *) ev);
 		} else {
-			_mouse_state = Pressed;
+			draw_drag = new NoteCreateDrag (_editing_context, drag_group(), this);
+			_editing_context.drags()->set (draw_drag, (GdkEvent *) ev);
 		}
 
-		return true;
+		remove_ghost_note ();
+		hide_verbose_cursor ();
+
+	} else {
+
+		if (m == MouseContent) {
+			selection_drag = new MidiRubberbandSelectDrag (_editing_context, this);
+			selection_drag->set_bounding_item (_editing_context.get_trackview_group());
+			_editing_context.drags()->set (selection_drag, (GdkEvent *) ev);
+
+			if (!Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+				clear_selection_internal ();
+				_mouse_changed_selection = true;
+			}
+
+		} else if (m == MouseRange) {
+			selection_drag = new MidiVerticalSelectDrag (_editing_context, this);
+			_editing_context.drags()->set (selection_drag, (GdkEvent *) ev);
+		}
 	}
 
-	_pressed_button = ev->button;
+	if (selection_drag || draw_drag) {
+
+		/* any drag immediately hides velocity text that may have been visible */
+
+		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+			(*i)->hide_velocity ();
+		}
+	}
+
 	_mouse_changed_selection = false;
 
-	return false;
+	return true;
 }
 
 bool
@@ -551,50 +565,12 @@ MidiView::button_release (GdkEventButton* ev)
 		return false;
 	}
 
-	event_x = ev->x;
-	event_y = ev->y;
-
-	_note_group->parent()->canvas_to_item (event_x, event_y);
-	_note_group->parent()->ungrab ();
-
-	_press_cursor_ctx.reset();
-
-	switch (_mouse_state) {
-	case Pressed: // Clicked
-		switch (_editing_context.current_mouse_mode()) {
-		case MouseRange:
-			/* no motion occurred - simple click */
-			clear_selection_internal ();
-			_mouse_changed_selection = true;
-			break;
-
-		case MouseContent:
-		case MouseTimeFX:
-			_mouse_changed_selection = true;
-			clear_selection_internal ();
-			break;
-		case MouseDraw:
-			break;
-
-		default:
-			break;
-		}
-
-		_mouse_state = None;
-		break;
-
-	case AddDragging:
-		/* Don't a ghost note when we added a note - wait until motion to avoid visual confusion.
-		   we don't want one when we were drag-selecting either. */
-	case SelectRectDragging:
-		_editing_context.drags()->end_grab ((GdkEvent *) ev);
-		_mouse_state = None;
-		break;
-
-
-	default:
-		break;
+	if (_editing_context.drags()->active()) {
+		_editing_context.drags()->end_grab ((GdkEvent*) ev);
 	}
+
+	selection_drag = nullptr;
+	draw_drag = nullptr;
 
 	if (_mouse_changed_selection) {
 		_editing_context.begin_reversible_selection_op (X_("Mouse Selection Change"));
@@ -609,28 +585,7 @@ MidiView::motion (GdkEventMotion* ev)
 {
 	if (!_entered_note) {
 
-		if (_mouse_state == AddDragging) {
-			if (_ghost_note) {
-				remove_ghost_note ();
-			}
-
-		} else if (!_ghost_note && _editing_context.current_mouse_mode() == MouseContent &&
-		    Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()) &&
-		    _mouse_state != AddDragging) {
-
-			create_ghost_note (ev->x, ev->y, ev->state);
-
-		} else if (_ghost_note && _editing_context.current_mouse_mode() == MouseContent &&
-			   Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
-
-			update_ghost_note (ev->x, ev->y, ev->state);
-
-		} else if (_ghost_note && _editing_context.current_mouse_mode() == MouseContent) {
-
-			remove_ghost_note ();
-			hide_verbose_cursor ();
-
-		} else if (_editing_context.current_mouse_mode() == MouseDraw) {
+		if (_editing_context.current_mouse_mode() == MouseDraw) {
 
 			if (_ghost_note) {
 				update_ghost_note (ev->x, ev->y, ev->state);
@@ -640,55 +595,7 @@ MidiView::motion (GdkEventMotion* ev)
 		}
 	}
 
-	/* any motion immediately hides velocity text that may have been visible */
-
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		(*i)->hide_velocity ();
-	}
-
-	switch (_mouse_state) {
-	case Pressed:
-
-		if (_pressed_button == 1) {
-
-			MouseMode m = _editing_context.current_mouse_mode();
-
-			if (m == MouseContent && !Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
-				MidiRubberbandSelectDrag* mrbsd = new MidiRubberbandSelectDrag (_editing_context, this);
-				mrbsd->set_bounding_item (_editing_context.get_trackview_group());
-				_editing_context.drags()->set (mrbsd, (GdkEvent *) ev);
-
-				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-					clear_selection_internal ();
-					_mouse_changed_selection = true;
-				}
-				_mouse_state = SelectRectDragging;
-				return true;
-
-			} else if (m == MouseRange) {
-
-				_editing_context.drags()->set (new MidiVerticalSelectDrag (_editing_context, this), (GdkEvent *) ev);
-				_mouse_state = SelectVerticalDragging;
-
-				return true;
-			}
-		}
-
-		return false;
-
-	case SelectRectDragging:
-	case SelectVerticalDragging:
-	case AddDragging:
-		_editing_context.drags()->motion_handler ((GdkEvent *) ev, false);
-		break;
-
-	case SelectTouchDragging:
-		return false;
-
-	default:
-		break;
-
-	}
+	_editing_context.drags()->motion_handler ((GdkEvent *) ev, false);
 
 	return false;
 }
@@ -781,30 +688,12 @@ MidiView::scroll (GdkEventScroll* ev)
 bool
 MidiView::key_press (GdkEventKey* ev)
 {
-	/* since GTK bindings are generally activated on press, and since
-	   detectable auto-repeat is the name of the game and only sends
-	   repeated presses, carry out key actions at key press, not release.
-	*/
-
-	if (Keyboard::no_modifier_keys_pressed(ev) && (ev->keyval == GDK_Alt_L || ev->keyval == GDK_Alt_R)) {
-
-		if (_mouse_state != AddDragging) {
-			_mouse_state = SelectTouchDragging;
-		}
-
-		return true;
-	}
-
 	return false;
 }
 
 bool
 MidiView::key_release (GdkEventKey* ev)
 {
-	if ((_mouse_state == SelectTouchDragging) && (ev->keyval == GDK_Alt_L || ev->keyval == GDK_Alt_R)) {
-		_mouse_state = None;
-		return true;
-	}
 	return false;
 }
 
@@ -2374,7 +2263,6 @@ void
 MidiView::clear_selection ()
 {
 	clear_note_selection ();
-	_mouse_state = None;
 	end_note_splitting ();
 }
 
@@ -3870,23 +3758,25 @@ MidiView::change_channel(uint8_t channel)
 
 
 void
-MidiView::note_entered(NoteBase* ev)
+MidiView::note_entered (NoteBase* ev)
 {
 	_entered_note = ev;
 
-	if (_mouse_state == SelectTouchDragging) {
+	if (selection_drag) {
 
 		note_selected (ev, true);
+		_mouse_changed_selection = true;
+		return;
+	}
 
-	} else if (_editing_context.current_mouse_mode() == MouseContent) {
-
+	switch (_editing_context.current_mouse_mode()) {
+	case MouseContent:
+	case MouseDraw:
 		remove_ghost_note ();
 		show_verbose_cursor (ev->note ());
-
-	} else if (_editing_context.current_mouse_mode() == MouseDraw) {
-
-		remove_ghost_note ();
-		show_verbose_cursor (ev->note ());
+		break;
+	default:
+		break;
 	}
 }
 
@@ -4367,10 +4257,6 @@ MidiView::selection_as_notelist (Notes& selected, bool allow_all_if_none_selecte
 void
 MidiView::update_ghost_note (double x, double y, uint32_t state)
 {
-	if (!_midi_region) {
-		return;
-	}
-
 	assert (_ghost_note);
 	x = _editing_context.canvas_to_timeline (x);
 	x = std::max (0.0, x);
@@ -4442,7 +4328,7 @@ void
 MidiView::remove_ghost_note ()
 {
 	delete _ghost_note;
-	_ghost_note = 0;
+	_ghost_note = nullptr;
 }
 
 void
@@ -4465,7 +4351,6 @@ MidiView::snap_changed ()
 void
 MidiView::drop_down_keys ()
 {
-	_mouse_state = None;
 }
 
 void

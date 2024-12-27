@@ -1310,8 +1310,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	timepos_t where (canvas_event_time (event));
 	AutomationTimeAxisView* atv = 0;
 
-	_press_cursor_ctx.reset();
-
 	/* no action if we're recording */
 
 	if (_session && _session->actively_recording()) {

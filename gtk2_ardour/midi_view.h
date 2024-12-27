@@ -279,17 +279,6 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	 */
 	void change_channel(uint8_t channel);
 
-	enum MouseState {
-		None,
-		Pressed,
-		SelectTouchDragging,
-		SelectRectDragging,
-		SelectVerticalDragging,
-		AddDragging
-	};
-
-	MouseState mouse_state() const { return _mouse_state; }
-
 	struct NoteResizeData {
 		::Note                  *note;
 		ArdourCanvas::Rectangle *resize_rect;
@@ -530,11 +519,11 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	Temporal::Beats                      _step_edit_cursor_width;
 	Temporal::Beats                      _step_edit_cursor_position;
 	NoteBase*                            _channel_selection_scoped_note;
-	MouseState                           _mouse_state;
-	int                                  _pressed_button;
 	StartBoundaryRect*                   _start_boundary_rect;
 	EndBoundaryRect*                     _end_boundary_rect;
 	bool                                 _show_source;
+	Drag*                                 selection_drag;
+	Drag*                                 draw_drag;
 
 	/** Currently selected NoteBase objects */
 	Selection _selection;
@@ -618,8 +607,6 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	Gtkmm2ext::Color _patch_change_outline;
 	Gtkmm2ext::Color _patch_change_fill;
-
-	std::shared_ptr<CursorContext> _press_cursor_ctx;
 
 	ARDOUR::ChannelMode get_channel_mode() const;
 	uint16_t get_selected_channels () const;

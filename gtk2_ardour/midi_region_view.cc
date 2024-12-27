@@ -340,7 +340,7 @@ MidiRegionView::mouse_mode_changed ()
 void
 MidiRegionView::enter_internal (uint32_t state)
 {
-	if (_editing_context.current_mouse_mode() == MouseDraw && _mouse_state != AddDragging) {
+	if (_editing_context.current_mouse_mode() == MouseDraw && !draw_drag) {
 		// Show ghost note under pencil
 		create_ghost_note(_last_event_x, _last_event_y, state);
 	}
@@ -370,113 +370,6 @@ MidiRegionView::leave_internal()
 	if (frame_handle_end) {
 		frame_handle_end->raise_to_top();
 	}
-}
-
-bool
-MidiRegionView::button_press (GdkEventButton* ev)
-{
-	if (ev->button != 1) {
-		return false;
-	}
-
-	MouseMode m = _editing_context.current_mouse_mode();
-
-	if (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
-		_editing_context.set_canvas_cursor (_editing_context.cursors()->midi_pencil);
-	}
-
-	if (_mouse_state != SelectTouchDragging) {
-
-		_pressed_button = ev->button;
-
-		if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
-
-			if (midi_view()->note_mode() == Percussive) {
-				_editing_context.drags()->set (new HitCreateDrag (_editing_context, group, this), (GdkEvent *) ev);
-			} else {
-				_editing_context.drags()->set (new NoteCreateDrag (_editing_context, group, this), (GdkEvent *) ev);
-			}
-
-			_mouse_state = AddDragging;
-			remove_ghost_note ();
-			hide_verbose_cursor ();
-		} else {
-			_mouse_state = Pressed;
-		}
-
-		return true;
-	}
-
-	_pressed_button = ev->button;
-	_mouse_changed_selection = false;
-
-	return true;
-}
-
-bool
-MidiRegionView::button_release (GdkEventButton* ev)
-{
-	double event_x, event_y;
-
-	if (ev->button != 1) {
-		return false;
-	}
-
-	event_x = ev->x;
-	event_y = ev->y;
-
-	group->canvas_to_item (event_x, event_y);
-	group->ungrab ();
-
-	_press_cursor_ctx.reset();
-
-	switch (_mouse_state) {
-	case Pressed: // Clicked
-
-		switch (_editing_context.current_mouse_mode()) {
-		case MouseRange:
-			/* no motion occurred - simple click */
-			clear_selection_internal ();
-			_mouse_changed_selection = true;
-			break;
-
-		case MouseContent:
-			_editing_context.get_selection().set (this);
-			/* fallthru */
-		case MouseTimeFX:
-			_mouse_changed_selection = true;
-			clear_selection_internal ();
-			break;
-		case MouseDraw:
-			_editing_context.get_selection().set (this);
-			break;
-
-		default:
-			break;
-		}
-
-		_mouse_state = None;
-		break;
-
-	case AddDragging:
-		/* Don't a ghost note when we added a note - wait until motion to avoid visual confusion.
-		   we don't want one when we were drag-selecting either. */
-	case SelectRectDragging:
-		_editing_context.drags()->end_grab ((GdkEvent *) ev);
-		_mouse_state = None;
-		break;
-
-
-	default:
-		break;
-	}
-
-	if (_mouse_changed_selection) {
-		_editing_context.begin_reversible_selection_op (X_("Mouse Selection Change"));
-		_editing_context.commit_reversible_selection_op ();
-	}
-
-	return false;
 }
 
 bool

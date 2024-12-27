@@ -164,8 +164,6 @@ public:
 
 	bool motion (GdkEventMotion*);
 	bool scroll (GdkEventScroll*);
-	bool button_press (GdkEventButton*);
-	bool button_release (GdkEventButton*);
 	bool enter_notify (GdkEventCrossing*);
 	bool leave_notify (GdkEventCrossing*);
 

@@ -756,7 +756,6 @@ MidiCueEditor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event
 		/* see if we're finishing a drag */
 
 		if (_drags->active ()) {
-
 			bool const r = _drags->end_grab (event);
 			if (r) {
 				/* grab dragged, so do nothing else */

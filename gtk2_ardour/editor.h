@@ -1082,8 +1082,6 @@ private:
 	samplepos_t cut_buffer_start;
 	samplecnt_t cut_buffer_length;
 
-	std::shared_ptr<CursorContext> _press_cursor_ctx;  ///< Button press cursor context
-
 	std::weak_ptr<ARDOUR::Trimmable> _trimmable;
 	std::weak_ptr<ARDOUR::Movable> _movable;
 
