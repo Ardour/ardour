@@ -204,7 +204,7 @@ MidiView::show_start (bool yn)
 	}
 
 	if (!_start_boundary_rect) {
-		_start_boundary_rect = new ArdourCanvas::Rectangle (_note_group->parent());
+		_start_boundary_rect = new StartBoundaryRect (_note_group->parent());
 		_start_boundary_rect->set_outline_what (ArdourCanvas::Rectangle::RIGHT);
 		_start_boundary_rect->set_fill_color (UIConfiguration::instance().color_mod ("cue editor start rect fill", "cue boundary alpha"));
 		_start_boundary_rect->set_outline_color (UIConfiguration::instance().color ("cue editor start rect outline"));
@@ -252,7 +252,7 @@ MidiView::show_end (bool yn)
 	}
 
 	if (!_end_boundary_rect) {
-		_end_boundary_rect = new ArdourCanvas::Rectangle (_note_group->parent());
+		_end_boundary_rect = new EndBoundaryRect (_note_group->parent());
 		_end_boundary_rect->set_outline_what (ArdourCanvas::Rectangle::LEFT);
 		_end_boundary_rect->set_fill_color (UIConfiguration::instance().color_mod ("cue editor end rect fill", "cue boundary alpha"));
 		_end_boundary_rect->set_outline_color (UIConfiguration::instance().color ("cue editor end rect outline"));
@@ -283,7 +283,8 @@ MidiView::size_end_rect ()
 
 	double offset = _editing_context.sample_to_pixel ((_midi_region->start() + _midi_region->length()).samples());
 	std::cerr << "end starts at " << (_midi_region->start() + _midi_region->length()).beats().str() << " aka " << offset << " from " << (_midi_region->start() + _midi_region->length()).samples() << std::endl;
-	_end_boundary_rect->set (ArdourCanvas::Rect (offset, 0., ArdourCanvas::COORD_MAX, height()));
+	_end_boundary_rect->set_position (ArdourCanvas::Duple (offset, 0.));
+	_end_boundary_rect->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, height()));
 }
 
 void
@@ -5236,4 +5237,102 @@ void
 MidiView::set_visibility_note_range (MidiViewBackground::VisibleNoteRange nvr, bool)
 {
 	_midi_context.set_note_visibility_range_style (nvr);
+}
+
+void
+StartBoundaryRect::render  (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	Rectangle::render (area, context);
+
+	ArdourCanvas::Rect self (item_to_window (_rect));
+	const double scale = UIConfiguration::instance().get_ui_scale();
+	const double radius = 10. * scale;
+
+	context->arc (self.x1, (self.y0 + (self.height() / 2.)) - radius, radius, -(M_PI/2.), (M_PI/2.));
+	Gtkmm2ext::set_source_rgba (context, _outline_color);
+	context->fill ();
+
+}
+
+bool
+StartBoundaryRect::covers (ArdourCanvas::Duple const & point) const
+{
+	ArdourCanvas::Rect self (item_to_window (_rect));
+	const double scale = UIConfiguration::instance().get_ui_scale();
+
+	/* 10-20 pixels of the right edge */
+
+	if (point.x >= self.x0  - (20. * scale) && point.x < self.x1) {
+		return true;
+	}
+
+	const double radius = 10. * scale;
+
+	/* Approximate the semicircle handle with a square */
+
+	double cy = self.y0 + (self.height() / 2.);
+
+	if (point.x >= self.x1 - (10. * scale) && point.x < self.x1 + radius &&
+	    point.y >= cy - radius && point.y < cy + radius) {
+		std::cerr << "\n\nWe're in! " << whoami() << std::endl;
+		return true;
+	}
+
+	return false;
+}
+
+void
+StartBoundaryRect::compute_bounding_box() const
+{
+	Rectangle::compute_bounding_box ();
+	const double scale = UIConfiguration::instance().get_ui_scale();
+	const double radius = 10. * scale;
+	_bounding_box = _bounding_box.expand (0., radius + _outline_width + 1.0, 0., 0.);
+}
+
+void
+EndBoundaryRect::render  (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	Rectangle::render (area, context);
+
+	ArdourCanvas::Rect self (item_to_window (_rect));
+	const double scale = UIConfiguration::instance().get_ui_scale();
+	const double radius = 10. * scale;
+
+	context->arc (self.x0, (self.y0 + (self.height() / 2.)) - radius, radius, (M_PI/2.), -(M_PI/2.));
+	Gtkmm2ext::set_source_rgba (context, _outline_color);
+	context->fill ();
+}
+
+bool
+EndBoundaryRect::covers (ArdourCanvas::Duple const & point) const
+{
+	ArdourCanvas::Rect self (item_to_window (_rect));
+	const double scale = UIConfiguration::instance().get_ui_scale();
+	const double radius = 10. * scale;
+
+	/* 10-20 pixels of the left edge */
+
+	if (point.x >= self.x0 && point.x < self.x0 + (20. * scale)) {
+		return true;
+	}
+
+	/* Approximate the semicircle handle with a square */
+
+	double cy = self.y0 + (self.height() / 2.);
+	if (point.x >= self.x0 - radius && point.x < self.x0 + (10. * scale) &&
+	    point.y >= cy - radius && point.y < cy + radius) {
+		return true;
+	}
+
+	return false;
+}
+
+void
+EndBoundaryRect::compute_bounding_box() const
+{
+	Rectangle::compute_bounding_box ();
+	const double scale = UIConfiguration::instance().get_ui_scale();
+	const double radius = 10. * scale;
+	_bounding_box = _bounding_box.expand (0., 0., 0., radius + _outline_width);
 }
