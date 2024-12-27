@@ -1231,8 +1231,8 @@ MidiView::view_changed()
 		return;
 	}
 
-	Note* sus = NULL;
-	Hit*  hit = NULL;
+	Note* sus = nullptr;
+	Hit*  hit = nullptr;
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 
