@@ -1700,8 +1700,8 @@ MidiView::note_in_region_range (const std::shared_ptr<NoteType> note, bool& visi
 void
 MidiView::update_note (NoteBase* note)
 {
-	Note* sus = NULL;
-	Hit*  hit = NULL;
+	Note* sus = nullptr;
+	Hit*  hit = nullptr;
 	if ((sus = dynamic_cast<Note*>(note))) {
 		update_sustained (sus);
 	} else if ((hit = dynamic_cast<Hit*>(note))) {
