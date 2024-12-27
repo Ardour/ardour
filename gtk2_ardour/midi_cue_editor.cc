@@ -1720,6 +1720,16 @@ MidiCueEditor::which_canvas_cursor (ItemType type) const
 			break;
 		case NoteItem:
 			cursor = _cursors->grabber_note;
+			break;
+		case RegionItem:
+			cursor = _cursors->midi_select;
+			break;
+
+		case ClipEndItem:
+		case ClipStartItem:
+			cursor = _cursors->expand_left_right;
+			break;
+
 		default:
 			break;
 		}
@@ -1739,6 +1749,14 @@ MidiCueEditor::which_canvas_cursor (ItemType type) const
 			break;
 		case NoteItem:
 			cursor = _cursors->grabber_note;
+			break;
+		case ClipEndItem:
+		case ClipStartItem:
+			cursor = _cursors->expand_left_right;
+			break;
+		case RegionItem:
+			cursor = _cursors->midi_pencil;
+			break;
 		default:
 			break;
 		}
