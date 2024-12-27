@@ -7575,7 +7575,6 @@ ClipStartDrag::motion (GdkEvent* event, bool first_move)
 	ArdourCanvas::Rect r (original_rect);
 
 	double pix = current_pointer_x();
-	double crx1 = dragging_rect->item_to_canvas (Duple (r.x1, 0.)).x;
 
 	if (pix > editing_context.timeline_origin()) {
 		r.x1 = dragging_rect->parent()->canvas_to_item (Duple (pix, 0.0)).x;
@@ -7636,7 +7635,6 @@ ClipEndDrag::motion (GdkEvent*, bool)
 	ArdourCanvas::Rect r (original_rect);
 
 	double pix = current_pointer_x();
-	double crx1 = dragging_rect->item_to_canvas (Duple (r.x0, 0.)).x;
 
 	if (pix > editing_context.timeline_origin()) {
 		r.x0 = dragging_rect->parent()->canvas_to_item (Duple (pix, 0.0)).x;
