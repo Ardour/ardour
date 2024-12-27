@@ -114,6 +114,7 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	: _editing_context (ec)
 	, _midi_context (bg)
 	, _active_notes (nullptr)
+	, active_note_end (std::numeric_limits<Temporal::Beats>::max())
 	, _note_group (new ArdourCanvas::Container (&parent))
 	, _note_diff_command (nullptr)
 	, _ghost_note (nullptr)
@@ -148,6 +149,7 @@ MidiView::MidiView (MidiView const & other)
 	, _midi_context (other.midi_context())
 	, _midi_region (other.midi_region())
 	, _active_notes (nullptr)
+	, active_note_end (std::numeric_limits<Temporal::Beats>::max())
 	, _note_group (new ArdourCanvas::Container (other._note_group->parent()))
 	, _note_diff_command (0)
 	, _ghost_note (nullptr)
@@ -1595,7 +1597,7 @@ MidiView::end_write()
 	_active_notes = nullptr;
 	_marked_for_selection.clear();
 	_marked_for_velocity.clear();
-	active_note_end = timecnt_t (Temporal::BeatTime);
+	active_note_end = std::numeric_limits<Temporal::Beats>::max();
 }
 
 /** Extend active notes to rightmost edge of region (if length is changed)
@@ -1781,8 +1783,11 @@ MidiView::clip_capture_update_sustained (Note *ev, double& x0, double& x1, doubl
 		/* normal note */
 
 		timepos_t ane = active_note_end.end();
-		if (note_end > ane) {
-			note_end = ane;
+
+		if (ane.beats() != std::numeric_limits<Temporal::Beats>::max()) {
+			if (note_end > ane) {
+				note_end = ane;
+			}
 		}
 
 		x1 = x0 + std::max (1., _editing_context.duration_to_pixels (note_start.distance (note_end)));
