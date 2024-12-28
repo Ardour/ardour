@@ -1658,8 +1658,8 @@ MidiView::start_playing_midi_chord (vector<std::shared_ptr<NoteType> > notes)
 
 	NotePlayer* player = new NotePlayer (_midi_track);
 
-	for (vector<std::shared_ptr<NoteType> >::iterator n = notes.begin(); n != notes.end(); ++n) {
-		player->add (*n);
+	for (auto & n : notes)  {
+		player->add (n);
 	}
 
 	player->play ();
