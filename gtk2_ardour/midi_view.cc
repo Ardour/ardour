@@ -1318,7 +1318,7 @@ MidiView::display_patch_changes_on_channel (uint8_t channel, bool active_channel
 				p->update_name ();
 
 				p->show();
-		}
+			}
 
 		} else {
 			add_canvas_patch_change (*i);
