@@ -1399,11 +1399,10 @@ MidiView::display_sysexes()
 
 	const std::shared_ptr<MidiRegion> mregion (midi_region());
 
-	for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
-		MidiModel::SysExPtr sysex_ptr = *i;
+	for (auto & sysex_ptr : _model->sysexes()) {
 		timepos_t time = timepos_t (sysex_ptr->time());
 
-		if ((*i)->is_spp() || (*i)->is_mtc_quarter() || (*i)->is_mtc_full()) {
+		if (sysex_ptr->is_spp() || sysex_ptr->is_mtc_quarter() || sysex_ptr->is_mtc_full()) {
 			if (!display_periodic_messages) {
 				continue;
 			}
@@ -1411,9 +1410,9 @@ MidiView::display_sysexes()
 
 		ostringstream str;
 		str << hex;
-		for (uint32_t b = 0; b < (*i)->size(); ++b) {
-			str << int((*i)->buffer()[b]);
-			if (b != (*i)->size() -1) {
+		for (uint32_t b = 0; b < sysex_ptr->size(); ++b) {
+			str << int(sysex_ptr->buffer()[b]);
+			if (b != sysex_ptr->size() -1) {
 				str << " ";
 			}
 		}
