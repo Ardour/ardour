@@ -1755,7 +1755,54 @@ icon_attachment_bottom (cairo_t* cr, const int width, const int height, const Gt
 
 
 
-/*****************************************************************************/
+/*****************************************************************************
+ * Drum icon (take from share/scripts/create_drum_tracks.lua
+ */
+
+static void
+drumstick (cairo_t* cr, double xp, double lr, double r, double x, double y)
+{
+	cairo_set_line_width (cr, r * .3);
+	cairo_move_to (cr, x * xp, y);
+	cairo_close_path (cr);
+	cairo_stroke (cr);
+	cairo_set_line_width (cr, r * .2);
+	cairo_move_to (cr, x * xp, y);
+	cairo_rel_line_to (cr, lr * x, y);
+	cairo_stroke (cr);
+}
+
+static void
+icon_drum (cairo_t* cr, const int width, const int height, const Gtkmm2ext::ActiveState state, const uint32_t fg_color)
+{
+
+	double x = width * .5;
+	double y = height * .5;
+	double r = std::min (x, y) * .7;
+
+	cairo_save (cr);
+	cairo_translate (cr, x, y);
+	cairo_scale (cr, 1, .5);
+	cairo_translate (cr, -x, -y);
+	cairo_arc (cr, x, y, r, 0, 2 * M_PI);
+	cairo_fill (cr);
+	cairo_arc (cr, x, y, r, 0, M_PI);
+	cairo_arc_negative (cr, x, y * 1.6, r, M_PI, 0);
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
+	cairo_fill (cr);
+	cairo_restore (cr);
+
+	// cairo_set_source_rgba (cr, .6, .4, .2, 1);
+	cairo_translate (cr, x, y);
+	cairo_scale (cr, .7, 1);
+	cairo_translate (cr, -x, -y);
+	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
+
+	drumstick (cr, 1.2, 1.2, r, x, y);
+	drumstick (cr, 0.7, -.5, r, x, y);
+}
+
+/****************************************************************************/
 
 bool
 ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr,
@@ -1931,6 +1978,9 @@ ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr
 		case AttachmentBottom:
 			icon_attachment_bottom (cr, width, height, state, fg_color);
 			break;
+		case Drum:
+			icon_drum (cr, width, height, state, fg_color);
+			break;
 		case NoIcon:
 			rv = false;
 			break;
@@ -2004,3 +2054,4 @@ ArdourWidgets::ArdourIcon::expose_with_text (GdkEventExpose* ev, Gtk::Widget* w,
 
 	return true;
 }
+
