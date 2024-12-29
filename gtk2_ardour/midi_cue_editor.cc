@@ -235,6 +235,10 @@ MidiCueEditor::build_upper_toolbar ()
 
 	set_tooltip (full_zoom_button, _("Zoom to full clip"));
 
+#define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
+	note_mode_button.set_size_request (PX_SCALE(50), -1);
+	note_mode_button.set_active_color (UIConfiguration::instance().color ("alert:blue"));
+
 	_toolbar_outer->set_border_width (6);
 	_toolbar_outer->set_spacing (12);
 	_toolbar_outer->pack_start (visible_channel_label, false, false);
@@ -2013,8 +2017,10 @@ MidiCueEditor::note_mode_clicked ()
 	assert (bg);
 
 	if (bg->note_mode() == Sustained) {
+		note_mode_button.set_icon (ArdourIcon::Drum);
 		set_note_mode (Percussive);
 	} else {
+		note_mode_button.remove_elements (ArdourButton::VectorIcon);
 		set_note_mode (Sustained);
 	}
 }
