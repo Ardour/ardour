@@ -1487,6 +1487,13 @@ ArdourButton::add_elements (Element e)
 }
 
 void
+ArdourButton::remove_elements (Element e)
+{
+	_elements = (ArdourButton::Element) (_elements & ~e);
+	CairoWidget::set_dirty ();
+}
+
+void
 ArdourButton::set_icon (ArdourIcon::Icon i)
 {
 	_icon = i;

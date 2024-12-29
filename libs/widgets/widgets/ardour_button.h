@@ -86,6 +86,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	Element elements() const { return _elements; }
 	void set_elements (Element);
 	void add_elements (Element);
+	void remove_elements (Element);
 
 	ArdourIcon::Icon icon() const { return _icon; }
 	void set_icon (ArdourIcon::Icon);
