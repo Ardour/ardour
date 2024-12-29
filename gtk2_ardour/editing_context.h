@@ -328,6 +328,10 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	Editing::ZoomFocus zoom_focus () const { return _zoom_focus; }
 	sigc::signal<void> ZoomFocusChanged;
 
+	void zoom_focus_selection_done (Editing::ZoomFocus);
+	void zoom_focus_chosen (Editing::ZoomFocus);
+	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
+
 	virtual void reposition_and_zoom (samplepos_t, double) = 0;
 
 	sigc::signal<void> ZoomChanged;
@@ -719,6 +723,10 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	PBD::ScopedConnectionList parameter_connections;
 	virtual void parameter_changed (std::string);
 	virtual void ui_parameter_changed (std::string);
+
+	ArdourWidgets::ArdourDropdown	zoom_focus_selector;
+	std::vector<std::string> zoom_focus_strings;
+	virtual void build_zoom_focus_menu () = 0;
 
 	bool _mouse_changed_selection;
 	ArdourMarker* entered_marker;

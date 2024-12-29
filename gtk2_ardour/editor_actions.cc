@@ -1022,39 +1022,6 @@ Editor::marker_click_behavior_action (MarkerClickBehavior m)
 	return ActionManager::get_radio_action (X_("MarkerClickBehavior"), action);
 }
 
-RefPtr<RadioAction>
-Editor::zoom_focus_action (ZoomFocus focus)
-{
-	const char* action = 0;
-	RefPtr<Action> act;
-
-	switch (focus) {
-	case ZoomFocusLeft:
-		action = X_("zoom-focus-left");
-		break;
-	case ZoomFocusRight:
-		action = X_("zoom-focus-right");
-		break;
-	case ZoomFocusCenter:
-		action = X_("zoom-focus-center");
-		break;
-	case ZoomFocusPlayhead:
-		action = X_("zoom-focus-playhead");
-		break;
-	case ZoomFocusMouse:
-		action = X_("zoom-focus-mouse");
-		break;
-	case ZoomFocusEdit:
-		action = X_("zoom-focus-edit");
-		break;
-	default:
-		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible focus type", (int) focus) << endmsg;
-		abort(); /*NOTREACHED*/
-	}
-
-	return ActionManager::get_radio_action (X_("Zoom"), action);
-}
-
 void
 Editor::toggle_sound_midi_notes ()
 {
@@ -1062,21 +1029,6 @@ Editor::toggle_sound_midi_notes ()
 	bool s = UIConfiguration::instance().get_sound_midi_notes();
 	if (tact->get_active () != s) {
 		UIConfiguration::instance().set_sound_midi_notes (tact->get_active());
-	}
-}
-
-void
-Editor::zoom_focus_chosen (ZoomFocus focus)
-{
-	/* this is driven by a toggle on a radio group, and so is invoked twice,
-	   once for the item that became inactive and once for the one that became
-	   active.
-	*/
-
-	RefPtr<RadioAction> ract = zoom_focus_action (focus);
-
-	if (ract && ract->get_active()) {
-		set_zoom_focus (focus);
 	}
 }
 

@@ -263,6 +263,7 @@ class MidiCueEditor : public CueEditor
 
 	void automation_state_changed ();
 
+	void build_zoom_focus_menu ();
 };
 
 

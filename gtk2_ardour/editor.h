@@ -1786,14 +1786,7 @@ private:
 	//zoom focus menu stuff
 	Editing::ZoomFocus effective_zoom_focus() const;
 
-	ArdourWidgets::ArdourDropdown	zoom_focus_selector;
-	void zoom_focus_selection_done (Editing::ZoomFocus);
 	void build_zoom_focus_menu ();
-	std::vector<std::string> zoom_focus_strings;
-
-	void zoom_focus_chosen (Editing::ZoomFocus);
-
-	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
 
 	/* Marker Click Radio */
 	Glib::RefPtr<Gtk::RadioAction> marker_click_behavior_action (Editing::MarkerClickBehavior);

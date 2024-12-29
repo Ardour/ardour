@@ -245,6 +245,13 @@ MidiCueEditor::build_upper_toolbar ()
 	_toolbar_outer->pack_start (full_zoom_button, false, false);
 	_toolbar_outer->pack_start (*_toolbar_inner, true, false);
 
+	build_zoom_focus_menu ();
+	std::string str = zoom_focus_strings[(int)_zoom_focus];
+	if (str != zoom_focus_selector.get_text()) {
+		zoom_focus_selector.set_text (str);
+	}
+	_toolbar_outer->pack_start (zoom_focus_selector, true, false);
+
 	_toolbox.pack_start (*_toolbar_outer, false, false);
 
 	Bindings* pr_bindings = Bindings::get_bindings (X_("Pianoroll"));
@@ -2026,3 +2033,17 @@ MidiCueEditor::set_note_mode (NoteMode nm)
 		}
 	}
 }
+
+void
+MidiCueEditor::build_zoom_focus_menu ()
+{
+	using namespace Gtk::Menu_Helpers;
+	using namespace Editing;
+
+	zoom_focus_selector.AddMenuElem (MenuElem (zoom_focus_strings[(int)ZoomFocusLeft], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusLeft)));
+	zoom_focus_selector.AddMenuElem (MenuElem (zoom_focus_strings[(int)ZoomFocusRight], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusRight)));
+	zoom_focus_selector.AddMenuElem (MenuElem (zoom_focus_strings[(int)ZoomFocusCenter], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusCenter)));
+	zoom_focus_selector.AddMenuElem (MenuElem (zoom_focus_strings[(int)ZoomFocusMouse], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusMouse)));
+	zoom_focus_selector.set_sizing_texts (zoom_focus_strings);
+}
+

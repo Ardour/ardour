@@ -10,7 +10,7 @@ CueEditor::CueEditor (std::string const & name)
 {
 	_history.Changed.connect (history_connection, invalidator (*this), std::bind (&CueEditor::history_changed, this), gui_context());
 
-	set_zoom_focus (Editing::ZoomFocusMouse);
+	set_zoom_focus (Editing::ZoomFocusLeft);
 }
 
 CueEditor::~CueEditor ()
@@ -151,6 +151,12 @@ CueEditor::set_zoom_focus (Editing::ZoomFocus zf)
 
 	if (zf == ZoomFocusPlayhead) {
 		return;
+	}
+
+	std::string str = zoom_focus_strings[(int)zf];
+
+	if (str != zoom_focus_selector.get_text()) {
+		zoom_focus_selector.set_text (str);
 	}
 
 	if (_zoom_focus != zf) {

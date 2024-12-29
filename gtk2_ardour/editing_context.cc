@@ -98,6 +98,17 @@ static const gchar *_grid_type_strings[] = {
 	0
 };
 
+
+static const gchar *_zoom_focus_strings[] = {
+	N_("Left"),
+	N_("Right"),
+	N_("Center"),
+	N_("Playhead"),
+	N_("Mouse"),
+	N_("Edit point"),
+	0
+};
+
 Editing::GridType EditingContext::_draw_length (GridTypeNone);
 int EditingContext::_draw_velocity (DRAW_VEL_AUTO);
 int EditingContext::_draw_channel (DRAW_CHAN_AUTO);
@@ -172,6 +183,10 @@ EditingContext::EditingContext (std::string const & name)
 
 	if (grid_type_strings.empty()) {
 		grid_type_strings =  I18N (_grid_type_strings);
+	}
+
+	if (zoom_focus_strings.empty()) {
+		zoom_focus_strings = I18N (_zoom_focus_strings);
 	}
 
 	snap_mode_button.set_text (_("Snap"));
@@ -3155,5 +3170,62 @@ EditingContext::window_event_sample (GdkEvent const * event, double* pcx, double
 	}
 
 	return pixel_to_sample (canvas_to_timeline (d.x));
+}
+
+void
+EditingContext::zoom_focus_selection_done (ZoomFocus f)
+{
+	RefPtr<RadioAction> ract = zoom_focus_action (f);
+	if (ract) {
+		ract->set_active ();
+	}
+}
+
+RefPtr<RadioAction>
+EditingContext::zoom_focus_action (ZoomFocus focus)
+{
+	const char* action = 0;
+	RefPtr<Action> act;
+
+	switch (focus) {
+	case ZoomFocusLeft:
+		action = X_("zoom-focus-left");
+		break;
+	case ZoomFocusRight:
+		action = X_("zoom-focus-right");
+		break;
+	case ZoomFocusCenter:
+		action = X_("zoom-focus-center");
+		break;
+	case ZoomFocusPlayhead:
+		action = X_("zoom-focus-playhead");
+		break;
+	case ZoomFocusMouse:
+		action = X_("zoom-focus-mouse");
+		break;
+	case ZoomFocusEdit:
+		action = X_("zoom-focus-edit");
+		break;
+	default:
+		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible focus type", (int) focus) << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	return ActionManager::get_radio_action (X_("Zoom"), action);
+}
+
+void
+EditingContext::zoom_focus_chosen (ZoomFocus focus)
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	RefPtr<RadioAction> ract = zoom_focus_action (focus);
+
+	if (ract && ract->get_active()) {
+		set_zoom_focus (focus);
+	}
 }
 
