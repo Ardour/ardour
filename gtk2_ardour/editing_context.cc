@@ -208,6 +208,7 @@ EditingContext::EditingContext (std::string const & name)
 	set_tooltip (draw_channel_selector, _("Note Channel to Draw (AUTO uses the nearest note's channel)"));
 	set_tooltip (grid_type_selector, _("Grid Mode"));
 	set_tooltip (snap_mode_button, _("Snap Mode\n\nRight-click to visit Snap preferences."));
+	set_tooltip (zoom_focus_selector, _("Zoom Focus"));
 
 	set_tooltip (play_note_selection_button, _("Play notes when selected"));
 	set_tooltip (note_mode_button, _("Switch between sustained and percussive mode"));

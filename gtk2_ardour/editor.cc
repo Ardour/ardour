@@ -2867,7 +2867,6 @@ Editor::setup_tooltips ()
 	set_tooltip (zoom_out_button, _("Zoom Out"));
 	set_tooltip (zoom_preset_selector, _("Zoom to Time Scale"));
 	set_tooltip (zoom_out_full_button, _("Zoom to Session"));
-	set_tooltip (zoom_focus_selector, _("Zoom Focus"));
 	set_tooltip (tav_expand_button, _("Expand Tracks"));
 	set_tooltip (tav_shrink_button, _("Shrink Tracks"));
 	set_tooltip (visible_tracks_selector, _("Number of visible tracks"));
