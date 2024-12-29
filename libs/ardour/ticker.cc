@@ -219,7 +219,8 @@ double
 MidiClockTicker::one_ppqn_in_samples (samplepos_t transport_position) const
 {
 	TempoPoint const & tempo (TempoMap::use()->metric_at (timepos_t (transport_position)).tempo());
-	const double samples_per_quarter_note = superclock_to_samples (tempo.superclocks_per_note_type_at (timepos_t (transport_position)), _session.nominal_sample_rate());
+	/* un-rounded superclock_to_samples (tempo.superclocks_per_note_type_at (timepos_t (transport_position)), _session.nominal_sample_rate()) */
+	const double samples_per_quarter_note = tempo.superclocks_per_note_type_at (timepos_t (transport_position)) * _session.nominal_sample_rate() / (double)superclock_ticks_per_second ();
 	return samples_per_quarter_note / 24.0;
 }
 
