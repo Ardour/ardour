@@ -3706,14 +3706,12 @@ Session::cleanup_sources (CleanupReport& rep)
 	/*  add our current source list */
 
 	ls.acquire ();
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {
+	for (SourceMap::iterator i = sources.begin(); i != sources.end();) {
 		std::shared_ptr<FileSource> fs;
-		SourceMap::iterator tmp = i;
-		++tmp;
 
 		if ((fs = std::dynamic_pointer_cast<FileSource> (i->second)) == 0) {
 			/* not a file */
-			i = tmp;
+			++i;
 			continue;
 		}
 
@@ -3726,40 +3724,42 @@ Session::cleanup_sources (CleanupReport& rep)
 
 		fs->close ();
 
-		if (!fs->is_stub()) {
-
-			/* Note that we're checking a list of all
-			 * sources across all snapshots with the list
-			 * of sources used by this snapshot.
-			 */
-
-			if (sources_used_by_this_snapshot.find (i->second) != sources_used_by_this_snapshot.end()) {
-				/* this source is in use by this snapshot */
-				sources_used_by_all_snapshots.insert (fs->path());
-				cerr << "Source from source list found in used_by_this_snapshot (" << fs->path() << ")\n";
-			} else {
-				cerr << "Source from source list NOT found in used_by_this_snapshot (" << fs->path() << ")\n";
-				/* this source is NOT in use by this snapshot */
-
-				/* remove all related regions from RegionFactory master list */
-
-				RegionFactory::remove_regions_using_source (i->second);
-
-				/* remove from our current source list
-				 * also. We may not remove it from
-				 * disk, because it may be used by
-				 * other snapshots, but it isn't used inside this
-				 * snapshot anymore, so we don't need a
-				 * reference to it.
-				 */
-
-				dead_sources.insert (i->second);
-				sources.erase (i);
-			}
+		if (fs->is_stub()) {
+			++i;
+			continue;
 		}
 
-		i = tmp;
+		/* Note that we're checking a list of all
+		 * sources across all snapshots with the list
+		 * of sources used by this snapshot.
+		 */
+
+		if (sources_used_by_this_snapshot.find (i->second) != sources_used_by_this_snapshot.end()) {
+			/* this source is in use by this snapshot */
+			sources_used_by_all_snapshots.insert (fs->path());
+			cerr << "Source from source list found in used_by_this_snapshot (" << fs->path() << ")\n";
+			++i;
+		} else {
+			cerr << "Source from source list NOT found in used_by_this_snapshot (" << fs->path() << ")\n";
+			/* this source is NOT in use by this snapshot */
+
+			/* remove all related regions from RegionFactory master list */
+
+			RegionFactory::remove_regions_using_source (i->second);
+
+			/* remove from our current source list
+			 * also. We may not remove it from
+			 * disk, because it may be used by
+			 * other snapshots, but it isn't used inside this
+			 * snapshot anymore, so we don't need a
+			 * reference to it.
+			 */
+
+			dead_sources.insert (i->second);
+			i = sources.erase (i);
+		}
 	}
+
 	ls.release ();
 
 	cerr << "Dead Sources: " << dead_sources.size() << endl;
