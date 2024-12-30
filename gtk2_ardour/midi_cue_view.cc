@@ -92,7 +92,7 @@ MidiCueView::midi_canvas_group_event (GdkEvent* ev)
 {
 	MidiView::midi_canvas_group_event (ev);
 
-	_editing_context.canvas_bg_event (ev, event_rect);
+	return _editing_context.canvas_bg_event (ev, event_rect);
 }
 
 void
