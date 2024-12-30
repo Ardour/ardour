@@ -234,6 +234,7 @@ MidiCueEditor::build_upper_toolbar ()
 	_toolbar_inner->pack_start (draw_box, false, false);
 
 	set_tooltip (full_zoom_button, _("Zoom to full clip"));
+	set_tooltip (note_mode_button, _("Toggle between drum and regular note drawing"));
 
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 	note_mode_button.set_size_request (PX_SCALE(50), -1);
