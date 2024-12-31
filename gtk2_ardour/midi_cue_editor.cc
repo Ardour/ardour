@@ -2054,3 +2054,23 @@ MidiCueEditor::build_zoom_focus_menu ()
 	zoom_focus_selector.set_sizing_texts (zoom_focus_strings);
 }
 
+
+std::pair<Temporal::timepos_t,Temporal::timepos_t>
+MidiCueEditor::max_zoom_extent() const
+{
+	if (view && view->midi_region()) {
+		return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (view->midi_region()->midi_source()->length().beats()));
+	}
+
+	return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (Temporal::Beats (32, 0)));
+}
+
+void
+MidiCueEditor::full_zoom_clicked()
+{
+	/* XXXX NEED LOCAL TEMPO MAP */
+
+	std::pair<Temporal::timepos_t,Temporal::timepos_t> dur (max_zoom_extent());
+	samplecnt_t s = dur.second.samples() - dur.first.samples();
+	reposition_and_zoom (0,  (s / (double) _visible_canvas_width));
+}

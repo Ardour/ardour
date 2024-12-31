@@ -124,6 +124,8 @@ class MidiCueEditor : public CueEditor
 	void set_trigger_length (Temporal::timecnt_t const &);
 	void set_trigger_bounds (Temporal::timepos_t const &, Temporal::timepos_t const &);
 
+	void full_zoom_clicked();
+
   protected:
 	void register_actions ();
 
@@ -264,6 +266,6 @@ class MidiCueEditor : public CueEditor
 	void automation_state_changed ();
 
 	void build_zoom_focus_menu ();
+
+	std::pair<Temporal::timepos_t,Temporal::timepos_t> max_zoom_extent() const;
 };
-
-

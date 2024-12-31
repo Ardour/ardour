@@ -104,8 +104,6 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner, public sigc::
 	void do_undo (uint32_t n);
 	void do_redo (uint32_t n);
 
-	std::pair<Temporal::timepos_t,Temporal::timepos_t> max_zoom_extent() const;
-
 	Temporal::timepos_t _get_preferred_edit_position (Editing::EditIgnoreOption, bool use_context_click, bool from_outside_canvas);
 };
 
