@@ -7802,7 +7802,7 @@ msgstr "Lautstärkekurve zurücksetzen"
 
 #: editor_ops.cc:6677
 msgid "region polarity invert"
-msgstr "Inveriere die Polarität der Region"
+msgstr "Invertiere die Polarität der Region"
 
 #: editor_ops.cc:6711
 msgid "region gain envelope active"
