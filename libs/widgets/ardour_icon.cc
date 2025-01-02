@@ -1807,7 +1807,7 @@ drumstick (cairo_t* cr, double xp, double lr, double r, double x, double y)
 	cairo_stroke (cr);
 	cairo_set_line_width (cr, r * .2);
 	cairo_move_to (cr, x * xp, y);
-	cairo_rel_line_to (cr, lr * x, y);
+	cairo_rel_line_to (cr, lr * std::min (x, y), y);
 	cairo_stroke (cr);
 }
 
@@ -1815,23 +1815,38 @@ static void
 icon_drum (cairo_t* cr, const int width, const int height, const Gtkmm2ext::ActiveState state, const uint32_t fg_color)
 {
 
-	double x = width * .5;
-	double y = height * .5;
-	double r = std::min (x, y) * .7;
+	const double x = width * .5;
+	const double y = height * .5;
+	const double r = std::min (x, y) * .7;
+
+	Gtkmm2ext::HSV hsv (fg_color);
 
 	cairo_save (cr);
 	cairo_translate (cr, x, y);
 	cairo_scale (cr, 1, .5);
 	cairo_translate (cr, -x, -y);
 	cairo_arc (cr, x, y, r, 0, 2 * M_PI);
-	cairo_fill (cr);
-	cairo_arc (cr, x, y, r, 0, M_PI);
-	cairo_arc_negative (cr, x, y * 1.6, r, M_PI, 0);
+
 	Gtkmm2ext::set_source_rgba (cr, fg_color);
 	cairo_fill (cr);
+
+	cairo_arc (cr, x, y, r, 0, M_PI);
+	cairo_arc_negative (cr, x, y * 1.6, r, M_PI, 0);
+	if (hsv.v > 0.5) {
+		Gtkmm2ext::set_source_rgba (cr, hsv.darker(0.3).color ());
+	} else {
+		Gtkmm2ext::set_source_rgba (cr, hsv.lighter(0.3).color ());
+	}
+	cairo_fill (cr);
+
 	cairo_restore (cr);
 
-	// cairo_set_source_rgba (cr, .6, .4, .2, 1);
+	if (hsv.v > 0.5) {
+		Gtkmm2ext::set_source_rgba (cr, hsv.darker(0.6).color ());
+	} else {
+		Gtkmm2ext::set_source_rgba (cr, hsv.lighter(0.6).color ());
+	}
+	cairo_save (cr);
 	cairo_translate (cr, x, y);
 	cairo_scale (cr, .7, 1);
 	cairo_translate (cr, -x, -y);
@@ -1839,6 +1854,7 @@ icon_drum (cairo_t* cr, const int width, const int height, const Gtkmm2ext::Acti
 
 	drumstick (cr, 1.2, 1.2, r, x, y);
 	drumstick (cr, 0.7, -.5, r, x, y);
+	cairo_restore (cr);
 }
 
 /****************************************************************************/
