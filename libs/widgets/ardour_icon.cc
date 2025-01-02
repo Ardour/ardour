@@ -1818,6 +1818,7 @@ icon_drum (cairo_t* cr, const int width, const int height, const Gtkmm2ext::Acti
 	const double x = width * .5;
 	const double y = height * .5;
 	const double r = std::min (x, y) * .7;
+	const int   wh = std::min (x, y);
 
 	Gtkmm2ext::HSV hsv (fg_color);
 
@@ -1847,6 +1848,9 @@ icon_drum (cairo_t* cr, const int width, const int height, const Gtkmm2ext::Acti
 		Gtkmm2ext::set_source_rgba (cr, hsv.lighter(0.6).color ());
 	}
 	cairo_save (cr);
+	cairo_rectangle (cr, x - wh + 1, y - wh + 1, 2 * wh - 2, 2 * wh - 2);
+	cairo_clip (cr);
+
 	cairo_translate (cr, x, y);
 	cairo_scale (cr, .7, 1);
 	cairo_translate (cr, -x, -y);
