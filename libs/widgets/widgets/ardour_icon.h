@@ -83,6 +83,7 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		AttachmentRight,
 		AttachmentBottom,
 		Drum,
+		CuesNTriggers,
 		NoIcon //< Last
 	};
 

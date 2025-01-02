@@ -1680,6 +1680,45 @@ icon_waveform (cairo_t* cr, const int width, const int height, const uint32_t fg
 	VECTORICONSTROKE (lw, fg_color);
 }
 
+static void
+icon_cues_triggers (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double wh = std::min (width, height);
+
+	cairo_save (cr);
+
+	bool large = wh > 25;
+	const double grid = wh / (large ? 16.0 : 10.0);
+
+	cairo_translate (cr, 0.5 * (width - wh), 0.5 * (height - wh) + (large ? 0 : grid));
+
+	for (int i = 0; i < (large ? 4 : 2); ++i) {
+		cairo_save (cr);
+		cairo_translate (cr, 0, grid * 4 * i);
+
+		/* play triangle */
+		cairo_move_to (cr, grid * 3, grid * 2);
+		cairo_line_to (cr, grid * 1, grid * 1);
+		cairo_line_to (cr, grid * 1, grid * 3);
+		cairo_close_path (cr);
+		VECTORICONSTROKEFILL (0.9);
+
+		/* trigger box 1 */
+		cairo_rectangle (cr, grid * 4, grid * 1, grid * 5, grid * 2);
+		VECTORICONSTROKEFILL (0.9);
+
+		if (large && i < 2) {
+			/* trigger box 2 */
+			cairo_rectangle (cr, grid * 10, grid * 1, grid * 5, grid * 2);
+			VECTORICONSTROKEFILL (0.9);
+		}
+
+		cairo_restore (cr);
+	}
+	cairo_restore (cr);
+}
+
+
 /*****************************************************************************
  * Attachment pane icons
  */
@@ -1980,6 +2019,9 @@ ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr
 			break;
 		case Drum:
 			icon_drum (cr, width, height, state, fg_color);
+			break;
+		case CuesNTriggers:
+			icon_cues_triggers (cr, width, height, fg_color);
 			break;
 		case NoIcon:
 			rv = false;
