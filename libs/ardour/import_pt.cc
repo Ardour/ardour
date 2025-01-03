@@ -332,6 +332,8 @@ Session::import_pt_rest (PTFFormat& ptf)
 		}
 	}
 
+	std::map<std::string, shared_ptr<AudioTrack>> track_map;
+
 	/* Check for no audio */
 	if (ptf.tracks ().size () == 0) {
 		goto no_audio_tracks;
@@ -351,6 +353,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 				}
 				existing_track = at.back();
 			}
+			track_map[a->name] = existing_track;
 			std::shared_ptr<Playlist> playlist = existing_track->playlist();
 
 			PlaylistState before;
@@ -374,7 +377,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 				DEBUG_TRACE (DEBUG::PTImport, string_compose ("wav(%1) reg(%2) tr(%3) '%4'\n", a->reg.wave.filename, a->reg.index, a->index, a->name));
 
 				/* Use audio track we know exists */
-				existing_track = dynamic_pointer_cast<AudioTrack> (route_by_name (a->name));
+				existing_track = track_map[a->name];
 				assert (existing_track);
 
 				/* Put on existing track */
@@ -392,6 +395,8 @@ Session::import_pt_rest (PTFFormat& ptf)
 			}
 		}
 	}
+
+	track_map.clear ();
 
 	maybe_update_session_range (timepos_t (0), latest);
 
