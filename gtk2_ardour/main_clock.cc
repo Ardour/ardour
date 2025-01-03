@@ -153,6 +153,9 @@ MainClock::change_display_delta_mode (ClockDeltaMode m)
 void
 MainClock::set_display_delta_mode (ClockDeltaMode m)
 {
+	if (_delta_mode == m) {
+		return;
+	}
 	_delta_mode = m;
 	if (_delta_mode != NoDelta) {
 		set_editable (false);
@@ -160,6 +163,10 @@ MainClock::set_display_delta_mode (ClockDeltaMode m)
 	} else {
 		set_editable (true);
 		set_widget_name (_widget_name);
+	}
+
+	if (_session) {
+		set(timepos_t(_session->audible_sample()), true);
 	}
 }
 
