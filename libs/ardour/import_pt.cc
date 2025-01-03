@@ -38,6 +38,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/midi_model.h"
 #include "ardour/operations.h"
+#include "ardour/debug.h"
 #include "ardour/region_factory.h"
 #include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
@@ -343,7 +344,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 			nth++;
 			if (!(existing_track = dynamic_pointer_cast<AudioTrack> (route_by_name (a->name)))) {
 				/* Create missing track */
-				DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\tcreate tr(%1) %2\n", nth, a->name.c_str()));
+				DEBUG_TRACE (DEBUG::PTImport, string_compose ("Create tr(%1) '%2'\n", nth, a->name));
 				list<std::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, a->name.c_str(), PresentationInfo::max_order, Normal));
 				if (at.empty ()) {
 					return;
@@ -370,7 +371,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 
 				/* Matched a ptf active region to an ardour region */
 				std::shared_ptr<Region> r = RegionFactory::region_by_id (p->id);
-				DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) tr(%3)\n", a->reg.wave.filename.c_str (), a->reg.index, a->index));
+				DEBUG_TRACE (DEBUG::PTImport, string_compose ("wav(%1) reg(%2) tr(%3) '%4'\n", a->reg.wave.filename, a->reg.index, a->index, a->name));
 
 				/* Use audio track we know exists */
 				existing_track = dynamic_pointer_cast<AudioTrack> (route_by_name (a->name));
