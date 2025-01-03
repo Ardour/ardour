@@ -80,6 +80,7 @@ PBD::DebugBits PBD::DEBUG::MidiTriggers = PBD::new_debug_bit ("miditriggers");
 PBD::DebugBits PBD::DEBUG::Monitor = PBD::new_debug_bit ("monitor");
 PBD::DebugBits PBD::DEBUG::OrderKeys = PBD::new_debug_bit ("orderkeys");
 PBD::DebugBits PBD::DEBUG::Panning = PBD::new_debug_bit ("panning");
+PBD::DebugBits PBD::DEBUG::PTImport = PBD::new_debug_bit ("ptimport");
 PBD::DebugBits PBD::DEBUG::Peaks = PBD::new_debug_bit ("peaks");
 PBD::DebugBits PBD::DEBUG::PluginManager = PBD::new_debug_bit ("pluginmanager");
 PBD::DebugBits PBD::DEBUG::PortConnectAuto = PBD::new_debug_bit ("PortConnectAuto");
