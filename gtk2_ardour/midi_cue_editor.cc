@@ -237,6 +237,8 @@ MidiCueEditor::build_upper_toolbar ()
 	set_tooltip (note_mode_button, _("Toggle between drum and regular note drawing"));
 	note_mode_button.set_icon (ArdourIcon::Drum);
 
+	play_note_selection_button.set_icon (ArdourIcon::ToolAudition);
+
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 	note_mode_button.set_size_request (PX_SCALE(50), -1);
 	note_mode_button.set_active_color (UIConfiguration::instance().color ("alert:yellow"));

@@ -132,7 +132,7 @@ EditingContext::EditingContext (std::string const & name)
 	, _grid_type (GridTypeBeat)
 	, _snap_mode (SnapOff)
 	, _timeline_origin (0.)
-	, play_note_selection_button (_("Ear"), ArdourButton::Text, true)
+	, play_note_selection_button (ArdourButton::default_elements)
 	, follow_playhead_button (_("F"), ArdourButton::Text, true)
 	, full_zoom_button (_("<->"), ArdourButton::Text)
 	, visible_channel_label (_("MIDI|Channel"))
@@ -233,6 +233,9 @@ EditingContext::EditingContext (std::string const & name)
 
 	Config->ParameterChanged.connect (parameter_connections, MISSING_INVALIDATOR, std::bind (&EditingContext::parameter_changed, this, _1), gui_context());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &EditingContext::ui_parameter_changed));
+
+	std::function<void (string)> pc (std::bind (&EditingContext::ui_parameter_changed, this, _1));
+	UIConfiguration::instance().map_parameters (pc);
 }
 
 EditingContext::~EditingContext()
@@ -242,7 +245,12 @@ EditingContext::~EditingContext()
 void
 EditingContext::ui_parameter_changed (string parameter)
 {
-	if (parameter == "sound-midi-note") {
+	if (parameter == "sound-midi-notes") {
+		if (UIConfiguration::instance().get_sound_midi_notes()) {
+			play_note_selection_button.set_active_state (Gtkmm2ext::ExplicitActive);
+		} else {
+			play_note_selection_button.set_active_state (Gtkmm2ext::Off);
+		}
 	}
 }
 
@@ -2777,6 +2785,7 @@ EditingContext::choose_canvas_cursor_on_entry (ItemType type)
 void
 EditingContext::play_note_selection_clicked ()
 {
+	UIConfiguration::instance().set_sound_midi_notes (!UIConfiguration::instance().get_sound_midi_notes());
 }
 
 void
