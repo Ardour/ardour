@@ -743,7 +743,6 @@ CoreAudioBackend::samples_since_cycle_start ()
 
 uint32_t
 CoreAudioBackend::name_to_id(std::string device_name, DeviceFilter filter) const {
-	uint32_t device_id = UINT32_MAX;
 	std::map<size_t, std::string> devices;
 	switch (filter) {
 		case Input:
@@ -761,13 +760,15 @@ CoreAudioBackend::name_to_id(std::string device_name, DeviceFilter filter) const
 			break;
 	}
 
-	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (i->second == device_name) {
-			device_id = i->first;
-			break;
+	auto device_it = std::find_if (
+		devices.cbegin (),
+		devices.cend (),
+		[&] (const auto& dev) {
+			return dev.second == device_name;
 		}
-	}
-	return device_id;
+	);
+
+	return device_it != devices.cend () ? device_it->first : UINT32_MAX;
 }
 
 void *
