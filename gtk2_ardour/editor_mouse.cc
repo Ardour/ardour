@@ -1728,10 +1728,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 
 GridType
-Editor::determine_mapping_grid_snap(timepos_t t)
+Editor::determine_mapping_grid_snap (timepos_t t)
 {
-	timepos_t snapped          = _snap_to_bbt (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBeat);
-	timepos_t snapped_to_bar   = _snap_to_bbt (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBar);
+	timepos_t snapped          = snap_to_bbt_via_grid (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBeat);
+	timepos_t snapped_to_bar   = snap_to_bbt_via_grid (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBar);
 	const double unsnapped_pos = time_to_pixel_unrounded (t);
 	const double snapped_pos   = time_to_pixel_unrounded (snapped);
 

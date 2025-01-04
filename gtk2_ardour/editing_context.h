@@ -568,10 +568,10 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	Editing::ZoomFocus _zoom_focus;
 	virtual Editing::ZoomFocus effective_zoom_focus() const { return _zoom_focus; }
 
-	Temporal::timepos_t _snap_to_bbt (Temporal::timepos_t const & start,
-	                                  Temporal::RoundMode   direction,
-	                                  ARDOUR::SnapPref    gpref,
-	                                  Editing::GridType   grid_type) const;
+	Temporal::timepos_t snap_to_bbt_via_grid (Temporal::timepos_t const & start,
+	                                          Temporal::RoundMode   direction,
+	                                          ARDOUR::SnapPref    gpref,
+	                                          Editing::GridType   grid_type) const;
 
 	virtual Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                          Temporal::RoundMode   direction,

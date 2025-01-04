@@ -1417,11 +1417,11 @@ EditingContext::snap_to (timepos_t& start, Temporal::RoundMode direction, SnapPr
 timepos_t
 EditingContext::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref) const
 {
-	return _snap_to_bbt (presnap, direction, gpref, _grid_type);
+	return snap_to_bbt_via_grid (presnap, direction, gpref, _grid_type);
 }
 
 timepos_t
-EditingContext::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref, GridType grid_type) const
+EditingContext::snap_to_bbt_via_grid (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref, GridType grid_type) const
 {
 	timepos_t ret(presnap);
 	TempoMap::SharedPtr tmap (TempoMap::use());
@@ -1434,22 +1434,7 @@ EditingContext::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode dir
 	 */
 
 	if (grid_type == GridTypeBar) {
-		TempoMetric m (tmap->metric_at (presnap));
-		BBT_Argument bbt (m.bbt_at (presnap));
-		switch (direction) {
-		case RoundDownAlways:
-			bbt = BBT_Argument (bbt.reference(), bbt.round_down_to_bar ());
-			break;
-		case RoundUpAlways:
-			bbt = BBT_Argument (bbt.reference(), bbt.round_up_to_bar ());
-			break;
-		case RoundNearest:
-			bbt = BBT_Argument (bbt.reference(), m.round_to_bar (bbt));
-			break;
-		default:
-			break;
-		}
-		return timepos_t (tmap->quarters_at (bbt));
+		return timepos_t (tmap->quarters_at (presnap).round_to_subdivision (get_grid_beat_divisions(grid_type), direction));
 	}
 
 	if (gpref != SnapToGrid_Unscaled) { // use the visual grid lines which are limited by the zoom scale that the user selected
@@ -1531,7 +1516,7 @@ EditingContext::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode dir
 		 * zoom level
 		 */
 
-		ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (get_grid_beat_divisions(_grid_type), direction));
+		ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (get_grid_beat_divisions (grid_type), direction));
 	}
 
 	return ret;
