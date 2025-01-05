@@ -298,6 +298,7 @@ def build(bld):
         obj.source   = libytk_sources +  libytk_quartz_sources
         obj.cflags   += ['-xobjective-c']
         obj.uselib   += ' OSX' #  -framework Cocoa -framework CoreFoundation -framework ApplicationServices
+        obj.defines += ['DISABLE_VISIBILITY']
     elif bld.env['build_target'] == 'mingw':
         obj.source   = libytk_sources +  libytk_win32_sources
         obj.defines += [ 'INSIDE_GTK_WIN32', 'DLL_EXPORT', 'PIC' ]

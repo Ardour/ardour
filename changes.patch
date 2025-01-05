@@ -1,0 +1,38 @@
+From c6300e0a430fe07a6d6efe78acab831245a0b390 Mon Sep 17 00:00:00 2001
+From: paseri3739 <tael43@icloud.com>
+Date: Tue, 5 Mar 2024 11:10:34 +0900
+Subject: [PATCH] fix compiler flags in ytk and ydk on OSX (define
+ DISABLE_VISIBILITY)
+
+---
+ libs/tk/ydk/wscript | 1 +
+ libs/tk/ytk/wscript | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/libs/tk/ydk/wscript b/libs/tk/ydk/wscript
+index 45e04326b3..e2eb99ee32 100644
+--- a/libs/tk/ydk/wscript
++++ b/libs/tk/ydk/wscript
+@@ -188,6 +188,7 @@ def build(bld):
+         obj.cflags   += ['-xobjective-c']
+         obj.uselib   += ' OSX' # -framework Cocoa -framework CoreFoundation -framework ApplicationServices
+         obj.includes += ['ydk/quartz', 'ydk/quartz/gdk', 'ydk/gdk/quartz']
++        obj.defines += ['DISABLE_VISIBILITY']
+         obj.export_includes += ['ydk/gdk']
+         obj.export_includes += ['ydk/quartz']
+     elif bld.env['build_target'] == 'mingw':
+diff --git a/libs/tk/ytk/wscript b/libs/tk/ytk/wscript
+index a921a79863..3701fcf02a 100644
+--- a/libs/tk/ytk/wscript
++++ b/libs/tk/ytk/wscript
+@@ -300,6 +300,7 @@ def build(bld):
+         obj.source   = libytk_sources +  libytk_quartz_sources
+         obj.cflags   += ['-xobjective-c']
+         obj.uselib   += ' OSX' #  -framework Cocoa -framework CoreFoundation -framework ApplicationServices
++        obj.defines += ['DISABLE_VISIBILITY']
+     elif bld.env['build_target'] == 'mingw':
+         obj.source   = libytk_sources +  libytk_win32_sources
+         obj.defines += [ 'INSIDE_GTK_WIN32', 'DLL_EXPORT', 'PIC' ]
+-- 
+2.39.3 (Apple Git-145)
+
