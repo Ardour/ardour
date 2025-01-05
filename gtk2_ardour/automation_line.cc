@@ -109,6 +109,8 @@ AutomationLine::AutomationLine (const string&                   name,
 	, _maximum_time (timepos_t::max (al->time_domain()))
 	, _fill (false)
 	, _desc (desc)
+	, _control_points_inherit_color (true)
+	, _sensitive (true)
 {
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple(0, 1.5));
 	CANVAS_DEBUG_NAME (group, "automation line group");
@@ -133,11 +135,27 @@ AutomationLine::~AutomationLine ()
 {
 	delete group; // deletes child items
 
-	for (std::vector<ControlPoint *>::iterator i = control_points.begin(); i != control_points.end(); i++) {
-		(*i)->unset_item ();
-		delete *i;
+	for (auto & cp :control_points) {
+		cp->unset_item ();
+		delete cp;
 	}
 	control_points.clear ();
+}
+
+void
+AutomationLine::set_sensitive (bool yn)
+{
+	_sensitive = yn;
+
+	set_line_color (_line_color);
+
+	for (auto & cp : control_points) {
+		if (yn) {
+			cp->show();
+		} else {
+			cp->hide ();
+		}
+	}
 }
 
 timepos_t
@@ -260,8 +278,8 @@ AutomationLine::set_height (guint32 h)
 
 		double bsz = control_point_box_size();
 
-		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-			(*i)->set_size (bsz);
+		for (auto & cp : control_points) {
+			cp->set_size (bsz);
 		}
 
 		if (_fill) {
@@ -274,23 +292,62 @@ AutomationLine::set_height (guint32 h)
 }
 
 void
-AutomationLine::set_line_color (string color_name, std::string color_mod)
+AutomationLine::set_line_color (string const & color_name, string color_mod)
 {
-	_line_color     = color_name;
-	_line_color_mod = color_mod;
+	_line_color = color_name;
 
-	uint32_t color = UIConfiguration::instance().color (color_name);
-	line->set_outline_color (color);
+	if (_sensitive) {
+		line->set_outline_color (UIConfiguration::instance().color (color_name));
+	} else {
+		line->set_outline_color (UIConfiguration::instance().color (color_name + " insensitive"));
+	}
+
+	/* The fill color is used to shade the area under some
+	 * automation lines
+	 */
 
 	Gtkmm2ext::SVAModifier mod = UIConfiguration::instance().modifier (color_mod.empty () ? "automation line fill" : color_mod);
+	line->set_fill_color ((line->outline_color() & 0xffffff00) + (mod.a() * 255));
 
-	line->set_fill_color ((color & 0xffffff00) + mod.a() * 255);
+	if (_control_points_inherit_color) {
+		for (auto & cp : control_points) {
+			cp->set_color ();
+		}
+	}
+}
+
+uint32_t
+AutomationLine::get_line_fill_color() const
+{
+	return line->fill_color ();
 }
 
 uint32_t
 AutomationLine::get_line_color() const
 {
-	return UIConfiguration::instance().color (_line_color);
+	return line->outline_color ();
+}
+
+uint32_t
+AutomationLine::get_line_selected_color() const
+{
+	return line->outline_color ();
+}
+
+bool
+AutomationLine::control_points_inherit_color () const
+{
+	return _control_points_inherit_color;
+}
+
+void
+AutomationLine::set_control_points_inherit_color (bool yn)
+{
+	_control_points_inherit_color = yn;
+
+	for (auto & cp : control_points) {
+		cp->set_color ();
+	}
 }
 
 ControlPoint*
@@ -988,12 +1045,12 @@ AutomationLine::get_inverted_selectables (Selection&, list<Selectable*>& /*resul
 void
 AutomationLine::set_selected_points (PointSelection const & points)
 {
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		(*i)->set_selected (false);
+	for (auto & cp : control_points) {
+		cp->set_selected (false);
 	}
 
-	for (PointSelection::const_iterator i = points.begin(); i != points.end(); ++i) {
-		(*i)->set_selected (true);
+	for (auto & p : points) {
+		p->set_selected (true);
 	}
 
 	if (points.empty()) {
@@ -1008,9 +1065,9 @@ AutomationLine::set_selected_points (PointSelection const & points)
 void
 AutomationLine::set_colors ()
 {
-	set_line_color (_line_color, _line_color_mod);
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		(*i)->set_color ();
+	set_line_color (_line_color);
+	for (auto & cp : control_points) {
+		cp->set_color ();
 	}
 }
 
@@ -1043,8 +1100,8 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 	uint32_t np;
 
 	if (events.empty()) {
-		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-			delete *i;
+		for (auto & cp : control_points) {
+			delete cp;
 		}
 		control_points.clear ();
 		line->hide();
@@ -1054,8 +1111,8 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 
 	/* hide all existing points, and the line */
 
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		(*i)->hide();
+	for (auto & cp : control_points) {
+		cp->hide();
 	}
 
 	line->hide ();

@@ -82,6 +82,9 @@ public:
 
 	ArdourCanvas::Rectangle* drag_base() const { return _drag_base; }
 
+	void set_sensitive (bool);
+	bool sensitive() const { return _sensitive; }
+
 	void queue_reset ();
 	void reset ();
 	void clear ();
@@ -110,8 +113,12 @@ public:
 	bool    visible() const { return _visible != VisibleAspects(0); }
 	guint32 height()  const { return _height; }
 
-	void set_line_color (std::string color, std::string mod = "");
+	void set_line_color (std::string const & color, std::string color_mode = std::string());
 	uint32_t get_line_color() const;
+	uint32_t get_line_fill_color() const;
+	uint32_t get_line_selected_color() const;
+	bool control_points_inherit_color () const;
+	void set_control_points_inherit_color (bool);
 
 	void set_visibility (VisibleAspects);
 	void add_visibility (VisibleAspects);
@@ -260,6 +267,8 @@ private:
 	bool _fill;
 
 	const ARDOUR::ParameterDescriptor _desc;
+	bool _control_points_inherit_color;
+	bool _sensitive;
 
 	friend class AudioRegionGainLine;
 	friend class RegionFxLine;

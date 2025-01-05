@@ -348,7 +348,7 @@ MidiCueView::update_automation_display (Evoral::Parameter const & param, Selecti
 			                                                   automation_group,
 			                                                   ac->alist(),
 			                                                   ac->desc()));
-			line->set_line_color ("midi line inactive");
+			line->set_sensitive (false);
 
 			AutomationDisplayState cad (ac, line, true);
 
@@ -414,7 +414,7 @@ void
 MidiCueView::unset_active_automation ()
 {
 	for (CueAutomationMap::iterator i = automation_map.begin(); i != automation_map.end(); ++i) {
-		i->second.line->set_line_color ("midi line inactive");
+		i->second.line->set_sensitive (false);
 	}
 
 	active_automation = nullptr;
@@ -428,11 +428,11 @@ MidiCueView::internal_set_active_automation (Evoral::Parameter const & param)
 
 	for (CueAutomationMap::iterator i = automation_map.begin(); i != automation_map.end(); ++i) {
 		if (i->first == param) {
-			i->second.line->set_line_color ("gain line");
+			i->second.line->set_sensitive (true);
 			active_automation = &i->second;
 			exists = true;
 		} else {
-			i->second.line->set_line_color ("midi line inactive");
+			i->second.line->set_sensitive (false);
 		}
 	}
 
