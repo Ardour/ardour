@@ -59,6 +59,7 @@
     <ColorAlias name="audio bus base" alias="neutral:background"/>
     <ColorAlias name="audio master bus base" alias="neutral:backgroundest"/>
     <ColorAlias name="audio track base" alias="neutral:background"/>
+    <ColorAlias name="automation line insensitive" alias="neutral:foreground2"/>
     <ColorAlias name="automation line" alias="alert:green"/>
     <ColorAlias name="automation track outline" alias="theme:bg2"/>
     <ColorAlias name="big clock active: background" alias="neutral:backgroundest"/>
