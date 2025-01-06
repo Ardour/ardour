@@ -147,7 +147,11 @@ AutomationLine::set_sensitive (bool yn)
 {
 	_sensitive = yn;
 
-	set_line_color (_line_color_name);
+	if (yn) {
+		set_line_color (_line_color_name);
+	} else {
+		set_line_color (UIConfiguration::instance().color ("nonexistent"));
+	}
 
 	for (auto & cp : control_points) {
 		if (yn) {
@@ -308,6 +312,29 @@ AutomationLine::set_line_color (string const & color_name, string color_mod)
 
 	Gtkmm2ext::SVAModifier mod = UIConfiguration::instance().modifier (color_mod.empty () ? "automation line fill" : color_mod);
 	line->set_fill_color ((line->outline_color() & 0xffffff00) + (mod.a() * 255));
+	line->set_fill (true);
+
+	if (_control_points_inherit_color) {
+		for (auto & cp : control_points) {
+			cp->set_color ();
+		}
+	}
+}
+
+void
+AutomationLine::set_colors ()
+{
+	set_line_color (_line_color_name);
+	for (auto & cp : control_points) {
+		cp->set_color ();
+	}
+}
+
+void
+AutomationLine::set_line_color (uint32_t color)
+{
+	line->set_outline_color (color);
+	line->set_fill (false);
 
 	if (_control_points_inherit_color) {
 		for (auto & cp : control_points) {
@@ -1060,15 +1087,6 @@ AutomationLine::set_selected_points (PointSelection const & points)
 	}
 
 	set_colors ();
-}
-
-void
-AutomationLine::set_colors ()
-{
-	set_line_color (_line_color_name);
-	for (auto & cp : control_points) {
-		cp->set_color ();
-	}
 }
 
 void

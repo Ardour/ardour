@@ -114,6 +114,7 @@ public:
 	guint32 height()  const { return _height; }
 
 	void set_line_color (std::string const & color, std::string color_mode = std::string());
+	void set_line_color (uint32_t color);
 	uint32_t get_line_color() const;
 	uint32_t get_line_fill_color() const;
 	uint32_t get_line_selected_color() const;
