@@ -93,7 +93,7 @@ AutomationLine::AutomationLine (const string&                   name,
                                         const ParameterDescriptor&      desc)
 	:_name (name)
 	, _height (0)
-	, _line_color ("automation line")
+	, _line_color_name ("automation line")
 	, _view_index_offset (0)
 	, alist (al)
 	, _visible (Line)
@@ -147,7 +147,7 @@ AutomationLine::set_sensitive (bool yn)
 {
 	_sensitive = yn;
 
-	set_line_color (_line_color);
+	set_line_color (_line_color_name);
 
 	for (auto & cp : control_points) {
 		if (yn) {
@@ -294,7 +294,7 @@ AutomationLine::set_height (guint32 h)
 void
 AutomationLine::set_line_color (string const & color_name, string color_mod)
 {
-	_line_color = color_name;
+	_line_color_name = color_name;
 
 	if (_sensitive) {
 		line->set_outline_color (UIConfiguration::instance().color (color_name));
@@ -1065,7 +1065,7 @@ AutomationLine::set_selected_points (PointSelection const & points)
 void
 AutomationLine::set_colors ()
 {
-	set_line_color (_line_color);
+	set_line_color (_line_color_name);
 	for (auto & cp : control_points) {
 		cp->set_color ();
 	}

@@ -192,7 +192,7 @@ protected:
 
 	std::string    _name;
 	guint32        _height;
-	std::string    _line_color;
+	std::string    _line_color_name;
 	std::string    _line_color_mod;
 	uint32_t       _view_index_offset;
 	std::shared_ptr<ARDOUR::AutomationList> alist;
