@@ -25,6 +25,7 @@
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/cairo_widget.h"
 
+#include "widgets/ardour_dropdown.h"
 #include "widgets/pane.h"
 #include "widgets/tabbable.h"
 
@@ -110,18 +111,20 @@ private:
 
 	Gtkmm2ext::Bindings* bindings;
 
-	Gtk::HBox            _strip_group_box;
-	Gtk::ScrolledWindow  _strip_scroller;
-	Gtk::HBox            _strip_packer;
-	Gtk::EventBox        _no_strips;
-	Gtk::Alignment       _cue_area_frame;
-	Gtk::VBox            _cue_area_box;
-	Gtk::HBox            _parameter_box;
-	Gtk::Notebook        _sidebar_notebook;
-	TriggerClipPicker    _trigger_clip_picker;
-	TriggerSourceList    _trigger_source_list;
-	TriggerRegionList    _trigger_region_list;
-	TriggerRouteList     _trigger_route_list;
+	Gtk::HBox                     _strip_group_box;
+	Gtk::ScrolledWindow           _strip_scroller;
+	Gtk::HBox                     _strip_packer;
+	Gtk::EventBox                 _no_strips;
+	Gtk::Alignment                _cue_area_frame;
+	Gtk::VBox                     _cue_area_box;
+	Gtk::HBox                     _parameter_box;
+	Gtk::VBox                     _sidebar_vbox;
+	ArdourWidgets::ArdourDropdown _sidebar_pager;
+	Gtk::Notebook                 _sidebar_notebook;
+	TriggerClipPicker             _trigger_clip_picker;
+	TriggerSourceList             _trigger_source_list;
+	TriggerRegionList             _trigger_region_list;
+	TriggerRouteList              _trigger_route_list;
 
 	CueBoxWidget       _cue_box;
 	FittedCanvasWidget _master_widget;

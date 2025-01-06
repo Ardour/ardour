@@ -129,10 +129,9 @@ TriggerPage::TriggerPage ()
 	_strip_group_box.pack_start (_strip_scroller, true, true);
 
 	/* sidebar */
-	_sidebar_notebook.set_show_tabs (true);
+	_sidebar_notebook.set_show_tabs (false);
 	_sidebar_notebook.set_scrollable (true);
 	_sidebar_notebook.popup_disable ();
-	_sidebar_notebook.set_tab_pos (Gtk::POS_RIGHT);
 
 	add_sidebar_page (_("Clips"), _trigger_clip_picker);
 	add_sidebar_page (_("Tracks"), _trigger_route_list.widget ());
@@ -160,11 +159,17 @@ TriggerPage::TriggerPage ()
 	_parameter_box.pack_start (*table);
 	_parameter_box.show ();
 
+	_sidebar_pager.disable_scrolling ();
+	_sidebar_notebook.signal_switch_page().connect ([this](GtkNotebookPage*, guint page) { _sidebar_pager.set_text (_sidebar_notebook.get_tab_label_text (*_sidebar_notebook.get_nth_page (page))); });
+
+	_sidebar_vbox.pack_start (_sidebar_pager, false, false, 2);
+	_sidebar_vbox.pack_start (_sidebar_notebook);
+
 	/* Top-level Layout */
 	content_app_bar.add (_application_bar);
 	content_main.add (_strip_group_box);
 	content_att_bottom.add (_parameter_box);
-	content_att_right.add (_sidebar_notebook);
+	content_att_right.add (_sidebar_vbox);
 
 	/* Show all */
 	_strip_group_box.show ();
@@ -173,7 +178,7 @@ TriggerPage::TriggerPage ()
 	_cue_area_frame.show_all ();
 	_trigger_clip_picker.show ();
 	_no_strips.show ();
-	_sidebar_notebook.show_all ();
+	_sidebar_vbox.show_all ();
 
 	/* setup keybidings */
 	contents().set_data ("ardour-bindings", bindings);
@@ -399,12 +404,9 @@ TriggerPage::update_title ()
 void
 TriggerPage::add_sidebar_page (string const & name, Gtk::Widget& widget)
 {
-	EventBox* b = manage (new EventBox);
-	Label* l = manage (new Label (name));
-	l->set_angle (-90);
-	b->add (*l);
-	b->show_all ();
-	_sidebar_notebook.append_page (widget, *b);
+	_sidebar_notebook.append_page (widget, name);
+	using namespace Menu_Helpers;
+	_sidebar_pager.AddMenuElem (MenuElem (name, [this, &widget]() {_sidebar_notebook.set_current_page (_sidebar_notebook.page_num (widget)); }));
 }
 
 void
