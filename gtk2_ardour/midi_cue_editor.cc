@@ -128,30 +128,42 @@ MidiCueEditor::canvas_pre_event (GdkEvent* ev)
 }
 
 void
+MidiCueEditor::rebuild_parameter_button_map()
+{
+	parameter_button_map.clear ();
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiVelocityAutomation, _visible_channel), velocity_button));
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiPitchBenderAutomation, _visible_channel), bender_button));
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiChannelPressureAutomation, _visible_channel), pressure_button));
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_EXPRESSION), expression_button));
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_MODWHEEL), modulation_button));
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE1), cc_dropdown1));
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE2), cc_dropdown2));
+	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE3), cc_dropdown3));
+}
+
+void
 MidiCueEditor::build_lower_toolbar ()
 {
 	ArdourButton::Element elements = ArdourButton::Element (ArdourButton::Text|ArdourButton::Indicator|ArdourButton::Edge|ArdourButton::Body);
 
 	velocity_button = new ArdourButton (_("Velocity"), elements);
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiVelocityAutomation), velocity_button));
 	bender_button = new ArdourButton (_("Bender"), elements);
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiPitchBenderAutomation), bender_button));
 	pressure_button = new ArdourButton (_("Pressure"), elements);
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiChannelPressureAutomation), pressure_button));
 	expression_button = new ArdourButton (_("Expression"), elements);
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION), expression_button));
 	modulation_button = new ArdourButton (_("Modulation"), elements);
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL), modulation_button));
 	cc_dropdown1 = new ArdourDropdown (elements);
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_GENERAL_PURPOSE1), cc_dropdown1));
 	cc_dropdown2 = new ArdourDropdown (elements);
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_GENERAL_PURPOSE2), cc_dropdown2));
 	cc_dropdown3 = new ArdourDropdown (elements);
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_GENERAL_PURPOSE3), cc_dropdown3));
 
 	cc_dropdown1->set_text (string_compose (_("CC%1"), MIDI_CTL_MSB_GENERAL_PURPOSE1));
 	cc_dropdown2->set_text (string_compose (_("CC%1"), MIDI_CTL_MSB_GENERAL_PURPOSE2));
 	cc_dropdown3->set_text (string_compose (_("CC%1"), MIDI_CTL_MSB_GENERAL_PURPOSE3));
+
+	rebuild_parameter_button_map ();
+
+	/* Only need to do this once because i->second is the actual button,
+	 * which does not change even when the parameter_button_map is rebuilt.
+	 */
 
 	for (ParameterButtonMap::iterator i = parameter_button_map.begin(); i != parameter_button_map.end(); ++i) {
 		i->second->set_active_color (0xff0000ff);
@@ -271,6 +283,8 @@ MidiCueEditor::set_visible_channel (int n)
 {
 	_visible_channel = n;
 	visible_channel_label.set_text (string_compose (_("MIDI Channel %1"), _visible_channel + 1));
+
+	rebuild_parameter_button_map ();
 
 	if (view) {
 		view->swap_automation_channel (n);

@@ -200,6 +200,7 @@ class MidiCueEditor : public CueEditor
 
 	typedef std::map<Evoral::Parameter,ArdourWidgets::ArdourButton*> ParameterButtonMap;
 	ParameterButtonMap parameter_button_map;
+	void rebuild_parameter_button_map ();
 
 	CueMidiBackground* bg;
 	MidiCueView* view;
