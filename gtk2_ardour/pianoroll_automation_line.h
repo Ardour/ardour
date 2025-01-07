@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk2_ardour_pianoroll_automation_line.h__
-#define __gtk2_ardour_pianoroll_automation_line.h__
+#ifndef __gtk2_ardour_pianoroll_automation_line_h__
+#define __gtk2_ardour_pianoroll_automation_line_h__
 
 #include "automation_line.h"
 

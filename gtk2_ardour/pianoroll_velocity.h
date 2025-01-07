@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk2_ardour_pianoroll_velocity.h__
-#define __gtk2_ardour_pianoroll_velocity.h__
+#ifndef __gtk2_ardour_pianoroll_velocity_h__
+#define __gtk2_ardour_pianoroll_velocity_h__
 
 #include "ghost_event.h"
 #include "velocity_display.h"
@@ -40,4 +40,4 @@ class PianorollVelocityDisplay : public VelocityDisplay
 	bool lollevent (GdkEvent*, GhostEvent*);
 };
 
-#endif /* __gtk2_ardour_pianoroll_velocity.h__ */
+#endif /* __gtk2_ardour_pianoroll_velocity_h__ */

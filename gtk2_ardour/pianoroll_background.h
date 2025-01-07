@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk2_ardour_pianoroll_background.h__
-#define __gtk2_ardour_pianoroll_background.h__
+#ifndef __gtk2_ardour_pianoroll_background_h__
+#define __gtk2_ardour_pianoroll_background_h__
 
 #include <cstdint>
 
@@ -59,4 +59,4 @@ class CueMidiBackground : public MidiViewBackground
 };
 
 
-#endif /* __gtk2_ardour_pianoroll_background.h__ */
+#endif /* __gtk2_ardour_pianoroll_background_h__ */
