@@ -7574,7 +7574,9 @@ ClipStartDrag::motion (GdkEvent* event, bool first_move)
 {
 	ArdourCanvas::Rect r (original_rect);
 
-	double pix = current_pointer_x();
+	timepos_t pos (adjusted_current_time (event));
+	editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+	double pix = editing_context.timeline_to_canvas (editing_context.time_to_pixel (pos));
 
 	if (pix > editing_context.timeline_origin()) {
 		r.x1 = dragging_rect->parent()->canvas_to_item (Duple (pix, 0.0)).x;
@@ -7630,11 +7632,13 @@ ClipEndDrag::end_grab (GdkEvent* ev)
 }
 
 void
-ClipEndDrag::motion (GdkEvent*, bool)
+ClipEndDrag::motion (GdkEvent* event, bool)
 {
 	ArdourCanvas::Rect r (original_rect);
 
-	double pix = current_pointer_x();
+	timepos_t pos (adjusted_current_time (event));
+	editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+	double pix = editing_context.timeline_to_canvas (editing_context.time_to_pixel (pos));
 
 	if (pix > editing_context.timeline_origin()) {
 		r.x0 = dragging_rect->parent()->canvas_to_item (Duple (pix, 0.0)).x;
