@@ -221,6 +221,13 @@ EditingContext::EditingContext (std::string const & name)
 	follow_playhead_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::follow_playhead_clicked));
 	full_zoom_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::full_zoom_clicked));
 
+	zoom_in_button.set_name ("zoom button");
+	zoom_in_button.set_icon (ArdourIcon::ZoomIn);
+
+	zoom_out_button.set_name ("zoom button");
+	zoom_out_button.set_icon (ArdourIcon::ZoomOut);
+
+
 	for (int i = 0; i < 16; i++) {
 		char buf[4];
 		sprintf(buf, "%d", i+1);
@@ -2183,6 +2190,13 @@ EditingContext::register_mouse_mode_actions ()
 void
 EditingContext::bind_mouse_mode_buttons ()
 {
+	RefPtr<Action> act;
+
+	act = ActionManager::get_action (X_("Editing"), X_("temporal-zoom-in"));
+	zoom_in_button.set_related_action (act);
+	act = ActionManager::get_action (X_("Editing"), X_("temporal-zoom-out"));
+	zoom_out_button.set_related_action (act);
+
 	mouse_move_button.set_related_action (get_mouse_mode_action (Editing::MouseObject));
 	mouse_move_button.set_icon (ArdourWidgets::ArdourIcon::ToolGrab);
 	mouse_move_button.set_name ("mouse mode button");

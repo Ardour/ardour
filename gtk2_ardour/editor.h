@@ -1722,8 +1722,6 @@ private:
 
 	/* toolbar */
 
-	ArdourWidgets::ArdourButton   zoom_in_button;
-	ArdourWidgets::ArdourButton   zoom_out_button;
 	ArdourWidgets::ArdourButton   zoom_out_full_button;
 
 	ArdourWidgets::ArdourButton   tav_expand_button;
