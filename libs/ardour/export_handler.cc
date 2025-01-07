@@ -311,7 +311,7 @@ ExportHandler::handle_duplicate_format_extensions()
 			/* stem-export has multiple files in the same timestamp, but a different channel_config for each.
 			 * However channel_config is only set in ExportGraphBuilder::Encoder::init_writer()
 			 * so we cannot yet use   it->second.filename->get_path(it->second.format).
-			 * We have to explicily check uniqueness of "channel-config + extension" here:
+			 * We have to explicitly check uniqueness of "channel-config + extension" here:
 			 */
 			counts[pfx + it->second.channel_config->name() + it->second.format->extension()]++;
 		} else {
