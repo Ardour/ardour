@@ -61,6 +61,14 @@
     <ColorAlias name="audio track base" alias="neutral:background"/>
     <ColorAlias name="automation line insensitive" alias="neutral:foreground2"/>
     <ColorAlias name="automation line" alias="alert:green"/>
+    <ColorAlias name="pianoroll: velocity" alias="theme:bg2"/>
+    <ColorAlias name="pianoroll: insensitive bender line" alias="theme:bg2"/>
+    <ColorAlias name="pianoroll: insensitive pressure line" alias="theme:bg2"/>
+    <ColorAlias name="pianoroll: insensitive modulation line" alias="theme:bg2"/>
+    <ColorAlias name="pianoroll: insensitive expression line" alias="theme:bg2"/>
+    <ColorAlias name="pianoroll: user1 line" alias="theme:bg2"/>
+    <ColorAlias name="pianoroll: user2 line" alias="theme:bg2"/>
+    <ColorAlias name="pianoroll: user3 line" alias="theme:bg2"/>
     <ColorAlias name="automation track outline" alias="theme:bg1"/>
     <ColorAlias name="big clock active: background" alias="neutral:backgroundest"/>
     <ColorAlias name="big clock active: cursor" alias="theme:contrasting alt"/>
