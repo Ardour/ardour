@@ -147,7 +147,7 @@ function dsp_run (_, _, n_samples)
    -- rolling state: It seems that we need to check the transport state (as
    -- given by Ardour's "transport finite state machine" = TFSM) here, even if
    -- the transport is not actually moving yet. Otherwise some input notes may
-   -- errorneously slip through before playback really starts.
+   -- erroneously slip through before playback really starts.
    local rolling = Session:transport_state_rolling ()
    local changed = false
 
@@ -386,7 +386,7 @@ function dsp_run (_, _, n_samples)
 	 -- sudden jump in transport => next beat is due immediately
 	 bt, ts = time.beat, time.sample
       elseif bf2 > bf1 and bf2 ~= b2 then
-	 -- next beat is due some time in this cycle (we're assuming contant
+	 -- next beat is due some time in this cycle (we're assuming constant
 	 -- tempo here, hence this number may be off in case the tempo is
 	 -- changing very quickly during the cycle -- so don't do that)
 	 local d = math.ceil((b2-bf2)/(b2-b1)*(s2-s1))
@@ -449,7 +449,7 @@ function dsp_run (_, _, n_samples)
 	    -- first beat in a bar, 80 for the other non-fractional beats, 60
 	    -- for everything else (subdivision pulses). These values can be
 	    -- changed with the corresponding control. NOTE: There are much
-	    -- more sophisticted ways to do this, but we try to keep things
+	    -- more sophisticated ways to do this, but we try to keep things
 	    -- simple here.
 	    local v = vel3
 	    if p == 0 then

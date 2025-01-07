@@ -8,7 +8,7 @@ function factory (params) return function ()
 
 	local loc = Session:locations () -- all marker locations
 
-	-- get the playhead postion
+	-- get the playhead position
 	local playhead = Temporal.timepos_t (Session:transport_sample ())
 
 	local sl = ArdourUI.SelectionList () -- empty selection list
