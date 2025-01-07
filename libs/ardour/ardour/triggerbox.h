@@ -867,7 +867,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 
 	void add_trigger (TriggerPtr);
 
-	void fast_forward (CueEvents const &, samplepos_t transport_postiion);
+	void fast_forward (CueEvents const &, samplepos_t transport_position);
 	bool fast_forwarding() const { return _fast_forwarding; }
 
 	void set_pending (uint32_t slot, Trigger*);
