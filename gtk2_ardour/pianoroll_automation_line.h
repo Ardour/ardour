@@ -16,15 +16,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk2_ardour_midi_cue_automation_line_h__
-#define __gtk2_ardour_midi_cue_automation_line_h__
+#ifndef __gtk2_ardour_pianoroll_automation_line.h__
+#define __gtk2_ardour_pianoroll_automation_line.h__
 
 #include "automation_line.h"
 
-class MidiCueAutomationLine : public AutomationLine
+class PianorollAutomationLine : public AutomationLine
 {
   public:
-	MidiCueAutomationLine (const std::string&                      name,
+	PianorollAutomationLine (const std::string&                      name,
 	                       EditingContext&                         ec,
 	                       ArdourCanvas::Item&                     parent,
 	                       ArdourCanvas::Rectangle*                drag_base,

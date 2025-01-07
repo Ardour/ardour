@@ -33,7 +33,7 @@
 #include "hit.h"
 #include "keyboard.h"
 #include "mergeable_line.h"
-#include "midi_cue_automation_line.h"
+#include "pianoroll_automation_line.h"
 #include "pianoroll_midi_view.h"
 #include "pianoroll_velocity.h"
 #include "note.h"
@@ -364,7 +364,7 @@ PianorollMidiView::update_automation_display (Evoral::Parameter const & param, S
 				return;
 			}
 
-			CueAutomationLine line (new MidiCueAutomationLine (ARDOUR::EventTypeMap::instance().to_symbol (param),
+			CueAutomationLine line (new PianorollAutomationLine (ARDOUR::EventTypeMap::instance().to_symbol (param),
 			                                                   _editing_context,
 			                                                   *automation_group,
 			                                                   automation_group,

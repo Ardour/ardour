@@ -31,7 +31,7 @@
 #include "midi_view.h"
 
 class VelocityDisplay;
-class MidiCueAutomationLine;
+class PianorollAutomationLine;
 
 namespace ArdourCanvas {
 	class Box;
@@ -84,7 +84,7 @@ class PianorollMidiView : public MidiView
 
 	ArdourCanvas::Rectangle* automation_group;
 
-	typedef std::shared_ptr<MidiCueAutomationLine>  CueAutomationLine;
+	typedef std::shared_ptr<PianorollAutomationLine>  CueAutomationLine;
 	typedef std::shared_ptr<ARDOUR::AutomationControl>  CueAutomationControl;
 
 	struct AutomationDisplayState {

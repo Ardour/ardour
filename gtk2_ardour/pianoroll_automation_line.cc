@@ -21,9 +21,9 @@
 #include "editing_context.h"
 #include "editor_drag.h"
 #include "keyboard.h"
-#include "midi_cue_automation_line.h"
+#include "pianoroll_automation_line.h"
 
-MidiCueAutomationLine::MidiCueAutomationLine (const std::string&                      name,
+PianorollAutomationLine::PianorollAutomationLine (const std::string&                      name,
                                               EditingContext&                         ec,
                                               ArdourCanvas::Item&                     parent,
                                               ArdourCanvas::Rectangle*                drag_base,
@@ -32,17 +32,17 @@ MidiCueAutomationLine::MidiCueAutomationLine (const std::string&                
 	: AutomationLine (name, ec, parent, drag_base, al, desc)
 {
 	_drag_base->set_data ("line", this);
-	_drag_base->Event.connect (sigc::mem_fun (*this, &MidiCueAutomationLine::base_event_handler));
+	_drag_base->Event.connect (sigc::mem_fun (*this, &PianorollAutomationLine::base_event_handler));
 }
 
 bool
-MidiCueAutomationLine::base_event_handler (GdkEvent* ev)
+PianorollAutomationLine::base_event_handler (GdkEvent* ev)
 {
 	return _editing_context.typed_event  (_drag_base, ev, AutomationTrackItem);
 }
 
 bool
-MidiCueAutomationLine::event_handler (GdkEvent* ev)
+PianorollAutomationLine::event_handler (GdkEvent* ev)
 {
 	return _editing_context.typed_event (line, ev, EditorAutomationLineItem);
 }
