@@ -138,7 +138,7 @@ TriggerPage::TriggerPage ()
 	add_sidebar_page (_("Sources"), _trigger_source_list.widget ());
 	add_sidebar_page (_("Regions"), _trigger_region_list.widget ());
 
-	_midi_editor = new Pianoroll;
+	_midi_editor = new Pianoroll (X_("MIDICueEditor"));
 
 	/* Bottom -- Properties of selected Slot/Region */
 	Gtk::Table* table = manage (new Gtk::Table);
@@ -268,7 +268,7 @@ TriggerPage::set_state (const XMLNode& node, int version)
 		_sidebar_notebook.set_current_page (sidebar_page);
 	}
 
-	XMLNode* mn = node.child (X_("MIDICueEditor"));
+	XMLNode* mn = node.child (_midi_editor->editor_name().c_str());
 	if (mn) {
 		_midi_editor->set_state (*mn, version);
 	}

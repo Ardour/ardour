@@ -50,7 +50,7 @@ class CueMidiBackground;
 class Pianoroll : public CueEditor
 {
   public:
-	Pianoroll ();
+	Pianoroll (std::string const & name);
 	~Pianoroll ();
 
 	ArdourCanvas::Container* get_trackview_group () const { return data_group; }

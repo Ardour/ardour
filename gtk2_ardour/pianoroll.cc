@@ -57,8 +57,8 @@ using namespace ArdourWidgets;
 using namespace Gtkmm2ext;
 using namespace Temporal;
 
-Pianoroll::Pianoroll()
-	: CueEditor (X_("Pianoroll"))
+Pianoroll::Pianoroll (std::string const & name)
+	: CueEditor (name)
 	, timebar_height (15.)
 	, n_timebars (3)
 	, prh (nullptr)
@@ -239,6 +239,7 @@ Pianoroll::build_upper_toolbar ()
 
 	Gtk::HBox* _toolbar_inner = manage (new Gtk::HBox);
 	Gtk::HBox* _toolbar_outer = manage (new Gtk::HBox);
+	Gtk::HBox* _toolbar_left = manage (new Gtk::HBox);
 
 	_toolbar_inner->pack_start (*mouse_mode_box, false, false);
 	_toolbar_inner->pack_start (snap_box, false, false);
@@ -262,7 +263,6 @@ Pianoroll::build_upper_toolbar ()
 	_toolbar_outer->pack_start (play_note_selection_button, false, false);
 	_toolbar_outer->pack_start (note_mode_button, false, false);
 	_toolbar_outer->pack_start (follow_playhead_button, false, false);
-	_toolbar_outer->pack_start (full_zoom_button, false, false);
 	_toolbar_outer->pack_start (*_toolbar_inner, true, false);
 
 	build_zoom_focus_menu ();
@@ -270,8 +270,13 @@ Pianoroll::build_upper_toolbar ()
 	if (str != zoom_focus_selector.get_text()) {
 		zoom_focus_selector.set_text (str);
 	}
-	_toolbar_outer->pack_start (zoom_focus_selector, true, false);
 
+	_toolbar_left->pack_start (zoom_in_button, false, false);
+	_toolbar_left->pack_start (zoom_out_button, false, false);
+	_toolbar_left->pack_start (full_zoom_button, false, false);
+	_toolbar_left->pack_start (zoom_focus_selector, false, false);
+
+	_toolbar_outer->pack_start (*_toolbar_left, true, false);
 	_toolbox.pack_start (*_toolbar_outer, false, false);
 
 	Bindings* pr_bindings = Bindings::get_bindings (X_("Pianoroll"));
@@ -1281,7 +1286,7 @@ Pianoroll::set_state (XMLNode const & node, int version)
 XMLNode&
 Pianoroll::get_state () const
 {
-	XMLNode* node (new XMLNode (_("MIDICueEditor")));
+	XMLNode* node (new XMLNode (editor_name()));
 	get_common_editing_state (*node);
 	return *node;
 }

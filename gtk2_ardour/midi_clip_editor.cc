@@ -59,7 +59,7 @@ MidiClipEditorBox::MidiClipEditorBox ()
 	_header_label.set_alignment (0.0, 0.5);
 	pack_start (_header_label, false, false, 6);
 
-	editor = new Pianoroll ();
+	editor = new Pianoroll (X_("MIDICueEditor"));
 	editor->viewport().set_size_request (600, 120);
 
 	pack_start (editor->viewport(), true, true);
