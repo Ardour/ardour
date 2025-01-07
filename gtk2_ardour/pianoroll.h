@@ -44,7 +44,7 @@ namespace ArdourWidgets {
 	class ArdourButton;
 }
 
-class MidiCueView;
+class PianorollMidiView;
 class CueMidiBackground;
 
 class Pianoroll : public CueEditor
@@ -203,7 +203,7 @@ class Pianoroll : public CueEditor
 	void rebuild_parameter_button_map ();
 
 	CueMidiBackground* bg;
-	MidiCueView* view;
+	PianorollMidiView* view;
 
 	void build_canvas ();
 	void canvas_allocate (Gtk::Allocation);

@@ -37,10 +37,10 @@ namespace ArdourCanvas {
 	class Box;
 }
 
-class MidiCueView : public MidiView
+class PianorollMidiView : public MidiView
 {
   public:
-	MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
+	PianorollMidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	             ArdourCanvas::Item&         parent,
 	             ArdourCanvas::Item&         noscroll_parent,
 	             EditingContext&             ec,
@@ -48,7 +48,7 @@ class MidiCueView : public MidiView
 	             uint32_t                    basic_color
 		);
 
-	~MidiCueView();
+	~PianorollMidiView();
 
 	void set_samples_per_pixel (double);
 	void set_height (double);

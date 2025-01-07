@@ -41,7 +41,7 @@
 #include "keyboard.h"
 #include "pianoroll_background.h"
 #include "pianoroll.h"
-#include "midi_cue_view.h"
+#include "pianoroll_midi_view.h"
 #include "note_base.h"
 #include "prh.h"
 #include "timers.h"
@@ -383,7 +383,7 @@ Pianoroll::build_canvas ()
 
 	prh = new ArdourCanvas::PianoRollHeader (v_scroll_group, *bg);
 
-	view = new MidiCueView (nullptr, *data_group, *no_scroll_group, *this, *bg, 0xff0000ff);
+	view = new PianorollMidiView (nullptr, *data_group, *no_scroll_group, *this, *bg, 0xff0000ff);
 	view->AutomationStateChange.connect (sigc::mem_fun (*this, &Pianoroll::automation_state_changed));
 
 	bg->set_view (view);

@@ -34,7 +34,7 @@
 #include "keyboard.h"
 #include "mergeable_line.h"
 #include "midi_cue_automation_line.h"
-#include "midi_cue_view.h"
+#include "pianoroll_midi_view.h"
 #include "pianoroll_velocity.h"
 #include "note.h"
 #include "ui_config.h"
@@ -45,7 +45,7 @@
 using namespace ARDOUR;
 using namespace Gtkmm2ext;
 
-MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
+PianorollMidiView::PianorollMidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
                           ArdourCanvas::Item&      parent,
                           ArdourCanvas::Item&      noscroll_parent,
                           EditingContext&          ec,
@@ -69,7 +69,7 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	event_rect->set_outline (false);
 	CANVAS_DEBUG_NAME (event_rect, "cue event rect");
 
-	event_rect->Event.connect (sigc::mem_fun (*this, &MidiCueView::midi_canvas_group_event));
+	event_rect->Event.connect (sigc::mem_fun (*this, &PianorollMidiView::midi_canvas_group_event));
 
 	_note_group->raise_to_top ();
 
@@ -82,13 +82,13 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	set_extensible (true);
 }
 
-MidiCueView::~MidiCueView ()
+PianorollMidiView::~PianorollMidiView ()
 {
 	delete velocity_display;
 }
 
 bool
-MidiCueView::midi_canvas_group_event (GdkEvent* ev)
+PianorollMidiView::midi_canvas_group_event (GdkEvent* ev)
 {
 	MidiView::midi_canvas_group_event (ev);
 
@@ -96,7 +96,7 @@ MidiCueView::midi_canvas_group_event (GdkEvent* ev)
 }
 
 void
-MidiCueView::set_height (double h)
+PianorollMidiView::set_height (double h)
 {
 	_height = h;
 
@@ -125,13 +125,13 @@ MidiCueView::set_height (double h)
 }
 
 ArdourCanvas::Item*
-MidiCueView::drag_group () const
+PianorollMidiView::drag_group () const
 {
 	return event_rect;
 }
 
 bool
-MidiCueView::scroll (GdkEventScroll* ev)
+PianorollMidiView::scroll (GdkEventScroll* ev)
 {
 	if (_editing_context.drags()->active()) {
 		return false;
@@ -156,7 +156,7 @@ MidiCueView::scroll (GdkEventScroll* ev)
 }
 
 void
-MidiCueView::set_samples_per_pixel (double spp)
+PianorollMidiView::set_samples_per_pixel (double spp)
 {
 	std::shared_ptr<Temporal::TempoMap> map;
 	Temporal::timecnt_t duration;
@@ -175,7 +175,7 @@ MidiCueView::set_samples_per_pixel (double spp)
 }
 
 void
-MidiCueView::clear_ghost_events ()
+PianorollMidiView::clear_ghost_events ()
 {
 	if (velocity_display) {
 		velocity_display->clear ();
@@ -183,7 +183,7 @@ MidiCueView::clear_ghost_events ()
 }
 
 void
-MidiCueView::ghosts_model_changed ()
+PianorollMidiView::ghosts_model_changed ()
 {
 	if (velocity_display) {
 		velocity_display->clear ();
@@ -194,7 +194,7 @@ MidiCueView::ghosts_model_changed ()
 }
 
 void
-MidiCueView::ghosts_view_changed ()
+PianorollMidiView::ghosts_view_changed ()
 {
 	if (velocity_display) {
 		velocity_display->redisplay();
@@ -202,7 +202,7 @@ MidiCueView::ghosts_view_changed ()
 }
 
 void
-MidiCueView::ghost_remove_note (NoteBase* nb)
+PianorollMidiView::ghost_remove_note (NoteBase* nb)
 {
 	if (velocity_display) {
 		velocity_display->remove_note (nb);
@@ -210,7 +210,7 @@ MidiCueView::ghost_remove_note (NoteBase* nb)
 }
 
 void
-MidiCueView::ghost_add_note (NoteBase* nb)
+PianorollMidiView::ghost_add_note (NoteBase* nb)
 {
 	if (velocity_display) {
 		velocity_display->add_note (nb);
@@ -218,7 +218,7 @@ MidiCueView::ghost_add_note (NoteBase* nb)
 }
 
 void
-MidiCueView::ghost_sync_selection (NoteBase* nb)
+PianorollMidiView::ghost_sync_selection (NoteBase* nb)
 {
 	if (velocity_display) {
 		velocity_display->note_selected (nb);
@@ -226,7 +226,7 @@ MidiCueView::ghost_sync_selection (NoteBase* nb)
 }
 
 void
-MidiCueView::update_sustained (Note* n)
+PianorollMidiView::update_sustained (Note* n)
 {
 	MidiView::update_sustained (n);
 	if (velocity_display) {
@@ -235,7 +235,7 @@ MidiCueView::update_sustained (Note* n)
 }
 
 void
-MidiCueView::update_hit (Hit* h)
+PianorollMidiView::update_hit (Hit* h)
 {
 	MidiView::update_hit (h);
 	if (velocity_display) {
@@ -244,7 +244,7 @@ MidiCueView::update_hit (Hit* h)
 }
 
 void
-MidiCueView::swap_automation_channel (int new_channel)
+PianorollMidiView::swap_automation_channel (int new_channel)
 {
 	std::vector<Evoral::Parameter> new_params;
 	Evoral::Parameter active (0, 0, 0);
@@ -281,7 +281,7 @@ MidiCueView::swap_automation_channel (int new_channel)
 }
 
 Gtkmm2ext::Color
-MidiCueView::line_color_for (Evoral::Parameter const & param)
+PianorollMidiView::line_color_for (Evoral::Parameter const & param)
 {
 	UIConfiguration& uic (UIConfiguration::instance());
 
@@ -303,7 +303,7 @@ MidiCueView::line_color_for (Evoral::Parameter const & param)
 	return 0xff0000ff;
 }
 void
-MidiCueView::update_automation_display (Evoral::Parameter const & param, SelectionOperation op)
+PianorollMidiView::update_automation_display (Evoral::Parameter const & param, SelectionOperation op)
 {
 	using namespace ARDOUR;
 
@@ -426,7 +426,7 @@ MidiCueView::update_automation_display (Evoral::Parameter const & param, Selecti
 }
 
 void
-MidiCueView::set_active_automation (Evoral::Parameter const & param)
+PianorollMidiView::set_active_automation (Evoral::Parameter const & param)
 {
 	if (!internal_set_active_automation (param)) {
 		update_automation_display (param, SelectionSet);
@@ -434,7 +434,7 @@ MidiCueView::set_active_automation (Evoral::Parameter const & param)
 }
 
 void
-MidiCueView::unset_active_automation ()
+PianorollMidiView::unset_active_automation ()
 {
 	for (CueAutomationMap::iterator i = automation_map.begin(); i != automation_map.end(); ++i) {
 		i->second.line->set_sensitive (false);
@@ -445,7 +445,7 @@ MidiCueView::unset_active_automation ()
 }
 
 bool
-MidiCueView::internal_set_active_automation (Evoral::Parameter const & param)
+PianorollMidiView::internal_set_active_automation (Evoral::Parameter const & param)
 {
 	bool exists = false;
 
@@ -467,7 +467,7 @@ MidiCueView::internal_set_active_automation (Evoral::Parameter const & param)
 }
 
 bool
-MidiCueView::is_active_automation (Evoral::Parameter const & param) const
+PianorollMidiView::is_active_automation (Evoral::Parameter const & param) const
 {
 	CueAutomationMap::const_iterator i = automation_map.find (param);
 
@@ -479,7 +479,7 @@ MidiCueView::is_active_automation (Evoral::Parameter const & param) const
 }
 
 bool
-MidiCueView::is_visible_automation (Evoral::Parameter const & param) const
+PianorollMidiView::is_visible_automation (Evoral::Parameter const & param) const
 {
 	CueAutomationMap::const_iterator i = automation_map.find (param);
 
@@ -492,7 +492,7 @@ MidiCueView::is_visible_automation (Evoral::Parameter const & param) const
 
 
 std::list<SelectableOwner*>
-MidiCueView::selectable_owners()
+PianorollMidiView::selectable_owners()
 {
 	std::list<SelectableOwner*> sl;
 	if (active_automation && active_automation->line) {
@@ -502,7 +502,7 @@ MidiCueView::selectable_owners()
 }
 
 MergeableLine*
-MidiCueView::make_merger ()
+PianorollMidiView::make_merger ()
 {
 	if (active_automation && active_automation->line) {
 		std::cerr << "Mergable will use active automation @ " << active_automation << std::endl;
@@ -516,7 +516,7 @@ MidiCueView::make_merger ()
 }
 
 bool
-MidiCueView::automation_rb_click (GdkEvent* event, Temporal::timepos_t const & pos)
+PianorollMidiView::automation_rb_click (GdkEvent* event, Temporal::timepos_t const & pos)
 {
 	if (!active_automation || !active_automation->control || !active_automation->line) {
 		return false;
@@ -528,17 +528,17 @@ MidiCueView::automation_rb_click (GdkEvent* event, Temporal::timepos_t const & p
 }
 
 void
-MidiCueView::line_drag_click (GdkEvent* event, Temporal::timepos_t const & pos)
+PianorollMidiView::line_drag_click (GdkEvent* event, Temporal::timepos_t const & pos)
 {
 }
 
-MidiCueView::AutomationDisplayState::~AutomationDisplayState()
+PianorollMidiView::AutomationDisplayState::~AutomationDisplayState()
 {
 	/* We do not own the velocity_display */
 }
 
 void
-MidiCueView::AutomationDisplayState::hide ()
+PianorollMidiView::AutomationDisplayState::hide ()
 {
 	if (velocity_display) {
 		velocity_display->hide ();
@@ -549,7 +549,7 @@ MidiCueView::AutomationDisplayState::hide ()
 }
 
 void
-MidiCueView::AutomationDisplayState::show ()
+PianorollMidiView::AutomationDisplayState::show ()
 {
 	if (velocity_display) {
 		velocity_display->show ();
@@ -560,7 +560,7 @@ MidiCueView::AutomationDisplayState::show ()
 }
 
 void
-MidiCueView::AutomationDisplayState::set_height (double h)
+PianorollMidiView::AutomationDisplayState::set_height (double h)
 {
 	if (velocity_display) {
 		// velocity_display->set_height (h);
@@ -570,7 +570,7 @@ MidiCueView::AutomationDisplayState::set_height (double h)
 }
 
 void
-MidiCueView::automation_entry ()
+PianorollMidiView::automation_entry ()
 {
 	if (active_automation && active_automation->line) {
 		active_automation->line->track_entered ();
@@ -579,7 +579,7 @@ MidiCueView::automation_entry ()
 
 
 void
-MidiCueView::automation_leave ()
+PianorollMidiView::automation_leave ()
 {
 	if (active_automation && active_automation->line) {
 		active_automation->line->track_entered ();
