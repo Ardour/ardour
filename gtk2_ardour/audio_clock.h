@@ -117,6 +117,7 @@ protected:
 
 	bool on_button_press_event (GdkEventButton *ev);
 	bool on_button_release_event(GdkEventButton *ev);
+	void on_size_request (Gtk::Requisition* req);
 
 	ArdourWidgets::ArdourButton _left_btn;
 	ArdourWidgets::ArdourButton _right_btn;
@@ -198,7 +199,6 @@ private:
 	bool on_key_release_event (GdkEventKey *);
 	bool on_scroll_event (GdkEventScroll *ev);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
-	void on_size_request (Gtk::Requisition* req);
 	bool on_motion_notify_event (GdkEventMotion *ev);
 	bool on_focus_out_event (GdkEventFocus*);
 	bool on_enter_notify_event (GdkEventCrossing*);

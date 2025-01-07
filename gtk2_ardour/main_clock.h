@@ -48,6 +48,8 @@ public:
 	void parameter_changed (std::string p);
 
 protected:
+	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
+	void on_size_request (Gtk::Requisition* req);
 	ClockDisposition _disposition;
 
 private:
@@ -59,7 +61,11 @@ private:
 	void insert_new_meter ();
 	bool _suspend_delta_mode_signal;
 	std::string _widget_name;
-	ARDOUR::ClockDeltaMode _delta_mode;
+
+	ARDOUR::ClockDeltaMode      _delta_mode;
+	Glib::RefPtr<Pango::Layout> _layout;
+	int _layout_width;
+	int _layout_height;
 };
 
 /** TransportClock is a clock widget that reflects the state of the canonical MainClocks in ARDOUR_UI (either Primary or Secondary)
