@@ -404,7 +404,7 @@ set_session_timecode (AAF_Iface* aafi, Session* s)
 	s->config.set_timecode_format (ardourtc);
 }
 
-/* Create and open Sesssion from AAF
+/* Create and open Session from AAF
  * return > 0 if file is not a [valid] AAF
  * return < 0 if session creation failed.
  * return 0 on success. path and snapshot are set.

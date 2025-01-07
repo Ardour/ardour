@@ -15,7 +15,7 @@
 ;                "owner" field is otherwise ignored.
 ;
 ;                If the group name starts with "-", the binding will not appear
-;                on the cheetsheet.
+;                on the cheatsheet.
 ;
 ; @group|action|binding|description -> defines an action+binding with description, as a member of a binding group
 ;                                       if group starts with '-' it will not be printed in the cheatsheet.

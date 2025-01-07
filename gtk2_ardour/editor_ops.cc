@@ -1635,7 +1635,7 @@ Editor::scroll_down_one_track (bool skip_child_views)
 				if (dev.first) {
 					/* some automation lane is currently at the top */
 					if (ci == kids.rbegin()) {
-						/* first (bottom-most) autmation lane is at the top.
+						/* first (bottom-most) automation lane is at the top.
 						 * -> move to next track
 						 */
 						nkid = kids.rend();
@@ -1707,7 +1707,7 @@ Editor::scroll_up_one_track (bool skip_child_views)
 				if (dev.first) {
 					/* some automation lane is currently at the top */
 					if (ci == kids.begin()) {
-						/* first (top-most) autmation lane is at the top.
+						/* first (top-most) automation lane is at the top.
 						 * jump directly to this track's top
 						 */
 						ensure_time_axis_view_is_visible (**t, true);

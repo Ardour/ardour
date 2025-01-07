@@ -1666,7 +1666,7 @@ MidiView::start_playing_midi_chord (vector<std::shared_ptr<NoteType> > notes)
 
 	player->play ();
 
-	/* player is deleted after a timeout when its ::off() method is invokved */
+	/* player is deleted after a timeout when its ::off() method is invoked */
 }
 
 bool
