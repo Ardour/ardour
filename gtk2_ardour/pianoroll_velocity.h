@@ -16,16 +16,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk2_ardour_midi_cue_velocity_h__
-#define __gtk2_ardour_midi_cue_velocity_h__
+#ifndef __gtk2_ardour_pianoroll_velocity.h__
+#define __gtk2_ardour_pianoroll_velocity.h__
 
 #include "ghost_event.h"
 #include "velocity_display.h"
 
-class MidiCueVelocityDisplay : public VelocityDisplay
+class PianorollVelocityDisplay : public VelocityDisplay
 {
   public:
-	MidiCueVelocityDisplay (EditingContext&, MidiViewBackground&, MidiView&, ArdourCanvas::Rectangle& base_rect, Gtkmm2ext::Color oc);
+	PianorollVelocityDisplay (EditingContext&, MidiViewBackground&, MidiView&, ArdourCanvas::Rectangle& base_rect, Gtkmm2ext::Color oc);
 
 	void remove_note (NoteBase*);
 	void set_colors ();
@@ -40,4 +40,4 @@ class MidiCueVelocityDisplay : public VelocityDisplay
 	bool lollevent (GdkEvent*, GhostEvent*);
 };
 
-#endif /* __gtk2_ardour_midi_cue_velocity_h__ */
+#endif /* __gtk2_ardour_pianoroll_velocity.h__ */

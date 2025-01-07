@@ -35,7 +35,7 @@
 #include "mergeable_line.h"
 #include "midi_cue_automation_line.h"
 #include "midi_cue_view.h"
-#include "midi_cue_velocity.h"
+#include "pianoroll_velocity.h"
 #include "note.h"
 #include "ui_config.h"
 #include "velocity_display.h"
@@ -345,7 +345,7 @@ MidiCueView::update_automation_display (Evoral::Parameter const & param, Selecti
 
 				/* Create and add to automation display map */
 
-				velocity_display = new MidiCueVelocityDisplay (editing_context(), midi_context(), *this, *automation_group, 0x312244ff);
+				velocity_display = new PianorollVelocityDisplay (editing_context(), midi_context(), *this, *automation_group, 0x312244ff);
 				auto res = automation_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiVelocityAutomation, 0, 0), AutomationDisplayState (*velocity_display, true)));
 
 				ads = &((*res.first).second);

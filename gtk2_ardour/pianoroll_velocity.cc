@@ -20,24 +20,24 @@
 #include "canvas/debug.h"
 
 #include "editing_context.h"
-#include "midi_cue_velocity.h"
+#include "pianoroll_velocity.h"
 #include "note_base.h"
 #include "ui_config.h"
 
-MidiCueVelocityDisplay::MidiCueVelocityDisplay (EditingContext& ec, MidiViewBackground& background, MidiView& mv, ArdourCanvas::Rectangle& base_rect, Gtkmm2ext::Color oc)
+PianorollVelocityDisplay::PianorollVelocityDisplay (EditingContext& ec, MidiViewBackground& background, MidiView& mv, ArdourCanvas::Rectangle& base_rect, Gtkmm2ext::Color oc)
 	: VelocityDisplay (ec, background, mv, base_rect, *(_note_group = new ArdourCanvas::Container (&base_rect)), events, oc)
 {
 	CANVAS_DEBUG_NAME (_note_group, "cue velocity lolli container");
 }
 
 void
-MidiCueVelocityDisplay::set_height (double h)
+PianorollVelocityDisplay::set_height (double h)
 {
 	redisplay ();
 }
 
 void
-MidiCueVelocityDisplay::set_colors ()
+PianorollVelocityDisplay::set_colors ()
 {
 	base.set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
 
@@ -47,7 +47,7 @@ MidiCueVelocityDisplay::set_colors ()
 }
 
 void
-MidiCueVelocityDisplay::remove_note (NoteBase* nb)
+PianorollVelocityDisplay::remove_note (NoteBase* nb)
 {
 	GhostEvent::EventList::iterator f = events.find (nb->note());
 	if (f == events.end()) {
@@ -61,13 +61,13 @@ MidiCueVelocityDisplay::remove_note (NoteBase* nb)
 }
 
 bool
-MidiCueVelocityDisplay::base_event (GdkEvent* ev)
+PianorollVelocityDisplay::base_event (GdkEvent* ev)
 {
 	return editing_context.canvas_velocity_base_event (ev, &base);
 }
 
 bool
-MidiCueVelocityDisplay::lollevent (GdkEvent* ev, GhostEvent* gev)
+PianorollVelocityDisplay::lollevent (GdkEvent* ev, GhostEvent* gev)
 {
 	return editing_context.canvas_velocity_event (ev, gev->item);
 }
