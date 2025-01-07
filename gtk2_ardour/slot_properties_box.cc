@@ -52,7 +52,7 @@
 #include "audio_clip_editor.h"
 #include "audio_trigger_properties_box.h"
 
-#include "midi_cue_editor.h"
+#include "pianoroll.h"
 
 #include "slot_properties_box.h"
 

@@ -40,7 +40,7 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "midi_cue_background.h"
-#include "midi_cue_editor.h"
+#include "pianoroll.h"
 #include "midi_cue_view.h"
 #include "note_base.h"
 #include "prh.h"
@@ -57,8 +57,8 @@ using namespace ArdourWidgets;
 using namespace Gtkmm2ext;
 using namespace Temporal;
 
-MidiCueEditor::MidiCueEditor()
-	: CueEditor (X_("MIDICueEditor"))
+Pianoroll::Pianoroll()
+	: CueEditor (X_("Pianoroll"))
 	, timebar_height (15.)
 	, n_timebars (3)
 	, prh (nullptr)
@@ -84,13 +84,13 @@ MidiCueEditor::MidiCueEditor()
 	set_mouse_mode (Editing::MouseContent, true);
 }
 
-MidiCueEditor::~MidiCueEditor ()
+Pianoroll::~Pianoroll ()
 {
 	delete bindings;
 }
 
 void
-MidiCueEditor::register_actions ()
+Pianoroll::register_actions ()
 {
 	editor_actions = ActionManager::create_action_group (bindings, editor_name());
 	register_mouse_mode_actions ();
@@ -99,19 +99,19 @@ MidiCueEditor::register_actions ()
 }
 
 ArdourCanvas::GtkCanvasViewport*
-MidiCueEditor::get_canvas_viewport() const
+Pianoroll::get_canvas_viewport() const
 {
 	return _canvas_viewport;
 }
 
 ArdourCanvas::GtkCanvas*
-MidiCueEditor::get_canvas() const
+Pianoroll::get_canvas() const
 {
 	return _canvas;
 }
 
 bool
-MidiCueEditor::canvas_pre_event (GdkEvent* ev)
+Pianoroll::canvas_pre_event (GdkEvent* ev)
 {
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
@@ -128,7 +128,7 @@ MidiCueEditor::canvas_pre_event (GdkEvent* ev)
 }
 
 void
-MidiCueEditor::rebuild_parameter_button_map()
+Pianoroll::rebuild_parameter_button_map()
 {
 	parameter_button_map.clear ();
 	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiVelocityAutomation, _visible_channel), velocity_button));
@@ -142,7 +142,7 @@ MidiCueEditor::rebuild_parameter_button_map()
 }
 
 void
-MidiCueEditor::build_lower_toolbar ()
+Pianoroll::build_lower_toolbar ()
 {
 	ArdourButton::Element elements = ArdourButton::Element (ArdourButton::Text|ArdourButton::Indicator|ArdourButton::Edge|ArdourButton::Body);
 
@@ -184,23 +184,23 @@ MidiCueEditor::build_lower_toolbar ()
 	button_bar.pack_start (*cc_dropdown2, false, false);
 	button_bar.pack_start (*cc_dropdown3, false, false);
 
-	velocity_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiVelocityAutomation, 0));
-	pressure_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiChannelPressureAutomation, 0));
-	bender_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiPitchBenderAutomation, 0));
-	modulation_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL));
-	expression_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION));
+	velocity_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_button_event), ARDOUR::MidiVelocityAutomation, 0));
+	pressure_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_button_event), ARDOUR::MidiChannelPressureAutomation, 0));
+	bender_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_button_event), ARDOUR::MidiPitchBenderAutomation, 0));
+	modulation_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL));
+	expression_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION));
 
-	velocity_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_led_click), ARDOUR::MidiVelocityAutomation, 0));
-	pressure_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_led_click), ARDOUR::MidiChannelPressureAutomation, 0));
-	bender_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_led_click), ARDOUR::MidiPitchBenderAutomation, 0));
-	modulation_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_led_click), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL));
-	expression_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &MidiCueEditor::automation_led_click), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION));
+	velocity_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_led_click), ARDOUR::MidiVelocityAutomation, 0));
+	pressure_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_led_click), ARDOUR::MidiChannelPressureAutomation, 0));
+	bender_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_led_click), ARDOUR::MidiPitchBenderAutomation, 0));
+	modulation_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_led_click), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL));
+	expression_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_led_click), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION));
 
 	_toolbox.pack_start (button_bar, false, false);
 }
 
 void
-MidiCueEditor::build_upper_toolbar ()
+Pianoroll::build_upper_toolbar ()
 {
 	using namespace Gtk::Menu_Helpers;
 
@@ -279,7 +279,7 @@ MidiCueEditor::build_upper_toolbar ()
 }
 
 void
-MidiCueEditor::set_visible_channel (int n)
+Pianoroll::set_visible_channel (int n)
 {
 	_visible_channel = n;
 	visible_channel_label.set_text (string_compose (_("MIDI Channel %1"), _visible_channel + 1));
@@ -292,13 +292,13 @@ MidiCueEditor::set_visible_channel (int n)
 }
 
 void
-MidiCueEditor::build_canvas ()
+Pianoroll::build_canvas ()
 {
 	_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
 
 	_canvas = _canvas_viewport->canvas ();
 	_canvas->set_background_color (UIConfiguration::instance().color ("arrange base"));
-	_canvas->signal_event().connect (sigc::mem_fun (*this, &MidiCueEditor::canvas_pre_event), false);
+	_canvas->signal_event().connect (sigc::mem_fun (*this, &Pianoroll::canvas_pre_event), false);
 	dynamic_cast<ArdourCanvas::GtkCanvas*>(_canvas)->use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
 
 	_canvas->PreRender.connect (sigc::mem_fun(*this, &EditingContext::pre_render));
@@ -372,7 +372,7 @@ MidiCueEditor::build_canvas ()
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
 
 	bg = new CueMidiBackground (data_group);
-	_canvas_viewport->signal_size_allocate().connect (sigc::mem_fun(*this, &MidiCueEditor::canvas_allocate), false);
+	_canvas_viewport->signal_size_allocate().connect (sigc::mem_fun(*this, &Pianoroll::canvas_allocate), false);
 
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::Rectangle (data_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
@@ -384,7 +384,7 @@ MidiCueEditor::build_canvas ()
 	prh = new ArdourCanvas::PianoRollHeader (v_scroll_group, *bg);
 
 	view = new MidiCueView (nullptr, *data_group, *no_scroll_group, *this, *bg, 0xff0000ff);
-	view->AutomationStateChange.connect (sigc::mem_fun (*this, &MidiCueEditor::automation_state_changed));
+	view->AutomationStateChange.connect (sigc::mem_fun (*this, &Pianoroll::automation_state_changed));
 
 	bg->set_view (view);
 	prh->set_view (view);
@@ -421,7 +421,7 @@ MidiCueEditor::build_canvas ()
 }
 
 void
-MidiCueEditor::bindings_changed ()
+Pianoroll::bindings_changed ()
 {
 	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
 	Bindings* shared_bindings = Bindings::get_bindings (X_("Editing"));
@@ -431,7 +431,7 @@ MidiCueEditor::bindings_changed ()
 }
 
 void
-MidiCueEditor::maybe_update ()
+Pianoroll::maybe_update ()
 {
 	if (!_track) {
 		return;
@@ -451,7 +451,7 @@ MidiCueEditor::maybe_update ()
 }
 
 bool
-MidiCueEditor::canvas_enter_leave (GdkEventCrossing* ev)
+Pianoroll::canvas_enter_leave (GdkEventCrossing* ev)
 {
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
@@ -475,7 +475,7 @@ MidiCueEditor::canvas_enter_leave (GdkEventCrossing* ev)
 }
 
 void
-MidiCueEditor::canvas_allocate (Gtk::Allocation alloc)
+Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 {
 	_visible_canvas_width = alloc.get_width();
 	_visible_canvas_height = alloc.get_height();
@@ -489,14 +489,14 @@ MidiCueEditor::canvas_allocate (Gtk::Allocation alloc)
 }
 
 timepos_t
-MidiCueEditor::snap_to_grid (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref) const
+Pianoroll::snap_to_grid (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref) const
 {
 	/* BBT time only */
 	return snap_to_bbt (presnap, direction, gpref);
 }
 
 void
-MidiCueEditor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap) const
+Pianoroll::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap) const
 {
 	UIConfiguration const& uic (UIConfiguration::instance ());
 	const timepos_t presnap = start;
@@ -528,7 +528,7 @@ MidiCueEditor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction
 }
 
 void
-MidiCueEditor::set_samples_per_pixel (samplecnt_t spp)
+Pianoroll::set_samples_per_pixel (samplecnt_t spp)
 {
 	CueEditor::set_samples_per_pixel (spp);
 
@@ -542,91 +542,91 @@ MidiCueEditor::set_samples_per_pixel (samplecnt_t spp)
 }
 
 samplecnt_t
-MidiCueEditor::current_page_samples() const
+Pianoroll::current_page_samples() const
 {
 	return (samplecnt_t) _visible_canvas_width* samples_per_pixel;
 }
 
 bool
-MidiCueEditor::canvas_bg_event (GdkEvent* event, ArdourCanvas::Item* item)
+Pianoroll::canvas_bg_event (GdkEvent* event, ArdourCanvas::Item* item)
 {
 	return typed_event (item, event, RegionItem);
 }
 
 bool
-MidiCueEditor::canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item* item, ControlPoint* cp)
+Pianoroll::canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item* item, ControlPoint* cp)
 {
 	return typed_event (item, event, ControlPointItem);
 }
 
 bool
-MidiCueEditor::canvas_note_event (GdkEvent* event, ArdourCanvas::Item* item)
+Pianoroll::canvas_note_event (GdkEvent* event, ArdourCanvas::Item* item)
 {
 	return typed_event (item, event, NoteItem);
 }
 
 bool
-MidiCueEditor::canvas_velocity_base_event (GdkEvent* event, ArdourCanvas::Item* item)
+Pianoroll::canvas_velocity_base_event (GdkEvent* event, ArdourCanvas::Item* item)
 {
 	return typed_event (item, event, VelocityBaseItem);
 }
 
 bool
-MidiCueEditor::canvas_velocity_event (GdkEvent* event, ArdourCanvas::Item* item)
+Pianoroll::canvas_velocity_event (GdkEvent* event, ArdourCanvas::Item* item)
 {
 	return typed_event (item, event, VelocityItem);
 }
 
 bool
-MidiCueEditor::canvas_cue_start_event (GdkEvent* event, ArdourCanvas::Item* item)
+Pianoroll::canvas_cue_start_event (GdkEvent* event, ArdourCanvas::Item* item)
 {
 	return typed_event (item, event, ClipStartItem);
 }
 
 bool
-MidiCueEditor::canvas_cue_end_event (GdkEvent* event, ArdourCanvas::Item* item)
+Pianoroll::canvas_cue_end_event (GdkEvent* event, ArdourCanvas::Item* item)
 {
 	return typed_event (item, event, ClipEndItem);
 }
 
 void
-MidiCueEditor::set_trigger_start (Temporal::timepos_t const & p)
+Pianoroll::set_trigger_start (Temporal::timepos_t const & p)
 {
 	ref.trigger()->the_region()->trim_front (p);
 }
 
 void
-MidiCueEditor::set_trigger_end (Temporal::timepos_t const & p)
+Pianoroll::set_trigger_end (Temporal::timepos_t const & p)
 {
 	ref.trigger()->the_region()->trim_end (p);
 }
 
 Gtk::Widget&
-MidiCueEditor::viewport()
+Pianoroll::viewport()
 {
 	return *_canvas_viewport;
 }
 
 Gtk::Widget&
-MidiCueEditor::toolbox ()
+Pianoroll::toolbox ()
 {
 	return _toolbox;
 }
 
 void
-MidiCueEditor::data_captured (samplecnt_t total_duration)
+Pianoroll::data_captured (samplecnt_t total_duration)
 {
 	data_capture_duration = total_duration;
 
 	if (!idle_update_queued.exchange (1)) {
-		Glib::signal_idle().connect (sigc::mem_fun (*this, &MidiCueEditor::idle_data_captured));
+		Glib::signal_idle().connect (sigc::mem_fun (*this, &Pianoroll::idle_data_captured));
 	}
 
 	_playhead_cursor->set_position (data_capture_duration);
 }
 
 bool
-MidiCueEditor::idle_data_captured ()
+Pianoroll::idle_data_captured ()
 {
 	double where = sample_to_pixel_unrounded (data_capture_duration);
 
@@ -642,12 +642,12 @@ MidiCueEditor::idle_data_captured ()
 }
 
 void
-MidiCueEditor::box_rec_enable_change (ARDOUR::TriggerBox const & b)
+Pianoroll::box_rec_enable_change (ARDOUR::TriggerBox const & b)
 {
 }
 
 void
-MidiCueEditor::trigger_rec_enable_change (ARDOUR::Trigger const & t)
+Pianoroll::trigger_rec_enable_change (ARDOUR::Trigger const & t)
 {
 	if (!t.armed()) {
 		view->end_write ();
@@ -655,7 +655,7 @@ MidiCueEditor::trigger_rec_enable_change (ARDOUR::Trigger const & t)
 }
 
 bool
-MidiCueEditor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+Pianoroll::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	switch (event->button.button) {
 	case 1:
@@ -679,7 +679,7 @@ MidiCueEditor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, 
 }
 
 bool
-MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	NoteBase* note = nullptr;
 
@@ -772,13 +772,13 @@ MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event
 }
 
 bool
-MidiCueEditor::button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType)
+Pianoroll::button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType)
 {
 	return true;
 }
 
 bool
-MidiCueEditor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	if (!Keyboard::is_context_menu_event (&event->button)) {
 
@@ -810,7 +810,7 @@ MidiCueEditor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event
 }
 
 bool
-MidiCueEditor::button_press_dispatch (GdkEventButton* ev)
+Pianoroll::button_press_dispatch (GdkEventButton* ev)
 {
 	/* this function is intended only for buttons 4 and above. */
 
@@ -819,7 +819,7 @@ MidiCueEditor::button_press_dispatch (GdkEventButton* ev)
 }
 
 bool
-MidiCueEditor::button_release_dispatch (GdkEventButton* ev)
+Pianoroll::button_release_dispatch (GdkEventButton* ev)
 {
 	/* this function is intended only for buttons 4 and above. */
 
@@ -828,7 +828,7 @@ MidiCueEditor::button_release_dispatch (GdkEventButton* ev)
 }
 
 bool
-MidiCueEditor::motion_handler (ArdourCanvas::Item*, GdkEvent* event, bool from_autoscroll)
+Pianoroll::motion_handler (ArdourCanvas::Item*, GdkEvent* event, bool from_autoscroll)
 {
 	if (_drags->active ()) {
 		//drags change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor
@@ -839,7 +839,7 @@ MidiCueEditor::motion_handler (ArdourCanvas::Item*, GdkEvent* event, bool from_a
 }
 
 bool
-MidiCueEditor::key_press_handler (ArdourCanvas::Item*, GdkEvent* ev, ItemType)
+Pianoroll::key_press_handler (ArdourCanvas::Item*, GdkEvent* ev, ItemType)
 {
 
 	switch (ev->key.keyval) {
@@ -855,13 +855,13 @@ MidiCueEditor::key_press_handler (ArdourCanvas::Item*, GdkEvent* ev, ItemType)
 }
 
 bool
-MidiCueEditor::key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
+Pianoroll::key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
 {
 	return true;
 }
 
 void
-MidiCueEditor::set_mouse_mode (Editing::MouseMode m, bool force)
+Pianoroll::set_mouse_mode (Editing::MouseMode m, bool force)
 {
 	if (m != Editing::MouseDraw && m != Editing::MouseContent) {
 		return;
@@ -871,24 +871,24 @@ MidiCueEditor::set_mouse_mode (Editing::MouseMode m, bool force)
 }
 
 void
-MidiCueEditor::step_mouse_mode (bool next)
+Pianoroll::step_mouse_mode (bool next)
 {
 }
 
 Editing::MouseMode
-MidiCueEditor::current_mouse_mode () const
+Pianoroll::current_mouse_mode () const
 {
 	return mouse_mode;
 }
 
 bool
-MidiCueEditor::internal_editing() const
+Pianoroll::internal_editing() const
 {
 	return true;
 }
 
 RegionSelection
-MidiCueEditor::region_selection()
+Pianoroll::region_selection()
 {
 	RegionSelection rs;
 	return rs;
@@ -904,7 +904,7 @@ edit_last_mark_label (std::vector<ArdourCanvas::Ruler::Mark>& marks, const std::
 }
 
 void
-MidiCueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, samplepos_t leftmost, samplepos_t rightmost, gint /*maxchars*/)
+Pianoroll::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, samplepos_t leftmost, samplepos_t rightmost, gint /*maxchars*/)
 {
 	if (_session == 0) {
 		return;
@@ -1247,7 +1247,7 @@ MidiCueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sa
 
 
 void
-MidiCueEditor::mouse_mode_toggled (Editing::MouseMode m)
+Pianoroll::mouse_mode_toggled (Editing::MouseMode m)
 {
 	Glib::RefPtr<Gtk::Action>       act  = get_mouse_mode_action (m);
 	Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
@@ -1272,14 +1272,14 @@ MidiCueEditor::mouse_mode_toggled (Editing::MouseMode m)
 }
 
 int
-MidiCueEditor::set_state (XMLNode const & node, int version)
+Pianoroll::set_state (XMLNode const & node, int version)
 {
 	set_common_editing_state (node);
 	return 0;
 }
 
 XMLNode&
-MidiCueEditor::get_state () const
+Pianoroll::get_state () const
 {
 	XMLNode* node (new XMLNode (_("MIDICueEditor")));
 	get_common_editing_state (*node);
@@ -1292,7 +1292,7 @@ MidiCueEditor::get_state () const
  *
  */
 void
-MidiCueEditor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
+Pianoroll::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 {
 	if (!UIConfiguration::instance().get_autoscroll_editor () || autoscroll_active ()) {
 		return;
@@ -1369,13 +1369,13 @@ MidiCueEditor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_he
 }
 
 bool
-MidiCueEditor::autoscroll_active () const
+Pianoroll::autoscroll_active () const
 {
 	return autoscroll_connection.connected ();
 }
 
 bool
-MidiCueEditor::autoscroll_canvas ()
+Pianoroll::autoscroll_canvas ()
 {
 	using std::max;
 	using std::min;
@@ -1575,7 +1575,7 @@ MidiCueEditor::autoscroll_canvas ()
 }
 
 void
-MidiCueEditor::start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary)
+Pianoroll::start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary)
 {
 	if (!_session) {
 		return;
@@ -1594,18 +1594,18 @@ MidiCueEditor::start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const
 
 	/* scroll again at very very roughly 30FPS */
 
-	autoscroll_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &MidiCueEditor::autoscroll_canvas), 30);
+	autoscroll_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &Pianoroll::autoscroll_canvas), 30);
 }
 
 void
-MidiCueEditor::stop_canvas_autoscroll ()
+Pianoroll::stop_canvas_autoscroll ()
 {
 	autoscroll_connection.disconnect ();
 	autoscroll_cnt = 0;
 }
 
 void
-MidiCueEditor::visual_changer (const VisualChange& vc)
+Pianoroll::visual_changer (const VisualChange& vc)
 {
 	/**
 	 * Changed first so the correct horizontal canvas position is calculated in
@@ -1651,7 +1651,7 @@ MidiCueEditor::visual_changer (const VisualChange& vc)
 }
 
 void
-MidiCueEditor::on_samples_per_pixel_changed ()
+Pianoroll::on_samples_per_pixel_changed ()
 {
 	if (view) {
 		view->set_samples_per_pixel (samples_per_pixel);
@@ -1659,7 +1659,7 @@ MidiCueEditor::on_samples_per_pixel_changed ()
 }
 
 void
-MidiCueEditor::midi_action (void (MidiView::*method)())
+Pianoroll::midi_action (void (MidiView::*method)())
 {
 	if (!view) {
 		return;
@@ -1669,7 +1669,7 @@ MidiCueEditor::midi_action (void (MidiView::*method)())
 }
 
 void
-MidiCueEditor::escape ()
+Pianoroll::escape ()
 {
 	if (!view) {
 		return;
@@ -1678,13 +1678,13 @@ MidiCueEditor::escape ()
 	view->clear_note_selection ();
 }
 Gdk::Cursor*
-MidiCueEditor::which_track_cursor () const
+Pianoroll::which_track_cursor () const
 {
 	return _cursors->grabber;
 }
 
 Gdk::Cursor*
-MidiCueEditor::which_mode_cursor () const
+Pianoroll::which_mode_cursor () const
 {
 	Gdk::Cursor* mode_cursor = MouseCursors::invalid_cursor ();
 
@@ -1705,7 +1705,7 @@ MidiCueEditor::which_mode_cursor () const
 }
 
 Gdk::Cursor*
-MidiCueEditor::which_trim_cursor (bool left_side) const
+Pianoroll::which_trim_cursor (bool left_side) const
 {
 	abort ();
 	/*NOTREACHED*/
@@ -1714,7 +1714,7 @@ MidiCueEditor::which_trim_cursor (bool left_side) const
 
 
 Gdk::Cursor*
-MidiCueEditor::which_canvas_cursor (ItemType type) const
+Pianoroll::which_canvas_cursor (ItemType type) const
 {
 	Gdk::Cursor* cursor = which_mode_cursor ();
 
@@ -1794,7 +1794,7 @@ MidiCueEditor::which_canvas_cursor (ItemType type) const
 }
 
 bool
-MidiCueEditor::enter_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
+Pianoroll::enter_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
 {
 	choose_canvas_cursor_on_entry (item_type);
 
@@ -1823,7 +1823,7 @@ MidiCueEditor::enter_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType i
 }
 
 bool
-MidiCueEditor::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
+Pianoroll::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
 {
 	EditorAutomationLine* al;
 
@@ -1854,7 +1854,7 @@ MidiCueEditor::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType i
 }
 
 std::list<SelectableOwner*>
-MidiCueEditor::selectable_owners()
+Pianoroll::selectable_owners()
 {
 	if (view) {
 		return view->selectable_owners();
@@ -1864,7 +1864,7 @@ MidiCueEditor::selectable_owners()
 }
 
 void
-MidiCueEditor::trigger_prop_change (PBD::PropertyChange const & what_changed)
+Pianoroll::trigger_prop_change (PBD::PropertyChange const & what_changed)
 {
 	if (what_changed.contains (Properties::region)) {
 		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (ref.trigger()->the_region());
@@ -1875,7 +1875,7 @@ MidiCueEditor::trigger_prop_change (PBD::PropertyChange const & what_changed)
 }
 
 void
-MidiCueEditor::set (TriggerReference & tref)
+Pianoroll::set (TriggerReference & tref)
 {
 	_update_connection.disconnect ();
 	object_connections.drop_connections ();
@@ -1884,7 +1884,7 @@ MidiCueEditor::set (TriggerReference & tref)
 
 	idle_update_queued.store (0);
 
-	ref.box()->Captured.connect (object_connections, invalidator (*this), std::bind (&MidiCueEditor::data_captured, this, _1), gui_context());
+	ref.box()->Captured.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::data_captured, this, _1), gui_context());
 	/* Don't bind a shared_ptr<TriggerBox> within the lambda */
 	TriggerBox* tb (ref.box().get());
 	tb->RecEnableChanged.connect (object_connections, invalidator (*this), [&, tb]() { box_rec_enable_change (*tb); }, gui_context());
@@ -1896,9 +1896,9 @@ MidiCueEditor::set (TriggerReference & tref)
 
 	view->set_track (_track);
 
-	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &MidiCueEditor::maybe_update));
-	_track->DropReferences.connect (object_connections, invalidator (*this), std::bind (&MidiCueEditor::unset, this), gui_context());
-	ref.trigger()->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&MidiCueEditor::trigger_prop_change, this, _1), gui_context());
+	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Pianoroll::maybe_update));
+	_track->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this), gui_context());
+	ref.trigger()->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_prop_change, this, _1), gui_context());
 
 	if (ref.trigger()->the_region()) {
 
@@ -1911,7 +1911,7 @@ MidiCueEditor::set (TriggerReference & tref)
 }
 
 void
-MidiCueEditor::unset ()
+Pianoroll::unset ()
 {
 	_update_connection.disconnect();
 	object_connections.drop_connections ();
@@ -1921,7 +1921,7 @@ MidiCueEditor::unset ()
 }
 
 void
-MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
+Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 {
 	if (!r) {
 		view->set_region (nullptr);
@@ -1964,7 +1964,7 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 }
 
 bool
-MidiCueEditor::automation_button_event (GdkEventButton* ev, Evoral::ParameterType type, int id)
+Pianoroll::automation_button_event (GdkEventButton* ev, Evoral::ParameterType type, int id)
 {
 	if (ev->button != 1) {
 		return false;
@@ -1992,7 +1992,7 @@ MidiCueEditor::automation_button_event (GdkEventButton* ev, Evoral::ParameterTyp
 }
 
 void
-MidiCueEditor::automation_led_click (GdkEventButton* ev, Evoral::ParameterType type, int id)
+Pianoroll::automation_led_click (GdkEventButton* ev, Evoral::ParameterType type, int id)
 {
 	if (ev->button != 1) {
 		return;
@@ -2004,7 +2004,7 @@ MidiCueEditor::automation_led_click (GdkEventButton* ev, Evoral::ParameterType t
 }
 
 void
-MidiCueEditor::automation_state_changed ()
+Pianoroll::automation_state_changed ()
 {
 	assert (view);
 
@@ -2030,7 +2030,7 @@ MidiCueEditor::automation_state_changed ()
 }
 
 void
-MidiCueEditor::note_mode_clicked ()
+Pianoroll::note_mode_clicked ()
 {
 	assert (bg);
 
@@ -2042,7 +2042,7 @@ MidiCueEditor::note_mode_clicked ()
 }
 
 void
-MidiCueEditor::set_note_mode (NoteMode nm)
+Pianoroll::set_note_mode (NoteMode nm)
 {
 	assert (bg);
 
@@ -2057,7 +2057,7 @@ MidiCueEditor::set_note_mode (NoteMode nm)
 }
 
 void
-MidiCueEditor::build_zoom_focus_menu ()
+Pianoroll::build_zoom_focus_menu ()
 {
 	using namespace Gtk::Menu_Helpers;
 	using namespace Editing;
@@ -2071,7 +2071,7 @@ MidiCueEditor::build_zoom_focus_menu ()
 
 
 std::pair<Temporal::timepos_t,Temporal::timepos_t>
-MidiCueEditor::max_zoom_extent() const
+Pianoroll::max_zoom_extent() const
 {
 	if (view && view->midi_region()) {
 		return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (view->midi_region()->midi_source()->length().beats()));
@@ -2081,7 +2081,7 @@ MidiCueEditor::max_zoom_extent() const
 }
 
 void
-MidiCueEditor::full_zoom_clicked()
+Pianoroll::full_zoom_clicked()
 {
 	/* XXXX NEED LOCAL TEMPO MAP */
 

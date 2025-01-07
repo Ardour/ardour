@@ -47,7 +47,7 @@
 #include "editor.h"
 #include "gui_thread.h"
 #include "public_editor.h"
-#include "midi_cue_editor.h"
+#include "pianoroll.h"
 #include "timers.h"
 #include "trigger_page.h"
 #include "trigger_strip.h"
@@ -138,7 +138,7 @@ TriggerPage::TriggerPage ()
 	add_sidebar_page (_("Sources"), _trigger_source_list.widget ());
 	add_sidebar_page (_("Regions"), _trigger_region_list.widget ());
 
-	_midi_editor = new MidiCueEditor;
+	_midi_editor = new Pianoroll;
 
 	/* Bottom -- Properties of selected Slot/Region */
 	Gtk::Table* table = manage (new Gtk::Table);

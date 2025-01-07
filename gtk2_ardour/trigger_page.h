@@ -45,7 +45,7 @@
 #include "trigger_master.h"
 
 class TriggerStrip;
-class MidiCueEditor;
+class Pianoroll;
 
 class TriggerPage : public ArdourWidgets::Tabbable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList, public AxisViewProvider
 {
@@ -142,7 +142,7 @@ private:
 	AudioClipEditorBox        _audio_trim_box;
 #endif
 
-	MidiCueEditor*           _midi_editor;
+	Pianoroll*           _midi_editor;
 
 	RouteProcessorSelection  _selection;
 	std::list<TriggerStrip*> _strips;

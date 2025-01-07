@@ -70,7 +70,7 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "mergeable_line.h"
-#include "midi_cue_editor.h"
+#include "pianoroll.h"
 #include "midi_region_view.h"
 #include "midi_selection.h"
 #include "midi_time_axis.h"
@@ -7544,7 +7544,7 @@ VelocityLineDrag::aborted (bool)
 	vd->end_line_drag (false);
 }
 
-ClipStartDrag::ClipStartDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, MidiCueEditor& m)
+ClipStartDrag::ClipStartDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Pianoroll& m)
 	: Drag (ec, &r, Temporal::BeatTime, nullptr, false)
 	, mce (m)
 	, dragging_rect (&r)
@@ -7606,7 +7606,7 @@ ClipStartDrag::aborted (bool)
 	dragging_rect->set (original_rect);
 }
 
-ClipEndDrag::ClipEndDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, MidiCueEditor& m)
+ClipEndDrag::ClipEndDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Pianoroll& m)
 	: Drag (ec, &r, Temporal::BeatTime, nullptr, false)
 	, mce (m)
 	, dragging_rect (&r)

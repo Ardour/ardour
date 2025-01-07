@@ -46,7 +46,7 @@ namespace ARDOUR {
 class TriggerPropertiesBox;
 class RegionPropertiesBox;
 class RegionOperationsBox;
-class MidiCueEditor;
+class Pianoroll;
 class ClipEditorBox;
 
 class SlotPropertyTable : public TriggerUI, public Gtk::Table

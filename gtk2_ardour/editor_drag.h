@@ -69,7 +69,7 @@ class EditingContext;
 class Editor;
 class EditorCursor;
 class TimeAxisView;
-class MidiCueEditor;
+class Pianoroll;
 class MidiTimeAxisView;
 class Drag;
 class NoteBase;
@@ -1642,7 +1642,7 @@ class VelocityLineDrag : public FreehandLineDrag<Evoral::ControlList::OrderedPoi
 class ClipStartDrag : public Drag
 {
   public:
-	ClipStartDrag (EditingContext&, ArdourCanvas::Rectangle &, MidiCueEditor& m);
+	ClipStartDrag (EditingContext&, ArdourCanvas::Rectangle &, Pianoroll& m);
 	~ClipStartDrag ();
 
 	void start_grab (GdkEvent*,Gdk::Cursor*);
@@ -1652,7 +1652,7 @@ class ClipStartDrag : public Drag
 	void aborted (bool);
 
   private:
-	MidiCueEditor& mce;
+	Pianoroll& mce;
 	ArdourCanvas::Rectangle* dragging_rect;
 	ArdourCanvas::Rect original_rect;
 };
@@ -1660,7 +1660,7 @@ class ClipStartDrag : public Drag
 class ClipEndDrag : public Drag
 {
   public:
-	ClipEndDrag (EditingContext&, ArdourCanvas::Rectangle &, MidiCueEditor& m);
+	ClipEndDrag (EditingContext&, ArdourCanvas::Rectangle &, Pianoroll& m);
 	~ClipEndDrag ();
 
 	void start_grab (GdkEvent*,Gdk::Cursor*);
@@ -1670,7 +1670,7 @@ class ClipEndDrag : public Drag
 	void aborted (bool);
 
   private:
-	MidiCueEditor& mce;
+	Pianoroll& mce;
 	ArdourCanvas::Rectangle* dragging_rect;
 	ArdourCanvas::Rect original_rect;
 };

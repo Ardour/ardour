@@ -47,11 +47,11 @@ namespace ArdourWidgets {
 class MidiCueView;
 class CueMidiBackground;
 
-class MidiCueEditor : public CueEditor
+class Pianoroll : public CueEditor
 {
   public:
-	MidiCueEditor ();
-	~MidiCueEditor ();
+	Pianoroll ();
+	~Pianoroll ();
 
 	ArdourCanvas::Container* get_trackview_group () const { return data_group; }
 	ArdourCanvas::Container* get_noscroll_group() const { return no_scroll_group; }
@@ -219,14 +219,14 @@ class MidiCueEditor : public CueEditor
 	class BBTMetric : public ArdourCanvas::Ruler::Metric
 	{
 	  public:
-		BBTMetric (MidiCueEditor& ec) : context (&ec) {}
+		BBTMetric (Pianoroll& ec) : context (&ec) {}
 
 		void get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const {
 			context->metric_get_bbt (marks, lower, upper, maxchars);
 		}
 
 	  private:
-		MidiCueEditor* context;
+		Pianoroll* context;
 	};
 
 	BBTMetric bbt_metric;
