@@ -20,76 +20,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "midi_cue_background.h"
-#include "midi_view.h"
+#ifndef __gtk2_ardour_pianoroll_background.h__
+#define __gtk2_ardour_pianoroll_background.h__
 
-CueMidiBackground::CueMidiBackground (ArdourCanvas::Item* parent)
-	: MidiViewBackground (parent)
-	, view (nullptr)
-	, _width (0.)
-	, _height (0.)
+#include <cstdint>
+
+#include <gtkmm/adjustment.h>
+
+#include "ardour/types.h"
+
+#include "midi_view_background.h"
+
+class MidiView;
+
+class CueMidiBackground : public MidiViewBackground
 {
-}
+  public:
+	CueMidiBackground (ArdourCanvas::Item* parent);
+	~CueMidiBackground ();
 
-CueMidiBackground::~CueMidiBackground ()
-{
-}
+	double height() const;
+	double width() const;
+	double contents_height() const;
 
-void
-CueMidiBackground::set_size (double w, double h)
-{
-	_width = w;
-	_height = h;
+	uint8_t get_preferred_midi_channel () const;
+	void set_note_highlight (bool);
+	void record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t);
 
-	update_contents_height ();
+	void set_size (double w, double h);
+	void set_view (MidiView*);
 
-	HeightChanged (); /* EMIT SIGNAL */
-}
+  protected:
+	MidiView* view;
+	double _width;
+	double _height;
 
-double
-CueMidiBackground::contents_height() const
-{
-	return _height;
-}
+	void apply_note_range_to_children();
+};
 
-double
-CueMidiBackground::height() const
-{
-	return _height;
-}
 
-double
-CueMidiBackground::width() const
-{
-	return _width;
-}
-
-uint8_t
-CueMidiBackground::get_preferred_midi_channel () const
-{
-	return 0;
-}
-
-void
-CueMidiBackground::set_note_highlight (bool yn)
-{
-}
-
-void
-CueMidiBackground::record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t)
-{
-}
-
-void
-CueMidiBackground::set_view (MidiView* mv)
-{
-	view = mv;
-}
-
-void
-CueMidiBackground::apply_note_range_to_children ()
-{
-	if (view) {
-		view->apply_note_range (lowest_note(), highest_note());
-	}
-}
+#endif /* __gtk2_ardour_pianoroll_background.h__ */

@@ -39,7 +39,7 @@
 #include "editor_drag.h"
 #include "gui_thread.h"
 #include "keyboard.h"
-#include "midi_cue_background.h"
+#include "pianoroll_background.h"
 #include "pianoroll.h"
 #include "midi_cue_view.h"
 #include "note_base.h"
