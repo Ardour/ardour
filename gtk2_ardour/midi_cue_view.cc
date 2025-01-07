@@ -350,7 +350,7 @@ MidiCueView::update_automation_display (Evoral::Parameter const & param, Selecti
 			                                                   ac->desc()));
 			line->set_sensitive (false);
 
-			AutomationDisplayState cad (ac, line, true);
+			AutomationDisplayState cad (ac, line, false);
 
 			auto res = automation_map.insert (std::make_pair (param, cad));
 
