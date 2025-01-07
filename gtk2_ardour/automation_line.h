@@ -114,7 +114,7 @@ public:
 	guint32 height()  const { return _height; }
 
 	void set_line_color (std::string const & color, std::string color_mode = std::string());
-	void set_line_color (uint32_t color);
+	void set_insensitive_line_color (uint32_t color);
 	uint32_t get_line_color() const;
 	uint32_t get_line_fill_color() const;
 	uint32_t get_line_selected_color() const;
@@ -195,6 +195,7 @@ protected:
 	guint32        _height;
 	std::string    _line_color_name;
 	std::string    _line_color_mod;
+	uint32_t       _insensitive_line_color;
 	uint32_t       _view_index_offset;
 	std::shared_ptr<ARDOUR::AutomationList> alist;
 

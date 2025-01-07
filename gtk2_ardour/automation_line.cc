@@ -94,6 +94,7 @@ AutomationLine::AutomationLine (const string&                   name,
 	:_name (name)
 	, _height (0)
 	, _line_color_name ("automation line")
+	, _insensitive_line_color (0x0)
 	, _view_index_offset (0)
 	, alist (al)
 	, _visible (Line)
@@ -147,11 +148,7 @@ AutomationLine::set_sensitive (bool yn)
 {
 	_sensitive = yn;
 
-	if (yn) {
-		set_line_color (_line_color_name);
-	} else {
-		set_line_color (UIConfiguration::instance().color ("nonexistent"));
-	}
+	set_line_color (_line_color_name, _line_color_mod);
 
 	for (auto & cp : control_points) {
 		if (yn) {
@@ -299,14 +296,15 @@ void
 AutomationLine::set_line_color (string const & color_name, string color_mod)
 {
 	_line_color_name = color_name;
+	_line_color_mod = color_mod;
 
 	if (_sensitive) {
 		line->set_outline_color (UIConfiguration::instance().color (color_name));
 	} else {
-		line->set_outline_color (UIConfiguration::instance().color (color_name + " insensitive"));
+		line->set_outline_color (_insensitive_line_color);
 	}
 
-	/* The fill color is used to shade the area under some
+	/* The fill color (and thus the color_mod) is used to shade the area under some
 	 * automation lines
 	 */
 
@@ -331,16 +329,9 @@ AutomationLine::set_colors ()
 }
 
 void
-AutomationLine::set_line_color (uint32_t color)
+AutomationLine::set_insensitive_line_color (uint32_t color)
 {
-	line->set_outline_color (color);
-	line->set_fill (false);
-
-	if (_control_points_inherit_color) {
-		for (auto & cp : control_points) {
-			cp->set_color ();
-		}
-	}
+	_insensitive_line_color = color;
 }
 
 uint32_t

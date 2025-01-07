@@ -125,4 +125,5 @@ class MidiCueView : public MidiView
 	void unset_active_automation ();
 
 	bool midi_canvas_group_event (GdkEvent*);
+	Gtkmm2ext::Color line_color_for (Evoral::Parameter const &);
 };

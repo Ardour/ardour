@@ -280,6 +280,28 @@ MidiCueView::swap_automation_channel (int new_channel)
 	}
 }
 
+Gtkmm2ext::Color
+MidiCueView::line_color_for (Evoral::Parameter const & param)
+{
+	UIConfiguration& uic (UIConfiguration::instance());
+
+	switch (param.type()) {
+	case MidiCCAutomation:
+		switch (param.id()) {
+		case MIDI_CTL_MSB_EXPRESSION:
+			return uic.color ("pianoroll: insensitive expression line");
+		case MIDI_CTL_MSB_MODWHEEL:
+			return uic.color ("pianoroll: insensitive modulation line");
+		}
+		break;
+	case MidiPitchBenderAutomation:
+		return uic.color ("pianoroll: insensitive bender line");
+	case MidiChannelPressureAutomation:
+		return uic.color ("pianoroll: insensitive pressure line");
+	}
+
+	return 0xff0000ff;
+}
 void
 MidiCueView::update_automation_display (Evoral::Parameter const & param, SelectionOperation op)
 {
@@ -349,6 +371,7 @@ MidiCueView::update_automation_display (Evoral::Parameter const & param, Selecti
 			                                                   ac->alist(),
 			                                                   ac->desc()));
 			line->set_sensitive (false);
+			line->set_insensitive_line_color (line_color_for (param));
 
 			AutomationDisplayState cad (ac, line, false);
 
