@@ -1256,7 +1256,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		 * Hidden tracks at the bottom of the TAV need to be skipped.
 		 *
 		 * This also handles the case if the mouse entered the DZ
-		 * in a large step (exessive delta), either due to fast-movement,
+		 * in a large step (excessive delta), either due to fast-movement,
 		 * autoscroll, laggy UI. _ddropzone copensates for that (see "move into dz" above)
 		 */
 		if (delta_time_axis_view < 0 && (int)_ddropzone - delta_time_axis_view >= (int)_pdropzone) {
@@ -2855,7 +2855,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		non_overlap_trim = true;
 	}
 
-	/* contstrain trim to fade length */
+	/* constrain trim to fade length */
 	if (_preserve_fade_anchor) {
 		/* fades are audio and always use AudioTime domain */
 
@@ -3336,7 +3336,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	} else if (_movable) {
 		timepos_t pos = adjusted_current_time (event);
 
-		/* This relies on the tempo map to round up the beat postiion
+		/* This relies on the tempo map to round up the beat position
 		 * and see if that differs from the current position (tempo
 		 * markers only allowed on beat)
 		 */
@@ -3984,7 +3984,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 		}
 	}
 
-	/* during fake-locate, the mouse position is delievered to the (red) playhead line, so we have to momentarily sensitize it */
+	/* during fake-locate, the mouse position is delivered to the (red) playhead line, so we have to momentarily sensitize it */
 	editing_context.playhead_cursor ()->set_sensitive (true);
 
 	fake_locate (where.earlier (snap_delta (event->button.state)).samples ());

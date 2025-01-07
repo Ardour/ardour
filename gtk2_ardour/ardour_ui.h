@@ -647,7 +647,7 @@ private:
 	bool process_snapshot_session_prompter (ArdourWidgets::Prompter& prompter, bool switch_to_it);
 	void snapshot_session (bool switch_to_it);
 
-	void quick_snapshot_session (bool switch_to_it);  //does not promtp for name, just makes a timestamped file
+	void quick_snapshot_session (bool switch_to_it);  //does not prompt for name, just makes a timestamped file
 
 	SaveAsDialog* save_as_dialog;
 

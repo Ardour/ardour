@@ -906,7 +906,7 @@ ARDOUR_UI::new_midi_tracer_window ()
 		t->show_all ();
 		_midi_tracer_windows.push_back (t);
 	} else {
-		/* re-use the hidden one */
+		/* reuse the hidden one */
 		(*i)->show_all ();
 	}
 }

@@ -1617,7 +1617,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			switch (item_type) {
 			case RegionItem:
 			{
-				/* since we have FreehandLineDrag we can only get here after a drag, when no movement has happend.
+				/* since we have FreehandLineDrag we can only get here after a drag, when no movement has happened.
 				 * Except when a drag was aborted by pressing Esc.
 				 */
 				if (!were_dragging) {

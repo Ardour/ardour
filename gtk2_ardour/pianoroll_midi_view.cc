@@ -505,7 +505,7 @@ MergeableLine*
 PianorollMidiView::make_merger ()
 {
 	if (active_automation && active_automation->line) {
-		std::cerr << "Mergable will use active automation @ " << active_automation << std::endl;
+		std::cerr << "Mergeable will use active automation @ " << active_automation << std::endl;
 
 		return new MergeableLine (active_automation->line, active_automation->control,
 		                          [](Temporal::timepos_t const& t) { return t; },

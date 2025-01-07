@@ -180,7 +180,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 				exit (EXIT_SUCCESS);
 			}
 #else
-			cerr << "This is not a debug build - igoring '-D " << optarg << "'" << endl;
+			cerr << "This is not a debug build - ignoring '-D " << optarg << "'" << endl;
 #endif /* NDEBUG */
 			break;
 

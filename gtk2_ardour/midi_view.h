@@ -255,7 +255,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	 * @return true iff the note is within the (time) extent of the region.
 	 */
 	virtual bool note_in_region_range(const std::shared_ptr<NoteType> note, bool& visible) const;
-	/* Test if a note is withing this region's time range. Return true if so */
+	/* Test if a note is within this region's time range. Return true if so */
 	virtual bool note_in_region_time_range(const std::shared_ptr<NoteType> note) const;
 
 	/** Get the region position in pixels relative to session. */

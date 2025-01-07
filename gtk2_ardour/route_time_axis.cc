@@ -1593,7 +1593,7 @@ RouteTimeAxisView::ensure_pan_views (bool show)
 		}
 	}
 
-	/* remove ATAV of no longer relevant pan ctrls (e.g. witdh, height); */
+	/* remove ATAV of no longer relevant pan ctrls (e.g. width, height); */
 	bool removed_one;
 	do {
 		removed_one = false;
