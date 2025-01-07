@@ -247,7 +247,7 @@ cp gtk2_ardour/icons/ArdourBug.ico $DESTDIR/share/
 # replace default cursor with square version (sans hotspot file)
 cp gtk2_ardour/icons/cursor_square/* $DESTDIR/share/${LOWERCASE_DIRNAME}/icons/
 
-# clean build-dir after depoyment
+# clean build-dir after deployment
 echo " === bundle completed, cleaning up"
 ./waf uninstall
 find $DESTDIR -name "*.dll.a" -print0 | xargs -0 -r rm

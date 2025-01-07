@@ -204,7 +204,7 @@ luabridge::getIdentityKey ()
 /* ...and this is the ugly part of it.
  *
  * We need to forward declare classes from gtk2_ardour
- * AND explicily list classes which are used by gtk2_ardour's bindings.
+ * AND explicitly list classes which are used by gtk2_ardour's bindings.
  *
  * This is required because some of the GUI classes use objects from libardour
  * as function parameters or return values and the .exe would re-create
