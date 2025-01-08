@@ -5149,21 +5149,19 @@ StartBoundaryRect::covers (ArdourCanvas::Duple const & point) const
 	ArdourCanvas::Rect self (item_to_window (_rect));
 	const double scale = UIConfiguration::instance().get_ui_scale();
 
-	/* 10-20 pixels of the right edge */
-
-	if (point.x >= self.x0  - (20. * scale) && point.x < self.x1) {
+	if ((point.x >= self.x1 - (20. * scale)) && (point.x < self.x1)) {
+		/* within 20 (scaled) pixels of the boundary, on the right */
 		return true;
 	}
 
-	const double radius = 10. * scale;
-
 	/* Approximate the semicircle handle with a square */
 
+	const double radius = 10. * scale;
 	double cy = self.y0 + (self.height() / 2.);
 
-	if (point.x >= self.x1 - (10. * scale) && point.x < self.x1 + radius &&
+	if (point.x >= self.x1 && point.x < self.x1 + radius && 
 	    point.y >= cy - radius && point.y < cy + radius) {
-		std::cerr << "\n\nWe're in! " << whoami() << std::endl;
+		/*inside rectangle that approximates the handle */
 		return true;
 	}
 
@@ -5198,19 +5196,19 @@ EndBoundaryRect::covers (ArdourCanvas::Duple const & point) const
 {
 	ArdourCanvas::Rect self (item_to_window (_rect));
 	const double scale = UIConfiguration::instance().get_ui_scale();
-	const double radius = 10. * scale;
 
-	/* 10-20 pixels of the left edge */
-
-	if (point.x >= self.x0 && point.x < self.x0 + (20. * scale)) {
+	if ((point.x >= self.x0) && (point.x < self.x0 + (20. * scale))) {
+		/* within 20 (scaled) pixels of the left edge */
 		return true;
 	}
 
 	/* Approximate the semicircle handle with a square */
 
+	const double radius = 10. * scale;
 	double cy = self.y0 + (self.height() / 2.);
-	if (point.x >= self.x0 - radius && point.x < self.x0 + (10. * scale) &&
-	    point.y >= cy - radius && point.y < cy + radius) {
+
+	if (point.x <= self.x0 && point.x >= self.x0 - radius && point.y >= cy - radius && point.y < cy + radius) {
+		/* within a rectangle approximating the handle */
 		return true;
 	}
 
