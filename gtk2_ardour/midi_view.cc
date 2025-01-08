@@ -236,7 +236,6 @@ MidiView::size_start_rect ()
 	}
 
 	double width = _editing_context.sample_to_pixel (_midi_region->start().samples());
-	std::cerr << "start is " << _midi_region->start() << " aka " << width << std::endl;
 	_start_boundary_rect->set (ArdourCanvas::Rect (0., 0., width, height()));
 }
 
