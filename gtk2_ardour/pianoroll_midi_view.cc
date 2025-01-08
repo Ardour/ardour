@@ -69,7 +69,32 @@ PianorollMidiView::PianorollMidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	event_rect->set_outline (false);
 	CANVAS_DEBUG_NAME (event_rect, "cue event rect");
 
+	/* The event rect is a sibling of canvas items that share @param
+	 * parent. Consequently, it does not get events that they do not handle
+	 * (because event propagation is up the item child->parent heirarchy,
+	 * not sideways.
+	 *
+	 * This means that if, for example, the start boundary rect doesn't
+	 * handle an event, it will propagate to @param parent. By contrast, if
+	 * the mouse pointer is not over some other type of item, an event will
+	 * be delivered to the event_rect.
+	 *
+	 * We need to capture events in both scenarios, so we connect to both
+	 * the event rect and the @param parent, with the same handler.
+	 *
+	 * The reason this is more complex than one may expect is that other
+	 * classes create items that share @param parent. Consequently, we
+	 * can't make event_rect the parent of "all items in this MidiView".
+	 * However, if we don't have an event_rect, then we can end up with
+	 * the current_item in the canvas being invalid because the canvas
+	 * cannot identify any *new* item to be the current item as the mouse
+	 * pointer moves. This means that mouse pointer motion does not change
+	 * the current_item, and this means that we do not get enter/leave
+	 * events for the current_item.
+	 */
+
 	event_rect->Event.connect (sigc::mem_fun (*this, &PianorollMidiView::midi_canvas_group_event));
+	parent.Event.connect (sigc::mem_fun (*this, &PianorollMidiView::midi_canvas_group_event));
 
 	_note_group->raise_to_top ();
 
