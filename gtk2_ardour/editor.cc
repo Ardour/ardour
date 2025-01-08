@@ -275,16 +275,10 @@ Editor::Editor ()
 	, range_marker_bar (0)
 	, section_marker_bar (0)
 	, ruler_separator (0)
-	, minsec_label (_("Mins:Secs"))
-	, bbt_label (_("Bars:Beats"))
-	, timecode_label (_("Timecode"))
-	, samples_label (_("Samples"))
-	, tempo_label (_("Tempo"))
-	, meter_label (_("Time Signature"))
-	, mark_label (_("Location Markers"))
-	, range_mark_label (_("Range Markers"))
-	, section_mark_label (_("Arrangement"))
-	, cue_mark_label (_("Cue Markers"))
+	, _ruler_btn_section_add ("+")
+	, _ruler_btn_loc_prev ("<")
+	, _ruler_btn_loc_next (">")
+	, _ruler_btn_loc_add ("+")
 	, videotl_label (_("Video Timeline"))
 	, videotl_group (0)
 	, _region_boundary_cache_dirty (true)
@@ -417,73 +411,32 @@ Editor::Editor ()
 	ArdourMarker::setup_sizes (timebar_height);
 	TempoCurve::setup_sizes (timebar_height);
 
-	bbt_label.set_name ("EditorRulerLabel");
-	bbt_label.set_size_request (-1, (int)timebar_height);
-	bbt_label.set_alignment (1.0, 0.5);
-	bbt_label.set_padding (5,0);
-	bbt_label.hide ();
-	bbt_label.set_no_show_all();
-	minsec_label.set_name ("EditorRulerLabel");
-	minsec_label.set_size_request (-1, (int)timebar_height);
-	minsec_label.set_alignment (1.0, 0.5);
-	minsec_label.set_padding (5,0);
-	minsec_label.hide ();
-	minsec_label.set_no_show_all();
-	timecode_label.set_name ("EditorRulerLabel");
-	timecode_label.set_size_request (-1, (int)timebar_height);
-	timecode_label.set_alignment (1.0, 0.5);
-	timecode_label.set_padding (5,0);
-	timecode_label.hide ();
-	timecode_label.set_no_show_all();
-	samples_label.set_name ("EditorRulerLabel");
-	samples_label.set_size_request (-1, (int)timebar_height);
-	samples_label.set_alignment (1.0, 0.5);
-	samples_label.set_padding (5,0);
-	samples_label.hide ();
-	samples_label.set_no_show_all();
+	Gtk::Table* rtbl;
 
-	tempo_label.set_name ("EditorRulerLabel");
-	tempo_label.set_size_request (-1, (int)timebar_height);
-	tempo_label.set_alignment (1.0, 0.5);
-	tempo_label.set_padding (5,0);
-	tempo_label.hide();
-	tempo_label.set_no_show_all();
+	rtbl = setup_ruler_new (_ruler_box_minsec, _("Mins:Secs"));
 
-	meter_label.set_name ("EditorRulerLabel");
-	meter_label.set_size_request (-1, (int)timebar_height);
-	meter_label.set_alignment (1.0, 0.5);
-	meter_label.set_padding (5,0);
-	meter_label.hide();
-	meter_label.set_no_show_all();
+	rtbl = setup_ruler_new (_ruler_box_timecode, _("Timecode"));
 
-	mark_label.set_name ("EditorRulerLabel");
-	mark_label.set_size_request (-1, (int)timebar_height);
-	mark_label.set_alignment (1.0, 0.5);
-	mark_label.set_padding (5,0);
-	mark_label.hide();
-	mark_label.set_no_show_all();
+	rtbl = setup_ruler_new (_ruler_box_samples, _("Samples"));
 
-	section_mark_label.set_name ("EditorRulerLabel");
-	section_mark_label.set_size_request (-1, (int)timebar_height);
-	section_mark_label.set_alignment (1.0, 0.5);
-	section_mark_label.set_padding (5,0);
-	section_mark_label.hide();
-	section_mark_label.set_no_show_all();
+	rtbl = setup_ruler_new (_ruler_box_bbt, _("Bars:Beats"));
 
-	videotl_bar_height = 4;
-	videotl_label.set_name ("EditorRulerLabel");
-	videotl_label.set_size_request (-1, (int)timebar_height * videotl_bar_height);
-	videotl_label.set_alignment (1.0, 0.5);
-	videotl_label.set_padding (5,0);
-	videotl_label.hide();
-	videotl_label.set_no_show_all();
+	rtbl = setup_ruler_new (_ruler_box_tempo, _("Tempo"));
 
-	range_mark_label.set_name ("EditorRulerLabel");
-	range_mark_label.set_size_request (-1, (int)timebar_height);
-	range_mark_label.set_alignment (1.0, 0.5);
-	range_mark_label.set_padding (5,0);
-	range_mark_label.hide();
-	range_mark_label.set_no_show_all();
+	rtbl = setup_ruler_new (_ruler_box_meter, _("Time Signature"));
+
+	rtbl = setup_ruler_new (_ruler_box_range, _("Range Markers"));
+
+	rtbl = setup_ruler_new (_ruler_box_marker, _("Location Markers"));
+	setup_ruler_add (rtbl, _ruler_btn_loc_prev, 0);
+	setup_ruler_add (rtbl, _ruler_btn_loc_next, 1);
+	setup_ruler_add (rtbl, _ruler_btn_loc_add, 2);
+
+	rtbl = setup_ruler_new (_ruler_box_section, _("Arrangement Markers"));
+	setup_ruler_add (rtbl, _ruler_btn_section_add);
+
+	rtbl = setup_ruler_new (_ruler_box_videotl, &videotl_label);
+	videotl_label.set_size_request (-1, 4 * timebar_height);
 
 	initialize_canvas ();
 
@@ -556,7 +509,7 @@ Editor::Editor ()
 #endif
 
 	/* labels for the time bars */
-	edit_packer.attach (time_bars_event_box,     1, 3, 0, 1,    FILL,        SHRINK,      0, 0);
+	edit_packer.attach (time_bars_event_box,     1, 3, 0, 1,    FILL,        SHRINK,      5, 0);
 	/* track controls */
 	edit_packer.attach (*_group_tabs,            1, 2, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
 	edit_packer.attach (controls_layout,         2, 3, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
@@ -682,6 +635,8 @@ Editor::Editor ()
 
 	setup_toolbar ();
 
+	ARDOUR_UI::instance()->ActionsReady.connect_same_thread (*this, std::bind (&Editor::initialize_ruler_actions, this));
+
 	RegionView::RegionViewGoingAway.connect (*this, invalidator (*this),  std::bind (&Editor::catch_vanishing_regionview, this, _1), gui_context());
 
 	/* nudge stuff */
@@ -780,6 +735,39 @@ Editor::~Editor()
 	for (std::map<ARDOUR::FadeShape, Gtk::Image*>::const_iterator i = _xfade_out_images.begin(); i != _xfade_out_images.end (); ++i) {
 		delete i->second;
 	}
+}
+
+Gtk::Table*
+Editor::setup_ruler_new (Gtk::HBox& box, std::string const& name)
+{
+	Gtk::Label* rlbl = manage (new Gtk::Label (name));
+	return setup_ruler_new (box, rlbl);
+}
+
+Gtk::Table*
+Editor::setup_ruler_new (Gtk::HBox& box, Gtk::Label* rlbl)
+{
+	rlbl->set_name ("EditorRulerLabel");
+	rlbl->set_size_request (-1, (int)timebar_height);
+	rlbl->show ();
+
+	Gtk::Table* rtbl = manage (new Gtk::Table);
+	rtbl->attach (*rlbl, 0, 1, 0, 1, SHRINK, SHRINK, 2, 0);
+	rtbl->show ();
+
+	box.pack_end (*rtbl, false, false);
+	box.hide();
+	box.set_no_show_all();
+	return rtbl;
+}
+
+void
+Editor::setup_ruler_add (Gtk::Table* rtbl, ArdourWidgets::ArdourButton& b, int pos)
+{
+	b.set_name ("editor ruler button");
+	b.set_size_request (-1, (int)timebar_height -2);
+	b.show ();
+	rtbl->attach (b, pos + 1, pos + 2, 0, 1, SHRINK, SHRINK, 2, 1);
 }
 
 bool

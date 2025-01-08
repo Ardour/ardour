@@ -1126,6 +1126,7 @@ widget "*MarkerText" style:highest "marker_text"
 widget "*ArdourContextMenu*" style:highest "default_menu"
 
 widget "*mixer strip button" style:highest "very_small_button"
+widget "*editor ruler button" style:highest "very_small_button"
 
 widget "*AddRouteDialogSpinner" style:highest "ardour_adjusters"
 widget "*OptionsNotebook" style:highest "preferences"

@@ -827,6 +827,10 @@ private:
 	ArdourCanvas::Rectangle* _canvas_grid_zone;
 	bool canvas_grid_zone_event (GdkEvent* event);
 
+	static Gtk::Table* setup_ruler_new (Gtk::HBox&, std::string const&);
+	static Gtk::Table* setup_ruler_new (Gtk::HBox&, Gtk::Label*);
+	static void        setup_ruler_add (Gtk::Table*, ArdourWidgets::ArdourButton&, int pos = 0);
+
 	Glib::RefPtr<Gtk::ToggleAction> ruler_minsec_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_timecode_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_samples_action;
@@ -855,6 +859,7 @@ private:
 	RulerDialog* ruler_dialog;
 
 	void initialize_rulers ();
+	void initialize_ruler_actions ();
 	void update_just_timecode ();
 	void compute_fixed_ruler_scale (); //calculates the RulerScale of the fixed rulers
 	void update_fixed_rulers ();
@@ -919,16 +924,21 @@ private:
 
 	void toggle_cue_behavior ();
 
-	Gtk::Label  minsec_label;
-	Gtk::Label  bbt_label;
-	Gtk::Label  timecode_label;
-	Gtk::Label  samples_label;
-	Gtk::Label  tempo_label;
-	Gtk::Label  meter_label;
-	Gtk::Label  mark_label;
-	Gtk::Label  range_mark_label;
-	Gtk::Label  section_mark_label;
-	Gtk::Label  cue_mark_label;
+	Gtk::HBox _ruler_box_minsec;
+	Gtk::HBox _ruler_box_timecode;
+	Gtk::HBox _ruler_box_samples;
+	Gtk::HBox _ruler_box_bbt;
+	Gtk::HBox _ruler_box_tempo;
+	Gtk::HBox _ruler_box_meter;
+	Gtk::HBox _ruler_box_range;
+	Gtk::HBox _ruler_box_marker;
+	Gtk::HBox _ruler_box_section;
+	Gtk::HBox _ruler_box_videotl;
+
+	ArdourWidgets::ArdourButton  _ruler_btn_section_add;
+	ArdourWidgets::ArdourButton  _ruler_btn_loc_prev;
+	ArdourWidgets::ArdourButton  _ruler_btn_loc_next;
+	ArdourWidgets::ArdourButton  _ruler_btn_loc_add;
 
 	/* videtimline related actions */
 	Gtk::Label                      videotl_label;

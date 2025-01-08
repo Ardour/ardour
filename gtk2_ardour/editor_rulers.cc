@@ -173,16 +173,16 @@ Editor::initialize_rulers ()
 	using namespace Box_Helpers;
 	BoxList & lab_children =  time_bars_vbox.children();
 
-	lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(timecode_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(samples_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(bbt_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(tempo_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(meter_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(section_mark_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(videotl_label, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(_ruler_box_minsec, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(_ruler_box_timecode, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(_ruler_box_samples, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(_ruler_box_bbt, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(_ruler_box_tempo, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(_ruler_box_meter, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(_ruler_box_range, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(_ruler_box_marker, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(_ruler_box_section, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(_ruler_box_videotl, PACK_SHRINK, PACK_START));
 
 	/* 1 event handler to bind them all ... */
 
@@ -192,6 +192,14 @@ Editor::initialize_rulers ()
 	samples_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), samples_ruler, SamplesRulerItem));
 
 	visible_timebars = 0; /*this will be changed below */
+}
+
+void
+Editor::initialize_ruler_actions ()
+{
+	_ruler_btn_loc_prev.set_related_action (ActionManager::get_action (X_("Common"), X_("jump-backward-to-mark")));
+	_ruler_btn_loc_next.set_related_action (ActionManager::get_action (X_("Common"), X_("jump-forward-to-mark")));
+	_ruler_btn_loc_add.set_related_action (ActionManager::get_action (X_("Common"), X_("add-location-from-playhead")));
 }
 
 bool
@@ -474,13 +482,12 @@ Editor::update_ruler_visibility ()
 
 #ifdef __APPLE__
 	/* gtk update probs require this (damn) */
-	meter_label.hide();
-	tempo_label.hide();
-	range_mark_label.hide();
-	section_mark_label.hide();
-	cue_mark_label.hide();
-	mark_label.hide();
-	videotl_label.hide();
+	_ruler_box_tempo.hide();
+	_ruler_box_meter.hide();
+	_ruler_box_range.hide();
+	_ruler_box_marker.hide();
+	_ruler_box_section.hide();
+	_ruler_box_videotl.hide();
 #endif
 
 	if (ruler_minsec_action->get_active()) {
@@ -489,14 +496,14 @@ Editor::update_ruler_visibility ()
 			minsec_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
 		minsec_ruler->show();
-		minsec_label.show();
+		_ruler_box_minsec.show();
 		tbpos += timebar_height;
 
 		visible_timebars++;
 		have_timebar = true;
 	} else {
 		minsec_ruler->hide();
-		minsec_label.hide();
+		_ruler_box_minsec.hide();
 	}
 
 	if (ruler_timecode_action->get_active()) {
@@ -505,13 +512,13 @@ Editor::update_ruler_visibility ()
 			timecode_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
 		timecode_ruler->show();
-		timecode_label.show();
+		_ruler_box_timecode.show();
 		tbpos += timebar_height;
 		visible_timebars++;
 		have_timebar = true;
 	} else {
 		timecode_ruler->hide();
-		timecode_label.hide();
+		_ruler_box_timecode.hide();
 	}
 
 	if (ruler_samples_action->get_active()) {
@@ -520,13 +527,13 @@ Editor::update_ruler_visibility ()
 			samples_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
 		samples_ruler->show();
-		samples_label.show();
+		_ruler_box_samples.show();
 		tbpos += timebar_height;
 		visible_timebars++;
 		have_timebar = true;
 	} else {
 		samples_ruler->hide();
-		samples_label.hide();
+		_ruler_box_samples.hide();
 	}
 
 	if (ruler_bbt_action->get_active()) {
@@ -535,13 +542,13 @@ Editor::update_ruler_visibility ()
 			bbt_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
 		bbt_ruler->show();
-		bbt_label.show();
+		_ruler_box_bbt.show();
 		tbpos += timebar_height;
 		visible_timebars++;
 		have_timebar = true;
 	} else {
 		bbt_ruler->hide();
-		bbt_label.hide();
+		_ruler_box_bbt.hide();
 	}
 
 	if (ruler_tempo_action->get_active()) {
@@ -550,12 +557,12 @@ Editor::update_ruler_visibility ()
 			tempo_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
 		tempo_group->show();
-		tempo_label.show();
+		_ruler_box_tempo.show();
 		tbpos += timebar_height;
 		visible_timebars++;
 	} else {
 		tempo_group->hide();
-		tempo_label.hide();
+		_ruler_box_tempo.hide();
 	}
 
 	if (ruler_meter_action->get_active()) {
@@ -564,12 +571,12 @@ Editor::update_ruler_visibility ()
 			meter_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
 		meter_group->show();
-		meter_label.show();
+		_ruler_box_meter.show();
 		tbpos += timebar_height;
 		visible_timebars++;
 	} else {
 		meter_group->hide();
-		meter_label.hide();
+		_ruler_box_meter.hide();
 	}
 
 	if (ruler_range_action->get_active()) {
@@ -578,7 +585,7 @@ Editor::update_ruler_visibility ()
 			range_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
 		range_marker_group->show();
-		range_mark_label.show();
+		_ruler_box_range.show();
 
 		range_marker_bar->set_outline(false);
 
@@ -586,7 +593,7 @@ Editor::update_ruler_visibility ()
 		visible_timebars++;
 	} else {
 		range_marker_group->hide();
-		range_mark_label.hide();
+		_ruler_box_range.hide();
 	}
 
 	if (ruler_marker_action->get_active()) {
@@ -595,7 +602,7 @@ Editor::update_ruler_visibility ()
 			marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
 		marker_group->show();
-		mark_label.show();
+		_ruler_box_marker.show();
 
 		marker_bar->set_outline(false);
 
@@ -603,7 +610,7 @@ Editor::update_ruler_visibility ()
 		visible_timebars++;
 	} else {
 		marker_group->hide();
-		mark_label.hide();
+		_ruler_box_marker.hide();
 	}
 
 	if (!Profile->get_livetrax() && ruler_section_action->get_active()) {
@@ -612,7 +619,7 @@ Editor::update_ruler_visibility ()
 			section_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
 		section_marker_group->show();
-		section_mark_label.show();
+		_ruler_box_section.show();
 
 		section_marker_bar->set_outline(false);
 
@@ -621,7 +628,7 @@ Editor::update_ruler_visibility ()
 		update_marker_display();
 	} else {
 		section_marker_group->hide();
-		section_mark_label.hide();
+		_ruler_box_section.hide();
 		update_marker_display();
 	}
 
@@ -631,13 +638,13 @@ Editor::update_ruler_visibility ()
 			videotl_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
 		videotl_group->show();
-		videotl_label.show();
+		_ruler_box_videotl.show();
 		tbpos += timebar_height * videotl_bar_height;
 		visible_timebars+=videotl_bar_height;
 		queue_visual_videotimeline_update();
 	} else {
 		videotl_group->hide();
-		videotl_label.hide();
+		_ruler_box_videotl.hide();
 		update_video_timeline(true);
 	}
 
