@@ -90,6 +90,8 @@ PianorollMidiView::~PianorollMidiView ()
 bool
 PianorollMidiView::midi_canvas_group_event (GdkEvent* ev)
 {
+	/* Let MidiView do its thing */
+
 	MidiView::midi_canvas_group_event (ev);
 
 	return _editing_context.canvas_bg_event (ev, event_rect);
