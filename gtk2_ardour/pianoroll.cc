@@ -472,6 +472,7 @@ Pianoroll::canvas_enter_leave (GdkEventCrossing* ev)
 			ActionManager::set_sensitive (_midi_actions, false);
 			within_track_canvas = false;
 			ARDOUR_UI::instance()->reset_focus (_canvas_viewport);
+			gdk_window_set_cursor (_canvas_viewport->get_window()->gobj(), nullptr);
 		}
 	default:
 		break;
