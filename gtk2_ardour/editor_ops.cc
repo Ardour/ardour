@@ -2144,6 +2144,13 @@ Editor::add_locations_from_region ()
 	}
 }
 
+void
+Editor::add_section_from_playhead ()
+{
+	add_location_mark_with_flag (timepos_t (_session->audible_sample()), Location::Flags(Location::IsMark | Location::IsSection), 0);
+}
+
+
 /** Add a single range marker around all selected regions */
 void
 Editor::add_location_from_region ()

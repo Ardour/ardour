@@ -185,6 +185,7 @@ public:
 	virtual void trigger_script (int nth) = 0;
 	virtual void add_bbt_marker_at_playhead_cursor () = 0;
 	virtual void add_location_from_playhead_cursor () = 0;
+	virtual void add_section_from_playhead () = 0;
 	virtual void remove_location_at_playhead_cursor () = 0;
 	void add_location_mark (Temporal::timepos_t const & where, ARDOUR::Location::Flags flags = ARDOUR::Location::IsMark, int32_t cue_id = 0) {
 		add_location_mark_with_flag (where, flags, cue_id);

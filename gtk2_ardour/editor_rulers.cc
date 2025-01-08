@@ -200,6 +200,9 @@ Editor::initialize_ruler_actions ()
 	_ruler_btn_loc_prev.set_related_action (ActionManager::get_action (X_("Common"), X_("jump-backward-to-mark")));
 	_ruler_btn_loc_next.set_related_action (ActionManager::get_action (X_("Common"), X_("jump-forward-to-mark")));
 	_ruler_btn_loc_add.set_related_action (ActionManager::get_action (X_("Common"), X_("add-location-from-playhead")));
+
+	_ruler_btn_section_add.set_related_action (ActionManager::get_action (X_("Common"), X_("add-section-from-playhead")));
+
 }
 
 bool

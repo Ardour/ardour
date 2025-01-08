@@ -1396,6 +1396,7 @@ private:
 	void add_location_from_region ();
 	void add_locations_from_region ();
 	void add_location_from_selection ();
+	void add_section_from_playhead ();
 	void set_loop_from_selection (bool play);
 	void set_punch_from_selection ();
 	void set_punch_from_region ();
