@@ -148,7 +148,7 @@ PianorollMidiView::scroll (GdkEventScroll* ev)
 			_editing_context.reset_zoom (_editing_context.get_current_zoom() * 2);
 			return true;
 		default:
-			return false;
+			break;
 		}
 	}
 
