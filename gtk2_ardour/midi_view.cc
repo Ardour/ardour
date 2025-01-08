@@ -284,7 +284,6 @@ MidiView::size_end_rect ()
 	}
 
 	double offset = _editing_context.sample_to_pixel ((_midi_region->start() + _midi_region->length()).samples());
-	std::cerr << "end starts at " << (_midi_region->start() + _midi_region->length()).beats().str() << " aka " << offset << " from " << (_midi_region->start() + _midi_region->length()).samples() << std::endl;
 	_end_boundary_rect->set_position (ArdourCanvas::Duple (offset, 0.));
 	_end_boundary_rect->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, height()));
 }
@@ -342,11 +341,8 @@ MidiView::set_model (std::shared_ptr<MidiModel> m)
 	_model = m;
 
 	if (!_model) {
-		std::cerr << "no model!\n";
 		return;
 	}
-
-	std::cerr << "model set to " << _model << std::endl;
 
 	//set_height (trackview.current_height());
 
