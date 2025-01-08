@@ -641,7 +641,7 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 
 		if (within_items.front() == _current_item) {
 			/* uppermost item at point is already _current_item */
-			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("CURRENT ITEM %1/%2\n", _new_current_item->whatami(), _current_item->name));
+			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("CURRENT ITEM remains %1/%2\n", _current_item->whatami(), _current_item->name));
 			return;
 		}
 
