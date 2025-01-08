@@ -2625,7 +2625,7 @@ Editor::setup_toolbar ()
 	if (!Profile->get_mixbus()) {
 		mouse_mode_size_group->add_widget (zoom_in_button);
 		mouse_mode_size_group->add_widget (zoom_out_button);
-		mouse_mode_size_group->add_widget (zoom_out_full_button);
+		mouse_mode_size_group->add_widget (full_zoom_button);
 		mouse_mode_size_group->add_widget (zoom_focus_selector);
 		mouse_mode_size_group->add_widget (tav_shrink_button);
 		mouse_mode_size_group->add_widget (tav_expand_button);
@@ -2691,10 +2691,8 @@ Editor::setup_toolbar ()
 	zoom_preset_selector.set_name ("zoom button");
 	zoom_preset_selector.set_icon (ArdourIcon::ZoomExpand);
 
-	zoom_out_full_button.set_name ("zoom button");
-	zoom_out_full_button.set_icon (ArdourIcon::ZoomFull);
 	act = ActionManager::get_action (X_("Editor"), X_("zoom-to-session"));
-	zoom_out_full_button.set_related_action (act);
+	full_zoom_button.set_related_action (act);
 
 	zoom_focus_selector.set_name ("zoom button");
 
@@ -2703,7 +2701,7 @@ Editor::setup_toolbar ()
 	} else {
 		_zoom_box.pack_start (zoom_out_button, false, false);
 		_zoom_box.pack_start (zoom_in_button, false, false);
-		_zoom_box.pack_start (zoom_out_full_button, false, false);
+		_zoom_box.pack_start (full_zoom_button, false, false);
 		_zoom_box.pack_start (zoom_focus_selector, false, false);
 	}
 
@@ -2851,7 +2849,7 @@ Editor::setup_tooltips ()
 	set_tooltip (zoom_in_button, _("Zoom In"));
 	set_tooltip (zoom_out_button, _("Zoom Out"));
 	set_tooltip (zoom_preset_selector, _("Zoom to Time Scale"));
-	set_tooltip (zoom_out_full_button, _("Zoom to Session"));
+	set_tooltip (full_zoom_button, _("Zoom to Session"));
 	set_tooltip (tav_expand_button, _("Expand Tracks"));
 	set_tooltip (tav_shrink_button, _("Shrink Tracks"));
 	set_tooltip (visible_tracks_selector, _("Number of visible tracks"));

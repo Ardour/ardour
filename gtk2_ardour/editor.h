@@ -1722,8 +1722,6 @@ private:
 
 	/* toolbar */
 
-	ArdourWidgets::ArdourButton   zoom_out_full_button;
-
 	ArdourWidgets::ArdourButton   tav_expand_button;
 	ArdourWidgets::ArdourButton   tav_shrink_button;
 	ArdourWidgets::ArdourDropdown visible_tracks_selector;

@@ -134,7 +134,6 @@ EditingContext::EditingContext (std::string const & name)
 	, _timeline_origin (0.)
 	, play_note_selection_button (ArdourButton::default_elements)
 	, follow_playhead_button (_("F"), ArdourButton::Text, true)
-	, full_zoom_button (_("<->"), ArdourButton::Text)
 	, visible_channel_label (_("MIDI|Channel"))
 	, _drags (new DragManager (this))
 	, _leftmost_sample (0)
@@ -226,6 +225,9 @@ EditingContext::EditingContext (std::string const & name)
 
 	zoom_out_button.set_name ("zoom button");
 	zoom_out_button.set_icon (ArdourIcon::ZoomOut);
+
+	full_zoom_button.set_name ("zoom button");
+	full_zoom_button.set_icon (ArdourIcon::ZoomFull);
 
 
 	for (int i = 0; i < 16; i++) {
