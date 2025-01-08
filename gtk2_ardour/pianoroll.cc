@@ -1756,7 +1756,7 @@ Pianoroll::which_canvas_cursor (ItemType type) const
 			cursor = _cursors->grabber_note;
 			break;
 		case RegionItem:
-			cursor = _cursors->midi_select;
+			cursor = nullptr; /* default cursor */
 			break;
 
 		case ClipEndItem:
