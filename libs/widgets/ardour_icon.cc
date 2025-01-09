@@ -41,6 +41,13 @@ using namespace ArdourWidgets::ArdourIcon;
 
 #define OUTLINEWIDTH 1.5 // px
 
+#define VECTORICONSTROKEFILLFG(fillalpha)             \
+  cairo_set_line_width (cr, OUTLINEWIDTH);          \
+  cairo_set_source_rgba (cr, 0, 0, 0, 1.0);         \
+  cairo_stroke_preserve (cr);                       \
+  Gtkmm2ext::set_source_rgba (cr, fg_color);        \
+  cairo_fill (cr);
+
 #define VECTORICONSTROKEFILL(fillalpha)             \
   cairo_set_line_width (cr, OUTLINEWIDTH);          \
   cairo_set_source_rgba (cr, 0, 0, 0, 1.0);         \
@@ -542,7 +549,7 @@ icon_tav_expand (cairo_t* cr, const int width, const int height)
 
 /** standard rec-enable circle */
 static void
-icon_rec_enable (cairo_t* cr, const int width, const int height, const Gtkmm2ext::ActiveState state)
+icon_rec_enable (cairo_t* cr, const int width, const int height, const Gtkmm2ext::ActiveState state, const uint32_t fg_color)
 {
 	const double x = width * .5;
 	const double y = height * .5;
@@ -567,19 +574,19 @@ icon_rec_enable (cairo_t* cr, const int width, const int height, const Gtkmm2ext
 
 /** stop square box */
 static void
-icon_transport_stop (cairo_t* cr, const int width, const int height)
+icon_transport_stop (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const int wh = std::min (width, height);
 	cairo_rectangle (cr,
 	                 (width - wh) * .5 + wh * .225,
 	                 (height - wh) * .5 + wh * .225,
 	                 wh * .55, wh * .55);
-	VECTORICONSTROKEFILL (0.9); // small 'shine'
+	VECTORICONSTROKEFILLFG (0.9); // small 'shine'
 }
 
 /** play triangle */
 static void
-icon_transport_play (cairo_t* cr, const int width, const int height)
+icon_transport_play (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const int    wh = std::min (width, height) * .5;
 	const double y  = height * .5;
@@ -592,12 +599,12 @@ icon_transport_play (cairo_t* cr, const int width, const int height)
 	cairo_line_to (cr, x - wh * .5, y + tri);
 	cairo_close_path (cr);
 
-	VECTORICONSTROKEFILL (0.9);
+	VECTORICONSTROKEFILLFG (0.9);
 }
 
 /** Midi Panic "!" */
 static void
-icon_transport_panic (cairo_t* cr, const int width, const int height)
+icon_transport_panic (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const int    wh = ceil (std::min (width, height) * .1) - .5;
 	const double xc = rint (width * .5);
@@ -606,17 +613,17 @@ icon_transport_panic (cairo_t* cr, const int width, const int height)
 	cairo_rectangle (cr,
 	                 xc - wh, y0 + yh * .12,
 	                 wh * 2, yh * .48);
-	VECTORICONSTROKEFILL (0.9);
+	VECTORICONSTROKEFILLFG (0.9);
 
 	cairo_arc (cr, xc, y0 + yh * .78, wh, 0, 2 * M_PI);
-	VECTORICONSTROKEFILL (0.9);
+	VECTORICONSTROKEFILLFG (0.9);
 }
 
 /** various combinations of lines and triangles "|>|", ">|" "|>" */
 static void
 icon_transport_ck (cairo_t*                                   cr,
                    const enum ArdourWidgets::ArdourIcon::Icon icon,
-                   const int width, const int height)
+                   const int width, const int height, const uint32_t fg_color)
 {
 	// small play triangle
 	int          wh = std::min (width, height);
@@ -632,7 +639,7 @@ icon_transport_ck (cairo_t*                                   cr,
 		                 x - wh - ln, y - tri * 1.7,
 		                 ln * 2, tri * 3.4);
 
-		VECTORICONSTROKEFILL (1.0);
+		VECTORICONSTROKEFILLFG (1.0);
 	}
 
 	if (icon == TransportEnd || icon == TransportRange) {
@@ -640,7 +647,7 @@ icon_transport_ck (cairo_t*                                   cr,
 		                 x + wh - ln, y - tri * 1.7,
 		                 ln * 2, tri * 3.4);
 
-		VECTORICONSTROKEFILL (1.0);
+		VECTORICONSTROKEFILLFG (1.0);
 	}
 
 	if (icon == TransportStart) {
@@ -654,12 +661,12 @@ icon_transport_ck (cairo_t*                                   cr,
 	}
 
 	cairo_close_path (cr);
-	VECTORICONSTROKEFILL (1.0);
+	VECTORICONSTROKEFILLFG (1.0);
 }
 
 /** loop spiral */
 static void
-icon_transport_loop (cairo_t* cr, const int width, const int height)
+icon_transport_loop (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double x = width * .5;
 	const double y = height * .5;
@@ -668,7 +675,7 @@ icon_transport_loop (cairo_t* cr, const int width, const int height)
 	cairo_arc (cr, x, y, r * .58, 0, 2 * M_PI);
 	cairo_arc_negative (cr, x, y, r * .30, 2 * M_PI, 0);
 
-	VECTORICONSTROKEFILL (1.0);
+	VECTORICONSTROKEFILLFG (1.0);
 
 #define ARCARROW(rad, ang) \
 	x + (rad)*sin ((ang)*2.0 * M_PI), y + (rad)*cos ((ang)*2.0 * M_PI)
@@ -689,7 +696,7 @@ icon_transport_loop (cairo_t* cr, const int width, const int height)
 
 /** de-construct thorwil's metronom */
 static void
-icon_transport_metronom (cairo_t* cr, const int width, const int height)
+icon_transport_metronom (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double x  = width * .5;
 	const double y  = height * .5;
@@ -707,7 +714,7 @@ icon_transport_metronom (cairo_t* cr, const int width, const int height)
 	                 x - w * .7, y + h * .25,
 	                 w * 1.4, lw);
 
-	VECTORICONSTROKEFILL (1.0);
+	VECTORICONSTROKEFILLFG (1.0);
 
 	cairo_move_to (cr, x - w,       y + h);
 	cairo_line_to (cr, x + w,       y + h);
@@ -721,7 +728,7 @@ icon_transport_metronom (cairo_t* cr, const int width, const int height)
 	cairo_line_to (cr, x + w - lw,       y + h - lw);
 	cairo_line_to (cr, x - w + lw,       y + h - lw);
 
-	VECTORICONSTROKEFILL (1.0);
+	VECTORICONSTROKEFILLFG (1.0);
 
 	// Pendulum
 	// ddx = .70 w      = .75 * .5 wh              = .375 wh
@@ -736,7 +743,7 @@ icon_transport_metronom (cairo_t* cr, const int width, const int height)
 	cairo_line_to (cr, x - w * .3 + lw, y + h * .25 + lw * .5);
 	cairo_close_path (cr);
 
-	VECTORICONSTROKEFILL (1.0);
+	VECTORICONSTROKEFILLFG (1.0);
 
 	cairo_rectangle (cr,
 	                 x - w * .7, y + h * .25,
@@ -1575,13 +1582,13 @@ icon_mixer (cairo_t* cr, const int width, const int height, const uint32_t fg_co
 	const double faderh  = 4 * lw;
 
 	cairo_rectangle (cr, x0 - faderw/2., y0, faderw, faderh);
-	VECTORICONSTROKEFILL (1);
+	VECTORICONSTROKEFILLFG (1);
 
 	cairo_rectangle (cr, x1 - faderw/2., y1, faderw, faderh);
-	VECTORICONSTROKEFILL (1);
+	VECTORICONSTROKEFILLFG (1);
 
 	cairo_rectangle (cr, x2 - faderw/2., y2, faderw, faderh);
-	VECTORICONSTROKEFILL (1);
+	VECTORICONSTROKEFILLFG (1);
 }
 
 static void
@@ -1630,13 +1637,13 @@ static void icon_tape_reel (cairo_t *cr, const int width, const int height, cons
 
 	cairo_arc (cr, 0, 0, r, 0, 2 * M_PI);
 	if (state == Gtkmm2ext::ExplicitActive) {
-		Gtkmm2ext::set_source_rgba (cr, fg_color);
+		cairo_set_source_rgba (cr, .9, .3, .3, 1.0);
 	}
 	else if (state == Gtkmm2ext::ImplicitActive) {
-		cairo_set_source_rgba (cr, 1.0, .1, .1, 1.0);
+		Gtkmm2ext::set_source_rgba (cr, fg_color);
 	}
 	else {
-		cairo_set_source_rgba (cr, .9, .3, .3, 1.0);
+		Gtkmm2ext::set_source_rgba (cr, fg_color);
 	}
 	cairo_fill_preserve (cr);
 
@@ -1682,13 +1689,13 @@ static void icon_tape_reel (cairo_t *cr, const int width, const int height, cons
 
 	cairo_arc (cr, 0, 0, r * .3, 0, 2 * M_PI);
 	if (state == Gtkmm2ext::ExplicitActive) {
-		Gtkmm2ext::set_source_rgba (cr, fg_color);
+		cairo_set_source_rgba (cr, .9, .3, .3, 1.0);
 	}
 	else if (state == Gtkmm2ext::ImplicitActive) {
-		cairo_set_source_rgba (cr, 1.0, .1, .1, 1.0);
+		Gtkmm2ext::set_source_rgba (cr, fg_color);
 	}
 	else {
-		cairo_set_source_rgba (cr, .9, .3, .3, 1.0);
+		Gtkmm2ext::set_source_rgba (cr, fg_color);
 	}
 	cairo_fill (cr);
 	cairo_set_source_rgba (cr, .0, .0, .0, 1.0);
@@ -1750,16 +1757,16 @@ icon_cues_triggers (cairo_t* cr, const int width, const int height, const uint32
 		cairo_line_to (cr, grid * 1, grid * 1);
 		cairo_line_to (cr, grid * 1, grid * 3);
 		cairo_close_path (cr);
-		VECTORICONSTROKEFILL (0.9);
+		VECTORICONSTROKEFILLFG (0.9);
 
 		/* trigger box 1 */
 		cairo_rectangle (cr, grid * 4, grid * 1, grid * 5, grid * 2);
-		VECTORICONSTROKEFILL (0.9);
+		VECTORICONSTROKEFILLFG (0.9);
 
 		if (large && i < 2) {
 			/* trigger box 2 */
 			cairo_rectangle (cr, grid * 10, grid * 1, grid * 5, grid * 2);
-			VECTORICONSTROKEFILL (0.9);
+			VECTORICONSTROKEFILLFG (0.9);
 		}
 
 		cairo_restore (cr);
@@ -1915,9 +1922,10 @@ icon_drum (cairo_t* cr, const int width, const int height, const Gtkmm2ext::Acti
 bool
 ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr,
                                    const enum ArdourWidgets::ArdourIcon::Icon icon,
-                                   const int width, const int height,
-                                   const Gtkmm2ext::ActiveState state,
-                                   const uint32_t               fg_color)
+                                   const int                                  width,
+                                   const int                                  height,
+                                   const Gtkmm2ext::ActiveState               state,
+                                   const uint32_t                             fg_color)
 {
 	bool rv = true;
 	cairo_save (cr);
@@ -1928,29 +1936,29 @@ ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr
 
 	switch (icon) {
 		case TransportStop:
-			icon_transport_stop (cr, width, height);
+			icon_transport_stop (cr, width, height, fg_color);
 			break;
 		case TransportPlay:
-			icon_transport_play (cr, width, height);
+			icon_transport_play (cr, width, height, fg_color);
 			break;
 		case TransportLoop:
-			icon_transport_loop (cr, width, height);
+			icon_transport_loop (cr, width, height, fg_color);
 			break;
 		case TransportMetronom:
-			icon_transport_metronom (cr, width, height);
+			icon_transport_metronom (cr, width, height, fg_color);
 			break;
 		case TransportPanic:
-			icon_transport_panic (cr, width, height);
+			icon_transport_panic (cr, width, height, fg_color);
 			break;
 		case TransportStart:
 			/* fallthrough */
 		case TransportEnd:
 			/* fallthrough */
 		case TransportRange:
-			icon_transport_ck (cr, icon, width, height);
+			icon_transport_ck (cr, icon, width, height, fg_color);
 			break;
 		case RecButton:
-			icon_rec_enable (cr, width, height, state);
+			icon_rec_enable (cr, width, height, state, fg_color);
 			break;
 		case CloseCross:
 			icon_close_cross (cr, width, height, fg_color);
