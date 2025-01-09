@@ -3060,9 +3060,9 @@ MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 	bool cursor_set = false;
 	bool const ensure_snap = _editing_context.snap_mode () != SnapMagnetic;
 
-	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
-		ArdourCanvas::Rectangle* resize_rect = (*i)->resize_rect;
-		Note* canvas_note = (*i)->note;
+	for (auto & rd : _resize_data) {
+		ArdourCanvas::Rectangle* resize_rect = rd->resize_rect;
+		Note* canvas_note = rd->note;
 		double current_x;
 
 		if (at_front) {
@@ -3085,8 +3085,11 @@ MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 			 */
 			current_x = 0;
 		}
-		if (current_x > _editing_context.duration_to_pixels (_midi_region->length())) {
-			current_x = _editing_context.duration_to_pixels (_midi_region->length());
+
+		if (!_show_source) {
+			if (current_x > _editing_context.duration_to_pixels (_midi_region->length())) {
+				current_x = _editing_context.duration_to_pixels (_midi_region->length());
+			}
 		}
 
 		if (at_front) {
@@ -3131,8 +3134,15 @@ MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 
 			Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 			const timepos_t abs_beats (tmap->quarters_at (snapped_x));
-			const Temporal::Beats src_beats = _midi_region->absolute_time_to_source_beats (abs_beats);
-			Temporal::Beats len         = Temporal::Beats();
+			Temporal::Beats src_beats;
+
+			if (_show_source) {
+				src_beats = abs_beats.beats();
+			} else {
+				src_beats = _midi_region->absolute_time_to_source_beats (abs_beats);
+			}
+
+			Temporal::Beats len;
 
 			if (at_front) {
 				if (src_beats < canvas_note->note()->end_time()) {
@@ -3158,10 +3168,8 @@ MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 			show_verbose_cursor (buf, 0, 0);
 
 			cursor_set = true;
-
 			_editing_context.set_snapped_cursor_position (snapped_x + midi_region()->position());
 		}
-
 	}
 }
 
@@ -3185,9 +3193,10 @@ MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 	/* XX why doesn't snap_pixel_to_sample() handle this properly? */
 	bool const ensure_snap = _editing_context.snap_mode () != SnapMagnetic;
 
-	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
-		Note*  canvas_note = (*i)->note;
-		ArdourCanvas::Rectangle*  resize_rect = (*i)->resize_rect;
+	for (auto & rd : _resize_data) {
+
+		Note*  canvas_note = rd->note;
+		ArdourCanvas::Rectangle*  resize_rect = rd->resize_rect;
 
 		/* Get the new x position for this resize, which is in pixels relative
 		 * to the region position.
@@ -3213,8 +3222,10 @@ MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 			current_x = 0;
 		}
 
-		if (current_x > _editing_context.duration_to_pixels (_midi_region->length())) {
-			current_x = _editing_context.duration_to_pixels (_midi_region->length());
+		if (!_show_source) {
+			if (current_x > _editing_context.duration_to_pixels (_midi_region->length())) {
+				current_x = _editing_context.duration_to_pixels (_midi_region->length());
+			}
 		}
 
 		/* Convert snap delta from pixels to beats with sign. */
@@ -3229,22 +3240,31 @@ MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 			sign = -1;
 		}
 
-		/* Convert the new x position to a position within the source */
-		timecnt_t current_time;
-		if (with_snap) {
-			current_time = snap_pixel_to_time (current_x, ensure_snap);
-		} else {
-			current_time = timecnt_t (_editing_context.pixel_to_sample (current_x));
-		}
-
 		/* and then to beats */
-		const Temporal::Beats src_beats = _midi_region->absolute_time_to_source_beats (_midi_region->position() + current_time);
+
+		Temporal::Beats src_beats;
+
+		if (_show_source) {
+			src_beats = timepos_t (_editing_context.pixel_to_sample (current_x)).beats();
+		} else {
+
+			/* Convert the new x position to a position within the source */
+
+			timecnt_t current_time;
+
+			if (with_snap) {
+				current_time = snap_pixel_to_time (current_x, ensure_snap);
+			} else {
+				current_time = timecnt_t (_editing_context.pixel_to_sample (current_x));
+			}
+
+			src_beats = _midi_region->absolute_time_to_source_beats (_midi_region->position() + current_time);
+		}
 
 		if (at_front && src_beats < canvas_note->note()->end_time()) {
 			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, src_beats - (snap_delta_beats * sign));
 			Temporal::Beats len = canvas_note->note()->time() - src_beats + (snap_delta_beats * sign);
 			len += canvas_note->note()->length();
-
 			if (!!len) {
 				note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
 			}
@@ -3257,7 +3277,7 @@ MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 		}
 
 		delete resize_rect;
-		delete (*i);
+		delete rd;
 	}
 
 	_resize_data.clear();
@@ -5158,7 +5178,7 @@ StartBoundaryRect::covers (ArdourCanvas::Duple const & point) const
 	const double radius = 10. * scale;
 	double cy = self.y0 + (self.height() / 2.);
 
-	if (point.x >= self.x1 && point.x < self.x1 + radius && 
+	if (point.x >= self.x1 && point.x < self.x1 + radius &&
 	    point.y >= cy - radius && point.y < cy + radius) {
 		/*inside rectangle that approximates the handle */
 		return true;
