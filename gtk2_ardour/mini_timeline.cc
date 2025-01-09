@@ -641,7 +641,7 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	cairo_move_to (cr, xc + .5, 0);
 	cairo_rel_line_to (cr, 0, height);
 	cairo_stroke (cr);
-	cairo_move_to (cr, xc + .5, height);
+	cairo_move_to (cr, xc + .5, height - PADDING );
 	cairo_rel_line_to (cr, -3,  0);
 	cairo_rel_line_to (cr,  3, -4);
 	cairo_rel_line_to (cr,  3,  4);
