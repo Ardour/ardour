@@ -789,6 +789,11 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		req->width  = wh;
 		req->height = wh;
 	}
+	else if (_tweaks & TransportIcon) { // same logic as above, but 4x bigger
+		const int wh = std::max (rint (TRACKHEADERBTNW * char_avg_pixel_width()), ceil (char_pixel_height() * BASELINESTRETCH + 1.));
+		req->width  = 2 * wh;
+		req->height = 2 * wh;
+	}
 	else if (_tweaks & (Square | ExpandtoSquare)) {
 		if (_squaresize.has_value ()) {
 			req->width = std::max (req->width, _squaresize.value ());

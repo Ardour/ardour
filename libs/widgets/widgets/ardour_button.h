@@ -69,6 +69,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 		ForceBoxy      = 0x10,
 		ForceFlat      = 0x20,
 		ExpandtoSquare = 0x40,
+		TransportIcon  = 0x80,
 	};
 
 	static Tweaks default_tweaks;
