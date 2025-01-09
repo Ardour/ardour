@@ -290,8 +290,9 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		build_patterns ();
 	}
 
-	if (active_state() == Gtkmm2ext::ExplicitActive) {
-		text_color = text_active_color;
+	if ( active_state() == Gtkmm2ext::ExplicitActive ) {
+		bool led = (_elements & Indicator)==Indicator;
+		text_color = led ? text_inactive_color :  text_active_color;
 		led_color = led_active_color;
 	} else {
 		text_color = text_inactive_color;
@@ -594,8 +595,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	// a transparent overlay to indicate insensitivity
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
 		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
-		uint32_t ins_color = UIConfigurationBase::instance().color ("gtk_background");
-		Gtkmm2ext::set_source_rgb_a (cr, ins_color, 0.6);
+		Gtkmm2ext::set_source_rgb_a (cr, fill_inactive_color, 0.6);
 		cairo_fill (cr);
 	}
 
@@ -816,7 +816,7 @@ ArdourButton::set_colors ()
 	}
 
 	text_active_color = Gtkmm2ext::contrasting_text_color (fill_active_color);
-	text_inactive_color = Gtkmm2ext::contrasting_text_color (fill_inactive_color);
+	text_inactive_color = UIConfigurationBase::instance().color ("gtk_foreground");
 
 	led_active_color = UIConfigurationBase::instance().color (string_compose ("%1: led active", name), &failed);
 	if (failed) {
@@ -862,8 +862,8 @@ void ArdourButton::set_active_color (const uint32_t color)
 		(max (double(b), 0.) - min (double(b), 0.));
 
 	text_active_color = (white_contrast > black_contrast) ?
-		RGBA_TO_UINT(255, 255, 255, 255) : /* use white */
-		RGBA_TO_UINT(  0,   0,   0,   255);  /* use black */
+		UIConfigurationBase::instance().color ("gtk_foreground") : /* nomimally white */
+		UIConfigurationBase::instance().color ("gtk_background");  /* nomimally black */
 
 	/* XXX what about led colors ? */
 	CairoWidget::set_dirty ();
@@ -887,8 +887,8 @@ void ArdourButton::set_inactive_color (const uint32_t color)
 		(max (double(b), 0.) - min (double(b), 0.));
 
 	text_inactive_color = (white_contrast > black_contrast) ?
-		RGBA_TO_UINT(255, 255, 255, 255) : /* use white */
-		RGBA_TO_UINT(  0,   0,   0,   255);  /* use black */
+		UIConfigurationBase::instance().color ("gtk_foreground") : /* nominally white */
+		UIConfigurationBase::instance().color ("gtk_background");  /* nominally black */
 
 	/* XXX what about led colors ? */
 	CairoWidget::set_dirty ();
