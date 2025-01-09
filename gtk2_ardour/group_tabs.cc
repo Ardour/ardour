@@ -308,13 +308,13 @@ GroupTabs::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 
 	if (!get_sensitive ()) {
 		c = get_style()->get_base (Gtk::STATE_INSENSITIVE);
+		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 	} else {
-		c = get_style()->get_base (Gtk::STATE_NORMAL);
+		uint32_t bg_color = UIConfiguration::instance().color ("group tab base");
+		Gtkmm2ext::set_source_rgb_a (cr, bg_color, 1.0);
 	}
 
 	/* background */
-
-	cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 	cairo_rectangle (cr, 0, 0, get_width(), get_height());
 	cairo_fill (cr);
 

@@ -136,6 +136,7 @@
     <ColorAlias name="grid line major" alias="neutral:backgroundest"/>
     <ColorAlias name="grid line micro" alias="neutral:midground"/>
     <ColorAlias name="grid line minor" alias="neutral:background2"/>
+    <ColorAlias name="group tab base" alias="theme:bg2"/>
     <ColorAlias name="gtk_arm" alias="alert:red"/>
     <ColorAlias name="gtk_audio_bus" alias="widget:blue darker"/>
     <ColorAlias name="gtk_audio_track" alias="theme:bg1"/>
