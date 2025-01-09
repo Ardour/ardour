@@ -4256,6 +4256,10 @@ MidiView::selection_as_notelist (Notes& selected, bool allow_all_if_none_selecte
 void
 MidiView::update_ghost_note (double x, double y, uint32_t state)
 {
+	if (!_midi_region) {
+		return;
+	}
+
 	assert (_ghost_note);
 	x = _editing_context.canvas_to_timeline (x);
 	x = std::max (0.0, x);

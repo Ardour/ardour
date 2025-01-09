@@ -170,6 +170,7 @@ class ApplicationBar;
 class Meterbridge;
 class LuaWindow;
 class MidiTracer;
+class PianorollWindow;
 class NSM_Client;
 class LevelMeterHBox;
 class GUIObjectState;
@@ -280,6 +281,7 @@ public:
 	Gtk::Menu* shared_popup_menu ();
 
 	void new_midi_tracer_window ();
+	void new_pianoroll_window ();
 	void toggle_editing_space();
 	void toggle_mixer_space();
 	void toggle_keep_tearoffs();
@@ -520,6 +522,7 @@ private:
 	void record_state_changed ();
 
 	std::list<MidiTracer*> _midi_tracer_windows;
+	std::list<PianorollWindow*> _pianoroll_windows;
 
 	/* Transport Control */
 

@@ -698,6 +698,9 @@
       <separator/><!-- Video Monitor !-->
       <menuitem action='ToggleJadeo'/>
 
+      <separator/><!-- MIDI Pianoroll !-->
+      <menuitem action='new-pianoroll'/>
+
       <separator/><!-- Connection dialogs !-->
       <menuitem action='toggle-audio-connection-manager'/>
       <menuitem action='toggle-midi-connection-manager'/>

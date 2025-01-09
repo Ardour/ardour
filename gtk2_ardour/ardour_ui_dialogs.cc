@@ -71,6 +71,7 @@
 #include "monitor_section.h"
 #include "midi_tracer.h"
 #include "mixer_ui.h"
+#include "pianoroll_window.h"
 #include "plugin_dspload_window.h"
 #include "plugin_manager_ui.h"
 #include "public_editor.h"
@@ -884,6 +885,30 @@ ARDOUR_UI::toggle_meterbridge ()
 		meterbridge->raise ();
 	} else {
 		meterbridge->hide_window (NULL);
+	}
+}
+
+void
+ARDOUR_UI::new_pianoroll_window ()
+{
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("new-pianoroll"));
+	if (!act) {
+		return;
+	}
+
+	std::list<PianorollWindow*>::iterator i = _pianoroll_windows.begin ();
+	while (i != _pianoroll_windows.end() && (*i)->get_visible() == true) {
+		++i;
+	}
+
+	if (i == _pianoroll_windows.end()) {
+		/* all our MIDITracer windows are visible; make a new one */
+		PianorollWindow* pr = new PianorollWindow (string_compose (_("Pianoroll %1"), _pianoroll_windows.size() + 1));
+		pr->show_all ();
+		_pianoroll_windows.push_back (pr);
+	} else {
+		/* re-use the hidden one */
+		(*i)->show_all ();
 	}
 }
 

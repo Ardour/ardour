@@ -286,6 +286,8 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));
 	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, X_("new-pianoroll"), _("Piano Roll"), sigc::mem_fun(*this, &ARDOUR_UI::new_pianoroll_window));
+	ActionManager::session_sensitive_actions.push_back (act);
 
 	ActionManager::register_action (common_actions, X_("chat"), _("Chat"),  sigc::mem_fun(*this, &ARDOUR_UI::launch_chat));
 	ActionManager::register_action (common_actions, X_("tutorial"), S_("Help|Tutorial"),  mem_fun(*this, &ARDOUR_UI::launch_tutorial));
