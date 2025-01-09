@@ -506,7 +506,7 @@ Editor::register_actions ()
 
 	act = reg_sens (editor_actions, "toggle-track-active", _("Toggle Active"), (sigc::mem_fun(*this, &Editor::toggle_tracks_active)));
 	ActionManager::route_selection_sensitive_actions.push_back (act);
-	act = reg_sens (editor_actions, "remove-track", _("Remove"), (sigc::mem_fun(*this, &Editor::remove_tracks)));
+	act = reg_sens (editor_actions, "remove-track", _("Remove Selected Track(s)"), (sigc::mem_fun(*this, &Editor::remove_tracks)));
 	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "fit-selection", _("Fit Selection (Vertical)"), sigc::mem_fun(*this, &Editor::fit_selection));
