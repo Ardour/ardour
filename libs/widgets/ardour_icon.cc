@@ -1496,7 +1496,7 @@ icon_mixer (cairo_t* cr, const int width, const int height, const uint32_t fg_co
 {
 	const double x  = width * .5;
 	const double y  = height * .5;
-	const double wh = .75 * std::min (x, y);
+	const double wh = .9 * std::min (x, y);
 	const double lw = DEFAULT_LINE_WIDTH;
 	const double lc = fmod (lw * .5, 1.0);
 
@@ -1506,10 +1506,8 @@ icon_mixer (cairo_t* cr, const int width, const int height, const uint32_t fg_co
 
 	const double h  = wh * .80 - lw;
 	const double y0 = rint (y - h * .5) - lc;
-	const double y1 = rint (y + h * .5) - lc;
+	const double y1 = rint (y + h * .4) - lc;
 	const double y2 = rint (y + h * .0) - lc;
-
-	const double ww  = 1.5 * lw;
 
 	cairo_move_to (cr, x0, y - h);
 	cairo_line_to (cr, x0, y + h);
@@ -1520,21 +1518,22 @@ icon_mixer (cairo_t* cr, const int width, const int height, const uint32_t fg_co
 	cairo_move_to (cr, x2, y - h);
 	cairo_line_to (cr, x2, y + h);
 
-	VECTORICONSTROKE (lw, (fg_color & 0xffffff00) + 0xaa);
-
-	cairo_move_to (cr, x0 - ww, y0);
-	cairo_line_to (cr, x0 + ww, y0);
-
-	cairo_move_to (cr, x1 - ww, y1);
-	cairo_line_to (cr, x1 + ww, y1);
-
-	cairo_move_to (cr, x2 - ww, y2);
-	cairo_line_to (cr, x2 + ww, y2);
-
 	Gtkmm2ext::set_source_rgba (cr, fg_color);
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
-	cairo_set_line_width (cr, sqrt(lw * 4));
+	cairo_set_line_width (cr, lw);
 	cairo_stroke (cr);
+
+	const double faderw  = 2 * lw;
+	const double faderh  = 4 * lw;
+
+	cairo_rectangle (cr, x0 - faderw/2., y0, faderw, faderh);
+	VECTORICONSTROKEFILL (1);
+
+	cairo_rectangle (cr, x1 - faderw/2., y1, faderw, faderh);
+	VECTORICONSTROKEFILL (1);
+
+	cairo_rectangle (cr, x2 - faderw/2., y2, faderw, faderh);
+	VECTORICONSTROKEFILL (1);
 }
 
 static void
