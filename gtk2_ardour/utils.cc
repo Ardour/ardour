@@ -711,13 +711,17 @@ ARDOUR_UI_UTILS::escape_underscores (string const& s)
 }
 
 Gdk::Color
-ARDOUR_UI_UTILS::round_robin_palette_color ()
+ARDOUR_UI_UTILS::round_robin_palette_color (bool just_peek)
 {
 	Gdk::Color                                newcolor;
 	string                                    cp = UIConfiguration::instance ().get_stripable_color_palette ();
 	Gdk::ArrayHandle_Color                    gc = ColorSelection::palette_from_string (cp);
 	std::vector<Gdk::Color>                   c (gc);
 	static std::vector<Gdk::Color>::size_type index = 0;
+
+	if(just_peek) {
+		return c[index];
+	}
 
 	if (index >= c.size ()) {
 		index = 0;
