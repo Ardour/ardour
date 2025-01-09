@@ -1331,6 +1331,54 @@ icon_config_wheel (cairo_t* cr, const int width, const int height, const uint32_
 }
 
 static void
+icon_config_menu (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double yoff  = height * .08;
+	const double r0 = std::min (x, y) * .2 * 0.8;
+	const double r1 = std::min (x, y) * .55 * 0.8;
+	const double r2 = std::min (x, y) * .70 * 0.8;
+	const double ar = std::min (x, y) * .25 * 0.8;
+	const double lw = DEFAULT_LINE_WIDTH;
+
+	cairo_save (cr);
+	cairo_translate(cr, 0, -yoff);
+
+	for (int i = 0; i < 8; ++i) {
+		double ang0 = i * 2.0 * M_PI / 8.0;
+		double ang1 = (i + 1) * 2.0 * M_PI / 8.0;
+		double angm = 2.0 * M_PI / 48.0;
+		double angd = 2.0 * M_PI / 64.0;
+
+		cairo_arc (cr, x, y, r2, ang0 - angm, ang0 + angm);
+		cairo_arc (cr, x, y, r1, ang0 + angm + angd, ang1 - angm - angd);
+	}
+	cairo_close_path (cr);
+	VECTORICONSTROKEFILL (lw);
+
+	cairo_arc (cr, x, y, r0, 0, 2.0 * M_PI);
+	VECTORICONSTROKE (lw, fg_color);
+
+	cairo_new_path (cr);
+	cairo_arc (cr, x, y, r0, 0, 2.0 * M_PI);
+	ardour_icon_set_source_inv_rgba (cr, 0xe5 | (fg_color & 0xffffff00));
+	cairo_fill (cr);
+
+	cairo_restore(cr);
+
+	cairo_save (cr);
+	cairo_translate(cr, x, height - ar * 2 - y * 0.02);
+	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
+	cairo_move_to (cr, -ar, 0);
+	cairo_rel_line_to (cr, ar * 2, 0);
+	cairo_rel_line_to (cr, -ar, ar);
+	cairo_line_to (cr, -ar, 0);
+	VECTORICONSTROKE (lw * .5, fg_color);
+	cairo_restore(cr);
+}
+
+static void
 icon_pcb_via (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double x = ceil (width * .5) - .5;
@@ -2001,6 +2049,9 @@ ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr
 			break;
 		case ConfigReset: /* unused */
 			icon_config_wheel (cr, width, height, fg_color, -1);
+			break;
+		case ConfigMenu:
+			icon_config_menu (cr, width, height, fg_color);
 			break;
 		case PowerOnOff: /* unused */
 			icon_on_off (cr, width, height, fg_color);

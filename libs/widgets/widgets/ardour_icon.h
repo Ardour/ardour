@@ -70,6 +70,7 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		LatencyClock,
 		Config,
 		ConfigReset,
+		ConfigMenu,
 		PowerOnOff,
 		ShadedPlusSign,
 		Folder,
