@@ -49,9 +49,9 @@ using Gtkmm2ext::Keyboard;
 list<Gdk::Color> GroupTabs::_used_colors;
 
 GroupTabs::GroupTabs ()
-	: _menu (0)
+	: _dragging_new_tab (0)
+	, _menu (0)
 	, _dragging (0)
-	, _dragging_new_tab (0)
 	, _extent (-1)
 	, _offset (0)
 	, _hovering (false)
