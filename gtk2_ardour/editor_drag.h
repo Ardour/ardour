@@ -619,7 +619,7 @@ public:
 	}
 
 private:
-	MidiView*     region;
+	MidiView*     midi_view;
 	bool          relative;
 	bool          at_front;
 	bool         _was_selected;

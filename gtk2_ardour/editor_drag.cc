@@ -2366,7 +2366,7 @@ RegionCreateDrag::aborted (bool)
 
 NoteResizeDrag::NoteResizeDrag (EditingContext& ec, ArdourCanvas::Item* i)
 	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group())
-	, region (0)
+	, midi_view (0)
 	, relative (false)
 	, at_front (true)
 	, _was_selected (false)
@@ -2393,10 +2393,10 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 
 	Drag::start_grab (event, cursor);
 
-	region = &cnote->region_view ();
+	midi_view = &cnote->region_view ();
 
 	double temp;
-	temp        = region->snap_to_pixel (cnote->x0 (), true);
+	temp        = midi_view->snap_to_pixel (cnote->x0 (), true);
 	_snap_delta = temp - cnote->x0 ();
 
 	_item->grab ();
@@ -2406,70 +2406,49 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 	} else {
 		relative = true;
 	}
-	MidiRegionSelection ms = editing_context.get_selection ().midi_regions ();
-
-	if (ms.size () > 1) {
-		/* has to be relative, may make no sense otherwise */
-		relative = true;
-	}
 
 	if (!(_was_selected = cnote->selected ())) {
 		const bool extend = Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier);
 		const bool add    = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
 
-		region->note_selected (cnote, add, extend);
+		midi_view->note_selected (cnote, add, extend);
 	}
 }
 
 void
 NoteResizeDrag::motion (GdkEvent* event, bool first_move)
 {
-	MidiRegionSelection ms = editing_context.get_selection ().midi_regions ();
 	if (first_move) {
 		editing_context.begin_reversible_command (_("resize notes"));
-
-		for (MidiRegionSelection::iterator r = ms.begin (); r != ms.end ();) {
-			MidiRegionSelection::iterator next;
-			next = r;
-			++next;
-			MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
-			if (mrv) {
-				mrv->begin_resizing (at_front);
-			}
-			r = next;
-		}
+		midi_view->begin_resizing (at_front);
 	}
 
-	for (MidiRegionSelection::iterator r = ms.begin (); r != ms.end (); ++r) {
-		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
-		assert (nb);
-		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
-		if (mrv) {
-			double sd               = 0.0;
-			bool   snap             = true;
-			bool   apply_snap_delta = ArdourKeyboard::indicates_snap_delta (event->button.state);
+	NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
+	assert (nb);
 
-			if (ArdourKeyboard::indicates_snap (event->button.state)) {
-				if (editing_context.snap_mode () != SnapOff) {
-					snap = false;
-				}
-			} else {
-				if (editing_context.snap_mode () == SnapOff) {
-					snap = false;
-					/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
-					if (apply_snap_delta) {
-						snap = true;
-					}
-				}
-			}
+	double sd               = 0.0;
+	bool   snap             = true;
+	bool   apply_snap_delta = ArdourKeyboard::indicates_snap_delta (event->button.state);
 
+	if (ArdourKeyboard::indicates_snap (event->button.state)) {
+		if (editing_context.snap_mode () != SnapOff) {
+			snap = false;
+		}
+	} else {
+		if (editing_context.snap_mode () == SnapOff) {
+			snap = false;
+				/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
 			if (apply_snap_delta) {
-				sd = _snap_delta;
+				snap = true;
 			}
-
-			mrv->update_resizing (nb, at_front, current_pointer_x () - grab_x (), relative, sd, snap);
 		}
 	}
+
+	if (apply_snap_delta) {
+		sd = _snap_delta;
+	}
+
+	midi_view->update_resizing (nb, at_front, current_pointer_x () - grab_x (), relative, sd, snap);
 }
 
 void
@@ -2485,7 +2464,7 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 			if (_was_selected) {
 				bool add = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
 				if (add) {
-					region->note_deselected (cnote);
+					midi_view->note_deselected (cnote);
 					changed = true;
 				} else {
 					/* handled during button press */
@@ -2503,36 +2482,31 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
-	MidiRegionSelection ms = editing_context.get_selection ().midi_regions ();
-	for (MidiRegionSelection::iterator r = ms.begin (); r != ms.end (); ++r) {
-		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
-		assert (nb);
-		MidiRegionView* mrv              = dynamic_cast<MidiRegionView*> (*r);
-		double          sd               = 0.0;
-		bool            snap             = true;
-		bool            apply_snap_delta = ArdourKeyboard::indicates_snap_delta (event->button.state);
-		if (mrv) {
-			if (ArdourKeyboard::indicates_snap (event->button.state)) {
-				if (editing_context.snap_mode () != SnapOff) {
-					snap = false;
-				}
-			} else {
-				if (editing_context.snap_mode () == SnapOff) {
-					snap = false;
-					/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
-					if (apply_snap_delta) {
-						snap = true;
-					}
-				}
-			}
+	NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
+	assert (nb);
+	double          sd               = 0.0;
+	bool            snap             = true;
+	bool            apply_snap_delta = ArdourKeyboard::indicates_snap_delta (event->button.state);
 
+	if (ArdourKeyboard::indicates_snap (event->button.state)) {
+		if (editing_context.snap_mode () != SnapOff) {
+			snap = false;
+		}
+	} else {
+		if (editing_context.snap_mode () == SnapOff) {
+			snap = false;
+			/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
 			if (apply_snap_delta) {
-				sd = _snap_delta;
+				snap = true;
 			}
-
-			mrv->finish_resizing (nb, at_front, current_pointer_x () - grab_x (), relative, sd, snap);
 		}
 	}
+
+	if (apply_snap_delta) {
+		sd = _snap_delta;
+	}
+
+	midi_view->finish_resizing (nb, at_front, current_pointer_x () - grab_x (), relative, sd, snap);
 
 	editing_context.commit_reversible_command ();
 }
@@ -2540,13 +2514,7 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 NoteResizeDrag::aborted (bool)
 {
-	MidiRegionSelection ms = editing_context.get_selection ().midi_regions ();
-	for (MidiRegionSelection::iterator r = ms.begin (); r != ms.end (); ++r) {
-		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
-		if (mrv) {
-			mrv->abort_resizing ();
-		}
-	}
+	midi_view->abort_resizing ();
 }
 
 AVDraggingView::AVDraggingView (RegionView* v)
