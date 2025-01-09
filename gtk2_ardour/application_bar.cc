@@ -800,9 +800,10 @@ ApplicationBar::set_session (Session *s)
 	_session->SoloActive.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::soloing_changed, this, _1), gui_context());
 	_session->AuditionActive.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::auditioning_changed, this, _1), gui_context());
 
-	//initialize all session config settings
+	//initialize all session and global config settings
 	std::function<void (std::string)> pc (std::bind (&ApplicationBar::parameter_changed, this, _1));
 	_session->config.map_parameters (pc);
+	UIConfiguration::instance().map_parameters (pc);
 
 	/* initialize */
 	session_latency_updated (true);
