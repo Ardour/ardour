@@ -539,6 +539,8 @@ Tabbable::showhide_att_right (bool yn)
 	} else {
 		content_right_vbox.hide ();
 	}
+
+	StateChange (*this);
 }
 
 void
@@ -563,6 +565,8 @@ Tabbable::showhide_att_left (bool yn)
 	} else {
 		content_att_left.hide ();
 	}
+
+	StateChange (*this);
 }
 
 void
@@ -587,6 +591,8 @@ Tabbable::showhide_att_bottom (bool yn)
 	} else {
 		content_att_bottom.hide ();
 	}
+
+	StateChange (*this);
 }
 
 void

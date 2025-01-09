@@ -102,6 +102,10 @@ public:
 	void att_right_button_toggled();
 	void att_bottom_button_toggled();
 
+	bool att_left_visible () const { return content_att_left.get_visible (); }
+	bool att_right_visible () const { return content_att_right.get_visible (); }
+	bool att_bottom_visible () const { return content_att_bottom.get_visible (); }
+
 protected:
 	virtual void showhide_att_left (bool yn);
 	virtual void showhide_att_right (bool yn);
