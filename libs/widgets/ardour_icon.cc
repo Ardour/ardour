@@ -20,6 +20,8 @@
 #include <assert.h>
 #include <math.h> // M_PI
 
+#include "gtkmm/layout.h"
+
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/rgb_macros.h"
 #include "widgets/ardour_icon.h"
@@ -2072,7 +2074,12 @@ ArdourWidgets::ArdourIcon::expose (GdkEventExpose* ev, Gtk::Widget* w, const enu
 bool
 ArdourWidgets::ArdourIcon::expose_with_text (GdkEventExpose* ev, Gtk::Widget* w, const enum ArdourIcon::Icon icon, std::string const& caption)
 {
-	Glib::RefPtr<Gdk::Window> win (w->get_window ());
+	Glib::RefPtr<Gdk::Window> win;
+	if (Gtk::Layout* l = dynamic_cast<Gtk::Layout*> (w)) {
+		win = l->get_bin_window ();
+	} else {
+		win = w->get_window ();
+	}
 	cairo_t*                  cr = gdk_cairo_create (win->gobj ());
 	gdk_cairo_rectangle (cr, &ev->area);
 	cairo_clip (cr);
