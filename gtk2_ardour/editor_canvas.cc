@@ -380,6 +380,7 @@ Editor::reset_controls_layout_height (int32_t h)
 	controls_layout.property_height() = h;
 
 	_group_tabs->set_extent (h);
+	controls_layout.queue_draw ();
 }
 
 bool
@@ -989,6 +990,7 @@ Editor::tie_vertical_scrolling ()
 		_summary->set_overlays_dirty ();
 	}
 	_group_tabs->set_offset (vertical_adjustment.get_value ());
+	controls_layout.queue_draw ();
 }
 
 void

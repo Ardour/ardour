@@ -463,6 +463,8 @@ Editor::Editor ()
 	_group_tabs = new EditorGroupTabs (this);
 	controls_layout.add (edit_controls_vbox);
 
+	controls_layout.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &controls_layout, ArdourWidgets::ArdourIcon::ShadedPlusSign, _("Right-click\nor Double-click here\nto add Track, Bus,\n or VCA.")));
+
 	HSeparator* separator = manage (new HSeparator());
 	separator->set_name("TrackSeparator");
 	separator->set_size_request(-1, 1);
