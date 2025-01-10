@@ -849,8 +849,12 @@ ArdourButton::set_colors ()
 		}
 	}
 
-	text_active_color = Gtkmm2ext::contrasting_text_color (fill_active_color);
-	text_inactive_color = UIConfigurationBase::instance().color ("gtk_foreground");
+	{
+		/* set contransting text color, but retain _fixed_colors_set */
+		PBD::Unwinder<int> uw (_fixed_colors_set, _fixed_colors_set);
+		set_active_color (fill_active_color);
+		set_inactive_color (fill_inactive_color);
+	}
 
 	led_active_color = UIConfigurationBase::instance().color (string_compose ("%1: led active", name), &failed);
 	if (failed) {
