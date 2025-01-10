@@ -518,7 +518,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 			if (old_move_threshold_passed != _move_threshold_passed) {
 				/* just changed */
 
-				if (fabs (_drags->current_pointer_y () - _grab_y) > fabs (_drags->current_pointer_x () - _grab_x)) {
+				if (fabs (current_pointer_y () - _grab_y) > fabs (current_pointer_x () - _grab_x)) {
 					_initially_vertical = true;
 				} else {
 					_initially_vertical = false;
@@ -6182,7 +6182,7 @@ NoteDrag::total_dx (GdkEvent* event) const
 	}
 
 	/* we need to use absolute positions here to honor the tempo-map */
-	timepos_t const t1 = pixel_duration_to_time (_drags->current_pointer_x ());
+	timepos_t const t1 = pixel_duration_to_time (current_pointer_x ());
 	timepos_t const t2 = pixel_duration_to_time (grab_x ());
 
 	/* now calculate proper `b@b` time */
