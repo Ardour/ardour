@@ -310,6 +310,8 @@ class LIBTEMPORAL_API Meter {
 	BBT_Time round_to_beat (BBT_Time const &) const;
 	Beats    to_quarters (BBT_Offset const &) const;
 
+	Beats round_to_beat (Beats const &) const;
+
 	XMLNode& get_state () const;
 	int set_state (XMLNode const&, int version);
 
@@ -473,6 +475,7 @@ class LIBTEMPORAL_API TempoMetric
 	BBT_Argument round_to_bar (BBT_Time const & bbt) const { return BBT_Argument (reftime(), _meter->round_to_bar (bbt)); }
 	BBT_Argument round_up_to_bar (BBT_Time const & bbt) const { return BBT_Argument (reftime(), _meter->round_up_to_bar (bbt)); }
 	Beats to_quarters (BBT_Offset const & bbo) const { return _meter->to_quarters (bbo); }
+	Beats round_to_beat (Beats const & b) const { return _meter->round_to_beat (b); }
 
 	/* combination methods that require both tempo and meter information */
 
