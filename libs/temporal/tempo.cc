@@ -1353,11 +1353,12 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 
 		/* tempo changes are required to be on-beat */
 
-		Beats on_beat = time.beats().round_to_beat();
+		TempoMetric metric (metric_at (time.beats(), false));
+		Beats on_beat = time.beats().round_to_multiple (Beats::ticks (metric.meter().ticks_per_grid()));
 		superclock_t sc;
 		BBT_Time bbt;
 
-		TempoMetric metric (metric_at (on_beat, false));
+		metric = metric_at (on_beat, false);
 
 		bbt = metric.bbt_at (on_beat);
 		sc = metric.superclock_at (on_beat);
@@ -1375,7 +1376,7 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 
 		/* tempo changes must be on beat */
 
-		beats = tm.quarters_at_superclock (sc).round_to_beat ();
+		beats = tm.quarters_at_superclock (sc).round_to_multiple (Beats::ticks (tm.meter().ticks_per_grid()));
 		bbt = tm.bbt_at (beats);
 
 		/* recompute superclock position of rounded beat */
