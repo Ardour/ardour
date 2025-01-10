@@ -578,9 +578,9 @@ icon_transport_stop (cairo_t* cr, const int width, const int height, const uint3
 {
 	const int wh = std::min (width, height);
 	cairo_rectangle (cr,
-	                 (width - wh) * .5 + wh * .225,
-	                 (height - wh) * .5 + wh * .225,
-	                 wh * .55, wh * .55);
+	                 (width - wh) * .5 + wh * .24,
+	                 (height - wh) * .5 + wh * .24,
+	                 wh * .48, wh * .48);
 	VECTORICONSTROKEFILLFG (0.9); // small 'shine'
 }
 
