@@ -197,12 +197,20 @@ Editor::initialize_rulers ()
 void
 Editor::initialize_ruler_actions ()
 {
-	_ruler_btn_loc_prev.set_related_action (ActionManager::get_action (X_("Common"), X_("jump-backward-to-mark")));
-	_ruler_btn_loc_next.set_related_action (ActionManager::get_action (X_("Common"), X_("jump-forward-to-mark")));
+	_ruler_btn_loc_prev.set_related_action (ActionManager::get_action (X_("Common"), X_("jump-backward-to-location-mark")));
+	_ruler_btn_loc_next.set_related_action (ActionManager::get_action (X_("Common"), X_("jump-forward-to-location-mark")));
 	_ruler_btn_loc_add.set_related_action (ActionManager::get_action (X_("Common"), X_("add-location-from-playhead")));
 
+	_ruler_btn_section_prev.set_related_action (ActionManager::get_action (X_("Common"), X_("jump-backward-to-section-mark")));
+	_ruler_btn_section_next.set_related_action (ActionManager::get_action (X_("Common"), X_("jump-forward-to-section-mark")));
 	_ruler_btn_section_add.set_related_action (ActionManager::get_action (X_("Common"), X_("add-section-from-playhead")));
 
+	_ruler_btn_range_add.set_related_action (ActionManager::get_action (X_("Editor"), X_("add-range-marker-from-selection")));
+	_ruler_btn_range_prev.set_related_action (ActionManager::get_action (X_("Common"), X_("jump-backward-to-range")));
+	_ruler_btn_range_next.set_related_action (ActionManager::get_action (X_("Common"), X_("jump-forward-to-range")));
+
+	_ruler_btn_tempo_add.set_related_action (ActionManager::get_action (X_("Editor"), X_("add-tempo-from-playhead")));
+	_ruler_btn_meter_add.set_related_action (ActionManager::get_action (X_("Editor"), X_("add-meter-from-playhead")));
 }
 
 bool

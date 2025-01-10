@@ -594,6 +594,22 @@ ARDOUR_UI::install_dependent_actions ()
 	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_forward_to_mark_flagged), Location::Flags (0), Location::Flags (0), Location::IsMark));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (common_actions, "jump-backward-to-range", _("Jump to Previous Range"),
+	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_backward_to_mark_flagged), Location::Flags (Location::IsRangeMarker | Location::IsSessionRange), Location::Flags (0), Location::Flags (0)));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (common_actions, "jump-forward-to-range", _("Jump to Next Range"),
+	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_forward_to_mark_flagged), Location::Flags(Location::IsRangeMarker | Location::IsSessionRange), Location::Flags (0), Location::Flags (0)));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (common_actions, "jump-backward-to-section-mark", _("Jump to Previous Arrangment Mark"),
+	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_backward_to_mark_flagged), Location::Flags (0), Location::Flags (0), Location::Flags (Location::IsMark | Location::IsSection)));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (common_actions, "jump-forward-to-section-mark", _("Jump to Next Arrangment Mark"),
+	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_forward_to_mark_flagged), Location::Flags (0), Location::Flags (0), Location::Flags(Location::IsMark | Location::IsSection)));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	for (int i = 1; i <= 9; ++i) {
 		string const a = string_compose(X_("goto-mark-%1"), i);
 		string const n = string_compose(_("Locate to Mark %1"), i);

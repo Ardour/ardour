@@ -935,10 +935,17 @@ private:
 	Gtk::HBox _ruler_box_section;
 	Gtk::HBox _ruler_box_videotl;
 
-	ArdourWidgets::ArdourButton  _ruler_btn_section_add;
+	ArdourWidgets::ArdourButton  _ruler_btn_tempo_add;
+	ArdourWidgets::ArdourButton  _ruler_btn_meter_add;
+	ArdourWidgets::ArdourButton  _ruler_btn_range_prev;
+	ArdourWidgets::ArdourButton  _ruler_btn_range_next;
+	ArdourWidgets::ArdourButton  _ruler_btn_range_add;
 	ArdourWidgets::ArdourButton  _ruler_btn_loc_prev;
 	ArdourWidgets::ArdourButton  _ruler_btn_loc_next;
 	ArdourWidgets::ArdourButton  _ruler_btn_loc_add;
+	ArdourWidgets::ArdourButton  _ruler_btn_section_prev;
+	ArdourWidgets::ArdourButton  _ruler_btn_section_next;
+	ArdourWidgets::ArdourButton  _ruler_btn_section_add;
 
 	/* videtimline related actions */
 	Gtk::Label                      videotl_label;
@@ -1410,6 +1417,9 @@ private:
 
 	void set_loop_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd);
 	void set_punch_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd);
+
+	void add_tempo_from_playhead_cursor ();
+	void add_meter_from_playhead_cursor ();
 
 	void toggle_location_at_playhead_cursor ();
 	void add_location_from_playhead_cursor ();

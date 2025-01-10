@@ -275,10 +275,17 @@ Editor::Editor ()
 	, range_marker_bar (0)
 	, section_marker_bar (0)
 	, ruler_separator (0)
-	, _ruler_btn_section_add ("+")
+	, _ruler_btn_tempo_add ("+")
+	, _ruler_btn_meter_add ("+")
+	, _ruler_btn_range_prev ("<")
+	, _ruler_btn_range_next (">")
+	, _ruler_btn_range_add ("+")
 	, _ruler_btn_loc_prev ("<")
 	, _ruler_btn_loc_next (">")
 	, _ruler_btn_loc_add ("+")
+	, _ruler_btn_section_prev ("<")
+	, _ruler_btn_section_next (">")
+	, _ruler_btn_section_add ("+")
 	, videotl_label (_("Video Timeline"))
 	, videotl_group (0)
 	, _region_boundary_cache_dirty (true)
@@ -422,18 +429,25 @@ Editor::Editor ()
 	rtbl = setup_ruler_new (_ruler_box_bbt, _("Bars:Beats"));
 
 	rtbl = setup_ruler_new (_ruler_box_tempo, _("Tempo"));
+	setup_ruler_add (rtbl, _ruler_btn_tempo_add);
 
 	rtbl = setup_ruler_new (_ruler_box_meter, _("Time Signature"));
+	setup_ruler_add (rtbl, _ruler_btn_meter_add);
 
 	rtbl = setup_ruler_new (_ruler_box_range, _("Range Markers"));
+	setup_ruler_add (rtbl, _ruler_btn_range_prev, 0);
+	setup_ruler_add (rtbl, _ruler_btn_range_add, 1);
+	setup_ruler_add (rtbl, _ruler_btn_range_next, 2);
 
 	rtbl = setup_ruler_new (_ruler_box_marker, _("Location Markers"));
 	setup_ruler_add (rtbl, _ruler_btn_loc_prev, 0);
-	setup_ruler_add (rtbl, _ruler_btn_loc_next, 1);
-	setup_ruler_add (rtbl, _ruler_btn_loc_add, 2);
+	setup_ruler_add (rtbl, _ruler_btn_loc_add, 1);
+	setup_ruler_add (rtbl, _ruler_btn_loc_next, 2);
 
 	rtbl = setup_ruler_new (_ruler_box_section, _("Arrangement Markers"));
-	setup_ruler_add (rtbl, _ruler_btn_section_add);
+	setup_ruler_add (rtbl, _ruler_btn_section_prev, 0);
+	setup_ruler_add (rtbl, _ruler_btn_section_add, 1);
+	setup_ruler_add (rtbl, _ruler_btn_section_next, 2);
 
 	rtbl = setup_ruler_new (_ruler_box_videotl, &videotl_label);
 	videotl_label.set_size_request (-1, 4 * timebar_height);
@@ -751,13 +765,14 @@ Editor::setup_ruler_new (Gtk::HBox& box, Gtk::Label* rlbl)
 {
 	rlbl->set_name ("EditorRulerLabel");
 	rlbl->set_size_request (-1, (int)timebar_height);
+	rlbl->set_alignment (1.0, 0);
 	rlbl->show ();
 
 	Gtk::Table* rtbl = manage (new Gtk::Table);
-	rtbl->attach (*rlbl, 0, 1, 0, 1, SHRINK, SHRINK, 2, 0);
+	rtbl->attach (*rlbl, 0, 1, 0, 1, EXPAND|FILL, SHRINK, 2, 0);
 	rtbl->show ();
 
-	box.pack_end (*rtbl, false, false);
+	box.pack_start (*rtbl, true, true);
 	box.hide();
 	box.set_no_show_all();
 	return rtbl;
@@ -768,8 +783,10 @@ Editor::setup_ruler_add (Gtk::Table* rtbl, ArdourWidgets::ArdourButton& b, int p
 {
 	b.set_name ("editor ruler button");
 	b.set_size_request (-1, (int)timebar_height -2);
+	b.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceBoxy | ArdourButton::ForceFlat));
+	b.set_elements (ArdourButton::Element(ArdourButton::Text));
 	b.show ();
-	rtbl->attach (b, pos + 1, pos + 2, 0, 1, SHRINK, SHRINK, 2, 1);
+	rtbl->attach (b, pos + 1, pos + 2, 0, 1, SHRINK, SHRINK, 0, 1);
 }
 
 bool
