@@ -346,6 +346,12 @@ Meter::bbt_subtract (Temporal::BBT_Time const & bbt, Temporal::BBT_Offset const 
 	return Temporal::BBT_Time (r.bars, r.beats, r.ticks);
 }
 
+Temporal::Beats
+Meter::round_to_beat (Temporal::Beats const & b) const
+{
+	return b.round_to_multiple (Beats::ticks (ticks_per_grid()));
+}
+
 Temporal::BBT_Time
 Meter::round_to_bar (Temporal::BBT_Time const & bbt) const
 {
@@ -1353,12 +1359,15 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 
 		/* tempo changes are required to be on-beat */
 
-		TempoMetric metric (metric_at (time.beats(), false));
-		Beats on_beat = time.beats().round_to_multiple (Beats::ticks (metric.meter().ticks_per_grid()));
+		Beats on_beat = metric_at (time.beats(), false).round_to_beat (time.beats());
 		superclock_t sc;
 		BBT_Time bbt;
 
-		metric = metric_at (on_beat, false);
+		/* the metric for the on-beat position may be different than
+		 * the one for the raw time, so look it up again.
+		 */
+
+		TempoMetric metric (metric_at (on_beat, false));
 
 		bbt = metric.bbt_at (on_beat);
 		sc = metric.superclock_at (on_beat);
@@ -1376,7 +1385,7 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 
 		/* tempo changes must be on beat */
 
-		beats = tm.quarters_at_superclock (sc).round_to_multiple (Beats::ticks (tm.meter().ticks_per_grid()));
+		beats = tm.round_to_beat (tm.quarters_at_superclock (sc));
 		bbt = tm.bbt_at (beats);
 
 		/* recompute superclock position of rounded beat */
