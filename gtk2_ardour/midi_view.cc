@@ -2973,6 +2973,20 @@ MidiView::snap_pixel_to_time (double x, bool ensure_snap)
 	return _editing_context.snap_relative_time_to_relative_time (_midi_region->position(), timecnt_t (_editing_context.pixel_to_sample (x)), ensure_snap);
 }
 
+timecnt_t
+MidiView::relative_position (timepos_t const & p) const
+{
+	if (!_midi_region) {
+		return timecnt_t (Beats (0,0));
+	}
+
+	if (_show_source) {
+		return _midi_region->source_relative_position (p);
+	}
+
+	return _midi_region->region_relative_position (p);
+}
+
 /** @param x Pixel relative to the region position.
  *  @param ensure_snap defaults to false. true = ignore magnetic snap and snap mode (used for snap delta calculation).
  *  @return Snapped pixel relative to the region position.

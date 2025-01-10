@@ -6796,8 +6796,8 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	 * coordinates relative to the region in order to draw it correctly.
 	 */
 
-	const timecnt_t rrp1 (_midi_view->midi_region ()->region_relative_position (_note[0]));
-	const timecnt_t rrp2 (_midi_view->midi_region ()->region_relative_position (_note[1]));
+	const timecnt_t rrp1 (_midi_view->relative_position (_note[0]));
+	const timecnt_t rrp2 (_midi_view->relative_position (_note[1]));
 
 	double const x0 = editing_context.sample_to_pixel (rrp1.samples ());
 	double const x1 = editing_context.sample_to_pixel (rrp2.samples ());
@@ -6820,11 +6820,12 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 
 	_note[1] = std::max (aligned_beats, (_note[0].beats () + min_length));
 
-	const timecnt_t rrp1 (_midi_view->midi_region ()->region_relative_position (_note[0]));
-	const timecnt_t rrp2 (_midi_view->midi_region ()->region_relative_position (_note[1]));
+	const timecnt_t rrp1 (_midi_view->relative_position (_note[0]));
+	const timecnt_t rrp2 (_midi_view->relative_position (_note[1]));
 
 	double const x0 = editing_context.sample_to_pixel (rrp1.samples ());
 	double const x1 = editing_context.sample_to_pixel (rrp2.samples ());
+
 	_drag_rect->set_x0 (std::min (x0, x1));
 	_drag_rect->set_x1 (std::max (x0, x1));
 }
