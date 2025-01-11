@@ -290,13 +290,13 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		build_patterns ();
 	}
 
-	if ( active_state() == Gtkmm2ext::ExplicitActive ) {
-		bool led = (_elements & Indicator)==Indicator;
+	if (active_state () == Gtkmm2ext::ExplicitActive) {
+		bool led   = (_elements & Indicator) == Indicator;
 		text_color = led ? text_inactive_color :  text_active_color;
-		led_color = led_active_color;
+		led_color  = led_active_color;
 	} else {
 		text_color = text_inactive_color;
-		led_color = led_inactive_color;
+		led_color  = led_inactive_color;
 	}
 
 	if (use_custom_led_color) {
@@ -338,7 +338,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		if (active_state() == Gtkmm2ext::ImplicitActive && !((_elements & Indicator)==Indicator)) {
 			Gtkmm2ext::set_source_rgba (cr, fill_inactive_color);
 			cairo_fill (cr);
-		} else if ( (active_state() == Gtkmm2ext::ExplicitActive) && !((_elements & Indicator)==Indicator) ) {
+		} else if ((active_state() == Gtkmm2ext::ExplicitActive) && !((_elements & Indicator)==Indicator)) {
 			//background color
 			Gtkmm2ext::set_source_rgba (cr, fill_active_color);
 			cairo_fill (cr);
@@ -361,7 +361,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 	//show the "convex" or "concave" gradient
 	if (!flat && (_elements & Body)==Body) {
-		if ( active_state() == Gtkmm2ext::ExplicitActive && ( !((_elements & Indicator)==Indicator) || use_custom_led_color) ) {
+		if (active_state () == Gtkmm2ext::ExplicitActive && (!((_elements & Indicator)==Indicator) || use_custom_led_color)) {
 			//concave
 			cairo_set_source (cr, concave_pattern);
 			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
@@ -456,7 +456,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			// always left align (dropdown)
 			cairo_move_to (cr, text_margin, text_ypos);
 			pango_cairo_show_layout (cr, _layout->gobj());
-		} else if ( (_elements & Indicator)  == Indicator) {
+		} else if ((_elements & Indicator) == Indicator) {
 			// left/right align depending on LED position
 			if (_led_left) {
 				cairo_move_to (cr, round (text_margin + _diameter + .5 * char_pixel_width()), text_ypos);
