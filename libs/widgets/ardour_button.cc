@@ -289,9 +289,15 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	const bool boxy = (_tweaks & ForceBoxy) | boxy_buttons ();
 	const bool flat = (_tweaks & ForceFlat) | flat_buttons ();
 
-	const float corner_radius = boxy ? 0 : std::max(2.f, _corner_radius * UIConfigurationBase::instance().get_ui_scale());
-
 	const float scale = UIConfigurationBase::instance().get_ui_scale();
+
+	float corner_radius = _corner_radius;
+	if (corner_radius==-1) {
+		corner_radius = get_height()-2*scale;
+	} else {
+		std::max(2.f, corner_radius * scale);
+	}
+	corner_radius = boxy ? 0 : corner_radius;
 
 	if (_update_colors) {
 		set_colors ();
@@ -316,18 +322,34 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	void (*rounded_function)(cairo_t*, double, double, double, double, double);
 	if (corner_radius) {
 		switch (_corner_mask) {
-		case 0x1: /* upper left only */
+		case NONE:
+			rounded_function = Gtkmm2ext::rectangle;
+			corner_radius=0;
+			break;
+		case TOP_LEFT:
 			rounded_function = Gtkmm2ext::rounded_top_left_rectangle;
 			break;
-		case 0x2: /* upper right only */
+		case TOP_RIGHT:
 			rounded_function = Gtkmm2ext::rounded_top_right_rectangle;
 			break;
-		case 0x3: /* upper only */
-			rounded_function = Gtkmm2ext::rounded_top_rectangle;
+		case BOTTOM_LEFT:
+			rounded_function = Gtkmm2ext::rounded_bottom_left_rectangle;
 			break;
-			/* should really have functions for lower right, lower left,
-			   lower only, but for now, we don't
-			*/
+		case BOTTOM_RIGHT:
+			rounded_function = Gtkmm2ext::rounded_bottom_right_rectangle;
+			break;
+		case TOP:
+			rounded_function = Gtkmm2ext::rounded_top_half_rectangle;
+			break;
+		case BOTTOM:
+			rounded_function = Gtkmm2ext::rounded_bottom_half_rectangle;
+			break;
+		case LEFT:
+			rounded_function = Gtkmm2ext::rounded_left_half_rectangle;
+			break;
+		case RIGHT:
+			rounded_function = Gtkmm2ext::rounded_right_half_rectangle;
+			break;
 		default:
 			rounded_function = Gtkmm2ext::rounded_rectangle;
 		}
@@ -337,18 +359,18 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 	// draw edge (filling a rect underneath, rather than stroking a border on top, allows the corners to be lighter-weight.
 	if ((_elements & (Body|Edge)) == (Body|Edge)) {
-		rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius + 1.5);
+		rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius + 1.5*scale);
 		Gtkmm2ext::set_source_rgba (cr, outline_color);
 		cairo_fill(cr);
 	}
 
 	// background fill
 	if ((_elements & Body)==Body) {
-		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
+		rounded_function (cr, 1*scale, 1*scale, get_width() - 2*scale, get_height() - 2*scale, corner_radius);
 		if (active_state() == Gtkmm2ext::ImplicitActive && !((_elements & Indicator)==Indicator)) {
 			Gtkmm2ext::set_source_rgba (cr, fill_inactive_color);
 			cairo_fill (cr);
-		} else if ((active_state() == Gtkmm2ext::ExplicitActive) && !((_elements & Indicator)==Indicator)) {
+		} else if ((active_state() == Gtkmm2ext::ExplicitActive) && !((_elements & Indicator)==Indicator) && !((_tweaks & TransportIcon)==TransportIcon)) {
 			//background color
 			Gtkmm2ext::set_source_rgba (cr, fill_active_color);
 			cairo_fill (cr);
@@ -362,8 +384,8 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	// IMPLICIT ACTIVE: draw a border of the active color
 	if ((_elements & Body)==Body) {
 		if (active_state() == Gtkmm2ext::ImplicitActive && !((_elements & Indicator)==Indicator)) {
-			cairo_set_line_width (cr, 2.0);
-			rounded_function (cr, 2, 2, get_width() - 4, get_height() - 4, corner_radius-0.5);
+			cairo_set_line_width (cr, 2.0*scale);
+			rounded_function (cr, 2*scale, 2*scale, get_width() - 4*scale, get_height() - 4*scale, corner_radius-0.5*scale);
 			Gtkmm2ext::set_source_rgba (cr, fill_active_color);
 			cairo_stroke (cr);
 		}
@@ -378,7 +400,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			cairo_fill (cr);
 		} else {
 			cairo_set_source (cr, convex_pattern);
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
+			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2*scale, get_height() - 2*scale, corner_radius);
 			cairo_fill (cr);
 		}
 	}
@@ -429,7 +451,11 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			vw -= _text_width + text_margin;
 		}
 		if (_elements & VectorIcon) {
-			ArdourIcon::render (cr, _icon, vw, vh, active_state(), text_color);
+			uint32_t fill_color = text_color;
+			if ( (active_state () == Gtkmm2ext::ExplicitActive) && ( ((_tweaks&TransportIcon)==TransportIcon))) {
+				fill_color = fill_active_color;
+			}
+			ArdourIcon::render (cr, _icon, vw, vh, active_state(), fill_color);
 		} else {
 			rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius + 1.5);
 			cairo_clip (cr);
@@ -540,7 +566,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		cairo_rel_line_to(cr, 2. * triw2 - 1, 0);
 		cairo_close_path(cr);
 		cairo_set_source_rgba (cr, 0, 0, 0, 0.8);
-		cairo_set_line_width(cr, 1);
+		cairo_set_line_width(cr, 1*scale);
 		cairo_stroke(cr);
 	}
 
@@ -608,12 +634,12 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 		//black ring
 		cairo_set_source_rgb (cr, 0, 0, 0);
-		cairo_arc (cr, 0, 0, _diameter * .5 - 1 * UIConfigurationBase::instance().get_ui_scale(), 0, 2 * M_PI);
+		cairo_arc (cr, 0, 0, _diameter * .5 - 1 * scale, 0, 2 * M_PI);
 		cairo_fill(cr);
 
 		//led color
 		Gtkmm2ext::set_source_rgba (cr, led_color);
-		cairo_arc (cr, 0, 0, _diameter * .5 - 3 * UIConfigurationBase::instance().get_ui_scale(), 0, 2 * M_PI);
+		cairo_arc (cr, 0, 0, _diameter * .5 - 3 * scale, 0, 2 * M_PI);
 		cairo_fill(cr);
 
 		cairo_restore (cr);
@@ -621,7 +647,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 	// a transparent overlay to indicate insensitivity
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
-		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
+		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2*scale, corner_radius);
 		Gtkmm2ext::set_source_rgb_a (cr, fill_inactive_color, 0.6);
 		cairo_fill (cr);
 	}
@@ -629,7 +655,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	// if requested, show hovering
 	if (UIConfigurationBase::instance().get_widget_prelight() && !((visual_state() & Gtkmm2ext::Insensitive))) {
 		if (_hovering) {
-			rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
+			rounded_function (cr, 1, 1, get_width() - 2*scale, get_height() - 2*scale, corner_radius);
 			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
 			cairo_fill (cr);
 		}
@@ -637,17 +663,17 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 	//user is currently pressing the button. dark outline helps to indicate this
 	if (_grabbed && !(_elements & (Inactive|Menu))) {
-		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
-		cairo_set_line_width(cr, 2);
+		rounded_function (cr, 1, 1, get_width() - 2*scale, get_height() - 2*scale, corner_radius);
+		cairo_set_line_width(cr, 2*scale);
 		cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, .5);
 		cairo_stroke (cr);
 	}
 
 	//some buttons (like processor boxes) can be selected  (so they can be deleted).  Draw a selection indicator
 	if (visual_state() & Gtkmm2ext::Selected) {
-		cairo_set_line_width(cr, 1);
+		cairo_set_line_width(cr, 1*scale);
 		cairo_set_source_rgba (cr, 1, 0, 0, 0.8);
-		rounded_function (cr, 0.5, 0.5, get_width() - 1, get_height() - 1, corner_radius);
+		rounded_function (cr, 0.5, 0.5, get_width() - 1*scale, get_height() - 1*scale, corner_radius);
 		cairo_stroke (cr);
 	}
 
@@ -657,12 +683,12 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	//   (the editor is always the first receiver for KeyDown).
 	//   It's needed for eg. the engine-dialog at startup or after closing a session.
 	if (_focused) {
-		rounded_function (cr, 1.5, 1.5, get_width() - 3, get_height() - 3, corner_radius);
+		rounded_function (cr, 1.5, 1.5, get_width() - 3*scale, get_height() - 3*scale, corner_radius);
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.8);
 		double dashes = 1;
 		cairo_set_dash (cr, &dashes, 1, 0);
 		cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
-		cairo_set_line_width (cr, 1.0);
+		cairo_set_line_width (cr, 1.0*scale);
 		cairo_stroke (cr);
 		cairo_set_dash (cr, 0, 0, 0);
 	}
@@ -981,6 +1007,13 @@ void
 ArdourButton::set_led_left (bool yn)
 {
 	_led_left = yn;
+}
+
+void
+ArdourButton::set_corner_mask (int cm)
+{
+	_corner_mask = cm;
+	CairoWidget::set_dirty ();
 }
 
 bool
