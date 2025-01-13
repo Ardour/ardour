@@ -117,50 +117,53 @@ protected:
 	 *
 	 * The end result is to provide 7 event-boxes (marked with a $) where the tab can put its contents.
 	 *
-	 * +--_content_vbox----------------------------------------------------------------------------------+
-	 * |                                                                                                 |
-	 * | /--toolbar_frame------------------------------------------------------------------------------\ |
-	 * | | +--content_header_hbox--------------------------------------------------------------------+ | |
-	 * | | |                                                                                         | | |
-	 * | | | +--content_app_bar--------------------+  +--attachment_hbox--+  +--content_tabbables--+ | | |
-	 * | | | $                              (EBOX) |  |    (internal)     |  $              (EBOX) | | | |
-	 * | | | |  MAIN APPLICATION BAR               |  | (attachment btns) |  | PAGE SWITCHER BTN   | | | |
-	 * | | | |                                     |  |                   |  |                     | | | |
-	 * | | | +-------------------------------------+  +-------------------+  +---------------------+ | | |
-	 * | | |                                                                                         | | |
-	 * | | +-----------------------------------------------------------------------------------------+ | |
-	 * | \---------------------------------------------------------------------------------------------/ |
-	 * |                                                                                                 |
-	 * | +--content_hbox--OR--content_left_pane--(EXPAND|FILL)-----------------------------------------+ |
-	 * | |                                                                                             | |
-	 * | | +--att_left--+   +--content_midlevel_vbox--OR-content_midlevel_vpane--(EXPAND|FILL)-------+ | |
-	 * | | $     (EBOX) |   | +--content_right_pane--(EXPAND|FILL)---------------------------------+ | | |
-	 * | | |            |   | | +--content_inner_vbox-----------------+   +--content_right_vbox--+ | | | |
-	 * | | |  O         |   | | |                                     |   |                      | | | | |
-	 * | | |  P   S     |   | | | +--content_main_top---------------+ |   | +--att_right-------+ | | | | |
-	 * | | |  T   I     |   | | | $    OPTIONAL TOOLBAR      (EBOX) | |   | $           (EBOX) | | | | | |
-	 * | | |  I   D     |   | | | +---------------------------------+ |<->| |                  | | | | | |
-	 * | | |  O   E     |<->| | |                                     | P | |  OPTIONAL        | | | | | |
-	 * | | |  N   B     | O | | | +--content_main--(EXPAND|FILL)----+ | A | |  SIDEBAR         | | | | | |
-	 * | | |  A   A     | P | | | $                          (EBOX) | | N | |                  | | | | | |
-	 * | | |  L   R     | T | | | |                                 | | E | |                  | | | | | |
-	 * | | |            | . | | | |    !!  MAIN PAGE CONTENT  !!    | |<->| |  (LIST)          | | | | | |
-	 * | | |            | P | | | |                                 | |   | |                  | | | | | |
-	 * | | |            | A | | | |                                 | |   | |                  | | | | | |
-	 * | | |            | N | | | +---------------------------------+ |   | +------------------+ | | | | |
-	 * | | |  (STRIP)   | E | | +-------------------------------------+   +----------------------+ | | | |
-	 * | | |            |<->| +--------------------------------------------------------------------+ | | |
-	 * | | |            |   |                          🡅  OPTIONAL  🡅                                | | |
-	 * | | |            |   |                          🡇    PANE    🡇                                | | |
-	 * | | |            |   | +-content_att_bottom-------------------------------------------------+ | | |
-	 * | | |            |   | $                                                             (EBOX) | | | |
-	 * | | |            |   | |   OPTIONAL BOTTOM (PROPERTIES)                                     | | | |
-	 * | | |            |   | |                                                                    | | | |
-	 * | | |            |   | +--------------------------------------------------------------------+ | | |
-	 * | | +------------+   +------------------------------------------------------------------------+ | |
-	 * | +---------------------------------------------------------------------------------------------+ |
-	 * |                                                                                                 |
-	 * +-------------------------------------------------------------------------------------------------+
+	 * +--_content_vbox---------------------------------------------------------------------------------------------------------------+
+	 * |                                                                                                                              |
+	 * | /--toolbar_frame-----------------------------------------------------------------------------------------------------------\ |
+	 * | | +--content_header_hbox-------------------------------------------------------------------------------------------------+ | |
+	 * | | |                                                                                                                      | | |
+	 * | | | +--content_app_bar-------------------------------------------------+  +--attachment_hbox--+  +--content_tabbables--+ | | |
+	 * | | | $                                                           (EBOX) |  |    (internal)     |  $              (EBOX) | | | |
+	 * | | | |  MAIN APPLICATION BAR                                            |  | (attachment btns) |  | PAGE SWITCHER BTN   | | | |
+	 * | | | |                                                                  |  |                   |  |                     | | | |
+	 * | | | +------------------------------------------------------------------+  +-------------------+  +---------------------+ | | |
+	 * | | |                                                                                                                      | | |
+	 * | | +----------------------------------------------------------------------------------------------------------------------+ | |
+	 * | \--------------------------------------------------------------------------------------------------------------------------/ |
+	 * |                                                                                                                              |
+	 * | +--content_left_pane-(OPTIONAL)--------------------------------------------------------------------------------------------+ |
+	 * | |                                                                                                                          | |
+	 * | | +--att_left--+   +--content_midlevel_vbox------------------------------------------------------------------------------+ | |
+	 * | | $     (EBOX) |   | +--content_right_pane--(EXPAND|FILL)--------------------------------------------------------------+ | | |
+	 * | | |            |   | | +--content_inner_hbox----------------------------------------------+   +--content_right_vbox--+ | | | |
+	 * | | |  O         |   | | | +--content_bottom_pane (OPT)------------+  +--content_bus_vbox-+ |   |                      | | | | |
+	 * | | |  P   S     |   | | | | +--content_main_vbox----------------+ |  $                   | |   | +--att_right-------+ | | | | |
+	 * | | |  T   I     |   | | | | |                                   | |  | +--content_bus--+ | |   | $           (EBOX) | | | | | |
+	 * | | |  I   D     |   | | | | | +--content_main_top-------------+ | |  | |        (EBOX) | | |   | |                  | | | | | |
+	 * | | |  O   E     |<->| | | | | $   OPTIONAL TOOLBAR     (EBOX) | | |  | |       M       | | |   | |  OPTIONAL        | | | | | |
+	 * | | |  N   B     | O | | | | | +-------------------------------+ | |  | |       O       | | |   | |                  | | | | | |
+	 * | | |  A   A     | P | | | | |                                   | |  | |       N       | | |<->| |                  | | | | | |
+	 * | | |  L   R     | T | | | | | +--content_main-----------------+ | |  | |       I       | | | P | |                  | | | | | |
+	 * | | |            | . | | | | | $                        (EBOX) | | |  | |       T       | | | A | |  (LIST)          | | | | | |
+	 * | | |            | P | | | | | |   !!  MAIN PAGE CONTENT  !!   | | |  | |       O       | | | N | |                  | | | | | |
+	 * | | |            | A | | | | | |                                 | |  | |       R       | | | E | |                  | | | | | |
+	 * | | |            | N | | | | | +-------------------------------+ | |  | |               | | |<->| |                  | | | | | |
+	 * | | |  (STRIP)   | E | | | | |                                   | |  | |       S       | | |   | |                  | | | | | |
+	 * | | |            |<->| | | | +-----------------------------------+ |  | |       E       | | |   | |                  | | | | | |
+	 * | | |            |   | | | |           🡅  OPTIONAL  🡅              |  | |       C       | | |   | |                  | | | | | |
+	 * | | |            |   | | | |           🡇    PANE    🡇              |  | |       T       | | |   | |                  | | | | | |
+	 * | | |            |   | | | | +-content_att_bottom----------------+ |  | |       I       | | |   | |                  | | | | | |
+	 * | | |            |   | | | | $                            (EBOX) | |  | |       O       | | |   | |                  | | | | | |
+	 * | | |            |   | | | | |   OPTIONAL BOTTOM (PROPERTIES)    | |  | |       N       | | |   | |                  | | | | | |
+	 * | | |            |   | | | | |                                   | |  | |               | | |   | |                  | | | | | |
+	 * | | |            |   | | | | +-----------------------------------+ |  | +---------------+ | |   | |                  | | | | | |
+	 * | | |            |   | | | +---------------------------------------+  +-------------------+ |   | +------------------+ | | | | |
+	 * | | |            |   | | +------------------------------------------------------------------+   +----------------------+ | | | |
+	 * | | |            |   | +-------------------------------------------------------------------------------------------------+ | | |
+	 * | | +------------+   +-----------------------------------------------------------------------------------------------------+ | |
+	 * | +--------------------------------------------------------------------------------------------------------------------------+ |
+	 * |                                                                                                                              |
+	 * +------------------------------------------------------------------------------------------------------------------------------+
 	 *
 	 */
 
@@ -173,17 +176,19 @@ protected:
 	Gtk::HBox           content_attachment_hbox;
 	EventBoxExt       content_tabbables;         /* a placeholder for the tabbable switching buttons (used by ArdourUI) */
 	HPane           content_left_pane;
-	Gtk::HBox       content_hbox;
 	EventBoxExt       content_att_left;          /* a placeholder for the mixer strip, if you want one */
-	VPane             content_midlevel_vpane;
 	Gtk::VBox         content_midlevel_vbox;
 	HPane               content_right_pane;
-	Gtk::VBox             content_inner_vbox;
-	EventBoxExt             content_main_top;    /* a placeholder for the content-specific toolbar, if you want one */
-	EventBoxExt             content_main;        /* a placeholder for the innermost content (recorder, cues, editor, mixer) */
+	Gtk::HBox             content_inner_hbox;
+	VPane                   content_bottom_pane; /* optional, replaced by content_main_vbox when no bottom att is present */
+	Gtk::VBox               content_main_vbox;
+	EventBoxExt               content_main_top;  /* a placeholder for the content-specific toolbar, if you want one */
+	EventBoxExt               content_main;      /* a placeholder for the innermost content (recorder, cues, editor, mixer) */
+	EventBoxExt             content_att_bottom;  /* a placeholder for the property box, if you want one */
+	Gtk::VBox               content_bus_vbox;
+	EventBoxExt               content_bus;       /* a placeholder for the monitor section */
 	Gtk::VBox             content_right_vbox;
-	EventBoxExt           content_att_right;     /* a placeholder for the sidebar list, if you want one */
-	EventBoxExt         content_att_bottom;      /* a placeholder for the property box, if you want one */
+	EventBoxExt             content_att_right;   /* a placeholder for the sidebar list, if you want one */
 	/* clang-format on */
 
 	/* visibility controls */

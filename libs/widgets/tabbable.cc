@@ -112,43 +112,46 @@ Tabbable::default_layout ()
 	content_header_hbox.pack_start (content_attachments, false, false);
 	content_header_hbox.pack_start (content_tabbables, false, false);
 
-	//wrap the header eboxen in a themeable frame
-	Gtk::Frame *toolbar_frame = manage(new Gtk::Frame);
+	/* wrap the header eboxes in a themeable frame */
+	Gtk::Frame *toolbar_frame = manage (new Gtk::Frame);
 	toolbar_frame->set_name ("TransportFrame");
 	toolbar_frame->set_shadow_type (Gtk::SHADOW_NONE);
 	toolbar_frame->add (content_header_hbox);
 
 	_content_vbox.pack_start (*toolbar_frame, false, false);
 
-	Widget* midlevel = 0 == (_panelayout & PaneBottom) ? (Widget*)&content_midlevel_vbox : (Widget*)&content_midlevel_vpane;
-
 	if (_panelayout & PaneLeft) {
 		_content_vbox.pack_start (content_left_pane, true, true);
 		content_left_pane.add (content_att_left);
-		content_left_pane.add (*midlevel);
+		content_left_pane.add (content_midlevel_vbox);
 	} else {
-		_content_vbox.pack_start (content_hbox, true, true);
-		content_hbox.pack_start (content_att_left, false, false);
-		content_hbox.pack_start (*midlevel, true, true);
+		_content_vbox.pack_start (content_midlevel_vbox, true, true);
+	}
+
+	if (_panelayout & PaneRight) {
+		content_midlevel_vbox.pack_start (content_right_pane, true, true);
+		content_right_pane.add (content_inner_hbox);
+		content_right_pane.add (content_right_vbox);
+		content_right_vbox.pack_start (content_att_right, true, true);
+	} else {
+		content_midlevel_vbox.pack_start (content_inner_hbox, true, true);
 	}
 
 	if (_panelayout & PaneBottom) {
-		content_midlevel_vpane.add (content_right_pane);
-		content_midlevel_vpane.add (content_att_bottom);
+		content_inner_hbox.pack_start (content_bottom_pane, true, true);
+		content_bottom_pane.add (content_main_vbox);
+		content_bottom_pane.add (content_att_bottom);
 	} else {
-		content_midlevel_vbox.pack_start (content_right_pane, true, true);
-		content_midlevel_vbox.pack_start (content_att_bottom, false, false);
+		content_inner_hbox.pack_start (content_main_vbox, true, true);
 	}
 
-	content_right_pane.add (content_inner_vbox);
+	content_inner_hbox.pack_start (content_bus_vbox, false, false);
+	content_bus_vbox.pack_start (content_bus, true, true);
 
-	if (_panelayout & PaneRight) {
-		content_right_pane.add (content_right_vbox);
-		content_right_vbox.pack_start (content_att_right, true, true);
-	}
+	content_main_vbox.pack_start (content_main_top, false, false);
+	content_main_vbox.pack_start (content_main, true, true);
 
-	content_inner_vbox.pack_start (content_main_top, false, false);
-	content_inner_vbox.pack_start (content_main, true, true);
+	/* set pane min. sizes */
 
 	if (_panelayout & PaneRight) {
 		content_right_pane.set_child_minsize (content_att_right, 160); /* rough guess at width of notebook tabs */
@@ -163,10 +166,10 @@ Tabbable::default_layout ()
 	content_left_pane.set_divider (0, 0.15);
 
 	if (_panelayout & PaneBottom) {
-		content_midlevel_vpane.set_child_minsize (content_right_pane, 300);
+		content_bottom_pane.set_child_minsize (content_right_pane, 300);
 	}
-	content_midlevel_vpane.set_check_divider_position (true);
-	content_midlevel_vpane.set_divider (0, 0.85);
+	content_bottom_pane.set_check_divider_position (true);
+	content_bottom_pane.set_divider (0, 0.85);
 
 	_content_vbox.show_all();
 }
@@ -467,7 +470,7 @@ Tabbable::get_state() const
 		node.set_property (string_compose("%1%2", _menu_name, X_("-leftpane-pos")).c_str(), content_left_pane.get_divider ());
 	}
 	if (_panelayout & PaneBottom) {
-		node.set_property (string_compose("%1%2", _menu_name, X_("-bottompane-pos")).c_str(), content_midlevel_vpane.get_divider ());
+		node.set_property (string_compose("%1%2", _menu_name, X_("-bottompane-pos")).c_str(), content_bottom_pane.get_divider ());
 	}
 
 	return node;
@@ -502,7 +505,7 @@ Tabbable::set_state (const XMLNode& node, int version)
 		}
 		if ( window_node->get_property (string_compose("%1%2", _menu_name, X_("-bottompane-pos")).c_str(), fract) ) {
 			fract = std::max (.05f, std::min (.95f, fract));
-			content_midlevel_vpane.set_divider (0, fract);
+			content_bottom_pane.set_divider (0, fract);
 		}
 	}
 
