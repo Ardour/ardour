@@ -362,8 +362,8 @@ SlotPropertyTable::SlotPropertyTable ()
 	eLaunchBox->add (_launch_table);
 
 	attach(*trigBox,        0,1, 0,1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
-	attach(*eLaunchBox,     1,2, 0,1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
-	attach(*eFollowBox,     2,3, 0,1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
+	attach(*eLaunchBox,     0,1, 1,2, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
+	attach(*eFollowBox,     0,1, 2,3, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
 
 	set_tooltip(_name_frame, _("Double-click to rename this clip"));
 	set_tooltip(_gain_spinner, _("Adjust audio gain (or MIDI velocity) for this slot"));
