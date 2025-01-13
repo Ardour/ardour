@@ -640,7 +640,6 @@ Editor::Editor ()
 	/* need to show the "contents" widget so that notebook will show if tab is switched to
 	 */
 
-	content_hbox.show ();
 	ebox_hpacker.show();
 	global_vpacker.show();
 
