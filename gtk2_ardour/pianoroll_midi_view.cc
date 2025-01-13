@@ -202,6 +202,17 @@ PianorollMidiView::set_samples_per_pixel (double spp)
 }
 
 void
+PianorollMidiView::reset_width_dependent_items (double pixel_width)
+{
+	MidiView::reset_width_dependent_items (pixel_width);
+
+	for (auto & a : automation_map) {
+		if (a.second.line) {
+			a.second.line->reset ();
+		}
+	}
+}
+void
 PianorollMidiView::clear_ghost_events ()
 {
 	if (velocity_display) {
