@@ -131,7 +131,7 @@ protected:
 	 * | | +----------------------------------------------------------------------------------------------------------------------+ | |
 	 * | \--------------------------------------------------------------------------------------------------------------------------/ |
 	 * |                                                                                                                              |
-	 * | +--content_left_pane-(OPTIONAL)--------------------------------------------------------------------------------------------+ |
+	 * | +--content_hbox--OR--content_left_pane--(EXPAND|FILL)----------------------------------------------------------------------+ |
 	 * | |                                                                                                                          | |
 	 * | | +--att_left--+   +--content_midlevel_vbox------------------------------------------------------------------------------+ | |
 	 * | | $     (EBOX) |   | +--content_right_pane--(EXPAND|FILL)--------------------------------------------------------------+ | | |
@@ -177,6 +177,7 @@ protected:
 	Gtk::HBox           content_attachment_hbox;
 	EventBoxExt       content_tabbables;         /* a placeholder for the tabbable switching buttons (used by ArdourUI) */
 	HPane           content_left_pane;
+	Gtk::HBox       content_hbox;
 	EventBoxExt       content_att_left;          /* a placeholder for the mixer strip, if you want one */
 	Gtk::VBox         content_midlevel_vbox;
 	HPane               content_right_pane;

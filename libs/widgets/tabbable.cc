@@ -125,7 +125,9 @@ Tabbable::default_layout ()
 		content_left_pane.add (content_att_left);
 		content_left_pane.add (content_midlevel_vbox);
 	} else {
-		_content_vbox.pack_start (content_midlevel_vbox, true, true);
+		_content_vbox.pack_start (content_hbox, true, true);
+		content_hbox.pack_start (content_att_left, false, false);
+		content_hbox.pack_start (content_midlevel_vbox, true, true);
 	}
 
 	if (_panelayout & PaneRight) {
@@ -137,19 +139,20 @@ Tabbable::default_layout ()
 		content_midlevel_vbox.pack_start (content_inner_hbox, true, true);
 	}
 
+	content_main_vbox.pack_start (content_main_top, false, false);
+	content_main_vbox.pack_start (content_main, true, true);
+
 	if (_panelayout & PaneBottom) {
 		content_inner_hbox.pack_start (content_bottom_pane, true, true);
 		content_bottom_pane.add (content_main_vbox);
 		content_bottom_pane.add (content_att_bottom);
 	} else {
 		content_inner_hbox.pack_start (content_main_vbox, true, true);
+		content_main_vbox.pack_start (content_att_bottom, false, false);
 	}
 
 	content_inner_hbox.pack_start (content_bus_vbox, false, false);
 	content_bus_vbox.pack_start (content_bus, true, true);
-
-	content_main_vbox.pack_start (content_main_top, false, false);
-	content_main_vbox.pack_start (content_main, true, true);
 
 	/* set pane min. sizes */
 
