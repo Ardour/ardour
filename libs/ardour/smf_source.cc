@@ -756,8 +756,6 @@ SMFSource::load_model_unlocked (bool force_reload)
 			continue;
 		}
 
-		std::cerr << "Now loading track " << i << std::endl;
-
 		time = 0;
 		have_event_id = false;
 
