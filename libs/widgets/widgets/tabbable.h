@@ -115,7 +115,7 @@ protected:
 
 	/* This is the heirarchy of a Tabbable's widget packing.
 	 *
-	 * The end result is to provide 7 event-boxes (marked with a $) where the tab can put its contents.
+	 * The end result is to provide 8 event-boxes (marked with a $) where the tab can put its contents.
 	 *
 	 * +--_content_vbox---------------------------------------------------------------------------------------------------------------+
 	 * |                                                                                                                              |
@@ -136,7 +136,7 @@ protected:
 	 * | | +--att_left--+   +--content_midlevel_vbox------------------------------------------------------------------------------+ | |
 	 * | | $     (EBOX) |   | +--content_right_pane--(EXPAND|FILL)--------------------------------------------------------------+ | | |
 	 * | | |            |   | | +--content_inner_hbox----------------------------------------------+   +--content_right_vbox--+ | | | |
-	 * | | |  O         |   | | | +--content_bottom_pane (OPT)------------+  +--content_bus_vbox-+ |   |                      | | | | |
+	 * | | |  O         |   | | | +--content_bottom_pane-(OPTIONAL)-------+  +--content_bus_vbox-+ |   |                      | | | | |
 	 * | | |  P   S     |   | | | | +--content_main_vbox----------------+ |  |                   | |   | +--att_right-------+ | | | | |
 	 * | | |  T   I     |   | | | | |                                   | |  | +--content_bus--+ | |   | $           (EBOX) | | | | | |
 	 * | | |  I   D     |   | | | | | +--content_main_top-------------+ | |  | $        (EBOX) | | |   | |                  | | | | | |
