@@ -646,7 +646,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 
 				if (route->is_monitor()) {
 
-					out_packer.pack_end (_monitor_section.tearoff(), false, false);
+					content_bus.add (_monitor_section.tearoff());
 					_monitor_section.set_session (_session);
 					_monitor_section.tearoff().show_all ();
 
@@ -1870,9 +1870,6 @@ Mixer_UI::redisplay_track_list ()
 	if (_surround_strip) {
 		out_packer.reorder_child (*_surround_strip, -1);
 	}
-	if (_monitor_section.tearoff ().get_parent ()) {
-		out_packer.reorder_child (_monitor_section.tearoff(), -1);
-	}
 }
 
 void
@@ -3062,7 +3059,7 @@ Mixer_UI::monitor_section_going_away ()
 	}
 
 	monitor_section_detached ();
-	out_packer.remove (_monitor_section.tearoff());
+	content_bus.remove ();
 }
 
 void
