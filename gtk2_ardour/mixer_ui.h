@@ -446,7 +446,8 @@ private:
 	enum PluginListMode {
 		PLM_Favorite,
 		PLM_Recent,
-		PLM_TopHits
+		PLM_TopHits,
+		PLM_SearchAll
 	};
 	enum PluginListMode plugin_list_mode;
 	void set_plugin_list_mode (PluginListMode plm);
