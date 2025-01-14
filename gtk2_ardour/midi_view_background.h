@@ -91,6 +91,7 @@ class MidiViewBackground : public virtual ViewBackground
 
 	sigc::signal<void> NoteRangeChanged;
 	void apply_note_range (uint8_t lowest, uint8_t highest, bool to_children);
+	void maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children);
 
 	/** @return y position, or -1 if hidden */
 	virtual double y_position () const { return 0.; }

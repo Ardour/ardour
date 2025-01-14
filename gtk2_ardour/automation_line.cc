@@ -1063,6 +1063,8 @@ AutomationLine::get_inverted_selectables (Selection&, list<Selectable*>& /*resul
 void
 AutomationLine::set_selected_points (PointSelection const & points)
 {
+	std::cerr << this << " AL::ssp\n";
+
 	for (auto & cp : control_points) {
 		cp->set_selected (false);
 	}

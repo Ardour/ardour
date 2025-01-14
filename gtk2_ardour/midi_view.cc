@@ -1096,8 +1096,6 @@ MidiView::model_changed()
 
 	NoteBase* cne;
 
-	std::cerr << "Now looking at a model with " << notes.size() << std::endl;
-
 	if (_midi_context.visibility_range_style() == MidiViewBackground::ContentsRange) {
 
 		uint8_t low_note = std::numeric_limits<uint8_t>::max();
@@ -1112,7 +1110,7 @@ MidiView::model_changed()
 			}
 		}
 
-		set_note_range (low_note, hi_note);
+		maybe_set_note_range (low_note, hi_note);
 	}
 
 	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
@@ -5153,6 +5151,12 @@ void
 MidiView::set_note_range (uint8_t low, uint8_t high)
 {
 	_midi_context.apply_note_range (low, high, true);
+}
+
+void
+MidiView::maybe_set_note_range (uint8_t low, uint8_t high)
+{
+	_midi_context.maybe_apply_note_range (low, high, true);
 }
 
 void

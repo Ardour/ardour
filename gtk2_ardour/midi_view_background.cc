@@ -232,11 +232,24 @@ MidiViewBackground::maybe_extend_note_range (uint8_t note_num)
 		apply_note_range (_data_note_min, _data_note_max, true);
 	}
 }
+
+void
+MidiViewBackground::maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children)
+{
+	if (_lowest_note <= lowest && _highest_note >= highest) {
+		/* already large enough */
+		return;
+	}
+
+	apply_note_range (lowest, highest, to_children);
+}
+
 void
 MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_children)
 {
 	bool changed = false;
 
+	
 	if (_highest_note != highest) {
 		_highest_note = highest;
 		changed = true;

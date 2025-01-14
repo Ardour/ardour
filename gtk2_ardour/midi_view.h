@@ -323,6 +323,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void show_list_editor ();
 
 	void set_note_range (uint8_t low, uint8_t high);
+	void maybe_set_note_range (uint8_t low, uint8_t high);
 	virtual void set_visibility_note_range (MidiViewBackground::VisibleNoteRange, bool);
 
 	typedef std::set<NoteBase*> Selection;
