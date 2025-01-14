@@ -122,15 +122,16 @@ ControlPoint::reset (double x, double y, AutomationList::iterator mi, uint32_t v
 void
 ControlPoint::set_color ()
 {
-	if (_line.control_points_inherit_color()) {
+	if (_selected) {
 
-		_item->set_outline_color(_line.get_line_color());
-		_item->set_fill_color(_line.get_line_fill_color ());
+		_item->set_outline_color(UIConfiguration::instance().color ("control point selected outline"));;
+		_item->set_fill_color(UIConfiguration::instance().color ("control point selected fill"));
 
 	} else {
-		if (_selected) {
-			_item->set_outline_color(UIConfiguration::instance().color ("control point selected outline"));;
-			_item->set_fill_color(UIConfiguration::instance().color ("control point selected fill"));
+
+		if (_line.control_points_inherit_color()) {
+			_item->set_outline_color(_line.get_line_color());
+			_item->set_fill_color(_line.get_line_fill_color ());
 		} else {
 			_item->set_outline_color(UIConfiguration::instance().color ("control point outline"));
 			_item->set_fill_color(UIConfiguration::instance().color ("control point fill"));
