@@ -306,6 +306,13 @@ EditingContext::register_common_actions (Bindings* common_bindings)
 	redo_action = reg_sens (_common_actions, "redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
 	alternate_redo_action = reg_sens (_common_actions, "alternate-redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
 	alternate_alternate_redo_action = reg_sens (_common_actions, "alternate-alternate-redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
+
+	reg_sens (_common_actions, "editor-delete", _("Delete"), []() { current_editing_context()->delete_() ; });
+	reg_sens (_common_actions, "alternate-editor-delete", _("Delete"), []() { current_editing_context()->delete_() ; });
+
+	reg_sens (_common_actions, "editor-cut", _("Cut"), []() { current_editing_context()->cut() ; });
+	reg_sens (_common_actions, "editor-copy", _("Copy"), []() { current_editing_context()->copy() ; });
+	reg_sens (_common_actions, "editor-paste", _("Paste"), []() { current_editing_context()->keyboard_paste() ; });
 }
 
 void
@@ -3247,4 +3254,25 @@ EditingContext::zoom_focus_chosen (ZoomFocus focus)
 		set_zoom_focus (focus);
 	}
 }
+
+void
+EditingContext::alt_delete_ ()
+{
+	delete_ ();
+}
+
+/** Cut selected regions, automation points or a time range */
+void
+EditingContext::cut ()
+{
+	cut_copy (Cut);
+}
+
+/** Copy selected regions, automation points or a time range */
+void
+EditingContext::copy ()
+{
+	cut_copy (Copy);
+}
+
 

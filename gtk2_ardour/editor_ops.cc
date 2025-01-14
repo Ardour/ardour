@@ -4266,27 +4266,6 @@ Editor::delete_ ()
 	}
 }
 
-void
-Editor::alt_delete_ ()
-{
-	delete_ ();
-}
-
-/** Cut selected regions, automation points or a time range */
-void
-Editor::cut ()
-{
-	cut_copy (Cut);
-}
-
-/** Copy selected regions, automation points or a time range */
-void
-Editor::copy ()
-{
-	cut_copy (Copy);
-}
-
-
 /** @return true if a Cut, Copy or Clear is possible */
 bool
 Editor::can_cut_copy () const

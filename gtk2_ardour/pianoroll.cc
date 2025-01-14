@@ -2103,3 +2103,88 @@ Pianoroll::point_selection_changed ()
 		view->point_selection_changed ();
 	}
 }
+
+void
+Pianoroll::delete_ ()
+{
+	/* Editor has a lot to do here, potentially. But we don't */
+	cut_copy (Editing::Delete);
+}
+
+void
+Pianoroll::paste (float times, bool from_context_menu)
+{
+	if (view) {
+		// view->paste (Editing::Cut);
+	}
+}
+
+void
+Pianoroll::keyboard_paste ()
+{
+}
+
+/** Cut, copy or clear selected regions, automation points or a time range.
+ * @param op Operation (Delete, Cut, Copy or Clear)
+ */
+
+void
+Pianoroll::cut_copy (Editing::CutCopyOp op)
+{
+	using namespace Editing;
+
+	/* only cancel selection if cut/copy is successful.*/
+
+	std::string opname;
+
+	switch (op) {
+	case Delete:
+		opname = _("delete");
+		break;
+	case Cut:
+		opname = _("cut");
+		break;
+	case Copy:
+		opname = _("copy");
+		break;
+	case Clear:
+		opname = _("clear");
+		break;
+	}
+
+	/* if we're deleting something, and the mouse is still pressed,
+	   the thing we started a drag for will be gone when we release
+	   the mouse button(s). avoid this. see part 2 at the end of
+	   this function.
+	*/
+
+	if (op == Delete || op == Cut || op == Clear) {
+		if (_drags->active ()) {
+			_drags->abort ();
+		}
+	}
+
+	if (op != Delete) { //"Delete" doesn't change copy/paste buf
+		cut_buffer->clear ();
+	}
+
+	switch (mouse_mode) {
+	case MouseDraw:
+	case MouseContent:
+		if (view) {
+			begin_reversible_command (opname + ' ' + X_("MIDI"));
+			view->cut_copy_clear (op);
+			commit_reversible_command ();
+		}
+		return;
+	default:
+		break;
+	}
+
+	bool did_edit = false;
+
+
+	if (op == Delete || op == Cut || op == Clear) {
+		_drags->abort ();
+	}
+}

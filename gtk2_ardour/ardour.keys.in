@@ -231,10 +231,10 @@ This mode provides many different operations on both regions and control points,
 @editing|Editing/alternate-alternate-redo|          <@PRIMARY@><@TERTIARY@>z|redo
 @vis|Editor/toggle-zoom|                                   <@TERTIARY@>z|toggle last 2 zoom states
 @aep|Region/align-regions-sync-relative|                               x|align sync points (relative)
-@edit|Editor/editor-cut|                                    <@PRIMARY@>x|cut
+@editing|Editing/editor-cut|                                    <@PRIMARY@>x|cut
 @edit|Editor/cut-paste-section|                 <@PRIMARY@><@TERTIARY@>x|cut \& paste section
 @mmode|Editor/set-mouse-mode-cut|                                   c|cut mode
-@edit|Editor/editor-copy|                                   <@PRIMARY@>c|copy
+@editing|Editing/editor-copy|                                   <@PRIMARY@>c|copy
 @wvis|Common/show-trigger|                                <@SECONDARY@>c|show cues page
 @edit|Editor/editor-crop|                      <@PRIMARY@><@SECONDARY@>c|crop range
 @edit|Editor/copy-paste-section|                <@PRIMARY@><@TERTIARY@>c|copy \& paste section
@@ -242,7 +242,7 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/alternate-delete-section|  <@PRIMARY@><@TERTIARY@>BackSpace|delete section
 @edit|Editor/editor-consolidate|              <@SECONDARY@><@TERTIARY@>c|consolidate range
 @rop|Region/set-region-sync-position|                                  v|set region sync point
-@edit|Editor/editor-paste|                                  <@PRIMARY@>v|paste
+@editing|Editing/editor-paste|                                  <@PRIMARY@>v|paste
 @edit|Editor/ToggleJadeo|                                 <@SECONDARY@>v|video window
 @wvis|Common/toggle-meterbridge|                          <@SECONDARY@>b|show meter bridge
 @edtrk|Editor/track-record-enable-toggle|                  <@TERTIARY@>b|toggle track rec-enable 
@@ -294,8 +294,8 @@ This mode provides many different operations on both regions and control points,
 @vis|Editor/scroll-tracks-up|                   Page_Up|scroll up (page)
 @movp|Transport/GotoStart|                         Home|to start marker
 @movp|Transport/GotoEnd|                            End|to end marker
-@edit|Editor/editor-delete|                      Delete|delete
-@edit|Editor/alternate-editor-delete|         BackSpace|backspace (delete)
+@editing|Editing/editor-delete|                      Delete|delete
+@editing|Editing/alternate-editor-delete|         BackSpace|backspace (delete)
 
 ;; this one is super-global, so we put it in the session group but don't show
 ;; it on cheat sheets etc.

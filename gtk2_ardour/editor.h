@@ -1124,7 +1124,6 @@ private:
 	Temporal::timepos_t last_paste_pos;
 	unsigned    paste_count;
 
-	void cut_copy (Editing::CutCopyOp);
 	bool can_cut_copy () const;
 	void cut_copy_points (Editing::CutCopyOp, Temporal::timepos_t const & earliest);
 	void cut_copy_regions (Editing::CutCopyOp, RegionSelection&);
@@ -1224,17 +1223,15 @@ private:
 	void split_region ();
 
 	void delete_ ();
-	void alt_delete_ ();
-	void cut ();
-	void copy ();
 	void paste (float times, bool from_context_menu);
+	void keyboard_paste ();
+	void cut_copy (Editing::CutCopyOp);
 
 	void place_transient ();
 	void remove_transient (ArdourCanvas::Item* item);
 	void snap_regions_to_grid ();
 	void close_region_gaps ();
 
-	void keyboard_paste ();
 
 	void region_from_selection ();
 	void create_region_from_selection (std::vector<std::shared_ptr<ARDOUR::Region> >&);

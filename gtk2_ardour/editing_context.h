@@ -463,6 +463,17 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	 */
 	bool mouse_sample (samplepos_t&, bool& in_track_canvas) const;
 
+	/* editing actions */
+
+	virtual void delete_ () = 0;
+	virtual void paste (float times, bool from_context_menu) = 0;
+	virtual void keyboard_paste () = 0;
+	virtual void cut_copy (Editing::CutCopyOp) = 0;
+
+	void cut ();
+	void copy ();
+	void alt_delete_ ();
+
   protected:
 	std::string _name;
 	bool within_track_canvas;

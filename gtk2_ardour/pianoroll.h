@@ -126,6 +126,11 @@ class Pianoroll : public CueEditor
 
 	void full_zoom_clicked();
 
+	void delete_ ();
+	void paste (float times, bool from_context_menu);
+	void keyboard_paste ();
+	void cut_copy (Editing::CutCopyOp);
+
   protected:
 	void register_actions ();
 
