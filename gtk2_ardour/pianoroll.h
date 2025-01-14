@@ -269,4 +269,6 @@ class Pianoroll : public CueEditor
 	void build_zoom_focus_menu ();
 
 	std::pair<Temporal::timepos_t,Temporal::timepos_t> max_zoom_extent() const;
+
+	void point_selection_changed ();
 };

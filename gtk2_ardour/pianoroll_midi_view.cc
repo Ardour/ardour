@@ -623,3 +623,11 @@ PianorollMidiView::automation_leave ()
 		active_automation->line->track_entered ();
 	}
 }
+
+void
+PianorollMidiView::point_selection_changed ()
+{
+	if (active_automation) {
+		active_automation->line->set_selected_points (_editing_context.get_selection().points);
+	}
+}

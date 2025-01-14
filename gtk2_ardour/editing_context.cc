@@ -229,6 +229,7 @@ EditingContext::EditingContext (std::string const & name)
 	full_zoom_button.set_name ("zoom button");
 	full_zoom_button.set_icon (ArdourIcon::ZoomFull);
 
+	selection->PointsChanged.connect (sigc::mem_fun(*this, &EditingContext::point_selection_changed));
 
 	for (int i = 0; i < 16; i++) {
 		char buf[4];

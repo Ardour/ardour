@@ -341,6 +341,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	void reset_point_selection ();
 
+	virtual void point_selection_changed () = 0;
+
 	/** Set the mouse mode (gain, object, range, timefx etc.)
 	 * @param m Mouse mode (defined in editing_syms.inc.h)
 	 * @param force Perform the effects of the change even if no change is required

@@ -2095,3 +2095,11 @@ Pianoroll::full_zoom_clicked()
 	samplecnt_t s = dur.second.samples() - dur.first.samples();
 	reposition_and_zoom (0,  (s / (double) _visible_canvas_width));
 }
+
+void
+Pianoroll::point_selection_changed ()
+{
+	if (view) {
+		view->point_selection_changed ();
+	}
+}
