@@ -249,7 +249,6 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 {
 	bool changed = false;
 
-	
 	if (_highest_note != highest) {
 		_highest_note = highest;
 		changed = true;
@@ -323,5 +322,8 @@ MidiViewBackground::update_data_note_range (uint8_t min, uint8_t max)
 void
 MidiViewBackground::set_note_mode (ARDOUR::NoteMode nm)
 {
-	_note_mode = nm;
+	if (_note_mode != nm) {
+		_note_mode = nm;
+		NoteModeChanged(); /* EMIT SIGNAL */
+	}
 }

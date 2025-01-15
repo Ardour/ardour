@@ -190,6 +190,14 @@ MidiView::init (std::shared_ptr<MidiTrack> mt)
 	_note_group->raise_to_top();
 	EditingContext::DropDownKeys.connect (sigc::mem_fun (*this, &MidiView::drop_down_keys));
 	_midi_context.NoteRangeChanged.connect (sigc::mem_fun (*this, &MidiView::view_changed));
+	_midi_context.NoteModeChanged.connect (sigc::mem_fun (*this, &MidiView::note_mode_changed));
+}
+
+void
+MidiView::note_mode_changed ()
+{
+	clear_events ();
+	model_changed ();
 }
 
 void
@@ -1862,9 +1870,15 @@ MidiView::update_hit (Hit* ev)
 	}
 
 	std::shared_ptr<NoteType> note = ev->note();
-	const timepos_t note_time = _midi_region->source_beats_to_absolute_time (note->time());
+	double x;
 
-	const double x = _editing_context.time_to_pixel(note_time) - _editing_context.time_to_pixel (_midi_region->position());
+	if (_midi_region && !_show_source) {
+		const timepos_t note_time = _midi_region->source_beats_to_absolute_time (note->time());
+		x = _editing_context.time_to_pixel(note_time) - _editing_context.time_to_pixel (_midi_region->position());
+	} else {
+		x = _editing_context.sample_to_pixel (timepos_t (note->time()).samples());
+	}
+
 	const double diamond_size = std::max(1., floor(note_height()) - 2.);
 	const double y = 1.5 + floor(note_to_y(note->note())) + diamond_size * .5;
 

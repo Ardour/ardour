@@ -61,6 +61,7 @@ class MidiViewBackground : public virtual ViewBackground
 
 	ARDOUR::NoteMode  note_mode() const { return _note_mode; }
 	void set_note_mode (ARDOUR::NoteMode nm);
+	sigc::signal<void> NoteModeChanged;
 
 	ARDOUR::ColorMode color_mode() const { return _color_mode; }
 	void set_color_mode (ARDOUR::ColorMode);

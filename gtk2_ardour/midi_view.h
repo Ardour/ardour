@@ -633,6 +633,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void update_sysexes ();
 	void view_changed ();
 	void model_changed ();
+	void note_mode_changed ();
 
 	void sync_ghost_selection (NoteBase*);
 
