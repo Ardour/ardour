@@ -2566,10 +2566,18 @@ MidiView::update_drag_selection(timepos_t const & start, timepos_t const & end, 
 
 	// Convert to local coordinates
 	const double     y  = _midi_context.y_position();
-	const double     x0 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, _midi_region->region_relative_position (start).samples()));
-	const double     x1 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, _midi_region->region_relative_position (end).samples()));
 	const double     y0 = max(0.0, gy0 - y);
 	const double     y1 = max(0.0, gy1 - y);
+	double x0;
+	double x1;
+
+	if (_midi_region && !_show_source) {
+		x0 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, _midi_region->region_relative_position (start).samples()));
+		x1 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, _midi_region->region_relative_position (end).samples()));
+	} else {
+		x0 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, start.samples()));
+		x1 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, end.samples()));
+	}
 
 	// TODO: Make this faster by storing the last updated selection rect, and only
 	// adjusting things that are in the area that appears/disappeared.
