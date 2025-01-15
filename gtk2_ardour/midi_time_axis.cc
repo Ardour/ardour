@@ -123,7 +123,6 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	, _ignore_signals(false)
 	, _asked_all_automation(false)
 	, _piano_roll_header(nullptr)
-	, _note_mode(Sustained)
 	, _note_mode_item(0)
 	, _percussion_mode_item(nullptr)
 	, _color_mode(MeterColors)
@@ -197,7 +196,7 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	}
 
 	if (is_midi_track()) {
-		_note_mode = midi_track()->note_mode();
+		midi_view()->set_note_mode (midi_track()->note_mode());
 	}
 
 	/* if set_state above didn't create a gain automation child, we need to make one */
@@ -301,9 +300,10 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 
 	const string note_mode = gui_property ("note-mode");
 	if (!note_mode.empty()) {
-		_note_mode = NoteMode (string_2_enum (note_mode, _note_mode));
+		NoteMode nm;
+		midi_view()->set_note_mode (NoteMode (string_2_enum (note_mode, nm)));
 		if (_percussion_mode_item) {
-			_percussion_mode_item->set_active (_note_mode == Percussive);
+			_percussion_mode_item->set_active (midi_view()->note_mode() == Percussive);
 		}
 	}
 
@@ -1236,14 +1236,14 @@ MidiTimeAxisView::build_note_mode_menu()
 		               sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_mode),
 		                           Sustained, true)));
 	_note_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
-	_note_mode_item->set_active(_note_mode == Sustained);
+	_note_mode_item->set_active(midi_view()->note_mode() == Sustained);
 
 	items.push_back (
 		RadioMenuElem (mode_group, _("Percussive"),
 		               sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_mode),
 		                           Percussive, true)));
 	_percussion_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
-	_percussion_mode_item->set_active(_note_mode == Percussive);
+	_percussion_mode_item->set_active(midi_view()->note_mode() == Percussive);
 
 	return mode_menu;
 }
@@ -1289,10 +1289,14 @@ MidiTimeAxisView::set_note_mode(NoteMode mode, bool apply_to_selection)
 		_editor.get_selection().tracks.foreach_midi_time_axis (
 			std::bind (&MidiTimeAxisView::set_note_mode, _1, mode, false));
 	} else {
-		if (_note_mode != mode || midi_track()->note_mode() != mode) {
-			_note_mode = mode;
+		if (midi_view()->note_mode() != mode || midi_track()->note_mode() != mode) {
+			/* Need to set both view and track note mode, although
+			   in some way it seems that they ought to be coupled more
+			   strongly.
+			*/
+			midi_view()->set_note_mode (mode);
 			midi_track()->set_note_mode(mode);
-			set_gui_property ("note-mode", enum_2_string(_note_mode));
+			set_gui_property ("note-mode", enum_2_string(midi_view()->note_mode()));
 			_view->redisplay_track();
 		}
 	}

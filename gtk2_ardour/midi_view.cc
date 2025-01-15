@@ -196,6 +196,7 @@ MidiView::init (std::shared_ptr<MidiTrack> mt)
 void
 MidiView::note_mode_changed ()
 {
+	std::cerr << "NM change\n";
 	clear_events ();
 	model_changed ();
 }

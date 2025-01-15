@@ -96,7 +96,7 @@ public:
 
 	bool paste (Temporal::timepos_t const &, const Selection&, PasteContext& ctx);
 
-	ARDOUR::NoteMode  note_mode() const { return _note_mode; }
+	// ARDOUR::NoteMode  note_mode() const { return _note_mode; }
 	ARDOUR::ColorMode color_mode() const { return _color_mode; }
 
 	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
@@ -153,7 +153,6 @@ private:
 	std::string                   _effective_model;
 	std::string                   _effective_mode;
 	PianoRollHeader*              _piano_roll_header;
-	ARDOUR::NoteMode              _note_mode;
 	Gtk::RadioMenuItem*           _note_mode_item;
 	Gtk::RadioMenuItem*           _percussion_mode_item;
 	ARDOUR::ColorMode             _color_mode;
