@@ -36,7 +36,7 @@ def configure(conf):
         children += [ 'contourdesign' ]
         children += [ 'launchpad_pro' ]
         children += [ 'launchpad_x' ]
-        children += [ 'launchpad_4' ]
+        children += [ 'launchkey_4' ]
 
     else:
         print ('You are missing the libusb-1.0 development package needed to compile Push2 and ContourDesign support')
