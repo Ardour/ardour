@@ -20,10 +20,7 @@ children = [
     'us2400',
     'launch_control_xl',
     'osc',
-    'console1',
-    'launchpad_pro',
-    'launchpad_x',
-    'launchkey_4'
+    'console1'
 ]
 
 def options(opt):
@@ -37,6 +34,9 @@ def configure(conf):
     if conf.is_defined('HAVE_USB'):
         children += [ 'push2' ]
         children += [ 'contourdesign' ]
+        children += [ 'launchpad_pro' ]
+        children += [ 'launchpad_x' ]
+        children += [ 'launchpad_4' ]
 
     else:
         print ('You are missing the libusb-1.0 development package needed to compile Push2 and ContourDesign support')
