@@ -249,7 +249,8 @@ touch_idx_lookup (DWORD id)
 static int
 touch_idx_map (DWORD id)
 {
-  GList* g = g_list_find (touch_mapper, GUINT_TO_POINTER(G_MAXUINT));
+  /* when there is an active touch, skip index 0 (mouse) */
+  GList* g = touch_mapper ? g_list_find (touch_mapper->next, GUINT_TO_POINTER(G_MAXUINT)): NULL;
   if (!g) {
     touch_mapper = g_list_append (touch_mapper, GUINT_TO_POINTER(id));
   } else {
@@ -267,6 +268,20 @@ touch_idx_unmap (DWORD id)
   }
   int rv = g_list_position (touch_mapper, g);
   g->data = GUINT_TO_POINTER(G_MAXULONG);
+
+  /* last touch clears the list */
+  gboolean empty = TRUE;
+  for (g = touch_mapper; g && empty; g = g->next) {
+    if (g->data != GUINT_TO_POINTER(G_MAXULONG)) {
+      empty = FALSE;
+      break;
+    }
+  }
+  if (empty) {
+    g_list_free (touch_mapper);
+    touch_mapper = NULL;
+  }
+
   return rv;
 }
 
@@ -2118,8 +2133,13 @@ handle_wm_pointer (GdkEventType type, GdkWindow* window, MSG* msg)
       return FALSE;
     }
 
-  last_touch_x[touch_sequence] = (int)point.x;
-  last_touch_y[touch_sequence] = (int)point.y;
+  if (type == GDK_TOUCH_BEGIN) {
+    last_touch_x[touch_sequence] = -1;
+    last_touch_y[touch_sequence] = -1;
+  } else {
+    last_touch_x[touch_sequence] = (int)point.x;
+    last_touch_y[touch_sequence] = (int)point.y;
+  }
 
   /* first single touch is already handled by Windows as mouse event */
   if (touch_sequence == 0) {
