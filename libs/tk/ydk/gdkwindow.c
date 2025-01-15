@@ -10887,6 +10887,22 @@ proxy_button_event (GdkEvent *source_event,
 				    pointer_window,
 				    type == GDK_TOUCH_BEGIN ? GDK_BUTTON_PRESS : GDK_BUTTON_RELEASE, state,
 				    NULL, serial);
+      if (event_win != NULL)
+	{
+	  /* grab window to create MOTION_NOTIFY messages for first touch */
+	  switch (type)
+	    {
+	      case GDK_TOUCH_BEGIN:
+		gdk_pointer_grab (event_win, FALSE, GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK, NULL, NULL, time_);
+		break;
+	      case GDK_TOUCH_END:
+		gdk_pointer_ungrab (time_);
+		break;
+	      default:
+		g_assert (0);
+		break;
+	    }
+	}
     }
   else
 #endif
