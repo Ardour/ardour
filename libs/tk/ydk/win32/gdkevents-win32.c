@@ -2052,6 +2052,7 @@ generate_button_event (GdkEventType type,
   event->button.button = button;
   event->button.device = _gdk_display->core_pointer;
 
+  GDK_NOTE (TOUCH, _gdk_win32_print_event (event));
   _gdk_win32_append_event (event);
 }
 
@@ -2114,14 +2115,14 @@ handle_wm_pointer (GdkEventType type, GdkWindow* window, MSG* msg)
 	return FALSE;
     }
 
-  // printf ("TOUCH %d SEQ %d %x | %d = %d | %d = %d\n", type, touch_sequence, GET_POINTERID_WPARAM (msg->wParam), (int)point.x, last_touch_x[touch_sequence], (int)point.y, last_touch_y[touch_sequence]);
+   //printf ("TOUCH %d SEQ %d %x | mask = %x  press = %d\n", type, touch_sequence, GET_POINTERID_WPARAM (msg->wParam), touch_info.touchMask, touch_info.pressure);
+   //printf ("TOUCH %d SEQ %d %x | %d = %d | %d = %d\n", type, touch_sequence, GET_POINTERID_WPARAM (msg->wParam), (int)point.x, last_touch_x[touch_sequence], (int)point.y, last_touch_y[touch_sequence]);
 
   /* Dear Aliens, we're sorry to limit multitouch to 30 fingers */
   if (touch_sequence < 0 || touch_sequence > 31)
     {
       return FALSE;
     }
-
 
   /* Windows periodically sends WM_POINTERUPDATE updates.
    * If a finger has not moved, do not create a GDK event.
@@ -2130,7 +2131,7 @@ handle_wm_pointer (GdkEventType type, GdkWindow* window, MSG* msg)
       && (int)point.x == last_touch_x[touch_sequence]
       && (int)point.y == last_touch_y[touch_sequence])
     {
-      return FALSE;
+      return TRUE;
     }
 
   if (type == GDK_TOUCH_BEGIN) {
@@ -2143,7 +2144,8 @@ handle_wm_pointer (GdkEventType type, GdkWindow* window, MSG* msg)
 
   /* first single touch is already handled by Windows as mouse event */
   if (touch_sequence == 0) {
-    return TRUE;
+    GDK_NOTE (TOUCH, g_print ("First touch - ignore type = %d at: %dx%d seq=%d\n", type, (int)point.x, (int)point.y, touch_sequence));
+    return FALSE;
   }
 
   ScreenToClient (msg->hwnd, &point);
@@ -2156,15 +2158,14 @@ handle_wm_pointer (GdkEventType type, GdkWindow* window, MSG* msg)
   event->touch.x_root   = msg->pt.x + _gdk_offset_x;
   event->touch.y_root   = msg->pt.y + _gdk_offset_y;
   event->touch.state    = 0;
-  event->touch.sequence = GET_POINTERID_WPARAM (msg->wParam); // or touch_sequence + 1
+  event->touch.sequence = touch_sequence + 1; // or GET_POINTERID_WPARAM (msg->wParam);
   event->touch.flags    = 0; // touch_sequence == 0 ? 0x20000 : 0;
   event->touch.deviceid = 0;
 
-#ifdef G_ENABLE_DEBUG
-  if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
-    g_message ("getPointerTouchInfo type = %d at: %.1fx%.1f root: %1.fx%1.f seq=%d\n", type, event->touch.x, event->touch.y, event->touch.x_root, event->touch.y_root, touch_sequence);
-#endif
+  GDK_NOTE (TOUCH, g_print ("getPointerTouchInfo type = %d at: %.1fx%.1f root: %1.fx%1.f seq=%d\n", type, event->touch.x, event->touch.y, event->touch.x_root, event->touch.y_root, touch_sequence));
+
   _gdk_win32_append_event (event);
+  return TRUE;
 }
 
 
@@ -2935,13 +2936,31 @@ gdk_event_translate (MSG  *msg,
       break;
 
     case 0x0246 /* WM_POINTERDOWN */:
-      handle_wm_pointer (GDK_TOUCH_BEGIN, window, msg);
+      return_val = handle_wm_pointer (GDK_TOUCH_BEGIN, window, msg);
       break;
     case 0x0247 /* WM_POINTERUP */:
-      handle_wm_pointer (GDK_TOUCH_END, window, msg);
+      return_val = handle_wm_pointer (GDK_TOUCH_END, window, msg);
       break;
     case 0x0245 /* WM_POINTERUPDATE */:
-      handle_wm_pointer (GDK_TOUCH_UPDATE, window, msg);
+      return_val = handle_wm_pointer (GDK_TOUCH_UPDATE, window, msg);
+      break;
+
+    case 0x249: /* WM_POINTERENTER */
+      GDK_NOTE (TOUCH, g_print ("WM_POINTERENTER %d %x\n", GET_POINTERID_WPARAM (msg->wParam),  msg->wParam));
+      break;
+
+    case 0x2cc: /* WM_TABLET_QUERYSYSTEMGESTURESTATUS */
+      GDK_NOTE (TOUCH, g_print ("WM_TABLET_QUERYGESTURE %d %d\n", GET_X_LPARAM (msg->lParam), GET_Y_LPARAM (msg->lParam)));
+#if 0
+      uint flags = 0;
+      flags |= 0x00000001; // TABLET_PRESSANDHOLD_DISABLED;
+      flags |= 0x00000008; // TABLET_TAPFEEDBACK_DISABLED;
+      flags |= 0x00000100; // TABLET_TOUCHUI_FORCEON;
+      flags |= 0x00000200; // TABLET_TOUCHUI_FORCEOFF;
+      flags |= 0x00010000; // TABLET_FLICKS_DISABLED;
+      flags |= 0x01000000; // TABLET_ENABLE_MULTITOUCHDATA
+      return flags;
+#endif
       break;
 
     case WM_NCMOUSEMOVE:
@@ -3879,6 +3898,11 @@ gdk_event_translate (MSG  *msg,
       else
 	gdk_event_free (event);
 
+      break;
+
+    default:
+      /* https://www.autohotkey.com/boards/viewtopic.php?t=39218 - list of window messages */
+      GDK_NOTE (EVENTS, g_print ("Unhandled WM_ EVENT %x\n", msg->message));
       break;
     }
 
