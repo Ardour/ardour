@@ -631,3 +631,14 @@ PianorollMidiView::point_selection_changed ()
 		active_automation->line->set_selected_points (_editing_context.get_selection().points);
 	}
 }
+
+void
+PianorollMidiView::clear_selection ()
+{
+	MidiView::clear_note_selection ();
+	PointSelection empty;
+
+	for (CueAutomationMap::iterator i = automation_map.begin(); i != automation_map.end(); ++i) {
+		i->second.line->set_selected_points (empty);
+	}
+}

@@ -1681,8 +1681,9 @@ Pianoroll::escape ()
 		return;
 	}
 
-	view->clear_note_selection ();
+	view->clear_selection ();
 }
+
 Gdk::Cursor*
 Pianoroll::which_track_cursor () const
 {
