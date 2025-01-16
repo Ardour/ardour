@@ -313,6 +313,16 @@ EditingContext::register_common_actions (Bindings* common_bindings)
 	reg_sens (_common_actions, "editor-cut", _("Cut"), []() { current_editing_context()->cut() ; });
 	reg_sens (_common_actions, "editor-copy", _("Copy"), []() { current_editing_context()->copy() ; });
 	reg_sens (_common_actions, "editor-paste", _("Paste"), []() { current_editing_context()->keyboard_paste() ; });
+
+	RadioAction::Group mouse_mode_group;
+
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseObject); });
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseRange); });
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseDraw); });
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseTimeFX); });
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseGrid); });
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseContent); });
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseCut); });
 }
 
 void
@@ -2157,44 +2167,23 @@ EditingContext::pack_snap_box ()
 Glib::RefPtr<Action>
 EditingContext::get_mouse_mode_action (MouseMode m) const
 {
-	char const * group_name = _name.c_str(); /* use char* to force correct ::get_action variant */
-
 	switch (m) {
 	case MouseRange:
-		return ActionManager::get_action (group_name, X_("set-mouse-mode-range"));
+		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-range"));
 	case MouseObject:
-		return ActionManager::get_action (group_name, X_("set-mouse-mode-object"));
+		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-object"));
 	case MouseCut:
-		return ActionManager::get_action (group_name, X_("set-mouse-mode-cut"));
+		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-cut"));
 	case MouseDraw:
-		return ActionManager::get_action (group_name, X_("set-mouse-mode-draw"));
+		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-draw"));
 	case MouseTimeFX:
-		return ActionManager::get_action (group_name, X_("set-mouse-mode-timefx"));
+		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-timefx"));
 	case MouseGrid:
-		return ActionManager::get_action (group_name, X_("set-mouse-mode-grid"));
+		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-grid"));
 	case MouseContent:
-		return ActionManager::get_action (group_name, X_("set-mouse-mode-content"));
+		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-content"));
 	}
 	return Glib::RefPtr<Action>();
-}
-
-void
-EditingContext::register_mouse_mode_actions ()
-{
-	RefPtr<Action> act;
-	std::string group_name = _name;
-	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionManager::create_action_group (bindings, group_name);
-	RadioAction::Group mouse_mode_group;
-
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseObject));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseRange));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseDraw));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseTimeFX));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseGrid));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseContent));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseCut));
-
-	add_mouse_mode_actions (mouse_mode_actions);
 }
 
 void
@@ -3275,4 +3264,25 @@ EditingContext::copy ()
 	cut_copy (Copy);
 }
 
+void
+EditingContext::load_shared_bindings ()
+{
+	/* This set of bindings may expand in the future to include things
+	 * other than MIDI editing, but for now this is all we've got as far as
+	 * bindings that need to be distinct from the Editors (because some of
+	 * the keys may overlap.
+	 */
 
+	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
+	register_midi_actions (midi_bindings);
+
+	Bindings* shared_bindings = Bindings::get_bindings (X_("Editing"));
+	register_common_actions (shared_bindings);
+
+	/* Give this editing context the chance to add more mode mode actions */
+	add_mouse_mode_actions (_common_actions);
+
+	/* Attach bindings to the canvas for this editing context */
+	get_canvas()->set_data ("ardour-bindings", midi_bindings);
+	get_canvas_viewport()->set_data ("ardour-bindings", shared_bindings);
+}

@@ -70,10 +70,6 @@ Pianoroll::Pianoroll (std::string const & name)
 	mouse_mode = Editing::MouseContent;
 	autoscroll_vertical_allowed = false;
 
-	bindings = Bindings::get_bindings (editor_name());
-
-	register_actions ();
-
 	build_grid_type_menu ();
 	build_draw_midi_menus();
 
@@ -81,7 +77,14 @@ Pianoroll::Pianoroll (std::string const & name)
 	build_canvas ();
 	build_lower_toolbar ();
 
+	load_bindings ();
+	register_actions ();
+
+	/* this is weird because it will use an action that uses current_editing_context */
+	EditingContext* ec = current_editing_context ();
+	switch_editing_context (this);
 	set_mouse_mode (Editing::MouseContent, true);
+	switch_editing_context (ec);
 }
 
 Pianoroll::~Pianoroll ()
@@ -90,10 +93,17 @@ Pianoroll::~Pianoroll ()
 }
 
 void
+Pianoroll::load_bindings ()
+{
+	bindings = Bindings::get_bindings (editor_name());
+	load_shared_bindings ();
+}
+
+void
 Pianoroll::register_actions ()
 {
 	editor_actions = ActionManager::create_action_group (bindings, editor_name());
-	register_mouse_mode_actions ();
+
 	bind_mouse_mode_buttons ();
 	register_grid_actions ();
 }

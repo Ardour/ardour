@@ -1,8 +1,0 @@
-<Bindings name="Pianoroll">
-  <Press>
-    <Binding key="d" action="Pianoroll/set-mouse-mode-draw" group="pianoroll"/>
-    <Binding key="e" action="Pianoroll/set-mouse-mode-content" group="pianoroll"/>
-    <Binding key="equal" action="Pianoroll/zoom-in" group="pianoroll"/>
-    <Binding key="minus" action="Pianoroll/zoom-in" group="pianoroll"/>
-  </Press>
-</Bindings>

@@ -554,7 +554,6 @@ Editor::register_actions ()
 		act->set_sensitive (false);
 	}
 
-	register_mouse_mode_actions ();
 	bind_mouse_mode_buttons ();
 
 	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), sigc::bind (sigc::mem_fun(*this, &Editor::step_mouse_mode), true));
@@ -765,20 +764,7 @@ Editor::load_bindings ()
 	bindings = Bindings::get_bindings (editor_name());
 	contents().set_data ("ardour-bindings", bindings);
 
-	/* This set of bindings may expand in the future to include things
-	 * other than MIDI editing, but for now this is all we've got as far as
-	 * bindings that need to be distinct from the Editors (because some of
-	 * the keys may overlap.
-	 */
-
-	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
-	register_midi_actions (midi_bindings);
-
-	Bindings* shared_bindings = Bindings::get_bindings (X_("Editing"));
-	register_common_actions (shared_bindings);
-
-	_track_canvas_viewport->canvas()->set_data ("ardour-bindings", midi_bindings);
-	_track_canvas_viewport->set_data ("ardour-bindings", shared_bindings);
+	EditingContext::load_shared_bindings ();
 }
 
 void
@@ -1341,11 +1327,11 @@ Editor::register_region_actions ()
 }
 
 void
-Editor::add_mouse_mode_actions (Glib::RefPtr<ActionGroup> mouse_mode_actions)
+Editor::add_mouse_mode_actions (Glib::RefPtr<ActionGroup> action_group)
 {
 	RefPtr<Action> act;
 
-	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Smart Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));
+	act = ActionManager::register_toggle_action (action_group, "set-mouse-mode-object-range", _("Smart Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));
 	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
 	smart_mode_button.set_related_action (smart_mode_action);
 	smart_mode_button.set_text (_("Smart"));

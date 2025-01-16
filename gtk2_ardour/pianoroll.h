@@ -132,6 +132,7 @@ class Pianoroll : public CueEditor
 	void cut_copy (Editing::CutCopyOp);
 
   protected:
+	void load_bindings ();
 	void register_actions ();
 
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,

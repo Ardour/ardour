@@ -481,6 +481,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	static Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 	static Glib::RefPtr<Gtk::ActionGroup> _common_actions;
 
+	void load_shared_bindings ();
+
 	Editing::GridType  pre_internal_grid_type;
 	Editing::SnapMode  pre_internal_snap_mode;
 	Editing::GridType  internal_grid_type;
@@ -679,7 +681,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void register_grid_actions ();
 
 	Glib::RefPtr<Gtk::Action> get_mouse_mode_action (Editing::MouseMode m) const;
-	void register_mouse_mode_actions ();
 	void bind_mouse_mode_buttons ();
 	virtual void add_mouse_mode_actions (Glib::RefPtr<Gtk::ActionGroup>) {}
 
