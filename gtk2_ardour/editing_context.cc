@@ -2118,7 +2118,7 @@ EditingContext::get_canvas_cursor () const
 void
 EditingContext::set_canvas_cursor (Gdk::Cursor* cursor)
 {
-	Glib::RefPtr<Gdk::Window> win = get_canvas_viewport()->get_window();
+	Glib::RefPtr<Gdk::Window> win = get_canvas()->get_window();
 
 	if (win && !_cursors->is_invalid (cursor)) {
 		/* glibmm 2.4 doesn't allow null cursor pointer because it uses
