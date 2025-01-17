@@ -451,7 +451,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 
 
 	DEBUG_TRACE (DEBUG::Peaks, string_compose (" ======>RP: npeaks = %1 start = %2 cnt = %3 len = %4 samples_per_visual_peak = %5 expected was %6 ... scale =  %7 PD ptr = %8 pf = %9\n"
-			, npeaks, start, cnt, _length, samples_per_visual_peak, expected_peaks, scale, peaks, _peakpath));
+			, npeaks, start, cnt, _length.samples (), samples_per_visual_peak, expected_peaks, scale, peaks, _peakpath));
 
 	/* fix for near-end-of-file conditions */
 
@@ -545,6 +545,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 			munmap (addr, map_length);
 #endif
 			if (zero_fill) {
+				assert (read_npeaks < npeaks);
 				memset (&peak_cache[read_npeaks], 0, sizeof (PeakData) * zero_fill);
 			}
 
@@ -590,6 +591,15 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		off_t  map_delta    = map_off - read_map_off;
 
 		samplecnt_t max_chunk = (statbuf.st_size - read_map_off - map_delta) / sizeof(PeakData);
+
+		if (map_off > statbuf.st_size) {
+			/* next_visual_peak is after peak-file end */
+			assert (npeaks == 1);
+			/* only process (next_visual_peak_sample - start), do not use peak-file */
+			max_chunk = 0;
+			map_delta = 0;
+			read_map_off = 0;
+		}
 		samplecnt_t chunksize = std::min<samplecnt_t> (expected_peaks, max_chunk);
 
 		size_t raw_map_length = chunksize * sizeof(PeakData);
@@ -604,6 +614,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 			samplecnt_t start_offset = next_visual_peak_sample - start;
 
 			peak_cache.reset (new PeakData[npeaks]);
+			if (chunksize > 0) {
 			std::unique_ptr<PeakData[]> staging (new PeakData[chunksize]);
 
 			char* addr;
@@ -664,6 +675,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 				next_visual_peak_sample = min ((double) start + cnt, (next_visual_peak_sample + samples_per_visual_peak));
 				stored_peak_before_next_visual_peak = (uint32_t) next_visual_peak_sample / samples_per_file_peak;
 			}
+			} // chunksize > 0
 
 			/* add data between start and sample corresponding to map_off */
 			if (start_offset > 0) {
@@ -682,6 +694,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 			}
 
 			if (zero_fill) {
+				assert (read_npeaks < npeaks);
 #ifndef NDEBUG
 				cerr << "Zero fill '" << _name << "' end of peaks (@ " << read_npeaks << " with " << zero_fill << ")" << endl;
 #endif
