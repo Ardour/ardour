@@ -884,9 +884,6 @@ static int showInvalidation = 0;
   r.width = bounds.size.width;
   r.height = bounds.size.height;
 
-  if (impl->needs_display_region)
-    gdk_region_destroy (impl->needs_display_region);
-
   impl->needs_display_region = gdk_region_rectangle (&r);
 
 #if 0
