@@ -615,67 +615,67 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 
 			peak_cache.reset (new PeakData[npeaks]);
 			if (chunksize > 0) {
-			std::unique_ptr<PeakData[]> staging (new PeakData[chunksize]);
+				std::unique_ptr<PeakData[]> staging (new PeakData[chunksize]);
 
-			char* addr;
+				char* addr;
 #ifdef PLATFORM_WINDOWS
-			HANDLE file_handle =  (HANDLE) _get_osfhandle(int(sfd));
-			HANDLE map_handle;
-			LPVOID view_handle;
-			bool err_flag;
+				HANDLE file_handle = (HANDLE) _get_osfhandle(int(sfd));
+				HANDLE map_handle;
+				LPVOID view_handle;
+				bool err_flag;
 
-			map_handle = CreateFileMapping(file_handle, NULL, PAGE_READONLY, 0, 0, NULL);
-			if (map_handle == NULL) {
-				error << string_compose (_("map failed - could not create file mapping for peakfile %1."), _peakpath) << endmsg;
-				return -1;
-			}
-
-			view_handle = MapViewOfFile(map_handle, FILE_MAP_READ, 0, read_map_off, map_length);
-			if (view_handle == NULL) {
-				error << string_compose (_("map failed - could not map peakfile %1."), _peakpath) << endmsg;
-				return -1;
-			}
-
-			addr = (char *) view_handle;
-
-			memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length);
-
-			err_flag = UnmapViewOfFile (view_handle);
-			err_flag = CloseHandle(map_handle);
-			if(!err_flag) {
-				error << string_compose (_("unmap failed - could not unmap peakfile %1."), _peakpath) << endmsg;
-				return -1;
-			}
-#else
-			addr = (char*) mmap (0, map_length, PROT_READ, MAP_PRIVATE, sfd, read_map_off);
-			if (addr ==  MAP_FAILED) {
-				error << string_compose (_("map failed - could not mmap peakfile %1."), _peakpath) << endmsg;
-				return -1;
-			}
-
-			memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length);
-			munmap (addr, map_length);
-#endif
-			while (nvisual_peaks < read_npeaks) {
-
-				xmax = -1.0;
-				xmin = 1.0;
-
-				while ((current_stored_peak <= stored_peak_before_next_visual_peak) && (i < chunksize)) {
-
-					xmax = max (xmax, staging[i].max);
-					xmin = min (xmin, staging[i].min);
-					++i;
-					++current_stored_peak;
+				map_handle = CreateFileMapping(file_handle, NULL, PAGE_READONLY, 0, 0, NULL);
+				if (map_handle == NULL) {
+					error << string_compose (_("map failed - could not create file mapping for peakfile %1."), _peakpath) << endmsg;
+					return -1;
 				}
 
-				peak_cache[nvisual_peaks].max = xmax;
-				peak_cache[nvisual_peaks].min = xmin;
-				++nvisual_peaks;
-				next_visual_peak_sample = min ((double) start + cnt, (next_visual_peak_sample + samples_per_visual_peak));
-				stored_peak_before_next_visual_peak = (uint32_t) next_visual_peak_sample / samples_per_file_peak;
+				view_handle = MapViewOfFile(map_handle, FILE_MAP_READ, 0, read_map_off, map_length);
+				if (view_handle == NULL) {
+					error << string_compose (_("map failed - could not map peakfile %1."), _peakpath) << endmsg;
+					return -1;
+				}
+
+				addr = (char *) view_handle;
+
+				memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length);
+
+				err_flag = UnmapViewOfFile (view_handle);
+				err_flag = CloseHandle(map_handle);
+				if(!err_flag) {
+					error << string_compose (_("unmap failed - could not unmap peakfile %1."), _peakpath) << endmsg;
+					return -1;
+				}
+#else
+				addr = (char*) mmap (0, map_length, PROT_READ, MAP_PRIVATE, sfd, read_map_off);
+				if (addr ==  MAP_FAILED) {
+					error << string_compose (_("map failed - could not mmap peakfile %1."), _peakpath) << endmsg;
+					return -1;
+				}
+
+				memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length);
+				munmap (addr, map_length);
+#endif
+				while (nvisual_peaks < read_npeaks) {
+
+					xmax = -1.0;
+					xmin = 1.0;
+
+					while ((current_stored_peak <= stored_peak_before_next_visual_peak) && (i < chunksize)) {
+
+						xmax = max (xmax, staging[i].max);
+						xmin = min (xmin, staging[i].min);
+						++i;
+						++current_stored_peak;
+					}
+
+					peak_cache[nvisual_peaks].max = xmax;
+					peak_cache[nvisual_peaks].min = xmin;
+					++nvisual_peaks;
+					next_visual_peak_sample = min ((double) start + cnt, (next_visual_peak_sample + samples_per_visual_peak));
+					stored_peak_before_next_visual_peak = (uint32_t) next_visual_peak_sample / samples_per_file_peak;
+				}
 			}
-			} // chunksize > 0
 
 			/* add data between start and sample corresponding to map_off */
 			if (start_offset > 0) {
