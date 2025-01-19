@@ -5,22 +5,24 @@ ardour {
 	author = "Ardour Team",
 	description = [[
 	1. Calibrate I/O Latency (Menu > Window > Audio/MIDI Setup)
-	2. Create a mono track - this will be used to record the IR
-	3. Disconnect the input and output of that track
-	4. Add a mono bus and load this plugin on the bus
+	2. Create a mono track - this will be used to record the IR.
+	3. Disconnect the input and output of that track.
+	4. Add a mono bus and load this plugin on the bus.
 	5. Connect the left output of the bus to the mono track's input.
-	   The deconvolved Impulse Response will be output on that channel
-	6. Connect the right output of the bus to a hardware playback port, matching the system you want to capture
+	   The deconvolved Impulse Response will be output on that channel.
+	6. Connect the right output of the bus to a hardware playback port, matching the system you want to capture.
 	   A sine-sweep will be played on that channel.
-	7. Connect the bus input to the return signal (hardware capture) of the system under test.
+	7. Connect the bus' input to the return signal (hardware capture) of the system under test.
 	8. Record Arm the track (from 2)
 	9. Record Arm the session
-	10. open the GUI of this plugin, enable "Capture"
-	11. Roll the transport
-	12. Wait 10 sec. (recording stops automatically)
-	13. Select the region on the mono track: Region > Edit > Strip Silence, Region > Gain > Normalize
-	14. Disable region-fades on the region: Region > Fades
-	15. Export the region: Region > Export
+	10. Open the GUI of this plugin, enable "Capture"
+	11. Roll the transport.
+	12. Wait 10 sec (recording stops automatically).
+	13. Select the region on the mono track: Region > Edit > Strip Silence and/or manually tweak the region start:
+	    move it close to the initial impulse.
+	14. Region > Gain > Normalize, or manually adjust gain.
+	15. Disable region-fades of the region: Region > Fades
+	16. Export the region to save the IR file (Region > Export)
 	]]
 }
 
@@ -109,7 +111,7 @@ function dsp_init (rate)
 	if fmax > rate * .47 then
 		fmax = rate * .47
 	end
-	gen_sweep (20, fmax, 5, rate)
+	gen_sweep (20, fmax, slen, rate)
 
 	rec_len = rlen * rate
 
