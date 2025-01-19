@@ -66,6 +66,9 @@ class PianorollMidiView : public MidiView
 	bool is_active_automation (Evoral::Parameter const &) const;
 	bool is_visible_automation (Evoral::Parameter const &) const;
 
+	AutomationLine* active_automation_line() const;
+	ArdourCanvas::Duple automation_group_position() const;
+
 	ArdourCanvas::Item* drag_group() const;
 
 	std::list<SelectableOwner*> selectable_owners();

@@ -151,6 +151,22 @@ PianorollMidiView::set_height (double h)
 	view_changed ();
 }
 
+ArdourCanvas::Duple
+PianorollMidiView::automation_group_position() const
+{
+	return automation_group->position();
+}
+
+AutomationLine*
+PianorollMidiView::active_automation_line() const
+{
+	if (active_automation) {
+		return active_automation->line.get();
+	}
+
+	return nullptr;
+}
+
 ArdourCanvas::Item*
 PianorollMidiView::drag_group () const
 {
@@ -642,3 +658,4 @@ PianorollMidiView::clear_selection ()
 		i->second.line->set_selected_points (empty);
 	}
 }
+

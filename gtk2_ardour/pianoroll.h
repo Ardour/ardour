@@ -108,6 +108,7 @@ class Pianoroll : public CueEditor
 	void midi_action (void (MidiView::*method)());
 
 	std::list<SelectableOwner*> selectable_owners();
+	void select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<SelectableOwner*> const &, ARDOUR::SelectionOperation, bool);
 
 	Gdk::Cursor* which_track_cursor () const;
 	Gdk::Cursor* which_mode_cursor () const;

@@ -30,11 +30,6 @@ CueEditor::filter_to_unique_midi_region_views (RegionSelection const & ms) const
 }
 
 void
-CueEditor::select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<SelectableOwner*> const &, ARDOUR::SelectionOperation, bool)
-{
-}
-
-void
 CueEditor::get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const
 {
 }

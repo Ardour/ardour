@@ -5302,3 +5302,4 @@ EndBoundaryRect::compute_bounding_box() const
 	const double radius = 10. * scale;
 	_bounding_box = _bounding_box.expand (0., 0., 0., radius + _outline_width);
 }
+

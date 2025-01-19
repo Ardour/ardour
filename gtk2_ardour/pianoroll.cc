@@ -2199,3 +2199,85 @@ Pianoroll::cut_copy (Editing::CutCopyOp op)
 		_drags->abort ();
 	}
 }
+
+void
+Pianoroll::select_all_within (Temporal::timepos_t const & start, Temporal::timepos_t const & end, double y0, double y1, std::list<SelectableOwner*> const & ignored, ARDOUR::SelectionOperation op, bool preserve_if_selected)
+{
+	std::list<Selectable*> found;
+
+	if (!view) {
+		return;
+	}
+
+	AutomationLine* al = view->active_automation_line();
+
+	if (!al) {
+		return;
+	}
+
+	double topfrac;
+	double botfrac;
+
+
+	/* translate y0 and y1 to use the top of the automation area as the * origin */
+
+	double automation_origin = view->automation_group_position().y;
+
+	y0 -= automation_origin;
+	y1 -= automation_origin;
+
+	if (y0 < 0. && al->height() <= y1) {
+
+		/* _y_position is below top, mybot is above bot, so we're fully
+		   covered vertically.
+		*/
+
+		topfrac = 1.0;
+		botfrac = 0.0;
+
+	} else {
+
+		/* top and bot are within _y_position .. mybot */
+
+		topfrac = 1.0 - (y0 / al->height());
+		botfrac = 1.0 - (y1 / al->height());
+
+	}
+
+	al->get_selectables (start, end, botfrac, topfrac, found);
+
+	if (found.empty()) {
+		view->clear_selection ();
+		return;
+	}
+
+	if (preserve_if_selected && op != SelectionToggle) {
+		auto i = found.begin();
+		while (i != found.end() && (*i)->selected()) {
+			++i;
+		}
+
+		if (i == found.end()) {
+			return;
+		}
+	}
+
+	switch (op) {
+	case SelectionAdd:
+		begin_reversible_selection_op (X_("add select all within"));
+		selection->add (found);
+		break;
+	case SelectionToggle:
+		begin_reversible_selection_op (X_("toggle select all within"));
+		selection->toggle (found);
+		break;
+	case SelectionSet:
+		begin_reversible_selection_op (X_("select all within"));
+		selection->set (found);
+		break;
+	default:
+		return;
+	}
+
+	commit_reversible_selection_op ();
+}
