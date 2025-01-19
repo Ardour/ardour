@@ -6136,7 +6136,7 @@ NoteDrag::NoteDrag (EditingContext& ec, ArdourCanvas::Item* i)
 void
 NoteDrag::setup_pointer_offset ()
 {
-	_pointer_offset = _view->midi_region()->source_beats_to_absolute_time (_primary->note ()->time ()).distance (raw_grab_time ());
+	_pointer_offset = _view->source_beats_to_timeline (_primary->note ()->time ()).distance (raw_grab_time ());
 }
 
 void
@@ -6150,7 +6150,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		_copy = false;
 	}
 
-	setup_snap_delta (_view->midi_region()->source_beats_to_absolute_time (_primary->note ()->time ()));
+	setup_snap_delta (_view->source_beats_to_timeline (_primary->note ()->time ()));
 
 	if (!(_was_selected = _primary->selected ())) {
 		/* tertiary-click means extend selection - we'll do that on button release,
@@ -6191,7 +6191,7 @@ NoteDrag::total_dx (GdkEvent* event) const
 	// std::cerr << "apparent dx " << dx << " beats " << dx.beats().str() << " from " << current_pointer_x() << " - " << grab_x() << " = " << current_pointer_x() - grab_x() << std::endl;
 
 	/* primary note time in quarter notes */
-	timepos_t const n_qn = _view->midi_region()->source_beats_to_absolute_time (_primary->note ()->time ());
+	timepos_t const n_qn = _view->source_beats_to_timeline (_primary->note ()->time ());
 
 	/* prevent (n_qn + dx) from becoming negative */
 	if (-dx.distance() > timecnt_t(n_qn).distance ()) {
@@ -6216,8 +6216,8 @@ NoteDrag::total_dx (GdkEvent* event) const
 	timecnt_t ret (snap.earlier (n_qn).earlier (snap_delta (event->button.state)), n_qn);
 
 	/* prevent the earliest note being dragged earlier than the region's start position */
-	if (_earliest + ret < _view->midi_region()->start ()) {
-		ret -= (ret + _earliest) - _view->midi_region()->start ();
+	if (_earliest + ret < _view->start ()) {
+		ret -= (ret + _earliest) - _view->start ();
 	}
 
 	return ret;
@@ -6283,7 +6283,7 @@ NoteDrag::motion (GdkEvent* event, bool first_move)
 
 		_view->show_verbose_cursor_for_new_note_value (_primary->note (), new_note);
 
-		editing_context.set_snapped_cursor_position (_view->midi_region()->region_beats_to_absolute_time (_primary->note ()->time ()) + dx_qn);
+		editing_context.set_snapped_cursor_position (_view->source_beats_to_timeline (_primary->note ()->time ()) + dx_qn);
 	}
 }
 

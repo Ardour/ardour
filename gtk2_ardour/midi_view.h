@@ -293,6 +293,10 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	Temporal::timecnt_t relative_position (Temporal::timepos_t const & p) const;
 
+	Temporal::timepos_t source_beats_to_timeline (Temporal::Beats const &) const;
+
+	Temporal::timepos_t start() const;
+
 	/** Snap a region relative pixel coordinate to pixel units.
 	 * @param x a pixel coordinate relative to region start
 	 * @param ensure_snap do not use magnetic snap (required for snap delta calculation)

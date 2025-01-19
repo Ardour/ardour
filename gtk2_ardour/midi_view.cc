@@ -3008,6 +3008,25 @@ MidiView::relative_position (timepos_t const & p) const
 	return _midi_region->region_relative_position (p);
 }
 
+timepos_t
+MidiView::source_beats_to_timeline (Beats const & source_beats) const
+{
+	if (_midi_region && !_show_source) {
+		return _midi_region->source_beats_to_absolute_time (source_beats);
+	}
+
+	return timepos_t (source_beats);
+}
+
+timepos_t
+MidiView::start() const
+{
+	if (_midi_region && !_show_source) {
+		return _midi_region->start();
+	}
+	return timepos_t (Temporal::BeatTime);
+}
+
 /** @param x Pixel relative to the region position.
  *  @param ensure_snap defaults to false. true = ignore magnetic snap and snap mode (used for snap delta calculation).
  *  @return Snapped pixel relative to the region position.
