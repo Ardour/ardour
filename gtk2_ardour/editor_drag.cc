@@ -6129,14 +6129,14 @@ NoteDrag::NoteDrag (EditingContext& ec, ArdourCanvas::Item* i)
 
 	_primary = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
 	assert (_primary);
-	_region      = &_primary->region_view ();
-	_note_height = _region->midi_context().note_height ();
+	_view      = &_primary->region_view ();
+	_note_height = _view->midi_context().note_height ();
 }
 
 void
 NoteDrag::setup_pointer_offset ()
 {
-	_pointer_offset = _region->midi_region()->source_beats_to_absolute_time (_primary->note ()->time ()).distance (raw_grab_time ());
+	_pointer_offset = _view->midi_region()->source_beats_to_absolute_time (_primary->note ()->time ()).distance (raw_grab_time ());
 }
 
 void
@@ -6150,7 +6150,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		_copy = false;
 	}
 
-	setup_snap_delta (_region->midi_region()->source_beats_to_absolute_time (_primary->note ()->time ()));
+	setup_snap_delta (_view->midi_region()->source_beats_to_absolute_time (_primary->note ()->time ()));
 
 	if (!(_was_selected = _primary->selected ())) {
 		/* tertiary-click means extend selection - we'll do that on button release,
@@ -6164,10 +6164,10 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 			bool add = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
 
 			if (add) {
-				_region->note_selected (_primary, true);
+				_view->note_selected (_primary, true);
 			} else {
 				editing_context.get_selection ().clear_points ();
-				_region->unique_select (_primary);
+				_view->unique_select (_primary);
 			}
 		}
 	}
@@ -6191,7 +6191,7 @@ NoteDrag::total_dx (GdkEvent* event) const
 	// std::cerr << "apparent dx " << dx << " beats " << dx.beats().str() << " from " << current_pointer_x() << " - " << grab_x() << " = " << current_pointer_x() - grab_x() << std::endl;
 
 	/* primary note time in quarter notes */
-	timepos_t const n_qn = _region->midi_region()->source_beats_to_absolute_time (_primary->note ()->time ());
+	timepos_t const n_qn = _view->midi_region()->source_beats_to_absolute_time (_primary->note ()->time ());
 
 	/* prevent (n_qn + dx) from becoming negative */
 	if (-dx.distance() > timecnt_t(n_qn).distance ()) {
@@ -6216,8 +6216,8 @@ NoteDrag::total_dx (GdkEvent* event) const
 	timecnt_t ret (snap.earlier (n_qn).earlier (snap_delta (event->button.state)), n_qn);
 
 	/* prevent the earliest note being dragged earlier than the region's start position */
-	if (_earliest + ret < _region->midi_region()->start ()) {
-		ret -= (ret + _earliest) - _region->midi_region()->start ();
+	if (_earliest + ret < _view->midi_region()->start ()) {
+		ret -= (ret + _earliest) - _view->midi_region()->start ();
 	}
 
 	return ret;
@@ -6231,25 +6231,25 @@ NoteDrag::total_dy () const
 		return 0;
 	}
 
-	double const y = _region->midi_context().y_position ();
+	double const y = _view->midi_context().y_position ();
 	/* new current note */
-	uint8_t n = _region->y_to_note (current_pointer_y () - y);
+	uint8_t n = _view->y_to_note (current_pointer_y () - y);
 	/* clamp */
-	MidiViewBackground& mvb = _region->midi_context ();
+	MidiViewBackground& mvb = _view->midi_context ();
 	n                   = max (mvb.lowest_note (), n);
 	n                   = min (mvb.highest_note (), n);
 	/* and work out delta */
-	return n - _region->y_to_note (grab_y () - y);
+	return n - _view->y_to_note (grab_y () - y);
 }
 
 void
 NoteDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (first_move) {
-		_earliest = timepos_t (_region->earliest_in_selection ());
+		_earliest = timepos_t (_view->earliest_in_selection ());
 		if (_copy) {
 			/* make copies of all the selected notes */
-			_primary = _region->copy_selection (_primary);
+			_primary = _view->copy_selection (_primary);
 		}
 	}
 
@@ -6268,9 +6268,9 @@ NoteDrag::motion (GdkEvent* event, bool first_move)
 		int8_t pitch_delta = total_dy ();
 
 		if (_copy) {
-			_region->move_copies (dx_qn, tdy, pitch_delta);
+			_view->move_copies (dx_qn, tdy, pitch_delta);
 		} else {
-			_region->move_selection (dx_qn, tdy, pitch_delta);
+			_view->move_selection (dx_qn, tdy, pitch_delta);
 		}
 
 		/* the new note value may be the same as the old one, but we
@@ -6281,9 +6281,9 @@ NoteDrag::motion (GdkEvent* event, bool first_move)
 
 		uint8_t new_note = min (max (_primary->note ()->note () + pitch_delta, 0), 127);
 
-		_region->show_verbose_cursor_for_new_note_value (_primary->note (), new_note);
+		_view->show_verbose_cursor_for_new_note_value (_primary->note (), new_note);
 
-		editing_context.set_snapped_cursor_position (_region->midi_region()->region_beats_to_absolute_time (_primary->note ()->time ()) + dx_qn);
+		editing_context.set_snapped_cursor_position (_view->midi_region()->region_beats_to_absolute_time (_primary->note ()->time ()) + dx_qn);
 	}
 }
 
@@ -6300,23 +6300,23 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 			if (_was_selected) {
 				bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
 				if (add) {
-					_region->note_deselected (_primary);
+					_view->note_deselected (_primary);
 					changed = true;
 				} else {
 					editing_context.get_selection ().clear_points ();
-					_region->unique_select (_primary);
+					_view->unique_select (_primary);
 					changed = true;
 				}
 			} else {
 				bool extend = Keyboard::modifier_state_equals (ev->button.state, Keyboard::TertiaryModifier);
 				bool add    = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
 
-				if (!extend && !add && _region->selection_size () > 1) {
+				if (!extend && !add && _view->selection_size () > 1) {
 					editing_context.get_selection ().clear_points ();
-					_region->unique_select (_primary);
+					_view->unique_select (_primary);
 					changed = true;
 				} else if (extend) {
-					_region->note_selected (_primary, true, true);
+					_view->note_selected (_primary, true, true);
 					changed = true;
 				} else {
 					/* it was added during button press */
@@ -6330,7 +6330,7 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 			}
 		}
 	} else {
-		_region->note_dropped (_primary, total_dx (ev), total_dy (), _copy);
+		_view->note_dropped (_primary, total_dx (ev), total_dy (), _copy);
 	}
 }
 

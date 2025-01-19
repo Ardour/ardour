@@ -648,7 +648,7 @@ private:
 	Temporal::timecnt_t total_dx (GdkEvent * event) const; // total movement in quarter notes
 	int8_t total_dy () const;
 
-	MidiView* _region;
+	MidiView* _view;
 	NoteBase* _primary;
 	Temporal::timecnt_t _cumulative_dx;
 	double _cumulative_dy;
