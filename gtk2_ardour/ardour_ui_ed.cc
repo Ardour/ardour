@@ -602,11 +602,11 @@ ARDOUR_UI::install_dependent_actions ()
 	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_forward_to_mark_flagged), Location::Flags(Location::IsRangeMarker | Location::IsSessionRange), Location::Flags (0), Location::Flags (0)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (common_actions, "jump-backward-to-section-mark", _("Jump to Previous Arrangment Mark"),
+	act = ActionManager::register_action (common_actions, "jump-backward-to-section-mark", _("Jump to Previous Arrangement Mark"),
 	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_backward_to_mark_flagged), Location::Flags (0), Location::Flags (0), Location::Flags (Location::IsMark | Location::IsSection)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (common_actions, "jump-forward-to-section-mark", _("Jump to Next Arrangment Mark"),
+	act = ActionManager::register_action (common_actions, "jump-forward-to-section-mark", _("Jump to Next Arrangement Mark"),
 	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_forward_to_mark_flagged), Location::Flags (0), Location::Flags (0), Location::Flags(Location::IsMark | Location::IsSection)));
 	ActionManager::session_sensitive_actions.push_back (act);
 

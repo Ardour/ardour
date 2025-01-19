@@ -71,7 +71,7 @@ PianorollMidiView::PianorollMidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 
 	/* The event rect is a sibling of canvas items that share @param
 	 * parent. Consequently, it does not get events that they do not handle
-	 * (because event propagation is up the item child->parent heirarchy,
+	 * (because event propagation is up the item child->parent hierarchy,
 	 * not sideways.
 	 *
 	 * This means that if, for example, the start boundary rect doesn't
