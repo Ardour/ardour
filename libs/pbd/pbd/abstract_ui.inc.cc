@@ -228,19 +228,16 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 	/* clean up any dead invalidation records (object was deleted) */
 	trash.sort();
 	trash.unique();
-	for (std::list<InvalidationRecord*>::iterator r = trash.begin(); r != trash.end();) {
-		if (!(*r)->in_use ()) {
-			assert (!(*r)->valid ());
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 drop invalidation trash %2\n", event_loop_name(), *r));
-			std::list<InvalidationRecord*>::iterator tmp = r;
-			++tmp;
-			delete *r;
-			trash.erase (r);
-			r = tmp;
-		} else {
-			++r;
+	static_cast<void>(trash.remove_if([this] (InvalidationRecord* const& r) {
+		bool cond = !r->in_use ();
+		if (cond) {
+			assert (!r->valid ());
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 drop invalidation trash %2\n", event_loop_name(), r));
+			delete r;
 		}
-	}
+
+		return cond;
+	}));
 #ifndef NDEBUG
 	if (trash.size() > 0) {
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 items in trash: %2\n", event_loop_name(), trash.size()));
