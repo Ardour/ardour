@@ -229,7 +229,6 @@ MidiViewBackground::maybe_extend_note_range (uint8_t note_num)
 	}
 
 	if (changed) {
-		std::cerr << "changing it\n";
 		apply_note_range (_data_note_min, _data_note_max, true);
 	}
 }

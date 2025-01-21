@@ -509,8 +509,6 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 	if (_canvas->is_mapped()) {
 		// zoom_to_show (timecnt_t (timepos_t (Temporal::BeatTime), timepos_t (max_zoom_extent ().second.beats() * 1.1)));
 	}
-
-	std::cerr << "new size " << _visible_canvas_width << " x " << _visible_canvas_width << std::endl;
 }
 
 timepos_t
