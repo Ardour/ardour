@@ -16,14 +16,12 @@ def configure(conf):
     autowaf.display_msg(conf, 'build session-utils', 'yes')
 
 def build_ardour_util(bld, util):
-    pgmprefix = bld.env['PROGRAM_NAME'].lower() + bld.env['MAJOR']
-
     # just the normal executable version of the GTK GUI
     obj = bld (features = 'cxx c cxxprogram')
     # this program does not do the whole hidden symbols thing
     obj.cxxflags = [ '-fvisibility=default' ]
     obj.source   = ['common.cc', util + '.cc' ]
-    obj.target   = pgmprefix + '-' + util
+    obj.target   = bld.env['INTERNAL_NAME'] + '-' + util
     obj.includes = ['.']
     obj.use      = [ 'libpbd',
                      'libardour',
@@ -33,7 +31,7 @@ def build_ardour_util(bld, util):
                      ]
     obj.defines = [
         'VERSIONSTRING="' + bld.env['VERSION'] + '"',
-        'UTILNAME="'   + str(pgmprefix + '-' + util) + '"',
+        'UTILNAME="'   + bld.env['INTERNAL_NAME'] + '-' + util + '"',
         'DATA_DIR="'   + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="'  + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
@@ -69,15 +67,13 @@ def build(bld):
     if not "dummy" in bld.env['BACKENDS']:
         return
 
-    pgmprefix = bld.env['PROGRAM_NAME'].lower() + bld.env['MAJOR']
-
     utils = bld.path.ant_glob('[a-z]*.cc', excl=['example.cc', 'common.cc'])
 
     for util in utils:
         fn = os.path.splitext(os.path.basename(str(util)))[0]
         build_ardour_util(bld, fn)
         if bld.env['build_target'] != 'mingw':
-            bld.symlink_as(bld.env['BINDIR'] + '/' + pgmprefix + "-" + fn, bld.env['LIBDIR'] + '/utils/ardour-util.sh')
+            bld.symlink_as(bld.env['BINDIR'] + '/' + bld.env['INTERNAL_NAME'] + "-" + fn, bld.env['LIBDIR'] + '/utils/ardour-util.sh')
 
     if bld.env['build_target'] == 'mingw':
         return
