@@ -229,6 +229,8 @@ public:
 
 	bool extend_selection_to_track (TimeAxisView&);
 
+	void edit_region_in_pianoroll_window ();
+
 	void play_selection ();
 	void maybe_locate_with_edit_preroll (samplepos_t);
 	void play_with_preroll ();

@@ -23,10 +23,11 @@
 
 using namespace ARDOUR;
 
-PianorollWindow::PianorollWindow (std::string const & name)
+PianorollWindow::PianorollWindow (std::string const & name, Session& s)
 	: ArdourWindow (string_compose ("%1 - %2", PROGRAM_NAME, name))
 	, pianoroll (new Pianoroll (name))
 {
+	pianoroll->set_session (&s);
 	pianoroll->viewport().set_size_request (600, 120);
 
 	add (pianoroll->toolbox());
@@ -36,4 +37,11 @@ PianorollWindow::PianorollWindow (std::string const & name)
 PianorollWindow::~PianorollWindow ()
 {
 	delete pianoroll;
+}
+
+void
+PianorollWindow::set (std::shared_ptr<MidiTrack> track, std::shared_ptr<MidiRegion> region)
+{
+	pianoroll->set_track (track);
+	pianoroll->set_region (region);
 }

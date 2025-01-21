@@ -134,6 +134,7 @@ public:
 	void set_visibility_note_range (MidiViewBackground::VisibleNoteRange, bool);
 
 	MergeableLine* make_merger ();
+	void edit_in_pianoroll_window ();
 
   protected:
 	void reset_width_dependent_items (double pixel_width);

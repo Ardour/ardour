@@ -30,10 +30,10 @@ class Pianoroll;
 class PianorollWindow : public ArdourWindow
 {
   public:
-	PianorollWindow (std::string const & name);
+	PianorollWindow (std::string const & name, ARDOUR::Session&);
 	~PianorollWindow ();
 
-	void set (std::shared_ptr<ARDOUR::Track>, std::shared_ptr<ARDOUR::MidiRegion>);
+	void set (std::shared_ptr<ARDOUR::MidiTrack>, std::shared_ptr<ARDOUR::MidiRegion>);
 
  private:
 	Pianoroll* pianoroll;

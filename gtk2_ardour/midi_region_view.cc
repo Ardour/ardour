@@ -48,7 +48,6 @@
 #include "ardour/midi_track.h"
 #include "ardour/operations.h"
 #include "ardour/quantize.h"
-#include "ardour/session.h"
 
 #include "evoral/Parameter.h"
 #include "evoral/Event.h"
@@ -77,6 +76,7 @@
 #include "midi_velocity_dialog.h"
 #include "note_player.h"
 #include "paste_context.h"
+#include "pianoroll_window.h"
 #include "public_editor.h"
 #include "route_time_axis.h"
 #include "rgb_macros.h"
@@ -680,4 +680,17 @@ MidiRegionView::add_control_points_to_selection (timepos_t const & start, timepo
 
 		at.second->set_selected_points (_editing_context.get_selection().points);
 	}
+}
+
+void
+MidiRegionView::edit_in_pianoroll_window ()
+{
+	std::shared_ptr<MidiTrack> track = std::dynamic_pointer_cast<MidiTrack> (trackview.stripable());
+	assert (track);
+
+	PianorollWindow* pr = new PianorollWindow (string_compose (_("Pianoroll: %1"), _region->name()), track->session());;
+
+	pr->set (track, midi_region());
+	pr->show_all ();
+	pr->present ();
 }

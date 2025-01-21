@@ -1253,6 +1253,9 @@ Editor::register_region_actions ()
 	/* Open the region properties dialogue for the selected regions */
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "show-region-properties", _("Properties..."), sigc::mem_fun (*this, &Editor::show_region_properties));
 
+	/* Edit the region in a separate region pianoroll window */
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "edit-region-pianoroll-window", _("Edit in separate window..."), sigc::mem_fun (*this, &Editor::edit_region_in_pianoroll_window));
+
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "play-selected-regions", _("Play Selected Regions"), sigc::mem_fun(*this, &Editor::play_selected_region));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "tag-selected-regions", _("Tag Selected Regions"), sigc::mem_fun(*this, &Editor::tag_selected_region));
 

@@ -113,6 +113,7 @@
 #include "note.h"
 #include "paste_context.h"
 #include "patch_change_dialog.h"
+#include "pianoroll_window.h"
 #include "region_gain_line.h"
 #include "route_time_axis.h"
 #include "selection.h"
@@ -9517,3 +9518,10 @@ Editor::temporal_zoom_extents ()
 		temporal_zoom_by_sample (start, end);
 	}
 }
+
+void
+Editor::edit_region_in_pianoroll_window ()
+{
+	selection->foreach_midi_regionview (&MidiRegionView::edit_in_pianoroll_window);
+}
+

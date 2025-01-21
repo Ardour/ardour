@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/stateful_diff_command.h"
+
 #include "ardour/midi_region.h"
 #include "ardour/midi_track.h"
 #include "ardour/smf_source.h"
@@ -51,6 +53,7 @@
 
 #include "pbd/i18n.h"
 
+using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourCanvas;
 using namespace ArdourWidgets;
@@ -502,6 +505,12 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 	prh->set (ArdourCanvas::Rect (0, 0, prh->x1(), view->midi_context().height()));
 
 	_track_canvas_width = _visible_canvas_width - prh->x1();
+
+	if (_canvas->is_mapped()) {
+		// zoom_to_show (timecnt_t (timepos_t (Temporal::BeatTime), timepos_t (max_zoom_extent ().second.beats() * 1.1)));
+	}
+
+	std::cerr << "new size " << _visible_canvas_width << " x " << _visible_canvas_width << std::endl;
 }
 
 timepos_t
@@ -608,13 +617,29 @@ Pianoroll::canvas_cue_end_event (GdkEvent* event, ArdourCanvas::Item* item)
 void
 Pianoroll::set_trigger_start (Temporal::timepos_t const & p)
 {
-	ref.trigger()->the_region()->trim_front (p);
+	if (ref.trigger()) {
+		ref.trigger()->the_region()->trim_front (p);
+	} else {
+		begin_reversible_command (_("trim region front"));
+		view->midi_region()->clear_changes ();
+		view->midi_region()->trim_front (view->midi_region()->position() + p);
+		add_command (new StatefulDiffCommand (view->midi_region()));
+		commit_reversible_command ();
+	}
 }
 
 void
 Pianoroll::set_trigger_end (Temporal::timepos_t const & p)
 {
-	ref.trigger()->the_region()->trim_end (p);
+	if (ref.trigger()) {
+		ref.trigger()->the_region()->trim_end (p);
+	} else {
+		begin_reversible_command (_("trim region end"));
+		view->midi_region()->clear_changes ();
+		view->midi_region()->trim_end (view->midi_region()->position() + p);
+		add_command (new StatefulDiffCommand (view->midi_region()));
+		commit_reversible_command ();
+	}
 }
 
 Gtk::Widget&
@@ -1938,6 +1963,14 @@ Pianoroll::unset ()
 }
 
 void
+Pianoroll::set_track (std::shared_ptr<ARDOUR::MidiTrack> track)
+{
+	if (view) {
+		view->set_track (track);
+	}
+}
+
+void
 Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 {
 	if (!r) {
@@ -1949,12 +1982,6 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 	view->show_start (true);
 	view->show_end (true);
 
-	/* Compute zoom level to show entire source plus some margin if possible */
-
-	Temporal::timecnt_t duration = Temporal::timecnt_t (r->midi_source()->length().beats());
-
-	std::cerr << "new region: " << duration << std::endl;
-
 	bool provided = false;
 	std::shared_ptr<Temporal::TempoMap> map;
 	std::shared_ptr<SMFSource> smf (std::dynamic_pointer_cast<SMFSource> (r->midi_source()));
@@ -1964,20 +1991,32 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 	}
 
 	if (!provided) {
+		/* COPY MAIN SESSION TEMPO MAP? */
 		map.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
 	}
 
 	{
 		EditingContext::TempoMapScope tms (*this, map);
-		double width = bg->width();
-		/* make it 20% wider than we need */
-		samplecnt_t samples = (samplecnt_t) floor (1.2 * duration.samples());
-		std::cerr << "new spp from " << samples << " / " << width << std::endl;
-		samplecnt_t spp = floor (samples / width);
-		reset_zoom (spp);
+		/* Compute zoom level to show entire source plus some margin if possible */
+		zoom_to_show (timecnt_t (timepos_t (Temporal::BeatTime), timepos_t (max_zoom_extent ().second.beats() * 1.1)));
+
 	}
 
 	set_visible_channel (0);
+}
+
+void
+Pianoroll::zoom_to_show (Temporal::timecnt_t const & duration)
+{
+	if (!_visible_canvas_width) {
+		return;
+	}
+
+	/* make it 20% wider than we need */
+	samplecnt_t samples = (samplecnt_t) floor (1.2 * duration.samples());
+	std::cerr << "new spp from " << samples << " / " << _visible_canvas_width << std::endl;
+	samplecnt_t spp = floor (samples / _visible_canvas_width);
+	reset_zoom (spp);
 }
 
 bool
@@ -2091,6 +2130,7 @@ std::pair<Temporal::timepos_t,Temporal::timepos_t>
 Pianoroll::max_zoom_extent() const
 {
 	if (view && view->midi_region()) {
+		/* XXX make this dependent on view _show_source setting */
 		return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (view->midi_region()->midi_source()->length().beats()));
 	}
 

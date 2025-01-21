@@ -145,6 +145,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	virtual void set_track (std::shared_ptr<ARDOUR::MidiTrack>);
 	virtual void set_model (std::shared_ptr<ARDOUR::MidiModel>);
 
+	void set_show_source (bool yn);
+
 	NoteBase* add_note(const std::shared_ptr<NoteType> note, bool visible);
 
 	void cut_copy_clear (Editing::CutCopyOp);

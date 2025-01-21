@@ -317,8 +317,17 @@ MidiView::region_going_away ()
 {
 	_midi_region.reset ();
 	_model.reset ();
+
+	clear_events ();
+
 	connections_requiring_model.drop_connections();
 	region_connections.drop_connections ();
+}
+
+void
+MidiView::set_show_source (bool yn)
+{
+	_show_source = yn;
 }
 
 void
@@ -333,6 +342,9 @@ MidiView::set_region (std::shared_ptr<MidiRegion> mr)
 
 	_midi_region->DropReferences.connect (region_connections, invalidator (*this), std::bind (&MidiView::region_going_away, this), gui_context());
 	_midi_region->PropertyChanged.connect (region_connections, invalidator (*this), std::bind (&MidiView::region_resized, this, _1), gui_context());
+
+	size_start_rect ();
+	size_end_rect ();
 
 	set_model (_midi_region->midi_source (0)->model());
 }

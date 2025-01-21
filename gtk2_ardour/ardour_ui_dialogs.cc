@@ -889,30 +889,6 @@ ARDOUR_UI::toggle_meterbridge ()
 }
 
 void
-ARDOUR_UI::new_pianoroll_window ()
-{
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("new-pianoroll"));
-	if (!act) {
-		return;
-	}
-
-	std::list<PianorollWindow*>::iterator i = _pianoroll_windows.begin ();
-	while (i != _pianoroll_windows.end() && (*i)->get_visible() == true) {
-		++i;
-	}
-
-	if (i == _pianoroll_windows.end()) {
-		/* all our MIDITracer windows are visible; make a new one */
-		PianorollWindow* pr = new PianorollWindow (string_compose (_("Pianoroll %1"), _pianoroll_windows.size() + 1));
-		pr->show_all ();
-		_pianoroll_windows.push_back (pr);
-	} else {
-		/* re-use the hidden one */
-		(*i)->show_all ();
-	}
-}
-
-void
 ARDOUR_UI::new_midi_tracer_window ()
 {
 	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("NewMIDITracer"));

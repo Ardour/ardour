@@ -79,6 +79,7 @@ class Pianoroll : public CueEditor
 
 	void set (ARDOUR::TriggerReference&);
 	void set_region (std::shared_ptr<ARDOUR::MidiRegion>);
+	void set_track (std::shared_ptr<ARDOUR::MidiTrack>);
 
 	ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
 	ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const { return cursor_scroll_group; }
@@ -126,6 +127,7 @@ class Pianoroll : public CueEditor
 	void set_trigger_bounds (Temporal::timepos_t const &, Temporal::timepos_t const &);
 
 	void full_zoom_clicked();
+	void zoom_to_show (Temporal::timecnt_t const &);
 
 	void delete_ ();
 	void paste (float times, bool from_context_menu);

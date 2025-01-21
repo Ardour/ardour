@@ -698,8 +698,7 @@
       <separator/><!-- Video Monitor !-->
       <menuitem action='ToggleJadeo'/>
 
-      <separator/><!-- MIDI Pianoroll !-->
-      <menuitem action='new-pianoroll'/>
+      <separator/>
 
       <separator/><!-- Connection dialogs !-->
       <menuitem action='toggle-audio-connection-manager'/>
@@ -900,6 +899,7 @@
     <menuitem action='loop-region'/>
     <menuitem action='rename-region'/>
     <menuitem action='show-region-properties'/>
+    <menuitem action='edit-region-pianoroll-window'/>
     <menu action='RegionMenuEdit'>
       <menuitem action='combine-regions'/>
       <menuitem action='uncombine-regions'/>
