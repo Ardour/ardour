@@ -187,12 +187,15 @@ Editor::initialize_canvas ()
 	tempo_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 
 	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
+	range_marker_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
 
 	marker_bar = new ArdourCanvas::Rectangle (marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
+	marker_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 	CANVAS_DEBUG_NAME (marker_bar, "Marker Bar");
 
 	section_marker_bar = new ArdourCanvas::Rectangle (section_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
+	section_marker_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 	CANVAS_DEBUG_NAME (section_marker_bar, "Arranger Marker Bar");
 
 	ruler_separator = new ArdourCanvas::Line(_time_markers_group);
