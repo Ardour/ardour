@@ -519,6 +519,11 @@ public:
 		return !_plugins.empty ();
 	}
 
+	size_t n_region_fx () const {
+		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		return _plugins.size ();
+	}
+
 	std::shared_ptr<RegionFxPlugin> nth_plugin (uint32_t n) const {
 		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
 		for (auto const& i : _plugins) {
