@@ -64,6 +64,7 @@ EditorRegions::init ()
 {
 	add_name_column ();
 	setup_col (append_col (_columns.channels, "Chans    "), 1, ALIGN_START, _("# Ch"), _("# Channels in the region"));
+	setup_col (append_col (_columns.regionfx, "Region Fx"), 2, ALIGN_START, _("# Fx"), _("# Region effects"));
 	add_tag_column ();
 
 	int cb_width = 24;
@@ -75,9 +76,9 @@ EditorRegions::init ()
 	TreeViewColumn* tvc;
 
 	tvc = append_col (_columns.start, bbt_width);
-	setup_col (tvc, 16, ALIGN_END, _("Start"), _("Position of start of region"));
+	setup_col (tvc, 4, ALIGN_END, _("Start"), _("Position of start of region"));
 	tvc = append_col (_columns.length, bbt_width);
-	setup_col (tvc, 4, ALIGN_END, _("Length"), _("Length of the region"));
+	setup_col (tvc, 5, ALIGN_END, _("Length"), _("Length of the region"));
 
 	tvc = append_col (_columns.locked, cb_width);
 	setup_col (tvc, -1, ALIGN_CENTER, S_("Lock|L"), _("Region position locked?"));
@@ -93,7 +94,7 @@ EditorRegions::init ()
 
 #ifdef SHOW_REGION_EXTRAS
 	tvc = append_col (_columns.end, bbt_width);
-	setup_col (tvc, 5, ALIGN_END, _("End"), _("Position of end of region"));
+	setup_col (tvc, 6, ALIGN_END, _("End"), _("Position of end of region"));
 	tvc = append_col (_columns.sync, bbt_width);
 	setup_col (tvc, -1, ALIGN_END, _("Sync"), _("Position of region sync point, relative to start of the region"));
 	tvc = append_col (_columns.fadein, bbt_width);
