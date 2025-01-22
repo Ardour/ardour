@@ -598,7 +598,7 @@ Editor::update_ruler_visibility ()
 		range_marker_group->show();
 		_ruler_box_range.show();
 
-		range_marker_bar->set_outline(false);
+		range_marker_bar->set_outline (true);
 
 		tbpos += timebar_height;
 		visible_timebars++;
@@ -615,7 +615,7 @@ Editor::update_ruler_visibility ()
 		marker_group->show();
 		_ruler_box_marker.show();
 
-		marker_bar->set_outline(false);
+		marker_bar->set_outline (true);
 
 		tbpos += timebar_height;
 		visible_timebars++;
@@ -632,7 +632,7 @@ Editor::update_ruler_visibility ()
 		section_marker_group->show();
 		_ruler_box_section.show();
 
-		section_marker_bar->set_outline(false);
+		section_marker_bar->set_outline (true);
 
 		tbpos += timebar_height;
 		visible_timebars++;
