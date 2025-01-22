@@ -586,7 +586,6 @@ private:
 
 	Gtk::VBox _editor_list_vbox;
 	Gtk::Notebook _the_notebook;
-	bool _notebook_shrunk;
 	void add_notebook_page (std::string const&, Gtk::Widget&);
 	bool notebook_tab_clicked (GdkEventButton*, Gtk::Widget*);
 
