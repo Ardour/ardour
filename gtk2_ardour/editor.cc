@@ -226,6 +226,7 @@ Editor::Editor ()
 	, no_save_visual (false)
 	, marker_click_behavior (MarkerClickSelectOnly)
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
+	, _notebook_shrunk (false)
 	, _show_marker_lines (false)
 	, clicked_axisview (0)
 	, clicked_routeview (0)
@@ -560,17 +561,22 @@ Editor::Editor ()
 	add_notebook_page (_("Track & Bus Groups"), _route_groups->widget ());
 	add_notebook_page (_("Ranges & Marks"), _locations->widget ());
 
-	_the_notebook.set_show_tabs (false);
+	_the_notebook.set_show_tabs (true);
 	_the_notebook.set_scrollable (true);
 	_the_notebook.popup_disable ();
+	_the_notebook.set_tab_pos (Gtk::POS_RIGHT);
 	_the_notebook.show_all ();
-	_notebook_tab.disable_scrolling ();
 
-	_the_notebook.signal_switch_page().connect ([this](GtkNotebookPage*, guint page) { _notebook_tab.set_text (_the_notebook.get_tab_label_text (*_the_notebook.get_nth_page (page))); });
+	_notebook_shrunk = false;
+
 
 	/* Pick up some settings we need to cache, early */
 
 	XMLNode* settings = ARDOUR_UI::instance()->editor_settings();
+
+	if (settings) {
+		settings->get_property ("notebook-shrunk", _notebook_shrunk);
+	}
 
 	editor_summary_pane.set_check_divider_position (true);
 	editor_summary_pane.add (edit_packer);
@@ -602,8 +608,6 @@ Editor::Editor ()
 	_summary_hbox.pack_start (*summary_arrows_right, false, false);
 
 	editor_summary_pane.add (_summary_hbox);
-
-	_editor_list_vbox.pack_start (_notebook_tab, false, false, 2);
 	_editor_list_vbox.pack_start (_the_notebook);
 
 	content_right_pane.set_drag_cursor (*_cursors->expand_left_right);
@@ -2297,6 +2301,7 @@ Editor::get_state () const
 
 	node->add_child_nocopy (Tabbable::get_state());
 
+	node->set_property("notebook-shrunk", _notebook_shrunk);
 	node->set_property("edit-vertical-pane-pos", editor_summary_pane.get_divider());
 
 	maybe_add_mixer_strip_width (*node);
@@ -5544,10 +5549,43 @@ Editor::action_menu_item (std::string const & name)
 void
 Editor::add_notebook_page (string const & name, Gtk::Widget& widget)
 {
-	_the_notebook.append_page (widget, name);
+	EventBox* b = manage (new EventBox);
+	b->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::notebook_tab_clicked), &widget));
+	Label* l = manage (new Label (name));
+	l->set_angle (-90);
+	b->add (*l);
+	b->show_all ();
+	_the_notebook.append_page (widget, *b);
+}
 
-	using namespace Menu_Helpers;
-	_notebook_tab.AddMenuElem (MenuElem (name, [this, &widget]() {_the_notebook.set_current_page (_the_notebook.page_num (widget)); }));
+bool
+Editor::notebook_tab_clicked (GdkEventButton* ev, Gtk::Widget* page)
+{
+	if (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_2BUTTON_PRESS) {
+		_the_notebook.set_current_page (_the_notebook.page_num (*page));
+	}
+
+	if (ev->type == GDK_2BUTTON_PRESS) {
+
+		/* double-click on a notebook tab shrinks or expands the notebook */
+
+		if (_notebook_shrunk) {
+			if (pre_notebook_shrink_pane_width) {
+				content_right_pane.set_divider (0, *pre_notebook_shrink_pane_width);
+			}
+			_notebook_shrunk = false;
+		} else {
+			pre_notebook_shrink_pane_width = content_right_pane.get_divider();
+
+			/* this expands the LHS of the edit pane to cover the notebook
+			   PAGE but leaves the tabs visible.
+			 */
+			content_right_pane.set_divider (0, content_right_pane.get_divider() + page->get_width());
+			_notebook_shrunk = true;
+		}
+	}
+
+	return true;
 }
 
 void
