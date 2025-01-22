@@ -760,7 +760,7 @@ Editor::setup_ruler_new (Gtk::HBox& box, Gtk::Label* rlbl)
 {
 	rlbl->set_name ("EditorRulerLabel");
 	rlbl->set_size_request (-1, (int)timebar_height);
-	rlbl->set_alignment (1.0, 0);
+	rlbl->set_alignment (1.0, 0.5);
 	rlbl->show ();
 
 	Gtk::Table* rtbl = manage (new Gtk::Table);

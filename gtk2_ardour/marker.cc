@@ -375,10 +375,11 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 	_name_item->set_font_description (name_font);
 	_name_item->set_color (RGBA_TO_UINT (0,0,0,255));
 
-	if (_type==Section) {
-		_name_item->set_position (ArdourCanvas::Duple (_label_offset, floor (.5 * (name_height - name_height))));
+	if (_type == Section) {
+		_name_item->set_position (ArdourCanvas::Duple (_label_offset, 1 + floor (.5 * (marker_height - name_descent))));
 	} else {
-		_name_item->set_position (ArdourCanvas::Duple (_label_offset, floor (.5 * (name_height - name_descent - .5))));
+		const double padding =  std::max (2., rint (2. * scale));
+		_name_item->set_position (ArdourCanvas::Duple (_label_offset, 1 + floor (.5 * (marker_height - name_descent)) - padding));
 	}
 
 	apply_color ();
