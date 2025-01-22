@@ -412,7 +412,7 @@ Editor::Editor ()
 	build_draw_midi_menus();
 	build_edit_point_menu();
 
-	timebar_height = std::max (12., ceil (15. * UIConfiguration::instance().get_ui_scale()));
+	timebar_height = std::max (13., ceil (17. * UIConfiguration::instance().get_ui_scale()));
 
 	TimeAxisView::setup_sizes ();
 	ArdourMarker::setup_sizes (timebar_height);
