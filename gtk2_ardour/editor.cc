@@ -2696,8 +2696,6 @@ Editor::setup_toolbar ()
 	act = ActionManager::get_action (X_("Editor"), X_("zoom-to-session"));
 	full_zoom_button.set_related_action (act);
 
-	zoom_focus_selector.set_name ("zoom button");
-
 	if (ARDOUR::Profile->get_mixbus()) {
 		_zoom_box.pack_start (zoom_preset_selector, false, false);
 	} else {

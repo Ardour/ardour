@@ -188,6 +188,8 @@ EditingContext::EditingContext (std::string const & name)
 		zoom_focus_strings = I18N (_zoom_focus_strings);
 	}
 
+	zoom_focus_selector.set_name ("zoom button");
+
 	snap_mode_button.set_text (_("Snap"));
 	snap_mode_button.set_name ("mouse mode button");
 	snap_mode_button.signal_button_press_event().connect (sigc::mem_fun (*this, &EditingContext::snap_mode_button_clicked), false);
@@ -323,6 +325,18 @@ EditingContext::register_common_actions (Bindings* common_bindings)
 	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseGrid); });
 	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseContent); });
 	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseCut); });
+
+	Glib::RefPtr<ActionGroup> zoom_actions = ActionManager::create_action_group (common_bindings, X_("Zoom"));
+	RadioAction::Group zoom_group;
+
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusLeft); });
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-right", _("Zoom Focus Right"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusRight); });
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-center", _("Zoom Focus Center"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusCenter); });
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-playhead", _("Zoom Focus Playhead"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusPlayhead); });
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-mouse", _("Zoom Focus Mouse"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusMouse); });
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-edit", _("Zoom Focus Edit Point"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusEdit); });
+
+	ActionManager::register_action (zoom_actions, X_("cycle-zoom-focus"), _("Next Zoom Focus"), []() { current_editing_context()->cycle_zoom_focus(); });
 }
 
 void

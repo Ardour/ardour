@@ -144,6 +144,8 @@ CueEditor::set_zoom_focus (Editing::ZoomFocus zf)
 {
 	using namespace Editing;
 
+	/* We don't allow playhead for zoom focus here */
+
 	if (zf == ZoomFocusPlayhead) {
 		return;
 	}

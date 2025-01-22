@@ -279,10 +279,7 @@ Pianoroll::build_upper_toolbar ()
 	_toolbar_outer->pack_start (*_toolbar_inner, true, false);
 
 	build_zoom_focus_menu ();
-	std::string str = zoom_focus_strings[(int)_zoom_focus];
-	if (str != zoom_focus_selector.get_text()) {
-		zoom_focus_selector.set_text (str);
-	}
+	zoom_focus_selector.set_text (zoom_focus_strings[(int)_zoom_focus]);
 
 	_toolbar_left->pack_start (zoom_in_button, false, false);
 	_toolbar_left->pack_start (zoom_out_button, false, false);
