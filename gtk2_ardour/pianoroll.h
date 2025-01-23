@@ -281,4 +281,5 @@ class Pianoroll : public CueEditor
 	std::pair<Temporal::timepos_t,Temporal::timepos_t> max_zoom_extent() const;
 
 	void point_selection_changed ();
+	bool enter (GdkEventCrossing*);
 };

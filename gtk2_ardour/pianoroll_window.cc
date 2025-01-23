@@ -30,8 +30,8 @@ PianorollWindow::PianorollWindow (std::string const & name, Session& s)
 	pianoroll->set_session (&s);
 	pianoroll->viewport().set_size_request (600, 120);
 
-	add (pianoroll->toolbox());
-	pianoroll->toolbox().show ();
+	add (pianoroll->contents());
+	pianoroll->contents().show ();
 }
 
 PianorollWindow::~PianorollWindow ()

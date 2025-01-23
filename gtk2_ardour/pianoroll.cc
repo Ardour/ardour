@@ -95,6 +95,13 @@ Pianoroll::~Pianoroll ()
 	delete bindings;
 }
 
+bool
+Pianoroll::enter (GdkEventCrossing*)
+{
+	switch_editing_context (this);
+	return false;
+}
+
 void
 Pianoroll::load_bindings ()
 {
@@ -291,7 +298,9 @@ Pianoroll::build_upper_toolbar ()
 
 	Bindings* pr_bindings = Bindings::get_bindings (X_("Pianoroll"));
 	_toolbox.set_data (X_("ardour-bindings"), pr_bindings);
+
 	_contents.add (_toolbox);
+	_contents.signal_enter_notify_event().connect (sigc::mem_fun (*this, &Pianoroll::enter), false);
 }
 
 void
