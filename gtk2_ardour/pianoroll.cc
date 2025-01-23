@@ -2002,7 +2002,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 	{
 		EditingContext::TempoMapScope tms (*this, map);
 		/* Compute zoom level to show entire source plus some margin if possible */
-		zoom_to_show (timecnt_t (timepos_t (Temporal::BeatTime), timepos_t (max_zoom_extent ().second.beats() * 1.1)));
+		zoom_to_show (timecnt_t (timepos_t (max_zoom_extent ().second.beats())));
 
 	}
 
@@ -2017,8 +2017,7 @@ Pianoroll::zoom_to_show (Temporal::timecnt_t const & duration)
 	}
 
 	/* make it 20% wider than we need */
-	samplecnt_t samples = (samplecnt_t) floor (1.2 * duration.samples());
-	std::cerr << "new spp from " << samples << " / " << _visible_canvas_width << std::endl;
+	samplecnt_t samples = (samplecnt_t) floor (max_extents_scale() * duration.samples());
 	samplecnt_t spp = floor (samples / _visible_canvas_width);
 	reset_zoom (spp);
 }

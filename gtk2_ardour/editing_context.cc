@@ -2510,7 +2510,7 @@ void
 EditingContext::reset_zoom (samplecnt_t spp)
 {
 	std::pair<timepos_t, timepos_t> ext = max_zoom_extent();
-	samplecnt_t max_extents_pp = (ext.second.samples() - ext.first.samples())  / _visible_canvas_width;
+	samplecnt_t max_extents_pp = (max_extents_scale() * (ext.second.samples() - ext.first.samples()))  / _visible_canvas_width;
 
 	if (spp > max_extents_pp) {
 		spp = max_extents_pp;

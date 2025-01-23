@@ -84,6 +84,7 @@ class Pianoroll : public CueEditor
 	ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
 	ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const { return cursor_scroll_group; }
 
+	double max_extents_scale() const { return 1.2; }
 	void set_samples_per_pixel (samplecnt_t);
 
 	void set_mouse_mode (Editing::MouseMode, bool force = false);
