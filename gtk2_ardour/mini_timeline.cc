@@ -140,6 +140,7 @@ MiniTimeline::set_session (Session* s)
 void
 MiniTimeline::dpi_changed ()
 {
+	_layout->set_font_description (ARDOUR_UI_UTILS::get_font_for_style (N_("MarkerText")));
 	calculate_time_width ();
 
 	if (get_realized()) {
