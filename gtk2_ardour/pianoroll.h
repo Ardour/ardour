@@ -56,7 +56,7 @@ class Pianoroll : public CueEditor
 	ArdourCanvas::Container* get_trackview_group () const { return data_group; }
 	ArdourCanvas::Container* get_noscroll_group() const { return no_scroll_group; }
 	Gtk::Widget& viewport();
-	Gtk::Widget& toolbox ();
+	Gtk::Widget& contents ();
 
 	double visible_canvas_width() const { return _visible_canvas_width; }
 	samplecnt_t current_page_samples() const;
@@ -195,6 +195,7 @@ class Pianoroll : public CueEditor
 
 	ArdourCanvas::Rectangle* transport_loop_range_rect;
 
+	Gtk::EventBox _contents;
 	Gtk::VBox     _toolbox;
 
 	Gtk::HBox                    button_bar;
