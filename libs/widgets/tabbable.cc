@@ -47,7 +47,8 @@ Tabbable::Tabbable (const string& visible_name, string const & nontranslatable_n
 	if (w) {
 		_contents = w;
 	} else {
-		_contents = &_content_vbox;
+		_content_ebox.add (_content_vbox);
+		_contents = &_content_ebox;
 		default_layout ();
 	}
 }
@@ -174,7 +175,7 @@ Tabbable::default_layout ()
 	content_bottom_pane.set_check_divider_position (true);
 	content_bottom_pane.set_divider (0, 0.85);
 
-	_content_vbox.show_all();
+	_content_ebox.show_all();
 }
 
 void
