@@ -7004,16 +7004,16 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 		break;
 	}
 
-	for (vector<std::string>::iterator i = sp.begin(); i != sp.end(); ++i) {
-		/* No need to add this new directory if it has the same inode as
-		   an existing one; checking inode rather than name prevents duplicated
-		   directories when we are using symlinks.
-
-		   On Windows, I think we could just do if (*i == path) here.
-		*/
-		if (PBD::equivalent_paths (*i, path)) {
-			return;
-		}
+	/* No need to add this new directory if it has the same inode as
+	 * an existing one; checking inode rather than name prevents duplicated
+	 * directories when we are using symlinks.
+	 *
+	 * On Windows, I think we could just do if (*i == path) here.
+	 */
+	if (std::any_of (sp.cbegin (), sp.cend (), [&] (const std::string& i) {
+		return PBD::equivalent_paths (i, path);
+	})) {
+		return;
 	}
 
 	sp += path;
