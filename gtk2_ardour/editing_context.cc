@@ -2523,6 +2523,7 @@ EditingContext::reset_zoom (samplecnt_t spp)
 	pending_visual_change.add (VisualChange::ZoomLevel);
 	pending_visual_change.samples_per_pixel = spp;
 	if (spp == 0.0) {
+		std::cerr << "spp set to zero\n";
 		PBD::stacktrace (std::cerr, 12);
 	}
 	ensure_visual_change_idle_handler ();
