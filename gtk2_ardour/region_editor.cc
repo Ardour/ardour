@@ -33,6 +33,7 @@
 
 #include "gtkmm2ext/dndtreeview.h"
 
+#include "widgets/ardour_spacer.h"
 #include "widgets/tooltips.h"
 
 #include "ardour/plugin_manager.h"
@@ -50,12 +51,12 @@
 #include "main_clock.h"
 #include "mixer_ui.h"
 #include "new_plugin_preset_dialog.h"
-#include "region_editor.h"
-#include "region_view.h"
-#include "timers.h"
 #include "plugin_selector.h"
 #include "plugin_window_proxy.h"
 #include "public_editor.h"
+#include "region_editor.h"
+#include "region_view.h"
+#include "timers.h"
 
 #include "pbd/i18n.h"
 
@@ -65,149 +66,160 @@ using namespace std;
 using namespace Gtkmm2ext;
 
 Glib::RefPtr<Gtk::ActionGroup> RegionEditor::RegionFxBox::rfx_box_actions;
-Gtkmm2ext::Bindings*           RegionEditor::RegionFxBox::bindings = 0;
+Gtkmm2ext::Bindings*           RegionEditor::RegionFxBox::bindings        = 0;
 RegionEditor::RegionFxBox*     RegionEditor::RegionFxBox::current_rfx_box = 0;
 
 RegionEditor::RegionEditor (Session* s, RegionView* rv)
 	: SessionHandlePtr (s)
-	, _table (9, 3)
-	, _table_row (0)
 	, _region (rv->region ())
-	, name_label (_("Name:"))
-	, audition_button (_("Audition"))
+	, _name_label (_("Name:"))
+	, _audition_button (_("Audition"))
 	, _clock_group (new ClockGroup)
-	, position_clock (X_("regionposition"), true, "", true, false)
-	, end_clock (X_("regionend"), true, "", true, false)
-	, length_clock (X_("regionlength"), true, "", true, false, true)
-	, sync_offset_relative_clock (X_("regionsyncoffsetrelative"), true, "", true, false)
-	, sync_offset_absolute_clock (X_("regionsyncoffsetabsolute"), true, "", true, false)
-	  /* XXX cannot file start yet */
-	, start_clock (X_("regionstart"), true, "", false, false)
+	, _position_clock (X_("regionposition"), true, "", true, false)
+	, _end_clock (X_("regionend"), true, "", true, false)
+	, _length_clock (X_("regionlength"), true, "", true, false, true)
+	, _sync_offset_relative_clock (X_("regionsyncoffsetrelative"), true, "", true, false)
+	, _sync_offset_absolute_clock (X_("regionsyncoffsetabsolute"), true, "", true, false)
+	, _start_clock (X_("regionstart"), true, "", false, false)
 	, _region_fx_box (_region)
 	, _sources (1)
 {
-	switch (_region->time_domain()) {
-	case Temporal::AudioTime:
-		/* XXX check length of region and choose samples or minsec */
-		_clock_group->set_clock_mode (AudioClock::MinSec);
-		break;
-	default:
-		_clock_group->set_clock_mode (AudioClock::BBT);
+	switch (_region->time_domain ()) {
+		case Temporal::AudioTime:
+			/* XXX check length of region and choose samples or minsec */
+			_clock_group->set_clock_mode (AudioClock::MinSec);
+			break;
+		default:
+			_clock_group->set_clock_mode (AudioClock::BBT);
 	}
 	// ARDOUR_UI::instance()->primary_clock->mode_changed.connect (sigc::mem_fun (*this, &RegionEditor::set_clock_mode_from_primary));
 
-	_clock_group->add (position_clock);
-	_clock_group->add (end_clock);
-	_clock_group->add (length_clock);
-	_clock_group->add (sync_offset_relative_clock);
-	_clock_group->add (sync_offset_absolute_clock);
-	_clock_group->add (start_clock);
+	_clock_group->add (_position_clock);
+	_clock_group->add (_end_clock);
+	_clock_group->add (_length_clock);
+	_clock_group->add (_sync_offset_relative_clock);
+	_clock_group->add (_sync_offset_absolute_clock);
+	_clock_group->add (_start_clock);
 
-	position_clock.set_session (_session);
-	end_clock.set_session (_session);
-	length_clock.set_session (_session);
-	sync_offset_relative_clock.set_session (_session);
-	sync_offset_absolute_clock.set_session (_session);
-	start_clock.set_session (_session);
+	_position_clock.set_session (_session);
+	_end_clock.set_session (_session);
+	_length_clock.set_session (_session);
+	_sync_offset_relative_clock.set_session (_session);
+	_sync_offset_absolute_clock.set_session (_session);
+	_start_clock.set_session (_session);
 
-	ArdourWidgets::set_tooltip (audition_button, _("audition this region"));
+	ArdourWidgets::set_tooltip (_audition_button, _("audition this region"));
 
-	audition_button.set_can_focus (false);
+	_audition_button.set_can_focus (false);
 
-	audition_button.set_events (audition_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	_audition_button.set_events (_audition_button.get_events () & ~(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK));
 
-	name_entry.set_name ("RegionEditorEntry");
-	name_label.set_name ("RegionEditorLabel");
-	position_label.set_name ("RegionEditorLabel");
-	position_label.set_text (_("Position:"));
-	end_label.set_name ("RegionEditorLabel");
-	end_label.set_text (_("End:"));
-	length_label.set_name ("RegionEditorLabel");
-	length_label.set_text (_("Length:"));
-	sync_relative_label.set_name ("RegionEditorLabel");
-	sync_relative_label.set_text (_("Sync point (relative to region):"));
-	sync_absolute_label.set_name ("RegionEditorLabel");
-	sync_absolute_label.set_text (_("Sync point (absolute):"));
-	start_label.set_name ("RegionEditorLabel");
-	start_label.set_text (_("File start:"));
+	_name_entry.set_name ("RegionEditorEntry");
+	_name_label.set_name ("RegionEditorLabel");
+	_position_label.set_name ("RegionEditorLabel");
+	_position_label.set_text (_("Position"));
+	_end_label.set_name ("RegionEditorLabel");
+	_end_label.set_text (_("End"));
+	_length_label.set_name ("RegionEditorLabel");
+	_length_label.set_text (_("Length"));
+	_sync_relative_label.set_name ("RegionEditorLabel");
+	_sync_relative_label.set_text (_("Sync point (relative to region)"));
+	_sync_absolute_label.set_name ("RegionEditorLabel");
+	_sync_absolute_label.set_text (_("Sync point (absolute)"));
+	_start_label.set_name ("RegionEditorLabel");
+	_start_label.set_text (_("File start"));
 	_sources_label.set_name ("RegionEditorLabel");
-	region_fx_label.set_text (_("Region Effects"));
-	region_fx_label.set_name ("RegionEditorLabel");
+	_region_fx_label.set_text (_("Region Effects"));
+	_region_fx_label.set_name ("RegionEditorLabel");
 
-	if (_region->sources().size() > 1) {
+	if (_region->sources ().size () > 1) {
 		_sources_label.set_text (_("Sources:"));
 	} else {
 		_sources_label.set_text (_("Source:"));
 	}
 
-	_table.set_col_spacings (12);
-	_table.set_row_spacings (6);
-	_table.set_border_width (12);
+	_table_clocks.set_col_spacings (12);
+	_table_clocks.set_row_spacings (6);
+	_table_clocks.set_border_width (0);
+	_table_clocks.set_homogeneous ();
 
-	name_label.set_alignment (1, 0.5);
-	position_label.set_alignment (1, 0.5);
-	end_label.set_alignment (1, 0.5);
-	length_label.set_alignment (1, 0.5);
-	sync_relative_label.set_alignment (1, 0.5);
-	sync_absolute_label.set_alignment (1, 0.5);
-	start_label.set_alignment (1, 0.5);
+	_table_main.set_col_spacings (12);
+	_table_main.set_row_spacings (6);
+	_table_main.set_border_width (12);
+
+	_name_label.set_alignment (1, 0.5);
 	_sources_label.set_alignment (1, 0.5);
+	_position_label.set_alignment (0, 0.5);
+	_end_label.set_alignment (1, 0.5);
+	_length_label.set_alignment (0, 0.5);
+	_sync_relative_label.set_alignment (1, 0.5);
+	_start_label.set_alignment (0, 0.5);
+	_sync_absolute_label.set_alignment (1, 0.5);
 
+	/* Name & Audition Box */
 	Gtk::HBox* nb = Gtk::manage (new Gtk::HBox);
 	nb->set_spacing (6);
-	nb->pack_start (name_entry);
-	nb->pack_start (audition_button, false, false);
+	nb->pack_start (_name_entry);
+	nb->pack_start (_audition_button, false, false);
 
-	_table.attach (name_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (*nb, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
-	++_table_row;
+	/* Clock Layout */
 
-	_table.attach (position_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (position_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
-	++_table_row;
+	int row = 0;
+	_table_clocks.attach (_position_label, 0, 2, row, row + 1, Gtk::FILL, Gtk::FILL);
+	_table_clocks.attach (_end_label, 2, 4, row, row + 1, Gtk::FILL, Gtk::FILL);
+	++row;
 
-	_table.attach (end_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (end_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
-	++_table_row;
+	_table_clocks.attach (_position_clock, 0, 2, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
+	_table_clocks.attach (_end_clock, 2, 4, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
+	++row;
 
-	_table.attach (length_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (length_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
-	++_table_row;
+	_table_clocks.attach (_length_label, 0, 1, row, row + 1, Gtk::FILL, Gtk::FILL);
+	_table_clocks.attach (_sync_relative_label, 1, 4, row, row + 1, Gtk::FILL, Gtk::FILL);
+	++row;
 
-	_table.attach (sync_relative_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (sync_offset_relative_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
-	++_table_row;
+	_table_clocks.attach (_length_clock, 0, 2, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
+	_table_clocks.attach (_sync_offset_relative_clock, 2, 4, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
+	++row;
 
-	_table.attach (sync_absolute_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (sync_offset_absolute_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
-	++_table_row;
+	_table_clocks.attach (_start_label, 0, 1, row, row + 1, Gtk::FILL, Gtk::FILL);
+	_table_clocks.attach (_sync_absolute_label, 1, 4, row, row + 1, Gtk::FILL, Gtk::FILL);
+	++row;
 
-	_table.attach (start_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (start_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
-	++_table_row;
+	_table_clocks.attach (_start_clock, 0, 2, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
+	_table_clocks.attach (_sync_offset_absolute_clock, 2, 4, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
+	++row;
 
-	_table.attach (_sources_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (_sources, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
-	++_table_row;
+	/* Main layout */
 
-	_table.attach (region_fx_label, 2, 3, 0, 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (_region_fx_box,  2, 3, 1, _table_row + 2, Gtk::FILL, Gtk::FILL);
+	_table_main.attach (_name_label,    0, 1, 0, 1, Gtk::FILL, Gtk::SHRINK);
+	_table_main.attach (*nb,            1, 3, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 
-	add (_table);
+	_table_main.attach (_sources_label, 0, 1, 1, 2, Gtk::FILL, Gtk::SHRINK);
+	_table_main.attach (_sources,       1, 3, 1, 2, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 
-	for (uint32_t i = 0; i < _region->sources().size(); ++i) {
-		_sources.append (_region->source(i)->name());
+	_table_main.attach (_table_clocks,  1, 2, 2, 3, Gtk::FILL, Gtk::SHRINK);
+
+	_table_main.attach (*manage (new ArdourWidgets::ArdourVSpacer (0)), 2, 3, 2, 4, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
+	_table_main.attach (*manage (new ArdourWidgets::ArdourHSpacer (0)), 0, 3, 4, 5, Gtk::FILL, Gtk::FILL | Gtk::EXPAND);
+
+	_table_main.attach (_region_fx_label, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK);
+	_table_main.attach (_region_fx_box,   3, 4, 1, 5, Gtk::FILL, Gtk::EXPAND | Gtk::FILL);
+
+	add (_table_main);
+
+	for (uint32_t i = 0; i < _region->sources ().size (); ++i) {
+		_sources.append (_region->source (i)->name ());
 	}
 
 	_sources.set_headers_visible (false);
-	Gtk::CellRendererText* t = dynamic_cast<Gtk::CellRendererText*> (_sources.get_column_cell_renderer(0));
+	Gtk::CellRendererText* t = dynamic_cast<Gtk::CellRendererText*> (_sources.get_column_cell_renderer (0));
 	assert (t);
-	t->property_ellipsize() = Pango::ELLIPSIZE_END;
+	t->property_ellipsize () = Pango::ELLIPSIZE_END;
 
-	region_fx_label.set_no_show_all ();
+	_region_fx_label.set_no_show_all ();
 	_region_fx_box.set_no_show_all ();
 
-	show_all();
+	show_all ();
 
 	name_changed ();
 
@@ -219,14 +231,14 @@ RegionEditor::RegionEditor (Session* s, RegionView* rv)
 
 	bounds_changed (change);
 
-	_region->PropertyChanged.connect (state_connection, invalidator (*this), std::bind (&RegionEditor::region_changed, this, _1), gui_context());
-	_region->RegionFxChanged.connect (region_connection, invalidator (*this), std::bind (&RegionEditor::region_fx_changed, this), gui_context ());
+	_region->PropertyChanged.connect (_state_connection, invalidator (*this), std::bind (&RegionEditor::region_changed, this, _1), gui_context ());
+	_region->RegionFxChanged.connect (_region_connection, invalidator (*this), std::bind (&RegionEditor::region_fx_changed, this), gui_context ());
 
-	spin_arrow_grab = false;
+	_spin_arrow_grab = false;
 
 	/* for now only audio region effects are supported */
 	if (std::dynamic_pointer_cast<AudioRegion> (_region)) {
-		region_fx_label.show ();
+		_region_fx_label.show ();
 		_region_fx_box.show ();
 	}
 
@@ -242,7 +254,7 @@ RegionEditor::~RegionEditor ()
 void
 RegionEditor::set_clock_mode_from_primary ()
 {
-	_clock_group->set_clock_mode (ARDOUR_UI::instance()->primary_clock->mode());
+	_clock_group->set_clock_mode (ARDOUR_UI::instance ()->primary_clock->mode ());
 }
 
 void
@@ -270,34 +282,34 @@ RegionEditor::region_fx_changed ()
 }
 
 gint
-RegionEditor::bpressed (GdkEventButton* ev, Gtk::SpinButton* /*but*/, void (RegionEditor::*/*pmf*/)())
+RegionEditor::bpressed (GdkEventButton* ev, Gtk::SpinButton* /*but*/, void (RegionEditor::* /*pmf*/) ())
 {
 	switch (ev->button) {
-	case 1:
-	case 2:
-	case 3:
-		if (ev->type == GDK_BUTTON_PRESS) { /* no double clicks here */
-			if (!spin_arrow_grab) {
-				// GTK2FIX probably nuke the region editor
-				// if ((ev->window == but->gobj()->panel)) {
-				// spin_arrow_grab = true;
-				// (this->*pmf)();
-				// }
+		case 1:
+		case 2:
+		case 3:
+			if (ev->type == GDK_BUTTON_PRESS) { /* no double clicks here */
+				if (!_spin_arrow_grab) {
+					// GTK2FIX probably nuke the region editor
+					// if ((ev->window == but->gobj()->panel)) {
+					// _spin_arrow_grab = true;
+					// (this->*pmf)();
+					// }
+				}
 			}
-		}
-		break;
-	default:
-		break;
+			break;
+		default:
+			break;
 	}
 	return FALSE;
 }
 
 gint
-RegionEditor::breleased (GdkEventButton* /*ev*/, Gtk::SpinButton* /*but*/, void (RegionEditor::*pmf)())
+RegionEditor::breleased (GdkEventButton* /*ev*/, Gtk::SpinButton* /*but*/, void (RegionEditor::*pmf) ())
 {
-	if (spin_arrow_grab) {
-		(this->*pmf)();
-		spin_arrow_grab = false;
+	if (_spin_arrow_grab) {
+		(this->*pmf) ();
+		_spin_arrow_grab = false;
 	}
 	return FALSE;
 }
@@ -305,92 +317,92 @@ RegionEditor::breleased (GdkEventButton* /*ev*/, Gtk::SpinButton* /*but*/, void 
 void
 RegionEditor::connect_editor_events ()
 {
-	name_entry.signal_changed().connect (sigc::mem_fun(*this, &RegionEditor::name_entry_changed));
+	_name_entry.signal_changed ().connect (sigc::mem_fun (*this, &RegionEditor::name_entry_changed));
 
-	position_clock.ValueChanged.connect (sigc::mem_fun(*this, &RegionEditor::position_clock_changed));
-	end_clock.ValueChanged.connect (sigc::mem_fun(*this, &RegionEditor::end_clock_changed));
-	length_clock.ValueChanged.connect (sigc::mem_fun(*this, &RegionEditor::length_clock_changed));
-	sync_offset_absolute_clock.ValueChanged.connect (sigc::mem_fun (*this, &RegionEditor::sync_offset_absolute_clock_changed));
-	sync_offset_relative_clock.ValueChanged.connect (sigc::mem_fun (*this, &RegionEditor::sync_offset_relative_clock_changed));
+	_position_clock.ValueChanged.connect (sigc::mem_fun (*this, &RegionEditor::position_clock_changed));
+	_end_clock.ValueChanged.connect (sigc::mem_fun (*this, &RegionEditor::end_clock_changed));
+	_length_clock.ValueChanged.connect (sigc::mem_fun (*this, &RegionEditor::length_clock_changed));
+	_sync_offset_absolute_clock.ValueChanged.connect (sigc::mem_fun (*this, &RegionEditor::sync_offset_absolute_clock_changed));
+	_sync_offset_relative_clock.ValueChanged.connect (sigc::mem_fun (*this, &RegionEditor::sync_offset_relative_clock_changed));
 
-	audition_button.signal_toggled().connect (sigc::mem_fun(*this, &RegionEditor::audition_button_toggled));
+	_audition_button.signal_toggled ().connect (sigc::mem_fun (*this, &RegionEditor::audition_button_toggled));
 
-	_session->AuditionActive.connect (audition_connection, invalidator (*this), std::bind (&RegionEditor::audition_state_changed, this, _1), gui_context());
+	_session->AuditionActive.connect (_audition_connection, invalidator (*this), std::bind (&RegionEditor::audition_state_changed, this, _1), gui_context ());
 }
 
 void
 RegionEditor::position_clock_changed ()
 {
-	bool in_command = false;
-	std::shared_ptr<Playlist> pl = _region->playlist();
+	bool                      in_command = false;
+	std::shared_ptr<Playlist> pl         = _region->playlist ();
 
 	if (pl) {
-		PublicEditor::instance().begin_reversible_command (_("change region start position"));
+		PublicEditor::instance ().begin_reversible_command (_("change region start position"));
 		in_command = true;
 
 		_region->clear_changes ();
-		_region->set_position (position_clock.last_when());
-		_session->add_command(new StatefulDiffCommand (_region));
+		_region->set_position (_position_clock.last_when ());
+		_session->add_command (new StatefulDiffCommand (_region));
 	}
 
 	if (in_command) {
-		PublicEditor::instance().commit_reversible_command ();
+		PublicEditor::instance ().commit_reversible_command ();
 	}
 }
 
 void
 RegionEditor::end_clock_changed ()
 {
-	bool in_command = false;
-	std::shared_ptr<Playlist> pl = _region->playlist();
+	bool                      in_command = false;
+	std::shared_ptr<Playlist> pl         = _region->playlist ();
 
 	if (pl) {
-		PublicEditor::instance().begin_reversible_command (_("change region end position"));
+		PublicEditor::instance ().begin_reversible_command (_("change region end position"));
 		in_command = true;
 
 		_region->clear_changes ();
-		_region->trim_end (end_clock.last_when());
-		_session->add_command(new StatefulDiffCommand (_region));
+		_region->trim_end (_end_clock.last_when ());
+		_session->add_command (new StatefulDiffCommand (_region));
 	}
 
 	if (in_command) {
-		PublicEditor::instance().commit_reversible_command ();
+		PublicEditor::instance ().commit_reversible_command ();
 	}
 
-	end_clock.set (_region->nt_last(), true);
+	_end_clock.set (_region->nt_last (), true);
 }
 
 void
 RegionEditor::length_clock_changed ()
 {
-	timecnt_t len = length_clock.current_duration();
-	bool in_command = false;
-	std::shared_ptr<Playlist> pl = _region->playlist();
+	timecnt_t                 len        = _length_clock.current_duration ();
+	bool                      in_command = false;
+	std::shared_ptr<Playlist> pl         = _region->playlist ();
 
 	if (pl) {
-		PublicEditor::instance().begin_reversible_command (_("change region length"));
+		PublicEditor::instance ().begin_reversible_command (_("change region length"));
 		in_command = true;
 
 		_region->clear_changes ();
 		/* new end is actually 1 domain unit before the clock duration
 		 * would otherwise indicate
 		 */
-		const timepos_t new_end = (_region->position() + len).decrement ();
+		const timepos_t new_end = (_region->position () + len).decrement ();
 		_region->trim_end (new_end);
-		_session->add_command(new StatefulDiffCommand (_region));
+		_session->add_command (new StatefulDiffCommand (_region));
 	}
 
 	if (in_command) {
-		PublicEditor::instance().commit_reversible_command ();
+		PublicEditor::instance ().commit_reversible_command ();
 	}
 
-	length_clock.set_duration (_region->length());
+	_length_clock.set_duration (_region->length ());
 }
 
 void
 RegionEditor::audition_button_toggled ()
 {
-	if (audition_button.get_active()) {
+	if (_audition_button.get_active ()) {
 		_session->audition_region (_region);
 	} else {
 		_session->cancel_audition ();
@@ -400,8 +412,8 @@ RegionEditor::audition_button_toggled ()
 void
 RegionEditor::name_changed ()
 {
-	if (name_entry.get_text() != _region->name()) {
-		name_entry.set_text (_region->name());
+	if (_name_entry.get_text () != _region->name ()) {
+		_name_entry.set_text (_region->name ());
 	}
 }
 
@@ -409,41 +421,40 @@ void
 RegionEditor::bounds_changed (const PropertyChange& what_changed)
 {
 	if (what_changed.contains (ARDOUR::Properties::length)) {
-		position_clock.set (_region->position(), true);
-		end_clock.set (_region->nt_last(), true);
-		length_clock.set_duration (_region->length(), true);
+		_position_clock.set (_region->position (), true);
+		_end_clock.set (_region->nt_last (), true);
+		_length_clock.set_duration (_region->length (), true);
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::sync_position) || what_changed.contains (ARDOUR::Properties::length)) {
-		int dir;
+		int       dir;
 		timecnt_t off = _region->sync_offset (dir);
 		if (dir == -1) {
 			off = -off;
 		}
 
 		if (what_changed.contains (ARDOUR::Properties::sync_position)) {
-			sync_offset_relative_clock.set_duration (off, true);
+			_sync_offset_relative_clock.set_duration (off, true);
 		}
 
-		sync_offset_absolute_clock.set (_region->position () + off, true);
+		_sync_offset_absolute_clock.set (_region->position () + off, true);
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::start)) {
-		start_clock.set (timepos_t (_region->start()), true);
+		_start_clock.set (timepos_t (_region->start ()), true);
 	}
 }
 
 void
 RegionEditor::activation ()
 {
-
 }
 
 void
 RegionEditor::name_entry_changed ()
 {
-	if (name_entry.get_text() != _region->name()) {
-		_region->set_name (name_entry.get_text());
+	if (_name_entry.get_text () != _region->name ()) {
+		_region->set_name (_name_entry.get_text ());
 	}
 }
 
@@ -453,32 +464,32 @@ RegionEditor::audition_state_changed (bool yn)
 	ENSURE_GUI_THREAD (*this, &RegionEditor::audition_state_changed, yn)
 
 	if (!yn) {
-		audition_button.set_active (false);
+		_audition_button.set_active (false);
 	}
 }
 
 void
 RegionEditor::sync_offset_absolute_clock_changed ()
 {
-	PublicEditor::instance().begin_reversible_command (_("change region sync point"));
+	PublicEditor::instance ().begin_reversible_command (_("change region sync point"));
 
 	_region->clear_changes ();
-	_region->set_sync_position (sync_offset_absolute_clock.last_when());
+	_region->set_sync_position (_sync_offset_absolute_clock.last_when ());
 	_session->add_command (new StatefulDiffCommand (_region));
 
-	PublicEditor::instance().commit_reversible_command ();
+	PublicEditor::instance ().commit_reversible_command ();
 }
 
 void
 RegionEditor::sync_offset_relative_clock_changed ()
 {
-	PublicEditor::instance().begin_reversible_command (_("change region sync point"));
+	PublicEditor::instance ().begin_reversible_command (_("change region sync point"));
 
 	_region->clear_changes ();
-	_region->set_sync_position (sync_offset_relative_clock.last_when() + _region->position ());
+	_region->set_sync_position (_sync_offset_relative_clock.last_when () + _region->position ());
 	_session->add_command (new StatefulDiffCommand (_region));
 
-	PublicEditor::instance().commit_reversible_command ();
+	PublicEditor::instance ().commit_reversible_command ();
 }
 
 bool
@@ -571,8 +582,8 @@ RegionEditor::RegionFxBox::RegionFxBox (std::shared_ptr<ARDOUR::Region> r)
 	_display.DropFromExternal.connect (sigc::mem_fun (*this, &RegionFxBox::plugin_drop));
 	_display.DragRefuse.connect (sigc::mem_fun (*this, &RegionFxBox::drag_refuse));
 
-	_display.signal_enter_notify_event().connect (sigc::mem_fun(*this, &RegionFxBox::enter_notify), false);
-	_display.signal_leave_notify_event().connect (sigc::mem_fun(*this, &RegionFxBox::leave_notify), false);
+	_display.signal_enter_notify_event ().connect (sigc::mem_fun (*this, &RegionFxBox::enter_notify), false);
+	_display.signal_leave_notify_event ().connect (sigc::mem_fun (*this, &RegionFxBox::leave_notify), false);
 
 	screen_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &RegionFxBox::update_controls));
 
@@ -623,7 +634,7 @@ RegionEditor::RegionFxBox::add_fx_to_display (std::weak_ptr<RegionFxPlugin> wfx)
 		return;
 	}
 	std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (_region);
-	RegionFxEntry* e = new RegionFxEntry (fx, ar && ar->fade_before_fx ());
+	RegionFxEntry*               e  = new RegionFxEntry (fx, ar && ar->fade_before_fx ());
 	_display.add_child (e, drag_targets ());
 }
 
@@ -782,7 +793,7 @@ RegionEditor::RegionFxBox::update_controls ()
 {
 	for (auto const& i : _display.children ()) {
 		std::shared_ptr<ARDOUR::RegionFxPlugin> rfx = i->region_fx_plugin ();
-		PluginWindowProxy* pwp = dynamic_cast<PluginWindowProxy*> (rfx->window_proxy ());
+		PluginWindowProxy*                      pwp = dynamic_cast<PluginWindowProxy*> (rfx->window_proxy ());
 		if (!pwp || !pwp->get (false) || !pwp->get (false)->is_mapped ()) {
 			continue;
 		}
@@ -799,7 +810,7 @@ RegionEditor::RegionFxBox::clear_automation (std::weak_ptr<ARDOUR::RegionFxPlugi
 	}
 	bool in_command = false;
 
-	timepos_t tas ((samplepos_t)_region->length().samples());
+	timepos_t tas ((samplepos_t)_region->length ().samples ());
 
 	for (auto const& c : fx->controls ()) {
 		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (c.second);
@@ -811,7 +822,7 @@ RegionEditor::RegionFxBox::clear_automation (std::weak_ptr<ARDOUR::RegionFxPlugi
 			continue;
 		}
 
-		XMLNode& before (alist->get_state());
+		XMLNode& before (alist->get_state ());
 
 		alist->freeze ();
 		alist->clear ();
@@ -823,7 +834,7 @@ RegionEditor::RegionFxBox::clear_automation (std::weak_ptr<ARDOUR::RegionFxPlugi
 			_region->session ().begin_reversible_command (_("Clear region fx automation"));
 			in_command = true;
 		}
-		_region->session ().add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+		_region->session ().add_command (new MementoCommand<AutomationList> (*alist.get (), &before, &alist->get_state ()));
 	}
 
 	if (in_command) {
@@ -1020,7 +1031,7 @@ RegionEditor::RegionFxBox::show_plugin_gui (std::weak_ptr<RegionFxPlugin> wfx, b
 		rfx->set_window_proxy (pwp);
 		WM::Manager::instance ().register_window (pwp);
 		RegionView* rv = PublicEditor::instance ().regionview_from_region (_region);
-		rv->RegionViewGoingAway.connect_same_thread (*pwp, [pwp, rv] (RegionView* srv) { if (rv == srv) { pwp->hide (); }});
+		rv->RegionViewGoingAway.connect_same_thread (*pwp, [pwp, rv] (RegionView* srv) { if (rv == srv) { pwp->hide (); } });
 	}
 
 	pwp->set_custom_ui_mode (custom_ui);
@@ -1042,10 +1053,10 @@ RegionEditor::RegionFxEntry::RegionFxEntry (std::shared_ptr<RegionFxPlugin> rfx,
 
 	if (rfx->plugin ()) {
 		_plugin_preset_pointer = PluginPresetPtr (new PluginPreset (rfx->plugin ()->get_info ()));
-		_selectable = true;
+		_selectable            = true;
 	} else {
 		_plugin_preset_pointer = 0;
-		_selectable = false;
+		_selectable            = false;
 	}
 
 	_fx_btn.set_fallthrough_to_parent (true);
