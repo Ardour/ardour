@@ -728,7 +728,9 @@ static int showInvalidation = 0;
 
   if (NSContainsRect (rect, [self bounds])) {
 	  full_draw = TRUE;
+#ifndef NDEBUG
 	  printf ("full draw seen!\n");
+#endif
   } else {
 	  full_draw = FALSE;
   }
