@@ -386,7 +386,6 @@ Pianoroll::build_canvas ()
 	Pango::FontDescription larger_font (UIConfiguration::instance().get_SmallBoldFont());
 	bbt_ruler = new ArdourCanvas::Ruler (time_line_group, &bbt_metric, ArdourCanvas::Rect (0, timebar_height * 2, ArdourCanvas::COORD_MAX, timebar_height * 3));
 	bbt_ruler->set_font_description (font);
-	bbt_ruler->set_second_font_description (larger_font);
 	Gtkmm2ext::Color base = UIConfiguration::instance().color ("ruler base");
 	Gtkmm2ext::Color text = UIConfiguration::instance().color ("ruler text");
 	bbt_ruler->set_fill_color (base);
