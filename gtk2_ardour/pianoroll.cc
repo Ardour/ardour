@@ -511,10 +511,6 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 	prh->set (ArdourCanvas::Rect (0, 0, prh->x1(), view->midi_context().height()));
 
 	_track_canvas_width = _visible_canvas_width - prh->x1();
-
-	if (_canvas->is_mapped()) {
-		// zoom_to_show (timecnt_t (timepos_t (Temporal::BeatTime), timepos_t (max_zoom_extent ().second.beats() * 1.1)));
-	}
 }
 
 timepos_t
