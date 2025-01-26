@@ -573,7 +573,7 @@ Pianoroll::set_samples_per_pixel (samplecnt_t spp)
 samplecnt_t
 Pianoroll::current_page_samples() const
 {
-	return (samplecnt_t) _visible_canvas_width* samples_per_pixel;
+	return (samplecnt_t) _track_canvas_width * samples_per_pixel;
 }
 
 bool
@@ -2019,6 +2019,7 @@ Pianoroll::zoom_to_show (Temporal::timecnt_t const & duration)
 	/* make it 20% wider than we need */
 	samplecnt_t samples = (samplecnt_t) floor (max_extents_scale() * duration.samples());
 	samplecnt_t spp = floor (samples / _visible_canvas_width);
+	samplecnt_t spp = floor (samples / _track_canvas_width);
 	reset_zoom (spp);
 }
 

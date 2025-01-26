@@ -2510,7 +2510,7 @@ void
 EditingContext::reset_zoom (samplecnt_t spp)
 {
 	std::pair<timepos_t, timepos_t> ext = max_zoom_extent();
-	samplecnt_t max_extents_pp = (max_extents_scale() * (ext.second.samples() - ext.first.samples()))  / _visible_canvas_width;
+	samplecnt_t max_extents_pp = (ext.second.samples() - ext.first.samples())  / _track_canvas_width;
 
 	if (spp > max_extents_pp) {
 		spp = max_extents_pp;
@@ -2879,7 +2879,7 @@ EditingContext::temporal_zoom_step_scale (bool zoom_out, double scale)
 	//zoom-behavior-tweaks
 	//limit our maximum zoom to the session gui extents value
 	std::pair<timepos_t, timepos_t> ext = max_zoom_extent();
-	samplecnt_t session_extents_pp = (ext.second.samples() - ext.first.samples())  / _visible_canvas_width;
+	samplecnt_t session_extents_pp = (ext.second.samples() - ext.first.samples())  / _track_canvas_width;
 	if (nspp > session_extents_pp) {
 		nspp = session_extents_pp;
 	}
@@ -3033,7 +3033,7 @@ EditingContext::calc_extra_zoom_edges (samplepos_t &start, samplepos_t &end)
 	const double one_centimeter_in_pixels = pix_per_mm * 10.0;
 
 	const samplepos_t range = end - start;
-	const samplecnt_t new_fpp = (samplecnt_t) ceil ((double) range / (double) _visible_canvas_width);
+	const samplecnt_t new_fpp = (samplecnt_t) ceil ((double) range / (double) _track_canvas_width);
 	const samplepos_t extra_samples = (samplepos_t) floor (one_centimeter_in_pixels * new_fpp);
 
 	if (start > extra_samples) {
@@ -3061,7 +3061,7 @@ EditingContext::temporal_zoom_by_sample (samplepos_t start, samplepos_t end)
 
 	samplepos_t range = end - start;
 
-	const samplecnt_t new_fpp = (samplecnt_t) ceil ((double) range / (double) _visible_canvas_width);
+	const samplecnt_t new_fpp = (samplecnt_t) ceil ((double) range / (double) _track_canvas_width);
 
 	samplepos_t new_page = range;
 	samplepos_t middle = (samplepos_t) floor ((double) start + ((double) range / 2.0f));
