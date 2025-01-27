@@ -285,4 +285,11 @@ class Pianoroll : public CueEditor
 	bool enter (GdkEventCrossing*);
 
 	bool zoom_in_allocate;
+
+	ArdourWidgets::ArdourButton rec_enable_button;
+	void rec_enable_clicked ();
+	Gtk::Adjustment bar_adjustment;
+	Gtk::SpinButton bar_spinner;
+	Gtk::Label length_label;
+	Gtk::HBox   rec_box;
 };

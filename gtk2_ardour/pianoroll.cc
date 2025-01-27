@@ -70,6 +70,9 @@ Pianoroll::Pianoroll (std::string const & name)
 	, bbt_metric (*this)
 	, _note_mode (Sustained)
 	, zoom_in_allocate (false)
+	, bar_adjustment (4, 1, 32, 1, 4)
+	, bar_spinner (bar_adjustment)
+	, length_label (X_("Length (Bars):"))
 {
 	mouse_mode = Editing::MouseContent;
 	autoscroll_vertical_allowed = false;
@@ -277,8 +280,21 @@ Pianoroll::build_upper_toolbar ()
 	note_mode_button.set_size_request (PX_SCALE(50), -1);
 	note_mode_button.set_active_color (UIConfiguration::instance().color ("alert:yellow"));
 
+	rec_enable_button.set_icon (ArdourIcon::RecButton);
+	rec_enable_button.set_sensitive (false);
+
+	rec_box.set_spacing (12);
+	rec_box.pack_start (rec_enable_button, false, false);
+	rec_box.pack_start (length_label, false, false);
+	rec_box.pack_start (bar_spinner, false, false);
+	rec_enable_button.show();
+	length_label.show ();
+	bar_spinner.show ();
+	rec_box.show ();
+
 	_toolbar_outer->set_border_width (6);
 	_toolbar_outer->set_spacing (12);
+	_toolbar_outer->pack_start (rec_box, false, false);
 	_toolbar_outer->pack_start (visible_channel_label, false, false);
 	_toolbar_outer->pack_start (visible_channel_selector, false, false);
 	_toolbar_outer->pack_start (play_note_selection_button, false, false);
@@ -1925,6 +1941,8 @@ Pianoroll::trigger_prop_change (PBD::PropertyChange const & what_changed)
 void
 Pianoroll::set (TriggerReference & tref)
 {
+	rec_enable_button.set_sensitive (true);
+
 	_update_connection.disconnect ();
 	object_connections.drop_connections ();
 
