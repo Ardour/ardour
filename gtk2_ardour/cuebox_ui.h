@@ -66,8 +66,6 @@ private:
 	PBD::ScopedConnectionList _session_connections;
 
 	uint64_t _cue_idx;
-	double   _poly_size;
-	double   _poly_margin;
 	bool _grabbed;
 };
 
