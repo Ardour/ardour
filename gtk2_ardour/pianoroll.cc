@@ -69,6 +69,7 @@ Pianoroll::Pianoroll (std::string const & name)
 	, view (nullptr)
 	, bbt_metric (*this)
 	, _note_mode (Sustained)
+	, zoom_in_allocate (false)
 {
 	mouse_mode = Editing::MouseContent;
 	autoscroll_vertical_allowed = false;
@@ -511,6 +512,11 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 	prh->set (ArdourCanvas::Rect (0, 0, prh->x1(), view->midi_context().height()));
 
 	_track_canvas_width = _visible_canvas_width - prh->x1();
+
+	if (zoom_in_allocate) {
+		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
+		zoom_in_allocate = false;
+	}
 }
 
 timepos_t
@@ -2009,6 +2015,7 @@ void
 Pianoroll::zoom_to_show (Temporal::timecnt_t const & duration)
 {
 	if (!_visible_canvas_width) {
+		zoom_in_allocate = true;
 		return;
 	}
 

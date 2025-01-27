@@ -283,4 +283,6 @@ class Pianoroll : public CueEditor
 
 	void point_selection_changed ();
 	bool enter (GdkEventCrossing*);
+
+	bool zoom_in_allocate;
 };
