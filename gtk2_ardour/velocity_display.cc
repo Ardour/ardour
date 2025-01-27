@@ -157,6 +157,14 @@ VelocityDisplay::clear ()
 }
 
 void
+VelocityDisplay::set_sensitive (bool yn)
+{
+	for (auto & ev : events) {
+		ev.second->set_sensitive (yn);
+	}
+}
+
+void
 VelocityDisplay::add_note (NoteBase* nb)
 {
 	ArdourCanvas::Lollipop* l = new ArdourCanvas::Lollipop (lolli_container);

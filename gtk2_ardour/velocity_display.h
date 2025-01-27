@@ -65,6 +65,8 @@ class VelocityDisplay
 
 	int y_position_to_velocity (double y) const;
 
+	void set_sensitive (bool yn);
+
 	void set_selected (bool);
 
 	bool line_draw_motion (ArdourCanvas::Duple const & d, ArdourCanvas::Rectangle const & r, double last_x);

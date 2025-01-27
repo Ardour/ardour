@@ -505,11 +505,19 @@ PianorollMidiView::internal_set_active_automation (Evoral::Parameter const & par
 
 	for (CueAutomationMap::iterator i = automation_map.begin(); i != automation_map.end(); ++i) {
 		if (i->first == param) {
-			i->second.line->set_sensitive (true);
+			if (i->second.line) {
+				/* velocity does not have a line */
+				i->second.line->set_sensitive (true);
+			} else {
+			}
 			active_automation = &i->second;
 			exists = true;
 		} else {
-			i->second.line->set_sensitive (false);
+			if (i->second.line) {
+				i->second.line->set_sensitive (false);
+			} else {
+				i->second.velocity_display->set_sensitive (false);
+			}
 		}
 	}
 
@@ -658,4 +666,3 @@ PianorollMidiView::clear_selection ()
 		i->second.line->set_selected_points (empty);
 	}
 }
-
