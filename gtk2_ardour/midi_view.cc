@@ -599,15 +599,12 @@ MidiView::button_release (GdkEventButton* ev)
 bool
 MidiView::motion (GdkEventMotion* ev)
 {
-	if (!_entered_note) {
+	if (!_editing_context.drags()->active() && !_entered_note && _editing_context.current_mouse_mode() == MouseDraw) {
 
-		if (_editing_context.current_mouse_mode() == MouseDraw) {
-
-			if (_ghost_note) {
-				update_ghost_note (ev->x, ev->y, ev->state);
-			} else {
-				create_ghost_note (ev->x, ev->y, ev->state);
-			}
+		if (_ghost_note) {
+			update_ghost_note (ev->x, ev->y, ev->state);
+		} else {
+			create_ghost_note (ev->x, ev->y, ev->state);
 		}
 	}
 
@@ -5314,4 +5311,3 @@ EndBoundaryRect::compute_bounding_box() const
 	const double radius = 10. * scale;
 	_bounding_box = _bounding_box.expand (0., 0., 0., radius + _outline_width);
 }
-
