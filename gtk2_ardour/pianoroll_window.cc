@@ -18,6 +18,7 @@
 
 #include "pbd/compose.h"
 
+#include "ardour_ui.h"
 #include "pianoroll.h"
 #include "pianoroll_window.h"
 
@@ -44,4 +45,10 @@ PianorollWindow::set (std::shared_ptr<MidiTrack> track, std::shared_ptr<MidiRegi
 {
 	pianoroll->set_track (track);
 	pianoroll->set_region (region);
+}
+
+bool
+PianorollWindow::on_key_press_event (GdkEventKey* ev)
+{
+	return ARDOUR_UI::instance()->key_event_handler (ev, this);
 }

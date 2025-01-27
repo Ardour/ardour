@@ -475,6 +475,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void copy ();
 	void alt_delete_ ();
 
+	Gtkmm2ext::Bindings* get_bindings() const { return bindings; }
+
   protected:
 	std::string _name;
 	bool within_track_canvas;
