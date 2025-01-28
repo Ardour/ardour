@@ -689,8 +689,7 @@ icon_transport_loop (cairo_t* cr, const int width, const int height, const uint3
 	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
 	cairo_stroke_preserve (cr);
 	cairo_close_path (cr);
-	cairo_set_source_rgba (cr, 1, 1, 1, 1.0);
-	cairo_fill (cr);
+	VECTORICONSTROKEFILLFG (1.0);
 #undef ARCARROW
 }
 
@@ -1362,7 +1361,7 @@ icon_config_menu (cairo_t* cr, const int width, const int height, const uint32_t
 		cairo_arc (cr, x, y, r1, ang0 + angm + angd, ang1 - angm - angd);
 	}
 	cairo_close_path (cr);
-	VECTORICONSTROKEFILL (lw);
+	VECTORICONSTROKEFILLFG (0.9);
 
 	cairo_arc (cr, x, y, r0, 0, 2.0 * M_PI);
 	VECTORICONSTROKE (lw, fg_color);
