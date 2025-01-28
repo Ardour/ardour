@@ -72,7 +72,7 @@ Pianoroll::Pianoroll (std::string const & name)
 	, zoom_in_allocate (false)
 	, bar_adjustment (4, 1, 32, 1, 4)
 	, bar_spinner (bar_adjustment)
-	, length_label (X_("Length (Bars):"))
+	, length_label (X_("Record (Bars):"))
 {
 	mouse_mode = Editing::MouseContent;
 	autoscroll_vertical_allowed = false;
