@@ -587,9 +587,8 @@ private:
 	Gtk::Notebook             _the_notebook;
 	ArdourWidgets::MetaButton _notebook_tab1;
 	ArdourWidgets::MetaButton _notebook_tab2;
-	ArdourWidgets::MetaButton _notebook_tab3;
 
-	void add_notebook_page (ArdourWidgets::MetaButton&, std::string const&, std::string const&, Gtk::Widget&);
+	void add_notebook_page (std::string const&, std::string const&, Gtk::Widget&);
 
 	ArdourWidgets::VPane editor_summary_pane;
 

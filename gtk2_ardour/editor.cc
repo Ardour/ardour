@@ -551,14 +551,16 @@ Editor::Editor ()
 	Location::end_changed.connect (*this, invalidator (*this), std::bind (&Editor::location_changed, this, _1), gui_context());
 	Location::changed.connect (*this, invalidator (*this), std::bind (&Editor::location_changed, this, _1), gui_context());
 
-	add_notebook_page (_notebook_tab1, _("Tracks"), _("Tracks & Busses"), _routes->widget ());
-	add_notebook_page (_notebook_tab2, _("Sources"), _("Sources"), _sources->widget ());
-	add_notebook_page (_notebook_tab2, _("Regions"), _("Regions"), _regions->widget ());
-	add_notebook_page (_notebook_tab2, _("Clips"), _("Clips"), _trigger_clip_picker);
-	add_notebook_page (_notebook_tab3, _("Arr"), _("Arrangement"), _sections->widget ());
-	add_notebook_page (_notebook_tab1, _("Snaps"), _("Snapshots"), _snapshots->widget ());
-	add_notebook_page (_notebook_tab1, _("Groups"), _("Track & Bus Groups"), _route_groups->widget ());
-	add_notebook_page (_notebook_tab3, _("Marks"), _("Ranges & Marks"), _locations->widget ());
+	add_notebook_page (_("Tracks"), _("Tracks & Busses"), _routes->widget ());
+	add_notebook_page (_("Sources"), _("Sources"), _sources->widget ());
+	add_notebook_page (_("Regions"), _("Regions"), _regions->widget ());
+	add_notebook_page (_("Clips"), _("Clips"), _trigger_clip_picker);
+	add_notebook_page (_("Arrange"), _("Arrangement"), _sections->widget ());
+	add_notebook_page (_("Snaps"), _("Snapshots"), _snapshots->widget ());
+	add_notebook_page (_("Groups"), _("Track & Bus Groups"), _route_groups->widget ());
+	add_notebook_page (_("Marks"), _("Ranges & Marks"), _locations->widget ());
+
+	_notebook_tab2.set_index (4);
 
 	_the_notebook.set_show_tabs (false);
 	_the_notebook.set_scrollable (true);
@@ -569,9 +571,11 @@ Editor::Editor ()
 			std::string label (_the_notebook.get_tab_label_text (*_the_notebook.get_nth_page (page)));
 			_notebook_tab1.set_active (label);
 			_notebook_tab2.set_active (label);
-			_notebook_tab3.set_active (label);
 			instant_save ();
 			});
+
+	_notebook_tab1.set_name ("tab button");
+	_notebook_tab2.set_name ("tab button");
 
 	/* Pick up some settings we need to cache, early */
 
@@ -612,7 +616,6 @@ Editor::Editor ()
 	tabbox->set_spacing (3);
 	tabbox->pack_start (_notebook_tab1);
 	tabbox->pack_start (_notebook_tab2);
-	tabbox->pack_start (_notebook_tab3);
 
 	_editor_list_vbox.pack_start (*tabbox, false, false, 2);
 	_editor_list_vbox.pack_start (_the_notebook);
@@ -2248,13 +2251,12 @@ Editor::set_state (const XMLNode& node, int version)
 		_notebook_tab2.set_index (index);
 	}
 
-	if (node.get_property (X_("editor-list-btn3"), index)) {
-		_notebook_tab3.set_index (index);
-	}
-
 	int32_t el_page;
 	if (node.get_property (X_("editor-list-page"), el_page)) {
 		_the_notebook.set_current_page (el_page);
+		std::string label (_the_notebook.get_tab_label_text (*_the_notebook.get_nth_page (el_page)));
+		_notebook_tab1.set_active (label);
+		_notebook_tab2.set_active (label);
 	}
 
 	yn = false;
@@ -2362,7 +2364,6 @@ Editor::get_state () const
 	node->set_property (X_("editor-list-page"), _the_notebook.get_current_page ());
 	node->set_property (X_("editor-list-btn1"), _notebook_tab1.index ());
 	node->set_property (X_("editor-list-btn2"), _notebook_tab2.index ());
-	node->set_property (X_("editor-list-btn3"), _notebook_tab3.index ());
 
 	if (button_bindings) {
 		XMLNode* bb = new XMLNode (X_("Buttons"));
@@ -5575,12 +5576,13 @@ Editor::action_menu_item (std::string const & name)
 }
 
 void
-Editor::add_notebook_page (MetaButton& btn, string const& label, string const& name, Gtk::Widget& widget)
+Editor::add_notebook_page (string const& label, string const& name, Gtk::Widget& widget)
 {
 	_the_notebook.append_page (widget, name);
 
 	using namespace Menu_Helpers;
-	btn.add_item (label, name, [this, &widget]() {_the_notebook.set_current_page (_the_notebook.page_num (widget)); });
+	_notebook_tab1.add_item (label, name, [this, &widget]() {_the_notebook.set_current_page (_the_notebook.page_num (widget)); });
+	_notebook_tab2.add_item (label, name, [this, &widget]() {_the_notebook.set_current_page (_the_notebook.page_num (widget)); });
 }
 
 void
