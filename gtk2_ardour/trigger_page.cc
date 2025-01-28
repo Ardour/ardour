@@ -129,15 +129,16 @@ TriggerPage::TriggerPage ()
 	_strip_group_box.pack_start (_strip_scroller, true, true);
 
 	/* sidebar */
-	_sidebar_notebook.set_show_tabs (true);
+	_sidebar_notebook.set_show_tabs (false);
 	_sidebar_notebook.set_scrollable (true);
 	_sidebar_notebook.popup_disable ();
-	_sidebar_notebook.set_tab_pos (Gtk::POS_RIGHT);
 
-	add_sidebar_page (_("Clips"), _trigger_clip_picker);
-	add_sidebar_page (_("Tracks"), _trigger_route_list.widget ());
-	add_sidebar_page (_("Sources"), _trigger_source_list.widget ());
-	add_sidebar_page (_("Regions"), _trigger_region_list.widget ());
+	add_sidebar_page (_("Clips"), _("Clips"), _trigger_clip_picker);
+	add_sidebar_page (_("Tracks"), _("Tracks & Busses"), _trigger_route_list.widget ());
+	add_sidebar_page (_("Sources"), _("Sources"), _trigger_source_list.widget ());
+	add_sidebar_page (_("Regions"), _("Regions"), _trigger_region_list.widget ());
+
+	_sidebar_pager2.set_index (3);
 
 	_midi_editor = new Pianoroll (X_("MIDICueEditor"));
 
@@ -160,11 +161,29 @@ TriggerPage::TriggerPage ()
 	_parameter_box.pack_start (*table);
 	_parameter_box.show ();
 
+	_sidebar_notebook.signal_switch_page().connect ([this](GtkNotebookPage*, guint page) {
+			std::string label (_sidebar_notebook.get_tab_label_text (*_sidebar_notebook.get_nth_page (page)));
+			_sidebar_pager1.set_active (label);
+			_sidebar_pager2.set_active (label);
+			//instant_save ();
+			});
+
+	_sidebar_pager1.set_name ("tab button");
+	_sidebar_pager2.set_name ("tab button");
+
+	HBox* tabbox = manage (new HBox (true));
+	tabbox->set_spacing (3);
+	tabbox->pack_start (_sidebar_pager1);
+	tabbox->pack_start (_sidebar_pager2);
+
+	_sidebar_vbox.pack_start (*tabbox, false, false, 2);
+	_sidebar_vbox.pack_start (_sidebar_notebook);
+
 	/* Top-level Layout */
 	content_app_bar.add (_application_bar);
 	content_main.add (_strip_group_box);
 	content_att_bottom.add (_parameter_box);
-	content_att_right.add (_sidebar_notebook);
+	content_att_right.add (_sidebar_vbox);
 
 	/* Show all */
 	_strip_group_box.show ();
@@ -173,7 +192,7 @@ TriggerPage::TriggerPage ()
 	_cue_area_frame.show_all ();
 	_trigger_clip_picker.show ();
 	_no_strips.show ();
-	_sidebar_notebook.show_all ();
+	_sidebar_vbox.show_all ();
 
 	/* setup keybidings */
 	contents().set_data ("ardour-bindings", bindings);
@@ -237,6 +256,8 @@ TriggerPage::get_state () const
 	node->add_child_nocopy (Tabbable::get_state ());
 
 	node->set_property (X_("triggerpage-sidebar-page"), _sidebar_notebook.get_current_page ());
+	node->set_property (X_("triggerpage-sidebar-btn1"), _sidebar_pager1.index ());
+	node->set_property (X_("triggerpage-sidebar-btn2"), _sidebar_pager2.index ());
 
 	node->add_child_nocopy (_midi_editor->get_state());
 
@@ -258,6 +279,15 @@ TriggerPage::focus_on_clock()
 int
 TriggerPage::set_state (const XMLNode& node, int version)
 {
+	guint index;
+	if (node.get_property (X_("triggerpage-sidebar-btn1"), index)) {
+		_sidebar_pager1.set_index (index);
+	}
+
+	if (node.get_property (X_("triggerpage-sidebar-btn2"), index)) {
+		_sidebar_pager2.set_index (index);
+	}
+
 	int32_t sidebar_page;
 	if (node.get_property (X_("triggerpage-sidebar-page"), sidebar_page)) {
 		_sidebar_notebook.set_current_page (sidebar_page);
@@ -397,14 +427,12 @@ TriggerPage::update_title ()
 }
 
 void
-TriggerPage::add_sidebar_page (string const & name, Gtk::Widget& widget)
+TriggerPage::add_sidebar_page (string const& label, string const& name, Gtk::Widget& widget)
 {
-	EventBox* b = manage (new EventBox);
-	Label* l = manage (new Label (name));
-	l->set_angle (-90);
-	b->add (*l);
-	b->show_all ();
-	_sidebar_notebook.append_page (widget, *b);
+	_sidebar_notebook.append_page (widget, name);
+	using namespace Menu_Helpers;
+	_sidebar_pager1.add_item (label, name, [this, &widget]() {_sidebar_notebook.set_current_page (_sidebar_notebook.page_num (widget)); });
+	_sidebar_pager2.add_item (label, name, [this, &widget]() {_sidebar_notebook.set_current_page (_sidebar_notebook.page_num (widget)); });
 }
 
 void

@@ -25,6 +25,7 @@
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/cairo_widget.h"
 
+#include "widgets/metabutton.h"
 #include "widgets/pane.h"
 #include "widgets/tabbable.h"
 
@@ -85,7 +86,7 @@ private:
 	void rec_state_changed ();
 	void rec_state_clicked ();
 
-	void add_sidebar_page (std::string const&, Gtk::Widget&);
+	void add_sidebar_page (std::string const&, std::string const&, Gtk::Widget&);
 
 	bool strip_button_release_event (GdkEventButton*, TriggerStrip*);
 	bool no_strip_button_event (GdkEventButton*);
@@ -110,18 +111,21 @@ private:
 
 	Gtkmm2ext::Bindings* bindings;
 
-	Gtk::HBox            _strip_group_box;
-	Gtk::ScrolledWindow  _strip_scroller;
-	Gtk::HBox            _strip_packer;
-	Gtk::EventBox        _no_strips;
-	Gtk::Alignment       _cue_area_frame;
-	Gtk::VBox            _cue_area_box;
-	Gtk::HBox            _parameter_box;
-	Gtk::Notebook        _sidebar_notebook;
-	TriggerClipPicker    _trigger_clip_picker;
-	TriggerSourceList    _trigger_source_list;
-	TriggerRegionList    _trigger_region_list;
-	TriggerRouteList     _trigger_route_list;
+	Gtk::HBox                 _strip_group_box;
+	Gtk::ScrolledWindow       _strip_scroller;
+	Gtk::HBox                 _strip_packer;
+	Gtk::EventBox             _no_strips;
+	Gtk::Alignment            _cue_area_frame;
+	Gtk::VBox                 _cue_area_box;
+	Gtk::HBox                 _parameter_box;
+	Gtk::VBox                 _sidebar_vbox;
+	ArdourWidgets::MetaButton _sidebar_pager1;
+	ArdourWidgets::MetaButton _sidebar_pager2;
+	Gtk::Notebook             _sidebar_notebook;
+	TriggerClipPicker         _trigger_clip_picker;
+	TriggerSourceList         _trigger_source_list;
+	TriggerRegionList         _trigger_region_list;
+	TriggerRouteList          _trigger_route_list;
 
 	CueBoxWidget       _cue_box;
 	FittedCanvasWidget _master_widget;
