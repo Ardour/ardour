@@ -351,20 +351,37 @@ Mixer_UI::Mixer_UI ()
 	}
 	_mixer_scene_vbox.pack_start(_mixer_scene_table, false, false);
 
-	rhs_pane1.add (favorite_plugins_frame);
-	rhs_pane1.add (track_display_frame);
+	_sidebar_notebook.signal_switch_page().connect ([this](GtkNotebookPage*, guint page) {
+			std::string label (_sidebar_notebook.get_tab_label_text (*_sidebar_notebook.get_nth_page (page)));
+			_sidebar_pager1.set_active (label);
+			_sidebar_pager2.set_active (label);
+			//instant_save ();
+			});
+	_sidebar_pager1.set_name ("tab button");
+	_sidebar_pager2.set_name ("tab button");
 
-	rhs_pane2.add (rhs_pane1);
-	rhs_pane2.add (group_display_frame);
+	HBox* tabbox = manage (new HBox (true));
+	tabbox->set_spacing (3);
+	tabbox->pack_start (_sidebar_pager1);
+	tabbox->pack_start (_sidebar_pager2);
 
-	list_vpacker.pack_start (rhs_pane2, true, true);
-
-	//add a spacer; this fills the area that is normally taken by the pane resizers
 	_mixer_scene_spacer.set_size_request (-1, 6);
-	list_vpacker.pack_start (_mixer_scene_spacer, false, false);
-
 	_mixer_scene_frame.add(_mixer_scene_vbox);
+
+	list_vpacker.pack_start (*tabbox, false, false, 2);
+	list_vpacker.pack_start (_sidebar_notebook);
+	list_vpacker.pack_start (_mixer_scene_spacer, false, false);
 	list_vpacker.pack_start (_mixer_scene_frame, false, false);
+
+	_sidebar_notebook.set_show_tabs (false);
+	_sidebar_notebook.set_scrollable (true);
+	_sidebar_notebook.popup_disable ();
+
+	add_sidebar_page (_("Plugins"), _("Favorite/Top Plugins"), favorite_plugins_frame);
+	add_sidebar_page (_("Tracks"), _("Track & Bus Visibility"), track_display_frame);
+	add_sidebar_page (_("Groups"), _("Track & Bus Groups"), group_display_frame);
+
+	_sidebar_pager2.set_index (1);
 
 	vca_label_bar.set_size_request (-1, 16 + 1); /* must match height in GroupTabs::set_size_request()  + 1 border px*/
 	vca_vpacker.pack_start (vca_label_bar, false, false);
@@ -386,12 +403,8 @@ Mixer_UI::Mixer_UI ()
 	global_hpacker.pack_start (inner_pane, true, true);
 	global_hpacker.pack_start (out_packer, false, false);
 
-	rhs_pane1.set_divider (0, .6);
-	rhs_pane2.set_divider (0, .7);
 	inner_pane.set_divider (0, .8);
 
-	rhs_pane1.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
-	rhs_pane2.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
 	inner_pane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
 
 	content_app_bar.add (_application_bar);
@@ -419,8 +432,6 @@ Mixer_UI::Mixer_UI ()
 	group_display_vbox.show();
 	group_display_frame.show();
 	favorite_plugins_frame.show_all();
-	rhs_pane1.show();
-	rhs_pane2.show();
 	strip_packer.show();
 	inner_pane.show();
 	vca_scroller.show();
@@ -471,6 +482,14 @@ Mixer_UI::~Mixer_UI ()
 	delete track_menu;
 	delete _group_tabs;
 	delete _mixer_scene_release;
+}
+
+void
+Mixer_UI::add_sidebar_page (string const& label, string const& name, Gtk::Widget& widget)
+{
+	_sidebar_notebook.append_page (widget, name);
+	_sidebar_pager1.add_item (label, name, [this, &widget]() {_sidebar_notebook.set_current_page (_sidebar_notebook.page_num (widget)); });
+	_sidebar_pager2.add_item (label, name, [this, &widget]() {_sidebar_notebook.set_current_page (_sidebar_notebook.page_num (widget)); });
 }
 
 struct MixerStripSorter {
@@ -2632,17 +2651,24 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 		sync_treeview_from_favorite_order ();
 	}
 
+	guint index;
+	if (node.get_property (X_("mixer-sidebar-btn1"), index)) {
+		_sidebar_pager1.set_index (index);
+	}
+
+	if (node.get_property (X_("mixer-sidebar-btn2"), index)) {
+		_sidebar_pager2.set_index (index);
+	}
+
+	int32_t sidebar_page;
+	if (node.get_property (X_("mixer-sidebar-page"), sidebar_page)) {
+		_sidebar_notebook.set_current_page (sidebar_page);
+		std::string label (_sidebar_notebook.get_tab_label_text (*_sidebar_notebook.get_nth_page (sidebar_page)));
+		_sidebar_pager1.set_active (label);
+		_sidebar_pager2.set_active (label);
+	}
+
 	float fract;
-	if (!node.get_property ("mixer-rhs-pane1-pos", fract) || fract > 1.0) {
-		fract = 0.6f;
-	}
-	rhs_pane1.set_divider (0, fract);
-
-	if (!node.get_property ("mixer-rhs-pane2-pos", fract) || fract > 1.0) {
-		fract = 0.7f;
-	}
-	rhs_pane2.set_divider (0, fract);
-
 	if (!node.get_property ("mixer-inner-pane-pos", fract) || fract > 1.0) {
 		fract = 0.8f;
 	}
@@ -2687,8 +2713,9 @@ Mixer_UI::get_state () const
 
 	node->add_child_nocopy (Tabbable::get_state());
 
-	node->set_property (X_("mixer-rhs-pane1-pos"), rhs_pane1.get_divider());
-	node->set_property (X_("mixer-rhs_pane2-pos"), rhs_pane2.get_divider());
+	node->set_property (X_("mixer-sidebar-page"), _sidebar_notebook.get_current_page ());
+	node->set_property (X_("mixer-sidebar-btn1"), _sidebar_pager1.index ());
+	node->set_property (X_("mixer-sidebar-btn2"), _sidebar_pager2.index ());
 	node->set_property (X_("mixer-inner-pane-pos"),  inner_pane.get_divider());
 
 	node->set_property ("narrow-strips", (_strip_width == Narrow));

@@ -51,9 +51,10 @@
 #include "gtkmm2ext/dndtreeview.h"
 #include "gtkmm2ext/treeutils.h"
 
+#include "widgets/ardour_dropdown.h"
+#include "widgets/metabutton.h"
 #include "widgets/pane.h"
 #include "widgets/tabbable.h"
-#include "widgets/ardour_dropdown.h"
 
 #include "application_bar.h"
 #include "axis_provider.h"
@@ -201,8 +202,6 @@ private:
 	ArdourWidgets::ArdourDropdown favorite_plugins_mode_combo;
 	Gtk::Entry            plugin_search_entry;
 	ArdourWidgets::ArdourButton plugin_search_clear_button;
-	ArdourWidgets::VPane  rhs_pane1;
-	ArdourWidgets::VPane  rhs_pane2;
 	ArdourWidgets::HPane  inner_pane;
 	Gtk::VBox             strip_group_box;
 	Gtk::HBox             strip_packer;
@@ -213,6 +212,10 @@ private:
 	Gtk::Label            vca_label;
 	Gtk::EventBox         vca_scroller_base;
 	Gtk::HBox             out_packer;
+
+	Gtk::Notebook             _sidebar_notebook;
+	ArdourWidgets::MetaButton _sidebar_pager1;
+	ArdourWidgets::MetaButton _sidebar_pager2;
 
 	Gtk::EventBox         _mixer_scene_spacer;
 	Gtk::Frame            _mixer_scene_frame;
@@ -249,6 +252,8 @@ private:
 	void add_stripables (ARDOUR::StripableList&);
 
 	void update_scene_buttons ();
+
+	void add_sidebar_page (std::string const&, std::string const&, Gtk::Widget&);
 
 	void add_routes (ARDOUR::RouteList&);
 	void remove_strip (MixerStrip *);
