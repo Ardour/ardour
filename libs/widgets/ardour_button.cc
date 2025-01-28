@@ -239,6 +239,13 @@ ArdourButton::set_sizing_text (std::string const& str)
 }
 
 void
+ArdourButton::add_sizing_text (std::string const& str)
+{
+	_sizing_texts.push_back (str);
+	queue_resize ();
+}
+
+void
 ArdourButton::set_sizing_texts (std::vector<std::string> const& s)
 {
 	_sizing_texts = s;

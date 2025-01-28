@@ -113,6 +113,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
      * empty string to return to the default behavior which uses
      * the currently displayed text for measurement. */
 	void set_sizing_text (std::string const&);
+	void add_sizing_text (std::string const&);
 	void set_sizing_texts (std::vector<std::string> const&);
 
 	sigc::signal<void, GdkEventButton*> signal_led_clicked;
