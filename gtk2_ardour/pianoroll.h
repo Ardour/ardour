@@ -292,4 +292,9 @@ class Pianoroll : public CueEditor
 	Gtk::SpinButton bar_spinner;
 	Gtk::Label length_label;
 	Gtk::HBox   rec_box;
+
+	bool rec_button_press (GdkEventButton*);
+	void rec_enable_change ();
+	void blink_rec_enable (bool);
+	sigc::connection rec_blink_connection;
 };

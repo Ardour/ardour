@@ -282,6 +282,7 @@ Pianoroll::build_upper_toolbar ()
 
 	rec_enable_button.set_icon (ArdourIcon::RecButton);
 	rec_enable_button.set_sensitive (false);
+	rec_enable_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::rec_button_press), false);
 
 	rec_box.set_spacing (12);
 	rec_box.pack_start (rec_enable_button, false, false);
@@ -290,7 +291,8 @@ Pianoroll::build_upper_toolbar ()
 	rec_enable_button.show();
 	length_label.show ();
 	bar_spinner.show ();
-	rec_box.show ();
+	rec_box.set_no_show_all (true);
+	/* rec box not shown */
 
 	_toolbar_outer->set_border_width (6);
 	_toolbar_outer->set_spacing (12);
@@ -1939,14 +1941,96 @@ Pianoroll::trigger_prop_change (PBD::PropertyChange const & what_changed)
 }
 
 void
+Pianoroll::blink_rec_enable (bool onoff)
+{
+	if (onoff) {
+		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	} else {
+		rec_enable_button.set_active_state (Gtkmm2ext::Off);
+	}
+}
+
+void
+Pianoroll::rec_enable_change ()
+{
+	if (!ref.box()) {
+		return;
+	}
+
+	rec_blink_connection.disconnect ();
+
+	switch (ref.box()->record_enabled()) {
+	case Recording:
+		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
+		break;
+	case Enabled:
+		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
+		if (!UIConfiguration::instance().get_no_strobe() && ref.trigger()->armed()) {
+			rec_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &Pianoroll::blink_rec_enable));
+		}
+		break;
+	case Disabled:
+		rec_enable_button.set_active_state (Gtkmm2ext::Off);
+		break;
+	}
+}
+
+
+bool
+Pianoroll::rec_button_press (GdkEventButton* ev)
+{
+	std::cerr << "RBP!\n";
+
+	if (ev->button != 1) {
+		return false;
+	}
+
+	if (!ref.box()) {
+		return true;
+	}
+
+	TriggerPtr trigger (ref.trigger());
+	bool trigger_armed = trigger->armed();
+
+	if (!trigger_armed) {
+
+		Stripable* st = dynamic_cast<Stripable*> (ref.box()->owner());
+		assert (st);
+		std::shared_ptr<Track> track = std::dynamic_pointer_cast<MidiTrack> (st->shared_from_this());
+		assert (track);
+
+		bool box_armed = !track->rec_enable_control()->get_value();
+
+		std::shared_ptr<RouteList> rl;
+
+		rl.reset (new RouteList);
+		rl->push_back (track);
+
+		_session->set_controls (route_list_to_control_list (rl, &Stripable::rec_enable_control), true, Controllable::NoGroup);
+	}
+
+	/* Step two: the trigger */
+
+	if (trigger_armed) {
+		trigger->disarm ();
+	} else {
+		trigger->arm ();
+	}
+
+	return true;
+}
+
+void
 Pianoroll::set (TriggerReference & tref)
 {
-	rec_enable_button.set_sensitive (true);
-
 	_update_connection.disconnect ();
 	object_connections.drop_connections ();
 
 	ref = tref;
+
+	rec_box.show ();
+	rec_enable_button.set_sensitive (true);
+	ref.box()->RecEnableChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::rec_enable_change, this), gui_context());
 
 	idle_update_queued.store (0);
 
