@@ -2001,8 +2001,6 @@ Pianoroll::rec_button_press (GdkEventButton* ev)
 		std::shared_ptr<Track> track = std::dynamic_pointer_cast<MidiTrack> (st->shared_from_this());
 		assert (track);
 
-		bool box_armed = !track->rec_enable_control()->get_value();
-
 		std::shared_ptr<RouteList> rl;
 
 		rl.reset (new RouteList);
@@ -2342,8 +2340,6 @@ Pianoroll::cut_copy (Editing::CutCopyOp op)
 	default:
 		break;
 	}
-
-	bool did_edit = false;
 
 
 	if (op == Delete || op == Cut || op == Clear) {
