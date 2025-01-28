@@ -18,7 +18,10 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "pbd/unwind.h"
+
 #include "widgets/metabutton.h"
+#include "widgets/ui_config.h"
 
 using namespace Gtk;
 using namespace std;
@@ -26,12 +29,15 @@ using namespace ArdourWidgets;
 
 MetaButton::MetaButton ()
 	: _active (0)
+	, _hover_dropdown (false)
 {
 	_menu.signal_size_request ().connect (sigc::mem_fun (*this, &MetaButton::menu_size_request));
 	_menu.set_reserve_toggle_size (false);
 
 	add_elements (default_elements);
 	add_elements (ArdourButton::Menu);
+	add_elements (ArdourButton::MetaMenu);
+	add_events (Gdk::POINTER_MOTION_MASK);
 }
 
 MetaButton::~MetaButton ()
@@ -60,6 +66,7 @@ MetaButton::add_item (std::string const& label, std::string const& menutext, sig
 	items.push_back (MetaElement (label, menutext, cb, sigc::mem_fun (*this, &MetaButton::activate_item)));
 	if (items.size () == 1) {
 		_menu.set_active (0);
+		update_button (dynamic_cast<MetaMenuItem*> (&items.back ()));
 		set_text (label);
 	}
 }
@@ -70,10 +77,12 @@ MetaButton::on_button_press_event (GdkEventButton* ev)
 	MetaMenuItem const* current_active = dynamic_cast<MetaMenuItem*> (_menu.get_active ());
 
 	if (ev->type == GDK_BUTTON_PRESS && ev->button == 3) {
-		Gtkmm2ext::anchored_menu_popup (&_menu, this, current_active ? current_active->menutext () : "", 3, ev->time);
+		Gtkmm2ext::anchored_menu_popup (&_menu, this, current_active ? current_active->menutext () : "", ev->button, ev->time);
 	}
-
-	if (ev->type == GDK_BUTTON_PRESS && ev->button == 1) {
+	else if (ev->type == GDK_BUTTON_PRESS && ev->button == 1 && ev->x > (get_width () - _diameter - 7)) {
+		Gtkmm2ext::anchored_menu_popup (&_menu, this, current_active ? current_active->menutext () : "", ev->button, ev->time);
+	}
+	else if (ev->type == GDK_BUTTON_PRESS && ev->button == 1) {
 		if (current_active) {
 			current_active->activate ();
 		}
@@ -82,11 +91,28 @@ MetaButton::on_button_press_event (GdkEventButton* ev)
 	return true;
 }
 
+bool
+MetaButton::on_motion_notify_event (GdkEventMotion* ev)
+{
+	bool hover_dropdown = ev->x > get_width () - _diameter - 7;
+	if (hover_dropdown != _hover_dropdown) {
+		_hover_dropdown = hover_dropdown;
+		CairoWidget::set_dirty ();
+	}
+	return false;
+}
+
 void
 MetaButton::activate_item (MetaMenuItem const* e)
 {
-	set_text (e->label ());
+	update_button (e);
 	e->activate ();
+}
+
+void
+MetaButton::update_button (MetaMenuItem const* e)
+{
+	set_text (e->label ());
 }
 
 void
@@ -100,7 +126,7 @@ MetaButton::set_active (std::string const& menulabel)
 			if (_menu.get_active () != &i) {
 				_menu.set_active (c);
 			}
-			set_text (dynamic_cast<MetaMenuItem*> (&i)->label ());
+			update_button (dynamic_cast<MetaMenuItem*> (&i));
 			set_active_state (Gtkmm2ext::ExplicitActive);
 			_active = c;
 			found   = true;
@@ -121,9 +147,28 @@ MetaButton::set_index (guint index)
 	for (auto& i : _menu.items ()) {
 		if (c == index) {
 			_menu.set_active (c);
-			set_text (dynamic_cast<MetaMenuItem*> (&i)->label ());
+			update_button (dynamic_cast<MetaMenuItem*> (&i));
 			break;
 		}
 		++c;
+	}
+}
+
+void
+MetaButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t* rect)
+{
+	{
+		PBD::Unwinder uw (_hovering, false);
+		ArdourButton::render (ctx, rect);
+	}
+	if (_hovering && UIConfigurationBase::instance().get_widget_prelight()) {
+		cairo_t* cr = ctx->cobj();
+		if (_hover_dropdown) {
+			Gtkmm2ext::rounded_right_half_rectangle (cr, get_width () - _diameter - 6, 1, _diameter + 5, get_height() - 2, _corner_radius);
+		} else {
+			Gtkmm2ext::rounded_left_half_rectangle (cr, 1, 1, get_width() -_diameter - 7 , get_height() - 2, _corner_radius);
+		}
+		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
+		cairo_fill (cr);
 	}
 }

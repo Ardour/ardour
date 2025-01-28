@@ -45,7 +45,9 @@ public:
 
 protected:
 	bool on_button_press_event (GdkEventButton*);
+	bool on_motion_notify_event (GdkEventMotion*);
 	void menu_size_request (Gtk::Requisition*);
+	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 
 private:
 	class MetaMenuItem : public Gtk::MenuItem
@@ -95,9 +97,11 @@ private:
 	};
 
 	void activate_item (MetaMenuItem const*);
+	void update_button (MetaMenuItem const*);
 
 	Gtk::Menu _menu;
 	guint     _active;
+	bool      _hover_dropdown;
 };
 
 } // namespace ArdourWidgets

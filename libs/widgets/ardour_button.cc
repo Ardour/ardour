@@ -397,7 +397,10 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		if (_elements & Menu) {
 			//if this is a DropDown with an icon, then we need to
 			//move the icon left slightly to accomomodate the arrow
-			x -= _diameter - 2;
+			x -= _diameter + 4;
+		}
+		if (_elements & MetaMenu) {
+			x -= 2;
 		}
 		cairo_rectangle (cr, x, y, _pixbuf->get_width(), _pixbuf->get_height());
 		gdk_cairo_set_source_pixbuf (cr, _pixbuf->gobj(), x, y);
@@ -409,6 +412,9 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 		if (_elements & Menu) {
 			vw -= _diameter + 4;
+		}
+		if (_elements & MetaMenu) {
+			vw -= 2;
 		}
 		if (_elements & Indicator) {
 			vw -= _diameter + .5 * text_margin;
@@ -459,7 +465,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		Gtkmm2ext::set_source_rgba (cr, text_color);
 		const double text_ypos = round ((get_height() - _text_height) * .5);
 
-		if (_elements & Menu) {
+		if ((_elements & (Menu | MetaMenu)) == Menu) {
 			// always left align (dropdown)
 			cairo_move_to (cr, text_margin, text_ypos);
 			pango_cairo_show_layout (cr, _layout->gobj());
@@ -493,6 +499,9 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			}
 
 			cairo_device_to_user(cr, &ww, &wh);
+			if (_elements & MetaMenu) {
+				ww -= _diameter + 6;
+			}
 			xa = text_margin + (ww - _text_width - 2 * text_margin) * _xalign;
 			ya = (wh - _text_height) * _yalign;
 
@@ -527,6 +536,14 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		cairo_rel_line_to(cr, .5 - triw2, .5 - trih);
 		cairo_rel_line_to(cr, 2. * triw2 - 1, 0);
 		cairo_close_path(cr);
+		cairo_set_source_rgba (cr, 0, 0, 0, 0.8);
+		cairo_set_line_width(cr, 1);
+		cairo_stroke(cr);
+	}
+
+	if (_elements & MetaMenu) {
+		cairo_move_to(cr, get_width() - floor (_diameter) - 5.5 , 1);
+		cairo_line_to(cr, get_width() - floor (_diameter) - 5.5 , get_height () -1);
 		cairo_set_source_rgba (cr, 0, 0, 0, 0.8);
 		cairo_set_line_width(cr, 1);
 		cairo_stroke(cr);
@@ -748,8 +765,12 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		req->height = std::max (req->height, (int) lrint (_diameter) + 4);
 	}
 
-	if ((_elements & Menu)) {
+	if (_elements & Menu) {
 		req->width += _diameter + 4;
+	}
+
+	if (_elements & MetaMenu) {
+		req->width += 2; // seprator line
 	}
 
 	if (_elements & (VectorIcon | IconRenderCallback)) {
@@ -776,7 +797,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 			req->width = req->height;
 		if (req->height < req->width)
 			req->height = req->width;
-	} else if (_sizing_texts.empty() && _text_width > 0 && !(_elements & Menu)) {
+	} else if (_sizing_texts.empty() && _text_width > 0 && ((_elements & (Menu | MetaMenu)) != (Menu | MetaMenu))) {
 		// properly centered text for those elements that are centered
 		// (no sub-pixel offset)
 		if ((req->width - _text_width) & 1) { ++req->width; }

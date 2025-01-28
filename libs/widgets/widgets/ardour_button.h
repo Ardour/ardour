@@ -39,15 +39,16 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 {
 	public:
 	enum Element {
-		Edge = 0x1,
-		Body = 0x2,
-		Text = 0x4,
-		Indicator = 0x8,
-		ColorBox = 0x18,  //also sets Indicator
-		Menu = 0x20,
-		Inactive = 0x40, // no _action is defined AND state is not used
-		VectorIcon = 0x80,
-		IconRenderCallback = 0x100,
+		Edge               = 0x001,
+		Body               = 0x002,
+		Text               = 0x004,
+		Indicator          = 0x008,
+		ColorBox           = 0x018, // also sets Indicator
+		Menu               = 0x020,
+		MetaMenu           = 0x040,
+		Inactive           = 0x080, // no _action is defined AND state is not used
+		VectorIcon         = 0x100,
+		IconRenderCallback = 0x200,
 	};
 
 	typedef void (* rendercallback_t) (cairo_t*, int, int, uint32_t, void*);
