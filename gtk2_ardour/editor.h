@@ -64,6 +64,7 @@
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
 #include "widgets/ardour_spacer.h"
+#include "widgets/metabutton.h"
 #include "widgets/pane.h"
 
 #include "application_bar.h"
@@ -582,12 +583,13 @@ private:
 
 	void update_join_object_range_location (double);
 
-	std::optional<float>  pre_notebook_shrink_pane_width;
+	Gtk::VBox                 _editor_list_vbox;
+	Gtk::Notebook             _the_notebook;
+	ArdourWidgets::MetaButton _notebook_tab1;
+	ArdourWidgets::MetaButton _notebook_tab2;
+	ArdourWidgets::MetaButton _notebook_tab3;
 
-	Gtk::VBox _editor_list_vbox;
-	Gtk::Notebook _the_notebook;
-	void add_notebook_page (std::string const&, Gtk::Widget&);
-	bool notebook_tab_clicked (GdkEventButton*, Gtk::Widget*);
+	void add_notebook_page (ArdourWidgets::MetaButton&, std::string const&, std::string const&, Gtk::Widget&);
 
 	ArdourWidgets::VPane editor_summary_pane;
 

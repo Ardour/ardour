@@ -551,21 +551,27 @@ Editor::Editor ()
 	Location::end_changed.connect (*this, invalidator (*this), std::bind (&Editor::location_changed, this, _1), gui_context());
 	Location::changed.connect (*this, invalidator (*this), std::bind (&Editor::location_changed, this, _1), gui_context());
 
-	add_notebook_page (_("Tracks & Busses"), _routes->widget ());
-	add_notebook_page (_("Sources"), _sources->widget ());
-	add_notebook_page (_("Regions"), _regions->widget ());
-	add_notebook_page (_("Clips"), _trigger_clip_picker);
-	add_notebook_page (_("Arrangement"), _sections->widget ());
-	add_notebook_page (_("Snapshots"), _snapshots->widget ());
-	add_notebook_page (_("Track & Bus Groups"), _route_groups->widget ());
-	add_notebook_page (_("Ranges & Marks"), _locations->widget ());
+	add_notebook_page (_notebook_tab1, _("Tracks"), _("Tracks & Busses"), _routes->widget ());
+	add_notebook_page (_notebook_tab2, _("Sources"), _("Sources"), _sources->widget ());
+	add_notebook_page (_notebook_tab2, _("Regions"), _("Regions"), _regions->widget ());
+	add_notebook_page (_notebook_tab2, _("Clips"), _("Clips"), _trigger_clip_picker);
+	add_notebook_page (_notebook_tab3, _("Arrangement"), _("Arrangement"), _sections->widget ());
+	add_notebook_page (_notebook_tab1, _("Snapshots"), _("Snapshots"), _snapshots->widget ());
+	add_notebook_page (_notebook_tab1, _("Groups"), _("Track & Bus Groups"), _route_groups->widget ());
+	add_notebook_page (_notebook_tab3, _("Markers"), _("Ranges & Marks"), _locations->widget ());
 
-	_the_notebook.set_show_tabs (true);
+	_the_notebook.set_show_tabs (false);
 	_the_notebook.set_scrollable (true);
 	_the_notebook.popup_disable ();
-	_the_notebook.set_tab_pos (Gtk::POS_RIGHT);
 	_the_notebook.show_all ();
 
+	_the_notebook.signal_switch_page().connect ([this](GtkNotebookPage*, guint page) {
+			std::string label (_the_notebook.get_tab_label_text (*_the_notebook.get_nth_page (page)));
+			_notebook_tab1.set_active (label);
+			_notebook_tab2.set_active (label);
+			_notebook_tab3.set_active (label);
+			instant_save ();
+			});
 
 	/* Pick up some settings we need to cache, early */
 
@@ -601,6 +607,14 @@ Editor::Editor ()
 	_summary_hbox.pack_start (*summary_arrows_right, false, false);
 
 	editor_summary_pane.add (_summary_hbox);
+
+	HBox* tabbox = manage (new HBox);
+	tabbox->set_spacing (3);
+	tabbox->pack_start (_notebook_tab1);
+	tabbox->pack_start (_notebook_tab2);
+	tabbox->pack_start (_notebook_tab3);
+
+	_editor_list_vbox.pack_start (*tabbox, false, false, 2);
 	_editor_list_vbox.pack_start (_the_notebook);
 
 	content_right_pane.set_drag_cursor (*_cursors->expand_left_right);
@@ -2225,6 +2239,19 @@ Editor::set_state (const XMLNode& node, int version)
 		tact->set_active (yn);
 	}
 
+	guint index;
+	if (node.get_property (X_("editor-list-btn1"), index)) {
+		_notebook_tab1.set_index (index);
+	}
+
+	if (node.get_property (X_("editor-list-btn2"), index)) {
+		_notebook_tab2.set_index (index);
+	}
+
+	if (node.get_property (X_("editor-list-btn3"), index)) {
+		_notebook_tab3.set_index (index);
+	}
+
 	int32_t el_page;
 	if (node.get_property (X_("editor-list-page"), el_page)) {
 		_the_notebook.set_current_page (el_page);
@@ -2333,6 +2360,9 @@ Editor::get_state () const
 	node->set_property (X_("show-editor-props"), tact->get_active());
 
 	node->set_property (X_("editor-list-page"), _the_notebook.get_current_page ());
+	node->set_property (X_("editor-list-btn1"), _notebook_tab1.index ());
+	node->set_property (X_("editor-list-btn2"), _notebook_tab2.index ());
+	node->set_property (X_("editor-list-btn3"), _notebook_tab3.index ());
 
 	if (button_bindings) {
 		XMLNode* bb = new XMLNode (X_("Buttons"));
@@ -5545,25 +5575,12 @@ Editor::action_menu_item (std::string const & name)
 }
 
 void
-Editor::add_notebook_page (string const & name, Gtk::Widget& widget)
+Editor::add_notebook_page (MetaButton& btn, string const& label, string const& name, Gtk::Widget& widget)
 {
-	EventBox* b = manage (new EventBox);
-	b->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::notebook_tab_clicked), &widget));
-	Label* l = manage (new Label (name));
-	l->set_angle (-90);
-	b->add (*l);
-	b->show_all ();
-	_the_notebook.append_page (widget, *b);
-}
+	_the_notebook.append_page (widget, name);
 
-bool
-Editor::notebook_tab_clicked (GdkEventButton* ev, Gtk::Widget* page)
-{
-	if (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_2BUTTON_PRESS) {
-		_the_notebook.set_current_page (_the_notebook.page_num (*page));
-	}
-
-	return true;
+	using namespace Menu_Helpers;
+	btn.add_item (label, name, [this, &widget]() {_the_notebook.set_current_page (_the_notebook.page_num (widget)); });
 }
 
 void
