@@ -771,7 +771,7 @@ def build(bld):
                 'MASSIVE' : '60',
         }
         font_names = {
-                'MONOSPACE' : 'Monaco',
+                'MONOSPACE' : 'ArdourMono',
                 'CLOCKFONT' : 'ArdourMono',
                 }
     else: # Linux/X11 & Windows fonts
