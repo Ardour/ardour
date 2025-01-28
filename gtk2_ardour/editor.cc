@@ -555,10 +555,10 @@ Editor::Editor ()
 	add_notebook_page (_notebook_tab2, _("Sources"), _("Sources"), _sources->widget ());
 	add_notebook_page (_notebook_tab2, _("Regions"), _("Regions"), _regions->widget ());
 	add_notebook_page (_notebook_tab2, _("Clips"), _("Clips"), _trigger_clip_picker);
-	add_notebook_page (_notebook_tab3, _("Arrangement"), _("Arrangement"), _sections->widget ());
-	add_notebook_page (_notebook_tab1, _("Snapshots"), _("Snapshots"), _snapshots->widget ());
+	add_notebook_page (_notebook_tab3, _("Arr"), _("Arrangement"), _sections->widget ());
+	add_notebook_page (_notebook_tab1, _("Snaps"), _("Snapshots"), _snapshots->widget ());
 	add_notebook_page (_notebook_tab1, _("Groups"), _("Track & Bus Groups"), _route_groups->widget ());
-	add_notebook_page (_notebook_tab3, _("Markers"), _("Ranges & Marks"), _locations->widget ());
+	add_notebook_page (_notebook_tab3, _("Marks"), _("Ranges & Marks"), _locations->widget ());
 
 	_the_notebook.set_show_tabs (false);
 	_the_notebook.set_scrollable (true);
@@ -608,7 +608,7 @@ Editor::Editor ()
 
 	editor_summary_pane.add (_summary_hbox);
 
-	HBox* tabbox = manage (new HBox);
+	HBox* tabbox = manage (new HBox (true));
 	tabbox->set_spacing (3);
 	tabbox->pack_start (_notebook_tab1);
 	tabbox->pack_start (_notebook_tab2);
