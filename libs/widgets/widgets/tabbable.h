@@ -207,7 +207,7 @@ private:
 	void window_mapped ();
 	void window_unmapped ();
 
-	Gtk::EventBox  _content_ebox; /* this is the root widget for a * full-featured tabbable, which * contains ...  */
+	EventBoxExt    _content_ebox; /* this is the root widget for a * full-featured tabbable, which * contains ...  */
 	Gtk::VBox      _content_vbox; /* a VBox for packing the internal contains into */
 	Gtk::Widget*   _contents; /* for most Tabbables this will be content_ebox;  but rc_options, for example, does something different. */
 	Gtk::Notebook  _own_notebook;
