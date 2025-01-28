@@ -413,6 +413,7 @@ Pianoroll::build_canvas ()
 	bbt_ruler->set_outline_color (text);
 	CANVAS_DEBUG_NAME (bbt_ruler, "cue bbt ruler");
 
+
 	data_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
 

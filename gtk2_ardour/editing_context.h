@@ -40,6 +40,8 @@
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
 
+#include "canvas/ruler.h"
+
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
 #include "widgets/ardour_spacer.h"
@@ -63,6 +65,7 @@ class CursorContext;
 class DragManager;
 class EditorCursor;
 class EditNoteDialog;
+class GridLines;
 class MidiRegionView;
 class MidiView;
 class MouseCursors;
@@ -759,6 +762,18 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	RegionView* entered_regionview;
 
 	bool clear_entered_track;
+
+	std::vector<ArdourCanvas::Ruler::Mark> grid_marks;
+	GridLines* grid_lines;
+
+	void drop_grid ();
+	void hide_grid_lines ();
+	void maybe_draw_grid_lines (ArdourCanvas::Container*);
+
+	virtual void metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
+	virtual void metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
+	virtual void metric_get_samples (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
+	virtual void metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
 
 	virtual void set_entered_track (TimeAxisView*) {};
 

@@ -1639,14 +1639,8 @@ private:
 	/// true if we are in fullscreen mode
 	bool _maximised;
 
-	std::vector<ArdourCanvas::Ruler::Mark> grid_marks;
-	GridLines* grid_lines;
-
 	ArdourCanvas::Container* global_rect_group;
 	ArdourCanvas::Container* time_line_group;
-
-	void hide_grid_lines ();
-	void maybe_draw_grid_lines ();
 
 	void new_tempo_section ();
 

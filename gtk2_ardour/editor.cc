@@ -317,7 +317,6 @@ Editor::Editor ()
 	, ignore_map_change (false)
 	, _stationary_playhead (false)
 	, _maximised (false)
-	, grid_lines (0)
 	, global_rect_group (0)
 	, time_line_group (0)
 	, tempo_marker_menu (0)
@@ -3422,9 +3421,9 @@ Editor::update_grid ()
 		if (bbt_ruler_scale != bbt_show_many) {
 			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
 		}
-		maybe_draw_grid_lines ();
+		maybe_draw_grid_lines (time_line_group);
 	} else {
-		maybe_draw_grid_lines ();
+		maybe_draw_grid_lines (time_line_group);
 	}
 }
 
@@ -5485,9 +5484,7 @@ Editor::session_going_away ()
 	remove_metric_marks ();
 	clear_marker_display ();
 
-	hide_grid_lines ();
-	delete grid_lines;
-	grid_lines = 0;
+	drop_grid ();
 
 	stop_step_editing ();
 

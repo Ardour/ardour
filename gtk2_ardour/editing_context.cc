@@ -41,6 +41,7 @@
 #include "editing_context.h"
 #include "editing_convert.h"
 #include "editor_drag.h"
+#include "grid_lines.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "midi_region_view.h"
@@ -166,6 +167,7 @@ EditingContext::EditingContext (std::string const & name)
 	, entered_track (nullptr)
 	, entered_regionview (nullptr)
 	, clear_entered_track (false)
+	, grid_lines (nullptr)
 {
 	using namespace Gtk::Menu_Helpers;
 
@@ -3301,3 +3303,48 @@ EditingContext::load_shared_bindings ()
 	get_canvas()->set_data ("ardour-bindings", midi_bindings);
 	get_canvas_viewport()->set_data ("ardour-bindings", shared_bindings);
 }
+
+void
+EditingContext::drop_grid ()
+{
+	hide_grid_lines ();
+	delete grid_lines;
+	grid_lines = nullptr;
+}
+
+void
+EditingContext::hide_grid_lines ()
+{
+	if (grid_lines) {
+		grid_lines->hide();
+	}
+}
+
+void
+EditingContext::maybe_draw_grid_lines (ArdourCanvas::Container* group)
+{
+	if ( _session == 0 ) {
+		return;
+	}
+
+	if (!grid_lines) {
+		grid_lines = new GridLines (group, ArdourCanvas::LineSet::Vertical);
+	}
+
+	grid_marks.clear();
+	samplepos_t rightmost_sample = _leftmost_sample + current_page_samples();
+
+	if (grid_musical()) {
+		 metric_get_bbt (grid_marks, _leftmost_sample, rightmost_sample, 12);
+	} else if (_grid_type== GridTypeTimecode) {
+		 metric_get_timecode (grid_marks, _leftmost_sample, rightmost_sample, 12);
+	} else if (_grid_type == GridTypeCDFrame) {
+		metric_get_minsec (grid_marks, _leftmost_sample, rightmost_sample, 12);
+	} else if (_grid_type == GridTypeMinSec) {
+		metric_get_minsec (grid_marks, _leftmost_sample, rightmost_sample, 12);
+	}
+
+	grid_lines->draw (grid_marks);
+	grid_lines->show();
+}
+
