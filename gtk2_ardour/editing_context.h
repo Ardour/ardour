@@ -680,6 +680,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	ArdourWidgets::ArdourButton mouse_content_button;
 
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
+	Glib::RefPtr<Gtk::ActionGroup> snap_actions;
 	virtual void register_actions() = 0;
 	void register_grid_actions ();
 

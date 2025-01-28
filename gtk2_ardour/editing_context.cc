@@ -2403,7 +2403,7 @@ EditingContext::register_grid_actions ()
 	ActionManager::register_action (editor_actions, X_("next-grid-choice"), _("Next Quantize Grid Choice"), sigc::mem_fun (*this, &EditingContext::next_grid_choice));
 	ActionManager::register_action (editor_actions, X_("prev-grid-choice"), _("Previous Quantize Grid Choice"), sigc::mem_fun (*this, &EditingContext::prev_grid_choice));
 
-	Glib::RefPtr<ActionGroup> snap_actions = ActionManager::create_action_group (bindings, editor_name() + X_("Snap"));
+	snap_actions = ActionManager::create_action_group (bindings, editor_name() + X_("Snap"));
 	RadioAction::Group grid_choice_group;
 
 	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv32)));

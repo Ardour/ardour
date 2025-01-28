@@ -97,6 +97,8 @@ Pianoroll::Pianoroll (std::string const & name)
 Pianoroll::~Pianoroll ()
 {
 	delete bindings;
+	ActionManager::drop_action_group (editor_actions);
+	ActionManager::drop_action_group (snap_actions);
 }
 
 bool

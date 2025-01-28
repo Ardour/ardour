@@ -18,6 +18,8 @@
 
 #include "pbd/compose.h"
 
+#include "gtkmm2ext/doi.h"
+
 #include "ardour_ui.h"
 #include "pianoroll.h"
 #include "pianoroll_window.h"
@@ -51,4 +53,11 @@ bool
 PianorollWindow::on_key_press_event (GdkEventKey* ev)
 {
 	return ARDOUR_UI::instance()->key_event_handler (ev, this);
+}
+
+bool
+PianorollWindow::on_delete_event (GdkEventAny*)
+{
+	delete_when_idle (this);
+	return true;
 }

@@ -34,7 +34,8 @@ class PianorollWindow : public ArdourWindow
 	~PianorollWindow ();
 
 	void set (std::shared_ptr<ARDOUR::MidiTrack>, std::shared_ptr<ARDOUR::MidiRegion>);
-	bool on_key_press_event (GdkEventKey* ev);
+	bool on_key_press_event (GdkEventKey*);
+	bool on_delete_event (GdkEventAny*);
 
  private:
 	Pianoroll* pianoroll;
