@@ -3689,6 +3689,12 @@ Mixer_UI::plugin_drop (const Glib::RefPtr<Gdk::DragContext>&, const Gtk::Selecti
 
 	manager.set_status (ppp->_pip->type, ppp->_pip->unique_id, status);
 	manager.save_statuses ();
+
+	/* switch to favorite tabe */
+	if (plugin_list_mode != PLM_Favorite) {
+		set_plugin_list_mode (PLM_Favorite);
+		update_sidebar_pagers (0);
+	}
 }
 
 void
