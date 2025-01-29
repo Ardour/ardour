@@ -2254,10 +2254,12 @@ Editor::set_state (const XMLNode& node, int version)
 	int32_t el_page;
 	if (node.get_property (X_("editor-list-page"), el_page)) {
 		_the_notebook.set_current_page (el_page);
-		std::string label (_the_notebook.get_tab_label_text (*_the_notebook.get_nth_page (el_page)));
-		_notebook_tab1.set_active (label);
-		_notebook_tab2.set_active (label);
+	} else {
+		el_page = _the_notebook.get_current_page ();
 	}
+	std::string label (_the_notebook.get_tab_label_text (*_the_notebook.get_nth_page (el_page)));
+	_notebook_tab1.set_active (label);
+	_notebook_tab2.set_active (label);
 
 	yn = false;
 	node.get_property (X_("show-marker-lines"), yn);

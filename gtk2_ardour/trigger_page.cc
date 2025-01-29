@@ -291,10 +291,12 @@ TriggerPage::set_state (const XMLNode& node, int version)
 	int32_t sidebar_page;
 	if (node.get_property (X_("triggerpage-sidebar-page"), sidebar_page)) {
 		_sidebar_notebook.set_current_page (sidebar_page);
-		std::string label (_sidebar_notebook.get_tab_label_text (*_sidebar_notebook.get_nth_page (sidebar_page)));
-		_sidebar_pager1.set_active (label);
-		_sidebar_pager2.set_active (label);
+	} else {
+		sidebar_page = _sidebar_notebook.get_current_page ();
 	}
+	std::string label (_sidebar_notebook.get_tab_label_text (*_sidebar_notebook.get_nth_page (sidebar_page)));
+	_sidebar_pager1.set_active (label);
+	_sidebar_pager2.set_active (label);
 
 	XMLNode* mn = node.child (_midi_editor->editor_name().c_str());
 	if (mn) {
