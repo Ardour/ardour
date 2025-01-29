@@ -199,7 +199,6 @@ private:
 	Gtk::Frame            favorite_plugins_frame;
 	Gtk::VBox             favorite_plugins_vbox;
 	Gtk::HBox             favorite_plugins_search_hbox;
-	ArdourWidgets::ArdourDropdown favorite_plugins_mode_combo;
 	Gtk::Entry            plugin_search_entry;
 	ArdourWidgets::ArdourButton plugin_search_clear_button;
 	ArdourWidgets::HPane  inner_pane;
@@ -456,7 +455,7 @@ private:
 	};
 	enum PluginListMode plugin_list_mode;
 	void set_plugin_list_mode (PluginListMode plm);
-	std::vector<std::string> plugin_list_mode_strings;
+	void update_sidebar_pagers (guint);
 
 	void refiller (ARDOUR::PluginInfoList& result, const ARDOUR::PluginInfoList& plugs);
 	void refill_favorite_plugins ();
