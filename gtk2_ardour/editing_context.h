@@ -480,6 +480,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	Gtkmm2ext::Bindings* get_bindings() const { return bindings; }
 
+	virtual void update_grid ();
+
   protected:
 	std::string _name;
 	bool within_track_canvas;
@@ -765,6 +767,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	std::vector<ArdourCanvas::Ruler::Mark> grid_marks;
 	GridLines* grid_lines;
+	ArdourCanvas::Container* time_line_group;
 
 	void drop_grid ();
 	void hide_grid_lines ();

@@ -90,6 +90,7 @@ CueEditor::autoscroll_active() const
 void
 CueEditor::redisplay_grid (bool immediate_redraw)
 {
+	update_grid ();
 }
 
 Temporal::timecnt_t

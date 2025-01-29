@@ -538,6 +538,8 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
 		zoom_in_allocate = false;
 	}
+
+	update_grid ();
 }
 
 timepos_t
@@ -1714,7 +1716,7 @@ Pianoroll::visual_changer (const VisualChange& vc)
 	/* If we are only scrolling vertically there is no need to update these */
 	if (vc.pending != VisualChange::YOrigin) {
 		// XXX update_fixed_rulers ();
-		//  XXX redisplay_grid (true);
+		redisplay_grid (true);
 	}
 }
 

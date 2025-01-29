@@ -168,6 +168,7 @@ EditingContext::EditingContext (std::string const & name)
 	, entered_regionview (nullptr)
 	, clear_entered_track (false)
 	, grid_lines (nullptr)
+	, time_line_group (nullptr)
 {
 	using namespace Gtk::Menu_Helpers;
 
@@ -254,6 +255,7 @@ EditingContext::EditingContext (std::string const & name)
 
 EditingContext::~EditingContext()
 {
+	delete grid_lines;
 }
 
 void
@@ -3346,5 +3348,27 @@ EditingContext::maybe_draw_grid_lines (ArdourCanvas::Container* group)
 
 	grid_lines->draw (grid_marks);
 	grid_lines->show();
+}
+
+
+void
+EditingContext::update_grid ()
+{
+	if (!_session) {
+		return;
+	}
+
+	if (_grid_type == GridTypeNone) {
+		hide_grid_lines ();
+	} else if (grid_musical()) {
+//		Temporal::TempoMapPoints grid;
+//		grid.reserve (4096);
+//		if (bbt_ruler_scale != bbt_show_many) {
+//			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
+//		}
+		maybe_draw_grid_lines (time_line_group);
+	} else {
+		maybe_draw_grid_lines (time_line_group);
+	}
 }
 

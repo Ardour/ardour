@@ -250,7 +250,7 @@ public:
 
 	/* tempo */
 
-	void update_grid ();
+	// void update_grid ();
 
 	/* analysis window */
 
@@ -1640,7 +1640,6 @@ private:
 	bool _maximised;
 
 	ArdourCanvas::Container* global_rect_group;
-	ArdourCanvas::Container* time_line_group;
 
 	void new_tempo_section ();
 

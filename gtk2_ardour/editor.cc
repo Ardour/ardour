@@ -154,7 +154,6 @@
 #include "selection_properties_box.h"
 #include "simple_progress_dialog.h"
 #include "sfdb_ui.h"
-#include "grid_lines.h"
 #include "time_axis_view.h"
 #include "timers.h"
 #include "ui_config.h"
@@ -318,7 +317,6 @@ Editor::Editor ()
 	, _stationary_playhead (false)
 	, _maximised (false)
 	, global_rect_group (0)
-	, time_line_group (0)
 	, tempo_marker_menu (0)
 	, meter_marker_menu (0)
 	, bbt_marker_menu (0)
@@ -3403,27 +3401,6 @@ Editor::cycle_marker_click_behavior ()
 	case MarkerClickLocateWhenStopped:
 		set_marker_click_behavior (MarkerClickSelectOnly);
 		break;
-	}
-}
-
-void
-Editor::update_grid ()
-{
-	if (!_session) {
-		return;
-	}
-
-	if (_grid_type == GridTypeNone) {
-		hide_grid_lines ();
-	} else if (grid_musical()) {
-		Temporal::TempoMapPoints grid;
-		grid.reserve (4096);
-		if (bbt_ruler_scale != bbt_show_many) {
-			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
-		}
-		maybe_draw_grid_lines (time_line_group);
-	} else {
-		maybe_draw_grid_lines (time_line_group);
 	}
 }
 
