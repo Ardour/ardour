@@ -281,19 +281,13 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_scroller.add (favorite_plugins_display);
 	favorite_plugins_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
+	favorite_plugins_search_hbox.set_spacing (2);
 	favorite_plugins_search_hbox.pack_start (plugin_search_entry, true, true);
 	favorite_plugins_search_hbox.pack_start (plugin_search_clear_button, false, false);
 
+	favorite_plugins_vbox.set_spacing (3);
 	favorite_plugins_vbox.pack_start (favorite_plugins_scroller, true, true);
 	favorite_plugins_vbox.pack_start (favorite_plugins_search_hbox, false, false);
-
-	Gtk::Label *l = manage (new Label (_("Mixer Scenes (F1...F8 to recall)")));
-	l->set_alignment(0, 0.5);
-	Gtk::Table *padder = manage (new Table ());
-	padder->set_border_width(4);
-	padder->attach (*l, 0,1,0,1, Gtk::FILL, Gtk::FILL);
-
-	_mixer_scene_vbox.pack_start(*padder, false, false);
 
 	_mixer_scene_table.set_border_width(4);
 	_mixer_scene_table.set_spacings(4);
@@ -338,6 +332,7 @@ Mixer_UI::Mixer_UI ()
 
 	_mixer_scene_spacer.set_size_request (-1, 6);
 	_mixer_scene_frame.add(_mixer_scene_vbox);
+	_mixer_scene_frame.set_label (_("Mixer Scenes (F1..F8 to recall)"));
 
 	list_vpacker.pack_start (*tabbox, false, false, 2);
 	list_vpacker.pack_start (_sidebar_notebook);

@@ -52,6 +52,7 @@
 #include "gtkmm2ext/treeutils.h"
 
 #include "widgets/ardour_dropdown.h"
+#include "widgets/frame.h"
 #include "widgets/metabutton.h"
 #include "widgets/pane.h"
 #include "widgets/tabbable.h"
@@ -214,7 +215,7 @@ private:
 	ArdourWidgets::MetaButton _sidebar_pager2;
 
 	Gtk::EventBox         _mixer_scene_spacer;
-	Gtk::Frame            _mixer_scene_frame;
+	ArdourWidgets::Frame  _mixer_scene_frame;
 	Gtk::Table            _mixer_scene_table;
 	Gtk::VBox             _mixer_scene_vbox;
 
