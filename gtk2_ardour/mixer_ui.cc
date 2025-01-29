@@ -248,10 +248,6 @@ Mixer_UI::Mixer_UI ()
 
 	group_display_vbox.pack_start (group_display_scroller, true, true);
 
-	group_display_frame.set_name ("BaseFrame");
-	group_display_frame.set_shadow_type (Gtk::SHADOW_IN);
-	group_display_frame.add (group_display_vbox);
-
 	list<TargetEntry> target_list;
 	target_list.push_back (TargetEntry ("x-ardour/plugin.preset", Gtk::TARGET_SAME_APP));
 
@@ -287,10 +283,6 @@ Mixer_UI::Mixer_UI ()
 
 	favorite_plugins_search_hbox.pack_start (plugin_search_entry, true, true);
 	favorite_plugins_search_hbox.pack_start (plugin_search_clear_button, false, false);
-
-	favorite_plugins_frame.set_name ("BaseFrame");
-	favorite_plugins_frame.set_shadow_type (Gtk::SHADOW_IN);
-	favorite_plugins_frame.add (favorite_plugins_vbox);
 
 	favorite_plugins_vbox.pack_start (favorite_plugins_scroller, true, true);
 	favorite_plugins_vbox.pack_start (favorite_plugins_search_hbox, false, false);
@@ -356,7 +348,7 @@ Mixer_UI::Mixer_UI ()
 	_sidebar_notebook.set_scrollable (true);
 	_sidebar_notebook.popup_disable ();
 
-	_sidebar_notebook.append_page (favorite_plugins_frame, _("Plugins"));
+	_sidebar_notebook.append_page (favorite_plugins_vbox, _("Plugins"));
 
 	_sidebar_pager1.add_item (_("Favorite"), _("Favorite Plugins"), [this]() {_sidebar_notebook.set_current_page (0); set_plugin_list_mode (PLM_Favorite); update_sidebar_pagers (0); });
 	_sidebar_pager1.add_item (_("Recent"), _("Recently Used Plugins"), [this]() {_sidebar_notebook.set_current_page (0); set_plugin_list_mode (PLM_Recent); update_sidebar_pagers (0); });
@@ -368,8 +360,8 @@ Mixer_UI::Mixer_UI ()
 	_sidebar_pager2.add_item (_("Top-10"), _("Top-10 Plugins"), [this]() {_sidebar_notebook.set_current_page (0); set_plugin_list_mode (PLM_TopHits); update_sidebar_pagers (0); });
 	_sidebar_pager2.add_item (_("Search"), _("Serach All Plugins"), [this]() {_sidebar_notebook.set_current_page (0); set_plugin_list_mode (PLM_SearchAll); update_sidebar_pagers (0); });
 
-	add_sidebar_page (_("Tracks"), _("Track & Bus Visibility"), track_display_frame);
-	add_sidebar_page (_("Groups"), _("Track & Bus Groups"), group_display_frame);
+	add_sidebar_page (_("Tracks"), _("Track & Bus Visibility"), track_display_scroller);
+	add_sidebar_page (_("Groups"), _("Track & Bus Groups"), group_display_vbox);
 
 	_sidebar_pager2.set_index (4);
 
@@ -420,8 +412,7 @@ Mixer_UI::Mixer_UI ()
 	group_display_scroller.show();
 	favorite_plugins_scroller.show();
 	group_display_vbox.show();
-	group_display_frame.show();
-	favorite_plugins_frame.show_all();
+	favorite_plugins_vbox.show_all();
 	strip_packer.show();
 	inner_pane.show();
 	vca_scroller.show();
@@ -2986,12 +2977,7 @@ Mixer_UI::setup_track_display ()
 	track_display_scroller.add (track_display);
 	track_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	track_display_frame.set_name("BaseFrame");
-	track_display_frame.set_shadow_type (Gtk::SHADOW_IN);
-	track_display_frame.add (track_display_scroller);
-
 	track_display_scroller.show();
-	track_display_frame.show();
 	track_display.show();
 }
 

@@ -194,9 +194,6 @@ private:
 	Gtk::ScrolledWindow   group_display_scroller;
 	Gtk::ScrolledWindow   favorite_plugins_scroller;
 	Gtk::VBox             group_display_vbox;
-	Gtk::Frame            track_display_frame;
-	Gtk::Frame            group_display_frame;
-	Gtk::Frame            favorite_plugins_frame;
 	Gtk::VBox             favorite_plugins_vbox;
 	Gtk::HBox             favorite_plugins_search_hbox;
 	Gtk::Entry            plugin_search_entry;
