@@ -3330,7 +3330,7 @@ EditingContext::maybe_draw_grid_lines (ArdourCanvas::Container* group)
 	}
 
 	if (!grid_lines) {
-		grid_lines = new GridLines (group, ArdourCanvas::LineSet::Vertical);
+		grid_lines = new GridLines (*this, group, ArdourCanvas::LineSet::Vertical);
 	}
 
 	grid_marks.clear();
