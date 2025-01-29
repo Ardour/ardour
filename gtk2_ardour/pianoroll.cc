@@ -976,7 +976,7 @@ edit_last_mark_label (std::vector<ArdourCanvas::Ruler::Mark>& marks, const std::
 void
 Pianoroll::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, samplepos_t leftmost, samplepos_t rightmost, gint /*maxchars*/)
 {
-	if (_session == 0) {
+	if (!_session) {
 		return;
 	}
 

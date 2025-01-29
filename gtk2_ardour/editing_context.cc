@@ -3325,7 +3325,7 @@ EditingContext::hide_grid_lines ()
 void
 EditingContext::maybe_draw_grid_lines (ArdourCanvas::Container* group)
 {
-	if ( _session == 0 ) {
+	if (!_session) {
 		return;
 	}
 
