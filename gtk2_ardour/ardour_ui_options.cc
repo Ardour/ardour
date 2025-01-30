@@ -145,6 +145,12 @@ ARDOUR_UI::toggle_click ()
 }
 
 void
+ARDOUR_UI::toggle_click_on_rec ()
+{
+	ActionManager::toggle_config_state ("Transport", "ToggleClickOnRec", &RCConfiguration::set_click_record_only, &RCConfiguration::get_click_record_only);
+}
+
+void
 ARDOUR_UI::toggle_session_monitoring_in ()
 {
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Transport"), X_("SessionMonitorIn"));
