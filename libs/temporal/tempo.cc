@@ -524,49 +524,53 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 		TEMPO_MAP_ASSERT (qn >= _quarters);
 	}
 
+	superclock_t r;
+
 	if (!actually_ramped()) {
 		/* not ramped, use linear */
 		const Beats delta = qn - _quarters;
 		const superclock_t spqn = superclocks_per_quarter_note ();
-		return _sclock + (spqn * delta.get_beats()) + muldiv_round (spqn, delta.get_ticks(), superclock_t (Temporal::ticks_per_beat));
-	}
-
-	superclock_t r;
-	const double log_expr = superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double();
-
-	// std::cerr << "logexpr " << log_expr << " from " << superclocks_per_quarter_note() << " * " << _omega << " * " << (qn - _quarters) << std::endl;
-
-	if (log_expr < -1) {
-
-		r = _sclock + llrint (log (-log_expr - 1.0) / -_omega);
-
-		if (r < 0) {
-			std::cerr << "CASE 1: " << *this << endl << " scpqn = " << superclocks_per_quarter_note() << std::endl;
-			std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log (" << log_expr << ") "
-			          << log (-log_expr - 1.0)
-			          << " - omega = " << -_omega
-			          << " => "
-			          << r << std::endl;
-			abort ();
-		}
-
+		r = _sclock + (spqn * delta.get_beats()) + muldiv_round (spqn, delta.get_ticks(), superclock_t (Temporal::ticks_per_beat));
 	} else {
-		r = _sclock + llrint (log1p (log_expr) / _omega);
 
-		// std::cerr << "r = " << _sclock << " + " << log1p (log_expr) / _omega << " => " << r << std::endl;
+		const double log_expr = superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double();
 
-		if (r < 0) {
-			std::cerr << "CASE 2: scpqn = " << superclocks_per_quarter_note() << std::endl;
-			std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log1p (" << superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double() << " = "
-			          << log1p (superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double())
-			          << " => "
-			          << r << std::endl;
-			_map->dump (std::cerr);
-			abort ();
+		// std::cerr << "logexpr " << log_expr << " from " << superclocks_per_quarter_note() << " * " << _omega << " * " << (qn - _quarters) << std::endl;
+
+		if (log_expr < -1) {
+
+			r = _sclock + llrint (log (-log_expr - 1.0) / -_omega);
+
+			if (r < 0) {
+				std::cerr << "CASE 1: " << *this << endl << " scpqn = " << superclocks_per_quarter_note() << std::endl;
+				std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log (" << log_expr << ") "
+				          << log (-log_expr - 1.0)
+				          << " - omega = " << -_omega
+				          << " => "
+				          << r << std::endl;
+				abort ();
+			}
+
+		} else {
+			r = _sclock + llrint (log1p (log_expr) / _omega);
+
+			// std::cerr << "r = " << _sclock << " + " << log1p (log_expr) / _omega << " => " << r << std::endl;
+
+			if (r < 0) {
+				std::cerr << "CASE 2: scpqn = " << superclocks_per_quarter_note() << std::endl;
+				std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log1p (" << superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double() << " = "
+				          << log1p (superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double())
+				          << " => "
+				          << r << std::endl;
+				_map->dump (std::cerr);
+				abort ();
+			}
 		}
 	}
 
-	return r;
+	/* Now round up to the nearest sample-equivalent superclock value */
+
+	return sample_aligned_superclock (r, TEMPORAL_SAMPLE_RATE);
 }
 
 superclock_t
