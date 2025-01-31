@@ -909,19 +909,23 @@ GtkCanvas::deliver_event (GdkEvent* event)
 
 		Item* parent = item->parent ();
 
-		if (!item->ignore_events () &&
-		    item->Event (event)) {
-			/* this item has just handled the event */
-			DEBUG_TRACE (
-				PBD::DEBUG::CanvasEvents,
-				string_compose ("canvas event handled by %1 %2\n", item->whatami(), item->name.empty() ? "[unknown]" : item->name)
-				);
+#ifndef NDEBUG
+		/* the item may have be deleted as part of the
+		 * handler, we cannot use it in DEBUG_TRACE() calls.
+		 */
+		std::string w = item->whatami();
+		std::string n = item->name;
+#endif
+		if (!item->ignore_events () && item->Event (event)) {
 
+#ifndef NDEBUG
+			DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas event handled by %1 %2\n", w, n.empty() ? "[unknown]" : n));
+#endif
 			return true;
 		}
-
-		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas event %3 left unhandled by %1 %2\n", item->whatami(), item->name.empty() ? "[unknown]" : item->name, event_type_string (event->type)));
-
+#ifndef NDEBUG
+		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas event %3 left unhandled by %1 %2\n", w, n.empty() ? "[unknown]" : n, event_type_string (event->type)));
+#endif
 		if ((item = parent) == 0) {
 			break;
 		}
