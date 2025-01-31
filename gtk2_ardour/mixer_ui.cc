@@ -348,12 +348,12 @@ Mixer_UI::Mixer_UI ()
 	_sidebar_pager1.add_item (_("Favorite"), _("Favorite Plugins"), [this]() {_sidebar_notebook.set_current_page (0); set_plugin_list_mode (PLM_Favorite); update_sidebar_pagers (0); });
 	_sidebar_pager1.add_item (_("Recent"), _("Recently Used Plugins"), [this]() {_sidebar_notebook.set_current_page (0); set_plugin_list_mode (PLM_Recent); update_sidebar_pagers (0); });
 	_sidebar_pager1.add_item (_("Top-10"), _("Top-10 Plugins"), [this]() {_sidebar_notebook.set_current_page (0); set_plugin_list_mode (PLM_TopHits); update_sidebar_pagers (0); });
-	_sidebar_pager1.add_item (_("Search"), _("Serach All Plugins"), [this]() {_sidebar_notebook.set_current_page (0); set_plugin_list_mode (PLM_SearchAll); update_sidebar_pagers (0); });
+	_sidebar_pager1.add_item (_("Search"), _("Search All Plugins"), [this]() {_sidebar_notebook.set_current_page (0); set_plugin_list_mode (PLM_SearchAll); update_sidebar_pagers (0); });
 
 	_sidebar_pager2.add_item (_("Favorite"), _("Favorite Plugins"), [this]() {_sidebar_notebook.set_current_page (0); set_plugin_list_mode (PLM_Favorite); update_sidebar_pagers (0); });
 	_sidebar_pager2.add_item (_("Recent"), _("Recently Used Plugins"), [this]() {_sidebar_notebook.set_current_page (0); set_plugin_list_mode (PLM_Recent); update_sidebar_pagers (0); });
 	_sidebar_pager2.add_item (_("Top-10"), _("Top-10 Plugins"), [this]() {_sidebar_notebook.set_current_page (0); set_plugin_list_mode (PLM_TopHits); update_sidebar_pagers (0); });
-	_sidebar_pager2.add_item (_("Search"), _("Serach All Plugins"), [this]() {_sidebar_notebook.set_current_page (0); set_plugin_list_mode (PLM_SearchAll); update_sidebar_pagers (0); });
+	_sidebar_pager2.add_item (_("Search"), _("Search All Plugins"), [this]() {_sidebar_notebook.set_current_page (0); set_plugin_list_mode (PLM_SearchAll); update_sidebar_pagers (0); });
 
 	add_sidebar_page (_("Tracks"), _("Track & Bus Visibility"), track_display_scroller);
 	add_sidebar_page (_("Groups"), _("Track & Bus Groups"), group_display_vbox);
@@ -3671,7 +3671,7 @@ Mixer_UI::plugin_drop (const Glib::RefPtr<Gdk::DragContext>&, const Gtk::Selecti
 	manager.set_status (ppp->_pip->type, ppp->_pip->unique_id, status);
 	manager.save_statuses ();
 
-	/* switch to favorite tabe */
+	/* switch to favorite tab */
 	if (plugin_list_mode != PLM_Favorite) {
 		set_plugin_list_mode (PLM_Favorite);
 		update_sidebar_pagers (0);
