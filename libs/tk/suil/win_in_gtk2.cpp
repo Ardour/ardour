@@ -19,7 +19,7 @@
 #include "lv2/options/options.h"
 #include "lv2/urid/urid.h"
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <ydk/gdkwin32.h>
 
 #ifndef WM_MOUSEWHEEL

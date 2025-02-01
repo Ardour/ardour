@@ -39,7 +39,7 @@
 
 #include <glibmm/miscutils.h>
 #include <gtkmm/accelmap.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 #include "pbd/file_utils.h"
 #include "pbd/fpu.h"

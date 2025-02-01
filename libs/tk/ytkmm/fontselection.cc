@@ -37,7 +37,7 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/treeview.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 namespace

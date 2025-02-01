@@ -26,8 +26,8 @@
 #include <algorithm>
 #include <iostream>
 
-#include <gtk/gtkpaned.h>
-#include <gtk/gtk.h>
+#include <ytk/gtkpaned.h>
+#include <ytk/ytk.h>
 
 #include <gtkmm/widget.h>
 #include <gtkmm/button.h>

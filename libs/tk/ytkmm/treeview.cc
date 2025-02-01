@@ -8,7 +8,7 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/private/treeview_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 /* $Id: treeview.ccg,v 1.24 2006/06/19 17:28:12 murrayc Exp $ */
@@ -35,7 +35,7 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treemodelfilter.h>
 #include <gtkmm/entry.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace
 {

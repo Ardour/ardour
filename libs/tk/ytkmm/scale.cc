@@ -31,7 +31,7 @@
 
 #include <gtkmm/adjustment.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <math.h>
 #include <cstring> //For strlen()
 #include <memory>

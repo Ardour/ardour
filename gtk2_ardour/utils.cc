@@ -41,7 +41,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <gtk/gtkpaned.h>
+#include <ytk/gtkpaned.h>
 #include <gtkmm/label.h>
 #include <gtkmm/paned.h>
 #include <gtkmm/rc.h>

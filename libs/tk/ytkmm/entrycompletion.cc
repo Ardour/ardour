@@ -29,7 +29,7 @@
 
 #include <gtkmm/treeiter.h>
 #include <gtkmm/entry.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 static gboolean SignalProxy_Match_gtk_callback(GtkEntryCompletion* completion, const gchar* key, GtkTreeIter* iter, gpointer user_data)

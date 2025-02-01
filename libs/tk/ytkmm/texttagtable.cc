@@ -30,7 +30,7 @@
  */
 
 #include <gtkmm/texttag.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 static void SignalProxy_ForEach_gtk_callback(GtkTextTag* texttag, gpointer data)

@@ -28,7 +28,7 @@
  */
 
 #include <gtkmm/adjustment.h> 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace //anonymous namespace
 {

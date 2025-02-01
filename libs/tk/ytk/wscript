@@ -270,8 +270,8 @@ def configure(conf):
 def build(bld):
     obj = bld.shlib(features = 'c cshlib')
     obj.cflags          = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
-    obj.export_includes = ['ytk']
-    obj.includes        = ['.', '..', 'ytk', 'ytk/gtk']
+    obj.export_includes = ['.']
+    obj.includes        = ['.', 'ytk']
     obj.name            = 'libytk'
     obj.target          = 'ytk'
     obj.use             = [ 'libztk', 'libydk-pixbuf', 'libydk' ]

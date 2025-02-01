@@ -11,7 +11,7 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/private/treemodel_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: treemodel.ccg,v 1.13 2006/05/11 11:40:24 murrayc Exp $ */

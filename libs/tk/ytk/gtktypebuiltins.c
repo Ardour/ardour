@@ -3,7 +3,7 @@
 
 #undef GTK_DISABLE_DEPRECATED
 #define GTK_ENABLE_BROKEN
-#include "gtk.h"
+#include "ytk.h"
 #include "gtkprivate.h"
 #include "gtkalias.h"
 /* enumerations from "gtkaccelgroup.h" */

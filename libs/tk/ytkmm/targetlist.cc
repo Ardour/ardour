@@ -6,7 +6,7 @@
 #include <gtkmm/targetlist.h>
 #include <gtkmm/private/targetlist_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 /* Copyright 2002 The gtkmm Development Team
  *

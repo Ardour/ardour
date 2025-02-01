@@ -6,7 +6,7 @@
 #include <gtkmm/spinner.h>
 #include <gtkmm/private/spinner_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 

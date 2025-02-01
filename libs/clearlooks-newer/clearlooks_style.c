@@ -19,7 +19,7 @@
  *
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <cairo.h>
 #include <math.h>
 #include <string.h>

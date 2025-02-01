@@ -18,8 +18,8 @@
  */
 
 #include <gtkmm.h>
-#include <gtk/gtk.h>
-#include <gtk/gtksocket.h>
+#include <ytk/ytk.h>
+#include <ytk/gtksocket.h>
 #include "gtkmm2ext/gui_thread.h"
 #include "fst.h"
 #include "ardour/plug_insert_base.h"

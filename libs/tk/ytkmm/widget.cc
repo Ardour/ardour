@@ -11,7 +11,7 @@
 #include <gtkmm/widget.h>
 #include <gtkmm/private/widget_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: widget.ccg,v 1.23 2006/07/19 16:58:50 murrayc Exp $ */
@@ -42,7 +42,7 @@
 #include <gtkmm/selectiondata_private.h>
 #include <gtkmm/action.h>
 #include <gtkmm/tooltip.h>
-#include <gtk/gtk.h> //For gtk_widget_get_action().
+#include <ytk/ytk.h> //For gtk_widget_get_action().
 
 
 namespace //anonymous

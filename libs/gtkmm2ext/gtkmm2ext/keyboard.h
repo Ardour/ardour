@@ -27,7 +27,7 @@
 #include <string>
 #include <vector>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <gtkmm/accelkey.h>
 
 #include "pbd/signals.h"

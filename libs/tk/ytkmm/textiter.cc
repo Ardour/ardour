@@ -6,7 +6,7 @@
 #include <gtkmm/textiter.h>
 #include <gtkmm/private/textiter_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <cstring> // std::memset()
 
 // -*- c++ -*-

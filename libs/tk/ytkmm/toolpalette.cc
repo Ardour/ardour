@@ -30,7 +30,7 @@
  */
 
 #include <glib.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

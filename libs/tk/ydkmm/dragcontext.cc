@@ -32,7 +32,7 @@
  */
 
 #include <gdkmm/window.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <ydk/gdk.h>
 #include <glibmm/utility.h> //For ScopedPtr<>.
 

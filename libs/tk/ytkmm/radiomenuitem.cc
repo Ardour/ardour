@@ -31,7 +31,7 @@
 
 #include <gtkmm/misc.h>
 #include <gtkmm/label.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 typedef Gtk::RadioMenuItem::Group Group; //So that the generate get_group return type is parsed.
 

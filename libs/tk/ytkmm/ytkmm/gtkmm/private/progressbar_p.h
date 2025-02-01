@@ -5,7 +5,7 @@
 
 
 #include <gtkmm/private/widget_p.h>
-#include <gtk/gtkprogress.h>
+#include <ytk/gtkprogress.h>
 
 #include <glibmm/class.h>
 

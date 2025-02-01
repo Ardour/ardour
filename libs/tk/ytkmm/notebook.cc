@@ -11,7 +11,7 @@
 #include <gtkmm/notebook.h>
 #include <gtkmm/private/notebook_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: notebook.ccg,v 1.6 2006/06/16 21:40:01 murrayc Exp $ */
@@ -33,7 +33,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <gtkmm/label.h>
 #include <algorithm>
 

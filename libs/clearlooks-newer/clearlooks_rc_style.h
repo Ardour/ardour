@@ -22,7 +22,7 @@
  * Modified by Kulyk Nazar <schamane@myeburg.net>
  */
 
-#include <gtk/gtkrc.h>
+#include <ytk/gtkrc.h>
 #include "clearlooks_types.h"
 
 typedef struct _ClearlooksRcStyle ClearlooksRcStyle;

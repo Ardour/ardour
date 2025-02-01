@@ -6,7 +6,7 @@
 #include <gtkmm/image.h>
 #include <gtkmm/private/image_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: image.ccg,v 1.3 2005/07/10 19:24:22 murrayc Exp $ */
@@ -30,7 +30,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <gdkmm/image.h>
 #include <gdkmm/bitmap.h>
 #include <gdkmm/pixmap.h>

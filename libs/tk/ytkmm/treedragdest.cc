@@ -29,7 +29,7 @@
 
 #include <gtkmm/treepath.h>
 #include <gtkmm/selectiondata_private.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 namespace

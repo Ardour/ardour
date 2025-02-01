@@ -27,7 +27,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h> //For gtk_file_filter_flags_get_type().
+#include <ytk/ytk.h> //For gtk_file_filter_flags_get_type().
 
 static gboolean SignalProxy_Custom_gtk_callback(const GtkFileFilterInfo* filter_info, gpointer data)
 {

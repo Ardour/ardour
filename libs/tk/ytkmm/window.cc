@@ -37,7 +37,7 @@
 
 #include <gtkmm/accelgroup.h>
 #include <gdkmm/cursor.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 namespace Gtk

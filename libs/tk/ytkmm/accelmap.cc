@@ -22,7 +22,7 @@
 #include <glibmm/arrayhandle.h>
 #include <glibmm/listhandle.h>
 #include <gtkmm/accelmap.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

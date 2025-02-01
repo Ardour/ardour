@@ -30,7 +30,7 @@
 #include <gtkmm/textbuffer.h>
 #include <gdkmm/pixbuf.h>
 #include <glibmm/utility.h> //For ScopedPtr<>.
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 namespace Gtk

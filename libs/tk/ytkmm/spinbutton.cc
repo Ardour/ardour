@@ -6,7 +6,7 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/private/spinbutton_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: spinbutton.ccg,v 1.1 2003/01/21 13:40:38 murrayc Exp $ */
@@ -29,7 +29,7 @@
  */
 
 #include <gtkmm/adjustment.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

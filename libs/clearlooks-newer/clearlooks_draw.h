@@ -4,7 +4,7 @@
 #include "clearlooks_types.h"
 #include "clearlooks_style.h"
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <ydk/gdk.h>
 
 #include <cairo.h>

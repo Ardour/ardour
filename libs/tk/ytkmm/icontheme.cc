@@ -24,7 +24,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h> //For gtk_icon_theme_error_get_type().
+#include <ytk/ytk.h> //For gtk_icon_theme_error_get_type().
 
 
 namespace Gtk

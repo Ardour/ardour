@@ -41,7 +41,7 @@
 #define GTKMM_GDK_DISABLE_DEPRECATED_UNDEFED 1
 #endif
 
-#include <gtk/gtk.h>  /* For _GtkBoxChild */
+#include <ytk/ytk.h>  /* For _GtkBoxChild */
 
 // Redefine GTK_DISABLE_DEPRECATED if it was defined before we temporarily undefed it:
 #if defined(GTKMM_GTK_DISABLE_DEPRECATED_UNDEFED)

@@ -24,7 +24,7 @@
 #ifndef __GTK_APPLICATION_H__
 #define __GTK_APPLICATION_H__
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 #include "gtkmm2ext/visibility.h"
 

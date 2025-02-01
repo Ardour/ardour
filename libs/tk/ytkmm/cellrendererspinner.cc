@@ -6,7 +6,7 @@
 #include <gtkmm/cellrendererspinner.h>
 #include <gtkmm/private/cellrendererspinner_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 

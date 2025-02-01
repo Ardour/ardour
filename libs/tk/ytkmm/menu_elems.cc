@@ -22,7 +22,7 @@
 
 #include <gtkmm/menu_elems.h>
 #include <gtkmm/label.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 #ifndef GLIBMM_WIN32

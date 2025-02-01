@@ -28,7 +28,7 @@
  */
 
 #include <gtkmm/treeview.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 static void proxy_foreach_selection_iter_callback(GtkTreeModel* model, GtkTreePath*, GtkTreeIter* iter, void* data)

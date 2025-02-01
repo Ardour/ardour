@@ -35,7 +35,7 @@
 
 #include <gtkmm/menu.h>
 #include <gtkmm/window.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

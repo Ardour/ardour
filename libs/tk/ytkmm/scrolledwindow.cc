@@ -36,7 +36,7 @@
 #include <gtkmm/scrollbar.h>
 #include <gtkmm/viewport.h>
 #include <gtkmm/adjustment.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 namespace Gtk

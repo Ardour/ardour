@@ -26,9 +26,9 @@
 #include <string>
 #include <list>
 
-#include <gtk/gtkaccelmap.h>
-#include <gtk/gtkuimanager.h>
-#include <gtk/gtkactiongroup.h>
+#include <ytk/gtkaccelmap.h>
+#include <ytk/gtkuimanager.h>
+#include <ytk/gtkactiongroup.h>
 
 #include <gtkmm/accelmap.h>
 #include <gtkmm/uimanager.h>

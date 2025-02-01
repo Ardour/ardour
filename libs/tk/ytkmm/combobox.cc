@@ -32,7 +32,7 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/cellrenderertext.h>
 #include <gtkmm/treeview_private.h> //For SignalProxy_RowSeparator.
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

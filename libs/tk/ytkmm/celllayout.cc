@@ -27,7 +27,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 static void SignalProxy_CellData_gtk_callback(GtkCellLayout* /* cell_layout */, GtkCellRenderer* /* cell */, GtkTreeModel* tree_model, GtkTreeIter* iter, gpointer data)

@@ -6,7 +6,7 @@
 #include <gtkmm/rc.h>
 #include <gtkmm/private/rc_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: rc.ccg,v 1.3 2004/03/02 21:49:58 murrayc Exp $ */
@@ -31,7 +31,7 @@
 #include <gtkmm/settings.h>
 #include <gtkmm/widget.h>
 #include <gtkmm/style.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 namespace Gtk

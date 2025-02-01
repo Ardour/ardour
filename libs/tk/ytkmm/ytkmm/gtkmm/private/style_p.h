@@ -5,7 +5,7 @@
 
 
 #include <glibmm/private/object_p.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 #include <glibmm/class.h>
 

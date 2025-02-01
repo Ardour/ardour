@@ -31,7 +31,7 @@
 
 #include <gtkmm/textbuffer.h>
 #include <gtkmm/textiter.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace
 {

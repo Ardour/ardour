@@ -28,7 +28,7 @@
 #include <gdkmm/rectangle.h>
 #include <gdkmm/types.h>
 
-//#include <gtk/gtkicontheme.h>
+//#include <ytk/gtkicontheme.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

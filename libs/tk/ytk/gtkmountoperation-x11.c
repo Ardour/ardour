@@ -34,7 +34,7 @@
 #include <gio/gio.h>
 #include "ydk/gdkx.h"
 #include <X11/Xatom.h>
-#include <gtk/gtkicontheme.h>
+#include <ytk/gtkicontheme.h>
 #include "gtkintl.h"
 
 /* for the kill(2) system call and errno - POSIX.1-2001 and later */

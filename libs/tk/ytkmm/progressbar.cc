@@ -6,7 +6,7 @@
 #include <gtkmm/progressbar.h>
 #include <gtkmm/private/progressbar_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: progressbar.ccg,v 1.1 2003/01/21 13:40:34 murrayc Exp $ */
@@ -31,7 +31,7 @@
  */
 
 #include <gtkmm/adjustment.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace
 {

@@ -28,7 +28,7 @@
 #include <sigc++/slot.h>
 
 #include <string.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <ydk/gdkkeysyms.h>
 #include <gtkmm2ext/gtkapplication.h>
 #include <gtkmm2ext/gtkapplication-private.h>

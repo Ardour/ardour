@@ -28,7 +28,7 @@
 #include <pango/pangocairo.h>
 
 #include <ydk/gdkkeysyms.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 #include "gtkmm2ext/keyboard.h"
 

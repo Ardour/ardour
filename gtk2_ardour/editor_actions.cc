@@ -27,7 +27,7 @@
  */
 
 #include <gio/gio.h>
-#include <gtk/gtkiconfactory.h>
+#include <ytk/gtkiconfactory.h>
 
 #include "pbd/file_utils.h"
 

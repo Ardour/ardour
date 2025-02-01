@@ -31,7 +31,7 @@
 
 #include <gtkmm/treemodelcolumn.h>
 #include <iterator>
-#include <gtk/gtk.h> /* for GtkTreeIter */
+#include <ytk/ytk.h> /* for GtkTreeIter */
 
 namespace Gtk
 {

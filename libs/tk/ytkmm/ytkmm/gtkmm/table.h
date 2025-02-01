@@ -33,7 +33,7 @@
 //TODO: Careful of including this before box.h,
 //because we need to undef some things first.
 //TODO: Maybe do all includes of gtk.h in a single file.
-#include <gtk/gtk.h> /* for GtkTableChild */
+#include <ytk/ytk.h> /* for GtkTableChild */
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

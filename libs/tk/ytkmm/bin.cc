@@ -37,7 +37,7 @@
 #include <gtkmm/adjustment.h>
 #include <gtkmm/label.h>
 #include <gtkmm/image.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

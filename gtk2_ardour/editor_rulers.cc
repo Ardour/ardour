@@ -33,7 +33,7 @@
 
 #include <string>
 
-#include <gtk/gtkaction.h>
+#include <ytk/gtkaction.h>
 
 #include "canvas/container.h"
 #include "canvas/canvas.h"

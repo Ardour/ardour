@@ -6,7 +6,7 @@
 #include <gtkmm/enums.h>
 #include <gtkmm/private/enums_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: enums.ccg,v 1.1 2003/01/21 13:38:48 murrayc Exp $ */
