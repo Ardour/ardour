@@ -29,7 +29,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atk/atkgobjectaccessible.h>
+#include <ztk/atkgobjectaccessible.h>
 namespace
 {
 } // anonymous namespace

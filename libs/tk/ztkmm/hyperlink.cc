@@ -28,8 +28,8 @@
  */
 
 #include <atkmm/object.h>
-#include <atk/atkobject.h>
-#include <atk/atkhyperlink.h>
+#include <ztk/atkobject.h>
+#include <ztk/atkhyperlink.h>
 
 
 namespace Atk

@@ -28,7 +28,7 @@
  */
 
 #include <atkmm/object.h>
-#include <atk/atkhypertext.h>
+#include <ztk/atkhypertext.h>
 
 
 namespace Atk

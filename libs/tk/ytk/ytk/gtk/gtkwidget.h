@@ -37,7 +37,7 @@
 #include <gtk/gtkadjustment.h>
 #include <gtk/gtkstyle.h>
 #include <gtk/gtksettings.h>
-#include <atk/atk.h>
+#include <ztk/atk.h>
 
 G_BEGIN_DECLS
 

@@ -5,7 +5,7 @@
 
 
 #include <glibmm/private/object_p.h>
-#include <atk/atkobject.h>
+#include <ztk/atkobject.h>
 
 #include <glibmm/class.h>
 

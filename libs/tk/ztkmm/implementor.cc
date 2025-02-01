@@ -28,7 +28,7 @@
  */
 
 #include <atkmm/object.h>
-#include <atk/atkobject.h>
+#include <ztk/atkobject.h>
 
 
 namespace

@@ -4,7 +4,7 @@
 #define _ATKMM_IMAGE_P_H
 
 
-#include <atk/atkimage.h>
+#include <ztk/atkimage.h>
 
 #include <glibmm/private/interface_p.h>
 

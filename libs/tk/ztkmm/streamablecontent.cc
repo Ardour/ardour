@@ -28,7 +28,7 @@
  */
 
 #include <atkmm/object.h>
-#include <atk/atkstreamablecontent.h>
+#include <ztk/atkstreamablecontent.h>
 
 
 namespace Atk

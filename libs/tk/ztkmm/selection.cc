@@ -28,7 +28,7 @@
  */
 
 #include <atkmm/object.h>
-#include <atk/atkselection.h>
+#include <ztk/atkselection.h>
 
 
 namespace

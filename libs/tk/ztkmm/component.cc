@@ -6,7 +6,7 @@
 #include <atkmm/component.h>
 #include <atkmm/private/component_p.h>
 
-#include <atk/atk-enum-types.h>
+#include <ztk/atk-enum-types.h>
 
 // -*- c++ -*-
 /* $Id: component.ccg,v 1.1 2003/01/21 13:37:05 murrayc Exp $ */
@@ -29,7 +29,7 @@
  */
 
 #include <atkmm/object.h>
-#include <atk/atkcomponent.h>
+#include <ztk/atkcomponent.h>
 
 
 namespace

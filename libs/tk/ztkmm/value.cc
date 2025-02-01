@@ -27,7 +27,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atk/atkvalue.h>
+#include <ztk/atkvalue.h>
 
 
 namespace

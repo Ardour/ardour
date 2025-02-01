@@ -27,7 +27,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atk/atknoopobject.h>
+#include <ztk/atknoopobject.h>
 
 
 namespace

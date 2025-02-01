@@ -4,7 +4,7 @@
 #define _ATKMM_COMPONENT_P_H
 
 
-#include <atk/atkcomponent.h>
+#include <ztk/atkcomponent.h>
 
 #include <glibmm/private/interface_p.h>
 

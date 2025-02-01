@@ -29,7 +29,7 @@
 
 #include <atkmm/component.h> /* for Atk::CoordType */
 #include <glibmm/slisthandle.h>
-#include <atk/atktext.h>
+#include <ztk/atktext.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

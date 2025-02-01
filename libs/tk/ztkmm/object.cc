@@ -6,7 +6,7 @@
 #include <atkmm/object.h>
 #include <atkmm/private/object_p.h>
 
-#include <atk/atk-enum-types.h>
+#include <ztk/atk-enum-types.h>
 
 // -*- c++ -*-
 /* $Id: object.ccg,v 1.1 2003/01/21 13:37:06 murrayc Exp $ */
@@ -32,7 +32,7 @@
 #include <atkmm/relation.h>
 #include <atkmm/relationset.h>
 #include <atkmm/stateset.h>
-#include <atk/atkobject.h>
+#include <ztk/atkobject.h>
 
 
 namespace Atk

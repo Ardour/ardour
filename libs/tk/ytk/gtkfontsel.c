@@ -34,7 +34,7 @@
 #include <glib/gprintf.h>
 #include <string.h>
 
-#include <atk/atk.h>
+#include <ztk/atk.h>
 
 #include "gdk/gdk.h"
 #include "gdk/gdkkeysyms.h"

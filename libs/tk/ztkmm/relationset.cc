@@ -27,8 +27,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atk/atkobject.h>
-#include <atk/atkrelationset.h>
+#include <ztk/atkobject.h>
+#include <ztk/atkrelationset.h>
 
 
 namespace

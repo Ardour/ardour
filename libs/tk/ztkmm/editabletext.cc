@@ -28,7 +28,7 @@
  */
 
 #include <atkmm/object.h>
-#include <atk/atkeditabletext.h>
+#include <ztk/atkeditabletext.h>
 
 
 namespace
