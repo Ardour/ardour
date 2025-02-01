@@ -48,7 +48,6 @@
 #include "prh.h"
 #include "timers.h"
 #include "ui_config.h"
-#include "velocity_ghost_region.h"
 #include "verbose_cursor.h"
 
 #include "pbd/i18n.h"
