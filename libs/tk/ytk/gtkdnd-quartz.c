@@ -31,7 +31,7 @@
 
 #include "gdkconfig.h"
 
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 
 #include "gtkdnd.h"
 #include "gtkiconfactory.h"
@@ -45,7 +45,7 @@
 #include "gtkintl.h"
 #include "gtkquartz.h"
 #include "gtkalias.h"
-#include "gdk/gdkquartz.h"
+#include "ydk/gdkquartz.h"
 
 typedef struct _GtkDragSourceSite GtkDragSourceSite;
 typedef struct _GtkDragSourceInfo GtkDragSourceInfo;

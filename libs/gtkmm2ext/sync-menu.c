@@ -23,7 +23,7 @@
  */
 
 #include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 
 #include <Carbon/Carbon.h>
 

@@ -31,7 +31,7 @@
 
 #include "vst3_x11_plugin_ui.h"
 
-#include <gdk/gdkx.h> /* must come later than glibmm/object.h */
+#include <ydk/gdkx.h> /* must come later than glibmm/object.h */
 
 using namespace ARDOUR;
 using namespace Steinberg;

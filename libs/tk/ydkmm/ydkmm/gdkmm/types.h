@@ -29,7 +29,7 @@
 
 #include <glibmm/arrayhandle.h>
 #include <glibmm/listhandle.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include <gdkmmconfig.h>
 
 /* Shadow ERROR macro (from wingdi.h).

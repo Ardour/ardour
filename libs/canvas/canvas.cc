@@ -45,7 +45,7 @@
 #include "canvas/scroll_group.h"
 
 #ifdef __APPLE__
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include "gtkmm2ext/nsglview.h"
 #endif
 

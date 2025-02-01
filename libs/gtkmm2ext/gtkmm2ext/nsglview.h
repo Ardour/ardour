@@ -19,7 +19,7 @@
 #ifndef __CANVAS_NSGLVIEW_H__
 #define __CANVAS_NSGLVIEW_H__
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 namespace Gtkmm2ext
 {

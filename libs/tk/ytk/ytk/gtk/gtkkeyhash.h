@@ -22,7 +22,7 @@
 #ifndef __GTK_KEY_HASH_H__
 #define __GTK_KEY_HASH_H__
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 G_BEGIN_DECLS
 

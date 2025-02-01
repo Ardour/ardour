@@ -21,7 +21,7 @@
 #include "lv2/urid/urid.h"
 
 #include <gtk/gtk.h>
-#include <gdk/gdkquartz.h>
+#include <ydk/gdkquartz.h>
 
 #include <string.h>
 

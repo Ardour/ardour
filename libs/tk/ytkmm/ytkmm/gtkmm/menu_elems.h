@@ -29,7 +29,7 @@
 #include <gtkmm/separatormenuitem.h>
 #include <gtkmm/accelgroup.h>
 #include <gtkmm/accelkey.h>
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 
 
 namespace Gtk

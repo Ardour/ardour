@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 #include <gtkmm/action.h>
 #include <gtkmm/radioaction.h>
 #include <gtkmm/toggleaction.h>

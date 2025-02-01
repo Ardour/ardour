@@ -20,7 +20,7 @@
 #define __GTK_ICON_CACHE_H__
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 typedef struct _GtkIconCache GtkIconCache;
 typedef struct _GtkIconData GtkIconData;

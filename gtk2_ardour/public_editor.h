@@ -36,7 +36,7 @@
 
 #include <string>
 #include <glib.h>
-#include <gdk/gdktypes.h>
+#include <ydk/gdktypes.h>
 #include <gtkmm/box.h>
 #include <gtkmm/window.h>
 #include <gtkmm/actiongroup.h>

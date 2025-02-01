@@ -28,7 +28,7 @@
 
 
 #include <gtk/gtkwindow.h>
-#include "gdk/gdkwin32.h"
+#include "ydk/gdkwin32.h"
 
 
 G_BEGIN_DECLS

@@ -29,7 +29,7 @@
 
 #include "pbd/gstdio_compat.h"
 
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 #include <gtkmm/accelmap.h>
 #include <gtkmm/widget.h>
 #include <gtkmm/window.h>

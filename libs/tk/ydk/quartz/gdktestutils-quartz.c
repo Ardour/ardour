@@ -18,9 +18,9 @@
  * Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <gdk/gdktestutils.h>
-#include <gdk/gdkkeysyms.h>
-#include <gdk/gdkinternals.h>
+#include <ydk/gdktestutils.h>
+#include <ydk/gdkkeysyms.h>
+#include <ydk/gdkinternals.h>
 
 /**
  * gdk_test_render_sync

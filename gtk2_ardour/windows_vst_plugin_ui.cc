@@ -28,11 +28,11 @@
 #include "windows_vst_plugin_ui.h"
 
 #ifdef PLATFORM_WINDOWS
-#include <gdk/gdkwin32.h>
+#include <ydk/gdkwin32.h>
 #elif defined __APPLE__
 // TODO
 #else
-#include <gdk/gdkx.h>
+#include <ydk/gdkx.h>
 #endif
 
 using namespace Gtk;

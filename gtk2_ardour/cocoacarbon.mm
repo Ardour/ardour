@@ -26,7 +26,7 @@
 
 #include <pbd/error.h>
 #include <gtkmm2ext/gtkapplication.h>
-#include <gdk/gdkquartz.h>
+#include <ydk/gdkquartz.h>
 
 #undef check
 #undef YES

@@ -31,7 +31,7 @@
 #error "Only <gtk/gtk.h> can be included directly."
 #endif
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include <gtk/gtkaccelgroup.h>
 #include <gtk/gtkobject.h>
 #include <gtk/gtkadjustment.h>

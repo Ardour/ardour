@@ -24,7 +24,7 @@
 #include "ardour/linux_vst_support.h"
 #include "lxvst_plugin_ui.h"
 
-#include <gdk/gdkx.h> /* must come later than glibmm/object.h */
+#include <ydk/gdkx.h> /* must come later than glibmm/object.h */
 
 #define LXVST_H_FIDDLE 40
 

@@ -21,7 +21,7 @@
  */
 
 #include "config.h"
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include "gdkpixbuf.h"
 #include "gdkscreen.h"

@@ -22,7 +22,7 @@
 #define __GTK_XEMBED_H__
 
 #include "xembed.h"
-#include "gdk/gdkx.h"
+#include "ydk/gdkx.h"
 
 G_BEGIN_DECLS
 

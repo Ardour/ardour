@@ -5,7 +5,7 @@
 #include "clearlooks_style.h"
 
 #include <gtk/gtk.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 #include <cairo.h>
 

@@ -22,7 +22,7 @@
 
 #include <ztk/atk.h>
 
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 
 #include "gtkiconview.h"
 #include "gtkcelllayout.h"

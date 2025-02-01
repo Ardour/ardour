@@ -33,7 +33,7 @@
 #include <gdkmm/visual.h>
 #include <gdkmm/window.h>
 #include <gdkmm/rectangle.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 namespace Gdk
 {

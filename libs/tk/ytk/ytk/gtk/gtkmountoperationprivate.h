@@ -29,7 +29,7 @@
 #define __GTK_MOUNT_OPERATION_PRIVATE_H__
 
 #include <gio/gio.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
 struct _GtkMountOperationLookupContext;

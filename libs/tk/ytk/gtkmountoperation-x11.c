@@ -32,7 +32,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <gio/gio.h>
-#include "gdk/gdkx.h"
+#include "ydk/gdkx.h"
 #include <X11/Xatom.h>
 #include <gtk/gtkicontheme.h>
 #include "gtkintl.h"

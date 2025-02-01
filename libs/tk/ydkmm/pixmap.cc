@@ -29,7 +29,7 @@
 
 #include <gdkmm/window.h>
 #include <gdkmm/display.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 
 namespace Gdk

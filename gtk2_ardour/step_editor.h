@@ -22,7 +22,7 @@
 
 #include <string>
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include <sigc++/trackable.h>
 
 #include "pbd/signals.h"

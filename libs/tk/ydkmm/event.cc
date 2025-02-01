@@ -8,7 +8,7 @@
 #include <gdkmm/event.h>
 #include <gdkmm/private/event_p.h>
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 // -*- c++ -*-
 /* $Id: event.ccg,v 1.2 2004/02/10 17:29:54 mxpxpod Exp $ */

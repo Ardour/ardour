@@ -29,7 +29,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include <gdkmm/pixmap.h>
 #include <gdkmm/cursor.h>
 #include <gdkmm/types.h>

@@ -29,7 +29,7 @@
 
 #include <string.h>
 #include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 #include <gtkmm2ext/gtkapplication.h>
 #include <gtkmm2ext/gtkapplication-private.h>
 

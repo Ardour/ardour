@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 #include <cairomm/cairomm.h>
 #include <gtkmm/window.h>

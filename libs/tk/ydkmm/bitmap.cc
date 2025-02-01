@@ -28,7 +28,7 @@
  */
 
 #include <gdkmm/window.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 namespace Gdk
 {

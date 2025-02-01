@@ -29,8 +29,8 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
-#include "gdk/gdk.h"
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdk.h"
+#include "ydk/gdkkeysyms.h"
 
 #include "gtkintl.h"
 
@@ -51,7 +51,7 @@
 #include "gtkalias.h"
 
 #ifdef GDK_WINDOWING_X11
-#include "gdk/gdkx.h"
+#include "ydk/gdkx.h"
 #endif
 
 enum {

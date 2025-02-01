@@ -80,7 +80,7 @@
 #endif
 
 #ifdef LXVST_SUPPORT
-#include <gdk/gdkx.h>
+#include <ydk/gdkx.h>
 #endif
 
 using namespace std;

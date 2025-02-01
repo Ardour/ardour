@@ -32,7 +32,7 @@
 #error "Only <gtk/gtk.h> can be included directly."
 #endif
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include <gtk/gtkwidget.h>
 #ifdef G_PLATFORM_WIN32
 #include <gtk/gtkbox.h>

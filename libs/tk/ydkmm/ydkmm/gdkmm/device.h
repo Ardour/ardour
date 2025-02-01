@@ -30,7 +30,7 @@
 #include <gdkmm/event.h>
 
 //#include <gdkmm/display.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

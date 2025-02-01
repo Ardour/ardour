@@ -44,7 +44,7 @@
 #include "gdkdisplay-x11.h"
 #include "gdkpixmap-x11.h"
 #include "gdkx.h"
-#include <gdk/gdkpixmap.h>
+#include <ydk/gdkpixmap.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include "gdkalias.h"
 

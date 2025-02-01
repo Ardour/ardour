@@ -30,7 +30,7 @@
  */
 
 #include <glibmm/utility.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 namespace Gdk
 {

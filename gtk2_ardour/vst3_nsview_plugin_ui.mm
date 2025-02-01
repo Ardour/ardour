@@ -22,7 +22,7 @@
 
 #include <gtkmm.h>
 #include <gtk/gtk.h>
-#include <gdk/gdkquartz.h>
+#include <ydk/gdkquartz.h>
 
 #include "pbd/convert.h"
 #include "pbd/error.h"

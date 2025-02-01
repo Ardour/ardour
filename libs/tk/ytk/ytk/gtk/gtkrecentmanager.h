@@ -26,7 +26,7 @@
 #endif
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include <time.h>
 
 G_BEGIN_DECLS

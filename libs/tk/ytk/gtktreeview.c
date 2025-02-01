@@ -20,7 +20,7 @@
 
 #include "config.h"
 #include <string.h>
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 
 #include "gtktreeview.h"
 #include "gtkrbtree.h"

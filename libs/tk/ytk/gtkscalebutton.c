@@ -43,7 +43,7 @@
 #include <string.h>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 
 #include "gtkbindings.h"
 #include "gtkframe.h"

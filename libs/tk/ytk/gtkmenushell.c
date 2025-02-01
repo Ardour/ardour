@@ -27,7 +27,7 @@
 #define GTK_MENU_INTERNALS
 
 #include "config.h"
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 #include "gtkbindings.h"
 #include "gtkkeyhash.h"
 #include "gtklabel.h"

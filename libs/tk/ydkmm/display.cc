@@ -6,7 +6,7 @@
 #include <gdkmm/display.h>
 #include <gdkmm/private/display_p.h>
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 // -*- c++ -*-
 /* $Id: display.ccg,v 1.5 2005/01/05 17:30:16 murrayc Exp $ */
@@ -31,7 +31,7 @@
  */
 
 #include <gdkmm/window.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 namespace Gdk
 {

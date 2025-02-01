@@ -33,7 +33,7 @@
 
 #include <gdkmm/window.h>
 #include <gtk/gtk.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include <glibmm/utility.h> //For ScopedPtr<>.
 
 namespace Gdk

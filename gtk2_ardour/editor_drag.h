@@ -29,7 +29,7 @@
 #include <list>
 #include <vector>
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include <stdint.h>
 
 #include "ardour/tempo.h"

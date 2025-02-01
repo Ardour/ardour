@@ -46,7 +46,7 @@
 #define GTKMM_GSEAL_ENABLE_UNDEFED 1
 #endif
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 // Redefine GDK_DISABLE_DEPRECATED if it was defined before we temporarily undefed it:
 #if defined(GTKMM_GDK_DISABLE_DEPRECATED_UNDEFED)

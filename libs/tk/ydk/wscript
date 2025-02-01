@@ -168,8 +168,8 @@ def configure(conf):
 def build(bld):
     obj = bld.shlib(features = 'c cshlib')
     obj.cflags          = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
-    obj.export_includes = ['ydk']
-    obj.includes        = ['.', '..', 'ydk', 'ydk/gdk']
+    obj.export_includes = ['.', 'ydk']
+    obj.includes        = ['.', 'ydk']
     obj.name            = 'libydk'
     obj.target          = 'ydk'
     obj.use             = [ 'libztk', 'libydk-pixbuf' ]
@@ -184,23 +184,20 @@ def build(bld):
         obj.source   = libydk_sources + libydk_quartz_sources
         obj.cflags   += ['-xobjective-c']
         obj.uselib   += ' OSX' # -framework Cocoa -framework CoreFoundation -framework ApplicationServices
-        obj.includes += ['ydk/quartz', 'ydk/quartz/gdk', 'ydk/gdk/quartz']
-        obj.export_includes += ['ydk/gdk']
-        obj.export_includes += ['ydk/quartz']
+        obj.includes += ['quartz', 'quartz/ydk', 'ydk/quartz']
+        obj.export_includes += ['quartz']
     elif bld.env['build_target'] == 'mingw':
         obj.source   = libydk_sources + libydk_win32_sources
         obj.cflags   += ['-mms-bitfields', '-Wl,--export-all-symbols']
         obj.uselib   += ' GIO-WINDOWS'
         obj.defines         += [ 'INSIDE_GDK_WIN32', 'DLL_EXPORT', 'PIC' ]
-        obj.includes        += ['ydk/win32/gdk', 'ydk/win32']
-        obj.export_includes += ['ydk/gdk']
-        obj.export_includes += ['ydk/win32']
+        obj.includes        += ['win32', 'win32/ydk']
+        obj.export_includes += ['win32']
         obj.linkflags = ['-Wl,--export-all-symbols']
         obj.ldflags          = '-limm32 -lole32 -lgdi32 -lcomdlg32 -lwinspool -lcomctl32 -luuid'
     else:
         obj.source    = libydk_sources + libydk_x11_sources
         obj.uselib   += ' GIO-UNIX X11 XEXT XINERAMA RANDR DL'
-        obj.includes        += ['ydk/x11/gdk', 'ydk/gdk/x11']
-        obj.export_includes += ['ydk/gdk']
-        obj.export_includes += ['ydk/x11']
+        obj.includes        += ['x11', 'x11/ydk', 'ydk/x11']
+        obj.export_includes += ['x11']
 

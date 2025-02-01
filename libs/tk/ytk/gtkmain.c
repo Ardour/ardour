@@ -65,9 +65,9 @@
 #include "gtkdebug.h"
 #include "gtkalias.h"
 #include "gtkmenu.h"
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 
-#include "gdk/gdkprivate.h" /* for GDK_WINDOW_DESTROYED */
+#include "ydk/gdkprivate.h" /* for GDK_WINDOW_DESTROYED */
 
 #ifdef G_OS_WIN32
 

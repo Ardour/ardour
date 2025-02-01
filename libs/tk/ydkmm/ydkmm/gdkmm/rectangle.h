@@ -29,7 +29,7 @@
  */
 
 #include <glibmm/value.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 
 namespace Gdk

@@ -23,7 +23,7 @@
 #include "gtkmm2ext/nsglview.h"
 #include "gtkmm2ext/rgb_macros.h"
 
-#include <gdk/gdkquartz.h>
+#include <ydk/gdkquartz.h>
 
 //#define NSVIEW_PROFILE
 //#define DEBUG_NSVIEW_EXPOSURE

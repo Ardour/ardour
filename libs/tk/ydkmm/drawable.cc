@@ -30,7 +30,7 @@
 #include <gdkmm/gc.h>
 #include <gdkmm/display.h>
 #include <gdkmm/pixbuf.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 namespace Gdk
 {
