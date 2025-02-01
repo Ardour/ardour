@@ -19,9 +19,9 @@
 #ifndef __ardour_trigger_strip__
 #define __ardour_trigger_strip__
 
-#include <gtkmm/box.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/frame.h>
+#include <ytkmm/box.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/frame.h>
 
 #include "pbd/stateful.h"
 

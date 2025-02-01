@@ -42,11 +42,11 @@
 #include <boost/algorithm/string.hpp>
 
 #include <ytk/gtkpaned.h>
-#include <gtkmm/label.h>
-#include <gtkmm/paned.h>
-#include <gtkmm/rc.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/window.h>
+#include <ytkmm/label.h>
+#include <ytkmm/paned.h>
+#include <ytkmm/rc.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/window.h>
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"

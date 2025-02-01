@@ -26,7 +26,7 @@
 
 #include <cstdio> // for snprintf, grrr
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/error.h"
 #include "midi++/parser.h"

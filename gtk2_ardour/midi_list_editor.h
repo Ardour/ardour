@@ -20,11 +20,11 @@
 #ifndef __ardour_gtk2_midi_list_editor_h_
 #define __ardour_gtk2_midi_list_editor_h_
 
-#include <gtkmm/box.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/table.h>
-#include <gtkmm/treeview.h>
+#include <ytkmm/box.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/table.h>
+#include <ytkmm/treeview.h>
 
 #include "temporal/beats.h"
 

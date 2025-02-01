@@ -21,10 +21,10 @@
 #endif
 
 #include <algorithm>
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "pbd/string_convert.h"
 

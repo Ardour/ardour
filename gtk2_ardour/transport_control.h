@@ -19,7 +19,7 @@
 #ifndef _gtkardour_transport_control_h_
 #define _gtkardour_transport_control_h_
 
-#include <gtkmm/widget.h>
+#include <ytkmm/widget.h>
 #include "pbd/controllable.h"
 
 #include "ardour/session_handle.h"

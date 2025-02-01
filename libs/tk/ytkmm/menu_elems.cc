@@ -20,8 +20,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/menu_elems.h>
-#include <gtkmm/label.h>
+#include <ytkmm/menu_elems.h>
+#include <ytkmm/label.h>
 #include <ytk/ytk.h>
 
 

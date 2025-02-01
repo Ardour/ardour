@@ -23,20 +23,20 @@
 
 #include <map>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/arrow.h>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/label.h>
-#include <gtkmm/listviewtext.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/separator.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/table.h>
-#include <gtkmm/togglebutton.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/arrow.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/listviewtext.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/separator.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/table.h>
+#include <ytkmm/togglebutton.h>
 
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/dndtreeview.h"

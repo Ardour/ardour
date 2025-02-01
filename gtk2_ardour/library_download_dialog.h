@@ -21,13 +21,13 @@
 
 #include <string>
 
-#include <gtkmm/cellrendererprogress.h>
-#include <gtkmm/cellrenderertext.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/treeview.h>
-#include <gtkmm/textview.h>
+#include <ytkmm/cellrendererprogress.h>
+#include <ytkmm/cellrenderertext.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/treeview.h>
+#include <ytkmm/textview.h>
 
 #include "ardour_dialog.h"
 

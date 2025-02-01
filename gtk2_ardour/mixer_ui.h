@@ -26,17 +26,17 @@
 
 #include <list>
 
-#include <gtkmm/box.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/label.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/button.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/treeview.h>
-#include <gtkmm/treestore.h>
-#include <gtkmm/liststore.h>
+#include <ytkmm/box.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/label.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/button.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/treeview.h>
+#include <ytkmm/treestore.h>
+#include <ytkmm/liststore.h>
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"

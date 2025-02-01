@@ -20,7 +20,7 @@
 
 #include <map>
 
-#include <gtkmm/adjustment.h>
+#include <ytkmm/adjustment.h>
 
 #include "canvas/ruler.h"
 

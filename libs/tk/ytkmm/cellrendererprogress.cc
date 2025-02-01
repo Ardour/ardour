@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/cellrendererprogress.h>
-#include <gtkmm/private/cellrendererprogress_p.h>
+#include <ytkmm/cellrendererprogress.h>
+#include <ytkmm/private/cellrendererprogress_p.h>
 
 
 // -*- c++ -*-

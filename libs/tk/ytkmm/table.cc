@@ -7,8 +7,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/table.h>
-#include <gtkmm/private/table_p.h>
+#include <ytkmm/table.h>
+#include <ytkmm/private/table_p.h>
 
 
 // -*- c++ -*-

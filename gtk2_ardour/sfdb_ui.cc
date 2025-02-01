@@ -45,9 +45,9 @@
 #include "pbd/gstdio_compat.h"
 #include <glibmm/fileutils.h>
 
-#include <gtkmm/box.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/box.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/stock.h>
 
 #include "ardour/debug.h"
 

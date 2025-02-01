@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/editable.h>
-#include <gtkmm/private/editable_p.h>
+#include <ytkmm/editable.h>
+#include <ytkmm/private/editable_p.h>
 
 
 // -*- c++ -*-

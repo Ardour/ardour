@@ -7,8 +7,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/comboboxentry.h>
-#include <gtkmm/private/comboboxentry_p.h>
+#include <ytkmm/comboboxentry.h>
+#include <ytkmm/private/comboboxentry_p.h>
 
 
 // -*- c++ -*-

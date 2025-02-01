@@ -38,8 +38,8 @@
 
 #include <glibmm/error.h>
 
-#include <gtkmm/progressbar.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/progressbar.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/basename.h"
 #include "pbd/localtime_r.h"

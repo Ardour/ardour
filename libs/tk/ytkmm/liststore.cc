@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/liststore.h>
-#include <gtkmm/private/liststore_p.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/private/liststore_p.h>
 
 
 // -*- c++ -*-

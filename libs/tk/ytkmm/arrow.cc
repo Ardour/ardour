@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/arrow.h>
-#include <gtkmm/private/arrow_p.h>
+#include <ytkmm/arrow.h>
+#include <ytkmm/private/arrow_p.h>
 
 
 // -*- c++ -*-

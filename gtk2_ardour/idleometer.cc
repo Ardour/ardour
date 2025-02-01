@@ -17,8 +17,8 @@
  */
 
 #include <glib.h>
-#include <gtkmm/button.h>
-#include <gtkmm/table.h>
+#include <ytkmm/button.h>
+#include <ytkmm/table.h>
 
 #include "pbd/microseconds.h"
 

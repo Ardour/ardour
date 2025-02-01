@@ -24,7 +24,7 @@
 
 #include <cstdint>
 
-#include <gtkmm/adjustment.h>
+#include <ytkmm/adjustment.h>
 
 #include "ardour/types.h"
 

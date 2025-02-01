@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 #include "ardour/auditioner.h"
 #include "ardour/session.h"
 #include "ardour/vst_plugin.h"

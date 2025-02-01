@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/textchildanchor.h>
-#include <gtkmm/private/textchildanchor_p.h>
+#include <ytkmm/textchildanchor.h>
+#include <ytkmm/private/textchildanchor_p.h>
 
 
 // -*- c++ -*-

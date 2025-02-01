@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/plug.h>
-#include <gtkmm/private/plug_p.h>
+#include <ytkmm/plug.h>
+#include <ytkmm/private/plug_p.h>
 
 
 // -*- c++ -*-

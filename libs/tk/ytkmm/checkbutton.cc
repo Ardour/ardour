@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/private/checkbutton_p.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/private/checkbutton_p.h>
 
 
 // -*- c++ -*-

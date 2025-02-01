@@ -8,8 +8,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/notebook.h>
-#include <gtkmm/private/notebook_p.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/private/notebook_p.h>
 
 #include <ytk/ytk.h>
 
@@ -34,7 +34,7 @@
  */
 
 #include <ytk/ytk.h>
-#include <gtkmm/label.h>
+#include <ytkmm/label.h>
 #include <algorithm>
 
 

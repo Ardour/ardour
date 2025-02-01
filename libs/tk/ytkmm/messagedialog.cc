@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/private/messagedialog_p.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/private/messagedialog_p.h>
 
 #include <ytk/ytk.h>
 

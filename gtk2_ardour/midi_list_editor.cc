@@ -21,7 +21,7 @@
 #include <cmath>
 #include <map>
 
-#include <gtkmm/cellrenderercombo.h>
+#include <ytkmm/cellrenderercombo.h>
 
 #include "evoral/Note.h"
 #include "evoral/midi_util.h"

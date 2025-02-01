@@ -34,19 +34,19 @@
 
 #include <sigc++/signal.h>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/expander.h>
-#include <gtkmm/filechooserbutton.h>
-#include <gtkmm/image.h>
-#include <gtkmm/label.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/socket.h>
-#include <gtkmm/togglebutton.h>
-#include <gtkmm/viewport.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/expander.h>
+#include <ytkmm/filechooserbutton.h>
+#include <ytkmm/image.h>
+#include <ytkmm/label.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/socket.h>
+#include <ytkmm/togglebutton.h>
+#include <ytkmm/viewport.h>
 
 #include "ardour/types.h"
 #include "ardour/plugin.h"

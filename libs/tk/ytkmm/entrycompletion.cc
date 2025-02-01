@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/entrycompletion.h>
-#include <gtkmm/private/entrycompletion_p.h>
+#include <ytkmm/entrycompletion.h>
+#include <ytkmm/private/entrycompletion_p.h>
 
 
 // -*- c++ -*-
@@ -27,8 +27,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/treeiter.h>
-#include <gtkmm/entry.h>
+#include <ytkmm/treeiter.h>
+#include <ytkmm/entry.h>
 #include <ytk/ytk.h>
 
 

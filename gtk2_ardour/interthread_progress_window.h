@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <gtkmm/label.h>
-#include <gtkmm/progressbar.h>
+#include <ytkmm/label.h>
+#include <ytkmm/progressbar.h>
 #include "ardour_dialog.h"
 
 namespace ARDOUR {

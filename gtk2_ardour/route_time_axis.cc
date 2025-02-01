@@ -37,9 +37,9 @@
 
 #include <sigc++/bind.h>
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/error.h"
 #include "pbd/whitespace.h"

@@ -20,7 +20,7 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#include <gtkmm/socket.h>
+#include <ytkmm/socket.h>
 
 #include "pbd/unwind.h"
 

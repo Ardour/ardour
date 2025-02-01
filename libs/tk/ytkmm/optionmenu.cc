@@ -7,8 +7,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/optionmenu.h>
-#include <gtkmm/private/optionmenu_p.h>
+#include <ytkmm/optionmenu.h>
+#include <ytkmm/private/optionmenu_p.h>
 
 
 // -*- c++ -*-
@@ -33,8 +33,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/menu.h>
-#include <gtkmm/window.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/window.h>
 #include <ytk/ytk.h>
 
 namespace Gtk

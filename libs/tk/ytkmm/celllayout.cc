@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/celllayout.h>
-#include <gtkmm/private/celllayout_p.h>
+#include <ytkmm/celllayout.h>
+#include <ytkmm/private/celllayout_p.h>
 
 
 // -*- c++ -*-

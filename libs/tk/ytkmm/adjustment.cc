@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/private/adjustment_p.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/private/adjustment_p.h>
 
 
 // -*- c++ -*-

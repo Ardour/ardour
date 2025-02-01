@@ -18,11 +18,11 @@
 
 #pragma once
 
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/filechooserbutton.h>
-#include <gtkmm/progressbar.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/filechooserbutton.h>
+#include <ytkmm/progressbar.h>
 
 #include "pbd/file_archive.h"
 #include "ardour/session.h"

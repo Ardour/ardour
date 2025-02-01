@@ -21,8 +21,8 @@
 #include <ydk/gdk.h>
 
 #include <cairomm/cairomm.h>
-#include <gtkmm/window.h>
-#include <gtkmm/label.h>
+#include <ytkmm/window.h>
+#include <ytkmm/label.h>
 
 #include "pbd/i18n.h"
 

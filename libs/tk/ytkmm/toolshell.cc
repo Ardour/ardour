@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/toolshell.h>
-#include <gtkmm/private/toolshell_p.h>
+#include <ytkmm/toolshell.h>
+#include <ytkmm/private/toolshell_p.h>
 
 
 // -*- c++ -*-

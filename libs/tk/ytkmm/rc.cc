@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/rc.h>
-#include <gtkmm/private/rc_p.h>
+#include <ytkmm/rc.h>
+#include <ytkmm/private/rc_p.h>
 
 #include <ytk/ytk.h>
 
@@ -28,9 +28,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/settings.h>
-#include <gtkmm/widget.h>
-#include <gtkmm/style.h>
+#include <ytkmm/settings.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/style.h>
 #include <ytk/ytk.h>
 
 

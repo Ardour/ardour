@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/treestore.h>
-#include <gtkmm/private/treestore_p.h>
+#include <ytkmm/treestore.h>
+#include <ytkmm/private/treestore_p.h>
 
 
 // -*- c++ -*-

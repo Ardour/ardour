@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "widgets/ardour_button.h"
 #include "widgets/visibility.h"

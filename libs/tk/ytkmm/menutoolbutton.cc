@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/menutoolbutton.h>
-#include <gtkmm/private/menutoolbutton_p.h>
+#include <ytkmm/menutoolbutton.h>
+#include <ytkmm/private/menutoolbutton_p.h>
 
 
 // -*- c++ -*-

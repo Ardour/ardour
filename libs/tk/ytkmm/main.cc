@@ -3,13 +3,13 @@
 #undef GTK_DISABLE_DEPRECATED
  //Include this before the other headers, such as main.h,
 //so that the undef is used.
-#include <gtkmm/window.h>
+#include <ytkmm/window.h>
  
 
 #include <glibmm.h>
 
-#include <gtkmm/main.h>
-#include <gtkmm/private/main_p.h>
+#include <ytkmm/main.h>
+#include <ytkmm/private/main_p.h>
 
 
 // -*- c++ -*-
@@ -35,9 +35,9 @@
  */
 
 #include <glib.h>
-#include <gtkmmconfig.h>
-#include <gtkmm/main.h>
-#include <gtkmm/window.h>
+#include <ytkmm/ytkmmconfig.h>
+#include <ytkmm/main.h>
+#include <ytkmm/window.h>
 #include <glibmm/init.h>
 #include <giomm/init.h>
 #include <pangomm/wrap_init.h>
@@ -45,7 +45,7 @@
 #include <ztkmm/wrap_init.h>
 #endif //GTKMM_ATKMM_ENABLED
 #include <ydkmm/wrap_init.h>
-#include <gtkmm/wrap_init.h>
+#include <ytkmm/wrap_init.h>
 
 namespace
 {

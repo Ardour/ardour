@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/textmark.h>
-#include <gtkmm/private/textmark_p.h>
+#include <ytkmm/textmark.h>
+#include <ytkmm/private/textmark_p.h>
 
 
 // -*- c++ -*-
@@ -30,8 +30,8 @@
  */
 
 
-#include <gtkmm/textmark.h>
-#include <gtkmm/textbuffer.h>
+#include <ytkmm/textmark.h>
+#include <ytkmm/textbuffer.h>
 #include <ytk/ytk.h>
 
 

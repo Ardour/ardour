@@ -26,10 +26,10 @@
 
 #include <ydkmm/gc.h>
 
-#include <gtkmm/widget.h>
-#include <gtkmm/style.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/treepath.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/style.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/treepath.h>
 
 #include "pbd/stl_delete.h"
 

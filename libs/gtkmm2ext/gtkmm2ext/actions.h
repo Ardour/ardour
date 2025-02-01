@@ -24,11 +24,11 @@
 #include <vector>
 #include <exception>
 
-#include <gtkmm/action.h>
-#include <gtkmm/radioaction.h>
-#include <gtkmm/toggleaction.h>
-#include <gtkmm/actiongroup.h>
-#include <gtkmm/accelkey.h>
+#include <ytkmm/action.h>
+#include <ytkmm/radioaction.h>
+#include <ytkmm/toggleaction.h>
+#include <ytkmm/actiongroup.h>
+#include <ytkmm/accelkey.h>
 
 #include "gtkmm2ext/visibility.h"
 

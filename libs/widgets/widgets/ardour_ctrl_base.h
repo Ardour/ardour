@@ -23,7 +23,7 @@
 #include <list>
 #include <stdint.h>
 
-#include <gtkmm/action.h>
+#include <ytkmm/action.h>
 
 #include "pbd/signals.h"
 

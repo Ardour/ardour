@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/textbuffer.h>
-#include <gtkmm/private/textbuffer_p.h>
+#include <ytkmm/textbuffer.h>
+#include <ytkmm/private/textbuffer_p.h>
 
 
 // -*- c++ -*-
@@ -29,8 +29,8 @@
 
 #include <ytk/ytk.h>
 #include <glib.h>
-#include <gtkmm/textmark.h>
-#include <gtkmm/textiter.h>
+#include <ytkmm/textmark.h>
+#include <ytkmm/textiter.h>
 
 
 /*

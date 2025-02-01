@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/treemodelsort.h>
-#include <gtkmm/private/treemodelsort_p.h>
+#include <ytkmm/treemodelsort.h>
+#include <ytkmm/private/treemodelsort_p.h>
 
 
 // -*- c++ -*-

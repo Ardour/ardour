@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/infobar.h>
-#include <gtkmm/private/infobar_p.h>
+#include <ytkmm/infobar.h>
+#include <ytkmm/private/infobar_p.h>
 
 
 // -*- c++ -*-

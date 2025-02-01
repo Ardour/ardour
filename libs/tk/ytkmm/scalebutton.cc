@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/scalebutton.h>
-#include <gtkmm/private/scalebutton_p.h>
+#include <ytkmm/scalebutton.h>
+#include <ytkmm/private/scalebutton_p.h>
 
 
 // -*- c++ -*-

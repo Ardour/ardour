@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/stockitem.h>
-#include <gtkmm/private/stockitem_p.h>
+#include <ytkmm/stockitem.h>
+#include <ytkmm/private/stockitem_p.h>
 
 
 // -*- c++ -*-

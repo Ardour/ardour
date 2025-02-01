@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <gtkmm/adjustment.h>
+#include <ytkmm/adjustment.h>
 #include "gtkmm2ext/cairo_widget.h"
 
 #include "widgets/visibility.h"

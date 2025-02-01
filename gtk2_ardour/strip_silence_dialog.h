@@ -20,8 +20,8 @@
  */
 
 #include <glibmm/threads.h>
-#include <gtkmm/progressbar.h>
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/progressbar.h>
+#include <ytkmm/spinbutton.h>
 #include <glibmm/threads.h>
 
 #include <pbd/xml++.h>

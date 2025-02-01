@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/eventbox.h>
-#include <gtkmm/private/eventbox_p.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/private/eventbox_p.h>
 
 
 // -*- c++ -*-

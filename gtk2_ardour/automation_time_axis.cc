@@ -32,7 +32,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <gtkmm/separator.h>
+#include <ytkmm/separator.h>
 
 #include "pbd/error.h"
 #include "pbd/memento_command.h"

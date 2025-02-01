@@ -33,7 +33,7 @@
 
 #include "pbd/gstdio_compat.h"
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include "pbd/basename.h"
 #include "pbd/failed_constructor.h"

@@ -21,7 +21,7 @@
 #include <glibmm/value.h>
 #include <glibmm/arrayhandle.h>
 #include <glibmm/listhandle.h>
-#include <gtkmm/accelmap.h>
+#include <ytkmm/accelmap.h>
 #include <ytk/ytk.h>
 
 namespace Gtk

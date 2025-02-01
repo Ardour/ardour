@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/menubar.h>
-#include <gtkmm/private/menubar_p.h>
+#include <ytkmm/menubar.h>
+#include <ytkmm/private/menubar_p.h>
 
 
 // -*- c++ -*-

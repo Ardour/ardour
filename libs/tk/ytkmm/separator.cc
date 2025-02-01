@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/separator.h>
-#include <gtkmm/private/separator_p.h>
+#include <ytkmm/separator.h>
+#include <ytkmm/private/separator_p.h>
 
 
 // -*- c++ -*-

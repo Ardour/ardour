@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/recentmanager.h>
-#include <gtkmm/private/recentmanager_p.h>
+#include <ytkmm/recentmanager.h>
+#include <ytkmm/private/recentmanager_p.h>
 
 
 /* Copyright (C) 2006 The gtkmm Development Team

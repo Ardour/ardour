@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/cellrenderertoggle.h>
-#include <gtkmm/private/cellrenderertoggle_p.h>
+#include <ytkmm/cellrenderertoggle.h>
+#include <ytkmm/private/cellrenderertoggle_p.h>
 
 
 // -*- c++ -*-

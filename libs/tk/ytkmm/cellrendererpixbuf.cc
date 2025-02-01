@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/cellrendererpixbuf.h>
-#include <gtkmm/private/cellrendererpixbuf_p.h>
+#include <ytkmm/cellrendererpixbuf.h>
+#include <ytkmm/private/cellrendererpixbuf_p.h>
 
 
 // -*- c++ -*-

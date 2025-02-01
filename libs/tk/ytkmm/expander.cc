@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/expander.h>
-#include <gtkmm/private/expander_p.h>
+#include <ytkmm/expander.h>
+#include <ytkmm/private/expander_p.h>
 
 
 // -*- c++ -*-

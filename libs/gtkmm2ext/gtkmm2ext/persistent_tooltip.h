@@ -22,7 +22,7 @@
 
 #include <sigc++/trackable.h>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 #include "gtkmm2ext/visibility.h"
 
 namespace Gtkmm2ext {

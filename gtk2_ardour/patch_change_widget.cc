@@ -19,7 +19,7 @@
 #include <bitset>
 #include <map>
 
-#include <gtkmm/frame.h>
+#include <ytkmm/frame.h>
 
 #include "pbd/unwind.h"
 

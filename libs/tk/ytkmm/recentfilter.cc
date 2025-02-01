@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/recentfilter.h>
-#include <gtkmm/private/recentfilter_p.h>
+#include <ytkmm/recentfilter.h>
+#include <ytkmm/private/recentfilter_p.h>
 
 
 /* Copyright (C) 2006 The gtkmm Development Team

@@ -22,15 +22,15 @@
 #include <glibmm.h>
 #include <glibmm/refptr.h>
 
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/dialog.h>
-#include <gtkmm/layout.h>
-#include <gtkmm/treeview.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/label.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/separator.h>
-#include <gtkmm/window.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/dialog.h>
+#include <ytkmm/layout.h>
+#include <ytkmm/treeview.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/label.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/separator.h>
+#include <ytkmm/window.h>
 
 #include <gtkmm2ext/dndtreeview.h>
 

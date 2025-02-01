@@ -37,9 +37,9 @@
 # define ISNAN(val) std::isnan((val))
 #endif
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/checkbutton.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/checkbutton.h>
 
 #include "gtkmm2ext/utils.h"
 

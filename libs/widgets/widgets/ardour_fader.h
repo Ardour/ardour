@@ -23,7 +23,7 @@
 #include <cmath>
 #include <stdint.h>
 
-#include <gtkmm/adjustment.h>
+#include <ytkmm/adjustment.h>
 
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/colors.h"

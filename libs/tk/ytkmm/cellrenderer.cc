@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/cellrenderer.h>
-#include <gtkmm/private/cellrenderer_p.h>
+#include <ytkmm/cellrenderer.h>
+#include <ytkmm/private/cellrenderer_p.h>
 
 
 // -*- c++ -*-

@@ -37,11 +37,11 @@
 #include <iostream>
 #include <cmath>
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include <sigc++/bind.h>
-#include <gtkmm/settings.h>
+#include <ytkmm/settings.h>
 
 #include "canvas/canvas.h"
 

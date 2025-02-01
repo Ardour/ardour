@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/togglebutton.h>
-#include <gtkmm/private/togglebutton_p.h>
+#include <ytkmm/togglebutton.h>
+#include <ytkmm/private/togglebutton_p.h>
 
 
 // -*- c++ -*-

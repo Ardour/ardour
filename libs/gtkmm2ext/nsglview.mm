@@ -17,7 +17,7 @@
  */
 
 /* include order matter due to apple defines */
-#include <gtkmm/window.h>
+#include <ytkmm/window.h>
 
 #include "gtkmm2ext/cairo_canvas.h"
 #include "gtkmm2ext/nsglview.h"

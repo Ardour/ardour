@@ -20,7 +20,7 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 #include <ytk/ytk.h>
 #include <ydk/gdkquartz.h>
 

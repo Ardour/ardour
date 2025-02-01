@@ -21,7 +21,7 @@
  */
 
 #include <string>
-#include <gtkmm/enums.h>
+#include <ytkmm/enums.h>
 
 #include "ardour/profile.h"
 

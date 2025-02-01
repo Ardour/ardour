@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/recentinfo.h>
-#include <gtkmm/private/recentinfo_p.h>
+#include <ytkmm/recentinfo.h>
+#include <ytkmm/private/recentinfo_p.h>
 
 
 /* Copyright (C) 2006 The gtkmm Development Team

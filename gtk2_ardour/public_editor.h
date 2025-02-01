@@ -37,10 +37,10 @@
 #include <string>
 #include <glib.h>
 #include <ydk/gdktypes.h>
-#include <gtkmm/box.h>
-#include <gtkmm/window.h>
-#include <gtkmm/actiongroup.h>
-#include <gtkmm/notebook.h>
+#include <ytkmm/box.h>
+#include <ytkmm/window.h>
+#include <ytkmm/actiongroup.h>
+#include <ytkmm/notebook.h>
 #include <sigc++/signal.h>
 
 #include "pbd/statefuldestructible.h"

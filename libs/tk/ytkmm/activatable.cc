@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/activatable.h>
-#include <gtkmm/private/activatable_p.h>
+#include <ytkmm/activatable.h>
+#include <ytkmm/private/activatable_p.h>
 
 
 // -*- c++ -*-

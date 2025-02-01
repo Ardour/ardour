@@ -26,7 +26,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include <gtkmm/menu.h>
+#include <ytkmm/menu.h>
 
 #include "pbd/convert.h"
 #include "pbd/unwind.h"

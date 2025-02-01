@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/cellrenderercombo.h>
-#include <gtkmm/private/cellrenderercombo_p.h>
+#include <ytkmm/cellrenderercombo.h>
+#include <ytkmm/private/cellrenderercombo_p.h>
 
 
 // -*- c++ -*-

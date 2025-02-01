@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include "gtkmm/colorselection.h"
-#include "gtkmm/entry.h"
+#include "ytkmm/colorselection.h"
+#include "ytkmm/entry.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/bindings.h"

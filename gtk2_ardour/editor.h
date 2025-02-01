@@ -44,8 +44,8 @@
 
 #include <optional>
 
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/layout.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/layout.h>
 
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/dndtreeview.h"

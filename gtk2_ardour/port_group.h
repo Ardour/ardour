@@ -27,8 +27,8 @@
 
 #include "pbd/signals.h"
 
-#include <gtkmm/widget.h>
-#include <gtkmm/checkbutton.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/checkbutton.h>
 
 #include "ardour/bundle.h"
 #include "ardour/data_type.h"

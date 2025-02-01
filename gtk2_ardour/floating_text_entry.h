@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include <gtkmm/entry.h>
-#include <gtkmm/window.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/window.h>
 
 class FloatingTextEntry : public Gtk::Window
 {

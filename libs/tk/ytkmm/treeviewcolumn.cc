@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/treeviewcolumn.h>
-#include <gtkmm/private/treeviewcolumn_p.h>
+#include <ytkmm/treeviewcolumn.h>
+#include <ytkmm/private/treeviewcolumn_p.h>
 
 #include <ytk/ytk.h>
 
@@ -31,7 +31,7 @@
  */
 
 #include <ytk/ytk.h>
-#include <gtkmm/treeview_private.h>
+#include <ytkmm/treeview_private.h>
 
 namespace Gtk
 {

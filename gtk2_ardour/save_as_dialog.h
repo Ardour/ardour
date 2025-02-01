@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include <gtkmm/entry.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/filechooserbutton.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/filechooserbutton.h>
 
 #include "ardour_dialog.h"
 

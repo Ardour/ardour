@@ -21,7 +21,7 @@
  */
 
 #include <ydkmm/cursor.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "ardour/session.h"
 #include "ardour/route_group.h"

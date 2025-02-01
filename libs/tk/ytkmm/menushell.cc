@@ -7,8 +7,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/menushell.h>
-#include <gtkmm/private/menushell_p.h>
+#include <ytkmm/menushell.h>
+#include <ytkmm/private/menushell_p.h>
 
 
 // -*- c++ -*-

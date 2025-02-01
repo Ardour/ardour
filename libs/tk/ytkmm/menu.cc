@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/menu.h>
-#include <gtkmm/private/menu_p.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/private/menu_p.h>
 
 
 // -*- c++ -*-
@@ -28,7 +28,7 @@
  */
 
 #include <ytk/ytk.h>
-#include <gtkmm/accelgroup.h>
+#include <ytkmm/accelgroup.h>
 
 
 static void SignalProxy_PopupPosition_gtk_callback(GtkMenu*, int* x, int* y, gboolean* push_in, void* data)

@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/linkbutton.h>
-#include <gtkmm/private/linkbutton_p.h>
+#include <ytkmm/linkbutton.h>
+#include <ytkmm/private/linkbutton_p.h>
 
 
 // -*- c++ -*-

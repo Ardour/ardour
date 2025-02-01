@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/spinbutton.h>
 #include "ardour_dialog.h"
 #include "audio_clock.h"
 

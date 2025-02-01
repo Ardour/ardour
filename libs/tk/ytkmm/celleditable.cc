@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/celleditable.h>
-#include <gtkmm/private/celleditable_p.h>
+#include <ytkmm/celleditable.h>
+#include <ytkmm/private/celleditable_p.h>
 
 
 // -*- c++ -*-

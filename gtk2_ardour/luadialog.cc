@@ -19,7 +19,7 @@
 
 #include <algorithm>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include "ardour/dB.h"
 #include "ardour/rc_configuration.h"

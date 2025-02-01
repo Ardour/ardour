@@ -24,12 +24,12 @@
 
 #include <unordered_map>
 
-#include <gtkmm/celleditable.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/treerowreference.h>
-#include <gtkmm/treestore.h>
+#include <ytkmm/celleditable.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/treerowreference.h>
+#include <ytkmm/treestore.h>
 
 #include "gtkmm2ext/utils.h"
 

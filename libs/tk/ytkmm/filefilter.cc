@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/filefilter.h>
-#include <gtkmm/private/filefilter_p.h>
+#include <ytkmm/filefilter.h>
+#include <ytkmm/private/filefilter_p.h>
 
 
 // -*- c++ -*-

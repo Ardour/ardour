@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/colorbutton.h>
-#include <gtkmm/private/colorbutton_p.h>
+#include <ytkmm/colorbutton.h>
+#include <ytkmm/private/colorbutton_p.h>
 
 
 // -*- c++ -*-

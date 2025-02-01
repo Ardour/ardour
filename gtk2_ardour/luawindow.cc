@@ -27,7 +27,7 @@
 
 #include "pbd/gstdio_compat.h"
 #include <glibmm/fileutils.h>
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/messagedialog.h>
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"

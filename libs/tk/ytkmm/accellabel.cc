@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/accellabel.h>
-#include <gtkmm/private/accellabel_p.h>
+#include <ytkmm/accellabel.h>
+#include <ytkmm/private/accellabel_p.h>
 
 
 // -*- c++ -*-

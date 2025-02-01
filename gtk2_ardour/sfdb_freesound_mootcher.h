@@ -42,7 +42,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include <gtkmm/progressbar.h>
+#include <ytkmm/progressbar.h>
 //#include <ctime>
 
 #include "sfdb_ui.h"

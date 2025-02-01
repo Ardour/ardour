@@ -22,8 +22,8 @@
 #define Marker FuckYouAppleAndYourLackOfNameSpaces
 
 #include <sys/time.h>
-#include <gtkmm/button.h>
-#include <gtkmm/comboboxtext.h>
+#include <ytkmm/button.h>
+#include <ytkmm/comboboxtext.h>
 #include <ydk/gdkquartz.h>
 
 #include "pbd/convert.h"

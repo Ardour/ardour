@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/aspectframe.h>
-#include <gtkmm/private/aspectframe_p.h>
+#include <ytkmm/aspectframe.h>
+#include <ytkmm/private/aspectframe_p.h>
 
 
 // -*- c++ -*-

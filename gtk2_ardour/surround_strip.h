@@ -19,10 +19,10 @@
 #ifndef _gtkardour_surround_strip_
 #define _gtkardour_surround_strip_
 
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/menu.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/menu.h>
 
 #include "ardour/types.h"
 

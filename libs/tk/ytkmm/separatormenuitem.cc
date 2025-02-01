@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/separatormenuitem.h>
-#include <gtkmm/private/separatormenuitem_p.h>
+#include <ytkmm/separatormenuitem.h>
+#include <ytkmm/private/separatormenuitem_p.h>
 
 
 // -*- c++ -*-

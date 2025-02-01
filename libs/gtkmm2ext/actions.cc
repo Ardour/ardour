@@ -31,9 +31,9 @@
 #include <ytk/gtkuimanager.h>
 #include <ytk/gtkactiongroup.h>
 
-#include <gtkmm.h>
-#include <gtkmm/accelmap.h>
-#include <gtkmm/uimanager.h>
+#include <ytkmm/ytkmm.h>
+#include <ytkmm/accelmap.h>
+#include <ytkmm/uimanager.h>
 
 #include <glibmm/miscutils.h>
 

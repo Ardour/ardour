@@ -20,12 +20,12 @@
 #ifndef _WIDGETS_TABBABLE_H_
 #define _WIDGETS_TABBABLE_H_
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/image.h>
-#include <gtkmm/label.h>
-#include <gtkmm/notebook.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/image.h>
+#include <ytkmm/label.h>
+#include <ytkmm/notebook.h>
 
 #include "gtkmm2ext/window_proxy.h"
 

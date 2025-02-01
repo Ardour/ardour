@@ -20,9 +20,9 @@
 
 #include "ardour_dialog.h"
 
-#include <gtkmm/label.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/buttonbox.h>
+#include <ytkmm/label.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/buttonbox.h>
 
 class NagScreen : public ArdourDialog
 {

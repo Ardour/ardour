@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <gtkmm/window.h>
+#include <ytkmm/window.h>
 
 #include "gtkmm2ext/visibility_tracker.h"
 

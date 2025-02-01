@@ -30,8 +30,8 @@
 #include <ytk/gtkuimanager.h>
 #include <ytk/gtkactiongroup.h>
 
-#include <gtkmm/accelmap.h>
-#include <gtkmm/uimanager.h>
+#include <ytkmm/accelmap.h>
+#include <ytkmm/uimanager.h>
 
 #include "pbd/error.h"
 #include "pbd/file_utils.h"

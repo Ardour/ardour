@@ -7,8 +7,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/button.h>
-#include <gtkmm/private/button_p.h>
+#include <ytkmm/button.h>
+#include <ytkmm/private/button_p.h>
 
 
 // -*- c++ -*-
@@ -34,7 +34,7 @@
  */
 
 #include <ytk/ytk.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 
 namespace Gtk

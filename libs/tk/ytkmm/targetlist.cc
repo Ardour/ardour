@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/targetlist.h>
-#include <gtkmm/private/targetlist_p.h>
+#include <ytkmm/targetlist.h>
+#include <ytkmm/private/targetlist_p.h>
 
 #include <ytk/ytk.h>
 

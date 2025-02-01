@@ -29,8 +29,8 @@
 
 #include <set>
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/eventbox.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/eventbox.h>
 #include <ydkmm/window.h>
 
 #include <cairomm/context.h>

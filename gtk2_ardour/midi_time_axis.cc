@@ -33,8 +33,8 @@
 
 #include <sigc++/bind.h>
 
-#include <gtkmm/separator.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/separator.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/error.h"
 #include "pbd/ffs.h"

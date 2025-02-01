@@ -6,8 +6,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/range.h>
-#include <gtkmm/private/range_p.h>
+#include <ytkmm/range.h>
+#include <ytkmm/private/range_p.h>
 
 
 // -*- c++ -*-
@@ -31,7 +31,7 @@
  */
 
 #include <ytk/ytk.h>
-#include <gtkmm/adjustment.h>
+#include <ytkmm/adjustment.h>
 
 namespace Gtk
 {

@@ -24,17 +24,17 @@
 
 #include <map>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/arrow.h>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/label.h>
-#include <gtkmm/separator.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/table.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/arrow.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/separator.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/table.h>
 
 #include "widgets/ardour_dropdown.h"
 

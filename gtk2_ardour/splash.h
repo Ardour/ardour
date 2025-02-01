@@ -22,10 +22,10 @@
 
 #include <set>
 
-#include <gtkmm/window.h>
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/box.h>
-#include <gtkmm/label.h>
+#include <ytkmm/window.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/box.h>
+#include <ytkmm/label.h>
 #include <ydkmm/pixbuf.h>
 
 #include "pbd/signals.h"

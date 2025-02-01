@@ -8,8 +8,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/buttonbox.h>
-#include <gtkmm/private/buttonbox_p.h>
+#include <ytkmm/buttonbox.h>
+#include <ytkmm/private/buttonbox_p.h>
 
 
 // -*- c++ -*-

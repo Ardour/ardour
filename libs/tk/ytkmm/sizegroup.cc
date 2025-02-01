@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/sizegroup.h>
-#include <gtkmm/private/sizegroup_p.h>
+#include <ytkmm/sizegroup.h>
+#include <ytkmm/private/sizegroup_p.h>
 
 #include <ytk/ytk.h>
 

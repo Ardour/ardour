@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/enums.h>
-#include <gtkmm/private/enums_p.h>
+#include <ytkmm/enums.h>
+#include <ytkmm/private/enums_p.h>
 
 #include <ytk/ytk.h>
 
@@ -30,7 +30,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/enums.h>
+#include <ytkmm/enums.h>
 
 // static
 GType Glib::Value<Gtk::IconSize>::value_type()

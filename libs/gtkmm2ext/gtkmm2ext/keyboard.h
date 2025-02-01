@@ -28,7 +28,7 @@
 #include <vector>
 
 #include <ytk/ytk.h>
-#include <gtkmm/accelkey.h>
+#include <ytkmm/accelkey.h>
 
 #include "pbd/signals.h"
 #include "pbd/stateful.h"

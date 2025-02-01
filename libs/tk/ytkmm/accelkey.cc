@@ -23,8 +23,8 @@
 #include <glibmm/value.h>
 #include <glibmm/arrayhandle.h>
 #include <glibmm/listhandle.h>
-#include <gtkmm/accelkey.h>
-#include <gtkmm/accelgroup.h>
+#include <ytkmm/accelkey.h>
+#include <ytkmm/accelgroup.h>
 
 namespace Gtk
 {

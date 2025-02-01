@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/item.h>
-#include <gtkmm/private/item_p.h>
+#include <ytkmm/item.h>
+#include <ytkmm/private/item_p.h>
 
 
 // -*- c++ -*-

@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/toolitemgroup.h>
-#include <gtkmm/private/toolitemgroup_p.h>
+#include <ytkmm/toolitemgroup.h>
+#include <ytkmm/private/toolitemgroup_p.h>
 
 
 // -*- c++ -*-

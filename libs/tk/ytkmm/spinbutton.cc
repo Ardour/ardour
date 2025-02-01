@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/private/spinbutton_p.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/private/spinbutton_p.h>
 
 #include <ytk/ytk.h>
 
@@ -28,7 +28,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/adjustment.h>
+#include <ytkmm/adjustment.h>
 #include <ytk/ytk.h>
 
 namespace Gtk

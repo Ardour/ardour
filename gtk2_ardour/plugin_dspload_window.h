@@ -20,8 +20,8 @@
 
 #include <memory>
 
-#include <gtkmm/box.h>
-#include <gtkmm/scrolledwindow.h>
+#include <ytkmm/box.h>
+#include <ytkmm/scrolledwindow.h>
 
 #include "widgets/ardour_button.h"
 #include "pbd/signals.h"

@@ -20,8 +20,8 @@
 
 #include <string>
 
-#include <gtkmm/entry.h>
-#include <gtkmm/textview.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/textview.h>
 
 #include "ardour_dialog.h"
 

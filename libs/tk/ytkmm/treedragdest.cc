@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/treedragdest.h>
-#include <gtkmm/private/treedragdest_p.h>
+#include <ytkmm/treedragdest.h>
+#include <ytkmm/private/treedragdest_p.h>
 
 
 // -*- c++ -*-
@@ -27,8 +27,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/treepath.h>
-#include <gtkmm/selectiondata_private.h>
+#include <ytkmm/treepath.h>
+#include <ytkmm/selectiondata_private.h>
 #include <ytk/ytk.h>
 
 

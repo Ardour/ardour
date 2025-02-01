@@ -7,8 +7,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/handlebox.h>
-#include <gtkmm/private/handlebox_p.h>
+#include <ytkmm/handlebox.h>
+#include <ytkmm/private/handlebox_p.h>
 
 
 // -*- c++ -*-

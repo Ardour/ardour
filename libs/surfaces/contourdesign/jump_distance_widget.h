@@ -19,9 +19,9 @@
 #ifndef ardour_contourdesign_jump_distance_widget_h
 #define ardour_contourdesign_jump_distance_widget_h
 
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/box.h>
-#include <gtkmm/adjustment.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/box.h>
+#include <ytkmm/adjustment.h>
 
 #include "pbd/signals.h"
 

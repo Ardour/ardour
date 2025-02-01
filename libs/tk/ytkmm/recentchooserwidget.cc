@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/recentchooserwidget.h>
-#include <gtkmm/private/recentchooserwidget_p.h>
+#include <ytkmm/recentchooserwidget.h>
+#include <ytkmm/private/recentchooserwidget_p.h>
 
 
 /* Copyright 2006 The gtkmm Development Team

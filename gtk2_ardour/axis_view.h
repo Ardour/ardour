@@ -26,8 +26,8 @@
 #include <list>
 #include <unordered_map>
 
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
 #include <ydkmm/color.h>
 
 #include "pbd/xml++.h"

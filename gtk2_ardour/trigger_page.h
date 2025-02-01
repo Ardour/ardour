@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <gtkmm/box.h>
+#include <ytkmm/box.h>
 
 #include "ardour/session_handle.h"
 

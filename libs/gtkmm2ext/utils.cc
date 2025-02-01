@@ -29,14 +29,14 @@
 #include <ytk/gtkpaned.h>
 #include <ytk/ytk.h>
 
-#include <gtkmm/widget.h>
-#include <gtkmm/button.h>
-#include <gtkmm/window.h>
-#include <gtkmm/paned.h>
-#include <gtkmm/label.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/tooltip.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/button.h>
+#include <ytkmm/window.h>
+#include <ytkmm/paned.h>
+#include <ytkmm/label.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/tooltip.h>
+#include <ytkmm/menuitem.h>
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/persistent_tooltip.h"

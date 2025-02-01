@@ -29,8 +29,8 @@
 #include "canvas/polygon.h"
 #include "canvas/text.h"
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/colors.h"

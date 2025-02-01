@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/offscreenwindow.h>
-#include <gtkmm/private/offscreenwindow_p.h>
+#include <ytkmm/offscreenwindow.h>
+#include <ytkmm/private/offscreenwindow_p.h>
 
 
 // -*- c++ -*-

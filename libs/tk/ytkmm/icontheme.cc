@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/icontheme.h>
-#include <gtkmm/private/icontheme_p.h>
+#include <ytkmm/icontheme.h>
+#include <ytkmm/private/icontheme_p.h>
 
 
 /* Copyright 2003 The gtkmm Development Team

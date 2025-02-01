@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/cellrenderertext.h>
-#include <gtkmm/private/cellrenderertext_p.h>
+#include <ytkmm/cellrenderertext.h>
+#include <ytkmm/private/cellrenderertext_p.h>
 
 
 // -*- c++ -*-

@@ -20,9 +20,9 @@
 #ifndef _gtk_ardour_cuebox_ui_h_
 #define _gtk_ardour_cuebox_ui_h_
 
-#include <gtkmm/window.h>
-#include <gtkmm/colorselection.h>
-#include <gtkmm/menu.h>
+#include <ytkmm/window.h>
+#include <ytkmm/colorselection.h>
+#include <ytkmm/menu.h>
 
 #include "pbd/properties.h"
 

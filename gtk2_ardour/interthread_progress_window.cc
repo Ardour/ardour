@@ -19,7 +19,7 @@
  */
 
 #include <glibmm/main.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 #include "gtkmm2ext/utils.h"
 #include "ardour/import_status.h"
 #include "interthread_progress_window.h"

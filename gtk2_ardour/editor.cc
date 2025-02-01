@@ -60,12 +60,12 @@
 #include <glibmm/datetime.h> /*for playlist group_id */
 #include <glibmm/miscutils.h>
 #include <glibmm/uriutils.h>
-#include <gtkmm/image.h>
+#include <ytkmm/image.h>
 #include <ydkmm/color.h>
 #include <ydkmm/bitmap.h>
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gtk_ui.h"

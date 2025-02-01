@@ -29,9 +29,9 @@
 
 #include <pangomm.h>
 
-#include <gtkmm/alignment.h>
+#include <ytkmm/alignment.h>
 #include <ydkmm/color.h>
-#include <gtkmm/style.h>
+#include <ytkmm/style.h>
 
 #include "ardour/amp.h"
 #include "ardour/control_group.h"

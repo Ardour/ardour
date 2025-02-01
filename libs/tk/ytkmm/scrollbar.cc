@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/scrollbar.h>
-#include <gtkmm/private/scrollbar_p.h>
+#include <ytkmm/scrollbar.h>
+#include <ytkmm/private/scrollbar_p.h>
 
 
 // -*- c++ -*-
@@ -29,7 +29,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/adjustment.h>
+#include <ytkmm/adjustment.h>
 
 #include <ytk/ytk.h>
 

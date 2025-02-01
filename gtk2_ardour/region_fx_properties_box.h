@@ -20,8 +20,8 @@
 
 #include <vector>
 
-#include <gtkmm/box.h>
-#include <gtkmm/scrolledwindow.h>
+#include <ytkmm/box.h>
+#include <ytkmm/scrolledwindow.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"

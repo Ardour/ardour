@@ -31,8 +31,8 @@
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 
-#include <gtkmm/filechooser.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/filechooser.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/basename.h"
 #include "pbd/failed_constructor.h"

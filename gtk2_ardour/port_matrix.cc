@@ -23,14 +23,14 @@
 
 #include <iostream>
 
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/adjustment.h>
-#include <gtkmm/label.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menushell.h>
-#include <gtkmm/menu_elems.h>
-#include <gtkmm/window.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/label.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menushell.h>
+#include <ytkmm/menu_elems.h>
+#include <ytkmm/window.h>
+#include <ytkmm/stock.h>
 
 #include "ardour/bundle.h"
 #include "ardour/types.h"

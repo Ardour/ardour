@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/checkmenuitem.h>
-#include <gtkmm/private/checkmenuitem_p.h>
+#include <ytkmm/checkmenuitem.h>
+#include <ytkmm/private/checkmenuitem_p.h>
 
 
 // -*- c++ -*-
@@ -30,8 +30,8 @@
  */
 
 #include <ytk/ytk.h>
-#include <gtkmm/misc.h>
-#include <gtkmm/label.h>
+#include <ytkmm/misc.h>
+#include <ytkmm/label.h>
 
 namespace Gtk
 {

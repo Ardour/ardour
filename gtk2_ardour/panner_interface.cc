@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/persistent_tooltip.h"
 

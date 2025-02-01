@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/fontbutton.h>
-#include <gtkmm/private/fontbutton_p.h>
+#include <ytkmm/fontbutton.h>
+#include <ytkmm/private/fontbutton_p.h>
 
 
 // -*- c++ -*-

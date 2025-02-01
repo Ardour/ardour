@@ -31,7 +31,7 @@
 #include <set>
 #include <vector>
 
-#include <gtkmm/widget.h>
+#include <ytkmm/widget.h>
 #include <sigc++/signal.h>
 
 #include "ardour_dialog.h"

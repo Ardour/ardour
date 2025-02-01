@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/statusbar.h>
-#include <gtkmm/private/statusbar_p.h>
+#include <ytkmm/statusbar.h>
+#include <ytkmm/private/statusbar_p.h>
 
 
 // -*- c++ -*-

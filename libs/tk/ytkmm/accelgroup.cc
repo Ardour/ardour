@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/accelgroup.h>
-#include <gtkmm/private/accelgroup_p.h>
+#include <ytkmm/accelgroup.h>
+#include <ytkmm/private/accelgroup_p.h>
 
 
 // -*- c++ -*-

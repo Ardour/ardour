@@ -36,10 +36,10 @@
 
 #include <glibmm/threads.h>
 
-#include <gtkmm/accelmap.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/offscreenwindow.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/accelmap.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/offscreenwindow.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/convert.h"
 #include "pbd/unwind.h"

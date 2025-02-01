@@ -28,7 +28,7 @@
 #include <algorithm>
 #include <vector>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include "ardour/playlist.h"
 #include "ardour/audioregion.h"

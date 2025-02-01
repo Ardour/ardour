@@ -17,7 +17,7 @@
  */
 
 #include <cassert>
-#include <gtkmm/widget.h>
+#include <ytkmm/widget.h>
 
 #include "pbd/compose.h"
 

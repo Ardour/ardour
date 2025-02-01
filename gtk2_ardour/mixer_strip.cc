@@ -35,7 +35,7 @@
 
 #include <sigc++/bind.h>
 
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/messagedialog.h>
 
 #include "pbd/convert.h"
 #include "pbd/enumwriter.h"

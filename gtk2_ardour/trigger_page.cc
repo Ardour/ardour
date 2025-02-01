@@ -22,7 +22,7 @@
 
 #include <list>
 
-#include <gtkmm/label.h>
+#include <ytkmm/label.h>
 
 #include "pbd/properties.h"
 

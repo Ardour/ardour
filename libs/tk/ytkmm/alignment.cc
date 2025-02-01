@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/private/alignment_p.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/private/alignment_p.h>
 
 
 // -*- c++ -*-

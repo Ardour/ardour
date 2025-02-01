@@ -23,12 +23,12 @@
 #include <list>
 #include <memory>
 
-#include <gtkmm/box.h>
-#include <gtkmm/scrollbar.h>
-#include <gtkmm/table.h>
-#include <gtkmm/label.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/notebook.h>
+#include <ytkmm/box.h>
+#include <ytkmm/scrollbar.h>
+#include <ytkmm/table.h>
+#include <ytkmm/label.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/notebook.h>
 
 #include "ardour/bundle.h"
 #include "ardour/types.h"

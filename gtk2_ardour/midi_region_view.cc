@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <ostream>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include "gtkmm2ext/gtk_ui.h"
 

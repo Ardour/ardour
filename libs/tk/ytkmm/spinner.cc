@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/spinner.h>
-#include <gtkmm/private/spinner_p.h>
+#include <ytkmm/spinner.h>
+#include <ytkmm/private/spinner_p.h>
 
 #include <ytk/ytk.h>
 

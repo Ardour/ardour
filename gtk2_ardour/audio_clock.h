@@ -30,10 +30,10 @@
 
 #include <pangomm.h>
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/label.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/label.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"

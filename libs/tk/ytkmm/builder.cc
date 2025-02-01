@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/builder.h>
-#include <gtkmm/private/builder_p.h>
+#include <ytkmm/builder.h>
+#include <ytkmm/private/builder_p.h>
 
 
 // -*- c++ -*-

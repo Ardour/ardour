@@ -25,8 +25,8 @@
 
 #include "ardour/session.h"
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "context_menu_helper.h"
 #include "streamview.h"

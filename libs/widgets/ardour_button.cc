@@ -22,7 +22,7 @@
 #include <algorithm>
 
 #include <pangomm/layout.h>
-#include <gtkmm/toggleaction.h>
+#include <ytkmm/toggleaction.h>
 
 #include "pbd/compose.h"
 #include "pbd/controllable.h"

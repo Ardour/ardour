@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/label.h>
-#include <gtkmm/private/label_p.h>
+#include <ytkmm/label.h>
+#include <ytkmm/private/label_p.h>
 
 
 // -*- c++ -*-
@@ -28,7 +28,7 @@
  */
 
 #include <ytk/ytk.h>
-#include <gtkmm/menu.h>
+#include <ytkmm/menu.h>
 
 namespace Gtk
 {

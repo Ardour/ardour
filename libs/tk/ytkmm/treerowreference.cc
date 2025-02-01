@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/treerowreference.h>
-#include <gtkmm/private/treerowreference_p.h>
+#include <ytkmm/treerowreference.h>
+#include <ytkmm/private/treerowreference_p.h>
 
 
 // -*- c++ -*-

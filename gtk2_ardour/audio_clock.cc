@@ -32,7 +32,7 @@
 #include "pbd/convert.h"
 #include "pbd/enumwriter.h"
 
-#include <gtkmm/style.h>
+#include <ytkmm/style.h>
 #include <sigc++/bind.h>
 
 #include "gtkmm2ext/utils.h"

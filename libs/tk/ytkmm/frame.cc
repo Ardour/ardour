@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/frame.h>
-#include <gtkmm/private/frame_p.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/private/frame_p.h>
 
 
 // -*- c++ -*-

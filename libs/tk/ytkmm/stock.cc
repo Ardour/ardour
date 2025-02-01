@@ -18,7 +18,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 #include <ytk/ytk.h>
 
 // Get rid of macro DELETE (from winnt.h).  We have some macro

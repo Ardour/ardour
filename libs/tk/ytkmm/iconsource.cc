@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/iconsource.h>
-#include <gtkmm/private/iconsource_p.h>
+#include <ytkmm/iconsource.h>
+#include <ytkmm/private/iconsource_p.h>
 
 
 // -*- c++ -*-

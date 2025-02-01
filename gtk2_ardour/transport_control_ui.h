@@ -19,7 +19,7 @@
 #ifndef _transport_control_ui_h_
 #define _transport_control_ui_h_
 
-#include <gtkmm/box.h>
+#include <ytkmm/box.h>
 
 #include "pbd/signals.h"
 #include "ardour/session_handle.h"

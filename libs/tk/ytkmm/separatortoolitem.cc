@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/separatortoolitem.h>
-#include <gtkmm/private/separatortoolitem_p.h>
+#include <ytkmm/separatortoolitem.h>
+#include <ytkmm/private/separatortoolitem_p.h>
 
 
 // -*- c++ -*-

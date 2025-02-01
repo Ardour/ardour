@@ -38,7 +38,7 @@
 #include <cmath>
 
 #include <glibmm/miscutils.h>
-#include <gtkmm/accelmap.h>
+#include <ytkmm/accelmap.h>
 #include <ytk/ytk.h>
 
 #include "pbd/file_utils.h"

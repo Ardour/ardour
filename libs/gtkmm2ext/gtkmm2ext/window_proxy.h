@@ -26,7 +26,7 @@
 
 #include "pbd/statefuldestructible.h"
 
-#include <gtkmm/action.h>
+#include <ytkmm/action.h>
 
 #include "gtkmm2ext/visibility.h"
 

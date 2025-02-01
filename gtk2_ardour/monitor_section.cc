@@ -30,8 +30,8 @@
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/utils.h"
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "widgets/tearoff.h"
 #include "widgets/tooltips.h"

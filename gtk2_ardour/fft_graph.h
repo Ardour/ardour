@@ -24,8 +24,8 @@
 #include "ardour/types.h"
 #include <fftw3.h>
 
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/treemodel.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/treemodel.h>
 #include <ydkmm/color.h>
 
 #include <glibmm/refptr.h>

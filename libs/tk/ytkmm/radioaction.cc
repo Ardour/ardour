@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/radioaction.h>
-#include <gtkmm/private/radioaction_p.h>
+#include <ytkmm/radioaction.h>
+#include <ytkmm/private/radioaction_p.h>
 
 
 // -*- c++ -*-

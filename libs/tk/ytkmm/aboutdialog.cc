@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/aboutdialog.h>
-#include <gtkmm/private/aboutdialog_p.h>
+#include <ytkmm/aboutdialog.h>
+#include <ytkmm/private/aboutdialog_p.h>
 
 
 // -*- c++ -*-

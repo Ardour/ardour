@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/misc.h>
-#include <gtkmm/private/misc_p.h>
+#include <ytkmm/misc.h>
+#include <ytkmm/private/misc_p.h>
 
 
 // -*- c++ -*-

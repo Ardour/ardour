@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/paned.h>
-#include <gtkmm/private/paned_p.h>
+#include <ytkmm/paned.h>
+#include <ytkmm/private/paned_p.h>
 
 
 // -*- c++ -*-

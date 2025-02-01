@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/assistant.h>
-#include <gtkmm/private/assistant_p.h>
+#include <ytkmm/assistant.h>
+#include <ytkmm/private/assistant_p.h>
 
 
 // -*- c++ -*-

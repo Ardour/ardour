@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 #include <cairo.h>
-#include <gtkmm/widget.h>
+#include <ytkmm/widget.h>
 
 #include "gtkmm2ext/widget_state.h"
 #include "widgets/visibility.h"

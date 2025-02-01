@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <memory>
 
-#include <gtkmm/eventbox.h>
+#include <ytkmm/eventbox.h>
 
 class PortMatrix;
 class PortMatrixBody;

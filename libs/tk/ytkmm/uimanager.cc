@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/uimanager.h>
-#include <gtkmm/private/uimanager_p.h>
+#include <ytkmm/uimanager.h>
+#include <ytkmm/private/uimanager_p.h>
 
 
 // -*- c++ -*-

@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/entrybuffer.h>
-#include <gtkmm/private/entrybuffer_p.h>
+#include <ytkmm/entrybuffer.h>
+#include <ytkmm/private/entrybuffer_p.h>
 
 
 // -*- c++ -*-

@@ -33,9 +33,9 @@
 #include "pbd/unwind.h"
 #include "pbd/xml++.h"
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/stock.h>
 #include <gtkmm2ext/utils.h>
 
 #include "widgets/tooltips.h"

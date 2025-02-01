@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/cellrendererspinner.h>
-#include <gtkmm/private/cellrendererspinner_p.h>
+#include <ytkmm/cellrendererspinner.h>
+#include <ytkmm/private/cellrendererspinner_p.h>
 
 #include <ytk/ytk.h>
 

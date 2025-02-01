@@ -20,9 +20,9 @@
 #include <algorithm>
 
 #include <pangomm/layout.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/openuri.h"
 #include "pbd/basename.h"

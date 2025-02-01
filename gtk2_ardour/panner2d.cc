@@ -26,7 +26,7 @@
 #include <string.h>
 
 #include <cairo.h>
-#include <gtkmm/menu.h>
+#include <ytkmm/menu.h>
 
 #include "gtkmm2ext/gtk_ui.h"
 

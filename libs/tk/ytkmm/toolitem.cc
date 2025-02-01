@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/toolitem.h>
-#include <gtkmm/private/toolitem_p.h>
+#include <ytkmm/toolitem.h>
+#include <ytkmm/private/toolitem_p.h>
 
 
 // -*- c++ -*-

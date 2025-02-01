@@ -26,8 +26,8 @@
 
 #include <string>
 
-#include <gtkmm/label.h>
-#include <gtkmm/window.h>
+#include <ytkmm/label.h>
+#include <ytkmm/window.h>
 
 #include <pbd/touchable.h>
 

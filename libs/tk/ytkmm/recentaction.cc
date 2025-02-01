@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/recentaction.h>
-#include <gtkmm/private/recentaction_p.h>
+#include <ytkmm/recentaction.h>
+#include <ytkmm/private/recentaction_p.h>
 
 
 // -*- c++ -*-

@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/filechooserwidget.h>
-#include <gtkmm/private/filechooserwidget_p.h>
+#include <ytkmm/filechooserwidget.h>
+#include <ytkmm/private/filechooserwidget_p.h>
 
 
 // -*- c++ -*-

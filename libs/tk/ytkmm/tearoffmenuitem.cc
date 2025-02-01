@@ -7,8 +7,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/tearoffmenuitem.h>
-#include <gtkmm/private/tearoffmenuitem_p.h>
+#include <ytkmm/tearoffmenuitem.h>
+#include <ytkmm/private/tearoffmenuitem_p.h>
 
 
 // -*- c++ -*-

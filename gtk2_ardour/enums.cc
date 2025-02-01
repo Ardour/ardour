@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/dialog.h>
+#include <ytkmm/dialog.h>
 
 #include "pbd/enumwriter.h"
 

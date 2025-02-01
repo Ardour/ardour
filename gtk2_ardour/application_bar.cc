@@ -26,10 +26,10 @@
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 
-#include <gtkmm/accelmap.h>
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/uimanager.h>
+#include <ytkmm/accelmap.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/uimanager.h>
 
 #include "pbd/error.h"
 #include "pbd/compose.h"

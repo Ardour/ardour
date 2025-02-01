@@ -25,7 +25,7 @@
 
 #include <cstdint>
 
-#include <gtkmm/adjustment.h>
+#include <ytkmm/adjustment.h>
 
 #include "pbd/signals.h"
 

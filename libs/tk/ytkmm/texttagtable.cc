@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/texttagtable.h>
-#include <gtkmm/private/texttagtable_p.h>
+#include <ytkmm/texttagtable.h>
+#include <ytkmm/private/texttagtable_p.h>
 
 
 // -*- c++ -*-
@@ -29,7 +29,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/texttag.h>
+#include <ytkmm/texttag.h>
 #include <ytk/ytk.h>
 
 

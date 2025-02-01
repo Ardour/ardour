@@ -29,7 +29,7 @@
 #include <unistd.h>
 #include <climits>
 
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/messagedialog.h>
 
 #include "pbd/gstdio_compat.h"
 

@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <gtkmm/aboutdialog.h>
+#include <ytkmm/aboutdialog.h>
 
 #include "ardour/session_handle.h"
 

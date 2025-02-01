@@ -38,7 +38,7 @@
 #include <map>
 #include <set>
 
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/messagedialog.h>
 
 #include "pbd/error.h"
 #include "pbd/basename.h"

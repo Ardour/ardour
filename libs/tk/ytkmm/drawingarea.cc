@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/private/drawingarea_p.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/private/drawingarea_p.h>
 
 
 // -*- c++ -*-

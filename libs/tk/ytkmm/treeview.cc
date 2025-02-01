@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/treeview.h>
-#include <gtkmm/private/treeview_p.h>
+#include <ytkmm/treeview.h>
+#include <ytkmm/private/treeview_p.h>
 
 #include <ytk/ytk.h>
 
@@ -30,11 +30,11 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/treeviewcolumn.h>
-#include <gtkmm/treeview_private.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/treemodelfilter.h>
-#include <gtkmm/entry.h>
+#include <ytkmm/treeviewcolumn.h>
+#include <ytkmm/treeview_private.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/treemodelfilter.h>
+#include <ytkmm/entry.h>
 #include <ytk/ytk.h>
 
 namespace

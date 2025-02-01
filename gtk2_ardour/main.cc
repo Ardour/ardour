@@ -33,7 +33,7 @@
 #include <locale.h>
 
 #include <sigc++/bind.h>
-#include <gtkmm/settings.h>
+#include <ytkmm/settings.h>
 
 #include <curl/curl.h>
 
@@ -54,8 +54,8 @@
 #include "ardour/session_utils.h"
 #include "ardour/filesystem_paths.h"
 
-#include <gtkmm/main.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/main.h>
+#include <ytkmm/stock.h>
 
 #include <gtkmm2ext/application.h>
 #include <gtkmm2ext/utils.h>

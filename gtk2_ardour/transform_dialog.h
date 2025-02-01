@@ -21,10 +21,10 @@
 #include <list>
 #include <string>
 
-#include <gtkmm/combobox.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/combobox.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/spinbutton.h>
 
 #include "ardour/midi_model.h"
 #include "ardour/transform.h"

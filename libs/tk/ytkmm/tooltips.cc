@@ -7,8 +7,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/tooltips.h>
-#include <gtkmm/private/tooltips_p.h>
+#include <ytkmm/tooltips.h>
+#include <ytkmm/private/tooltips_p.h>
 
 
 // -*- c++ -*-
@@ -32,7 +32,7 @@
  */
 
 #include <ydkmm/color.h>
-#include <gtkmm/widget.h>
+#include <ytkmm/widget.h>
 #include <ytk/ytk.h>
 
 namespace Gtk

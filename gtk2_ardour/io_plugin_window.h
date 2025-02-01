@@ -19,10 +19,10 @@
 #ifndef _gtkardour_ioplugin_window_h_
 #define _gtkardour_ioplugin_window_h_
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/menu.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/menu.h>
 
 #include "pbd/signals.h"
 

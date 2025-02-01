@@ -33,7 +33,7 @@
 
 #include <vector>
 
-#include <gtkmm/treemodelfilter.h>
+#include <ytkmm/treemodelfilter.h>
 
 #include "pbd/convert.h"
 

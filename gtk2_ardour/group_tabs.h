@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <gtkmm/menu.h>
+#include <ytkmm/menu.h>
 
 #include "ardour/session_handle.h"
 #include "ardour/types.h"

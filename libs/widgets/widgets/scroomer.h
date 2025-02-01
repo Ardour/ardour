@@ -20,8 +20,8 @@
 #ifndef _WIDGETS_SCROOMER_H_
 #define _WIDGETS_SCROOMER_H_
 
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/adjustment.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/adjustment.h>
 
 #include "widgets/visibility.h"
 

@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/invisible.h>
-#include <gtkmm/private/invisible_p.h>
+#include <ytkmm/invisible.h>
+#include <ytkmm/private/invisible_p.h>
 
 
 // -*- c++ -*-

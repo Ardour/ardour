@@ -35,7 +35,7 @@
 #include <string>
 #include <vector>
 
-#include <gtkmm/separator.h>
+#include <ytkmm/separator.h>
 
 #include "pbd/stl_delete.h"
 #include "pbd/unwind.h"

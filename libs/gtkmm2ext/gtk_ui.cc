@@ -31,7 +31,7 @@
 #include <climits>
 #include <cctype>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include "pbd/error.h"
 #include "pbd/touchable.h"

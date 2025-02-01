@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/textview.h>
-#include <gtkmm/private/textview_p.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/private/textview_p.h>
 
 #include <ytk/ytk.h>
 

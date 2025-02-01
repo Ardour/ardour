@@ -197,8 +197,8 @@ def build(bld):
     obj = bld.shlib(features = 'cxx cxxshlib', source=libytkmm_sources)
     obj.cxxflags        = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
     obj.cflags          = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
-    obj.export_includes = ['ytkmm']
-    obj.includes        = ['.', 'ytkmm']
+    obj.export_includes = ['.']
+    obj.includes        = ['.']
     obj.name            = 'libytkmm'
     obj.target          = 'ytkmm'
     obj.use             = ['libztk', 'libytk', 'libztkmm', 'libydkmm' ]

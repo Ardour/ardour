@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/toolbar.h>
-#include <gtkmm/private/toolbar_p.h>
+#include <ytkmm/toolbar.h>
+#include <ytkmm/private/toolbar_p.h>
 
 
 // -*- c++ -*-
@@ -32,12 +32,12 @@
  */
 
 #include <glib.h>
-#include <gtkmm/button.h>
-#include <gtkmm/togglebutton.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/tooltips.h>
-//#include <gtkmm/image.h>
-#include <gtkmm/label.h>
+#include <ytkmm/button.h>
+#include <ytkmm/togglebutton.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/tooltips.h>
+//#include <ytkmm/image.h>
+#include <ytkmm/label.h>
 #include <ytk/ytk.h>
 
 namespace Gtk

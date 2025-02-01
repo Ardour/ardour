@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/private/radiobutton_p.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/private/radiobutton_p.h>
 
 
 // -*- c++ -*-

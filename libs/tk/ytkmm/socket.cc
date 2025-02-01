@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/socket.h>
-#include <gtkmm/private/socket_p.h>
+#include <ytkmm/socket.h>
+#include <ytkmm/private/socket_p.h>
 
 
 // -*- c++ -*-

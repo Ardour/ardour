@@ -30,9 +30,9 @@
 
 #include <list>
 #include <cassert>
-#include <gtkmm/adjustment.h>
-#include <gtkmm/label.h>
-#include <gtkmm/window.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/label.h>
+#include <ytkmm/window.h>
 
 #include "gtkmm2ext/persistent_tooltip.h"
 

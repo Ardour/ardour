@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/textattributes.h>
-#include <gtkmm/private/textattributes_p.h>
+#include <ytkmm/textattributes.h>
+#include <ytkmm/private/textattributes_p.h>
 
 
 // -*- c++ -*-
