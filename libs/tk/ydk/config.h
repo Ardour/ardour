@@ -27,7 +27,7 @@
 #define HAVE_GETRESUID 1
 #endif
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__NetBSD__)
 /* Have GNU ftw */
 #define HAVE_GNU_FTW 1
 #endif
