@@ -26,6 +26,7 @@
 
 #include "canvas/box.h"
 #include "canvas/button.h"
+#include "canvas/canvas.h"
 #include "canvas/debug.h"
 
 #include "editing_context.h"
@@ -407,6 +408,8 @@ PianorollMidiView::update_automation_display (Evoral::Parameter const & param, S
 				for (auto & ev : _events) {
 					velocity_display->add_note (ev.second);
 				}
+
+				velocity_display->set_sensitive (false);
 			}
 
 		} else {
@@ -503,20 +506,21 @@ PianorollMidiView::internal_set_active_automation (Evoral::Parameter const & par
 {
 	bool exists = false;
 
-	for (CueAutomationMap::iterator i = automation_map.begin(); i != automation_map.end(); ++i) {
-		if (i->first == param) {
-			if (i->second.line) {
+	for (auto & iter : automation_map) {
+		if (iter.first == param) {
+			if (iter.second.line) {
 				/* velocity does not have a line */
-				i->second.line->set_sensitive (true);
+				iter.second.line->set_sensitive (true);
 			} else {
+				iter.second.velocity_display->set_sensitive (true);
 			}
-			active_automation = &i->second;
+			active_automation = &iter.second;
 			exists = true;
 		} else {
-			if (i->second.line) {
-				i->second.line->set_sensitive (false);
+			if (iter.second.line) {
+				iter.second.line->set_sensitive (false);
 			} else {
-				i->second.velocity_display->set_sensitive (false);
+				iter.second.velocity_display->set_sensitive (false);
 			}
 		}
 	}
@@ -589,6 +593,16 @@ PianorollMidiView::automation_rb_click (GdkEvent* event, Temporal::timepos_t con
 	return false;
 }
 
+bool
+PianorollMidiView::velocity_rb_click (GdkEvent* event, Temporal::timepos_t const & pos)
+{
+	if (!active_automation || !active_automation->control || !active_automation->velocity_display) {
+		return false;
+	}
+
+	return false;
+}
+
 void
 PianorollMidiView::line_drag_click (GdkEvent* event, Temporal::timepos_t const & pos)
 {
@@ -652,7 +666,9 @@ void
 PianorollMidiView::point_selection_changed ()
 {
 	if (active_automation) {
-		active_automation->line->set_selected_points (_editing_context.get_selection().points);
+		if (active_automation->line) {
+			active_automation->line->set_selected_points (_editing_context.get_selection().points);
+		}
 	}
 }
 
@@ -663,6 +679,8 @@ PianorollMidiView::clear_selection ()
 	PointSelection empty;
 
 	for (CueAutomationMap::iterator i = automation_map.begin(); i != automation_map.end(); ++i) {
-		i->second.line->set_selected_points (empty);
+		if (i->second.line) {
+			i->second.line->set_selected_points (empty);
+		}
 	}
 }

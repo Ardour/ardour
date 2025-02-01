@@ -66,6 +66,7 @@ class VelocityDisplay
 	int y_position_to_velocity (double y) const;
 
 	void set_sensitive (bool yn);
+	bool sensitive () const;
 
 	void set_selected (bool);
 
@@ -94,6 +95,7 @@ class VelocityDisplay
 	bool drag_did_change;
 	bool selected;
 	GhostEvent::EventList::iterator _optimization_iterator;
+	bool _sensitive;
 
 	virtual bool base_event (GdkEvent*) = 0;
 	void set_size_and_position (GhostEvent&);

@@ -67,6 +67,7 @@ VelocityDisplay::VelocityDisplay (EditingContext& ec, MidiViewBackground& backgr
 	, drag_did_change (false)
 	, selected (false)
 	, _optimization_iterator (events.end())
+	, _sensitive (false)
 {
 	base.set_data (X_("ghostregionview"), this);
 	base.Event.connect (sigc::mem_fun (*this, &VelocityDisplay::base_event));
@@ -162,6 +163,14 @@ VelocityDisplay::set_sensitive (bool yn)
 	for (auto & ev : events) {
 		ev.second->set_sensitive (yn);
 	}
+
+	_sensitive = yn;
+}
+
+bool
+VelocityDisplay::sensitive () const
+{
+	return _sensitive;
 }
 
 void
@@ -174,7 +183,6 @@ VelocityDisplay::add_note (NoteBase* nb)
 	events.insert (std::make_pair (nb->note(), event));
 
 	l->Event.connect (sigc::bind (sigc::mem_fun (*this, &VelocityDisplay::lollevent), event));
-	l->set_ignore_events (true);
 	l->raise_to_top ();
 	l->set_data (X_("ghostregionview"), this);
 	l->set_data (X_("note"), nb);

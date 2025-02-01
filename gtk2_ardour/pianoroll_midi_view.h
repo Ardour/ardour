@@ -75,6 +75,7 @@ class PianorollMidiView : public MidiView
 	MergeableLine* make_merger ();
 
 	bool automation_rb_click (GdkEvent*, Temporal::timepos_t const &);
+	bool velocity_rb_click (GdkEvent*, Temporal::timepos_t const &);
 	void line_drag_click (GdkEvent*, Temporal::timepos_t const &);
 
 	void automation_entry();

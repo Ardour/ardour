@@ -38,6 +38,9 @@ PianorollAutomationLine::PianorollAutomationLine (const std::string&            
 bool
 PianorollAutomationLine::base_event_handler (GdkEvent* ev)
 {
+	if (!sensitive()) {
+		return false;
+	}
 	return _editing_context.typed_event  (_drag_base, ev, AutomationTrackItem);
 }
 

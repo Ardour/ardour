@@ -63,6 +63,9 @@ PianorollVelocityDisplay::remove_note (NoteBase* nb)
 bool
 PianorollVelocityDisplay::base_event (GdkEvent* ev)
 {
+	if (!_sensitive) {
+		return false;
+	}
 	return editing_context.canvas_velocity_base_event (ev, &base);
 }
 

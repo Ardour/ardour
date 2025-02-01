@@ -776,14 +776,23 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 		break;
 
 	case VelocityItem:
-		if (mouse_mode == Editing::MouseContent) {
-			_drags->set (new LollipopDrag (*this, item), event);
-		}
+		/* mouse mode independent - always allow drags */
+		_drags->set (new LollipopDrag (*this, item), event);
 		return true;
 		break;
 
 	case VelocityBaseItem:
-		_drags->set (new VelocityLineDrag (*this, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime), event);
+		switch (mouse_mode) {
+		case Editing::MouseContent:
+			/* rubberband drag to select notes */
+			_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return view->velocity_rb_click (ev, pos); }), event);
+			break;
+		case Editing::MouseDraw:
+			_drags->set (new VelocityLineDrag (*this, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime), event);
+			break;
+		default:
+			break;
+		}
 		return true;
 		break;
 
@@ -859,6 +868,7 @@ Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, It
 				/* grab dragged, so do nothing else */
 				return true;
 			}
+			std::cerr << "end grab was not true\n";
 		}
 	}
 
@@ -1760,7 +1770,7 @@ Pianoroll::which_mode_cursor () const
 
 	switch (mouse_mode) {
 	case Editing::MouseContent:
-		/* don't use mode cursor, pick a grabber cursor based on the item */
+		mode_cursor = _cursors->grabber;
 		break;
 
 	case Editing::MouseDraw:
@@ -1822,6 +1832,9 @@ Pianoroll::which_canvas_cursor (ItemType type) const
 		case RegionItem:
 			cursor = nullptr; /* default cursor */
 			break;
+		case VelocityItem:
+			cursor = _cursors->up_down;
+			break;
 
 		case ClipEndItem:
 		case ClipStartItem:
@@ -1854,6 +1867,9 @@ Pianoroll::which_canvas_cursor (ItemType type) const
 			break;
 		case RegionItem:
 			cursor = _cursors->midi_pencil;
+			break;
+		case VelocityItem:
+			cursor = _cursors->up_down;
 			break;
 		default:
 			break;
@@ -1896,6 +1912,8 @@ bool
 Pianoroll::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
 {
 	EditorAutomationLine* al;
+
+	set_canvas_cursor (which_mode_cursor());
 
 	switch (item_type) {
 	case ControlPointItem:
