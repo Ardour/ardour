@@ -188,6 +188,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (BBTRulerItem);
 	REGISTER_ENUM (SamplesRulerItem);
 	REGISTER_ENUM (VelocityItem);
+	REGISTER_ENUM (VelocityBaseItem);
 	REGISTER_ENUM (ClipStartItem);
 	REGISTER_ENUM (ClipEndItem);
 	REGISTER (item_type);
