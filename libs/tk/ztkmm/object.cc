@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/object.h>
-#include <atkmm/private/object_p.h>
+#include <ztkmm/object.h>
+#include <ztkmm/private/object_p.h>
 
 #include <ztk/atk-enum-types.h>
 
@@ -28,10 +28,10 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/noopobject.h>
-#include <atkmm/relation.h>
-#include <atkmm/relationset.h>
-#include <atkmm/stateset.h>
+#include <ztkmm/noopobject.h>
+#include <ztkmm/relation.h>
+#include <ztkmm/relationset.h>
+#include <ztkmm/stateset.h>
 #include <ztk/atkobject.h>
 
 

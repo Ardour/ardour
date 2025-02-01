@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/component.h>
-#include <atkmm/private/component_p.h>
+#include <ztkmm/component.h>
+#include <ztkmm/private/component_p.h>
 
 #include <ztk/atk-enum-types.h>
 
@@ -28,7 +28,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/object.h>
+#include <ztkmm/object.h>
 #include <ztk/atkcomponent.h>
 
 

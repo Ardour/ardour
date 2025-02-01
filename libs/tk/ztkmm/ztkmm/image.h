@@ -27,7 +27,7 @@
  */
 
 
-#include <atkmm/component.h> /* for Atk::CoordType */
+#include <ztkmm/component.h> /* for Atk::CoordType */
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 extern "C"

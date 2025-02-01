@@ -27,7 +27,7 @@
  */
 
 
-#include <atkmm/hyperlink.h>
+#include <ztkmm/hyperlink.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 extern "C"

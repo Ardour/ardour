@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/text.h>
-#include <atkmm/private/text_p.h>
+#include <ztkmm/text.h>
+#include <ztkmm/private/text_p.h>
 
 #include <ztk/atk-enum-types.h>
 
@@ -28,7 +28,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/object.h>
+#include <ztkmm/object.h>
 #include <glib.h>
 #include <algorithm> /* for std::swap() */
 

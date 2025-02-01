@@ -27,7 +27,7 @@
  */
 
 
-#include <atkmm/component.h> /* for Atk::CoordType */
+#include <ztkmm/component.h> /* for Atk::CoordType */
 #include <glibmm/slisthandle.h>
 #include <ztk/atktext.h>
 

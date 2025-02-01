@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/relation.h>
-#include <atkmm/private/relation_p.h>
+#include <ztkmm/relation.h>
+#include <ztkmm/private/relation_p.h>
 
 #include <ztk/atk-enum-types.h>
 
@@ -28,7 +28,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/object.h>
+#include <ztkmm/object.h>
 #include <ztk/atkobject.h>
 #include <ztk/atkrelation.h>
 

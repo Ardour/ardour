@@ -27,8 +27,8 @@
  */
 
 
-#include <atkmm/relation.h>
-#include <atkmm/object.h>
+#include <ztkmm/relation.h>
+#include <ztkmm/object.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

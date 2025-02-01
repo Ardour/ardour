@@ -44,8 +44,8 @@ def build(bld):
     obj = bld.shlib(features = 'cxx cxxshlib', source=libztkmm_sources)
     obj.cxxflags        = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
     obj.cflags          = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
-    obj.export_includes = ['ztkmm']
-    obj.includes        = ['ztkmm']
+    obj.export_includes = ['.']
+    obj.includes        = ['.']
     obj.name            = 'libztkmm'
     obj.target          = 'ztkmm'
     obj.use             = 'libztk'

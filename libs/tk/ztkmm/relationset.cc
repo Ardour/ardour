@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/relationset.h>
-#include <atkmm/private/relationset_p.h>
+#include <ztkmm/relationset.h>
+#include <ztkmm/private/relationset_p.h>
 
 
 // -*- c++ -*-

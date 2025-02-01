@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/action.h>
-#include <atkmm/private/action_p.h>
+#include <ztkmm/action.h>
+#include <ztkmm/private/action_p.h>
 
 
 // -*- c++ -*-

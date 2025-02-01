@@ -27,7 +27,7 @@
  */
 
 
-#include <atkmm/object.h>
+#include <ztkmm/object.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 extern "C"

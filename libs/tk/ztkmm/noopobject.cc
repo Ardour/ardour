@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/noopobject.h>
-#include <atkmm/private/noopobject_p.h>
+#include <ztkmm/noopobject.h>
+#include <ztkmm/private/noopobject_p.h>
 
 
 // -*- c++ -*-

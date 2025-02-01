@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/implementor.h>
-#include <atkmm/private/implementor_p.h>
+#include <ztkmm/implementor.h>
+#include <ztkmm/private/implementor_p.h>
 
 
 // -*- c++ -*-
@@ -27,7 +27,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/object.h>
+#include <ztkmm/object.h>
 #include <ztk/atkobject.h>
 
 

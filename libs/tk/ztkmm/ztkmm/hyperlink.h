@@ -24,7 +24,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/action.h>
+#include <ztkmm/action.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

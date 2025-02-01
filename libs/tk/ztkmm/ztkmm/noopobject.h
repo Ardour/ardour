@@ -26,15 +26,15 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/object.h>
-#include <atkmm/component.h>
-#include <atkmm/action.h>
-#include <atkmm/editabletext.h>
-#include <atkmm/image.h>
-#include <atkmm/selection.h>
-#include <atkmm/table.h>
-#include <atkmm/value.h>
-#include <atkmm/hypertext.h>
+#include <ztkmm/object.h>
+#include <ztkmm/component.h>
+#include <ztkmm/action.h>
+#include <ztkmm/editabletext.h>
+#include <ztkmm/image.h>
+#include <ztkmm/selection.h>
+#include <ztkmm/table.h>
+#include <ztkmm/value.h>
+#include <ztkmm/hypertext.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

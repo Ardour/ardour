@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/stateset.h>
-#include <atkmm/private/stateset_p.h>
+#include <ztkmm/stateset.h>
+#include <ztkmm/private/stateset_p.h>
 
 #include <ztk/atk-enum-types.h>
 

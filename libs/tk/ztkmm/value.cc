@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/value.h>
-#include <atkmm/private/value_p.h>
+#include <ztkmm/value.h>
+#include <ztkmm/private/value_p.h>
 
 
 // -*- c++ -*-

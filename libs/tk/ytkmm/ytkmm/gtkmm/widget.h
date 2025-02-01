@@ -31,8 +31,8 @@
 #include <pangomm/layout.h>
 
 #ifdef GTKMM_ATKMM_ENABLED
-#include <atkmm/object.h>
-#include <atkmm/implementor.h>
+#include <ztkmm/object.h>
+#include <ztkmm/implementor.h>
 #endif //GTKMM_ATKMM_ENABLED
 
 #include <gdkmm/event.h>

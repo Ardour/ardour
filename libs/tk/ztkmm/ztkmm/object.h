@@ -28,8 +28,8 @@
 
 
 #include <glibmm/object.h>
-#include <atkmm/component.h>
-#include <atkmm/relation.h>
+#include <ztkmm/component.h>
+#include <ztkmm/relation.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 extern "C" { typedef struct _AtkPropertyValues AtkPropertyValues; }

@@ -42,7 +42,7 @@
 #include <giomm/init.h>
 #include <pangomm/wrap_init.h>
 #ifdef GTKMM_ATKMM_ENABLED
-#include <atkmm/wrap_init.h>
+#include <ztkmm/wrap_init.h>
 #endif //GTKMM_ATKMM_ENABLED
 #include <gdkmm/wrap_init.h>
 #include <gtkmm/wrap_init.h>
