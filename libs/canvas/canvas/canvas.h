@@ -31,7 +31,7 @@
 
 #include <gtkmm/alignment.h>
 #include <gtkmm/eventbox.h>
-#include <gdkmm/window.h>
+#include <ydkmm/window.h>
 
 #include <cairomm/context.h>
 #include <cairomm/surface.h>

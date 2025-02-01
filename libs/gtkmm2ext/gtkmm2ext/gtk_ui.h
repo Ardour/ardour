@@ -43,7 +43,7 @@
 #endif
 #include <gtkmm/textbuffer.h>
 #include <gtkmm/main.h>
-#include <gdkmm/color.h>
+#include <ydkmm/color.h>
 
 #ifndef ABSTRACT_UI_EXPORTS
 #define ABSTRACT_UI_EXPORTS

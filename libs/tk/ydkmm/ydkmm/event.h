@@ -25,8 +25,8 @@
  */
 
  
-#include <gdkmm/window.h>
-#include <gdkmm/screen.h>
+#include <ydkmm/window.h>
+#include <ydkmm/screen.h>
 
 /* Shadow DELETE macro (from winnt.h).
  */

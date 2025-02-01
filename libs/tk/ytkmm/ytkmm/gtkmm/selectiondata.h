@@ -27,7 +27,7 @@
  */
 
 
-#include <gdkmm/display.h>
+#include <ydkmm/display.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

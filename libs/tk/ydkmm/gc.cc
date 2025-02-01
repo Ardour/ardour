@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/gc.h>
-#include <gdkmm/private/gc_p.h>
+#include <ydkmm/gc.h>
+#include <ydkmm/private/gc_p.h>
 
 
 // -*- c++ -*-
@@ -30,11 +30,11 @@
  */
 
 #include <ydk/gdk.h>
-#include <gdkmm/color.h>
-//#include <gdkmm/font.h>
-//#include <gdkmm/pixmap.h>
-#include <gdkmm/bitmap.h>
-#include <gdkmm/colormap.h>
+#include <ydkmm/color.h>
+//#include <ydkmm/font.h>
+//#include <ydkmm/pixmap.h>
+#include <ydkmm/bitmap.h>
+#include <ydkmm/colormap.h>
 
 namespace Gdk
 {

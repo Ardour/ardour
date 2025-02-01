@@ -27,8 +27,8 @@
  */
 
  
-#include <gdkmm/screen.h>
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/screen.h>
+#include <ydkmm/pixbuf.h>
 
 #include <gtkmm/recentinfo.h>
 

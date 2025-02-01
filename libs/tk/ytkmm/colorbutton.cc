@@ -30,7 +30,7 @@
  */
 
 #include <ytk/ytk.h>
-#include <gdkmm/color.h>
+#include <ydkmm/color.h>
 
 namespace Gtk
 {

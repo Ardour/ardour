@@ -35,14 +35,14 @@
 #include <ztkmm/implementor.h>
 #endif //GTKMM_ATKMM_ENABLED
 
-#include <gdkmm/event.h>
-#include <gdkmm/types.h>
-#include <gdkmm/window.h>
-#include <gdkmm/dragcontext.h>
-#include <gdkmm/pixbuf.h>
-#include <gdkmm/screen.h>
+#include <ydkmm/event.h>
+#include <ydkmm/types.h>
+#include <ydkmm/window.h>
+#include <ydkmm/dragcontext.h>
+#include <ydkmm/pixbuf.h>
+#include <ydkmm/screen.h>
 #include <gtkmm/enums.h>
-#include <gdkmm/display.h>
+#include <ydkmm/display.h>
 //#include <gtkmm/style.h>
 #include <gtkmm/targetlist.h>
 #include <gtkmm/rc.h>

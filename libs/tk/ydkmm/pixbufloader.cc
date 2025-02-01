@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/pixbufloader.h>
-#include <gdkmm/private/pixbufloader_p.h>
+#include <ydkmm/pixbufloader.h>
+#include <ydkmm/private/pixbufloader_p.h>
 
 
 // -*- c++ -*-

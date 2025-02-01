@@ -28,7 +28,7 @@
 
 #include <glibmm/exceptionhandler.h>
 #include <glibmm/slisthandle.h>
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/pixbuf.h>
 #include <gtkmm/texttag.h>
 #include <gtkmm/textchildanchor.h>
 #include <gtkmm/textattributes.h>

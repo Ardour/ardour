@@ -1,7 +1,7 @@
 #ifndef _GTKMM_CONFIG_H
 #define _GTKMM_CONFIG_H
 
-#include <gdkmmconfig.h>
+#include <ydkmm/ydkmmconfig.h>
 
 /* Defined when the --enable-api-atkmm configure argument was given */
 #define GTKMM_ATKMM_ENABLED 1

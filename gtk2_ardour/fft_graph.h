@@ -26,7 +26,7 @@
 
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/treemodel.h>
-#include <gdkmm/color.h>
+#include <ydkmm/color.h>
 
 #include <glibmm/refptr.h>
 

@@ -22,7 +22,6 @@
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/widget.h>
 #include <gtkmm/cellrenderer.h>
-#include <gdkmm.h>
 
 #include "gtkmm2ext/visibility.h"
 

@@ -38,7 +38,7 @@
 #include <gtkmm/textmark.h>
 #include <gtkmm/textiter.h>
 #include <gtkmm/clipboard.h>
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/pixbuf.h>
 #include <gtkmmconfig.h>
 #include <utility>
 

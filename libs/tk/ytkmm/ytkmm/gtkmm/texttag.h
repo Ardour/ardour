@@ -31,8 +31,8 @@
 
 #include <gtkmm/object.h>
 #include <gtkmm/enums.h>
-#include <gdkmm/bitmap.h>
-#include <gdkmm/color.h>
+#include <ydkmm/bitmap.h>
+#include <ydkmm/color.h>
 #include <pangomm/fontdescription.h>
 #include <pangomm/tabarray.h>
 

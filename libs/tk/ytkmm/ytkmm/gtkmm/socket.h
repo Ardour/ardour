@@ -27,7 +27,7 @@
  */
 
 #include <gtkmm/container.h>
-#include <gdkmm/types.h>
+#include <ydkmm/types.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

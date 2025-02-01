@@ -23,7 +23,7 @@
 #include <cairomm/cairomm.h>
 
 #include <glibmm/threads.h>
-#include <gdkmm/general.h>
+#include <ydkmm/general.h>
 
 #include "pbd/base_ui.h"
 #include "pbd/compose.h"

@@ -31,9 +31,9 @@
  */
 
 #include <ytk/ytk.h>
-#include <gdkmm/image.h>
-#include <gdkmm/bitmap.h>
-#include <gdkmm/pixmap.h>
+#include <ydkmm/image.h>
+#include <ydkmm/bitmap.h>
+#include <ydkmm/pixmap.h>
 
 namespace Gtk
 {

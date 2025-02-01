@@ -26,7 +26,7 @@
 #include <algorithm>
 
 
-#include <gdkmm/cursor.h>
+#include <ydkmm/cursor.h>
 #include <gtkmm/container.h>
 #include <gtkmm/eventbox.h>
 

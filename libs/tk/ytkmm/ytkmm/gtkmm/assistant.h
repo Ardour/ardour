@@ -29,7 +29,7 @@
  */
 
 #include <gtkmm/window.h>
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/pixbuf.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

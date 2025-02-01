@@ -61,8 +61,8 @@
 #include <glibmm/miscutils.h>
 #include <glibmm/uriutils.h>
 #include <gtkmm/image.h>
-#include <gdkmm/color.h>
-#include <gdkmm/bitmap.h>
+#include <ydkmm/color.h>
+#include <ydkmm/bitmap.h>
 
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>

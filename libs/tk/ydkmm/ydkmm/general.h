@@ -20,7 +20,7 @@
 #ifndef _GDKMM_GENERAL_H
 #define _GDKMM_GENERAL_H
 
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/pixbuf.h>
 #include <cairomm/context.h>
 
 namespace Gdk

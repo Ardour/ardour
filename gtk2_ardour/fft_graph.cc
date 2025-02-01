@@ -24,7 +24,7 @@
 #include <glibmm.h>
 #include <glibmm/refptr.h>
 
-#include <gdkmm/gc.h>
+#include <ydkmm/gc.h>
 
 #include <gtkmm/widget.h>
 #include <gtkmm/style.h>

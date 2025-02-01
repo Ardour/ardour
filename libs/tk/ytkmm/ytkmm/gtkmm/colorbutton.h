@@ -29,7 +29,7 @@
  */
 
 #include <gtkmm/button.h>
-#include <gdkmm/color.h>
+#include <ydkmm/color.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

@@ -30,7 +30,7 @@
 
 #include <gtkmm/misc.h>
 #include <gtkmm/iconset.h>
-#include <gdkmm/pixbufanimation.h>
+#include <ydkmm/pixbufanimation.h>
 #include <giomm/icon.h>
 
 

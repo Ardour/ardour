@@ -28,9 +28,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdkmm/screen.h>
-#include <gdkmm/device.h>
-#include <gdkmm/types.h> //For ModifierType
+#include <ydkmm/screen.h>
+#include <ydkmm/device.h>
+#include <ydkmm/types.h> //For ModifierType
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

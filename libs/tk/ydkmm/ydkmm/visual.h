@@ -29,7 +29,7 @@
  */
 
 #include <glibmm/object.h>
-#include <gdkmm/screen.h>
+#include <ydkmm/screen.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

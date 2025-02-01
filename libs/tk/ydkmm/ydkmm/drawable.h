@@ -30,14 +30,14 @@
 #include <pangomm/layout.h>
 #include <pangomm/layoutline.h>
 #include <pangomm/glyphstring.h>
-#include <gdkmm/region.h>
-#include <gdkmm/gc.h>
-#include <gdkmm/image.h>
-#include <gdkmm/color.h>
-#include <gdkmm/rgbcmap.h>
-#include <gdkmm/types.h>
+#include <ydkmm/region.h>
+#include <ydkmm/gc.h>
+#include <ydkmm/image.h>
+#include <ydkmm/color.h>
+#include <ydkmm/rgbcmap.h>
+#include <ydkmm/types.h>
 #include <cairomm/context.h>
-//#include <gdkmm/pixbuf.h>
+//#include <ydkmm/pixbuf.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

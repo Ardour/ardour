@@ -8,8 +8,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/pixbuf.h>
-#include <gdkmm/private/pixbuf_p.h>
+#include <ydkmm/pixbuf.h>
+#include <ydkmm/private/pixbuf_p.h>
 
 #include <ydk-pixbuf/ydk-pixbuf.h>
 

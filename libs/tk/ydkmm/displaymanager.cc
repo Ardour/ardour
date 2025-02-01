@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/displaymanager.h>
-#include <gdkmm/private/displaymanager_p.h>
+#include <ydkmm/displaymanager.h>
+#include <ydkmm/private/displaymanager_p.h>
 
 
 // -*- c++ -*-

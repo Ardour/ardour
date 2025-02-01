@@ -3,7 +3,7 @@
 #ifndef _GDKMM_COLORMAP_H
 #define _GDKMM_COLORMAP_H
 
-#include <gdkmmconfig.h>
+#include <ydkmm/ydkmmconfig.h>
 
 
 #include <glibmm/ustring.h>
@@ -35,8 +35,8 @@
 
 
 #include <glibmm/object.h>
-#include <gdkmm/visual.h>
-#include <gdkmm/color.h>
+#include <ydkmm/visual.h>
+#include <ydkmm/color.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

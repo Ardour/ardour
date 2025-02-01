@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/pixbuf.h>
 
 #include "pbd/compose.h"
 #include "pbd/error.h"

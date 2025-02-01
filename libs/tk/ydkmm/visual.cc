@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/visual.h>
-#include <gdkmm/private/visual_p.h>
+#include <ydkmm/visual.h>
+#include <ydkmm/private/visual_p.h>
 
 
 // -*- c++ -*-

@@ -35,7 +35,7 @@
 
 #include "ardour/types.h"
 
-#include <gdkmm/types.h>
+#include <ydkmm/types.h>
 #include <gtkmm/menushell.h>
 
 #include "canvas/types.h"

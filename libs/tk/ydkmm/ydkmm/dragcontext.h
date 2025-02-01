@@ -30,9 +30,9 @@
 
 
 #include <glibmm/object.h>
-#include <gdkmm/pixbuf.h>
-//#include <gdkmm/bitmap.h>
-#include <gdkmm/colormap.h>
+#include <ydkmm/pixbuf.h>
+//#include <ydkmm/bitmap.h>
+#include <ydkmm/colormap.h>
 #include <glibmm/listhandle.h>
 
 

@@ -33,7 +33,7 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treepath.h>
 #include <gtkmm/cellrenderer.h>
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/pixbuf.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

@@ -93,7 +93,7 @@ extern const int gtkmm_micro_version;
 #include <glibmm.h>
 #endif
 #include <giomm.h>
-#include <gdkmm.h>
+#include <ydkmm/ydkmm.h>
 
 #include <gtkmm/box.h>
 #include <gtkmm/dialog.h>

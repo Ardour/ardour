@@ -44,7 +44,7 @@
 #ifdef GTKMM_ATKMM_ENABLED
 #include <ztkmm/wrap_init.h>
 #endif //GTKMM_ATKMM_ENABLED
-#include <gdkmm/wrap_init.h>
+#include <ydkmm/wrap_init.h>
 #include <gtkmm/wrap_init.h>
 
 namespace

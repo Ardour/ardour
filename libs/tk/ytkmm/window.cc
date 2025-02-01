@@ -36,7 +36,7 @@
  */
 
 #include <gtkmm/accelgroup.h>
-#include <gdkmm/cursor.h>
+#include <ydkmm/cursor.h>
 #include <ytk/ytk.h>
 
 

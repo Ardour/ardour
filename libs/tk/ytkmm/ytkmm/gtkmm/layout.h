@@ -30,7 +30,7 @@
 
 #include <gtkmm/container.h>
 #include <gtkmm/adjustment.h>
-#include <gdkmm/window.h>
+#include <ydkmm/window.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

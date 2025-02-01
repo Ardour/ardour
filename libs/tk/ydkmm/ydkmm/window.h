@@ -3,7 +3,7 @@
 #ifndef _GDKMM_WINDOW_H
 #define _GDKMM_WINDOW_H
 
-#include <gdkmmconfig.h>
+#include <ydkmm/ydkmmconfig.h>
 
 
 #include <glibmm/ustring.h>
@@ -27,12 +27,12 @@
  */
 
  
-#include <gdkmm/region.h>
-#include <gdkmm/drawable.h>
-#include <gdkmm/bitmap.h>
-//#include <gdkmm/cursor.h>
-#include <gdkmm/dragcontext.h>
-#include <gdkmm/types.h>
+#include <ydkmm/region.h>
+#include <ydkmm/drawable.h>
+#include <ydkmm/bitmap.h>
+//#include <ydkmm/cursor.h>
+#include <ydkmm/dragcontext.h>
+#include <ydkmm/types.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

@@ -30,7 +30,7 @@
 #include <glibmm/arrayhandle.h>
 #include <glibmm/listhandle.h>
 #include <ydk/gdk.h>
-#include <gdkmmconfig.h>
+#include <ydkmm/ydkmmconfig.h>
 
 /* Shadow ERROR macro (from wingdi.h).
  */

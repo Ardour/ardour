@@ -26,7 +26,7 @@
 
 #include <string>
 #include <ydk/gdk.h>
-#include <gdkmm/color.h>
+#include <ydkmm/color.h>
 #include <pangomm/fontdescription.h>
 #include "ardour/types.h"
 #include "pbd/signals.h"

@@ -28,10 +28,10 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//#include <gdkmm/visual.h>
-//#include <gdkmm/window.h>
-#include <gdkmm/region.h> //Just to solve GDK_DISABLE_DEPRECATED problems when this header is included from elsewhere.
-#include <gdkmm/rectangle.h>
+//#include <ydkmm/visual.h>
+//#include <ydkmm/window.h>
+#include <ydkmm/region.h> //Just to solve GDK_DISABLE_DEPRECATED problems when this header is included from elsewhere.
+#include <ydkmm/rectangle.h>
 #include <glibmm/object.h>
 #include <cairomm/fontoptions.h>
 

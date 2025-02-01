@@ -24,9 +24,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdkmm/pixbuf.h>
-#include <gdkmm/rectangle.h>
-#include <gdkmm/types.h>
+#include <ydkmm/pixbuf.h>
+#include <ydkmm/rectangle.h>
+#include <ydkmm/types.h>
 
 //#include <ytk/gtkicontheme.h>
 

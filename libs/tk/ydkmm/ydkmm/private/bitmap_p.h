@@ -4,7 +4,7 @@
 #define _GDKMM_BITMAP_P_H
 
 
-#include <gdkmm/private/pixmap_p.h>
+#include <ydkmm/private/pixmap_p.h>
 
 
 #endif /* _GDKMM_BITMAP_P_H */

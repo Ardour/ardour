@@ -25,7 +25,6 @@
 #include <stdlib.h>
 
 #include <glibmm.h>
-#include <gdkmm.h>
 
 #include "gtkmm2ext/utils.h"
 #include "widgets/fastmeter.h"

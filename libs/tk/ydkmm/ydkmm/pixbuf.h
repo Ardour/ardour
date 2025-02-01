@@ -3,7 +3,7 @@
 #ifndef _GDKMM_PIXBUF_H
 #define _GDKMM_PIXBUF_H
 
-#include <gdkmmconfig.h>
+#include <ydkmm/ydkmmconfig.h>
 
 
 #include <glibmm/ustring.h>
@@ -30,12 +30,12 @@
 // the #ifndef GDKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
 
 
-#include <gdkmm/drawable.h>
-#include <gdkmm/image.h>
-#include <gdkmm/pixmap.h>
-#include <gdkmm/bitmap.h>
-#include <gdkmm/pixbufformat.h>
-#include <gdkmm/types.h>
+#include <ydkmm/drawable.h>
+#include <ydkmm/image.h>
+#include <ydkmm/pixmap.h>
+#include <ydkmm/bitmap.h>
+#include <ydkmm/pixbufformat.h>
+#include <ydkmm/types.h>
 #include <giomm/inputstream.h>
 
 

@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/cursor.h>
-#include <gdkmm/private/cursor_p.h>
+#include <ydkmm/cursor.h>
+#include <ydkmm/private/cursor_p.h>
 
 
 // -*- c++ -*-

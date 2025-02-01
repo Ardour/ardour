@@ -54,8 +54,8 @@ def build(bld):
     obj = bld.shlib(features = 'cxx cxxshlib', source=libydkmm_sources)
     obj.cxxflags        = [ bld.env['compiler_flags_dict']['pic'] ]
     obj.cflags          = [ bld.env['compiler_flags_dict']['pic'] ]
-    obj.export_includes = ['ydkmm']
-    obj.includes        = ['.', 'ydkmm']
+    obj.export_includes = ['.']
+    obj.includes        = ['.']
     obj.name            = 'libydkmm'
     obj.target          = 'ydkmm'
     obj.use             = 'libztkmm libytk'

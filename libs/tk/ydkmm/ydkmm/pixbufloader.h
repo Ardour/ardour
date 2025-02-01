@@ -27,9 +27,9 @@
  */
 
 #include <glibmm/object.h>
-#include <gdkmm/pixbuf.h>
-#include <gdkmm/pixbufanimation.h>
-#include <gdkmm/pixbufformat.h>
+#include <ydkmm/pixbuf.h>
+#include <ydkmm/pixbufanimation.h>
+#include <ydkmm/pixbufformat.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

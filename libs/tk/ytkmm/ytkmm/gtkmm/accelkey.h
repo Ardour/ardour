@@ -22,7 +22,7 @@
  */
 
 #include <ydk/gdkkeysyms.h>
-#include <gdkmm/types.h>
+#include <ydkmm/types.h>
 
 
 namespace Gtk

@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/region.h>
-#include <gdkmm/private/region_p.h>
+#include <ydkmm/region.h>
+#include <ydkmm/private/region_p.h>
 
 #include <ydk/gdk.h>
 

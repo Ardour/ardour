@@ -28,7 +28,7 @@
  */
 
 #include <gtkmm/textbuffer.h>
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/pixbuf.h>
 #include <glibmm/utility.h> //For ScopedPtr<>.
 #include <ytk/ytk.h>
 

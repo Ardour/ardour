@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/pixbufanimation.h>
-#include <gdkmm/private/pixbufanimation_p.h>
+#include <ydkmm/pixbufanimation.h>
+#include <ydkmm/private/pixbufanimation_p.h>
 
 
 // -*- c++ -*-

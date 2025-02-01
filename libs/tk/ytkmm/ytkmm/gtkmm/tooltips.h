@@ -32,7 +32,7 @@
 // the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
 
 
-#include <gdkmm/color.h>
+#include <ydkmm/color.h>
 #include <gtkmm/object.h>
 
 

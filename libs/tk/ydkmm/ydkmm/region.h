@@ -64,8 +64,8 @@
 extern "C" { typedef struct _GdkRegion GdkRegion; }
 
 #include <glibmm/arrayhandle.h>
-#include <gdkmm/types.h>
-#include <gdkmm/rectangle.h>
+#include <ydkmm/types.h>
+#include <ydkmm/rectangle.h>
 
 
 namespace Gdk

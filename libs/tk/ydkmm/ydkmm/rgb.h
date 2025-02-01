@@ -20,8 +20,8 @@
 #ifndef _GDKMM_RGB_H
 #define _GDKMM_RGB_H
 
-#include <gdkmm/colormap.h>  
-#include <gdkmm/visual.h>
+#include <ydkmm/colormap.h>  
+#include <ydkmm/visual.h>
 
 namespace Gdk
 {

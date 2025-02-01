@@ -18,7 +18,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdkmm/general.h>
+#include <ydkmm/general.h>
 #include <ydk/gdk.h>
 
 namespace Gdk

@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <ydkmm/cursor.h>
 #include <gtkmm/stock.h>
 
 #include "ardour/session.h"

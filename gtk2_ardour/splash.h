@@ -26,7 +26,7 @@
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/box.h>
 #include <gtkmm/label.h>
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/pixbuf.h>
 
 #include "pbd/signals.h"
 

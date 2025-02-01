@@ -34,7 +34,7 @@
  */
 
 #include <ytk/ytk.h>
-#include <gdkmm/window.h>
+#include <ydkmm/window.h>
 
 namespace Gtk
 {

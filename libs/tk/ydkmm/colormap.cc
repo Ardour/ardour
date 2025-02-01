@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/colormap.h>
-#include <gdkmm/private/colormap_p.h>
+#include <ydkmm/colormap.h>
+#include <ydkmm/private/colormap_p.h>
 
 
 // -*- c++ -*-

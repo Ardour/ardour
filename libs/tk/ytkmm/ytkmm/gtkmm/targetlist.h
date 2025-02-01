@@ -27,7 +27,7 @@
 
 #include <gtkmm/enums.h>
 #include <gtkmm/targetentry.h>
-#include <gdkmm/types.h>
+#include <ydkmm/types.h>
 
 
 namespace Gtk

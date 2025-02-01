@@ -28,8 +28,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdkmm/display.h> 
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/display.h> 
+#include <ydkmm/pixbuf.h>
 #include <gtkmm/targetentry.h>
 #include <gtkmm/selectiondata.h>
 #include <glibmm/object.h>

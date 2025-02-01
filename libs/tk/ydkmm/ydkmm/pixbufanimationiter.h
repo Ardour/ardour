@@ -29,7 +29,7 @@
  */
 
 #include <glibmm/object.h>
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/pixbuf.h>
 #include <glibmm/timeval.h>
 #include <ydk-pixbuf/ydk-pixbuf.h>
 

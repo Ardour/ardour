@@ -28,7 +28,7 @@
 
 #include <gtkmm/label.h>
 #include <gtkmm/table.h>
-#include <gdkmm/color.h>
+#include <ydkmm/color.h>
 
 #include "pbd/xml++.h"
 #include "pbd/signals.h"

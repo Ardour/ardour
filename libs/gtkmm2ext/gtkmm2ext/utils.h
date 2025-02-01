@@ -36,8 +36,8 @@
 #include <gtkmm/filechooser.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/treeview.h>
-#include <gdkmm/window.h> /* for WMDecoration */
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/window.h> /* for WMDecoration */
+#include <ydkmm/pixbuf.h>
 
 #include "gtkmm2ext/visibility.h"
 

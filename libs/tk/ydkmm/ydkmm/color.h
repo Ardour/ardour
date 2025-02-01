@@ -3,7 +3,7 @@
 #ifndef _GDKMM_COLOR_H
 #define _GDKMM_COLOR_H
 
-#include <gdkmmconfig.h>
+#include <ydkmm/ydkmmconfig.h>
 
 
 #include <glibmm/ustring.h>

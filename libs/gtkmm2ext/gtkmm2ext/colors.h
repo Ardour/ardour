@@ -22,7 +22,7 @@
 
 #include<stdint.h>
 
-#include <gdkmm/types.h>
+#include <ydkmm/types.h>
 #include <cairomm/context.h>
 
 #include "gtkmm2ext/visibility.h"

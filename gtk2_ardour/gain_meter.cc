@@ -30,7 +30,7 @@
 #include <pangomm.h>
 
 #include <gtkmm/alignment.h>
-#include <gdkmm/color.h>
+#include <ydkmm/color.h>
 #include <gtkmm/style.h>
 
 #include "ardour/amp.h"

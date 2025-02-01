@@ -26,10 +26,10 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdkmm/window.h>
-#include <gdkmm/event.h>
+#include <ydkmm/window.h>
+#include <ydkmm/event.h>
 
-//#include <gdkmm/display.h>
+//#include <ydkmm/display.h>
 #include <ydk/gdk.h>
 
 

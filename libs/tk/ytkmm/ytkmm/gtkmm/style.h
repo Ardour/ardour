@@ -35,10 +35,10 @@
 #include <pangomm/fontdescription.h>
 #include <pangomm/layout.h>
 
-#include <gdkmm/gc.h>
-#include <gdkmm/pixmap.h>
-#include <gdkmm/types.h>
-#include <gdkmm/window.h>
+#include <ydkmm/gc.h>
+#include <ydkmm/pixmap.h>
+#include <ydkmm/types.h>
+#include <ydkmm/window.h>
 
 #include <gtkmm/object.h>
 #include <gtkmm/enums.h>

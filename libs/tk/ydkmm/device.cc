@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/device.h>
-#include <gdkmm/private/device_p.h>
+#include <ydkmm/device.h>
+#include <ydkmm/private/device_p.h>
 
 
 // -*- c++ -*-
@@ -28,8 +28,8 @@
  */
 
 #include <ydk/gdk.h>
-#include <gdkmm/cursor.h>
-#include <gdkmm/display.h>
+#include <ydkmm/cursor.h>
+#include <ydkmm/display.h>
 
 namespace Gdk
 {

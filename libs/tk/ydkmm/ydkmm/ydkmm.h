@@ -24,24 +24,24 @@
 #ifndef _GDKMM_GDKMM_H_
 #define _GDKMM_GDKMM_H_
 
-#include <gdkmm/screen.h>
-#include <gdkmm/types.h>
-#include <gdkmm/visual.h>
-#include <gdkmm/gc.h>
-#include <gdkmm/drawable.h>
-#include <gdkmm/window.h>
-#include <gdkmm/pixbuf.h>
-#include <gdkmm/pixbufanimation.h>
-#include <gdkmm/pixbufformat.h>
-#include <gdkmm/pixbufloader.h>
-#include <gdkmm/pixmap.h>
-#include <gdkmm/bitmap.h>
-#include <gdkmm/image.h>
-#include <gdkmm/cursor.h>
-#include <gdkmm/rectangle.h>
-#include <gdkmm/display.h>
-#include <gdkmm/displaymanager.h>
-#include <gdkmm/general.h>
-#include <gdkmm/rgb.h>
+#include <ydkmm/screen.h>
+#include <ydkmm/types.h>
+#include <ydkmm/visual.h>
+#include <ydkmm/gc.h>
+#include <ydkmm/drawable.h>
+#include <ydkmm/window.h>
+#include <ydkmm/pixbuf.h>
+#include <ydkmm/pixbufanimation.h>
+#include <ydkmm/pixbufformat.h>
+#include <ydkmm/pixbufloader.h>
+#include <ydkmm/pixmap.h>
+#include <ydkmm/bitmap.h>
+#include <ydkmm/image.h>
+#include <ydkmm/cursor.h>
+#include <ydkmm/rectangle.h>
+#include <ydkmm/display.h>
+#include <ydkmm/displaymanager.h>
+#include <ydkmm/general.h>
+#include <ydkmm/rgb.h>
 
 #endif /* _GDKMM_GDKMM_H_ */

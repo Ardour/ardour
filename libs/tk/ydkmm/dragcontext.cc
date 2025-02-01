@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/dragcontext.h>
-#include <gdkmm/private/dragcontext_p.h>
+#include <ydkmm/dragcontext.h>
+#include <ydkmm/private/dragcontext_p.h>
 
 
 // -*- c++ -*-
@@ -31,7 +31,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdkmm/window.h>
+#include <ydkmm/window.h>
 #include <ytk/ytk.h>
 #include <ydk/gdk.h>
 #include <glibmm/utility.h> //For ScopedPtr<>.

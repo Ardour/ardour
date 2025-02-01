@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/image.h>
-#include <gdkmm/private/image_p.h>
+#include <ydkmm/image.h>
+#include <ydkmm/private/image_p.h>
 
 
 // -*- c++ -*-

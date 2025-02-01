@@ -33,7 +33,7 @@
 #include <glibmm/listhandle.h>
 #include <gtkmm/container.h>
 #include <gtkmm/adjustment.h>
-#include <gdkmm/pixmap.h>
+#include <ydkmm/pixmap.h>
 #include <gtkmm/treeviewcolumn.h>
 #include <gtkmm/treeselection.h>
 #include <gtkmm/treemodelcolumn.h>

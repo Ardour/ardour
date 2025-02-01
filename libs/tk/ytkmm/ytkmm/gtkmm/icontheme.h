@@ -24,8 +24,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdkmm/pixbuf.h>
-#include <gdkmm/screen.h>
+#include <ydkmm/pixbuf.h>
+#include <ydkmm/screen.h>
 
 #include <gtkmm/iconinfo.h>
 #include <giomm/icon.h>

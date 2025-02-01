@@ -29,7 +29,7 @@
  */
 
 //#include <gtkmm/style.h>
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/pixbuf.h>
 #include <gtkmm/iconsource.h>
 //#include <gtkmm/widget.h>
 #include <gtkmm/stockid.h>

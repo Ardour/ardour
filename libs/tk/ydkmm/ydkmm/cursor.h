@@ -28,10 +28,10 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdkmm/bitmap.h>
-#include <gdkmm/display.h>
-#include <gdkmm/pixbuf.h>
-#include <gdkmm/color.h>
+#include <ydkmm/bitmap.h>
+#include <ydkmm/display.h>
+#include <ydkmm/pixbuf.h>
+#include <ydkmm/color.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

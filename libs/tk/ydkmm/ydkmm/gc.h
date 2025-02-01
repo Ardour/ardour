@@ -29,11 +29,11 @@
  */
 
 #include <glibmm/object.h>
-#include <gdkmm/region.h>
-#include <gdkmm/drawable.h>
-#include <gdkmm/types.h>
-#include <gdkmm/rectangle.h>
-#include <gdkmm/screen.h>
+#include <ydkmm/region.h>
+#include <ydkmm/drawable.h>
+#include <ydkmm/types.h>
+#include <ydkmm/rectangle.h>
+#include <ydkmm/screen.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

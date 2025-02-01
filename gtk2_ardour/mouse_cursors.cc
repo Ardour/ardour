@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gdkmm/cursor.h>
+#include <ydkmm/cursor.h>
 
 #include "gtkmm2ext/cursors.h"
 

@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/window.h>
-#include <gdkmm/private/window_p.h>
+#include <ydkmm/window.h>
+#include <ydkmm/private/window_p.h>
 
 
 // -*- c++ -*-
@@ -30,9 +30,9 @@
  */
 
 #include <ydk/gdk.h>
-#include <gdkmm/pixmap.h>
-#include <gdkmm/cursor.h>
-#include <gdkmm/types.h>
+#include <ydkmm/pixmap.h>
+#include <ydkmm/cursor.h>
+#include <ydkmm/types.h>
 
 
 namespace Gdk

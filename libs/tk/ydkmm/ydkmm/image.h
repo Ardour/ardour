@@ -29,9 +29,9 @@
  */
 
 #include <glibmm/object.h>
-#include <gdkmm/visual.h>
-#include <gdkmm/colormap.h>
-#include <gdkmm/types.h> //For ByteOrder.
+#include <ydkmm/visual.h>
+#include <ydkmm/colormap.h>
+#include <ydkmm/types.h> //For ByteOrder.
 
  
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

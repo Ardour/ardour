@@ -23,7 +23,7 @@
 
 #include <string>
 
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/pixbuf.h>
 #include <gtkmm/label.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/expander.h>

@@ -37,7 +37,7 @@
 #include <gtkmm/frame.h>
 #include <gtkmm/table.h>
 
-//#include <gdkmm/colormap.h>
+//#include <ydkmm/colormap.h>
 
 #include "pbd/signals.h"
 

@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/event.h>
-#include <gdkmm/private/event_p.h>
+#include <ydkmm/event.h>
+#include <ydkmm/private/event_p.h>
 
 #include <ydk/gdk.h>
 
@@ -32,7 +32,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdkmm/display.h>
+#include <ydkmm/display.h>
 
 namespace Gdk
 {

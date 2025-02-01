@@ -26,7 +26,7 @@
 
 #include <glibmm/object.h>
 #include <giomm/icon.h>
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/pixbuf.h>
 #include <gtkmm/enums.h>
 #include <gtkmm/widget.h>
 
