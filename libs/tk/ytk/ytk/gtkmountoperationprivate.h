@@ -30,7 +30,7 @@
 
 #include <gio/gio.h>
 #include <ydk/gdk.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <ydk-pixbuf/ydk-pixbuf.h>
 
 struct _GtkMountOperationLookupContext;
 typedef struct _GtkMountOperationLookupContext GtkMountOperationLookupContext;

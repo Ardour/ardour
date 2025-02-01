@@ -28,7 +28,7 @@
  */
 
 #include <ydk/gdk.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <ydk-pixbuf/ydk-pixbuf.h>
 
 
 namespace

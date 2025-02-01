@@ -34,7 +34,7 @@
 #include <cairo.h>
 #include <ydk/gdktypes.h>
 #include <ydk/gdkrgb.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <ydk-pixbuf/ydk-pixbuf.h>
 
 G_BEGIN_DECLS
 

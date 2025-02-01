@@ -28,7 +28,7 @@
  */
 
 #include <glibmm/utility.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <ydk-pixbuf/ydk-pixbuf.h>
 
 namespace Gdk
 {

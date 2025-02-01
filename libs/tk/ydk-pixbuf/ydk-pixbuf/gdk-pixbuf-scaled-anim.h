@@ -22,7 +22,7 @@
 #ifndef GDK_PIXBUF_SCALED_ANIM_H
 #define GDK_PIXBUF_SCALED_ANIM_H
 
-#include <gdk-pixbuf/gdk-pixbuf-animation.h>
+#include <ydk-pixbuf/gdk-pixbuf-animation.h>
 
 G_BEGIN_DECLS
 

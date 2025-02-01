@@ -17,7 +17,7 @@
 #ifndef __GDK_PIXDATA_H__
 #define __GDK_PIXDATA_H__
 
-#include        <gdk-pixbuf/gdk-pixbuf.h>
+#include        <ydk-pixbuf/ydk-pixbuf.h>
 
 G_BEGIN_DECLS
 

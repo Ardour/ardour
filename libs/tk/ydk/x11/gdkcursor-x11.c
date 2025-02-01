@@ -45,7 +45,7 @@
 #include "gdkpixmap-x11.h"
 #include "gdkx.h"
 #include <ydk/gdkpixmap.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <ydk-pixbuf/ydk-pixbuf.h>
 #include "gdkalias.h"
 
 static guint theme_serial = 0;

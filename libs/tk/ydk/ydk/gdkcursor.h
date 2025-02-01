@@ -32,7 +32,7 @@
 #endif
 
 #include <ydk/gdktypes.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <ydk-pixbuf/ydk-pixbuf.h>
 
 G_BEGIN_DECLS
 

@@ -31,7 +31,7 @@
 #include <glibmm/object.h>
 #include <gdkmm/pixbuf.h>
 #include <gdkmm/pixbufanimationiter.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <ydk-pixbuf/ydk-pixbuf.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

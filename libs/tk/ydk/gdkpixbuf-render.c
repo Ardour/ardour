@@ -22,7 +22,7 @@
 
 #include "config.h"
 #include <ydk/gdk.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <ydk-pixbuf/ydk-pixbuf.h>
 #include "gdkpixbuf.h"
 #include "gdkscreen.h"
 #include "gdkinternals.h"

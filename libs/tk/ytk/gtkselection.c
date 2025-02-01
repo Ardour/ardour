@@ -60,7 +60,7 @@
 #include "gtkselection.h"
 #include "gtktextbufferrichtext.h"
 #include "gtkintl.h"
-#include "gdk-pixbuf/gdk-pixbuf.h"
+#include "ydk-pixbuf/ydk-pixbuf.h"
 
 #ifdef GDK_WINDOWING_X11
 #include "ydk/gdkx.h"

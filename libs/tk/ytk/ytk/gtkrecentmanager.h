@@ -25,7 +25,7 @@
 #error "Only <ytk/ytk.h> can be included directly."
 #endif
 
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <ydk-pixbuf/ydk-pixbuf.h>
 #include <ydk/gdk.h>
 #include <time.h>
 
