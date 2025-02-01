@@ -32,7 +32,7 @@
 #include <arpa/inet.h>
 #include <mntent.h>
 #include <unistd.h> /* access() */
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) || defined(__NetBSD__)
 #include <sys/syslimits.h>
 #include <unistd.h> /* access() */
 #elif defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
