@@ -258,20 +258,16 @@ def options(opt):
     pass
 
 def configure(conf):
-    if conf.is_defined('YTK'):
-        autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
-        autowaf.check_pkg(conf, 'pango', uselib_store='PANGO', atleast_version='1.20', mandatory=True)
-        autowaf.check_pkg(conf, 'cairo', uselib_store='CAIRO', atleast_version='1.12', mandatory=True)
-        autowaf.check_pkg(conf, 'pangocairo', uselib_store='PANGOCAIRO', mandatory=True)
-        autowaf.check_pkg(conf, 'gmodule-2.0', uselib_store='GMODULE', mandatory=True)
-        if conf.env['build_target'] != 'mingw' and sys.platform != 'darwin': # Linux
-            autowaf.check_pkg(conf, 'x11', uselib_store='X11', system=True, mandatory=True)
-            autowaf.check_pkg(conf, 'xext', uselib_store='XEXT', system=True, mandatory=True)
+    autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
+    autowaf.check_pkg(conf, 'pango', uselib_store='PANGO', atleast_version='1.20', mandatory=True)
+    autowaf.check_pkg(conf, 'cairo', uselib_store='CAIRO', atleast_version='1.12', mandatory=True)
+    autowaf.check_pkg(conf, 'pangocairo', uselib_store='PANGOCAIRO', mandatory=True)
+    autowaf.check_pkg(conf, 'gmodule-2.0', uselib_store='GMODULE', mandatory=True)
+    if conf.env['build_target'] != 'mingw' and sys.platform != 'darwin': # Linux
+        autowaf.check_pkg(conf, 'x11', uselib_store='X11', system=True, mandatory=True)
+        autowaf.check_pkg(conf, 'xext', uselib_store='XEXT', system=True, mandatory=True)
 
 def build(bld):
-    if not bld.is_defined('YTK'):
-        return
-
     obj = bld.shlib(features = 'c cshlib')
     obj.cflags          = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
     obj.export_includes = ['ytk']
