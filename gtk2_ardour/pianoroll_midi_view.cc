@@ -241,7 +241,7 @@ void
 PianorollMidiView::ghosts_model_changed ()
 {
 	if (velocity_display) {
-		velocity_display->clear ();
+		velocity_display->clear();
 		for (auto & ev : _events) {
 			velocity_display->add_note (ev.second);
 		}
@@ -401,15 +401,13 @@ PianorollMidiView::update_automation_display (Evoral::Parameter const & param, S
 				/* Create and add to automation display map */
 
 				velocity_display = new PianorollVelocityDisplay (editing_context(), midi_context(), *this, *automation_group, 0x312244ff);
-				auto res = automation_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiVelocityAutomation, 0, 0), AutomationDisplayState (*velocity_display, true)));
+				auto res = automation_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiVelocityAutomation, 0, 0), AutomationDisplayState (*velocity_display, false)));
 
 				ads = &((*res.first).second);
 
 				for (auto & ev : _events) {
 					velocity_display->add_note (ev.second);
 				}
-
-				velocity_display->set_sensitive (false);
 			}
 
 		} else {
@@ -427,7 +425,7 @@ PianorollMidiView::update_automation_display (Evoral::Parameter const & param, S
 			                                                   automation_group,
 			                                                   ac->alist(),
 			                                                   ac->desc()));
-			line->set_sensitive (false);
+
 			line->set_insensitive_line_color (line_color_for (param));
 
 			AutomationDisplayState cad (ac, line, false);
@@ -494,7 +492,11 @@ void
 PianorollMidiView::unset_active_automation ()
 {
 	for (CueAutomationMap::iterator i = automation_map.begin(); i != automation_map.end(); ++i) {
-		i->second.line->set_sensitive (false);
+		if (i->second.line) {
+			i->second.line->set_sensitive (false);
+		} else {
+			i->second.velocity_display->set_sensitive (false);
+		}
 	}
 
 	active_automation = nullptr;

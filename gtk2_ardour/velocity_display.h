@@ -53,6 +53,7 @@ class VelocityDisplay
 	void update_note (NoteBase*);
 
 	void update_ghost_event (GhostEvent*);
+	void color_ghost_event (GhostEvent*);
 	void update_note (GhostEvent* gev) { update_ghost_event (gev); }
 	void update_hit (GhostEvent* gev)  { update_ghost_event (gev); }
 

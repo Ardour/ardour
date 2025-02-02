@@ -165,6 +165,8 @@ VelocityDisplay::set_sensitive (bool yn)
 	}
 
 	_sensitive = yn;
+
+	set_colors ();
 }
 
 bool
@@ -183,11 +185,12 @@ VelocityDisplay::add_note (NoteBase* nb)
 	events.insert (std::make_pair (nb->note(), event));
 
 	l->Event.connect (sigc::bind (sigc::mem_fun (*this, &VelocityDisplay::lollevent), event));
+	l->set_ignore_events (!_sensitive);
 	l->raise_to_top ();
 	l->set_data (X_("ghostregionview"), this);
 	l->set_data (X_("note"), nb);
-	l->set_fill_color (nb->base_color());
 	l->set_outline_color (_outline);
+	color_ghost_event (event);
 
 	if (view.note_in_region_time_range (nb->note())) {
 		set_size_and_position (*event);
@@ -235,7 +238,18 @@ void
 VelocityDisplay::update_ghost_event (GhostEvent* gev)
 {
 	set_size_and_position (*gev);
-	gev->item->set_fill_color (gev->event->base_color());
+	color_ghost_event (gev);
+}
+
+void
+VelocityDisplay::color_ghost_event (GhostEvent* gev)
+{
+	if (sensitive()) {
+		gev->item->set_fill_color (gev->event->base_color());
+	} else {
+		/* Note: notes may have different colors */
+		gev->item->set_fill_color (Gtkmm2ext::change_alpha (gev->event->base_color(), 0.2));
+	}
 }
 
 void
@@ -244,7 +258,7 @@ VelocityDisplay::set_colors ()
 	base.set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
 
 	for (auto & gev : events) {
-		gev.second->item->set_fill_color (gev.second->event->base_color());
+		color_ghost_event (gev.second);
 	}
 }
 
@@ -274,7 +288,7 @@ VelocityDisplay::drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev)
 	const double factor = newlen / base.height();
 	view.sync_velocity_drag (factor);
 
-	MidiRegionView::Selection const & sel (view.selection());
+	MidiView::Selection const & sel (view.selection());
 	int verbose_velocity = -1;
 	GhostEvent* primary_ghost = 0;
 	const double scale  = UIConfiguration::instance ().get_ui_scale ();
@@ -354,7 +368,7 @@ VelocityDisplay::note_selected (NoteBase* ev)
 void
 VelocityDisplay::lollis_between (int x0, int x1, std::vector<GhostEvent*>& within)
 {
-	MidiRegionView::Selection const & sel (view.selection());
+	MidiView::Selection const & sel (view.selection());
 	bool only_selected = !sel.empty();
 
 	for (auto & gev : events) {
