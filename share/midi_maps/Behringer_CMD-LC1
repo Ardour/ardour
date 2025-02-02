@@ -7,16 +7,16 @@
 	<DeviceInfo bank-size="4" motorised="no"/>
 
 <!-- Knobs mapped to selected tracks Sends 1 and 2  -->
-	<Binding channel="8" enc-b="16" uri="/route/send/gain B1 1"/> <!-- Selction 1 Send 1-->
-	<Binding channel="8" enc-b="17" uri="/route/send/gain B2 1"/> <!-- Selction 2 Send 1-->
-	<Binding channel="8" enc-b="18" uri="/route/send/gain B3 1"/> <!-- Selction 3 Send 1-->
-	<Binding channel="8" enc-b="19" uri="/route/send/gain B4 1"/> <!-- Selction 4 Send 1-->
-	<Binding channel="8" enc-b="20" uri="/route/send/gain B1 2"/> <!-- Selction 1 Send 2-->
-	<Binding channel="8" enc-b="21" uri="/route/send/gain B2 2"/> <!-- Selction 2 Send 2-->
-	<Binding channel="8" enc-b="22" uri="/route/send/gain B3 2"/> <!-- Selction 3 Send 2-->
-	<Binding channel="8" enc-b="23" uri="/route/send/gain B4 2"/> <!-- Selction 4 Send 2-->
+	<Binding channel="8" enc-b="16" uri="/route/send/gain B1 1"/> <!-- Selection 1 Send 1-->
+	<Binding channel="8" enc-b="17" uri="/route/send/gain B2 1"/> <!-- Selection 2 Send 1-->
+	<Binding channel="8" enc-b="18" uri="/route/send/gain B3 1"/> <!-- Selection 3 Send 1-->
+	<Binding channel="8" enc-b="19" uri="/route/send/gain B4 1"/> <!-- Selection 4 Send 1-->
+	<Binding channel="8" enc-b="20" uri="/route/send/gain B1 2"/> <!-- Selection 1 Send 2-->
+	<Binding channel="8" enc-b="21" uri="/route/send/gain B2 2"/> <!-- Selection 2 Send 2-->
+	<Binding channel="8" enc-b="22" uri="/route/send/gain B3 2"/> <!-- Selection 3 Send 2-->
+	<Binding channel="8" enc-b="23" uri="/route/send/gain B4 2"/> <!-- Selection 4 Send 2-->
 
-<!-- Assing function to 1-8 labeled buttons -->
+<!-- Assign function to 1-8 labeled buttons -->
 	<Binding channel="8" note="16" function="prev-bank"/>	<!-- [Button 1] shift the bank selection to the left -->
 	<Binding channel="8" note="17" function="next-bank"/>	<!-- [Button 2] shift the bank selection to the right -->
 	<Binding channel="8" note="18" function="transport-stop"/>		<!-- [Button 3] transport Stop -->
