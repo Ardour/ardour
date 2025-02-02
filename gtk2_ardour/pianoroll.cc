@@ -327,7 +327,7 @@ void
 Pianoroll::set_visible_channel (int n)
 {
 	_visible_channel = n;
-	visible_channel_label.set_text (string_compose (_("MIDI Channel %1"), _visible_channel + 1));
+	visible_channel_selector.set_active (string_compose ("%1", _visible_channel + 1));
 
 	rebuild_parameter_button_map ();
 
