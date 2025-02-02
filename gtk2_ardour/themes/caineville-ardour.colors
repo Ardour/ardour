@@ -47,6 +47,14 @@
     <Color name="midi meter 54" value="d40310ff"/>
     <Color name="midi meter 55" value="9d000aff"/>
     <Color name="midi meter 56" value="4b2414ff"/>
+    <Color name="pianoroll: velocity" value="ff9408ff"/>
+    <Color name="pianoroll: insensitive bender line" value="96b2df84"/>
+    <Color name="pianoroll: insensitive pressure line" value="96dfc984"/>
+    <Color name="pianoroll: insensitive modulation line" value="afdf9684"/>
+    <Color name="pianoroll: insensitive expression line" value="dfc59684"/>
+    <Color name="pianoroll: user1 line" value="df96b084"/>
+    <Color name="pianoroll: user2 line" value="bc96df84"/>
+    <Color name="pianoroll: user3 line" value="9699df84"/>
   </Colors>
   <ColorAliases>
     <ColorAlias name="active crossfade" alias="neutral:foreground"/>
@@ -61,14 +69,6 @@
     <ColorAlias name="automation line" alias="theme:contrasting"/>
     <ColorAlias name="automation line insensitive" alias="neutral:foreground2"/>
     <ColorAlias name="automation track outline" alias="theme:bg1"/>
-    <ColorAlias name="pianoroll: velocity" alias="theme:bg2"/>
-    <ColorAlias name="pianoroll: insensitive bender line" alias="theme:bg2"/>
-    <ColorAlias name="pianoroll: insensitive pressure line" alias="theme:bg2"/>
-    <ColorAlias name="pianoroll: insensitive modulation line" alias="theme:bg2"/>
-    <ColorAlias name="pianoroll: insensitive expression line" alias="theme:bg2"/>
-    <ColorAlias name="pianoroll: user1 line" alias="theme:bg2"/>
-    <ColorAlias name="pianoroll: user2 line" alias="theme:bg2"/>
-    <ColorAlias name="pianoroll: user3 line" alias="theme:bg2"/>
     <ColorAlias name="big clock active: background" alias="neutral:backgroundest"/>
     <ColorAlias name="big clock active: cursor" alias="theme:contrasting alt"/>
     <ColorAlias name="big clock active: edited text" alias="theme:contrasting alt"/>
