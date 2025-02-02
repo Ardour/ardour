@@ -434,7 +434,7 @@ int main (int argc, char *argv[])
 
 #ifndef PLATFORM_WINDOWS
 	if (::signal (SIGPIPE, sigpipe_handler)) {
-		cerr << _("Cannot xinstall SIGPIPE error handler") << endl;
+		cerr << _("Cannot install SIGPIPE error handler") << endl;
 	}
 #endif
 
