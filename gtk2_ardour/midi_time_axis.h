@@ -58,6 +58,7 @@ namespace ARDOUR {
 	class Processor;
 	class Location;
 	class MidiPlaylist;
+	class InstrumentInfo;
 }
 
 namespace Evoral {
@@ -209,4 +210,3 @@ private:
 	void mouse_mode_changed ();
 	PBD::ScopedConnection mouse_mode_connection;
 };
-
