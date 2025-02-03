@@ -49,6 +49,7 @@ public:
 	void disable_scrolling();
 
 	Gtk::Menu_Helpers::MenuList& items () { return _menu.items (); }
+	Gtk::Menu& menu () { return _menu; }
 
 	void append_text_item (std::string const& text);
 	void set_active (std::string const& text);
