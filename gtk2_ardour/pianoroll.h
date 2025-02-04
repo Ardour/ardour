@@ -25,6 +25,7 @@
 #include <ytkmm/adjustment.h>
 
 #include "canvas/ruler.h"
+#include "widgets/eventboxext.h"
 
 #include "cue_editor.h"
 
@@ -211,7 +212,7 @@ class Pianoroll : public CueEditor
 
 	ArdourCanvas::Rectangle* transport_loop_range_rect;
 
-	Gtk::EventBox _contents;
+	ArdourWidgets::EventBoxExt _contents;
 	Gtk::VBox     _toolbox;
 
 	Gtk::HBox                    button_bar;
