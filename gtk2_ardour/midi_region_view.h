@@ -135,6 +135,8 @@ public:
 
 	MergeableLine* make_merger ();
 	void edit_in_pianoroll_window ();
+	void show_region_editor ();
+	void hide_region_editor ();
 
   protected:
 	void reset_width_dependent_items (double pixel_width);
@@ -175,6 +177,7 @@ public:
 	double contents_height() const { return (_height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
 
 	void connect_to_diskstream ();
+	bool pianoroll_window_deleted (GdkEventAny*);
 };
 
 

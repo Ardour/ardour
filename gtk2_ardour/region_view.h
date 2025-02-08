@@ -87,8 +87,8 @@ public:
 
 	bool set_position(Temporal::timepos_t const & pos, void* src, double* delta = 0);
 
-	void show_region_editor ();
-	void hide_region_editor ();
+	virtual void show_region_editor ();
+	virtual void hide_region_editor ();
 
 	virtual void region_changed (const PBD::PropertyChange&);
 

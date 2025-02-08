@@ -693,4 +693,28 @@ MidiRegionView::edit_in_pianoroll_window ()
 	pr->set (track, midi_region());
 	pr->show_all ();
 	pr->present ();
+
+	pr->signal_delete_event().connect (sigc::mem_fun (*this, &MidiRegionView::pianoroll_window_deleted), false);
+	_editor = pr;
+}
+
+bool
+MidiRegionView::pianoroll_window_deleted (GdkEventAny*)
+{
+	_editor = nullptr;
+	return false;
+}
+
+void
+MidiRegionView::show_region_editor ()
+{
+	edit_in_pianoroll_window ();
+}
+
+void
+MidiRegionView::hide_region_editor ()
+{
+	RegionView::hide_region_editor ();
+	delete _editor;
+	_editor = nullptr;
 }
