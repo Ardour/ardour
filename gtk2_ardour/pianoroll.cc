@@ -2302,6 +2302,11 @@ Pianoroll::user_automation_button_event (GdkEventButton* ev, MetaButton* mb)
 		return false;
 	}
 
+	if (mb->is_led_click (ev)) {
+		user_led_click (ev, mb);
+		return true;
+	}
+
 	ParameterButtonMap::iterator i = parameter_button_map.find (mb);
 	if (i == parameter_button_map.end()) {
 		std::cerr << "nuttn not found\n";
