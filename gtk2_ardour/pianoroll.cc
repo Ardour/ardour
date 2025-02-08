@@ -183,8 +183,6 @@ Pianoroll::reset_user_cc_choice (std::string name, Evoral::Parameter param, Meta
 
 	parameter_button_map.insert (std::make_pair (metabutton, param));
 
-	std::cerr << "Set menu active for " << name << " aka " << ARDOUR::EventTypeMap::instance().to_symbol (param) << std::endl;
-
 	metabutton->set_by_menutext (name);
 }
 
@@ -971,7 +969,6 @@ Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, It
 				/* grab dragged, so do nothing else */
 				return true;
 			}
-			std::cerr << "end grab was not true\n";
 		}
 	}
 
@@ -2269,36 +2266,10 @@ Pianoroll::zoom_to_show (Temporal::timecnt_t const & duration)
 	reset_zoom (spp);
 }
 
-void
-Pianoroll::user_activate (MetaButton* metabutton)
-{
-	std::cerr << "shouldn't really be here\n";
-
-	/* Find the parameter */
-
-	ParameterButtonMap::iterator i;
-	for (i = parameter_button_map.begin(); i != parameter_button_map.end(); ++i) {
-		if (i->first == metabutton) {
-			break;
-		}
-	}
-
-	if (i == parameter_button_map.end()) {
-		return;
-	}
-
-	if (view) {
-		view->update_automation_display (i->second, SelectionSet);
-	}
-}
-
 bool
 Pianoroll::user_automation_button_event (GdkEventButton* ev, MetaButton* mb)
 {
-	std::cerr << "UABe\n";
-
 	if (mb->is_menu_popup_event (ev)) {
-		std::cerr << "meny popup event\n";
 		return false;
 	}
 
@@ -2309,7 +2280,6 @@ Pianoroll::user_automation_button_event (GdkEventButton* ev, MetaButton* mb)
 
 	ParameterButtonMap::iterator i = parameter_button_map.find (mb);
 	if (i == parameter_button_map.end()) {
-		std::cerr << "nuttn not found\n";
 		return false;
 	}
 
@@ -2334,8 +2304,6 @@ Pianoroll::automation_button_event (GdkEventButton* ev, Evoral::ParameterType ty
 				op = SelectionToggle;
 			}
 
-			std::cerr << "update ad for " << ARDOUR::EventTypeMap::instance().to_symbol (param) << " op " << op << std::endl;
-
 			view->update_automation_display (param, op);
 		}
 		return true;
@@ -2349,8 +2317,6 @@ Pianoroll::automation_button_event (GdkEventButton* ev, Evoral::ParameterType ty
 void
 Pianoroll::user_led_click (GdkEventButton* ev, MetaButton* metabutton)
 {
-	std::cerr << "ULC\n";
-
 	if (ev->button != 1) {
 		return;
 	}
@@ -2368,7 +2334,6 @@ Pianoroll::user_led_click (GdkEventButton* ev, MetaButton* metabutton)
 		return;
 	}
 
-	std::cerr << "led set active for " << ARDOUR::EventTypeMap::instance().to_symbol (i->second) << std::endl;
 	if (view) {
 		view->set_active_automation (i->second);
 	}

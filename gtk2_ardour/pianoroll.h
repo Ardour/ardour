@@ -271,7 +271,6 @@ class Pianoroll : public CueEditor
 	bool automation_button_click (Evoral::ParameterType type, int id, ARDOUR::SelectionOperation);
 	void automation_led_click (GdkEventButton*, Evoral::ParameterType type, int id);
 	void user_led_click (GdkEventButton* ev, ArdourWidgets::MetaButton* metabutton);
-	void user_activate (ArdourWidgets::MetaButton* metabutton);
 
 	int _visible_channel;
 
