@@ -42,6 +42,7 @@ namespace ArdourCanvas {
 
 namespace ArdourWidgets {
 	class ArdourButton;
+	class MetaButton;
 }
 
 class PianorollMidiView;
@@ -204,11 +205,11 @@ class Pianoroll : public CueEditor
 	ArdourWidgets::ArdourButton* pressure_button;
 	ArdourWidgets::ArdourButton* expression_button;
 	ArdourWidgets::ArdourButton* modulation_button;
-	ArdourWidgets::ArdourDropdown* cc_dropdown1;
-	ArdourWidgets::ArdourDropdown* cc_dropdown2;
-	ArdourWidgets::ArdourDropdown* cc_dropdown3;
+	ArdourWidgets::MetaButton* cc_dropdown1;
+	ArdourWidgets::MetaButton* cc_dropdown2;
+	ArdourWidgets::MetaButton* cc_dropdown3;
 
-	typedef std::map<Evoral::Parameter,ArdourWidgets::ArdourButton*> ParameterButtonMap;
+	typedef std::map<ArdourWidgets::ArdourButton*,Evoral::Parameter> ParameterButtonMap;
 	ParameterButtonMap parameter_button_map;
 	void rebuild_parameter_button_map ();
 
@@ -265,9 +266,12 @@ class Pianoroll : public CueEditor
 	PBD::ScopedConnectionList capture_connections;
 	samplecnt_t data_capture_duration;
 
+	bool user_automation_button_event (GdkEventButton* ev, ArdourWidgets::MetaButton* mb);
 	bool automation_button_event (GdkEventButton*, Evoral::ParameterType type, int id);
 	bool automation_button_click (Evoral::ParameterType type, int id, ARDOUR::SelectionOperation);
 	void automation_led_click (GdkEventButton*, Evoral::ParameterType type, int id);
+	void user_led_click (GdkEventButton* ev, ArdourWidgets::MetaButton* metabutton);
+	void user_activate (ArdourWidgets::MetaButton* metabutton);
 
 	int _visible_channel;
 
@@ -296,4 +300,9 @@ class Pianoroll : public CueEditor
 	void rec_enable_change ();
 	void blink_rec_enable (bool);
 	sigc::connection rec_blink_connection;
+
+	void add_single_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name, ArdourWidgets::MetaButton*);
+	void add_multi_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, uint16_t channels, int ctl, const std::string& name, ArdourWidgets::MetaButton*);
+	void reset_user_cc_choice (std::string, Evoral::Parameter param, ArdourWidgets::MetaButton*);
+
 };

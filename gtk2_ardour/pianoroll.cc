@@ -34,6 +34,7 @@
 
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
+#include "widgets/metabutton.h"
 #include "widgets/tooltips.h"
 
 #include "ardour_ui.h"
@@ -41,6 +42,7 @@
 #include "editor_drag.h"
 #include "gui_thread.h"
 #include "keyboard.h"
+#include "midi_util.h"
 #include "pianoroll_background.h"
 #include "pianoroll.h"
 #include "pianoroll_midi_view.h"
@@ -156,15 +158,108 @@ void
 Pianoroll::rebuild_parameter_button_map()
 {
 	parameter_button_map.clear ();
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiVelocityAutomation, _visible_channel), velocity_button));
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiPitchBenderAutomation, _visible_channel), bender_button));
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiChannelPressureAutomation, _visible_channel), pressure_button));
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_EXPRESSION), expression_button));
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_MODWHEEL), modulation_button));
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE1), cc_dropdown1));
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE2), cc_dropdown2));
-	parameter_button_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE3), cc_dropdown3));
+	parameter_button_map.insert (std::make_pair (velocity_button, Evoral::Parameter (ARDOUR::MidiVelocityAutomation, _visible_channel)));
+	parameter_button_map.insert (std::make_pair (bender_button, Evoral::Parameter (ARDOUR::MidiPitchBenderAutomation, _visible_channel)));
+	parameter_button_map.insert (std::make_pair (pressure_button, Evoral::Parameter (ARDOUR::MidiChannelPressureAutomation, _visible_channel)));
+	parameter_button_map.insert (std::make_pair (expression_button, Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_EXPRESSION)));
+	parameter_button_map.insert (std::make_pair (modulation_button, Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_MODWHEEL)));
+
+	parameter_button_map.insert (std::make_pair (cc_dropdown1, Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE1)));
+	parameter_button_map.insert (std::make_pair (cc_dropdown2, Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE2)));
+	parameter_button_map.insert (std::make_pair (cc_dropdown3, Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE3)));
 }
+
+void
+Pianoroll::reset_user_cc_choice (std::string name, Evoral::Parameter param, MetaButton* metabutton)
+{
+	ParameterButtonMap::iterator iter;
+
+	for (iter = parameter_button_map.begin(); iter != parameter_button_map.end(); ++iter) {
+		if (iter->first == metabutton) {
+			parameter_button_map.erase (iter);
+			break;
+		}
+	}
+
+	parameter_button_map.insert (std::make_pair (metabutton, param));
+
+	std::cerr << "Set menu active for " << name << " aka " << ARDOUR::EventTypeMap::instance().to_symbol (param) << std::endl;
+
+	metabutton->set_by_menutext (name);
+}
+
+void
+Pianoroll::add_single_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items,
+                                       int                     ctl,
+                                       const std::string&      name,
+                                       ArdourWidgets::MetaButton* mb)
+{
+	using namespace Gtk::Menu_Helpers;
+
+	const uint16_t selected_channels = 0xffff;
+	for (uint8_t chn = 0; chn < 16; chn++) {
+
+		if (selected_channels & (0x0001 << chn)) {
+
+			Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
+			std::string menu_text (string_compose ("<b>%1</b>: %2 [%3]", ctl, name, int (chn + 1)));
+
+			mb->add_item (name, menu_text, sigc::bind (sigc::mem_fun (*this, &Pianoroll::reset_user_cc_choice), name, fully_qualified_param, mb));
+
+			/* one channel only */
+			break;
+		}
+	}
+}
+
+static void relax() {}
+
+void
+Pianoroll::add_multi_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items,
+                                      const uint16_t          channels,
+                                      int                     ctl,
+                                      const std::string&      name,
+                                      MetaButton* mb)
+{
+	using namespace Gtk;
+	using namespace Gtk::Menu_Helpers;
+
+	Menu* chn_menu = manage (new Menu);
+	MenuList& chn_items (chn_menu->items());
+	std::string menu_text (string_compose ("%1: %2", ctl, name));
+
+	/* Build the channel sub-menu */
+
+	Evoral::Parameter param_without_channel (MidiCCAutomation, 0, ctl);
+
+	for (uint8_t chn = 0; chn < 16; chn++) {
+		if (channels & (0x0001 << chn)) {
+
+			/* for each selected channel, add a menu item for this controller */
+
+			Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
+
+			chn_items.push_back (CheckMenuElem (string_compose (_("Channel %1"), chn+1),
+			                                    sigc::bind (sigc::mem_fun (*this, &Pianoroll::reset_user_cc_choice),  menu_text, fully_qualified_param, mb)));
+
+			ParameterButtonMap::iterator i = parameter_button_map.find (mb);
+
+			if (i != parameter_button_map.end()) {
+				if (fully_qualified_param == i->second) {
+					Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&ctl_items.back());
+					cmi->set_active();
+				}
+			}
+		}
+	}
+
+	/* add an item to metabutton's menu that will connect to the
+	 * per-channel submenu we built above.
+	 */
+
+	mb->add_item (name, menu_text, *chn_menu, sigc::ptr_fun (relax));
+}
+
 
 void
 Pianoroll::build_lower_toolbar ()
@@ -176,26 +271,30 @@ Pianoroll::build_lower_toolbar ()
 	pressure_button = new ArdourButton (_("Pressure"), elements);
 	expression_button = new ArdourButton (_("Expression"), elements);
 	modulation_button = new ArdourButton (_("Modulation"), elements);
-	cc_dropdown1 = new ArdourDropdown (elements);
-	cc_dropdown2 = new ArdourDropdown (elements);
-	cc_dropdown3 = new ArdourDropdown (elements);
+	cc_dropdown1 = new MetaButton ();
+	cc_dropdown2 = new MetaButton ();
+	cc_dropdown3 = new MetaButton ();
 
-	cc_dropdown1->set_text (string_compose (_("CC%1"), MIDI_CTL_MSB_GENERAL_PURPOSE1));
-	cc_dropdown2->set_text (string_compose (_("CC%1"), MIDI_CTL_MSB_GENERAL_PURPOSE2));
-	cc_dropdown3->set_text (string_compose (_("CC%1"), MIDI_CTL_MSB_GENERAL_PURPOSE3));
+	cc_dropdown1->add_elements (ArdourButton::Indicator);
+	cc_dropdown2->add_elements (ArdourButton::Indicator);
+	cc_dropdown3->add_elements (ArdourButton::Indicator);
+
+	cc_dropdown1->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_led_click), cc_dropdown1));
+	cc_dropdown2->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_led_click), cc_dropdown2));
+	cc_dropdown3->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_led_click), cc_dropdown3));
 
 	rebuild_parameter_button_map ();
 
-	/* Only need to do this once because i->second is the actual button,
+	/* Only need to do this once because i->first is the actual button,
 	 * which does not change even when the parameter_button_map is rebuilt.
 	 */
 
 	for (ParameterButtonMap::iterator i = parameter_button_map.begin(); i != parameter_button_map.end(); ++i) {
-		i->second->set_active_color (0xff0000ff);
-		i->second->set_distinct_led_click (true);
-		i->second->set_led_left (true);
-		i->second->set_act_on_release (false);
-		i->second->set_fallthrough_to_parent (true);
+		i->first->set_active_color (0xff0000ff);
+		i->first->set_distinct_led_click (true);
+		i->first->set_led_left (true);
+		i->first->set_act_on_release (false);
+		i->first->set_fallthrough_to_parent (true);
 	}
 
 	// button_bar.set_homogeneous (true);
@@ -214,6 +313,10 @@ Pianoroll::build_lower_toolbar ()
 	bender_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_button_event), ARDOUR::MidiPitchBenderAutomation, 0));
 	modulation_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL));
 	expression_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION));
+
+	cc_dropdown1->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_automation_button_event), cc_dropdown1), false);
+	cc_dropdown2->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_automation_button_event), cc_dropdown2), false);
+	cc_dropdown3->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_automation_button_event), cc_dropdown3), false);
 
 	velocity_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_led_click), ARDOUR::MidiVelocityAutomation, 0));
 	pressure_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_led_click), ARDOUR::MidiChannelPressureAutomation, 0));
@@ -2064,7 +2167,7 @@ Pianoroll::set (TriggerReference & tref)
 	_track = std::dynamic_pointer_cast<MidiTrack> (st->shared_from_this());
 	assert (_track);
 
-	view->set_track (_track);
+	set_track (_track);
 
 	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Pianoroll::maybe_update));
 	_track->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this), gui_context());
@@ -2096,6 +2199,24 @@ Pianoroll::set_track (std::shared_ptr<ARDOUR::MidiTrack> track)
 	if (view) {
 		view->set_track (track);
 	}
+
+	cc_dropdown1->menu().items().clear ();
+	cc_dropdown2->menu().items().clear ();
+	cc_dropdown3->menu().items().clear ();
+
+	build_controller_menu (cc_dropdown1->menu(), track->instrument_info(), 0xffff,
+	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_single_controller_item), cc_dropdown1),
+	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), cc_dropdown1));
+	build_controller_menu (cc_dropdown2->menu(), track->instrument_info(), 0xffff,
+	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_single_controller_item), cc_dropdown2),
+	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), cc_dropdown2));
+	build_controller_menu (cc_dropdown3->menu(), track->instrument_info(), 0xffff,
+	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_single_controller_item), cc_dropdown3),
+	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), cc_dropdown3));
+
+	// reset_user_cc_choice (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE1), cc_dropdown1);
+	// reset_user_cc_choice (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE2), cc_dropdown2);
+	// reset_user_cc_choice (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE3), cc_dropdown3);
 }
 
 void
@@ -2148,6 +2269,48 @@ Pianoroll::zoom_to_show (Temporal::timecnt_t const & duration)
 	reset_zoom (spp);
 }
 
+void
+Pianoroll::user_activate (MetaButton* metabutton)
+{
+	std::cerr << "shouldn't really be here\n";
+
+	/* Find the parameter */
+
+	ParameterButtonMap::iterator i;
+	for (i = parameter_button_map.begin(); i != parameter_button_map.end(); ++i) {
+		if (i->first == metabutton) {
+			break;
+		}
+	}
+
+	if (i == parameter_button_map.end()) {
+		return;
+	}
+
+	if (view) {
+		view->update_automation_display (i->second, SelectionSet);
+	}
+}
+
+bool
+Pianoroll::user_automation_button_event (GdkEventButton* ev, MetaButton* mb)
+{
+	std::cerr << "UABe\n";
+
+	if (mb->is_menu_popup_event (ev)) {
+		std::cerr << "meny popup event\n";
+		return false;
+	}
+
+	ParameterButtonMap::iterator i = parameter_button_map.find (mb);
+	if (i == parameter_button_map.end()) {
+		std::cerr << "nuttn not found\n";
+		return false;
+	}
+
+	return automation_button_event (ev, i->second.type(), i->second.id());
+}
+
 bool
 Pianoroll::automation_button_event (GdkEventButton* ev, Evoral::ParameterType type, int id)
 {
@@ -2166,6 +2329,8 @@ Pianoroll::automation_button_event (GdkEventButton* ev, Evoral::ParameterType ty
 				op = SelectionToggle;
 			}
 
+			std::cerr << "update ad for " << ARDOUR::EventTypeMap::instance().to_symbol (param) << " op " << op << std::endl;
+
 			view->update_automation_display (param, op);
 		}
 		return true;
@@ -2174,6 +2339,34 @@ Pianoroll::automation_button_event (GdkEventButton* ev, Evoral::ParameterType ty
 	}
 
 	return false;
+}
+
+void
+Pianoroll::user_led_click (GdkEventButton* ev, MetaButton* metabutton)
+{
+	std::cerr << "ULC\n";
+
+	if (ev->button != 1) {
+		return;
+	}
+
+	/* Find the parameter */
+
+	ParameterButtonMap::iterator i;
+	for (i = parameter_button_map.begin(); i != parameter_button_map.end(); ++i) {
+		if (i->first == metabutton) {
+			break;
+		}
+	}
+
+	if (i == parameter_button_map.end()) {
+		return;
+	}
+
+	std::cerr << "led set active for " << ARDOUR::EventTypeMap::instance().to_symbol (i->second) << std::endl;
+	if (view) {
+		view->set_active_automation (i->second);
+	}
 }
 
 void
@@ -2194,22 +2387,22 @@ Pianoroll::automation_state_changed ()
 	assert (view);
 
 	for (ParameterButtonMap::iterator i = parameter_button_map.begin(); i != parameter_button_map.end(); ++i) {
-		std::string str (ARDOUR::EventTypeMap::instance().to_symbol (i->first));
+		std::string str (ARDOUR::EventTypeMap::instance().to_symbol (i->second));
 
 		/* Indicate visible automation state with selected/not-selected visual state */
 
-		if (view->is_visible_automation (i->first)) {
-			i->second->set_visual_state (Gtkmm2ext::Selected);
+		if (view->is_visible_automation (i->second)) {
+			i->first->set_visual_state (Gtkmm2ext::Selected);
 		} else {
-			i->second->set_visual_state (Gtkmm2ext::NoVisualState);
+			i->first->set_visual_state (Gtkmm2ext::NoVisualState);
 		}
 
 		/* Indicate active automation state with explicit widget active state (LED) */
 
-		if (view->is_active_automation (i->first)) {
-			i->second->set_active_state (Gtkmm2ext::ExplicitActive);
+		if (view->is_active_automation (i->second)) {
+			i->first->set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
-			i->second->set_active_state (Gtkmm2ext::Off);
+			i->first->set_active_state (Gtkmm2ext::Off);
 		}
 	}
 }
