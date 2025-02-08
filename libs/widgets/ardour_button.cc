@@ -1056,18 +1056,28 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 }
 
 bool
+ArdourButton::is_led_click (GdkEventButton *ev)
+{
+	if (ev->button == 1 && _hovering && (_elements & Indicator) && _led_rect && _distinct_led_click) {
+		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width &&
+		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool
 ArdourButton::on_button_release_event (GdkEventButton *ev)
 {
 	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS) {
 		return _fallthrough_to_parent ? false : true;
 	}
-	if (ev->button == 1 && _hovering && (_elements & Indicator) && _led_rect && _distinct_led_click) {
-		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width &&
-		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
-			std::cerr << "LED click\n";
-			signal_led_clicked(ev); /* EMIT SIGNAL */
-			return true;
-		}
+
+	if (is_led_click (ev)) {
+		signal_led_clicked(ev); /* EMIT SIGNAL */
+		return true;
 	}
 
 	_grabbed = false;

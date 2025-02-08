@@ -117,6 +117,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	void add_sizing_text (std::string const&);
 	void set_sizing_texts (std::vector<std::string> const&);
 
+	bool is_led_click (GdkEventButton*);
 	sigc::signal<void, GdkEventButton*> signal_led_clicked;
 	sigc::signal<void> signal_clicked;
 
