@@ -69,9 +69,9 @@ Glib::RefPtr<Gtk::ActionGroup> RegionEditor::RegionFxBox::rfx_box_actions;
 Gtkmm2ext::Bindings*           RegionEditor::RegionFxBox::bindings        = 0;
 RegionEditor::RegionFxBox*     RegionEditor::RegionFxBox::current_rfx_box = 0;
 
-RegionEditor::RegionEditor (Session* s, RegionView* rv)
+RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 	: SessionHandlePtr (s)
-	, _region (rv->region ())
+	, _region (r)
 	, _name_label (_("Name:"))
 	, _audition_button (_("Audition"))
 	, _clock_group (new ClockGroup)

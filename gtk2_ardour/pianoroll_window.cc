@@ -18,11 +18,14 @@
 
 #include "pbd/compose.h"
 
+#include "ardour/midi_region.h"
+
 #include "gtkmm2ext/doi.h"
 
 #include "ardour_ui.h"
 #include "pianoroll.h"
 #include "pianoroll_window.h"
+#include "region_editor.h"
 
 using namespace ARDOUR;
 
@@ -33,8 +36,8 @@ PianorollWindow::PianorollWindow (std::string const & name, Session& s)
 	pianoroll->set_session (&s);
 	pianoroll->viewport().set_size_request (600, 120);
 
-	add (pianoroll->contents());
-	pianoroll->contents().show ();
+	add (hpacker);
+	hpacker.show ();
 }
 
 PianorollWindow::~PianorollWindow ()
@@ -47,6 +50,13 @@ PianorollWindow::set (std::shared_ptr<MidiTrack> track, std::shared_ptr<MidiRegi
 {
 	pianoroll->set_track (track);
 	pianoroll->set_region (region);
+
+	region_editor = new RegionEditor (pianoroll->session(), region);
+	hpacker.pack_start (*region_editor, false, false);
+	hpacker.pack_start (pianoroll->contents(), true, true);
+
+	region_editor->show ();
+	pianoroll->contents().show ();
 }
 
 bool

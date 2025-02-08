@@ -55,7 +55,7 @@ _peak_amplitude_thread (void* arg)
 }
 
 AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
-	: RegionEditor (s, arv)
+	: RegionEditor (s, arv->region())
 	, _arv (arv)
 	, _audio_region (arv->audio_region ())
 	, _gain_adjustment (accurate_coefficient_to_dB (fabsf (_audio_region->scale_amplitude ())), -40.0, +40.0, 0.1, 1.0, 0)
@@ -129,7 +129,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	_fade_before_fx_toggle.signal_toggled ().connect (sigc::mem_fun (*this, &AudioRegionEditor::fade_before_fx_toggle_changed));
 	_show_on_touch.signal_toggled ().connect (sigc::mem_fun (*this, &AudioRegionEditor::show_on_touch_changed));
 
-	arv->region_line_changed.connect ((sigc::mem_fun (*this, &AudioRegionEditor::refill_region_line)));
+	_arv->region_line_changed.connect ((sigc::mem_fun (*this, &AudioRegionEditor::refill_region_line)));
 
 	_peak_amplitude.property_editable () = false;
 	_peak_amplitude.set_width_chars (9);

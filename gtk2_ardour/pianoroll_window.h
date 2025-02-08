@@ -26,6 +26,7 @@ namespace ARDOUR {
 }
 
 class Pianoroll;
+class RegionEditor;
 
 class PianorollWindow : public ArdourWindow
 {
@@ -38,5 +39,7 @@ class PianorollWindow : public ArdourWindow
 	bool on_delete_event (GdkEventAny*);
 
  private:
+	Gtk::HBox hpacker;
 	Pianoroll* pianoroll;
+	RegionEditor* region_editor;
 };

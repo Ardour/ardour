@@ -169,7 +169,7 @@ SelectionPropertiesBox::selection_changed ()
 			if (arv) {
 				_region_editor = new AudioRegionEditor (_session, arv);
 			} else {
-				_region_editor = new RegionEditor (_session, rv);
+				_region_editor = new RegionEditor (_session, rv->region());
 			}
 			// TODO subscribe to region name changes
 			_region_editor->set_label (string_compose (_("Region '%1'"), rv->region()->name ()));

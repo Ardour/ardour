@@ -61,7 +61,7 @@ class ClockGroup;
 class RegionEditor : public ArdourWidgets::Frame, public ARDOUR::SessionHandlePtr
 {
 public:
-	RegionEditor (ARDOUR::Session*, RegionView*);
+	RegionEditor (ARDOUR::Session*, std::shared_ptr<ARDOUR::Region>);
 	virtual ~RegionEditor ();
 
 	std::shared_ptr<ARDOUR::Region> region () const { return _region; }
