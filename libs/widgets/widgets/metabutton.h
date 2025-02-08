@@ -33,15 +33,21 @@ public:
 	virtual ~MetaButton ();
 
 	void add_item (std::string const& label, std::string const& menutext, sigc::slot<void> const&);
+	void add_item (std::string const& label, std::string const& menutext, Gtk::Menu&, sigc::slot<void> const&);
 	void clear_items ();
 
 	void set_active (std::string const&);
 	void set_index (guint);
+	void set_by_menutext (std::string const & mt);
 
 	guint index () const
 	{
 		return _active;
 	}
+
+	Gtk::Menu& menu() { return _menu; }
+
+	bool is_menu_popup_event (GdkEventButton* ev) const;
 
 protected:
 	bool on_button_press_event (GdkEventButton*);
@@ -58,6 +64,14 @@ private:
 			, _label (label)
 			, _cb (cb)
 		{
+		}
+
+		MetaMenuItem (std::string const& label, std::string const& menutext, sigc::slot<void> const & cb, Gtk::Menu& submenu)
+			: Gtk::MenuItem (menutext, false)
+			, _label (label)
+			, _cb (cb)
+		{
+			set_submenu (submenu);
 		}
 
 		void activate () const
@@ -94,6 +108,16 @@ private:
 			child_->signal_activate ().connect (sigc::bind (wrap, mmi));
 			child_->show ();
 		}
+		MetaElement (std::string const& label, std::string const & menutext, sigc::slot<void> const & cb, SlotActivate const & wrap, Gtk::Menu& submenu)
+			: Gtk::Menu_Helpers::MenuElem ("")
+		{
+			MetaMenuItem* mmi = manage (new MetaMenuItem (label, menutext, cb, submenu));
+			child_->unreference ();
+			set_child (mmi);
+			child_->signal_activate ().connect (sigc::bind (wrap, mmi));
+			child_->show ();
+		}
+
 	};
 
 	void activate_item (MetaMenuItem const*);

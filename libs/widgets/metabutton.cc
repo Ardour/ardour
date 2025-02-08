@@ -71,16 +71,39 @@ MetaButton::add_item (std::string const& label, std::string const& menutext, sig
 	}
 }
 
+void
+MetaButton::add_item (std::string const& label, std::string const & menutext, Gtk::Menu& submenu, sigc::slot<void> const & cb)
+{
+	using namespace Menu_Helpers;
+
+	add_sizing_text (label);
+	MenuList& items = _menu.items ();
+	items.push_back (MetaElement (label, menutext, cb, sigc::mem_fun (*this, &MetaButton::activate_item), submenu));
+	if (items.size () == 1) {
+		_menu.set_active (0);
+		update_button (dynamic_cast<MetaMenuItem*> (&items.back ()));
+		set_text (label);
+	}
+}
+
+bool
+MetaButton::is_menu_popup_event (GdkEventButton* ev) const
+{
+	return ((ev->type == GDK_BUTTON_PRESS && ev->button == 3) ||
+	        (ev->type == GDK_BUTTON_PRESS && ev->button == 1 && ev->x > (get_width () - _diameter - 7)));
+}
+
 bool
 MetaButton::on_button_press_event (GdkEventButton* ev)
 {
 	MetaMenuItem const* current_active = dynamic_cast<MetaMenuItem*> (_menu.get_active ());
 
-	if (ev->type == GDK_BUTTON_PRESS && ev->button == 3) {
+	if (is_menu_popup_event (ev)) {
 		Gtkmm2ext::anchored_menu_popup (&_menu, this, current_active ? current_active->menutext () : "", ev->button, ev->time);
-	} else if (ev->type == GDK_BUTTON_PRESS && ev->button == 1 && ev->x > (get_width () - _diameter - 7)) {
-		Gtkmm2ext::anchored_menu_popup (&_menu, this, current_active ? current_active->menutext () : "", ev->button, ev->time);
-	} else if (ev->type == GDK_BUTTON_PRESS && ev->button == 1) {
+		return true;
+	}
+
+	if (ev->type == GDK_BUTTON_PRESS && ev->button == 1) {
 		if (current_active) {
 			current_active->activate ();
 		}
@@ -133,6 +156,21 @@ MetaButton::set_active (std::string const& menulabel)
 		set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		set_active_state (Gtkmm2ext::Off);
+	}
+}
+
+void
+MetaButton::set_by_menutext (std::string const & mt)
+{
+	guint c = 0;
+	for (auto & i : _menu.items()) {
+		if (i.get_label() == mt) {
+			_menu.set_active (c);
+			_active = c;
+			update_button (dynamic_cast<MetaMenuItem*> (&i));
+			break;
+		}
+		++c;
 	}
 }
 
