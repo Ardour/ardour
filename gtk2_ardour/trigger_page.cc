@@ -73,6 +73,7 @@ TriggerPage::TriggerPage ()
 	, _master (_master_widget.root ())
 	, _show_bottom_pane (false)
 	, _selection (*this, *this)
+	, clip_editor_column (-1)
 {
 	load_bindings ();
 	register_actions ();
@@ -143,22 +144,20 @@ TriggerPage::TriggerPage ()
 	_midi_editor = new Pianoroll (X_("MIDICueEditor"));
 
 	/* Bottom -- Properties of selected Slot/Region */
-	Gtk::Table* table = manage (new Gtk::Table);
-	table->set_homogeneous (false);
-	table->set_spacings (8);  //match to slot_properties_box::set_spacings
-	table->set_border_width (8);
+
+	table.set_homogeneous (false);
+	table.set_spacings (8);  //match to slot_properties_box::set_spacings
+	table.set_border_width (8);
 
 	int col = 0;
-	table->attach (_slot_prop_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
+	table.attach (_slot_prop_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
 	++col;
-	table->attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
-	++col;
-	table->attach (_midi_editor->contents(), col, col + 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL);
-	++col;
+	table.attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
+	clip_editor_column = ++col;
 
-	table->show_all ();
+	table.set_no_show_all ();
 
-	_parameter_box.pack_start (*table);
+	_parameter_box.pack_start (table);
 	_parameter_box.show ();
 
 	_sidebar_notebook.signal_switch_page().connect ([this](GtkNotebookPage*, guint page) {
@@ -516,36 +515,48 @@ TriggerPage::selection_changed ()
 	_slot_prop_box.hide ();
 	_audio_trig_box.hide ();
 	_midi_trig_box.hide ();
-	_midi_editor->viewport().hide ();
+
+	if (_midi_editor->contents().get_parent()) {
+		_midi_editor->contents().get_parent()->remove (_midi_editor->contents());
+	}
 
 	Tabbable::showhide_att_bottom (false);
 
-	if (!selection.triggers.empty ()) {
-		TriggerSelection ts      = selection.triggers;
-		TriggerEntry*    entry   = *ts.begin ();
-		TriggerReference ref     = entry->trigger_reference ();
-		TriggerPtr       trigger = entry->trigger ();
-		std::shared_ptr<TriggerBox> box = ref.box();
+	if (selection.triggers.empty ()) {
+		return;
+	}
 
-		_slot_prop_box.set_slot (ref);
-		_slot_prop_box.show ();
+	TriggerSelection ts      = selection.triggers;
+	TriggerEntry*    entry   = *ts.begin ();
+	TriggerReference ref     = entry->trigger_reference ();
+	TriggerPtr       trigger = entry->trigger ();
+	std::shared_ptr<TriggerBox> box = ref.box();
 
-		if (box->data_type () == DataType::AUDIO) {
-			if (trigger->the_region()) {
-				_audio_trig_box.set_trigger (ref);
-				_audio_trig_box.show ();
-			}
-		} else {
-			_midi_trig_box.set_trigger (ref);
-			_midi_trig_box.show ();
+	_slot_prop_box.set_slot (ref);
+	_slot_prop_box.show ();
 
-			_midi_editor->set (ref);
-			_midi_editor->viewport().show ();
+	if (box->data_type () == DataType::AUDIO) {
+
+		if (trigger->the_region()) {
+			_audio_trig_box.set_trigger (ref);
+			_audio_trig_box.show ();
 		}
 
-		if (_show_bottom_pane) {
-			Tabbable::showhide_att_bottom (true);
-		}
+	} else {
+
+		_midi_trig_box.set_trigger (ref);
+		_midi_trig_box.show ();
+
+		_midi_editor->set (ref);
+
+		table.attach (_midi_editor->contents(), clip_editor_column, clip_editor_column + 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL);
+		_midi_editor->contents().show_all ();
+	}
+
+	table.show ();
+
+	if (_show_bottom_pane) {
+		Tabbable::showhide_att_bottom (true);
 	}
 }
 
