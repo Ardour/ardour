@@ -58,6 +58,10 @@ extern void no_app_nap (); // cocoacarbon.mm
 static void
 setup_logging (void)
 {
+	if (g_getenv ("ARDOUR_NOLOG_STD")) {
+		return;
+	}
+
 	char path[PATH_MAX+1];
 	snprintf (path, sizeof (path), "%s/stderr.log", user_config_directory().c_str());
 
