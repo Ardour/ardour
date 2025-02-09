@@ -47,11 +47,11 @@ using namespace ARDOUR;
 using namespace Gtkmm2ext;
 
 PianorollMidiView::PianorollMidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
-                          ArdourCanvas::Item&      parent,
-                          ArdourCanvas::Item&      noscroll_parent,
-                          EditingContext&          ec,
-                          MidiViewBackground&      bg,
-                          uint32_t                 basic_color)
+                                      ArdourCanvas::Item&      parent,
+                                      ArdourCanvas::Item&      noscroll_parent,
+                                      EditingContext&          ec,
+                                      MidiViewBackground&      bg,
+                                      uint32_t                 basic_color)
 	: MidiView (mt, parent, ec, bg, basic_color)
 	, active_automation (nullptr)
 	, velocity_display (nullptr)
