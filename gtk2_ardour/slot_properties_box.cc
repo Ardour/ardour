@@ -324,25 +324,30 @@ SlotPropertyTable::SlotPropertyTable ()
 	fol_table->set_spacings(2);
 	fol_table->set_border_width(4);
 
-	_follow_count_label.set_text(_("Follow Count:"));  _follow_count_label.set_alignment(1.0, 0.5);
+	_follow_count_label.set_text(_("Follow Count:"));
+	_follow_count_label.set_alignment(1.0, 0.5);
 	fol_table->attach(_follow_count_label,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	Gtk::Alignment *align = manage (new Gtk::Alignment (0, .5, 0, 0));
 	align->add (_follow_count_spinner);
 	fol_table->attach(*align,               2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 ); row++;
 
-	_follow_length_label.set_text(_("Follow Length:"));  _follow_length_label.set_alignment(1.0, 0.5);
-	_beat_label.set_text(_("(beats)"));	_beat_label.set_alignment (0.0, 0.5);
+	_follow_length_label.set_text(_("Follow Length:"));
+	_follow_length_label.set_alignment(1.0, 0.5);
+	_beat_label.set_text(_("(beats)"));
+	_beat_label.set_alignment (0.0, 0.5);
 	Gtk::Alignment *fl_align = manage (new Gtk::Alignment (0, .5, 0, 0));
 	fl_align->add (_follow_length_spinner);
-	fol_table->attach(_use_follow_length_button,     0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK);
-	fol_table->attach(_follow_length_label,          1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	fol_table->attach(*fl_align,                     2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	fol_table->attach(_beat_label,                   3, 4, row, row+1, Gtk::SHRINK, Gtk::SHRINK);
+	fol_table->attach (_use_follow_length_button,     0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK);
+	fol_table->attach (_follow_length_label,          1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	fol_table->attach (*fl_align,                     2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	fol_table->attach (_beat_label,                   3, 4, row, row+1, Gtk::SHRINK, Gtk::SHRINK);
 
-	_follow_table.attach(_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
-	_follow_table.attach(_follow_right,  1, 2, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
-	_follow_table.attach( *prob_table,   0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
-	_follow_table.attach( *fol_table,    0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	_follow_table.attach (_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
+	_follow_table.attach (_follow_right,  1, 2, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
+	_follow_table.attach (*prob_table,   0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	_follow_table.attach (*fol_table,    0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+
+	_follow_table.show_all ();
 
 	ArdourWidgets::Frame* trigBox = manage (new ArdourWidgets::Frame);
 	trigBox->set_label(_("Clip Properties"));
