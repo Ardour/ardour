@@ -142,14 +142,15 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Again), 0)));
 	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ReverseTrigger), 0)));
 	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ForwardTrigger), 0)));
-		Menu*     jump_menu = manage (new Menu);
-		MenuList& jitems      = jump_menu->items ();
-		jitems.push_back (MenuElem (_("Multi..."), sigc::bind (sigc::mem_fun (*this, &TriggerUI::edit_jump), false)));
-		for (int i = 0; i < TriggerBox::default_triggers_per_box; i++) {
-			FollowAction jump_fa = (FollowAction::JumpTrigger);
-			jump_fa.targets.set(i);
-			jitems.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 0)));
-		}
+
+	Menu*     jump_menu = manage (new Menu);
+	MenuList& jitems      = jump_menu->items ();
+	jitems.push_back (MenuElem (_("Multi..."), sigc::bind (sigc::mem_fun (*this, &TriggerUI::edit_jump), false)));
+	for (int i = 0; i < TriggerBox::default_triggers_per_box; i++) {
+		FollowAction jump_fa = (FollowAction::JumpTrigger);
+		jump_fa.targets.set(i);
+		jitems.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 0)));
+	}
 	_follow_left.AddMenuElem (MenuElem (_("Jump"), *jump_menu));
 	_follow_left.set_sizing_text (longest_follow);
 
@@ -159,14 +160,14 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Again), 1)));
 	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ReverseTrigger), 1)));
 	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ForwardTrigger), 1)));
-		Menu*     jump_menu_1 = manage (new Menu);
-		MenuList& jitems_1      = jump_menu_1->items ();
-		jitems_1.push_back (MenuElem (_("Multi..."), sigc::bind (sigc::mem_fun (*this, &TriggerUI::edit_jump), true)));
-		for (int i = 0; i < TriggerBox::default_triggers_per_box; i++) {
-			FollowAction jump_fa = (FollowAction::JumpTrigger);
-			jump_fa.targets.set(i);
-			jitems_1.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 1)));
-		}
+	Menu*     jump_menu_1 = manage (new Menu);
+	MenuList& jitems_1      = jump_menu_1->items ();
+	jitems_1.push_back (MenuElem (_("Multi..."), sigc::bind (sigc::mem_fun (*this, &TriggerUI::edit_jump), true)));
+	for (int i = 0; i < TriggerBox::default_triggers_per_box; i++) {
+		FollowAction jump_fa = (FollowAction::JumpTrigger);
+		jump_fa.targets.set(i);
+		jitems_1.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 1)));
+	}
 	_follow_right.AddMenuElem (MenuElem (_("Jump"), *jump_menu_1));
 	_follow_right.set_sizing_text (longest_follow);
 
