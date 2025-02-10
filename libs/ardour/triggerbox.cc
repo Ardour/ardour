@@ -1999,7 +1999,6 @@ AudioTrigger::load_data (std::shared_ptr<AudioRegion> ar)
 {
 	const uint32_t nchans = ar->n_channels();
 
-	std::cerr << _box.order() << '/' << index() << " Data loaded, length = " << data.length << std::endl;
 	drop_data ();
 
 	try {
