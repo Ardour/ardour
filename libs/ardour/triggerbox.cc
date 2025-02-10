@@ -1999,16 +1999,19 @@ AudioTrigger::load_data (std::shared_ptr<AudioRegion> ar)
 {
 	const uint32_t nchans = ar->n_channels();
 
-	data.length = ar->length_samples();
+	std::cerr << _box.order() << '/' << index() << " Data loaded, length = " << data.length << std::endl;
 	drop_data ();
 
 	try {
-		data.alloc (data.length, nchans);
+		samplecnt_t len = ar->length_samples();
+
+		data.alloc (len, nchans);
 
 		for (uint32_t n = 0; n < nchans; ++n) {
-			ar->read (data[n], 0, data.length, n);
+			ar->read (data[n], 0, len, n);
 		}
 
+		data.length = len;
 		set_name (ar->name());
 
 	} catch (...) {
