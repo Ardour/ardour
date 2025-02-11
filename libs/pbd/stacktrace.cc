@@ -131,3 +131,13 @@ PBD::stacktrace (std::ostream& out, int, size_t)
 }
 
 #endif
+
+extern "C" {
+
+void
+libpbd_c_stacktrace (int levels)
+{
+	PBD::stacktrace (std::cerr, levels);
+}
+
+}
