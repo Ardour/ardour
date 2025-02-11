@@ -17,6 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iostream>
 #include "pbd/demangle.h"
 
 #if defined(__GLIBCXX__) || defined(__APPLE__)
@@ -60,7 +61,6 @@ PBD::demangle (std::string const& str)
 #ifdef __APPLE__
 
 	std::string foo;
-	std::string symbol;
 	std::stringstream sstr (str);
 
 	/* format is:
@@ -74,10 +74,38 @@ PBD::demangle (std::string const& str)
 	sstr >> foo;
 	sstr >> foo;
 	sstr >> foo;
-	sstr >> symbol;
 
-	return demangle_symbol (symbol);
+	/* Read as far as the "offset" */
 
+	char sym[1024];
+	sstr.getline (sym, sizeof (sym), '+');
+	if (sstr.bad() || strlen (sym) < 2) {
+		return str;
+	}
+
+	/* There's a space at the beginning which we don't care about, and one
+	 * at the end too
+	 */
+
+	sym[strlen(sym)-1] = '\0';
+	std::string symbol = &sym[1];
+
+	if (symbol.size() > 2) {
+		if (symbol[0] == '-' && symbol[1] == '[') {
+			/* Objective C */
+			std::string::size_type bracket = symbol.find_last_of (']');
+			if (bracket == std::string::npos) {
+				/* Apparently no Objective C, despite early indications that it was */
+				return demangle_symbol (symbol);
+			}
+			return symbol.substr (0, bracket + 1);
+		} else {
+			/* Not Objective C */
+			return demangle_symbol (symbol);
+		}
+	}
+
+	return str;
 #else
 
 	std::string::size_type const b = str.find_first_of ("(");
