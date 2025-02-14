@@ -730,7 +730,8 @@ static int showInvalidation = 0;
   if (NSContainsRect (rect, bo)) {
 	  full_draw = TRUE;
 #ifndef NDEBUG
-	  printf ("full draw seen!\n");
+	  //printf ("full draw seen because %.0f x %.0f @ %.0f, %.0f contains %.0f x %.0f @ %.0f, %.0f\n", rect.size.width, rect.size.height, rect.origin.x, rect.origin.y,
+	  // bo.size.width, bo.size.height, bo.origin.x, bo.origin.y);
 #endif
   } else {
 	  full_draw = FALSE;
@@ -775,14 +776,6 @@ static int showInvalidation = 0;
        // printf ("quartz says there are %d rects\n", count);
        region = gdk_region_new ();
 
-#ifndef NDEBUG
-       if (showInvalidation) {
-	       r = 1.0;
-	       g = 0.0;
-	       b = 0.0;
-       }
-#endif
-
        for (i = 0; i < count; i++) {
 	 gdk_rect.x = drawn_rects[i].origin.x;
 	 gdk_rect.y = drawn_rects[i].origin.y;
@@ -806,6 +799,38 @@ static int showInvalidation = 0;
     }
 
 #ifndef NDEBUG
+  if (showInvalidation) {
+	  gint nrects;
+	  GdkRectangle* rects;
+
+	  [NSGraphicsContext saveGraphicsState];
+	  cg = [[NSGraphicsContext currentContext] CGContext];
+
+	  r = (random() % 65535) / 65535.;
+	  g = (random() % 65535) / 65535.;
+	  b = (random() % 65535) / 65535.;
+
+	  CGContextSetRGBFillColor (cg, r, g, b, 1.);
+
+	  /* The GDK process updates call tree will have removed child window
+	   * areas from the expose region. This will show up whatever is left
+	   */
+
+	  gdk_region_get_rectangles (region, &rects, &nrects);
+	  // printf ("\t%p rects from region %p: %d\n", impl, region, nrects);
+	  if (nrects == 0) {
+		  printf ("region %p empty: %d\n", region, gdk_region_empty (region));
+	  }
+	  for (gint n = 0; n < nrects; ++n) {
+		  CGContextFillRect (cg, NSMakeRect(rects[n].x, rects[n].y, rects[n].width, rects[n].height));
+		  // printf ("\tR: %d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
+	  }
+
+	  [NSGraphicsContext restoreGraphicsState];
+  }
+#endif
+
+#ifndef NDEBUG
     GdkRegion* copy = gdk_region_copy (region);
 #endif
 
@@ -823,7 +848,7 @@ static int showInvalidation = 0;
 	  [NSGraphicsContext saveGraphicsState];
 	  cg = [[NSGraphicsContext currentContext] CGContext];
 
-	  CGContextSetRGBFillColor (cg, 0.4, 0., 0.3, 0.2);
+	  CGContextSetRGBFillColor (cg, 0., 0., 1., 1.);
 
 	  /* The GDK process updates call tree will have removed child window
 	   * areas from the expose region. This will show up whatever is left
@@ -832,8 +857,8 @@ static int showInvalidation = 0;
 	  gdk_region_get_rectangles (region, &rects, &nrects);
 	  // printf ("%p leftover %d rects after expose\n", impl, nrects);
 	  for (gint n = 0; n < nrects; ++n) {
-		  CGContextFillRect (cg, NSMakeRect(rects[n].x, rects[n].y, rects[n].width, rects[n].height));
-		  // printf ("\t%d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
+		  // CGContextFillRect (cg, NSMakeRect(rects[n].x, rects[n].y, rects[n].width, rects[n].height));
+		  // printf ("\tB: %d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
 	  }
 
 	  /* Now draw the rectangles making up the region where the process
@@ -841,14 +866,14 @@ static int showInvalidation = 0;
 	   * use a red line; GDK-driven redraws will use a green line.
 	   */
 
-	  CGContextSetLineWidth (cg, 1.);
-	  CGContextSetRGBStrokeColor (cg, r, g, b, 1.);
+	  CGContextSetLineWidth (cg, 5.);
+	  CGContextSetRGBStrokeColor (cg, 0., 1., 0., 1.);
 
 	  gdk_region_get_rectangles (copy, &rects, &nrects);
 	  // printf ("%p drawRect with %d rects in %p (region from gdk? %d)\n", impl, nrects, region, region == impl->needs_display_region);
 	  for (gint n = 0; n < nrects; ++n) {
 		  CGContextStrokeRect (cg, NSMakeRect(rects[n].x, rects[n].y, rects[n].width, rects[n].height));
-		  // printf ("\t%d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
+		  // printf ("\tG: %d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
 	  }
 
 	  [NSGraphicsContext restoreGraphicsState];
