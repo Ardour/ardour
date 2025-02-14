@@ -707,6 +707,7 @@ static int showInvalidation = 0;
   CGContextRef cg;
   double r, g, b;
 #endif
+  NSRect bo = [self bounds];
 
   if (GDK_WINDOW_DESTROYED (gdk_window))
     return;
@@ -726,7 +727,7 @@ static int showInvalidation = 0;
    * window will remain undrawn.
    */
 
-  if (NSContainsRect (rect, [self bounds])) {
+  if (NSContainsRect (rect, bo)) {
 	  full_draw = TRUE;
 #ifndef NDEBUG
 	  printf ("full draw seen!\n");
@@ -762,7 +763,7 @@ static int showInvalidation = 0;
     }
 
     if (full_draw) {
-      GdkRectangle r = { rect.origin.x, rect.origin.y, rect.size.width, rect.size.height };
+      GdkRectangle r = { bo.origin.x, bo.origin.y, bo.size.width, bo.size.height };
       region = gdk_region_rectangle (&r);
       if (impl->needs_display_region) {
 	gdk_region_destroy (impl->needs_display_region);
