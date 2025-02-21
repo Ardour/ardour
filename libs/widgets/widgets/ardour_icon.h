@@ -40,6 +40,8 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		TransportStart,
 		TransportEnd,
 		TransportMetronom,
+		TransportLoopMode,
+		TransportAutoReturn,
 		ToolGrab,
 		ToolGrid,
 		ToolRange,

@@ -750,6 +750,61 @@ icon_transport_metronom (cairo_t* cr, const int width, const int height, const u
 	cairo_fill (cr);
 }
 
+/** flat loop  */
+static void
+icon_transport_loop_mode (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	static const double degrees = M_PI / 180.0;
+
+	double linew = std::max(1, std::min(width, height) / 8);
+
+	const double x = width * .5;
+	const double y = height * .5;
+	const double r = std::min (x, y)/3.;
+
+	cairo_move_to (cr, x+r, y-r); //top right
+	cairo_arc (cr, x+r, y, r, -90 * degrees, 90 * degrees);  //right arc
+	//implicit line here
+	cairo_arc (cr, x-r, y, r, 90 * degrees, 270 * degrees);  //left arc
+	VECTORICONSTROKE(linew, fg_color);
+
+	float r2 = r/1.4;
+
+	//play triangle
+	cairo_move_to (cr, x+r2, y-r);  //tip
+	cairo_line_to (cr, x-r2, y-r-r2);
+	cairo_line_to (cr, x-r2, y-r+r2);
+	cairo_close_path (cr);
+	VECTORICONSTROKEFILLFG (1.0);
+}
+
+/** half loop  */
+static void
+icon_transport_auto_return (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	static const double degrees = M_PI / 180.0;
+
+	double linew = std::max(1, std::min(width, height) / 8);
+
+	const double x = width * .5;
+	const double y = height * .5;
+	const double r = std::min (x, y)/3.;
+
+	cairo_move_to (cr, x, y-r); //top left
+	cairo_line_to (cr, x, y-r);  //top line
+	cairo_arc (cr, x+r, y, r, -90 * degrees, 90 * degrees);  //right arc
+	cairo_line_to (cr, x-r, y+r);  //bottom line
+	VECTORICONSTROKE(linew, fg_color);
+
+	linew/=2.0;
+	float r2 = r/1.5;
+	cairo_move_to (cr, x, y-r);
+	cairo_line_to (cr, x+r2, y-r-r2);  //arrow
+	cairo_move_to (cr, x, y-r);
+	cairo_line_to (cr, x+r2, y-r+r2);  //arrow
+	VECTORICONSTROKE(linew, fg_color);
+}
+
 /*****************************************************************************
  * Zoom: In "+", Out "-" and Full "[]"
  */
@@ -1948,6 +2003,12 @@ ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr
 			break;
 		case TransportPanic:
 			icon_transport_panic (cr, width, height, fg_color);
+			break;
+		case TransportLoopMode:
+			icon_transport_loop_mode (cr, width, height, fg_color);
+			break;
+		case TransportAutoReturn:
+			icon_transport_auto_return (cr, width, height, fg_color);
 			break;
 		case TransportStart:
 			/* fallthrough */
