@@ -49,6 +49,8 @@ using Gtkmm2ext::Keyboard;
 
 list<Gdk::Color> GroupTabs::_used_colors;
 
+#define BASELINESTRETCH (1.25)
+
 GroupTabs::GroupTabs ()
 	: _dragging_new_tab (0)
 	, _menu (0)
@@ -140,8 +142,16 @@ GroupTabs::set_offset (double offset)
 void
 GroupTabs::on_size_request (Gtk::Requisition *req)
 {
-	req->width = std::max (16.f, rintf (16.f * UIConfiguration::instance().get_ui_scale()));
-	req->height = std::max (16.f, rintf (16.f * UIConfiguration::instance().get_ui_scale()));
+	Glib::RefPtr<Pango::Layout> layout;
+	layout = Pango::Layout::create (get_pango_context ());
+	layout->set_text (X_("Tab Text"));
+	int tw, th;
+	layout->get_pixel_size (tw, th);
+
+	int size = (int) ceil(th * BASELINESTRETCH + 1.0);  //@robin this should match ArdourButton impl
+
+	req->width = size;
+	req->height = size;
 }
 
 bool
