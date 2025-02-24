@@ -6186,11 +6186,11 @@ Route::monitoring_state () const
 	 * I don't think it's ever going to be too pretty too look at.
 	 */
 
+	bool session_rec       = _session.get_record_enabled ();
 	bool const roll        = _session.transport_state_rolling ();
 	bool const auto_input  = _session.config.get_auto_input ();
-	bool const clip_rec    = _triggerbox && _triggerbox->record_enabled() == Recording && !_session.get_record_enabled ();
+	bool const clip_rec    = _triggerbox && _triggerbox->record_enabled() == Recording && !session_rec;
 	bool const track_rec   = _disk_writer->record_enabled ();
-	bool session_rec;
 
 	bool const auto_input_does_talkback = Config->get_auto_input_does_talkback ();
 
@@ -6214,8 +6214,6 @@ Route::monitoring_state () const
 
 	if ((_session.config.get_punch_in() || _session.config.get_punch_out()) && 0 != _session.locations()->auto_punch_location ()) {
 		session_rec = _session.actively_recording ();
-	} else {
-		session_rec = _session.get_record_enabled();
 	}
 
 	if (track_rec || clip_rec) {
