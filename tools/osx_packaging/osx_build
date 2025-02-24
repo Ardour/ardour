@@ -268,7 +268,7 @@ if test x$WITH_NLS != x ; then
 	LINGUAS=
 
 	for pkg in gtk2_ardour libs/ardour libs/gtkmm2ext lib/tk/ytk  ; do
-		files=`find ../../$pkg -name \! -path "*/appdata/*" "*.mo"`
+		files=`find ../../$pkg -not -path "*/appdata/*" -name "*.mo"`
 
 		#
 		# the package name is appended with a number so that
