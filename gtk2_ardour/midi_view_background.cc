@@ -37,12 +37,13 @@ MidiViewBackground::MidiViewBackground (ArdourCanvas::Item* parent)
 	, _range_sum_cache (-1.0)
 	, _lowest_note (UIConfiguration::instance().get_default_lower_midi_note())
 	, _highest_note (UIConfiguration::instance().get_default_upper_midi_note())
-	, _data_note_min (60)
-	, _data_note_max (71)
+	, _data_note_min (127)
+	, _data_note_max (0)
 	, _note_lines (new ArdourCanvas::LineSet (parent, ArdourCanvas::LineSet::Horizontal))
 	, _note_mode (ARDOUR::Sustained)
 	, _color_mode (ARDOUR::MeterColors)
 	, _visibility_note_range (ContentsRange)
+	, note_range_set (false)
 {
 	_note_lines->lower_to_bottom();
 
@@ -220,11 +221,16 @@ MidiViewBackground::maybe_extend_note_range (uint8_t note_num)
 		return;
 	}
 
-	if (_lowest_note > _data_note_min) {
-		changed = true;
-	}
+	if (note_range_set) {
 
-	if (_highest_note < _data_note_max) {
+		if (_lowest_note > _data_note_min) {
+			changed = true;
+		}
+
+		if (_highest_note < _data_note_max) {
+			changed = true;
+		}
+	} else {
 		changed = true;
 	}
 
@@ -236,7 +242,7 @@ MidiViewBackground::maybe_extend_note_range (uint8_t note_num)
 void
 MidiViewBackground::maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children)
 {
-	if (_lowest_note <= lowest && _highest_note >= highest) {
+	if (note_range_set && _lowest_note <= lowest && _highest_note >= highest) {
 		/* already large enough */
 		return;
 	}
@@ -259,7 +265,7 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 		_lowest_note = lowest;
 	}
 
-	if (!changed) {
+	if (note_range_set && !changed) {
 		return;
 	}
 
@@ -298,6 +304,8 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 	if (to_children) {
 		apply_note_range_to_children ();
 	}
+
+	note_range_set = true;
 
 	NoteRangeChanged(); /* EMIT SIGNAL*/
 }
