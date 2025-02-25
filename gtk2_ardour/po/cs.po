@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-13 14:36+0100\n"
-"PO-Revision-Date: 2024-02-03 14:29+0100\n"
+"PO-Revision-Date: 2024-03-02 21:40+0100\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -1935,7 +1935,7 @@ msgstr "Ztlumit výstup sledovacího úseku"
 
 #: ardour_ui2.cc:891
 msgid "No Align"
-msgstr "Žádné zarovnání"
+msgstr "Není zarovnáno"
 
 #: ardour_ui2.cc:973 rc_option_editor.cc:2488 rc_option_editor.cc:2501
 #: rc_option_editor.cc:2514 rc_option_editor.cc:2519 rc_option_editor.cc:2521
@@ -2407,7 +2407,7 @@ msgstr "Zastavit a nahrávku odmítnout"
 
 #: ardour_ui_ed.cc:337
 msgid "Play Loop Range"
-msgstr "Přehrávat rozsah smyčky"
+msgstr "Přehrávat rozsah ve smyčce"
 
 #: ardour_ui_ed.cc:340
 msgid "Play Selection"
@@ -4532,7 +4532,7 @@ msgstr "Přehrávat rozsah"
 
 #: editor.cc:1962 editor_markers.cc:1185
 msgid "Loop Range"
-msgstr "Přehrávat rozsah smyčky"
+msgstr "Přehrávat rozsah ve smyčce"
 
 #: editor.cc:1965 editor_markers.cc:1190
 msgid "Zoom to Range"
@@ -20431,7 +20431,7 @@ msgstr "Přejít na konec sezení"
 
 #: transport_control_ui.cc:77
 msgid "Play loop range"
-msgstr "Přehrávat rozsah smyčky"
+msgstr "Přehrávat rozsah ve smyčce"
 
 #: transport_control_ui.cc:78
 msgid ""
