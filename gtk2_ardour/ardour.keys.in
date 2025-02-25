@@ -189,6 +189,7 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/Recent|                              <@PRIMARY@><@TERTIARY@>o|open a recent session
 @wvis|Window/toggle-session-options-editor|               <@SECONDARY@>o|toggle preferences dialog
 @edit|Editor/set-playhead|                                             p|set playhead position
+@vis|Editor/show-editor-props|                             <@TERTIARY@>p|toggle editor properties
 
 ;; MIDDLE ROW
 
