@@ -1243,11 +1243,7 @@ Editor::which_canvas_cursor(ItemType type) const
 		/* find correct cursor to use in object/smart mode */
 		switch (type) {
 		case RegionItem:
-		/* We don't choose a cursor for these items on top of a region view,
-		   because this would push a new context on the enter stack which
-		   means switching the region context for things like smart mode
-		   won't actually change the cursor. */
-		// case WaveItem:
+		case WaveItem:
 		case StreamItem:
 		case AutomationTrackItem:
 			cursor = which_track_cursor ();
