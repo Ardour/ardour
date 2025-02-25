@@ -187,6 +187,10 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (MinsecRulerItem);
 	REGISTER_ENUM (BBTRulerItem);
 	REGISTER_ENUM (SamplesRulerItem);
+	REGISTER_ENUM (SelectionMarkerItem);
+	REGISTER_ENUM (SelectionMarkerItem);
+	REGISTER_ENUM (DropZoneItem);
+	REGISTER_ENUM (GridZoneItem);
 	REGISTER_ENUM (VelocityItem);
 	REGISTER_ENUM (VelocityBaseItem);
 	REGISTER_ENUM (ClipStartItem);
