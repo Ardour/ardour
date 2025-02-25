@@ -547,6 +547,7 @@ GtkCanvas::GtkCanvas ()
 	, tooltip_window (0)
 	, _in_dtor (false)
 	, resize_queued (false)
+	, _ptr_grabbed (false)
 	, _nsglview (0)
 {
 #ifdef USE_CAIRO_IMAGE_SURFACE /* usually Windows builds */
@@ -1232,7 +1233,13 @@ GtkCanvas::on_button_press_event (GdkEventButton* ev)
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
 
-	gdk_pointer_grab (ev->window,false, GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK), NULL,NULL,ev->time);
+	if (ev->button == 1 && ev->type == GDK_BUTTON_PRESS) {
+		gdk_pointer_grab (ev->window,false, GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK), NULL,NULL,ev->time);
+		_ptr_grabbed = true;
+	} else if (_ptr_grabbed) {
+		gdk_pointer_ungrab (GDK_CURRENT_TIME);
+		_ptr_grabbed = false;
+	}
 
 	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas button press %1 @ %2, %3 => %4\n", ev->button, ev->x, ev->y, where));
 	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
@@ -1256,7 +1263,11 @@ GtkCanvas::on_button_release_event (GdkEventButton* ev)
 	copy.button.x = where.x;
 	copy.button.y = where.y;
 
-	gdk_pointer_ungrab (GDK_CURRENT_TIME);
+	if (_ptr_grabbed) {
+		gdk_pointer_ungrab (GDK_CURRENT_TIME);
+		_ptr_grabbed = false;
+	}
+
 
 	/* Coordinates in the event will be canvas coordinates, correctly adjusted
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.

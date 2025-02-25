@@ -322,6 +322,7 @@ private:
 
 	bool _in_dtor;
 	bool resize_queued;
+	bool _ptr_grabbed;
 
 	void* _nsglview;
 	Cairo::RefPtr<Cairo::Surface> _canvas_image;
