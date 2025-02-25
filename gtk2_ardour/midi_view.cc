@@ -1076,6 +1076,8 @@ MidiView::model_changed()
 		return;
 	}
 
+	MidiViewBackground::NoteRangeSuspender nrs (_midi_context);
+
 	if (_active_notes) {
 		// Currently recording
 		const samplecnt_t zoom = _editing_context.get_current_zoom();

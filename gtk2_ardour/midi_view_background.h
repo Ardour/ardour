@@ -54,6 +54,19 @@ class MidiViewBackground : public virtual ViewBackground
 
 	Gtk::Adjustment note_range_adjustment;
 
+	struct NoteRangeSuspender {
+		NoteRangeSuspender (MidiViewBackground& mv) : mvb (mv) {
+			mvb.NoteRangeChanged.block ();
+		}
+
+		~NoteRangeSuspender() {
+			mvb.NoteRangeChanged.unblock ();
+			mvb.NoteRangeChanged(); /* EMIT SIGNAL */
+		}
+
+		MidiViewBackground& mvb;
+	};
+
 	enum VisibleNoteRange {
 		FullRange,
 		ContentsRange
