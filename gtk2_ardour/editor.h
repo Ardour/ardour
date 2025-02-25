@@ -136,6 +136,7 @@ class MidiExportDialog;
 class MixerStrip;
 class MouseCursors;
 class NoteBase;
+class Pianoroll;
 class PluginSelector;
 class ProgressReporter;
 class QuantizeDialog;
@@ -537,7 +538,9 @@ private:
 	// to keep track of the playhead position for control_scroll
 	std::optional<samplepos_t> _control_scroll_target;
 
+	Gtk::HBox                    _bottom_hbox;
 	SelectionPropertiesBox*      _properties_box;
+	Pianoroll*                   _pianoroll;
 
 	typedef std::pair<TimeAxisView*,XMLNode*> TAVState;
 

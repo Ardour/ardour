@@ -29,6 +29,7 @@
 
 #include "ardour/control_protocol_manager.h"
 #include "ardour/midi_region.h"
+#include "ardour/midi_track.h"
 #include "ardour/playlist.h"
 #include "ardour/profile.h"
 #include "ardour/route_group.h"
@@ -51,6 +52,7 @@
 #include "editor_cursors.h"
 #include "keyboard.h"
 #include "midi_region_view.h"
+#include "pianoroll.h"
 #include "sfdb_ui.h"
 
 #include "pbd/i18n.h"
@@ -1712,6 +1714,21 @@ Editor::region_selection_changed ()
 		}
 	}
 	update_selection_markers ();
+
+	_pianoroll->contents().hide ();
+	if (selection->regions.size () == 1)  {
+		RegionView* rv = (selection->regions.front ());
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
+		if (mrv) {
+			std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
+			std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
+			if (mrv && mt && mr) {
+				_pianoroll->set_track (mt);
+				_pianoroll->set_region (mr);
+				_pianoroll->contents().show ();
+			}
+		}
+	}
 }
 
 void

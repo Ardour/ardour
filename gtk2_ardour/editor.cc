@@ -142,6 +142,7 @@
 #include "mouse_cursors.h"
 #include "note_base.h"
 #include "opts.h"
+#include "pianoroll.h"
 #include "plugin_setup_dialog.h"
 #include "public_editor.h"
 #include "quantize_dialog.h"
@@ -643,7 +644,7 @@ Editor::Editor ()
 	 */
 	content_app_bar.add (_application_bar);
 	content_att_right.add (_editor_list_vbox);
-	content_att_bottom.add (*_properties_box);
+	content_att_bottom.add (_bottom_hbox);
 	content_main_top.add (global_vpacker);
 	content_main.add (editor_summary_pane);
 
@@ -652,6 +653,7 @@ Editor::Editor ()
 
 	ebox_hpacker.show();
 	global_vpacker.show();
+	_bottom_hbox.show();
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 
@@ -752,6 +754,7 @@ Editor::~Editor()
 	delete _snapshots;
 	delete _sections;
 	delete _locations;
+	delete _pianoroll;
 	delete _properties_box;
 	delete selection;
 	delete cut_buffer;
@@ -1211,6 +1214,15 @@ Editor::set_session (Session *t)
 	_routes->set_session (_session);
 	_locations->set_session (_session);
 	_properties_box->set_session (_session);
+
+	/* Cannot initialize in constructor, because pianoroll needs Actions */
+	_pianoroll = new Pianoroll ("editor pianroll");
+	_pianoroll->set_session (_session);
+	_pianoroll->viewport().set_size_request (600, 120);
+
+	_bottom_hbox.pack_start(*_properties_box, true, true);
+	_bottom_hbox.pack_start(_pianoroll->contents(), true, true);
+	_bottom_hbox.show_all();
 
 	if (rhythm_ferret) {
 		rhythm_ferret->set_session (_session);
