@@ -210,14 +210,12 @@ Pianoroll::add_single_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items,
 	}
 }
 
-static void relax() {}
-
 void
-Pianoroll::add_multi_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items,
+Pianoroll::add_multi_controller_item (Gtk::Menu_Helpers::MenuList&,
                                       const uint16_t          channels,
                                       int                     ctl,
                                       const std::string&      name,
-                                      MetaButton* mb)
+                                      MetaButton*             mb)
 {
 	using namespace Gtk;
 	using namespace Gtk::Menu_Helpers;
@@ -230,6 +228,9 @@ Pianoroll::add_multi_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items,
 
 	Evoral::Parameter param_without_channel (MidiCCAutomation, 0, ctl);
 
+	/* look up the parameter represented by this MetaButton */
+	ParameterButtonMap::iterator pbmi = parameter_button_map.find (mb);
+
 	for (uint8_t chn = 0; chn < 16; chn++) {
 		if (channels & (0x0001 << chn)) {
 
@@ -240,11 +241,15 @@ Pianoroll::add_multi_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items,
 			chn_items.push_back (CheckMenuElem (string_compose (_("Channel %1"), chn+1),
 			                                    sigc::bind (sigc::mem_fun (*this, &Pianoroll::reset_user_cc_choice),  menu_text, fully_qualified_param, mb)));
 
-			ParameterButtonMap::iterator i = parameter_button_map.find (mb);
 
-			if (i != parameter_button_map.end()) {
-				if (fully_qualified_param == i->second) {
-					Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&ctl_items.back());
+			if (pbmi != parameter_button_map.end()) {
+
+				/* if this parameter is the one represented by
+				   the button, mark it active in the menu
+				*/
+
+				if (fully_qualified_param == pbmi->second) {
+					Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&chn_items.back());
 					cmi->set_active();
 				}
 			}
@@ -255,7 +260,7 @@ Pianoroll::add_multi_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items,
 	 * per-channel submenu we built above.
 	 */
 
-	mb->add_item (name, menu_text, *chn_menu, sigc::ptr_fun (relax));
+	mb->add_item (name, menu_text, *chn_menu, [](){});
 }
 
 
