@@ -88,6 +88,8 @@ ARDOUR_UI::we_have_dependents ()
 	StepEntry::setup_actions_and_bindings ();
 	ClipEditorBox::init ();
 
+	setup_action_tooltips ();
+
 	/* Global, editor, mixer, processor box actions are defined now. Link
 	   them with any bindings, so that GTK does not get a chance to define
 	   the GTK accel map entries first when we ask the GtkUIManager to

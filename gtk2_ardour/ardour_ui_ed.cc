@@ -788,6 +788,20 @@ ARDOUR_UI::install_dependent_actions ()
 }
 
 void
+ARDOUR_UI::setup_action_tooltips ()
+{
+	ActionManager::get_action ("Transport", "TogglePunchIn")->set_tooltip (_("Start recording at auto-punch start"));
+	ActionManager::get_action ("Transport", "TogglePunchOut")->set_tooltip (_("Stop recording at auto-punch end"));
+	ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_tooltip (_("Return to last playback start when stopped"));
+	ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_tooltip (_("Playhead follows Range tool clicks, and Range selections"));
+
+	ActionManager::get_action (X_("Main"), X_("cancel-solo"))->set_tooltip (_("When active, something is soloed.\nClick to de-solo everything"));
+	ActionManager::get_action (X_("Monitor Section"), X_("monitor-dim-all"))->set_tooltip (_("Monitor section dim output"));
+	ActionManager::get_action (X_("Monitor Section"), X_("monitor-mono"))->set_tooltip (_("Monitor section mono output"));
+	ActionManager::get_action (X_("Monitor Section"), X_("monitor-cut-all"))->set_tooltip (_("Monitor section mute output"));
+}
+
+void
 ARDOUR_UI::build_menu_bar ()
 {
 	menu_bar = dynamic_cast<MenuBar*> (ActionManager::get_widget (X_("/Main")));
