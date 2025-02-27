@@ -805,6 +805,102 @@ icon_transport_auto_return (cairo_t* cr, const int width, const int height, cons
 	VECTORICONSTROKE(linew, fg_color);
 }
 
+/** triangle phead between brackets  */
+static void
+icon_transport_follow_playhead (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	static const double degrees = M_PI / 180.0;
+
+	double linew = std::max(1, std::min(width, height) / 16);
+	cairo_set_line_width(cr,linew);
+
+	const double xc = floor(width * .5);
+	const double yc = floor(height * .5);
+
+	double r = floor(std::min (xc, yc)/3.);
+
+	//triangle phead
+	cairo_move_to (cr, xc-3*r/2, yc-3*r/2); //top left
+	cairo_line_to (cr, xc+3*r/2, yc-3*r/2);  //top line
+	cairo_line_to (cr, xc, yc);  //center pt
+	cairo_close_path (cr);
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
+	cairo_fill(cr);
+
+	//center line
+	cairo_move_to (cr, xc, yc); //top center
+	cairo_line_to (cr, xc, yc+2*r);  //center line
+	cairo_stroke(cr);
+
+	r = floor(std::min (xc, yc)/4.);
+
+	cairo_save(cr);
+	cairo_translate(cr, 0,r);
+
+	//left bracket
+	cairo_move_to (cr, xc-2*r, yc-r); //top left
+	cairo_line_to (cr, xc-r, yc);     //left crease
+	cairo_line_to (cr, xc-2*r, yc+r);  //left btm
+	cairo_stroke(cr);
+
+	//left bracket
+	cairo_move_to (cr, xc+2*r, yc-r); //top right
+	cairo_line_to (cr, xc+r,  yc);   //right crease
+	cairo_line_to (cr, xc+2*r, yc+r);  //right btm
+	cairo_stroke(cr);
+
+	cairo_restore(cr);
+}
+
+/** triangle phead plus square brackets  */
+static void
+icon_transport_follow_edits (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	static const double degrees = M_PI / 180.0;
+
+	double linew = std::max(1, std::min(width, height) / 16);
+	cairo_set_line_width(cr,linew);
+
+	const double xc = floor(width * .5);
+	const double yc = floor(height * .5);
+
+	double r = floor(std::min (xc, yc)/3.);
+
+	cairo_save(cr);
+	cairo_translate(cr, -r,0);
+
+	//triangle phead
+	cairo_move_to (cr, xc-3*r/2, yc-3*r/2); //top left
+	cairo_line_to (cr, xc+3*r/2, yc-3*r/2);  //top line
+	cairo_line_to (cr, xc, yc);  //center pt
+	cairo_close_path (cr);
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
+	cairo_fill(cr);
+
+	//center line
+	cairo_move_to (cr, xc, yc); //top center
+	cairo_line_to (cr, xc, yc+2*r);  //center line
+	cairo_stroke(cr);
+
+	cairo_restore(cr);
+
+	double r2 = floor(std::min (xc, yc)/4.);
+
+	cairo_save(cr);
+	cairo_translate(cr, 0,r2);
+
+	//region 'box'
+	cairo_move_to (cr, xc-r, yc-r2); //top left
+	cairo_line_to (cr, xc+2*r, yc-r2); //top right
+	cairo_line_to (cr, xc+2*r, yc+r2);  //btm right
+	cairo_line_to (cr, xc-r, yc+r2);  //btm left
+	cairo_close_path (cr);
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
+	cairo_stroke(cr);
+
+	cairo_restore(cr);
+}
+
 /*****************************************************************************
  * Zoom: In "+", Out "-" and Full "[]"
  */
@@ -961,6 +1057,34 @@ icon_hide_eye (cairo_t* cr, const int width, const int height, const uint32_t fg
 	cairo_move_to (cr, x - o, y + o);
 	cairo_line_to (cr, x + o, y - o);
 	VECTORICONSTROKEOUTLINE (DEFAULT_LINE_WIDTH, fg_color);
+}
+
+/** "show" eye */
+static void
+icon_show_eye (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double wh = std::min (x, y);
+
+	const double r  = .2 * wh;
+	const double o  = .60 * wh;
+	const double dx = .75 * wh;
+	const double dy = .65 * wh;
+
+	cairo_move_to (cr, x - dx, y);
+	cairo_curve_to (cr, x, y + dy, x, y + dy, x + dx, y);
+	cairo_curve_to (cr, x, y - dy, x, y - dy, x - dx, y);
+	VECTORICONSTROKE (DEFAULT_LINE_WIDTH, fg_color);
+
+	cairo_arc (cr, x, y, r, 0, 2 * M_PI);
+	//cairo_fill (cr);
+	VECTORICONSTROKE (DEFAULT_LINE_WIDTH, fg_color);
+
+	cairo_move_to (cr, x - o, y + o);
+	cairo_line_to (cr, x + o, y + o);
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
+	cairo_stroke(cr);
 }
 
 /** slim "<" */
@@ -2009,6 +2133,15 @@ ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr
 			break;
 		case TransportAutoReturn:
 			icon_transport_auto_return (cr, width, height, fg_color);
+			break;
+		case EditorFollowPlayhead:
+			icon_transport_follow_playhead (cr, width, height, fg_color);
+			break;
+		case EditorFollowEdits:
+			icon_transport_follow_edits (cr, width, height, fg_color);
+			break;
+		case EditorShowAutoOnTouch:
+			icon_show_eye (cr, width, height, fg_color);
 			break;
 		case TransportStart:
 			/* fallthrough */
