@@ -427,6 +427,8 @@ Pianoroll::build_upper_toolbar ()
 
 	_contents.add (_toolbox);
 	_contents.signal_enter_notify_event().connect (sigc::mem_fun (*this, &Pianoroll::enter), false);
+	_contents.signal_unmap().connect ([this]() {_canvas_viewport->unmap ();}, false);
+	_contents.signal_map().connect ([this]() {_canvas_viewport->map ();}, false);
 }
 
 void
