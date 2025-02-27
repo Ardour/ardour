@@ -809,9 +809,6 @@ ApplicationBar::set_session (Session *s)
 		delete _editor_meter;
 		_editor_meter = 0;
 	}
-	if (_editor_meter_table.get_parent()) {
-		_transport_hbox.remove (_editor_meter_table);
-	}
 	if (_editor_meter_peak_display.get_parent ()) {
 		_editor_meter_table.remove (_editor_meter_peak_display);
 	}
