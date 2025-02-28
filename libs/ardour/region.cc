@@ -1553,9 +1553,14 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 		   match.
 		*/
 		if ((length().time_domain() == Temporal::AudioTime) && (_sources.front()->length().time_domain() == Temporal::AudioTime) && (length().distance() > _sources.front()->length())) {
-			std::cerr << "Region " << _name << " has length " << _length.val().str() << " which is longer than its (first?) source's length of " << _sources.front()->length().str() << std::endl;
-			throw failed_constructor();
-			// _length = timecnt_t (start().distance (_sources.front()->length()), _length.val().position());
+			/* A bug in the 8.x release series led to Regions which
+			   were a fractional sample longer than their
+			   sources. This bug has been fixed, and we can now
+			   non-silently just force the region length to the
+			   correct value.
+			*/
+			error << "Correcting length of region " << _name << " to match it's (first) source's length of " << _sources.front()->length().str() << endmsg;
+			_length = timecnt_t (start().distance (_sources.front()->length()), _length.val().position());
 		}
 	}
 
