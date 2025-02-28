@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+	<Author>Mr. Zdeeck</Author>
+	<MasterDeviceNames>
+		<Manufacturer>Novation</Manufacturer>
+		<Model>Circuit</Model>
+		<CustomDeviceMode Name="Default" >
+			<ChannelNameSetAssignments>
+				<ChannelNameSetAssign Channel="1" NameSet="Digital Synth" />
+				<ChannelNameSetAssign Channel="2" NameSet="Digital Synth" />
+				<ChannelNameSetAssign Channel="10" NameSet="Drums" />
+				<ChannelNameSetAssign Channel="16" NameSet="Session" />
+			</ChannelNameSetAssignments>
+		</CustomDeviceMode>
+		<ChannelNameSet Name="Digital Synth" >
+			<AvailableForChannels>
+				<AvailableChannel Channel="1" Available="true" />
+				<AvailableChannel Channel="2" Available="true" />
+				<AvailableChannel Channel="3" Available="false" />
+				<AvailableChannel Channel="4" Available="false" />
+				<AvailableChannel Channel="5" Available="false" />
+				<AvailableChannel Channel="6" Available="false" />
+				<AvailableChannel Channel="7" Available="false" />
+				<AvailableChannel Channel="8" Available="false" />
+				<AvailableChannel Channel="9" Available="false" />
+				<AvailableChannel Channel="10" Available="false" />
+				<AvailableChannel Channel="11" Available="false" />
+				<AvailableChannel Channel="12" Available="false" />
+				<AvailableChannel Channel="13" Available="false" />
+				<AvailableChannel Channel="14" Available="false" />
+				<AvailableChannel Channel="15" Available="false" />
+				<AvailableChannel Channel="16" Available="false" />
+			</AvailableForChannels>
+			<PatchBank Name="Default Bank" >
+			        <MIDICommands>
+				      <ControlChange Control="32" Value="0"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="Default Patches" />
+			</PatchBank>
+			<UsesControlNameList Name="Synth Controls"/>
+		</ChannelNameSet>
+		<ChannelNameSet Name="Drums" >
+			<AvailableForChannels>
+				<AvailableChannel Channel="1" Available="false" />
+				<AvailableChannel Channel="2" Available="false" />
+				<AvailableChannel Channel="3" Available="false" />
+				<AvailableChannel Channel="4" Available="false" />
+				<AvailableChannel Channel="5" Available="false" />
+				<AvailableChannel Channel="6" Available="false" />
+				<AvailableChannel Channel="7" Available="false" />
+				<AvailableChannel Channel="8" Available="false" />
+				<AvailableChannel Channel="9" Available="false" />
+				<AvailableChannel Channel="10" Available="true" />
+				<AvailableChannel Channel="11" Available="false" />
+				<AvailableChannel Channel="12" Available="false" />
+				<AvailableChannel Channel="13" Available="false" />
+				<AvailableChannel Channel="14" Available="false" />
+				<AvailableChannel Channel="15" Available="false" />
+				<AvailableChannel Channel="16" Available="false" />
+			</AvailableForChannels>
+			<UsesNoteNameList Name="Drums"/>
+			<UsesControlNameList Name="Drum Controls"/>
+		</ChannelNameSet>
+		<ChannelNameSet Name="Session" >
+			<AvailableForChannels>
+				<AvailableChannel Channel="1" Available="false" />
+				<AvailableChannel Channel="2" Available="false" />
+				<AvailableChannel Channel="3" Available="false" />
+				<AvailableChannel Channel="4" Available="false" />
+				<AvailableChannel Channel="5" Available="false" />
+				<AvailableChannel Channel="6" Available="false" />
+				<AvailableChannel Channel="7" Available="false" />
+				<AvailableChannel Channel="8" Available="false" />
+				<AvailableChannel Channel="9" Available="false" />
+				<AvailableChannel Channel="10" Available="false" />
+				<AvailableChannel Channel="11" Available="false" />
+				<AvailableChannel Channel="12" Available="false" />
+				<AvailableChannel Channel="13" Available="false" />
+				<AvailableChannel Channel="14" Available="false" />
+				<AvailableChannel Channel="15" Available="false" />
+				<AvailableChannel Channel="16" Available="true" />
+			</AvailableForChannels>
+			<UsesControlNameList Name="Session Controls"/>
+		</ChannelNameSet>
+		<PatchNameList Name="Default Patches" >
+			<Patch Number="0" Name="Bass-ic Square" ProgramChange="0" />
+			<Patch Number="1" Name="Bouncy Bass" ProgramChange="1" />
+			<Patch Number="2" Name="Flat Bass" ProgramChange="2" />
+			<Patch Number="3" Name="Funk Bass" ProgramChange="3" />
+			<Patch Number="4" Name="Organ Bass" ProgramChange="4" />
+			<Patch Number="5" Name="Dirty Sine" ProgramChange="5" />
+			<Patch Number="6" Name="Vocalogue" ProgramChange="6" />
+			<Patch Number="7" Name="Dinky" ProgramChange="7" />
+			<Patch Number="8" Name="Book of Bass" ProgramChange="8" />
+			<Patch Number="9" Name="Acid Square" ProgramChange="9" />
+			<Patch Number="10" Name="Analogue Keys" ProgramChange="10" />
+			<Patch Number="11" Name="Morph Poly" ProgramChange="11" />
+			<Patch Number="12" Name="Organ Donut" ProgramChange="12" />
+			<Patch Number="13" Name="Glisten Poly" ProgramChange="13" />
+			<Patch Number="14" Name="Simpoly" ProgramChange="14" />
+			<Patch Number="15" Name="Marimbives" ProgramChange="15" />
+			<Patch Number="16" Name="Bending" ProgramChange="16" />
+			<Patch Number="17" Name="WaveMachine" ProgramChange="17" />
+			<Patch Number="18" Name="Lucky Keyz" ProgramChange="18" />
+			<Patch Number="19" Name="PolySEQ" ProgramChange="19" />
+			<Patch Number="20" Name="String Theory" ProgramChange="20" />
+			<Patch Number="21" Name="Wonky Pad" ProgramChange="21" />
+			<Patch Number="22" Name="Drone Bass" ProgramChange="22" />
+			<Patch Number="23" Name="3rd Lead" ProgramChange="23" />
+			<Patch Number="24" Name="Drunk Trumpet" ProgramChange="24" />
+			<Patch Number="25" Name="Whistle Rez" ProgramChange="25" />
+			<Patch Number="26" Name="Formant Vel" ProgramChange="26" />
+			<Patch Number="27" Name="System Bass" ProgramChange="27" />
+			<Patch Number="28" Name="Blip" ProgramChange="28" />
+			<Patch Number="29" Name="Blissed Bell" ProgramChange="29" />
+			<Patch Number="30" Name="Dirty Keys" ProgramChange="30" />
+			<Patch Number="31" Name="Talky Bass" ProgramChange="31" />
+			<Patch Number="32" Name="Simpleton" ProgramChange="32" />
+			<Patch Number="33" Name="Noise Lead" ProgramChange="33" />
+			<Patch Number="34" Name="Clav Lead" ProgramChange="34" />
+			<Patch Number="35" Name="Crossover Lead" ProgramChange="35" />
+			<Patch Number="36" Name="Zapper" ProgramChange="36" />
+			<Patch Number="37" Name="Kick Designer" ProgramChange="37" />
+			<Patch Number="38" Name="Snare Designer" ProgramChange="38" />
+			<Patch Number="39" Name="Tuned Afrika" ProgramChange="39" />
+			<Patch Number="40" Name="Swirling" ProgramChange="40" />
+			<Patch Number="41" Name="House Arrest Pad" ProgramChange="41" />
+			<Patch Number="42" Name="Cheap Organ" ProgramChange="42" />
+			<Patch Number="43" Name="Chill Waves" ProgramChange="43" />
+			<Patch Number="44" Name="Dual Resonances" ProgramChange="44" />
+			<Patch Number="45" Name="Syncing Feeling" ProgramChange="45" />
+			<Patch Number="46" Name="Circuit Bent" ProgramChange="46" />
+			<Patch Number="47" Name="RiseFX" ProgramChange="47" />
+			<Patch Number="48" Name="Glitch Bass" ProgramChange="48" />
+			<Patch Number="49" Name="Swirl Bass" ProgramChange="49" />
+			<Patch Number="50" Name="5fth-10th Lead" ProgramChange="50" />
+			<Patch Number="51" Name="Bass2Lead Cutta" ProgramChange="51" />
+			<Patch Number="52" Name="Drifter" ProgramChange="52" />
+			<Patch Number="53" Name="Sawble" ProgramChange="53" />
+			<Patch Number="54" Name="DeTuna" ProgramChange="54" />
+			<Patch Number="55" Name="Rhythmic Lead" ProgramChange="55" />
+			<Patch Number="56" Name="Chicago Stab" ProgramChange="56" />
+			<Patch Number="57" Name="DnB Bass" ProgramChange="57" />
+			<Patch Number="58" Name="Arp Pad" ProgramChange="58" />
+			<Patch Number="59" Name="Soft Bass" ProgramChange="59" />
+			<Patch Number="60" Name="Mainroom Lead" ProgramChange="60" />
+			<Patch Number="61" Name="Sine Tines" ProgramChange="61" />
+			<Patch Number="62" Name="Bit Bass" ProgramChange="62" />
+			<Patch Number="63" Name="PolyAnna" ProgramChange="63" />
+		</PatchNameList>
+		<NoteNameList Name="Drums">
+			<Note Number="60" Name="Drum 1"/>
+			<Note Number="62" Name="Drum 2"/>
+			<Note Number="64" Name="Drum 3"/>
+			<Note Number="65" Name="Drum 4"/>
+		</NoteNameList>
+	        <ControlNameList Name="Synth Controls">
+<!-- Voice -->
+		        <Control Type="7bit" Number="3" Name="Polyphony Mode"/>
+		        <Control Type="7bit" Number="5" Name="Portamento Rate"/>
+		        <Control Type="7bit" Number="9" Name="Pre-glide"/>
+		        <Control Type="7bit" Number="13" Name="Keyboard Octave"/>
+<!-- Oscillator -->
+		        <Control Type="7bit" Number="19" Name="Osc1 Wave"/>
+		        <Control Type="7bit" Number="20" Name="Osc1 Wave Interpolate"/>
+		        <Control Type="7bit" Number="21" Name="Osc1 Pulse"/>
+		        <Control Type="7bit" Number="22" Name="Osc1 Virtual Sync Depth"/>
+		        <Control Type="7bit" Number="24" Name="Osc1 Density"/>
+		        <Control Type="7bit" Number="25" Name="Osc1 Density Detune"/>
+		        <Control Type="7bit" Number="26" Name="Osc1 Semitones"/>
+		        <Control Type="7bit" Number="27" Name="Osc1 Cents"/>
+		        <Control Type="7bit" Number="28" Name="Osc1 Pitchbend"/>
+		        <Control Type="7bit" Number="29" Name="Osc2 Wave"/>
+		        <Control Type="7bit" Number="30" Name="Osc2 Wave Interpolate"/>
+		        <Control Type="7bit" Number="31" Name="Osc2 Pulse"/>
+		        <Control Type="7bit" Number="33" Name="Osc2 Virtual Sync Depth"/>
+		        <Control Type="7bit" Number="35" Name="Osc2 Density"/>
+		        <Control Type="7bit" Number="36" Name="Osc2 Density Detune"/>
+		        <Control Type="7bit" Number="37" Name="Osc2 Semitones"/>
+		        <Control Type="7bit" Number="39" Name="Osc2 Cents"/>
+		        <Control Type="7bit" Number="40" Name="Osc2 Pitchbend"/>
+<!-- Mixer -->
+		        <Control Type="7bit" Number="51" Name="Osc1 Level"/>
+		        <Control Type="7bit" Number="52" Name="Osc2 Level"/>
+		        <Control Type="7bit" Number="54" Name="Ring Modulation"/>
+		        <Control Type="7bit" Number="56" Name="Noise Level"/>
+		        <Control Type="7bit" Number="58" Name="Pre FX Level"/>
+		        <Control Type="7bit" Number="59" Name="Post FX Level"/>
+<!-- Filter -->
+		        <Control Type="7bit" Number="60" Name="Fltr Routing"/>
+		        <Control Type="7bit" Number="63" Name="Fltr Drive"/>
+		        <Control Type="7bit" Number="65" Name="Fltr Drive Type"/>
+		        <Control Type="7bit" Number="68" Name="Fltr Type"/>
+		        <Control Type="7bit" Number="74" Name="Fltr Frequency"/>
+		        <Control Type="7bit" Number="69" Name="Fltr Tracking"/>
+		        <Control Type="7bit" Number="71" Name="Fltr Resonance"/>
+		        <Control Type="7bit" Number="78" Name="Fltr Q Normalize"/>
+		        <Control Type="7bit" Number="79" Name="Fltr Env2 to Frequency"/>
+<!-- Envelope -->
+		        <Control Type="7bit" Number="70" Name="Env1 Sustain"/>
+		        <Control Type="7bit" Number="72" Name="Env1 Release"/>
+		        <Control Type="7bit" Number="73" Name="Env1 Attack"/>
+		        <Control Type="7bit" Number="75" Name="Env1 Decay"/>
+		        <Control Type="7bit" Number="108" Name="Env1 Velocity"/>
+<!-- Effects and EQ -->
+		        <Control Type="7bit" Number="91" Name="Distortion Level"/>
+		        <Control Type="7bit" Number="93" Name="Chorus Level"/>
+<!-- Macro Knobs -->
+		        <Control Type="7bit" Number="80" Name="Macro Knob 1 Position"/>
+		        <Control Type="7bit" Number="81" Name="Macro Knob 2 Position"/>
+		        <Control Type="7bit" Number="82" Name="Macro Knob 3 Position"/>
+		        <Control Type="7bit" Number="83" Name="Macro Knob 4 Position"/>
+		        <Control Type="7bit" Number="84" Name="Macro Knob 5 Position"/>
+		        <Control Type="7bit" Number="85" Name="Macro Knob 6 Position"/>
+		        <Control Type="7bit" Number="86" Name="Macro Knob 7 Position"/>
+		        <Control Type="7bit" Number="87" Name="Macro Knob 8 Position"/>
+		</ControlNameList>
+	        <ControlNameList Name="Drum Controls">
+		        <Control Type="7bit" Number="8" Name="Drum 1 Patch Select"/>
+		        <Control Type="7bit" Number="12" Name="Drum 1 Level"/>
+		        <Control Type="7bit" Number="14" Name="Drum 1 Pitch"/>
+		        <Control Type="7bit" Number="15" Name="Drum 1 Decay"/>
+		        <Control Type="7bit" Number="16" Name="Drum 1 Distortion"/>
+		        <Control Type="7bit" Number="17" Name="Drum 1 EQ"/>
+		        <Control Type="7bit" Number="77" Name="Drum 1 Pan"/>
+		        <Control Type="7bit" Number="18" Name="Drum 2 Patch Select"/>
+		        <Control Type="7bit" Number="23" Name="Drum 2 Level"/>
+		        <Control Type="7bit" Number="34" Name="Drum 2 Pitch"/>
+		        <Control Type="7bit" Number="40" Name="Drum 2 Decay"/>
+		        <Control Type="7bit" Number="42" Name="Drum 2 Distortion"/>
+		        <Control Type="7bit" Number="43" Name="Drum 2 EQ"/>
+		        <Control Type="7bit" Number="78" Name="Drum 2 Pan"/>
+		        <Control Type="7bit" Number="44" Name="Drum 3 Patch Select"/>
+		        <Control Type="7bit" Number="45" Name="Drum 3 Level"/>
+		        <Control Type="7bit" Number="46" Name="Drum 3 Pitch"/>
+		        <Control Type="7bit" Number="47" Name="Drum 3 Decay"/>
+		        <Control Type="7bit" Number="48" Name="Drum 3 Distortion"/>
+		        <Control Type="7bit" Number="49" Name="Drum 3 EQ"/>
+		        <Control Type="7bit" Number="79" Name="Drum 3 Pan"/>
+		        <Control Type="7bit" Number="50" Name="Drum 4 Patch Select"/>
+		        <Control Type="7bit" Number="53" Name="Drum 4 Level"/>
+		        <Control Type="7bit" Number="55" Name="Drum 4 Pitch"/>
+		        <Control Type="7bit" Number="57" Name="Drum 4 Decay"/>
+		        <Control Type="7bit" Number="61" Name="Drum 4 Distortion"/>
+		        <Control Type="7bit" Number="76" Name="Drum 4 EQ"/>
+		        <Control Type="7bit" Number="80" Name="Drum 4 Pan"/>
+		</ControlNameList>
+	        <ControlNameList Name="Session Controls">
+<!-- Reverb -->
+			<Control Type="7bit" Number="88" Name="Synth 1 Reverb Send Level"/>
+			<Control Type="7bit" Number="89" Name="Synth 2 Reverb Send Level"/>
+			<Control Type="7bit" Number="90" Name="Drum 1 Reverb Send Level"/>
+			<Control Type="7bit" Number="106" Name="Drum 2 Reverb Send Level"/>
+			<Control Type="7bit" Number="109" Name="Drum 3 Reverb Send Level"/>
+			<Control Type="7bit" Number="110" Name="Drum 4 Reverb Send Level"/>
+<!-- Delay -->
+			<Control Type="7bit" Number="111" Name="Synth 1 Delay Send Level"/>
+			<Control Type="7bit" Number="112" Name="Synth 2 Delay Send Level"/>
+			<Control Type="7bit" Number="113" Name="Drum 1 Delay Send Level"/>
+			<Control Type="7bit" Number="114" Name="Drum 2 Delay Send Level"/>
+			<Control Type="7bit" Number="115" Name="Drum 3 Delay Send Level"/>
+			<Control Type="7bit" Number="116" Name="Drum 4 Delay Send Level"/>
+<!-- Master Filter -->
+			<Control Type="7bit" Number="74" Name="Master Filter Frequency"/>
+			<Control Type="7bit" Number="71" Name="Master Filter Resonance"/>
+<!-- Mixer -->
+		        <Control Type="7bit" Number="12" Name="Synth 1 Level"/>
+		        <Control Type="7bit" Number="117" Name="Synth 1 Pan"/>
+		        <Control Type="7bit" Number="14" Name="Synth 2 Level"/>
+		        <Control Type="7bit" Number="118" Name="Synth 2 Pan"/>
+		</ControlNameList>
+	</MasterDeviceNames>
+</MIDINameDocument>
