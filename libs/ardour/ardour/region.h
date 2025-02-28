@@ -569,7 +569,7 @@ protected:
 	virtual void send_change (const PBD::PropertyChange&);
 	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 	virtual void set_position_internal (timepos_t const & pos);
-	virtual void set_length_internal (timecnt_t const &);
+	void set_length_internal (timecnt_t const &);
 	virtual void set_start_internal (timepos_t const &);
 	bool verify_start_and_length (timepos_t const &, timecnt_t&);
 	void first_edit ();
