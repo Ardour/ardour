@@ -126,6 +126,7 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	, _show_source (false)
 	, selection_drag (nullptr)
 	, draw_drag (nullptr)
+	, _visible_channel (-1)
 	, _optimization_iterator (_events.end())
 	, _list_editor (nullptr)
 	, _no_sound_notes (false)
@@ -161,6 +162,7 @@ MidiView::MidiView (MidiView const & other)
 	, _show_source (false)
 	, selection_drag (nullptr)
 	, draw_drag (nullptr)
+	, _visible_channel (-1)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, _no_sound_notes (false)
@@ -1282,6 +1284,26 @@ MidiView::view_changed()
 }
 
 void
+MidiView::visible_channel_changed ()
+{
+	if (!display_is_enabled()) {
+		return;
+	}
+
+	if (!_model) {
+		return;
+	}
+
+	for (auto & [note, gui] : _events) {
+
+		if (gui->item()->visible()) {
+			color_note (gui, note->channel());
+			gui->set_ignore_events (note->channel() != _visible_channel);
+		}
+	}
+}
+
+void
 MidiView::display_patch_changes ()
 {
 	if (!_midi_track) {
@@ -1767,11 +1789,22 @@ MidiView::update_sustained (Note* ev)
 		ev->set_outline_all ();
 	}
 
-	// Update color in case velocity has changed
-	const uint32_t base_col = ev->base_color();
-	ev->set_fill_color (base_col);
-	ev->set_outline_color (ev->calculate_outline(base_col, ev->selected()));
 
+	color_note (ev, note->channel());
+}
+
+void
+MidiView::color_note (NoteBase* ev, int channel)
+{
+	// Update color in case velocity has changed
+	uint32_t base_color = ev->base_color();
+
+	if (channel != _visible_channel) {
+		base_color = Gtkmm2ext::change_alpha (base_color, 0.2);
+	}
+
+	ev->set_fill_color (base_color);
+	ev->set_outline_color (ev->calculate_outline (base_color, ev->selected()));
 }
 
 void
@@ -5219,6 +5252,13 @@ MidiView::set_visibility_note_range (MidiViewBackground::VisibleNoteRange nvr, b
 }
 
 void
+MidiView::set_visible_channel (int chn)
+{
+	_visible_channel = chn;
+	visible_channel_changed ();
+}
+
+void
 StartBoundaryRect::render  (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	Rectangle::render (area, context);
@@ -5313,3 +5353,4 @@ EndBoundaryRect::compute_bounding_box() const
 	const double radius = 10. * scale;
 	_bounding_box = _bounding_box.expand (0., 0., 0., radius + _outline_width);
 }
+

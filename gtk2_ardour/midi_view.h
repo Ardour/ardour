@@ -381,6 +381,9 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	virtual bool midi_canvas_group_event(GdkEvent* ev);
 
+	int visible_channel() const { return _visible_channel; }
+	void set_visible_channel (int);
+
   protected:
 	void init (std::shared_ptr<ARDOUR::MidiTrack>);
 	virtual void region_resized (const PBD::PropertyChange&);
@@ -540,6 +543,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	bool                                 _show_source;
 	Drag*                                 selection_drag;
 	Drag*                                 draw_drag;
+	int                                  _visible_channel;
 
 	/** Currently selected NoteBase objects */
 	Selection _selection;
@@ -687,6 +691,9 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	bool end_boundary_event (GdkEvent*);
 
 	virtual void add_control_points_to_selection (Temporal::timepos_t const &, Temporal::timepos_t const &, double y0, double y1) {}
+
+	void color_note (NoteBase*, int channel);
+	void visible_channel_changed ();
 };
 
 

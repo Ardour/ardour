@@ -440,6 +440,7 @@ Pianoroll::set_visible_channel (int n)
 	rebuild_parameter_button_map ();
 
 	if (view) {
+		view->set_visible_channel (n);
 		view->swap_automation_channel (n);
 	}
 }
