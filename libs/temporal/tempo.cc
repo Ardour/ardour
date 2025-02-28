@@ -557,9 +557,7 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 		}
 	}
 
-	/* Truncate to the nearest sample-equivalent superclock value */
-
-	return (r / TEMPORAL_SAMPLE_RATE) * TEMPORAL_SAMPLE_RATE;
+	return r;
 }
 
 superclock_t
