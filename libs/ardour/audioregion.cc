@@ -438,6 +438,8 @@ AudioRegion::~AudioRegion ()
 void
 AudioRegion::post_set (const PropertyChange& /*ignored*/)
 {
+	ensure_length_sanity ();
+
 	if (!_sync_marked) {
 		_sync_position = _start;
 	}
@@ -2701,3 +2703,19 @@ AudioRegion::apply_region_fx (BufferSet& bufs, samplepos_t start_sample, samplep
 	_fx_pos = end_sample;
 	_fx_latent_read = false;
 }
+
+void
+AudioRegion::ensure_length_sanity ()
+{
+	if (_type == DataType::AUDIO) {
+		/* Force audio regions to have a length that is the
+		   rounded-down integer number of samples. No other value makes
+		   any sort of logical sense. We tried to fix this at a lower
+		   level, by rounding the return value of
+		   TempoMap::superclock_at(), but the breaks the fundamental
+		   point of a high resolution audio time unit.
+		*/
+		_length = timecnt_t (timepos_t (_length.val().samples()), _length.val().position());
+	}
+}
+

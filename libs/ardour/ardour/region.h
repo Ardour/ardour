@@ -573,6 +573,7 @@ protected:
 	virtual void set_start_internal (timepos_t const &);
 	bool verify_start_and_length (timepos_t const &, timecnt_t&);
 	void first_edit ();
+	virtual void ensure_length_sanity () {}
 
 	void override_opaqueness (bool yn) {
 		_opaque = yn;
