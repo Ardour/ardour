@@ -4867,6 +4867,7 @@ Session::reset_last_capture_sources ()
 		}
 		tr->reset_last_capture_sources ();
 	}
+	ClearedLastCaptureSources (); /* EMIT SIGNAL */
 }
 
 /* Source Management */

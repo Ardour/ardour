@@ -432,6 +432,9 @@ public:
 
 	PBD::Signal<void()> UpdateRouteRecordState; /* signals potential change in route recording arming */
 
+	PBD::Signal<void()> RecordPassCompleted;
+	PBD::Signal<void()> ClearedLastCaptureSources;
+
 	/* Emited when session is loaded */
 	PBD::Signal<void()> SessionLoaded;
 
