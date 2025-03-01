@@ -1611,27 +1611,29 @@ Locations::marks_either_side (timepos_t const & pos, timepos_t& before, timepos_
 
 	positions.sort ();
 
-	std::list<timepos_t>::iterator i = positions.begin ();
+	auto time_mark_it = std::find_if(
+		positions.begin (),
+		positions.end (),
+		[&] (const auto& p) {
+			return p >= pos;
+		}
+	);
 
-	while (i != positions.end () && *i < pos) {
-		++i;
-	}
-
-	if (i == positions.end ()) {
+	if (time_mark_it == positions.end ()) {
 		/* run out of marks */
 		before = positions.back ();
 		return;
 	}
 
-	after = *i;
+	after = *time_mark_it;
 
-	if (i == positions.begin ()) {
+	if (time_mark_it == positions.begin ()) {
 		/* none before */
 		return;
 	}
 
-	--i;
-	before = *i;
+	--time_mark_it;
+	before = *time_mark_it;
 }
 
 void
