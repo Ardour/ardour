@@ -1300,6 +1300,8 @@ Editor::set_session (Session *t)
 	_session->locations()->removed.connect (_session_connections, invalidator (*this), std::bind (&Editor::location_gone, this, _1), gui_context());
 	_session->locations()->changed.connect (_session_connections, invalidator (*this), std::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->auto_loop_location_changed.connect (_session_connections, invalidator (*this), std::bind (&Editor::loop_location_changed, this, _1), gui_context ());
+	_session->RecordPassCompleted.connect (_session_connections, invalidator (*this), std::bind (&Editor::capture_sources_changed, this, false), gui_context ());
+	_session->ClearedLastCaptureSources.connect (_session_connections, invalidator (*this), std::bind (&Editor::capture_sources_changed, this, true), gui_context ());
 	Location::flags_changed.connect (_session_connections, invalidator (*this), std::bind (&Editor::update_section_rects, this), gui_context ());
 
 	_session->history().Changed.connect (_session_connections, invalidator (*this), std::bind (&Editor::history_changed, this), gui_context());
@@ -1315,6 +1317,7 @@ Editor::set_session (Session *t)
 	_session->config.map_parameters (pc);
 
 	loop_location_changed (_session->locations()->auto_loop_location ());
+	capture_sources_changed (true);
 
 	//tempo_map_changed (PropertyChange (0));
 	reset_metric_marks ();
