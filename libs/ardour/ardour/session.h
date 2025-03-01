@@ -872,6 +872,7 @@ public:
 
 	int remove_last_capture ();
 	void get_last_capture_sources (std::list<std::shared_ptr<Source> >&);
+	void reset_last_capture_sources ();
 
 	/** handlers should return -1 for "stop cleanup",
 	    0 for "yes, delete this playlist",

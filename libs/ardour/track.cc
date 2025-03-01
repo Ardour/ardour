@@ -585,6 +585,12 @@ Track::last_capture_sources ()
 	return _disk_writer->last_capture_sources ();
 }
 
+void
+Track::reset_last_capture_sources ()
+{
+	_disk_writer->reset_last_capture_sources ();
+}
+
 std::string
 Track::steal_write_source_name()
 {

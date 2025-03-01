@@ -4856,6 +4856,20 @@ Session::get_last_capture_sources (std::list<std::shared_ptr<Source> >& srcs)
 	}
 }
 
+void
+Session::reset_last_capture_sources ()
+{
+	std::shared_ptr<RouteList const> rl = routes.reader ();
+	for (auto const& i : *rl) {
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
+		if (!tr) {
+			continue;
+		}
+		tr->reset_last_capture_sources ();
+
+	}
+}
+
 /* Source Management */
 
 void
