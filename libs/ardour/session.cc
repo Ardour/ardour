@@ -4866,7 +4866,6 @@ Session::reset_last_capture_sources ()
 			continue;
 		}
 		tr->reset_last_capture_sources ();
-
 	}
 }
 
