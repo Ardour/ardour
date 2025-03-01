@@ -5380,8 +5380,8 @@ Editor::remove_last_capture ()
 	}
 
 	if (Config->get_verify_remove_last_capture()) {
-		prompt  = _("Do you really want to destroy the last capture?"
-		            "\n(This is destructive and cannot be undone)");
+		prompt  = _("Do you really want to remove the last capture?"
+		            "\n(This is destructive, deletes recorded files,\nand cannot be undone)");
 
 		choices.push_back (_("No, do nothing."));
 		choices.push_back (_("Yes, destroy it."));
