@@ -874,7 +874,9 @@ public:
 	int destroy_sources (std::list<std::shared_ptr<Source> > const&);
 
 	int remove_last_capture ();
-	void get_last_capture_sources (std::list<std::shared_ptr<Source> >&);
+	void get_last_capture_sources (std::list<std::shared_ptr<Source> >&); // deprecated
+	bool have_last_capture_sources () const;
+	void last_capture_sources (std::list<std::shared_ptr<Source> >&) const;
 	void reset_last_capture_sources ();
 
 	/** handlers should return -1 for "stop cleanup",
