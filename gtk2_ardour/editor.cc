@@ -1302,6 +1302,7 @@ Editor::set_session (Session *t)
 	_session->auto_loop_location_changed.connect (_session_connections, invalidator (*this), std::bind (&Editor::loop_location_changed, this, _1), gui_context ());
 	_session->RecordPassCompleted.connect (_session_connections, invalidator (*this), std::bind (&Editor::capture_sources_changed, this, false), gui_context ());
 	_session->ClearedLastCaptureSources.connect (_session_connections, invalidator (*this), std::bind (&Editor::capture_sources_changed, this, true), gui_context ());
+	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), std::bind (&Editor::capture_sources_changed, this, false), gui_context ());
 	Location::flags_changed.connect (_session_connections, invalidator (*this), std::bind (&Editor::update_section_rects, this), gui_context ());
 
 	_session->history().Changed.connect (_session_connections, invalidator (*this), std::bind (&Editor::history_changed, this), gui_context());
