@@ -4858,12 +4858,6 @@ Session::have_last_capture_sources () const
 }
 
 void
-Session::get_last_capture_sources (std::list<std::shared_ptr<Source>>& srcs)
-{
-	last_capture_sources (srcs);
-}
-
-void
 Session::reset_last_capture_sources ()
 {
 	std::shared_ptr<RouteList const> rl = routes.reader ();
