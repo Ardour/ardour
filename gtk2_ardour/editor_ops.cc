@@ -5471,17 +5471,12 @@ Editor::tag_last_capture ()
 	std::list<std::shared_ptr<Region> > rlist;
 
 	std::list<std::shared_ptr<Source> > srcs;
-	_session->get_last_capture_sources (srcs);
-	for (std::list<std::shared_ptr<Source> >::iterator i = srcs.begin(); i != srcs.end(); ++i) {
-		std::shared_ptr<ARDOUR::Source> source = (*i);
-		if (source) {
-
-			set<std::shared_ptr<Region> > regions;
-			RegionFactory::get_regions_using_source (source, regions);
-			for (set<std::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); r++) {
-				rlist.push_back(*r);
-			}
-
+	_session->last_capture_sources (srcs);
+	for (auto const& source : srcs) {
+		set<std::shared_ptr<Region>> regions;
+		RegionFactory::get_regions_using_source (source, regions);
+		for (auto const& r: regions) {
+			rlist.push_back (r);
 		}
 	}
 

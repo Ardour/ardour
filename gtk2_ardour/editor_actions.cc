@@ -1021,9 +1021,7 @@ Editor::capture_sources_changed (bool cleared)
 	if (cleared || !_session) {
 		ActionManager::get_action (X_("Editor"), X_("remove-last-capture"))->set_sensitive (false);
 	} else {
-		std::list<std::shared_ptr<ARDOUR::Source> > srcs;
-		_session->get_last_capture_sources (srcs);
-		ActionManager::get_action (X_("Editor"), X_("remove-last-capture"))->set_sensitive (!srcs.empty ());
+		ActionManager::get_action (X_("Editor"), X_("remove-last-capture"))->set_sensitive (_session->have_last_capture_sources ());
 	}
 }
 
