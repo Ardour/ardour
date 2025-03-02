@@ -83,7 +83,7 @@ public:
 
 	bool configure_io (ChanCount in, ChanCount out);
 
-	std::list<std::shared_ptr<Source> >& last_capture_sources () { return _last_capture_sources; }
+	std::list<std::shared_ptr<Source>>& last_capture_sources ();
 	void reset_last_capture_sources ();
 
 	bool record_enabled () const { return _record_enabled.load(); }

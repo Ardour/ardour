@@ -282,6 +282,20 @@ DiskWriter::calculate_record_range (Temporal::OverlapType ot, samplepos_t transp
 	                                                      _first_recordable_sample, _last_recordable_sample, rec_nframes, rec_offset));
 }
 
+std::list<std::shared_ptr<Source>>&
+DiskWriter::last_capture_sources ()
+{
+#if 0 // C++20
+	_reset_last_capture_sources.wait (0);
+#else
+	if (_reset_last_capture_sources != 0) {
+		static std::list<std::shared_ptr<Source>> empty;
+		return empty;
+	}
+#endif
+	return _last_capture_sources;
+}
+
 void
 DiskWriter::reset_last_capture_sources ()
 {
