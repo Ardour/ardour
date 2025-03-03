@@ -158,15 +158,7 @@ public:
 
 		// clean out any dead wood
 
-		typename std::list<std::shared_ptr<T> >::iterator i;
-
-		for (i = _dead_wood.begin (); i != _dead_wood.end ();) {
-			if ((*i).unique ()) {
-				i = _dead_wood.erase (i);
-			} else {
-				++i;
-			}
-		}
+		static_cast<void> (_dead_wood.remove_if ([] (const std::shared_ptr<T>& d) { return d.unique (); }));
 
 		/* store the current so that we can do compare and exchange
 		 * when someone calls update(). Notice that we hold
