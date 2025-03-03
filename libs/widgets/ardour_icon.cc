@@ -1814,15 +1814,7 @@ static void icon_tape_reel (cairo_t *cr, const int width, const int height, cons
 	cairo_translate (cr, x, y);
 
 	cairo_arc (cr, 0, 0, r, 0, 2 * M_PI);
-	if (state == Gtkmm2ext::ExplicitActive) {
-		cairo_set_source_rgba (cr, .9, .3, .3, 1.0);
-	}
-	else if (state == Gtkmm2ext::ImplicitActive) {
-		Gtkmm2ext::set_source_rgba (cr, fg_color);
-	}
-	else {
-		Gtkmm2ext::set_source_rgba (cr, fg_color);
-	}
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
 	cairo_fill_preserve (cr);
 
 	if (is_dark (fg_color) && state == Gtkmm2ext::ExplicitActive) {
@@ -1866,15 +1858,7 @@ static void icon_tape_reel (cairo_t *cr, const int width, const int height, cons
 	cairo_restore (cr);
 
 	cairo_arc (cr, 0, 0, r * .3, 0, 2 * M_PI);
-	if (state == Gtkmm2ext::ExplicitActive) {
-		cairo_set_source_rgba (cr, .9, .3, .3, 1.0);
-	}
-	else if (state == Gtkmm2ext::ImplicitActive) {
-		Gtkmm2ext::set_source_rgba (cr, fg_color);
-	}
-	else {
-		Gtkmm2ext::set_source_rgba (cr, fg_color);
-	}
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
 	cairo_fill (cr);
 	cairo_set_source_rgba (cr, .0, .0, .0, 1.0);
 	cairo_arc (cr, 0, 0, r *.15, 0, 2 * M_PI); // hole in the middle
