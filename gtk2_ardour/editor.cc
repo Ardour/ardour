@@ -223,6 +223,7 @@ Editor::Editor ()
 	, editor_mixer_strip_width (Wide)
 	, constructed (false)
 	, _properties_box (0)
+	, _pianoroll (0)
 	, no_save_visual (false)
 	, marker_click_behavior (MarkerClickSelectOnly)
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
@@ -1216,9 +1217,12 @@ Editor::set_session (Session *t)
 	_properties_box->set_session (_session);
 
 	/* Cannot initialize in constructor, because pianoroll needs Actions */
-	_pianoroll = new Pianoroll ("editor pianroll");
+	if (!_pianoroll) {
+		// XXX this should really not happen here
+		_pianoroll = new Pianoroll ("editor pianroll");
+		_pianoroll->viewport().set_size_request (600, 120);
+	}
 	_pianoroll->set_session (_session);
-	_pianoroll->viewport().set_size_request (600, 120);
 
 	_bottom_hbox.pack_start(*_properties_box, true, true);
 	_bottom_hbox.pack_start(_pianoroll->contents(), true, true);
