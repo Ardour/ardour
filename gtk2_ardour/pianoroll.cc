@@ -2236,6 +2236,8 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 	view->show_start (true);
 	view->show_end (true);
 
+	r->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this), gui_context());
+
 	bool provided = false;
 	std::shared_ptr<Temporal::TempoMap> map;
 	std::shared_ptr<SMFSource> smf (std::dynamic_pointer_cast<SMFSource> (r->midi_source()));
