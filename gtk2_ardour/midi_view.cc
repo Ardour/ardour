@@ -1290,7 +1290,7 @@ MidiView::view_changed()
 bool
 MidiView::note_editable (NoteBase const * ev) const
 {
-	return (ev != _ghost_note) && (_visible_channel < 0) || (ev->note()->channel() == _visible_channel);
+	return (ev != _ghost_note) && ((_visible_channel < 0) || (ev->note()->channel() == _visible_channel));
 }
 
 void
