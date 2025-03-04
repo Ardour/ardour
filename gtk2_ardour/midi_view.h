@@ -276,11 +276,6 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void finish_resizing (NoteBase* primary, bool at_front, double delat_x, bool relative, double snap_delta, bool with_snap);
 	void abort_resizing ();
 
-	/** Change the channel of the selection.
-	 * @param channel - the channel number of the new channel, zero-based
-	 */
-	void change_channel(uint8_t channel);
-
 	struct NoteResizeData {
 		::Note                  *note;
 		ArdourCanvas::Rectangle *resize_rect;

@@ -158,13 +158,6 @@ NoteBase::on_channel_selection_change(uint16_t selection)
 }
 
 void
-NoteBase::on_channel_change(uint8_t channel)
-{
-	_region.note_selected(this, true);
-	_region.change_channel(channel);
-}
-
-void
 NoteBase::set_selected(bool selected)
 {
 	if (!_note) {

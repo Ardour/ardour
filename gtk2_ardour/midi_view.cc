@@ -3863,18 +3863,6 @@ MidiView::nudge_notes (bool forward, bool fine)
 }
 
 void
-MidiView::change_channel(uint8_t channel)
-{
-	start_note_diff_command(_("change channel"));
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		note_diff_add_change (*i, MidiModel::NoteDiffCommand::Channel, channel);
-	}
-
-	apply_note_diff();
-}
-
-
-void
 MidiView::note_entered (NoteBase* ev)
 {
 	_entered_note = ev;
