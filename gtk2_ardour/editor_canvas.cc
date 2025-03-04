@@ -1285,10 +1285,11 @@ Editor::which_canvas_cursor(ItemType type) const
 			cursor = _cursors->cross_hair;
 			break;
 		case LeftFrameHandle:
-			if (effective_mouse_mode() == MouseObject) // (smart mode): if the user is in the btm half, show the trim cursor
+			if (effective_mouse_mode() == MouseObject) {// (smart mode): if the user is in the btm half, show the trim cursor
 				cursor = which_trim_cursor (true);
-			else
+			} else {
 				cursor = _cursors->selector; // (smart mode): in the top half, just show the selection (range) cursor
+			}
 			break;
 		case RightFrameHandle:
 			if (effective_mouse_mode() == MouseObject) // see above
