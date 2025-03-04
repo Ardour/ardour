@@ -746,6 +746,10 @@ MidiView::channel_edit ()
 	}
 
 	apply_note_diff ();
+
+	if (_visible_channel >= 0 && _visible_channel != new_channel) {
+		set_visible_channel (new_channel, false);
+	}
 }
 
 void
@@ -1283,24 +1287,10 @@ MidiView::view_changed()
 	size_end_rect ();
 }
 
-void
-MidiView::visible_channel_changed ()
+bool
+MidiView::note_editable (std::shared_ptr<const NoteType>  note) const
 {
-	if (!display_is_enabled()) {
-		return;
-	}
-
-	if (!_model) {
-		return;
-	}
-
-	for (auto & [note, gui] : _events) {
-
-		if (gui->item()->visible()) {
-			color_note (gui, note->channel());
-			gui->set_ignore_events (note->channel() != _visible_channel);
-		}
-	}
+	return (_visible_channel < 0) || (note->channel() == _visible_channel);
 }
 
 void
@@ -1789,8 +1779,8 @@ MidiView::update_sustained (Note* ev)
 		ev->set_outline_all ();
 	}
 
-
 	color_note (ev, note->channel());
+	ev->set_ignore_events (!note_editable (note));
 }
 
 void
@@ -1799,8 +1789,8 @@ MidiView::color_note (NoteBase* ev, int channel)
 	// Update color in case velocity has changed
 	uint32_t base_color = ev->base_color();
 
-	if (channel != _visible_channel) {
-		base_color = Gtkmm2ext::change_alpha (base_color, 0.2);
+	if (!note_editable (ev->note())) {
+		base_color = Gtkmm2ext::change_alpha (base_color, 0.15);
 	}
 
 	ev->set_fill_color (base_color);
@@ -1940,6 +1930,9 @@ MidiView::update_hit (Hit* ev)
 	const uint32_t base_col = ev->base_color();
 	ev->set_fill_color(base_col);
 	ev->set_outline_color(ev->calculate_outline(base_col, ev->selected()));
+
+	color_note (ev, _visible_channel);
+	ev->set_ignore_events (!note_editable (note));
 }
 
 /** Add a MIDI note to the view (with length).
@@ -2327,10 +2320,11 @@ MidiView::clear_selection_internal ()
 {
 	DEBUG_TRACE(DEBUG::Selection, "MRV::clear_selection_internal\n");
 
-	for (auto & sel : _selection) {
-		sel->set_selected (false);
-		sel->hide_velocity();
-		ghost_sync_selection (sel);
+	for (auto & note : _selection) {
+		note->set_selected (false);
+		color_note (note, _visible_channel);
+		note->hide_velocity();
+		ghost_sync_selection (note);
 	}
 	_selection.clear();
 }
@@ -2627,15 +2621,15 @@ MidiView::update_drag_selection(timepos_t const & start, timepos_t const & end, 
 	// adjusting things that are in the area that appears/disappeared.
 	// We probably need a tree to be able to find events in O(log(n)) time.
 
-	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		if (i->second->x0() < x1 && i->second->x1() > x0 && i->second->y0() < y1 && i->second->y1() > y0) {
+	for (auto & [ note, gui ] : _events) {
+		if (gui->x0() < x1 && gui->x1() > x0 && gui->y0() < y1 && gui->y1() > y0) {
 			// Rectangles intersect
-			if (!i->second->selected()) {
-				add_to_selection (i->second);
+			if (!gui->selected() && note_editable (note)) {
+				add_to_selection (gui);
 			}
-		} else if (i->second->selected() && !extend) {
+		} else if (gui->selected() && !extend) {
 			// Rectangles do not intersect
-			remove_from_selection (i->second);
+			remove_from_selection (gui);
 		}
 	}
 
@@ -3518,6 +3512,8 @@ MidiView::change_note_channel (NoteBase* event, int8_t chn, bool relative)
 	}
 
 	note_diff_add_change (event, MidiModel::NoteDiffCommand::Channel, new_channel);
+
+	
 }
 
 void
@@ -5240,10 +5236,30 @@ MidiView::set_visibility_note_range (MidiViewBackground::VisibleNoteRange nvr, b
 }
 
 void
-MidiView::set_visible_channel (int chn)
+MidiView::set_visible_channel (int chn, bool clear_selection)
 {
 	_visible_channel = chn;
-	visible_channel_changed ();
+	VisibleChannelChanged(); /* EMIT SIGNAL */
+
+	if (!display_is_enabled()) {
+		return;
+	}
+
+	if (!_model) {
+		return;
+	}
+
+	for (auto & [note, gui] : _events) {
+
+		if (gui->item()->visible()) {
+			color_note (gui, note->channel());
+			gui->set_ignore_events (!note_editable (note));
+		}
+	}
+
+	if (clear_selection) {
+		clear_selection_internal ();
+	}
 }
 
 void

@@ -252,6 +252,7 @@ class Pianoroll : public CueEditor
 
 	sigc::connection _update_connection;
 	PBD::ScopedConnectionList object_connections;
+	PBD::ScopedConnectionList view_connections;
 	void maybe_update ();
 	void trigger_prop_change (PBD::PropertyChange const &);
 
@@ -303,5 +304,8 @@ class Pianoroll : public CueEditor
 	void add_single_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name, ArdourWidgets::MetaButton*);
 	void add_multi_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, uint16_t channels, int ctl, const std::string& name, ArdourWidgets::MetaButton*);
 	void reset_user_cc_choice (std::string, Evoral::Parameter param, ArdourWidgets::MetaButton*);
+
+	bool ignore_channel_changes;
+	void visible_channel_changed ();
 
 };

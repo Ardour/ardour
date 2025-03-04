@@ -17,6 +17,7 @@
  */
 
 #include "pbd/stateful_diff_command.h"
+#include "pbd/unwind.h"
 
 #include "ardour/midi_region.h"
 #include "ardour/midi_track.h"
@@ -74,6 +75,7 @@ Pianoroll::Pianoroll (std::string const & name)
 	, bar_adjustment (4, 1, 32, 1, 4)
 	, bar_spinner (bar_adjustment)
 	, length_label (X_("Record (Bars):"))
+	, ignore_channel_changes (false)
 {
 	mouse_mode = Editing::MouseContent;
 	autoscroll_vertical_allowed = false;
@@ -434,6 +436,8 @@ Pianoroll::build_upper_toolbar ()
 void
 Pianoroll::set_visible_channel (int n)
 {
+	PBD::Unwinder<bool> uw (ignore_channel_changes, true);
+
 	_visible_channel = n;
 	visible_channel_selector.set_active (string_compose ("%1", _visible_channel + 1));
 
@@ -539,6 +543,7 @@ Pianoroll::build_canvas ()
 
 	view = new PianorollMidiView (nullptr, *data_group, *no_scroll_group, *this, *bg, 0xff0000ff);
 	view->AutomationStateChange.connect (sigc::mem_fun (*this, &Pianoroll::automation_state_changed));
+	view->VisibleChannelChanged.connect (view_connections, invalidator (*this), std::bind (&Pianoroll::visible_channel_changed, this), gui_context());
 
 	bg->set_view (view);
 	prh->set_view (view);
@@ -572,6 +577,24 @@ Pianoroll::build_canvas ()
 	_toolbox.pack_start (*_canvas_viewport, true, true);
 
 	bindings_changed ();
+}
+
+void
+Pianoroll::visible_channel_changed ()
+{
+	if (ignore_channel_changes) {
+		/* We're changing it */
+		return;
+	}
+
+	/* Something else changed it */
+
+	if (!view) {
+		return; /* Ought to be impossible */
+	}
+
+	_visible_channel = view->visible_channel();
+	visible_channel_selector.set_active (string_compose ("%1", view->visible_channel() + 1));
 }
 
 void

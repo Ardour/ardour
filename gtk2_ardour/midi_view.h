@@ -377,7 +377,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	virtual bool midi_canvas_group_event(GdkEvent* ev);
 
 	int visible_channel() const { return _visible_channel; }
-	void set_visible_channel (int);
+	void set_visible_channel (int, bool clear_selection = true);
+	PBD::Signal<void()> VisibleChannelChanged;
 
   protected:
 	void init (std::shared_ptr<ARDOUR::MidiTrack>);
@@ -389,6 +390,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	virtual void reset_width_dependent_items (double pixel_width);
 
 	void redisplay (bool view_only);
+	bool note_editable (std::shared_ptr<const NoteType>) const;
 
   protected:
 	friend class EditingContext;
@@ -688,7 +690,6 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	virtual void add_control_points_to_selection (Temporal::timepos_t const &, Temporal::timepos_t const &, double y0, double y1) {}
 
 	void color_note (NoteBase*, int channel);
-	void visible_channel_changed ();
 };
 
 
