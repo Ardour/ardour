@@ -30,6 +30,8 @@
 #include "temporal/beats.h"
 #include "temporal/timeline.h"
 
+#include "ardour/midi_state_tracker.h"
+
 namespace ARDOUR {
 class MidiTrack;
 class MidiRegion;
@@ -97,6 +99,7 @@ private:
 	MidiTimeAxisView&                     _mtv;
 	int8_t                                 last_added_pitch;
 	Temporal::Beats                        last_added_end;
+	ARDOUR::MidiNoteTracker                _tracker;
 
 	sigc::connection delete_connection;
 	sigc::connection hide_connection;

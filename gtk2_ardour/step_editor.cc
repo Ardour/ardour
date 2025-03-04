@@ -68,6 +68,7 @@ StepEditor::start_step_editing ()
 	step_edit_region_view = 0;
 	last_added_pitch = -1;
 	last_added_end = Temporal::Beats();
+	_tracker.reset ();
 
 	resync_step_edit_position ();
 	prepare_step_edit_region ();
@@ -203,8 +204,18 @@ StepEditor::check_step_edit ()
 			break;
 		}
 
+		_tracker.track (buf);
+
 		if ((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON && size == 3) {
 			step_add_note (buf[0] & 0xf, buf[1], buf[2], Temporal::Beats());
+		}
+
+		/* note-off w/chord .. move to next beat */
+		if ((buf[0] & 0xf0) == MIDI_CMD_NOTE_OFF && size == 3 && _tracker.empty ()) {
+			if (step_edit_region_view && _step_edit_within_chord) {
+				step_edit_beat_pos += _step_edit_chord_duration;
+				step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
+			}
 		}
 	}
 	delete [] buf;
