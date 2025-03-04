@@ -281,13 +281,6 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Tem
 
 	if (beat_duration == 0.0) {
 		beat_duration = StepEntry::instance().note_length();
-	} else if (beat_duration == 0.0) {
-		bool success;
-		beat_duration = _editor.get_draw_length_as_beats (success, step_edit_insert_position);
-
-		if (!success) {
-			return -1;
-		}
 	}
 
 	MidiStreamView* msv = _mtv.midi_view();
