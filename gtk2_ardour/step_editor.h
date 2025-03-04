@@ -70,6 +70,7 @@ public:
 	int  step_add_program_change (uint8_t channel, uint8_t program);
 	int  step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity,
 	                    Temporal::Beats beat_duration);
+	void step_to_next_chord ();
 	void step_edit_sustain (Temporal::Beats beats);
 	bool step_edit_within_triplet () const;
 	void step_edit_toggle_triplet ();
@@ -95,11 +96,11 @@ private:
 	Temporal::Beats                       _step_edit_chord_duration;
 	PBD::ScopedConnection                  step_edit_region_connection;
 	PublicEditor&                         _editor;
-	std::shared_ptr<ARDOUR::MidiTrack>  _track;
+	std::shared_ptr<ARDOUR::MidiTrack>    _track;
 	MidiTimeAxisView&                     _mtv;
-	int8_t                                 last_added_pitch;
-	Temporal::Beats                        last_added_end;
-	ARDOUR::MidiNoteTracker                _tracker;
+	Temporal::Beats                       _last_added_beat;
+	ARDOUR::MidiNoteTracker               _tracker;
+	ARDOUR::MidiNoteTracker               _chord_tracker;
 
 	sigc::connection delete_connection;
 	sigc::connection hide_connection;
