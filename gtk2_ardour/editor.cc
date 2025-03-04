@@ -719,7 +719,8 @@ Editor::Editor ()
 	setup_fade_images ();
 
 	switch_editing_context (this);
-	contents().signal_enter_notify_event().connect (sigc::mem_fun (*this, &Editor::enter), false);
+	content_main_top.signal_enter_notify_event().connect (sigc::mem_fun (*this, &Editor::enter), false);
+	content_main.signal_enter_notify_event().connect (sigc::mem_fun (*this, &Editor::enter), false);
 }
 
 bool
