@@ -390,7 +390,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	virtual void reset_width_dependent_items (double pixel_width);
 
 	void redisplay (bool view_only);
-	bool note_editable (std::shared_ptr<const NoteType>) const;
+	bool note_editable (NoteBase const *) const;
 
   protected:
 	friend class EditingContext;

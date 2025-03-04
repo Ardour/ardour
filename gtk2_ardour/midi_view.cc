@@ -1288,9 +1288,9 @@ MidiView::view_changed()
 }
 
 bool
-MidiView::note_editable (std::shared_ptr<const NoteType>  note) const
+MidiView::note_editable (NoteBase const * ev) const
 {
-	return (_visible_channel < 0) || (note->channel() == _visible_channel);
+	return (ev != _ghost_note) && (_visible_channel < 0) || (ev->note()->channel() == _visible_channel);
 }
 
 void
@@ -1780,7 +1780,7 @@ MidiView::update_sustained (Note* ev)
 	}
 
 	color_note (ev, note->channel());
-	ev->set_ignore_events (!note_editable (note));
+	ev->set_ignore_events (!note_editable (ev));
 }
 
 void
@@ -1789,7 +1789,7 @@ MidiView::color_note (NoteBase* ev, int channel)
 	// Update color in case velocity has changed
 	uint32_t base_color = ev->base_color();
 
-	if (!note_editable (ev->note())) {
+	if (!note_editable (ev)) {
 		base_color = Gtkmm2ext::change_alpha (base_color, 0.15);
 	}
 
@@ -1932,7 +1932,7 @@ MidiView::update_hit (Hit* ev)
 	ev->set_outline_color(ev->calculate_outline(base_col, ev->selected()));
 
 	color_note (ev, _visible_channel);
-	ev->set_ignore_events (!note_editable (note));
+	ev->set_ignore_events (!ev);
 }
 
 /** Add a MIDI note to the view (with length).
@@ -2624,7 +2624,7 @@ MidiView::update_drag_selection(timepos_t const & start, timepos_t const & end, 
 	for (auto & [ note, gui ] : _events) {
 		if (gui->x0() < x1 && gui->x1() > x0 && gui->y0() < y1 && gui->y1() > y0) {
 			// Rectangles intersect
-			if (!gui->selected() && note_editable (note)) {
+			if (!gui->selected() && note_editable (gui)) {
 				add_to_selection (gui);
 			}
 		} else if (gui->selected() && !extend) {
@@ -5253,7 +5253,7 @@ MidiView::set_visible_channel (int chn, bool clear_selection)
 
 		if (gui->item()->visible()) {
 			color_note (gui, note->channel());
-			gui->set_ignore_events (!note_editable (note));
+			gui->set_ignore_events (!note_editable (gui));
 		}
 	}
 
