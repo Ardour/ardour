@@ -831,12 +831,6 @@ Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, Re
 
 	case GDK_LEAVE_NOTIFY:
 		ret = leave_handler (item, event, type);
-		/* Moving the mouse from a RegionView's frame-handle towards the
-		 * center of a region does not trigger another  ::enter_handler
-		 * handler (the mouse was already over the region.
-		 * So maually reset the cursor:
-		 */
-		choose_canvas_cursor_on_entry (RegionItem);
 		break;
 
 	default:
