@@ -69,7 +69,6 @@ using std::string;
 sigc::signal<void> EditingContext::DropDownKeys;
 Gtkmm2ext::Bindings* EditingContext::button_bindings = nullptr;
 Glib::RefPtr<Gtk::ActionGroup> EditingContext::_midi_actions;
-Glib::RefPtr<Gtk::ActionGroup> EditingContext::_common_actions;
 std::vector<std::string> EditingContext::grid_type_strings;
 MouseCursors* EditingContext::_cursors = nullptr;
 EditingContext* EditingContext::_current_editing_context = nullptr;
@@ -299,11 +298,7 @@ EditingContext::set_selected_midi_region_view (MidiRegionView& mrv)
 void
 EditingContext::register_common_actions (Bindings* common_bindings)
 {
-	if (_common_actions) {
-		return;
-	}
-
-	_common_actions = ActionManager::create_action_group (common_bindings, X_("Editing"));
+	_common_actions = ActionManager::create_action_group (common_bindings, _name);
 
 	reg_sens (_common_actions, "temporal-zoom-out", _("Zoom Out"), []() { current_editing_context()->temporal_zoom_step (true); });
 	reg_sens (_common_actions, "temporal-zoom-in", _("Zoom In"), []() { current_editing_context()->temporal_zoom_step (false); });
@@ -329,6 +324,10 @@ EditingContext::register_common_actions (Bindings* common_bindings)
 	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseGrid); });
 	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseContent); });
 	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseCut); });
+
+	if (ActionManager::get_action_group(X_("Zoom"))) {
+		return;
+	}
 
 	Glib::RefPtr<ActionGroup> zoom_actions = ActionManager::create_action_group (common_bindings, X_("Zoom"));
 	RadioAction::Group zoom_group;
@@ -2187,19 +2186,19 @@ EditingContext::get_mouse_mode_action (MouseMode m) const
 {
 	switch (m) {
 	case MouseRange:
-		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-range"));
+		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-range"));
 	case MouseObject:
-		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-object"));
+		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-object"));
 	case MouseCut:
-		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-cut"));
+		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-cut"));
 	case MouseDraw:
-		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-draw"));
+		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-draw"));
 	case MouseTimeFX:
-		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-timefx"));
+		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-timefx"));
 	case MouseGrid:
-		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-grid"));
+		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-grid"));
 	case MouseContent:
-		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-content"));
+		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-content"));
 	}
 	return Glib::RefPtr<Action>();
 }
@@ -2209,9 +2208,9 @@ EditingContext::bind_mouse_mode_buttons ()
 {
 	RefPtr<Action> act;
 
-	act = ActionManager::get_action (X_("Editing"), X_("temporal-zoom-in"));
+	act = ActionManager::get_action (_name.c_str(), X_("temporal-zoom-in"));
 	zoom_in_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Editing"), X_("temporal-zoom-out"));
+	act = ActionManager::get_action (_name.c_str(), X_("temporal-zoom-out"));
 	zoom_out_button.set_related_action (act);
 
 	mouse_move_button.set_related_action (get_mouse_mode_action (Editing::MouseObject));
@@ -3295,7 +3294,7 @@ EditingContext::load_shared_bindings ()
 	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
 	register_midi_actions (midi_bindings);
 
-	Bindings* shared_bindings = Bindings::get_bindings (X_("Editing"));
+	Bindings* shared_bindings = Bindings::get_bindings (_name);
 	register_common_actions (shared_bindings);
 
 	/* Give this editing context the chance to add more mode mode actions */

@@ -79,9 +79,9 @@ playhead to the n-th marker.
 The "move" commands all move the active marker(s). Jump to the first 9 markers using
 the keypad digits 1-9 (requires numlock).
 
-%mmode Editor Mouse Modes
+%mmode Editing Mouse Modes
 
-%mouse Editor Mouse Usage
+%mouse Editing Mouse Usage
 Right click on most objects and controls displays a context menu
 Shift+Right click deletes most objects. 
 OS X users without a 3 button mouse can use {\tt Option+Ctrl+Left} to simulate "Middle" for some purposes.

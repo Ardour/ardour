@@ -408,7 +408,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void transpose_region ();
 
 	static void register_midi_actions (Gtkmm2ext::Bindings*);
-	static void register_common_actions (Gtkmm2ext::Bindings*);
+	void register_common_actions (Gtkmm2ext::Bindings*);
 
 	ArdourCanvas::Rectangle* rubberband_rect;
 
@@ -487,7 +487,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	bool within_track_canvas;
 
 	static Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
-	static Glib::RefPtr<Gtk::ActionGroup> _common_actions;
+	Glib::RefPtr<Gtk::ActionGroup> _common_actions;
 
 	void load_shared_bindings ();
 
