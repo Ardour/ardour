@@ -846,7 +846,7 @@ Editor::dpi_reset ()
 		l->set_size_request (-1, (int)timebar_height);
 	}
 	videotl_label.set_size_request (-1, 4 * timebar_height);
-	update_ruler_visibility ();
+	set_video_timeline_height (videotl_bar_height, true); // calls update_ruler_visibility();
 
 	ArdourMarker::setup_sizes (timebar_height);
 	TempoCurve::setup_sizes (timebar_height);

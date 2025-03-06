@@ -1544,7 +1544,7 @@ private:
 
 	bool canvas_videotl_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	void update_video_timeline (bool flush = false);
-	void set_video_timeline_height (const int);
+	void set_video_timeline_height (const int, bool force = false);
 	bool is_video_timeline_locked ();
 	void toggle_video_timeline_locked ();
 	void set_video_timeline_locked (const bool);
