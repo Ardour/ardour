@@ -172,10 +172,6 @@ Editor::initialize_canvas ()
 	meter_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
 	CANVAS_DEBUG_NAME (meter_group, "meter group");
 
-	float timebar_thickness = timebar_height; //was 4
-	float timebar_top = (timebar_height - timebar_thickness)/2;
-	float timebar_btm = timebar_height - timebar_top;
-
 	meter_bar = new ArdourCanvas::Rectangle (meter_group, ArdourCanvas::Rect (0.0, 0., ArdourCanvas::COORD_MAX, timebar_height));
 	CANVAS_DEBUG_NAME (meter_bar, "meter Bar");
 	meter_bar->set_outline(false);
@@ -186,15 +182,15 @@ Editor::initialize_canvas ()
 	tempo_bar->set_outline(false);
 	tempo_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 
-	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
+	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, 0, ArdourCanvas::COORD_MAX, timebar_height));
 	range_marker_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
 
-	marker_bar = new ArdourCanvas::Rectangle (marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
+	marker_bar = new ArdourCanvas::Rectangle (marker_group, ArdourCanvas::Rect (0.0, 0, ArdourCanvas::COORD_MAX, timebar_height));
 	marker_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 	CANVAS_DEBUG_NAME (marker_bar, "Marker Bar");
 
-	section_marker_bar = new ArdourCanvas::Rectangle (section_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
+	section_marker_bar = new ArdourCanvas::Rectangle (section_marker_group, ArdourCanvas::Rect (0.0, 0, ArdourCanvas::COORD_MAX, timebar_height));
 	section_marker_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 	CANVAS_DEBUG_NAME (section_marker_bar, "Arranger Marker Bar");
 
@@ -299,8 +295,8 @@ Editor::initialize_canvas ()
 	initialize_rulers ();
 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &Editor::color_handler));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &Editor::dpi_reset));
 	color_handler();
-
 }
 
 void

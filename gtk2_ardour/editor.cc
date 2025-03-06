@@ -419,36 +419,36 @@ Editor::Editor ()
 
 	Gtk::Table* rtbl;
 
-	rtbl = setup_ruler_new (_ruler_box_minsec, _("Mins:Secs"));
+	rtbl = setup_ruler_new (_ruler_box_minsec, _ruler_labels, _("Mins:Secs"));
 
-	rtbl = setup_ruler_new (_ruler_box_timecode, _("Timecode"));
+	rtbl = setup_ruler_new (_ruler_box_timecode, _ruler_labels, _("Timecode"));
 
-	rtbl = setup_ruler_new (_ruler_box_samples, _("Samples"));
+	rtbl = setup_ruler_new (_ruler_box_samples, _ruler_labels, _("Samples"));
 
-	rtbl = setup_ruler_new (_ruler_box_bbt, _("Bars:Beats"));
+	rtbl = setup_ruler_new (_ruler_box_bbt, _ruler_labels, _("Bars:Beats"));
 
-	rtbl = setup_ruler_new (_ruler_box_tempo, _("Tempo"));
+	rtbl = setup_ruler_new (_ruler_box_tempo, _ruler_labels, _("Tempo"));
 	setup_ruler_add (rtbl, _ruler_btn_tempo_add);
 
-	rtbl = setup_ruler_new (_ruler_box_meter, _("Time Signature"));
+	rtbl = setup_ruler_new (_ruler_box_meter, _ruler_labels, _("Time Signature"));
 	setup_ruler_add (rtbl, _ruler_btn_meter_add);
 
-	rtbl = setup_ruler_new (_ruler_box_range, _("Range Markers"));
+	rtbl = setup_ruler_new (_ruler_box_range, _ruler_labels, _("Range Markers"));
 	setup_ruler_add (rtbl, _ruler_btn_range_prev, 0);
 	setup_ruler_add (rtbl, _ruler_btn_range_add, 1);
 	setup_ruler_add (rtbl, _ruler_btn_range_next, 2);
 
-	rtbl = setup_ruler_new (_ruler_box_marker, _("Location Markers"));
+	rtbl = setup_ruler_new (_ruler_box_marker, _ruler_labels, _("Location Markers"));
 	setup_ruler_add (rtbl, _ruler_btn_loc_prev, 0);
 	setup_ruler_add (rtbl, _ruler_btn_loc_add, 1);
 	setup_ruler_add (rtbl, _ruler_btn_loc_next, 2);
 
-	rtbl = setup_ruler_new (_ruler_box_section, _("Arrangement Markers"));
+	rtbl = setup_ruler_new (_ruler_box_section, _ruler_labels, _("Arrangement Markers"));
 	setup_ruler_add (rtbl, _ruler_btn_section_prev, 0);
 	setup_ruler_add (rtbl, _ruler_btn_section_add, 1);
 	setup_ruler_add (rtbl, _ruler_btn_section_next, 2);
 
-	rtbl = setup_ruler_new (_ruler_box_videotl, &videotl_label);
+	rtbl = setup_ruler_new (_ruler_box_videotl, _ruler_labels, &videotl_label);
 	videotl_label.set_size_request (-1, 4 * timebar_height);
 
 	initialize_canvas ();
@@ -776,19 +776,20 @@ Editor::~Editor()
 }
 
 Gtk::Table*
-Editor::setup_ruler_new (Gtk::HBox& box, std::string const& name)
+Editor::setup_ruler_new (Gtk::HBox& box, vector<Gtk::Label*>& labels, std::string const& name)
 {
 	Gtk::Label* rlbl = manage (new Gtk::Label (name));
-	return setup_ruler_new (box, rlbl);
+	return setup_ruler_new (box, labels, rlbl);
 }
 
 Gtk::Table*
-Editor::setup_ruler_new (Gtk::HBox& box, Gtk::Label* rlbl)
+Editor::setup_ruler_new (Gtk::HBox& box, vector<Gtk::Label*>& labels, Gtk::Label* rlbl)
 {
 	rlbl->set_name ("EditorRulerLabel");
 	rlbl->set_size_request (-1, (int)timebar_height);
 	rlbl->set_alignment (1.0, 0.5);
 	rlbl->show ();
+	labels.push_back (rlbl);
 
 	Gtk::Table* rtbl = manage (new Gtk::Table);
 	rtbl->attach (*rlbl, 0, 1, 0, 1, EXPAND|FILL, SHRINK, 2, 0);
@@ -809,6 +810,46 @@ Editor::setup_ruler_add (Gtk::Table* rtbl, ArdourWidgets::ArdourButton& b, int p
 	b.set_elements (ArdourButton::Element(ArdourButton::Text));
 	b.show ();
 	rtbl->attach (b, pos + 1, pos + 2, 0, 1, SHRINK, SHRINK, 0, 1);
+}
+
+void
+Editor::dpi_reset ()
+{
+	timebar_height = std::max (13., ceil (17. * UIConfiguration::instance().get_ui_scale()));
+
+	_ruler_btn_tempo_add.set_size_request (-1, (int)timebar_height -2);
+	_ruler_btn_meter_add.set_size_request (-1, (int)timebar_height -2);
+
+	_ruler_btn_range_add.set_size_request (-1, (int)timebar_height -2);
+	_ruler_btn_range_prev.set_size_request (-1, (int)timebar_height -2);
+	_ruler_btn_range_next.set_size_request (-1, (int)timebar_height -2);
+
+	_ruler_btn_loc_add.set_size_request (-1, (int)timebar_height -2);
+	_ruler_btn_loc_prev.set_size_request (-1, (int)timebar_height -2);
+	_ruler_btn_loc_prev.set_size_request (-1, (int)timebar_height -2);
+
+	_ruler_btn_section_add.set_size_request (-1, (int)timebar_height -2);
+	_ruler_btn_section_prev.set_size_request (-1, (int)timebar_height -2);
+	_ruler_btn_section_next.set_size_request (-1, (int)timebar_height -2);
+
+	timecode_ruler->set_y1 (timecode_ruler->y0() + timebar_height);
+	bbt_ruler->set_y1 (bbt_ruler->y0() + timebar_height);
+	samples_ruler->set_y1 (samples_ruler->y0() + timebar_height);
+	minsec_ruler->set_y1 (minsec_ruler->y0() + timebar_height);
+	meter_bar->set_y1 (meter_bar->y0() + timebar_height);
+	tempo_bar->set_y1 (tempo_bar->y0() + timebar_height);
+	marker_bar->set_y1 (marker_bar->y0() + timebar_height);
+	range_marker_bar->set_y1 (range_marker_bar->y0() + timebar_height);
+	section_marker_bar->set_y1 (section_marker_bar->y0() + timebar_height);
+
+	for (auto const& l : _ruler_labels) {
+		l->set_size_request (-1, (int)timebar_height);
+	}
+	videotl_label.set_size_request (-1, 4 * timebar_height);
+	update_ruler_visibility ();
+
+	ArdourMarker::setup_sizes (timebar_height);
+	TempoCurve::setup_sizes (timebar_height);
 }
 
 bool

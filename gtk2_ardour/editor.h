@@ -533,6 +533,7 @@ protected:
 private:
 
 	void color_handler ();
+	void dpi_reset ();
 	bool constructed;
 
 	// to keep track of the playhead position for control_scroll
@@ -835,8 +836,8 @@ private:
 	ArdourCanvas::Rectangle* _canvas_grid_zone;
 	bool canvas_grid_zone_event (GdkEvent* event);
 
-	static Gtk::Table* setup_ruler_new (Gtk::HBox&, std::string const&);
-	static Gtk::Table* setup_ruler_new (Gtk::HBox&, Gtk::Label*);
+	static Gtk::Table* setup_ruler_new (Gtk::HBox&, std::vector<Gtk::Label*>&, std::string const&);
+	static Gtk::Table* setup_ruler_new (Gtk::HBox&, std::vector<Gtk::Label*>&, Gtk::Label*);
 	static void        setup_ruler_add (Gtk::Table*, ArdourWidgets::ArdourButton&, int pos = 0);
 
 	Glib::RefPtr<Gtk::ToggleAction> ruler_minsec_action;
@@ -942,6 +943,8 @@ private:
 	Gtk::HBox _ruler_box_marker;
 	Gtk::HBox _ruler_box_section;
 	Gtk::HBox _ruler_box_videotl;
+
+	std::vector<Gtk::Label*> _ruler_labels;
 
 	ArdourWidgets::ArdourButton  _ruler_btn_tempo_add;
 	ArdourWidgets::ArdourButton  _ruler_btn_meter_add;
