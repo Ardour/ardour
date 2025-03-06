@@ -426,6 +426,7 @@ MixerStrip::init ()
 
 	parameter_changed (X_("mixer-element-visibility"));
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MixerStrip::parameter_changed));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &MixerStrip::dpi_reset));
 	 Config->ParameterChanged.connect (_config_connection, invalidator (*this), std::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 	 _session->config.ParameterChanged.connect (_config_connection, invalidator (*this), std::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 
@@ -786,6 +787,12 @@ MixerStrip::set_stuff_from_route ()
 	if (get_gui_property ("strip-width", width)) {
 		set_width_enum (width, this);
 	}
+}
+
+void
+MixerStrip::dpi_reset ()
+{
+	set_width_enum (_width, _width_owner);
 }
 
 void
