@@ -803,13 +803,13 @@ MidiView::show_list_editor ()
 
 
 /** Add a note to the model, and the view, at a canvas (click) coordinate.
- * \param t time in samples relative to the position of the region
+ * \param t time relative to the start of the region's source
  * \param y vertical position in pixels
  * \param length duration of the note in beats
  * \param snap_t true to snap t to the grid, otherwise false.
  */
 void
-MidiView::create_note_at (timepos_t const & t, double y, Temporal::Beats length, uint32_t state, bool shift_snap)
+MidiView::create_note_at (timepos_t const & source_relative_start, double y, Temporal::Beats length, uint32_t state, bool shift_snap)
 {
 	if (!_model) {
 		return;
@@ -819,15 +819,15 @@ MidiView::create_note_at (timepos_t const & t, double y, Temporal::Beats length,
 		return;
 	}
 
-	/* assume time is already region-relative and snapped */
+	/* assume time is already source-relative and snapped */
 
-	Temporal::Beats region_start = t.beats();
+	Temporal::Beats t = source_relative_start.beats();
 
 	const double  note     = y_to_note(y);
-	const uint8_t chan     = get_channel_for_add(region_start);
-	const uint8_t velocity = get_velocity_for_add (region_start);
+	const uint8_t chan     = get_channel_for_add (t);
+	const uint8_t velocity = get_velocity_for_add (t);
 
-	const std::shared_ptr<NoteType> new_note (new NoteType (chan, region_start, length, (uint8_t)note, velocity));
+	const std::shared_ptr<NoteType> new_note (new NoteType (chan, t, length, (uint8_t)note, velocity));
 
 	if (_model->contains (new_note)) {
 		return;
