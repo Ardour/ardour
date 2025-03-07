@@ -2456,7 +2456,12 @@ Pianoroll::max_zoom_extent() const
 {
 	if (view && view->midi_region()) {
 		/* XXX make this dependent on view _show_source setting */
-		return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (view->midi_region()->midi_source()->length().beats()));
+
+		Temporal::Beats slen = view->midi_region()->midi_source()->length().beats();
+
+		if (slen != Temporal::Beats()) {
+			return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (slen));
+		}
 	}
 
 	return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (Temporal::Beats (32, 0)));
