@@ -6837,7 +6837,14 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 
 	/* Compute start within region, rather than absolute time start */
 
-	Beats const start  = _midi_view->midi_region ()->absolute_time_to_region_beats (min (_note[0], _note[1]));
+	Beats start;
+
+	if (_midi_view->show_source()) {
+		Beats spos = _midi_view->midi_region()->source_position().beats() + min (_note[0], _note[1]).beats();
+		start = _midi_view->midi_region ()->absolute_time_to_source_beats (timepos_t (spos));
+	} else {
+		start = _midi_view->midi_region ()->absolute_time_to_source_beats (timepos_t (min (_note[0], _note[1])));
+	}
 
 	if (!had_movement) {
 		/* we create a note even if there was no movement */
@@ -6899,7 +6906,7 @@ HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 	editing_context.snap_to (pos, RoundNearest, SnapToGrid_Scaled);
 	Temporal::Beats aligned_beats (pos.beats ());
 
-	Beats const start = _midi_view->midi_region ()->absolute_time_to_region_beats (timepos_t (aligned_beats));
+	Beats const start = _midi_view->midi_region ()->absolute_time_to_source_beats (timepos_t (aligned_beats));
 
 	/* Percussive hits are as short as possible */
 	Beats length (0, 1);

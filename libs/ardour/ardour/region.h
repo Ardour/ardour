@@ -389,7 +389,7 @@ public:
 	/** Convert a timestamp in absolute time to beats measured from source start*/
 	Temporal::Beats absolute_time_to_source_beats(Temporal::timepos_t const &) const;
 
-	Temporal::Beats absolute_time_to_region_beats (Temporal::timepos_t const &) const;
+	Temporal::Beats absolute_time_to_soucre_beats (Temporal::timepos_t const &) const;
 
 	Temporal::timepos_t absolute_time_to_region_time (Temporal::timepos_t const &) const;
 
