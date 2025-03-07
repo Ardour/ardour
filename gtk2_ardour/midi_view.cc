@@ -3040,7 +3040,7 @@ MidiView::relative_position (timepos_t const & p) const
 	}
 
 	if (_show_source) {
-		return _midi_region->source_relative_position (p);
+		return timecnt_t (p, timepos_t (Temporal::Beats()));
 	}
 
 	return _midi_region->region_relative_position (p);
