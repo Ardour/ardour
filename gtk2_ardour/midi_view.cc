@@ -4859,6 +4859,12 @@ MidiView::get_channel_for_add (MidiModel::TimeType time) const
 		return 0;
 	}
 
+	/* zeroth, use the _visible_channel if set */
+
+	if (_visible_channel >= 0) {
+		return _visible_channel;
+	}
+
 	/* first, use the user-specified channel in the editor */
 	if (_editing_context.draw_channel() != Editing::DRAW_CHAN_AUTO) {
 		return _editing_context.draw_channel();
