@@ -3032,14 +3032,13 @@ MidiView::snap_pixel_to_time (double x, bool ensure_snap)
 	return _editing_context.snap_relative_time_to_relative_time (_midi_region->position(), timecnt_t (_editing_context.pixel_to_sample (x)), ensure_snap);
 }
 
+/** @param p a position relative to the left edge of the MidiView, which could
+ * correspond to the source start, or a region start.
+ */
 timecnt_t
 MidiView::relative_position (timepos_t const & p) const
 {
-	if (!_midi_region) {
-		return timecnt_t (Beats (0,0));
-	}
-
-	if (_show_source) {
+	if (!_midi_region || _show_source) {
 		return timecnt_t (p, timepos_t (Temporal::Beats()));
 	}
 
