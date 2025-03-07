@@ -413,7 +413,7 @@ MidiView::midi_canvas_group_event (GdkEvent* ev)
 
 	case GDK_SCROLL:
 		if (scroll (&ev->scroll)) {
-			return true;
+			return false;
 		}
 		break;
 
