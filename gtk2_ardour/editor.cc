@@ -850,6 +850,9 @@ Editor::dpi_reset ()
 
 	ArdourMarker::setup_sizes (timebar_height);
 	TempoCurve::setup_sizes (timebar_height);
+
+	clear_marker_display ();
+	refresh_location_display  ();
 }
 
 bool
