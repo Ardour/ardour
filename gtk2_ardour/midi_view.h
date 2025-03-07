@@ -289,7 +289,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	 * is true.
 	 */
 
-	Temporal::timecnt_t relative_position (Temporal::timepos_t const & p) const;
+	Temporal::timecnt_t view_position_to_model_position (Temporal::timepos_t const & p) const;
 
 	Temporal::timepos_t source_beats_to_timeline (Temporal::Beats const &) const;
 

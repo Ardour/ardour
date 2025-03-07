@@ -3036,7 +3036,7 @@ MidiView::snap_pixel_to_time (double x, bool ensure_snap)
  * correspond to the source start, or a region start.
  */
 timecnt_t
-MidiView::relative_position (timepos_t const & p) const
+MidiView::view_position_to_model_position (timepos_t const & p) const
 {
 	if (!_midi_region || _show_source) {
 		return timecnt_t (p, timepos_t (Temporal::Beats()));
