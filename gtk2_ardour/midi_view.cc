@@ -4873,7 +4873,7 @@ MidiView::get_channel_for_add (MidiModel::TimeType time) const
 	/* second, use the nearest note in the region-view (consistent with get_velocity_for_add behavior) */
 
 	if (!_model->notes().empty()) {
-		MidiModel::Notes::const_iterator m = _model->note_lower_bound(time);
+		MidiModel::Notes::const_iterator m = _model->note_lower_bound (time);
 		if (m == _model->notes().begin()) {
 			// Before the start, use the channel of the first note
 			return (*m)->channel();
