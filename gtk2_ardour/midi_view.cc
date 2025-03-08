@@ -2739,8 +2739,14 @@ MidiView::move_selection (timecnt_t const & dx_qn, double dy, double cumulative_
 		if (n->note()->time() == earliest) {
 			to_play.push_back (n->note());
 		}
-		Temporal::Beats const note_time_qn = _midi_region->source_beats_to_absolute_beats (n->note()->time());
+		Temporal::Beats note_time_qn;
 		double dx = 0.0;
+
+		if (_show_source) {
+			note_time_qn = n->note()->time ();
+		} else {
+			note_time_qn =  _midi_region->source_beats_to_absolute_beats (n->note()->time());
+		}
 
 		if (_midi_context.note_mode() == Sustained) {
 			dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn + dx_qn.beats()));
