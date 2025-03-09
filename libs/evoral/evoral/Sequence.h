@@ -314,6 +314,8 @@ public:
 	uint8_t lowest_note()  const { return _lowest_note; }
 	uint8_t highest_note() const { return _highest_note; }
 
+	uint16_t channels_present () const { return _channels_present; }
+
 	Time duration() const { return _duration; }
 	void set_duration (Time const &);
 
@@ -369,6 +371,7 @@ private:
 
 	uint8_t _lowest_note;
 	uint8_t _highest_note;
+	uint16_t _channels_present;
 
 	Time    _duration;
 	bool    _explicit_duration;
