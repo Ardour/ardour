@@ -721,10 +721,12 @@ Sequence<Time>::add_note_unlocked(const NotePtr note, void* arg)
 		note->set_id (Evoral::next_event_id());
 	}
 
-	if (note->note() < _lowest_note)
+	if (note->note() < _lowest_note) {
 		_lowest_note = note->note();
-	if (note->note() > _highest_note)
+	}
+	if (note->note() > _highest_note) {
 		_highest_note = note->note();
+	}
 
 	_notes.insert (note);
 	_pitches[note->channel()].insert (note);
