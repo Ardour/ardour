@@ -368,6 +368,15 @@ MidiView::set_model (std::shared_ptr<MidiModel> m)
 
 	//set_height (trackview.current_height());
 
+	if (_show_source) {
+		for (int n = 0; n < 16; ++n) {
+			if (_model->channels_present() & (1 << n)) {
+				set_visible_channel (n);
+				break;
+			}
+		}
+	}
+
 	_model->ContentsChanged.connect (connections_requiring_model, invalidator (*this), std::bind (&MidiView::model_changed, this), gui_context());
 
 	_midi_track->playback_filter().ChannelModeChanged.connect (connections_requiring_model, invalidator (*this),

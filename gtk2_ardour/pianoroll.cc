@@ -2280,8 +2280,6 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
 
 	}
-
-	set_visible_channel (0);
 }
 
 void
