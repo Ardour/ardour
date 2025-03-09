@@ -19,9 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/label.h>
-#include <gtkmm/liststore.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/label.h>
+#include <ytkmm/liststore.h>
 
 #include "pbd/file_utils.h"
 #include "pbd/strsplit.h"
@@ -392,8 +392,8 @@ FPGUI::build_proj_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 	actions.push_back (make_pair (string (_("Zoom to Session")), string (X_("Editor/zoom-to-session"))));
 
 #if 0
-	actions.push_back (make_pair (string (_("Zoom In")), string (X_("Editor/temporal-zoom-in"))));
-	actions.push_back (make_pair (string (_("Zoom Out")), string (X_("Editor/temporal-zoom-out"))));
+	actions.push_back (make_pair (string (_("Zoom In")), string (X_("Editing/temporal-zoom-in"))));
+	actions.push_back (make_pair (string (_("Zoom Out")), string (X_("Editing/temporal-zoom-out"))));
 #endif
 
 	build_action_combo (cb, actions, FaderPort::Proj, bs);

@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/pixmap.h>
-#include <gdkmm/private/pixmap_p.h>
+#include <ydkmm/pixmap.h>
+#include <ydkmm/private/pixmap_p.h>
 
 
 // -*- c++ -*-
@@ -27,9 +27,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdkmm/window.h>
-#include <gdkmm/display.h>
-#include <gdk/gdk.h>
+#include <ydkmm/window.h>
+#include <ydkmm/display.h>
+#include <ydk/gdk.h>
 
 
 namespace Gdk

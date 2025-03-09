@@ -30,16 +30,16 @@
 
 #include <cmath>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/button.h>
-#include <gtkmm/box.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/label.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/sizegroup.h>
-#include <gtkmm/textview.h>
-#include <gtkmm/togglebutton.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/button.h>
+#include <ytkmm/box.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/sizegroup.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/togglebutton.h>
 
 #include "pbd/stateful.h"
 
@@ -281,6 +281,7 @@ private:
 	void route_property_changed (const PBD::PropertyChange&);
 	void name_button_resized (Gtk::Allocation&);
 	void name_changed ();
+	void dpi_reset ();
 	void update_speed_display ();
 	void map_frozen ();
 	void hide_processor_editor (std::weak_ptr<ARDOUR::Processor> processor);

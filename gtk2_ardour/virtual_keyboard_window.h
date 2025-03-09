@@ -19,8 +19,8 @@
 #ifndef _virtual_keyboard_window_h_
 #define _virtual_keyboard_window_h_
 
-#include <gtkmm/box.h>
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/box.h>
+#include <ytkmm/spinbutton.h>
 
 #include "pbd/controllable.h"
 #include "pbd/signals.h"

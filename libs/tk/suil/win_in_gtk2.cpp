@@ -19,8 +19,8 @@
 #include "lv2/options/options.h"
 #include "lv2/urid/urid.h"
 
-#include <gtk/gtk.h>
-#include <gdk/gdkwin32.h>
+#include <ytk/ytk.h>
+#include <ydk/gdkwin32.h>
 
 #ifndef WM_MOUSEWHEEL
 #    define WM_MOUSEWHEEL 0x020A

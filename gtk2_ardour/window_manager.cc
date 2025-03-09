@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/window.h>
+#include <ytkmm/window.h>
 
 #include "pbd/xml++.h"
 
@@ -191,6 +191,9 @@ void
 Manager::set_session (ARDOUR::Session* s)
 {
 	SessionHandlePtr::set_session (s);
+	if (!s) {
+		return;
+	}
 	for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
 		(*i)->set_session(s);
 	}

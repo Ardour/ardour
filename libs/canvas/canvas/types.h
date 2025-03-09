@@ -25,7 +25,7 @@
 #include <vector>
 #include <stdint.h>
 #include <algorithm>
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <cairomm/refptr.h>
 

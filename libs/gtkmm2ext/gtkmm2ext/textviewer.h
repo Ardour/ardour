@@ -21,11 +21,11 @@
 
 #include <string>
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/textview.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/window.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/window.h>
 
 #include "pbd/transmitter.h"
 

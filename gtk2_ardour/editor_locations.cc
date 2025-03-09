@@ -37,7 +37,9 @@ void
 EditorLocations::set_session (ARDOUR::Session* s)
 {
 	SessionHandlePtr::set_session (s);
-	_locations->set_session (s);
+	if (s) {
+		_locations->set_session (s);
+	}
 }
 
 Widget&

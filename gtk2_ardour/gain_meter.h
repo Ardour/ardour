@@ -28,16 +28,16 @@
 #include <vector>
 #include <map>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/alignment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/table.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/table.h>
 
-//#include <gdkmm/colormap.h>
+//#include <ydkmm/colormap.h>
 
 #include "pbd/signals.h"
 
@@ -210,19 +210,24 @@ protected:
 
 	void redraw_metrics ();
 	void on_theme_changed ();
-	void color_handler(bool);
+	void color_handler();
+	virtual void reset_dpi ();
 	ARDOUR::DataType _data_type;
 	ARDOUR::ChanCount _previous_amp_output_streams;
 
 	std::shared_ptr<ARDOUR::Route> route();
 
 private:
-
 	bool level_meter_button_press (GdkEventButton *);
-	PBD::ScopedConnection _level_meter_connection;
 
 	bool _clear_meters;
 	bool _meter_peaked;
+
+	int _unscaled_fader_length;
+	int _unscaled_fader_girth;
+
+	PBD::ScopedConnection _level_meter_connection;
+
 };
 
 class GainMeter : public GainMeterBase, public Gtk::VBox
@@ -242,6 +247,8 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 
   protected:
 	void hide_all_meters ();
+
+	void reset_dpi ();
 
 	gint meter_metrics_expose (GdkEventExpose *);
 	gint meter_ticks1_expose (GdkEventExpose *);

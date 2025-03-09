@@ -150,29 +150,26 @@ def options(opt):
     pass
 
 def configure(conf):
-    if conf.is_defined('YTK'):
-        autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
-        autowaf.check_pkg(conf, 'pango', uselib_store='PANGO', atleast_version='1.20', mandatory=True)
-        autowaf.check_pkg(conf, 'cairo', uselib_store='CAIRO', atleast_version='1.12', mandatory=True)
-        autowaf.check_pkg(conf, 'pangocairo', uselib_store='PANGOCAIRO', mandatory=True)
-        if conf.env['build_target'] == 'mingw':
-            autowaf.check_pkg(conf, 'gio-windows-2.0', uselib_store='GIO-WINDOWS', mandatory=True)
-        elif sys.platform != 'darwin':
-            autowaf.check_pkg(conf, 'gio-unix-2.0', uselib_store='GIO-UNIX', mandatory=True)
-            autowaf.check_pkg(conf, 'xrandr', uselib_store='RANDR', mandatory=False, atleast_version='1.2.99')
-            autowaf.check_pkg(conf, 'xrandr', uselib_store='RANDR15', mandatory=False, atleast_version='1.5.0')
-            conf.check_cc(header_name='X11/extensions/Xinerama.h',
-                          lib='Xinerama', uselib_store="XINERAMA", define_name='HAVE_XFREE_XINERAMA',
-                          execute = False, mandatory=False)
+    autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
+    autowaf.check_pkg(conf, 'pango', uselib_store='PANGO', atleast_version='1.20', mandatory=True)
+    autowaf.check_pkg(conf, 'cairo', uselib_store='CAIRO', atleast_version='1.12', mandatory=True)
+    autowaf.check_pkg(conf, 'pangocairo', uselib_store='PANGOCAIRO', mandatory=True)
+    if conf.env['build_target'] == 'mingw':
+        autowaf.check_pkg(conf, 'gio-windows-2.0', uselib_store='GIO-WINDOWS', mandatory=True)
+    elif sys.platform != 'darwin':
+        autowaf.check_pkg(conf, 'gio-unix-2.0', uselib_store='GIO-UNIX', mandatory=True)
+        autowaf.check_pkg(conf, 'xrandr', uselib_store='RANDR', mandatory=False, atleast_version='1.2.99')
+        autowaf.check_pkg(conf, 'xrandr', uselib_store='RANDR15', mandatory=False, atleast_version='1.5.0')
+        conf.check_cc(header_name='X11/extensions/Xinerama.h',
+                      lib='Xinerama', uselib_store="XINERAMA", define_name='HAVE_XFREE_XINERAMA',
+                      execute = False, mandatory=False)
+        autowaf.check_pkg(conf, 'xi', uselib_store='XINPUT2', mandatory=False, atleast_version='1.7.10')
 
 def build(bld):
-    if not bld.is_defined('YTK'):
-        return
-
     obj = bld.shlib(features = 'c cshlib')
     obj.cflags          = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
-    obj.export_includes = ['ydk']
-    obj.includes        = ['.', '..', 'ydk', 'ydk/gdk']
+    obj.export_includes = ['.', 'ydk']
+    obj.includes        = ['.', 'ydk']
     obj.name            = 'libydk'
     obj.target          = 'ydk'
     obj.use             = [ 'libztk', 'libydk-pixbuf' ]
@@ -187,23 +184,20 @@ def build(bld):
         obj.source   = libydk_sources + libydk_quartz_sources
         obj.cflags   += ['-xobjective-c']
         obj.uselib   += ' OSX' # -framework Cocoa -framework CoreFoundation -framework ApplicationServices
-        obj.includes += ['ydk/quartz', 'ydk/quartz/gdk', 'ydk/gdk/quartz']
-        obj.export_includes += ['ydk/gdk']
-        obj.export_includes += ['ydk/quartz']
+        obj.includes += ['quartz', 'quartz/ydk', 'ydk/quartz']
+        obj.export_includes += ['quartz']
     elif bld.env['build_target'] == 'mingw':
         obj.source   = libydk_sources + libydk_win32_sources
         obj.cflags   += ['-mms-bitfields', '-Wl,--export-all-symbols']
         obj.uselib   += ' GIO-WINDOWS'
         obj.defines         += [ 'INSIDE_GDK_WIN32', 'DLL_EXPORT', 'PIC' ]
-        obj.includes        += ['ydk/win32/gdk', 'ydk/win32']
-        obj.export_includes += ['ydk/gdk']
-        obj.export_includes += ['ydk/win32']
+        obj.includes        += ['win32', 'win32/ydk']
+        obj.export_includes += ['win32']
         obj.linkflags = ['-Wl,--export-all-symbols']
         obj.ldflags          = '-limm32 -lole32 -lgdi32 -lcomdlg32 -lwinspool -lcomctl32 -luuid'
     else:
         obj.source    = libydk_sources + libydk_x11_sources
-        obj.uselib   += ' GIO-UNIX X11 XEXT XINERAMA RANDR'
-        obj.includes        += ['ydk/x11/gdk', 'ydk/gdk/x11']
-        obj.export_includes += ['ydk/gdk']
-        obj.export_includes += ['ydk/x11']
+        obj.uselib   += ' GIO-UNIX X11 XEXT XINERAMA RANDR DL'
+        obj.includes        += ['x11', 'x11/ydk', 'ydk/x11']
+        obj.export_includes += ['x11']
 

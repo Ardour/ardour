@@ -20,9 +20,9 @@
 #pragma once
 
 #include <string>
-#include <gtkmm/label.h>
-#include <gtkmm/filechooserbutton.h>
-#include <gtkmm/radiobutton.h>
+#include <ytkmm/label.h>
+#include <ytkmm/filechooserbutton.h>
+#include <ytkmm/radiobutton.h>
 
 #include "ardour/types.h"
 

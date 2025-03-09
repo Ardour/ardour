@@ -40,8 +40,6 @@
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 
-#include <boost/shared_array.hpp>
-
 #include "pbd/basename.h"
 #include "pbd/convert.h"
 
@@ -134,7 +132,7 @@ open_importable_source (const string& path, samplecnt_t samplerate, ARDOUR::SrcQ
 		}
 
 		/* rewrap as a resampled source */
-		return std::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));		
+		return std::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
 	} catch (...) { }
 
 	throw failed_constructor ();
@@ -266,10 +264,10 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 	}
 
 	std::unique_ptr<float[]> data(new float[nframes * channels]);
-	vector<boost::shared_array<Sample> > channel_data;
+	vector<std::shared_ptr<Sample[]> > channel_data;
 
 	for (uint32_t n = 0; n < channels; ++n) {
-		channel_data.push_back(boost::shared_array<Sample>(new Sample[nframes]));
+		channel_data.push_back(std::shared_ptr<Sample[]>(new Sample[nframes]));
 	}
 
 	float gain = 1;
@@ -464,18 +462,7 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 
 				/* we wrote something */
 
-				/* try to guess at the meter, for 5/4 midi loop oddballs */
-				int pulses_per_bar = 4;
-				Evoral::SMF::Tempo *tempo = source->nth_tempo (0);
-				if (tempo && (tempo->numerator>0) ) {
-					pulses_per_bar = tempo->numerator;
-				}
-
-				/* extend the length of the region to the end of a bar */
-				const Temporal::Beats  length_beats = Temporal::Beats::ticks_at_rate(t, source->ppqn());
-				smfs->update_length (timepos_t (length_beats.round_up_to_multiple(Temporal::Beats(pulses_per_bar,0))));
-
-				smfs->mark_streaming_write_completed (source_lock);
+				smfs->mark_streaming_write_completed (source_lock, timecnt_t (source->duration()));
 
 				/* the streaming write that we've just finished
 				 * only wrote data to the SMF object, which is
@@ -486,12 +473,10 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 
 				smfs->load_model (source_lock, true);
 
-				/* Now that there is a model, we can set interpolation of parameters. */
-				smfs->mark_streaming_write_completed (source_lock);
-
 				if (status.cancel) {
 					break;
 				}
+
 			} else {
 				info << string_compose (_("Track %1 of %2 contained no usable MIDI data"), i, total_files) << endmsg;
 			}

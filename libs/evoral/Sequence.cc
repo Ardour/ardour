@@ -482,6 +482,8 @@ Sequence<Time>::Sequence(const TypeMap& type_map)
 	, _end_iter(*this, std::numeric_limits<Time>::max(), false, std::set<Evoral::Parameter> ())
 	, _lowest_note(127)
 	, _highest_note(0)
+	, _channels_present (0)
+	, _explicit_duration (false)
 {
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("Sequence constructed: %1\n", this));
 	assert(_end_iter._is_end);
@@ -503,6 +505,9 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
 	, _end_iter(*this, std::numeric_limits<Time>::max(), false, std::set<Evoral::Parameter> ())
 	, _lowest_note(other._lowest_note)
 	, _highest_note(other._highest_note)
+	, _channels_present (0)
+	, _duration (other._duration)
+	, _explicit_duration (other._explicit_duration)
 {
 	for (typename Notes::const_iterator i = other._notes.begin(); i != other._notes.end(); ++i) {
 		NotePtr n (new Note<Time> (**i));
@@ -718,13 +723,19 @@ Sequence<Time>::add_note_unlocked(const NotePtr note, void* arg)
 		note->set_id (Evoral::next_event_id());
 	}
 
-	if (note->note() < _lowest_note)
+	if (note->note() < _lowest_note) {
 		_lowest_note = note->note();
-	if (note->note() > _highest_note)
+	}
+	if (note->note() > _highest_note) {
 		_highest_note = note->note();
+	}
+
+	_channels_present = _channels_present | (1 << note->channel());
 
 	_notes.insert (note);
 	_pitches[note->channel()].insert (note);
+
+	update_duration_unlocked (note->time());
 
 	_edited = true;
 
@@ -760,12 +771,21 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 
 				_lowest_note = 127;
 				_highest_note = 0;
+				_channels_present = 0;
 
-				for (typename Sequence<Time>::Notes::iterator ii = _notes.begin(); ii != _notes.end(); ++ii) {
-					if ((*ii)->note() < _lowest_note)
-						_lowest_note = (*ii)->note();
-					if ((*ii)->note() > _highest_note)
-						_highest_note = (*ii)->note();
+				for (auto const & nt : _notes) {
+					if (nt->note() < _lowest_note) {
+						_lowest_note = nt->note();
+					}
+					if (nt->note() > _highest_note) {
+						_highest_note = nt->note();
+					}
+					_channels_present = _channels_present | (1 << nt->channel());
+				}
+			} else {
+				_channels_present = 0;
+				for (auto const & nt : _notes) {
+					_channels_present = _channels_present | (1 << nt->channel());
 				}
 			}
 
@@ -800,12 +820,21 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 
 					_lowest_note = 127;
 					_highest_note = 0;
+					_channels_present = 0;
 
-					for (typename Sequence<Time>::Notes::iterator ii = _notes.begin(); ii != _notes.end(); ++ii) {
-						if ((*ii)->note() < _lowest_note)
-							_lowest_note = (*ii)->note();
-						if ((*ii)->note() > _highest_note)
-							_highest_note = (*ii)->note();
+					for (auto const & nt : _notes) {
+						if (nt->note() < _lowest_note) {
+							_lowest_note = nt->note();
+						}
+						if (nt->note() > _highest_note) {
+							_highest_note = nt->note();
+						}
+						_channels_present = _channels_present | (1 << nt->channel());
+					}
+				} else {
+					_channels_present = 0;
+					for (auto const & nt : _notes) {
+						_channels_present = _channels_present | (1 << nt->channel());
 					}
 				}
 
@@ -912,7 +941,7 @@ Sequence<Time>::remove_sysex_unlocked (const SysExPtr sysex)
  */
 template<typename Time>
 void
-Sequence<Time>::append(const Event<Time>& ev, event_id_t evid)
+Sequence<Time>::append (const Event<Time>& ev, event_id_t evid)
 {
 	WriteLock lock(write_lock());
 
@@ -921,6 +950,11 @@ Sequence<Time>::append(const Event<Time>& ev, event_id_t evid)
 
 	if (!midi_event_is_valid(ev.buffer(), ev.size())) {
 		cerr << "WARNING: Sequence ignoring illegal MIDI event" << endl;
+		return;
+	}
+
+	if (ev.is_realtime()) {
+		/* relax - we do not store these in a Sequence */
 		return;
 	}
 
@@ -1090,6 +1124,7 @@ Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, doubl
 	std::shared_ptr<Control> c = control(param, true);
 	c->list()->add (Temporal::timepos_t (time), value, true, false);
 	/* XXX control events should use IDs */
+	update_duration_unlocked (time);
 }
 
 template<typename Time>
@@ -1106,6 +1141,7 @@ Sequence<Time>::append_sysex_unlocked(const Event<Time>& ev, event_id_t /* evid 
 	std::shared_ptr< Event<Time> > event(new Event<Time>(ev, true));
 	/* XXX sysex events should use IDs */
 	_sysexes.insert(event);
+	update_duration_unlocked (ev.time());
 }
 
 template<typename Time>
@@ -1119,6 +1155,7 @@ Sequence<Time>::append_patch_change_unlocked (const PatchChange<Time>& ev, event
 	}
 
 	_patch_changes.insert (p);
+	update_duration_unlocked (ev.time());
 }
 
 template<typename Time>
@@ -1130,6 +1167,7 @@ Sequence<Time>::add_patch_change_unlocked (PatchChangePtr p)
 	}
 
 	_patch_changes.insert (p);
+	update_duration_unlocked (p->time());
 }
 
 template<typename Time>
@@ -1141,6 +1179,33 @@ Sequence<Time>::add_sysex_unlocked (SysExPtr s)
 	}
 
 	_sysexes.insert (s);
+	update_duration_unlocked (s->time());
+}
+
+template<typename Time>
+void
+Sequence<Time>::set_duration (Time const & t)
+{
+	WriteLock lock(write_lock());
+	_duration = t;
+	_explicit_duration = true;
+}
+
+template<typename Time>
+void
+Sequence<Time>::update_duration_unlocked (Time const & t, bool can_shorten)
+{
+	if (_explicit_duration) {
+		return;
+	}
+
+	if (t < _duration) {
+		if (can_shorten) {
+			_duration = t;
+		}
+	} else if (t > _duration) {
+		_duration = t;
+	}
 }
 
 template<typename Time>
@@ -1162,45 +1227,6 @@ Sequence<Time>::contains_unlocked (const NotePtr& note) const
 	     i != p.end() && (*i)->note() == note->note(); ++i) {
 
 		if (**i == *note) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-template<typename Time>
-bool
-Sequence<Time>::overlaps (const NotePtr& note, const NotePtr& without) const
-{
-	ReadLock lock (read_lock());
-	return overlaps_unlocked (note, without);
-}
-
-template<typename Time>
-bool
-Sequence<Time>::overlaps_unlocked (const NotePtr& note, const NotePtr& without) const
-{
-	Time sa = note->time();
-	Time ea  = note->end_time();
-
-	const Pitches& p (pitches (note->channel()));
-	NotePtr search_note(new Note<Time>(0, Time(), Time(), note->note()));
-
-	for (typename Pitches::const_iterator i = p.lower_bound (search_note);
-	     i != p.end() && (*i)->note() == note->note(); ++i) {
-
-		if (without && (**i) == *without) {
-			continue;
-		}
-
-		Time sb = (*i)->time();
-		Time eb = (*i)->end_time();
-
-		if (((sb > sa) && (eb <= ea)) ||
-		    ((eb >= sa) && (eb <= ea)) ||
-		    ((sb > sa) && (sb <= ea)) ||
-		    ((sa >= sb) && (sa <= eb) && (ea <= eb))) {
 			return true;
 		}
 	}

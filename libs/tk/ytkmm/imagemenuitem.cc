@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/imagemenuitem.h>
-#include <gtkmm/private/imagemenuitem_p.h>
+#include <ytkmm/imagemenuitem.h>
+#include <ytkmm/private/imagemenuitem_p.h>
 
 
 // -*- c++ -*-
@@ -29,11 +29,11 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
-#include <gtkmm/image.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/accellabel.h>
+#include <ytkmm/image.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/accellabel.h>
 
 namespace Gtk
 {

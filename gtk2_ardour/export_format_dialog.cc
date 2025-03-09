@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/frame.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/stock.h>
 
 #include "ardour/export_format_specification.h"
 #include "ardour/session.h"
@@ -354,12 +354,13 @@ void
 ExportFormatDialog::set_session (ARDOUR::Session* s)
 {
 	SessionHandlePtr::set_session (s);
-	silence_start_clock.set_session (s);
-	silence_end_clock.set_session (s);
 
 	if (!_session) {
 		return;
 	}
+
+	silence_start_clock.set_session (s);
+	silence_end_clock.set_session (s);
 
 	update_clock (silence_start_clock, silence_start);
 	update_clock (silence_end_clock, silence_end);

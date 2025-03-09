@@ -17,7 +17,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <gtkmm/frame.h>
+#include <ytkmm/frame.h>
 
 #include "ardour/debug.h"
 #include "ardour/soundcloud_upload.h"

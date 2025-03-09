@@ -22,16 +22,17 @@
 #include "canvas/debug.h"
 #include "canvas/ruler.h"
 
+#include "editing_context.h"
 #include "grid_lines.h"
-#include "public_editor.h"
 #include "rgb_macros.h"
 #include "ui_config.h"
 
 using namespace std;
 using namespace ArdourCanvas;
 
-GridLines::GridLines (Container* group, double)
-	: lines (group, LineSet::Vertical)
+GridLines::GridLines (EditingContext& ec, Container* group, double)
+	: _editing_context (ec)
+	, lines (group, LineSet::Vertical)
 {
 	lines.set_extent (COORD_MAX);
 }
@@ -66,11 +67,11 @@ GridLines::draw (std::vector<Ruler::Mark> const & marks)
 		samplepos_t s = m.position;
 
 		if (m.style == ArdourCanvas::Ruler::Mark::Major) {
-			lines.add_coord (PublicEditor::instance().sample_to_pixel (s), 1.0, major_color);
+			lines.add_coord (_editing_context.sample_to_pixel (s), 1.0, major_color);
 		} else if (m.style == ArdourCanvas::Ruler::Mark::Minor) {
-			lines.add_coord (PublicEditor::instance().sample_to_pixel (s), 1.0, minor_color);
+			lines.add_coord (_editing_context.sample_to_pixel (s), 1.0, minor_color);
 		} else {
-			lines.add_coord (PublicEditor::instance().sample_to_pixel (s), 1.0, micro_color);
+			lines.add_coord (_editing_context.sample_to_pixel (s), 1.0, micro_color);
 		}
 	}
 }

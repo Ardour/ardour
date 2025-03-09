@@ -899,8 +899,27 @@ Session::request_stop (bool abort, bool clear_state, TransportRequestSource orig
 		solo_selection ( _soloSelection, false );
 	}
 
-	SessionEvent* ev = new SessionEvent (SessionEvent::EndRoll, SessionEvent::Add, SessionEvent::Immediate, audible_sample(), 0.0, abort, clear_state);
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport stop, audible %3 transport %4 abort = %1, clear state = %2\n", abort, clear_state, audible_sample(), _transport_sample));
+	SessionEvent *ev;
+
+	if (Config->get_stop_on_grid() && _global_quantization.type == AnyTime::BBT_Offset && _transport_sample != 0) {
+		/* XXX for now this only does anything if we are quantized to
+		 * Beats. Other quantization settings require moving
+		 * Editor::snap_to() code into libardour, which is not in-scope
+		 * at the time this work is occuring.
+		 */
+
+		TempoMap::SharedPtr tmap (TempoMap::use());
+		BBT_Argument now = tmap->bbt_at (timepos_t (_transport_sample));
+		BBT_Argument rounded = tmap->round_up_to_bar (now);
+		samplepos_t samples = tmap->sample_at (rounded);
+
+		ev = new SessionEvent (SessionEvent::EndRoll, SessionEvent::Add, samples, samples, 0.0, abort, clear_state);
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport stop @ %4 snapped to %1 => %2 => %3\n", samples, now, rounded, _transport_sample));
+	} else {
+		ev = new SessionEvent (SessionEvent::EndRoll, SessionEvent::Add, SessionEvent::Immediate, audible_sample(), 0.0, abort, clear_state);
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport stop, audible %3 transport %4 abort = %1, clear state = %2\n", abort, clear_state, audible_sample(), _transport_sample));
+	}
+
 	queue_event (ev);
 }
 
@@ -1596,6 +1615,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished, bool will_
 			SaveSessionRequested (_current_snapshot_name);
 			saved = true;
 		}
+	}
+
+	if (!abort && did_record) {
+		RecordPassCompleted (); /* EMIT SIGNAL */
 	}
 
 	/* save the current state of things if appropriate */

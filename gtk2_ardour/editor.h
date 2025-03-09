@@ -44,8 +44,8 @@
 
 #include <optional>
 
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/layout.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/layout.h>
 
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/dndtreeview.h"
@@ -64,8 +64,10 @@
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
 #include "widgets/ardour_spacer.h"
+#include "widgets/metabutton.h"
 #include "widgets/pane.h"
 
+#include "application_bar.h"
 #include "ardour_dialog.h"
 #include "public_editor.h"
 #include "editing.h"
@@ -134,6 +136,7 @@ class MidiExportDialog;
 class MixerStrip;
 class MouseCursors;
 class NoteBase;
+class Pianoroll;
 class PluginSelector;
 class ProgressReporter;
 class QuantizeDialog;
@@ -228,6 +231,8 @@ public:
 
 	bool extend_selection_to_track (TimeAxisView&);
 
+	void edit_region_in_pianoroll_window ();
+
 	void play_selection ();
 	void maybe_locate_with_edit_preroll (samplepos_t);
 	void play_with_preroll ();
@@ -246,7 +251,7 @@ public:
 
 	/* tempo */
 
-	void update_grid ();
+	// void update_grid ();
 
 	/* analysis window */
 
@@ -273,13 +278,6 @@ public:
 
 	bool process_midi_export_dialog (MidiExportDialog& dialog, std::shared_ptr<ARDOUR::MidiRegion> midi_region);
 
-	void               set_zoom_focus (Editing::ZoomFocus);
-	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
-	void               cycle_zoom_focus ();
-	void temporal_zoom_step (bool zoom_out);
-	void temporal_zoom_step_scale (bool zoom_out, double scale);
-	void temporal_zoom_step_mouse_focus (bool zoom_out);
-	void temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale);
 	void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top);
 	void tav_zoom_step (bool coarser);
 	void tav_zoom_smooth (bool coarser, bool force_all);
@@ -300,7 +298,7 @@ public:
 	void maybe_add_mixer_strip_width (XMLNode&) const;
 	void show_editor_mixer (bool yn);
 	void create_editor_mixer ();
-	void show_editor_list (bool yn);
+	void showhide_att_left (bool);
 	void set_selected_mixer_strip (TimeAxisView&);
 	void mixer_strip_width_changed ();
 	void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false);
@@ -375,10 +373,6 @@ public:
 	void reposition_and_zoom (samplepos_t, double);
 
 	void reset_x_origin_to_follow_playhead ();
-
-	Temporal::timepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE,
-	                                                 bool use_context_click = false,
-	                                                 bool from_outside_canvas = false);
 
 	void toggle_meter_updating();
 
@@ -511,6 +505,14 @@ public:
 	bool rb_click (GdkEvent*, Temporal::timepos_t const &);
 	void line_drag_click (GdkEvent*, Temporal::timepos_t const &, double);
 
+	void focus_on_clock();
+
+	void set_zoom_focus (Editing::ZoomFocus);
+
+	void temporal_zoom_selection (Editing::ZoomAxis);
+	void temporal_zoom_session ();
+	void temporal_zoom_extents ();
+
 protected:
 	void map_transport_state ();
 	void map_position_change (samplepos_t);
@@ -526,15 +528,20 @@ protected:
 	void do_undo (uint32_t n);
 	void do_redo (uint32_t n);
 
+	Temporal::timepos_t _get_preferred_edit_position (Editing::EditIgnoreOption, bool use_context_click, bool from_outside_canvas);
+
 private:
 
 	void color_handler ();
+	void dpi_reset ();
 	bool constructed;
 
 	// to keep track of the playhead position for control_scroll
 	std::optional<samplepos_t> _control_scroll_target;
 
+	Gtk::HBox                    _bottom_hbox;
 	SelectionPropertiesBox*      _properties_box;
+	Pianoroll*                   _pianoroll;
 
 	typedef std::pair<TimeAxisView*,XMLNode*> TAVState;
 
@@ -580,15 +587,13 @@ private:
 
 	void update_join_object_range_location (double);
 
-	std::optional<float>  pre_notebook_shrink_pane_width;
+	Gtk::VBox                 _editor_list_vbox;
+	Gtk::Notebook             _the_notebook;
+	ArdourWidgets::MetaButton _notebook_tab1;
+	ArdourWidgets::MetaButton _notebook_tab2;
 
-	Gtk::VBox _editor_list_vbox;
-	Gtk::Notebook _the_notebook;
-	bool _notebook_shrunk;
-	void add_notebook_page (std::string const&, Gtk::Widget&);
-	bool notebook_tab_clicked (GdkEventButton*, Gtk::Widget*);
+	void add_notebook_page (std::string const&, std::string const&, Gtk::Widget&);
 
-	ArdourWidgets::HPane edit_pane;
 	ArdourWidgets::VPane editor_summary_pane;
 
 	Gtk::EventBox meter_base;
@@ -618,6 +623,7 @@ private:
 	void set_marker_line_visibility (bool);
 	void update_selection_markers ();
 	void update_section_box ();
+	void capture_sources_changed (bool);
 
 	void jump_forward_to_mark_flagged (ARDOUR::Location::Flags, ARDOUR::Location::Flags, ARDOUR::Location::Flags);
 	void jump_backward_to_mark_flagged (ARDOUR::Location::Flags, ARDOUR::Location::Flags, ARDOUR::Location::Flags);
@@ -765,7 +771,6 @@ private:
 	void timeaxisview_deleted (TimeAxisView*);
 	void add_vcas (ARDOUR::VCAList&);
 
-	Gtk::HBox global_hpacker;
 	Gtk::VBox global_vpacker;
 
 	Gdk::Cursor* which_track_cursor () const;
@@ -773,10 +778,9 @@ private:
 	Gdk::Cursor* which_trim_cursor (bool left_side) const;
 	Gdk::Cursor* which_canvas_cursor (ItemType type) const;
 
+	ApplicationBar           _application_bar;
 	ArdourCanvas::GtkCanvas* _track_canvas;
 	ArdourCanvas::GtkCanvasViewport* _track_canvas_viewport;
-
-	bool within_track_canvas;
 
 	RegionPeakCursor* _region_peak_cursor;
 
@@ -832,6 +836,10 @@ private:
 	ArdourCanvas::Rectangle* _canvas_grid_zone;
 	bool canvas_grid_zone_event (GdkEvent* event);
 
+	static Gtk::Table* setup_ruler_new (Gtk::HBox&, std::vector<Gtk::Label*>&, std::string const&);
+	static Gtk::Table* setup_ruler_new (Gtk::HBox&, std::vector<Gtk::Label*>&, Gtk::Label*);
+	static void        setup_ruler_add (Gtk::Table*, ArdourWidgets::ArdourButton&, int pos = 0);
+
 	Glib::RefPtr<Gtk::ToggleAction> ruler_minsec_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_timecode_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_samples_action;
@@ -860,6 +868,7 @@ private:
 	RulerDialog* ruler_dialog;
 
 	void initialize_rulers ();
+	void initialize_ruler_actions ();
 	void update_just_timecode ();
 	void compute_fixed_ruler_scale (); //calculates the RulerScale of the fixed rulers
 	void update_fixed_rulers ();
@@ -924,16 +933,30 @@ private:
 
 	void toggle_cue_behavior ();
 
-	Gtk::Label  minsec_label;
-	Gtk::Label  bbt_label;
-	Gtk::Label  timecode_label;
-	Gtk::Label  samples_label;
-	Gtk::Label  tempo_label;
-	Gtk::Label  meter_label;
-	Gtk::Label  mark_label;
-	Gtk::Label  range_mark_label;
-	Gtk::Label  section_mark_label;
-	Gtk::Label  cue_mark_label;
+	Gtk::HBox _ruler_box_minsec;
+	Gtk::HBox _ruler_box_timecode;
+	Gtk::HBox _ruler_box_samples;
+	Gtk::HBox _ruler_box_bbt;
+	Gtk::HBox _ruler_box_tempo;
+	Gtk::HBox _ruler_box_meter;
+	Gtk::HBox _ruler_box_range;
+	Gtk::HBox _ruler_box_marker;
+	Gtk::HBox _ruler_box_section;
+	Gtk::HBox _ruler_box_videotl;
+
+	std::vector<Gtk::Label*> _ruler_labels;
+
+	ArdourWidgets::ArdourButton  _ruler_btn_tempo_add;
+	ArdourWidgets::ArdourButton  _ruler_btn_meter_add;
+	ArdourWidgets::ArdourButton  _ruler_btn_range_prev;
+	ArdourWidgets::ArdourButton  _ruler_btn_range_next;
+	ArdourWidgets::ArdourButton  _ruler_btn_range_add;
+	ArdourWidgets::ArdourButton  _ruler_btn_loc_prev;
+	ArdourWidgets::ArdourButton  _ruler_btn_loc_next;
+	ArdourWidgets::ArdourButton  _ruler_btn_loc_add;
+	ArdourWidgets::ArdourButton  _ruler_btn_section_prev;
+	ArdourWidgets::ArdourButton  _ruler_btn_section_next;
+	ArdourWidgets::ArdourButton  _ruler_btn_section_add;
 
 	/* videtimline related actions */
 	Gtk::Label                      videotl_label;
@@ -1085,8 +1108,6 @@ private:
 	samplepos_t cut_buffer_start;
 	samplecnt_t cut_buffer_length;
 
-	std::shared_ptr<CursorContext> _press_cursor_ctx;  ///< Button press cursor context
-
 	std::weak_ptr<ARDOUR::Trimmable> _trimmable;
 	std::weak_ptr<ARDOUR::Movable> _movable;
 
@@ -1114,7 +1135,6 @@ private:
 	Temporal::timepos_t last_paste_pos;
 	unsigned    paste_count;
 
-	void cut_copy (Editing::CutCopyOp);
 	bool can_cut_copy () const;
 	void cut_copy_points (Editing::CutCopyOp, Temporal::timepos_t const & earliest);
 	void cut_copy_regions (Editing::CutCopyOp, RegionSelection&);
@@ -1214,17 +1234,15 @@ private:
 	void split_region ();
 
 	void delete_ ();
-	void alt_delete_ ();
-	void cut ();
-	void copy ();
 	void paste (float times, bool from_context_menu);
+	void keyboard_paste ();
+	void cut_copy (Editing::CutCopyOp);
 
 	void place_transient ();
 	void remove_transient (ArdourCanvas::Item* item);
 	void snap_regions_to_grid ();
 	void close_region_gaps ();
 
-	void keyboard_paste ();
 
 	void region_from_selection ();
 	void create_region_from_selection (std::vector<std::shared_ptr<ARDOUR::Region> >&);
@@ -1239,14 +1257,6 @@ private:
 
 	void group_selected_regions ();
 	void ungroup_selected_regions ();
-
-	void calc_extra_zoom_edges(samplepos_t &start, samplepos_t &end);
-	void temporal_zoom_selection (Editing::ZoomAxis);
-	void temporal_zoom_session ();
-	void temporal_zoom_extents ();
-	void temporal_zoom (samplecnt_t samples_per_pixel);
-	void temporal_zoom_by_sample (samplepos_t start, samplepos_t end);
-	void temporal_zoom_to_sample (bool coarser, samplepos_t sample);
 
 	std::shared_ptr<ARDOUR::Playlist> current_playlist () const;
 	void insert_source_list_selection (float times);
@@ -1401,6 +1411,7 @@ private:
 	void add_location_from_region ();
 	void add_locations_from_region ();
 	void add_location_from_selection ();
+	void add_section_from_playhead ();
 	void set_loop_from_selection (bool play);
 	void set_punch_from_selection ();
 	void set_punch_from_region ();
@@ -1414,6 +1425,9 @@ private:
 
 	void set_loop_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd);
 	void set_punch_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd);
+
+	void add_tempo_from_playhead_cursor ();
+	void add_meter_from_playhead_cursor ();
 
 	void toggle_location_at_playhead_cursor ();
 	void add_location_from_playhead_cursor ();
@@ -1451,7 +1465,8 @@ private:
 	void unlock ();
 	Gtk::Dialog* lock_dialog;
 
-	struct timeval last_event_time;
+	int64_t _last_event_time;
+
 	bool generic_event_handler (GdkEvent*);
 	bool lock_timeout_callback ();
 	void start_lock_event_timing ();
@@ -1529,7 +1544,7 @@ private:
 
 	bool canvas_videotl_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	void update_video_timeline (bool flush = false);
-	void set_video_timeline_height (const int);
+	void set_video_timeline_height (const int, bool force = false);
 	bool is_video_timeline_locked ();
 	void toggle_video_timeline_locked ();
 	void set_video_timeline_locked (const bool);
@@ -1631,14 +1646,7 @@ private:
 	/// true if we are in fullscreen mode
 	bool _maximised;
 
-	std::vector<ArdourCanvas::Ruler::Mark> grid_marks;
-	GridLines* grid_lines;
-
 	ArdourCanvas::Container* global_rect_group;
-	ArdourCanvas::Container* time_line_group;
-
-	void hide_grid_lines ();
-	void maybe_draw_grid_lines ();
 
 	void new_tempo_section ();
 
@@ -1736,15 +1744,6 @@ private:
 
 	/* toolbar */
 
-	Gtk::ToggleButton editor_mixer_button;
-	Gtk::ToggleButton editor_list_button;
-	void editor_mixer_button_toggled ();
-	void editor_list_button_toggled ();
-
-	ArdourWidgets::ArdourButton   zoom_in_button;
-	ArdourWidgets::ArdourButton   zoom_out_button;
-	ArdourWidgets::ArdourButton   zoom_out_full_button;
-
 	ArdourWidgets::ArdourButton   tav_expand_button;
 	ArdourWidgets::ArdourButton   tav_shrink_button;
 	ArdourWidgets::ArdourDropdown visible_tracks_selector;
@@ -1801,14 +1800,9 @@ private:
 	Gtk::HBox _box;
 
 	//zoom focus menu stuff
-	ArdourWidgets::ArdourDropdown	zoom_focus_selector;
-	void zoom_focus_selection_done (Editing::ZoomFocus);
+	Editing::ZoomFocus effective_zoom_focus() const;
+
 	void build_zoom_focus_menu ();
-	std::vector<std::string> zoom_focus_strings;
-
-	void zoom_focus_chosen (Editing::ZoomFocus);
-
-	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
 
 	/* Marker Click Radio */
 	Glib::RefPtr<Gtk::RadioAction> marker_click_behavior_action (Editing::MarkerClickBehavior);
@@ -1991,15 +1985,6 @@ private:
 	void duplicate_range (bool with_dialog);
 	void duplicate_regions (float times);
 
-	/** computes the timeline sample (sample) of an event whose coordinates
-	 * are in window units (pixels, no scroll offset).
-	 */
-	samplepos_t window_event_sample (GdkEvent const*, double* px = 0, double* py = 0) const;
-
-	/* returns false if mouse pointer is not in track or marker canvas
-	 */
-	bool mouse_sample (samplepos_t&, bool& in_track_canvas) const;
-
 	TimeFXDialog* current_timefx;
 	static void* timefx_thread (void* arg);
 	void do_timefx (bool fixed_end);
@@ -2063,6 +2048,8 @@ private:
 	void set_entered_track (TimeAxisView*);
 	void set_entered_regionview (RegionView*);
 	gint left_automation_track ();
+
+	std::pair<Temporal::timepos_t,Temporal::timepos_t> max_zoom_extent() const { return session_gui_extents(); }
 
 	void reset_canvas_action_sensitivity (bool);
 	void set_gain_envelope_visibility ();
@@ -2306,6 +2293,8 @@ private:
 	void show_range_type (RangeBarType);
 	PBD::Signal<void()> VisibleMarkersChanged;
 	PBD::Signal<void()> VisibleRangesChanged;
+
+	bool enter (GdkEventCrossing*);
 
 	friend class RegionMoveDrag;
 	friend class TrimDrag;

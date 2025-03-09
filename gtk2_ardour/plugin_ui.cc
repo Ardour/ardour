@@ -36,8 +36,8 @@
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
 
-#include "gtkmm/box.h"
-#include "gtkmm/widget.h"
+#include "ytkmm/box.h"
+#include "ytkmm/widget.h"
 
 #include "gtkmm2ext/application.h"
 #include "gtkmm2ext/doi.h"

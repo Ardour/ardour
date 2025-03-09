@@ -676,10 +676,12 @@ Bundle::overall_channel_to_type (DataType t, uint32_t c) const
 
 	Glib::Threads::Mutex::Lock lm (_channel_mutex);
 
+	assert (_channel.size () > c);
+
 	uint32_t s = 0;
 
 	vector<Channel>::const_iterator i = _channel.begin ();
-	for (uint32_t j = 0; j < c; ++j) {
+	for (uint32_t j = 0; j < c && i != _channel.end (); ++j) {
 		if (i->type == t) {
 			++s;
 		}

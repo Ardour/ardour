@@ -22,7 +22,7 @@
 #include <glib.h>
 
 #undef GDK_PIXBUF_DISABLE_DEPRECATED
-#include <gdk-pixbuf/gdk-pixdata.h>
+#include <ydk-pixbuf/gdk-pixdata.h>
 
 
 #define VERBOSE(x) 

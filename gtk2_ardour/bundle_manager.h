@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/treeview.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/treeview.h>
 
 #include "ardour/user_bundle.h"
 

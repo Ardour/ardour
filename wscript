@@ -562,7 +562,6 @@ int main() { return 0; }''',
             cxx_flags.append('-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION')
         else:
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
-            cxx_flags.append('-DBOOST_BIND_GLOBAL_PLACEHOLDERS')
 
     if (is_clang and platform == "darwin"):
         # Silence warnings about the non-existing osx clang compiler flags
@@ -747,7 +746,7 @@ int main() { return 0; }''',
 
     # need ISOC9X for llabs()
     compiler_flags.extend(
-        ('-DBOOST_SYSTEM_NO_DEPRECATED', '-DBOOST_BIND_GLOBAL_PLACEHOLDERS', '-D_ISOC9X_SOURCE',
+        ('-DBOOST_SYSTEM_NO_DEPRECATED', '-D_ISOC9X_SOURCE',
          '-D_LARGEFILE64_SOURCE', '-D_FILE_OFFSET_BITS=64'))
     cxx_flags.extend(
         ('-D__STDC_LIMIT_MACROS', '-D__STDC_FORMAT_MACROS',
@@ -760,10 +759,6 @@ int main() { return 0; }''',
     if Options.options.program_name.lower().startswith('mixbus'):
         compiler_flags.append ('-DMIXBUS')
         conf.define('MIXBUS', 1)
-
-    if Options.options.program_name.lower() == "mixbus32c":
-        conf.define('MIXBUS32C', 1)
-        compiler_flags.append ('-DMIXBUS32C')
 
     compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
     compiler_flags.append ('-DPROGRAM_VERSION="' + PROGRAM_VERSION + '"')
@@ -919,8 +914,6 @@ def options(opt):
                     help='Disable threaded waveview rendering')
     opt.add_option('--no-futex-semaphore', action='store_true', default=False, dest='no_futex_semaphore',
                     help='Disable use of futex for semaphores (Linux only)')
-    opt.add_option('--no-ytk', action='store_true', default=False, dest='no_ytk',
-                   help='Use system-wide GTK instead of Ardour YTK')
     opt.add_option(
         '--qm-dsp-include', type='string', action='store',
         dest='qm_dsp_include', default='/usr/include/qm-dsp',
@@ -1079,10 +1072,6 @@ def configure(conf):
         conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'AudioToolbox', '-framework', 'AudioUnit'])
         conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Cocoa'])
 
-        # use image surface for rendering
-        conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
-        conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
-
         if (
                 # osx up to and including 10.6 (uname 10.X.X)
                 (re.search (r"^[1-9][0-9]\.", os.uname()[2]) is None or not re.search (r"^10\.", os.uname()[2]) is None)
@@ -1108,12 +1097,6 @@ def configure(conf):
 
     if Options.options.internal_shared_libs:
         conf.define('INTERNAL_SHARED_LIBS', 1)
-
-    if not Options.options.no_ytk:
-        conf.define('YTK', 1)
-        conf.define('HAVE_SUIL', 1)
-    else:
-        autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL', atleast_version='0.6.0', mandatory=False)
 
     if Options.options.use_external_libs:
         conf.define('USE_EXTERNAL_LIBS', 1)
@@ -1286,6 +1269,11 @@ int main () { __int128 x = 0; return 0; }
     if have_int128_support:
         conf.env.append_value('CXXFLAGS', "-DCOMPILER_INT128_SUPPORT")
         conf.env.append_value('CFLAGS', "-DCOMPILER_INT128_SUPPORT")
+
+
+    # always use localized gtk2
+    conf.define('YTK', 1)
+    conf.define('HAVE_SUIL', 1)
 
     # Tell everyone that this is a waf build
 
@@ -1492,7 +1480,6 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Install prefix',        conf.env['PREFIX'])
     write_config_text('Strict compiler flags', conf.env['STRICT'])
     write_config_text('Internal Shared Libraries', conf.is_defined('INTERNAL_SHARED_LIBS'))
-    write_config_text('Use YTK instead of GTK',    conf.is_defined('YTK'))
     write_config_text('Use External Libraries', conf.is_defined('USE_EXTERNAL_LIBS'))
     write_config_text('Library exports hidden', conf.is_defined('EXPORT_VISIBILITY_HIDDEN'))
     write_config_text('Free/Demo copy',        conf.is_defined('FREEBIE'))
@@ -1517,7 +1504,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Futex Semaphore',       conf.is_defined('USE_FUTEX_SEMAPHORE'))
     write_config_text('Freedesktop files',     opts.freedesktop)
     write_config_text('G_ENABLE_DEBUG',        opts.gdebug or conf.env['DEBUG'])
-    write_config_text('I/O Priorty Set',       conf.is_defined('HAVE_IOPRIO'))
+    write_config_text('I/O Priority Set',      conf.is_defined('HAVE_IOPRIO'))
     write_config_text('Libjack linking',       conf.env['libjack_link'])
     write_config_text('Libjack metadata',      conf.is_defined ('HAVE_JACK_METADATA'))
     write_config_text('Lua Binding Doc',       conf.is_defined('LUABINDINGDOC'))
@@ -1586,9 +1573,6 @@ def build(bld):
     bld.path.find_dir ('libs/gtkmm2ext/gtkmm2ext')
     bld.path.find_dir ('libs/ardour/ardour')
     bld.path.find_dir ('libs/pbd/pbd')
-
-    #if bld.is_defined('YTK'):
-    #    bld.path.find_dir ('libs/tk/ztkmm')
 
     # set up target directories
     lwrcase_dirname = 'ardour' + bld.env['MAJOR']

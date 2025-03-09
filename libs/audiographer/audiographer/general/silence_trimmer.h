@@ -1,6 +1,8 @@
 #ifndef AUDIOGRAPHER_SILENCE_TRIMMER_H
 #define AUDIOGRAPHER_SILENCE_TRIMMER_H
 
+#include <cassert>
+
 #include "audiographer/visibility.h"
 #include "audiographer/debug_utils.h"
 #include "audiographer/flag_debuggable.h"

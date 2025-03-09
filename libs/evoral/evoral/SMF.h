@@ -27,6 +27,8 @@
 #include <memory>
 #include <set>
 
+#include "temporal/beats.h"
+
 #include "evoral/visibility.h"
 #include "evoral/types.h"
 
@@ -39,7 +41,6 @@ typedef smf_tempo_struct smf_tempo_t;
 
 namespace Temporal {
 	class TempoMap;
-	class Beats;
 }
 
 namespace Evoral {
@@ -70,6 +71,8 @@ public:
 	SMF();
 	virtual ~SMF();
 
+	virtual Temporal::Beats duration() const { return std::numeric_limits<Temporal::Beats>::max(); }
+
 	static bool test(const std::string& path);
 	int open (const std::string& path, int track = 1, bool scan = true);
 	// XXX 19200 = 10 * Temporal::ticks_per_beat
@@ -95,6 +98,9 @@ public:
 	double round_to_file_precision (double val) const;
 
 	int smf_format () const;
+
+	Temporal::Beats file_duration() const;
+	bool duration_is_explicit() const;
 
 	int num_channels () const { return _num_channels; }
 	typedef std::bitset<16> UsedChannels;

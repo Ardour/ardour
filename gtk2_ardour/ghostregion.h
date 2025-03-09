@@ -133,6 +133,5 @@ public:
 	GhostEvent* find_event (std::shared_ptr<GhostEvent::NoteType>);
 
 	GhostEvent::EventList events;
-	GhostEvent::EventList::iterator _optimization_iterator;
 };
 

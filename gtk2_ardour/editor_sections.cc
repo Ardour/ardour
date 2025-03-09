@@ -273,7 +273,7 @@ EditorSections::selection_changed ()
 		return;
 	}
 	Gtk::TreeModel::Row row = *_model->get_iter (*rows.begin ());
-
+	Glib::RefPtr<ToggleAction> tact;
 	timepos_t start = row[_columns.start];
 	timepos_t end   = row[_columns.end];
 
@@ -284,14 +284,34 @@ EditorSections::selection_changed ()
 			/* OK */
 			break;
 		case Editing::MouseObject:
-			if (ActionManager::get_toggle_action ("MouseMode", "set-mouse-mode-object-range")->get_active ()) {
+			/* "object-range" mode is not a distinct mouse mode, so
+			   we cannot use get_mouse_mode_action() here
+			*/
+			std::cerr << "A\n";
+			tact = ActionManager::get_toggle_action (X_("Editing"), "set-mouse-mode-object-range");
+			if (!tact) {
+				/* missing action */
+				fatal << X_("programming error: missing mouse-mode-object-range action") << endmsg;
+				/*NOTREACHED*/
+				break;
+			}
+			if (tact->get_active()) {
 				/* smart mode; OK */
 				break;
 			}
 			/*fallthrough*/
 		default:
-			Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (X_("MouseMode"), X_("set-mouse-mode-range"));
-			ract->set_active (true);
+			std::cerr << "B\n";
+			Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (X_("Editing"), X_("set-mouse-mode-range"));
+			if (!ract) {
+				/* missing action */
+				fatal << X_("programming error: missing mouse-mode-range action") << endmsg;
+				/*NOTREACHED*/
+				break;
+			}
+			if (ract) {
+				ract->set_active (true);
+			}
 			break;
 	}
 

@@ -93,7 +93,8 @@ AutomationLine::AutomationLine (const string&                   name,
                                         const ParameterDescriptor&      desc)
 	:_name (name)
 	, _height (0)
-	, _line_color ("automation line")
+	, _line_color_name ("automation line")
+	, _insensitive_line_color (0x0)
 	, _view_index_offset (0)
 	, alist (al)
 	, _visible (Line)
@@ -109,6 +110,8 @@ AutomationLine::AutomationLine (const string&                   name,
 	, _maximum_time (timepos_t::max (al->time_domain()))
 	, _fill (false)
 	, _desc (desc)
+	, _control_points_inherit_color (true)
+	, _sensitive (true)
 {
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple(0, 1.5));
 	CANVAS_DEBUG_NAME (group, "automation line group");
@@ -133,11 +136,27 @@ AutomationLine::~AutomationLine ()
 {
 	delete group; // deletes child items
 
-	for (std::vector<ControlPoint *>::iterator i = control_points.begin(); i != control_points.end(); i++) {
-		(*i)->unset_item ();
-		delete *i;
+	for (auto & cp :control_points) {
+		cp->unset_item ();
+		delete cp;
 	}
 	control_points.clear ();
+}
+
+void
+AutomationLine::set_sensitive (bool yn)
+{
+	_sensitive = yn;
+
+	set_line_color (_line_color_name, _line_color_mod);
+
+	for (auto & cp : control_points) {
+		if (yn) {
+			cp->show();
+		} else {
+			cp->hide ();
+		}
+	}
 }
 
 timepos_t
@@ -225,6 +244,19 @@ AutomationLine::hide ()
 	set_visibility (AutomationLine::VisibleAspects (_visible & ~Line));
 }
 
+void
+AutomationLine::hide_all ()
+{
+	set_visibility (AutomationLine::VisibleAspects (0));
+}
+
+void
+AutomationLine::show ()
+{
+	/* hide everything */
+	set_visibility (AutomationLine::VisibleAspects (~0));
+}
+
 double
 AutomationLine::control_point_box_size ()
 {
@@ -232,11 +264,11 @@ AutomationLine::control_point_box_size ()
 	uiscale = std::max<float> (1.f, powf (uiscale, 1.71));
 
 	if (_height > TimeAxisView::preset_height (HeightLarger)) {
-		return rint (8.0 * uiscale);
+		return rint (10.0 * uiscale);
 	} else if (_height > (guint32) TimeAxisView::preset_height (HeightNormal)) {
-		return rint (6.0 * uiscale);
+		return rint (8.0 * uiscale);
 	}
-	return rint (12.0 * uiscale);
+	return rint (6.0 * uiscale);
 }
 
 void
@@ -247,8 +279,8 @@ AutomationLine::set_height (guint32 h)
 
 		double bsz = control_point_box_size();
 
-		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-			(*i)->set_size (bsz);
+		for (auto & cp : control_points) {
+			cp->set_size (bsz);
 		}
 
 		if (_fill) {
@@ -261,23 +293,79 @@ AutomationLine::set_height (guint32 h)
 }
 
 void
-AutomationLine::set_line_color (string color_name, std::string color_mod)
+AutomationLine::set_line_color (string const & color_name, string color_mod)
 {
-	_line_color     = color_name;
+	_line_color_name = color_name;
 	_line_color_mod = color_mod;
 
-	uint32_t color = UIConfiguration::instance().color (color_name);
-	line->set_outline_color (color);
+	if (_sensitive) {
+		line->set_outline_color (UIConfiguration::instance().color (color_name));
+	} else {
+		line->set_outline_color (_insensitive_line_color);
+	}
+
+	/* The fill color (and thus the color_mod) is used to shade the area under some
+	 * automation lines
+	 */
 
 	Gtkmm2ext::SVAModifier mod = UIConfiguration::instance().modifier (color_mod.empty () ? "automation line fill" : color_mod);
+	line->set_fill_color ((line->outline_color() & 0xffffff00) + (mod.a() * 255));
+	line->set_fill (true);
 
-	line->set_fill_color ((color & 0xffffff00) + mod.a() * 255);
+	if (_control_points_inherit_color) {
+		for (auto & cp : control_points) {
+			cp->set_color ();
+		}
+	}
+}
+
+void
+AutomationLine::set_colors ()
+{
+	set_line_color (_line_color_name);
+	for (auto & cp : control_points) {
+		cp->set_color ();
+	}
+}
+
+void
+AutomationLine::set_insensitive_line_color (uint32_t color)
+{
+	_insensitive_line_color = color;
+}
+
+uint32_t
+AutomationLine::get_line_fill_color() const
+{
+	return line->fill_color ();
 }
 
 uint32_t
 AutomationLine::get_line_color() const
 {
-	return UIConfiguration::instance().color (_line_color);
+	return line->outline_color ();
+}
+
+uint32_t
+AutomationLine::get_line_selected_color() const
+{
+	return line->outline_color ();
+}
+
+bool
+AutomationLine::control_points_inherit_color () const
+{
+	return _control_points_inherit_color;
+}
+
+void
+AutomationLine::set_control_points_inherit_color (bool yn)
+{
+	_control_points_inherit_color = yn;
+
+	for (auto & cp : control_points) {
+		cp->set_color ();
+	}
 }
 
 ControlPoint*
@@ -975,12 +1063,12 @@ AutomationLine::get_inverted_selectables (Selection&, list<Selectable*>& /*resul
 void
 AutomationLine::set_selected_points (PointSelection const & points)
 {
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		(*i)->set_selected (false);
+	for (auto & cp : control_points) {
+		cp->set_selected (false);
 	}
 
-	for (PointSelection::const_iterator i = points.begin(); i != points.end(); ++i) {
-		(*i)->set_selected (true);
+	for (auto & p : points) {
+		p->set_selected (true);
 	}
 
 	if (points.empty()) {
@@ -990,15 +1078,6 @@ AutomationLine::set_selected_points (PointSelection const & points)
 	}
 
 	set_colors ();
-}
-
-void
-AutomationLine::set_colors ()
-{
-	set_line_color (_line_color, _line_color_mod);
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		(*i)->set_color ();
-	}
 }
 
 void
@@ -1030,8 +1109,8 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 	uint32_t np;
 
 	if (events.empty()) {
-		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-			delete *i;
+		for (auto & cp : control_points) {
+			delete cp;
 		}
 		control_points.clear ();
 		line->hide();
@@ -1041,8 +1120,8 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 
 	/* hide all existing points, and the line */
 
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		(*i)->hide();
+	for (auto & cp : control_points) {
+		cp->hide();
 	}
 
 	line->hide ();

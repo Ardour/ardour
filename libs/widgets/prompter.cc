@@ -18,8 +18,8 @@
  */
 
 #include <string>
-#include <gtkmm/image.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/image.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/whitespace.h"
 #include "widgets/prompter.h"

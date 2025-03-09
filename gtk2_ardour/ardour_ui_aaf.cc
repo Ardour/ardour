@@ -166,7 +166,7 @@ import_sndfile_as_region (Session* s, struct aafiAudioEssencePointer* aafAudioEs
 				status.paths.push_back (aafAudioEssencePtr->essenceFile->original_file_path);
 
 			channelCount++;
-			PBD::info << string_compose ("AAF: Preparing to import clip channel %1: %2\n", channelCount, aafAudioEssencePtr->essenceFile->unique_name);
+			PBD::info << string_compose ("AAF: Preparing to import clip channel %1 of '%2'", channelCount, aafAudioEssencePtr->essenceFile->unique_name);
 		}
 
 		s->import_files (status);
@@ -226,12 +226,12 @@ import_sndfile_as_region (Session* s, struct aafiAudioEssencePointer* aafAudioEs
 }
 
 static std::shared_ptr<Region>
-create_region (vector<std::shared_ptr<Region>> source_regions, aafiAudioClip* aafAudioClip, SourceList& oneClipSources, aafPosition_t clipOffset, aafRational_t samplerate_r)
+create_region (vector<std::shared_ptr<Region>> source_regions, AAF_Iface* aafi, aafiAudioClip* aafAudioClip, SourceList& oneClipSources, aafPosition_t clipOffset, aafRational_t samplerate_r)
 {
 	string unique_file_name = aafAudioClip->essencePointerList->essenceFile->unique_name; // XXX
 
 	aafPosition_t clipPos       = aafi_convertUnit (aafAudioClip->pos, aafAudioClip->track->edit_rate, &samplerate_r);
-	aafPosition_t clipLen       = aafi_convertUnit (aafAudioClip->len, aafAudioClip->track->edit_rate, &samplerate_r);
+	aafPosition_t clipLen       = aafi_getClipLength (aafi, aafAudioClip, &samplerate_r, NULL);
 	aafPosition_t essenceOffset = aafi_convertUnit (aafAudioClip->essence_offset, aafAudioClip->track->edit_rate, &samplerate_r);
 
 	PropertyList proplist;
@@ -404,7 +404,7 @@ set_session_timecode (AAF_Iface* aafi, Session* s)
 	s->config.set_timecode_format (ardourtc);
 }
 
-/* Create and open Sesssion from AAF
+/* Create and open Session from AAF
  * return > 0 if file is not a [valid] AAF
  * return < 0 if session creation failed.
  * return 0 on success. path and snapshot are set.
@@ -590,21 +590,26 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 			}
 
 			int   essenceError = 0;
-			char* essenceName  = aafAudioClip->essencePointerList->essenceFile->name;
+			char* essenceName  = NULL;
 
 			AAFI_foreachEssencePointer (aafAudioClip->essencePointerList, aafAudioEssencePtr)
 			{
 				struct aafiAudioEssenceFile* audioEssenceFile = aafAudioEssencePtr->essenceFile;
 
 				if (!audioEssenceFile) {
-					PBD::error << string_compose (_ ("AAF: Could not create new region for clip '%1': Missing audio essence"), audioEssenceFile->unique_name) << endmsg;
+					/* should not happen */
+					PBD::error << _ ("AAF: Audio essence pointer is missing an audio essence file entry") << endmsg;
 					essenceError++;
 					continue;
 				}
 
+				if (!essenceName) {
+					essenceName = aafAudioClip->essencePointerList->essenceFile->name;
+				}
+
 				if (audioEssenceFile->is_embedded) {
 					if (aafi_extractAudioEssenceFile (aafi, audioEssenceFile, AAFI_EXTRACT_DEFAULT, media_cache_path.c_str (), 0, 0, NULL, NULL) < 0) {
-						PBD::error << string_compose ("AAF: Could not extract audio file '%1' from AAF.", audioEssenceFile->unique_name) << endmsg;
+						PBD::error << string_compose ("AAF: Could not extract audio file '%1' from AAF", audioEssenceFile->unique_name) << endmsg;
 						essenceError++;
 						continue;
 					}
@@ -616,12 +621,12 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 			}
 
 			if (essenceError) {
-				PBD::error << string_compose ("AAF: Error parsing audio essence pointerlist : %1\n", essenceName);
+				PBD::error << string_compose ("AAF: Error parsing audio essence pointerlist '%1'", essenceName);
 				continue;
 			}
 
 			if (!import_sndfile_as_region (_session, aafAudioClip->essencePointerList, SrcBest, pos, &oneClipSources, import_status, source_regions)) {
-				PBD::error << string_compose ("AAF: Could not import '%1' to session.", essenceName) << endmsg;
+				PBD::error << string_compose ("AAF: Could not import audio file(s) '%1' to session", essenceName) << endmsg;
 				continue;
 			} else {
 				AAFI_foreachEssencePointer (aafAudioClip->essencePointerList, aafAudioEssencePtr)
@@ -637,7 +642,7 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 				continue;
 			}
 
-			std::shared_ptr<Region> region = create_region (source_regions, aafAudioClip, *oneClipSources, sessionStart, samplerate_r);
+			std::shared_ptr<Region> region = create_region (source_regions, aafi, aafAudioClip, *oneClipSources, sessionStart, samplerate_r);
 
 			if (!region) {
 				error << string_compose (_ ("AAF: Could not create new region for clip '%1'"), essenceName) << endmsg;

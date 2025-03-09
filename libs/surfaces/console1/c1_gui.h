@@ -22,14 +22,14 @@
 #include <vector>
 #include <string>   
 
-#include <gtkmm/box.h>
-#include <gtkmm/combobox.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/image.h>
-#include <gtkmm/table.h>
-#include <gtkmm/treestore.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/notebook.h>
+#include <ytkmm/box.h>
+#include <ytkmm/combobox.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/image.h>
+#include <ytkmm/table.h>
+#include <ytkmm/treestore.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/notebook.h>
 
 namespace Gtk {
 	class CellRendererCombo;

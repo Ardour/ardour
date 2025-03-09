@@ -25,7 +25,7 @@
 #include "config.h"
 #include <stdio.h>
 #include <string.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <ydk-pixbuf/ydk-pixbuf.h>
 
 #include "gdkcolor.h"
 #include "gdkimage.h"

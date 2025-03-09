@@ -69,6 +69,7 @@ DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcesso
 	_record_safe.store (0);
 	_samples_pending_write.store (0);
 	_num_captured_loops.store (0);
+	_reset_last_capture_sources.store (0);
 }
 
 DiskWriter::~DiskWriter ()
@@ -281,6 +282,26 @@ DiskWriter::calculate_record_range (Temporal::OverlapType ot, samplepos_t transp
 	                                                      _first_recordable_sample, _last_recordable_sample, rec_nframes, rec_offset));
 }
 
+std::list<std::shared_ptr<Source>>&
+DiskWriter::last_capture_sources ()
+{
+#if 0 // C++20
+	_reset_last_capture_sources.wait (0);
+#else
+	if (_reset_last_capture_sources != 0) {
+		static std::list<std::shared_ptr<Source>> empty;
+		return empty;
+	}
+#endif
+	return _last_capture_sources;
+}
+
+void
+DiskWriter::reset_last_capture_sources ()
+{
+	_reset_last_capture_sources.store (1);
+}
+
 void
 DiskWriter::engage_record_enable ()
 {
@@ -390,7 +411,7 @@ DiskWriter::set_state (const XMLNode& node, int version)
 	node.get_property (X_("record-safe"), rec_safe);
 	_record_safe.store (rec_safe);
 
-	reset_write_sources (false, true);
+	reset_write_sources (false);
 
 	return 0;
 }
@@ -561,7 +582,9 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	}
 
-	if (can_record && !_last_capture_sources.empty ()) {
+	int canderef (1);
+	const bool reset_capture_src = _reset_last_capture_sources.compare_exchange_strong (canderef, 0);
+	if ((reset_capture_src || can_record) && !_last_capture_sources.empty ()) {
 		_last_capture_sources.clear ();
 	}
 
@@ -1072,7 +1095,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 }
 
 void
-DiskWriter::reset_write_sources (bool mark_write_complete, bool /*force*/)
+DiskWriter::reset_write_sources (bool mark_write_complete)
 {
 	std::shared_ptr<ChannelList const> c = channels.reader();
 	uint32_t n = 0;
@@ -1085,13 +1108,17 @@ DiskWriter::reset_write_sources (bool mark_write_complete, bool /*force*/)
 
 	for (auto const chan : *c) {
 
-		if (chan->write_source) {
+		if (mark_write_complete) {
+			Source::WriterLock lock(chan->write_source->mutex());
+			/* we're iterating over channels, so we know this is an
+			   audio source and the duration argument makes no
+			   difference
+			*/
+			chan->write_source->mark_streaming_write_completed (lock, timecnt_t());
+			chan->write_source->done_with_peakfile_writes ();
+		}
 
-			if (mark_write_complete) {
-				Source::WriterLock lock(chan->write_source->mutex());
-				chan->write_source->mark_streaming_write_completed (lock);
-				chan->write_source->done_with_peakfile_writes ();
-			}
+		if (chan->write_source) {
 
 			if (chan->write_source->removable()) {
 				chan->write_source->mark_for_remove ();
@@ -1105,13 +1132,6 @@ DiskWriter::reset_write_sources (bool mark_write_complete, bool /*force*/)
 
 		if (record_enabled()) {
 			capturing_sources.push_back (chan->write_source);
-		}
-	}
-
-	if (_midi_write_source) {
-		if (mark_write_complete) {
-			Source::WriterLock lm(_midi_write_source->mutex());
-			_midi_write_source->mark_streaming_write_completed (lm);
 		}
 	}
 
@@ -1315,7 +1335,11 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 			total_capture += timecnt_t ((*ci)->samples);
 		}
 
-		_midi_write_source->mark_midi_streaming_write_completed (source_lock, Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, total_capture.beats());
+		/* XXX we need to consider snapping the duration up to the next
+		 * beat/bar here
+		 */
+
+		_midi_write_source->mark_midi_streaming_write_completed (source_lock, Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, total_capture);
 	}
 
 	_last_capture_sources.insert (_last_capture_sources.end(), audio_srcs.begin(), audio_srcs.end());
@@ -1441,6 +1465,7 @@ bool
 DiskWriter::configure_io (ChanCount in, ChanCount out)
 {
 	bool changed = false;
+
 	{
 		std::shared_ptr<ChannelList const> c = channels.reader();
 		if (in.n_audio() != c->size()) {
@@ -1457,7 +1482,7 @@ DiskWriter::configure_io (ChanCount in, ChanCount out)
 	}
 
 	if (record_enabled() || changed) {
-		reset_write_sources (false, true);
+		reset_write_sources (false);
 	}
 
 	return true;
@@ -1472,7 +1497,7 @@ DiskWriter::use_playlist (DataType dt, std::shared_ptr<Playlist> playlist)
 		return -1;
 	}
 	if (reset_ws) {
-		reset_write_sources (false, true);
+		reset_write_sources (false);
 	}
 	return 0;
 }

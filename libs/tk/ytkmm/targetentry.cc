@@ -20,7 +20,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/targetentry.h>
+#include <ytkmm/targetentry.h>
 #include <cstring> //For memset().
 
 using std::memset;

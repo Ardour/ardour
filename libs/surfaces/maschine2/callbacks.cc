@@ -348,9 +348,9 @@ Maschine2::encoder_master (int delta)
 		case MST_NONE:
 			if (_ctrl->button (M2Contols::BtnShift, M2Contols::ModNone)->active ()) {
 				if (delta > 0) {
-					AccessAction ("Editor", "temporal-zoom-in");
+					AccessAction ("Editing", "temporal-zoom-in");
 				} else {
-					AccessAction ("Editor", "temporal-zoom-out");
+					AccessAction ("Editing", "temporal-zoom-out");
 				}
 			} else {
 				if (delta > 0) {

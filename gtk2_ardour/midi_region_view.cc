@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <ostream>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include "gtkmm2ext/gtk_ui.h"
 
@@ -48,7 +48,6 @@
 #include "ardour/midi_track.h"
 #include "ardour/operations.h"
 #include "ardour/quantize.h"
-#include "ardour/session.h"
 
 #include "evoral/Parameter.h"
 #include "evoral/Event.h"
@@ -77,6 +76,7 @@
 #include "midi_velocity_dialog.h"
 #include "note_player.h"
 #include "paste_context.h"
+#include "pianoroll_window.h"
 #include "public_editor.h"
 #include "route_time_axis.h"
 #include "rgb_macros.h"
@@ -168,6 +168,20 @@ MidiRegionView::init (bool /*wfd*/)
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
+}
+
+void
+MidiRegionView::set_model (std::shared_ptr<ARDOUR::MidiModel> model)
+{
+	MidiView::set_model (model);
+
+	region_muted ();
+	region_sync_changed ();
+	region_resized (ARDOUR::bounds_change);
+	region_locked ();
+
+	set_colors ();
+	reset_width_dependent_items (_pixel_width);
 }
 
 bool
@@ -294,7 +308,7 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 		return RegionView::canvas_group_event (ev);
 	}
 
-	return MidiView::canvas_group_event (ev);
+	return MidiView::midi_canvas_group_event (ev);
 }
 
 bool
@@ -326,7 +340,7 @@ MidiRegionView::mouse_mode_changed ()
 void
 MidiRegionView::enter_internal (uint32_t state)
 {
-	if (_editing_context.current_mouse_mode() == MouseDraw && _mouse_state != AddDragging) {
+	if (_editing_context.current_mouse_mode() == MouseDraw && !draw_drag) {
 		// Show ghost note under pencil
 		create_ghost_note(_last_event_x, _last_event_y, state);
 	}
@@ -356,113 +370,6 @@ MidiRegionView::leave_internal()
 	if (frame_handle_end) {
 		frame_handle_end->raise_to_top();
 	}
-}
-
-bool
-MidiRegionView::button_press (GdkEventButton* ev)
-{
-	if (ev->button != 1) {
-		return false;
-	}
-
-	MouseMode m = _editing_context.current_mouse_mode();
-
-	if (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
-		_press_cursor_ctx = CursorContext::create(_editing_context, _editing_context.cursors()->midi_pencil);
-	}
-
-	if (_mouse_state != SelectTouchDragging) {
-
-		_pressed_button = ev->button;
-
-		if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
-
-			if (midi_view()->note_mode() == Percussive) {
-				_editing_context.drags()->set (new HitCreateDrag (_editing_context, group, this), (GdkEvent *) ev);
-			} else {
-				_editing_context.drags()->set (new NoteCreateDrag (_editing_context, group, this), (GdkEvent *) ev);
-			}
-
-			_mouse_state = AddDragging;
-			remove_ghost_note ();
-			hide_verbose_cursor ();
-		} else {
-			_mouse_state = Pressed;
-		}
-
-		return true;
-	}
-
-	_pressed_button = ev->button;
-	_mouse_changed_selection = false;
-
-	return true;
-}
-
-bool
-MidiRegionView::button_release (GdkEventButton* ev)
-{
-	double event_x, event_y;
-
-	if (ev->button != 1) {
-		return false;
-	}
-
-	event_x = ev->x;
-	event_y = ev->y;
-
-	group->canvas_to_item (event_x, event_y);
-	group->ungrab ();
-
-	_press_cursor_ctx.reset();
-
-	switch (_mouse_state) {
-	case Pressed: // Clicked
-
-		switch (_editing_context.current_mouse_mode()) {
-		case MouseRange:
-			/* no motion occurred - simple click */
-			clear_selection_internal ();
-			_mouse_changed_selection = true;
-			break;
-
-		case MouseContent:
-			_editing_context.get_selection().set (this);
-			/* fallthru */
-		case MouseTimeFX:
-			_mouse_changed_selection = true;
-			clear_selection_internal ();
-			break;
-		case MouseDraw:
-			_editing_context.get_selection().set (this);
-			break;
-
-		default:
-			break;
-		}
-
-		_mouse_state = None;
-		break;
-
-	case AddDragging:
-		/* Don't a ghost note when we added a note - wait until motion to avoid visual confusion.
-		   we don't want one when we were drag-selecting either. */
-	case SelectRectDragging:
-		_editing_context.drags()->end_grab ((GdkEvent *) ev);
-		_mouse_state = None;
-		break;
-
-
-	default:
-		break;
-	}
-
-	if (_mouse_changed_selection) {
-		_editing_context.begin_reversible_selection_op (X_("Mouse Selection Change"));
-		_editing_context.commit_reversible_selection_op ();
-	}
-
-	return false;
 }
 
 bool
@@ -642,24 +549,8 @@ MidiRegionView::~MidiRegionView ()
 void
 MidiRegionView::reset_width_dependent_items (double pixel_width)
 {
-	RegionView::reset_width_dependent_items(pixel_width);
-
-	view_changed ();
-
-	bool hide_all = false;
-	PatchChanges::iterator x = _patch_changes.begin();
-	if (x != _patch_changes.end()) {
-		hide_all = x->second->width() >= _pixel_width;
-	}
-
-	if (hide_all) {
-		for (; x != _patch_changes.end(); ++x) {
-			x->second->hide();
-		}
-	}
-
-	move_step_edit_cursor (_step_edit_cursor_position);
-	set_step_edit_cursor_width (_step_edit_cursor_width);
+	MidiView::reset_width_dependent_items (pixel_width);
+	RegionView::reset_width_dependent_items (pixel_width);
 }
 
 void
@@ -761,4 +652,69 @@ MergeableLine*
 MidiRegionView::make_merger ()
 {
 	return nullptr;
+}
+
+void
+MidiRegionView::add_control_points_to_selection (timepos_t const & start, timepos_t const & end, double gy0, double gy1)
+{
+	typedef RouteTimeAxisView::AutomationTracks ATracks;
+	typedef std::list<Selectable*>              Selectables;
+
+	const ATracks& atracks = dynamic_cast<StripableTimeAxisView*>(&trackview)->automation_tracks();
+	Selectables    selectables;
+	_editing_context.get_selection().clear_points();
+
+	timepos_t st (start);
+	timepos_t et (end);
+
+	for (auto const & at : atracks) {
+
+		at.second->get_selectables (st, et, gy0, gy1, selectables);
+
+		for (Selectables::const_iterator s = selectables.begin(); s != selectables.end(); ++s) {
+			ControlPoint* cp = dynamic_cast<ControlPoint*>(*s);
+			if (cp) {
+				_editing_context.get_selection().add(cp);
+			}
+		}
+
+		at.second->set_selected_points (_editing_context.get_selection().points);
+	}
+}
+
+void
+MidiRegionView::edit_in_pianoroll_window ()
+{
+	std::shared_ptr<MidiTrack> track = std::dynamic_pointer_cast<MidiTrack> (trackview.stripable());
+	assert (track);
+
+	PianorollWindow* pr = new PianorollWindow (string_compose (_("Pianoroll: %1"), _region->name()), track->session());;
+
+	pr->set (track, midi_region());
+	pr->show_all ();
+	pr->present ();
+
+	pr->signal_delete_event().connect (sigc::mem_fun (*this, &MidiRegionView::pianoroll_window_deleted), false);
+	_editor = pr;
+}
+
+bool
+MidiRegionView::pianoroll_window_deleted (GdkEventAny*)
+{
+	_editor = nullptr;
+	return false;
+}
+
+void
+MidiRegionView::show_region_editor ()
+{
+	edit_in_pianoroll_window ();
+}
+
+void
+MidiRegionView::hide_region_editor ()
+{
+	RegionView::hide_region_editor ();
+	delete _editor;
+	_editor = nullptr;
 }

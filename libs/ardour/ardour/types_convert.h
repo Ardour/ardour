@@ -95,6 +95,32 @@ DEFINE_ENUM_CONVERT(ARDOUR::CueBehavior)
 DEFINE_ENUM_CONVERT(MusicalMode::Type)
 
 template <>
+inline bool to_string (ARDOUR::AnyTime const & at, std::string & str)
+{
+	str = at.str();
+	return true;
+}
+
+template <>
+inline bool string_to (std::string const & str, ARDOUR::AnyTime & at)
+{
+	at = ARDOUR::AnyTime (str);
+	return true;
+}
+
+template <>
+inline std::string to_string (ARDOUR::AnyTime at)
+{
+	return at.str();
+}
+
+template <>
+inline ARDOUR::AnyTime string_to (std::string const & str)
+{
+	return ARDOUR::AnyTime (str);
+}
+
+template <>
 inline std::string to_string (ARDOUR::timepos_t val)
 {
 	return val.str ();

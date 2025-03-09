@@ -18,11 +18,11 @@
 
 #include <glib/gstdio.h>
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/filechooserdialog.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
@@ -40,6 +40,7 @@
 #include "ardour/triggerbox.h"
 
 #include "gtkmm2ext/colors.h"
+#include <gtkmm2ext/utils.h>
 
 #include "slot_properties_box.h"
 
@@ -627,14 +628,6 @@ TriggerUI::clear_trigger ()
 void
 TriggerUI::edit_trigger ()
 {
-	SlotPropertyWindow* tw = static_cast<SlotPropertyWindow*> (trigger()->ui ());
-
-	if (!tw) {
-		tw = new SlotPropertyWindow (TriggerReference (trigger()->boxptr(), trigger()->index()));
-		trigger()->set_ui (tw);
-	}
-
-	tw->present ();
 }
 
 void
@@ -796,7 +789,6 @@ TriggerUI::trigger_changed (PropertyChange const& what)
 {
 	on_trigger_changed(what);
 }
-
 
 void
 TriggerUI::set_trigger (ARDOUR::TriggerReference tr)

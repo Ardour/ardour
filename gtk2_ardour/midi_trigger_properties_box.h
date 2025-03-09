@@ -20,7 +20,7 @@
 #ifndef _gtk_ardour_midi_trigger_properties_box_h_
 #define _gtk_ardour_midi_trigger_properties_box_h_
 
-#include <gtkmm/label.h>
+#include <ytkmm/label.h>
 
 #include "ardour/ardour.h"
 #include "ardour/triggerbox.h"

@@ -58,14 +58,16 @@ style "default" = "medium_text"
   GtkScrollbar        :: arrow-scaling                    = 0.4               # [             0.5 ] ( 0.1  ) The arrow size proportion relative to the scroll button size.
   GtkScrollbar        :: fixed-slider-length              = 0                 # [               0 ] ( bool ) Don't change slider size, just lock it to the minimum length.
   GtkScrollbar        :: min-slider-length                = 50                # [              21 ] ( >= 0 ) Minimum length of scrollbar slider.
-  GtkScrollbar        :: slider-width                     = 15                # [              14 ] ( >= 0 ) Width of scrollbar or scale thumb.
+  GtkScrollbar        :: slider-width                     = 10                # [              14 ] ( >= 0 ) Width of scrollbar or scale thumb.
   GtkScrollbar        :: stepper-spacing                  = 0                 # [               0 ] ( >= 0 ) The spacing between the stepper buttons and thumb. Note that setting this value to anything > 0 will automatically set the trough-under-steppers style property to TRUE as well. Also, stepper-spacing won't have any effect if there are no steppers.
   GtkScrollbar        :: trough-border                    = 0                 # [               1 ] ( >= 0 ) Spacing between thumb/steppers and outer trough bevel.
+  GtkScrollbar        :: focus-line-width                 = 0
+  GtkScrollbar        :: focus-padding                    = 0
   GtkScrollbar        :: trough-side-details              = 0                 # [               0 ] ( bool ) When TRUE, the parts of the trough on the two sides of the slider are drawn with different details.
   GtkScrollbar        :: trough-under-steppers            = 1                 # [               1 ] ( bool ) Whether to draw the trough across the full length of the range or to exclude the steppers and their spacing. Note that setting the "stepper-spacing" style property to any value > 0 will automatically enable trough-under-steppers too.
 
-  GtkScrollbar        :: has-backward-stepper             = 1                 # [               1 ] ( bool ) Display the standard backward arrow button.
-  GtkScrollbar        :: has-forward-stepper              = 1                 # [               1 ] ( bool ) Display the standard forward arrow button.
+  GtkScrollbar        :: has-backward-stepper             = 0                 # [               1 ] ( bool ) Display the standard backward arrow button.
+  GtkScrollbar        :: has-forward-stepper              = 0                 # [               1 ] ( bool ) Display the standard forward arrow button.
   GtkScrollbar        :: has-secondary-backward-stepper   = 0                 # [               0 ] ( bool ) Display a second backward arrow button on the opposite end of the scrollbar.
   GtkScrollbar        :: has-secondary-forward-stepper    = 0                 # [               0 ] ( bool ) Display a second forward arrow button on the opposite end of the scrollbar.
 
@@ -290,7 +292,12 @@ style "status_bar_box"
         bg[NORMAL] = @background
 }
 
-style "very_small_text"
+style "smaller_text"
+{
+	font_name = "@FONTFAMILY@ @FONT_VERYSMALL@"
+}
+
+style "smaller_text"
 {
 	font_name = "@FONTFAMILY@ @FONT_SMALLER@"
 }
@@ -386,7 +393,7 @@ style "verbose_canvas_cursor" = "big_bold_text"
 {
 }
 
-style "marker_text" = "small text"
+style "marker_text" = "small_text"
 {
 }
 
@@ -400,7 +407,7 @@ style "midi_tracer_textview" = "medium_monospace_text"
 
 }
 
-style "time_axis_view_item_name" = "very small text"
+style "time_axis_view_item_name" = "smaller_text"
 {
 }
 
@@ -409,7 +416,7 @@ style "midi_tracer_textview" = "medium_monospace_text"
 
 }
 
-style "time_axis_view_item_name" = "very small text"
+style "time_axis_view_item_name" = "smaller_text"
 {
 }
 style "contrasting_popup" = "medium_monospace_text"
@@ -506,15 +513,15 @@ style "meterbridge_label" = "small_text"
 {
 }
 
-style "midi_device" = "very_small_text"
+style "midi_device" = "smaller_text"
 {
 }
 
-style "solo_isolate" = "very_small_text"
+style "solo_isolate" = "smaller_text"
 {
 }
 
-style "solo_safe" = "very_small_text"
+style "solo_safe" = "smaller_text"
 {
 }
 
@@ -547,7 +554,7 @@ style "midi_channel_selector_button"
 	fg[ACTIVE] = @light_text_on_dark
 }
 
-style "shuttle_control" = "very_small_text"
+style "shuttle_control" = "smaller_text"
 {
 	fg[NORMAL] = @control_text2
 	fg[ACTIVE] = @control_text2
@@ -606,7 +613,7 @@ style "font_scale_slider" = "default"
   bg[NORMAL] = shade(1.4, @background)
 }
 
-style "very_small_bright_when_active" = "very_small_text"
+style "very_small_bright_when_active" = "smaller_text"
 {
 	fg[NORMAL] = @foreground
 	bg[NORMAL] = @background
@@ -761,14 +768,14 @@ style "small_red_on_black_entry"  = "small_bold_text"
 	bg[ACTIVE] = @bases
 }
 
-style "audio_bus_base" = "very_small_text"
+style "audio_bus_base" = "smaller_text"
 {
 	fg[NORMAL] = @foreground
 	bg[NORMAL] = @audio_bus
 	bg[ACTIVE] = @background
 }
 
-style "foldback_bus_base" = "very_small_text"
+style "foldback_bus_base" = "smaller_text"
 {
 	fg[NORMAL] = @foreground
 	bg[NORMAL] = @foldback_bg
@@ -933,7 +940,7 @@ style "plugin_slider"
 	text[PRELIGHT] = @texts
 }
 
-style "processor_control_button"  = "very_small_text"
+style "processor_control_button"  = "smaller_text"
 {
 }
 
@@ -961,7 +968,7 @@ style "inspector_track_list_display" = "track_list_display"
 
 }
 
-style "processor_list" = "very_small_text"
+style "processor_list" = "smaller_text"
 {
 	bg[NORMAL] = @bases
 	bg[ACTIVE] = shade (1.8, @fg_selected)
@@ -1002,7 +1009,7 @@ style "selected_strip_frame"
 	bg[NORMAL] = darker(@bright_indicator)
 }
 
-style "flashing_alert" = "very_small_text"
+style "flashing_alert" = "smaller_text"
 {
 	GtkButton::child-displacement-x = 0
 	GtkButton::child-displacement-y = 0
@@ -1119,6 +1126,7 @@ widget "*MarkerText" style:highest "marker_text"
 widget "*ArdourContextMenu*" style:highest "default_menu"
 
 widget "*mixer strip button" style:highest "very_small_button"
+widget "*editor ruler button" style:highest "very_small_button"
 
 widget "*AddRouteDialogSpinner" style:highest "ardour_adjusters"
 widget "*OptionsNotebook" style:highest "preferences"

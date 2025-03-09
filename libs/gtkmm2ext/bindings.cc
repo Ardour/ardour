@@ -21,8 +21,8 @@
 #include <iostream>
 
 #include "pbd/gstdio_compat.h"
-#include <gtkmm/accelmap.h>
-#include <gtkmm/uimanager.h>
+#include <ytkmm/accelmap.h>
+#include <ytkmm/uimanager.h>
 
 #include "pbd/convert.h"
 #include "pbd/debug.h"

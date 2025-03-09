@@ -30,7 +30,7 @@
 #include <string>
 #include <list>
 
-#include <gtkmm/separator.h>
+#include <ytkmm/separator.h>
 
 #include "pbd/error.h"
 #include "pbd/convert.h"

@@ -40,6 +40,8 @@
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
 
+#include "canvas/ruler.h"
+
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
 #include "widgets/ardour_spacer.h"
@@ -63,6 +65,7 @@ class CursorContext;
 class DragManager;
 class EditorCursor;
 class EditNoteDialog;
+class GridLines;
 class MidiRegionView;
 class MidiView;
 class MouseCursors;
@@ -75,12 +78,6 @@ class SelectableOwner;
 class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 {
  public:
-	/** Context for mouse entry (stored in a stack). */
-	struct EnterContext {
-		ItemType                       item_type;
-		std::shared_ptr<CursorContext> cursor_ctx;
-	};
-
 	EditingContext (std::string const &);
 	~EditingContext ();
 
@@ -152,6 +149,12 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	/** @return true if the editor is following the playhead */
 	bool follow_playhead () const { return _follow_playhead; }
 
+	Temporal::timepos_t get_preferred_edit_position (Editing::EditIgnoreOption eio = Editing::EDIT_IGNORE_NONE,
+	                                                 bool use_context_click = false,
+	                                                 bool from_outside_canvas = false) {
+		return _get_preferred_edit_position (eio, use_context_click, from_outside_canvas);
+	}
+
 	virtual void instant_save() = 0;
 
 	virtual void begin_selection_op_history () = 0;
@@ -179,6 +182,16 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual void set_selected_midi_region_view (MidiRegionView&);
 
 	samplecnt_t get_current_zoom () const { return samples_per_pixel; }
+
+	void temporal_zoom_step (bool zoom_out);
+	void temporal_zoom_step_scale (bool zoom_out, double scale);
+	void temporal_zoom_step_mouse_focus (bool zoom_out);
+	void temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale);
+
+	void calc_extra_zoom_edges(samplepos_t &start, samplepos_t &end);
+	void temporal_zoom (samplecnt_t samples_per_pixel);
+	void temporal_zoom_by_sample (samplepos_t start, samplepos_t end);
+	void temporal_zoom_to_sample (bool coarser, samplepos_t sample);
 
 	double timeline_origin() const { return _timeline_origin; }
 
@@ -224,8 +237,15 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	double time_to_pixel (Temporal::timepos_t const & pos) const;
 	double time_to_pixel_unrounded (Temporal::timepos_t const & pos) const;
 
+	double time_delta_to_pixel (Temporal::timepos_t const& start, Temporal::timepos_t const& end) const;
+
+	/* deprecated, prefer time_delta_to_pixel
+	 * first taking the duation and then rounding leads to different results:
+	 * duration_to_pixels (start.distance(end)) != time_to_pixel (end) - time_to_pixel (start)
+	 */
 	double duration_to_pixels (Temporal::timecnt_t const & pos) const;
 	double duration_to_pixels_unrounded (Temporal::timecnt_t const & pos) const;
+
 	samplecnt_t pixel_duration_to_samples (double pixels) const {
 		return pixels * samples_per_pixel;
 	}
@@ -253,6 +273,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual bool canvas_velocity_base_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_velocity_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item*, ControlPoint*) = 0;
+	virtual bool canvas_cue_start_event (GdkEvent* event, ArdourCanvas::Item*) { return true; }
+	virtual bool canvas_cue_end_event (GdkEvent* event, ArdourCanvas::Item*) { return true; }
+	virtual bool canvas_bg_event (GdkEvent* event, ArdourCanvas::Item*) { return true; }
 
 	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) const;
 	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) const;
@@ -300,11 +323,19 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void reset_x_origin (samplepos_t);
 	void reset_y_origin (double);
 	void reset_zoom (samplecnt_t);
-	void set_samples_per_pixel (samplecnt_t);
+	virtual double max_extents_scale() const { return 1.0; }
+	virtual void set_samples_per_pixel (samplecnt_t) = 0;
 	virtual void on_samples_per_pixel_changed () {}
 
+	virtual void cycle_zoom_focus ();
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
-	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
+	Editing::ZoomFocus zoom_focus () const { return _zoom_focus; }
+	sigc::signal<void> ZoomFocusChanged;
+
+	void zoom_focus_selection_done (Editing::ZoomFocus);
+	void zoom_focus_chosen (Editing::ZoomFocus);
+	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
+
 	virtual void reposition_and_zoom (samplepos_t, double) = 0;
 
 	sigc::signal<void> ZoomChanged;
@@ -313,6 +344,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual Selection& get_cut_buffer () const { return *cut_buffer; }
 
 	void reset_point_selection ();
+
+	virtual void point_selection_changed () = 0;
 
 	/** Set the mouse mode (gain, object, range, timefx etc.)
 	 * @param m Mouse mode (defined in editing_syms.inc.h)
@@ -338,8 +371,14 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	/** Push the appropriate enter/cursor context on item entry. */
 	void choose_canvas_cursor_on_entry (ItemType);
 
-	/** Update all enter cursors based on current settings. */
-	void update_all_enter_cursors ();
+	struct CursorRAII {
+		CursorRAII (EditingContext& e, Gdk::Cursor* new_cursor)
+			: ec (e), old_cursor (ec.get_canvas_cursor ()) { ec.set_canvas_cursor (new_cursor); }
+		~CursorRAII () { ec.set_canvas_cursor (old_cursor); }
+
+		EditingContext& ec;
+		Gdk::Cursor* old_cursor;
+	};
 
 	virtual Gdk::Cursor* get_canvas_cursor () const;
 	static MouseCursors const* cursors () {
@@ -369,7 +408,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void transpose_region ();
 
 	static void register_midi_actions (Gtkmm2ext::Bindings*);
-	static void register_common_actions (Gtkmm2ext::Bindings*);
+	void register_common_actions (Gtkmm2ext::Bindings*);
 
 	ArdourCanvas::Rectangle* rubberband_rect;
 
@@ -389,22 +428,12 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual ArdourCanvas::GtkCanvasViewport* get_canvas_viewport() const = 0;
 	virtual ArdourCanvas::GtkCanvas* get_canvas() const = 0;
 
-	virtual size_t push_canvas_cursor (Gdk::Cursor*);
-	virtual void pop_canvas_cursor ();
-
 	virtual void mouse_mode_toggled (Editing::MouseMode) = 0;
 
 	bool on_velocity_scroll_event (GdkEventScroll*);
 	void pre_render ();
 
 	void select_automation_line (GdkEventButton*, ArdourCanvas::Item*, ARDOUR::SelectionOperation);
-
-	/** Get the topmost enter context for the given item type.
-	 *
-	 * This is used to change the cursor associated with a given enter context,
-	 * which may not be on the top of the stack.
-	 */
-	virtual EnterContext* get_enter_context(ItemType type);
 
 	virtual Gdk::Cursor* which_track_cursor () const = 0;
 	virtual Gdk::Cursor* which_mode_cursor () const = 0;
@@ -427,16 +456,40 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	static EditingContext* current_editing_context();
 	static void switch_editing_context(EditingContext*);
 
+	virtual void set_canvas_cursor (Gdk::Cursor*);
+
+	/** computes the timeline sample (sample) of an event whose coordinates
+	 * are in window units (pixels, no scroll offset).
+	 */
+	samplepos_t window_event_sample (GdkEvent const*, double* px = 0, double* py = 0) const;
+
+	/* returns false if mouse pointer is not in track or marker canvas
+	 */
+	bool mouse_sample (samplepos_t&, bool& in_track_canvas) const;
+
+	/* editing actions */
+
+	virtual void delete_ () = 0;
+	virtual void paste (float times, bool from_context_menu) = 0;
+	virtual void keyboard_paste () = 0;
+	virtual void cut_copy (Editing::CutCopyOp) = 0;
+
+	void cut ();
+	void copy ();
+	void alt_delete_ ();
+
+	Gtkmm2ext::Bindings* get_bindings() const { return bindings; }
+
+	virtual void update_grid ();
+
   protected:
 	std::string _name;
+	bool within_track_canvas;
 
 	static Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
-	static Glib::RefPtr<Gtk::ActionGroup> _common_actions;
+	Glib::RefPtr<Gtk::ActionGroup> _common_actions;
 
-	/* Cursor stuff.  Do not use directly, use via CursorContext. */
-	friend class CursorContext;
-	std::vector<Gdk::Cursor*> _cursor_stack;
-	virtual void set_canvas_cursor (Gdk::Cursor*);
+	void load_shared_bindings ();
 
 	Editing::GridType  pre_internal_grid_type;
 	Editing::SnapMode  pre_internal_snap_mode;
@@ -490,6 +543,23 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void snap_mode_chosen (Editing::SnapMode);
 	void grid_type_chosen (Editing::GridType);
 
+	ArdourWidgets::ArdourButton play_note_selection_button;
+	ArdourWidgets::ArdourButton note_mode_button;
+	ArdourWidgets::ArdourButton follow_playhead_button;
+
+	ArdourWidgets::ArdourButton zoom_in_button;
+	ArdourWidgets::ArdourButton zoom_out_button;
+	ArdourWidgets::ArdourButton full_zoom_button;
+
+	Gtk::Label visible_channel_label;
+	ArdourWidgets::ArdourDropdown visible_channel_selector;
+
+	virtual void play_note_selection_clicked();
+	virtual void note_mode_clicked() {}
+	virtual void follow_playhead_clicked ();
+	virtual void full_zoom_clicked() {};
+	virtual void set_visible_channel (int) {}
+
 	DragManager* _drags;
 
 	ArdourWidgets::ArdourButton snap_mode_button;
@@ -522,12 +592,13 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	VerboseCursor* _verbose_cursor;
 
 	samplecnt_t        samples_per_pixel;
-	Editing::ZoomFocus zoom_focus;
+	Editing::ZoomFocus _zoom_focus;
+	virtual Editing::ZoomFocus effective_zoom_focus() const { return _zoom_focus; }
 
-	Temporal::timepos_t _snap_to_bbt (Temporal::timepos_t const & start,
-	                                  Temporal::RoundMode   direction,
-	                                  ARDOUR::SnapPref    gpref,
-	                                  Editing::GridType   grid_type) const;
+	Temporal::timepos_t snap_to_bbt_via_grid (Temporal::timepos_t const & start,
+	                                          Temporal::RoundMode   direction,
+	                                          ARDOUR::SnapPref    gpref,
+	                                          Editing::GridType   grid_type) const;
 
 	virtual Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                          Temporal::RoundMode   direction,
@@ -562,12 +633,13 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	uint32_t count_bars (Temporal::Beats const & start, Temporal::Beats const & end) const;
 	void compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper);
 
+	double _track_canvas_width;
 	double _visible_canvas_width;
 	double _visible_canvas_height; ///< height of the visible area of the track canvas
 
 	QuantizeDialog* quantize_dialog;
 
-	friend class TempoMapScope;
+	friend struct TempoMapScope;
 	virtual std::shared_ptr<Temporal::TempoMap const> start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>);
 	virtual void end_local_tempo_map (std::shared_ptr<Temporal::TempoMap const>) { /* no-op by default */ }
 
@@ -613,11 +685,11 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	ArdourWidgets::ArdourButton mouse_content_button;
 
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
+	Glib::RefPtr<Gtk::ActionGroup> snap_actions;
 	virtual void register_actions() = 0;
 	void register_grid_actions ();
 
 	Glib::RefPtr<Gtk::Action> get_mouse_mode_action (Editing::MouseMode m) const;
-	void register_mouse_mode_actions ();
 	void bind_mouse_mode_buttons ();
 	virtual void add_mouse_mode_actions (Glib::RefPtr<Gtk::ActionGroup>) {}
 
@@ -675,6 +747,14 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	uint32_t autoscroll_cnt;
 	ArdourCanvas::Rect autoscroll_boundary;
 
+	PBD::ScopedConnectionList parameter_connections;
+	virtual void parameter_changed (std::string);
+	virtual void ui_parameter_changed (std::string);
+
+	ArdourWidgets::ArdourDropdown	zoom_focus_selector;
+	std::vector<std::string> zoom_focus_strings;
+	virtual void build_zoom_focus_menu () = 0;
+
 	bool _mouse_changed_selection;
 	ArdourMarker* entered_marker;
 	TimeAxisView* entered_track;
@@ -685,9 +765,26 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	bool clear_entered_track;
 
+	std::vector<ArdourCanvas::Ruler::Mark> grid_marks;
+	GridLines* grid_lines;
+	ArdourCanvas::Container* time_line_group;
+
+	void drop_grid ();
+	void hide_grid_lines ();
+	void maybe_draw_grid_lines (ArdourCanvas::Container*);
+
+	virtual void metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
+	virtual void metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
+	virtual void metric_get_samples (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
+	virtual void metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
+
 	virtual void set_entered_track (TimeAxisView*) {};
 
-	std::vector<EnterContext> _enter_stack;
+	virtual std::pair<Temporal::timepos_t,Temporal::timepos_t> max_zoom_extent() const = 0;
+
+	virtual Temporal::timepos_t _get_preferred_edit_position (Editing::EditIgnoreOption,
+	                                                          bool use_context_click,
+	                                                          bool from_outside_canvas) = 0;
 
 	PBD::ScopedConnection escape_connection;
 	virtual void escape () {}
@@ -709,5 +806,3 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	static EditingContext* _current_editing_context;
 
 };
-
-

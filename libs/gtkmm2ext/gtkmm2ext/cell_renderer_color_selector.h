@@ -19,10 +19,9 @@
 #ifndef __gtkmm2ext_cell_renderer_color_selector_h__
 #define __gtkmm2ext_cell_renderer_color_selector_h__
 
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/widget.h>
-#include <gtkmm/cellrenderer.h>
-#include <gdkmm.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/cellrenderer.h>
 
 #include "gtkmm2ext/visibility.h"
 

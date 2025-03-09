@@ -432,6 +432,9 @@ public:
 
 	PBD::Signal<void()> UpdateRouteRecordState; /* signals potential change in route recording arming */
 
+	PBD::Signal<void()> RecordPassCompleted;
+	PBD::Signal<void()> ClearedLastCaptureSources;
+
 	/* Emited when session is loaded */
 	PBD::Signal<void()> SessionLoaded;
 
@@ -871,7 +874,9 @@ public:
 	int destroy_sources (std::list<std::shared_ptr<Source> > const&);
 
 	int remove_last_capture ();
-	void get_last_capture_sources (std::list<std::shared_ptr<Source> >&);
+	bool have_last_capture_sources () const;
+	void last_capture_sources (std::list<std::shared_ptr<Source> >&) const;
+	void reset_last_capture_sources ();
 
 	/** handlers should return -1 for "stop cleanup",
 	    0 for "yes, delete this playlist",
@@ -1341,6 +1346,10 @@ public:
 	void start_domain_bounce (Temporal::DomainBounceInfo&);
 	void finish_domain_bounce (Temporal::DomainBounceInfo&);
 
+	AnyTime global_quantization() const { return _global_quantization; }
+	void set_global_quantization (AnyTime const &);
+	PBD::Signal<void()> QuantizationChanged;
+
 protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
@@ -1773,8 +1782,8 @@ private:
 	void mmc_shuttle (MIDI::MachineControl &mmc, float speed, bool forw);
 	void mmc_record_enable (MIDI::MachineControl &mmc, size_t track, bool enabled);
 
-	struct timeval last_mmc_step;
-	double step_speed;
+	int64_t _last_mmc_step;
+	double  step_speed;
 
 	typedef std::function<bool()> MidiTimeoutCallback;
 	typedef std::list<MidiTimeoutCallback> MidiTimeoutList;
@@ -1978,7 +1987,7 @@ public:
 	ARDOUR::CueMarkers pending_source_markers; // source markers created while recording
 
 private:
-	void reset_write_sources (bool mark_write_complete, bool force = false);
+	void reset_write_sources (bool mark_write_complete);
 	SourceMap sources;
 
 	int load_sources (const XMLNode& node);
@@ -2347,6 +2356,8 @@ private:
 	void handle_slots_empty_status (std::weak_ptr<Route> const &);
 
 	void time_domain_changed ();
+
+	AnyTime _global_quantization;
 };
 
 

@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/treepath.h>
-#include <gtkmm/private/treepath_p.h>
+#include <ytkmm/treepath.h>
+#include <ytkmm/private/treepath_p.h>
 
 
 // -*- c++ -*-
@@ -27,9 +27,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/treemodel.h>
+#include <ytkmm/treemodel.h>
 #include <glibmm/utility.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 namespace Gtk

@@ -22,12 +22,12 @@
 
 #include <algorithm>
 #include <sstream>
-#include <gtkmm/separator.h>
-#include <gtkmm/box.h>
-#include <gtkmm/label.h>
-#include <gtkmm/togglebutton.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/table.h>
+#include <ytkmm/separator.h>
+#include <ytkmm/box.h>
+#include <ytkmm/label.h>
+#include <ytkmm/togglebutton.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/table.h>
 
 #include "pbd/compose.h"
 #include "pbd/ffs.h"

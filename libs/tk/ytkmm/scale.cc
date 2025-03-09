@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/scale.h>
-#include <gtkmm/private/scale_p.h>
+#include <ytkmm/scale.h>
+#include <ytkmm/private/scale_p.h>
 
 
 // -*- c++ -*-
@@ -29,9 +29,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/adjustment.h>
+#include <ytkmm/adjustment.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <math.h>
 #include <cstring> //For strlen()
 #include <memory>

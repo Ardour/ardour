@@ -25,12 +25,12 @@
 
 #include <sigc++/signal.h>
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/label.h>
-#include <gtkmm/notebook.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/label.h>
+#include <ytkmm/notebook.h>
 
 #include "ardour/export_profile_manager.h"
 #include "ardour/session_handle.h"

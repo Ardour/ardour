@@ -304,6 +304,7 @@ Region::Region (Session& s, timepos_t const & start, timecnt_t const & length, c
 	, _changemap (0)
 {
 	register_properties ();
+	ensure_length_sanity ();
 
 	/* no sources at this point */
 }
@@ -324,6 +325,7 @@ Region::Region (const SourceList& srcs)
 	register_properties ();
 
 	use_sources (srcs);
+	ensure_length_sanity ();
 
 	assert(_sources.size() > 0);
 	assert (_type == srcs.front()->type());
@@ -382,6 +384,7 @@ Region::Region (std::shared_ptr<const Region> other)
 		_sync_position = _start;
 	}
 
+	ensure_length_sanity ();
 	assert (_type == other->data_type());
 }
 
@@ -433,6 +436,7 @@ Region::Region (std::shared_ptr<const Region> other, timecnt_t const & offset)
 		_sync_position = _start;
 	}
 
+	ensure_length_sanity ();
 	assert (_type == other->data_type());
 }
 
@@ -462,6 +466,7 @@ Region::Region (std::shared_ptr<const Region> other, const SourceList& srcs)
 	}
 
 	use_sources (srcs);
+	ensure_length_sanity ();
 	assert(_sources.size() > 0);
 }
 
@@ -567,25 +572,34 @@ Region::set_length_internal (timecnt_t const & len)
 
 	_last_length = timecnt_t (_length.val().distance(), _last_length.position());
 
-	std::shared_ptr<Playlist> pl (playlist());
+	if (_type == DataType::AUDIO) {
 
-	if (pl) {
-		Temporal::TimeDomain td (pl->time_domain());
+		/* Equivalent to what AudioRegion::ensure_length_sanity() does */
+		_length = timecnt_t (timepos_t (len.samples()), _length.val().position());
 
-		/* Note: timecnt_t::time_domain() returns the domain for the
-		 * length component, *not* the position.
-		 */
+	} else {
 
-		if (td != len.time_domain()) {
-			timecnt_t l = _length.val();
-			l.set_time_domain (td);
-			_length = l;
-			return;
+		std::shared_ptr<Playlist> pl (playlist());
+
+		if (pl) {
+			Temporal::TimeDomain td (pl->time_domain());
+
+			/* Note: timecnt_t::time_domain() returns the domain for the
+			 * length component, *not* the position.
+			 */
+
+			if (td != len.time_domain()) {
+				timecnt_t l = _length.val();
+				l.set_time_domain (td);
+				_length = l;
+				return;
+			}
 		}
-	}
-	/* either no playlist or time domain for distance is not changing */
 
-	_length = timecnt_t (len.distance(), _length.val().position());
+		/* either no playlist or time domain for distance is not changing */
+
+		_length = timecnt_t (len.distance(), _length.val().position());
+	}
 }
 
 void
@@ -1539,9 +1553,14 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 		   match.
 		*/
 		if ((length().time_domain() == Temporal::AudioTime) && (_sources.front()->length().time_domain() == Temporal::AudioTime) && (length().distance() > _sources.front()->length())) {
-			std::cerr << "Region " << _name << " has length " << _length.val().str() << " which is longer than its (first?) source's length of " << _sources.front()->length().str() << std::endl;
-			throw failed_constructor();
-			// _length = timecnt_t (start().distance (_sources.front()->length()), _length.val().position());
+			/* A bug in the 8.x release series led to Regions which
+			   were a fractional sample longer than their
+			   sources. This bug has been fixed, and we can now
+			   non-silently just force the region length to the
+			   correct value.
+			*/
+			error << "Correcting length of region " << _name << " to match it's (first) source's length of " << _sources.front()->length().str() << endmsg;
+			_length = timecnt_t (start().distance (_sources.front()->length()), _length.val().position());
 		}
 	}
 
@@ -2278,12 +2297,6 @@ Region::source_beats_to_absolute_beats (Temporal::Beats beats) const
 	   beats before adding, rather than after.
 	*/
 	return source_position().beats() + beats;
-}
-
-Temporal::Beats
-Region::absolute_time_to_region_beats(timepos_t const & b) const
-{
-	 return (position().distance (b)).beats () + start().beats();
 }
 
 Temporal::timepos_t

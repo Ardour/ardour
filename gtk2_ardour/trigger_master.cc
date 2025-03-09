@@ -16,10 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/filechooserdialog.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
@@ -87,7 +87,7 @@ Loopster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 		return;
 	}
 
-	context->set_identity_matrix ();
+	context->save ();
 	context->translate (self.x0, self.y0);
 
 	float size = _rect.height ();
@@ -110,7 +110,7 @@ Loopster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 	context->stroke ();
 
 	context->set_line_width (1);
-	context->set_identity_matrix ();
+	context->restore ();
 }
 
 TriggerMaster::TriggerMaster (Item* parent)

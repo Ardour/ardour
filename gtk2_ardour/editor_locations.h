@@ -22,7 +22,7 @@
 
 #include "pbd/xml++.h"
 
-#include <gtkmm/scrolledwindow.h>
+#include <ytkmm/scrolledwindow.h>
 #include "ardour/session_handle.h"
 #include "editor_component.h"
 

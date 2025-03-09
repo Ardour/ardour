@@ -671,7 +671,9 @@ void
 TransportMastersWindow::set_session (ARDOUR::Session* s)
 {
 	ArdourWindow::set_session (s);
-	w.set_session (s);
+	if (s) {
+		w.set_session (s);
+	}
 }
 
 void

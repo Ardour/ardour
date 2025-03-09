@@ -112,6 +112,7 @@ public:
 	{ return midi_view()->midi_view(); }
 
 	void set_height (double);
+	void set_model (std::shared_ptr<ARDOUR::MidiModel>);
 
 	inline ARDOUR::ColorMode color_mode() const { return midi_view()->color_mode(); }
 
@@ -133,6 +134,9 @@ public:
 	void set_visibility_note_range (MidiViewBackground::VisibleNoteRange, bool);
 
 	MergeableLine* make_merger ();
+	void edit_in_pianoroll_window ();
+	void show_region_editor ();
+	void hide_region_editor ();
 
   protected:
 	void reset_width_dependent_items (double pixel_width);
@@ -141,6 +145,7 @@ public:
 	void color_handler ();
 	void region_resized (const PBD::PropertyChange&);
 	bool canvas_group_event (GdkEvent*);
+	void add_control_points_to_selection (Temporal::timepos_t const &, Temporal::timepos_t const &, double y0, double y1);
 
   private:
 
@@ -162,8 +167,6 @@ public:
 
 	bool motion (GdkEventMotion*);
 	bool scroll (GdkEventScroll*);
-	bool button_press (GdkEventButton*);
-	bool button_release (GdkEventButton*);
 	bool enter_notify (GdkEventCrossing*);
 	bool leave_notify (GdkEventCrossing*);
 
@@ -174,6 +177,7 @@ public:
 	double contents_height() const { return (_height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
 
 	void connect_to_diskstream ();
+	bool pianoroll_window_deleted (GdkEventAny*);
 };
 
 

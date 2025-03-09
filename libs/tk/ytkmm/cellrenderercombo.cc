@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/cellrenderercombo.h>
-#include <gtkmm/private/cellrenderercombo_p.h>
+#include <ytkmm/cellrenderercombo.h>
+#include <ytkmm/private/cellrenderercombo_p.h>
 
 
 // -*- c++ -*-
@@ -29,7 +29,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
  
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 ///This is used only by signal_changed's generated implementation.
 static GtkTreeModel* _get_model(GtkCellRendererCombo* renderer)

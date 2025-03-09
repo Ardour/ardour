@@ -24,7 +24,7 @@
 #include <inttypes.h>
 
 #include <glibmm/threads.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "ardour/audioengine.h"
 #include "ardour/audio_track.h"

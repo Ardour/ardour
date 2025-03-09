@@ -49,7 +49,7 @@ using namespace std;
 namespace Evoral {
 
 SMF::SMF()
-	: _smf (0)
+	: _smf (nullptr)
 	, _smf_track (0)
 	, _empty (true)
 	, _n_note_on_events (0)
@@ -238,7 +238,7 @@ SMF::create(const std::string& path, int track, uint16_t ppqn)
 
 	_smf = smf_new();
 
-	if (_smf == NULL) {
+	if (_smf == nullptr) {
 		return -1;
 	}
 
@@ -508,7 +508,7 @@ SMF::begin_write()
 }
 
 void
-SMF::end_write(string const & path)
+SMF::end_write (string const & path)
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
 
@@ -521,6 +521,18 @@ SMF::end_write(string const & path)
 		throw FileError (path);
 	}
 
+	Temporal::Beats b = duration();
+
+	if (b != std::numeric_limits<Temporal::Beats>::max()) {
+
+		int64_t their_pulses = b.to_ticks (_smf->ppqn);
+
+		for (uint16_t n = 0; n < _smf->number_of_tracks; ++n) {
+			smf_track_t* trk = smf_get_track_by_number (_smf, n+1);
+			 (void) smf_track_add_eot_pulses (trk, their_pulses);
+		}
+	}
+
 	if (smf_save(_smf, f) != 0) {
 		fclose(f);
 		throw FileError (path);
@@ -529,19 +541,24 @@ SMF::end_write(string const & path)
 	fclose(f);
 }
 
-void
-SMF::set_length (Temporal::Beats const & b)
+Temporal::Beats
+SMF::file_duration () const
 {
 	if (!_smf) {
-		return;
+		return Temporal::Beats();
 	}
 
-	for (uint16_t n = 0; n < _smf->number_of_tracks; ++n) {
-		smf_track_t* trk = smf_get_track_by_number (_smf, n+1);
-		if (trk) {
-			smf_track_add_eot_pulses (trk, (int) floor (b.get_ticks() * ((double) ppqn() / Temporal::ticks_per_beat)));
-		}
+	return Temporal::Beats::ticks_at_rate (smf_get_length_pulses (_smf), ppqn());
+}
+
+bool
+SMF::duration_is_explicit () const
+{
+	if (!_smf) {
+		return false;
 	}
+
+	return smf_length_is_explicit (_smf);
 }
 
 double

@@ -7,8 +7,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/button.h>
-#include <gtkmm/private/button_p.h>
+#include <ytkmm/button.h>
+#include <ytkmm/private/button_p.h>
 
 
 // -*- c++ -*-
@@ -33,8 +33,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
-#include <gtkmm/stock.h>
+#include <ytk/ytk.h>
+#include <ytkmm/stock.h>
 
 
 namespace Gtk

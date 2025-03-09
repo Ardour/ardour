@@ -19,9 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/table.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/alignment.h>
+#include <ytkmm/table.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/alignment.h>
 
 #include "pbd/stateful_diff_command.h"
 

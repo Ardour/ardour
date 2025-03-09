@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/menuitem.h>
-#include <gtkmm/private/menuitem_p.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/private/menuitem_p.h>
 
 
 // -*- c++ -*-
@@ -31,14 +31,14 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
-#include <gtkmm/label.h>
-#include <gtkmm/misc.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/box.h>
-#include <gtkmm/window.h>
-#include <gtkmm/menubar.h>
-#include <gtkmm/accelmap.h>
+#include <ytk/ytk.h>
+#include <ytkmm/label.h>
+#include <ytkmm/misc.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/box.h>
+#include <ytkmm/window.h>
+#include <ytkmm/menubar.h>
+#include <ytkmm/accelmap.h>
 
 // gtk_menu_item_(de)select are just a wrapper for gtk_item_(de)select
 // and defined in Gtk_Item, so they do not be redefined here

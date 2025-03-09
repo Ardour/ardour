@@ -128,7 +128,10 @@ VCA::get_state () const
 	node->add_child_nocopy (_gain_control->get_state());
 	node->add_child_nocopy (_solo_control->get_state());
 	node->add_child_nocopy (_mute_control->get_state());
-	node->add_child_nocopy (get_automation_xml_state());
+
+	if (!skip_saving_automation) {
+		node->add_child_nocopy (get_automation_xml_state());
+	}
 
 	node->add_child_nocopy (Slavable::get_state());
 

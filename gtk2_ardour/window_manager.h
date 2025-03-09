@@ -24,11 +24,13 @@
 #include <string>
 #include <map>
 
-#include <glibmm/refptr.h>
 #include <sigc++/trackable.h>
 
+#include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/window_proxy.h"
+
+#include <glibmm/refptr.h>
 
 #include "ardour/session_handle.h"
 
@@ -151,6 +153,9 @@ public:
 
 	void set_session(ARDOUR::Session *s) {
 		SessionHandlePtr::set_session (s);
+		if (!s) {
+			return;
+		}
 		ARDOUR::SessionHandlePtr* sp = session_handle ();
 		if (sp) {
 			sp->set_session (s);
@@ -204,6 +209,9 @@ public:
 
 	void set_session(ARDOUR::Session *s) {
 		SessionHandlePtr::set_session (s);
+		if (!s) {
+			return;
+		}
 		ARDOUR::SessionHandlePtr* sp = session_handle ();
 		if (sp) {
 			sp->set_session (s);

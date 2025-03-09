@@ -183,6 +183,7 @@ CONFIG_VARIABLE (AutoReturnTarget, auto_return_target_list, "auto-return-target-
 CONFIG_VARIABLE (bool, reset_default_speed_on_stop, "reset-default-speed-on-stop", false)
 CONFIG_VARIABLE (bool, rewind_ffwd_like_tape_decks, "rewind-ffwd-like-tape-decks", true)
 CONFIG_VARIABLE (bool, auto_return_after_rewind_ffwd, "auto-return-after-rewind-ffwd", false)
+CONFIG_VARIABLE (bool, stop_on_grid, "stop-on-grid", false)
 
 /* metering */
 
@@ -230,8 +231,8 @@ CONFIG_VARIABLE (double, automation_thinning_factor, "automation-thinning-factor
 CONFIG_VARIABLE (samplecnt_t, range_location_minimum, "range-location-minimum", 128) /* samples */
 CONFIG_VARIABLE (EditMode, edit_mode, "edit-mode", Slide)
 CONFIG_VARIABLE (RippleMode, ripple_mode, "ripple-mode", RippleSelected)
-CONFIG_VARIABLE (Temporal::TimeDomain, default_automation_time_domain, "default-automation-time-domain", Temporal::BeatTime)
-
+CONFIG_VARIABLE (Temporal::TimeDomain, default_automation_time_domain, "default-automation-time-domain", Temporal::AudioTime)
+CONFIG_VARIABLE (ARDOUR::AnyTime, default_quantization, "default-quantization", ARDOUR::AnyTime (Temporal::BBT_Offset (1, 0, 0)))
 CONFIG_VARIABLE (bool, mark_at_pgm_change, "mark-at-pgm-change", true)
 CONFIG_VARIABLE (bool, locate_to_pgm_change, "locate-to-pgm-change", true)
 

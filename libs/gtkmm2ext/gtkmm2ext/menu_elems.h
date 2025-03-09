@@ -21,7 +21,7 @@
 #ifndef _gtkmm2ext_menu_elems_h_
 #define _gtkmm2ext_menu_elems_h_
 
-#include <gtkmm/menu_elems.h>
+#include <ytkmm/menu_elems.h>
 #include "gtkmm2ext/visibility.h"
 
 namespace Gtkmm2ext {

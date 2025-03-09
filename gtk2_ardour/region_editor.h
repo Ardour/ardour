@@ -23,30 +23,31 @@
 
 #include <map>
 
-#include <gtkmm/label.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/box.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/togglebutton.h>
-#include <gtkmm/button.h>
-#include <gtkmm/arrow.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/table.h>
-#include <gtkmm/adjustment.h>
-#include <gtkmm/separator.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/listviewtext.h>
-#include <gtkmm/scrolledwindow.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/arrow.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/listviewtext.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/separator.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/table.h>
+#include <ytkmm/togglebutton.h>
 
+#include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/dndtreeview.h"
 #include "gtkmm2ext/dndvbox.h"
+
+#include "widgets/frame.h"
 
 #include "pbd/signals.h"
 
 #include "audio_clock.h"
-#include "ardour_dialog.h"
 #include "plugin_interest.h"
-#include "region_editor.h"
 
 namespace ARDOUR {
 	class Region;
@@ -57,18 +58,20 @@ namespace ARDOUR {
 class RegionView;
 class ClockGroup;
 
-class RegionEditor : public ArdourDialog
+class RegionEditor : public ArdourWidgets::Frame, public ARDOUR::SessionHandlePtr
 {
 public:
-	RegionEditor (ARDOUR::Session*, RegionView*);
+	RegionEditor (ARDOUR::Session*, std::shared_ptr<ARDOUR::Region>);
 	virtual ~RegionEditor ();
+
+	std::shared_ptr<ARDOUR::Region> region () const { return _region; }
 
 protected:
 	virtual void region_changed (const PBD::PropertyChange&);
 	virtual void region_fx_changed ();
 
-	Gtk::Table _table;
-	int _table_row;
+	Gtk::Table _table_main;
+	Gtk::Table _table_clocks;
 
 private:
 	class RegionFxEntry : public Gtkmm2ext::DnDVBoxChild, public sigc::trackable
@@ -102,14 +105,24 @@ private:
 		void redisplay_plugins ();
 
 	private:
+		static void register_actions ();
+		static void load_bindings ();
+		static void static_delete ();
+
+		static Glib::RefPtr<Gtk::ActionGroup> rfx_box_actions;
+		static Gtkmm2ext::Bindings*           bindings;
+		static RegionFxBox*                   current_rfx_box;
+
 		void add_fx_to_display (std::weak_ptr<ARDOUR::RegionFxPlugin>);
 		void show_plugin_gui (std::weak_ptr<ARDOUR::RegionFxPlugin>, bool custom_ui = true);
 		void queue_delete_region_fx (std::weak_ptr<ARDOUR::RegionFxPlugin>);
 		bool idle_delete_region_fx (std::weak_ptr<ARDOUR::RegionFxPlugin>);
 		void notify_plugin_load_fail (uint32_t cnt = 1);
-		bool on_key_press (GdkEventKey*);
+		bool enter_notify (GdkEventCrossing*);
+		bool leave_notify (GdkEventCrossing*);
 		void clear_automation (std::weak_ptr<ARDOUR::RegionFxPlugin>);
 		void update_controls ();
+		void delete_selected ();
 
 		/* PluginInterestedObject */
 		bool use_plugins (SelectedPlugins const&);
@@ -122,6 +135,7 @@ private:
 		void plugin_drop (Gtk::SelectionData const&, RegionFxEntry*, Glib::RefPtr<Gdk::DragContext> const&);
 		void object_drop (Gtkmm2ext::DnDVBox<RegionFxEntry>*, RegionFxEntry*, Glib::RefPtr<Gdk::DragContext> const&);
 		void delete_dragged_plugins (std::list<std::shared_ptr<ARDOUR::RegionFxPlugin>> const&);
+		bool drag_refuse (Gtkmm2ext::DnDVBox<RegionFxEntry>*, RegionFxEntry*);
 
 		std::shared_ptr<ARDOUR::RegionFxPlugin> find_drop_position (RegionFxEntry*);
 
@@ -139,32 +153,37 @@ private:
 
 	void connect_editor_events ();
 
-	Gtk::Label name_label;
-	Gtk::Entry name_entry;
-	Gtk::ToggleButton audition_button;
+	Gtk::Label _name_label;
+	Gtk::Entry _name_entry;
+	Gtk::Label _position_label;
+	Gtk::Label _end_label;
+	Gtk::Label _length_label;
+	Gtk::Label _sync_relative_label;
+	Gtk::Label _sync_absolute_label;
+	Gtk::Label _start_label;
+	Gtk::Label _region_fx_label;
 
-	Gtk::Label position_label;
-	Gtk::Label end_label;
-	Gtk::Label length_label;
-	Gtk::Label sync_relative_label;
-	Gtk::Label sync_absolute_label;
-	Gtk::Label start_label;
-	Gtk::Label region_fx_label;
+	Gtk::ToggleButton _audition_button;
 
 	ClockGroup* _clock_group;
 
-	AudioClock position_clock;
-	AudioClock end_clock;
-	AudioClock length_clock;
-	AudioClock sync_offset_relative_clock; ///< sync offset relative to the start of the region
-	AudioClock sync_offset_absolute_clock; ///< sync offset relative to the start of the timeline
-	AudioClock start_clock;
+	AudioClock _position_clock;
+	AudioClock _end_clock;
+	AudioClock _length_clock;
+	AudioClock _sync_offset_relative_clock; ///< sync offset relative to the start of the region
+	AudioClock _sync_offset_absolute_clock; ///< sync offset relative to the start of the timeline
+	AudioClock _start_clock;
 
 	RegionFxBox _region_fx_box;
 
-	PBD::ScopedConnection state_connection;
-	PBD::ScopedConnection audition_connection;
-	PBD::ScopedConnection region_connection;
+	bool _spin_arrow_grab;
+
+	Gtk::Label        _sources_label;
+	Gtk::ListViewText _sources;
+
+	PBD::ScopedConnection _state_connection;
+	PBD::ScopedConnection _audition_connection;
+	PBD::ScopedConnection _region_connection;
 
 	void bounds_changed (const PBD::PropertyChange&);
 	void name_changed ();
@@ -182,17 +201,10 @@ private:
 
 	void audition_button_toggled ();
 
-	gint bpressed (GdkEventButton* ev, Gtk::SpinButton* but, void (RegionEditor::*pmf)());
-	gint breleased (GdkEventButton* ev, Gtk::SpinButton* but, void (RegionEditor::*pmf)());
+	gint bpressed (GdkEventButton* ev, Gtk::SpinButton* but, void (RegionEditor::*pmf) ());
+	gint breleased (GdkEventButton* ev, Gtk::SpinButton* but, void (RegionEditor::*pmf) ());
 
-	bool on_delete_event (GdkEventAny *);
-	void handle_response (int);
-
-	bool spin_arrow_grab;
-
-	Gtk::Label _sources_label;
-	Gtk::ListViewText _sources;
+	bool on_delete_event (GdkEventAny*);
 
 	void set_clock_mode_from_primary ();
 };
-

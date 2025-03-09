@@ -38,8 +38,8 @@
 
 #include <glibmm/error.h>
 
-#include <gtkmm/progressbar.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/progressbar.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/basename.h"
 #include "pbd/localtime_r.h"
@@ -47,6 +47,7 @@
 
 #include "gtkmm2ext/application.h"
 #include "gtkmm2ext/doi.h"
+#include "gtkmm2ext/utils.h"
 
 #include "widgets/prompter.h"
 
@@ -151,7 +152,7 @@ ARDOUR_UI::start_session_load (bool create_new)
 		}
 	}
 
-	SessionDialog* session_dialog = new SessionDialog (create_new, string(), Config->get_default_session_parent_dir(), string(), true);
+	SessionDialog* session_dialog = new SessionDialog (create_new ? SessionDialog::New : SessionDialog::Recent, string(), Config->get_default_session_parent_dir(), string(), true);
 	session_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::session_dialog_response_handler), session_dialog));
 	session_dialog->set_position (WIN_POS_CENTER);
 	session_dialog->present ();
@@ -1177,140 +1178,17 @@ ARDOUR_UI::open_session ()
 		return;
 	}
 
-	/* ardour sessions are folders */
-	Gtk::FileChooserDialog open_session_selector(_("Open Session"), FILE_CHOOSER_ACTION_OPEN);
-	open_session_selector.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	open_session_selector.add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
-	open_session_selector.set_default_response(Gtk::RESPONSE_ACCEPT);
-
-	if (_session) {
-		string session_parent_dir = Glib::path_get_dirname(_session->path());
-		open_session_selector.set_current_folder(session_parent_dir);
-	} else {
-		open_session_selector.set_current_folder(Config->get_default_session_parent_dir());
-	}
-
-	Gtkmm2ext::add_volume_shortcuts (open_session_selector);
-	try {
-		/* add_shortcut_folder throws an exception if the folder being added already has a shortcut */
-		string default_session_folder = Config->get_default_session_parent_dir();
-		open_session_selector.add_shortcut_folder (default_session_folder);
-	}
-	catch (Glib::Error const& e) {
-		std::cerr << "open_session_selector.add_shortcut_folder() threw Glib::Error " << e.what() << std::endl;
-	}
-
-	FileFilter session_filter;
-	session_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::statefile_suffix));
-	session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
-	open_session_selector.add_filter (session_filter);
-
-	FileFilter archive_filter;
-	archive_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::session_archive_suffix));
-	archive_filter.set_name (_("Session Archives"));
-	open_session_selector.add_filter (archive_filter);
-
-	FileFilter aaf_filter;
-	aaf_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::advanced_authoring_format_suffix));
-	aaf_filter.set_name (_("Advanced Authoring Format (AAF)"));
-	open_session_selector.add_filter (aaf_filter);
-
-	FileFilter all_filter;
-	all_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::statefile_suffix));
-	all_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::session_archive_suffix));
-	all_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::advanced_authoring_format_suffix));
-	all_filter.set_name (_("All supported files"));
-	open_session_selector.add_filter (all_filter);
-
-	open_session_selector.set_filter (session_filter);
-
-	int response = open_session_selector.run();
-	open_session_selector.hide ();
-
-	switch (response) {
-		case Gtk::RESPONSE_ACCEPT:
-			break;
-		default:
-			return;
-	}
-
-	string session_path = open_session_selector.get_filename();
-	string path, name;
-	bool isnew;
-
-	if (session_path.empty()) {
-		return;
-	}
-	int rv = ARDOUR::inflate_session (session_path, Config->get_default_session_parent_dir(), path, name);
-	if (rv == 0) {
-		_session_is_new = false;
-		load_session (path, name);
-		return;
-	}
-	else if (rv < 0) {
-		ArdourMessageDialog msg (_main_window, string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
-		msg.run ();
-		return;
-	}
-
-	rv = new_session_from_aaf (session_path, Config->get_default_session_parent_dir(), path, name);
-	if (rv == 0) {
-		_session_is_new = false;
-		return;
-	} else if (rv < 0) {
-		ArdourMessageDialog msg (_main_window, _("Extracting AAF failed"));
-		msg.run ();
-		return;
-	}
-
-	if (ARDOUR::find_session (session_path, path, name, isnew) == 0) {
-		_session_is_new = isnew;
-		load_session (path, name);
-	}
+	SessionDialog* session_dialog = new SessionDialog (SessionDialog::Open, string(), Config->get_default_session_parent_dir(), string(), true);
+	session_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::session_dialog_response_handler), session_dialog));
+	session_dialog->present ();
 }
 
 void
 ARDOUR_UI::open_recent_session ()
 {
-	bool can_return = (_session != 0);
-
-	SessionDialog recent_session_dialog;
-
-	while (true) {
-
-		ResponseType r = (ResponseType) recent_session_dialog.run ();
-
-		switch (r) {
-		case RESPONSE_ACCEPT:
-			break;
-		default:
-			if (can_return) {
-				recent_session_dialog.hide();
-				return;
-			} else {
-				exit (EXIT_FAILURE);
-			}
-		}
-
-		recent_session_dialog.hide();
-
-		bool should_be_new;
-
-		std::string path = recent_session_dialog.session_folder();
-		std::string state = recent_session_dialog.session_name (should_be_new);
-
-		if (should_be_new == true) {
-			continue;
-		}
-
-		_session_is_new = false;
-
-		if (load_session (path, state) == 0) {
-			break;
-		}
-
-		can_return = false;
-	}
+	SessionDialog* session_dialog = new SessionDialog (SessionDialog::Recent, string(), Config->get_default_session_parent_dir(), string(), true);
+	session_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::session_dialog_response_handler), session_dialog));
+	session_dialog->present ();
 }
 
 int

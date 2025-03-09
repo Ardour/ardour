@@ -28,12 +28,12 @@
 #include <vector>
 
 #include <glibmm/refptr.h>
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/window.h>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/adjustment.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/window.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/adjustment.h>
 
 #include "pbd/cartesian.h"
 

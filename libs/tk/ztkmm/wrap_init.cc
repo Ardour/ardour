@@ -7,30 +7,30 @@
 #undef  G_GNUC_CONST
 #define G_GNUC_CONST /* empty */
 
-#include <atkmm/wrap_init.h>
+#include <ztkmm/wrap_init.h>
 #include <glibmm/error.h>
 #include <glibmm/object.h>
 
 // #include the widget headers so that we can call the get_type() static methods:
-#include "atkmm/action.h"
-#include "atkmm/component.h"
-#include "atkmm/document.h"
-#include "atkmm/editabletext.h"
-#include "atkmm/hyperlink.h"
-#include "atkmm/hypertext.h"
-#include "atkmm/image.h"
-#include "atkmm/implementor.h"
-#include "atkmm/noopobject.h"
-#include "atkmm/object.h"
-#include "atkmm/objectaccessible.h"
-#include "atkmm/relation.h"
-#include "atkmm/relationset.h"
-#include "atkmm/selection.h"
-#include "atkmm/stateset.h"
-#include "atkmm/streamablecontent.h"
-#include "atkmm/table.h"
-#include "atkmm/text.h"
-#include "atkmm/value.h"
+#include "ztkmm/action.h"
+#include "ztkmm/component.h"
+#include "ztkmm/document.h"
+#include "ztkmm/editabletext.h"
+#include "ztkmm/hyperlink.h"
+#include "ztkmm/hypertext.h"
+#include "ztkmm/image.h"
+#include "ztkmm/implementor.h"
+#include "ztkmm/noopobject.h"
+#include "ztkmm/object.h"
+#include "ztkmm/objectaccessible.h"
+#include "ztkmm/relation.h"
+#include "ztkmm/relationset.h"
+#include "ztkmm/selection.h"
+#include "ztkmm/stateset.h"
+#include "ztkmm/streamablecontent.h"
+#include "ztkmm/table.h"
+#include "ztkmm/text.h"
+#include "ztkmm/value.h"
 
 extern "C"
 {

@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <gtkmm/box.h>
-#include <gtkmm/alignment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/alignment.h>
 
 #include "gtkmm2ext/cairo_widget.h"
 

@@ -24,13 +24,13 @@
 
 #include <string>
 
-#include <gtkmm/assistant.h>
-#include <gtkmm/label.h>
-#include <gtkmm/expander.h>
-#include <gtkmm/box.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/filechooserbutton.h>
-#include <gtkmm/comboboxtext.h>
+#include <ytkmm/assistant.h>
+#include <ytkmm/label.h>
+#include <ytkmm/expander.h>
+#include <ytkmm/box.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/filechooserbutton.h>
+#include <ytkmm/comboboxtext.h>
 
 #include "ardour/utils.h"
 

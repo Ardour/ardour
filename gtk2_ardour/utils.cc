@@ -41,12 +41,12 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <gtk/gtkpaned.h>
-#include <gtkmm/label.h>
-#include <gtkmm/paned.h>
-#include <gtkmm/rc.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/window.h>
+#include <ytk/gtkpaned.h>
+#include <ytkmm/label.h>
+#include <ytkmm/paned.h>
+#include <ytkmm/rc.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/window.h>
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
@@ -711,13 +711,17 @@ ARDOUR_UI_UTILS::escape_underscores (string const& s)
 }
 
 Gdk::Color
-ARDOUR_UI_UTILS::round_robin_palette_color ()
+ARDOUR_UI_UTILS::round_robin_palette_color (bool just_peek)
 {
 	Gdk::Color                                newcolor;
 	string                                    cp = UIConfiguration::instance ().get_stripable_color_palette ();
 	Gdk::ArrayHandle_Color                    gc = ColorSelection::palette_from_string (cp);
 	std::vector<Gdk::Color>                   c (gc);
 	static std::vector<Gdk::Color>::size_type index = 0;
+
+	if(just_peek) {
+		return c[index];
+	}
 
 	if (index >= c.size ()) {
 		index = 0;

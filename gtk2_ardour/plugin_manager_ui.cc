@@ -21,8 +21,8 @@
 #endif
 
 #include <cassert>
-#include <gtkmm/frame.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/openuri.h"
 #include "pbd/unwind.h"

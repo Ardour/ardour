@@ -19,7 +19,7 @@ test -f gtk2_ardour/wscript || exit 1
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
-: ${HARRISONDSPURL=https://rsrc.harrisonconsoles.com/plugins/releases/public}
+: ${HARRISONDSPURL=https://builder.harrisonconsoles.com/pub/dsp}
 
 # see also wscript, video_tool_paths.cc, bundle_env_mingw.cc
 # registry keys based on this are used there
@@ -247,7 +247,7 @@ cp gtk2_ardour/icons/ArdourBug.ico $DESTDIR/share/
 # replace default cursor with square version (sans hotspot file)
 cp gtk2_ardour/icons/cursor_square/* $DESTDIR/share/${LOWERCASE_DIRNAME}/icons/
 
-# clean build-dir after depoyment
+# clean build-dir after deployment
 echo " === bundle completed, cleaning up"
 ./waf uninstall
 find $DESTDIR -name "*.dll.a" -print0 | xargs -0 -r rm
@@ -427,7 +427,7 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -#  \
 		-z "${SRCCACHE}/MixbusBundledMedia.zip" \
 		-o "${SRCCACHE}/MixbusBundledMedia.zip" \
-		"http://builder.harrisonconsoles.com/pub/share/MixbusBundledMedia.zip"
+		"https://builder.harrisonconsoles.com/pub/share/MixbusBundledMedia.zip"
 
 	if test -f "${SRCCACHE}/MixbusBundledMedia.zip"; then
 		echo "Adding Mixbus Bundled Content"

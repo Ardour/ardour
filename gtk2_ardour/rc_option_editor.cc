@@ -33,9 +33,9 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <gtkmm/liststore.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/scale.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/scale.h>
 
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
@@ -81,6 +81,7 @@
 #include "rc_option_editor.h"
 #include "sfdb_ui.h"
 #include "transport_masters_dialog.h"
+#include "application_bar.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -2362,7 +2363,7 @@ MidiPortOptions::pretty_name_edit (std::string const & path, string const & new_
 RCOptionEditor::RCOptionEditor ()
 	: OptionEditorContainer (Config)
 	  /* pack self-as-vbox into tabbable */
-	, Tabbable (*this, _("Preferences"), X_("preferences"), /* detached by default */ false)
+	, Tabbable (_("Preferences"), X_("preferences"), this, /* detached by default */ false)
 	, _rc_config (Config)
 	, _mixer_strip_visibility ("mixer-element-visibility")
 	, _cairo_image_surface (0)
@@ -2901,7 +2902,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance/Toolbar"),
 	     new BoolOption (
 		     "show-toolbar-latency",
-		     _("Display Latency Compensation"),
+		     _("Plugin Delay Compensation"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_latency),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_latency)
 		     ));
@@ -3750,6 +3751,14 @@ These settings will only take effect after %1 is restarted.\n\
 	                     _("Locate to the next matching scene marker when a MIDI program change is received (and NOT recording)"),
 	                     sigc::mem_fun (*_rc_config, &RCConfiguration::get_locate_to_pgm_change),
 	                     sigc::mem_fun (*_rc_config, &RCConfiguration::set_locate_to_pgm_change)
+	                     );
+	add_option (_("Transport"), bo);
+
+
+	bo = new BoolOption ("stop-on-grid",
+	                     _("Stop transport using the current grid (if any)"),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_on_grid),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_on_grid)
 	                     );
 	add_option (_("Transport"), bo);
 
@@ -5104,6 +5113,9 @@ void
 RCOptionEditor::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
+	if (!s) {
+		return;
+	}
 	_transport_masters_widget.set_session (s);
 }
 

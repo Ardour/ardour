@@ -21,7 +21,7 @@
 #define _PIANO_KEYBOARD_H_
 
 #include <map>
-#include <gtkmm/drawingarea.h>
+#include <ytkmm/drawingarea.h>
 
 #include "piano_key_bindings.h"
 

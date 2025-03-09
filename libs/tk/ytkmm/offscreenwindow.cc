@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/offscreenwindow.h>
-#include <gtkmm/private/offscreenwindow_p.h>
+#include <ytkmm/offscreenwindow.h>
+#include <ytkmm/private/offscreenwindow_p.h>
 
 
 // -*- c++ -*-
@@ -31,7 +31,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 namespace Gtk

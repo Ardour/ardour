@@ -20,7 +20,7 @@
 #ifndef _WIDGETS_BAR_CONTROLLER_H_
 #define _WIDGETS_BAR_CONTROLLER_H_
 
-#include <gtkmm/alignment.h>
+#include <ytkmm/alignment.h>
 #include <cairo.h>
 
 #include "widgets/binding_proxy.h"

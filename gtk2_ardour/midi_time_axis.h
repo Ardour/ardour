@@ -25,13 +25,13 @@
 
 #include <list>
 
-#include <gtkmm/table.h>
-#include <gtkmm/button.h>
-#include <gtkmm/box.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/radiomenuitem.h>
-#include <gtkmm/checkmenuitem.h>
+#include <ytkmm/table.h>
+#include <ytkmm/button.h>
+#include <ytkmm/box.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/radiomenuitem.h>
+#include <ytkmm/checkmenuitem.h>
 
 #include "ardour/types.h"
 #include "ardour/region.h"
@@ -58,6 +58,7 @@ namespace ARDOUR {
 	class Processor;
 	class Location;
 	class MidiPlaylist;
+	class InstrumentInfo;
 }
 
 namespace Evoral {
@@ -96,7 +97,7 @@ public:
 
 	bool paste (Temporal::timepos_t const &, const Selection&, PasteContext& ctx);
 
-	ARDOUR::NoteMode  note_mode() const { return _note_mode; }
+	// ARDOUR::NoteMode  note_mode() const { return _note_mode; }
 	ARDOUR::ColorMode color_mode() const { return _color_mode; }
 
 	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
@@ -153,7 +154,6 @@ private:
 	std::string                   _effective_model;
 	std::string                   _effective_mode;
 	PianoRollHeader*              _piano_roll_header;
-	ARDOUR::NoteMode              _note_mode;
 	Gtk::RadioMenuItem*           _note_mode_item;
 	Gtk::RadioMenuItem*           _percussion_mode_item;
 	ARDOUR::ColorMode             _color_mode;
@@ -210,4 +210,3 @@ private:
 	void mouse_mode_changed ();
 	PBD::ScopedConnection mouse_mode_connection;
 };
-

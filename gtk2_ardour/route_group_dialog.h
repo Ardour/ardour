@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include <gtkmm/dialog.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/checkbutton.h>
+#include <ytkmm/dialog.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/checkbutton.h>
 
 #include "ardour_dialog.h"
 #include "stripable_colorpicker.h"

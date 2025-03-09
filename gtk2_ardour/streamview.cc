@@ -26,7 +26,7 @@
 
 #include <cmath>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include <gtkmm2ext/colors.h>
 #include <gtkmm2ext/gtk_ui.h>
@@ -95,6 +95,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Container* canvas_g
 
 StreamView::~StreamView ()
 {
+	undisplay_track ();
 	delete canvas_rect;
 }
 

@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/spinbutton.h>
 #include "ardour_dialog.h"
 
 

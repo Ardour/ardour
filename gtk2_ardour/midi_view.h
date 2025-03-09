@@ -37,6 +37,8 @@
 #include "ardour/midi_model.h"
 #include "ardour/types.h"
 
+#include "canvas/rectangle.h"
+
 #include "editing.h"
 #include "region_view.h"
 #include "midi_view_background.h"
@@ -75,6 +77,27 @@ class CursorContext;
 class VelocityGhostRegion;
 class EditingContext;
 class PasteContext;
+class Drag;
+
+class StartBoundaryRect : public ArdourCanvas::Rectangle
+{
+  public:
+	StartBoundaryRect (ArdourCanvas::Item* p) : ArdourCanvas::Rectangle (p) {}
+
+	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
+	bool covers (ArdourCanvas::Duple const& point) const;
+	void compute_bounding_box () const;
+};
+
+class EndBoundaryRect : public ArdourCanvas::Rectangle
+{
+  public:
+	EndBoundaryRect (ArdourCanvas::Item* p) : ArdourCanvas::Rectangle (p) {}
+
+	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
+	bool covers (ArdourCanvas::Duple const& point) const;
+	void compute_bounding_box () const;
+};
 
 class MidiView : public virtual sigc::trackable, public LineMerger
 {
@@ -118,9 +141,12 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	virtual GhostRegion* add_ghost (TimeAxisView&) { return nullptr; }
 	virtual std::string get_modifier_name() const;
 
-	void set_region (std::shared_ptr<ARDOUR::MidiRegion>);
-	void set_track (std::shared_ptr<ARDOUR::MidiTrack>);
-	void set_model (std::shared_ptr<ARDOUR::MidiModel>);
+	virtual void set_region (std::shared_ptr<ARDOUR::MidiRegion>);
+	virtual void set_track (std::shared_ptr<ARDOUR::MidiTrack>);
+	virtual void set_model (std::shared_ptr<ARDOUR::MidiModel>);
+
+	void set_show_source (bool yn);
+	bool show_source () const { return _show_source; }
 
 	NoteBase* add_note(const std::shared_ptr<NoteType> note, bool visible);
 
@@ -232,8 +258,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	 * @return true iff the note is within the (time) extent of the region.
 	 */
 	virtual bool note_in_region_range(const std::shared_ptr<NoteType> note, bool& visible) const;
-	/* Test if a note is withing this region's time range. Return true if so */
-	bool note_in_region_time_range(const std::shared_ptr<NoteType> note) const;
+	/* Test if a note is within this region's time range. Return true if so */
+	virtual bool note_in_region_time_range(const std::shared_ptr<NoteType> note) const;
 
 	/** Get the region position in pixels relative to session. */
 	double get_position_pixels();
@@ -251,26 +277,23 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void finish_resizing (NoteBase* primary, bool at_front, double delat_x, bool relative, double snap_delta, bool with_snap);
 	void abort_resizing ();
 
-	/** Change the channel of the selection.
-	 * @param channel - the channel number of the new channel, zero-based
-	 */
-	void change_channel(uint8_t channel);
-
-	enum MouseState {
-		None,
-		Pressed,
-		SelectTouchDragging,
-		SelectRectDragging,
-		SelectVerticalDragging,
-		AddDragging
-	};
-
-	MouseState mouse_state() const { return _mouse_state; }
-
 	struct NoteResizeData {
 		::Note                  *note;
 		ArdourCanvas::Rectangle *resize_rect;
 	};
+
+	/* Convert a position to a distance (origin+position) relative to the
+	 * start of this MidiView.
+	 *
+	 * What this is relative to will depend on whether or not _show_source
+	 * is true.
+	 */
+
+	Temporal::timecnt_t view_position_to_model_position (Temporal::timepos_t const & p) const;
+
+	Temporal::timepos_t source_beats_to_timeline (Temporal::Beats const &) const;
+
+	Temporal::timepos_t start() const;
 
 	/** Snap a region relative pixel coordinate to pixel units.
 	 * @param x a pixel coordinate relative to region start
@@ -302,6 +325,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void show_list_editor ();
 
 	void set_note_range (uint8_t low, uint8_t high);
+	void maybe_set_note_range (uint8_t low, uint8_t high);
 	virtual void set_visibility_note_range (MidiViewBackground::VisibleNoteRange, bool);
 
 	typedef std::set<NoteBase*> Selection;
@@ -341,12 +365,21 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	EditingContext& editing_context() const { return _editing_context; }
 	MidiViewBackground& midi_context() const { return _midi_context; }
 
-	void clip_data_recorded (Temporal::timecnt_t const &);
+	void clip_data_recorded (samplecnt_t);
 
 	virtual void select_self (bool add) {}
 	virtual void unselect_self () {}
 	void select_self () { select_self (false); }
 	virtual void select_self_uniquely () {}
+
+	void show_start (bool yn);
+	void show_end (bool yn);
+
+	virtual bool midi_canvas_group_event(GdkEvent* ev);
+
+	int visible_channel() const { return _visible_channel; }
+	void set_visible_channel (int, bool clear_selection = true);
+	PBD::Signal<void()> VisibleChannelChanged;
 
   protected:
 	void init (std::shared_ptr<ARDOUR::MidiTrack>);
@@ -358,6 +391,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	virtual void reset_width_dependent_items (double pixel_width);
 
 	void redisplay (bool view_only);
+	bool note_editable (NoteBase const *) const;
 
   protected:
 	friend class EditingContext;
@@ -444,12 +478,11 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	virtual void ghost_add_note (NoteBase*) {}
 	virtual void ghost_sync_selection (NoteBase*) {}
 
-	virtual bool canvas_group_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
 
 	PBD::ScopedConnectionList connections_requiring_model;
 	PBD::ScopedConnection track_going_away_connection;
-	PBD::ScopedConnection region_going_away_connection;
+	PBD::ScopedConnectionList region_connections;
 	void track_going_away ();
 	void region_going_away ();
 
@@ -503,9 +536,12 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	Temporal::Beats                      _step_edit_cursor_width;
 	Temporal::Beats                      _step_edit_cursor_position;
 	NoteBase*                            _channel_selection_scoped_note;
-
-	MouseState _mouse_state;
-	int _pressed_button;
+	StartBoundaryRect*                   _start_boundary_rect;
+	EndBoundaryRect*                     _end_boundary_rect;
+	bool                                 _show_source;
+	Drag*                                 selection_drag;
+	Drag*                                 draw_drag;
+	int                                  _visible_channel;
 
 	/** Currently selected NoteBase objects */
 	Selection _selection;
@@ -590,8 +626,6 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	Gtkmm2ext::Color _patch_change_outline;
 	Gtkmm2ext::Color _patch_change_fill;
 
-	std::shared_ptr<CursorContext> _press_cursor_ctx;
-
 	ARDOUR::ChannelMode get_channel_mode() const;
 	uint16_t get_selected_channels () const;
 
@@ -607,6 +641,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void update_sysexes ();
 	void view_changed ();
 	void model_changed ();
+	void note_mode_changed ();
 
 	void sync_ghost_selection (NoteBase*);
 
@@ -647,6 +682,15 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void add_split_notes ();
 	void region_update_sustained (Note *, double&, double&, double&, double&);
 	void clip_capture_update_sustained (Note *, double&, double&, double&, double&);
+
+	void size_start_rect ();
+	void size_end_rect ();
+	bool start_boundary_event (GdkEvent*);
+	bool end_boundary_event (GdkEvent*);
+
+	virtual void add_control_points_to_selection (Temporal::timepos_t const &, Temporal::timepos_t const &, double y0, double y1) {}
+
+	void color_note (NoteBase*, int channel);
 };
 
 

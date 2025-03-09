@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <gtkmm/window.h>
-#include <gtkmm/dialog.h>
+#include <ytkmm/window.h>
+#include <ytkmm/dialog.h>
 
 #include "ardour/session_handle.h"
 

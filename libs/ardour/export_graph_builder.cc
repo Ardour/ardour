@@ -380,6 +380,13 @@ ExportGraphBuilder::Encoder::add_child (FileSpec const & new_config)
 	filenames.push_back (new_config.filename);
 }
 
+ExportGraphBuilder::Encoder::~Encoder ()
+{
+	if (pipe_writer) {
+		pipe_writer->flush ();
+	}
+}
+
 void
 ExportGraphBuilder::Encoder::destroy_writer (bool delete_out_file)
 {
@@ -796,9 +803,9 @@ ExportGraphBuilder::Intermediate::Intermediate (ExportGraphBuilder & parent, Fil
 	int format = ExportFormatBase::F_RAW | ExportFormatBase::SF_Float;
 
 	if (parent._realtime) {
-		tmp_file.reset (new TmpFileRt<float> (&tmpfile_path_buf[0], format, channels, config.format->sample_rate()));
+		tmp_file.reset (new TmpFileRt<float> (tmpfile_path_buf.data (), format, channels, config.format->sample_rate()));
 	} else {
-		tmp_file.reset (new TmpFileSync<float> (&tmpfile_path_buf[0], format, channels, config.format->sample_rate()));
+		tmp_file.reset (new TmpFileSync<float> (tmpfile_path_buf.data (), format, channels, config.format->sample_rate()));
 	}
 
 	tmp_file->FileWritten.connect_same_thread (post_processing_connection,

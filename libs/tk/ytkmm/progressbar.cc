@@ -3,10 +3,10 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/progressbar.h>
-#include <gtkmm/private/progressbar_p.h>
+#include <ytkmm/progressbar.h>
+#include <ytkmm/private/progressbar_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: progressbar.ccg,v 1.1 2003/01/21 13:40:34 murrayc Exp $ */
@@ -30,8 +30,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/adjustment.h>
-#include <gtk/gtk.h>
+#include <ytkmm/adjustment.h>
+#include <ytk/ytk.h>
 
 namespace
 {

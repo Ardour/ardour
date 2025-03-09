@@ -65,6 +65,9 @@
 #include <X11/extensions/Xrandr.h>
 #endif
 
+#ifdef HAVE_XINPUT2
+#include <dlfcn.h>
+#endif
 
 static void   gdk_display_x11_dispose            (GObject            *object);
 static void   gdk_display_x11_finalize           (GObject            *object);
@@ -863,6 +866,13 @@ gdk_display_x11_finalize (GObject *object)
   /* Atom Hashtable */
   g_hash_table_destroy (display_x11->atom_from_virtual);
   g_hash_table_destroy (display_x11->atom_to_virtual);
+
+  /* Multitouch */
+#ifdef HAVE_XINPUT2
+  if (display_x11->xi.libxi)
+    dlclose (display_x11->xi.libxi);
+  g_hash_table_destroy (display_x11->touch_devices);
+#endif
 
   /* Leader Window */
   XDestroyWindow (display_x11->xdisplay, display_x11->leader_window);

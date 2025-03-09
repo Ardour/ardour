@@ -120,7 +120,8 @@ class LIBARDOUR_API ExportGraphBuilder
 	void add_split_config (FileSpec const & config);
 
 	class Encoder {
-            public:
+	public:
+		~Encoder ();
 		template <typename T> std::shared_ptr<AudioGrapher::Sink<T> > init (FileSpec const & new_config);
 		void add_child (FileSpec const & new_config);
 		void remove_children ();

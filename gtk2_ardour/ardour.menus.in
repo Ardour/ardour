@@ -631,6 +631,14 @@
       <menuitem action='show-marker-lines'/>
 
       <separator/>
+      <menuitem action='ToggleTriggerList'/>
+      <menuitem action='ToggleTriggerProps'/>
+
+      <separator/>
+      <menuitem action='ToggleMixerStrip'/>
+#ifdef MIXBUS
+      <menuitem action='ToggleMixerProps'/>
+#endif
       <menuitem action='ToggleMixerList'/>
 #ifdef MIXBUS
       <menuitem action='ToggleMixbusPane'/>
@@ -689,6 +697,8 @@
 
       <separator/><!-- Video Monitor !-->
       <menuitem action='ToggleJadeo'/>
+
+      <separator/>
 
       <separator/><!-- Connection dialogs !-->
       <menuitem action='toggle-audio-connection-manager'/>
@@ -889,6 +899,7 @@
     <menuitem action='loop-region'/>
     <menuitem action='rename-region'/>
     <menuitem action='show-region-properties'/>
+    <menuitem action='edit-region-pianoroll-window'/>
     <menu action='RegionMenuEdit'>
       <menuitem action='combine-regions'/>
       <menuitem action='uncombine-regions'/>

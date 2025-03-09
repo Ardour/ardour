@@ -21,7 +21,7 @@
 
 #include <cstdlib>
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gtk_ui.h"

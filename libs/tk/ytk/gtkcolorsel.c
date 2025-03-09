@@ -30,7 +30,7 @@
 #include <string.h>
 
 #include "gdkconfig.h"
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 #include "gtkcolorsel.h"
 #include "gtkhsv.h"
 #include "gtkwindow.h"

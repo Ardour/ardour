@@ -47,7 +47,7 @@ private:
 	ARDOUR::Session&      _session;
 	std::shared_ptr<MidiPort> _midi_port;
 	bool                  _rolling;
-	samplepos_t           _next_tick;
+	double                _next_tick;
 	uint32_t              _beat_pos;
 	uint32_t              _clock_cnt;
 	samplepos_t           _transport_pos;

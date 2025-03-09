@@ -25,7 +25,7 @@
 
 #include <cstdint>
 
-#include <gtkmm/adjustment.h>
+#include <ytkmm/adjustment.h>
 
 #include "pbd/signals.h"
 
@@ -54,6 +54,19 @@ class MidiViewBackground : public virtual ViewBackground
 
 	Gtk::Adjustment note_range_adjustment;
 
+	struct NoteRangeSuspender {
+		NoteRangeSuspender (MidiViewBackground& mv) : mvb (mv) {
+			mvb.NoteRangeChanged.block ();
+		}
+
+		~NoteRangeSuspender() {
+			mvb.NoteRangeChanged.unblock ();
+			mvb.NoteRangeChanged(); /* EMIT SIGNAL */
+		}
+
+		MidiViewBackground& mvb;
+	};
+
 	enum VisibleNoteRange {
 		FullRange,
 		ContentsRange
@@ -61,6 +74,7 @@ class MidiViewBackground : public virtual ViewBackground
 
 	ARDOUR::NoteMode  note_mode() const { return _note_mode; }
 	void set_note_mode (ARDOUR::NoteMode nm);
+	sigc::signal<void> NoteModeChanged;
 
 	ARDOUR::ColorMode color_mode() const { return _color_mode; }
 	void set_color_mode (ARDOUR::ColorMode);
@@ -91,6 +105,7 @@ class MidiViewBackground : public virtual ViewBackground
 
 	sigc::signal<void> NoteRangeChanged;
 	void apply_note_range (uint8_t lowest, uint8_t highest, bool to_children);
+	void maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children);
 
 	/** @return y position, or -1 if hidden */
 	virtual double y_position () const { return 0.; }
@@ -114,6 +129,7 @@ class MidiViewBackground : public virtual ViewBackground
 	Gtkmm2ext::Color          _region_color;
 	ARDOUR::ColorMode         _color_mode;
 	VisibleNoteRange          _visibility_note_range;
+	bool                       note_range_set;
 
 	void color_handler ();
 	void parameter_changed (std::string const &);

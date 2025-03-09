@@ -91,9 +91,6 @@ class NoteBase : public sigc::trackable
 	void show_velocity();
 	void hide_velocity();
 
-	/** Channel changed for this specific event */
-	void on_channel_change(uint8_t channel);
-
 	/** Channel selection changed */
 	void on_channel_selection_change(uint16_t selection);
 

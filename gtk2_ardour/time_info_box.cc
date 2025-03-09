@@ -206,18 +206,20 @@ TimeInfoBox::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
-	selection_start->set_session (s);
-	selection_end->set_session (s);
-	selection_length->set_session (s);
+	if (s) {
+		selection_start->set_session (s);
+		selection_end->set_session (s);
+		selection_length->set_session (s);
+	}
 
 	if (!with_punch_clock) {
 		return;
 	}
 
-	punch_start->set_session (s);
-	punch_end->set_session (s);
-
 	if (s) {
+		punch_start->set_session (s);
+		punch_end->set_session (s);
+
 		Location* punch = s->locations()->auto_punch_location ();
 
 		if (punch) {
@@ -313,11 +315,7 @@ TimeInfoBox::selection_changed ()
 
 	case Editing::MouseRange:
 		if (selection.time.empty()) {
-			/* XXX we really ought to be calling
-			   ::get_mouse_mode_action() here but there is no actual
-			   mouse emode enum for smart mode (object-range).
-			*/
-			Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (PublicEditor::instance().editor_name(), "set-mouse-mode-object-range");
+			Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editing"), "set-mouse-mode-object-range");
 
 			if (tact->get_active() &&  !selection.regions.empty()) {
 				/* show selected regions */

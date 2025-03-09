@@ -45,9 +45,9 @@
 #include "pbd/gstdio_compat.h"
 #include <glibmm/fileutils.h>
 
-#include <gtkmm/box.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/box.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/stock.h>
 
 #include "ardour/debug.h"
 
@@ -279,14 +279,13 @@ SoundFileBox::set_session(Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
-	length_clock.set_session (s);
-	timecode_clock.set_session (s);
-
 	if (!_session) {
 		play_btn.set_sensitive (false);
 		stop_btn.set_sensitive (false);
 		auditioner_connections.drop_connections();
 	} else {
+		length_clock.set_session (s);
+		timecode_clock.set_session (s);
 		auditioner_connections.drop_connections();
 		if (_session->the_auditioner()) {
 			_session->AuditionActive.connect(auditioner_connections, invalidator (*this), std::bind (&SoundFileBox::audition_active, this, _1), gui_context());
@@ -989,9 +988,9 @@ void
 SoundFileBrowser::set_session (Session* s)
 {
 	ArdourWindow::set_session (s);
-	preview.set_session (s);
 
 	if (_session) {
+		preview.set_session (s);
 		add_gain_meter ();
 	} else {
 		remove_gain_meter ();

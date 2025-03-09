@@ -825,6 +825,7 @@ Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, Re
 		ret = motion_handler (item, event);
 		break;
 	case GDK_ENTER_NOTIFY:
+		set_entered_regionview (rv);
 		ret = enter_handler (item, event, type);
 		break;
 

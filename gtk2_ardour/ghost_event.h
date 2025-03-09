@@ -22,6 +22,8 @@ class GhostEvent : public sigc::trackable
 	GhostEvent (::NoteBase *, ArdourCanvas::Container *, ArdourCanvas::Item* i);
 	virtual ~GhostEvent ();
 
+	void set_sensitive (bool yn);
+
 	NoteBase* event;
 	ArdourCanvas::Item* item;
 	bool is_hit;

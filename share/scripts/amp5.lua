@@ -47,7 +47,7 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	cur_gain = target_gain -- use target gain if no channel is mapped.
 
 	for c = 1, n_audio do
-		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped output buffer for given cannel
+		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped output buffer for given channel
 		if (ob ~= ARDOUR.ChanMapping.Invalid) then
 			cur_gain = ARDOUR.Amp.apply_gain (bufs:get_audio(ob), sr, n_samples, current_gain, target_gain, offset)
 		end

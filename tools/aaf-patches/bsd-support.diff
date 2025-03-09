@@ -1,0 +1,26 @@
+diff --git a/libs/aaf/aaf/LibCFB.h b/libs/aaf/aaf/LibCFB.h
+index c06de43edb..75610431f5 100644
+--- a/libs/aaf/aaf/LibCFB.h
++++ b/libs/aaf/aaf/LibCFB.h
+@@ -35,6 +35,8 @@
+ #elif defined(_WIN32)
+ #include <windows.h> // MAX_PATH
+ #include <limits.h>
++#else
++#include <limits.h>
+ #endif
+ 
+ /**
+diff --git a/libs/aaf/utils.c b/libs/aaf/utils.c
+index 71240eab99..41eb6566e2 100644
+--- a/libs/aaf/utils.c
++++ b/libs/aaf/utils.c
+@@ -32,7 +32,7 @@
+ #include <arpa/inet.h>
+ #include <mntent.h>
+ #include <unistd.h> /* access() */
+-#elif defined(__APPLE__)
++#elif defined(__APPLE__) || defined(__NetBSD__)
+ #include <sys/syslimits.h>
+ #include <unistd.h> /* access() */
+ #elif defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
