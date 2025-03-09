@@ -24,6 +24,7 @@
 #include <pthread.h>
 
 #include "pbd/ringbuffer.h"
+#include "pbd/signals.h"
 
 #include "zita-resampler/vresampler.h"
 #include "zita-alsa-pcmi.h"

@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/cellrenderer_generation.h>
+#include <ytkmm/cellrenderer_generation.h>
 
 
 //template specializations:

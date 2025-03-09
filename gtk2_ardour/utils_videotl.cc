@@ -21,7 +21,7 @@
 #include <cstdio>
 #include <string>
 #include <cerrno>
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include "pbd/error.h"
 #include "pbd/string_convert.h"

@@ -21,8 +21,8 @@
 
 #include <glibmm/objectbase.h>
 
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/stock.h>
 
 #include "gtkmm2ext/keyboard.h"
 

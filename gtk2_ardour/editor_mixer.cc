@@ -28,7 +28,7 @@
 #endif
 
 #include <glibmm/miscutils.h>
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/messagedialog.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
 
@@ -60,23 +60,9 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 
 void
-Editor::editor_mixer_button_toggled ()
+Editor::showhide_att_left (bool yn)
 {
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
-	if (act) {
-		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
-		show_editor_mixer (tact->get_active());
-	}
-}
-
-void
-Editor::editor_list_button_toggled ()
-{
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-list"));
-	if (act) {
-		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
-		show_editor_list (tact->get_active());
-	}
+	show_editor_mixer (yn);
 }
 
 void
@@ -151,8 +137,7 @@ Editor::show_editor_mixer (bool yn)
 		}
 
 		if (current_mixer_strip && current_mixer_strip->get_parent() == 0) {
-			global_hpacker.pack_start (*current_mixer_strip, Gtk::PACK_SHRINK );
-			global_hpacker.reorder_child (*current_mixer_strip, 0);
+			content_att_left.add (*current_mixer_strip);
 			current_mixer_strip->show ();
 		}
 
@@ -165,7 +150,7 @@ Editor::show_editor_mixer (bool yn)
 
 		if (current_mixer_strip) {
 			if (current_mixer_strip->get_parent() != 0) {
-				global_hpacker.remove (*current_mixer_strip);
+				content_att_left.remove ();
 			}
 		}
 	}

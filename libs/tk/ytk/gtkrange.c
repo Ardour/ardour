@@ -32,7 +32,7 @@
 
 #undef GTK_DISABLE_DEPRECATED
 
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 #include "gtkmain.h"
 #include "gtkmarshalers.h"
 #include "gtkorientable.h"

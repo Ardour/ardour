@@ -18,10 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/table.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/alignment.h>
+#include <ytkmm/table.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/alignment.h>
 #include "insert_remove_time_dialog.h"
 #include "audio_clock.h"
 #include "ardour_ui.h"

@@ -21,6 +21,7 @@
 #include <midi++/types.h>
 
 #include "pbd/signals.h"
+#include "pbd/xml++.h"
 
 
 #include "midi_byte_array.h"

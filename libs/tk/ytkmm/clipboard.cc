@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/clipboard.h>
-#include <gtkmm/private/clipboard_p.h>
+#include <ytkmm/clipboard.h>
+#include <ytkmm/private/clipboard_p.h>
 
 
 /* 
@@ -26,9 +26,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/textbuffer.h>
-#include <gtkmm/selectiondata_private.h>
-#include <gtk/gtk.h>
+#include <ytkmm/textbuffer.h>
+#include <ytkmm/selectiondata_private.h>
+#include <ytk/ytk.h>
 
 namespace
 {

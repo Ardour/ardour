@@ -16,22 +16,6 @@ from waflib.Tools.compiler_cxx import cxx_compiler
 c_compiler['darwin'] = ['gcc', 'clang' ]
 cxx_compiler['darwin'] = ['g++', 'clang++' ]
 
-class i18n(BuildContext):
-    cmd = 'i18n'
-    fun = 'i18n'
-
-class i18n_pot(BuildContext):
-    cmd = 'i18n_pot'
-    fun = 'i18n_pot'
-
-class i18n_po(BuildContext):
-    cmd = 'i18n_po'
-    fun = 'i18n_po'
-
-class i18n_mo(BuildContext):
-    cmd = 'i18n_mo'
-    fun = 'i18n_mo'
-
 compiler_flags_dictionaries= {
     'gcc' : {
         # Flags required when building a debug build
@@ -578,7 +562,6 @@ int main() { return 0; }''',
             cxx_flags.append('-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION')
         else:
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
-            cxx_flags.append('-DBOOST_BIND_GLOBAL_PLACEHOLDERS')
 
     if (is_clang and platform == "darwin"):
         # Silence warnings about the non-existing osx clang compiler flags
@@ -763,7 +746,7 @@ int main() { return 0; }''',
 
     # need ISOC9X for llabs()
     compiler_flags.extend(
-        ('-DBOOST_SYSTEM_NO_DEPRECATED', '-DBOOST_BIND_GLOBAL_PLACEHOLDERS', '-D_ISOC9X_SOURCE',
+        ('-DBOOST_SYSTEM_NO_DEPRECATED', '-D_ISOC9X_SOURCE',
          '-D_LARGEFILE64_SOURCE', '-D_FILE_OFFSET_BITS=64'))
     cxx_flags.extend(
         ('-D__STDC_LIMIT_MACROS', '-D__STDC_FORMAT_MACROS',
@@ -777,14 +760,8 @@ int main() { return 0; }''',
         compiler_flags.append ('-DMIXBUS')
         conf.define('MIXBUS', 1)
 
-    if Options.options.program_name.lower() == "mixbus32c":
-        conf.define('MIXBUS32C', 1)
-        compiler_flags.append ('-DMIXBUS32C')
-
     compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
     compiler_flags.append ('-DPROGRAM_VERSION="' + PROGRAM_VERSION + '"')
-
-    conf.env['PROGRAM_NAME'] = Options.options.program_name
 
     if opt.debug:
         conf.env.append_value('CFLAGS', debug_flags)
@@ -806,9 +783,9 @@ int main() { return 0; }''',
     conf.env.append_value('CXXFLAGS', cxx_flags)
     conf.env.append_value('LINKFLAGS', linker_flags)
 
-def create_resource_file(icon):
+def create_resource_file(name):
     try:
-        text = 'IDI_ICON1 ICON DISCARDABLE "icons/' + icon + '.ico"\n'
+        text = 'IDI_ICON1 ICON DISCARDABLE "icons/' + name + '.ico"\n'
         o = open('gtk2_ardour/windows_icon.rc', 'w')
         o.write(text)
         o.close()
@@ -900,8 +877,6 @@ def options(opt):
                     help="Run tests after build")
     opt.add_option('--single-tests', action='store_true', default=False, dest='single_tests',
                     help="Build a single executable for each unit test")
-    #opt.add_option('--tranzport', action='store_true', default=False, dest='tranzport',
-    # help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
     opt.add_option('--maschine', action='store_true', default=False, dest='maschine',
                     help='Compile with support for NI-Maschine')
     opt.add_option('--generic', action='store_true', default=False, dest='generic',
@@ -939,8 +914,6 @@ def options(opt):
                     help='Disable threaded waveview rendering')
     opt.add_option('--no-futex-semaphore', action='store_true', default=False, dest='no_futex_semaphore',
                     help='Disable use of futex for semaphores (Linux only)')
-    opt.add_option('--no-ytk', action='store_true', default=False, dest='no_ytk',
-                   help='Use system-wide GTK instead of Ardour YTK')
     opt.add_option(
         '--qm-dsp-include', type='string', action='store',
         dest='qm_dsp_include', default='/usr/include/qm-dsp',
@@ -984,6 +957,8 @@ def configure(conf):
         # lazy approach: just use major version 2.X.X
         if itstool != "itstool" or version[0] < "2":
             conf.fatal("--freedesktop requires itstool > 2.0.0 to translate files.")
+
+    conf.env['PROGRAM_NAME'] = Options.options.program_name or 'Ardour'
 
     conf.env['VERSION'] = VERSION
     conf.env['MAJOR'] = MAJOR
@@ -1097,10 +1072,6 @@ def configure(conf):
         conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'AudioToolbox', '-framework', 'AudioUnit'])
         conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Cocoa'])
 
-        # use image surface for rendering
-        conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
-        conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
-
         if (
                 # osx up to and including 10.6 (uname 10.X.X)
                 (re.search (r"^[1-9][0-9]\.", os.uname()[2]) is None or not re.search (r"^10\.", os.uname()[2]) is None)
@@ -1126,12 +1097,6 @@ def configure(conf):
 
     if Options.options.internal_shared_libs:
         conf.define('INTERNAL_SHARED_LIBS', 1)
-
-    if not Options.options.no_ytk:
-        conf.define('YTK', 1)
-        conf.define('HAVE_SUIL', 1)
-    else:
-        autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL', atleast_version='0.6.0', mandatory=False)
 
     if Options.options.use_external_libs:
         conf.define('USE_EXTERNAL_LIBS', 1)
@@ -1305,6 +1270,11 @@ int main () { __int128 x = 0; return 0; }
         conf.env.append_value('CXXFLAGS', "-DCOMPILER_INT128_SUPPORT")
         conf.env.append_value('CFLAGS', "-DCOMPILER_INT128_SUPPORT")
 
+
+    # always use localized gtk2
+    conf.define('YTK', 1)
+    conf.define('HAVE_SUIL', 1)
+
     # Tell everyone that this is a waf build
 
     conf.env.append_value('CFLAGS', '-DWAF_BUILD')
@@ -1348,8 +1318,6 @@ int main () { __int128 x = 0; return 0; }
         conf.env['RUN_TESTS'] = opts.run_tests
     if opts.single_tests:
         conf.env['SINGLE_TESTS'] = opts.single_tests
-    #if opts.tranzport:
-    #    conf.env['TRANZPORT'] = 1
     if not opts.no_windows_vst:
         if Options.options.dist_target == 'mingw':
             conf.define('WINDOWS_VST_SUPPORT', 1)
@@ -1512,7 +1480,6 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Install prefix',        conf.env['PREFIX'])
     write_config_text('Strict compiler flags', conf.env['STRICT'])
     write_config_text('Internal Shared Libraries', conf.is_defined('INTERNAL_SHARED_LIBS'))
-    write_config_text('Use YTK instead of GTK',    conf.is_defined('YTK'))
     write_config_text('Use External Libraries', conf.is_defined('USE_EXTERNAL_LIBS'))
     write_config_text('Library exports hidden', conf.is_defined('EXPORT_VISIBILITY_HIDDEN'))
     write_config_text('Free/Demo copy',        conf.is_defined('FREEBIE'))
@@ -1537,7 +1504,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Futex Semaphore',       conf.is_defined('USE_FUTEX_SEMAPHORE'))
     write_config_text('Freedesktop files',     opts.freedesktop)
     write_config_text('G_ENABLE_DEBUG',        opts.gdebug or conf.env['DEBUG'])
-    write_config_text('I/O Priorty Set',       conf.is_defined('HAVE_IOPRIO'))
+    write_config_text('I/O Priority Set',      conf.is_defined('HAVE_IOPRIO'))
     write_config_text('Libjack linking',       conf.env['libjack_link'])
     write_config_text('Libjack metadata',      conf.is_defined ('HAVE_JACK_METADATA'))
     write_config_text('Lua Binding Doc',       conf.is_defined('LUABINDINGDOC'))
@@ -1558,7 +1525,6 @@ const char* const ardour_config_info = "\\n\\
 #    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
     write_config_text('Threaded WaveViews',    not opts.no_threaded_waveviews)
     write_config_text('Translation',           not opts.no_nls)
-#    write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
     write_config_text('Use LLD linker',        opts.use_lld)
     write_config_text('VST3 support',          conf.is_defined('VST3_SUPPORT'))
@@ -1608,9 +1574,6 @@ def build(bld):
     bld.path.find_dir ('libs/ardour/ardour')
     bld.path.find_dir ('libs/pbd/pbd')
 
-    #if bld.is_defined('YTK'):
-    #    bld.path.find_dir ('libs/tk/ztkmm')
-
     # set up target directories
     lwrcase_dirname = 'ardour' + bld.env['MAJOR']
 
@@ -1653,17 +1616,36 @@ def build(bld):
     if bld.env['RUN_TESTS']:
         bld.add_post_fun(test)
 
-def i18n(bld):
-    print(bld.env)
+# The following i18n command implementations need a BuildContext (with .env),
+# and we thus create BuildContext subclasses that define the `cmd` command to
+# execute the `fun` function (which often will recurse).
+
+class _i18n_build_context(BuildContext):
+    cmd = 'i18n'
+    fun = 'i18n_func'
+
+def i18n_func(bld):
     bld.recurse (i18n_children)
 
-def i18n_pot(bld):
+class _i18n_pot_build_context(BuildContext):
+    cmd = 'i18n_pot'
+    fun = 'i18n_pot_func'
+
+def i18n_pot_func(bld):
     bld.recurse (i18n_children)
 
-def i18n_po(bld):
+class _i18n_po_build_context(BuildContext):
+    cmd = 'i18n_po'
+    fun = 'i18n_po_func'
+
+def i18n_po_func(bld):
     bld.recurse (i18n_children)
 
-def i18n_mo(bld):
+class _i18n_mo_build_context(BuildContext):
+    cmd = 'i18n_mo'
+    fun = 'i18n_mo_func'
+
+def i18n_mo_func(bld):
     bld.recurse (i18n_children)
 
 def tarball(bld):

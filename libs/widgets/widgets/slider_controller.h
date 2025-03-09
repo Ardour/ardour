@@ -26,8 +26,8 @@
 
 #include <memory>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/spinbutton.h>
 
 #include "widgets/fader_widget.h"
 #include "widgets/ardour_fader.h"

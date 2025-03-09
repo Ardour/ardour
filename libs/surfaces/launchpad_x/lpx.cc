@@ -80,7 +80,7 @@ using namespace ArdourSurface;
 using namespace ArdourSurface::LAUNCHPAD_NAMESPACE;
 using namespace Gtkmm2ext;
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 #define NOVATION     0x1235
 

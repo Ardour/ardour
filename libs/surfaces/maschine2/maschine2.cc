@@ -42,7 +42,7 @@
 
 #include "canvas.h"
 
-#include "pbd/abstract_ui.cc" // instantiate template, includes i18n
+#include "pbd/abstract_ui.inc.cc" // instantiate template, includes i18n
 
 using namespace ARDOUR;
 using namespace PBD;

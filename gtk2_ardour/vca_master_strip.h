@@ -23,10 +23,10 @@
 
 #include <memory>
 
-#include <gtkmm/box.h>
-#include <gtkmm/colorselection.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/box.h>
+#include <ytkmm/colorselection.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/messagedialog.h>
 
 #include "widgets/ardour_button.h"
 

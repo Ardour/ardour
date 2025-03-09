@@ -18,11 +18,11 @@
 
 #include <vector>
 
-#include "gtkmm/sizegroup.h"
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/stock.h>
+#include "ytkmm/sizegroup.h"
+#include <ytkmm/filechooserdialog.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
@@ -318,10 +318,10 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 	if (!trigger ()->playable ()) {
 
 		bool solid = false;
-		context->arc (margin + (size * 0.75), margin + (size * 0.75), (size * 0.75), 0., 360.0 * (M_PI/180.0));
 
 		switch (tref.box()->record_enabled()) {
 		case Enabled:
+			context->arc (margin + (size * 0.75), margin + (size * 0.75), (size * 0.75), 0., 360.0 * (M_PI/180.0));
 			if (trigger()->armed()) {
 				solid = rec_blink_on;
 			} else {
@@ -330,6 +330,7 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 			break;
 
 		case Recording:
+			context->arc (margin + (size * 0.75), margin + (size * 0.75), (size * 0.75), 0., 360.0 * (M_PI/180.0));
 			if (trigger()->armed()) {
 				solid = true;
 			} else {
@@ -358,7 +359,6 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 			set_source_rgba (context, UIConfiguration::instance ().color ("record enable button: fill active"));
 			context->stroke ();
 		}
-
 		return;
 	}
 
@@ -369,15 +369,14 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 			if (active) {
 				/* special case: now it's a square Stop button */
 				context->move_to (margin, margin);
-				context->rel_line_to (size, 0);
-				context->rel_line_to (0, size);
+				context->rel_line_to (size, 0);	
 				context->rel_line_to (-size, 0);
 				context->line_to (margin, margin);
 				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
 				context->fill ();
 				context->stroke ();
-			} else {
-				/* boxy arrow */
+			} else {				/* boxy arrow */
+				context->rel_line_to (0, size);
 				context->move_to (margin, margin);
 				context->rel_line_to (0, size);
 				context->rel_line_to (size * 1 / 3, 0);
@@ -465,6 +464,7 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 			context->stroke ();
 			break;
 		default:
+			std::cerr << "other\n";
 			break;
 	}
 
@@ -501,7 +501,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 
 	if (trigger ()->cue_isolated ()) {
 		/* left shadow */
-		context->set_identity_matrix ();
+		context->save ();
 		context->translate (self.x0, self.y0 - 0.5);
 		Cairo::RefPtr<Cairo::LinearGradient> l_shadow = Cairo::LinearGradient::create (0, 0, scale * 12, 0);
 		l_shadow->add_color_stop_rgba (0.0, 0.0, 0.0, 0.0, 0.8);
@@ -509,7 +509,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 		context->set_source (l_shadow);
 		context->rectangle (0, 0, scale * 12, height);
 		context->fill ();
-		context->set_identity_matrix ();
+		context->restore ();
 	}
 
 	if (false /*tref.slot == 1*/) {
@@ -524,20 +524,20 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 
 	/* launch icon */
 	{
-		context->set_identity_matrix ();
+		context->save ();
 		context->translate (self.x0, self.y0 - 0.5);
 		context->translate (0, 0); // left side of the widget
 		draw_launch_icon (context, height, scale);
-		context->set_identity_matrix ();
+		context->restore ();
 	}
 
 	/* follow-action icon */
 	if (trigger ()->playable () && trigger ()->will_follow ()) {
-		context->set_identity_matrix ();
+		context->save ();
 		context->translate (self.x0, self.y0 - 0.5);
 		context->translate (width - height, 0); // right side of the widget
 		draw_follow_icon (context, trigger ()->follow_action0 (), height, scale);
-		context->set_identity_matrix ();
+		context->restore ();
 	}
 }
 
@@ -862,7 +862,6 @@ TriggerEntry::drag_begin (Glib::RefPtr<Gdk::DragContext> const& context)
 		/* inverse offset, because ::render() translates coordinates itself */
 		ArdourCanvas::Rect self (item_to_window (_rect));
 		ctx->translate (-self.x0, -self.y0);
-		/* save context because ::render() calls set_identity_matrix () */
 		ctx->save ();
 		render (self, ctx);
 		ctx->restore ();
@@ -1129,6 +1128,7 @@ TriggerBoxWidget::TriggerBoxWidget (TriggerStrip& s, float w, float h)
 	, ui (nullptr)
 	, _strip (s)
 {
+	use_intermediate_surface (false);
 	set_background_color (UIConfiguration::instance ().color (X_("theme:bg")));
 }
 

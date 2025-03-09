@@ -3,10 +3,10 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/textiter.h>
-#include <gtkmm/private/textiter_p.h>
+#include <ytkmm/textiter.h>
+#include <ytkmm/private/textiter_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <cstring> // std::memset()
 
 // -*- c++ -*-
@@ -29,8 +29,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/texttag.h>
-#include <gtkmm/textbuffer.h>
+#include <ytkmm/texttag.h>
+#include <ytkmm/textbuffer.h>
 
 namespace Gtk
 {

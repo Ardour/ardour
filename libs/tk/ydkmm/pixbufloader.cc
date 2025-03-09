@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/pixbufloader.h>
-#include <gdkmm/private/pixbufloader_p.h>
+#include <ydkmm/pixbufloader.h>
+#include <ydkmm/private/pixbufloader_p.h>
 
 
 // -*- c++ -*-
@@ -27,8 +27,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdk/gdk.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <ydk/gdk.h>
+#include <ydk-pixbuf/ydk-pixbuf.h>
 
 
 namespace

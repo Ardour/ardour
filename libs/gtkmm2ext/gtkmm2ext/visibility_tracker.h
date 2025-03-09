@@ -19,9 +19,12 @@
 #ifndef __libgtkmm2ext_visibility_tracker__
 #define __libgtkmm2ext_visibility_tracker__
 
-#include <gdk/gdkevents.h>
+#include <ydk/gdkevents.h>
 
 #include "gtkmm2ext/visibility.h"
+#include "gtkmm2ext/visibility_tracker.h"
+
+#include <sigc++/trackable.h>
 
 namespace Gtk {
 	class Window;

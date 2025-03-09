@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2011-2017 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2021 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2024 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,36 +18,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <algorithm>
 #include "pbd/compose.h"
 
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/actions.h"
 
-#include "ardour/location.h"
-#include "ardour/profile.h"
 #include "ardour/session.h"
 
-#include "audio_clock.h"
-#include "editor_automation_line.h"
-#include "control_point.h"
+#include "audio_region_editor.h"
+#include "audio_region_view.h"
 #include "editor.h"
+#include "region_fx_properties_box.h"
 #include "region_view.h"
-#include "time_info_box.h"
-#include "triggerbox_ui.h"
-
-#include "multi_region_properties_box.h"
-
-#include "audio_region_properties_box.h"
-#include "midi_region_properties_box.h"
-
-#include "audio_region_operations_box.h"
-#include "midi_region_operations_box.h"
-
-#include "slot_properties_box.h"
-
+#include "route_properties_box.h"
 #include "selection_properties_box.h"
+#include "time_info_box.h"
 
 #include "pbd/i18n.h"
 
@@ -56,76 +42,53 @@ using std::min;
 using std::max;
 
 SelectionPropertiesBox::SelectionPropertiesBox ()
+	: _region_editor (nullptr)
+	, _region_fx_box (nullptr)
 {
-	_header_label.set_text(_("Selection Properties (ESC = Deselect All)"));
-	_header_label.set_alignment(0.0, 0.5);
-	pack_start(_header_label, false, false, 6);
+	init ();
 
-	/* Time Info, for Range selections  ToDo:  range operations*/
-	_time_info_box = new TimeInfoBox ("EditorTimeInfo", true);
+	_time_info_box  = new TimeInfoBox ("EditorTimeInfo", true);
+	_route_prop_box = new RoutePropertiesBox ();
+
 	pack_start(*_time_info_box, false, false, 0);
+	pack_start(*_route_prop_box, true, true, 0);
+	pack_start(_region_editor_box, true, true, 0);
 
-#if SELECTION_PROPERTIES_BOX_TODO
-	/* Region ops (mute/unmute), for multiple-Region selections */
-	_mregions_prop_box = new MultiRegionPropertiesBox ();
-	pack_start(*_mregions_prop_box, false, false, 0);
+	_time_info_box->set_no_show_all ();
+	_route_prop_box->set_no_show_all ();
+	_region_editor_box.set_no_show_all ();
+	_region_editor_box.set_spacing (4);
 
-
-	/* MIDI Region props, for Clips */
-	_midi_prop_box = new MidiRegionPropertiesBox ();
-	pack_start(*_midi_prop_box, false, false, 0);
-
-	/* AUDIO Region props for Clips */
-	_audio_prop_box = new AudioRegionPropertiesBox ();
-	pack_start(*_audio_prop_box, false, false, 0);
-
-
-	/* MIDI Region ops (transpose, quantize), for only-midi selections */
-	_midi_ops_box = new MidiRegionOperationsBox ();
-	pack_start(*_midi_ops_box, false, false, 0);
-
-	/* AUDIO Region ops (reverse, normalize), for only-audio selections */
-	_audio_ops_box = new AudioRegionOperationsBox ();
-	pack_start(*_audio_ops_box, false, false, 0);
-
-
-	/* SLOT properties, for Trigger slot selections */
-	_slot_prop_box = new SlotPropertiesBox ();
-	pack_start(*_slot_prop_box, false, false, 0);
-#endif
-
-	/* watch for any change in our selection, so we can show an appropriate property editor */
-	Editor::instance().get_selection().TracksChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
-	Editor::instance().get_selection().RegionsChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
-	Editor::instance().get_selection().TimeChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
-	Editor::instance().get_selection().LinesChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
-	Editor::instance().get_selection().PlaylistsChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
-	Editor::instance().get_selection().PointsChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
-	Editor::instance().get_selection().MarkersChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
-	Editor::instance().get_selection().MidiNotesChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
-	Editor::instance().get_selection().TriggersChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
-
-	/* maybe we care about mouse mode?? */
-	Editor::instance().MouseModeChanged.connect (editor_connections, invalidator(*this), std::bind (&SelectionPropertiesBox::track_mouse_mode, this), gui_context());
-
-	selection_changed();
+	_time_info_box->hide ();
+	_route_prop_box->hide ();
 }
 
 SelectionPropertiesBox::~SelectionPropertiesBox ()
 {
 	delete _time_info_box;
+	delete _route_prop_box;
+	delete _region_editor;
+	delete _region_fx_box;
+}
 
-#if SELECTION_PROPERTIES_BOX_TODO
-	delete _mregions_prop_box;
+void
+SelectionPropertiesBox::init ()
+{
+	Selection& selection (Editor::instance().get_selection());
 
-	delete _slot_prop_box;
+	/* watch for any change in our selection, so we can show an appropriate property editor */
+	selection.TracksChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
+	selection.RegionsChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
+	selection.TimeChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
+	selection.LinesChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
+	selection.PlaylistsChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
+	selection.PointsChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
+	selection.MarkersChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
+	selection.MidiNotesChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
+	selection.TriggersChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
 
-	delete _midi_ops_box;
-	delete _audio_ops_box;
-
-	delete _midi_prop_box;
-	delete _audio_prop_box;
-#endif
+	/* maybe we care about mouse mode?? */
+	Editor::instance().MouseModeChanged.connect (_editor_connection, invalidator(*this), std::bind (&SelectionPropertiesBox::track_mouse_mode, this), gui_context());
 }
 
 void
@@ -133,19 +96,14 @@ SelectionPropertiesBox::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
+	if (!s) {
+		return;
+	}
+
 	_time_info_box->set_session(s);
+	_route_prop_box->set_session(s);
 
-#if SELECTION_PROPERTIES_BOX_TODO
-	_mregions_prop_box->set_session(s);
-
-	_midi_prop_box->set_session(s);
-	_audio_prop_box->set_session(s);
-
-	_midi_ops_box->set_session(s);
-	_audio_ops_box->set_session(s);
-
-	_slot_prop_box->set_session(s);
-#endif
+	selection_changed();
 }
 
 void
@@ -155,90 +113,80 @@ SelectionPropertiesBox::track_mouse_mode ()
 }
 
 void
+SelectionPropertiesBox::delete_region_editor ()
+{
+	if (!_region_editor) {
+		return;
+	}
+	assert (_region_fx_box);
+	_region_editor_box.remove (*_region_editor);
+	_region_editor_box.remove (*_region_fx_box);
+	delete _region_editor;
+	delete _region_fx_box;
+	_region_editor = nullptr;
+	_region_fx_box = nullptr;
+	_region_editor_box.hide ();
+}
+
+void
 SelectionPropertiesBox::selection_changed ()
 {
+	if (!_session || _session->inital_connect_or_deletion_in_progress ()) {
+		_time_info_box->hide ();
+		_route_prop_box->hide ();
+		delete_region_editor ();
+		return;
+	}
+
 	Selection& selection (Editor::instance().get_selection());
 
-	_time_info_box->hide();
-
-#if SELECTION_PROPERTIES_BOX_TODO
-	_mregions_prop_box->hide();
-
-	_midi_ops_box->hide();
-	_audio_ops_box->hide();
-
-	_midi_prop_box->hide();
-	_audio_prop_box->hide();
-
-	_slot_prop_box->hide();
-#endif
-
-	_header_label.hide();
-
-	if (!selection.time.empty()) {
-		_time_info_box->show();
-		_header_label.set_text(_("Range Properties (Press ESC to Deselect All)"));
-		_header_label.show();
+	if (!selection.time.empty ()) {
+		_time_info_box->show ();
+	} else {
+		_time_info_box->hide ();
 	}
 
-#if SELECTION_PROPERTIES_BOX_TODO
-	/* one or more regions, show the multi-region operations box (just MUTE? kinda boring) */
-	if (!selection.regions.empty()) {
-		_mregions_prop_box->show();
-	}
-
-	bool found_midi_regions = false;
-	for (RegionSelection::iterator s = selection.regions.begin(); s != selection.regions.end(); ++s) {
-		ARDOUR::Region* region = (*s)->region().get();
-		if (region->data_type() == DataType::MIDI) {
-			found_midi_regions = true;
-			break;
+	bool show_route_properties = false;
+	if (!selection.tracks.empty ()) {
+		TimeAxisView *tav = selection.tracks.front ();
+		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(tav);
+		if (rtav) {
+			_route_prop_box->set_route (rtav->route());
+			show_route_properties = true;
 		}
 	}
+	if (show_route_properties) {
+		_route_prop_box->show();
+	} else {
+		_route_prop_box->hide();
+	}
 
-	bool found_audio_regions = false;
-	for (RegionSelection::iterator s = selection.regions.begin(); s != selection.regions.end(); ++s) {
-		ARDOUR::Region* region = (*s)->region().get();
-		if (region->data_type() == DataType::AUDIO) {
-			found_audio_regions = true;
-			break;
+	if (selection.regions.size () == 1)  {
+		RegionView* rv = (selection.regions.front ());
+		if (!_region_editor || _region_editor->region () != rv->region ()) {
+			delete_region_editor ();
+			AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
+			if (arv) {
+				_region_editor = new AudioRegionEditor (_session, arv);
+			} else {
+				_region_editor = new RegionEditor (_session, rv->region());
+			}
+			// TODO subscribe to region name changes
+			_region_editor->set_label (string_compose (_("Region '%1'"), rv->region()->name ()));
+			_region_editor->set_padding (4);
+			_region_editor->set_edge_color (0x000000ff); // black
+			_region_editor->show_all ();
+			_region_editor_box.pack_start (*_region_editor, false, false);
+
+			_region_fx_box = new RegionFxPropertiesBox (rv->region ());
+			_region_editor_box.pack_start (*_region_fx_box);
+			rv->RegionViewGoingAway.connect_same_thread (_region_connection, std::bind (&SelectionPropertiesBox::delete_region_editor, this));
+		}
+		_region_editor_box.show ();
+	} else {
+		/* only hide region props when selecting a track or trigger ..*/
+		if (_route_prop_box->get_visible () || !selection.markers.empty () || !selection.playlists.empty () || !selection.triggers.empty ()) {
+			delete_region_editor ();
 		}
 	}
-
-	if (found_midi_regions && ! found_audio_regions) {
-		_midi_ops_box->show();
-	}
-	if (found_audio_regions && ! found_midi_regions) {
-		_audio_ops_box->show();
-	}
-
-	std::shared_ptr<ARDOUR::Region> selected_region = std::shared_ptr<ARDOUR::Region>();
-
-	if (!selection.triggers.empty()) {
-		TriggerSelection ts = selection.triggers;
-		TriggerEntry* entry = *ts.begin();
-		TriggerReference ref = entry->trigger_reference();
-
-		//slot properties incl "Follow Actions"
-		_slot_prop_box->set_slot(ref);
-		_slot_prop_box->show();
-
-		selected_region = ref.trigger()->region();
-	} else if (selection.regions.size()==1)  {
-		selected_region = (*(selection.regions.begin()))->region();
-	}
-
-	if (selected_region) {
-		//region properties
-		if (selected_region->data_type() == DataType::MIDI) {
-			_midi_prop_box->set_region(selected_region);
-			_midi_prop_box->show();
-			_midi_ops_box->show();
-		} else  {
-			_audio_prop_box->set_region(selected_region);
-			_audio_prop_box->show();
-			_audio_ops_box->show();
-		}
-	}
-#endif
 }

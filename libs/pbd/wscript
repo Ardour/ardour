@@ -136,7 +136,6 @@ def build(bld):
         # C++ Headers
         includedir = '${INCLUDEDIR}/pbd-%s/pbd' % LIBPBD_MAJOR_VERSION
         bld.install_files(includedir, bld.path.ant_glob('pbd/*.h'))
-        bld.install_files(includedir, 'build/pbd/signals_generated.h')
 
         # Pkgconfig file
         autowaf.build_pc(bld, 'libpbd', LIBPBD_VERSION, LIBPBD_MAJOR_VERSION, [],

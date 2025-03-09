@@ -61,6 +61,8 @@ ArdourFader::ArdourFader (Gtk::Adjustment& adj, int orientation, int fader_lengt
 {
 	update_unity_position ();
 
+	add_events (Gdk::TOUCH_UPDATE_MASK);
+
 	if (_orien == VERT) {
 		CairoWidget::set_size_request(_girth, _span);
 	} else {
@@ -464,6 +466,18 @@ ArdourFader::on_motion_notify_event (GdkEventMotion* ev)
 	return true;
 }
 
+bool
+ArdourFader::on_touch_update_event (GdkEventTouch* ev)
+{
+  GdkEventMotion mev;
+  mev.window = ev->window;
+  mev.time   = ev->time;
+  mev.x      = ev->x;
+  mev.y      = ev->y;
+  mev.state  = 0;
+  return ArdourFader::on_motion_notify_event (&mev);
+}
+
 /** @return pixel offset of the current value from the right or bottom of the fader */
 int
 ArdourFader::display_span ()
@@ -560,6 +574,21 @@ ArdourFader::on_style_changed (const Glib::RefPtr<Gtk::Style>& style)
 	 * during 'expose' in the GUI thread */
 	_pattern = 0;
 	queue_draw ();
+}
+
+void
+ArdourFader::update_min_size (int span, int girth)
+{
+	_min_span = span;
+	_min_girth = girth;
+	_pattern = 0;
+
+	if (_orien == VERT) {
+		CairoWidget::set_size_request(girth, span);
+	} else {
+		CairoWidget::set_size_request(span, girth);
+	}
+	queue_resize ();
 }
 
 Gdk::Color

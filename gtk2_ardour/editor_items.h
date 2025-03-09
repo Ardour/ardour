@@ -69,6 +69,8 @@ enum ItemType {
 	GridZoneItem,
 	VelocityItem,
 	VelocityBaseItem,
+	ClipStartItem,
+	ClipEndItem,
 
 	/* don't remove this */
 

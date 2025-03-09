@@ -25,10 +25,10 @@
 #include <vector>
 #include <string>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/comboboxtext.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/comboboxtext.h>
 
 #include "pbd/controllable.h"
 #include "ardour/types.h"

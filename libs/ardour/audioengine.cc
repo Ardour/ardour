@@ -463,7 +463,12 @@ AudioEngine::process_callback (pframes_t nframes)
 			/* fade out done */
 			PortManager::silence_outputs (nframes);
 			session_deleted = true;
+#ifdef TRACE_SETSESSION_NULL
+			_session_connections.drop_connections ();
+			_session = 0;
+#else
 			SessionHandlePtr::set_session (0);
+#endif
 			session_removal_countdown = -1; // reset to "not in progress"
 			session_remove_pending = false;
 			session_removed.signal(); // wakes up thread that initiated session removal

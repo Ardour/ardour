@@ -95,9 +95,9 @@ class LIBARDOUR_API Stripable : public SessionObject,
 
 	struct LIBARDOUR_API Sorter
 	{
-		bool _mixer_order; // master is last
+		const bool _mixer_order; // master is last
 		Sorter (bool mixer_order = false) : _mixer_order (mixer_order) {}
-		bool operator() (std::shared_ptr<ARDOUR::Stripable> a, std::shared_ptr<ARDOUR::Stripable> b);
+		bool operator() (std::shared_ptr<ARDOUR::Stripable> a, std::shared_ptr<ARDOUR::Stripable> b) const;
 	};
 
 	/* gui's call this for their own purposes. */

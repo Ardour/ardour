@@ -20,7 +20,7 @@
 
 #include <memory>
 
-#include <gdkmm/color.h>
+#include <ydkmm/color.h>
 #include "port_matrix_labels.h"
 
 class PortMatrix;

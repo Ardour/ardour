@@ -490,7 +490,7 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (samplecnt_t nframes)
 			   elsewhere
 			*/
 
-			if (ev.is_note_on()) {
+			if (ev.is_note ()) {
 				/* we don't care about the time for this purpose */
 				_step_edit_ring_buffer.write (0, ev.event_type(), ev.size(), ev.buffer());
 			}

@@ -28,10 +28,10 @@
 
 #include "ardour_dialog.h"
 #include "ardour/session.h"
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/filechooserwidget.h>
-#include <gtkmm/textview.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/filechooserwidget.h>
+#include <ytkmm/textview.h>
 
 class PTImportSelector : public ArdourDialog
 {

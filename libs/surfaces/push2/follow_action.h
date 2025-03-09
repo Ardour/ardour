@@ -25,7 +25,11 @@
  * correctly.
  */
 
+#include "ardour/triggerbox.h"
+
 #include "canvas/rectangle.h"
+
+#include <pangomm/fontdescription.h>
 
 namespace ArdourCanvas  {
 

@@ -24,7 +24,7 @@
 #include <list>
 #include <utility>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include "gtkmm2ext/gtk_ui.h"
 
@@ -71,12 +71,11 @@ AutomationStreamView::~AutomationStreamView ()
 {
 }
 
-
 RegionView*
 AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, bool /*wait_for_data*/, bool /*recording*/)
 {
 	if (!region) {
-		return 0;
+		return nullptr;
 	}
 
 	std::shared_ptr<AutomationList> list;
@@ -89,7 +88,7 @@ AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, 
 		list = std::dynamic_pointer_cast<AutomationList>(control->list());
 		if (control->list() && !list) {
 			error << _("unable to display automation region for control without list") << endmsg;
-			return 0;
+			return nullptr;
 		}
 	}
 
@@ -107,7 +106,7 @@ AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, 
 			rv->set_valid (true);
 			display_region (arv);
 
-			return 0;
+			return nullptr;
 		}
 	}
 

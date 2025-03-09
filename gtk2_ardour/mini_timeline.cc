@@ -81,6 +81,8 @@ MiniTimeline::MiniTimeline ()
 				Gtkmm2ext::Keyboard::primary_modifier_name(),
 				Gtkmm2ext::Keyboard::primary_modifier_name (),
 				Gtkmm2ext::Keyboard::secondary_modifier_name ()));
+
+	set_colors ();
 }
 
 MiniTimeline::~MiniTimeline ()
@@ -138,6 +140,7 @@ MiniTimeline::set_session (Session* s)
 void
 MiniTimeline::dpi_changed ()
 {
+	_layout->set_font_description (ARDOUR_UI_UTILS::get_font_for_style (N_("MarkerText")));
 	calculate_time_width ();
 
 	if (get_realized()) {
@@ -639,7 +642,7 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	cairo_move_to (cr, xc + .5, 0);
 	cairo_rel_line_to (cr, 0, height);
 	cairo_stroke (cr);
-	cairo_move_to (cr, xc + .5, height);
+	cairo_move_to (cr, xc + .5, height - PADDING );
 	cairo_rel_line_to (cr, -3,  0);
 	cairo_rel_line_to (cr,  3, -4);
 	cairo_rel_line_to (cr,  3,  4);

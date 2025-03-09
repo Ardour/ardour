@@ -355,7 +355,7 @@ def configure(conf):
             features  = 'c',
             mandatory = False,
             execute   = False,
-            fragment = "#include <sys/syscall.h>\nint main () { syscall(SYS_ioprio_set, 1, 0, 8192); return 0; }")
+            fragment = "#include <unistd.h>\n#include <sys/syscall.h>\nint main () { syscall(SYS_ioprio_set, 1, 0, 8192); return 0; }")
 
     if have_sys_ioprio:
             conf.define('HAVE_IOPRIO', 1)
@@ -513,7 +513,7 @@ def build(bld):
                 fma_sources = [ 'x86_functions_fma.cc' ]
                 avx512f_sources = [ 'x86_functions_avx512f.cc' ]
         elif bld.env['build_target'] == 'aarch64':
-            obj.source += ['arm_neon_functions.cc']
+            obj.source += ['aarch64_neon_functions.cc']
             obj.defines += [ 'ARM_NEON_SUPPORT' ]
 
         elif bld.env['build_target'] == 'armhf':
@@ -736,18 +736,18 @@ def create_ardour_test_program(bld, includes, name, target, sources):
         'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
         ]
 
-def i18n(bld):
+def i18n_func(bld):
     autowaf.build_i18n(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
                        'Paul Davis')
 
-def i18n_pot(bld):
-    autowaf.build_i18n(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
+def i18n_pot_func(bld):
+    autowaf.build_i18n_pot(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
                        'Paul Davis')
 
-def i18n_po(bld):
+def i18n_po_func(bld):
     autowaf.build_i18n_po(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
                        'Paul Davis')
 
-def i18n_mo(bld):
+def i18n_mo_func(bld):
     autowaf.build_i18n_mo(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
                        'Paul Davis')

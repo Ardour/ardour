@@ -34,6 +34,8 @@
 
 #include <cstdio> // Needed so that libraptor (included in lrdf) won't complain
 #include <cstdlib>
+#include <sstream>
+
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -84,6 +86,7 @@
 #include "pbd/cpus.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
+#include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
 #include "pbd/fpu.h"
 #include "pbd/id.h"
@@ -739,9 +742,12 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 	 * each I/O thread (up to hardware_concurrency) and one for itself
 	 * (butler's main thread).
 	 *
-	 * In theory (2 * hw + 4) should be sufficient, let's add one for luck.
+	 * In theory (2 * hw + 4) should be sufficient, were it not for
+	 * AudioPlaylistSource and AudioRegionEditor::peak_amplitude_thread(s).
+	 * WaveViewThreads::start_threads adds `min (8, hw - 1)`
+	 *
 	 */
-	BufferManager::init (hardware_concurrency () * 2 + 5);
+	BufferManager::init (hardware_concurrency () * 3 + 6);
 
 	PannerManager::instance ().discover_panners ();
 
@@ -1074,3 +1080,70 @@ ARDOUR::reset_performance_meters (Session *session)
 		AudioEngine::instance()->current_backend()->dsp_stats[n].queue_reset ();
 	}
 }
+
+ARDOUR::AnyTime::AnyTime (std::string const & str)
+{
+	char c;
+	std::stringstream ss;
+
+	ss << str;
+	ss >> c;
+
+	switch (c) {
+	case 't':
+		type = Timecode;
+		if (!Timecode::parse_timecode_format (str.substr (1), timecode)) {
+			throw failed_constructor ();
+		}
+		break;
+	case 'b':
+		type = BBT;
+		ss >> bbt;
+		break;
+	case 'B':
+		type = BBT_Offset;
+		ss >> bbt_offset;
+		break;
+	case 's':
+		type = Samples;
+		ss >> samples;
+		break;
+	case 'S':
+		type = Seconds;
+		ss >> seconds;
+		break;
+	default:
+		throw failed_constructor();
+	}
+}
+
+std::string
+ARDOUR::AnyTime::str() const
+{
+	std::stringstream ss;
+	switch (type) {
+	case Timecode:
+		ss << 't';
+		ss << timecode;
+		break;
+	case BBT:
+		ss << 'b';
+		ss << bbt;
+		break;
+	case BBT_Offset:
+		ss << 'B';
+		ss << bbt_offset;
+		break;
+	case Samples:
+		ss << 's';
+		ss << samples;
+		break;
+	case Seconds:
+		ss << 'S';
+		ss << seconds;
+		break;
+	}
+
+	return ss.str ();
+}
+

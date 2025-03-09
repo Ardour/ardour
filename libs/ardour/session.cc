@@ -353,6 +353,7 @@ Session::Session (AudioEngine &eng,
 	, _pending_cue (-1)
 	, _active_cue (-1)
 	, tb_with_filled_slots (0)
+	, _global_quantization (Config->get_default_quantization())
 {
 	_suspend_save.store (0);
 	_playback_load.store (0);
@@ -4808,27 +4809,15 @@ Session::destroy_sources (list<std::shared_ptr<Source> > const& srcs)
 int
 Session::remove_last_capture ()
 {
-	list<std::shared_ptr<Source> > srcs;
-
-	std::shared_ptr<RouteList const> rl = routes.reader ();
-	for (auto const& i : *rl) {
-		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
-		if (!tr) {
-			continue;
-		}
-
-		list<std::shared_ptr<Source> >& l = tr->last_capture_sources();
-
-		if (!l.empty()) {
-			srcs.insert (srcs.end(), l.begin(), l.end());
-			l.clear ();
-		}
-	}
+	list<std::shared_ptr<Source>> srcs;
+	last_capture_sources (srcs);
 
 	destroy_sources (srcs);
 
 	/* save state so we don't end up with a session file
 	 * referring to non-existent sources.
+	 *
+	 * Note: save_state calls reset_last_capture_sources ();
 	 */
 
 	save_state ();
@@ -4837,7 +4826,7 @@ Session::remove_last_capture ()
 }
 
 void
-Session::get_last_capture_sources (std::list<std::shared_ptr<Source> >& srcs)
+Session::last_capture_sources (std::list<std::shared_ptr<Source>>& srcs) const
 {
 	std::shared_ptr<RouteList const> rl = routes.reader ();
 	for (auto const& i : *rl) {
@@ -4846,13 +4835,40 @@ Session::get_last_capture_sources (std::list<std::shared_ptr<Source> >& srcs)
 			continue;
 		}
 
-		list<std::shared_ptr<Source> >& l = tr->last_capture_sources();
+		list<std::shared_ptr<Source>> const& l = tr->last_capture_sources();
+		srcs.insert (srcs.end(), l.begin(), l.end());
+	}
+}
 
-		if (!l.empty()) {
-			srcs.insert (srcs.end(), l.begin(), l.end());
-			l.clear ();
+bool
+Session::have_last_capture_sources () const
+{
+	std::shared_ptr<RouteList const> rl = routes.reader ();
+	for (auto const& i : *rl) {
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
+		if (!tr) {
+			continue;
+		}
+
+		if (!tr->last_capture_sources().empty ()) {
+			return true;
 		}
 	}
+	return false;
+}
+
+void
+Session::reset_last_capture_sources ()
+{
+	std::shared_ptr<RouteList const> rl = routes.reader ();
+	for (auto const& i : *rl) {
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
+		if (!tr) {
+			continue;
+		}
+		tr->reset_last_capture_sources ();
+	}
+	ClearedLastCaptureSources (); /* EMIT SIGNAL */
 }
 
 /* Source Management */
@@ -6468,6 +6484,10 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 		time (&now);
 		xnow = localtime (&now);
 
+		/* XXX we may want to round this up to the next beat or bar */
+
+		const timecnt_t duration (end - start);
+
 		for (vector<std::shared_ptr<Source> >::iterator src=srcs.begin(); src != srcs.end(); ++src) {
 			std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource>(*src);
 			std::shared_ptr<MidiSource> ms;
@@ -6479,9 +6499,9 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 				plist.add (Properties::start, timepos_t (0));
 			} else if ((ms = std::dynamic_pointer_cast<MidiSource>(*src))) {
 				Source::WriterLock lock (ms->mutex());
-				ms->mark_streaming_write_completed(lock);
+				ms->mark_streaming_write_completed (lock, duration);
 				plist.add (Properties::start, timepos_t (Beats()));
-		}
+			}
 		}
 
 		/* construct a whole-file region to represent the bounced material */

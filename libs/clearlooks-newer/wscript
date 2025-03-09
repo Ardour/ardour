@@ -15,9 +15,6 @@ def build(bld):
     animation.c
     cairo-support.c
     clearlooks_draw.c
-    clearlooks_draw_glossy.c
-    clearlooks_draw_gummy.c
-    clearlooks_draw_inverted.c
     clearlooks_rc_style.c
     clearlooks_style.c
     clearlooks_theme_main.c

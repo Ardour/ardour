@@ -3,10 +3,10 @@
 
 #include <glibmm.h>
 
-#include <atkmm/relation.h>
-#include <atkmm/private/relation_p.h>
+#include <ztkmm/relation.h>
+#include <ztkmm/private/relation_p.h>
 
-#include <atk/atk-enum-types.h>
+#include <ztk/atk-enum-types.h>
 
 // -*- c++ -*-
 /* $Id: relation.ccg,v 1.2 2003/09/30 14:28:09 murrayc Exp $ */
@@ -28,9 +28,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/object.h>
-#include <atk/atkobject.h>
-#include <atk/atkrelation.h>
+#include <ztkmm/object.h>
+#include <ztk/atkobject.h>
+#include <ztk/atkrelation.h>
 
 
 namespace Atk

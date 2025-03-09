@@ -30,7 +30,7 @@
 #include <map>
 #include <boost/algorithm/string.hpp>
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/controllable.h"
 #include "pbd/enumwriter.h"

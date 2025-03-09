@@ -21,10 +21,10 @@
 #endif
 
 #include <algorithm>
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "pbd/string_convert.h"
 
@@ -53,6 +53,7 @@
 #include "actions.h"
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
+#include "audio_clock.h"
 #include "gui_thread.h"
 #include "instrument_selector.h"
 #include "public_editor.h"
@@ -77,7 +78,7 @@ using namespace Menu_Helpers;
 #define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))
 
 RecorderUI::RecorderUI ()
-	: Tabbable (_content, _("Recorder"), X_("recorder"))
+	: Tabbable (_("Recorder"), X_("recorder"), NULL, true, Tabbable::NoPanes)
 	, _toolbar_sep (1.0)
 	, _btn_rec_all (_("All"))
 	, _btn_rec_none (_("None"))
@@ -99,12 +100,6 @@ RecorderUI::RecorderUI ()
 
 	load_bindings ();
 	register_actions ();
-
-	_transport_ctrl.setup (ARDOUR_UI::instance ());
-	_transport_ctrl.map_actions ();
-	_transport_ctrl.set_no_show_all ();
-
-	signal_tabbed_changed.connect (sigc::mem_fun (*this, &RecorderUI::tabbed_changed));
 
 	/* monitoring */
 	_auto_input_button.set_related_action (ActionManager::get_action ("Transport", "ToggleAutoInput"));
@@ -198,18 +193,16 @@ RecorderUI::RecorderUI ()
 	_pane.add (_meter_scroller);
 
 	/* Top-level VBox */
-	_content.pack_start (_toolbar_sep, false, false, 1);
-	_content.pack_start (_toolbar, false, false, 2);
-	_content.pack_start (_pane, true, true);
+	content_app_bar.add (_application_bar);
+	//content_att_right.add (_editor_list_vbox); // TODO
+	content_main_top.add (_toolbar);
+	content_main.add (_pane);
 
 	/* button_table setup is similar to transport_table in ardour_ui */
 	int vpadding = 1;
 	int hpadding = 2;
 	int spacepad = 3;
 	int col = 0;
-
-	_button_table.attach (_transport_ctrl, col,  col + 1, 0, 1, FILL, FILL, hpadding, vpadding);
-	col += 1;
 
 	_button_table.attach (_duration_info_box,  col,     col + 1, 0, 1, FILL, FILL,   hpadding, vpadding);
 	_button_table.attach (_xrun_info_box,      col + 1, col + 2, 0, 1, FILL, FILL,   hpadding, vpadding);
@@ -288,10 +281,9 @@ RecorderUI::RecorderUI ()
 	_meter_area.show ();
 	_meter_scroller.show ();
 	_pane.show ();
-	_content.show ();
 
 	/* setup keybidings */
-	_content.set_data ("ardour-bindings", bindings);
+	contents().set_data ("ardour-bindings", bindings);
 
 	/* subscribe to signals */
 	AudioEngine::instance ()->Running.connect (_engine_connections, invalidator (*this), std::bind (&RecorderUI::start_updating, this), gui_context ());
@@ -355,16 +347,6 @@ RecorderUI::use_own_window (bool and_fill_it)
 	return win;
 }
 
-void
-RecorderUI::tabbed_changed (bool tabbed)
-{
-	if (tabbed) {
-		_transport_ctrl.hide ();
-	} else {
-		_transport_ctrl.show ();
-	}
-}
-
 XMLNode&
 RecorderUI::get_state () const
 {
@@ -372,6 +354,12 @@ RecorderUI::get_state () const
 	node->add_child_nocopy (Tabbable::get_state ());
 	node->set_property (X_("recorder-vpane-pos"), _pane.get_divider ());
 	return *node;
+}
+
+void
+RecorderUI::focus_on_clock()
+{
+	_application_bar.focus_on_clock();
 }
 
 int
@@ -403,13 +391,6 @@ RecorderUI::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
-	_ruler.set_session (s);
-	_duration_info_box.set_session (s);
-	_xrun_info_box.set_session (s);
-	_remain_info_box.set_session (s);
-	_transport_ctrl.set_session (s);
-	_rec_group_tabs->set_session (s);
-
 	update_sensitivity ();
 
 	if (!_session) {
@@ -417,6 +398,13 @@ RecorderUI::set_session (Session* s)
 		_visible_recorders.clear ();
 		return;
 	}
+
+	_ruler.set_session (s);
+	_duration_info_box.set_session (s);
+	_xrun_info_box.set_session (s);
+	_remain_info_box.set_session (s);
+	_application_bar.set_session (s);
+	_rec_group_tabs->set_session (s);
 
 	XMLNode* node = ARDOUR_UI::instance()->recorder_settings();
 	set_state (*node, Stateful::loading_state_version);
@@ -1838,7 +1826,7 @@ RecorderUI::RecRuler::render (Cairo::RefPtr<Cairo::Context> const& cr, cairo_rec
 
 		char buf[32];
 		int lw, lh;
-		AudioClock::print_minsec (when, buf, sizeof (buf), _session->sample_rate (), 0);
+		AudioClock::AudioClock::print_minsec (when, buf, sizeof (buf), _session->sample_rate (), 0);
 		_layout->set_text (string(buf).substr(1));
 		_layout->get_pixel_size (lw, lh);
 

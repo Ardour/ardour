@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/types.h>
-#include <gdkmm/private/types_p.h>
+#include <ydkmm/types.h>
+#include <ydkmm/private/types_p.h>
 
 
 // -*- c++ -*-

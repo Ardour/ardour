@@ -25,6 +25,7 @@
 #include "zita-resampler/vmresampler.h"
 
 #include "pbd/rcu.h"
+#include <pbd/signals.h>
 
 #include "ardour/audio_buffer.h"
 #include "ardour/port_engine.h"

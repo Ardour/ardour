@@ -5,10 +5,10 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/treeviewcolumn.h>
-#include <gtkmm/private/treeviewcolumn_p.h>
+#include <ytkmm/treeviewcolumn.h>
+#include <ytkmm/private/treeviewcolumn_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: treeviewcolumn.ccg,v 1.6 2006/05/10 20:59:28 murrayc Exp $ */
@@ -30,8 +30,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
-#include <gtkmm/treeview_private.h>
+#include <ytk/ytk.h>
+#include <ytkmm/treeview_private.h>
 
 namespace Gtk
 {

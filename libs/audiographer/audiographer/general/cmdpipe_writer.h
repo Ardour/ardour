@@ -59,6 +59,12 @@ public:
 	samplecnt_t get_samples_written() const { return samples_written; }
 	void       reset_samples_written_count() { samples_written = 0; }
 
+	void flush (void)
+	{
+		_proc->close_stdin ();
+		_proc->wait ();
+	}
+
 	void close (void)
 	{
 		_proc->terminate ();
@@ -93,6 +99,7 @@ public:
 				if (_proc->start (ARDOUR::SystemExec::ShareWithParent)) {
 					throw ARDOUR::ExportFailed ("External encoder (ffmpeg) cannot be started.");
 				}
+				assert (_proc->is_running ());
 			} else {
 				_proc->close_stdin ();
 			}

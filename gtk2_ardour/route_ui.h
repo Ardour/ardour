@@ -30,8 +30,8 @@
 #include "pbd/signals.h"
 #include "pbd/xml++.h"
 
-#include <gtkmm/colorselection.h>
-#include <gtkmm/textview.h>
+#include <ytkmm/colorselection.h>
+#include <ytkmm/textview.h>
 
 #include "gtkmm2ext/widget_state.h"
 

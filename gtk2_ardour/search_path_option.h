@@ -20,10 +20,10 @@
 
 #include <string>
 
-#include <gtkmm/filechooserbutton.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/button.h>
-#include <gtkmm/box.h>
+#include <ytkmm/filechooserbutton.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/button.h>
+#include <ytkmm/box.h>
 
 #include "option_editor.h"
 

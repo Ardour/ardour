@@ -25,6 +25,8 @@
 #include "ardour/midi_state_tracker.h"
 #include "ardour/types.h"
 
+#include <memory>
+
 namespace ARDOUR
 {
 class MidiBuffer;
@@ -36,6 +38,7 @@ public:
 	~ExportSMFWriter ();
 
 	int init (std::string const& path, samplepos_t);
+	Temporal::Beats duration() const;
 
 	void process (MidiBuffer const&, sampleoffset_t, samplecnt_t, bool);
 

@@ -25,8 +25,8 @@
 #include <map>
 #include <sigc++/bind.h>
 
-#include <gtkmm/accelmap.h>
-#include <gtkmm/comboboxtext.h>
+#include <ytkmm/accelmap.h>
+#include <ytkmm/comboboxtext.h>
 
 #include <glibmm/threads.h>
 

@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "actions.h"
 #include "ruler_dialog.h"

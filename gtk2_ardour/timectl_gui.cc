@@ -22,7 +22,7 @@
 #include <inttypes.h>
 #include <iomanip>
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/convert.h"
 #include "pbd/error.h"

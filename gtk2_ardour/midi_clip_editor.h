@@ -21,9 +21,9 @@
 
 #include <map>
 
-#include <gtkmm/box.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
+#include <ytkmm/box.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
@@ -49,7 +49,7 @@ namespace ArdourCanvas
 	class Polygon;
 }
 
-class MidiCueEditor;
+class Pianoroll;
 
 class MidiClipEditorBox : public ClipEditorBox
 {
@@ -66,7 +66,7 @@ private:
 	Gtk::Label _header_label;
 	Gtk::Table table;
 
-	MidiCueEditor* editor;
+	Pianoroll* editor;
 
 	PBD::ScopedConnection state_connection;
 

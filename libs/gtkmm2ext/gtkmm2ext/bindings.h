@@ -26,10 +26,10 @@
 
 #include <stdint.h>
 
-#include <gdk/gdkkeysyms.h>
-#include <gtkmm/action.h>
-#include <gtkmm/radioaction.h>
-#include <gtkmm/toggleaction.h>
+#include <ydk/gdkkeysyms.h>
+#include <ytkmm/action.h>
+#include <ytkmm/radioaction.h>
+#include <ytkmm/toggleaction.h>
 
 #include "pbd/signals.h"
 

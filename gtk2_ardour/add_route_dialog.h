@@ -27,21 +27,21 @@
 
 #include <string>
 
-#include <gtkmm/entry.h>
-#include <gtkmm/dialog.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/adjustment.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/button.h>
-#include <gtkmm/combobox.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/textview.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/treeview.h>
-#include <gtkmm/treestore.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/scrolledwindow.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/dialog.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/button.h>
+#include <ytkmm/combobox.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/treeview.h>
+#include <ytkmm/treestore.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/scrolledwindow.h>
 
 #include "ardour/plugin.h"
 #include "ardour/types.h"

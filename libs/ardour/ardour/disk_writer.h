@@ -74,7 +74,7 @@ public:
 
 	std::string steal_write_source_name ();
 	int use_new_write_source (DataType, uint32_t n = 0);
-	void reset_write_sources (bool, bool force = false);
+	void reset_write_sources (bool mark_write_complete);
 
 	AlignStyle alignment_style () const { return _alignment_style; }
 	void       set_align_style (AlignStyle, bool force = false);
@@ -83,7 +83,8 @@ public:
 
 	bool configure_io (ChanCount in, ChanCount out);
 
-	std::list<std::shared_ptr<Source> >& last_capture_sources () { return _last_capture_sources; }
+	std::list<std::shared_ptr<Source>>& last_capture_sources ();
+	void reset_last_capture_sources ();
 
 	bool record_enabled () const { return _record_enabled.load(); }
 	bool record_safe () const { return _record_safe.load(); }
@@ -192,6 +193,7 @@ private:
 	std::atomic<int> _record_safe;
 	std::atomic<int> _samples_pending_write;
 	std::atomic<int> _num_captured_loops;
+	std::atomic<int> _reset_last_capture_sources;
 
 	std::shared_ptr<SMFSource> _midi_write_source;
 

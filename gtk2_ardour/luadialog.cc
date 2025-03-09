@@ -19,7 +19,7 @@
 
 #include <algorithm>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include "ardour/dB.h"
 #include "ardour/rc_configuration.h"
@@ -591,6 +591,35 @@ protected:
 	Gtk::FileChooserWidget _fc;
 };
 
+class LuaDialogText : public LuaDialogWidget
+{
+public:
+	LuaDialogText (std::string const& key, std::string const& title, std::string const& dflt)
+		: LuaDialogWidget (key, title)
+	{
+		_text_view.set_wrap_mode (Gtk::WRAP_WORD);
+		_text_view.get_buffer()->set_text (dflt);
+
+		_scrolled_window.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+
+        _scrolled_window.add(_text_view);
+	}
+
+	Gtk::Widget* widget ()
+	{
+		return &_scrolled_window;
+	}
+
+	void assign (luabridge::LuaRef* rv) const
+	{
+		(*rv)[_key] = std::string (_text_view.get_buffer()->get_text());
+	}
+
+protected:
+	Gtk::TextView _text_view;
+	Gtk::ScrolledWindow _scrolled_window;
+};
+
 /* *****************************************************************************
  * Lua Parameter Dialog
  */
@@ -659,6 +688,12 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 				dflt = i.value ()["default"].cast<std::string> ();
 			}
 			w = new LuaDialogEntry (key, title, dflt);
+		} else if (type == "textarea") {
+			std::string dflt;
+			if (i.value ()["default"].isString ()) {
+				dflt = i.value ()["default"].cast<std::string> ();
+			}
+			w = new LuaDialogText (key, title, dflt);
 		} else if (type == "radio") {
 			std::string dflt;
 			if (!i.value ()["values"].isTable ()) {

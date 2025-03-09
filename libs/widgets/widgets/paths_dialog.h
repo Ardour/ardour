@@ -22,9 +22,9 @@
 #include <string>
 #include <vector>
 
-#include <gtkmm/button.h>
-#include <gtkmm/dialog.h>
-#include <gtkmm/listviewtext.h>
+#include <ytkmm/button.h>
+#include <ytkmm/dialog.h>
+#include <ytkmm/listviewtext.h>
 
 #include "widgets/visibility.h"
 

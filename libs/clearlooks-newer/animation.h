@@ -19,7 +19,7 @@
 #include "config.h"
 
 #ifdef HAVE_ANIMATION
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <ge-support.h>
 
 #define CL_IS_PROGRESS_BAR(widget) GE_IS_PROGRESS_BAR(widget) && widget->allocation.x != -1 && widget->allocation.y != -1

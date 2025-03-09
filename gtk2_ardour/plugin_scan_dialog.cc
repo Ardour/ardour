@@ -22,7 +22,7 @@
 #include "gtk2ardour-version.h"
 #endif
 
-#include <gtkmm/progressbar.h>
+#include <ytkmm/progressbar.h>
 
 #include "pbd/basename.h"
 

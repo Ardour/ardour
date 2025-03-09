@@ -22,6 +22,8 @@
 
 #include "canvas/flag.h"
 
+#include "ardour/midi_model.h"
+
 class MidiView;
 
 class SysEx

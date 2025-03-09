@@ -27,11 +27,11 @@
 
 #include "ardour/buffer_set.h"
 
-#include <gtkmm/table.h>
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/combobox.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/liststore.h>
+#include <ytkmm/table.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/combobox.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/liststore.h>
 
 namespace ARDOUR {
 	class Plugin;

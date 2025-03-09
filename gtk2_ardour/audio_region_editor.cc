@@ -25,15 +25,15 @@
 #include <gtkmm2ext/utils.h>
 
 #include "pbd/memento_command.h"
-#include "pbd/stateful_diff_command.h"
 #include "pbd/pthread_utils.h"
+#include "pbd/stateful_diff_command.h"
 
 #include "temporal/tempo.h"
 
 #include "ardour/audioregion.h"
-#include "ardour/session_event.h"
 #include "ardour/dB.h"
 #include "ardour/region_fx_plugin.h"
+#include "ardour/session_event.h"
 
 #include "audio_region_editor.h"
 #include "audio_region_view.h"
@@ -47,64 +47,74 @@ using namespace PBD;
 using namespace std;
 using namespace Gtkmm2ext;
 
-static void *
+static void*
 _peak_amplitude_thread (void* arg)
 {
-	static_cast<AudioRegionEditor*>(arg)->peak_amplitude_thread ();
+	static_cast<AudioRegionEditor*> (arg)->peak_amplitude_thread ();
 	return 0;
 }
 
 AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
-	: RegionEditor (s, arv)
+	: RegionEditor (s, arv->region())
 	, _arv (arv)
 	, _audio_region (arv->audio_region ())
-	, gain_adjustment(accurate_coefficient_to_dB(fabsf (_audio_region->scale_amplitude())), -40.0, +40.0, 0.1, 1.0, 0)
-	, _polarity_toggle (_("Invert"))
+	, _gain_adjustment (accurate_coefficient_to_dB (fabsf (_audio_region->scale_amplitude ())), -40.0, +40.0, 0.1, 1.0, 0)
+	, _polarity_toggle (_("Polarity Invert"))
 	, _fade_before_fx_toggle (_("Fade before Fx"))
 	, _show_on_touch (_("Show on Touch"))
 	, _peak_channel (false)
 {
+	_gain_label.set_name ("AudioRegionEditorLabel");
+	_gain_label.set_text (_("Region gain"));
+	_gain_label.set_alignment (0, 0.5);
+
+	_peak_amplitude_label.set_name ("AudioRegionEditorLabel");
+	_peak_amplitude_label.set_text (_("Peak Amplitude"));
+	_peak_amplitude_label.set_alignment (1, 0.5);
+
+	_region_line_label.set_name ("AudioRegionEditorLabel");
+	_region_line_label.set_text (_("Region Line:"));
+	_region_line_label.set_alignment (1, 0.5);
+
+	_region_line.set_text_ellipsize (Pango::ELLIPSIZE_MIDDLE);
+	_region_line.set_layout_ellipsize_width (PANGO_SCALE * 240);
+
+	Gtk::Table* gain_table = manage (new Gtk::Table ());
+	gain_table->set_homogeneous ();
+	gain_table->set_col_spacings (12);
+	gain_table->set_row_spacings (6);
+	gain_table->set_border_width (0);
+
+	_gain_entry.configure (_gain_adjustment, 0, 1);
+
+	int row = 0;
+	gain_table->attach (_gain_label, 0, 2, row, row + 1, Gtk::FILL, Gtk::FILL);
+	gain_table->attach (_peak_amplitude_label, 2, 4, row, row + 1, Gtk::FILL, Gtk::FILL);
+	++row;
 
 	Gtk::HBox* b = Gtk::manage (new Gtk::HBox);
 	b->set_spacing (6);
-	b->pack_start (gain_entry);
+	b->pack_start (_gain_entry);
 	b->pack_start (*Gtk::manage (new Gtk::Label (_("dB"))), false, false);
-
-	gain_label.set_name ("AudioRegionEditorLabel");
-	gain_label.set_text (_("Region gain:"));
-	gain_label.set_alignment (1, 0.5);
-	gain_entry.configure (gain_adjustment, 0.0, 1);
-	_table.attach (gain_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (*b, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	++_table_row;
+	gain_table->attach (*b, 0, 2, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
 
 	b = Gtk::manage (new Gtk::HBox);
 	b->set_spacing (6);
 	b->pack_start (_peak_amplitude);
 	b->pack_start (*Gtk::manage (new Gtk::Label (_("dBFS"))), false, false);
+	gain_table->attach (*b, 2, 4, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
+	++row;
 
-	_peak_amplitude_label.set_name ("AudioRegionEditorLabel");
-	_peak_amplitude_label.set_text (_("Peak amplitude:"));
-	_peak_amplitude_label.set_alignment (1, 0.5);
-	_table.attach (_peak_amplitude_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (*b, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	++_table_row;
+	gain_table->attach (_polarity_toggle, 0, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	gain_table->attach (_fade_before_fx_toggle, 2, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	++row;
 
-	_polarity_label.set_name ("AudioRegionEditorLabel");
-	_polarity_label.set_text (_("Polarity:"));
-	_polarity_label.set_alignment (1, 0.5);
-	_table.attach (_polarity_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (_polarity_toggle, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (_fade_before_fx_toggle, 2, 3, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	++_table_row;
+	/* Add to main layout */
 
-	_region_line_label.set_name ("AudioRegionEditorLabel");
-	_region_line_label.set_text (_("Region Line:"));
-	_region_line_label.set_alignment (1, 0.5);
-	_table.attach (_region_line_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (_region_line, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (_show_on_touch, 2, 3, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	++_table_row;
+	_table_main.attach (*gain_table,        1, 2, 3, 4, Gtk::FILL, Gtk::SHRINK);
+	_table_main.attach (_region_line_label, 0, 1, 5, 6, Gtk::FILL, Gtk::SHRINK);
+	_table_main.attach (_region_line,       1, 3, 5, 6, Gtk::EXPAND | Gtk::FILL, Gtk::SHRINK);
+	_table_main.attach (_show_on_touch,     3, 4, 5, 6, Gtk::FILL, Gtk::SHRINK);
 
 	UI::instance()->set_tip (_polarity_toggle, _("Invert the signal polarity (180deg phase shift)"));
 	UI::instance()->set_tip (_fade_before_fx_toggle, _("Apply region effects after the region fade.\nThis is useful if the effect(s) have tail, which would otherwise be faded out by the region fade (e.g. reverb, delay)"));
@@ -114,15 +124,16 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	fade_before_fx_changed ();
 	refill_region_line ();
 
-	gain_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
-	_polarity_toggle.signal_toggled().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
-	_fade_before_fx_toggle.signal_toggled().connect (sigc::mem_fun (*this, &AudioRegionEditor::fade_before_fx_toggle_changed));
-	_show_on_touch.signal_toggled().connect (sigc::mem_fun (*this, &AudioRegionEditor::show_on_touch_changed));
+	_gain_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
+	_polarity_toggle.signal_toggled ().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
+	_fade_before_fx_toggle.signal_toggled ().connect (sigc::mem_fun (*this, &AudioRegionEditor::fade_before_fx_toggle_changed));
+	_show_on_touch.signal_toggled ().connect (sigc::mem_fun (*this, &AudioRegionEditor::show_on_touch_changed));
 
-	arv->region_line_changed.connect ((sigc::mem_fun (*this, &AudioRegionEditor::refill_region_line)));
+	_arv->region_line_changed.connect ((sigc::mem_fun (*this, &AudioRegionEditor::refill_region_line)));
 
-	_peak_amplitude.property_editable() = false;
-	_peak_amplitude.set_text (_("Calculating..."));
+	_peak_amplitude.property_editable () = false;
+	_peak_amplitude.set_width_chars (9);
+	_peak_amplitude.set_text (_("Analyzing"));
 
 	PeakAmplitudeFound.connect (_peak_amplitude_connection, invalidator (*this), std::bind (&AudioRegionEditor::peak_amplitude_found, this, _1), gui_context ());
 
@@ -130,8 +141,6 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	snprintf (name, 64, "peak amplitude-%p", this);
 	pthread_create_and_store (name, &_peak_amplitude_thread_handle, _peak_amplitude_thread, this);
 	signal_peak_thread ();
-
-
 }
 
 AudioRegionEditor::~AudioRegionEditor ()
@@ -170,11 +179,11 @@ AudioRegionEditor::region_fx_changed ()
 void
 AudioRegionEditor::gain_changed ()
 {
-	const gain_t scale_amplitude = _audio_region->scale_amplitude();
+	const gain_t scale_amplitude = _audio_region->scale_amplitude ();
 
 	float const region_gain_dB = accurate_coefficient_to_dB (fabsf (scale_amplitude));
-	if (region_gain_dB != gain_adjustment.get_value()) {
-		gain_adjustment.set_value(region_gain_dB);
+	if (region_gain_dB != _gain_adjustment.get_value ()) {
+		_gain_adjustment.set_value (region_gain_dB);
 	}
 	_polarity_toggle.set_active (scale_amplitude < 0);
 }
@@ -182,11 +191,11 @@ AudioRegionEditor::gain_changed ()
 void
 AudioRegionEditor::gain_adjustment_changed ()
 {
-	float gain = dB_to_coefficient (gain_adjustment.get_value());
+	float gain = dB_to_coefficient (_gain_adjustment.get_value ());
 	if (_polarity_toggle.get_active ()) {
 		gain *= -1;
 	}
-	if (_audio_region->scale_amplitude() != gain) {
+	if (_audio_region->scale_amplitude () != gain) {
 		_audio_region->set_scale_amplitude (gain);
 	}
 }
@@ -280,7 +289,7 @@ AudioRegionEditor::refill_region_line ()
 
 	int      nth = 0;
 	PBD::ID  rfx_id (0);
-	uint32_t param_id = 0;
+	uint32_t param_id    = 0;
 	string   active_text = _("Gain Envelope");
 
 	_arv->get_region_fx_line (rfx_id, param_id);
@@ -292,10 +301,9 @@ AudioRegionEditor::refill_region_line ()
 	rm_items.push_back (RadioMenuElem (grp, _("Gain Envelope")));
 	Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*> (&rm_items.back ());
 	cmi->set_active (rfx_id == 0 || param_id == UINT32_MAX);
-	cmi->signal_activate ().connect ([cmi, arv] () { if (cmi->get_active ()) {arv->set_region_gain_line (); }});
+	cmi->signal_activate ().connect ([cmi, arv] () { if (cmi->get_active ()) {arv->set_region_gain_line (); } });
 
-	_audio_region->foreach_plugin ([&rm_items, arv, &nth, &grp, &active_text, rfx_id, param_id](std::weak_ptr<RegionFxPlugin> wfx)
-	{
+	_audio_region->foreach_plugin ([&rm_items, arv, &nth, &grp, &active_text, rfx_id, param_id] (std::weak_ptr<RegionFxPlugin> wfx) {
 		std::shared_ptr<RegionFxPlugin> fx (wfx.lock ());
 		if (!fx) {
 			return;
@@ -327,7 +335,7 @@ AudioRegionEditor::refill_region_line ()
 			acm_items.push_back (RadioMenuElem (grp, label));
 			Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*> (&acm_items.back ());
 			cmi->set_active (active);
-			cmi->signal_activate ().connect ([cmi, arv, nth, i] () { if (cmi->get_active ()) {arv->set_region_fx_line (nth, i); }});
+			cmi->signal_activate ().connect ([cmi, arv, nth, i] () { if (cmi->get_active ()) {arv->set_region_fx_line (nth, i); } });
 			if (active) {
 				active_text = fx->name () + ": " + label;
 			}
@@ -340,7 +348,6 @@ AudioRegionEditor::refill_region_line ()
 		}
 		++nth;
 	});
-
 
 	if (rm_items.size () > 1) {
 		_show_on_touch.set_sensitive (true);
@@ -357,5 +364,4 @@ void
 AudioRegionEditor::on_unmap ()
 {
 	_show_on_touch.set_active (false);
-	ArdourDialog::on_unmap ();
 }

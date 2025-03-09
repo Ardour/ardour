@@ -19,6 +19,8 @@
 #ifndef _ardour_surface_websockets_json_h_
 #define _ardour_surface_websockets_json_h_
 
+#include <string>
+
 namespace ArdourSurface {
 
 namespace WebSocketsJSON

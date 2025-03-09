@@ -84,7 +84,7 @@ using namespace std;
 using namespace Glib;
 using namespace ArdourSurface;
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 OSC* OSC::_instance = 0;
 

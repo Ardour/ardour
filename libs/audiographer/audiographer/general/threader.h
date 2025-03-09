@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 
+#include "glibmm/threads.h"
 #include <glibmm/threadpool.h>
 #include <glibmm/timeval.h>
 #include <sigc++/slot.h>

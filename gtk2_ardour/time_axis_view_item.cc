@@ -500,7 +500,7 @@ TimeAxisViewItem::set_selected(bool yn)
 			selection_frame->set_outline_color (UIConfiguration::instance().color ("selected time axis frame"));
 			selection_frame->set_ignore_events (true);
 		}
-		selection_frame->set (frame->get().shrink (1.0));
+		selection_frame->set (frame->get().shrink (1.0, 0.0, 1.0, 0.0));
 		selection_frame->show ();
 	} else {
 		if (selection_frame) {
@@ -567,7 +567,7 @@ TimeAxisViewItem::set_height (double height)
 		}
 
 		if (selection_frame) {
-			selection_frame->set (frame->get().shrink (1.0));
+			selection_frame->set (frame->get().shrink (1.0, 0.0, 1.0, 0.0));
 		}
 	}
 }
@@ -799,10 +799,7 @@ TimeAxisViewItem::set_samples_per_pixel (double fpp)
 	samples_per_pixel = fpp;
 	set_position (this->get_position(), this);
 
-	double end_pixel = trackview.editor().time_to_pixel (time_position + get_duration());
-	double first_pixel = trackview.editor().time_to_pixel (time_position);
-
-	reset_width_dependent_items (end_pixel - first_pixel);
+	reset_width_dependent_items (trackview.editor().time_delta_to_pixel (time_position, time_position + get_duration()));
 }
 
 void
@@ -834,7 +831,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 			frame->set_x1 (pixel_width);
 
 			if (selection_frame) {
-				selection_frame->set (frame->get().shrink (1.0));
+				selection_frame->set (frame->get().shrink (1.0, 0.0, 1.0, 0.0));
 			}
 		}
 

@@ -19,7 +19,7 @@
 #include <cassert>
 #include <vector>
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"

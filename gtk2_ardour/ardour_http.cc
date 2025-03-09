@@ -63,6 +63,9 @@ HttpGet::ca_setopt (CURL* c)
 	}
 	if (ca_info || ca_path) {
 		curl_easy_setopt (c, CURLOPT_SSL_VERIFYPEER, 1);
+	} else {
+		curl_easy_setopt (c, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_easy_setopt (c, CURLOPT_SSL_VERIFYHOST, 0);
 	}
 }
 
@@ -213,7 +216,7 @@ HttpGet::get (const char* url, bool with_error_logging)
 
 	if (!persist) {
 		::free (mem.data);
-	} // otherwise caller is expected to have free()d or re-used it.
+	} // otherwise caller is expected to have free()d or reused it.
 
 	error_buffer[0] = 0;
 	mem.data = NULL;

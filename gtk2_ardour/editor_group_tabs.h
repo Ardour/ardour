@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <gtkmm/menu.h>
+#include <ytkmm/menu.h>
 #include "group_tabs.h"
 
 class Editor;

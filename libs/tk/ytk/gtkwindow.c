@@ -29,8 +29,8 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
-#include "gdk/gdk.h"
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdk.h"
+#include "ydk/gdkkeysyms.h"
 
 #include "gtkintl.h"
 
@@ -51,7 +51,7 @@
 #include "gtkalias.h"
 
 #ifdef GDK_WINDOWING_X11
-#include "gdk/gdkx.h"
+#include "ydk/gdkx.h"
 #endif
 
 enum {
@@ -8010,7 +8010,7 @@ gtk_XParseGeometry (const char   *string,
  * gtk_widget_show_all() on the contents and gtk_window_set_geometry_hints()
  * on the window.
  * |[
- * #include <gtk/gtk.h>
+ * #include <ytk/ytk.h>
  *    
  * static void
  * fill_with_content (GtkWidget *vbox)

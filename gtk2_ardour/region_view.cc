@@ -26,7 +26,7 @@
 #include <cmath>
 #include <algorithm>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 
@@ -48,7 +48,7 @@
 #include "region_view.h"
 #include "automation_region_view.h"
 #include "public_editor.h"
-#include "region_editor.h"
+#include "region_editor_window.h"
 #include "ghostregion.h"
 #include "ui_config.h"
 #include "utils.h"
@@ -82,7 +82,7 @@ RegionView::RegionView (ArdourCanvas::Container*                 parent,
         , _region (r)
         , sync_mark (nullptr)
         , sync_line (nullptr)
-        , editor (nullptr)
+        , _editor (nullptr)
         , current_visible_sync_position (0.0)
         , valid (false)
         , _disable_display (0)
@@ -162,7 +162,7 @@ RegionView::RegionView (ArdourCanvas::Container*                 parent,
         , _region (r)
         , sync_mark (nullptr)
         , sync_line (nullptr)
-        , editor (nullptr)
+        , _editor (nullptr)
         , current_visible_sync_position (0.0)
         , valid (false)
         , _disable_display (0)
@@ -181,7 +181,7 @@ RegionView::RegionView (ArdourCanvas::Container*                 parent,
 void
 RegionView::init (bool wfd)
 {
-	editor        = nullptr;
+	_editor       = nullptr;
 	valid         = true;
 	in_destructor = false;
 	wait_for_data = wfd;
@@ -203,6 +203,10 @@ RegionView::init (bool wfd)
 		frame_handle_end->set_data ("isleft", (void*) 0);
 		frame_handle_end->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_end, this));
 		frame_handle_end->raise_to_top();
+	}
+
+	if (frame) {
+		frame->Event.connect (sigc::mem_fun (*this, &RegionView::canvas_group_event));
 	}
 
 	if (name_text) {
@@ -268,7 +272,7 @@ RegionView::~RegionView ()
 
 	drop_silent_frames ();
 
-	delete editor;
+	delete _editor;
 }
 
 bool
@@ -749,19 +753,19 @@ RegionView::set_sync_mark_color ()
 void
 RegionView::show_region_editor ()
 {
-	if (!editor) {
-		editor = new RegionEditor (trackview.session(), this);
+	if (!_editor) {
+		_editor = new RegionEditorWindow (trackview.session(), this);
 	}
 
-	editor->present ();
-	editor->show_all();
+	_editor->present ();
+	_editor->show_all();
 }
 
 void
 RegionView::hide_region_editor()
 {
-	if (editor) {
-		editor->hide_all ();
+	if (_editor) {
+		_editor->hide_all ();
 	}
 }
 
@@ -1033,7 +1037,7 @@ RegionView::update_coverage_frame (LayerDisplay d)
 
 	if (cr) {
 		/* finish off the last rectangle */
-		cr->set_x1 (trackview.editor().duration_to_pixels (position.distance (end)));
+		cr->set_x1 (trackview.editor().time_delta_to_pixel (position, end));
 	}
 
 	if (frame_handle_start) {

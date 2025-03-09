@@ -23,7 +23,7 @@
 #include <map>
 #include <string>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 /*
  * Class for mapping PC keyboard keys to note pitches. Used by the

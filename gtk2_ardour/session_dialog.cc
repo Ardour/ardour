@@ -31,8 +31,8 @@
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 
-#include <gtkmm/filechooser.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/filechooser.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/basename.h"
 #include "pbd/failed_constructor.h"
@@ -76,110 +76,216 @@ using namespace ARDOUR;
 using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 
-SessionDialog::SessionDialog (bool require_new, const std::string& session_name, const std::string& session_path, const std::string& template_name, bool cancel_not_quit)
-	: ArdourDialog (_("Session Setup"), true, true)
-	, new_only (require_new)
+SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_name, const std::string& session_path, const std::string& template_name, bool cancel_not_quit)
+	: ArdourDialog (initial_tab == New ? _("Session Setup") : _("Recent Sessions"), true, true)
+	, _initial_tab (initial_tab)
 	, new_name_was_edited (false)
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
-	, _existing_session_chooser_used (false)
 {
 	set_position (WIN_POS_CENTER);
 	get_vbox()->set_spacing (6);
+	get_vbox()->pack_start (_open_table, false, false);
+
+	string image_path;
+	Searchpath rc (ARDOUR::ardour_data_search_path());
+	rc.add_subdirectory_to_paths ("resources");
+
+	if (find_file (rc, PROGRAM_NAME "-small-splash.png", image_path)) {
+		Gtk::Image* image;
+		if ((image = manage (new Gtk::Image (image_path))) != 0) {
+			_open_table.attach (*image, 0,1,  0,1, FILL, FILL, 0, 6);
+		}
+	}
+
+	/* Possible update message */
+	if (ARDOUR_UI::instance()->announce_string() != "") {
+		_info_box.set_border_width (12);
+		_info_box.set_spacing (6);
+
+		_info_box.pack_start (info_scroller_label, false, false);
+
+		info_scroller_count = 0;
+		info_scroller_connection = Glib::signal_timeout().connect (mem_fun(*this, &SessionDialog::info_scroller_update), 50);
+
+		ArdourButton *updates_button = manage (new ArdourButton (_("Check the website for more...")));
+
+		updates_button->signal_clicked.connect (mem_fun(*this, &SessionDialog::updates_button_clicked));
+		set_tooltip (*updates_button, _("Click to open the program website in your web browser"));
+
+		_info_box.pack_start (*updates_button, false, false);
+
+		_info_box.show_all ();
+	}
+#ifndef LIVETRAX
+	/* no update message for trax, show license here */
+	_open_table.attach (_info_box, 1,3, 0,1, FILL, FILL, 0, 6);
+#endif
+	
+	new_button.set_text("NEW");
+	new_button.set_name ("tab button");
+	new_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::new_button_pressed), false);
+	new_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
+
+	recent_button.set_text("RECENT");
+	recent_button.set_name ("tab button");
+	recent_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::recent_button_pressed), false);
+	recent_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
+
+	existing_button.set_text("OPEN");
+	existing_button.set_name ("tab button");
+	existing_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::existing_button_pressed), false);
+	existing_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
+
+	prefs_button.set_text("SETTINGS");
+	prefs_button.set_name ("tab button");
+	prefs_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::prefs_button_pressed), false);
+	prefs_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
+
+	Glib::RefPtr<SizeGroup> grp = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
+	grp->add_widget(new_button);
+	grp->add_widget(recent_button);
+	grp->add_widget(existing_button);
+	grp->add_widget(prefs_button);
+
+	ArdourHSpacer *spacer = manage (new ArdourHSpacer(1.0));
+	spacer->set_size_request(-1, 12);
+	_open_table.attach (*spacer,           0,3, 1,2, FILL|EXPAND, SHRINK, 0, 6);
+
+	_open_table.attach (new_button,        0,1, 2,3, FILL, FILL);
+	_open_table.attach (recent_button,     0,1, 3,4, FILL, FILL);
+	_open_table.attach (existing_button,   0,1, 4,5, FILL, FILL);
+#if 0
+	_open_table.attach (prefs_button,      0,1, 5,6, FILL, FILL);
+#endif
+
+	Label *vspacer = manage (new Label());
+	vspacer->set_size_request(8, -1);
+	_open_table.attach (*vspacer,          1,2, 1,6, FILL, FILL|EXPAND, 0, 0);
+	_open_table.attach (_tabs,             2,3, 2,6, FILL|EXPAND, FILL|EXPAND, 0, 0);
+
+	_tabs.set_show_tabs(false);
+	_tabs.set_show_border(false);
+
+	_tabs.append_page(session_new_vbox);
+	_tabs.append_page(recent_vbox);
+	_tabs.append_page(existing_session_chooser);
+
+	session_new_vbox.show_all();
+	recent_vbox.show_all();
+	existing_session_chooser.show_all();
+
+	_tabs.show_all();
 
 	cancel_button = add_button ((cancel_not_quit ? Stock::CANCEL : Stock::QUIT), RESPONSE_CANCEL);
-	back_button = add_button (Stock::GO_BACK, RESPONSE_NO);
-	open_button = add_button (Stock::OPEN, RESPONSE_ACCEPT);
 
-	back_button->signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::back_button_pressed), false);
+	open_button = add_button (Stock::OPEN, RESPONSE_ACCEPT);
 	open_button->signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::open_button_pressed), false);
 
-	open_button->set_sensitive (false);
-	back_button->set_sensitive (false);
+	_disable_plugins.set_label (_("Safe Mode: Disable all Plugins"));
+	_disable_plugins.set_can_focus ();
+	_disable_plugins.set_relief (Gtk::RELIEF_NORMAL);
+	_disable_plugins.set_mode (true);
+	_disable_plugins.set_active (ARDOUR::Session::get_disable_all_loaded_plugins());
+	_disable_plugins.set_border_width(0);
+#ifndef LIVETRAX
+	_disable_plugins.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::disable_plugins_clicked));
 
-	/* this is where announcements will be displayed, but it may be empty
-	 * and invisible most of the time.
-	 */
+	cancel_button->get_parent ()->remove (*cancel_button);
+	open_button->get_parent ()->remove (*open_button);
+	ButtonBox* bbox = manage (new HButtonBox (BUTTONBOX_DEFAULT_STYLE, 5));
+	bbox->add (*cancel_button);
+	bbox->add (*open_button);
 
-	info_frame.set_shadow_type(SHADOW_ETCHED_OUT);
-	info_frame.set_no_show_all (true);
-	info_frame.set_border_width (12);
-	get_vbox()->pack_start (info_frame, false, false);
+	HBox* abx = manage (new HBox (false, 5));
+	abx->pack_end (*bbox, false, false);
+	abx->pack_start (_disable_plugins, true, true);
+
+	get_action_area ()->add (*abx);
+#endif
 
 	if (!template_name.empty()) {
 		load_template_override = template_name;
 	}
 
-	setup_new_session_page ();
-
-	if (!require_new) {
-		setup_initial_choice_box ();
-		get_vbox()->pack_start (ic_vbox, true, true);
-	} else {
-		get_vbox()->pack_start (session_new_vbox, true, true);
-	}
-
-	get_vbox()->show_all ();
-
 	/* fill data models and show/hide accordingly */
 
+	setup_new_session_page ();
+	setup_existing_box ();
 	populate_session_templates ();
+	setup_untitled_session ();
+	setup_recent_sessions ();
+
+	recent_vbox.pack_start (recent_scroller, true, true);
+
+	get_vbox()->show_all ();
 
 	if (recent_session_model) {
 		int cnt = redisplay_recent_sessions ();
 		if (cnt > 0) {
 			recent_scroller.show();
 			recent_label.show ();
-
-			if (cnt > 4) {
-				recent_scroller.set_size_request (-1, 300);
-			} else {
-				recent_scroller.set_size_request (-1, 80);
-			}
+			recent_scroller.set_size_request (-1, 300);
 		} else {
 			recent_scroller.hide();
 			recent_label.hide ();
 		}
 	}
-	inital_height = get_height();
-	inital_width = get_width();
 
-	if (require_new) {
-		setup_untitled_session ();
-	}
-
-	disallow_idle ();
-}
-
-SessionDialog::SessionDialog ()
-	: ArdourDialog (_("Recent Sessions"), true, true)
-	, new_only (false)
-	, _existing_session_chooser_used (false) // caller must check should_be_new
-{
-	get_vbox()->set_spacing (6);
-
-	cancel_button = add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	open_button = add_button (Stock::OPEN, RESPONSE_ACCEPT);
-	open_button->set_sensitive (false);
-
-	setup_recent_sessions ();
-
-	get_vbox()->pack_start (recent_scroller, true, true);
-	get_vbox()->show_all ();
-
-	recent_scroller.show();
-
-	int cnt = redisplay_recent_sessions ();
-	if (cnt > 4) {
-		recent_scroller.set_size_request (-1, 300);
-	} else {
-		recent_scroller.set_size_request (-1, 80);
-	}
-
+	_tabs.signal_switch_page().connect (sigc::mem_fun (*this, &SessionDialog::tab_page_switched));
 	disallow_idle ();
 }
 
 SessionDialog::~SessionDialog()
 {
+}
+
+void
+SessionDialog::on_show ()
+{
+	ArdourDialog::on_show ();
+
+	_tabs.set_current_page(3); // force change
+	switch (_initial_tab) {
+		case New:
+			_tabs.set_current_page(0);
+			break;
+		case Open:
+			_tabs.set_current_page(2);
+			break;
+		default:
+			_tabs.set_current_page(1);
+			break;
+	}
+}
+
+void
+SessionDialog::tab_page_switched(GtkNotebookPage*, guint page_number)
+{
+	/* clang-format off */
+	new_button.set_active_state      (page_number==0 ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	recent_button.set_active_state   (page_number==1 ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	existing_button.set_active_state (page_number==2 ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	prefs_button.set_active_state    (page_number==3 ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	/* clang-format on */
+
+	//check the status of each tab and sensitize the 'open' button appropriately
+	open_button->set_sensitive(false);
+	switch (page_number) {
+		case 0:
+			new_name_changed();
+			new_name_entry.select_region (0, -1);
+			new_name_entry.grab_focus ();
+			_disable_plugins.hide ();
+			break;
+		case 1:
+			recent_session_row_selected();
+			_disable_plugins.show ();
+			break;
+		case 2:
+			existing_file_selected();
+			_disable_plugins.show ();
+			break;
+	}
 }
 
 uint32_t
@@ -253,10 +359,6 @@ SessionDialog::master_channel_count ()
 bool
 SessionDialog::use_session_template () const
 {
-	if (!back_button->is_sensitive () && !new_only) {
-		/* open session -- not create a new one */
-		return false;
-	}
 
 	if (template_chooser.get_selection()->count_selected_rows() > 0) {
 		return true;
@@ -291,55 +393,67 @@ SessionDialog::clear_name ()
 std::string
 SessionDialog::session_name (bool& should_be_new)
 {
-	/* Try recent session selection */
-
-	TreeIter iter = recent_session_display.get_selection()->get_selected();
-
-	if (iter) {
-		should_be_new = false;
-		string s = (*iter)[recent_session_columns.fullpath];
-		if (Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
-			return PBD::basename_nosuffix (s);
-		}
-		return (*iter)[recent_session_columns.visible_name];
-	}
-
-	if (_existing_session_chooser_used) {
-		/* existing session chosen from file chooser */
-		should_be_new = false;
-		return existing_session_chooser.get_filename ();
-	} else {
+	switch (_tabs.get_current_page()) {
+	case 0: {
 		should_be_new = true;
 		string val = new_name_entry.get_text ();
 		strip_whitespace_edges (val);
 		return val;
+	} break;
+	case 1: {
+		/* Try recent session selection */
+		TreeIter iter = recent_session_display.get_selection()->get_selected();
+		if (iter) {
+			should_be_new = false;
+			string s = (*iter)[recent_session_columns.fullpath];
+			if (Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
+				return PBD::basename_nosuffix (s);
+			}
+			return (*iter)[recent_session_columns.visible_name];
+		}
+	} break;
+	case 2: {
+		/* existing session chosen from file chooser */
+		should_be_new = false;
+		return existing_session_chooser.get_filename ();
+	} break;
 	}
+
+	return "";
 }
 
 std::string
 SessionDialog::session_folder ()
 {
-	/* Try recent session selection */
-
-	TreeIter iter = recent_session_display.get_selection()->get_selected();
-
-	if (iter) {
-		string s = (*iter)[recent_session_columns.fullpath];
-		if (Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
-			return Glib::path_get_dirname (s);
-		}
-		return s;
+	switch (_tabs.get_current_page()) {
+		case 0:
+			{
+				std::string val = new_name_entry.get_text();
+				strip_whitespace_edges (val);
+				std::string legal_session_folder_name = legalize_for_path (val);
+				return Glib::build_filename (new_folder_chooser.get_filename (), legal_session_folder_name);
+			}
+		case 1:
+			{
+				/* Try recent session selection */
+				TreeIter iter = recent_session_display.get_selection()->get_selected();
+				if (iter) {
+					string s = (*iter)[recent_session_columns.fullpath];
+					if (Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
+						return Glib::path_get_dirname (s);
+					}
+					return s;
+				}
+			}
+			break;
+		case 2:
+			/* existing session chosen from file chooser */
+			return Glib::path_get_dirname (existing_session_chooser.get_current_folder ());
+		default:
+			break;
 	}
-
-	if (_existing_session_chooser_used) {
-		/* existing session chosen from file chooser */
-		return Glib::path_get_dirname (existing_session_chooser.get_current_folder ());
-	} else {
-		std::string val = new_name_entry.get_text();
-		strip_whitespace_edges (val);
-		std::string legal_session_folder_name = legalize_for_path (val);
-		return Glib::build_filename (new_folder_chooser.get_filename (), legal_session_folder_name);
-	}
+	assert (0);
+	return "";
 }
 
 Temporal::TimeDomain
@@ -378,84 +492,11 @@ SessionDialog::setup_recent_sessions ()
 }
 
 void
-SessionDialog::setup_initial_choice_box ()
+SessionDialog::setup_existing_box ()
 {
-	ic_vbox.set_spacing (6);
-
-	HBox* centering_hbox = manage (new HBox);
-	VBox* centering_vbox = manage (new VBox);
-
-	centering_vbox->set_spacing (6);
-
-	Label* new_label = manage (new Label);
-	new_label->set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", _("New Session")));
-	new_label->set_justify (JUSTIFY_CENTER);
-
-	ic_new_session_button.add (*new_label);
-	ic_new_session_button.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::new_session_button_clicked));
-
-	Gtk::HBox* hbox = manage (new HBox);
-	Gtk::VBox* vbox = manage (new VBox);
-	hbox->set_spacing (12);
-	vbox->set_spacing (12);
-
-	string image_path;
-
-	Searchpath rc (ARDOUR::ardour_data_search_path());
-	rc.add_subdirectory_to_paths ("resources");
-
-	if (find_file (rc, PROGRAM_NAME "-small-splash.png", image_path)) {
-		Gtk::Image* image;
-		if ((image = manage (new Gtk::Image (image_path))) != 0) {
-			hbox->pack_start (*image, false, false);
-		}
-	}
-
-	vbox->pack_start (ic_new_session_button, true, true, 20);
-	hbox->pack_start (*vbox, true, true, 20);
-
-	centering_vbox->pack_start (*hbox, false, false);
-
-	/* Possible update message */
-
-	if (ARDOUR_UI::instance()->announce_string() != "" ) {
-
-		Box *info_box = manage (new VBox);
-		info_box->set_border_width (12);
-		info_box->set_spacing (6);
-
-		info_box->pack_start (info_scroller_label, false, false);
-
-		info_scroller_count = 0;
-		info_scroller_connection = Glib::signal_timeout().connect (mem_fun(*this, &SessionDialog::info_scroller_update), 50);
-
-		Gtk::Button *updates_button = manage (new Gtk::Button (_("Check the website for more...")));
-
-		updates_button->signal_clicked().connect (mem_fun(*this, &SessionDialog::updates_button_clicked) );
-		set_tooltip (*updates_button, _("Click to open the program website in your web browser"));
-
-		info_box->pack_start (*updates_button, false, false);
-
-		info_frame.add (*info_box);
-		info_box->show_all ();
-		info_frame.show ();
-	}
-
-	/* recent session scroller */
-	setup_recent_sessions ();
-
-	recent_label.set_no_show_all (true);
-	recent_scroller.set_no_show_all (true);
-
-	recent_label.set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", _("Recent Sessions")));
-
-	centering_vbox->pack_start (recent_label, false, false, 12);
-	centering_vbox->pack_start (recent_scroller, true, true);
-
 	/* Browse button */
 
-	existing_session_chooser.set_title (_("Select session file"));
-	existing_session_chooser.signal_file_set().connect (sigc::mem_fun (*this, &SessionDialog::existing_session_selected));
+	existing_session_chooser.set_size_request (450, 300);
 	existing_session_chooser.set_current_folder(poor_mans_glob (Config->get_default_session_parent_dir()));
 
 	FileFilter session_filter;
@@ -484,69 +525,83 @@ SessionDialog::setup_initial_choice_box ()
 
 	Gtkmm2ext::add_volume_shortcuts (existing_session_chooser);
 
-	Label* browse_label = manage (new Label);
-	browse_label->set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", _("Other Sessions")));
+	existing_session_chooser.signal_selection_changed().connect (mem_fun (this, &SessionDialog::existing_file_selected));
+	existing_session_chooser.signal_file_activated().connect (sigc::mem_fun (*this, &SessionDialog::existing_file_activated));
+}
 
-	centering_vbox->pack_start (*browse_label, false, false, 12);
-	centering_vbox->pack_start (existing_session_chooser, false, false);
+void
+SessionDialog::existing_file_selected ()
+{
+	if (_tabs.get_current_page()!=2) {
+		//gtk filechooser is threaded; don't allow it to mess with open_button sensitivity when it's not actually visible
+		return;
+	}
 
-	/* --disable plugins UI */
+	open_button->set_sensitive(false);
 
-	_disable_plugins.set_label (_("Safe Mode: Disable all Plugins"));
-	_disable_plugins.set_can_focus ();
-	_disable_plugins.set_relief (Gtk::RELIEF_NORMAL);
-	_disable_plugins.set_mode (true);
-	_disable_plugins.set_active (ARDOUR::Session::get_disable_all_loaded_plugins());
-	_disable_plugins.set_border_width(0);
-	_disable_plugins.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::disable_plugins_clicked));
-	centering_vbox->pack_start (_disable_plugins, false, false);
+	float sr;
+	SampleFormat sf;
+	string pv;
+	XMLNode   engine_hints ("EngineHints");
 
-	/* pack it all up */
-
-	centering_hbox->pack_start (*centering_vbox, true, true);
-	ic_vbox.pack_start (*centering_hbox, true, true);
-	ic_vbox.show_all ();
+	std::string s = existing_session_chooser.get_filename ();
+	if (Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
+		switch (Session::get_info_from_path (s, sr, sf, pv, &engine_hints)) {
+			case 0: {
+				//TODO: display the rate somewhere? check that our engine can open this rate?
+				/* OK */
+			} break;
+			case -1:
+				error << string_compose (_("Session file %1 does not exist"), s) << endmsg;
+				return;
+			break;
+			case -3:
+				error << string_compose (_("Session %1 is from a newer version of %2"), s, PROGRAM_NAME) << endmsg;
+				return;
+			break;
+			default:
+				error << string_compose (_("Cannot get existing session information from %1"), s) << endmsg;
+				//fallthrough
+		}
+		open_button->set_sensitive(true);  //still potentially openable; checks for session archives, .ptf, and .aaf will have to occur later
+	}
 }
 
 void
 SessionDialog::session_selected ()
 {
-	/* HACK HACK HACK ... change the "Apply" button label
-	   to say "Open"
-	*/
-
-	Gtk::Widget* tl = ic_vbox.get_toplevel();
-	Gtk::Window* win;
-	if ((win = dynamic_cast<Gtk::Window*>(tl)) != 0) {
-		/* ::get_default_widget() is not wrapped in gtkmm */
-		Gtk::Widget* def = wrap (gtk_window_get_default_widget (win->gobj()));
-		Gtk::Button* button;
-		if ((button = dynamic_cast<Gtk::Button*>(def)) != 0) {
-			button->set_label (_("Open"));
-		}
-	}
-}
-
-void
-SessionDialog::new_session_button_clicked ()
-{
-	_existing_session_chooser_used = false;
-	recent_session_display.get_selection()->unselect_all ();
-
-	get_vbox()->remove (ic_vbox);
-	get_vbox()->pack_start (session_new_vbox, true, true);
-
-	back_button->set_sensitive (true);
-	setup_untitled_session ();
 }
 
 bool
-SessionDialog::back_button_pressed (GdkEventButton*)
+SessionDialog::new_button_pressed (GdkEventButton*)
 {
-	get_vbox()->remove (session_new_vbox);
-	back_button->set_sensitive (false);
-	get_vbox()->pack_start (ic_vbox);
-	resize(inital_height, inital_width);
+	_tabs.set_current_page(0);
+
+	return true;
+}
+
+bool
+SessionDialog::recent_button_pressed (GdkEventButton*)
+{
+	_tabs.set_current_page(1);
+
+	return true;
+}
+
+bool
+SessionDialog::existing_button_pressed (GdkEventButton*)
+{
+	_tabs.set_current_page(2);
+
+	return true;
+}
+
+bool
+SessionDialog::prefs_button_pressed (GdkEventButton*)
+{
+	_tabs.set_current_page(3);
+
+	open_button->set_sensitive(false);  //do not allow to open a session from this page
 
 	return true;
 }
@@ -565,11 +620,48 @@ void
 SessionDialog::setup_untitled_session ()
 {
 	new_name_entry.set_text (string_compose (_("Untitled-%1"), Glib::DateTime::create_now_local().format ("%F-%H-%M-%S")));
-	new_name_entry.select_region (0, -1);
 	new_name_was_edited = false;
+}
 
-	back_button->set_sensitive (true);
-	new_name_entry.grab_focus ();
+void
+SessionDialog::delete_selected_template ()
+{
+	Gtk::TreeModel::const_iterator current_selection = template_chooser.get_selection()->get_selected ();
+
+	if (!current_selection) {
+		return;
+	}
+
+	if (!current_selection->get_value (session_template_columns.removable)) {
+		ArdourMessageDialog msg (("This type of template cannot be deleted"));
+		msg.run ();
+		return;  //cannot delete built-in scripts
+	}
+
+	PBD::remove_directory (current_selection->get_value (session_template_columns.path));
+
+	template_model->erase (current_selection);
+
+	populate_session_templates ();
+}
+bool
+SessionDialog::template_button_press (GdkEventButton* ev)
+{
+	if (Gtkmm2ext::Keyboard::is_context_menu_event (ev)) {
+		show_template_context_menu (ev->button, ev->time);
+		/* return false to select item under the mouse */
+	}
+	return false;
+}
+
+void
+SessionDialog::show_template_context_menu (int button, int time)
+{
+	using namespace Gtk::Menu_Helpers;
+	Gtk::Menu* menu = ARDOUR_UI::instance()->shared_popup_menu ();
+	MenuList&  items = menu->items ();
+	items.push_back (MenuElem (_("Delete the selected Template"), hide_return (sigc::mem_fun (*this, &SessionDialog::delete_selected_template))));
+	menu->popup (button, time);
 }
 
 void
@@ -601,6 +693,7 @@ SessionDialog::populate_session_templates ()
 		row[session_template_columns.description] = (*s)->description;
 		row[session_template_columns.modified_with_short] = string_compose ("{%1}", _("Factory Template"));
 		row[session_template_columns.modified_with_long] = string_compose ("{%1}", _("Factory Template"));
+		row[session_template_columns.removable] = false;
 	}
 
 	//Add any "template sessions" found in the user's preferences folder
@@ -614,6 +707,7 @@ SessionDialog::populate_session_templates ()
 		row[session_template_columns.description] = (*x).description;
 		row[session_template_columns.modified_with_long] = (*x).modified_with;
 		row[session_template_columns.modified_with_short] = (*x).modified_with.substr(0, (*x).modified_with.find(" "));
+		row[session_template_columns.removable] = true;
 	}
 
 	//Add an explicit 'Empty Template' item
@@ -623,6 +717,7 @@ SessionDialog::populate_session_templates ()
 	row[session_template_columns.description] = _("An empty session with factory default settings.\n\nSelect this option if you are importing files to mix.");
 	row[session_template_columns.modified_with_short] = ("");
 	row[session_template_columns.modified_with_long] = ("");
+	row[session_template_columns.removable] = false;
 
 	//auto-select the first item in the list
 	Gtk::TreeModel::Row first = template_model->children()[0];
@@ -634,7 +729,6 @@ SessionDialog::populate_session_templates ()
 void
 SessionDialog::setup_new_session_page ()
 {
-	session_new_vbox.set_border_width (8);
 	session_new_vbox.set_spacing (8);
 
 	Label* name_label = manage (new Label);
@@ -722,7 +816,7 @@ SessionDialog::setup_new_session_page ()
 	//template_desc is the textview that displays the currently selected template's description
 	template_desc.set_editable (false);
 	template_desc.set_wrap_mode (Gtk::WRAP_WORD);
-	template_desc.set_size_request (300,400);
+	template_desc.set_size_request (300,300);
 	template_desc.set_name (X_("TextOnBackground"));
 	template_desc.set_border_width (6);
 
@@ -732,17 +826,23 @@ SessionDialog::setup_new_session_page ()
 	template_chooser.append_column (_("Template"), session_template_columns.name);
 #ifdef MIXBUS
 	template_chooser.append_column (_("Modified With"), session_template_columns.modified_with_short);
-#endif
 	template_chooser.set_headers_visible (true);
+#else
+	template_chooser.set_headers_visible (false);  //there is only one column and its purpose should be obvious
+#endif
 	template_chooser.get_selection()->set_mode (SELECTION_SINGLE);
 	template_chooser.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::template_row_selected));
+	template_chooser.signal_button_press_event ().connect (sigc::mem_fun (*this, &SessionDialog::template_button_press), false);
 	template_chooser.set_sensitive (true);
 	if (UIConfiguration::instance().get_use_tooltips()) {
 		template_chooser.set_tooltip_column(4); // modified_with_long
 	}
+	template_chooser.set_size_request (150,300);
 
 	session_new_vbox.pack_start (*template_hbox, true, true);
+#ifndef LIVETRAX
 	session_new_vbox.pack_start (*timebase_box, false, true);
+#endif
 	session_new_vbox.pack_start (*folder_box, false, true);
 	session_new_vbox.pack_start (*name_hbox, false, true);
 	session_new_vbox.show_all ();
@@ -877,6 +977,16 @@ SessionDialog::redisplay_recent_sessions ()
 			continue;
 		}
 
+#ifdef LIVETRAX
+		/* check 'modified-with' */
+		if (program_version.empty()) {
+			continue;
+		}
+		if (program_version.rfind (PROGRAM_NAME, 0) != 0) {
+			continue;
+		}
+#endif
+
 		GStatBuf gsb;
 		g_stat (s.c_str(), &gsb);
 
@@ -1008,6 +1118,12 @@ SessionDialog::redisplay_recent_sessions ()
 	}
 	recent_session_model->set_sort_column (abs (sort) -1, sort < 0 ? Gtk::SORT_DESCENDING : Gtk::SORT_ASCENDING);
 
+	//auto-select the first item in the list
+	Gtk::TreeModel::Row first = recent_session_model->children()[0];
+	if(first) {
+		recent_session_display.get_selection()->select(first);
+	}
+
 	return session_snapshot_count;
 }
 
@@ -1057,7 +1173,7 @@ SessionDialog::recent_row_activated (const Gtk::TreePath&, Gtk::TreeViewColumn*)
 bool
 SessionDialog::recent_button_press (GdkEventButton* ev)
 {
-	if ((ev->type == GDK_BUTTON_PRESS) && (ev->button == 3) ) {
+	if ((ev->type == GDK_BUTTON_PRESS) && (ev->button == 3)) {
 
 		TreeModel::Path path;
 		TreeViewColumn* column;
@@ -1125,15 +1241,12 @@ SessionDialog::disable_plugins_clicked ()
 }
 
 void
-SessionDialog::existing_session_selected ()
+SessionDialog::existing_file_activated ()
 {
-	_existing_session_chooser_used = true;
-	recent_session_display.get_selection()->unselect_all();
-	/* mark this sensitive in case we come back here after a failed open
-	 * attempt and the user has hacked up the fix. sigh.
-	 */
-	open_button->set_sensitive (true);
-	response (RESPONSE_ACCEPT);
+	std::string s = existing_session_chooser.get_filename ();
+	if (Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
+		response (RESPONSE_ACCEPT);
+	}
 }
 
 void
@@ -1149,7 +1262,7 @@ SessionDialog::info_scroller_update()
 	info_scroller_count++;
 
 	char buf[512];
-	snprintf (buf, std::min(info_scroller_count,sizeof(buf)-1), "%s", ARDOUR_UI::instance()->announce_string().c_str() );
+	snprintf (buf, std::min(info_scroller_count,sizeof(buf)-1), "%s", ARDOUR_UI::instance()->announce_string().c_str());
 	buf[info_scroller_count] = 0;
 	info_scroller_label.set_text (buf);
 	info_scroller_label.show();

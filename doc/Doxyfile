@@ -875,10 +875,10 @@ INPUT                  = mainpage.md \
                          ../libs/surfaces \
                          ../libs/temporal \
                          ../libs/tk/suil/suil \
-                         ../libs/tk/ydk/ydk/gdk \
-                         ../libs/tk/ytk/ytk/gtk \
-                         ../libs/tk/ydkmm/ydkmm/gdkmm \
-                         ../libs/tk/ytkmm/ytkmm/gtkmm \
+                         ../libs/tk/ydk/ydk \
+                         ../libs/tk/ytk/ytk \
+                         ../libs/tk/ydkmm/ydkmm \
+                         ../libs/tk/ytkmm/ytkmm \
                          ../libs/waveview \
                          ../libs/widgets \
                          ../libs/zita-convolver \

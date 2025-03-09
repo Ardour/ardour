@@ -1,7 +1,7 @@
 
 /* Generated data (by glib-mkenums) */
 
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <ydk-pixbuf/ydk-pixbuf.h>
 
 /* enumerations from "gdk-pixbuf-core.h" */
 GType

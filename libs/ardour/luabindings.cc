@@ -204,7 +204,7 @@ luabridge::getIdentityKey ()
 /* ...and this is the ugly part of it.
  *
  * We need to forward declare classes from gtk2_ardour
- * AND explicily list classes which are used by gtk2_ardour's bindings.
+ * AND explicitly list classes which are used by gtk2_ardour's bindings.
  *
  * This is required because some of the GUI classes use objects from libardour
  * as function parameters or return values and the .exe would re-create
@@ -2424,6 +2424,14 @@ LuaBindings::common (lua_State* L)
 		// TODO add uint32_t cast, add operator==  !=
 		.endClass()
 
+		/* libardour class-enums */
+		.beginClass <AnyTime> ("AnyTime")
+		.addConstructor <void (*) (std::string)> ()
+		.addFunction ("str", &AnyTime::str)
+		.addFunction ("not_zero", &AnyTime::not_zero)
+		//.addData ("type", &AnyTime::type)
+		.endClass()
+
 		/* libardour enums */
 		.beginNamespace ("PluginType")
 		.addFunction ("name", &PluginManager::plugin_type_name)
@@ -2538,6 +2546,12 @@ LuaBindings::common (lua_State* L)
 		.addConst ("MonitoringInput", ARDOUR::MonitorState(MonitoringInput))
 		.addConst ("MonitoringDisk", ARDOUR::MonitorState(MonitoringDisk))
 		.addConst ("MonitoringCue", ARDOUR::MonitorState(MonitoringCue))
+		.endNamespace ()
+
+		.beginNamespace ("FastWindOp")
+		.addConst ("FastWindOff", ARDOUR::FastWindOp(FastWindOff))
+		.addConst ("FastWindVarispeed", ARDOUR::FastWindOp(FastWindVarispeed))
+		.addConst ("FastWindLocate", ARDOUR::FastWindOp(FastWindLocate))
 		.endNamespace ()
 
 		.beginNamespace ("MutePoint")
@@ -3006,7 +3020,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_" # var, &RCConfiguration::set_##var) \
 		.addProperty (#var, &RCConfiguration::get_##var, &RCConfiguration::set_##var)
 
-#include "ardour/rc_configuration_vars.h"
+#include "ardour/rc_configuration_vars.inc.h"
 
 #undef CONFIG_VARIABLE
 #undef CONFIG_VARIABLE_SPECIAL
@@ -3025,7 +3039,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_" # var, &SessionConfiguration::set_##var) \
 		.addProperty (#var, &SessionConfiguration::get_##var, &SessionConfiguration::set_##var)
 
-#include "ardour/session_configuration_vars.h"
+#include "ardour/session_configuration_vars.inc.h"
 
 #undef CONFIG_VARIABLE
 #undef CONFIG_VARIABLE_SPECIAL

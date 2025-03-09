@@ -20,7 +20,7 @@
 
 #include <sys/time.h>
 #include <iostream>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include "canvas/debug.h"
 
 using namespace std;

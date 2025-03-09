@@ -21,7 +21,7 @@
 
 #include "ardour/types.h"
 
-#include <gtkmm/drawingarea.h>
+#include <ytkmm/drawingarea.h>
 
 namespace ARDOUR {
 	class MidiTrack;

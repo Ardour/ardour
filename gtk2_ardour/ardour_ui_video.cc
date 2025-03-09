@@ -38,7 +38,7 @@
 
 #include "pbd/gstdio_compat.h"
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/error.h"
 #include "pbd/openuri.h"

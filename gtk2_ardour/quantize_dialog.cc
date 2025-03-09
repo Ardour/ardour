@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/stock.h>
-#include <gtkmm/table.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/table.h>
 #include "gtkmm2ext/utils.h"
 
 #include "pbd/convert.h"

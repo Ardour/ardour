@@ -66,8 +66,9 @@ StepEditor::start_step_editing ()
 	_step_edit_chord_duration = Temporal::Beats();
 	step_edit_region.reset ();
 	step_edit_region_view = 0;
-	last_added_pitch = -1;
-	last_added_end = Temporal::Beats();
+	_last_added_beat = Temporal::Beats();
+	_tracker.reset ();
+	_chord_tracker.reset ();
 
 	resync_step_edit_position ();
 	prepare_step_edit_region ();
@@ -203,8 +204,15 @@ StepEditor::check_step_edit ()
 			break;
 		}
 
+		_tracker.track (buf);
+
 		if ((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON && size == 3) {
 			step_add_note (buf[0] & 0xf, buf[1], buf[2], Temporal::Beats());
+		}
+
+		/* note-off w/chord .. move to next beat */
+		if ((buf[0] & 0xf0) == MIDI_CMD_NOTE_OFF && size == 3 && _tracker.empty ()) {
+			step_to_next_chord ();
 		}
 	}
 	delete [] buf;
@@ -270,13 +278,6 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Tem
 
 	if (beat_duration == 0.0) {
 		beat_duration = StepEntry::instance().note_length();
-	} else if (beat_duration == 0.0) {
-		bool success;
-		beat_duration = _editor.get_draw_length_as_beats (success, step_edit_insert_position);
-
-		if (!success) {
-			return -1;
-		}
 	}
 
 	MidiStreamView* msv = _mtv.midi_view();
@@ -299,20 +300,18 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Tem
 	Temporal::Beats at = step_edit_beat_pos;
 	Temporal::Beats len = beat_duration;
 
-	if ((last_added_pitch >= 0) && (pitch == last_added_pitch) && (last_added_end == step_edit_beat_pos)) {
-
-		/* avoid any apparent note overlap - move the start of this note
-		   up by 1 tick from where the last note ended
-		*/
-
-		at  += Temporal::Beats::ticks(1);
-		len -= Temporal::Beats::ticks(1);
+	if (_last_added_beat != step_edit_beat_pos) {
+		_chord_tracker.reset ();
+		_last_added_beat = step_edit_beat_pos;
 	}
 
-	step_edit_region_view->step_add_note (channel, pitch, velocity, at, len);
+	if (!_step_edit_within_chord || !_chord_tracker.active (pitch, channel)) {
+		step_edit_region_view->step_add_note (channel, pitch, velocity, at, len);
+	}
 
-	last_added_pitch = pitch;
-	last_added_end = at+len;
+	if (_step_edit_within_chord) {
+		_chord_tracker.add (pitch, channel);
+	}
 
 	if (_step_edit_triplet_countdown > 0) {
 		_step_edit_triplet_countdown--;
@@ -326,13 +325,23 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Tem
 		step_edit_beat_pos += beat_duration;
 		step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 	} else {
-		step_edit_beat_pos += Temporal::Beats::ticks(1); // tiny, but no longer overlapping
 		_step_edit_chord_duration = max (_step_edit_chord_duration, beat_duration);
 	}
 
 	step_edit_region_view->set_step_edit_cursor_width (StepEntry::instance().note_length());
 
 	return 0;
+}
+
+void
+StepEditor::step_to_next_chord ()
+{
+	if (!step_edit_region_view || !_step_edit_within_chord) {
+		return;
+	}
+	step_edit_beat_pos += _step_edit_chord_duration;
+	step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
+	_chord_tracker.reset ();
 }
 
 void
@@ -370,14 +379,13 @@ void
 StepEditor::step_edit_toggle_chord ()
 {
 	if (_step_edit_within_chord) {
+		step_to_next_chord ();
 		_step_edit_within_chord = false;
-		if (step_edit_region_view) {
-			step_edit_beat_pos += _step_edit_chord_duration;
-			step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
-		}
+		_step_edit_chord_duration = Temporal::Beats();
 	} else {
 		_step_edit_triplet_countdown = 0;
 		_step_edit_within_chord = true;
+		_chord_tracker.reset ();
 	}
 }
 

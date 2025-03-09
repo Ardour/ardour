@@ -19,6 +19,7 @@
 #ifndef _ardour_rt_task_h_
 #define _ardour_rt_task_h_
 
+#include <functional>
 
 #include "ardour/graphnode.h"
 

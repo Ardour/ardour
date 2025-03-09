@@ -44,12 +44,16 @@ class VelocityDisplay
 	VelocityDisplay (EditingContext&, MidiViewBackground&, MidiView&, ArdourCanvas::Rectangle& base_rect, ArdourCanvas::Container&, GhostEvent::EventList& el, Gtkmm2ext::Color oc);
 	virtual ~VelocityDisplay ();
 
+	void hide ();
+	void show ();
+
 	void redisplay();
 	void add_note(NoteBase*);
 
 	void update_note (NoteBase*);
 
 	void update_ghost_event (GhostEvent*);
+	void color_ghost_event (GhostEvent*);
 	void update_note (GhostEvent* gev) { update_ghost_event (gev); }
 	void update_hit (GhostEvent* gev)  { update_ghost_event (gev); }
 
@@ -61,6 +65,9 @@ class VelocityDisplay
 	void drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev);
 
 	int y_position_to_velocity (double y) const;
+
+	void set_sensitive (bool yn);
+	bool sensitive () const;
 
 	void set_selected (bool);
 
@@ -89,6 +96,7 @@ class VelocityDisplay
 	bool drag_did_change;
 	bool selected;
 	GhostEvent::EventList::iterator _optimization_iterator;
+	bool _sensitive;
 
 	virtual bool base_event (GdkEvent*) = 0;
 	void set_size_and_position (GhostEvent&);

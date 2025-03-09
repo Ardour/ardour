@@ -304,6 +304,7 @@ class AnyTime {
 	enum Type {
 		Timecode,
 		BBT,
+		BBT_Offset,
 		Samples,
 		Seconds
 	};
@@ -311,14 +312,21 @@ class AnyTime {
 	Type type;
 
 	Timecode::Time     timecode;
-	Temporal::BBT_Time bbt;
+	union {
+		Temporal::BBT_Time bbt;
+		Temporal::BBT_Offset bbt_offset;
+	};
 
 	union {
 		samplecnt_t     samples;
 		double         seconds;
 	};
 
-	AnyTime() { type = Samples; samples = 0; }
+	AnyTime () : type (Samples), samples (0) {}
+	AnyTime (Temporal::BBT_Offset bt) : type (BBT_Offset), bbt_offset (bt) {}
+	AnyTime (std::string const &);
+
+	std::string str() const;
 
 	bool operator== (AnyTime const & other) const {
 		if (type != other.type) { return false; }
@@ -328,6 +336,8 @@ class AnyTime {
 			return timecode == other.timecode;
 		case BBT:
 			return bbt == other.bbt;
+		case BBT_Offset:
+			return bbt_offset == other.bbt_offset;
 		case Samples:
 			return samples == other.samples;
 		case Seconds:
@@ -344,6 +354,8 @@ class AnyTime {
 				timecode.seconds != 0 || timecode.frames != 0;
 		case BBT:
 			return bbt.bars != 0 || bbt.beats != 0 || bbt.ticks != 0;
+		case BBT_Offset:
+			return bbt_offset.bars != 0 || bbt_offset.beats != 0 || bbt_offset.ticks != 0;
 		case Samples:
 			return samples != 0;
 		case Seconds:

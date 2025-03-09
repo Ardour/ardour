@@ -30,7 +30,7 @@
 #include "gtkplug.h"
 #include "gtkplugprivate.h"
 
-#include "gdk/gdkwin32.h"
+#include "ydk/gdkwin32.h"
 
 #include "gtkwin32embed.h"
 #include "gtkalias.h"

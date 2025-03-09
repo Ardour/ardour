@@ -25,7 +25,7 @@
 #include "ardour/session_event.h"
 #include "ardour/rc_configuration.h"
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 using namespace ARDOUR;
 

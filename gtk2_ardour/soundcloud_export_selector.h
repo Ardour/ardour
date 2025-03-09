@@ -12,12 +12,14 @@
 #include <sstream>
 #include <vector>
 
-#include <gtkmm/box.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/label.h>
-#include <gtkmm/progressbar.h>
-#include <gtkmm/table.h>
+#include <ytkmm/box.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/label.h>
+#include <ytkmm/progressbar.h>
+#include <ytkmm/table.h>
+
+#include "ardour/session_handle.h"
 
 class SoundcloudExportSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {

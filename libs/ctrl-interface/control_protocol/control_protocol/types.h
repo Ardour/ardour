@@ -19,6 +19,7 @@
 #ifndef __ardour_control_protocol_types_h__
 #define __ardour_control_protocol_types_h__
 
+#include <memory>
 #include <vector>
 
 namespace ARDOUR {

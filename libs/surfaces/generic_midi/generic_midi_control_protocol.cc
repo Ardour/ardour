@@ -66,7 +66,7 @@
 #include "midifunction.h"
 #include "midiaction.h"
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 #include "pbd/i18n.h"
 

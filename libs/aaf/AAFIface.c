@@ -400,6 +400,76 @@ aafi_convertUnitUint64 (aafPosition_t value, aafRational_t* valueEditRate, aafRa
 	return (uint64_t)((double)value * (destEditRateFloat / valueEditRateFloat));
 }
 
+aafPosition_t
+aafi_getClipLength (AAF_Iface* aafi, aafiAudioClip* audioClip, aafRational_t* samplerate, char* isBeyondSource)
+{
+	if (!audioClip) {
+		return 0;
+	}
+
+	uint64_t              smallestFileLength  = 0;
+	aafiAudioEssenceFile* smallestEssenceFile = NULL;
+
+	/*
+	 * Common samplerate used for comparison, with a high resolution. Although it
+	 * is very unlikely that each essence file composing the clip has a different
+	 * samplerate, it is still possible...
+	 */
+
+	aafRational_t base_samplerate = { 192000, 1 };
+
+	aafiAudioEssencePointer* essencePointer = NULL;
+	AAFI_foreachEssencePointer (audioClip->essencePointerList, essencePointer)
+	{
+		uint64_t fileLen = aafi_convertUnitUint64 (essencePointer->essenceFile->length, essencePointer->essenceFile->samplerateRational, &base_samplerate);
+
+		if (!smallestFileLength || fileLen < smallestFileLength) {
+			smallestEssenceFile = essencePointer->essenceFile;
+			smallestFileLength  = fileLen;
+		}
+	}
+
+	if (!smallestEssenceFile || !smallestFileLength) {
+		if (!smallestEssenceFile) {
+			warning ("Clip has no source essence file");
+		} else if (smallestFileLength == 0) {
+			warning ("Could not check source file length (0 or not set)");
+		}
+
+		if (samplerate) {
+			return aafi_convertUnit (audioClip->len, audioClip->track->edit_rate, samplerate);
+		}
+
+		return aafi_convertUnit (audioClip->len, audioClip->track->edit_rate, smallestEssenceFile->samplerateRational);
+	}
+
+	aafPosition_t clipLen = 0;
+	aafPosition_t fileLen = 0;
+
+	if (samplerate) {
+		clipLen = aafi_convertUnit (audioClip->len, audioClip->track->edit_rate, samplerate);
+		fileLen = aafi_convertUnit (smallestEssenceFile->length, smallestEssenceFile->samplerateRational, samplerate);
+	} else {
+		clipLen = aafi_convertUnit (audioClip->len, audioClip->track->edit_rate, smallestEssenceFile->samplerateRational);
+		fileLen = smallestEssenceFile->length;
+	}
+
+	if (clipLen > fileLen) {
+		if (isBeyondSource) {
+			*isBeyondSource = 1;
+		}
+
+		warning ("Clip length (%li) is beyond the end of the smallest clip source file (%li). Using file length instead.", clipLen, fileLen);
+		return fileLen;
+	}
+
+	if (isBeyondSource) {
+		*isBeyondSource = 0;
+	}
+
+	return clipLen;
+}
+
 int
 aafi_removeTimelineItem (AAF_Iface* aafi, aafiTimelineItem* timelineItem)
 {

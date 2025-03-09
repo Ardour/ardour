@@ -19,7 +19,7 @@
 
 #include <string>
 
-#include <gtkmm/menu.h>
+#include <ytkmm/menu.h>
 
 #include "pbd/string_convert.h"
 

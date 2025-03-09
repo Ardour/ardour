@@ -63,7 +63,7 @@ using namespace std;
 
 #include "pbd/i18n.h"
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 FaderPort::FaderPort (Session& s)
 	: MIDISurface (s, X_("PreSonus FaderPort"), X_("FaderPort"), false)

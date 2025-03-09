@@ -19,18 +19,18 @@
 
 #include <vector>
 
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/box.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/table.h>
-#include <gtkmm/image.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/scale.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/treeview.h>
-#include <gtkmm/treestore.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/box.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/table.h>
+#include <ytkmm/image.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/scale.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/treeview.h>
+#include <ytkmm/treestore.h>
 
 namespace Gtk {
 	class CellRendererCombo;

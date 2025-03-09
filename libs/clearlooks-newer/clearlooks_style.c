@@ -19,7 +19,7 @@
  *
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <cairo.h>
 #include <math.h>
 #include <string.h>
@@ -133,11 +133,6 @@ clearlooks_style_draw_flat_box (DRAW_ARGS)
 		STYLE_FUNCTION (draw_tooltip) (cr, colors, &params, x, y, width, height);
 
 		cairo_destroy (cr);
-	}
-	else if ((CLEARLOOKS_STYLE (style)->style == CL_STYLE_GLOSSY || CLEARLOOKS_STYLE (style)->style == CL_STYLE_GUMMY) &&
-	         ((DETAIL("checkbutton") || DETAIL("radiobutton")) && state_type == GTK_STATE_PRELIGHT))
-	{
-		/* XXX: Don't draw any check/radiobutton bg in GLOSSY or GUMMY mode. */
 	}
 	else
 	{
@@ -902,8 +897,7 @@ clearlooks_style_draw_slider (DRAW_ARGS, GtkOrientation orientation)
 		slider.lower = FALSE;
 		slider.fill_level = FALSE;
 
-		if (clearlooks_style->style == CL_STYLE_GLOSSY) /* XXX! */
-			params.corners = CR_CORNER_ALL;
+		//params.corners = CR_CORNER_ALL;
 
 		STYLE_FUNCTION(draw_slider_button) (cr, &clearlooks_style->colors,
 		                               &params, &slider,
@@ -915,7 +909,7 @@ clearlooks_style_draw_slider (DRAW_ARGS, GtkOrientation orientation)
 		ScrollBarParameters scrollbar;
 
 		clearlooks_set_widget_parameters (widget, style, state_type, &params);
-		params.corners = CR_CORNER_NONE;
+		//params.corners = CR_CORNER_NONE;
 
 		scrollbar.has_color  = FALSE;
 		scrollbar.horizontal = (orientation == GTK_ORIENTATION_HORIZONTAL);
@@ -931,11 +925,9 @@ clearlooks_style_draw_slider (DRAW_ARGS, GtkOrientation orientation)
 		{
 			ge_gdk_color_to_cairo (&clearlooks_style->scrollbar_color, &scrollbar.color);
 			scrollbar.has_color = TRUE;
-		}
-
-		if ((clearlooks_style->style == CL_STYLE_GLOSSY || clearlooks_style->style == CL_STYLE_GUMMY)
-			&& !scrollbar.has_color)
+		} else {
 			scrollbar.color = colors->bg[0];
+		}
 
 		STYLE_FUNCTION(draw_scrollbar_slider) (cr, colors, &params, &scrollbar,
 		                                       x, y, width, height);
@@ -1640,12 +1632,6 @@ clearlooks_style_class_init (ClearlooksStyleClass * klass)
 	style_class->render_icon      = clearlooks_style_draw_render_icon;
 
 	clearlooks_register_style_classic (&clearlooks_style_class->style_functions[CL_STYLE_CLASSIC]);
-	clearlooks_style_class->style_functions[CL_STYLE_GLOSSY] = clearlooks_style_class->style_functions[CL_STYLE_CLASSIC];
-	clearlooks_register_style_glossy (&clearlooks_style_class->style_functions[CL_STYLE_GLOSSY]);
-	clearlooks_style_class->style_functions[CL_STYLE_INVERTED] = clearlooks_style_class->style_functions[CL_STYLE_CLASSIC];
-	clearlooks_register_style_inverted (&clearlooks_style_class->style_functions[CL_STYLE_INVERTED]);
-	clearlooks_style_class->style_functions[CL_STYLE_GUMMY] = clearlooks_style_class->style_functions[CL_STYLE_CLASSIC];
-	clearlooks_register_style_gummy (&clearlooks_style_class->style_functions[CL_STYLE_GUMMY]);
 }
 
 GType clearlooks_type_style = 0;

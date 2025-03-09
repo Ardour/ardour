@@ -29,7 +29,6 @@
 #include <sys/time.h>
 #include <errno.h>
 
-#include <boost/shared_array.hpp>
 #include <glibmm/miscutils.h>
 
 #include "midi++/types.h"
@@ -83,7 +82,7 @@ using namespace US2400;
 
 #include "pbd/i18n.h"
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 const int US2400Protocol::MODIFIER_OPTION = 0x1;
 const int US2400Protocol::MODIFIER_CONTROL = 0x2;

@@ -3190,9 +3190,15 @@ Playlist::combine (const RegionList& rl, std::shared_ptr<Track>)
 	pair<timepos_t,timepos_t> extent = pl->get_extent();
 	timepos_t zero (_type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime);
 
+	/* This may require regionFx processing, via AudioRegion::read_at */
+	ARDOUR::ProcessThread* pt = new ProcessThread ();
+	pt->get_buffers ();
 	for (uint32_t chn = 0; chn < channels; ++chn) {
 		sources.push_back (SourceFactory::createFromPlaylist (_type, _session, pl, id(), parent_name, chn, zero, extent.second, false, false));
 	}
+	pt->drop_buffers ();
+	delete pt;
+
 
 	/* now a new whole-file region using the list of sources */
 

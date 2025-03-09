@@ -27,6 +27,10 @@
 
 #include <glibmm/threads.h>
 
+#include "ardour/libardour_visibility.h"
+#include "ardour/types.h"
+
+#include "temporal/domain_swap.h"
 
 #include "pbd/signals.h"
 

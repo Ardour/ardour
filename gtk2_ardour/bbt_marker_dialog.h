@@ -18,10 +18,10 @@
 
 #pragma once
 
-#include <gtkmm/box.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/label.h>
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/box.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/label.h>
+#include <ytkmm/spinbutton.h>
 
 #include "temporal/tempo.h"
 #include "temporal/types.h"

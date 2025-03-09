@@ -19,11 +19,11 @@
 
 #pragma once
 
-#include <gtkmm/treeview.h>
-#include <gtkmm/treestore.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/colorselection.h>
-#include <gtkmm/button.h>
+#include <ytkmm/treeview.h>
+#include <ytkmm/treestore.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/colorselection.h>
+#include <ytkmm/button.h>
 
 #include "canvas/types.h"
 #include "canvas/canvas.h"

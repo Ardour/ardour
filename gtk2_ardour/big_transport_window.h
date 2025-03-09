@@ -32,7 +32,10 @@ public:
 	BigTransportWindow ();
 
 	void set_session (ARDOUR::Session *s) {
-		transport_ctrl.set_session (s);
+		ArdourWindow::set_session (s);
+		if (s) {
+			transport_ctrl.set_session (s);
+		}
 	}
 
 protected:

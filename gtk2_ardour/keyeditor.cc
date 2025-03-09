@@ -33,13 +33,13 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include <gtkmm/accelkey.h>
-#include <gtkmm/accelmap.h>
-#include <gtkmm/label.h>
-#include <gtkmm/separator.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/treemodelsort.h>
-#include <gtkmm/uimanager.h>
+#include <ytkmm/accelkey.h>
+#include <ytkmm/accelmap.h>
+#include <ytkmm/label.h>
+#include <ytkmm/separator.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/treemodelsort.h>
+#include <ytkmm/uimanager.h>
 
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/utils.h"

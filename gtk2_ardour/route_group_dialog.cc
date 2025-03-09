@@ -24,9 +24,9 @@
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 
-#include <gtkmm/table.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/table.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/messagedialog.h>
 
 #include "gtkmm2ext/colors.h"
 

@@ -26,7 +26,7 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/liststore.h>
+#include <ytkmm/liststore.h>
 
 #include "ardour/filename_extensions.h"
 #include "ardour/session.h"

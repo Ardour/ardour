@@ -16,9 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/frame.h>
-#include <gtkmm/label.h>
-#include <gtkmm/scrolledwindow.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/scrolledwindow.h>
 
 #include "ardour/audioengine.h"
 #include "ardour/io_plug.h"
@@ -93,12 +93,13 @@ void
 IOPluginWindow::set_session (Session* s)
 {
 	ArdourWindow::set_session (s);
-	_box_pre.set_session (s);
-	_box_post.set_session (s);
 
 	if (!_session) {
 		return;
 	}
+
+	_box_pre.set_session (s);
+	_box_post.set_session (s);
 	refill ();
 	_session->IOPluginsChanged.connect (_session_connections, invalidator (*this), std::bind (&IOPluginWindow::refill, this), gui_context ());
 }

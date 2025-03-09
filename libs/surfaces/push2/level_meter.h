@@ -23,6 +23,9 @@
 #include "canvas/container.h"
 #include "canvas/meter.h"
 
+#include "ardour/chan_count.h"
+#include "ardour/types.h"
+
 namespace ARDOUR {
 	class PeakMeter;
 }

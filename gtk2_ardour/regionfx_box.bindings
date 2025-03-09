@@ -1,0 +1,6 @@
+<Bindings name="RegionFx Box">
+  <Press>
+     <Binding key="Delete" action="RegionFxMenu/delete"/>
+     <Binding key="BackSpace" action="RegionFxMenu/backspace"/>
+  </Press>
+</Bindings>

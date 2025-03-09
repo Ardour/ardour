@@ -1,6 +1,10 @@
 /* always defined to indicate that i18n is enabled */
 /* #undef ENABLE_NLS */
 
+#ifdef _MSC_VER
+#define GETTEXT_PACKAGE "gtk20"
+#endif
+
 /* Define the location where the catalogs will be installed */
 #define GTK_LOCALEDIR "/ardour/share/locale"
 
@@ -14,15 +18,17 @@
 #define HAVE_BROKEN_WCTYPE 1
 #endif
 
+#ifndef _MSC_VER
 /* Define to 1 if you have the <ftw.h> header file. */
 #define HAVE_FTW_H 1
+#endif
 
 /* Define to 1 if you have the `getresuid' function. */
-#if !(defined PLATFORM_WINDOWS || defined __APPLE__)
+#if !(defined PLATFORM_WINDOWS || defined __APPLE__ || defined(__NetBSD__))
 #define HAVE_GETRESUID 1
 #endif
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__NetBSD__)
 /* Have GNU ftw */
 #define HAVE_GNU_FTW 1
 #endif
@@ -58,8 +64,10 @@
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
 
+#ifndef _MSC_VER
 /* Define to 1 if you have the <sys/param.h> header file. */
 #define HAVE_SYS_PARAM_H 1
+#endif
 
 /* Define to 1 if sys/sysinfo.h is available */
 #if !(defined PLATFORM_WINDOWS || defined __APPLE__)

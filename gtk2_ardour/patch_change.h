@@ -23,6 +23,11 @@
 
 #include "canvas/flag.h"
 
+#include <ytkmm/menu.h>
+
+#include "midi_view.h"
+#include "patch_change_dialog.h"
+
 class MidiRegionView;
 
 namespace MIDI {

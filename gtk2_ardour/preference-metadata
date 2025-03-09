@@ -10,9 +10,6 @@
 # [never-do-that-thing]
 #   thing that action prevent never stop otherthing
 #
-# The file is processed via tools/process-metadata to create build/gtk2_ardour/configuration_metadata.h which is then incorporated via an #include directive
-# within gtk2_ardour/ui_config.cc
-#
 # Whenever a new preference variable is added to the source code, its name should also be added here.
 #
 # GUIDANCE:
@@ -20,6 +17,12 @@
 #   use "synchronization" rather than sync, because that will match both "sync" and "synchronization". For languages that create plurals with a suffix,
 #   prefer plural forms for the same reason.
 #
+# This file is processed automatically when invoking a custom tool manually:
+#
+#   tools/process-metadata gtk2_ardour/preference-metadata > gtk2_ardour/configuration_metadata.inc.h
+#
+# The generated file is incorporated via an #include directive within gtk2_ardour/ui_config.cc .
+
 [SECTION:UI]
 
 [action-table-columns]
@@ -49,9 +52,9 @@
 [clock-display-limit]
   clock display limit length maximum duration
 [color-file]
- theme colors appearance style themeing
+ theme colors appearance style theming
 [color-regions-using-track-color]
- theme colors appearance style themeing
+ theme colors appearance style theming
 [default-bindings]
  shortcuts keys keybindings bindings
 [default-lower-midi-note]
@@ -623,7 +626,6 @@
    osc open sound control
 [use-plugin-own-gui]
    plugins GUI editor prefer use own
-[use-tranzport]
 [use-vst3]
    plugins vst3
 [use-windows-vst]

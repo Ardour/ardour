@@ -38,7 +38,7 @@ using namespace Glib;
 using namespace std;
 using namespace ArdourSurface;
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 static const uint16_t ContourDesign = 0x0b33;
 static const uint16_t ShuttlePRO_id = 0x0010;

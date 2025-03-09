@@ -209,6 +209,7 @@ RegionFxPlugin::RegionFxPlugin (Session& s, Temporal::TimeDomain const td, std::
 	: SessionObject (s, (plug ? plug->name () : string ("toBeRenamed")))
 	, TimeDomainProvider (td)
 	, _plugin_signal_latency (0)
+	, _plugin_signal_tailtime (0)
 	, _configured (false)
 	, _no_inplace (false)
 	, _last_emit (0)
@@ -294,13 +295,17 @@ RegionFxPlugin::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	bool any_vst;
+	bool any_vst = false;
 
 	uint32_t count = 1;
 	node.get_property ("count", count);
 
 	if (_plugins.empty()) {
-		std::shared_ptr<Plugin> plugin = find_and_load_plugin (_session, node, type, unique_id, any_vst);
+		std::shared_ptr<Plugin> plugin;
+
+		if (!_session.get_disable_all_loaded_plugins ()) {
+			plugin = find_and_load_plugin (_session, node, type, unique_id, any_vst);
+		}
 
 		if (!plugin) {
 			delete _state;
@@ -1444,7 +1449,7 @@ RegionFxPlugin::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t
 		_plugin_signal_latency= l;
 		LatencyChanged (); /* EMIT SIGNAL */
 	}
-	const samplecnt_t t = effective_latency ();
+	const samplecnt_t t = effective_tailtime ();
 	if (_plugin_signal_tailtime != l) {
 		_plugin_signal_tailtime = t;
 		TailTimeChanged (); /* EMIT SIGNAL */

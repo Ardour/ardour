@@ -18,13 +18,16 @@
 
 #pragma once
 
+#include "canvas/container.h"
 #include "canvas/line_set.h"
 #include "canvas/ruler.h"
 #include "ardour/tempo.h"
 
+class EditingContext;
+
 class GridLines {
 public:
-	GridLines (ArdourCanvas::Container* group, double screen_height);
+	GridLines (EditingContext&, ArdourCanvas::Container* group, double screen_height);
 	~GridLines ();
 
 	void draw (std::vector<ArdourCanvas::Ruler::Mark> const & marks);
@@ -33,7 +36,7 @@ public:
 	void hide();
 
 private:
-
+	EditingContext& _editing_context;
 	ArdourCanvas::LineSet lines;
 };
 

@@ -20,7 +20,9 @@
 #ifndef __ardour_visibility_group__
 #define __ardour_visibility_group__
 
-#include <gtkmm/liststore.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/widget.h>
+
 #include "pbd/signals.h"
 
 class XMLNode;

@@ -22,12 +22,13 @@
 
 #include <string>
 
-#include <gtkmm/buttonbox.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/treemodelfilter.h>
-#include <gtkmm/treestore.h>
-#include <gtkmm/treeview.h>
+#include <ytkmm/action.h>
+#include <ytkmm/buttonbox.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/treemodelfilter.h>
+#include <ytkmm/treestore.h>
+#include <ytkmm/treeview.h>
 
 #include "widgets/searchbar.h"
 

@@ -25,7 +25,7 @@
 #include <cstring>
 #include <cmath>
 
-#include <gtkmm/window.h>
+#include <ytkmm/window.h>
 #include <pangomm/layout.h>
 
 #include "pbd/compose.h"

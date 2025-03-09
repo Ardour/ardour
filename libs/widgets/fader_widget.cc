@@ -41,6 +41,8 @@ FaderWidget::FaderWidget (Gtk::Adjustment& adj, int orien)
 	            | Gdk::SCROLL_MASK
 	            | Gdk::ENTER_NOTIFY_MASK
 	            | Gdk::LEAVE_NOTIFY_MASK
+	            | Gdk::TOUCH_BEGIN_MASK
+	            | Gdk::TOUCH_END_MASK
 	           );
 
 	_adjustment.signal_value_changed().connect (mem_fun (*this, &FaderWidget::adjustment_changed));
@@ -98,6 +100,29 @@ FaderWidget::on_button_press_event (GdkEventButton* ev)
 	}
 
 	return (_tweaks & NoButtonForward) ? true : false;
+}
+
+bool
+FaderWidget::on_touch_begin_event (GdkEventTouch *ev)
+{
+  StartGesture (0);
+  _grab_loc = (_orien == VERT) ? ev->y : ev->x;
+  _grab_start = (_orien == VERT) ? ev->y : ev->x;
+  _grab_window = ev->window;
+  _dragging = true;
+  return true;
+}
+
+bool
+FaderWidget::on_touch_end_event (GdkEventTouch *ev)
+{
+  if (!_dragging) {
+    return true;
+  }
+  _dragging = false;
+  StopGesture (0);
+
+  return true;
 }
 
 bool

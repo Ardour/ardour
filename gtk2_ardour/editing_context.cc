@@ -20,6 +20,7 @@
 
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
+#include "pbd/unwind.h"
 
 #include "ardour/legatize.h"
 #include "ardour/midi_region.h"
@@ -40,6 +41,7 @@
 #include "editing_context.h"
 #include "editing_convert.h"
 #include "editor_drag.h"
+#include "grid_lines.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "midi_region_view.h"
@@ -61,12 +63,12 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace Temporal;
+using namespace ArdourWidgets;
 using std::string;
 
 sigc::signal<void> EditingContext::DropDownKeys;
 Gtkmm2ext::Bindings* EditingContext::button_bindings = nullptr;
 Glib::RefPtr<Gtk::ActionGroup> EditingContext::_midi_actions;
-Glib::RefPtr<Gtk::ActionGroup> EditingContext::_common_actions;
 std::vector<std::string> EditingContext::grid_type_strings;
 MouseCursors* EditingContext::_cursors = nullptr;
 EditingContext* EditingContext::_current_editing_context = nullptr;
@@ -96,6 +98,17 @@ static const gchar *_grid_type_strings[] = {
 	0
 };
 
+
+static const gchar *_zoom_focus_strings[] = {
+	N_("Left"),
+	N_("Right"),
+	N_("Center"),
+	N_("Playhead"),
+	N_("Mouse"),
+	N_("Edit point"),
+	0
+};
+
 Editing::GridType EditingContext::_draw_length (GridTypeNone);
 int EditingContext::_draw_velocity (DRAW_VEL_AUTO);
 int EditingContext::_draw_channel (DRAW_CHAN_AUTO);
@@ -111,6 +124,7 @@ Glib::RefPtr<Gtk::Action> EditingContext::alternate_alternate_redo_action;
 EditingContext::EditingContext (std::string const & name)
 	: rubberband_rect (0)
 	, _name (name)
+	, within_track_canvas (false)
 	, pre_internal_grid_type (GridTypeBeat)
 	, pre_internal_snap_mode (SnapOff)
 	, internal_grid_type (GridTypeBeat)
@@ -118,6 +132,9 @@ EditingContext::EditingContext (std::string const & name)
 	, _grid_type (GridTypeBeat)
 	, _snap_mode (SnapOff)
 	, _timeline_origin (0.)
+	, play_note_selection_button (ArdourButton::default_elements)
+	, follow_playhead_button (_("F"), ArdourButton::Text, true)
+	, visible_channel_label (_("MIDI Channel"))
 	, _drags (new DragManager (this))
 	, _leftmost_sample (0)
 	, _playhead_cursor (nullptr)
@@ -128,10 +145,11 @@ EditingContext::EditingContext (std::string const & name)
 	, _selection_memento (new SelectionMemento())
 	, _verbose_cursor (nullptr)
 	, samples_per_pixel (2048)
-	, zoom_focus (ZoomFocusPlayhead)
+	, _zoom_focus (ZoomFocusPlayhead)
 	, bbt_ruler_scale (bbt_show_many)
 	, bbt_bars (0)
 	, bbt_bar_helper_on (0)
+	, _track_canvas_width (0)
 	, _visible_canvas_width (0)
 	, _visible_canvas_height (0)
 	, quantize_dialog (nullptr)
@@ -148,7 +166,11 @@ EditingContext::EditingContext (std::string const & name)
 	, entered_track (nullptr)
 	, entered_regionview (nullptr)
 	, clear_entered_track (false)
+	, grid_lines (nullptr)
+	, time_line_group (nullptr)
 {
+	using namespace Gtk::Menu_Helpers;
+
 	if (!button_bindings) {
 		button_bindings = new Bindings ("editor-mouse");
 
@@ -163,6 +185,12 @@ EditingContext::EditingContext (std::string const & name)
 	if (grid_type_strings.empty()) {
 		grid_type_strings =  I18N (_grid_type_strings);
 	}
+
+	if (zoom_focus_strings.empty()) {
+		zoom_focus_strings = I18N (_zoom_focus_strings);
+	}
+
+	zoom_focus_selector.set_name ("zoom button");
 
 	snap_mode_button.set_text (_("Snap"));
 	snap_mode_button.set_name ("mouse mode button");
@@ -183,13 +211,67 @@ EditingContext::EditingContext (std::string const & name)
 	set_tooltip (draw_channel_selector, _("Note Channel to Draw (AUTO uses the nearest note's channel)"));
 	set_tooltip (grid_type_selector, _("Grid Mode"));
 	set_tooltip (snap_mode_button, _("Snap Mode\n\nRight-click to visit Snap preferences."));
+	set_tooltip (zoom_focus_selector, _("Zoom Focus"));
+
+	set_tooltip (play_note_selection_button, _("Play notes when selected"));
+	set_tooltip (note_mode_button, _("Switch between sustained and percussive mode"));
+	set_tooltip (follow_playhead_button, _("Scroll automatically to keep playhead visible"));
+	/* Leave tip for full zoom button to derived class */
+	set_tooltip (visible_channel_selector, _("Select visible MIDI channel"));
+
+	play_note_selection_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::play_note_selection_clicked));
+	note_mode_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::note_mode_clicked));
+	follow_playhead_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::follow_playhead_clicked));
+	full_zoom_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::full_zoom_clicked));
+
+	zoom_in_button.set_name ("zoom button");
+	zoom_in_button.set_icon (ArdourIcon::ZoomIn);
+
+	zoom_out_button.set_name ("zoom button");
+	zoom_out_button.set_icon (ArdourIcon::ZoomOut);
+
+	full_zoom_button.set_name ("zoom button");
+	full_zoom_button.set_icon (ArdourIcon::ZoomFull);
+
+	selection->PointsChanged.connect (sigc::mem_fun(*this, &EditingContext::point_selection_changed));
+
+	for (int i = 0; i < 16; i++) {
+		char buf[4];
+		sprintf(buf, "%d", i+1);
+		visible_channel_selector.AddMenuElem (MenuElem (buf, [this,i]() { set_visible_channel (i); }));
+	}
 
 	/* handle escape */
 
 	ARDOUR_UI::instance()->Escape.connect (escape_connection, MISSING_INVALIDATOR, std::bind (&EditingContext::escape, this), gui_context());
+
+	Config->ParameterChanged.connect (parameter_connections, MISSING_INVALIDATOR, std::bind (&EditingContext::parameter_changed, this, _1), gui_context());
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &EditingContext::ui_parameter_changed));
+
+	std::function<void (string)> pc (std::bind (&EditingContext::ui_parameter_changed, this, _1));
+	UIConfiguration::instance().map_parameters (pc);
 }
 
 EditingContext::~EditingContext()
+{
+	delete grid_lines;
+}
+
+void
+EditingContext::ui_parameter_changed (string parameter)
+{
+	if (parameter == "sound-midi-notes") {
+		if (UIConfiguration::instance().get_sound_midi_notes()) {
+			play_note_selection_button.set_active_state (Gtkmm2ext::ExplicitActive);
+		} else {
+			play_note_selection_button.set_active_state (Gtkmm2ext::Off);
+		}
+	}
+}
+
+
+void
+EditingContext::parameter_changed (string parameter)
 {
 }
 
@@ -216,16 +298,48 @@ EditingContext::set_selected_midi_region_view (MidiRegionView& mrv)
 void
 EditingContext::register_common_actions (Bindings* common_bindings)
 {
-	if (_common_actions) {
-		return;
-	}
+	_common_actions = ActionManager::create_action_group (common_bindings, _name);
 
-	_common_actions = ActionManager::create_action_group (common_bindings, X_("Editing"));
+	reg_sens (_common_actions, "temporal-zoom-out", _("Zoom Out"), []() { current_editing_context()->temporal_zoom_step (true); });
+	reg_sens (_common_actions, "temporal-zoom-in", _("Zoom In"), []() { current_editing_context()->temporal_zoom_step (false); });
 
 	undo_action = reg_sens (_common_actions, "undo", S_("Command|Undo"), []() { current_editing_context()->undo(1U) ; });
 	redo_action = reg_sens (_common_actions, "redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
 	alternate_redo_action = reg_sens (_common_actions, "alternate-redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
 	alternate_alternate_redo_action = reg_sens (_common_actions, "alternate-alternate-redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
+
+	reg_sens (_common_actions, "editor-delete", _("Delete"), []() { current_editing_context()->delete_() ; });
+	reg_sens (_common_actions, "alternate-editor-delete", _("Delete"), []() { current_editing_context()->delete_() ; });
+
+	reg_sens (_common_actions, "editor-cut", _("Cut"), []() { current_editing_context()->cut() ; });
+	reg_sens (_common_actions, "editor-copy", _("Copy"), []() { current_editing_context()->copy() ; });
+	reg_sens (_common_actions, "editor-paste", _("Paste"), []() { current_editing_context()->keyboard_paste() ; });
+
+	RadioAction::Group mouse_mode_group;
+
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseObject); });
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseRange); });
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseDraw); });
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseTimeFX); });
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseGrid); });
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseContent); });
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseCut); });
+
+	if (ActionManager::get_action_group(X_("Zoom"))) {
+		return;
+	}
+
+	Glib::RefPtr<ActionGroup> zoom_actions = ActionManager::create_action_group (common_bindings, X_("Zoom"));
+	RadioAction::Group zoom_group;
+
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusLeft); });
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-right", _("Zoom Focus Right"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusRight); });
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-center", _("Zoom Focus Center"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusCenter); });
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-playhead", _("Zoom Focus Playhead"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusPlayhead); });
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-mouse", _("Zoom Focus Mouse"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusMouse); });
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-edit", _("Zoom Focus Edit Point"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusEdit); });
+
+	ActionManager::register_action (zoom_actions, X_("cycle-zoom-focus"), _("Next Zoom Focus"), []() { current_editing_context()->cycle_zoom_focus(); });
 }
 
 void
@@ -1290,6 +1404,12 @@ EditingContext::time_to_pixel_unrounded (timepos_t const & pos) const
 }
 
 double
+EditingContext::time_delta_to_pixel (timepos_t const& start, timepos_t const& end) const
+{
+	return sample_to_pixel (end.samples()) - sample_to_pixel (start.samples ());
+}
+
+double
 EditingContext::duration_to_pixels (timecnt_t const & dur) const
 {
 	return sample_to_pixel (dur.samples());
@@ -1341,11 +1461,11 @@ EditingContext::snap_to (timepos_t& start, Temporal::RoundMode direction, SnapPr
 timepos_t
 EditingContext::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref) const
 {
-	return _snap_to_bbt (presnap, direction, gpref, _grid_type);
+	return snap_to_bbt_via_grid (presnap, direction, gpref, _grid_type);
 }
 
 timepos_t
-EditingContext::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref, GridType grid_type) const
+EditingContext::snap_to_bbt_via_grid (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref, GridType grid_type) const
 {
 	timepos_t ret(presnap);
 	TempoMap::SharedPtr tmap (TempoMap::use());
@@ -1358,22 +1478,7 @@ EditingContext::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode dir
 	 */
 
 	if (grid_type == GridTypeBar) {
-		TempoMetric m (tmap->metric_at (presnap));
-		BBT_Argument bbt (m.bbt_at (presnap));
-		switch (direction) {
-		case RoundDownAlways:
-			bbt = BBT_Argument (bbt.reference(), bbt.round_down_to_bar ());
-			break;
-		case RoundUpAlways:
-			bbt = BBT_Argument (bbt.reference(), bbt.round_up_to_bar ());
-			break;
-		case RoundNearest:
-			bbt = BBT_Argument (bbt.reference(), m.round_to_bar (bbt));
-			break;
-		default:
-			break;
-		}
-		return timepos_t (tmap->quarters_at (bbt));
+		return timepos_t (tmap->quarters_at (presnap).round_to_subdivision (get_grid_beat_divisions(grid_type), direction));
 	}
 
 	if (gpref != SnapToGrid_Unscaled) { // use the visual grid lines which are limited by the zoom scale that the user selected
@@ -1455,7 +1560,7 @@ EditingContext::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode dir
 		 * zoom level
 		 */
 
-		ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (get_grid_beat_divisions(_grid_type), direction));
+		ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (get_grid_beat_divisions (grid_type), direction));
 	}
 
 	return ret;
@@ -1690,7 +1795,7 @@ EditingContext::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType
 		return false;
 	}
 
-	gint ret = FALSE;
+	bool ret = false;
 
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
@@ -2018,14 +2123,19 @@ EditingContext::set_horizontal_position (double p)
 Gdk::Cursor*
 EditingContext::get_canvas_cursor () const
 {
-	/* The top of the cursor stack is always the currently visible cursor. */
-	return _cursor_stack.back();
+	Glib::RefPtr<Gdk::Window> win = get_canvas_viewport()->get_window();
+
+	if (win) {
+		return _cursors->from_gdk_cursor (gdk_window_get_cursor (win->gobj()));
+	}
+
+	return nullptr;
 }
 
 void
 EditingContext::set_canvas_cursor (Gdk::Cursor* cursor)
 {
-	Glib::RefPtr<Gdk::Window> win = get_canvas_viewport()->get_window();
+	Glib::RefPtr<Gdk::Window> win = get_canvas()->get_window();
 
 	if (win && !_cursors->is_invalid (cursor)) {
 		/* glibmm 2.4 doesn't allow null cursor pointer because it uses
@@ -2036,36 +2146,7 @@ EditingContext::set_canvas_cursor (Gdk::Cursor* cursor)
 		   For now, drop down and use C API
 		*/
 		gdk_window_set_cursor (win->gobj(), cursor ? cursor->gobj() : 0);
-	}
-}
-
-size_t
-EditingContext::push_canvas_cursor (Gdk::Cursor* cursor)
-{
-	if (!_cursors->is_invalid (cursor)) {
-		_cursor_stack.push_back (cursor);
-		set_canvas_cursor (cursor);
-	}
-	return _cursor_stack.size() - 1;
-}
-
-void
-EditingContext::pop_canvas_cursor ()
-{
-	while (true) {
-		if (_cursor_stack.size() <= 1) {
-			PBD::error << "attempt to pop default cursor" << endmsg;
-			return;
-		}
-
-		_cursor_stack.pop_back();
-		if (_cursor_stack.back()) {
-			/* Popped to an existing cursor, we're done.  Otherwise, the
-			   context that created this cursor has been destroyed, so we need
-			   to skip to the next down the stack. */
-			set_canvas_cursor (_cursor_stack.back());
-			return;
-		}
+		gdk_flush ();
 	}
 }
 
@@ -2103,49 +2184,35 @@ EditingContext::pack_snap_box ()
 Glib::RefPtr<Action>
 EditingContext::get_mouse_mode_action (MouseMode m) const
 {
-	char const * group_name = _name.c_str(); /* use char* to force correct ::get_action variant */
-
 	switch (m) {
 	case MouseRange:
-		return ActionManager::get_action (group_name, X_("set-mouse-mode-range"));
+		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-range"));
 	case MouseObject:
-		return ActionManager::get_action (group_name, X_("set-mouse-mode-object"));
+		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-object"));
 	case MouseCut:
-		return ActionManager::get_action (group_name, X_("set-mouse-mode-cut"));
+		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-cut"));
 	case MouseDraw:
-		return ActionManager::get_action (group_name, X_("set-mouse-mode-draw"));
+		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-draw"));
 	case MouseTimeFX:
-		return ActionManager::get_action (group_name, X_("set-mouse-mode-timefx"));
+		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-timefx"));
 	case MouseGrid:
-		return ActionManager::get_action (group_name, X_("set-mouse-mode-grid"));
+		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-grid"));
 	case MouseContent:
-		return ActionManager::get_action (group_name, X_("set-mouse-mode-content"));
+		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-content"));
 	}
 	return Glib::RefPtr<Action>();
 }
 
 void
-EditingContext::register_mouse_mode_actions ()
-{
-	RefPtr<Action> act;
-	std::string group_name = _name;
-	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionManager::create_action_group (bindings, group_name);
-	RadioAction::Group mouse_mode_group;
-
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseObject));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseRange));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseDraw));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseTimeFX));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseGrid));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseContent));
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), std::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseCut));
-
-	add_mouse_mode_actions (mouse_mode_actions);
-}
-
-void
 EditingContext::bind_mouse_mode_buttons ()
 {
+	RefPtr<Action> act;
+
+	act = ActionManager::get_action (_name.c_str(), X_("temporal-zoom-in"));
+	zoom_in_button.set_related_action (act);
+	act = ActionManager::get_action (_name.c_str(), X_("temporal-zoom-out"));
+	zoom_out_button.set_related_action (act);
+
 	mouse_move_button.set_related_action (get_mouse_mode_action (Editing::MouseObject));
 	mouse_move_button.set_icon (ArdourWidgets::ArdourIcon::ToolGrab);
 	mouse_move_button.set_name ("mouse mode button");
@@ -2339,7 +2406,7 @@ EditingContext::register_grid_actions ()
 	ActionManager::register_action (editor_actions, X_("next-grid-choice"), _("Next Quantize Grid Choice"), sigc::mem_fun (*this, &EditingContext::next_grid_choice));
 	ActionManager::register_action (editor_actions, X_("prev-grid-choice"), _("Previous Quantize Grid Choice"), sigc::mem_fun (*this, &EditingContext::prev_grid_choice));
 
-	Glib::RefPtr<ActionGroup> snap_actions = ActionManager::create_action_group (bindings, editor_name() + X_("Snap"));
+	snap_actions = ActionManager::create_action_group (bindings, editor_name() + X_("Snap"));
 	RadioAction::Group grid_choice_group;
 
 	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv32)));
@@ -2445,12 +2512,23 @@ EditingContext::reset_y_origin (double y)
 void
 EditingContext::reset_zoom (samplecnt_t spp)
 {
+	std::pair<timepos_t, timepos_t> ext = max_zoom_extent();
+	samplecnt_t max_extents_pp = (ext.second.samples() - ext.first.samples())  / _track_canvas_width;
+
+	if (spp > max_extents_pp) {
+		spp = max_extents_pp;
+	}
+
 	if (spp == samples_per_pixel) {
 		return;
 	}
 
 	pending_visual_change.add (VisualChange::ZoomLevel);
 	pending_visual_change.samples_per_pixel = spp;
+	if (spp == 0.0) {
+		std::cerr << "spp set to zero\n";
+		PBD::stacktrace (std::cerr, 12);
+	}
 	ensure_visual_change_idle_handler ();
 }
 
@@ -2712,18 +2790,6 @@ EditingContext::reset_point_selection ()
 	}
 }
 
-EditingContext::EnterContext*
-EditingContext::get_enter_context(ItemType type)
-{
-	for (ssize_t i = _enter_stack.size() - 1; i >= 0; --i) {
-		if (_enter_stack[i].item_type == type) {
-			return &_enter_stack[i];
-		}
-	}
-	return NULL;
-}
-
-
 void
 EditingContext::choose_canvas_cursor_on_entry (ItemType type)
 {
@@ -2731,21 +2797,577 @@ EditingContext::choose_canvas_cursor_on_entry (ItemType type)
 		return;
 	}
 
-	Gdk::Cursor* cursor = which_canvas_cursor(type);
+	Gdk::Cursor* cursor = which_canvas_cursor (type);
 
 	if (!_cursors->is_invalid (cursor)) {
 		// Push a new enter context
-		const EnterContext ctx = { type, CursorContext::create(*this, cursor) };
-		_enter_stack.push_back(ctx);
+		set_canvas_cursor (cursor);
 	}
 }
 
 void
-EditingContext::update_all_enter_cursors ()
+EditingContext::play_note_selection_clicked ()
 {
-	for (auto & ec : _enter_stack) {
-		ec.cursor_ctx->change(which_canvas_cursor (ec.item_type));
+	UIConfiguration::instance().set_sound_midi_notes (!UIConfiguration::instance().get_sound_midi_notes());
+}
+
+void
+EditingContext::follow_playhead_clicked ()
+{
+}
+
+void
+EditingContext::cycle_zoom_focus ()
+{
+	switch (_zoom_focus) {
+	case ZoomFocusLeft:
+		set_zoom_focus (ZoomFocusRight);
+		break;
+	case ZoomFocusRight:
+		set_zoom_focus (ZoomFocusCenter);
+		break;
+	case ZoomFocusCenter:
+		set_zoom_focus (ZoomFocusPlayhead);
+		break;
+	case ZoomFocusPlayhead:
+		set_zoom_focus (ZoomFocusMouse);
+		break;
+	case ZoomFocusMouse:
+		set_zoom_focus (ZoomFocusEdit);
+		break;
+	case ZoomFocusEdit:
+		set_zoom_focus (ZoomFocusLeft);
+		break;
 	}
 }
 
+void
+EditingContext::temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale)
+{
+	PBD::Unwinder<Editing::ZoomFocus> zf (_zoom_focus, Editing::ZoomFocusMouse);
+	temporal_zoom_step_scale (zoom_out, scale);
+}
+
+void
+EditingContext::temporal_zoom_step_mouse_focus (bool zoom_out)
+{
+	temporal_zoom_step_mouse_focus_scale (zoom_out, 2.0);
+}
+
+void
+EditingContext::temporal_zoom_step (bool zoom_out)
+{
+	temporal_zoom_step_scale (zoom_out, 2.0);
+}
+
+void
+EditingContext::temporal_zoom_step_scale (bool zoom_out, double scale)
+{
+	ENSURE_GUI_THREAD (*this, &EditingContext::temporal_zoom_step, zoom_out, scale)
+
+	samplecnt_t nspp = samples_per_pixel;
+
+	if (zoom_out) {
+		nspp *= scale;
+		if (nspp == samples_per_pixel) {
+			nspp *= 2.0;
+		}
+	} else {
+		nspp /= scale;
+		if (nspp == samples_per_pixel) {
+			nspp /= 2.0;
+		}
+	}
+
+	//zoom-behavior-tweaks
+	//limit our maximum zoom to the session gui extents value
+	std::pair<timepos_t, timepos_t> ext = max_zoom_extent();
+	samplecnt_t session_extents_pp = (ext.second.samples() - ext.first.samples())  / _track_canvas_width;
+	if (nspp > session_extents_pp) {
+		nspp = session_extents_pp;
+	}
+
+	temporal_zoom (nspp);
+}
+
+void
+EditingContext::temporal_zoom (samplecnt_t spp)
+{
+	if (!_session) {
+		return;
+	}
+
+	samplepos_t current_page = current_page_samples();
+	samplepos_t current_leftmost = _leftmost_sample;
+	samplepos_t current_rightmost;
+	samplepos_t current_center;
+	samplepos_t new_page_size;
+	samplepos_t half_page_size;
+	samplepos_t leftmost_after_zoom = 0;
+	samplepos_t where;
+	bool in_track_canvas;
+	bool use_mouse_sample = true;
+	samplecnt_t nspp;
+	double l;
+
+	if (spp == samples_per_pixel) {
+		return;
+	}
+
+	// Imposing an arbitrary limit to zoom out as too much zoom out produces
+	// segfaults for lack of memory. If somebody decides this is not high enough I
+	// believe it can be raisen to higher values but some limit must be in place.
+	//
+	// This constant represents 1 day @ 48kHz on a 1600 pixel wide display
+	// all of which is used for the editor track displays. The whole day
+	// would be 4147200000 samples, so 2592000 samples per pixel.
+
+	nspp = std::min (spp, (samplecnt_t) 2592000);
+	nspp = std::max ((samplecnt_t) 1, nspp);
+
+	new_page_size = (samplepos_t) floor (_track_canvas_width * nspp);
+	half_page_size = new_page_size / 2;
+
+	Editing::ZoomFocus zf = effective_zoom_focus();
+
+	switch (zf) {
+	case ZoomFocusLeft:
+		leftmost_after_zoom = current_leftmost;
+		break;
+
+	case ZoomFocusRight:
+		current_rightmost = _leftmost_sample + current_page;
+		if (current_rightmost < new_page_size) {
+			leftmost_after_zoom = 0;
+		} else {
+			leftmost_after_zoom = current_rightmost - new_page_size;
+		}
+		break;
+
+	case ZoomFocusCenter:
+		current_center = current_leftmost + (current_page/2);
+		if (current_center < half_page_size) {
+			leftmost_after_zoom = 0;
+		} else {
+			leftmost_after_zoom = current_center - half_page_size;
+		}
+		break;
+
+	case ZoomFocusPlayhead:
+		/* centre playhead */
+		l = _session->transport_sample() - (new_page_size * 0.5);
+
+		if (l < 0) {
+			leftmost_after_zoom = 0;
+		} else if (l > max_samplepos) {
+			leftmost_after_zoom = max_samplepos - new_page_size;
+		} else {
+			leftmost_after_zoom = (samplepos_t) l;
+		}
+		break;
+
+	case ZoomFocusMouse:
+		/* try to keep the mouse over the same point in the display */
+
+		if (_drags->active()) {
+			where = _drags->current_pointer_sample ();
+		} else if (!mouse_sample (where, in_track_canvas)) {
+			use_mouse_sample = false;
+		}
+
+		if (use_mouse_sample) {
+
+			l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
+
+			if (l < 0) {
+				leftmost_after_zoom = 0;
+			} else if (l > max_samplepos) {
+				leftmost_after_zoom = max_samplepos - new_page_size;
+			} else {
+				leftmost_after_zoom = (samplepos_t) l;
+			}
+		} else {
+			/* use playhead instead */
+			where = _session->transport_sample();
+
+			if (where < half_page_size) {
+				leftmost_after_zoom = 0;
+			} else {
+				leftmost_after_zoom = where - half_page_size;
+			}
+		}
+		break;
+
+	case ZoomFocusEdit:
+		/* try to keep the edit point in the same place */
+		where = get_preferred_edit_position ().samples();
+		{
+			double l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
+
+			if (l < 0) {
+				leftmost_after_zoom = 0;
+			} else if (l > max_samplepos) {
+				leftmost_after_zoom = max_samplepos - new_page_size;
+			} else {
+				leftmost_after_zoom = (samplepos_t) l;
+			}
+		}
+		break;
+
+	}
+
+	// leftmost_after_zoom = min (leftmost_after_zoom, _session->current_end_sample());
+
+	reposition_and_zoom (leftmost_after_zoom, nspp);
+}
+
+void
+EditingContext::calc_extra_zoom_edges (samplepos_t &start, samplepos_t &end)
+{
+	/* this func helps make sure we leave a little space
+	   at each end of the editor so that the zoom doesn't fit the region
+	   precisely to the screen.
+	*/
+
+	GdkScreen* screen = gdk_screen_get_default ();
+	const gint pixwidth = gdk_screen_get_width (screen);
+	const gint mmwidth = gdk_screen_get_width_mm (screen);
+	const double pix_per_mm = (double) pixwidth/ (double) mmwidth;
+	const double one_centimeter_in_pixels = pix_per_mm * 10.0;
+
+	const samplepos_t range = end - start;
+	const samplecnt_t new_fpp = (samplecnt_t) ceil ((double) range / (double) _track_canvas_width);
+	const samplepos_t extra_samples = (samplepos_t) floor (one_centimeter_in_pixels * new_fpp);
+
+	if (start > extra_samples) {
+		start -= extra_samples;
+	} else {
+		start = 0;
+	}
+
+	if (max_samplepos - extra_samples > end) {
+		end += extra_samples;
+	} else {
+		end = max_samplepos;
+	}
+}
+
+
+void
+EditingContext::temporal_zoom_by_sample (samplepos_t start, samplepos_t end)
+{
+	if (!_session) return;
+
+	if ((start == 0 && end == 0) || end < start) {
+		return;
+	}
+
+	samplepos_t range = end - start;
+
+	const samplecnt_t new_fpp = (samplecnt_t) ceil ((double) range / (double) _track_canvas_width);
+
+	samplepos_t new_page = range;
+	samplepos_t middle = (samplepos_t) floor ((double) start + ((double) range / 2.0f));
+	samplepos_t new_leftmost = (samplepos_t) floor ((double) middle - ((double) new_page / 2.0f));
+
+	if (new_leftmost > middle) {
+		new_leftmost = 0;
+	}
+
+	if (new_leftmost < 0) {
+		new_leftmost = 0;
+	}
+
+	reposition_and_zoom (new_leftmost, new_fpp);
+}
+
+void
+EditingContext::temporal_zoom_to_sample (bool coarser, samplepos_t sample)
+{
+	if (!_session) {
+		return;
+	}
+
+	samplecnt_t range_before = sample - _leftmost_sample;
+	samplecnt_t new_spp;
+
+	if (coarser) {
+		if (samples_per_pixel <= 1) {
+			new_spp = 2;
+		} else {
+			new_spp = samples_per_pixel + (samples_per_pixel/2);
+		}
+		range_before += range_before/2;
+	} else {
+		if (samples_per_pixel >= 1) {
+			new_spp = samples_per_pixel - (samples_per_pixel/2);
+		} else {
+			/* could bail out here since we cannot zoom any finer,
+			   but leave that to the equality test below
+			*/
+			new_spp = samples_per_pixel;
+		}
+
+		range_before -= range_before/2;
+	}
+
+	if (new_spp == samples_per_pixel)  {
+		return;
+	}
+
+	/* zoom focus is automatically taken as @p sample when this
+	   method is used.
+	*/
+
+	samplepos_t new_leftmost = sample - (samplepos_t)range_before;
+
+	if (new_leftmost > sample) {
+		new_leftmost = 0;
+	}
+
+	if (new_leftmost < 0) {
+		new_leftmost = 0;
+	}
+
+	reposition_and_zoom (new_leftmost, new_spp);
+}
+
+bool
+EditingContext::mouse_sample (samplepos_t& where, bool& in_track_canvas) const
+{
+	/* gdk_window_get_pointer() has X11's XQueryPointer semantics in that it only
+	 * pays attentions to subwindows. this means that menu windows are ignored, and
+	 * if the pointer is in a menu, the return window from the call will be the
+	 * the regular subwindow *under* the menu.
+	 *
+	 * this matters quite a lot if the pointer is moving around in a menu that overlaps
+	 * the track canvas because we will believe that we are within the track canvas
+	 * when we are not. therefore, we track enter/leave events for the track canvas
+	 * and allow that to override the result of gdk_window_get_pointer().
+	 */
+
+	if (!within_track_canvas) {
+		return false;
+	}
+
+	int x, y;
+	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<EditingContext*>(this)->get_canvas()->get_window();
+
+	if (!canvas_window) {
+		return false;
+	}
+
+	Glib::RefPtr<const Gdk::Window> pointer_window = Gdk::Display::get_default()->get_window_at_pointer (x, y);
+
+	if (!pointer_window) {
+		return false;
+	}
+
+	if (pointer_window != canvas_window) {
+		in_track_canvas = false;
+		return false;
+	}
+
+	in_track_canvas = true;
+
+	GdkEvent event;
+	event.type = GDK_BUTTON_RELEASE;
+	event.button.x = x;
+	event.button.y = y;
+
+	where = window_event_sample (&event, 0, 0);
+
+	return true;
+}
+
+samplepos_t
+EditingContext::window_event_sample (GdkEvent const * event, double* pcx, double* pcy) const
+{
+	ArdourCanvas::Duple d;
+
+	if (!gdk_event_get_coords (event, &d.x, &d.y)) {
+		return 0;
+	}
+
+	/* event coordinates are in window units, so convert to canvas
+	 */
+
+	d = get_canvas()->window_to_canvas (d);
+
+	if (pcx) {
+		*pcx = d.x;
+	}
+
+	if (pcy) {
+		*pcy = d.y;
+	}
+
+	return pixel_to_sample (canvas_to_timeline (d.x));
+}
+
+void
+EditingContext::zoom_focus_selection_done (ZoomFocus f)
+{
+	RefPtr<RadioAction> ract = zoom_focus_action (f);
+	if (ract) {
+		ract->set_active ();
+	}
+}
+
+RefPtr<RadioAction>
+EditingContext::zoom_focus_action (ZoomFocus focus)
+{
+	const char* action = 0;
+	RefPtr<Action> act;
+
+	switch (focus) {
+	case ZoomFocusLeft:
+		action = X_("zoom-focus-left");
+		break;
+	case ZoomFocusRight:
+		action = X_("zoom-focus-right");
+		break;
+	case ZoomFocusCenter:
+		action = X_("zoom-focus-center");
+		break;
+	case ZoomFocusPlayhead:
+		action = X_("zoom-focus-playhead");
+		break;
+	case ZoomFocusMouse:
+		action = X_("zoom-focus-mouse");
+		break;
+	case ZoomFocusEdit:
+		action = X_("zoom-focus-edit");
+		break;
+	default:
+		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible focus type", (int) focus) << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	return ActionManager::get_radio_action (X_("Zoom"), action);
+}
+
+void
+EditingContext::zoom_focus_chosen (ZoomFocus focus)
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	RefPtr<RadioAction> ract = zoom_focus_action (focus);
+
+	if (ract && ract->get_active()) {
+		set_zoom_focus (focus);
+	}
+}
+
+void
+EditingContext::alt_delete_ ()
+{
+	delete_ ();
+}
+
+/** Cut selected regions, automation points or a time range */
+void
+EditingContext::cut ()
+{
+	cut_copy (Cut);
+}
+
+/** Copy selected regions, automation points or a time range */
+void
+EditingContext::copy ()
+{
+	cut_copy (Copy);
+}
+
+void
+EditingContext::load_shared_bindings ()
+{
+	/* This set of bindings may expand in the future to include things
+	 * other than MIDI editing, but for now this is all we've got as far as
+	 * bindings that need to be distinct from the Editors (because some of
+	 * the keys may overlap.
+	 */
+
+	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
+	register_midi_actions (midi_bindings);
+
+	Bindings* shared_bindings = Bindings::get_bindings (_name);
+	register_common_actions (shared_bindings);
+
+	/* Give this editing context the chance to add more mode mode actions */
+	add_mouse_mode_actions (_common_actions);
+
+	/* Attach bindings to the canvas for this editing context */
+	get_canvas()->set_data ("ardour-bindings", midi_bindings);
+	get_canvas_viewport()->set_data ("ardour-bindings", shared_bindings);
+}
+
+void
+EditingContext::drop_grid ()
+{
+	hide_grid_lines ();
+	delete grid_lines;
+	grid_lines = nullptr;
+}
+
+void
+EditingContext::hide_grid_lines ()
+{
+	if (grid_lines) {
+		grid_lines->hide();
+	}
+}
+
+void
+EditingContext::maybe_draw_grid_lines (ArdourCanvas::Container* group)
+{
+	if (!_session) {
+		return;
+	}
+
+	if (!grid_lines) {
+		grid_lines = new GridLines (*this, group, ArdourCanvas::LineSet::Vertical);
+	}
+
+	grid_marks.clear();
+	samplepos_t rightmost_sample = _leftmost_sample + current_page_samples();
+
+	if (grid_musical()) {
+		 metric_get_bbt (grid_marks, _leftmost_sample, rightmost_sample, 12);
+	} else if (_grid_type== GridTypeTimecode) {
+		 metric_get_timecode (grid_marks, _leftmost_sample, rightmost_sample, 12);
+	} else if (_grid_type == GridTypeCDFrame) {
+		metric_get_minsec (grid_marks, _leftmost_sample, rightmost_sample, 12);
+	} else if (_grid_type == GridTypeMinSec) {
+		metric_get_minsec (grid_marks, _leftmost_sample, rightmost_sample, 12);
+	}
+
+	grid_lines->draw (grid_marks);
+	grid_lines->show();
+}
+
+
+void
+EditingContext::update_grid ()
+{
+	if (!_session) {
+		return;
+	}
+
+	if (_grid_type == GridTypeNone) {
+		hide_grid_lines ();
+	} else if (grid_musical()) {
+//		Temporal::TempoMapPoints grid;
+//		grid.reserve (4096);
+//		if (bbt_ruler_scale != bbt_show_many) {
+//			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
+//		}
+		maybe_draw_grid_lines (time_line_group);
+	} else {
+		maybe_draw_grid_lines (time_line_group);
+	}
+}
 

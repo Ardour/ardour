@@ -17,13 +17,13 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/radiobuttongroup.h>
+#include <ytkmm/radiobuttongroup.h>
 
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/radiomenuitem.h>
-#include <gtkmm/radioaction.h>
-#include <gtkmm/radiotoolbutton.h>
-#include <gtk/gtk.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/radiomenuitem.h>
+#include <ytkmm/radioaction.h>
+#include <ytkmm/radiotoolbutton.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

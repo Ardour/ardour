@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include "pbd/property_basics.h"
+
 namespace PBD {
 
 template<typename T>

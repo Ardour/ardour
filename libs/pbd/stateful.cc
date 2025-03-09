@@ -222,35 +222,36 @@ Stateful::set_values (XMLNode const & node)
 }
 
 PropertyChange
-Stateful::apply_changes (const PropertyList& property_list)
+Stateful::apply_changes (PropertyList const & property_list)
 {
 	PropertyChange c;
 	PropertyList::const_iterator p;
 
+#ifndef NDEBUG
 	DEBUG_TRACE (DEBUG::Stateful, string_compose ("Stateful %1 setting properties from list of %2\n", this, property_list.size()));
-
-	for (auto pp = property_list.begin(); pp != property_list.end(); ++pp) {
-		DEBUG_TRACE (DEBUG::Stateful, string_compose ("in plist: %1\n", pp->second->property_name()));
+	for (auto const & prop : property_list) {
+		DEBUG_TRACE (DEBUG::Stateful, string_compose ("in plist: %1\n", prop.second->property_name()));
 	}
+#endif
 
-	for (auto i = property_list.begin(); i != property_list.end(); ++i) {
-		if ((p = _properties->find (i->first)) != _properties->end()) {
+	for (auto const & prop : property_list) {
+		if ((p = _properties->find (prop.first)) != _properties->end()) {
 
 			DEBUG_TRACE (
 				DEBUG::Stateful,
-				string_compose ("actually setting property %1 using %2\n", p->second->property_name(), i->second->property_name())
+				string_compose ("actually setting property %1 using %2\n", p->second->property_name(), prop.second->property_name())
 				);
 
-			if (apply_change (*i->second)) {
+			if (apply_change (*prop.second)) {
 				DEBUG_TRACE (DEBUG::Stateful, string_compose ("applying change succeeded, add %1 to change list\n", p->second->property_name()));
-				c.add (i->first);
+				c.add (prop.first);
 			} else {
 				DEBUG_TRACE (DEBUG::Stateful, string_compose ("applying change failed for %1\n", p->second->property_name()));
 			}
 
 		} else {
 			DEBUG_TRACE (DEBUG::Stateful, string_compose ("passed in property %1 not found in own property list\n",
-			                                              i->second->property_name()));
+			                                              prop.second->property_name()));
 		}
 	}
 

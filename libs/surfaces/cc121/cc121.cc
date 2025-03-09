@@ -69,7 +69,7 @@ using namespace std;
 
 #include "pbd/i18n.h"
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 CC121::CC121 (Session& s)
 	: ControlProtocol (s, _("Steinberg CC121"))

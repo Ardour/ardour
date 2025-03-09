@@ -28,7 +28,7 @@
 #include <algorithm>
 #include <vector>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include "ardour/playlist.h"
 #include "ardour/audioregion.h"
@@ -1811,17 +1811,6 @@ AudioRegionView::update_coverage_frame (LayerDisplay d)
 		if (fade_in_trim_handle)  { fade_in_trim_handle->raise_to_top (); }
 		if (fade_out_trim_handle) { fade_out_trim_handle->raise_to_top (); }
 	}
-}
-
-void
-AudioRegionView::show_region_editor ()
-{
-	if (editor == 0) {
-		editor = new AudioRegionEditor (trackview.session(), this);
-	}
-
-	editor->present ();
-	editor->show_all();
 }
 
 void

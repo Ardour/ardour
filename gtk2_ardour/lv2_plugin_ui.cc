@@ -23,7 +23,7 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "ardour/lv2_plugin.h"
 #include "ardour/plugin_insert.h"

@@ -20,7 +20,7 @@
 #define _WIDGETS_FRAME_H_
 
 #include <optional>
-#include <gtkmm/bin.h>
+#include <ytkmm/bin.h>
 
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/cairo_theme.h"

@@ -7,8 +7,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/box.h>
-#include <gtkmm/private/box_p.h>
+#include <ytkmm/box.h>
+#include <ytkmm/private/box_p.h>
 
 
 // -*- c++ -*-
@@ -33,7 +33,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <glibmm/wrap.h>
 
 

@@ -26,13 +26,14 @@
 #include <list>
 #include <unordered_map>
 
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
-#include <gdkmm/color.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
+#include <ydkmm/color.h>
 
 #include "pbd/xml++.h"
 #include "pbd/signals.h"
 
+#include "ardour/automation_control.h"
 #include "ardour/session_handle.h"
 
 #include "gui_object.h"

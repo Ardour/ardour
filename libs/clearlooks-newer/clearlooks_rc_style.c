@@ -60,9 +60,6 @@ enum
 	TOKEN_RADIUS,
 
 	TOKEN_CLASSIC,
-	TOKEN_GLOSSY,
-	TOKEN_INVERTED,
-	TOKEN_GUMMY,
 
 	TOKEN_TRUE,
 	TOKEN_FALSE
@@ -89,9 +86,6 @@ clearlooks_gtk2_rc_symbols[] =
 	{ "radius",             TOKEN_RADIUS },
 
 	{ "CLASSIC",            TOKEN_CLASSIC },
-	{ "GLOSSY",             TOKEN_GLOSSY },
-	{ "INVERTED",           TOKEN_INVERTED },
-	{ "GUMMY",              TOKEN_GUMMY },
 
 	{ "TRUE",               TOKEN_TRUE },
 	{ "FALSE",              TOKEN_FALSE }
@@ -271,7 +265,7 @@ clearlooks_gtk2_rc_parse_style (GtkSettings      *settings,
 
 	(void) settings;
 
-	g_assert (CL_NUM_STYLES == CL_STYLE_GUMMY + 1); /* so that people don't forget ;-) */
+	g_assert (CL_NUM_STYLES == CL_STYLE_CLASSIC + 1); /* so that people don't forget ;-) */
 
 	/* Skip 'style' */
 	token = g_scanner_get_next_token (scanner);
@@ -286,15 +280,6 @@ clearlooks_gtk2_rc_parse_style (GtkSettings      *settings,
 	{
 		case TOKEN_CLASSIC:
 		   *style = CL_STYLE_CLASSIC;
-		   break;
-		case TOKEN_GLOSSY:
-		   *style = CL_STYLE_GLOSSY;
-		   break;
-		case TOKEN_INVERTED:
-		   *style = CL_STYLE_INVERTED;
-		   break;
-		case TOKEN_GUMMY:
-		   *style = CL_STYLE_GUMMY;
 		   break;
 		default:
 		   return TOKEN_CLASSIC;

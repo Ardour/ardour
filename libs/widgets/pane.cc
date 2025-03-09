@@ -19,7 +19,7 @@
  */
 
 #include <assert.h>
-#include <gdkmm/cursor.h>
+#include <ydkmm/cursor.h>
 
 #include "widgets/pane.h"
 

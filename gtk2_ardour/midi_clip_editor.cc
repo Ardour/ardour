@@ -38,7 +38,7 @@
 #include "editor_automation_line.h"
 #include "control_point.h"
 #include "editor.h"
-#include "midi_cue_editor.h"
+#include "pianoroll.h"
 #include "region_view.h"
 #include "ui_config.h"
 
@@ -59,7 +59,7 @@ MidiClipEditorBox::MidiClipEditorBox ()
 	_header_label.set_alignment (0.0, 0.5);
 	pack_start (_header_label, false, false, 6);
 
-	editor = new MidiCueEditor ();
+	editor = new Pianoroll (X_("MIDICueEditor"));
 	editor->viewport().set_size_request (600, 120);
 
 	pack_start (editor->viewport(), true, true);
@@ -75,7 +75,9 @@ void
 MidiClipEditorBox::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
-	editor->set_session (s);
+	if (s) {
+		editor->set_session (s);
+	}
 }
 
 void

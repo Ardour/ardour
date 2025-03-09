@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <string>
+
 namespace ARDOUR {
 	void pingback (const std::string& this_version,
 		       const std::string& announce_path);

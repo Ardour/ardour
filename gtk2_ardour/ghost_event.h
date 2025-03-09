@@ -1,6 +1,7 @@
 #ifndef __gtk2_ardour_ghost_event_h__
 #define __gtk2_ardour_ghost_event_h__
 
+#include <memory>
 #include <unordered_map>
 #include <sigc++/trackable.h>
 
@@ -20,6 +21,8 @@ class GhostEvent : public sigc::trackable
 	GhostEvent (::NoteBase *, ArdourCanvas::Container *);
 	GhostEvent (::NoteBase *, ArdourCanvas::Container *, ArdourCanvas::Item* i);
 	virtual ~GhostEvent ();
+
+	void set_sensitive (bool yn);
 
 	NoteBase* event;
 	ArdourCanvas::Item* item;

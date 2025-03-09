@@ -22,12 +22,12 @@
 
 #include <sigc++/signal.h>
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/label.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/treemodel.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/label.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/treemodel.h>
 
 #include "ardour/export_profile_manager.h"
 

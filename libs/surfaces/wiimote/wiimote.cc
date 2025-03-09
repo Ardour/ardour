@@ -31,7 +31,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 void wiimote_control_protocol_mesg_callback (cwiid_wiimote_t *wiimote, int mesg_count, union cwiid_mesg mesg[], timespec *t);
 
@@ -417,12 +417,12 @@ WiimoteControlProtocol::wiimote_callback (int mesg_count, union cwiid_mesg mesg[
 
 			// + = zoom in
 			if (b & CWIID_BTN_PLUS) {
-				access_action ("Editor/temporal-zoom-in");
+				access_action ("Editing/temporal-zoom-in");
 			}
 
 			// - = zoom out
 			if (b & CWIID_BTN_MINUS) {
-				access_action ("Editor/temporal-zoom-out");
+				access_action ("Editing/temporal-zoom-out");
 			}
 
 			// home = no-op

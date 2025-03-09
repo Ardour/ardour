@@ -153,6 +153,11 @@ gdk_display_dispose (GObject *object)
   display->queued_events = NULL;
   display->queued_tail = NULL;
 
+  if (display->touch_grabs)
+    {
+      g_hash_table_destroy (display->touch_grabs);
+    }
+
   _gdk_displays = g_slist_remove (_gdk_displays, object);
 
   if (gdk_display_get_default() == display)

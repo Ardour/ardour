@@ -38,7 +38,7 @@
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/messagedialog.h>
 
 #include "pbd/unwind.h"
 
@@ -715,7 +715,7 @@ ProcessorEntry::show_all_controls ()
 		(*i)->set_visible (true);
 	}
 
-	_parent->update_gui_object_state (this);
+	_parent->update_gui_object_state (this, true);
 }
 
 void
@@ -725,7 +725,7 @@ ProcessorEntry::hide_all_controls ()
 		(*i)->set_visible (false);
 	}
 
-	_parent->update_gui_object_state (this);
+	_parent->update_gui_object_state (this, true);
 }
 
 void
@@ -942,14 +942,14 @@ ProcessorEntry::toggle_inline_display_visibility ()
 	} else {
 		_plugin_display->show();
 	}
-	_parent->update_gui_object_state (this);
+	_parent->update_gui_object_state (this, true);
 }
 
 void
 ProcessorEntry::toggle_control_visibility (Control* c)
 {
 	c->set_visible (!c->visible ());
-	_parent->update_gui_object_state (this);
+	_parent->update_gui_object_state (this, true);
 }
 
 Menu*
@@ -1984,6 +1984,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, std::function<PluginSelector*
 	processor_display.Reordered.connect (sigc::mem_fun (*this, &ProcessorBox::reordered));
 	processor_display.DropFromAnotherBox.connect (sigc::mem_fun (*this, &ProcessorBox::object_drop));
 	processor_display.DropFromExternal.connect (sigc::mem_fun (*this, &ProcessorBox::plugin_drop));
+	processor_display.DragRefuse.connect (sigc::mem_fun (*this, &ProcessorBox::drag_refuse));
 
 	processor_scroller.show ();
 	processor_display.show ();
@@ -2149,6 +2150,17 @@ not match the configuration of this track.");
 		MessageDialog am (msg);
 		am.run ();
 	}
+}
+
+bool
+ProcessorBox::drag_refuse (DnDVBox<ProcessorEntry>* source, ProcessorEntry*)
+{
+	if (!source) {
+		/* handle drag from sidebar */
+		return false;
+	}
+	ProcessorBox* other = reinterpret_cast<ProcessorBox*> (source->get_data ("processorbox"));
+	return (other && other->_route == _route);
 }
 
 void
@@ -4691,7 +4703,7 @@ ProcessorBox::entry_gui_object_state (ProcessorEntry* entry)
 }
 
 void
-ProcessorBox::update_gui_object_state (ProcessorEntry* entry)
+ProcessorBox::update_gui_object_state (ProcessorEntry* entry, bool emit)
 {
 	XMLNode* proc = entry_gui_object_state (entry);
 	if (!proc) {
@@ -4701,6 +4713,12 @@ ProcessorBox::update_gui_object_state (ProcessorEntry* entry)
 	/* XXX: this is a bit inefficient; we just remove all child nodes and re-add them */
 	proc->remove_nodes_and_delete (X_("Object"));
 	entry->add_control_state (proc);
+
+	/* notify other strips to update */
+	if (emit && _route) {
+		PBD::Unwinder<bool> uw (no_processor_redisplay, true);
+		_route->processors_changed (RouteProcessorChange ());
+	}
 }
 
 bool

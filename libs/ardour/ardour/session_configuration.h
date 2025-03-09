@@ -53,7 +53,7 @@ public:
 #define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) \
 	Type get_##var () const { return var.get(); } \
 	bool set_##var (Type val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret; }
-#include "ardour/session_configuration_vars.h"
+#include "ardour/session_configuration_vars.inc.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 	/* clang-format on */
@@ -67,7 +67,7 @@ public:
 #undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(Type,var,name,value) PBD::ConfigVariable<Type> var;
 #define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) PBD::ConfigVariableWithMutation<Type> var;
-#include "ardour/session_configuration_vars.h"
+#include "ardour/session_configuration_vars.inc.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 	/* clang-format on */

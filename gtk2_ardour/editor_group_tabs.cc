@@ -22,6 +22,7 @@
 #include "ardour/route_group.h"
 
 #include "gtkmm2ext/colors.h"
+#include "gtkmm2ext/rgb_macros.h"
 
 #include "editor.h"
 #include "editor_group_tabs.h"
@@ -29,6 +30,7 @@
 #include "editor_routes.h"
 #include "route_time_axis.h"
 #include "ui_config.h"
+#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -99,6 +101,10 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab)
 
 	if (tab.group && tab.group->is_active()) {
 		Gtkmm2ext::color_to_rgba (tab.color, r, g, b, a);
+	} else if (!tab.group && _dragging_new_tab) {
+		Gdk::Color col = ARDOUR_UI_UTILS::round_robin_palette_color (true);
+		color_t ct = Gtkmm2ext::gdk_color_to_rgba (col);
+		Gtkmm2ext::color_to_rgba (ct, r, g, b, a);
 	} else {
 		Gtkmm2ext::color_to_rgba (UIConfiguration::instance().color ("inactive group tab"), r, g, b, a);
 	}

@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/combobox.h>
-#include <gtkmm/private/combobox_p.h>
+#include <ytkmm/combobox.h>
+#include <ytkmm/private/combobox_p.h>
 
 
 // -*- c++ -*-
@@ -29,10 +29,10 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/liststore.h>
-#include <gtkmm/cellrenderertext.h>
-#include <gtkmm/treeview_private.h> //For SignalProxy_RowSeparator.
-#include <gtk/gtk.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/cellrenderertext.h>
+#include <ytkmm/treeview_private.h> //For SignalProxy_RowSeparator.
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

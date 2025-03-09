@@ -29,13 +29,13 @@
 
 #include "note_base.h"
 #include "editing_context.h"
-#include "editing_syms.h"
+#include "editing_syms.inc.h"
 #include "keyboard.h"
 #include "midi_view.h"
 
 /* clang-format off */
 // Include last, when GRIDTYPE has been defined by editing.h via midi_region_view.h
-#include "editing_syms.h"
+#include "editing_syms.inc.h"
 /* clang-format on */
 
 using namespace std;
@@ -155,13 +155,6 @@ NoteBase::on_channel_selection_change(uint16_t selection)
 	// this forces the item to update..... maybe slow...
 	_item->hide();
 	_item->show();
-}
-
-void
-NoteBase::on_channel_change(uint8_t channel)
-{
-	_region.note_selected(this, true);
-	_region.change_channel(channel);
 }
 
 void

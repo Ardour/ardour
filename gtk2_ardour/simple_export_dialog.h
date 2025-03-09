@@ -19,10 +19,10 @@
 #ifndef _gtkardour_simple_export_dialog_h_
 #define _gtkardour_simple_export_dialog_h_
 
-#include <gtkmm/button.h>
-#include <gtkmm/combobox.h>
-#include <gtkmm/label.h>
-#include <gtkmm/progressbar.h>
+#include <ytkmm/button.h>
+#include <ytkmm/combobox.h>
+#include <ytkmm/label.h>
+#include <ytkmm/progressbar.h>
 
 #include "ardour/simple_export.h"
 

@@ -19,7 +19,7 @@
 #ifndef _ardour_message_h_
 #define _ardour_message_h_
 
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/messagedialog.h>
 
 class ArdourMessageDialog : public Gtk::MessageDialog
 {

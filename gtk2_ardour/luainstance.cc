@@ -365,7 +365,7 @@ LuaSignal
 str2luasignal (const std::string &str) {
 	const char* type = str.c_str();
 	if (0) { }
-#	include "luasignal_syms.h"
+#	include "luasignal_syms.inc.h"
 	else {
 		PBD::fatal << string_compose (_("programming error: %1: %2"), "Impossible LuaSignal type", str) << endmsg;
 		abort(); /*NOTREACHED*/
@@ -379,7 +379,7 @@ str2luasignal (const std::string &str) {
 #define SESSION(name,c) N_(#name),
 #define ENGINE(name,c) N_(#name),
 const char *luasignalstr[] = {
-#	include "luasignal_syms.h"
+#	include "luasignal_syms.inc.h"
 	0
 };
 
@@ -551,7 +551,7 @@ LuaInstance::register_hooks (lua_State* L)
 #define SESSION(name,c) .addConst (stringify(name), (LuaSignal::LuaSignal)LuaSignal::name)
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("LuaSignal")
-#		include "luasignal_syms.h"
+#		include "luasignal_syms.inc.h"
 		.endNamespace ();
 #undef ENGINE
 #undef SESSION
@@ -910,7 +910,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addFunction ("get_cut_buffer", &EditingContext::get_cut_buffer)
 
 		.addFunction ("set_zoom_focus", &EditingContext::set_zoom_focus)
-		.addFunction ("get_zoom_focus", &EditingContext::get_zoom_focus)
+		.addFunction ("zoom_focus", &EditingContext::zoom_focus)
 		.addFunction ("get_current_zoom", &EditingContext::get_current_zoom)
 		.addFunction ("reset_zoom", &EditingContext::reset_zoom)
 
@@ -1114,7 +1114,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addFunction ("set_" # var, &UIConfiguration::set_##var) \
 		.addProperty (#var, &UIConfiguration::get_##var, &UIConfiguration::set_##var)
 
-#include "ui_config_vars.h"
+#include "ui_config_vars.inc.h"
 
 #undef UI_CONFIG_VARIABLE
 		.endClass()
@@ -1146,7 +1146,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 #define NOTENAMEDISPLAY(NAME) .addConst (stringify(NAME), (Editing::NoteNameDisplay)Editing::NAME)
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("Editing")
-#		include "editing_syms.h"
+#		include "editing_syms.inc.h"
 		.endNamespace ();
 
 	if (!sandbox) {
@@ -2379,7 +2379,7 @@ LuaCallback::reconnect_object (T obj)
 #define SESSION(n,c) else if (i == LuaSignal::n) { if (_session) { connect (LuaSignal::n, _session, &(_session->c)); } }
 #define STATIC(n,c) else if (i == LuaSignal::n) { connect (LuaSignal::n, obj, c); }
 			if (0) {}
-#			include "luasignal_syms.h"
+#			include "luasignal_syms.inc.h"
 			else {
 				PBD::fatal << string_compose (_("programming error: %1: %2"), "Impossible LuaSignal type", i) << endmsg;
 				abort(); /*NOTREACHED*/

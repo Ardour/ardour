@@ -40,7 +40,7 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	local gain = ctrl[1] / ctrl[2]
 	ARDOUR.DSP.process_map (bufs, n_out, in_map, out_map, n_samples, offset)
 	for c = 1, n_audio do
-		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped output buffer for given cannel
+		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped output buffer for given channel
 		if (ob ~= ARDOUR.ChanMapping.Invalid) then
 			bufs:get_audio (ob):apply_gain (gain, n_samples);
 		end

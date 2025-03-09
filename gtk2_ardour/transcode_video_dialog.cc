@@ -29,8 +29,8 @@
 
 #include <sigc++/bind.h>
 
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/filechooserdialog.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/gstdio_compat.h"
 

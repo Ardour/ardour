@@ -20,7 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/stock.h>
+#include <ydkmm/cursor.h>
+#include <ytkmm/stock.h>
 
 #include "ardour/session.h"
 #include "ardour/route_group.h"
@@ -49,9 +50,9 @@ using Gtkmm2ext::Keyboard;
 list<Gdk::Color> GroupTabs::_used_colors;
 
 GroupTabs::GroupTabs ()
-	: _menu (0)
+	: _dragging_new_tab (0)
+	, _menu (0)
 	, _dragging (0)
-	, _dragging_new_tab (0)
 	, _extent (-1)
 	, _offset (0)
 	, _hovering (false)
@@ -308,13 +309,13 @@ GroupTabs::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 
 	if (!get_sensitive ()) {
 		c = get_style()->get_base (Gtk::STATE_INSENSITIVE);
+		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 	} else {
-		c = get_style()->get_base (Gtk::STATE_NORMAL);
+		uint32_t bg_color = UIConfiguration::instance().color ("group tab base");
+		Gtkmm2ext::set_source_rgb_a (cr, bg_color, 1.0);
 	}
 
 	/* background */
-
-	cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 	cairo_rectangle (cr, 0, 0, get_width(), get_height());
 	cairo_fill (cr);
 
@@ -886,7 +887,7 @@ GroupTabs::group_color (RouteGroup* group)
 
 	if (empty) {
 		/* no color has yet been set, so use a random one */
-		uint32_t c = Gtkmm2ext::gdk_color_to_rgba (unique_random_color (_used_colors));
+		uint32_t c = Gtkmm2ext::gdk_color_to_rgba (round_robin_palette_color ());
 		set_group_color (group, c);
 		return c;
 	}

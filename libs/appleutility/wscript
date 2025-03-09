@@ -42,6 +42,3 @@ def build(bld):
     obj.name           = 'libappleutility'
     obj.target         = 'appleutility'
     obj.install_path   = os.path.join(bld.env['LIBDIR'], 'appleutility')
-
-def i18n(bld):
-    pass

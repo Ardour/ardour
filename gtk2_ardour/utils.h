@@ -35,8 +35,8 @@
 
 #include "ardour/types.h"
 
-#include <gdkmm/types.h>
-#include <gtkmm/menushell.h>
+#include <ydkmm/types.h>
+#include <ytkmm/menushell.h>
 
 #include "canvas/types.h"
 
@@ -100,7 +100,7 @@ void resize_window_to_proportion_of_monitor (Gtk::Window*, int, int);
 
 std::string escape_underscores (std::string const &);
 
-Gdk::Color round_robin_palette_color ();
+Gdk::Color round_robin_palette_color (bool just_peek = false);
 Gdk::Color unique_random_color (std::list<Gdk::Color> &);
 
 std::string rate_as_string (float r);

@@ -29,15 +29,15 @@
 #include <vector>
 #include <list>
 
-#include <gtkmm/box.h>
-#include <gtkmm/fixed.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/table.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/label.h>
-#include <gtkmm/sizegroup.h>
+#include <ytkmm/box.h>
+#include <ytkmm/fixed.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/table.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/label.h>
+#include <ytkmm/sizegroup.h>
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"

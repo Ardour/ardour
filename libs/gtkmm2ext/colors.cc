@@ -25,7 +25,7 @@
 
 #include <glib.h>
 
-#include <gdkmm/color.h>
+#include <ydkmm/color.h>
 
 #include "pbd/failed_constructor.h"
 #include "pbd/string_convert.h"

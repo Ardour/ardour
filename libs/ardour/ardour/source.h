@@ -83,7 +83,12 @@ public:
 	void mark_for_remove();
 
 	virtual void mark_streaming_write_started (const WriterLock& lock) {}
-	virtual void mark_streaming_write_completed (const WriterLock& lock) = 0;
+	/* The duration argument is ignored for audio data, where length is
+	   implicitly given by the sample data. It matters for MIDI data, where
+	   the file may be intended to be N bars long, but has no events that
+	   occur at that duration.
+	*/
+	virtual void mark_streaming_write_completed (const WriterLock& lock, Temporal::timecnt_t const & duration) = 0;
 
 	virtual void session_saved() {}
 

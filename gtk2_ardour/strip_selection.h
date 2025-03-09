@@ -20,9 +20,11 @@
 
 #pragma once
 
+#include "mixer_strip.h"
+
 #include <list>
 
 class MixerStrip;
 
-struct MixerStripSelection : list<MixerStrip*> {};
+struct MixerStripSelection : std::list<MixerStrip*> {};
 

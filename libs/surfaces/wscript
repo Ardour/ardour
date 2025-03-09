@@ -20,10 +20,7 @@ children = [
     'us2400',
     'launch_control_xl',
     'osc',
-    'console1',
-    'launchpad_pro',
-    'launchpad_x',
-    'launchkey_4'
+    'console1'
 ]
 
 def options(opt):
@@ -34,12 +31,12 @@ def configure(conf):
 
     autowaf.set_recursive()
 
-    #if Options.options.tranzport and conf.is_defined('HAVE_USB'):
-    #    conf.define('BUILD_TRANZPORT', 1)
-
     if conf.is_defined('HAVE_USB'):
         children += [ 'push2' ]
         children += [ 'contourdesign' ]
+        children += [ 'launchpad_pro' ]
+        children += [ 'launchpad_x' ]
+        children += [ 'launchkey_4' ]
 
     else:
         print ('You are missing the libusb-1.0 development package needed to compile Push2 and ContourDesign support')
@@ -86,8 +83,6 @@ def build(bld):
 
     if bld.is_defined('BUILD_WIIMOTE'):
         bld.recurse('wiimote')
-    if bld.is_defined('BUILD_TRANZPORT'):
-        bld.recurse('tranzport')
     if bld.is_defined('HAVE_USB'):
         bld.recurse('push2')
         bld.recurse('contourdesign')

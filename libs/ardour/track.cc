@@ -585,6 +585,12 @@ Track::last_capture_sources ()
 	return _disk_writer->last_capture_sources ();
 }
 
+void
+Track::reset_last_capture_sources ()
+{
+	_disk_writer->reset_last_capture_sources ();
+}
+
 std::string
 Track::steal_write_source_name()
 {
@@ -592,9 +598,9 @@ Track::steal_write_source_name()
 }
 
 void
-Track::reset_write_sources (bool r, bool force)
+Track::reset_write_sources (bool mark_write_complete)
 {
-	_disk_writer->reset_write_sources (r, force);
+	_disk_writer->reset_write_sources (mark_write_complete);
 }
 
 float

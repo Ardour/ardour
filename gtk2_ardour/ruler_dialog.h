@@ -21,7 +21,7 @@
 #define __gtk_ardour_ruler _h__
 
 #include <string>
-#include <gtkmm/checkbutton.h>
+#include <ytkmm/checkbutton.h>
 
 #include "ardour_dialog.h"
 

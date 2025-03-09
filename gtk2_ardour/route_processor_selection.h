@@ -21,6 +21,8 @@
 #pragma once
 
 #include <vector>
+
+#include "pbd/property_basics.h"
 #include "pbd/signals.h"
 
 #include "processor_selection.h"

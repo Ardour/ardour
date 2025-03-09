@@ -21,6 +21,7 @@
 
 #include <glibmm/threads.h>
 
+#include "ardour/midi_port.h"
 #include "ardour/scene_changer.h"
 
 namespace ARDOUR

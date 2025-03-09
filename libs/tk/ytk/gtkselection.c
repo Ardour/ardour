@@ -60,14 +60,14 @@
 #include "gtkselection.h"
 #include "gtktextbufferrichtext.h"
 #include "gtkintl.h"
-#include "gdk-pixbuf/gdk-pixbuf.h"
+#include "ydk-pixbuf/ydk-pixbuf.h"
 
 #ifdef GDK_WINDOWING_X11
-#include "gdk/gdkx.h"
+#include "ydk/gdkx.h"
 #endif
 
 #ifdef GDK_WINDOWING_WIN32
-#include "gdk/gdkwin32.h"
+#include "ydk/gdkwin32.h"
 #endif
 
 #include "gtkalias.h"

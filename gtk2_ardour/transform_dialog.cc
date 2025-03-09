@@ -17,9 +17,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/box.h>
-#include <gtkmm/label.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/box.h>
+#include <ytkmm/label.h>
+#include <ytkmm/stock.h>
 
 #include "transform_dialog.h"
 

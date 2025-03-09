@@ -26,6 +26,10 @@
  *  Held centrally by the Editor because some cursors are used in several places.
  */
 
+#include <ydkmm/cursor.h>
+
+#include <string>
+
 class MouseCursors
 {
 public:
@@ -34,6 +38,8 @@ public:
 
 	void set_cursor_set (const std::string& name);
 	std::string cursor_set() const { return _cursor_set; }
+
+	Gdk::Cursor* from_gdk_cursor (GdkCursor*);
 
 	Gdk::Cursor* cross_hair;
 	Gdk::Cursor* scissors;
@@ -84,6 +90,7 @@ public:
 	static Gdk::Cursor* invalid_cursor() { if (!_invalid) { create_invalid(); } return _invalid; }
 
     private:
+	std::vector<Gdk::Cursor*> cursors;
 	std::string _cursor_set;
 	void drop_all ();
 

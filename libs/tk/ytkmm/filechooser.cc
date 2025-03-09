@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/filechooser.h>
-#include <gtkmm/private/filechooser_p.h>
+#include <ytkmm/filechooser.h>
+#include <ytkmm/private/filechooser_p.h>
 
 
 // -*- c++ -*-
@@ -27,8 +27,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
-//#include <gtk/gtkfilesystem.h> //We include this semi-private header just to get GTK_FILE_SYSTEM_ERROR.
+#include <ytk/ytk.h>
+//#include <ytk/gtkfilesystem.h> //We include this semi-private header just to get GTK_FILE_SYSTEM_ERROR.
 
 
 namespace

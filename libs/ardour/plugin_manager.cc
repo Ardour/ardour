@@ -118,8 +118,9 @@
 #include <Carbon/Carbon.h>
 #endif
 
-#ifdef VST3_SUPPORT
 #include "ardour/system_exec.h"
+
+#ifdef VST3_SUPPORT
 #include "ardour/vst3_module.h"
 #include "ardour/vst3_plugin.h"
 #include "ardour/vst3_scan.h"

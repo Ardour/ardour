@@ -54,13 +54,12 @@
 #include "keyeditor.h"
 #include "rc_option_editor.h"
 #include "route_params_ui.h"
-#include "time_info_box.h"
 #include "trigger_ui.h"
 #include "step_entry.h"
 #include "opts.h"
 
 #ifdef GDK_WINDOWING_X11
-#include <gdk/gdkx.h>
+#include <ydk/gdkx.h>
 #endif
 
 #include "pbd/i18n.h"
@@ -88,6 +87,8 @@ ARDOUR_UI::we_have_dependents ()
 
 	StepEntry::setup_actions_and_bindings ();
 	ClipEditorBox::init ();
+
+	setup_action_tooltips ();
 
 	/* Global, editor, mixer, processor box actions are defined now. Link
 	   them with any bindings, so that GTK does not get a chance to define
@@ -118,8 +119,6 @@ ARDOUR_UI::we_have_dependents ()
 
 	std::function<void (std::string)> pc (std::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	Config->map_parameters (pc);
-
-	UIConfiguration::instance().reset_dpi ();
 }
 
 void
@@ -282,7 +281,6 @@ ARDOUR_UI::setup_windows ()
 		return -1;
 	}
 
-	time_info_box = new TimeInfoBox ("ToolbarTimeInfo", false);
 	/* all other dialogs are created conditionally */
 
 	we_have_dependents ();
@@ -306,31 +304,16 @@ ARDOUR_UI::setup_windows ()
 	/* now add the transport sample to the top of main window */
 
 	main_vpacker.pack_start ( *spacer, false, false);
-	main_vpacker.pack_start (transport_frame, false, false);
 	main_vpacker.pack_start (_tabs, true, true);
-
-	LuaInstance::instance()->ActionChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::action_script_changed));
-
-	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
-		std::string const a = string_compose (X_("script-%1"), i + 1);
-		Glib::RefPtr<Action> act = ActionManager::get_action(X_("LuaAction"), a.c_str());
-		assert (act);
-		action_script_call_btn[i].set_name ("lua action button");
-		action_script_call_btn[i].set_text (string_compose ("%1%2", std::hex, i+1));
-		action_script_call_btn[i].set_related_action (act);
-		action_script_call_btn[i].signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::bind_lua_action_script), i), false);
-		if (act->get_sensitive ()) {
-			action_script_call_btn[i].set_visual_state (Gtkmm2ext::VisualState (action_script_call_btn[i].visual_state() & ~Gtkmm2ext::Insensitive));
-		} else {
-			action_script_call_btn[i].set_visual_state (Gtkmm2ext::VisualState (action_script_call_btn[i].visual_state() | Gtkmm2ext::Insensitive));
-		}
-		action_script_call_btn[i].set_sizing_text ("88");
-		action_script_call_btn[i].set_no_show_all ();
-	}
 
 	setup_transport();
 	build_menu_bar ();
 	setup_tooltips ();
+
+	/* set DPI before realizing widgets */
+	UIConfiguration::instance().reset_dpi ();
+
+	ActionsReady (); // EMIT SIGNAL
 
 	_main_window.signal_delete_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::main_window_delete_event));
 
@@ -338,7 +321,6 @@ ARDOUR_UI::setup_windows ()
 	 */
 
 	_main_window.add (main_vpacker);
-	transport_frame.show_all ();
 
 	apply_window_settings (true);
 
@@ -426,59 +408,4 @@ ARDOUR_UI::apply_window_settings (bool with_size)
 		_tabs.set_current_page (_tabs.page_num (editor->contents()));
 	}
 	return;
-}
-
-bool
-ARDOUR_UI::bind_lua_action_script (GdkEventButton*ev, int i)
-{
-	if (!_session) {
-		return false;
-	}
-	LuaInstance *li = LuaInstance::instance();
-	std::string name;
-	if (ev->button != 3 && !(ev->button == 1 && !li->lua_action_name (i, name))) {
-		return false;
-	}
-	if (Gtkmm2ext::Keyboard::modifier_state_equals (ev->state, Gtkmm2ext::Keyboard::TertiaryModifier)) {
-		li->remove_lua_action (i);
-	} else {
-		li->interactive_add (*editor->current_toplevel (), LuaScriptInfo::EditorAction, i);
-	}
-	return true;
-}
-
-void
-ARDOUR_UI::action_script_changed (int i, const std::string& n)
-{
-	if (i < 0 || i >= MAX_LUA_ACTION_SCRIPTS) {
-		return;
-	}
-
-	if (i < MAX_LUA_ACTION_BUTTONS) {
-		if (LuaInstance::instance()->lua_action_has_icon (i)) {
-			uintptr_t ii = i;
-			action_script_call_btn[i].set_icon (&LuaInstance::render_action_icon, (void*)ii);
-		} else {
-			action_script_call_btn[i].set_icon (0, 0);
-		}
-		if (n.empty ()) {
-			action_script_call_btn[i].set_text (string_compose ("%1%2", std::hex, i+1));
-		} else {
-			action_script_call_btn[i].set_text (n.substr(0,1));
-		}
-	}
-
-	std::string const a = string_compose (X_("script-%1"), i + 1);
-	Glib::RefPtr<Action> act = ActionManager::get_action(X_("LuaAction"), a.c_str());
-	assert (act);
-	if (n.empty ()) {
-		act->set_label (string_compose (_("Unset #%1"), i + 1));
-		act->set_tooltip (_("No action bound\nRight-click to assign"));
-		act->set_sensitive (false);
-	} else {
-		act->set_label (n);
-		act->set_tooltip (string_compose (_("%1\n\nClick to run\nRight-click to re-assign\nShift+right-click to unassign"), n));
-		act->set_sensitive (true);
-	}
-	KeyEditor::UpdateBindings ();
 }

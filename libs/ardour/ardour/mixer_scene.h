@@ -19,15 +19,12 @@
 #ifndef _libardour_mixer_scene_h_
 #define _libardour_mixer_scene_h_
 
+#include "pbd/controllable.h"
 #include "pbd/stateful.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
-
-namespace PBD {
-	class Controllable;
-}
 
 namespace ARDOUR {
 

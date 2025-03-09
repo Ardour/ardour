@@ -1338,7 +1338,6 @@ IO::bundle_changed (Bundle::Change /*c*/)
 string
 IO::build_legal_port_name (std::shared_ptr<PortSet const> ports, DataType type)
 {
-	const int name_size = AudioEngine::instance()->port_name_size();
 	int limit;
 	string suffix;
 
@@ -1372,21 +1371,24 @@ IO::build_legal_port_name (std::shared_ptr<PortSet const> ports, DataType type)
 
 	// allow up to 4 digits for the output port number, plus the slash, suffix and extra space
 
+	uint32_t name_size = AudioEngine::instance()->port_name_size();
 	limit = name_size - AudioEngine::instance()->my_name().length() - (suffix.length() + 5);
 
-	std::vector<char> buf1(name_size+1);
-	std::vector<char> buf2(name_size+1);
+	++name_size; // allow for \0
+
+	std::unique_ptr<char[]> buf1 (new char[name_size]);
+	std::unique_ptr<char[]> buf2 (new char[name_size]);
 
 	/* colons are illegal in port names, so fix that */
 
 	string nom = legalize_io_name (_name.val());
 
-	snprintf (&buf1[0], name_size+1, ("%.*s/%s"), limit, nom.c_str(), suffix.c_str());
+	std::snprintf (buf1.get(), name_size, ("%.*s/%s"), limit, nom.c_str(), suffix.c_str());
 
-	int port_number = find_port_hole (ports, &buf1[0]);
-	snprintf (&buf2[0], name_size+1, "%s %d", &buf1[0], port_number);
+	int port_number = find_port_hole (ports, buf1.get ());
+	std::snprintf (buf2.get(), name_size, "%s %d", buf1.get (), port_number);
 
-	return string (&buf2[0]);
+	return string (buf2.get ());
 }
 
 int32_t
@@ -1400,17 +1402,17 @@ IO::find_port_hole (std::shared_ptr<PortSet const> ports, const char* base)
 		return 1;
 	}
 
-	/* we only allow up to 4 characters for the port number
-	 */
+	uint32_t const name_size = AudioEngine::instance()->port_name_size() + 1;
 
+	/* we only allow up to 4 characters for the port number */
 	for (n = 1; n < 9999; ++n) {
-		std::vector<char> buf (AudioEngine::instance()->port_name_size());
 		PortSet::const_iterator i = ports->begin ();
 
-		snprintf (&buf[0], buf.size()+1, _("%s %u"), base, n);
+		std::unique_ptr<char[]> buf (new char[name_size]);
+		std::snprintf (buf.get (), name_size, "%s %u", base, n);
 
 		for ( ; i != ports->end (); ++i) {
-			if (string (i->name()) == string (&buf[0])) {
+			if (string (i->name()) == string (buf.get ())) {
 				break;
 			}
 		}
@@ -1526,13 +1528,13 @@ IO::bundle_channel_name (uint32_t c, uint32_t n, DataType t) const
 		case 2:
 			return c == 0 ? _("L") : _("R");
 		default:
-			snprintf (buf, sizeof(buf), "%d", (c + 1));
+			std::snprintf (buf, sizeof(buf), "%d", (c + 1));
 			return buf;
 		}
 
 	} else {
 
-		snprintf (buf, sizeof(buf), "%d", (c + 1));
+		std::snprintf (buf, sizeof(buf), "%d", (c + 1));
 		return buf;
 
 	}

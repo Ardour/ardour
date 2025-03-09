@@ -19,11 +19,11 @@
 
 #include <glibmm/thread.h>
 
-#include <gtkmm/box.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/label.h>
-#include <gtkmm/textview.h>
-#include <gtkmm/window.h>
+#include <ytkmm/box.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/label.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/window.h>
 
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
@@ -39,6 +39,8 @@
 
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
+
+#include "ardour_window.h"
 
 class LuaWindow :
 	public ArdourWindow,

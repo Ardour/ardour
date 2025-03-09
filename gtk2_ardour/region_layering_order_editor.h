@@ -21,16 +21,18 @@
 #ifndef __gtk2_ardour_region_layering_order_editor_h__
 #define __gtk2_ardour_region_layering_order_editor_h__
 
-#include <gtkmm/dialog.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/treeview.h>
-#include <gtkmm/scrolledwindow.h>
+#include <ytkmm/dialog.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/treeview.h>
+#include <ytkmm/scrolledwindow.h>
 
 #include "ardour/region.h"
 #include "ardour/playlist.h"
 
 #include "ardour_window.h"
 #include "audio_clock.h"
+#include "region_view.h"
+#include "time_axis_view.h"
 
 class PublicEditor;
 

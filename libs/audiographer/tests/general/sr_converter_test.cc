@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "tests/utils.h"
 
 #include "audiographer/general/sr_converter.h"

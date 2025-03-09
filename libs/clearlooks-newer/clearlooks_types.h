@@ -10,10 +10,7 @@ typedef struct _ClearlooksStyleFunctions ClearlooksStyleFunctions;
 typedef enum
 {
 	CL_STYLE_CLASSIC = 0,
-	CL_STYLE_GLOSSY = 1,
-	CL_STYLE_INVERTED = 2,
-	CL_STYLE_GUMMY = 3,
-	CL_NUM_STYLES = 4
+	CL_NUM_STYLES = 1
 } ClearlooksStyles;
 
 
