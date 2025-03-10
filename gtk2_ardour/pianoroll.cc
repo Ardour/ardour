@@ -782,7 +782,7 @@ Pianoroll::set_trigger_start (Temporal::timepos_t const & p)
 	} else {
 		begin_reversible_command (_("trim region front"));
 		view->midi_region()->clear_changes ();
-		view->midi_region()->trim_front (view->midi_region()->position() + p);
+		view->midi_region()->trim_front (view->midi_region()->source_position() + p);
 		add_command (new StatefulDiffCommand (view->midi_region()));
 		commit_reversible_command ();
 	}
@@ -796,7 +796,7 @@ Pianoroll::set_trigger_end (Temporal::timepos_t const & p)
 	} else {
 		begin_reversible_command (_("trim region end"));
 		view->midi_region()->clear_changes ();
-		view->midi_region()->trim_end (view->midi_region()->position() + p);
+		view->midi_region()->trim_end (view->midi_region()->source_position() + p);
 		add_command (new StatefulDiffCommand (view->midi_region()));
 		commit_reversible_command ();
 	}

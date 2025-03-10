@@ -136,6 +136,8 @@ class Pianoroll : public CueEditor
 	void keyboard_paste ();
 	void cut_copy (Editing::CutCopyOp);
 
+	PianorollMidiView* midi_view() const { return view; }
+
   protected:
 	void load_bindings ();
 	void register_actions ();
