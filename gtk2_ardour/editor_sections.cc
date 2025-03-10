@@ -302,7 +302,7 @@ EditorSections::selection_changed ()
 			/*fallthrough*/
 		default:
 			std::cerr << "B\n";
-			Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (X_("Editing"), X_("set-mouse-mode-range"));
+			Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (X_("Editor"), X_("set-mouse-mode-range"));
 			if (!ract) {
 				/* missing action */
 				fatal << X_("programming error: missing mouse-mode-range action") << endmsg;
