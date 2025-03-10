@@ -628,8 +628,8 @@ Bindings::add (KeyboardKey kb, Operation op, string const& action_name, XMLPrope
 		(void) kbm.insert (new_pair).first;
 	}
 
-	DEBUG_TRACE (DEBUG::Bindings, string_compose ("add binding between %1 (%3) and %2, group [%3]\n",
-	                                              kb, action_name, (group ? group->value() : string()), op));
+	DEBUG_TRACE (DEBUG::Bindings, string_compose ("%5: add binding between %1 (%3) and %2, group [%3]\n",
+	                                              kb, action_name, (group ? group->value() : string()), op, _name));
 
 	if (can_save) {
 		Keyboard::keybindings_changed ();
@@ -1157,3 +1157,19 @@ std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey const & k) {
 	return out << "Key " << k.key() << " (" << (gdk_name ? gdk_name : "no-key") << ") state "
 	           << hex << k.state() << dec << ' ' << show_gdk_event_state (k.state());
 }
+
+void
+set_widget_bindings (Gtk::Widget& w, Bindings& b, char const * const name)
+{
+	BindingSet* bs = new BindingSet;
+	bs->push_back (&b);
+	w.set_data (name, bs);
+}
+
+void
+set_widget_bindings (Gtk::Widget& w, BindingSet& bs, char const * const name)
+{
+	w.set_data (name, &bs);
+}
+
+
