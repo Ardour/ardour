@@ -732,6 +732,7 @@ Editor::enter (GdkEventCrossing*)
 
 Editor::~Editor()
 {
+	delete own_bindings;
 	delete tempo_marker_menu;
 	delete meter_marker_menu;
 	delete marker_menu;
@@ -5688,7 +5689,7 @@ Editor::use_own_window (bool and_fill_it)
 		// win->signal_realize().connect (*this, &Editor::on_realize);
 		win->signal_event().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), win));
 		win->signal_event().connect (sigc::mem_fun (*this, &Editor::generic_event_handler));
-		win->set_data ("ardour-bindings", bindings);
+		set_widget_bindings (*win, bindings, ARDOUR_BINDING_KEY);
 
 		update_title ();
 	}

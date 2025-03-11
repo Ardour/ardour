@@ -155,7 +155,7 @@ EditingContext::EditingContext (std::string const & name)
 	, quantize_dialog (nullptr)
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
 	, horizontal_adjustment (0.0, 0.0, 1e16)
-	, bindings (nullptr)
+	, own_bindings (nullptr)
 	, mouse_mode (MouseObject)
 	, visual_change_queued (false)
 	, autoscroll_horizontal_allowed (false)
@@ -2406,7 +2406,7 @@ EditingContext::register_grid_actions ()
 	ActionManager::register_action (editor_actions, X_("next-grid-choice"), _("Next Quantize Grid Choice"), sigc::mem_fun (*this, &EditingContext::next_grid_choice));
 	ActionManager::register_action (editor_actions, X_("prev-grid-choice"), _("Previous Quantize Grid Choice"), sigc::mem_fun (*this, &EditingContext::prev_grid_choice));
 
-	snap_actions = ActionManager::create_action_group (bindings, editor_name() + X_("Snap"));
+	snap_actions = ActionManager::create_action_group (own_bindings, editor_name() + X_("Snap"));
 	RadioAction::Group grid_choice_group;
 
 	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv32)));
@@ -3294,15 +3294,16 @@ EditingContext::load_shared_bindings ()
 	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
 	register_midi_actions (midi_bindings);
 
-	Bindings* shared_bindings = Bindings::get_bindings (_name);
+	Bindings* shared_bindings = Bindings::get_bindings (X_("Editing"));
 	register_common_actions (shared_bindings);
 
 	/* Give this editing context the chance to add more mode mode actions */
 	add_mouse_mode_actions (_common_actions);
 
 	/* Attach bindings to the canvas for this editing context */
-	get_canvas()->set_data ("ardour-bindings", midi_bindings);
-	get_canvas_viewport()->set_data ("ardour-bindings", shared_bindings);
+
+	bindings.push_back (midi_bindings);
+	bindings.push_back (shared_bindings);
 }
 
 void

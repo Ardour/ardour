@@ -93,8 +93,8 @@ Editor::register_actions ()
 {
 	RefPtr<Action> act;
 
-	editor_actions = ActionManager::create_action_group (bindings, X_("Editor"));
-	editor_menu_actions = ActionManager::create_action_group (bindings, X_("EditorMenu"));
+	editor_actions = ActionManager::create_action_group (own_bindings, X_("Editor"));
+	editor_menu_actions = ActionManager::create_action_group (own_bindings, X_("EditorMenu"));
 
 	/* non-operative menu items for menu bar */
 
@@ -524,7 +524,7 @@ Editor::register_actions ()
 
 	toggle_reg_sens (editor_actions, "sound-midi-notes", _("Sound Selected MIDI Notes"), sigc::mem_fun (*this, &Editor::toggle_sound_midi_notes));
 
-	Glib::RefPtr<ActionGroup> marker_click_actions = ActionManager::create_action_group (bindings, X_("MarkerClickBehavior"));
+	Glib::RefPtr<ActionGroup> marker_click_actions = ActionManager::create_action_group (own_bindings, X_("MarkerClickBehavior"));
 	RadioAction::Group marker_click_group;
 
 	radio_reg_sens (marker_click_actions, marker_click_group, "marker-click-select-only", _("Marker Click Only Selects"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_click_behavior_chosen), Editing::MarkerClickSelectOnly));
@@ -532,7 +532,7 @@ Editor::register_actions ()
 	radio_reg_sens (marker_click_actions, marker_click_group, "marker-click-locate-when-stopped", _("Locate To Marker When Transport Is Not Rolling "), sigc::bind (sigc::mem_fun(*this, &Editor::marker_click_behavior_chosen), Editing::MarkerClickLocateWhenStopped));
 	ActionManager::register_action (editor_actions, X_("cycle-marker-click-behavior"), _("Next Marker Click Mode"), sigc::mem_fun (*this, &Editor::cycle_marker_click_behavior));
 
-	Glib::RefPtr<ActionGroup> lua_script_actions = ActionManager::create_action_group (bindings, X_("LuaAction"));
+	Glib::RefPtr<ActionGroup> lua_script_actions = ActionManager::create_action_group (own_bindings, X_("LuaAction"));
 
 	for (int i = 1; i <= MAX_LUA_ACTION_SCRIPTS; ++i) {
 		string const a = string_compose (X_("script-%1"), i);
@@ -569,7 +569,7 @@ Editor::register_actions ()
 
 	/* RULERS */
 
-	Glib::RefPtr<ActionGroup> ruler_actions = ActionManager::create_action_group (bindings, X_("Rulers"));
+	Glib::RefPtr<ActionGroup> ruler_actions = ActionManager::create_action_group (own_bindings, X_("Rulers"));
 	ruler_minsec_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-minsec-ruler"), _("Mins:Secs"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_timecode_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-timecode-ruler"), _("Timecode"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_samples_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-samples-ruler"), _("Samples"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
@@ -642,7 +642,7 @@ Editor::register_actions ()
 
 	/* REGION LIST */
 
-	Glib::RefPtr<ActionGroup> rl_actions = ActionManager::create_action_group (bindings, X_("RegionList"));
+	Glib::RefPtr<ActionGroup> rl_actions = ActionManager::create_action_group (own_bindings, X_("RegionList"));
 	RadioAction::Group sort_type_group;
 	RadioAction::Group sort_order_group;
 
@@ -749,10 +749,10 @@ Editor::trigger_script_by_name (const std::string script_name, const std::string
 void
 Editor::load_bindings ()
 {
-	bindings = Bindings::get_bindings (editor_name());
-	contents().set_data ("ardour-bindings", bindings);
-
+	own_bindings = Bindings::get_bindings (editor_name());
 	EditingContext::load_shared_bindings ();
+	bindings.push_back (own_bindings);
+	set_widget_bindings (contents(), bindings, Gtkmm2ext::ARDOUR_BINDING_KEY);
 }
 
 void
@@ -1122,7 +1122,7 @@ Editor::reset_canvas_action_sensitivity (bool onoff)
 void
 Editor::register_region_actions ()
 {
-	_region_actions = ActionManager::create_action_group (bindings, X_("Region"));
+	_region_actions = ActionManager::create_action_group (own_bindings, X_("Region"));
 
 	/* PART 1: actions that operate on the selection, and for which the edit point type and location is irrelevant */
 

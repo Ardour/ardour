@@ -107,7 +107,7 @@ MonitorSection::MonitorSection ()
 
 	load_bindings ();
 	register_actions ();
-	set_data ("ardour-bindings", bindings);
+	set_widget_bindings (*this, *bindings, ARDOUR_BINDING_KEY);
 
 	channel_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
 

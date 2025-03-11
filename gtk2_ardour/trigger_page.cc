@@ -194,7 +194,7 @@ TriggerPage::TriggerPage ()
 	_sidebar_vbox.show_all ();
 
 	/* setup keybidings */
-	contents().set_data ("ardour-bindings", bindings);
+	set_widget_bindings (contents(), *bindings, ARDOUR_BINDING_KEY);
 
 	/* subscribe to signals */
 	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&TriggerPage::parameter_changed, this, _1), gui_context ());
@@ -219,7 +219,7 @@ TriggerPage::use_own_window (bool and_fill_it)
 		win->set_name ("TriggerWindow");
 		ARDOUR_UI::instance ()->setup_toplevel_window (*win, _("Cues"), this);
 		win->signal_event ().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), win));
-		win->set_data ("ardour-bindings", bindings);
+		set_widget_bindings (*win, *bindings, ARDOUR_BINDING_KEY);
 		update_title ();
 #if 0 // TODO
 		if (!win->get_focus()) {

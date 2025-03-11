@@ -478,8 +478,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void copy ();
 	void alt_delete_ ();
 
-	Gtkmm2ext::Bindings* get_bindings() const { return bindings; }
-
 	virtual void update_grid ();
 
   protected:
@@ -703,7 +701,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void pack_draw_box ();
 	void pack_snap_box ();
 
-	Gtkmm2ext::Bindings* bindings;
+	Gtkmm2ext::BindingSet bindings;
+	Gtkmm2ext::Bindings* own_bindings;
 
 	Editing::MouseMode mouse_mode;
 

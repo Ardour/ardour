@@ -99,7 +99,7 @@ Pianoroll::Pianoroll (std::string const & name)
 
 Pianoroll::~Pianoroll ()
 {
-	delete bindings;
+	delete own_bindings;
 	ActionManager::drop_action_group (editor_actions);
 	ActionManager::drop_action_group (snap_actions);
 }
@@ -114,14 +114,16 @@ Pianoroll::enter (GdkEventCrossing*)
 void
 Pianoroll::load_bindings ()
 {
-	bindings = Bindings::get_bindings (editor_name());
+	own_bindings = Bindings::get_bindings (editor_name());
 	load_shared_bindings ();
+	bindings.push_back (own_bindings);
+	set_widget_bindings (*get_canvas(), bindings, ARDOUR_BINDING_KEY);
 }
 
 void
 Pianoroll::register_actions ()
 {
-	editor_actions = ActionManager::create_action_group (bindings, editor_name());
+	editor_actions = ActionManager::create_action_group (own_bindings, editor_name());
 
 	bind_mouse_mode_buttons ();
 	register_grid_actions ();
@@ -425,7 +427,7 @@ Pianoroll::build_upper_toolbar ()
 	_toolbox.pack_start (*_toolbar_outer, false, false);
 
 	Bindings* pr_bindings = Bindings::get_bindings (X_("Pianoroll"));
-	_toolbox.set_data (X_("ardour-bindings"), pr_bindings);
+	set_widget_bindings (_toolbox, *pr_bindings, ARDOUR_BINDING_KEY);
 
 	_contents.add (_toolbox);
 	_contents.signal_enter_notify_event().connect (sigc::mem_fun (*this, &Pianoroll::enter), false);
@@ -603,8 +605,11 @@ Pianoroll::bindings_changed ()
 	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
 	Bindings* shared_bindings = Bindings::get_bindings (X_("Editing"));
 
-	_canvas_viewport->set_data (X_("ardour-bindings"), shared_bindings);
-	_canvas->set_data (X_("ardour-bindings"), midi_bindings);
+	BindingSet* bs = new BindingSet;
+	bs->push_back (midi_bindings);
+	bs->push_back (shared_bindings);
+
+	set_widget_bindings (*_canvas, *bs, ARDOUR_BINDING_KEY);
 }
 
 void
