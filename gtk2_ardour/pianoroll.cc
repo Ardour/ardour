@@ -597,14 +597,8 @@ Pianoroll::visible_channel_changed ()
 void
 Pianoroll::bindings_changed ()
 {
-	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
-	Bindings* shared_bindings = Bindings::get_bindings (X_("Editing"));
-
-	BindingSet* bs = new BindingSet;
-	bs->push_back (midi_bindings);
-	bs->push_back (shared_bindings);
-
-	set_widget_bindings (*_canvas, *bs, ARDOUR_BINDING_KEY);
+	bindings.clear ();
+	load_shared_bindings ();
 }
 
 void
