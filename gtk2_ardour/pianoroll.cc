@@ -115,6 +115,9 @@ void
 Pianoroll::load_bindings ()
 {
 	load_shared_bindings ();
+	for (auto & b : bindings) {
+		b->associate ();
+	}
 	set_widget_bindings (*get_canvas(), bindings, ARDOUR_BINDING_KEY);
 }
 
