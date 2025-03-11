@@ -42,6 +42,7 @@
 #include "public_editor.h"
 #include "virtual_keyboard_window.h"
 
+#include "gtkmm2ext/debug.h"
 #include "gtkmm2ext/utils.h"
 
 using namespace ARDOUR;
@@ -111,7 +112,8 @@ get_bindings_from_widget_hierarchy (GtkWidget** w)
 	void* p = NULL;
 
 	while (*w) {
-		if ((p = g_object_get_data (G_OBJECT(*w), "ardour-bindings")) != 0) {
+		if ((p = g_object_get_data (G_OBJECT(*w), ARDOUR_BINDING_KEY)) != 0) {
+			DEBUG_TRACE (DEBUG::Bindings, string_compose ("found %1 in widget %2\n", ARDOUR_BINDING_KEY, gtk_widget_get_name (*w)));
 			break;
 		}
 		*w = gtk_widget_get_parent (*w);
