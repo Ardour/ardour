@@ -1265,7 +1265,7 @@ Editor::set_session (Session *t)
 	/* Cannot initialize in constructor, because pianoroll needs Actions */
 	if (!_pianoroll) {
 		// XXX this should really not happen here
-		_pianoroll = new Pianoroll ("editor pianroll");
+		_pianoroll = new Pianoroll ("editor pianoroll");
 		_pianoroll->viewport().set_size_request (600, 120);
 	}
 	_pianoroll->set_session (_session);
