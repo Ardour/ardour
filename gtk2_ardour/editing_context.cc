@@ -300,46 +300,42 @@ EditingContext::register_common_actions (Bindings* common_bindings)
 {
 	_common_actions = ActionManager::create_action_group (common_bindings, _name);
 
-	reg_sens (_common_actions, "temporal-zoom-out", _("Zoom Out"), []() { current_editing_context()->temporal_zoom_step (true); });
-	reg_sens (_common_actions, "temporal-zoom-in", _("Zoom In"), []() { current_editing_context()->temporal_zoom_step (false); });
+	reg_sens (_common_actions, "temporal-zoom-out", _("Zoom Out"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), true));
+	reg_sens (_common_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), false));
 
-	undo_action = reg_sens (_common_actions, "undo", S_("Command|Undo"), []() { current_editing_context()->undo(1U) ; });
-	redo_action = reg_sens (_common_actions, "redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
-	alternate_redo_action = reg_sens (_common_actions, "alternate-redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
-	alternate_alternate_redo_action = reg_sens (_common_actions, "alternate-alternate-redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
+	undo_action = reg_sens (_common_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::undo), 1U));
+	redo_action = reg_sens (_common_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::redo), 1U));
+	alternate_redo_action = reg_sens (_common_actions, "alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::redo), 1U));
+	alternate_alternate_redo_action = reg_sens (_common_actions, "alternate-alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::redo), 1U));
 
-	reg_sens (_common_actions, "editor-delete", _("Delete"), []() { current_editing_context()->delete_() ; });
-	reg_sens (_common_actions, "alternate-editor-delete", _("Delete"), []() { current_editing_context()->delete_() ; });
+	reg_sens (_common_actions, "editor-delete", _("Delete"), sigc::mem_fun (*this, &EditingContext::delete_));
+	reg_sens (_common_actions, "alternate-editor-delete", _("Delete"), sigc::mem_fun (*this, &EditingContext::delete_));
 
-	reg_sens (_common_actions, "editor-cut", _("Cut"), []() { current_editing_context()->cut() ; });
-	reg_sens (_common_actions, "editor-copy", _("Copy"), []() { current_editing_context()->copy() ; });
-	reg_sens (_common_actions, "editor-paste", _("Paste"), []() { current_editing_context()->keyboard_paste() ; });
+	reg_sens (_common_actions, "editor-cut", _("Cut"), sigc::mem_fun (*this, &EditingContext::cut));
+	reg_sens (_common_actions, "editor-copy", _("Copy"), sigc::mem_fun (*this, &EditingContext::copy));
+	reg_sens (_common_actions, "editor-paste", _("Paste"), sigc::mem_fun (*this, &EditingContext::keyboard_paste));
 
 	RadioAction::Group mouse_mode_group;
 
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseObject); });
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseRange); });
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseDraw); });
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseTimeFX); });
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseGrid); });
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseContent); });
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseCut); });
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseObject));
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseRange));
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseDraw));
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseTimeFX));
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseGrid));
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseContent));
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseCut));
 
-	if (ActionManager::get_action_group(X_("Zoom"))) {
-		return;
-	}
-
-	Glib::RefPtr<ActionGroup> zoom_actions = ActionManager::create_action_group (common_bindings, X_("Zoom"));
+	Glib::RefPtr<ActionGroup> zoom_actions = ActionManager::create_action_group (common_bindings, _name + X_("Zoom"));
 	RadioAction::Group zoom_group;
 
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusLeft); });
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-right", _("Zoom Focus Right"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusRight); });
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-center", _("Zoom Focus Center"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusCenter); });
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-playhead", _("Zoom Focus Playhead"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusPlayhead); });
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-mouse", _("Zoom Focus Mouse"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusMouse); });
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-edit", _("Zoom Focus Edit Point"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusEdit); });
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusLeft));
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-right", _("Zoom Focus Right"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusRight));
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-center", _("Zoom Focus Center"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusCenter));
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-playhead", _("Zoom Focus Playhead"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusPlayhead));
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-mouse", _("Zoom Focus Mouse"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusMouse));
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-edit", _("Zoom Focus Edit Point"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusEdit));
 
-	ActionManager::register_action (zoom_actions, X_("cycle-zoom-focus"), _("Next Zoom Focus"), []() { current_editing_context()->cycle_zoom_focus(); });
+	ActionManager::register_action (zoom_actions, X_("cycle-zoom-focus"), _("Next Zoom Focus"), sigc::mem_fun (*this, &EditingContext::cycle_zoom_focus));
 }
 
 void
@@ -3244,7 +3240,8 @@ EditingContext::zoom_focus_action (ZoomFocus focus)
 		abort(); /*NOTREACHED*/
 	}
 
-	return ActionManager::get_radio_action (X_("Zoom"), action);
+
+	return ActionManager::get_radio_action ((_name + X_("Zoom")).c_str(), action);
 }
 
 void
@@ -3294,7 +3291,13 @@ EditingContext::load_shared_bindings ()
 	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
 	register_midi_actions (midi_bindings);
 
-	Bindings* shared_bindings = Bindings::get_bindings (X_("Editing"));
+	Bindings* b = Bindings::get_bindings (X_("Editing"));
+
+	/* Copy the Editing bindings, which will make them refer to actions
+	 * named after this EditingContext (ie. unique to this EC)
+	 */
+
+	Bindings* shared_bindings = new Bindings (_name, *b);
 	register_common_actions (shared_bindings);
 
 	/* Give this editing context the chance to add more mode mode actions */

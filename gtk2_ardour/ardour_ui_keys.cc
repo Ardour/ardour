@@ -218,7 +218,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 			Gtkmm2ext::BindingSet* focus_bindings = get_bindings_from_widget_hierarchy (&focus);
 
-			if (focus_bindings) {
+			if (focus && focus_bindings) {
 				for (auto & bindings : *focus_bindings) {
 					DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing widget (%3) bindings %1 @ %2 for this event\n", bindings->name(), bindings, gtk_widget_get_name (focus)));
 					if (bindings->activate (k, Bindings::Press)) {
