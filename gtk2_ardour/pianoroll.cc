@@ -114,9 +114,7 @@ Pianoroll::enter (GdkEventCrossing*)
 void
 Pianoroll::load_bindings ()
 {
-	own_bindings = Bindings::get_bindings (editor_name());
 	load_shared_bindings ();
-	bindings.push_back (own_bindings);
 	set_widget_bindings (*get_canvas(), bindings, ARDOUR_BINDING_KEY);
 }
 
