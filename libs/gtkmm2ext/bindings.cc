@@ -378,6 +378,17 @@ Bindings::Bindings (std::string const& name)
 	bindings.push_back (this);
 }
 
+Bindings::Bindings (std::string const & name, Bindings const & other)
+	: _name (name)
+	, press_bindings (other.press_bindings)
+	, release_bindings (other.release_bindings)
+	, button_press_bindings (other.button_press_bindings)
+	, button_release_bindings (other.button_release_bindings)
+{
+	relativize ();
+	bindings.push_back (this);
+}
+
 Bindings::~Bindings()
 {
 	bindings.remove (this);
@@ -519,6 +530,23 @@ Bindings::activate (KeyboardKey kb, Operation op)
 	/* return true even if the action could not be found */
 
 	return true;
+}
+
+void
+Bindings::relativize ()
+{
+	for (auto & [key,action_info] : press_bindings) {
+		action_info.action_name = _name + action_info.action_name.substr (action_info.action_name.find_first_of ('/'));
+	}
+	for (auto & [key,action_info] : release_bindings) {
+		action_info.action_name = _name + action_info.action_name.substr (action_info.action_name.find_first_of ('/'));
+	}
+	for (auto & [mb,action_info] : button_press_bindings) {
+		action_info.action_name = _name + action_info.action_name.substr (action_info.action_name.find_first_of ('/'));
+	}
+	for (auto & [mb,action_info] : button_release_bindings) {
+		action_info.action_name = _name + action_info.action_name.substr (action_info.action_name.find_first_of ('/'));
+	}
 }
 
 void
