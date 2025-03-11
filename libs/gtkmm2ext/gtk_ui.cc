@@ -387,17 +387,25 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 	if (action) {
 		/* get_bindings_from_widget_hierarchy */
 		Widget* ww = w;
-		Bindings* bindings = NULL;
+		BindingSet* binding_set = nullptr;
 		do {
-			bindings = (Bindings*) ww->get_data ("ardour-bindings");
-			if (bindings) {
+			binding_set = (BindingSet*) ww->get_data ("ardour-bindings");
+			if (binding_set) {
 				break;
 			}
 			ww = ww->get_parent ();
 		} while (ww);
 
-		if (!bindings) {
+		Bindings* bindings;
+
+		if (!binding_set) {
 			bindings = global_bindings;
+		} else {
+			/* Use only the first bindings for the widget when
+			   looking up keys.
+			*/
+			assert (!binding_set->empty());
+			bindings = binding_set->front ();
 		}
 
 		if (bindings) {

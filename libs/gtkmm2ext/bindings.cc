@@ -1158,16 +1158,22 @@ std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey const & k) {
 	           << hex << k.state() << dec << ' ' << show_gdk_event_state (k.state());
 }
 
-void
-set_widget_bindings (Gtk::Widget& w, Bindings& b, char const * const name)
+static void
+delete_binding_set (void* p)
 {
-	BindingSet* bs = new BindingSet;
-	bs->push_back (&b);
-	w.set_data (name, bs);
+	delete (BindingSet*) p;
 }
 
 void
-set_widget_bindings (Gtk::Widget& w, BindingSet& bs, char const * const name)
+Gtkmm2ext::set_widget_bindings (Gtk::Widget& w, Bindings& b, char const * const name)
+{
+	BindingSet* bs = new BindingSet;
+	bs->push_back (&b);
+	g_object_set_data_full (G_OBJECT(w.gobj()), name, bs, (GDestroyNotify) delete_binding_set);
+}
+
+void
+Gtkmm2ext::set_widget_bindings (Gtk::Widget& w, BindingSet& bs, char const * const name)
 {
 	w.set_data (name, &bs);
 }
