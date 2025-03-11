@@ -574,8 +574,6 @@ Pianoroll::build_canvas ()
 	_canvas->set_can_focus ();
 
 	_toolbox.pack_start (*_canvas_viewport, true, true);
-
-	bindings_changed ();
 }
 
 void
