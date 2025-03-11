@@ -27,6 +27,7 @@
 $ARDOUR Shortcuts \linebreak Mnemonic US-Keypad
 
 ;; GROUP DEFINITIONS
+;; %WORD GROUPWORD GROUP DESCRIPTION TEXT
 
 %trans Global Global Transport \& Recording Control
 
