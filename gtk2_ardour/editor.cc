@@ -717,17 +717,6 @@ Editor::Editor ()
 	UIConfiguration::instance().map_parameters (pc);
 
 	setup_fade_images ();
-
-	switch_editing_context (this);
-	content_main_top.signal_enter_notify_event().connect (sigc::mem_fun (*this, &Editor::enter), false);
-	content_main.signal_enter_notify_event().connect (sigc::mem_fun (*this, &Editor::enter), false);
-}
-
-bool
-Editor::enter (GdkEventCrossing*)
-{
-	switch_editing_context (this);
-	return false;
 }
 
 Editor::~Editor()

@@ -90,11 +90,7 @@ Pianoroll::Pianoroll (std::string const & name)
 	load_bindings ();
 	register_actions ();
 
-	/* this is weird because it will use an action that uses current_editing_context */
-	EditingContext* ec = current_editing_context ();
-	switch_editing_context (this);
 	set_mouse_mode (Editing::MouseContent, true);
-	switch_editing_context (ec);
 }
 
 Pianoroll::~Pianoroll ()
@@ -102,13 +98,6 @@ Pianoroll::~Pianoroll ()
 	delete own_bindings;
 	ActionManager::drop_action_group (editor_actions);
 	ActionManager::drop_action_group (snap_actions);
-}
-
-bool
-Pianoroll::enter (GdkEventCrossing*)
-{
-	switch_editing_context (this);
-	return false;
 }
 
 void
@@ -428,7 +417,6 @@ Pianoroll::build_upper_toolbar ()
 	_toolbox.pack_start (*_toolbar_outer, false, false);
 
 	_contents.add (_toolbox);
-	_contents.signal_enter_notify_event().connect (sigc::mem_fun (*this, &Pianoroll::enter), false);
 	_contents.signal_unmap().connect ([this]() {_canvas_viewport->unmap ();}, false);
 	_contents.signal_map().connect ([this]() {_canvas_viewport->map ();}, false);
 }
@@ -631,7 +619,6 @@ Pianoroll::canvas_enter_leave (GdkEventCrossing* ev)
 			_canvas_viewport->canvas()->grab_focus ();
 			ActionManager::set_sensitive (_midi_actions, true);
 			within_track_canvas = true;
-			EditingContext::switch_editing_context (this);
 		}
 		break;
 	case GDK_LEAVE_NOTIFY:

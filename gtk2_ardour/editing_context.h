@@ -407,7 +407,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void legatize_region (bool shrink_only);
 	void transpose_region ();
 
-	static void register_midi_actions (Gtkmm2ext::Bindings*);
+	void register_midi_actions (Gtkmm2ext::Bindings*);
 	void register_common_actions (Gtkmm2ext::Bindings*);
 
 	ArdourCanvas::Rectangle* rubberband_rect;
@@ -451,10 +451,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void redo (uint32_t n = 1) { do_redo (n); }
 
 	virtual void history_changed() = 0;
-	static void update_undo_redo_actions (PBD::UndoHistory const &);
-
-	static EditingContext* current_editing_context();
-	static void switch_editing_context(EditingContext*);
+	void update_undo_redo_actions (PBD::UndoHistory const &);
 
 	virtual void set_canvas_cursor (Gdk::Cursor*);
 
@@ -484,7 +481,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	std::string _name;
 	bool within_track_canvas;
 
-	static Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
+	Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 	Glib::RefPtr<Gtk::ActionGroup> _common_actions;
 
 	void load_shared_bindings ();
@@ -499,28 +496,24 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	Glib::RefPtr<Gtk::RadioAction> grid_type_action (Editing::GridType);
 	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
 
-	static Glib::RefPtr<Gtk::RadioAction> draw_length_action (Editing::GridType);
-	static Glib::RefPtr<Gtk::RadioAction> draw_velocity_action (int);
-	static Glib::RefPtr<Gtk::RadioAction> draw_channel_action (int);
+	Glib::RefPtr<Gtk::RadioAction> draw_length_action (Editing::GridType);
+	Glib::RefPtr<Gtk::RadioAction> draw_velocity_action (int);
+	Glib::RefPtr<Gtk::RadioAction> draw_channel_action (int);
 
 	Editing::GridType _grid_type;
 	Editing::SnapMode _snap_mode;
 
-	static Editing::GridType _draw_length;
-	static int _draw_velocity;
-	static int _draw_channel;
+	Editing::GridType _draw_length;
+	int _draw_velocity;
+	int _draw_channel;
 
-	static void draw_channel_chosen (int);
-	static void draw_velocity_chosen (int);
-	static void draw_length_chosen (Editing::GridType);
+	void draw_channel_chosen (int);
+	void draw_velocity_chosen (int);
+	void draw_length_chosen (Editing::GridType);
 
-	static void draw_channel_action_method (int);
-	static void draw_velocity_action_method (int);
-	static void draw_length_action_method (Editing::GridType);
-
-	static sigc::signal<void> DrawLengthChanged;
-	static sigc::signal<void> DrawVelocityChanged;
-	static sigc::signal<void> DrawChannelChanged;
+	sigc::signal<void> DrawLengthChanged;
+	sigc::signal<void> DrawVelocityChanged;
+	sigc::signal<void> DrawChannelChanged;
 
 	void draw_length_changed ();
 	void draw_velocity_changed ();
@@ -791,17 +784,14 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual void do_undo (uint32_t n) = 0;
 	virtual void do_redo (uint32_t n) = 0;
 
-	static Glib::RefPtr<Gtk::Action> undo_action;
-	static Glib::RefPtr<Gtk::Action> redo_action;
-	static Glib::RefPtr<Gtk::Action> alternate_redo_action;
-	static Glib::RefPtr<Gtk::Action> alternate_alternate_redo_action;
+	Glib::RefPtr<Gtk::Action> undo_action;
+	Glib::RefPtr<Gtk::Action> redo_action;
+	Glib::RefPtr<Gtk::Action> alternate_redo_action;
+	Glib::RefPtr<Gtk::Action> alternate_alternate_redo_action;
 
 	/* protected helper functions to help with registering actions */
 
 	static Glib::RefPtr<Gtk::Action> reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
 	static void toggle_reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
 	static void radio_reg_sens (Glib::RefPtr<Gtk::ActionGroup> action_group, Gtk::RadioAction::Group& radio_group, char const* name, char const* label, sigc::slot<void> slot);
-
-	static EditingContext* _current_editing_context;
-
 };

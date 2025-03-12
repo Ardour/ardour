@@ -2294,8 +2294,6 @@ private:
 	PBD::Signal<void()> VisibleMarkersChanged;
 	PBD::Signal<void()> VisibleRangesChanged;
 
-	bool enter (GdkEventCrossing*);
-
 	friend class RegionMoveDrag;
 	friend class TrimDrag;
 	friend class MappingTwistDrag;
