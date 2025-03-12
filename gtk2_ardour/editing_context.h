@@ -483,6 +483,12 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 	Glib::RefPtr<Gtk::ActionGroup> _common_actions;
+	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
+	Glib::RefPtr<Gtk::ActionGroup> snap_actions;
+	Glib::RefPtr<Gtk::ActionGroup> length_actions;
+	Glib::RefPtr<Gtk::ActionGroup> channel_actions;
+	Glib::RefPtr<Gtk::ActionGroup> velocity_actions;
+	Glib::RefPtr<Gtk::ActionGroup> zoom_actions;
 
 	void load_shared_bindings ();
 
@@ -675,8 +681,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	ArdourWidgets::ArdourButton mouse_draw_button;
 	ArdourWidgets::ArdourButton mouse_content_button;
 
-	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
-	Glib::RefPtr<Gtk::ActionGroup> snap_actions;
 	virtual void register_actions() = 0;
 	void register_grid_actions ();
 

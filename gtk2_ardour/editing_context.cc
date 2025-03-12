@@ -243,6 +243,15 @@ EditingContext::EditingContext (std::string const & name)
 
 EditingContext::~EditingContext()
 {
+	ActionManager::drop_action_group (_midi_actions);
+	ActionManager::drop_action_group (_common_actions);
+	ActionManager::drop_action_group (editor_actions);
+	ActionManager::drop_action_group (snap_actions);
+	ActionManager::drop_action_group (length_actions);
+	ActionManager::drop_action_group (channel_actions);
+	ActionManager::drop_action_group (velocity_actions);
+	ActionManager::drop_action_group (zoom_actions);
+
 	delete grid_lines;
 }
 
@@ -287,7 +296,7 @@ EditingContext::set_selected_midi_region_view (MidiRegionView& mrv)
 void
 EditingContext::register_common_actions (Bindings* common_bindings)
 {
-	_common_actions = ActionManager::create_action_group (common_bindings, _name);
+	_common_actions = ActionManager::create_action_group (common_bindings, _name + X_("Editing"));
 
 	reg_sens (_common_actions, "temporal-zoom-out", _("Zoom Out"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), true));
 	reg_sens (_common_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), false));
@@ -314,7 +323,7 @@ EditingContext::register_common_actions (Bindings* common_bindings)
 	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseContent));
 	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseCut));
 
-	Glib::RefPtr<ActionGroup> zoom_actions = ActionManager::create_action_group (common_bindings, _name + X_("Zoom"));
+	zoom_actions = ActionManager::create_action_group (common_bindings, _name + X_("Zoom"));
 	RadioAction::Group zoom_group;
 
 	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusLeft));
@@ -408,7 +417,7 @@ EditingContext::register_midi_actions (Bindings* midi_bindings)
 
 	ActionManager::register_action (_midi_actions, X_("quantize-selected-notes"), _("Quantize Selected Notes"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action),  &MidiView::quantize_selected_notes));
 
-	Glib::RefPtr<ActionGroup> length_actions = ActionManager::create_action_group (midi_bindings, _name + X_("DrawLength"));
+	length_actions = ActionManager::create_action_group (midi_bindings, _name + X_("DrawLength"));
 	RadioAction::Group draw_length_group;
 
 	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv32));
@@ -430,7 +439,7 @@ EditingContext::register_midi_actions (Bindings* midi_bindings)
 	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBar));
 	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-auto"),           _("Auto"),                                         sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), DRAW_LEN_AUTO));
 
-	Glib::RefPtr<ActionGroup> velocity_actions = ActionManager::create_action_group (midi_bindings, _name + X_("DrawVelocity"));
+	velocity_actions = ActionManager::create_action_group (midi_bindings, _name + X_("DrawVelocity"));
 	RadioAction::Group draw_velocity_group;
 	ActionManager::register_radio_action (velocity_actions, draw_velocity_group, X_("draw-velocity-auto"),  _("Auto"), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), DRAW_VEL_AUTO));
 	for (int i = 1; i <= 127; i++) {
@@ -441,7 +450,7 @@ EditingContext::register_midi_actions (Bindings* midi_bindings)
 		ActionManager::register_radio_action (velocity_actions, draw_velocity_group, buf, vel, sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), i));
 	}
 
-	Glib::RefPtr<ActionGroup> channel_actions = ActionManager::create_action_group (midi_bindings, _name + X_("DrawChannel"));
+	channel_actions = ActionManager::create_action_group (midi_bindings, _name + X_("DrawChannel"));
 	RadioAction::Group draw_channel_group;
 	ActionManager::register_radio_action (channel_actions, draw_channel_group, X_("draw-channel-auto"),  _("Auto"), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_channel_chosen), DRAW_CHAN_AUTO));
 	for (int i = 0; i <= 15; i++) {
@@ -2098,19 +2107,19 @@ EditingContext::get_mouse_mode_action (MouseMode m) const
 {
 	switch (m) {
 	case MouseRange:
-		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-range"));
+		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-range"));
 	case MouseObject:
-		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-object"));
+		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-object"));
 	case MouseCut:
-		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-cut"));
+		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-cut"));
 	case MouseDraw:
-		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-draw"));
+		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-draw"));
 	case MouseTimeFX:
-		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-timefx"));
+		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-timefx"));
 	case MouseGrid:
-		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-grid"));
+		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-grid"));
 	case MouseContent:
-		return ActionManager::get_action (_name.c_str(), X_("set-mouse-mode-content"));
+		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-content"));
 	}
 	return Glib::RefPtr<Action>();
 }
@@ -2120,9 +2129,9 @@ EditingContext::bind_mouse_mode_buttons ()
 {
 	RefPtr<Action> act;
 
-	act = ActionManager::get_action (_name.c_str(), X_("temporal-zoom-in"));
+	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("temporal-zoom-in"));
 	zoom_in_button.set_related_action (act);
-	act = ActionManager::get_action (_name.c_str(), X_("temporal-zoom-out"));
+	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("temporal-zoom-out"));
 	zoom_out_button.set_related_action (act);
 
 	mouse_move_button.set_related_action (get_mouse_mode_action (Editing::MouseObject));

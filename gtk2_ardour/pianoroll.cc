@@ -96,7 +96,9 @@ Pianoroll::Pianoroll (std::string const & name)
 Pianoroll::~Pianoroll ()
 {
 	delete own_bindings;
+
 	drop_grid (); // unparent gridlines before deleting _canvas_viewport
+
 	ActionManager::drop_action_group (editor_actions);
 	ActionManager::drop_action_group (snap_actions);
 	delete view;
