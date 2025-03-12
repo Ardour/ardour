@@ -99,8 +99,6 @@ Pianoroll::~Pianoroll ()
 
 	drop_grid (); // unparent gridlines before deleting _canvas_viewport
 
-	ActionManager::drop_action_group (editor_actions);
-	ActionManager::drop_action_group (snap_actions);
 	delete view;
 	delete _canvas_viewport;
 }
