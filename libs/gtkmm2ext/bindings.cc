@@ -552,6 +552,11 @@ Bindings::relativize ()
 void
 Bindings::associate ()
 {
+#warning find a better solution than this
+	if (_name == "Editing" || _name == "MIDI") {
+		return;
+	}
+
 	KeybindingMap::iterator k;
 
 	for (k = press_bindings.begin(); k != press_bindings.end(); ++k) {
