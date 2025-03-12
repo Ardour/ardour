@@ -39,7 +39,6 @@ GridLines::GridLines (EditingContext& ec, Container* group, double)
 
 GridLines::~GridLines ()
 {
-	lines.parent()->remove (&lines);
 }
 
 void
