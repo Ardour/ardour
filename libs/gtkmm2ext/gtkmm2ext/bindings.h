@@ -215,8 +215,8 @@ class LIBGTKMM2EXT_API Bindings {
 
 typedef std::vector<Bindings*> BindingSet;
 
-void set_widget_bindings (Gtk::Widget&, Bindings&, char const * const name);
-void set_widget_bindings (Gtk::Widget&, BindingSet&, char const * const name);
+LIBGTKMM2EXT_API void set_widget_bindings (Gtk::Widget&, Bindings&, char const * const name);
+LIBGTKMM2EXT_API void set_widget_bindings (Gtk::Widget&, BindingSet&, char const * const name);
 
 static char const * const ARDOUR_BINDING_KEY = "ardour-bindings";
 
