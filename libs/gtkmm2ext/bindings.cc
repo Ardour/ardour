@@ -536,16 +536,16 @@ void
 Bindings::relativize ()
 {
 	for (auto & [key,action_info] : press_bindings) {
-		action_info.action_name = _name + action_info.action_name.substr (action_info.action_name.find_first_of ('/'));
+		action_info.action_name = _name + action_info.action_name;
 	}
 	for (auto & [key,action_info] : release_bindings) {
-		action_info.action_name = _name + action_info.action_name.substr (action_info.action_name.find_first_of ('/'));
+		action_info.action_name = _name + action_info.action_name;
 	}
 	for (auto & [mb,action_info] : button_press_bindings) {
-		action_info.action_name = _name + action_info.action_name.substr (action_info.action_name.find_first_of ('/'));
+		action_info.action_name = _name + action_info.action_name;
 	}
 	for (auto & [mb,action_info] : button_release_bindings) {
-		action_info.action_name = _name + action_info.action_name.substr (action_info.action_name.find_first_of ('/'));
+		action_info.action_name = _name + action_info.action_name;
 	}
 }
 
