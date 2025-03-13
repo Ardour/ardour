@@ -228,7 +228,7 @@ This mode provides many different operations on both regions and control points,
 
 ;; BOTTOM ROW
 
-@emmode|Editing/zoom-to-selection|                                      z|zoom to selection
+@emmode|Editor/zoom-to-selection|                                      z|zoom to selection
 @editing|Editing/undo|                                       <@PRIMARY@>z|undo
 @editing|Editing/alternate-alternate-redo|       <@PRIMARY@><@TERTIARY@>z|redo
 @vis|Editor/toggle-zoom|                                   <@TERTIARY@>z|toggle last 2 zoom states
