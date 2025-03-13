@@ -177,6 +177,8 @@ public:
 	static Gtkmm2ext::ActiveState solo_safe_active_state (std::shared_ptr<ARDOUR::Stripable>);
 	static Gtkmm2ext::ActiveState mute_active_state (ARDOUR::Session*, std::shared_ptr<ARDOUR::Stripable>);
 
+	static bool verify_new_route_name (const std::string& name);
+
 protected:
 	virtual void set_color (uint32_t c);
 	virtual void processors_changed (ARDOUR::RouteProcessorChange) {}
@@ -246,7 +248,6 @@ protected:
 	bool mark_hidden (bool yn);
 	void setup_invert_buttons ();
 	void update_phase_invert_sensitivty ();
-	bool verify_new_route_name (const std::string& name);
 	void check_rec_enable_sensitivity ();
 	void route_gui_changed (PBD::PropertyChange const&);
 
