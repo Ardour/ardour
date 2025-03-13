@@ -76,7 +76,6 @@
 #include "keyboard.h"
 #include "mixer_strip.h"
 #include "mixer_ui.h"
-#include "option_editor.h"
 #include "opts.h"
 #include "patch_change_widget.h"
 #include "playlist_selector.h"
@@ -128,10 +127,8 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 	, solo_menu(0)
 	, sends_menu(0)
 	, playlist_action_menu (0)
-	, _comment_window(0)
 	, _playlist_selector(0)
 	, _record_menu(0)
-	, _comment_area(0)
 	, _invert_menu(0)
 {
 	if (program_port_prefix.empty()) {
@@ -168,7 +165,6 @@ RouteUI::~RouteUI()
 	delete monitor_disk_button;
 	delete playlist_action_menu;
 	delete _record_menu;
-	delete _comment_window;
 	delete _invert_menu;
 	delete _playlist_selector;
 
@@ -199,7 +195,6 @@ RouteUI::init ()
 	denormal_menu_item = 0;
 	_step_edit_item = 0;
 	_rec_safe_item = 0;
-	_ignore_comment_edit = false;
 	_i_am_the_modifier = 0;
 	_n_polarity_invert = 0;
 
@@ -389,8 +384,6 @@ RouteUI::set_route (std::shared_ptr<Route> rp)
 	solo_button->set_controllable (_route->solo_control());
 
 	_route->active_changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::route_active_changed, this), gui_context());
-
-	_route->comment_changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::comment_changed, this), gui_context());
 
 	_route->mute_control()->Changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::update_mute_display, this), gui_context());
 	_route->solo_control()->Changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::update_solo_display, this), gui_context());
@@ -1755,89 +1748,14 @@ RouteUI::route_rename ()
 void
 RouteUI::toggle_comment_editor ()
 {
-	if (_comment_window && _comment_window->get_visible ()) {
-		_comment_window->hide ();
-	} else {
-		open_comment_editor ();
-	}
+	_comment_editor.toggle (_route);
 }
 
 
 void
 RouteUI::open_comment_editor ()
 {
-	if (_comment_window == 0) {
-		setup_comment_editor ();
-	}
-
-	string title;
-	title = _route->name();
-	title += _(": comment editor");
-
-	_comment_window->set_title (title);
-	_comment_window->present();
-}
-
-void
-RouteUI::setup_comment_editor ()
-{
-	const float scale = std::max(1.f, UIConfiguration::instance().get_ui_scale());
-
-	_comment_window = new ArdourWindow (""); // title will be reset to show route
-	_comment_window->set_skip_taskbar_hint (true);
-	_comment_window->signal_hide().connect (sigc::mem_fun(*this, &MixerStrip::comment_editor_done_editing));
-	_comment_window->set_default_size (400 * scale, 200 * scale);
-
-	VBox* vbox = manage (new VBox ());
-	vbox->show ();
-
-	_comment_area = manage (new TextView());
-	_comment_area->set_name ("MixerTrackCommentArea");
-	_comment_area->set_wrap_mode (WRAP_WORD);
-	_comment_area->set_editable (true);
-	_comment_area->get_buffer()->set_text (_route->comment());
-	_comment_area->show ();
-
-	vbox->pack_start (*_comment_area);
-
-	if (is_master ()) {
-		BoolOption* bo = new BoolOption (
-				"show-master-bus-comment-on-load",
-				_("Show this comment on next session load"),
-				sigc::mem_fun (_session->config, &SessionConfiguration::get_show_master_bus_comment_on_load),
-				sigc::mem_fun (_session->config, &SessionConfiguration::set_show_master_bus_comment_on_load)
-				);
-
-		vbox->pack_start (bo->tip_widget (), false, false, 4);
-		bo->tip_widget ().show_all ();
-		bo->parameter_changed ("show-master-bus-comment-on-load");
-		vbox->signal_unrealize().connect ([bo]() { delete bo; });
-		_session->config.ParameterChanged.connect (*this, invalidator (*this), std::bind (&BoolOption::parameter_changed, bo, _1), gui_context());
-	}
-	_comment_window->add (*vbox);
-}
-
-void
-RouteUI::comment_changed ()
-{
-	_ignore_comment_edit = true;
-	if (_comment_area) {
-		_comment_area->get_buffer()->set_text (_route->comment());
-	}
-	_ignore_comment_edit = false;
-}
-
-void
-RouteUI::comment_editor_done_editing ()
-{
-	ENSURE_GUI_THREAD (*this, &MixerStrip::comment_editor_done_editing, src)
-
-	string const str = _comment_area->get_buffer()->get_text();
-	if (str == _route->comment ()) {
-		return;
-	}
-
-	_route->set_comment (str, this);
+	_comment_editor.open (_route);
 }
 
 void

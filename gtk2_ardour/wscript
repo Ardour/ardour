@@ -259,6 +259,7 @@ gtk2_ardour_sources = [
         'region_view.cc',
         'return_ui.cc',
         'rhythm_ferret.cc',
+        'route_comment_editor.cc',
         'route_group_dialog.cc',
         'route_group_menu.cc',
         'route_list_base.cc',
