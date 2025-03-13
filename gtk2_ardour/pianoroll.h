@@ -136,6 +136,8 @@ class Pianoroll : public CueEditor
 	void keyboard_paste ();
 	void cut_copy (Editing::CutCopyOp);
 
+	PianorollMidiView* midi_view() const { return view; }
+
   protected:
 	void load_bindings ();
 	void register_actions ();
@@ -285,7 +287,6 @@ class Pianoroll : public CueEditor
 	std::pair<Temporal::timepos_t,Temporal::timepos_t> max_zoom_extent() const;
 
 	void point_selection_changed ();
-	bool enter (GdkEventCrossing*);
 
 	bool zoom_in_allocate;
 

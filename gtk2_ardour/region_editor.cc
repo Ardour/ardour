@@ -570,7 +570,7 @@ RegionEditor::RegionFxBox::RegionFxBox (std::shared_ptr<ARDOUR::Region> r)
 	_display.set_can_focus ();
 	_display.set_name ("ProcessorList");
 	_display.set_data ("regionfxbox", this);
-	_display.set_data ("ardour-bindings", bindings);
+	set_widget_bindings (_display, *bindings, ARDOUR_BINDING_KEY);
 	_display.set_size_request (104, -1); // TODO UI scale
 	_display.set_spacing (0);
 

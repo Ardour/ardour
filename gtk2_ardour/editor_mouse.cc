@@ -2245,10 +2245,6 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 void
 Editor::escape ()
 {
-	if (this != current_editing_context()) {
-		return;
-	}
-
 	if (_drags->active ()) {
 		_drags->abort ();
 	} else if (_session) {

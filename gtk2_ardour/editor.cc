@@ -717,21 +717,11 @@ Editor::Editor ()
 	UIConfiguration::instance().map_parameters (pc);
 
 	setup_fade_images ();
-
-	switch_editing_context (this);
-	content_main_top.signal_enter_notify_event().connect (sigc::mem_fun (*this, &Editor::enter), false);
-	content_main.signal_enter_notify_event().connect (sigc::mem_fun (*this, &Editor::enter), false);
-}
-
-bool
-Editor::enter (GdkEventCrossing*)
-{
-	switch_editing_context (this);
-	return false;
 }
 
 Editor::~Editor()
 {
+	delete own_bindings;
 	delete tempo_marker_menu;
 	delete meter_marker_menu;
 	delete marker_menu;
@@ -1264,7 +1254,7 @@ Editor::set_session (Session *t)
 	/* Cannot initialize in constructor, because pianoroll needs Actions */
 	if (!_pianoroll) {
 		// XXX this should really not happen here
-		_pianoroll = new Pianoroll ("editor pianroll");
+		_pianoroll = new Pianoroll ("editor pianoroll");
 		_pianoroll->viewport().set_size_request (600, 120);
 	}
 	_pianoroll->set_session (_session);
@@ -5688,7 +5678,7 @@ Editor::use_own_window (bool and_fill_it)
 		// win->signal_realize().connect (*this, &Editor::on_realize);
 		win->signal_event().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), win));
 		win->signal_event().connect (sigc::mem_fun (*this, &Editor::generic_event_handler));
-		win->set_data ("ardour-bindings", bindings);
+		set_widget_bindings (*win, bindings, ARDOUR_BINDING_KEY);
 
 		update_title ();
 	}

@@ -90,38 +90,33 @@ Pianoroll::Pianoroll (std::string const & name)
 	load_bindings ();
 	register_actions ();
 
-	/* this is weird because it will use an action that uses current_editing_context */
-	EditingContext* ec = current_editing_context ();
-	switch_editing_context (this);
 	set_mouse_mode (Editing::MouseContent, true);
-	switch_editing_context (ec);
 }
 
 Pianoroll::~Pianoroll ()
 {
-	delete bindings;
-	ActionManager::drop_action_group (editor_actions);
-	ActionManager::drop_action_group (snap_actions);
-}
+	delete own_bindings;
 
-bool
-Pianoroll::enter (GdkEventCrossing*)
-{
-	switch_editing_context (this);
-	return false;
+	drop_grid (); // unparent gridlines before deleting _canvas_viewport
+
+	delete view;
+	delete _canvas_viewport;
 }
 
 void
 Pianoroll::load_bindings ()
 {
-	bindings = Bindings::get_bindings (editor_name());
 	load_shared_bindings ();
+	for (auto & b : bindings) {
+		b->associate ();
+	}
+	set_widget_bindings (*get_canvas(), bindings, ARDOUR_BINDING_KEY);
 }
 
 void
 Pianoroll::register_actions ()
 {
-	editor_actions = ActionManager::create_action_group (bindings, editor_name());
+	editor_actions = ActionManager::create_action_group (own_bindings, editor_name());
 
 	bind_mouse_mode_buttons ();
 	register_grid_actions ();
@@ -424,11 +419,7 @@ Pianoroll::build_upper_toolbar ()
 	_toolbar_outer->pack_start (*_toolbar_left, true, false);
 	_toolbox.pack_start (*_toolbar_outer, false, false);
 
-	Bindings* pr_bindings = Bindings::get_bindings (X_("Pianoroll"));
-	_toolbox.set_data (X_("ardour-bindings"), pr_bindings);
-
 	_contents.add (_toolbox);
-	_contents.signal_enter_notify_event().connect (sigc::mem_fun (*this, &Pianoroll::enter), false);
 	_contents.signal_unmap().connect ([this]() {_canvas_viewport->unmap ();}, false);
 	_contents.signal_map().connect ([this]() {_canvas_viewport->map ();}, false);
 }
@@ -575,8 +566,6 @@ Pianoroll::build_canvas ()
 	_canvas->set_can_focus ();
 
 	_toolbox.pack_start (*_canvas_viewport, true, true);
-
-	bindings_changed ();
 }
 
 void
@@ -600,11 +589,8 @@ Pianoroll::visible_channel_changed ()
 void
 Pianoroll::bindings_changed ()
 {
-	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
-	Bindings* shared_bindings = Bindings::get_bindings (X_("Editing"));
-
-	_canvas_viewport->set_data (X_("ardour-bindings"), shared_bindings);
-	_canvas->set_data (X_("ardour-bindings"), midi_bindings);
+	bindings.clear ();
+	load_shared_bindings ();
 }
 
 void
@@ -636,7 +622,6 @@ Pianoroll::canvas_enter_leave (GdkEventCrossing* ev)
 			_canvas_viewport->canvas()->grab_focus ();
 			ActionManager::set_sensitive (_midi_actions, true);
 			within_track_canvas = true;
-			EditingContext::switch_editing_context (this);
 		}
 		break;
 	case GDK_LEAVE_NOTIFY:
@@ -782,7 +767,7 @@ Pianoroll::set_trigger_start (Temporal::timepos_t const & p)
 	} else {
 		begin_reversible_command (_("trim region front"));
 		view->midi_region()->clear_changes ();
-		view->midi_region()->trim_front (view->midi_region()->position() + p);
+		view->midi_region()->trim_front (view->midi_region()->source_position() + p);
 		add_command (new StatefulDiffCommand (view->midi_region()));
 		commit_reversible_command ();
 	}
@@ -796,7 +781,7 @@ Pianoroll::set_trigger_end (Temporal::timepos_t const & p)
 	} else {
 		begin_reversible_command (_("trim region end"));
 		view->midi_region()->clear_changes ();
-		view->midi_region()->trim_end (view->midi_region()->position() + p);
+		view->midi_region()->trim_end (view->midi_region()->source_position() + p);
 		add_command (new StatefulDiffCommand (view->midi_region()));
 		commit_reversible_command ();
 	}
