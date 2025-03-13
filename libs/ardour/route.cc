@@ -127,6 +127,7 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, _pending_meter_point (MeterPostFader)
 	, _denormal_protection (false)
 	, _recordable (true)
+	, _comment_editor_window (0)
 	, _have_internal_generator (false)
 	, _default_type (default_type)
 	, _instrument_fanned_out (false)
