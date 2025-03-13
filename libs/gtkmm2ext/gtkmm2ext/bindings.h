@@ -118,6 +118,7 @@ class LIBGTKMM2EXT_API Bindings {
 	typedef std::map<KeyboardKey,ActionInfo> KeybindingMap;
 
 	Bindings (std::string const& name);
+	Bindings (std::string const & name, Bindings const & other);
 	~Bindings ();
 
 	std::string const& name() const { return _name; }
@@ -191,6 +192,8 @@ class LIBGTKMM2EXT_API Bindings {
 	const KeybindingMap& get_keymap (Operation op) const;
 	MouseButtonBindingMap& get_mousemap (Operation op);
 
+	void relativize ();
+
 	/* GTK has the following position a Gtk::Action:
 	 *
 	 *  accel_path: <Actions>/GroupName/ActionName
@@ -209,6 +212,13 @@ class LIBGTKMM2EXT_API Bindings {
 	static int _drag_active;
 	friend struct DragsBlockBindings;
 };
+
+typedef std::vector<Bindings*> BindingSet;
+
+LIBGTKMM2EXT_API void set_widget_bindings (Gtk::Widget&, Bindings&, char const * const name);
+LIBGTKMM2EXT_API void set_widget_bindings (Gtk::Widget&, BindingSet&, char const * const name);
+
+static char const * const ARDOUR_BINDING_KEY = "ardour-bindings";
 
 } // namespace
 

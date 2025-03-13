@@ -20,8 +20,11 @@
 
 #include "ardour_window.h"
 
+#include <ytkmm/box.h>
+
 namespace ARDOUR {
 	class MidiRegion;
+	class MidiTrack;
 	class Track;
 }
 
@@ -30,7 +33,7 @@ class RegionEditor;
 
 class PianorollWindow : public ArdourWindow
 {
-  public:
+public:
 	PianorollWindow (std::string const & name, ARDOUR::Session&);
 	~PianorollWindow ();
 
@@ -38,8 +41,8 @@ class PianorollWindow : public ArdourWindow
 	bool on_key_press_event (GdkEventKey*);
 	bool on_delete_event (GdkEventAny*);
 
- private:
-	Gtk::HBox hpacker;
-	Pianoroll* pianoroll;
+private:
+	Gtk::HBox     hpacker;
+	Pianoroll*    pianoroll;
 	RegionEditor* region_editor;
 };

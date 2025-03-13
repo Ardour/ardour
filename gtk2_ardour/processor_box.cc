@@ -1957,7 +1957,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, std::function<PluginSelector*
 	 * are available for context menus.
 	 */
 
-	processor_display.set_data ("ardour-bindings", bindings);
+	set_widget_bindings (processor_display, *bindings, ARDOUR_BINDING_KEY);
 	processor_display.SelectionAdded.connect (sigc::mem_fun (*this, &ProcessorBox::selection_added));
 
 	_width = Wide;

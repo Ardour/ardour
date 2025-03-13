@@ -71,6 +71,7 @@
 #include "keyboard.h"
 #include "mergeable_line.h"
 #include "pianoroll.h"
+#include "pianoroll_midi_view.h"
 #include "midi_region_view.h"
 #include "midi_selection.h"
 #include "midi_time_axis.h"
@@ -7572,6 +7573,13 @@ ClipStartDrag::finished (GdkEvent* event, bool movement_occured)
 	}
 
 	timepos_t pos = adjusted_current_time (event);
+
+	assert (mce.midi_view());
+
+	if (mce.midi_view()->show_source()) {
+		pos = mce.midi_view()->source_beats_to_timeline (pos.beats());
+	}
+
 	editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
 	mce.set_trigger_start (pos);
 }
