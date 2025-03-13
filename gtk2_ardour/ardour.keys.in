@@ -395,7 +395,7 @@ This mode provides many different operations on both regions and control points,
 @eep|Editor/cycle-edit-mode|                             1|cycle edit mode {slide, lock, ripple}
 @eep|Editor/cycle-edit-point|                            2|next EP w/o marker {playhead, mouse}
 @eep|Editor/cycle-edit-point-with-marker|     <@PRIMARY@>2|next EP w/marker {playhead, mouse, marker}
-@emmode|Editing/set-mouse-mode-object-range|              3|Smart Mode (provide some Range tools in Object mode)
+@emmode|Editor/set-mouse-mode-object-range|              3|Smart Mode (provide some Range tools in Object mode)
 @gmode|Transport/ToggleFollowEdits|           <@PRIMARY@>3|toggle playhead follows edits
 @grid|Editor/cycle-snap-mode|                            4|cycle to next snap mode {On/Off}
 @grid|Editor/prev-grid-choice|                           5|use prev grid unit

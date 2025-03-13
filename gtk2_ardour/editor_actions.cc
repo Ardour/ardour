@@ -680,6 +680,12 @@ Editor::register_actions ()
 
 	/* MIDI stuff */
 	reg_sens (editor_actions, "quantize", _("Quantize"), sigc::mem_fun (*this, &Editor::quantize_region));
+
+	act = ActionManager::register_toggle_action (editor_actions, "set-mouse-mode-object-range", _("Smart Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));
+	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
+	smart_mode_button.set_related_action (smart_mode_action);
+	smart_mode_button.set_text (_("Smart"));
+	smart_mode_button.set_name ("mouse mode button");
 }
 
 static void _lua_print (std::string s) {
@@ -1328,13 +1334,6 @@ Editor::register_region_actions ()
 }
 
 void
-Editor::add_mouse_mode_actions (Glib::RefPtr<ActionGroup> action_group)
+Editor::add_mouse_mode_actions ()
 {
-	RefPtr<Action> act;
-
-	act = ActionManager::register_toggle_action (action_group, "set-mouse-mode-object-range", _("Smart Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));
-	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
-	smart_mode_button.set_related_action (smart_mode_action);
-	smart_mode_button.set_text (_("Smart"));
-	smart_mode_button.set_name ("mouse mode button");
 }
