@@ -3225,9 +3225,6 @@ EditingContext::load_shared_bindings ()
 	Bindings* shared_bindings = new Bindings (_name, *b);
 	register_common_actions (shared_bindings);
 
-	/* Give this editing context the chance to add more mode mode actions */
-	add_mouse_mode_actions ();
-
 	/* Attach bindings to the canvas for this editing context */
 
 	bindings.push_back (midi_bindings);

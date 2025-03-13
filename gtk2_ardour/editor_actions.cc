@@ -1333,7 +1333,3 @@ Editor::register_region_actions ()
 	sensitize_all_region_actions (false);
 }
 
-void
-Editor::add_mouse_mode_actions ()
-{
-}

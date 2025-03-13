@@ -686,7 +686,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	Glib::RefPtr<Gtk::Action> get_mouse_mode_action (Editing::MouseMode m) const;
 	void bind_mouse_mode_buttons ();
-	virtual void add_mouse_mode_actions () {}
 
 	Gtk::HBox snap_box;
 	Gtk::HBox grid_box;
