@@ -520,7 +520,7 @@ Pianoroll::build_canvas ()
 	_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
 
 	_canvas = _canvas_viewport->canvas ();
-	_canvas->set_background_color (UIConfiguration::instance().color ("arrange base"));
+	_canvas->set_background_color (UIConfiguration::instance().color ("midi track base"));
 	_canvas->signal_event().connect (sigc::mem_fun (*this, &Pianoroll::canvas_pre_event), false);
 	dynamic_cast<ArdourCanvas::GtkCanvas*>(_canvas)->use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
 
