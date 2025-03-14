@@ -53,6 +53,7 @@
 #include "keyboard.h"
 #include "midi_region_view.h"
 #include "pianoroll.h"
+#include "selection_properties_box.h"
 #include "sfdb_ui.h"
 
 #include "pbd/i18n.h"
@@ -1715,7 +1716,7 @@ Editor::region_selection_changed ()
 	}
 	update_selection_markers ();
 
-	_pianoroll->contents().hide ();
+	bool pack_pianoroll = false;
 	if (selection->regions.size () == 1)  {
 		RegionView* rv = (selection->regions.front ());
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
@@ -1725,10 +1726,20 @@ Editor::region_selection_changed ()
 			if (mrv && mt && mr) {
 				_pianoroll->set_track (mt);
 				_pianoroll->set_region (mr);
-				_pianoroll->contents().show ();
+				pack_pianoroll = true;
 			}
 		}
 	}
+	Gtkmm2ext::container_clear (_bottom_hbox);
+	if (pack_pianoroll) {
+		_bottom_hbox.pack_start(*_properties_box, false, false);
+		_bottom_hbox.pack_start(_pianoroll->contents(), true, true);
+		_pianoroll->contents().hide ();
+		_pianoroll->contents().show_all ();
+	} else {
+		_bottom_hbox.pack_start(*_properties_box, true, true);
+	}
+	_properties_box->show ();
 }
 
 void
