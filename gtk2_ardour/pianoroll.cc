@@ -100,6 +100,7 @@ Pianoroll::~Pianoroll ()
 	drop_grid (); // unparent gridlines before deleting _canvas_viewport
 
 	delete view;
+	delete bg;
 	delete _canvas_viewport;
 }
 

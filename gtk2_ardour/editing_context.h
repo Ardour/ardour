@@ -75,7 +75,7 @@ class Selection;
 class SelectionMemento;
 class SelectableOwner;
 
-class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
+class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider, public virtual sigc::trackable
 {
  public:
 	EditingContext (std::string const &);
