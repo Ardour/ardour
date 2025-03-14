@@ -422,7 +422,7 @@ MidiView::midi_canvas_group_event (GdkEvent* ev)
 
 	case GDK_SCROLL:
 		if (scroll (&ev->scroll)) {
-			return false;
+			return true;
 		}
 		break;
 
@@ -632,7 +632,7 @@ MidiView::scroll (GdkEventScroll* ev)
 		return false;
 	}
 
-	if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier) ||
+	if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier) &&
 	    Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
 		/* XXX: bit of a hack; allow PrimaryModifier+TertiaryModifier scroll
 		 * through so that it still works for navigation and zoom.
@@ -674,10 +674,12 @@ MidiView::scroll (GdkEventScroll* ev)
 
 		case GDK_SCROLL_LEFT:
 			_editing_context.set_horizontal_position (_editing_context.horizontal_position() - 20.0);
+			return true;
 			break;
 
 		case GDK_SCROLL_RIGHT:
 			_editing_context.set_horizontal_position (_editing_context.horizontal_position() + 20.0);
+			return true;
 			break;
 
 		default:
