@@ -6730,6 +6730,19 @@ MidiRubberbandSelectDrag::deselect_things ()
 	/* XXX */
 }
 
+void
+MidiRubberbandSelectDrag::finished (GdkEvent* ev, bool movement_occurred)
+{
+	if (!movement_occurred) {
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (_midi_view);
+		if (mrv) {
+			mrv->editing_context().get_selection().set (mrv);
+		}
+	}
+
+	RubberbandSelectDrag::finished (ev, movement_occurred);
+}
+
 MidiVerticalSelectDrag::MidiVerticalSelectDrag (EditingContext& ec, MidiView* mv)
 	: RubberbandSelectDrag (ec, mv->drag_group (), [](GdkEvent*,timepos_t const &) { return true; })
 	, _midi_view (mv)
