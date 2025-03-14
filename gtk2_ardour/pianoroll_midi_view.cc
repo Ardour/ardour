@@ -401,8 +401,6 @@ PianorollMidiView::update_automation_display (Evoral::Parameter const & param, S
 
 				/* Create and add to automation display map */
 
-				std::cerr << "Createing velocity_display\n";
-
 				velocity_display = new PianorollVelocityDisplay (editing_context(), midi_context(), *this, *automation_group, 0x312244ff);
 				auto res = automation_map.insert (std::make_pair (param, AutomationDisplayState (*velocity_display, false)));
 
