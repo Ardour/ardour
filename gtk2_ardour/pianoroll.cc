@@ -597,14 +597,26 @@ Pianoroll::bindings_changed ()
 void
 Pianoroll::maybe_update ()
 {
-	if (!_track) {
-		return;
+	ARDOUR::TriggerPtr trigger;
+
+	if (_track) {
+		trigger = _track->triggerbox()->currently_playing ();
 	}
 
-	ARDOUR::TriggerPtr trigger = _track->triggerbox()->currently_playing ();
-
 	if (!trigger) {
-		_playhead_cursor->set_position (0);
+
+		if (_drags->active() || !view) {
+			return;
+		}
+
+		samplepos_t pos = _session->transport_sample();
+		samplepos_t spos = view->midi_region()->source_position().samples();
+		if (pos < spos) {
+			_playhead_cursor->set_position (0);
+		} else {
+			_playhead_cursor->set_position (pos - spos);
+		}
+
 	} else {
 		if (trigger->active ()) {
 			_playhead_cursor->set_position (trigger->current_pos().samples() + trigger->the_region()->start().samples());
@@ -2183,7 +2195,6 @@ Pianoroll::set (TriggerReference & tref)
 
 	set_track (_track);
 
-	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Pianoroll::maybe_update));
 	_track->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this), gui_context());
 	ref.trigger()->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_prop_change, this, _1), gui_context());
 
@@ -2237,7 +2248,7 @@ void
 Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 {
 	if (!r) {
-		view->set_region (nullptr);
+		unset ();
 		return;
 	}
 
@@ -2266,6 +2277,8 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
 
 	}
+
+	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Pianoroll::maybe_update));
 }
 
 void
