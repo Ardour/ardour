@@ -2015,7 +2015,7 @@ EditingContext::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection
 				in_command = true;
 			}
 			(*cmd)();
-			_session->add_command (cmd);
+			add_command (cmd);
 			}
 	}
 
