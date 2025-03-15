@@ -79,8 +79,6 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	, ignore_channel_changes (false)
 	, with_transport_controls (with_transport)
 {
-	std::cerr << "NPR wt " << with_transport << std::endl;
-	PBD::stacktrace (std::cerr, 13);
 	mouse_mode = Editing::MouseContent;
 	autoscroll_vertical_allowed = false;
 
