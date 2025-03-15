@@ -388,7 +388,9 @@ Pianoroll::build_upper_toolbar ()
 
 
 	play_button.set_icon (ArdourIcon::TransportPlay);
+	play_button.set_name ("transport button");
 	loop_button.set_icon (ArdourIcon::TransportLoop);
+	loop_button.set_name ("transport button");
 
 	solo_button.set_name ("solo button");
 
@@ -2723,4 +2725,55 @@ Pianoroll::select_all_within (Temporal::timepos_t const & start, Temporal::timep
 	}
 
 	commit_reversible_selection_op ();
+}
+
+void
+Pianoroll::set_session (ARDOUR::Session* s)
+{
+	CueEditor::set_session (s);
+
+	if (_session) {
+		_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&Pianoroll::map_transport_state, this), gui_context());
+	} else {
+		_session_connections.drop_connections();
+	}
+
+	map_transport_state ();
+}
+
+void
+Pianoroll::map_transport_state ()
+{
+	if (!_session) {
+		loop_button.unset_active_state ();
+		play_button.unset_active_state ();
+		return;
+	}
+
+	if (_session->transport_rolling()) {
+
+		/* we're rolling */
+
+		if (_session->get_play_loop ()) {
+
+			loop_button.set_active (true);
+
+			if (Config->get_loop_is_mode()) {
+				play_button.set_active (true);
+			} else {
+				play_button.set_active (false);
+			}
+		} else {
+			play_button.set_active (true);
+			loop_button.set_active (false);
+		}
+	} else {
+		play_button.set_active (false);
+
+		if (Config->get_loop_is_mode()) {
+			loop_button.set_active (true);
+		} else {
+			loop_button.set_active (false);
+		}
+	}
 }

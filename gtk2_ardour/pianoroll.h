@@ -137,6 +137,7 @@ class Pianoroll : public CueEditor
 	void cut_copy (Editing::CutCopyOp);
 
 	PianorollMidiView* midi_view() const { return view; }
+	void set_session (ARDOUR::Session*);
 
   protected:
 	void load_bindings ();
@@ -318,4 +319,5 @@ class Pianoroll : public CueEditor
 	void visible_channel_changed ();
 
 	void update_solo_display ();
+	void map_transport_state ();
 };
