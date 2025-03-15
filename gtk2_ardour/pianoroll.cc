@@ -72,6 +72,7 @@ Pianoroll::Pianoroll (std::string const & name)
 	, bbt_metric (*this)
 	, _note_mode (Sustained)
 	, zoom_in_allocate (false)
+	, solo_button (S_("Solo|S"))
 	, bar_adjustment (4, 1, 32, 1, 4)
 	, bar_spinner (bar_adjustment)
 	, length_label (X_("Record (Bars):"))
@@ -385,9 +386,29 @@ Pianoroll::build_upper_toolbar ()
 	note_mode_button.set_size_request (PX_SCALE(50), -1);
 	note_mode_button.set_active_color (UIConfiguration::instance().color ("alert:yellow"));
 
+
+	play_button.set_icon (ArdourIcon::TransportPlay);
+	loop_button.set_icon (ArdourIcon::TransportLoop);
+
+	solo_button.set_name ("solo button");
+
+	play_box.set_spacing (8);
+	play_box.pack_start (play_button, false, false);
+	play_box.pack_start (loop_button, false, false);
+	play_box.pack_start (solo_button, false, false);
+	play_button.show();
+	loop_button.show();
+	solo_button.show();
+	play_box.set_no_show_all (true);
+	play_box.show ();
+	play_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::play_button_press), false);
+	solo_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::solo_button_press), false);
+	loop_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::loop_button_press), false);
+
 	rec_enable_button.set_icon (ArdourIcon::RecButton);
 	rec_enable_button.set_sensitive (false);
 	rec_enable_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::rec_button_press), false);
+	rec_enable_button.set_name ("record enable button");
 
 	rec_box.set_spacing (12);
 	rec_box.pack_start (rec_enable_button, false, false);
@@ -401,6 +422,7 @@ Pianoroll::build_upper_toolbar ()
 
 	_toolbar_outer->set_border_width (6);
 	_toolbar_outer->set_spacing (12);
+	_toolbar_outer->pack_start (play_box, false, false);
 	_toolbar_outer->pack_start (rec_box, false, false);
 	_toolbar_outer->pack_start (visible_channel_label, false, false);
 	_toolbar_outer->pack_start (visible_channel_selector, false, false);
@@ -2126,6 +2148,49 @@ Pianoroll::rec_enable_change ()
 	}
 }
 
+bool
+Pianoroll::play_button_press (GdkEventButton* ev)
+{
+	_session->request_locate (view->midi_region()->position().samples());
+	_session->request_roll ();
+	return true;
+}
+
+bool
+Pianoroll::loop_button_press (GdkEventButton* ev)
+{
+	if (!view) {
+		return true;
+	}
+	if (!view->midi_region()) {
+		return true;
+	}
+
+	if (_session->get_play_loop()) {
+		_session->request_play_loop (false);
+	} else {
+		set_loop_range (view->midi_region()->position(), view->midi_region()->end(), _("loop region"));
+		_session->request_play_loop (true);
+	}
+
+	return true;
+}
+
+bool
+Pianoroll::solo_button_press (GdkEventButton* ev)
+{
+	if (!view) {
+		return true;
+	}
+
+	if (!view->midi_track()) {
+		return true;
+	}
+
+	view->midi_track()->solo_control()->set_value (!view->midi_track()->solo_control()->get_value(), Controllable::NoGroup);
+
+	return true;
+}
 
 bool
 Pianoroll::rec_button_press (GdkEventButton* ev)
@@ -2239,9 +2304,22 @@ Pianoroll::set_track (std::shared_ptr<ARDOUR::MidiTrack> track)
 	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_single_controller_item), cc_dropdown3),
 	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), cc_dropdown3));
 
+	track->solo_control()->Changed.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::update_solo_display, this), gui_context());
+	update_solo_display ();
+
 	// reset_user_cc_choice (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE1), cc_dropdown1);
 	// reset_user_cc_choice (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE2), cc_dropdown2);
 	// reset_user_cc_choice (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE3), cc_dropdown3);
+}
+
+void
+Pianoroll::update_solo_display ()
+{
+	if (view->midi_track()->solo_control()->get_value()) {
+		solo_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	} else {
+		solo_button.set_active_state (Gtkmm2ext::Off);
+	}
 }
 
 void

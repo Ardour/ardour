@@ -3633,16 +3633,6 @@ Editor::finish_cleanup ()
 }
 
 Location*
-Editor::transport_loop_location()
-{
-	if (_session) {
-		return _session->locations()->auto_loop_location();
-	} else {
-		return 0;
-	}
-}
-
-Location*
 Editor::transport_punch_location()
 {
 	if (_session) {
@@ -4144,38 +4134,6 @@ Editor::_get_preferred_edit_position (EditIgnoreOption ignore, bool from_context
 	}
 
 	return where;
-}
-
-void
-Editor::set_loop_range (timepos_t const & start, timepos_t const & end, string cmd)
-{
-	if (!_session) {
-		return;
-	}
-	if (_session->get_play_loop () && _session->actively_recording ()) {
-		return;
-	}
-
-	begin_reversible_command (cmd);
-
-	Location* tll;
-
-	if ((tll = transport_loop_location()) == 0) {
-		Location* loc = new Location (*_session, start, end, _("Loop"),  Location::IsAutoLoop);
-		XMLNode &before = _session->locations()->get_state();
-		_session->locations()->add (loc, true);
-		_session->set_auto_loop_location (loc);
-		XMLNode &after = _session->locations()->get_state();
-		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-	} else {
-		XMLNode &before = tll->get_state();
-		tll->set_hidden (false, this);
-		tll->set (start, end);
-		XMLNode &after = tll->get_state();
-		_session->add_command (new MementoCommand<Location>(*tll, &before, &after));
-	}
-
-	commit_reversible_command ();
 }
 
 void

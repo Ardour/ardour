@@ -477,6 +477,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	virtual void update_grid ();
 
+	void set_loop_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd);
+
   protected:
 	std::string _name;
 	bool within_track_canvas;
@@ -759,6 +761,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	RegionView* entered_regionview;
 
 	bool clear_entered_track;
+
+	ARDOUR::Location* transport_loop_location();
 
 	std::vector<ArdourCanvas::Ruler::Mark> grid_marks;
 	GridLines* grid_lines;

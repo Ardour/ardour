@@ -291,11 +291,19 @@ class Pianoroll : public CueEditor
 	bool zoom_in_allocate;
 
 	ArdourWidgets::ArdourButton rec_enable_button;
-	void rec_enable_clicked ();
+	ArdourWidgets::ArdourButton play_button;
+	ArdourWidgets::ArdourButton solo_button;
+	ArdourWidgets::ArdourButton loop_button;
+
+	bool play_button_press (GdkEventButton*);
+	bool solo_button_press (GdkEventButton*);
+	bool loop_button_press (GdkEventButton*);
+
 	Gtk::Adjustment bar_adjustment;
 	Gtk::SpinButton bar_spinner;
 	Gtk::Label length_label;
 	Gtk::HBox   rec_box;
+	Gtk::HBox   play_box;
 
 	bool rec_button_press (GdkEventButton*);
 	void rec_enable_change ();
@@ -309,4 +317,5 @@ class Pianoroll : public CueEditor
 	bool ignore_channel_changes;
 	void visible_channel_changed ();
 
+	void update_solo_display ();
 };
