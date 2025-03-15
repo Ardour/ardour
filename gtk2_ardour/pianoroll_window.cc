@@ -31,7 +31,7 @@ using namespace ARDOUR;
 
 PianorollWindow::PianorollWindow (std::string const & name, Session& s)
 	: ArdourWindow (string_compose ("%1 - %2", PROGRAM_NAME, name))
-	, pianoroll (new Pianoroll (name))
+	, pianoroll (new Pianoroll (name, true))
 	, region_editor (nullptr)
 {
 	pianoroll->set_session (&s);

@@ -51,7 +51,7 @@ class CueMidiBackground;
 class Pianoroll : public CueEditor
 {
   public:
-	Pianoroll (std::string const & name);
+	Pianoroll (std::string const & name, bool with_transport_controls = false);
 	~Pianoroll ();
 
 	ArdourCanvas::Container* get_trackview_group () const { return data_group; }
@@ -318,6 +318,7 @@ class Pianoroll : public CueEditor
 	bool ignore_channel_changes;
 	void visible_channel_changed ();
 
+	bool with_transport_controls;
 	void update_solo_display ();
 	void map_transport_state ();
 };

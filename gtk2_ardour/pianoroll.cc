@@ -62,7 +62,7 @@ using namespace ArdourWidgets;
 using namespace Gtkmm2ext;
 using namespace Temporal;
 
-Pianoroll::Pianoroll (std::string const & name)
+Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	: CueEditor (name)
 	, timebar_height (15.)
 	, n_timebars (3)
@@ -77,7 +77,10 @@ Pianoroll::Pianoroll (std::string const & name)
 	, bar_spinner (bar_adjustment)
 	, length_label (X_("Record (Bars):"))
 	, ignore_channel_changes (false)
+	, with_transport_controls (with_transport)
 {
+	std::cerr << "NPR wt " << with_transport << std::endl;
+	PBD::stacktrace (std::cerr, 13);
 	mouse_mode = Editing::MouseContent;
 	autoscroll_vertical_allowed = false;
 
@@ -386,26 +389,28 @@ Pianoroll::build_upper_toolbar ()
 	note_mode_button.set_size_request (PX_SCALE(50), -1);
 	note_mode_button.set_active_color (UIConfiguration::instance().color ("alert:yellow"));
 
+	if (with_transport_controls) {
+		play_button.set_icon (ArdourIcon::TransportPlay);
+		play_button.set_name ("transport button");
+		loop_button.set_icon (ArdourIcon::TransportLoop);
+		loop_button.set_name ("transport button");
 
-	play_button.set_icon (ArdourIcon::TransportPlay);
-	play_button.set_name ("transport button");
-	loop_button.set_icon (ArdourIcon::TransportLoop);
-	loop_button.set_name ("transport button");
+		solo_button.set_name ("solo button");
 
-	solo_button.set_name ("solo button");
+		play_box.set_spacing (8);
+		play_box.pack_start (play_button, false, false);
+		play_box.pack_start (loop_button, false, false);
+		play_box.pack_start (solo_button, false, false);
+		play_button.show();
+		loop_button.show();
+		solo_button.show();
+		play_box.set_no_show_all (true);
+		play_box.show ();
 
-	play_box.set_spacing (8);
-	play_box.pack_start (play_button, false, false);
-	play_box.pack_start (loop_button, false, false);
-	play_box.pack_start (solo_button, false, false);
-	play_button.show();
-	loop_button.show();
-	solo_button.show();
-	play_box.set_no_show_all (true);
-	play_box.show ();
-	play_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::play_button_press), false);
-	solo_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::solo_button_press), false);
-	loop_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::loop_button_press), false);
+		play_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::play_button_press), false);
+		solo_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::solo_button_press), false);
+		loop_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::loop_button_press), false);
+	}
 
 	rec_enable_button.set_icon (ArdourIcon::RecButton);
 	rec_enable_button.set_sensitive (false);
@@ -424,7 +429,9 @@ Pianoroll::build_upper_toolbar ()
 
 	_toolbar_outer->set_border_width (6);
 	_toolbar_outer->set_spacing (12);
-	_toolbar_outer->pack_start (play_box, false, false);
+	if (with_transport_controls) {
+		_toolbar_outer->pack_start (play_box, false, false);
+	}
 	_toolbar_outer->pack_start (rec_box, false, false);
 	_toolbar_outer->pack_start (visible_channel_label, false, false);
 	_toolbar_outer->pack_start (visible_channel_selector, false, false);
@@ -2732,13 +2739,15 @@ Pianoroll::set_session (ARDOUR::Session* s)
 {
 	CueEditor::set_session (s);
 
-	if (_session) {
-		_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&Pianoroll::map_transport_state, this), gui_context());
-	} else {
-		_session_connections.drop_connections();
-	}
+	if (with_transport_controls) {
+		if (_session) {
+			_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&Pianoroll::map_transport_state, this), gui_context());
+		} else {
+			_session_connections.drop_connections();
+		}
 
-	map_transport_state ();
+		map_transport_state ();
+	}
 }
 
 void
