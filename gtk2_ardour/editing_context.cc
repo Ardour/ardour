@@ -1780,7 +1780,7 @@ EditingContext::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* eve
 	   popping up the menu will cause a region leave event which clears
 	   entered_regionview. */
 
-	MidiView&       mrv = note->region_view();
+	MidiView&       mrv = note->midi_view();
 	const RegionSelection rs  = region_selection ();
 	const uint32_t sel_size = mrv.selection_size ();
 

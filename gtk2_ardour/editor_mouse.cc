@@ -512,9 +512,9 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 			if (press && event->button.button == 3) {
 				NoteBase* cnote = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
 				assert (cnote);
-				if (cnote->region_view().selection_size() == 0 || !cnote->selected()) {
+				if (cnote->midi_view().selection_size() == 0 || !cnote->selected()) {
 					selection->clear_points();
-					cnote->region_view().unique_select (cnote);
+					cnote->midi_view().unique_select (cnote);
 					/* we won't get the release, so store the selection change now */
 					begin_reversible_selection_op (X_("Button 3 Note Selection"));
 					commit_reversible_selection_op ();
@@ -2361,7 +2361,7 @@ Editor::remove_midi_note (ArdourCanvas::Item* item, GdkEvent *)
 	NoteBase* e = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
 	assert (e);
 
-	e->region_view().delete_note (e->note ());
+	e->midi_view().delete_note (e->note ());
 }
 
 /** Obtain the pointer position in canvas coordinates */

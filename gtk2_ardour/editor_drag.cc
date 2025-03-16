@@ -2394,7 +2394,7 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 
 	Drag::start_grab (event, cursor);
 
-	midi_view = &cnote->region_view ();
+	midi_view = &cnote->midi_view ();
 
 	double temp;
 	temp        = midi_view->snap_to_pixel (cnote->x0 (), true);
@@ -6130,7 +6130,7 @@ NoteDrag::NoteDrag (EditingContext& ec, ArdourCanvas::Item* i)
 
 	_primary = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
 	assert (_primary);
-	_view      = &_primary->region_view ();
+	_view      = &_primary->midi_view ();
 	_note_height = _view->midi_context().note_height ();
 }
 
