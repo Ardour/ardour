@@ -34,15 +34,21 @@ using namespace ARDOUR;
 /** @param converter A TimeConverter whose origin_b is the start time of the AutomationList in session samples.
  *  This will not be deleted by EditorAutomationLine.
  */
-EditorAutomationLine::EditorAutomationLine (const string&                              name,
-                                TimeAxisView&                              tv,
-                                ArdourCanvas::Item&                        parent,
-                                std::shared_ptr<AutomationList>            al,
-                                const ParameterDescriptor&                 desc)
+EditorAutomationLine::EditorAutomationLine (const string&                   name,
+                                            TimeAxisView&                   tv,
+                                            ArdourCanvas::Item&             parent,
+                                            std::shared_ptr<AutomationList> al,
+                                            const ParameterDescriptor&      desc)
 	: AutomationLine (name, tv.editor(), parent, nullptr, al, desc)
 	, trackview (tv)
 {
 	line->set_data ("trackview", &trackview);
+
+	AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (&tv);
+
+	if (atv) {
+		set_atv (*atv);
+	}
 }
 
 EditorAutomationLine::~EditorAutomationLine ()

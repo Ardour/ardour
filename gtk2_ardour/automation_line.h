@@ -78,6 +78,9 @@ public:
 
 	virtual ~AutomationLine ();
 
+
+	void set_atv (AutomationTimeAxisView&);
+
 	virtual Temporal::timepos_t get_origin () const;
 
 	ArdourCanvas::Rectangle* drag_base() const { return _drag_base; }
@@ -271,6 +274,7 @@ private:
 	const ARDOUR::ParameterDescriptor _desc;
 	bool _control_points_inherit_color;
 	bool _sensitive;
+	AutomationTimeAxisView* atv;
 
 	friend class AudioRegionGainLine;
 	friend class RegionFxLine;
