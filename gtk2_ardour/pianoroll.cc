@@ -550,7 +550,7 @@ Pianoroll::build_canvas ()
 	data_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
 
-	bg = new CueMidiBackground (data_group);
+	bg = new PianorollMidiBackground (data_group, *this);
 	_canvas_viewport->signal_size_allocate().connect (sigc::mem_fun(*this, &Pianoroll::canvas_allocate), false);
 
 	// used as rubberband rect

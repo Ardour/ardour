@@ -31,12 +31,13 @@
 #include "midi_view_background.h"
 
 class MidiView;
+class Pianoroll;
 
-class CueMidiBackground : public MidiViewBackground
+class PianorollMidiBackground : public MidiViewBackground
 {
   public:
-	CueMidiBackground (ArdourCanvas::Item* parent);
-	~CueMidiBackground ();
+	PianorollMidiBackground (ArdourCanvas::Item* parent, Pianoroll&);
+	~PianorollMidiBackground ();
 
 	double height() const;
 	double width() const;
@@ -51,6 +52,7 @@ class CueMidiBackground : public MidiViewBackground
 
   protected:
 	MidiView* view;
+	Pianoroll& pianoroll;
 	double _width;
 	double _height;
 

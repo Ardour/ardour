@@ -46,7 +46,7 @@ namespace ArdourWidgets {
 }
 
 class PianorollMidiView;
-class CueMidiBackground;
+class PianorollMidiBackground;
 
 class Pianoroll : public CueEditor
 {
@@ -119,6 +119,8 @@ class Pianoroll : public CueEditor
 	Gdk::Cursor* which_canvas_cursor (ItemType type) const;
 
 	void set_visible_channel (int chan);
+	int visible_channel () const { return _visible_channel; }
+
 	void note_mode_clicked();
 	ARDOUR::NoteMode note_mode() const { return _note_mode; }
 	void set_note_mode (ARDOUR::NoteMode);
@@ -216,7 +218,7 @@ class Pianoroll : public CueEditor
 	ParameterButtonMap parameter_button_map;
 	void rebuild_parameter_button_map ();
 
-	CueMidiBackground* bg;
+	PianorollMidiBackground* bg;
 	PianorollMidiView* view;
 
 	void build_canvas ();
