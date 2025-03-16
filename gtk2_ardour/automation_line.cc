@@ -86,11 +86,11 @@ using namespace Temporal;
  *  This will not be deleted by EditorAutomationLine.
  */
 AutomationLine::AutomationLine (const string&                   name,
-                                        EditingContext&                 ec,
-                                        ArdourCanvas::Item&             parent,
-                                        ArdourCanvas::Rectangle*        drag_base,
-                                        std::shared_ptr<AutomationList> al,
-                                        const ParameterDescriptor&      desc)
+                                EditingContext&                 ec,
+                                ArdourCanvas::Item&             parent,
+                                ArdourCanvas::Rectangle*        drag_base,
+                                std::shared_ptr<AutomationList> al,
+                                const ParameterDescriptor&      desc)
 	:_name (name)
 	, _height (0)
 	, _line_color_name ("automation line")
