@@ -32,6 +32,7 @@
 #include "editing_syms.inc.h"
 #include "keyboard.h"
 #include "midi_view.h"
+#include "time_axis_view.h"
 
 /* clang-format off */
 // Include last, when GRIDTYPE has been defined by editing.h via midi_region_view.h
@@ -291,19 +292,17 @@ NoteBase::event_handler (GdkEvent* ev)
 		return false;
 	}
 
-#warning paul fix this pianorule issue
-#if 0
-	/* notebase has a MidiView not a RegionView so get_time_axis_view() Is
-	missing etc.
-	*/
-	if (_region.get_time_axis_view ().layer_display () == Stacked) {
-		/* only allow edting notes in the topmost layer */
-		if (_region.region()->layer() != _region.region()->playlist()->top_layer ()) {
-			/* this stll allows the draw tool to work, and edit cursor is updated */
-			return false;
+	RegionView* rv;
+	if ((rv = dynamic_cast<RegionView*> (&_region))) {
+		if (rv->get_time_axis_view ().layer_display () == Stacked) {
+			/* only allow edting notes in the topmost layer */
+			if (rv->region()->layer() != rv->region()->playlist()->top_layer ()) {
+				/* this stll allows the draw tool to work, and edit cursor is updated */
+				return false;
+			}
 		}
 	}
-#endif
+
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
 		_region.note_entered (this);
