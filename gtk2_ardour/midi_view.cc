@@ -369,11 +369,18 @@ MidiView::set_model (std::shared_ptr<MidiModel> m)
 	//set_height (trackview.current_height());
 
 	if (_show_source) {
-		for (int n = 0; n < 16; ++n) {
+		int n = 0;
+
+		while (n < 16) {
 			if (_model->channels_present() & (1 << n)) {
 				set_visible_channel (n);
 				break;
 			}
+			++n;
+		}
+
+		if (n == 16) {
+			set_visible_channel (n);
 		}
 	}
 
