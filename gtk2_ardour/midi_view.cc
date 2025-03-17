@@ -1154,6 +1154,13 @@ MidiView::model_changed()
 			}
 		}
 
+		/* Pick a reasonable default range if the model is mepty */
+
+		if (notes.empty()) {
+			low_note = UIConfiguration::instance().get_default_lower_midi_note();
+			hi_note = UIConfiguration::instance().get_default_upper_midi_note();
+		}
+
 		maybe_set_note_range (low_note, hi_note);
 	}
 
