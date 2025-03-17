@@ -622,8 +622,12 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 
 		_loudess_analysis_button->show ();
 		_volume_controller->show ();
+		if (Config->get_use_master_volume ()) {
+			master_volume_table.show ();
+		}
 #ifdef MIXBUS
 	} else if (!route()->is_master()) {
+		/* mixbus has/had a show_all, empty table still adds some pixel padding */
 		master_volume_table.hide ();
 #endif
 	}
