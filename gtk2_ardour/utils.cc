@@ -719,12 +719,14 @@ ARDOUR_UI_UTILS::round_robin_palette_color (bool just_peek)
 	std::vector<Gdk::Color>                   c (gc);
 	static std::vector<Gdk::Color>::size_type index = 0;
 
-	if(just_peek) {
-		return c[index];
-	}
+	assert (c.size() > 0);
 
 	if (index >= c.size ()) {
 		index = 0;
+	}
+
+	if(just_peek) {
+		return c[index];
 	}
 
 	return c[index++];
