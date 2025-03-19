@@ -137,6 +137,7 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	, _entered_note (0)
 	, _select_all_notes_after_add (false)
 	, _mouse_changed_selection (false)
+	, in_note_split (false)
 	, split_tuple (0)
 	, note_splitting (false)
 	, _extensible (false)
@@ -173,6 +174,7 @@ MidiView::MidiView (MidiView const & other)
 	, _entered_note (0)
 	, _select_all_notes_after_add (false)
 	, _mouse_changed_selection (false)
+	, in_note_split (false)
 	, split_tuple (0)
 	, note_splitting (false)
 {
@@ -2358,6 +2360,7 @@ void
 MidiView::clear_note_selection ()
 {
 	clear_selection_internal ();
+	end_note_splitting ();
 	unselect_self ();
 }
 
@@ -2687,6 +2690,8 @@ MidiView::update_vertical_drag_selection (double y1, double y2, bool extend)
 void
 MidiView::remove_from_selection (NoteBase* ev)
 {
+	end_note_splitting ();
+
 	Selection::iterator i = _selection.find (ev);
 
 	if (i != _selection.end()) {
@@ -2706,6 +2711,8 @@ MidiView::remove_from_selection (NoteBase* ev)
 void
 MidiView::add_to_selection (NoteBase* ev)
 {
+	end_note_splitting ();
+
 	if (_selection.empty()) {
 
 		/* we're about to select a note/some notes. Obey rule that only
@@ -5065,6 +5072,11 @@ MidiView::start_note_splitting ()
 void
 MidiView::end_note_splitting ()
 {
+	/* This can be true for selection operations during a note split */
+	if (in_note_split) {
+		return;
+	}
+
 	split_info.clear ();
 	note_splitting = false;
 }
@@ -5072,10 +5084,13 @@ MidiView::end_note_splitting ()
 void
 MidiView::split_notes_grid ()
 {
-	start_note_splitting ();
+	PBD::Unwinder<bool> uw (in_note_split, true);
 
 	if (split_info.empty()) {
-		return;
+		start_note_splitting ();
+		if (split_info.empty()) {
+			return;
+		}
 	}
 
 	/* XXX need to adjust pos to be global */
@@ -5100,6 +5115,8 @@ MidiView::split_notes_grid ()
 void
 MidiView::split_notes_more ()
 {
+	PBD::Unwinder<bool> uw (in_note_split, true);
+
 	if (split_info.empty()) {
 		start_note_splitting ();
 		if (split_info.empty()) {
@@ -5124,6 +5141,8 @@ MidiView::split_notes_more ()
 void
 MidiView::split_notes_less ()
 {
+	PBD::Unwinder<bool> uw (in_note_split, true);
+
 	if (split_info.empty()) {
 		start_note_splitting ();
 		if (split_info.empty()) {

@@ -662,6 +662,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 			, off_velocity (ov) {}
 	};
 	std::vector<SplitInfo> split_info;
+	bool in_note_split;
 
 	uint32_t split_tuple;
 	bool     note_splitting;
