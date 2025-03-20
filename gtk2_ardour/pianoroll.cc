@@ -282,10 +282,6 @@ Pianoroll::build_lower_toolbar ()
 	cc_dropdown2->add_elements (ArdourButton::Indicator);
 	cc_dropdown3->add_elements (ArdourButton::Indicator);
 
-	cc_dropdown1->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_led_click), cc_dropdown1));
-	cc_dropdown2->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_led_click), cc_dropdown2));
-	cc_dropdown3->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_led_click), cc_dropdown3));
-
 	rebuild_parameter_button_map ();
 
 	/* Only need to do this once because i->first is the actual button,
@@ -317,15 +313,19 @@ Pianoroll::build_lower_toolbar ()
 	modulation_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL));
 	expression_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_button_event), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION));
 
-	cc_dropdown1->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_automation_button_event), cc_dropdown1), false);
-	cc_dropdown2->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_automation_button_event), cc_dropdown2), false);
-	cc_dropdown3->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_automation_button_event), cc_dropdown3), false);
-
 	velocity_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_led_click), ARDOUR::MidiVelocityAutomation, 0));
 	pressure_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_led_click), ARDOUR::MidiChannelPressureAutomation, 0));
 	bender_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_led_click), ARDOUR::MidiPitchBenderAutomation, 0));
 	modulation_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_led_click), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL));
 	expression_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_led_click), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION));
+
+	cc_dropdown1->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_automation_button_event), cc_dropdown1), false);
+	cc_dropdown2->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_automation_button_event), cc_dropdown2), false);
+	cc_dropdown3->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_automation_button_event), cc_dropdown3), false);
+
+	cc_dropdown1->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_led_click), cc_dropdown1));
+	cc_dropdown2->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_led_click), cc_dropdown2));
+	cc_dropdown3->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_led_click), cc_dropdown3));
 
 	_toolbox.pack_start (button_bar, false, false);
 }
@@ -885,6 +885,10 @@ Pianoroll::trigger_rec_enable_change (ARDOUR::Trigger const & t)
 bool
 Pianoroll::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
+	if (event->type != GDK_BUTTON_PRESS) {
+		return false;
+	}
+
 	switch (event->button.button) {
 	case 1:
 		return button_press_handler_1 (item, event, item_type);
@@ -2389,44 +2393,20 @@ Pianoroll::user_automation_button_event (GdkEventButton* ev, MetaButton* mb)
 	}
 
 	if (mb->is_led_click (ev)) {
-		user_led_click (ev, mb);
-		return true;
+		return false;
 	}
 
 	ParameterButtonMap::iterator i = parameter_button_map.find (mb);
+
 	if (i == parameter_button_map.end()) {
 		return false;
 	}
 
-	return automation_button_event (ev, i->second.type(), i->second.id());
-}
-
-bool
-Pianoroll::automation_button_event (GdkEventButton* ev, Evoral::ParameterType type, int id)
-{
-	if (ev->button != 1) {
-		return false;
+	if (view) {
+		view->set_active_automation (i->second);
 	}
 
-	SelectionOperation op = ArdourKeyboard::selection_type (ev->state);
-
-	switch (ev->type) {
-	case GDK_BUTTON_RELEASE:
-		if (view)  {
-			Evoral::Parameter param (type, _visible_channel, id);
-
-			if (view->is_visible_automation (param) && (op == SelectionSet)) {
-				op = SelectionToggle;
-			}
-
-			view->update_automation_display (param, op);
-		}
-		return true;
-	default:
-		break;
-	}
-
-	return false;
+	return true;
 }
 
 void
@@ -2436,22 +2416,27 @@ Pianoroll::user_led_click (GdkEventButton* ev, MetaButton* metabutton)
 		return;
 	}
 
-	/* Find the parameter */
-
-	ParameterButtonMap::iterator i;
-	for (i = parameter_button_map.begin(); i != parameter_button_map.end(); ++i) {
-		if (i->first == metabutton) {
-			break;
-		}
-	}
+	ParameterButtonMap::iterator i = parameter_button_map.find (metabutton);
 
 	if (i == parameter_button_map.end()) {
 		return;
 	}
 
-	if (view) {
-		view->set_active_automation (i->second);
+	automation_button_event (ev, i->second.type(), i->second.id());
+}
+
+bool
+Pianoroll::automation_button_event (GdkEventButton* ev, Evoral::ParameterType type, int id)
+{
+	if (ev->button != 1) {
+		return false;
 	}
+
+	if (view)  {
+		view->set_active_automation (Evoral::Parameter (type, _visible_channel, id));
+	}
+
+	return true;
 }
 
 void
@@ -2461,8 +2446,15 @@ Pianoroll::automation_led_click (GdkEventButton* ev, Evoral::ParameterType type,
 		return;
 	}
 
-	if (view)  {
-		view->set_active_automation (Evoral::Parameter (type, _visible_channel, id));
+	switch (ev->type) {
+	case GDK_BUTTON_RELEASE:
+		if (view)  {
+			Evoral::Parameter param (type, _visible_channel, id);
+			view->toggle_visibility (param);
+		}
+		break;
+	default:
+		break;
 	}
 }
 
@@ -2474,17 +2466,17 @@ Pianoroll::automation_state_changed ()
 	for (ParameterButtonMap::iterator i = parameter_button_map.begin(); i != parameter_button_map.end(); ++i) {
 		std::string str (ARDOUR::EventTypeMap::instance().to_symbol (i->second));
 
-		/* Indicate visible automation state with selected/not-selected visual state */
+		/* Indicate active automation state with selected/not-selected visual state */
 
-		if (view->is_visible_automation (i->second)) {
+		if (view->is_active_automation (i->second)) {
 			i->first->set_visual_state (Gtkmm2ext::Selected);
 		} else {
 			i->first->set_visual_state (Gtkmm2ext::NoVisualState);
 		}
 
-		/* Indicate active automation state with explicit widget active state (LED) */
+		/* Indicate visible automation state with explicit widget active state (LED) */
 
-		if (view->is_active_automation (i->second)) {
+		if (view->is_visible_automation (i->second)) {
 			i->first->set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
 			i->first->set_active_state (Gtkmm2ext::Off);

@@ -327,7 +327,7 @@ PianorollMidiView::swap_automation_channel (int new_channel)
 	/* Create the new */
 
 	for (auto const & p : new_params) {
-		update_automation_display (p, SelectionAdd);
+		toggle_visibility (p);
 	}
 
 	if (have_active) {
@@ -359,8 +359,73 @@ PianorollMidiView::line_color_for (Evoral::Parameter const & param)
 
 	return 0xff0000ff;
 }
+
+PianorollMidiView::AutomationDisplayState*
+PianorollMidiView::find_or_create_automation_display_state (Evoral::Parameter const & param)
+{
+	CueAutomationMap::iterator i = automation_map.find (param);
+
+	/* Step one: find the AutomationDisplayState object for this parameter,
+	 * or create it if it does not already exist.
+	 */
+
+	if (i != automation_map.end()) {
+		return &i->second;
+	}
+
+	AutomationDisplayState* ads = nullptr;
+	bool was_empty = automation_map.empty();
+
+	if (param.type() == MidiVelocityAutomation) {
+
+		if (!velocity_display) {
+
+			/* Create and add to automation display map */
+
+			velocity_display = new PianorollVelocityDisplay (editing_context(), midi_context(), *this, *automation_group, 0x312244ff);
+			auto res = automation_map.insert (std::make_pair (param, AutomationDisplayState (*velocity_display, false)));
+
+			ads = &((*res.first).second);
+
+			for (auto & ev : _events) {
+				velocity_display->add_note (ev.second);
+			}
+		}
+
+	} else {
+
+		std::shared_ptr<Evoral::Control> control = _midi_region->model()->control (param, true);
+		CueAutomationControl ac = std::dynamic_pointer_cast<AutomationControl> (control);
+
+		if (!ac) {
+			return nullptr;
+		}
+
+		CueAutomationLine line (new PianorollAutomationLine (ARDOUR::EventTypeMap::instance().to_symbol (param),
+		                                                     _editing_context,
+		                                                     *automation_group,
+		                                                     automation_group,
+		                                                     ac->alist(),
+		                                                     ac->desc()));
+
+		line->set_insensitive_line_color (line_color_for (param));
+
+		AutomationDisplayState cad (ac, line, false);
+
+		auto res = automation_map.insert (std::make_pair (param, cad));
+
+		ads = &((*res.first).second);
+	}
+
+	if (was_empty) {
+		set_height (_height);
+	}
+
+	return ads;
+}
+
 void
-PianorollMidiView::update_automation_display (Evoral::Parameter const & param, SelectionOperation op)
+PianorollMidiView::toggle_visibility (Evoral::Parameter const & param)
 {
 	using namespace ARDOUR;
 
@@ -381,111 +446,34 @@ PianorollMidiView::update_automation_display (Evoral::Parameter const & param, S
 		return;
 	}
 
-	CueAutomationMap::iterator i = automation_map.find (param);
-	AutomationDisplayState* ads = nullptr;
+	AutomationDisplayState* ads = find_or_create_automation_display_state (param);
 
-	if (i != automation_map.end()) {
-
-		ads = &i->second;
-
-	} else {
-
-		if (op == SelectionRemove) {
-			/* remove it, but it doesn't exist yet, no worries */
-			return;
-		}
-
-		if (param.type() == MidiVelocityAutomation) {
-
-			if (!velocity_display) {
-
-				/* Create and add to automation display map */
-
-				velocity_display = new PianorollVelocityDisplay (editing_context(), midi_context(), *this, *automation_group, 0x312244ff);
-				auto res = automation_map.insert (std::make_pair (param, AutomationDisplayState (*velocity_display, false)));
-
-				ads = &((*res.first).second);
-
-				for (auto & ev : _events) {
-					velocity_display->add_note (ev.second);
-				}
-			}
-
-		} else {
-
-			std::shared_ptr<Evoral::Control> control = _midi_region->model()->control (param, true);
-			CueAutomationControl ac = std::dynamic_pointer_cast<AutomationControl> (control);
-
-			if (!ac) {
-				return;
-			}
-
-			CueAutomationLine line (new PianorollAutomationLine (ARDOUR::EventTypeMap::instance().to_symbol (param),
-			                                                   _editing_context,
-			                                                   *automation_group,
-			                                                   automation_group,
-			                                                   ac->alist(),
-			                                                   ac->desc()));
-
-			line->set_insensitive_line_color (line_color_for (param));
-
-			AutomationDisplayState cad (ac, line, false);
-
-			auto res = automation_map.insert (std::make_pair (param, cad));
-
-			ads = &((*res.first).second);
-		}
+	if (!ads) {
+		return;
 	}
 
-	switch (op) {
-	case SelectionSet:
-		/* hide the rest */
-		for (auto & as : automation_map) {
-			as.second.hide ();
-		}
-		ads->set_height (automation_group->get().height());
-		ads->show ();
-		internal_set_active_automation (param);
-		break;
-
-	case SelectionAdd:
-		ads->set_height (automation_group->get().height());
-		ads->show ();
-		break;
-
-	case SelectionRemove:
+	if (ads->visible) {
 		ads->hide ();
-		if (active_automation == ads) {
+		if (ads == active_automation) {
 			unset_active_automation ();
+			/* no need to set height or emit signal */
+			return;
 		}
-		break;
-
-	case SelectionToggle:
-		if (ads->visible) {
-			ads->hide ();
-			if (active_automation == ads) {
-				unset_active_automation ();
-			}
-		} else {
-			ads->set_height (automation_group->get().height());
-			ads->show ();
-			internal_set_active_automation (param);
-		}
-		break;
-
-	case SelectionExtend:
-		/* undefined in this context */
-		break;
+	} else {
+		ads->show ();
 	}
 
 	set_height (_height);
+	AutomationStateChange (); /* EMIT SIGNAL */
 }
 
 void
 PianorollMidiView::set_active_automation (Evoral::Parameter const & param)
 {
-	if (!internal_set_active_automation (param)) {
-		update_automation_display (param, SelectionSet);
+	AutomationDisplayState* ads = find_or_create_automation_display_state (param);
+
+	if (ads) {
+		internal_set_active_automation (*ads);
 	}
 }
 
@@ -504,35 +492,31 @@ PianorollMidiView::unset_active_automation ()
 	AutomationStateChange(); /* EMIT SIGNAL */
 }
 
-bool
-PianorollMidiView::internal_set_active_automation (Evoral::Parameter const & param)
+void
+PianorollMidiView::internal_set_active_automation (AutomationDisplayState& ads)
 {
-	bool exists = false;
+	if (active_automation == &ads) {
+		return;
+	}
 
-	for (auto & iter : automation_map) {
-		if (iter.first == param) {
-			if (iter.second.line) {
-				/* velocity does not have a line */
-				iter.second.line->set_sensitive (true);
-			} else {
-				iter.second.velocity_display->set_sensitive (true);
-			}
-			active_automation = &iter.second;
-			exists = true;
-		} else {
-			if (iter.second.line) {
-				iter.second.line->set_sensitive (false);
-			} else {
-				iter.second.velocity_display->set_sensitive (false);
-			}
+	/* active automation MUST be visible and sensitive */
+
+	ads.set_sensitive (true);
+	ads.set_height (automation_group->get().height());
+	ads.show ();
+	active_automation = &ads;
+
+	/* Now desensitize the rest */
+
+	for (auto & [param,ds] : automation_map) {
+		if (&ds == &ads) {
+			continue;
 		}
+
+		ds.set_sensitive (false);
 	}
 
-	if (exists) {
-		AutomationStateChange(); /* EMIT SIGNAL */
-	}
-
-	return exists;
+	AutomationStateChange(); /* EMIT SIGNAL */
 }
 
 bool
@@ -574,7 +558,6 @@ MergeableLine*
 PianorollMidiView::make_merger ()
 {
 	if (active_automation && active_automation->line) {
-		std::cerr << "Mergeable will use active automation @ " << active_automation << std::endl;
 
 		return new MergeableLine (active_automation->line, active_automation->control,
 		                          [](Temporal::timepos_t const& t) { return t; },
@@ -625,6 +608,16 @@ PianorollMidiView::AutomationDisplayState::hide ()
 		line->hide_all ();
 	}
 	visible = false;
+}
+
+void
+PianorollMidiView::AutomationDisplayState::set_sensitive (bool yn)
+{
+	if (velocity_display) {
+		velocity_display->set_sensitive (yn);
+	} else if (line) {
+		line->set_sensitive (yn);
+	}
 }
 
 void
