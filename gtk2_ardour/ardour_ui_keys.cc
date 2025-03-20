@@ -83,7 +83,7 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 		/* see if it uses the ardour binding system */
 
 		if (w) {
-			bindings = reinterpret_cast<Gtkmm2ext::BindingSet*>(w->get_data ("ardour-bindings"));
+			bindings = reinterpret_cast<Gtkmm2ext::BindingSet*>(w->get_data (ARDOUR_BINDING_KEY));
 		}
 
 		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("main window key event, bindings = %1, global = %2\n", bindings, &global_bindings));
@@ -94,7 +94,7 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 
 		/* see if window uses ardour binding system */
 
-		bindings = reinterpret_cast<Gtkmm2ext::BindingSet*>(window->get_data ("ardour-bindings"));
+		bindings = reinterpret_cast<Gtkmm2ext::BindingSet*>(window->get_data (ARDOUR_BINDING_KEY));
 	}
 
 	/* An empty binding set is treated as if it doesn't exist */

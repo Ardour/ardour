@@ -90,7 +90,7 @@ StepEntry::StepEntry ()
 	, program_button (_("+"))
 	, se (0)
 {
-	set_widget_bindings (*this, *bindings, "ardour-bindings");
+	set_widget_bindings (*this, *bindings, ARDOUR_BINDING_KEY);
 
 	Pango::FontDescription font (ARDOUR_UI_UTILS::sanitized_font ("ArdourSans 24"));
 	length_1_button.set_layout_font (font);
