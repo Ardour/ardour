@@ -389,7 +389,7 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 		Widget* ww = w;
 		BindingSet* binding_set = nullptr;
 		do {
-			binding_set = (BindingSet*) ww->get_data ("ardour-bindings");
+			binding_set = (BindingSet*) ww->get_data (ARDOUR_BINDING_KEY);
 			if (binding_set) {
 				break;
 			}
