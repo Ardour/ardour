@@ -140,6 +140,7 @@ class Pianoroll : public CueEditor
 
 	PianorollMidiView* midi_view() const { return view; }
 	void set_session (ARDOUR::Session*);
+	bool allow_trim_cursors () const;
 
   protected:
 	void load_bindings ();

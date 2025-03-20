@@ -3977,7 +3977,7 @@ void
 MidiView::note_mouse_position (float x_fraction, float /*y_fraction*/, bool can_set_cursor)
 {
 	Editing::MouseMode mm = _editing_context.current_mouse_mode();
-	bool trimmable = (mm == MouseContent || mm == MouseTimeFX || mm == MouseDraw);
+	bool trimmable = _editing_context.allow_trim_cursors ();
 
 	if (can_set_cursor) {
 		if (trimmable && x_fraction > 0.0 && x_fraction < 0.2) {

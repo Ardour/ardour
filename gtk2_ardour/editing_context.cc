@@ -3339,3 +3339,8 @@ EditingContext::set_loop_range (timepos_t const & start, timepos_t const & end, 
 	commit_reversible_command ();
 }
 
+bool
+EditingContext::allow_trim_cursors () const
+{
+	return mouse_mode == MouseContent || mouse_mode == MouseTimeFX || mouse_mode == MouseDraw;
+}

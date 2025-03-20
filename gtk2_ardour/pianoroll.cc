@@ -2776,3 +2776,9 @@ Pianoroll::map_transport_state ()
 		}
 	}
 }
+
+bool
+Pianoroll::allow_trim_cursors () const
+{
+	return mouse_mode == Editing::MouseContent || mouse_mode == Editing::MouseTimeFX;
+}

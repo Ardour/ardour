@@ -479,6 +479,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	void set_loop_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd);
 
+	virtual bool allow_trim_cursors () const;
+
   protected:
 	std::string _name;
 	bool within_track_canvas;
