@@ -145,7 +145,7 @@ PianorollMidiView::set_height (double h)
 	midi_context().set_size (midi_context().width(), note_area_height);
 
 	automation_group->set_position (ArdourCanvas::Duple (0., note_area_height));
-	automation_group->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, automation_height));
+	automation_group->set (ArdourCanvas::Rect (0., 0., 100000000000000., automation_height));
 
 	for (auto & ads : automation_map) {
 		ads.second.set_height (automation_height);
