@@ -137,4 +137,5 @@ class PianorollMidiView : public MidiView
 	Gtkmm2ext::Color line_color_for (Evoral::Parameter const &);
 
 	void reset_width_dependent_items (double pixel_width);
+	bool have_visible_automation () const;
 };

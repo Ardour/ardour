@@ -133,7 +133,7 @@ PianorollMidiView::set_height (double h)
 	double note_area_height;
 	double automation_height;
 
-	if (automation_map.empty()) {
+	if (!have_visible_automation()) {
 		note_area_height = h;
 		automation_height = 0.;
 	} else {
@@ -424,6 +424,18 @@ PianorollMidiView::find_or_create_automation_display_state (Evoral::Parameter co
 	return ads;
 }
 
+bool
+PianorollMidiView::have_visible_automation () const
+{
+	for (auto const & [oarameter,ads] : automation_map) {
+		if (ads.visible) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void
 PianorollMidiView::toggle_visibility (Evoral::Parameter const & param)
 {
@@ -456,8 +468,10 @@ PianorollMidiView::toggle_visibility (Evoral::Parameter const & param)
 		ads->hide ();
 		if (ads == active_automation) {
 			unset_active_automation ();
-			/* no need to set height or emit signal */
 			return;
+		}
+		if (!have_visible_automation()) {
+			set_height (_height);
 		}
 	} else {
 		ads->show ();
@@ -480,15 +494,33 @@ PianorollMidiView::set_active_automation (Evoral::Parameter const & param)
 void
 PianorollMidiView::unset_active_automation ()
 {
-	for (CueAutomationMap::iterator i = automation_map.begin(); i != automation_map.end(); ++i) {
-		if (i->second.line) {
-			i->second.line->set_sensitive (false);
+	if (!active_automation) {
+		return;
+	}
+
+	CueAutomationMap::size_type visible = 0;
+
+	for (auto & [param,ads] : automation_map) {
+		if (ads.line) {
+			ads.line->set_sensitive (false);
 		} else {
-			i->second.velocity_display->set_sensitive (false);
+			ads.velocity_display->set_sensitive (false);
+		}
+
+		if (ads.visible) {
+			visible++;
 		}
 	}
 
+	/* If the currently active automation is the only one visible, hide it */
+
+	if (active_automation->visible && visible == 1) {
+		active_automation->hide ();
+		set_height (_height);
+	}
+
 	active_automation = nullptr;
+
 	AutomationStateChange(); /* EMIT SIGNAL */
 }
 
@@ -496,14 +528,18 @@ void
 PianorollMidiView::internal_set_active_automation (AutomationDisplayState& ads)
 {
 	if (active_automation == &ads) {
+		unset_active_automation ();
 		return;
 	}
 
 	/* active automation MUST be visible and sensitive */
-
+	bool had_visible = have_visible_automation ();
+	ads.show ();
+	if (!had_visible) {
+		set_height (_height);
+	}
 	ads.set_sensitive (true);
 	ads.set_height (automation_group->get().height());
-	ads.show ();
 	active_automation = &ads;
 
 	/* Now desensitize the rest */
