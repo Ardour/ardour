@@ -541,7 +541,9 @@ gtk_drag_dest_set_proxy (GtkWidget      *widget,
 			 GdkDragProtocol protocol,
 			 gboolean        use_coordinates)
 {
+#ifndef NDEBUG
   g_warning ("gtk_drag_dest_set_proxy is not supported on Mac OS X.");
+#endif
 }
 
 void 
@@ -1687,7 +1689,9 @@ gtk_drag_set_icon_widget (GdkDragContext    *context,
   g_return_if_fail (context->is_source);
   g_return_if_fail (GTK_IS_WIDGET (widget));
 
+#ifndef NDEBUG
   g_warning ("gtk_drag_set_icon_widget is not supported on Mac OS X");
+#endif
 }
 
 static void
@@ -1885,7 +1889,9 @@ gtk_drag_set_default_icon (GdkColormap   *colormap,
 			   gint           hot_x,
 			   gint           hot_y)
 {
+#ifndef NDEBUG
   g_warning ("gtk_drag_set_default_icon is not supported on Mac OS X.");
+#endif
 }
 
 static void
