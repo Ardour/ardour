@@ -3733,8 +3733,16 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 	bool reached_end = false;
 
 	if (!ai->slot.armed()) {
+		/* since _arm_info is set, we have been capturing for a lot,
+		   but now the slot is no longer armed.
+		*/
 		if (!ai->end_samples) {
-			/* disarmed: compute end */
+			/* we have just noticed that the slot has been
+			   disarmed, so now compute where the end of recording
+			   will be, if that has not already been determined (we
+			   are quantizating to the slot's own quantization
+			   setting here).
+			*/
 			Beats start_b;
 			Beats end_b;
 			BBT_Argument t_bbt;
