@@ -329,6 +329,86 @@ namespace ARDOUR { namespace DSP {
 			fftwf_plan _fftplan;
 	};
 
+	class LIBARDOUR_API PerceptualAnalyzer {
+		public:
+			PerceptualAnalyzer (double rate, int ipsize = 4096, int maxfft = 512);
+			~PerceptualAnalyzer ();
+
+			class Trace {
+				public:
+					Trace (int size);
+					~Trace (void);
+
+					bool     _valid;
+					int32_t  _count;
+					float   *_data;
+			};
+
+			enum ProcessMode {
+					MM_NONE,
+					MM_PEAK,
+					MM_AVER
+			};
+
+			enum Speed {
+				Rapid,
+				Fast,
+				Moderate,
+				Slow,
+				Noise
+			};
+
+			enum Warp {
+				Bark,
+				Medium,
+				High
+			};
+
+			void set_wfact (float wfact);
+			void set_speed (float speed);
+
+			void set_wfact (enum Warp);
+			void set_speed (enum Speed);
+
+			void set_fftlen (int fftlen);
+			void clr_peak (void);
+			void ipskip (int iplen);
+
+			float *ipdata (void) const { return _ipdata; }
+			Trace *power (void)  const { return _power; }
+			Trace *peakp (void)  const { return _peakp; }
+			float  pmax (void) const { return _pmax; }
+
+			/** process current data in buffer */
+			void process (int iplen, ProcessMode mode = MM_NONE);
+
+			static double warp_freq (double w, double f);
+
+			float freq_at_bin (const uint32_t bin) const;
+			float power_at_bin (const uint32_t bin) const;
+
+		private:
+
+			float conv0 (fftwf_complex *);
+			float conv1 (fftwf_complex *);
+
+			int              _ipsize;
+			int              _icount;
+			int              _fftmax;
+			int              _fftlen;
+			fftwf_plan       _fftplan;
+			float           *_ipdata;
+			float           *_warped;
+			fftwf_complex   *_trdata;
+			Trace           *_power;
+			Trace           *_peakp;
+			float            _fsamp;
+			float            _wfact;
+			float            _speed;
+			float            _pmax;
+			float            _ptot;
+	};
+
 	class LIBARDOUR_API Generator {
 		public:
 			Generator ();
