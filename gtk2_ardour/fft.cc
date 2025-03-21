@@ -22,6 +22,8 @@
 #include <string.h>
 #include <math.h>
 
+#include "ardour/ardour.h"
+
 using namespace GTKArdour;
 
 FFT::FFT(uint32_t windowSize)
@@ -37,6 +39,7 @@ FFT::FFT(uint32_t windowSize)
 	_power_at_bin  = (float *) malloc(sizeof(float) * _data_size);
 	_phase_at_bin  = (float *) malloc(sizeof(float) * _data_size);
 
+	Glib::Threads::Mutex::Lock lk (ARDOUR::fft_planner_lock);
 	_plan = fftwf_plan_r2r_1d(_window_size, _fftInput, _fftOutput, FFTW_R2HC, FFTW_ESTIMATE);
 
 	reset();
@@ -138,6 +141,7 @@ FFT::~FFT()
 	if (_hann_window) {
 		free(_hann_window);
 	}
+	Glib::Threads::Mutex::Lock lk (ARDOUR::fft_planner_lock);
 	fftwf_destroy_plan(_plan);
 	free(_power_at_bin);
 	free(_phase_at_bin);
