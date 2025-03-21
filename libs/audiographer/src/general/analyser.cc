@@ -18,6 +18,7 @@
 
 #include "audiographer/general/analyser.h"
 #include "pbd/fastlog.h"
+#include "ardour/ardour.h"
 
 using namespace AudioGrapher;
 
@@ -67,7 +68,10 @@ Analyser::Analyser (float sample_rate, unsigned int channels, samplecnt_t bufsiz
 	_result.freq[4] = YPOS (5000);
 	_result.freq[5] = YPOS (10000);
 
-	_fft_plan = fftwf_plan_r2r_1d (_bufsize, _fft_data_in, _fft_data_out, FFTW_R2HC, FFTW_MEASURE);
+	{
+		Glib::Threads::Mutex::Lock lk (ARDOUR::fft_planner_lock);
+		_fft_plan = fftwf_plan_r2r_1d (_bufsize, _fft_data_in, _fft_data_out, FFTW_R2HC, FFTW_MEASURE);
+	}
 
 	_hann_window = (float *) malloc (sizeof (float) * _bufsize);
 	double sum = 0.0;
@@ -90,6 +94,7 @@ Analyser::Analyser (float sample_rate, unsigned int channels, samplecnt_t bufsiz
 
 Analyser::~Analyser ()
 {
+	Glib::Threads::Mutex::Lock lk (ARDOUR::fft_planner_lock);
 	fftwf_destroy_plan (_fft_plan);
 	fftwf_free (_fft_data_in);
 	fftwf_free (_fft_data_out);
