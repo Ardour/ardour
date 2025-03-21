@@ -313,7 +313,6 @@ namespace ARDOUR { namespace DSP {
 			}
 
 		private:
-			static Glib::Threads::Mutex fft_planner_lock;
 			float* hann_window;
 
 			void init (uint32_t window_size, double rate);

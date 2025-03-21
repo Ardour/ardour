@@ -58,6 +58,8 @@ namespace ARDOUR {
 	extern LIBARDOUR_API std::map<std::string, bool> reserved_io_names;
 	extern LIBARDOUR_API float ui_scale_factor;
 
+	extern LIBARDOUR_API Glib::Threads::Mutex fft_planner_lock;
+
 	/**
 	 * @param try_optimization true to enable hardware optimized routines
 	 * for mixing, finding peak values etc.
