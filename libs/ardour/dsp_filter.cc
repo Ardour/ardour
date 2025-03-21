@@ -21,6 +21,7 @@
 #include <cmath>
 #include <stdlib.h>
 
+#include "ardour/ardour.h"
 #include "ardour/buffer.h"
 #include "ardour/dB.h"
 #include "ardour/dsp_filter.h"
@@ -471,8 +472,6 @@ Biquad::dB_at_freq (float freq) const
 	return std::min (120.f, std::max (-120.f, rv));
 }
 
-Glib::Threads::Mutex FFTSpectrum::fft_planner_lock;
-
 FFTSpectrum::FFTSpectrum (uint32_t window_size, double rate)
 	: hann_window (0)
 {
@@ -482,7 +481,7 @@ FFTSpectrum::FFTSpectrum (uint32_t window_size, double rate)
 FFTSpectrum::~FFTSpectrum ()
 {
 	{
-		Glib::Threads::Mutex::Lock lk (fft_planner_lock);
+		Glib::Threads::Mutex::Lock lk (ARDOUR::fft_planner_lock);
 		fftwf_destroy_plan (_fftplan);
 	}
 	fftwf_free (_fft_data_in);
@@ -495,7 +494,7 @@ void
 FFTSpectrum::init (uint32_t window_size, double rate)
 {
 	assert (window_size > 0);
-	Glib::Threads::Mutex::Lock lk (fft_planner_lock);
+	Glib::Threads::Mutex::Lock lk (ARDOUR::fft_planner_lock);
 
 	_fft_window_size  = window_size;
 	_fft_data_size    = window_size / 2;
