@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2016-2017 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2016-2018 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2004-2018 Fons Adriaensen <fons@linuxaudio.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -153,7 +154,7 @@ LowPass::ctrl (float* data, const float val, const uint32_t n_samples)
 	_z = z;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/* ****************************************************************************/
 
 Biquad::Biquad (double samplerate)
 	: _rate (samplerate)
@@ -472,6 +473,8 @@ Biquad::dB_at_freq (float freq) const
 	return std::min (120.f, std::max (-120.f, rv));
 }
 
+/* ****************************************************************************/
+
 FFTSpectrum::FFTSpectrum (uint32_t window_size, double rate)
 	: hann_window (0)
 {
@@ -565,6 +568,313 @@ FFTSpectrum::power_at_bin (const uint32_t b, const float norm) const
 	const float a = _fft_power[b] * norm;
 	return a > 1e-12 ? 10.0 * fast_log10 (a) : -INFINITY;
 }
+
+/* ****************************************************************************/
+
+PerceptualAnalyzer::Trace::Trace (int size)
+	: _valid (false)
+{
+	_data = new float [size];
+}
+
+PerceptualAnalyzer::Trace::~Trace ()
+{
+	delete[] _data;
+}
+
+PerceptualAnalyzer::PerceptualAnalyzer (double sample_rate, int ipsize)
+	: _ipsize (ipsize)
+	, _icount (0)
+	, _fftplan (0)
+	, _fsamp (sample_rate)
+	, _wfact (0.9f)
+	, _speed (1.0f)
+{
+	_ipdata = new float [ipsize];
+	_warped = (float *) fftwf_malloc ((_fftlen + 1) * sizeof (float));
+	_trdata = (fftwf_complex *) fftwf_malloc ((_fftlen / 2 + 9) * sizeof (fftwf_complex));
+	_power = new Trace (_fftlen + 1);
+	_peakp = new Trace (_fftlen + 1);
+
+	init ();
+}
+
+PerceptualAnalyzer::~PerceptualAnalyzer ()
+{
+	if (_fftplan) {
+		Glib::Threads::Mutex::Lock lk (ARDOUR::fft_planner_lock);
+		fftwf_destroy_plan (_fftplan);
+	}
+	delete _power;
+	delete _peakp;
+	fftwf_free (_trdata);
+	fftwf_free (_warped);
+	delete[] _ipdata;
+}
+
+void
+PerceptualAnalyzer::init ()
+{
+	Glib::Threads::Mutex::Lock lk (ARDOUR::fft_planner_lock);
+	if (_fftplan) {
+		fftwf_destroy_plan (_fftplan);
+	}
+	_fftplan = fftwf_plan_dft_r2c_1d (_fftlen, _warped, _trdata + 4, FFTW_ESTIMATE);
+	set_wfact (_wfact);
+	set_speed (_speed);
+}
+
+void
+PerceptualAnalyzer::set_wfact (Warp warp)
+{
+	float wfact;
+	switch (warp) {
+		case Bark:
+			wfact = 0.8517f * sqrtf (atanf (65.83e-6f * _fsamp)) - 0.1916f;
+			break;
+		case Medium:
+			wfact = 0.90;
+			break;
+		case High:
+			wfact = 0.95;
+			break;
+	}
+	set_wfact (wfact);
+}
+
+void
+PerceptualAnalyzer::set_wfact (float wfact)
+{
+	_wfact = wfact;
+
+	reset ();
+
+	for (int i = 0; i <= _fftlen; ++i) {
+		const double f = 0.5 * i / _fftlen;
+		_fscale [i] = warp_freq (-wfact, f);
+	}
+	for (int i = 1; i < _fftlen; ++i) {
+		_bwcorr [i] = 30.0f * (_fscale [i + 1] - _fscale [i - 1]) / _fscale [i];
+	}
+
+	_bwcorr [0]       = _bwcorr [1];
+	_bwcorr [_fftlen] = _bwcorr [_fftlen - 1];
+}
+
+void
+PerceptualAnalyzer::set_speed (Speed speed)
+{
+	switch (speed) {
+		case Noise:
+			_speed = 20.0;
+			break;
+		case Slow:
+			_speed = 2.0;
+			break;
+		case Moderate:
+			_speed = 0.2;
+			break;
+		case Fast:
+			_speed = 0.08;
+			break;
+		case Rapid:
+			_speed = 0.03;
+			break;
+	}
+}
+
+void
+PerceptualAnalyzer::set_speed (float speed)
+{
+	_speed = speed;
+}
+
+void
+PerceptualAnalyzer::reset ()
+{
+	_power->_valid = false;
+	_peakp->_valid = false;
+	_peakp->_count = 0;
+	::memset (_warped, 0, (_fftlen + 1) * sizeof (float));
+	::memset (_power->_data,  0, (_fftlen + 1) * sizeof (float));
+	::memset (_peakp->_data,  0, (_fftlen + 1) * sizeof (float));
+}
+
+float
+PerceptualAnalyzer::conv0 (fftwf_complex *v)
+{
+	float x, y;
+	x =  v [0][0]
+	    - 0.677014f * (v [-1][0] + v [1][0])
+	    + 0.195602f * (v [-2][0] + v [2][0])
+	    - 0.019420f * (v [-3][0] + v [3][0])
+	    + 0.000741f * (v [-4][0] + v [4][0]);
+	y =  v [0][1]
+	    - 0.677014f * (v [-1][1] + v [1][1])
+	    + 0.195602f * (v [-2][1] + v [2][1])
+	    - 0.019420f * (v [-3][1] + v [3][1])
+	    + 0.000741f * (v [-4][1] + v [4][1]);
+	return x * x + y * y;
+}
+
+float PerceptualAnalyzer::conv1 (fftwf_complex *v)
+{
+	float x, y;
+	x =   0.908040f * (v [ 0][0] - v [1][0])
+	    - 0.409037f * (v [-1][0] - v [2][0])
+	    + 0.071556f * (v [-2][0] - v [3][0])
+	    - 0.004085f * (v [-3][0] - v [4][0]);
+	y =   0.908040f * (v [ 0][1] - v [1][1])
+	    - 0.409037f * (v [-1][1] - v [2][1])
+	    + 0.071556f * (v [-2][1] - v [3][1])
+	    - 0.004085f * (v [-3][1] - v [4][1]);
+	return x * x + y * y;
+}
+
+void
+PerceptualAnalyzer::process (int iplen, ProcessMode mode)
+{
+	int    i, j, k, l, n;
+	float  a, b, c, d, m, p, s, w, z;
+	float  *p1, *p2;
+
+	w = -_wfact;
+	l = _fftlen / 2;
+
+	for (k = 0; k < iplen; k += l) {
+		p1 = _ipdata + _icount;
+		_icount += l;
+		if (_icount == _ipsize) {
+			_icount = 0;
+		}
+
+		for (j = 0; j < l; j += 4) {
+			a = _warped [0];
+			b = *p1++ + 1e-20f;
+			c = *p1++ - 1e-20f;
+			d = *p1++ + 1e-20f;
+			_warped [0] = z = *p1++ - 1e-20f;
+
+			for (i = 0; i < _fftlen; i += 4) {
+				s = _warped [i + 1];
+				a += w * (b - s);
+				b += w * (c - a);
+				c += w * (d - b);
+				_warped [i + 1] = z = d + w * (z - c);
+				d = s;
+				s = _warped [i + 2];
+				d += w * (a - s);
+				a += w * (b - d);
+				b += w * (c - a);
+				_warped [i + 2] = z = c + w * (z - b);
+				c = s;
+				s = _warped [i + 3];
+				c += w * (d - s);
+				d += w * (a - c);
+				a += w * (b - d);
+				_warped [i + 3] = z = b + w * (z - a);
+				b = s;
+				s = _warped [i + 4];
+				b += w * (c - s);
+				c += w * (d - b);
+				d += w * (a - c);
+				_warped [i + 4] = z = a + w * (z - d);
+				a = s;
+			}
+		}
+
+		fftwf_execute (_fftplan);
+
+		for (i = 1; i <= 4; i++) {
+			_trdata [4 - i][0]     =  _trdata [4 + i][0];
+			_trdata [4 - i][1]     = -_trdata [4 + i][1];
+			_trdata [4 + l + i][0] =  _trdata [4 + l - i][0];
+			_trdata [4 + l + i][1] = -_trdata [4 + l - i][1];
+		}
+
+		a = 1.0f - powf (0.1f, l / (_fsamp * _speed));
+		b = 4.0f / ((float)_fftlen * (float)_fftlen);
+		s = 0;
+		m = 0;
+		p1 = _power->_data;
+
+		for (i = 0; i < l; i++) {
+			p = b * conv0 (_trdata + 4 + i) + 1e-20f;
+			if (m < p) {
+				m = p;
+			}
+			s += p;
+			*p1 += a * (p - *p1);
+			p1++;
+			p = b * conv1 (_trdata + 4 + i) + 1e-20f;
+			if (m < p) {
+				m = p;
+			}
+			s += p;
+			*p1 += a * (p - *p1);
+			p1++;
+		}
+
+		p = b * conv0 (_trdata + 4 + i) + 1e-20f;
+		s += p;
+		*p1 += a * (p - *p1);
+		_power->_valid = true;
+
+		if (_pmax < m) {
+			_pmax = m;
+		} else {
+			_pmax *= 0.95f;
+		}
+
+		if (mode == MM_PEAK) {
+			p1 = _power->_data;
+			p2 = _peakp->_data;
+			for (i = 0; i <= 2 * l; i++) {
+				if (p2 [i] < p1 [i]) p2 [i] = p1 [i];
+			}
+			_peakp->_valid = true;
+		} else if (mode == MM_AVER) {
+			p1 = _power->_data;
+			p2 = _peakp->_data;
+			n = _peakp->_count;
+			a = n;
+			b = a + 1;
+			for (i = 0; i <= 2 * l; i++) {
+				p2 [i] = (a * p2 [i] + p1 [i]) / b;
+			}
+			if (n < 1000000) _peakp->_count = n + 1;
+			_peakp->_valid = true;
+		}
+	}
+}
+
+double
+PerceptualAnalyzer::warp_freq (double w, double f)
+{
+	f *= 2 * M_PI;
+	return fabs (atan2 ((1 - w * w) * sin (f), (1 + w * w) * cos (f) - 2 * w) / (2 * M_PI));
+}
+
+float
+PerceptualAnalyzer::freq_at_bin (const uint32_t bin) const
+{
+	assert (bin <= _fftlen);
+	return _fscale [bin] * _fsamp;
+}
+
+float
+PerceptualAnalyzer::power_at_bin (const uint32_t b, float gain, bool flat) const
+{
+	assert (b <= _fftlen);
+	if (flat) {
+		return 10.f * log10f (_power->_data[b] + 1e-30);
+	} else {
+		/* proportional */
+		return 10.f * log10f ((_power->_data[b] + 1e-30) / _bwcorr[b]);
+	}
+}
+
+/* ****************************************************************************/
 
 Generator::Generator ()
 	: _type (UniformWhiteNoise)

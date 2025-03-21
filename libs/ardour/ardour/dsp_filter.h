@@ -26,6 +26,7 @@
 #include <glibmm.h>
 #include <fftw3.h>
 
+#include "pbd/enum_convert.h"
 #include "pbd/malign.h"
 
 #include "ardour/buffer_set.h"
@@ -329,6 +330,87 @@ namespace ARDOUR { namespace DSP {
 			fftwf_plan _fftplan;
 	};
 
+	class LIBARDOUR_API PerceptualAnalyzer {
+		public:
+			PerceptualAnalyzer (double rate, int ipsize = 4096);
+			~PerceptualAnalyzer ();
+			PerceptualAnalyzer (PerceptualAnalyzer const&) = delete;
+
+			class Trace {
+				public:
+					Trace (int size);
+					~Trace ();
+
+					bool     _valid;
+					int32_t  _count;
+					float   *_data;
+			};
+
+			enum ProcessMode {
+					MM_NONE,
+					MM_PEAK,
+					MM_AVER
+			};
+
+			enum Speed {
+				Rapid,
+				Fast,
+				Moderate,
+				Slow,
+				Noise
+			};
+
+			enum Warp {
+				Bark,
+				Medium,
+				High
+			};
+
+			void set_wfact (float wfact);
+			void set_speed (float speed);
+
+			void set_wfact (enum Warp);
+			void set_speed (enum Speed);
+
+			void reset ();
+
+			int    fftlen () const { return _fftlen; }
+			float* ipdata () const { return _ipdata; }
+			Trace* power ()  const { return _power; }
+			Trace* peakp ()  const { return _peakp; }
+			float  pmax ()   const { return _pmax; }
+
+			/** process current data in buffer */
+			void process (int iplen, ProcessMode mode = MM_NONE);
+
+			static double warp_freq (double w, double f);
+
+			float freq_at_bin (const uint32_t bin) const;
+			float power_at_bin (const uint32_t bin, const float gain = 1.f, bool flat = false) const;
+
+		private:
+			static const int _fftlen = 512;
+
+			void  init ();
+			float conv0 (fftwf_complex*);
+			float conv1 (fftwf_complex*);
+
+			int              _ipsize;
+			int              _icount;
+			fftwf_plan       _fftplan;
+			float           *_ipdata;
+			float           *_warped;
+			fftwf_complex   *_trdata;
+			Trace           *_power;
+			Trace           *_peakp;
+			float            _fsamp;
+			float            _wfact;
+			float            _speed;
+			float            _pmax;
+			float            _fscale[513];
+			float            _bwcorr[513];
+	};
+
 	class LIBARDOUR_API Generator {
 		public:
 			Generator ();
@@ -358,4 +440,9 @@ namespace ARDOUR { namespace DSP {
 	};
 
 } } /* namespace */
+
+namespace PBD {
+DEFINE_ENUM_CONVERT(ARDOUR::DSP::PerceptualAnalyzer::Speed);
+DEFINE_ENUM_CONVERT(ARDOUR::DSP::PerceptualAnalyzer::Warp);
+}
 #endif
