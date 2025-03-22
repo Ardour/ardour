@@ -2221,38 +2221,17 @@ Pianoroll::solo_button_press (GdkEventButton* ev)
 bool
 Pianoroll::rec_button_press (GdkEventButton* ev)
 {
-	std::cerr << "RBP!\n";
-
 	if (ev->button != 1) {
 		return false;
 	}
 
-	if (!ref.box()) {
-		std::cerr << "no box\n";
+	TriggerPtr trigger (ref.trigger());
+
+	if (!trigger) {
 		return true;
 	}
 
-	TriggerPtr trigger (ref.trigger());
-	bool trigger_armed = trigger->armed();
-
-	if (!trigger_armed) {
-
-		Stripable* st = dynamic_cast<Stripable*> (ref.box()->owner());
-		assert (st);
-		std::shared_ptr<Track> track = std::dynamic_pointer_cast<MidiTrack> (st->shared_from_this());
-		assert (track);
-
-		std::shared_ptr<RouteList> rl;
-
-		rl.reset (new RouteList);
-		rl->push_back (track);
-
-		_session->set_controls (route_list_to_control_list (rl, &Stripable::rec_enable_control), true, Controllable::NoGroup);
-	}
-
-	/* Step two: the trigger */
-
-	if (trigger_armed) {
+	if (trigger->armed()) {
 		trigger->disarm ();
 	} else {
 		trigger->arm (rec_length);
