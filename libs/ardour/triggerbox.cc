@@ -293,6 +293,16 @@ Trigger::request_trigger_delete (Trigger* t)
 void
 Trigger::_arm (Temporal::BBT_Offset const & duration)
 {
+	Track* trk = static_cast<Track*> (_box.owner());
+
+	if (trk->rec_enable_control()->get_value()) {
+		/* Cannot arm slots for recording if track is rec-enabled,
+		   since that creates ambiguity about what the track is doing
+		   during a process callback
+		*/
+		return;
+	}
+
 	if (_box.record_enabled() == Recording) {
 		return;
 	}
@@ -301,7 +311,6 @@ Trigger::_arm (Temporal::BBT_Offset const & duration)
 
 	_box.disarm_all ();
 
-	Track* trk = static_cast<Track*> (_box.owner());
 	int chns;
 
 	if (trk->data_type() == DataType::AUDIO) {
