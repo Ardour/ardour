@@ -122,6 +122,9 @@ private:
 	Gtk::Table mute_solo_table;
 	Gtk::Table volume_table;
 
+	ArdourWidgets::ArdourButton* rec_toggle_button;
+	bool rec_toggle_press (GdkEventButton* ev);
+
 	/* Widgets */
 	FittedCanvasWidget _tmaster_widget;
 	TriggerMaster*     _tmaster;

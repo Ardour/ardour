@@ -73,9 +73,7 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	, _note_mode (Sustained)
 	, zoom_in_allocate (false)
 	, solo_button (S_("Solo|S"))
-	, bar_adjustment (4, 1, 32, 1, 4)
-	, bar_spinner (bar_adjustment)
-	, length_label (X_("Record (Bars):"))
+	, length_label (X_("Record:"))
 	, ignore_channel_changes (false)
 	, with_transport_controls (with_transport)
 {
@@ -415,13 +413,21 @@ Pianoroll::build_upper_toolbar ()
 	rec_enable_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::rec_button_press), false);
 	rec_enable_button.set_name ("record enable button");
 
+	length_selector.AddMenuElem (MenuElem (_("Until Stopped"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_recording_length), Temporal::BBT_Offset ())));
+	length_selector.AddMenuElem (MenuElem (_("1 Bar"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_recording_length), Temporal::BBT_Offset (1, 0, 0))));
+	std::vector<int> b ({ 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 20, 24, 32 });
+	for (auto & n : b) {
+		length_selector.AddMenuElem (MenuElem (string_compose (_("%1 Bars"), n), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_recording_length), Temporal::BBT_Offset (n, 0, 0))));
+	}
+	length_selector.set_active (_("Until Stopped"));
+
 	rec_box.set_spacing (12);
 	rec_box.pack_start (rec_enable_button, false, false);
 	rec_box.pack_start (length_label, false, false);
-	rec_box.pack_start (bar_spinner, false, false);
+	rec_box.pack_start (length_selector, false, false);
 	rec_enable_button.show();
 	length_label.show ();
-	bar_spinner.show ();
+	length_selector.show ();
 	rec_box.set_no_show_all (true);
 	/* rec box not shown */
 
@@ -452,6 +458,12 @@ Pianoroll::build_upper_toolbar ()
 	_contents.add (_toolbox);
 	_contents.signal_unmap().connect ([this]() {_canvas_viewport->unmap ();}, false);
 	_contents.signal_map().connect ([this]() {_canvas_viewport->map ();}, false);
+}
+
+void
+Pianoroll::set_recording_length (Temporal::BBT_Offset dur)
+{
+	rec_length = dur;
 }
 
 void
@@ -2148,9 +2160,12 @@ Pianoroll::rec_enable_change ()
 		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
 		break;
 	case Enabled:
-		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
+		std::cerr << "maybe connect to blink, armed ? " << ref.trigger()->armed() << std::endl;
 		if (!UIConfiguration::instance().get_no_strobe() && ref.trigger()->armed()) {
+			std::cerr << "connect to blink\n";
 			rec_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &Pianoroll::blink_rec_enable));
+		} else {
+			rec_enable_button.set_active_state (Gtkmm2ext::Off);
 		}
 		break;
 	case Disabled:
@@ -2213,6 +2228,7 @@ Pianoroll::rec_button_press (GdkEventButton* ev)
 	}
 
 	if (!ref.box()) {
+		std::cerr << "no box\n";
 		return true;
 	}
 
@@ -2239,7 +2255,7 @@ Pianoroll::rec_button_press (GdkEventButton* ev)
 	if (trigger_armed) {
 		trigger->disarm ();
 	} else {
-		trigger->arm ();
+		trigger->arm (rec_length);
 	}
 
 	return true;
@@ -2255,7 +2271,6 @@ Pianoroll::set (TriggerReference & tref)
 
 	rec_box.show ();
 	rec_enable_button.set_sensitive (true);
-	ref.box()->RecEnableChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::rec_enable_change, this), gui_context());
 
 	idle_update_queued.store (0);
 
@@ -2273,6 +2288,7 @@ Pianoroll::set (TriggerReference & tref)
 
 	_track->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this), gui_context());
 	ref.trigger()->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_prop_change, this, _1), gui_context());
+	ref.trigger()->ArmChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::rec_enable_change, this), gui_context());
 
 	if (ref.trigger()->the_region()) {
 

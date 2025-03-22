@@ -303,11 +303,13 @@ class Pianoroll : public CueEditor
 	bool solo_button_press (GdkEventButton*);
 	bool loop_button_press (GdkEventButton*);
 
-	Gtk::Adjustment bar_adjustment;
-	Gtk::SpinButton bar_spinner;
+	ArdourWidgets::ArdourDropdown length_selector;
+	Temporal::BBT_Offset rec_length;
 	Gtk::Label length_label;
 	Gtk::HBox   rec_box;
 	Gtk::HBox   play_box;
+
+	void set_recording_length (Temporal::BBT_Offset bars);
 
 	bool rec_button_press (GdkEventButton*);
 	void rec_enable_change ();
