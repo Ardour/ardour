@@ -297,7 +297,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	double position_as_fraction() const;
 
 	virtual void captured (SlotArmInfo&, BufferSet&) {}
-	virtual void arm();
+	void arm (Temporal::BBT_Offset duration = Temporal::BBT_Offset()) {
+		_arm (duration);
+	}
 	virtual void disarm ();
 	bool armed() const { return _armed; }
 	PBD::Signal<void()> ArmChanged;
@@ -501,6 +503,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	bool internal_use_follow_length() const;
 	void send_property_change (PBD::PropertyChange pc);
+
+	virtual void _arm (Temporal::BBT_Offset const &);
 };
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
@@ -612,7 +616,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	bool playable() const { return rt_midibuffer.load() || _region; }
 
 	void captured (SlotArmInfo&, BufferSet&);
-	void arm();
 	void disarm ();
 
 	template<bool actually_run> pframes_t midi_run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample,
@@ -682,6 +685,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
   protected:
 	void retrigger ();
+	void _arm (Temporal::BBT_Offset const &);
 
   private:
 	PBD::ID data_source;
@@ -804,10 +808,12 @@ struct CueRecord {
 typedef PBD::RingBuffer<CueRecord> CueRecords;
 
 struct SlotArmInfo {
-	SlotArmInfo (Trigger& s);
+	SlotArmInfo ();
 	~SlotArmInfo();
 
-	Trigger& slot;
+	void reset (Trigger&);
+
+	Trigger* slot;
 	Temporal::Beats start_beats;
 	samplepos_t start_samples;
 	Temporal::Beats end_beats;
@@ -841,7 +847,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	PBD::Signal<void()> RecEnableChanged;
 	static PBD::Signal<void()> TriggerRecEnableChanged;
 
-	void arm_from_another_thread (Trigger& slot, samplepos_t, uint32_t chans);
+	void arm_from_another_thread (Trigger& slot, samplepos_t, uint32_t chans, Temporal::BBT_Offset const &);
 	void disarm();
 	void disarm_all();
 	bool armed() const { return (bool) _arm_info.load(); }
@@ -1062,6 +1068,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 
 	PBD::ScopedConnection stop_all_connection;
 	std::atomic<SlotArmInfo*> _arm_info;
+	SlotArmInfo _the_arm_info;
 
 	/** A buffer that we use to put newly-arrived MIDI data in for
 	 * the GUI to read (so that it can update itself).

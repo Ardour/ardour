@@ -36,6 +36,7 @@
 #include "pbd/unwind.h"
 
 #include "temporal/tempo.h"
+#include "temporal/bbt_time.h"
 
 #include "ardour/amp.h"
 #include "ardour/async_midi_port.h"
@@ -253,7 +254,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _beatcnt (0.)
 	, _meter (4, 4)
 	, expected_end_sample (0)
-	, _pending ((Trigger*) 0)
+	, _pending (nullptr)
 	, last_property_generation (0)
 {
 	add_property (_launch_style);
@@ -290,7 +291,7 @@ Trigger::request_trigger_delete (Trigger* t)
 }
 
 void
-Trigger::arm ()
+Trigger::_arm (Temporal::BBT_Offset const & duration)
 {
 	if (_box.record_enabled() == Recording) {
 		return;
@@ -309,7 +310,7 @@ Trigger::arm ()
 		chns = 0;
 	}
 
-	_box.arm_from_another_thread (*this, _box.session().transport_sample(), chns);
+	_box.arm_from_another_thread (*this, _box.session().transport_sample(), chns, duration);
 	_armed = true;
 	ArmChanged(); /* EMIT SIGNAL */
 	TriggerArmChanged (this); /* EMIT SIGNAL */
@@ -1945,7 +1946,6 @@ AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
 		/* Nothing captured */
 		_armed = false;
 		ArmChanged (); /* EMIT SIGNAL */
-		delete &ai;
 		return;
 	}
 
@@ -1977,13 +1977,9 @@ AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
 
 	/* adopt the previously allocated stretcher, with a ratio of 1.0 (no stretch) */
 
-	delete _stretcher;
-	_stretcher = ai.stretcher;
+	std::swap (_stretcher, ai.stretcher);
 	_stretcher->setMaxProcessSize (rb_blocksize);
 	_stretcher->setTimeRatio (1.0);
-
-	ai.stretcher = nullptr;
-	delete &ai; // XXX delete is not RT-safe
 
 	_box.queue_explict (index());
 
@@ -2477,7 +2473,7 @@ MIDITrigger::setup_event_indices ()
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 first index %3 last index %4 of %5\n", _box.order(), index(), first_event_index, last_event_index, rt->size()));
 }
 
-void 
+void
 MIDITrigger::adjust_bounds (Temporal::Beats const & start, Temporal::Beats const & end, Temporal::Beats const & length, bool from_region)
 {
 	if (!from_region && _region) {
@@ -2504,9 +2500,9 @@ MIDITrigger::adjust_bounds (Temporal::Beats const & start, Temporal::Beats const
 }
 
 void
-MIDITrigger::arm ()
+MIDITrigger::_arm (Temporal::BBT_Offset const & duration)
 {
-	Trigger::arm ();
+	Trigger::_arm (duration);
 }
 
 void
@@ -2521,16 +2517,14 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 	if (ai.midi_buf->size() == 0) {
 		_armed = false;
 		ArmChanged(); /* EMIT SIGNAL */
-		delete &ai;
 		return;
 	}
 
-	/* Note: the original MIDI buffer in ai is now invalid, all data has
-	 * been moved to rtmb.
+	/* Move ownership of the MIDI buffer from the SlotArmInfo (where it was
+	 * captured) to our own rt_midibuffer pointer.
 	 */
 
-#warning what to do about the old RT midi buffer
-	// old_rt_midibuffer = rt_midibuffer.exchange (ai.midi_buf);
+	ai.midi_buf = rt_midibuffer.exchange (ai.midi_buf);
 
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	timecnt_t dur = tmap->convert_duration (timecnt_t (ai.captured), timepos_t (ai.start_samples), Temporal::BeatTime);
@@ -2539,10 +2533,6 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 
 	iter = 0;
 	_follow_action0 = FollowAction::Again;
-
-	/* Mark ai.midi_buf as null so that it is not deleted */
-	ai.midi_buf = nullptr;
-	delete &ai;
 
 	/* start playing */
 	_box.queue_explict (index());
@@ -3543,8 +3533,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for queued = %1\n", Properties::queued.property_id));
 }
 
-SlotArmInfo::SlotArmInfo (Trigger& s)
-	: slot (s)
+SlotArmInfo::SlotArmInfo ()
+	: slot (nullptr)
 	, start_samples (0)
 	, end_samples (0)
 	, captured (0)
@@ -3558,6 +3548,22 @@ SlotArmInfo::~SlotArmInfo()
 	delete midi_buf;
 	delete stretcher;
 }
+
+void
+SlotArmInfo::reset (Trigger& s)
+{
+	slot = &s;
+	delete midi_buf;
+	midi_buf = nullptr;
+	delete stretcher;
+	stretcher = nullptr;
+	start_samples = 0;
+	end_samples = 0;
+	start_beats = Temporal::Beats();
+	end_beats = Temporal::Beats();
+	captured = 0;
+}
+
 
 Temporal::BBT_Offset TriggerBox::_assumed_trigger_duration (4, 0, 0);
 TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::Custom);
@@ -3652,11 +3658,17 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 }
 
 void
-TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t chans)
+TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t chans, Temporal::BBT_Offset const & duration)
 {
 	using namespace Temporal;
 
-	SlotArmInfo* ai = new SlotArmInfo (slot);
+	SlotArmInfo* ai = &_the_arm_info;
+
+	/* Delete any dangling RTMidiBuffer and Stretcher from previous capture
+	 * passes
+	 */
+
+	ai->reset (slot);
 
 	if (_data_type == DataType::MIDI) {
 		ai->midi_buf = new RTMidiBufferBeats;
@@ -3682,7 +3694,12 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 	ai->start_samples = t_samples;
 	ai->start_beats = t_beats;
 
-	// std::cerr << "Will start at " << t_beats.str() << std::endl;
+	if (!duration) {
+		timepos_t sb (ai->start_beats);
+		sb += duration;
+		ai->end_beats = sb.beats ();
+		ai->end_samples = timepos_t (ai->end_beats).samples();
+	}
 
 	ai->captured = 0;
 
@@ -3692,7 +3709,6 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 void
 TriggerBox::disarm ()
 {
-	delete _arm_info;
 	_arm_info = nullptr;
 }
 
@@ -3713,7 +3729,7 @@ TriggerBox::finish_recording (BufferSet& bufs)
 	/* This transfers responsibility for the SlotArmInfo object to the
 	   trigger
 	*/
-	ai->slot.captured (*ai, bufs);
+	ai->slot->captured (*ai, bufs);
 	_arm_info = nullptr;
 	_record_state = Enabled;
 }
@@ -3732,8 +3748,8 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 	pframes_t offset = 0;
 	bool reached_end = false;
 
-	if (!ai->slot.armed()) {
-		/* since _arm_info is set, we have been capturing for a lot,
+	if (!ai->slot->armed()) {
+		/* since _arm_info is set, we have been capturing for a slot,
 		   but now the slot is no longer armed.
 		*/
 		if (!ai->end_samples) {
@@ -3751,8 +3767,8 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 			TempoMap::SharedPtr tmap (TempoMap::use());
 			Beats now_beats = tmap->quarters_at (timepos_t (start_sample));
 
-			ai->slot.compute_quantized_transition (start_sample, now_beats, std::numeric_limits<Beats>::max(),
-			                                       t_bbt, t_beats, t_samples, tmap, ai->slot.quantization());
+			ai->slot->compute_quantized_transition (start_sample, now_beats, std::numeric_limits<Beats>::max(),
+			                                       t_bbt, t_beats, t_samples, tmap, ai->slot->quantization());
 			ai->end_samples = t_samples;
 			ai->end_beats = t_beats;
 
@@ -3768,6 +3784,8 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		/* we stopped or reversed, but were not recording. Nothing to do here */
 		return;
 	}
+
+	std::cerr << "Ok, maybe here we go ...\n";
 
 	if (ai->end_samples != 0 && (start_sample > ai->end_samples)) {
 		return;
