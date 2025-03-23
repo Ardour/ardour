@@ -385,9 +385,11 @@ Pianoroll::build_upper_toolbar ()
 	note_mode_button.set_size_request (PX_SCALE(50), -1);
 	note_mode_button.set_active_color (UIConfiguration::instance().color ("alert:yellow"));
 
+	play_button.set_icon (ArdourIcon::TransportPlay);
+	play_button.set_name ("transport button");
+	play_button.show();
+
 	if (with_transport_controls) {
-		play_button.set_icon (ArdourIcon::TransportPlay);
-		play_button.set_name ("transport button");
 		loop_button.set_icon (ArdourIcon::TransportLoop);
 		loop_button.set_name ("transport button");
 
@@ -397,7 +399,6 @@ Pianoroll::build_upper_toolbar ()
 		play_box.pack_start (play_button, false, false);
 		play_box.pack_start (loop_button, false, false);
 		play_box.pack_start (solo_button, false, false);
-		play_button.show();
 		loop_button.show();
 		solo_button.show();
 		play_box.set_no_show_all (true);
@@ -406,6 +407,9 @@ Pianoroll::build_upper_toolbar ()
 		play_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::play_button_press), false);
 		solo_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::solo_button_press), false);
 		loop_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::loop_button_press), false);
+	} else {
+		rec_box.pack_start (play_button, false, false);
+		play_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::bang_button_press), false);
 	}
 
 	rec_enable_button.set_icon (ArdourIcon::RecButton);
@@ -2179,6 +2183,19 @@ Pianoroll::play_button_press (GdkEventButton* ev)
 {
 	_session->request_locate (view->midi_region()->position().samples());
 	_session->request_roll ();
+	return true;
+}
+
+
+bool
+Pianoroll::bang_button_press (GdkEventButton* ev)
+{
+	if (!ref.trigger()) {
+		return true;
+	}
+
+	ref.trigger()->bang ();
+
 	return true;
 }
 

@@ -300,6 +300,7 @@ class Pianoroll : public CueEditor
 	ArdourWidgets::ArdourButton loop_button;
 
 	bool play_button_press (GdkEventButton*);
+	bool bang_button_press (GdkEventButton*);
 	bool solo_button_press (GdkEventButton*);
 	bool loop_button_press (GdkEventButton*);
 
