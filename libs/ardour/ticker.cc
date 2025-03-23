@@ -211,7 +211,6 @@ MidiClockTicker::tick (samplepos_t start_sample, samplepos_t end_sample, pframes
 	_transport_pos = end_sample;
 
 out:
-	_midi_port->flush_buffers (n_samples);
 	_midi_port->cycle_end (n_samples);
 }
 
