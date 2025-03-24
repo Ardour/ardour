@@ -1193,7 +1193,6 @@ MidiView::model_changed()
 	}
 
 	if (!empty_when_starting) {
-		MidiModel::Notes::iterator f;
 		for (Events::iterator i = _events.begin(); i != _events.end(); ) {
 
 			NoteBase* cne = i->second;
@@ -1234,8 +1233,7 @@ MidiView::model_changed()
 		}
 	}
 
-	for (MidiModel::Notes::iterator n = missing_notes.begin(); n != missing_notes.end(); ++n) {
-		std::shared_ptr<NoteType> note (*n);
+	for (auto & note : missing_notes) {
 		NoteBase* cne;
 		bool visible;
 
@@ -1245,8 +1243,8 @@ MidiView::model_changed()
 			cne = add_note (note, false);
 		}
 
-		for (set<Evoral::event_id_t>::iterator it = _pending_note_selection.begin(); it != _pending_note_selection.end(); ++it) {
-			if ((*it) == note->id()) {
+		for (auto & id : _pending_note_selection) {
+			if (id == note->id()) {
 				add_to_selection (cne);
 				break;
 			}
