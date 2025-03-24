@@ -1974,7 +1974,7 @@ MidiView::update_hit (Hit* ev)
  * corresponding note off event arrives, to properly display the note.
  */
 NoteBase*
-MidiView::add_note(const std::shared_ptr<NoteType> note, bool visible)
+MidiView::add_note (const std::shared_ptr<NoteType> note, bool visible)
 {
 	NoteBase* event = 0;
 
