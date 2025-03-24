@@ -17,15 +17,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __slot_properties_box_h__
-#define __slot_properties_box_h__
+#pragma once
 
 #include <map>
 
-#include <gtkmm/box.h>
-#include <gtkmm/label.h>
-#include "gtkmm/sizegroup.h"
-#include <gtkmm/table.h>
+#include <ytkmm/box.h>
+#include <ytkmm/label.h>
+#include "ytkmm/sizegroup.h"
+#include <ytkmm/table.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
@@ -44,14 +43,10 @@ namespace ARDOUR {
 	class Location;
 }
 
-namespace ArdourWidgets {
-	class ArdourButton;
-	class HSliderController;
-}
-
 class TriggerPropertiesBox;
 class RegionPropertiesBox;
 class RegionOperationsBox;
+class Pianoroll;
 class ClipEditorBox;
 
 class SlotPropertyTable : public TriggerUI, public Gtk::Table
@@ -171,19 +166,3 @@ private:
 
 	SlotPropertyWidget* _triggerwidget;
 };
-
-/* XXX probably for testing only */
-
-class SlotPropertyWindow : public Gtk::Window
-{
-    public:
-	SlotPropertyWindow (ARDOUR::TriggerReference);
-
-	bool on_key_press_event (GdkEventKey*);
-	bool on_key_release_event (GdkEventKey*);
-
-	TriggerPropertiesBox *_trig_box;
-	RegionOperationsBox *_ops_box;
-	ClipEditorBox *_trim_box;
-};
-#endif /* __multi_region_properties_box_h__ */

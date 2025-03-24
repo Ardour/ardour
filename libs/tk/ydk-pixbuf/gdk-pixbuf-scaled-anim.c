@@ -22,7 +22,7 @@
 
 #include <glib.h>
 
-#include "gdk-pixbuf.h"
+#include "ydk-pixbuf.h"
 #include "gdk-pixbuf-io.h"
 #include "gdk-pixbuf-scaled-anim.h"
 

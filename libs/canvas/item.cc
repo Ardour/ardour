@@ -650,7 +650,7 @@ Item::size_request (double& w, double& h) const
 	Rect r (bounding_box());
 
 	w = _requested_width < 0 ? r.width()  : _requested_width;
-	h = _requested_width < 0 ? r.height() : _requested_height;
+	h = _requested_height < 0 ? r.height() : _requested_height;
 }
 
 void
@@ -941,8 +941,13 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 					}
 				}
 #endif
-
+				if (_canvas->item_save_restore) {
+					context->save();
+				}
 				(*i)->render (area, context);
+				if (_canvas->item_save_restore) {
+					context->restore();
+				}
 				++render_count;
 			}
 
@@ -1332,10 +1337,8 @@ Item::set_layout_sensitive (bool yn)
 {
 	_layout_sensitive = yn;
 
-	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
-		if (!(*i)->layout_sensitive()) {
-			(*i)->set_layout_sensitive (yn);
-		}
+	for (auto & item : _items) {
+		item->set_layout_sensitive (yn);
 	}
 }
 

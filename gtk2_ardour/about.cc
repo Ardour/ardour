@@ -251,7 +251,9 @@ static const char* translators[] = {
 \n\tRobin Gloster <robin@loc-com.de>\n"),
 	N_("Italian:\n\tVincenzo Reale <smart2128@baslug.org>\
 \n\tFilippo Pappalardo <filippo@email.it>\
-\n\tRaffaele Morelli <raffaele.morelli@gmail.com>\n"),
+\n\tRaffaele Morelli <raffaele.morelli@gmail.com>\
+\n\tGuido Pietrella\
+\n\tDaniele Tombolini\n"),
 	N_("Portuguese:\n\tRui Nuno Capela <rncbc@rncbc.org>\n"),
 	N_("Brazilian Portuguese:\n\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\
 \n\tChris Ross <chris@tebibyte.org>\n"),
@@ -641,7 +643,7 @@ About::About ()
 #endif
 
 	set_translator_credits (t);
-	set_copyright (_("Copyright (C) 1999-2023 Paul Davis\n"));
+	set_copyright (_("Copyright (C) 1999-2025 Paul Davis\n"));
 	set_license (gpl);
 	set_name (X_("Ardour"));
 	set_website (X_("https://ardour.org/"));

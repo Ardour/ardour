@@ -29,8 +29,8 @@
 
 #include <sigc++/bind.h>
 
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/filechooserdialog.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/gstdio_compat.h"
 
@@ -385,8 +385,8 @@ TranscodeVideoDialog::launch_audioonly ()
 	if (debug_checkbox.get_active ()) {
 		transcoder->set_debug (true);
 	}
-	transcoder->Progress.connect (*this, invalidator (*this), boost::bind (&TranscodeVideoDialog::update_progress, this, _1, _2), gui_context ());
-	transcoder->Finished.connect (*this, invalidator (*this), boost::bind (&TranscodeVideoDialog::finished, this, _1), gui_context ());
+	transcoder->Progress.connect (*this, invalidator (*this), std::bind (&TranscodeVideoDialog::update_progress, this, _1, _2), gui_context ());
+	transcoder->Finished.connect (*this, invalidator (*this), std::bind (&TranscodeVideoDialog::finished, this, _1), gui_context ());
 	launch_extract ();
 }
 
@@ -437,7 +437,7 @@ TranscodeVideoDialog::launch_transcode ()
 	aborted = false;
 	if (audio_combo.get_active_row_number () != 0) {
 		pending_audio_extract = true;
-		StartNextStage.connect (*this, invalidator (*this), boost::bind (&TranscodeVideoDialog::launch_extract, this), gui_context ());
+		StartNextStage.connect (*this, invalidator (*this), std::bind (&TranscodeVideoDialog::launch_extract, this), gui_context ());
 	}
 
 	int scale_width, scale_height, bitrate;
@@ -457,8 +457,8 @@ TranscodeVideoDialog::launch_transcode ()
 		bitrate = 0;
 	}
 
-	transcoder->Progress.connect (*this, invalidator (*this), boost::bind (&TranscodeVideoDialog::update_progress, this, _1, _2), gui_context ());
-	transcoder->Finished.connect (*this, invalidator (*this), boost::bind (&TranscodeVideoDialog::finished, this, _1), gui_context ());
+	transcoder->Progress.connect (*this, invalidator (*this), std::bind (&TranscodeVideoDialog::update_progress, this, _1, _2), gui_context ());
+	transcoder->Finished.connect (*this, invalidator (*this), std::bind (&TranscodeVideoDialog::finished, this, _1), gui_context ());
 	if (!transcoder->transcode (outfn, scale_width, scale_height, bitrate)) {
 		ARDOUR_UI::instance ()->popup_error (_("Transcoding Failed."));
 		Gtk::Dialog::response (RESPONSE_CANCEL);

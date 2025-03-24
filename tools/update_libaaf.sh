@@ -40,7 +40,7 @@ else
 	cd "${LOCAL_AAF_PROJECT}"
 	echo $PWD
 	AAF="./"
-	RSYNC_OPT="-ac --info=progress2"
+	RSYNC_OPT="-aI --size-only --info=progress2"
 fi
 
 rsync $RSYNC_OPT \
@@ -52,13 +52,14 @@ rsync $RSYNC_OPT \
   ${AAF}src/AAFCore/AAFDump.c \
   ${AAF}src/AAFIface/AAFIface.c \
   ${AAF}src/AAFIface/AAFIParser.c \
-  ${AAF}src/AAFIface/AAFIAudioFiles.c \
+  ${AAF}src/AAFIface/AAFIEssenceFile.c \
   ${AAF}src/AAFIface/RIFFParser.c \
   ${AAF}src/AAFIface/URIParser.c \
-  ${AAF}src/AAFIface/ProTools.c \
+	${AAF}src/AAFIface/ProTools.c \
+	${AAF}src/AAFIface/MediaComposer.c \
   ${AAF}src/AAFIface/Resolve.c \
   ${AAF}src/common/utils.c \
-  ${AAF}src/debug.c \
+  ${AAF}src/common/log.c \
   \
   "$ASRC/libs/aaf"
 
@@ -67,9 +68,10 @@ rsync -auc --info=progress2 \
 	${AAF}include/libaaf/Resolve.h \
 	${AAF}include/libaaf/AAFIParser.h \
 	${AAF}include/libaaf/AAFCore.h \
-	${AAF}include/libaaf/debug.h \
-	${AAF}include/libaaf/AAFIAudioFiles.h \
+	${AAF}include/libaaf/log.h \
+	${AAF}include/libaaf/AAFIEssenceFile.h \
 	${AAF}include/libaaf/ProTools.h \
+	${AAF}include/libaaf/MediaComposer.h \
 	${AAF}include/libaaf/AAFToText.h \
 	${AAF}include/libaaf/AAFIface.h \
 	${AAF}include/libaaf/CFBDump.h \

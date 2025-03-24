@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2023 Adrien Gesta-Fline
+ * Copyright (C) 2017-2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -57,33 +57,33 @@ typedef enum aafStoredForm_e {
 typedef int32_t AAFTypeCategory_t;
 typedef enum _eAAFTypeCategory_e
 {
-	AAFTypeCatUnknown       = 0,  // can only occur in damaged files
-	AAFTypeCatInt           = 1,  // any integral type
-	AAFTypeCatCharacter     = 2,  // any character type
-	AAFTypeCatStrongObjRef  = 3,  // strong object reference
-	AAFTypeCatWeakObjRef    = 4,  // weak object reference
-	AAFTypeCatRename        = 5,  // renamed type
-	AAFTypeCatEnum          = 6,  // enumerated type
-	AAFTypeCatFixedArray    = 7,  // fixed-size array
-	AAFTypeCatVariableArray = 8,  // variably-sized array
-	AAFTypeCatSet           = 9,  // set of strong object references or
-	                              // set of weak object references
-	AAFTypeCatRecord        = 10, // a structured type
-	AAFTypeCatStream        = 11, // potentially huge amount of data
-	AAFTypeCatString        = 12, // null-terminated variably-sized
-	                              // array of characters
-	AAFTypeCatExtEnum       = 13, // extendible enumerated type
-	AAFTypeCatIndirect      = 14, // type must be determined at runtime
-	AAFTypeCatOpaque        = 15, // type can be determined at runtime
-	AAFTypeCatEncrypted     = 16  // type can be determined at runtime
-	                              // but bits are encrypted
+        AAFTypeCatUnknown       = 0,  // can only occur in damaged files
+        AAFTypeCatInt           = 1,  // any integral type
+        AAFTypeCatCharacter     = 2,  // any character type
+        AAFTypeCatStrongObjRef  = 3,  // strong object reference
+        AAFTypeCatWeakObjRef    = 4,  // weak object reference
+        AAFTypeCatRename        = 5,  // renamed type
+        AAFTypeCatEnum          = 6,  // enumerated type
+        AAFTypeCatFixedArray    = 7,  // fixed-size array
+        AAFTypeCatVariableArray = 8,  // variably-sized array
+        AAFTypeCatSet           = 9,  // set of strong object references or
+                                      // set of weak object references
+        AAFTypeCatRecord        = 10, // a structured type
+        AAFTypeCatStream        = 11, // potentially huge amount of data
+        AAFTypeCatString        = 12, // null-terminated variably-sized
+                                      // array of characters
+        AAFTypeCatExtEnum       = 13, // extendible enumerated type
+        AAFTypeCatIndirect      = 14, // type must be determined at runtime
+        AAFTypeCatOpaque        = 15, // type can be determined at runtime
+        AAFTypeCatEncrypted     = 16  // type can be determined at runtime
+                                      // but bits are encrypted
 } AAFTypeCategory_e;
 */
 
 /*
  * :: Types Definition
  * see Git nevali/aaf/ref-impl/include/ref-api/AAFTypes.h
-*/
+ */
 
 typedef unsigned char aafByte_t;
 
@@ -184,6 +184,8 @@ typedef struct _aafUID_t {
 
 static const aafUID_t AUID_NULL = { 0x00000000, 0x0000, 0x0000, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
 
+static const aafUID_t AAFUID_NULL = { 0x00000000, 0x0000, 0x0000, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+
 typedef struct _aafMobID_t {
 	uint8_t  SMPTELabel[12]; // 12-bytes of label prefix
 	uint8_t  length;
@@ -193,6 +195,8 @@ typedef struct _aafMobID_t {
 	aafUID_t material; // 16 bytes
 
 } aafMobID_t; // 32 bytes total
+
+static const aafMobID_t AAFMOBID_NULL = { { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, 0x00, 0x00, 0x00, 0x00, { 0x00000000, 0x0000, 0x0000, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } };
 
 typedef struct _aafIndirect_t {
 	/*
@@ -365,9 +369,7 @@ typedef struct _aafRGBAComponent_t {
 
 } aafRGBAComponent_t;
 
-//typedef aafRGBAComponent_t aafRGBALayout[8];
-
-static const aafUID_t AAFUID_NULL = { 0x00000000, 0x0000, 0x0000, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+// typedef aafRGBAComponent_t aafRGBALayout[8];
 
 /**
  * This structure map the first bytes in a **properties** stream
@@ -519,7 +521,7 @@ typedef struct aafStrongRefSetEntry_t {
 	 * of the first aafStrongRefSetEntry_t is used to
 	 * form the name of the first element in the set and so
 	 * on. The #_localKey is an insertion key.
-	*/
+	 */
 
 	uint32_t _localKey;
 
@@ -586,7 +588,7 @@ typedef struct aafStrongRefVectorEntry_t {
 	 * of the first aafStrongRefVectorEntry_t is used to
 	 * form the name of the first element in the vector and so
 	 * on. The #_localKey is an insertion key.
-	*/
+	 */
 
 	uint32_t _localKey;
 
@@ -677,15 +679,15 @@ typedef struct _WeakReferenceIndexHeader {
 /*
 typedef struct _aafIndirect_t
 {
-	int                     type;
-	size_t                  size;
-	aafByte_t              *data;
+        int                     type;
+        size_t                  size;
+        aafByte_t              *data;
 } aafIndirect_t;
 
 typedef struct _AAF_TaggedValueClass
 {
-	aafString_t             Name;
-	aafIndirect_t           Value;
+        aafString_t             Name;
+        aafIndirect_t           Value;
 } AAF_ObjTaggedValue;
 */
 

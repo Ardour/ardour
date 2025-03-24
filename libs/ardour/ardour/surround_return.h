@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_surround_return_h__
-#define __ardour_surround_return_h__
+#pragma once
 
 #ifdef HAVE_LV2_1_18_6
 #include <lv2/atom/atom.h>
@@ -35,6 +34,7 @@
 #endif
 
 #include "ardour/chan_mapping.h"
+#include "ardour/fixed_delay.h"
 #include "ardour/lufs_meter.h"
 #include "ardour/monitor_processor.h"
 #include "ardour/processor.h"
@@ -63,6 +63,14 @@ public:
 	void setup_export (std::string const&, samplepos_t, samplepos_t);
 	void finalize_export ();
 
+	size_t n_channels () const {
+		return _current_n_channels;
+	}
+
+	size_t total_n_channels (bool with_beds = true) const {
+		return _total_n_channels - (with_beds ? 0 : 10);
+	}
+
 	std::shared_ptr<LV2Plugin> surround_processor () const {
 		return _surround_processor;
 	}
@@ -70,6 +78,9 @@ public:
 	bool have_au_renderer () const {
 		return _have_au_renderer;
 	}
+
+	bool load_au_preset (size_t);
+	bool set_au_param (size_t, float);
 
 	std::shared_ptr<PBD::Controllable> binaural_render_controllable () const {
 		return _binaural_render_control;
@@ -96,6 +107,12 @@ public:
 
 	samplecnt_t signal_latency () const;
 
+	/* XXX this is only for testing */
+	void set_bed_mix (bool on, std::string const& ref, int* cmap = NULL);
+	void set_sync_and_align (bool on);
+	void set_ffoa (float);
+	void set_with_all_metadata (bool);
+
 	int set_state (XMLNode const&, int version);
 
 protected:
@@ -103,11 +120,14 @@ protected:
 
 private:
 	static const size_t max_object_id = 128; // happens to be the same as a constant in a well known surround system
-	static const size_t num_pan_parameters = 5; // X, Y, Z, Size, Snap
+	static const size_t num_pan_parameters = 8; // X, Y, Z, Size, Snap [ElevEn, Ramp, Zones]
 
 	void forge_int_msg (uint32_t obj_id, uint32_t key, int val, uint32_t key2 = 0, int val2 = 0);
 	void maybe_send_metadata (size_t id, pframes_t frame, pan_t const v[num_pan_parameters], bool force = false);
 	void evaluate (size_t id, std::shared_ptr<SurroundPannable> const&, timepos_t const& , pframes_t, bool force = false);
+
+	void reset_object_map ();
+	void latency_changed ();
 
 	std::shared_ptr<LV2Plugin> _surround_processor;
 
@@ -139,6 +159,17 @@ private:
 	samplecnt_t      _au_samples_processed;
 	float*           _au_data[12];
 
+	struct LIBARDOUR_API AUParameter {
+		AudioUnitParameterID id;
+		AudioUnitScope scope;
+		AudioUnitElement element;
+		std::string label;
+		float lower, upper, normal;
+	};
+
+	std::vector<AUParameter> _au_params;
+	std::vector<AUPreset>    _au_presets;
+
 	static OSStatus _render_callback(void*, AudioUnitRenderActionFlags*, const AudioTimeStamp*, UInt32, UInt32, AudioBufferList*);
 	OSStatus render_callback(AudioUnitRenderActionFlags*, const AudioTimeStamp*, UInt32, UInt32, AudioBufferList*);
 #endif
@@ -148,7 +179,9 @@ private:
 	uint8_t          _atom_buf[8192];
 	pan_t            _current_value[max_object_id][num_pan_parameters];
 	int              _current_render_mode[max_object_id];
-	size_t           _current_n_objects;
+	size_t           _channel_id_map[max_object_id];
+	size_t           _current_n_channels;
+	size_t           _total_n_channels;
 	MainOutputFormat _current_output_format;
 	BufferSet        _surround_bufs;
 	ChanMapping      _in_map;
@@ -157,9 +190,15 @@ private:
 	samplepos_t      _export_start;
 	samplepos_t      _export_end;
 	bool             _rolling;
+	bool             _with_bed;
+	bool             _sync_and_align;
+	bool             _with_all_metadata;
+	bool             _content_creation;
+	float            _ffoa;
+	std::string      _export_reference;
+	FixedDelay       _delaybuffers;
 	std::atomic<int> _flush;
 };
 
 } // namespace ARDOUR
 
-#endif /* __ardour_surround_return_h__ */

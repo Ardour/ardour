@@ -70,6 +70,9 @@ SurroundPannable::SurroundPannable (Session& s, uint32_t chn, Temporal::TimeDoma
 	, pan_size (new SurroundControllable  (s, Evoral::Parameter (PanSurroundSize, 0, chn), tdp))
 	, pan_snap (new SurroundControllable  (s, Evoral::Parameter (PanSurroundSnap, 0, chn), tdp))
 	, binaural_render_mode (new SurroundControllable (s, Evoral::Parameter (BinauralRenderMode, 0, chn), tdp))
+	, sur_elevation_enable (new SurroundControllable (s, Evoral::Parameter (PanSurroundElevationEnable, 0, chn), tdp))
+	, sur_zones (new SurroundControllable (s, Evoral::Parameter (PanSurroundZones, 0, chn), tdp))
+	, sur_ramp (new SurroundControllable (s, Evoral::Parameter (PanSurroundRamp, 0, chn), tdp))
 	, _auto_state (Off)
 	, _responding_to_control_auto_state_change (0)
 {
@@ -81,19 +84,22 @@ SurroundPannable::SurroundPannable (Session& s, uint32_t chn, Temporal::TimeDoma
 	add_control (pan_size);
 	add_control (pan_snap);
 	add_control (binaural_render_mode); // not automatable
+	add_control (sur_elevation_enable); // hidden, volatile
+	add_control (sur_zones); // hidden, volatile
+	add_control (sur_ramp); // hidden, volatile
 
 	/* all controls change state together */
-	pan_pos_x->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&SurroundPannable::control_auto_state_changed, this, _1));
-	pan_pos_y->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&SurroundPannable::control_auto_state_changed, this, _1));
-	pan_pos_z->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&SurroundPannable::control_auto_state_changed, this, _1));
-	pan_size->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&SurroundPannable::control_auto_state_changed, this, _1));
-	pan_snap->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&SurroundPannable::control_auto_state_changed, this, _1));
+	pan_pos_x->alist()->automation_state_changed.connect_same_thread (*this, std::bind (&SurroundPannable::control_auto_state_changed, this, _1));
+	pan_pos_y->alist()->automation_state_changed.connect_same_thread (*this, std::bind (&SurroundPannable::control_auto_state_changed, this, _1));
+	pan_pos_z->alist()->automation_state_changed.connect_same_thread (*this, std::bind (&SurroundPannable::control_auto_state_changed, this, _1));
+	pan_size->alist()->automation_state_changed.connect_same_thread (*this, std::bind (&SurroundPannable::control_auto_state_changed, this, _1));
+	pan_snap->alist()->automation_state_changed.connect_same_thread (*this, std::bind (&SurroundPannable::control_auto_state_changed, this, _1));
 
-	pan_pos_x->Changed.connect_same_thread (*this, boost::bind (&SurroundPannable::value_changed, this));
-	pan_pos_y->Changed.connect_same_thread (*this, boost::bind (&SurroundPannable::value_changed, this));
-	pan_pos_z->Changed.connect_same_thread (*this, boost::bind (&SurroundPannable::value_changed, this));
-	pan_size->Changed.connect_same_thread (*this, boost::bind (&SurroundPannable::value_changed, this));
-	pan_snap->Changed.connect_same_thread (*this, boost::bind (&SurroundPannable::value_changed, this));
+	pan_pos_x->Changed.connect_same_thread (*this, std::bind (&SurroundPannable::value_changed, this));
+	pan_pos_y->Changed.connect_same_thread (*this, std::bind (&SurroundPannable::value_changed, this));
+	pan_pos_z->Changed.connect_same_thread (*this, std::bind (&SurroundPannable::value_changed, this));
+	pan_size->Changed.connect_same_thread (*this, std::bind (&SurroundPannable::value_changed, this));
+	pan_snap->Changed.connect_same_thread (*this, std::bind (&SurroundPannable::value_changed, this));
 
 	setup_visual_links ();
 }
@@ -133,17 +139,20 @@ SurroundPannable::sync_visual_link_to (std::shared_ptr<SurroundPannable> other)
 void
 SurroundPannable::sync_auto_state_with (std::shared_ptr<SurroundPannable> other)
 {
-	other->pan_pos_x->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&SurroundPannable::control_auto_state_changed, this, _1));
+	other->pan_pos_x->alist()->automation_state_changed.connect_same_thread (*this, std::bind (&SurroundPannable::control_auto_state_changed, this, _1));
 }
 
 void
-SurroundPannable::foreach_pan_control (boost::function<void(std::shared_ptr<AutomationControl>)> f) const
+SurroundPannable::foreach_pan_control (std::function<void(std::shared_ptr<AutomationControl>)> f) const
 {
 	f (pan_pos_x);
 	f (pan_pos_y);
 	f (pan_pos_z);
 	f (pan_size);
 	f (pan_snap);
+	f (sur_elevation_enable);
+	f (sur_zones);
+	f (sur_ramp);
 }
 
 void

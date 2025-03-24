@@ -19,26 +19,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_track_meter_h__
-#define __ardour_gtk_track_meter_h__
+#pragma once
 
 #include <vector>
 
-#include <gtkmm/box.h>
-#include <gtkmm/adjustment.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/button.h>
-#include <gtkmm/table.h>
-#include <gtkmm/drawingarea.h>
+#include <ytkmm/box.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/button.h>
+#include <ytkmm/table.h>
+#include <ytkmm/drawingarea.h>
 
 #include "ardour/types.h"
 #include "ardour/chan_count.h"
 #include "ardour/session_handle.h"
 
 #include "widgets/fastmeter.h"
-#include "widgets/focus_entry.h"
-#include "widgets/slider_controller.h"
 
 #include "enums.h"
 
@@ -69,8 +66,8 @@ public:
 	void set_max_audio_meter_count (uint32_t cnt = 0);
 
 	/** Emitted in the GUI thread when a button is pressed over the meter */
-	PBD::Signal1<bool, GdkEventButton *> ButtonPress;
-	PBD::Signal1<bool, GdkEventButton *> ButtonRelease;
+	PBD::Signal<bool(GdkEventButton *)> ButtonPress;
+	PBD::Signal<bool(GdkEventButton *)> ButtonRelease;
 
 protected:
 	virtual void mtr_pack(Gtk::Widget &w) = 0;
@@ -147,5 +144,4 @@ protected:
 	void mtr_remove(Gtk::Widget &w);
 };
 
-#endif /* __ardour_gtk_track_meter_h__ */
 

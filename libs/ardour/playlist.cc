@@ -91,7 +91,7 @@ Playlist::make_property_quarks ()
 }
 
 RegionListProperty::RegionListProperty (Playlist& pl)
-	: SequenceProperty<std::list<std::shared_ptr<Region> > > (Properties::regions.property_id, boost::bind (&Playlist::update, &pl, _1))
+	: SequenceProperty<std::list<std::shared_ptr<Region> > > (Properties::regions.property_id, std::bind (&Playlist::update, &pl, _1))
 	, _playlist (pl)
 {
 }
@@ -355,10 +355,10 @@ Playlist::init (bool hide)
 	_end_space = timecnt_t (_type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime);
 	_playlist_shift_active = false;
 
-	_session.history ().BeginUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::begin_undo, this));
-	_session.history ().EndUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::end_undo, this));
+	_session.history ().BeginUndoRedo.connect_same_thread (*this, std::bind (&Playlist::begin_undo, this));
+	_session.history ().EndUndoRedo.connect_same_thread (*this, std::bind (&Playlist::end_undo, this));
 
-	ContentsChanged.connect_same_thread (*this, boost::bind (&Playlist::mark_session_dirty, this));
+	ContentsChanged.connect_same_thread (*this, std::bind (&Playlist::mark_session_dirty, this));
 }
 
 Playlist::~Playlist ()
@@ -798,8 +798,8 @@ Playlist::add_region_internal (std::shared_ptr<Region> region, timepos_t const &
 
 	notify_region_added (region);
 
-	region->PropertyChanged.connect_same_thread (region_state_changed_connections, boost::bind (&Playlist::region_changed_proxy, this, _1, std::weak_ptr<Region> (region)));
-	region->DropReferences.connect_same_thread (region_drop_references_connections, boost::bind (&Playlist::region_going_away, this, std::weak_ptr<Region> (region)));
+	region->PropertyChanged.connect_same_thread (region_state_changed_connections, std::bind (&Playlist::region_changed_proxy, this, _1, std::weak_ptr<Region> (region)));
+	region->DropReferences.connect_same_thread (region_drop_references_connections, std::bind (&Playlist::region_going_away, this, std::weak_ptr<Region> (region)));
 
 	/* do not handle property changes of newly added regions.
 	 * Otherwise this would trigger Playlist::notify_region_moved()
@@ -875,7 +875,7 @@ Playlist::remove_region_internal (std::shared_ptr<Region> region, ThawList& thaw
 }
 
 void
-Playlist::remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_gap, boost::function<void (timepos_t, timecnt_t)> gap_callback)
+Playlist::remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_gap, std::function<void (timepos_t, timecnt_t)> gap_callback)
 {
 	bool closed = false;
 
@@ -1700,6 +1700,7 @@ Playlist::region_changed (const PropertyChange& what_changed, std::shared_ptr<Re
 	our_interests.add (Properties::opaque);
 	our_interests.add (Properties::contents);
 	our_interests.add (Properties::time_domain);
+	our_interests.add (Properties::region_fx);
 
 	bounds.add (Properties::start);
 	bounds.add (Properties::length);
@@ -1988,16 +1989,16 @@ std::shared_ptr<RegionList>
 Playlist::regions_touched (timepos_t const & start, timepos_t const & end)
 {
 	RegionReadLock rlock (this);
-	return regions_touched_locked (start, end);
+	return regions_touched_locked (start, end, false);
 }
 
 std::shared_ptr<RegionList>
-Playlist::regions_touched_locked (timepos_t const & start, timepos_t const & end)
+Playlist::regions_touched_locked (timepos_t const & start, timepos_t const & end, bool with_tail)
 {
 	std::shared_ptr<RegionList> rlist (new RegionList);
 
 	for (auto & r : regions) {
-		if (r->coverage (start, end) != Temporal::OverlapNone) {
+		if (r->coverage (start, end, with_tail) != Temporal::OverlapNone) {
 			rlist->push_back (r);
 		}
 	}
@@ -2667,6 +2668,7 @@ Playlist::relayer ()
 		}
 
 		assert (divisions == 0 || end_division < divisions);
+		assert (start_division >= 0 && end_division >= start_division);
 
 		/* find the lowest layer that this region can go on */
 		size_t j = layers.size ();
@@ -3059,7 +3061,7 @@ Playlist::update_after_tempo_map_change ()
 }
 
 void
-Playlist::foreach_region (boost::function<void(std::shared_ptr<Region>)> func)
+Playlist::foreach_region (std::function<void(std::shared_ptr<Region>)> func)
 {
 	RegionReadLock rl (this);
 	for (auto & r : regions) {
@@ -3188,9 +3190,15 @@ Playlist::combine (const RegionList& rl, std::shared_ptr<Track>)
 	pair<timepos_t,timepos_t> extent = pl->get_extent();
 	timepos_t zero (_type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime);
 
+	/* This may require regionFx processing, via AudioRegion::read_at */
+	ARDOUR::ProcessThread* pt = new ProcessThread ();
+	pt->get_buffers ();
 	for (uint32_t chn = 0; chn < channels; ++chn) {
 		sources.push_back (SourceFactory::createFromPlaylist (_type, _session, pl, id(), parent_name, chn, zero, extent.second, false, false));
 	}
+	pt->drop_buffers ();
+	delete pt;
+
 
 	/* now a new whole-file region using the list of sources */
 
@@ -3411,17 +3419,14 @@ Playlist::fade_range (list<TimelineRange>& ranges)
 {
 	ThawList thawlist;
 	RegionReadLock rlock (this);
-	for (list<TimelineRange>::iterator r = ranges.begin(); r != ranges.end(); ) {
-		list<TimelineRange>::iterator tmpr = r;
-		++tmpr;
-		for (RegionList::const_iterator i = regions.begin (); i != regions.end ();) {
-			RegionList::const_iterator tmpi = i;
-			++tmpi;
-			thawlist.add (*i);
-			(*i)->fade_range ((*r).start().samples(), (*r).end().samples());
-			i = tmpi;
+	/* add regions only once, not for each range */
+	for (auto const& r : regions) {
+		thawlist.add (r);
+	}
+	for (auto const& t: ranges) {
+		for (auto const& r : regions) {
+			r->fade_range (t.start().samples(), t.end().samples());
 		}
-		r = tmpr;
 	}
 	rlock.release ();
 	thawlist.release ();

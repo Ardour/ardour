@@ -26,10 +26,12 @@
 #include <cmath>
 
 #include <sigc++/bind.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/separator.h>
-#include <gtkmm/table.h>
+
+#include <ytkmm/alignment.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/separator.h>
+#include <ytkmm/table.h>
 
 #include "pbd/error.h"
 #include "pbd/convert.h"

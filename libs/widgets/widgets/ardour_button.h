@@ -23,7 +23,7 @@
 #include <list>
 #include <stdint.h>
 
-#include <gtkmm/action.h>
+#include <ytkmm/action.h>
 
 #include "pbd/signals.h"
 #include "gtkmm2ext/activatable.h"
@@ -39,15 +39,16 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 {
 	public:
 	enum Element {
-		Edge = 0x1,
-		Body = 0x2,
-		Text = 0x4,
-		Indicator = 0x8,
-		ColorBox = 0x18,  //also sets Indicator
-		Menu = 0x20,
-		Inactive = 0x40, // no _action is defined AND state is not used
-		VectorIcon = 0x80,
-		IconRenderCallback = 0x100,
+		Edge               = 0x001,
+		Body               = 0x002,
+		Text               = 0x004,
+		Indicator          = 0x008,
+		ColorBox           = 0x018, // also sets Indicator
+		Menu               = 0x020,
+		MetaMenu           = 0x040,
+		Inactive           = 0x080, // no _action is defined AND state is not used
+		VectorIcon         = 0x100,
+		IconRenderCallback = 0x200,
 	};
 
 	typedef void (* rendercallback_t) (cairo_t*, int, int, uint32_t, void*);
@@ -61,13 +62,17 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	virtual ~ArdourButton ();
 
 	enum Tweaks {
-		Square = 0x1,
-		TrackHeader = 0x2,
-		OccasionalText = 0x4,
-		OccasionalLED = 0x8,
-		ForceBoxy = 0x10,
-		ForceFlat = 0x20,
+		Square         = 0x01,
+		TrackHeader    = 0x02,
+		OccasionalText = 0x04,
+		OccasionalLED  = 0x08,
+		ForceBoxy      = 0x10,
+		ForceFlat      = 0x20,
+		ExpandtoSquare = 0x40,
 	};
+
+	static Tweaks default_tweaks;
+	static void set_default_tweaks (Tweaks t) { default_tweaks = t; }
 
 	Tweaks tweaks() const { return _tweaks; }
 	void set_tweaks (Tweaks);
@@ -82,6 +87,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	Element elements() const { return _elements; }
 	void set_elements (Element);
 	void add_elements (Element);
+	void remove_elements (Element);
 
 	ArdourIcon::Icon icon() const { return _icon; }
 	void set_icon (ArdourIcon::Icon);
@@ -108,8 +114,10 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
      * empty string to return to the default behavior which uses
      * the currently displayed text for measurement. */
 	void set_sizing_text (std::string const&);
+	void add_sizing_text (std::string const&);
 	void set_sizing_texts (std::vector<std::string> const&);
 
+	bool is_led_click (GdkEventButton*);
 	sigc::signal<void, GdkEventButton*> signal_led_clicked;
 	sigc::signal<void> signal_clicked;
 
@@ -121,6 +129,8 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
+	bool on_touch_begin_event (GdkEventTouch*);
+	bool on_touch_end_event (GdkEventTouch*);
 
 	void set_image (const Glib::RefPtr<Gdk::Pixbuf>&);
 
@@ -197,6 +207,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 
 	uint32_t outline_color;
 
+	std::optional<int> _squaresize;
 
 	cairo_pattern_t* convex_pattern;
 	cairo_pattern_t* concave_pattern;

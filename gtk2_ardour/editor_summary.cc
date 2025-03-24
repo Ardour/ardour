@@ -25,8 +25,8 @@
 
 #include "ardour/session.h"
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "context_menu_helper.h"
 #include "streamview.h"
@@ -114,11 +114,11 @@ EditorSummary::set_session (Session* s)
 	 */
 
 	if (_session) {
-		Region::RegionsPropertyChanged.connect (region_property_connection, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context());
-		PresentationInfo::Change.connect (route_ctrl_id_connection, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context());
-		_editor->playhead_cursor()->PositionChanged.connect (position_connection, invalidator (*this), boost::bind (&EditorSummary::playhead_position_changed, this, _1), gui_context());
-		_session->StartTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context());
-		_session->EndTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context());
+		Region::RegionsPropertyChanged.connect (region_property_connection, invalidator (*this), std::bind (&EditorSummary::set_background_dirty, this), gui_context());
+		PresentationInfo::Change.connect (route_ctrl_id_connection, invalidator (*this), std::bind (&EditorSummary::set_background_dirty, this), gui_context());
+		_editor->playhead_cursor()->PositionChanged.connect (position_connection, invalidator (*this), std::bind (&EditorSummary::playhead_position_changed, this, _1), gui_context());
+		_session->StartTimeChanged.connect (_session_connections, invalidator (*this), std::bind (&EditorSummary::set_background_dirty, this), gui_context());
+		_session->EndTimeChanged.connect (_session_connections, invalidator (*this), std::bind (&EditorSummary::set_background_dirty, this), gui_context());
 		_editor->selection->RegionsChanged.connect (sigc::mem_fun(*this, &EditorSummary::set_background_dirty));
 	}
 
@@ -960,10 +960,10 @@ EditorSummary::routes_added (list<RouteTimeAxisView*> const & r)
 {
 	for (list<RouteTimeAxisView*>::const_iterator i = r.begin(); i != r.end(); ++i) {
 		/* Connect to the relevant signal for the route so that we know when its colour has changed */
-		(*i)->route()->presentation_info().PropertyChanged.connect (*this, invalidator (*this), boost::bind (&EditorSummary::route_gui_changed, this, _1), gui_context ());
+		(*i)->route()->presentation_info().PropertyChanged.connect (*this, invalidator (*this), std::bind (&EditorSummary::route_gui_changed, this, _1), gui_context ());
 		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> ((*i)->route ());
 		if (tr) {
-			tr->PlaylistChanged.connect (*this, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context ());
+			tr->PlaylistChanged.connect (*this, invalidator (*this), std::bind (&EditorSummary::set_background_dirty, this), gui_context ());
 		}
 	}
 

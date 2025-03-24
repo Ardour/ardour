@@ -16,27 +16,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_trigger_page_h__
-#define __gtk_ardour_trigger_page_h__
+#pragma once
 
-#include <gtkmm/box.h>
+#include <ytkmm/box.h>
 
 #include "ardour/session_handle.h"
 
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/cairo_widget.h"
 
+#include "widgets/metabutton.h"
 #include "widgets/pane.h"
 #include "widgets/tabbable.h"
 
+#include "application_bar.h"
 #include "audio_region_operations_box.h"
-#include "audio_region_properties_box.h"
 #include "audio_trigger_properties_box.h"
+#include "axis_provider.h"
 #include "cuebox_ui.h"
 #include "fitted_canvas_widget.h"
-#include "midi_clip_editor.h"
-#include "midi_region_operations_box.h"
-#include "midi_region_properties_box.h"
 #include "midi_trigger_properties_box.h"
 #include "route_processor_selection.h"
 #include "slot_properties_box.h"
@@ -47,6 +45,7 @@
 #include "trigger_master.h"
 
 class TriggerStrip;
+class Pianoroll;
 
 class TriggerPage : public ArdourWidgets::Tabbable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList, public AxisViewProvider
 {
@@ -62,6 +61,8 @@ public:
 	Gtk::Window* use_own_window (bool and_fill_it);
 
 	RouteProcessorSelection& selection() { return _selection; }
+
+	void focus_on_clock();
 
 private:
 	void load_bindings ();
@@ -80,10 +81,12 @@ private:
 	void pi_property_changed (PBD::PropertyChange const&);
 	void stripable_property_changed (PBD::PropertyChange const&, std::weak_ptr<ARDOUR::Stripable>);
 
+	void showhide_att_bottom (bool);
+
 	void rec_state_changed ();
 	void rec_state_clicked ();
 
-	void add_sidebar_page (std::string const&, Gtk::Widget&);
+	void add_sidebar_page (std::string const&, std::string const&, Gtk::Widget&);
 
 	bool strip_button_release_event (GdkEventButton*, TriggerStrip*);
 	bool no_strip_button_event (GdkEventButton*);
@@ -97,33 +100,39 @@ private:
 	AxisView* axis_view_by_control (std::shared_ptr<ARDOUR::AutomationControl>) const;
 
 	void                      selection_changed ();
+	void                      rec_enable_changed (ARDOUR::Trigger const *);
 	PBD::ScopedConnectionList editor_connections;
 
 	gint start_updating ();
 	gint stop_updating ();
 	void fast_update_strips ();
 
-	Gtkmm2ext::Bindings* bindings;
-	Gtk::VBox            _content;
+	ApplicationBar _application_bar;
 
-	ArdourWidgets::HPane _pane_upper;
-	Gtk::HBox            _strip_group_box;
-	Gtk::ScrolledWindow  _strip_scroller;
-	Gtk::HBox            _strip_packer;
-	Gtk::EventBox        _no_strips;
-	Gtk::Alignment       _cue_area_frame;
-	Gtk::VBox            _cue_area_box;
-	Gtk::HBox            _parameter_box;
-	Gtk::VBox            _sidebar_vbox;
-	Gtk::Notebook        _sidebar_notebook;
-	TriggerClipPicker    _trigger_clip_picker;
-	TriggerSourceList    _trigger_source_list;
-	TriggerRegionList    _trigger_region_list;
-	TriggerRouteList     _trigger_route_list;
+	Gtkmm2ext::Bindings* bindings;
+
+	Gtk::HBox                 _strip_group_box;
+	Gtk::ScrolledWindow       _strip_scroller;
+	Gtk::HBox                 _strip_packer;
+	Gtk::EventBox             _no_strips;
+	Gtk::Alignment            _cue_area_frame;
+	Gtk::VBox                 _cue_area_box;
+	Gtk::HBox                 _parameter_box;
+	Gtk::VBox                 _sidebar_vbox;
+	ArdourWidgets::MetaButton _sidebar_pager1;
+	ArdourWidgets::MetaButton _sidebar_pager2;
+	Gtk::Notebook             _sidebar_notebook;
+	TriggerClipPicker         _trigger_clip_picker;
+	TriggerSourceList         _trigger_source_list;
+	TriggerRegionList         _trigger_region_list;
+	TriggerRouteList          _trigger_route_list;
+	Gtk::Table                 table;
 
 	CueBoxWidget       _cue_box;
 	FittedCanvasWidget _master_widget;
 	CueMaster          _master;
+
+	bool _show_bottom_pane;
 
 	SlotPropertiesBox _slot_prop_box;
 
@@ -133,14 +142,13 @@ private:
 #if REGION_PROPERTIES_BOX_TODO
 	AudioRegionOperationsBox  _audio_ops_box;
 	AudioClipEditorBox        _audio_trim_box;
-
-	MidiRegionOperationsBox  _midi_ops_box;
-	MidiClipEditorBox        _midi_trim_box;
 #endif
+
+	Pianoroll*           _midi_editor;
 
 	RouteProcessorSelection  _selection;
 	std::list<TriggerStrip*> _strips;
 	sigc::connection         _fast_screen_update_connection;
+	int                       clip_editor_column;
 };
 
-#endif /* __gtk_ardour_trigger_page_h__ */

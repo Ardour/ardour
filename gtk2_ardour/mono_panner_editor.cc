@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/table.h>
+#include <ytkmm/table.h>
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/gtk_ui.h"
@@ -60,8 +60,8 @@ MonoPannerEditor::MonoPannerEditor (MonoPanner* p)
 	_right.set_increments (1, 10);
 	_right.set_range (0, 100);
 
-	_panner->get_controllable()->Changed.connect (_connections, invalidator (*this), boost::bind (&MonoPannerEditor::update_editor, this), gui_context ());
-	_panner->DropReferences.connect (_connections, invalidator (*this), boost::bind (&MonoPannerEditor::panner_going_away, this), gui_context ());
+	_panner->get_controllable()->Changed.connect (_connections, invalidator (*this), std::bind (&MonoPannerEditor::update_editor, this), gui_context ());
+	_panner->DropReferences.connect (_connections, invalidator (*this), std::bind (&MonoPannerEditor::panner_going_away, this), gui_context ());
 	_left.signal_value_changed().connect (sigc::mem_fun (*this, &MonoPannerEditor::left_changed));
 	_right.signal_value_changed().connect (sigc::mem_fun (*this, &MonoPannerEditor::right_changed));
 

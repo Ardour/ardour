@@ -16,10 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_event_ring_buffer_h__
-#define __ardour_event_ring_buffer_h__
+#pragma once
 
 #include <algorithm>
+#include <cassert>
 #include <iostream>
 
 #include "pbd/ringbufferNPT.h"
@@ -132,4 +132,3 @@ EventRingBuffer<Time>::write(Time time, Evoral::EventType type, uint32_t size, c
 
 } // namespace ARDOUR
 
-#endif // __ardour_event_ring_buffer_h__

@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtkardour_luainstance_h__
-#define __gtkardour_luainstance_h__
+#pragma once
 
 #include <bitset>
 
@@ -60,7 +59,7 @@ public:
 	const std::string& name () const { return _name; }
 	ActionHook signals () const { return _signals; }
 	bool lua_slot (std::string&, std::string&, ActionHook&, ARDOUR::LuaScriptParamList&);
-	PBD::Signal0<void> drop_callback;
+	PBD::Signal<void()> drop_callback;
 
 protected:
 	void session_going_away ();
@@ -84,20 +83,8 @@ private:
 
 	PBD::ScopedConnectionList _connections;
 
-	template <typename T, typename S> void connect_0 (enum LuaSignal::LuaSignal, T, S*);
-	template <typename T> void proxy_0 (enum LuaSignal::LuaSignal, T);
-
-	template <typename T, typename C1> void connect_1 (enum LuaSignal::LuaSignal, T, PBD::Signal1<void, C1>*);
-	template <typename T, typename C1> void proxy_1 (enum LuaSignal::LuaSignal, T, C1);
-
-	template <typename T, typename C1, typename C2> void connect_2 (enum LuaSignal::LuaSignal, T, PBD::Signal2<void, C1, C2>*);
-	template <typename T, typename C1, typename C2> void proxy_2 (enum LuaSignal::LuaSignal, T, C1, C2);
-
-	template <typename T, typename C1, typename C2, typename C3> void connect_3 (enum LuaSignal::LuaSignal, T, PBD::Signal3<void, C1, C2, C3>*);
-	template <typename T, typename C1, typename C2, typename C3> void proxy_3 (enum LuaSignal::LuaSignal, T, C1, C2, C3);
-
-	template <typename T, typename C1, typename C2, typename C3, typename C4> void connect_4 (enum LuaSignal::LuaSignal, T, PBD::Signal4<void, C1, C2, C3, C4>*);
-	template <typename T, typename C1, typename C2, typename C3, typename C4> void proxy_4 (enum LuaSignal::LuaSignal, T, C1, C2, C3, C4);
+	template <typename T, typename... C> void connect (enum LuaSignal::LuaSignal, T, PBD::Signal<void(C...)>*);
+	template <typename T, typename... C> void proxy (enum LuaSignal::LuaSignal, T, C...);
 };
 
 typedef std::shared_ptr<LuaCallback> LuaCallbackPtr;
@@ -151,10 +138,10 @@ public:
 	bool lua_slot (const PBD::ID&, std::string&, std::string&, ActionHook&, ARDOUR::LuaScriptParamList&);
 	sigc::signal<void,PBD::ID,std::string,ActionHook> SlotChanged;
 
-	static PBD::Signal0<void> LuaTimerS; // deci-seconds (Timer every 1s)
-	static PBD::Signal0<void> LuaTimerDS; // deci-seconds (Timer every .1s)
-	static PBD::Signal0<void> SetSession; // emitted when a session is loaded
-	static PBD::Signal0<void> SelectionChanged; // emitted when editor selection changes
+	static PBD::Signal<void()> LuaTimerS; // deci-seconds (Timer every 1s)
+	static PBD::Signal<void()> LuaTimerDS; // deci-seconds (Timer every .1s)
+	static PBD::Signal<void()> SetSession; // emitted when a session is loaded
+	static PBD::Signal<void()> SelectionChanged; // emitted when editor selection changes
 
 private:
 	LuaInstance();
@@ -191,4 +178,3 @@ private:
 
 };
 
-#endif

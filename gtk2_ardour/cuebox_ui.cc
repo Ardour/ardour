@@ -29,8 +29,8 @@
 #include "canvas/polygon.h"
 #include "canvas/text.h"
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/colors.h"
@@ -84,7 +84,7 @@ CueEntry::CueEntry (Item* item, uint64_t cue_index)
 	set_tooltip (_("Click to launch all clips in this row\nRight-click to select properties for all clips in this row"));
 
 	/* watch for cue-recording state */
-	TriggerBox::CueRecordingChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&CueEntry::rec_state_changed, this), gui_context ());
+	TriggerBox::CueRecordingChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&CueEntry::rec_state_changed, this), gui_context ());
 
 	/* watch for change in theme */
 	UIConfiguration::instance ().ParameterChanged.connect (sigc::mem_fun (*this, &CueEntry::ui_parameter_changed));

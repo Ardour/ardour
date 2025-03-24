@@ -26,17 +26,17 @@
 #include <algorithm>
 #include <iostream>
 
-#include <gtk/gtkpaned.h>
-#include <gtk/gtk.h>
+#include <ytk/gtkpaned.h>
+#include <ytk/ytk.h>
 
-#include <gtkmm/widget.h>
-#include <gtkmm/button.h>
-#include <gtkmm/window.h>
-#include <gtkmm/paned.h>
-#include <gtkmm/label.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/tooltip.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/button.h>
+#include <ytkmm/window.h>
+#include <ytkmm/paned.h>
+#include <ytkmm/label.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/tooltip.h>
+#include <ytkmm/menuitem.h>
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/persistent_tooltip.h"
@@ -194,10 +194,10 @@ Gtkmm2ext::pixbuf_from_string(const string& name, const Pango::FontDescription& 
 		int width, height;
 		pixel_size (name, font, width, height);
 		if (clip_width <= 0) {
-			clip_width = width - clip_width;
+			clip_width = width - clip_width;    /* this is an addition because clip_width is negative */
 		}
 		if (clip_height <= 0) {
-			clip_height = height - clip_height;
+			clip_height = height - clip_height; /* this is an addition because clip_height is negative */
 		}
 	}
 
@@ -589,6 +589,12 @@ Gtkmm2ext::container_clear (Gtk::Container& c, bool and_delete)
 }
 
 void
+Gtkmm2ext::rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double /*r*/)
+{
+	cairo_rectangle (context->cobj(), x, y, w, h);
+}
+
+void
 Gtkmm2ext::rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r)
 {
 	rounded_rectangle (context->cobj(), x, y, w, h, r);
@@ -629,6 +635,12 @@ void
 Gtkmm2ext::rounded_right_half_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r)
 {
 	rounded_right_half_rectangle (context->cobj(), x, y, w, h, r);
+}
+
+void
+Gtkmm2ext::rectangle (cairo_t* cr, double x, double y, double w, double h, double /*r*/)
+{
+	cairo_rectangle (cr, x, y, w, h);
 }
 
 void

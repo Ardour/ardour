@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_midi_buffer_h__
-#define __ardour_midi_buffer_h__
+#pragma once
 
 #include "evoral/Event.h"
 #include "evoral/EventSink.h"
@@ -59,6 +58,7 @@ public:
 	void resize(size_t);
 	size_t size() const { return _size; }
 	bool empty() const { return _size == 0; }
+	bool silent_data () const { return _size == 0; }
 
 	bool insert_event(const Evoral::Event<TimeType>& event);
 	bool merge_in_place(const MidiBuffer &other);
@@ -70,11 +70,17 @@ public:
 		class iterator_base
 	{
 	public:
-		iterator_base<BufferType, EventType>(BufferType& b, samplecnt_t o)
-			: buffer(&b), offset(o) {}
+		iterator_base (BufferType& b, samplecnt_t o)
+		        : buffer (&b)
+		        , offset (o)
+		{
+		}
 
-		iterator_base<BufferType, EventType>(const iterator_base<BufferType,EventType>& o)
-			: buffer (o.buffer), offset(o.offset) {}
+		iterator_base (const iterator_base<BufferType, EventType>& o)
+		        : buffer (o.buffer)
+		        , offset (o.offset)
+		{
+		}
 
 		inline iterator_base<BufferType,EventType> operator= (const iterator_base<BufferType,EventType>& o) {
 			if (&o != this) {
@@ -210,4 +216,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif // __ardour_midi_buffer_h__

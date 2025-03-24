@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/action.h>
-#include <gtkmm/private/action_p.h>
+#include <ytkmm/action.h>
+#include <ytkmm/private/action_p.h>
 
 
 // -*- c++ -*-
@@ -29,13 +29,13 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/toolitem.h>
-#include <gtkmm/image.h>
-#include <gtkmm/widget.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/toolitem.h>
+#include <ytkmm/image.h>
+#include <ytkmm/widget.h>
 
 typedef Gtk::Action Action; 
 

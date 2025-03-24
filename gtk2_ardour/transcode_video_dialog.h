@@ -15,20 +15,19 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __gtk_ardour_transcode_video_dialog_h__
-#define __gtk_ardour_transcode_video_dialog_h__
+#pragma once
 
 #include <string>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/label.h>
-#include <gtkmm/progressbar.h>
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/label.h>
+#include <ytkmm/progressbar.h>
+#include <ytkmm/spinbutton.h>
 
 #include "ardour/template_utils.h"
 #include "ardour/types.h"
@@ -96,7 +95,7 @@ private:
 	std::string infn;
 	double      m_aspect;
 
-	PBD::Signal0<void> StartNextStage;
+	PBD::Signal<void()> StartNextStage;
 
 	TranscodeFfmpeg* transcoder;
 
@@ -126,4 +125,3 @@ private:
 	Gtk::CheckButton  debug_checkbox;
 };
 
-#endif /* __gtk_ardour_transcode_video_dialog_h__ */

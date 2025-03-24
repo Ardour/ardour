@@ -652,7 +652,7 @@ PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 		if (ev->type == GDK_2BUTTON_PRESS) {
 			MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&_view.trackview());
 			if (mtv) {
-				mtv->set_note_range (MidiStreamView::ContentsRange, false);
+				mtv->set_visibility_note_range (MidiStreamView::ContentsRange, false);
 			}
 			return true;
 		}
@@ -674,9 +674,8 @@ PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 				_adj.set_page_size (127.0);
 				_adj.value_changed ();
 				queue_draw ();
-				return false;
 			}
-			return false;
+			return true;
 		} else if (ev->button == 2 && Keyboard::no_modifiers_active (ev->state)) {
 			SetNoteSelection (note); // EMIT SIGNAL
 			return true;

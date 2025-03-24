@@ -24,17 +24,17 @@
 
 #include <glib/gstdio.h>
 
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/progressbar.h>
-#include <gtkmm/separator.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/textview.h>
-#include <gtkmm/treeiter.h>
-#include <gtkmm/treeview.h>
+#include <ytkmm/filechooserdialog.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/progressbar.h>
+#include <ytkmm/separator.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/treeiter.h>
+#include <ytkmm/treeview.h>
 
 #include "pbd/basename.h"
 #include "pbd/error.h"
@@ -69,7 +69,7 @@ public:
 	virtual void init () = 0;
 	void handle_dirty_description ();
 
-	PBD::Signal0<void> TemplatesImported;
+	PBD::Signal<void()> TemplatesImported;
 
 protected:
 	TemplateManager ();
@@ -208,8 +208,8 @@ TemplateDialog::TemplateDialog ()
 	session_tm->init ();
 	route_tm->init ();
 
-	session_tm->TemplatesImported.connect (*this, invalidator (*this), boost::bind (&RouteTemplateManager::init, route_tm), gui_context ());
-	route_tm->TemplatesImported.connect (*this, invalidator (*this), boost::bind (&SessionTemplateManager::init, session_tm), gui_context ());
+	session_tm->TemplatesImported.connect (*this, invalidator (*this), std::bind (&RouteTemplateManager::init, route_tm), gui_context ());
+	route_tm->TemplatesImported.connect (*this, invalidator (*this), std::bind (&SessionTemplateManager::init, session_tm), gui_context ());
 
 	signal_hide().connect (sigc::mem_fun (session_tm, &TemplateManager::handle_dirty_description));
 	signal_hide().connect (sigc::mem_fun (route_tm, &TemplateManager::handle_dirty_description));

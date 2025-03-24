@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_value_as_string_h__
-#define __ardour_value_as_string_h__
+#pragma once
 
 #include <stddef.h>
 
@@ -53,7 +52,7 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 	// Value is not a scale point, print it normally
 	if (desc.unit == ARDOUR::ParameterDescriptor::MIDI_NOTE) {
 		snprintf(buf, sizeof(buf), "%s", ParameterDescriptor::midi_note_name (rint(v)).c_str());
-	} else if (desc.type == GainAutomation || desc.type == BusSendLevel || desc.type == TrimAutomation || desc.type == EnvelopeAutomation || desc.type == MainOutVolume || desc.type == InsertReturnLevel) {
+	} else if (desc.type == GainAutomation || desc.type == BusSendLevel || desc.type == TrimAutomation || desc.type == EnvelopeAutomation || desc.type == MainOutVolume || desc.type == SurroundSendLevel || desc.type == InsertReturnLevel) {
 #ifdef PLATFORM_WINDOWS
 		if (v < GAIN_COEFF_SMALL) {
 			snprintf(buf, sizeof(buf), "-inf dB");
@@ -93,4 +92,3 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 
 }  // namespace ARDOUR
 
-#endif /* __ardour_value_as_string_h__ */

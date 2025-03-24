@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/accellabel.h>
-#include <gtkmm/private/accellabel_p.h>
+#include <ytkmm/accellabel.h>
+#include <ytkmm/private/accellabel_p.h>
 
 
 // -*- c++ -*-
@@ -29,7 +29,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <glibmm/wrap.h>
 
 namespace Gtk

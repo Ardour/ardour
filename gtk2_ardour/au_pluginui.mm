@@ -22,9 +22,9 @@
 #define Marker FuckYouAppleAndYourLackOfNameSpaces
 
 #include <sys/time.h>
-#include <gtkmm/button.h>
-#include <gtkmm/comboboxtext.h>
-#include <gdk/gdkquartz.h>
+#include <ytkmm/button.h>
+#include <ytkmm/comboboxtext.h>
+#include <ydk/gdkquartz.h>
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
@@ -73,11 +73,6 @@
 
 #include "gtk2ardour-config.h"
 
-#ifdef COREAUDIO105
-#define ArdourCloseComponent CloseComponent
-#else
-#define ArdourCloseComponent AudioComponentInstanceDispose
-#endif
 using namespace ARDOUR;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -503,7 +498,7 @@ AUPluginUI::~AUPluginUI ()
 #endif
 
 	if (editView) {
-		ArdourCloseComponent (editView);
+		AudioComponentInstanceDispose (editView);
 	}
 
 	if (au_view) {
@@ -972,14 +967,14 @@ AUPluginUI::create_carbon_view ()
 
 	if ((err = CreateNewWindow(kUtilityWindowClass, attr, &r, &carbon_window)) != noErr) {
 		error << string_compose (_("AUPluginUI: cannot create carbon window (err: %1)"), err) << endmsg;
-	        ArdourCloseComponent (editView);
+	        AudioComponentInstanceDispose (editView);
 		return -1;
 	}
 
 	if ((err = GetRootControl(carbon_window, &root_control)) != noErr) {
 		error << string_compose (_("AUPlugin: cannot get root control of carbon window (err: %1)"), err) << endmsg;
 		DisposeWindow (carbon_window);
-	        ArdourCloseComponent (editView);
+	        AudioComponentInstanceDispose (editView);
 		return -1;
 	}
 
@@ -990,7 +985,7 @@ AUPluginUI::create_carbon_view ()
 	if ((err = AudioUnitCarbonViewCreate (editView, *au->get_au(), carbon_window, root_control, &location, &size, &viewPane)) != noErr) {
 		error << string_compose (_("AUPluginUI: cannot create carbon plugin view (err: %1)"), err) << endmsg;
 		DisposeWindow (carbon_window);
-	        ArdourCloseComponent (editView);
+	        AudioComponentInstanceDispose (editView);
 		return -1;
 	}
 

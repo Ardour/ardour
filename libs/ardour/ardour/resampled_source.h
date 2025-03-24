@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_resampled_source_h__
-#define __ardour_resampled_source_h__
+#pragma once
 
 #include <samplerate.h>
 
@@ -63,4 +62,3 @@ class LIBARDOUR_API ResampledImportableSource : public ImportableSource
 
 }
 
-#endif /* __ardour_resampled_source_h__ */

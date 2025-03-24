@@ -17,8 +17,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef __ardour_spline_h__
-#define __ardour_spline_h__
+#pragma once
+
+#include "ardour/libardour_visibility.h"
+
+#include <cstdint>
 
 #ifdef __cplusplus
 extern "C" {
@@ -86,4 +89,3 @@ struct LIBARDOUR_API _spline
 }
 #endif
 
-#endif /* __ardour_spline_h__ */

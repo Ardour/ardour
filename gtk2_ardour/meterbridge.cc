@@ -25,8 +25,8 @@
 #include <map>
 #include <sigc++/bind.h>
 
-#include <gtkmm/accelmap.h>
-#include <gtkmm/comboboxtext.h>
+#include <ytkmm/accelmap.h>
+#include <ytkmm/comboboxtext.h>
 
 #include <glibmm/threads.h>
 
@@ -134,10 +134,10 @@ Meterbridge::Meterbridge ()
 
 	signal_delete_event().connect (sigc::mem_fun (*this, &Meterbridge::hide_window));
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
-	MeterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Meterbridge::remove_strip, this, _1), gui_context());
-	MeterStrip::MetricChanged.connect (*this, invalidator (*this), boost::bind(&Meterbridge::sync_order_keys, this), gui_context());
-	MeterStrip::ConfigurationChanged.connect (*this, invalidator (*this), boost::bind(&Meterbridge::queue_resize, this), gui_context());
-	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&Meterbridge::resync_order, this, _1), gui_context());
+	MeterStrip::CatchDeletion.connect (*this, invalidator (*this), std::bind (&Meterbridge::remove_strip, this, _1), gui_context());
+	MeterStrip::MetricChanged.connect (*this, invalidator (*this), std::bind(&Meterbridge::sync_order_keys, this), gui_context());
+	MeterStrip::ConfigurationChanged.connect (*this, invalidator (*this), std::bind(&Meterbridge::queue_resize, this), gui_context());
+	PresentationInfo::Change.connect (*this, invalidator (*this), std::bind (&Meterbridge::resync_order, this, _1), gui_context());
 
 	/* work around ScrolledWindowViewport alignment mess Part one */
 	Gtk::HBox * yspc = manage (new Gtk::HBox());
@@ -427,9 +427,9 @@ Meterbridge::set_session (Session* s)
 	copy.sort (Stripable::Sorter (true));
 	add_strips (copy);
 
-	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::add_strips, this, _1), gui_context());
-	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::update_title, this), gui_context());
-	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::update_title, this), gui_context());
+	_session->RouteAdded.connect (_session_connections, invalidator (*this), std::bind (&Meterbridge::add_strips, this, _1), gui_context());
+	_session->DirtyChanged.connect (_session_connections, invalidator (*this), std::bind (&Meterbridge::update_title, this), gui_context());
+	_session->StateSaved.connect (_session_connections, invalidator (*this), std::bind (&Meterbridge::update_title, this), gui_context());
 	_session->config.ParameterChanged.connect (*this, invalidator (*this), ui_bind (&Meterbridge::parameter_changed, this, _1), gui_context());
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&Meterbridge::parameter_changed, this, _1), gui_context());
 
@@ -542,7 +542,7 @@ Meterbridge::add_strips (RouteList& routes)
 
 		strip = new MeterStrip (_session, route);
 		strips.push_back (MeterBridgeStrip(strip));
-		route->active_changed.connect (*this, invalidator (*this), boost::bind (&Meterbridge::sync_order_keys, this), gui_context ());
+		route->active_changed.connect (*this, invalidator (*this), std::bind (&Meterbridge::sync_order_keys, this), gui_context ());
 
 		meterarea.pack_start (*strip, false, false);
 		strip->show();

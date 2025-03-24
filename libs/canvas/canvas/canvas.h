@@ -29,9 +29,9 @@
 
 #include <set>
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/eventbox.h>
-#include <gdkmm/window.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/eventbox.h>
+#include <ydkmm/window.h>
 
 #include <cairomm/context.h>
 #include <cairomm/surface.h>
@@ -188,6 +188,9 @@ public:
 
 	void set_debug_render (bool yn) { _debug_render = yn; }
 	bool debug_render() const { return _debug_render; }
+
+	bool item_save_restore;
+
 protected:
 	Root             _root;
 	uint32_t         _queue_draw_frozen;
@@ -215,7 +218,7 @@ class LIBCANVAS_API GtkCanvas : public Canvas, public Gtk::EventBox, public Gtkm
 {
 public:
 	GtkCanvas ();
-	~GtkCanvas () { _in_dtor = true ; }
+	~GtkCanvas ();
 
 	void use_nsglview (bool retina = true);
 
@@ -235,7 +238,7 @@ public:
 
 	bool get_mouse_position (Duple& winpos) const;
 
-	void set_single_exposure (bool s) { _single_exposure = s; }
+	void set_single_exposure (bool s);
 	bool single_exposure () { return _single_exposure; }
 
 	void re_enter ();
@@ -249,12 +252,10 @@ public:
 
 	Glib::RefPtr<Pango::Context> get_pango_context();
 
-	void render (Cairo::RefPtr<Cairo::Context> const & ctx, cairo_rectangle_t* r)
-	{
-		ArdourCanvas::Rect rect (r->x, r->y, r->width + r->x, r->height + r->y);
-		Canvas::render (rect, ctx);
-	}
-
+	/* This is the render method called via the Gtkmm2ext::CairoCanvas API,
+	   which is distinct from ArdourCanvas.
+	*/
+	void render (Cairo::RefPtr<Cairo::Context> const & ctx, cairo_rectangle_t* r);
 	void prepare_for_render () const;
 
 	uint32_t background_color() { return Canvas::background_color (); }
@@ -268,8 +269,13 @@ protected:
 	bool on_button_press_event (GdkEventButton *);
 	bool on_button_release_event (GdkEventButton* event);
 	bool on_motion_notify_event (GdkEventMotion *);
+	bool on_touch_begin_event (GdkEventTouch *);
+	bool on_touch_update_event (GdkEventTouch* event);
+	bool on_touch_end_event (GdkEventTouch *);
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
+	bool on_visibility_notify_event (GdkEventVisibility*);
 	void on_map();
 	void on_unmap();
 
@@ -279,6 +285,8 @@ protected:
 	bool motion_notify_handler (GdkEventMotion *);
 	bool deliver_event (GdkEvent *);
 	void deliver_enter_leave (Duple const & point, int state);
+
+	void get_items_enclosing (Duple const& point, std::list<Item const*>& enclosing_items);
 
 	void pick_current_item (int state);
 	void pick_current_item (Duple const &, int state);
@@ -297,6 +305,9 @@ private:
 	/** the item that currently has key focus or 0 */
 	Item * _focused_item;
 
+	/** for multitouch: the item(s) that have been touched (effectively a GRAB) */
+	std::map<int, Item*> _touched_item;
+
 	bool _single_exposure;
 	bool _use_image_surface;
 
@@ -311,6 +322,7 @@ private:
 
 	bool _in_dtor;
 	bool resize_queued;
+	bool _ptr_grabbed;
 
 	void* _nsglview;
 	Cairo::RefPtr<Cairo::Surface> _canvas_image;

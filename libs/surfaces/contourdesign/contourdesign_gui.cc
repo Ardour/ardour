@@ -18,14 +18,14 @@
 
 #include <libusb.h>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/label.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/table.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/table.h>
 
 #include "pbd/unwind.h"
 
@@ -195,8 +195,8 @@ ContourDesignGUI::ContourDesignGUI (ContourDesignControlProtocol& ccp)
 	pack_start (*top_box);
 	pack_start (*btn_action_sample);
 
-	_ccp.ButtonPress.connect (*this, invalidator (*this), boost::bind (&ContourDesignGUI::test_button_press, this, _1), gui_context ());
-	_ccp.ButtonRelease.connect (*this, invalidator (*this), boost::bind (&ContourDesignGUI::test_button_release, this, _1), gui_context ());
+	_ccp.ButtonPress.connect (*this, invalidator (*this), std::bind (&ContourDesignGUI::test_button_press, this, _1), gui_context ());
+	_ccp.ButtonRelease.connect (*this, invalidator (*this), std::bind (&ContourDesignGUI::test_button_release, this, _1), gui_context ());
 
 	signal_map().connect (sigc::mem_fun (*this, &ContourDesignGUI::init_on_show));
 	update_device_state ();

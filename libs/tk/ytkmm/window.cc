@@ -9,8 +9,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/window.h>
-#include <gtkmm/private/window_p.h>
+#include <ytkmm/window.h>
+#include <ytkmm/private/window_p.h>
 
 
 // -*- c++ -*-
@@ -35,9 +35,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/accelgroup.h>
-#include <gdkmm/cursor.h>
-#include <gtk/gtk.h>
+#include <ytkmm/accelgroup.h>
+#include <ydkmm/cursor.h>
+#include <ytk/ytk.h>
 
 
 namespace Gtk

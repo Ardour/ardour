@@ -2,13 +2,13 @@
 
 //Include this before the other headers, such as container.h,
 //so that the undef is used.
-#include <gtkmm/box.h>
+#include <ytkmm/box.h>
  
 
 #include <glibmm.h>
 
-#include <gtkmm/bin.h>
-#include <gtkmm/private/bin_p.h>
+#include <ytkmm/bin.h>
+#include <ytkmm/private/bin_p.h>
 
 
 // -*- c++ -*-
@@ -33,11 +33,11 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/box.h>
-#include <gtkmm/adjustment.h>
-#include <gtkmm/label.h>
-#include <gtkmm/image.h>
-#include <gtk/gtk.h>
+#include <ytkmm/box.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/label.h>
+#include <ytkmm/image.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

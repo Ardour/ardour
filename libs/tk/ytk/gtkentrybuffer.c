@@ -26,7 +26,7 @@
 #include "gtkwidget.h"
 #include "gtkalias.h"
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 #include <string.h>
 

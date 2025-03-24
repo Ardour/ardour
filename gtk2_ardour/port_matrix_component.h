@@ -16,13 +16,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_port_matrix_component_h__
-#define __gtk_ardour_port_matrix_component_h__
+#pragma once
 
 #include <cstdint>
 #include <memory>
 
-#include <gtkmm/eventbox.h>
+#include <ytkmm/eventbox.h>
 
 class PortMatrix;
 class PortMatrixBody;
@@ -193,4 +192,3 @@ private:
 	bool _dimension_computation_required; ///< true if the dimensions are out of date
 };
 
-#endif

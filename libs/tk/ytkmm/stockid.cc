@@ -20,8 +20,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/stockid.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/stockid.h>
+#include <ytkmm/stock.h>
 
 
 namespace Gtk

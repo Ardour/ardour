@@ -20,8 +20,8 @@
 #include "pbd/compose.h"
 #include <algorithm>
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -35,7 +35,7 @@
 #include "ardour/session.h"
 
 #include "audio_clock.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "control_point.h"
 #include "editor.h"
 #include "region_view.h"
@@ -196,6 +196,10 @@ void
 AudioTriggerPropertiesBox::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
+
+	if (!s) {
+		return;
+	}
 
 	_length_clock.set_session (s);
 	_start_clock.set_session (s);

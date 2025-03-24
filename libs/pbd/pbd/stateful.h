@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_stateful_h__
-#define __pbd_stateful_h__
+#pragma once
 
 #include <atomic>
 #include <string>
@@ -97,7 +96,7 @@ class LIBPBD_API Stateful {
 	virtual PropertyList* property_factory (const XMLNode&) const;
 
 	/* How stateful's notify of changes to their properties */
-	PBD::Signal1<void,const PropertyChange&> PropertyChanged;
+	PBD::Signal<void(const PropertyChange&)> PropertyChanged;
 
 	static int current_state_version;
 	static int loading_state_version;
@@ -149,4 +148,3 @@ class LIBPBD_API Stateful {
 
 } // namespace PBD
 
-#endif /* __pbd_stateful_h__ */

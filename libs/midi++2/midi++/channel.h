@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __midichannel_h__
-#define __midichannel_h__
+#pragma once
 
 #include <queue>
 #include <map>
@@ -188,7 +187,6 @@ class LIBMIDIPP_API Channel : public PBD::ScopedConnectionList {
 
 } // namespace MIDI
 
-#endif // __midichannel_h__
 
 
 

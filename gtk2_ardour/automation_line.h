@@ -23,8 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_automation_line_h__
-#define __ardour_automation_line_h__
+#ifndef __gtk2_ardour_automation_line_base_h__
+#define __gtk2_ardour_automation_line_base_h__
 
 #include <vector>
 #include <list>
@@ -45,18 +45,22 @@
 #include "canvas/container.h"
 #include "canvas/poly_line.h"
 
-class AutomationLine;
+#include "selectable.h"
+
+namespace ArdourCanvas {
+	class Rectangle;
+}
+
+class EditorAutomationLine;
 class ControlPoint;
 class PointSelection;
 class TimeAxisView;
 class AutomationTimeAxisView;
-class Selectable;
 class Selection;
-class PublicEditor;
-
+class EditingContext;
 
 /** A GUI representation of an ARDOUR::AutomationList */
-class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
+class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible, public SelectableOwner
 {
 public:
 	enum VisibleAspects {
@@ -65,16 +69,24 @@ public:
 		SelectedControlPoints = 0x4
 	};
 
-	AutomationLine (const std::string&                                 name,
-	                TimeAxisView&                                      tv,
-	                ArdourCanvas::Item&                                parent,
-	                std::shared_ptr<ARDOUR::AutomationList>          al,
-	                const ARDOUR::ParameterDescriptor&                 desc);
-
+	AutomationLine (const std::string&                      name,
+	                    EditingContext&                         ec,
+	                    ArdourCanvas::Item&                     parent,
+	                    ArdourCanvas::Rectangle*                drag_base,
+	                    std::shared_ptr<ARDOUR::AutomationList> al,
+	                    const ARDOUR::ParameterDescriptor&      desc);
 
 	virtual ~AutomationLine ();
 
+
+	void set_atv (AutomationTimeAxisView&);
+
 	virtual Temporal::timepos_t get_origin () const;
+
+	ArdourCanvas::Rectangle* drag_base() const { return _drag_base; }
+
+	void set_sensitive (bool);
+	bool sensitive() const { return _sensitive; }
 
 	void queue_reset ();
 	void reset ();
@@ -82,7 +94,7 @@ public:
 	void set_fill (bool f) { _fill = f; } // owner needs to call set_height
 
 	void set_selected_points (PointSelection const &);
-	void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<Selectable*>&);
+	void _get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<Selectable*>&, bool within);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
 	virtual void remove_point (ControlPoint&);
@@ -94,6 +106,7 @@ public:
 	virtual void start_drag_multiple (std::list<ControlPoint*>, float, XMLNode *);
 	virtual std::pair<float, float> drag_motion (Temporal::timecnt_t const &, float, bool, bool with_push, uint32_t& final_index);
 	virtual void end_drag (bool with_push, uint32_t final_index);
+	virtual void end_draw_merge () {}
 
 	ControlPoint* nth (uint32_t);
 	ControlPoint const * nth (uint32_t) const;
@@ -103,20 +116,25 @@ public:
 	bool    visible() const { return _visible != VisibleAspects(0); }
 	guint32 height()  const { return _height; }
 
-	void     set_line_color (uint32_t);
-	uint32_t get_line_color() const { return _line_color; }
+	void set_line_color (std::string const & color, std::string color_mode = std::string());
+	void set_insensitive_line_color (uint32_t color);
+	uint32_t get_line_color() const;
+	uint32_t get_line_fill_color() const;
+	uint32_t get_line_selected_color() const;
+	bool control_points_inherit_color () const;
+	void set_control_points_inherit_color (bool);
 
 	void set_visibility (VisibleAspects);
 	void add_visibility (VisibleAspects);
 	void remove_visibility (VisibleAspects);
 
 	void hide ();
+	void hide_all ();
+	void show ();
 	void set_height (guint32);
 
 	bool get_uses_gain_mapping () const;
 	void tempo_map_changed ();
-
-	TimeAxisView& trackview;
 
 	ArdourCanvas::Container& canvas_group() const { return *group; }
 	ArdourCanvas::Item&  parent_group() const { return _parent_group; }
@@ -169,11 +187,18 @@ public:
 
 	double dt_to_dx (Temporal::timepos_t const &, Temporal::timecnt_t const &);
 
+	ARDOUR::ParameterDescriptor const & param() const { return _desc; }
+	EditingContext& editing_context() const { return _editing_context; }
+
+	void add (std::shared_ptr<ARDOUR::AutomationControl>, GdkEvent*, Temporal::timepos_t const &, double y, bool with_guard_points);
+
 protected:
 
 	std::string    _name;
 	guint32        _height;
-	uint32_t       _line_color;
+	std::string    _line_color_name;
+	std::string    _line_color_mod;
+	uint32_t       _insensitive_line_color;
 	uint32_t       _view_index_offset;
 	std::shared_ptr<ARDOUR::AutomationList> alist;
 
@@ -187,19 +212,21 @@ protected:
 	/** true if we did a push at any point during the current drag */
 	bool    did_push;
 
+	EditingContext&             _editing_context;
 	ArdourCanvas::Item&         _parent_group;
+	ArdourCanvas::Rectangle*    _drag_base;
 	ArdourCanvas::Container*    group;
 	ArdourCanvas::PolyLine*     line; /* line */
 	ArdourCanvas::Points        line_points; /* coordinates for canvas line */
 	std::vector<ControlPoint*>  control_points; /* visible control points */
 
 	class ContiguousControlPoints : public std::list<ControlPoint*> {
-public:
+          public:
 		ContiguousControlPoints (AutomationLine& al);
 		Temporal::timecnt_t clamp_dt (Temporal::timecnt_t const & dx, Temporal::timepos_t const & region_limit);
 		void move (Temporal::timecnt_t const &, double dvalue);
-		void compute_x_bounds (PublicEditor& e);
-private:
+		void compute_x_bounds ();
+          private:
 		AutomationLine& line;
 		Temporal::timepos_t before_x;
 		Temporal::timepos_t after_x;
@@ -217,7 +244,7 @@ private:
 	void reset_callback (const Evoral::ControlList&);
 	void list_changed ();
 
-	virtual bool event_handler (GdkEvent*);
+	virtual bool event_handler (GdkEvent*) = 0;
 
 private:
 	std::list<ControlPoint*> _drag_points; ///< points we are dragging
@@ -245,9 +272,13 @@ private:
 	bool _fill;
 
 	const ARDOUR::ParameterDescriptor _desc;
+	bool _control_points_inherit_color;
+	bool _sensitive;
+	AutomationTimeAxisView* atv;
 
 	friend class AudioRegionGainLine;
+	friend class RegionFxLine;
 };
 
-#endif /* __ardour_automation_line_h__ */
+#endif /* __gtk2_ardour_automation_line_base_h__ */
 

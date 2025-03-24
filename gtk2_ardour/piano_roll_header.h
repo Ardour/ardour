@@ -17,12 +17,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_piano_roll_header_h__
-#define __ardour_piano_roll_header_h__
+#pragma once
 
 #include "ardour/types.h"
 
-#include <gtkmm/drawingarea.h>
+#include <ytkmm/drawingarea.h>
 
 namespace ARDOUR {
 	class MidiTrack;
@@ -129,4 +128,3 @@ private:
 	bool show_scroomer () const;
 };
 
-#endif /* __ardour_piano_roll_header_h__ */

@@ -106,10 +106,10 @@ libardour_sources = [
         'instrument_info.cc',
         'internal_return.cc',
         'internal_send.cc',
-        'interpolation.cc',
         'io.cc',
         'io_plug.cc',
         'io_processor.cc',
+        'io_tasklist.cc',
         'kmeterdsp.cc',
         'ladspa_plugin.cc',
         'latent.cc',
@@ -193,6 +193,7 @@ libardour_sources = [
         'record_enable_control.cc',
         'record_safe_control.cc',
         'region_factory.cc',
+        'region_fx_plugin.cc',
         'resampled_source.cc',
         'region.cc',
         'return.cc',
@@ -255,6 +256,7 @@ libardour_sources = [
         'system_exec.cc',
         'revision.cc',
         'rt_midibuffer.cc',
+        'tailtime.cc',
         'template_utils.cc',
         'tempo_map_importer.cc',
         'thawlist.cc',
@@ -319,6 +321,8 @@ def configure(conf):
                       atleast_version='0.24.2', mandatory=True)
     conf.define ('LV2_SUPPORT', 1)
 
+    conf.define ('USE_TLSF', 1)
+
     # non-standard LV2 extention -- TODO: add option to disable??
     if conf.is_defined ('HAVE_LV2_1_10_0'):
         conf.define ('LV2_EXTENDED', 1)
@@ -344,13 +348,22 @@ def configure(conf):
 
     conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H',mandatory=False)
     conf.check(header_name='sys/statvfs.h', define_name='HAVE_SYS_STATVFS_H',mandatory=False)
-
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
+
+    have_sys_ioprio = conf.check_cc(
+            msg="Checking for 'ioprio_set' syscall support",
+            features  = 'c',
+            mandatory = False,
+            execute   = False,
+            fragment = "#include <unistd.h>\n#include <sys/syscall.h>\nint main () { syscall(SYS_ioprio_set, 1, 0, 8192); return 0; }")
+
+    if have_sys_ioprio:
+            conf.define('HAVE_IOPRIO', 1)
+            conf.env['HAVE_IOPRIO'] = True
 
     conf.write_config_header('libardour-config.h', remove=False)
 
     # Boost headers
-    autowaf.check_header(conf, 'cxx', 'boost/scoped_ptr.hpp')
     autowaf.check_header(conf, 'cxx', 'boost/ptr_container/ptr_list.hpp')
 
     if conf.env['WINDOWS_VST_SUPPORT'] == True:
@@ -422,7 +435,7 @@ def build(bld):
     #obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'
 
     if bld.is_defined('HAVE_LILV') :
-        obj.source += ['lv2_plugin.cc', 'lv2_evbuf.c', 'uri_map.cc']
+        obj.source += ['lv2_plugin.cc', 'lv2_evbuf.cc', 'uri_map.cc']
         obj.uselib += ['LILV']
         if bld.is_defined('HAVE_SUIL'):
             if bld.is_defined('YTK'):
@@ -500,7 +513,7 @@ def build(bld):
                 fma_sources = [ 'x86_functions_fma.cc' ]
                 avx512f_sources = [ 'x86_functions_avx512f.cc' ]
         elif bld.env['build_target'] == 'aarch64':
-            obj.source += ['arm_neon_functions.cc']
+            obj.source += ['aarch64_neon_functions.cc']
             obj.defines += [ 'ARM_NEON_SUPPORT' ]
 
         elif bld.env['build_target'] == 'armhf':
@@ -723,18 +736,18 @@ def create_ardour_test_program(bld, includes, name, target, sources):
         'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
         ]
 
-def i18n(bld):
+def i18n_func(bld):
     autowaf.build_i18n(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
                        'Paul Davis')
 
-def i18n_pot(bld):
-    autowaf.build_i18n(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
+def i18n_pot_func(bld):
+    autowaf.build_i18n_pot(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
                        'Paul Davis')
 
-def i18n_po(bld):
+def i18n_po_func(bld):
     autowaf.build_i18n_po(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
                        'Paul Davis')
 
-def i18n_mo(bld):
+def i18n_mo_func(bld):
     autowaf.build_i18n_mo(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
                        'Paul Davis')

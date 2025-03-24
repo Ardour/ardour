@@ -17,14 +17,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_midi_ui_h__
-#define __libardour_midi_ui_h__
+#pragma once
 
 #include <list>
 
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
 #include "pbd/signals.h"
+
+#include "ardour/libardour_visibility.h"
 
 namespace ARDOUR {
 
@@ -69,4 +70,3 @@ class LIBARDOUR_API MidiControlUI : public AbstractUI<MidiUIRequest>
 
 }
 
-#endif /* __libardour_midi_ui_h__ */

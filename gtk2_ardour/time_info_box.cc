@@ -30,7 +30,7 @@
 #include "ardour/session.h"
 
 #include "audio_clock.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "control_point.h"
 #include "editor.h"
 #include "region_view.h"
@@ -138,7 +138,7 @@ TimeInfoBox::TimeInfoBox (std::string state_node_name, bool with_punch)
 	Editor::instance().get_selection().TimeChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 	Editor::instance().get_selection().RegionsChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 
-	Editor::instance().MouseModeChanged.connect (editor_connections, invalidator(*this), boost::bind (&TimeInfoBox::track_mouse_mode, this), gui_context());
+	Editor::instance().MouseModeChanged.connect (editor_connections, invalidator(*this), std::bind (&TimeInfoBox::track_mouse_mode, this), gui_context());
 }
 
 TimeInfoBox::~TimeInfoBox ()
@@ -206,18 +206,20 @@ TimeInfoBox::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
-	selection_start->set_session (s);
-	selection_end->set_session (s);
-	selection_length->set_session (s);
+	if (s) {
+		selection_start->set_session (s);
+		selection_end->set_session (s);
+		selection_length->set_session (s);
+	}
 
 	if (!with_punch_clock) {
 		return;
 	}
 
-	punch_start->set_session (s);
-	punch_end->set_session (s);
-
 	if (s) {
+		punch_start->set_session (s);
+		punch_end->set_session (s);
+
 		Location* punch = s->locations()->auto_punch_location ();
 
 		if (punch) {
@@ -227,7 +229,7 @@ TimeInfoBox::set_session (Session* s)
 		punch_changed (punch);
 
 		_session->auto_punch_location_changed.connect (_session_connections, MISSING_INVALIDATOR,
-				boost::bind (&TimeInfoBox::punch_location_changed, this, _1), gui_context());
+				std::bind (&TimeInfoBox::punch_location_changed, this, _1), gui_context());
 	}
 }
 
@@ -305,7 +307,7 @@ TimeInfoBox::selection_changed ()
 			}
 			for (PlaylistSet::iterator ps = playlists.begin(); ps != playlists.end(); ++ps) {
 				(*ps)->ContentsChanged.connect (region_property_connections, invalidator (*this),
-								boost::bind (&TimeInfoBox::region_selection_changed, this), gui_context());
+								std::bind (&TimeInfoBox::region_selection_changed, this), gui_context());
 			}
 			region_selection_changed ();
 		}
@@ -313,7 +315,7 @@ TimeInfoBox::selection_changed ()
 
 	case Editing::MouseRange:
 		if (selection.time.empty()) {
-			Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("MouseMode", "set-mouse-mode-object-range");
+			Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), "set-mouse-mode-object-range");
 
 			if (tact->get_active() &&  !selection.regions.empty()) {
 				/* show selected regions */
@@ -362,8 +364,8 @@ TimeInfoBox::watch_punch (Location* punch)
 	assert (with_punch_clock);
 	punch_connections.drop_connections ();
 
-	punch->start_changed.connect (punch_connections, MISSING_INVALIDATOR, boost::bind (&TimeInfoBox::punch_changed, this, _1), gui_context());
-	punch->end_changed.connect (punch_connections, MISSING_INVALIDATOR, boost::bind (&TimeInfoBox::punch_changed, this, _1), gui_context());
+	punch->start_changed.connect (punch_connections, MISSING_INVALIDATOR, std::bind (&TimeInfoBox::punch_changed, this, _1), gui_context());
+	punch->end_changed.connect (punch_connections, MISSING_INVALIDATOR, std::bind (&TimeInfoBox::punch_changed, this, _1), gui_context());
 
 	punch_changed (punch);
 }

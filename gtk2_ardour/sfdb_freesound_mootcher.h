@@ -34,8 +34,7 @@
 
 *****************************************************************************/
 
-#ifndef __gtk_ardour_sfdb_freesound_mootcher_h__
-#define __gtk_ardour_sfdb_freesound_mootcher_h__
+#pragma once
 
 #include <string>
 #include <stdio.h>
@@ -43,7 +42,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include <gtkmm/progressbar.h>
+#include <ytkmm/progressbar.h>
 //#include <ctime>
 
 #include "sfdb_ui.h"
@@ -87,9 +86,9 @@ public:
 	/** signal emitted when mootcher reports progress updates during download.
 	 * The parameters are current and total numbers of bytes downloaded.
 	 */
-	PBD::Signal2<void, double, double> Progress;
+	PBD::Signal<void(double, double)> Progress;
 	/** signal emitted when the mootcher has finished downloading. */
-	PBD::Signal0<void> Finished;
+	PBD::Signal<void()> Finished;
 
 
 private:
@@ -131,4 +130,3 @@ private:
 	struct curl_slist *custom_headers;
 };
 
-#endif // __gtk_ardour_sfdb_freesound_mootcher_h__

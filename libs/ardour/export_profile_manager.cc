@@ -300,20 +300,20 @@ ExportProfileManager::load_preset_from_disk (std::string const& path)
 bool
 ExportProfileManager::set_state (XMLNode const& root)
 {
-	return set_global_state (root) & set_local_state (root);
+	return set_global_state (root) && set_local_state (root);
 }
 
 bool
 ExportProfileManager::set_global_state (XMLNode const& root)
 {
-	return init_filenames (root.children ("ExportFilename")) &
+	return init_filenames (root.children ("ExportFilename")) &&
 	       init_formats (root.children ("ExportFormat"));
 }
 
 bool
 ExportProfileManager::set_local_state (XMLNode const& root)
 {
-	return init_timespans (root.children ("ExportTimespan")) &
+	return init_timespans (root.children ("ExportTimespan")) &&
 	       init_channel_configs (root.children ("ExportChannelConfiguration"));
 }
 
@@ -542,6 +542,18 @@ ExportProfileManager::init_channel_configs (XMLNodeList nodes)
 	if (nodes.empty ()) {
 		ChannelConfigStatePtr config (new ChannelConfigState (handler->add_channel_config ()));
 		channel_configs.push_back (config);
+
+#ifdef LIVETRAX
+		/* Do not add master-bus for stem-export.
+		 *
+		 * This changes "with processing" to be false
+		 * since TrackExportChannelSelector::sync_with_manager_state
+		 * checks for  RouteExportChannel/PortExportChannel
+		 */
+		if (_type == StemExport) {
+			return false;
+		}
+#endif
 
 		/* Add master outs as default */
 		if (!session.master_out ()) {

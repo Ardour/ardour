@@ -49,7 +49,7 @@ protected:
 	void close ();
 	/* AudioSource API */
 	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const;
-	samplecnt_t write_unlocked (Sample *, samplecnt_t) { return 0; }
+	samplecnt_t write_unlocked (Sample const *, samplecnt_t) { return 0; }
 
 private:
 	mutable FFMPEGFileImportableSource _ffmpeg;

@@ -18,9 +18,9 @@
 
 #include "transpose_dialog.h"
 
-#include <gtkmm/table.h>
-#include <gtkmm/label.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/table.h>
+#include <ytkmm/label.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/i18n.h"
 

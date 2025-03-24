@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_port_h__
-#define __ardour_port_h__
+#pragma once
 
 #ifdef WAF_BUILD
 #include "libardour-config.h"
@@ -29,7 +28,6 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <boost/utility.hpp>
 #include "pbd/signals.h"
 
 #include "ardour/data_type.h"
@@ -42,9 +40,11 @@ namespace ARDOUR {
 class AudioEngine;
 class Buffer;
 
-class LIBARDOUR_API Port : public boost::noncopyable
+class LIBARDOUR_API Port
 {
 public:
+	Port (const Port&) = delete;
+	Port& operator= (const Port&) = delete;
 	virtual ~Port ();
 
 	static void set_connecting_blocked( bool yn ) {
@@ -142,12 +142,12 @@ public:
 	void decrement_internal_connections ();
 
 
-	PBD::Signal1<void,bool> MonitorInputChanged;
-	PBD::Signal3<void,std::shared_ptr<Port>,std::shared_ptr<Port>, bool > ConnectedOrDisconnected;
+	PBD::Signal<void(bool)> MonitorInputChanged;
+	PBD::Signal<void(std::shared_ptr<Port>,std::shared_ptr<Port>, bool )> ConnectedOrDisconnected;
 
-	static PBD::Signal0<void> PortDrop;
-	static PBD::Signal0<void> PortSignalDrop;
-	static PBD::Signal0<void> ResamplerQualityChanged;
+	static PBD::Signal<void()> PortDrop;
+	static PBD::Signal<void()> PortSignalDrop;
+	static PBD::Signal<void()> ResamplerQualityChanged;
 
 	static void set_varispeed_ratio (double s); //< varispeed playback
 	static bool set_engine_ratio (double session, double engine); //< SR mismatch
@@ -228,4 +228,3 @@ private:
 
 }
 
-#endif /* __ardour_port_h__ */

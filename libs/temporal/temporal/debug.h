@@ -17,8 +17,7 @@
 
 */
 
-#ifndef __temporal_debug_h__
-#define __temporal_debug_h__
+#pragma once
 
 #include "temporal/visibility.h"
 #include "pbd/debug.h"
@@ -34,5 +33,4 @@ namespace PBD {
 	}
 }
 
-#endif /* __ardour_debug_h__ */
 

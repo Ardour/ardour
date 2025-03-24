@@ -17,9 +17,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm.h>
-#include <gtk/gtk.h>
-#include <gtk/gtksocket.h>
+#include <ytkmm/ytkmm.h>
+#include <ytk/ytk.h>
+#include <ytk/gtksocket.h>
 #include "gtkmm2ext/gui_thread.h"
 #include "fst.h"
 #include "ardour/plug_insert_base.h"
@@ -28,11 +28,11 @@
 #include "windows_vst_plugin_ui.h"
 
 #ifdef PLATFORM_WINDOWS
-#include <gdk/gdkwin32.h>
+#include <ydk/gdkwin32.h>
 #elif defined __APPLE__
 // TODO
 #else
-#include <gdk/gdkx.h>
+#include <ydk/gdkx.h>
 #endif
 
 using namespace Gtk;
@@ -104,7 +104,7 @@ WindowsVSTPluginUI::package (Gtk::Window& win)
 	VSTPluginUI::package (win);
 	_vst->state()->gtk_window_parent = (void*) (&win);
 
-	_vst->VSTSizeWindow.connect (_resize_connection, invalidator (*this), boost::bind (&WindowsVSTPluginUI::resize_callback, this), gui_context());
+	_vst->VSTSizeWindow.connect (_resize_connection, invalidator (*this), std::bind (&WindowsVSTPluginUI::resize_callback, this), gui_context());
 
 	resize_callback ();
 

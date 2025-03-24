@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/scalebutton.h>
-#include <gtkmm/private/scalebutton_p.h>
+#include <ytkmm/scalebutton.h>
+#include <ytkmm/private/scalebutton_p.h>
 
 
 // -*- c++ -*-
@@ -31,7 +31,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

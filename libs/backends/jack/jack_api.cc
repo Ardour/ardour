@@ -31,7 +31,11 @@ static bool already_configured ();
 static bool available ();
 
 static ARDOUR::AudioBackendInfo _descriptor = {
+#if ! (defined(__APPLE__) || defined(PLATFORM_WINDOWS))
+	"JACK/Pipewire",
+#else
 	"JACK",
+#endif
 	instantiate,
 	deinstantiate,
 	backend_factory,

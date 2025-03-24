@@ -22,8 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_sfdb_ui_h__
-#define __ardour_sfdb_ui_h__
+#pragma once
 
 #include <string>
 #include <vector>
@@ -31,22 +30,22 @@
 
 #include <sigc++/signal.h>
 
-#include <gtkmm/stock.h>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/dialog.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/filechooserwidget.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/label.h>
-#include <gtkmm/scale.h>
-#include <gtkmm/textview.h>
-#include <gtkmm/table.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/notebook.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/dialog.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/filechooserwidget.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/scale.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/table.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/notebook.h>
 
 
 #include "ardour/audiofilesource.h"
@@ -362,4 +361,3 @@ private:
 	bool _reset_post_import;
 };
 
-#endif // __ardour_sfdb_ui_h__

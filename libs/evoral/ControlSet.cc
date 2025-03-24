@@ -26,6 +26,7 @@
 #include "evoral/Event.h"
 
 using namespace std;
+using namespace std::placeholders;
 
 namespace Evoral {
 
@@ -45,12 +46,12 @@ ControlSet::add_control(std::shared_ptr<Control> ac)
 {
 	_controls[ac->parameter()] = ac;
 
-	ac->ListMarkedDirty.connect_same_thread (_control_connections, boost::bind (&ControlSet::control_list_marked_dirty, this));
+	ac->ListMarkedDirty.connect_same_thread (_control_connections, std::bind (&ControlSet::control_list_marked_dirty, this));
 
 	if (ac->list()) {
 		ac->list()->InterpolationChanged.connect_same_thread (
 			_list_connections,
-			boost::bind (&ControlSet::control_list_interpolation_changed,
+			std::bind (&ControlSet::control_list_interpolation_changed,
 			             this, ac->parameter(), _1));
 	}
 }

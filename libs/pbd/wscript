@@ -43,6 +43,7 @@ libpbd_sources = [
     'file_utils.cc',
     'fpu.cc',
     'glib_event_source.cc',
+    'history_owner.cc',
     'id.cc',
     'inflater.cc',
     'locale_guard.cc',
@@ -135,15 +136,11 @@ def build(bld):
         # C++ Headers
         includedir = '${INCLUDEDIR}/pbd-%s/pbd' % LIBPBD_MAJOR_VERSION
         bld.install_files(includedir, bld.path.ant_glob('pbd/*.h'))
-        bld.install_files(includedir, 'build/pbd/signals_generated.h')
 
         # Pkgconfig file
         autowaf.build_pc(bld, 'libpbd', LIBPBD_VERSION, LIBPBD_MAJOR_VERSION, [],
                          {'LIBPBD_VERSION' : LIBPBD_VERSION,
                           'LIBPBD_MAJOR_VERSION' : LIBPBD_MAJOR_VERSION})
-
-    # Make signals_generated.h using signals.py
-    bld(rule = sys.executable + ' ${SRC} ${TGT}', source = 'pbd/signals.py', target = 'pbd/signals_generated.h', name="pbdsignals", features='use', ext_out=['.h'])
 
     # Library
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
@@ -162,7 +159,6 @@ def build(bld):
     obj.includes     = ['.']
     obj.name         = 'libpbd'
     obj.target       = 'pbd'
-    obj.use          = 'pbdsignals'
     obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM ARCHIVE CURL'
     if sys.platform == 'darwin':
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']

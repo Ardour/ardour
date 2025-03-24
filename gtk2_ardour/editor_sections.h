@@ -19,15 +19,15 @@
 #ifndef _gtk_ardour_editor_sections_h_
 #define _gtk_ardour_editor_sections_h_
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include "ardour/location.h"
 #include "ardour/session_handle.h"
 
-#include <gtkmm/liststore.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/treeview.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/treeview.h>
 
 class EditorSections : public ARDOUR::SessionHandlePtr, public virtual sigc::trackable
 {
@@ -108,7 +108,7 @@ private:
 		Gtk::TreeModelColumn<Temporal::timepos_t> end;
 	};
 
-	typedef boost::unordered_map<ARDOUR::Location*, Gtk::TreeModel::iterator> LocationRowMap;
+	typedef std::unordered_map<ARDOUR::Location*, Gtk::TreeModel::iterator> LocationRowMap;
 
 	Columns                      _columns;
 	Glib::RefPtr<Gtk::ListStore> _model;

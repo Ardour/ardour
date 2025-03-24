@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libmisc_textreceiver_h__
-#define __libmisc_textreceiver_h__
+#pragma once
 
 #include <string>
 
@@ -36,4 +35,3 @@ class LIBPBD_API TextReceiver : public Receiver
 	std::string name;
 };
 
-#endif //__libmisc_textreceiver_h__

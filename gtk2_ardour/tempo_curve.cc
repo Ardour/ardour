@@ -40,7 +40,7 @@
 
 using namespace Temporal;
 
-PBD::Signal1<void,TempoCurve*> TempoCurve::CatchDeletion;
+PBD::Signal<void(TempoCurve*)> TempoCurve::CatchDeletion;
 
 static double curve_height = 13.0;
 

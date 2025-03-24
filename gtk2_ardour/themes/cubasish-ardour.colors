@@ -47,6 +47,14 @@
     <Color name="midi meter 54" value="7610baff"/>
     <Color name="midi meter 55" value="b22353ff"/>
     <Color name="midi meter 56" value="ea0508ff"/>
+    <Color name="pianoroll: velocity" value="ff9408ff"/>
+    <Color name="pianoroll: insensitive bender line" value="96b2df84"/>
+    <Color name="pianoroll: insensitive pressure line" value="96dfc984"/>
+    <Color name="pianoroll: insensitive modulation line" value="afdf9684"/>
+    <Color name="pianoroll: insensitive expression line" value="dfc59684"/>
+    <Color name="pianoroll: user1 line" value="df96b084"/>
+    <Color name="pianoroll: user2 line" value="bc96df84"/>
+    <Color name="pianoroll: user3 line" value="9699df84"/>
   </Colors>
   <ColorAliases>
     <ColorAlias name="active crossfade" alias="neutral:foreground"/>
@@ -59,6 +67,7 @@
     <ColorAlias name="audio master bus base" alias="neutral:backgroundest"/>
     <ColorAlias name="audio track base" alias="neutral:background"/>
     <ColorAlias name="automation line" alias="alert:greenish"/>
+    <ColorAlias name="automation line insensitive" alias="neutral:foreground2"/>
     <ColorAlias name="automation track outline" alias="theme:bg1"/>
     <ColorAlias name="big clock active: background" alias="neutral:backgroundest"/>
     <ColorAlias name="big clock active: cursor" alias="theme:contrasting alt"/>
@@ -88,6 +97,10 @@
     <ColorAlias name="crossfade editor point outline" alias="alert:blue"/>
     <ColorAlias name="crossfade editor wave" alias="neutral:foregroundest"/>
     <ColorAlias name="crossfade line" alias="neutral:backgroundest"/>
+    <ColorAlias name="cue editor start rect fill" alias="neutral:midground"/>
+    <ColorAlias name="cue editor start rect outline" alias="alert:orange"/>
+    <ColorAlias name="cue editor end rect fill" alias="neutral:midground"/>
+    <ColorAlias name="cue editor end rect outline" alias="alert:orange"/>
     <ColorAlias name="edit point" alias="alert:blue"/>
     <ColorAlias name="entered automation line" alias="widget:orange"/>
     <ColorAlias name="entered gain line" alias="widget:orange"/>
@@ -123,6 +136,7 @@
     <ColorAlias name="grid line major" alias="neutral:backgroundest"/>
     <ColorAlias name="grid line micro" alias="neutral:midground"/>
     <ColorAlias name="grid line minor" alias="neutral:background2"/>
+    <ColorAlias name="group tab base" alias="theme:bg2"/>
     <ColorAlias name="gtk_arm" alias="alert:red"/>
     <ColorAlias name="gtk_audio_bus" alias="widget:blue darker"/>
     <ColorAlias name="gtk_audio_track" alias="theme:bg1"/>
@@ -318,7 +332,7 @@
     <ColorAlias name="pluginui toggle: fill" alias="widget:bg"/>
     <ColorAlias name="pluginui toggle: fill active" alias="widget:blue"/>
     <ColorAlias name="preference highlight" alias="alert:yellow"/>
-    <ColorAlias name="processor automation line" alias="theme:bg1"/>
+    <ColorAlias name="processor automation line" alias="alert:greenish"/>
     <ColorAlias name="processor auxfeedback: fill" alias="theme:contrasting alt"/>
     <ColorAlias name="processor auxfeedback: led active" alias="alert:green"/>
     <ColorAlias name="processor control button: fill" alias="neutral:background"/>
@@ -357,6 +371,7 @@
     <ColorAlias name="recording note" alias="neutral:foregroundest"/>
     <ColorAlias name="recording waveform fill" alias="neutral:foregroundest"/>
     <ColorAlias name="recording waveform outline" alias="neutral:background2"/>
+    <ColorAlias name="region automation line" alias="alert:blue"/>
     <ColorAlias name="region list automatic" alias="theme:contrasting less"/>
     <ColorAlias name="region list missing source" alias="alert:red"/>
     <ColorAlias name="region list whole file" alias="neutral:foreground"/>
@@ -434,6 +449,9 @@
     <ColorAlias name="stretch clock: edited text" alias="theme:contrasting alt"/>
     <ColorAlias name="stretch clock: text" alias="theme:contrasting clock"/>
     <ColorAlias name="sync mark" alias="theme:contrasting clock"/>
+    <ColorAlias name="tab button: fill" alias="widget:bg"/>
+    <ColorAlias name="tab button: fill active" alias="neutral:midground"/>
+    <ColorAlias name="tab button: led active" alias="alert:red"/>
     <ColorAlias name="region mark" alias="theme:contrasting alt"/>
     <ColorAlias name="tempo bar" alias="neutral:backgroundest"/>
     <ColorAlias name="tempo curve" alias="widget:blue"/>
@@ -495,6 +513,7 @@
     <Modifier name="automation track fill" modifier="= alpha:0.3"/>
     <Modifier name="covered region base" modifier="= alpha:0.7"/>
     <Modifier name="crossfade alpha" modifier="= alpha:0.1803"/>
+    <Modifier name="cue boundary alpha" modifier="= alpha:0.3"/>
     <Modifier name="dragging region" modifier="= alpha:0.5"/>
     <Modifier name="editable region" modifier="= alpha:0.15"/>
     <Modifier name="gain line inactive" modifier="= alpha:0.7725"/>

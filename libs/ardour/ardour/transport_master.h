@@ -16,13 +16,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_transport_master_h__
-#define __ardour_transport_master_h__
+#pragma once
 
 #include <vector>
 
-#include <boost/atomic.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <glibmm/threads.h>
 #include <glibmm/timer.h>
@@ -82,11 +80,11 @@ struct LIBARDOUR_API SafeTime {
 	 * complete and the values stored there are consistent.
 	 */
 
-	boost::atomic<int> guard1;
-	samplepos_t        position;
-	samplepos_t        timestamp;
-	double             speed;
-	boost::atomic<int> guard2;
+	std::atomic<int> guard1;
+	samplepos_t      position;
+	samplepos_t      timestamp;
+	double           speed;
+	std::atomic<int> guard2;
 
 	SafeTime ()
 	{
@@ -108,11 +106,11 @@ struct LIBARDOUR_API SafeTime {
 
 	void update (samplepos_t p, samplepos_t t, double s)
 	{
-		guard1.fetch_add (1, boost::memory_order_acquire);
+		guard1.fetch_add (1, std::memory_order_acquire);
 		position  = p;
 		timestamp = t;
 		speed     = s;
-		guard2.fetch_add (1, boost::memory_order_acquire);
+		guard2.fetch_add (1, std::memory_order_acquire);
 	}
 
 	void safe_read (SafeTime& dst) const
@@ -125,14 +123,14 @@ struct LIBARDOUR_API SafeTime {
 				Glib::usleep (20);
 				tries = 0;
 			}
-			dst.guard1.store (guard1.load (boost::memory_order_seq_cst), boost::memory_order_seq_cst);
+			dst.guard1.store (guard1.load (std::memory_order_seq_cst), std::memory_order_seq_cst);
 			dst.position  = position;
 			dst.timestamp = timestamp;
 			dst.speed     = speed;
-			dst.guard2.store (guard2.load (boost::memory_order_seq_cst), boost::memory_order_seq_cst);
+			dst.guard2.store (guard2.load (std::memory_order_seq_cst), std::memory_order_seq_cst);
 			tries++;
 
-		} while (dst.guard1.load (boost::memory_order_seq_cst) != dst.guard2.load (boost::memory_order_seq_cst));
+		} while (dst.guard1.load (std::memory_order_seq_cst) != dst.guard2.load (std::memory_order_seq_cst));
 	}
 };
 
@@ -154,7 +152,7 @@ public:
 	static std::shared_ptr<TransportMaster> factory (SyncSource, std::string const&, bool removeable);
 	static std::shared_ptr<TransportMaster> factory (XMLNode const&);
 
-	virtual void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>) = 0;
+	virtual void pre_process (pframes_t nframes, samplepos_t now, std::optional<samplepos_t>) = 0;
 
 	/**
 	 * This is the most important function to implement:
@@ -515,7 +513,7 @@ public:
 
 	void set_session (Session*);
 
-	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
+	void pre_process (pframes_t nframes, samplepos_t now, std::optional<samplepos_t>);
 
 	void unregister_port ();
 
@@ -587,7 +585,7 @@ public:
 
 	void set_session (Session*);
 
-	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
+	void pre_process (pframes_t nframes, samplepos_t now, std::optional<samplepos_t>);
 
 	void reset (bool with_pos);
 	bool locked () const;
@@ -613,7 +611,7 @@ public:
 	void create_port ();
 
 private:
-	void parse_ltc (const pframes_t, const Sample* const, const samplecnt_t);
+	void parse_ltc (const pframes_t, Sample const*, samplecnt_t);
 	void process_ltc (samplepos_t const);
 	void init_dll (samplepos_t, int32_t);
 	bool detect_discontinuity (LTCFrameExt*, int, bool);
@@ -643,6 +641,17 @@ private:
 	PBD::ScopedConnection     port_connection;
 	PBD::ScopedConnectionList session_connections;
 	LatencyRange              ltc_slave_latency;
+
+
+	struct Biquad {
+		void reset () { z1 = z2 = 0;}
+		float  z1, z2;
+		double a1, a2, b0, b1, b2;
+	};
+
+	bool   _filter_enable;
+	Biquad _lpf;
+	Biquad _hpf;
 };
 
 class LIBARDOUR_API MIDIClock_TransportMaster : public TransportMaster, public TransportMasterViaMIDI
@@ -657,7 +666,7 @@ public:
 
 	void unregister_port ();
 
-	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
+	void pre_process (pframes_t nframes, samplepos_t now, std::optional<samplepos_t>);
 
 	void rebind (MidiPort&);
 
@@ -728,7 +737,7 @@ public:
 	Engine_TransportMaster (AudioEngine&);
 	~Engine_TransportMaster ();
 
-	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
+	void pre_process (pframes_t nframes, samplepos_t now, std::optional<samplepos_t>);
 	bool speed_and_position (double& speed, samplepos_t& pos, samplepos_t&, samplepos_t&, samplepos_t);
 
 	bool starting () const
@@ -768,4 +777,3 @@ private:
 
 }
 
-#endif /* __ardour_transport_master_h__ */

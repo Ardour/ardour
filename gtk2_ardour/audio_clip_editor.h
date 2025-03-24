@@ -17,14 +17,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __audio_region_trimmer_box_h__
-#define __audio_region_trimmer_box_h__
+#pragma once
 
 #include <map>
 
-#include <gtkmm/box.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
+#include <ytkmm/box.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
@@ -221,4 +220,3 @@ private:
 	void zoom_out_click ();
 };
 
-#endif /* __audio_region_trimmer_box_h__ */

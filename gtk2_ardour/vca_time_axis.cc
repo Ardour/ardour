@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/menu.h>
+#include <ytkmm/menu.h>
 
 #include "pbd/string_convert.h"
 
@@ -113,10 +113,10 @@ VCATimeAxisView::VCATimeAxisView (PublicEditor& ed, Session* s, ArdourCanvas::Ca
 	controls_ebox.set_name (controls_base_unselected_name);
 	time_axis_frame.set_name (controls_base_unselected_name);
 
-	s->MonitorBusAddedOrRemoved.connect (*this, invalidator (*this), boost::bind (&VCATimeAxisView::set_button_names, this), gui_context());
+	s->MonitorBusAddedOrRemoved.connect (*this, invalidator (*this), std::bind (&VCATimeAxisView::set_button_names, this), gui_context());
 
-	s->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&VCATimeAxisView::parameter_changed, this, _1), gui_context());
-	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&VCATimeAxisView::parameter_changed, this, _1), gui_context());
+	s->config.ParameterChanged.connect (*this, invalidator (*this), std::bind (&VCATimeAxisView::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&VCATimeAxisView::parameter_changed, this, _1), gui_context());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &VCATimeAxisView::parameter_changed));
 }
 
@@ -177,11 +177,11 @@ VCATimeAxisView::set_vca (std::shared_ptr<VCA> v)
 
 	// Mixer_UI::instance()->show_vca_change.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill_change));
 
-	_vca->PropertyChanged.connect (vca_connections, invalidator (*this), boost::bind (&VCATimeAxisView::vca_property_changed, this, _1), gui_context());
+	_vca->PropertyChanged.connect (vca_connections, invalidator (*this), std::bind (&VCATimeAxisView::vca_property_changed, this, _1), gui_context());
 
-	_vca->solo_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCATimeAxisView::update_solo_display, this), gui_context());
-	_vca->mute_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCATimeAxisView::update_mute_display, this), gui_context());
-	_vca->DropReferences.connect (vca_connections, invalidator (*this), boost::bind (&VCATimeAxisView::self_delete, this), gui_context());
+	_vca->solo_control()->Changed.connect (vca_connections, invalidator (*this), std::bind (&VCATimeAxisView::update_solo_display, this), gui_context());
+	_vca->mute_control()->Changed.connect (vca_connections, invalidator (*this), std::bind (&VCATimeAxisView::update_mute_display, this), gui_context());
+	_vca->DropReferences.connect (vca_connections, invalidator (*this), std::bind (&VCATimeAxisView::self_delete, this), gui_context());
 
 	solo_button.set_controllable (_vca->solo_control());
 	mute_button.set_controllable (_vca->mute_control());

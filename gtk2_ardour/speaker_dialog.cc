@@ -521,7 +521,7 @@ SpeakerDialog::set_selected (int i)
 		azimuth_adjustment.set_value (speakers->speakers()[selected_index].angles().azi);
 		speakers->speakers()[selected_index].PositionChanged.connect (
 			selected_speaker_connection, MISSING_INVALIDATOR,
-			boost::bind (&SpeakerDialog::speaker_position_changed, this),
+			std::bind (&SpeakerDialog::speaker_position_changed, this),
 			gui_context ()
 			);
 	}

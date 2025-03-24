@@ -19,9 +19,9 @@
 #ifndef __ardour_trigger_strip__
 #define __ardour_trigger_strip__
 
-#include <gtkmm/box.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/frame.h>
+#include <ytkmm/box.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/frame.h>
 
 #include "pbd/stateful.h"
 
@@ -33,6 +33,7 @@
 #include "automation_controller.h"
 #include "axis_view.h"
 #include "fitted_canvas_widget.h"
+#include "io_button.h"
 #include "level_meter.h"
 #include "panner_ui.h"
 #include "processor_box.h"
@@ -63,7 +64,7 @@ public:
 
 	void fast_update ();
 
-	static PBD::Signal1<void, TriggerStrip*> CatchDeletion;
+	static PBD::Signal<void(TriggerStrip*)> CatchDeletion;
 
 protected:
 	void self_delete ();
@@ -121,10 +122,15 @@ private:
 	Gtk::Table mute_solo_table;
 	Gtk::Table volume_table;
 
+	ArdourWidgets::ArdourButton* rec_toggle_button;
+	bool rec_toggle_press (GdkEventButton* ev);
+
 	/* Widgets */
 	FittedCanvasWidget _tmaster_widget;
 	TriggerMaster*     _tmaster;
 
+	IOButton                                input_button;
+	IOButton                                output_button;
 	ArdourWidgets::ArdourButton             _name_button;
 	ProcessorBox                            _processor_box;
 	TriggerBoxWidget                        _trigger_display;

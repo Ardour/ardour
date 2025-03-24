@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_point_selection_h__
-#define __ardour_gtk_point_selection_h__
+#pragma once
 
 #include <list>
 
@@ -29,4 +28,3 @@ class PointSelection : public std::list<ControlPoint *>
 {
 };
 
-#endif /* __ardour_gtk_point_selection_h__ */

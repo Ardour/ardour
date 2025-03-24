@@ -68,8 +68,8 @@ EditorSources::EditorSources (Editor* e)
 
 	_change_connection = _display.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &EditorSources::selection_changed));
 
-	e->EditorFreeze.connect (_editor_freeze_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::freeze_tree_model, this), gui_context ());
-	e->EditorThaw.connect (_editor_thaw_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::thaw_tree_model, this), gui_context ());
+	e->EditorFreeze.connect (_editor_freeze_connection, MISSING_INVALIDATOR, std::bind (&EditorSources::freeze_tree_model, this), gui_context ());
+	e->EditorThaw.connect (_editor_thaw_connection, MISSING_INVALIDATOR, std::bind (&EditorSources::thaw_tree_model, this), gui_context ());
 }
 
 void
@@ -125,7 +125,7 @@ EditorSources::selection_changed ()
 
 					for (set<std::shared_ptr<Region>>::iterator region = regions.begin (); region != regions.end (); region++) {
 						_change_connection.block (true);
-						_editor->set_selected_regionview_from_region_list (*region, Selection::Add);
+						_editor->set_selected_regionview_from_region_list (*region, SelectionAdd);
 						_change_connection.block (false);
 					}
 				}
@@ -228,7 +228,7 @@ EditorSources::remove_selected_sources ()
 							 * (Source::drop_references -> Region::source_deleted,
 							 *  -> Region::drop_references). see f58f5bef55a5aa1
 							 */
-							_editor->set_selected_regionview_from_region_list (region, Selection::Add);
+							_editor->set_selected_regionview_from_region_list (region, SelectionAdd);
 							_change_connection.block (false);
 						}
 
@@ -294,7 +294,7 @@ EditorSources::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 
 		if (UIConfiguration::instance ().get_only_copy_imported_files () || copy) {
 			_editor->do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion,
-			                    SrcBest, SMFTrackNumber, SMFTempoIgnore, pos);
+			                    SrcBest, SMFFileAndTrackName, SMFTempoIgnore, pos);
 		} else {
 			_editor->do_embed (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion, pos);
 		}

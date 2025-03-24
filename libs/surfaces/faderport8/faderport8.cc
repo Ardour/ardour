@@ -62,7 +62,7 @@ using namespace ArdourSurface::FP_NAMESPACE::FP8Types;
 
 #include "pbd/i18n.h"
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 #ifndef NDEBUG
 //#define VERBOSE_DEBUG
@@ -107,26 +107,36 @@ FaderPort8::probe (std::string& i, std::string& o)
 	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsOutput|IsTerminal), midi_inputs);
 	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsInput|IsTerminal), midi_outputs);
 
-	auto has_fp8 = [](string const& s) {
-		std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name (s);
+	if (midi_outputs.size () == 0)
+		DEBUG_TRACE (DEBUG::FaderPort8, "prope got no output midi ports at all - perhaps an audio backend problem?\n");
+	// midi_inputs will never be empty - there is always at least x-virtual-keyboard
+
+	const string needle =
 #ifdef FADERPORT16
-		return pn.find ("PreSonus FP16 Port 1") != string::npos;
+	    "PreSonus FP16 Port 1"
 #elif defined FADERPORT2
-		return pn.find ("PreSonus FP2") != string::npos;
+	    "PreSonus FP2"
 #else
-		return pn.find ("PreSonus FP8") != string::npos;
+	    "PreSonus FP8 Port 1"
 #endif
+	    ;
+
+	auto has_fp8 = [&needle] (string const& s) {
+		std::string pn = AudioEngine::instance ()->get_hardware_port_name_by_name (s);
+		return pn.find (needle) != string::npos;
 	};
 
 	auto pi = std::find_if (midi_inputs.begin (), midi_inputs.end (), has_fp8);
 	auto po = std::find_if (midi_outputs.begin (), midi_outputs.end (), has_fp8);
 
 	if (pi == midi_inputs.end () || po == midi_outputs.end ()) {
+		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("prope did not find the '%1' midi ports\n", needle));
 		return false;
 	}
 
 	i = *pi;
 	o = *po;
+	DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("prope found midi ports '%1' and '%2'\n", i, o));
 	return true;
 }
 
@@ -202,15 +212,15 @@ FaderPort8::FaderPort8 (Session& s)
 		session->engine().make_port_name_non_relative (outp->name())
 		);
 
-	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::connection_handler, this, _2, _4), this);
-	ARDOUR::AudioEngine::instance()->Stopped.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::engine_reset, this), this);
-	ARDOUR::Port::PortDrop.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::engine_reset, this), this);
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::connection_handler, this, _2, _4), this);
+	ARDOUR::AudioEngine::instance()->Stopped.connect (port_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::engine_reset, this), this);
+	ARDOUR::Port::PortDrop.connect (port_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::engine_reset, this), this);
 
 	/* bind button events to call libardour actions */
 	setup_actions ();
 
-	_ctrls.FaderModeChanged.connect_same_thread (modechange_connections, boost::bind (&FaderPort8::notify_fader_mode_changed, this));
-	_ctrls.MixModeChanged.connect_same_thread (modechange_connections, boost::bind (&FaderPort8::assign_strips, this));
+	_ctrls.FaderModeChanged.connect_same_thread (modechange_connections, std::bind (&FaderPort8::notify_fader_mode_changed, this));
+	_ctrls.MixModeChanged.connect_same_thread (modechange_connections, std::bind (&FaderPort8::assign_strips, this));
 
 	std::string  pn_in, pn_out;
 	if (probe (pn_in, pn_out)) {
@@ -244,8 +254,6 @@ FaderPort8::~FaderPort8 ()
 		AudioEngine::instance()->unregister_port (_output_port);
 		_output_port.reset ();
 	}
-
-	tear_down_gui ();
 }
 
 /* ****************************************************************************
@@ -266,6 +274,7 @@ FaderPort8::do_request (FaderPort8Request* req)
 void
 FaderPort8::stop ()
 {
+	tear_down_gui ();
 	DEBUG_TRACE (DEBUG::FaderPort8, "BaseUI::quit ()\n");
 	BaseUI::quit ();
 	close (); // drop references, disconnect from session signals
@@ -274,8 +283,6 @@ FaderPort8::stop ()
 void
 FaderPort8::thread_init ()
 {
-	pthread_set_name (event_loop_name().c_str());
-
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), event_loop_name(), 2048);
 	ARDOUR::SessionEvent::create_per_thread_pool (event_loop_name(), 128);
 
@@ -458,7 +465,7 @@ FaderPort8::connection_handler (std::string name1, std::string name2)
 	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (std::shared_ptr<ARDOUR::Port>(_output_port)->name());
 
 	if (ni == name1 || ni == name2) {
-		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connection notify %1 and %2\n", name1, name2));
+		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connection notify inputs '%1' and '%2'\n", name1, name2));
 		if (_input_port->connected ()) {
 			if (_connection_state & InputConnected) {
 				return false;
@@ -468,7 +475,7 @@ FaderPort8::connection_handler (std::string name1, std::string name2)
 			_connection_state &= ~InputConnected;
 		}
 	} else if (no == name1 || no == name2) {
-		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connection notify %1 and %2\n", name1, name2));
+		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connection notify outputs '%1' and '%2'\n", name1, name2));
 		if (_output_port->connected ()) {
 			if (_connection_state & OutputConnected) {
 				return false;
@@ -479,7 +486,7 @@ FaderPort8::connection_handler (std::string name1, std::string name2)
 		}
 	} else {
 #ifdef VERBOSE_DEBUG
-		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connections between %1 and %2 changed, but I ignored it\n", name1, name2));
+		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connections between '%1' and '%2' changed, but I ignored it\n", name1, name2));
 #endif
 		/* not our ports */
 		return false;
@@ -562,14 +569,14 @@ FaderPort8::midi_input_handler (Glib::IOCondition ioc, std::weak_ptr<ARDOUR::Asy
 void
 FaderPort8::start_midi_handling ()
 {
-	_input_port->parser()->sysex.connect_same_thread (midi_connections, boost::bind (&FaderPort8::sysex_handler, this, _1, _2, _3));
-	_input_port->parser()->poly_pressure.connect_same_thread (midi_connections, boost::bind (&FaderPort8::polypressure_handler, this, _1, _2));
+	_input_port->parser()->sysex.connect_same_thread (midi_connections, std::bind (&FaderPort8::sysex_handler, this, _1, _2, _3));
+	_input_port->parser()->poly_pressure.connect_same_thread (midi_connections, std::bind (&FaderPort8::polypressure_handler, this, _1, _2));
 	for (uint8_t i = 0; i < 16; ++i) {
-	_input_port->parser()->channel_pitchbend[i].connect_same_thread (midi_connections, boost::bind (&FaderPort8::pitchbend_handler, this, _1, i, _2));
+	_input_port->parser()->channel_pitchbend[i].connect_same_thread (midi_connections, std::bind (&FaderPort8::pitchbend_handler, this, _1, i, _2));
 	}
-	_input_port->parser()->controller.connect_same_thread (midi_connections, boost::bind (&FaderPort8::controller_handler, this, _1, _2));
-	_input_port->parser()->note_on.connect_same_thread (midi_connections, boost::bind (&FaderPort8::note_on_handler, this, _1, _2));
-	_input_port->parser()->note_off.connect_same_thread (midi_connections, boost::bind (&FaderPort8::note_off_handler, this, _1, _2));
+	_input_port->parser()->controller.connect_same_thread (midi_connections, std::bind (&FaderPort8::controller_handler, this, _1, _2));
+	_input_port->parser()->note_on.connect_same_thread (midi_connections, std::bind (&FaderPort8::note_on_handler, this, _1, _2));
+	_input_port->parser()->note_off.connect_same_thread (midi_connections, std::bind (&FaderPort8::note_off_handler, this, _1, _2));
 
 	/* This connection means that whenever data is ready from the input
 	 * port, the relevant thread will invoke our ::midi_input_handler()
@@ -1069,17 +1076,17 @@ FaderPort8::assign_stripables (bool select_only)
 
 		_assigned_strips[*s] = id;
 		(*s)->DropReferences.connect (assigned_stripable_connections, MISSING_INVALIDATOR,
-				boost::bind (&FaderPort8::notify_stripable_added_or_removed, this), this);
+				std::bind (&FaderPort8::notify_stripable_added_or_removed, this), this);
 
 		(*s)->PropertyChanged.connect (assigned_stripable_connections, MISSING_INVALIDATOR,
-				boost::bind (&FaderPort8::notify_stripable_property_changed, this, std::weak_ptr<Stripable> (*s), _1), this);
+				std::bind (&FaderPort8::notify_stripable_property_changed, this, std::weak_ptr<Stripable> (*s), _1), this);
 		(*s)->presentation_info ().PropertyChanged.connect (assigned_stripable_connections, MISSING_INVALIDATOR,
-				boost::bind (&FaderPort8::notify_stripable_property_changed, this, std::weak_ptr<Stripable> (*s), _1), this);
+				std::bind (&FaderPort8::notify_stripable_property_changed, this, std::weak_ptr<Stripable> (*s), _1), this);
 
 		if (std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route>(*s)) {
 			if (r->panner_shell()) {
 				r->panner_shell()->Changed.connect (assigned_stripable_connections, MISSING_INVALIDATOR,
-				boost::bind (&FaderPort8::notify_stripable_property_changed, this, std::weak_ptr<Stripable> (*s), PropertyChange()), this);
+				std::bind (&FaderPort8::notify_stripable_property_changed, this, std::weak_ptr<Stripable> (*s), PropertyChange()), this);
 			}
 		}
 
@@ -1094,7 +1101,7 @@ FaderPort8::assign_stripables (bool select_only)
 			_ctrls.strip(id).set_stripable (*s, _ctrls.fader_mode() == ModePan);
 		}
 
-		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_strip, this, std::weak_ptr<Stripable> (*s)));
+		 std::function<void ()> cb (std::bind (&FaderPort8::select_strip, this, std::weak_ptr<Stripable> (*s)));
 		 _ctrls.strip(id).set_select_cb (cb);
 
 		if (++id == N_STRIPS) {
@@ -1142,7 +1149,7 @@ FaderPort8::lock_link ()
 	if (!ac) {
 		return;
 	}
-	ac->DropReferences.connect (link_locked_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort8::unlock_link, this, true), this);
+	ac->DropReferences.connect (link_locked_connection, MISSING_INVALIDATOR, std::bind (&FaderPort8::unlock_link, this, true), this);
 
 	// stop watching for focus events
 	link_connection.disconnect ();
@@ -1175,7 +1182,7 @@ FaderPort8::start_link ()
 	_ctrls.button (FP8Controls::BtnLock).set_active (true);
 	nofity_focus_control (_link_control); // update BtnLink, BtnLock colors
 
-	PBD::Controllable::GUIFocusChanged.connect (link_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort8::nofity_focus_control, this, _1), this);
+	PBD::Controllable::GUIFocusChanged.connect (link_connection, MISSING_INVALIDATOR, std::bind (&FaderPort8::nofity_focus_control, this, _1), this);
 }
 
 
@@ -1288,7 +1295,7 @@ FaderPort8::assign_plugin_presets (std::shared_ptr<PluginInsert> pi)
 	uint8_t id = 0;
 	for (size_t i = _parameter_off; i < (size_t)n_parameters; ++i) {
 		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT01 & ~FP8Strip::CTRL_TEXT3 & ~FP8Strip::CTRL_SELECT);
-		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin_preset, this, i));
+		 std::function<void ()> cb (std::bind (&FaderPort8::select_plugin_preset, this, i));
 		_ctrls.strip(id).set_select_cb (cb);
 		_ctrls.strip(id).select_button ().set_active (true);
 		if (active != presets.at(i)) {
@@ -1315,7 +1322,7 @@ FaderPort8::assign_plugin_presets (std::shared_ptr<PluginInsert> pi)
 	// pin clear-preset to the last slot
 	assert (id == (N_STRIPS - 1));
 	_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT0 & ~FP8Strip::CTRL_TEXT3 & ~FP8Strip::CTRL_SELECT);
-	 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin_preset, this, SIZE_MAX));
+	 std::function<void ()> cb (std::bind (&FaderPort8::select_plugin_preset, this, SIZE_MAX));
 	_ctrls.strip(id).set_select_cb (cb);
 	_ctrls.strip(id).select_button ().set_blinking (false);
 	_ctrls.strip(id).select_button ().set_color (active.uri.empty() ? 0x00ffffff : 0x0000ffff);
@@ -1412,7 +1419,7 @@ FaderPort8::select_plugin (int num)
 
 	if (num < 0) {
 		processor_connections.drop_connections ();
-		r->DropReferences.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FP8Controls::set_fader_mode, &_ctrls, ModeTrack), this);
+		r->DropReferences.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FP8Controls::set_fader_mode, &_ctrls, ModeTrack), this);
 
 		build_well_known_processor_ctrls (r, -num);
 		assign_processor_ctrls ();
@@ -1454,12 +1461,12 @@ FaderPort8::select_plugin (int num)
 		_plugin_insert = std::weak_ptr<ARDOUR::PluginInsert> (pi);
 		std::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin ();
 
-		plugin->PresetAdded.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
-		plugin->PresetRemoved.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
-		plugin->PresetLoaded.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
-		plugin->PresetDirty.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
+		plugin->PresetAdded.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::preset_changed, this), this);
+		plugin->PresetRemoved.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::preset_changed, this), this);
+		plugin->PresetLoaded.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::preset_changed, this), this);
+		plugin->PresetDirty.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::preset_changed, this), this);
 
-		r->MappedControlsChanged.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::stripable_selection_changed, this), this);
+		r->MappedControlsChanged.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::stripable_selection_changed, this), this);
 
 		if (_auto_pluginui) {
 			pi->ShowUI (); /* EMIT SIGNAL */
@@ -1478,7 +1485,7 @@ FaderPort8::select_plugin (int num)
 
 	// disconnect signals from spill_plugins: processors_changed and ActiveChanged
 	processor_connections.drop_connections ();
-	r->DropReferences.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FP8Controls::set_fader_mode, &_ctrls, ModeTrack), this);
+	r->DropReferences.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FP8Controls::set_fader_mode, &_ctrls, ModeTrack), this);
 
 	std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (proc);
 	assert (pi); // nth_plugin() always returns a PI.
@@ -1490,13 +1497,13 @@ FaderPort8::select_plugin (int num)
 #endif
 	{
 		_plugin_insert = std::weak_ptr<ARDOUR::PluginInsert> (pi);
-		pi->ActiveChanged.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_plugin_active_changed, this), this);
+		pi->ActiveChanged.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::notify_plugin_active_changed, this), this);
 		std::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin ();
 
-		plugin->PresetAdded.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
-		plugin->PresetRemoved.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
-		plugin->PresetLoaded.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
-		plugin->PresetDirty.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
+		plugin->PresetAdded.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::preset_changed, this), this);
+		plugin->PresetRemoved.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::preset_changed, this), this);
+		plugin->PresetLoaded.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::preset_changed, this), this);
+		plugin->PresetDirty.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::preset_changed, this), this);
 
 		if (_auto_pluginui) {
 			pi->ShowUI (); /* EMIT SIGNAL */
@@ -1505,7 +1512,7 @@ FaderPort8::select_plugin (int num)
 
 	// switching to "Mode Track" -> calls FaderPort8::notify_fader_mode_changed()
 	// which drops the references, disconnects the signal and re-spills tracks
-	proc->DropReferences.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FP8Controls::set_fader_mode, &_ctrls, ModeTrack), this);
+	proc->DropReferences.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FP8Controls::set_fader_mode, &_ctrls, ModeTrack), this);
 
 	// build params
 	_proc_params.clear();
@@ -1563,10 +1570,10 @@ FaderPort8::spill_plugins ()
 
 	// switching to "Mode Track" -> calls FaderPort8::notify_fader_mode_changed()
 	// which drops the references, disconnects the signal and re-spills tracks
-	r->DropReferences.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FP8Controls::set_fader_mode, &_ctrls, ModeTrack), this);
+	r->DropReferences.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FP8Controls::set_fader_mode, &_ctrls, ModeTrack), this);
 
 	// update when processor change
-	r->processors_changed.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::spill_plugins, this), this);
+	r->processors_changed.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::spill_plugins, this), this);
 
 	// count available
 	std::shared_ptr<Processor> proc;
@@ -1637,7 +1644,7 @@ FaderPort8::spill_plugins ()
 			break;
 		}
 		std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (proc);
-		boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, procs[i]));
+		std::function<void ()> cb (std::bind (&FaderPort8::select_plugin, this, procs[i]));
 
 		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
 		_ctrls.strip(id).set_select_cb (cb);
@@ -1649,7 +1656,7 @@ FaderPort8::spill_plugins ()
 		_ctrls.strip(id).set_text_line (2, PluginManager::plugin_type_name (pi->type()));
 		_ctrls.strip(id).set_text_line (3, "");
 
-		pi->ActiveChanged.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::spill_plugins, this), this);
+		pi->ActiveChanged.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::spill_plugins, this), this);
 
 		if (++id == spillwidth) {
 			break;
@@ -1662,7 +1669,7 @@ FaderPort8::spill_plugins ()
 
 	if (have_well_known_gate) {
 			assert (id < N_STRIPS);
-		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, -3));
+		 std::function<void ()> cb (std::bind (&FaderPort8::select_plugin, this, -3));
 		 _ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
 		 _ctrls.strip(id).set_select_cb (cb);
 		 _ctrls.strip(id).select_button ().set_color (0xffff00ff);
@@ -1676,7 +1683,7 @@ FaderPort8::spill_plugins ()
 	}
 	if (have_well_known_eq) {
 			assert (id < N_STRIPS);
-		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, -1));
+		 std::function<void ()> cb (std::bind (&FaderPort8::select_plugin, this, -1));
 		 _ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
 		 _ctrls.strip(id).set_select_cb (cb);
 		 _ctrls.strip(id).select_button ().set_color (0xffff00ff);
@@ -1690,7 +1697,7 @@ FaderPort8::spill_plugins ()
 	}
 	if (have_well_known_comp) {
 			assert (id < N_STRIPS);
-		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, -2));
+		 std::function<void ()> cb (std::bind (&FaderPort8::select_plugin, this, -2));
 		 _ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
 		 _ctrls.strip(id).set_select_cb (cb);
 		 _ctrls.strip(id).select_button ().set_color (0xffff00ff);
@@ -1728,7 +1735,7 @@ FaderPort8::assign_sends ()
 	}
 
 	drop_ctrl_connections ();
-	s->DropReferences.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FP8Controls::set_fader_mode, &_ctrls, ModeTrack), this);
+	s->DropReferences.connect (processor_connections, MISSING_INVALIDATOR, std::bind (&FP8Controls::set_fader_mode, &_ctrls, ModeTrack), this);
 
 	set_periodic_display_mode (FP8Strip::SendDisplay);
 
@@ -2053,16 +2060,16 @@ FaderPort8::subscribe_to_strip_signals ()
 		std::shared_ptr<AutomationControl> ac;
 		ac = s->gain_control();
 		if (ac && ac->alist()) {
-			ac->alist()->automation_state_changed.connect (route_state_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_route_state_changed, this), this);
+			ac->alist()->automation_state_changed.connect (route_state_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::notify_route_state_changed, this), this);
 		}
 		ac = s->pan_azimuth_control();
 		if (ac && ac->alist()) {
-			ac->alist()->automation_state_changed.connect (route_state_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_route_state_changed, this), this);
+			ac->alist()->automation_state_changed.connect (route_state_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::notify_route_state_changed, this), this);
 		}
 #ifdef FADERPORT2
 		ac = s->rec_enable_control();
 		if (ac) {
-			ac->Changed.connect (route_state_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_route_state_changed, this), this);
+			ac->Changed.connect (route_state_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::notify_route_state_changed, this), this);
 		}
 #endif
 	}

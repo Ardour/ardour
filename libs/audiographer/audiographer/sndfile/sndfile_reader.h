@@ -1,6 +1,8 @@
 #ifndef AUDIOGRAPHER_SNDFILE_READER_H
 #define AUDIOGRAPHER_SNDFILE_READER_H
 
+#include "pbd/compose.h"
+
 #include "audiographer/utils/listed_source.h"
 #include "audiographer/process_context.h"
 #include "audiographer/sndfile/sndfile_base.h"
@@ -32,9 +34,9 @@ class SndfileReader
 	samplecnt_t read (ProcessContext<T> & context)
 	{
 		if (throw_level (ThrowStrict) && context.channels() != channels() ) {
-			throw Exception (*this, boost::str (boost::format
-				("Wrong number of channels given to process(), %1% instead of %2%")
-				% context.channels() % channels()));
+			throw Exception (*this, string_compose
+					("Wrong number of channels given to process(), %1 instead of %2",
+					context.channels(), channels()));
 		}
 
 		samplecnt_t const samples_read = SndfileHandle::read (context.data(), context.samples());

@@ -16,12 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_transport_master_manager_h__
-#define __ardour_transport_master_manager_h__
+#pragma once
 
 #include <string>
-
-#include <boost/noncopyable.hpp>
 
 #include "ardour/transport_master.h"
 #include "ardour/types.h"
@@ -30,10 +27,12 @@ namespace ARDOUR {
 
 class UI_TransportMaster;
 
-class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
+class LIBARDOUR_API TransportMasterManager
 {
   public:
 	static TransportMasterManager& create ();
+	TransportMasterManager (const TransportMasterManager&) = delete;
+	TransportMasterManager& operator= (const TransportMasterManager&) = delete;
 	~TransportMasterManager ();
 
 	int set_default_configuration ();
@@ -54,8 +53,8 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 	int remove (std::string const & name);
 	void clear (bool emit = true);
 
-	PBD::Signal1<void,std::shared_ptr<TransportMaster> > Added;
-	PBD::Signal1<void,std::shared_ptr<TransportMaster> > Removed; // null argument means "clear"
+	PBD::Signal<void(std::shared_ptr<TransportMaster> )> Added;
+	PBD::Signal<void(std::shared_ptr<TransportMaster> )> Removed; // null argument means "clear"
 
 	double pre_process_transport_masters (pframes_t, samplepos_t session_transport_position);
 
@@ -67,7 +66,7 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 	int set_current (SyncSource);
 	int set_current (std::string const &);
 
-	PBD::Signal2<void,std::shared_ptr<TransportMaster>, std::shared_ptr<TransportMaster> > CurrentChanged;
+	PBD::Signal<void(std::shared_ptr<TransportMaster>, std::shared_ptr<TransportMaster> )> CurrentChanged;
 
 	int set_state (XMLNode const &, int);
 	XMLNode& get_state() const;
@@ -118,7 +117,7 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 	static TransportMasterManager* _instance;
 
 	/* original TC format in case the slave changed it */
-	boost::optional<Timecode::TimecodeFormat> _session_tc_format;
+	std::optional<Timecode::TimecodeFormat> _session_tc_format;
 	void maybe_restore_tc_format ();
 	void maybe_set_tc_format ();
 
@@ -132,4 +131,3 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 
 } // namespace ARDOUR
 
-#endif /* __ardour_transport_master_manager_h__ */

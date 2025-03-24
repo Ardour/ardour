@@ -19,9 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/label.h>
-#include <gtkmm/liststore.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/label.h>
+#include <ytkmm/liststore.h>
 
 #include "pbd/file_utils.h"
 #include "pbd/strsplit.h"
@@ -272,9 +272,9 @@ FPGUI::FPGUI (FaderPort& p)
 
 	/* catch future changes to connection state */
 
-	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), boost::bind (&FPGUI::connection_handler, this), gui_context());
-	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), boost::bind (&FPGUI::connection_handler, this), gui_context());
-	fp.ConnectionChange.connect (_port_connections, invalidator (*this), boost::bind (&FPGUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), std::bind (&FPGUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), std::bind (&FPGUI::connection_handler, this), gui_context());
+	fp.ConnectionChange.connect (_port_connections, invalidator (*this), std::bind (&FPGUI::connection_handler, this), gui_context());
 }
 
 FPGUI::~FPGUI ()
@@ -392,8 +392,8 @@ FPGUI::build_proj_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 	actions.push_back (make_pair (string (_("Zoom to Session")), string (X_("Editor/zoom-to-session"))));
 
 #if 0
-	actions.push_back (make_pair (string (_("Zoom In")), string (X_("Editor/temporal-zoom-in"))));
-	actions.push_back (make_pair (string (_("Zoom Out")), string (X_("Editor/temporal-zoom-out"))));
+	actions.push_back (make_pair (string (_("Zoom In")), string (X_("Editing/temporal-zoom-in"))));
+	actions.push_back (make_pair (string (_("Zoom Out")), string (X_("Editing/temporal-zoom-out"))));
 #endif
 
 	build_action_combo (cb, actions, FaderPort::Proj, bs);
@@ -436,10 +436,6 @@ FPGUI::build_foot_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 void
 FPGUI::build_user_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 {
-#ifndef MIXBUS
-	bs = FaderPort::ButtonState (bs|FaderPort::UserDown);
-#endif
-
 	/* set the active "row" to the right value for the current button binding */
 
 	string current_action = fp.get_action (FaderPort::User, false, bs); /* lookup release action */

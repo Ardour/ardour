@@ -24,12 +24,13 @@
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 
-#include <gtkmm/table.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/table.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/messagedialog.h>
 
 #include "gtkmm2ext/colors.h"
 
+#include "gui_thread.h"
 #include "route_group_dialog.h"
 #include "group_tabs.h"
 
@@ -115,9 +116,9 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	_share_monitoring.set_active (_group->is_monitoring());
 
 	if (_group->name ().empty()) {
-		_initial_name = "1";
+		_initial_name = bump_name_abc ("");
 		while (!unique_name (_initial_name)) {
-			_initial_name = bump_name_number (_initial_name);
+			_initial_name = bump_name_abc (_initial_name);
 		}
 		_name.set_text (_initial_name);
 		update();
@@ -177,6 +178,8 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 		add_button (Stock::CANCEL, RESPONSE_CANCEL);
 		add_button (Stock::NEW, RESPONSE_OK);
 		set_default_response (RESPONSE_OK);
+	} else {
+		_group->Destroyed.connect (_group_connection, invalidator (*this), std::bind (&Dialog::response, this, RESPONSE_CANCEL), gui_context());
 	}
 
 	show_all_children ();

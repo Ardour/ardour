@@ -300,8 +300,6 @@ public:
 	bool edited() const      { return _edited; }
 	void set_edited(bool yn) { _edited = yn; }
 
-	bool overlaps (const NotePtr& ev,
-	               const NotePtr& ignore_this_note) const;
 	bool contains (const NotePtr& ev) const;
 
 	bool add_note_unlocked (const NotePtr note, void* arg = 0);
@@ -316,6 +314,10 @@ public:
 	uint8_t lowest_note()  const { return _lowest_note; }
 	uint8_t highest_note() const { return _highest_note; }
 
+	uint16_t channels_present () const { return _channels_present; }
+
+	Time duration() const { return _duration; }
+	void set_duration (Time const &);
 
 protected:
 	bool                   _edited;
@@ -337,7 +339,6 @@ protected:
 private:
 	friend class const_iterator;
 
-	bool overlaps_unlocked (const NotePtr& ev, const NotePtr& ignore_this_note) const;
 	bool contains_unlocked (const NotePtr& ev) const;
 
 	void append_note_on_unlocked(const Event<Time>& event, Evoral::event_id_t);
@@ -370,6 +371,12 @@ private:
 
 	uint8_t _lowest_note;
 	uint8_t _highest_note;
+	uint16_t _channels_present;
+
+	Time    _duration;
+	bool    _explicit_duration;
+
+	void update_duration_unlocked (Time const &, bool can_shorten = false);
 };
 
 

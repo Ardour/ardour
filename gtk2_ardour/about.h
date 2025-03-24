@@ -17,10 +17,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_about_h__
-#define __ardour_gtk_about_h__
+#pragma once
 
-#include <gtkmm/aboutdialog.h>
+#include <ytkmm/aboutdialog.h>
 
 #include "ardour/session_handle.h"
 
@@ -39,4 +38,3 @@ private:
 	static void launch_homepage (AboutDialog& about, const Glib::ustring& website_url);
 };
 
-#endif /* __ardour_gtk_about_h__ */

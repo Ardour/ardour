@@ -28,8 +28,10 @@
 
 #include "pbd/controllable.h"
 #include "pbd/stateful.h"
-#include "ardour/types.h"
+
 #include "ardour/processor.h"
+#include "ardour/route_group.h"
+#include "ardour/types.h"
 
 #include "osc.h"
 
@@ -54,6 +56,7 @@ class OSCSelectObserver
 	void set_plugin_id (int id, uint32_t page);
 	void set_plugin_page (uint32_t page);
 	void set_plugin_size (uint32_t size);
+	void set_feedback (std::bitset<32> fb);
 
   private:
 	std::shared_ptr<ARDOUR::Stripable> _strip;

@@ -21,8 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_route_group_h__
-#define __ardour_route_group_h__
+#pragma once
 
 #include <list>
 #include <set>
@@ -146,9 +145,9 @@ public:
 	std::shared_ptr<RouteList> route_list() { return routes; }
 
 	/** Emitted when a route has been added to this group */
-	PBD::Signal2<void, RouteGroup *, std::weak_ptr<ARDOUR::Route> > RouteAdded;
+	PBD::Signal<void(RouteGroup *, std::weak_ptr<ARDOUR::Route> )> RouteAdded;
 	/** Emitted when a route has been removed from this group */
-	PBD::Signal2<void, RouteGroup *, std::weak_ptr<ARDOUR::Route> > RouteRemoved;
+	PBD::Signal<void(RouteGroup *, std::weak_ptr<ARDOUR::Route> )> RouteRemoved;
 
 	XMLNode& get_state () const;
 
@@ -209,4 +208,3 @@ private:
 
 } /* namespace */
 
-#endif /* __ardour_route_group_h__ */

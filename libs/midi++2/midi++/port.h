@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef  __libmidi_port_base_h__
-#define  __libmidi_port_base_h__
+#pragma once
 
 #include <string>
 #include <iostream>
@@ -153,4 +152,3 @@ std::ostream & operator << (std::ostream& os, const Port& port);
 
 } // namespace MIDI
 
-#endif // __libmidi_port_base_h__

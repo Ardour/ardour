@@ -178,10 +178,10 @@ int
 JACKAudioBackend::set_port_property (PortHandle port, const std::string& key, const std::string& value, const std::string& type)
 {
 #ifdef HAVE_JACK_METADATA // really everyone ought to have this by now.
-	int rv = -1;
+	int rv;
 	jack_client_t* client = _jack_connection->jack();
 	jack_uuid_t uuid = jack_port_uuid (std::dynamic_pointer_cast<JackPort>(port)->jack_ptr);
-	return jack_set_property(client, uuid, key.c_str(), value.c_str(), type.c_str());
+	JACK_SERVER_CALL (rv = jack_set_property(client, uuid, key.c_str(), value.c_str(), type.c_str()));
 	return rv;
 #else
 	return -1;

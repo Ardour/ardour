@@ -22,13 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_region_gain_line_h__
-#define __ardour_gtk_region_gain_line_h__
+#pragma once
 
 #include "ardour/ardour.h"
 
-
-#include "automation_line.h"
+#include "region_fx_line.h"
 
 namespace ARDOUR {
 	class Session;
@@ -37,23 +35,20 @@ namespace ARDOUR {
 class TimeAxisView;
 class AudioRegionView;
 
-class AudioRegionGainLine : public AutomationLine
+class AudioRegionGainLine : public RegionFxLine
 {
 public:
 	AudioRegionGainLine (const std::string & name, AudioRegionView&, ArdourCanvas::Container& parent, std::shared_ptr<ARDOUR::AutomationList>);
 
-	Temporal::timepos_t get_origin() const;
-
 	void start_drag_single (ControlPoint*, double, float);
+	void start_drag_line (uint32_t, uint32_t, float);
+	void start_drag_multiple (std::list<ControlPoint*>, float, XMLNode*);
 	void end_drag (bool with_push, uint32_t final_index);
-
+	void end_draw_merge ();
+	void enable_automation ();
 	void remove_point (ControlPoint&);
-	AudioRegionView& region_view () { return rv; }
 
 private:
-	PBD::ScopedConnection _region_changed_connection;
-	void region_changed (const PBD::PropertyChange& what_changed);
-	AudioRegionView& rv;
+	AudioRegionView& arv;
 };
 
-#endif /* __ardour_gtk_region_gain_line_h__ */

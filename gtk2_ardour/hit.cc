@@ -29,7 +29,7 @@
 using namespace ARDOUR;
 using namespace ArdourCanvas;
 
-Hit::Hit (MidiRegionView& region, Item* parent, double size, const std::shared_ptr<NoteType> note, bool with_events)
+Hit::Hit (MidiView& region, Item* parent, double size, const std::shared_ptr<NoteType> note, bool with_events)
 	: NoteBase (region, with_events, note)
 {
 	_polygon = new ArdourCanvas::Polygon (parent);
@@ -40,7 +40,9 @@ Hit::Hit (MidiRegionView& region, Item* parent, double size, const std::shared_p
 
 Hit::~Hit ()
 {
-	delete _polygon;
+	/* do not delete the visual note here, because that will be handled by
+	 * the parent
+	 */
 }
 
 void

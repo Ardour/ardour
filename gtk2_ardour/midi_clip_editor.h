@@ -17,14 +17,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __midi_region_trimmer_box_h__
-#define __midi_region_trimmer_box_h__
+#pragma once
 
 #include <map>
 
-#include <gtkmm/box.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
+#include <ytkmm/box.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
@@ -50,16 +49,7 @@ namespace ArdourCanvas
 	class Polygon;
 }
 
-class MidiClipEditor : public ArdourCanvas::GtkCanvas
-{
-public:
-	MidiClipEditor ();
-	~MidiClipEditor ();
-
-private:
-	ArdourCanvas::Rectangle* frame;
-	bool                     event_handler (GdkEvent* ev);
-};
+class Pianoroll;
 
 class MidiClipEditorBox : public ClipEditorBox
 {
@@ -76,11 +66,10 @@ private:
 	Gtk::Label _header_label;
 	Gtk::Table table;
 
-	MidiClipEditor* editor;
+	Pianoroll* editor;
 
 	PBD::ScopedConnection state_connection;
 
 	std::shared_ptr<ARDOUR::Region> _region;
 };
 
-#endif /* __midi_region_trimmer_box_h__ */

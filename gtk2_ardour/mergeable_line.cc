@@ -20,8 +20,8 @@
 
 #include "ardour/session.h"
 
-#include "automation_line.h"
-#include "editor.h"
+#include "editor_automation_line.h"
+#include "editing_context.h"
 #include "mergeable_line.h"
 #include "route_time_axis.h"
 #include "selectable.h"
@@ -32,7 +32,7 @@
 using namespace ARDOUR;
 
 void
-MergeableLine::merge_drawn_line (Editor& e, Session& s, Evoral::ControlList::OrderedPoints& points, bool thin)
+MergeableLine::merge_drawn_line (EditingContext& e, Session& s, Evoral::ControlList::OrderedPoints& points, bool thin)
 {
 	if (points.empty()) {
 		return;
@@ -85,7 +85,7 @@ MergeableLine::merge_drawn_line (Editor& e, Session& s, Evoral::ControlList::Ord
 	}
 
 	list->freeze ();
-	list->editor_add_ordered (points, false);
+	list->editor_add_ordered (points, true);
 	if (thin) {
 		list->thin (Config->get_automation_thinning_factor());
 	}
@@ -101,7 +101,9 @@ MergeableLine::merge_drawn_line (Editor& e, Session& s, Evoral::ControlList::Ord
 
 	XMLNode& after = list->get_state();
 	e.begin_reversible_command (_("draw automation"));
-	s.add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));
+	e.add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));
+
+	_line->end_draw_merge ();
 
 	_line->get_selectables (earliest, latest, 0.0, 1.0, results);
 	e.get_selection ().set (results);

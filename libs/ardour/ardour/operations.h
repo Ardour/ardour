@@ -18,6 +18,7 @@
  */
 
 #include "ardour/libardour_visibility.h"
+#include "pbd/properties.h"
 
 /** These are GQuarks for a subset of UI operations.  We use these
  *  so that the undo system can be queried to find out what operations

@@ -16,8 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_property_basics_impl_h__
-#define __libpbd_property_basics_impl_h__
+#pragma once
+
+#include "pbd/property_basics.h"
 
 namespace PBD {
 
@@ -49,4 +50,3 @@ PropertyChange::add (PropertyDescriptor<T> p)
 
 }
 
-#endif /* __libpbd_property_basics_impl_h__ */

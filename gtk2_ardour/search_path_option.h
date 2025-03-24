@@ -16,15 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_search_path_option_h__
-#define __gtk_ardour_search_path_option_h__
+#pragma once
 
 #include <string>
 
-#include <gtkmm/filechooserbutton.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/button.h>
-#include <gtkmm/box.h>
+#include <ytkmm/filechooserbutton.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/button.h>
+#include <ytkmm/box.h>
 
 #include "option_editor.h"
 
@@ -69,4 +68,3 @@ protected:
 	void path_chosen ();
 };
 
-#endif /* __gtk_ardour_search_path_option_h__ */

@@ -31,12 +31,12 @@
 
 #include "gdkconfig.h"
 
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 
 #ifdef GDK_WINDOWING_X11
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
-#include "gdk/gdkx.h"
+#include "ydk/gdkx.h"
 #endif
 
 #include "gtkdnd.h"

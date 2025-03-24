@@ -18,8 +18,7 @@
 
 #ifdef DEBUG_RT_ALLOC
 
-#ifndef __pbd_debug_rt_alloc_h__
-#define __pbd_debug_rt_alloc_h__
+#pragma once
 
 #include "pbd/libpbd_visibility.h"
 
@@ -37,8 +36,6 @@ LIBPBD_API extern void suspend_rt_malloc_checks ();
 LIBPBD_API extern void resume_rt_malloc_checks ();
 
 }
-
-#endif
 
 #else
 

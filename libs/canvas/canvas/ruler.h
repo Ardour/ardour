@@ -67,7 +67,6 @@ public:
 
 	void set_range (int64_t lower, int64_t upper);
 	void set_font_description (Pango::FontDescription);
-	void set_second_font_description (Pango::FontDescription);
 	void set_metric (const Metric *);
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
@@ -86,7 +85,6 @@ private:
 	Gtkmm2ext::Color _divider_color_bottom;
 
 	Pango::FontDescription* _font_description;
-	Pango::FontDescription* _second_font_description;
 	mutable std::vector<Mark> marks;
 	mutable bool _need_marks;
 };

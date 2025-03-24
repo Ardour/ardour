@@ -108,6 +108,22 @@ MonitorProcessor::allocate_channels (uint32_t size)
 
 	while (_channels.size() < size) {
 		_channels.push_back (new ChannelRecord (n));
+
+		/* update solo_cnt when Solo changes */
+		std::shared_ptr<Controllable> sc = _channels.back()->soloed_control;
+		std::weak_ptr<Controllable> wc (sc);
+		sc->Changed.connect_same_thread (*this, [this, wc](bool, PBD::Controllable::GroupControlDisposition)
+				{
+					std::shared_ptr<Controllable> ac = wc.lock ();
+					if (ac && ac->get_value () > 0) {
+						solo_cnt++;
+					} else {
+						if (solo_cnt > 0) {
+							solo_cnt--;
+						}
+					}
+					update_monitor_state ();
+				});
 	}
 }
 
@@ -391,18 +407,8 @@ MonitorProcessor::set_cut (uint32_t chn, bool yn)
 void
 MonitorProcessor::set_solo (uint32_t chn, bool solo)
 {
-	if (solo != _channels[chn]->soloed) {
-		_channels[chn]->soloed = solo;
-
-		if (solo) {
-			solo_cnt++;
-		} else {
-			if (solo_cnt > 0) {
-				solo_cnt--;
-			}
-		}
-	}
-	update_monitor_state ();
+	_channels[chn]->soloed = solo;
+	/* update_monitor_state is called via the Changed signal */
 }
 
 void

@@ -19,7 +19,7 @@
 #ifndef _ardour_rt_task_h_
 #define _ardour_rt_task_h_
 
-#include <boost/function.hpp>
+#include <functional>
 
 #include "ardour/graphnode.h"
 
@@ -31,14 +31,14 @@ class RTTaskList;
 class LIBARDOUR_API RTTask : public ProcessNode
 {
 public:
-	RTTask (Graph* g, boost::function<void ()> const& fn);
+	RTTask (Graph* g, std::function<void ()> const& fn);
 
 	void prep (GraphChain const*) {}
 	void run (GraphChain const*);
 
 private:
 	friend class RTTaskList;
-	boost::function<void ()> _f;
+	std::function<void ()> _f;
 	Graph*                   _graph;
 };
 

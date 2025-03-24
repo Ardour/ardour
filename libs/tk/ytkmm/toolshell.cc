@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/toolshell.h>
-#include <gtkmm/private/toolshell_p.h>
+#include <ytkmm/toolshell.h>
+#include <ytkmm/private/toolshell_p.h>
 
 
 // -*- c++ -*-
@@ -27,7 +27,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 namespace

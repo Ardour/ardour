@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef playback_buffer_h
-#define playback_buffer_h
+#pragma once
 
 #include <atomic>
 #include <cstdint>
@@ -334,4 +333,3 @@ PlaybackBuffer<T>::read (T *dest, size_t cnt, bool commit, size_t offset)
 
 } /* end namespace */
 
-#endif /* __ringbuffer_h__ */

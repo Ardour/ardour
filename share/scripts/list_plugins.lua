@@ -19,7 +19,7 @@ function factory () return function ()
 			local id = pi:type() .. "-" .. pp:unique_id()
 			local cnt = 0
 			local rns = {}
-			if pi:is_channelstrip () then goto nextproc end
+			if pi:is_channelstrip () or not pi:display_to_user () then goto nextproc end
 			if all_plugs[id] then
 				cnt = all_plugs[id]['cnt']
 				rns = all_plugs[id]['rns']

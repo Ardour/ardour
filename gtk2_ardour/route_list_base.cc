@@ -277,11 +277,11 @@ RouteListBase::set_session (Session* s)
 	initial_display ();
 
 	if (_session) {
-		_session->vca_manager ().VCAAdded.connect (_session_connections, invalidator (_scroller), boost::bind (&RouteListBase::add_masters, this, _1), gui_context ());
-		_session->RouteAdded.connect (_session_connections, invalidator (_scroller), boost::bind (&RouteListBase::add_routes, this, _1), gui_context ());
-		_session->SoloChanged.connect (_session_connections, invalidator (_scroller), boost::bind (&RouteListBase::queue_idle_update, this), gui_context ());
-		_session->RecordStateChanged.connect (_session_connections, invalidator (_scroller), boost::bind (&RouteListBase::queue_idle_update, this), gui_context ());
-		PresentationInfo::Change.connect (_session_connections, invalidator (_scroller), boost::bind (&RouteListBase::presentation_info_changed, this, _1), gui_context ());
+		_session->vca_manager ().VCAAdded.connect (_session_connections, invalidator (_scroller), std::bind (&RouteListBase::add_masters, this, _1), gui_context ());
+		_session->RouteAdded.connect (_session_connections, invalidator (_scroller), std::bind (&RouteListBase::add_routes, this, _1), gui_context ());
+		_session->SoloChanged.connect (_session_connections, invalidator (_scroller), std::bind (&RouteListBase::queue_idle_update, this), gui_context ());
+		_session->RecordStateChanged.connect (_session_connections, invalidator (_scroller), std::bind (&RouteListBase::queue_idle_update, this), gui_context ());
+		PresentationInfo::Change.connect (_session_connections, invalidator (_scroller), std::bind (&RouteListBase::presentation_info_changed, this, _1), gui_context ());
 	}
 }
 
@@ -622,39 +622,39 @@ RouteListBase::add_stripables (StripableList& slist)
 		 * UI (e.g. track-height is not of any relevant to OSC)
 		 */
 
-		stripable->PropertyChanged.connect (_stripable_connections, invalidator (_scroller), boost::bind (&RouteListBase::route_property_changed, this, _1, ws), gui_context ());
-		stripable->presentation_info ().PropertyChanged.connect (_stripable_connections, invalidator (_scroller), boost::bind (&RouteListBase::route_property_changed, this, _1, ws), gui_context ());
+		stripable->PropertyChanged.connect (_stripable_connections, invalidator (_scroller), std::bind (&RouteListBase::route_property_changed, this, _1, ws), gui_context ());
+		stripable->presentation_info ().PropertyChanged.connect (_stripable_connections, invalidator (_scroller), std::bind (&RouteListBase::route_property_changed, this, _1, ws), gui_context ());
 
 		if (std::dynamic_pointer_cast<Track> (stripable)) {
 			std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track> (stripable);
-			t->rec_enable_control ()->Changed.connect (_stripable_connections, invalidator (_scroller), boost::bind (&RouteListBase::queue_idle_update, this), gui_context ());
-			t->rec_safe_control ()->Changed.connect (_stripable_connections, invalidator (_scroller), boost::bind (&RouteListBase::queue_idle_update, this), gui_context ());
+			t->rec_enable_control ()->Changed.connect (_stripable_connections, invalidator (_scroller), std::bind (&RouteListBase::queue_idle_update, this), gui_context ());
+			t->rec_safe_control ()->Changed.connect (_stripable_connections, invalidator (_scroller), std::bind (&RouteListBase::queue_idle_update, this), gui_context ());
 		}
 
 		if (midi_trk) {
-			midi_trk->StepEditStatusChange.connect (_stripable_connections, invalidator (_scroller), boost::bind (&RouteListBase::queue_idle_update, this), gui_context ());
-			midi_trk->InputActiveChanged.connect (_stripable_connections, invalidator (_scroller), boost::bind (&RouteListBase::update_input_active_display, this), gui_context ());
+			midi_trk->StepEditStatusChange.connect (_stripable_connections, invalidator (_scroller), std::bind (&RouteListBase::queue_idle_update, this), gui_context ());
+			midi_trk->InputActiveChanged.connect (_stripable_connections, invalidator (_scroller), std::bind (&RouteListBase::update_input_active_display, this), gui_context ());
 		}
 
 		std::shared_ptr<AutomationControl> ac;
 
 		if ((ac = stripable->mute_control ()) != 0) {
-			ac->Changed.connect (_stripable_connections, invalidator (_scroller), boost::bind (&RouteListBase::queue_idle_update, this), gui_context ());
+			ac->Changed.connect (_stripable_connections, invalidator (_scroller), std::bind (&RouteListBase::queue_idle_update, this), gui_context ());
 		}
 		if ((ac = stripable->solo_control ()) != 0) {
-			ac->Changed.connect (_stripable_connections, invalidator (_scroller), boost::bind (&RouteListBase::queue_idle_update, this), gui_context ());
+			ac->Changed.connect (_stripable_connections, invalidator (_scroller), std::bind (&RouteListBase::queue_idle_update, this), gui_context ());
 		}
 		if ((ac = stripable->solo_isolate_control ()) != 0) {
-			ac->Changed.connect (_stripable_connections, invalidator (_scroller), boost::bind (&RouteListBase::queue_idle_update, this), gui_context ());
+			ac->Changed.connect (_stripable_connections, invalidator (_scroller), std::bind (&RouteListBase::queue_idle_update, this), gui_context ());
 		}
 		if ((ac = stripable->solo_safe_control ()) != 0) {
-			ac->Changed.connect (_stripable_connections, invalidator (_scroller), boost::bind (&RouteListBase::queue_idle_update, this), gui_context ());
+			ac->Changed.connect (_stripable_connections, invalidator (_scroller), std::bind (&RouteListBase::queue_idle_update, this), gui_context ());
 		}
 
 		if (route) {
-			route->active_changed.connect (_stripable_connections, invalidator (_scroller), boost::bind (&RouteListBase::queue_idle_update, this), gui_context ());
+			route->active_changed.connect (_stripable_connections, invalidator (_scroller), std::bind (&RouteListBase::queue_idle_update, this), gui_context ());
 		}
-		stripable->DropReferences.connect (_stripable_connections, invalidator (_scroller), boost::bind (&RouteListBase::remove_strip, this, ws), gui_context ());
+		stripable->DropReferences.connect (_stripable_connections, invalidator (_scroller), std::bind (&RouteListBase::remove_strip, this, ws), gui_context ());
 	}
 
 	queue_idle_update ();
@@ -1162,7 +1162,7 @@ RouteListBase::idle_update_mute_rec_solo_etc ()
 			std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (route);
 
 			if (trk->rec_enable_control ()->get_value ()) {
-				if (_session->record_status () == Session::Recording) {
+				if (_session->record_status () == Recording) {
 					(*i)[_columns.rec_state] = 1;
 				} else {
 					(*i)[_columns.rec_state] = 2;

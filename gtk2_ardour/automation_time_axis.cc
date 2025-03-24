@@ -32,7 +32,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <gtkmm/separator.h>
+#include <ytkmm/separator.h>
 
 #include "pbd/error.h"
 #include "pbd/memento_command.h"
@@ -60,7 +60,7 @@
 #include "gui_thread.h"
 #include "mergeable_line.h"
 #include "route_time_axis.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "paste_context.h"
 #include "public_editor.h"
 #include "selection.h"
@@ -110,7 +110,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	, _automatable (a)
 	, _parameter (p)
 	, _base_rect (new ArdourCanvas::Rectangle (_canvas_display))
-	, _view (show_regions ? new AutomationStreamView (*this) : 0)
+	, _view (show_regions ? new AutomationStreamView (*this) : nullptr)
 	, auto_dropdown ()
 	, _show_regions (show_regions)
 	, _velocity_mode (VelocityModeLollipops)
@@ -242,7 +242,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	}
 
 	Gtk::DrawingArea *blank0 = manage (new Gtk::DrawingArea());
-	Gtk::DrawingArea *blank1 = manage (new Gtk::DrawingArea());
 
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&parent);
 	// TODO use rtv->controls_base_unselected_name
@@ -257,7 +256,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		blank0->set_name ("UnknownControlsBaseUnselected");
 	}
 	blank0->set_size_request (-1, -1);
-	blank1->set_size_request (1, 0);
 	VSeparator* separator = manage (new VSeparator());
 	separator->set_name("TrackSeparator");
 	separator->set_size_request (1, -1);
@@ -270,10 +268,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	time_axis_hbox.reorder_child (*blank0, 0);
 	time_axis_hbox.reorder_child (*separator, 1);
 	time_axis_hbox.reorder_child (time_axis_vbox, 2);
-
-	if (!ARDOUR::Profile->get_mixbus() ) {
-		time_axis_hbox.pack_start (*blank1, false, false);
-	}
 
 	blank0->show();
 	separator->show();
@@ -303,7 +297,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &AutomationTimeAxisView::color_handler));
 
 	_stripable->DropReferences.connect (
-		_stripable_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::route_going_away, this), gui_context ()
+		_stripable_connections, invalidator (*this), std::bind (&AutomationTimeAxisView::route_going_away, this), gui_context ()
 		);
 
 	set_velocity_mode (_velocity_mode, true);
@@ -340,8 +334,8 @@ AutomationTimeAxisView::add_contents (bool show_regions)
 
 		assert (_control);
 
-		std::shared_ptr<AutomationLine> line (
-			new AutomationLine (
+		std::shared_ptr<EditorAutomationLine> line (
+			new EditorAutomationLine (
 				ARDOUR::EventTypeMap::instance().to_symbol(_parameter),
 				*this,
 				*_canvas_display,
@@ -350,7 +344,7 @@ AutomationTimeAxisView::add_contents (bool show_regions)
 				)
 			);
 
-		line->set_line_color (UIConfiguration::instance().color ("processor automation line"));
+		line->set_line_color ("processor automation line");
 		line->set_fill (true);
 		line->queue_reset ();
 		add_line (line);
@@ -797,56 +791,7 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, timepos_t const &
 		return;
 	}
 
-	std::shared_ptr<AutomationList> list = _line->the_list ();
-
-	if (list->in_write_pass()) {
-		/* do not allow the GUI to add automation events during an
-		   automation write pass.
-		*/
-		return;
-	}
-
-	timepos_t when (pos);
-	_editor.snap_to_with_modifier (when, event);
-
-	if (UIConfiguration::instance().get_new_automation_points_on_lane() || _control->list()->size () == 0) {
-		if (_control->list()->size () == 0) {
-			y = _control->get_value ();
-		} else {
-			y = _control->list()->eval (when);
-		}
-	} else {
-		double x = 0;
-		_line->grab_item().canvas_to_item (x, y);
-		/* compute vertical fractional position */
-		y = 1.0 - (y / _line->height());
-		/* map using line */
-		_line->view_to_model_coord_y (y);
-	}
-
-	XMLNode& before = list->get_state();
-	std::list<Selectable*> results;
-
-	if (list->editor_add (when, y, with_guard_points)) {
-
-		if (_control->automation_state () == ARDOUR::Off) {
-			set_automation_state (ARDOUR::Play);
-		}
-
-		if (UIConfiguration::instance().get_automation_edit_cancels_auto_hide () && _control == _session->recently_touched_controllable ()) {
-			RouteTimeAxisView::signal_ctrl_touched (false);
-		}
-
-		XMLNode& after = list->get_state();
-		_editor.begin_reversible_command (_("add automation event"));
-		_session->add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));
-
-		_line->get_selectables (when, when, 0.0, 1.0, results);
-		_editor.get_selection ().set (results);
-
-		_editor.commit_reversible_command ();
-		_session->set_dirty ();
-	}
+	_line->add (_control, event, pos, y, with_guard_points);
 }
 
 bool
@@ -917,7 +862,7 @@ AutomationTimeAxisView::paste_one (timepos_t const & pos, unsigned paste_count, 
 }
 
 void
-AutomationTimeAxisView::get_selectables (timepos_t const & start, timepos_t const & end, double top, double bot, list<Selectable*>& results, bool /*within*/)
+AutomationTimeAxisView::_get_selectables (timepos_t const & start, timepos_t const & end, double top, double bot, list<Selectable*>& results, bool /*within*/)
 {
 	if (!_line && !_view) {
 		return;
@@ -987,17 +932,17 @@ AutomationTimeAxisView::clear_lines ()
 }
 
 void
-AutomationTimeAxisView::add_line (std::shared_ptr<AutomationLine> line)
+AutomationTimeAxisView::add_line (std::shared_ptr<EditorAutomationLine> line)
 {
 	if (_control && line) {
 		assert(line->the_list() == _control->list());
 
 		_control->alist()->automation_state_changed.connect (
-			_list_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::automation_state_changed, this), gui_context()
+			_list_connections, invalidator (*this), std::bind (&AutomationTimeAxisView::automation_state_changed, this), gui_context()
 			);
 
 		_control->alist()->InterpolationChanged.connect (
-			_list_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::interpolation_changed, this, _1), gui_context()
+			_list_connections, invalidator (*this), std::bind (&AutomationTimeAxisView::interpolation_changed, this, _1), gui_context()
 			);
 	}
 
@@ -1008,7 +953,7 @@ AutomationTimeAxisView::add_line (std::shared_ptr<AutomationLine> line)
 	/* pick up the current state */
 	automation_state_changed ();
 
-	line->add_visibility (AutomationLine::Line);
+	line->add_visibility (EditorAutomationLine::Line);
 }
 
 bool
@@ -1041,6 +986,13 @@ AutomationTimeAxisView::color_handler ()
 {
 	if (_line) {
 		_line->set_colors();
+	}
+
+	if (_base_rect) {
+		const std::string fill_color_name = (dynamic_cast<MidiTimeAxisView*>(get_parent())
+		                                     ? "midi automation track fill"
+		                                     : "audio automation track fill");
+		_base_rect->set_fill_color (UIConfiguration::instance().color_mod (fill_color_name, "automation track fill"));
 	}
 }
 
@@ -1161,14 +1113,13 @@ void
 AutomationTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
 	list<std::shared_ptr<AutomationLine> > lines;
-	if (_line) {
-		lines.push_back (_line);
-	} else if (_view) {
-		lines = _view->get_lines ();
-	}
 
-	for (list<std::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
-		cut_copy_clear_one (**i, selection, op);
+	if (_line) {
+		cut_copy_clear_one (*_line, selection, op);
+	} else if (_view) {
+		for (auto & line : _view->get_lines ()) {
+			cut_copy_clear_one (*line, selection, op);
+		}
 	}
 }
 
@@ -1286,6 +1237,6 @@ AutomationTimeAxisView::set_selected_regionviews (RegionSelection& rs)
 MergeableLine*
 AutomationTimeAxisView::make_merger ()
 {
-	return new MergeableLine (_line, _control, nullptr, boost::bind (&AutomationTimeAxisView::set_automation_state, this, _1), boost::bind (RouteTimeAxisView::signal_ctrl_touched, false));
+	return new MergeableLine (_line, _control, nullptr, std::bind (&AutomationTimeAxisView::set_automation_state, this, _1), std::bind (RouteTimeAxisView::signal_ctrl_touched, false));
 }
 

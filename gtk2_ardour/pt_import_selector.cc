@@ -147,6 +147,6 @@ PTImportSelector::update_ptf()
 void
 PTImportSelector::set_session (Session* s)
 {
-        ArdourDialog::set_session (s);
+	ArdourDialog::set_session (s);
 	_session_rate = s->sample_rate ();
 }

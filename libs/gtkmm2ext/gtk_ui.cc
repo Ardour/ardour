@@ -31,7 +31,7 @@
 #include <climits>
 #include <cctype>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include "pbd/error.h"
 #include "pbd/touchable.h"
@@ -69,7 +69,7 @@ BaseUI::RequestType Gtkmm2ext::SetTip = BaseUI::new_request_type();
 BaseUI::RequestType Gtkmm2ext::AddIdle = BaseUI::new_request_type();
 BaseUI::RequestType Gtkmm2ext::AddTimeout = BaseUI::new_request_type();
 
-#include "pbd/abstract_ui.cc"  /* instantiate the template */
+#include "pbd/abstract_ui.inc.cc"  /* instantiate the template */
 
 template class AbstractUI<Gtkmm2ext::UIRequest>;
 
@@ -387,17 +387,25 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 	if (action) {
 		/* get_bindings_from_widget_hierarchy */
 		Widget* ww = w;
-		Bindings* bindings = NULL;
+		BindingSet* binding_set = nullptr;
 		do {
-			bindings = (Bindings*) ww->get_data ("ardour-bindings");
-			if (bindings) {
+			binding_set = (BindingSet*) ww->get_data (ARDOUR_BINDING_KEY);
+			if (binding_set) {
 				break;
 			}
 			ww = ww->get_parent ();
 		} while (ww);
 
-		if (!bindings) {
+		Bindings* bindings;
+
+		if (!binding_set) {
 			bindings = global_bindings;
+		} else {
+			/* Use only the first bindings for the widget when
+			   looking up keys.
+			*/
+			assert (!binding_set->empty());
+			bindings = binding_set->front ();
 		}
 
 		if (bindings) {

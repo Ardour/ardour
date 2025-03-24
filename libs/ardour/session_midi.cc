@@ -207,21 +207,14 @@ Session::mmc_step (MIDI::MachineControl &/*mmc*/, int steps)
 		return;
 	}
 
-	struct timeval now;
-	struct timeval diff = { 0, 0 };
+	int64_t now  = g_get_monotonic_time ();
+	int64_t diff = now - _last_mmc_step;
 
-	gettimeofday (&now, 0);
-
-	timersub (&now, &last_mmc_step, &diff);
-
-	gettimeofday (&now, 0);
-	timersub (&now, &last_mmc_step, &diff);
-
-	if (last_mmc_step.tv_sec != 0 && (diff.tv_usec + (diff.tv_sec * 1000000)) < _engine.usecs_per_cycle()) {
+	if (_last_mmc_step != 0 && diff < _engine.usecs_per_cycle()) {
 		return;
 	}
 
-	double diff_secs = diff.tv_sec + (diff.tv_usec / 1000000.0);
+	double diff_secs = diff * 1e-6;
 	double cur_speed = (((steps * 0.5) * timecode_frames_per_second()) / diff_secs) / timecode_frames_per_second();
 
 	if (_transport_fsm->transport_speed() == 0 || cur_speed * _transport_fsm->transport_speed() < 0) {
@@ -243,7 +236,7 @@ Session::mmc_step (MIDI::MachineControl &/*mmc*/, int steps)
 #endif
 
 	request_transport_speed_nonzero (step_speed);
-	last_mmc_step = now;
+	_last_mmc_step = now;
 
 	if (!step_queued) {
 		if (midi_control_ui) {
@@ -258,16 +251,53 @@ Session::mmc_step (MIDI::MachineControl &/*mmc*/, int steps)
 void
 Session::mmc_rewind (MIDI::MachineControl &/*mmc*/)
 {
+	if (actively_recording()) {
+		return;
+	}
+
 	if (Config->get_mmc_control ()) {
-		request_transport_speed(-Config->get_max_transport_speed());
+		switch (Config->get_mmc_fast_wind_op ()) {
+			case (FastWindOff):
+				//nothing
+			break;
+			case (FastWindVarispeed):
+				request_transport_speed (-Config->get_max_transport_speed());
+				request_roll (TRS_MMC);
+			break;
+			case (FastWindLocate):
+				timepos_t pos = locations()->first_mark_before (timepos_t (transport_sample()-1), false);
+				if (pos != timepos_t::max (Temporal::AudioTime)) {
+					request_locate (pos.samples());
+				}
+			break;
+		}
 	}
 }
 
 void
 Session::mmc_fast_forward (MIDI::MachineControl &/*mmc*/)
 {
+	if (actively_recording()) {
+		return;
+	}
+
 	if (Config->get_mmc_control ()) {
-		request_transport_speed (Config->get_max_transport_speed());
+		switch (Config->get_mmc_fast_wind_op ()) {
+			case (FastWindOff):
+				//nothing
+			break;
+			case (FastWindVarispeed):
+				request_transport_speed (Config->get_max_transport_speed());
+				request_roll (TRS_MMC);
+			break;
+			case (FastWindLocate):
+				timepos_t pos = locations()->first_mark_after (timepos_t (transport_sample()+1), false);
+				if (pos != timepos_t::max (Temporal::AudioTime)) {
+					request_locate (pos.samples());
+				}
+
+			break;
+		}
 	}
 }
 
@@ -617,15 +647,9 @@ Session::send_immediate_mmc (MachineControlCommand c)
 bool
 Session::mmc_step_timeout ()
 {
-	struct timeval now;
-	struct timeval diff;
-	double diff_usecs;
-	gettimeofday (&now, 0);
+	int64_t diff_usecs = g_get_monotonic_time () - _last_mmc_step;
 
-	timersub (&now, &last_mmc_step, &diff);
-	diff_usecs = diff.tv_sec * 1000000 + diff.tv_usec;
-
-	if (diff_usecs > 1000000.0 || fabs (_transport_fsm->transport_speed()) < 0.0000001) {
+	if (diff_usecs > 1000000 || fabs (_transport_fsm->transport_speed()) < 0.0000001) {
 		/* too long or too slow, stop transport */
 		request_stop ();
 		step_queued = false;
@@ -744,7 +768,8 @@ Session::disconnect_port_for_rewire (std::string const& port) const
 	bool keep_ctrl = mpf & MidiPortControl;
 
 	vector<string> port_connections;
-	AudioEngine::instance()->get_connections (port, port_connections);
+	AudioEngine::instance()->get_connections (port, port_connections, false);
+
 	for (vector<string>::iterator i = port_connections.begin(); i != port_connections.end(); ++i) {
 
 		/* test if (*i) is a control-surface input port */
@@ -763,6 +788,10 @@ Session::disconnect_port_for_rewire (std::string const& port) const
 void
 Session::rewire_selected_midi (std::shared_ptr<MidiTrack> new_midi_target)
 {
+	if (actively_recording()) {
+		return;
+	}
+
 	if (!new_midi_target) {
 		return;
 	}
@@ -805,6 +834,10 @@ Session::rewire_selected_midi (std::shared_ptr<MidiTrack> new_midi_target)
 void
 Session::rewire_midi_selection_ports ()
 {
+	if (actively_recording()) {
+		return;
+	}
+
 	if (!Config->get_midi_input_follows_selection()) {
 		return;
 	}

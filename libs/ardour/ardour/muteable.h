@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_muteable_h__
-#define __ardour_muteable_h__
+#pragma once
 
 #include <memory>
 
@@ -41,7 +40,7 @@ public:
 		return _mute_master;
 	}
 
-	PBD::Signal0<void> mute_points_changed;
+	PBD::Signal<void()> mute_points_changed;
 
 protected:
 	std::shared_ptr<MuteMaster> _mute_master;
@@ -49,4 +48,3 @@ protected:
 
 } /* namespace */
 
-#endif /* __ardour_muteable_h__ */

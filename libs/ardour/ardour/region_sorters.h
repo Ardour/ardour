@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_region_sorters_h__
-#define __libardour_region_sorters_h__
+#pragma once
 
 #include "ardour/region.h"
 
@@ -51,4 +50,3 @@ struct LIBARDOUR_API RegionSortByLayerAndPosition {
 
 } // namespace
 
-#endif /* __libardour_region_sorters_h__ */

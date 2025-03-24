@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_semutils_h__
-#define __pbd_semutils_h__
+#pragma once
 
 #if (defined PLATFORM_WINDOWS && !defined USE_PTW32_SEMAPHORE)
 #define WINDOWS_SEMAPHORE 1
@@ -73,4 +72,3 @@ class LIBPBD_API Semaphore {
 
 }
 
-#endif /* __pbd_semutils_h__ */

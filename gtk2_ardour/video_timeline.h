@@ -16,8 +16,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __ardour_video_timeline_h__
-#define __ardour_video_timeline_h__
+#pragma once
 
 #include <string>
 
@@ -142,11 +141,10 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	VideoMonitor *vmonitor;
 	bool reopen_vmonitor;
 
-	PBD::Signal0<void> VtlUpdate;
-	PBD::Signal1<void,std::string> GuiUpdate;
+	PBD::Signal<void()> VtlUpdate;
+	PBD::Signal<void(std::string)> GuiUpdate;
 	void gui_update (const std::string &);
 
 	PBD::ScopedConnection sessionsave;
 };
 
-#endif /* __ardour_video_timeline_h__ */

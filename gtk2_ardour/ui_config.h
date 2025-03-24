@@ -21,16 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_ui_configuration_h__
-#define __ardour_ui_configuration_h__
+#pragma once
 
 #include <sstream>
 #include <ostream>
 #include <iostream>
 #include <map>
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
 
 #include "ardour/types.h" // required for operators used in pbd/configuration_variable.h
 #include "ardour/types_convert.h"
@@ -65,13 +62,13 @@ public:
 	int load_defaults ();
 	int load_color_theme (bool allow_own);
 
-	void     map_parameters (boost::function<void (std::string)>&);
+	void     map_parameters (std::function<void (std::string)>&);
 	int      set_state (const XMLNode&, int version);
 	XMLNode& get_state () const;
 	XMLNode& get_variables (std::string const &) const;
 	void     set_variables (const XMLNode&);
 
-	std::string color_file_name (bool use_my, bool with_version) const;
+	std::string color_file_name (bool use_my, bool with_version, bool fallback = false) const;
 
 	typedef std::map<std::string, Gtkmm2ext::Color>       Colors;
 	typedef std::map<std::string, std::string>            ColorAliases;
@@ -117,13 +114,13 @@ public:
 #define UI_CONFIG_VARIABLE(Type,var,name,value) \
 	Type get_##var () const { return var.get(); } \
 	bool set_##var (Type val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
-#include "ui_config_vars.h"
+#include "ui_config_vars.inc.h"
 #undef  UI_CONFIG_VARIABLE
 #define CANVAS_FONT_VARIABLE(var,name) \
 	Pango::FontDescription get_##var () const { return ARDOUR_UI_UTILS::sanitized_font (var.get()); } \
 	Pango::FontDescription get_Ardour##var () const { return ARDOUR_UI_UTILS::ardour_font (var.get()); } \
 	bool set_##var (const std::string& val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
-#include "canvas_vars.h"
+#include "canvas_vars.inc.h"
 #undef CANVAS_FONT_VARIABLE
 
 private:
@@ -131,11 +128,11 @@ private:
 
 #undef  UI_CONFIG_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,name,value) PBD::ConfigVariable<Type> var;
-#include "ui_config_vars.h"
+#include "ui_config_vars.inc.h"
 #undef UI_CONFIG_VARIABLE
 
 #define CANVAS_FONT_VARIABLE(var,name) PBD::ConfigVariable<std::string> var;
-#include "canvas_vars.h"
+#include "canvas_vars.inc.h"
 #undef CANVAS_FONT_VARIABLE
 
 	XMLNode& state () const;
@@ -155,4 +152,3 @@ private:
 	uint32_t block_save;
 };
 
-#endif /* __ardour_ui_configuration_h__ */

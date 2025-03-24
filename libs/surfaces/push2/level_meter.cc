@@ -55,7 +55,7 @@ LevelMeter::LevelMeter (Push2& p, Item* parent, int len, Meter::Orientation o)
 	, _meter_count (0)
 	, _max_visible_meters (0)
 {
-	Config->ParameterChanged.connect (_parameter_connection, invalidator(*this), boost::bind (&LevelMeter::parameter_changed, this, _1), &_p2);
+	Config->ParameterChanged.connect (_parameter_connection, invalidator(*this), std::bind (&LevelMeter::parameter_changed, this, _1), &_p2);
 
 	if (_meter_orientation == Meter::Vertical) {
 		_meter_packer = new HBox (this);
@@ -86,8 +86,8 @@ LevelMeter::set_meter (PeakMeter* meter)
 	_meter = meter;
 
 	if (_meter) {
-		_meter->ConfigurationChanged.connect (_configuration_connection, invalidator(*this), boost::bind (&LevelMeter::configuration_changed, this, _1, _2), &_p2);
-		_meter->MeterTypeChanged.connect (_meter_type_connection, invalidator (*this), boost::bind (&LevelMeter::meter_type_changed, this, _1), &_p2);
+		_meter->ConfigurationChanged.connect (_configuration_connection, invalidator(*this), std::bind (&LevelMeter::configuration_changed, this, _1, _2), &_p2);
+		_meter->MeterTypeChanged.connect (_meter_type_connection, invalidator (*this), std::bind (&LevelMeter::meter_type_changed, this, _1), &_p2);
 	}
 
 	setup_meters (_meter_length, _regular_meter_width, _thin_meter_width);

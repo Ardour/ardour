@@ -19,11 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_control_point_h__
-#define __ardour_control_point_h__
+#pragma once
 
 #include <sys/types.h>
-#include <gdk/gdkevents.h>
+#include <ydk/gdkevents.h>
 
 #include "ardour/automation_list.h"
 
@@ -80,17 +79,17 @@ public:
 
 	ArdourCanvas::Item& item() const;
 
-	/* used from ~AutomationLine */
+	/* used from ~EditorAutomationLine */
 	void unset_item () { _item = 0 ; }
 
 	ARDOUR::AutomationList::iterator model() const { return _model; }
-	AutomationLine&                  line()  const { return _line; }
+	AutomationLine&              line()  const { return _line; }
 
-	static PBD::Signal1<void, ControlPoint *> CatchDeletion;
+	static PBD::Signal<void(ControlPoint *)> CatchDeletion;
 
 private:
-	ArdourCanvas::Rectangle*        _item;
-	AutomationLine&                  _line;
+	ArdourCanvas::Rectangle *        _item;
+	AutomationLine&              _line;
 	ARDOUR::AutomationList::iterator _model;
 	uint32_t                         _view_index;
 	bool                             _can_slide;
@@ -104,5 +103,4 @@ private:
 };
 
 
-#endif /* __ardour_control_point_h__ */
 

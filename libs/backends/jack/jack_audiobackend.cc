@@ -22,7 +22,6 @@
 #include <list>
 #include <math.h>
 
-#include <boost/scoped_ptr.hpp>
 #include <glibmm/timer.h>
 #include <glibmm/spawn.h>
 
@@ -69,8 +68,8 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, std:
 	, _jack_ports (new JackPorts)
 	, _session (0)
 {
-	_jack_connection->Connected.connect_same_thread (jack_connection_connection, boost::bind (&JACKAudioBackend::when_connected_to_jack, this));
-	_jack_connection->Disconnected.connect_same_thread (disconnect_connection, boost::bind (&JACKAudioBackend::disconnected, this, _1));
+	_jack_connection->Connected.connect_same_thread (jack_connection_connection, std::bind (&JACKAudioBackend::when_connected_to_jack, this));
+	_jack_connection->Disconnected.connect_same_thread (disconnect_connection, std::bind (&JACKAudioBackend::disconnected, this, _1));
 }
 
 JACKAudioBackend::~JACKAudioBackend()
@@ -87,7 +86,11 @@ JACKAudioBackend::~JACKAudioBackend()
 string
 JACKAudioBackend::name() const
 {
+#if ! (defined(__APPLE__) || defined(PLATFORM_WINDOWS))
+	return X_("JACK/Pipewire");
+#else
 	return X_("JACK");
+#endif
 }
 
 void*
@@ -227,18 +230,6 @@ JACKAudioBackend::available_period_sizes (const std::string& driver, const std::
 	return s;
 }
 
-uint32_t
-JACKAudioBackend::available_input_channel_count (const string& /*device*/) const
-{
-	return 128;
-}
-
-uint32_t
-JACKAudioBackend::available_output_channel_count (const string& /*device*/) const
-{
-	return 128;
-}
-
 /* -- parameter setting -- */
 
 int
@@ -307,36 +298,6 @@ JACKAudioBackend::set_interleaved (bool yn)
 		return 0;
 	}
 	return -1;
-}
-
-int
-JACKAudioBackend::set_input_channels (uint32_t cnt)
-{
-	if (available()) {
-		if (cnt != 0) {
-			/* can't set a real value for this while JACK runs */
-			return -1;
-		}
-	}
-
-	_target_input_channels = cnt;
-
-	return 0;
-}
-
-int
-JACKAudioBackend::set_output_channels (uint32_t cnt)
-{
-	if (available()) {
-		if (cnt != 0) {
-			/* can't set a real value for this while JACK runs */
-			return -1;
-		}
-	}
-
-	_target_output_channels = cnt;
-
-	return 0;
 }
 
 int
@@ -431,42 +392,6 @@ string
 JACKAudioBackend::midi_option () const
 {
 	return _target_midi_option;
-}
-
-uint32_t
-JACKAudioBackend::input_channels () const
-{
-	if (!_jack_connection->in_control()) {
-		if (available()) {
-			return n_physical (JackPortIsInput).n_audio();
-		} else {
-			return 0;
-		}
-	} else {
-		if (available()) {
-			return n_physical (JackPortIsInput).n_audio();
-		} else {
-			return _target_input_channels;
-		}
-	}
-}
-
-uint32_t
-JACKAudioBackend::output_channels () const
-{
-	if (!_jack_connection->in_control()) {
-		if (available()) {
-			return n_physical (JackPortIsOutput).n_audio();
-		} else {
-			return 0;
-		}
-	} else {
-		if (available()) {
-			return n_physical (JackPortIsOutput).n_audio();
-		} else {
-			return _target_output_channels;
-		}
-	}
 }
 
 uint32_t
@@ -874,7 +799,7 @@ JACKAudioBackend::_latency_callback (jack_latency_callback_mode_t mode, void* ar
 }
 
 int
-JACKAudioBackend::create_process_thread (boost::function<void()> f)
+JACKAudioBackend::create_process_thread (std::function<void()> f)
 {
         GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 
@@ -964,7 +889,7 @@ void*
 JACKAudioBackend::_start_process_thread (void* arg)
 {
         ThreadData* td = reinterpret_cast<ThreadData*> (arg);
-        boost::function<void()> f = td->f;
+        std::function<void()> f = td->f;
         delete td;
 
         f ();

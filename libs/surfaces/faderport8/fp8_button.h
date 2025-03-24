@@ -36,8 +36,8 @@ public:
 	virtual ~FP8ButtonInterface () {}
 
 	/* user API */
-	PBD::Signal0<void> pressed;
-	PBD::Signal0<void> released;
+	PBD::Signal<void()> pressed;
+	PBD::Signal<void()> released;
 
 	virtual bool is_pressed () const { return false; }
 	virtual bool is_active () const { return false; }
@@ -116,7 +116,7 @@ public:
 	void set_blinking (bool yes) {
 		if (yes && !_blinking) {
 			_blinking = true;
-			_base.BlinkIt.connect_same_thread (_blink_connection, boost::bind (&FP8ButtonBase::blink, this, _1));
+			_base.BlinkIt.connect_same_thread (_blink_connection, std::bind (&FP8ButtonBase::blink, this, _1));
 		} else if (!yes && _blinking) {
 			_blink_connection.disconnect ();
 			_blinking = false;
@@ -197,8 +197,8 @@ public:
 		: FP8ButtonBase (b)
 	{}
 
-	PBD::Signal1<void, bool> ActiveChanged;
-	PBD::Signal0<void> ColourChanged;
+	PBD::Signal<void(bool)> ActiveChanged;
+	PBD::Signal<void()> ColourChanged;
 
 	uint32_t color () const { return _rgba; }
 
@@ -251,11 +251,11 @@ public:
 		, _rgba (0)
 		, _shift (false)
 	{
-		_b0.ActiveChanged.connect_same_thread (_button_connections, boost::bind (&FP8DualButton::active_changed, this, false, _1));
-		_b1.ActiveChanged.connect_same_thread (_button_connections, boost::bind (&FP8DualButton::active_changed, this, true, _1));
+		_b0.ActiveChanged.connect_same_thread (_button_connections, std::bind (&FP8DualButton::active_changed, this, false, _1));
+		_b1.ActiveChanged.connect_same_thread (_button_connections, std::bind (&FP8DualButton::active_changed, this, true, _1));
 		if (_has_color) {
-			_b0.ColourChanged.connect_same_thread (_button_connections, boost::bind (&FP8DualButton::colour_changed, this, false));
-			_b1.ColourChanged.connect_same_thread (_button_connections, boost::bind (&FP8DualButton::colour_changed, this, true));
+			_b0.ColourChanged.connect_same_thread (_button_connections, std::bind (&FP8DualButton::colour_changed, this, false));
+			_b1.ColourChanged.connect_same_thread (_button_connections, std::bind (&FP8DualButton::colour_changed, this, true));
 		}
 	}
 
@@ -331,7 +331,7 @@ public:
 protected:
 	void connect_toggle ()
 	{
-		_base.ShiftButtonChange.connect_same_thread (_shift_connection, boost::bind (&FP8ShiftSensitiveButton::shift_changed, this, _1));
+		_base.ShiftButtonChange.connect_same_thread (_shift_connection, std::bind (&FP8ShiftSensitiveButton::shift_changed, this, _1));
 	}
 
 private:
@@ -350,7 +350,7 @@ public:
 protected:
 	void connect_toggle ()
 	{
-		_base.ARMButtonChange.connect_same_thread (_arm_connection, boost::bind (&FP8ARMSensitiveButton::shift_changed, this, _1));
+		_base.ARMButtonChange.connect_same_thread (_arm_connection, std::bind (&FP8ARMSensitiveButton::shift_changed, this, _1));
 	}
 
 private:
@@ -373,7 +373,7 @@ public:
 		_hold_connection.disconnect ();
 	}
 
-	PBD::Signal1<void, bool> StateChange;
+	PBD::Signal<void(bool)> StateChange;
 
 	void set_active (bool a)
 	{

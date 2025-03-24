@@ -16,10 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtkardour_plugin_pin_dialog_h__
-#define __gtkardour_plugin_pin_dialog_h__
+#pragma once
 
-#include <gtkmm/drawingarea.h>
+#include <ytkmm/drawingarea.h>
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
@@ -27,11 +26,11 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/route.h"
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/sizegroup.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/sizegroup.h>
 
 #include "gtkmm2ext/persistent_tooltip.h"
 
@@ -267,4 +266,3 @@ private:
 	bool _height_mapped;
 };
 
-#endif

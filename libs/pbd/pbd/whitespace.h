@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_whitespace_h__
-#define __pbd_whitespace_h__
+#pragma once
 
 #include <string>
 
@@ -32,4 +31,3 @@ namespace PBD {
 	LIBPBD_API extern void remove_extra_whitespace (std::string const & in, std::string & out);
 } // namespace PBD
 
-#endif // __pbd_whitespace_h__

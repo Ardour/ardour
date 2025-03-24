@@ -20,7 +20,9 @@
 #ifndef __ardour_visibility_group__
 #define __ardour_visibility_group__
 
-#include <gtkmm/liststore.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/widget.h>
+
 #include "pbd/signals.h"
 
 class XMLNode;
@@ -41,7 +43,7 @@ public:
 		std::string const &,
 		std::string const &,
 		bool visible = false,
-		boost::function<boost::optional<bool> ()> = 0
+		std::function<std::optional<bool> ()> = 0
 		);
 
 	Gtk::Widget* list_view ();
@@ -52,7 +54,7 @@ public:
 	std::string get_state_name () const;
 	std::string get_state_value () const;
 
-	PBD::Signal0<void> VisibilityChanged;
+	PBD::Signal<void()> VisibilityChanged;
 
 	static std::string remove_element (std::string const& from, std::string const& element);
 	static std::string add_element (std::string const& from, std::string const& element);
@@ -64,7 +66,7 @@ private:
 		std::string  id;
 		std::string  name;
 		bool         visible;
-		boost::function<boost::optional<bool> ()> override;
+		std::function<std::optional<bool> ()> override;
 	};
 
 	class ModelColumns : public Gtk::TreeModelColumnRecord {

@@ -26,7 +26,6 @@
 #include <libgen.h>
 #include <assert.h>
 
-#include <pthread.h>
 #include <signal.h>
 #include <glib.h>
 #include <glibmm/timer.h>
@@ -42,7 +41,6 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <sys/time.h>
 
 struct ERect{
@@ -58,7 +56,7 @@ static VSTState * vstfx_first = NULL;
 
 const char magic[] = "VSTFX Plugin State v002";
 
-static volatile int gui_quit = 0;
+static volatile int gui_state = -1;
 
 /*This will be our connection to X*/
 
@@ -319,9 +317,8 @@ any Xevents to all the UI callbacks plugins 'may' have registered on their
 windows, that is if they don't manage their own UIs **/
 
 static void*
-gui_event_loop (void* ptr)
+gui_event_loop (void*)
 {
-	pthread_set_name ("LXVSTEventLoop");
 	VSTState* vstfx;
 	int LXVST_sched_timer_interval = 40; //ms, 25fps
 	XEvent event;
@@ -330,7 +327,7 @@ gui_event_loop (void* ptr)
 	clock1 = g_get_monotonic_time();
 	/*The 'Forever' loop - runs the plugin UIs etc - based on the FST gui event loop*/
 
-	while (!gui_quit)
+	while (gui_state == 0)
 	{
 		/* handle window creation requests, destroy requests,
 		   and run idle callbacks */
@@ -464,7 +461,7 @@ again:
 			clock1 = g_get_monotonic_time();
 		}
 
-		if (!gui_quit && may_sleep && elapsed_time_ms + 1 < LXVST_sched_timer_interval) {
+		if (0 == gui_state && may_sleep && elapsed_time_ms + 1 < LXVST_sched_timer_interval) {
 			Glib::usleep (1000 * (LXVST_sched_timer_interval - elapsed_time_ms - 1));
 		}
 	}
@@ -506,22 +503,8 @@ normally started in globals.cc*/
 
 int vstfx_init (void* ptr)
 {
-	assert (gui_quit == 0);
+	assert (gui_state == -1);
 	pthread_mutex_init (&plugin_mutex, NULL);
-
-	int thread_create_result;
-
-	pthread_attr_t thread_attributes;
-
-	/*Init the attribs to defaults*/
-
-	pthread_attr_init (&thread_attributes);
-
-	/*Make sure the thread is joinable - this should be the default anyway -
-	so we can join to it on vstfx_exit*/
-
-	pthread_attr_setdetachstate (&thread_attributes, PTHREAD_CREATE_JOINABLE);
-
 
 	/*This is where we need to open a connection to X, and start the GUI thread*/
 
@@ -542,10 +525,11 @@ int vstfx_init (void* ptr)
 	}
 
 	/*We have a connection to X - so start the gui event loop*/
+	gui_state = 0;
 
 	/*Create the thread - use default attrs for now, don't think we need anything special*/
 
-	thread_create_result = pthread_create (&LXVST_gui_event_thread, &thread_attributes, gui_event_loop, NULL);
+	int thread_create_result = pthread_create_and_store ("LXVSTEventLoop", &LXVST_gui_event_thread, gui_event_loop, NULL, 0);
 
 	if (thread_create_result != 0)
 	{
@@ -555,7 +539,7 @@ int vstfx_init (void* ptr)
 
 		XCloseDisplay (LXVST_XDisplay);
 		LXVST_XDisplay = 0;
-		gui_quit = 1;
+		gui_state = 1;
 
 		return -1;
 	}
@@ -567,10 +551,10 @@ int vstfx_init (void* ptr)
 
 void vstfx_exit ()
 {
-	if (gui_quit) {
+	if (gui_state) {
 		return;
 	}
-	gui_quit = 1;
+	gui_state = 1;
 
 	/*We need to pthread_join the gui_thread here so
 	we know when it has stopped*/
@@ -782,7 +766,7 @@ vstfx_launch_editor (VSTState* vstfx)
 void
 vstfx_destroy_editor (VSTState* vstfx)
 {
-	assert (!gui_quit);
+	assert (0 == gui_state);
 	pthread_mutex_lock (&vstfx->lock);
 	if (vstfx->linux_window) {
 		vstfx->destroy = TRUE;

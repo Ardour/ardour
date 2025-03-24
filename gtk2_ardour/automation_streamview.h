@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_automation_streamview_h__
-#define __ardour_automation_streamview_h__
+#pragma once
 
 #include <list>
 #include <cmath>
@@ -52,7 +51,7 @@ public:
 
 	void redisplay_track ();
 
-	inline double contents_height() const {
+	double contents_height() const {
 		return (_trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2);
 	}
 
@@ -63,7 +62,7 @@ public:
 
 	void clear ();
 
-	void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<Selectable*> &, bool within = false);
+	void _get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<Selectable*> &, bool within);
 	void set_selected_points (PointSelection &);
 
 	std::list<std::shared_ptr<AutomationLine> > get_lines () const;
@@ -86,4 +85,3 @@ private:
 	ARDOUR::AutoState _pending_automation_state;
 };
 
-#endif /* __ardour_automation_streamview_h__ */

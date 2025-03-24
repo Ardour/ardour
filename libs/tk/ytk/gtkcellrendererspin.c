@@ -21,7 +21,7 @@
  */
 
 #include "config.h"
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 #include "gtkintl.h"
 #include "gtkprivate.h"
 #include "gtkspinbutton.h"
@@ -207,7 +207,7 @@ gtk_cell_renderer_spin_set_property (GObject      *object,
 	}
 
       if (obj)
-	priv->adjustment = g_object_ref_sink (obj);
+	priv->adjustment = GTK_ADJUSTMENT (g_object_ref_sink (obj));
       break;
     case PROP_CLIMB_RATE:
       priv->climb_rate = g_value_get_double (value);

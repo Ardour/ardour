@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/toolpalette.h>
-#include <gtkmm/private/toolpalette_p.h>
+#include <ytkmm/toolpalette.h>
+#include <ytkmm/private/toolpalette_p.h>
 
 
 // -*- c++ -*-
@@ -30,7 +30,7 @@
  */
 
 #include <glib.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

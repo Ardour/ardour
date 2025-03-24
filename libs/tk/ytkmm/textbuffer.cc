@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/textbuffer.h>
-#include <gtkmm/private/textbuffer_p.h>
+#include <ytkmm/textbuffer.h>
+#include <ytkmm/private/textbuffer_p.h>
 
 
 // -*- c++ -*-
@@ -27,10 +27,10 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <glib.h>
-#include <gtkmm/textmark.h>
-#include <gtkmm/textiter.h>
+#include <ytkmm/textmark.h>
+#include <ytkmm/textiter.h>
 
 
 /*

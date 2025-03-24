@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_actions_h__
-#define __ardour_gtk_actions_h__
+#pragma once
 
 #include <vector>
 
@@ -66,4 +65,3 @@ namespace ActionManager {
 }
 
 
-#endif /* __ardour_gtk_actions_h__ */

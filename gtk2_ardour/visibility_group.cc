@@ -18,9 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menushell.h>
-#include <gtkmm/treeview.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menushell.h>
+#include <ytkmm/treeview.h>
 
 #include "pbd/strsplit.h"
 #include "pbd/xml++.h"
@@ -50,7 +50,7 @@ VisibilityGroup::VisibilityGroup (std::string const & name)
  */
 
 void
-VisibilityGroup::add (Gtk::Widget* widget, string const & id, string const & name, bool visible, boost::function<boost::optional<bool> ()> override)
+VisibilityGroup::add (Gtk::Widget* widget, string const & id, string const & name, bool visible, std::function<std::optional<bool> ()> override)
 {
 	Member m;
 	m.widget = widget;
@@ -92,9 +92,9 @@ bool
 VisibilityGroup::should_actually_be_visible (Member const & m) const
 {
 	if (m.override) {
-		boost::optional<bool> o = m.override ();
+		std::optional<bool> o = m.override ();
 		if (o) {
-			return o.get ();
+			return o.value ();
 		}
 	}
 

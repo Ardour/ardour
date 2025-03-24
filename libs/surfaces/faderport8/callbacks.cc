@@ -38,20 +38,20 @@ using namespace ArdourSurface::FP_NAMESPACE::FP8Types;
 void
 FaderPort8::connect_session_signals ()
 {
-	 session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_stripable_added_or_removed, this), this);
-	 PresentationInfo::Change.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_pi_property_changed, this, _1), this);
+	 session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::notify_stripable_added_or_removed, this), this);
+	 PresentationInfo::Change.connect(session_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::notify_pi_property_changed, this, _1), this);
 
-	Config->ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_parameter_changed, this, _1), this);
-	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_parameter_changed, this, _1), this);
+	Config->ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::notify_parameter_changed, this, _1), this);
+	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::notify_parameter_changed, this, _1), this);
 
-	session->TransportStateChange.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_transport_state_changed, this), this);
-	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_loop_state_changed, this), this);
-	session->RecordStateChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_record_state_changed, this), this);
+	session->TransportStateChange.connect (session_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::notify_transport_state_changed, this), this);
+	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::notify_loop_state_changed, this), this);
+	session->RecordStateChanged.connect (session_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::notify_record_state_changed, this), this);
 
-	session->DirtyChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_session_dirty_changed, this), this);
-	session->SoloChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_solo_changed, this), this);
-	session->MuteChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_mute_changed, this), this);
-	session->history().Changed.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_history_changed, this), this);
+	session->DirtyChanged.connect (session_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::notify_session_dirty_changed, this), this);
+	session->SoloChanged.connect (session_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::notify_solo_changed, this), this);
+	session->MuteChanged.connect (session_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::notify_mute_changed, this), this);
+	session->history().Changed.connect (session_connections, MISSING_INVALIDATOR, std::bind (&FaderPort8::notify_history_changed, this), this);
 }
 
 void
@@ -149,15 +149,15 @@ void
 FaderPort8::notify_record_state_changed ()
 {
 	switch (session->record_status ()) {
-		case Session::Disabled:
+		case Disabled:
 			_ctrls.button (FP8Controls::BtnRecord).set_active (0);
 			_ctrls.button (FP8Controls::BtnRecord).set_blinking (false);
 			break;
-		case Session::Enabled:
+		case Enabled:
 			_ctrls.button (FP8Controls::BtnRecord).set_active (true);
 			_ctrls.button (FP8Controls::BtnRecord).set_blinking (true);
 			break;
-		case Session::Recording:
+		case Recording:
 			_ctrls.button (FP8Controls::BtnRecord).set_active (true);
 			_ctrls.button (FP8Controls::BtnRecord).set_blinking (false);
 			break;

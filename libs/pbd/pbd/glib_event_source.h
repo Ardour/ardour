@@ -16,10 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_glib_event_source_h__
-#define __libpbd_glib_event_source_h__
+#pragma once
 
-#include <boost/function.hpp>
 
 #include <glib.h>
 #include <glibmm/main.h>
@@ -28,7 +26,7 @@
 class LIBPBD_API GlibEventLoopCallback
 {
   public:
-	GlibEventLoopCallback (boost::function<void()> callback);
+	GlibEventLoopCallback (std::function<void()> callback);
 	~GlibEventLoopCallback();
 
 	static gboolean c_prepare (GSource*, gint* timeout);
@@ -44,7 +42,6 @@ class LIBPBD_API GlibEventLoopCallback
 
 	GSourceWithParent* gsource;
 	GSourceFuncs funcs;
-	boost::function<void()> _callback;
+	std::function<void()> _callback;
 };
 
-#endif /* __libpbd_glib_event_source_h__ */

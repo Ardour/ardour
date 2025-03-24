@@ -22,8 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_plugin_ui_h__
-#define __ardour_plugin_ui_h__
+#pragma once
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
@@ -35,20 +34,19 @@
 
 #include <sigc++/signal.h>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/expander.h>
-#include <gtkmm/filechooserbutton.h>
-#include <gtkmm/image.h>
-#include <gtkmm/label.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/socket.h>
-#include <gtkmm/table.h>
-#include <gtkmm/togglebutton.h>
-#include <gtkmm/viewport.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/expander.h>
+#include <ytkmm/filechooserbutton.h>
+#include <ytkmm/image.h>
+#include <ytkmm/label.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/socket.h>
+#include <ytkmm/togglebutton.h>
+#include <ytkmm/viewport.h>
 
 #include "ardour/types.h"
 #include "ardour/plugin.h"
@@ -81,7 +79,7 @@ namespace ArdourWidgets {
 	class FastMeter;
 }
 
-class LatencyGUI;
+class TimeCtlGUI;
 class ArdourWindow;
 class PluginEqGui;
 class PluginLoadStatsGui;
@@ -110,6 +108,7 @@ public:
 	void update_preset ();
 
 	void latency_button_clicked ();
+	void tailtime_button_clicked ();
 
 	virtual bool on_window_show(const std::string& /*title*/) { return true; }
 	virtual void on_window_hide() {}
@@ -157,6 +156,8 @@ protected:
 	Gtk::Expander cpuload_expander;
 	/** a button which, when clicked, opens the latency GUI */
 	ArdourWidgets::ArdourButton _latency_button;
+	/** a button which, when clicked, opens the tailtime GUI */
+	ArdourWidgets::ArdourButton _tailtime_button;
 	/** a button which sets all controls' automation setting to Manual */
 	ArdourWidgets::ArdourButton automation_manual_all_button;
 	/** a button which sets all controls' automation setting to Play */
@@ -169,8 +170,12 @@ protected:
 	ArdourWidgets::ArdourButton automation_latch_all_button;
 
 	void set_latency_label ();
-	LatencyGUI* latency_gui;
+	TimeCtlGUI*   latency_gui;
 	ArdourWindow* latency_dialog;
+
+	void set_tailtime_label ();
+	TimeCtlGUI*   tailtime_gui;
+	ArdourWindow* tailtime_dialog;
 
 	PluginEqGui* eqgui;
 	PluginLoadStatsGui* stats_gui;
@@ -213,11 +218,12 @@ private:
 class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 {
 public:
-	GenericPluginUI (std::shared_ptr<ARDOUR::PlugInsertBase> plug, bool scrollable=false);
+	GenericPluginUI (std::shared_ptr<ARDOUR::PlugInsertBase> plug, bool scrollable = false, bool ctrls_only = false);
 	~GenericPluginUI ();
 
 	gint get_preferred_height () { return prefheight; }
 	gint get_preferred_width () { return -1; }
+	bool empty () const { return _empty; }
 
 	bool start_updating(GdkEventAny*);
 	bool stop_updating(GdkEventAny*);
@@ -230,6 +236,8 @@ private:
 
 	gint prefheight;
 	bool is_scrollable;
+	bool want_ctrl_only;
+	bool _empty;
 
 	struct MeterInfo {
 		ArdourWidgets::FastMeter* meter;
@@ -277,10 +285,6 @@ private:
 		ControlUI (const Evoral::Parameter& param);
 		~ControlUI ();
 
-		/* layout */
-		Gtk::Table* knobtable;
-		int x0, x1, y0, y1;
-
 		bool short_autostate; // modify with set_short_autostate below
 	};
 
@@ -301,8 +305,7 @@ private:
 	                             const ARDOUR::ParameterDescriptor&           desc,
 	                             std::shared_ptr<ARDOUR::AutomationControl> mcontrol,
 	                             float                                        value,
-	                             bool                                         is_input,
-	                             bool                                         use_knob = false);
+	                             bool                                         is_input);
 
 	void ui_parameter_changed (ControlUI* cui);
 	void update_control_display (ControlUI* cui);
@@ -404,4 +407,3 @@ extern VSTPluginUI* create_mac_vst_gui (std::shared_ptr<ARDOUR::PlugInsertBase>)
 extern PlugUIBase* create_au_gui (std::shared_ptr<ARDOUR::PlugInsertBase>, Gtk::VBox**);
 #endif
 
-#endif /* __ardour_plugin_ui_h__ */

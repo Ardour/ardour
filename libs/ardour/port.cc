@@ -39,9 +39,9 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal0<void> Port::PortDrop;
-PBD::Signal0<void> Port::PortSignalDrop;
-PBD::Signal0<void> Port::ResamplerQualityChanged;
+PBD::Signal<void()> Port::PortDrop;
+PBD::Signal<void()> Port::PortSignalDrop;
+PBD::Signal<void()> Port::ResamplerQualityChanged;
 
 bool         Port::_connecting_blocked = false;
 pframes_t    Port::_global_port_buffer_offset = 0;
@@ -89,9 +89,9 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 	}
 	DEBUG_TRACE (DEBUG::Ports, string_compose ("registered port %1 handle %2\n", name(), _port_handle));
 
-	PortDrop.connect_same_thread (drop_connection, boost::bind (&Port::session_global_drop, this));
-	PortSignalDrop.connect_same_thread (drop_connection, boost::bind (&Port::signal_drop, this));
-	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection, boost::bind (&Port::port_connected_or_disconnected, this, _1, _2, _3, _4, _5));
+	PortDrop.connect_same_thread (drop_connection, std::bind (&Port::session_global_drop, this));
+	PortSignalDrop.connect_same_thread (drop_connection, std::bind (&Port::signal_drop, this));
+	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection, std::bind (&Port::port_connected_or_disconnected, this, _1, _2, _3, _4, _5));
 }
 
 /** Port destructor */
@@ -697,7 +697,7 @@ Port::reestablish ()
 
 	reset ();
 
-	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection, boost::bind (&Port::port_connected_or_disconnected, this, _1, _2, _3, _4, _5));
+	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection, std::bind (&Port::port_connected_or_disconnected, this, _1, _2, _3, _4, _5));
 	return 0;
 }
 

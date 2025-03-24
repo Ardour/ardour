@@ -27,7 +27,7 @@
 
 #include "pbd/gstdio_compat.h"
 #include <glibmm/fileutils.h>
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/messagedialog.h>
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
@@ -167,7 +167,7 @@ LuaWindow::LuaWindow ()
 	ArdourWidgets::set_tooltip (script_select, _("Select Editor Buffer"));
 
 	setup_buffers ();
-	LuaScripting::instance().scripts_changed.connect (*this, invalidator (*this), boost::bind (&LuaWindow::refresh_scriptlist, this), gui_context());
+	LuaScripting::instance().scripts_changed.connect (*this, invalidator (*this), std::bind (&LuaWindow::refresh_scriptlist, this), gui_context());
 
 	Glib::RefPtr<Gtk::TextBuffer> tb (entry.get_buffer());
 	_script_changed_connection = tb->signal_changed().connect (sigc::mem_fun(*this, &LuaWindow::script_changed));
@@ -217,7 +217,7 @@ void LuaWindow::set_session (Session* s)
 	ArdourWindow::set_session (s);
 
 	update_title ();
-	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&LuaWindow::update_title, this), gui_context());
+	_session->DirtyChanged.connect (_session_connections, invalidator (*this), std::bind (&LuaWindow::update_title, this), gui_context());
 
 	lua_State* L = lua->getState();
 	LuaBindings::set_session (L, _session);

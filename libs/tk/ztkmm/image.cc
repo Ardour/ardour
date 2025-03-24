@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/image.h>
-#include <atkmm/private/image_p.h>
+#include <ztkmm/image.h>
+#include <ztkmm/private/image_p.h>
 
 
 // -*- c++ -*-
@@ -27,8 +27,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/object.h>
-#include <atk/atkimage.h>
+#include <ztkmm/object.h>
+#include <ztk/atkimage.h>
 
 
 namespace

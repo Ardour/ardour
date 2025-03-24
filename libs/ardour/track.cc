@@ -64,7 +64,7 @@ using namespace PBD;
 
 Track::Track (Session& sess, string name, PresentationInfo::Flag flag, TrackMode mode, DataType default_type)
 	: Route (sess, name, flag, default_type)
-	, _saved_meter_point (_meter_point)
+	, _record_prepared (false)
 	, _mode (mode)
 	, _alignment_choice (Automatic)
 	, _pending_name_change (false)
@@ -141,15 +141,17 @@ Track::init ()
 		set_name (name ());
 	}
 
-	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&Track::parameter_changed, this, _1));
+	_session.config.ParameterChanged.connect_same_thread (*this, std::bind (&Track::parameter_changed, this, _1));
+	_session.RecordStateChanged.connect_same_thread (*this, std::bind (&Track::update_input_meter, this));
+	_session.TransportStateChange.connect_same_thread (*this, std::bind (&Track::update_input_meter, this));
 
-	_monitoring_control->Changed.connect_same_thread (*this, boost::bind (&Track::monitoring_changed, this, _1, _2));
-	_record_safe_control->Changed.connect_same_thread (*this, boost::bind (&Track::record_safe_changed, this, _1, _2));
-	_record_enable_control->Changed.connect_same_thread (*this, boost::bind (&Track::record_enable_changed, this, _1, _2));
+	_monitoring_control->Changed.connect_same_thread (*this, std::bind (&Track::monitoring_changed, this, _1, _2));
+	_record_safe_control->Changed.connect_same_thread (*this, std::bind (&Track::record_safe_changed, this, _1, _2));
+	_record_enable_control->Changed.connect_same_thread (*this, std::bind (&Track::record_enable_changed, this, _1, _2));
 
-	_input->changed.connect_same_thread (*this, boost::bind (&Track::input_changed, this));
+	_input->changed.connect_same_thread (*this, std::bind (&Track::input_changed, this));
 
-	_disk_reader->ConfigurationChanged.connect_same_thread (*this, boost::bind (&Track::chan_count_changed, this));
+	_disk_reader->ConfigurationChanged.connect_same_thread (*this, std::bind (&Track::chan_count_changed, this));
 
 	return 0;
 }
@@ -202,7 +204,9 @@ Track::state (bool save_template) const
 	root.add_child_nocopy (_record_safe_control->get_state ());
 	root.add_child_nocopy (_record_enable_control->get_state ());
 
-	root.set_property (X_("saved-meter-point"), _saved_meter_point);
+	if (_saved_meter_point) {
+		root.set_property (X_("saved-meter-point"), _saved_meter_point.value ());
+	}
 	root.set_property (X_("alignment-choice"), _alignment_choice);
 
 	return root;
@@ -268,14 +272,19 @@ Track::set_state (const XMLNode& node, int version)
 				_record_safe_control->set_state (*child, version);
 			} else if (name == _monitoring_control->name()) {
 				_monitoring_control->set_state (*child, version);
+			} else if (name == "recenable" && version <= 3002) {
+				float value;
+				if (child->get_property ("value", value)) {
+					_record_enable_control->set_value (value, Controllable::NoGroup);
+				}
 			}
 		}
 	}
 
-	if (!node.get_property (X_("saved-meter-point"), _saved_meter_point)) {
-		_saved_meter_point = _meter_point;
+	MeterPoint mp;
+	if (node.get_property (X_("saved-meter-point"), mp)) {
+		_saved_meter_point = mp;
 	}
-
 
 	AlignChoice ac;
 
@@ -309,11 +318,12 @@ bool
 Track::can_record()
 {
 	bool will_record = true;
-	for (PortSet::iterator i = _input->ports().begin(); i != _input->ports().end() && will_record; ++i) {
-		if (!i->connected())
+	for (auto const& p : *_input->ports()) {
+		if (!p->connected()) {
 			will_record = false;
+			break;
+		}
 	}
-
 	return will_record;
 }
 
@@ -328,11 +338,6 @@ Track::prep_record_enabled (bool yn)
 		return -1;
 	}
 
-	/* keep track of the meter point as it was before we rec-enabled */
-	if (!_disk_writer->record_enabled()) {
-		_saved_meter_point = _meter_point;
-	}
-
 	bool will_follow;
 
 	if (yn) {
@@ -341,23 +346,74 @@ Track::prep_record_enabled (bool yn)
 		will_follow = _disk_writer->prep_record_disable ();
 	}
 
-	if (will_follow) {
-		if (yn) {
-			if (_meter_point != MeterCustom) {
-				set_meter_point (MeterInput);
-			}
-		} else {
-			set_meter_point (_saved_meter_point);
-		}
+	if (!will_follow) {
+		return -1;
 	}
+
+	_record_prepared = yn;
+	update_input_meter ();
 
 	return 0;
 }
 
 void
+Track::update_input_meter ()
+{
+	if (_session.loading ()) {
+		return;
+	}
+	/* meter input if _record_prepared,
+	 * except if Rolling, but not recording (master-rec-enable is off) and auto-input is enabled
+	 */
+	bool monitor_input = false;
+
+	if (_record_prepared) {
+		/* actually rolling (no count-in, pre-roll) */
+		bool const rolling     = 0 != _session.transport_speed();
+		bool const recording   = _session.actively_recording ();
+		bool const auto_input  = _session.config.get_auto_input ();
+
+		if (!(rolling && !recording && auto_input)) {
+			monitor_input = true;
+		}
+	}
+
+	if (monitor_input) {
+		if (_saved_meter_point) {
+			/* already monitoring input */
+			return;
+		}
+		MeterPoint mp = meter_point ();
+		if (mp == MeterInput) {
+			/* user explicitly monitors input, do nothing */
+			return;
+		}
+
+		/* keep track of the meter point as it was before we rec-enabled */
+		_saved_meter_point = mp;
+
+		if (mp != MeterCustom) {
+			set_meter_point (MeterInput);
+		}
+
+	} else {
+		if (!_saved_meter_point) {
+			return;
+		}
+		if (_saved_meter_point != MeterCustom) {
+			set_meter_point (_saved_meter_point.value ());
+		}
+		_saved_meter_point.reset ();
+	}
+}
+
+void
 Track::record_enable_changed (bool, Controllable::GroupControlDisposition)
 {
-	_disk_writer->set_record_enabled (_record_enable_control->get_value());
+	bool yn = _record_enable_control->get_value();
+
+	_disk_writer->set_record_enabled (yn);
+	_triggerbox->set_record_enabled (yn);
 }
 
 void
@@ -375,7 +431,7 @@ Track::can_be_record_safe ()
 bool
 Track::can_be_record_enabled ()
 {
-	return !_record_safe_control->get_value() && _disk_writer && !_disk_writer->record_safe() && _session.writable() && (_freeze_record.state != Frozen);
+	return !_record_safe_control->get_value() && _disk_writer && !_disk_writer->record_safe() && _session.writable() && (_freeze_record.state != Frozen) && (!_triggerbox || !_triggerbox->record_enabled());
 }
 
 void
@@ -391,6 +447,8 @@ Track::parameter_changed (string const & p)
 		if (_session.config.get_track_name_take()) {
 			resync_take_name ();
 		}
+	} else if (p == "auto-input") {
+		update_input_meter ();
 	}
 }
 
@@ -435,11 +493,22 @@ Track::resync_take_name (std::string n)
 bool
 Track::set_name (const string& str)
 {
+	if (_record_enable_control->get_value()) {
+		/* cannot rename rec-armed track - see also Track::resync_take_name */
+		return false;
+	}
+
 	if (str.empty ()) {
 		return false;
 	}
 
-	switch (resync_take_name (str)) {
+	string newname = Route::ensure_track_or_route_name (str);
+
+	if (newname == name()) {
+		return true;
+	}
+
+	switch (resync_take_name (newname)) {
 		case -1:
 			return false;
 		case 1:
@@ -450,8 +519,8 @@ Track::set_name (const string& str)
 
 	std::shared_ptr<Track> me = std::dynamic_pointer_cast<Track> (shared_from_this ());
 
-	_disk_reader->set_name (str);
-	_disk_writer->set_name (str);
+	_disk_reader->set_name (newname);
+	_disk_writer->set_name (newname);
 
 
 	/* When creating a track during session-load, do not change playlist's name.
@@ -462,7 +531,7 @@ Track::set_name (const string& str)
 	 * (new track name -> new playlist name  != old playlist)
 	 */
 	if (_session.loading ()) {
-		return Route::set_name (str);
+		return Route::set_name (newname);
 	}
 
 	for (uint32_t n = 0; n < DataType::num_types; ++n) {
@@ -481,11 +550,11 @@ Track::set_name (const string& str)
 			 * If (b) is not followed, we rename the current playlist and not
 			 * the other ones, which is a bit confusing (see mantis #4977).
 			 */
-			_playlists[n]->set_name (str);
+			_playlists[n]->set_name (newname);
 		}
 	}
 
-	return Route::set_name (str);
+	return Route::set_name (newname);
 }
 
 std::shared_ptr<Playlist>
@@ -497,16 +566,16 @@ Track::playlist ()
 void
 Track::request_input_monitoring (bool m)
 {
-	for (PortSet::iterator i = _input->ports().begin(); i != _input->ports().end(); ++i) {
-		AudioEngine::instance()->request_input_monitoring ((*i)->name(), m);
+	for (auto const& p : *_input->ports()) {
+		AudioEngine::instance()->request_input_monitoring (p->name(), m);
 	}
 }
 
 void
 Track::ensure_input_monitoring (bool m)
 {
-	for (PortSet::iterator i = _input->ports().begin(); i != _input->ports().end(); ++i) {
-		AudioEngine::instance()->ensure_input_monitoring ((*i)->name(), m);
+	for (auto const& p : *_input->ports()) {
+		AudioEngine::instance()->ensure_input_monitoring (p->name(), m);
 	}
 }
 
@@ -516,6 +585,12 @@ Track::last_capture_sources ()
 	return _disk_writer->last_capture_sources ();
 }
 
+void
+Track::reset_last_capture_sources ()
+{
+	_disk_writer->reset_last_capture_sources ();
+}
+
 std::string
 Track::steal_write_source_name()
 {
@@ -523,9 +598,9 @@ Track::steal_write_source_name()
 }
 
 void
-Track::reset_write_sources (bool r, bool force)
+Track::reset_write_sources (bool mark_write_complete)
 {
-	_disk_writer->reset_write_sources (r, force);
+	_disk_writer->reset_write_sources (mark_write_complete);
 }
 
 float
@@ -1075,7 +1150,20 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 			if (time_domain() == Temporal::BeatTime) {
 
 				const timepos_t ss (start_off);
-				const timecnt_t ll ((*ci)->samples, ss);
+				/* 2nd argument is the timeline position of the
+				 * start of the region in samples. We have to
+				 * get this right so that the conversion of
+				 * the capture duration (samples) to beats is
+				 * using the actual position where the region
+				 * will end up, rather than using its
+				 * source-relative start offset as a timeline position.
+				 *
+				 * This matters if the region ought to cover
+				 * part of the timeline where the tempo is
+				 * different from the value at the natural
+				 * position of the source.
+				 */
+				const timecnt_t ll ((*ci)->samples, timepos_t (initial_capture + start_off));
 
 				s = timepos_t (ss.beats());
 				l = timecnt_t (ll.beats(), s);

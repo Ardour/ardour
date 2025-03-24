@@ -35,10 +35,12 @@ def build(bld):
     autowaf.ensure_visible_symbols (obj, False)
     obj.export_includes    = ['hidapi']
     obj.includes           = ['hidapi']
+    obj.defines            = ['_POSIX_C_SOURCE=200809L']
     obj.name               = 'hidapi'
     obj.target             = 'hidapi'
     obj.vnum               = HIDAPI_VERSION
     obj.install_path       = bld.env['LIBDIR']
+    obj.defines            = '_POSIX_C_SOURCE=200809L'
 
     if bld.env['build_target'] == 'mingw':
         obj.source         = 'windows/hid.c'

@@ -3,7 +3,7 @@ ardour {
 	name        = "Mixer Scene Sequencer",
 	license     = "MIT",
 	author      = "John Devlin, Robin Gareus",
-	description = [[Recall a Mixer Scene when the playhead passes over a Marker named 'MS <nuber>' where <number> indicates the scene to recall.]]
+	description = [[Recall a Mixer Scene when the playhead passes over a Marker named 'MS <number>' where <number> indicates the scene to recall.]]
 }
 
 function factory ()
@@ -27,7 +27,7 @@ function factory ()
 			return
 		end
 
-		local mloc = loc:first_mark_at(mpos, Temporal.timecnt_t(0))
+		local mloc = loc:mark_at(mpos, Temporal.timecnt_t(0), 0)
 		if not mloc then
 			-- no marker found at that location
 			return

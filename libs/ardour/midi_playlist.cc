@@ -363,8 +363,8 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 		EventsSortByTimeAndType<samplepos_t> cmp;
 
 		/* iterate, top-most region first */
-		for (auto i = regs.rbegin(); i != regs.rend(); ++i) {
-			std::shared_ptr<MidiRegion> mr = *i;
+		for (auto & mr : regs) {
+
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("maybe render from %1\n", mr->name()));
 
 			if (top) {

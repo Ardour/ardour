@@ -173,7 +173,7 @@ Automatable::add_control(std::shared_ptr<Evoral::Control> ac)
 	if ((!actl || !(actl->flags() & Controllable::NotAutomatable)) && al) {
 		al->automation_state_changed.connect_same_thread (
 			_list_connections,
-			boost::bind (&Automatable::automation_list_automation_state_changed,
+			std::bind (&Automatable::automation_list_automation_state_changed,
 			             this, ac->parameter(), _1));
 	}
 
@@ -195,6 +195,8 @@ Automatable::describe_parameter (Evoral::Parameter param)
 	if (param == Evoral::Parameter(GainAutomation)) {
 		return _("Fader");
 	} else if (param.type() == BusSendLevel) {
+		return _("Send");
+	} else if (param.type() == SurroundSendLevel) {
 		return _("Send");
 	} else if (param.type() == InsertReturnLevel) {
 		return _("Return");
@@ -222,6 +224,12 @@ Automatable::describe_parameter (Evoral::Parameter param)
 		return _("Snap to Speaker");
 	} else if (param.type() == BinauralRenderMode) {
 		return _("Binaural Render mode");
+	} else if (param.type() == PanSurroundElevationEnable) {
+		return X_("hidden");
+	} else if (param.type() == PanSurroundZones) {
+		return X_("hidden");
+	} else if (param.type() == PanSurroundRamp) {
+		return X_("hidden");
 	} else if (param.type() == PhaseAutomation) {
 		return _("Polarity Invert");
 	} else if (param.type() == MidiVelocityAutomation) {
@@ -546,7 +554,7 @@ Automatable::automation_list_automation_state_changed (Evoral::Parameter const& 
 std::shared_ptr<Evoral::Control>
 Automatable::control_factory(const Evoral::Parameter& param)
 {
-	Evoral::Control*                  control   = NULL;
+	Evoral::Control*                  control   = nullptr;
 	bool                              make_list = true;
 	ParameterDescriptor               desc(param);
 	std::shared_ptr<AutomationList> list;
@@ -561,7 +569,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 		PluginInsert* pi = dynamic_cast<PluginInsert*>(this);
 		if (pi) {
 			pi->plugin(0)->get_parameter_descriptor(param.id(), desc);
-			control = new PluginInsert::PluginControl(pi, param, desc);
+			control = new PluginInsert::PIControl (_a_session, pi, param, desc);
 		} else {
 			warning << "PluginAutomation for non-Plugin" << endl;
 		}
@@ -575,7 +583,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 				} else {
 					list = std::shared_ptr<AutomationList>(new AutomationList(param, desc, Temporal::TimeDomainProvider (Temporal::AudioTime)));
 				}
-				control = new PluginInsert::PluginPropertyControl(pi, param, desc, list);
+				control = new PluginInsert::PluginPropertyControl (_a_session, pi, param, desc, list);
 			}
 		} else {
 			warning << "PluginPropertyAutomation for non-Plugin" << endl;
@@ -589,6 +597,8 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	} else if (param.type() == MainOutVolume) {
 		control = new GainControl(_a_session, param);
 	} else if (param.type() == BusSendLevel) {
+		control = new GainControl(_a_session, param);
+	} else if (param.type() == SurroundSendLevel) {
 		control = new GainControl(_a_session, param);
 	} else if (param.type() == PanSurroundX || param.type() == PanSurroundY || param.type() == PanSurroundZ || param.type() == PanSurroundSize || param.type() == PanSurroundSnap || param.type() == BinauralRenderMode) {
 		assert (0);
@@ -712,7 +722,7 @@ Automatable::find_next_event (timepos_t const & start, timepos_t const & end, Ev
 }
 
 void
-Automatable::find_next_ac_event (std::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event) const
+Automatable::find_next_ac_event (std::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event)
 {
 	assert (start <= end);
 
@@ -739,7 +749,7 @@ Automatable::find_next_ac_event (std::shared_ptr<AutomationControl> c, timepos_t
 }
 
 void
-Automatable::find_prev_ac_event (std::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event) const
+Automatable::find_prev_ac_event (std::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event)
 {
 	assert (start > end);
 	std::shared_ptr<SlavableAutomationControl> sc

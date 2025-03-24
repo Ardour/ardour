@@ -20,19 +20,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_route_params_ui_h__
-#define __ardour_route_params_ui_h__
+#pragma once
 
 #include <list>
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/label.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/togglebutton.h>
-#include <gtkmm/treeview.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/togglebutton.h>
+#include <ytkmm/treeview.h>
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
@@ -177,4 +176,3 @@ private:
 };
 
 
-#endif /* __ardour_route_params_ui_h__ */

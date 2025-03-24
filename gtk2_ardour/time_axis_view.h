@@ -24,21 +24,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_time_axis_h__
-#define __ardour_gtk_time_axis_h__
+#pragma once
 
 #include <vector>
 #include <list>
 
-#include <gtkmm/box.h>
-#include <gtkmm/fixed.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/table.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/label.h>
-#include <gtkmm/sizegroup.h>
+#include <ytkmm/box.h>
+#include <ytkmm/fixed.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/table.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/label.h>
+#include <ytkmm/sizegroup.h>
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
@@ -56,6 +55,7 @@
 #include "axis_view.h"
 #include "enums.h"
 #include "editing.h"
+#include "selectable.h"
 
 namespace ARDOUR {
 	class Session;
@@ -82,7 +82,6 @@ class TimeSelection;
 class PointSelection;
 class TimeAxisViewItem;
 class Selection;
-class Selectable;
 class RegionView;
 class GhostRegion;
 class StreamView;
@@ -95,7 +94,7 @@ class PasteContext;
  * This class provides the basic LHS controls and display methods. This should be
  * extended to create functional time-axis based views.
  */
-class TimeAxisView : public virtual AxisView
+class TimeAxisView : public virtual AxisView, public SelectableOwner
 {
 private:
 	enum NamePackingBits {
@@ -107,7 +106,7 @@ public:
 	TimeAxisView(ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
 
-	static PBD::Signal1<void,TimeAxisView*> CatchDeletion;
+	static PBD::Signal<void(TimeAxisView*)> CatchDeletion;
 
 	static void setup_sizes ();
 
@@ -188,7 +187,6 @@ public:
 	 *  @param pos Position to paste to (session samples).
 	 *  @param selection Selection to paste.
 	 *  @param ctx Paste context.
-	 *  @param sub_num music-time sub-division: \c -1: snap to bar, \c 1: exact beat, \c >1: \c (1 \c / \p sub_num \c ) beat-divisions
 	 */
 	virtual bool paste (Temporal::timepos_t const & pos,
 	                    const Selection&    selection,
@@ -209,8 +207,8 @@ public:
 
 	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);
 
-	virtual void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t  const &, double, double, std::list<Selectable*>&, bool within = false);
-	virtual void get_inverted_selectables (Selection&, std::list<Selectable *>& results);
+	void _get_selectables (Temporal::timepos_t const &, Temporal::timepos_t  const &, double, double, std::list<Selectable*>&, bool within);
+	void get_inverted_selectables (Selection&, std::list<Selectable *>& results);
 	virtual void get_regionviews_at_or_after (Temporal::timepos_t const &, RegionSelection&) {}
 
 	void add_ghost (RegionView*);
@@ -335,4 +333,3 @@ private:
 
 }; /* class TimeAxisView */
 
-#endif /* __ardour_gtk_time_axis_h__ */

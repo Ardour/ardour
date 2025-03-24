@@ -19,10 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_group_tabs_h__
-#define __gtk_ardour_group_tabs_h__
+#pragma once
 
-#include <gtkmm/menu.h>
+#include <ytkmm/menu.h>
 
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
@@ -65,6 +64,9 @@ public:
 
 	void run_new_group_dialog (ARDOUR::RouteList const *, bool with_master);
 
+	void set_extent (double);
+	void set_offset (double);
+
 	static void set_group_color (ARDOUR::RouteGroup *, uint32_t);
 	static std::string group_gui_id (ARDOUR::RouteGroup *);
 	static uint32_t group_color (ARDOUR::RouteGroup *);
@@ -79,6 +81,17 @@ protected:
 		uint32_t color; ///< color
 		ARDOUR::RouteGroup* group; ///< route group
 	};
+
+	/** @return Size of the widget along the primary axis */
+	virtual double visible_extent () const = 0;
+
+	/** @return Size of all contained strips along the primary axis */
+	double extent () const { return _extent < 0 ? visible_extent () : _extent; }
+
+	/** @return Scroll offset of \ref visible_extent along the primary axis */
+	double offset () const { return _offset; }
+
+	bool _dragging_new_tab; ///< true if we're dragging a new tab
 
 private:
 	static void emit_gui_changed_for_members (std::shared_ptr<ARDOUR::RouteList>);
@@ -102,10 +115,6 @@ private:
 	virtual double primary_coordinate (double x, double y) const = 0;
 
 	virtual ARDOUR::RouteList routes_for_tab (Tab const * t) const = 0;
-
-	/** @return Size of the widget along the primary axis */
-	virtual double extent () const = 0;
-
 	virtual void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *) {}
 	virtual ARDOUR::RouteList selected_routes () const = 0;
 
@@ -133,6 +142,9 @@ private:
 	bool on_motion_notify_event (GdkEventMotion *);
 	bool on_button_release_event (GdkEventButton *);
 
+	bool on_enter_notify_event (GdkEventCrossing*);
+	bool on_leave_notify_event (GdkEventCrossing*);
+
 	Tab * click_to_tab (double, std::list<Tab>::iterator *, std::list<Tab>::iterator *);
 
 	void route_group_property_changed (ARDOUR::RouteGroup *);
@@ -154,7 +166,6 @@ private:
 	Tab* _dragging; ///< tab being dragged, or 0
 	/** routes that were in the tab that is being dragged when the drag started */
 	ARDOUR::RouteList _initial_dragging_routes;
-	bool _dragging_new_tab; ///< true if we're dragging a new tab
 	bool _drag_moved; ///< true if there has been movement during any current drag
 	double _drag_fixed; ///< the position of the fixed end of the tab being dragged
 	double _drag_moving; ///< the position of the moving end of the tab being dragged
@@ -162,9 +173,14 @@ private:
 	double _drag_min; ///< minimum position for drag
 	double _drag_max; ///< maximum position for drag
 	double _drag_first; ///< first mouse pointer position during drag
+	double _extent;
+	double _offset;
+
+	bool  _hovering;
+
+	mutable PBD::ScopedConnection _new_route_group_connection;
 
 	/** colors that have been used for new route group tabs */
 	static std::list<Gdk::Color> _used_colors;
 };
 
-#endif // __gtk_ardour_group_tabs_h__

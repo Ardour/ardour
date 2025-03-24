@@ -30,8 +30,8 @@
 #include "pbd/signals.h"
 #include "pbd/xml++.h"
 
-#include <gtkmm/colorselection.h>
-#include <gtkmm/textview.h>
+#include <ytkmm/colorselection.h>
+#include <ytkmm/textview.h>
 
 #include "gtkmm2ext/widget_state.h"
 
@@ -45,6 +45,7 @@
 #include "ardour/track.h"
 
 #include "axis_view.h"
+#include "route_comment_editor.h"
 #include "selectable.h"
 #include "stripable_colorpicker.h"
 #include "window_manager.h"
@@ -155,7 +156,6 @@ public:
 	void update_monitoring_display ();
 	void open_comment_editor ();
 	void toggle_comment_editor ();
-	void comment_changed ();
 	void set_route_active (bool, bool);
 	void set_disk_io_point (ARDOUR::DiskIOPoint);
 	void fan_out (bool to_busses = true, bool group = true);
@@ -176,6 +176,8 @@ public:
 	static Gtkmm2ext::ActiveState solo_isolate_active_state (std::shared_ptr<ARDOUR::Stripable>);
 	static Gtkmm2ext::ActiveState solo_safe_active_state (std::shared_ptr<ARDOUR::Stripable>);
 	static Gtkmm2ext::ActiveState mute_active_state (ARDOUR::Session*, std::shared_ptr<ARDOUR::Stripable>);
+
+	static bool verify_new_route_name (const std::string& name);
 
 protected:
 	virtual void set_color (uint32_t c);
@@ -246,7 +248,6 @@ protected:
 	bool mark_hidden (bool yn);
 	void setup_invert_buttons ();
 	void update_phase_invert_sensitivty ();
-	bool verify_new_route_name (const std::string& name);
 	void check_rec_enable_sensitivity ();
 	void route_gui_changed (PBD::PropertyChange const&);
 
@@ -290,9 +291,6 @@ private:
 	void step_edit_changed (bool);
 	void toggle_rec_safe ();
 
-	void setup_comment_editor ();
-	void comment_editor_done_editing ();
-
 	void init_mute_menu (ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
 	void build_mute_menu ();
 	void build_solo_menu ();
@@ -322,13 +320,10 @@ private:
 	PlaylistSelector*  _playlist_selector;
 
 	Gtk::Menu*     _record_menu;
-	ArdourWindow*  _comment_window;
-	Gtk::TextView* _comment_area;
 
 	Gtk::CheckMenuItem* _step_edit_item;
 	Gtk::CheckMenuItem* _rec_safe_item;
 
-	bool       _ignore_comment_edit;
 	int        _i_am_the_modifier;
 	Gtk::Menu* _invert_menu;
 	uint32_t   _n_polarity_invert;
@@ -336,6 +331,7 @@ private:
 	std::vector<ArdourWidgets::ArdourButton*> _invert_buttons;
 
 	StripableColorDialog _color_picker;
+	RouteCommentEditor   _comment_editor;
 
 	sigc::connection send_blink_connection;
 	sigc::connection rec_blink_connection;
@@ -344,7 +340,7 @@ private:
 	 *  by a click on the `Sends' button.  The parameter is the route that the sends are
 	 *  to, or 0 if no route is now in this mode.
 	 */
-	static PBD::Signal1<void, std::shared_ptr<ARDOUR::Route> > BusSendDisplayChanged;
+	static PBD::Signal<void(std::shared_ptr<ARDOUR::Route> )> BusSendDisplayChanged;
 
 	static std::weak_ptr<ARDOUR::Route> _showing_sends_to;
 

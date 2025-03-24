@@ -22,11 +22,11 @@
 #ifndef __gtk2_ardour_monitor_section_h__
 #define __gtk2_ardour_monitor_section_h__
 
-#include <gtkmm/box.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/sizegroup.h>
-#include <gtkmm/table.h>
-#include <gtkmm/viewport.h>
+#include <ytkmm/box.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/sizegroup.h>
+#include <ytkmm/table.h>
+#include <ytkmm/viewport.h>
 
 #include "gtkmm2ext/bindings.h"
 

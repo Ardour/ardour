@@ -44,14 +44,14 @@ namespace Editing {
 GridType
 str2gridtype (const string & str) {
 	const char* type = str.c_str();
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	return GridTypeBar;
 }
 
 #undef GRIDTYPE
 #define GRIDTYPE(s) N_(#s),
 const char *gridtypestrs[] = {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	0
 };
 #undef GRIDTYPE
@@ -63,14 +63,14 @@ const char *gridtypestrs[] = {
 SnapMode
 str2snapmode (const string & str) {
 	const char* type = str.c_str();
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	return SnapMagnetic;
 }
 
 #undef SNAPMODE
 #define SNAPMODE(s) N_(#s),
 const char *snapmodestrs[] = {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	0
 };
 #undef SNAPMODE
@@ -83,14 +83,14 @@ const char *snapmodestrs[] = {
 RegionListSortType
 str2regionlistsorttype (const string & str) {
 	const char* type = str.c_str();
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	return ByName;
 }
 
 #undef REGIONLISTSORTTYPE
 #define REGIONLISTSORTTYPE(s) N_(#s),
 const char *regionlistsorttypestrs[] = {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	0
 };
 #undef REGIONLISTSORTTYPE
@@ -102,14 +102,14 @@ const char *regionlistsorttypestrs[] = {
 MouseMode
 str2mousemode (const string & str) {
 	const char* type = str.c_str();
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	return MouseObject;
 }
 
 #undef MOUSEMODE
 #define MOUSEMODE(s) N_(#s),
 const char *mousemodestrs[] = {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	0
 };
 #undef MOUSEMODE
@@ -121,14 +121,14 @@ const char *mousemodestrs[] = {
 ZoomFocus
 str2zoomfocus (const string & str) {
 	const char* type = str.c_str();
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	return ZoomFocusPlayhead;
 }
 
 #undef ZOOMFOCUS
 #define ZOOMFOCUS(s) N_(#s),
 const char *zoomfocusstrs[] = {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	0
 };
 #undef ZOOMFOCUS
@@ -140,14 +140,14 @@ const char *zoomfocusstrs[] = {
 DisplayControl
 str2displaycontrol (const string & str) {
 	const char* type = str.c_str();
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	return FollowPlayhead;
 }
 
 #undef DISPLAYCONTROL
 #define DISPLAYCONTROL(s) N_(#s),
 const char *displaycontrolstrs[] = {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	0
 };
 #undef DISPLAYCONTROL
@@ -157,7 +157,7 @@ const char *displaycontrolstrs[] = {
 #undef IMPORTMODE
 #define IMPORTMODE(s) N_(#s),
 const char *importmodestrs[] = {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	0
 };
 #undef IMPORTMODE
@@ -167,7 +167,7 @@ const char *importmodestrs[] = {
 #undef TEMPOEDITBEHAVIOR
 #define TEMPOEDITBEHAVIOR(s) N_(#s),
 const char *tempoeditbehaviorstrs[] = {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	0
 };
 #undef TEMPOEDITBEHAVIOR
@@ -176,7 +176,7 @@ const char *tempoeditbehaviorstrs[] = {
 #undef NOTENAMEDISPLAY
 #define NOTENAMEDISPLAY(s) N_(#s),
 const char *notenamedisplaystrs[] = {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	0
 };
 #undef NOTENAMEDISPLAY
@@ -185,7 +185,7 @@ const char *notenamedisplaystrs[] = {
 #undef MARKERCLICKBEHAVIOR
 #define MARKERCLICKBEHAVIOR(s) N_(#s),
 const char *markerclickbehaviorstrs[] = {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 	0
 };
 #undef MARKERCLICKBEHAVIOR

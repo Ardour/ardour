@@ -16,12 +16,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtkutils_h__
-#define __gtkutils_h__
+#pragma once
 
 #include <string>
 
 #include "gtkmm2ext/visibility.h"
+
+#include <glib.h>
 
 namespace Gtk {
 	class Widget;
@@ -31,4 +32,3 @@ LIBGTKMM2EXT_API void gtk_set_size_request_to_display_given_text (Gtk::Widget& w
 								  const std::string& text,
 								  gint hpadding = 0,
 								  gint vpadding = 0);
-#endif /* __gtkutils_h__ */

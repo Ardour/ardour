@@ -23,8 +23,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/scoped_array.hpp>
-
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 
@@ -91,7 +89,7 @@ AudioTrack::set_state (const XMLNode& node, int version)
 	pending_state = const_cast<XMLNode*> (&node);
 
 	if (_session.loading ()) {
-		_session.StateReady.connect_same_thread (*this, boost::bind (&AudioTrack::set_state_part_two, this));
+		_session.StateReady.connect_same_thread (*this, std::bind (&AudioTrack::set_state_part_two, this));
 	} else {
 		set_state_part_two ();
 	}
@@ -209,8 +207,8 @@ AudioTrack::export_stuff (BufferSet& buffers, samplepos_t start, samplecnt_t nfr
                           std::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze,
                           MidiNoteTracker& /* ignored, this is audio */)
 {
-	boost::scoped_array<gain_t> gain_buffer (new gain_t[nframes]);
-	boost::scoped_array<Sample> mix_buffer (new Sample[nframes]);
+	std::unique_ptr<gain_t[]> gain_buffer (new gain_t[nframes]);
+	std::unique_ptr<Sample[]> mix_buffer (new Sample[nframes]);
 
 	Glib::Threads::RWLock::ReaderLock rlock (_processor_lock);
 

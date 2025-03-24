@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "ardour/parameter_descriptor.h"
 #include "ardour/parameter_types.h"
@@ -25,7 +25,7 @@
 
 #include "public_editor.h"
 #include "stripable_time_axis.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 
 #include "pbd/i18n.h"
 
@@ -197,14 +197,13 @@ StripableTimeAxisView::automation_child_by_alist_id (PBD::ID alist_id)
 {
 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 		std::shared_ptr<AutomationTimeAxisView> atv (i->second);
-		std::list<std::shared_ptr<AutomationLine> > lines = atv->lines();
-		for (std::list<std::shared_ptr<AutomationLine> >::const_iterator li = lines.begin(); li != lines.end(); ++li) {
-			if ((*li)->the_list()->id() == alist_id) {
-				return *li;
+		for (auto & line : atv->lines()) {
+			if (line->the_list()->id() == alist_id) {
+				return line;;
 			}
 		}
 	}
-	return std::shared_ptr<AutomationLine> ();
+	return std::shared_ptr<EditorAutomationLine> ();
 }
 
 void

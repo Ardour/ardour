@@ -16,10 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_port_matrix_body_h__
-#define __gtk_ardour_port_matrix_body_h__
+#pragma once
 
-#include <gtkmm/eventbox.h>
+#include <ytkmm/eventbox.h>
 #include "port_group.h"
 #include "port_matrix_types.h"
 
@@ -106,4 +105,3 @@ private:
 	PBD::ScopedConnectionList _bundle_connections;
 };
 
-#endif

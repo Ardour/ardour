@@ -110,9 +110,9 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal3<int,std::shared_ptr<Route>, std::shared_ptr<PluginInsert>, Route::PluginSetupOptions > Route::PluginSetup;
+PBD::Signal<int(std::shared_ptr<Route>, std::shared_ptr<PluginInsert>, Route::PluginSetupOptions )> Route::PluginSetup;
 
-PBD::Signal1<void, std::weak_ptr<Route> > Route::FanOut;
+PBD::Signal<void(std::weak_ptr<Route> )> Route::FanOut;
 
 /** Base class for all routable/mixable objects (tracks and busses) */
 Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType default_type)
@@ -127,6 +127,7 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, _pending_meter_point (MeterPostFader)
 	, _denormal_protection (false)
 	, _recordable (true)
+	, _comment_editor_window (0)
 	, _have_internal_generator (false)
 	, _default_type (default_type)
 	, _instrument_fanned_out (false)
@@ -178,7 +179,7 @@ Route::init ()
 
 	_solo_control.reset (new SoloControl (_session, X_("solo"), *this, *this, tdp));
 	add_control (_solo_control);
-	_solo_control->Changed.connect_same_thread (*this, boost::bind (&Route::solo_control_changed, this, _1, _2));
+	_solo_control->Changed.connect_same_thread (*this, std::bind (&Route::solo_control_changed, this, _1, _2));
 
 	_mute_control.reset (new MuteControl (_session, X_("mute"), *this, tdp));
 	add_control (_mute_control);
@@ -203,11 +204,11 @@ Route::init ()
 	_input.reset (new IO (_session, _name, IO::Input, _default_type));
 	_output.reset (new IO (_session, _name, IO::Output, _default_type));
 
-	_input->changed.connect_same_thread (*this, boost::bind (&Route::input_change_handler, this, _1, _2));
-	_input->PortCountChanging.connect_same_thread (*this, boost::bind (&Route::input_port_count_changing, this, _1));
+	_input->changed.connect_same_thread (*this, std::bind (&Route::input_change_handler, this, _1, _2));
+	_input->PortCountChanging.connect_same_thread (*this, std::bind (&Route::input_port_count_changing, this, _1));
 
-	_output->changed.connect_same_thread (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
-	_output->PortCountChanging.connect_same_thread (*this, boost::bind (&Route::output_port_count_changing, this, _1));
+	_output->changed.connect_same_thread (*this, std::bind (&Route::output_change_handler, this, _1, _2));
+	_output->PortCountChanging.connect_same_thread (*this, std::bind (&Route::output_port_count_changing, this, _1));
 
 	/* add the amp/fader processor.
 	 * it should be the first processor to be added on every route.
@@ -226,6 +227,8 @@ Route::init ()
 
 	if (is_monitor ()) {
 		_amp->set_display_name (_("Monitor"));
+		_gain_control->set_flag (Controllable::MonitorControl);
+		_trim_control->set_flag (Controllable::MonitorControl);
 	}
 
 	if (!is_singleton () && !is_auditioner ()) {
@@ -299,6 +302,7 @@ Route::init ()
 	if (is_surround_master ()) {
 		_meter_point = _pending_meter_point = MeterPreFader;
 		_surround_return.reset (new SurroundReturn (_session, this));
+		_surround_return->set_owner (this);
 		_surround_return->activate ();
 		panner_shell()->set_bypassed (true);
 
@@ -307,7 +311,7 @@ Route::init ()
 		_output->set_audio_channel_names (std::vector<std::string> {
 				_("L"), _("R"), _("C"), _("LFE"), _("Ls"), _("Rs"),
 				_("Lrs"), _("Rrs"), _("Lfh"), _("Rfh"), _("Lrh"), _("Rrh"),
-				_("Lb"), _("Rb")
+				_("BinL"), _("BinR")
 				});
 	}
 
@@ -354,6 +358,13 @@ Route::~Route ()
 string
 Route::ensure_track_or_route_name (string newname) const
 {
+	/* remove any colons (and other nasty chars) */
+	newname = legalize_for_universal_path (newname);
+
+	/* Some ctrl surfaces may put NULL in the middle of a string.
+	 * Ben found out just how much havoc this can wreak. SysEx 1s 4 b1tch. */
+	newname.erase (std::remove (newname.begin(), newname.end(), '\0'), newname.end());
+
 	while (!_session.io_name_is_legal (newname)) {
 		newname = bump_name_once (newname, ' ');
 		if (newname == name()) {
@@ -390,31 +401,48 @@ Route::process_output_buffers (BufferSet& bufs,
 		return;
 	}
 
-	/* We should offset the route-owned ctrls by the given latency, however
-	 * this only affects Mute. Other route-owned controls (solo, polarity..)
-	 * are not automatable.
-	 *
-	 * Mute has its own issues since there's not a single mute-point,
-	 * but in general
-	 */
-	automation_run (start_sample, nframes);
-
 	if (_pannable) {
-		_pannable->automation_run (start_sample + _signal_latency, nframes);
+		/* this is only for the benfit of updating the UI.
+		 *
+		 * Panner's `::distribute_one_automated()` evalualte
+		 * a sample-accurate curve using start/end of the
+		 * delivery processor.
+		 */
+		_pannable->automation_run (start_sample, nframes);
 	}
+
+	const int speed = (is_auditioner() ? 1 : _session.transport_speed (true));
+	assert (speed == -1 || speed == 0 || speed == 1);
+
+	const samplecnt_t output_latency = speed * _output_latency;
+	const samplecnt_t latency_offset = speed * (_signal_latency + _output_latency);
+
+	/* Mute is the only actual route-owned control (solo, solo safe, polarity
+	 * are not automatable).
+	 *
+	 * Here we offset mute automation to align to output/master bus
+	 * to be consistent with the fader. This applied to the
+	 * "Main outs" mute point.
+	 *
+	 * Other mute points in the middle of signal flow flow
+	 * will not be handled correctly. That would mean to add
+	 * _signal_latency - accumulated processor effective_latency() at mute mute
+	 */
+
+	automation_run (start_sample + output_latency, nframes);
 
 	/* figure out if we're going to use gain automation */
 	if (gain_automation_ok) {
 		_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
 		_amp->setup_gain_automation (
-				start_sample + _amp->output_latency (),
-				end_sample + _amp->output_latency (),
+				start_sample + _amp->output_latency () + output_latency,
+				end_sample + _amp->output_latency () + output_latency,
 				nframes);
 
 		_trim->set_gain_automation_buffer (_session.trim_automation_buffer ());
 		_trim->setup_gain_automation (
-				start_sample + _trim->output_latency (),
-				end_sample + _trim->output_latency (),
+				start_sample + _trim->output_latency () + output_latency,
+				end_sample + _trim->output_latency () + output_latency,
 				nframes);
 	}
 
@@ -428,18 +456,8 @@ Route::process_output_buffers (BufferSet& bufs,
 	 * -> at Time T= -15, the disk-reader reads sample T=0.
 	 * By the Time T=0 is reached (dt=15 later) that sample is audible.
 	 */
-
-	const double speed = (is_auditioner() ? 1.0 : _session.transport_speed ());
-
-	const sampleoffset_t latency_offset = _signal_latency + _output_latency;
-	if (speed < 0) {
-		/* when rolling backwards this can become negative */
-		start_sample -= latency_offset;
-		end_sample -= latency_offset;
-	} else {
-		start_sample += latency_offset;
-		end_sample += latency_offset;
-	}
+	start_sample += latency_offset;
+	end_sample += latency_offset;
 
 	/* Note: during initial pre-roll 'start_sample' as passed as argument can be negative.
 	 * Functions calling process_output_buffers() will set  "run_disk_reader"
@@ -913,7 +931,7 @@ Route::add_processor (std::shared_ptr<Processor> processor, std::shared_ptr<Proc
 	assert (processor != _main_outs);
 
 	DEBUG_TRACE (DEBUG::Processors, string_compose (
-		             "%1 adding processor %2\n", name(), processor->name()));
+		             "%1 adding processor %2\n", name(), processor->display_name()));
 
 	ProcessorList pl;
 
@@ -1111,7 +1129,7 @@ Route::add_processors (const ProcessorList& others, std::shared_ptr<Processor> b
 		flags &= mask;
 
 		if (flags != None) {
-			boost::optional<int> rv = PluginSetup (std::dynamic_pointer_cast<Route>(shared_from_this ()), pi, flags);  /* EMIT SIGNAL */
+			std::optional<int> rv = PluginSetup (std::dynamic_pointer_cast<Route>(shared_from_this ()), pi, flags);  /* EMIT SIGNAL */
 			int mode = rv.value_or (0);
 			switch (mode & 3) {
 				case 1:
@@ -1187,7 +1205,7 @@ Route::add_processors (const ProcessorList& others, std::shared_ptr<Processor> b
 
 			if (pi && pi->has_sidechain ()) {
 				pi->update_sidechain_name ();
-				pi->sidechain_input ()->changed.connect_same_thread (*pi, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
+				pi->sidechain_input ()->changed.connect_same_thread (*pi, std::bind (&Route::sidechain_change_handler, this, _1, _2));
 			}
 
 			if ((*i)->active()) {
@@ -1195,14 +1213,14 @@ Route::add_processors (const ProcessorList& others, std::shared_ptr<Processor> b
 				(*i)->activate ();
 			}
 
-			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, &_session));
+			(*i)->ActiveChanged.connect_same_thread (*this, std::bind (&Session::queue_latency_recompute, &_session));
 
 			std::shared_ptr<Send> send;
 			if ((send = std::dynamic_pointer_cast<Send> (*i))) {
 				send->SelfDestruct.connect_same_thread (**i,
-						boost::bind (&Route::processor_selfdestruct, this, std::weak_ptr<Processor> (*i)));
+						std::bind (&Route::processor_selfdestruct, this, std::weak_ptr<Processor> (*i)));
 				if (send->output()) {
-					send->output()->changed.connect_same_thread (**i, boost::bind (&Route::output_change_handler, this, _1, _2));
+					send->output()->changed.connect_same_thread (**i, std::bind (&Route::output_change_handler, this, _1, _2));
 				}
 			}
 
@@ -1659,7 +1677,7 @@ Route::replace_processor (std::shared_ptr<Processor> old, std::shared_ptr<Proces
 			sub->enable (true);
 		}
 
-		sub->ActiveChanged.connect_same_thread (*sub, boost::bind (&Session::queue_latency_recompute, &_session));
+		sub->ActiveChanged.connect_same_thread (*sub, std::bind (&Session::queue_latency_recompute, &_session));
 	}
 
 	reset_instrument_info ();
@@ -1875,7 +1893,7 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 				}
 			}
 
-			DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1 ID=%2 in=%3 out=%4\n",(*p)->name(), (*p)->id(), in, out));
+			DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1 ID=%2 in=%3 out=%4\n",(*p)->display_name(), (*p)->id(), in, out));
 			configuration.push_back(make_pair(in, out));
 
 			if (is_monitor()) {
@@ -2406,7 +2424,7 @@ Route::add_remove_sidechain (std::shared_ptr<Processor> proc, bool add)
 
 	if (pi->has_sidechain ()) {
 		pi->reset_sidechain_map ();
-		pi->sidechain_input ()->changed.connect_same_thread (*pi, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
+		pi->sidechain_input ()->changed.connect_same_thread (*pi, std::bind (&Route::sidechain_change_handler, this, _1, _2));
 	}
 
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
@@ -2890,6 +2908,8 @@ Route::set_state (const XMLNode& node, int version)
 				_volume_control->set_state (*child, version);
 			} else if (control_name == _phase_control->name()) {
 				_phase_control->set_state (*child, version);
+			} else if (control_name == "recenable" && version <= 3002) {
+				/* ignore (now "rec-enable"), handled by Track */
 			} else {
 				Evoral::Parameter p = EventTypeMap::instance().from_symbol (control_name);
 				if (p.type () >= MidiCCAutomation && p.type () < MidiSystemExclusiveAutomation) {
@@ -3261,7 +3281,7 @@ Route::set_processor_state (const XMLNode& node, int version)
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 			(*i)->set_owner (this);
-			(*i)->ActiveChanged.connect_same_thread (**i, boost::bind (&Session::queue_latency_recompute, &_session));
+			(*i)->ActiveChanged.connect_same_thread (**i, std::bind (&Session::queue_latency_recompute, &_session));
 
 			std::shared_ptr<PluginInsert> pi;
 
@@ -3327,12 +3347,18 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 			processor->set_owner (this);
 
 		} else if (prop->value() == "send") {
+#ifndef LIVETRAX
+			Delivery::Role role;
+			if (Delivery::role_from_xml (node, role) && role == Delivery::DirectOuts) {
+				return true;
+			}
+#endif
 
 			processor.reset (new Send (_session, _pannable, _mute_master, Delivery::Send, true));
 			std::shared_ptr<Send> send = std::dynamic_pointer_cast<Send> (processor);
-			send->SelfDestruct.connect_same_thread (*send, boost::bind (&Route::processor_selfdestruct, this, std::weak_ptr<Processor> (processor)));
+			send->SelfDestruct.connect_same_thread (*send, std::bind (&Route::processor_selfdestruct, this, std::weak_ptr<Processor> (processor)));
 			if (send->output()) {
-				send->output()->changed.connect_same_thread (*send, boost::bind (&Route::output_change_handler, this, _1, _2));
+				send->output()->changed.connect_same_thread (*send, std::bind (&Route::output_change_handler, this, _1, _2));
 			}
 
 		} else if (prop->value() == "sursend") {
@@ -3363,7 +3389,7 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 
 		/* subscribe to Sidechain IO changes */
 		if (pi && pi->has_sidechain ()) {
-			pi->sidechain_input ()->changed.connect_same_thread (*pi, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
+			pi->sidechain_input ()->changed.connect_same_thread (*pi, std::bind (&Route::sidechain_change_handler, this, _1, _2));
 		}
 
 		/* we have to note the monitor send here, otherwise a new one will be created
@@ -4025,7 +4051,7 @@ Route::latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_
 		return nframes;
 	}
 	if (!_disk_reader) {
-		if (_session.transport_speed() < 0) {
+		if (_session.transport_speed (true) < 0) {
 			start_sample += latency_preroll;
 			end_sample   += latency_preroll;
 		} else {
@@ -4040,7 +4066,7 @@ Route::latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_
 		return 0;
 	}
 
-	if (_session.transport_speed() < 0) {
+	if (_session.transport_speed (true) < 0) {
 		start_sample += latency_preroll;
 		end_sample   += latency_preroll;
 	} else {
@@ -4742,7 +4768,7 @@ Route::set_name (const string& str)
 		 */
 
 		if (_main_outs) {
-			if (_main_outs->set_name (newname)) {
+			if (!_main_outs->set_name (newname)) {
 				/* XXX returning false here is stupid because
 				   we already changed the route name.
 				*/
@@ -4821,7 +4847,7 @@ Route::set_active (bool yn, void* src)
 	}
 
 	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_route_active()) {
-		_route_group->foreach_route (boost::bind (&Route::set_active, _1, yn, _route_group));
+		_route_group->foreach_route (std::bind (&Route::set_active, _1, yn, _route_group));
 		return;
 	}
 
@@ -5164,10 +5190,10 @@ Route::set_private_port_latencies (bool playback) const
 
 	if (playback) {
 		/* playback: propagate latency from "outside the route" to outputs to inputs */
-		return update_port_latencies (_output->ports (), _input->ports (), true, own_latency);
+		return update_port_latencies (*_output->ports (), *_input->ports (), true, own_latency);
 	} else {
 		/* capture: propagate latency from "outside the route" to inputs to outputs */
-		return update_port_latencies (_input->ports (), _output->ports (), false, own_latency);
+		return update_port_latencies (*_input->ports (), *_output->ports (), false, own_latency);
 	}
 }
 
@@ -5413,7 +5439,6 @@ Route::setup_invisible_processors ()
 				}
 				if (_disk_reader) {
 					new_processors.push_front (_disk_reader);
-					new_processors.begin();
 				}
 			}
 			break;
@@ -5531,7 +5556,7 @@ Route::setup_invisible_processors ()
 
 	DEBUG_TRACE (DEBUG::Processors, string_compose ("%1: setup_invisible_processors\n", _name));
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1\n", (*i)->name ()));
+		DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1\n", (*i)->display_name ()));
 	}
 }
 
@@ -5902,8 +5927,15 @@ Route::send_pan_azimuth_controllable (uint32_t n) const
 }
 
 std::shared_ptr<AutomationControl>
-Route::send_level_controllable (uint32_t n) const
+Route::send_level_controllable (uint32_t n, bool locked) const
 {
+	if (locked) {
+		/* calling thread has a WriterLock (_processor_lock)
+		 * we cannot call nth_send()
+		 */
+		return std::shared_ptr<AutomationControl>();
+	}
+
 	std::shared_ptr<Send> s = std::dynamic_pointer_cast<Send>(nth_send (n));
 	if (s) {
 		return s->gain_control ();
@@ -6151,14 +6183,15 @@ Route::monitoring_state () const
 			break;
 	}
 
-	/* This is an implementation of the truth table in doc/monitor_modes.pdf;
+	/* This is an implementation of the truth table at https://manual.ardour.org/appendix/monitor-modes/
 	 * I don't think it's ever going to be too pretty too look at.
 	 */
 
+	bool session_rec       = _session.get_record_enabled ();
 	bool const roll        = _session.transport_state_rolling ();
 	bool const auto_input  = _session.config.get_auto_input ();
+	bool const clip_rec    = _triggerbox && _triggerbox->record_enabled() == Recording && !session_rec;
 	bool const track_rec   = _disk_writer->record_enabled ();
-	bool session_rec;
 
 	bool const auto_input_does_talkback = Config->get_auto_input_does_talkback ();
 
@@ -6180,13 +6213,19 @@ Route::monitoring_state () const
 	 * TODO: FIXME
 	 */
 
-	if (_session.config.get_punch_in() || _session.config.get_punch_out()) {
+	if ((_session.config.get_punch_in() || _session.config.get_punch_out()) && 0 != _session.locations()->auto_punch_location ()) {
 		session_rec = _session.actively_recording ();
-	} else {
-		session_rec = _session.get_record_enabled();
 	}
 
-	if (track_rec) {
+	if (track_rec || clip_rec) {
+
+		/* either record to the timeline or into a clip */
+		assert (track_rec != clip_rec);
+
+		if (clip_rec) {
+			/* actively recording into a slot */
+			return get_input_monitoring_state (true, auto_input_does_talkback) & auto_monitor_mask;
+		}
 
 		if (!session_rec && roll && auto_input) {
 			return auto_monitor_disk | get_input_monitoring_state (false, false);

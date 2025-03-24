@@ -38,7 +38,7 @@ using namespace Glib;
 using namespace std;
 using namespace ArdourSurface;
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 static const uint16_t ContourDesign = 0x0b33;
 static const uint16_t ShuttlePRO_id = 0x0010;
@@ -238,8 +238,6 @@ void
 ContourDesignControlProtocol::thread_init ()
 {
 	DEBUG_TRACE (DEBUG::ContourDesignControl, "thread_init()\n");
-
-	pthread_set_name (X_("contourdesign"));
 	PBD::notify_event_loops_about_thread_creation (pthread_self (), X_("contourdesign"), 2048);
 	ARDOUR::SessionEvent::create_per_thread_pool (X_("contourdesign"), 128);
 

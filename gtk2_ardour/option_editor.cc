@@ -29,8 +29,8 @@
 
 #include <boost/tokenizer.hpp>
 
-#include <gtkmm/box.h>
-#include <gtkmm/alignment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/alignment.h>
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/colors.h"
 
@@ -45,6 +45,7 @@
 #include "pbd/strsplit.h"
 
 #include "widgets/frame.h"
+#include "widgets/slider_controller.h"
 
 #include "gui_thread.h"
 #include "option_editor.h"
@@ -678,6 +679,11 @@ FaderOption::add_to_page (OptionEditorPage* p)
 	add_widgets_to_page (p, _label, &_box);
 }
 
+Gtk::Widget&
+FaderOption::tip_widget() {
+	return *_db_slider;
+}
+
 /*--------------------------*/
 
 ClockOption::ClockOption (string const & i, string const & n, sigc::slot<std::string> g, sigc::slot<bool, std::string> s)
@@ -724,7 +730,9 @@ void
 ClockOption::set_session (Session* s)
 {
 	_session = s;
-	_clock.set_session (s);
+	if (s) {
+		_clock.set_session (s);
+	}
 }
 
 /*--------------------------*/
@@ -810,7 +818,7 @@ OptionEditor::OptionEditor (PBD::Configuration* c)
 	option_treeview.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &OptionEditor::treeview_row_selected));
 
 	/* Watch out for changes to parameters */
-	_config->ParameterChanged.connect (config_connection, invalidator (*this), boost::bind (&OptionEditor::parameter_changed, this, _1), gui_context());
+	_config->ParameterChanged.connect (config_connection, invalidator (*this), std::bind (&OptionEditor::parameter_changed, this, _1), gui_context());
 
 	search_entry.show ();
 	search_entry.set_text (_("Search here..."));
@@ -1107,20 +1115,20 @@ OptionEditor::add_path_to_treeview (std::string const & pn, Gtk::Widget& widget)
 }
 
 /** Add a component to a given page.
- *  @param pn Page name (will be created if it doesn't already exist)
+ *  @param page_name Page name (will be created if it doesn't already exist)
  *  @param o Component.
  */
 void
-OptionEditor::add_option (std::string const & pn, OptionEditorComponent* o)
+OptionEditor::add_option (std::string const & page_name, OptionEditorComponent* o)
 {
-	if (_pages.find (pn) == _pages.end()) {
-		OptionEditorPage* oep = new OptionEditorPage (_notebook, pn);
-		_pages[pn] = oep;
+	if (_pages.find (page_name) == _pages.end()) {
+		OptionEditorPage* oep = new OptionEditorPage (_notebook, page_name);
+		_pages[page_name] = oep;
 
-		add_path_to_treeview (pn, oep->box);
+		add_path_to_treeview (page_name, oep->box);
 	}
 
-	OptionEditorPage* p = _pages[pn];
+	OptionEditorPage* p = _pages[page_name];
 	p->components.push_back (o);
 
 	o->add_to_page (p);

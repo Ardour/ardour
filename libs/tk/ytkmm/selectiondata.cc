@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/selectiondata.h>
-#include <gtkmm/private/selectiondata_p.h>
+#include <ytkmm/selectiondata.h>
+#include <ytkmm/private/selectiondata_p.h>
 
 
 // -*- c++ -*-
@@ -27,10 +27,10 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/textbuffer.h>
-#include <gdkmm/pixbuf.h>
+#include <ytkmm/textbuffer.h>
+#include <ydkmm/pixbuf.h>
 #include <glibmm/utility.h> //For ScopedPtr<>.
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 namespace Gtk

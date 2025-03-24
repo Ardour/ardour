@@ -17,13 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_verbose_cursor_h__
-#define __gtk_ardour_verbose_cursor_h__
+#pragma once
 
 #include "ardour/types.h"
 #include "canvas/canvas.h"
 
-class Editor;
+class EditingContext;
 
 namespace ArdourCanvas {
 	class TrackingText;
@@ -32,7 +31,7 @@ namespace ArdourCanvas {
 class VerboseCursor
 {
 public:
-	VerboseCursor (Editor *);
+	VerboseCursor (EditingContext&);
 
 	ArdourCanvas::Item* canvas_item () const;
 	bool visible () const;
@@ -46,10 +45,9 @@ public:
 	void hide ();
 
 private:
-	Editor*                     _editor;
+	EditingContext&             _editor;
 	ArdourCanvas::TrackingText* _canvas_item;
 
 	void color_handler ();
 };
 
-#endif // __gtk_ardour_verbose_cursor_h__

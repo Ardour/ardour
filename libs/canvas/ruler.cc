@@ -38,7 +38,6 @@ Ruler::Ruler (Canvas* c, const Metric* m)
 	, _upper (0)
 	, _divide_height (-1.0)
 	, _font_description (0)
-	, _second_font_description (0)
 	, _need_marks (true)
 {
 }
@@ -50,7 +49,6 @@ Ruler::Ruler (Canvas* c, const Metric* m, Rect const& r)
 	, _upper (0)
 	, _divide_height (-1.0)
 	, _font_description (0)
-	, _second_font_description (0)
 	, _need_marks (true)
 {
 }
@@ -62,7 +60,6 @@ Ruler::Ruler (Item* parent, const Metric* m)
 	, _upper (0)
 	, _divide_height (-1.0)
 	, _font_description (0)
-	, _second_font_description (0)
 	, _need_marks (true)
 {
 }
@@ -74,7 +71,6 @@ Ruler::Ruler (Item* parent, const Metric* m, Rect const& r)
 	, _upper (0)
 	, _divide_height (-1.0)
 	, _font_description (0)
-	, _second_font_description (0)
 	, _need_marks (true)
 {
 }
@@ -99,18 +95,10 @@ Ruler::set_font_description (Pango::FontDescription fd)
 }
 
 void
-Ruler::set_second_font_description (Pango::FontDescription fd)
-{
-	begin_visual_change ();
-	delete _second_font_description;
-	_second_font_description = new Pango::FontDescription (fd);
-	end_visual_change ();
-}
-
-
-void
 Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 {
+	// std::cerr << whoami() << " ruler render " << _lower << " .. " << _upper << "\n";
+
 	if (_lower == _upper) {
 		/* nothing to draw */
 		return;
@@ -165,10 +153,14 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 
 		for (vector<Mark>::const_iterator m = marks.begin(); m != marks.end(); ++m) {
 			Duple pos;
-			Pango::FontDescription* fd = (m->style == Mark::Major) ? (_second_font_description ? _second_font_description : _font_description) : _font_description;
+			Pango::FontDescription* fd = _font_description;
 
 			pos.x = round (m->position/_metric->units_per_pixel) + self.x0;
 			pos.y = self.y1; /* bottom edge */
+
+			if (pos.x < 0) {
+				continue;
+			}
 
 			if (fd != last_font_description) {
 				layout->set_font_description (*fd);

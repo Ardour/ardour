@@ -9,8 +9,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/fontselection.h>
-#include <gtkmm/private/fontselection_p.h>
+#include <ytkmm/fontselection.h>
+#include <ytkmm/private/fontselection_p.h>
 
 
 // -*- c++ -*-
@@ -33,11 +33,11 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/button.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/treeview.h>
-#include <gtk/gtk.h>
+#include <ytkmm/button.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/treeview.h>
+#include <ytk/ytk.h>
 
 
 namespace

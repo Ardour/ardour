@@ -38,8 +38,8 @@
 #include <cmath>
 
 #include <glibmm/miscutils.h>
-#include <gtkmm/accelmap.h>
-#include <gtk/gtk.h>
+#include <ytkmm/accelmap.h>
+#include <ytk/ytk.h>
 
 #include "pbd/file_utils.h"
 #include "pbd/fpu.h"
@@ -54,6 +54,7 @@
 #include "widgets/tearoff.h"
 #include "widgets/tooltips.h"
 
+#include "application_bar.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "audio_clock.h"
@@ -64,6 +65,7 @@
 #include "editing.h"
 #include "enums_convert.h"
 #include "actions.h"
+#include "meter_patterns.h"
 #include "meterbridge.h"
 #include "luawindow.h"
 #include "mixer_ui.h"
@@ -500,6 +502,12 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (main_actions, X_("ToggleLatencyCompensation"), _("Disable Latency Compensation"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_latency_switch));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_toggle_action (main_actions, X_("ResetAllPeakDisplays"), _("Reset Mixer Meter Peaks"), []() { ArdourMeter::ResetAllPeakDisplays (); });
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (main_actions, X_("ResetMeterPeakHold"), _("Reset All Meter Peak Hold"), []() { ArdourMeter::ResetAllPeakDisplays (); ActionManager::get_action ("Recorder", "reset-input-peak-hold")->activate (); });
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (main_actions, X_("MonitorMenu"), _("Monitor Section")); /* just the submenu item */
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -576,6 +584,30 @@ ARDOUR_UI::install_dependent_actions ()
 	act = ActionManager::register_action (common_actions, "jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*editor, &PublicEditor::jump_forward_to_mark));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (common_actions, "jump-backward-to-location-mark", _("Jump to Previous Location Mark"),
+	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_backward_to_mark_flagged), Location::Flags (0), Location::Flags (0), Location::IsMark));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (common_actions, "jump-forward-to-location-mark", _("Jump to Next Location Mark"),
+	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_forward_to_mark_flagged), Location::Flags (0), Location::Flags (0), Location::IsMark));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (common_actions, "jump-backward-to-range", _("Jump to Previous Range"),
+	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_backward_to_mark_flagged), Location::Flags (Location::IsRangeMarker | Location::IsSessionRange), Location::Flags (0), Location::Flags (0)));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (common_actions, "jump-forward-to-range", _("Jump to Next Range"),
+	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_forward_to_mark_flagged), Location::Flags(Location::IsRangeMarker | Location::IsSessionRange), Location::Flags (0), Location::Flags (0)));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (common_actions, "jump-backward-to-section-mark", _("Jump to Previous Arrangement Mark"),
+	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_backward_to_mark_flagged), Location::Flags (0), Location::Flags (0), Location::Flags (Location::IsMark | Location::IsSection)));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (common_actions, "jump-forward-to-section-mark", _("Jump to Next Arrangement Mark"),
+	                                      sigc::bind (sigc::mem_fun(*editor, &PublicEditor::jump_forward_to_mark_flagged), Location::Flags (0), Location::Flags (0), Location::Flags(Location::IsMark | Location::IsSection)));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	for (int i = 1; i <= 9; ++i) {
 		string const a = string_compose(X_("goto-mark-%1"), i);
 		string const n = string_compose(_("Locate to Mark %1"), i);
@@ -640,6 +672,9 @@ ARDOUR_UI::install_dependent_actions ()
 	act = ActionManager::register_action (common_actions, "remove-location-from-playhead", _("Remove Mark at Playhead"), sigc::mem_fun(editor, &PublicEditor::remove_location_at_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, "alternate-remove-location-from-playhead", _("Remove Mark at Playhead"), sigc::mem_fun(editor, &PublicEditor::remove_location_at_playhead_cursor));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (common_actions, "add-section-from-playhead", _("Add Arrangement Mark at Playhead"), sigc::mem_fun(editor, &PublicEditor::add_section_from_playhead));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (common_actions, "add-bbt-from-playhead", _("Add BBT Marker from Playhead"), sigc::mem_fun(editor, &PublicEditor::add_bbt_marker_at_playhead_cursor));
@@ -753,6 +788,20 @@ ARDOUR_UI::install_dependent_actions ()
 }
 
 void
+ARDOUR_UI::setup_action_tooltips ()
+{
+	ActionManager::get_action ("Transport", "TogglePunchIn")->set_tooltip (_("Start recording at auto-punch start"));
+	ActionManager::get_action ("Transport", "TogglePunchOut")->set_tooltip (_("Stop recording at auto-punch end"));
+	ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_tooltip (_("Return to last playback start when stopped"));
+	ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_tooltip (_("Playhead follows Range tool clicks, and Range selections"));
+
+	ActionManager::get_action (X_("Main"), X_("cancel-solo"))->set_tooltip (_("When active, something is soloed.\nClick to de-solo everything"));
+	ActionManager::get_action (X_("Monitor Section"), X_("monitor-dim-all"))->set_tooltip (_("Monitor section dim output"));
+	ActionManager::get_action (X_("Monitor Section"), X_("monitor-mono"))->set_tooltip (_("Monitor section mono output"));
+	ActionManager::get_action (X_("Monitor Section"), X_("monitor-cut-all"))->set_tooltip (_("Monitor section mute output"));
+}
+
+void
 ARDOUR_UI::build_menu_bar ()
 {
 	menu_bar = dynamic_cast<MenuBar*> (ActionManager::get_widget (X_("/Main")));
@@ -763,17 +812,21 @@ ARDOUR_UI::build_menu_bar ()
 	ev->show ();
 
 	EventBox* ev_dsp = manage (new EventBox);
+	EventBox* ev_pdc = manage (new EventBox);
 	EventBox* ev_path = manage (new EventBox);
 	EventBox* ev_name = manage (new EventBox);
 	EventBox* ev_audio = manage (new EventBox);
 	EventBox* ev_format = manage (new EventBox);
+	EventBox* ev_latency = manage (new EventBox);
 	EventBox* ev_timecode = manage (new EventBox);
 
 	ev_dsp->set_name ("MainMenuBar");
+	ev_pdc->set_name ("MainMenuBar");
 	ev_path->set_name ("MainMenuBar");
 	ev_name->set_name ("MainMenuBar");
 	ev_audio->set_name ("MainMenuBar");
 	ev_format->set_name ("MainMenuBar");
+	ev_latency->set_name ("MainMenuBar");
 	ev_timecode->set_name ("MainMenuBar");
 
 	Gtk::HBox* hbox = manage (new Gtk::HBox);
@@ -783,7 +836,7 @@ ARDOUR_UI::build_menu_bar ()
 
 	wall_clock_label.set_name ("WallClock");
 	wall_clock_label.set_use_markup ();
-	timecode_format_label.set_name ("WallClock");
+	timecode_format_label.set_name ("Timecode");
 	timecode_format_label.set_use_markup ();
 	peak_thread_work_label.set_name ("PeakThreadWork");
 	peak_thread_work_label.set_use_markup ();
@@ -795,16 +848,20 @@ ARDOUR_UI::build_menu_bar ()
 	format_label.set_use_markup ();
 
 	ev_dsp->add (dsp_load_label);
+	ev_pdc->add (pdc_info_label);
 	ev_path->add (session_path_label);
 	ev_name->add (snapshot_name_label);
 	ev_audio->add (sample_rate_label);
 	ev_format->add (format_label);
+	ev_latency->add (latency_info_label);
 	ev_timecode->add (timecode_format_label);
 
 	ev_dsp->show ();
+	ev_pdc->show ();
 	ev_path->show ();
 	ev_audio->show ();
 	ev_format->show ();
+	ev_latency->show ();
 	ev_timecode->show ();
 
 #ifdef __APPLE__
@@ -820,6 +877,8 @@ ARDOUR_UI::build_menu_bar ()
 	hbox->pack_end (disk_space_label, false, false, 6);
 	hbox->pack_end (*ev_audio, false, false, 6);
 	hbox->pack_end (*ev_timecode, false, false, 6);
+	hbox->pack_end (*ev_pdc, false, false, 6);
+	hbox->pack_end (*ev_latency, false, false, 6);
 	hbox->pack_end (*ev_format, false, false, 6);
 	hbox->pack_end (peak_thread_work_label, false, false, 6);
 	hbox->pack_end (*ev_name, false, false, 6);
@@ -834,6 +893,8 @@ ARDOUR_UI::build_menu_bar ()
 	_status_bar_visibility.add (&snapshot_name_label   ,X_("Name"),      _("Snapshot Name and Modified Indicator"), false);
 	_status_bar_visibility.add (&peak_thread_work_label,X_("Peakfile"),  _("Active Peak-file Work"), false);
 	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), false);
+	_status_bar_visibility.add (&latency_info_label,    X_("Latency"),   _("Total I/O Latency"), !Profile->get_small_screen());
+	_status_bar_visibility.add (&pdc_info_label,        X_("PDC"),       _("Plugin Latency"), !Profile->get_small_screen());
 	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), false);
 	_status_bar_visibility.add (&sample_rate_label,     X_("Audio"),     _("Audio"), true);
 	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), !Profile->get_small_screen());
@@ -1038,8 +1099,19 @@ ARDOUR_UI::on_theme_changed ()
 void
 ARDOUR_UI::focus_on_clock ()
 {
-	if (primary_clock) {
-		primary_clock->focus ();
+	// TODO: how do we handle detached windows?  Use WindowManager?
+	
+	if (editor->tabbed() && _tabs.get_current_page() == _tabs.page_num (editor->contents())) {
+		editor->focus_on_clock ();
+	}
+	if (mixer->tabbed() && _tabs.get_current_page() == _tabs.page_num (mixer->contents())) {
+		mixer->focus_on_clock ();
+	}
+	if (recorder->tabbed() && _tabs.get_current_page() == _tabs.page_num (recorder->contents())) {
+		recorder->focus_on_clock ();
+	}
+	if (trigger_page->tabbed() && _tabs.get_current_page() == _tabs.page_num (trigger_page->contents())) {
+		trigger_page->focus_on_clock ();
 	}
 }
 

@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_automation_event_h__
-#define __ardour_automation_event_h__
+#pragma once
 
 #include <atomic>
 #include <cstdint>
@@ -44,7 +43,6 @@
 namespace ARDOUR {
 
 class AutomationList;
-class BeatsSamplesConverter;
 
 /** A SharedStatefulProperty for AutomationLists */
 class LIBARDOUR_API AutomationListProperty : public PBD::SharedStatefulProperty<AutomationList>
@@ -90,7 +88,7 @@ public:
 
 	void set_automation_state (AutoState);
 	AutoState automation_state() const;
-	PBD::Signal1<void, AutoState> automation_state_changed;
+	PBD::Signal<void(AutoState)> automation_state_changed;
 
 	bool automation_playback() const {
 		return (_state & Play) || ((_state & (Touch | Latch)) && !touching());
@@ -99,9 +97,9 @@ public:
 		return ((_state & Write) || ((_state & (Touch | Latch)) && touching()));
 	}
 
-	PBD::Signal0<void> StateChanged;
+	PBD::Signal<void()> StateChanged;
 
-	static PBD::Signal1<void,AutomationList*> AutomationListCreated;
+	static PBD::Signal<void(AutomationList*)> AutomationListCreated;
 
 	void start_write_pass (timepos_t const & when);
 	void write_pass_finished (timepos_t const & when, double thinning_factor=0.0);
@@ -147,4 +145,3 @@ private:
 
 } // namespace
 
-#endif /* __ardour_automation_event_h__ */

@@ -16,8 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/lexical_cast.hpp>
-
 #include "ardour/dB.h"
 #include "ardour/meter.h"
 #include "ardour/plugin_insert.h"
@@ -95,7 +93,7 @@ ArdourMixerPlugin::param_control (uint32_t param_id) const
 
 	if (!ok || !plugin->parameter_is_input (control_id)) {
 		throw ArdourMixerNotFoundException ("invalid automation control for param id = "
-			+ boost::lexical_cast<std::string>(param_id));
+			+ std::to_string(param_id));
 	}
 
 	return _insert->automation_control (Evoral::Parameter (PluginAutomation, 0, control_id));
@@ -139,7 +137,7 @@ ArdourMixerStrip::ArdourMixerStrip (std::shared_ptr<ARDOUR::Stripable> stripable
 		if (insert) {
 			_plugins[plugin_id] = std::shared_ptr<ArdourMixerPlugin> (new ArdourMixerPlugin (insert));
 			insert->DropReferences.connect (*_plugins[plugin_id], MISSING_INVALIDATOR,
-			                                boost::bind (&ArdourMixerStrip::on_drop_plugin, this, plugin_id), event_loop);
+			                                std::bind (&ArdourMixerStrip::on_drop_plugin, this, plugin_id), event_loop);
 		}
 	}
 }
@@ -159,7 +157,7 @@ ArdourMixerPlugin&
 ArdourMixerStrip::plugin (uint32_t plugin_id)
 {
 	if (_plugins.find (plugin_id) == _plugins.end ()) {
-		throw ArdourMixerNotFoundException ("plugin id = " + boost::lexical_cast<std::string>(plugin_id) + " not found");
+		throw ArdourMixerNotFoundException ("plugin id = " + std::to_string(plugin_id) + " not found");
 	}
 
 	return *_plugins[plugin_id];
@@ -299,7 +297,7 @@ ArdourMixer::start ()
 	for (StripableList::iterator it = strips.begin (); it != strips.end (); ++it) {
 		_strips[strip_id] = std::shared_ptr<ArdourMixerStrip> (new ArdourMixerStrip (*it, event_loop ()));
 		(*it)->DropReferences.connect (*_strips[strip_id], MISSING_INVALIDATOR,
-		                               boost::bind (&ArdourMixer::on_drop_strip, this, strip_id), event_loop ());
+		                               std::bind (&ArdourMixer::on_drop_strip, this, strip_id), event_loop ());
 		strip_id++;
 	}
 
@@ -325,7 +323,7 @@ ArdourMixerStrip&
 ArdourMixer::strip (uint32_t strip_id)
 {
 	if (_strips.find (strip_id) == _strips.end ()) {
-		throw ArdourMixerNotFoundException ("strip id = " + boost::lexical_cast<std::string>(strip_id) + " not found");
+		throw ArdourMixerNotFoundException ("strip id = " + std::to_string(strip_id) + " not found");
 	}
 
 	return *_strips[strip_id];

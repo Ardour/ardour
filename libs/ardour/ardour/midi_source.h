@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_midi_source_h__
-#define __ardour_midi_source_h__
+#pragma once
 
 #include <string>
 #include <time.h>
@@ -109,6 +108,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	                             MidiNoteTracker*                   tracker,
 	                             MidiChannelFilter*                 filter,
 	                             const std::set<Evoral::Parameter>& filtered);
+	virtual void render (const ReaderLock& lock, Evoral::EventSink<Temporal::Beats>& dst) = 0;
 
 	/** Write data from a MidiRingBuffer to this source.
 	 * @param lock Reference to the Mutex to lock before modification
@@ -138,7 +138,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 
 	virtual void mark_streaming_midi_write_started (const WriterLock& lock, NoteMode mode);
 	virtual void mark_streaming_write_started (const WriterLock& lock);
-	virtual void mark_streaming_write_completed (const WriterLock& lock);
+	virtual void mark_streaming_write_completed (const WriterLock& lock, Temporal::timecnt_t const & duration);
 
 	/** Mark write starting with the given time parameters.
 	 *
@@ -160,7 +160,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	virtual void mark_midi_streaming_write_completed (
 		const WriterLock&                                  lock,
 		Evoral::Sequence<Temporal::Beats>::StuckNoteOption stuck_option,
-		Temporal::Beats                                    when = Temporal::Beats());
+		Temporal::timecnt_t const &                        when);
 
 	virtual void session_saved();
 
@@ -178,7 +178,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	void invalidate(const WriterLock& lock);
 
 	/** Thou shalt not emit this directly, use invalidate() instead. */
-	mutable PBD::Signal1<void, bool> Invalidated;
+	mutable PBD::Signal<void(bool)> Invalidated;
 
 	void set_note_mode(const WriterLock& lock, NoteMode mode);
 
@@ -197,11 +197,11 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	void copy_automation_state_from (MidiSource *);
 
 	/** Emitted when a different MidiModel is set */
-	PBD::Signal0<void> ModelChanged;
+	PBD::Signal<void()> ModelChanged;
 	/** Emitted when a parameter's interpolation style is changed */
-	PBD::Signal2<void, Evoral::Parameter, AutomationList::InterpolationStyle> InterpolationChanged;
+	PBD::Signal<void(Evoral::Parameter, AutomationList::InterpolationStyle)> InterpolationChanged;
 	/** Emitted when a parameter's automation state is changed */
-	PBD::Signal2<void, Evoral::Parameter, AutoState> AutomationStateChanged;
+	PBD::Signal<void(Evoral::Parameter, AutoState)> AutomationStateChanged;
 
   protected:
 	virtual void flush_midi(const WriterLock& lock) = 0;
@@ -247,4 +247,3 @@ class LIBARDOUR_API MidiSource : virtual public Source
 
 }
 
-#endif /* __ardour_midi_source_h__ */

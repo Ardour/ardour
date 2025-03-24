@@ -18,9 +18,9 @@
 
 #include "c1_gui.h"
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/label.h>
-#include <gtkmm/liststore.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/label.h>
+#include <ytkmm/liststore.h>
 
 #include "pbd/file_utils.h"
 #include "pbd/i18n.h"
@@ -162,11 +162,11 @@ C1GUI::C1GUI (Console1& p)
 	/* catch future changes to connection state */
 
 	ARDOUR::AudioEngine::instance ()->PortRegisteredOrUnregistered.connect (
-	  _port_connections, invalidator (*this), boost::bind (&C1GUI::connection_handler, this), gui_context ());
+	  _port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
 	ARDOUR::AudioEngine::instance ()->PortPrettyNameChanged.connect (
-	  _port_connections, invalidator (*this), boost::bind (&C1GUI::connection_handler, this), gui_context ());
+	  _port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
 	c1.ConnectionChange.connect (
-	  _port_connections, invalidator (*this), boost::bind (&C1GUI::connection_handler, this), gui_context ());
+	  _port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
 }
 
 C1GUI::~C1GUI () {}

@@ -41,20 +41,20 @@ using namespace ArdourSurface::FP_NAMESPACE;
 using namespace ArdourSurface::FP_NAMESPACE::FP8Types;
 
 #define BindMethod(ID, CB) \
-	_ctrls.button (FP8Controls::ID).released.connect_same_thread (button_connections, boost::bind (&FaderPort8:: CB, this));
+	_ctrls.button (FP8Controls::ID).released.connect_same_thread (button_connections, std::bind (&FaderPort8:: CB, this));
 
 #define BindMethod2(ID, ACT, CB) \
-	_ctrls.button (FP8Controls::ID). ACT .connect_same_thread (button_connections, boost::bind (&FaderPort8:: CB, this));
+	_ctrls.button (FP8Controls::ID). ACT .connect_same_thread (button_connections, std::bind (&FaderPort8:: CB, this));
 
 #define BindFunction(ID, ACT, CB, ...) \
-	_ctrls.button (FP8Controls::ID). ACT .connect_same_thread (button_connections, boost::bind (&FaderPort8:: CB, this, __VA_ARGS__));
+	_ctrls.button (FP8Controls::ID). ACT .connect_same_thread (button_connections, std::bind (&FaderPort8:: CB, this, __VA_ARGS__));
 
 #define BindAction(ID, GRP, ITEM) \
-	_ctrls.button (FP8Controls::ID).released.connect_same_thread (button_connections, boost::bind (&FaderPort8::button_action, this, GRP, ITEM));
+	_ctrls.button (FP8Controls::ID).released.connect_same_thread (button_connections, std::bind (&FaderPort8::button_action, this, GRP, ITEM));
 
 #define BindUserAction(ID) \
-	_ctrls.button (ID).pressed.connect_same_thread (button_connections, boost::bind (&FaderPort8::button_user, this, true, ID)); \
-_ctrls.button (ID).released.connect_same_thread (button_connections, boost::bind (&FaderPort8::button_user, this, false, ID));
+	_ctrls.button (ID).pressed.connect_same_thread (button_connections, std::bind (&FaderPort8::button_user, this, true, ID)); \
+_ctrls.button (ID).released.connect_same_thread (button_connections, std::bind (&FaderPort8::button_user, this, false, ID));
 
 
 /* Bind button signals (press, release) to callback methods
@@ -99,11 +99,11 @@ FaderPort8::setup_actions ()
 	BindFunction (BtnAWrite, released, button_automation, ARDOUR::Write);
 	BindFunction (BtnALatch, released, button_automation, ARDOUR::Latch);
 
-	_ctrls.button (FP8Controls::BtnEncoder).pressed.connect_same_thread (button_connections, boost::bind (&FaderPort8::button_encoder, this));
+	_ctrls.button (FP8Controls::BtnEncoder).pressed.connect_same_thread (button_connections, std::bind (&FaderPort8::button_encoder, this));
 #ifdef FADERPORT2
-	_ctrls.button (FP8Controls::BtnParam).pressed.connect_same_thread (button_connections, boost::bind (&FaderPort8::button_encoder, this));
+	_ctrls.button (FP8Controls::BtnParam).pressed.connect_same_thread (button_connections, std::bind (&FaderPort8::button_encoder, this));
 #else
-	_ctrls.button (FP8Controls::BtnParam).pressed.connect_same_thread (button_connections, boost::bind (&FaderPort8::button_parameter, this));
+	_ctrls.button (FP8Controls::BtnParam).pressed.connect_same_thread (button_connections, std::bind (&FaderPort8::button_parameter, this));
 #endif
 
 

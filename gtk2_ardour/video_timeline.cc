@@ -71,8 +71,8 @@ VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Container *vbg, in
 	video_server_url = video_get_server_url(Config);
 	server_docroot   = video_get_docroot(Config);
 
-	VtlUpdate.connect (*this, invalidator (*this), boost::bind (&PublicEditor::queue_visual_videotimeline_update, editor), gui_context());
-	GuiUpdate.connect (*this, invalidator (*this), boost::bind (&VideoTimeLine::gui_update, this, _1), gui_context());
+	VtlUpdate.connect (*this, invalidator (*this), std::bind (&PublicEditor::queue_visual_videotimeline_update, editor), gui_context());
+	GuiUpdate.connect (*this, invalidator (*this), std::bind (&VideoTimeLine::gui_update, this, _1), gui_context());
 }
 
 VideoTimeLine::~VideoTimeLine ()
@@ -143,7 +143,7 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 	SessionHandlePtr::set_session (s);
 	if (!_session) { return ; }
 
-	_session->SessionSaveUnderway.connect_same_thread (sessionsave, boost::bind (&VideoTimeLine::save_session, this));
+	_session->SessionSaveUnderway.connect_same_thread (sessionsave, std::bind (&VideoTimeLine::save_session, this));
 
 	XMLNode* node = _session->extra_xml (X_("Videotimeline"));
 
@@ -371,7 +371,7 @@ VideoTimeLine::update_video_timeline()
 	while (video_frames.size() < visible_video_frames) {
 		VideoImageFrame *frame;
 		frame = new VideoImageFrame(*editor, *videotl_group, display_vframe_width, bar_height, video_server_url, translated_filename());
-		frame->ImgChanged.connect (*this, invalidator (*this), boost::bind (&PublicEditor::queue_visual_videotimeline_update, editor), gui_context());
+		frame->ImgChanged.connect (*this, invalidator (*this), std::bind (&PublicEditor::queue_visual_videotimeline_update, editor), gui_context());
 		video_frames.push_back(frame);
 	}
 
@@ -725,8 +725,8 @@ VideoTimeLine::find_xjadeo () {
 	if (found_xjadeo ()) {
 		ARDOUR::SystemExec version_check (_xjadeo_bin, X_("--version"), true);
 		xjadeo_version = "";
-		version_check.ReadStdout.connect_same_thread (*this, boost::bind (&VideoTimeLine::xjadeo_readversion, this, _1 ,_2));
-		version_check.Terminated.connect_same_thread (*this, boost::bind (&VideoTimeLine::xjadeo_readversion, this, "\n" ,1));
+		version_check.ReadStdout.connect_same_thread (*this, std::bind (&VideoTimeLine::xjadeo_readversion, this, _1 ,_2));
+		version_check.Terminated.connect_same_thread (*this, std::bind (&VideoTimeLine::xjadeo_readversion, this, "\n" ,1));
 		if (version_check.start (ARDOUR::SystemExec::MergeWithStdin)) {
 			warning << _(
 					"Video-monitor 'xjadeo' cannot be launched."
@@ -797,8 +797,8 @@ VideoTimeLine::find_harvid () {
 	}
 	ARDOUR::SystemExec version_check (harvid_bin, X_("--version"), true);
 	harvid_version = "";
-	version_check.ReadStdout.connect_same_thread (*this, boost::bind (&VideoTimeLine::harvid_readversion, this, _1 ,_2));
-	version_check.Terminated.connect_same_thread (*this, boost::bind (&VideoTimeLine::harvid_readversion, this, "\n" ,1));
+	version_check.ReadStdout.connect_same_thread (*this, std::bind (&VideoTimeLine::harvid_readversion, this, _1 ,_2));
+	version_check.Terminated.connect_same_thread (*this, std::bind (&VideoTimeLine::harvid_readversion, this, "\n" ,1));
 	if (version_check.start (ARDOUR::SystemExec::MergeWithStdin)) {
 		return;
 	}
@@ -834,7 +834,7 @@ VideoTimeLine::open_video_monitor() {
 		vmonitor->set_session(_session);
 		vmonitor->set_offset(video_offset);
 		vmonitor->Terminated.connect (sigc::mem_fun (*this, &VideoTimeLine::terminated_video_monitor));
-		vmonitor->UiState.connect (*this, invalidator (*this), boost::bind (&VideoTimeLine::gui_update, this, _1), gui_context());
+		vmonitor->UiState.connect (*this, invalidator (*this), std::bind (&VideoTimeLine::gui_update, this, _1), gui_context());
 	} else if (vmonitor->is_started()) {
 		return;
 	}

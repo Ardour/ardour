@@ -38,7 +38,7 @@ def build(bld):
             obj.linkflags = ['-mwindows']
 
         if re.search ("bsd", sys.platform) != None:
-            obj.defines.append('_POSIX_C_SOURCE=200809')
+            obj.defines.append('_POSIX_C_SOURCE=200809L')
             obj.defines.append('_XOPEN_SOURCE=700')
 
         obj.install_path = os.path.join(bld.env['LIBDIR'])

@@ -16,10 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/filechooserdialog.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
@@ -87,7 +87,7 @@ Loopster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 		return;
 	}
 
-	context->set_identity_matrix ();
+	context->save ();
 	context->translate (self.x0, self.y0);
 
 	float size = _rect.height ();
@@ -110,7 +110,7 @@ Loopster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 	context->stroke ();
 
 	context->set_line_width (1);
-	context->set_identity_matrix ();
+	context->restore ();
 }
 
 TriggerMaster::TriggerMaster (Item* parent)
@@ -129,7 +129,7 @@ TriggerMaster::TriggerMaster (Item* parent)
 	set_tooltip (_("Click to stop all clips in this track\nRight-click to select properties for all clips in this track"));
 
 #if 0 /* XXX trigger changes */
-	_triggerbox->PropertyChanged.connect (_trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerMaster::prop_change, this, _1), gui_context());
+	_triggerbox->PropertyChanged.connect (_trigger_prop_connection, MISSING_INVALIDATOR, std::bind (&TriggerMaster::prop_change, this, _1), gui_context());
 	PropertyChange changed;
 	changed.add (ARDOUR::Properties::name);
 	changed.add (ARDOUR::Properties::running);
@@ -137,7 +137,7 @@ TriggerMaster::TriggerMaster (Item* parent)
 #endif
 
 #if 0 /* XXX route changes */
-	dynamic_cast<Stripable*> (_triggerbox->owner())->presentation_info().Change.connect (_owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerMaster::owner_prop_change, this, _1), gui_context());
+	dynamic_cast<Stripable*> (_triggerbox->owner())->presentation_info().Change.connect (_owner_prop_connection, MISSING_INVALIDATOR, std::bind (&TriggerMaster::owner_prop_change, this, _1), gui_context());
 #endif
 
 	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &TriggerMaster::maybe_update));

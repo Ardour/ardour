@@ -25,8 +25,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_public_editor_h__
-#define __gtk_ardour_public_editor_h__
+#pragma once
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
@@ -37,11 +36,11 @@
 
 #include <string>
 #include <glib.h>
-#include <gdk/gdktypes.h>
-#include <gtkmm/box.h>
-#include <gtkmm/window.h>
-#include <gtkmm/actiongroup.h>
-#include <gtkmm/notebook.h>
+#include <ydk/gdktypes.h>
+#include <ytkmm/box.h>
+#include <ytkmm/window.h>
+#include <ytkmm/actiongroup.h>
+#include <ytkmm/notebook.h>
 #include <sigc++/signal.h>
 
 #include "pbd/statefuldestructible.h"
@@ -60,8 +59,8 @@
 
 #include "widgets/tabbable.h"
 
-#include "axis_provider.h"
 #include "editing.h"
+#include "editing_context.h"
 #include "selection.h"
 
 namespace Temporal {
@@ -86,7 +85,7 @@ namespace Gtk {
 }
 
 class AudioRegionView;
-class AutomationLine;
+class EditorAutomationLine;
 class AutomationTimeAxisView;
 class ControlPoint;
 class DragManager;
@@ -96,6 +95,7 @@ class MeterMarker;
 class MixerStrip;
 class MouseCursors;
 class RegionView;
+class MidiView;
 class RouteTimeAxisView;
 class Selection;
 class SimpleExport;
@@ -123,10 +123,10 @@ using ARDOUR::samplecnt_t;
  * of PublicEditor need not be recompiled if private methods or member variables
  * change.
  */
-class PublicEditor : public ArdourWidgets::Tabbable,  public ARDOUR::SessionHandlePtr, public AxisViewProvider
+class PublicEditor : public EditingContext, public ArdourWidgets::Tabbable
 {
 public:
-	PublicEditor (Gtk::Widget& content);
+	PublicEditor ();
 	virtual ~PublicEditor ();
 
 	/** @return Singleton PublicEditor instance */
@@ -137,68 +137,12 @@ public:
 
 	virtual void setup_tooltips() = 0;
 
-	/* returns the time domain to be used when there's no other overriding
-	 * reason to choose one.
-	 */
-	virtual Temporal::TimeDomain default_time_domain() const = 0;
-
 	/** Attach this editor to a Session.
 	 * @param s Session to connect to.
 	 */
 	virtual void set_session (ARDOUR::Session* s) = 0;
 
-	/** Set the snap type.
-	 * @param t Snap type (defined in editing_syms.h)
-	 */
-	virtual void set_grid_to (Editing::GridType t) = 0;
-
-	virtual Editing::GridType grid_type () const = 0;
-	virtual Editing::SnapMode snap_mode () const = 0;
-
-	/** Set the snap mode.
-	 * @param m Snap mode (defined in editing_syms.h)
-	 */
-	virtual void set_snap_mode (Editing::SnapMode m) = 0;
-
-	/**
-	 * Snap a value according to the current snap setting.
-	 * ensure_snap overrides SnapOff and magnetic snap
-	 */
-	virtual void snap_to (Temporal::timepos_t & first,
-	                      Temporal::RoundMode   direction = Temporal::RoundNearest,
-	                      ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny_Visual,
-	                      bool                ensure_snap = false) = 0;
-
-	/** Undo some transactions.
-	 * @param n Number of transactions to undo.
-	 */
-
-	virtual void undo (uint32_t n = 1) = 0;
-
-	/** Redo some transactions.
-	 * @param n Number of transaction to redo.
-	 */
-	virtual void redo (uint32_t n = 1) = 0;
-
-	/** Set the mouse mode (gain, object, range, timefx etc.)
-	 * @param m Mouse mode (defined in editing_syms.h)
-	 * @param force Perform the effects of the change even if no change is required
-	 * (ie even if the current mouse mode is equal to @p m)
-	 */
-	virtual void set_mouse_mode (Editing::MouseMode m, bool force = false) = 0;
-
-	/** Step the mouse mode onto the next or previous one.
-	 * @param next true to move to the next, otherwise move to the previous
-	 */
-	virtual void step_mouse_mode (bool next) = 0;
-
-	/** @return The current mouse mode (gain, object, range, timefx etc.)
-	 * (defined in editing_syms.h)
-	 */
-	virtual Editing::MouseMode current_mouse_mode () const = 0;
-
-	/** @return Whether the current mouse mode is an "internal" editing mode. */
-	virtual bool internal_editing() const = 0;
+	virtual samplepos_t playhead_cursor_sample () const = 0;
 
 	/** Possibly start the audition of a region.
 	 *
@@ -219,28 +163,13 @@ public:
 
 	virtual void reverse_region () = 0;
 	virtual void normalize_region () = 0;
-	virtual void quantize_region () = 0;
-	virtual void legatize_region (bool shrink_only) = 0;
-	virtual void transform_region () = 0;
-	virtual void transpose_region () = 0;
 	virtual void pitch_shift_region () = 0;
 
 	virtual void transition_to_rolling (bool fwd) = 0;
-	virtual samplepos_t pixel_to_sample (double pixel) const = 0;
-	virtual samplepos_t playhead_cursor_sample () const = 0;
-	virtual double sample_to_pixel (samplepos_t sample) const = 0;
-	virtual double sample_to_pixel_unrounded (samplepos_t sample) const = 0;
-	virtual double time_to_pixel (Temporal::timepos_t const &) const = 0;
-	virtual double time_to_pixel_unrounded (Temporal::timepos_t const &) const = 0;
-	virtual double duration_to_pixels (Temporal::timecnt_t const &) const = 0;
-	virtual double duration_to_pixels_unrounded (Temporal::timecnt_t const &) const = 0;
 
-	virtual Selection& get_selection () const = 0;
 	virtual bool get_selection_extents (Temporal::timepos_t &start, Temporal::timepos_t &end) const = 0;
-	virtual Selection& get_cut_buffer () const = 0;
 
-	virtual void set_selection (std::list<Selectable*>, Selection::Operation) = 0;
-	virtual void set_selected_midi_region_view (MidiRegionView&) = 0;
+	virtual void set_selection (std::list<Selectable*>, ARDOUR::SelectionOperation) = 0;
 
 	virtual std::shared_ptr<ARDOUR::Route> current_mixer_stripable () const = 0;
 
@@ -256,15 +185,23 @@ public:
 	virtual void trigger_script (int nth) = 0;
 	virtual void add_bbt_marker_at_playhead_cursor () = 0;
 	virtual void add_location_from_playhead_cursor () = 0;
+	virtual void add_section_from_playhead () = 0;
 	virtual void remove_location_at_playhead_cursor () = 0;
-	virtual void add_location_mark (Temporal::timepos_t const & where) = 0;
-	virtual void update_grid () = 0;
+	void add_location_mark (Temporal::timepos_t const & where, ARDOUR::Location::Flags flags = ARDOUR::Location::IsMark, int32_t cue_id = 0) {
+		add_location_mark_with_flag (where, flags, cue_id);
+	}
+	virtual void add_location_mark_with_flag (Temporal::timepos_t const & where, ARDOUR::Location::Flags, int32_t cue_id) = 0;
 	virtual void remove_tracks () = 0;
-	virtual void set_loop_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd) = 0;
 	virtual void set_punch_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd) = 0;
 
-	virtual void jump_forward_to_mark () = 0;
-	virtual void jump_backward_to_mark () = 0;
+	void jump_forward_to_mark () {
+		jump_forward_to_mark_flagged (ARDOUR::Location::Flags (0), ARDOUR::Location::Flags (0), ARDOUR::Location::Flags (0));
+	}
+	void jump_backward_to_mark () {
+		jump_backward_to_mark_flagged (ARDOUR::Location::Flags (0), ARDOUR::Location::Flags (0), ARDOUR::Location::Flags (0));
+	}
+	virtual void jump_forward_to_mark_flagged (ARDOUR::Location::Flags whitelist, ARDOUR::Location::Flags blacklist, ARDOUR::Location::Flags equalist) = 0;
+	virtual void jump_backward_to_mark_flagged (ARDOUR::Location::Flags whitelist, ARDOUR::Location::Flags blacklist, ARDOUR::Location::Flags equalist) = 0;
 
 	virtual void set_session_start_from_playhead () = 0;
 	virtual void set_session_end_from_playhead () = 0;
@@ -317,10 +254,6 @@ public:
 	virtual void loudness_assistant (bool) = 0;
 
 	virtual void register_actions () = 0;
-	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
-	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
-	virtual samplecnt_t get_current_zoom () const = 0;
-	virtual void reset_zoom (samplecnt_t) = 0;
 	virtual void clear_playlist (std::shared_ptr<ARDOUR::Playlist>) = 0;
 	virtual void clear_grouped_playlists (RouteUI*) = 0;
 
@@ -340,7 +273,7 @@ public:
 	virtual void select_all_tracks () = 0;
 	virtual void deselect_all () = 0;
 	virtual void invert_selection () = 0;
-	virtual void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove = false) = 0;
+	virtual void set_selected_track (TimeAxisView&, ARDOUR::SelectionOperation op = ARDOUR::SelectionSet, bool no_remove = false) = 0;
 	virtual void set_selected_mixer_strip (TimeAxisView&) = 0;
 	virtual void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false) = 0;
 	virtual void show_track_in_display (TimeAxisView* tv, bool move_into_view = false) = 0;
@@ -351,24 +284,11 @@ public:
 
 	virtual void toggle_cue_behavior () = 0;
 
-	/** Set whether the editor should follow the playhead.
-	 * @param yn true to follow playhead, otherwise false.
-	 * @param catch_up true to reset the editor view to show the playhead (if yn == true), otherwise false.
-	 */
-	virtual void set_follow_playhead (bool yn, bool catch_up = true) = 0;
-
-	/** Toggle whether the editor is following the playhead */
-	virtual void toggle_follow_playhead () = 0;
-
-	/** @return true if the editor is following the playhead */
-	virtual bool follow_playhead () const = 0;
-
 	/** @return true if the playhead is currently being dragged, otherwise false */
 	virtual bool dragging_playhead () const = 0;
 	virtual samplepos_t leftmost_sample() const = 0;
 	virtual samplecnt_t current_page_samples() const = 0;
 	virtual double visible_canvas_height () const = 0;
-	virtual void temporal_zoom_step (bool coarser) = 0;
 	virtual void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top = false) = 0;
 	virtual void override_visible_track_count () = 0;
 	virtual void scroll_tracks_down_line () = 0;
@@ -379,34 +299,17 @@ public:
 	virtual void cleanup_regions () = 0;
 	virtual void prepare_for_cleanup () = 0;
 	virtual void finish_cleanup () = 0;
-	virtual void reset_x_origin (samplepos_t sample) = 0;
-	virtual double get_y_origin () const = 0;
-	virtual void reset_y_origin (double pos) = 0;
 	virtual void set_visible_track_count (int32_t) = 0;
 	virtual void fit_selection () = 0;
 	virtual void remove_last_capture () = 0;
 	virtual void maximise_editing_space () = 0;
 	virtual void restore_editing_space () = 0;
-	virtual Temporal::timepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE, bool from_context_menu = false, bool from_outside_canvas = false) = 0;
 	virtual void toggle_meter_updating() = 0;
 	virtual void split_regions_at (Temporal::timepos_t const &, RegionSelection&) = 0;
 	virtual void split_region_at_points (std::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
-	virtual void mouse_add_new_marker (Temporal::timepos_t where, ARDOUR::Location::Flags extra_flags = ARDOUR::Location::Flags (0), int32_t cue_id = 0) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
-	virtual Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) = 0;
 	virtual Temporal::timecnt_t get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count, Temporal::timecnt_t const & duration) = 0;
-
-	virtual Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) = 0;
-	virtual Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) = 0;
-
-	virtual int draw_velocity () const = 0;
-	virtual int draw_channel () const = 0;
-
-	virtual int32_t get_grid_beat_divisions (Editing::GridType gt) = 0;
-	virtual int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) = 0;
-
-	virtual void edit_notes (MidiRegionView*) = 0;
 
 	virtual void queue_visual_videotimeline_update () = 0;
 	virtual void set_close_video_sensitive (bool) = 0;
@@ -415,7 +318,7 @@ public:
 	virtual void toggle_xjadeo_viewoption (int, int) = 0;
 	virtual void set_xjadeo_sensitive (bool onoff) = 0;
 	virtual int  get_videotl_bar_height () const = 0;
-	virtual void set_video_timeline_height (const int h) = 0;
+	virtual void set_video_timeline_height (const int h, bool force = false) = 0;
 	virtual void embed_audio_from_video (std::string, samplepos_t n = 0, bool lock_position_to_video = true) = 0;
 
 	virtual void trigger_script_by_name (const std::string script_name, const std::string args = "") = 0;
@@ -423,21 +326,16 @@ public:
 	virtual bool track_selection_change_without_scroll () const = 0;
 	virtual bool show_touched_automation () const = 0;
 
-	virtual StripableTimeAxisView* get_stripable_time_axis_by_id (const PBD::ID& id) const = 0;
-
 	virtual TimeAxisView* time_axis_view_from_stripable (std::shared_ptr<ARDOUR::Stripable> s) const = 0;
 
 	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, PBD::PropertyID) const = 0;
 	virtual RegionView* regionview_from_region (std::shared_ptr<ARDOUR::Region>) const = 0;
 	virtual RouteTimeAxisView* rtav_from_route (std::shared_ptr<ARDOUR::Route>) const = 0;
 
-	sigc::signal<void> ZoomChanged;
 	sigc::signal<void> Realized;
 	sigc::signal<void,samplepos_t> UpdateAllTransportClocks;
 
 	virtual bool pending_locate_request() const = 0;
-
-	static sigc::signal<void> DropDownKeys;
 
 	struct RegionAction {
 		Glib::RefPtr<Gtk::Action> action;
@@ -452,16 +350,14 @@ public:
 
 	std::map<std::string,RegionAction> region_action_map;
 
-	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
 	Glib::RefPtr<Gtk::ActionGroup> editor_menu_actions;
 	Glib::RefPtr<Gtk::ActionGroup> _region_actions;
-	Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 
 	virtual bool canvas_scroll_event (GdkEventScroll* event, bool from_canvas) = 0;
 	virtual bool canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item*, ControlPoint*) = 0;
 	virtual bool canvas_velocity_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_velocity_base_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
-	virtual bool canvas_line_event (GdkEvent* event, ArdourCanvas::Item*, AutomationLine*) = 0;
+	virtual bool canvas_line_event (GdkEvent* event, ArdourCanvas::Item*, EditorAutomationLine*) = 0;
 	virtual bool canvas_selection_rect_event (GdkEvent* event, ArdourCanvas::Item*, SelectionRect*) = 0;
 	virtual bool canvas_selection_start_trim_event (GdkEvent* event, ArdourCanvas::Item*, SelectionRect*) = 0;
 	virtual bool canvas_selection_end_trim_event (GdkEvent* event, ArdourCanvas::Item*, SelectionRect*) = 0;
@@ -487,8 +383,6 @@ public:
 	virtual bool canvas_bbt_marker_event (GdkEvent* event, ArdourCanvas::Item*, BBTMarker*) = 0;
 	virtual bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, AutomationTimeAxisView*) = 0;
 
-	virtual bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
-
 	static const int window_border_width;
 	static const int container_border_width;
 	static const int vertical_spacing;
@@ -500,31 +394,14 @@ public:
 	virtual ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const = 0;
 	virtual ArdourCanvas::Container* get_drag_motion_group () const = 0;
 
-	virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
-
 	virtual void set_current_trimmable (std::shared_ptr<ARDOUR::Trimmable>) = 0;
 	virtual void set_current_movable (std::shared_ptr<ARDOUR::Movable>) = 0;
 
 	virtual void center_screen (samplepos_t) = 0;
 
-	virtual TrackViewList axis_views_from_routes (std::shared_ptr<ARDOUR::RouteList>) const = 0;
 	virtual TrackViewList const & get_track_views () const = 0;
 
 	virtual MixerStrip* get_current_mixer_strip () const = 0;
-
-	virtual DragManager* drags () const = 0;
-	virtual bool drag_active () const = 0;
-	virtual bool preview_video_drag_active () const = 0;
-	virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;
-	virtual void stop_canvas_autoscroll () = 0;
-	virtual bool autoscroll_active() const = 0;
-
-	virtual void begin_reversible_selection_op (std::string cmd_name) = 0;
-	virtual void commit_reversible_selection_op () = 0;
-	virtual void begin_reversible_command (std::string cmd_name) = 0;
-	virtual void begin_reversible_command (GQuark) = 0;
-	virtual void abort_reversible_command () = 0;
-	virtual void commit_reversible_command () = 0;
 
 	virtual Temporal::TempoMap::WritableSharedPtr begin_tempo_map_edit () = 0;
 	virtual void abort_tempo_map_edit () = 0;
@@ -539,37 +416,15 @@ public:
 	virtual void access_action (const std::string&, const std::string&) = 0;
 	virtual void set_toggleaction (const std::string&, const std::string&, bool) = 0;
 
-	virtual MouseCursors const* cursors () const = 0;
-	virtual VerboseCursor* verbose_cursor () const = 0;
-
-	virtual EditorCursor* playhead_cursor () const = 0;
-	virtual EditorCursor* snapped_cursor () const = 0;
-
 	virtual bool get_smart_mode () const = 0;
 
 	virtual void get_pointer_position (double &, double &) const = 0;
 
 	virtual std::pair <Temporal::timepos_t, Temporal::timepos_t> session_gui_extents (bool use_extra = true) const = 0;
 
-	virtual ARDOUR::Location* find_location_from_marker (ArdourMarker*, bool&) const = 0;
-	virtual ArdourMarker* find_marker_from_location_id (PBD::ID const&, bool) const = 0;
-	virtual TempoMarker* find_marker_for_tempo (Temporal::TempoPoint const &) = 0;
-	virtual MeterMarker* find_marker_for_meter (Temporal::MeterPoint const &) = 0;
-
-	virtual void snap_to_with_modifier (Temporal::timepos_t & first,
-	                                    GdkEvent const*      ev,
-	                                    Temporal::RoundMode    direction = Temporal::RoundNearest,
-	                                    ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
-	                                    bool ensure_snap = false) = 0;
-	virtual Temporal::timepos_t snap_to_bbt (Temporal::timepos_t const & pos, Temporal::RoundMode, ARDOUR::SnapPref) = 0;
-
-	virtual void set_snapped_cursor_position (Temporal::timepos_t const & pos) = 0;
-
 	virtual void get_regions_at (RegionSelection &, Temporal::timepos_t const & where, TrackViewList const &) const = 0;
 	virtual void get_regions_after (RegionSelection&, Temporal::timepos_t const & where, const TrackViewList& ts) const = 0;
 	virtual RegionSelection get_regions_from_selection_and_mouse (Temporal::timepos_t const &) = 0;
-	virtual void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const = 0;
-	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const = 0;
 
 	virtual void build_region_boundary_cache () = 0;
 	virtual void mark_region_boundary_cache_dirty () = 0;
@@ -583,10 +438,14 @@ public:
 
 	virtual void queue_redisplay_track_views () = 0;
 
-	virtual ARDOUR::Quantize* get_quantize_op () = 0;
-	virtual void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs) = 0;
-
 	virtual void set_tempo_curve_range (double& max, double& min) const = 0;
+
+	virtual void start_track_drag (TimeAxisView&, int y, Gtk::Widget&, bool can_change_cursor) = 0;
+	virtual void mid_track_drag (GdkEventMotion*, Gtk::Widget&) = 0;
+	virtual void end_track_drag () = 0;
+	virtual bool track_dragging() const = 0;
+
+	virtual void focus_on_clock() = 0;
 
 	/// Singleton instance, set up by Editor::Editor()
 
@@ -594,11 +453,6 @@ public:
 
 	friend bool ARDOUR_UI_UTILS::relay_key_press (GdkEventKey*, Gtk::Window*);
 	friend bool ARDOUR_UI_UTILS::forward_key_press (GdkEventKey*);
-
-	PBD::Signal0<void> SnapChanged;
-	PBD::Signal0<void> MouseModeChanged;
-
-	Gtkmm2ext::Bindings* bindings;
 
 protected:
 	friend class DisplaySuspender;
@@ -638,4 +492,3 @@ public:
 	}
 };
 
-#endif // __gtk_ardour_public_editor_h__

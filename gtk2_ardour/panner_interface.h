@@ -17,13 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_panner_interface_h__
-#define __gtk_ardour_panner_interface_h__
+#pragma once
 
 #include <memory>
 
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/label.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/label.h>
 #include "gtkmm2ext/persistent_tooltip.h"
 
 #include "pbd/destructible.h"
@@ -89,4 +88,3 @@ private:
 	PannerEditor* _editor;
 };
 
-#endif

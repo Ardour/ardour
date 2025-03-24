@@ -16,45 +16,53 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_session_handle_h__
-#define __libardour_session_handle_h__
+#pragma once
 
 #include "pbd/signals.h"
 
 #include "ardour/libardour_visibility.h"
+
+#ifndef NDEBUG
+# define TRACE_SETSESSION_NULL
+#endif
 
 namespace ARDOUR {
 	class Session;
 
 class LIBARDOUR_API SessionHandleRef : public PBD::ScopedConnectionList
 {
-  public:
+public:
 	SessionHandleRef (ARDOUR::Session& s);
 	virtual ~SessionHandleRef ();
 
-  protected:
-	ARDOUR::Session&          _session;
+protected:
 	virtual void session_going_away ();
 	virtual void insanity_check ();
+
+	ARDOUR::Session& _session;
 };
 
 class LIBARDOUR_API SessionHandlePtr
 {
-  public:
+public:
 	SessionHandlePtr (ARDOUR::Session* s);
-	SessionHandlePtr () : _session (0) {}
+	SessionHandlePtr ();
 	virtual ~SessionHandlePtr () {}
 
 	virtual void set_session (ARDOUR::Session *);
 	virtual ARDOUR::Session* session() const { return _session; }
 
-  protected:
+protected:
+	virtual void session_going_away ();
+
 	ARDOUR::Session*          _session;
 	PBD::ScopedConnectionList _session_connections;
 
-	virtual void session_going_away ();
+#ifdef TRACE_SETSESSION_NULL
+private:
+	bool _gone_away_emitted;
+#endif
 };
 
 } /* namespace */
 
-#endif /* __libardour_session_handle_h__ */

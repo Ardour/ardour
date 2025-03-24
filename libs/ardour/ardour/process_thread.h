@@ -42,6 +42,10 @@ public:
 	void get_buffers ();
 	void drop_buffers ();
 
+	static bool have_thread_buffers () {
+		return 0 != _private_thread_buffers.get ();
+	}
+
 	/* these MUST be called by a process thread's thread, nothing else */
 
 	static BufferSet& get_silent_buffers (ChanCount count = ChanCount::ZERO);

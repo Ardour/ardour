@@ -118,14 +118,14 @@ MTC_TransportMaster::set_session (Session* s)
 		parse_timecode_offset ();
 		reset (true);
 
-		parser.mtc_time.connect_same_thread (port_connections,  boost::bind (&MTC_TransportMaster::update_mtc_time, this, _1, _2, _3));
-		parser.mtc_qtr.connect_same_thread (port_connections, boost::bind (&MTC_TransportMaster::update_mtc_qtr, this, _1, _2, _3));
-		parser.mtc_status.connect_same_thread (port_connections, boost::bind (&MTC_TransportMaster::update_mtc_status, this, _1));
+		parser.mtc_time.connect_same_thread (port_connections,  std::bind (&MTC_TransportMaster::update_mtc_time, this, _1, _2, _3));
+		parser.mtc_qtr.connect_same_thread (port_connections, std::bind (&MTC_TransportMaster::update_mtc_qtr, this, _1, _2, _3));
+		parser.mtc_status.connect_same_thread (port_connections, std::bind (&MTC_TransportMaster::update_mtc_status, this, _1));
 	}
 }
 
 void
-MTC_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now, boost::optional<samplepos_t> session_pos)
+MTC_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now, std::optional<samplepos_t> session_pos)
 {
 	/* Read and parse incoming MIDI */
 

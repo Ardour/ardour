@@ -31,7 +31,7 @@ class M2EncoderInterface
 		virtual ~M2EncoderInterface () {}
 
 		/* user API */
-		PBD::Signal1<void, int> changed;
+		PBD::Signal<void(int)> changed;
 		virtual float value () const { return 0.f; }
 		virtual float range () const { return 0.f; }
 

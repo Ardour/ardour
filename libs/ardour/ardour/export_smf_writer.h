@@ -19,13 +19,13 @@
 #ifndef _libardour_export_smf_writer_h_
 #define _libardour_export_smf_writer_h_
 
-#include <boost/shared_ptr.hpp>
-
 #include "evoral/SMF.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/types.h"
+
+#include <memory>
 
 namespace ARDOUR
 {
@@ -38,6 +38,7 @@ public:
 	~ExportSMFWriter ();
 
 	int init (std::string const& path, samplepos_t);
+	Temporal::Beats duration() const;
 
 	void process (MidiBuffer const&, sampleoffset_t, samplecnt_t, bool);
 

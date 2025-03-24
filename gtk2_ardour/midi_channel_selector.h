@@ -20,18 +20,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_ui_midi_channel_selector_h__
-#define __ardour_ui_midi_channel_selector_h__
+#pragma once
 
 #include <set>
-#include "boost/shared_ptr.hpp"
 #include "sigc++/trackable.h"
 
-#include "gtkmm/table.h"
-#include "gtkmm/box.h"
-#include "gtkmm/button.h"
-#include "gtkmm/radiobutton.h"
-#include "gtkmm/label.h"
+#include "ytkmm/table.h"
+#include "ytkmm/box.h"
+#include "ytkmm/button.h"
+#include "ytkmm/radiobutton.h"
+#include "ytkmm/label.h"
 
 #include "widgets/stateful_button.h"
 
@@ -183,4 +181,3 @@ private:
 	void playback_mode_toggled (ARDOUR::ChannelMode);
 };
 
-#endif /*__ardour_ui_midi_channel_selector_h__*/

@@ -65,7 +65,7 @@ AutomationControl::AutomationControl(ARDOUR::Session&                          s
 	}
 	std::shared_ptr<AutomationList> al = alist();
 	if (al) {
-		al->StateChanged.connect_same_thread (_state_changed_connection, boost::bind (&Session::set_dirty, &_session));
+		al->StateChanged.connect_same_thread (_state_changed_connection, std::bind (&Session::set_dirty, &_session));
 	}
 }
 

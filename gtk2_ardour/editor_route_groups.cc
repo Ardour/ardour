@@ -21,7 +21,7 @@
 
 #include <cstdlib>
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gtk_ui.h"
@@ -430,7 +430,7 @@ EditorRouteGroups::add (RouteGroup* group)
 		focus = true;
 	}
 
-	group->PropertyChanged.connect (_property_changed_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::property_changed, this, group, _1), gui_context());
+	group->PropertyChanged.connect (_property_changed_connections, MISSING_INVALIDATOR, std::bind (&EditorRouteGroups::property_changed, this, group, _1), gui_context());
 
 	if (focus) {
 		TreeViewColumn* col = _display.get_column (0);
@@ -543,12 +543,12 @@ EditorRouteGroups::set_session (Session* s)
 
 	if (_session) {
 
-		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::add, this, _1), gui_context());
+		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&EditorRouteGroups::add, this, _1), gui_context());
 		_session->route_group_removed.connect (
-			_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::groups_changed, this), gui_context()
+			_session_connections, MISSING_INVALIDATOR, std::bind (&EditorRouteGroups::groups_changed, this), gui_context()
 			);
 		_session->route_groups_reordered.connect (
-			_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::groups_changed, this), gui_context()
+			_session_connections, MISSING_INVALIDATOR, std::bind (&EditorRouteGroups::groups_changed, this), gui_context()
 			);
 	}
 

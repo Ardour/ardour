@@ -171,7 +171,7 @@ void
 RegionListBase::add_tag_column ()
 {
 	TreeViewColumn* tvc = append_col (_columns.tags, "2099-10-10 10:10:30");
-	setup_col (tvc, 2, ALIGN_START, _("Tags"), _("Tags"));
+	setup_col (tvc, 3, ALIGN_START, _("Tags"), _("Tags"));
 
 	/* Tags cell: make editable */
 	CellRendererText* region_tags_cell     = dynamic_cast<CellRendererText*> (tvc->get_first_cell ());
@@ -284,8 +284,8 @@ RegionListBase::set_session (ARDOUR::Session* s)
 		return;
 	}
 
-	ARDOUR::Region::RegionsPropertyChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&RegionListBase::regions_changed, this, _1, _2), gui_context ());
-	ARDOUR::RegionFactory::CheckNewRegion.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&RegionListBase::add_region, this, _1), gui_context ());
+	ARDOUR::Region::RegionsPropertyChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&RegionListBase::regions_changed, this, _1, _2), gui_context ());
+	ARDOUR::RegionFactory::CheckNewRegion.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&RegionListBase::add_region, this, _1), gui_context ());
 
 	redisplay ();
 }
@@ -336,7 +336,7 @@ RegionListBase::add_region (std::shared_ptr<Region> region)
 	}
 
 	if (region->whole_file ()) {
-		region->DropReferences.connect (_remove_region_connections, MISSING_INVALIDATOR, boost::bind (&RegionListBase::remove_weak_region, this, std::weak_ptr<Region> (region)), gui_context ());
+		region->DropReferences.connect (_remove_region_connections, MISSING_INVALIDATOR, std::bind (&RegionListBase::remove_weak_region, this, std::weak_ptr<Region> (region)), gui_context ());
 	}
 
 	PropertyChange                pc;
@@ -492,6 +492,9 @@ RegionListBase::populate_row (std::shared_ptr<Region> region, TreeModel::Row con
 		populate_row_end (region, row);
 		populate_row_length (region, row);
 	}
+	if (all || what_changed.contains (Properties::region_fx)) {
+		populate_row_regionfx (region, row);
+	}
 	if (all) {
 		populate_row_source (region, row);
 	}
@@ -608,6 +611,12 @@ void
 RegionListBase::populate_row_opaque (std::shared_ptr<Region> region, TreeModel::Row const& row)
 {
 	row[_columns.opaque] = region->opaque ();
+}
+
+void
+RegionListBase::populate_row_regionfx (std::shared_ptr<Region> region, TreeModel::Row const& row)
+{
+	row[_columns.regionfx] = region->n_region_fx ();
 }
 
 void

@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/label.h>
+#include <ytkmm/label.h>
 #include "pbd/compose.h"
 #include "ambiguous_file_dialog.h"
 #include "pbd/i18n.h"

@@ -7,8 +7,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/private/scrolledwindow_p.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/private/scrolledwindow_p.h>
 
 
 // -*- c++ -*-
@@ -33,10 +33,10 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/scrollbar.h>
-#include <gtkmm/viewport.h>
-#include <gtkmm/adjustment.h>
-#include <gtk/gtk.h>
+#include <ytkmm/scrollbar.h>
+#include <ytkmm/viewport.h>
+#include <ytkmm/adjustment.h>
+#include <ytk/ytk.h>
 
 
 namespace Gtk

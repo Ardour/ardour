@@ -20,6 +20,8 @@
 #ifndef PBD_ATOMIC_COUNTER_H
 #define PBD_ATOMIC_COUNTER_H
 
+#include "pbd/atomic.h"
+
 #include <atomic>
 
 #include <glib.h>

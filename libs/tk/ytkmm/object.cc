@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/object.h>
-#include <gtkmm/private/object_p.h>
+#include <ytkmm/object.h>
+#include <ytkmm/private/object_p.h>
 
 
 /* $Id: object.ccg,v 1.8 2005/12/10 11:54:53 murrayc Exp $ */
@@ -27,7 +27,7 @@
  */
 
 #include <glibmm/quark.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 namespace Gtk

@@ -30,7 +30,7 @@ done
 if [ -d $dir -a -f $dir/testfile_1 ] ; then
     # dir exists and has a testfile within it - reuse to avoid
     # recreating files
-    echo "# Re-using files in $dir"
+    echo "# Reusing files in $dir"
     needfiles=
 else
     dir=$dir/readtest_$$

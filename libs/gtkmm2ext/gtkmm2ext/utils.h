@@ -32,12 +32,12 @@
 #include <cairomm/cairomm.h>
 #include <pangomm/fontdescription.h>
 
-#include <gtkmm/container.h>
-#include <gtkmm/filechooser.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/treeview.h>
-#include <gdkmm/window.h> /* for WMDecoration */
-#include <gdkmm/pixbuf.h>
+#include <ytkmm/container.h>
+#include <ytkmm/filechooser.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/treeview.h>
+#include <ydkmm/window.h> /* for WMDecoration */
+#include <ydkmm/pixbuf.h>
 
 #include "gtkmm2ext/visibility.h"
 
@@ -117,6 +117,7 @@ namespace Gtkmm2ext {
 
 	/* C++ API for rounded rectangles */
 
+	LIBGTKMM2EXT_API void rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_top_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_top_left_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
@@ -128,6 +129,7 @@ namespace Gtkmm2ext {
 
 	/* C API for rounded rectangles */
 
+	LIBGTKMM2EXT_API void rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_top_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_top_left_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);

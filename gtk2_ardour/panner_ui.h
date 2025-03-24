@@ -20,17 +20,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_panner_ui_h__
-#define __ardour_gtk_panner_ui_h__
+#pragma once
 
 #include <vector>
 
-#include <gtkmm/box.h>
-#include <gtkmm/adjustment.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/arrow.h>
-#include <gtkmm/togglebutton.h>
-#include <gtkmm/button.h>
+#include <ytkmm/box.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/arrow.h>
+#include <ytkmm/togglebutton.h>
+#include <ytkmm/button.h>
 
 #include "ardour/session_handle.h"
 
@@ -50,6 +49,7 @@ namespace ARDOUR {
 }
 
 namespace Gtk {
+	class CheckMenuItem;
 	class Menu;
 	class Menuitem;
 }
@@ -153,5 +153,4 @@ private:
 	bool _suspend_menu_callbacks;
 };
 
-#endif /* __ardour_gtk_panner_ui_h__ */
 

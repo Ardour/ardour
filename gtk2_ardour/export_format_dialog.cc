@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/frame.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/stock.h>
 
 #include "ardour/export_format_specification.h"
 #include "ardour/session.h"
@@ -70,7 +70,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog)
 	, silence_end_checkbox (_("Add silence at end:"))
 	, silence_end_clock ("silence_end", true, "", true, false, true)
 
-	, command_label (_("Command to run post-export\n(%f=file path, %d=directory, %b=basename, see tooltip for more):"), Gtk::ALIGN_START)
+	, command_label (_("Command to run post-export\n(%f=file path, %d=directory, %b=basename; see tooltip for more,\ndon't add quotes around arguments):"), Gtk::ALIGN_START)
 
 	, format_table (3, 4)
 	, compatibility_label (_("Compatibility"), Gtk::ALIGN_START)
@@ -111,7 +111,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog)
 	update_description ();
 	manager.DescriptionChanged.connect (
 	    *this, invalidator (*this),
-	    boost::bind (&ExportFormatDialog::update_description, this), gui_context ());
+	    std::bind (&ExportFormatDialog::update_description, this), gui_context ());
 
 	/* Normalize */
 
@@ -235,7 +235,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog)
 	close_button = add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_APPLY);
 	close_button->set_sensitive (false);
 	close_button->signal_clicked ().connect (sigc::mem_fun (*this, &ExportFormatDialog::end_dialog));
-	manager.CompleteChanged.connect (*this, invalidator (*this), boost::bind (&Gtk::Button::set_sensitive, close_button, _1), gui_context ());
+	manager.CompleteChanged.connect (*this, invalidator (*this), std::bind (&Gtk::Button::set_sensitive, close_button, _1), gui_context ());
 
 	with_cue.signal_toggled ().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_with_cue));
 	with_toc.signal_toggled ().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_with_toc));
@@ -354,12 +354,13 @@ void
 ExportFormatDialog::set_session (ARDOUR::Session* s)
 {
 	SessionHandlePtr::set_session (s);
-	silence_start_clock.set_session (s);
-	silence_end_clock.set_session (s);
 
 	if (!_session) {
 		return;
 	}
+
+	silence_start_clock.set_session (s);
+	silence_end_clock.set_session (s);
 
 	update_clock (silence_start_clock, silence_start);
 	update_clock (silence_end_clock, silence_end);
@@ -504,7 +505,7 @@ ExportFormatDialog::init_format_table ()
 		row[compatibility_cols.label]    = (*it)->name ();
 
 		WeakCompatPtr ptr (*it);
-		(*it)->SelectChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_compatibility_selection, this, _1, ptr), gui_context ());
+		(*it)->SelectChanged.connect (*this, invalidator (*this), std::bind (&ExportFormatDialog::change_compatibility_selection, this, _1, ptr), gui_context ());
 	}
 
 	compatibility_view.append_column_editable ("", compatibility_cols.selected);
@@ -532,8 +533,8 @@ ExportFormatDialog::init_format_table ()
 		row[quality_cols.label] = (*it)->name ();
 
 		WeakQualityPtr ptr (*it);
-		(*it)->SelectChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_quality_selection, this, _1, ptr), gui_context ());
-		(*it)->CompatibleChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_quality_compatibility, this, _1, ptr), gui_context ());
+		(*it)->SelectChanged.connect (*this, invalidator (*this), std::bind (&ExportFormatDialog::change_quality_selection, this, _1, ptr), gui_context ());
+		(*it)->CompatibleChanged.connect (*this, invalidator (*this), std::bind (&ExportFormatDialog::change_quality_compatibility, this, _1, ptr), gui_context ());
 	}
 
 	quality_view.append_column ("", quality_cols.label);
@@ -554,19 +555,19 @@ ExportFormatDialog::init_format_table ()
 		row[format_cols.label] = (*it)->name ();
 
 		WeakFormatPtr ptr (*it);
-		(*it)->SelectChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_format_selection, this, _1, ptr), gui_context ());
-		(*it)->CompatibleChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_format_compatibility, this, _1, ptr), gui_context ());
+		(*it)->SelectChanged.connect (*this, invalidator (*this), std::bind (&ExportFormatDialog::change_format_selection, this, _1, ptr), gui_context ());
+		(*it)->CompatibleChanged.connect (*this, invalidator (*this), std::bind (&ExportFormatDialog::change_format_compatibility, this, _1, ptr), gui_context ());
 
 		/* Encoding options */
 
 		std::shared_ptr<HasSampleFormat> hsf;
 
 		if ((hsf = std::dynamic_pointer_cast<HasSampleFormat> (*it))) {
-			hsf->SampleFormatSelectChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_sample_format_selection, this, _1, _2), gui_context ());
-			hsf->SampleFormatCompatibleChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_sample_format_compatibility, this, _1, _2), gui_context ());
+			hsf->SampleFormatSelectChanged.connect (*this, invalidator (*this), std::bind (&ExportFormatDialog::change_sample_format_selection, this, _1, _2), gui_context ());
+			hsf->SampleFormatCompatibleChanged.connect (*this, invalidator (*this), std::bind (&ExportFormatDialog::change_sample_format_compatibility, this, _1, _2), gui_context ());
 
-			hsf->DitherTypeSelectChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_dither_type_selection, this, _1, _2), gui_context ());
-			hsf->DitherTypeCompatibleChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_dither_type_compatibility, this, _1, _2), gui_context ());
+			hsf->DitherTypeSelectChanged.connect (*this, invalidator (*this), std::bind (&ExportFormatDialog::change_dither_type_selection, this, _1, _2), gui_context ());
+			hsf->DitherTypeCompatibleChanged.connect (*this, invalidator (*this), std::bind (&ExportFormatDialog::change_dither_type_compatibility, this, _1, _2), gui_context ());
 		}
 	}
 
@@ -588,8 +589,8 @@ ExportFormatDialog::init_format_table ()
 		row[sample_rate_cols.label] = (*it)->name ();
 
 		WeakSampleRatePtr ptr (*it);
-		(*it)->SelectChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_sample_rate_selection, this, _1, ptr), gui_context ());
-		(*it)->CompatibleChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_sample_rate_compatibility, this, _1, ptr), gui_context ());
+		(*it)->SelectChanged.connect (*this, invalidator (*this), std::bind (&ExportFormatDialog::change_sample_rate_selection, this, _1, ptr), gui_context ());
+		(*it)->CompatibleChanged.connect (*this, invalidator (*this), std::bind (&ExportFormatDialog::change_sample_rate_compatibility, this, _1, ptr), gui_context ());
 	}
 
 	sample_rate_view.append_column ("", sample_rate_cols.label);
@@ -1262,8 +1263,8 @@ ExportFormatDialog::fill_sample_rate_lists (std::shared_ptr<ARDOUR::ExportFormat
 		row[sample_rate_cols.label] = (*it)->name ();
 
 		WeakSampleRatePtr ptr (*it);
-		(*it)->SelectChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_sample_rate_selection, this, _1, ptr), gui_context ());
-		(*it)->CompatibleChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_sample_rate_compatibility, this, _1, ptr), gui_context ());
+		(*it)->SelectChanged.connect (*this, invalidator (*this), std::bind (&ExportFormatDialog::change_sample_rate_selection, this, _1, ptr), gui_context ());
+		(*it)->CompatibleChanged.connect (*this, invalidator (*this), std::bind (&ExportFormatDialog::change_sample_rate_compatibility, this, _1, ptr), gui_context ());
 	}
 
 }

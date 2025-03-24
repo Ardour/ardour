@@ -200,7 +200,7 @@ ScaleLayout::ScaleLayout (Push2& p, Session & s, std::string const & name)
 
 	build_scale_menu ();
 
-	_p2.ScaleChange.connect (_p2_connections, invalidator (*this), boost::bind (&ScaleLayout::show_root_state, this), &_p2);
+	_p2.ScaleChange.connect (_p2_connections, invalidator (*this), std::bind (&ScaleLayout::show_root_state, this), &_p2);
 }
 
 ScaleLayout::~ScaleLayout ()
@@ -501,7 +501,7 @@ ScaleLayout::build_scale_menu ()
 	v.push_back ("Algeria");
 
 	_scale_menu = new Push2Menu (this, v);
-	_scale_menu->Rearranged.connect (_menu_connections, invalidator (*this), boost::bind (&ScaleLayout::menu_rearranged, this), &_p2);
+	_scale_menu->Rearranged.connect (_menu_connections, invalidator (*this), std::bind (&ScaleLayout::menu_rearranged, this), &_p2);
 
 	_scale_menu->set_layout (6, 6);
 	_scale_menu->set_text_color (_p2.get_color (Push2::ParameterName));
@@ -518,7 +518,7 @@ ScaleLayout::build_scale_menu ()
 
 	/* listen for changes */
 
-	_scale_menu->ActiveChanged.connect (_menu_connections, invalidator (*this), boost::bind (&ScaleLayout::mode_changed, this), &_p2);
+	_scale_menu->ActiveChanged.connect (_menu_connections, invalidator (*this), std::bind (&ScaleLayout::mode_changed, this), &_p2);
 }
 
 void

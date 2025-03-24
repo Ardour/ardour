@@ -112,7 +112,7 @@ PortExportChannel::read (Buffer const*& buf, samplecnt_t samples) const
 	assert (_buffer);
 	assert (samples <= _buffer_size);
 
-	if (ports.size () == 1 && _delaylines.size () == 1 && !ports.begin ()->expired () && _delaylines.front ()->bufsize () == _buffer_size + 1) {
+	if (ports.size () == 1 && _delaylines.size () == 1 && !ports.begin ()->expired () && (samplecnt_t) _delaylines.front ()->bufsize () == _buffer_size + 1) {
 		std::shared_ptr<AudioPort> p = ports.begin ()->lock ();
 		AudioBuffer&               ab (p->get_audio_buffer (samples)); // unsets AudioBuffer::_written
 		ab.set_written (true);
@@ -291,7 +291,7 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session* session, AudioR
 			throw ExportFailed ("Unhandled type in ExportChannelFactory constructor");
 	}
 
-	session->ProcessExport.connect_same_thread (export_connection, boost::bind (&RegionExportChannelFactory::new_cycle_started, this, _1));
+	session->ProcessExport.connect_same_thread (export_connection, std::bind (&RegionExportChannelFactory::new_cycle_started, this, _1));
 
 	buffers.ensure_buffers (DataType::AUDIO, n_channels, samples_per_cycle);
 	buffers.set_count (ChanCount (DataType::AUDIO, n_channels));
@@ -385,6 +385,11 @@ RouteExportChannel::create_from_route (std::list<ExportChannelPtr>& result, std:
 void
 RouteExportChannel::create_from_state (std::list<ExportChannelPtr>& result, Session& s, XMLNode* node)
 {
+	uint32_t chn;
+	if (node->get_property ("number", chn) && chn > 1) {
+		/* create_from_route adds ExportChannel for all channels of a given Route */
+		return;
+	}
 	XMLNode* xml_route = node->child ("Route");
 	if (!xml_route) {
 		return;

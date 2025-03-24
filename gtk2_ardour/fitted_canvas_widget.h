@@ -22,7 +22,7 @@
 
 #include <canvas/canvas.h>
 
-#include <gtkmm/layout.h>
+#include <ytkmm/layout.h>
 
 /* FittedCanvasWidget has these properties:
  *  it is provided a 'nominal size' on construction, which it will request of gtk

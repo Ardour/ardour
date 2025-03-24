@@ -16,8 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __temporal_domain_provider_h__
-#define __temporal_domain_provider_h__
+#pragma once
 
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
@@ -76,7 +75,7 @@ class TimeDomainProvider  {
 		}
 	}
 
-	mutable PBD::Signal0<void> TimeDomainChanged;
+	mutable PBD::Signal<void()> TimeDomainChanged;
 
 	virtual void time_domain_changed() {
 		/* Forward a time domain change to children */
@@ -86,7 +85,7 @@ class TimeDomainProvider  {
   protected:
 	void listen () {
 		if (parent) {
-			parent->TimeDomainChanged.connect_same_thread (parent_connection, boost::bind (&TimeDomainProvider::time_domain_changed, this));
+			parent->TimeDomainChanged.connect_same_thread (parent_connection, std::bind (&TimeDomainProvider::time_domain_changed, this));
 		}
 	}
 
@@ -99,4 +98,3 @@ class TimeDomainProvider  {
 
 }
 
-#endif /* __temporal_domain_provider_h__ */

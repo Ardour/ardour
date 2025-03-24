@@ -7,8 +7,6 @@
 #include "process_context.h"
 #include "types.h"
 
-#include <boost/format.hpp>
-
 namespace AudioGrapher
 {
 
@@ -35,10 +33,11 @@ class LIBAUDIOGRAPHER_API FlagDebuggable : public Debuggable<L>
 		FlagField unsupported = flags.unsupported_flags_of (context.flags());
 
 		for (FlagField::iterator it = unsupported.begin(); it != unsupported.end(); ++it) {
-			Debuggable<L>::debug_stream() << boost::str (boost::format
-				("%1% does not support flag %2%")
-				% DebugUtils::demangled_name (self) % DebugUtils::process_context_flag_name (*it)
-				) << std::endl;
+			Debuggable<L>::debug_stream()
+				<< DebugUtils::demangled_name (self)
+				<< " does not support flag "
+				<< DebugUtils::process_context_flag_name (*it)
+				<< std::endl;
 		}
 	}
 

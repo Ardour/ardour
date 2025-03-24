@@ -257,7 +257,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	//set_position (start, this);
 
 	group->Event.connect (sigc::mem_fun (*this, &TimeAxisViewItem::canvas_group_event));
-	//Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&TimeAxisViewItem::parameter_changed, this, _1), gui_context ());
+	//Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&TimeAxisViewItem::parameter_changed, this, _1), gui_context ());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &TimeAxisViewItem::parameter_changed));
 }
 
@@ -500,7 +500,7 @@ TimeAxisViewItem::set_selected(bool yn)
 			selection_frame->set_outline_color (UIConfiguration::instance().color ("selected time axis frame"));
 			selection_frame->set_ignore_events (true);
 		}
-		selection_frame->set (frame->get().shrink (1.0));
+		selection_frame->set (frame->get().shrink (1.0, 0.0, 1.0, 0.0));
 		selection_frame->show ();
 	} else {
 		if (selection_frame) {
@@ -567,7 +567,7 @@ TimeAxisViewItem::set_height (double height)
 		}
 
 		if (selection_frame) {
-			selection_frame->set (frame->get().shrink (1.0));
+			selection_frame->set (frame->get().shrink (1.0, 0.0, 1.0, 0.0));
 		}
 	}
 }
@@ -618,7 +618,7 @@ TimeAxisViewItem::get_canvas_frame()
 }
 
 ArdourCanvas::Item*
-TimeAxisViewItem::get_canvas_group()
+TimeAxisViewItem::get_canvas_group() const
 {
 	return group;
 }
@@ -799,10 +799,7 @@ TimeAxisViewItem::set_samples_per_pixel (double fpp)
 	samples_per_pixel = fpp;
 	set_position (this->get_position(), this);
 
-	double end_pixel = trackview.editor().time_to_pixel (time_position + get_duration());
-	double first_pixel = trackview.editor().time_to_pixel (time_position);
-
-	reset_width_dependent_items (end_pixel - first_pixel);
+	reset_width_dependent_items (trackview.editor().time_delta_to_pixel (time_position, time_position + get_duration()));
 }
 
 void
@@ -834,7 +831,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 			frame->set_x1 (pixel_width);
 
 			if (selection_frame) {
-				selection_frame->set (frame->get().shrink (1.0));
+				selection_frame->set (frame->get().shrink (1.0, 0.0, 1.0, 0.0));
 			}
 		}
 

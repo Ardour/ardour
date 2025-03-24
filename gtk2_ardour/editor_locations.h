@@ -18,12 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_editor_locations_h__
-#define __gtk_ardour_editor_locations_h__
+#pragma once
 
 #include "pbd/xml++.h"
 
-#include <gtkmm/scrolledwindow.h>
+#include <ytkmm/scrolledwindow.h>
 #include "ardour/session_handle.h"
 #include "editor_component.h"
 
@@ -50,4 +49,3 @@ private:
 };
 
 
-#endif /* __gtk_ardour_editor_locations_h__ */

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ArdourMIDIBindings version="1.0.0" name="Arturia MiniLab 3">
 <!-- 2024-01-19 Alexandre Prokoudine: Map file creation -->
+<!-- 2024-09-10 Alexandre Prokoudine: Update the map file -->
 
 <!-- Transport controls. The rest is reserved for synths -->
 
@@ -8,5 +9,13 @@
   <Binding channel="1" ctl="106" function="transport-stop"/>
   <Binding channel="1" ctl="107" function="transport-roll"/>
   <Binding channel="1" ctl="108" function="toggle-rec-enable"/>
+  <Binding channel="1" ctl="109" action="Transport/ToggleClick"/>
+
+<!-- Faders in DAW mode -->
+
+  <Binding channel="1" ctl="14" uri="/route/gain 1"/>
+  <Binding channel="1" ctl="15" uri="/route/gain 2"/>
+  <Binding channel="1" ctl="30" uri="/route/gain 3"/>
+  <Binding channel="1" ctl="31" uri="/route/gain 4"/>
 
 </ArdourMIDIBindings>

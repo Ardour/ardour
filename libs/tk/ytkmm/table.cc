@@ -7,8 +7,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/table.h>
-#include <gtkmm/private/table_p.h>
+#include <ytkmm/table.h>
+#include <ytkmm/private/table_p.h>
 
 
 // -*- c++ -*-
@@ -33,7 +33,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

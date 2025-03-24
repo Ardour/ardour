@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_audio_track_h__
-#define __ardour_audio_track_h__
+#pragma once
 
 #include "ardour/interthread_info.h"
 #include "ardour/track.h"
@@ -64,4 +63,3 @@ class LIBARDOUR_API AudioTrack : public Track
 
 } // namespace ARDOUR
 
-#endif /* __ardour_audio_track_h__ */

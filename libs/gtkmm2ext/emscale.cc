@@ -17,7 +17,7 @@
  */
 
 #include <algorithm>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include <pangomm/layout.h>
 
 #include "gtkmm2ext/emscale.h"

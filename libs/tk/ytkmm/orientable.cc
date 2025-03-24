@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/orientable.h>
-#include <gtkmm/private/orientable_p.h>
+#include <ytkmm/orientable.h>
+#include <ytkmm/private/orientable_p.h>
 
 
 // -*- c++ -*-
@@ -27,7 +27,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 namespace

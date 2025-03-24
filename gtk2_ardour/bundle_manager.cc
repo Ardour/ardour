@@ -19,13 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/stock.h>
-#include <gtkmm/button.h>
-#include <gtkmm/label.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/table.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/alignment.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/button.h>
+#include <ytkmm/label.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/table.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/alignment.h>
 
 #include "ardour/session.h"
 #include "ardour/user_bundle.h"
@@ -385,7 +385,7 @@ BundleManager::add_bundle (std::shared_ptr<Bundle> b)
 	(*i)[_list_model_columns.name] = u->name ();
 	(*i)[_list_model_columns.bundle] = u;
 
-	u->Changed.connect (bundle_connections, invalidator (*this), boost::bind (&BundleManager::bundle_changed, this, _1, std::weak_ptr<UserBundle> (u)), gui_context());
+	u->Changed.connect (bundle_connections, invalidator (*this), std::bind (&BundleManager::bundle_changed, this, _1, std::weak_ptr<UserBundle> (u)), gui_context());
 }
 
 void

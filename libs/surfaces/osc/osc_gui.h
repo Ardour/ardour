@@ -18,6 +18,10 @@
 #ifndef osc_gui_h
 #define osc_gui_h
 
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/label.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/spinbutton.h>
 
 #include "osc.h"
 

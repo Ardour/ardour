@@ -69,6 +69,8 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		normal = 1.f;
 		toggled = true;
 		break;
+	case SurroundSendLevel:
+		/* fallthrough */
 	case TrimAutomation:
 		upper  = 10; // +20dB
 		lower  = .1; // -20dB
@@ -126,7 +128,26 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		scale_points->insert (std::make_pair (_("Near"), 2));
 		scale_points->insert (std::make_pair (_("Far"), 3));
 		break;
+	case PanSurroundZones:
+		enumeration = true;
+		integer_step = true;
+		upper  = 5.0f;
+		normal = 0.0f;
+		scale_points = std::shared_ptr<ScalePoints>(new ScalePoints());
+		scale_points->insert (std::make_pair (_("All"), 0));
+		scale_points->insert (std::make_pair (_("No Back"), 1));
+		scale_points->insert (std::make_pair (_("No Sides"), 2));
+		scale_points->insert (std::make_pair (_("Center Back"), 3));
+		scale_points->insert (std::make_pair (_("Screen Only"), 4));
+		scale_points->insert (std::make_pair (_("Surround Only"), 5));
+		break;
+	case PanSurroundElevationEnable:
+		upper  = 1.0f;
+		normal = 1.0f;
+		toggled = true;
+		break;
 	case PanSurroundSnap:
+	case PanSurroundRamp:
 	case SoloAutomation:
 	case MuteAutomation:
 		upper  = 1.0f;
@@ -265,7 +286,7 @@ ParameterDescriptor::update_steps()
 	if (unit == ParameterDescriptor::MIDI_NOTE) {
 		step      = smallstep = 1;  // semitone
 		largestep = 12;             // octave
-	} else if (type == GainAutomation || type == TrimAutomation || type == BusSendLevel || type == MainOutVolume || type == InsertReturnLevel) {
+	} else if (type == GainAutomation || type == TrimAutomation || type == BusSendLevel || type == MainOutVolume || type == SurroundSendLevel || type == InsertReturnLevel) {
 		/* dB_coeff_step gives a step normalized for [0, max_gain].  This is
 		   like "slider position", so we convert from "slider position" to gain
 		   to have the correct unit here. */
@@ -389,6 +410,8 @@ ParameterDescriptor::to_interface (float val, bool rotary) const
 		case EnvelopeAutomation:
 			val = gain_to_slider_position_with_max (val, upper);
 			break;
+		case SurroundSendLevel:
+			/* fallthrough */
 		case TrimAutomation:
 			/* fallthrough */
 		case MainOutVolume:
@@ -403,8 +426,11 @@ ParameterDescriptor::to_interface (float val, bool rotary) const
 				val = 1.0 - val;
 			}
 			break;
-		case PanElevationAutomation:
-			// val = val;
+		case PanSurroundX:
+		case PanSurroundY:
+			if (!rotary) {
+				val = 1.0 - val;
+			}
 			break;
 		case PanWidthAutomation:
 			val = .5f + val * .5f;
@@ -447,6 +473,7 @@ ParameterDescriptor::from_interface (float val, bool rotary) const
 		case InsertReturnLevel:
 			val = slider_position_to_gain_with_max (val, upper);
 			break;
+		case SurroundSendLevel:
 		case TrimAutomation:
 			{
 				const float lower_db = accurate_coefficient_to_dB (lower);
@@ -459,8 +486,11 @@ ParameterDescriptor::from_interface (float val, bool rotary) const
 				val = 1.0 - val;
 			}
 			break;
-		case PanElevationAutomation:
-			 // val = val;
+		case PanSurroundX:
+		case PanSurroundY:
+			if (!rotary) {
+				val = 1.0 - val;
+			}
 			break;
 		case PanWidthAutomation:
 			val = 2.f * val - 1.f;
@@ -504,6 +534,7 @@ ParameterDescriptor::is_linear () const
 		case GainAutomation:
 		case EnvelopeAutomation:
 		case BusSendLevel:
+		case SurroundSendLevel:
 		case InsertReturnLevel:
 			return false;
 		default:

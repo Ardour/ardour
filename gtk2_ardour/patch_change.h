@@ -23,6 +23,11 @@
 
 #include "canvas/flag.h"
 
+#include <ytkmm/menu.h>
+
+#include "midi_view.h"
+#include "patch_change_dialog.h"
+
 class MidiRegionView;
 
 namespace MIDI {
@@ -34,8 +39,8 @@ namespace MIDI {
 class PatchChange
 {
 public:
-	PatchChange (MidiRegionView&                   region,
-	             ArdourCanvas::Container*          parent,
+	PatchChange (MidiView&                         region,
+	             ArdourCanvas::Item*               parent,
 	             double                            height,
 	             double                            x,
 	             double                            y,
@@ -65,7 +70,7 @@ public:
 private:
 	bool event_handler (GdkEvent*);
 
-	MidiRegionView&                   _region;
+	MidiView&                         _region;
 	ARDOUR::InstrumentInfo&           _info;
 	ARDOUR::MidiModel::PatchChangePtr _patch;
 	Gtk::Menu                         _popup;

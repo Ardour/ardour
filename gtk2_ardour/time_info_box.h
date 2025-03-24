@@ -17,14 +17,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __time_info_box_h__
-#define __time_info_box_h__
+#pragma once
 
 #include <map>
 
-#include <gtkmm/box.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
+#include <ytkmm/box.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
@@ -79,4 +78,3 @@ private:
 	void track_mouse_mode ();
 };
 
-#endif /* __time_info_box_h__ */

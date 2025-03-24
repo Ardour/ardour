@@ -18,16 +18,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_playlist_selector_h__
-#define __ardour_playlist_selector_h__
+#pragma once
 
 #include <memory>
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/treestore.h>
-#include <gtkmm/treeview.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/treestore.h>
+#include <ytkmm/treeview.h>
+
+#include "widgets/ardour_button.h"
 
 #include "ardour/playlist.h"
 #include "ardour/session_handle.h"
@@ -123,4 +124,3 @@ private:
 	bool _ignore_selection;
 };
 
-#endif // __ardour_playlist_selector_h__

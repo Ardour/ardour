@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_pitch_h__
-#define __ardour_pitch_h__
+#pragma once
 
 #ifdef WAF_BUILD
 #include "libardour-config.h"
@@ -64,4 +63,3 @@ class LIBARDOUR_API Pitch : public Filter {
 
 #endif
 
-#endif /* __ardour_pitch_h__ */

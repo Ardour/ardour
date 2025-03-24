@@ -102,6 +102,7 @@
         <AvailableChannel Channel="10" Available="true"/>
       </AvailableForChannels>
       <UsesNoteNameList Name="General MIDI Drums"/>
+      <UsesControlNameList Name="Controls"/>
       <PatchBank Name="Patches" ROM="false">
         <MIDICommands>
           <ControlChange Control="120" Value="120"/>

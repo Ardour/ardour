@@ -338,6 +338,11 @@ MonitorPort::clear_ports (bool instantly)
 		MonitorInputChanged (i->first, false); /* EMIT SIGNAL */
 	}
 
+	if (instantly) {
+		/* release shared_ptr references */
+		_monitor_ports.flush ();
+	}
+
 	if (!s) {
 		return;
 	}

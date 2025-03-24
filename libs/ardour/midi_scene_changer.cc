@@ -44,12 +44,12 @@ MIDISceneChanger::MIDISceneChanger (Session& s)
 
 {
 	/* catch any add/remove/clear etc. for all Locations */
-	_session.locations()->changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
-	_session.locations()->added.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
-	_session.locations()->removed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
+	_session.locations()->changed.connect_same_thread (*this, std::bind (&MIDISceneChanger::locations_changed, this));
+	_session.locations()->added.connect_same_thread (*this, std::bind (&MIDISceneChanger::locations_changed, this));
+	_session.locations()->removed.connect_same_thread (*this, std::bind (&MIDISceneChanger::locations_changed, this));
 
 	/* catch class-based signal that notifies of us changes in the scene change state of any Location */
-	Location::scene_changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
+	Location::scene_changed.connect_same_thread (*this, std::bind (&MIDISceneChanger::locations_changed, this));
 }
 
 MIDISceneChanger::~MIDISceneChanger ()
@@ -102,14 +102,23 @@ MIDISceneChanger::rt_deliver (MidiBuffer& mbuf, samplepos_t when, std::shared_pt
 
 	uint8_t buf[4];
 	size_t cnt;
+	std::shared_ptr<AsyncMIDIPort> aport = std::dynamic_pointer_cast<AsyncMIDIPort>(output_port);
+	MIDI::Parser* parser (aport ? aport->parser() : output_port->trace_parser().get());
 
 	MIDIOutputActivity (); /* EMIT SIGNAL */
 
 	if ((cnt = msc->get_bank_msb_message (buf, sizeof (buf))) > 0) {
 		mbuf.push_back (when, Evoral::MIDI_EVENT, cnt, buf);
 
+		for (size_t n = 0; parser && n < cnt; ++n) {
+			parser->scanner (buf[n]);
+		}
+
 		if ((cnt = msc->get_bank_lsb_message (buf, sizeof (buf))) > 0) {
 			mbuf.push_back (when, Evoral::MIDI_EVENT, cnt, buf);
+			for (size_t n = 0; parser && n < cnt; ++n) {
+				parser->scanner (buf[n]);
+			}
 		}
 
 		last_delivered_bank = msc->bank();
@@ -117,7 +126,9 @@ MIDISceneChanger::rt_deliver (MidiBuffer& mbuf, samplepos_t when, std::shared_pt
 
 	if ((cnt = msc->get_program_message (buf, sizeof (buf))) > 0) {
 		mbuf.push_back (when, Evoral::MIDI_EVENT, cnt, buf);
-
+		for (size_t n = 0; parser && n < cnt; ++n) {
+			parser->scanner (buf[n]);
+		}
 		last_delivered_program = msc->program();
 	}
 }
@@ -243,8 +254,8 @@ MIDISceneChanger::set_input_port (std::shared_ptr<MidiPort> mp)
 		 */
 
 		for (int channel = 0; channel < 16; ++channel) {
-			async->parser()->channel_bank_change[channel].connect_same_thread (incoming_connections, boost::bind (&MIDISceneChanger::bank_change_input, this, _1, _2, channel));
-			async->parser()->channel_program_change[channel].connect_same_thread (incoming_connections, boost::bind (&MIDISceneChanger::program_change_input, this, _1, _2, channel));
+			async->parser()->channel_bank_change[channel].connect_same_thread (incoming_connections, std::bind (&MIDISceneChanger::bank_change_input, this, _1, _2, channel));
+			async->parser()->channel_program_change[channel].connect_same_thread (incoming_connections, std::bind (&MIDISceneChanger::program_change_input, this, _1, _2, channel));
 		}
 	}
 }
@@ -283,16 +294,22 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 
 	last_program_message_time = time;
 
-	if (!recording()) {
+	if (!recording ()) {
+		if (Config->get_locate_to_pgm_change ()) {
+			MIDIInputActivity (); /* EMIT SIGNAL */
 
-		MIDIInputActivity (); /* EMIT SIGNAL */
+			int bank = -1;
+			if (have_seen_bank_changes) {
+				bank = std::dynamic_pointer_cast<AsyncMIDIPort>(input_port)->channel (channel)->bank();
+			}
 
-		int bank = -1;
-		if (have_seen_bank_changes) {
-			bank = std::dynamic_pointer_cast<AsyncMIDIPort>(input_port)->channel (channel)->bank();
+			jump_to (bank, program);
+			return;
 		}
+	}
 
-		jump_to (bank, program);
+	/* we are recording,  do we need to create a marker */
+	if (!Config->get_mark_at_pgm_change ()) {
 		return;
 	}
 
@@ -318,12 +335,12 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 		new_mark = true;
 	}
 
-	int bank = -1;
+	int bank = 0;
 	if (have_seen_bank_changes) {
 		bank = std::dynamic_pointer_cast<AsyncMIDIPort>(input_port)->channel (channel)->bank();
 	}
 
-	MIDISceneChange* msc =new MIDISceneChange (channel, bank, program & 0x7f);
+	std::shared_ptr<MIDISceneChange> msc (new MIDISceneChange (channel, bank, program & 0x7f));
 
 	/* check for identical scene change so we can re-use color, if any */
 
@@ -338,7 +355,8 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 		}
 	}
 
-	loc->set_scene_change (std::shared_ptr<MIDISceneChange> (msc));
+	loc->set_scene_change (msc);
+	loc->set_name (string_compose(_("scene [%1]"), 1 + ((bank*128)+(program & 0x7f))));
 
 	/* this will generate a "changed" signal to be emitted by locations,
 	   and we will call ::gather() to update our list of MIDI events.

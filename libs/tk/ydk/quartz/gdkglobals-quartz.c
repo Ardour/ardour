@@ -27,6 +27,8 @@ GdkDisplay *_gdk_display = NULL;
 GdkScreen *_gdk_screen = NULL;
 GdkWindow *_gdk_root = NULL;
 
+static int _gdk_quartz_use_cocoa_invalidation = FALSE;
+
 GdkOSXVersion
 gdk_quartz_osx_version (void)
 {
@@ -52,4 +54,16 @@ gdk_quartz_osx_version (void)
     return GDK_OSX_NEW;
   else
     return vkey;
+}
+
+void
+gdk_quartz_set_use_cocoa_invalidation (int yn)
+{
+	_gdk_quartz_use_cocoa_invalidation = yn;
+}
+
+int
+gdk_quartz_get_use_cocoa_invalidation (void)
+{
+	return _gdk_quartz_use_cocoa_invalidation;
 }

@@ -16,15 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_library_h__
-#define __libardour_library_h__
+#pragma once
 
 #include <cstdio>
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <vector>
 
-#include <boost/function.hpp>
 
 #include <ardour/libardour_visibility.h>
 #include <curl/curl.h>
@@ -67,10 +66,10 @@ class LIBARDOUR_API LibraryFetcher {
 
 	int get_descriptions ();
 	size_t n_descriptions() const { return _descriptions.size(); }
-	void foreach_description (boost::function<void (LibraryDescription)> f) const;
+	void foreach_description (std::function<void (LibraryDescription)> f) const;
 
 	bool installed (LibraryDescription const & desc);
-	void foreach_description (boost::function<void (LibraryDescription)> f);
+	void foreach_description (std::function<void (LibraryDescription)> f);
 
   private:
 	std::vector<LibraryDescription> _descriptions;
@@ -79,4 +78,3 @@ class LIBARDOUR_API LibraryFetcher {
 
 } /* namespace */
 
-#endif

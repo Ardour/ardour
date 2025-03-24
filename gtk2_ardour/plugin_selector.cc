@@ -32,14 +32,14 @@
 
 #include <algorithm>
 
-#include <gtkmm/button.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/table.h>
-#include <gtkmm/treestore.h>
+#include <ytkmm/button.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/table.h>
+#include <ytkmm/treestore.h>
 
 #include "gtkmm2ext/utils.h"
 
@@ -85,12 +85,12 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	_plugin_menu = 0;
 	in_row_change = false;
 
-	manager.PluginListChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::build_plugin_menu, this), gui_context());
-	manager.PluginStatusChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::build_plugin_menu, this), gui_context());
-	manager.PluginTagChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::build_plugin_menu, this), gui_context());
+	manager.PluginListChanged.connect (plugin_list_changed_connection, invalidator (*this), std::bind (&PluginSelector::build_plugin_menu, this), gui_context());
+	manager.PluginStatusChanged.connect (plugin_list_changed_connection, invalidator (*this), std::bind (&PluginSelector::build_plugin_menu, this), gui_context());
+	manager.PluginTagChanged.connect (plugin_list_changed_connection, invalidator (*this), std::bind (&PluginSelector::build_plugin_menu, this), gui_context());
 
-	manager.PluginStatusChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::plugin_status_changed, this, _1, _2, _3), gui_context());
-	manager.PluginTagChanged.connect(plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::tags_changed, this, _1, _2, _3), gui_context());
+	manager.PluginStatusChanged.connect (plugin_list_changed_connection, invalidator (*this), std::bind (&PluginSelector::plugin_status_changed, this, _1, _2, _3), gui_context());
+	manager.PluginTagChanged.connect(plugin_list_changed_connection, invalidator (*this), std::bind (&PluginSelector::tags_changed, this, _1, _2, _3), gui_context());
 
 	plugin_model = Gtk::ListStore::create (plugin_columns);
 	plugin_display.set_model (plugin_model);

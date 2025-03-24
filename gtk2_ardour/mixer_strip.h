@@ -30,16 +30,16 @@
 
 #include <cmath>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/button.h>
-#include <gtkmm/box.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/label.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/sizegroup.h>
-#include <gtkmm/textview.h>
-#include <gtkmm/togglebutton.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/button.h>
+#include <ytkmm/box.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/sizegroup.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/togglebutton.h>
 
 #include "pbd/stateful.h"
 
@@ -135,9 +135,9 @@ public:
 	sigc::signal<void> WidthChanged;
 
 	/** The delivery that we are handling the level for with our fader has changed */
-	PBD::Signal1<void, std::weak_ptr<ARDOUR::Delivery> > DeliveryChanged;
+	PBD::Signal<void(std::weak_ptr<ARDOUR::Delivery> )> DeliveryChanged;
 
-	static PBD::Signal1<void,MixerStrip*> CatchDeletion;
+	static PBD::Signal<void(MixerStrip*)> CatchDeletion;
 
 	std::string state_id() const;
 
@@ -192,7 +192,6 @@ private:
 	ProcessorBox processor_box;
 	GainMeter    gpm;
 	PannerUI     panners;
-	TriggerBoxWidget trigger_display;
 
 	Glib::RefPtr<Gtk::SizeGroup> button_size_group;
 
@@ -240,11 +239,6 @@ private:
 	ArdourWidgets::ArdourButton* _loudess_analysis_button;
 	std::shared_ptr<AutomationController> _volume_controller;
 
-	void trim_start_touch (int);
-	void trim_end_touch (int);
-
-	std::shared_ptr<ARDOUR::ControlGroup> _touch_control_group;
-
 	void setup_comment_button ();
 
 	void loudess_analysis_button_clicked ();
@@ -287,6 +281,7 @@ private:
 	void route_property_changed (const PBD::PropertyChange&);
 	void name_button_resized (Gtk::Allocation&);
 	void name_changed ();
+	void dpi_reset ();
 	void update_speed_display ();
 	void map_frozen ();
 	void hide_processor_editor (std::weak_ptr<ARDOUR::Processor> processor);
@@ -317,8 +312,8 @@ private:
 	 *  the RC option editor.
 	 */
 	VisibilityGroup _visibility;
-	boost::optional<bool> override_solo_visibility () const;
-	boost::optional<bool> override_rec_mon_visibility () const;
+	std::optional<bool> override_solo_visibility () const;
+	std::optional<bool> override_rec_mon_visibility () const;
 
 	PBD::ScopedConnectionList _config_connection;
 

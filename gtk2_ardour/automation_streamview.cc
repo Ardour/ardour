@@ -24,7 +24,7 @@
 #include <list>
 #include <utility>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include "gtkmm2ext/gtk_ui.h"
 
@@ -71,12 +71,11 @@ AutomationStreamView::~AutomationStreamView ()
 {
 }
 
-
 RegionView*
 AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, bool /*wait_for_data*/, bool /*recording*/)
 {
 	if (!region) {
-		return 0;
+		return nullptr;
 	}
 
 	std::shared_ptr<AutomationList> list;
@@ -89,7 +88,7 @@ AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, 
 		list = std::dynamic_pointer_cast<AutomationList>(control->list());
 		if (control->list() && !list) {
 			error << _("unable to display automation region for control without list") << endmsg;
-			return 0;
+			return nullptr;
 		}
 	}
 
@@ -107,7 +106,7 @@ AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, 
 			rv->set_valid (true);
 			display_region (arv);
 
-			return 0;
+			return nullptr;
 		}
 	}
 
@@ -125,11 +124,11 @@ AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, 
 	display_region (region_view);
 
 	/* catch regionview going away */
-	region->DropReferences.connect (*this, invalidator (*this), boost::bind (&AutomationStreamView::remove_region_view, this, std::weak_ptr<Region>(region)), gui_context());
+	region->DropReferences.connect (*this, invalidator (*this), std::bind (&AutomationStreamView::remove_region_view, this, std::weak_ptr<Region>(region)), gui_context());
 
 	/* setup automation state for this region */
 	if (_automation_view.parameter().type() != MidiVelocityAutomation) {
-		std::shared_ptr<AutomationLine> line = dynamic_cast<AutomationRegionView*>(region_view)->line ();
+		std::shared_ptr<EditorAutomationLine> line = dynamic_cast<AutomationRegionView*>(region_view)->line ();
 		if (line && line->the_list()) {
 			line->the_list()->set_automation_state (automation_state ());
 		}
@@ -156,11 +155,9 @@ AutomationStreamView::set_automation_state (AutoState state)
 	if (region_views.empty()) {
 		_pending_automation_state = state;
 	} else {
-		list<std::shared_ptr<AutomationLine> > lines = get_lines ();
-
-		for (list<std::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
-			if ((*i)->the_list()) {
-				(*i)->the_list()->set_automation_state (state);
+		for (auto & line : get_lines()) {
+			if (line->the_list()) {
+				line->the_list()->set_automation_state (state);
 			}
 		}
 	}
@@ -211,7 +208,7 @@ AutomationStreamView::automation_state () const
 		return _pending_automation_state;
 	}
 
-	std::shared_ptr<AutomationLine> line = ((AutomationRegionView*) region_views.front())->line ();
+	std::shared_ptr<EditorAutomationLine> line = ((AutomationRegionView*) region_views.front())->line ();
 	if (!line || !line->the_list()) {
 		return Off;
 	}
@@ -222,10 +219,8 @@ AutomationStreamView::automation_state () const
 bool
 AutomationStreamView::has_automation () const
 {
-	list<std::shared_ptr<AutomationLine> > lines = get_lines ();
-
-	for (list<std::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
-		if ((*i)->npoints() > 0) {
+	for (auto const & line : get_lines()) {
+		if (line->npoints() > 0) {
 			return true;
 		}
 	}
@@ -239,10 +234,8 @@ AutomationStreamView::has_automation () const
 void
 AutomationStreamView::set_interpolation (AutomationList::InterpolationStyle s)
 {
-	list<std::shared_ptr<AutomationLine> > lines = get_lines ();
-
-	for (list<std::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
-		(*i)->the_list()->set_interpolation (s);
+	for (auto & line : get_lines()) {
+		line->the_list()->set_interpolation (s);
 	}
 }
 
@@ -264,10 +257,8 @@ AutomationStreamView::interpolation () const
 void
 AutomationStreamView::clear ()
 {
-	list<std::shared_ptr<AutomationLine> > lines = get_lines ();
-
-	for (list<std::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
-		(*i)->clear ();
+	for (auto & line : get_lines()) {
+		line->clear ();
 	}
 }
 
@@ -279,7 +270,7 @@ AutomationStreamView::clear ()
  *  confusing.
  */
 void
-AutomationStreamView::get_selectables (timepos_t const & start, timepos_t const & end, double botfrac, double topfrac, list<Selectable*>& results, bool /*within*/)
+AutomationStreamView::_get_selectables (timepos_t const & start, timepos_t const & end, double botfrac, double topfrac, list<Selectable*>& results, bool /*within*/)
 {
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*i);
@@ -292,10 +283,8 @@ AutomationStreamView::get_selectables (timepos_t const & start, timepos_t const 
 void
 AutomationStreamView::set_selected_points (PointSelection& ps)
 {
-	list<std::shared_ptr<AutomationLine> > lines = get_lines ();
-
-	for (list<std::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
-		(*i)->set_selected_points (ps);
+	for (auto & line : get_lines()) {
+		line->set_selected_points (ps);
 	}
 }
 
@@ -304,8 +293,8 @@ AutomationStreamView::get_lines () const
 {
 	list<std::shared_ptr<AutomationLine> > lines;
 
-	for (list<RegionView*>::const_iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*i);
+	for (auto const & rv : region_views) {
+		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (rv);
 		if (arv) {
 			lines.push_back (arv->line());
 		}

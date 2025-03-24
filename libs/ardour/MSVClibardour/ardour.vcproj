@@ -1882,10 +1882,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\ardour\export_multiplication.h"
-				>
-			</File>
-			<File
 				RelativePath="..\ardour\export_pointers.h"
 				>
 			</File>
@@ -2350,7 +2346,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\ardour\rc_configuration_vars.h"
+				RelativePath="..\ardour\rc_configuration_vars.inc.h"
 				>
 			</File>
 			<File
@@ -2458,7 +2454,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\ardour\session_configuration_vars.h"
+				RelativePath="..\ardour\session_configuration_vars.inc.h"
 				>
 			</File>
 			<File
@@ -2543,10 +2539,6 @@
 			</File>
 			<File
 				RelativePath="..\ardour\soundcloud_upload.h"
-				>
-			</File>
-			<File
-				RelativePath="..\ardour\soundseq.h"
 				>
 			</File>
 			<File

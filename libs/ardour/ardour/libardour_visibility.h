@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_libardour_visibility_h__
-#define __libardour_libardour_visibility_h__
+#pragma once
 
 #if defined(COMPILER_MSVC)
   #define LIBARDOUR_DLL_IMPORT __declspec(dllimport)
@@ -41,4 +40,3 @@
   #define LIBARDOUR_LOCAL LIBARDOUR_DLL_LOCAL
 #endif
 
-#endif /* __libardour_libardour_visibility_h__ */

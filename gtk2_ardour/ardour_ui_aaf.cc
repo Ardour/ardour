@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2023 Robin Gareus <robin@gareus.org>
- * Copyright (C) 2023 Adrien Gesta-Fline <dev.agfline@posteo.net>
+ * Copyright (C) 2023-2024 Adrien Gesta-Fline <dev.agfline@posteo.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,9 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <fcntl.h>       // O_WRONLY
+#include <glib/gstdio.h> // g_unlink()
 
 #include "pbd/basename.h"
 #include "pbd/convert.h"
@@ -45,8 +48,43 @@ using namespace PBD;
 using namespace ARDOUR;
 
 static void
-aaf_debug_callback (struct dbg* dbg, void* ctxdata, int lib, int type, const char* srcfile, const char* srcfunc, int lineno, const char* msg, void* user)
+aaf_debug_callback (struct aafLog* log, void* ctxdata, int libid, int type, const char* srcfile, const char* srcfunc, int lineno, const char* msg, void* user)
 {
+	const char* eol = "";
+
+	if (libid != LOG_SRC_ID_TRACE && libid != LOG_SRC_ID_DUMP) {
+		switch (type) {
+			case VERB_SUCCESS:
+				PBD::info << string_compose ("[libaaf] %1:%2 in %3(): ", srcfile, lineno, srcfunc);
+				break;
+			case VERB_ERROR:
+				PBD::error << string_compose ("[libaaf] %1:%2 in %3(): ", srcfile, lineno, srcfunc);
+				break;
+			case VERB_WARNING:
+				PBD::warning << string_compose ("[libaaf] %1:%2 in %3(): ", srcfile, lineno, srcfunc);
+				break;
+				// case VERB_DEBUG:    PBD::debug   << string_compose ("[libaaf] %1:%2 in %3(): ", srcfile, lineno, srcfunc);  break;
+		}
+	}
+
+	if (libid != LOG_SRC_ID_DUMP) {
+		eol = "\n";
+	}
+
+	switch (type) {
+		case VERB_SUCCESS:
+			PBD::info << msg << eol;
+			break;
+		case VERB_ERROR:
+			PBD::error << msg << eol;
+			break;
+		case VERB_WARNING:
+			PBD::warning << msg << eol;
+			break;
+			// case VERB_DEBUG:    PBD::debug   << msg << eol;  break;
+	}
+
+	LOG_BUFFER_RESET (log);
 }
 
 static std::shared_ptr<AudioTrack>
@@ -78,15 +116,13 @@ prepare_audio_track (aafiAudioTrack* aafTrack, Session* s)
 	}
 
 	/* ..or create a new track */
-	wstring ws_track_name = std::wstring (aafTrack->name);
-	string  track_name    = string (ws_track_name.begin (), ws_track_name.end ());
 
 	uint32_t outputs = 2;
 	if (s->master_out ()) {
 		outputs = max (outputs, s->master_out ()->n_inputs ().n_audio ());
 	}
 
-	list<std::shared_ptr<AudioTrack>> at (s->new_audio_track (aafTrack->format, outputs, NULL, 1, track_name, PresentationInfo::max_order));
+	list<std::shared_ptr<AudioTrack>> at (s->new_audio_track (aafTrack->format, outputs, NULL, 1, aafTrack->name, PresentationInfo::max_order));
 
 	if (at.empty ()) {
 		PBD::fatal << "AAF: Could not create new audio track." << endmsg;
@@ -97,91 +133,106 @@ prepare_audio_track (aafiAudioTrack* aafTrack, Session* s)
 }
 
 static bool
-import_sndfile_as_region (Session* s, struct aafiAudioEssence* audioEssence, SrcQuality quality, timepos_t& pos, SourceList& sources, ImportStatus& status, vector<std::shared_ptr<Region>>& regions)
+import_sndfile_as_region (Session* s, struct aafiAudioEssencePointer* aafAudioEssencePtrList, SrcQuality quality, timepos_t& pos, SourceList** oneClipSources, ImportStatus& status, vector<std::shared_ptr<Region>>& regions)
 {
-	wstring ws (audioEssence->usable_file_path);
-	string  usable_file_path (ws.begin (), ws.end ());
+	SourceList* sources = NULL;
 
-	/* Import the source */
-	status.clear ();
+	if (aafAudioEssencePtrList->user) {
+		sources = (SourceList*)aafAudioEssencePtrList->user;
+	} else {
+		sources = new SourceList;
 
-	status.current                 = 1;
-	status.total                   = 1;
-	status.freeze                  = false;
-	status.quality                 = quality;
-	status.replace_existing_source = false;
-	status.split_midi_channels     = false;
-	status.import_markers          = false;
-	status.done                    = false;
-	status.cancel                  = false;
+		/* Import the source */
+		status.clear ();
 
-	status.paths.push_back (usable_file_path);
+		status.current                 = 1;
+		status.total                   = 1;
+		status.freeze                  = false;
+		status.quality                 = quality;
+		status.replace_existing_source = false;
+		status.split_midi_channels     = false;
+		status.import_markers          = false;
+		status.done                    = false;
+		status.cancel                  = false;
 
-	s->import_files (status);
+		int channelCount = 0;
 
-	status.progress = 1.0;
-	sources.clear ();
+		aafiAudioEssencePointer* aafAudioEssencePtr = NULL;
+		AAFI_foreachEssencePointer (aafAudioEssencePtrList, aafAudioEssencePtr)
+		{
+			if (aafAudioEssencePtr->essenceFile->usable_file_path)
+				status.paths.push_back (aafAudioEssencePtr->essenceFile->usable_file_path);
+			else
+				status.paths.push_back (aafAudioEssencePtr->essenceFile->original_file_path);
 
-	/* FIXME: There is no way to tell if cancel button was pressed
-	 * or if the file failed to import, just that one of these occurred.
-	 * We want status.cancel to reflect the user's choice only
-	 */
-	if (status.cancel && status.current > 1) {
-		/* Succeeded to import file, assume user hit cancel */
-		return false;
-	} else if (status.cancel && status.current == 1) {
-		/* Failed to import file, assume user did not hit cancel */
-		status.cancel = false;
-		return false;
+			channelCount++;
+			PBD::info << string_compose ("AAF: Preparing to import clip channel %1 of '%2'", channelCount, aafAudioEssencePtr->essenceFile->unique_name);
+		}
+
+		s->import_files (status);
+
+		status.progress = 1.0;
+		sources->clear ();
+
+		/* FIXME: There is no way to tell if cancel button was pressed
+		 * or if the file failed to import, just that one of these occurred.
+		 * We want status.cancel to reflect the user's choice only
+		 */
+		if (status.cancel && status.current > 1) {
+			/* Succeeded to import file, assume user hit cancel */
+			return false;
+		} else if (status.cancel && status.current == 1) {
+			/* Failed to import file, assume user did not hit cancel */
+			status.cancel = false;
+			return false;
+		}
+
+		for (int i = 0; i < channelCount; i++) {
+			PropertyList proplist;
+			sources->push_back (status.sources.at (i));
+
+			proplist.add (ARDOUR::Properties::start, 0);
+			proplist.add (ARDOUR::Properties::length, timecnt_t ((*sources)[0]->length (), pos));
+			proplist.add (ARDOUR::Properties::name, aafAudioEssencePtrList->essenceFile->unique_name);
+			proplist.add (ARDOUR::Properties::layer, 0);
+			proplist.add (ARDOUR::Properties::whole_file, true);
+			proplist.add (ARDOUR::Properties::external, true);
+
+			RegionFactory::create (*sources, proplist);
+		}
+
+		/* build peakfiles */
+		for (SourceList::iterator x = sources->begin (); x != sources->end (); ++x) {
+			SourceFactory::setup_peakfile (*x, true);
+		}
+
+		aafAudioEssencePtrList->user = sources;
 	}
 
-	for (int i = 0; i < audioEssence->channels; i++) {
-		sources.push_back (status.sources.at (i));
-	}
-
-	/* build peakfiles */
-	for (SourceList::iterator x = sources.begin (); x != sources.end (); ++x) {
-		SourceFactory::setup_peakfile (*x, true);
-	}
+	*oneClipSources = sources;
 
 	/* Put the source on a region */
-	std::shared_ptr<Region> region;
-	string                  region_name;
+	string region_name;
 
 	/* take all the sources we have and package them up as a region */
-	region_name = region_name_from_path (status.paths.front (), (sources.size () > 1), false);
+	region_name = region_name_from_path (status.paths.front (), (sources->size () > 1), false);
 
 	/* we checked in import_sndfiles() that there were not too many */
 	while (RegionFactory::region_by_name (region_name)) {
 		region_name = bump_name_once (region_name, '.');
 	}
 
-	ws = audioEssence->unique_file_name;
-	string unique_file_name (ws.begin (), ws.end ());
-
-	PropertyList proplist;
-
-	proplist.add (ARDOUR::Properties::start, 0);
-	proplist.add (ARDOUR::Properties::length, timecnt_t (sources[0]->length (), pos));
-	proplist.add (ARDOUR::Properties::name, unique_file_name);
-	proplist.add (ARDOUR::Properties::layer, 0);
-	proplist.add (ARDOUR::Properties::whole_file, true);
-	proplist.add (ARDOUR::Properties::external, true);
-
-	region = RegionFactory::create (sources, proplist);
-	regions.push_back (region);
 	return true;
 }
 
 static std::shared_ptr<Region>
-create_region (vector<std::shared_ptr<Region>> source_regions, aafiAudioClip* aafAudioClip, SourceList& oneClipSources, aafPosition_t clipOffset, aafRational_t samplerate_r)
+create_region (vector<std::shared_ptr<Region>> source_regions, AAF_Iface* aafi, aafiAudioClip* aafAudioClip, SourceList& oneClipSources, aafPosition_t clipOffset, aafRational_t samplerate_r)
 {
-	wstring ws = aafAudioClip->essencePointerList->essence->unique_file_name; // XXX
-	string  unique_file_name (ws.begin (), ws.end ());
+	string unique_file_name = aafAudioClip->essencePointerList->essenceFile->unique_name; // XXX
 
-	aafPosition_t clipPos       = laaf_util_converUnit (aafAudioClip->pos, aafAudioClip->track->edit_rate, &samplerate_r);
-	aafPosition_t clipLen       = laaf_util_converUnit (aafAudioClip->len, aafAudioClip->track->edit_rate, &samplerate_r);
-	aafPosition_t essenceOffset = laaf_util_converUnit (aafAudioClip->essence_offset, aafAudioClip->track->edit_rate, &samplerate_r);
+	aafPosition_t clipPos       = aafi_convertUnit (aafAudioClip->pos, aafAudioClip->track->edit_rate, &samplerate_r);
+	aafPosition_t clipLen       = aafi_getClipLength (aafi, aafAudioClip, &samplerate_r, NULL);
+	aafPosition_t essenceOffset = aafi_convertUnit (aafAudioClip->essence_offset, aafAudioClip->track->edit_rate, &samplerate_r);
 
 	PropertyList proplist;
 
@@ -223,7 +274,7 @@ set_region_gain (aafiAudioClip* aafAudioClip, std::shared_ptr<Region> region, Se
 		std::shared_ptr<AudioRegion>    ar    = std::dynamic_pointer_cast<AudioRegion> (region);
 		std::shared_ptr<AutomationList> al    = ar->envelope ();
 
-		for (int i = 0; i < level->pts_cnt; ++i) {
+		for (unsigned int i = 0; i < level->pts_cnt; ++i) {
 			al->fast_simple_add (timepos_t (aafRationalToFloat (level->time[i]) * region->length ().samples ()), aafRationalToFloat (level->value[i]));
 		}
 	}
@@ -257,9 +308,9 @@ set_region_fade (aafiAudioClip* aafAudioClip, std::shared_ptr<Region> region, aa
 		return;
 	}
 
-	aafiTransition* fadein  = aafi_get_fadein (aafAudioClip->Item);
-	aafiTransition* fadeout = aafi_get_fadeout (aafAudioClip->Item);
-	aafiTransition* xfade   = aafi_get_xfade (aafAudioClip->Item);
+	aafiTransition* fadein  = aafi_getFadeIn (aafAudioClip);
+	aafiTransition* fadeout = aafi_getFadeOut (aafAudioClip);
+	aafiTransition* xfade   = (aafAudioClip->timelineItem->prev) ? aafi_timelineItemToCrossFade (aafAudioClip->timelineItem->prev) : NULL;
 
 	if (xfade) {
 		if (fadein == NULL) {
@@ -273,15 +324,15 @@ set_region_fade (aafiAudioClip* aafAudioClip, std::shared_ptr<Region> region, aa
 	samplecnt_t fade_len;
 
 	if (fadein != NULL) {
-		fade_shape = aaf_fade_interpol_to_ardour_fade_shape ((aafiInterpolation_e) (fadein->flags & AAFI_INTERPOL_MASK));
-		fade_len   = laaf_util_converUnit (fadein->len, aafAudioClip->track->edit_rate, samplerate);
+		fade_shape = aaf_fade_interpol_to_ardour_fade_shape ((aafiInterpolation_e)(fadein->flags & AAFI_INTERPOL_MASK));
+		fade_len   = aafi_convertUnit (fadein->len, aafAudioClip->track->edit_rate, samplerate);
 
 		std::dynamic_pointer_cast<AudioRegion> (region)->set_fade_in (fade_shape, fade_len);
 	}
 
 	if (fadeout != NULL) {
-		fade_shape = aaf_fade_interpol_to_ardour_fade_shape ((aafiInterpolation_e) (fadeout->flags & AAFI_INTERPOL_MASK));
-		fade_len   = laaf_util_converUnit (fadeout->len, aafAudioClip->track->edit_rate, samplerate);
+		fade_shape = aaf_fade_interpol_to_ardour_fade_shape ((aafiInterpolation_e)(fadeout->flags & AAFI_INTERPOL_MASK));
+		fade_len   = aafi_convertUnit (fadeout->len, aafAudioClip->track->edit_rate, samplerate);
 
 		std::dynamic_pointer_cast<AudioRegion> (region)->set_fade_out (fade_shape, fade_len);
 	}
@@ -346,14 +397,14 @@ set_session_timecode (AAF_Iface* aafi, Session* s)
 			break;
 
 		default:
-			PBD::error << string_compose ("Unknown AAF timecode fps : %1.", aafFPS) << endmsg;
+			PBD::error << string_compose ("Unknown AAF timecode fps : %1 (%2/%3).", aafFPS, aafi->Timecode->edit_rate->numerator, aafi->Timecode->edit_rate->denominator) << endmsg;
 			return;
 	}
 
 	s->config.set_timecode_format (ardourtc);
 }
 
-/* Create and open Sesssion from AAF
+/* Create and open Session from AAF
  * return > 0 if file is not a [valid] AAF
  * return < 0 if session creation failed.
  * return 0 on success. path and snapshot are set.
@@ -372,21 +423,41 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 		}
 	}
 
+	/* Possible libaaf log to external file : part 1/2 */
+	// string logfile = Glib::build_filename (g_get_tmp_dir (), "aaf-import-XXXXXX.log");
+	// int logfd = g_mkstemp_full (&logfile[0], O_WRONLY, 0700);
+	//
+	// fprintf(stderr, "Logfile: %s\n",&logfile[0] );
+	//
+	// if (logfd < 0) {
+	// 	error << _("AAF: Could not prepare log file") << endmsg;
+	// 	fprintf(stderr, "AAF: Could not prepare log file\n" );
+	// 	return -1;
+	// }
+	//
+	// FILE *logfp = fdopen( logfd, "w" );
+	//
+	// if (!logfp) {
+	// 	error << _("AAF: Could not prepare log file") << endmsg;
+	// 	fprintf(stderr, "AAF: Could not prepare log file\n" );
+	// 	return -1;
+	// }
+
 	AAF_Iface* aafi = aafi_alloc (NULL);
 
-	uint32_t aaf_resolve_options  = 0;
-	uint32_t aaf_protools_options = 0;
+	if (!aafi) {
+		error << "AAF: Could not init AAF library." << endmsg;
+		return -1;
+	}
+
+	/* protools options must be set (there is no sens not setting them with Ardour) */
+	uint32_t aaf_protools_options = (AAFI_PROTOOLS_OPT_REPLACE_CLIP_FADES | AAFI_PROTOOLS_OPT_REMOVE_SAMPLE_ACCURATE_EDIT);
 
 	aafi_set_option_int (aafi, "trace", 1);
 	aafi_set_option_int (aafi, "protools", aaf_protools_options);
-	aafi_set_option_int (aafi, "resolve", aaf_resolve_options);
+	// aafi_set_option_str (aafi, "media_location", media_location_path.c_str ());
 
-	// XXX use Glib::convert_with_fallback
-	aafi->ctx.options.forbid_nonlatin_filenames = 1;
-
-	aafi_set_debug (aafi, VERB_DEBUG, 0, 0, aaf_debug_callback, this);
-
-	//aafi_set_option_str (aafi, "media_location", media_location_path.c_str ());
+	aafi_set_debug (aafi, VERB_DEBUG, 0, NULL, &aaf_debug_callback, this);
 
 	if (aafi_load_file (aafi, aaf.c_str ())) {
 		error << "AAF: Could not load AAF file." << endmsg;
@@ -394,19 +465,11 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 		return -1;
 	}
 
-	/* extract or set session name */
-	if (aafi->compositionName && aafi->compositionName[0] != 0x00) {
-		wstring ws_session_name = std::wstring (aafi->compositionName);
-		snapshot                = string (ws_session_name.begin (), ws_session_name.end ());
-	} else {
-		snapshot = basename_nosuffix (aaf);
-	}
-
-	snapshot = legalize_for_universal_path (snapshot);
+	snapshot = legalize_for_universal_path (basename_nosuffix (aaf));
 	path     = Glib::build_filename (target_dir, snapshot);
 
 	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
-		error << string_compose (_("AAF: Destination '%1' already exists."), path) << endmsg;
+		error << string_compose (_ ("AAF: Destination '%1' already exists."), path) << endmsg;
 		snapshot = ""; // XXX?
 		path     = "";
 		aafi_release (&aafi);
@@ -418,7 +481,7 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 	char*   td  = g_dir_make_tmp ("aaf-cache-XXXXXX", &err);
 
 	if (!td) {
-		error << string_compose (_("AAF: Could not prepare media cache: %1"), err->message) << endmsg;
+		error << string_compose (_ ("AAF: Could not prepare media cache: %1"), err->message) << endmsg;
 		aafi_release (&aafi);
 		return -1;
 	}
@@ -437,16 +500,16 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 	samplerate_r.denominator = 1;
 
 	std::string restore_backend;
-	if (!AudioEngine::instance()->running ()) {
-		AudioEngine* e = AudioEngine::instance();
+	if (!AudioEngine::instance ()->running ()) {
+		AudioEngine* e  = AudioEngine::instance ();
 		restore_backend = e->current_backend_name ();
 		e->set_backend ("None (Dummy)", "", "");
 		e->start ();
 		PluginManager::instance ().refresh (true);
 		attach_to_engine ();
 	}
-	if (!AudioEngine::instance()->running ()) {
-		error << _("Could not start [dummy] engine for AAF import .") << endmsg;
+	if (!AudioEngine::instance ()->running ()) {
+		PBD::error << _ ("AAF: Could not start [dummy] engine for AAF import .") << endmsg;
 		return -1;
 	}
 
@@ -456,12 +519,30 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 		aafi_release (&aafi);
 		PBD::remove_directory (media_cache_path);
 		if (!restore_backend.empty ()) {
-			AudioEngine::instance()->stop ();
-			AudioEngine::instance()->set_backend (restore_backend, "", "");
+			AudioEngine::instance ()->stop ();
+			AudioEngine::instance ()->set_backend (restore_backend, "", "");
 		}
-		error << _("Could not create new session for AAF import .") << endmsg;
+		error << _ ("AAF: Could not create new session for AAF import .") << endmsg;
 		return -1;
 	}
+
+	/* Possible libaaf log to external file : part 2/2
+	 * Moving log file from temp/ to session/
+	 */
+
+	// string newlogfile = Glib::build_filename (path, "aaf-import.log");
+	//
+	// if (!PBD::copy_file (logfile, newlogfile)) {
+	// // if (g_rename (logfile.c_str(), newlogfile.c_str()) != 0) {
+	// 	error << string_compose (_("Could not copy logfile from \"%1\" to \"%2\": %3"),
+	// 				 logfile, newlogfile, strerror (errno)) << endmsg;
+	// 	fprintf(stderr, "Could not copy logfile from \"%s\" to \"%s\": %s\n", logfile.c_str(), newlogfile.c_str(), strerror (errno) );
+	// } else {
+	// 	fprintf(stderr, "Copied logfile from \"%s\" to \"%s\"\n", logfile.c_str(), newlogfile.c_str() );
+	// 	g_unlink(logfile.c_str ());
+	// 	logfile = newlogfile;
+	// 	fprintf(stderr, "New logfile : \"%s\"\n", logfile.c_str() );
+	// }
 
 	switch (aafi->Audio->samplesize) {
 		case 16:
@@ -479,121 +560,122 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 
 	/* Import Sources */
 
-	SourceList                      oneClipSources;
+	SourceList*                     oneClipSources;
 	ARDOUR::ImportStatus            import_status;
 	vector<std::shared_ptr<Region>> source_regions;
 	timepos_t                       pos = timepos_t::max (Temporal::AudioTime);
 
-	aafiAudioEssence* audioEssence = NULL;
+	aafiAudioTrack*          aafAudioTrack      = NULL;
+	aafiTimelineItem*        aafAudioItem       = NULL;
+	aafiAudioClip*           aafAudioClip       = NULL;
+	aafiAudioEssencePointer* aafAudioEssencePtr = NULL;
 
-	for (aafiAudioEssence* audioEssence = aafi->Audio->Essences; audioEssence != NULL; audioEssence = audioEssence->next) {
-		/*  If we extract embedded essences to `s->session_directory().sound_path()` then we end up with a duplicate on import.
-		 *  So we extract essence to a cache folder
-		 */
+	aafPosition_t sessionStart = aafi_convertUnit (aafi->compositionStart, aafi->compositionStart_editRate, &samplerate_r);
 
-		if (audioEssence->is_embedded) {
-			if (media_cache_path.empty ()) {
-				error << _("Could not extract audio file from AAF: media cache was not set.") << endmsg;
-				continue;
-			}
-			if (aafi_extract_audio_essence (aafi, audioEssence, media_cache_path.c_str (), NULL) < 0) {
-				error << string_compose (_("AAF: Could not extract audio file '%1' from AAF."), audioEssence->unique_file_name) << endmsg;
-				continue;
-			}
-		} else {
-			if (!audioEssence->usable_file_path) {
-				error << string_compose (_("AAF: Could not locate external audio file: '%1'"), audioEssence->original_file_path) << endmsg;
-				continue;
-			}
-		}
-
-		if (!import_sndfile_as_region (_session, audioEssence, SrcBest, pos, oneClipSources, import_status, source_regions)) {
-			error << string_compose (_("AAF: Could not import '%1' to session."), audioEssence->unique_file_name) << endmsg;
-			continue;
-		}
-
-		audioEssence->user = new SourceList (oneClipSources);
-
-		info << string_compose ("Source file '%1' successfully imported to session.", audioEssence->unique_file_name) << endmsg;
-	}
-
-	oneClipSources.clear ();
-
-	aafPosition_t sessionStart = laaf_util_converUnit (aafi->compositionStart, aafi->compositionStart_editRate, &samplerate_r);
-
-	aafiAudioTrack*   aafAudioTrack = NULL;
-	aafiTimelineItem* aafAudioItem  = NULL;
-	aafiAudioClip*    aafAudioClip  = NULL;
-
-	foreach_audioTrack (aafAudioTrack, aafi)
+	AAFI_foreachAudioTrack (aafi, aafAudioTrack)
 	{
 		std::shared_ptr<AudioTrack> track = prepare_audio_track (aafAudioTrack, _session);
 
-		foreach_Item (aafAudioItem, aafAudioTrack)
+		AAFI_foreachTrackItem (aafAudioTrack, aafAudioItem)
 		{
-			if (aafAudioItem->type != AAFI_AUDIO_CLIP) {
+			aafAudioClip = aafi_timelineItemToAudioClip (aafAudioItem);
+
+			if (!aafAudioClip) {
 				continue;
 			}
 
-			aafAudioClip = (aafiAudioClip*)aafAudioItem->data;
-
 			if (aafAudioClip->essencePointerList == NULL) {
-				error << _("AAF: Clip has no essence.") << endmsg;
+				error << _ ("AAF: Clip has no essence.") << endmsg;
+				continue;
+			}
+
+			int   essenceError = 0;
+			char* essenceName  = NULL;
+
+			AAFI_foreachEssencePointer (aafAudioClip->essencePointerList, aafAudioEssencePtr)
+			{
+				struct aafiAudioEssenceFile* audioEssenceFile = aafAudioEssencePtr->essenceFile;
+
+				if (!audioEssenceFile) {
+					/* should not happen */
+					PBD::error << _ ("AAF: Audio essence pointer is missing an audio essence file entry") << endmsg;
+					essenceError++;
+					continue;
+				}
+
+				if (!essenceName) {
+					essenceName = aafAudioClip->essencePointerList->essenceFile->name;
+				}
+
+				if (audioEssenceFile->is_embedded) {
+					if (aafi_extractAudioEssenceFile (aafi, audioEssenceFile, AAFI_EXTRACT_DEFAULT, media_cache_path.c_str (), 0, 0, NULL, NULL) < 0) {
+						PBD::error << string_compose ("AAF: Could not extract audio file '%1' from AAF", audioEssenceFile->unique_name) << endmsg;
+						essenceError++;
+						continue;
+					}
+				} else if (!audioEssenceFile->is_embedded && !audioEssenceFile->usable_file_path) {
+					PBD::error << string_compose ("AAF: Could not locate external audio file: '%1'", audioEssenceFile->original_file_path) << endmsg;
+					essenceError++;
+					continue;
+				}
+			}
+
+			if (essenceError) {
+				PBD::error << string_compose ("AAF: Error parsing audio essence pointerlist '%1'", essenceName);
+				continue;
+			}
+
+			if (!import_sndfile_as_region (_session, aafAudioClip->essencePointerList, SrcBest, pos, &oneClipSources, import_status, source_regions)) {
+				PBD::error << string_compose ("AAF: Could not import audio file(s) '%1' to session", essenceName) << endmsg;
+				continue;
+			} else {
+				AAFI_foreachEssencePointer (aafAudioClip->essencePointerList, aafAudioEssencePtr)
+				{
+					if (aafAudioEssencePtr->essenceFile->is_embedded) {
+						g_unlink (aafAudioEssencePtr->essenceFile->usable_file_path);
+					}
+				}
+			}
+
+			if (!oneClipSources || oneClipSources->size () == 0) {
+				error << string_compose (_ ("AAF: Could not create new region for clip '%1': Region has no source"), essenceName) << endmsg;
+				continue;
+			}
+
+			std::shared_ptr<Region> region = create_region (source_regions, aafi, aafAudioClip, *oneClipSources, sessionStart, samplerate_r);
+
+			if (!region) {
+				error << string_compose (_ ("AAF: Could not create new region for clip '%1'"), essenceName) << endmsg;
 				continue;
 			}
 
 			/* converts whatever edit_rate clip is in, to samples */
-			aafPosition_t clipPos = laaf_util_converUnit (aafAudioClip->pos, aafAudioClip->track->edit_rate, &samplerate_r);
+			aafPosition_t clipPos = aafi_convertUnit (aafAudioClip->pos, aafAudioClip->track->edit_rate, &samplerate_r);
 
-			aafiAudioEssencePointer *audioEssencePtr = aafAudioClip->essencePointerList;
-
-			while (audioEssencePtr) {
-				struct aafiAudioEssence* audioEssence = audioEssencePtr->essence;
-
-				if (!audioEssence || !audioEssence->user) {
-					error << string_compose (_("AAF: Could not create new region for clip '%1': Missing audio essence"), audioEssence->unique_file_name) << endmsg;
-					continue;
-				}
-
-				SourceList* oneClipSources = static_cast<SourceList*> (audioEssence->user);
-
-				if (oneClipSources->size () == 0) {
-					error << string_compose (_("AAF: Could not create new region for clip '%1': Region has no source"), audioEssence->unique_file_name) << endmsg;
-					continue;
-				}
-
-				std::shared_ptr<Region> region = create_region (source_regions, aafAudioClip, *oneClipSources, sessionStart, samplerate_r);
-
-				if (!region) {
-					error << string_compose (_("AAF: Could not create new region for clip '%2'"), audioEssence->unique_file_name) << endmsg;
-					continue;
-				}
-
-				track->playlist ()->add_region (region, timepos_t (clipPos + sessionStart));
-				set_region_gain (aafAudioClip, region, _session);
-				set_region_fade (aafAudioClip, region, &samplerate_r);
-				if (aafAudioClip->mute) {
-					region->set_muted (true);
-				}
-
-				audioEssencePtr = audioEssencePtr->next;
+			track->playlist ()->add_region (region, timepos_t (clipPos + sessionStart));
+			set_region_gain (aafAudioClip, region, _session);
+			set_region_fade (aafAudioClip, region, &samplerate_r);
+			if (aafAudioClip->mute) {
+				region->set_muted (true);
 			}
-
 		}
 	}
 
-	for (aafiMarker* marker = aafi->Markers; marker != NULL; marker = marker->next) {
-		aafPosition_t markerStart = sessionStart + laaf_util_converUnit (marker->start, marker->edit_rate, &samplerate_r);
-		aafPosition_t markerEnd   = sessionStart + laaf_util_converUnit ((marker->start + marker->length), marker->edit_rate, &samplerate_r);
+	// oneClipSources.clear ();
 
-		wstring markerName (marker->name);
+	aafiMarker* marker = NULL;
+
+	AAFI_foreachMarker (aafi, marker)
+	{
+		aafPosition_t markerStart = sessionStart + aafi_convertUnit (marker->start, marker->edit_rate, &samplerate_r);
+		aafPosition_t markerEnd   = sessionStart + aafi_convertUnit ((marker->start + marker->length), marker->edit_rate, &samplerate_r);
 
 		Location* location;
 
 		if (marker->length == 0) {
-			location = new Location (*_session, timepos_t (markerStart), timepos_t (markerStart), string (markerName.begin (), markerName.end ()), Location::Flags (Location::IsMark));
+			location = new Location (*_session, timepos_t (markerStart), timepos_t (markerStart), marker->name, Location::Flags (Location::IsMark));
 		} else {
-			location = new Location (*_session, timepos_t (markerStart), timepos_t (markerEnd), string (markerName.begin (), markerName.end ()), Location::Flags (Location::IsRangeMarker));
+			location = new Location (*_session, timepos_t (markerStart), timepos_t (markerEnd), marker->name, Location::Flags (Location::IsRangeMarker));
 		}
 
 		_session->locations ()->add (location, true);
@@ -604,8 +686,8 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 	nominal_sample_rate.numerator   = _session->nominal_sample_rate ();
 	nominal_sample_rate.denominator = 1;
 
-	samplepos_t start = samplepos_t (laaf_util_converUnit (aafi->compositionStart, aafi->compositionStart_editRate, &nominal_sample_rate));
-	samplepos_t end   = samplepos_t (laaf_util_converUnit (aafi->compositionLength, aafi->compositionLength_editRate, &nominal_sample_rate)) + start;
+	samplepos_t start = samplepos_t (aafi_convertUnit (aafi->compositionStart, aafi->compositionStart_editRate, &nominal_sample_rate));
+	samplepos_t end   = samplepos_t (aafi_convertUnit (aafi->compositionLength, aafi->compositionLength_editRate, &nominal_sample_rate)) + start;
 	_session->maybe_update_session_range (timepos_t (start), timepos_t (end));
 
 	/* set timecode */
@@ -621,15 +703,6 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 
 	_session->save_state ("");
 
-	/* clear */
-
-	foreachEssence (audioEssence, aafi->Audio->Essences)
-	{
-		if (audioEssence && audioEssence->user) {
-			static_cast<SourceList*> (audioEssence->user)->clear ();
-		}
-	}
-
 	source_regions.clear ();
 
 	PBD::remove_directory (media_cache_path);
@@ -637,8 +710,8 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 	aafi_release (&aafi);
 
 	if (!restore_backend.empty ()) {
-		AudioEngine::instance()->stop ();
-		AudioEngine::instance()->set_backend (restore_backend, "", "");
+		AudioEngine::instance ()->stop ();
+		AudioEngine::instance ()->set_backend (restore_backend, "", "");
 	}
 	return 0;
 }

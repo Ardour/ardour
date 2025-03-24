@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_runtime_functions_h__
-#define __ardour_runtime_functions_h__
+#pragma once
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
@@ -40,4 +39,3 @@ namespace ARDOUR {
 	LIBARDOUR_API extern copy_vector_t           copy_vector;
 }
 
-#endif /* __ardour_runtime_functions_h__ */

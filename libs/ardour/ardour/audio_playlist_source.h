@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_audio_playlist_source_h__
-#define __ardour_audio_playlist_source_h__
+#pragma once
 
 #include <memory>
 #include <string>
@@ -41,7 +40,7 @@ public:
 	bool clamped_at_unity () const { return false; }
 
 	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const;
-	samplecnt_t write_unlocked (Sample *src, samplecnt_t cnt);
+	samplecnt_t write_unlocked (Sample const * src, samplecnt_t cnt);
 
 	float sample_rate () const;
 	int setup_peakfile ();
@@ -69,4 +68,3 @@ private:
 
 } /* namespace */
 
-#endif /* __ardour_audio_playlist_source_h__ */

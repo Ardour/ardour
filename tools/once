@@ -1,0 +1,7 @@
+#!/bin/sh
+
+for x in *.h ; do
+    sed -i -e 's/^#ifndef  *__[a-z_][a-z_]*_h__/#pragma once/' -e '/^#define  *__[a-z_][a-z_]*_h__/d' -e '/^#endif  *\/\* __[a-z_][a-z_]*_h__.*$/d' -e '/^#endif *\/\/  *__[a-z_][a-z_]*_h__.*$/d' $x
+done
+
+exit 0

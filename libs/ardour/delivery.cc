@@ -50,7 +50,7 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-PBD::Signal0<void>            Delivery::PannersLegal;
+PBD::Signal<void()>            Delivery::PannersLegal;
 bool                          Delivery::panners_legal = false;
 
 /* deliver to an existing IO object */
@@ -74,7 +74,7 @@ Delivery::Delivery (Session& s, std::shared_ptr<IO> io, std::shared_ptr<Pannable
 	_display_to_user = false;
 
 	if (_output) {
-		_output->changed.connect_same_thread (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
+		_output->changed.connect_same_thread (*this, std::bind (&Delivery::output_changed, this, _1, _2));
 	}
 }
 
@@ -98,7 +98,7 @@ Delivery::Delivery (Session& s, std::shared_ptr<Pannable> pannable, std::shared_
 	_display_to_user = false;
 
 	if (_output) {
-		_output->changed.connect_same_thread (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
+		_output->changed.connect_same_thread (*this, std::bind (&Delivery::output_changed, this, _1, _2));
 	}
 }
 
@@ -262,10 +262,10 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 		return;
 	}
 
-	PortSet& ports (_output->ports());
+	std::shared_ptr<PortSet> ports (_output->ports());
 	gain_t tgain;
 
-	if (ports.num_ports () == 0) {
+	if (ports->num_ports () == 0) {
 		return;
 	}
 
@@ -274,7 +274,7 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 	 */
 
 	// TODO delayline -- latency-compensation
-	output_buffers().get_backend_port_addresses (ports, nframes);
+	output_buffers().get_backend_port_addresses (*ports, nframes);
 
 	// this Delivery processor is not a derived type, and thus we assume
 	// we really can modify the buffers passed in (it is almost certainly
@@ -411,6 +411,12 @@ Delivery::state () const
 	return node;
 }
 
+bool
+Delivery::role_from_xml (const XMLNode& node, Role& role)
+{
+	return node.get_property ("role", role);
+}
+
 int
 Delivery::set_state (const XMLNode& node, int version)
 {
@@ -488,7 +494,7 @@ Delivery::reset_panner ()
 
 	} else {
 		panner_legal_c.disconnect ();
-		PannersLegal.connect_same_thread (panner_legal_c, boost::bind (&Delivery::panners_became_legal, this));
+		PannersLegal.connect_same_thread (panner_legal_c, std::bind (&Delivery::panners_became_legal, this));
 	}
 }
 
@@ -549,10 +555,8 @@ Delivery::non_realtime_transport_stop (samplepos_t now, bool flush)
 	}
 
 	if (_output) {
-		PortSet& ports (_output->ports());
-
-		for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-			i->transport_stopped ();
+		for (auto const& p : *_output->ports()) {
+			p->transport_stopped ();
 		}
 	}
 }
@@ -561,10 +565,8 @@ void
 Delivery::realtime_locate (bool for_loop_end)
 {
 	if (_output) {
-		PortSet& ports (_output->ports());
-
-		for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-			i->realtime_locate (for_loop_end);
+		for (auto const& p : *_output->ports()) {
+			p->realtime_locate (for_loop_end);
 		}
 	}
 }
@@ -595,6 +597,7 @@ Delivery::target_gain ()
 		case Listen:
 			mp = MuteMaster::Listen;
 			break;
+		case DirectOuts:
 		case Send:
 		case Insert:
 		case Aux:
@@ -662,14 +665,12 @@ Delivery::set_name (const std::string& name)
 	return ret;
 }
 
-bool ignore_output_change = false;
-
 void
 Delivery::output_changed (IOChange change, void* /*src*/)
 {
 	if (change.type & IOChange::ConfigurationChanged) {
 		reset_panner ();
-		_output_buffers->attach_buffers (_output->ports ());
+		_output_buffers->attach_buffers (*_output->ports ());
 	}
 }
 

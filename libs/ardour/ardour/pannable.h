@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_pannable_h__
-#define __libardour_pannable_h__
+#pragma once
 
 #include <memory>
 #include <string>
@@ -54,7 +53,7 @@ public:
 
 	void set_automation_state (AutoState);
 	AutoState automation_state() const { return _auto_state; }
-	PBD::Signal1<void, AutoState> automation_state_changed;
+	PBD::Signal<void(AutoState)> automation_state_changed;
 
 	bool automation_playback() const {
 		return (_auto_state & Play) || ((_auto_state & (Touch | Latch)) && !touching());
@@ -97,4 +96,3 @@ private:
 
 } // namespace
 
-#endif /* __libardour_pannable_h__ */

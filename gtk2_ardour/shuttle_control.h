@@ -20,7 +20,7 @@
 #ifndef __gtk2_ardour_shuttle_control_h__
 #define __gtk2_ardour_shuttle_control_h__
 
-#include <gtkmm/drawingarea.h>
+#include <ytkmm/drawingarea.h>
 
 #include "pbd/controllable.h"
 

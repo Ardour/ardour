@@ -25,6 +25,11 @@
 
 #include "ardour/types.h"
 
+namespace Gtk
+{
+class Window;
+} // namespace Gtk
+
 class ArdourDialog;
 class NewUserWizard;
 class EngineControl;

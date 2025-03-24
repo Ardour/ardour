@@ -26,13 +26,13 @@
 
 #include "pbd/file_utils.h"
 
-#include <gtkmm/box.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/table.h>
-#include <gtkmm/label.h>
-#include <gtkmm/button.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/comboboxtext.h>
+#include <ytkmm/box.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/table.h>
+#include <ytkmm/label.h>
+#include <ytkmm/button.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/comboboxtext.h>
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/gui_thread.h"

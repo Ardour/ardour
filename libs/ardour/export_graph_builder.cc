@@ -380,6 +380,13 @@ ExportGraphBuilder::Encoder::add_child (FileSpec const & new_config)
 	filenames.push_back (new_config.filename);
 }
 
+ExportGraphBuilder::Encoder::~Encoder ()
+{
+	if (pipe_writer) {
+		pipe_writer->flush ();
+	}
+}
+
 void
 ExportGraphBuilder::Encoder::destroy_writer (bool delete_out_file)
 {
@@ -437,7 +444,7 @@ ExportGraphBuilder::Encoder::init_writer (std::shared_ptr<AudioGrapher::SndfileW
 	writer_filename = config.filename->get_path (config.format);
 
 	writer.reset (new AudioGrapher::SndfileWriter<T> (writer_filename, format, channels, config.format->sample_rate(), config.broadcast_info));
-	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
+	writer->FileWritten.connect_same_thread (copy_files_connection, std::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
 	if ((format & SF_FORMAT_SUBMASK) == ExportFormatBase::SF_Vorbis ||
 	    (format & SF_FORMAT_TYPEMASK) == ExportFormatBase::F_MPEG ||
 	    (format & SF_FORMAT_SUBMASK) == ExportFormatBase::SF_Opus) {
@@ -557,7 +564,7 @@ ExportGraphBuilder::Encoder::init_writer (std::shared_ptr<AudioGrapher::CmdPipeW
 
 	PBD::info << "Encode command: { " << exec->to_s () << "}" << endmsg;
 	writer.reset (new AudioGrapher::CmdPipeWriter<T> (exec, writer_filename, fd, tmpfile_name));
-	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
+	writer->FileWritten.connect_same_thread (copy_files_connection, std::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
 }
 
 void
@@ -700,14 +707,14 @@ ExportGraphBuilder::SFC::sink ()
 void
 ExportGraphBuilder::SFC::add_child (FileSpec const & new_config)
 {
-	for (boost::ptr_list<Encoder>::iterator it = children.begin(); it != children.end(); ++it) {
+	for (std::list<Encoder>::iterator it = children.begin(); it != children.end(); ++it) {
 		if (*it == new_config) {
 			it->add_child (new_config);
 			return;
 		}
 	}
 
-	children.push_back (new Encoder());
+	children.push_back (Encoder());
 	Encoder & encoder = children.back();
 
 	if (data_width == 8 || data_width == 16) {
@@ -722,7 +729,7 @@ ExportGraphBuilder::SFC::add_child (FileSpec const & new_config)
 void
 ExportGraphBuilder::SFC::remove_children (bool remove_out_files)
 {
-	boost::ptr_list<Encoder>::iterator iter = children.begin ();
+	std::list<Encoder>::iterator iter = children.begin ();
 
 	while (iter != children.end() ) {
 
@@ -796,15 +803,15 @@ ExportGraphBuilder::Intermediate::Intermediate (ExportGraphBuilder & parent, Fil
 	int format = ExportFormatBase::F_RAW | ExportFormatBase::SF_Float;
 
 	if (parent._realtime) {
-		tmp_file.reset (new TmpFileRt<float> (&tmpfile_path_buf[0], format, channels, config.format->sample_rate()));
+		tmp_file.reset (new TmpFileRt<float> (tmpfile_path_buf.data (), format, channels, config.format->sample_rate()));
 	} else {
-		tmp_file.reset (new TmpFileSync<float> (&tmpfile_path_buf[0], format, channels, config.format->sample_rate()));
+		tmp_file.reset (new TmpFileSync<float> (tmpfile_path_buf.data (), format, channels, config.format->sample_rate()));
 	}
 
 	tmp_file->FileWritten.connect_same_thread (post_processing_connection,
-	                                           boost::bind (&Intermediate::prepare_post_processing, this));
+	                                           std::bind (&Intermediate::prepare_post_processing, this));
 	tmp_file->FileFlushed.connect_same_thread (post_processing_connection,
-	                                           boost::bind (&Intermediate::start_post_processing, this));
+	                                           std::bind (&Intermediate::start_post_processing, this));
 
 	add_child (new_config);
 
@@ -830,21 +837,21 @@ ExportGraphBuilder::Intermediate::add_child (FileSpec const & new_config)
 	use_peak     |= new_config.format->normalize ();
 	use_loudness |= new_config.format->normalize_loudness ();
 
-	for (boost::ptr_list<SFC>::iterator it = children.begin(); it != children.end(); ++it) {
+	for (std::list<SFC>::iterator it = children.begin(); it != children.end(); ++it) {
 		if (*it == new_config) {
 			it->add_child (new_config);
 			return;
 		}
 	}
 
-	children.push_back (new SFC (parent, new_config, max_samples_out));
+	children.push_back (SFC (parent, new_config, max_samples_out));
 	threader->add_output (children.back().sink());
 }
 
 void
 ExportGraphBuilder::Intermediate::remove_children (bool remove_out_files)
 {
-	boost::ptr_list<SFC>::iterator iter = children.begin ();
+	std::list<SFC>::iterator iter = children.begin ();
 
 	while (iter != children.end() ) {
 		iter->remove_children (remove_out_files);
@@ -875,7 +882,7 @@ ExportGraphBuilder::Intermediate::process()
 void
 ExportGraphBuilder::Intermediate::prepare_post_processing()
 {
-	for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (std::list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
 		if (use_peak) {
 			(*i).set_peak_dbfs (peak_reader->get_peak());
 		}
@@ -891,7 +898,7 @@ ExportGraphBuilder::Intermediate::prepare_post_processing()
 void
 ExportGraphBuilder::Intermediate::start_post_processing()
 {
-	for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (std::list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i).set_duration (tmp_file->get_samples_written() / config.channel_config->get_n_chans());
 	}
 

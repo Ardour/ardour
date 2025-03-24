@@ -26,10 +26,10 @@
 
 #include <sigc++/bind.h>
 
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/table.h>
+#include <ytkmm/filechooserdialog.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/table.h>
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
@@ -770,8 +770,8 @@ ExportVideoDialog::encode_video ()
 		ffs["-b:a"] = audio_bitrate_combo.get_active_text ();
 	}
 
-	_transcoder->Progress.connect (*this, invalidator (*this), boost::bind (&ExportVideoDialog::update_progress, this, _1, _2), gui_context ());
-	_transcoder->Finished.connect (*this, invalidator (*this), boost::bind (&ExportVideoDialog::finished, this, _1), gui_context ());
+	_transcoder->Progress.connect (*this, invalidator (*this), std::bind (&ExportVideoDialog::update_progress, this, _1, _2), gui_context ());
+	_transcoder->Finished.connect (*this, invalidator (*this), std::bind (&ExportVideoDialog::finished, this, _1), gui_context ());
 
 	if (!_transcoder->encode (outfn, _insnd, invid, ffs, meta, map)) {
 		ARDOUR_UI::instance ()->popup_error (_("Transcoding failed."));

@@ -23,8 +23,7 @@
  * Code assumed to be in the public domain.
  */
 
-#ifndef __libpbd__floating_h__
-#define __libpbd__floating_h__
+#pragma once
 
 #include <stdint.h>
 
@@ -76,4 +75,3 @@ static inline bool floateq (float a, float b, int max_ulps_diff)
 
 } /* namespace */
 
-#endif /* __libpbd__floating_h__ */

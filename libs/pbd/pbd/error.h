@@ -15,8 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __libpbd_error_h__
-#define __libpbd_error_h__
+#pragma once
 
 #include "pbd/libpbd_visibility.h"
 #include "transmitter.h"
@@ -29,4 +28,3 @@ namespace PBD {
 	LIBPBD_API extern Transmitter fatal;
 }
 
-#endif  // __libpbd_error_h__

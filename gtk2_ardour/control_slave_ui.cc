@@ -19,7 +19,7 @@
 
 #include <string>
 
-#include <gtkmm/menu.h>
+#include <ytkmm/menu.h>
 
 #include "pbd/string_convert.h"
 
@@ -79,10 +79,10 @@ ControlSlaveUI::set_stripable (std::shared_ptr<Stripable> s)
 
 		ac->MasterStatusChange.connect (connections,
 		                                invalidator (*this),
-		                                boost::bind (&ControlSlaveUI::update_vca_display, this),
+		                                std::bind (&ControlSlaveUI::update_vca_display, this),
 		                                gui_context());
 
-		stripable->DropReferences.connect (connections, invalidator (*this), boost::bind (&ControlSlaveUI::set_stripable, this, std::shared_ptr<Stripable>()), gui_context());
+		stripable->DropReferences.connect (connections, invalidator (*this), std::bind (&ControlSlaveUI::set_stripable, this, std::shared_ptr<Stripable>()), gui_context());
 	}
 
 	update_vca_display ();
@@ -232,7 +232,7 @@ ControlSlaveUI::add_vca_button (std::shared_ptr<VCA> vca)
 	vca_button->set_text (PBD::to_string (vca->number()));
 	vca_button->set_fixed_colors (vca->presentation_info().color(), vca->presentation_info().color ());
 
-	vca->presentation_info().PropertyChanged.connect (master_connections, invalidator (*this), boost::bind (&ControlSlaveUI::master_property_changed, this, _1), gui_context());
+	vca->presentation_info().PropertyChanged.connect (master_connections, invalidator (*this), std::bind (&ControlSlaveUI::master_property_changed, this, _1), gui_context());
 
 	pack_start (*vca_button);
 	vca_button->show ();

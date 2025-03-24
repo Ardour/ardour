@@ -18,17 +18,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_key_editor_h__
-#define __ardour_gtk_key_editor_h__
+#pragma once
 
 #include <string>
 
-#include <gtkmm/buttonbox.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/treemodelfilter.h>
-#include <gtkmm/treestore.h>
-#include <gtkmm/treeview.h>
+#include <ytkmm/action.h>
+#include <ytkmm/buttonbox.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/treemodelfilter.h>
+#include <ytkmm/treestore.h>
+#include <ytkmm/treeview.h>
 
 #include "widgets/searchbar.h"
 
@@ -136,4 +136,3 @@ private:
 	sigc::connection _refresh_connection;
 };
 
-#endif /* __ardour_gtk_key_editor_h__ */

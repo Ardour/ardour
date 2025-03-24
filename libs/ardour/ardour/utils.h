@@ -21,8 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_utils_h__
-#define __ardour_utils_h__
+#pragma once
 
 #ifdef WAF_BUILD
 #include "libardour-config.h"
@@ -31,8 +30,6 @@
 #include <iostream>
 #include <string>
 #include <cmath>
-
-#include "boost/shared_ptr.hpp"
 
 #if __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
@@ -70,6 +67,7 @@ static inline float f_max(float x, float a) {
 
 LIBARDOUR_API std::string bump_name_once(const std::string& s, char delimiter);
 LIBARDOUR_API std::string bump_name_number(const std::string& s);
+LIBARDOUR_API std::string bump_name_abc(const std::string& s);
 
 LIBARDOUR_API int cmp_nocase (const std::string& s, const std::string& s2);
 LIBARDOUR_API int cmp_nocase_utf8 (const std::string& s1, const std::string& s2);
@@ -109,6 +107,7 @@ LIBARDOUR_API const char* native_header_format_extension (ARDOUR::HeaderFormat, 
 LIBARDOUR_API bool matching_unsuffixed_filename_exists_in (const std::string& dir, const std::string& name);
 
 LIBARDOUR_API uint32_t how_many_dsp_threads ();
+LIBARDOUR_API uint32_t how_many_io_threads ();
 
 LIBARDOUR_API std::string compute_sha1_of_file (std::string path);
 
@@ -153,4 +152,3 @@ LIBARDOUR_API std::string CFStringRefToStdString(CFStringRef stringRef);
 
 } //namespave
 
-#endif /* __ardour_utils_h__ */

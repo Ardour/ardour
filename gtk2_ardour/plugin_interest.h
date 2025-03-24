@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtkardour_plugin_interest_h__
-#define __gtkardour_plugin_interest_h__
+#pragma once
 
 #include <vector>
 #include "ardour/plugin.h"
@@ -33,4 +32,3 @@ public:
 	virtual bool use_plugins (const SelectedPlugins&) = 0;
 };
 
-#endif /* __gtkardour_plugin_interest_h__ */

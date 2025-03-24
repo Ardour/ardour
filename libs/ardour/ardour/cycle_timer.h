@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_cycle_timer_h__
-#define __ardour_cycle_timer_h__
+#pragma once
 
 #include <string>
 #include <iostream>
@@ -95,4 +94,3 @@ extern StoringTimer ST;
 #define PT_TIMING_CHECK(x)
 #endif
 
-#endif /* __ardour_cycle_timer_h__ */

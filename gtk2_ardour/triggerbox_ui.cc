@@ -18,11 +18,11 @@
 
 #include <vector>
 
-#include "gtkmm/sizegroup.h"
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/stock.h>
+#include "ytkmm/sizegroup.h"
+#include <ytkmm/filechooserdialog.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
@@ -42,7 +42,6 @@
 #include "canvas/polygon.h"
 #include "canvas/text.h"
 
-#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/utils.h"
 
 #include "ardour_ui.h"
@@ -65,21 +64,23 @@ using namespace ArdourCanvas;
 using namespace Gtkmm2ext;
 using namespace PBD;
 
-TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
+TriggerEntry::TriggerEntry (Item* item, TriggerStrip& s, TriggerReference tr)
 	: ArdourCanvas::Rectangle (item)
+	, _strip (s)
 	, _grabbed (false)
 	, _drag_active (false)
+	, rec_blink_on (false)
 {
 	set_layout_sensitive (true); // why???
 
-	name = string_compose ("trigger %1", tr.slot);
+	name = string_compose ("trigger %1", tr.slot());
 
 	set_outline (false);
 
 	play_button = new ArdourCanvas::Rectangle (this);
 	play_button->set_outline (true);
 	play_button->set_fill (true);
-	play_button->name = string_compose ("playbutton %1", tr.slot);
+	play_button->name = string_compose ("playbutton %1", tref.slot());
 	play_button->show ();
 
 	follow_button = new ArdourCanvas::Rectangle (this);
@@ -103,6 +104,9 @@ TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	/* this will trigger a call to on_trigger_changed() */
 	set_trigger (tr);
 
+	trigger()->ArmChanged.connect (_rec_enable_connections, MISSING_INVALIDATOR, std::bind (&TriggerEntry::rec_enable_change, this), gui_context());
+	tref.box()->RecEnableChanged.connect (_rec_enable_connections, MISSING_INVALIDATOR, std::bind (&TriggerEntry::rec_enable_change, this), gui_context());
+
 	/* DnD Source */
 	GtkCanvas* gtkcanvas = static_cast<GtkCanvas*> (canvas ());
 	assert (gtkcanvas);
@@ -123,13 +127,54 @@ TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	set_widget_colors ();
 
 	/* owner color changes (?) */
-	dynamic_cast<Stripable*> (tref.box->owner ())->presentation_info ().Change.connect (_owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
+	dynamic_cast<Stripable*> (tref.box()->owner ())->presentation_info ().Change.connect (_owner_prop_connection, MISSING_INVALIDATOR, std::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
 
 	selection_change ();
+	rec_enable_change ();
 }
 
 TriggerEntry::~TriggerEntry ()
 {
+}
+
+void
+TriggerEntry::rec_enable_change ()
+{
+	switch (tref.box()->record_enabled()) {
+	case Recording:
+		break;
+	case Enabled:
+		if (!UIConfiguration::instance().get_no_strobe() && trigger()->armed()) {
+			rec_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &TriggerEntry::blink_rec_enable));
+		}
+		break;
+	case Disabled:
+		rec_blink_connection.disconnect ();
+		break;
+	}
+
+	set_play_button_tooltip ();
+	redraw ();
+}
+
+void
+TriggerEntry::blink_rec_enable (bool onoff)
+{
+	rec_blink_on = onoff;
+	redraw ();
+}
+
+void
+TriggerEntry::set_play_button_tooltip ()
+{
+	switch (tref.box()->record_enabled()) {
+	case Recording:
+	case Enabled:
+		play_button->set_tooltip (_("Record into this clip\nRight-click to select Launch Options for this clip"));
+		break;
+	default:
+		play_button->set_tooltip (_("Stop other clips on this track.\nRight-click to select Launch Options for this clip"));
+	}
 }
 
 void
@@ -165,10 +210,8 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 	follow_button->set (ArdourCanvas::Rect (width - height, 0, width, height));
 
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
-	_poly_margin       = 2. * scale;
-	_poly_size         = height - 2 * _poly_margin;
-
-	float font_margin = 2. * scale;
+	double _poly_margin = 2. * scale;
+	double font_margin = 2. * scale;
 
 	name_text->size_allocate (ArdourCanvas::Rect (0, 0, width, height - font_margin * 2));
 	float tleft = height;                                                 // make room for the play button
@@ -272,15 +315,50 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 
 	bool active = trigger ()->active ();
 
-	if (!trigger ()->region ()) {
-		/* no content in this slot, it is only a Stop button */
-		context->move_to (margin, margin);
-		context->rel_line_to (size, 0);
-		context->rel_line_to (0, size);
-		context->rel_line_to (-size, 0);
-		context->rel_line_to (0, -size);
-		set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
-		context->stroke ();
+	if (!trigger ()->playable ()) {
+
+		bool solid = false;
+
+		switch (tref.box()->record_enabled()) {
+		case Enabled:
+			context->arc (margin + (size * 0.75), margin + (size * 0.75), (size * 0.75), 0., 360.0 * (M_PI/180.0));
+			if (trigger()->armed()) {
+				solid = rec_blink_on;
+			} else {
+				solid = false;
+			}
+			break;
+
+		case Recording:
+			context->arc (margin + (size * 0.75), margin + (size * 0.75), (size * 0.75), 0., 360.0 * (M_PI/180.0));
+			if (trigger()->armed()) {
+				solid = true;
+			} else {
+				solid = false;
+			}
+			break;
+
+		case Disabled:
+			/* not recording and no content in this slot, it is only a Stop button */
+			context->move_to (margin, margin);
+			context->rel_line_to (size, 0);
+			context->rel_line_to (0, size);
+			context->rel_line_to (-size, 0);
+			context->rel_line_to (0, -size);
+			set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
+			context->stroke ();
+			return;
+		}
+
+		if (solid) {
+			set_source_rgba (context, UIConfiguration::instance ().color ("record enable button: fill active"));
+			context->fill ();
+		} else {
+			set_source_rgba (context, bg_color());
+			context->fill_preserve ();
+			set_source_rgba (context, UIConfiguration::instance ().color ("record enable button: fill active"));
+			context->stroke ();
+		}
 		return;
 	}
 
@@ -291,15 +369,14 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 			if (active) {
 				/* special case: now it's a square Stop button */
 				context->move_to (margin, margin);
-				context->rel_line_to (size, 0);
-				context->rel_line_to (0, size);
+				context->rel_line_to (size, 0);	
 				context->rel_line_to (-size, 0);
 				context->line_to (margin, margin);
 				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
 				context->fill ();
 				context->stroke ();
-			} else {
-				/* boxy arrow */
+			} else {				/* boxy arrow */
+				context->rel_line_to (0, size);
 				context->move_to (margin, margin);
 				context->rel_line_to (0, size);
 				context->rel_line_to (size * 1 / 3, 0);
@@ -387,6 +464,7 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 			context->stroke ();
 			break;
 		default:
+			std::cerr << "other\n";
 			break;
 	}
 
@@ -423,7 +501,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 
 	if (trigger ()->cue_isolated ()) {
 		/* left shadow */
-		context->set_identity_matrix ();
+		context->save ();
 		context->translate (self.x0, self.y0 - 0.5);
 		Cairo::RefPtr<Cairo::LinearGradient> l_shadow = Cairo::LinearGradient::create (0, 0, scale * 12, 0);
 		l_shadow->add_color_stop_rgba (0.0, 0.0, 0.0, 0.0, 0.8);
@@ -431,7 +509,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 		context->set_source (l_shadow);
 		context->rectangle (0, 0, scale * 12, height);
 		context->fill ();
-		context->set_identity_matrix ();
+		context->restore ();
 	}
 
 	if (false /*tref.slot == 1*/) {
@@ -446,20 +524,20 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 
 	/* launch icon */
 	{
-		context->set_identity_matrix ();
+		context->save ();
 		context->translate (self.x0, self.y0 - 0.5);
 		context->translate (0, 0); // left side of the widget
 		draw_launch_icon (context, height, scale);
-		context->set_identity_matrix ();
+		context->restore ();
 	}
 
 	/* follow-action icon */
-	if (trigger ()->region () && trigger ()->will_follow ()) {
-		context->set_identity_matrix ();
+	if (trigger ()->playable () && trigger ()->will_follow ()) {
+		context->save ();
 		context->translate (self.x0, self.y0 - 0.5);
 		context->translate (width - height, 0); // right side of the widget
 		draw_follow_icon (context, trigger ()->follow_action0 (), height, scale);
-		context->set_identity_matrix ();
+		context->restore ();
 	}
 }
 
@@ -467,13 +545,12 @@ void
 TriggerEntry::on_trigger_changed (PropertyChange const& change)
 {
 	if (change.contains (ARDOUR::Properties::name)) {
-		if (trigger ()->region ()) {
+		if (trigger ()->playable ()) {
 			name_text->set (short_version (trigger ()->name (), 16));
-			play_button->set_tooltip (_("Launch this clip\nRight-click to select Launch Options for this clip"));
 		} else {
 			name_text->set ("");
-			play_button->set_tooltip (_("Stop other clips on this track.\nRight-click to select Launch Options for this clip"));
 		}
+		set_play_button_tooltip ();
 	}
 
 	set_widget_colors (); //depending on the state, this might change a color and queue a redraw
@@ -494,16 +571,23 @@ TriggerEntry::on_trigger_changed (PropertyChange const& change)
 	}
 }
 
-void
-TriggerEntry::set_widget_colors (TriggerEntry::EnteredState es)
+Color
+TriggerEntry::bg_color() const
 {
-	color_t bg_col = UIConfiguration::instance ().color ("theme:bg");
+	Color bg_col = UIConfiguration::instance ().color ("theme:bg");
 
 	//alternating darker bands
-	if ((tref.slot / 2) % 2 == 0) {
+	if ((tref.slot() / 2) % 2 == 0) {
 		bg_col = HSV (bg_col).darker (0.25).color ();
 	}
 
+	return bg_col;
+}
+
+void
+TriggerEntry::set_widget_colors (TriggerEntry::EnteredState es)
+{
+	color_t bg_col = bg_color ();
 	set_fill_color (bg_col);
 
 	//child widgets highlight when entered
@@ -587,12 +671,20 @@ TriggerEntry::name_button_event (GdkEvent* ev)
 bool
 TriggerEntry::play_button_event (GdkEvent* ev)
 {
-	if (!trigger ()->region ()) {
+	if (!trigger ()->playable ()) {
 		/* empty slot; this is just a stop button */
 		switch (ev->type) {
 			case GDK_BUTTON_PRESS:
 				if (ev->button.button == 1) {
-					if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
+					if (trigger()->box().record_enabled()) {
+						/* this is a record button */
+						if (trigger()->armed()) {
+							trigger()->disarm ();
+						} else {
+							trigger()->arm ();
+						}
+						return true;
+					} else if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
 						trigger ()->box ().stop_all_immediately ();
 					} else {
 						trigger ()->box ().stop_all_quantized ();
@@ -688,7 +780,7 @@ TriggerEntry::follow_button_event (GdkEvent* ev)
 bool
 TriggerEntry::event (GdkEvent* ev)
 {
-	if (!trigger ()->region ()) {
+	if (!trigger ()->playable ()) {
 		return false;
 	}
 
@@ -770,7 +862,6 @@ TriggerEntry::drag_begin (Glib::RefPtr<Gdk::DragContext> const& context)
 		/* inverse offset, because ::render() translates coordinates itself */
 		ArdourCanvas::Rect self (item_to_window (_rect));
 		ctx->translate (-self.x0, -self.y0);
-		/* save context because ::render() calls set_identity_matrix () */
 		ctx->save ();
 		render (self, ctx);
 		ctx->restore ();
@@ -784,7 +875,7 @@ TriggerEntry::drag_begin (Glib::RefPtr<Gdk::DragContext> const& context)
 		/* ctx leaves scope, cr is destroyed, and pixmap surface is flush()ed */
 	}
 
-	std::shared_ptr<Region> region = trigger ()->region ();
+	std::shared_ptr<Region> region = trigger ()->the_region ();
 	if (region) {
 		PublicEditor::instance ().pbdid_dragged_dt = region->data_type ();
 	} else {
@@ -812,7 +903,7 @@ TriggerEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::Selecti
 		return;
 	}
 	if (data.get_target () == "x-ardour/region.pbdid") {
-		std::shared_ptr<Region> region = trigger ()->region ();
+		std::shared_ptr<Region> region = trigger ()->the_region ();
 		if (region) {
 			data.set (data.get_target (), region->id ().to_s ());
 		}
@@ -826,9 +917,10 @@ TriggerEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::Selecti
 
 Glib::RefPtr<Gtk::TargetList> TriggerBoxUI::_dnd_src;
 
-TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
+TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerStrip& s, TriggerBox& tb)
 	: Rectangle (parent)
 	, _triggerbox (tb)
+	, _strip (s)
 {
 	set_layout_sensitive (true); // why???
 
@@ -894,7 +986,7 @@ TriggerBoxUI::build ()
 		if (!t) {
 			break;
 		}
-		TriggerEntry* te = new TriggerEntry (this, TriggerReference (_triggerbox, n));
+		TriggerEntry* te = new TriggerEntry (this, _strip, TriggerReference (_triggerbox.shared_from_this(), n));
 
 		_slots.push_back (te);
 
@@ -1006,8 +1098,8 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 			Trigger::UIState *state = new Trigger::UIState();
 			source->get_ui_state(*state);
 			std::shared_ptr<Trigger::UIState> state_p (state);
-			_triggerbox.enqueue_trigger_state_for_region(source->region(), state_p);
-			_triggerbox.set_from_selection (n, source->region());
+			_triggerbox.enqueue_trigger_state_for_region(source->the_region(), state_p);
+			_triggerbox.set_from_selection (n, source->the_region());
 			context->drag_finish (true, false, time);
 		} else {
 			context->drag_finish (false, false, time);
@@ -1031,10 +1123,12 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 
 /* ********************************************** */
 
-TriggerBoxWidget::TriggerBoxWidget (float w, float h)
+TriggerBoxWidget::TriggerBoxWidget (TriggerStrip& s, float w, float h)
 	: FittedCanvasWidget (w, h)
-	, ui (0)
+	, ui (nullptr)
+	, _strip (s)
 {
+	use_intermediate_surface (false);
 	set_background_color (UIConfiguration::instance ().color (X_("theme:bg")));
 }
 
@@ -1044,13 +1138,13 @@ TriggerBoxWidget::set_triggerbox (TriggerBox* tb)
 	if (ui) {
 		root ()->remove (ui);
 		delete ui;
-		ui = 0;
+		ui = nullptr;
 	}
 
 	if (!tb) {
 		return;
 	}
 
-	ui = new TriggerBoxUI (root (), *tb);
+	ui = new TriggerBoxUI (root (), _strip, *tb);
 	repeat_size_allocation ();
 }

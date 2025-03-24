@@ -63,7 +63,7 @@ using namespace PBD;
 
 ControlProtocolManager* ControlProtocolManager::_instance = 0;
 const string ControlProtocolManager::state_node_name = X_("ControlProtocols");
-PBD::Signal1<void,StripableNotificationListPtr> ControlProtocolManager::StripableSelectionChanged;
+PBD::Signal<void(StripableNotificationListPtr)> ControlProtocolManager::StripableSelectionChanged;
 
 #ifdef HAVE_USB
 static int
@@ -185,7 +185,7 @@ ControlProtocolManager::set_session (Session* s)
 					usb_hotplug_cb, this,
 					&_hpcp)) {
 			_hotplug_thread_run = true;
-			if (pthread_create (&_hotplug_thread, NULL, usb_hotplug_thread, this)) {
+			if (pthread_create_and_store ("Ctrl USB Hotplug", &_hotplug_thread, usb_hotplug_thread, this, 0)) {
 				_hotplug_thread_run = false;
 			}
 		}
@@ -503,7 +503,7 @@ ControlProtocolManager::get_descriptor (string path)
 }
 
 void
-ControlProtocolManager::foreach_known_protocol (boost::function<void(const ControlProtocolInfo*)> method)
+ControlProtocolManager::foreach_known_protocol (std::function<void(const ControlProtocolInfo*)> method)
 {
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 		method (*i);
@@ -619,12 +619,12 @@ ControlProtocolManager::instance ()
 }
 
 void
-ControlProtocolManager::midi_connectivity_established ()
+ControlProtocolManager::midi_connectivity_established (bool yn)
 {
 	Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
 
 	for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
-		(*p)->midi_connectivity_established ();
+		(*p)->midi_connectivity_established (yn);
 	}
 }
 

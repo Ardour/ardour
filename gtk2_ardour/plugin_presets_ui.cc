@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/box.h>
-#include <gtkmm/frame.h>
+#include <ytkmm/box.h>
+#include <ytkmm/frame.h>
 
 #include "gtkmm2ext/utils.h"
 
@@ -99,11 +99,11 @@ PluginPresetsUI::PluginPresetsUI (std::shared_ptr<PluginInsert> insert)
 
 	std::shared_ptr<Plugin> plugin (_insert->plugin ());
 
-	plugin->PresetAdded.connect (_preset_connections, invalidator (*this), boost::bind (&PluginPresetsUI::update_preset_list, this), gui_context ());
-	plugin->PresetRemoved.connect (_preset_connections, invalidator (*this), boost::bind (&PluginPresetsUI::update_preset_list, this), gui_context ());
+	plugin->PresetAdded.connect (_preset_connections, invalidator (*this), std::bind (&PluginPresetsUI::update_preset_list, this), gui_context ());
+	plugin->PresetRemoved.connect (_preset_connections, invalidator (*this), std::bind (&PluginPresetsUI::update_preset_list, this), gui_context ());
 
-	plugin->PresetLoaded.connect (_preset_connections, invalidator (*this), boost::bind (&PluginPresetsUI::filter_presets, this), gui_context ());
-	plugin->PresetDirty.connect (_preset_connections, invalidator (*this), boost::bind (&PluginPresetsUI::filter_presets, this), gui_context ());
+	plugin->PresetLoaded.connect (_preset_connections, invalidator (*this), std::bind (&PluginPresetsUI::filter_presets, this), gui_context ());
+	plugin->PresetDirty.connect (_preset_connections, invalidator (*this), std::bind (&PluginPresetsUI::filter_presets, this), gui_context ());
 
 	update_preset_list ();
 }

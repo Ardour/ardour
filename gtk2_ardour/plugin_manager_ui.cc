@@ -21,8 +21,8 @@
 #endif
 
 #include <cassert>
-#include <gtkmm/frame.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/openuri.h"
 #include "pbd/unwind.h"
@@ -291,9 +291,9 @@ PluginManagerUI::PluginManagerUI ()
 
 	/* connect to signals */
 
-	PluginManager::instance ().PluginListChanged.connect (_manager_connections, invalidator (*this), boost::bind (&PluginManagerUI::refill, this), gui_context ());
-	PluginManager::instance ().PluginScanLogChanged.connect (_manager_connections, invalidator (*this), boost::bind (&PluginManagerUI::refill, this), gui_context ());
-	PluginManager::instance ().PluginStatusChanged.connect (_manager_connections, invalidator (*this), boost::bind (&PluginManagerUI::plugin_status_changed, this, _1, _2, _3), gui_context ());
+	PluginManager::instance ().PluginListChanged.connect (_manager_connections, invalidator (*this), std::bind (&PluginManagerUI::refill, this), gui_context ());
+	PluginManager::instance ().PluginScanLogChanged.connect (_manager_connections, invalidator (*this), std::bind (&PluginManagerUI::refill, this), gui_context ());
+	PluginManager::instance ().PluginStatusChanged.connect (_manager_connections, invalidator (*this), std::bind (&PluginManagerUI::plugin_status_changed, this, _1, _2, _3), gui_context ());
 
 	_btn_reindex.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::reindex));
 	_btn_discover.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::discover));

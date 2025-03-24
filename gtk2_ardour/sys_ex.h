@@ -20,23 +20,25 @@
 #ifndef __SYSEX_H__
 #define __SYSEX_H__
 
-#include "midi_region_view.h"
+#include "canvas/flag.h"
 
-namespace ArdourCanvas {
-	class Flag;
-}
+#include "ardour/midi_model.h"
+
+class MidiView;
 
 class SysEx
 {
 public:
 	SysEx (
-		MidiRegionView&             region,
+		MidiView&                   view,
 		ArdourCanvas::Container*    parent,
 		std::string&                text,
 		double                      height,
 		double                      x,
 		double                      y,
 		ARDOUR::MidiModel::SysExPtr sysex);
+
+	SysEx (SysEx const&) = delete;
 
 	~SysEx ();
 
@@ -46,12 +48,13 @@ public:
 	void set_height (ArdourCanvas::Distance h) { _flag->set_height (h); }
 
 	ArdourCanvas::Item& item() const { return *_flag; }
+	ARDOUR::MidiModel::SysExPtr sysex () const { return _sysex; }
 
 private:
 	bool event_handler (GdkEvent* ev);
-	SysEx(const SysEx& rhs){}
 	ArdourCanvas::Flag* _flag;
 	ARDOUR::MidiModel::SysExPtr _sysex;
+	MidiView&          _view;
 };
 
 #endif /* __SYSEX_H__ */

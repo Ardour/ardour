@@ -21,8 +21,8 @@
 #include <iostream>
 
 #include "pbd/gstdio_compat.h"
-#include <gtkmm/accelmap.h>
-#include <gtkmm/uimanager.h>
+#include <ytkmm/accelmap.h>
+#include <ytkmm/uimanager.h>
 
 #include "pbd/convert.h"
 #include "pbd/debug.h"
@@ -45,7 +45,7 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 
 list<Bindings*> Bindings::bindings; /* global. Gulp */
-PBD::Signal1<void,Bindings*> Bindings::BindingsChanged;
+PBD::Signal<void(Bindings*)> Bindings::BindingsChanged;
 int Bindings::_drag_active = 0;
 
 template <typename IteratorValueType>
@@ -378,6 +378,17 @@ Bindings::Bindings (std::string const& name)
 	bindings.push_back (this);
 }
 
+Bindings::Bindings (std::string const & name, Bindings const & other)
+	: _name (name)
+	, press_bindings (other.press_bindings)
+	, release_bindings (other.release_bindings)
+	, button_press_bindings (other.button_press_bindings)
+	, button_release_bindings (other.button_release_bindings)
+{
+	relativize ();
+	bindings.push_back (this);
+}
+
 Bindings::~Bindings()
 {
 	bindings.remove (this);
@@ -481,7 +492,7 @@ Bindings::activate (KeyboardKey kb, Operation op)
 
 	if (k == kbm.end()) {
 		/* no entry for this key in the state map */
-		DEBUG_TRACE (DEBUG::Bindings, string_compose ("no binding for %1 (of %2)\n", unshifted, kbm.size()));
+		DEBUG_TRACE (DEBUG::Bindings, string_compose ("no binding for %1 (of %2) within %3\n", unshifted, kbm.size(), _name));
 		return false;
 	}
 
@@ -507,14 +518,14 @@ Bindings::activate (KeyboardKey kb, Operation op)
 	if (action) {
 		/* lets do it ... */
 		if (action->get_sensitive()) {
-			DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2\n", unshifted, k->second.action_name));
+			DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2 within %3\n", unshifted, k->second.action_name, _name));
 			action->activate ();
 		} else {
-			DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2 - insensitive, skipped\n", unshifted, k->second.action_name));
+			DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2 - insensitive, skipped within %3\n", unshifted, k->second.action_name, _name));
 			return false;
 		}
 	} else {
-		DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1 is known but has no action\n", unshifted));
+		DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1 is known but has no action within %2\n", unshifted, _name));
 	}
 	/* return true even if the action could not be found */
 
@@ -522,8 +533,30 @@ Bindings::activate (KeyboardKey kb, Operation op)
 }
 
 void
+Bindings::relativize ()
+{
+	for (auto & [key,action_info] : press_bindings) {
+		action_info.action_name = _name + action_info.action_name;
+	}
+	for (auto & [key,action_info] : release_bindings) {
+		action_info.action_name = _name + action_info.action_name;
+	}
+	for (auto & [mb,action_info] : button_press_bindings) {
+		action_info.action_name = _name + action_info.action_name;
+	}
+	for (auto & [mb,action_info] : button_release_bindings) {
+		action_info.action_name = _name + action_info.action_name;
+	}
+}
+
+void
 Bindings::associate ()
 {
+#warning find a better solution than this
+	if (_name == "Editing" || _name == "MIDI") {
+		return;
+	}
+
 	KeybindingMap::iterator k;
 
 	for (k = press_bindings.begin(); k != press_bindings.end(); ++k) {
@@ -628,8 +661,8 @@ Bindings::add (KeyboardKey kb, Operation op, string const& action_name, XMLPrope
 		(void) kbm.insert (new_pair).first;
 	}
 
-	DEBUG_TRACE (DEBUG::Bindings, string_compose ("add binding between %1 (%3) and %2, group [%3]\n",
-	                                              kb, action_name, (group ? group->value() : string()), op));
+	DEBUG_TRACE (DEBUG::Bindings, string_compose ("%5: add binding between %1 (%3) and %2, group [%3]\n",
+	                                              kb, action_name, (group ? group->value() : string()), op, _name));
 
 	if (can_save) {
 		Keyboard::keybindings_changed ();
@@ -1157,3 +1190,25 @@ std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey const & k) {
 	return out << "Key " << k.key() << " (" << (gdk_name ? gdk_name : "no-key") << ") state "
 	           << hex << k.state() << dec << ' ' << show_gdk_event_state (k.state());
 }
+
+static void
+delete_binding_set (void* p)
+{
+	delete (BindingSet*) p;
+}
+
+void
+Gtkmm2ext::set_widget_bindings (Gtk::Widget& w, Bindings& b, char const * const name)
+{
+	BindingSet* bs = new BindingSet;
+	bs->push_back (&b);
+	g_object_set_data_full (G_OBJECT(w.gobj()), name, bs, (GDestroyNotify) delete_binding_set);
+}
+
+void
+Gtkmm2ext::set_widget_bindings (Gtk::Widget& w, BindingSet& bs, char const * const name)
+{
+	w.set_data (name, &bs);
+}
+
+

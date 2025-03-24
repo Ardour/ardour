@@ -33,26 +33,22 @@ def options(opt):
     pass
 
 def configure(conf):
-    if conf.is_defined('YTK'):
-        autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
-        autowaf.check_pkg(conf, 'gio-2.0', uselib_store='GIO', atleast_version='2.2', mandatory=True)
-        autowaf.check_pkg(conf, 'gobject-2.0', uselib_store='GOBJECT', mandatory=True)
-        autowaf.check_pkg(conf, 'libpng', uselib_store='LIBPNG', mandatory=True)
+    autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
+    autowaf.check_pkg(conf, 'gio-2.0', uselib_store='GIO', atleast_version='2.2', mandatory=True)
+    autowaf.check_pkg(conf, 'gobject-2.0', uselib_store='GOBJECT', mandatory=True)
+    autowaf.check_pkg(conf, 'libpng', uselib_store='LIBPNG', mandatory=True)
 
 def build(bld):
-    if not bld.is_defined('YTK'):
-        return
-
     obj = bld.shlib(features = 'c cshlib', source=libydkpixbuf_sources)
     obj.cflags          = [ bld.env['compiler_flags_dict']['pic'] ]
-    obj.export_includes = ['ydk-pixbuf']
-    obj.includes        = ['.', 'ydk-pixbuf', 'ydk-pixbuf/gdk-pixbuf']
+    obj.export_includes = ['.']
+    obj.includes        = ['.', 'ydk-pixbuf']
     obj.name            = 'libydk-pixbuf'
     obj.target          = 'ydk-pixbuf'
     obj.use             = ''
     obj.uselib          = 'GLIB GIO GOBJECT LIBPNG'
     obj.defines         = [ 'HAVE_CONFIG_H', '_LARGEFILE64_SOURCE', '_REENTRANT', 'G_LOG_DOMAIN="GdkPixbuf"', 'DGDK_PIXBUF_COMPILATION', '_FILE_OFFSET_BITS=64',
-                            'GDK_PIXBUF_ENABLE_BACKEND', 'G_DISABLE_SINGLE_INCLUDES',
+                            'GDK_PIXBUF_ENABLE_BACKEND', 'G_DISABLE_SINGLE_INCLUDES', '_POSIX_C_SOURCE=200809L',
                             'INCLUDE_png', 'INCLUDE_xbm', 'INCLUDE_xpm',
                             'PACKAGE="' + I18N_PACKAGE + '"', 'GDK_PIXBUF_LOCALEDIR=""'
 

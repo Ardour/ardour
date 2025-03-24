@@ -40,13 +40,13 @@ Maschine2::connect_signals ()
 	// TODO: use some convenience macros here
 
 	/* Signals */
-	session->TransportStateChange.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_transport_state_changed, this), this);
-	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_loop_state_changed, this), this);
-	session->RecordStateChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_record_state_changed, this), this);
-	Config->ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_parameter_changed, this, _1), this);
-	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_parameter_changed, this, _1), this);
-	session->DirtyChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_session_dirty_changed, this), this);
-	session->history().Changed.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_history_changed, this), this);
+	session->TransportStateChange.connect (session_connections, MISSING_INVALIDATOR, std::bind (&Maschine2::notify_transport_state_changed, this), this);
+	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, std::bind (&Maschine2::notify_loop_state_changed, this), this);
+	session->RecordStateChanged.connect (session_connections, MISSING_INVALIDATOR, std::bind (&Maschine2::notify_record_state_changed, this), this);
+	Config->ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, std::bind (&Maschine2::notify_parameter_changed, this, _1), this);
+	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, std::bind (&Maschine2::notify_parameter_changed, this, _1), this);
+	session->DirtyChanged.connect (session_connections, MISSING_INVALIDATOR, std::bind (&Maschine2::notify_session_dirty_changed, this), this);
+	session->history().Changed.connect (session_connections, MISSING_INVALIDATOR, std::bind (&Maschine2::notify_history_changed, this), this);
 
 	/* Actions */
 	Glib::RefPtr<Gtk::ToggleAction> tact;
@@ -65,34 +65,34 @@ Maschine2::connect_signals ()
 	ract->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_snap_change));
 
 	/* Surface events */
-	_ctrl->button (M2Contols::Play)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::button_play, this));
-	_ctrl->button (M2Contols::Rec)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::button_record, this));
-	_ctrl->button (M2Contols::Loop)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::button_loop, this));
-	_ctrl->button (M2Contols::Metronom)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::button_metronom, this));
-	_ctrl->button (M2Contols::GotoStart)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::button_rewind, this));
-	_ctrl->button (M2Contols::FastRewind)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::button_action, this, "Transport", "RewindSlow"));
-	_ctrl->button (M2Contols::FastForward)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::button_action, this, "Transport", "ForwardSlow"));
-	_ctrl->button (M2Contols::Panic)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::button_action, this, "MIDI", "panic"));
-	_ctrl->button (M2Contols::JumpForward)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::button_action, this, "Editor", "jump-forward-to-mark"));
-	_ctrl->button (M2Contols::JumpBackward)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::button_action, this, "Editor", "jump-backward-to-mark"));
+	_ctrl->button (M2Contols::Play)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_play, this));
+	_ctrl->button (M2Contols::Rec)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_record, this));
+	_ctrl->button (M2Contols::Loop)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_loop, this));
+	_ctrl->button (M2Contols::Metronom)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_metronom, this));
+	_ctrl->button (M2Contols::GotoStart)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_rewind, this));
+	_ctrl->button (M2Contols::FastRewind)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_action, this, "Transport", "RewindSlow"));
+	_ctrl->button (M2Contols::FastForward)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_action, this, "Transport", "ForwardSlow"));
+	_ctrl->button (M2Contols::Panic)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_action, this, "MIDI", "panic"));
+	_ctrl->button (M2Contols::JumpForward)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_action, this, "Editor", "jump-forward-to-mark"));
+	_ctrl->button (M2Contols::JumpBackward)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_action, this, "Editor", "jump-backward-to-mark"));
 
-	_ctrl->button (M2Contols::Grid)->pressed.connect (button_connections, invalidator (*this), boost::bind (&Maschine2::button_snap_pressed, this), gui_context());
-	_ctrl->button (M2Contols::Grid)->released.connect (button_connections, invalidator (*this), boost::bind (&Maschine2::button_snap_released, this), gui_context());
-	_ctrl->button (M2Contols::Grid)->changed.connect (button_connections, invalidator (*this), boost::bind (&Maschine2::button_snap_changed, this, _1), gui_context());
+	_ctrl->button (M2Contols::Grid)->pressed.connect (button_connections, invalidator (*this), std::bind (&Maschine2::button_snap_pressed, this), gui_context());
+	_ctrl->button (M2Contols::Grid)->released.connect (button_connections, invalidator (*this), std::bind (&Maschine2::button_snap_released, this), gui_context());
+	_ctrl->button (M2Contols::Grid)->changed.connect (button_connections, invalidator (*this), std::bind (&Maschine2::button_snap_changed, this, _1), gui_context());
 
-	_ctrl->button (M2Contols::Save)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::button_action, this, "Common", "Save"));
-	_ctrl->button (M2Contols::Undo)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::button_action, this, "Editor", "undo"));
-	_ctrl->button (M2Contols::Redo)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::button_action, this, "Editor", "redo"));
+	_ctrl->button (M2Contols::Save)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_action, this, "Common", "Save"));
+	_ctrl->button (M2Contols::Undo)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_action, this, "Editor", "undo"));
+	_ctrl->button (M2Contols::Redo)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_action, this, "Editor", "redo"));
 
-	_ctrl->button (M2Contols::MasterVolume)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::handle_master_change, this, MST_VOLUME));
-	_ctrl->button (M2Contols::MasterTempo)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::handle_master_change, this, MST_TEMPO));
+	_ctrl->button (M2Contols::MasterVolume)->released.connect_same_thread (button_connections, std::bind (&Maschine2::handle_master_change, this, MST_VOLUME));
+	_ctrl->button (M2Contols::MasterTempo)->released.connect_same_thread (button_connections, std::bind (&Maschine2::handle_master_change, this, MST_TEMPO));
 
-	_ctrl->button (M2Contols::EncoderWheel)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::button_encoder, this));
-	_ctrl->encoder (0)->changed.connect_same_thread (button_connections, boost::bind (&Maschine2::encoder_master, this, _1));
+	_ctrl->button (M2Contols::EncoderWheel)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_encoder, this));
+	_ctrl->encoder (0)->changed.connect_same_thread (button_connections, std::bind (&Maschine2::encoder_master, this, _1));
 
 	for (unsigned int pad = 0; pad < 16; ++pad) {
-		_ctrl->pad (pad)->event.connect_same_thread (button_connections, boost::bind (&Maschine2::pad_event, this, pad, _1, _2));
-		_ctrl->pad (pad)->changed.connect_same_thread (button_connections, boost::bind (&Maschine2::pad_change, this, pad, _1));
+		_ctrl->pad (pad)->event.connect_same_thread (button_connections, std::bind (&Maschine2::pad_event, this, pad, _1, _2));
+		_ctrl->pad (pad)->changed.connect_same_thread (button_connections, std::bind (&Maschine2::pad_change, this, pad, _1));
 	}
 
 	/* set initial values */
@@ -109,15 +109,15 @@ void
 Maschine2::notify_record_state_changed ()
 {
 	switch (session->record_status ()) {
-		case Session::Disabled:
+		case Disabled:
 			_ctrl->button (M2Contols::Rec)->set_color (0);
 			_ctrl->button (M2Contols::Rec)->set_blinking (false);
 			break;
-		case Session::Enabled:
+		case Enabled:
 			_ctrl->button (M2Contols::Rec)->set_color (COLOR_WHITE);
 			_ctrl->button (M2Contols::Rec)->set_blinking (true);
 			break;
-		case Session::Recording:
+		case Recording:
 			_ctrl->button (M2Contols::Rec)->set_color (COLOR_WHITE);
 			_ctrl->button (M2Contols::Rec)->set_blinking (false);
 			break;
@@ -348,9 +348,9 @@ Maschine2::encoder_master (int delta)
 		case MST_NONE:
 			if (_ctrl->button (M2Contols::BtnShift, M2Contols::ModNone)->active ()) {
 				if (delta > 0) {
-					AccessAction ("Editor", "temporal-zoom-in");
+					AccessAction ("Editing", "temporal-zoom-in");
 				} else {
-					AccessAction ("Editor", "temporal-zoom-out");
+					AccessAction ("Editing", "temporal-zoom-out");
 				}
 			} else {
 				if (delta > 0) {

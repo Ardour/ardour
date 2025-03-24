@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_stateful_destructible_h__
-#define __pbd_stateful_destructible_h__
+#pragma once
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/stateful.h"
@@ -26,10 +25,9 @@
 namespace PBD {
 
 /** Base class for objects with saveable and undoable state with destruction notification */
-class LIBPBD_API StatefulDestructible : public Stateful, virtual public Destructible
+class LIBPBD_API StatefulDestructible : virtual public Stateful, virtual public Destructible
 {
 };
 
 }
 
-#endif /* __pbd_stateful_destructible_h__ */

@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardouralsautil_deviceinfo_h__
-#define __libardouralsautil_deviceinfo_h__
+#pragma once
 
 namespace ARDOUR {
 
@@ -31,4 +30,3 @@ namespace ARDOUR {
 
 	int get_alsa_device_parameters (const char* device_name, const bool play, ALSADeviceInfo *nfo);
 }
-#endif

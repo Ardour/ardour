@@ -19,7 +19,7 @@
 #include <bitset>
 #include <map>
 
-#include <gtkmm/frame.h>
+#include <ytkmm/frame.h>
 
 #include "pbd/unwind.h"
 
@@ -290,8 +290,8 @@ PatchChangeTab::reset (std::shared_ptr<ARDOUR::Route> r, std::shared_ptr<MIDITri
 		_enable_btn.set_active (false);
 	}
 
-	_route->instrument_info().Changed.connect (_connections, invalidator (*this), boost::bind (&PatchChangeTab::instrument_info_changed, this), gui_context ());
-	_trigger->PropertyChanged.connect (_connections, invalidator (*this), boost::bind (&PatchChangeTab::trigger_property_changed, this, _1), gui_context ());
+	_route->instrument_info().Changed.connect (_connections, invalidator (*this), std::bind (&PatchChangeTab::instrument_info_changed, this), gui_context ());
+	_trigger->PropertyChanged.connect (_connections, invalidator (*this), std::bind (&PatchChangeTab::trigger_property_changed, this, _1), gui_context ());
 
 	refill_banks ();
 }
@@ -469,11 +469,11 @@ PatchChangeWidget::PatchChangeWidget (std::shared_ptr<ARDOUR::Route> r)
 	if (!std::dynamic_pointer_cast<MidiTrack> (_route)) {
 		processors_changed ();
 		_route->processors_changed.connect (_route_connections, invalidator (*this),
-		                                    boost::bind (&PatchChangeWidget::processors_changed, this), gui_context ());
+		                                    std::bind (&PatchChangeWidget::processors_changed, this), gui_context ());
 	}
 
 	_info.Changed.connect (_route_connections, invalidator (*this),
-	                       boost::bind (&PatchChangeWidget::instrument_info_changed, this), gui_context ());
+	                       std::bind (&PatchChangeWidget::instrument_info_changed, this), gui_context ());
 }
 
 PatchChangeWidget::~PatchChangeWidget ()
@@ -528,18 +528,18 @@ PatchChangeWidget::select_channel (uint8_t chn)
 	std::shared_ptr<PluginInsert> pi;
 	if ((pi = std::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ())) && pi->plugin ()->knows_bank_patch ()) {
 		pi->plugin ()->BankPatchChange.connect (_ac_connections, invalidator (*this),
-		                                        boost::bind (&PatchChangeWidget::bankpatch_changed, this, _1), gui_context ());
+		                                        std::bind (&PatchChangeWidget::bankpatch_changed, this, _1), gui_context ());
 	} else if (std::dynamic_pointer_cast<MidiTrack> (_route)) {
 		std::shared_ptr<AutomationControl> bank_msb = _route->automation_control (Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_MSB_BANK), true);
 		std::shared_ptr<AutomationControl> bank_lsb = _route->automation_control (Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_LSB_BANK), true);
 		std::shared_ptr<AutomationControl> program  = _route->automation_control (Evoral::Parameter (MidiPgmChangeAutomation, chn), true);
 
 		bank_msb->Changed.connect (_ac_connections, invalidator (*this),
-		                           boost::bind (&PatchChangeWidget::bank_changed, this), gui_context ());
+		                           std::bind (&PatchChangeWidget::bank_changed, this), gui_context ());
 		bank_lsb->Changed.connect (_ac_connections, invalidator (*this),
-		                           boost::bind (&PatchChangeWidget::bank_changed, this), gui_context ());
+		                           std::bind (&PatchChangeWidget::bank_changed, this), gui_context ());
 		program->Changed.connect (_ac_connections, invalidator (*this),
-		                          boost::bind (&PatchChangeWidget::program_changed, this), gui_context ());
+		                          std::bind (&PatchChangeWidget::program_changed, this), gui_context ());
 	} else {
 		_no_notifications = true;
 	}
@@ -850,7 +850,7 @@ PatchChangeTriggerWindow::reset (std::shared_ptr<Route> r, std::shared_ptr<MIDIT
 
 	set_title (string_compose (_("Select Patch for \"%1\" - \"%2\""), r->name (), t->name ()));
 
-	r->DropReferences.connect (_route_connection, invalidator(*this), boost::bind (&PatchChangeTriggerWindow::clear, this), gui_context());
+	r->DropReferences.connect (_route_connection, invalidator(*this), std::bind (&PatchChangeTriggerWindow::clear, this), gui_context());
 
 	/* only show tabs for the chans that this region uses */
 	Evoral::SMF::UsedChannels used = t->used_channels();
@@ -885,7 +885,7 @@ PatchChangeGridDialog::PatchChangeGridDialog (std::shared_ptr<ARDOUR::Route> r)
 	: ArdourDialog (string_compose (_("Select Patch for \"%1\""), r->name ()), false, false)
 	, w (r)
 {
-	r->PropertyChanged.connect (_route_connection, invalidator (*this), boost::bind (&PatchChangeGridDialog::route_property_changed, this, _1, std::weak_ptr<Route> (r)), gui_context ());
+	r->PropertyChanged.connect (_route_connection, invalidator (*this), std::bind (&PatchChangeGridDialog::route_property_changed, this, _1, std::weak_ptr<Route> (r)), gui_context ());
 	get_vbox ()->add (w);
 	w.show ();
 }

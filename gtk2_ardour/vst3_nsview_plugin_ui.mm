@@ -20,9 +20,9 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#include <gtkmm.h>
-#include <gtk/gtk.h>
-#include <gdk/gdkquartz.h>
+#include <ytkmm/ytkmm.h>
+#include <ytk/ytk.h>
+#include <ydk/gdkquartz.h>
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
@@ -65,7 +65,7 @@ VST3NSViewPluginUI::VST3NSViewPluginUI (std::shared_ptr<PlugInsertBase> pib, std
 	_gui_widget.signal_unmap ().connect (mem_fun (this, &VST3NSViewPluginUI::view_unmap));
 	_gui_widget.signal_scroll_event ().connect (sigc::mem_fun (*this, &VST3NSViewPluginUI::forward_scroll_event), false);
 
-	//vst->LoadPresetProgram.connect (_program_connection, invalidator (*this), boost::bind (&VST3NSViewPluginUI::set_program, this), gui_context());
+	//vst->LoadPresetProgram.connect (_program_connection, invalidator (*this), std::bind (&VST3NSViewPluginUI::set_program, this), gui_context());
 
 	_ns_view = [[NSView new] retain];
 

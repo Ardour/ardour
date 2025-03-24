@@ -503,7 +503,7 @@ gtk_ui_manager_buildable_construct_child (GtkBuildable *buildable,
   g_signal_connect (widget, "hierarchy-changed",
 		    G_CALLBACK (child_hierarchy_changed_cb),
 		    GTK_UI_MANAGER (buildable));
-  return g_object_ref (widget);
+  return G_OBJECT (g_object_ref (widget));
 }
 
 static void

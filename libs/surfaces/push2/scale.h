@@ -22,9 +22,11 @@
 #include <vector>
 
 #include "layout.h"
+#include "push2.h"
 
 namespace ArdourCanvas {
 	class Rectangle;
+	class Text;
 }
 
 namespace ArdourSurface {

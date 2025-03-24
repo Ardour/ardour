@@ -93,4 +93,5 @@ TempoMapCutBufferTest::pasteTest()
 	CPPUNIT_ASSERT_EQUAL (omt, nmt);
 
 	delete new_map;
+	tmap->abort_update ();
 }

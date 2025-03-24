@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libmisc_transmitter_h__
-#define __libmisc_transmitter_h__
+#pragma once
 
 #include <sstream>
 #include <iostream>
@@ -41,7 +40,7 @@ class LIBPBD_API Transmitter : public std::stringstream
 
 	Transmitter (Channel);
 
-	PBD::Signal2<void,Channel, const char *> &sender() {
+	PBD::Signal<void(Channel, const char *)> &sender() {
 		return *send;
 	}
 
@@ -53,13 +52,13 @@ class LIBPBD_API Transmitter : public std::stringstream
 
   private:
 	Channel channel;
-	PBD::Signal2<void, Channel, const char *> *send;
+	PBD::Signal<void(Channel, const char *)> *send;
 
-	PBD::Signal2<void, Channel, const char *> debug;
-	PBD::Signal2<void, Channel, const char *> info;
-	PBD::Signal2<void, Channel, const char *> warning;
-	PBD::Signal2<void, Channel, const char *> error;
-	PBD::Signal2<void, Channel, const char *> fatal;
+	PBD::Signal<void(Channel, const char *)> debug;
+	PBD::Signal<void(Channel, const char *)> info;
+	PBD::Signal<void(Channel, const char *)> warning;
+	PBD::Signal<void(Channel, const char *)> error;
+	PBD::Signal<void(Channel, const char *)> fatal;
 };
 
 /* for EGCS 2.91.66, if this function is not compiled within the same
@@ -105,4 +104,3 @@ endmsg (std::ostream &ostr)
 
 extern "C" { LIBPBD_API void pbd_c_error (const char *); }
 
-#endif // __libmisc_transmitter_h__

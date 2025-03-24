@@ -35,10 +35,10 @@
 #define _WIN32_WINNT WINVER
 #endif
 
-#include <gdk/gdkprivate.h>
-#include <gdk/gdkwindow-win32.h>
-#include <gdk/gdkpixmap-win32.h>
-#include <gdk/gdkwin32keys.h>
+#include <ydk/gdkprivate.h>
+#include <ydk/gdkwindow-win32.h>
+#include <ydk/gdkpixmap-win32.h>
+#include <ydk/gdkwin32keys.h>
 
 #include "gdkinternals.h"
 

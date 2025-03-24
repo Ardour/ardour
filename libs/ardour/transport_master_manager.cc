@@ -115,7 +115,7 @@ TransportMasterManager::set_session (Session* s)
 	}
 
 	if (_session) {
-		_session->config.ParameterChanged.connect_same_thread (config_connection, boost::bind (&TransportMasterManager::parameter_changed, this, _1));
+		_session->config.ParameterChanged.connect_same_thread (config_connection, std::bind (&TransportMasterManager::parameter_changed, this, _1));
 	}
 
 }
@@ -160,7 +160,7 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 		return 1.0;
 	}
 
-	boost::optional<samplepos_t> session_pos;
+	std::optional<samplepos_t> session_pos;
 
 	if (_session) {
 		session_pos = _session->audible_sample();

@@ -39,6 +39,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/simple_export.h"
 #include "ardour/source_factory.h"
+#include "ardour/uri_map.h"
 
 #include "LuaBridge/LuaBridge.h"
 
@@ -281,6 +282,97 @@ ARDOUR::LuaAPI::get_plugin_insert_param (std::shared_ptr<PluginInsert> pi, uint3
 }
 
 bool
+ARDOUR::LuaAPI::set_plugin_insert_property (std::shared_ptr<PluginInsert> pi, std::string const& uri, luabridge::LuaRef value)
+{
+	std::shared_ptr<Plugin> plugin = pi->plugin ();
+	if (!plugin) { return false; }
+	uint32_t key = URIMap::instance ().uri_to_id (uri.c_str ());
+	const ParameterDescriptor& desc = plugin->get_property_descriptor (key);
+	switch (desc.datatype) {
+		case Variant::PATH:
+			plugin->set_property(desc.key, Variant(Variant::PATH, value.cast<string> ()));
+			return true;
+		case Variant::STRING:
+			plugin->set_property(desc.key, Variant(Variant::STRING, value.cast<string> ()));
+			return true;
+		case Variant::URI:
+			plugin->set_property(desc.key, Variant(Variant::URI, value.cast<string> ()));
+			return true;
+		case Variant::BOOL:
+			plugin->set_property(desc.key, Variant(Variant::BOOL, value.cast<bool> ()));
+			return true;
+		case Variant::DOUBLE:
+			plugin->set_property(desc.key, Variant(Variant::DOUBLE, value.cast<double> ()));
+			return true;
+		case Variant::FLOAT:
+			plugin->set_property(desc.key, Variant(Variant::FLOAT, value.cast<float> ()));
+			return true;
+		case Variant::INT:
+			plugin->set_property(desc.key, Variant(Variant::INT, value.cast<int> ()));
+			return true;
+		case Variant::LONG:
+			plugin->set_property(desc.key, Variant(Variant::LONG, value.cast<long> ()));
+			return true;
+		default:
+			printf ("NO VARIANT\n");
+			break;
+	}
+	return false;
+}
+
+int
+ARDOUR::LuaAPI::get_plugin_insert_property (lua_State* L)
+{
+	typedef std::shared_ptr<PluginInsert> T;
+	int top = lua_gettop (L);
+	if (top < 2) {
+		return luaL_argerror (L, 1, "invalid number of arguments, :get_plugin_insert_property (plugin, uri)");
+	}
+
+	T* const    pi  = luabridge::Userdata::get<T> (L, 1, false);
+	std::string uri = luabridge::Stack<std::string>::get (L, 2);
+	if (!pi) {
+		return luaL_error (L, "Invalid pointer to Ardour:PluginInsert");
+	}
+
+	std::shared_ptr<Plugin> plugin = (*pi)->plugin ();
+	if (!plugin) { return 0; }
+	uint32_t key = URIMap::instance ().uri_to_id (uri.c_str ());
+	plugin->announce_property_values ();
+	wait_for_process_callback (1, 0);
+	Variant v = plugin->get_property_value (key);
+	switch (v.type ()) {
+		case Variant::PATH:
+			luabridge::Stack<std::string>::push (L, v.get_path ());
+			return 1;
+		case Variant::STRING:
+			luabridge::Stack<std::string>::push (L, v.get_string ());
+			return 1;
+		case Variant::URI:
+			luabridge::Stack<std::string>::push (L, v.get_uri ());
+			return 1;
+		case Variant::BOOL:
+			luabridge::Stack<bool>::push (L, v.get_bool ());
+			return 1;
+		case Variant::DOUBLE:
+			luabridge::Stack<double>::push (L, v.get_double ());
+			return 1;
+		case Variant::FLOAT:
+			luabridge::Stack<float>::push (L, v.get_float ());
+			return 1;
+		case Variant::INT:
+			luabridge::Stack<int>::push (L, v.get_int ());
+			return 1;
+		case Variant::LONG:
+			luabridge::Stack<long>::push (L, v.get_long ());
+			return 1;
+		default:
+			break;
+	}
+	return 0;
+}
+
+bool
 ARDOUR::LuaAPI::set_processor_param (std::shared_ptr<Processor> proc, uint32_t which, float val)
 {
 	std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (proc);
@@ -351,6 +443,36 @@ ARDOUR::LuaAPI::plugin_automation (lua_State *L)
 	luabridge::Stack<std::shared_ptr<Evoral::ControlList> >::push (L, c->list ());
 	luabridge::Stack<ParameterDescriptor>::push (L, pd);
 	return 3;
+}
+
+bool
+ARDOUR::LuaAPI::set_automation_data (std::shared_ptr<AutomationControl> ac, luabridge::LuaRef tbl, double thin)
+{
+	if (!tbl.isTable () || !ac) {
+		return false;
+	}
+
+	std::shared_ptr<ARDOUR::AutomationList> alist = ac->alist ();
+	ParameterDescriptor const& desc = ac->desc ();
+
+	alist->freeze ();
+	alist->clear ();
+	for (luabridge::Iterator i (tbl); !i.isNil (); ++i) {
+		if (!i.key ().isNumber () || !i.value ().isNumber ()) {
+			continue;
+		}
+		samplecnt_t tme = i.key ().cast<int> ();
+		double      val = i.value ().cast<double> ();
+		val = std::min<double> (desc.upper, std::max<double> (desc.lower, val));
+		alist->fast_simple_add (timepos_t (tme), val);
+	}
+	alist->thaw ();
+	if (thin < 0) {
+		alist->thin (Config->get_automation_thinning_factor ());
+	} else {
+		alist->thin (thin);
+	}
+	return true;
 }
 
 int
@@ -525,7 +647,7 @@ ARDOUR::LuaAPI::wait_for_process_callback (size_t n_cycles, int64_t timeout_ms)
 	size_t cnt = 0;
 	ScopedConnection c;
 
-	InternalSend::CycleStart.connect_same_thread (c, boost::bind (&proc_cycle_start, &cnt));
+	InternalSend::CycleStart.connect_same_thread (c, std::bind (&proc_cycle_start, &cnt));
 	while (cnt <= n_cycles) {
 		Glib::usleep (1000);
 		if (timeout_ms > 0) {
@@ -1036,6 +1158,32 @@ LuaAPI::note_list (std::shared_ptr<MidiModel> mm)
 	return note_ptr_list;
 }
 
+std::list<std::shared_ptr<Evoral::Event<Temporal::Beats> > >
+LuaAPI::sysex_list (std::shared_ptr<MidiModel> mm)
+{
+	typedef std::shared_ptr<Evoral::Event<Temporal::Beats> > SysExPtr;
+
+	std::list<SysExPtr> event_ptr_list;
+
+	for (auto const& i : mm->sysexes ()) {
+		event_ptr_list.push_back (i);
+	}
+	return event_ptr_list;
+}
+
+std::list<std::shared_ptr<Evoral::PatchChange<Temporal::Beats> > >
+LuaAPI::patch_change_list (std::shared_ptr<MidiModel> mm)
+{
+	typedef std::shared_ptr<Evoral::PatchChange<Temporal::Beats> > PatchChangePtr;
+
+	std::list<PatchChangePtr> patch_change_ptr_list;
+
+	for (auto const& i : mm->patch_changes ()) {
+		patch_change_ptr_list.push_back (i);
+	}
+	return patch_change_ptr_list;
+}
+
 /* ****************************************************************************/
 
 const samplecnt_t LuaAPI::Rubberband::_bufsize = 256;
@@ -1085,7 +1233,7 @@ LuaAPI::Rubberband::set_mapping (luabridge::LuaRef tbl)
 		}
 		size_t ss = i.key ().cast<double> ();
 		size_t ds = i.value ().cast<double> ();
-		printf ("ADD %ld %ld\n", ss, ds);
+		//printf ("ADD %ld %ld\n", ss, ds);
 		_mapping[ss] = ds;
 	}
 	return !_mapping.empty ();
@@ -1094,7 +1242,7 @@ LuaAPI::Rubberband::set_mapping (luabridge::LuaRef tbl)
 samplecnt_t
 LuaAPI::Rubberband::read (Sample* buf, samplepos_t pos, samplecnt_t cnt, int channel) const
 {
-	return _region->master_read_at (buf, NULL, NULL, _read_offset + pos, cnt, channel);
+	return _region->master_read_at (buf, _read_offset + pos, cnt, channel);
 }
 
 static void null_deleter (LuaAPI::Rubberband*) {}

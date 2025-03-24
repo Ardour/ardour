@@ -23,7 +23,7 @@
 #include <memory>
 #include <set>
 
-#include <gtkmm/treemodel.h>
+#include <ytkmm/treemodel.h>
 
 namespace ARDOUR {
 	class Session;

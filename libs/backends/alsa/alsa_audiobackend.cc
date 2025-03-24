@@ -24,7 +24,6 @@
 
 #include <glibmm.h>
 
-#include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 
 #include "alsa_audiobackend.h"
@@ -71,8 +70,6 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _samplerate (48000)
 	, _samples_per_period (1024)
 	, _periods_per_cycle (2)
-	, _n_inputs (0)
-	, _n_outputs (0)
 	, _systemic_audio_input_latency (0)
 	, _systemic_audio_output_latency (0)
 	, _midi_device_thread_active (false)
@@ -258,30 +255,6 @@ AlsaAudioBackend::available_buffer_sizes (const std::string& device) const
 	return bs;
 }
 
-uint32_t
-AlsaAudioBackend::available_input_channel_count (const std::string& device) const
-{
-	if (device == get_standard_device_name (DeviceNone)) {
-		return 0;
-	}
-	if (device == _input_audio_device && _input_audio_device_info.valid) {
-		return _input_audio_device_info.max_channels;
-	}
-	return 128;
-}
-
-uint32_t
-AlsaAudioBackend::available_output_channel_count (const std::string& device) const
-{
-	if (device == get_standard_device_name (DeviceNone)) {
-		return 0;
-	}
-	if (device == _output_audio_device && _output_audio_device_info.valid) {
-		return _output_audio_device_info.max_channels;
-	}
-	return 128;
-}
-
 std::vector<uint32_t>
 AlsaAudioBackend::available_period_sizes (const std::string& driver, const std::string& device) const
 {
@@ -447,20 +420,6 @@ AlsaAudioBackend::set_interleaved (bool yn)
 }
 
 int
-AlsaAudioBackend::set_input_channels (uint32_t cc)
-{
-	_n_inputs = cc;
-	return 0;
-}
-
-int
-AlsaAudioBackend::set_output_channels (uint32_t cc)
-{
-	_n_outputs = cc;
-	return 0;
-}
-
-int
 AlsaAudioBackend::set_systemic_input_latency (uint32_t sl)
 {
 	if (_systemic_audio_input_latency == sl) {
@@ -608,18 +567,6 @@ bool
 AlsaAudioBackend::interleaved () const
 {
 	return false;
-}
-
-uint32_t
-AlsaAudioBackend::input_channels () const
-{
-	return _n_inputs;
-}
-
-uint32_t
-AlsaAudioBackend::output_channels () const
-{
-	return _n_outputs;
 }
 
 uint32_t
@@ -969,24 +916,6 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	}
 #endif
 
-	if (_n_outputs != _pcmi->nplay ()) {
-		if (_n_outputs == 0) {
-			_n_outputs = _pcmi->nplay ();
-		} else {
-			_n_outputs = std::min (_n_outputs, _pcmi->nplay ());
-		}
-		PBD::info << _("AlsaAudioBackend: adjusted output channel count to match device.") << endmsg;
-	}
-
-	if (_n_inputs != _pcmi->ncapt ()) {
-		if (_n_inputs == 0) {
-			_n_inputs = _pcmi->ncapt ();
-		} else {
-			_n_inputs = std::min (_n_inputs, _pcmi->ncapt ());
-		}
-		PBD::info << _("AlsaAudioBackend: adjusted input channel count to match device.") << endmsg;
-	}
-
 	if (_pcmi->fsize () != _samples_per_period) {
 		_samples_per_period = _pcmi->fsize ();
 		PBD::warning << string_compose (_("AlsaAudioBackend: samples per period does not match, using %1."), _samples_per_period) << endmsg;
@@ -1022,7 +951,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	_run = true;
 	_port_change_flag.store (0);
 
-	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_PROC,
+	if (pbd_realtime_pthread_create ("ALSA Main", PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_PROC,
 	                                 &_main_thread, pthread_process, this)) {
 		if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &_main_thread, pthread_process, this)) {
 			PBD::error << _("AlsaAudioBackend: failed to create process thread.") << endmsg;
@@ -1072,7 +1001,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 		boost::tokenizer<boost::char_separator<char> > devs (ext, sep);
 
-		BOOST_FOREACH (const std::string& tmp, devs) {
+		for (const std::string& tmp : devs) {
 			std::string            dev (tmp);
 			unsigned int           sr     = _samplerate;
 			unsigned int           spp    = _samples_per_period;
@@ -1210,19 +1139,19 @@ void*
 AlsaAudioBackend::alsa_process_thread (void* arg)
 {
 	ThreadData* td = reinterpret_cast<ThreadData*> (arg);
-	boost::function<void ()> f = td->f;
+	std::function<void ()> f = td->f;
 	delete td;
 	f ();
 	return 0;
 }
 
 int
-AlsaAudioBackend::create_process_thread (boost::function<void ()> func)
+AlsaAudioBackend::create_process_thread (std::function<void ()> func)
 {
 	pthread_t   thread_id;
 	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);
 
-	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_PROC, PBD_RT_STACKSIZE_PROC, &thread_id, alsa_process_thread, td)) {
+	if (pbd_realtime_pthread_create ("ALSA Proc", PBD_SCHED_FIFO, PBD_RT_PRI_PROC, PBD_RT_STACKSIZE_PROC, &thread_id, alsa_process_thread, td)) {
 		if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &thread_id, alsa_process_thread, td)) {
 			PBD::error << _("AudioEngine: cannot create process thread.") << endmsg;
 			return -1;
@@ -1296,8 +1225,8 @@ AlsaAudioBackend::register_system_audio_ports ()
 {
 	LatencyRange lr;
 
-	const int a_ins = _n_inputs;
-	const int a_out = _n_outputs;
+	const int a_ins = _pcmi->ncapt ();
+	const int a_out = _pcmi->nplay ();
 
 	const uint32_t lcpp = (_periods_per_cycle - 2) * _samples_per_period;
 
@@ -1455,7 +1384,7 @@ AlsaAudioBackend::midi_device_thread ()
 bool
 AlsaAudioBackend::listen_for_midi_device_changes ()
 {
-	if (pthread_create (&_midi_device_thread_id, NULL, _midi_device_thread, this)) {
+	if (pbd_pthread_create (PBD_RT_STACKSIZE_HELP, &_midi_device_thread_id, _midi_device_thread, this)) {
 		return false;
 	}
 	return true;
@@ -1736,7 +1665,7 @@ AlsaAudioBackend::set_latency_range (PortEngine::PortHandle port_handle, bool fo
 {
 	BackendPortPtr port = std::dynamic_pointer_cast<BackendPort> (port_handle);
 	if (!valid_port (port)) {
-		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "AlsaPort::set_latency_range (): invalid port.");
+		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "AlsaAudioBackend::set_latency_range (): invalid port.");
 		return;
 	}
 	port->set_latency_range (latency_range, for_playback);
@@ -1749,7 +1678,7 @@ AlsaAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool fo
 	LatencyRange   r;
 
 	if (!valid_port (port)) {
-		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "AlsaPort::get_latency_range (): invalid port.");
+		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "AlsaAudioBackend::get_latency_range (): invalid port.");
 		r.min = 0;
 		r.max = 0;
 		return r;
@@ -2176,7 +2105,7 @@ AlsaAudioBackend::add_slave (const char*            device,
 		PBD::error << string_compose (_("Failed to start slave device '%1'\n"), device) << endmsg;
 		goto errout;
 	}
-	s->UpdateLatency.connect_same_thread (s->latency_connection, boost::bind (&AlsaAudioBackend::update_latencies, this));
+	s->UpdateLatency.connect_same_thread (s->latency_connection, std::bind (&AlsaAudioBackend::update_latencies, this));
 	_slaves.push_back (s);
 	return true;
 
@@ -2203,7 +2132,7 @@ AlsaAudioBackend::AudioSlave::AudioSlave (
 	, halt (false)
 	, dead (false)
 {
-	Halted.connect_same_thread (_halted_connection, boost::bind (&AudioSlave::halted, this));
+	Halted.connect_same_thread (_halted_connection, std::bind (&AudioSlave::halted, this));
 }
 
 AlsaAudioBackend::AudioSlave::~AudioSlave ()
@@ -2463,8 +2392,8 @@ AlsaDeviceReservation::acquire_device (const char* device_name, bool silent)
 	argp[4] = 0;
 
 	_device_reservation = new ARDOUR::SystemExec (request_device_exe, argp);
-	_device_reservation->ReadStdout.connect_same_thread (_reservation_connection, boost::bind (&AlsaDeviceReservation::reservation_stdout, this, _1, _2));
-	_device_reservation->Terminated.connect_same_thread (_reservation_connection, boost::bind (&AlsaDeviceReservation::release_device, this));
+	_device_reservation->ReadStdout.connect_same_thread (_reservation_connection, std::bind (&AlsaDeviceReservation::reservation_stdout, this, _1, _2));
+	_device_reservation->Terminated.connect_same_thread (_reservation_connection, std::bind (&AlsaDeviceReservation::release_device, this));
 
 	if (_device_reservation->start (SystemExec::ShareWithParent)) {
 		if (!silent) {

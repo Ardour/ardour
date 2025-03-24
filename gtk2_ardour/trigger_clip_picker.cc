@@ -19,7 +19,7 @@
 #include <cassert>
 #include <vector>
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
@@ -219,8 +219,8 @@ TriggerClipPicker::TriggerClipPicker ()
 
 	UIConfiguration::instance ().ColorsChanged.connect (sigc::mem_fun (*this, &TriggerClipPicker::on_theme_changed));
 	UIConfiguration::instance ().ParameterChanged.connect (sigc::mem_fun (*this, &TriggerClipPicker::parameter_changed));
-	Config->ParameterChanged.connect (_config_connection, invalidator (*this), boost::bind (&TriggerClipPicker::parameter_changed, this, _1), gui_context ());
-	LibraryClipAdded.connect (_clip_added_connection, invalidator (*this), boost::bind (&TriggerClipPicker::clip_added, this, _1, _2), gui_context ());
+	Config->ParameterChanged.connect (_config_connection, invalidator (*this), std::bind (&TriggerClipPicker::parameter_changed, this, _1), gui_context ());
+	LibraryClipAdded.connect (_clip_added_connection, invalidator (*this), std::bind (&TriggerClipPicker::clip_added, this, _1, _2), gui_context ());
 
 	/* cache value */
 	_clip_library_dir = clip_library_dir ();
@@ -865,9 +865,9 @@ TriggerClipPicker::set_session (Session* s)
 		_gain_control.set_controllable (none);
 	} else {
 		_auditioner_connections.drop_connections ();
-		_session->AuditionActive.connect (_auditioner_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_active, this, _1), gui_context ());
-		_session->the_auditioner ()->AuditionProgress.connect (_auditioner_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_progress, this, _1, _2), gui_context ());
-		_session->the_auditioner ()->processors_changed.connect (_auditioner_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_processors_changed, this), gui_context ());
+		_session->AuditionActive.connect (_auditioner_connections, invalidator (*this), std::bind (&TriggerClipPicker::audition_active, this, _1), gui_context ());
+		_session->the_auditioner ()->AuditionProgress.connect (_auditioner_connections, invalidator (*this), std::bind (&TriggerClipPicker::audition_progress, this, _1, _2), gui_context ());
+		_session->the_auditioner ()->processors_changed.connect (_auditioner_connections, invalidator (*this), std::bind (&TriggerClipPicker::audition_processors_changed, this), gui_context ());
 		audition_processors_changed (); /* set sensitivity */
 
 		_gain_control.set_controllable (_session->the_auditioner ()->gain_control ());
@@ -1095,7 +1095,7 @@ TriggerClipPicker::audition_show_plugin_ui ()
 			_audition_plugnui->set_session (_session);
 			_audition_plugnui->show_all ();
 			_audition_plugnui->set_title (/* generate_processor_title (plugin_insert)*/ _("Audition Synth"));
-			plugin_insert->DropReferences.connect (_processor_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_processor_going_away, this), gui_context());
+			plugin_insert->DropReferences.connect (_processor_connections, invalidator (*this), std::bind (&TriggerClipPicker::audition_processor_going_away, this), gui_context());
 
 			_audition_plugnui->signal_map_event ().connect (sigc::hide (sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::audition_processor_viz), true)));
 			_audition_plugnui->signal_unmap_event ().connect (sigc::hide (sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::audition_processor_viz), false)));

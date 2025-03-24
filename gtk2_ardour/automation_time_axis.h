@@ -23,8 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_automation_time_axis_h__
-#define __ardour_gtk_automation_time_axis_h__
+#pragma once
 
 #include <list>
 #include <memory>
@@ -55,6 +54,7 @@ class TimeSelection;
 class RegionSelection;
 class PointSelection;
 class AutomationLine;
+class EditorAutomationLine;
 class Selection;
 class Selectable;
 class AutomationStreamView;
@@ -91,16 +91,16 @@ public:
 
 	void clear_lines ();
 
-	/** @return Our AutomationLine, if this view has one, or 0 if it uses AutomationRegionViews */
-	std::shared_ptr<AutomationLine> line() { return _line; }
+	/** @return Our EditorAutomationLine, if this view has one, or 0 if it uses AutomationRegionViews */
+	std::shared_ptr<EditorAutomationLine> line() { return _line; }
 
-	/** @return All AutomationLines associated with this view */
+	/** @return All EditorAutomationLines associated with this view */
 	std::list<std::shared_ptr<AutomationLine> > lines () const;
 
 	AutomationStreamView* automation_view() const { return _view; }
 
 	void set_selected_points (PointSelection&);
-	void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double top, double bot, std::list<Selectable *>&, bool within = false);
+	void _get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double top, double bot, std::list<Selectable *>&, bool within);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
 	void show_timestretch (Temporal::timepos_t const &/*start*/, Temporal::timepos_t const & /*end*/, int /*layers*/, int /*layer*/) {}
@@ -166,7 +166,7 @@ protected:
 	Evoral::Parameter _parameter;
 
 	ArdourCanvas::Rectangle* _base_rect;
-	std::shared_ptr<AutomationLine> _line;
+	std::shared_ptr<EditorAutomationLine> _line;
 
 	std::string _name;
 
@@ -193,7 +193,7 @@ protected:
 
 	bool _show_regions;
 
-	void add_line (std::shared_ptr<AutomationLine>);
+	void add_line (std::shared_ptr<EditorAutomationLine>);
 
 	void clear_clicked ();
 	void hide_clicked ();
@@ -241,4 +241,3 @@ private:
 	int set_state_2X (const XMLNode &, int);
 };
 
-#endif /* __ardour_gtk_automation_time_axis_h__ */

@@ -23,9 +23,9 @@
 
 #include <stdint.h>
 #include <string>
-#include <gtkmm/treeview.h>
-#include <gtkmm/treeselection.h>
-#include <gtkmm/selectiondata.h>
+#include <ytkmm/treeview.h>
+#include <ytkmm/treeselection.h>
+#include <ytkmm/selectiondata.h>
 
 #include "gtkmm2ext/visibility.h"
 

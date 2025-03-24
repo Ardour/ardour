@@ -30,8 +30,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gui_h__
-#define __ardour_gui_h__
+#pragma once
 
 #include <time.h>
 
@@ -48,26 +47,25 @@
 #include <list>
 #include <cmath>
 
-#include <boost/utility.hpp>
-
 #include "pbd/xml++.h"
-#include <gtkmm/box.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
-#include <gtkmm/fixed.h>
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/button.h>
-#include <gtkmm/togglebutton.h>
-#include <gtkmm/treeview.h>
-#include <gtkmm/menubar.h>
-#include <gtkmm/textbuffer.h>
-#include <gtkmm/adjustment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
+#include <ytkmm/fixed.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/button.h>
+#include <ytkmm/togglebutton.h>
+#include <ytkmm/sizegroup.h>
+#include <ytkmm/treeview.h>
+#include <ytkmm/menubar.h>
+#include <ytkmm/textbuffer.h>
+#include <ytkmm/adjustment.h>
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/bindings.h"
@@ -91,7 +89,6 @@
 #include "ardour_window.h"
 #include "editing.h"
 #include "enums.h"
-#include "mini_timeline.h"
 #include "shuttle_control.h"
 #include "startup_fsm.h"
 #include "transport_control.h"
@@ -169,9 +166,11 @@ class SessionDialog;
 class SessionOptionEditorWindow;
 class Splash;
 class TimeInfoBox;
+class ApplicationBar;
 class Meterbridge;
 class LuaWindow;
 class MidiTracer;
+class PianorollWindow;
 class NSM_Client;
 class LevelMeterHBox;
 class GUIObjectState;
@@ -197,7 +196,6 @@ namespace ArdourWidgets {
 }
 
 #define MAX_LUA_ACTION_SCRIPTS 32
-#define MAX_LUA_ACTION_BUTTONS 12
 
 class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr, public TransportControlProvider
 {
@@ -239,6 +237,16 @@ public:
 	RCOptionEditor* get_rc_option_editor() { return rc_option_editor; }
 	void show_tabbable (ArdourWidgets::Tabbable*);
 
+	enum ArdourLogLevel {
+		LogLevelNone = 0,
+		LogLevelInfo,
+		LogLevelWarning,
+		LogLevelError
+	};
+
+	ArdourLogLevel log_not_acknowledged () const { return _log_not_acknowledged; }
+	void set_log_not_acknowledged (const ArdourLogLevel lvl) { _log_not_acknowledged =lvl; }
+
 	void start_session_load (bool create_new);
 	void session_dialog_response_handler (int response, SessionDialog* session_dialog);
 	void build_session_from_dialog (SessionDialog&, std::string const& session_name, std::string const& session_path, std::string const& session_template, Temporal::TimeDomain domain);
@@ -256,11 +264,16 @@ public:
 
 	static ARDOUR_UI *instance () { return theArdourUI; }
 
+	/* signal emitted when all windows (editor, mixer/monitor, recorder and cues)
+	   have published their actions to the ActionManager
+	*/
+	PBD::Signal<void()> ActionsReady;
+
 	/* signal emitted when escape key is pressed. All UI components that
 	   need to respond to Escape in some way (e.g. break drag, clear
 	   selection, etc) should connect to and handle this.
 	*/
-	PBD::Signal0<void> Escape;
+	PBD::Signal<void()> Escape;
 
 	PublicEditor&	  the_editor() { return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }
@@ -274,8 +287,6 @@ public:
 	void show_plugin_manager();
 
 	void reset_focus (Gtk::Widget*);
-
-	static PublicEditor* _instance;
 
 	/** Emitted frequently with the audible sample, false, and the edit point as
 	 *  parameters respectively.
@@ -309,12 +320,15 @@ public:
 	void xrun_handler (samplepos_t);
 	void create_xrun_marker (samplepos_t);
 
+	Glib::RefPtr<Gtk::SizeGroup> button_height_size_group;
+
 	GUIObjectState* gui_object_state;
 
-	MainClock* primary_clock;
-	MainClock* secondary_clock;
-	void focus_on_clock ();
+	MainClock* primary_clock;    //this clock is the canonical PrimaryClock, whose mode is reflected to all other clocks with PrimaryClock disposition.
+	MainClock* secondary_clock;  //this clock is the canonical SecondaryClock, whose mode is reflected to all other clocks with PrimaryClock disposition
 	AudioClock*   big_clock;
+
+	void focus_on_clock ();
 
 	VideoTimeLine *video_timeline;
 
@@ -370,10 +384,6 @@ public:
 
 	void get_process_buffers ();
 	void drop_process_buffers ();
-
-	void reset_peak_display ();
-	void reset_route_peak_display (ARDOUR::Route*);
-	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
 	void show_library_download_window();
 
@@ -489,10 +499,6 @@ private:
 	void session_dirty_changed ();
 	void update_title ();
 
-	void cue_rec_state_changed ();
-	void cue_rec_state_clicked ();
-	void cue_ffwd_state_clicked ();
-
 	void map_transport_state ();
 	int32_t do_engine_start ();
 
@@ -518,108 +524,28 @@ private:
 
 	/* Transport Control */
 
-	Gtk::Table               transport_table;
-	Gtk::Frame               transport_frame;
-	Gtk::HBox                transport_hbox;
+	Gtk::Table               tabbables_table;
 
-	ArdourWidgets::ArdourVSpacer* secondary_clock_spacer;
-	void repack_transport_hbox ();
-	void update_clock_visibility ();
 	void toggle_follow_edits ();
 
 	void set_transport_controllable_state (const XMLNode&);
 	XMLNode& get_transport_controllable_state ();
 
-	TransportControlUI transport_ctrl;
-
-	ArdourWidgets::ArdourButton   punch_in_button;
-	ArdourWidgets::ArdourButton   punch_out_button;
-	ArdourWidgets::ArdourDropdown record_mode_selector;
-
-	ArdourWidgets::ArdourVSpacer recpunch_spacer;
-	ArdourWidgets::ArdourVSpacer latency_spacer;
-	ArdourWidgets::ArdourVSpacer monitor_spacer;
-	ArdourWidgets::ArdourVSpacer scripts_spacer;
-	ArdourWidgets::ArdourVSpacer cuectrl_spacer;
-
-	ArdourWidgets::ArdourButton monitor_dim_button;
-	ArdourWidgets::ArdourButton monitor_mono_button;
-	ArdourWidgets::ArdourButton monitor_mute_button;
-
-	Gtk::Label   punch_label;
-	Gtk::Label   layered_label;
-
-	Gtk::Label   punch_space;
-
 	void toggle_external_sync ();
 	void toggle_time_master ();
 	void toggle_video_sync ();
 
-
-	ArdourWidgets::ArdourButton latency_disable_button;
-
-	ArdourWidgets::ArdourButton  _cue_rec_enable;
-	ArdourWidgets::ArdourButton  _cue_play_enable;
-
-	Gtk::Label route_latency_value;
-	Gtk::Label io_latency_label;
-	Gtk::Label io_latency_value;
-
-	ShuttleControl     shuttle_box;
-	MiniTimeline       mini_timeline;
-	TimeInfoBox*       time_info_box;
-
-
-	ArdourWidgets::ArdourVSpacer      meterbox_spacer;
-	Gtk::HBox                         meterbox_spacer2;
-
-	ArdourWidgets::ArdourButton auto_return_button;
-	ArdourWidgets::ArdourButton follow_edits_button;
-	ArdourWidgets::ArdourButton sync_button;
-
-	ArdourWidgets::ArdourButton auditioning_alert_button;
-	ArdourWidgets::ArdourButton solo_alert_button;
-	ArdourWidgets::ArdourButton feedback_alert_button;
 	ArdourWidgets::ArdourButton error_alert_button;
-
-	ArdourWidgets::ArdourButton action_script_call_btn[MAX_LUA_ACTION_BUTTONS];
-
-	Gtk::VBox alert_box;
-
-	Gtk::Table editor_meter_table;
-	ArdourWidgets::ArdourButton editor_meter_peak_display;
-	LevelMeterHBox *            editor_meter;
-
-	bool  _clear_editor_meter;
-	bool  _editor_meter_peaked;
-	bool  editor_meter_peak_button_release (GdkEventButton*);
 
 	void blink_handler (bool);
 	sigc::connection blink_connection;
 
 	void cancel_solo ();
-	void solo_blink (bool);
-	void sync_blink (bool);
-	void audition_blink (bool);
-	void feedback_blink (bool);
 	void error_blink (bool);
 
 	void set_flat_buttons();
 
-	void soloing_changed (bool);
-	void auditioning_changed (bool);
-	void _auditioning_changed (bool);
-
-	bool solo_alert_press (GdkEventButton* ev);
-	void audition_alert_clicked ();
 	bool error_alert_press (GdkEventButton *);
-
-	void set_record_mode (ARDOUR::RecordMode);
-
-	void big_clock_value_changed ();
-	void primary_clock_value_changed ();
-	void secondary_clock_value_changed ();
-
 	/* menu bar and associated stuff */
 
 	Gtk::MenuBar* menu_bar;
@@ -638,6 +564,10 @@ private:
 
 	Gtk::Label   timecode_format_label;
 	void update_timecode_format ();
+
+	Gtk::Label   latency_info_label;
+	Gtk::Label   pdc_info_label;
+	void session_latency_updated (bool);
 
 	Gtk::Label  dsp_load_label;
 	void update_cpu_load ();
@@ -658,11 +588,9 @@ private:
 
 	void every_second ();
 	void every_point_one_seconds ();
-	void every_point_zero_something_seconds ();
 
 	sigc::connection second_connection;
 	sigc::connection point_one_second_connection;
-	sigc::connection point_zero_something_second_connection;
 	sigc::connection fps_connection;
 
 	void set_fps_timeout_connection ();
@@ -679,7 +607,6 @@ private:
 	void edit_metadata ();
 	void import_metadata ();
 
-	void set_transport_sensitivity (bool);
 	void set_punch_sensitivity ();
 
 	//stuff for ProTools-style numpad
@@ -713,6 +640,7 @@ private:
 	void set_session (ARDOUR::Session *);
 	void connect_dependents_to_session (ARDOUR::Session *);
 	void we_have_dependents ();
+	void setup_action_tooltips ();
 
 	void setup_session_options ();
 
@@ -721,7 +649,7 @@ private:
 	bool process_snapshot_session_prompter (ArdourWidgets::Prompter& prompter, bool switch_to_it);
 	void snapshot_session (bool switch_to_it);
 
-	void quick_snapshot_session (bool switch_to_it);  //does not promtp for name, just makes a timestamped file
+	void quick_snapshot_session (bool switch_to_it);  //does not prompt for name, just makes a timestamped file
 
 	SaveAsDialog* save_as_dialog;
 
@@ -840,8 +768,6 @@ private:
 
 	void editor_realized ();
 
-	std::vector<std::string> record_mode_strings;
-
 	void toggle_use_mmc ();
 	void toggle_send_mmc ();
 	void toggle_send_mtc ();
@@ -875,7 +801,6 @@ private:
 	int ambiguous_file (std::string file, std::vector<std::string> hits);
 
 	bool click_button_clicked (GdkEventButton *);
-	bool sync_button_clicked (GdkEventButton *);
 
 	VisibilityGroup _status_bar_visibility;
 
@@ -886,23 +811,9 @@ private:
 
 	void toggle_latency_switch ();
 	void latency_switch_changed ();
-	void session_latency_updated (bool);
-
-	void feedback_detected ();
 
 	ArdourWidgets::ArdourButton             midi_panic_button;
 	void                     midi_panic ();
-
-	void successful_graph_sort ();
-	bool _feedback_exists;
-	bool _ambiguous_latency;
-
-	enum ArdourLogLevel {
-		LogLevelNone = 0,
-		LogLevelInfo,
-		LogLevelWarning,
-		LogLevelError
-	};
 
 	ArdourLogLevel _log_not_acknowledged;
 
@@ -933,7 +844,7 @@ private:
 	ArdourWidgets::ArdourButton recorder_visibility_button;
 	ArdourWidgets::ArdourButton trigger_page_visibility_button;
 
-	bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::Bindings*);
+	bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::BindingSet*);
 	bool try_gtk_accel_binding (GtkWindow* win, GdkEventKey* ev, bool translate, GdkModifierType modifier);
 
 	bool main_window_delete_event (GdkEventAny*);
@@ -947,13 +858,9 @@ private:
 	void escape ();
 	void close_current_dialog ();
 
-	bool bind_lua_action_script (GdkEventButton*, int);
-	void action_script_changed (int i, const std::string&);
-
 	void ask_about_scratch_deletion ();
 	bool nsm_first_session_opened;
 
 	PBD::ScopedConnectionList clock_state_connection;
 };
 
-#endif /* __ardour_gui_h__ */

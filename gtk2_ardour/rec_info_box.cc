@@ -90,8 +90,8 @@ DurationInfoBox::set_session (Session* s)
 		_rectime_connection.disconnect ();
 		return;
 	}
-	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&DurationInfoBox::rec_state_changed, this), gui_context());
-	_session->UpdateRouteRecordState.connect (_session_connections, invalidator (*this), boost::bind (&DurationInfoBox::update, this), gui_context());
+	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), std::bind (&DurationInfoBox::rec_state_changed, this), gui_context());
+	_session->UpdateRouteRecordState.connect (_session_connections, invalidator (*this), std::bind (&DurationInfoBox::update, this), gui_context());
 }
 
 void
@@ -116,7 +116,9 @@ DurationInfoBox::dpi_reset ()
 	_layout_value->get_pixel_size (wv, hv);
 	_width  = 8 + wv;
 	_height = 4 + hv;
-	queue_resize ();
+	if (get_realized ()) {
+		queue_resize ();
+	}
 }
 
 void
@@ -185,8 +187,8 @@ XrunInfoBox::set_session (Session* s)
 		return;
 	}
 
-	_session->Xrun.connect (_session_connections, invalidator (*this), boost::bind (&XrunInfoBox::update, this), gui_context());
-	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&XrunInfoBox::update, this), gui_context());
+	_session->Xrun.connect (_session_connections, invalidator (*this), std::bind (&XrunInfoBox::update, this), gui_context());
+	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), std::bind (&XrunInfoBox::update, this), gui_context());
 }
 
 void
@@ -198,7 +200,9 @@ XrunInfoBox::dpi_reset ()
 	_layout_value->get_pixel_size (wv, hv);
 	_width  = 8 + wv;
 	_height = 8 + hv;
-	queue_resize ();
+	if (get_realized ()) {
+		queue_resize ();
+	}
 }
 
 void
@@ -271,7 +275,7 @@ RemainInfoBox::set_session (Session* s)
 	}
 
 	_diskspace_connection = Timers::second_connect (sigc::mem_fun (*this, &RemainInfoBox::update));
-	_session->UpdateRouteRecordState.connect (_session_connections, invalidator (*this), boost::bind (&RemainInfoBox::update, this), gui_context());
+	_session->UpdateRouteRecordState.connect (_session_connections, invalidator (*this), std::bind (&RemainInfoBox::update, this), gui_context());
 }
 
 void
@@ -291,7 +295,9 @@ RemainInfoBox::dpi_reset ()
 	_width  = 8 + std::max (wl, wv);
 	_height = 2 + hv + 2 + hl + 2;
 
-	queue_resize ();
+	if (get_realized ()) {
+		queue_resize ();
+	}
 }
 
 void
@@ -318,7 +324,7 @@ RemainInfoBox::render (Cairo::RefPtr<Cairo::Context> const& cr, cairo_rectangle_
 	}
 
 	samplecnt_t  sample_rate                 = _session->nominal_sample_rate ();
-	boost::optional<samplecnt_t> opt_samples = _session->available_capture_duration ();
+	std::optional<samplecnt_t> opt_samples = _session->available_capture_duration ();
 
 	Gtkmm2ext::set_source_rgb_a (cr, UIConfiguration::instance ().color ("widget:bg"), .7);
 
@@ -340,20 +346,23 @@ RemainInfoBox::render (Cairo::RefPtr<Cairo::Context> const& cr, cairo_rectangle_
 		float remain_sec = samples / (float)sample_rate;
 		char buf[32];
 
+		bool  at_least     = FLAC == _session->config.get_native_file_header_format ();
+		const char* prefix = at_least ? u8"\u2265" : ""; // Greater-Than or Equal To
+
 		if (remain_sec > 86400) {
 			_layout_value->set_text (_(">24h"));
 		} else if (remain_sec > 32400 /* 9 hours */) {
-			snprintf (buf, sizeof (buf), "%.0f", remain_sec / 3600.f);
+			snprintf (buf, sizeof (buf), "%s%.0f", prefix, remain_sec / 3600.f);
 			_layout_value->set_text (std::string (buf) + S_("hours|h"));
 		} else if (remain_sec > 5940 /* 99 mins */) {
-			snprintf (buf, sizeof (buf), "%.1f", remain_sec / 3600.f);
+			snprintf (buf, sizeof (buf), "%s%.1f", prefix, remain_sec / 3600.f);
 			_layout_value->set_text (std::string (buf) + S_("hours|h"));
 		} else if (remain_sec > 60*3 /* 3 mins */) {
-			snprintf (buf, sizeof (buf), "%.0f", remain_sec / 60.f);
+			snprintf (buf, sizeof (buf), "%s%.0f", prefix, remain_sec / 60.f);
 			_layout_value->set_text (std::string (buf) + S_("minutes|m"));
 		} else {
 			Gtkmm2ext::set_source_rgb_a (cr, UIConfiguration::instance ().color ("alert:red"), .7);
-			snprintf (buf, sizeof (buf), "%.0f", remain_sec / 60.f);
+			snprintf (buf, sizeof (buf), "%s%.0f", prefix, remain_sec / 60.f);
 			_layout_value->set_text (std::string (buf) + S_("minutes|m"));
 		}
 	}

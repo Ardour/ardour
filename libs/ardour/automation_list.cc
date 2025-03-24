@@ -49,7 +49,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal1<void,AutomationList *> AutomationList::AutomationListCreated;
+PBD::Signal<void(AutomationList *)> AutomationList::AutomationListCreated;
 
 #if 0
 static void dumpit (const AutomationList& al, string prefix = "")
@@ -158,6 +158,7 @@ AutomationList::create_curve_if_necessary()
 	switch (_parameter.type()) {
 	case GainAutomation:
 	case BusSendLevel:
+	case SurroundSendLevel:
 	case InsertReturnLevel:
 	case TrimAutomation:
 	case PanAzimuthAutomation:
@@ -173,7 +174,7 @@ AutomationList::create_curve_if_necessary()
 		break;
 	}
 
-	WritePassStarted.connect_same_thread (_writepass_connection, boost::bind (&AutomationList::snapshot_history, this, false));
+	WritePassStarted.connect_same_thread (_writepass_connection, std::bind (&AutomationList::snapshot_history, this, false));
 }
 
 AutomationList&
@@ -234,6 +235,7 @@ AutomationList::default_interpolation () const
 	switch (_parameter.type()) {
 		case GainAutomation:
 		case BusSendLevel:
+		case SurroundSendLevel:
 		case InsertReturnLevel:
 		case EnvelopeAutomation:
 			return ControlList::Exponential;

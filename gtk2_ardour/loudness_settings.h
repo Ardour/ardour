@@ -19,6 +19,11 @@
 #ifndef _gtkardour_loudness_settings_h_
 #define _gtkardour_loudness_settings_h_
 
+#include <cstddef>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
 class XMLNode;
 
 struct CLoudnessPreset

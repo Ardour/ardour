@@ -17,13 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_missing_file_dialog_h__
-#define __gtk_ardour_missing_file_dialog_h__
+#pragma once
 
 #include <string>
-#include <gtkmm/label.h>
-#include <gtkmm/filechooserbutton.h>
-#include <gtkmm/radiobutton.h>
+#include <ytkmm/label.h>
+#include <ytkmm/filechooserbutton.h>
+#include <ytkmm/radiobutton.h>
 
 #include "ardour/types.h"
 
@@ -57,4 +56,3 @@ private:
 	void set_absolute ();
 };
 
-#endif /* __gtk_ardour_missing_file_dialog_h__ */

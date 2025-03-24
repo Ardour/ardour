@@ -25,7 +25,7 @@
 #include <cstring>
 #include <cmath>
 
-#include <gtkmm/window.h>
+#include <ytkmm/window.h>
 #include <pangomm/layout.h>
 
 #include "pbd/compose.h"
@@ -86,10 +86,10 @@ MonoPanner::MonoPanner (std::shared_ptr<ARDOUR::PannerShell> p)
 		have_font = true;
 	}
 
-	position_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
+	position_control->Changed.connect (panvalue_connections, invalidator(*this), std::bind (&MonoPanner::value_change, this), gui_context());
 
-	_panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::bypass_handler, this), gui_context());
-	_panner_shell->PannableChanged.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::pannable_handler, this), gui_context());
+	_panner_shell->Changed.connect (panshell_connections, invalidator (*this), std::bind (&MonoPanner::bypass_handler, this), gui_context());
+	_panner_shell->PannableChanged.connect (panshell_connections, invalidator (*this), std::bind (&MonoPanner::pannable_handler, this), gui_context());
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &MonoPanner::color_handler));
 
 	set_tooltip ();
@@ -514,7 +514,7 @@ MonoPanner::pannable_handler ()
 	panvalue_connections.drop_connections();
 	position_control = _panner->pannable()->pan_azimuth_control;
 	position_binder.set_controllable(position_control);
-	position_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
+	position_control->Changed.connect (panvalue_connections, invalidator(*this), std::bind (&MonoPanner::value_change, this), gui_context());
 	queue_draw ();
 }
 

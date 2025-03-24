@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_editor_cursors_h__
-#define __gtk_ardour_editor_cursors_h__
+#pragma once
 
 #include "pbd/signals.h"
 #include "ardour/types.h"
@@ -29,13 +28,13 @@
 #include "canvas/line.h"
 #include "canvas/types.h"
 
-class Editor;
+class EditingContext;
 
 class EditorCursor
 {
 public:
-	EditorCursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*), std::string const &);
-	EditorCursor (Editor&, std::string const &);
+	EditorCursor (EditingContext&, bool (EditingContext::*)(GdkEvent*,ArdourCanvas::Item*), std::string const &);
+	EditorCursor (EditingContext&, std::string const &);
 	~EditorCursor ();
 
 	void set_position (samplepos_t);
@@ -50,16 +49,15 @@ public:
 		return _current_sample;
 	}
 
-	ArdourCanvas::Arrow& track_canvas_item () {
-		return *_track_canvas_item;
+	ArdourCanvas::Arrow& canvas_item () {
+		return *_canvas_item;
 	}
 
-	PBD::Signal1<void, samplepos_t> PositionChanged;
+	PBD::Signal<void(samplepos_t)> PositionChanged;
 
 private:
-	Editor&               _editor;
-	ArdourCanvas::Arrow*  _track_canvas_item;
+	EditingContext&       _editor;
+	ArdourCanvas::Arrow*  _canvas_item;
 	samplepos_t           _current_sample;
 };
 
-#endif // __gtk_ardour_editor_cursors_h__

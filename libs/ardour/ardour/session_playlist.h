@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_session_playlist_h__
-#define __ardour_session_playlist_h__
+#pragma once
 
 #include "ardour/session.h"
 #include "ardour/playlist.h"
@@ -45,4 +44,3 @@ SessionPlaylists::foreach (T *obj, void (T::*func)(std::shared_ptr<Playlist>))
 
 } /* namespace */
 
-#endif /* __ardour_session_playlist_h__ */

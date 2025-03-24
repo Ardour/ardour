@@ -19,6 +19,7 @@ gtk2_ardour_sources = [
         'add_route_dialog.cc',
         'ambiguous_file_dialog.cc',
         'analysis_window.cc',
+        'application_bar.cc',
         'ardour_dialog.cc',
         'ardour_http.cc',
         'ardour_message.cc',
@@ -42,8 +43,6 @@ gtk2_ardour_sources = [
         'audio_clip_editor.cc',
         'audio_region_editor.cc',
         'audio_region_view.cc',
-        'audio_region_operations_box.cc',
-        'audio_region_properties_box.cc',
         'audio_trigger_properties_box.cc',
         'audio_streamview.cc',
         'audio_time_axis.cc',
@@ -65,7 +64,7 @@ gtk2_ardour_sources = [
         'control_point_dialog.cc',
         'control_slave_ui.cc',
         'cuebox_ui.cc',
-        'cursor_context.cc',
+        'cue_editor.cc',
         'curvetest.cc',
         'debug.cc',
         'dsp_stats_ui.cc',
@@ -73,8 +72,10 @@ gtk2_ardour_sources = [
         'duplicate_routes_dialog.cc',
         'edit_note_dialog.cc',
         'editing.cc',
+        'editing_context.cc',
         'editor.cc',
         'editor_actions.cc',
+        'editor_automation_line.cc',
         'editor_audio_import.cc',
         'editor_pt_import.cc',
         'editor_audiotrack.cc',
@@ -124,6 +125,7 @@ gtk2_ardour_sources = [
         'sfdb_freesound_mootcher.cc',
         'gain_meter.cc',
         'generic_pluginui.cc',
+        'ghost_event.cc',
         'ghostregion.cc',
         'global_port_matrix.cc',
         'group_tabs.cc',
@@ -139,7 +141,6 @@ gtk2_ardour_sources = [
         'hit.cc',
         'keyboard.cc',
         'keyeditor.cc',
-        'latency_gui.cc',
         'led.cc',
         'level_meter.cc',
         'library_download_dialog.cc',
@@ -153,23 +154,23 @@ gtk2_ardour_sources = [
         'main.cc',
         'main_clock.cc',
         'marker.cc',
-    	'mergeable_line.cc',
+        'mergeable_line.cc',
         'midi_automation_line.cc',
         'midi_channel_dialog.cc',
         'midi_channel_selector.cc',
-        'midi_clip_editor.cc',
         'midi_cut_buffer.cc',
         'midi_export_dialog.cc',
         'midi_list_editor.cc',
         'midi_region_view.cc',
-        'midi_region_operations_box.cc',
-        'midi_region_properties_box.cc',
         'midi_trigger_properties_box.cc',
         'midi_selection.cc',
         'midi_streamview.cc',
         'midi_time_axis.cc',
         'midi_tracer.cc',
+        'midi_util.cc',
         'midi_velocity_dialog.cc',
+        'midi_view.cc',
+        'midi_view_background.cc',
         'mini_timeline.cc',
         'missing_file_dialog.cc',
         'missing_filesource_dialog.cc',
@@ -184,7 +185,6 @@ gtk2_ardour_sources = [
         'mono_panner.cc',
         'mono_panner_editor.cc',
         'mouse_cursors.cc',
-        'multi_region_properties_box.cc',
         'nag.cc',
         'new_plugin_preset_dialog.cc',
         'new_user_wizard.cc',
@@ -206,6 +206,12 @@ gtk2_ardour_sources = [
         'pianokeyboard.cc',
         'piano_key_bindings.cc',
         'piano_roll_header.cc',
+        'pianoroll.cc',
+        'pianoroll_automation_line.cc',
+        'pianoroll_background.cc',
+        'pianoroll_velocity.cc',
+        'pianoroll_midi_view.cc',
+        'pianoroll_window.cc',
         'pingback.cc',
         'playlist_selector.cc',
         'plugin_display.cc',
@@ -219,6 +225,7 @@ gtk2_ardour_sources = [
         'plugin_ui.cc',
         'plugin_dspload_ui.cc',
         'plugin_dspload_window.cc',
+        'plugin_window_proxy.cc',
         'port_group.cc',
         'port_insert_ui.cc',
         'port_matrix.cc',
@@ -228,7 +235,8 @@ gtk2_ardour_sources = [
         'port_matrix_grid.cc',
         'port_matrix_labels.cc',
         'port_matrix_row_labels.cc',
-        'processor_box.cc',
+	'prh.cc',
+	'processor_box.cc',
         'processor_selection.cc',
         'patch_change_dialog.cc',
         'progress_reporter.cc',
@@ -240,6 +248,9 @@ gtk2_ardour_sources = [
         'recorder_group_tabs.cc',
         'recorder_ui.cc',
         'region_editor.cc',
+        'region_editor_window.cc',
+        'region_fx_line.cc',
+        'region_fx_properties_box.cc',
         'region_gain_line.cc',
         'region_layering_order_editor.cc',
         'region_list_base.cc',
@@ -248,10 +259,12 @@ gtk2_ardour_sources = [
         'region_view.cc',
         'return_ui.cc',
         'rhythm_ferret.cc',
+        'route_comment_editor.cc',
         'route_group_dialog.cc',
         'route_group_menu.cc',
         'route_list_base.cc',
         'route_params_ui.cc',
+        'route_properties_box.cc',
         'route_processor_selection.cc',
         'route_time_axis.cc',
         'route_ui.cc',
@@ -299,6 +312,7 @@ gtk2_ardour_sources = [
         'time_fx_dialog.cc',
         'time_info_box.cc',
         'time_selection.cc',
+        'timectl_gui.cc',
         'timers.cc',
         'track_record_axis.cc',
         'track_selection.cc',
@@ -333,8 +347,10 @@ gtk2_ardour_sources = [
         'vca_time_axis.cc',
         'video_timeline.cc',
         'video_monitor.cc',
+	'view_background.cc',
         'transcode_ffmpeg.cc',
         'transcode_video_dialog.cc',
+        'velocity_display.cc',
         'velocity_ghost_region.cc',
         'video_server_dialog.cc',
         'utils_videotl.cc',
@@ -436,15 +452,16 @@ def enoify (major, minor):
             return "\\n\\\"I Dormienti\\\"" # 1999
         if minor == 6:
             return "\\n\\\"Kite Stories\\\"" # 1999
-        if minor == 7:
+        if minor >= 7:
             return "\\n\\\"Sonora Portraits\\\"" # 1999 Compilation
-        if minor == 8:
+    elif major == 9:
+        if minor == 0:
             return "\\n\\\"Music for Civic Recovery Centre\\\"" # 2000
-        if minor == 9:
+        if minor == 1:
             return "\\n\\\"Music for Onmyo-Ji\\\"" # 2000 Collaborative
-        if minor == 10:
+        if minor == 2:
             return "\\n\\\"Compact Forest Proposal\\\"" # 2001
-        if minor == 11:
+        if minor == 3:
             return "\\n\\\"Drawn from Life\\\"" # 2001 Collaborative
     return "\\\"\\\""
 
@@ -753,6 +770,7 @@ def build(bld):
     if sys.platform == 'darwin':
         basefont = ""
         font_sizes = {
+                'VERYSMALL' : '7',
                 'SMALLER' : '9',
                 'SMALL' : '10',
                 'NORMAL' : '11',
@@ -763,21 +781,14 @@ def build(bld):
                 'HUGER' : '36',
                 'MASSIVE' : '60',
         }
-        if bld.env['build_target'] in ['panther', 'tiger', 'leopard'] or (Options.options.ppc and bld.env['build_target'] == 'snowleopard'):
-            # CTFontManagerRegisterFontsForURL for ArdourMono is 10.6 or newer
-            # "Lucida Grande" is not mono-spaced, but works for most cases, except big-clock-window
-            font_names = {
-                    'MONOSPACE' : 'Monaco',
-                    'CLOCKFONT' : 'Lucida Grande',
-                    }
-        else:
-            font_names = {
-                    'MONOSPACE' : 'Monaco',
-                    'CLOCKFONT' : 'ArdourMono',
-                    }
+        font_names = {
+                'MONOSPACE' : 'Monaco',
+                'CLOCKFONT' : 'ArdourMono',
+                }
     else: # Linux/X11 & Windows fonts
         basefont = '' # unspecified - use system defaults
         font_sizes = {
+                'VERYSMALL' : '8',
                 'SMALLER' : '6',
                 'SMALL' : '7',
                 'NORMAL' : '8',
@@ -857,17 +868,19 @@ def build(bld):
 
     # always build all versions of the menu definitions
     # so that we can try them out with different program builds.
-    for program in [ 'ardour']:
-        obj = bld(features = 'command-output')
-        obj.command = 'cpp'
-        obj.command_is_external = True
-        obj.no_inputs = True
-        obj.argv = menus_argv
 
-        obj.dep_vars = ['PTFORMAT', 'MIXBUS', 'WINDOWS', 'debug']
-        obj.stdin = program + '.menus.in'
-        obj.stdout = program + '.menus'
-        bld.install_files (bld.env['CONFDIR'], program + '.menus')
+    obj = bld(features = 'command-output')
+    obj.command = 'cpp'
+    obj.command_is_external = True
+    obj.no_inputs = True
+    obj.argv = menus_argv
+    obj.dep_vars = ['PTFORMAT', 'MIXBUS', 'WINDOWS', 'debug']
+    if bld.is_defined('LIVETRAX'):
+        obj.stdin = 'livetrax.menus.in'
+    else:
+        obj.stdin = 'ardour.menus.in'
+    obj.stdout = 'ardour.menus'
+    bld.install_files (bld.env['CONFDIR'], 'ardour.menus')
 
     # Freedesktop
     freedesktop_subst_dict = {
@@ -917,11 +930,16 @@ def build(bld):
     # NATIVE ARDOUR BINDING FILES
     # explicitly state the use of perl here so that it works on windows too
     #
+    #
+    # ***** NOTE: THE CANONICAL LIST OF FILES PROCESSED FOR BINDINGS IS INSIDE ../tools/fmt-bindings
+    #
+    # If you add or delete some ,bindings files, be sure to edit fmt_bindings too, or better yet,
+    # hack fmt-bindings and this wscript file so that the list is defined here and passed in.
     a_rule = 'perl %s/tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap 1 ${SRC[0].abspath()} >${TGT}' % (bld.top_dir, sys.platform, bld.env['WINDOWS_KEY'] )
     for b in [ 'ardour' ] :
         obj = bld(
             target = b + '.keys',
-            source = [ b + '.keys.in', 'mixer.bindings', 'processor_box.bindings', 'step_editing.bindings', 'monitor.bindings', 'trigger.bindings' ],
+            source = [ b + '.keys.in', 'mixer.bindings', 'processor_box.bindings', 'step_editing.bindings', 'monitor.bindings', 'trigger.bindings', 'regionfx_box.bindings' ],
             rule = a_rule
             )
         obj.install_path = bld.env['CONFDIR']
@@ -958,26 +976,27 @@ def build(bld):
             bld.install_as (os.path.join(os.path.normpath(bld.env['LOCALEDIR']), lang, 'LC_MESSAGES', I18N_PACKAGE + '.mo'),
                             mo)
 
-def i18n(bld):
+def i18n_func(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
     autowaf.build_i18n(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                        'Paul Davis')
     appdata_i18n_pot(bld)
     appdata_i18n_po(bld)
+    appdata_i18n_mo(bld)
 
-def i18n_pot(bld):
+def i18n_pot_func(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
     autowaf.build_i18n_pot(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                            'Paul Davis')
     appdata_i18n_pot(bld)
 
-def i18n_po(bld):
+def i18n_po_func(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
     autowaf.build_i18n_po(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                           'Paul Davis')
     appdata_i18n_po(bld)
 
-def i18n_mo(bld):
+def i18n_mo_func(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
     autowaf.build_i18n_mo(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                           'Paul Davis')
@@ -985,7 +1004,7 @@ def i18n_mo(bld):
 def appdata_i18n_pot(bld):
     potfile = os.path.join(bld.top_dir, 'gtk2_ardour', 'appdata',
             'ardour.appdata.pot')
-    if bld.cmd == 'i18n_pot':
+    if bld.cmd in ('i18n_pot', 'i18n'):
         Logs.info('Generating pot file from Ardour appdata')
         itsfile = os.path.join(bld.top_dir, 'tools', 'as-metainfo.its')
         adsource = os.path.join(bld.top_dir, 'gtk2_ardour',

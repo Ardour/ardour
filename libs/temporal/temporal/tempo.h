@@ -16,8 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __temporal_tempo_h__
-#define __temporal_tempo_h__
+#pragma once
 
 #include <list>
 #include <string>
@@ -263,7 +262,9 @@ class LIBTEMPORAL_API Tempo {
 	superclock_t _end_superclocks_per_note_type;
 	int8_t       _note_type;
 	bool         _locked_to_meter; /* XXX name has unclear meaning with nutempo */
-	bool         _continuing;
+	bool         _continuing; /* true if our effective end tempo is defined
+	                           * by the following tempo in the TempoMap;
+	                           * false if we use our own end tempo. */
 
 	static inline superclock_t double_npm_to_scpn (double npm) { return (superclock_t) llround ((60./npm) * superclock_ticks_per_second()); }
 
@@ -303,10 +304,13 @@ class LIBTEMPORAL_API Meter {
 	BBT_Time bbt_add (BBT_Time const & bbt, BBT_Offset const & add) const;
 	BBT_Time bbt_subtract (BBT_Time const & bbt, BBT_Offset const & sub) const;
 	BBT_Time round_to_bar (BBT_Time const &) const;
+	BBT_Time round_up_to_bar (BBT_Time const &) const;
 	BBT_Time round_up_to_beat_div (BBT_Time const &, int beat_div) const;
 	BBT_Time round_up_to_beat (BBT_Time const & bbt) const { return round_up_to_beat_div (bbt, 1); }
 	BBT_Time round_to_beat (BBT_Time const &) const;
 	Beats    to_quarters (BBT_Offset const &) const;
+
+	Beats round_to_beat (Beats const &) const;
 
 	XMLNode& get_state () const;
 	int set_state (XMLNode const&, int version);
@@ -348,8 +352,8 @@ class /*LIBTEMPORAL_API*/ MeterPoint : public Meter, public meter_hook, public v
 };
 
 /* A TempoPoint is a combination of a Tempo with a Point. However, if the temp
- * is ramped, then at some point we will need to compute the ramp coefficients
- * (c-per-quarter and c-per-superclock) and store them so that we can compute
+ * is ramped, then at some point we will need to compute the ramp coefficient
+ * (_omega) and store it so that we can compute tempo-at-time and
  * time-at-quarter-note on demand.
  */
 
@@ -469,7 +473,9 @@ class LIBTEMPORAL_API TempoMetric
 	BBT_Argument   bbt_add (BBT_Time const & bbt, BBT_Offset const & add) const { return BBT_Argument (reftime(), _meter->bbt_add (bbt, add)); }
 	BBT_Argument   bbt_subtract (BBT_Time const & bbt, BBT_Offset const & sub) const { return BBT_Argument (reftime(), _meter->bbt_subtract (bbt, sub)); }
 	BBT_Argument round_to_bar (BBT_Time const & bbt) const { return BBT_Argument (reftime(), _meter->round_to_bar (bbt)); }
+	BBT_Argument round_up_to_bar (BBT_Time const & bbt) const { return BBT_Argument (reftime(), _meter->round_up_to_bar (bbt)); }
 	Beats to_quarters (BBT_Offset const & bbo) const { return _meter->to_quarters (bbo); }
+	Beats round_to_beat (Beats const & b) const { return _meter->round_to_beat (b); }
 
 	/* combination methods that require both tempo and meter information */
 
@@ -928,9 +934,12 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	 */
 	LIBTEMPORAL_API double quarters_per_minute_at (timepos_t const & pos) const;
 
-	/* convenience function */
+	/* convenience functions */
 	LIBTEMPORAL_API BBT_Argument round_to_bar (BBT_Argument const & bbt) const {
 		return metric_at (bbt).round_to_bar (bbt);
+	}
+	LIBTEMPORAL_API BBT_Argument round_up_to_bar (BBT_Argument const & bbt) const {
+		return metric_at (bbt).round_up_to_bar (bbt);
 	}
 
 	LIBTEMPORAL_API BBT_Argument bbt_at (timepos_t const &) const;
@@ -981,7 +990,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API void dump (std::ostream&) const;
 
-	LIBTEMPORAL_API static PBD::Signal0<void> MapChanged;
+	LIBTEMPORAL_API static PBD::Signal<void()> MapChanged;
 
 	LIBTEMPORAL_API XMLNode& get_state() const;
 
@@ -1294,4 +1303,3 @@ LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::MusicTimeP
 LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::TempoMetric const &);
 }
 
-#endif /* __temporal_tempo_h__ */

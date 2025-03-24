@@ -22,7 +22,6 @@
 #include "libpbd-config.h"
 #endif
 
-#include <boost/scoped_ptr.hpp>
 #include <string>
 #include <glibmm/spawn.h>
 
@@ -55,7 +54,7 @@ PBD::open_uri (const char* uri)
 	return cocoa_open_url (uri);
 #else
 	EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
-	boost::scoped_ptr<EnvironmentalProtectionAgency> current_epa;
+	std::unique_ptr<EnvironmentalProtectionAgency> current_epa;
 
 	/* revert all environment settings back to whatever they were when ardour started
 	 */

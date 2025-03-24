@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_vst_plugin_ui_h__
-#define __ardour_vst_plugin_ui_h__
+#pragma once
 
 #include "plugin_ui.h"
 
@@ -57,4 +56,3 @@ private:
 	void preset_selected (ARDOUR::Plugin::PresetRecord preset);
 };
 
-#endif

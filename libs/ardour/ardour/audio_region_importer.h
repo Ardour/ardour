@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_audio_region_importer_h__
-#define __ardour_audio_region_importer_h__
+#pragma once
 
 #include <list>
 #include <map>
@@ -109,4 +108,3 @@ class LIBARDOUR_API AudioRegionImporter : public ElementImporter
 
 } // namespace ARDOUR
 
-#endif

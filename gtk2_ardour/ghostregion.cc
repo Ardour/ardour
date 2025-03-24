@@ -59,14 +59,13 @@ GhostRegion::GhostRegion (RegionView& rv,
 	: parent_rv (rv)
 	, trackview (tv)
 	, source_trackview (source_tv)
-	, base_rect (0)
+	, group (new ArdourCanvas::Container (parent))
+	, base_rect (new ArdourCanvas::Rectangle (group))
 {
-	group = new ArdourCanvas::Container (parent);
 	CANVAS_DEBUG_NAME (group, "ghost region group");
 	group->set_position (ArdourCanvas::Duple (initial_pos, 0));
 
 	if (is_automation_ghost()) {
-		base_rect = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (base_rect, "ghost region rect");
 		base_rect->set_x0 (0);
 		base_rect->set_y0 (1.0);
@@ -193,7 +192,6 @@ MidiGhostRegion::MidiGhostRegion(MidiRegionView& rv,
 	: GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
 	, _note_group (new ArdourCanvas::Container (group))
 	,  parent_mrv (rv)
-	, _optimization_iterator(events.end())
 {
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
@@ -208,43 +206,6 @@ MidiGhostRegion::~MidiGhostRegion()
 {
 	clear_events ();
 	delete _note_group;
-}
-
-MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g, ArdourCanvas::Item* i)
-	: event (e)
-	, item (i)
-	, is_hit (false)
-{
-	velocity_while_editing = event->note()->velocity();
-}
-
-MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g)
-	: event (e)
-{
-	if (dynamic_cast<Note*>(e)) {
-		item = new ArdourCanvas::Rectangle (g, ArdourCanvas::Rect(e->x0(), e->y0(), e->x1(), e->y1()));
-		is_hit = false;
-	} else {
-		Hit* hit = dynamic_cast<Hit*>(e);
-		if (!hit) {
-			return;
-		}
-		ArdourCanvas::Polygon* poly = new ArdourCanvas::Polygon(g);
-		poly->set(Hit::points(e->y1() - e->y0()));
-		poly->set_position(hit->position());
-		item = poly;
-		is_hit = true;
-	}
-
-	velocity_while_editing = event->note()->velocity();
-
-	CANVAS_DEBUG_NAME (item, "ghost note item");
-}
-
-MidiGhostRegion::GhostEvent::~GhostEvent ()
-{
-	/* event is not ours to delete */
-	delete item;
 }
 
 void
@@ -277,7 +238,7 @@ MidiGhostRegion::set_colors()
 	GhostRegion::set_colors();
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
-	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
+	for (GhostEvent::EventList::iterator it = events.begin(); it != events.end(); ++it) {
 		it->second->item->set_fill_color (UIConfiguration::instance().color_mod((*it).second->event->base_color(), "ghost track midi fill"));
 		it->second->item->set_outline_color (_outline);
 	}
@@ -313,7 +274,7 @@ MidiGhostRegion::update_contents_height ()
 
 	double const h = note_height(trackview, mv);
 
-	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
+	for (GhostEvent::EventList::iterator it = events.begin(); it != events.end(); ++it) {
 		uint8_t const note_num = it->second->event->note()->note();
 
 		double const y = note_y(trackview, mv, note_num);
@@ -336,7 +297,6 @@ MidiGhostRegion::add_note (NoteBase* n)
 {
 	GhostEvent* event = new GhostEvent (n, _note_group);
 	events.insert (make_pair (n->note(), event));
-	_optimization_iterator = events.end();
 
 	event->item->set_fill_color (UIConfiguration::instance().color_mod(n->base_color(), "ghost track midi fill"));
 	event->item->set_outline_color (_outline);
@@ -370,7 +330,6 @@ MidiGhostRegion::clear_events()
 {
 	_note_group->clear (true);
 	events.clear ();
-	_optimization_iterator = events.end();
 }
 
 /** Update the  positions of our representation of a note.
@@ -424,15 +383,13 @@ MidiGhostRegion::update_hit (GhostEvent* ev)
 void
 MidiGhostRegion::remove_note (NoteBase* note)
 {
-	EventList::iterator f = events.find (note->note());
+	GhostEvent::EventList::iterator f = events.find (note->note());
 	if (f == events.end()) {
 		return;
 	}
 
 	delete f->second;
 	events.erase (f);
-
-	_optimization_iterator = events.end ();
 }
 
 void
@@ -445,12 +402,12 @@ void
 MidiGhostRegion::model_changed ()
 {
 	/* we rely on the parent MRV having removed notes not in the model */
-	for (EventList::iterator i = events.begin(); i != events.end(); ) {
+	for (GhostEvent::EventList::iterator i = events.begin(); i != events.end(); ) {
 
-		std::shared_ptr<NoteType> note = i->first;
+		std::shared_ptr<GhostEvent::NoteType> note = i->first;
 		GhostEvent* cne = i->second;
-		const bool visible = (note->note() >= parent_mrv._current_range_min) &&
-			(note->note() <= parent_mrv._current_range_max);
+		const bool visible = (note->note() >= parent_mrv.midi_context().lowest_note()) &&
+			(note->note() <= parent_mrv.midi_context().highest_note());
 
 		if (visible) {
 			if (cne->is_hit) {
@@ -465,30 +422,4 @@ MidiGhostRegion::model_changed ()
 
 		++i;
 	}
-}
-
-/** Given a note in our parent region (ie the actual MidiRegionView), find our
- *  representation of it.
- *  @return Our Event, or 0 if not found.
- */
-MidiGhostRegion::GhostEvent *
-MidiGhostRegion::find_event (std::shared_ptr<NoteType> parent)
-{
-	/* we are using _optimization_iterator to speed up the common case where a caller
-	   is going through our notes in order.
-	*/
-
-	if (_optimization_iterator != events.end()) {
-		++_optimization_iterator;
-		if (_optimization_iterator != events.end() && _optimization_iterator->first == parent) {
-			return _optimization_iterator->second;
-		}
-	}
-
-	_optimization_iterator = events.find (parent);
-	if (_optimization_iterator != events.end()) {
-		return _optimization_iterator->second;
-	}
-
-	return 0;
 }

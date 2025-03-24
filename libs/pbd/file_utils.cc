@@ -21,6 +21,8 @@
  */
 
 #include <algorithm>
+#include <climits>
+#include <set>
 #include <vector>
 
 #include <glib.h>
@@ -79,17 +81,19 @@ run_functor_for_paths (vector<string>& result,
                        void *arg,
                        bool pass_files_only,
                        bool pass_fullpath, bool return_fullpath,
-                       bool recurse)
+                       bool recurse,
+                       set<string>& scanned_paths)
 {
 	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
-		string expanded_path = path_expand (*i);
-		DEBUG_TRACE (DEBUG::FileUtils,
-				string_compose("Find files in expanded path: %1\n", expanded_path));
-
-		if (!Glib::file_test (expanded_path, Glib::FILE_TEST_IS_DIR)) continue;
-
 		try
 		{
+			string expanded_path = path_expand (*i);
+
+			DEBUG_TRACE (DEBUG::FileUtils,
+					string_compose("Find files in expanded path: %1\n", expanded_path));
+
+			if (!Glib::file_test (expanded_path, Glib::FILE_TEST_IS_DIR)) continue;
+
 			Glib::Dir dir(expanded_path);
 
 			for (Glib::DirIterator di = dir.begin(); di != dir.end(); di++) {
@@ -100,11 +104,12 @@ run_functor_for_paths (vector<string>& result,
 				bool is_dir = Glib::file_test (fullpath, Glib::FILE_TEST_IS_DIR);
 
 				if (is_dir && recurse) {
-					DEBUG_TRACE (DEBUG::FileUtils,
-							string_compose("Descending into directory:  %1\n",
-								fullpath));
-					run_functor_for_paths (result, fullpath, functor, arg, pass_files_only,
-					                       pass_fullpath, return_fullpath, recurse);
+					if (scanned_paths.find (fullpath) == scanned_paths.end ()) {
+						scanned_paths.insert (fullpath);
+						DEBUG_TRACE (DEBUG::FileUtils, string_compose("Descending into directory:  %1\n", fullpath));
+						run_functor_for_paths (result, fullpath, functor, arg, pass_files_only,
+						                       pass_fullpath, return_fullpath, recurse, scanned_paths);
+					}
 				}
 
 				if (is_dir && pass_files_only) {
@@ -137,10 +142,14 @@ run_functor_for_paths (vector<string>& result,
 			}
 		}
 		catch (Glib::FileError const& err) {
-			warning << string_compose (_("Cannot access file: %1"), err.what()) << endmsg;
+			char errstr[PATH_MAX*2];
+			snprintf (errstr, sizeof (errstr), "Cannot access file: %s", err.what().c_str());
+			warning << errstr << endmsg;
 		}
 		catch (Glib::ConvertError const& err) {
-			warning << string_compose (_("Could not convert filename: %1"), err.what()) << endmsg;
+			char errstr[PATH_MAX*2];
+			snprintf (errstr, sizeof (errstr), "Cannot convert filename: %s", err.what().c_str());
+			warning << errstr << endmsg;
 		}
 	}
 }
@@ -157,8 +166,9 @@ get_paths (vector<string>& result,
            bool files_only,
            bool recurse)
 {
+	set<string> scanned_path;
 	run_functor_for_paths (result, paths, accept_all_files, 0,
-	                       files_only, true, true, recurse);
+	                       files_only, true, true, recurse, scanned_path);
 }
 
 void
@@ -180,9 +190,10 @@ find_files_matching_pattern (vector<string>& result,
                              const Searchpath& paths,
                              const Glib::PatternSpec& pattern)
 {
+	set<string> unused;
 	run_functor_for_paths (result, paths, pattern_filter,
 	                       const_cast<Glib::PatternSpec*>(&pattern),
-	                       true, false, true, false);
+	                       true, false, true, false, unused);
 }
 
 void
@@ -275,7 +286,8 @@ find_paths_matching_filter (vector<string>& result,
                             bool pass_fullpath, bool return_fullpath,
                             bool recurse)
 {
-	run_functor_for_paths (result, paths, filter, arg, false, pass_fullpath, return_fullpath, recurse);
+	set<string> scanned_path;
+	run_functor_for_paths (result, paths, filter, arg, false, pass_fullpath, return_fullpath, recurse, scanned_path);
 }
 
 void
@@ -286,7 +298,8 @@ find_files_matching_filter (vector<string>& result,
                             bool pass_fullpath, bool return_fullpath,
                             bool recurse)
 {
-	run_functor_for_paths (result, paths, filter, arg, true, pass_fullpath, return_fullpath, recurse);
+	set<string> scanned_path;
+	run_functor_for_paths (result, paths, filter, arg, true, pass_fullpath, return_fullpath, recurse, scanned_path);
 }
 
 bool

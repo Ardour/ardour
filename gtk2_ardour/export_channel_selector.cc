@@ -26,7 +26,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include <gtkmm/menu.h>
+#include <ytkmm/menu.h>
 
 #include "pbd/convert.h"
 #include "pbd/unwind.h"
@@ -679,6 +679,8 @@ TrackExportChannelSelector::sync_with_manager_state ()
 		} else {
 			track_output_button.set_active (true);
 		}
+	} else {
+		track_output_button.set_active (false);
 	}
 
 	if (selected > 0) {
@@ -733,8 +735,8 @@ TrackExportChannelSelector::sync_with_manager_state ()
 					PortExportChannel::PortSet route_ports;
 					PortExportChannel::PortSet intersection;
 
-					PortSet& ps (route->output()->ports ());
-					for (PortSet::audio_iterator p = ps.audio_begin (); p != ps.audio_end (); ++p) {
+					std::shared_ptr<PortSet> ps (route->output()->ports ());
+					for (PortSet::audio_iterator p = ps->audio_begin (); p != ps->audio_end (); ++p) {
 						route_ports.insert (*p);
 					}
 
@@ -838,7 +840,7 @@ TrackExportChannelSelector::fill_list()
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
 		if (!std::dynamic_pointer_cast<Track>(*it)) {
 			// not a track, must be a bus
-			if ((*it)->is_main_bus ()) {
+			if ((*it)->is_main_bus () && !(*it)->is_surround_master ()) {
 				continue;
 			}
 			if (!(*it)->active ()) {

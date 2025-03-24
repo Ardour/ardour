@@ -35,7 +35,6 @@
 #include <sys/time.h>
 #include <errno.h>
 
-#include <boost/shared_array.hpp>
 #include <glibmm/miscutils.h>
 
 #include "midi++/types.h"
@@ -98,7 +97,7 @@ using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 #include "pbd/i18n.h"
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 const int MACKIE_NAMESPACE::MackieControlProtocol::MODIFIER_OPTION = 0x1;
 const int MACKIE_NAMESPACE::MackieControlProtocol::MODIFIER_CONTROL = 0x2;
@@ -148,7 +147,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session, const char* pnam
 		_last_bank[i] = 0;
 	}
 
-	PresentationInfo::Change.connect (gui_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_presentation_info_changed, this, _1), this);
+	PresentationInfo::Change.connect (gui_connections, MISSING_INVALIDATOR, std::bind (&MackieControlProtocol::notify_presentation_info_changed, this, _1), this);
 
 	_instance = this;
 
@@ -194,27 +193,10 @@ MackieControlProtocol::~MackieControlProtocol()
 void
 MackieControlProtocol::thread_init ()
 {
-	pthread_set_name (event_loop_name().c_str());
-
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), event_loop_name(), 2048);
 	ARDOUR::SessionEvent::create_per_thread_pool (event_loop_name(), 128);
 
 	set_thread_priority ();
-}
-
-void
-MackieControlProtocol::ping_devices ()
-{
-	/* should not be called if surfaces are not connected, but will not
-	 * malfunction if it is.
-	 */
-
-	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
-		for (auto const& si : surfaces) {
-			si->connected ();
-		}
-	}
 }
 
 // go to the previous track.
@@ -745,22 +727,22 @@ void
 MackieControlProtocol::connect_session_signals()
 {
 	// receive routes added
-	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_routes_added, this, _1), this);
+	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, std::bind (&MackieControlProtocol::notify_routes_added, this, _1), this);
 	// receive VCAs added
-	session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_vca_added, this, _1), this);
+	session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, std::bind (&MackieControlProtocol::notify_vca_added, this, _1), this);
 
 	// receive record state toggled
-	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_record_state_changed, this), this);
+	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, std::bind (&MackieControlProtocol::notify_record_state_changed, this), this);
 	// receive transport state changed
-	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_transport_state_changed, this), this);
-	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_loop_state_changed, this), this);
+	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, std::bind (&MackieControlProtocol::notify_transport_state_changed, this), this);
+	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, std::bind (&MackieControlProtocol::notify_loop_state_changed, this), this);
 	// receive punch-in and punch-out
-	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
-	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
+	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, std::bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
+	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, std::bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
 	// receive rude solo changed
-	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_solo_active_changed, this, _1), this);
+	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, std::bind (&MackieControlProtocol::notify_solo_active_changed, this, _1), this);
 
-	session->MonitorBusAddedOrRemoved.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_monitor_added_or_removed, this), this);
+	session->MonitorBusAddedOrRemoved.connect (session_connections, MISSING_INVALIDATOR, std::bind (&MackieControlProtocol::notify_monitor_added_or_removed, this), this);
 
 	// make sure remote id changed signals reach here
 	// see also notify_stripable_added
@@ -834,7 +816,7 @@ MackieControlProtocol::set_device (const string& device_name, bool force)
 		   loop, not in the thread where the
 		   PortConnectedOrDisconnected signal is emitted.
 		*/
-		ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::connection_handler, this, _1, _2, _3, _4, _5), this);
+		ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, std::bind (&MackieControlProtocol::connection_handler, this, _1, _2, _3, _4, _5), this);
 	}
 
 	build_button_map();
@@ -1430,15 +1412,15 @@ MackieControlProtocol::notify_record_state_changed ()
 			LedState ls;
 
 			switch (session->record_status()) {
-			case Session::Disabled:
+			case Disabled:
 				DEBUG_TRACE (DEBUG::MackieControl, "record state changed to disabled, LED off\n");
 				ls = off;
 				break;
-			case Session::Recording:
+			case Recording:
 				DEBUG_TRACE (DEBUG::MackieControl, "record state changed to recording, LED on\n");
 				ls = on;
 				break;
-			case Session::Enabled:
+			case Enabled:
 
 				if(_device_info.is_qcon()){
 					// For qcon the rec button is two state only (on/off)
@@ -1831,7 +1813,7 @@ MackieControlProtocol::set_subview_mode (MACKIE_NAMESPACE::Subview::Mode sm, std
 	/* Catch the current subview stripable going away */
 	if (_subview->subview_stripable()) {
 		_subview->subview_stripable()->DropReferences.connect (_subview->subview_stripable_connections(), MISSING_INVALIDATOR,
-													boost::bind (&MackieControlProtocol::notify_subview_stripable_deleted, this),
+													std::bind (&MackieControlProtocol::notify_subview_stripable_deleted, this),
 													this);
 	}
 
@@ -1946,7 +1928,7 @@ MackieControlProtocol::check_fader_automation_state ()
 
 	r->gain_control()->alist()->automation_state_changed.connect (fader_automation_connections,
 	                                                              MISSING_INVALIDATOR,
-	                                                              boost::bind (&MackieControlProtocol::update_fader_automation_state, this),
+	                                                              std::bind (&MackieControlProtocol::update_fader_automation_state, this),
 	                                                              this);
 
 	update_fader_automation_state ();

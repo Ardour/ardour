@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_export_analysis_h__
-#define __ardour_export_analysis_h__
+#pragma once
 
 #include <cstring>
 #include <map>
@@ -151,4 +150,3 @@ typedef std::shared_ptr<ExportAnalysis>        ExportAnalysisPtr;
 typedef std::map<std::string, ExportAnalysisPtr> AnalysisResults;
 
 } // namespace ARDOUR
-#endif

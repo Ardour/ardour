@@ -20,7 +20,7 @@
 #ifndef _gtk_ardour_trigger_master_h_
 #define _gtk_ardour_trigger_master_h_
 
-#include <gtkmm/colorselection.h>
+#include <ytkmm/colorselection.h>
 
 #include "pbd/properties.h"
 

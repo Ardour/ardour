@@ -27,7 +27,7 @@
 #define GTK_MENU_INTERNALS
 #include "config.h"
 #include <string.h>
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 #include "gtkaccellabel.h"
 #include "gtkaccelmap.h"
 #include "gtkbindings.h"
@@ -3906,9 +3906,8 @@ gtk_menu_enter_notify (GtkWidget        *widget,
 		   */
 		  menu_shell->activate_time = 0;
 		}
+	      priv->seen_item_enter = TRUE;
 	    }
-	    
-	  priv->seen_item_enter = TRUE;
 	}
     }
   

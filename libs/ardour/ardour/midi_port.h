@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_midi_port_h__
-#define __ardour_midi_port_h__
+#pragma once
 
 #include "midi++/parser.h"
 
@@ -60,8 +59,9 @@ class LIBARDOUR_API MidiPort : public Port {
 	MidiBuffer& get_midi_buffer (pframes_t nframes);
 
 	void set_trace (std::weak_ptr<MIDI::Parser> trace_parser);
+	std::shared_ptr<MIDI::Parser> trace_parser() const;
 
-	typedef boost::function<bool(MidiBuffer&,MidiBuffer&)> MidiFilter;
+	typedef std::function<bool(MidiBuffer&,MidiBuffer&)> MidiFilter;
 	void set_inbound_filter (MidiFilter);
 	int add_shadow_port (std::string const &, MidiFilter);
 	std::shared_ptr<MidiPort> shadow_port() const { return _shadow_port; }
@@ -90,4 +90,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_midi_port_h__ */

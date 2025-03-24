@@ -22,17 +22,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_selection_h__
-#define __ardour_gtk_selection_h__
+#pragma once
 
 #include <memory>
 #include <vector>
 
-#include <boost/noncopyable.hpp>
-
 #include <sigc++/signal.h>
 
 #include "pbd/signals.h"
+
+#include "ardour/types.h"
 
 #include "time_selection.h"
 #include "region_selection.h"
@@ -48,9 +47,9 @@
 class TimeAxisView;
 class RegionView;
 class Selectable;
-class PublicEditor;
+class EditingContext;
 class MidiRegionView;
-class AutomationLine;
+class EditorAutomationLine;
 class ControlPoint;
 
 
@@ -78,13 +77,6 @@ public:
 		Range = 0x2
 	};
 
-	enum Operation {
-		Set,
-		Add,
-		Toggle,
-		Extend
-	};
-
 	TrackSelection       tracks;
 	RegionSelection      regions;
 	TimeSelection        time;
@@ -102,7 +94,7 @@ public:
 	 */
 	MidiRegionSelection midi_regions();
 
-	Selection (PublicEditor const * e, bool manage_libardour_selection);
+	Selection (EditingContext const * e, bool manage_libardour_selection);
 
 	// Selection& operator= (const Selection& other);
 
@@ -250,13 +242,10 @@ public:
 	void core_selection_changed (PBD::PropertyChange const & pc);
 
 private:
-	PublicEditor const * editor;
+	EditingContext const * editor;
 	uint32_t next_time_id;
 	bool     manage_libardour_selection;
-
-	TrackViewList add_grouped_tracks (TrackViewList const & t);
 };
 
 bool operator==(const Selection& a, const Selection& b);
 
-#endif /* __ardour_gtk_selection_h__ */

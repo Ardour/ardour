@@ -274,6 +274,8 @@ VideoImageFrame::http_get (samplepos_t fn) {
 	queued_request=false;
 	req_video_frame_number=fn;
 	pthread_mutex_unlock(&queue_lock);
+	/* do not use `pbd pthread_create_and_store' here.
+	 * The request thread uses aync cancellation */
 	int rv = pthread_create(&thread_id_tt, NULL, http_get_thread, this);
 	thread_active=true;
 	if (rv) {

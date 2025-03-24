@@ -22,7 +22,7 @@
 #include "config.h"
 
 #include <string.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 #include "gtktoolpaletteprivate.h"
 #include "gtkmarshalers.h"
@@ -734,7 +734,7 @@ gtk_tool_palette_add (GtkContainer *container,
 
   g_ptr_array_add (palette->priv->groups, info);
   info->pos = palette->priv->groups->len - 1;
-  info->widget = g_object_ref_sink (child);
+  info->widget = GTK_TOOL_ITEM_GROUP (g_object_ref_sink (child));
 
   gtk_widget_set_parent (child, GTK_WIDGET (palette));
 }

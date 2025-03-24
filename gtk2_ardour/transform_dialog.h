@@ -16,16 +16,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __transform_dialog_h__
-#define __transform_dialog_h__
+#pragma once
 
 #include <list>
 #include <string>
 
-#include <gtkmm/combobox.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/combobox.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/spinbutton.h>
 
 #include "ardour/midi_model.h"
 #include "ardour/transform.h"
@@ -138,4 +137,3 @@ private:
 	Gtk::Button   _add_button;
 };
 
-#endif /* __transform_dialog_h__ */

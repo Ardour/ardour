@@ -42,6 +42,8 @@ static std::string gain_control_name (Evoral::Parameter const& param)
 			/* fallthrough */
 		case BusSendLevel:
 			/* fallthrough */
+		case SurroundSendLevel:
+			/* fallthrough */
 		case InsertReturnLevel:
 			return X_("gaincontrol");
 		case TrimAutomation:
@@ -63,6 +65,8 @@ static std::shared_ptr<AutomationList> automation_list_new (Evoral::Parameter co
 		case GainAutomation:
 			/* fallthrough */
 		case BusSendLevel:
+			/* fallthrough */
+		case SurroundSendLevel:
 			/* fallthrough */
 		case InsertReturnLevel:
 			/* fallthrough */
@@ -101,6 +105,17 @@ GainControl::inc_gain (gain_t factor)
 	} else {
 		actually_set_value (desired_gain + (desired_gain * factor), Controllable::ForGroup);
 	}
+}
+
+void
+GainControl::actually_set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
+{
+	const double max_factor = _desc.from_interface (1.0);
+	const double min_factor = _desc.from_interface (0.0);
+
+	value = std::max (min_factor, std::min (value, max_factor));
+
+	SlavableAutomationControl::actually_set_value (value, gcd);
 }
 
 void

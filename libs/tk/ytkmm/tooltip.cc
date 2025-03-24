@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/tooltip.h>
-#include <gtkmm/private/tooltip_p.h>
+#include <ytkmm/tooltip.h>
+#include <ytkmm/private/tooltip_p.h>
 
 
 /* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
@@ -26,7 +26,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

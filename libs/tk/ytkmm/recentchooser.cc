@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/recentchooser.h>
-#include <gtkmm/private/recentchooser_p.h>
+#include <ytkmm/recentchooser.h>
+#include <ytkmm/private/recentchooser_p.h>
 
 
 /* Copyright 2006 The gtkmm Development Team
@@ -24,7 +24,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // This Signal Proxy allows the C++ coder to specify a sigc::slot instead of a static function.
 

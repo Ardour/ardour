@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_mute_master_h__
-#define __ardour_mute_master_h__
+#pragma once
 
 #include <string>
 
@@ -76,7 +75,7 @@ public:
 
 	void set_muted_by_masters (bool);
 
-	PBD::Signal0<void> MutePointChanged;
+	PBD::Signal<void()> MutePointChanged;
 
 	XMLNode& get_state() const;
 	int set_state(const XMLNode&, int version);
@@ -93,4 +92,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif /*__ardour_mute_master_h__ */

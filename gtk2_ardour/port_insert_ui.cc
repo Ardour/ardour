@@ -21,8 +21,8 @@
 
 #include <glibmm/objectbase.h>
 
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/stock.h>
 
 #include "gtkmm2ext/keyboard.h"
 
@@ -35,7 +35,7 @@
 
 #include "context_menu_helper.h"
 #include "gui_thread.h"
-#include "latency_gui.h"
+#include "timectl_gui.h"
 #include "port_insert_ui.h"
 #include "timers.h"
 #include "utils.h"
@@ -115,9 +115,9 @@ PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session* sess, std::sha
 	Gtkmm2ext::UI::instance ()->set_tip (_measure_latency_button, _("Measure Latency using the first port of each direction\n(note that gain is not applied during measurement).\nRight-click to forget previous measurements,\nand revert to use default port latency."));
 
 	_pi->set_metering (true);
-	_pi->input ()->changed.connect (_connections, invalidator (*this), boost::bind (&PortInsertUI::return_changed, this, _1, _2), gui_context ());
-	_pi->output ()->changed.connect (_connections, invalidator (*this), boost::bind (&PortInsertUI::send_changed, this, _1, _2), gui_context ());
-	_pi->LatencyChanged.connect (_connections, invalidator (*this), boost::bind (&PortInsertUI::set_latency_label, this), gui_context ());
+	_pi->input ()->changed.connect (_connections, invalidator (*this), std::bind (&PortInsertUI::return_changed, this, _1, _2), gui_context ());
+	_pi->output ()->changed.connect (_connections, invalidator (*this), std::bind (&PortInsertUI::send_changed, this, _1, _2), gui_context ());
+	_pi->LatencyChanged.connect (_connections, invalidator (*this), std::bind (&PortInsertUI::set_latency_label, this), gui_context ());
 
 	_fast_screen_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &PortInsertUI::fast_update));
 
@@ -282,7 +282,7 @@ PortInsertUI::edit_latency_button_clicked ()
 {
 	assert (_pi);
 	if (!_latency_gui) {
-		_latency_gui    = new LatencyGUI (*(_pi.get ()), _pi->session ().sample_rate (), _pi->session ().get_block_size ());
+		_latency_gui    = new TimeCtlGUI (*(_pi.get ()), _pi->session ().sample_rate (), _pi->session ().get_block_size ());
 		_latency_dialog = new ArdourWindow (_("Edit Latency"));
 		/* use both keep-above and transient for to try cover as many
 		   different WM's as possible.

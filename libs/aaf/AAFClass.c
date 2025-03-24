@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2023 Adrien Gesta-Fline
+ * Copyright (C) 2017-2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -38,31 +38,31 @@
 #include "aaf/AAFDefs/AAFPropertyIDs.h"
 #include "aaf/AAFDefs/AAFTypeDefUIDs.h"
 
-#include "aaf/debug.h"
+#include "aaf/log.h"
 
 #include "aaf/AAFClass.h"
 
 #define debug(...) \
-	_dbg (aafd->dbg, aafd, DEBUG_SRC_ID_AAF_CORE, VERB_DEBUG, __VA_ARGS__)
+	AAF_LOG (aafd->log, aafd, LOG_SRC_ID_AAF_CORE, VERB_DEBUG, __VA_ARGS__)
 
 #define warning(...) \
-	_dbg (aafd->dbg, aafd, DEBUG_SRC_ID_AAF_CORE, VERB_WARNING, __VA_ARGS__)
+	AAF_LOG (aafd->log, aafd, LOG_SRC_ID_AAF_CORE, VERB_WARNING, __VA_ARGS__)
 
 #define error(...) \
-	_dbg (aafd->dbg, aafd, DEBUG_SRC_ID_AAF_CORE, VERB_ERROR, __VA_ARGS__)
+	AAF_LOG (aafd->log, aafd, LOG_SRC_ID_AAF_CORE, VERB_ERROR, __VA_ARGS__)
 
-#define attachNewProperty(aafd, Class, Prop, Pid, IsReq)                 \
-	Prop = calloc (sizeof (aafPropertyDef), sizeof (unsigned char)); \
-	if (Prop == NULL) {                                              \
-		error ("%s.", strerror (errno));                         \
-		return -1;                                               \
-	}                                                                \
-	Prop->pid   = Pid;                                               \
-	Prop->name  = NULL;                                              \
-	Prop->isReq = IsReq;                                             \
-	Prop->meta  = 0;                                                 \
-	Prop->next  = Class->Properties;                                 \
-	memset (&Prop->type, 0x00, sizeof (aafUID_t));                   \
+#define attachNewProperty(aafd, Class, Prop, Pid, IsReq) \
+	Prop = calloc (1, sizeof (aafPropertyDef));      \
+	if (!Prop) {                                     \
+		error ("Out of memory");                 \
+		return -1;                               \
+	}                                                \
+	Prop->pid   = Pid;                               \
+	Prop->name  = NULL;                              \
+	Prop->isReq = IsReq;                             \
+	Prop->meta  = 0;                                 \
+	Prop->next  = Class->Properties;                 \
+	memset (&Prop->type, 0x00, sizeof (aafUID_t));   \
 	Class->Properties = Prop;
 
 int
@@ -72,7 +72,7 @@ aafclass_classExists (AAF_Data* aafd, aafUID_t* ClassID)
 
 	foreachClass (Class, aafd->Classes) if (aafUIDCmp (Class->ID, ClassID)) break;
 
-	if (Class == NULL)
+	if (!Class)
 		return 0;
 
 	return 1;
@@ -95,8 +95,8 @@ aafclass_defineNewClass (AAF_Data* aafd, const aafUID_t* id, uint8_t isConcrete,
 {
 	aafClass* Class = malloc (sizeof (aafClass));
 
-	if (Class == NULL) {
-		error ("%s.", strerror (errno));
+	if (!Class) {
+		error ("Out of memory");
 		return NULL;
 	}
 
@@ -161,8 +161,6 @@ int
 aafclass_setDefaultClasses (AAF_Data* aafd)
 {
 	aafPropertyDef* prop = NULL;
-
-	/* TODO test ENOMEM after each class alloc */
 
 	aafClass* IOC = aafclass_defineNewClass (aafd, &AAFClassID_InterchangeObject, ABSTRACT, NULL);
 

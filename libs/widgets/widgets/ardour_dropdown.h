@@ -23,9 +23,9 @@
 #include <list>
 #include <stdint.h>
 
-#include <gtkmm/action.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/action.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "widgets/ardour_button.h"
 #include "widgets/visibility.h"
@@ -49,6 +49,7 @@ public:
 	void disable_scrolling();
 
 	Gtk::Menu_Helpers::MenuList& items () { return _menu.items (); }
+	Gtk::Menu& menu () { return _menu; }
 
 	void append_text_item (std::string const& text);
 	void set_active (std::string const& text);

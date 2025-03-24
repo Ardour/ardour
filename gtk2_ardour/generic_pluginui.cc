@@ -35,7 +35,7 @@
 #include <string>
 #include <vector>
 
-#include <gtkmm/separator.h>
+#include <ytkmm/separator.h>
 
 #include "pbd/stl_delete.h"
 #include "pbd/unwind.h"
@@ -84,10 +84,12 @@ using namespace ArdourWidgets;
 using namespace Gtk;
 using namespace ARDOUR_UI_UTILS;
 
-GenericPluginUI::GenericPluginUI (std::shared_ptr<PlugInsertBase> pib, bool scrollable)
+GenericPluginUI::GenericPluginUI (std::shared_ptr<PlugInsertBase> pib, bool scrollable, bool ctrls_only)
 	: PlugUIBase (pib)
 	, automation_menu (0)
 	, is_scrollable(scrollable)
+	, want_ctrl_only(ctrls_only)
+	, _empty (true)
 	, _plugin_pianokeyboard_expander (_("MIDI Keyboard (audition only)"))
 	, _piano (0)
 	, _piano_velocity (*manage (new Adjustment (100, 1, 127, 1, 16)))
@@ -121,7 +123,9 @@ GenericPluginUI::GenericPluginUI (std::shared_ptr<PlugInsertBase> pib, bool scro
 	automation_latch_all_button.set_text (GainMeterBase::astate_string (ARDOUR::Latch));
 	automation_latch_all_button.set_name (X_("generic button"));
 
-	if (_pib->ui_elements () & PlugInsertBase::MIDIKeyboard) {
+	if (ctrls_only) {
+		// relax
+	} else if (_pib->ui_elements () & PlugInsertBase::MIDIKeyboard) {
 		_piano = new APianoKeyboard ();
 		_piano->set_can_focus ();
 
@@ -149,11 +153,11 @@ GenericPluginUI::GenericPluginUI (std::shared_ptr<PlugInsertBase> pib, bool scro
 		pack_end (plugin_analysis_expander, false, false);
 	}
 
-	if (_pib->provides_stats ()) {
+	if (!ctrls_only && _pib->provides_stats ()) {
 		pack_end (cpuload_expander, false, false);
 	}
 
-	if (!plugin->get_docs().empty()) {
+	if (!ctrls_only && !plugin->get_docs().empty()) {
 		pack_end (description_expander, false, false);
 	}
 
@@ -175,10 +179,12 @@ GenericPluginUI::GenericPluginUI (std::shared_ptr<PlugInsertBase> pib, bool scro
 		settings_box.pack_start (*automation_hbox, false, false, 6);
 	}
 
-	main_contents.pack_start (settings_box, false, false);
+	if (!ctrls_only) {
+		main_contents.pack_start (settings_box, false, false);
+	}
 
 	if (_pi) {
-		_pi->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&GenericPluginUI::processor_active_changed, this, std::weak_ptr<Processor>(_pi)), gui_context());
+		_pi->ActiveChanged.connect (active_connection, invalidator (*this), std::bind (&GenericPluginUI::processor_active_changed, this, std::weak_ptr<Processor>(_pi)), gui_context());
 		_bypass_button.set_active (!_pi->enabled());
 	} else {
 		_bypass_button.set_sensitive (false);
@@ -385,7 +391,7 @@ GenericPluginUI::build ()
 		 * AutomationControl has only support for numeric values currently.
 		 * The only case is Variant::PATH for now */
 		plugin->PropertyChanged.connect(*this, invalidator(*this),
-				boost::bind(&GenericPluginUI::path_property_changed, this, _1, _2),
+				std::bind(&GenericPluginUI::path_property_changed, this, _1, _2),
 				gui_context());
 
 		/* and query current property value */
@@ -396,6 +402,12 @@ GenericPluginUI::build ()
 		if (has_descriptive_presets ()) {
 			preset_gui = new PluginPresetsUI (_pi); // XXX
 			hpacker.pack_start (*preset_gui, true, true);
+			_empty = false;
+			if (is_scrollable) {
+				preset_gui->show_all ();
+				GtkRequisition request = preset_gui->size_request();
+				prefheight = std::max (prefheight, request.height);
+			}
 		}
 	} else {
 		automatic_layout (control_uis);
@@ -410,7 +422,7 @@ GenericPluginUI::build ()
 	automation_latch_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Latch));
 
 	/* XXX This is a workaround for AutomationControl not knowing about preset loads */
-	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&GenericPluginUI::update_input_displays, this), gui_context ());
+	plugin->PresetLoaded.connect (*this, invalidator (*this), std::bind (&GenericPluginUI::update_input_displays, this), gui_context ());
 }
 
 
@@ -418,6 +430,7 @@ void
 GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 {
 	guint32 x = 0;
+	bool in_property_box = is_scrollable && want_ctrl_only;
 
 	static const int32_t initial_button_rows = 12;
 	static const int32_t initial_button_cols = 1;
@@ -435,8 +448,14 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	int output_rows, output_cols;
 	int button_rows, button_cols;
 
-	hpacker.set_spacing (10);
-	hpacker.set_border_width (10);
+	if (in_property_box) {
+		/* don't add spacing in property box */
+		hpacker.set_spacing (5);
+		hpacker.set_border_width (0);
+	} else {
+		hpacker.set_spacing (10);
+		hpacker.set_border_width (10);
+	}
 
 	output_rows = initial_output_rows;
 	output_cols = initial_output_cols;
@@ -450,7 +469,11 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	button_table->set_homogeneous (false);
 	button_table->set_row_spacings (2);
 	button_table->set_col_spacings (2);
-	button_table->set_border_width (5);
+	if (in_property_box) {
+		button_table->set_border_width (1);
+	} else {
+		button_table->set_border_width (5);
+	}
 
 	output_table->set_homogeneous (true);
 	output_table->set_row_spacings (2);
@@ -465,8 +488,13 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	hpacker.pack_start(*bt_frame, true, true);
 
 	box = manage (new VBox);
-	box->set_border_width (5);
-	box->set_spacing (1);
+	if (in_property_box) {
+		box->set_border_width (1);
+		box->set_spacing (2);
+	} else {
+		box->set_border_width (5);
+		box->set_spacing (1);
+	}
 
 	frame = manage (new Gtk::Frame);
 	frame->set_name ("BaseFrame");
@@ -498,7 +526,7 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 			// we can lay them out a bit more nicely later.
 			cui_controls_list.push_back(cui);
 
-		} else if (cui->display) {
+		} else if (cui->display && !want_ctrl_only) {
 
 			output_table->attach (*cui, output_col, output_col + 1, output_row, output_row+1,
 			                     FILL|EXPAND, FILL);
@@ -578,12 +606,17 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 				frame->set_name ("BaseFrame");
 				frame->set_label (_("Controls"));
 				box = manage (new VBox);
-				box->set_border_width (5);
-				box->set_spacing (1);
+				if (in_property_box) {
+					box->set_border_width (1);
+					box->set_spacing (2);
+				} else {
+					box->set_border_width (5);
+					box->set_spacing (1);
+				}
 				frame->add (*box);
 				hpacker.pack_start(*frame, true, true);
 				x = 0;
-			} else {
+			} else if (!in_property_box) {
 				HSeparator *split = new HSeparator();
 				split->set_size_request(-1, 5);
 				box->pack_start(*split, false, false, 0);
@@ -593,8 +626,11 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 		box->pack_start (*cui, false, false);
 	}
 
+	if (i > 0) {
+		_empty = false;
+	}
 	if (is_scrollable && i > 0) {
-		prefheight = 30 * i;
+		prefheight = 30 * i * UIConfiguration::instance().get_ui_scale();
 	}
 
 	if (box->children().empty()) {
@@ -606,6 +642,7 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 		delete button_table;
 	} else {
 		button_table->show_all ();
+		_empty = false;
 	}
 
 	if (!output_table->children().empty()) {
@@ -615,13 +652,15 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 		frame->add (*output_table);
 		hpacker.pack_end (*frame, true, true);
 		output_table->show_all ();
+		_empty = false;
 	} else {
 		delete output_table;
 	}
 
-	if (plugin->has_inline_display () && plugin->inline_display_in_gui ()) {
+	if (!want_ctrl_only && plugin->has_inline_display () && plugin->inline_display_in_gui ()) {
 		PluginDisplay* pd = manage (new PluginDisplay (plugin, 300));
 		hpacker.pack_end (*pd, true, true);
+		_empty = false;
 	}
 	show_all();
 
@@ -660,18 +699,26 @@ GenericPluginUI::build_midi_table ()
 		pgm_table->attach (*cui, col + 1, col + 2, row, row+1, SHRINK, SHRINK);
 	}
 
+	_empty = false;
+
+	if (is_scrollable) {
+		frame->show_all ();
+		GtkRequisition request = frame->size_request();
+		prefheight = std::max (prefheight, request.height);
+	}
+
 	_pib->plugin ()->read_midnam();
 
 	midi_refill_patches ();
 
 	_pib->plugin()->BankPatchChange.connect (
 			midi_connections, invalidator (*this),
-			boost::bind (&GenericPluginUI::midi_bank_patch_change, this, _1),
+			std::bind (&GenericPluginUI::midi_bank_patch_change, this, _1),
 			gui_context());
 
 	_pib->plugin()->UpdatedMidnam.connect (
 			midi_connections, invalidator (*this),
-			boost::bind (&GenericPluginUI::midi_refill_patches, this),
+			std::bind (&GenericPluginUI::midi_refill_patches, this),
 			gui_context());
 }
 
@@ -775,7 +822,6 @@ GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 	, hbox (0)
 	, vbox (0)
 	, meterinfo (0)
-	, knobtable (0)
 {
 	automate_button.set_name ("plugin automation state button");
 	set_tooltip (automate_button, _("Automation control"));
@@ -783,8 +829,6 @@ GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 	ignore_change = false;
 	update_pending = false;
 	button = false;
-
-	x0 = x1 = y0 = y1 = -1;
 }
 
 GenericPluginUI::ControlUI::~ControlUI()
@@ -840,11 +884,12 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 GenericPluginUI::ControlUI*
 GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
                                    const ParameterDescriptor&           desc,
-                                   std::shared_ptr<AutomationControl> mcontrol,
+                                   std::shared_ptr<AutomationControl>   mcontrol,
                                    float                                value,
-                                   bool                                 is_input,
-                                   bool                                 use_knob)
+                                   bool                                 is_input)
 {
+	bool use_knob = is_scrollable && want_ctrl_only; /* route property box */
+
 	ControlUI* control_ui = 0;
 
 	control_ui = manage (new ControlUI (param));
@@ -870,15 +915,8 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			control_ui->file_button->set_title(desc.label);
 			Gtkmm2ext::add_volume_shortcuts (*control_ui->file_button);
 
-			if (use_knob) {
-				control_ui->knobtable = manage (new Table());
-				control_ui->pack_start(*control_ui->knobtable, true, false);
-				control_ui->knobtable->attach (control_ui->label, 0, 1, 0, 1);
-				control_ui->knobtable->attach (*control_ui->file_button, 0, 1, 1, 2);
-			} else {
-				control_ui->pack_start (control_ui->label, false, true);
-				control_ui->pack_start (*control_ui->file_button, true, true);
-			}
+			control_ui->pack_start (control_ui->label, false, true);
+			control_ui->pack_start (*control_ui->file_button, true, true);
 
 			// Monitor changes from the user.
 			control_ui->file_button->signal_file_set().connect(
@@ -973,31 +1011,42 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		if (use_knob) {
 			set_short_autostate(control_ui, true);
 
-			control_ui->label.set_alignment (0.5, 0.5);
-			control_ui->knobtable = manage (new Table());
-			control_ui->pack_start(*control_ui->knobtable, true, true);
+			control_ui->label.set_alignment (0.0, 0.5);
+			control_ui->label.set_ellipsize (Pango::ELLIPSIZE_END);
+			control_ui->label.set_max_width_chars (11);
 
 			if (control_ui->combo) {
-				control_ui->knobtable->attach (control_ui->label, 0, 1, 0, 1);
-				control_ui->knobtable->attach (*control_ui->combo, 0, 1, 1, 2);
+				control_ui->pack_start (control_ui->label, true, true);
+				control_ui->pack_start(*control_ui->combo, false, true);
+
 			} else if (control_ui->spin_box) {
+				control_ui->pack_start (control_ui->label, true, true);
+#if 1
 				ArdourKnob* knob = dynamic_cast<ArdourKnob*>(control_ui->controller->widget ());
 				knob->set_tooltip_prefix (desc.label + ": ");
+
 				Alignment *align = manage (new Alignment (.5, .5, 0, 0));
 				align->add (*control_ui->controller);
-				control_ui->knobtable->attach (*align, 0, 1, 0, 1, EXPAND, SHRINK, 1, 2);
-				control_ui->knobtable->attach (*control_ui->spin_box, 0, 2, 1, 2);
-				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 0, 1, SHRINK, SHRINK, 2, 0);
+				delete control_ui->spin_box;
+				control_ui->pack_start (*align, false, false);
+#else
+				control_ui->pack_start (*control_ui->spin_box, false, true);
+#endif
+				control_ui->pack_start (control_ui->automate_button, false, true);
 			} else if (desc.toggled) {
 				Alignment *align = manage (new Alignment (.5, .5, 0, 0));
 				align->add (*control_ui->controller);
-				control_ui->knobtable->attach (*align, 0, 2, 0, 1, EXPAND, SHRINK, 2, 2);
-				control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
-				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
+				control_ui->pack_start (control_ui->label, true, true);
+				control_ui->pack_start (*align, false, true);
+				control_ui->pack_start (control_ui->automate_button, false, true);
 			} else {
-				control_ui->knobtable->attach (*control_ui->controller, 0, 2, 0, 1);
-				control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
-				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
+				ArdourKnob* knob = dynamic_cast<ArdourKnob*>(control_ui->controller->widget ());
+				if (knob) {
+					knob->set_tooltip_prefix (desc.label + ": ");
+				}
+				control_ui->pack_start (control_ui->label, true, true);
+				control_ui->pack_start (*control_ui->controller, false, true);
+				control_ui->pack_start (control_ui->automate_button, false, true);
 			}
 
 		} else {
@@ -1015,7 +1064,10 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		}
 
 
-		if (!_pi || mcontrol->flags () & Controllable::NotAutomatable) {
+		if (!_pi) {
+			control_ui->automate_button.set_no_show_all ();
+			control_ui->automate_button.hide ();
+		} else if (mcontrol->flags () & Controllable::NotAutomatable) {
 			control_ui->automate_button.set_sensitive (false);
 			set_tooltip(control_ui->automate_button, _("This control cannot be automated"));
 		} else {
@@ -1026,7 +1078,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			mcontrol->alist()->automation_state_changed.connect (
 					control_connections,
 					invalidator (*this),
-					boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui),
+					std::bind (&GenericPluginUI::automation_state_changed, this, control_ui),
 					gui_context());
 			input_controls_with_automation.push_back (control_ui);
 		}
@@ -1111,7 +1163,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 	if (mcontrol) {
 		mcontrol->Changed.connect(control_connections, invalidator(*this),
-		                          boost::bind(&GenericPluginUI::ui_parameter_changed,
+		                          std::bind(&GenericPluginUI::ui_parameter_changed,
 		                                      this, control_ui),
 		                          gui_context());
 	}
@@ -1186,7 +1238,7 @@ GenericPluginUI::ui_parameter_changed (ControlUI* cui)
 {
 	if (!cui->update_pending) {
 		cui->update_pending = true;
-		Gtkmm2ext::UI::instance()->call_slot (MISSING_INVALIDATOR, boost::bind (&GenericPluginUI::update_control_display, this, cui));
+		Gtkmm2ext::UI::instance()->call_slot (MISSING_INVALIDATOR, std::bind (&GenericPluginUI::update_control_display, this, cui));
 	}
 }
 
@@ -1270,9 +1322,9 @@ void
 GenericPluginUI::output_update ()
 {
 	for (vector<ControlUI*>::iterator i = output_controls.begin(); i != output_controls.end(); ++i) {
-		float val = plugin->get_parameter ((*i)->parameter().id());
 		char buf[32];
 		std::shared_ptr<ReadOnlyControl> c = _pib->control_output ((*i)->parameter().id());
+		float val = c->get_parameter ();
 		const std::string& str = ARDOUR::value_as_string(c->desc(), Variant(val));
 		size_t len = str.copy(buf, 31);
 		buf[len] = '\0';

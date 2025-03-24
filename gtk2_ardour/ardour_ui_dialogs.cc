@@ -33,7 +33,7 @@
 
 #include <vector>
 
-#include <gtkmm/treemodelfilter.h>
+#include <ytkmm/treemodelfilter.h>
 
 #include "pbd/convert.h"
 
@@ -70,8 +70,8 @@
 #include "meter_patterns.h"
 #include "monitor_section.h"
 #include "midi_tracer.h"
-#include "mini_timeline.h"
 #include "mixer_ui.h"
+#include "pianoroll_window.h"
 #include "plugin_dspload_window.h"
 #include "plugin_manager_ui.h"
 #include "public_editor.h"
@@ -84,7 +84,6 @@
 #include "speaker_dialog.h"
 #include "splash.h"
 #include "sfdb_ui.h"
-#include "time_info_box.h"
 #include "timers.h"
 #include "transport_masters_dialog.h"
 #include "trigger_page.h"
@@ -123,13 +122,10 @@ ARDOUR_UI::set_session (Session *s)
 		ActionManager::set_sensitive (ActionManager::range_sensitive_actions, false);
 	}
 
-	transport_ctrl.set_session (s);
-
 	update_path_label ();
 	update_sample_rate ();
 
 	if (!_session) {
-		WM::Manager::instance().set_session (s);
 		/* Session option editor cannot exist across change-of-session */
 		session_option_editor.drop_window ();
 		/* Ditto for AddVideoDialog */
@@ -155,10 +151,6 @@ ARDOUR_UI::set_session (Session *s)
 	apply_window_settings (false);
 
 	AutomationWatch::instance().set_session (s);
-
-	shuttle_box.set_session (s);
-	mini_timeline.set_session (s);
-	time_info_box->set_session (s);
 
 	primary_clock->set_session (s);
 	secondary_clock->set_session (s);
@@ -193,31 +185,25 @@ ARDOUR_UI::set_session (Session *s)
 	ActionManager::set_sensitive (ActionManager::point_selection_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::playlist_selection_sensitive_actions, false);
 
-	solo_alert_button.set_active (_session->soloing());
-
 	setup_session_options ();
 
 	blink_connection = Timers::blink_connect (sigc::mem_fun(*this, &ARDOUR_UI::blink_handler));
 
-	_session->SaveSessionRequested.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::save_session_at_its_request, this, _1), gui_context());
-	_session->StateSaved.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_title, this), gui_context());
-	_session->StateSaved.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_path_label, this), gui_context());
-	_session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::record_state_changed, this), gui_context());
-	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::map_transport_state, this), gui_context());
-	_session->DirtyChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_dirty_changed, this), gui_context());
+	_session->SaveSessionRequested.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::save_session_at_its_request, this, _1), gui_context());
+	_session->StateSaved.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::update_title, this), gui_context());
+	_session->StateSaved.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::update_path_label, this), gui_context());
+	_session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::record_state_changed, this), gui_context());
+	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::map_transport_state, this), gui_context());
+	_session->DirtyChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::session_dirty_changed, this), gui_context());
+	_session->LatencyUpdated.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::session_latency_updated, this, _1), gui_context());
 
-	_session->PunchLoopConstraintChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::set_punch_sensitivity, this), gui_context());
-	_session->auto_punch_location_changed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::set_punch_sensitivity, this), gui_context ());
+	_session->PunchLoopConstraintChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::set_punch_sensitivity, this), gui_context());
+	_session->auto_punch_location_changed.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::set_punch_sensitivity, this), gui_context ());
 
-	_session->Xrun.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::xrun_handler, this, _1), gui_context());
-	_session->SoloActive.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::soloing_changed, this, _1), gui_context());
-	_session->AuditionActive.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::auditioning_changed, this, _1), gui_context());
-	_session->locations()->added.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
-	_session->locations()->removed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
-	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_parameter_changed, this, _1), gui_context ());
-
-	_session->LatencyUpdated.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_latency_updated, this, _1), gui_context());
-	session_latency_updated (true);
+	_session->Xrun.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::xrun_handler, this, _1), gui_context());
+	_session->locations()->added.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
+	_session->locations()->removed.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
+	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::session_parameter_changed, this, _1), gui_context ());
 
 	/* Clocks are on by default after we are connected to a session, so show that here.
 	*/
@@ -234,62 +220,13 @@ ARDOUR_UI::set_session (Session *s)
 	start_clocking ();
 
 	map_transport_state ();
+	set_punch_sensitivity ();
 
 	second_connection = Timers::second_connect (sigc::mem_fun(*this, &ARDOUR_UI::every_second));
 	point_one_second_connection = Timers::rapid_connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_one_seconds));
-	point_zero_something_second_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_zero_something_seconds));
 	set_fps_timeout_connection();
 
 	update_format ();
-
-	if (editor_meter_table.get_parent()) {
-		transport_hbox.remove (editor_meter_table);
-	}
-
-	if (editor_meter) {
-		editor_meter_table.remove(*editor_meter);
-		delete editor_meter;
-		editor_meter = 0;
-	}
-
-	if (editor_meter_table.get_parent()) {
-		transport_hbox.remove (editor_meter_table);
-	}
-	if (editor_meter_peak_display.get_parent ()) {
-		editor_meter_table.remove (editor_meter_peak_display);
-	}
-
-	if (_session &&
-	    _session->master_out() &&
-	    _session->master_out()->n_outputs().n(DataType::AUDIO) > 0) {
-
-		editor_meter = new LevelMeterHBox(_session);
-		editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
-		editor_meter->clear_meters();
-		editor_meter->setup_meters (30, 10, 6);
-		editor_meter->show();
-
-		editor_meter_table.set_spacings(3);
-		editor_meter_table.attach(*editor_meter,             0,1, 0,1, FILL, EXPAND|FILL, 0, 1);
-		editor_meter_table.attach(editor_meter_peak_display, 0,1, 1,2, FILL, SHRINK, 0, 0);
-
-		editor_meter->show();
-		editor_meter_peak_display.show();
-
-		ArdourMeter::ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_peak_display));
-		ArdourMeter::ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_route_peak_display));
-		ArdourMeter::ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_group_peak_display));
-
-		editor_meter_peak_display.set_name ("meterbridge peakindicator");
-		editor_meter_peak_display.set_can_focus (false);
-		editor_meter_peak_display.set_size_request (-1, std::max (5.f, std::min (12.f, rintf (8.f * UIConfiguration::instance().get_ui_scale()))) );
-		editor_meter_peak_display.set_corner_radius (1.0);
-
-		_clear_editor_meter = true;
-		editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::editor_meter_peak_button_release), false);
-
-		repack_transport_hbox ();
-	}
 
 	update_title ();
 }
@@ -334,8 +271,13 @@ ARDOUR_UI::unload_session (bool hide_stuff, bool force_unload)
 			break;
 		case 0:
 			// discard/don't save
+			if (_session->unnamed()) {
+				ask_about_scratch_deletion ();
+			}
 			break;
 		}
+	} else if (!force_unload && _session && _session->unnamed()) {
+		ask_about_scratch_deletion ();
 	}
 
 
@@ -361,19 +303,9 @@ ARDOUR_UI::unload_session (bool hide_stuff, bool force_unload)
 
 	second_connection.disconnect ();
 	point_one_second_connection.disconnect ();
-	point_zero_something_second_connection.disconnect();
 	fps_connection.disconnect();
 
-	if (editor_meter) {
-		editor_meter_table.remove(*editor_meter);
-		delete editor_meter;
-		editor_meter = 0;
-		editor_meter_peak_display.hide();
-	}
-
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
-
-	WM::Manager::instance().set_session ((ARDOUR::Session*) 0);
 
 	if (ARDOUR_UI::instance()->video_timeline) {
 		ARDOUR_UI::instance()->video_timeline->close_session();
@@ -692,7 +624,17 @@ ARDOUR_UI::tabs_page_removed (Widget*, guint)
 void
 ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 {
+	if (tabbables_table.get_parent ()) {
+		editor->tab_btn_box ().remove ();
+		mixer->tab_btn_box ().remove ();
+		recorder->tab_btn_box ().remove ();
+		trigger_page->tab_btn_box ().remove ();
+	}
+
+	//pack the tabbables selector in this tab, and set button sensitivity appropriately
 	if (editor && (page == (guint) _tabs.page_num (editor->contents()))) {
+
+		editor->tab_btn_box ().add (tabbables_table);
 
 		editor_visibility_button.set_active_state (Gtkmm2ext::ImplicitActive);
 
@@ -713,6 +655,8 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 		}
 
 	} else if (mixer && (page == (guint) _tabs.page_num (mixer->contents()))) {
+
+		mixer->tab_btn_box ().add (tabbables_table);
 
 		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {
 			editor_visibility_button.set_active_state (Gtkmm2ext::Off);
@@ -754,6 +698,8 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 
 	} else if (page == (guint) _tabs.page_num (recorder->contents())) {
 
+		recorder->tab_btn_box ().add (tabbables_table);
+
 		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {
 			editor_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
@@ -773,6 +719,8 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 		}
 
 	} else if (page == (guint) _tabs.page_num (trigger_page->contents())) {
+
+		trigger_page->tab_btn_box ().add (tabbables_table);
 
 		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {
 			editor_visibility_button.set_active_state (Gtkmm2ext::Off);
@@ -957,7 +905,7 @@ ARDOUR_UI::new_midi_tracer_window ()
 		t->show_all ();
 		_midi_tracer_windows.push_back (t);
 	} else {
-		/* re-use the hidden one */
+		/* reuse the hidden one */
 		(*i)->show_all ();
 	}
 }
@@ -1080,15 +1028,6 @@ ARDOUR_UI::tabbed_window_state_event_handler (GdkEventWindowState* ev, void* obj
 	}
 #endif
 
-	return false;
-}
-
-bool
-ARDOUR_UI::editor_meter_peak_button_release (GdkEventButton* ev)
-{
-	if (ev->button == 1) {
-		ArdourMeter::ResetAllPeakDisplays ();
-	}
 	return false;
 }
 

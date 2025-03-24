@@ -380,6 +380,7 @@ LuaProc::load_script ()
 				_param_desc[pn].logarithmic  = lr["logarithmic"].isBoolean () && (lr["logarithmic"]).cast<bool> ();
 				_param_desc[pn].integer_step = lr["integer"].isBoolean () && (lr["integer"]).cast<bool> ();
 				_param_desc[pn].sr_dependent = lr["ratemult"].isBoolean () && (lr["ratemult"]).cast<bool> ();
+				_param_desc[pn].inline_ctrl  = lr["inline"].isBoolean () && (lr["inline"]).cast<bool> ();
 				_param_desc[pn].enumeration  = lr["enum"].isBoolean () && (lr["enum"]).cast<bool> ();
 
 				if (lr["bypass"].isBoolean () && (lr["bypass"]).cast<bool> ()) {
@@ -813,7 +814,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 				if (valid) {
 					in_map[ap + 1] = bufs.get_audio (buf_index).data (offset);
 				} else {
-					in_map[ap + 1] = silent_bufs.get_audio (0).data (offset);
+					in_map[ap + 1] = silent_bufs.get_audio (0).data (0);
 				}
 			}
 			for (uint32_t ap = 0; ap < audio_out; ++ap) {
@@ -822,7 +823,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 				if (valid) {
 					out_map[ap + 1] = bufs.get_audio (buf_index).data (offset);
 				} else {
-					out_map[ap + 1] = scratch_bufs.get_audio (0).data (offset);
+					out_map[ap + 1] = scratch_bufs.get_audio (0).data (0);
 				}
 			}
 
@@ -1094,6 +1095,7 @@ LuaProc::get_parameter_descriptor (uint32_t port, ParameterDescriptor& desc) con
 	desc.integer_step = d.integer_step;
 	desc.sr_dependent = d.sr_dependent;
 	desc.enumeration  = d.enumeration;
+	desc.inline_ctrl  = d.inline_ctrl;
 	desc.unit         = d.unit;
 	desc.label        = d.label;
 	desc.scale_points = d.scale_points;
@@ -1163,7 +1165,6 @@ LuaProc::parse_scale_points (luabridge::LuaRef* lr)
 		return std::shared_ptr<ScalePoints> ();
 	}
 
-	int cnt = 0;
 	std::shared_ptr<ScalePoints> rv = std::shared_ptr<ScalePoints>(new ScalePoints());
 	luabridge::LuaRef scalepoints ((*lr)["scalepoints"]);
 
@@ -1172,7 +1173,6 @@ LuaProc::parse_scale_points (luabridge::LuaRef* lr)
 		if (!i.value ().isNumber ())  { continue; }
 		rv->insert(make_pair(i.key ().cast<std::string> (),
 					i.value ().cast<float> ()));
-		++cnt;
 	}
 
 	if (rv->size() > 0) {

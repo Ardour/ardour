@@ -21,19 +21,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_xfade_edit_h__
-#define __gtk_ardour_xfade_edit_h__
+#pragma once
 
 #include <list>
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/radiobutton.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/table.h>
 
 #include "canvas/canvas.h"
+#include "canvas/poly_line.h"
 
 #include "evoral/Curve.h"
+#include "ardour/automation_list.h"
 #include "ardour/session_handle.h"
+
+#include "waveview/wave_view.h"
 
 #include "ardour_dialog.h"
 
@@ -232,4 +236,3 @@ private:
 	void dump ();
 };
 
-#endif /* __gtk_ardour_xfade_edit_h__ */

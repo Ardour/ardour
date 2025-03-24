@@ -18,14 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_doi_h__
-#define __ardour_gtk_doi_h__
+#pragma once
 
 #ifdef interface
 #undef interface
 #endif
 
-#include <gdk/gdkevents.h>
+#include <ydk/gdkevents.h>
 #include <glibmm/main.h>
 
 #include "gtkmm2ext/visibility.h"
@@ -41,4 +40,3 @@ template<typename T> /*LIBGTKMM2EXT_API*/ gint delete_on_unmap (GdkEventAny *ign
 	return FALSE;
 }
 
-#endif /* __ardour_gtk_doi_h__ */

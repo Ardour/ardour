@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libwidgets_visibility_h__
-#define __libwidgets_visibility_h__
+#pragma once
 
 #if defined(COMPILER_MSVC)
   #define LIBWIDGETS_DLL_IMPORT __declspec(dllimport)
@@ -42,4 +41,3 @@
   #define LIBWIDGETS_LOCAL LIBWIDGETS_DLL_LOCAL
 #endif
 
-#endif /* __libwidgets_visibility_h__ */

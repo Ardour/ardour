@@ -17,10 +17,10 @@
  */
 #include <cstdio>
 
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/treestore.h>
+#include <ytkmm/filechooserdialog.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/treestore.h>
 
 #include "pbd/i18n.h"
 #include "pbd/pathexpand.h"

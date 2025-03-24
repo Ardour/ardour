@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_enums_h__
-#define __ardour_gtk_enums_h__
+#pragma once
 
 #include "ardour/types.h"
 
@@ -56,4 +55,3 @@ enum Height {
 
 extern void setup_gtk_ardour_enums ();
 
-#endif /* __ardour_gtk_enums_h__ */

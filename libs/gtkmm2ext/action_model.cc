@@ -18,8 +18,8 @@
 
 #include <vector>
 
-#include  <gtkmm/combobox.h>
-#include <gtkmm/liststore.h>
+#include  <ytkmm/combobox.h>
+#include <ytkmm/liststore.h>
 
 #include "pbd/i18n.h"
 #include "pbd/strsplit.h"

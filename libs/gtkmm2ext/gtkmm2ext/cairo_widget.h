@@ -23,7 +23,7 @@
 
 #include <cairomm/context.h>
 #include <cairomm/surface.h>
-#include <gtkmm/eventbox.h>
+#include <ytkmm/eventbox.h>
 
 #include "gtkmm2ext/visibility.h"
 #include "gtkmm2ext/cairo_canvas.h"

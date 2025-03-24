@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/objectaccessible.h>
-#include <atkmm/private/objectaccessible_p.h>
+#include <ztkmm/objectaccessible.h>
+#include <ztkmm/private/objectaccessible_p.h>
 
 
 // -*- c++ -*-
@@ -29,7 +29,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atk/atkgobjectaccessible.h>
+#include <ztk/atkgobjectaccessible.h>
 namespace
 {
 } // anonymous namespace

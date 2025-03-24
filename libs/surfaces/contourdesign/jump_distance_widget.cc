@@ -18,7 +18,7 @@
 
 #include <vector>
 
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/spinbutton.h>
 
 #include "gtkmm2ext/utils.h"
 

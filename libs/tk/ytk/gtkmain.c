@@ -65,9 +65,9 @@
 #include "gtkdebug.h"
 #include "gtkalias.h"
 #include "gtkmenu.h"
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 
-#include "gdk/gdkprivate.h" /* for GDK_WINDOW_DESTROYED */
+#include "ydk/gdkprivate.h" /* for GDK_WINDOW_DESTROYED */
 
 #ifdef G_OS_WIN32
 
@@ -338,48 +338,6 @@ check_setugid (void)
 #endif
   return TRUE;
 }
-
-#ifdef G_OS_WIN32
-
-const gchar *
-_gtk_get_datadir (void)
-{
-  static char *gtk_datadir = NULL;
-  if (gtk_datadir == NULL)
-    {
-      gchar *root = g_win32_get_package_installation_directory_of_module (gtk_dll);
-      gtk_datadir = g_build_filename (root, "share", NULL);
-      g_free (root);
-    }
-
-  return gtk_datadir;
-}
-
-const gchar *
-_gtk_get_sysconfdir (void)
-{
-  static char *gtk_sysconfdir = NULL;
-  if (gtk_sysconfdir == NULL)
-    {
-      gchar *root = g_win32_get_package_installation_directory_of_module (gtk_dll);
-      gtk_sysconfdir = g_build_filename (root, "etc", NULL);
-      g_free (root);
-    }
-
-  return gtk_sysconfdir;
-}
-
-const gchar *
-_gtk_get_data_prefix (void)
-{
-  static char *gtk_data_prefix = NULL;
-  if (gtk_data_prefix == NULL)
-    gtk_data_prefix = g_win32_get_package_installation_directory_of_module (gtk_dll);
-
-  return gtk_data_prefix;
-}
-
-#endif /* G_OS_WIN32 */
 
 static gboolean do_setlocale = TRUE;
 
@@ -689,21 +647,6 @@ do_pre_parse_initialization (int    *argc,
       env_string = NULL;
     }
 #endif	/* G_ENABLE_DEBUG */
-
-  env_string = g_getenv ("GTK2_MODULES");
-  if (env_string)
-    gtk_modules_string = g_string_new (env_string);
-
-  env_string = g_getenv ("GTK_MODULES");
-  if (env_string)
-    {
-      if (gtk_modules_string)
-        g_string_append_c (gtk_modules_string, G_SEARCHPATH_SEPARATOR);
-      else
-        gtk_modules_string = g_string_new (NULL);
-
-      g_string_append (gtk_modules_string, env_string);
-    }
 }
 
 static void
@@ -1484,6 +1427,11 @@ rewrite_event_for_grabs (GdkEvent *event)
 	return NULL;
       break;
 
+    case GDK_TOUCH_BEGIN:
+    case GDK_TOUCH_END:
+    case GDK_TOUCH_UPDATE:
+      return NULL;
+
     default:
       return NULL;
     }
@@ -1696,6 +1644,12 @@ gtk_main_do_event (GdkEvent *event)
     case GDK_PROXIMITY_IN:
     case GDK_PROXIMITY_OUT:
       gtk_propagate_event (grab_widget, event);
+      break;
+
+    case GDK_TOUCH_BEGIN:
+    case GDK_TOUCH_UPDATE:
+    case GDK_TOUCH_END:
+      gtk_propagate_event (event_widget, event);
       break;
       
     case GDK_ENTER_NOTIFY:

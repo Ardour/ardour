@@ -20,8 +20,6 @@
 #ifndef __ardour_mackie_control_protocol_subview_h__
 #define __ardour_mackie_control_protocol_subview_h__
 
-#include <boost/smart_ptr.hpp>
-
 #include "pbd/signals.h"
 #include "ardour/types.h"
 

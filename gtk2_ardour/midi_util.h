@@ -17,8 +17,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_midi_util_h__
-#define __gtk_ardour_midi_util_h__
+#pragma once
+
+#include <cstdint>
+#include <string>
+
+namespace Gtk {
+	class Menu;
+	namespace Menu_Helpers {
+		class MenuList;
+	}
+}
+
+namespace ARDOUR {
+	class InstrumentInfo;
+}
 
 inline static void clamp_to_0_127(uint8_t &val)
 {
@@ -29,5 +42,8 @@ inline static void clamp_to_0_127(uint8_t &val)
 	}
 }
 
-#endif /* __gtk_ardour_midi_util_h__ */
 
+void
+build_controller_menu (Gtk::Menu& menu, ARDOUR::InstrumentInfo const & instrument_info, uint16_t channel_mask,
+                       std::function<void (Gtk::Menu_Helpers::MenuList&, int, const std::string&)> add_single,
+                       std::function<void (Gtk::Menu_Helpers::MenuList&, uint16_t, int, const std::string&)> add_multi);

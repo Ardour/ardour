@@ -33,9 +33,9 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <gtkmm/liststore.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/scale.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/scale.h>
 
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
@@ -81,6 +81,7 @@
 #include "rc_option_editor.h"
 #include "sfdb_ui.h"
 #include "transport_masters_dialog.h"
+#include "application_bar.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -1380,13 +1381,13 @@ protected:
 		AudioEngine::instance()->PortRegisteredOrUnregistered.connect (
 				_engine_connection,
 				invalidator (*this),
-				boost::bind (&PortSelectOption::update_port_combo, this),
+				std::bind (&PortSelectOption::update_port_combo, this),
 				gui_context());
 
 		AudioEngine::instance()->PortPrettyNameChanged.connect (
 				_engine_connection,
 				invalidator (*this),
-				boost::bind (&PortSelectOption::update_port_combo, this),
+				std::bind (&PortSelectOption::update_port_combo, this),
 				gui_context());
 	}
 
@@ -1612,7 +1613,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
 			m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
-					boost::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1), gui_context());
+					std::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1), gui_context());
 
 			_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::view_changed));
 			_view.signal_button_press_event().connect_notify (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked));
@@ -2104,15 +2105,15 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 
 			AudioEngine::instance()->PortRegisteredOrUnregistered.connect (connections,
 					invalidator (*this),
-					boost::bind (&MidiPortOptions::refill, this),
+					std::bind (&MidiPortOptions::refill, this),
 					gui_context());
 			AudioEngine::instance()->MidiPortInfoChanged.connect (connections,
 					invalidator (*this),
-					boost::bind (&MidiPortOptions::refill, this),
+					std::bind (&MidiPortOptions::refill, this),
 					gui_context());
 			AudioEngine::instance()->MidiSelectionPortsChanged.connect (connections,
 					invalidator (*this),
-					boost::bind (&MidiPortOptions::refill, this),
+					std::bind (&MidiPortOptions::refill, this),
 					gui_context());
 		}
 
@@ -2362,7 +2363,7 @@ MidiPortOptions::pretty_name_edit (std::string const & path, string const & new_
 RCOptionEditor::RCOptionEditor ()
 	: OptionEditorContainer (Config)
 	  /* pack self-as-vbox into tabbable */
-	, Tabbable (*this, _("Preferences"), X_("preferences"), /* detached by default */ false)
+	, Tabbable (_("Preferences"), X_("preferences"), this, /* detached by default */ false)
 	, _rc_config (Config)
 	, _mixer_strip_visibility ("mixer-element-visibility")
 	, _cairo_image_surface (0)
@@ -2901,7 +2902,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance/Toolbar"),
 	     new BoolOption (
 		     "show-toolbar-latency",
-		     _("Display Latency Compensation"),
+		     _("Plugin Delay Compensation"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_latency),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_latency)
 		     ));
@@ -3094,6 +3095,18 @@ These settings will only take effect after %1 is restarted.\n\
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
 				_("On some XWayland systems the engine-dialog is blank when shown a second time (from the main menu). Allowing to resize the window works around this oddity."));
 	add_option (_("Appearance/Quirks"), bo);
+#endif
+
+#ifdef __APPLE__
+	BoolOption* bco = new BoolOption (
+		"use-cocoa-invalidation",
+		_("Use macOS to determine GUI redraw areas"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_cocoa_invalidation),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_cocoa_invalidation)
+		);
+
+	Gtkmm2ext::UI::instance()->set_tip (bco->tip_widget(), string_compose (_("When enabled, macOS is in charge of what areas of the GUI are redrawn.\nWhen disabled, %1 manages this by itself"), PROGRAM_NAME));
+	add_option (_("Appearance/Quirks"), bco);
 #endif
 
 	add_option (_("Appearance/Quirks"), new OptionEditorBlank ());
@@ -3727,6 +3740,28 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Transport"), psc);
 
 
+	bo = new BoolOption ("mark-at-pgm-change",
+	                     _("Create a marker when a MIDI program change is received (and RECORDING)"),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mark_at_pgm_change),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mark_at_pgm_change)
+	                     );
+	add_option (_("Transport"), bo);
+
+	bo = new BoolOption ("locate-to-pgm-change",
+	                     _("Locate to the next matching scene marker when a MIDI program change is received (and NOT recording)"),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::get_locate_to_pgm_change),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::set_locate_to_pgm_change)
+	                     );
+	add_option (_("Transport"), bo);
+
+
+	bo = new BoolOption ("stop-on-grid",
+	                     _("Stop transport using the current grid (if any)"),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_on_grid),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_on_grid)
+	                     );
+	add_option (_("Transport"), bo);
+
 	add_option (_("Transport"), new OptionEditorHeading (_("Looping")));
 
 	bo = new BoolOption (
@@ -3802,6 +3837,17 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_receive_device_id),
 		     0, 127, 1, 10
 		     ));
+
+	ComboOption<FastWindOp> *mtc_op = new ComboOption<FastWindOp> (
+		     "mmc-fast-wind-op",
+		     _("MMC Fast-wind behavior"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_fast_wind_op),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_fast_wind_op)
+		     );
+	mtc_op->add (FastWindOff, _("Off (MMC fast-forward+rewind are ignored)"));
+	mtc_op->add (FastWindVarispeed, _("Varispeed"));
+	mtc_op->add (FastWindLocate, _("Marker Locate (MMC ffwd/rewd jumps to next/prior marker)"));
+	add_option (_("Transport/Chase"), mtc_op);
 
 	add_option (_("Transport/Chase"), new OptionEditorHeading (_("Transport Masters")));
 
@@ -4317,7 +4363,6 @@ These settings will only take effect after %1 is restarted.\n\
 	}
 
 	string prog (PROGRAM_NAME);
-	boost::algorithm::to_lower (prog);
 	mm->add (SoftwareMonitoring, string_compose (_("%1"), prog));
 	mm->add (ExternalMonitoring, _("Audio Hardware"));
 
@@ -4894,6 +4939,40 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("Performance"), new BufferingOptions (_rc_config));
 
+	if (hwcpus > 1) {
+		ComboOption<int32_t>* procs = new ComboOption<int32_t> (
+				"io-thread-count",
+				_("Disk I/O threads"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_io_thread_count),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_io_thread_count)
+				);
+
+		procs->add (-2, _("all but two processor"));
+		procs->add (-1, _("all but one processor"));
+		procs->add (0, _("all available processors"));
+
+		for (uint32_t i = 1; i <= hwcpus; ++i) {
+			procs->add (i, string_compose (P_("%1 processor", "%1 processors", i), i));
+		}
+
+		procs->set_note (string_compose (_("This setting will only take effect when %1 is restarted."), PROGRAM_NAME));
+
+		add_option (_("Performance"), procs);
+
+#ifndef PLATFORM_WINDOWS
+		ComboOption<int32_t>* iotp = new ComboOption<int32_t> (
+		     "io-thread-policy",
+		     _("Disk I/O thread scheduling policy"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_io_thread_policy),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_io_thread_policy)
+		     );
+		iotp->add (0, _("No priority"));
+		iotp->add (1, _("Realtime (FIFO)"));
+		iotp->add (1, _("Realtime (Round Robin)"));
+		add_option (_("Performance"), iotp);
+#endif
+	}
+
 	/* Image cache size */
 	add_option (_("Performance"), new OptionEditorHeading (_("Memory Usage")));
 
@@ -4945,7 +5024,7 @@ These settings will only take effect after %1 is restarted.\n\
 	lna->add (999, _("999 parameters"));
 	add_option (_("Performance"), lna);
 	Gtkmm2ext::UI::instance()->set_tip (lna->tip_widget(),
-					    _("Some Plugins expose an unreasonable amount of control-inputs. This option limits the number of parameters that can are listed as automatable without restricting the number of total controls.\n\nThis reduces lag in the GUI and shortens excessively long drop-down lists for plugins with a large number of control ports.\n\nNote: This only affects newly added plugins and is applied to plugin on session-reload. Already automated parameters are retained."));
+					    _("Some Plugins expose an unreasonable amount of control-inputs. This option limits the number of parameters that are listed as automatable without restricting the number of total controls.\n\nThis reduces lag in the GUI and shortens excessively long drop-down lists for plugins with a large number of control ports.\n\nNote: This only affects newly added plugins and is applied to plugin on session-reload. Already automated parameters are retained."));
 
 	/* VIDEO Timeline */
 	add_option (_("Video"), new OptionEditorHeading (_("Video Server")));
@@ -5034,6 +5113,9 @@ void
 RCOptionEditor::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
+	if (!s) {
+		return;
+	}
 	_transport_masters_widget.set_session (s);
 }
 

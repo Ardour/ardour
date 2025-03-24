@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 #include <cairo.h>
-#include <gtkmm/widget.h>
+#include <ytkmm/widget.h>
 
 #include "gtkmm2ext/widget_state.h"
 #include "widgets/visibility.h"
@@ -70,9 +70,21 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		LatencyClock,
 		Config,
 		ConfigReset,
+		ConfigMenu,
 		PowerOnOff,
 		ShadedPlusSign,
 		Folder,
+		Lock,
+		Mixer,
+		Meters,
+		TapeReel,
+		TrackWaveform,
+		TailTimeClock,
+		AttachmentLeft,
+		AttachmentRight,
+		AttachmentBottom,
+		Drum,
+		CuesNTriggers,
 		NoIcon //< Last
 	};
 

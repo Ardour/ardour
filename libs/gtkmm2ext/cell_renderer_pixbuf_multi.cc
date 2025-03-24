@@ -17,7 +17,7 @@
  */
 
 #include <iostream>
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include <gtkmm2ext/cell_renderer_pixbuf_multi.h>
 

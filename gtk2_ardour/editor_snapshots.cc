@@ -26,7 +26,7 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/liststore.h>
+#include <ytkmm/liststore.h>
 
 #include "ardour/filename_extensions.h"
 #include "ardour/session.h"
@@ -84,6 +84,10 @@ EditorSnapshots::button_press (GdkEventButton* ev)
 		int cx;
 		int cy;
 		_snapshot_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, col, cx, cy);
+		if (!path) {
+			return false;
+		}
+		_snapshot_display.get_selection()->select (path);
 		Gtk::TreeModel::iterator iter = _snapshot_model->get_iter (path);
 		if (iter) {
 			Gtk::TreeModel::Row row = *iter;
@@ -97,6 +101,9 @@ EditorSnapshots::button_press (GdkEventButton* ev)
 		int cy;
 		string snap_name;
 		_snapshot_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, col, cx, cy);
+		if (!path) {
+			return false;
+		}
 		Gtk::TreeModel::iterator iter = _snapshot_model->get_iter (path);
 		if (iter) {
 			Gtk::TreeModel::Row row = *iter;

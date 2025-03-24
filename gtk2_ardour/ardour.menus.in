@@ -548,11 +548,8 @@
         <menuitem action="toggle-meter-ruler"/>
         <menuitem action="toggle-tempo-ruler"/>
         <menuitem action="toggle-range-ruler"/>
-        <menuitem action="toggle-loop-punch-ruler"/>
-        <menuitem action="toggle-cd-marker-ruler"/>
         <menuitem action="toggle-arrangement-ruler"/>
         <menuitem action="toggle-marker-ruler"/>
-        <menuitem action="toggle-cue-marker-ruler"/>
         <separator/>
         <menuitem action="toggle-video-ruler"/>
       </menu>
@@ -634,6 +631,14 @@
       <menuitem action='show-marker-lines'/>
 
       <separator/>
+      <menuitem action='ToggleTriggerList'/>
+      <menuitem action='ToggleTriggerProps'/>
+
+      <separator/>
+      <menuitem action='ToggleMixerStrip'/>
+#ifdef MIXBUS
+      <menuitem action='ToggleMixerProps'/>
+#endif
       <menuitem action='ToggleMixerList'/>
 #ifdef MIXBUS
       <menuitem action='ToggleMixbusPane'/>
@@ -692,6 +697,8 @@
 
       <separator/><!-- Video Monitor !-->
       <menuitem action='ToggleJadeo'/>
+
+      <separator/>
 
       <separator/><!-- Connection dialogs !-->
       <menuitem action='toggle-audio-connection-manager'/>
@@ -801,10 +808,7 @@
     <menuitem action="toggle-meter-ruler"/>
     <menuitem action="toggle-tempo-ruler"/>
     <menuitem action="toggle-range-ruler"/>
-    <menuitem action="toggle-loop-punch-ruler"/>
-    <menuitem action="toggle-cd-marker-ruler"/>
     <menuitem action="toggle-marker-ruler"/>
-    <menuitem action="toggle-cue-marker-ruler"/>
     <separator/>
     <menuitem action="toggle-video-ruler"/>
   </popup>
@@ -869,6 +873,22 @@
     <menuitem action='removeUnusedRegions'/>
   </popup>
 
+<popup name='MarkerShowMenu' accelerators='true'>
+   <menuitem action='show-all-markers'/>
+   <menuitem action='show-cd-markers'/>
+   <menuitem action='show-cue-markers'/>
+   <menuitem action='show-scene-markers'/>
+   <menuitem action='show-location-markers'/>
+</popup>
+
+<popup name='RangeShowMenu' accelerators='true'>
+   <menuitem action='show-all-ranges'/>
+   <menuitem action='show-session-range'/>
+   <menuitem action='show-punch-range'/>
+   <menuitem action='show-loop-range'/>
+   <menuitem action='show-other-ranges'/>
+</popup>
+
   <popup name='PopupRegionMenu' action='PopupRegionMenu' accelerators='true'>
     <menuitem action='play-selected-regions'/>
     <menuitem action='tag-selected-regions'/>
@@ -879,6 +899,7 @@
     <menuitem action='loop-region'/>
     <menuitem action='rename-region'/>
     <menuitem action='show-region-properties'/>
+    <menuitem action='edit-region-pianoroll-window'/>
     <menu action='RegionMenuEdit'>
       <menuitem action='combine-regions'/>
       <menuitem action='uncombine-regions'/>

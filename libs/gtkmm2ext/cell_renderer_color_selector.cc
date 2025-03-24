@@ -17,7 +17,7 @@
  */
 
 #include <iostream>
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include "gtkmm2ext/cell_renderer_color_selector.h"
 #include "gtkmm2ext/utils.h"

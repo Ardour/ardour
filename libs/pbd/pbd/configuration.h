@@ -17,14 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_configuration_h__
-#define __libpbd_configuration_h__
+#pragma once
 
 #include <map>
 #include <string>
 #include <vector>
 
-#include <boost/function.hpp>
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
 #include "pbd/configuration_variable.h"
@@ -39,13 +37,13 @@ class LIBPBD_API Configuration : public PBD::Stateful
 	Configuration() {}
 	virtual ~Configuration() {}
 
-	virtual void map_parameters (boost::function<void (std::string)>&) = 0;
+	virtual void map_parameters (std::function<void (std::string)>&) = 0;
 	virtual int set_state (XMLNode const &, int) = 0;
 	virtual XMLNode & get_state () const = 0;
 	virtual XMLNode & get_variables (std::string const & nodename) const = 0;
 	virtual void set_variables (XMLNode const &) = 0;
 
-	PBD::Signal1<void,std::string> ParameterChanged;
+	PBD::Signal<void(std::string)> ParameterChanged;
 
 	typedef std::vector<std::string> Metadata;
 
@@ -55,4 +53,3 @@ class LIBPBD_API Configuration : public PBD::Stateful
 
 } // namespace PBD
 
-#endif /* __libpbd_configuration_h__ */

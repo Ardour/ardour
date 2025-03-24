@@ -1,6 +1,6 @@
 /* Helpful functions when dealing with cairo in gtk engines */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <math.h>
 
 typedef struct
