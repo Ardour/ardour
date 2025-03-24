@@ -2293,6 +2293,9 @@ Pianoroll::set (TriggerReference & tref)
 		if (mr) {
 			set_region (mr);
 		}
+
+	} else {
+		view->set_region (nullptr);
 	}
 }
 
