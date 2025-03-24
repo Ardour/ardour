@@ -3756,6 +3756,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 
 	pframes_t offset = 0;
 	bool reached_end = false;
+	bool signal = false;
 
 	if (!ai->slot->armed()) {
 		/* since _arm_info is set, we have been capturing for a slot,
@@ -3794,8 +3795,6 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		return;
 	}
 
-	std::cerr << "Ok, maybe here we go ...\n";
-
 	if (ai->end_samples != 0 && (start_sample > ai->end_samples)) {
 		return;
 	}
@@ -3833,6 +3832,8 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 			AudioBuffer& buf (bufs.get_audio (n));
 			ai->audio_buf.append (buf.data() + offset, nframes, n);
 		}
+
+		signal = true;
 	}
 
 	n_buffers = bufs.count().n_midi();
@@ -3876,6 +3877,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 					 */
 					ai->midi_buf->write (tmap->quarters_at_sample (event_time) - ai->start_beats,  ev.event_type(), ev.size(), ev.buffer());
 					_gui_feed_fifo.write (event_time - ai->start_samples, Evoral::MIDI_EVENT, ev.size(), ev.buffer());
+					signal = true;
 				}
 			}
 		}
@@ -3884,7 +3886,9 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 	ai->captured += nframes;
 	//std::cerr << "Captured " << nframes << " total " << ai->captured << std::endl;
 
-	Captured (ai->captured); /* EMIT SIGNAL */
+	if (signal) {
+		Captured (ai->captured); /* EMIT SIGNAL */
+	}
 
 	if (reached_end) {
 		finish_recording (bufs);
