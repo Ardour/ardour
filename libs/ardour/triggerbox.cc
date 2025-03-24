@@ -3740,7 +3740,7 @@ TriggerBox::finish_recording (BufferSet& bufs)
 	*/
 	ai->slot->captured (*ai, bufs);
 	_arm_info = nullptr;
-	_record_state = Enabled;
+	_record_state = Disabled;
 }
 
 void
