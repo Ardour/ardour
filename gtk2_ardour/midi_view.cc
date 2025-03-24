@@ -3555,7 +3555,7 @@ MidiView::change_note_channel (NoteBase* event, int8_t chn, bool relative)
 
 	note_diff_add_change (event, MidiModel::NoteDiffCommand::Channel, new_channel);
 
-	
+
 }
 
 void
@@ -5416,4 +5416,3 @@ EndBoundaryRect::compute_bounding_box() const
 	const double radius = 10. * scale;
 	_bounding_box = _bounding_box.expand (0., 0., 0., radius + _outline_width);
 }
-
