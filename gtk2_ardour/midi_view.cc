@@ -322,6 +322,9 @@ MidiView::region_going_away ()
 	_midi_region.reset ();
 	_model.reset ();
 
+	show_start (false);
+	show_end (false);
+
 	clear_events ();
 
 	connections_requiring_model.drop_connections();
