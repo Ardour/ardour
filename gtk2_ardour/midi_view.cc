@@ -3981,7 +3981,6 @@ MidiView::sysex_left (SysEx *)
 void
 MidiView::note_mouse_position (float x_fraction, float /*y_fraction*/, bool can_set_cursor)
 {
-	Editing::MouseMode mm = _editing_context.current_mouse_mode();
 	bool trimmable = _editing_context.allow_trim_cursors ();
 
 	if (can_set_cursor) {
