@@ -79,6 +79,7 @@
 #include "rc_option_editor.h"
 #include "recorder_ui.h"
 #include "route_params_ui.h"
+#include "rta_window.h"
 #include "shuttle_control.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
@@ -978,6 +979,13 @@ ARDOUR_UI::create_luawindow ()
 {
 	LuaWindow* luawindow = LuaWindow::instance ();
 	return luawindow;
+}
+
+RTAWindow*
+ARDOUR_UI::create_rtawindow ()
+{
+	RTAWindow* rtawindow = RTAWindow::instance ();
+	return rtawindow;
 }
 
 void

@@ -69,6 +69,7 @@
 #include "meterbridge.h"
 #include "luawindow.h"
 #include "mixer_ui.h"
+#include "rta_window.h"
 #include "recorder_ui.h"
 #include "trigger_page.h"
 #include "window_manager.h"
@@ -1015,6 +1016,7 @@ ARDOUR_UI::save_ardour_state ()
 	XMLNode& pnode (rc_option_editor->get_state());
 	XMLNode& rnode (recorder->get_state());
 	XMLNode& tnode (trigger_page->get_state());
+	XMLNode& anode (rtawindow->get_state());
 
 	/* store clock modes */
 	XMLNode* cnode = new XMLNode(X_("ClockModes"));
@@ -1043,6 +1045,7 @@ ARDOUR_UI::save_ardour_state ()
 		_session->add_instant_xml (bnode);
 		_session->add_instant_xml (rnode);
 		_session->add_instant_xml (tnode);
+		_session->add_instant_xml (anode);
 		_session->add_instant_xml (*cnode);
 		if (location_ui) {
 			_session->add_instant_xml (location_ui->ui().get_state ());
@@ -1063,6 +1066,7 @@ ARDOUR_UI::save_ardour_state ()
 		Config->add_instant_xml (bnode);
 		Config->add_instant_xml (rnode);
 		Config->add_instant_xml (tnode);
+		Config->add_instant_xml (anode);
 		Config->add_instant_xml (*cnode);
 		if (location_ui) {
 			Config->add_instant_xml (location_ui->ui().get_state ());
