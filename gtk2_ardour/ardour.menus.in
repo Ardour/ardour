@@ -689,6 +689,9 @@
       </menu>
       <!-- Common Ardour Widows (all toggle) !-->
       <menuitem action='toggle-meterbridge'/>
+#ifndef NDEBUG
+      <menuitem action='toggle-rtawindow'/>
+#endif
       <menuitem action='toggle-locations'/>
       <menuitem action='toggle-big-clock'/>
       <menuitem action='toggle-big-transport'/>

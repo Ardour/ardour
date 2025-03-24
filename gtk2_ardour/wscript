@@ -268,6 +268,7 @@ gtk2_ardour_sources = [
         'route_processor_selection.cc',
         'route_time_axis.cc',
         'route_ui.cc',
+        'rta_window.cc',
         'ruler_dialog.cc',
         'save_as_dialog.cc',
         'save_template_dialog.cc',
@@ -863,8 +864,11 @@ def build(bld):
     if bld.is_defined('PTFORMAT'):
         menus_argv += [ '-DPTFORMAT' ]
 
-    if bld.is_defined('MIXBUS') or Options.options.debug:
+    if bld.is_defined('MIXBUS') or bld.env['DEBUG']:
         menus_argv += [ '-DVAPOR' ]
+
+    if not not bld.env['DEBUG']:
+        menus_argv += [ '-DNDEBUG' ]
 
     # always build all versions of the menu definitions
     # so that we can try them out with different program builds.
@@ -874,7 +878,7 @@ def build(bld):
     obj.command_is_external = True
     obj.no_inputs = True
     obj.argv = menus_argv
-    obj.dep_vars = ['PTFORMAT', 'MIXBUS', 'WINDOWS', 'debug']
+    obj.dep_vars = ['PTFORMAT', 'MIXBUS', 'WINDOWS', 'DEBUG']
     if bld.is_defined('LIVETRAX'):
         obj.stdin = 'livetrax.menus.in'
     else:

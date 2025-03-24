@@ -117,6 +117,7 @@
 #include "rc_option_editor.h"
 #include "route_dialogs.h"
 #include "route_params_ui.h"
+#include "rta_window.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
 #include "transport_masters_dialog.h"
@@ -144,6 +145,7 @@ class IdleOMeter;
 class IOPluginWindow;
 class PluginDSPLoadWindow;
 class PluginManagerUI;
+class RTAWindow;
 class DspStatisticsWindow;
 class TransportMastersWindow;
 class VirtualKeyboardWindow;
@@ -286,6 +288,7 @@ public:
 	void toggle_keep_tearoffs();
 	void show_plugin_manager();
 	void show_lua_window();
+	void show_realtime_analyzer();
 
 	void reset_focus (Gtk::Widget*);
 
@@ -701,6 +704,7 @@ private:
 	WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
 	WM::ProxyWithConstructor<KeyEditor> key_editor;
 	WM::ProxyWithConstructor<LuaWindow> luawindow;
+	WM::ProxyWithConstructor<RTAWindow> rtawindow;
 
 	/* creator methods */
 
@@ -714,6 +718,7 @@ private:
 	GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
 	KeyEditor*              create_key_editor ();
 	LuaWindow*              create_luawindow ();
+	RTAWindow*              create_rtawindow ();
 
 	ARDOUR::SystemExec *video_server_process;
 

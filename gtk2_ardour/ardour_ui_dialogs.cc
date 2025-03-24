@@ -79,6 +79,7 @@
 #include "rc_option_editor.h"
 #include "recorder_ui.h"
 #include "route_params_ui.h"
+#include "rta_window.h"
 #include "shuttle_control.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
@@ -980,6 +981,13 @@ ARDOUR_UI::create_luawindow ()
 	return luawindow;
 }
 
+RTAWindow*
+ARDOUR_UI::create_rtawindow ()
+{
+	RTAWindow* rtawindow = new RTAWindow ();
+	return rtawindow;
+}
+
 void
 ARDOUR_UI::handle_locations_change (Location *)
 {
@@ -1052,6 +1060,13 @@ void
 ARDOUR_UI::show_plugin_manager ()
 {
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-plugin-manager");
+	tact->set_active();
+}
+
+void
+ARDOUR_UI::show_realtime_analyzer ()
+{
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-rtawindow");
 	tact->set_active();
 }
 
