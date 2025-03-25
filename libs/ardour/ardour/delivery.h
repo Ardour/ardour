@@ -24,6 +24,8 @@
 
 #include <string>
 
+#include "pbd/ringbuffer.h"
+
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/chan_count.h"
@@ -110,6 +112,11 @@ public:
 
 	void set_gain_control (std::shared_ptr<GainControl> gc);
 
+	void set_analysis_ringbuffer (std::shared_ptr<PBD::RingBuffer<ARDOUR::Sample>> rb) {
+		_rtabuffer = rb;
+	}
+	void set_analysis_active (bool);
+
 	void set_polarity_control (std::shared_ptr<AutomationControl> ac) {
 		_polarity_control = ac;
 	}
@@ -152,6 +159,9 @@ private:
 	std::shared_ptr<GainControl>       _gain_control;
 	std::shared_ptr<AutomationControl> _polarity_control;
 
+	std::shared_ptr<PBD::RingBuffer<ARDOUR::Sample>> _rtabuffer;
+	std::atomic<bool>                                _rta_active;
+
 	static bool panners_legal;
 	static PBD::Signal<void()> PannersLegal;
 
@@ -164,5 +174,3 @@ private:
 
 
 } // namespace ARDOUR
-
-

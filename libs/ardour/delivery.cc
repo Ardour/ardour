@@ -63,6 +63,7 @@ Delivery::Delivery (Session& s, std::shared_ptr<IO> io, std::shared_ptr<Pannable
 	, _current_gain (GAIN_COEFF_ZERO)
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
+	, _rta_active (false)
 	, _no_panner_reset (false)
 {
 	if (pannable) {
@@ -87,6 +88,7 @@ Delivery::Delivery (Session& s, std::shared_ptr<Pannable> pannable, std::shared_
 	, _current_gain (GAIN_COEFF_ZERO)
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
+	, _rta_active (false)
 	, _no_panner_reset (false)
 {
 	if (pannable) {
@@ -199,6 +201,13 @@ Delivery::set_gain_control (std::shared_ptr<GainControl> gc) {
 	}
 }
 
+void
+Delivery::set_analysis_active (bool en)
+{
+	// TODO latch with session wide enable, sync'ed at process start
+	_rta_active.store (en);
+}
+
 /** Caller must hold process lock */
 bool
 Delivery::configure_io (ChanCount in, ChanCount out)
@@ -299,6 +308,12 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 			bufs.set_count (output_buffers().count ());
 			Amp::apply_simple_gain (bufs, nframes, GAIN_COEFF_ZERO);
 		}
+
+		std::shared_ptr<PBD::RingBuffer<ARDOUR::Sample>> rb = _rtabuffer;
+		if (_rta_active.load () && rb && output_buffers().count().n_audio() > 0) {
+			const BufferSet& outs (output_buffers());
+			rb->write (outs.get_audio (0).data(), nframes);
+		}
 		return;
 
 	} else if (tgain != GAIN_COEFF_UNITY) {
@@ -352,6 +367,46 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			if (*t != DataType::AUDIO && bufs.count().get(*t) > 0) {
 				_output->copy_to_outputs (bufs, *t, nframes, 0);
+			}
+		}
+	}
+
+	if (_rta_active.load () && output_buffers().count().n_audio() > 0) {
+		const BufferSet& outs (output_buffers());
+		std::shared_ptr<PBD::RingBuffer<ARDOUR::Sample>> rb = _rtabuffer;
+		if (rb) {
+			int n_chn = outs.count().n_audio();
+			if (n_chn == 1) {
+				rb->write (outs.get_audio (0).data(), nframes);
+			} else {
+				float gain = sqrtf (1.0 / n_chn);
+				PBD::RingBuffer<Sample>::rw_vector vec;
+				rb->get_write_vector (&vec);
+				if (nframes <=  vec.len[0]) {
+					copy_vector (vec.buf[0], outs.get_audio (0).data(), nframes);
+					for (int i = 1; i < n_chn; ++i) {
+						mix_buffers_no_gain (vec.buf[0], outs.get_audio (i).data(), nframes);
+					}
+					apply_gain_to_buffer (vec.buf[0], nframes, gain);
+				} else {
+					size_t total = vec.len[0] + vec.len[1];
+					if (total >= nframes) {
+						size_t first =  vec.len[0];
+						size_t remain =  nframes - first;
+						copy_vector (vec.buf[0], outs.get_audio (0).data(), first);
+						for (int i = 1; i < n_chn; ++i) {
+							mix_buffers_no_gain (vec.buf[0], outs.get_audio (i).data(), first);
+						}
+						apply_gain_to_buffer (vec.buf[0], first, gain);
+
+						copy_vector (vec.buf[1], outs.get_audio (0).data(first), remain);
+						for (int i = 1; i < n_chn; ++i) {
+							mix_buffers_no_gain (vec.buf[1], outs.get_audio (i).data(first), remain);
+						}
+						apply_gain_to_buffer (vec.buf[1], remain, gain);
+					}
+				}
+				rb->increment_write_idx (nframes);
 			}
 		}
 	}
