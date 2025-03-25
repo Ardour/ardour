@@ -642,29 +642,37 @@ Pianoroll::bindings_changed ()
 void
 Pianoroll::maybe_update ()
 {
-	ARDOUR::TriggerPtr trigger;
+	ARDOUR::TriggerPtr playing_trigger;
 
 	if (_track) {
-		trigger = _track->triggerbox()->currently_playing ();
+		playing_trigger = _track->triggerbox()->currently_playing ();
 	}
 
-	if (!trigger) {
+	if (!playing_trigger) {
 
 		if (_drags->active() || !view) {
 			return;
 		}
+		if (_track->triggerbox()->record_enabled() == Recording) {
 
-		samplepos_t pos = _session->transport_sample();
-		samplepos_t spos = view->midi_region()->source_position().samples();
-		if (pos < spos) {
-			_playhead_cursor->set_position (0);
+			_playhead_cursor->set_position (data_capture_duration);
+
+		} else if (view->midi_region()) {
+
+			samplepos_t pos = _session->transport_sample();
+			samplepos_t spos = view->midi_region()->source_position().samples();
+			if (pos < spos) {
+				_playhead_cursor->set_position (0);
+			} else {
+				_playhead_cursor->set_position (pos - spos);
+			}
 		} else {
-			_playhead_cursor->set_position (pos - spos);
+			_playhead_cursor->set_position (0);
 		}
 
 	} else {
-		if (trigger->active ()) {
-			_playhead_cursor->set_position (trigger->current_pos().samples() + trigger->the_region()->start().samples());
+		if (playing_trigger->active ()) {
+			_playhead_cursor->set_position (playing_trigger->current_pos().samples() + playing_trigger->the_region()->start().samples());
 		} else {
 			_playhead_cursor->set_position (0);
 		}
@@ -865,8 +873,6 @@ Pianoroll::data_captured (samplecnt_t total_duration)
 	if (!idle_update_queued.exchange (1)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &Pianoroll::idle_data_captured));
 	}
-
-	_playhead_cursor->set_position (data_capture_duration);
 }
 
 bool
@@ -2297,6 +2303,8 @@ Pianoroll::set (TriggerReference & tref)
 	} else {
 		view->set_region (nullptr);
 	}
+
+	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Pianoroll::maybe_update));
 }
 
 void
