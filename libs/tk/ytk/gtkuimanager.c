@@ -1943,7 +1943,6 @@ get_action_by_name (GtkUIManager *merge,
   if (group_name = strchr (action_name, '/')) {
 	  char const * an = group_name + 1;
 	  group_name = g_strndup (action_name, group_name - action_name);
-	  printf ("from %s group name will be %s\n", action_name, group_name);
 	  action_name = an;
   }
 
@@ -1956,7 +1955,6 @@ get_action_by_name (GtkUIManager *merge,
 
       if (group_name) {
 	      if (strcmp (gtk_action_group_get_name (action_group), group_name)) {
-		      printf ("checking group %s against %s failed\n", gtk_action_group_get_name (action_group), group_name);
 		      continue;
 	      }
       }
