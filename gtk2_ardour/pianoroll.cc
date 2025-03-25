@@ -659,6 +659,10 @@ Pianoroll::maybe_update ()
 
 		} else if (view->midi_region()) {
 
+			if (!_session) {
+				return;
+			}
+
 			samplepos_t pos = _session->transport_sample();
 			samplepos_t spos = view->midi_region()->source_position().samples();
 			if (pos < spos) {
