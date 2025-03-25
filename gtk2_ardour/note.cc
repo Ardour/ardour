@@ -39,9 +39,7 @@ Note::Note (MidiView& region, ArdourCanvas::Item* parent, const std::shared_ptr<
 
 Note::~Note ()
 {
-	/* do not delete the canvas item here, because that will be handled by
-	 * the parent
-	 */
+	delete _visual_note;
 }
 
 void

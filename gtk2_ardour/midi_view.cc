@@ -876,12 +876,13 @@ MidiView::clear_events ()
 	// clear selection without signaling or trying to change state of event objects
 	_selection.clear ();
 	clear_ghost_events ();
-	/* This will delete all the _visual_note members of the NoteBase* elements in the _events map */
-	_note_group->clear (true);
-	/* The above did not actually delete the the NoteBase* elements, so do that now  */
 	for (auto & [model_note,gui_note] : _events) {
 		delete gui_note;
 	}
+	/* This will delete any danging canvas items that were not owned by the
+	 * NoteBase objects we just deleted.
+	 */
+	_note_group->clear (true);
 	_events.clear();
 	_patch_changes.clear();
 	_sys_exes.clear();

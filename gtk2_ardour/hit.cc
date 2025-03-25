@@ -40,9 +40,7 @@ Hit::Hit (MidiView& region, Item* parent, double size, const std::shared_ptr<Not
 
 Hit::~Hit ()
 {
-	/* do not delete the visual note here, because that will be handled by
-	 * the parent
-	 */
+	delete _polygon;
 }
 
 void

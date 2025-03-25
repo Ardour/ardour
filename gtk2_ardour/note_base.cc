@@ -88,7 +88,7 @@ NoteBase::NoteBase(MidiView& v, bool with_events, const std::shared_ptr<NoteType
 NoteBase::~NoteBase()
 {
 	_view.note_deleted (this);
-	/* do not delete _text, parent will do so */
+	delete _text;
 }
 
 void
