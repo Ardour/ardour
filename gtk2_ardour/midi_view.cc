@@ -1641,7 +1641,6 @@ void
 MidiView::end_write()
 {
 	if (_active_notes) {
-		std::cerr << "active notes deleted in end_write\n";
 		for (unsigned i = 0; i < 128; ++i) {
 			delete _active_notes[i];
 		}
