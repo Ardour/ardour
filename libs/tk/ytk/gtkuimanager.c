@@ -1935,22 +1935,41 @@ get_action_by_name (GtkUIManager *merge,
 		    const gchar  *action_name)
 {
   GList *tmp;
+  char const * group_name = NULL;
 
   if (!action_name)
     return NULL;
-  
+
+  if (group_name = strchr (action_name, '/')) {
+	  char const * an = group_name + 1;
+	  group_name = g_strndup (action_name, group_name - action_name);
+	  printf ("from %s group name will be %s\n", action_name, group_name);
+	  action_name = an;
+  }
+
+
   /* lookup name */
   for (tmp = merge->private_data->action_groups; tmp != NULL; tmp = tmp->next)
     {
       GtkActionGroup *action_group = tmp->data;
       GtkAction *action;
-      
+
+      if (group_name) {
+	      if (strcmp (gtk_action_group_get_name (action_group), group_name)) {
+		      printf ("checking group %s against %s failed\n", gtk_action_group_get_name (action_group), group_name);
+		      continue;
+	      }
+      }
+
       action = gtk_action_group_get_action (action_group, action_name);
 
-      if (action)
-	return action;
+      if (action) {
+	      g_free (group_name);
+	      return action;
+      }
     }
 
+  g_free (group_name);
   return NULL;
 }
 
