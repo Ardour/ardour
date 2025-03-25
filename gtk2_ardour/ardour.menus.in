@@ -201,9 +201,9 @@
       <menuitem action='undo-last-selection-op'/>
       <menuitem action='redo-last-selection-op'/>
       <separator/>
-      <menuitem action='editor-cut'/>
-      <menuitem action='editor-copy'/>
-      <menuitem action='editor-paste'/>
+      <menuitem action='EditorEditing/editor-cut'/>
+      <menuitem action='EditorEditing/editor-copy'/>
+      <menuitem action='EditorEditing/editor-paste'/>
       <separator/>
       <menuitem action='cut-paste-section'/>
       <menuitem action='copy-paste-section'/>
@@ -241,7 +241,7 @@
         <menuitem action='select-prev-route'/>
       </menu>
       <separator/>
-      <menuitem action='editor-delete'/>
+      <menuitem action='EditorEditing/editor-delete'/>
       <menuitem action='editor-crop'/>
       <menuitem action='split-region'/>
       <menu action="SeparateMenu">
@@ -330,7 +330,7 @@
         <menuitem action='set-tempo-from-region'/>
         <menuitem action='set-tempo-from-edit-range'/>
       </menu>
-      <menuitem action='set-mouse-mode-object-range'/>
+      <menuitem action='EditorEditing/set-mouse-mode-object-range'/>
       <menuitem action='show-touched-automation'/>
       <separator/>
       <menu action="LuaScripts">
@@ -567,13 +567,13 @@
         <menuitem action='shrink-tracks'/>
       </menu>
       <menu name='ZoomFocus' action='ZoomFocus'>
-        <menuitem action='zoom-focus-left'/>
-        <menuitem action='zoom-focus-right'/>
-        <menuitem action='zoom-focus-center'/>
-        <menuitem action='zoom-focus-playhead'/>
-        <menuitem action='zoom-focus-mouse'/>
-        <menuitem action='zoom-focus-edit'/>
-        <menuitem action='cycle-zoom-focus'/>
+        <menuitem action='EditorEditing/zoom-focus-left'/>
+        <menuitem action='EditorEditing/zoom-focus-right'/>
+        <menuitem action='EditorEditing/zoom-focus-center'/>
+        <menuitem action='EditorEditing/zoom-focus-playhead'/>
+        <menuitem action='EditorEditing/zoom-focus-mouse'/>
+        <menuitem action='EditorEditing/zoom-focus-edit'/>
+        <menuitem action='EditorEditing/cycle-zoom-focus'/>
       </menu>
       <menu action="ScrollMenu">
         <menuitem action='scroll-tracks-down'/>
