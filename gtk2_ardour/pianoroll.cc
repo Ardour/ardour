@@ -2753,6 +2753,10 @@ Pianoroll::set_session (ARDOUR::Session* s)
 
 		map_transport_state ();
 	}
+
+	if (!_session) {
+		_update_connection.disconnect ();
+	}
 }
 
 void
