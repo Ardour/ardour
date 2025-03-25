@@ -63,6 +63,7 @@ Delivery::Delivery (Session& s, std::shared_ptr<IO> io, std::shared_ptr<Pannable
 	, _current_gain (GAIN_COEFF_ZERO)
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
+	, _rta_active (false)
 	, _no_panner_reset (false)
 {
 	if (pannable) {
@@ -87,6 +88,7 @@ Delivery::Delivery (Session& s, std::shared_ptr<Pannable> pannable, std::shared_
 	, _current_gain (GAIN_COEFF_ZERO)
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
+	, _rta_active (false)
 	, _no_panner_reset (false)
 {
 	if (pannable) {
@@ -199,6 +201,13 @@ Delivery::set_gain_control (std::shared_ptr<GainControl> gc) {
 	}
 }
 
+void
+Delivery::set_analysis_active (bool en)
+{
+	// TODO latch with session wide enable, sync'ed at process start
+	_rta_active.store (en);
+}
+
 /** Caller must hold process lock */
 bool
 Delivery::configure_io (ChanCount in, ChanCount out)
@@ -299,6 +308,14 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 			bufs.set_count (output_buffers().count ());
 			Amp::apply_simple_gain (bufs, nframes, GAIN_COEFF_ZERO);
 		}
+
+		RTABufferListPtr rtabuffers = _rtabuffers;
+		if (_rta_active.load () && rtabuffers && !rtabuffers->empty () && output_buffers().count().n_audio() > 0) {
+			const BufferSet& outs (output_buffers());
+			for (auto const& rb : *rtabuffers) {
+				rb->write (outs.get_audio (0).data(), nframes);
+			}
+		}
 		return;
 
 	} else if (tgain != GAIN_COEFF_UNITY) {
@@ -352,6 +369,21 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			if (*t != DataType::AUDIO && bufs.count().get(*t) > 0) {
 				_output->copy_to_outputs (bufs, *t, nframes, 0);
+			}
+		}
+	}
+
+	uint32_t n_audio = output_buffers().count().n_audio();
+	RTABufferListPtr rtabuffers = _rtabuffers;
+	if (_rta_active.load () && n_audio > 0 && rtabuffers) {
+		const BufferSet& outs (output_buffers());
+		uint32_t n = 0;
+		for (auto const& rb: *rtabuffers) {
+			if (n < n_audio) {
+				rb->write (outs.get_audio (n++).data(), nframes);
+			} else {
+				BufferSet& silent_bufs = _session.get_silent_buffers(ChanCount(DataType::AUDIO, 1));
+				rb->write (silent_bufs.get_audio(0).data(), nframes);
 			}
 		}
 	}
