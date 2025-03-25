@@ -330,7 +330,7 @@
         <menuitem action='set-tempo-from-region'/>
         <menuitem action='set-tempo-from-edit-range'/>
       </menu>
-      <menuitem action='EditorEditing/set-mouse-mode-object-range'/>
+      <menuitem action='set-mouse-mode-object-range'/>
       <menuitem action='show-touched-automation'/>
       <separator/>
       <menu action="LuaScripts">
@@ -567,13 +567,13 @@
         <menuitem action='shrink-tracks'/>
       </menu>
       <menu name='ZoomFocus' action='ZoomFocus'>
-        <menuitem action='EditorEditing/zoom-focus-left'/>
-        <menuitem action='EditorEditing/zoom-focus-right'/>
-        <menuitem action='EditorEditing/zoom-focus-center'/>
-        <menuitem action='EditorEditing/zoom-focus-playhead'/>
-        <menuitem action='EditorEditing/zoom-focus-mouse'/>
-        <menuitem action='EditorEditing/zoom-focus-edit'/>
-        <menuitem action='EditorEditing/cycle-zoom-focus'/>
+        <menuitem action='EditorZoom/zoom-focus-left'/>
+        <menuitem action='EditorZoom/zoom-focus-right'/>
+        <menuitem action='EditorZoom/zoom-focus-center'/>
+        <menuitem action='EditorZoom/zoom-focus-playhead'/>
+        <menuitem action='EditorZoom/zoom-focus-mouse'/>
+        <menuitem action='EditorZoom/zoom-focus-edit'/>
+        <menuitem action='EditorZoom/cycle-zoom-focus'/>
       </menu>
       <menu action="ScrollMenu">
         <menuitem action='scroll-tracks-down'/>
