@@ -650,7 +650,7 @@ Pianoroll::maybe_update ()
 
 	if (!playing_trigger) {
 
-		if (_drags->active() || !view) {
+		if (_drags->active() || !view || !_track || !_track->triggerbox()) {
 			return;
 		}
 		if (_track->triggerbox()->record_enabled() == Recording) {
