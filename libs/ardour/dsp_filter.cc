@@ -562,10 +562,10 @@ FFTSpectrum::execute ()
 }
 
 float
-FFTSpectrum::power_at_bin (const uint32_t b, const float norm) const
+FFTSpectrum::power_at_bin (const uint32_t b, const float gain, bool pink) const
 {
 	assert (b < _fft_data_size);
-	const float a = _fft_power[b] * norm;
+	const float a = _fft_power[b] * gain * (pink ? b : 1.f);
 	return a > 1e-12 ? 10.0 * fast_log10 (a) : -INFINITY;
 }
 
@@ -863,10 +863,10 @@ PerceptualAnalyzer::freq_at_bin (const uint32_t bin) const
 }
 
 float
-PerceptualAnalyzer::power_at_bin (const uint32_t b, float gain, bool flat) const
+PerceptualAnalyzer::power_at_bin (const uint32_t b, float gain, bool pink) const
 {
 	assert (b <= _fftlen);
-	if (flat) {
+	if (!pink) {
 		return 10.f * log10f (_power->_data[b] + 1e-30);
 	} else {
 		/* proportional */

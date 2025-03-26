@@ -285,7 +285,14 @@ namespace ARDOUR { namespace DSP {
 			double _b0, _b1, _b2;
 	};
 
-	class LIBARDOUR_API FFTSpectrum {
+	class LIBARDOUR_API SpectrumAnalyzer {
+	public:
+		virtual ~SpectrumAnalyzer () {}
+		virtual float power_at_bin (const uint32_t bin, const float gain, bool pink) const = 0;
+		virtual float freq_at_bin (const uint32_t bin) const = 0;
+	};
+
+	class LIBARDOUR_API FFTSpectrum : public SpectrumAnalyzer {
 		public:
 			FFTSpectrum (uint32_t window_size, double rate);
 			~FFTSpectrum ();
@@ -307,7 +314,7 @@ namespace ARDOUR { namespace DSP {
 			 * @param norm gain factor (set equal to \p bin for 1/f normalization)
 			 * @return signal power at given bin (in dBFS)
 			 */
-			float power_at_bin (const uint32_t bin, const float norm = 1.f) const;
+			float power_at_bin (const uint32_t bin, const float gain = 1.f, bool pink = false) const;
 
 			float freq_at_bin (const uint32_t bin) const {
 				return bin * _fft_freq_per_bin;
@@ -330,7 +337,7 @@ namespace ARDOUR { namespace DSP {
 			fftwf_plan _fftplan;
 	};
 
-	class LIBARDOUR_API PerceptualAnalyzer {
+	class LIBARDOUR_API PerceptualAnalyzer : public SpectrumAnalyzer {
 		public:
 			PerceptualAnalyzer (double rate, int ipsize = 4096);
 			~PerceptualAnalyzer ();
@@ -386,7 +393,7 @@ namespace ARDOUR { namespace DSP {
 			static double warp_freq (double w, double f);
 
 			float freq_at_bin (const uint32_t bin) const;
-			float power_at_bin (const uint32_t bin, const float gain = 1.f, bool flat = false) const;
+			float power_at_bin (const uint32_t bin, const float gain = 1.f, bool pink = false) const;
 
 		private:
 			static const int _fftlen = 512;
