@@ -17,6 +17,8 @@
  */
 #pragma once
 
+#include "pbd/ringbuffer.h"
+
 #include "ardour/ardour.h"
 #include "ardour/dsp_filter.h"
 #include "ardour/session_handle.h"
@@ -25,26 +27,65 @@
 class RTAManager
 	: public ARDOUR::SessionHandlePtr
 	, public PBD::ScopedConnectionList
+	, public sigc::trackable
 {
 public:
 	static RTAManager* instance ();
 	~RTAManager ();
 
+	class RTA {
+	public:
+		RTA (std::shared_ptr<ARDOUR::Route>);
+		~RTA ();
+
+		RTA (RTA const&) = delete;
+
+		using RTARingBuffer    = PBD::RingBuffer<ARDOUR::Sample>;
+		using RTARingBufferPtr = std::shared_ptr<RTARingBuffer>;
+		using RTABufferList    = std::vector<RTARingBufferPtr>;
+		using RTABufferListPtr = std::shared_ptr<RTABufferList>;
+
+		std::shared_ptr<ARDOUR::Route>  route;
+		ARDOUR::samplecnt_t             rate;
+		size_t                          blocksize;
+		size_t                          stepsize;
+		size_t                          offset;
+		ARDOUR::DSP::PerceptualAnalyzer analyzer;
+		RTABufferListPtr                ringbuffers;
+	};
+
 	void set_session (ARDOUR::Session*);
+
 	XMLNode& get_state () const;
 
 	void attach (std::shared_ptr<ARDOUR::Route>);
 	void remove (std::shared_ptr<ARDOUR::Route>);
 	bool attached (std::shared_ptr<ARDOUR::Route>) const;
 
-	void run_rta ();
+	std::list<RTA> const& rta () const { return _rta; }
+
 	void set_active (bool);
+	void set_rta_speed (ARDOUR::DSP::PerceptualAnalyzer::Speed);
+	void set_rta_warp (ARDOUR::DSP::PerceptualAnalyzer::Warp);
+
+	ARDOUR::DSP::PerceptualAnalyzer::Speed rta_speed() const { return _speed; }
+	ARDOUR::DSP::PerceptualAnalyzer::Warp rta_warp() const { return _warp; }
+
+	PBD::Signal<void()> SignalReady;
+	PBD::Signal<void()> SettingsChanged;
 
 private:
 	RTAManager ();
 	static RTAManager* _instance;
 
+	void run_rta ();
 	void session_going_away ();
+	void route_removed (std::weak_ptr<ARDOUR::Route>);
+
+	std::list<RTA>                         _rta;
+	bool                                   _active;
+	ARDOUR::DSP::PerceptualAnalyzer::Speed _speed;
+	ARDOUR::DSP::PerceptualAnalyzer::Warp  _warp;
 
 	sigc::connection _update_connection;
 };
