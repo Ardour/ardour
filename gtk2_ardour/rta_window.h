@@ -23,8 +23,12 @@
 #include <ytkmm/drawingarea.h>
 
 #include "ardour/ardour.h"
+#include "ardour/dsp_filter.h"
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
+
+#include "widgets/ardour_button.h"
+#include "widgets/ardour_dropdown.h"
 
 #include "ardour_window.h"
 
@@ -38,14 +42,61 @@ public:
 	XMLNode& get_state () const;
 
 private:
+
+	void on_map ();
+	void on_unmap ();
+
 	void session_going_away ();
 	void update_title ();
 	void on_theme_changed ();
+	void rta_settings_changed ();
 
 	void darea_size_request (Gtk::Requisition*);
 	void darea_size_allocate (Gtk::Allocation&);
 	bool darea_expose_event (GdkEventExpose*);
 
-	Gtk::VBox         _vpacker;
-	Gtk::DrawingArea  _darea;
+	bool darea_button_press_event (GdkEventButton*);
+	bool darea_button_release_event (GdkEventButton*);
+	bool darea_motion_notify_event (GdkEventMotion*);
+	bool darea_leave_notify_event (GdkEventCrossing*);
+
+	void set_rta_speed (ARDOUR::DSP::PerceptualAnalyzer::Speed);
+	void set_rta_warp (ARDOUR::DSP::PerceptualAnalyzer::Warp);
+
+	void pause_toggled ();
+
+	enum DragStatus {
+		DragNone,
+		DragUpper,
+		DragLower,
+		DragRange
+	};
+
+	const float _dB_range = 86; // +6 .. -80 dB
+	const float _dB_min   = -80;
+
+	Gtk::VBox                              _vpacker;
+	Gtk::HBox                              _ctrlbox;
+	Gtk::DrawingArea                       _darea;
+	Gtk::Label                             _pointer_info;
+	ArdourWidgets::ArdourButton            _pause;
+	ArdourWidgets::ArdourDropdown          _speed_dropdown;
+	ArdourWidgets::ArdourDropdown          _warp_dropdown;
+	Cairo::RefPtr<Cairo::ImageSurface>     _grid;
+	bool                                   _visible;
+	std::vector<std::string>               _speed_strings;
+	std::vector<std::string>               _warp_strings;
+	std::map<int, float>                   _xpos;
+	Gtkmm2ext::Color                       _basec;
+	Gtkmm2ext::Color                       _gridc;
+	Gtkmm2ext::Color                       _textc;
+	int                                    _margin;
+	int                                    _min_dB;
+	int                                    _max_dB;
+	bool                                   _hovering_dB;
+	DragStatus                             _dragging_dB;
+	float                                  _dragstart_y;
+	float                                  _dragstart_dB;
+
+	PBD::ScopedConnectionList _rta_connections;
 };
