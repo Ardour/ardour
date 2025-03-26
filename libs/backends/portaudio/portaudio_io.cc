@@ -320,21 +320,27 @@ PortAudioIO::available_buffer_sizes(int device_id, std::vector<uint32_t>& buffer
 void
 PortAudioIO::input_device_list(std::map<int, std::string> &devices) const
 {
-	for (std::map<int, paDevice*>::const_iterator i = _input_devices.begin ();
-	     i != _input_devices.end ();
-	     ++i) {
-		devices.insert (std::pair<int, std::string>(i->first, Glib::locale_to_utf8(i->second->name)));
-	}
+	static_cast<void> (std::transform (
+		_input_devices.cbegin (),
+		_input_devices.cend (),
+		devices.end (),
+		[] (const std::pair<const int, paDevice*>& i) {
+			return std::pair<int, std::string>(i.first, Glib::locale_to_utf8(i.second->name);
+		}
+	));
 }
 
 void
 PortAudioIO::output_device_list(std::map<int, std::string> &devices) const
 {
-	for (std::map<int, paDevice*>::const_iterator i = _output_devices.begin ();
-	     i != _output_devices.end ();
-	     ++i) {
-		devices.insert (std::pair<int, std::string>(i->first, Glib::locale_to_utf8(i->second->name)));
-	}
+	static_cast<void> (std::transform (
+		_output_devices.cbegin (),
+		_output_devices.cend (),
+		devices.end (),
+		[] (const std::pair<const int, paDevice*>& i) {
+			return std::pair<int, std::string>(i.first, Glib::locale_to_utf8(i.second->name);
+		}
+	));
 }
 
 bool&

@@ -1058,14 +1058,10 @@ PTFFormat::parserest(void) {
 			}
 		}
 	}
-	for (std::vector<track_t>::iterator tr = _tracks.begin();
-			tr != _tracks.end(); /* noop */) {
-		if ((*tr).reg.index == 65535) {
-			tr = _tracks.erase(tr);
-		} else {
-			tr++;
-		}
-	}
+
+	static_cast<void>(std::remove_if(_tracks.begin(), _tracks.end(), [] (track_t& tr) {
+		return tr.reg.index == 65535;
+	}));
 
 	if (_tracks.begin() == _tracks.end())
 		return found;
@@ -1319,13 +1315,10 @@ PTFFormat::parsemidi(void) {
 			}
 		}
 	}
-	for (std::vector<track_t>::iterator tr = _miditracks.begin();
-			tr != _miditracks.end(); /* noop */) {
-		if ((*tr).reg.index == 65535) {
-			tr = _miditracks.erase(tr);
-		} else {
-			tr++;
-		}
-	}
+
+	static_cast<void>(std::remove_if(_miditracks.begin(), _miditracks.end(), [] (track_t& tr) {
+		return tr.reg.index == 65535;
+	}));
+
 	return true;
 }
