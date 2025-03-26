@@ -89,6 +89,7 @@
 #include "gui_thread.h"
 #include "route_group_menu.h"
 #include "meter_patterns.h"
+#include "rta_manager.h"
 #include "ui_config.h"
 #include "triggerbox_ui.h"
 
@@ -1132,6 +1133,23 @@ MixerStrip::build_route_ops_menu ()
 		denormal_menu_item = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 		denormal_menu_item->set_active (_route->denormal_protection());
 	}
+
+#ifndef NDEBUG
+	if (active && !is_singleton ()) {
+		items.push_back (CheckMenuElem (_("RTA")));
+		Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+		bool attached = RTAManager::instance ()->attached (_route);
+		i->set_active (attached);
+		i->signal_activate().connect ([this, attached]() {
+				if (attached) {
+					RTAManager::instance ()->remove (_route);
+				} else {
+					RTAManager::instance ()->attach (_route);
+					ARDOUR_UI::instance()->show_realtime_analyzer ();
+				}
+			});
+	}
+#endif
 
 	/* Disk I/O */
 
