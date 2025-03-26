@@ -562,10 +562,10 @@ FFTSpectrum::execute ()
 }
 
 float
-FFTSpectrum::power_at_bin (const uint32_t b, const float norm) const
+FFTSpectrum::power_at_bin (const uint32_t b, const float gain) const
 {
 	assert (b < _fft_data_size);
-	const float a = _fft_power[b] * norm;
+	const float a = _fft_power[b] * gain;
 	return a > 1e-12 ? 10.0 * fast_log10 (a) : -INFINITY;
 }
 
