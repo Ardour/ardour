@@ -373,19 +373,21 @@ KeyboardKey::make_key (const string& str, KeyboardKey& k)
 
 /*================================= Bindings =================================*/
 Bindings::Bindings (std::string const& name)
-	: _name (name)
+	: _parent (nullptr)
+	, _name (name)
 {
 	bindings.push_back (this);
 }
 
-Bindings::Bindings (std::string const & name, Bindings const & other)
-	: _name (name)
-	, press_bindings (other.press_bindings)
-	, release_bindings (other.release_bindings)
-	, button_press_bindings (other.button_press_bindings)
-	, button_release_bindings (other.button_release_bindings)
+Bindings::Bindings (std::string const & name, Bindings & other)
+	: _parent (&other)
+	, _name (name)
 {
-	relativize ();
+	PBD::stacktrace (std::cerr, 13);
+	copy_from_parent (false);
+
+	BindingsChanged.connect_same_thread (bc, std::bind (&Bindings::parent_changed, this, _1));
+
 	bindings.push_back (this);
 }
 
@@ -536,7 +538,9 @@ void
 Bindings::relativize ()
 {
 	for (auto & [key,action_info] : press_bindings) {
+		std::cerr << action_info.action_name << " ---------> ";
 		action_info.action_name = _name + action_info.action_name;
+		std::cerr << action_info.action_name << std::endl;
 	}
 	for (auto & [key,action_info] : release_bindings) {
 		action_info.action_name = _name + action_info.action_name;
@@ -550,13 +554,8 @@ Bindings::relativize ()
 }
 
 void
-Bindings::associate ()
+Bindings::associate (bool force)
 {
-#warning find a better solution than this
-	if (_name == "Editing" || _name == "MIDI") {
-		return;
-	}
-
 	KeybindingMap::iterator k;
 
 	for (k = press_bindings.begin(); k != press_bindings.end(); ++k) {
@@ -593,6 +592,55 @@ Bindings::dissociate ()
 	for (k = release_bindings.begin(); k != release_bindings.end(); ++k) {
 		k->second.action.clear ();
 	}
+}
+
+void
+Bindings::copy_from_parent (bool assoc)
+{
+	assert (_parent);
+	press_bindings.clear ();
+	release_bindings.clear ();
+
+	_parent->clone_press (press_bindings);
+	_parent->clone_release (release_bindings);
+
+	dissociate ();
+	relativize ();
+
+	if (assoc) {
+		associate (true);
+	}
+}
+
+void
+Bindings::parent_changed (Bindings* changed)
+{
+	if (_parent != changed) {
+		return;
+	}
+
+	press_bindings.clear();
+	release_bindings.clear();
+
+	copy_from_parent (true);
+}
+
+void
+Bindings::clone_press (KeybindingMap& target) const
+{
+	clone_kbd_bindings (press_bindings, target);
+}
+
+void
+Bindings::clone_release (KeybindingMap& target) const
+{
+	clone_kbd_bindings (release_bindings, target);
+}
+
+void
+Bindings::clone_kbd_bindings (KeybindingMap const & src, KeybindingMap& target) const
+{
+	target = src;
 }
 
 void
