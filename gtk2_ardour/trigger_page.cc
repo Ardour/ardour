@@ -513,6 +513,7 @@ TriggerPage::selection_changed ()
 
 	_audio_trig_box.hide ();
 	_midi_trig_box.hide ();
+	_midi_editor->contents().hide(); // although we de-parent this, it requires this explicit HIDE to prevent bleeding into other pages on macOS
 
 	if (_midi_editor->contents().get_parent()) {
 		_midi_editor->contents().get_parent()->remove (_midi_editor->contents());
