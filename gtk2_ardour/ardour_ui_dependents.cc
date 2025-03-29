@@ -53,6 +53,7 @@
 #include "keyboard.h"
 #include "keyeditor.h"
 #include "rc_option_editor.h"
+#include "rta_manager.h"
 #include "route_params_ui.h"
 #include "trigger_ui.h"
 #include "step_entry.h"
@@ -132,6 +133,8 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 	recorder->set_session (s);
 	trigger_page->set_session (s);
 	meterbridge->set_session (s);
+
+	RTAManager::instance ()->set_session (s);
 
 	/* its safe to do this now */
 
