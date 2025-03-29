@@ -90,7 +90,6 @@ LuaWindow::instance ()
 LuaWindow::LuaWindow ()
 	: ArdourWindow ("Lua")
 	, lua (0)
-	, _visible (false)
 	, _menu_scratch (0)
 	, _menu_snippet (0)
 	, _menu_actions (0)
@@ -116,7 +115,6 @@ LuaWindow::LuaWindow ()
 	outtext.set_wrap_mode (Gtk::WRAP_WORD);
 	outtext.set_cursor_visible (false);
 
-	signal_delete_event().connect (sigc::mem_fun (*this, &LuaWindow::hide_window));
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 
 	_btn_run.signal_clicked.connect (sigc::mem_fun(*this, &LuaWindow::run_script));
@@ -176,21 +174,6 @@ LuaWindow::LuaWindow ()
 LuaWindow::~LuaWindow ()
 {
 	delete lua;
-}
-
-void
-LuaWindow::show_window ()
-{
-	present();
-	_visible = true;
-}
-
-bool
-LuaWindow::hide_window (GdkEventAny *ev)
-{
-	if (!_visible) return 0;
-	_visible = false;
-	return ARDOUR_UI_UTILS::just_hide_it (ev, static_cast<Gtk::Window *>(this));
 }
 
 void LuaWindow::reinit_lua ()
@@ -347,7 +330,7 @@ LuaWindow::edit_script (const std::string& name, const std::string& script)
 	script_buffers.push_back (ScriptBufferPtr (sb));
 	script_selection_changed (script_buffers.back ());
 	refresh_scriptlist ();
-	show_window ();
+	ARDOUR_UI::instance()->show_lua_window ();
 }
 
 void

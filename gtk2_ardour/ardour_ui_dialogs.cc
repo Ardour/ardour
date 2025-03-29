@@ -1041,6 +1041,12 @@ ARDOUR_UI::toggle_mixer_space()
 		mixer->restore_mixer_space ();
 	}
 }
+void
+ARDOUR_UI::show_lua_window ()
+{
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-luawindow");
+	tact->set_active();
+}
 
 void
 ARDOUR_UI::show_plugin_manager ()

@@ -285,6 +285,7 @@ public:
 	void toggle_mixer_space();
 	void toggle_keep_tearoffs();
 	void show_plugin_manager();
+	void show_lua_window();
 
 	void reset_focus (Gtk::Widget*);
 
