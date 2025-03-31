@@ -721,10 +721,6 @@
 #ifndef MIXBUS
       <menuitem action='toggle-io-plugins'/>
 #endif
-#ifdef MIXBUS
-      <separator/>
-      <menuitem action='license-manager'/>
-#endif
 
       <separator/><!-- Misc Configuration !-->
       <menuitem action='toggle-luawindow'/>
