@@ -868,7 +868,7 @@ def build(bld):
     if bld.is_defined('MIXBUS') or bld.env['DEBUG']:
         menus_argv += [ '-DVAPOR' ]
 
-    if not not bld.env['DEBUG']:
+    if not bld.env['DEBUG']:
         menus_argv += [ '-DNDEBUG' ]
 
     # always build all versions of the menu definitions
