@@ -147,6 +147,7 @@ public:
 	bool show_sends_release (GdkEventButton*);
 	bool solo_isolate_button_release (GdkEventButton*);
 	bool solo_safe_button_release (GdkEventButton*);
+	void rta_clicked ();
 
 	bool monitor_release (GdkEventButton*, ARDOUR::MonitorChoice);
 	bool monitor_input_press (GdkEventButton*);
@@ -197,6 +198,7 @@ protected:
 	ArdourWidgets::ArdourButton* show_sends_button; /* busses */
 	ArdourWidgets::ArdourButton* monitor_input_button;
 	ArdourWidgets::ArdourButton* monitor_disk_button;
+	ArdourWidgets::ArdourButton* rta_button;
 
 	ArdourWidgets::ArdourButton* solo_safe_led;
 	ArdourWidgets::ArdourButton* solo_isolated_led;
@@ -287,6 +289,7 @@ private:
 	void session_rec_enable_changed ();
 	void denormal_protection_changed ();
 	void muting_change ();
+	void handle_gui_changes (std::string const&);
 
 	void step_edit_changed (bool);
 	void toggle_rec_safe ();

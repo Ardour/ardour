@@ -180,6 +180,7 @@ RTAManager::attach (std::shared_ptr<ARDOUR::Route> route)
 	_rta.back ().set_rta_warp (_warp);
 	_rta.back ().delivery ()->set_analysis_active (_active);
 
+	route->gui_changed ("rta", this); /* EMIT SIGNAL */
 	route->DropReferences.connect (*this, invalidator (*this), std::bind (&RTAManager::route_removed, this, std::weak_ptr<Route> (route)), gui_context ());
 }
 
@@ -187,6 +188,7 @@ void
 RTAManager::remove (std::shared_ptr<ARDOUR::Route> route)
 {
 	_rta.remove_if ([route] (RTAManager::RTA const& r) { return r.route () == route; });
+	route->gui_changed ("rta", this); /* EMIT SIGNAL */
 }
 
 bool

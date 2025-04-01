@@ -83,6 +83,7 @@
 #include "rgb_macros.h"
 #include "route_time_axis.h"
 #include "route_ui.h"
+#include "rta_manager.h"
 #include "save_template_dialog.h"
 #include "timers.h"
 #include "ui_config.h"
@@ -214,6 +215,11 @@ RouteUI::init ()
 	solo_button->set_name ("solo button");
 	solo_button->set_no_show_all (true);
 
+	rta_button = manage (new ArdourButton);
+	rta_button->set_name ("rta button");
+	rta_button->set_act_on_release (true);
+	rta_button->set_text (_("RTA"));
+
 	rec_enable_button = manage (new ArdourButton);
 	rec_enable_button->set_name ("record enable button");
 	rec_enable_button->set_icon (ArdourIcon::RecButton);
@@ -255,6 +261,8 @@ RouteUI::init ()
 
 	rec_enable_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_press), false);
 	rec_enable_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_release), false);
+
+	rta_button->signal_clicked.connect (sigc::mem_fun(*this, &RouteUI::rta_clicked));
 
 	show_sends_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_press), false);
 	show_sends_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_release), false);
@@ -391,6 +399,8 @@ RouteUI::set_route (std::shared_ptr<Route> rp)
 	_route->solo_isolate_control()->Changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->phase_control()->Changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::update_polarity_display, this), gui_context());
 
+	_route->gui_changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::handle_gui_changes, this, _1), gui_context());
+
 	if (is_track()) {
 		track()->FreezeChange.connect (*this, invalidator (*this), std::bind (&RouteUI::map_frozen, this), gui_context());
 		track_mode_changed();
@@ -435,6 +445,7 @@ RouteUI::set_route (std::shared_ptr<Route> rp)
 
 	mute_button->set_can_focus (false);
 	solo_button->set_can_focus (false);
+	rta_button->set_can_focus (false);
 
 	mute_button->show();
 
@@ -454,6 +465,7 @@ RouteUI::set_route (std::shared_ptr<Route> rp)
 	update_mute_display ();
 	update_solo_display ();
 	update_solo_button ();
+	handle_gui_changes ("rta");
 
 	if (!UIConfiguration::instance().get_blink_rec_arm()) {
 		blink_rec_display(true); // set initial rec-en button state
@@ -1186,6 +1198,27 @@ RouteUI::send_blink (bool onoff)
 		show_sends_button->set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		show_sends_button->unset_active_state ();
+	}
+}
+
+void
+RouteUI::rta_clicked ()
+{
+	bool attached = RTAManager::instance ()->attached (_route);
+	if (attached) {
+		RTAManager::instance ()->remove (_route);
+	} else {
+		RTAManager::instance ()->attach (_route);
+		ARDOUR_UI::instance()->show_realtime_analyzer ();
+	}
+}
+
+void
+RouteUI::handle_gui_changes (std::string const& what)
+{
+	if (what == "rta") {
+		bool attached = RTAManager::instance ()->attached (_route);
+		rta_button->set_active_state (attached ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 }
 
@@ -2820,4 +2853,3 @@ RouteUI::clear_time_domain (bool apply_to_selection)
 	}
 
 }
-
