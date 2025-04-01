@@ -248,7 +248,7 @@ Pianoroll::add_multi_controller_item (Gtk::Menu_Helpers::MenuList&,
 
 				if (fully_qualified_param == pbmi->second) {
 					Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&chn_items.back());
-					cmi->set_active();
+					// cmi->set_active();
 				}
 			}
 		}
