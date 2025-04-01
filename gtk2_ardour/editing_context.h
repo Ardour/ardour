@@ -407,8 +407,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	void legatize_region (bool shrink_only);
 	void transpose_region ();
 
-	void register_midi_actions (Gtkmm2ext::Bindings*);
-	void register_common_actions (Gtkmm2ext::Bindings*);
+	static bool need_shared_actions;
+	void register_midi_actions (Gtkmm2ext::Bindings*, std::string const &);
+	void register_common_actions (Gtkmm2ext::Bindings*, std::string const &);
 
 	ArdourCanvas::Rectangle* rubberband_rect;
 

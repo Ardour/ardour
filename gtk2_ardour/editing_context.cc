@@ -70,6 +70,7 @@ sigc::signal<void> EditingContext::DropDownKeys;
 Gtkmm2ext::Bindings* EditingContext::button_bindings = nullptr;
 std::vector<std::string> EditingContext::grid_type_strings;
 MouseCursors* EditingContext::_cursors = nullptr;
+bool EditingContext::need_shared_actions = true;
 
 static const gchar *_grid_type_strings[] = {
 	N_("No Grid"),
@@ -294,9 +295,9 @@ EditingContext::set_selected_midi_region_view (MidiRegionView& mrv)
 }
 
 void
-EditingContext::register_common_actions (Bindings* common_bindings)
+EditingContext::register_common_actions (Bindings* common_bindings, std::string const & prefix)
 {
-	_common_actions = ActionManager::create_action_group (common_bindings, _name + X_("Editing"));
+	_common_actions = ActionManager::create_action_group (common_bindings, prefix + X_("Editing"));
 
 	reg_sens (_common_actions, "temporal-zoom-out", _("Zoom Out"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), true));
 	reg_sens (_common_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), false));
@@ -323,7 +324,7 @@ EditingContext::register_common_actions (Bindings* common_bindings)
 	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseContent));
 	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseCut));
 
-	zoom_actions = ActionManager::create_action_group (common_bindings, _name + X_("Zoom"));
+	zoom_actions = ActionManager::create_action_group (common_bindings, prefix + X_("Zoom"));
 	RadioAction::Group zoom_group;
 
 	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusLeft));
@@ -337,9 +338,9 @@ EditingContext::register_common_actions (Bindings* common_bindings)
 }
 
 void
-EditingContext::register_midi_actions (Bindings* midi_bindings)
+EditingContext::register_midi_actions (Bindings* midi_bindings, std::string const & prefix)
 {
-	_midi_actions = ActionManager::create_action_group (midi_bindings, _name + X_("Notes"));
+	_midi_actions = ActionManager::create_action_group (midi_bindings, prefix + X_("Notes"));
 
 	/* two versions to allow same action for Delete and Backspace */
 
@@ -417,7 +418,7 @@ EditingContext::register_midi_actions (Bindings* midi_bindings)
 
 	ActionManager::register_action (_midi_actions, X_("quantize-selected-notes"), _("Quantize Selected Notes"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action),  &MidiView::quantize_selected_notes));
 
-	length_actions = ActionManager::create_action_group (midi_bindings, _name + X_("DrawLength"));
+	length_actions = ActionManager::create_action_group (midi_bindings, prefix + X_("DrawLength"));
 	RadioAction::Group draw_length_group;
 
 	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv32));
@@ -439,7 +440,7 @@ EditingContext::register_midi_actions (Bindings* midi_bindings)
 	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBar));
 	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-auto"),           _("Auto"),                                         sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), DRAW_LEN_AUTO));
 
-	velocity_actions = ActionManager::create_action_group (midi_bindings, _name + X_("DrawVelocity"));
+	velocity_actions = ActionManager::create_action_group (midi_bindings, prefix + X_("DrawVelocity"));
 	RadioAction::Group draw_velocity_group;
 	ActionManager::register_radio_action (velocity_actions, draw_velocity_group, X_("draw-velocity-auto"),  _("Auto"), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), DRAW_VEL_AUTO));
 	for (int i = 1; i <= 127; i++) {
@@ -450,7 +451,7 @@ EditingContext::register_midi_actions (Bindings* midi_bindings)
 		ActionManager::register_radio_action (velocity_actions, draw_velocity_group, buf, vel, sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), i));
 	}
 
-	channel_actions = ActionManager::create_action_group (midi_bindings, _name + X_("DrawChannel"));
+	channel_actions = ActionManager::create_action_group (midi_bindings, prefix + X_("DrawChannel"));
 	RadioAction::Group draw_channel_group;
 	ActionManager::register_radio_action (channel_actions, draw_channel_group, X_("draw-channel-auto"),  _("Auto"), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_channel_chosen), DRAW_CHAN_AUTO));
 	for (int i = 0; i <= 15; i++) {
@@ -3207,6 +3208,15 @@ EditingContext::copy ()
 void
 EditingContext::load_shared_bindings ()
 {
+	Bindings* m = Bindings::get_bindings (X_("MIDI"));
+	Bindings* b = Bindings::get_bindings (X_("Editing"));
+
+	if (need_shared_actions) {
+		register_midi_actions (m, string());
+		register_common_actions (b, string());
+		need_shared_actions = false;
+	}
+
 	/* This set of bindings may expand in the future to include things
 	 * other than MIDI editing, but for now this is all we've got as far as
 	 * bindings that need to be distinct from the Editors (because some of
@@ -3217,13 +3227,13 @@ EditingContext::load_shared_bindings ()
 	 * named after this EditingContext (ie. unique to this EC)
 	 */
 
-	Bindings* m = Bindings::get_bindings (X_("MIDI"));
 	Bindings* midi_bindings = new Bindings (_name, *m);
-	register_midi_actions (midi_bindings);
+	register_midi_actions (midi_bindings, _name);
+	midi_bindings->associate ();
 
-	Bindings* b = Bindings::get_bindings (X_("Editing"));
 	Bindings* shared_bindings = new Bindings (_name, *b);
-	register_common_actions (shared_bindings);
+	register_common_actions (shared_bindings, _name);
+	shared_bindings->associate ();
 
 	/* Attach bindings to the canvas for this editing context */
 

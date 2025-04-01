@@ -916,8 +916,10 @@ ARDOUR_UI::create_key_editor ()
 {
 	KeyEditor* kedit = new KeyEditor;
 
-	for (std::list<Bindings*>::iterator b = Bindings::bindings.begin(); b != Bindings::bindings.end(); ++b) {
-		kedit->add_tab ((*b)->name(), **b);
+	for (auto & b : Bindings::bindings) {
+		if (!b->parent()) {
+			kedit->add_tab (b->name(), *b);
+		}
 	}
 
 	return kedit;
