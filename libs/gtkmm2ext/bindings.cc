@@ -537,9 +537,7 @@ void
 Bindings::relativize ()
 {
 	for (auto & [key,action_info] : press_bindings) {
-		std::cerr << action_info.action_name << " ---------> ";
 		action_info.action_name = _name + action_info.action_name;
-		std::cerr << action_info.action_name << std::endl;
 	}
 	for (auto & [key,action_info] : release_bindings) {
 		action_info.action_name = _name + action_info.action_name;
