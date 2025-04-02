@@ -383,7 +383,6 @@ Bindings::Bindings (std::string const & name, Bindings & other)
 	: _parent (&other)
 	, _name (name)
 {
-	PBD::stacktrace (std::cerr, 13);
 	copy_from_parent (false);
 
 	BindingsChanged.connect_same_thread (bc, std::bind (&Bindings::parent_changed, this, _1));
