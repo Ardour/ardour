@@ -1601,6 +1601,18 @@ AudioRegion::fade_out_is_default () const
 	return _fade_out->size() == 2 && _fade_out->when(true) == 0 && _fade_out->when(false).samples () == 64;
 }
 
+samplecnt_t
+AudioRegion::fade_in_length ()
+{
+	return _fade_in->when(false).samples();
+}
+
+samplecnt_t
+AudioRegion::fade_out_length ()
+{
+	return _fade_out->when(false).samples();
+}
+
 void
 AudioRegion::set_default_fade_in ()
 {
