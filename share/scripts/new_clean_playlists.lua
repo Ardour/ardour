@@ -20,7 +20,7 @@ function factory (params) return function ()
 			-- if not, skip it
 			goto next_route
 		end
-        
+
 		local is_audio = false
 		if track:data_type():to_string() == "audio" then
 			is_audio = true
@@ -205,7 +205,7 @@ function factory (params) return function ()
 			-- and overlap segments from the same region
 			local last_end = -1
 			local new_segments = {}
- 
+
 			for i, s in pairs(segments) do
 				if s[2] - s[1] > 128 then
 					if s[1] > last_end + 128 then
