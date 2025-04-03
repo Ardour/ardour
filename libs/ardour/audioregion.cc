@@ -1601,16 +1601,16 @@ AudioRegion::fade_out_is_default () const
 	return _fade_out->size() == 2 && _fade_out->when(true) == 0 && _fade_out->when(false).samples () == 64;
 }
 
-samplecnt_t
+Temporal::timepos_t
 AudioRegion::fade_in_length ()
 {
-	return _fade_in->when(false).samples();
+	return _fade_in->when(false);
 }
 
-samplecnt_t
+Temporal::timepos_t
 AudioRegion::fade_out_length ()
 {
-	return _fade_out->when(false).samples();
+	return _fade_out->when(false);
 }
 
 void
