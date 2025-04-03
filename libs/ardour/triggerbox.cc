@@ -2178,10 +2178,10 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 					 * the end of the region
 					 */
 
-					std::vector<Sample*> in(nchans);
+					float** in = (float**)alloca(nchans * sizeof (float*));
 
 					for (uint32_t chn = 0; chn < nchans; ++chn) {
-						in[chn] = data[chn] + read_index;
+						in[chn] = data[chn % data.size ()] + read_index;
 					}
 
 					/* Note: RubberBandStretcher's process() and retrieve() API's accepts Sample**
