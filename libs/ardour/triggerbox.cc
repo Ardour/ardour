@@ -2189,7 +2189,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 					 * channel, but actually processes them all in one pass.
 					 */
 
-					_stretcher->process (&in[0], to_stretcher, at_end);
+					_stretcher->process (in, to_stretcher, at_end);
 
 					read_index += to_stretcher;
 					avail = _stretcher->available ();
