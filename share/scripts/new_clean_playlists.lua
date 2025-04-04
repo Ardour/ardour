@@ -39,14 +39,14 @@ function factory (params) return function ()
 
 		-- copy current playlist, get new playlist and rename it
 		-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:Playlist
-        track:use_copy_playlist()
+		track:use_copy_playlist()
 		local playlist = track:playlist()
 		playlist:set_name(track:name() .. "._MAIN_")
 
 		-- we will stock here the values needed to modify/remove regions
 		local regions_to_modify = {}
-        local point_b = 0
-        local point_c = 0
+		local point_b = 0
+		local point_c = 0
 
 		for r in playlist:region_list():iter() do
 			local r_front = r:position():samples()
@@ -161,7 +161,7 @@ function factory (params) return function ()
 						-- s :  A___________D
 
 						-- worst case, compared region rg is above r,
-                        -- rg starts after and finish before r.
+						-- rg starts after and finish before r.
 
 						point_b = cut_point_left
 						point_c = cut_point_right
@@ -219,7 +219,7 @@ function factory (params) return function ()
 
 			-- remember the regions we have to delete or modify
 			table.insert(regions_to_modify, {r, new_segments})
-        end
+		end
 
 		-- Remove, split or cut needed regions
 		for i=1, #regions_to_modify do
