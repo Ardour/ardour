@@ -65,11 +65,11 @@ function factory (params) return function ()
 			if is_audio then
 				local ra = r:to_audioregion()
 				if ra:fade_in_active() then
-					r_no_cut_before = r_front + ra:fade_in_length() + 64
+					r_no_cut_before = r_front + ra:fade_in_length():samples() + 64
 				end
 
 				if ra:fade_out_active() then
-					r_no_cut_after = r_end - ra:fade_out_length() - 64
+					r_no_cut_after = r_end - ra:fade_out_length():samples() - 64
 				end
 			end
 
@@ -90,11 +90,11 @@ function factory (params) return function ()
 					cut_point_right = cut_point_right - 64
 
 					if rga:fade_in_active() then
-						cut_point_left = cut_point_left + rga:fade_in_length()
+						cut_point_left = cut_point_left + rga:fade_in_length():samples()
 					end
 
 					if rga:fade_out_active() then
-						cut_point_right = cut_point_right - rga:fade_out_length()
+						cut_point_right = cut_point_right - rga:fade_out_length():samples()
 					end
 				end
 
