@@ -644,42 +644,49 @@ Pianoroll::maybe_update ()
 {
 	ARDOUR::TriggerPtr playing_trigger;
 
-	if (_track) {
-		playing_trigger = _track->triggerbox()->currently_playing ();
-	}
+	if (ref.trigger()) {
 
-	if (!playing_trigger) {
+		/* Trigger editor */
 
-		if (_drags->active() || !view || !_track || !_track->triggerbox()) {
-			return;
-		}
-		if (_track->triggerbox()->record_enabled() == Recording) {
+		playing_trigger = ref.box()->currently_playing ();
 
-			_playhead_cursor->set_position (data_capture_duration);
+		if (!playing_trigger) {
 
-		} else if (view->midi_region()) {
-
-			if (!_session) {
+			if (_drags->active() || !view || !_track || !_track->triggerbox()) {
 				return;
 			}
 
-			samplepos_t pos = _session->transport_sample();
-			samplepos_t spos = view->midi_region()->source_position().samples();
-			if (pos < spos) {
-				_playhead_cursor->set_position (0);
-			} else {
-				_playhead_cursor->set_position (pos - spos);
+			if (_track->triggerbox()->record_enabled() == Recording) {
+
+				_playhead_cursor->set_position (data_capture_duration);
 			}
+
 		} else {
+			if (playing_trigger->active ()) {
+				_playhead_cursor->set_position (playing_trigger->current_pos().samples() + playing_trigger->the_region()->start().samples());
+			} else {
+				_playhead_cursor->set_position (0);
+			}
+		}
+
+	} else if (view->midi_region()) {
+
+		/* Timeline region editor */
+
+		if (!_session) {
+			return;
+		}
+
+		samplepos_t pos = _session->transport_sample();
+		samplepos_t spos = view->midi_region()->source_position().samples();
+		if (pos < spos) {
 			_playhead_cursor->set_position (0);
+		} else {
+			_playhead_cursor->set_position (pos - spos);
 		}
 
 	} else {
-		if (playing_trigger->active ()) {
-			_playhead_cursor->set_position (playing_trigger->current_pos().samples() + playing_trigger->the_region()->start().samples());
-		} else {
-			_playhead_cursor->set_position (0);
-		}
+		_playhead_cursor->set_position (0);
 	}
 }
 
@@ -2812,4 +2819,14 @@ bool
 Pianoroll::allow_trim_cursors () const
 {
 	return mouse_mode == Editing::MouseContent || mouse_mode == Editing::MouseTimeFX;
+}
+
+void
+Pianoroll::shift_notes (timepos_t const & t)
+{
+	if (!_view) {
+		return;
+	}
+
+	_view->shift_notes (t);
 }
