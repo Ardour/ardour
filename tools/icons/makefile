@@ -7,10 +7,10 @@ TK = ../../build/libs/tk
 CXXFLAGS = -Wall -fsanitize=address
 
 CPPFLAGS = -I $(AD)/libs/gtkmm2ext -I $(AD)/libs/widgets -I $(AD)/libs/pbd -I $(AD)/build/libs/pbd
-CPPFLAGS += -I $(AD)/libs/tk/ydkmm/ydkmm -I $(AD)/libs/tk/ydk/ydk/
-CPPFLAGS += -I $(AD)/libs/tk/ytkmm/ytkmm -I $(AD)/libs/tk/ytk/ytk/
-CPPFLAGS += -I $(AD)/libs/tk/ztkmm/ztkmm/ -I $(AD)/libs/tk/ztk/ztk/
-CPPFLAGS += -I $(AD)/libs/tk/ydk-pixbuf/ydk-pixbuf/
+CPPFLAGS += -I $(AD)/libs/tk/ydkmm/ -I $(AD)/libs/tk/ydk//
+CPPFLAGS += -I $(AD)/libs/tk/ytkmm/ -I $(AD)/libs/tk/ytk/
+CPPFLAGS += -I $(AD)/libs/tk/ztkmm/ -I $(AD)/libs/tk/ztk/
+CPPFLAGS += -I $(AD)/libs/tk/ydk-pixbuf
 CPPFLAGS += `pkg-config --cflags cairo pangomm-1.4 cairomm-1.0 libxml-2.0 glibmm-2.4 giomm-2.4`
 
 LDFLAGS = -L$(BL)/pbd -Wl,-rpath=$(BL)/pbd
