@@ -1022,18 +1022,18 @@ PortAudioBackend::samples_since_cycle_start ()
 
 int
 PortAudioBackend::name_to_id(std::string device_name) const {
-	uint32_t device_id = UINT32_MAX;
 	std::map<int, std::string> devices;
 	_pcmio->input_device_list(devices);
 	_pcmio->output_device_list(devices);
 
-	for (std::map<int, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (i->second == device_name) {
-			device_id = i->first;
-			break;
+	auto device_it = std::find_if (
+		devices.cbegin (),
+		devices.cend (),
+		[&] (const auto& i) {
+			return i.second == device_name;
 		}
-	}
-	return device_id;
+	);
+	return device_it != devices.cend () ? device_it->first : UINT32_MAX;
 }
 
 bool
