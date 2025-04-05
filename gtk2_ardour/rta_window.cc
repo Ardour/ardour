@@ -524,12 +524,15 @@ RTAWindow::darea_expose_event (GdkEventExpose* ev)
 			cr->line_to (xx, y1 + 5);
 			cr->stroke ();
 
+			cr->save ();
 			layout->set_text (txt);
 			layout->set_alignment (Pango::ALIGN_CENTER);
 			int tw, th;
 			layout->get_pixel_size (tw, th);
 			cr->move_to (xx - tw / 2, y1 + 5);
+			Gtkmm2ext::set_source_rgb_a (cr, _textc, 0.75);
 			layout->show_in_cairo_context (cr);
+			cr->restore ();
 		}
 
 		/* dB grid */
@@ -569,11 +572,13 @@ RTAWindow::darea_expose_event (GdkEventExpose* ev)
 			int tw, th;
 			layout->get_pixel_size (tw, th);
 			cr->save ();
+			Gtkmm2ext::set_source_rgb_a (cr, _textc, 0.75);
 			cr->move_to (x1 + 5, y + tw / 2);
 			cr->rotate (1.5 * M_PI);
 			layout->show_in_cairo_context (cr);
 			cr->restore ();
 			cr->save ();
+			Gtkmm2ext::set_source_rgb_a (cr, _textc, 0.75);
 			cr->move_to (x0 - 5, y - tw / 2);
 			cr->rotate (0.5 * M_PI);
 			layout->show_in_cairo_context (cr);
