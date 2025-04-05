@@ -76,22 +76,26 @@ ExportFormatSpecification::Time::get_state () const
 	node->set_property ("format", type);
 
 	switch (type) {
-	  case Timecode:
+	case Timecode:
 		node->set_property ("hours", timecode.hours);
 		node->set_property ("minutes", timecode.minutes);
 		node->set_property ("seconds", timecode.seconds);
 		node->set_property ("frames", timecode.frames);
 		break;
-	  case BBT:
+	case BBT:
 		node->set_property ("bars", bbt.bars);
 		node->set_property ("beats", bbt.beats);
 		node->set_property ("ticks", bbt.ticks);
 		break;
-	  case Samples:
+	case Samples:
 		node->set_property ("samples", samples);
 		break;
-	  case Seconds:
+	case Seconds:
 		node->set_property ("seconds", seconds);
+		break;
+	default:
+		fatal << string_compose (_("programming error: %1\n"), X_("illegal time type passed to export specification")) << endmsg;
+		/*NOTREACHED*/
 		break;
 	}
 
@@ -125,6 +129,11 @@ ExportFormatSpecification::Time::set_state (const XMLNode & node)
 
 	case Seconds:
 		node.get_property ("seconds", seconds);
+		break;
+
+	default:
+		fatal << string_compose (_("programming error: %1\n"), X_("illegal time type passed to export specification")) << endmsg;
+		/*NOTREACHED*/
 		break;
 
 	}
