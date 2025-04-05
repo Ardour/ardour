@@ -119,7 +119,14 @@ PianorollMidiView::midi_canvas_group_event (GdkEvent* ev)
 	/* Let MidiView do its thing */
 
 	if (MidiView::midi_canvas_group_event (ev)) {
-		return true;
+
+		switch (ev->type) {
+		case GDK_ENTER_NOTIFY:
+		case GDK_LEAVE_NOTIFY:
+			break;
+		default:
+			return true;
+		}
 	}
 
 	return _editing_context.canvas_bg_event (ev, event_rect);
