@@ -1450,6 +1450,26 @@ Sequence<Time>::control_list_marked_dirty ()
 
 template<typename Time>
 void
+Sequence<Time>::shift (Time const & d)
+{
+	WriteLock rl (write_lock());
+
+	for (auto & n : _notes) {
+		n->set_time (n->time() + d);
+	}
+	for (auto & s : _sysexes) {
+		s->set_time (s->time() + d);
+	}
+	for (auto & p : _patch_changes) {
+		p->set_time (p->time() + d);
+	}
+	for (auto & [param,ctl] : _controls) {
+		ctl->list()->simple_shift (Temporal::timepos_t (d));
+	}
+}
+
+template<typename Time>
+void
 Sequence<Time>::dump (ostream& str, typename Sequence<Time>::const_iterator x, uint32_t limit) const
 {
 	typename Sequence<Time>::const_iterator i = begin();

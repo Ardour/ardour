@@ -319,6 +319,8 @@ public:
 	Time duration() const { return _duration; }
 	void set_duration (Time const &);
 
+	void shift (Time const &);
+
 protected:
 	bool                   _edited;
 	bool                   _overlapping_pitches_accepted;

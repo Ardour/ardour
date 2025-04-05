@@ -126,6 +126,7 @@ MidiModel::apply_diff_command_only (Command* cmd)
 
 /* ************* DIFF COMMAND ********************/
 
+#define SHIFT_COMMAND_ELEMENT "ShiftCommand"
 #define NOTE_DIFF_COMMAND_ELEMENT "NoteDiffCommand"
 #define DIFF_NOTES_ELEMENT "ChangedNotes"
 #define ADDED_NOTES_ELEMENT "AddedNotes"
@@ -144,6 +145,55 @@ MidiModel::DiffCommand::DiffCommand(std::shared_ptr<MidiModel> m, const std::str
 	, _name (name)
 {
 	assert(_model);
+}
+
+MidiModel::ShiftCommand::ShiftCommand (std::shared_ptr<MidiModel> m, std::string const & name, MidiModel::TimeType distance)
+	: DiffCommand (m, name)
+	, _distance (distance)
+{
+	assert (_model);
+}
+
+MidiModel::ShiftCommand::ShiftCommand (std::shared_ptr<MidiModel> m, const XMLNode& node)
+	: DiffCommand (m, "")
+{
+	assert (_model);
+	set_state (node, Stateful::loading_state_version);
+	// _name = string_compose (_("Shift MIDI by %1"), _distance.str());
+}
+
+void
+MidiModel::ShiftCommand::operator() ()
+{
+	_model->shift (_distance);
+	_model->ContentsChanged (); /* EMIT SIGNAL */
+}
+
+void
+MidiModel::ShiftCommand::undo ()
+{
+	_model->shift (-_distance);
+	_model->ContentsChanged (); /* EMIT SIGNAL */
+}
+
+int
+MidiModel::ShiftCommand::set_state (XMLNode const & diff_command, int /* version */)
+{
+	if (diff_command.name() != string (SHIFT_COMMAND_ELEMENT)) {
+		return 1;
+	}
+
+	diff_command.get_property (X_("distance"), _distance);
+
+	return 0;
+}
+
+XMLNode&
+MidiModel::ShiftCommand::get_state () const
+{
+	XMLNode* node = new XMLNode (SHIFT_COMMAND_ELEMENT);
+	node->set_property (X_("distance"), _distance);
+	return *node;
 }
 
 MidiModel::NoteDiffCommand::NoteDiffCommand (std::shared_ptr<MidiModel> m, const XMLNode& node)
