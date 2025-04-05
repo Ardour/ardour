@@ -119,10 +119,12 @@ RTAWindow::on_theme_changed ()
 	_gridc = UIConfiguration::instance ().color (X_("gtk_background"));
 	_textc = UIConfiguration::instance ().color (X_("gtk_foreground"));
 
-	_margin = 2 * ceilf (10.f * UIConfiguration::instance ().get_ui_scale ());
+	_margin  = 2 * ceilf (10.f * UIConfiguration::instance ().get_ui_scale ());
+	_uiscale = std::max<float> (1.f, sqrtf (UIConfiguration::instance ().get_ui_scale ()));
 
 	_grid.clear ();
 	_xpos.clear ();
+	_darea.queue_resize ();
 	_darea.queue_draw ();
 }
 
@@ -381,7 +383,6 @@ RTAWindow::darea_motion_notify_event (GdkEventMotion* ev)
 
 		if (changed) {
 			_grid.clear ();
-			_xpos.clear ();
 			_darea.queue_draw ();
 		}
 
@@ -474,7 +475,7 @@ RTAWindow::darea_size_allocate (Gtk::Allocation&)
 void
 RTAWindow::darea_size_request (Gtk::Requisition* req)
 {
-	req->width  = 512 + 2 * _margin;
+	req->width  = 512 *_uiscale + 2 * _margin;
 	req->height = req->width * 9 / 17;
 }
 
@@ -577,7 +578,7 @@ RTAWindow::darea_expose_event (GdkEventExpose* ev)
 		dashes2.push_back (2.0);
 
 		for (int dB = min_dB; dB <= max_dB; ++dB) {
-			bool lbl = 0 == (dB % 18);
+			bool lbl = 0 == (dB % 12);
 			if (dB % 6 != 0) {
 				continue;
 			}

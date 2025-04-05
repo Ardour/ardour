@@ -91,6 +91,7 @@ private:
 	Gtkmm2ext::Color                   _gridc;
 	Gtkmm2ext::Color                   _textc;
 	int                                _margin;
+	float                              _uiscale;
 	int                                _min_dB;
 	int                                _max_dB;
 	bool                               _hovering_dB;
