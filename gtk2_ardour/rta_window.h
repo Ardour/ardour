@@ -56,6 +56,7 @@ private:
 	bool darea_button_press_event (GdkEventButton*);
 	bool darea_button_release_event (GdkEventButton*);
 	bool darea_motion_notify_event (GdkEventMotion*);
+	bool darea_scroll_event (GdkEventScroll*);
 	bool darea_leave_notify_event (GdkEventCrossing*);
 
 	void set_rta_speed (ARDOUR::DSP::PerceptualAnalyzer::Speed);

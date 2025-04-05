@@ -61,6 +61,7 @@ RTAWindow::RTAWindow ()
 	_darea.signal_button_press_event ().connect (sigc::mem_fun (*this, &RTAWindow::darea_button_press_event));
 	_darea.signal_button_release_event ().connect (sigc::mem_fun (*this, &RTAWindow::darea_button_release_event));
 	_darea.signal_motion_notify_event ().connect (sigc::mem_fun (*this, &RTAWindow::darea_motion_notify_event));
+	_darea.signal_scroll_event ().connect (sigc::mem_fun (*this, &RTAWindow::darea_scroll_event), false);
 	_darea.signal_leave_notify_event ().connect (sigc::mem_fun (*this, &RTAWindow::darea_leave_notify_event), false);
 
 	_speed_strings.push_back (_("Rapid"));
@@ -429,6 +430,37 @@ RTAWindow::darea_motion_notify_event (GdkEventMotion* ev)
 	_hovering_dB = h;
 	_darea.queue_draw ();
 
+	return true;
+}
+
+bool
+RTAWindow::darea_scroll_event (GdkEventScroll* ev)
+{
+	if (_dragging_dB != DragNone || !_hovering_dB) {
+		return true;
+	}
+
+	float new_dB = _min_dB;
+	switch (ev->direction) {
+		case GDK_SCROLL_UP:
+			new_dB += 1;
+			break;
+		case GDK_SCROLL_DOWN:
+			new_dB -= 1;
+			break;
+		default:
+			return true;
+	}
+	/* compare to DragRange */
+	float min_dB = rintf (std::max (_dB_min, std::min (new_dB, _max_dB - _dB_span)));
+	float dbd    = (min_dB - _min_dB);
+	float max_dB = rintf (std::min (_dB_min + _dB_range, std::max (_max_dB + dbd, _min_dB + _dB_span)));
+	dbd          = std::min<float> (dbd, max_dB - _max_dB);
+	_max_dB += dbd;
+	_min_dB += dbd;
+
+	_grid.clear ();
+	_darea.queue_draw ();
 	return true;
 }
 
