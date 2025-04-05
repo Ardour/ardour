@@ -522,9 +522,11 @@ exists_and_writable (const std::string & p)
 	GStatBuf statbuf;
 
 	if (g_stat (p.c_str(), &statbuf) != 0) {
+		DEBUG_TRACE (DEBUG::FileUtils, string_compose("exists_and_writable stat '%1': failed\n", p));
 		/* doesn't exist - not writable */
 		return false;
 	} else {
+		DEBUG_TRACE (DEBUG::FileUtils, string_compose("exists_and_writable stat '%1': %2 \n", p, statbuf.st_mode));
 		if (!(statbuf.st_mode & S_IWUSR)) {
 			/* exists and is not writable */
 			return false;
@@ -534,6 +536,7 @@ exists_and_writable (const std::string & p)
 		 * access(2) seems like the best test for this.
 		 */
 		if (g_access (p.c_str(), W_OK) != 0) {
+			DEBUG_TRACE (DEBUG::FileUtils, string_compose("exists_and_writable g_access '%1': !W_OK\n", p));
 			return false;
 		}
 	}
