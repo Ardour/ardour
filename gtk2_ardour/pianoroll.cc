@@ -2821,12 +2821,3 @@ Pianoroll::allow_trim_cursors () const
 	return mouse_mode == Editing::MouseContent || mouse_mode == Editing::MouseTimeFX;
 }
 
-void
-Pianoroll::shift_notes (timepos_t const & t)
-{
-	if (!_view) {
-		return;
-	}
-
-	_view->shift_notes (t);
-}
