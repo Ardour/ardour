@@ -1997,10 +1997,13 @@ Editor::add_location_mark_with_flag (timepos_t const & where, Location::Flags fl
 
 	_session->locations()->next_available_name(markername, namebase);
 
-	if (!choose_new_marker_name (markername)) {
+	Location *location = new Location (*_session, where, where, markername, flags, cue_id);
+
+	if (!edit_location (*location, true, false)) {
+		delete location;
 		return;
 	}
-	Location *location = new Location (*_session, where, where, markername, flags, cue_id);
+
 	begin_reversible_command (_("add marker"));
 
 	XMLNode &before = _session->locations()->get_state();

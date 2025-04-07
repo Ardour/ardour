@@ -1520,7 +1520,7 @@ Editor::add_section_context_items (Gtk::Menu_Helpers::MenuList& items)
 		assert (lm && lm->start);
 		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Move Playhead to Marker"), sigc::bind (sigc::mem_fun(*_session, &Session::request_locate), start.samples (), false, MustStop, TRS_UI)));
-		items.push_back (MenuElem (_("Rename..."), sigc::bind (sigc::mem_fun(*this, &Editor::rename_marker), lm->start)));
+		items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun(*this, &Editor::edit_marker), lm->start, true)));
 	}
 
 	items.push_back (SeparatorElem());

@@ -1668,7 +1668,8 @@ private:
 	void marker_menu_edit ();
 	void marker_menu_remove ();
 	void marker_menu_rename ();
-	void rename_marker (ArdourMarker* marker);
+	void edit_marker (ArdourMarker* marker, bool with_scene);
+	bool edit_location (ARDOUR::Location& loc, bool with_scene, bool with_command);
 	void toggle_tempo_continues ();
 	void toggle_tempo_type ();
 	void ramp_to_next_tempo ();

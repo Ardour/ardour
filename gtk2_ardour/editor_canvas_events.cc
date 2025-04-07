@@ -1116,7 +1116,7 @@ Editor::section_rect_event (GdkEvent* ev, Location* loc, ArdourCanvas::Rectangle
 			}
 			if (ev->button.button == 1) {
 				assert (find_location_markers (loc));
-				rename_marker (find_location_markers (loc)->start);
+				edit_marker (find_location_markers (loc)->start, true);
 				return true;
 			}
 			break;

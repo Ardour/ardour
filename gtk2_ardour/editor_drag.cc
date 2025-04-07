@@ -4621,7 +4621,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
 		if (was_double_click ()) {
-			_editor.rename_marker (_marker);
+			_editor.edit_marker (_marker, true);
 			return;
 		}
 
