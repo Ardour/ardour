@@ -252,6 +252,12 @@ RegionEditor::~RegionEditor ()
 }
 
 void
+RegionEditor::setup_actions_and_bindings ()
+{
+	RegionFxBox::register_actions ();
+}
+
+void
 RegionEditor::set_clock_mode_from_primary ()
 {
 	_clock_group->set_clock_mode (ARDOUR_UI::instance ()->primary_clock->mode ());
@@ -558,9 +564,7 @@ RegionEditor::RegionFxBox::RegionFxBox (std::shared_ptr<ARDOUR::Region> r)
 	, _no_redisplay (false)
 	, _placement (-1)
 {
-	if (!rfx_box_actions) {
-		register_actions ();
-	}
+	assert (rfx_box_actions);
 
 	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	_scroller.set_name ("ProcessorScroller");

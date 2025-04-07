@@ -53,6 +53,7 @@
 #include "keyboard.h"
 #include "keyeditor.h"
 #include "rc_option_editor.h"
+#include "region_editor.h"
 #include "rta_manager.h"
 #include "route_params_ui.h"
 #include "trigger_ui.h"
@@ -88,6 +89,7 @@ ARDOUR_UI::we_have_dependents ()
 
 	StepEntry::setup_actions_and_bindings ();
 	ClipEditorBox::init ();
+	RegionEditor::setup_actions_and_bindings ();
 
 	setup_action_tooltips ();
 

@@ -66,6 +66,8 @@ public:
 
 	std::shared_ptr<ARDOUR::Region> region () const { return _region; }
 
+	static void setup_actions_and_bindings ();
+
 protected:
 	virtual void region_changed (const PBD::PropertyChange&);
 	virtual void region_fx_changed ();
@@ -104,8 +106,9 @@ private:
 		RegionFxBox (std::shared_ptr<ARDOUR::Region>);
 		void redisplay_plugins ();
 
-	private:
 		static void register_actions ();
+
+	private:
 		static void load_bindings ();
 		static void static_delete ();
 
