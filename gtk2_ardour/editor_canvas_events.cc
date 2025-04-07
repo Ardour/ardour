@@ -1384,7 +1384,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	double px;
 	double py;
 
-	event.type = GDK_MOTION_NOTIFY;
+	event.type = GDK_BUTTON_PRESS;
 	event.button.x = x;
 	event.button.y = y;
 	/* assume we're dragging with button 1 */
