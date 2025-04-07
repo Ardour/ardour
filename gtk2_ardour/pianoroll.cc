@@ -2321,6 +2321,7 @@ Pianoroll::set (TriggerReference & tref)
 void
 Pianoroll::unset ()
 {
+	_history.clear ();
 	_update_connection.disconnect();
 	object_connections.drop_connections ();
 	_track.reset ();
