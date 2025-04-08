@@ -78,8 +78,8 @@ MidiModel::MidiModel (MidiModel const & other, MidiSource & s)
 MidiModel::NoteDiffCommand*
 MidiModel::new_note_diff_command (const string& name)
 {
-	/* return via the MidiSource to get a shared_ptr to
-	 *  ourselves. Probably faster than shared_from_this()
+	/* go via the MidiSource to get a shared_ptr to
+	 * ourselves. Probably faster than shared_from_this()
 	 */
 	return new NoteDiffCommand (_midi_source.model(), name);
 }
