@@ -358,6 +358,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void note_deleted (NoteBase*);
 	void clear_note_selection ();
 
+	void shift_midi (Temporal::timepos_t const &, bool model);
+
 	void show_verbose_cursor_for_new_note_value(std::shared_ptr<NoteType> current_note, uint8_t new_note) const;
 
 	std::shared_ptr<ARDOUR::MidiTrack>  midi_track() const { return _midi_track; }

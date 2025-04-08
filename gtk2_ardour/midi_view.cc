@@ -1260,6 +1260,9 @@ MidiView::model_changed()
 	_marked_for_selection.clear ();
 	_marked_for_velocity.clear ();
 	_pending_note_selection.clear ();
+
+	size_start_rect ();
+	size_end_rect ();
 }
 
 void
@@ -5266,6 +5269,81 @@ MidiView::add_split_notes ()
 			new_note->set_off_velocity (si.off_velocity);
 			note_diff_add_note (new_note, true, true);
 			pos += b;
+		}
+	}
+}
+
+void
+MidiView::shift_midi (timepos_t const & t, bool model)
+{
+	/* INTENDED FOR USE IN PIANOROLL CONTEXT ONLY */
+
+	assert (_show_source);
+
+	Beats beats (t.beats());
+
+	if (model) {
+
+		/* Change the model */
+
+		std::string cmd = string_compose (_("Shift MIDI by %1"), beats.str());
+		XMLNode& before (_midi_region->get_state());
+		_editing_context.begin_reversible_command (cmd);
+		_model->insert_silence_at_start (beats, _editing_context.history());
+		XMLNode& after (_midi_region->get_state());
+		_editing_context.add_command (new MementoCommand<MidiRegion> (*(_midi_region.get()), &before, &after));
+		_editing_context.commit_reversible_command ();
+
+	} else {
+
+		/* Only change the view */
+
+		for (auto & [ note, gui ] : _events) {
+			Temporal::Beats note_time_qn;
+			double dx = 0.0;
+
+			if (_show_source) {
+				note_time_qn = note->time ();
+			} else {
+				note_time_qn = _midi_region->source_beats_to_absolute_beats (note->time());
+			}
+
+			if (_midi_context.note_mode() == Sustained) {
+				dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn + beats));
+
+				/*: ::item_to_canvas() converts to a global canvas
+				 *  coordinate, but ::time_to_pixel() gives us a
+				 *  timeline-relative coordinate.
+				 *
+				 * So we need to adjust ...
+				 */
+
+				dx -= _editing_context.canvas_to_timeline (gui->item()->item_to_canvas (ArdourCanvas::Duple (gui->x0(), 0)).x);
+			} else {
+				/* Hit::x0() is offset by _position.x, unlike Note::x0() */
+				Hit* hit = dynamic_cast<Hit*>(gui);
+				if (hit) {
+					dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn + beats));
+					dx -= _editing_context.canvas_to_timeline (gui->item()->item_to_canvas (ArdourCanvas::Duple (((hit->x0() + hit->x1()) / 2.0) - hit->position().x, 0)).x);
+				}
+			}
+
+			gui->move_event (dx, 0.0);
+
+			/* update length, which may have changed in pixels at the new location */
+			if (_midi_context.note_mode() == Sustained) {
+				Note* sus = dynamic_cast<Note*> (gui);
+				double len_dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn) + t + timecnt_t (note->length()));
+
+				/* at this point, len_dx is a timeline-relative pixel
+				 * duration. To convert it back to an item-centric
+				 * coordinate, we need to first convert it to a global
+				 * canvas position.
+				 */
+
+				len_dx = _editing_context.timeline_to_canvas (len_dx);
+				sus->set_x1 (gui->item()->canvas_to_item (ArdourCanvas::Duple (len_dx, 0)).x);
+			}
 		}
 	}
 }

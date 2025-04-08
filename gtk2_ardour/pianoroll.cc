@@ -2822,3 +2822,12 @@ Pianoroll::allow_trim_cursors () const
 	return mouse_mode == Editing::MouseContent || mouse_mode == Editing::MouseTimeFX;
 }
 
+void
+Pianoroll::shift_midi (timepos_t const & t, bool model)
+{
+	if (!view) {
+		return;
+	}
+
+	view->shift_midi (t, model);
+}

@@ -7564,13 +7564,34 @@ ClipStartDrag::motion (GdkEvent* event, bool first_move)
 {
 	ArdourCanvas::Rect r (original_rect);
 
-	timepos_t pos (adjusted_current_time (event));
-	editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
-	double pix = editing_context.timeline_to_canvas (editing_context.time_to_pixel (pos));
+	double x, y;
+	gdk_event_get_coords (event, &x, &y);
 
-	if (pix > editing_context.timeline_origin()) {
-		r.x1 = dragging_rect->parent()->canvas_to_item (Duple (pix, 0.0)).x;
+	if (x >= editing_context.timeline_origin()) {
+
+		/* Compute snapped position and adjust rect item if appropriate */
+
+		timepos_t pos = adjusted_current_time (event);
+		editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+		double pix = editing_context.timeline_to_canvas (editing_context.time_to_pixel (pos));
+
+		if (pix >= editing_context.timeline_origin()) {
+			r.x1 = dragging_rect->parent()->canvas_to_item (Duple (pix, 0.0)).x;
+		}
+
 	} else {
+
+		/* We need to do our own math here because the normal drag
+		 * coordinates are clamped to zero (no negative values).
+		 */
+
+		x -= editing_context.timeline_origin();
+		timepos_t tp (mce.pixel_to_sample (x));
+		Beats b (tp.beats() * -1);
+		mce.shift_midi (timepos_t (b), false);
+
+		/* ensure the line is in the right place */
+
 		r.x1 = r.x0 + 1.;
 	}
 
@@ -7585,22 +7606,50 @@ ClipStartDrag::finished (GdkEvent* event, bool movement_occured)
 		return;
 	}
 
-	timepos_t pos = adjusted_current_time (event);
+	double x, y;
+	gdk_event_get_coords (event, &x, &y);
 
-	assert (mce.midi_view());
+	if (x >= editing_context.timeline_origin()) {
 
-	if (mce.midi_view()->show_source()) {
-		pos = mce.midi_view()->source_beats_to_timeline (pos.beats());
+		timepos_t pos = adjusted_current_time (event);
+		editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+		double pix = editing_context.timeline_to_canvas (editing_context.time_to_pixel (pos));
+
+		if (pix >= editing_context.timeline_origin()) {
+
+			assert (mce.midi_view());
+
+			if (mce.midi_view()->show_source()) {
+				pos = mce.midi_view()->source_beats_to_timeline (pos.beats());
+			}
+
+			editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+			mce.set_trigger_start (pos);
+		}
+
+	} else {
+
+		/* We need to do our own math here because the normal drag
+		 * coordinates are clamped to zero (no negative values).
+		 */
+
+		x -= editing_context.timeline_origin();
+		timepos_t tp (mce.pixel_to_sample (x));
+		Beats b (tp.beats() * -1);
+		mce.shift_midi (timepos_t (b), true);
+
 	}
-
-	editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
-	mce.set_trigger_start (pos);
 }
 
 void
-ClipStartDrag::aborted (bool)
+ClipStartDrag::aborted (bool movement_occured)
 {
 	dragging_rect->set (original_rect);
+
+	if (movement_occured) {
+		/* redraw to get notes back to the right places */
+		mce.shift_midi (timepos_t (Temporal::Beats()), false);
+	}
 }
 
 ClipEndDrag::ClipEndDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Pianoroll& m)

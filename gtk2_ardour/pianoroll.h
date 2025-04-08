@@ -142,6 +142,8 @@ class Pianoroll : public CueEditor
 	void set_session (ARDOUR::Session*);
 	bool allow_trim_cursors () const;
 
+	void shift_midi (Temporal::timepos_t const &, bool model);
+
   protected:
 	void load_bindings ();
 	void register_actions ();
