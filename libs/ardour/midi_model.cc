@@ -1763,55 +1763,13 @@ MidiModel::control_factory (Evoral::Parameter const & p)
  *  Adds commands to the session's current undo stack to reflect the movements.
  */
 void
-MidiModel::insert_silence_at_start (TimeType t)
+MidiModel::insert_silence_at_start (TimeType t, HistoryOwner& history)
 {
-	/* Notes */
-
-	if (!notes().empty ()) {
-		NoteDiffCommand* c = new_note_diff_command ("insert silence");
-
-		for (Notes::const_iterator i = notes().begin(); i != notes().end(); ++i) {
-			c->change (*i, NoteDiffCommand::StartTime, (*i)->time() + t);
-		}
-
-		apply_diff_command_as_subcommand (_midi_source.session(), c);
-	}
-
-	/* Patch changes */
-
-	if (!patch_changes().empty ()) {
-		PatchChangeDiffCommand* c = new_patch_change_diff_command ("insert silence");
-
-		for (PatchChanges::const_iterator i = patch_changes().begin(); i != patch_changes().end(); ++i) {
-			c->change_time (*i, (*i)->time() + t);
-		}
-
-		apply_diff_command_as_subcommand (_midi_source.session(), c);
-	}
-
-	/* Controllers */
-
-	for (Controls::iterator i = controls().begin(); i != controls().end(); ++i) {
-		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i->second);
-		XMLNode& before = ac->alist()->get_state ();
-		i->second->list()->shift (timepos_t::zero (i->second->list()->time_domain()), timecnt_t (t));
-		XMLNode& after = ac->alist()->get_state ();
-		_midi_source.session().add_command (new MementoCommand<AutomationList> (new MidiAutomationListBinder (_midi_source, i->first), &before, &after));
-	}
-
-	/* Sys-ex */
-
-	if (!sysexes().empty()) {
-		SysExDiffCommand* c = new_sysex_diff_command ("insert silence");
-
-		for (SysExes::iterator i = sysexes().begin(); i != sysexes().end(); ++i) {
-			c->change (*i, (*i)->time() + t);
-		}
-
-		apply_diff_command_as_subcommand (_midi_source.session(), c);
-	}
-
-	ContentsShifted (timecnt_t (t));
+	/* go via the MidiSource to get a shared_ptr to
+	 * ourselves. Probably faster than shared_from_this()
+	 */
+	apply_diff_command_as_subcommand (history, new MidiModel::ShiftCommand (_midi_source.model(), std::string(), t));
+	ContentsShifted (timecnt_t (t)); /* EMIT SIGNAL */
 }
 
 void

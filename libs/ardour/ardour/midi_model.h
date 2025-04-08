@@ -340,7 +340,7 @@ public:
 
 	std::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
 
-	void insert_silence_at_start (TimeType);
+	void insert_silence_at_start (TimeType, PBD::HistoryOwner&);
 	void transpose (NoteDiffCommand *, const NotePtr, int);
 
 	void track_state (timepos_t const & when, MidiStateTracker&) const;
