@@ -718,3 +718,25 @@ MidiRegionView::hide_region_editor ()
 	delete _editor;
 	_editor = nullptr;
 }
+
+void
+MidiRegionView::trim_front_starting ()
+{
+	/* We used to eparent the note group to the region view's parent, so that it didn't change.
+	   now we update it.
+	*/
+}
+
+void
+MidiRegionView::trim_front_ending ()
+{
+	if (!_midi_region) {
+		return;
+	}
+
+	if (_midi_region->start().is_negative()) {
+		/* Trim drag made start time -ve; fix this */
+		midi_region()->fix_negative_start (_editing_context.history());
+	}
+}
+

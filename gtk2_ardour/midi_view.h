@@ -338,9 +338,6 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void set_channel_selector_scoped_note(NoteBase* note){ _channel_selection_scoped_note = note; }
 	NoteBase* channel_selector_scoped_note(){  return _channel_selection_scoped_note; }
 
-	void trim_front_starting ();
-	void trim_front_ending ();
-
 	/** Add a note to the model, and the view, at a canvas (click) coordinate.
 	 * \param t time in samples relative to the position of the region
 	 * \param y vertical position in pixels

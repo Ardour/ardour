@@ -138,6 +138,9 @@ public:
 	void show_region_editor ();
 	void hide_region_editor ();
 
+	void trim_front_starting ();
+	void trim_front_ending ();
+
   protected:
 	void reset_width_dependent_items (double pixel_width);
 	void parameter_changed (std::string const & p);
