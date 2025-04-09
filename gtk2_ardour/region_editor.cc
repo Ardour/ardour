@@ -546,8 +546,8 @@ RegionEditor::RegionFxBox::register_actions ()
 
 	rfx_box_actions = ActionManager::create_action_group (bindings, X_("RegionFxMenu"));
 
-	ActionManager::register_action (rfx_box_actions, X_("delete"), _("Delete"), sigc::ptr_fun (RegionEditor::RegionFxBox::static_delete));
-	ActionManager::register_action (rfx_box_actions, X_("backspace"), _("Delete"), sigc::ptr_fun (RegionEditor::RegionFxBox::static_delete));
+	ActionManager::register_action (rfx_box_actions, X_("rfx-delete"), _("Delete"), sigc::ptr_fun (RegionEditor::RegionFxBox::static_delete));
+	ActionManager::register_action (rfx_box_actions, X_("rfx-backspace"), _("Delete"), sigc::ptr_fun (RegionEditor::RegionFxBox::static_delete));
 }
 
 void
