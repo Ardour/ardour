@@ -28,6 +28,7 @@
 #include "canvas/button.h"
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
+#include "canvas/text.h"
 
 #include "editing_context.h"
 #include "editor_drag.h"
@@ -721,5 +722,35 @@ PianorollMidiView::clear_selection ()
 		if (i->second.line) {
 			i->second.line->set_selected_points (empty);
 		}
+	}
+}
+
+void
+PianorollMidiView::set_overlay_text (std::string const & str)
+{
+	if (!overlay_text) {
+		overlay_text = new ArdourCanvas::Text (_note_group->parent());
+		Pango::FontDescription font ("Sans 18");
+		overlay_text->set_font_description (font);
+		overlay_text->set_color (0xff0000ff);
+	}
+
+	overlay_text->set (str);
+	show_overlay_text ();
+}
+
+void
+PianorollMidiView::show_overlay_text ()
+{
+	if (overlay_text) {
+		overlay_text->show ();
+	}
+}
+
+void
+PianorollMidiView::hide_overlay_text ()
+{
+	if (overlay_text) {
+		overlay_text->hide ();
 	}
 }

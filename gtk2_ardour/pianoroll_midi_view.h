@@ -86,10 +86,15 @@ class PianorollMidiView : public MidiView
 
 	sigc::signal<void> AutomationStateChange;
 
+	void set_overlay_text (std::string const &);
+	void hide_overlay_text ();
+	void show_overlay_text ();
+
   protected:
 	bool scroll (GdkEventScroll* ev);
 
 	ArdourCanvas::Rectangle* automation_group;
+	ArdourCanvas::Text* overlay_text;
 
 	typedef std::shared_ptr<PianorollAutomationLine>  CueAutomationLine;
 	typedef std::shared_ptr<ARDOUR::AutomationControl>  CueAutomationControl;
