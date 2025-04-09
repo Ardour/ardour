@@ -788,7 +788,13 @@ RegionEditor::RegionFxBox::enter_notify (GdkEventCrossing* ev)
 bool
 RegionEditor::RegionFxBox::leave_notify (GdkEventCrossing* ev)
 {
+	if (ev->detail == GDK_NOTIFY_INFERIOR || ev->detail == GDK_NOTIFY_NONLINEAR || ev->detail == GDK_NOTIFY_NONLINEAR_VIRTUAL) {
+		/* leaving towards a child - here a Processor Entry */
+		return false;
+	}
+
 	current_rfx_box = 0;
+	_display.select_none ();
 	return false;
 }
 
