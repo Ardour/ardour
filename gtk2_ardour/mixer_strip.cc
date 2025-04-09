@@ -450,7 +450,7 @@ MixerStrip::~MixerStrip ()
 void
 MixerStrip::vca_assign (std::shared_ptr<ARDOUR::VCA> vca)
 {
-	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> ( route() );
+	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> (route());
 	if (sl)
 		sl->assign(vca);
 }
@@ -458,7 +458,7 @@ MixerStrip::vca_assign (std::shared_ptr<ARDOUR::VCA> vca)
 void
 MixerStrip::vca_unassign (std::shared_ptr<ARDOUR::VCA> vca)
 {
-	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> ( route() );
+	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> (route());
 	if (sl)
 		sl->unassign(vca);
 }
@@ -475,7 +475,7 @@ bool
 MixerStrip::mixer_strip_leave_event (GdkEventCrossing *ev)
 {
 	//if we have moved outside our strip, but not into a child view, then deselect ourselves
-	if ( !(ev->detail == GDK_NOTIFY_INFERIOR) ) {
+	if (ev->detail != GDK_NOTIFY_INFERIOR) {
 		_entered_mixer_strip= 0;
 
 		//clear keyboard focus in the gain display.  this is cheesy but fixes a longstanding "bug" where the user starts typing in the gain entry, and leaves it active, thereby prohibiting other keybindings from working
@@ -526,10 +526,10 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 		rec_mon_table.remove (*rec_enable_button);
 	}
 	if (monitor_input_button->get_parent()) {
-		rec_mon_table.remove (*monitor_input_button);
+		monitor_input_button->get_parent()->remove (*monitor_input_button);
 	}
 	if (monitor_disk_button->get_parent()) {
-		rec_mon_table.remove (*monitor_disk_button);
+		monitor_disk_button->get_parent()->remove (*monitor_disk_button);
 	}
 	if (group_button.get_parent()) {
 		bottom_button_table.remove (group_button);
@@ -1041,7 +1041,8 @@ MixerStrip::route_color_changed ()
 {
 	using namespace ARDOUR_UI_UTILS;
 	name_button.modify_bg (STATE_NORMAL, color());
-	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
+	Gtkmm2ext::Color c (gdk_color_to_rgba (color()));
+	number_label.set_fixed_colors (c, c);
 	reset_strip_style ();
 }
 
