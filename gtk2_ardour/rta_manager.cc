@@ -189,6 +189,10 @@ RTAManager::remove (std::shared_ptr<ARDOUR::Route> route)
 {
 	_rta.remove_if ([route] (RTAManager::RTA const& r) { return r.route () == route; });
 	route->gui_changed ("rta", this); /* EMIT SIGNAL */
+
+	if (_rta.empty ()) {
+		SignalReady (); /* EMIT SIGNAL */
+	}
 }
 
 bool

@@ -534,6 +534,9 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 	if (group_button.get_parent()) {
 		bottom_button_table.remove (group_button);
 	}
+	if (rta_button->get_parent()) {
+		rta_button->get_parent()->remove (*rta_button);
+	}
 
 	RouteUI::set_route (rt);
 

@@ -246,6 +246,7 @@ RTAWindow::rta_settings_changed ()
 	_speed_dropdown.set_text (_speed_strings[(int)RTAManager::instance ()->rta_speed ()]);
 	_warp_dropdown.set_text (_warp_strings[(int)RTAManager::instance ()->rta_warp ()]);
 	_xpos.clear ();
+	_darea.queue_draw ();
 }
 
 void
