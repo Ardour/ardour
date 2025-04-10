@@ -451,16 +451,18 @@ void
 MixerStrip::vca_assign (std::shared_ptr<ARDOUR::VCA> vca)
 {
 	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> (route());
-	if (sl)
+	if (sl) {
 		sl->assign(vca);
+	}
 }
 
 void
 MixerStrip::vca_unassign (std::shared_ptr<ARDOUR::VCA> vca)
 {
 	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> (route());
-	if (sl)
+	if (sl) {
 		sl->unassign(vca);
+	}
 }
 
 bool
