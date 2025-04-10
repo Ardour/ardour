@@ -61,8 +61,10 @@ RTAWindow::RTAWindow ()
 	_darea.signal_button_press_event ().connect (sigc::mem_fun (*this, &RTAWindow::darea_button_press_event));
 	_darea.signal_button_release_event ().connect (sigc::mem_fun (*this, &RTAWindow::darea_button_release_event));
 	_darea.signal_motion_notify_event ().connect (sigc::mem_fun (*this, &RTAWindow::darea_motion_notify_event));
-	_darea.signal_scroll_event ().connect (sigc::mem_fun (*this, &RTAWindow::darea_scroll_event), false);
-	_darea.signal_leave_notify_event ().connect (sigc::mem_fun (*this, &RTAWindow::darea_leave_notify_event), false);
+	_darea.signal_scroll_event ().connect (sigc::mem_fun (*this, &RTAWindow::darea_scroll_event));
+	_darea.signal_leave_notify_event ().connect (sigc::mem_fun (*this, &RTAWindow::darea_leave_notify_event), true);
+	_darea.signal_grab_broken_event ().connect (sigc::mem_fun (*this, &RTAWindow::darea_grab_broken_event), true);
+	_darea.signal_grab_notify ().connect (sigc::mem_fun (*this, &RTAWindow::darea_grab_notify), true);
 
 	_speed_strings.push_back (_("Rapid"));
 	_speed_strings.push_back (_("Fast"));
@@ -308,7 +310,8 @@ RTAWindow::darea_button_press_event (GdkEventButton* ev)
 	}
 	_dragstart_y = ev->y;
 
-	gdk_pointer_grab (ev->window, false, GdkEventMask (Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK), NULL, NULL, ev->time);
+	_darea.add_modal_grab ();
+	_darea.queue_draw ();
 
 	return true;
 }
@@ -320,13 +323,20 @@ RTAWindow::darea_button_release_event (GdkEventButton* ev)
 		return false;
 	}
 
+	bool changed = false;
+
 	if (_dragging_dB != DragNone) {
 		_dragging_dB = DragNone;
-		gdk_pointer_ungrab (ev->time);
+		changed = true;
+		_darea.remove_modal_grab ();
 	}
 
 	if (_hovering_dB) {
 		_hovering_dB = false;
+		changed = true;
+	}
+
+	if (changed) {
 		_darea.queue_draw ();
 	}
 
@@ -337,7 +347,6 @@ bool
 RTAWindow::darea_leave_notify_event (GdkEventCrossing*)
 {
 	if (_hovering_dB) {
-		_dragging_dB = DragNone;
 		_hovering_dB = false;
 		_darea.queue_draw ();
 	} else if (_cursor_x >= 0 || _cursor_y >= 0) {
@@ -346,6 +355,28 @@ RTAWindow::darea_leave_notify_event (GdkEventCrossing*)
 	_pointer_info.set_text ("");
 	_cursor_x = _cursor_y = -1;
 	return false;
+}
+
+bool
+RTAWindow::darea_grab_broken_event (GdkEventGrabBroken*)
+{
+	if (_dragging_dB != DragNone) {
+		_darea.remove_modal_grab ();
+		_dragging_dB = DragNone;
+		_darea.queue_draw ();
+		return true;
+	}
+	return false;
+}
+
+void
+RTAWindow::darea_grab_notify (bool was_grabbed)
+{
+	if (!was_grabbed) {
+		_darea.remove_modal_grab ();
+		_dragging_dB = DragNone;
+		_darea.queue_draw ();
+	}
 }
 
 bool
@@ -712,7 +743,7 @@ RTAWindow::darea_expose_event (GdkEventExpose* ev)
 
 	cr->restore ();
 
-	if (_hovering_dB) {
+	if (_hovering_dB || _dragging_dB != DragNone) {
 		float m2 = _margin / 2.0;
 		float m4 = _margin / 4.0;
 		float m8 = _margin / 8.0;

@@ -58,6 +58,8 @@ private:
 	bool darea_motion_notify_event (GdkEventMotion*);
 	bool darea_scroll_event (GdkEventScroll*);
 	bool darea_leave_notify_event (GdkEventCrossing*);
+	bool darea_grab_broken_event (GdkEventGrabBroken*);
+	void darea_grab_notify (bool);
 
 	void set_rta_speed (ARDOUR::DSP::PerceptualAnalyzer::Speed);
 	void set_rta_warp (ARDOUR::DSP::PerceptualAnalyzer::Warp);
