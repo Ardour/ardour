@@ -201,7 +201,10 @@ PortMatrixComponent::position_to_channel (double p, double, std::shared_ptr<cons
 			ARDOUR::ChanCount const N = (*j)->bundle->nchannels ();
 
 			uint32_t const s = _matrix->count_of_our_type_min_1 (N);
-			if (p < s) {
+
+			if (p < 0) {
+				break;
+			} else if (p < s) {
 				if (p < _matrix->count_of_our_type (N)) {
 					return ARDOUR::BundleChannel ((*j)->bundle, (*j)->bundle->type_channel_to_overall (_matrix->type (), p));
 				} else {
