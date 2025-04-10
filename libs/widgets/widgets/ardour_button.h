@@ -219,6 +219,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	bool _led_left;
 	bool _distinct_led_click;
 	bool _hovering;
+	bool _touching;
 	bool _focused;
 	int  _fixed_colors_set;
 	bool _fallthrough_to_parent;

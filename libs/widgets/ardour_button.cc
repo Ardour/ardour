@@ -27,6 +27,7 @@
 #include "pbd/compose.h"
 #include "pbd/controllable.h"
 #include "pbd/error.h"
+#include "pbd/unwind.h"
 
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -92,6 +93,7 @@ ArdourButton::ArdourButton (Element e, bool toggle)
 	, _led_left (false)
 	, _distinct_led_click (false)
 	, _hovering (false)
+	, _touching (false)
 	, _focused (false)
 	, _fixed_colors_set (false)
 	, _fallthrough_to_parent (false)
@@ -142,6 +144,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e, bool toggle)
 	, _led_left (false)
 	, _distinct_led_click (false)
 	, _hovering (false)
+	, _touching (false)
 	, _focused (false)
 	, _fixed_colors_set (false)
 	, _fallthrough_to_parent (false)
@@ -989,7 +992,8 @@ ArdourButton::on_touch_begin_event (GdkEventTouch *ev)
 	bev.state   = 0;
 	bev.axes    = NULL;
 	bev.device  = NULL;
-	_hovering   = true;
+	_touching = true;
+	PBD::Unwinder<bool> uw (_hovering, true);
 	return event ((GdkEvent*)&bev);
 }
 
@@ -1011,8 +1015,8 @@ ArdourButton::on_touch_end_event (GdkEventTouch *ev)
 	bev.state   = 0;
 	bev.axes    = NULL;
 	bev.device  = NULL;
-
-	_hovering   = false;
+	PBD::Unwinder<bool> uw (_hovering, _touching);
+	_touching = false;
 	return event ((GdkEvent*)&bev);
 }
 
