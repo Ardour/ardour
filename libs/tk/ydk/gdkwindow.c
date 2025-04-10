@@ -10979,6 +10979,10 @@ proxy_button_event (GdkEvent *source_event,
 	  g_assert (0);
           return TRUE;
         }
+        if (type == GDK_TOUCH_END && NULL != _gdk_display_has_pointer_grab (display, serial)) {
+	  /* skip if grabbed, button release event will be sent directly */
+	  return TRUE;
+	}
         convert_toplevel_coords_to_window (event_win,
                                            toplevel_x, toplevel_y,
                                            &event->button.x, &event->button.y);
