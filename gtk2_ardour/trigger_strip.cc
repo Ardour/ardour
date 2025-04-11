@@ -202,6 +202,24 @@ TriggerStrip::init ()
 	set_size_request (width, -1);
 }
 
+void
+TriggerStrip::box_rec_enable_change ()
+{
+	if (!_route) {
+		return;
+	}
+
+	if (!_route->triggerbox()) {
+		return;
+	}
+
+	if (_route->triggerbox()->record_enabled()) {
+		rec_toggle_button->set_active_state (Gtkmm2ext::ExplicitActive);
+	} else {
+		rec_toggle_button->set_active_state (Gtkmm2ext::Off);
+	}
+}
+
 bool
 TriggerStrip::rec_toggle_press (GdkEventButton* ev)
 {
@@ -247,6 +265,9 @@ TriggerStrip::set_route (std::shared_ptr<Route> rt)
 	_route->input ()->changed.connect (*this, invalidator (*this), std::bind (&TriggerStrip::io_changed, this), gui_context ());
 	_route->output ()->changed.connect (*this, invalidator (*this), std::bind (&TriggerStrip::io_changed, this), gui_context ());
 	_route->io_changed.connect (route_connections, invalidator (*this), std::bind (&TriggerStrip::io_changed, this), gui_context ());
+
+	std::shared_ptr<TriggerBox> tb (_route->triggerbox());
+	tb->RecEnableChanged.connect (route_connections, invalidator (*this), std::bind (&TriggerStrip::box_rec_enable_change, this), gui_context());
 
 	if (_route->panner_shell ()) {
 		update_panner_choices ();

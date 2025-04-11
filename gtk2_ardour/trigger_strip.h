@@ -139,6 +139,8 @@ private:
 	std::shared_ptr<AutomationController> _gain_control;
 
 	Gtk::Menu* _route_ops_menu;
+
+	void box_rec_enable_change ();
 };
 
 #endif /* __ardour_trigger_strip__ */
