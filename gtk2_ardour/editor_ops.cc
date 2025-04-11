@@ -1999,9 +1999,11 @@ Editor::add_location_mark_with_flag (timepos_t const & where, Location::Flags fl
 
 	Location *location = new Location (*_session, where, where, markername, flags, cue_id);
 
-	if (!edit_location (*location, true, false)) {
-		delete location;
-		return;
+	if (UIConfiguration::instance().get_name_new_markers()) {
+		if (!edit_location (*location, true, false)) {
+			delete location;
+ 			return;
+ 		}
 	}
 
 	begin_reversible_command (_("add marker"));
