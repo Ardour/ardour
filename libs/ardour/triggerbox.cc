@@ -1057,12 +1057,19 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 
 	} else {
 
-		possible_bbt = tmap->bbt_at (timepos_t (start_beats));
-		possible_bbt = Temporal::BBT_Argument (possible_bbt.reference(), possible_bbt.round_up_to_bar ());
-		/* bars are 1-based; 'every 4 bars' means 'on bar 1, 5, 9, ...' */
-		possible_bbt.bars = 1 + ((possible_bbt.bars-1) / q.bars * q.bars);
-		possible_beats = tmap->quarters_at (possible_bbt);
-		possible_samples = tmap->sample_at (possible_bbt);
+		timepos_t start (start_sample);
+		Temporal::Beats qb = tmap->meter_at (start).to_quarters (q); /* Quantization as beats */
+
+		/* The quantizing code always rounds up, If the start position
+		 * is on a quantize point, we shouldn't do that
+		 */
+
+		possible_beats = tmap->quarters_at (start);
+		if (possible_beats % qb != Temporal::Beats()) {
+			possible_beats = ((tmap->quarters_at (start) + (qb/2)) / qb) * qb;
+		}
+		possible_bbt = tmap->bbt_at (possible_beats);
+		possible_samples = tmap->sample_at (possible_beats);
 
 	}
 
