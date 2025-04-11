@@ -2182,6 +2182,16 @@ ARDOUR_UI::start_clocking ()
 	}
 }
 
+unsigned int
+ARDOUR_UI::clock_signal_interval ()
+{
+	if (UIConfiguration::instance().get_super_rapid_clock_update()) {
+		return Timers::fps_interval ();
+	} else {
+		return Timers::rapid_interval ();
+	}
+}
+
 void
 ARDOUR_UI::stop_clocking ()
 {
