@@ -5924,3 +5924,16 @@ TriggerBox::get_gui_feed_buffer () const
 
 	return b;
 }
+
+Temporal::Beats
+TriggerBox::start_time (bool& is_set) const
+{
+	SlotArmInfo* ai = _arm_info.load ();
+	if (!ai) {
+		is_set = false;
+		return Temporal::Beats();
+	}
+
+	is_set = true;
+	return ai->start_beats;
+}

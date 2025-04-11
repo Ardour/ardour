@@ -979,6 +979,9 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 
 	PBD::Signal<void(samplecnt_t)> Captured;
 
+	/* return start time for capture; only valid if is_set is true upon return */
+	Temporal::Beats start_time (bool& is_set) const;
+
   private:
 	struct Requests {
 		std::atomic<bool> stop_all;
