@@ -2175,9 +2175,11 @@ Pianoroll::rec_enable_change ()
 	}
 
 	rec_blink_connection.disconnect ();
+	count_in_connection.disconnect ();
 
 	switch (ref.box()->record_enabled()) {
 	case Recording:
+		std::cerr << "recording now active\n";
 		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
 		break;
 	case Enabled:
@@ -2188,10 +2190,84 @@ Pianoroll::rec_enable_change ()
 		} else {
 			rec_enable_button.set_active_state (Gtkmm2ext::Off);
 		}
+		maybe_set_count_in ();
 		break;
 	case Disabled:
 		rec_enable_button.set_active_state (Gtkmm2ext::Off);
 		break;
+	}
+}
+
+void
+Pianoroll::maybe_set_count_in ()
+{
+	if (!ref.box()) {
+		return;
+	}
+
+	count_in_connection.disconnect ();
+
+	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+	bool valid;
+	count_in_to = ref.box()->start_time (valid);
+
+	if (!valid) {
+		return;
+	}
+
+	std::cerr << "Going to start at " << count_in_to << std::endl;
+
+	samplepos_t audible (_session->audible_sample());
+	Temporal::Beats const & a_q (tmap->quarters_at_sample (audible));
+
+	if ((count_in_to - a_q).get_beats() == 0) {
+		return;
+	}
+
+	count_in_connection = ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::count_in),  ARDOUR_UI::clock_signal_interval()));
+}
+
+void
+Pianoroll::count_in (Temporal::timepos_t audible, unsigned int clock_interval_msecs)
+{
+	if (!_session) {
+		return;
+	}
+
+	if (!_session->transport_rolling()) {
+		return;
+	}
+
+	TempoMapPoints grid_points;
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	Temporal::Beats audible_beats = tmap->quarters_at_sample (audible.samples());
+	samplepos_t audible_samples = audible.samples ();
+
+	if (audible_beats >= count_in_to) {
+		/* passed the count_in_to time */
+		view->hide_overlay_text ();
+		count_in_connection.disconnect ();
+		return;
+	}
+
+	tmap->get_grid (grid_points, samples_to_superclock (audible_samples, _session->sample_rate()), samples_to_superclock ((audible_samples + ((_session->sample_rate() / 1000) * clock_interval_msecs)), _session->sample_rate()));
+
+	if (!grid_points.empty()) {
+
+		/* At least one click in the time between now and the next
+		 * Clock signal
+		 */
+
+		Temporal::Beats current_delta = count_in_to - audible_beats;
+
+		if (current_delta.get_beats() < 1) {
+			view->hide_overlay_text ();
+			count_in_connection.disconnect ();
+			return;
+		}
+
+		std::string str (string_compose ("%1", current_delta.get_beats()));
+		view->set_overlay_text (str);
 	}
 }
 

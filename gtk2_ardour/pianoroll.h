@@ -20,6 +20,8 @@
 
 #include <map>
 
+#include "pbd/timer.h"
+
 #include <ytkmm/adjustment.h>
 
 #include "canvas/ruler.h"
@@ -329,4 +331,10 @@ class Pianoroll : public CueEditor
 	bool with_transport_controls;
 	void update_solo_display ();
 	void map_transport_state ();
+
+	sigc::connection count_in_connection;
+	Temporal::Beats count_in_to;
+
+	void count_in (Temporal::timepos_t, unsigned int);
+	void maybe_set_count_in ();
 };
