@@ -2002,8 +2002,8 @@ Editor::add_location_mark_with_flag (timepos_t const & where, Location::Flags fl
 	if (UIConfiguration::instance().get_name_new_markers()) {
 		if (!edit_location (*location, true, false)) {
 			delete location;
- 			return;
- 		}
+			return;
+		}
 	}
 
 	begin_reversible_command (_("add marker"));
