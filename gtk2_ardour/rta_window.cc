@@ -42,7 +42,7 @@ using namespace ARDOUR;
 
 RTAWindow::RTAWindow ()
 	: ArdourWindow (_("Realtime Perceptual Analyzer"))
-	, _pause (_("Freeze"), ArdourWidgets::ArdourButton::led_default_elements, true)
+	, _pause (_("Freeze"), ArdourWidgets::ArdourButton::default_elements, true)
 	, _visible (false)
 	, _margin (20)
 	, _min_dB (-60)
@@ -53,6 +53,7 @@ RTAWindow::RTAWindow ()
 	, _cursor_y (-1)
 {
 	_pause.signal_clicked.connect (mem_fun (*this, &RTAWindow::pause_toggled));
+	_pause.set_name ("rta freeze button");
 
 	_darea.add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK | Gdk::LEAVE_NOTIFY_MASK);
 	_darea.signal_size_request ().connect (sigc::mem_fun (*this, &RTAWindow::darea_size_request));
@@ -279,8 +280,15 @@ freq_at_x (const int x, const int width)
 bool
 RTAWindow::darea_button_press_event (GdkEventButton* ev)
 {
-	if (ev->button != 1 || !_hovering_dB || ev->type != GDK_BUTTON_PRESS) {
+	if (ev->button != 1 || ev->type != GDK_BUTTON_PRESS) {
 		return false;
+	}
+	if (!_hovering_dB) {
+		if (!_pause.get_active ()) {
+			_pause.set_active_state (Gtkmm2ext::ImplicitActive);
+			pause_toggled ();
+		}
+		return true;
 	}
 
 	assert (_dragging_dB == DragNone);
@@ -321,6 +329,11 @@ RTAWindow::darea_button_release_event (GdkEventButton* ev)
 {
 	if (ev->button != 1) {
 		return false;
+	}
+
+	if (_pause.active_state () == Gtkmm2ext::ImplicitActive) {
+		_pause.set_active_state (Gtkmm2ext::Off);
+		pause_toggled ();
 	}
 
 	bool changed = false;

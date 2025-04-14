@@ -388,6 +388,8 @@
     <ColorAlias name="route button: fill active" alias="theme:bg2"/>
     <ColorAlias name="route button: led active" alias="alert:green"/>
     <ColorAlias name="route rec button: led active" alias="alert:red"/>
+    <ColorAlias name="rta freeze button: fill" alias="widget:bg"/>
+    <ColorAlias name="rta freeze button: fill active" alias="alert:yellow"/>
     <ColorAlias name="rubber band rect" alias="neutral:foreground2"/>
     <ColorAlias name="rude audition: fill" alias="widget:bg"/>
     <ColorAlias name="rude audition: fill active" alias="alert:ruddy"/>
