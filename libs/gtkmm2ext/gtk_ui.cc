@@ -73,12 +73,26 @@ BaseUI::RequestType Gtkmm2ext::AddTimeout = BaseUI::new_request_type();
 
 template class AbstractUI<Gtkmm2ext::UIRequest>;
 
+#ifndef NDEBUG
+static int debug_call_slot = -1;
+#endif
+
 UI::UI (string application_name, string thread_name, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (thread_name)
 	, _receiver (*this)
 	, global_bindings (0)
 	, errors (0)
 {
+#ifndef NDEBUG
+	/* one time initialization of this to reduce run time cost in debug builds */
+	if (debug_call_slot < 0) {
+		if (g_getenv ("DEBUG_THREADED_SIGNALS")) {
+			debug_call_slot = 1;
+		} else {
+			debug_call_slot = 0;
+		}
+	}
+#endif
 	theMain = new Main (argc, argv);
 
 	char buf[18];
@@ -479,7 +493,7 @@ UI::do_request (UIRequest* req)
 
 	} else if (req->type == CallSlot) {
 #ifndef NDEBUG
-		if (getenv ("DEBUG_THREADED_SIGNALS")) {
+		if (debug_call_slot) {
 			cerr << "call slot for " << event_loop_name() << endl;
 		}
 #endif
