@@ -43,6 +43,7 @@
 
 #ifndef NDEBUG
 #define DEBUG_PBD_SIGNAL_CONNECTIONS
+#define DEBUG_PBD_SIGNAL_EMISSION
 #endif
 
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
@@ -68,11 +69,17 @@ public:
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
 	, _debug_connection (false)
 #endif
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+	, _debug_emission (false)
+#endif
 	{}
 	virtual ~SignalBase () { }
 	virtual void disconnect (std::shared_ptr<Connection>) = 0;
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
 	void set_debug_connection (bool yn) { _debug_connection = yn; }
+#endif
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+	void set_debug_emission (bool yn) { _debug_emission = yn; }
 #endif
 
 protected:
@@ -80,6 +87,9 @@ protected:
 	std::atomic<bool>            _in_dtor;
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
 	bool _debug_connection;
+#endif
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+	bool _debug_emission;
 #endif
 };
 
@@ -276,6 +286,8 @@ class LIBPBD_API ScopedConnectionList
 	void add_connection (const UnscopedConnection& c);
 	void drop_connections ();
 
+	std::list<ScopedConnectionList*>::size_type size() const { Glib::Threads::Mutex::Lock lm (_scoped_connection_lock); return _scoped_connection_list.size(); }
+
   private:
 	/* Even though our signals code is thread-safe, this additional list of
 	   scoped connections needs to be protected in 2 cases:
@@ -288,9 +300,10 @@ class LIBPBD_API ScopedConnectionList
 	       one from another.
 	 */
 
-	Glib::Threads::Mutex _scoped_connection_lock;
+	mutable Glib::Threads::Mutex _scoped_connection_lock;
 
 	typedef std::list<ScopedConnection*> ConnectionList;
+  public:
 	ConnectionList _scoped_connection_list;
 };
 
@@ -416,7 +429,12 @@ typename std::conditional_t<std::is_void_v<R>, R, typename Combiner::result_type
 SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 {
 	/* First, take a copy of our list of slots as it is now */
-
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+	if (_debug_emission) {
+		std::cerr << "------ Signal @ " << this << " emission process begins\n";
+		PBD::stacktrace (std::cerr, 19);
+	}
+#endif
 	Slots s;
 	{
 		Glib::Threads::Mutex::Lock lm (_mutex);
@@ -438,6 +456,11 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 			}
 
 			if (still_there) {
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+				if (_debug_emission) {
+					std::cerr << "signal @ " << this << " calling slot for connection @ " << i->first << " of " << _slots.size() << std::endl;
+				}
+#endif
 				(i->second)(a...);
 			}
 		}
@@ -457,6 +480,11 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 			}
 
 			if (still_there) {
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+				if (_debug_emission) {
+					std::cerr << "signal @ " << this << " calling non-void slot for connection @ " << i->first << " of " << _slots.size() << std::endl;
+				}
+#endif
 				r.push_back ((i->second)(a...));
 			}
 		}
@@ -465,6 +493,11 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 		Combiner c;
 		return c (r.begin(), r.end());
 	}
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+	if (_debug_emission) {
+		std::cerr << "------ Signal @ " << this << " emission process ends\n";
+	}
+#endif
 }
 
 template <typename Combiner, typename R, typename... A>
@@ -477,7 +510,7 @@ SignalWithCombiner<Combiner, R(A...)>::_connect (PBD::EventLoop::InvalidationRec
 	_slots[c] = f;
 	#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
 	if (_debug_connection) {
-		std::cerr << "+++++++ CONNECT " << this << " size now " << _slots.size() << std::endl;
+		std::cerr << "+++++++ CONNECT " << this << " via connection @ " << c << " size now " << _slots.size() << std::endl;
 		stacktrace (std::cerr, 10);
 	}
 	#endif
