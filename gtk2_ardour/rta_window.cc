@@ -31,6 +31,7 @@
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
+#include "keyboard.h"
 #include "rta_manager.h"
 #include "rta_window.h"
 #include "timers.h"
@@ -486,24 +487,33 @@ RTAWindow::darea_scroll_event (GdkEventScroll* ev)
 		return true;
 	}
 
-	float new_dB = _min_dB;
+	float delta = 0;
 	switch (ev->direction) {
 		case GDK_SCROLL_UP:
-			new_dB += 1;
+			delta = 1;
 			break;
 		case GDK_SCROLL_DOWN:
-			new_dB -= 1;
+			delta = -1;
 			break;
 		default:
 			return true;
 	}
-	/* compare to DragRange */
-	float min_dB = rintf (std::max (_dB_min, std::min (new_dB, _max_dB - _dB_span)));
-	float dbd    = (min_dB - _min_dB);
-	float max_dB = rintf (std::min (_dB_min + _dB_range, std::max (_max_dB + dbd, _min_dB + _dB_span)));
-	dbd          = std::min<float> (dbd, max_dB - _max_dB);
-	_max_dB += dbd;
-	_min_dB += dbd;
+
+	using Gtkmm2ext::Keyboard;
+
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
+		_min_dB = rintf (std::max (_dB_min, std::min (_min_dB - delta, _max_dB - _dB_span)));
+		_max_dB = rintf (std::min (_dB_min + _dB_range, std::max (_max_dB + delta, _min_dB + _dB_span)));
+	} else {
+		float new_dB = _min_dB + delta;
+		/* compare to DragRange */
+		float min_dB = rintf (std::max (_dB_min, std::min (new_dB, _max_dB - _dB_span)));
+		float dbd    = (min_dB - _min_dB);
+		float max_dB = rintf (std::min (_dB_min + _dB_range, std::max (_max_dB + dbd, _min_dB + _dB_span)));
+		dbd          = std::min<float> (dbd, max_dB - _max_dB);
+		_max_dB += dbd;
+		_min_dB += dbd;
+	}
 
 	_grid.clear ();
 	_darea.queue_draw ();
