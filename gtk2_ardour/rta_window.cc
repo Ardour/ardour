@@ -44,7 +44,7 @@ RTAWindow::RTAWindow ()
 	: ArdourWindow (_("Realtime Perceptual Analyzer"))
 	, _pause (_("Freeze"), ArdourWidgets::ArdourButton::default_elements, true)
 	, _visible (false)
-	, _margin (20)
+	, _margin (24)
 	, _min_dB (-60)
 	, _max_dB (0)
 	, _hovering_dB (false)
@@ -122,7 +122,7 @@ RTAWindow::on_theme_changed ()
 	_gridc = UIConfiguration::instance ().color (X_("gtk_background"));
 	_textc = UIConfiguration::instance ().color (X_("gtk_foreground"));
 
-	_margin  = 2 * ceilf (10.f * UIConfiguration::instance ().get_ui_scale ());
+	_margin  = 2 * ceilf (12.f * UIConfiguration::instance ().get_ui_scale ());
 	_uiscale = std::max<float> (1.f, sqrtf (UIConfiguration::instance ().get_ui_scale ()));
 
 	_grid.clear ();
@@ -623,7 +623,7 @@ RTAWindow::darea_expose_event (GdkEventExpose* ev)
 		dashes2.push_back (2.0);
 
 		for (int dB = min_dB; dB <= max_dB; ++dB) {
-			bool lbl = 0 == (dB % 12);
+			bool lbl = 0 == (dB % 12) || dB == max_dB;
 			if (dB % 6 != 0) {
 				continue;
 			}
@@ -645,20 +645,17 @@ RTAWindow::darea_expose_event (GdkEventExpose* ev)
 				continue;
 			}
 
-			layout->set_text (string_compose ("%1", dB));
-			layout->set_alignment (Pango::ALIGN_CENTER);
+			cr->save ();
+			Gtkmm2ext::set_source_rgb_a (cr, _textc, 0.75);
+			layout->set_text (string_compose ("%1", abs (dB) >= 10 ? abs(dB) : dB));
+			layout->set_alignment (Pango::ALIGN_LEFT);
 			int tw, th;
 			layout->get_pixel_size (tw, th);
-			cr->save ();
-			Gtkmm2ext::set_source_rgb_a (cr, _textc, 0.75);
-			cr->move_to (x1 + 5, y + tw / 2);
-			cr->rotate (1.5 * M_PI);
+			cr->move_to (x1 + 5, y - th / 2);
 			layout->show_in_cairo_context (cr);
-			cr->restore ();
-			cr->save ();
-			Gtkmm2ext::set_source_rgb_a (cr, _textc, 0.75);
-			cr->move_to (x0 - 5, y - tw / 2);
-			cr->rotate (0.5 * M_PI);
+
+			layout->set_alignment (Pango::ALIGN_RIGHT);
+			cr->move_to (x0 - 5 - tw, y - th / 2);
 			layout->show_in_cairo_context (cr);
 			cr->restore ();
 		}
