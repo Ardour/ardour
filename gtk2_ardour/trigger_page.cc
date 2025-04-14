@@ -359,7 +359,7 @@ TriggerPage::set_session (Session* s)
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), std::bind (&TriggerPage::parameter_changed, this, _1), gui_context ());
 
 	Editor::instance ().get_selection ().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerPage::selection_changed));
-	Trigger::TriggerArmChanged.connect (*this, invalidator (*this), std::bind (&TriggerPage::rec_enable_changed, this, _1), gui_context());
+	Trigger::TriggerArmChanged.connect (*this, invalidator (*this), std::bind (&TriggerPage::trigger_arm_changed, this, _1), gui_context());
 
 	initial_track_display ();
 
@@ -461,14 +461,15 @@ TriggerPage::clear_selected_slot ()
 }
 
 void
-TriggerPage::rec_enable_changed (Trigger const * trigger)
+TriggerPage::trigger_arm_changed (Trigger const * trigger)
 {
 	assert (trigger);
 
 	if (!trigger->armed()) {
-		_midi_editor->trigger_rec_enable_change (*trigger);
 		return;
 	}
+
+	std::cerr << "TP:tac\n";
 
 	/* hide everything */
 

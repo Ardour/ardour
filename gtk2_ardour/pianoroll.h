@@ -95,8 +95,7 @@ class Pianoroll : public CueEditor
 	Editing::MouseMode current_mouse_mode () const;
 	bool internal_editing() const;
 
-	void box_rec_enable_change (ARDOUR::TriggerBox const &);
-	void trigger_rec_enable_change (ARDOUR::Trigger const &);
+	void trigger_arm_change ();
 
 	double timebar_height;
 	size_t n_timebars;

@@ -902,19 +902,6 @@ Pianoroll::idle_data_captured ()
 	return false;
 }
 
-void
-Pianoroll::box_rec_enable_change (ARDOUR::TriggerBox const & b)
-{
-}
-
-void
-Pianoroll::trigger_rec_enable_change (ARDOUR::Trigger const & t)
-{
-	if (!t.armed()) {
-		view->end_write ();
-	}
-}
-
 bool
 Pianoroll::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
@@ -2168,6 +2155,20 @@ Pianoroll::blink_rec_enable (bool onoff)
 }
 
 void
+Pianoroll::trigger_arm_change ()
+{
+	if (!ref.trigger()) {
+		return;
+	}
+
+	if (!ref.trigger()->armed()) {
+		view->end_write ();
+	}
+
+	rec_enable_change ();
+}
+
+void
 Pianoroll::rec_enable_change ()
 {
 	if (!ref.box()) {
@@ -2179,13 +2180,11 @@ Pianoroll::rec_enable_change ()
 
 	switch (ref.box()->record_enabled()) {
 	case Recording:
-		std::cerr << "recording now active\n";
 		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
+		rec_blink_connection.disconnect ();
 		break;
 	case Enabled:
-		std::cerr << "maybe connect to blink, armed ? " << ref.trigger()->armed() << std::endl;
 		if (!UIConfiguration::instance().get_no_strobe() && ref.trigger()->armed()) {
-			std::cerr << "connect to blink\n";
 			rec_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &Pianoroll::blink_rec_enable));
 		} else {
 			rec_enable_button.set_active_state (Gtkmm2ext::Off);
@@ -2214,8 +2213,6 @@ Pianoroll::maybe_set_count_in ()
 	if (!valid) {
 		return;
 	}
-
-	std::cerr << "Going to start at " << count_in_to << std::endl;
 
 	samplepos_t audible (_session->audible_sample());
 	Temporal::Beats const & a_q (tmap->quarters_at_sample (audible));
@@ -2353,6 +2350,10 @@ Pianoroll::rec_button_press (GdkEventButton* ev)
 void
 Pianoroll::set (TriggerReference & tref)
 {
+	if (tref.trigger() == ref.trigger()) {
+		return;
+	}
+
 	_update_connection.disconnect ();
 	object_connections.drop_connections ();
 
@@ -2366,7 +2367,7 @@ Pianoroll::set (TriggerReference & tref)
 	ref.box()->Captured.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::data_captured, this, _1), gui_context());
 	/* Don't bind a shared_ptr<TriggerBox> within the lambda */
 	TriggerBox* tb (ref.box().get());
-	tb->RecEnableChanged.connect (object_connections, invalidator (*this), [&, tb]() { box_rec_enable_change (*tb); }, gui_context());
+	tb->RecEnableChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::rec_enable_change, this), gui_context());
 
 	Stripable* st = dynamic_cast<Stripable*> (ref.box()->owner());
 	assert (st);
@@ -2377,7 +2378,7 @@ Pianoroll::set (TriggerReference & tref)
 
 	_track->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this), gui_context());
 	ref.trigger()->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_prop_change, this, _1), gui_context());
-	ref.trigger()->ArmChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::rec_enable_change, this), gui_context());
+	ref.trigger()->ArmChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_arm_change, this), gui_context());
 
 	if (ref.trigger()->the_region()) {
 

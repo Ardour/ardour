@@ -100,7 +100,7 @@ private:
 	AxisView* axis_view_by_control (std::shared_ptr<ARDOUR::AutomationControl>) const;
 
 	void                      selection_changed ();
-	void                      rec_enable_changed (ARDOUR::Trigger const *);
+	void                      trigger_arm_changed (ARDOUR::Trigger const *);
 	PBD::ScopedConnectionList editor_connections;
 
 	gint start_updating ();
