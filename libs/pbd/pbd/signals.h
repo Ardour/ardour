@@ -303,7 +303,6 @@ class LIBPBD_API ScopedConnectionList
 	mutable Glib::Threads::Mutex _scoped_connection_lock;
 
 	typedef std::list<ScopedConnection*> ConnectionList;
-  public:
 	ConnectionList _scoped_connection_list;
 };
 
