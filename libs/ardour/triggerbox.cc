@@ -320,17 +320,22 @@ Trigger::_arm (Temporal::BBT_Offset const & duration)
 	}
 
 	_box.arm_from_another_thread (*this, _box.session().transport_sample(), chns, duration);
-	_armed = true;
-	ArmChanged(); /* EMIT SIGNAL */
-	TriggerArmChanged (this); /* EMIT SIGNAL */
+
+	if (!_armed) {
+		_armed = true;
+		ArmChanged(); /* EMIT SIGNAL */
+		TriggerArmChanged (this); /* EMIT SIGNAL */
+	}
 }
 
 void
 Trigger::disarm ()
 {
-	_armed = false;
-	ArmChanged(); /* EMIT SIGNAL */
-	TriggerArmChanged (this);
+	if (_armed) {
+		_armed = false;
+		ArmChanged(); /* EMIT SIGNAL */
+		TriggerArmChanged (this);
+	}
 }
 
 void
@@ -2531,8 +2536,10 @@ void
 MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 {
 	if (ai.midi_buf->size() == 0) {
-		_armed = false;
-		ArmChanged(); /* EMIT SIGNAL */
+		if (_armed) {
+			_armed = false;
+			ArmChanged(); /* EMIT SIGNAL */
+		}
 		return;
 	}
 
@@ -3816,6 +3823,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		offset = ai->start_samples - start_sample;
 		nframes -= offset;
 		_record_state = Recording;
+		RecEnableChanged(); /* EMIT SIGNAL */
 		// std::cerr << "Hit start @ " << ai->start_samples << " within " << start_sample << " ... " << end_sample << " offset will be " << offset << " nf " << nframes << std::endl;
 	}
 
