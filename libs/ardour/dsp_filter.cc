@@ -875,6 +875,71 @@ PerceptualAnalyzer::power_at_bin (const uint32_t b, float gain, bool pink) const
 }
 
 /* ****************************************************************************/
+StereoCorrelation::StereoCorrelation (float samplerate, float lp_freq, float tc_corr)
+{
+	_w1 = 6.28f * lp_freq / samplerate;
+	_w2 = 1.f / (tc_corr * samplerate);
+	reset ();
+}
+
+void
+StereoCorrelation::reset ()
+{
+	_zl  = 0;
+	_zr  = 0;
+	_zlr = 0;
+	_zll = 0;
+	_zrr = 0;
+}
+
+float
+StereoCorrelation::read () const
+{
+	return _zlr / sqrtf (_zll * _zrr + 1e-10f);
+}
+
+void
+StereoCorrelation::process (float const* pl, float const* pr, uint32_t n)
+{
+	float zl, zr, zlr, zll, zrr;
+
+	zl  = _zl;
+	zr  = _zr;
+	zlr = _zlr;
+	zll = _zll;
+	zrr = _zrr;
+	while (n--) {
+		zl += _w1 * (*pl++ - zl) + 1e-20f;
+		zr += _w1 * (*pr++ - zr) + 1e-20f;
+		zlr += _w2 * (zl * zr - zlr);
+		zll += _w2 * (zl * zl - zll);
+		zrr += _w2 * (zr * zr - zrr);
+	}
+
+	if (!isfinite (zl)) {
+		zl = 0;
+	}
+	if (!isfinite (zr)) {
+		zr = 0;
+	}
+	if (!isfinite (zlr)) {
+		zlr = 0;
+	}
+	if (!isfinite (zll)) {
+		zll = 0;
+	}
+	if (!isfinite (zrr)) {
+		zrr = 0;
+	}
+
+	_zl  = zl;
+	_zr  = zr;
+	_zlr = zlr + 1e-10f;
+	_zll = zll + 1e-10f;
+	_zrr = zrr + 1e-10f;
+}
+
+/* ****************************************************************************/
 
 Generator::Generator ()
 	: _type (UniformWhiteNoise)

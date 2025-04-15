@@ -418,6 +418,24 @@ namespace ARDOUR { namespace DSP {
 			float            _bwcorr[513];
 	};
 
+	class LIBARDOUR_API StereoCorrelation {
+		public:
+			StereoCorrelation (float samplerate, float lp_freq = 2e3f, float tc_corr = .3f);
+
+			void process (float const*, float const*, uint32_t n_samples);
+			void reset ();
+			float read () const;
+
+		private:
+			float _zl;
+			float _zr;
+			float _zlr;
+			float _zll;
+			float _zrr;
+			float _w1;  // lowpass filter coefficient
+			float _w2;  // correlation filter coeffient
+	};
+
 	class LIBARDOUR_API Generator {
 		public:
 			Generator ();
