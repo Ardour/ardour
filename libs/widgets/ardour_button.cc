@@ -1082,10 +1082,10 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 		return true;
 	}
 
-	_grabbed = false;
 	CairoWidget::set_dirty ();
 
-	if (ev->button == 1 && _hovering) {
+	if (ev->button == 1 && _hovering && _grabbed) {
+		_grabbed = false;
 		if (_act_on_release && _auto_toggle && !_action) {
 			set_active (!get_active ());
 		}
@@ -1097,6 +1097,8 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 			}
 		}
 	}
+
+	_grabbed = false;
 
 	return _fallthrough_to_parent ? false : true;
 }
