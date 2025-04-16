@@ -65,7 +65,7 @@ using namespace Temporal;
 Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	: CueEditor (name)
 	, timebar_height (15.)
-	, n_timebars (3)
+	, n_timebars (0)
 	, prh (nullptr)
 	, bg (nullptr)
 	, view (nullptr)
@@ -534,7 +534,10 @@ Pianoroll::build_canvas ()
 	time_line_group = new ArdourCanvas::Container (h_scroll_group);
 	CANVAS_DEBUG_NAME (time_line_group, "cue  time line group");
 
-	meter_bar = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0., 0, ArdourCanvas::COORD_MAX, timebar_height));
+	n_timebars = 0;
+
+#if 0 /* these can't be used for anything useful, so don't display them until they can */
+	meter_bar = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0., 0, ArdourCanvas::COORD_MAX, timebar_height * (n_timebars+1)));
 	CANVAS_DEBUG_NAME (meter_bar, "Meter Bar");
 	meter_bar->set_fill(true);
 	meter_bar->set_outline(true);
@@ -543,7 +546,9 @@ Pianoroll::build_canvas ()
 	meter_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 	meter_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
-	tempo_bar = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0.0, timebar_height, ArdourCanvas::COORD_MAX, timebar_height * 2));
+	n_timebars++;
+
+	tempo_bar = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0.0, timebar_height * n_timebars, ArdourCanvas::COORD_MAX, timebar_height * (n_timebars+1)));
 	CANVAS_DEBUG_NAME (tempo_bar, "Tempo Bar");
 	tempo_bar->set_fill(true);
 	tempo_bar->set_outline(true);
@@ -552,9 +557,9 @@ Pianoroll::build_canvas ()
 	tempo_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 	meter_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
-	Pango::FontDescription font (UIConfiguration::instance().get_SmallerFont());
-	Pango::FontDescription larger_font (UIConfiguration::instance().get_SmallBoldFont());
-	bbt_ruler = new ArdourCanvas::Ruler (time_line_group, &bbt_metric, ArdourCanvas::Rect (0, timebar_height * 2, ArdourCanvas::COORD_MAX, timebar_height * 3));
+	n_timebars++;
+#endif
+	bbt_ruler = new ArdourCanvas::Ruler (time_line_group, &bbt_metric, ArdourCanvas::Rect (0, timebar_height * n_timebars, ArdourCanvas::COORD_MAX, timebar_height * (n_timebars+1)));
 	bbt_ruler->set_font_description (font);
 	Gtkmm2ext::Color base = UIConfiguration::instance().color ("ruler base");
 	Gtkmm2ext::Color text = UIConfiguration::instance().color ("ruler text");
@@ -562,6 +567,7 @@ Pianoroll::build_canvas ()
 	bbt_ruler->set_outline_color (text);
 	CANVAS_DEBUG_NAME (bbt_ruler, "cue bbt ruler");
 
+	n_timebars++;
 
 	data_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
