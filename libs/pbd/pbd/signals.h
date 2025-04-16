@@ -463,15 +463,24 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 				(i->second)(a...);
 			}
 		}
+
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+		if (_debug_emission) {
+			std::cerr << "------ Signal @ " << this << " emission process ends\n";
+		}
+#endif
+		return;
+
 	} else {
+
 		std::list<R> r;
 		for (typename Slots::const_iterator i = s.begin(); i != s.end(); ++i) {
 
 			/* We may have just called a slot, and this may have resulted in
-			* disconnection of other slots from us.  The list copy means that
-			* this won't cause any problems with invalidated iterators, but we
-			* must check to see if the slot we are about to call is still on the list.
-			*/
+			 * disconnection of other slots from us.  The list copy means that
+			 * this won't cause any problems with invalidated iterators, but we
+			 * must check to see if the slot we are about to call is still on the list.
+			 */
 			bool still_there = false;
 			{
 				Glib::Threads::Mutex::Lock lm (_mutex);
@@ -486,17 +495,17 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 #endif
 				r.push_back ((i->second)(a...));
 			}
-		}
 
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+			if (_debug_emission) {
+				std::cerr << "------ Signal @ " << this << " emission process ends\n";
+			}
+#endif
+		}
 		/* Call our combiner to do whatever is required to the result values */
 		Combiner c;
 		return c (r.begin(), r.end());
 	}
-#ifdef DEBUG_PBD_SIGNAL_EMISSION
-	if (_debug_emission) {
-		std::cerr << "------ Signal @ " << this << " emission process ends\n";
-	}
-#endif
 }
 
 template <typename Combiner, typename R, typename... A>
@@ -543,4 +552,3 @@ SignalWithCombiner<Combiner, R(A...)>::disconnect (std::shared_ptr<Connection> c
 }
 
 } /* namespace */
-
