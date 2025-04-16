@@ -66,14 +66,16 @@ using namespace Temporal;
 void
 Editor::clear_marker_display ()
 {
-	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
-		delete i->second;
-	}
-
 	entered_marker = 0;
+	LocationMarkerMap lm = location_markers;
 
 	location_markers.clear ();
 	_sorted_marker_lists.clear ();
+
+	for (auto const & [l, m] : lm ) {
+		delete m;
+	}
+
 }
 
 void
