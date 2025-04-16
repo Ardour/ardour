@@ -569,6 +569,8 @@ Pianoroll::build_canvas ()
 
 	n_timebars++;
 
+	bbt_ruler->Event.connect (sigc::mem_fun (*this, &Pianoroll::bbt_ruler_event));
+
 	data_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
 
@@ -618,6 +620,43 @@ Pianoroll::build_canvas ()
 	_canvas->set_can_focus ();
 
 	_toolbox.pack_start (*_canvas_viewport, true, true);
+}
+
+bool
+Pianoroll::bbt_ruler_event (GdkEvent* ev)
+{
+	switch (ev->type) {
+	case GDK_BUTTON_RELEASE:
+		if (ev->button.button == 1) {
+			ruler_locate (&ev->button);
+		}
+		return true;
+	default:
+		break;
+	}
+
+	return false;
+}
+
+void
+Pianoroll::ruler_locate (GdkEventButton* ev)
+{
+	if (!_session) {
+		return;
+	}
+
+	if (ref.box()) {
+		/* we don't locate when working with triggers */
+		return;
+	}
+
+	if (!view->midi_region()) {
+		return;
+	}
+
+	samplepos_t sample = pixel_to_sample_from_event (ev->x);
+	sample += view->midi_region()->source_position().samples();
+	_session->request_locate (sample);
 }
 
 void

@@ -336,4 +336,7 @@ class Pianoroll : public CueEditor
 
 	void count_in (Temporal::timepos_t, unsigned int);
 	void maybe_set_count_in ();
+
+	bool bbt_ruler_event (GdkEvent*);
+	void ruler_locate (GdkEventButton*);
 };
