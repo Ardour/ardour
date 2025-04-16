@@ -728,8 +728,8 @@ Trigger::clear_region ()
 	/* Called from RT process thread */
 
 	_region.reset ();
-
-	set_name("");
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("cleared region for %1\n", _index));
+	set_name ("");
 }
 
 void
@@ -835,12 +835,16 @@ Trigger::_startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Offset 
 void
 Trigger::shutdown_from_fwd ()
 {
+	if (_state == Stopped) {
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 [%3] already stopped\n", _box.order(), index(), name()));
+		return;
+	}
 	_state = Stopped;
 	_playout = false;
 	_loop_cnt = 0;
 	_cue_launched = false;
 	_pending_velocity_gain = _velocity_gain = 1.0;
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 shuts down\n", name()));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 [%3] shuts down\n", _box.order(), index(), name()));
 	send_property_change (ARDOUR::Properties::running);
 }
 
@@ -1699,6 +1703,8 @@ AudioTrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 int
 AudioTrigger::set_region_in_worker_thread_internal (std::shared_ptr<Region> r, bool from_capture)
 {
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 setting region from worker thread, from capture? %3\n", _box.order(), index(), from_capture));
+
 	if (!from_capture) {
 		assert (!active());
 	}
@@ -2540,6 +2546,7 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 			_armed = false;
 			ArmChanged(); /* EMIT SIGNAL */
 		}
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 captured but with no MIDI data\n", _box.order(), index()));
 		return;
 	}
 
@@ -3040,6 +3047,8 @@ MIDITrigger::estimate_midi_patches ()
 int
 MIDITrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> r)
 {
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 setting region from worker thread, from capture\n", _box.order(), index()));
+
 	assert (r);
 
 	std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (r);
@@ -4314,6 +4323,7 @@ TriggerBox::queue_explict (uint32_t n)
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("explicit queue %1, EQ = %2\n", n, explicit_queue.read_space()));
 
 	if (_currently_playing) {
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 for explicit queue, stop %2\n", _order, _currently_playing->index()));
 		_currently_playing->begin_stop (false);  /* @paul is this necessary/desired?  the current clip should stop (only) when the new one starts */
 	}
 }
