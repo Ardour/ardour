@@ -2470,7 +2470,11 @@ MIDITrigger::setup_event_indices ()
 {
 	RTMidiBufferBeats* rt = rt_midibuffer.load ();
 
-	assert (rt->size() > 0);
+	if (rt->size() == 0) {
+		first_event_index = 0;
+		last_event_index = 0;
+		return;
+	}
 
 	if (rt->size() == 1) {
 		first_event_index = 0;
