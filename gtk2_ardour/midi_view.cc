@@ -385,7 +385,8 @@ MidiView::set_model (std::shared_ptr<MidiModel> m)
 		}
 
 		if (n == 16) {
-			set_visible_channel (n);
+			/* No channel data in model, use channel 0 (1) */
+			set_visible_channel (0);
 		}
 	}
 
