@@ -134,33 +134,31 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	prefs_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::prefs_button_pressed), false);
 	prefs_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
 
-	Glib::RefPtr<SizeGroup> grp = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
+	Glib::RefPtr<SizeGroup> grp = SizeGroup::create (Gtk::SIZE_GROUP_BOTH);
 	grp->add_widget(new_button);
 	grp->add_widget(recent_button);
 	grp->add_widget(existing_button);
-	grp->add_widget(prefs_button);
+
+	int top = 0;
+	int row = 0;
 
 	if (find_file (rc, PROGRAM_NAME "-small-splash.png", image_path)) {
 		Gtk::Image* image;
 		if ((image = manage (new Gtk::Image (image_path))) != 0) {
-			_open_table.attach (*image, 0,1,  0,1, FILL, FILL);
+			_open_table.attach (*image, 0,1,  row , row + 1, FILL, FILL); ++row;
 			grp->add_widget (*image);
 		}
 	}
 
-	_open_table.attach (new_button,        0,1, 1,2, FILL|EXPAND, FILL|EXPAND);
-	_open_table.attach (recent_button,     0,1, 2,3, FILL|EXPAND, FILL|EXPAND);
-	_open_table.attach (existing_button,   0,1, 3,4, FILL|EXPAND, FILL|EXPAND);
-#if 0
-	_open_table.attach (prefs_button,      0,1, 5,6, FILL, FILL);
-#endif
+	_open_table.attach (new_button,        0,1, row, row + 1, FILL, FILL); ++row;
+	_open_table.attach (recent_button,     0,1, row, row + 1, FILL, FILL); ++row;
+	_open_table.attach (existing_button,   0,1, row, row + 1, FILL, FILL); ++row;
 
+	++row;
 	Label *vspacer = manage (new Label());
 	vspacer->set_size_request(8, -1);
-	_open_table.attach (*vspacer,          1,2, 0,4, FILL, FILL|EXPAND, 0, 0);
-	_open_table.attach (_tabs,             2,3, 0,4, FILL|EXPAND, FILL|EXPAND, 0, 0);
-
-	// _open_table.set_border_width (12);
+	_open_table.attach (*vspacer,          1,2, top, row, FILL,        FILL|EXPAND, 0, 0);
+	_open_table.attach (_tabs,             2,3, top, row, FILL|EXPAND, FILL|EXPAND, 0, 0);
 
 	_tabs.set_show_tabs(false);
 	_tabs.set_show_border(false);
