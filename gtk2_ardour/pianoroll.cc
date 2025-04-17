@@ -22,6 +22,7 @@
 #include "ardour/midi_region.h"
 #include "ardour/midi_track.h"
 #include "ardour/smf_source.h"
+#include "ardour/region_factory.h"
 
 #include "canvas/box.h"
 #include "canvas/canvas.h"
@@ -2427,16 +2428,32 @@ Pianoroll::set (TriggerReference & tref)
 	ref.trigger()->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_prop_change, this, _1), gui_context());
 	ref.trigger()->ArmChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_arm_change, this), gui_context());
 
-	if (ref.trigger()->the_region()) {
+	std::shared_ptr<MidiRegion> mr;
 
-		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (ref.trigger()->the_region());
+	if (!ref.trigger()->the_region()) {
 
-		if (mr) {
-			set_region (mr);
-		}
+		std::shared_ptr<MidiSource> new_source = _session->create_midi_source_for_session (_track->name());
+		SourceList sources;
+		sources.push_back (new_source);
 
+		PropertyList plist;
+		plist.add (ARDOUR::Properties::start, timepos_t (Temporal::Beats ()));
+		plist.add (ARDOUR::Properties::length, timepos_t (Temporal::Beats::beats (32)));
+		plist.add (ARDOUR::Properties::name, new_source->name());
+		plist.add (ARDOUR::Properties::whole_file, true);
+
+		mr = std::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (sources, plist, true));
+
+		plist.remove (ARDOUR::Properties::whole_file);
+		mr = std::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (mr, timecnt_t::zero (Temporal::BeatTime), plist, true));
+
+		ref.trigger()->set_region (mr);
 	} else {
-		view->set_region (nullptr);
+		mr = std::dynamic_pointer_cast<MidiRegion> (ref.trigger()->the_region());
+	}
+
+	if (mr) {
+		set_region (mr);
 	}
 
 	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Pianoroll::maybe_update));
