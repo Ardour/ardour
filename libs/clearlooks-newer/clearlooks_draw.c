@@ -1583,11 +1583,9 @@ clearlooks_draw_scrollbar_trough (cairo_t *cr,
                                   int x, int y, int width, int height)
 {
 	const CairoColor *bg;
-	CairoColor        bg_shade;
 
 	(void) widget;
-	bg = &colors->shade[2];
-	ge_shade_color (bg, 0.95, &bg_shade);
+	bg = &colors->bg[GTK_STATE_ACTIVE];
 
 	cairo_set_line_width (cr, 1);
 	/* cairo_translate (cr, x, y); */
@@ -1601,23 +1599,6 @@ clearlooks_draw_scrollbar_trough (cairo_t *cr,
 	cairo_rectangle (cr, 1, 0, width-2, height);
 	ge_cairo_set_color (cr, bg);
 	cairo_fill (cr);
-
-#if 0
-	cairo_pattern_t  *pattern;
-	const CairoColor *border = &colors->shade[5];
-	/* Draw shadow */
-	pattern = cairo_pattern_create_linear (1, 0, 3, 0);
-	cairo_pattern_add_color_stop_rgb (pattern, 0,   bg_shade.r, bg_shade.g, bg_shade.b);
-	cairo_pattern_add_color_stop_rgb (pattern, 1.0, bg->r,      bg->g,      bg->b);
-	cairo_rectangle (cr, 1, 0, 4, height);
-	cairo_set_source (cr, pattern);
-	cairo_fill (cr);
-	cairo_pattern_destroy (pattern);
-
-	/* Draw border */
-	ge_cairo_set_color (cr, border);
-	ge_cairo_stroke_rectangle (cr, 0.5, 0.5, width-1, height-1);
-#endif
 }
 
 static void
