@@ -30,6 +30,7 @@
 
 namespace Gtk {
 	class Widget;
+	class HScrollbar;
 }
 
 namespace ArdourCanvas {
@@ -181,6 +182,8 @@ class Pianoroll : public CueEditor
 	ArdourCanvas::GtkCanvasViewport* _canvas_viewport;
 	ArdourCanvas::GtkCanvas* _canvas;
 
+	Gtk::HScrollbar* _canvas_hscrollbar;
+
 	/* The group containing all other groups that are scrolled vertically
 	   and horizontally.
 	*/
@@ -264,6 +267,7 @@ class Pianoroll : public CueEditor
 	PBD::ScopedConnectionList view_connections;
 	void maybe_update ();
 	void trigger_prop_change (PBD::PropertyChange const &);
+	void region_prop_change (PBD::PropertyChange const &);
 
 	void unset ();
 

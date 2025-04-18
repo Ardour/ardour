@@ -32,6 +32,8 @@
 #include "canvas/rectangle.h"
 #include "canvas/widget.h"
 
+#include "ytkmm/scrollbar.h"
+
 #include "gtkmm2ext/actions.h"
 
 #include "widgets/ardour_button.h"
@@ -268,6 +270,8 @@ Pianoroll::build_lower_toolbar ()
 {
 	ArdourButton::Element elements = ArdourButton::Element (ArdourButton::Text|ArdourButton::Indicator|ArdourButton::Edge|ArdourButton::Body);
 
+	_canvas_hscrollbar = manage (new Gtk::HScrollbar (horizontal_adjustment));
+
 	velocity_button = new ArdourButton (_("Velocity"), elements);
 	bender_button = new ArdourButton (_("Bender"), elements);
 	pressure_button = new ArdourButton (_("Pressure"), elements);
@@ -326,6 +330,7 @@ Pianoroll::build_lower_toolbar ()
 	cc_dropdown2->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_led_click), cc_dropdown2));
 	cc_dropdown3->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_led_click), cc_dropdown3));
 
+	_toolbox.pack_start (*_canvas_hscrollbar, false, false);
 	_toolbox.pack_start (button_bar, false, false);
 }
 
@@ -834,6 +839,11 @@ Pianoroll::set_samples_per_pixel (samplecnt_t spp)
 	bbt_ruler->set_range (0, current_page_samples());
 	compute_bbt_ruler_scale (0, current_page_samples());
 	bbt_metric.units_per_pixel = spp;
+
+	horizontal_adjustment.set_upper (max_zoom_extent().second.samples() / samples_per_pixel);
+	horizontal_adjustment.set_page_size (current_page_samples()/ samples_per_pixel / 10);
+	horizontal_adjustment.set_page_increment (current_page_samples()/ samples_per_pixel / 20);
+	horizontal_adjustment.set_step_increment (current_page_samples() / samples_per_pixel / 100);
 }
 
 samplecnt_t
@@ -2188,6 +2198,20 @@ Pianoroll::trigger_prop_change (PBD::PropertyChange const & what_changed)
 		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (ref.trigger()->the_region());
 		if (mr) {
 			set_region (mr);
+			zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
+		}
+	}
+}
+
+void
+Pianoroll::region_prop_change (PBD::PropertyChange const & what_changed)
+{
+	std::cerr << "region prop change " << what_changed << std::endl;
+	if (what_changed.contains (Properties::length)) {
+		std::shared_ptr<MidiRegion> mr = view->midi_region();
+		if (mr) {
+			set_region (mr);
+			zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
 		}
 	}
 }
@@ -2512,8 +2536,9 @@ Pianoroll::update_solo_display ()
 void
 Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 {
+	unset ();
+
 	if (!r) {
-		unset ();
 		return;
 	}
 
@@ -2522,6 +2547,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 	view->show_end (true);
 
 	r->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this), gui_context());
+	r->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::region_prop_change, this, _1), gui_context());
 
 	bool provided = false;
 	std::shared_ptr<Temporal::TempoMap> map;
@@ -2540,7 +2566,6 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 		EditingContext::TempoMapScope tms (*this, map);
 		/* Compute zoom level to show entire source plus some margin if possible */
 		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
-
 	}
 
 	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Pianoroll::maybe_update));
