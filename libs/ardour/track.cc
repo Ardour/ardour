@@ -334,7 +334,7 @@ Track::prep_record_enabled (bool yn)
 		return -1;
 	}
 
-	if (!can_be_record_enabled()) {
+	if (yn && !can_be_record_enabled()) {
 		return -1;
 	}
 
