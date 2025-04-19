@@ -173,6 +173,6 @@ private:
 }
 
 namespace std {
-ostream& operator<< (std::ostream& os, PBD::PropertyChange const & pc);
+	LIBPBD_API ostream& operator<< (std::ostream& os, PBD::PropertyChange const & pc);
 }
 
