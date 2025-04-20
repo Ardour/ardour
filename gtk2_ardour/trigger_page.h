@@ -100,7 +100,7 @@ private:
 	AxisView* axis_view_by_control (std::shared_ptr<ARDOUR::AutomationControl>) const;
 
 	void                      selection_changed ();
-	void                      rec_enable_changed (ARDOUR::Trigger const *);
+	void                      trigger_arm_changed (ARDOUR::Trigger const *);
 	PBD::ScopedConnectionList editor_connections;
 
 	gint start_updating ();
@@ -126,6 +126,7 @@ private:
 	TriggerSourceList         _trigger_source_list;
 	TriggerRegionList         _trigger_region_list;
 	TriggerRouteList          _trigger_route_list;
+	Gtk::Table                 table;
 
 	CueBoxWidget       _cue_box;
 	FittedCanvasWidget _master_widget;
@@ -148,5 +149,6 @@ private:
 	RouteProcessorSelection  _selection;
 	std::list<TriggerStrip*> _strips;
 	sigc::connection         _fast_screen_update_connection;
+	int                       clip_editor_column;
 };
 

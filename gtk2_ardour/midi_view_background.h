@@ -54,6 +54,19 @@ class MidiViewBackground : public virtual ViewBackground
 
 	Gtk::Adjustment note_range_adjustment;
 
+	struct NoteRangeSuspender {
+		NoteRangeSuspender (MidiViewBackground& mv) : mvb (mv) {
+			mvb.NoteRangeChanged.block ();
+		}
+
+		~NoteRangeSuspender() {
+			mvb.NoteRangeChanged.unblock ();
+			mvb.NoteRangeChanged(); /* EMIT SIGNAL */
+		}
+
+		MidiViewBackground& mvb;
+	};
+
 	enum VisibleNoteRange {
 		FullRange,
 		ContentsRange
@@ -116,6 +129,7 @@ class MidiViewBackground : public virtual ViewBackground
 	Gtkmm2ext::Color          _region_color;
 	ARDOUR::ColorMode         _color_mode;
 	VisibleNoteRange          _visibility_note_range;
+	bool                       note_range_set;
 
 	void color_handler ();
 	void parameter_changed (std::string const &);

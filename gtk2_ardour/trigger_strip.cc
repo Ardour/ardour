@@ -149,7 +149,14 @@ TriggerStrip::init ()
 	mute_solo_table.set_spacings (2);
 	mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
 	mute_solo_table.attach (*solo_button, 1, 2, 0, 1);
-	mute_solo_table.attach (*rec_enable_button, 0, 2, 1, 2);
+
+	rec_toggle_button = manage (new ArdourButton);
+	rec_toggle_button->set_name ("record enable button");
+	rec_toggle_button->set_icon (ArdourIcon::RecButton);
+	UI::instance()->set_tip (rec_toggle_button, _("Switch controls from cue launching to cue recording"), "");
+	rec_toggle_button->show ();
+	rec_toggle_button->signal_button_press_event().connect (sigc::mem_fun(*this, &TriggerStrip::rec_toggle_press), false);
+	mute_solo_table.attach (*rec_toggle_button, 0, 2, 1, 2);
 
 	volume_table.attach (_level_meter, 0, 1, 0, 1);
 	/*Note: _gain_control is added in set_route */
@@ -196,6 +203,40 @@ TriggerStrip::init ()
 }
 
 void
+TriggerStrip::box_rec_enable_change ()
+{
+	if (!_route) {
+		return;
+	}
+
+	if (!_route->triggerbox()) {
+		return;
+	}
+
+	if (_route->triggerbox()->record_enabled()) {
+		rec_toggle_button->set_active_state (Gtkmm2ext::ExplicitActive);
+	} else {
+		rec_toggle_button->set_active_state (Gtkmm2ext::Off);
+	}
+}
+
+bool
+TriggerStrip::rec_toggle_press (GdkEventButton* ev)
+{
+	if (!_route) {
+		return false;
+	}
+
+	if (!_route->triggerbox()) {
+		return false;
+	}
+
+	_route->triggerbox()->set_record_enabled (!_route->triggerbox()->record_enabled());
+
+	return true;
+}
+
+void
 TriggerStrip::set_route (std::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
@@ -224,6 +265,9 @@ TriggerStrip::set_route (std::shared_ptr<Route> rt)
 	_route->input ()->changed.connect (*this, invalidator (*this), std::bind (&TriggerStrip::io_changed, this), gui_context ());
 	_route->output ()->changed.connect (*this, invalidator (*this), std::bind (&TriggerStrip::io_changed, this), gui_context ());
 	_route->io_changed.connect (route_connections, invalidator (*this), std::bind (&TriggerStrip::io_changed, this), gui_context ());
+
+	std::shared_ptr<TriggerBox> tb (_route->triggerbox());
+	tb->RecEnableChanged.connect (route_connections, invalidator (*this), std::bind (&TriggerStrip::box_rec_enable_change, this), gui_context());
 
 	if (_route->panner_shell ()) {
 		update_panner_choices ();

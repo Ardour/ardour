@@ -321,7 +321,7 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 
 		switch (tref.box()->record_enabled()) {
 		case Enabled:
-			context->arc (margin + (size * 0.75), margin + (size * 0.75), (size * 0.75), 0., 360.0 * (M_PI/180.0));
+			context->arc (margin + (size * 0.5), margin + (size * 0.5), (size * 0.5), 0., 360.0 * (M_PI/180.0));
 			if (trigger()->armed()) {
 				solid = rec_blink_on;
 			} else {
@@ -330,7 +330,7 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 			break;
 
 		case Recording:
-			context->arc (margin + (size * 0.75), margin + (size * 0.75), (size * 0.75), 0., 360.0 * (M_PI/180.0));
+			context->arc (margin + (size * 0.5), margin + (size * 0.5), (size * 0.5), 0., 360.0 * (M_PI/180.0));
 			if (trigger()->armed()) {
 				solid = true;
 			} else {

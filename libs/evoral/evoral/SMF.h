@@ -100,6 +100,7 @@ public:
 	int smf_format () const;
 
 	Temporal::Beats file_duration() const;
+	bool duration_is_explicit() const;
 
 	int num_channels () const { return _num_channels; }
 	typedef std::bitset<16> UsedChannels;

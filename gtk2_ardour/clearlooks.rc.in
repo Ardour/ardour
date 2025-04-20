@@ -571,8 +571,9 @@ style "shuttle_control" = "smaller_text"
 
 style "ardour_adjusters" = "default_generic"
 {
-	bg[NORMAL] = @background
-	bg[PRELIGHT] = lighter(@background)
+	# this is the color of the slider
+	bg[NORMAL] = @scrollbar_slider
+	# this is the color of the trough
 	bg[ACTIVE] = @darkest
 }
 

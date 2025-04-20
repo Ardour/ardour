@@ -252,6 +252,12 @@ RegionEditor::~RegionEditor ()
 }
 
 void
+RegionEditor::setup_actions_and_bindings ()
+{
+	RegionFxBox::register_actions ();
+}
+
+void
 RegionEditor::set_clock_mode_from_primary ()
 {
 	_clock_group->set_clock_mode (ARDOUR_UI::instance ()->primary_clock->mode ());
@@ -540,8 +546,8 @@ RegionEditor::RegionFxBox::register_actions ()
 
 	rfx_box_actions = ActionManager::create_action_group (bindings, X_("RegionFxMenu"));
 
-	ActionManager::register_action (rfx_box_actions, X_("delete"), _("Delete"), sigc::ptr_fun (RegionEditor::RegionFxBox::static_delete));
-	ActionManager::register_action (rfx_box_actions, X_("backspace"), _("Delete"), sigc::ptr_fun (RegionEditor::RegionFxBox::static_delete));
+	ActionManager::register_action (rfx_box_actions, X_("rfx-delete"), _("Delete"), sigc::ptr_fun (RegionEditor::RegionFxBox::static_delete));
+	ActionManager::register_action (rfx_box_actions, X_("rfx-backspace"), _("Delete"), sigc::ptr_fun (RegionEditor::RegionFxBox::static_delete));
 }
 
 void
@@ -558,9 +564,7 @@ RegionEditor::RegionFxBox::RegionFxBox (std::shared_ptr<ARDOUR::Region> r)
 	, _no_redisplay (false)
 	, _placement (-1)
 {
-	if (!rfx_box_actions) {
-		register_actions ();
-	}
+	assert (rfx_box_actions);
 
 	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	_scroller.set_name ("ProcessorScroller");
@@ -570,7 +574,7 @@ RegionEditor::RegionFxBox::RegionFxBox (std::shared_ptr<ARDOUR::Region> r)
 	_display.set_can_focus ();
 	_display.set_name ("ProcessorList");
 	_display.set_data ("regionfxbox", this);
-	_display.set_data ("ardour-bindings", bindings);
+	set_widget_bindings (_display, *bindings, ARDOUR_BINDING_KEY);
 	_display.set_size_request (104, -1); // TODO UI scale
 	_display.set_spacing (0);
 
@@ -784,7 +788,13 @@ RegionEditor::RegionFxBox::enter_notify (GdkEventCrossing* ev)
 bool
 RegionEditor::RegionFxBox::leave_notify (GdkEventCrossing* ev)
 {
+	if (ev->detail == GDK_NOTIFY_INFERIOR || ev->detail == GDK_NOTIFY_NONLINEAR || ev->detail == GDK_NOTIFY_NONLINEAR_VIRTUAL) {
+		/* leaving towards a child - here a Processor Entry */
+		return false;
+	}
+
 	current_rfx_box = 0;
+	_display.select_none ();
 	return false;
 }
 

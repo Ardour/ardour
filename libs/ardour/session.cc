@@ -4809,27 +4809,15 @@ Session::destroy_sources (list<std::shared_ptr<Source> > const& srcs)
 int
 Session::remove_last_capture ()
 {
-	list<std::shared_ptr<Source> > srcs;
-
-	std::shared_ptr<RouteList const> rl = routes.reader ();
-	for (auto const& i : *rl) {
-		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
-		if (!tr) {
-			continue;
-		}
-
-		list<std::shared_ptr<Source> >& l = tr->last_capture_sources();
-
-		if (!l.empty()) {
-			srcs.insert (srcs.end(), l.begin(), l.end());
-			l.clear ();
-		}
-	}
+	list<std::shared_ptr<Source>> srcs;
+	last_capture_sources (srcs);
 
 	destroy_sources (srcs);
 
 	/* save state so we don't end up with a session file
 	 * referring to non-existent sources.
+	 *
+	 * Note: save_state calls reset_last_capture_sources ();
 	 */
 
 	save_state ();
@@ -4838,7 +4826,7 @@ Session::remove_last_capture ()
 }
 
 void
-Session::get_last_capture_sources (std::list<std::shared_ptr<Source> >& srcs)
+Session::last_capture_sources (std::list<std::shared_ptr<Source>>& srcs) const
 {
 	std::shared_ptr<RouteList const> rl = routes.reader ();
 	for (auto const& i : *rl) {
@@ -4847,13 +4835,40 @@ Session::get_last_capture_sources (std::list<std::shared_ptr<Source> >& srcs)
 			continue;
 		}
 
-		list<std::shared_ptr<Source> >& l = tr->last_capture_sources();
+		list<std::shared_ptr<Source>> const& l = tr->last_capture_sources();
+		srcs.insert (srcs.end(), l.begin(), l.end());
+	}
+}
 
-		if (!l.empty()) {
-			srcs.insert (srcs.end(), l.begin(), l.end());
-			l.clear ();
+bool
+Session::have_last_capture_sources () const
+{
+	std::shared_ptr<RouteList const> rl = routes.reader ();
+	for (auto const& i : *rl) {
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
+		if (!tr) {
+			continue;
+		}
+
+		if (!tr->last_capture_sources().empty ()) {
+			return true;
 		}
 	}
+	return false;
+}
+
+void
+Session::reset_last_capture_sources ()
+{
+	std::shared_ptr<RouteList const> rl = routes.reader ();
+	for (auto const& i : *rl) {
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
+		if (!tr) {
+			continue;
+		}
+		tr->reset_last_capture_sources ();
+	}
+	ClearedLastCaptureSources (); /* EMIT SIGNAL */
 }
 
 /* Source Management */

@@ -195,15 +195,15 @@
     </menu>
 
     <menu name='Edit' action='Edit'>
-      <menuitem action='undo'/>
-      <menuitem action='redo'/>
+      <menuitem action='EditorEditing/undo'/>
+      <menuitem action='EditorEditing/redo'/>
       <separator/>
       <menuitem action='undo-last-selection-op'/>
       <menuitem action='redo-last-selection-op'/>
       <separator/>
-      <menuitem action='editor-cut'/>
-      <menuitem action='editor-copy'/>
-      <menuitem action='editor-paste'/>
+      <menuitem action='EditorEditing/editor-cut'/>
+      <menuitem action='EditorEditing/editor-copy'/>
+      <menuitem action='EditorEditing/editor-paste'/>
       <separator/>
       <menuitem action='cut-paste-section'/>
       <menuitem action='copy-paste-section'/>
@@ -241,7 +241,7 @@
         <menuitem action='select-prev-route'/>
       </menu>
       <separator/>
-      <menuitem action='editor-delete'/>
+      <menuitem action='EditorEditing/editor-delete'/>
       <menuitem action='editor-crop'/>
       <menuitem action='split-region'/>
       <menu action="SeparateMenu">
@@ -567,13 +567,13 @@
         <menuitem action='shrink-tracks'/>
       </menu>
       <menu name='ZoomFocus' action='ZoomFocus'>
-        <menuitem action='zoom-focus-left'/>
-        <menuitem action='zoom-focus-right'/>
-        <menuitem action='zoom-focus-center'/>
-        <menuitem action='zoom-focus-playhead'/>
-        <menuitem action='zoom-focus-mouse'/>
-        <menuitem action='zoom-focus-edit'/>
-        <menuitem action='cycle-zoom-focus'/>
+        <menuitem action='EditorZoom/zoom-focus-left'/>
+        <menuitem action='EditorZoom/zoom-focus-right'/>
+        <menuitem action='EditorZoom/zoom-focus-center'/>
+        <menuitem action='EditorZoom/zoom-focus-playhead'/>
+        <menuitem action='EditorZoom/zoom-focus-mouse'/>
+        <menuitem action='EditorZoom/zoom-focus-edit'/>
+        <menuitem action='EditorZoom/cycle-zoom-focus'/>
       </menu>
       <menu action="ScrollMenu">
         <menuitem action='scroll-tracks-down'/>
@@ -689,6 +689,9 @@
       </menu>
       <!-- Common Ardour Widows (all toggle) !-->
       <menuitem action='toggle-meterbridge'/>
+#ifndef NDEBUG
+      <menuitem action='toggle-rtawindow'/>
+#endif
       <menuitem action='toggle-locations'/>
       <menuitem action='toggle-big-clock'/>
       <menuitem action='toggle-big-transport'/>
@@ -717,10 +720,6 @@
       <menuitem action='toggle-plugin-manager'/>
 #ifndef MIXBUS
       <menuitem action='toggle-io-plugins'/>
-#endif
-#ifdef MIXBUS
-      <separator/>
-      <menuitem action='license-manager'/>
 #endif
 
       <separator/><!-- Misc Configuration !-->

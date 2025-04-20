@@ -34,6 +34,7 @@
 
 #include "ardour/session.h"
 #include "ardour/location.h"
+#include "ardour/midi_scene_change.h"
 #include "ardour/profile.h"
 #include "pbd/memento_command.h"
 
@@ -65,14 +66,16 @@ using namespace Temporal;
 void
 Editor::clear_marker_display ()
 {
-	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
-		delete i->second;
-	}
-
 	entered_marker = 0;
+	LocationMarkerMap lm = location_markers;
 
 	location_markers.clear ();
 	_sorted_marker_lists.clear ();
+
+	for (auto const & [l, m] : lm ) {
+		delete m;
+	}
+
 }
 
 void
@@ -1825,11 +1828,11 @@ Editor::marker_menu_rename ()
 	}
 
 
-	rename_marker (marker);
+	edit_marker (marker, false);
 }
 
 void
-Editor::rename_marker(ArdourMarker *marker)
+Editor::edit_marker(ArdourMarker *marker, bool with_scene)
 {
 	Location* loc;
 	bool is_start;
@@ -1844,26 +1847,114 @@ Editor::rename_marker(ArdourMarker *marker)
 		return;
 	}
 
+	edit_location (*loc, with_scene, true);
+}
+
+bool
+Editor::edit_location (Location& loc, bool with_scene, bool with_command)
+{
 	ArdourWidgets::Prompter dialog (true);
 	string txt;
+	string verb;
+
+	if (!Profile->get_livetrax()) {
+		with_scene = false;
+	}
+
+	if (with_scene) {
+		verb = _("Edit");
+	} else {
+		verb = _("Rename");
+	}
 
 	dialog.set_prompt (_("New Name:"));
 
-	if (loc->is_section()) {
-		dialog.set_title (_("Rename Arrangement Section"));
-	} else if (loc->is_range()) {
-		dialog.set_title (_("Rename Range"));
+	if (loc.is_section()) {
+		dialog.set_title (string_compose (_("%1 Arrangement Section"), verb));
+	} else if (loc.is_range()) {
+		dialog.set_title (string_compose (_("%1 Range"), verb));
 	} else {
-		dialog.set_title (_("Rename Mark"));
+		dialog.set_title (string_compose (_("%1 Mark"), verb));
 	}
 
 	dialog.set_name ("MarkRenameWindow");
 	dialog.set_size_request (250, -1);
 	dialog.set_position (Gtk::WIN_POS_MOUSE);
 
-	dialog.add_button (_("Rename"), RESPONSE_ACCEPT);
+	dialog.add_button (verb, RESPONSE_ACCEPT);
 	dialog.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
-	dialog.set_initial_text (loc->name());
+	dialog.set_initial_text (loc.name());
+
+	Gtk::Adjustment* program_adjust (nullptr);
+	Gtk::Adjustment* bank_adjust (nullptr);
+	Gtk::Adjustment* channel_adjust (nullptr);
+	Gtk::CheckButton* use_scene_button (nullptr);
+
+	if (with_scene) {
+		program_adjust = new Gtk::Adjustment (1, 1, 128, 1, 10);
+		bank_adjust = new Gtk::Adjustment (1, 1, 128, 1, 10);
+		channel_adjust = new Gtk::Adjustment (1, 1, 16, 1, 4);
+		Gtk::SpinButton* program = manage (new Gtk::SpinButton (*program_adjust));
+		Gtk::SpinButton* bank = manage (new Gtk::SpinButton (*bank_adjust));
+		Gtk::SpinButton* channel = manage (new Gtk::SpinButton (*channel_adjust));
+		Gtk::Label* l1 = manage (new Gtk::Label (_("Program Number")));
+		Gtk::Label* l2 = manage (new Gtk::Label (_("Bank Number")));
+		Gtk::Label* l3 = manage (new Gtk::Label (_("Channel")));
+
+		std::shared_ptr<MIDISceneChange> msc = std::dynamic_pointer_cast<MIDISceneChange> (loc.scene_change());
+		if (msc) {
+			program_adjust->set_value (msc->program() + 1);
+			bank_adjust->set_value (msc->bank() + 1);
+			channel_adjust->set_value (msc->channel() + 1);
+		}
+
+		program_adjust->signal_value_changed().connect (sigc::bind (sigc::mem_fun (dialog, &Gtk::Dialog::set_response_sensitive), Gtk::RESPONSE_ACCEPT, true));
+		bank_adjust->signal_value_changed().connect (sigc::bind (sigc::mem_fun (dialog, &Gtk::Dialog::set_response_sensitive), Gtk::RESPONSE_ACCEPT, true));
+		channel_adjust->signal_value_changed().connect (sigc::bind (sigc::mem_fun (dialog, &Gtk::Dialog::set_response_sensitive), Gtk::RESPONSE_ACCEPT, true));
+
+		Gtk::Label* scene_title = manage (new Gtk::Label (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Scene Change"))));
+		scene_title->set_use_markup (true);
+
+		Gtk::HBox* b1 = manage (new Gtk::HBox);
+		b1->set_spacing (12);
+		b1->pack_start (*l1, true, true);
+		l1->set_alignment (1.0);
+		b1->pack_start (*program, true, false);
+
+		Gtk::HBox* b2 = manage (new Gtk::HBox);
+		b2->set_spacing (12);
+		b2->pack_start (*l2, true, true);
+		l2->set_alignment (1.0);
+		b2->pack_start (*bank, true, false);
+
+		Gtk::HBox* b3 = manage (new Gtk::HBox);
+		b3->set_spacing (12);
+		b3->pack_start (*l3, true, true);
+		l3->set_alignment (1.0);
+		b3->pack_start (*channel, true, false);
+
+		use_scene_button = manage (new Gtk::CheckButton (_("Clear scene change")));
+		if (!msc) {
+			use_scene_button->set_sensitive (false);
+		} else {
+			use_scene_button->signal_toggled().connect  (sigc::bind (sigc::mem_fun (dialog, &Gtk::Dialog::set_response_sensitive), Gtk::RESPONSE_ACCEPT, true));
+		}
+
+		Gtk::HBox* b4 = manage (new Gtk::HBox);
+		b4->pack_start (*use_scene_button, true, false);
+
+		Gtk::VBox* scene_box = manage (new Gtk::VBox);
+		scene_box->set_spacing (12);
+		scene_box->pack_start (*scene_title, false, false);
+		scene_box->pack_start (*b1, false, false);
+		scene_box->pack_start (*b2, false, false);
+		scene_box->pack_start (*b3, false, false);
+		scene_box->pack_start (*b4, true, true);
+
+		scene_box->show_all ();
+
+		dialog.get_vbox()->pack_end (*scene_box, false, false);
+	}
 
 	dialog.show ();
 
@@ -1871,19 +1962,50 @@ Editor::rename_marker(ArdourMarker *marker)
 	case RESPONSE_ACCEPT:
 		break;
 	default:
-		return;
+		return false;
 	}
 
-	begin_reversible_command ( _("rename marker") );
 	XMLNode &before = _session->locations()->get_state();
 
-	dialog.get_result(txt);
-	loc->set_name (txt);
+	if (with_command) {
+		begin_reversible_command (with_scene ? _("edit marker") : _("rename marker"));
+	}
+
+	dialog.get_result (txt);
+	loc.set_name (txt);
+
+	if (with_scene) {
+
+		if (use_scene_button->get_active()) {
+			loc.set_scene_change (nullptr);
+		} else {
+
+			int pc = program_adjust->get_value() - 1;
+			int b = bank_adjust->get_value() - 1;
+			int chn = channel_adjust->get_value() - 1;
+
+			std::shared_ptr<MIDISceneChange> msc = std::dynamic_pointer_cast<MIDISceneChange> (loc.scene_change ());
+			if (!msc) {
+				msc.reset (new MIDISceneChange (chn, b, pc));
+				loc.set_scene_change (msc);
+			}
+			msc->set_channel (chn);
+			msc->set_program (pc);
+			msc->set_bank (b);
+		}
+	}
+
 	_session->set_dirty ();
 
-	XMLNode &after = _session->locations()->get_state();
-	_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-	commit_reversible_command ();
+	if (with_command) {
+		XMLNode &after = _session->locations()->get_state();
+		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+		commit_reversible_command ();
+	} else {
+		delete &before;
+	}
+
+	return true;
 }
 
 void

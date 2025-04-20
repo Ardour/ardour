@@ -23,7 +23,7 @@
 #include "editing.h"
 #include "editing_context.h"
 
-class CueEditor : public EditingContext, public PBD::HistoryOwner, public sigc::trackable
+class CueEditor : public EditingContext, public PBD::HistoryOwner
 {
   public:
 	CueEditor (std::string const & name);

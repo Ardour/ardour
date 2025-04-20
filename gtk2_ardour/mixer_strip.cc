@@ -89,6 +89,7 @@
 #include "gui_thread.h"
 #include "route_group_menu.h"
 #include "meter_patterns.h"
+#include "rta_manager.h"
 #include "ui_config.h"
 #include "triggerbox_ui.h"
 
@@ -175,9 +176,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, std::shared_ptr<Route> rt, 
 
 	if (is_master () && !_route->comment().empty () && _session->config.get_show_master_bus_comment_on_load () && self_destruct) {
 		open_comment_editor ();
-		_comment_window->hide ();
-		_comment_window->set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
-		_comment_window->present ();
 		/* show only once */
 		_session->config.set_show_master_bus_comment_on_load (false);
 	}
@@ -426,6 +424,7 @@ MixerStrip::init ()
 
 	parameter_changed (X_("mixer-element-visibility"));
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MixerStrip::parameter_changed));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &MixerStrip::dpi_reset));
 	 Config->ParameterChanged.connect (_config_connection, invalidator (*this), std::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 	 _session->config.ParameterChanged.connect (_config_connection, invalidator (*this), std::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 
@@ -451,17 +450,19 @@ MixerStrip::~MixerStrip ()
 void
 MixerStrip::vca_assign (std::shared_ptr<ARDOUR::VCA> vca)
 {
-	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> ( route() );
-	if (sl)
+	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> (route());
+	if (sl) {
 		sl->assign(vca);
+	}
 }
 
 void
 MixerStrip::vca_unassign (std::shared_ptr<ARDOUR::VCA> vca)
 {
-	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> ( route() );
-	if (sl)
+	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> (route());
+	if (sl) {
 		sl->unassign(vca);
+	}
 }
 
 bool
@@ -476,7 +477,7 @@ bool
 MixerStrip::mixer_strip_leave_event (GdkEventCrossing *ev)
 {
 	//if we have moved outside our strip, but not into a child view, then deselect ourselves
-	if ( !(ev->detail == GDK_NOTIFY_INFERIOR) ) {
+	if (ev->detail != GDK_NOTIFY_INFERIOR) {
 		_entered_mixer_strip= 0;
 
 		//clear keyboard focus in the gain display.  this is cheesy but fixes a longstanding "bug" where the user starts typing in the gain entry, and leaves it active, thereby prohibiting other keybindings from working
@@ -527,13 +528,16 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 		rec_mon_table.remove (*rec_enable_button);
 	}
 	if (monitor_input_button->get_parent()) {
-		rec_mon_table.remove (*monitor_input_button);
+		monitor_input_button->get_parent()->remove (*monitor_input_button);
 	}
 	if (monitor_disk_button->get_parent()) {
-		rec_mon_table.remove (*monitor_disk_button);
+		monitor_disk_button->get_parent()->remove (*monitor_disk_button);
 	}
 	if (group_button.get_parent()) {
 		bottom_button_table.remove (group_button);
+	}
+	if (rta_button->get_parent()) {
+		rta_button->get_parent()->remove (*rta_button);
 	}
 
 	RouteUI::set_route (rt);
@@ -624,8 +628,12 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 
 		_loudess_analysis_button->show ();
 		_volume_controller->show ();
+		if (Config->get_use_master_volume ()) {
+			master_volume_table.show ();
+		}
 #ifdef MIXBUS
 	} else if (!route()->is_master()) {
+		/* mixbus has/had a show_all, empty table still adds some pixel padding */
 		master_volume_table.hide ();
 #endif
 	}
@@ -724,7 +732,6 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 	/* now force an update of all the various elements */
 
 	name_changed ();
-	comment_changed ();
 	route_group_changed ();
 	update_track_number_visibility ();
 
@@ -786,6 +793,12 @@ MixerStrip::set_stuff_from_route ()
 	if (get_gui_property ("strip-width", width)) {
 		set_width_enum (width, this);
 	}
+}
+
+void
+MixerStrip::dpi_reset ()
+{
+	set_width_enum (_width, _width_owner);
 }
 
 void
@@ -1033,7 +1046,8 @@ MixerStrip::route_color_changed ()
 {
 	using namespace ARDOUR_UI_UTILS;
 	name_button.modify_bg (STATE_NORMAL, color());
-	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
+	Gtkmm2ext::Color c (gdk_color_to_rgba (color()));
+	number_label.set_fixed_colors (c, c);
 	reset_strip_style ();
 }
 
@@ -1125,6 +1139,23 @@ MixerStrip::build_route_ops_menu ()
 		denormal_menu_item = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 		denormal_menu_item->set_active (_route->denormal_protection());
 	}
+
+#ifndef NDEBUG
+	if (active && !is_singleton ()) {
+		items.push_back (CheckMenuElem (_("RTA")));
+		Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+		bool attached = RTAManager::instance ()->attached (_route);
+		i->set_active (attached);
+		i->signal_activate().connect ([this, attached]() {
+				if (attached) {
+					RTAManager::instance ()->remove (_route);
+				} else {
+					RTAManager::instance ()->attach (_route);
+					ARDOUR_UI::instance()->show_realtime_analyzer ();
+				}
+			});
+	}
+#endif
 
 	/* Disk I/O */
 

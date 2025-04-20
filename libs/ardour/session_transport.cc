@@ -1617,6 +1617,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished, bool will_
 		}
 	}
 
+	if (!abort && did_record) {
+		RecordPassCompleted (); /* EMIT SIGNAL */
+	}
+
 	/* save the current state of things if appropriate */
 
 	if (did_record && !saved) {

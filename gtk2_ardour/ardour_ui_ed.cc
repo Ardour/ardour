@@ -76,6 +76,8 @@
 #include "location_ui.h"
 #include "main_clock.h"
 #include "rc_option_editor.h"
+#include "rta_manager.h"
+#include "rta_window.h"
 #include "virtual_keyboard_window.h"
 
 #include <gtkmm2ext/application.h>
@@ -788,6 +790,20 @@ ARDOUR_UI::install_dependent_actions ()
 }
 
 void
+ARDOUR_UI::setup_action_tooltips ()
+{
+	ActionManager::get_action ("Transport", "TogglePunchIn")->set_tooltip (_("Start recording at auto-punch start"));
+	ActionManager::get_action ("Transport", "TogglePunchOut")->set_tooltip (_("Stop recording at auto-punch end"));
+	ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_tooltip (_("Return to last playback start when stopped"));
+	ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_tooltip (_("Playhead follows Range tool clicks, and Range selections"));
+
+	ActionManager::get_action (X_("Main"), X_("cancel-solo"))->set_tooltip (_("When active, something is soloed.\nClick to de-solo everything"));
+	ActionManager::get_action (X_("Monitor Section"), X_("monitor-dim-all"))->set_tooltip (_("Monitor section dim output"));
+	ActionManager::get_action (X_("Monitor Section"), X_("monitor-mono"))->set_tooltip (_("Monitor section mono output"));
+	ActionManager::get_action (X_("Monitor Section"), X_("monitor-cut-all"))->set_tooltip (_("Monitor section mute output"));
+}
+
+void
 ARDOUR_UI::build_menu_bar ()
 {
 	menu_bar = dynamic_cast<MenuBar*> (ActionManager::get_widget (X_("/Main")));
@@ -1033,11 +1049,15 @@ ARDOUR_UI::save_ardour_state ()
 		if (location_ui) {
 			_session->add_instant_xml (location_ui->ui().get_state ());
 		}
+		if (rtawindow) {
+			_session->add_instant_xml (rtawindow->get_state ());
+		}
 		if (virtual_keyboard_window) {
 			XMLNode& vkstate (virtual_keyboard_window->get_state());
 			vkstate.add_child_nocopy (virtual_keyboard_window.get_state ());
 			_session->add_instant_xml (vkstate);
 		}
+		_session->add_instant_xml (RTAManager::instance()->get_state());
 	}
 
 	/* save current Window settings and sizes for new sessions */
@@ -1053,11 +1073,15 @@ ARDOUR_UI::save_ardour_state ()
 		if (location_ui) {
 			Config->add_instant_xml (location_ui->ui().get_state ());
 		}
+		if (rtawindow) {
+			Config->add_instant_xml (rtawindow->get_state ());
+		}
 		if (virtual_keyboard_window) {
 			XMLNode& vkstate (virtual_keyboard_window->get_state());
 			vkstate.add_child_nocopy (virtual_keyboard_window.get_state ());
 			Config->add_instant_xml (vkstate);
 		}
+		Config->add_instant_xml (RTAManager::instance()->get_state());
 	}
 
 	delete &enode;

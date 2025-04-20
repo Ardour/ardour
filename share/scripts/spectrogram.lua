@@ -298,7 +298,7 @@ function render_inline (ctx, w, max_h)
 
 			if b1 >= b0 and b1 <= bins and b0 >= 0 then
 				for i = b0, b1 do
-					local level = gaindb + fft:power_at_bin (i, pink and i or 1) -- pink ? i : 1
+					local level = gaindb + fft:power_at_bin (i, 1, pink)
 					if level > -dbrange then
 						local p = (dbrange + level) / dbrange
 						if p > pk then pk = p; end

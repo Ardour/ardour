@@ -389,7 +389,7 @@ public:
 	/** Convert a timestamp in absolute time to beats measured from source start*/
 	Temporal::Beats absolute_time_to_source_beats(Temporal::timepos_t const &) const;
 
-	Temporal::Beats absolute_time_to_region_beats (Temporal::timepos_t const &) const;
+	Temporal::Beats absolute_time_to_soucre_beats (Temporal::timepos_t const &) const;
 
 	Temporal::timepos_t absolute_time_to_region_time (Temporal::timepos_t const &) const;
 
@@ -573,10 +573,11 @@ protected:
 	virtual void send_change (const PBD::PropertyChange&);
 	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 	virtual void set_position_internal (timepos_t const & pos);
-	virtual void set_length_internal (timecnt_t const &);
+	void set_length_internal (timecnt_t const &);
 	virtual void set_start_internal (timepos_t const &);
 	bool verify_start_and_length (timepos_t const &, timecnt_t&);
 	void first_edit ();
+	virtual void ensure_length_sanity () {}
 
 	void override_opaqueness (bool yn) {
 		_opaque = yn;

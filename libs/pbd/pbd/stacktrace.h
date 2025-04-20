@@ -38,6 +38,8 @@
 #include "pbd/libpbd_visibility.h"
 
 
+extern "C" { void libpbd_c_stacktrace (int levels); }
+
 namespace PBD {
 
 	LIBPBD_API void stacktrace (std::ostream& out, int levels = 0, size_t start_level = 0);

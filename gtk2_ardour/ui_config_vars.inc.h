@@ -107,7 +107,6 @@ UI_CONFIG_VARIABLE (bool, show_toolbar_monitor_info, "show-toolbar-monitor-info"
 UI_CONFIG_VARIABLE (bool, show_mini_timeline, "show-mini-timeline", true)
 UI_CONFIG_VARIABLE (bool, show_secondary_clock, "show-secondary-clock", true)
 UI_CONFIG_VARIABLE (double, waveform_clip_level, "waveform-clip-level", -0.0933967) /* units of dB */
-UI_CONFIG_VARIABLE (bool, no_new_session_dialog, "no-new-session-dialog", false)
 UI_CONFIG_VARIABLE (bool, buggy_gradients, "buggy-gradients", false)
 UI_CONFIG_VARIABLE (bool, cairo_image_surface, "cairo-image-surface", false)
 UI_CONFIG_VARIABLE (ARDOUR::AppleNSGLViewMode, nsgl_view_mode, "nsgl-view-mode", NSGLHiRes)

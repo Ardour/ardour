@@ -86,11 +86,11 @@ using namespace Temporal;
  *  This will not be deleted by EditorAutomationLine.
  */
 AutomationLine::AutomationLine (const string&                   name,
-                                        EditingContext&                 ec,
-                                        ArdourCanvas::Item&             parent,
-                                        ArdourCanvas::Rectangle*        drag_base,
-                                        std::shared_ptr<AutomationList> al,
-                                        const ParameterDescriptor&      desc)
+                                EditingContext&                 ec,
+                                ArdourCanvas::Item&             parent,
+                                ArdourCanvas::Rectangle*        drag_base,
+                                std::shared_ptr<AutomationList> al,
+                                const ParameterDescriptor&      desc)
 	:_name (name)
 	, _height (0)
 	, _line_color_name ("automation line")
@@ -112,6 +112,7 @@ AutomationLine::AutomationLine (const string&                   name,
 	, _desc (desc)
 	, _control_points_inherit_color (true)
 	, _sensitive (true)
+	, atv (nullptr)
 {
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple(0, 1.5));
 	CANVAS_DEBUG_NAME (group, "automation line group");
@@ -1628,8 +1629,9 @@ AutomationLine::add (std::shared_ptr<AutomationControl> control, GdkEvent* event
 	if (alist->editor_add (when, y, with_guard_points)) {
 
 		if (control->automation_state () == ARDOUR::Off) {
-#warning paul make this work again .. call back to ATV or similar
-			// set_automation_state (ARDOUR::Play);
+			if (atv) {
+				atv->set_automation_state (ARDOUR::Play);
+			}
 		}
 
 		if (UIConfiguration::instance().get_automation_edit_cancels_auto_hide () && control == session->recently_touched_controllable ()) {
@@ -1646,4 +1648,10 @@ AutomationLine::add (std::shared_ptr<AutomationControl> control, GdkEvent* event
 		_editing_context.commit_reversible_command ();
 		session->set_dirty ();
 	}
+}
+
+void
+AutomationLine::set_atv (AutomationTimeAxisView& a)
+{
+	atv = &a;
 }

@@ -288,7 +288,7 @@ EditorSections::selection_changed ()
 			   we cannot use get_mouse_mode_action() here
 			*/
 			std::cerr << "A\n";
-			tact = ActionManager::get_toggle_action (X_("Editing"), "set-mouse-mode-object-range");
+			tact = ActionManager::get_toggle_action (X_("Editor"), "set-mouse-mode-object-range");
 			if (!tact) {
 				/* missing action */
 				fatal << X_("programming error: missing mouse-mode-object-range action") << endmsg;
@@ -302,7 +302,7 @@ EditorSections::selection_changed ()
 			/*fallthrough*/
 		default:
 			std::cerr << "B\n";
-			Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (X_("Editing"), X_("set-mouse-mode-range"));
+			Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (X_("Editor"), X_("set-mouse-mode-range"));
 			if (!ract) {
 				/* missing action */
 				fatal << X_("programming error: missing mouse-mode-range action") << endmsg;

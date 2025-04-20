@@ -48,6 +48,8 @@ public:
 	void unset_bg ();
 	void unset_fg ();
 
+	void update_min_size (int span, int girth);
+
 protected:
 	void on_size_request (GtkRequisition*);
 	void on_size_allocate (Gtk::Allocation& alloc);

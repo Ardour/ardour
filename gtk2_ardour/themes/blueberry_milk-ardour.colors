@@ -172,6 +172,7 @@
     <ColorAlias name="gtk_processor_postfader_frame" alias="widget:green"/>
     <ColorAlias name="gtk_processor_prefader" alias="widget:ruddy"/>
     <ColorAlias name="gtk_processor_prefader_frame" alias="widget:ruddy"/>
+    <ColorAlias name="gtk_scrollbar_slider" alias="neutral:midground"/>
     <ColorAlias name="gtk_send_bg" alias="theme:bg1"/>
     <ColorAlias name="gtk_send_fg" alias="widget:blue"/>
     <ColorAlias name="gtk_solo" alias="alert:green"/>
@@ -378,6 +379,8 @@
     <ColorAlias name="route button: fill active" alias="theme:bg2"/>
     <ColorAlias name="route button: led active" alias="alert:green"/>
     <ColorAlias name="route rec button: led active" alias="alert:red"/>
+    <ColorAlias name="rta freeze button: fill" alias="widget:bg"/>
+    <ColorAlias name="rta freeze button: fill active" alias="alert:yellow"/>
     <ColorAlias name="rubber band rect" alias="neutral:foreground2"/>
     <ColorAlias name="rude audition: fill" alias="widget:bg"/>
     <ColorAlias name="rude audition: fill active" alias="alert:ruddy"/>

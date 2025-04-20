@@ -482,6 +482,7 @@ Sequence<Time>::Sequence(const TypeMap& type_map)
 	, _end_iter(*this, std::numeric_limits<Time>::max(), false, std::set<Evoral::Parameter> ())
 	, _lowest_note(127)
 	, _highest_note(0)
+	, _channels_present (0)
 	, _explicit_duration (false)
 {
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("Sequence constructed: %1\n", this));
@@ -504,6 +505,7 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
 	, _end_iter(*this, std::numeric_limits<Time>::max(), false, std::set<Evoral::Parameter> ())
 	, _lowest_note(other._lowest_note)
 	, _highest_note(other._highest_note)
+	, _channels_present (0)
 	, _duration (other._duration)
 	, _explicit_duration (other._explicit_duration)
 {
@@ -721,10 +723,14 @@ Sequence<Time>::add_note_unlocked(const NotePtr note, void* arg)
 		note->set_id (Evoral::next_event_id());
 	}
 
-	if (note->note() < _lowest_note)
+	if (note->note() < _lowest_note) {
 		_lowest_note = note->note();
-	if (note->note() > _highest_note)
+	}
+	if (note->note() > _highest_note) {
 		_highest_note = note->note();
+	}
+
+	_channels_present = _channels_present | (1 << note->channel());
 
 	_notes.insert (note);
 	_pitches[note->channel()].insert (note);
@@ -765,12 +771,21 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 
 				_lowest_note = 127;
 				_highest_note = 0;
+				_channels_present = 0;
 
-				for (typename Sequence<Time>::Notes::iterator ii = _notes.begin(); ii != _notes.end(); ++ii) {
-					if ((*ii)->note() < _lowest_note)
-						_lowest_note = (*ii)->note();
-					if ((*ii)->note() > _highest_note)
-						_highest_note = (*ii)->note();
+				for (auto const & nt : _notes) {
+					if (nt->note() < _lowest_note) {
+						_lowest_note = nt->note();
+					}
+					if (nt->note() > _highest_note) {
+						_highest_note = nt->note();
+					}
+					_channels_present = _channels_present | (1 << nt->channel());
+				}
+			} else {
+				_channels_present = 0;
+				for (auto const & nt : _notes) {
+					_channels_present = _channels_present | (1 << nt->channel());
 				}
 			}
 
@@ -805,12 +820,21 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 
 					_lowest_note = 127;
 					_highest_note = 0;
+					_channels_present = 0;
 
-					for (typename Sequence<Time>::Notes::iterator ii = _notes.begin(); ii != _notes.end(); ++ii) {
-						if ((*ii)->note() < _lowest_note)
-							_lowest_note = (*ii)->note();
-						if ((*ii)->note() > _highest_note)
-							_highest_note = (*ii)->note();
+					for (auto const & nt : _notes) {
+						if (nt->note() < _lowest_note) {
+							_lowest_note = nt->note();
+						}
+						if (nt->note() > _highest_note) {
+							_highest_note = nt->note();
+						}
+						_channels_present = _channels_present | (1 << nt->channel());
+					}
+				} else {
+					_channels_present = 0;
+					for (auto const & nt : _notes) {
+						_channels_present = _channels_present | (1 << nt->channel());
 					}
 				}
 
@@ -1422,6 +1446,26 @@ void
 Sequence<Time>::control_list_marked_dirty ()
 {
 	set_edited (true);
+}
+
+template<typename Time>
+void
+Sequence<Time>::shift (Time const & d)
+{
+	WriteLock rl (write_lock());
+
+	for (auto & n : _notes) {
+		n->set_time (n->time() + d);
+	}
+	for (auto & s : _sysexes) {
+		s->set_time (s->time() + d);
+	}
+	for (auto & p : _patch_changes) {
+		p->set_time (p->time() + d);
+	}
+	for (auto & [param,ctl] : _controls) {
+		ctl->list()->simple_shift (Temporal::timepos_t (d));
+	}
 }
 
 template<typename Time>

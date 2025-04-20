@@ -192,7 +192,6 @@ public:
 	}
 	virtual void add_location_mark_with_flag (Temporal::timepos_t const & where, ARDOUR::Location::Flags, int32_t cue_id) = 0;
 	virtual void remove_tracks () = 0;
-	virtual void set_loop_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd) = 0;
 	virtual void set_punch_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd) = 0;
 
 	void jump_forward_to_mark () {
@@ -319,7 +318,7 @@ public:
 	virtual void toggle_xjadeo_viewoption (int, int) = 0;
 	virtual void set_xjadeo_sensitive (bool onoff) = 0;
 	virtual int  get_videotl_bar_height () const = 0;
-	virtual void set_video_timeline_height (const int h) = 0;
+	virtual void set_video_timeline_height (const int h, bool force = false) = 0;
 	virtual void embed_audio_from_video (std::string, samplepos_t n = 0, bool lock_position_to_video = true) = 0;
 
 	virtual void trigger_script_by_name (const std::string script_name, const std::string args = "") = 0;

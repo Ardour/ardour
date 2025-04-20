@@ -20,23 +20,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pianoroll.h"
 #include "pianoroll_background.h"
 #include "midi_view.h"
 
-CueMidiBackground::CueMidiBackground (ArdourCanvas::Item* parent)
+PianorollMidiBackground::PianorollMidiBackground (ArdourCanvas::Item* parent, Pianoroll& pr)
 	: MidiViewBackground (parent)
 	, view (nullptr)
+	, pianoroll (pr)
 	, _width (0.)
 	, _height (0.)
 {
 }
 
-CueMidiBackground::~CueMidiBackground ()
+PianorollMidiBackground::~PianorollMidiBackground ()
 {
 }
 
 void
-CueMidiBackground::set_size (double w, double h)
+PianorollMidiBackground::set_size (double w, double h)
 {
 	_width = w;
 	_height = h;
@@ -47,47 +49,47 @@ CueMidiBackground::set_size (double w, double h)
 }
 
 double
-CueMidiBackground::contents_height() const
+PianorollMidiBackground::contents_height() const
 {
 	return _height;
 }
 
 double
-CueMidiBackground::height() const
+PianorollMidiBackground::height() const
 {
 	return _height;
 }
 
 double
-CueMidiBackground::width() const
+PianorollMidiBackground::width() const
 {
 	return _width;
 }
 
 uint8_t
-CueMidiBackground::get_preferred_midi_channel () const
+PianorollMidiBackground::get_preferred_midi_channel () const
 {
-	return 0;
+	return pianoroll.visible_channel ();
 }
 
 void
-CueMidiBackground::set_note_highlight (bool yn)
-{
-}
-
-void
-CueMidiBackground::record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t)
+PianorollMidiBackground::set_note_highlight (bool yn)
 {
 }
 
 void
-CueMidiBackground::set_view (MidiView* mv)
+PianorollMidiBackground::record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t)
+{
+}
+
+void
+PianorollMidiBackground::set_view (MidiView* mv)
 {
 	view = mv;
 }
 
 void
-CueMidiBackground::apply_note_range_to_children ()
+PianorollMidiBackground::apply_note_range_to_children ()
 {
 	if (view) {
 		view->apply_note_range (lowest_note(), highest_note());

@@ -148,7 +148,7 @@ SelectionPropertiesBox::selection_changed ()
 
 	bool show_route_properties = false;
 	if (!selection.tracks.empty ()) {
-		TimeAxisView *tav = selection.tracks.front ();
+		TimeAxisView *tav = selection.tracks.back (); //the LAST selected stripable is the clicked one. see selection.cc line ~92
 		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(tav);
 		if (rtav) {
 			_route_prop_box->set_route (rtav->route());
@@ -180,6 +180,7 @@ SelectionPropertiesBox::selection_changed ()
 
 			_region_fx_box = new RegionFxPropertiesBox (rv->region ());
 			_region_editor_box.pack_start (*_region_fx_box);
+			_region_editor_box.show ();
 			rv->RegionViewGoingAway.connect_same_thread (_region_connection, std::bind (&SelectionPropertiesBox::delete_region_editor, this));
 		}
 		_region_editor_box.show ();

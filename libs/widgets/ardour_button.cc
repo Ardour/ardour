@@ -27,6 +27,7 @@
 #include "pbd/compose.h"
 #include "pbd/controllable.h"
 #include "pbd/error.h"
+#include "pbd/unwind.h"
 
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -92,6 +93,7 @@ ArdourButton::ArdourButton (Element e, bool toggle)
 	, _led_left (false)
 	, _distinct_led_click (false)
 	, _hovering (false)
+	, _touching (false)
 	, _focused (false)
 	, _fixed_colors_set (false)
 	, _fallthrough_to_parent (false)
@@ -142,6 +144,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e, bool toggle)
 	, _led_left (false)
 	, _distinct_led_click (false)
 	, _hovering (false)
+	, _touching (false)
 	, _focused (false)
 	, _fixed_colors_set (false)
 	, _fallthrough_to_parent (false)
@@ -691,12 +694,10 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	req->width = req->height = 0;
 	CairoWidget::on_size_request (req);
 
-	if (_diameter == 0) {
-		const float newdia = rintf (11.f * UIConfigurationBase::instance().get_ui_scale());
-		if (_diameter != newdia) {
-			_pattern_height = 0;
-			_diameter = newdia;
-		}
+	const float newdia = rintf (11.f * UIConfigurationBase::instance().get_ui_scale());
+	if (_diameter != newdia) {
+		_pattern_height = 0;
+		_diameter = newdia;
 	}
 
 	if (_elements & Text) {
@@ -991,7 +992,8 @@ ArdourButton::on_touch_begin_event (GdkEventTouch *ev)
 	bev.state   = 0;
 	bev.axes    = NULL;
 	bev.device  = NULL;
-	_hovering   = true;
+	_touching = true;
+	PBD::Unwinder<bool> uw (_hovering, true);
 	return event ((GdkEvent*)&bev);
 }
 
@@ -1013,8 +1015,8 @@ ArdourButton::on_touch_end_event (GdkEventTouch *ev)
 	bev.state   = 0;
 	bev.axes    = NULL;
 	bev.device  = NULL;
-
-	_hovering   = false;
+	PBD::Unwinder<bool> uw (_hovering, _touching);
+	_touching = false;
 	return event ((GdkEvent*)&bev);
 }
 
@@ -1080,10 +1082,10 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 		return true;
 	}
 
-	_grabbed = false;
 	CairoWidget::set_dirty ();
 
-	if (ev->button == 1 && _hovering) {
+	if (ev->button == 1 && _hovering && _grabbed) {
+		_grabbed = false;
 		if (_act_on_release && _auto_toggle && !_action) {
 			set_active (!get_active ());
 		}
@@ -1095,6 +1097,8 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 			}
 		}
 	}
+
+	_grabbed = false;
 
 	return _fallthrough_to_parent ? false : true;
 }

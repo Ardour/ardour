@@ -117,6 +117,7 @@
 #include "rc_option_editor.h"
 #include "route_dialogs.h"
 #include "route_params_ui.h"
+#include "rta_window.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
 #include "transport_masters_dialog.h"
@@ -144,6 +145,7 @@ class IdleOMeter;
 class IOPluginWindow;
 class PluginDSPLoadWindow;
 class PluginManagerUI;
+class RTAWindow;
 class DspStatisticsWindow;
 class TransportMastersWindow;
 class VirtualKeyboardWindow;
@@ -285,6 +287,8 @@ public:
 	void toggle_mixer_space();
 	void toggle_keep_tearoffs();
 	void show_plugin_manager();
+	void show_lua_window();
+	void show_realtime_analyzer();
 
 	void reset_focus (Gtk::Widget*);
 
@@ -294,6 +298,7 @@ public:
 	 *  (either RapidScreenUpdate || SuperRapidScreenUpdate - user-config)
 	 */
 	static sigc::signal<void, Temporal::timepos_t> Clock;
+	static unsigned int clock_signal_interval ();
 
 	static void close_all_dialogs () { CloseAllDialogs(); }
 	static sigc::signal<void> CloseAllDialogs;
@@ -640,6 +645,7 @@ private:
 	void set_session (ARDOUR::Session *);
 	void connect_dependents_to_session (ARDOUR::Session *);
 	void we_have_dependents ();
+	void setup_action_tooltips ();
 
 	void setup_session_options ();
 
@@ -699,6 +705,7 @@ private:
 	WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
 	WM::ProxyWithConstructor<KeyEditor> key_editor;
 	WM::ProxyWithConstructor<LuaWindow> luawindow;
+	WM::ProxyWithConstructor<RTAWindow> rtawindow;
 
 	/* creator methods */
 
@@ -712,6 +719,7 @@ private:
 	GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
 	KeyEditor*              create_key_editor ();
 	LuaWindow*              create_luawindow ();
+	RTAWindow*              create_rtawindow ();
 
 	ARDOUR::SystemExec *video_server_process;
 
@@ -843,7 +851,7 @@ private:
 	ArdourWidgets::ArdourButton recorder_visibility_button;
 	ArdourWidgets::ArdourButton trigger_page_visibility_button;
 
-	bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::Bindings*);
+	bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::BindingSet*);
 	bool try_gtk_accel_binding (GtkWindow* win, GdkEventKey* ev, bool translate, GdkModifierType modifier);
 
 	bool main_window_delete_event (GdkEventAny*);

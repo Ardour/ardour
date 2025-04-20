@@ -281,6 +281,7 @@ private:
 	void route_property_changed (const PBD::PropertyChange&);
 	void name_button_resized (Gtk::Allocation&);
 	void name_changed ();
+	void dpi_reset ();
 	void update_speed_display ();
 	void map_frozen ();
 	void hide_processor_editor (std::weak_ptr<ARDOUR::Processor> processor);

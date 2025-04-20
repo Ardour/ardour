@@ -841,7 +841,23 @@ SMFSource::load_model_unlocked (bool force_reload)
 	   the final true event.
 	*/
 
-	_length = file_duration();
+	Temporal::Beats fd = file_duration();
+
+	if (duration_is_explicit()) {
+		/* SMF provides an explicit duration that differs from the data
+		   duration, use it
+		*/
+		_length = fd;
+	} else {
+		bool ignored;
+		std::shared_ptr<Temporal::TempoMap> tmap = tempo_map (ignored);
+		Temporal::BBT_Time bbt (tmap->bbt_at (fd));
+		std::cerr << "SMF file duration " << fd << " = " << bbt << ' ';
+		bbt = tmap->round_up_to_bar (Temporal::BBT_Argument (bbt));
+		_length = tmap->quarters_at (Temporal::BBT_Argument (bbt));
+		std::cerr << " rounded up to bar " << bbt << " aka " << _length.beats() << std::endl;
+	}
+
 	_model->set_duration (_length.beats());
 
 	// cerr << "----SMF-SRC-----\n";

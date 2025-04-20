@@ -60,7 +60,7 @@ class PianorollMidiView : public MidiView
 	void ghost_add_note (NoteBase*);
 	void ghost_sync_selection (NoteBase*);
 
-	void update_automation_display (Evoral::Parameter const & param, ARDOUR::SelectionOperation);
+	void toggle_visibility (Evoral::Parameter const & param);
 	void swap_automation_channel (int);
 	void set_active_automation (Evoral::Parameter const &);
 	bool is_active_automation (Evoral::Parameter const &) const;
@@ -86,10 +86,15 @@ class PianorollMidiView : public MidiView
 
 	sigc::signal<void> AutomationStateChange;
 
+	void set_overlay_text (std::string const &);
+	void hide_overlay_text ();
+	void show_overlay_text ();
+
   protected:
 	bool scroll (GdkEventScroll* ev);
 
 	ArdourCanvas::Rectangle* automation_group;
+	ArdourCanvas::Text* overlay_text;
 
 	typedef std::shared_ptr<PianorollAutomationLine>  CueAutomationLine;
 	typedef std::shared_ptr<ARDOUR::AutomationControl>  CueAutomationControl;
@@ -110,6 +115,7 @@ class PianorollMidiView : public MidiView
 
 		void hide ();
 		void show ();
+		void set_sensitive (bool);
 		void set_height (double);
 	};
 
@@ -128,11 +134,13 @@ class PianorollMidiView : public MidiView
 
 	double _height;
 
-	bool internal_set_active_automation (Evoral::Parameter const &);
+	AutomationDisplayState* find_or_create_automation_display_state (Evoral::Parameter const &);
+	void internal_set_active_automation (AutomationDisplayState&);
 	void unset_active_automation ();
 
 	bool midi_canvas_group_event (GdkEvent*);
 	Gtkmm2ext::Color line_color_for (Evoral::Parameter const &);
 
 	void reset_width_dependent_items (double pixel_width);
+	bool have_visible_automation () const;
 };

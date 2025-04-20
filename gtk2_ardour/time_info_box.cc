@@ -315,7 +315,7 @@ TimeInfoBox::selection_changed ()
 
 	case Editing::MouseRange:
 		if (selection.time.empty()) {
-			Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editing"), "set-mouse-mode-object-range");
+			Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), "set-mouse-mode-object-range");
 
 			if (tact->get_active() &&  !selection.regions.empty()) {
 				/* show selected regions */

@@ -73,12 +73,26 @@ BaseUI::RequestType Gtkmm2ext::AddTimeout = BaseUI::new_request_type();
 
 template class AbstractUI<Gtkmm2ext::UIRequest>;
 
+#ifndef NDEBUG
+static int debug_call_slot = -1;
+#endif
+
 UI::UI (string application_name, string thread_name, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (thread_name)
 	, _receiver (*this)
 	, global_bindings (0)
 	, errors (0)
 {
+#ifndef NDEBUG
+	/* one time initialization of this to reduce run time cost in debug builds */
+	if (debug_call_slot < 0) {
+		if (g_getenv ("DEBUG_THREADED_SIGNALS")) {
+			debug_call_slot = 1;
+		} else {
+			debug_call_slot = 0;
+		}
+	}
+#endif
 	theMain = new Main (argc, argv);
 
 	char buf[18];
@@ -387,17 +401,25 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 	if (action) {
 		/* get_bindings_from_widget_hierarchy */
 		Widget* ww = w;
-		Bindings* bindings = NULL;
+		BindingSet* binding_set = nullptr;
 		do {
-			bindings = (Bindings*) ww->get_data ("ardour-bindings");
-			if (bindings) {
+			binding_set = (BindingSet*) ww->get_data (ARDOUR_BINDING_KEY);
+			if (binding_set) {
 				break;
 			}
 			ww = ww->get_parent ();
 		} while (ww);
 
-		if (!bindings) {
+		Bindings* bindings;
+
+		if (!binding_set) {
 			bindings = global_bindings;
+		} else {
+			/* Use only the first bindings for the widget when
+			   looking up keys.
+			*/
+			assert (!binding_set->empty());
+			bindings = binding_set->front ();
 		}
 
 		if (bindings) {
@@ -471,7 +493,7 @@ UI::do_request (UIRequest* req)
 
 	} else if (req->type == CallSlot) {
 #ifndef NDEBUG
-		if (getenv ("DEBUG_THREADED_SIGNALS")) {
+		if (debug_call_slot) {
 			cerr << "call slot for " << event_loop_name() << endl;
 		}
 #endif

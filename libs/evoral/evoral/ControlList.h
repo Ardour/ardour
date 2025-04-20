@@ -141,6 +141,7 @@ public:
 	bool extend_to (Temporal::timepos_t const & );
 	void slide (iterator before, Temporal::timecnt_t const &  distance);
 	void shift (Temporal::timepos_t const & before, Temporal::timecnt_t const & distance);
+	void simple_shift (Temporal::timepos_t const & distance);
 
 	void y_transform (std::function<double(double)> callback);
 	void list_merge (ControlList const& other, std::function<double(double, double)> callback);

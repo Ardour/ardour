@@ -31,6 +31,7 @@
 
 #include "ardour/delivery.h"
 #include "ardour/disk_io.h"
+#include "ardour/dsp_filter.h"
 #include "ardour/export_channel.h"
 #include "ardour/export_filename.h"
 #include "ardour/export_format_base.h"
@@ -167,6 +168,8 @@ setup_enum_writer ()
 	FollowAction::Type _FollowAction;
 	Trigger::StretchMode _TriggerStretchMode;
 	CueBehavior _CueBehavior;
+	DSP::PerceptualAnalyzer::Speed _DSPAnalyzerSpeed;
+	DSP::PerceptualAnalyzer::Warp _DSPAnalyzerWarp;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -948,6 +951,18 @@ setup_enum_writer ()
 	REGISTER_ENUM (FollowCues);
 	REGISTER_ENUM (ImplicitlyIgnoreCues);
 	REGISTER_BITS (_CueBehavior);
+
+	REGISTER_CLASS_ENUM (DSP::PerceptualAnalyzer, Rapid);
+	REGISTER_CLASS_ENUM (DSP::PerceptualAnalyzer, Fast);
+	REGISTER_CLASS_ENUM (DSP::PerceptualAnalyzer, Moderate);
+	REGISTER_CLASS_ENUM (DSP::PerceptualAnalyzer, Slow);
+	REGISTER_CLASS_ENUM (DSP::PerceptualAnalyzer, Noise);
+	REGISTER (_DSPAnalyzerSpeed);
+
+	REGISTER_CLASS_ENUM (DSP::PerceptualAnalyzer, Bark);
+	REGISTER_CLASS_ENUM (DSP::PerceptualAnalyzer, Medium);
+	REGISTER_CLASS_ENUM (DSP::PerceptualAnalyzer, High);
+	REGISTER (_DSPAnalyzerWarp);
 }
 
 } /* namespace ARDOUR */

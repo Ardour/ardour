@@ -432,6 +432,9 @@ public:
 
 	PBD::Signal<void()> UpdateRouteRecordState; /* signals potential change in route recording arming */
 
+	PBD::Signal<void()> RecordPassCompleted;
+	PBD::Signal<void()> ClearedLastCaptureSources;
+
 	/* Emited when session is loaded */
 	PBD::Signal<void()> SessionLoaded;
 
@@ -871,7 +874,9 @@ public:
 	int destroy_sources (std::list<std::shared_ptr<Source> > const&);
 
 	int remove_last_capture ();
-	void get_last_capture_sources (std::list<std::shared_ptr<Source> >&);
+	bool have_last_capture_sources () const;
+	void last_capture_sources (std::list<std::shared_ptr<Source> >&) const;
+	void reset_last_capture_sources ();
 
 	/** handlers should return -1 for "stop cleanup",
 	    0 for "yes, delete this playlist",

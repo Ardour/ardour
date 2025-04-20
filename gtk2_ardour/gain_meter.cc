@@ -111,6 +111,8 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	, _data_type (DataType::AUDIO)
 	, _clear_meters (true)
 	, _meter_peaked (false)
+	, _unscaled_fader_length (fader_length)
+	, _unscaled_fader_girth (fader_girth)
 {
 	using namespace Menu_Helpers;
 
@@ -217,8 +219,8 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	RedrawMetrics.connect (sigc::mem_fun(*this, &GainMeterBase::redraw_metrics));
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &GainMeterBase::on_theme_changed));
-	UIConfiguration::instance().ColorsChanged.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), false));
-	UIConfiguration::instance().DPIReset.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), true));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &GainMeterBase::color_handler));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &GainMeterBase::reset_dpi));
 }
 
 GainMeterBase::~GainMeterBase ()
@@ -383,7 +385,7 @@ GainMeterBase::setup_meters (int len)
 	if (len == 0) {
 		assert (gain_slider);
 		Gtk::Requisition sz;
-		sz = gain_slider->size_request ();
+		sz = gain_slider->size_request (); // XXX
 		len = gain_slider->orientation () == FaderWidget::VERT ? sz.height : sz.width;
 	}
 
@@ -925,8 +927,19 @@ GainMeterBase::update_meters()
 	}
 }
 
-void GainMeterBase::color_handler(bool /*dpi*/)
+void
+GainMeterBase::color_handler()
 {
+	setup_meters();
+}
+
+void
+GainMeterBase::reset_dpi ()
+{
+	int length = rint (_unscaled_fader_length * UIConfiguration::instance().get_ui_scale());
+	int girth = rint (_unscaled_fader_girth * UIConfiguration::instance().get_ui_scale());
+	dynamic_cast<ArdourFader*>(gain_slider)->update_min_size (length, girth);
+
 	setup_meters();
 }
 
@@ -979,15 +992,12 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	gain_display_box.pack_start (peak_display, true, true);
 
 	meter_metric_area.set_name ("AudioTrackMetrics");
-	meter_metric_area.set_size_request(PX_SCALE(24, 24), -1);
 
 	gain_automation_state_button.set_name ("mixer strip button");
 
 	set_tooltip (gain_automation_state_button, _("Fader automation mode"));
 
 	gain_automation_state_button.set_can_focus (false);
-
-	gain_automation_state_button.set_size_request (PX_SCALE(12, 15), PX_SCALE(12, 15));
 
 	fader_vbox.set_spacing (0);
 	fader_vbox.pack_start (*gain_slider, true, true);
@@ -997,19 +1007,16 @@ GainMeter::GainMeter (Session* s, int fader_length)
 
 	hbox.pack_start (fader_alignment, true, true);
 
-	set_spacing (PX_SCALE(2, 2));
-
 	pack_start (gain_display_box, Gtk::PACK_SHRINK);
 	pack_start (hbox, true, true);
 
 	meter_alignment.set (0.5, 0.5, 0.0, 1.0);
 	meter_alignment.add (*level_meter);
 
+	reset_dpi ();
+
 	meter_metric_area.signal_expose_event().connect (
 		sigc::mem_fun(*this, &GainMeter::meter_metrics_expose));
-
-	meter_ticks1_area.set_size_request (PX_SCALE(3, 3), -1);
-	meter_ticks2_area.set_size_request (PX_SCALE(3, 3), -1);
 
 	meter_ticks1_area.signal_expose_event().connect (
 			sigc::mem_fun(*this, &GainMeter::meter_ticks1_expose));
@@ -1023,6 +1030,20 @@ GainMeter::GainMeter (Session* s, int fader_length)
 
 	meter_metric_area.set_no_show_all ();
 }
+
+void
+GainMeter::reset_dpi ()
+{
+	meter_metric_area.set_size_request(PX_SCALE(24, 24), -1);
+	gain_automation_state_button.set_size_request (PX_SCALE(12, 15), PX_SCALE(12, 15));
+	set_spacing (PX_SCALE(2, 2));
+	meter_ticks1_area.set_size_request (PX_SCALE(3, 3), -1);
+	meter_ticks2_area.set_size_request (PX_SCALE(3, 3), -1);
+	if (route()) {
+		GainMeterBase::reset_dpi ();
+	}
+}
+
 #undef PX_SCALE
 
 GainMeter::~GainMeter () { }

@@ -1997,10 +1997,15 @@ Editor::add_location_mark_with_flag (timepos_t const & where, Location::Flags fl
 
 	_session->locations()->next_available_name(markername, namebase);
 
-	if (!choose_new_marker_name (markername)) {
-		return;
-	}
 	Location *location = new Location (*_session, where, where, markername, flags, cue_id);
+
+	if (UIConfiguration::instance().get_name_new_markers()) {
+		if (!edit_location (*location, true, false)) {
+			delete location;
+			return;
+		}
+	}
+
 	begin_reversible_command (_("add marker"));
 
 	XMLNode &before = _session->locations()->get_state();
@@ -5380,8 +5385,8 @@ Editor::remove_last_capture ()
 	}
 
 	if (Config->get_verify_remove_last_capture()) {
-		prompt  = _("Do you really want to destroy the last capture?"
-		            "\n(This is destructive and cannot be undone)");
+		prompt  = _("Do you really want to remove the last capture?"
+		            "\n(This is destructive, deletes recorded files,\nand cannot be undone)");
 
 		choices.push_back (_("No, do nothing."));
 		choices.push_back (_("Yes, destroy it."));
@@ -5471,17 +5476,12 @@ Editor::tag_last_capture ()
 	std::list<std::shared_ptr<Region> > rlist;
 
 	std::list<std::shared_ptr<Source> > srcs;
-	_session->get_last_capture_sources (srcs);
-	for (std::list<std::shared_ptr<Source> >::iterator i = srcs.begin(); i != srcs.end(); ++i) {
-		std::shared_ptr<ARDOUR::Source> source = (*i);
-		if (source) {
-
-			set<std::shared_ptr<Region> > regions;
-			RegionFactory::get_regions_using_source (source, regions);
-			for (set<std::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); r++) {
-				rlist.push_back(*r);
-			}
-
+	_session->last_capture_sources (srcs);
+	for (auto const& source : srcs) {
+		set<std::shared_ptr<Region>> regions;
+		RegionFactory::get_regions_using_source (source, regions);
+		for (auto const& r: regions) {
+			rlist.push_back (r);
 		}
 	}
 

@@ -31,6 +31,7 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/lua_api.h"
 #include "ardour/types.h"
 
 #include "common.h"
@@ -169,6 +170,12 @@ static Session * _load_session (string dir, string state)
 
 	Session* session = new Session (*engine, dir, state);
 	engine->set_session (session);
+
+	/* Wait for a few cycle, apply latency compensation, push port info back to backend.
+	 * Theoretically 1 cycle is sufficient, but we can warm up caches, too ..
+	 */
+	ARDOUR::LuaAPI::wait_for_process_callback (4, 1000);
+
 	return session;
 }
 

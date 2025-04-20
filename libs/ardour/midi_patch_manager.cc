@@ -290,7 +290,9 @@ MidiPatchManager::load_midnams ()
 void
 MidiPatchManager::load_midnams_in_thread ()
 {
-	_midnam_load_thread = PBD::Thread::create (std::bind (&MidiPatchManager::load_midnams, this), "MIDNAMLoader");
+	if (!g_getenv ("ARDOUR_NO_PATCHFILES")) {
+		_midnam_load_thread = PBD::Thread::create (std::bind (&MidiPatchManager::load_midnams, this), "MIDNAMLoader");
+	}
 }
 
 void

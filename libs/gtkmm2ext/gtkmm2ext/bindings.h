@@ -118,13 +118,15 @@ class LIBGTKMM2EXT_API Bindings {
 	typedef std::map<KeyboardKey,ActionInfo> KeybindingMap;
 
 	Bindings (std::string const& name);
+	Bindings (std::string const & name, Bindings & other);
 	~Bindings ();
 
 	std::string const& name() const { return _name; }
+	Bindings const * parent() const { return _parent; }
 
-	void reassociate ();
-	void associate ();
+	void associate (bool force = false);
 	void dissociate ();
+	void reassociate ();
 
 	bool empty() const;
 	bool empty_keys () const;
@@ -177,7 +179,8 @@ class LIBGTKMM2EXT_API Bindings {
 	};
 
   private:
-	std::string  _name;
+        Bindings * _parent;
+        std::string  _name;
 	KeybindingMap press_bindings;
 	KeybindingMap release_bindings;
 
@@ -190,6 +193,14 @@ class LIBGTKMM2EXT_API Bindings {
 	KeybindingMap& get_keymap (Operation op);
 	const KeybindingMap& get_keymap (Operation op) const;
 	MouseButtonBindingMap& get_mousemap (Operation op);
+
+	void relativize ();
+	void clone_press (KeybindingMap&) const;
+	void clone_release (KeybindingMap&) const;
+	void clone_kbd_bindings (KeybindingMap const&, KeybindingMap&) const;
+	void copy_from_parent (bool associate);
+	void parent_changed (Bindings*);
+	PBD::ScopedConnection bc;
 
 	/* GTK has the following position a Gtk::Action:
 	 *
@@ -209,6 +220,13 @@ class LIBGTKMM2EXT_API Bindings {
 	static int _drag_active;
 	friend struct DragsBlockBindings;
 };
+
+typedef std::vector<Bindings*> BindingSet;
+
+LIBGTKMM2EXT_API void set_widget_bindings (Gtk::Widget&, Bindings&, char const * const name);
+LIBGTKMM2EXT_API void set_widget_bindings (Gtk::Widget&, BindingSet&, char const * const name);
+
+static char const * const ARDOUR_BINDING_KEY = "ardour-bindings";
 
 } // namespace
 

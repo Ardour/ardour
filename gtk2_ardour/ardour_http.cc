@@ -63,6 +63,9 @@ HttpGet::ca_setopt (CURL* c)
 	}
 	if (ca_info || ca_path) {
 		curl_easy_setopt (c, CURLOPT_SSL_VERIFYPEER, 1);
+	} else {
+		curl_easy_setopt (c, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_easy_setopt (c, CURLOPT_SSL_VERIFYHOST, 0);
 	}
 }
 

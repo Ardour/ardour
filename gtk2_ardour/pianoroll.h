@@ -20,6 +20,8 @@
 
 #include <map>
 
+#include "pbd/timer.h"
+
 #include <ytkmm/adjustment.h>
 
 #include "canvas/ruler.h"
@@ -28,6 +30,7 @@
 
 namespace Gtk {
 	class Widget;
+	class HScrollbar;
 }
 
 namespace ArdourCanvas {
@@ -46,12 +49,12 @@ namespace ArdourWidgets {
 }
 
 class PianorollMidiView;
-class CueMidiBackground;
+class PianorollMidiBackground;
 
 class Pianoroll : public CueEditor
 {
   public:
-	Pianoroll (std::string const & name);
+	Pianoroll (std::string const & name, bool with_transport_controls = false);
 	~Pianoroll ();
 
 	ArdourCanvas::Container* get_trackview_group () const { return data_group; }
@@ -93,8 +96,7 @@ class Pianoroll : public CueEditor
 	Editing::MouseMode current_mouse_mode () const;
 	bool internal_editing() const;
 
-	void box_rec_enable_change (ARDOUR::TriggerBox const &);
-	void trigger_rec_enable_change (ARDOUR::Trigger const &);
+	void trigger_arm_change ();
 
 	double timebar_height;
 	size_t n_timebars;
@@ -119,6 +121,8 @@ class Pianoroll : public CueEditor
 	Gdk::Cursor* which_canvas_cursor (ItemType type) const;
 
 	void set_visible_channel (int chan);
+	int visible_channel () const { return _visible_channel; }
+
 	void note_mode_clicked();
 	ARDOUR::NoteMode note_mode() const { return _note_mode; }
 	void set_note_mode (ARDOUR::NoteMode);
@@ -135,6 +139,12 @@ class Pianoroll : public CueEditor
 	void paste (float times, bool from_context_menu);
 	void keyboard_paste ();
 	void cut_copy (Editing::CutCopyOp);
+
+	PianorollMidiView* midi_view() const { return view; }
+	void set_session (ARDOUR::Session*);
+	bool allow_trim_cursors () const;
+
+	void shift_midi (Temporal::timepos_t const &, bool model);
 
   protected:
 	void load_bindings ();
@@ -171,6 +181,8 @@ class Pianoroll : public CueEditor
 	std::shared_ptr<ARDOUR::MidiTrack> _track;
 	ArdourCanvas::GtkCanvasViewport* _canvas_viewport;
 	ArdourCanvas::GtkCanvas* _canvas;
+
+	Gtk::HScrollbar* _canvas_hscrollbar;
 
 	/* The group containing all other groups that are scrolled vertically
 	   and horizontally.
@@ -213,7 +225,7 @@ class Pianoroll : public CueEditor
 	ParameterButtonMap parameter_button_map;
 	void rebuild_parameter_button_map ();
 
-	CueMidiBackground* bg;
+	PianorollMidiBackground* bg;
 	PianorollMidiView* view;
 
 	void build_canvas ();
@@ -252,8 +264,10 @@ class Pianoroll : public CueEditor
 
 	sigc::connection _update_connection;
 	PBD::ScopedConnectionList object_connections;
+	PBD::ScopedConnectionList view_connections;
 	void maybe_update ();
 	void trigger_prop_change (PBD::PropertyChange const &);
+	void region_prop_change (PBD::PropertyChange const &);
 
 	void unset ();
 
@@ -284,16 +298,26 @@ class Pianoroll : public CueEditor
 	std::pair<Temporal::timepos_t,Temporal::timepos_t> max_zoom_extent() const;
 
 	void point_selection_changed ();
-	bool enter (GdkEventCrossing*);
 
 	bool zoom_in_allocate;
 
 	ArdourWidgets::ArdourButton rec_enable_button;
-	void rec_enable_clicked ();
-	Gtk::Adjustment bar_adjustment;
-	Gtk::SpinButton bar_spinner;
+	ArdourWidgets::ArdourButton play_button;
+	ArdourWidgets::ArdourButton solo_button;
+	ArdourWidgets::ArdourButton loop_button;
+
+	bool play_button_press (GdkEventButton*);
+	bool bang_button_press (GdkEventButton*);
+	bool solo_button_press (GdkEventButton*);
+	bool loop_button_press (GdkEventButton*);
+
+	ArdourWidgets::ArdourDropdown length_selector;
+	Temporal::BBT_Offset rec_length;
 	Gtk::Label length_label;
 	Gtk::HBox   rec_box;
+	Gtk::HBox   play_box;
+
+	void set_recording_length (Temporal::BBT_Offset bars);
 
 	bool rec_button_press (GdkEventButton*);
 	void rec_enable_change ();
@@ -304,4 +328,19 @@ class Pianoroll : public CueEditor
 	void add_multi_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, uint16_t channels, int ctl, const std::string& name, ArdourWidgets::MetaButton*);
 	void reset_user_cc_choice (std::string, Evoral::Parameter param, ArdourWidgets::MetaButton*);
 
+	bool ignore_channel_changes;
+	void visible_channel_changed ();
+
+	bool with_transport_controls;
+	void update_solo_display ();
+	void map_transport_state ();
+
+	sigc::connection count_in_connection;
+	Temporal::Beats count_in_to;
+
+	void count_in (Temporal::timepos_t, unsigned int);
+	void maybe_set_count_in ();
+
+	bool bbt_ruler_event (GdkEvent*);
+	void ruler_locate (GdkEventButton*);
 };

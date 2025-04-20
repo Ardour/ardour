@@ -136,6 +136,7 @@ class MidiExportDialog;
 class MixerStrip;
 class MouseCursors;
 class NoteBase;
+class Pianoroll;
 class PluginSelector;
 class ProgressReporter;
 class QuantizeDialog;
@@ -532,12 +533,15 @@ protected:
 private:
 
 	void color_handler ();
+	void dpi_reset ();
 	bool constructed;
 
 	// to keep track of the playhead position for control_scroll
 	std::optional<samplepos_t> _control_scroll_target;
 
+	Gtk::HBox                    _bottom_hbox;
 	SelectionPropertiesBox*      _properties_box;
+	Pianoroll*                   _pianoroll;
 
 	typedef std::pair<TimeAxisView*,XMLNode*> TAVState;
 
@@ -619,6 +623,7 @@ private:
 	void set_marker_line_visibility (bool);
 	void update_selection_markers ();
 	void update_section_box ();
+	void capture_sources_changed (bool);
 
 	void jump_forward_to_mark_flagged (ARDOUR::Location::Flags, ARDOUR::Location::Flags, ARDOUR::Location::Flags);
 	void jump_backward_to_mark_flagged (ARDOUR::Location::Flags, ARDOUR::Location::Flags, ARDOUR::Location::Flags);
@@ -831,8 +836,8 @@ private:
 	ArdourCanvas::Rectangle* _canvas_grid_zone;
 	bool canvas_grid_zone_event (GdkEvent* event);
 
-	static Gtk::Table* setup_ruler_new (Gtk::HBox&, std::string const&);
-	static Gtk::Table* setup_ruler_new (Gtk::HBox&, Gtk::Label*);
+	static Gtk::Table* setup_ruler_new (Gtk::HBox&, std::vector<Gtk::Label*>&, std::string const&);
+	static Gtk::Table* setup_ruler_new (Gtk::HBox&, std::vector<Gtk::Label*>&, Gtk::Label*);
 	static void        setup_ruler_add (Gtk::Table*, ArdourWidgets::ArdourButton&, int pos = 0);
 
 	Glib::RefPtr<Gtk::ToggleAction> ruler_minsec_action;
@@ -938,6 +943,8 @@ private:
 	Gtk::HBox _ruler_box_marker;
 	Gtk::HBox _ruler_box_section;
 	Gtk::HBox _ruler_box_videotl;
+
+	std::vector<Gtk::Label*> _ruler_labels;
 
 	ArdourWidgets::ArdourButton  _ruler_btn_tempo_add;
 	ArdourWidgets::ArdourButton  _ruler_btn_meter_add;
@@ -1416,7 +1423,6 @@ private:
 
 	void set_loop_from_region (bool play);
 
-	void set_loop_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd);
 	void set_punch_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd);
 
 	void add_tempo_from_playhead_cursor ();
@@ -1537,7 +1543,7 @@ private:
 
 	bool canvas_videotl_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	void update_video_timeline (bool flush = false);
-	void set_video_timeline_height (const int);
+	void set_video_timeline_height (const int, bool force = false);
 	bool is_video_timeline_locked ();
 	void toggle_video_timeline_locked ();
 	void set_video_timeline_locked (const bool);
@@ -1662,7 +1668,8 @@ private:
 	void marker_menu_edit ();
 	void marker_menu_remove ();
 	void marker_menu_rename ();
-	void rename_marker (ArdourMarker* marker);
+	void edit_marker (ArdourMarker* marker, bool with_scene);
+	bool edit_location (ARDOUR::Location& loc, bool with_scene, bool with_command);
 	void toggle_tempo_continues ();
 	void toggle_tempo_type ();
 	void ramp_to_next_tempo ();
@@ -1755,8 +1762,6 @@ private:
 
 	ArdourWidgets::ArdourButton smart_mode_button;
 	Glib::RefPtr<Gtk::ToggleAction> smart_mode_action;
-
-	void add_mouse_mode_actions (Glib::RefPtr<Gtk::ActionGroup>);
 
 	void                     mouse_mode_toggled (Editing::MouseMode m);
 	void			 mouse_mode_object_range_toggled ();
@@ -1859,7 +1864,6 @@ private:
 	ArdourCanvas::Rectangle* transport_preroll_rect;
 	ArdourCanvas::Rectangle* transport_postroll_rect;
 
-	ARDOUR::Location* transport_loop_location();
 	ARDOUR::Location* transport_punch_location();
 
 	ARDOUR::Location* temp_location;
@@ -2286,8 +2290,6 @@ private:
 	void show_range_type (RangeBarType);
 	PBD::Signal<void()> VisibleMarkersChanged;
 	PBD::Signal<void()> VisibleRangesChanged;
-
-	bool enter (GdkEventCrossing*);
 
 	friend class RegionMoveDrag;
 	friend class TrimDrag;

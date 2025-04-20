@@ -19,7 +19,7 @@
  */
 #include <ydk/gdktestutils.h>
 #include <ydk/gdkkeysyms.h>
-#include <win32/gdkwin32.h>
+#include <win32/ydk/gdkwin32.h>
 #include "gdkalias.h"
 
 void

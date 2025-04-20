@@ -350,20 +350,12 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	monitor_button_size_group->add_widget (_monitor_mute_button);
 
 	/* tooltips */
-	Gtkmm2ext::UI::instance()->set_tip (_punch_in_button, _("Start recording at auto-punch start"));
-	Gtkmm2ext::UI::instance()->set_tip (_punch_out_button, _("Stop recording at auto-punch end"));
 	Gtkmm2ext::UI::instance()->set_tip (_record_mode_selector, _("<b>Layered</b>, new recordings will be added as regions on a layer atop existing regions.\n<b>SoundOnSound</b>, behaves like <i>Layered</i>, except underlying regions will be audible.\n<b>Non Layered</b>, the underlying region will be spliced and replaced with the newly recorded region."));
 	Gtkmm2ext::UI::instance()->set_tip (_latency_disable_button, _("Disable all Plugin Delay Compensation. This results in the shortest delay from live input to output, but any paths with delay-causing plugins will sound later than those without."));
-	Gtkmm2ext::UI::instance()->set_tip (_auto_return_button, _("Return to last playback start when stopped"));
-	Gtkmm2ext::UI::instance()->set_tip (_follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 	Gtkmm2ext::UI::instance()->set_tip (_primary_clock, _("<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	Gtkmm2ext::UI::instance()->set_tip (_secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
-	Gtkmm2ext::UI::instance()->set_tip (_solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	Gtkmm2ext::UI::instance()->set_tip (_auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
 	Gtkmm2ext::UI::instance()->set_tip (_feedback_alert_button, _("When lit, there is a ports connection issue, leading to feedback loop or ambiguous alignment.\nThis is caused by connecting an output back to some input (feedback), or by multiple connections from a source to the same output via different paths (ambiguous latency, record alignment)."));
-	Gtkmm2ext::UI::instance()->set_tip (_monitor_dim_button, _("Monitor section dim output"));
-	Gtkmm2ext::UI::instance()->set_tip (_monitor_mono_button, _("Monitor section mono output"));
-	Gtkmm2ext::UI::instance()->set_tip (_monitor_mute_button, _("Monitor section mute output"));
 	Gtkmm2ext::UI::instance()->set_tip (_cue_rec_enable, _("<b>When enabled</b>, triggering Cues will result in Cue Markers added to the timeline"));
 	Gtkmm2ext::UI::instance()->set_tip (_cue_play_enable, _("<b>When enabled</b>, Cue Markers will trigger the associated Cue when passed on the timeline"));
 	Gtkmm2ext::UI::instance()->set_tip (_editor_meter_peak_display, _("Reset All Peak Meters"));
@@ -816,9 +808,6 @@ ApplicationBar::set_session (Session *s)
 		_editor_meter_table.remove(*_editor_meter);
 		delete _editor_meter;
 		_editor_meter = 0;
-	}
-	if (_editor_meter_table.get_parent()) {
-		_transport_hbox.remove (_editor_meter_table);
 	}
 	if (_editor_meter_peak_display.get_parent ()) {
 		_editor_meter_table.remove (_editor_meter_peak_display);

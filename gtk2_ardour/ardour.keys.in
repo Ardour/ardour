@@ -27,6 +27,7 @@
 $ARDOUR Shortcuts \linebreak Mnemonic US-Keypad
 
 ;; GROUP DEFINITIONS
+;; %WORD GROUPWORD GROUP DESCRIPTION TEXT
 
 %trans Global Global Transport \& Recording Control
 
@@ -79,9 +80,10 @@ playhead to the n-th marker.
 The "move" commands all move the active marker(s). Jump to the first 9 markers using
 the keypad digits 1-9 (requires numlock).
 
-%mmode Editor Mouse Modes
+%mmode Editing Mouse Modes
+%emmode Editor Mouse Modes
 
-%mouse Editor Mouse Usage
+%mouse Editing Mouse Usage
 Right click on most objects and controls displays a context menu
 Shift+Right click deletes most objects. 
 OS X users without a 3 button mouse can use {\tt Option+Ctrl+Left} to simulate "Middle" for some purposes.
@@ -159,23 +161,23 @@ This mode provides many different operations on both regions and control points,
 @gmark|Common/jump-backward-to-mark|                                   q|to previous mark
 @sess|Common/Quit|                                          <@PRIMARY@>q|quit
 @gmark|Common/jump-forward-to-mark|                                    w|to next mark
-@mmode|Editing/set-mouse-mode-content|                               e|content mode
+@mmode|Editing/set-mouse-mode-content|                                  e|content mode
 @sess|Main/QuickExport|                                     <@PRIMARY@>e|quick export session
 @rop|Region/export-region|                     <@PRIMARY@><@SECONDARY@>e|export selected region(s)
 @sess|Main/ExportAudio|                                   <@SECONDARY@>e|export session
 @sess|Main/StemExport|                        <@SECONDARY@><@TERTIARY@>e|stem export selected tracks
 @select|Editor/select-all-after-edit-cursor|    <@PRIMARY@><@TERTIARY@>e|select all after EP
 @vis|Editor/show-editor-mixer|                             <@TERTIARY@>e|toggle editor window mixer
-@mmode|Editing/set-mouse-mode-range|                                 r|range mode
+@mmode|Editing/set-mouse-mode-range|                                    r|range mode
 @wvis|Common/show-recorder|                               <@SECONDARY@>r|show recorder page
-@editing|Editing/redo|                                          <@PRIMARY@>r|redo
+@editing|Editing/redo|                                       <@PRIMARY@>r|redo
 @edit|Editor/select-from-regions|               <@PRIMARY@><@TERTIARY@>r|set Range to selected regions
 @edit|Editor/add-range-marker-from-selection| <@SECONDARY@><@TERTIARY@>r|Add single Range marker from selection
 @trans|Transport/Record|                                   <@TERTIARY@>r|engage record
-@mmode|Editing/set-mouse-mode-timefx|                                t|timefx mode
+@mmode|Editing/set-mouse-mode-timefx|                                   t|timefx mode
 @gselect|Common/select-all-visible-lanes|                   <@PRIMARY@>t|select all visible lanes
-@mmode|Editing/set-mouse-mode-grid|                                  y|grid mode
-@editing|Editing/alternate-redo|                                <@PRIMARY@>y|redo
+@mmode|Editing/set-mouse-mode-grid|                                     y|grid mode
+@editing|Editing/alternate-redo|                             <@PRIMARY@>y|redo
 @select|Editor/select-all-between-cursors|                  <@PRIMARY@>u|select all regions enclosed by Range
 @select|Editor/select-all-within-cursors|                              u|select all regions touched by Range
 @rop|Region/fork-regions-from-unselected|                  <@TERTIARY@>u|unlink midi from unselected regions
@@ -202,17 +204,17 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/SnapshotStay|                        <@PRIMARY@><@TERTIARY@>s|snapshot session
 @edtrk|Editor/track-solo-toggle|                          <@SECONDARY@>s|toggle track solo status
 @edit|Editor/ToggleSummary|                                <@TERTIARY@>s|toggle summary
-@mmode|Editing/set-mouse-mode-draw|                                  d|note-draw mode
+@mmode|Editing/set-mouse-mode-draw|                                     d|note-draw mode
 @edit|Editor/duplicate|                                     <@PRIMARY@>d|duplicate (once)
-@edit|Editor/multi-duplicate|                              <@SECONDARY@>d|duplicate (multi)
-@select|Editor/select-all-in-punch-range|                   <@TERTIARY@>d|select all in punch range
+@edit|Editor/multi-duplicate|                             <@SECONDARY@>d|duplicate (multi)
+@select|Editor/select-all-in-punch-range|                  <@TERTIARY@>d|select all in punch range
 @vis|Editor/fit-selection|                                             f|fit selection vertically
 @edit|Editor/toggle-follow-playhead|                        <@PRIMARY@>f|toggle playhead tracking
 @edit|Editor/toggle-stationary-playhead|                   <@TERTIARY@>f|toggle stationary playhead
 @rop|Region/show-rhythm-ferret|                           <@SECONDARY@>f|show rhythm ferret window 
 @wvis|Common/ToggleMaximalEditor|              <@PRIMARY@><@SECONDARY@>f|maximise editor space
 @wvis|Common/ToggleMaximalMixer|                <@PRIMARY@><@TERTIARY@>f|maximise mixer space
-@mmode|Editing/set-mouse-mode-object|                                g|object mode
+@mmode|Editing/set-mouse-mode-object|                                   g|object mode
 @edit|Editor/group-selected-regions|                        <@PRIMARY@>g|group selected regions
 @edit|Editor/ungroup-selected-regions|          <@PRIMARY@><@TERTIARY@>g|ungroup selected regions
 @edit|Region/play-selected-regions|                                    h|play selected region(s)
@@ -226,15 +228,15 @@ This mode provides many different operations on both regions and control points,
 
 ;; BOTTOM ROW
 
-@mmode|Editor/zoom-to-selection|                                       z|zoom to selection
-@editing|Editing/undo|                                          <@PRIMARY@>z|undo
-@editing|Editing/alternate-alternate-redo|          <@PRIMARY@><@TERTIARY@>z|redo
+@emmode|Editor/zoom-to-selection|                                      z|zoom to selection
+@editing|Editing/undo|                                       <@PRIMARY@>z|undo
+@editing|Editing/alternate-alternate-redo|       <@PRIMARY@><@TERTIARY@>z|redo
 @vis|Editor/toggle-zoom|                                   <@TERTIARY@>z|toggle last 2 zoom states
 @aep|Region/align-regions-sync-relative|                               x|align sync points (relative)
-@editing|Editing/editor-cut|                                    <@PRIMARY@>x|cut
+@editing|Editing/editor-cut|                                 <@PRIMARY@>x|cut
 @edit|Editor/cut-paste-section|                 <@PRIMARY@><@TERTIARY@>x|cut \& paste section
-@mmode|Editing/set-mouse-mode-cut|                                   c|cut mode
-@editing|Editing/editor-copy|                                   <@PRIMARY@>c|copy
+@mmode|Editing/set-mouse-mode-cut|                                      c|cut mode
+@editing|Editing/editor-copy|                                <@PRIMARY@>c|copy
 @wvis|Common/show-trigger|                                <@SECONDARY@>c|show cues page
 @edit|Editor/editor-crop|                      <@PRIMARY@><@SECONDARY@>c|crop range
 @edit|Editor/copy-paste-section|                <@PRIMARY@><@TERTIARY@>c|copy \& paste section
@@ -242,7 +244,7 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/alternate-delete-section|  <@PRIMARY@><@TERTIARY@>BackSpace|delete section
 @edit|Editor/editor-consolidate|              <@SECONDARY@><@TERTIARY@>c|consolidate range
 @rop|Region/set-region-sync-position|                                  v|set region sync point
-@editing|Editing/editor-paste|                                  <@PRIMARY@>v|paste
+@editing|Editing/editor-paste|                               <@PRIMARY@>v|paste
 @edit|Editor/ToggleJadeo|                                 <@SECONDARY@>v|video window
 @wvis|Common/toggle-meterbridge|                          <@SECONDARY@>b|show meter bridge
 @edtrk|Editor/track-record-enable-toggle|                  <@TERTIARY@>b|toggle track rec-enable 
@@ -294,8 +296,8 @@ This mode provides many different operations on both regions and control points,
 @vis|Editor/scroll-tracks-up|                   Page_Up|scroll up (page)
 @movp|Transport/GotoStart|                         Home|to start marker
 @movp|Transport/GotoEnd|                            End|to end marker
-@editing|Editing/editor-delete|                      Delete|delete
-@editing|Editing/alternate-editor-delete|         BackSpace|backspace (delete)
+@editing|Editing/editor-delete|                   Delete|delete
+@editing|Editing/alternate-editor-delete|      BackSpace|backspace (delete)
 
 ;; this one is super-global, so we put it in the session group but don't show
 ;; it on cheat sheets etc.
@@ -393,7 +395,7 @@ This mode provides many different operations on both regions and control points,
 @eep|Editor/cycle-edit-mode|                             1|cycle edit mode {slide, lock, ripple}
 @eep|Editor/cycle-edit-point|                            2|next EP w/o marker {playhead, mouse}
 @eep|Editor/cycle-edit-point-with-marker|     <@PRIMARY@>2|next EP w/marker {playhead, mouse, marker}
-@mmode|Editing/set-mouse-mode-object-range|            3|Smart Mode (provide some Range tools in Object mode)
+@emmode|Editor/set-mouse-mode-object-range|              3|Smart Mode (provide some Range tools in Object mode)
 @gmode|Transport/ToggleFollowEdits|           <@PRIMARY@>3|toggle playhead follows edits
 @grid|Editor/cycle-snap-mode|                            4|cycle to next snap mode {On/Off}
 @grid|Editor/prev-grid-choice|                           5|use prev grid unit

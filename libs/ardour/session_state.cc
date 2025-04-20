@@ -774,6 +774,13 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	XMLTree tree;
 	std::string xml_path(_session_dir->root_path());
 
+	if (!pending) {
+		/* Prevent destructive edits after explicit save or snapshot changes.
+		 * Otherwise this one can delete sources used by other snapshot
+		 */
+		reset_last_capture_sources ();
+	}
+
 	/* prevent concurrent saves from different threads */
 
 	Glib::Threads::Mutex::Lock lm (save_state_lock);

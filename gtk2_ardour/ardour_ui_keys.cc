@@ -42,6 +42,7 @@
 #include "public_editor.h"
 #include "virtual_keyboard_window.h"
 
+#include "gtkmm2ext/debug.h"
 #include "gtkmm2ext/utils.h"
 
 using namespace ARDOUR;
@@ -54,7 +55,7 @@ using namespace std;
 bool
 ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 {
-	Gtkmm2ext::Bindings* bindings = 0;
+	Gtkmm2ext::BindingSet* bindings = nullptr;
 	Gtk::Window* window = 0;
 
 	if (virtual_keyboard_window && virtual_keyboard_window->get_visible()) {
@@ -82,7 +83,7 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 		/* see if it uses the ardour binding system */
 
 		if (w) {
-			bindings = reinterpret_cast<Gtkmm2ext::Bindings*>(w->get_data ("ardour-bindings"));
+			bindings = reinterpret_cast<Gtkmm2ext::BindingSet*>(w->get_data (ARDOUR_BINDING_KEY));
 		}
 
 		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("main window key event, bindings = %1, global = %2\n", bindings, &global_bindings));
@@ -93,35 +94,36 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 
 		/* see if window uses ardour binding system */
 
-		bindings = reinterpret_cast<Gtkmm2ext::Bindings*>(window->get_data ("ardour-bindings"));
+		bindings = reinterpret_cast<Gtkmm2ext::BindingSet*>(window->get_data (ARDOUR_BINDING_KEY));
 	}
 
 	/* An empty binding set is treated as if it doesn't exist */
 
 	if (bindings && bindings->empty()) {
-		bindings = 0;
+		bindings = nullptr;
 	}
 
 	return key_press_focus_accelerator_handler (*window, ev, bindings);
 }
 
-static Gtkmm2ext::Bindings*
+static Gtkmm2ext::BindingSet*
 get_bindings_from_widget_hierarchy (GtkWidget** w)
 {
 	void* p = NULL;
 
 	while (*w) {
-		if ((p = g_object_get_data (G_OBJECT(*w), "ardour-bindings")) != 0) {
+		if ((p = g_object_get_data (G_OBJECT(*w), ARDOUR_BINDING_KEY)) != 0) {
+			DEBUG_TRACE (DEBUG::Bindings, string_compose ("found %1 in widget %2\n", ARDOUR_BINDING_KEY, gtk_widget_get_name (*w)));
 			break;
 		}
 		*w = gtk_widget_get_parent (*w);
 	}
 
-	return reinterpret_cast<Gtkmm2ext::Bindings*> (p);
+	return reinterpret_cast<Gtkmm2ext::BindingSet*> (p);
 }
 
 bool
-ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::Bindings* top_level_bindings)
+ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::BindingSet* top_level_bindings)
 {
 	GtkWindow* win = window.gobj();
 	GtkWidget* focus = gtk_window_get_focus (win);
@@ -214,12 +216,15 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 		while (focus) {
 
-			Gtkmm2ext::Bindings* focus_bindings = get_bindings_from_widget_hierarchy (&focus);
+			Gtkmm2ext::BindingSet* focus_bindings = get_bindings_from_widget_hierarchy (&focus);
 
-			if (focus_bindings) {
-				DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing widget (%3) bindings %1 @ %2 for this event\n", focus_bindings->name(), focus_bindings, gtk_widget_get_name (focus)));
-				if (focus_bindings->activate (k, Bindings::Press)) {
-					return true;
+			if (focus && focus_bindings) {
+				for (auto & bindings : *focus_bindings) {
+					DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing widget (%3) bindings %1 @ %2 for this event\n", bindings->name(), bindings, gtk_widget_get_name (focus)));
+					if (bindings->activate (k, Bindings::Press)) {
+						DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
+						return true;
+					}
 				}
 			}
 
@@ -233,12 +238,14 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 		 */
 
 		if (top_level_bindings) {
-			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing top level bindings %1 @ %2 for this event\n", top_level_bindings->name(), top_level_bindings));
-		}
+			for (auto & tlb : *top_level_bindings) {
+				DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing top level bindings %1 @ %2 for this event\n", tlb->name(), tlb));
 
-		if (top_level_bindings && top_level_bindings->activate (k, Bindings::Press)) {
-			DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
-			return true;
+				if (tlb->activate (k, Bindings::Press)) {
+					DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
+					return true;
+				}
+			}
 		}
 
 		/* Use any global bindings */
@@ -273,12 +280,14 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 		while (focus) {
 
-			Gtkmm2ext::Bindings* focus_bindings = get_bindings_from_widget_hierarchy (&focus);
+			Gtkmm2ext::BindingSet* focus_bindings = get_bindings_from_widget_hierarchy (&focus);
 
 			if (focus_bindings) {
-				DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\t(nomod) using widget (%3) bindings %1 @ %2 for this event\n", focus_bindings->name(), focus_bindings, gtk_widget_get_name (focus)));
-				if (focus_bindings->activate (k, Bindings::Press)) {
-					return true;
+				for (auto & bindings : *focus_bindings) {
+					DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\t(nomod) using widget (%3) bindings %1 @ %2 for this event\n", bindings->name(), bindings, gtk_widget_get_name (focus)));
+					if (bindings->activate (k, Bindings::Press)) {
+						return true;
+					}
 				}
 			}
 
@@ -292,12 +301,14 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 		 */
 
 		if (top_level_bindings) {
-			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\t(nomod) using top level bindings %1 @ %2 for this event\n", top_level_bindings->name(), top_level_bindings));
-		}
+			for (auto & tlb : *top_level_bindings) {
+				DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\t(nomod)using top level bindings %1 @ %2 for this event\n", tlb->name(), tlb));
 
-		if (top_level_bindings && top_level_bindings->activate (k, Bindings::Press)) {
-			DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
-			return true;
+				if (tlb->activate (k, Bindings::Press)) {
+					DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
+					return true;
+				}
+			}
 		}
 
 		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tnot yet handled, try global bindings (%1)\n", global_bindings));

@@ -162,7 +162,7 @@ Mixer_UI::Mixer_UI ()
 	Glib::RefPtr<ToggleAction> fb_act = ActionManager::get_toggle_action ("Mixer", "ToggleFoldbackStrip");
 	fb_act->set_sensitive (false);
 
-	contents().set_data ("ardour-bindings", bindings);
+	set_widget_bindings (contents(), *bindings, ARDOUR_BINDING_KEY);
 
 	PresentationInfo::Change.connect (*this, invalidator (*this), std::bind (&Mixer_UI::presentation_info_changed, this, _1), gui_context());
 	Route::FanOut.connect (*this, invalidator (*this), std::bind (&Mixer_UI::fan_out, this, _1, false, true), gui_context());
@@ -494,7 +494,7 @@ Mixer_UI::use_own_window (bool and_fill_it)
 		win->set_name ("MixerWindow");
 		ARDOUR_UI::instance()->setup_toplevel_window (*win, _("Mixer"), this);
 		win->signal_event().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), win));
-		win->set_data ("ardour-bindings", bindings);
+		set_widget_bindings (*win, *bindings, ARDOUR_BINDING_KEY);
 		update_title ();
 		if (!win->get_focus()) {
 			/* set focus widget to something, anything */

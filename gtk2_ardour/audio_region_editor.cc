@@ -146,7 +146,9 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 AudioRegionEditor::~AudioRegionEditor ()
 {
 	void* v;
+	_peak_amplitude_connection.disconnect ();
 	_peak_channel.deliver ('t');
+	Progress::cancel ();
 	pthread_join (_peak_amplitude_thread_handle, &v);
 }
 
@@ -235,7 +237,7 @@ AudioRegionEditor::peak_amplitude_thread ()
 		Temporal::TempoMap::fetch ();
 
 		/* compute peak amplitude and signal the fact */
-		PeakAmplitudeFound (accurate_coefficient_to_dB (_audio_region->maximum_amplitude ())); /* EMIT SIGNAL */
+		PeakAmplitudeFound (accurate_coefficient_to_dB (_audio_region->maximum_amplitude (this))); /* EMIT SIGNAL */
 	}
 }
 

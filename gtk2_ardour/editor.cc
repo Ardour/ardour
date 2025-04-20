@@ -142,6 +142,7 @@
 #include "mouse_cursors.h"
 #include "note_base.h"
 #include "opts.h"
+#include "pianoroll.h"
 #include "plugin_setup_dialog.h"
 #include "public_editor.h"
 #include "quantize_dialog.h"
@@ -222,6 +223,7 @@ Editor::Editor ()
 	, editor_mixer_strip_width (Wide)
 	, constructed (false)
 	, _properties_box (0)
+	, _pianoroll (0)
 	, no_save_visual (false)
 	, marker_click_behavior (MarkerClickSelectOnly)
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
@@ -287,6 +289,7 @@ Editor::Editor ()
 	, _ruler_btn_section_add ("+")
 	, videotl_label (_("Video Timeline"))
 	, videotl_group (0)
+	, videotl_bar_height (4)
 	, _region_boundary_cache_dirty (true)
 	, edit_packer (4, 4, true)
 	, unused_adjustment (0.0, 0.0, 10.0, 400.0)
@@ -417,36 +420,36 @@ Editor::Editor ()
 
 	Gtk::Table* rtbl;
 
-	rtbl = setup_ruler_new (_ruler_box_minsec, _("Mins:Secs"));
+	rtbl = setup_ruler_new (_ruler_box_minsec, _ruler_labels, _("Mins:Secs"));
 
-	rtbl = setup_ruler_new (_ruler_box_timecode, _("Timecode"));
+	rtbl = setup_ruler_new (_ruler_box_timecode, _ruler_labels, _("Timecode"));
 
-	rtbl = setup_ruler_new (_ruler_box_samples, _("Samples"));
+	rtbl = setup_ruler_new (_ruler_box_samples, _ruler_labels, _("Samples"));
 
-	rtbl = setup_ruler_new (_ruler_box_bbt, _("Bars:Beats"));
+	rtbl = setup_ruler_new (_ruler_box_bbt, _ruler_labels, _("Bars:Beats"));
 
-	rtbl = setup_ruler_new (_ruler_box_tempo, _("Tempo"));
+	rtbl = setup_ruler_new (_ruler_box_tempo, _ruler_labels, _("Tempo"));
 	setup_ruler_add (rtbl, _ruler_btn_tempo_add);
 
-	rtbl = setup_ruler_new (_ruler_box_meter, _("Time Signature"));
+	rtbl = setup_ruler_new (_ruler_box_meter, _ruler_labels, _("Time Signature"));
 	setup_ruler_add (rtbl, _ruler_btn_meter_add);
 
-	rtbl = setup_ruler_new (_ruler_box_range, _("Range Markers"));
+	rtbl = setup_ruler_new (_ruler_box_range, _ruler_labels, _("Range Markers"));
 	setup_ruler_add (rtbl, _ruler_btn_range_prev, 0);
 	setup_ruler_add (rtbl, _ruler_btn_range_add, 1);
 	setup_ruler_add (rtbl, _ruler_btn_range_next, 2);
 
-	rtbl = setup_ruler_new (_ruler_box_marker, _("Location Markers"));
+	rtbl = setup_ruler_new (_ruler_box_marker, _ruler_labels, _("Location Markers"));
 	setup_ruler_add (rtbl, _ruler_btn_loc_prev, 0);
 	setup_ruler_add (rtbl, _ruler_btn_loc_add, 1);
 	setup_ruler_add (rtbl, _ruler_btn_loc_next, 2);
 
-	rtbl = setup_ruler_new (_ruler_box_section, _("Arrangement Markers"));
+	rtbl = setup_ruler_new (_ruler_box_section, _ruler_labels, _("Arrangement Markers"));
 	setup_ruler_add (rtbl, _ruler_btn_section_prev, 0);
 	setup_ruler_add (rtbl, _ruler_btn_section_add, 1);
 	setup_ruler_add (rtbl, _ruler_btn_section_next, 2);
 
-	rtbl = setup_ruler_new (_ruler_box_videotl, &videotl_label);
+	rtbl = setup_ruler_new (_ruler_box_videotl, _ruler_labels, &videotl_label);
 	videotl_label.set_size_request (-1, 4 * timebar_height);
 
 	initialize_canvas ();
@@ -643,7 +646,7 @@ Editor::Editor ()
 	 */
 	content_app_bar.add (_application_bar);
 	content_att_right.add (_editor_list_vbox);
-	content_att_bottom.add (*_properties_box);
+	content_att_bottom.add (_bottom_hbox);
 	content_main_top.add (global_vpacker);
 	content_main.add (editor_summary_pane);
 
@@ -652,6 +655,7 @@ Editor::Editor ()
 
 	ebox_hpacker.show();
 	global_vpacker.show();
+	_bottom_hbox.show();
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 
@@ -714,20 +718,11 @@ Editor::Editor ()
 	UIConfiguration::instance().map_parameters (pc);
 
 	setup_fade_images ();
-
-	switch_editing_context (this);
-	contents().signal_enter_notify_event().connect (sigc::mem_fun (*this, &Editor::enter), false);
-}
-
-bool
-Editor::enter (GdkEventCrossing*)
-{
-	switch_editing_context (this);
-	return false;
 }
 
 Editor::~Editor()
 {
+	delete own_bindings;
 	delete tempo_marker_menu;
 	delete meter_marker_menu;
 	delete marker_menu;
@@ -752,6 +747,7 @@ Editor::~Editor()
 	delete _snapshots;
 	delete _sections;
 	delete _locations;
+	delete _pianoroll;
 	delete _properties_box;
 	delete selection;
 	delete cut_buffer;
@@ -771,19 +767,20 @@ Editor::~Editor()
 }
 
 Gtk::Table*
-Editor::setup_ruler_new (Gtk::HBox& box, std::string const& name)
+Editor::setup_ruler_new (Gtk::HBox& box, vector<Gtk::Label*>& labels, std::string const& name)
 {
 	Gtk::Label* rlbl = manage (new Gtk::Label (name));
-	return setup_ruler_new (box, rlbl);
+	return setup_ruler_new (box, labels, rlbl);
 }
 
 Gtk::Table*
-Editor::setup_ruler_new (Gtk::HBox& box, Gtk::Label* rlbl)
+Editor::setup_ruler_new (Gtk::HBox& box, vector<Gtk::Label*>& labels, Gtk::Label* rlbl)
 {
 	rlbl->set_name ("EditorRulerLabel");
 	rlbl->set_size_request (-1, (int)timebar_height);
 	rlbl->set_alignment (1.0, 0.5);
 	rlbl->show ();
+	labels.push_back (rlbl);
 
 	Gtk::Table* rtbl = manage (new Gtk::Table);
 	rtbl->attach (*rlbl, 0, 1, 0, 1, EXPAND|FILL, SHRINK, 2, 0);
@@ -804,6 +801,49 @@ Editor::setup_ruler_add (Gtk::Table* rtbl, ArdourWidgets::ArdourButton& b, int p
 	b.set_elements (ArdourButton::Element(ArdourButton::Text));
 	b.show ();
 	rtbl->attach (b, pos + 1, pos + 2, 0, 1, SHRINK, SHRINK, 0, 1);
+}
+
+void
+Editor::dpi_reset ()
+{
+	timebar_height = std::max (13., ceil (17. * UIConfiguration::instance().get_ui_scale()));
+
+	_ruler_btn_tempo_add.set_size_request (-1, (int)timebar_height -2);
+	_ruler_btn_meter_add.set_size_request (-1, (int)timebar_height -2);
+
+	_ruler_btn_range_add.set_size_request (-1, (int)timebar_height -2);
+	_ruler_btn_range_prev.set_size_request (-1, (int)timebar_height -2);
+	_ruler_btn_range_next.set_size_request (-1, (int)timebar_height -2);
+
+	_ruler_btn_loc_add.set_size_request (-1, (int)timebar_height -2);
+	_ruler_btn_loc_prev.set_size_request (-1, (int)timebar_height -2);
+	_ruler_btn_loc_prev.set_size_request (-1, (int)timebar_height -2);
+
+	_ruler_btn_section_add.set_size_request (-1, (int)timebar_height -2);
+	_ruler_btn_section_prev.set_size_request (-1, (int)timebar_height -2);
+	_ruler_btn_section_next.set_size_request (-1, (int)timebar_height -2);
+
+	timecode_ruler->set_y1 (timecode_ruler->y0() + timebar_height);
+	bbt_ruler->set_y1 (bbt_ruler->y0() + timebar_height);
+	samples_ruler->set_y1 (samples_ruler->y0() + timebar_height);
+	minsec_ruler->set_y1 (minsec_ruler->y0() + timebar_height);
+	meter_bar->set_y1 (meter_bar->y0() + timebar_height);
+	tempo_bar->set_y1 (tempo_bar->y0() + timebar_height);
+	marker_bar->set_y1 (marker_bar->y0() + timebar_height);
+	range_marker_bar->set_y1 (range_marker_bar->y0() + timebar_height);
+	section_marker_bar->set_y1 (section_marker_bar->y0() + timebar_height);
+
+	for (auto const& l : _ruler_labels) {
+		l->set_size_request (-1, (int)timebar_height);
+	}
+	videotl_label.set_size_request (-1, 4 * timebar_height);
+	set_video_timeline_height (videotl_bar_height, true); // calls update_ruler_visibility();
+
+	ArdourMarker::setup_sizes (timebar_height);
+	TempoCurve::setup_sizes (timebar_height);
+
+	clear_marker_display ();
+	refresh_location_display  ();
 }
 
 bool
@@ -1212,6 +1252,18 @@ Editor::set_session (Session *t)
 	_locations->set_session (_session);
 	_properties_box->set_session (_session);
 
+	/* Cannot initialize in constructor, because pianoroll needs Actions */
+	if (!_pianoroll) {
+		// XXX this should really not happen here
+		_pianoroll = new Pianoroll ("editor pianoroll", true);
+		_pianoroll->viewport().set_size_request (-1, 120);
+	}
+	_pianoroll->set_session (_session);
+
+	_bottom_hbox.pack_start(*_properties_box, true, true);
+	/* _pianoroll is packed on demand in Editor::region_selection_changed */
+	_bottom_hbox.show_all();
+
 	if (rhythm_ferret) {
 		rhythm_ferret->set_session (_session);
 	}
@@ -1288,6 +1340,9 @@ Editor::set_session (Session *t)
 	_session->locations()->removed.connect (_session_connections, invalidator (*this), std::bind (&Editor::location_gone, this, _1), gui_context());
 	_session->locations()->changed.connect (_session_connections, invalidator (*this), std::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->auto_loop_location_changed.connect (_session_connections, invalidator (*this), std::bind (&Editor::loop_location_changed, this, _1), gui_context ());
+	_session->RecordPassCompleted.connect (_session_connections, invalidator (*this), std::bind (&Editor::capture_sources_changed, this, false), gui_context ());
+	_session->ClearedLastCaptureSources.connect (_session_connections, invalidator (*this), std::bind (&Editor::capture_sources_changed, this, true), gui_context ());
+	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), std::bind (&Editor::capture_sources_changed, this, false), gui_context ());
 	Location::flags_changed.connect (_session_connections, invalidator (*this), std::bind (&Editor::update_section_rects, this), gui_context ());
 
 	_session->history().Changed.connect (_session_connections, invalidator (*this), std::bind (&Editor::history_changed, this), gui_context());
@@ -1303,6 +1358,7 @@ Editor::set_session (Session *t)
 	_session->config.map_parameters (pc);
 
 	loop_location_changed (_session->locations()->auto_loop_location ());
+	capture_sources_changed (true);
 
 	//tempo_map_changed (PropertyChange (0));
 	reset_metric_marks ();
@@ -1465,7 +1521,7 @@ Editor::add_section_context_items (Gtk::Menu_Helpers::MenuList& items)
 		assert (lm && lm->start);
 		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Move Playhead to Marker"), sigc::bind (sigc::mem_fun(*_session, &Session::request_locate), start.samples (), false, MustStop, TRS_UI)));
-		items.push_back (MenuElem (_("Rename..."), sigc::bind (sigc::mem_fun(*this, &Editor::rename_marker), lm->start)));
+		items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun(*this, &Editor::edit_marker), lm->start, true)));
 	}
 
 	items.push_back (SeparatorElem());
@@ -3578,16 +3634,6 @@ Editor::finish_cleanup ()
 }
 
 Location*
-Editor::transport_loop_location()
-{
-	if (_session) {
-		return _session->locations()->auto_loop_location();
-	} else {
-		return 0;
-	}
-}
-
-Location*
 Editor::transport_punch_location()
 {
 	if (_session) {
@@ -4089,38 +4135,6 @@ Editor::_get_preferred_edit_position (EditIgnoreOption ignore, bool from_context
 	}
 
 	return where;
-}
-
-void
-Editor::set_loop_range (timepos_t const & start, timepos_t const & end, string cmd)
-{
-	if (!_session) {
-		return;
-	}
-	if (_session->get_play_loop () && _session->actively_recording ()) {
-		return;
-	}
-
-	begin_reversible_command (cmd);
-
-	Location* tll;
-
-	if ((tll = transport_loop_location()) == 0) {
-		Location* loc = new Location (*_session, start, end, _("Loop"),  Location::IsAutoLoop);
-		XMLNode &before = _session->locations()->get_state();
-		_session->locations()->add (loc, true);
-		_session->set_auto_loop_location (loc);
-		XMLNode &after = _session->locations()->get_state();
-		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-	} else {
-		XMLNode &before = tll->get_state();
-		tll->set_hidden (false, this);
-		tll->set (start, end);
-		XMLNode &after = tll->get_state();
-		_session->add_command (new MementoCommand<Location>(*tll, &before, &after));
-	}
-
-	commit_reversible_command ();
 }
 
 void
@@ -5623,7 +5637,7 @@ Editor::use_own_window (bool and_fill_it)
 		// win->signal_realize().connect (*this, &Editor::on_realize);
 		win->signal_event().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), win));
 		win->signal_event().connect (sigc::mem_fun (*this, &Editor::generic_event_handler));
-		win->set_data ("ardour-bindings", bindings);
+		set_widget_bindings (*win, bindings, ARDOUR_BINDING_KEY);
 
 		update_title ();
 	}

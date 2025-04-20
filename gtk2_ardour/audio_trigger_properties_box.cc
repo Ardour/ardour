@@ -110,6 +110,8 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	eTempoBox->set_edge_color (0x000000ff); // black
 	eTempoBox->add (*bpm_table);
 
+	eTempoBox->show_all();
+
 	/* -------------- Clip start&length (redundant with the trimmer gui handles?)  ----------*/
 	row = 0;
 

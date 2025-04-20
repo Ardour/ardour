@@ -68,11 +68,9 @@ using std::string;
 
 sigc::signal<void> EditingContext::DropDownKeys;
 Gtkmm2ext::Bindings* EditingContext::button_bindings = nullptr;
-Glib::RefPtr<Gtk::ActionGroup> EditingContext::_midi_actions;
-Glib::RefPtr<Gtk::ActionGroup> EditingContext::_common_actions;
 std::vector<std::string> EditingContext::grid_type_strings;
 MouseCursors* EditingContext::_cursors = nullptr;
-EditingContext* EditingContext::_current_editing_context = nullptr;
+bool EditingContext::need_shared_actions = true;
 
 static const gchar *_grid_type_strings[] = {
 	N_("No Grid"),
@@ -110,18 +108,6 @@ static const gchar *_zoom_focus_strings[] = {
 	0
 };
 
-Editing::GridType EditingContext::_draw_length (GridTypeNone);
-int EditingContext::_draw_velocity (DRAW_VEL_AUTO);
-int EditingContext::_draw_channel (DRAW_CHAN_AUTO);
-sigc::signal<void> EditingContext::DrawLengthChanged;
-sigc::signal<void> EditingContext::DrawVelocityChanged;
-sigc::signal<void> EditingContext::DrawChannelChanged;
-
-Glib::RefPtr<Gtk::Action> EditingContext::undo_action;
-Glib::RefPtr<Gtk::Action> EditingContext::redo_action;
-Glib::RefPtr<Gtk::Action> EditingContext::alternate_redo_action;
-Glib::RefPtr<Gtk::Action> EditingContext::alternate_alternate_redo_action;
-
 EditingContext::EditingContext (std::string const & name)
 	: rubberband_rect (0)
 	, _name (name)
@@ -132,6 +118,9 @@ EditingContext::EditingContext (std::string const & name)
 	, internal_snap_mode (SnapOff)
 	, _grid_type (GridTypeBeat)
 	, _snap_mode (SnapOff)
+	, _draw_length (GridTypeNone)
+	, _draw_velocity (DRAW_VEL_AUTO)
+	, _draw_channel (DRAW_CHAN_AUTO)
 	, _timeline_origin (0.)
 	, play_note_selection_button (ArdourButton::default_elements)
 	, follow_playhead_button (_("F"), ArdourButton::Text, true)
@@ -156,7 +145,7 @@ EditingContext::EditingContext (std::string const & name)
 	, quantize_dialog (nullptr)
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
 	, horizontal_adjustment (0.0, 0.0, 1e16)
-	, bindings (nullptr)
+	, own_bindings (nullptr)
 	, mouse_mode (MouseObject)
 	, visual_change_queued (false)
 	, autoscroll_horizontal_allowed (false)
@@ -255,6 +244,15 @@ EditingContext::EditingContext (std::string const & name)
 
 EditingContext::~EditingContext()
 {
+	ActionManager::drop_action_group (_midi_actions);
+	ActionManager::drop_action_group (_common_actions);
+	ActionManager::drop_action_group (editor_actions);
+	ActionManager::drop_action_group (snap_actions);
+	ActionManager::drop_action_group (length_actions);
+	ActionManager::drop_action_group (channel_actions);
+	ActionManager::drop_action_group (velocity_actions);
+	ActionManager::drop_action_group (zoom_actions);
+
 	delete grid_lines;
 }
 
@@ -297,181 +295,171 @@ EditingContext::set_selected_midi_region_view (MidiRegionView& mrv)
 }
 
 void
-EditingContext::register_common_actions (Bindings* common_bindings)
+EditingContext::register_common_actions (Bindings* common_bindings, std::string const & prefix)
 {
-	if (_common_actions) {
-		return;
-	}
+	_common_actions = ActionManager::create_action_group (common_bindings, prefix + X_("Editing"));
 
-	_common_actions = ActionManager::create_action_group (common_bindings, X_("Editing"));
+	reg_sens (_common_actions, "temporal-zoom-out", _("Zoom Out"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), true));
+	reg_sens (_common_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), false));
 
-	reg_sens (_common_actions, "temporal-zoom-out", _("Zoom Out"), []() { current_editing_context()->temporal_zoom_step (true); });
-	reg_sens (_common_actions, "temporal-zoom-in", _("Zoom In"), []() { current_editing_context()->temporal_zoom_step (false); });
+	undo_action = reg_sens (_common_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::undo), 1U));
+	redo_action = reg_sens (_common_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::redo), 1U));
+	alternate_redo_action = reg_sens (_common_actions, "alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::redo), 1U));
+	alternate_alternate_redo_action = reg_sens (_common_actions, "alternate-alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::redo), 1U));
 
-	undo_action = reg_sens (_common_actions, "undo", S_("Command|Undo"), []() { current_editing_context()->undo(1U) ; });
-	redo_action = reg_sens (_common_actions, "redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
-	alternate_redo_action = reg_sens (_common_actions, "alternate-redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
-	alternate_alternate_redo_action = reg_sens (_common_actions, "alternate-alternate-redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
+	reg_sens (_common_actions, "editor-delete", _("Delete"), sigc::mem_fun (*this, &EditingContext::delete_));
+	reg_sens (_common_actions, "alternate-editor-delete", _("Delete"), sigc::mem_fun (*this, &EditingContext::delete_));
 
-	reg_sens (_common_actions, "editor-delete", _("Delete"), []() { current_editing_context()->delete_() ; });
-	reg_sens (_common_actions, "alternate-editor-delete", _("Delete"), []() { current_editing_context()->delete_() ; });
-
-	reg_sens (_common_actions, "editor-cut", _("Cut"), []() { current_editing_context()->cut() ; });
-	reg_sens (_common_actions, "editor-copy", _("Copy"), []() { current_editing_context()->copy() ; });
-	reg_sens (_common_actions, "editor-paste", _("Paste"), []() { current_editing_context()->keyboard_paste() ; });
+	reg_sens (_common_actions, "editor-cut", _("Cut"), sigc::mem_fun (*this, &EditingContext::cut));
+	reg_sens (_common_actions, "editor-copy", _("Copy"), sigc::mem_fun (*this, &EditingContext::copy));
+	reg_sens (_common_actions, "editor-paste", _("Paste"), sigc::mem_fun (*this, &EditingContext::keyboard_paste));
 
 	RadioAction::Group mouse_mode_group;
 
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseObject); });
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseRange); });
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseDraw); });
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseTimeFX); });
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseGrid); });
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseContent); });
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), []() { current_editing_context()->mouse_mode_toggled (Editing::MouseCut); });
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseObject));
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseRange));
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseDraw));
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseTimeFX));
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseGrid));
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseContent));
+	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseCut));
 
-	Glib::RefPtr<ActionGroup> zoom_actions = ActionManager::create_action_group (common_bindings, X_("Zoom"));
+	zoom_actions = ActionManager::create_action_group (common_bindings, prefix + X_("Zoom"));
 	RadioAction::Group zoom_group;
 
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusLeft); });
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-right", _("Zoom Focus Right"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusRight); });
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-center", _("Zoom Focus Center"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusCenter); });
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-playhead", _("Zoom Focus Playhead"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusPlayhead); });
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-mouse", _("Zoom Focus Mouse"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusMouse); });
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-edit", _("Zoom Focus Edit Point"), []() { current_editing_context()->zoom_focus_chosen (Editing::ZoomFocusEdit); });
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusLeft));
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-right", _("Zoom Focus Right"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusRight));
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-center", _("Zoom Focus Center"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusCenter));
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-playhead", _("Zoom Focus Playhead"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusPlayhead));
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-mouse", _("Zoom Focus Mouse"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusMouse));
+	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-edit", _("Zoom Focus Edit Point"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusEdit));
 
-	ActionManager::register_action (zoom_actions, X_("cycle-zoom-focus"), _("Next Zoom Focus"), []() { current_editing_context()->cycle_zoom_focus(); });
+	ActionManager::register_action (zoom_actions, X_("cycle-zoom-focus"), _("Next Zoom Focus"), sigc::mem_fun (*this, &EditingContext::cycle_zoom_focus));
 }
 
 void
-EditingContext::register_midi_actions (Bindings* midi_bindings)
+EditingContext::register_midi_actions (Bindings* midi_bindings, std::string const & prefix)
 {
-	/* These actions are all singletons, defined globally for all EditingContexts */
-
-	if (_midi_actions) {
-		return;
-	}
-
-	_midi_actions = ActionManager::create_action_group (midi_bindings, X_("Notes"));
+	_midi_actions = ActionManager::create_action_group (midi_bindings, prefix + X_("Notes"));
 
 	/* two versions to allow same action for Delete and Backspace */
 
-	ActionManager::register_action (_midi_actions, X_("clear-selection"), _("Clear Note Selection"), []() { current_editing_context()->midi_action (&MidiRegionView::clear_note_selection); });
-	ActionManager::register_action (_midi_actions, X_("invert-selection"), _("Invert Note Selection"), []() { current_editing_context()->midi_action (&MidiRegionView::invert_selection); });
-	ActionManager::register_action (_midi_actions, X_("extend-selection"), _("Extend Note Selection"), []() { current_editing_context()->midi_action (&MidiRegionView::extend_selection); });
-	ActionManager::register_action (_midi_actions, X_("duplicate-selection"), _("Duplicate Note Selection"), []() { current_editing_context()->midi_action (&MidiRegionView::duplicate_selection); });
+	ActionManager::register_action (_midi_actions, X_("clear-selection"), _("Clear Note Selection"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::clear_note_selection));
+	ActionManager::register_action (_midi_actions, X_("invert-selection"), _("Invert Note Selection"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::invert_selection));
+	ActionManager::register_action (_midi_actions, X_("extend-selection"), _("Extend Note Selection"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::extend_selection));
+	ActionManager::register_action (_midi_actions, X_("duplicate-selection"), _("Duplicate Note Selection"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::duplicate_selection));
 
 	/* Lengthen */
 
-	ActionManager::register_action (_midi_actions, X_("move-starts-earlier-fine"), _("Move Note Start Earlier (fine)"), []() { current_editing_context()->midi_action (&MidiRegionView::move_note_starts_earlier_fine); });
-	ActionManager::register_action (_midi_actions, X_("move-starts-earlier"), _("Move Note Start Earlier"), []() { current_editing_context()->midi_action (&MidiRegionView::move_note_starts_earlier); });
-	ActionManager::register_action (_midi_actions, X_("move-ends-later-fine"), _("Move Note Ends Later (fine)"), []() { current_editing_context()->midi_action (&MidiRegionView::move_note_ends_later_fine); });
-	ActionManager::register_action (_midi_actions, X_("move-ends-later"), _("Move Note Ends Later"), []() { current_editing_context()->midi_action (&MidiRegionView::move_note_ends_later); });
+	ActionManager::register_action (_midi_actions, X_("move-starts-earlier-fine"), _("Move Note Start Earlier (fine)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::move_note_starts_earlier_fine));
+	ActionManager::register_action (_midi_actions, X_("move-starts-earlier"), _("Move Note Start Earlier"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::move_note_starts_earlier));
+	ActionManager::register_action (_midi_actions, X_("move-ends-later-fine"), _("Move Note Ends Later (fine)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::move_note_ends_later_fine));
+	ActionManager::register_action (_midi_actions, X_("move-ends-later"), _("Move Note Ends Later"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::move_note_ends_later));
 
 	/* Shorten */
 
-	ActionManager::register_action (_midi_actions, X_("move-starts-later-fine"), _("Move Note Start Later (fine)"), []() { current_editing_context()->midi_action (&MidiRegionView::move_note_starts_later_fine); });
-	ActionManager::register_action (_midi_actions, X_("move-starts-later"), _("Move Note Start Later"), []() { current_editing_context()->midi_action (&MidiRegionView::move_note_starts_later); });
-	ActionManager::register_action (_midi_actions, X_("move-ends-earlier-fine"), _("Move Note Ends Earlier (fine)"), []() { current_editing_context()->midi_action (&MidiRegionView::move_note_ends_earlier_fine); });
-	ActionManager::register_action (_midi_actions, X_("move-ends-earlier"), _("Move Note Ends Earlier"), []() { current_editing_context()->midi_action (&MidiRegionView::move_note_ends_earlier); });
+	ActionManager::register_action (_midi_actions, X_("move-starts-later-fine"), _("Move Note Start Later (fine)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::move_note_starts_later_fine));
+	ActionManager::register_action (_midi_actions, X_("move-starts-later"), _("Move Note Start Later"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::move_note_starts_later));
+	ActionManager::register_action (_midi_actions, X_("move-ends-earlier-fine"), _("Move Note Ends Earlier (fine)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::move_note_ends_earlier_fine));
+	ActionManager::register_action (_midi_actions, X_("move-ends-earlier"), _("Move Note Ends Earlier"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::move_note_ends_earlier));
 
 
 	/* Alt versions allow bindings for both Tab and ISO_Left_Tab, if desired */
 
-	ActionManager::register_action (_midi_actions, X_("select-next"), _("Select Next"), []() { current_editing_context()->midi_action (&MidiView::select_next_note); });
-	ActionManager::register_action (_midi_actions, X_("alt-select-next"), _("Select Next (alternate)"), []() { current_editing_context()->midi_action (&MidiView::select_next_note); });
-	ActionManager::register_action (_midi_actions, X_("select-previous"), _("Select Previous"), []() { current_editing_context()->midi_action (&MidiView::select_previous_note); });
-	ActionManager::register_action (_midi_actions, X_("alt-select-previous"), _("Select Previous (alternate)"), []() { current_editing_context()->midi_action (&MidiView::select_previous_note); });
-	ActionManager::register_action (_midi_actions, X_("add-select-next"), _("Add Next to Selection"), []() { current_editing_context()->midi_action (&MidiView::add_select_next_note); });
-	ActionManager::register_action (_midi_actions, X_("alt-add-select-next"), _("Add Next to Selection (alternate)"), []() { current_editing_context()->midi_action (&MidiView::add_select_next_note); });
-	ActionManager::register_action (_midi_actions, X_("add-select-previous"), _("Add Previous to Selection"), []() { current_editing_context()->midi_action (&MidiView::add_select_previous_note); });
-	ActionManager::register_action (_midi_actions, X_("alt-add-select-previous"), _("Add Previous to Selection (alternate)"), []() { current_editing_context()->midi_action (&MidiView::add_select_previous_note); });
+	ActionManager::register_action (_midi_actions, X_("select-next"), _("Select Next"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::select_next_note));
+	ActionManager::register_action (_midi_actions, X_("alt-select-next"), _("Select Next (alternate)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::select_next_note));
+	ActionManager::register_action (_midi_actions, X_("select-previous"), _("Select Previous"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::select_previous_note));
+	ActionManager::register_action (_midi_actions, X_("alt-select-previous"), _("Select Previous (alternate)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::select_previous_note));
+	ActionManager::register_action (_midi_actions, X_("add-select-next"), _("Add Next to Selection"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::add_select_next_note));
+	ActionManager::register_action (_midi_actions, X_("alt-add-select-next"), _("Add Next to Selection (alternate)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::add_select_next_note));
+	ActionManager::register_action (_midi_actions, X_("add-select-previous"), _("Add Previous to Selection"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::add_select_previous_note));
+	ActionManager::register_action (_midi_actions, X_("alt-add-select-previous"), _("Add Previous to Selection (alternate)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::add_select_previous_note));
 
-	ActionManager::register_action (_midi_actions, X_("increase-velocity"), _("Increase Velocity"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity); });
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine"), _("Increase Velocity (fine)"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity_fine); });
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-smush"), _("Increase Velocity (allow mush)"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity_smush); });
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-together"), _("Increase Velocity (non-relative)"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity_together); });
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-smush"), _("Increase Velocity (fine, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity_fine_smush); });
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-together"), _("Increase Velocity (fine, non-relative)"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity_fine_together); });
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-smush-together"), _("Increase Velocity (maintain ratios, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity_smush_together); });
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-smush-together"), _("Increase Velocity (fine, allow mush, non-relative)"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity_fine_smush_together); });
+	ActionManager::register_action (_midi_actions, X_("increase-velocity"), _("Increase Velocity"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::increase_note_velocity));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine"), _("Increase Velocity (fine)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::increase_note_velocity_fine));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-smush"), _("Increase Velocity (allow mush)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::increase_note_velocity_smush));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-together"), _("Increase Velocity (non-relative)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::increase_note_velocity_together));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-smush"), _("Increase Velocity (fine, allow mush)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::increase_note_velocity_fine_smush));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-together"), _("Increase Velocity (fine, non-relative)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::increase_note_velocity_fine_together));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-smush-together"), _("Increase Velocity (maintain ratios, allow mush)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::increase_note_velocity_smush_together));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-smush-together"), _("Increase Velocity (fine, allow mush, non-relative)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::increase_note_velocity_fine_smush_together));
 
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity"), _("Decrease Velocity"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity); });
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine"), _("Decrease Velocity (fine)"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity_fine); });
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush"), _("Decrease Velocity (allow mush)"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity_smush); });
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-together"), _("Decrease Velocity (non-relative)"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity_together); });
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-smush"), _("Decrease Velocity (fine, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity_fine_smush); });
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-together"), _("Decrease Velocity (fine, non-relative)"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity_fine_together); });
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush-together"), _("Decrease Velocity (maintain ratios, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity_smush_together); });
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-smush-together"), _("Decrease Velocity (fine, allow mush, non-relative)"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity_fine_smush_together); });
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity"), _("Decrease Velocity"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::decrease_note_velocity));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine"), _("Decrease Velocity (fine)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::decrease_note_velocity_fine));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush"), _("Decrease Velocity (allow mush)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::decrease_note_velocity_smush));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-together"), _("Decrease Velocity (non-relative)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::decrease_note_velocity_together));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-smush"), _("Decrease Velocity (fine, allow mush)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::decrease_note_velocity_fine_smush));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-together"), _("Decrease Velocity (fine, non-relative)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::decrease_note_velocity_fine_together));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush-together"), _("Decrease Velocity (maintain ratios, allow mush)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::decrease_note_velocity_smush_together));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-smush-together"), _("Decrease Velocity (fine, allow mush, non-relative)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::decrease_note_velocity_fine_smush_together));
 
-	ActionManager::register_action (_midi_actions, X_("transpose-up-octave"), _("Transpose Up (octave)"), []() { current_editing_context()->midi_action (&MidiView::transpose_up_octave); });
-	ActionManager::register_action (_midi_actions, X_("transpose-up-octave-smush"), _("Transpose Up (octave, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::transpose_up_octave_smush); });
-	ActionManager::register_action (_midi_actions, X_("transpose-up-semitone"), _("Transpose Up (semitone)"), []() { current_editing_context()->midi_action (&MidiView::transpose_up_tone); });
-	ActionManager::register_action (_midi_actions, X_("transpose-up-semitone-smush"), _("Transpose Up (semitone, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::transpose_up_octave_smush); });
+	ActionManager::register_action (_midi_actions, X_("transpose-up-octave"), _("Transpose Up (octave)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::transpose_up_octave));
+	ActionManager::register_action (_midi_actions, X_("transpose-up-octave-smush"), _("Transpose Up (octave, allow mush)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::transpose_up_octave_smush));
+	ActionManager::register_action (_midi_actions, X_("transpose-up-semitone"), _("Transpose Up (semitone)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::transpose_up_tone));
+	ActionManager::register_action (_midi_actions, X_("transpose-up-semitone-smush"), _("Transpose Up (semitone, allow mush)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::transpose_up_octave_smush));
 
-	ActionManager::register_action (_midi_actions, X_("transpose-down-octave"), _("Transpose Down (octave)"), []() { current_editing_context()->midi_action (&MidiView::transpose_down_octave); });
-	ActionManager::register_action (_midi_actions, X_("transpose-down-octave-smush"), _("Transpose Down (octave, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::transpose_down_octave_smush); });
-	ActionManager::register_action (_midi_actions, X_("transpose-down-semitone"), _("Transpose Down (semitone)"), []() { current_editing_context()->midi_action (&MidiView::transpose_down_tone); });
-	ActionManager::register_action (_midi_actions, X_("transpose-down-semitone-smush"), _("Transpose Down (semitone, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::transpose_down_octave_smush); });
+	ActionManager::register_action (_midi_actions, X_("transpose-down-octave"), _("Transpose Down (octave)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::transpose_down_octave));
+	ActionManager::register_action (_midi_actions, X_("transpose-down-octave-smush"), _("Transpose Down (octave, allow mush)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::transpose_down_octave_smush));
+	ActionManager::register_action (_midi_actions, X_("transpose-down-semitone"), _("Transpose Down (semitone)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::transpose_down_tone));
+	ActionManager::register_action (_midi_actions, X_("transpose-down-semitone-smush"), _("Transpose Down (semitone, allow mush)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::transpose_down_octave_smush));
 
-	ActionManager::register_action (_midi_actions, X_("nudge-later"), _("Nudge Notes Later (grid)"), []() { current_editing_context()->midi_action (&MidiView::nudge_notes_later); });
-	ActionManager::register_action (_midi_actions, X_("nudge-later-fine"), _("Nudge Notes Later (1/4 grid)"), []() { current_editing_context()->midi_action (&MidiView::nudge_notes_later_fine); });
-	ActionManager::register_action (_midi_actions, X_("nudge-earlier"), _("Nudge Notes Earlier (grid)"), []() { current_editing_context()->midi_action (&MidiView::nudge_notes_earlier); });
-	ActionManager::register_action (_midi_actions, X_("nudge-earlier-fine"), _("Nudge Notes Earlier (1/4 grid)"), []() { current_editing_context()->midi_action (&MidiView::nudge_notes_earlier_fine); });
+	ActionManager::register_action (_midi_actions, X_("nudge-later"), _("Nudge Notes Later (grid)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::nudge_notes_later));
+	ActionManager::register_action (_midi_actions, X_("nudge-later-fine"), _("Nudge Notes Later (1/4 grid)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::nudge_notes_later_fine));
+	ActionManager::register_action (_midi_actions, X_("nudge-earlier"), _("Nudge Notes Earlier (grid)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::nudge_notes_earlier));
+	ActionManager::register_action (_midi_actions, X_("nudge-earlier-fine"), _("Nudge Notes Earlier (1/4 grid)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::nudge_notes_earlier_fine));
 
-	ActionManager::register_action (_midi_actions, X_("split-notes-grid"), _("Split Selected Notes on grid boundaries"), []() { current_editing_context()->midi_action (&MidiView::split_notes_grid); });
-	ActionManager::register_action (_midi_actions, X_("split-notes-more"), _("Split Selected Notes into more pieces"), []() { current_editing_context()->midi_action (&MidiView::split_notes_more); });
-	ActionManager::register_action (_midi_actions, X_("split-notes-less"), _("Split Selected Notes into less pieces"), []() { current_editing_context()->midi_action (&MidiView::split_notes_less); });
-	ActionManager::register_action (_midi_actions, X_("join-notes"), _("Join Selected Notes"), []() { current_editing_context()->midi_action (&MidiView::join_notes); });
+	ActionManager::register_action (_midi_actions, X_("split-notes-grid"), _("Split Selected Notes on grid boundaries"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::split_notes_grid));
+	ActionManager::register_action (_midi_actions, X_("split-notes-more"), _("Split Selected Notes into more pieces"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::split_notes_more));
+	ActionManager::register_action (_midi_actions, X_("split-notes-less"), _("Split Selected Notes into less pieces"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::split_notes_less));
+	ActionManager::register_action (_midi_actions, X_("join-notes"), _("Join Selected Notes"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::join_notes));
 
-	ActionManager::register_action (_midi_actions, X_("edit-channels"), _("Edit Note Channels"), []() { current_editing_context()->midi_action (&MidiView::channel_edit); });
-	ActionManager::register_action (_midi_actions, X_("edit-velocities"), _("Edit Note Velocities"), []() { current_editing_context()->midi_action (&MidiView::velocity_edit); });
+	ActionManager::register_action (_midi_actions, X_("edit-channels"), _("Edit Note Channels"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::channel_edit));
+	ActionManager::register_action (_midi_actions, X_("edit-velocities"), _("Edit Note Velocities"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::velocity_edit));
 
-	ActionManager::register_action (_midi_actions, X_("quantize-selected-notes"), _("Quantize Selected Notes"), []() { current_editing_context()->midi_action ( &MidiView::quantize_selected_notes); });
+	ActionManager::register_action (_midi_actions, X_("quantize-selected-notes"), _("Quantize Selected Notes"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action),  &MidiView::quantize_selected_notes));
 
-	Glib::RefPtr<ActionGroup> length_actions = ActionManager::create_action_group (midi_bindings, X_("DrawLength"));
+	length_actions = ActionManager::create_action_group (midi_bindings, prefix + X_("DrawLength"));
 	RadioAction::Group draw_length_group;
 
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv32); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentyeighths"),  grid_type_strings[(int)GridTypeBeatDiv28].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv28); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentyfourths"),  grid_type_strings[(int)GridTypeBeatDiv24].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv24); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentieths"),     grid_type_strings[(int)GridTypeBeatDiv20].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv20); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-asixteenthbeat"), grid_type_strings[(int)GridTypeBeatDiv16].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv16); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fourteenths"),    grid_type_strings[(int)GridTypeBeatDiv14].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv14); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twelfths"),       grid_type_strings[(int)GridTypeBeatDiv12].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv12); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-tenths"),         grid_type_strings[(int)GridTypeBeatDiv10].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv10); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-eighths"),        grid_type_strings[(int)GridTypeBeatDiv8].c_str(),  []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv8); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sevenths"),       grid_type_strings[(int)GridTypeBeatDiv7].c_str(),  []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv7); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sixths"),         grid_type_strings[(int)GridTypeBeatDiv6].c_str(),  []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv6); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fifths"),         grid_type_strings[(int)GridTypeBeatDiv5].c_str(),  []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv5); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-quarters"),       grid_type_strings[(int)GridTypeBeatDiv4].c_str(),  []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv4); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirds"),         grid_type_strings[(int)GridTypeBeatDiv3].c_str(),  []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv3); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-halves"),         grid_type_strings[(int)GridTypeBeatDiv2].c_str(),  []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv2); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      []() { EditingContext::draw_length_action_method (Editing::GridTypeBeat); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       []() { EditingContext::draw_length_action_method (Editing::GridTypeBar); });
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-auto"),           _("Auto"),                                         []() { EditingContext::draw_length_action_method (DRAW_LEN_AUTO); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv32));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentyeighths"),  grid_type_strings[(int)GridTypeBeatDiv28].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv28));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentyfourths"),  grid_type_strings[(int)GridTypeBeatDiv24].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv24));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentieths"),     grid_type_strings[(int)GridTypeBeatDiv20].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv20));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-asixteenthbeat"), grid_type_strings[(int)GridTypeBeatDiv16].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv16));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fourteenths"),    grid_type_strings[(int)GridTypeBeatDiv14].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv14));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twelfths"),       grid_type_strings[(int)GridTypeBeatDiv12].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv12));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-tenths"),         grid_type_strings[(int)GridTypeBeatDiv10].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv10));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-eighths"),        grid_type_strings[(int)GridTypeBeatDiv8].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv8));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sevenths"),       grid_type_strings[(int)GridTypeBeatDiv7].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv7));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sixths"),         grid_type_strings[(int)GridTypeBeatDiv6].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv6));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fifths"),         grid_type_strings[(int)GridTypeBeatDiv5].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv5));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-quarters"),       grid_type_strings[(int)GridTypeBeatDiv4].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv4));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirds"),         grid_type_strings[(int)GridTypeBeatDiv3].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv3));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-halves"),         grid_type_strings[(int)GridTypeBeatDiv2].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv2));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeat));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBar));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-auto"),           _("Auto"),                                         sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), DRAW_LEN_AUTO));
 
-	Glib::RefPtr<ActionGroup> velocity_actions = ActionManager::create_action_group (midi_bindings, _("Draw Velocity"));
+	velocity_actions = ActionManager::create_action_group (midi_bindings, prefix + X_("DrawVelocity"));
 	RadioAction::Group draw_velocity_group;
-	ActionManager::register_radio_action (velocity_actions, draw_velocity_group, X_("draw-velocity-auto"),  _("Auto"), []() { EditingContext::draw_velocity_action_method (DRAW_VEL_AUTO); });
+	ActionManager::register_radio_action (velocity_actions, draw_velocity_group, X_("draw-velocity-auto"),  _("Auto"), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), DRAW_VEL_AUTO));
 	for (int i = 1; i <= 127; i++) {
 		char buf[64];
 		snprintf(buf, sizeof (buf), X_("draw-velocity-%d"), i);
 		char vel[64];
 		sprintf(vel, _("Velocity %d"), i);
-		ActionManager::register_radio_action (velocity_actions, draw_velocity_group, buf, vel, [i]() { EditingContext::draw_velocity_action_method (i); });
+		ActionManager::register_radio_action (velocity_actions, draw_velocity_group, buf, vel, sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), i));
 	}
 
-	Glib::RefPtr<ActionGroup> channel_actions = ActionManager::create_action_group (midi_bindings, _("Draw Channel"));
+	channel_actions = ActionManager::create_action_group (midi_bindings, prefix + X_("DrawChannel"));
 	RadioAction::Group draw_channel_group;
-	ActionManager::register_radio_action (channel_actions, draw_channel_group, X_("draw-channel-auto"),  _("Auto"), []() { EditingContext::draw_channel_action_method (DRAW_CHAN_AUTO); });
+	ActionManager::register_radio_action (channel_actions, draw_channel_group, X_("draw-channel-auto"),  _("Auto"), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_channel_chosen), DRAW_CHAN_AUTO));
 	for (int i = 0; i <= 15; i++) {
 		char buf[64];
 		snprintf(buf, sizeof (buf), X_("draw-channel-%d"), i+1);
 		char ch[64];
 		sprintf(ch, X_("Channel %d"), i+1);
-		ActionManager::register_radio_action (channel_actions, draw_channel_group, buf, ch, [i]() { EditingContext::draw_channel_action_method (i); });
+		ActionManager::register_radio_action (channel_actions, draw_channel_group, buf, ch, sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_channel_chosen), i));
 	}
 
 	ActionManager::set_sensitive (_midi_actions, false);
@@ -719,22 +707,6 @@ EditingContext::grid_type_chosen (GridType type)
 }
 
 void
-EditingContext::draw_length_action_method (GridType type)
-{
-	/* this is driven by a toggle on a radio group, and so is invoked twice,
-	   once for the item that became inactive and once for the one that became
-	   active.
-	*/
-
-	RefPtr<RadioAction> ract = draw_length_action (type);
-
-	if (ract && ract->get_active()) {
-		/* It doesn't really matter which EditingContext executes this */
-		current_editing_context()->set_draw_length_to (type);
-	}
-}
-
-void
 EditingContext::draw_length_chosen (GridType type)
 {
 	/* this is driven by a toggle on a radio group, and so is invoked twice,
@@ -746,25 +718,7 @@ EditingContext::draw_length_chosen (GridType type)
 
 	if (ract && ract->get_active()) {
 		/* It doesn't really matter which EditingContext executes this */
-		current_editing_context()->set_draw_length_to (type);
-	} else {
-		ract->set_active();
-	}
-}
-
-void
-EditingContext::draw_velocity_action_method (int v)
-{
-	/* this is driven by a toggle on a radio group, and so is invoked twice,
-	   once for the item that became inactive and once for the one that became
-	   active.
-	*/
-
-	RefPtr<RadioAction> ract = draw_velocity_action (v);
-
-	if (ract && ract->get_active()) {
-		/* It doesn't really matter which EditingContext executes this */
-		current_editing_context()->set_draw_velocity_to (v);
+		set_draw_length_to (type);
 	}
 }
 
@@ -780,25 +734,7 @@ EditingContext::draw_velocity_chosen (int v)
 
 	if (ract && ract->get_active()) {
 		/* It doesn't really matter which EditingContext executes this */
-		current_editing_context()->set_draw_velocity_to (v);
-	} else {
-		ract->set_active();
-	}
-}
-
-void
-EditingContext::draw_channel_action_method (int c)
-{
-	/* this is driven by a toggle on a radio group, and so is invoked twice,
-	   once for the item that became inactive and once for the one that became
-	   active.
-	*/
-
-	RefPtr<RadioAction> ract = draw_channel_action (c);
-
-	if (ract && ract->get_active()) {
-		/* It doesn't really matter which EditingContext executes this */
-		current_editing_context()->set_draw_channel_to (c);
+		set_draw_velocity_to (v);
 	}
 }
 
@@ -814,9 +750,7 @@ EditingContext::draw_channel_chosen (int c)
 
 	if (ract && ract->get_active()) {
 		/* It doesn't really matter which EditingContext executes this */
-		current_editing_context()->set_draw_channel_to (c);
-	} else {
-		ract->set_active();
+		set_draw_channel_to (c);
 	}
 }
 
@@ -1116,7 +1050,7 @@ EditingContext::draw_velocity_action (int v)
 		action = buf;
 	}
 
-	act = ActionManager::get_action (_("Draw Velocity"), action);
+	act = ActionManager::get_action ((_name + X_("DrawVelocity")).c_str(), action);
 	if (act) {
 		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 		return ract;
@@ -1140,7 +1074,7 @@ EditingContext::draw_channel_action (int c)
 		action = buf;
 	}
 
-	act = ActionManager::get_action (_("Draw Channel"), action);
+	act = ActionManager::get_action ((_name + X_("DrawChannel")).c_str(), action);
 	if (act) {
 		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 		return ract;
@@ -1219,7 +1153,7 @@ EditingContext::draw_length_action (GridType type)
 		abort(); /*NOTREACHED*/
 	}
 
-	act = ActionManager::get_action (X_("DrawLength"), action);
+	act = ActionManager::get_action ((_name + X_("DrawLength")).c_str(), action);
 
 	if (act) {
 		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
@@ -1295,13 +1229,13 @@ EditingContext::build_draw_midi_menus ()
 	using namespace Menu_Helpers;
 
 	/* Note-Length when drawing */
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeat],     []() { EditingContext::draw_length_chosen ((GridType) GridTypeBeat); }));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv2], []() { EditingContext::draw_length_chosen ((GridType) GridTypeBeatDiv2); }));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv4], []() { EditingContext::draw_length_chosen ((GridType) GridTypeBeatDiv4); }));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv8], []() { EditingContext::draw_length_chosen ((GridType) GridTypeBeatDiv8); }));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv16],[]() { EditingContext::draw_length_chosen ((GridType) GridTypeBeatDiv16); }));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv32],[]() { EditingContext::draw_length_chosen ((GridType) GridTypeBeatDiv32); }));
-	draw_length_selector.AddMenuElem (MenuElem (_("Auto"),[]() { EditingContext::draw_length_chosen ((GridType) DRAW_LEN_AUTO); }));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeat],     sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), (GridType) GridTypeBeat)));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv2], sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), (GridType) GridTypeBeatDiv2)));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv4], sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), (GridType) GridTypeBeatDiv4)));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv8], sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), (GridType) GridTypeBeatDiv8)));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv16],sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), (GridType) GridTypeBeatDiv16)));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv32],sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), (GridType) GridTypeBeatDiv32)));
+	draw_length_selector.AddMenuElem (MenuElem (_("Auto"),sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), (GridType) DRAW_LEN_AUTO)));
 
 	{
 		std::vector<std::string> draw_grid_type_strings = {grid_type_strings.begin() + GridTypeBeat, grid_type_strings.begin() + GridTypeBeatDiv32 + 1};
@@ -1311,21 +1245,21 @@ EditingContext::build_draw_midi_menus ()
 
 	/* Note-Velocity when drawing */
 
-	draw_velocity_selector.AddMenuElem (MenuElem ("8",   []() { EditingContext::draw_velocity_chosen (8); }));
-	draw_velocity_selector.AddMenuElem (MenuElem ("32",  []() { EditingContext::draw_velocity_chosen (32); }));
-	draw_velocity_selector.AddMenuElem (MenuElem ("64",  []() { EditingContext::draw_velocity_chosen (64); }));
-	draw_velocity_selector.AddMenuElem (MenuElem ("82",  []() { EditingContext::draw_velocity_chosen (82); }));
-	draw_velocity_selector.AddMenuElem (MenuElem ("100", []() { EditingContext::draw_velocity_chosen (100); }));
-	draw_velocity_selector.AddMenuElem (MenuElem ("127", []() { EditingContext::draw_velocity_chosen (127); }));
-	draw_velocity_selector.AddMenuElem (MenuElem (_("Auto"),[]() { EditingContext::draw_velocity_chosen (DRAW_VEL_AUTO); }));
+	draw_velocity_selector.AddMenuElem (MenuElem ("8",   sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), 8)));
+	draw_velocity_selector.AddMenuElem (MenuElem ("32",  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), 32)));
+	draw_velocity_selector.AddMenuElem (MenuElem ("64",  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), 64)));
+	draw_velocity_selector.AddMenuElem (MenuElem ("82",  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), 82)));
+	draw_velocity_selector.AddMenuElem (MenuElem ("100", sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), 100)));
+	draw_velocity_selector.AddMenuElem (MenuElem ("127", sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), 127)));
+	draw_velocity_selector.AddMenuElem (MenuElem (_("Auto"),sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), DRAW_VEL_AUTO)));
 
 	/* Note-Channel when drawing */
 	for (int i = 0; i<= 15; i++) {
 		char buf[64];
 		sprintf(buf, "%d", i+1);
-		draw_channel_selector.AddMenuElem (MenuElem (buf, [i]() { EditingContext::draw_channel_chosen (i); }));
+		draw_channel_selector.AddMenuElem (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_channel_chosen), i)));
 	}
-	draw_channel_selector.AddMenuElem (MenuElem (_("Auto"),[]() { EditingContext::draw_channel_chosen (DRAW_CHAN_AUTO); }));
+	draw_channel_selector.AddMenuElem (MenuElem (_("Auto"),sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_channel_chosen), DRAW_CHAN_AUTO)));
 }
 
 bool
@@ -1847,7 +1781,7 @@ EditingContext::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* eve
 	   popping up the menu will cause a region leave event which clears
 	   entered_regionview. */
 
-	MidiView&       mrv = note->region_view();
+	MidiView&       mrv = note->midi_view();
 	const RegionSelection rs  = region_selection ();
 	const uint32_t sel_size = mrv.selection_size ();
 
@@ -2082,7 +2016,7 @@ EditingContext::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection
 				in_command = true;
 			}
 			(*cmd)();
-			_session->add_command (cmd);
+			add_command (cmd);
 			}
 	}
 
@@ -2090,19 +2024,6 @@ EditingContext::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection
 		commit_reversible_command ();
 		_session->set_dirty ();
 	}
-}
-
-EditingContext*
-EditingContext::current_editing_context()
-{
-	return _current_editing_context;
-}
-
-void
-EditingContext::switch_editing_context (EditingContext* ec)
-{
-	assert (ec);
-	_current_editing_context = ec;
 }
 
 double
@@ -2187,19 +2108,19 @@ EditingContext::get_mouse_mode_action (MouseMode m) const
 {
 	switch (m) {
 	case MouseRange:
-		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-range"));
+		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-range"));
 	case MouseObject:
-		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-object"));
+		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-object"));
 	case MouseCut:
-		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-cut"));
+		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-cut"));
 	case MouseDraw:
-		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-draw"));
+		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-draw"));
 	case MouseTimeFX:
-		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-timefx"));
+		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-timefx"));
 	case MouseGrid:
-		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-grid"));
+		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-grid"));
 	case MouseContent:
-		return ActionManager::get_action (X_("Editing"), X_("set-mouse-mode-content"));
+		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-content"));
 	}
 	return Glib::RefPtr<Action>();
 }
@@ -2209,9 +2130,9 @@ EditingContext::bind_mouse_mode_buttons ()
 {
 	RefPtr<Action> act;
 
-	act = ActionManager::get_action (X_("Editing"), X_("temporal-zoom-in"));
+	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("temporal-zoom-in"));
 	zoom_in_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Editing"), X_("temporal-zoom-out"));
+	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("temporal-zoom-out"));
 	zoom_out_button.set_related_action (act);
 
 	mouse_move_button.set_related_action (get_mouse_mode_action (Editing::MouseObject));
@@ -2407,7 +2328,7 @@ EditingContext::register_grid_actions ()
 	ActionManager::register_action (editor_actions, X_("next-grid-choice"), _("Next Quantize Grid Choice"), sigc::mem_fun (*this, &EditingContext::next_grid_choice));
 	ActionManager::register_action (editor_actions, X_("prev-grid-choice"), _("Previous Quantize Grid Choice"), sigc::mem_fun (*this, &EditingContext::prev_grid_choice));
 
-	snap_actions = ActionManager::create_action_group (bindings, editor_name() + X_("Snap"));
+	snap_actions = ActionManager::create_action_group (own_bindings, editor_name() + X_("Snap"));
 	RadioAction::Group grid_choice_group;
 
 	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv32)));
@@ -3245,7 +3166,8 @@ EditingContext::zoom_focus_action (ZoomFocus focus)
 		abort(); /*NOTREACHED*/
 	}
 
-	return ActionManager::get_radio_action (X_("Zoom"), action);
+
+	return ActionManager::get_radio_action ((_name + X_("Zoom")).c_str(), action);
 }
 
 void
@@ -3286,24 +3208,37 @@ EditingContext::copy ()
 void
 EditingContext::load_shared_bindings ()
 {
+	Bindings* m = Bindings::get_bindings (X_("MIDI"));
+	Bindings* b = Bindings::get_bindings (X_("Editing"));
+
+	if (need_shared_actions) {
+		register_midi_actions (m, string());
+		register_common_actions (b, string());
+		need_shared_actions = false;
+	}
+
 	/* This set of bindings may expand in the future to include things
 	 * other than MIDI editing, but for now this is all we've got as far as
 	 * bindings that need to be distinct from the Editors (because some of
 	 * the keys may overlap.
 	 */
 
-	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
-	register_midi_actions (midi_bindings);
+	/* Copy each set of shared bindings but give them a new name, which will make them refer to actions
+	 * named after this EditingContext (ie. unique to this EC)
+	 */
 
-	Bindings* shared_bindings = Bindings::get_bindings (X_("Editing"));
-	register_common_actions (shared_bindings);
+	Bindings* midi_bindings = new Bindings (_name, *m);
+	register_midi_actions (midi_bindings, _name);
+	midi_bindings->associate ();
 
-	/* Give this editing context the chance to add more mode mode actions */
-	add_mouse_mode_actions (_common_actions);
+	Bindings* shared_bindings = new Bindings (_name, *b);
+	register_common_actions (shared_bindings, _name);
+	shared_bindings->associate ();
 
 	/* Attach bindings to the canvas for this editing context */
-	get_canvas()->set_data ("ardour-bindings", midi_bindings);
-	get_canvas_viewport()->set_data ("ardour-bindings", shared_bindings);
+
+	bindings.push_back (midi_bindings);
+	bindings.push_back (shared_bindings);
 }
 
 void
@@ -3372,3 +3307,50 @@ EditingContext::update_grid ()
 	}
 }
 
+Location*
+EditingContext::transport_loop_location()
+{
+	if (_session) {
+		return _session->locations()->auto_loop_location();
+	} else {
+		return 0;
+	}
+}
+
+void
+EditingContext::set_loop_range (timepos_t const & start, timepos_t const & end, string cmd)
+{
+	if (!_session) {
+		return;
+	}
+	if (_session->get_play_loop () && _session->actively_recording ()) {
+		return;
+	}
+
+	begin_reversible_command (cmd);
+
+	Location* tll;
+
+	if ((tll = transport_loop_location()) == 0) {
+		Location* loc = new Location (*_session, start, end, _("Loop"),  Location::IsAutoLoop);
+		XMLNode &before = _session->locations()->get_state();
+		_session->locations()->add (loc, true);
+		_session->set_auto_loop_location (loc);
+		XMLNode &after = _session->locations()->get_state();
+		add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+	} else {
+		XMLNode &before = tll->get_state();
+		tll->set_hidden (false, this);
+		tll->set (start, end);
+		XMLNode &after = tll->get_state();
+		add_command (new MementoCommand<Location>(*tll, &before, &after));
+	}
+
+	commit_reversible_command ();
+}
+
+bool
+EditingContext::allow_trim_cursors () const
+{
+	return mouse_mode == MouseContent || mouse_mode == MouseTimeFX || mouse_mode == MouseDraw;
+}

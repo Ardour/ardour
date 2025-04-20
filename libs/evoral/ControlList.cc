@@ -1213,6 +1213,23 @@ ControlList::shift (timepos_t const& time, timecnt_t const& distance)
 	maybe_signal_changed ();
 }
 
+/* Note: timepos_t is used here instead of timecnt_t because there's an
+ * implicit origin for the magnitude of the distance.
+ */
+void
+ControlList::simple_shift (timepos_t const & distance)
+{
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+		for (auto & e : _events) {
+			e->when = e->when + distance;
+		}
+
+		mark_dirty ();
+	}
+	maybe_signal_changed ();
+}
+
 void
 ControlList::modify (iterator iter, timepos_t const& time, double val)
 {

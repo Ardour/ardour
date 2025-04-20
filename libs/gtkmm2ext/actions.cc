@@ -495,7 +495,7 @@ ActionManager::register_toggle_action (RefPtr<ActionGroup> group,
 	fullpath += name;
 
 	RefPtr<Action> act = ToggleAction::create (name, label);
-	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created action %1 in %2 success: %2\n", name, group->get_name(), (bool) act));
+	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created action %1 in %2 success: %3\n", name, group->get_name(), (bool) act));
 
 	if (actions.insert (ActionMap::value_type (fullpath, act)).second) {
 		group->add (act, sl);

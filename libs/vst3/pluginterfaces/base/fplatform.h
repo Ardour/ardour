@@ -115,8 +115,8 @@
 		#ifndef SMTG_CPP11
 			#error unsupported compiler
 		#endif
-		#define SMTG_CPP11_STDLIBSUPPORT SMTG_CPP11
-		#define SMTG_HAS_NOEXCEPT SMTG_CPP11
+		#define SMTG_CPP11_STDLIBSUPPORT 1
+		#define SMTG_HAS_NOEXCEPT 1
 	#endif
 //-----------------------------------------------------------------------------
 // Mac and iOS

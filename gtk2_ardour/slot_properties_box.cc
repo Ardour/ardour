@@ -142,14 +142,15 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Again), 0)));
 	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ReverseTrigger), 0)));
 	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ForwardTrigger), 0)));
-		Menu*     jump_menu = manage (new Menu);
-		MenuList& jitems      = jump_menu->items ();
-		jitems.push_back (MenuElem (_("Multi..."), sigc::bind (sigc::mem_fun (*this, &TriggerUI::edit_jump), false)));
-		for (int i = 0; i < TriggerBox::default_triggers_per_box; i++) {
-			FollowAction jump_fa = (FollowAction::JumpTrigger);
-			jump_fa.targets.set(i);
-			jitems.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 0)));
-		}
+
+	Menu*     jump_menu = manage (new Menu);
+	MenuList& jitems      = jump_menu->items ();
+	jitems.push_back (MenuElem (_("Multi..."), sigc::bind (sigc::mem_fun (*this, &TriggerUI::edit_jump), false)));
+	for (int i = 0; i < TriggerBox::default_triggers_per_box; i++) {
+		FollowAction jump_fa = (FollowAction::JumpTrigger);
+		jump_fa.targets.set(i);
+		jitems.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 0)));
+	}
 	_follow_left.AddMenuElem (MenuElem (_("Jump"), *jump_menu));
 	_follow_left.set_sizing_text (longest_follow);
 
@@ -159,14 +160,14 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Again), 1)));
 	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ReverseTrigger), 1)));
 	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ForwardTrigger), 1)));
-		Menu*     jump_menu_1 = manage (new Menu);
-		MenuList& jitems_1      = jump_menu_1->items ();
-		jitems_1.push_back (MenuElem (_("Multi..."), sigc::bind (sigc::mem_fun (*this, &TriggerUI::edit_jump), true)));
-		for (int i = 0; i < TriggerBox::default_triggers_per_box; i++) {
-			FollowAction jump_fa = (FollowAction::JumpTrigger);
-			jump_fa.targets.set(i);
-			jitems_1.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 1)));
-		}
+	Menu*     jump_menu_1 = manage (new Menu);
+	MenuList& jitems_1      = jump_menu_1->items ();
+	jitems_1.push_back (MenuElem (_("Multi..."), sigc::bind (sigc::mem_fun (*this, &TriggerUI::edit_jump), true)));
+	for (int i = 0; i < TriggerBox::default_triggers_per_box; i++) {
+		FollowAction jump_fa = (FollowAction::JumpTrigger);
+		jump_fa.targets.set(i);
+		jitems_1.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 1)));
+	}
 	_follow_right.AddMenuElem (MenuElem (_("Jump"), *jump_menu_1));
 	_follow_right.set_sizing_text (longest_follow);
 
@@ -323,25 +324,30 @@ SlotPropertyTable::SlotPropertyTable ()
 	fol_table->set_spacings(2);
 	fol_table->set_border_width(4);
 
-	_follow_count_label.set_text(_("Follow Count:"));  _follow_count_label.set_alignment(1.0, 0.5);
+	_follow_count_label.set_text(_("Follow Count:"));
+	_follow_count_label.set_alignment(1.0, 0.5);
 	fol_table->attach(_follow_count_label,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	Gtk::Alignment *align = manage (new Gtk::Alignment (0, .5, 0, 0));
 	align->add (_follow_count_spinner);
 	fol_table->attach(*align,               2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 ); row++;
 
-	_follow_length_label.set_text(_("Follow Length:"));  _follow_length_label.set_alignment(1.0, 0.5);
-	_beat_label.set_text(_("(beats)"));	_beat_label.set_alignment (0.0, 0.5);
+	_follow_length_label.set_text(_("Follow Length:"));
+	_follow_length_label.set_alignment(1.0, 0.5);
+	_beat_label.set_text(_("(beats)"));
+	_beat_label.set_alignment (0.0, 0.5);
 	Gtk::Alignment *fl_align = manage (new Gtk::Alignment (0, .5, 0, 0));
 	fl_align->add (_follow_length_spinner);
-	fol_table->attach(_use_follow_length_button,     0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK);
-	fol_table->attach(_follow_length_label,          1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	fol_table->attach(*fl_align,                     2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	fol_table->attach(_beat_label,                   3, 4, row, row+1, Gtk::SHRINK, Gtk::SHRINK);
+	fol_table->attach (_use_follow_length_button,     0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK);
+	fol_table->attach (_follow_length_label,          1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	fol_table->attach (*fl_align,                     2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	fol_table->attach (_beat_label,                   3, 4, row, row+1, Gtk::SHRINK, Gtk::SHRINK);
 
-	_follow_table.attach(_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
-	_follow_table.attach(_follow_right,  1, 2, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
-	_follow_table.attach( *prob_table,   0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
-	_follow_table.attach( *fol_table,    0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	_follow_table.attach (_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
+	_follow_table.attach (_follow_right,  1, 2, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
+	_follow_table.attach (*prob_table,   0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	_follow_table.attach (*fol_table,    0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+
+	_follow_table.show_all ();
 
 	ArdourWidgets::Frame* trigBox = manage (new ArdourWidgets::Frame);
 	trigBox->set_label(_("Clip Properties"));
@@ -360,6 +366,10 @@ SlotPropertyTable::SlotPropertyTable ()
 	eLaunchBox->set_name("EditorDark");
 	eLaunchBox->set_edge_color (0x000000ff); // black
 	eLaunchBox->add (_launch_table);
+
+	trigBox->show_all();
+	eLaunchBox->show_all();
+	eFollowBox->show_all();
 
 	attach(*trigBox,        0,1, 0,1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
 	attach(*eLaunchBox,     0,1, 1,2, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);

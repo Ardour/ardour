@@ -205,6 +205,10 @@ RegionView::init (bool wfd)
 		frame_handle_end->raise_to_top();
 	}
 
+	if (frame) {
+		frame->Event.connect (sigc::mem_fun (*this, &RegionView::canvas_group_event));
+	}
+
 	if (name_text) {
 		name_text->set_data ("regionview", this);
 		name_text->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_event), name_text, this));

@@ -30,9 +30,9 @@ std::map<std::string,EmScale> EmScale::_emscales;
 
 EmScale::EmScale (const Pango::FontDescription& fd)
 	: _font (fd)
-	, _char_pixel_width (-1)
-	, _char_pixel_height (-1)
-	, _char_avg_pixel_width (-1)
+	, _char_pixel_width (0)
+	, _char_pixel_height (0)
+	, _char_avg_pixel_width (0)
 {
 }
 

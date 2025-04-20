@@ -169,6 +169,7 @@
 #include "recorder_ui.h"
 #include "route_time_axis.h"
 #include "route_params_ui.h"
+#include "rta_window.h"
 #include "save_as_dialog.h"
 #include "save_template_dialog.h"
 #include "script_selector.h"
@@ -328,6 +329,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), std::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
 	, key_editor (X_("key-editor"), _("Keyboard Shortcuts"), std::bind (&ARDOUR_UI::create_key_editor, this))
 	, luawindow (X_("luawindow"), S_("Window|Scripting"), std::bind (&ARDOUR_UI::create_luawindow, this))
+	, rtawindow (X_("rtawindow"), S_("Window|Realtime Analyzer"), std::bind (&ARDOUR_UI::create_rtawindow, this))
 	, video_server_process (0)
 	, have_configure_timeout (false)
 	, last_configure_time (0)
@@ -485,6 +487,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		audio_port_matrix.set_state (*ui_xml, 0);
 		midi_port_matrix.set_state (*ui_xml, 0);
 		luawindow.set_state (*ui_xml, 0);
+		rtawindow.set_state (*ui_xml, 0);
 		export_video_dialog.set_state (*ui_xml, 0);
 		lua_script_window.set_state (*ui_xml, 0);
 		idleometer.set_state (*ui_xml, 0);
@@ -519,6 +522,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&audio_port_matrix);
 	WM::Manager::instance().register_window (&midi_port_matrix);
 	WM::Manager::instance().register_window (&luawindow);
+	WM::Manager::instance().register_window (&rtawindow);
 	WM::Manager::instance().register_window (&idleometer);
 	WM::Manager::instance().register_window (&io_plugin_window);
 	WM::Manager::instance().register_window (&plugin_manager_ui);
@@ -2175,6 +2179,16 @@ ARDOUR_UI::start_clocking ()
 		clock_signal_connection = Timers::fps_connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
 	} else {
 		clock_signal_connection = Timers::rapid_connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
+	}
+}
+
+unsigned int
+ARDOUR_UI::clock_signal_interval ()
+{
+	if (UIConfiguration::instance().get_super_rapid_clock_update()) {
+		return Timers::fps_interval ();
+	} else {
+		return Timers::rapid_interval ();
 	}
 }
 

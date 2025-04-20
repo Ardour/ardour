@@ -1323,6 +1323,7 @@ class MidiRubberbandSelectDrag : public RubberbandSelectDrag
 
 	void select_things (int, Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, bool);
 	void deselect_things ();
+	void finished (GdkEvent *, bool);
 
   private:
 	MidiView* _midi_view;

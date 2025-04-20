@@ -70,6 +70,10 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
+#ifdef __APPLE__
+extern void set_default_cocoa_invalidation (); // cocoacarbon.mm
+#endif
+
 NewUserWizard::NewUserWizard ()
 	: _splash_pushed (false)
 	, config_modified (false)
@@ -117,6 +121,12 @@ NewUserWizard::required ()
 	if (Glib::file_test (ARDOUR::been_here_before_path (), Glib::FILE_TEST_EXISTS)) {
 		return false;
 	}
+#ifdef __APPLE__
+	/* since we cannot use std::optional<bool> as UI_CONFIG_VARIABLE
+	 * this is likely the best place for a special case..
+	 */
+	set_default_cocoa_invalidation ();
+#endif
 
 	return true;
 }

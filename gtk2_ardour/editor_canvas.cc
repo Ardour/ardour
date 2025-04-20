@@ -172,10 +172,6 @@ Editor::initialize_canvas ()
 	meter_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
 	CANVAS_DEBUG_NAME (meter_group, "meter group");
 
-	float timebar_thickness = timebar_height; //was 4
-	float timebar_top = (timebar_height - timebar_thickness)/2;
-	float timebar_btm = timebar_height - timebar_top;
-
 	meter_bar = new ArdourCanvas::Rectangle (meter_group, ArdourCanvas::Rect (0.0, 0., ArdourCanvas::COORD_MAX, timebar_height));
 	CANVAS_DEBUG_NAME (meter_bar, "meter Bar");
 	meter_bar->set_outline(false);
@@ -186,15 +182,15 @@ Editor::initialize_canvas ()
 	tempo_bar->set_outline(false);
 	tempo_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 
-	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
+	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, 0, ArdourCanvas::COORD_MAX, timebar_height));
 	range_marker_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
 
-	marker_bar = new ArdourCanvas::Rectangle (marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
+	marker_bar = new ArdourCanvas::Rectangle (marker_group, ArdourCanvas::Rect (0.0, 0, ArdourCanvas::COORD_MAX, timebar_height));
 	marker_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 	CANVAS_DEBUG_NAME (marker_bar, "Marker Bar");
 
-	section_marker_bar = new ArdourCanvas::Rectangle (section_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
+	section_marker_bar = new ArdourCanvas::Rectangle (section_marker_group, ArdourCanvas::Rect (0.0, 0, ArdourCanvas::COORD_MAX, timebar_height));
 	section_marker_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 	CANVAS_DEBUG_NAME (section_marker_bar, "Arranger Marker Bar");
 
@@ -299,8 +295,8 @@ Editor::initialize_canvas ()
 	initialize_rulers ();
 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &Editor::color_handler));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &Editor::dpi_reset));
 	color_handler();
-
 }
 
 void
@@ -916,13 +912,7 @@ Editor::entered_track_canvas (GdkEventCrossing* ev)
 
 	if (!was_within) {
 
-		if (internal_editing()) {
-			/* ensure that key events go here because there are
-			   internal editing bindings associated only with the
-			   canvas. if the focus is elsewhere, we cannot find them.
-			*/
-			_track_canvas->grab_focus ();
-		}
+		_track_canvas->grab_focus ();
 
 		if (ev->detail == GDK_NOTIFY_NONLINEAR ||
 		    ev->detail == GDK_NOTIFY_NONLINEAR_VIRTUAL) {
@@ -1243,11 +1233,7 @@ Editor::which_canvas_cursor(ItemType type) const
 		/* find correct cursor to use in object/smart mode */
 		switch (type) {
 		case RegionItem:
-		/* We don't choose a cursor for these items on top of a region view,
-		   because this would push a new context on the enter stack which
-		   means switching the region context for things like smart mode
-		   won't actually change the cursor. */
-		// case WaveItem:
+		case WaveItem:
 		case StreamItem:
 		case AutomationTrackItem:
 			cursor = which_track_cursor ();
@@ -1295,10 +1281,11 @@ Editor::which_canvas_cursor(ItemType type) const
 			cursor = _cursors->cross_hair;
 			break;
 		case LeftFrameHandle:
-			if (effective_mouse_mode() == MouseObject) // (smart mode): if the user is in the btm half, show the trim cursor
+			if (effective_mouse_mode() == MouseObject) {// (smart mode): if the user is in the btm half, show the trim cursor
 				cursor = which_trim_cursor (true);
-			else
+			} else {
 				cursor = _cursors->selector; // (smart mode): in the top half, just show the selection (range) cursor
+			}
 			break;
 		case RightFrameHandle:
 			if (effective_mouse_mode() == MouseObject) // see above

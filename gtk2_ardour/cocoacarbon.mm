@@ -37,6 +37,7 @@
 
 #include "ardour_ui.h"
 #include "actions.h"
+#include "ui_config.h"
 #include "opts.h"
 
 #include <CoreFoundation/CFLocale.h>
@@ -207,4 +208,10 @@ use_cocoa_invalidation (int yn)
 {
 	gdk_quartz_set_use_cocoa_invalidation (yn);
 	std::cerr << "cocoa invalidation: " << yn << std::endl;
+}
+
+void
+set_default_cocoa_invalidation ()
+{
+  UIConfiguration::instance ().set_use_cocoa_invalidation (gdk_quartz_osx_version () <= GDK_OSX_VENTURA);
 }
