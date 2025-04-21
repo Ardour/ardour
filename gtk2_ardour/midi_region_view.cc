@@ -688,7 +688,7 @@ MidiRegionView::edit_in_pianoroll_window ()
 	std::shared_ptr<MidiTrack> track = std::dynamic_pointer_cast<MidiTrack> (trackview.stripable());
 	assert (track);
 
-	PianorollWindow* pr = new PianorollWindow (string_compose (_("Pianoroll: %1"), _region->name()), track->session());;
+	PianorollWindow* pr = new PianorollWindow (string_compose (_("Pianoroll: %1"), _region->name()), track->session());
 
 	pr->set (track, midi_region());
 	pr->show_all ();
