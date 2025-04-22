@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Jon Bennett - Bishopville, Ohio</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Simmons</Manufacturer>
+    <Model>SD500</Model>
+    <CustomDeviceMode Name="Default">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Instruments"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Instruments"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Instruments"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Instruments"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Instruments"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Instruments"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Instruments"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Instruments"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Instruments"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Drum Kits"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Channel 11"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Instruments"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Instruments"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Instruments"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Instruments"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Instruments"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+
+    <ChannelNameSet Name="Instruments">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="false"/>
+        <AvailableChannel Channel="11" Available="false"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+
+      <PatchBank Name="Instruments">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+
+        <PatchNameList>
+          <Patch Number="01" Name="Acoustic Piano" ProgramChange="0"/>
+          <Patch Number="02" Name="Electric Piano" ProgramChange="4"/>
+          <Patch Number="03" Name="Calvinet" ProgramChange="7"/>
+          <Patch Number="04" Name="Drawbar Organ" ProgramChange="16"/>
+          <Patch Number="05" Name="Percussion Organ" ProgramChange="17"/>
+          <Patch Number="06" Name="Nylon Guitar" ProgramChange="24"/>
+          <Patch Number="07" Name="Steel Guitar" ProgramChange="25"/>
+          <Patch Number="08" Name="Tweed Guitar" ProgramChange="27"/>
+          <Patch Number="09" Name="Muted Guitar" ProgramChange="28"/>
+          <Patch Number="10" Name="Distorted Guitar 1" ProgramChange="29"/>
+          <Patch Number="11" Name="Distorted Guitar 2" ProgramChange="30"/>
+          <Patch Number="12" Name="Acoustic Bass" ProgramChange="32"/>
+          <Patch Number="13" Name="Acoustic Slap Bass" ProgramChange="38"/>
+          <Patch Number="14" Name="Acoustic Bass Slide" ProgramChange="39"/>
+          <Patch Number="15" Name="Fingered Bass" ProgramChange="33"/>
+          <Patch Number="16" Name="Slap bass hardthumb" ProgramChange="40"/>
+          <Patch Number="17" Name="Muted Bass" ProgramChange="37"/>
+          <Patch Number="18" Name="Pick Bass" ProgramChange="34"/>
+          <Patch Number="19" Name="Rock Bass" ProgramChange="35"/>
+          <Patch Number="20" Name="Slap Bass" ProgramChange="36"/>
+          <Patch Number="21" Name="Slap Bass Softthumb" ProgramChange="41"/>
+          <Patch Number="22" Name="Slap Bass 1" ProgramChange="42"/>
+          <Patch Number="23" Name="Slap Bass 2" ProgramChange="43"/>
+          <Patch Number="24" Name="Slap Bass 3" ProgramChange="44"/>
+          <Patch Number="25" Name="Funk Guitar 1" ProgramChange="45"/>
+          <Patch Number="26" Name="Funk Guitar 2" ProgramChange="46"/>
+          <Patch Number="27" Name="Funk Guitar 3" ProgramChange="47"/>
+          <Patch Number="28" Name="Funk Guitar 4" ProgramChange="48"/>
+          <Patch Number="29" Name="Funk Guitar 5" ProgramChange="49"/>
+          <Patch Number="30" Name="Funk Guitar Phrase 6" ProgramChange="50"/>
+          <Patch Number="31" Name="Horn Section" ProgramChange="61"/>
+          <Patch Number="32" Name="Synth 1" ProgramChange="80"/>
+          <Patch Number="33" Name="Synth 2" ProgramChange="81"/>
+          <Patch Number="34" Name="Synth 3" ProgramChange="82"/>
+          <Patch Number="35" Name="Synth 4" ProgramChange="83"/>
+          <Patch Number="36" Name="Synth 5" ProgramChange="84"/>
+          <Patch Number="37" Name="Synth 6" ProgramChange="85"/>
+          <Patch Number="38" Name="Synth 7" ProgramChange="86"/>
+          <Patch Number="39" Name="Synth 8" ProgramChange="87"/>
+          <Patch Number="40" Name="Synth 9" ProgramChange="88"/>
+          <Patch Number="41" Name="Synth 10" ProgramChange="89"/>
+          <Patch Number="42" Name="Synth 11" ProgramChange="90"/>
+          <Patch Number="43" Name="Synth 12" ProgramChange="91"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+
+    <ChannelNameSet Name="Drum Kits">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="false"/>
+        <AvailableChannel Channel="2" Available="false"/>
+        <AvailableChannel Channel="3" Available="false"/>
+        <AvailableChannel Channel="4" Available="false"/>
+        <AvailableChannel Channel="5" Available="false"/>
+        <AvailableChannel Channel="6" Available="false"/>
+        <AvailableChannel Channel="7" Available="false"/>
+        <AvailableChannel Channel="8" Available="false"/>
+        <AvailableChannel Channel="9" Available="false"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="false"/>
+        <AvailableChannel Channel="12" Available="false"/>
+        <AvailableChannel Channel="13" Available="false"/>
+        <AvailableChannel Channel="14" Available="false"/>
+        <AvailableChannel Channel="15" Available="false"/>
+        <AvailableChannel Channel="16" Available="false"/>
+      </AvailableForChannels>
+
+      <PatchBank Name="Drum Kits">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+
+        <PatchNameList>
+          <Patch Number="01" Name="Maple" ProgramChange="0">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="02" Name="LA Funk Rok" ProgramChange="1">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="03" Name="Funk 1" ProgramChange="2">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="04" Name="Vintage" ProgramChange="3">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="05" Name="Metal" ProgramChange="4">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="06" Name="Bubinga Kit" ProgramChange="5">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="07" Name="Classic Rock" ProgramChange="6">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="08" Name="Funk 2" ProgramChange="7">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="09" Name="Heavy Metal" ProgramChange="8">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="10" Name="Techno 1" ProgramChange="9">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="11" Name="Country" ProgramChange="10">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="12" Name="Hip Hop 1" ProgramChange="11">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="13" Name="Simmons" ProgramChange="12">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="14" Name="Latin Perc" ProgramChange="13">
+            <UsesNoteNameList Name="Latin Kit"/>
+          </Patch>
+          <Patch Number="15" Name="Studio" ProgramChange="14">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="16" Name="ElectroFunk" ProgramChange="15">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="17" Name="Jazz" ProgramChange="16">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="18" Name="Brushes" ProgramChange="17">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="19" Name="Reggae" ProgramChange="18">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="20" Name="80's Gated'" ProgramChange="19">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="21" Name="Mental" ProgramChange="20">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="22" Name="Breakbeat" ProgramChange="21">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="23" Name="Funk 3" ProgramChange="22">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="24" Name="Crazy!" ProgramChange="23">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="25" Name="Hip Hop 2" ProgramChange="24">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="26" Name="User Kit 01" ProgramChange="25">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="27" Name="User Kit 02" ProgramChange="26">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="28" Name="User Kit 03" ProgramChange="27">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="29" Name="User Kit 04" ProgramChange="28">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="30" Name="User Kit 05" ProgramChange="29">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="31" Name="User Kit 06" ProgramChange="30">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="32" Name="User Kit 07" ProgramChange="31">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="33" Name="User Kit 08" ProgramChange="32">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="34" Name="User Kit 09" ProgramChange="33">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+          <Patch Number="35" Name="User Kit 10" ProgramChange="34">
+            <UsesNoteNameList Name="Standard Kit"/>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+
+    <ChannelNameSet Name="Channel 11">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="false"/>
+        <AvailableChannel Channel="2" Available="false"/>
+        <AvailableChannel Channel="3" Available="false"/>
+        <AvailableChannel Channel="4" Available="false"/>
+        <AvailableChannel Channel="5" Available="false"/>
+        <AvailableChannel Channel="6" Available="false"/>
+        <AvailableChannel Channel="7" Available="false"/>
+        <AvailableChannel Channel="8" Available="false"/>
+        <AvailableChannel Channel="9" Available="false"/>
+        <AvailableChannel Channel="10" Available="false"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="false"/>
+        <AvailableChannel Channel="13" Available="false"/>
+        <AvailableChannel Channel="14" Available="false"/>
+        <AvailableChannel Channel="15" Available="false"/>
+        <AvailableChannel Channel="16" Available="false"/>
+      </AvailableForChannels>
+
+      <PatchBank Name="Percussion">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+
+        <PatchNameList>
+          <Patch Number="01" Name="Effects" ProgramChange="0">
+            <UsesNoteNameList Name="Percussion"/>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+
+
+    <NoteNameList Name="Standard Kit">
+      <Note Number="36" Name="Kick"/>
+      <Note Number="38" Name="Snare"/>
+      <Note Number="40" Name="Rim"/>
+      <Note Number="42" Name="Closed Hat"/>
+      <Note Number="43" Name="Tom 3"/>
+      <Note Number="44" Name="Pedal Hat"/>
+      <Note Number="45" Name="Tom 2"/>
+      <Note Number="46" Name="Open Hat"/>
+      <Note Number="48" Name="Tom 1"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="51" Name="Ride"/>
+    </NoteNameList>
+
+    <NoteNameList Name="Latin Kit">
+      <Note Number="36" Name="Surdo"/>
+      <Note Number="38" Name="Timbale"/>
+      <Note Number="40" Name="Timbale Rim"/>
+      <Note Number="42" Name="Shaker"/>
+      <Note Number="43" Name="Timbale Open"/>
+      <Note Number="44" Name="Clave"/>
+      <Note Number="45" Name="Bongo Lg"/>
+      <Note Number="46" Name="Cabasa"/>
+      <Note Number="48" Name="Conga Slap"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="51" Name="Cowbell"/>
+    </NoteNameList>
+
+    <NoteNameList Name="Percussion">
+      <Note Number="52" Name="Shaker"/>
+      <Note Number="53" Name="Sleigh Bells"/>
+      <Note Number="54" Name="Tambourine"/>
+      <Note Number="56" Name="Cow Bell"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="High Bongo"/>
+      <Note Number="60" Name="Mid Bongo"/>
+      <Note Number="61" Name="Low Bongo"/>
+      <Note Number="62" Name="Mute Hi Conga"/>
+      <Note Number="63" Name="Open Hi Conga"/>
+      <Note Number="64" Name="Low Conga"/>
+      <Note Number="65" Name="High Timbale"/>
+      <Note Number="66" Name="Low Timbale"/>
+      <Note Number="67" Name="High Agogo"/>
+      <Note Number="68" Name="Low Agogo"/>
+      <Note Number="69" Name="Cabasa"/>
+      <Note Number="70" Name="Maracas"/>
+      <Note Number="71" Name="Short Whistle"/>
+      <Note Number="72" Name="Long Whistle"/>
+      <Note Number="73" Name="Short Guiro"/>
+      <Note Number="74" Name="Long Guiro"/>
+      <Note Number="75" Name="Claves"/>
+      <Note Number="76" Name="Hi Wood Block"/>
+      <Note Number="77" Name="Low Wood Block"/>
+      <Note Number="78" Name="Mute Cuica"/>
+      <Note Number="79" Name="Open Cuica"/>
+      <Note Number="80" Name="Mute Triangle"/>
+      <Note Number="81" Name="Open Triangle"/>
+    </NoteNameList>
+
+  </MasterDeviceNames>
+</MIDINameDocument>
