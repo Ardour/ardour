@@ -884,6 +884,8 @@ MidiView::clear_events ()
 	 * NoteBase objects we just deleted.
 	 */
 	_note_group->clear (true);
+	/* the above line deleted the ghost note (if any). Make sure we know */
+	_ghost_note = nullptr;
 	_events.clear();
 	_patch_changes.clear();
 	_sys_exes.clear();
