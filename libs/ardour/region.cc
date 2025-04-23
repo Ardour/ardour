@@ -1061,8 +1061,6 @@ Region::modify_front_unchecked (timepos_t const & npos, bool reset_fade)
 		newlen = length() + (np.distance (position()));
 	}
 
-	std::cerr << "tti " << np << ", " << newlen << std::endl;
-
 	trim_to_internal (np, newlen);
 
 	if (reset_fade) {
