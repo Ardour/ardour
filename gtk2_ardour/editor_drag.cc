@@ -6853,6 +6853,11 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 
 	Beats start;
 
+	if (!_midi_view->midi_region()) {
+		editing_context.make_a_region ();
+		assert (_midi_view->midi_region());
+	}
+
 	if (_midi_view->show_source()) {
 		Beats spos = _midi_view->midi_region()->source_position().beats() + min (_note[0], _note[1]).beats();
 		start = _midi_view->midi_region ()->absolute_time_to_source_beats (timepos_t (spos));
@@ -6912,6 +6917,11 @@ HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 {
 	if (had_movement) {
 		return;
+	}
+
+	if (!_midi_view->midi_region()) {
+		editing_context.make_a_region ();
+		assert (_midi_view->midi_region());
 	}
 
 	std::shared_ptr<MidiRegion> mr = _midi_view->midi_region ();

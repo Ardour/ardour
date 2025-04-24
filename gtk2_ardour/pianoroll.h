@@ -145,6 +145,7 @@ class Pianoroll : public CueEditor
 	bool allow_trim_cursors () const;
 
 	void shift_midi (Temporal::timepos_t const &, bool model);
+	void make_a_region();
 
   protected:
 	void load_bindings ();

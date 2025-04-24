@@ -2451,33 +2451,39 @@ Pianoroll::set (TriggerReference & tref)
 
 	std::shared_ptr<MidiRegion> mr;
 
-	if (!ref.trigger()->the_region()) {
-
-		std::shared_ptr<MidiSource> new_source = _session->create_midi_source_for_session (_track->name());
-		SourceList sources;
-		sources.push_back (new_source);
-
-		PropertyList plist;
-		plist.add (ARDOUR::Properties::start, timepos_t (Temporal::Beats ()));
-		plist.add (ARDOUR::Properties::length, timepos_t (Temporal::Beats::beats (32)));
-		plist.add (ARDOUR::Properties::name, new_source->name());
-		plist.add (ARDOUR::Properties::whole_file, true);
-
-		mr = std::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (sources, plist, true));
-
-		plist.remove (ARDOUR::Properties::whole_file);
-		mr = std::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (mr, timecnt_t::zero (Temporal::BeatTime), plist, true));
-
-		ref.trigger()->set_region (mr);
-	} else {
-		mr = std::dynamic_pointer_cast<MidiRegion> (ref.trigger()->the_region());
-	}
-
-	if (mr) {
-		set_region (mr);
+	if (ref.trigger()->the_region()) {
+		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (ref.trigger()->the_region());
+		if (mr) {
+			set_region (mr);
+		}
 	}
 
 	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Pianoroll::maybe_update));
+}
+
+void
+Pianoroll::make_a_region ()
+{
+	std::shared_ptr<MidiSource> new_source = _session->create_midi_source_for_session (_track->name());
+	SourceList sources;
+	sources.push_back (new_source);
+
+	PropertyList plist;
+	plist.add (ARDOUR::Properties::start, timepos_t (Temporal::Beats ()));
+	plist.add (ARDOUR::Properties::length, timepos_t (Temporal::Beats::beats (32)));
+	plist.add (ARDOUR::Properties::name, new_source->name());
+	plist.add (ARDOUR::Properties::whole_file, true);
+
+	std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (sources, plist, true));
+
+	plist.remove (ARDOUR::Properties::whole_file);
+	mr = std::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (mr, timecnt_t::zero (Temporal::BeatTime), plist, true));
+
+	if (ref.trigger()) {
+		ref.trigger()->set_region (mr);
+	}
+
+	set_region (mr);
 }
 
 void
