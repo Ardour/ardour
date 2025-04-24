@@ -2205,7 +2205,6 @@ Pianoroll::trigger_prop_change (PBD::PropertyChange const & what_changed)
 void
 Pianoroll::region_prop_change (PBD::PropertyChange const & what_changed)
 {
-	std::cerr << "region prop change " << what_changed << std::endl;
 	if (what_changed.contains (Properties::length)) {
 		std::shared_ptr<MidiRegion> mr = view->midi_region();
 		if (mr) {
