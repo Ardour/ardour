@@ -1850,6 +1850,23 @@ ARDOUR_UI::get_smart_mode() const
 
 
 void
+ARDOUR_UI::spacebar_action (bool with_abort, bool roll_out_of_bounded_mode)
+{
+	if (!_session) {
+		return;
+	}
+
+	std::shared_ptr<TriggerBox> armed_tb = _session->armed_triggerbox();
+
+	if (armed_tb) {
+		armed_tb->disarm_all ();
+		return;
+	}
+
+	toggle_roll (with_abort, roll_out_of_bounded_mode);
+}
+
+void
 ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 {
 	if (!_session) {
@@ -3100,4 +3117,3 @@ ARDOUR_UI::stop_cues (int col, bool immediately)
 {
 	_basic_ui->trigger_stop_col (col, immediately);
 }
-

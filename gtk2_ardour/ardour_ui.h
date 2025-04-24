@@ -639,6 +639,7 @@ private:
 	void transport_ffwd_rewind (bool fwd);
 	void transport_loop ();
 	void toggle_roll (bool with_abort, bool roll_out_of_bounded_mode);
+	void spacebar_action (bool with_abort, bool roll_out_of_bounded_mode);
 	bool trx_record_enable_all_tracks ();
 
 	bool _session_is_new;
