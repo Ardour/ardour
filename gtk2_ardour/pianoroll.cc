@@ -2964,6 +2964,8 @@ Pianoroll::set_session (ARDOUR::Session* s)
 
 	if (!_session) {
 		_update_connection.disconnect ();
+	} else {
+		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
 	}
 }
 
