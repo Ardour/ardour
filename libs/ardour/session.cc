@@ -8197,3 +8197,20 @@ Session::have_external_connections_for_current_backend (bool tracks_only) const
 	}
 	return false;
 }
+
+std::shared_ptr<TriggerBox>
+Session::armed_triggerbox () const
+{
+	std::shared_ptr<TriggerBox> armed_tb;
+	std::shared_ptr<RouteList const> rl = routes.reader();
+
+	for (auto const & r : *rl) {
+		std::shared_ptr<TriggerBox> tb = r->triggerbox();
+		if (tb && tb->armed()) {
+			armed_tb = tb;
+			break;
+		}
+	}
+
+	return armed_tb;
+}
