@@ -2754,6 +2754,7 @@ Pianoroll::max_zoom_extent() const
 		}
 	}
 
+	/* this needs to match the default empty region length used in ::make_a_region() */
 	return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (Temporal::Beats (32, 0)));
 }
 
