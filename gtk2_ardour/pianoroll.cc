@@ -2555,8 +2555,26 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 	}
 
 	if (!provided) {
-		/* COPY MAIN SESSION TEMPO MAP? */
-		map.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
+		Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+
+		if (with_transport_controls) {
+			/* clip editing, timeline irrelevant, sort of */
+
+			if (tmap->n_tempos() == 1 && tmap->n_meters() == 1) {
+				/* Single entry tempo map, use the values there */
+				map.reset (new Temporal::TempoMap (tmap->tempo_at (timepos_t (0)), tmap->meter_at (timepos_t (0))));
+			}  else {
+
+				map.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
+			}
+
+		} else {
+			/* COPY MAIN SESSION TEMPO MAP? */
+			Meter m (tmap->meter_at (r->source_position()));
+			Tempo t (tmap->tempo_at (r->source_position()));
+
+			map.reset (new Temporal::TempoMap (t, m));
+		}
 	}
 
 	{
