@@ -2198,7 +2198,6 @@ Pianoroll::trigger_prop_change (PBD::PropertyChange const & what_changed)
 		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (ref.trigger()->the_region());
 		if (mr) {
 			set_region (mr);
-			zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
 		}
 	}
 }
