@@ -2209,7 +2209,6 @@ Pianoroll::region_prop_change (PBD::PropertyChange const & what_changed)
 		std::shared_ptr<MidiRegion> mr = view->midi_region();
 		if (mr) {
 			set_region (mr);
-			zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
 		}
 	}
 }
