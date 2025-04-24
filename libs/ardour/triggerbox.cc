@@ -2482,22 +2482,22 @@ MIDITrigger::setup_event_indices ()
 		return;
 	}
 
-	first_event_index = 0;
-	last_event_index = std::numeric_limits<uint32_t>::max();
+	first_event_index = std::numeric_limits<uint32_t>::max();
+	last_event_index = 0;
 
 	for (uint32_t n = 0; n < rt->size(); ++n) {
-		if ((first_event_index == 0) && ((*rt)[n].timestamp >= _play_start)) {
+		if ((first_event_index == std::numeric_limits<uint32_t>::max()) && ((*rt)[n].timestamp >= _play_start)) {
 			/* first one at or after the loop start */
 			first_event_index = n;
 		}
 
-		if ((last_event_index == std::numeric_limits<uint32_t>::max()) && ((*rt)[n].timestamp > _play_end)) {
+		if ((last_event_index == 0) && ((*rt)[n].timestamp > _play_end)) {
 			/* first one at or after the loop end */
 			last_event_index = n; /* exclusive end */
 		}
 	}
 
-	if (last_event_index == std::numeric_limits<uint32_t>::max()) {
+	if (last_event_index == 0) {
 		last_event_index = rt->size();
 	}
 
