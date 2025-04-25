@@ -1201,6 +1201,16 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 }
 
 bool
+Editor::canvas_bg_event (GdkEvent *event, ArdourCanvas::Item* item)
+{
+	if (!internal_editing()) {
+		return false;
+	}
+
+	return typed_event (item, event, RegionItem);
+}
+
+bool
 Editor::canvas_drop_zone_event (GdkEvent* event)
 {
 	GdkEventScroll scroll;

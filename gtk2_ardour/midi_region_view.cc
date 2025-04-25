@@ -308,7 +308,20 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 		return RegionView::canvas_group_event (ev);
 	}
 
-	return MidiView::midi_canvas_group_event (ev);
+	/* Let MidiView do its thing */
+
+	if (MidiView::midi_canvas_group_event (ev)) {
+
+		switch (ev->type) {
+		case GDK_ENTER_NOTIFY:
+		case GDK_LEAVE_NOTIFY:
+			break;
+		default:
+			return true;
+		}
+	}
+
+	return _editing_context.canvas_bg_event (ev, get_canvas_group());
 }
 
 bool

@@ -309,7 +309,6 @@ NoteBase::event_handler (GdkEvent* ev)
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		set_mouse_fractions (ev);
 		_view.note_left (this);
 		break;
 
