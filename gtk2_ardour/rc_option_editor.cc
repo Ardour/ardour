@@ -4968,7 +4968,7 @@ These settings will only take effect after %1 is restarted.\n\
 		     );
 		iotp->add (0, _("No priority"));
 		iotp->add (1, _("Realtime (FIFO)"));
-		iotp->add (1, _("Realtime (Round Robin)"));
+		iotp->add (2, _("Realtime (Round Robin)"));
 		add_option (_("Performance"), iotp);
 #endif
 	}
