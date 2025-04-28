@@ -255,6 +255,14 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 {
 	bool changed = false;
 
+	/* Enforce a 1 octave minimum */
+
+	if (highest - lowest < 12) {
+		int8_t mid = lowest + ((highest - lowest) / 2);
+		lowest = std::max (mid - 6, 0);
+		highest = lowest + 12;
+	}
+
 	if (_highest_note != highest) {
 		_highest_note = highest;
 		changed = true;
