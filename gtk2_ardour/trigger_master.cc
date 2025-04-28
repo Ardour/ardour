@@ -267,6 +267,9 @@ TriggerMaster::event_handler (GdkEvent* ev)
 				} else {
 					_triggerbox->stop_all_quantized ();
 				}
+				break;
+			} else if (Gtkmm2ext::Keyboard::is_context_menu_event (&ev->button)) {
+				context_menu (&ev->button);
 			}
 			break;
 		case GDK_ENTER_NOTIFY:
@@ -281,11 +284,7 @@ TriggerMaster::event_handler (GdkEvent* ev)
 			}
 			redraw ();
 			break;
-		case GDK_BUTTON_RELEASE:
-			switch (ev->button.button) {
-				case 3:
-					context_menu ();
-			}
+
 		default:
 			break;
 	}
@@ -294,7 +293,7 @@ TriggerMaster::event_handler (GdkEvent* ev)
 }
 
 void
-TriggerMaster::context_menu ()
+TriggerMaster::context_menu (GdkEventButton* ev)
 {
 	using namespace Gtk;
 	using namespace Gtk::Menu_Helpers;
@@ -358,7 +357,7 @@ TriggerMaster::context_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Clear All..."), sigc::mem_fun (*this, &TriggerMaster::clear_all_triggers)));
 
-	_context_menu->popup (1, gtk_get_current_event_time ());
+	_context_menu->popup (ev->button, gtk_get_current_event_time ());
 }
 
 void
@@ -576,36 +575,32 @@ bool
 CueMaster::event_handler (GdkEvent* ev)
 {
 	switch (ev->type) {
-		case GDK_BUTTON_PRESS:
-			if (ev->button.button == 1) {
-				if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
-					_session->trigger_stop_all (true);  //stop 'now'
-				} else {
-					_session->trigger_stop_all (false);  //stop quantized (bar end)
-				}
-				return true;
+	case GDK_BUTTON_PRESS:
+		if (ev->button.button == 1) {
+			if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
+				_session->trigger_stop_all (true);  //stop 'now'
+			} else {
+				_session->trigger_stop_all (false);  //stop quantized (bar end)
 			}
-			break;
-		case GDK_BUTTON_RELEASE:
-			switch (ev->button.button) {
-				case 3:
-					context_menu ();
-					return true;
-			}
-			break;
-		case GDK_ENTER_NOTIFY:
-			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				stop_shape->set_fill_color (UIConfiguration::instance ().color ("neutral:foreground"));
-				set_fill_color (HSV (fill_color ()).lighter (0.25).color ());
-			}
-			break;
-		case GDK_LEAVE_NOTIFY:
-			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				set_default_colors ();
-			}
-			break;
-		default:
-			break;
+			return true;
+		} else if (Gtkmm2ext::Keyboard::is_context_menu_event (&ev->button)) {
+			context_menu (&ev->button);
+		}
+		break;
+	case GDK_ENTER_NOTIFY:
+		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			stop_shape->set_fill_color (UIConfiguration::instance ().color ("neutral:foreground"));
+			set_fill_color (HSV (fill_color ()).lighter (0.25).color ());
+		}
+		break;
+	case GDK_LEAVE_NOTIFY:
+		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			set_default_colors ();
+		}
+		break;
+
+	default:
+		break;
 	}
 
 	return false;
@@ -652,7 +647,7 @@ CueMaster::ui_parameter_changed (std::string const& p)
 }
 
 void
-CueMaster::context_menu ()
+CueMaster::context_menu (GdkEventButton* ev)
 {
 	using namespace Gtk;
 	using namespace Gtk::Menu_Helpers;
@@ -721,7 +716,7 @@ CueMaster::context_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Clear All..."), sigc::mem_fun (*this, &CueMaster::clear_all_triggers)));
 
-	_context_menu->popup (3, gtk_get_current_event_time ());
+	_context_menu->popup (ev->button, gtk_get_current_event_time ());
 }
 
 void

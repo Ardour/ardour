@@ -84,7 +84,7 @@ private:
 	bool text_event (GdkEvent*, uint64_t);
 	void build ();
 
-	void context_menu (uint64_t idx);
+	void context_menu (GdkEventButton*, uint64_t idx);
 	void get_slots (TriggerList &triggerlist, uint64_t idx);
 
 	void clear_all_triggers(uint64_t idx);

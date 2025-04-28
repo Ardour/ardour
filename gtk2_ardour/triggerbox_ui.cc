@@ -627,42 +627,43 @@ bool
 TriggerEntry::name_button_event (GdkEvent* ev)
 {
 	switch (ev->type) {
-		case GDK_ENTER_NOTIFY:
-			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				set_widget_colors (NameEntered);
-			}
-			break;
-		case GDK_LEAVE_NOTIFY:
-			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				set_widget_colors (NoneEntered);
-			}
-			break;
-		case GDK_BUTTON_PRESS:
-			break;
-		case GDK_2BUTTON_PRESS:
-#if SELECTION_PROPERTIES_BOX_TODO
-			edit_trigger ();
-#endif
+	case GDK_ENTER_NOTIFY:
+		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			set_widget_colors (NameEntered);
+		}
+		break;
+	case GDK_LEAVE_NOTIFY:
+		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			set_widget_colors (NoneEntered);
+		}
+		break;
+	case GDK_BUTTON_PRESS:
+		if (Gtkmm2ext::Keyboard::is_context_menu_event (&ev->button)) {
+			PublicEditor::instance ().get_selection ().set (this);
+			context_menu ();
 			return true;
-		case GDK_BUTTON_RELEASE:
-			if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
-				clear_trigger ();
-				return true;
-			}
-			switch (ev->button.button) {
-				case 3:
-					PublicEditor::instance ().get_selection ().set (this);
-					context_menu ();
-					return true;
-				case 1:
-					PublicEditor::instance ().get_selection ().set (this);
-					return true;
-				default:
-					break;
-			}
-			break;
+		}
+		break;
+	case GDK_2BUTTON_PRESS:
+#if SELECTION_PROPERTIES_BOX_TODO
+		edit_trigger ();
+#endif
+		return true;
+	case GDK_BUTTON_RELEASE:
+		if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
+			clear_trigger ();
+			return true;
+		}
+		switch (ev->button.button) {
+		case 1:
+			PublicEditor::instance ().get_selection ().set (this);
+			return true;
 		default:
 			break;
+		}
+		break;
+	default:
+		break;
 	}
 
 	return false;

@@ -79,7 +79,7 @@ public:
 	void selection_change ();
 
 private:
-	void context_menu ();
+	void context_menu (GdkEventButton*);
 
 	void clear_all_triggers();
 	void set_all_colors();
@@ -127,7 +127,7 @@ public:
 	bool event_handler (GdkEvent*);
 
 private:
-	void context_menu ();
+	void context_menu (GdkEventButton*);
 
 	void get_boxen (TriggerBoxList &boxlist);
 	void clear_all_triggers();

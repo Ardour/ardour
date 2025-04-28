@@ -411,8 +411,7 @@ TriggerUI::context_menu ()
 	items.push_back (MenuElem (_("MIDI Learn"), sigc::mem_fun (*this, &TriggerUI::trigger_midi_learn)));
 	items.push_back (MenuElem (_("MIDI un-Learn"), sigc::mem_fun (*this, &TriggerUI::trigger_midi_unlearn)));
 
-
-	_context_menu->popup (3, gtk_get_current_event_time ());
+	_context_menu->popup (1, gtk_get_current_event_time ());
 }
 
 void
@@ -547,7 +546,7 @@ TriggerUI::launch_context_menu ()
 		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
 	}
 
-	_launch_context_menu->popup (3, gtk_get_current_event_time ());
+	_launch_context_menu->popup (1, gtk_get_current_event_time ());
 }
 
 void
