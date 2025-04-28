@@ -92,6 +92,17 @@ MidiStreamView::~MidiStreamView ()
 	undisplay_track ();
 }
 
+InstrumentInfo*
+MidiStreamView::instrument_info() const
+{
+	std::shared_ptr<Route> r = _trackview.route();
+	if (!r) {
+		return nullptr;
+	}
+
+	return &r->instrument_info();
+}
+
 void
 MidiStreamView::parameter_changed (string const & param)
 {

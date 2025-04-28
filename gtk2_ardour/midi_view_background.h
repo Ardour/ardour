@@ -35,6 +35,10 @@
 
 #include "view_background.h"
 
+namespace ARDOUR {
+	class InstrumentInfo;
+}
+
 namespace ArdourCanvas {
 	class Item;
 	class LineSet;
@@ -116,6 +120,8 @@ class MidiViewBackground : public virtual ViewBackground
 
 	virtual void set_size (double w, double h) {}
 	PBD::Signal<void()> HeightChanged;
+
+	virtual ARDOUR::InstrumentInfo* instrument_info() const = 0;
 
   protected:
 	bool                      _range_dirty;

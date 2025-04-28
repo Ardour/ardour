@@ -490,6 +490,8 @@ Pianoroll::set_visible_channel (int n)
 		view->set_visible_channel (n);
 		view->swap_automation_channel (n);
 	}
+
+	prh->instrument_info_change ();
 }
 
 void
@@ -3020,4 +3022,14 @@ Pianoroll::shift_midi (timepos_t const & t, bool model)
 	}
 
 	view->shift_midi (t, model);
+}
+
+InstrumentInfo*
+Pianoroll::instrument_info () const
+{
+	if (!view || !view->midi_track()) {
+		return nullptr;
+	}
+
+	return &view->midi_track()->instrument_info ();
 }

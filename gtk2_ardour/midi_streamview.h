@@ -89,6 +89,8 @@ public:
 	void record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t);
 	void set_note_highlight (bool);
 
+	ARDOUR::InstrumentInfo* instrument_info() const;
+
 protected:
 	void setup_rec_box ();
 	void update_rec_box ();

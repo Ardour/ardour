@@ -66,6 +66,12 @@ PianorollMidiBackground::width() const
 	return _width;
 }
 
+ARDOUR::InstrumentInfo*
+PianorollMidiBackground::instrument_info () const
+{
+	return pianoroll.instrument_info ();
+}
+
 uint8_t
 PianorollMidiBackground::get_preferred_midi_channel () const
 {

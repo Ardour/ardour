@@ -50,6 +50,8 @@ class PianorollMidiBackground : public MidiViewBackground
 	void set_size (double w, double h);
 	void set_view (MidiView*);
 
+	ARDOUR::InstrumentInfo* instrument_info() const;
+
   protected:
 	MidiView* view;
 	Pianoroll& pianoroll;

@@ -147,6 +147,8 @@ class Pianoroll : public CueEditor
 	void shift_midi (Temporal::timepos_t const &, bool model);
 	void make_a_region();
 
+	ARDOUR::InstrumentInfo* instrument_info() const;
+
   protected:
 	void load_bindings ();
 	void register_actions ();
