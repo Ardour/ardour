@@ -2228,7 +2228,7 @@ MidiView::change_patch_change (MidiModel::PatchChangePtr old_change, const Evora
 /** Add a patch change to the region.
  *  @param t Time in samples relative to region position
  *  @param patch Patch to add; time and channel are ignored (time is converted from t, and channel comes from
- *  MidiTimeAxisView::get_preferred_midi_channel())
+ *  MidiViewBackground::get_preferred_midi_channel())
  */
 void
 MidiView::add_patch_change (timecnt_t const & t, Evoral::PatchChange<Temporal::Beats> const & patch)
