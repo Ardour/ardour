@@ -25,6 +25,7 @@
 
 #include "canvas/canvas.h"
 
+#include "ardour/instrument_info.h"
 #include "ardour/midi_track.h"
 
 #include "gtkmm2ext/colors.h"
@@ -550,26 +551,19 @@ PianoRollHeader::get_note_name (int note)
 	std::string note_n;
 	NoteName rtn;
 
-#if 0
-	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&_view.trackview());
+	ARDOUR::InstrumentInfo* ii = _midi_context.instrument_info();
 
-	if (mtv) {
-		string chn = mtv->gui_property (X_("midnam-channel"));
-
-		if (!chn.empty()) {
-
-			int midnam_channel;
-
-			sscanf (chn.c_str(), "%*s %d", &midnam_channel);
-			midnam_channel--;
-
-			name = mtv->route()->instrument_info ().get_note_name (
-				0,               //bank
-				0,               //program
-				midnam_channel,  //channel
-				note);           //note
-		}
+	if (!ii) {
+		return rtn;
 	}
+
+	int midnam_channel = _midi_context.get_preferred_midi_channel ();
+
+	name = ii->get_note_name (
+		0,               //bank
+		0,               //program
+		midnam_channel,  //channel
+		note);           //note
 
 	int oct_rel = note % 12;
 	switch (oct_rel) {
@@ -613,7 +607,6 @@ PianoRollHeader::get_note_name (int note)
 			break;
 	}
 
-#endif
 	std::string new_string = std::string(3 - std::to_string(note).length(), '0') + std::to_string(note);
 	rtn.name = name.empty()? new_string + " " + note_n : name;
 	rtn.from_midnam = !name.empty();
