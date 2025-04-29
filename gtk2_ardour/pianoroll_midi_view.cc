@@ -192,8 +192,7 @@ PianorollMidiView::scroll (GdkEventScroll* ev)
 		return false;
 	}
 
-	if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier) &&
-	    Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
 		switch (ev->direction) {
 		case GDK_SCROLL_UP:
