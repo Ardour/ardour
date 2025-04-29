@@ -417,7 +417,8 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 		return false;
 	}
 
-	if (_selection.empty()) {
+	if (_selection.empty() || !UIConfiguration::instance().get_scroll_velocity_editing()) {
+
 		const int step = 1;
 		const bool zoom = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier);
 		const bool just_one_edge = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier|Keyboard::PrimaryModifier);
@@ -757,4 +758,3 @@ MidiRegionView::trim_front_ending ()
 		midi_region()->fix_negative_start (_editing_context.history());
 	}
 }
-
