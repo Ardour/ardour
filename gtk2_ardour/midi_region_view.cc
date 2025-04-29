@@ -400,6 +400,12 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 		return false;
 	}
 
+	/* Note: it is hard to select regions in draw mode, which makes the
+	 * requirement that the region is selected before we do MIDI scrolling
+	 * a bit burdensome. However, removing it means that in draw mode,
+	 * vertical scroll will behave in even less desirable ways.
+	 */
+
 	if (!_editing_context.get_selection().selected (this)) {
 		return false;
 	}
