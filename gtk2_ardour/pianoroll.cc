@@ -2512,13 +2512,13 @@ Pianoroll::set_track (std::shared_ptr<ARDOUR::MidiTrack> track)
 
 	build_controller_menu (cc_dropdown1->menu(), track->instrument_info(), 0xffff,
 	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_single_controller_item), cc_dropdown1),
-	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), cc_dropdown1));
+	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), cc_dropdown1),  12);
 	build_controller_menu (cc_dropdown2->menu(), track->instrument_info(), 0xffff,
 	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_single_controller_item), cc_dropdown2),
-	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), cc_dropdown2));
+	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), cc_dropdown2), 12);
 	build_controller_menu (cc_dropdown3->menu(), track->instrument_info(), 0xffff,
 	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_single_controller_item), cc_dropdown3),
-	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), cc_dropdown3));
+	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), cc_dropdown3), 12);
 
 	track->solo_control()->Changed.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::update_solo_display, this), gui_context());
 	update_solo_display ();
