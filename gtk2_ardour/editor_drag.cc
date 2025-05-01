@@ -6930,7 +6930,14 @@ HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 	editing_context.snap_to (pos, RoundNearest, SnapToGrid_Scaled);
 	Temporal::Beats aligned_beats (pos.beats ());
 
-	Beats const start = _midi_view->midi_region ()->absolute_time_to_source_beats (timepos_t (aligned_beats));
+	Beats start;
+
+	if (_midi_view->show_source()) {
+		Beats spos = _midi_view->midi_region()->source_position().beats() + aligned_beats;
+		start = _midi_view->midi_region ()->absolute_time_to_source_beats (timepos_t (spos));
+	} else {
+		start = _midi_view->midi_region ()->absolute_time_to_source_beats (timepos_t (aligned_beats));
+	}
 
 	/* Percussive hits are as short as possible */
 	Beats length (0, 1);
