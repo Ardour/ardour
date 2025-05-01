@@ -6227,30 +6227,45 @@ Route::monitoring_state () const
 			return get_input_monitoring_state (true, auto_input_does_talkback) & auto_monitor_mask;
 		}
 
-		if (!session_rec && roll && auto_input) {
-			return auto_monitor_disk | get_input_monitoring_state (false, false);
-		} else {
-			/* recording */
-			const samplecnt_t prtl = _session.preroll_record_trim_len ();
-			if (session_rec && roll && prtl > 0 && _disk_writer->get_captured_samples () < prtl) {
-				/* CUE monitor during pre-roll */
-				return auto_monitor_disk | (get_input_monitoring_state (true, false) & auto_monitor_mask);
-			}
+		if (!roll) {
+			/*  9, 10, 25, 26 -> MonitoringInput; 41, 42, 57, 58 -> HW passthrough
+			 * 13, 14, 29, 30 -> MonitoringInput; 46, 47, 61, 62 -> HW passthrough */
 			return get_input_monitoring_state (true, false) & auto_monitor_mask;
 		}
+
+		if (!session_rec) {
+			if (auto_input) {
+				/* 11, 27, 43, 59 -> MonitoringDisk */
+				return auto_monitor_disk | get_input_monitoring_state (false, false);
+			} else {
+				/* 12, 28 -> MonitoringInput;  44, 60 -> HW passthru */
+				return get_input_monitoring_state (true, false) & auto_monitor_mask;
+			}
+		}
+
+		/* actively recording
+		 * 15, 16, 31, 32 -> MonitoringInput, 47, 48, 63, 64 -> HW passthrough */
+		const samplecnt_t prtl = _session.preroll_record_trim_len ();
+		if (session_rec && roll && prtl > 0 && _disk_writer->get_captured_samples () < prtl) {
+			/* CUE monitor during pre-roll */
+			return auto_monitor_disk | (get_input_monitoring_state (true, false) & auto_monitor_mask);
+		}
+		return get_input_monitoring_state (true, false) & auto_monitor_mask;
 
 	} else {
 
 		if (auto_input_does_talkback) {
-
+			/* 1 - 8 ; 33 - 40 */
 			if (!roll && auto_input) {
+				/* 1, 5 -> MonitoringInput */
 				return get_input_monitoring_state (false, true) & auto_monitor_mask;
 			} else {
 				return auto_monitor_disk | get_input_monitoring_state (false, false);
 			}
 
 		} else {
-			/* tape-machine-mode */
+			/* tape-machine-mode
+			 * 17 - 24; 49 - 56 -> MonitoringDisk */
 			return auto_monitor_disk | get_input_monitoring_state (false, false);
 		}
 	}
