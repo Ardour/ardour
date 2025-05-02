@@ -346,4 +346,5 @@ class Pianoroll : public CueEditor
 
 	bool bbt_ruler_event (GdkEvent*);
 	void ruler_locate (GdkEventButton*);
+	void scrolled ();
 };

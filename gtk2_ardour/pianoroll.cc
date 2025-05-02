@@ -266,8 +266,18 @@ Pianoroll::add_multi_controller_item (Gtk::Menu_Helpers::MenuList&,
 
 
 void
+Pianoroll::scrolled ()
+{
+	pending_visual_change.add (VisualChange::TimeOrigin);
+	pending_visual_change.time_origin = horizontal_adjustment.get_value() * samples_per_pixel;
+	ensure_visual_change_idle_handler ();
+}
+
+void
 Pianoroll::build_lower_toolbar ()
 {
+	horizontal_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Pianoroll::scrolled));
+
 	ArdourButton::Element elements = ArdourButton::Element (ArdourButton::Text|ArdourButton::Indicator|ArdourButton::Edge|ArdourButton::Body);
 
 	_canvas_hscrollbar = manage (new Gtk::HScrollbar (horizontal_adjustment));
