@@ -979,6 +979,10 @@ msgstr "独奏"
 msgid "Feedback"
 msgstr "反馈"
 
+#: ardour_ui.cc:319 dsp_stats_window.cc:29
+msgid "Performance Meters"
+msgstr "性能仪表"
+
 #: ardour_ui.cc:329 speaker_dialog.cc:37
 msgid "Speaker Configuration"
 msgstr "扬声器配置"
@@ -1955,7 +1959,7 @@ msgstr "样本格式"
 
 #: ardour_ui_ed.cc:167 rc_option_editor.cc:3556 rc_option_editor.cc:3557
 msgid "Control Surfaces"
-msgstr "控制面"
+msgstr "控制面板"
 
 #: ardour_ui_ed.cc:168 rc_option_editor.cc:3563 rc_option_editor.cc:3564
 #: rc_option_editor.cc:3570 rc_option_editor.cc:3579 rc_option_editor.cc:3590
@@ -1991,6 +1995,10 @@ msgstr "新建…"
 #: ardour_ui_ed.cc:178
 msgid "Open..."
 msgstr "打开…"
+
+#: ardour_ui_ed.cc:179 recorder_ui.cc:81
+msgid "Recorder"
+msgstr "录音器"
 
 #: ardour_ui_ed.cc:179
 msgid "Recent..."
@@ -3739,6 +3747,10 @@ msgstr "视频时间线"
 msgid "mode"
 msgstr "模式"
 
+#: editor.cc:434 editor_actions.cc:578
+msgid "Time Signature"
+msgstr "拍号"
+
 #: editor.cc:667
 msgid "Tracks & Busses"
 msgstr "音轨 & 总线"
@@ -3800,6 +3812,18 @@ msgstr "撤销激活"
 #: editor.cc:1504 editor.cc:1529
 msgid "Activate"
 msgstr "激活"
+
+#: editor.cc:1507 editor_actions.cc:359
+msgid "Cut/Paste Range Section to Edit Point"
+msgstr "剪切/粘贴范围区域到编辑点"
+
+#: editor.cc:1506 editor_actions.cc:358
+msgid "Copy/Paste Range Section to Edit Point"
+msgstr "复制/粘贴范围区域到编辑点"
+
+#: editor.cc:1509 editor_actions.cc:363 editor_actions.cc:364
+msgid "Delete Range Section"
+msgstr "删除范围区域"
 
 #: editor.cc:1614 editor.cc:1622 editor_ops.cc:4037
 msgid "Freeze"
@@ -4421,6 +4445,10 @@ msgstr "增益"
 msgid "Ranges"
 msgstr "范围"
 
+#: editor_actions.cc:143
+msgid "Editor Views"
+msgstr "编辑器视图"
+
 #: editor_actions.cc:144 editor_actions.cc:1551 session_option_editor.cc:144
 #: session_option_editor.cc:146 session_option_editor.cc:153
 #: session_option_editor.cc:160 session_option_editor.cc:167
@@ -4862,6 +4890,14 @@ msgstr "设置自动切换从指针处入/出"
 #: editor_actions.cc:365 editor_actions.cc:1557
 msgid "Multi-Duplicate..."
 msgstr "多个副本…"
+
+#: editor_actions.cc:370
+msgid "Group Selected Regions"
+msgstr "分组选定区域"
+
+#: editor_actions.cc:371
+msgid "Ungroup Selected Regions"
+msgstr "取消分组选定区域"
 
 #: editor_actions.cc:374
 msgid "Undo Selection Change"
@@ -7268,6 +7304,14 @@ msgstr "音高替换"
 msgid "timefx cannot be started - thread creation error"
 msgstr "间特效无法启动——线程创建错误"
 
+#: engine_dialog.cc:85
+msgid "Advanced Settings"
+msgstr "高级设置"
+
+#: engine_dialog.cc:86
+msgid "Hardware Monitoring"
+msgstr "硬件监控"
+
 #: engine_dialog.cc:97
 msgid "Device Control Panel"
 msgstr "设备控制面板"
@@ -7387,11 +7431,11 @@ msgstr "设备："
 
 #: engine_dialog.cc:603 engine_dialog.cc:720 export_report.cc:165
 #: export_report.cc:339 sfdb_ui.cc:183 sfdb_ui.cc:412 sfdb_ui.cc:417
-msgid "Sample rate:"
+msgid "Sample Rate:"
 msgstr "采样率："
 
 #: engine_dialog.cc:608 engine_dialog.cc:727
-msgid "Buffer size:"
+msgid "Buffer Size:"
 msgstr "缓冲区大小："
 
 #: engine_dialog.cc:617
@@ -7407,7 +7451,7 @@ msgid "Output channels:"
 msgstr "输出声道："
 
 #: engine_dialog.cc:666
-msgid "Hardware input latency:"
+msgid "Hardware Input Latency:"
 msgstr "硬件输入延迟："
 
 #: engine_dialog.cc:669 engine_dialog.cc:682
@@ -7415,7 +7459,7 @@ msgid "samples"
 msgstr "样本"
 
 #: engine_dialog.cc:679
-msgid "Hardware output latency:"
+msgid "Hardware Output Latency:"
 msgstr "硬件输出延迟："
 
 #: engine_dialog.cc:690
@@ -7449,11 +7493,11 @@ msgstr ""
 
 #: engine_dialog.cc:932
 msgid "Engine|Stop"
-msgstr "停"
+msgstr "停止"
 
 #: engine_dialog.cc:936
 msgid "Engine|Start"
-msgstr "启"
+msgstr "启动"
 
 #: engine_dialog.cc:1022
 msgid "MIDI Devices"
@@ -12824,8 +12868,8 @@ msgid "Maximum number of recent sessions"
 msgstr "当前会话的最大数量"
 
 #: rc_option_editor.cc:2465 rc_option_editor.cc:2476
-msgid "General/Translation"
-msgstr "通用 /翻译"
+msgid "Appearance/Translation"
+msgstr "外观/翻译"
 
 #: rc_option_editor.cc:2465
 msgid "Internationalization"
@@ -12971,6 +13015,10 @@ msgstr "不论何时都及时重叠它们"
 #: rc_option_editor.cc:2622
 msgid "if either encloses the other"
 msgstr "如果其中一个包含另一个"
+
+#: rc_option_editor.cc:3623 rc_option_editor.cc:3624
+msgid "MIDI/MIDI Port Config"
+msgstr "MIDI/MIDI端口配置"
 
 #: rc_option_editor.cc:2623
 msgid "only if they have identical length, position and origin"
@@ -13244,6 +13292,14 @@ msgstr "自动化物理输出"
 #: rc_option_editor.cc:2965
 msgid "automatically to master bus"
 msgstr "自动化主控总线"
+
+#: rc_option_editor.cc:2972 rc_option_editor.cc:2976
+msgid "Appearance/Size and Scale"
+msgstr "外观/大小和缩放"
+
+#: rc_option_editor.cc:2972
+msgid "User Interface Size and Scale"
+msgstr "用户界面大小和缩放"
 
 #: rc_option_editor.cc:2972
 msgid "Use 'Strict-I/O' for new tracks or busses"
@@ -13904,6 +13960,12 @@ msgstr ""
 msgid "Plugins/VST"
 msgstr "插件/VST（虚拟工作室技术）"
 
+#: rc_option_editor.cc:4063 rc_option_editor.cc:4064 rc_option_editor.cc:4078
+#: rc_option_editor.cc:4092 rc_option_editor.cc:4096 rc_option_editor.cc:4097
+#: rc_option_editor.cc:4111
+msgid "Plugins/GUI"
+msgstr "插件/GUI"
+
 #: rc_option_editor.cc:3621
 msgid "VST"
 msgstr "VST 虚拟工作室技术（Virtual Studio Technology）"
@@ -14055,6 +14117,22 @@ msgstr "插件图形用户界面"
 msgid "Automatically open the plugin GUI when adding a new plugin"
 msgstr "添加新的插件时自动打开插件图形用户界面"
 
+#: rc_option_editor.cc:4074
+msgid "Show only one plugin window at a time"
+msgstr "一次只显示一个插件窗口"
+
+#: rc_option_editor.cc:4088
+msgid "only hides the window"
+msgstr "仅隐藏窗口"
+
+#: rc_option_editor.cc:4089
+msgid "destroys the GUI instance, releasing resources"
+msgstr "销毁 GUI 实例，释放资源"
+
+#: rc_option_editor.cc:4090
+msgid "only destroys VST2/3 UIs, hides others"
+msgstr "仅关闭 VST2/3 UI，隐藏其他窗口"
+
 #: rc_option_editor.cc:3807
 msgid "Show Plugin Inline Display on Mixerstrip by default"
 msgstr "在混音器工具栏上默认显示插件内联显示"
@@ -14083,6 +14161,10 @@ msgid ""
 "before adding a multichannel plugin."
 msgstr ""
 "<b>当启用时</b>显示一个对话框以便于在添加一个复合声道插件前选择乐器声道配置。"
+
+#: rc_option_editor.cc:4084
+msgid "Closing a Plugin GUI Window"
+msgstr "关闭插件 GUI 窗口时"
 
 #: rc_option_editor.cc:3841
 msgid "Statistics"
@@ -14163,6 +14245,14 @@ msgstr "闪亮录制预备按钮"
 #: rc_option_editor.cc:3937
 msgid "Blink Alert Indicators"
 msgstr "闪亮警报指示器"
+
+#: rc_option_editor.cc:2621 rc_option_editor.cc:2634
+msgid "Appearance/Recorder"
+msgstr "外观/录音器"
+
+#: rc_option_editor.cc:2621 rc_option_editor.cc:2625
+msgid "Input Meter Layout"
+msgstr "输入仪表布局"
 
 #: rc_option_editor.cc:3947 rc_option_editor.cc:3948 rc_option_editor.cc:3956
 #: rc_option_editor.cc:3964 rc_option_editor.cc:3984 rc_option_editor.cc:3995
