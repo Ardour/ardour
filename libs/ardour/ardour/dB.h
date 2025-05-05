@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_dB_h__
-#define __ardour_dB_h__
+#pragma once
 
 #include <limits>
 #include "pbd/fastlog.h"
@@ -48,4 +47,3 @@ static inline double dB_coeff_step(double max_coeff) {
 
 extern double zero_db_as_fraction;
 
-#endif /* __ardour_dB_h__ */
