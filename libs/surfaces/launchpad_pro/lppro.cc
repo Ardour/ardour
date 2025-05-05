@@ -1969,7 +1969,7 @@ LaunchPadPro::fader_move (int cc, int val)
 	case VolumeFaders:
 		ac = r->gain_control();
 		if (ac) {
-			session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ARDOUR::Config->get_max_gain()), PBD::Controllable::NoGroup);
+			session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ac->upper()), PBD::Controllable::NoGroup);
 		}
 		break;
 	case PanFaders:
@@ -1981,7 +1981,7 @@ LaunchPadPro::fader_move (int cc, int val)
 	case SendFaders:
 		ac = r->send_level_controllable (scroll_x_offset + (cc - first_fader));
 		if (ac) {
-			session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ARDOUR::Config->get_max_gain()), PBD::Controllable::NoGroup);
+			session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ac->upper()), PBD::Controllable::NoGroup);
 		}
 		break;
 	default:
@@ -2032,7 +2032,7 @@ LaunchPadPro::map_faders ()
 		case VolumeFaders:
 			ac = r->gain_control();
 			if (ac) {
-				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
+				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ac->upper()) * 127.0);
 			} else {
 				msg[2] = 0;
 			}
@@ -2048,7 +2048,7 @@ LaunchPadPro::map_faders ()
 		case SendFaders:
 			ac = r->send_level_controllable (n);
 			if (ac) {
-				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
+				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ac->upper()) * 127.0);
 			} else {
 				msg[2] = 0;
 			}
@@ -2081,7 +2081,7 @@ LaunchPadPro::automation_control_change (int n, std::weak_ptr<AutomationControl>
 	switch (current_fader_bank) {
 	case VolumeFaders:
 	case SendFaders:
-		msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
+		msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ac->upper()) * 127.0);
 		break;
 	case PanFaders:
 		msg[2] = (MIDI::byte) (ac->get_value() * 127.0);

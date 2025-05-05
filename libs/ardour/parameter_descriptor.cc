@@ -78,7 +78,7 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		logarithmic = true;
 		break;
 	case MainOutVolume:
-		upper  = 100; // +40dB
+		upper  = 15.85; // +24B
 		lower  = .01; // -40dB
 		normal = 1.0f;
 		logarithmic = true;

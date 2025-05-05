@@ -1549,7 +1549,7 @@ LaunchKey4::fader_move (int which, int val)
 	}
 
 	if (ac) {
-		gain_t gain = ARDOUR::slider_position_to_gain_with_max (val/127.0, ARDOUR::Config->get_max_gain());
+		gain_t gain = ARDOUR::slider_position_to_gain_with_max (val/127.0, ac->upper());
 		session->set_control (ac, gain, PBD::Controllable::NoGroup);
 
 		char buf[16];
@@ -1574,7 +1574,7 @@ LaunchKey4::automation_control_change (int n, std::weak_ptr<AutomationControl> w
 	case VolumeFaders:
 	case SendAFaders:
 	case SendBFaders:
-		msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
+		msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ac->upper()) * 127.0);
 		break;
 	case PanFaders:
 		msg[2] = (MIDI::byte) (ac->get_value() * 127.0);
@@ -1779,9 +1779,9 @@ LaunchKey4::encoder_level (int which, int step)
 	if (shift_pressed) {
 		gain = gc->get_value();
 	} else {
-		double pos = ARDOUR::gain_to_slider_position_with_max (gc->get_value(), ARDOUR::Config->get_max_gain());
+		double pos = ARDOUR::gain_to_slider_position_with_max (gc->get_value(), gc->upper());
 		pos += (step/127.0);
-		gain = ARDOUR::slider_position_to_gain_with_max (pos, ARDOUR::Config->get_max_gain());
+		gain = ARDOUR::slider_position_to_gain_with_max (pos, gc->upper());
 		session->set_control (gc, gain, Controllable::NoGroup);
 	}
 
@@ -1827,9 +1827,9 @@ LaunchKey4::encoder_senda (int which, int step)
 		/* Just display current value */
 		gain = gc->get_value();
 	} else {
-		double pos = ARDOUR::gain_to_slider_position_with_max (gc->get_value(), ARDOUR::Config->get_max_gain());
+		double pos = ARDOUR::gain_to_slider_position_with_max (gc->get_value(), gc->upper());
 		pos += (step/127.0);
-		gain = ARDOUR::slider_position_to_gain_with_max (pos, ARDOUR::Config->get_max_gain());
+		gain = ARDOUR::slider_position_to_gain_with_max (pos, gc->upper());
 		session->set_control (gc, gain, Controllable::NoGroup);
 	}
 

@@ -2969,7 +2969,7 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 	if (0 == strcmp (id, ContextInfo::kMaxVolume)) {
 		value = s->gain_control ()->upper ();
 	} else if (0 == strcmp (id, ContextInfo::kMaxSendLevel)) {
-		value = 2.0; // Config->get_max_gain();
+		value = Config->get_max_gain();
 #ifdef MIXBUS
 		if (s->send_enable_controllable (0)) {
 			assert (s->send_level_controllable (0));

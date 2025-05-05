@@ -1666,7 +1666,7 @@ LaunchPadX::fader_move (int cc, int val)
 	case VolumeFaders:
 		ac = r->gain_control();
 		if (ac) {
-			session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ARDOUR::Config->get_max_gain()), PBD::Controllable::NoGroup);
+			session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ac->upper()), PBD::Controllable::NoGroup);
 		}
 		break;
 	case PanFaders:
@@ -1678,7 +1678,7 @@ LaunchPadX::fader_move (int cc, int val)
 	case SendAFaders:
 		ac = r->send_level_controllable (scroll_x_offset + (cc - first_fader));
 		if (ac) {
-			session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ARDOUR::Config->get_max_gain()), PBD::Controllable::NoGroup);
+			session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ac->upper()), PBD::Controllable::NoGroup);
 		}
 		break;
 	case SendBFaders:
@@ -1731,7 +1731,7 @@ LaunchPadX::map_faders ()
 		case VolumeFaders:
 			ac = r->gain_control();
 			if (ac) {
-				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
+				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ac->upper()) * 127.0);
 			} else {
 				msg[2] = 0;
 			}
@@ -1747,7 +1747,7 @@ LaunchPadX::map_faders ()
 		case SendAFaders:
 			ac = r->send_level_controllable (0);
 			if (ac) {
-				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
+				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ac->upper()) * 127.0);
 			} else {
 				msg[2] = 0;
 			}
@@ -1755,7 +1755,7 @@ LaunchPadX::map_faders ()
 		case SendBFaders:
 			ac = r->send_level_controllable (1);
 			if (ac) {
-				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
+				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ac->upper()) * 127.0);
 			} else {
 				msg[2] = 0;
 			}
@@ -1789,7 +1789,7 @@ LaunchPadX::automation_control_change (int n, std::weak_ptr<AutomationControl> w
 	case VolumeFaders:
 	case SendAFaders:
 	case SendBFaders:
-		msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
+		msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ac->upper()) * 127.0);
 		break;
 	case PanFaders:
 		msg[2] = (MIDI::byte) (ac->get_value() * 127.0);
