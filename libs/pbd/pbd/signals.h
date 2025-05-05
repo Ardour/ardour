@@ -503,7 +503,7 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 		return;
 
 	} else {
-		std::list<R,PBD::StackAllocator<R,nslots> > r;
+		std::vector<R,PBD::StackAllocator<R,nslots> > r;
 		slot_function_type functor;
 
 		for (auto const & c : s) {
