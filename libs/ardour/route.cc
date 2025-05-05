@@ -5037,7 +5037,7 @@ Route::set_processor_positions ()
 }
 
 /** Called when there is a proposed change to the input port count */
-bool
+int
 Route::input_port_count_changing (ChanCount to)
 {
 	list<pair<ChanCount, ChanCount> > c = try_configure_processors (to, 0);
@@ -5045,15 +5045,15 @@ Route::input_port_count_changing (ChanCount to)
 		/* The processors cannot be configured with the new input arrangement, so
 		   block the change.
 		*/
-		return true;
+		return 1;
 	}
 
 	/* The change is ok */
-	return false;
+	return 0;
 }
 
 /** Called when there is a proposed change to the output port count */
-bool
+int
 Route::output_port_count_changing (ChanCount to)
 {
 	if (_strict_io && !_in_configure_processors) {
@@ -5061,11 +5061,11 @@ Route::output_port_count_changing (ChanCount to)
 	}
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		if (processor_out_streams.get(*t) > to.get(*t)) {
-			return true;
+			return 1;
 		}
 	}
 	/* The change is ok */
-	return false;
+	return 0;
 }
 
 list<string>

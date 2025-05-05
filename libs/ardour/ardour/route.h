@@ -725,8 +725,8 @@ private:
 	std::vector<std::weak_ptr<Processor> > selfdestruct_sequence;
 	Glib::Threads::Mutex  selfdestruct_lock;
 
-	bool input_port_count_changing (ChanCount);
-	bool output_port_count_changing (ChanCount);
+	int input_port_count_changing (ChanCount);
+	int output_port_count_changing (ChanCount);
 
 	bool output_effectively_connected_real () const;
 	mutable std::map<Route*, bool> _connection_cache;

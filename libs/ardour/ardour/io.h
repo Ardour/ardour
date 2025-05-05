@@ -156,17 +156,24 @@ public:
 	int set_state_2X (const XMLNode&, int, bool);
 	static void prepare_for_reset (XMLNode&, const std::string&);
 
-	class BoolCombiner {
+	/* We'd like this to use bool, but there are unexplained issues using
+	 * bool with a PBD::StackAllocator. They may arise from stdlib's
+	 * specialiation of std::list<bool> and/or std::vector<bool>.
+	 *
+	 * So we use int instead, with the same semantics.
+	 */
+
+	class IntBoolCombiner {
 	public:
 
-		typedef bool result_type;
+		typedef int result_type;
 
 		template <typename Iter>
 		result_type operator() (Iter first, Iter last) const {
-			bool r = false;
+			int r = 0;
 			while (first != last) {
-				if (*first) {
-					r = true;
+				if (*first > 0) {
+					r = 1;
 				}
 				++first;
 			}
@@ -176,10 +183,10 @@ public:
 	};
 
 	/** Emitted when the port count is about to change.  Objects
-	 *  can attach to this, and return `true' if they want to prevent
+	 *  can attach to this, and return a non-zero if they want to prevent
 	 *  the change from happening.
 	 */
-	PBD::SignalWithCombiner<BoolCombiner, bool(ChanCount)> PortCountChanging;
+	PBD::SignalWithCombiner<IntBoolCombiner, int(ChanCount)> PortCountChanging;
 
 	static PBD::Signal<void(ChanCount)> PortCountChanged; // emitted when the number of ports changes
 
