@@ -1730,16 +1730,21 @@ Editor::region_selection_changed ()
 			}
 		}
 	}
+
 	Gtkmm2ext::container_clear (_bottom_hbox);
+
 	if (pack_pianoroll) {
 		_bottom_hbox.pack_start(*_properties_box, false, false);
 		_bottom_hbox.pack_start(_pianoroll->contents(), true, true);
 		_pianoroll->contents().hide ();
 		_pianoroll->contents().show_all ();
+		_properties_box->show ();
 	} else {
-		_bottom_hbox.pack_start(*_properties_box, true, true);
+		if (!selection->regions.empty()) {
+			_bottom_hbox.pack_start(*_properties_box, true, true);
+			_properties_box->show ();
+		}
 	}
-	_properties_box->show ();
 }
 
 void

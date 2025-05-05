@@ -1260,7 +1260,6 @@ Editor::set_session (Session *t)
 	}
 	_pianoroll->set_session (_session);
 
-	_bottom_hbox.pack_start(*_properties_box, true, true);
 	/* _pianoroll is packed on demand in Editor::region_selection_changed */
 	_bottom_hbox.show_all();
 
