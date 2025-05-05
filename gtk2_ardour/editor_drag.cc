@@ -4753,14 +4753,15 @@ ControlPointDrag::ControlPointDrag (EditingContext& e, ArdourCanvas::Item* i)
 	, _pushing (false)
 	, _final_index (0)
 {
+	_point = reinterpret_cast<ControlPoint*> (_item->get_data ("control_point"));
+	assert (_point);
+
 	if (_zero_gain_fraction < 0.0) {
-		_zero_gain_fraction = gain_to_slider_position_with_max (dB_to_coefficient (0.0), Config->get_max_gain ());
+		_zero_gain_fraction = gain_to_slider_position_with_max (dB_to_coefficient (0.0), _point->line().the_list()->descriptor().upper);
 	}
 
 	DEBUG_TRACE (DEBUG::Drags, string_compose ("New ControlPointDrag @ %1\n", this));
 
-	_point = reinterpret_cast<ControlPoint*> (_item->get_data ("control_point"));
-	assert (_point);
 
 	set_time_domain (_point->line ().the_list ()->time_domain ());
 }

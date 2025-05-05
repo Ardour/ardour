@@ -100,11 +100,7 @@ reset_cursor_to_default_state (Gtk::StateType, Gtk::Entry* widget)
 sigc::signal<void, ARDOUR::AutoState> GainMeterBase::ChangeGainAutomationState;
 
 GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int fader_girth)
-	: gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()),  // value
-	                   0.0,  // lower
-	                   1.0,  // upper
-	                   dB_coeff_step(Config->get_max_gain()) / 10.0,  // step increment
-	                   dB_coeff_step(Config->get_max_gain()))  // page increment
+	: gain_adjustment (0.0, 0.0, 1.0, 1.0, 1.0) /* values reset in ::setup_gain_adjustment() */
 	, gain_automation_state_button ("")
 	, meter_point_button (_("pre"))
 	, gain_astate_propagate (false)
@@ -337,12 +333,14 @@ GainMeterBase::setup_gain_adjustment ()
 	ignore_toggle = true;
 
 	if (_amp->output_streams().n_midi() <=  _amp->output_streams().n_audio()) {
+		gain_t max_gain = _amp->gain_control()->upper();
+
 		_data_type = DataType::AUDIO;
 		gain_adjustment.set_lower (GAIN_COEFF_ZERO);
 		gain_adjustment.set_upper (GAIN_COEFF_UNITY);
-		gain_adjustment.set_step_increment (dB_coeff_step(Config->get_max_gain()) / 10.0);
-		gain_adjustment.set_page_increment (dB_coeff_step(Config->get_max_gain()));
-		gain_slider->set_default_value (gain_to_slider_position_with_max (GAIN_COEFF_UNITY, Config->get_max_gain()));
+		gain_adjustment.set_step_increment (dB_coeff_step(max_gain) / 10.0);
+		gain_adjustment.set_page_increment (dB_coeff_step(max_gain));
+		gain_slider->set_default_value (gain_to_slider_position_with_max (GAIN_COEFF_UNITY, max_gain));
 	} else {
 		_data_type = DataType::MIDI;
 		gain_adjustment.set_lower (0.0);
@@ -575,7 +573,7 @@ GainMeterBase::show_gain ()
 		if (v == 0.0) {
 			strcpy (buf, _("-inf"));
 		} else {
-			snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain_with_max (v, Config->get_max_gain())));
+			snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain_with_max (v, _amp->gain_control()->upper())));
 		}
 		break;
 	case DataType::MIDI:
@@ -596,7 +594,7 @@ GainMeterBase::fader_moved ()
 		/* convert from adjustment range (0..1) to gain coefficient */
 
 		if (_data_type == DataType::AUDIO) {
-			value = slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain());
+			value = slider_position_to_gain_with_max (gain_adjustment.get_value(), _amp->gain_control()->upper());
 		} else {
 			value = gain_adjustment.get_value();
 		}
@@ -625,7 +623,7 @@ GainMeterBase::effective_gain_display ()
 		/* the position of the fader should reflect any master gain,
 		 * not just the control's own inherent value
 		 */
-		fader_position = gain_to_slider_position_with_max (_control->get_value(), Config->get_max_gain());
+		fader_position = gain_to_slider_position_with_max (_control->get_value(), _amp->gain_control()->upper());
 		break;
 	case DataType::MIDI:
 		fader_position = _control->get_value ();

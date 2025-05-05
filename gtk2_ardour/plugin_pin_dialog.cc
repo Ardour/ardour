@@ -2021,7 +2021,7 @@ PluginPinWidget::property_changed (PBD::PropertyChange const& what_changed)
 /* lifted from ProcessorEntry::Control */
 PluginPinWidget::Control::Control (std::shared_ptr<AutomationControl> c, string const & n)
 	: _control (c)
-	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain ()), 0, 1, 0.01, 0.1)
+	, _adjustment (gain_to_slider_position_with_max (1.0, c->upper()), 0, 1, 0.01, 0.1)
 	, _slider (&_adjustment, std::shared_ptr<PBD::Controllable> (), 0, max (13.f, rintf (13.f * UIConfiguration::instance ().get_ui_scale ())))
 	, _slider_persistant_tooltip (&_slider)
 	, _ignore_ui_adjustment (false)
