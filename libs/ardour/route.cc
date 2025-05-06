@@ -167,7 +167,11 @@ Route::init ()
 
 	/* add standard controls */
 
-	_gain_control.reset (new GainControl (_session, GainAutomation));
+	if (is_master()) {
+		_gain_control.reset (new GainControl (_session, LargeGainAutomation));
+	} else {
+		_gain_control.reset (new GainControl (_session, GainAutomation));
+	}
 	_trim_control.reset (new GainControl (_session, TrimAutomation));
 	/* While the route has-a gain-control for consistency with Stripable and VCA
 	 * ownership is handed over to the Amp Processor which manages the
