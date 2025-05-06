@@ -503,6 +503,10 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 		return;
 
 	} else {
+		if (s.empty()) {
+			return typename Combiner::result_type ();
+		}
+
 		std::vector<R,PBD::StackAllocator<R,nslots> > r;
 		slot_function_type functor;
 
