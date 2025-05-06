@@ -22,8 +22,6 @@
 #include <iostream>
 #include <assert.h>
 
-#include "ardour/utils.h"
-
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/keyboard.h"
