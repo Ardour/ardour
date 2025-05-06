@@ -801,8 +801,6 @@ AutomationLine::drag_motion (timecnt_t const & pdt, float fraction, bool ignore_
 		}
 	}
 
-	std::cerr << "clamped to " << _desc.lower << " .. " << _desc.upper << std::endl;
-
 	if (!dt.is_zero() || dy) {
 		/* and now move each section */
 
