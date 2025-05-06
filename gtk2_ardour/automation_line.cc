@@ -223,6 +223,7 @@ bool
 AutomationLine::get_uses_gain_mapping () const
 {
 	switch (_desc.type) {
+		case LargeGainAutomation:
 		case GainAutomation:
 		case BusSendLevel:
 		case EnvelopeAutomation:
@@ -495,6 +496,7 @@ AutomationLine::string_to_fraction (string const & s) const
 
 	switch (_desc.type) {
 		case GainAutomation:
+		case LargeGainAutomation:
 		case BusSendLevel:
 		case EnvelopeAutomation:
 		case TrimAutomation:
@@ -798,6 +800,8 @@ AutomationLine::drag_motion (timecnt_t const & pdt, float fraction, bool ignore_
 			delta_value = compute_delta (orig, _desc.upper);
 		}
 	}
+
+	std::cerr << "clamped to " << _desc.lower << " .. " << _desc.upper << std::endl;
 
 	if (!dt.is_zero() || dy) {
 		/* and now move each section */

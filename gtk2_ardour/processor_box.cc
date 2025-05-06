@@ -186,7 +186,8 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, std::shared_ptr<Processor>
 		_button.set_elements(ArdourButton::Element(_button.elements() & ~ArdourButton::Indicator));
 	}
 	if (std::dynamic_pointer_cast<Amp> (_processor) &&
-	    std::dynamic_pointer_cast<Amp> (_processor)->gain_control()->parameter().type() != GainAutomation) {
+	    ((std::dynamic_pointer_cast<Amp> (_processor)->gain_control()->parameter().type() != GainAutomation) ||
+	     (std::dynamic_pointer_cast<Amp> (_processor)->gain_control()->parameter().type() != LargeGainAutomation))) {
 		/* Trim, Volume */
 		_button.set_elements(ArdourButton::Element(_button.elements() & ~ArdourButton::Indicator));
 	}
@@ -2653,7 +2654,9 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 			if (!std::dynamic_pointer_cast<PluginInsert> (*i)) {
 				continue;
 			}
-			if (std::dynamic_pointer_cast<Amp> (*i) && std::dynamic_pointer_cast<Amp> (*i)->gain_control()->parameter().type() != GainAutomation) {
+			if (std::dynamic_pointer_cast<Amp> (*i) &&
+			    ((std::dynamic_pointer_cast<Amp> (*i)->gain_control()->parameter().type() != GainAutomation) &&
+			     (std::dynamic_pointer_cast<Amp> (*i)->gain_control()->parameter().type() != LargeGainAutomation))) {
 				/* Trim, Volume */
 				continue;
 			}
@@ -2749,7 +2752,9 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev, ProcessorEntry
 		processor = child->processor ();
 	}
 
-	if (std::dynamic_pointer_cast<Amp> (processor) && std::dynamic_pointer_cast<Amp> (processor)->gain_control()->parameter().type() != GainAutomation) {
+	if (std::dynamic_pointer_cast<Amp> (processor) &&
+	    ((std::dynamic_pointer_cast<Amp> (processor)->gain_control()->parameter().type() != GainAutomation) &&
+	     (std::dynamic_pointer_cast<Amp> (processor)->gain_control()->parameter().type() != LargeGainAutomation))) {
 		/* Volume */
 		return false;
 	}
@@ -3345,7 +3350,8 @@ ProcessorBox::setup_entry_positions ()
 	uint32_t num = 0;
 	for (list<ProcessorEntry*>::iterator i = children.begin(); i != children.end(); ++i) {
 		if (std::dynamic_pointer_cast<Amp>((*i)->processor()) &&
-		    std::dynamic_pointer_cast<Amp>((*i)->processor())->gain_control()->parameter().type() == GainAutomation) {
+		    (std::dynamic_pointer_cast<Amp>((*i)->processor())->gain_control()->parameter().type() == GainAutomation ||
+		     std::dynamic_pointer_cast<Amp>((*i)->processor())->gain_control()->parameter().type() == LargeGainAutomation)) {
 			pre_fader = false;
 			(*i)->set_position (ProcessorEntry::Fader, num++);
 		} else {
@@ -4020,7 +4026,9 @@ ProcessorBox::get_editor_window (std::shared_ptr<Processor> processor, bool use_
 		}
 	}
 
-	if (std::dynamic_pointer_cast<Amp> (processor) && std::dynamic_pointer_cast<Amp> (processor)->gain_control()->parameter().type() == GainAutomation) {
+	if (std::dynamic_pointer_cast<Amp> (processor) &&
+	    (std::dynamic_pointer_cast<Amp> (processor)->gain_control()->parameter().type() == GainAutomation ||
+	     std::dynamic_pointer_cast<Amp> (processor)->gain_control()->parameter().type() == LargeGainAutomation)) {
 
 		if (_parent_strip) {
 			_parent_strip->revert_to_default_display ();

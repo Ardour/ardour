@@ -999,7 +999,9 @@ AutomationTimeAxisView::color_handler ()
 int
 AutomationTimeAxisView::set_state_2X (const XMLNode& node, int /*version*/)
 {
-	if (node.name() == X_("gain") && _parameter == Evoral::Parameter (GainAutomation)) {
+	if (node.name() == X_("gain") &&
+	    ((_parameter == Evoral::Parameter (GainAutomation)) ||
+	     (_parameter == Evoral::Parameter (LargeGainAutomation)))) {
 
 		bool shown;
 		if (node.get_property (X_("shown"), shown)) {

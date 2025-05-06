@@ -3588,7 +3588,8 @@ Mixer_UI::add_favorite_processor (ARDOUR::PluginPresetPtr ppp, ProcessorPosition
 							continue;
 						}
 						if (std::dynamic_pointer_cast<Amp> (np) && // Fader, not Trim
-								std::dynamic_pointer_cast<Amp> (np)->gain_control()->parameter().type() == GainAutomation) {
+						    (std::dynamic_pointer_cast<Amp> (np)->gain_control()->parameter().type() == GainAutomation ||
+						     std::dynamic_pointer_cast<Amp> (np)->gain_control()->parameter().type() == LargeGainAutomation)) {
 							break;
 						}
 						++pos;

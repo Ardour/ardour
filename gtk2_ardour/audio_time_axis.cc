@@ -105,8 +105,10 @@ AudioTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	}
 
 	/* if set_state above didn't create a gain automation child, we need to make one */
-	if (automation_child (GainAutomation) == 0) {
-		create_automation_child (GainAutomation, false);
+	AutomationType at = _route->is_master() ? LargeGainAutomation : GainAutomation;
+
+	if (automation_child (at) == 0) {
+		create_automation_child (at, false);
 	}
 
 	if (automation_child (TrimAutomation) == 0) {
@@ -190,7 +192,7 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 		return;
 	}
 
-	if (param.type() == GainAutomation) {
+	if (param.type() == GainAutomation || param.type() == LargeGainAutomation) {
 
 		create_gain_automation_child (param, show);
 

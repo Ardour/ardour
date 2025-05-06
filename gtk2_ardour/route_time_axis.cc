@@ -582,7 +582,9 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 		gain_automation_item->set_active (single_track_selected &&
 		                                  string_to<bool>(gain_track->gui_property ("visible")));
 
-		_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
+		AutomationType at = _route->is_master() ? LargeGainAutomation : GainAutomation;
+
+		_main_automation_menu_map[Evoral::Parameter(at)] = gain_automation_item;
 	}
 
 	if (trim_track) {
@@ -2454,7 +2456,8 @@ RouteTimeAxisView::create_gain_automation_child (const Evoral::Parameter& param,
 		_view->foreach_regionview (sigc::mem_fun (*gain_track.get(), &TimeAxisView::add_ghost));
 	}
 
-	add_automation_child (Evoral::Parameter(GainAutomation), gain_track, show);
+	AutomationType at = _route->is_master() ? LargeGainAutomation : GainAutomation;
+	add_automation_child (Evoral::Parameter (at), gain_track, show);
 }
 
 void
