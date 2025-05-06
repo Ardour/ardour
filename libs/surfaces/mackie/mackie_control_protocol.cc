@@ -2103,6 +2103,7 @@ MackieControlProtocol::down_controls (AutomationType p, uint32_t pressed)
 	pull_stripable_range (m->second, stripables, pressed);
 
 	switch (p) {
+	case LargeGainAutomation:
 	case GainAutomation:
 		for (StripableList::iterator s = stripables.begin(); s != stripables.end(); ++s) {
 			controls.push_back ((*s)->gain_control());

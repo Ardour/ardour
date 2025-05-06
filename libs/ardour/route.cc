@@ -3074,7 +3074,8 @@ Route::set_state_2X (const XMLNode& node, int version)
 					_main_outs->panner_shell()->set_state(*io_child, version);
 				} else if (io_child->name() == X_("Automation")) {
 					/* IO's automation is for the fader */
-					_amp->set_automation_xml_state (*io_child, Evoral::Parameter (GainAutomation));
+					AutomationType at = is_master() ? LargeGainAutomation : GainAutomation;
+					_amp->set_automation_xml_state (*io_child, Evoral::Parameter (at));
 				}
 			}
 		}

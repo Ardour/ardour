@@ -222,6 +222,7 @@ Maschine2Knob::controllable_changed ()
 				break;
 
 			case ARDOUR::GainAutomation:
+			case ARDOUR::LargeGainAutomation:
 			case ARDOUR::BusSendLevel:
 			case ARDOUR::SurroundSendLevel:
 			case ARDOUR::InsertReturnLevel:

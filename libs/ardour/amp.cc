@@ -335,6 +335,7 @@ Amp::state () const
 	XMLNode& node (Processor::state ());
 	switch (_gain_control->parameter().type()) {
 		case GainAutomation:
+		case LargeGainAutomation:
 			node.set_property("type", "amp");
 			break;
 		case TrimAutomation:

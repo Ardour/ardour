@@ -2481,6 +2481,7 @@ LuaBindings::common (lua_State* L)
 
 		.beginNamespace ("AutomationType")
 		.addConst ("GainAutomation", ARDOUR::AutomationType(GainAutomation))
+		.addConst ("LargeGainAutomation", ARDOUR::AutomationType(LargeGainAutomation))
 		.addConst ("BusSendLevel", ARDOUR::AutomationType(BusSendLevel))
 		.addConst ("SurroundSendLevel", ARDOUR::AutomationType(SurroundSendLevel))
 		.addConst ("InsertReturnLevel", ARDOUR::AutomationType(InsertReturnLevel))

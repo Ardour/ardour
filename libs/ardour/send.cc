@@ -369,7 +369,7 @@ Send::set_state (const XMLNode& node, int version)
 				continue;
 			}
 			Evoral::Parameter param = EventTypeMap::instance().from_symbol (id_prop->value());
-			if (param.type() != GainAutomation) {
+			if (param.type() != GainAutomation && param.type() != LargeGainAutomation) {
 				continue;
 			}
 			XMLNode xn (**i);

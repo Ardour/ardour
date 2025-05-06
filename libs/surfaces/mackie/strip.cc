@@ -713,6 +713,7 @@ Strip::format_parameter_for_display(
 
 	switch (desc.type) {
 	case GainAutomation:
+	case LargeGainAutomation:
 	case BusSendLevel:
 	case TrimAutomation:
 	case SurroundSendLevel:

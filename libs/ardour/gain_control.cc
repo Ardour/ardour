@@ -38,6 +38,8 @@ using namespace std;
 static std::string gain_control_name (Evoral::Parameter const& param)
 {
 	switch (param.type()) {
+		case LargeGainAutomation:
+			/* fallthrough */
 		case GainAutomation:
 			/* fallthrough */
 		case BusSendLevel:
@@ -62,6 +64,8 @@ static std::string gain_control_name (Evoral::Parameter const& param)
 static std::shared_ptr<AutomationList> automation_list_new (Evoral::Parameter const& param)
 {
 	switch (param.type()) {
+		case LargeGainAutomation:
+			/* fallthrough */
 		case GainAutomation:
 			/* fallthrough */
 		case BusSendLevel:

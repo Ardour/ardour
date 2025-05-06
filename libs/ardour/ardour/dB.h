@@ -45,5 +45,3 @@ static inline double dB_coeff_step(double max_coeff) {
 	return 0.1 * (max_coeff / max_db);
 }
 
-extern double zero_db_as_fraction;
-

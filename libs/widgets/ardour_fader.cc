@@ -22,6 +22,8 @@
 #include <iostream>
 #include <assert.h>
 
+#include "ardour/utils.h"
+
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/keyboard.h"
@@ -59,6 +61,8 @@ ArdourFader::ArdourFader (Gtk::Adjustment& adj, int orientation, int fader_lengt
 	, have_explicit_fg (false)
 	, outline_color (0)
 {
+	adj.signal_changed().connect (sigc::mem_fun (*this, &ArdourFader::update_unity_position));
+
 	update_unity_position ();
 
 	add_events (Gdk::TOUCH_UPDATE_MASK);

@@ -227,6 +227,7 @@ ControlGroup::fill_from_stripable_list (StripableList& sl, Evoral::Parameter con
 
 	switch (p.type()) {
 	case GainAutomation:
+	case LargeGainAutomation:
 		for (auto & s : sl) {
 			std::shared_ptr<AutomationControl> ac = s->gain_control ();
 			if (ac) {

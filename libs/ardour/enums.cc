@@ -184,6 +184,7 @@ setup_enum_writer ()
 
 	REGISTER_ENUM (NullAutomation);
 	REGISTER_ENUM (GainAutomation);
+	REGISTER_ENUM (LargeGainAutomation);
 	REGISTER_ENUM (PanAzimuthAutomation);
 	REGISTER_ENUM (PanElevationAutomation);
 	REGISTER_ENUM (PanWidthAutomation);

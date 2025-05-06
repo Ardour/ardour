@@ -157,6 +157,7 @@ AutomationList::create_curve_if_necessary()
 {
 	switch (_parameter.type()) {
 	case GainAutomation:
+	case LargeGainAutomation:
 	case BusSendLevel:
 	case SurroundSendLevel:
 	case InsertReturnLevel:
@@ -234,6 +235,7 @@ AutomationList::default_interpolation () const
 {
 	switch (_parameter.type()) {
 		case GainAutomation:
+		case LargeGainAutomation:
 		case BusSendLevel:
 		case SurroundSendLevel:
 		case InsertReturnLevel:

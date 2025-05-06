@@ -64,6 +64,10 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		upper  = Config->get_max_gain();
 		normal = 1.0f;
 		break;
+	case LargeGainAutomation:
+		upper  = 15.85; /* +24dB */
+		normal = 1.0f;
+		break;
 	case BusSendEnable:
 		upper  = 1.f;
 		normal = 1.f;
@@ -286,11 +290,11 @@ ParameterDescriptor::update_steps()
 	if (unit == ParameterDescriptor::MIDI_NOTE) {
 		step      = smallstep = 1;  // semitone
 		largestep = 12;             // octave
-	} else if (type == GainAutomation || type == TrimAutomation || type == BusSendLevel || type == MainOutVolume || type == SurroundSendLevel || type == InsertReturnLevel) {
+	} else if (type == LargeGainAutomation || type == GainAutomation || type == TrimAutomation || type == BusSendLevel || type == MainOutVolume || type == SurroundSendLevel || type == InsertReturnLevel) {
 		/* dB_coeff_step gives a step normalized for [0, max_gain].  This is
 		   like "slider position", so we convert from "slider position" to gain
 		   to have the correct unit here. */
-		largestep = position_to_gain (dB_coeff_step(upper));
+		largestep = position_to_gain (dB_coeff_step (upper));
 		step      = position_to_gain (largestep / 10.0);
 		smallstep = step;
 	} else if (logarithmic) {
@@ -401,6 +405,8 @@ ParameterDescriptor::to_interface (float val, bool rotary) const
 {
 	val = std::min (upper, std::max (lower, val));
 	switch(type) {
+		case LargeGainAutomation:
+			/* fallthrough */
 		case GainAutomation:
 			/* fallthrough */
 		case BusSendLevel:
@@ -468,6 +474,7 @@ ParameterDescriptor::from_interface (float val, bool rotary) const
 
 	switch(type) {
 		case GainAutomation:
+		case LargeGainAutomation:
 		case EnvelopeAutomation:
 		case BusSendLevel:
 		case InsertReturnLevel:
@@ -532,6 +539,7 @@ ParameterDescriptor::is_linear () const
 	}
 	switch(type) {
 		case GainAutomation:
+		case LargeGainAutomation:
 		case EnvelopeAutomation:
 		case BusSendLevel:
 		case SurroundSendLevel:

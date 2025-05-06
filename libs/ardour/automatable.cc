@@ -194,6 +194,8 @@ Automatable::describe_parameter (Evoral::Parameter param)
 
 	if (param == Evoral::Parameter(GainAutomation)) {
 		return _("Fader");
+	} else if (param == Evoral::Parameter(LargeGainAutomation)) {
+		return _("Fader");
 	} else if (param.type() == BusSendLevel) {
 		return _("Send");
 	} else if (param.type() == SurroundSendLevel) {
@@ -588,7 +590,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 		} else {
 			warning << "PluginPropertyAutomation for non-Plugin" << endl;
 		}
-	} else if (param.type() == GainAutomation) {
+	} else if (param.type() == GainAutomation || param.type() == GainAutomation) {
 		control = new GainControl(_a_session, param);
 	} else if (param.type() == TrimAutomation) {
 		control = new GainControl(_a_session, param);

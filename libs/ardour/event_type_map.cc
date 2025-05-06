@@ -130,6 +130,8 @@ EventTypeMap::from_symbol(const string& str) const
 
 	if (str == "gain") {
 		p_type = GainAutomation;
+	} else if (str == "large-gain") {
+		p_type = LargeGainAutomation;
 	} else if (str == "send") {
 		p_type = BusSendLevel;
 	} else if (str == "surround-send") {
@@ -258,6 +260,8 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 
 	if (t == GainAutomation) {
 		return "gain";
+	} else if (t == LargeGainAutomation) {
+		return "large-gain";
 	} else if (t == BusSendLevel) {
 		return "send";
 	} else if (t == BusSendEnable) {

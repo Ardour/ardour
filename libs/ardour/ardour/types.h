@@ -145,6 +145,7 @@ enum InsertMergePolicy {
  */
 enum AutomationType {
 	NullAutomation,
+	LargeGainAutomation,
 	GainAutomation,
 	PanAzimuthAutomation,
 	PanElevationAutomation,

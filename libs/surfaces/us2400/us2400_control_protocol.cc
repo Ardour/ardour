@@ -1639,6 +1639,7 @@ US2400Protocol::down_controls (AutomationType p, uint32_t pressed)
 
 	switch (p) {
 	case GainAutomation:
+	case LargeGainAutomation:
 		for (StripableList::iterator s = stripables.begin(); s != stripables.end(); ++s) {
 			controls.push_back ((*s)->gain_control());
 		}
