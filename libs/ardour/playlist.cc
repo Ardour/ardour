@@ -2628,7 +2628,7 @@ Playlist::relayer ()
 	}
 
 	/* hence the size of each time division */
-	double const division_size = (end.samples() - start.samples()) / double (divisions);
+	double const division_size = start.distance (end).samples() / double (divisions);
 
 	vector<vector<RegionList> > layers;
 	layers.push_back (vector<RegionList> (divisions));
