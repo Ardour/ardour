@@ -620,6 +620,15 @@ RegionFxPlugin::truncate_automation_end (timepos_t end)
 	}
 }
 
+void
+RegionFxPlugin::x_scale_automation (Temporal::ratio_t r)
+{
+	for (auto const& i : _controls) {
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i.second);
+		ac->alist ()->x_scale (r);
+	}
+}
+
 bool
 RegionFxPlugin::write_immediate_event (Evoral::EventType event_type, size_t size, const uint8_t* buf)
 {
