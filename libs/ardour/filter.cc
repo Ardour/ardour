@@ -133,7 +133,7 @@ Filter::finish (std::shared_ptr<Region> region, SourceList& nsrcs, string region
 	}
 	results.clear ();
 
-	PropertyList plist (region->derive_properties (true, false));
+	PropertyList plist (region->derive_properties (true, true));
 
 	plist.add (Properties::start, std::numeric_limits<timepos_t>::min());
 	plist.add (Properties::name, region_name);
