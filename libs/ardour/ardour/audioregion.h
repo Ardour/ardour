@@ -73,6 +73,7 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	~AudioRegion();
 
 	void copy_settings (std::shared_ptr<const AudioRegion>);
+	void copy_plugin_state (std::shared_ptr<const AudioRegion>);
 
 	bool source_equivalent (std::shared_ptr<const Region>) const;
 
@@ -268,7 +269,6 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	void apply_region_fx (BufferSet&, samplepos_t, samplepos_t, samplecnt_t);
 	void fx_latency_changed (bool no_emit);
 	void fx_tail_changed (bool no_emit);
-	void copy_plugin_state (std::shared_ptr<const AudioRegion>);
 
 	mutable samplepos_t _fx_pos;
 	pframes_t           _fx_block_size;
