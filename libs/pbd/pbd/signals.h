@@ -507,7 +507,29 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 			return typename Combiner::result_type ();
 		}
 
-		std::vector<R,PBD::StackAllocator<R,nslots> > r;
+		/* We would like to use a stack allocator here, but for reasons
+		 * not really understood, this breaks on macOS when using
+		 * the custom combiner used by libs/ardour IO's
+		 * PortCountChanging signal.
+		 *
+		 * Using a vector here is not RT-safe but a manual code
+		 * inspection reveals that there are no combiner-based signals
+		 * (i.e. Signals with a return value) that are ever used in RT
+		 * code.
+		 *
+		 * The alternative is to use alloca() but that could
+		 * theoretically cause stack overflows if the number of
+		 * handlers for the signal is too large (it would have to be
+		 * very large, however).
+		 *
+		 * In short, std::vector<T> is the least-bad of two bad
+		 * choices, and we've chosen this because of the lack of RT use
+		 * cases for a Signal with a return value.
+		 *
+		 */
+
+		std::vector<R> r;
+		r.reserve (s.size());
 		slot_function_type functor;
 
 		for (auto const & c : s) {
