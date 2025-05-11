@@ -25,6 +25,7 @@ def build_ardour_util(bld, util):
     obj.source   = ['common.cc', util + '.cc' ]
     obj.target   = pgmprefix + '-' + util
     obj.includes = ['.']
+    obj.linkflags= ''
     obj.use      = [ 'libpbd',
                      'libardour',
                      'libardour_cp',
@@ -56,13 +57,18 @@ def build_ardour_util(bld, util):
     if sys.platform == 'darwin':
         obj.uselib += ' AUDIOUNITS OSX'
         obj.use    += ' libappleutility'
+    elif bld.env['build_target'] == 'mingw':
+        obj.linkflags += ' -mwindows'
+    else:
+        obj.linkflags += ' -zexecstack'
+
     obj.includes += ['../libs']
 
     if bld.env['build_target'] == 'mingw':
         obj.install_path = bld.env['BINDIR']
 
     if bld.is_defined('NEED_INTL'):
-        obj.linkflags = ' -lintl'
+        obj.linkflags += ' -lintl'
 
 def build(bld):
     # session-utils depend on the dummy backend

@@ -678,6 +678,7 @@ def build(bld):
         obj.source += [ 'bundle_env_mingw.cc' ]
         obj.source += [ 'windows_icon.rc' ]
     else:
+        obj.linkflags += ' -zexecstack'
         obj.source += [ 'bundle_env_linux.cc' ]
         obj.use += [ 'X11' ]
 
