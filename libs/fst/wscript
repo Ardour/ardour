@@ -35,7 +35,7 @@ def build(bld):
 
         if sys.platform == 'darwin':
             obj.uselib += ' OSX'
-        if bld.env['build_target'] == 'mingw':
+        elif bld.env['build_target'] == 'mingw':
             obj.uselib += ' GDI32'
             obj.linkflags += ' -mwindows'
         else:
