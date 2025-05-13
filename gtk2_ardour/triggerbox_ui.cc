@@ -682,7 +682,13 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 						if (trigger()->armed()) {
 							trigger()->disarm ();
 						} else {
-							trigger()->arm ();
+							if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
+								/* Record till done */
+								trigger()->arm ();
+							} else {
+								/* use trigger follow length */
+								trigger()->arm (trigger()->follow_length());
+							}
 						}
 						return true;
 					} else if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
