@@ -879,7 +879,7 @@ MidiView::clear_events ()
 	for (auto & [model_note,gui_note] : _events) {
 		delete gui_note;
 	}
-	/* This will delete any danging canvas items that were not owned by the
+	/* This will delete any dangling canvas items that were not owned by the
 	 * NoteBase objects we just deleted.
 	 */
 	_note_group->clear (true);
