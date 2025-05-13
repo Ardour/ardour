@@ -333,6 +333,7 @@ Trigger::disarm ()
 {
 	if (_armed) {
 		_armed = false;
+		_box.disarm ();
 		ArmChanged(); /* EMIT SIGNAL */
 		TriggerArmChanged (this);
 	}
@@ -1971,8 +1972,7 @@ AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
 {
 	if (ai.audio_buf.length == 0) {
 		/* Nothing captured */
-		_armed = false;
-		ArmChanged (); /* EMIT SIGNAL */
+		disarm ();
 		return;
 	}
 
@@ -2012,9 +2012,7 @@ AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
 
 	TriggerBox::worker->request_build_source (this, timecnt_t (data.length));
 
-	_armed = false;
-	ArmChanged(); /* EMIT SIGNAL */
-	TriggerArmChanged (this);
+	disarm ();
 }
 
 int
@@ -2546,10 +2544,7 @@ void
 MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 {
 	if (ai.midi_buf->size() == 0) {
-		if (_armed) {
-			_armed = false;
-			ArmChanged(); /* EMIT SIGNAL */
-		}
+		disarm ();
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 captured but with no MIDI data\n", _box.order(), index()));
 		return;
 	}
@@ -2576,9 +2571,7 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 	// std::cerr << "capture done, ask for a source of length " << dur.beats().str() << std::endl;
 	TriggerBox::worker->request_build_source (this, timecnt_t (dur.beats()));
 
-	_armed = false;
-	ArmChanged(); /* EMIT SIGNAL */
-	TriggerArmChanged (this);
+	disarm ();
 }
 
 void
@@ -3743,17 +3736,19 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 }
 
 void
-TriggerBox::disarm ()
-{
-	_arm_info = nullptr;
-}
-
-void
 TriggerBox::disarm_all ()
 {
 	for (auto & t : all_triggers) {
 		t->disarm ();
 	}
+}
+
+void
+TriggerBox::disarm ()
+{
+	/* This must be called as an alternative to ::finish_recording() */
+
+	_arm_info = nullptr;
 }
 
 void
