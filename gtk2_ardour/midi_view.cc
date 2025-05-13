@@ -1647,9 +1647,10 @@ void
 MidiView::end_write()
 {
 	if (_active_notes) {
-		for (unsigned i = 0; i < 128; ++i) {
-			delete _active_notes[i];
-		}
+		/* do not delete individual notes referenced here, because they are
+		   owned by _events. Just delete the container used for active
+		   notes only.
+		*/
 		delete [] _active_notes;
 	}
 
