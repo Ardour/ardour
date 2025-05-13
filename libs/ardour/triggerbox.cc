@@ -3803,8 +3803,6 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 			                                       t_bbt, t_beats, t_samples, tmap, ai->slot->quantization());
 			ai->end_samples = t_samples;
 			ai->end_beats = t_beats;
-
-			//std::cerr << "will end at " << t_beats.str() << " samples " << ai->start_samples << " .. " << ai->end_samples << " = " << (ai->end_samples - ai->start_samples) << std::endl;
 		}
 	}
 
@@ -4995,7 +4993,7 @@ TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		}
 	}
 
-	/* STEP SIX: if at this point there is an active cue, make it trigger
+	/* if at this point there is an active cue, make it trigger
 	 * our corresponding slot
 	 */
 
@@ -5018,13 +5016,13 @@ TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		all_triggers[n]->check_edit_swap (timepos_t (start_sample), _currently_playing == all_triggers[n], bufs);
 	}
 
-	/* STEP FOUR: handle any incoming requests from the GUI or other
+	/* handle any incoming requests from the GUI or other
 	 * non-MIDI UIs
 	 */
 
 	process_requests (bufs);
 
-	/* STEP SEVEN: let each slot process any individual state requests
+	/*  let each slot process any individual state requests
 	 */
 
 	std::vector<uint32_t> to_run;
@@ -5047,7 +5045,7 @@ TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		}
 	}
 
-	/* STEP EIGHT: if there is no active slot, see if there any queued up
+	/* if there is no active slot, see if there any queued up
 	 */
 
 	if (!_currently_playing && !allstop) {
@@ -5059,7 +5057,7 @@ TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		}
 	}
 
-	/* STEP NINE: if we've been told to stop all slots, do so
+	/* if we've been told to stop all slots, do so
 	 */
 
 	if (allstop) {
@@ -5080,7 +5078,7 @@ TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		_cancel_locate_armed = false;
 	}
 
-	/* STEP TEN: nothing to do?
+	/* nothing to do?
 	 */
 
 	if (!_currently_playing) {
