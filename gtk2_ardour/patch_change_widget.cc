@@ -855,15 +855,26 @@ PatchChangeTriggerWindow::reset (std::shared_ptr<Route> r, std::shared_ptr<MIDIT
 	/* only show tabs for the chans that this region uses */
 	Evoral::SMF::UsedChannels used = t->used_channels();
 	uint32_t first_used_chan = 15;
+	uint32_t used_cnt = 0;
+
 	for (uint32_t chn = 0; chn < 16; ++chn) {
 		if (used.test(chn)) {
 			if (chn < first_used_chan) {
 				first_used_chan = chn;
 			}
 			_w[chn]->show();
+			used_cnt++;
 		} else {
 			_w[chn]->hide();
 		}
+	}
+
+	if (used_cnt == 0) {
+		/* no channels in use - empty. So make everything visible */
+		for (uint32_t chn = 0; chn < 16; ++chn) {
+			_w[chn]->show ();
+		}
+		first_used_chan = 0;
 	}
 
 	for (uint32_t chn = 0; chn < 16; ++chn) {
