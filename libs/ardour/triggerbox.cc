@@ -3003,9 +3003,9 @@ MIDITrigger::estimate_midi_patches ()
 {
 	/* first, initialize all our slot's patches to GM defaults, to make playback deterministic */
 	for (uint8_t chan = 0; chan < 16; ++chan) {
-		_patch_change[chan].set_channel(chan);
-		_patch_change[chan].set_bank( chan == 9 ? 120 : 0 );
-		_patch_change[chan].set_program( 0 );
+		_patch_change[chan].set_channel (chan);
+		_patch_change[chan].set_bank (chan == 9 ? 120 : 0);
+		_patch_change[chan].set_program (0);
 	}
 
 	std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (_region->source(0));
