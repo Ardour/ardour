@@ -469,8 +469,6 @@ TriggerPage::trigger_arm_changed (Trigger const * trigger)
 		return;
 	}
 
-	std::cerr << "TP:tac\n";
-
 	/* hide everything */
 
 	_slot_prop_box.hide ();
