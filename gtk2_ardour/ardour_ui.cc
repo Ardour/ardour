@@ -1858,7 +1858,7 @@ ARDOUR_UI::spacebar_action (bool with_abort, bool roll_out_of_bounded_mode)
 
 	std::shared_ptr<TriggerBox> armed_tb = _session->armed_triggerbox();
 
-	if (armed_tb) {
+	if (armed_tb && _session->transport_rolling()) {
 		armed_tb->disarm_all ();
 		return;
 	}
