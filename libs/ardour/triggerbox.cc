@@ -2563,6 +2563,8 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 	iter = 0;
 	_follow_action0 = FollowAction::Again;
 
+	/* XXXX need a set of choices for what the next thing to do here is */
+
 	/* start playing */
 	_box.queue_explict (index());
 
@@ -3762,6 +3764,9 @@ TriggerBox::finish_recording (BufferSet& bufs)
 	*/
 	ai->slot->captured (*ai, bufs);
 	_arm_info = nullptr;
+
+	/* XXX this should likely be dependent on what the post-record action is */
+
 	_record_state = Disabled;
 	RecEnableChanged (); /* EMIT SIGNAL */
 }
