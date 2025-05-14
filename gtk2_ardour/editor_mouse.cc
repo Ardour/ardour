@@ -2356,6 +2356,47 @@ Editor::effective_mouse_mode () const
 }
 
 void
+Editor::use_appropriate_mouse_mode_for_sections ()
+{
+	Glib::RefPtr<ToggleAction> tact;
+
+	switch (current_mouse_mode ()) {
+		case Editing::MouseRange:
+			/* OK, no need to change mouse mode */
+			break;
+		case Editing::MouseObject:
+			/* "object-range" mode is not a distinct mouse mode, so
+			   we cannot use get_mouse_mode_action() here
+			*/
+			tact = ActionManager::get_toggle_action (X_("Editor"), "set-mouse-mode-object-range");
+			if (!tact) {
+				/* missing action */
+				fatal << X_("programming error: missing mouse-mode-object-range action") << endmsg;
+				/*NOTREACHED*/
+				break;
+			}
+			if (tact->get_active()) {
+				/* smart mode; OK, leave things as they are */
+				break;
+			}
+			/*fallthrough*/
+		default:
+			/* switch to range mode */
+			Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_static (get_mouse_mode_action (Editing::MouseRange));
+			if (!ract) {
+				/* missing action */
+				fatal << X_("programming error: missing mouse-mode-range action") << endmsg;
+				/*NOTREACHED*/
+				break;
+			}
+			if (ract) {
+				ract->set_active (true);
+			}
+			break;
+	}
+}
+
+void
 Editor::remove_midi_note (ArdourCanvas::Item* item, GdkEvent *)
 {
 	NoteBase* e = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));

@@ -572,6 +572,7 @@ private:
 	void on_samples_per_pixel_changed ();
 
 	Editing::MouseMode effective_mouse_mode () const;
+	void use_appropriate_mouse_mode_for_sections ();
 
 	Editing::MarkerClickBehavior marker_click_behavior;
 

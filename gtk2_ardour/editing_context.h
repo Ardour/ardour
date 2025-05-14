@@ -362,6 +362,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	 */
 	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
 	virtual Editing::MouseMode effective_mouse_mode () const { return mouse_mode; }
+	virtual void use_appropriate_mouse_mode_for_sections () {}
 
 	/** @return Whether the current mouse mode is an "internal" editing mode. */
 	virtual bool internal_editing() const = 0;
