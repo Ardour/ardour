@@ -526,11 +526,14 @@ exists_and_writable (const std::string & p)
 		/* doesn't exist - not writable */
 		return false;
 	} else {
+#ifndef PLATFORM_WINDOWS
+		/* Folders on Windows fail this test if they're on OneDrive */
 		DEBUG_TRACE (DEBUG::FileUtils, string_compose("exists_and_writable stat '%1': %2 \n", p, statbuf.st_mode));
 		if (!(statbuf.st_mode & S_IWUSR)) {
 			/* exists and is not writable */
 			return false;
 		}
+#endif
 		/* filesystem may be mounted read-only, so even though file
 		 * permissions permit access, the mount status does not.
 		 * access(2) seems like the best test for this.
