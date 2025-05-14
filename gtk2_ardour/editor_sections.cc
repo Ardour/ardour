@@ -25,11 +25,11 @@
 
 #include "ardour_ui.h"
 #include "context_menu_helper.h"
+#include "editing_context.h"
 #include "editor_sections.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "main_clock.h"
-#include "public_editor.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -40,8 +40,9 @@ using namespace PBD;
 using namespace Gtk;
 using namespace ARDOUR;
 
-EditorSections::EditorSections ()
-	: _no_redisplay (false)
+EditorSections::EditorSections (EditingContext& ec)
+	: editing_context (ec)
+	, _no_redisplay (false)
 {
 	_model = ListStore::create (_columns);
 	_view.set_model (_model);
@@ -87,7 +88,7 @@ EditorSections::EditorSections ()
 
 	ARDOUR_UI::instance ()->primary_clock->mode_changed.connect (sigc::mem_fun (*this, &EditorSections::clock_format_changed));
 
-	_selection_change = PublicEditor::instance ().get_selection ().TimeChanged.connect (sigc::mem_fun (*this, &EditorSections::update_time_selection));
+	_selection_change = editing_context.get_selection ().TimeChanged.connect (sigc::mem_fun (*this, &EditorSections::update_time_selection));
 }
 
 void
@@ -234,7 +235,7 @@ EditorSections::update_time_selection ()
 
 	_view.get_selection ()->unselect_all ();
 
-	Selection& selection (PublicEditor::instance ().get_selection ());
+	Selection& selection (editing_context.get_selection ());
 
 	if (selection.time.empty ()) {
 		return;
@@ -264,7 +265,7 @@ EditorSections::selection_changed ()
 		return;
 	}
 
-	if (PublicEditor::instance ().drag_active ()) {
+	if (editing_context.drag_active ()) {
 		return;
 	}
 
@@ -315,7 +316,7 @@ EditorSections::selection_changed ()
 			break;
 	}
 
-	Selection& s (PublicEditor::instance ().get_selection ());
+	Selection& s (editing_context.get_selection ());
 	s.clear ();
 	s.set (start, end);
 
@@ -511,7 +512,7 @@ EditorSections::delete_selected_section ()
 	}
 	redisplay ();
 
-	PublicEditor::instance ().get_selection ().clear ();
+	editing_context.get_selection ().clear ();
 
 	return true;
 }
