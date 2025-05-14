@@ -456,7 +456,7 @@ Editor::Editor ()
 
 	CairoWidget::set_focus_handler (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::reset_focus));
 
-	_summary = new EditorSummary (this);
+	_summary = new EditorSummary (*this);
 
 	TempoMap::MapChanged.connect (tempo_map_connection, invalidator (*this), std::bind (&Editor::tempo_map_changed, this), gui_context());
 
@@ -473,7 +473,7 @@ Editor::Editor ()
 	vertical_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &Editor::tie_vertical_scrolling), true);
 	_track_canvas->signal_map_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_map_handler));
 
-	_group_tabs = new EditorGroupTabs (this);
+	_group_tabs = new EditorGroupTabs (*this);
 	controls_layout.add (edit_controls_vbox);
 
 	controls_layout.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &controls_layout, ArdourWidgets::ArdourIcon::ShadedPlusSign, _("Right-click\nor Double-click here\nto add Track, Bus,\n or VCA.")));
@@ -536,13 +536,13 @@ Editor::Editor ()
 
 	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, std::bind (&Editor::presentation_info_changed, this, _1), gui_context());
 
-	_route_groups = new EditorRouteGroups (this);
+	_route_groups = new EditorRouteGroups (*this);
 	_routes = new EditorRoutes ();
-	_regions = new EditorRegions (this);
-	_sources = new EditorSources (this);
+	_regions = new EditorRegions (*this);
+	_sources = new EditorSources (*this);
 	_sections = new EditorSections (*this);
 	_snapshots = new EditorSnapshots ();
-	_locations = new EditorLocations (this);
+	_locations = new EditorLocations (*this);
 	_properties_box = new SelectionPropertiesBox ();
 
 	/* these are static location signals */

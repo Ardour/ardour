@@ -25,7 +25,7 @@
 using namespace ARDOUR;
 using namespace Gtk;
 
-EditorLocations::EditorLocations (Editor* e)
+EditorLocations::EditorLocations (Editor& e)
 	: EditorComponent (e)
 {
 	_locations = new LocationUI (X_("EditorLocations"));

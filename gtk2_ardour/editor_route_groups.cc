@@ -51,7 +51,7 @@ using namespace PBD;
 using namespace Gtk;
 using Gtkmm2ext::Keyboard;
 
-EditorRouteGroups::EditorRouteGroups (Editor* e)
+EditorRouteGroups::EditorRouteGroups (Editor& e)
 	: EditorComponent (e)
 	, _in_row_change (false)
 	, _in_rebuild (false)
@@ -240,7 +240,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 	}
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		_editor->_group_tabs->get_menu(group)->popup (1, ev->time);
+		_editor._group_tabs->get_menu(group)->popup (1, ev->time);
 		return true;
 	}
 
@@ -440,7 +440,7 @@ EditorRouteGroups::add (RouteGroup* group)
 
 	_in_row_change = false;
 
-	_editor->_group_tabs->set_dirty ();
+	_editor._group_tabs->set_dirty ();
 }
 
 void
@@ -499,12 +499,12 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange&)
 
 	_in_row_change = false;
 
-	for (TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
+	for (TrackViewList::const_iterator i = _editor.get_track_views().begin(); i != _editor.get_track_views().end(); ++i) {
 		if ((*i)->route_group() == group) {
 			if (group->is_hidden ()) {
-				_editor->hide_track_in_display (*i);
+				_editor.hide_track_in_display (*i);
 			} else {
-				_editor->show_track_in_display (*i);
+				_editor.show_track_in_display (*i);
 			}
 		}
 	}
@@ -562,7 +562,7 @@ EditorRouteGroups::set_session (Session* s)
 void
 EditorRouteGroups::run_new_group_dialog ()
 {
-	return _editor->_group_tabs->run_new_group_dialog (0, false);
+	return _editor._group_tabs->run_new_group_dialog (0, false);
 }
 
 /** Called when a model row is deleted, but also when the model is

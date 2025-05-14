@@ -35,7 +35,7 @@ namespace Gtk {
 class EditorLocations : public EditorComponent, public ARDOUR::SessionHandlePtr
 {
 public:
-	EditorLocations (Editor *);
+	EditorLocations (Editor&);
 
 	void set_session (ARDOUR::Session *);
 

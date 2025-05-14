@@ -23,10 +23,10 @@ class Editor;
 class EditorComponent
 {
 public:
-	EditorComponent (Editor *);
+	EditorComponent (Editor&);
 	virtual ~EditorComponent() {}
 
 protected:
-	Editor* _editor;
+	Editor& _editor;
 };
 

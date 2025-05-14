@@ -35,7 +35,7 @@
 class EditorRouteGroups : public EditorComponent, public ARDOUR::SessionHandlePtr
 {
 public:
-	EditorRouteGroups (Editor *);
+	EditorRouteGroups (Editor&);
 
 	void set_session (ARDOUR::Session *);
 

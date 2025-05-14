@@ -23,7 +23,7 @@
 class EditorSources : public EditorComponent, public SourceListBase
 {
 public:
-	EditorSources (Editor*);
+	EditorSources (Editor&);
 
 	std::shared_ptr<ARDOUR::Region> get_single_selection ();
 

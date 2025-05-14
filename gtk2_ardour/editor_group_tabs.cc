@@ -38,7 +38,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
-EditorGroupTabs::EditorGroupTabs (Editor* e)
+EditorGroupTabs::EditorGroupTabs (Editor& e)
 	: EditorComponent (e)
 {
 
@@ -54,7 +54,7 @@ EditorGroupTabs::compute_tabs () const
 	tab.group = 0;
 
 	int32_t y = 0;
-	for (TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+	for (TrackViewList::iterator i = _editor.track_views.begin(); i != _editor.track_views.end(); ++i) {
 
 		if ((*i)->marked_for_display() == false) {
 			continue;
@@ -155,7 +155,7 @@ EditorGroupTabs::routes_for_tab (Tab const * t) const
 	RouteList routes;
 	int32_t y = 0;
 
-	for (TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+	for (TrackViewList::iterator i = _editor.track_views.begin(); i != _editor.track_views.end(); ++i) {
 
 		if ((*i)->marked_for_display() == false) {
 			continue;
@@ -190,7 +190,7 @@ EditorGroupTabs::add_menu_items (Gtk::Menu* m, RouteGroup* g)
 
 	if (g) {
 		MenuList& items = m->items ();
-		items.push_back (MenuElem (_("Fit to Window"), sigc::bind (sigc::mem_fun (*_editor, &Editor::fit_route_group), g)));
+		items.push_back (MenuElem (_("Fit to Window"), sigc::bind (sigc::mem_fun (_editor, &Editor::fit_route_group), g)));
 	}
 }
 
@@ -199,7 +199,7 @@ EditorGroupTabs::selected_routes () const
 {
 	RouteList rl;
 
-	for (TrackSelection::iterator i = _editor->get_selection().tracks.begin(); i != _editor->get_selection().tracks.end(); ++i) {
+	for (TrackSelection::iterator i = _editor.get_selection().tracks.begin(); i != _editor.get_selection().tracks.end(); ++i) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
 		if (rtv) {
 			rl.push_back (rtv->route());
