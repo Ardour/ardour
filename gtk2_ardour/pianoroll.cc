@@ -969,7 +969,6 @@ Pianoroll::idle_data_captured ()
 	case Recording:
 		break;
 	default:
-		std::cerr << "Idle data callback but no longer recording\n";
 		return false;
 	}
 
