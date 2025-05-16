@@ -2434,6 +2434,10 @@ EditingContext::reset_y_origin (double y)
 void
 EditingContext::reset_zoom (samplecnt_t spp)
 {
+	if (_track_canvas_width <= 0) {
+		return;
+	}
+
 	std::pair<timepos_t, timepos_t> ext = max_zoom_extent();
 	samplecnt_t max_extents_pp = (ext.second.samples() - ext.first.samples())  / _track_canvas_width;
 
