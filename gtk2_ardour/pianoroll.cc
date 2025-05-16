@@ -728,7 +728,9 @@ Pianoroll::maybe_update ()
 
 		} else {
 			if (playing_trigger->active ()) {
-				_playhead_cursor->set_position (playing_trigger->current_pos().samples() + playing_trigger->the_region()->start().samples());
+				if (playing_trigger->the_region()) {
+					_playhead_cursor->set_position (playing_trigger->current_pos().samples() + playing_trigger->the_region()->start().samples());
+				}
 			} else {
 				_playhead_cursor->set_position (0);
 			}
