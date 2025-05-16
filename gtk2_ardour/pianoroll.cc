@@ -1955,18 +1955,9 @@ Pianoroll::visual_changer (const VisualChange& vc)
 		vertical_adjustment.set_value (vc.y_origin);
 	}
 
-	/**
-	 * Now the canvas is in the final state before render the canvas items that
-	 * support the Item::prepare_for_render interface can calculate the correct
-	 * item to visible canvas intersection.
-	 */
 	if (vc.pending & VisualChange::ZoomLevel) {
 		on_samples_per_pixel_changed ();
-
-		// update_tempo_based_rulers ();
-	}
-
-	if (!(vc.pending & VisualChange::ZoomLevel)) {
+	} else {
 		/* If the canvas is not being zoomed then the canvas items will not change
 		 * and cause Item::prepare_for_render to be called so do it here manually.
 		 * Not ideal, but I can't think of a better solution atm.
@@ -1984,9 +1975,7 @@ Pianoroll::visual_changer (const VisualChange& vc)
 void
 Pianoroll::on_samples_per_pixel_changed ()
 {
-	if (view) {
-		view->set_samples_per_pixel (samples_per_pixel);
-	}
+	update_tempo_based_rulers ();
 }
 
 void
@@ -3042,4 +3031,16 @@ Pianoroll::instrument_info () const
 	}
 
 	return &view->midi_track()->instrument_info ();
+}
+
+void
+Pianoroll::update_tempo_based_rulers ()
+{
+	if (!_session) {
+		return;
+	}
+
+	bbt_metric.units_per_pixel = samples_per_pixel;
+	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
+	bbt_ruler->set_range (_leftmost_sample, _leftmost_sample+current_page_samples());
 }
