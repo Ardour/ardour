@@ -497,7 +497,7 @@ TriggerPage::trigger_arm_changed (Trigger const * trigger)
 		_midi_trig_box.set_trigger (ref);
 		_midi_trig_box.show ();
 
-		_midi_editor->set (ref);
+		_midi_editor->set_trigger (ref);
 		_midi_editor->viewport().show ();
 	}
 
@@ -548,7 +548,7 @@ TriggerPage::selection_changed ()
 		_midi_trig_box.set_trigger (ref);
 		_midi_trig_box.show ();
 
-		_midi_editor->set (ref);
+		_midi_editor->set_trigger (ref);
 
 		table.attach (_midi_editor->contents(), clip_editor_column, clip_editor_column + 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL);
 		_midi_editor->contents().show_all ();

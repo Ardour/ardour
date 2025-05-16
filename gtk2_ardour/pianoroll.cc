@@ -2434,7 +2434,7 @@ Pianoroll::rec_button_press (GdkEventButton* ev)
 }
 
 void
-Pianoroll::set (TriggerReference & tref)
+Pianoroll::set_trigger (TriggerReference & tref)
 {
 	if (tref.trigger() == ref.trigger()) {
 		return;
@@ -2462,7 +2462,7 @@ Pianoroll::set (TriggerReference & tref)
 
 	set_track (_track);
 
-	_track->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this), gui_context());
+	_track->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this, true), gui_context());
 	ref.trigger()->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_prop_change, this, _1), gui_context());
 	ref.trigger()->ArmChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_arm_change, this), gui_context());
 
@@ -2504,14 +2504,16 @@ Pianoroll::make_a_region ()
 }
 
 void
-Pianoroll::unset ()
+Pianoroll::unset (bool trigger_too)
 {
 	_history.clear ();
 	_update_connection.disconnect();
 	object_connections.drop_connections ();
 	_track.reset ();
 	view->set_region (nullptr);
-	ref = TriggerReference ();
+	if (trigger_too) {
+		ref = TriggerReference ();
+	}
 }
 
 void
@@ -2556,7 +2558,7 @@ Pianoroll::update_solo_display ()
 void
 Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 {
-	unset ();
+	unset (false);
 
 	if (!r) {
 		return;
@@ -2566,7 +2568,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 	view->show_start (true);
 	view->show_end (true);
 
-	r->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this), gui_context());
+	r->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this, false), gui_context());
 	r->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::region_prop_change, this, _1), gui_context());
 
 	bool provided = false;
