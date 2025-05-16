@@ -2379,7 +2379,7 @@ EditingContext::idle_visual_changer ()
 	pending_visual_change.idle_handler_id = -1;
 
 	if (pending_visual_change.pending == 0) {
-		return 0;
+		return G_SOURCE_REMOVE;
 	}
 
 	/* set_horizontal_position() below (and maybe other calls) call
@@ -2393,7 +2393,7 @@ EditingContext::idle_visual_changer ()
 	*/
 
 	if (visual_change_queued) {
-		return 0;
+		return G_SOURCE_REMOVE;
 	}
 
 	pending_visual_change.being_handled = true;
@@ -2408,7 +2408,7 @@ EditingContext::idle_visual_changer ()
 
 	visual_change_queued = true;
 
-	return 0; /* this is always a one-shot call */
+	return G_SOURCE_REMOVE; /* this is always a one-shot call */
 }
 
 
