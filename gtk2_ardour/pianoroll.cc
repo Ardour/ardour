@@ -959,6 +959,18 @@ Pianoroll::data_captured (samplecnt_t total_duration)
 bool
 Pianoroll::idle_data_captured ()
 {
+	if (!ref.box()) {
+		return false;
+	}
+
+	switch (ref.box()->record_enabled()) {
+	case Recording:
+		break;
+	default:
+		std::cerr << "Idle data callback but no longer recording\n";
+		return false;
+	}
+
 	double where = sample_to_pixel_unrounded (data_capture_duration);
 
 	if (where > _visible_canvas_width * 0.80) {
@@ -2252,6 +2264,9 @@ Pianoroll::rec_enable_change ()
 	case Recording:
 		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
 		rec_blink_connection.disconnect ();
+		if (view) {
+			view->begin_write ();
+		}
 		break;
 	case Enabled:
 		if (!UIConfiguration::instance().get_no_strobe() && ref.trigger()->armed()) {

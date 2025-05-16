@@ -1622,11 +1622,14 @@ MidiView::begin_write()
 	   XXX this should not happen.
 	*/
 
-	clear_events ();
-
 	if (_active_notes) {
-		for (unsigned i = 0; i < 128; ++i) {
-			delete _active_notes[i];
+		for (auto n = 0; n < 128; ++n) {
+			if (_active_notes[n]) {
+				auto iter = _events.find (_active_notes[n]->note());
+				if (iter != _events.end()) {
+					_events.erase (iter);
+				}
+			}
 		}
 		delete [] _active_notes;
 	}
@@ -1646,15 +1649,13 @@ MidiView::begin_write()
 void
 MidiView::end_write()
 {
-	if (_active_notes) {
-		/* do not delete individual notes referenced here, because they are
-		   owned by _events. Just delete the container used for active
-		   notes only.
-		*/
-		delete [] _active_notes;
-	}
-
+	/* do not delete individual notes referenced here, because they are
+	   owned by _events. Just delete the container used for active
+	   notes only.
+	*/
+	delete [] _active_notes;
 	_active_notes = nullptr;
+
 	_marked_for_selection.clear();
 	_marked_for_velocity.clear();
 	active_note_end = std::numeric_limits<Temporal::Beats>::max();
@@ -4622,7 +4623,8 @@ MidiView::clip_data_recorded (samplecnt_t total_duration)
 	}
 
 	if (!_active_notes) {
-		begin_write ();
+		/* left over idle callback, but we're not recording */
+		return;
 	}
 
 	if (_active_notes) {
