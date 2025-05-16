@@ -497,8 +497,8 @@ MidiView::mouse_mode_changed ()
 
 		leave_internal ();
 
-		for (Events::iterator it = _events.begin(); it != _events.end(); ++it) {
-			it->second->set_hide_selection (true);
+		for (auto & [ note, gui ] : _events) {
+			gui->set_hide_selection (true);
 		}
 
 	} else if (_editing_context.current_mouse_mode() == MouseContent) {
@@ -519,8 +519,8 @@ MidiView::mouse_mode_changed ()
 			hide_verbose_cursor ();
 		}
 
-		for (Events::iterator it = _events.begin(); it != _events.end(); ++it) {
-			it->second->set_hide_selection (false);
+		for (auto & [ note, gui ] : _events) {
+			gui->set_hide_selection (false);
 		}
 	}
 }
@@ -1027,15 +1027,13 @@ MidiView::find_canvas_note (std::shared_ptr<NoteType> note)
 NoteBase*
 MidiView::find_canvas_note (Evoral::event_id_t id)
 {
-	Events::iterator it;
-
-	for (it = _events.begin(); it != _events.end(); ++it) {
-		if (it->first->id() == id) {
-			return it->second;
+	for (auto & [ note, gui ] : _events) {
+		if (note->id() == id) {
+			return gui;
 		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
 std::shared_ptr<PatchChange>
@@ -1121,9 +1119,9 @@ MidiView::model_changed()
 			/* Update resolved canvas notes to reflect changes in zoom without
 			   touching model.  Leave active notes (with length max) alone since
 			   they are being extended. */
-			for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-				if (i->second->note()->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
-					update_note(i->second);
+			for (auto & [ note, gui ] : _events) {
+				if (note->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
+					update_note (gui);
 				}
 			}
 			_last_display_zoom = zoom;
@@ -1196,6 +1194,10 @@ MidiView::model_changed()
 	}
 
 	if (!empty_when_starting) {
+		/* Cannot use for (auto & [ note, gui] : _events) here because
+		 * we may modify the map as we iterate.
+		 */
+
 		for (Events::iterator i = _events.begin(); i != _events.end(); ) {
 
 			NoteBase* cne = i->second;
@@ -1215,7 +1217,7 @@ MidiView::model_changed()
 				if (note_in_region_range (cne->note(), visible)) {
 
 					if (visible) {
-						cne->item()->show ();
+						cne->show ();
 
 						if ((sus = dynamic_cast<Note*>(cne))) {
 							update_sustained (sus);
@@ -1223,12 +1225,12 @@ MidiView::model_changed()
 							update_hit (hit);
 						}
 					} else {
-						cne->item()->hide ();
+						cne->hide ();
 					}
 
 				} else {
 
-					cne->item()->hide ();
+					cne->hide ();
 				}
 
 				++i;
@@ -1275,10 +1277,9 @@ MidiView::view_changed()
 	}
 
 	if (_active_notes) {
-		// Currently recording
-		for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-			if (i->second->note()->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
-				update_note (i->second);
+		for (auto & [ note, gui ] : _events) {
+			if (note->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
+				update_note (gui);
 			}
 		}
 		return;
@@ -1288,31 +1289,29 @@ MidiView::view_changed()
 		return;
 	}
 
-	Note* sus = nullptr;
-	Hit*  hit = nullptr;
+	for (auto & [ note, gui] : _events) {
 
-	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-
-		NoteBase* cne = i->second;
 		bool visible;
 
-		if (note_in_region_range (cne->note(), visible)) {
+		if (note_in_region_range (note, visible)) {
 
 			if (visible) {
-				cne->item()->show ();
+				gui->show ();
 
-				if ((sus = dynamic_cast<Note*>(cne))) {
+				Note* sus = nullptr;
+				Hit*  hit = nullptr;
+
+				if ((sus = dynamic_cast<Note*>(gui))) {
 					update_sustained (sus);
-				} else if ((hit = dynamic_cast<Hit*>(cne))) {
+				} else if ((hit = dynamic_cast<Hit*>(gui))) {
 					update_hit (hit);
 				}
 			} else {
-				cne->item()->hide ();
+				gui->hide ();
 			}
 
 		} else {
-
-			cne->item()->hide ();
+			gui->hide ();
 		}
 	}
 
@@ -2387,8 +2386,8 @@ void
 MidiView::select_all_notes ()
 {
 	PBD::Unwinder<bool> uw (_no_sound_notes, true);
-	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		add_to_selection (i->second);
+	for (auto & [ note, gui ] : _events) {
+		add_to_selection (gui);
 	}
 }
 
@@ -2400,10 +2399,10 @@ MidiView::select_range (timepos_t const & start, timepos_t const & end)
 	}
 
 	PBD::Unwinder<bool> uw (_no_sound_notes, true);
-	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		timepos_t t = _midi_region->source_beats_to_absolute_time (i->first->time());
+	for (auto & [ note, gui] : _events) {
+		timepos_t t = _midi_region->source_beats_to_absolute_time (note->time());
 		if (t >= start && t <= end) {
-			add_to_selection (i->second);
+			add_to_selection (gui);
 		}
 	}
 }
@@ -2432,15 +2431,15 @@ MidiView::extend_selection ()
 		}
 	}
 
-	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		timepos_t t (_midi_region->source_beats_to_absolute_beats(i->first->time()));
+	for (auto & [ note, gui ] : _events) {
+		timepos_t t (_midi_region->source_beats_to_absolute_beats (note->time()));
 
-		if (i->second->selected()) {
+		if (gui->selected()) {
 			continue;
 		}
 
 		if (t >= first_note_start) {
-			add_to_selection (i->second);
+			add_to_selection (gui);
 		}
 	}
 }
@@ -2449,11 +2448,11 @@ void
 MidiView::invert_selection ()
 {
 	PBD::Unwinder<bool> uw (_no_sound_notes, true);
-	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		if (i->second->selected()) {
-			remove_from_selection(i->second);
+	for (auto & [ note , gui ] : _events) {
+		if (gui->selected()) {
+			remove_from_selection (gui);
 		} else {
-			add_to_selection (i->second);
+			add_to_selection (gui);
 		}
 	}
 }
@@ -2617,13 +2616,13 @@ MidiView::note_selected (NoteBase* ev, bool add, bool extend)
 			earliest = ev->note()->time();
 		}
 
-		for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
+		for (auto & [ note, gui ] : _events) {
 
 			/* find notes entirely within OR spanning the earliest..latest range */
 
-			if ((i->first->time() >= earliest && i->first->end_time() <= latest) ||
-			    (i->first->time() <= earliest && i->first->end_time() >= latest)) {
-				add_to_selection (i->second);
+			if ((note->time() >= earliest && note->end_time() <= latest) ||
+			    (note->time() <= earliest && note->end_time() >= latest)) {
+				add_to_selection (gui);
 			}
 		}
 	}
@@ -2687,14 +2686,14 @@ MidiView::update_vertical_drag_selection (double y1, double y2, bool extend)
 	// adjusting things that are in the area that appears/disappeared.
 	// We probably need a tree to be able to find events in O(log(n)) time.
 
-	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		if ((i->second->y1() >= y1 && i->second->y1() <= y2)) {
+	for (auto & [ note, gui ] : _events) {
+		if ((gui->y1() >= y1 && gui->y1() <= y2)) {
 			// within y- (note-) range
-			if (!i->second->selected()) {
-				add_to_selection (i->second);
+			if (!gui->selected()) {
+				add_to_selection (gui);
 			}
-		} else if (i->second->selected() && !extend) {
-			remove_from_selection (i->second);
+		} else if (gui->selected() && !extend) {
+			remove_from_selection (gui);
 		}
 	}
 }
@@ -4034,8 +4033,8 @@ MidiView::midi_channel_mode_changed ()
 	}
 
 	// Update notes for selection
-	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		i->second->on_channel_selection_change (mask);
+	for (auto & [ note, gui ] : _events) {
+		gui->on_channel_selection_change (mask);
 	}
 
 	_patch_changes.clear ();
@@ -4389,16 +4388,16 @@ MidiView::selection_as_notelist (Notes& selected, bool allow_all_if_none_selecte
 
 	/* we previously time sorted events here, but Notes is a multiset sorted by time */
 
-	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		if (i->second->selected()) {
-			selected.insert (i->first);
+	for (auto & [ note, gui ] : _events) {
+		if (gui->selected()) {
+			selected.insert (note);
 			had_selected = true;
 		}
 	}
 
 	if (allow_all_if_none_selected && !had_selected) {
-		for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-			selected.insert (i->first);
+		for (auto & [ note, gui ] : _events) {
+			selected.insert (note);
 		}
 	}
 }
@@ -4552,9 +4551,9 @@ MidiView::color_handler ()
 	_patch_change_outline = UIConfiguration::instance().color ("midi patch change outline");
 	_patch_change_fill = UIConfiguration::instance().color_mod ("midi patch change fill", "midi patch change fill");
 
-	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		i->second->set_selected (i->second->selected()); // will change color
-		ghost_sync_selection (i->second);
+	for (auto & [ note, gui ] : _events) {
+		gui->set_selected (gui->selected()); // will change color
+		ghost_sync_selection (gui);
 	}
 
 	/* XXX probably more to do here */
