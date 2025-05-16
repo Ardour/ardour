@@ -268,10 +268,11 @@ TimeAxisView::~TimeAxisView()
 	delete _canvas_display;
 	_canvas_display = 0;
 
+	delete _size_menu;
+	_size_menu = 0;
+
 	delete display_menu;
 	display_menu = 0;
-
-	delete _size_menu;
 }
 
 void
