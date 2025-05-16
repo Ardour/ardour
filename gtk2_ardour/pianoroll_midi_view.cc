@@ -212,18 +212,15 @@ PianorollMidiView::scroll (GdkEventScroll* ev)
 void
 PianorollMidiView::set_samples_per_pixel (double spp)
 {
-	std::shared_ptr<Temporal::TempoMap> map;
 	Temporal::timecnt_t duration;
 
 	if (_midi_region) {
 		duration = Temporal::timecnt_t (_midi_region->midi_source()->length().beats());
-		map.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
 	} else {
 		duration = Temporal::timecnt_t (Temporal::Beats (4, 0));
-		map.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
 	}
 
-	EditingContext::TempoMapScope tms (_editing_context, map);
+	/* XXX Really needs to use a tempo map based on the _midi_region (and its SMF) */
 
 	reset_width_dependent_items (_editing_context.duration_to_pixels (duration));
 }
