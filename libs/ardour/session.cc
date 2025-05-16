@@ -2806,7 +2806,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 
 		catch (AudioEngine::PortRegistrationFailure& pfe) {
 
-			error << string_compose (_("No more JACK ports are available. You will need to stop %1 and restart JACK with more ports if you need this many tracks."), PROGRAM_NAME) << endmsg;
+			error << string_compose (_("A required port for MIDI I/O could not be created (%1).\nYou may need to restart the Audio/MIDI engine to fix this."), pfe.what()) << endmsg;
 			goto failed;
 		}
 
