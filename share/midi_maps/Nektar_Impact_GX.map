@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Ardour MIDI Binding Map for the Nektar Impact GX series of controllers
+
+The volume pot controls the fader for the selected buss / track.
+
+Normal Functions:
+The "Click" button enables the click (metronome)
+The "<<" and ">>" buttons move the playhead to previous / next marker
+The loop button enables transport loop (you must have a loop region set up)
+The stop button stops the transport
+The play button starts the transport
+The record button enables global (not track) record
+
+Shifted Functions:
+The "S1" button does nothing
+The "|<<" button move playhead to start marker
+The ">>|" button move playhead to end marker
+The "< Track" button select previous track / buss
+The Track >" button select next track / buss
+The "< Patch" button plays selected region (requires a selection)
+The "Patch >" button arms selected track for record
+
+Configuration:
+
+First, configure the Impact GX*** keyboard:
+You must set the USB Port Setup to "2" as follows
+Press "Setup"
+Press the key labeled "USB Port Setup"
+Press the key labeled "2"
+Press the key labeled "Enter"
+
+If you don't see both ports you might have to restart the stop and restart
+the audio/midi setup.
+
+Next, configure Ardour:
+Edit->Preferences
+Select "MIDI/MIDI Port Config"
+Make sure that "Music Data" is selected for BOTH Impact GX*** ports.
+
+Next, select "Control Surfaces"
+Check-box the "Generic MIDI" entry.
+Now click the "Show Protocol Settings" Button
+Set Incoming MIDI on to "Impact GX*** MIDI 2 (In)"
+Set Outgoing MIDI on to "Impact GX*** MIDI2 (Out)"
+Set the "Smoothing" parameter above 15 and see if you like that setting
+
+-->
+
+<ArdourMIDIBindings version="1.0.0" name="Nektar Impact GX">
+
+  <DeviceInfo bank-size="1"/>
+
+  <!-- The volume pot controles the fader for the selected track -->
+  <Binding channel="16" ctl-dial="20" uri="/route/gain S1"/>
+
+  <!-- Transport controls -->
+  <Binding channel="16" ctl="101" action="Transport/ToggleClick"/>
+  <Binding channel="16" ctl="102" function="loop-toggle"/>
+  <Binding channel="16" ctl="103" action="Common/alternate-jump-backward-to-mark"/>
+  <Binding channel="16" ctl="104" action="Common/alternate-jump-forward-to-mark"/>
+  <Binding channel="16" ctl="105" function="transport-stop"/>
+  <Binding channel="16" ctl="106" function="transport-roll"/>
+  <Binding channel="16" ctl="107" function="toggle-rec-enable"/>
+
+  <!-- Shifted Functions -->
+  <Binding channel="16" ctl="113" action=""/>
+  <Binding channel="16" ctl="114" action="Transport/GotoStart"/>
+  <Binding channel="16" ctl="115" action="Transport/GotoEnd"/>
+  <Binding channel="16" ctl="109" action="Editor/select-prev-route"/>
+  <Binding channel="16" ctl="110" action="Editor/select-next-route"/>
+  <Binding channel="16" ctl="111" action="Transport/PlaySelection"/>
+  <Binding channel="16" ctl="112" action="Editor/track-record-enable-toggle"/>
+
+</ArdourMIDIBindings>
