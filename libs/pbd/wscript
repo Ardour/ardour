@@ -105,6 +105,7 @@ def configure(conf):
 
     conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO',mandatory=False)
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
+    conf.env.append_value('CFLAGS', "-D_POSIX_C_SOURCE=200809L")
     if not Options.options.ppc:
         conf.check_cc(
                 msg="Checking for function 'posix_memalign' in stdlib.h",
