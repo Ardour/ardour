@@ -24,6 +24,7 @@ libpbd_sources = [
     'base_ui.cc',
     'boost_debug.cc',
     'cartesian.cc',
+    'ccurl.cc',
     'command.cc',
     'configuration_variable.cc',
     'convert.cc',
@@ -169,6 +170,7 @@ def build(bld):
     obj.vnum         = LIBPBD_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines     += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+    obj.defines     += [ 'VERSIONSTRING="' + bld.env['VERSION'] + '"' ]
 
     if sys.platform.startswith('netbsd'):
         obj.linkflags = '-lexecinfo'

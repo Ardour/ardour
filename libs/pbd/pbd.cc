@@ -31,6 +31,7 @@
 #include <glibmm/thread.h>
 
 #include "pbd/pbd.h"
+#include "pbd/ccurl.h"
 #include "pbd/debug.h"
 #include "pbd/error.h"
 #include "pbd/id.h"
@@ -95,6 +96,10 @@ PBD::init ()
 	PBD::ID::init ();
 
 	setup_libpbd_enums ();
+
+#ifdef __linux__
+	CCurl::setup_certificate_paths ();
+#endif
 
 	libpbd_initialized = true;
 	return true;
