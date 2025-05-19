@@ -115,8 +115,6 @@ fixup_bundle_environment (int /*argc*/, char* argv[], string & localedir)
 		 from looking outside the bundle to find the charset.alias file.
 		 */
 	g_setenv ("CHARSETALIASDIR", dir_path.c_str(), 1);
-
-	ArdourCurl::HttpGet::setup_certificate_paths ();
 }
 
 void
