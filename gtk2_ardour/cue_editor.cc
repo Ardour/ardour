@@ -179,11 +179,13 @@ CueEditor::get_current_zoom () const
 void
 CueEditor::reposition_and_zoom (samplepos_t pos, double spp)
 {
-	set_samples_per_pixel (spp);
+	pending_visual_change.add (VisualChange::ZoomLevel);
+	pending_visual_change.samples_per_pixel = spp;
 
-	horizontal_adjustment.set_value (sample_to_pixel (pos));
-	/* correct rounding errors */
-	_leftmost_sample = pos;
+	pending_visual_change.add (VisualChange::TimeOrigin);
+	pending_visual_change.time_origin = pos;
+
+	ensure_visual_change_idle_handler ();
 }
 
 void

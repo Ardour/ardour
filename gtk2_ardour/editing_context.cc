@@ -2038,7 +2038,6 @@ EditingContext::set_horizontal_position (double p)
 	p = std::max (0., p);
 
 	horizontal_adjustment.set_value (p);
-
 	_leftmost_sample = (samplepos_t) floor (p * samples_per_pixel);
 }
 

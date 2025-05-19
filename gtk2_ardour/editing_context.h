@@ -325,7 +325,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	void reset_zoom (samplecnt_t);
 	virtual double max_extents_scale() const { return 1.0; }
 	virtual void set_samples_per_pixel (samplecnt_t) = 0;
-	virtual void on_samples_per_pixel_changed () {}
 
 	virtual void cycle_zoom_focus ();
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;

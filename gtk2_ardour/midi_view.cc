@@ -343,6 +343,7 @@ MidiView::set_region (std::shared_ptr<MidiRegion> mr)
 	_midi_region = mr;
 
 	if (!_midi_region) {
+		std::cerr << "region cleared\n";
 		region_going_away ();
 		return;
 	}

@@ -850,9 +850,7 @@ Pianoroll::set_samples_per_pixel (samplecnt_t spp)
 		view->set_samples_per_pixel (spp);
 	}
 
-	bbt_ruler->set_range (0, current_page_samples());
-	compute_bbt_ruler_scale (0, current_page_samples());
-	bbt_metric.units_per_pixel = spp;
+	update_tempo_based_rulers ();
 
 	horizontal_adjustment.set_upper (max_zoom_extent().second.samples() / samples_per_pixel);
 	horizontal_adjustment.set_page_size (current_page_samples()/ samples_per_pixel / 10);
@@ -1962,6 +1960,7 @@ Pianoroll::visual_changer (const VisualChange& vc)
 	if (vc.pending & VisualChange::TimeOrigin) {
 		double new_time_origin = sample_to_pixel_unrounded (vc.time_origin);
 		set_horizontal_position (new_time_origin);
+		update_tempo_based_rulers ();
 	}
 
 	if (vc.pending & VisualChange::YOrigin) {
@@ -1969,7 +1968,9 @@ Pianoroll::visual_changer (const VisualChange& vc)
 	}
 
 	if (vc.pending & VisualChange::ZoomLevel) {
-		on_samples_per_pixel_changed ();
+		if (!(vc.pending & VisualChange::TimeOrigin)) {
+			update_tempo_based_rulers ();
+		}
 	} else {
 		/* If the canvas is not being zoomed then the canvas items will not change
 		 * and cause Item::prepare_for_render to be called so do it here manually.
@@ -1983,12 +1984,6 @@ Pianoroll::visual_changer (const VisualChange& vc)
 		// XXX update_fixed_rulers ();
 		redisplay_grid (true);
 	}
-}
-
-void
-Pianoroll::on_samples_per_pixel_changed ()
-{
-	update_tempo_based_rulers ();
 }
 
 void
@@ -2561,6 +2556,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 	unset (false);
 
 	if (!r) {
+		view->set_region (nullptr);
 		return;
 	}
 

@@ -3815,10 +3815,15 @@ Editor::get_y_origin () const
 
 
 void
-Editor::reposition_and_zoom (samplepos_t sample, double fpu)
+Editor::reposition_and_zoom (samplepos_t pos, double spp)
 {
-	reset_x_origin (sample);
-	reset_zoom (fpu);
+	pending_visual_change.add (VisualChange::ZoomLevel);
+	pending_visual_change.samples_per_pixel = spp;
+
+	pending_visual_change.add (VisualChange::TimeOrigin);
+	pending_visual_change.time_origin = pos;
+
+	ensure_visual_change_idle_handler ();
 
 	if (!no_save_visual) {
 		undo_visual_stack.push_back (current_visual_state(false));
