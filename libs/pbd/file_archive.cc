@@ -31,8 +31,7 @@
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 
-#include <curl/curl.h>
-
+#include "pbd/ccurl.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/file_archive.h"
 #include "pbd/file_utils.h"
@@ -60,9 +59,9 @@ static void*
 get_url (void* arg)
 {
 	FileArchive::Request* r = (FileArchive::Request*) arg;
-	CURL* curl;
+	PBD::CCurl ccurl;
+	CURL* curl = ccurl.curl ();
 
-	curl = curl_easy_init ();
 	curl_easy_setopt (curl, CURLOPT_URL, r->url);
 	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1L);
 
@@ -81,7 +80,6 @@ get_url (void* arg)
 	curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, write_callback);
 	curl_easy_setopt (curl, CURLOPT_WRITEDATA, (void*) &r->mp);
 	curl_easy_perform (curl);
-	curl_easy_cleanup (curl);
 
 	r->mp.lock ();
 	r->mp.done = 1;
@@ -190,7 +188,8 @@ FileArchive::fetch (const std::string & url, const std::string & destdir) const
 		return std::string();
 	}
 
-	CURL* curl = curl_easy_init ();
+	PBD::CCurl ccurl;
+	CURL* curl = ccurl.curl ();
 
 	if (!curl) {
 		return std::string ();
@@ -199,7 +198,6 @@ FileArchive::fetch (const std::string & url, const std::string & destdir) const
 	curl_easy_setopt (curl, CURLOPT_URL, url.c_str ());
 	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1L);
 	CURLcode res = curl_easy_perform (curl);
-	curl_easy_cleanup (curl);
 
 	g_chdir (pwd.c_str());
 	if (res != CURLE_OK) {

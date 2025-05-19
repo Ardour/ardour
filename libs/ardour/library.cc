@@ -16,12 +16,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <curl/curl.h>
 #include <glib/gstdio.h>
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#include "pbd/ccurl.h"
 #include "pbd/error.h"
 #include "pbd/i18n.h"
 #include "pbd/file_archive.h"
@@ -61,9 +61,9 @@ LibraryFetcher::LibraryFetcher ()
 int
 LibraryFetcher::get_descriptions ()
 {
-	CURL* curl;
+	PBD::CCurl ccurl;
+	CURL* curl = ccurl.curl ();
 
-	curl = curl_easy_init ();
 	if (!curl) {
 		return -1;
 	}
@@ -72,10 +72,9 @@ LibraryFetcher::get_descriptions ()
 	curl_easy_setopt (curl, CURLOPT_URL, Config->get_resource_index_url().c_str());
 	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_StdString);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buf);
-        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 2L);
-        CURLcode res = curl_easy_perform (curl);
-	curl_easy_cleanup (curl);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buf);
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 2L);
+	CURLcode res = curl_easy_perform (curl);
 
 	if (res != CURLE_OK) {
 		return -2;
