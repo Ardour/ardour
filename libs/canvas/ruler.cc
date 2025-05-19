@@ -37,7 +37,8 @@ Ruler::Ruler (Canvas* c, const Metric* m)
 	, _lower (0)
 	, _upper (0)
 	, _divide_height (-1.0)
-	, _font_description (0)
+	, _font_description (nullptr)
+	, _minor_font_description (nullptr)
 	, _need_marks (true)
 {
 }
@@ -48,7 +49,8 @@ Ruler::Ruler (Canvas* c, const Metric* m, Rect const& r)
 	, _lower (0)
 	, _upper (0)
 	, _divide_height (-1.0)
-	, _font_description (0)
+	, _font_description (nullptr)
+	, _minor_font_description (nullptr)
 	, _need_marks (true)
 {
 }
@@ -59,7 +61,8 @@ Ruler::Ruler (Item* parent, const Metric* m)
 	, _lower (0)
 	, _upper (0)
 	, _divide_height (-1.0)
-	, _font_description (0)
+	, _font_description (nullptr)
+	, _minor_font_description (nullptr)
 	, _need_marks (true)
 {
 }
@@ -70,9 +73,16 @@ Ruler::Ruler (Item* parent, const Metric* m, Rect const& r)
 	, _lower (0)
 	, _upper (0)
 	, _divide_height (-1.0)
-	, _font_description (0)
+	, _font_description (nullptr)
+	, _minor_font_description (nullptr)
 	, _need_marks (true)
 {
+}
+
+Ruler::~Ruler()
+{
+	delete _font_description;
+	delete _minor_font_description;
 }
 
 void
@@ -91,6 +101,15 @@ Ruler::set_font_description (Pango::FontDescription fd)
 	begin_visual_change ();
 	delete _font_description;
 	_font_description = new Pango::FontDescription (fd);
+	end_visual_change ();
+}
+
+void
+Ruler::set_minor_font_description (Pango::FontDescription fd)
+{
+	begin_visual_change ();
+	delete _minor_font_description;
+	_minor_font_description = new Pango::FontDescription (fd);
 	end_visual_change ();
 }
 
@@ -148,12 +167,25 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 
 		Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (cr);
 
-		Pango::FontDescription* last_font_description = 0;
+		Pango::FontDescription* last_font_description = nullptr;
 		Coord prev = -1;
 
 		for (vector<Mark>::const_iterator m = marks.begin(); m != marks.end(); ++m) {
 			Duple pos;
-			Pango::FontDescription* fd = _font_description;
+			Pango::FontDescription* fd;
+
+			switch (m->style) {
+			case Mark::Major:
+				fd = _font_description;
+				break;
+			default:
+				if (_minor_font_description) {
+					fd = _minor_font_description;
+				} else {
+					fd = _font_description;
+				}
+				break;
+			}
 
 			pos.x = round (m->position/_metric->units_per_pixel) + self.x0;
 			pos.y = self.y1; /* bottom edge */
