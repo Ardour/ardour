@@ -675,18 +675,14 @@ Item::set_size_request_to_display_given_text (const std::vector<std::string>& st
 	int width_max = 0;
 	int height_max = 0;
 
+	auto string_match = std::find_if(strings.cbegin(), strings.cend(), [&] (const string& s) {
+		return s.find_first_of ("gy") != string::npos;
+	});
+
 	vector<string> copy;
 	const vector<string>* to_use;
-	vector<string>::const_iterator i;
 
-	for (i = strings.begin(); i != strings.end(); ++i) {
-		if ((*i).find_first_of ("gy") != string::npos) {
-			/* contains a descender */
-			break;
-		}
-	}
-
-	if (i == strings.end()) {
+	if (string_match == strings.end()) {
 		/* make a copy of the strings then add one that has a descender */
 		copy = strings;
 		copy.push_back ("g");

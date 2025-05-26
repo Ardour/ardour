@@ -3002,7 +3002,6 @@ Session::refresh_disk_space ()
 	DWORD nSectorsPerCluster, nBytesPerSector,
 	      nFreeClusters, nTotalClusters;
 	char disk_drive[4];
-	bool volume_found;
 
 	_total_free_4k_blocks = 0;
 
@@ -3011,19 +3010,15 @@ Session::refresh_disk_space ()
 		disk_drive[3] = 0;
 		strupr(disk_drive);
 
-		volume_found = false;
 		if (0 != (GetDiskFreeSpace(disk_drive, &nSectorsPerCluster, &nBytesPerSector, &nFreeClusters, &nTotalClusters)))
 		{
 			int64_t nBytesPerCluster = nBytesPerSector * nSectorsPerCluster;
 			int64_t nFreeBytes = nBytesPerCluster * (int64_t)nFreeClusters;
 			i->blocks = (uint32_t)(nFreeBytes / 4096);
 
-			for (j = scanned_volumes.begin(); j != scanned_volumes.end(); j++) {
-				if (0 == j->compare(disk_drive)) {
-					volume_found = true;
-					break;
-				}
-			}
+			bool volume_found = std::any_of(scanned_volumes.cbegin(), scanned_volumes.cend(), [&] (const string& j) {
+				return j.compare(disk_drive) == 0;
+			});
 
 			if (!volume_found) {
 				scanned_volumes.push_back(disk_drive);
@@ -3462,16 +3457,10 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 	this_snapshot_path = Glib::build_filename (_path, legalize_for_path (_current_snapshot_name));
 	this_snapshot_path += statefile_suffix;
 
-	for (vector<string>::iterator i = state_files.begin(); i != state_files.end(); ++i) {
-
-		if (exclude_this_snapshot && *i == this_snapshot_path) {
-			continue;
-
-		}
-
-		if (find_all_sources (*i, result) < 0) {
-			return -1;
-		}
+	if (std::any_of (state_files.cbegin (), state_files.cend (), [&] (const string& i) {
+		return !(exclude_this_snapshot && i == this_snapshot_path) && find_all_sources (i, result) < 0;
+	})) {
+		return -1;
 	}
 
 	return 0;
@@ -5257,22 +5246,17 @@ Session::save_as (SaveAs& saveas)
 					/* normal non-media file. Don't copy state, history, etc.
 					 */
 
-					bool do_copy = true;
-
-					for (vector<string>::iterator v = do_not_copy_extensions.begin(); v != do_not_copy_extensions.end(); ++v) {
-						if ((from.length() > (*v).length()) && (from.find (*v) == from.length() - (*v).length())) {
-							/* end of filename matches extension, do not copy file */
-							do_copy = false;
-							break;
-						}
-					}
-
-					if (!saveas.copy_media && from.find (peakfile_suffix) != string::npos) {
-						/* don't copy peakfiles if
-						 * we're not copying media
-						 */
-						do_copy = false;
-					}
+					/* don't copy peakfiles if we're not copying media */
+					bool do_copy = (saveas.copy_media || from.find (peakfile_suffix) == string::npos)
+					            && std::none_of (
+							            do_not_copy_extensions.cbegin (),
+							            do_not_copy_extensions.cend (),
+							            [&] (const string& v) {
+								            /* end of filename matches extension, do not copy file */
+								            return from.length() > v.length()
+								                && from.find (v) == (from.length() - v.length());
+							            }
+						           );
 
 					if (do_copy) {
 						string to = Glib::build_filename (to_dir, from.substr (prefix_len));

@@ -54,19 +54,8 @@ Searchpath::Searchpath (const vector<std::string>& paths)
 }
 
 void
-Searchpath::remove_directory (const std::string& directory_path)
-{
-	if (directory_path.empty()) {
-		return;
-	}
-
-	for (vector<std::string>::iterator i = begin(); i != end();) {
-		if (*i == directory_path) {
-			i = erase (i);
-		} else {
-			++i;
-		}
-	}
+Searchpath::remove_directory (const std::string& directory_path) {
+	static_cast<void>(std::remove(begin(), end(), directory_path));
 }
 
 void
@@ -172,12 +161,7 @@ Searchpath::add_subdirectory_to_paths (const string& subdir)
 bool
 Searchpath::contains (const string& path) const
 {
-	std::vector<std::string>::const_iterator i = find(begin(), end(), path);
-
-	if (i == end()) {
-		return false;
-	}
-	return true;
+	return find(begin(), end(), path) != end();
 }
 
 /* This is not part of the Searchpath object, but is closely related to the

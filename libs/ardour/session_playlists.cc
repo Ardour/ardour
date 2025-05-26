@@ -657,14 +657,16 @@ SessionPlaylists::playlists_for_track (std::shared_ptr<Track> tr) const
 
 	vector<std::shared_ptr<Playlist> > pl_tr;
 
-	for (vector<std::shared_ptr<Playlist> >::iterator i = pl.begin(); i != pl.end(); ++i) {
-		if ( ((*i)->get_orig_track_id() == tr->id()) ||
-			(tr->playlist()->id() == (*i)->id())    ||
-			((*i)->shared_with (tr->id())) )
-		{
-			pl_tr.push_back (*i);
+	static_cast<void> (std::copy_if (
+		pl.cbegin (),
+		pl.cend (),
+		pl_tr.begin (),
+		[&] (const std::shared_ptr<Playlist>& i) {
+			return i->get_orig_track_id() == tr->id()
+			    || tr->playlist()->id() == i->id()
+			    || i->shared_with (tr->id());
 		}
-	}
+	));
 
 	return pl_tr;
 }

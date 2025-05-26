@@ -206,13 +206,9 @@ ExportGraphBuilder::process (samplecnt_t samples, bool last_cycle)
 bool
 ExportGraphBuilder::post_process ()
 {
-	for (std::list<Intermediate *>::iterator it = intermediates.begin(); it != intermediates.end(); /* ++ in loop */) {
-		if ((*it)->process()) {
-			it = intermediates.erase (it);
-		} else {
-			++it;
-		}
-	}
+	static_cast<void>(intermediates.remove_if([] (Intermediate* const& it) {
+		return it->process();
+	}));
 
 	return intermediates.empty();
 }

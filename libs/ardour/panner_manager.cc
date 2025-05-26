@@ -113,15 +113,11 @@ PannerManager::panner_discover (string path)
 
 	if ((pinfo = get_descriptor (path)) != 0) {
 
-		list<PannerInfo*>::iterator i;
+		auto pi_it = std::find_if(panner_info.begin(), panner_info.end(), [&] (const auto& pi) {
+			return pi->descriptor.name == pinfo->descriptor.name;
+		});
 
-		for (i = panner_info.begin(); i != panner_info.end(); ++i) {
-			if (pinfo->descriptor.name == (*i)->descriptor.name) {
-				break;
-			}
-		}
-
-		if (i == panner_info.end()) {
+		if (pi_it == panner_info.end()) {
 			panner_info.push_back (pinfo);
 			DEBUG_TRACE (DEBUG::Panning, string_compose(_("Panner discovered: \"%1\" in %2\n"), pinfo->descriptor.name, path));
 		} else {
