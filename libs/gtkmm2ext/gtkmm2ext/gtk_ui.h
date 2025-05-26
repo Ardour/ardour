@@ -36,14 +36,14 @@
 
 #include <glibmm/thread.h>
 
-#include <gtkmm/widget.h>
-#include <gtkmm/style.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/style.h>
 #ifndef GTK_NEW_TOOLTIP_API
-#include <gtkmm/tooltips.h>
+#include <ytkmm/tooltips.h>
 #endif
-#include <gtkmm/textbuffer.h>
-#include <gtkmm/main.h>
-#include <gdkmm/color.h>
+#include <ytkmm/textbuffer.h>
+#include <ytkmm/main.h>
+#include <ydkmm/color.h>
 
 #ifndef ABSTRACT_UI_EXPORTS
 #define ABSTRACT_UI_EXPORTS

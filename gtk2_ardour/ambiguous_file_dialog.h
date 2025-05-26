@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <gtkmm/radiobutton.h>
+#include <ytkmm/radiobutton.h>
 #include "ardour_dialog.h"
 
 class AmbiguousFileDialog : public ArdourDialog

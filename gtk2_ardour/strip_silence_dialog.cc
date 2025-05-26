@@ -21,10 +21,10 @@
 
 #include <iostream>
 
-#include <gtkmm/table.h>
-#include <gtkmm/label.h>
-#include <gtkmm/progressbar.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/table.h>
+#include <ytkmm/label.h>
+#include <ytkmm/progressbar.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/pthread_utils.h"
 

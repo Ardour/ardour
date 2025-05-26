@@ -3566,7 +3566,7 @@ msgstr "Kann den Videoserver nicht starten "
 
 #: ardour_ui_video.cc:209
 msgid "Video-server was started but does not respond to requests..."
-msgstr "Viideoserver wurde gestartet, reagiert aber nicht auf Anfragen..."
+msgstr "Videoserver wurde gestartet, reagiert aber nicht auf Anfragen..."
 
 #: ardour_ui_video.cc:254 editor_audio_import.cc:774
 msgid "could not open %1"
@@ -5583,7 +5583,7 @@ msgstr "Alle Regionen des Bearbeitungsbereichs auswählen"
 
 #: editor_actions.cc:260
 msgid "Select All Inside Edit Range"
-msgstr "Alles inerhalb des Bearbeitungsbereichs auswählen"
+msgstr "Alles innerhalb des Bearbeitungsbereichs auswählen"
 
 #: editor_actions.cc:262
 msgid "Select Edit Range"
@@ -7802,7 +7802,7 @@ msgstr "Lautstärkekurve zurücksetzen"
 
 #: editor_ops.cc:6677
 msgid "region polarity invert"
-msgstr "Inveriere die Polarität deer Regiont"
+msgstr "Invertiere die Polarität der Region"
 
 #: editor_ops.cc:6711
 msgid "region gain envelope active"
@@ -7914,7 +7914,7 @@ msgstr "Marker hinzufügen"
 
 #: editor_ops.cc:7750
 msgid "Set global tempo"
-msgstr "Globales tempo setzen"
+msgstr "Globales Tempo setzen"
 
 #: editor_ops.cc:7753
 msgid "Define one bar"
@@ -8165,7 +8165,7 @@ msgstr "Regionenmarker -> globale Marker"
 
 #: editor_ops.cc:9683
 msgid "Smallest gap size to remove (seconds):"
-msgstr "Kleinste zu entfernende Lückengröße (Sekundn):"
+msgstr "Kleinste zu entfernende Lückengröße (Sekunden):"
 
 #: editor_ops.cc:9692
 msgid "Leave a gap of(seconds):"
@@ -10129,7 +10129,7 @@ msgstr "Zuletzt empfangene MIDI Nachrichten anzeigen"
 
 #: insert_remove_time_dialog.cc:61
 msgid "Remove Time starting at:"
-msgstr "Enferne Zeit beginnend bei:"
+msgstr "Entferne Zeit beginnend bei:"
 
 #: insert_remove_time_dialog.cc:61
 msgid "Insert Time starting at:"
@@ -19196,7 +19196,7 @@ msgstr "Bei Aufnahme immer einzählen"
 
 #: session_option_editor.cc:439
 msgid "Project Banner"
-msgstr "Projektbbanner"
+msgstr "Projektbanner"
 
 #: session_option_editor.cc:443
 msgid "Show master bus comment window on session load"

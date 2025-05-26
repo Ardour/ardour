@@ -35,6 +35,10 @@
 
 class XMLNode;
 
+namespace PBD {
+class HistoryOwner;
+}
+
 namespace Evoral {
 template<typename Time> class EventSink;
 }
@@ -101,7 +105,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	std::shared_ptr<MidiModel> model();
 	std::shared_ptr<const MidiModel> model() const;
 
-	void fix_negative_start ();
+	void fix_negative_start (PBD::HistoryOwner&);
 
 	int render (Evoral::EventSink<samplepos_t>& dst,
 	            uint32_t                        chan_n,

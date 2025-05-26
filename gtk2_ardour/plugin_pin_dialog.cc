@@ -18,12 +18,12 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <gtkmm/box.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/label.h>
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/separator.h>
-#include <gtkmm/table.h>
+#include <ytkmm/box.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/separator.h>
+#include <ytkmm/table.h>
 
 #include "pbd/replace_all.h"
 
@@ -651,7 +651,7 @@ PluginPinWidget::add_port_to_table (std::shared_ptr<Port> p, uint32_t r, bool ca
 					continue;
 				}
 				/* if processor goes away, we're notified by the port disconnect,
-				 * there should be no need to explicily connect to proc->DropReferences
+				 * there should be no need to explicitly connect to proc->DropReferences
 				 */
 				set<Evoral::Parameter> p = proc->what_can_be_automated ();
 				for (set<Evoral::Parameter>::iterator i = p.begin (); i != p.end (); ++i) {

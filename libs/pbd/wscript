@@ -24,6 +24,7 @@ libpbd_sources = [
     'base_ui.cc',
     'boost_debug.cc',
     'cartesian.cc',
+    'ccurl.cc',
     'command.cc',
     'configuration_variable.cc',
     'convert.cc',
@@ -105,6 +106,7 @@ def configure(conf):
 
     conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO',mandatory=False)
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
+    conf.env.append_value('CFLAGS', "-D_POSIX_C_SOURCE=200809L")
     if not Options.options.ppc:
         conf.check_cc(
                 msg="Checking for function 'posix_memalign' in stdlib.h",
@@ -168,6 +170,7 @@ def build(bld):
     obj.vnum         = LIBPBD_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines     += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+    obj.defines     += [ 'VERSIONSTRING="' + bld.env['VERSION'] + '"' ]
 
     if sys.platform.startswith('netbsd'):
         obj.linkflags = '-lexecinfo'
@@ -209,3 +212,4 @@ def build(bld):
         testobj.defines      = [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
         if sys.platform != 'darwin' and bld.env['build_target'] != 'mingw':
             testobj.lib      = ['rt', 'dl']
+        testobj.install_path = ''

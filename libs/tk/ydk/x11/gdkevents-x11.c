@@ -2254,7 +2254,7 @@ gdk_event_translate (GdkDisplay *display,
 	  XIDeviceEvent *xev = (XIDeviceEvent *) xevent->xcookie.data;
 #ifdef G_ENABLE_DEBUG
 	  if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
-	    g_message ("TOUCH dev=%d src=%d | dt: %u flags: %x\n", xev->deviceid, xev->sourceid, xev->detail, xev->flags);
+	    g_message ("TOUCH dev=%d src=%d | type: %d dt: %u flags: %x\n", xev->deviceid, xev->sourceid, xevent->xcookie.evtype, xev->detail, xev->flags);
 #endif
 	  window = gdk_window_lookup_for_display (display, xev->event);
 	  g_object_ref (window);

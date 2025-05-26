@@ -1,24 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Ardour>
-  <UI>
-    <Option name="icon-set" value="default"/>
-    <Option name="ui-rc-file" value="clearlooks.rc"/>
-    <Option name="color-file" value="dark"/>
-    <Option name="flat-buttons" value="0"/>
-    <Option name="blink-rec-arm" value="0"/>
-    <Option name="waveform-gradient-depth" value="0"/>
-    <Option name="timeline-item-gradient-depth" value="0.5"/>
-    <Option name="all-floating-windows-are-dialogs" value="0"/>
-    <Option name="transients-follow-front" value="0"/>
-    <Option name="color-regions-using-track-color" value="0"/>
-    <Option name="show-waveform-clipping" value="1"/>
-    <Option name="lock-gui-after-seconds" value="0"/>
-    <Option name="sensitize-playhead" value="0"/>
-    <Option name="no-new-session-dialog" value="1"/>
-    <Option name="show-track-meters" value="1"/>
-    <Option name="default-narrow_ms" value="0"/>
-    <Option name="font-scale" value="102400"/>
-  </UI>
+  <UI/>
   <Canvas>
     <Option name="very small font" value="@FONT_VERYSMALL@"/>
     <Option name="small font" value="@FONT_SMALL@"/>

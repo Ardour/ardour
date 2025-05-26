@@ -5,10 +5,10 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/region.h>
-#include <gdkmm/private/region_p.h>
+#include <ydkmm/region.h>
+#include <ydkmm/private/region_p.h>
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 // -*- c++ -*-
 /* $Id: region.ccg,v 1.1 2003/01/21 13:38:38 murrayc Exp $ */
@@ -32,7 +32,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 namespace Gdk
 {

@@ -3,10 +3,10 @@
 
 #include <glibmm.h>
 
-#include <atkmm/component.h>
-#include <atkmm/private/component_p.h>
+#include <ztkmm/component.h>
+#include <ztkmm/private/component_p.h>
 
-#include <atk/atk-enum-types.h>
+#include <ztk/atk-enum-types.h>
 
 // -*- c++ -*-
 /* $Id: component.ccg,v 1.1 2003/01/21 13:37:05 murrayc Exp $ */
@@ -28,8 +28,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/object.h>
-#include <atk/atkcomponent.h>
+#include <ztkmm/object.h>
+#include <ztk/atkcomponent.h>
 
 
 namespace

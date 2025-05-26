@@ -25,6 +25,7 @@
 
 #include "canvas/canvas.h"
 
+#include "ardour/instrument_info.h"
 #include "ardour/midi_track.h"
 
 #include "gtkmm2ext/colors.h"
@@ -550,26 +551,19 @@ PianoRollHeader::get_note_name (int note)
 	std::string note_n;
 	NoteName rtn;
 
-#if 0
-	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&_view.trackview());
+	ARDOUR::InstrumentInfo* ii = _midi_context.instrument_info();
 
-	if (mtv) {
-		string chn = mtv->gui_property (X_("midnam-channel"));
-
-		if (!chn.empty()) {
-
-			int midnam_channel;
-
-			sscanf (chn.c_str(), "%*s %d", &midnam_channel);
-			midnam_channel--;
-
-			name = mtv->route()->instrument_info ().get_note_name (
-				0,               //bank
-				0,               //program
-				midnam_channel,  //channel
-				note);           //note
-		}
+	if (!ii) {
+		return rtn;
 	}
+
+	int midnam_channel = _midi_context.get_preferred_midi_channel ();
+
+	name = ii->get_note_name (
+		0,               //bank
+		0,               //program
+		midnam_channel,  //channel
+		note);           //note
 
 	int oct_rel = note % 12;
 	switch (oct_rel) {
@@ -613,7 +607,6 @@ PianoRollHeader::get_note_name (int note)
 			break;
 	}
 
-#endif
 	std::string new_string = std::string(3 - std::to_string(note).length(), '0') + std::to_string(note);
 	rtn.name = name.empty()? new_string + " " + note_n : name;
 	rtn.from_midnam = !name.empty();
@@ -637,17 +630,17 @@ PianoRollHeader::motion_handler (GdkEventMotion* ev)
 
 		if (evd.y > scroomer_top - 5 && evd.y < scroomer_top + edge){
 			if (_scroomer_state != TOP) {
-				_view->editing_context().push_canvas_cursor (_view->editing_context().cursors()->resize_top);
+				_view->editing_context().set_canvas_cursor (_view->editing_context().cursors()->resize_top);
 				_scroomer_state = TOP;
 			}
 		} else if (evd.y > scroomer_bottom - edge && evd.y < scroomer_bottom + edge){
 			if (_scroomer_state != BOTTOM) {
-				_view->editing_context().push_canvas_cursor (_view->editing_context().cursors()->resize_bottom);
+				_view->editing_context().set_canvas_cursor (_view->editing_context().cursors()->resize_bottom);
 				_scroomer_state = BOTTOM;
 			}
 		} else {
 			if (_scroomer_state != MOVE) {
-				_view->editing_context().push_canvas_cursor (_view->editing_context().cursors()->grabber);
+				_view->editing_context().set_canvas_cursor (_view->editing_context().cursors()->grabber);
 				_scroomer_state = MOVE;
 			}
 		}
@@ -870,7 +863,7 @@ PianoRollHeader::leave_handler (GdkEventCrossing*)
 {
 	if (!_scroomer_drag){
 		if (_view) {
-			_view->editing_context().pop_canvas_cursor ();
+			/* XXX we used to pop the cursor stack here */
 		}
 	}
 	invalidate_note_range(_highlighted_note, _highlighted_note);

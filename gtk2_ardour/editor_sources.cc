@@ -51,7 +51,7 @@ using namespace Gtk;
 using namespace Glib;
 using Gtkmm2ext::Keyboard;
 
-EditorSources::EditorSources (Editor* e)
+EditorSources::EditorSources (Editor& e)
 	: EditorComponent (e)
 {
 	init ();
@@ -68,8 +68,8 @@ EditorSources::EditorSources (Editor* e)
 
 	_change_connection = _display.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &EditorSources::selection_changed));
 
-	e->EditorFreeze.connect (_editor_freeze_connection, MISSING_INVALIDATOR, std::bind (&EditorSources::freeze_tree_model, this), gui_context ());
-	e->EditorThaw.connect (_editor_thaw_connection, MISSING_INVALIDATOR, std::bind (&EditorSources::thaw_tree_model, this), gui_context ());
+	_editor.EditorFreeze.connect (_editor_freeze_connection, MISSING_INVALIDATOR, std::bind (&EditorSources::freeze_tree_model, this), gui_context ());
+	_editor.EditorThaw.connect (_editor_thaw_connection, MISSING_INVALIDATOR, std::bind (&EditorSources::thaw_tree_model, this), gui_context ());
 }
 
 void
@@ -109,7 +109,7 @@ EditorSources::selection_changed ()
 		TreeIter                             iter;
 		TreeView::Selection::ListHandle_Path rows = _display.get_selection ()->get_selected_rows ();
 
-		_editor->get_selection ().clear_regions ();
+		_editor.get_selection ().clear_regions ();
 
 		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin (); i != rows.end (); ++i) {
 			if ((iter = _model->get_iter (*i))) {
@@ -125,14 +125,14 @@ EditorSources::selection_changed ()
 
 					for (set<std::shared_ptr<Region>>::iterator region = regions.begin (); region != regions.end (); region++) {
 						_change_connection.block (true);
-						_editor->set_selected_regionview_from_region_list (*region, SelectionAdd);
+						_editor.set_selected_regionview_from_region_list (*region, SelectionAdd);
 						_change_connection.block (false);
 					}
 				}
 			}
 		}
 	} else {
-		_editor->get_selection ().clear_regions ();
+		_editor.get_selection ().clear_regions ();
 	}
 }
 
@@ -170,7 +170,7 @@ EditorSources::recover_selected_sources ()
 	}
 
 	/* ToDo */
-	_editor->recover_regions (to_be_recovered); // this operation should be undo-able
+	_editor.recover_regions (to_be_recovered); // this operation should be undo-able
 }
 
 void
@@ -206,7 +206,7 @@ EditorSources::remove_selected_sources ()
 			TreeIter                             iter;
 			TreeView::Selection::ListHandle_Path rows = _display.get_selection ()->get_selected_rows ();
 
-			_editor->get_selection ().clear_regions ();
+			_editor.get_selection ().clear_regions ();
 
 			for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin (); i != rows.end (); ++i) {
 				if ((iter = _model->get_iter (*i))) {
@@ -228,7 +228,7 @@ EditorSources::remove_selected_sources ()
 							 * (Source::drop_references -> Region::source_deleted,
 							 *  -> Region::drop_references). see f58f5bef55a5aa1
 							 */
-							_editor->set_selected_regionview_from_region_list (region, SelectionAdd);
+							_editor.set_selected_regionview_from_region_list (region, SelectionAdd);
 							_change_connection.block (false);
 						}
 
@@ -237,7 +237,7 @@ EditorSources::remove_selected_sources ()
 				}
 			}
 
-			_editor->remove_regions (_editor->get_regions_from_selection_and_entered (), false /*can_ripple*/, false /*as_part_of_other_command*/); // this operation is undo-able
+			_editor.remove_regions (_editor.get_regions_from_selection_and_entered (), false /*can_ripple*/, false /*as_part_of_other_command*/); // this operation is undo-able
 
 			if (opt == 2) {
 				for (auto const& s : to_be_removed) {
@@ -283,7 +283,7 @@ EditorSources::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 
 	if (data.get_target () == "GTK_TREE_MODEL_ROW") {
 		/* something is being dragged over the source list */
-		_editor->_drags->abort ();
+		_editor._drags->abort ();
 		_display.on_drag_data_received (context, x, y, data, info, dtime);
 		return;
 	}
@@ -293,10 +293,10 @@ EditorSources::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 		bool      copy = ((context->get_actions () & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
 
 		if (UIConfiguration::instance ().get_only_copy_imported_files () || copy) {
-			_editor->do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion,
-			                    SrcBest, SMFFileAndTrackName, SMFTempoIgnore, pos);
+			_editor.do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion,
+			                   SrcBest, SMFFileAndTrackName, SMFTempoIgnore, pos);
 		} else {
-			_editor->do_embed (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion, pos);
+			_editor.do_embed (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion, pos);
 		}
 		context->drag_finish (true, false, dtime);
 	}

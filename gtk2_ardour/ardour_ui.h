@@ -48,24 +48,24 @@
 #include <cmath>
 
 #include "pbd/xml++.h"
-#include <gtkmm/box.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
-#include <gtkmm/fixed.h>
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/button.h>
-#include <gtkmm/togglebutton.h>
-#include <gtkmm/sizegroup.h>
-#include <gtkmm/treeview.h>
-#include <gtkmm/menubar.h>
-#include <gtkmm/textbuffer.h>
-#include <gtkmm/adjustment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
+#include <ytkmm/fixed.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/button.h>
+#include <ytkmm/togglebutton.h>
+#include <ytkmm/sizegroup.h>
+#include <ytkmm/treeview.h>
+#include <ytkmm/menubar.h>
+#include <ytkmm/textbuffer.h>
+#include <ytkmm/adjustment.h>
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/bindings.h"
@@ -117,6 +117,7 @@
 #include "rc_option_editor.h"
 #include "route_dialogs.h"
 #include "route_params_ui.h"
+#include "rta_window.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
 #include "transport_masters_dialog.h"
@@ -144,6 +145,7 @@ class IdleOMeter;
 class IOPluginWindow;
 class PluginDSPLoadWindow;
 class PluginManagerUI;
+class RTAWindow;
 class DspStatisticsWindow;
 class TransportMastersWindow;
 class VirtualKeyboardWindow;
@@ -170,6 +172,7 @@ class ApplicationBar;
 class Meterbridge;
 class LuaWindow;
 class MidiTracer;
+class PianorollWindow;
 class NSM_Client;
 class LevelMeterHBox;
 class GUIObjectState;
@@ -284,6 +287,8 @@ public:
 	void toggle_mixer_space();
 	void toggle_keep_tearoffs();
 	void show_plugin_manager();
+	void show_lua_window();
+	void show_realtime_analyzer();
 
 	void reset_focus (Gtk::Widget*);
 
@@ -293,6 +298,7 @@ public:
 	 *  (either RapidScreenUpdate || SuperRapidScreenUpdate - user-config)
 	 */
 	static sigc::signal<void, Temporal::timepos_t> Clock;
+	static unsigned int clock_signal_interval ();
 
 	static void close_all_dialogs () { CloseAllDialogs(); }
 	static sigc::signal<void> CloseAllDialogs;
@@ -564,6 +570,10 @@ private:
 	Gtk::Label   timecode_format_label;
 	void update_timecode_format ();
 
+	Gtk::Label   latency_info_label;
+	Gtk::Label   pdc_info_label;
+	void session_latency_updated (bool);
+
 	Gtk::Label  dsp_load_label;
 	void update_cpu_load ();
 
@@ -629,12 +639,14 @@ private:
 	void transport_ffwd_rewind (bool fwd);
 	void transport_loop ();
 	void toggle_roll (bool with_abort, bool roll_out_of_bounded_mode);
+	void spacebar_action (bool with_abort, bool roll_out_of_bounded_mode);
 	bool trx_record_enable_all_tracks ();
 
 	bool _session_is_new;
 	void set_session (ARDOUR::Session *);
 	void connect_dependents_to_session (ARDOUR::Session *);
 	void we_have_dependents ();
+	void setup_action_tooltips ();
 
 	void setup_session_options ();
 
@@ -643,7 +655,7 @@ private:
 	bool process_snapshot_session_prompter (ArdourWidgets::Prompter& prompter, bool switch_to_it);
 	void snapshot_session (bool switch_to_it);
 
-	void quick_snapshot_session (bool switch_to_it);  //does not promtp for name, just makes a timestamped file
+	void quick_snapshot_session (bool switch_to_it);  //does not prompt for name, just makes a timestamped file
 
 	SaveAsDialog* save_as_dialog;
 
@@ -694,6 +706,7 @@ private:
 	WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
 	WM::ProxyWithConstructor<KeyEditor> key_editor;
 	WM::ProxyWithConstructor<LuaWindow> luawindow;
+	WM::ProxyWithConstructor<RTAWindow> rtawindow;
 
 	/* creator methods */
 
@@ -707,6 +720,7 @@ private:
 	GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
 	KeyEditor*              create_key_editor ();
 	LuaWindow*              create_luawindow ();
+	RTAWindow*              create_rtawindow ();
 
 	ARDOUR::SystemExec *video_server_process;
 
@@ -838,7 +852,7 @@ private:
 	ArdourWidgets::ArdourButton recorder_visibility_button;
 	ArdourWidgets::ArdourButton trigger_page_visibility_button;
 
-	bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::Bindings*);
+	bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::BindingSet*);
 	bool try_gtk_accel_binding (GtkWindow* win, GdkEventKey* ev, bool translate, GdkModifierType modifier);
 
 	bool main_window_delete_event (GdkEventAny*);

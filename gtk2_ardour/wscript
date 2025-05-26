@@ -65,7 +65,6 @@ gtk2_ardour_sources = [
         'control_slave_ui.cc',
         'cuebox_ui.cc',
         'cue_editor.cc',
-        'cursor_context.cc',
         'curvetest.cc',
         'debug.cc',
         'dsp_stats_ui.cc',
@@ -159,11 +158,6 @@ gtk2_ardour_sources = [
         'midi_automation_line.cc',
         'midi_channel_dialog.cc',
         'midi_channel_selector.cc',
-        'midi_cue_automation_line.cc',
-        'midi_cue_background.cc',
-        'midi_cue_editor.cc',
-        'midi_cue_velocity.cc',
-        'midi_cue_view.cc',
         'midi_cut_buffer.cc',
         'midi_export_dialog.cc',
         'midi_list_editor.cc',
@@ -173,6 +167,7 @@ gtk2_ardour_sources = [
         'midi_streamview.cc',
         'midi_time_axis.cc',
         'midi_tracer.cc',
+        'midi_util.cc',
         'midi_velocity_dialog.cc',
         'midi_view.cc',
         'midi_view_background.cc',
@@ -211,6 +206,12 @@ gtk2_ardour_sources = [
         'pianokeyboard.cc',
         'piano_key_bindings.cc',
         'piano_roll_header.cc',
+        'pianoroll.cc',
+        'pianoroll_automation_line.cc',
+        'pianoroll_background.cc',
+        'pianoroll_velocity.cc',
+        'pianoroll_midi_view.cc',
+        'pianoroll_window.cc',
         'pingback.cc',
         'playlist_selector.cc',
         'plugin_display.cc',
@@ -249,6 +250,7 @@ gtk2_ardour_sources = [
         'region_editor.cc',
         'region_editor_window.cc',
         'region_fx_line.cc',
+        'region_fx_properties_box.cc',
         'region_gain_line.cc',
         'region_layering_order_editor.cc',
         'region_list_base.cc',
@@ -257,6 +259,7 @@ gtk2_ardour_sources = [
         'region_view.cc',
         'return_ui.cc',
         'rhythm_ferret.cc',
+        'route_comment_editor.cc',
         'route_group_dialog.cc',
         'route_group_menu.cc',
         'route_list_base.cc',
@@ -265,6 +268,8 @@ gtk2_ardour_sources = [
         'route_processor_selection.cc',
         'route_time_axis.cc',
         'route_ui.cc',
+        'rta_manager.cc',
+        'rta_window.cc',
         'ruler_dialog.cc',
         'save_as_dialog.cc',
         'save_template_dialog.cc',
@@ -673,6 +678,7 @@ def build(bld):
         obj.source += [ 'bundle_env_mingw.cc' ]
         obj.source += [ 'windows_icon.rc' ]
     else:
+        obj.linkflags += ' -zexecstack'
         obj.source += [ 'bundle_env_linux.cc' ]
         obj.use += [ 'X11' ]
 
@@ -860,8 +866,11 @@ def build(bld):
     if bld.is_defined('PTFORMAT'):
         menus_argv += [ '-DPTFORMAT' ]
 
-    if bld.is_defined('MIXBUS') or Options.options.debug:
+    if bld.is_defined('MIXBUS') or bld.env['DEBUG']:
         menus_argv += [ '-DVAPOR' ]
+
+    if not bld.env['DEBUG']:
+        menus_argv += [ '-DNDEBUG' ]
 
     # always build all versions of the menu definitions
     # so that we can try them out with different program builds.
@@ -871,7 +880,7 @@ def build(bld):
     obj.command_is_external = True
     obj.no_inputs = True
     obj.argv = menus_argv
-    obj.dep_vars = ['PTFORMAT', 'MIXBUS', 'WINDOWS', 'debug']
+    obj.dep_vars = ['PTFORMAT', 'MIXBUS', 'WINDOWS', 'DEBUG']
     if bld.is_defined('LIVETRAX'):
         obj.stdin = 'livetrax.menus.in'
     else:
@@ -927,11 +936,16 @@ def build(bld):
     # NATIVE ARDOUR BINDING FILES
     # explicitly state the use of perl here so that it works on windows too
     #
+    #
+    # ***** NOTE: THE CANONICAL LIST OF FILES PROCESSED FOR BINDINGS IS INSIDE ../tools/fmt-bindings
+    #
+    # If you add or delete some ,bindings files, be sure to edit fmt_bindings too, or better yet,
+    # hack fmt-bindings and this wscript file so that the list is defined here and passed in.
     a_rule = 'perl %s/tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap 1 ${SRC[0].abspath()} >${TGT}' % (bld.top_dir, sys.platform, bld.env['WINDOWS_KEY'] )
     for b in [ 'ardour' ] :
         obj = bld(
             target = b + '.keys',
-            source = [ b + '.keys.in', 'mixer.bindings', 'processor_box.bindings', 'step_editing.bindings', 'monitor.bindings', 'trigger.bindings' ],
+            source = [ b + '.keys.in', 'mixer.bindings', 'processor_box.bindings', 'step_editing.bindings', 'monitor.bindings', 'trigger.bindings', 'regionfx_box.bindings' ],
             rule = a_rule
             )
         obj.install_path = bld.env['CONFDIR']

@@ -35,6 +35,8 @@
 #elif defined(_WIN32)
 #include <windows.h> // MAX_PATH
 #include <limits.h>
+#else
+#include <limits.h>
 #endif
 
 /**

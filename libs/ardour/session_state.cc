@@ -179,7 +179,7 @@ Session::pre_engine_init (string fullpath)
 	   definition.
 	*/
 
-	timerclear (&last_mmc_step);
+	_last_mmc_step = 0;
 	_processing_prohibited.store (0);
 	_record_status.store (Disabled);
 	_playback_load.store (100);
@@ -773,6 +773,13 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	XMLTree tree;
 	std::string xml_path(_session_dir->root_path());
+
+	if (!pending) {
+		/* Prevent destructive edits after explicit save or snapshot changes.
+		 * Otherwise this one can delete sources used by other snapshot
+		 */
+		reset_last_capture_sources ();
+	}
 
 	/* prevent concurrent saves from different threads */
 
@@ -3695,14 +3702,12 @@ Session::cleanup_sources (CleanupReport& rep)
 	/*  add our current source list */
 
 	ls.acquire ();
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {
+	for (SourceMap::iterator i = sources.begin(); i != sources.end();) {
 		std::shared_ptr<FileSource> fs;
-		SourceMap::iterator tmp = i;
-		++tmp;
 
 		if ((fs = std::dynamic_pointer_cast<FileSource> (i->second)) == 0) {
 			/* not a file */
-			i = tmp;
+			++i;
 			continue;
 		}
 
@@ -3715,40 +3720,42 @@ Session::cleanup_sources (CleanupReport& rep)
 
 		fs->close ();
 
-		if (!fs->is_stub()) {
-
-			/* Note that we're checking a list of all
-			 * sources across all snapshots with the list
-			 * of sources used by this snapshot.
-			 */
-
-			if (sources_used_by_this_snapshot.find (i->second) != sources_used_by_this_snapshot.end()) {
-				/* this source is in use by this snapshot */
-				sources_used_by_all_snapshots.insert (fs->path());
-				cerr << "Source from source list found in used_by_this_snapshot (" << fs->path() << ")\n";
-			} else {
-				cerr << "Source from source list NOT found in used_by_this_snapshot (" << fs->path() << ")\n";
-				/* this source is NOT in use by this snapshot */
-
-				/* remove all related regions from RegionFactory master list */
-
-				RegionFactory::remove_regions_using_source (i->second);
-
-				/* remove from our current source list
-				 * also. We may not remove it from
-				 * disk, because it may be used by
-				 * other snapshots, but it isn't used inside this
-				 * snapshot anymore, so we don't need a
-				 * reference to it.
-				 */
-
-				dead_sources.insert (i->second);
-				sources.erase (i);
-			}
+		if (fs->is_stub()) {
+			++i;
+			continue;
 		}
 
-		i = tmp;
+		/* Note that we're checking a list of all
+		 * sources across all snapshots with the list
+		 * of sources used by this snapshot.
+		 */
+
+		if (sources_used_by_this_snapshot.find (i->second) != sources_used_by_this_snapshot.end()) {
+			/* this source is in use by this snapshot */
+			sources_used_by_all_snapshots.insert (fs->path());
+			cerr << "Source from source list found in used_by_this_snapshot (" << fs->path() << ")\n";
+			++i;
+		} else {
+			cerr << "Source from source list NOT found in used_by_this_snapshot (" << fs->path() << ")\n";
+			/* this source is NOT in use by this snapshot */
+
+			/* remove all related regions from RegionFactory master list */
+
+			RegionFactory::remove_regions_using_source (i->second);
+
+			/* remove from our current source list
+			 * also. We may not remove it from
+			 * disk, because it may be used by
+			 * other snapshots, but it isn't used inside this
+			 * snapshot anymore, so we don't need a
+			 * reference to it.
+			 */
+
+			dead_sources.insert (i->second);
+			i = sources.erase (i);
+		}
 	}
+
 	ls.release ();
 
 	cerr << "Dead Sources: " << dead_sources.size() << endl;
@@ -4354,6 +4361,18 @@ Session::config_changed (std::string p, bool ours)
 		engine().reset_timebase ();
 
 	} else if (p == "native-file-header-format") {
+
+#ifndef HAVE_RF64_RIFF
+		switch (config.get_native_file_header_format ()) {
+			case MBWF:
+				/* fallthrough */
+			case RF64_WAV:
+				config.set_native_file_header_format (RF64);
+				return;
+			default:
+				break;
+		}
+#endif
 
 		if (!first_file_header_format_reset) {
 			reset_native_file_format ();

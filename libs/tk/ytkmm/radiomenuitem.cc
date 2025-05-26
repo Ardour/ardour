@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/radiomenuitem.h>
-#include <gtkmm/private/radiomenuitem_p.h>
+#include <ytkmm/radiomenuitem.h>
+#include <ytkmm/private/radiomenuitem_p.h>
 
 
 // -*- c++ -*-
@@ -29,9 +29,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/misc.h>
-#include <gtkmm/label.h>
-#include <gtk/gtk.h>
+#include <ytkmm/misc.h>
+#include <ytkmm/label.h>
+#include <ytk/ytk.h>
 
 typedef Gtk::RadioMenuItem::Group Group; //So that the generate get_group return type is parsed.
 

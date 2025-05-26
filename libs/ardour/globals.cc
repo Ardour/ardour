@@ -168,6 +168,8 @@ std::map<std::string, bool> ARDOUR::reserved_io_names;
 
 float ARDOUR::ui_scale_factor = 1.0;
 
+Glib::Threads::Mutex ARDOUR::fft_planner_lock;
+
 static bool have_old_configuration_files = false;
 static bool running_from_gui             = false;
 
@@ -742,9 +744,12 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 	 * each I/O thread (up to hardware_concurrency) and one for itself
 	 * (butler's main thread).
 	 *
-	 * In theory (2 * hw + 4) should be sufficient, let's add one for luck.
+	 * In theory (2 * hw + 4) should be sufficient, were it not for
+	 * AudioPlaylistSource and AudioRegionEditor::peak_amplitude_thread(s).
+	 * WaveViewThreads::start_threads adds `min (8, hw - 1)`
+	 *
 	 */
-	BufferManager::init (hardware_concurrency () * 2 + 5);
+	BufferManager::init (hardware_concurrency () * 3 + 6);
 
 	PannerManager::instance ().discover_panners ();
 

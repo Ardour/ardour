@@ -25,10 +25,10 @@
 
 #include <list>
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/table.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/table.h>
 
 #include "canvas/canvas.h"
 #include "canvas/poly_line.h"

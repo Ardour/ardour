@@ -231,7 +231,7 @@ CONFIG_VARIABLE (double, automation_thinning_factor, "automation-thinning-factor
 CONFIG_VARIABLE (samplecnt_t, range_location_minimum, "range-location-minimum", 128) /* samples */
 CONFIG_VARIABLE (EditMode, edit_mode, "edit-mode", Slide)
 CONFIG_VARIABLE (RippleMode, ripple_mode, "ripple-mode", RippleSelected)
-CONFIG_VARIABLE (Temporal::TimeDomain, default_automation_time_domain, "default-automation-time-domain", Temporal::BeatTime)
+CONFIG_VARIABLE (Temporal::TimeDomain, default_automation_time_domain, "default-automation-time-domain", Temporal::AudioTime)
 CONFIG_VARIABLE (ARDOUR::AnyTime, default_quantization, "default-quantization", ARDOUR::AnyTime (Temporal::BBT_Offset (1, 0, 0)))
 CONFIG_VARIABLE (bool, mark_at_pgm_change, "mark-at-pgm-change", true)
 CONFIG_VARIABLE (bool, locate_to_pgm_change, "locate-to-pgm-change", true)

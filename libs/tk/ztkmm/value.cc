@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/value.h>
-#include <atkmm/private/value_p.h>
+#include <ztkmm/value.h>
+#include <ztkmm/private/value_p.h>
 
 
 // -*- c++ -*-
@@ -27,7 +27,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atk/atkvalue.h>
+#include <ztk/atkvalue.h>
 
 
 namespace

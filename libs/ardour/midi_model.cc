@@ -78,8 +78,8 @@ MidiModel::MidiModel (MidiModel const & other, MidiSource & s)
 MidiModel::NoteDiffCommand*
 MidiModel::new_note_diff_command (const string& name)
 {
-	/* return via the MidiSource to get a shared_ptr to
-	 *  ourselves. Probably faster than shared_from_this()
+	/* go via the MidiSource to get a shared_ptr to
+	 * ourselves. Probably faster than shared_from_this()
 	 */
 	return new NoteDiffCommand (_midi_source.model(), name);
 }
@@ -126,6 +126,7 @@ MidiModel::apply_diff_command_only (Command* cmd)
 
 /* ************* DIFF COMMAND ********************/
 
+#define SHIFT_COMMAND_ELEMENT "ShiftCommand"
 #define NOTE_DIFF_COMMAND_ELEMENT "NoteDiffCommand"
 #define DIFF_NOTES_ELEMENT "ChangedNotes"
 #define ADDED_NOTES_ELEMENT "AddedNotes"
@@ -144,6 +145,55 @@ MidiModel::DiffCommand::DiffCommand(std::shared_ptr<MidiModel> m, const std::str
 	, _name (name)
 {
 	assert(_model);
+}
+
+MidiModel::ShiftCommand::ShiftCommand (std::shared_ptr<MidiModel> m, std::string const & name, MidiModel::TimeType distance)
+	: DiffCommand (m, name)
+	, _distance (distance)
+{
+	assert (_model);
+}
+
+MidiModel::ShiftCommand::ShiftCommand (std::shared_ptr<MidiModel> m, const XMLNode& node)
+	: DiffCommand (m, "")
+{
+	assert (_model);
+	set_state (node, Stateful::loading_state_version);
+	// _name = string_compose (_("Shift MIDI by %1"), _distance.str());
+}
+
+void
+MidiModel::ShiftCommand::operator() ()
+{
+	_model->shift (_distance);
+	_model->ContentsChanged (); /* EMIT SIGNAL */
+}
+
+void
+MidiModel::ShiftCommand::undo ()
+{
+	_model->shift (-_distance);
+	_model->ContentsChanged (); /* EMIT SIGNAL */
+}
+
+int
+MidiModel::ShiftCommand::set_state (XMLNode const & diff_command, int /* version */)
+{
+	if (diff_command.name() != string (SHIFT_COMMAND_ELEMENT)) {
+		return 1;
+	}
+
+	diff_command.get_property (X_("distance"), _distance);
+
+	return 0;
+}
+
+XMLNode&
+MidiModel::ShiftCommand::get_state () const
+{
+	XMLNode* node = new XMLNode (SHIFT_COMMAND_ELEMENT);
+	node->set_property (X_("distance"), _distance);
+	return *node;
 }
 
 MidiModel::NoteDiffCommand::NoteDiffCommand (std::shared_ptr<MidiModel> m, const XMLNode& node)
@@ -1713,55 +1763,13 @@ MidiModel::control_factory (Evoral::Parameter const & p)
  *  Adds commands to the session's current undo stack to reflect the movements.
  */
 void
-MidiModel::insert_silence_at_start (TimeType t)
+MidiModel::insert_silence_at_start (TimeType t, HistoryOwner& history)
 {
-	/* Notes */
-
-	if (!notes().empty ()) {
-		NoteDiffCommand* c = new_note_diff_command ("insert silence");
-
-		for (Notes::const_iterator i = notes().begin(); i != notes().end(); ++i) {
-			c->change (*i, NoteDiffCommand::StartTime, (*i)->time() + t);
-		}
-
-		apply_diff_command_as_subcommand (_midi_source.session(), c);
-	}
-
-	/* Patch changes */
-
-	if (!patch_changes().empty ()) {
-		PatchChangeDiffCommand* c = new_patch_change_diff_command ("insert silence");
-
-		for (PatchChanges::const_iterator i = patch_changes().begin(); i != patch_changes().end(); ++i) {
-			c->change_time (*i, (*i)->time() + t);
-		}
-
-		apply_diff_command_as_subcommand (_midi_source.session(), c);
-	}
-
-	/* Controllers */
-
-	for (Controls::iterator i = controls().begin(); i != controls().end(); ++i) {
-		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i->second);
-		XMLNode& before = ac->alist()->get_state ();
-		i->second->list()->shift (timepos_t::zero (i->second->list()->time_domain()), timecnt_t (t));
-		XMLNode& after = ac->alist()->get_state ();
-		_midi_source.session().add_command (new MementoCommand<AutomationList> (new MidiAutomationListBinder (_midi_source, i->first), &before, &after));
-	}
-
-	/* Sys-ex */
-
-	if (!sysexes().empty()) {
-		SysExDiffCommand* c = new_sysex_diff_command ("insert silence");
-
-		for (SysExes::iterator i = sysexes().begin(); i != sysexes().end(); ++i) {
-			c->change (*i, (*i)->time() + t);
-		}
-
-		apply_diff_command_as_subcommand (_midi_source.session(), c);
-	}
-
-	ContentsShifted (timecnt_t (t));
+	/* go via the MidiSource to get a shared_ptr to
+	 * ourselves. Probably faster than shared_from_this()
+	 */
+	apply_diff_command_as_subcommand (history, new MidiModel::ShiftCommand (_midi_source.model(), std::string(), t));
+	ContentsShifted (timecnt_t (t)); /* EMIT SIGNAL */
 }
 
 void

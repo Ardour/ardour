@@ -11,4 +11,6 @@
 #define VERSION "2.14.0"
 
 /* defines how to decorate public symbols while building */
-/* #undef _ATK_EXTERN */
+#ifdef _MSC_VER
+#define _ATK_EXTERN __declspec (dllexport) extern
+#endif

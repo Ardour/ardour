@@ -21,8 +21,8 @@
 
 #include <memory>
 
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/label.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/label.h>
 #include "gtkmm2ext/persistent_tooltip.h"
 
 #include "pbd/destructible.h"

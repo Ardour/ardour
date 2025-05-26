@@ -30,7 +30,7 @@
 
 #include "vst3_hwnd_plugin_ui.h"
 
-#include <gdk/gdkwin32.h>
+#include <ydk/gdkwin32.h>
 
 using namespace ARDOUR;
 using namespace Steinberg;

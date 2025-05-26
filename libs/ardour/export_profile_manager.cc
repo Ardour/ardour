@@ -543,6 +543,18 @@ ExportProfileManager::init_channel_configs (XMLNodeList nodes)
 		ChannelConfigStatePtr config (new ChannelConfigState (handler->add_channel_config ()));
 		channel_configs.push_back (config);
 
+#ifdef LIVETRAX
+		/* Do not add master-bus for stem-export.
+		 *
+		 * This changes "with processing" to be false
+		 * since TrackExportChannelSelector::sync_with_manager_state
+		 * checks for  RouteExportChannel/PortExportChannel
+		 */
+		if (_type == StemExport) {
+			return false;
+		}
+#endif
+
 		/* Add master outs as default */
 		if (!session.master_out ()) {
 			return false;

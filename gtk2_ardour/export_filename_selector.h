@@ -20,17 +20,17 @@
 
 #pragma once
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/combobox.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/label.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/sizegroup.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/treemodel.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/combobox.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/label.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/sizegroup.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/treemodel.h>
 
 #include "ardour/export_filename.h"
 #include "ardour/export_profile_manager.h"

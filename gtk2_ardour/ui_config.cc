@@ -32,7 +32,7 @@
 #include <pango/pangoft2.h> // for fontmap resolution control for GnomeCanvas
 #include <pango/pangocairo.h> // for fontmap resolution control for GnomeCanvas
 
-#include <gtkmm/settings.h>
+#include <ytkmm/settings.h>
 
 #include "pbd/convert.h"
 #include "pbd/error.h"

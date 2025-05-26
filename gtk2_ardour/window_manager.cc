@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/window.h>
+#include <ytkmm/window.h>
 
 #include "pbd/xml++.h"
 

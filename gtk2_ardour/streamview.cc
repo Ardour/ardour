@@ -26,7 +26,7 @@
 
 #include <cmath>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include <gtkmm2ext/colors.h>
 #include <gtkmm2ext/gtk_ui.h>

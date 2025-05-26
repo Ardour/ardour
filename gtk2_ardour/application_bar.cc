@@ -26,10 +26,10 @@
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 
-#include <gtkmm/accelmap.h>
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/uimanager.h>
+#include <ytkmm/accelmap.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/uimanager.h>
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
@@ -39,7 +39,6 @@
 #include "pbd/openuri.h"
 #include "pbd/types_convert.h"
 #include "pbd/file_utils.h"
-#include <pbd/localtime_r.h>
 #include "pbd/pthread_utils.h"
 #include "pbd/replace_all.h"
 #include "pbd/scoped_file_descriptor.h"
@@ -178,10 +177,6 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_record_mode_selector.set_sizing_texts (_record_mode_strings);
 
 	_latency_disable_button.set_text (_("Disable PDC"));
-	_io_latency_label.set_text (_("I/O Latency:"));
-
-	set_size_request_to_display_given_text (_route_latency_value, "1000 spl", 0, 0);
-	set_size_request_to_display_given_text (_io_latency_value, "888.88 ms", 0, 0);
 
 	_auto_return_button.set_text(_("Auto Return"));
 	_follow_edits_button.set_text(_("Follow Range"));
@@ -240,14 +235,10 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	++col;
 
 	_table.attach (_latency_disable_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	_table.attach (_io_latency_label, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, 0);
-	++col;
-	_table.attach (_route_latency_value, TCOL, 0, 1 , SHRINK, EXPAND|FILL, hpadding, 0);
-	_table.attach (_io_latency_value, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, 0);
+	_table.attach (_route_latency_value, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, 0);
 	++col;
 
 	_route_latency_value.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
-	_io_latency_value.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 
 	_table.attach (_latency_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
@@ -359,20 +350,12 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	monitor_button_size_group->add_widget (_monitor_mute_button);
 
 	/* tooltips */
-	Gtkmm2ext::UI::instance()->set_tip (_punch_in_button, _("Start recording at auto-punch start"));
-	Gtkmm2ext::UI::instance()->set_tip (_punch_out_button, _("Stop recording at auto-punch end"));
 	Gtkmm2ext::UI::instance()->set_tip (_record_mode_selector, _("<b>Layered</b>, new recordings will be added as regions on a layer atop existing regions.\n<b>SoundOnSound</b>, behaves like <i>Layered</i>, except underlying regions will be audible.\n<b>Non Layered</b>, the underlying region will be spliced and replaced with the newly recorded region."));
 	Gtkmm2ext::UI::instance()->set_tip (_latency_disable_button, _("Disable all Plugin Delay Compensation. This results in the shortest delay from live input to output, but any paths with delay-causing plugins will sound later than those without."));
-	Gtkmm2ext::UI::instance()->set_tip (_auto_return_button, _("Return to last playback start when stopped"));
-	Gtkmm2ext::UI::instance()->set_tip (_follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 	Gtkmm2ext::UI::instance()->set_tip (_primary_clock, _("<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	Gtkmm2ext::UI::instance()->set_tip (_secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
-	Gtkmm2ext::UI::instance()->set_tip (_solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	Gtkmm2ext::UI::instance()->set_tip (_auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
 	Gtkmm2ext::UI::instance()->set_tip (_feedback_alert_button, _("When lit, there is a ports connection issue, leading to feedback loop or ambiguous alignment.\nThis is caused by connecting an output back to some input (feedback), or by multiple connections from a source to the same output via different paths (ambiguous latency, record alignment)."));
-	Gtkmm2ext::UI::instance()->set_tip (_monitor_dim_button, _("Monitor section dim output"));
-	Gtkmm2ext::UI::instance()->set_tip (_monitor_mono_button, _("Monitor section mono output"));
-	Gtkmm2ext::UI::instance()->set_tip (_monitor_mute_button, _("Monitor section mute output"));
 	Gtkmm2ext::UI::instance()->set_tip (_cue_rec_enable, _("<b>When enabled</b>, triggering Cues will result in Cue Markers added to the timeline"));
 	Gtkmm2ext::UI::instance()->set_tip (_cue_play_enable, _("<b>When enabled</b>, Cue Markers will trigger the associated Cue when passed on the timeline"));
 	Gtkmm2ext::UI::instance()->set_tip (_editor_meter_peak_display, _("Reset All Peak Meters"));
@@ -569,14 +552,10 @@ ApplicationBar::repack_transport_hbox ()
 	if (show_pdc) {
 		_latency_disable_button.show ();
 		_route_latency_value.show ();
-		_io_latency_label.show ();
-		_io_latency_value.show ();
 		_latency_spacer.show ();
 	} else {
 		_latency_disable_button.hide ();
 		_route_latency_value.hide ();
-		_io_latency_label.hide ();
-		_io_latency_value.hide ();
 		_latency_spacer.hide ();
 	}
 
@@ -812,9 +791,10 @@ ApplicationBar::set_session (Session *s)
 	_session->SoloActive.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::soloing_changed, this, _1), gui_context());
 	_session->AuditionActive.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::auditioning_changed, this, _1), gui_context());
 
-	//initialize all session config settings
+	//initialize all session and global config settings
 	std::function<void (std::string)> pc (std::bind (&ApplicationBar::parameter_changed, this, _1));
 	_session->config.map_parameters (pc);
+	UIConfiguration::instance().map_parameters (pc);
 
 	/* initialize */
 	session_latency_updated (true);
@@ -828,9 +808,6 @@ ApplicationBar::set_session (Session *s)
 		_editor_meter_table.remove(*_editor_meter);
 		delete _editor_meter;
 		_editor_meter = 0;
-	}
-	if (_editor_meter_table.get_parent()) {
-		_transport_hbox.remove (_editor_meter_table);
 	}
 	if (_editor_meter_peak_display.get_parent ()) {
 		_editor_meter_table.remove (_editor_meter_peak_display);
@@ -922,21 +899,10 @@ ApplicationBar::session_latency_updated (bool for_playback)
 
 	if (!_session) {
 		_route_latency_value.set_text ("--");
-		_io_latency_value.set_text ("--");
 	} else {
 		samplecnt_t wrl = _session->worst_route_latency ();
-		samplecnt_t iol = _session->io_latency ();
 		float rate      = _session->nominal_sample_rate ();
-
 		_route_latency_value.set_text (samples_as_time_string (wrl, rate));
-
-		if (_session->engine().check_for_ambiguous_latency (true)) {
-			_ambiguous_latency = true;
-			_io_latency_value.set_markup ("<span background=\"red\" foreground=\"white\">ambiguous</span>");
-		} else {
-			_ambiguous_latency = false;
-			_io_latency_value.set_text (samples_as_time_string (iol, rate));
-		}
 	}
 }
 

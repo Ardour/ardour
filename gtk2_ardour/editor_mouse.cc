@@ -98,79 +98,6 @@ using namespace Temporal;
 
 using Gtkmm2ext::Keyboard;
 
-bool
-Editor::mouse_sample (samplepos_t& where, bool& in_track_canvas) const
-{
-	/* gdk_window_get_pointer() has X11's XQueryPointer semantics in that it only
-	 * pays attentions to subwindows. this means that menu windows are ignored, and
-	 * if the pointer is in a menu, the return window from the call will be the
-	 * the regular subwindow *under* the menu.
-	 *
-	 * this matters quite a lot if the pointer is moving around in a menu that overlaps
-	 * the track canvas because we will believe that we are within the track canvas
-	 * when we are not. therefore, we track enter/leave events for the track canvas
-	 * and allow that to override the result of gdk_window_get_pointer().
-	 */
-
-	if (!within_track_canvas) {
-		return false;
-	}
-
-	int x, y;
-	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->_track_canvas->get_window();
-
-	if (!canvas_window) {
-		return false;
-	}
-
-	Glib::RefPtr<const Gdk::Window> pointer_window = Gdk::Display::get_default()->get_window_at_pointer (x, y);
-
-	if (!pointer_window) {
-		return false;
-	}
-
-	if (pointer_window != canvas_window) {
-		in_track_canvas = false;
-		return false;
-	}
-
-	in_track_canvas = true;
-
-	GdkEvent event;
-	event.type = GDK_BUTTON_RELEASE;
-	event.button.x = x;
-	event.button.y = y;
-
-	where = window_event_sample (&event, 0, 0);
-
-	return true;
-}
-
-samplepos_t
-Editor::window_event_sample (GdkEvent const * event, double* pcx, double* pcy) const
-{
-	ArdourCanvas::Duple d;
-
-	if (!gdk_event_get_coords (event, &d.x, &d.y)) {
-		return 0;
-	}
-
-	/* event coordinates are in window units, so convert to canvas
-	 */
-
-	d = _track_canvas->window_to_canvas (d);
-
-	if (pcx) {
-		*pcx = d.x;
-	}
-
-	if (pcy) {
-		*pcy = d.y;
-	}
-
-	return pixel_to_sample (d.x);
-}
-
 void
 Editor::set_current_trimmable (std::shared_ptr<Trimmable> t)
 {
@@ -300,8 +227,6 @@ Editor::mouse_mode_toggled (MouseMode m)
 		 */
 		get_selection().clear_regions ();
 	}
-
-	update_all_enter_cursors ();
 
 	MouseModeChanged (); /* EMIT SIGNAL */
 
@@ -587,9 +512,9 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 			if (press && event->button.button == 3) {
 				NoteBase* cnote = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
 				assert (cnote);
-				if (cnote->region_view().selection_size() == 0 || !cnote->selected()) {
+				if (cnote->midi_view().selection_size() == 0 || !cnote->selected()) {
 					selection->clear_points();
-					cnote->region_view().unique_select (cnote);
+					cnote->midi_view().unique_select (cnote);
 					/* we won't get the release, so store the selection change now */
 					begin_reversible_selection_op (X_("Button 3 Note Selection"));
 					commit_reversible_selection_op ();
@@ -1385,8 +1310,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	timepos_t where (canvas_event_time (event));
 	AutomationTimeAxisView* atv = 0;
 
-	_press_cursor_ctx.reset();
-
 	/* no action if we're recording */
 
 	if (_session && _session->actively_recording()) {
@@ -1694,7 +1617,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			switch (item_type) {
 			case RegionItem:
 			{
-				/* since we have FreehandLineDrag we can only get here after a drag, when no movement has happend.
+				/* since we have FreehandLineDrag we can only get here after a drag, when no movement has happened.
 				 * Except when a drag was aborted by pressing Esc.
 				 */
 				if (!were_dragging) {
@@ -1805,10 +1728,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 
 GridType
-Editor::determine_mapping_grid_snap(timepos_t t)
+Editor::determine_mapping_grid_snap (timepos_t t)
 {
-	timepos_t snapped          = _snap_to_bbt (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBeat);
-	timepos_t snapped_to_bar   = _snap_to_bbt (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBar);
+	timepos_t snapped          = snap_to_bbt_via_grid (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBeat);
+	timepos_t snapped_to_bar   = snap_to_bbt_via_grid (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBar);
 	const double unsnapped_pos = time_to_pixel_unrounded (t);
 	const double snapped_pos   = time_to_pixel_unrounded (snapped);
 
@@ -2322,10 +2245,6 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 void
 Editor::escape ()
 {
-	if (this != current_editing_context()) {
-		return;
-	}
-
 	if (_drags->active ()) {
 		_drags->abort ();
 	} else if (_session) {
@@ -2385,9 +2304,8 @@ Editor::update_join_object_range_location (double y)
 
 		_join_object_range_state = c <= 0.5 ? JOIN_OBJECT_RANGE_RANGE : JOIN_OBJECT_RANGE_OBJECT;
 
-		Editor::EnterContext* ctx = get_enter_context(RegionItem);
-		if (_join_object_range_state != old && ctx) {
-			ctx->cursor_ctx->change(which_track_cursor());
+		if (_join_object_range_state != old) {
+			set_canvas_cursor (which_track_cursor());
 		}
 
 	} else if (entered_track) {
@@ -2419,9 +2337,8 @@ Editor::update_join_object_range_location (double y)
 			_join_object_range_state = JOIN_OBJECT_RANGE_OBJECT;
 		}
 
-		Editor::EnterContext* ctx = get_enter_context(StreamItem);
-		if (_join_object_range_state != old && ctx) {
-			ctx->cursor_ctx->change(which_track_cursor());
+		if (_join_object_range_state != old) {
+			set_canvas_cursor (which_track_cursor());
 		}
 	}
 }
@@ -2439,12 +2356,53 @@ Editor::effective_mouse_mode () const
 }
 
 void
+Editor::use_appropriate_mouse_mode_for_sections ()
+{
+	Glib::RefPtr<ToggleAction> tact;
+
+	switch (current_mouse_mode ()) {
+		case Editing::MouseRange:
+			/* OK, no need to change mouse mode */
+			break;
+		case Editing::MouseObject:
+			/* "object-range" mode is not a distinct mouse mode, so
+			   we cannot use get_mouse_mode_action() here
+			*/
+			tact = ActionManager::get_toggle_action (X_("Editor"), "set-mouse-mode-object-range");
+			if (!tact) {
+				/* missing action */
+				fatal << X_("programming error: missing mouse-mode-object-range action") << endmsg;
+				/*NOTREACHED*/
+				break;
+			}
+			if (tact->get_active()) {
+				/* smart mode; OK, leave things as they are */
+				break;
+			}
+			/*fallthrough*/
+		default:
+			/* switch to range mode */
+			Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_static (get_mouse_mode_action (Editing::MouseRange));
+			if (!ract) {
+				/* missing action */
+				fatal << X_("programming error: missing mouse-mode-range action") << endmsg;
+				/*NOTREACHED*/
+				break;
+			}
+			if (ract) {
+				ract->set_active (true);
+			}
+			break;
+	}
+}
+
+void
 Editor::remove_midi_note (ArdourCanvas::Item* item, GdkEvent *)
 {
 	NoteBase* e = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
 	assert (e);
 
-	e->region_view().delete_note (e->note ());
+	e->midi_view().delete_note (e->note ());
 }
 
 /** Obtain the pointer position in canvas coordinates */

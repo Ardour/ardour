@@ -21,6 +21,7 @@ def build(bld):
     obj.source    = hardour_sources
     obj.target = 'hardour-' + bld.env['VERSION']
     obj.includes = ['.']
+    obj.linkflags= ''
     obj.use      = [ 'libpbd',
                      'libardour',
                      'libardour_cp',
@@ -51,11 +52,13 @@ def build(bld):
     if sys.platform == 'darwin':
         obj.uselib += ' AUDIOUNITS OSX'
         obj.use    += ' libappleutility'
+    elif bld.env['build_target'] == 'mingw':
+        if bld.env['DEBUG'] == False:
+            obj.linkflags += ' -mwindows'
+    else:
+        obj.linkflags += ' -zexecstack'
+
     obj.includes += ['../libs']
 
-    if bld.env['build_target'] == 'mingw':
-        if bld.env['DEBUG'] == False:
-            obj.linkflags = ['-mwindows']
-
     if bld.is_defined('NEED_INTL'):
-        obj.linkflags = ' -lintl'
+        obj.linkflags += ' -lintl'

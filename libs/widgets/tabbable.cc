@@ -17,11 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/action.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/window.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/action.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/window.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/table.h>
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/gtk_ui.h"
@@ -46,7 +47,8 @@ Tabbable::Tabbable (const string& visible_name, string const & nontranslatable_n
 	if (w) {
 		_contents = w;
 	} else {
-		_contents = &_content_vbox;
+		_content_ebox.add (_content_vbox);
+		_contents = &_content_ebox;
 		default_layout ();
 	}
 }
@@ -74,13 +76,10 @@ Tabbable::default_layout ()
 	right_attachment_button.set_name ("lock button");  // TODO create dedicate button style
 	bottom_attachment_button.set_name ("lock button");
 
+#ifdef MIXBUS
 	left_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
 	right_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
 	bottom_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
-
-	left_attachment_button.set_sensitive (0 != (_panelayout & (PaneLeft | AttLeft)));
-	right_attachment_button.set_sensitive (0 != (_panelayout & PaneRight));
-	bottom_attachment_button.set_sensitive (0 != (_panelayout & (PaneBottom | AttBottom)));
 
 	content_attachment_hbox.set_border_width(3);
 	content_attachment_hbox.set_spacing(3);
@@ -88,48 +87,75 @@ Tabbable::default_layout ()
 	content_attachment_hbox.pack_end (bottom_attachment_button, false, false);
 	content_attachment_hbox.pack_end (left_attachment_button, false, false);
 	content_attachments.add (content_attachment_hbox);
+#else
+	Gtk::Table* atta_table = manage(new Gtk::Table);
+	atta_table->set_homogeneous ();
+	atta_table->set_spacings (0);
+	atta_table->set_row_spacings (3);
+	atta_table->set_border_width (0);
+	atta_table->attach (left_attachment_button,   0, 1, 0, 1, Gtk::SHRINK, Gtk::EXPAND|FILL, 1, 2);
+	atta_table->attach (right_attachment_button,  1, 2, 0, 1, Gtk::SHRINK, Gtk::EXPAND|FILL, 1, 2);
+	atta_table->attach (bottom_attachment_button, 0, 2, 1, 2, Gtk::FILL,   Gtk::EXPAND|FILL, 1, 2);
+
+	left_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
+	right_attachment_button.set_tweaks (ArdourButton::ExpandtoSquare);
+
+	content_attachment_hbox.set_border_width(1);
+	content_attachment_hbox.pack_end (*atta_table, true, true);
+	content_attachments.add (content_attachment_hbox);
+#endif
+
+	left_attachment_button.set_sensitive (0 != (_panelayout & (PaneLeft | AttLeft)));
+	right_attachment_button.set_sensitive (0 != (_panelayout & PaneRight));
+	bottom_attachment_button.set_sensitive (0 != (_panelayout & (PaneBottom | AttBottom)));
 
 	content_header_hbox.pack_start (content_app_bar, true, true);
 	content_header_hbox.pack_start (content_attachments, false, false);
 	content_header_hbox.pack_start (content_tabbables, false, false);
 
-	//wrap the header eboxen in a themeable frame
-	Gtk::Frame *toolbar_frame = manage(new Gtk::Frame);
+	/* wrap the header eboxes in a themeable frame */
+	Gtk::Frame *toolbar_frame = manage (new Gtk::Frame);
 	toolbar_frame->set_name ("TransportFrame");
 	toolbar_frame->set_shadow_type (Gtk::SHADOW_NONE);
 	toolbar_frame->add (content_header_hbox);
 
 	_content_vbox.pack_start (*toolbar_frame, false, false);
 
-	Widget* midlevel = 0 == (_panelayout & PaneBottom) ? (Widget*)&content_midlevel_vbox : (Widget*)&content_midlevel_vpane;
-
 	if (_panelayout & PaneLeft) {
 		_content_vbox.pack_start (content_left_pane, true, true);
 		content_left_pane.add (content_att_left);
-		content_left_pane.add (*midlevel);
+		content_left_pane.add (content_midlevel_vbox);
 	} else {
 		_content_vbox.pack_start (content_hbox, true, true);
 		content_hbox.pack_start (content_att_left, false, false);
-		content_hbox.pack_start (*midlevel, true, true);
+		content_hbox.pack_start (content_midlevel_vbox, true, true);
 	}
-
-	if (_panelayout & PaneBottom) {
-		content_midlevel_vpane.add (content_right_pane);
-		content_midlevel_vpane.add (content_att_bottom);
-	} else {
-		content_midlevel_vbox.pack_start (content_right_pane, true, true);
-		content_midlevel_vbox.pack_start (content_att_bottom, false, false);
-	}
-
-	content_right_pane.add (content_inner_vbox);
 
 	if (_panelayout & PaneRight) {
+		content_midlevel_vbox.pack_start (content_right_pane, true, true);
+		content_right_pane.add (content_inner_hbox);
 		content_right_pane.add (content_right_vbox);
 		content_right_vbox.pack_start (content_att_right, true, true);
+	} else {
+		content_midlevel_vbox.pack_start (content_inner_hbox, true, true);
 	}
 
-	content_inner_vbox.pack_start (content_main_top, false, false);
-	content_inner_vbox.pack_start (content_main, true, true);
+	content_main_vbox.pack_start (content_main_top, false, false);
+	content_main_vbox.pack_start (content_main, true, true);
+
+	if (_panelayout & PaneBottom) {
+		content_inner_hbox.pack_start (content_bottom_pane, true, true);
+		content_bottom_pane.add (content_main_vbox);
+		content_bottom_pane.add (content_att_bottom);
+	} else {
+		content_inner_hbox.pack_start (content_main_vbox, true, true);
+		content_main_vbox.pack_start (content_att_bottom, false, false);
+	}
+
+	content_inner_hbox.pack_start (content_bus_vbox, false, false);
+	content_bus_vbox.pack_start (content_bus, true, true);
+
+	/* set pane min. sizes */
 
 	if (_panelayout & PaneRight) {
 		content_right_pane.set_child_minsize (content_att_right, 160); /* rough guess at width of notebook tabs */
@@ -144,12 +170,12 @@ Tabbable::default_layout ()
 	content_left_pane.set_divider (0, 0.15);
 
 	if (_panelayout & PaneBottom) {
-		content_midlevel_vpane.set_child_minsize (content_right_pane, 300);
+		content_bottom_pane.set_child_minsize (content_right_pane, 300);
 	}
-	content_midlevel_vpane.set_check_divider_position (true);
-	content_midlevel_vpane.set_divider (0, 0.85);
+	content_bottom_pane.set_check_divider_position (true);
+	content_bottom_pane.set_divider (0, 0.85);
 
-	_content_vbox.show_all();
+	_content_ebox.show_all();
 }
 
 void
@@ -448,7 +474,7 @@ Tabbable::get_state() const
 		node.set_property (string_compose("%1%2", _menu_name, X_("-leftpane-pos")).c_str(), content_left_pane.get_divider ());
 	}
 	if (_panelayout & PaneBottom) {
-		node.set_property (string_compose("%1%2", _menu_name, X_("-bottompane-pos")).c_str(), content_midlevel_vpane.get_divider ());
+		node.set_property (string_compose("%1%2", _menu_name, X_("-bottompane-pos")).c_str(), content_bottom_pane.get_divider ());
 	}
 
 	return node;
@@ -483,7 +509,7 @@ Tabbable::set_state (const XMLNode& node, int version)
 		}
 		if ( window_node->get_property (string_compose("%1%2", _menu_name, X_("-bottompane-pos")).c_str(), fract) ) {
 			fract = std::max (.05f, std::min (.95f, fract));
-			content_midlevel_vpane.set_divider (0, fract);
+			content_bottom_pane.set_divider (0, fract);
 		}
 	}
 
@@ -520,6 +546,8 @@ Tabbable::showhide_att_right (bool yn)
 	} else {
 		content_right_vbox.hide ();
 	}
+
+	StateChange (*this);
 }
 
 void
@@ -544,6 +572,8 @@ Tabbable::showhide_att_left (bool yn)
 	} else {
 		content_att_left.hide ();
 	}
+
+	StateChange (*this);
 }
 
 void
@@ -568,6 +598,8 @@ Tabbable::showhide_att_bottom (bool yn)
 	} else {
 		content_att_bottom.hide ();
 	}
+
+	StateChange (*this);
 }
 
 void

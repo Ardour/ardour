@@ -23,6 +23,7 @@
 #include "public_editor.h"
 #include "ui_config.h"
 
+#include "canvas/debug.h"
 #include "canvas/rectangle.h"
 
 #include "pbd/i18n.h"
@@ -45,6 +46,7 @@ ControlPoint::ControlPoint (AutomationLine& al)
 	_size = 4.0;
 
 	_item = new ArdourCanvas::Rectangle (&_line.canvas_group());
+	CANVAS_DEBUG_NAME (_item, "Control Point");
 	_item->set_fill (true);
 	_item->set_fill_color (UIConfiguration::instance().color ("control point fill"));
 	_item->set_outline_color (UIConfiguration::instance().color ("control point outline"));
@@ -121,11 +123,19 @@ void
 ControlPoint::set_color ()
 {
 	if (_selected) {
+
 		_item->set_outline_color(UIConfiguration::instance().color ("control point selected outline"));;
 		_item->set_fill_color(UIConfiguration::instance().color ("control point selected fill"));
+
 	} else {
-		_item->set_outline_color(UIConfiguration::instance().color ("control point outline"));
-		_item->set_fill_color(UIConfiguration::instance().color ("control point fill"));
+
+		if (_line.control_points_inherit_color()) {
+			_item->set_outline_color(_line.get_line_color());
+			_item->set_fill_color(_line.get_line_fill_color ());
+		} else {
+			_item->set_outline_color(UIConfiguration::instance().color ("control point outline"));
+			_item->set_fill_color(UIConfiguration::instance().color ("control point fill"));
+		}
 	}
 }
 

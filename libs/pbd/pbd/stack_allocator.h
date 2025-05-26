@@ -77,26 +77,28 @@ public:
 	pointer allocate (size_type n, void* hint = 0)
 	{
 		if ((pointer)&_buf + stack_capacity >= _ptr + n) {
-			DEBUG_STACK_ALLOC ("Allocate %ld item(s) of size %zu on the stack\n", n, sizeof (T));
+			DEBUG_STACK_ALLOC ("[%p] Allocate %ld item(s) of size %zu on the stack. used: %ld\n", (pointer)&_buf, n, sizeof (T), (_ptr - (pointer)&_buf));
 			pointer rv = _ptr;
 			_ptr += n;
 			return rv;
 		} else {
-			DEBUG_STACK_ALLOC ("Allocate using new (%ld * %zu)\n", n, sizeof (T));
+			DEBUG_STACK_ALLOC ("[%p] Allocate using new (%ld * %zu)\n", (pointer)&_buf, n, sizeof (T));
 			return static_cast<pointer> (::operator new (n * sizeof (T)));
 		}
 	}
 
 	void deallocate (pointer p, size_type n)
 	{
+		DEBUG_STACK_ALLOC ("[%p] Deallocate: %ld item(s), at %p (offset: %ld) used: %ld\n", (pointer)&_buf, n, p, p - (pointer)&_buf, (_ptr - (pointer)&_buf));
 		if (pointer_in_buffer (p)) {
 			if (p + n == _ptr) {
-				DEBUG_STACK_ALLOC ("Deallocate: pop item from the top of the stack\n");
+				DEBUG_STACK_ALLOC ("[%p] Deallocate: pop item from the top of the stack %ld\n", (pointer)&_buf, n);
 				_ptr = p;
 			} else {
-				DEBUG_STACK_ALLOC ("Deallocate: ignored. Item is not at the top of the stack \n");
+				DEBUG_STACK_ALLOC ("[%p] Deallocate: ignored. Item is not at the top of the stack %ld\n", (pointer)&_buf, n);
 			}
 		} else {
+			DEBUG_STACK_ALLOC ("[%p] Deallocate: using delete %p %ld\n", (pointer)&_buf, p, n);
 			::operator delete (p);
 		}
 	}

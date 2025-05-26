@@ -23,7 +23,7 @@
 #include <cairomm/cairomm.h>
 
 #include <glibmm/threads.h>
-#include <gdkmm/general.h>
+#include <ydkmm/general.h>
 
 #include "pbd/base_ui.h"
 #include "pbd/compose.h"
@@ -302,11 +302,24 @@ WaveView::get_item_and_draw_rect_in_window_coords (Rect const& canvas_rect, Rect
 	 * So let's start by determining the area covered by the region, in
 	 * window coordinates. It begins at zero (in item coordinates for this
 	 * waveview, and extends to region_length() / _samples_per_pixel.
+	 *
+	 * Use same rounding as UI's TimeAxisViewItem::set_samples_per_pixel,
+	 * TimeAxisViewItem::reset_width_dependent_items
 	 */
+	double spp         = _props->samples_per_pixel;
+	double end_pixel   = round ((_region->position () + _region->length ()).samples () / spp);
+	double start_pixel = round (_region->position ().samples () / spp);
+	double const width = end_pixel - start_pixel;
 
-	double const width = region_length() / _props->samples_per_pixel;
 	item_rect = item_to_window (Rect (0.0, 0.0, width, _props->height), false);
 
+	/* do round actual start/end clip-mask, to match TimeAxisViewItem frame */
+	double rx0 = round (item_rect.x0);
+	double rx1 = round (item_rect.x1);
+
+	/* don't round item, this way sample-positions from pixels remain consistent
+	 * (waveform does not jitter when region is split)
+	 */
 	item_rect.x0 = floor (item_rect.x0);
 	item_rect.x1 = ceil  (item_rect.x1);
 	item_rect.y0 = round (item_rect.y0);
@@ -326,8 +339,8 @@ WaveView::get_item_and_draw_rect_in_window_coords (Rect const& canvas_rect, Rect
 	 * We round down in case we were asked to draw "between" pixels at the start
 	 * and/or end.
 	 */
-	draw_rect.x0 = floor (draw_rect.x0);
-	draw_rect.x1 = ceil (draw_rect.x1);
+	draw_rect.x0 = max (floor (draw_rect.x0), rx0);
+	draw_rect.x1 = min (ceil (draw_rect.x1), rx1);
 
 	return true;
 }
@@ -1153,7 +1166,10 @@ void
 WaveView::compute_bounding_box () const
 {
 	if (_region) {
-		_bounding_box = Rect (0.0, 0.0, region_length() / _props->samples_per_pixel, _props->height);
+		double spp         = _props->samples_per_pixel;
+		double end_pixel   = round ((_region->position () + _region->length ()).samples () / spp);
+		double start_start = round (_region->position ().samples () / spp);
+		_bounding_box = Rect (0.0, 0.0, end_pixel - start_start, _props->height);
 	} else {
 		_bounding_box = Rect ();
 	}

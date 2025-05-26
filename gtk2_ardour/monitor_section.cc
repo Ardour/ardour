@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gdkmm/pixbuf.h>
+#include <ydkmm/pixbuf.h>
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
@@ -30,8 +30,8 @@
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/utils.h"
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "widgets/tearoff.h"
 #include "widgets/tooltips.h"
@@ -107,7 +107,7 @@ MonitorSection::MonitorSection ()
 
 	load_bindings ();
 	register_actions ();
-	set_data ("ardour-bindings", bindings);
+	set_widget_bindings (*this, *bindings, ARDOUR_BINDING_KEY);
 
 	channel_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
 
@@ -490,6 +490,7 @@ MonitorSection::MonitorSection ()
 	_tearoff->tearoff_window().set_title (X_("Monitor"));
 	_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), (Gtk::Window*) &_tearoff->tearoff_window()), false);
 
+	unassign_controllables ();
 	update_processor_box ();
 	_ui_initialized = true;
 
@@ -1217,6 +1218,23 @@ MonitorSection::unassign_controllables ()
 	dim_display->set_controllable (none);
 	solo_boost_control->set_controllable (none);
 	solo_boost_display->set_controllable (none);
+
+	Glib::RefPtr<ToggleAction> tact;
+	tact = ActionManager::get_toggle_action (X_("Monitor Section"), X_("monitor-dim-all"));
+	if (tact) {
+		tact->set_active (false);
+		tact->set_sensitive (false);
+	}
+	tact = ActionManager::get_toggle_action (X_("Monitor Section"), X_("monitor-mono"));
+	if (tact) {
+		tact->set_active (false);
+		tact->set_sensitive (false);
+	}
+	tact = ActionManager::get_toggle_action (X_("Monitor Section"), X_("monitor-cut-all"));
+	if (tact) {
+		tact->set_active (false);
+		tact->set_sensitive (false);
+	}
 }
 
 void
@@ -1241,6 +1259,21 @@ MonitorSection::assign_controllables ()
 	dim_display->set_controllable (_monitor->dim_level_control ());
 	solo_boost_control->set_controllable (_monitor->solo_boost_control ());
 	solo_boost_display->set_controllable (_monitor->solo_boost_control ());
+
+
+	Glib::RefPtr<Action> act;
+	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-dim-all"));
+	if (act) {
+		act->set_sensitive (true);
+	}
+	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-mono"));
+	if (act) {
+		act->set_sensitive (true);
+	}
+	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-cut-all"));
+	if (act) {
+		act->set_sensitive (true);
+	}
 }
 
 string

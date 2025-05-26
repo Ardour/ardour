@@ -630,7 +630,6 @@ FoldbackStrip::set_route (std::shared_ptr<Route> rt)
 	/* now force an update of all the various elements */
 	name_changed ();
 	update_send_box ();
-	comment_changed ();
 	connect_to_pan ();
 	_panners.setup_pan ();
 	_panners.show_all ();

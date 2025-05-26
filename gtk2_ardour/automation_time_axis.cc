@@ -32,7 +32,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <gtkmm/separator.h>
+#include <ytkmm/separator.h>
 
 #include "pbd/error.h"
 #include "pbd/memento_command.h"
@@ -242,7 +242,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	}
 
 	Gtk::DrawingArea *blank0 = manage (new Gtk::DrawingArea());
-	Gtk::DrawingArea *blank1 = manage (new Gtk::DrawingArea());
 
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&parent);
 	// TODO use rtv->controls_base_unselected_name
@@ -257,7 +256,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		blank0->set_name ("UnknownControlsBaseUnselected");
 	}
 	blank0->set_size_request (-1, -1);
-	blank1->set_size_request (1, 0);
 	VSeparator* separator = manage (new VSeparator());
 	separator->set_name("TrackSeparator");
 	separator->set_size_request (1, -1);
@@ -270,10 +268,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	time_axis_hbox.reorder_child (*blank0, 0);
 	time_axis_hbox.reorder_child (*separator, 1);
 	time_axis_hbox.reorder_child (time_axis_vbox, 2);
-
-	if (!ARDOUR::Profile->get_mixbus() ) {
-		time_axis_hbox.pack_start (*blank1, false, false);
-	}
 
 	blank0->show();
 	separator->show();

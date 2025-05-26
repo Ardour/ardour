@@ -6,8 +6,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/fixed.h>
-#include <gtkmm/private/fixed_p.h>
+#include <ytkmm/fixed.h>
+#include <ytkmm/private/fixed_p.h>
 
 
 // -*- c++ -*-
@@ -32,7 +32,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

@@ -25,7 +25,7 @@
 #include <cmath>
 #include <utility>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 
@@ -90,6 +90,17 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 MidiStreamView::~MidiStreamView ()
 {
 	undisplay_track ();
+}
+
+InstrumentInfo*
+MidiStreamView::instrument_info() const
+{
+	std::shared_ptr<Route> r = _trackview.route();
+	if (!r) {
+		return nullptr;
+	}
+
+	return &r->instrument_info();
 }
 
 void

@@ -28,8 +28,8 @@
 
 #include <sigc++/signal.h>
 
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/gstdio_compat.h"
 #include "pbd/file_utils.h"

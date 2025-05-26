@@ -136,6 +136,17 @@ TriggerStrip::init ()
 	global_vpacker.set_spacing (2);
 	global_vpacker.pack_start (input_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_name_button, Gtk::PACK_SHRINK);
+
+	/* rec toggle below name */
+
+	rec_toggle_button = manage (new ArdourButton);
+	rec_toggle_button->set_name ("record enable button");
+	rec_toggle_button->set_icon (ArdourIcon::RecButton);
+	UI::instance()->set_tip (rec_toggle_button, _("Switch controls from cue launching to cue recording"), "");
+	rec_toggle_button->show ();
+	rec_toggle_button->signal_button_press_event().connect (sigc::mem_fun(*this, &TriggerStrip::rec_toggle_press), false);
+	global_vpacker.pack_start (*rec_toggle_button, Gtk::PACK_SHRINK);
+
 	global_vpacker.pack_start (_trigger_display, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_tmaster_widget, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_processor_box, true, true);
@@ -149,7 +160,6 @@ TriggerStrip::init ()
 	mute_solo_table.set_spacings (2);
 	mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
 	mute_solo_table.attach (*solo_button, 1, 2, 0, 1);
-	mute_solo_table.attach (*rec_enable_button, 0, 2, 1, 2);
 
 	volume_table.attach (_level_meter, 0, 1, 0, 1);
 	/*Note: _gain_control is added in set_route */
@@ -187,12 +197,46 @@ TriggerStrip::init ()
 	show ();
 
 	/* Width -- wide channel strip
-	 * Note that panners require an ven number of horiz. pixels 
+	 * Note that panners require an ven number of horiz. pixels
 	 */
 	const float scale = std::max (1.f, UIConfiguration::instance ().get_ui_scale ());
 	int         width = rintf (110.f * scale) + 1;
 	width &= ~1;
 	set_size_request (width, -1);
+}
+
+void
+TriggerStrip::box_rec_enable_change ()
+{
+	if (!_route) {
+		return;
+	}
+
+	if (!_route->triggerbox()) {
+		return;
+	}
+
+	if (_route->triggerbox()->record_enabled()) {
+		rec_toggle_button->set_active_state (Gtkmm2ext::ExplicitActive);
+	} else {
+		rec_toggle_button->set_active_state (Gtkmm2ext::Off);
+	}
+}
+
+bool
+TriggerStrip::rec_toggle_press (GdkEventButton* ev)
+{
+	if (!_route) {
+		return false;
+	}
+
+	if (!_route->triggerbox()) {
+		return false;
+	}
+
+	_route->triggerbox()->set_record_enabled (!_route->triggerbox()->record_enabled());
+
+	return true;
 }
 
 void
@@ -224,6 +268,9 @@ TriggerStrip::set_route (std::shared_ptr<Route> rt)
 	_route->input ()->changed.connect (*this, invalidator (*this), std::bind (&TriggerStrip::io_changed, this), gui_context ());
 	_route->output ()->changed.connect (*this, invalidator (*this), std::bind (&TriggerStrip::io_changed, this), gui_context ());
 	_route->io_changed.connect (route_connections, invalidator (*this), std::bind (&TriggerStrip::io_changed, this), gui_context ());
+
+	std::shared_ptr<TriggerBox> tb (_route->triggerbox());
+	tb->RecEnableChanged.connect (route_connections, invalidator (*this), std::bind (&TriggerStrip::box_rec_enable_change, this), gui_context());
 
 	if (_route->panner_shell ()) {
 		update_panner_choices ();

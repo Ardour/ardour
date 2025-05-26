@@ -574,7 +574,8 @@ PBD::Thread::Thread (std::function<void ()> const& slot, std::string const& name
 }
 
 void*
-PBD::Thread::_run (void* arg) {
+PBD::Thread::_run (void* arg)
+{
 	PBD::Thread* self = static_cast<PBD::Thread *>(arg);
 	if (!self->_name.empty ()) {
 		pthread_set_name (self->_name.c_str ());

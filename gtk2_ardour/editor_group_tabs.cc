@@ -22,6 +22,7 @@
 #include "ardour/route_group.h"
 
 #include "gtkmm2ext/colors.h"
+#include "gtkmm2ext/rgb_macros.h"
 
 #include "editor.h"
 #include "editor_group_tabs.h"
@@ -29,6 +30,7 @@
 #include "editor_routes.h"
 #include "route_time_axis.h"
 #include "ui_config.h"
+#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -36,7 +38,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
-EditorGroupTabs::EditorGroupTabs (Editor* e)
+EditorGroupTabs::EditorGroupTabs (Editor& e)
 	: EditorComponent (e)
 {
 
@@ -52,7 +54,7 @@ EditorGroupTabs::compute_tabs () const
 	tab.group = 0;
 
 	int32_t y = 0;
-	for (TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+	for (TrackViewList::iterator i = _editor.track_views.begin(); i != _editor.track_views.end(); ++i) {
 
 		if ((*i)->marked_for_display() == false) {
 			continue;
@@ -99,6 +101,10 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab)
 
 	if (tab.group && tab.group->is_active()) {
 		Gtkmm2ext::color_to_rgba (tab.color, r, g, b, a);
+	} else if (!tab.group && _dragging_new_tab) {
+		Gdk::Color col = ARDOUR_UI_UTILS::round_robin_palette_color (true);
+		color_t ct = Gtkmm2ext::gdk_color_to_rgba (col);
+		Gtkmm2ext::color_to_rgba (ct, r, g, b, a);
 	} else {
 		Gtkmm2ext::color_to_rgba (UIConfiguration::instance().color ("inactive group tab"), r, g, b, a);
 	}
@@ -149,7 +155,7 @@ EditorGroupTabs::routes_for_tab (Tab const * t) const
 	RouteList routes;
 	int32_t y = 0;
 
-	for (TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+	for (TrackViewList::iterator i = _editor.track_views.begin(); i != _editor.track_views.end(); ++i) {
 
 		if ((*i)->marked_for_display() == false) {
 			continue;
@@ -184,7 +190,7 @@ EditorGroupTabs::add_menu_items (Gtk::Menu* m, RouteGroup* g)
 
 	if (g) {
 		MenuList& items = m->items ();
-		items.push_back (MenuElem (_("Fit to Window"), sigc::bind (sigc::mem_fun (*_editor, &Editor::fit_route_group), g)));
+		items.push_back (MenuElem (_("Fit to Window"), sigc::bind (sigc::mem_fun (_editor, &Editor::fit_route_group), g)));
 	}
 }
 
@@ -193,7 +199,7 @@ EditorGroupTabs::selected_routes () const
 {
 	RouteList rl;
 
-	for (TrackSelection::iterator i = _editor->get_selection().tracks.begin(); i != _editor->get_selection().tracks.end(); ++i) {
+	for (TrackSelection::iterator i = _editor.get_selection().tracks.begin(); i != _editor.get_selection().tracks.end(); ++i) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
 		if (rtv) {
 			rl.push_back (rtv->route());

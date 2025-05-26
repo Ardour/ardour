@@ -8973,7 +8973,7 @@ msgstr "Список файлов"
 
 #: export_dialog.cc:158
 msgid "Only Analyze"
-msgstr "Только пяанализироапть"
+msgstr "Только проанализировать"
 
 #: export_dialog.cc:188
 msgid "File format"

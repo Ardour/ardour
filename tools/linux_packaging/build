@@ -38,7 +38,7 @@ X42PLUGINS="x42-autotune x42-midifilter x42-stereoroute setBfree x42-avldrums x4
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
-: ${HARRISONDSPURL=http://rsrc.harrisonconsoles.com/plugins/releases/public}
+: ${HARRISONDSPURL=https://builder.harrisonconsoles.com/pub/dsp}
 
 if [ $# -eq 0 ] ; then
 	echo ""
@@ -301,7 +301,7 @@ if test x$WITH_NLS != x ; then
 	LINGUAS=
 
         for pkg in gtk2_ardour libs/ardour libs/gtkmm2ext libs/tk/ytk ; do
-	    files=`find ../../$pkg -name "*.mo"`
+	    files=`find ../../$pkg -not -path "*/appdata/*" -name "*.mo"`
 
             #
             # the package name is appended with a number so that
@@ -767,7 +767,7 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -#  \
 		-z "${CACHEDIR}/MixbusBundledMedia.zip" \
 		-o "${CACHEDIR}/MixbusBundledMedia.zip" \
-		"http://builder.harrisonconsoles.com/pub/share/MixbusBundledMedia.zip"
+		"https://builder.harrisonconsoles.com/pub/share/MixbusBundledMedia.zip"
 
 	if test -f "${CACHEDIR}/MixbusBundledMedia.zip"; then
 		echo "Adding Mixbus Bundled Content"

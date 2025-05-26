@@ -29,11 +29,12 @@
 #include "canvas/polygon.h"
 #include "canvas/text.h"
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/colors.h"
+#include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
 
 #include "ardour_ui.h"
@@ -226,7 +227,7 @@ CueBoxUI::~CueBoxUI ()
 }
 
 void
-CueBoxUI::context_menu (uint64_t idx)
+CueBoxUI::context_menu (GdkEventButton* ev, uint64_t idx)
 {
 	using namespace Gtk;
 	using namespace Gtk::Menu_Helpers;
@@ -298,7 +299,7 @@ CueBoxUI::context_menu (uint64_t idx)
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Clear All..."), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::clear_all_triggers), idx)));
 
-	_context_menu->popup (3, gtk_get_current_event_time ());
+	_context_menu->popup (ev->button, gtk_get_current_event_time ());
 }
 
 void
@@ -436,21 +437,15 @@ bool
 CueBoxUI::event (GdkEvent* ev, uint64_t n)
 {
 	switch (ev->type) {
-		case GDK_BUTTON_PRESS:
-			if (ev->button.button==1) {
-				trigger_cue_row (n);
-			}
-			break;
-		case GDK_2BUTTON_PRESS:
-			break;
-		case GDK_BUTTON_RELEASE:
-			switch (ev->button.button) {
-				case 3:
-					context_menu (n);
-					return true;
-			}
-		default:
-			break;
+	case GDK_BUTTON_PRESS:
+		if (ev->button.button == 1) {
+			trigger_cue_row (n);
+		} else if (Gtkmm2ext::Keyboard::is_context_menu_event (&ev->button)) {
+			context_menu (&ev->button, n);
+		}
+		break;
+	default:
+		break;
 	}
 
 	return false;

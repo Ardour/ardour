@@ -29,8 +29,8 @@
 
 #include <boost/tokenizer.hpp>
 
-#include <gtkmm/box.h>
-#include <gtkmm/alignment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/alignment.h>
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/colors.h"
 

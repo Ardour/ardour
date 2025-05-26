@@ -43,11 +43,11 @@
 #include "gtkwindow.h"
 #include "gtkbindings.h"
 #include "gtkprivate.h"
-#include "gdk/gdk.h"
-#include "gdk/gdkprivate.h" /* Used in gtk_reset_shapes_recurse to avoid copy */
+#include "ydk/gdk.h"
+#include "ydk/gdkprivate.h" /* Used in gtk_reset_shapes_recurse to avoid copy */
 #include <gobject/gvaluecollector.h>
 #include <gobject/gobjectnotifyqueue.c>
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 #include "gtkaccessible.h"
 #include "gtktooltip.h"
 #include "gtkinvisible.h"

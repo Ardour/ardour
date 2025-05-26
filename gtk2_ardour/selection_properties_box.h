@@ -20,14 +20,12 @@
 
 #pragma once
 
-#include <gtkmm/box.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
+#include <ytkmm/box.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
-
-#include "widgets/eventboxext.h"
 
 namespace ARDOUR {
 	class Session;
@@ -35,6 +33,7 @@ namespace ARDOUR {
 
 class TimeInfoBox;
 class RegionEditor;
+class RegionFxPropertiesBox;
 class RoutePropertiesBox;
 
 class SelectionPropertiesBox : public Gtk::HBox, public ARDOUR::SessionHandlePtr
@@ -51,10 +50,11 @@ private:
 	void track_mouse_mode ();
 	void delete_region_editor ();
 
-	TimeInfoBox*                _time_info_box;
-	RoutePropertiesBox*         _route_prop_box;
-	ArdourWidgets::EventBoxExt  _region_editor_box;
-	RegionEditor*               _region_editor;
+	TimeInfoBox*           _time_info_box;
+	RoutePropertiesBox*    _route_prop_box;
+	Gtk::HBox              _region_editor_box;
+	RegionEditor*          _region_editor;
+	RegionFxPropertiesBox* _region_fx_box;
 
 	PBD::ScopedConnection _region_connection;
 	PBD::ScopedConnection _editor_connection;

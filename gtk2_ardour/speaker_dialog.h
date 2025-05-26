@@ -20,11 +20,11 @@
 
 #pragma once
 
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/box.h>
-#include <gtkmm/adjustment.h>
-#include <gtkmm/aspectframe.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/box.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/aspectframe.h>
 
 #include "ardour/speakers.h"
 

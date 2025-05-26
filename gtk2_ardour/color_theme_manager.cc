@@ -20,7 +20,7 @@
 #include <cmath>
 #include <errno.h>
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "fix_carbon.h"
 

@@ -33,7 +33,7 @@
 
 #include <vector>
 
-#include <gtkmm/treemodelfilter.h>
+#include <ytkmm/treemodelfilter.h>
 
 #include "pbd/convert.h"
 
@@ -71,6 +71,7 @@
 #include "monitor_section.h"
 #include "midi_tracer.h"
 #include "mixer_ui.h"
+#include "pianoroll_window.h"
 #include "plugin_dspload_window.h"
 #include "plugin_manager_ui.h"
 #include "public_editor.h"
@@ -78,6 +79,7 @@
 #include "rc_option_editor.h"
 #include "recorder_ui.h"
 #include "route_params_ui.h"
+#include "rta_window.h"
 #include "shuttle_control.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
@@ -194,6 +196,7 @@ ARDOUR_UI::set_session (Session *s)
 	_session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::record_state_changed, this), gui_context());
 	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::map_transport_state, this), gui_context());
 	_session->DirtyChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::session_dirty_changed, this), gui_context());
+	_session->LatencyUpdated.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::session_latency_updated, this, _1), gui_context());
 
 	_session->PunchLoopConstraintChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::set_punch_sensitivity, this), gui_context());
 	_session->auto_punch_location_changed.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::set_punch_sensitivity, this), gui_context ());
@@ -652,8 +655,6 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 			trigger_page_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
 
-		EditingContext::switch_editing_context (editor);
-
 	} else if (mixer && (page == (guint) _tabs.page_num (mixer->contents()))) {
 
 		mixer->tab_btn_box ().add (tabbables_table);
@@ -905,7 +906,7 @@ ARDOUR_UI::new_midi_tracer_window ()
 		t->show_all ();
 		_midi_tracer_windows.push_back (t);
 	} else {
-		/* re-use the hidden one */
+		/* reuse the hidden one */
 		(*i)->show_all ();
 	}
 }
@@ -915,8 +916,10 @@ ARDOUR_UI::create_key_editor ()
 {
 	KeyEditor* kedit = new KeyEditor;
 
-	for (std::list<Bindings*>::iterator b = Bindings::bindings.begin(); b != Bindings::bindings.end(); ++b) {
-		kedit->add_tab ((*b)->name(), **b);
+	for (auto & b : Bindings::bindings) {
+		if (!b->parent()) {
+			kedit->add_tab (b->name(), *b);
+		}
 	}
 
 	return kedit;
@@ -980,6 +983,13 @@ ARDOUR_UI::create_luawindow ()
 	return luawindow;
 }
 
+RTAWindow*
+ARDOUR_UI::create_rtawindow ()
+{
+	RTAWindow* rtawindow = new RTAWindow ();
+	return rtawindow;
+}
+
 void
 ARDOUR_UI::handle_locations_change (Location *)
 {
@@ -1041,11 +1051,24 @@ ARDOUR_UI::toggle_mixer_space()
 		mixer->restore_mixer_space ();
 	}
 }
+void
+ARDOUR_UI::show_lua_window ()
+{
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-luawindow");
+	tact->set_active();
+}
 
 void
 ARDOUR_UI::show_plugin_manager ()
 {
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-plugin-manager");
+	tact->set_active();
+}
+
+void
+ARDOUR_UI::show_realtime_analyzer ()
+{
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-rtawindow");
 	tact->set_active();
 }
 

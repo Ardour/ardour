@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/cellrenderertoggle.h>
-#include <gtkmm/private/cellrenderertoggle_p.h>
+#include <ytkmm/cellrenderertoggle.h>
+#include <ytkmm/private/cellrenderertoggle_p.h>
 
 
 // -*- c++ -*-
@@ -29,7 +29,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

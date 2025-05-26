@@ -22,7 +22,7 @@
 #pragma once
 
 #include <sys/types.h>
-#include <gdk/gdkevents.h>
+#include <ydk/gdkevents.h>
 
 #include "ardour/automation_list.h"
 

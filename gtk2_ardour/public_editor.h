@@ -36,11 +36,11 @@
 
 #include <string>
 #include <glib.h>
-#include <gdk/gdktypes.h>
-#include <gtkmm/box.h>
-#include <gtkmm/window.h>
-#include <gtkmm/actiongroup.h>
-#include <gtkmm/notebook.h>
+#include <ydk/gdktypes.h>
+#include <ytkmm/box.h>
+#include <ytkmm/window.h>
+#include <ytkmm/actiongroup.h>
+#include <ytkmm/notebook.h>
 #include <sigc++/signal.h>
 
 #include "pbd/statefuldestructible.h"
@@ -185,14 +185,13 @@ public:
 	virtual void trigger_script (int nth) = 0;
 	virtual void add_bbt_marker_at_playhead_cursor () = 0;
 	virtual void add_location_from_playhead_cursor () = 0;
+	virtual void add_section_from_playhead () = 0;
 	virtual void remove_location_at_playhead_cursor () = 0;
 	void add_location_mark (Temporal::timepos_t const & where, ARDOUR::Location::Flags flags = ARDOUR::Location::IsMark, int32_t cue_id = 0) {
 		add_location_mark_with_flag (where, flags, cue_id);
 	}
 	virtual void add_location_mark_with_flag (Temporal::timepos_t const & where, ARDOUR::Location::Flags, int32_t cue_id) = 0;
-	virtual void update_grid () = 0;
 	virtual void remove_tracks () = 0;
-	virtual void set_loop_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd) = 0;
 	virtual void set_punch_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd) = 0;
 
 	void jump_forward_to_mark () {
@@ -290,7 +289,6 @@ public:
 	virtual samplepos_t leftmost_sample() const = 0;
 	virtual samplecnt_t current_page_samples() const = 0;
 	virtual double visible_canvas_height () const = 0;
-	virtual void temporal_zoom_step (bool coarser) = 0;
 	virtual void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top = false) = 0;
 	virtual void override_visible_track_count () = 0;
 	virtual void scroll_tracks_down_line () = 0;
@@ -306,7 +304,6 @@ public:
 	virtual void remove_last_capture () = 0;
 	virtual void maximise_editing_space () = 0;
 	virtual void restore_editing_space () = 0;
-	virtual Temporal::timepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE, bool from_context_menu = false, bool from_outside_canvas = false) = 0;
 	virtual void toggle_meter_updating() = 0;
 	virtual void split_regions_at (Temporal::timepos_t const &, RegionSelection&) = 0;
 	virtual void split_region_at_points (std::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
@@ -321,7 +318,7 @@ public:
 	virtual void toggle_xjadeo_viewoption (int, int) = 0;
 	virtual void set_xjadeo_sensitive (bool onoff) = 0;
 	virtual int  get_videotl_bar_height () const = 0;
-	virtual void set_video_timeline_height (const int h) = 0;
+	virtual void set_video_timeline_height (const int h, bool force = false) = 0;
 	virtual void embed_audio_from_video (std::string, samplepos_t n = 0, bool lock_position_to_video = true) = 0;
 
 	virtual void trigger_script_by_name (const std::string script_name, const std::string args = "") = 0;

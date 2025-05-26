@@ -83,8 +83,23 @@ public:
 
 	protected:
 		std::shared_ptr<MidiModel> _model;
-		const std::string            _name;
+		const std::string          _name;
 
+	};
+
+	class LIBARDOUR_API ShiftCommand : public DiffCommand {
+	  public:
+		ShiftCommand (std::shared_ptr<MidiModel> m, std::string const & name, TimeType distance);
+		ShiftCommand (std::shared_ptr<MidiModel> m, const XMLNode& node);
+
+		void operator() ();
+		void undo ();
+
+		int set_state (const XMLNode&, int version);
+		XMLNode & get_state () const;
+
+	  private:
+		TimeType _distance;
 	};
 
 	class LIBARDOUR_API NoteDiffCommand : public DiffCommand {
@@ -325,7 +340,7 @@ public:
 
 	std::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
 
-	void insert_silence_at_start (TimeType);
+	void insert_silence_at_start (TimeType, PBD::HistoryOwner&);
 	void transpose (NoteDiffCommand *, const NotePtr, int);
 
 	void track_state (timepos_t const & when, MidiStateTracker&) const;

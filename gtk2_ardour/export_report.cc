@@ -20,9 +20,9 @@
 #include <algorithm>
 
 #include <pangomm/layout.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/openuri.h"
 #include "pbd/basename.h"
@@ -597,7 +597,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 
 		if (channels > 0 && file_length > 0 && sample_rate > 0)
 		{
-			/* Time Axis  -- re-use waveform width */
+			/* Time Axis  -- reuse waveform width */
 			const size_t width = p->width;
 			Cairo::RefPtr<Cairo::ImageSurface> ytme = ArdourGraphs::time_axis (get_pango_context (), width, m_l, start_off, file_length, sample_rate);
 

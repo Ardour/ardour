@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/frame.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/stock.h>
 
 #include "ardour/export_format_specification.h"
 #include "ardour/session.h"
@@ -999,18 +999,20 @@ ExportFormatDialog::update_clock (AudioClock& clock, ARDOUR::AnyTime const& time
 	AudioClock::Mode mode (AudioClock::Timecode);
 
 	switch (time.type) {
-		case AnyTime::Timecode:
-			mode = AudioClock::Timecode;
-			break;
-		case AnyTime::BBT:
-			mode = AudioClock::BBT;
-			break;
-		case AnyTime::Samples:
-			mode = AudioClock::Samples;
-			break;
-		case AnyTime::Seconds:
-			mode = AudioClock::MinSec;
-			break;
+	case AnyTime::Timecode:
+		mode = AudioClock::Timecode;
+		break;
+	case AnyTime::BBT:
+		mode = AudioClock::BBT;
+		break;
+	case AnyTime::Samples:
+		mode = AudioClock::Samples;
+		break;
+	case AnyTime::Seconds:
+		mode = AudioClock::MinSec;
+		break;
+	default:
+		return;
 	}
 
 	clock.set_mode (mode);
@@ -1042,6 +1044,8 @@ ExportFormatDialog::update_time (AnyTime& time, AudioClock const& clock)
 	case AudioClock::Samples:
 		time.type    = AnyTime::Samples;
 		time.samples = samples;
+		break;
+	default:
 		break;
 	}
 }

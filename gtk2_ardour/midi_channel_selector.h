@@ -25,11 +25,11 @@
 #include <set>
 #include "sigc++/trackable.h"
 
-#include "gtkmm/table.h"
-#include "gtkmm/box.h"
-#include "gtkmm/button.h"
-#include "gtkmm/radiobutton.h"
-#include "gtkmm/label.h"
+#include "ytkmm/table.h"
+#include "ytkmm/box.h"
+#include "ytkmm/button.h"
+#include "ytkmm/radiobutton.h"
+#include "ytkmm/label.h"
 
 #include "widgets/stateful_button.h"
 

@@ -26,7 +26,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include <gtkmm/menu.h>
+#include <ytkmm/menu.h>
 
 #include "pbd/convert.h"
 #include "pbd/unwind.h"
@@ -679,6 +679,8 @@ TrackExportChannelSelector::sync_with_manager_state ()
 		} else {
 			track_output_button.set_active (true);
 		}
+	} else {
+		track_output_button.set_active (false);
 	}
 
 	if (selected > 0) {

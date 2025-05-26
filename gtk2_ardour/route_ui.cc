@@ -30,7 +30,7 @@
 #include <map>
 #include <boost/algorithm/string.hpp>
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/controllable.h"
 #include "pbd/enumwriter.h"
@@ -76,7 +76,6 @@
 #include "keyboard.h"
 #include "mixer_strip.h"
 #include "mixer_ui.h"
-#include "option_editor.h"
 #include "opts.h"
 #include "patch_change_widget.h"
 #include "playlist_selector.h"
@@ -84,6 +83,7 @@
 #include "rgb_macros.h"
 #include "route_time_axis.h"
 #include "route_ui.h"
+#include "rta_manager.h"
 #include "save_template_dialog.h"
 #include "timers.h"
 #include "ui_config.h"
@@ -128,10 +128,8 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 	, solo_menu(0)
 	, sends_menu(0)
 	, playlist_action_menu (0)
-	, _comment_window(0)
 	, _playlist_selector(0)
 	, _record_menu(0)
-	, _comment_area(0)
 	, _invert_menu(0)
 {
 	if (program_port_prefix.empty()) {
@@ -168,7 +166,6 @@ RouteUI::~RouteUI()
 	delete monitor_disk_button;
 	delete playlist_action_menu;
 	delete _record_menu;
-	delete _comment_window;
 	delete _invert_menu;
 	delete _playlist_selector;
 
@@ -199,7 +196,6 @@ RouteUI::init ()
 	denormal_menu_item = 0;
 	_step_edit_item = 0;
 	_rec_safe_item = 0;
-	_ignore_comment_edit = false;
 	_i_am_the_modifier = 0;
 	_n_polarity_invert = 0;
 
@@ -218,6 +214,11 @@ RouteUI::init ()
 	solo_button = manage (new ArdourButton);
 	solo_button->set_name ("solo button");
 	solo_button->set_no_show_all (true);
+
+	rta_button = manage (new ArdourButton);
+	rta_button->set_name ("rta button");
+	rta_button->set_act_on_release (true);
+	rta_button->set_text (_("RTA"));
 
 	rec_enable_button = manage (new ArdourButton);
 	rec_enable_button->set_name ("record enable button");
@@ -260,6 +261,8 @@ RouteUI::init ()
 
 	rec_enable_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_press), false);
 	rec_enable_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_release), false);
+
+	rta_button->signal_clicked.connect (sigc::mem_fun(*this, &RouteUI::rta_clicked));
 
 	show_sends_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_press), false);
 	show_sends_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_release), false);
@@ -390,13 +393,13 @@ RouteUI::set_route (std::shared_ptr<Route> rp)
 
 	_route->active_changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::route_active_changed, this), gui_context());
 
-	_route->comment_changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::comment_changed, this), gui_context());
-
 	_route->mute_control()->Changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::update_mute_display, this), gui_context());
 	_route->solo_control()->Changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->solo_safe_control()->Changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->solo_isolate_control()->Changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->phase_control()->Changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::update_polarity_display, this), gui_context());
+
+	_route->gui_changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::handle_gui_changes, this, _1), gui_context());
 
 	if (is_track()) {
 		track()->FreezeChange.connect (*this, invalidator (*this), std::bind (&RouteUI::map_frozen, this), gui_context());
@@ -442,6 +445,7 @@ RouteUI::set_route (std::shared_ptr<Route> rp)
 
 	mute_button->set_can_focus (false);
 	solo_button->set_can_focus (false);
+	rta_button->set_can_focus (false);
 
 	mute_button->show();
 
@@ -461,6 +465,7 @@ RouteUI::set_route (std::shared_ptr<Route> rp)
 	update_mute_display ();
 	update_solo_display ();
 	update_solo_button ();
+	handle_gui_changes ("rta");
 
 	if (!UIConfiguration::instance().get_blink_rec_arm()) {
 		blink_rec_display(true); // set initial rec-en button state
@@ -1196,6 +1201,27 @@ RouteUI::send_blink (bool onoff)
 	}
 }
 
+void
+RouteUI::rta_clicked ()
+{
+	bool attached = RTAManager::instance ()->attached (_route);
+	if (attached) {
+		RTAManager::instance ()->remove (_route);
+	} else {
+		RTAManager::instance ()->attach (_route);
+		ARDOUR_UI::instance()->show_realtime_analyzer ();
+	}
+}
+
+void
+RouteUI::handle_gui_changes (std::string const& what)
+{
+	if (what == "rta") {
+		bool attached = RTAManager::instance ()->attached (_route);
+		rta_button->set_active_state (attached ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	}
+}
+
 Gtkmm2ext::ActiveState
 RouteUI::solo_active_state (std::shared_ptr<Stripable> s)
 {
@@ -1755,89 +1781,14 @@ RouteUI::route_rename ()
 void
 RouteUI::toggle_comment_editor ()
 {
-	if (_comment_window && _comment_window->get_visible ()) {
-		_comment_window->hide ();
-	} else {
-		open_comment_editor ();
-	}
+	_comment_editor.toggle (_route);
 }
 
 
 void
 RouteUI::open_comment_editor ()
 {
-	if (_comment_window == 0) {
-		setup_comment_editor ();
-	}
-
-	string title;
-	title = _route->name();
-	title += _(": comment editor");
-
-	_comment_window->set_title (title);
-	_comment_window->present();
-}
-
-void
-RouteUI::setup_comment_editor ()
-{
-	const float scale = std::max(1.f, UIConfiguration::instance().get_ui_scale());
-
-	_comment_window = new ArdourWindow (""); // title will be reset to show route
-	_comment_window->set_skip_taskbar_hint (true);
-	_comment_window->signal_hide().connect (sigc::mem_fun(*this, &MixerStrip::comment_editor_done_editing));
-	_comment_window->set_default_size (400 * scale, 200 * scale);
-
-	VBox* vbox = manage (new VBox ());
-	vbox->show ();
-
-	_comment_area = manage (new TextView());
-	_comment_area->set_name ("MixerTrackCommentArea");
-	_comment_area->set_wrap_mode (WRAP_WORD);
-	_comment_area->set_editable (true);
-	_comment_area->get_buffer()->set_text (_route->comment());
-	_comment_area->show ();
-
-	vbox->pack_start (*_comment_area);
-
-	if (is_master ()) {
-		BoolOption* bo = new BoolOption (
-				"show-master-bus-comment-on-load",
-				_("Show this comment on next session load"),
-				sigc::mem_fun (_session->config, &SessionConfiguration::get_show_master_bus_comment_on_load),
-				sigc::mem_fun (_session->config, &SessionConfiguration::set_show_master_bus_comment_on_load)
-				);
-
-		vbox->pack_start (bo->tip_widget (), false, false, 4);
-		bo->tip_widget ().show_all ();
-		bo->parameter_changed ("show-master-bus-comment-on-load");
-		vbox->signal_unrealize().connect ([bo]() { delete bo; });
-		_session->config.ParameterChanged.connect (*this, invalidator (*this), std::bind (&BoolOption::parameter_changed, bo, _1), gui_context());
-	}
-	_comment_window->add (*vbox);
-}
-
-void
-RouteUI::comment_changed ()
-{
-	_ignore_comment_edit = true;
-	if (_comment_area) {
-		_comment_area->get_buffer()->set_text (_route->comment());
-	}
-	_ignore_comment_edit = false;
-}
-
-void
-RouteUI::comment_editor_done_editing ()
-{
-	ENSURE_GUI_THREAD (*this, &MixerStrip::comment_editor_done_editing, src)
-
-	string const str = _comment_area->get_buffer()->get_text();
-	if (str == _route->comment ()) {
-		return;
-	}
-
-	_route->set_comment (str, this);
+	_comment_editor.open (_route);
 }
 
 void
@@ -2902,4 +2853,3 @@ RouteUI::clear_time_domain (bool apply_to_selection)
 	}
 
 }
-

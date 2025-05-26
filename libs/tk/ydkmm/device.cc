@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/device.h>
-#include <gdkmm/private/device_p.h>
+#include <ydkmm/device.h>
+#include <ydkmm/private/device_p.h>
 
 
 // -*- c++ -*-
@@ -27,9 +27,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdk/gdk.h>
-#include <gdkmm/cursor.h>
-#include <gdkmm/display.h>
+#include <ydk/gdk.h>
+#include <ydkmm/cursor.h>
+#include <ydkmm/display.h>
 
 namespace Gdk
 {

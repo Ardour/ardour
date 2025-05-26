@@ -207,6 +207,9 @@ set_fps_interval (unsigned int interval)
 	get_timers().fps.set_interval (interval);
 }
 
+unsigned int fps_interval()  { return get_timers().fps.get_interval(); }
+unsigned int rapid_interval()  { return get_timers().rapid.get_interval(); }
+
 sigc::connection
 fps_connect(const sigc::slot<void>& slot)
 {

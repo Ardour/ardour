@@ -46,7 +46,7 @@ class LIBARDOUR_API SessionHandlePtr
 {
 public:
 	SessionHandlePtr (ARDOUR::Session* s);
-	SessionHandlePtr () : _session (0) {}
+	SessionHandlePtr ();
 	virtual ~SessionHandlePtr () {}
 
 	virtual void set_session (ARDOUR::Session *);

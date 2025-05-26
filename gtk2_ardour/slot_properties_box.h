@@ -21,10 +21,10 @@
 
 #include <map>
 
-#include <gtkmm/box.h>
-#include <gtkmm/label.h>
-#include "gtkmm/sizegroup.h"
-#include <gtkmm/table.h>
+#include <ytkmm/box.h>
+#include <ytkmm/label.h>
+#include "ytkmm/sizegroup.h"
+#include <ytkmm/table.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
@@ -46,7 +46,7 @@ namespace ARDOUR {
 class TriggerPropertiesBox;
 class RegionPropertiesBox;
 class RegionOperationsBox;
-class MidiCueEditor;
+class Pianoroll;
 class ClipEditorBox;
 
 class SlotPropertyTable : public TriggerUI, public Gtk::Table

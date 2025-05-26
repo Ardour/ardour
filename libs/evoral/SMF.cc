@@ -551,6 +551,16 @@ SMF::file_duration () const
 	return Temporal::Beats::ticks_at_rate (smf_get_length_pulses (_smf), ppqn());
 }
 
+bool
+SMF::duration_is_explicit () const
+{
+	if (!_smf) {
+		return false;
+	}
+
+	return smf_length_is_explicit (_smf);
+}
+
 double
 SMF::round_to_file_precision (double val) const
 {

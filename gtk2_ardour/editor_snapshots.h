@@ -22,10 +22,10 @@
 
 #include "ardour/session_handle.h"
 
-#include <gtkmm/liststore.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/treeview.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/treeview.h>
 
 class EditorSnapshots : public ARDOUR::SessionHandlePtr
 {

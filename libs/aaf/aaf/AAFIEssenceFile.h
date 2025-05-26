@@ -36,7 +36,7 @@
 #include "aaf/AAFIface.h"
 
 char*
-aafi_locate_external_essence_file (AAF_Iface* aafi, const char* original_uri_filepath, const char* search_location);
+aafi_locate_external_essence_file (AAF_Iface* aafi, const char* original_uri_filepath, const char* commonPathPart, const char* search_location);
 
 /**
  * Extract audio essence file.

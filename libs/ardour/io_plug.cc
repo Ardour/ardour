@@ -63,8 +63,8 @@ IOPlug::IOPlug (Session& s, std::shared_ptr<Plugin> p, bool pre)
 	/* do not allow to add/remove ports (for now).
 	 * when adding ports _buf will needs to be resized.
 	 */
-	_input->PortCountChanging.connect_same_thread (*this, [this](ChanCount) { return !_configuring_io; });
-	_output->PortCountChanging.connect_same_thread (*this, [this](ChanCount) { return !_configuring_io; });
+	_input->PortCountChanging.connect_same_thread (*this, [this](ChanCount) { return _configuring_io ? 0 : 1; });
+	_output->PortCountChanging.connect_same_thread (*this, [this](ChanCount) { return _configuring_io ? 0 : 1; });
 }
 
 IOPlug::~IOPlug ()
@@ -145,7 +145,7 @@ IOPlug::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	bool any_vst;
+	bool any_vst = false;
 	_plugin = find_and_load_plugin (_session, node, type, unique_id, any_vst);
 
 	if (!_plugin) {

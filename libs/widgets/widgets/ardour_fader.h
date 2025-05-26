@@ -23,8 +23,7 @@
 #include <cmath>
 #include <stdint.h>
 
-#include <gdkmm.h>
-#include <gtkmm/adjustment.h>
+#include <ytkmm/adjustment.h>
 
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/colors.h"
@@ -48,6 +47,8 @@ public:
 	void set_fg (Gtkmm2ext::Color);
 	void unset_bg ();
 	void unset_fg ();
+
+	void update_min_size (int span, int girth);
 
 protected:
 	void on_size_request (GtkRequisition*);

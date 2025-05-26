@@ -35,7 +35,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "gtkmm2ext/utils.h"
 
@@ -70,6 +70,8 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "mergeable_line.h"
+#include "pianoroll.h"
+#include "pianoroll_midi_view.h"
 #include "midi_region_view.h"
 #include "midi_selection.h"
 #include "midi_time_axis.h"
@@ -331,11 +333,7 @@ Drag::swap_grab (ArdourCanvas::Item* new_item, Gdk::Cursor* cursor, uint32_t /*t
 	_item->ungrab ();
 	_item = new_item;
 
-	if (!_cursor_ctx) {
-		_cursor_ctx = CursorContext::create (editing_context, cursor);
-	} else {
-		_cursor_ctx->change (cursor);
-	}
+	editing_context.set_canvas_cursor (cursor);
 
 	_item->grab ();
 }
@@ -349,6 +347,11 @@ Drag::set_grab_button_anyway (GdkEvent* ev)
 void
 Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
+	if (event->type != GDK_BUTTON_PRESS) {
+		fatal << "Drag started with non-button-press event (" << event_type_string (event->type) << ')' << endmsg;
+		/*NOTREACHED*/
+	}
+
 	/* we set up x/y dragging constraints on first move */
 	_constraint_pressed = ArdourKeyboard::indicates_constraint (event->button.state);
 
@@ -391,7 +394,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	if (!editing_context.cursors ()->is_invalid (cursor)) {
 		/* CAIROCANVAS need a variant here that passes *cursor */
-		_cursor_ctx = CursorContext::create (editing_context, cursor);
+		editing_context.set_canvas_cursor (cursor);
 	}
 
 	if (editing_context.session () && editing_context.session ()->transport_rolling ()) {
@@ -424,7 +427,6 @@ Drag::end_grab (GdkEvent* event)
 	finished (event, _starting_point_passed);
 
 	editing_context.verbose_cursor ()->hide ();
-	_cursor_ctx.reset ();
 
 	return _starting_point_passed;
 }
@@ -517,7 +519,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 			if (old_move_threshold_passed != _move_threshold_passed) {
 				/* just changed */
 
-				if (fabs (_drags->current_pointer_y () - _grab_y) > fabs (_drags->current_pointer_x () - _grab_x)) {
+				if (fabs (current_pointer_y () - _grab_y) > fabs (current_pointer_x () - _grab_x)) {
 					_initially_vertical = true;
 				} else {
 					_initially_vertical = false;
@@ -1255,7 +1257,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		 * Hidden tracks at the bottom of the TAV need to be skipped.
 		 *
 		 * This also handles the case if the mouse entered the DZ
-		 * in a large step (exessive delta), either due to fast-movement,
+		 * in a large step (excessive delta), either due to fast-movement,
 		 * autoscroll, laggy UI. _ddropzone copensates for that (see "move into dz" above)
 		 */
 		if (delta_time_axis_view < 0 && (int)_ddropzone - delta_time_axis_view >= (int)_pdropzone) {
@@ -2365,7 +2367,7 @@ RegionCreateDrag::aborted (bool)
 
 NoteResizeDrag::NoteResizeDrag (EditingContext& ec, ArdourCanvas::Item* i)
 	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group())
-	, region (0)
+	, midi_view (0)
 	, relative (false)
 	, at_front (true)
 	, _was_selected (false)
@@ -2392,10 +2394,10 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 
 	Drag::start_grab (event, cursor);
 
-	region = &cnote->region_view ();
+	midi_view = &cnote->midi_view ();
 
 	double temp;
-	temp        = region->snap_to_pixel (cnote->x0 (), true);
+	temp        = midi_view->snap_to_pixel (cnote->x0 (), true);
 	_snap_delta = temp - cnote->x0 ();
 
 	_item->grab ();
@@ -2405,70 +2407,49 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 	} else {
 		relative = true;
 	}
-	MidiRegionSelection ms = editing_context.get_selection ().midi_regions ();
-
-	if (ms.size () > 1) {
-		/* has to be relative, may make no sense otherwise */
-		relative = true;
-	}
 
 	if (!(_was_selected = cnote->selected ())) {
 		const bool extend = Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier);
 		const bool add    = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
 
-		region->note_selected (cnote, add, extend);
+		midi_view->note_selected (cnote, add, extend);
 	}
 }
 
 void
 NoteResizeDrag::motion (GdkEvent* event, bool first_move)
 {
-	MidiRegionSelection ms = editing_context.get_selection ().midi_regions ();
 	if (first_move) {
 		editing_context.begin_reversible_command (_("resize notes"));
-
-		for (MidiRegionSelection::iterator r = ms.begin (); r != ms.end ();) {
-			MidiRegionSelection::iterator next;
-			next = r;
-			++next;
-			MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
-			if (mrv) {
-				mrv->begin_resizing (at_front);
-			}
-			r = next;
-		}
+		midi_view->begin_resizing (at_front);
 	}
 
-	for (MidiRegionSelection::iterator r = ms.begin (); r != ms.end (); ++r) {
-		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
-		assert (nb);
-		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
-		if (mrv) {
-			double sd               = 0.0;
-			bool   snap             = true;
-			bool   apply_snap_delta = ArdourKeyboard::indicates_snap_delta (event->button.state);
+	NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
+	assert (nb);
 
-			if (ArdourKeyboard::indicates_snap (event->button.state)) {
-				if (editing_context.snap_mode () != SnapOff) {
-					snap = false;
-				}
-			} else {
-				if (editing_context.snap_mode () == SnapOff) {
-					snap = false;
-					/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
-					if (apply_snap_delta) {
-						snap = true;
-					}
-				}
-			}
+	double sd               = 0.0;
+	bool   snap             = true;
+	bool   apply_snap_delta = ArdourKeyboard::indicates_snap_delta (event->button.state);
 
+	if (ArdourKeyboard::indicates_snap (event->button.state)) {
+		if (editing_context.snap_mode () != SnapOff) {
+			snap = false;
+		}
+	} else {
+		if (editing_context.snap_mode () == SnapOff) {
+			snap = false;
+				/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
 			if (apply_snap_delta) {
-				sd = _snap_delta;
+				snap = true;
 			}
-
-			mrv->update_resizing (nb, at_front, current_pointer_x () - grab_x (), relative, sd, snap);
 		}
 	}
+
+	if (apply_snap_delta) {
+		sd = _snap_delta;
+	}
+
+	midi_view->update_resizing (nb, at_front, current_pointer_x () - grab_x (), relative, sd, snap);
 }
 
 void
@@ -2484,7 +2465,7 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 			if (_was_selected) {
 				bool add = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
 				if (add) {
-					region->note_deselected (cnote);
+					midi_view->note_deselected (cnote);
 					changed = true;
 				} else {
 					/* handled during button press */
@@ -2502,36 +2483,31 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
-	MidiRegionSelection ms = editing_context.get_selection ().midi_regions ();
-	for (MidiRegionSelection::iterator r = ms.begin (); r != ms.end (); ++r) {
-		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
-		assert (nb);
-		MidiRegionView* mrv              = dynamic_cast<MidiRegionView*> (*r);
-		double          sd               = 0.0;
-		bool            snap             = true;
-		bool            apply_snap_delta = ArdourKeyboard::indicates_snap_delta (event->button.state);
-		if (mrv) {
-			if (ArdourKeyboard::indicates_snap (event->button.state)) {
-				if (editing_context.snap_mode () != SnapOff) {
-					snap = false;
-				}
-			} else {
-				if (editing_context.snap_mode () == SnapOff) {
-					snap = false;
-					/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
-					if (apply_snap_delta) {
-						snap = true;
-					}
-				}
-			}
+	NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
+	assert (nb);
+	double          sd               = 0.0;
+	bool            snap             = true;
+	bool            apply_snap_delta = ArdourKeyboard::indicates_snap_delta (event->button.state);
 
+	if (ArdourKeyboard::indicates_snap (event->button.state)) {
+		if (editing_context.snap_mode () != SnapOff) {
+			snap = false;
+		}
+	} else {
+		if (editing_context.snap_mode () == SnapOff) {
+			snap = false;
+			/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
 			if (apply_snap_delta) {
-				sd = _snap_delta;
+				snap = true;
 			}
-
-			mrv->finish_resizing (nb, at_front, current_pointer_x () - grab_x (), relative, sd, snap);
 		}
 	}
+
+	if (apply_snap_delta) {
+		sd = _snap_delta;
+	}
+
+	midi_view->finish_resizing (nb, at_front, current_pointer_x () - grab_x (), relative, sd, snap);
 
 	editing_context.commit_reversible_command ();
 }
@@ -2539,13 +2515,7 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 NoteResizeDrag::aborted (bool)
 {
-	MidiRegionSelection ms = editing_context.get_selection ().midi_regions ();
-	for (MidiRegionSelection::iterator r = ms.begin (); r != ms.end (); ++r) {
-		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
-		if (mrv) {
-			mrv->abort_resizing ();
-		}
-	}
+	midi_view->abort_resizing ();
 }
 
 AVDraggingView::AVDraggingView (RegionView* v)
@@ -2854,7 +2824,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		non_overlap_trim = true;
 	}
 
-	/* contstrain trim to fade length */
+	/* constrain trim to fade length */
 	if (_preserve_fade_anchor) {
 		/* fades are audio and always use AudioTime domain */
 
@@ -3335,7 +3305,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	} else if (_movable) {
 		timepos_t pos = adjusted_current_time (event);
 
-		/* This relies on the tempo map to round up the beat postiion
+		/* This relies on the tempo map to round up the beat position
 		 * and see if that differs from the current position (tempo
 		 * markers only allowed on beat)
 		 */
@@ -3983,7 +3953,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 		}
 	}
 
-	/* during fake-locate, the mouse position is delievered to the (red) playhead line, so we have to momentarily sensitize it */
+	/* during fake-locate, the mouse position is delivered to the (red) playhead line, so we have to momentarily sensitize it */
 	editing_context.playhead_cursor ()->set_sensitive (true);
 
 	fake_locate (where.earlier (snap_delta (event->button.state)).samples ());
@@ -4651,7 +4621,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
 		if (was_double_click ()) {
-			_editor.rename_marker (_marker);
+			_editor.edit_marker (_marker, true);
 			return;
 		}
 
@@ -6160,14 +6130,14 @@ NoteDrag::NoteDrag (EditingContext& ec, ArdourCanvas::Item* i)
 
 	_primary = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
 	assert (_primary);
-	_region      = &_primary->region_view ();
-	_note_height = _region->midi_context().note_height ();
+	_view      = &_primary->midi_view ();
+	_note_height = _view->midi_context().note_height ();
 }
 
 void
 NoteDrag::setup_pointer_offset ()
 {
-	_pointer_offset = _region->midi_region()->source_beats_to_absolute_time (_primary->note ()->time ()).distance (raw_grab_time ());
+	_pointer_offset = _view->source_beats_to_timeline (_primary->note ()->time ()).distance (raw_grab_time ());
 }
 
 void
@@ -6181,7 +6151,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		_copy = false;
 	}
 
-	setup_snap_delta (_region->midi_region()->source_beats_to_absolute_time (_primary->note ()->time ()));
+	setup_snap_delta (_view->source_beats_to_timeline (_primary->note ()->time ()));
 
 	if (!(_was_selected = _primary->selected ())) {
 		/* tertiary-click means extend selection - we'll do that on button release,
@@ -6195,10 +6165,10 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 			bool add = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
 
 			if (add) {
-				_region->note_selected (_primary, true);
+				_view->note_selected (_primary, true);
 			} else {
 				editing_context.get_selection ().clear_points ();
-				_region->unique_select (_primary);
+				_view->unique_select (_primary);
 			}
 		}
 	}
@@ -6213,7 +6183,7 @@ NoteDrag::total_dx (GdkEvent* event) const
 	}
 
 	/* we need to use absolute positions here to honor the tempo-map */
-	timepos_t const t1 = pixel_duration_to_time (_drags->current_pointer_x ());
+	timepos_t const t1 = pixel_duration_to_time (current_pointer_x ());
 	timepos_t const t2 = pixel_duration_to_time (grab_x ());
 
 	/* now calculate proper `b@b` time */
@@ -6222,7 +6192,7 @@ NoteDrag::total_dx (GdkEvent* event) const
 	// std::cerr << "apparent dx " << dx << " beats " << dx.beats().str() << " from " << current_pointer_x() << " - " << grab_x() << " = " << current_pointer_x() - grab_x() << std::endl;
 
 	/* primary note time in quarter notes */
-	timepos_t const n_qn = _region->midi_region()->source_beats_to_absolute_time (_primary->note ()->time ());
+	timepos_t const n_qn = _view->source_beats_to_timeline (_primary->note ()->time ());
 
 	/* prevent (n_qn + dx) from becoming negative */
 	if (-dx.distance() > timecnt_t(n_qn).distance ()) {
@@ -6247,8 +6217,8 @@ NoteDrag::total_dx (GdkEvent* event) const
 	timecnt_t ret (snap.earlier (n_qn).earlier (snap_delta (event->button.state)), n_qn);
 
 	/* prevent the earliest note being dragged earlier than the region's start position */
-	if (_earliest + ret < _region->midi_region()->start ()) {
-		ret -= (ret + _earliest) - _region->midi_region()->start ();
+	if (_earliest + ret < _view->start ()) {
+		ret -= (ret + _earliest) - _view->start ();
 	}
 
 	return ret;
@@ -6262,25 +6232,25 @@ NoteDrag::total_dy () const
 		return 0;
 	}
 
-	double const y = _region->midi_context().y_position ();
+	double const y = _view->midi_context().y_position ();
 	/* new current note */
-	uint8_t n = _region->y_to_note (current_pointer_y () - y);
+	uint8_t n = _view->y_to_note (current_pointer_y () - y);
 	/* clamp */
-	MidiViewBackground& mvb = _region->midi_context ();
+	MidiViewBackground& mvb = _view->midi_context ();
 	n                   = max (mvb.lowest_note (), n);
 	n                   = min (mvb.highest_note (), n);
 	/* and work out delta */
-	return n - _region->y_to_note (grab_y () - y);
+	return n - _view->y_to_note (grab_y () - y);
 }
 
 void
 NoteDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (first_move) {
-		_earliest = timepos_t (_region->earliest_in_selection ());
+		_earliest = timepos_t (_view->earliest_in_selection ());
 		if (_copy) {
 			/* make copies of all the selected notes */
-			_primary = _region->copy_selection (_primary);
+			_primary = _view->copy_selection (_primary);
 		}
 	}
 
@@ -6299,9 +6269,9 @@ NoteDrag::motion (GdkEvent* event, bool first_move)
 		int8_t pitch_delta = total_dy ();
 
 		if (_copy) {
-			_region->move_copies (dx_qn, tdy, pitch_delta);
+			_view->move_copies (dx_qn, tdy, pitch_delta);
 		} else {
-			_region->move_selection (dx_qn, tdy, pitch_delta);
+			_view->move_selection (dx_qn, tdy, pitch_delta);
 		}
 
 		/* the new note value may be the same as the old one, but we
@@ -6312,9 +6282,9 @@ NoteDrag::motion (GdkEvent* event, bool first_move)
 
 		uint8_t new_note = min (max (_primary->note ()->note () + pitch_delta, 0), 127);
 
-		_region->show_verbose_cursor_for_new_note_value (_primary->note (), new_note);
+		_view->show_verbose_cursor_for_new_note_value (_primary->note (), new_note);
 
-		editing_context.set_snapped_cursor_position (_region->midi_region()->region_beats_to_absolute_time (_primary->note ()->time ()) + dx_qn);
+		editing_context.set_snapped_cursor_position (_view->source_beats_to_timeline (_primary->note ()->time ()) + dx_qn);
 	}
 }
 
@@ -6331,23 +6301,23 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 			if (_was_selected) {
 				bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
 				if (add) {
-					_region->note_deselected (_primary);
+					_view->note_deselected (_primary);
 					changed = true;
 				} else {
 					editing_context.get_selection ().clear_points ();
-					_region->unique_select (_primary);
+					_view->unique_select (_primary);
 					changed = true;
 				}
 			} else {
 				bool extend = Keyboard::modifier_state_equals (ev->button.state, Keyboard::TertiaryModifier);
 				bool add    = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
 
-				if (!extend && !add && _region->selection_size () > 1) {
+				if (!extend && !add && _view->selection_size () > 1) {
 					editing_context.get_selection ().clear_points ();
-					_region->unique_select (_primary);
+					_view->unique_select (_primary);
 					changed = true;
 				} else if (extend) {
-					_region->note_selected (_primary, true, true);
+					_view->note_selected (_primary, true, true);
 					changed = true;
 				} else {
 					/* it was added during button press */
@@ -6361,7 +6331,7 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 			}
 		}
 	} else {
-		_region->note_dropped (_primary, total_dx (ev), total_dy (), _copy);
+		_view->note_dropped (_primary, total_dx (ev), total_dy (), _copy);
 	}
 }
 
@@ -6760,6 +6730,19 @@ MidiRubberbandSelectDrag::deselect_things ()
 	/* XXX */
 }
 
+void
+MidiRubberbandSelectDrag::finished (GdkEvent* ev, bool movement_occurred)
+{
+	if (!movement_occurred) {
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (_midi_view);
+		if (mrv) {
+			mrv->editing_context().get_selection().set (mrv);
+		}
+	}
+
+	RubberbandSelectDrag::finished (ev, movement_occurred);
+}
+
 MidiVerticalSelectDrag::MidiVerticalSelectDrag (EditingContext& ec, MidiView* mv)
 	: RubberbandSelectDrag (ec, mv->drag_group (), [](GdkEvent*,timepos_t const &) { return true; })
 	, _midi_view (mv)
@@ -6827,8 +6810,8 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	 * coordinates relative to the region in order to draw it correctly.
 	 */
 
-	const timecnt_t rrp1 (_midi_view->midi_region ()->region_relative_position (_note[0]));
-	const timecnt_t rrp2 (_midi_view->midi_region ()->region_relative_position (_note[1]));
+	const timecnt_t rrp1 (_midi_view->view_position_to_model_position (_note[0]));
+	const timecnt_t rrp2 (_midi_view->view_position_to_model_position (_note[1]));
 
 	double const x0 = editing_context.sample_to_pixel (rrp1.samples ());
 	double const x1 = editing_context.sample_to_pixel (rrp2.samples ());
@@ -6851,11 +6834,12 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 
 	_note[1] = std::max (aligned_beats, (_note[0].beats () + min_length));
 
-	const timecnt_t rrp1 (_midi_view->midi_region ()->region_relative_position (_note[0]));
-	const timecnt_t rrp2 (_midi_view->midi_region ()->region_relative_position (_note[1]));
+	const timecnt_t rrp1 (_midi_view->view_position_to_model_position (_note[0]));
+	const timecnt_t rrp2 (_midi_view->view_position_to_model_position (_note[1]));
 
 	double const x0 = editing_context.sample_to_pixel (rrp1.samples ());
 	double const x1 = editing_context.sample_to_pixel (rrp2.samples ());
+
 	_drag_rect->set_x0 (std::min (x0, x1));
 	_drag_rect->set_x1 (std::max (x0, x1));
 }
@@ -6867,7 +6851,19 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 
 	/* Compute start within region, rather than absolute time start */
 
-	Beats const start  = _midi_view->midi_region ()->absolute_time_to_region_beats (min (_note[0], _note[1]));
+	Beats start;
+
+	if (!_midi_view->midi_region()) {
+		editing_context.make_a_region ();
+		assert (_midi_view->midi_region());
+	}
+
+	if (_midi_view->show_source()) {
+		Beats spos = _midi_view->midi_region()->source_position().beats() + min (_note[0], _note[1]).beats();
+		start = _midi_view->midi_region ()->absolute_time_to_source_beats (timepos_t (spos));
+	} else {
+		start = _midi_view->midi_region ()->absolute_time_to_source_beats (timepos_t (min (_note[0], _note[1])));
+	}
 
 	if (!had_movement) {
 		/* we create a note even if there was no movement */
@@ -6923,13 +6919,25 @@ HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 		return;
 	}
 
+	if (!_midi_view->midi_region()) {
+		editing_context.make_a_region ();
+		assert (_midi_view->midi_region());
+	}
+
 	std::shared_ptr<MidiRegion> mr = _midi_view->midi_region ();
 
 	timepos_t pos (_drags->current_pointer_time ());
 	editing_context.snap_to (pos, RoundNearest, SnapToGrid_Scaled);
 	Temporal::Beats aligned_beats (pos.beats ());
 
-	Beats const start = _midi_view->midi_region ()->absolute_time_to_region_beats (timepos_t (aligned_beats));
+	Beats start;
+
+	if (_midi_view->show_source()) {
+		Beats spos = _midi_view->midi_region()->source_position().beats() + aligned_beats;
+		start = _midi_view->midi_region ()->absolute_time_to_source_beats (timepos_t (spos));
+	} else {
+		start = _midi_view->midi_region ()->absolute_time_to_source_beats (timepos_t (aligned_beats));
+	}
 
 	/* Percussive hits are as short as possible */
 	Beats length (0, 1);
@@ -7480,8 +7488,10 @@ AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 	FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint>::finished (event, motion_occured);
 
 	MergeableLine* ml = lm->make_merger();
-	ml->merge_drawn_line (editing_context, *editing_context.session(), drawn_points, !did_snap);
-	delete ml;
+	if (ml) {
+		ml->merge_drawn_line (editing_context, *editing_context.session(), drawn_points, !did_snap);
+		delete ml;
+	}
 }
 
 /*****************/
@@ -7541,10 +7551,11 @@ VelocityLineDrag::aborted (bool)
 	vd->end_line_drag (false);
 }
 
-ClipStartDrag::ClipStartDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Temporal::timepos_t const & os)
-	: Drag (ec, &r, os.time_domain(), nullptr, false)
+ClipStartDrag::ClipStartDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Pianoroll& m)
+	: Drag (ec, &r, Temporal::BeatTime, nullptr, false)
+	, mce (m)
 	, dragging_rect (&r)
-	, original_start (os)
+	, original_rect (r.get())
 {
 }
 
@@ -7566,24 +7577,103 @@ ClipStartDrag::end_grab (GdkEvent* ev)
 }
 
 void
-ClipStartDrag::motion (GdkEvent*, bool)
+ClipStartDrag::motion (GdkEvent* event, bool first_move)
 {
+	ArdourCanvas::Rect r (original_rect);
+
+	double x, y;
+	gdk_event_get_coords (event, &x, &y);
+
+	if (x >= editing_context.timeline_origin()) {
+
+		/* Compute snapped position and adjust rect item if appropriate */
+
+		timepos_t pos = adjusted_current_time (event);
+		editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+		double pix = editing_context.timeline_to_canvas (editing_context.time_to_pixel (pos));
+
+		if (pix >= editing_context.timeline_origin()) {
+			r.x1 = dragging_rect->parent()->canvas_to_item (Duple (pix, 0.0)).x;
+		}
+
+	} else {
+
+		/* We need to do our own math here because the normal drag
+		 * coordinates are clamped to zero (no negative values).
+		 */
+
+		x -= editing_context.timeline_origin();
+		timepos_t tp (mce.pixel_to_sample (x));
+		Beats b (tp.beats() * -1);
+		mce.shift_midi (timepos_t (b), false);
+
+		/* ensure the line is in the right place */
+
+		r.x1 = r.x0 + 1.;
+	}
+
+	dragging_rect->set (r);
 }
 
 void
-ClipStartDrag::finished (GdkEvent*, bool)
+ClipStartDrag::finished (GdkEvent* event, bool movement_occured)
 {
+	if (!movement_occured) {
+		dragging_rect->set (original_rect);
+		return;
+	}
+
+	double x, y;
+	gdk_event_get_coords (event, &x, &y);
+
+	if (x >= editing_context.timeline_origin()) {
+
+		timepos_t pos = adjusted_current_time (event);
+		editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+		double pix = editing_context.timeline_to_canvas (editing_context.time_to_pixel (pos));
+
+		if (pix >= editing_context.timeline_origin()) {
+
+			assert (mce.midi_view());
+
+			if (mce.midi_view()->show_source()) {
+				pos = mce.midi_view()->source_beats_to_timeline (pos.beats());
+			}
+
+			editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+			mce.set_trigger_start (pos);
+		}
+
+	} else {
+
+		/* We need to do our own math here because the normal drag
+		 * coordinates are clamped to zero (no negative values).
+		 */
+
+		x -= editing_context.timeline_origin();
+		timepos_t tp (mce.pixel_to_sample (x));
+		Beats b (tp.beats() * -1);
+		mce.shift_midi (timepos_t (b), true);
+
+	}
 }
 
 void
-ClipStartDrag::aborted (bool)
+ClipStartDrag::aborted (bool movement_occured)
 {
+	dragging_rect->set (original_rect);
+
+	if (movement_occured) {
+		/* redraw to get notes back to the right places */
+		mce.shift_midi (timepos_t (Temporal::Beats()), false);
+	}
 }
 
-ClipEndDrag::ClipEndDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Temporal::timepos_t const & oe)
-	: Drag (ec, &r, oe.time_domain(), nullptr, false)
+ClipEndDrag::ClipEndDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Pianoroll& m)
+	: Drag (ec, &r, Temporal::BeatTime, nullptr, false)
+	, mce (m)
 	, dragging_rect (&r)
-	, original_end (oe)
+	, original_rect (r.get())
 {
 }
 
@@ -7605,16 +7695,38 @@ ClipEndDrag::end_grab (GdkEvent* ev)
 }
 
 void
-ClipEndDrag::motion (GdkEvent*, bool)
+ClipEndDrag::motion (GdkEvent* event, bool)
 {
+	ArdourCanvas::Rect r (original_rect);
+
+	timepos_t pos (adjusted_current_time (event));
+	editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+	double pix = editing_context.timeline_to_canvas (editing_context.time_to_pixel (pos));
+
+	if (pix > editing_context.timeline_origin()) {
+		r.x0 = dragging_rect->parent()->canvas_to_item (Duple (pix, 0.0)).x;
+	} else {
+		r.x0 = r.x1 - 1.;
+	}
+
+	dragging_rect->set_position (ArdourCanvas::Duple (r.x0, 0.0));
 }
 
 void
-ClipEndDrag::finished (GdkEvent*, bool)
+ClipEndDrag::finished (GdkEvent* event, bool movement_occured)
 {
+	if (!movement_occured) {
+		dragging_rect->set (original_rect);
+		return;
+	}
+
+	timepos_t pos = adjusted_current_time (event);
+	editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+	mce.set_trigger_end (pos);
 }
 
 void
 ClipEndDrag::aborted (bool)
 {
+	dragging_rect->set (original_rect);
 }

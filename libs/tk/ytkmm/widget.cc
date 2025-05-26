@@ -8,10 +8,10 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/widget.h>
-#include <gtkmm/private/widget_p.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/private/widget_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: widget.ccg,v 1.23 2006/07/19 16:58:50 murrayc Exp $ */
@@ -33,16 +33,16 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/window.h>
-#include <gtkmm/accelgroup.h>
-#include <gtkmm/settings.h>
-#include <gtkmm/style.h>
-#include <gtkmm/container.h>
-#include <gtkmm/selectiondata_private.h>
-#include <gtkmm/action.h>
-#include <gtkmm/tooltip.h>
-#include <gtk/gtk.h> //For gtk_widget_get_action().
+#include <ytkmm/adjustment.h>
+#include <ytkmm/window.h>
+#include <ytkmm/accelgroup.h>
+#include <ytkmm/settings.h>
+#include <ytkmm/style.h>
+#include <ytkmm/container.h>
+#include <ytkmm/selectiondata_private.h>
+#include <ytkmm/action.h>
+#include <ytkmm/tooltip.h>
+#include <ytk/ytk.h> //For gtk_widget_get_action().
 
 
 namespace //anonymous

@@ -33,9 +33,9 @@
 #include "pbd/unwind.h"
 #include "pbd/xml++.h"
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/stock.h>
 #include <gtkmm2ext/utils.h>
 
 #include "widgets/tooltips.h"
@@ -582,6 +582,9 @@ EngineControl::build_full_control_notebook ()
 		settings_table.attach (update_devices_button, 3, 4, btn, btn + ht, xopt, xopt);
 	}
 
+	settings_table.attach (*manage (new ArdourHSpacer(1.0)),   0, 4, row, row + 1, xopt, SHRINK, 4, 12);
+	row++;
+
 	if (backend->requires_driver_selection ()) {
 		settings_table.attach (lbl_driver,   0, 1, row, row + 1, xopt, SHRINK);
 		settings_table.attach (driver_combo, 1, 2, row, row + 1, xopt, SHRINK);
@@ -628,6 +631,9 @@ EngineControl::build_full_control_notebook ()
 
 	/* button spans 2 or 3 rows: Sample rate, Buffer size, Periods */
 	settings_table.attach (control_app_button, 3, 4, row - ctrl_btn_span, row + 1, xopt, xopt);
+	++row;
+
+	settings_table.attach (*manage (new ArdourHSpacer(1.0)),   0, 4, row, row + 1, xopt, SHRINK, 4, 12);
 	++row;
 
 	/* Monitor settings */

@@ -42,7 +42,7 @@ class RouteTimeAxisView;
 class EditorSummary : public CairoWidget, public EditorComponent, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList
 {
 public:
-	EditorSummary (Editor *);
+	EditorSummary (Editor&);
 	~EditorSummary ();
 
 	void set_session (ARDOUR::Session *);

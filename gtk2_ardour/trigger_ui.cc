@@ -18,11 +18,11 @@
 
 #include <glib/gstdio.h>
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/filechooserdialog.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
@@ -411,8 +411,7 @@ TriggerUI::context_menu ()
 	items.push_back (MenuElem (_("MIDI Learn"), sigc::mem_fun (*this, &TriggerUI::trigger_midi_learn)));
 	items.push_back (MenuElem (_("MIDI un-Learn"), sigc::mem_fun (*this, &TriggerUI::trigger_midi_unlearn)));
 
-
-	_context_menu->popup (3, gtk_get_current_event_time ());
+	_context_menu->popup (1, gtk_get_current_event_time ());
 }
 
 void
@@ -547,7 +546,7 @@ TriggerUI::launch_context_menu ()
 		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
 	}
 
-	_launch_context_menu->popup (3, gtk_get_current_event_time ());
+	_launch_context_menu->popup (1, gtk_get_current_event_time ());
 }
 
 void

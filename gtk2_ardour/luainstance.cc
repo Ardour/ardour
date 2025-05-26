@@ -910,7 +910,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addFunction ("get_cut_buffer", &EditingContext::get_cut_buffer)
 
 		.addFunction ("set_zoom_focus", &EditingContext::set_zoom_focus)
-		.addFunction ("get_zoom_focus", &EditingContext::get_zoom_focus)
+		.addFunction ("zoom_focus", &EditingContext::zoom_focus)
 		.addFunction ("get_current_zoom", &EditingContext::get_current_zoom)
 		.addFunction ("reset_zoom", &EditingContext::reset_zoom)
 

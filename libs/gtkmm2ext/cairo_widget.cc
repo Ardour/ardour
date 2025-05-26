@@ -23,7 +23,7 @@
 #include "gtkmm2ext/rgb_macros.h"
 
 #ifdef __APPLE__
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include "gtkmm2ext/nsglview.h"
 #endif
 

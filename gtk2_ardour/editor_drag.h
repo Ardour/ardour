@@ -29,7 +29,7 @@
 #include <list>
 #include <vector>
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include <stdint.h>
 
 #include "ardour/tempo.h"
@@ -41,7 +41,6 @@
 
 #include "gtkmm2ext/bindings.h"
 
-#include "cursor_context.h"
 #include "editor_items.h"
 #include "mouse_cursors.h"
 #include "editing.h"
@@ -70,6 +69,7 @@ class EditingContext;
 class Editor;
 class EditorCursor;
 class TimeAxisView;
+class Pianoroll;
 class MidiTimeAxisView;
 class Drag;
 class NoteBase;
@@ -352,7 +352,6 @@ private:
 	 *  samplepos. used for relative snap.
 	 */
 	Temporal::timecnt_t _snap_delta;
-	CursorContext::Handle _cursor_ctx; ///< cursor change context
 	bool _constraint_pressed; ///< if the keyboard indicated constraint modifier was pressed on start_grab()
 	int _grab_button;
 
@@ -620,7 +619,7 @@ public:
 	}
 
 private:
-	MidiView*     region;
+	MidiView*     midi_view;
 	bool          relative;
 	bool          at_front;
 	bool         _was_selected;
@@ -649,7 +648,7 @@ private:
 	Temporal::timecnt_t total_dx (GdkEvent * event) const; // total movement in quarter notes
 	int8_t total_dy () const;
 
-	MidiView* _region;
+	MidiView* _view;
 	NoteBase* _primary;
 	Temporal::timecnt_t _cumulative_dx;
 	double _cumulative_dy;
@@ -1324,6 +1323,7 @@ class MidiRubberbandSelectDrag : public RubberbandSelectDrag
 
 	void select_things (int, Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, bool);
 	void deselect_things ();
+	void finished (GdkEvent *, bool);
 
   private:
 	MidiView* _midi_view;
@@ -1643,7 +1643,7 @@ class VelocityLineDrag : public FreehandLineDrag<Evoral::ControlList::OrderedPoi
 class ClipStartDrag : public Drag
 {
   public:
-	ClipStartDrag (EditingContext&, ArdourCanvas::Rectangle &, Temporal::timepos_t const &);
+	ClipStartDrag (EditingContext&, ArdourCanvas::Rectangle &, Pianoroll& m);
 	~ClipStartDrag ();
 
 	void start_grab (GdkEvent*,Gdk::Cursor*);
@@ -1653,14 +1653,15 @@ class ClipStartDrag : public Drag
 	void aborted (bool);
 
   private:
+	Pianoroll& mce;
 	ArdourCanvas::Rectangle* dragging_rect;
-	Temporal::timepos_t original_start;
+	ArdourCanvas::Rect original_rect;
 };
 
 class ClipEndDrag : public Drag
 {
   public:
-	ClipEndDrag (EditingContext&, ArdourCanvas::Rectangle &, Temporal::timepos_t const &);
+	ClipEndDrag (EditingContext&, ArdourCanvas::Rectangle &, Pianoroll& m);
 	~ClipEndDrag ();
 
 	void start_grab (GdkEvent*,Gdk::Cursor*);
@@ -1670,9 +1671,9 @@ class ClipEndDrag : public Drag
 	void aborted (bool);
 
   private:
+	Pianoroll& mce;
 	ArdourCanvas::Rectangle* dragging_rect;
-	Temporal::timepos_t original_end;
-
+	ArdourCanvas::Rect original_rect;
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */

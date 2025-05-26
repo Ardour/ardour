@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <gtkmm/button.h>
+#include <ytkmm/button.h>
 #include "port_matrix.h"
 #include "port_group.h"
 #include "ardour_window.h"

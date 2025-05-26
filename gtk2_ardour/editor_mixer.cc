@@ -28,7 +28,7 @@
 #endif
 
 #include <glibmm/miscutils.h>
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/messagedialog.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
 

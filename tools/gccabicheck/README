@@ -5,7 +5,7 @@ This is a simple tool to test a system for g++5's glibmm at runtime.
 
 GCC5.1 introduced a new ABI for the C++ standard library.
 The old 3.4 .. 5.0 ABI is not compatible. By default gcc provides a
-dual ABI, so testing libstc++ itself is not sufficient.
+dual ABI, so testing libstdc++ itself is not sufficient.
 
 
 Some GNU/Linux distributions systems switched to the new ABI already

@@ -23,13 +23,11 @@
 #include "editing.h"
 #include "editing_context.h"
 
-class CueEditor : public EditingContext, public PBD::HistoryOwner, public sigc::trackable
+class CueEditor : public EditingContext, public PBD::HistoryOwner
 {
   public:
 	CueEditor (std::string const & name);
 	~CueEditor ();
-
-	void select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<SelectableOwner*> const &, ARDOUR::SelectionOperation, bool);
 
 	void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const;
 	StripableTimeAxisView* get_stripable_time_axis_by_id (const PBD::ID& id) const;
@@ -51,13 +49,6 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner, public sigc::
 
 	void instant_save();
 
-	/** Get the topmost enter context for the given item type.
-	 *
-	 * This is used to change the cursor associated with a given enter context,
-	 * which may not be on the top of the stack.
-	 */
-	EnterContext* get_enter_context(ItemType type);
-
 	void begin_selection_op_history ();
 	void begin_reversible_selection_op (std::string cmd_name);
 	void commit_reversible_selection_op ();
@@ -78,9 +69,8 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner, public sigc::
 	double get_y_origin () const;
 
 	void set_zoom_focus (Editing::ZoomFocus);
-	Editing::ZoomFocus get_zoom_focus () const;
 	samplecnt_t get_current_zoom () const;
-	void set_samples_per_pixel (samplecnt_t);
+	virtual void set_samples_per_pixel (samplecnt_t);
 	void reposition_and_zoom (samplepos_t, double);
 
 	void set_mouse_mode (Editing::MouseMode, bool force = false);
@@ -111,5 +101,7 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner, public sigc::
 
 	void do_undo (uint32_t n);
 	void do_redo (uint32_t n);
+
+	Temporal::timepos_t _get_preferred_edit_position (Editing::EditIgnoreOption, bool use_context_click, bool from_outside_canvas);
 };
 

@@ -576,6 +576,21 @@ ArdourFader::on_style_changed (const Glib::RefPtr<Gtk::Style>& style)
 	queue_draw ();
 }
 
+void
+ArdourFader::update_min_size (int span, int girth)
+{
+	_min_span = span;
+	_min_girth = girth;
+	_pattern = 0;
+
+	if (_orien == VERT) {
+		CairoWidget::set_size_request(girth, span);
+	} else {
+		CairoWidget::set_size_request(span, girth);
+	}
+	queue_resize ();
+}
+
 Gdk::Color
 ArdourFader::get_parent_bg ()
 {

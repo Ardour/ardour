@@ -1,5 +1,5 @@
 #include <iostream>
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 #include "canvas/pixbuf.h"

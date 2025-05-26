@@ -24,7 +24,7 @@ function factory () return function ()
   local curPos = region:position()
   local curBeat = Editor:get_grid_type_as_beats(true, curPos)
   local nextPos = Temporal.timepos_t.from_ticks(curPos:ticks() + curBeat:to_ticks())
-  -- gap could be used to create mulitple duplicates at once
+  -- gap could be used to create multiple duplicates at once
   local gap = Temporal.timecnt_t.from_ticks(curBeat:to_ticks())
   playlist:duplicate(region, nextPos, gap, 1)
 

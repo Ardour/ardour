@@ -31,7 +31,7 @@ RegionEditorWindow::RegionEditorWindow (Session* s, RegionView* rv)
 	if (arv) {
 		_region_editor = new AudioRegionEditor (s, arv);
 	} else {
-		_region_editor = new RegionEditor (s, rv);
+		_region_editor = new RegionEditor (s, rv->region());
 	}
 	add (*_region_editor);
 	set_name ("RegionEditorWindow");

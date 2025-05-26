@@ -21,8 +21,8 @@
 
 #ifdef VST3_SUPPORT
 
-#include <gtkmm/widget.h>
-#include <gtkmm/socket.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/socket.h>
 
 #include "vst3_plugin_ui.h"
 

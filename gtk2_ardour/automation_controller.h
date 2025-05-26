@@ -30,7 +30,7 @@
 
 #include <memory>
 
-#include <gtkmm/alignment.h>
+#include <ytkmm/alignment.h>
 
 #include "pbd/signals.h"
 #include "ardour/parameter_descriptor.h"

@@ -23,7 +23,7 @@
 #include <list>
 #include <stdint.h>
 
-#include <gtkmm/action.h>
+#include <ytkmm/action.h>
 
 #include "pbd/signals.h"
 
@@ -77,6 +77,9 @@ public:
 	bool on_button_release_event (GdkEventButton*);
 	bool on_scroll_event (GdkEventScroll* ev);
 	bool on_motion_notify_event (GdkEventMotion *ev) ;
+	bool on_touch_begin_event (GdkEventTouch*);
+	bool on_touch_end_event (GdkEventTouch*);
+	bool on_touch_update_event (GdkEventTouch*);
 
 	void color_handler ();
 

@@ -290,8 +290,16 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		}
 
 	} else {
-		/* no panner or panner is bypassed */
-		assert (mixbufs.available () >= bufs.count ());
+		/* no panner or panner is bypassed
+		 * 1: if source has more channels than the destination bus
+		 *    only send as many channels as there ae on the destination
+		 *    (ignore excess channels)
+		 * 2: if desination has more channels than the source:
+		 *    silence additional channels.
+		 *
+		 * The following assert() would go off in case of (1)
+		 */
+		//assert (mixbufs.available () >= bufs.count ());
 		/* BufferSet::read_from() changes the channel-conut,
 		 * so we manually copy bufs -> mixbufs
 		 */

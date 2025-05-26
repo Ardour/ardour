@@ -27,7 +27,7 @@
  */
 
 #include <gio/gio.h>
-#include <gtk/gtkiconfactory.h>
+#include <ytk/gtkiconfactory.h>
 
 #include "pbd/file_utils.h"
 
@@ -93,8 +93,8 @@ Editor::register_actions ()
 {
 	RefPtr<Action> act;
 
-	editor_actions = ActionManager::create_action_group (bindings, editor_name());
-	editor_menu_actions = ActionManager::create_action_group (bindings, X_("EditorMenu"));
+	editor_actions = ActionManager::create_action_group (own_bindings, X_("Editor"));
+	editor_menu_actions = ActionManager::create_action_group (own_bindings, X_("EditorMenu"));
 
 	/* non-operative menu items for menu bar */
 
@@ -296,8 +296,6 @@ Editor::register_actions ()
 		reg_sens (editor_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::cancel_visual_state_op), i - 1));
 	}
 
-	reg_sens (editor_actions, "temporal-zoom-out", _("Zoom Out"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), true));
-	reg_sens (editor_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), false));
 	reg_sens (editor_actions, "zoom-to-session", _("Zoom to Session"), sigc::mem_fun(*this, &Editor::temporal_zoom_session));
 	reg_sens (editor_actions, "zoom-to-extents", _("Zoom to Extents"), sigc::mem_fun(*this, &Editor::temporal_zoom_extents));
 	reg_sens (editor_actions, "zoom-to-selection", _("Zoom to Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), Both));
@@ -314,6 +312,7 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "fit_16_tracks", _("Fit 16 Tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 16));
 	reg_sens (editor_actions, "fit_32_tracks", _("Fit 32 Tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 32));
 	reg_sens (editor_actions, "fit_all_tracks", _("Fit All Tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 0));
+	reg_sens (editor_actions, "fit_selected_tracks", _("Fit Selected Tracks"), sigc::mem_fun(*this, &Editor::fit_selection));
 
 	reg_sens (editor_actions, "zoom_10_ms", _("Zoom to 10 ms"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 10));
 	reg_sens (editor_actions, "zoom_100_ms", _("Zoom to 100 ms"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 100));
@@ -405,6 +404,12 @@ Editor::register_actions ()
 	act = reg_sens (editor_actions, "add-range-marker-from-selection", _("Add Range Marker from Selection"), sigc::mem_fun(*this, &Editor::add_location_from_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = reg_sens (editor_actions, "add-tempo-from-playhead", _("Add Tempo Marker at Playhead"), sigc::mem_fun(*this, &Editor::add_tempo_from_playhead_cursor));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = reg_sens (editor_actions, "add-meter-from-playhead", _("Add Time Signature at Playhead"), sigc::mem_fun(*this, &Editor::add_meter_from_playhead_cursor));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = reg_sens (editor_actions, "editor-consolidate-with-processing", _("Consolidate Range (with processing)"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), ReplaceRange, true));
 	ActionManager::time_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "editor-consolidate", _("Consolidate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), ReplaceRange, false));
@@ -417,14 +422,8 @@ Editor::register_actions ()
 	act = reg_sens (editor_actions, "editor-loudness-assistant", _("Loudness Assistant"), sigc::bind (sigc::mem_fun(*this, &Editor::loudness_assistant), true));
 	ActionManager::time_selection_sensitive_actions.push_back (act);
 
-	reg_sens (editor_actions, "editor-cut", _("Cut"), sigc::mem_fun(*this, &Editor::cut));
-	reg_sens (editor_actions, "editor-delete", _("Delete"), sigc::mem_fun(*this, &Editor::delete_));
-	reg_sens (editor_actions, "alternate-editor-delete", _("Delete"), sigc::mem_fun(*this, &Editor::delete_));
 
 	reg_sens (editor_actions, "split-region", _("Split/Separate"), sigc::mem_fun (*this, &Editor::split_region));
-
-	reg_sens (editor_actions, "editor-copy", _("Copy"), sigc::mem_fun(*this, &Editor::copy));
-	reg_sens (editor_actions, "editor-paste", _("Paste"), sigc::mem_fun(*this, &Editor::keyboard_paste));
 
 	reg_sens (editor_actions, "editor-fade-range", _("Fade Range Selection"), sigc::mem_fun(*this, &Editor::fade_range));
 
@@ -502,7 +501,7 @@ Editor::register_actions ()
 
 	act = reg_sens (editor_actions, "toggle-track-active", _("Toggle Active"), (sigc::mem_fun(*this, &Editor::toggle_tracks_active)));
 	ActionManager::route_selection_sensitive_actions.push_back (act);
-	act = reg_sens (editor_actions, "remove-track", _("Remove"), (sigc::mem_fun(*this, &Editor::remove_tracks)));
+	act = reg_sens (editor_actions, "remove-track", _("Remove Selected Track(s)"), (sigc::mem_fun(*this, &Editor::remove_tracks)));
 	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "fit-selection", _("Fit Selection (Vertical)"), sigc::mem_fun(*this, &Editor::fit_selection));
@@ -526,19 +525,7 @@ Editor::register_actions ()
 
 	toggle_reg_sens (editor_actions, "sound-midi-notes", _("Sound Selected MIDI Notes"), sigc::mem_fun (*this, &Editor::toggle_sound_midi_notes));
 
-	Glib::RefPtr<ActionGroup> zoom_actions = ActionManager::create_action_group (bindings, X_("Zoom"));
-	RadioAction::Group zoom_group;
-
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_chosen), Editing::ZoomFocusLeft));
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-right", _("Zoom Focus Right"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_chosen), Editing::ZoomFocusRight));
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-center", _("Zoom Focus Center"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_chosen), Editing::ZoomFocusCenter));
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-playhead", _("Zoom Focus Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_chosen), Editing::ZoomFocusPlayhead));
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-mouse", _("Zoom Focus Mouse"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_chosen), Editing::ZoomFocusMouse));
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-edit", _("Zoom Focus Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_chosen), Editing::ZoomFocusEdit));
-
-	ActionManager::register_action (editor_actions, X_("cycle-zoom-focus"), _("Next Zoom Focus"), sigc::mem_fun (*this, &Editor::cycle_zoom_focus));
-
-	Glib::RefPtr<ActionGroup> marker_click_actions = ActionManager::create_action_group (bindings, X_("MarkerClickBehavior"));
+	Glib::RefPtr<ActionGroup> marker_click_actions = ActionManager::create_action_group (own_bindings, X_("MarkerClickBehavior"));
 	RadioAction::Group marker_click_group;
 
 	radio_reg_sens (marker_click_actions, marker_click_group, "marker-click-select-only", _("Marker Click Only Selects"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_click_behavior_chosen), Editing::MarkerClickSelectOnly));
@@ -546,7 +533,7 @@ Editor::register_actions ()
 	radio_reg_sens (marker_click_actions, marker_click_group, "marker-click-locate-when-stopped", _("Locate To Marker When Transport Is Not Rolling "), sigc::bind (sigc::mem_fun(*this, &Editor::marker_click_behavior_chosen), Editing::MarkerClickLocateWhenStopped));
 	ActionManager::register_action (editor_actions, X_("cycle-marker-click-behavior"), _("Next Marker Click Mode"), sigc::mem_fun (*this, &Editor::cycle_marker_click_behavior));
 
-	Glib::RefPtr<ActionGroup> lua_script_actions = ActionManager::create_action_group (bindings, X_("LuaAction"));
+	Glib::RefPtr<ActionGroup> lua_script_actions = ActionManager::create_action_group (own_bindings, X_("LuaAction"));
 
 	for (int i = 1; i <= MAX_LUA_ACTION_SCRIPTS; ++i) {
 		string const a = string_compose (X_("script-%1"), i);
@@ -556,7 +543,6 @@ Editor::register_actions ()
 		act->set_sensitive (false);
 	}
 
-	register_mouse_mode_actions ();
 	bind_mouse_mode_buttons ();
 
 	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), sigc::bind (sigc::mem_fun(*this, &Editor::step_mouse_mode), true));
@@ -584,7 +570,7 @@ Editor::register_actions ()
 
 	/* RULERS */
 
-	Glib::RefPtr<ActionGroup> ruler_actions = ActionManager::create_action_group (bindings, X_("Rulers"));
+	Glib::RefPtr<ActionGroup> ruler_actions = ActionManager::create_action_group (own_bindings, X_("Rulers"));
 	ruler_minsec_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-minsec-ruler"), _("Mins:Secs"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_timecode_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-timecode-ruler"), _("Timecode"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_samples_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-samples-ruler"), _("Samples"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
@@ -657,7 +643,7 @@ Editor::register_actions ()
 
 	/* REGION LIST */
 
-	Glib::RefPtr<ActionGroup> rl_actions = ActionManager::create_action_group (bindings, X_("RegionList"));
+	Glib::RefPtr<ActionGroup> rl_actions = ActionManager::create_action_group (own_bindings, X_("RegionList"));
 	RadioAction::Group sort_type_group;
 	RadioAction::Group sort_order_group;
 
@@ -695,6 +681,12 @@ Editor::register_actions ()
 
 	/* MIDI stuff */
 	reg_sens (editor_actions, "quantize", _("Quantize"), sigc::mem_fun (*this, &Editor::quantize_region));
+
+	act = ActionManager::register_toggle_action (editor_actions, "set-mouse-mode-object-range", _("Smart Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));
+	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
+	smart_mode_button.set_related_action (smart_mode_action);
+	smart_mode_button.set_text (_("Smart"));
+	smart_mode_button.set_name ("mouse mode button");
 }
 
 static void _lua_print (std::string s) {
@@ -764,23 +756,10 @@ Editor::trigger_script_by_name (const std::string script_name, const std::string
 void
 Editor::load_bindings ()
 {
-	bindings = Bindings::get_bindings (editor_name());
-	contents().set_data ("ardour-bindings", bindings);
-
-	/* This set of bindings may expand in the future to include things
-	 * other than MIDI editing, but for now this is all we've got as far as
-	 * bindings that need to be distinct from the Editors (because some of
-	 * the keys may overlap.
-	 */
-
-	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
-	register_midi_actions (midi_bindings);
-
-	Bindings* shared_bindings = Bindings::get_bindings (X_("Editing"));
-	register_common_actions (shared_bindings);
-
-	_track_canvas_viewport->canvas()->set_data ("ardour-bindings", midi_bindings);
-	_track_canvas_viewport->set_data ("ardour-bindings", shared_bindings);
+	own_bindings = Bindings::get_bindings (editor_name());
+	EditingContext::load_shared_bindings ();
+	bindings.push_back (own_bindings);
+	set_widget_bindings (contents(), bindings, Gtkmm2ext::ARDOUR_BINDING_KEY);
 }
 
 void
@@ -1024,39 +1003,6 @@ Editor::marker_click_behavior_action (MarkerClickBehavior m)
 	return ActionManager::get_radio_action (X_("MarkerClickBehavior"), action);
 }
 
-RefPtr<RadioAction>
-Editor::zoom_focus_action (ZoomFocus focus)
-{
-	const char* action = 0;
-	RefPtr<Action> act;
-
-	switch (focus) {
-	case ZoomFocusLeft:
-		action = X_("zoom-focus-left");
-		break;
-	case ZoomFocusRight:
-		action = X_("zoom-focus-right");
-		break;
-	case ZoomFocusCenter:
-		action = X_("zoom-focus-center");
-		break;
-	case ZoomFocusPlayhead:
-		action = X_("zoom-focus-playhead");
-		break;
-	case ZoomFocusMouse:
-		action = X_("zoom-focus-mouse");
-		break;
-	case ZoomFocusEdit:
-		action = X_("zoom-focus-edit");
-		break;
-	default:
-		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible focus type", (int) focus) << endmsg;
-		abort(); /*NOTREACHED*/
-	}
-
-	return ActionManager::get_radio_action (X_("Zoom"), action);
-}
-
 void
 Editor::toggle_sound_midi_notes ()
 {
@@ -1068,26 +1014,21 @@ Editor::toggle_sound_midi_notes ()
 }
 
 void
-Editor::zoom_focus_chosen (ZoomFocus focus)
-{
-	/* this is driven by a toggle on a radio group, and so is invoked twice,
-	   once for the item that became inactive and once for the one that became
-	   active.
-	*/
-
-	RefPtr<RadioAction> ract = zoom_focus_action (focus);
-
-	if (ract && ract->get_active()) {
-		set_zoom_focus (focus);
-	}
-}
-
-void
 Editor::marker_click_behavior_chosen (Editing::MarkerClickBehavior m)
 {
 	RefPtr<RadioAction> ract = marker_click_behavior_action (m);
 	if (ract && ract->get_active()) {
 		set_marker_click_behavior (m);
+	}
+}
+
+void
+Editor::capture_sources_changed (bool cleared)
+{
+	if (cleared || !_session || _session->actively_recording ()) {
+		ActionManager::get_action (X_("Editor"), X_("remove-last-capture"))->set_sensitive (false);
+	} else {
+		ActionManager::get_action (X_("Editor"), X_("remove-last-capture"))->set_sensitive (_session->have_last_capture_sources ());
 	}
 }
 
@@ -1188,7 +1129,7 @@ Editor::reset_canvas_action_sensitivity (bool onoff)
 void
 Editor::register_region_actions ()
 {
-	_region_actions = ActionManager::create_action_group (bindings, X_("Region"));
+	_region_actions = ActionManager::create_action_group (own_bindings, X_("Region"));
 
 	/* PART 1: actions that operate on the selection, and for which the edit point type and location is irrelevant */
 
@@ -1317,6 +1258,9 @@ Editor::register_region_actions ()
 	/* Open the region properties dialogue for the selected regions */
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "show-region-properties", _("Properties..."), sigc::mem_fun (*this, &Editor::show_region_properties));
 
+	/* Edit the region in a separate region pianoroll window */
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "edit-region-pianoroll-window", _("Edit in separate window..."), sigc::mem_fun (*this, &Editor::edit_region_in_pianoroll_window));
+
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "play-selected-regions", _("Play Selected Regions"), sigc::mem_fun(*this, &Editor::play_selected_region));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "tag-selected-regions", _("Tag Selected Regions"), sigc::mem_fun(*this, &Editor::tag_selected_region));
 
@@ -1390,14 +1334,3 @@ Editor::register_region_actions ()
 	sensitize_all_region_actions (false);
 }
 
-void
-Editor::add_mouse_mode_actions (Glib::RefPtr<ActionGroup> mouse_mode_actions)
-{
-	RefPtr<Action> act;
-
-	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Smart Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));
-	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
-	smart_mode_button.set_related_action (smart_mode_action);
-	smart_mode_button.set_text (_("Smart"));
-	smart_mode_button.set_name ("mouse mode button");
-}

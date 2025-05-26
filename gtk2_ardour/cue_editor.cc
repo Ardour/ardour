@@ -9,6 +9,8 @@ CueEditor::CueEditor (std::string const & name)
 	, HistoryOwner (X_("cue-editor"))
 {
 	_history.Changed.connect (history_connection, invalidator (*this), std::bind (&CueEditor::history_changed, this), gui_context());
+
+	set_zoom_focus (Editing::ZoomFocusLeft);
 }
 
 CueEditor::~CueEditor ()
@@ -25,11 +27,6 @@ CueEditor::filter_to_unique_midi_region_views (RegionSelection const & ms) const
 {
 	std::vector<MidiRegionView*> mrv;
 	return mrv;
-}
-
-void
-CueEditor::select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<SelectableOwner*> const &, ARDOUR::SelectionOperation, bool)
-{
 }
 
 void
@@ -93,6 +90,7 @@ CueEditor::autoscroll_active() const
 void
 CueEditor::redisplay_grid (bool immediate_redraw)
 {
+	update_grid ();
 }
 
 Temporal::timecnt_t
@@ -104,12 +102,6 @@ CueEditor::get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecn
 void
 CueEditor::instant_save()
 {
-}
-
-EditingContext::EnterContext*
-CueEditor::get_enter_context(ItemType type)
-{
-	return nullptr;
 }
 
 void
@@ -149,14 +141,26 @@ CueEditor::get_y_origin () const
 }
 
 void
-CueEditor::set_zoom_focus (Editing::ZoomFocus)
+CueEditor::set_zoom_focus (Editing::ZoomFocus zf)
 {
-}
+	using namespace Editing;
 
-Editing::ZoomFocus
-CueEditor::get_zoom_focus () const
-{
-	return Editing::ZoomFocusPlayhead;
+	/* We don't allow playhead for zoom focus here */
+
+	if (zf == ZoomFocusPlayhead) {
+		return;
+	}
+
+	std::string str = zoom_focus_strings[(int)zf];
+
+	if (str != zoom_focus_selector.get_text()) {
+		zoom_focus_selector.set_text (str);
+	}
+
+	if (_zoom_focus != zf) {
+		_zoom_focus = zf;
+		ZoomFocusChanged (); /* EMIT SIGNAL */
+	}
 }
 
 void
@@ -173,8 +177,15 @@ CueEditor::get_current_zoom () const
 }
 
 void
-CueEditor::reposition_and_zoom (samplepos_t, double)
+CueEditor::reposition_and_zoom (samplepos_t pos, double spp)
 {
+	pending_visual_change.add (VisualChange::ZoomLevel);
+	pending_visual_change.samples_per_pixel = spp;
+
+	pending_visual_change.add (VisualChange::TimeOrigin);
+	pending_visual_change.time_origin = pos;
+
+	ensure_visual_change_idle_handler ();
 }
 
 void
@@ -247,3 +258,15 @@ CueEditor::history_changed ()
 	update_undo_redo_actions (_history);
 }
 
+Temporal::timepos_t
+CueEditor::_get_preferred_edit_position (Editing::EditIgnoreOption ignore, bool from_context_menu, bool from_outside_canvas)
+{
+	samplepos_t where;
+	bool in_track_canvas = false;
+
+	if (!mouse_sample (where, in_track_canvas)) {
+		return Temporal::timepos_t (0);
+	}
+
+	return Temporal::timepos_t (where);
+}

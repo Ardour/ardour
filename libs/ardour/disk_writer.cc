@@ -69,6 +69,7 @@ DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcesso
 	_record_safe.store (0);
 	_samples_pending_write.store (0);
 	_num_captured_loops.store (0);
+	_reset_last_capture_sources.store (0);
 }
 
 DiskWriter::~DiskWriter ()
@@ -279,6 +280,26 @@ DiskWriter::calculate_record_range (Temporal::OverlapType ot, samplepos_t transp
 	DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 rec? %2 @ %3 (for %4) FRF %5 LRF %6 : rf %7 @ %8\n",
 	                                                      _name, enum_2_string (ot), transport_sample, nframes,
 	                                                      _first_recordable_sample, _last_recordable_sample, rec_nframes, rec_offset));
+}
+
+std::list<std::shared_ptr<Source>>&
+DiskWriter::last_capture_sources ()
+{
+#if 0 // C++20
+	_reset_last_capture_sources.wait (0);
+#else
+	if (_reset_last_capture_sources != 0) {
+		static std::list<std::shared_ptr<Source>> empty;
+		return empty;
+	}
+#endif
+	return _last_capture_sources;
+}
+
+void
+DiskWriter::reset_last_capture_sources ()
+{
+	_reset_last_capture_sources.store (1);
 }
 
 void
@@ -561,7 +582,9 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	}
 
-	if (can_record && !_last_capture_sources.empty ()) {
+	int canderef (1);
+	const bool reset_capture_src = _reset_last_capture_sources.compare_exchange_strong (canderef, 0);
+	if ((reset_capture_src || can_record) && !_last_capture_sources.empty ()) {
 		_last_capture_sources.clear ();
 	}
 

@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <gtkmm/label.h>
+#include <ytkmm/label.h>
 #include "ardour_dialog.h"
 
 class IdleOMeter : public ArdourDialog

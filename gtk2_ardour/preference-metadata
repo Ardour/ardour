@@ -52,9 +52,9 @@
 [clock-display-limit]
   clock display limit length maximum duration
 [color-file]
- theme colors appearance style themeing
+ theme colors appearance style theming
 [color-regions-using-track-color]
- theme colors appearance style themeing
+ theme colors appearance style theming
 [default-bindings]
  shortcuts keys keybindings bindings
 [default-lower-midi-note]

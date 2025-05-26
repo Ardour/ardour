@@ -313,7 +313,6 @@ SurroundStrip::set_route (std::shared_ptr<Route> r)
 
 	/* now force an update of all the various elements */
 	name_changed ();
-	comment_changed ();
 	setup_comment_button ();
 
 	add_events (Gdk::BUTTON_RELEASE_MASK);

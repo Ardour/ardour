@@ -102,7 +102,7 @@ private:
 		guint                 _source_id;
 	};
 
-	std::unordered_map<FileDescriptor, EventHandler> _event_handlers;
+	std::unordered_map<Linux::FileDescriptor, EventHandler> _event_handlers;
 	std::unordered_map<guint, Linux::ITimerHandler*> _timer_handlers;
 
 	static gboolean event (GIOChannel* source, GIOCondition condition, gpointer data)
@@ -132,7 +132,7 @@ public:
 
 	void clear () {
 		Glib::Threads::Mutex::Lock lm (_lock);
-		for (std::unordered_map<FileDescriptor, EventHandler>::const_iterator it = _event_handlers.begin (); it != _event_handlers.end (); ++it) {
+		for (auto it = _event_handlers.begin (); it != _event_handlers.end (); ++it) {
 			g_source_remove (it->second._source_id);
 			g_io_channel_unref (it->second._gio_channel);
 		}
@@ -144,7 +144,7 @@ public:
 	}
 
 	/* VST3 IRunLoop interface */
-	tresult registerEventHandler (Linux::IEventHandler* handler, FileDescriptor fd) SMTG_OVERRIDE
+	tresult registerEventHandler (Linux::IEventHandler* handler, Linux::FileDescriptor fd) SMTG_OVERRIDE
 	{
 		if (!handler || _event_handlers.find(fd) != _event_handlers.end()) {
 			return kInvalidArgument;
@@ -165,7 +165,7 @@ public:
 
 		tresult rv = false;
 		Glib::Threads::Mutex::Lock lm (_lock);
-		for (std::unordered_map<FileDescriptor, EventHandler>::const_iterator it = _event_handlers.begin (); it != _event_handlers.end ();) {
+		for (auto it = _event_handlers.begin (); it != _event_handlers.end ();) {
 			if (it->second._handler == handler) {
 				g_source_remove (it->second._source_id);
 				g_io_channel_unref (it->second._gio_channel);
@@ -178,7 +178,7 @@ public:
 		return rv;
 	}
 
-	tresult registerTimer (Linux::ITimerHandler* handler, TimerInterval milliseconds) SMTG_OVERRIDE
+	tresult registerTimer (Linux::ITimerHandler* handler, Linux::TimerInterval milliseconds) SMTG_OVERRIDE
 	{
 		if (!handler || milliseconds == 0) {
 			return kInvalidArgument;

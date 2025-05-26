@@ -22,11 +22,11 @@
 #include <memory>
 #include <vector>
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/sizegroup.h>
-#include <gtkmm/table.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/sizegroup.h>
+#include <ytkmm/table.h>
 
 #include "pbd/natsort.h"
 

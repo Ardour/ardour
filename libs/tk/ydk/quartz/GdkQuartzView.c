@@ -27,8 +27,14 @@
 
 @implementation GdkQuartzView
 
+static int showInvalidation = 0;
+
 -(id)initWithFrame: (NSRect)frameRect
 {
+#ifndef NDEBUG
+  showInvalidation = (int) g_getenv ("GDK_SHOW_QUARTZ_INVALIDATION");
+#endif
+
   if ((self = [super initWithFrame: frameRect]))
     {
       markedRange = NSMakeRange (NSNotFound, 0);
@@ -696,6 +702,12 @@
   NSInteger count;
   int i;
   GdkRegion *region;
+  gboolean full_draw;
+#ifndef NDEBUG
+  CGContextRef cg;
+  double r, g, b;
+#endif
+  NSRect bo = [self bounds];
 
   if (GDK_WINDOW_DESTROYED (gdk_window))
     return;
@@ -705,6 +717,25 @@
 
   if (NSEqualRects (rect, NSZeroRect))
     return;
+
+
+  /* Quartz/CoreGraphics/something on macOS causes occasional/periodic drawRect
+   * calls with a "dirty" rect that covers the entire NSView. As of 11/2024,
+   * this seems to be caused by how much of the NSView is redrawn in a given
+   * interval. The lower layers really do invalidate the contents of any
+   * backing store, so if we do not obey the drawRect call, portions of the
+   * window will remain undrawn.
+   */
+
+  if (NSContainsRect (rect, bo)) {
+	  full_draw = TRUE;
+#ifndef NDEBUG
+	  //printf ("full draw seen because %.0f x %.0f @ %.0f, %.0f contains %.0f x %.0f @ %.0f, %.0f\n", rect.size.width, rect.size.height, rect.origin.x, rect.origin.y,
+	  // bo.size.width, bo.size.height, bo.origin.x, bo.origin.y);
+#endif
+  } else {
+	  full_draw = FALSE;
+  }
 
   if (!GDK_WINDOW_IS_MAPPED (gdk_window) && ((gdk_quartz_osx_version() >= GDK_OSX_LEOPARD) && [self wantsLayer]))
     {
@@ -732,32 +763,76 @@
       return;
     }
 
-  if (!impl->needs_display_region || gdk_quartz_get_use_cocoa_invalidation()) {
-    [self getRectsBeingDrawn: &drawn_rects count: &count];
-    region = gdk_region_new ();
+    if (full_draw) {
+      GdkRectangle r = { bo.origin.x, bo.origin.y, bo.size.width, bo.size.height };
+      region = gdk_region_rectangle (&r);
+      if (impl->needs_display_region) {
+	gdk_region_destroy (impl->needs_display_region);
+	impl->needs_display_region = NULL;
+      }
+    } else if (!impl->needs_display_region || gdk_quartz_get_use_cocoa_invalidation()) {
+       gint nrects;
+       GdkRectangle* rects;
+       [self getRectsBeingDrawn: &drawn_rects count: &count];
+       // printf ("quartz says there are %d rects\n", count);
+       region = gdk_region_new ();
 
-    for (i = 0; i < count; i++)
-      {
-	gdk_rect.x = drawn_rects[i].origin.x;
-	gdk_rect.y = drawn_rects[i].origin.y;
-	gdk_rect.width = drawn_rects[i].size.width;
-	gdk_rect.height = drawn_rects[i].size.height;
+       for (i = 0; i < count; i++) {
+	 gdk_rect.x = drawn_rects[i].origin.x;
+	 gdk_rect.y = drawn_rects[i].origin.y;
+	 gdk_rect.width = drawn_rects[i].size.width;
+	 gdk_rect.height = drawn_rects[i].size.height;
 
-	gdk_region_union_with_rect (region, &gdk_rect);
+	 gdk_region_union_with_rect (region, &gdk_rect);
+       }
+    } else {
+	    gint nrects;
+	    GdkRectangle* rects;
+
+#ifndef NDEBUG
+       if (showInvalidation) {
+	       r = 0.0;
+	       g = 1.0;
+	       b = 0.0;
+       }
+#endif
+       region = impl->needs_display_region;
     }
-  } else {
-    region = impl->needs_display_region;
-  }
 
-#if 0
-  gint nrects;
-  GdkRectangle* rects;
+#ifndef NDEBUG
+  if (showInvalidation) {
+	  gint nrects;
+	  GdkRectangle* rects;
 
-  gdk_region_get_rectangles (region, &rects, &nrects);
-  printf ("%p drawRect with %d rects\n", impl, nrects);
-  for (gint n = 0; n < nrects; ++n) {
-    printf ("\t%d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
+	  [NSGraphicsContext saveGraphicsState];
+	  cg = [[NSGraphicsContext currentContext] CGContext];
+
+	  r = (random() % 65535) / 65535.;
+	  g = (random() % 65535) / 65535.;
+	  b = (random() % 65535) / 65535.;
+
+	  CGContextSetRGBFillColor (cg, r, g, b, 1.);
+
+	  /* The GDK process updates call tree will have removed child window
+	   * areas from the expose region. This will show up whatever is left
+	   */
+
+	  gdk_region_get_rectangles (region, &rects, &nrects);
+	  // printf ("\t%p rects from region %p: %d\n", impl, region, nrects);
+	  if (nrects == 0) {
+		  printf ("region %p empty: %d\n", region, gdk_region_empty (region));
+	  }
+	  for (gint n = 0; n < nrects; ++n) {
+		  CGContextFillRect (cg, NSMakeRect(rects[n].x, rects[n].y, rects[n].width, rects[n].height));
+		  // printf ("\tR: %d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
+	  }
+
+	  [NSGraphicsContext restoreGraphicsState];
   }
+#endif
+
+#ifndef NDEBUG
+    GdkRegion* copy = gdk_region_copy (region);
 #endif
 
   impl->in_paint_rect_count++;
@@ -765,12 +840,53 @@
   _gdk_window_process_updates_recurse (gdk_window, region);
   impl->in_paint_rect_count--;
 
-  if (impl->needs_display_region)
-    {
-      impl->needs_display_region = NULL;
-    }
+
+#ifndef NDEBUG
+  if (showInvalidation) {
+	  gint nrects;
+	  GdkRectangle* rects;
+
+	  [NSGraphicsContext saveGraphicsState];
+	  cg = [[NSGraphicsContext currentContext] CGContext];
+
+	  CGContextSetRGBFillColor (cg, 0., 0., 1., 1.);
+
+	  /* The GDK process updates call tree will have removed child window
+	   * areas from the expose region. This will show up whatever is left
+	   */
+
+	  gdk_region_get_rectangles (region, &rects, &nrects);
+	  // printf ("%p leftover %d rects after expose\n", impl, nrects);
+	  for (gint n = 0; n < nrects; ++n) {
+		  // CGContextFillRect (cg, NSMakeRect(rects[n].x, rects[n].y, rects[n].width, rects[n].height));
+		  // printf ("\tB: %d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
+	  }
+
+	  /* Now draw the rectangles making up the region where the process
+	   * updates call tree should have drawn ("exposed"). Quartz-driven redraws will
+	   * use a red line; GDK-driven redraws will use a green line.
+	   */
+
+	  CGContextSetLineWidth (cg, 5.);
+	  CGContextSetRGBStrokeColor (cg, 0., 1., 0., 1.);
+
+	  gdk_region_get_rectangles (copy, &rects, &nrects);
+	  // printf ("%p drawRect with %d rects in %p (region from gdk? %d)\n", impl, nrects, region, region == impl->needs_display_region);
+	  for (gint n = 0; n < nrects; ++n) {
+		  CGContextStrokeRect (cg, NSMakeRect(rects[n].x, rects[n].y, rects[n].width, rects[n].height));
+		  // printf ("\tG: %d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
+	  }
+
+	  [NSGraphicsContext restoreGraphicsState];
+  }
+#endif
+
+  impl->needs_display_region = NULL;
 
   gdk_region_destroy (region);
+#ifndef NDEBUG
+  gdk_region_destroy (copy);
+#endif
 
   if (needsInvalidateShadow)
     {
@@ -802,9 +918,6 @@
   r.y = 0;
   r.width = bounds.size.width;
   r.height = bounds.size.height;
-
-  if (impl->needs_display_region)
-    gdk_region_destroy (impl->needs_display_region);
 
   impl->needs_display_region = gdk_region_rectangle (&r);
 

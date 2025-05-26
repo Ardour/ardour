@@ -19,6 +19,7 @@ def build(bld):
         obj.source    = 'vst3-scanner.cc'
         obj.target    = 'ardour-vst3-scanner'
         obj.includes  = [ '../pbd/', '../ardour/', '../vst3/', '..' ]
+        obj.linkflags = ''
         obj.defines   = [
             'VST3_SCANNER_APP',
             'VERSIONSTRING="' + bld.env['VERSION'] + '"',
@@ -31,11 +32,14 @@ def build(bld):
 
         if bld.is_defined('HAVE_USB'):
             obj.uselib += ' USB'
+
         if sys.platform == 'darwin':
             obj.uselib += ' OSX'
-        if bld.env['build_target'] == 'mingw':
+        elif bld.env['build_target'] == 'mingw':
             obj.uselib += ' GDI32'
-            obj.linkflags = ['-mwindows']
+            obj.linkflags += ' -mwindows'
+        else:
+            obj.linkflags += ' -zexecstack'
 
         if re.search ("bsd", sys.platform) != None:
             obj.defines.append('_POSIX_C_SOURCE=200809L')
@@ -47,10 +51,10 @@ def build(bld):
         obj = bld (features = 'cxx c cxxprogram')
         obj.source = ( 'vst2-scanner.cc' )
         obj.target = 'ardour-vst-scanner'
+        obj.linkflags= ''
         if bld.is_defined('WINDOWS_VST_SUPPORT'):
             bld (features = 'c', name='vstwin', source='vstwin.c', uselib = 'GIOMM', includes  = [ '../pbd/', '../ardour/', '.' ])
             obj.uselib = ['GIOMM', 'DL', 'GDI32', 'ARCHIVE', 'CURL', 'XML']
-            obj.linkflags = ['-mwindows']
             obj.use = [ 'libpbd', 'libtemporal', 'libevoral', 'vstwin' ]
         else:
             obj.uselib = ['GIOMM', 'DL', 'OSX', 'ARCHIVE', 'CURL', 'XML' ]
@@ -58,6 +62,13 @@ def build(bld):
 
         if bld.is_defined('HAVE_USB'):
             obj.uselib += ['USB']
+
+        if sys.platform == 'darwin':
+            pass
+        elif bld.env['build_target'] == 'mingw':
+            obj.linkflags += ' -mwindows'
+        else:
+            obj.linkflags += ' -zexecstack'
 
         obj.includes  = [ '../pbd/', '../ardour/', '.' ]
         obj.defines = [

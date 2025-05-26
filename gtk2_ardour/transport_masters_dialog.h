@@ -21,16 +21,16 @@
 #include <vector>
 #include <string>
 
-#include <gtkmm/button.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/box.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/treestore.h>
+#include <ytkmm/button.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/box.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/treestore.h>
 
 #include "ardour/types.h"
 #include "pbd/property_basics.h"

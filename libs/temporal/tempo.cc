@@ -346,6 +346,12 @@ Meter::bbt_subtract (Temporal::BBT_Time const & bbt, Temporal::BBT_Offset const 
 	return Temporal::BBT_Time (r.bars, r.beats, r.ticks);
 }
 
+Temporal::Beats
+Meter::round_to_beat (Temporal::Beats const & b) const
+{
+	return b.round_to_multiple (Beats::ticks (ticks_per_grid()));
+}
+
 Temporal::BBT_Time
 Meter::round_to_bar (Temporal::BBT_Time const & bbt) const
 {
@@ -397,8 +403,8 @@ Meter::to_quarters (Temporal::BBT_Offset const & offset) const
 {
 	int64_t ticks = 0;
 
-	ticks += (Beats::PPQN * offset.bars * _divisions_per_bar * 4) / _note_value;
-	ticks += (Beats::PPQN * offset.beats * 4) / _note_value;
+	ticks += (Beats::PPQN * offset.bars * _divisions_per_bar * _note_value) / 4;
+	ticks += (Beats::PPQN * offset.beats * _note_value) / 4;
 
 	/* "parts per bar division" */
 
@@ -518,45 +524,47 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 		TEMPO_MAP_ASSERT (qn >= _quarters);
 	}
 
+	superclock_t r;
+
 	if (!actually_ramped()) {
 		/* not ramped, use linear */
 		const Beats delta = qn - _quarters;
 		const superclock_t spqn = superclocks_per_quarter_note ();
-		return _sclock + (spqn * delta.get_beats()) + muldiv_round (spqn, delta.get_ticks(), superclock_t (Temporal::ticks_per_beat));
-	}
-
-	superclock_t r;
-	const double log_expr = superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double();
-
-	// std::cerr << "logexpr " << log_expr << " from " << superclocks_per_quarter_note() << " * " << _omega << " * " << (qn - _quarters) << std::endl;
-
-	if (log_expr < -1) {
-
-		r = _sclock + llrint (log (-log_expr - 1.0) / -_omega);
-
-		if (r < 0) {
-			std::cerr << "CASE 1: " << *this << endl << " scpqn = " << superclocks_per_quarter_note() << std::endl;
-			std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log (" << log_expr << ") "
-			          << log (-log_expr - 1.0)
-			          << " - omega = " << -_omega
-			          << " => "
-			          << r << std::endl;
-			abort ();
-		}
-
+		r = _sclock + (spqn * delta.get_beats()) + muldiv_round (spqn, delta.get_ticks(), superclock_t (Temporal::ticks_per_beat));
 	} else {
-		r = _sclock + llrint (log1p (log_expr) / _omega);
 
-		// std::cerr << "r = " << _sclock << " + " << log1p (log_expr) / _omega << " => " << r << std::endl;
+		const double log_expr = superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double();
 
-		if (r < 0) {
-			std::cerr << "CASE 2: scpqn = " << superclocks_per_quarter_note() << std::endl;
-			std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log1p (" << superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double() << " = "
-			          << log1p (superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double())
-			          << " => "
-			          << r << std::endl;
-			_map->dump (std::cerr);
-			abort ();
+		// std::cerr << "logexpr " << log_expr << " from " << superclocks_per_quarter_note() << " * " << _omega << " * " << (qn - _quarters) << std::endl;
+
+		if (log_expr < -1) {
+
+			r = _sclock + llrint (log (-log_expr - 1.0) / -_omega);
+
+			if (r < 0) {
+				std::cerr << "CASE 1: " << *this << endl << " scpqn = " << superclocks_per_quarter_note() << std::endl;
+				std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log (" << log_expr << ") "
+				          << log (-log_expr - 1.0)
+				          << " - omega = " << -_omega
+				          << " => "
+				          << r << std::endl;
+				abort ();
+			}
+
+		} else {
+			r = _sclock + llrint (log1p (log_expr) / _omega);
+
+			// std::cerr << "r = " << _sclock << " + " << log1p (log_expr) / _omega << " => " << r << std::endl;
+
+			if (r < 0) {
+				std::cerr << "CASE 2: scpqn = " << superclocks_per_quarter_note() << std::endl;
+				std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log1p (" << superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double() << " = "
+				          << log1p (superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double())
+				          << " => "
+				          << r << std::endl;
+				_map->dump (std::cerr);
+				abort ();
+			}
 		}
 	}
 
@@ -907,7 +915,7 @@ TempoMap::copy ( timepos_t const & start, timepos_t const & end)
 TempoMapCutBuffer*
 TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, bool ripple)
 {
-	if (n_tempos() == 1 && n_meters() == 1) {
+	if (!copy && (n_tempos() == 1 && n_meters() == 1)) {
 		return nullptr;
 	}
 
@@ -1364,9 +1372,13 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 
 		/* tempo changes are required to be on-beat */
 
-		Beats on_beat = time.beats().round_to_beat();
+		Beats on_beat = metric_at (time.beats(), false).round_to_beat (time.beats());
 		superclock_t sc;
 		BBT_Time bbt;
+
+		/* the metric for the on-beat position may be different than
+		 * the one for the raw time, so look it up again.
+		 */
 
 		TempoMetric metric (metric_at (on_beat, false));
 
@@ -1386,7 +1398,7 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 
 		/* tempo changes must be on beat */
 
-		beats = tm.quarters_at_superclock (sc).round_to_beat ();
+		beats = tm.round_to_beat (tm.quarters_at_superclock (sc));
 		bbt = tm.bbt_at (beats);
 
 		/* recompute superclock position of rounded beat */

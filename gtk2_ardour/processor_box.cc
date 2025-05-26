@@ -38,7 +38,7 @@
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/messagedialog.h>
 
 #include "pbd/unwind.h"
 
@@ -1957,7 +1957,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, std::function<PluginSelector*
 	 * are available for context menus.
 	 */
 
-	processor_display.set_data ("ardour-bindings", bindings);
+	set_widget_bindings (processor_display, *bindings, ARDOUR_BINDING_KEY);
 	processor_display.SelectionAdded.connect (sigc::mem_fun (*this, &ProcessorBox::selection_added));
 
 	_width = Wide;
@@ -1984,6 +1984,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, std::function<PluginSelector*
 	processor_display.Reordered.connect (sigc::mem_fun (*this, &ProcessorBox::reordered));
 	processor_display.DropFromAnotherBox.connect (sigc::mem_fun (*this, &ProcessorBox::object_drop));
 	processor_display.DropFromExternal.connect (sigc::mem_fun (*this, &ProcessorBox::plugin_drop));
+	processor_display.DragRefuse.connect (sigc::mem_fun (*this, &ProcessorBox::drag_refuse));
 
 	processor_scroller.show ();
 	processor_display.show ();
@@ -2149,6 +2150,17 @@ not match the configuration of this track.");
 		MessageDialog am (msg);
 		am.run ();
 	}
+}
+
+bool
+ProcessorBox::drag_refuse (DnDVBox<ProcessorEntry>* source, ProcessorEntry*)
+{
+	if (!source) {
+		/* handle drag from sidebar */
+		return false;
+	}
+	ProcessorBox* other = reinterpret_cast<ProcessorBox*> (source->get_data ("processorbox"));
+	return (other && other->_route == _route);
 }
 
 void

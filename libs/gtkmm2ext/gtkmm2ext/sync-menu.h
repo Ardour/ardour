@@ -25,7 +25,7 @@
 #ifndef __IGE_MAC_MENU_H__
 #define __IGE_MAC_MENU_H__
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 #include "gtkmm2ext/visibility.h"
 

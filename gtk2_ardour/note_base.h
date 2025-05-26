@@ -91,9 +91,6 @@ class NoteBase : public sigc::trackable
 	void show_velocity();
 	void hide_velocity();
 
-	/** Channel changed for this specific event */
-	void on_channel_change(uint8_t channel);
-
 	/** Channel selection changed */
 	void on_channel_selection_change(uint16_t selection);
 
@@ -114,7 +111,7 @@ class NoteBase : public sigc::trackable
 	float mouse_y_fraction() const { return _mouse_y_fraction; }
 
 	const std::shared_ptr<NoteType> note() const { return _note; }
-	MidiView& region_view() const { return _region; }
+	MidiView& midi_view() const { return _view; }
 
 	static void set_colors ();
 
@@ -138,7 +135,7 @@ class NoteBase : public sigc::trackable
 protected:
 	enum State { None, Pressed, Dragging };
 
-	MidiView&                         _region;
+	MidiView&                         _view;
 	ArdourCanvas::Item*               _item;
 	ArdourCanvas::Text*               _text;
 	State                             _state;

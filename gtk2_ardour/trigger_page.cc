@@ -22,7 +22,7 @@
 
 #include <list>
 
-#include <gtkmm/label.h>
+#include <ytkmm/label.h>
 
 #include "pbd/properties.h"
 
@@ -47,7 +47,7 @@
 #include "editor.h"
 #include "gui_thread.h"
 #include "public_editor.h"
-#include "midi_cue_editor.h"
+#include "pianoroll.h"
 #include "timers.h"
 #include "trigger_page.h"
 #include "trigger_strip.h"
@@ -73,19 +73,29 @@ TriggerPage::TriggerPage ()
 	, _master (_master_widget.root ())
 	, _show_bottom_pane (false)
 	, _selection (*this, *this)
+	, clip_editor_column (-1)
 {
 	load_bindings ();
 	register_actions ();
 
-	/* Match TriggerStrip::_name_button height */
-	ArdourButton* spacer = manage (new ArdourButton (ArdourButton::Text));
-	spacer->set_name ("mixer strip button");
-	spacer->set_sensitive (false);
-	spacer->set_text (" ");
+	/* Spacers to match height of TriggerStrip's input, name and toggle
+	 * rec-enable buttons
+	 */
+
+	ArdourButton* spacer[3];
+
+	for (std::size_t n = 0; n < sizeof (spacer) / sizeof (spacer[0]); ++n) {
+		spacer[n] = manage (new ArdourButton (ArdourButton::Text));
+		spacer[n]->set_name ("mixer strip button");
+		spacer[n]->set_sensitive (false);
+		spacer[n]->set_text (" ");
+	}
 
 	/* left-side, fixed-size cue-box */
 	_cue_area_box.set_spacing (2);
-	_cue_area_box.pack_start (*spacer, Gtk::PACK_SHRINK);
+	_cue_area_box.pack_start (*spacer[0], Gtk::PACK_SHRINK);
+	_cue_area_box.pack_start (*spacer[1], Gtk::PACK_SHRINK);
+	_cue_area_box.pack_start (*spacer[2], Gtk::PACK_SHRINK);
 	_cue_area_box.pack_start (_cue_box, Gtk::PACK_SHRINK);
 	_cue_area_box.pack_start (_master_widget, Gtk::PACK_SHRINK);
 
@@ -93,7 +103,7 @@ TriggerPage::TriggerPage ()
 	 * use Alignment instead of Frame with SHADOW_IN (2px)
 	 * +1px padding for _strip_scroller frame -> 3px top padding
 	 */
-	_cue_area_frame.set_padding (3, 1, 1, 1);
+	_cue_area_frame.set_padding (4, 1, 1, 1);
 	_cue_area_frame.add (_cue_area_box);
 
 	_strip_scroller.add (_strip_packer);
@@ -122,42 +132,59 @@ TriggerPage::TriggerPage ()
 	_strip_group_box.pack_start (_strip_scroller, true, true);
 
 	/* sidebar */
-	_sidebar_notebook.set_show_tabs (true);
+	_sidebar_notebook.set_show_tabs (false);
 	_sidebar_notebook.set_scrollable (true);
 	_sidebar_notebook.popup_disable ();
-	_sidebar_notebook.set_tab_pos (Gtk::POS_RIGHT);
 
-	add_sidebar_page (_("Clips"), _trigger_clip_picker);
-	add_sidebar_page (_("Tracks"), _trigger_route_list.widget ());
-	add_sidebar_page (_("Sources"), _trigger_source_list.widget ());
-	add_sidebar_page (_("Regions"), _trigger_region_list.widget ());
+	add_sidebar_page (_("Clips"), _("Clips"), _trigger_clip_picker);
+	add_sidebar_page (_("Tracks"), _("Tracks & Busses"), _trigger_route_list.widget ());
+	add_sidebar_page (_("Sources"), _("Sources"), _trigger_source_list.widget ());
+	add_sidebar_page (_("Regions"), _("Regions"), _trigger_region_list.widget ());
 
-	_midi_editor = new MidiCueEditor;
+	_sidebar_pager2.set_index (3);
+
+	_midi_editor = new Pianoroll (X_("MIDICueEditor"));
 
 	/* Bottom -- Properties of selected Slot/Region */
-	Gtk::Table* table = manage (new Gtk::Table);
-	table->set_homogeneous (false);
-	table->set_spacings (8);  //match to slot_properties_box::set_spacings
-	table->set_border_width (8);
+
+	table.set_homogeneous (false);
+	table.set_spacings (8);  //match to slot_properties_box::set_spacings
+	table.set_border_width (8);
 
 	int col = 0;
-	table->attach (_slot_prop_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
+	table.attach (_slot_prop_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
 	++col;
-	table->attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
-	++col;
-	table->attach (_midi_editor->toolbox(), col, col + 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL);
-	++col;
+	table.attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
+	clip_editor_column = ++col;
 
-	table->show_all ();
+	table.set_no_show_all ();
 
-	_parameter_box.pack_start (*table);
+	_parameter_box.pack_start (table);
 	_parameter_box.show ();
+
+	_sidebar_notebook.signal_switch_page().connect ([this](GtkNotebookPage*, guint page) {
+			std::string label (_sidebar_notebook.get_tab_label_text (*_sidebar_notebook.get_nth_page (page)));
+			_sidebar_pager1.set_active (label);
+			_sidebar_pager2.set_active (label);
+			//instant_save ();
+			});
+
+	_sidebar_pager1.set_name ("tab button");
+	_sidebar_pager2.set_name ("tab button");
+
+	HBox* tabbox = manage (new HBox (true));
+	tabbox->set_spacing (3);
+	tabbox->pack_start (_sidebar_pager1);
+	tabbox->pack_start (_sidebar_pager2);
+
+	_sidebar_vbox.pack_start (*tabbox, false, false, 2);
+	_sidebar_vbox.pack_start (_sidebar_notebook);
 
 	/* Top-level Layout */
 	content_app_bar.add (_application_bar);
 	content_main.add (_strip_group_box);
 	content_att_bottom.add (_parameter_box);
-	content_att_right.add (_sidebar_notebook);
+	content_att_right.add (_sidebar_vbox);
 
 	/* Show all */
 	_strip_group_box.show ();
@@ -166,10 +193,10 @@ TriggerPage::TriggerPage ()
 	_cue_area_frame.show_all ();
 	_trigger_clip_picker.show ();
 	_no_strips.show ();
-	_sidebar_notebook.show_all ();
+	_sidebar_vbox.show_all ();
 
 	/* setup keybidings */
-	contents().set_data ("ardour-bindings", bindings);
+	set_widget_bindings (contents(), *bindings, ARDOUR_BINDING_KEY);
 
 	/* subscribe to signals */
 	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&TriggerPage::parameter_changed, this, _1), gui_context ());
@@ -194,7 +221,7 @@ TriggerPage::use_own_window (bool and_fill_it)
 		win->set_name ("TriggerWindow");
 		ARDOUR_UI::instance ()->setup_toplevel_window (*win, _("Cues"), this);
 		win->signal_event ().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), win));
-		win->set_data ("ardour-bindings", bindings);
+		set_widget_bindings (*win, *bindings, ARDOUR_BINDING_KEY);
 		update_title ();
 #if 0 // TODO
 		if (!win->get_focus()) {
@@ -230,6 +257,8 @@ TriggerPage::get_state () const
 	node->add_child_nocopy (Tabbable::get_state ());
 
 	node->set_property (X_("triggerpage-sidebar-page"), _sidebar_notebook.get_current_page ());
+	node->set_property (X_("triggerpage-sidebar-btn1"), _sidebar_pager1.index ());
+	node->set_property (X_("triggerpage-sidebar-btn2"), _sidebar_pager2.index ());
 
 	node->add_child_nocopy (_midi_editor->get_state());
 
@@ -251,12 +280,26 @@ TriggerPage::focus_on_clock()
 int
 TriggerPage::set_state (const XMLNode& node, int version)
 {
+	guint index;
+	if (node.get_property (X_("triggerpage-sidebar-btn1"), index)) {
+		_sidebar_pager1.set_index (index);
+	}
+
+	if (node.get_property (X_("triggerpage-sidebar-btn2"), index)) {
+		_sidebar_pager2.set_index (index);
+	}
+
 	int32_t sidebar_page;
 	if (node.get_property (X_("triggerpage-sidebar-page"), sidebar_page)) {
 		_sidebar_notebook.set_current_page (sidebar_page);
+	} else {
+		sidebar_page = _sidebar_notebook.get_current_page ();
 	}
+	std::string label (_sidebar_notebook.get_tab_label_text (*_sidebar_notebook.get_nth_page (sidebar_page)));
+	_sidebar_pager1.set_active (label);
+	_sidebar_pager2.set_active (label);
 
-	XMLNode* mn = node.child (X_("MIDICueEditor"));
+	XMLNode* mn = node.child (_midi_editor->editor_name().c_str());
 	if (mn) {
 		_midi_editor->set_state (*mn, version);
 	}
@@ -318,7 +361,7 @@ TriggerPage::set_session (Session* s)
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), std::bind (&TriggerPage::parameter_changed, this, _1), gui_context ());
 
 	Editor::instance ().get_selection ().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerPage::selection_changed));
-	Trigger::TriggerArmChanged.connect (*this, invalidator (*this), std::bind (&TriggerPage::rec_enable_changed, this, _1), gui_context());
+	Trigger::TriggerArmChanged.connect (*this, invalidator (*this), std::bind (&TriggerPage::trigger_arm_changed, this, _1), gui_context());
 
 	initial_track_display ();
 
@@ -390,14 +433,12 @@ TriggerPage::update_title ()
 }
 
 void
-TriggerPage::add_sidebar_page (string const & name, Gtk::Widget& widget)
+TriggerPage::add_sidebar_page (string const& label, string const& name, Gtk::Widget& widget)
 {
-	EventBox* b = manage (new EventBox);
-	Label* l = manage (new Label (name));
-	l->set_angle (-90);
-	b->add (*l);
-	b->show_all ();
-	_sidebar_notebook.append_page (widget, *b);
+	_sidebar_notebook.append_page (widget, name);
+	using namespace Menu_Helpers;
+	_sidebar_pager1.add_item (label, name, [this, &widget]() {_sidebar_notebook.set_current_page (_sidebar_notebook.page_num (widget)); });
+	_sidebar_pager2.add_item (label, name, [this, &widget]() {_sidebar_notebook.set_current_page (_sidebar_notebook.page_num (widget)); });
 }
 
 void
@@ -422,12 +463,11 @@ TriggerPage::clear_selected_slot ()
 }
 
 void
-TriggerPage::rec_enable_changed (Trigger const * trigger)
+TriggerPage::trigger_arm_changed (Trigger const * trigger)
 {
 	assert (trigger);
 
 	if (!trigger->armed()) {
-		_midi_editor->trigger_rec_enable_change (*trigger);
 		return;
 	}
 
@@ -457,7 +497,7 @@ TriggerPage::rec_enable_changed (Trigger const * trigger)
 		_midi_trig_box.set_trigger (ref);
 		_midi_trig_box.show ();
 
-		_midi_editor->set (ref);
+		_midi_editor->set_trigger (ref);
 		_midi_editor->viewport().show ();
 	}
 
@@ -476,36 +516,48 @@ TriggerPage::selection_changed ()
 	_slot_prop_box.hide ();
 	_audio_trig_box.hide ();
 	_midi_trig_box.hide ();
-	_midi_editor->viewport().hide ();
+
+	if (_midi_editor->contents().get_parent()) {
+		_midi_editor->contents().get_parent()->remove (_midi_editor->contents());
+	}
 
 	Tabbable::showhide_att_bottom (false);
 
-	if (!selection.triggers.empty ()) {
-		TriggerSelection ts      = selection.triggers;
-		TriggerEntry*    entry   = *ts.begin ();
-		TriggerReference ref     = entry->trigger_reference ();
-		TriggerPtr       trigger = entry->trigger ();
-		std::shared_ptr<TriggerBox> box = ref.box();
+	if (selection.triggers.empty ()) {
+		return;
+	}
 
-		_slot_prop_box.set_slot (ref);
-		_slot_prop_box.show ();
+	TriggerSelection ts      = selection.triggers;
+	TriggerEntry*    entry   = *ts.begin ();
+	TriggerReference ref     = entry->trigger_reference ();
+	TriggerPtr       trigger = entry->trigger ();
+	std::shared_ptr<TriggerBox> box = ref.box();
 
-		if (box->data_type () == DataType::AUDIO) {
-			if (trigger->the_region()) {
-				_audio_trig_box.set_trigger (ref);
-				_audio_trig_box.show ();
-			}
-		} else {
-			_midi_trig_box.set_trigger (ref);
-			_midi_trig_box.show ();
+	_slot_prop_box.set_slot (ref);
+	_slot_prop_box.show ();
 
-			_midi_editor->set (ref);
-			_midi_editor->viewport().show ();
+	if (box->data_type () == DataType::AUDIO) {
+
+		if (trigger->the_region()) {
+			_audio_trig_box.set_trigger (ref);
+			_audio_trig_box.show ();
 		}
 
-		if (_show_bottom_pane) {
-			Tabbable::showhide_att_bottom (true);
-		}
+	} else {
+
+		_midi_trig_box.set_trigger (ref);
+		_midi_trig_box.show ();
+
+		_midi_editor->set_trigger (ref);
+
+		table.attach (_midi_editor->contents(), clip_editor_column, clip_editor_column + 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL);
+		_midi_editor->contents().show_all ();
+	}
+
+	table.show ();
+
+	if (_show_bottom_pane) {
+		Tabbable::showhide_att_bottom (true);
 	}
 }
 

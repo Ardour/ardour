@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <gtkmm/menu.h>
+#include <ytkmm/menu.h>
 #include "group_tabs.h"
 
 class Editor;
@@ -27,7 +27,7 @@ class Editor;
 class EditorGroupTabs : public GroupTabs, public EditorComponent
 {
 public:
-	EditorGroupTabs (Editor *);
+	EditorGroupTabs (Editor&);
 
 private:
 	std::list<Tab> compute_tabs () const;

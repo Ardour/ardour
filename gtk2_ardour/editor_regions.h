@@ -28,7 +28,7 @@
 class EditorRegions : public EditorComponent, public RegionListBase
 {
 public:
-	EditorRegions (Editor*);
+	EditorRegions (Editor&);
 
 	void set_selected (RegionSelection&);
 	void selection_mapover (sigc::slot<void, std::shared_ptr<ARDOUR::Region>>);

@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/comboboxtext.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/comboboxtext.h>
 
 #include "evoral/PatchChange.h"
 #include "ardour_dialog.h"

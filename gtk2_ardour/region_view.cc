@@ -26,7 +26,7 @@
 #include <cmath>
 #include <algorithm>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 
@@ -203,6 +203,10 @@ RegionView::init (bool wfd)
 		frame_handle_end->set_data ("isleft", (void*) 0);
 		frame_handle_end->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_end, this));
 		frame_handle_end->raise_to_top();
+	}
+
+	if (frame) {
+		frame->Event.connect (sigc::mem_fun (*this, &RegionView::canvas_group_event));
 	}
 
 	if (name_text) {
@@ -1033,7 +1037,7 @@ RegionView::update_coverage_frame (LayerDisplay d)
 
 	if (cr) {
 		/* finish off the last rectangle */
-		cr->set_x1 (trackview.editor().duration_to_pixels (position.distance (end)));
+		cr->set_x1 (trackview.editor().time_delta_to_pixel (position, end));
 	}
 
 	if (frame_handle_start) {

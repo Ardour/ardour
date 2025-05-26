@@ -2419,7 +2419,7 @@ AlsaDeviceReservation::release_device ()
 	_reservation_connection.drop_connections ();
 	ARDOUR::SystemExec* tmp = _device_reservation;
 	_device_reservation     = 0;
-	delete tmp;
+	Glib::signal_idle().connect ([tmp] { delete tmp; return false; }, Glib::PRIORITY_HIGH_IDLE);
 }
 
 void

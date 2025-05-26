@@ -825,6 +825,7 @@ Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, Re
 		ret = motion_handler (item, event);
 		break;
 	case GDK_ENTER_NOTIFY:
+		set_entered_regionview (rv);
 		ret = enter_handler (item, event, type);
 		break;
 
@@ -1115,7 +1116,7 @@ Editor::section_rect_event (GdkEvent* ev, Location* loc, ArdourCanvas::Rectangle
 			}
 			if (ev->button.button == 1) {
 				assert (find_location_markers (loc));
-				rename_marker (find_location_markers (loc)->start);
+				edit_marker (find_location_markers (loc)->start, true);
 				return true;
 			}
 			break;
@@ -1197,6 +1198,16 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 	}
 
 	return typed_event (item, event, NoteItem);
+}
+
+bool
+Editor::canvas_bg_event (GdkEvent *event, ArdourCanvas::Item* item)
+{
+	if (!internal_editing()) {
+		return false;
+	}
+
+	return typed_event (item, event, RegionItem);
 }
 
 bool
@@ -1383,7 +1394,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	double px;
 	double py;
 
-	event.type = GDK_MOTION_NOTIFY;
+	event.type = GDK_BUTTON_PRESS;
 	event.button.x = x;
 	event.button.y = y;
 	/* assume we're dragging with button 1 */

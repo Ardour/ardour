@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <gtkmm/eventbox.h>
+#include <ytkmm/eventbox.h>
 #include "port_group.h"
 #include "port_matrix_types.h"
 

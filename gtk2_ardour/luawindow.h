@@ -19,11 +19,11 @@
 
 #include <glibmm/thread.h>
 
-#include <gtkmm/box.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/label.h>
-#include <gtkmm/textview.h>
-#include <gtkmm/window.h>
+#include <ytkmm/box.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/label.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/window.h>
 
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
@@ -50,8 +50,6 @@ public:
 	static LuaWindow* instance();
 	~LuaWindow();
 
-	void show_window ();
-	bool hide_window (GdkEventAny *ev);
 	void edit_script (const std::string&, const std::string&);
 
 	void set_session (ARDOUR::Session* s);
@@ -87,7 +85,6 @@ private:
 	static LuaWindow* _instance;
 
 	LuaState *lua;
-	bool _visible;
 
 	Gtk::Menu* _menu_scratch;
 	Gtk::Menu* _menu_snippet;

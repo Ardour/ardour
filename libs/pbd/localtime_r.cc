@@ -22,7 +22,7 @@
 #include "libpbd-config.h"
 #endif
 
-#ifndef HAVE_LOCALTIME_R
+#if !defined HAVE_LOCALTIME_R || defined __MINGW64__
 #include <time.h>
 #include <string.h>
 

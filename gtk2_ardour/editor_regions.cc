@@ -48,15 +48,15 @@ using namespace Gtk;
 
 using Gtkmm2ext::Keyboard;
 
-EditorRegions::EditorRegions (Editor* e)
+EditorRegions::EditorRegions (Editor& e)
 	: EditorComponent (e)
 {
 	init ();
 
 	_change_connection = _display.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &EditorRegions::selection_changed));
 
-	e->EditorFreeze.connect (_editor_freeze_connection, MISSING_INVALIDATOR, std::bind (&EditorRegions::freeze_tree_model, this), gui_context ());
-	e->EditorThaw.connect (_editor_thaw_connection, MISSING_INVALIDATOR, std::bind (&EditorRegions::thaw_tree_model, this), gui_context ());
+	_editor.EditorFreeze.connect (_editor_freeze_connection, MISSING_INVALIDATOR, std::bind (&EditorRegions::freeze_tree_model, this), gui_context ());
+	_editor.EditorThaw.connect (_editor_thaw_connection, MISSING_INVALIDATOR, std::bind (&EditorRegions::thaw_tree_model, this), gui_context ());
 }
 
 void
@@ -64,6 +64,7 @@ EditorRegions::init ()
 {
 	add_name_column ();
 	setup_col (append_col (_columns.channels, "Chans    "), 1, ALIGN_START, _("# Ch"), _("# Channels in the region"));
+	setup_col (append_col (_columns.regionfx, "Region Fx"), 2, ALIGN_START, _("# Fx"), _("# Region effects"));
 	add_tag_column ();
 
 	int cb_width = 24;
@@ -75,9 +76,9 @@ EditorRegions::init ()
 	TreeViewColumn* tvc;
 
 	tvc = append_col (_columns.start, bbt_width);
-	setup_col (tvc, 16, ALIGN_END, _("Start"), _("Position of start of region"));
+	setup_col (tvc, 4, ALIGN_END, _("Start"), _("Position of start of region"));
 	tvc = append_col (_columns.length, bbt_width);
-	setup_col (tvc, 4, ALIGN_END, _("Length"), _("Length of the region"));
+	setup_col (tvc, 5, ALIGN_END, _("Length"), _("Length of the region"));
 
 	tvc = append_col (_columns.locked, cb_width);
 	setup_col (tvc, -1, ALIGN_CENTER, S_("Lock|L"), _("Region position locked?"));
@@ -93,7 +94,7 @@ EditorRegions::init ()
 
 #ifdef SHOW_REGION_EXTRAS
 	tvc = append_col (_columns.end, bbt_width);
-	setup_col (tvc, 5, ALIGN_END, _("End"), _("Position of end of region"));
+	setup_col (tvc, 6, ALIGN_END, _("End"), _("Position of end of region"));
 	tvc = append_col (_columns.sync, bbt_width);
 	setup_col (tvc, -1, ALIGN_END, _("Sync"), _("Position of region sync point, relative to start of the region"));
 	tvc = append_col (_columns.fadein, bbt_width);
@@ -106,13 +107,13 @@ EditorRegions::init ()
 void
 EditorRegions::selection_changed ()
 {
-	_editor->_region_selection_change_updates_region_list = false;
+	_editor._region_selection_change_updates_region_list = false;
 
 	if (_display.get_selection ()->count_selected_rows () > 0) {
 		TreeIter                             iter;
 		TreeView::Selection::ListHandle_Path rows = _display.get_selection ()->get_selected_rows ();
 
-		_editor->get_selection ().clear_regions ();
+		_editor.get_selection ().clear_regions ();
 
 		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin (); i != rows.end (); ++i) {
 			if ((iter = _model->get_iter (*i))) {
@@ -124,16 +125,16 @@ EditorRegions::selection_changed ()
 
 				if (region) {
 					_change_connection.block (true);
-					_editor->set_selected_regionview_from_region_list (region, SelectionAdd);
+					_editor.set_selected_regionview_from_region_list (region, SelectionAdd);
 					_change_connection.block (false);
 				}
 			}
 		}
 	} else {
-		_editor->get_selection ().clear_regions ();
+		_editor.get_selection ().clear_regions ();
 	}
 
-	_editor->_region_selection_change_updates_region_list = true;
+	_editor._region_selection_change_updates_region_list = true;
 }
 
 void
@@ -185,7 +186,7 @@ EditorRegions::button_press (GdkEventButton* ev)
 	if (region != 0 && Keyboard::is_button2_event (ev)) {
 		/* start/stop audition */
 		if (!Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-			_editor->consider_auditioning (region);
+			_editor.consider_auditioning (region);
 		}
 		return true;
 	}
@@ -231,7 +232,7 @@ EditorRegions::regions_changed (std::shared_ptr<RegionList> rl, const PropertyCh
 	grid_interests.add (ARDOUR::Properties::sync_position);
 
 	if (what_changed.contains (grid_interests)) {
-		_editor->mark_region_boundary_cache_dirty ();
+		_editor.mark_region_boundary_cache_dirty ();
 	}
 
 	RegionListBase::regions_changed (rl, what_changed);

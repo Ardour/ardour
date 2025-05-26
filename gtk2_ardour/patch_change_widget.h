@@ -18,10 +18,10 @@
 
 #pragma once
 
-#include <gtkmm/box.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/table.h>
+#include <ytkmm/box.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/table.h>
 
 #include "midi++/midnam_patch.h"
 #include "pbd/signals.h"

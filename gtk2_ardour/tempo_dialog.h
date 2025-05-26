@@ -24,17 +24,17 @@
 
 #pragma once
 
-#include <gtkmm/entry.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/label.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/table.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/combobox.h>
-#include <gtkmm/comboboxtext.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/label.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/table.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/combobox.h>
+#include <ytkmm/comboboxtext.h>
 
 #include "ardour/types.h"
 #include "ardour/tempo.h"

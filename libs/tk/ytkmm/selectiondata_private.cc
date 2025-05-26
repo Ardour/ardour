@@ -20,7 +20,7 @@
  */
 
 #include <glibmm/listhandle.h>
-#include <gtkmm/selectiondata_private.h>
+#include <ytkmm/selectiondata_private.h>
 
 namespace Gtk
 {

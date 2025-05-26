@@ -20,8 +20,8 @@
 #include "pbd/compose.h"
 #include <algorithm>
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -109,6 +109,8 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	eTempoBox->set_name("EditorDark");
 	eTempoBox->set_edge_color (0x000000ff); // black
 	eTempoBox->add (*bpm_table);
+
+	eTempoBox->show_all();
 
 	/* -------------- Clip start&length (redundant with the trimmer gui handles?)  ----------*/
 	row = 0;

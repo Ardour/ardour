@@ -24,9 +24,9 @@
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 
-#include <gtkmm/table.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/table.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/messagedialog.h>
 
 #include "gtkmm2ext/colors.h"
 
@@ -161,7 +161,9 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	table->attach (_mute,             1, 3, r, r + 1, Gtk::FILL, Gtk::FILL, 0, 0); ++r;
 	table->attach (_solo,             1, 3, r, r + 1, Gtk::FILL, Gtk::FILL, 0, 0); ++r;
 	table->attach (_rec_enable,       1, 3, r, r + 1, Gtk::FILL, Gtk::FILL, 0, 0); ++r;
+#ifdef VAPOR
 	table->attach (_sursend_enable,   1, 3, r, r + 1, Gtk::FILL, Gtk::FILL, 0, 0); ++r;
+#endif
 	table->attach (_select,           1, 3, r, r + 1, Gtk::FILL, Gtk::FILL, 0, 0); ++r;
 	table->attach (_route_active,     1, 3, r, r + 1, Gtk::FILL, Gtk::FILL, 0, 0); ++r;
 	table->attach (_share_color,      1, 3, r, r + 1, Gtk::FILL, Gtk::FILL, 0, 0); ++r;

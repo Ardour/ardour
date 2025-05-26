@@ -19,9 +19,9 @@
 #ifndef __ardour_trigger_strip__
 #define __ardour_trigger_strip__
 
-#include <gtkmm/box.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/frame.h>
+#include <ytkmm/box.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/frame.h>
 
 #include "pbd/stateful.h"
 
@@ -122,6 +122,9 @@ private:
 	Gtk::Table mute_solo_table;
 	Gtk::Table volume_table;
 
+	ArdourWidgets::ArdourButton* rec_toggle_button;
+	bool rec_toggle_press (GdkEventButton* ev);
+
 	/* Widgets */
 	FittedCanvasWidget _tmaster_widget;
 	TriggerMaster*     _tmaster;
@@ -136,6 +139,8 @@ private:
 	std::shared_ptr<AutomationController> _gain_control;
 
 	Gtk::Menu* _route_ops_menu;
+
+	void box_rec_enable_change ();
 };
 
 #endif /* __ardour_trigger_strip__ */

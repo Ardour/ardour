@@ -40,9 +40,11 @@
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/event_loop.h"
+#include "pbd/stack_allocator.h"
 
 #ifndef NDEBUG
 #define DEBUG_PBD_SIGNAL_CONNECTIONS
+#define DEBUG_PBD_SIGNAL_EMISSION
 #endif
 
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
@@ -50,9 +52,14 @@
 #include <iostream>
 #endif
 
+
 using namespace std::placeholders;
 
 namespace PBD {
+
+#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+static std::size_t max_signal_subscribers;
+#endif
 
 class LIBPBD_API Connection;
 
@@ -68,11 +75,17 @@ public:
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
 	, _debug_connection (false)
 #endif
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+	, _debug_emission (false)
+#endif
 	{}
 	virtual ~SignalBase () { }
 	virtual void disconnect (std::shared_ptr<Connection>) = 0;
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
 	void set_debug_connection (bool yn) { _debug_connection = yn; }
+#endif
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+	void set_debug_emission (bool yn) { _debug_emission = yn; }
 #endif
 
 protected:
@@ -80,6 +93,9 @@ protected:
 	std::atomic<bool>            _in_dtor;
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
 	bool _debug_connection;
+#endif
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+	bool _debug_emission;
 #endif
 };
 
@@ -276,6 +292,8 @@ class LIBPBD_API ScopedConnectionList
 	void add_connection (const UnscopedConnection& c);
 	void drop_connections ();
 
+	std::list<ScopedConnectionList*>::size_type size() const { Glib::Threads::Mutex::Lock lm (_scoped_connection_lock); return _scoped_connection_list.size(); }
+
   private:
 	/* Even though our signals code is thread-safe, this additional list of
 	   scoped connections needs to be protected in 2 cases:
@@ -288,7 +306,7 @@ class LIBPBD_API ScopedConnectionList
 	       one from another.
 	 */
 
-	Glib::Threads::Mutex _scoped_connection_lock;
+	mutable Glib::Threads::Mutex _scoped_connection_lock;
 
 	typedef std::list<ScopedConnection*> ConnectionList;
 	ConnectionList _scoped_connection_list;
@@ -415,52 +433,138 @@ template <typename Combiner, typename R, typename... A>
 typename std::conditional_t<std::is_void_v<R>, R, typename Combiner::result_type>
 SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 {
-	/* First, take a copy of our list of slots as it is now */
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+	if (_debug_emission) {
+		std::cerr << "------ Signal @ " << this << " emission process begins\n";
+		PBD::stacktrace (std::cerr, 19);
+	}
+#endif
+	const std::size_t nslots = 512;
+	std::vector<Connection*,PBD::StackAllocator<Connection*,nslots> > s;
 
-	Slots s;
+	/* First, make a copy of the current connection state for us to iterate
+	 * over later (the connection state may be changed by a signal handler.
+	 */
+
 	{
 		Glib::Threads::Mutex::Lock lm (_mutex);
-		s = _slots;
+		/* copy only the raw pointer, no need for a shared_ptr in this
+		 * context, we only use the address as a lookup into the _slots
+		 * container. Note: because of the use of a stack allocator,
+		 * this is *unlikely* to cause any (heap) memory
+		 * allocation. That will only happen if the number of
+		 * connections to this signal exceeds the value of nslots
+		 * defined above. As of April 2025, the maximum number of
+		 * connections appears to be ntracks+1. 
+		 */
+		for (auto const & [connection,functor] : _slots) {
+			s.push_back (connection.get());
+		}
 	}
 
 	if constexpr (std::is_void_v<R>) {
-		for (typename Slots::const_iterator i = s.begin(); i != s.end(); ++i) {
+		slot_function_type functor;
 
-			/* We may have just called a slot, and this may have resulted in
-			* disconnection of other slots from us.  The list copy means that
-			* this won't cause any problems with invalidated iterators, but we
-			* must check to see if the slot we are about to call is still on the list.
-			*/
+		for (auto const & c : s) {
+
+			/* We may have just called a slot, and this may have
+			 * resulted in disconnection of other slots from us.
+			 * The list copy means that this won't cause any
+			 * problems with invalidated iterators, but we must
+			 * check to see if the slot we are about to call is
+			 * still on the list.
+			 */
 			bool still_there = false;
+
 			{
 				Glib::Threads::Mutex::Lock lm (_mutex);
-				still_there = _slots.find (i->first) != _slots.end ();
+				typename Slots::const_iterator f = std::find_if (_slots.begin(), _slots.end(), [&](typename Slots::value_type const & elem) { return elem.first.get() == c; });
+				if (f != _slots.end()) {
+					functor = f->second;
+					still_there = true;
+				}
 			}
 
 			if (still_there) {
-				(i->second)(a...);
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+				if (_debug_emission) {
+					std::cerr << "signal @ " << this << " calling slot for connection @ " << c << " of " << _slots.size() << std::endl;
+				}
+#endif
+				functor (a...);
 			}
 		}
+
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+		if (_debug_emission) {
+			std::cerr << "------ Signal @ " << this << " emission process ends\n";
+		}
+#endif
+		return;
+
 	} else {
-		std::list<R> r;
-		for (typename Slots::const_iterator i = s.begin(); i != s.end(); ++i) {
-
-			/* We may have just called a slot, and this may have resulted in
-			* disconnection of other slots from us.  The list copy means that
-			* this won't cause any problems with invalidated iterators, but we
-			* must check to see if the slot we are about to call is still on the list.
-			*/
-			bool still_there = false;
-			{
-				Glib::Threads::Mutex::Lock lm (_mutex);
-				still_there = _slots.find (i->first) != _slots.end ();
-			}
-
-			if (still_there) {
-				r.push_back ((i->second)(a...));
-			}
+		if (s.empty()) {
+			return typename Combiner::result_type ();
 		}
 
+		/* We would like to use a stack allocator here, but for reasons
+		 * not really understood, this breaks on macOS when using
+		 * the custom combiner used by libs/ardour IO's
+		 * PortCountChanging signal.
+		 *
+		 * Using a vector here is not RT-safe but a manual code
+		 * inspection reveals that there are no combiner-based signals
+		 * (i.e. Signals with a return value) that are ever used in RT
+		 * code.
+		 *
+		 * The alternative is to use alloca() but that could
+		 * theoretically cause stack overflows if the number of
+		 * handlers for the signal is too large (it would have to be
+		 * very large, however).
+		 *
+		 * In short, std::vector<T> is the least-bad of two bad
+		 * choices, and we've chosen this because of the lack of RT use
+		 * cases for a Signal with a return value.
+		 *
+		 */
+
+		std::vector<R> r;
+		r.reserve (s.size());
+		slot_function_type functor;
+
+		for (auto const & c : s) {
+
+			/* We may have just called a slot, and this may have resulted in
+			 * disconnection of other slots from us.  The list copy means that
+			 * this won't cause any problems with invalidated iterators, but we
+			 * must check to see if the slot we are about to call is still on the list.
+			 */
+			bool still_there = false;
+
+			{
+				Glib::Threads::Mutex::Lock lm (_mutex);
+				typename Slots::const_iterator f = std::find_if (_slots.begin(), _slots.end(), [&](typename Slots::value_type const & elem) { return elem.first.get() == c; });
+
+				if (f != _slots.end()) {
+					functor = f->second;
+					still_there = true;
+				}
+			}
+			if (still_there) {
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+				if (_debug_emission) {
+					std::cerr << "signal @ " << this << " calling non-void slot for connection @ " << c << " of " << _slots.size() << std::endl;
+				}
+#endif
+				r.push_back (functor (a...));
+			}
+
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+			if (_debug_emission) {
+				std::cerr << "------ Signal @ " << this << " emission process ends\n";
+			}
+#endif
+		}
 		/* Call our combiner to do whatever is required to the result values */
 		Combiner c;
 		return c (r.begin(), r.end());
@@ -475,12 +579,16 @@ SignalWithCombiner<Combiner, R(A...)>::_connect (PBD::EventLoop::InvalidationRec
 	std::shared_ptr<Connection> c (new Connection (this, ir));
 	Glib::Threads::Mutex::Lock lm (_mutex);
 	_slots[c] = f;
-	#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+
+#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+	if (_slots.size() > max_signal_subscribers) {
+		max_signal_subscribers = _slots.size();
+	}
 	if (_debug_connection) {
-		std::cerr << "+++++++ CONNECT " << this << " size now " << _slots.size() << std::endl;
+		std::cerr << "+++++++ CONNECT " << this << " via connection @ " << c << " size now " << _slots.size() << std::endl;
 		stacktrace (std::cerr, 10);
 	}
-	#endif
+#endif
 	return c;
 }
 
@@ -511,4 +619,3 @@ SignalWithCombiner<Combiner, R(A...)>::disconnect (std::shared_ptr<Connection> c
 }
 
 } /* namespace */
-

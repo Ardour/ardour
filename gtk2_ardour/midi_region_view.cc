@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <ostream>
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 
 #include "gtkmm2ext/gtk_ui.h"
 
@@ -48,7 +48,6 @@
 #include "ardour/midi_track.h"
 #include "ardour/operations.h"
 #include "ardour/quantize.h"
-#include "ardour/session.h"
 
 #include "evoral/Parameter.h"
 #include "evoral/Event.h"
@@ -77,6 +76,7 @@
 #include "midi_velocity_dialog.h"
 #include "note_player.h"
 #include "paste_context.h"
+#include "pianoroll_window.h"
 #include "public_editor.h"
 #include "route_time_axis.h"
 #include "rgb_macros.h"
@@ -308,7 +308,20 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 		return RegionView::canvas_group_event (ev);
 	}
 
-	return MidiView::canvas_group_event (ev);
+	/* Let MidiView do its thing */
+
+	if (MidiView::midi_canvas_group_event (ev)) {
+
+		switch (ev->type) {
+		case GDK_ENTER_NOTIFY:
+		case GDK_LEAVE_NOTIFY:
+			break;
+		default:
+			return true;
+		}
+	}
+
+	return _editing_context.canvas_bg_event (ev, get_canvas_group());
 }
 
 bool
@@ -340,7 +353,7 @@ MidiRegionView::mouse_mode_changed ()
 void
 MidiRegionView::enter_internal (uint32_t state)
 {
-	if (_editing_context.current_mouse_mode() == MouseDraw && _mouse_state != AddDragging) {
+	if (_editing_context.current_mouse_mode() == MouseDraw && !draw_drag) {
 		// Show ghost note under pencil
 		create_ghost_note(_last_event_x, _last_event_y, state);
 	}
@@ -373,113 +386,6 @@ MidiRegionView::leave_internal()
 }
 
 bool
-MidiRegionView::button_press (GdkEventButton* ev)
-{
-	if (ev->button != 1) {
-		return false;
-	}
-
-	MouseMode m = _editing_context.current_mouse_mode();
-
-	if (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
-		_press_cursor_ctx = CursorContext::create(_editing_context, _editing_context.cursors()->midi_pencil);
-	}
-
-	if (_mouse_state != SelectTouchDragging) {
-
-		_pressed_button = ev->button;
-
-		if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
-
-			if (midi_view()->note_mode() == Percussive) {
-				_editing_context.drags()->set (new HitCreateDrag (_editing_context, group, this), (GdkEvent *) ev);
-			} else {
-				_editing_context.drags()->set (new NoteCreateDrag (_editing_context, group, this), (GdkEvent *) ev);
-			}
-
-			_mouse_state = AddDragging;
-			remove_ghost_note ();
-			hide_verbose_cursor ();
-		} else {
-			_mouse_state = Pressed;
-		}
-
-		return true;
-	}
-
-	_pressed_button = ev->button;
-	_mouse_changed_selection = false;
-
-	return true;
-}
-
-bool
-MidiRegionView::button_release (GdkEventButton* ev)
-{
-	double event_x, event_y;
-
-	if (ev->button != 1) {
-		return false;
-	}
-
-	event_x = ev->x;
-	event_y = ev->y;
-
-	group->canvas_to_item (event_x, event_y);
-	group->ungrab ();
-
-	_press_cursor_ctx.reset();
-
-	switch (_mouse_state) {
-	case Pressed: // Clicked
-
-		switch (_editing_context.current_mouse_mode()) {
-		case MouseRange:
-			/* no motion occurred - simple click */
-			clear_selection_internal ();
-			_mouse_changed_selection = true;
-			break;
-
-		case MouseContent:
-			_editing_context.get_selection().set (this);
-			/* fallthru */
-		case MouseTimeFX:
-			_mouse_changed_selection = true;
-			clear_selection_internal ();
-			break;
-		case MouseDraw:
-			_editing_context.get_selection().set (this);
-			break;
-
-		default:
-			break;
-		}
-
-		_mouse_state = None;
-		break;
-
-	case AddDragging:
-		/* Don't a ghost note when we added a note - wait until motion to avoid visual confusion.
-		   we don't want one when we were drag-selecting either. */
-	case SelectRectDragging:
-		_editing_context.drags()->end_grab ((GdkEvent *) ev);
-		_mouse_state = None;
-		break;
-
-
-	default:
-		break;
-	}
-
-	if (_mouse_changed_selection) {
-		_editing_context.begin_reversible_selection_op (X_("Mouse Selection Change"));
-		_editing_context.commit_reversible_selection_op ();
-	}
-
-	return false;
-}
-
-bool
 MidiRegionView::motion (GdkEventMotion* ev)
 {
 	MidiView::motion (ev);
@@ -494,19 +400,25 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 		return false;
 	}
 
+	/* Note: it is hard to select regions in draw mode, which makes the
+	 * requirement that the region is selected before we do MIDI scrolling
+	 * a bit burdensome. However, removing it means that in draw mode,
+	 * vertical scroll will behave in even less desirable ways.
+	 */
+
 	if (!_editing_context.get_selection().selected (this)) {
 		return false;
 	}
 
-	if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier) ||
-	    Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
-		/* XXX: bit of a hack; allow PrimaryModifier+TertiaryModifier scroll
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		/* XXX: bit of a hack; allow PrimaryModifier scroll
 		 * through so that it still works for navigation and zoom.
 		 */
 		return false;
 	}
 
-	if (_selection.empty()) {
+	if (_selection.empty() || !UIConfiguration::instance().get_scroll_velocity_editing()) {
+
 		const int step = 1;
 		const bool zoom = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier);
 		const bool just_one_edge = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier|Keyboard::PrimaryModifier);
@@ -759,4 +671,90 @@ MergeableLine*
 MidiRegionView::make_merger ()
 {
 	return nullptr;
+}
+
+void
+MidiRegionView::add_control_points_to_selection (timepos_t const & start, timepos_t const & end, double gy0, double gy1)
+{
+	typedef RouteTimeAxisView::AutomationTracks ATracks;
+	typedef std::list<Selectable*>              Selectables;
+
+	const ATracks& atracks = dynamic_cast<StripableTimeAxisView*>(&trackview)->automation_tracks();
+	Selectables    selectables;
+	_editing_context.get_selection().clear_points();
+
+	timepos_t st (start);
+	timepos_t et (end);
+
+	for (auto const & at : atracks) {
+
+		at.second->get_selectables (st, et, gy0, gy1, selectables);
+
+		for (Selectables::const_iterator s = selectables.begin(); s != selectables.end(); ++s) {
+			ControlPoint* cp = dynamic_cast<ControlPoint*>(*s);
+			if (cp) {
+				_editing_context.get_selection().add(cp);
+			}
+		}
+
+		at.second->set_selected_points (_editing_context.get_selection().points);
+	}
+}
+
+void
+MidiRegionView::edit_in_pianoroll_window ()
+{
+	std::shared_ptr<MidiTrack> track = std::dynamic_pointer_cast<MidiTrack> (trackview.stripable());
+	assert (track);
+
+	PianorollWindow* pr = new PianorollWindow (string_compose (_("Pianoroll: %1"), _region->name()), track->session());
+
+	pr->set (track, midi_region());
+	pr->show_all ();
+	pr->present ();
+
+	pr->signal_delete_event().connect (sigc::mem_fun (*this, &MidiRegionView::pianoroll_window_deleted), false);
+	_editor = pr;
+}
+
+bool
+MidiRegionView::pianoroll_window_deleted (GdkEventAny*)
+{
+	_editor = nullptr;
+	return false;
+}
+
+void
+MidiRegionView::show_region_editor ()
+{
+	edit_in_pianoroll_window ();
+}
+
+void
+MidiRegionView::hide_region_editor ()
+{
+	RegionView::hide_region_editor ();
+	delete _editor;
+	_editor = nullptr;
+}
+
+void
+MidiRegionView::trim_front_starting ()
+{
+	/* We used to eparent the note group to the region view's parent, so that it didn't change.
+	   now we update it.
+	*/
+}
+
+void
+MidiRegionView::trim_front_ending ()
+{
+	if (!_midi_region) {
+		return;
+	}
+
+	if (_midi_region->start().is_negative()) {
+		/* Trim drag made start time -ve; fix this */
+		midi_region()->fix_negative_start (_editing_context.history());
+	}
 }

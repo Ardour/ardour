@@ -68,8 +68,6 @@ ClipEditorBox::init ()
 	Bindings* bindings = Bindings::get_bindings (X_("Clip Editing"));
 
 	register_clip_editor_actions (bindings);
-
-	//_track_canvas_viewport->canvas()->set_data ("ardour-bindings", midi_bindings);
 }
 
 void

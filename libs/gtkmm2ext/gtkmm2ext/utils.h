@@ -32,12 +32,12 @@
 #include <cairomm/cairomm.h>
 #include <pangomm/fontdescription.h>
 
-#include <gtkmm/container.h>
-#include <gtkmm/filechooser.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/treeview.h>
-#include <gdkmm/window.h> /* for WMDecoration */
-#include <gdkmm/pixbuf.h>
+#include <ytkmm/container.h>
+#include <ytkmm/filechooser.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/treeview.h>
+#include <ydkmm/window.h> /* for WMDecoration */
+#include <ydkmm/pixbuf.h>
 
 #include "gtkmm2ext/visibility.h"
 

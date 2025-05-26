@@ -3,10 +3,10 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/textview.h>
-#include <gtkmm/private/textview_p.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/private/textview_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: textview.ccg,v 1.3 2005/11/29 16:38:10 murrayc Exp $ */
@@ -28,7 +28,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

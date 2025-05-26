@@ -33,9 +33,9 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <gtkmm/liststore.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/scale.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/scale.h>
 
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
@@ -2902,7 +2902,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance/Toolbar"),
 	     new BoolOption (
 		     "show-toolbar-latency",
-		     _("Display Latency Compensation"),
+		     _("Plugin Delay Compensation"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_latency),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_latency)
 		     ));
@@ -4968,7 +4968,7 @@ These settings will only take effect after %1 is restarted.\n\
 		     );
 		iotp->add (0, _("No priority"));
 		iotp->add (1, _("Realtime (FIFO)"));
-		iotp->add (1, _("Realtime (Round Robin)"));
+		iotp->add (2, _("Realtime (Round Robin)"));
 		add_option (_("Performance"), iotp);
 #endif
 	}

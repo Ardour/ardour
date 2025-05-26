@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/rgbcmap.h>
-#include <gdkmm/private/rgbcmap_p.h>
+#include <ydkmm/rgbcmap.h>
+#include <ydkmm/private/rgbcmap_p.h>
 
 
 // -*- c++ -*-
@@ -30,7 +30,7 @@
  */
 
 #include <glibmm/utility.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 namespace Gdk
 {

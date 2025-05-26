@@ -513,7 +513,7 @@ def build(bld):
                 fma_sources = [ 'x86_functions_fma.cc' ]
                 avx512f_sources = [ 'x86_functions_avx512f.cc' ]
         elif bld.env['build_target'] == 'aarch64':
-            obj.source += ['arm_neon_functions.cc']
+            obj.source += ['aarch64_neon_functions.cc']
             obj.defines += [ 'ARM_NEON_SUPPORT' ]
 
         elif bld.env['build_target'] == 'armhf':
@@ -727,8 +727,7 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj.use          = [ 'testcommon' ]
     testobj.name         = name
     testobj.target       = target
-    # not sure about install path
-    testobj.install_path = bld.env['LIBDIR']
+    testobj.install_path = ''
     testobj.defines      = [
         'PACKAGE="libardour' + bld.env['MAJOR'] + 'test"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',

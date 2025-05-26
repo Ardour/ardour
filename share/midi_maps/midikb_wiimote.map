@@ -37,9 +37,9 @@
 <!-- home -->
 <Binding channel="1" note="37" action="Editor/playhead-to-edit"/>
 <!-- minus -->
-<Binding channel="1" note="38" action="Editor/temporal-zoom-out"/>
+<Binding channel="1" note="38" action="Editing/temporal-zoom-out"/>
 <!-- plus -->
-<Binding channel="1" note="39" action="Editor/temporal-zoom-in"/>
+<Binding channel="1" note="39" action="Editing/temporal-zoom-in"/>
 <!-- one -->
 <Binding channel="1" note="40" action="Editor/track-record-enable-toggle"/>
 <!-- Two -->

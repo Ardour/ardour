@@ -432,6 +432,9 @@ public:
 
 	PBD::Signal<void()> UpdateRouteRecordState; /* signals potential change in route recording arming */
 
+	PBD::Signal<void()> RecordPassCompleted;
+	PBD::Signal<void()> ClearedLastCaptureSources;
+
 	/* Emited when session is loaded */
 	PBD::Signal<void()> SessionLoaded;
 
@@ -871,7 +874,9 @@ public:
 	int destroy_sources (std::list<std::shared_ptr<Source> > const&);
 
 	int remove_last_capture ();
-	void get_last_capture_sources (std::list<std::shared_ptr<Source> >&);
+	bool have_last_capture_sources () const;
+	void last_capture_sources (std::list<std::shared_ptr<Source> >&) const;
+	void reset_last_capture_sources ();
 
 	/** handlers should return -1 for "stop cleanup",
 	    0 for "yes, delete this playlist",
@@ -1337,6 +1342,7 @@ public:
 	bool bang_trigger_at(int32_t route_index, int32_t row_index, float velocity = 1.0);
 	bool unbang_trigger_at(int32_t route_index, int32_t row_index);
 	void clear_cue (int row_index);
+	std::shared_ptr<TriggerBox> armed_triggerbox () const;
 
 	void start_domain_bounce (Temporal::DomainBounceInfo&);
 	void finish_domain_bounce (Temporal::DomainBounceInfo&);
@@ -1777,8 +1783,8 @@ private:
 	void mmc_shuttle (MIDI::MachineControl &mmc, float speed, bool forw);
 	void mmc_record_enable (MIDI::MachineControl &mmc, size_t track, bool enabled);
 
-	struct timeval last_mmc_step;
-	double step_speed;
+	int64_t _last_mmc_step;
+	double  step_speed;
 
 	typedef std::function<bool()> MidiTimeoutCallback;
 	typedef std::list<MidiTimeoutCallback> MidiTimeoutList;

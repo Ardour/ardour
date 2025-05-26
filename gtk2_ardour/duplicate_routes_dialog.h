@@ -18,12 +18,12 @@
 
 #pragma once
 
-#include <gtkmm/entry.h>
-#include <gtkmm/box.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/adjustment.h>
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/box.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/spinbutton.h>
 
 #include "ardour/types.h"
 

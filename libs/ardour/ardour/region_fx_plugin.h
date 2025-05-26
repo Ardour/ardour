@@ -137,6 +137,7 @@ public:
 
 	void truncate_automation_start (timecnt_t);
 	void truncate_automation_end (timepos_t);
+	void x_scale_automation (Temporal::ratio_t);
 
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);

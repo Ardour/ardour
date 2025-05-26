@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <gtkmm/box.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
+#include <ytkmm/box.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
 
 #include "ardour/ardour.h"
 #include "ardour/types.h"
@@ -131,8 +131,6 @@ private:
 	ArdourWidgets::ArdourVSpacer  _latency_spacer;
 	ArdourWidgets::ArdourButton   _latency_disable_button;
 	Gtk::Label                    _route_latency_value;
-	Gtk::Label                    _io_latency_label;
-	Gtk::Label                    _io_latency_value;
 	ArdourWidgets::ArdourButton   _auto_return_button;
 	ArdourWidgets::ArdourButton   _follow_edits_button;
 	TransportClock                _primary_clock;

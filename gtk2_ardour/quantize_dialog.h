@@ -22,10 +22,10 @@
 #include <vector>
 #include <string>
 
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/adjustment.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/spinbutton.h>
 
 #include "temporal/beats.h"
 

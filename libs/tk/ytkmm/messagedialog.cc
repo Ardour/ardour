@@ -3,10 +3,10 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/private/messagedialog_p.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/private/messagedialog_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: messagedialog.ccg,v 1.7 2005/02/15 10:52:44 murrayc Exp $ */
@@ -30,7 +30,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 namespace Gtk

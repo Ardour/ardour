@@ -32,12 +32,12 @@
 using namespace std;
 
 MidiAutomationLine::MidiAutomationLine (
-	const std::string&                                      name,
-	TimeAxisView&                                           tav,
-	ArdourCanvas::Item&                                     parent,
-	std::shared_ptr<ARDOUR::AutomationList>               list,
-	std::shared_ptr<ARDOUR::MidiRegion>                   region,
-	Evoral::Parameter                                       parameter)
+	const std::string&                      name,
+	TimeAxisView&                           tav,
+	ArdourCanvas::Item&                     parent,
+	std::shared_ptr<ARDOUR::AutomationList> list,
+	std::shared_ptr<ARDOUR::MidiRegion>     region,
+	Evoral::Parameter                       parameter)
 	: EditorAutomationLine (name, tav, parent, list, parameter)
 	, _region (region)
 	, _parameter (parameter)

@@ -24,7 +24,7 @@
 #undef interface
 #endif
 
-#include <gdk/gdkevents.h>
+#include <ydk/gdkevents.h>
 #include <glibmm/main.h>
 
 #include "gtkmm2ext/visibility.h"

@@ -19,7 +19,7 @@
  */
 
 #include <glibmm/init.h>
-#include <atkmm/wrap_init.h>
+#include <ztkmm/wrap_init.h>
 
 namespace Atk
 {

@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/container.h>
-#include <gtkmm/private/container_p.h>
+#include <ytkmm/container.h>
+#include <ytkmm/private/container_p.h>
 
 
 // -*- c++ -*-
@@ -27,8 +27,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/adjustment.h>
-#include <gtk/gtk.h>
+#include <ytkmm/adjustment.h>
+#include <ytk/ytk.h>
 
 
 namespace

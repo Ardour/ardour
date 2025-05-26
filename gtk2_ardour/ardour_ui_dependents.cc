@@ -53,13 +53,15 @@
 #include "keyboard.h"
 #include "keyeditor.h"
 #include "rc_option_editor.h"
+#include "region_editor.h"
+#include "rta_manager.h"
 #include "route_params_ui.h"
 #include "trigger_ui.h"
 #include "step_entry.h"
 #include "opts.h"
 
 #ifdef GDK_WINDOWING_X11
-#include <gdk/gdkx.h>
+#include <ydk/gdkx.h>
 #endif
 
 #include "pbd/i18n.h"
@@ -87,6 +89,9 @@ ARDOUR_UI::we_have_dependents ()
 
 	StepEntry::setup_actions_and_bindings ();
 	ClipEditorBox::init ();
+	RegionEditor::setup_actions_and_bindings ();
+
+	setup_action_tooltips ();
 
 	/* Global, editor, mixer, processor box actions are defined now. Link
 	   them with any bindings, so that GTK does not get a chance to define
@@ -130,6 +135,8 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 	recorder->set_session (s);
 	trigger_page->set_session (s);
 	meterbridge->set_session (s);
+
+	RTAManager::instance ()->set_session (s);
 
 	/* its safe to do this now */
 

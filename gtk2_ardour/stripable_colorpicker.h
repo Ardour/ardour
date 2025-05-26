@@ -20,8 +20,8 @@
 
 #include <memory>
 
-#include <gtkmm/colorbutton.h>
-#include <gtkmm/colorselection.h>
+#include <ytkmm/colorbutton.h>
+#include <ytkmm/colorselection.h>
 
 #include "ardour/stripable.h"
 

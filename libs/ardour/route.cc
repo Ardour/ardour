@@ -127,6 +127,7 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, _pending_meter_point (MeterPostFader)
 	, _denormal_protection (false)
 	, _recordable (true)
+	, _comment_editor_window (0)
 	, _have_internal_generator (false)
 	, _default_type (default_type)
 	, _instrument_fanned_out (false)
@@ -5036,7 +5037,7 @@ Route::set_processor_positions ()
 }
 
 /** Called when there is a proposed change to the input port count */
-bool
+int
 Route::input_port_count_changing (ChanCount to)
 {
 	list<pair<ChanCount, ChanCount> > c = try_configure_processors (to, 0);
@@ -5044,15 +5045,15 @@ Route::input_port_count_changing (ChanCount to)
 		/* The processors cannot be configured with the new input arrangement, so
 		   block the change.
 		*/
-		return true;
+		return 1;
 	}
 
 	/* The change is ok */
-	return false;
+	return 0;
 }
 
 /** Called when there is a proposed change to the output port count */
-bool
+int
 Route::output_port_count_changing (ChanCount to)
 {
 	if (_strict_io && !_in_configure_processors) {
@@ -5060,11 +5061,11 @@ Route::output_port_count_changing (ChanCount to)
 	}
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		if (processor_out_streams.get(*t) > to.get(*t)) {
-			return true;
+			return 1;
 		}
 	}
 	/* The change is ok */
-	return false;
+	return 0;
 }
 
 list<string>
@@ -6186,11 +6187,11 @@ Route::monitoring_state () const
 	 * I don't think it's ever going to be too pretty too look at.
 	 */
 
+	bool session_rec       = _session.get_record_enabled ();
 	bool const roll        = _session.transport_state_rolling ();
 	bool const auto_input  = _session.config.get_auto_input ();
-	bool const clip_rec    = _triggerbox && _triggerbox->record_enabled();
+	bool const clip_rec    = _triggerbox && _triggerbox->record_enabled() == Recording && !session_rec;
 	bool const track_rec   = _disk_writer->record_enabled ();
-	bool session_rec;
 
 	bool const auto_input_does_talkback = Config->get_auto_input_does_talkback ();
 
@@ -6214,36 +6215,57 @@ Route::monitoring_state () const
 
 	if ((_session.config.get_punch_in() || _session.config.get_punch_out()) && 0 != _session.locations()->auto_punch_location ()) {
 		session_rec = _session.actively_recording ();
-	} else {
-		session_rec = _session.get_record_enabled();
 	}
 
 	if (track_rec || clip_rec) {
 
-		if (!clip_rec && (!session_rec && roll && auto_input)) {
-			return auto_monitor_disk | get_input_monitoring_state (false, false);
-		} else {
-			/* recording */
-			const samplecnt_t prtl = _session.preroll_record_trim_len ();
-			if (!clip_rec && session_rec && roll && prtl > 0 && _disk_writer->get_captured_samples () < prtl) {
-				/* CUE monitor during pre-roll */
-				return auto_monitor_disk | (get_input_monitoring_state (true, false) & auto_monitor_mask);
-			}
+		/* either record to the timeline or into a clip */
+		assert (track_rec != clip_rec);
+
+		if (clip_rec) {
+			/* actively recording into a slot */
+			return get_input_monitoring_state (true, auto_input_does_talkback) & auto_monitor_mask;
+		}
+
+		if (!roll) {
+			/*  9, 10, 25, 26 -> MonitoringInput; 41, 42, 57, 58 -> HW passthrough
+			 * 13, 14, 29, 30 -> MonitoringInput; 46, 47, 61, 62 -> HW passthrough */
 			return get_input_monitoring_state (true, false) & auto_monitor_mask;
 		}
+
+		if (!session_rec) {
+			if (auto_input) {
+				/* 11, 27, 43, 59 -> MonitoringDisk */
+				return auto_monitor_disk | get_input_monitoring_state (false, false);
+			} else {
+				/* 12, 28 -> MonitoringInput;  44, 60 -> HW passthru */
+				return get_input_monitoring_state (true, false) & auto_monitor_mask;
+			}
+		}
+
+		/* actively recording
+		 * 15, 16, 31, 32 -> MonitoringInput, 47, 48, 63, 64 -> HW passthrough */
+		const samplecnt_t prtl = _session.preroll_record_trim_len ();
+		if (session_rec && roll && prtl > 0 && _disk_writer->get_captured_samples () < prtl) {
+			/* CUE monitor during pre-roll */
+			return auto_monitor_disk | (get_input_monitoring_state (true, false) & auto_monitor_mask);
+		}
+		return get_input_monitoring_state (true, false) & auto_monitor_mask;
 
 	} else {
 
 		if (auto_input_does_talkback) {
-
+			/* 1 - 8 ; 33 - 40 */
 			if (!roll && auto_input) {
+				/* 1, 5 -> MonitoringInput */
 				return get_input_monitoring_state (false, true) & auto_monitor_mask;
 			} else {
 				return auto_monitor_disk | get_input_monitoring_state (false, false);
 			}
 
 		} else {
-			/* tape-machine-mode */
+			/* tape-machine-mode
+			 * 17 - 24; 49 - 56 -> MonitoringDisk */
 			return auto_monitor_disk | get_input_monitoring_state (false, false);
 		}
 	}

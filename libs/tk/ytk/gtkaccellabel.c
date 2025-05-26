@@ -36,7 +36,7 @@
 #include "gtkprivate.h"
 #include "gtkintl.h"
 #include "gtkalias.h"
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 
 /**
  * SECTION:gtkaccellabel

@@ -24,7 +24,7 @@
 #ifndef __GTK_APPLICATION_PRIVATE_H__
 #define __GTK_APPLICATION_PRIVATE_H__
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 G_BEGIN_DECLS
 

@@ -42,12 +42,12 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include <gtkmm/progressbar.h>
+#include <ytkmm/progressbar.h>
 //#include <ctime>
 
 #include "sfdb_ui.h"
 
-#include "curl/curl.h"
+#include "pbd/ccurl.h"
 
 //--- struct to store XML file
 struct SfdbMemoryStruct {
@@ -105,7 +105,7 @@ private:
 	std::string sortMethodString (enum sortMethod sort);
 	std::string getSoundResourceFile (std::string ID);
 
-	CURL *curl;
+	PBD::CCurl ccurl;
 	char errorBuffer[CURL_ERROR_SIZE]; // storage for cUrl error message
 
 	FILE* theFile;

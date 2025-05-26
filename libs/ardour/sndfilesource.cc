@@ -553,7 +553,9 @@ SndFileSource::read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) c
 		if (sf_seek (_sndfile, (sf_count_t) start, SEEK_SET|SFM_READ) != (sf_count_t) start) {
 			char errbuf[256];
 			sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-			error << string_compose(_("SndFileSource: could not seek to sample %1 within %2 (%3)"), start, _name, errbuf) << endmsg;
+			if ((_info.format & SF_FORMAT_TYPEMASK ) != SF_FORMAT_FLAC && writable ()) {
+				error << string_compose(_("SndFileSource: could not seek to sample %1 within %2 (%3)"), start, _name, errbuf) << endmsg;
+			}
 			return 0;
 		}
 

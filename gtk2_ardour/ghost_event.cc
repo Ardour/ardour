@@ -46,6 +46,13 @@ GhostEvent::~GhostEvent ()
 	/* event is not ours to delete */
 	delete item;
 }
+
+void
+GhostEvent::set_sensitive (bool yn)
+{
+	item->set_ignore_events (!yn);
+}
+
 /** Given a note in our parent region (ie the actual MidiRegionView), find our
  *  representation of it.
  *  @return Our Event, or 0 if not found.

@@ -334,7 +334,7 @@ Track::prep_record_enabled (bool yn)
 		return -1;
 	}
 
-	if (!can_be_record_enabled()) {
+	if (yn && !can_be_record_enabled()) {
 		return -1;
 	}
 
@@ -431,7 +431,7 @@ Track::can_be_record_safe ()
 bool
 Track::can_be_record_enabled ()
 {
-	return !_record_safe_control->get_value() && _disk_writer && !_disk_writer->record_safe() && _session.writable() && (_freeze_record.state != Frozen);
+	return !_record_safe_control->get_value() && _disk_writer && !_disk_writer->record_safe() && _session.writable() && (_freeze_record.state != Frozen) && (!_triggerbox || !_triggerbox->record_enabled());
 }
 
 void
@@ -583,6 +583,12 @@ list<std::shared_ptr<Source> > &
 Track::last_capture_sources ()
 {
 	return _disk_writer->last_capture_sources ();
+}
+
+void
+Track::reset_last_capture_sources ()
+{
+	_disk_writer->reset_last_capture_sources ();
 }
 
 std::string

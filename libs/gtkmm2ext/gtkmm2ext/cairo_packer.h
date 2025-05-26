@@ -1,7 +1,7 @@
 #ifndef __gtkmm2ext_cairo_packer_h__
 #define __gtkmm2ext_cairo_packer_h__
 
-#include <gtkmm/box.h>
+#include <ytkmm/box.h>
 
 #include "gtkmm2ext/visibility.h"
 
