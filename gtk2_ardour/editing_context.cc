@@ -253,6 +253,7 @@ EditingContext::~EditingContext()
 	ActionManager::drop_action_group (velocity_actions);
 	ActionManager::drop_action_group (zoom_actions);
 
+	delete _verbose_cursor;
 	delete grid_lines;
 }
 
