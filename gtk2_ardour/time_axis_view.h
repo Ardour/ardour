@@ -124,7 +124,7 @@ public:
 	uint32_t effective_height () const { return _effective_height; }
 
 	/** @return y position, or -1 if hidden */
-	double y_position () const { return _y_position; }
+	int y_position () const { return _y_position; }
 
 	/** @return our Editor */
 	PublicEditor& editor () const { return _editor; }
@@ -133,7 +133,7 @@ public:
 
 	void idle_resize (int32_t);
 
-	virtual guint32 show_at (double y, int& nth, Gtk::VBox *parent);
+	virtual guint32 show_at (int y, int& nth, Gtk::VBox *parent);
 	virtual void hide ();
 
 	bool touched (double top, double bot);
@@ -260,7 +260,7 @@ protected:
 	Gtk::Menu*            _size_menu;
 	ArdourCanvas::Line*       _canvas_separator;
 	ArdourCanvas::Container*  _canvas_display;
-	double                _y_position;
+	int                   _y_position;
 	PublicEditor&         _editor;
 
 	virtual bool can_edit_name() const;

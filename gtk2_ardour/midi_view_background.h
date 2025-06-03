@@ -93,18 +93,20 @@ class MidiViewBackground : public virtual ViewBackground
 
 	void maybe_extend_note_range (uint8_t note_num);
 
-	double note_to_y (uint8_t note) const {
-		return contents_height() - (note + 1 - lowest_note()) * note_height() + 1;
+	int note_height() const {
+		/* Note: this effectively rounds down (truncates) due to integer arithmetic */
+		return contents_height() / contents_note_range();
 	}
 
-	uint8_t y_to_note(double y) const;
+	int note_to_y (uint8_t note) const {
+		/* Note: this effectively rounds down (truncates) due to integer arithmetic */
+		return contents_height() - ((note - lowest_note()) * note_height());
+	}
+
+	uint8_t y_to_note (int y) const;
 
 	uint8_t contents_note_range() const {
 		return highest_note() - lowest_note() + 1;
-	}
-
-	double note_height() const {
-		return contents_height() / (double)contents_note_range();
 	}
 
 	sigc::signal<void> NoteRangeChanged;
@@ -112,13 +114,13 @@ class MidiViewBackground : public virtual ViewBackground
 	void maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children);
 
 	/** @return y position, or -1 if hidden */
-	virtual double y_position () const { return 0.; }
+	virtual int y_position () const { return 0; }
 
 	virtual uint8_t get_preferred_midi_channel () const = 0;
 	virtual void set_note_highlight (bool) = 0;
 	virtual void record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t) = 0;
 
-	virtual void set_size (double w, double h) {}
+	virtual void set_size (int w, int h) {}
 	PBD::Signal<void()> HeightChanged;
 
 	virtual ARDOUR::InstrumentInfo* instrument_info() const = 0;

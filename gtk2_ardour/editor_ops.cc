@@ -8442,7 +8442,7 @@ Editor::fit_tracks (TrackViewList & tracks)
 	 *  - height of the ruler/hscroll area
 	 */
 	uint32_t h = (uint32_t) floor ((trackviews_height() - child_heights) / visible_tracks);
-	double first_y_pos = DBL_MAX;
+	int first_y_pos = std::numeric_limits<int>::max();
 
 	if (h < TimeAxisView::preset_height (HeightSmall)) {
 		ArdourMessageDialog msg (_("There are too many tracks to fit in the current window"));

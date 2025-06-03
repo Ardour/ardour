@@ -107,9 +107,9 @@ MidiViewBackground::note_range_adjustment_changed()
 }
 
 uint8_t
-MidiViewBackground::y_to_note (double y) const
+MidiViewBackground::y_to_note (int y) const
 {
-	int const n = ((contents_height() - y) / contents_height() * (double)contents_note_range())
+	int const n = floor (((contents_height() - (double) y) / contents_height() * (double) contents_note_range()))
 		+ lowest_note();
 
 	if (n < 0) {
@@ -286,7 +286,7 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 	int const max_note_height = std::max<int> (mnh, mnh * uiscale);
 	int const range = _highest_note - _lowest_note;
 
-	int const available_note_range = floor (contents_height() / max_note_height);
+	int const available_note_range = contents_height() / max_note_height;
 	int additional_notes = available_note_range - range;
 
 	/* distribute additional notes to higher and lower ranges, clamp at 0 and 127 */

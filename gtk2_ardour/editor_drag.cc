@@ -6815,9 +6815,9 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	double const x0 = editing_context.sample_to_pixel (rrp1.samples ());
 	double const x1 = editing_context.sample_to_pixel (rrp2.samples ());
-	double const y  = _midi_view->note_to_y (_midi_view->y_to_note (y_to_region (event->button.y)));
+	int const y  = _midi_view->note_to_y (_midi_view->y_to_note (y_to_region (event->button.y)));
 
-	_drag_rect->set (ArdourCanvas::Rect (x0, y, x1, y + floor (_midi_view->midi_context ().note_height ())));
+	_drag_rect->set (ArdourCanvas::Rect (x0, y, x1, y + _midi_view->midi_context ().note_height ()));
 	_drag_rect->set_outline_all ();
 	_drag_rect->set_outline_color (0xffffff99);
 	_drag_rect->set_fill_color (0xffffff66);
@@ -6896,7 +6896,7 @@ HitCreateDrag::HitCreateDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiVie
 	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group())
 	, _midi_view (mv)
 	, _last_pos (Temporal::Beats ())
-	, _y (0.0)
+	, _y (0)
 {
 }
 

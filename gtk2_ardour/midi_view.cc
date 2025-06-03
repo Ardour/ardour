@@ -1483,7 +1483,7 @@ MidiView::display_sysexes()
 
 		const double x = _editing_context.time_to_pixel (_midi_region->source_beats_to_region_time (time.beats()));
 
-		double height = _midi_context.contents_height();
+		int height = _midi_context.contents_height();
 
 		// CAIROCANVAS: no longer passing *i (the sysex event) to the
 		// SysEx canvas object!!!
@@ -1513,7 +1513,7 @@ MidiView::update_sysexes ()
 		return;
 	}
 
-	double height = _midi_context.contents_height();
+	int height = _midi_context.contents_height();
 
 	for (SysExes::iterator s = _sys_exes.begin(); s != _sys_exes.end(); ++s) {
 
@@ -1844,7 +1844,7 @@ MidiView::clip_capture_update_sustained (Note *ev, double& x0, double& x1, doubl
 	timepos_t note_end (note->end_time());
 
 	x0 = _editing_context.sample_to_pixel (note_start.samples());
-	y0 = 1 + floor(note_to_y(note->note()));
+	y0 = 1 + note_to_y (note->note());
 
 	if (note->length() == Temporal::Beats()) {
 
@@ -1873,7 +1873,7 @@ MidiView::clip_capture_update_sustained (Note *ev, double& x0, double& x1, doubl
 		x1 = x0 + std::max (1., _editing_context.duration_to_pixels (note_start.distance (active_note_end.end())));
 	}
 
-	y1 = y0 + std::max (1., floor(note_height()) - 1);
+	y1 = y0 + std::max (1., note_height() - 1.);
 }
 
 void
@@ -1903,7 +1903,7 @@ MidiView::region_update_sustained (Note *ev, double& x0, double& x1, double& y0,
 	const samplepos_t note_start_samples = _midi_region->position().distance ((note_start + session_source_start)).samples();
 
 	x0 = _editing_context.sample_to_pixel (note_start_samples);
-	y0 = 1 + floor(note_to_y(note->note()));
+	y0 = 1 + note_to_y (note->note());
 
 	if (note->length() == Temporal::Beats()) {
 
@@ -1954,7 +1954,7 @@ MidiView::update_hit (Hit* ev)
 	}
 
 	const double diamond_size = std::max(1., floor(note_height()) - 2.);
-	const double y = 1.5 + floor(note_to_y(note->note())) + diamond_size * .5;
+	double y = 1.5 + note_to_y (note->note()) + diamond_size * .5;
 
 	if (y <= 0 || y >= height()) {
 		ev->hide();
@@ -2090,7 +2090,7 @@ MidiView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 
 	timecnt_t off (_midi_region->source_beats_to_region_time (patch->time()), _midi_region->position());
 	const double x = _editing_context.duration_to_pixels (off);
-	double const height = _midi_context.contents_height();
+	int const height = _midi_context.contents_height();
 
 	// CAIROCANVAS: active_channel info removed from PatcChange constructor
 	// so we need to do something more sophisticated to keep its color

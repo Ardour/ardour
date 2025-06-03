@@ -177,7 +177,7 @@ public:
 	void leave_internal ();
 	void mouse_mode_changed ();
 
-	double contents_height() const { return (_height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
+	int contents_height() const { return (_height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
 
 	void connect_to_diskstream ();
 	bool pianoroll_window_deleted (GdkEventAny*);

@@ -39,15 +39,15 @@ class PianorollMidiBackground : public MidiViewBackground
 	PianorollMidiBackground (ArdourCanvas::Item* parent, Pianoroll&);
 	~PianorollMidiBackground ();
 
-	double height() const;
-	double width() const;
-	double contents_height() const;
+	int height() const;
+	int width() const;
+	int contents_height() const;
 
 	uint8_t get_preferred_midi_channel () const;
 	void set_note_highlight (bool);
 	void record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t);
 
-	void set_size (double w, double h);
+	void set_size (int w, int h);
 	void set_view (MidiView*);
 
 	ARDOUR::InstrumentInfo* instrument_info() const;
@@ -55,8 +55,8 @@ class PianorollMidiBackground : public MidiViewBackground
   protected:
 	MidiView* view;
 	Pianoroll& pianoroll;
-	double _width;
-	double _height;
+	int _width;
+	int _height;
 
 	void apply_note_range_to_children();
 };

@@ -316,7 +316,7 @@ TimeAxisView::hide ()
 * @return height of this TimeAxisView.
 */
 guint32
-TimeAxisView::show_at (double y, int& nth, VBox *parent)
+TimeAxisView::show_at (int y, int& nth, VBox *parent)
 {
 	if (control_parent) {
 		control_parent->reorder_child (TOP_LEVEL_WIDGET, nth);
