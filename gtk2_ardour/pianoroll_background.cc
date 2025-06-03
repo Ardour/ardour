@@ -28,8 +28,8 @@ PianorollMidiBackground::PianorollMidiBackground (ArdourCanvas::Item* parent, Pi
 	: MidiViewBackground (parent, pr)
 	, view (nullptr)
 	, pianoroll (pr)
-	, _width (0.)
-	, _height (0.)
+	, _width (0)
+	, _height (0)
 {
 }
 
@@ -38,7 +38,7 @@ PianorollMidiBackground::~PianorollMidiBackground ()
 }
 
 void
-PianorollMidiBackground::set_size (double w, double h)
+PianorollMidiBackground::set_size (int w, int h)
 {
 	_width = w;
 	_height = h;
@@ -48,19 +48,19 @@ PianorollMidiBackground::set_size (double w, double h)
 	HeightChanged (); /* EMIT SIGNAL */
 }
 
-double
+int
 PianorollMidiBackground::contents_height() const
 {
 	return _height;
 }
 
-double
+int
 PianorollMidiBackground::height() const
 {
 	return _height;
 }
 
-double
+int
 PianorollMidiBackground::width() const
 {
 	return _width;
