@@ -101,21 +101,18 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	for (auto const & l : _lines) {
 
 		Rect self;
-		const double shift = 0.5;
 
 		if (_orientation == Horizontal) {
 			self = Rect (0, l.pos - (l.width/2.0), _extent, l.pos + (l.width/2.0));
-			if (fmod (l.width, 2.)) {
-				self.y0 += shift;
-			}
 		} else {
 			self = Rect (l.pos - (l.width/2.0), 0, l.pos + (l.width/2.0), _extent);
-			if (fmod (l.width, 2.)) {
-				self.x0 += shift;
-			}
 		}
 
-		self = item_to_window (self);
+		/* Note the 2nd argument, to avoid rounding after we may have
+		 * just shifted to a half-pixel grid (see
+		 * doc/cairo-single-pixel-lines)
+		 */
+		self = item_to_window (self, false);
 		Rect intersection = self.intersection (area);
 
 		if (!intersection) {
@@ -125,20 +122,12 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		Gtkmm2ext::set_source_rgba (context, l.color);
 		context->set_line_width (l.width);
 
-		/* Not 100% sure that the computation of the invariant
-		 * positions (y and x) below work correctly if the line width
-		 * is not 1.0, but visual inspection suggests it is OK.
-		 * See doc/cairo-single-pixel-lines lines to understand why we add 0.5
-		 */
-
 		if (_orientation == Horizontal) {
-			const double y = item_to_window (Duple (0, l.pos)).y;
-			context->move_to (intersection.x0, y + shift);
-			context->line_to (intersection.x1, y + shift);
+			context->move_to (intersection.x0, self.y0);
+			context->line_to (intersection.x1, self.y0);
 		} else {
-			const double x = item_to_window (Duple (l.pos, 0)).x;
-			context->move_to (x + shift, intersection.y0);
-			context->line_to (x + shift, intersection.y1);
+			context->move_to (self.x0, intersection.y0);
+			context->line_to (self.x0, intersection.y1);
 		}
 
 		context->stroke ();
@@ -149,6 +138,28 @@ void
 LineSet::add_coord (Coord pos, Distance width, Gtkmm2ext::Color color)
 {
 	_lines.push_back (Line (pos, width, color));
+	Line& l (_lines.back());
+
+	if (_orientation == Horizontal) {
+		/* If width is odd (width % 2 != 0) and position is on
+		   a whole pixel, shift it to a half-pixel position. Otherwise
+		   force it back to an integer position. See
+		   doc/cairo-single-pixel-lines for more details.
+		*/
+		if (fmod (l.width, 2.) && fmod (l.pos, 1.0)) {
+			l.pos += 0.5;
+		} else {
+			l.pos = floor (l.pos);
+		}
+
+	} else {
+
+		if (fmod (l.width, 2.) && fmod (l.pos, 1.0)) {
+			l.pos += 0.5;
+		} else {
+			l.pos = floor (l.pos);
+		}
+	}
 }
 
 void
