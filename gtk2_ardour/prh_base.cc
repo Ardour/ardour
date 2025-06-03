@@ -233,6 +233,20 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 	draw_transform (origin_x, origin_y);
 
 	cr->save ();
+
+	/* XXX this is s horrible hack. For some reason, there is an off-by-one
+	 * error with the drawing transform for the Gtk::Widget-derived version
+	 * of this class. It is unclear right now (June 2025) where the extra
+	 * pixel offset comes from. Correct it only for the case where the
+	 * transform does nothing, which is (currently) only true for the
+	 * Gtk::Widget case.
+	 */
+
+	if (origin_y == 0.) {
+		origin_y -= 1;
+	}
+
+
 	cr->translate (origin_x, origin_y);
 
 	// Render the MIDNAM text or its equivalent.  First, set up a clip
