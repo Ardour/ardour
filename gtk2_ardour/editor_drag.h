@@ -722,9 +722,9 @@ private:
 		return std::make_pair (Temporal::timecnt_t::zero (Temporal::AudioTime), 0);
 	}
 
-	MidiView* _midi_view;
+	MidiView*           _midi_view;
 	Temporal::timepos_t _last_pos;
-	double          _y;
+	int                 _y;
 
 };
 
