@@ -31,20 +31,22 @@
 
 using namespace std;
 
-MidiViewBackground::MidiViewBackground (ArdourCanvas::Item* parent)
-	: note_range_adjustment (0.0f, 0.0f, 0.0f)
+MidiViewBackground::MidiViewBackground (ArdourCanvas::Item* parent, EditingContext& ec)
+	: _editing_context (ec)
+	, note_range_adjustment (0.0f, 0.0f, 0.0f)
 	, _range_dirty (false)
 	, _range_sum_cache (-1.0)
 	, _lowest_note (UIConfiguration::instance().get_default_lower_midi_note())
 	, _highest_note (UIConfiguration::instance().get_default_upper_midi_note())
 	, _data_note_min (127)
 	, _data_note_max (0)
-	, _note_lines (new ArdourCanvas::LineSet (parent, ArdourCanvas::LineSet::Horizontal))
+	, _note_lines (new ArdourCanvas::RectSet (parent))
 	, _note_mode (ARDOUR::Sustained)
 	, _color_mode (ARDOUR::MeterColors)
 	, _visibility_note_range (ContentsRange)
 	, note_range_set (false)
 {
+	CANVAS_DEBUG_NAME (_note_lines, "MVB note lines");
 	_note_lines->lower_to_bottom();
 
 	// color_handler ();
