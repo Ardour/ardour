@@ -138,7 +138,6 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 			context->line_to (intersection.x1, c);
 		} else {
 			Coord c = item_to_window (Duple (l.pos, 0.), false).x;
-			std::cerr << "draw line of " << l.width << " @ " << c << " from " << l.pos << std::endl;
 			context->move_to (c, intersection.y0);
 			context->line_to (c, intersection.y1);
 		}
