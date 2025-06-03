@@ -351,12 +351,16 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 		cr->rectangle (x, y, width() - 1., heights[n]);
 		cr->fill ();
 
-		if (oct_rel == 4 || oct_rel == 11) {
+		if ((oct_rel == 4 || oct_rel == 11) && y > 0) {
 			/* draw black separators between B/C and E/F */
-			cr->set_source_rgb (0.0f, 0.0f, 0.0f);
-			cr->move_to (x, y);
-			cr->line_to (x + width(), y);
-			cr->set_line_width (2.0);
+			Gtkmm2ext::set_source_rgba (cr, black);
+			cr->set_line_width (1.0);
+			/* move the divider up to match the rect-drawing
+			   semantics used for MidiViewBackground's note lines,
+			   which are rects
+			*/
+			cr->move_to (x, y + 0.5);
+			cr->line_to (x + width(), y + 0.5);
 			cr->stroke ();
 		}
 	}
