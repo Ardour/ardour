@@ -60,7 +60,7 @@ MidiViewBackground::MidiViewBackground (ArdourCanvas::Item* parent, EditingConte
 	note_range_adjustment.set_lower(0);
 	note_range_adjustment.set_upper(127);
 
-	note_range_adjustment.signal_value_changed().connect(sigc::mem_fun(*this, &MidiViewBackground::note_range_adjustment_changed));
+	note_range_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MidiViewBackground::note_range_adjustment_changed));
 }
 
 MidiViewBackground::~MidiViewBackground()
