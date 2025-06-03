@@ -41,7 +41,7 @@ namespace ARDOUR {
 
 namespace ArdourCanvas {
 	class Item;
-	class LineSet;
+	class RectSet;
 }
 
 /** A class that provides various context for a MidiVieww:
@@ -132,7 +132,7 @@ class MidiViewBackground : public virtual ViewBackground
 	uint8_t                   _highest_note;  ///< currently visible
 	uint8_t                   _data_note_min; ///< in data
 	uint8_t                   _data_note_max; ///< in data
-	ArdourCanvas::LineSet*    _note_lines;
+	ArdourCanvas::RectSet*    _note_lines;
 	ARDOUR::NoteMode          _note_mode;
 	Gtkmm2ext::Color          _region_color;
 	ARDOUR::ColorMode         _color_mode;
@@ -142,7 +142,7 @@ class MidiViewBackground : public virtual ViewBackground
 	void color_handler ();
 	void parameter_changed (std::string const &);
 	void note_range_adjustment_changed();
-	void draw_note_lines();
+	void setup_note_lines();
 	bool update_data_note_range (uint8_t min, uint8_t max);
 	void update_contents_height ();
 	virtual void apply_note_range_to_children () = 0;

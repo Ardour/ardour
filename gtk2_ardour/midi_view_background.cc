@@ -22,7 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "canvas/line_set.h"
+#include "canvas/debug.h"
+#include "canvas/rect_set.h"
 
 #include "midi_view_background.h"
 #include "ui_config.h"
@@ -77,7 +78,7 @@ MidiViewBackground::parameter_changed (std::string const & param)
 void
 MidiViewBackground::color_handler ()
 {
-	draw_note_lines ();
+	setup_note_lines ();
 }
 
 void
@@ -129,7 +130,7 @@ MidiViewBackground::update_contents_height ()
 {
 	ViewBackground::update_contents_height ();
 
-	draw_note_lines ();
+	setup_note_lines ();
 	apply_note_range (lowest_note(), highest_note(), true);
 }
 
@@ -141,13 +142,12 @@ MidiViewBackground::draw_note_lines()
 	}
 
 	double y;
-	double prev_y = 0.;
 	Gtkmm2ext::Color black = UIConfiguration::instance().color_mod ("piano roll black", "piano roll black");
 	Gtkmm2ext::Color white = UIConfiguration::instance().color_mod ("piano roll white", "piano roll white");
-	Gtkmm2ext::Color outline = UIConfiguration::instance().color ("piano roll black outline");
+	Gtkmm2ext::Color divider = UIConfiguration::instance().color ("piano roll black outline");
 	Gtkmm2ext::Color color;
 
-	ArdourCanvas::LineSet::ResetRAII lr (*_note_lines);
+	ArdourCanvas::RectSet::ResetRAII lr (*_note_lines);
 
 	if (contents_height() < 10 || note_height() < 3) {
 		/* context is too small for note lines, or there are too many */
@@ -158,9 +158,20 @@ MidiViewBackground::draw_note_lines()
 	 * coordinate system in which y=0 is at the top
 	 */
 
-	for (int i = highest_note() + 1; i >= lowest_note(); --i) {
+	int h = note_height();
+	int ch = contents_height();
 
-		y = floor (note_to_y (i));
+	for (int i = highest_note() + 5; i >= lowest_note(); --i) {
+
+		y = note_to_y (i);
+
+		/* if note is outside the range of our container, do not add it
+		 * to _note_lines.
+		 */
+
+		if (y + h <= 0 || y >= ch) {
+			continue;
+		}
 
 		/* add a thicker line/bar which covers the entire vertical height of this note. */
 
@@ -174,29 +185,18 @@ MidiViewBackground::draw_note_lines()
 			break;
 		case 4:
 		case 11:
-			/* this is the line actually corresponding to the division between B & C and E & F */
-			_note_lines->add_coord (y, 1.0, outline);
+			/* this is the line corresponding to the division between B & C and E & F */
+			_note_lines->add_rect (i, ArdourCanvas::Rect (0., y, ArdourCanvas::COORD_MAX, y + 1.), divider);
 			/* fallthrough */
 		default:
 			color = white;
 			break;
 		}
 
-		double h = y - prev_y;
-		double middle = y + (h/2.0);
-
-		if (!fmod (h, 2.) && !fmod (middle, 1.)) {
-			middle += 0.5;
+		if (h > 1) {
+			_note_lines->add_rect (i, ArdourCanvas::Rect (0., y, ArdourCanvas::COORD_MAX, y + h), color);
 		}
-
-		if (middle >= 0 && h > 1.0) {
-			_note_lines->add_coord (middle, h, color);
-		}
-
-		prev_y = y;
 	}
-
-	_note_lines->set_extent (ArdourCanvas::COORD_MAX);
 }
 
 void
@@ -309,7 +309,7 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 	note_range_adjustment.set_page_size (_highest_note - _lowest_note);
 	note_range_adjustment.set_value (_lowest_note);
 
-	draw_note_lines();
+	setup_note_lines();
 
 	if (to_children) {
 		apply_note_range_to_children ();
@@ -319,8 +319,6 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 
 	NoteRangeChanged(); /* EMIT SIGNAL*/
 }
-
-
 
 bool
 MidiViewBackground::update_data_note_range (uint8_t min, uint8_t max)

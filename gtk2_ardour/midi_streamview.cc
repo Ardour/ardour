@@ -30,7 +30,7 @@
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "canvas/rectangle.h"
-#include "canvas/line_set.h"
+#include "canvas/rect_set.h"
 
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
@@ -219,7 +219,7 @@ MidiStreamView::display_track (std::shared_ptr<Track> tr)
 {
 	StreamView::display_track (tr);
 
-	draw_note_lines();
+	setup_note_lines();
 
 	NoteRangeChanged(); /* EMIT SIGNAL*/
 }
@@ -453,7 +453,7 @@ MidiStreamView::resume_updates ()
 {
 	_updates_suspended = false;
 
-	draw_note_lines ();
+	setup_note_lines ();
 	apply_note_range_to_children ();
 
 	_canvas_group->redraw ();
