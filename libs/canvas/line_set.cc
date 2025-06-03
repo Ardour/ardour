@@ -102,6 +102,12 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 
 		Rect self;
 
+		/* Self is a rectangle that fully encloses the pixels drawn to
+		 * display this line. It does NOT represent the coordinates
+		 * that should be used to actually draw the line, at least not
+		 * along the axis corresponding to _orientation
+		 */
+
 		if (_orientation == Horizontal) {
 			self = Rect (0, l.pos - (l.width/2.0), _extent, l.pos + (l.width/2.0));
 		} else {
@@ -122,12 +128,19 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		Gtkmm2ext::set_source_rgba (context, l.color);
 		context->set_line_width (l.width);
 
+		/* OK, something to draw. The actual line must be drawn at
+		 * l.pos (one one axis)
+		 */
+
 		if (_orientation == Horizontal) {
-			context->move_to (intersection.x0, self.y0);
-			context->line_to (intersection.x1, self.y0);
+			Coord c = item_to_window (Duple (0., l.pos), false).y;
+			context->move_to (intersection.x0, c);
+			context->line_to (intersection.x1, c);
 		} else {
-			context->move_to (self.x0, intersection.y0);
-			context->line_to (self.x0, intersection.y1);
+			Coord c = item_to_window (Duple (l.pos, 0.), false).x;
+			std::cerr << "draw line of " << l.width << " @ " << c << " from " << l.pos << std::endl;
+			context->move_to (c, intersection.y0);
+			context->line_to (c, intersection.y1);
 		}
 
 		context->stroke ();
