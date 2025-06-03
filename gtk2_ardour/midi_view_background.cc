@@ -135,7 +135,17 @@ MidiViewBackground::update_contents_height ()
 }
 
 void
-MidiViewBackground::draw_note_lines()
+MidiViewBackground::get_note_positions (std::vector<int>& numbers, std::vector<int>& pos, std::vector<int>& heights) const
+{
+	for (auto const & r : _note_lines->rects()) {
+		numbers.push_back (r.index);
+		pos.push_back (r.y0);
+		heights.push_back (r.height());
+	}
+}
+
+void
+MidiViewBackground::setup_note_lines()
 {
 	if (updates_suspended()) {
 		return;

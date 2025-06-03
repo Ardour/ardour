@@ -25,7 +25,7 @@
 #include "midi_view.h"
 
 PianorollMidiBackground::PianorollMidiBackground (ArdourCanvas::Item* parent, Pianoroll& pr)
-	: MidiViewBackground (parent)
+	: MidiViewBackground (parent, pr)
 	, view (nullptr)
 	, pianoroll (pr)
 	, _width (0.)

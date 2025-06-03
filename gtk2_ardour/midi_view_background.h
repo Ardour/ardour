@@ -44,6 +44,8 @@ namespace ArdourCanvas {
 	class RectSet;
 }
 
+class EditingContext;
+
 /** A class that provides various context for a MidiVieww:
         = note ranges
         * color information
@@ -53,7 +55,7 @@ namespace ArdourCanvas {
 class MidiViewBackground : public virtual ViewBackground
 {
   public:
-	MidiViewBackground (ArdourCanvas::Item* parent);
+	MidiViewBackground (ArdourCanvas::Item* parent, EditingContext& ec);
 	~MidiViewBackground ();
 
 	Gtk::Adjustment note_range_adjustment;
@@ -125,7 +127,12 @@ class MidiViewBackground : public virtual ViewBackground
 
 	virtual ARDOUR::InstrumentInfo* instrument_info() const = 0;
 
+	void get_note_positions (std::vector<int>& numbers, std::vector<int>& pos, std::vector<int>& heights) const;
+
+	EditingContext& editing_context() const { return _editing_context; }
+
   protected:
+	EditingContext&           _editing_context;
 	bool                      _range_dirty;
 	double                    _range_sum_cache;
 	uint8_t                   _lowest_note;   ///< currently visible

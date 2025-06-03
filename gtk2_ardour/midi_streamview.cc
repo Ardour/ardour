@@ -64,7 +64,7 @@ using namespace Editing;
 
 MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	: StreamView (tv)
-	, MidiViewBackground (_canvas_group)
+	, MidiViewBackground (_canvas_group, tv.editor())
 	, _updates_suspended (false)
 {
 	/* use a dedicated group for MIDI regions (on top of the grid and lines) */
