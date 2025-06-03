@@ -137,29 +137,21 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 void
 LineSet::add_coord (Coord pos, Distance width, Gtkmm2ext::Color color)
 {
-	_lines.push_back (Line (pos, width, color));
-	Line& l (_lines.back());
+	/* If width is odd (width % 2 != 0) and position is on
+	   a whole pixel, shift it to a half-pixel position. Otherwise
+	   force it back to an integer position. See
+	   doc/cairo-single-pixel-lines for more details.
+	*/
 
-	if (_orientation == Horizontal) {
-		/* If width is odd (width % 2 != 0) and position is on
-		   a whole pixel, shift it to a half-pixel position. Otherwise
-		   force it back to an integer position. See
-		   doc/cairo-single-pixel-lines for more details.
-		*/
-		if (fmod (l.width, 2.) && fmod (l.pos, 1.0)) {
-			l.pos += 0.5;
-		} else {
-			l.pos = floor (l.pos);
-		}
-
+	if (fmod (width, 2.) && !fmod (pos, 1.0)) {
+		/* odd width, integral position */
+		pos += 0.5;
 	} else {
-
-		if (fmod (l.width, 2.) && fmod (l.pos, 1.0)) {
-			l.pos += 0.5;
-		} else {
-			l.pos = floor (l.pos);
-		}
+		/* even width and/or non-integral position */
+		pos = floor (pos);
 	}
+
+	_lines.push_back (Line (pos, width, color));
 }
 
 void
