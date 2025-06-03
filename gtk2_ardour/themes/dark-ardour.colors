@@ -326,7 +326,7 @@
     <ColorAlias name="piano key highlight" alias="alert:ruddy"/>
     <ColorAlias name="piano key white" alias="neutral:foreground2"/>
     <ColorAlias name="piano roll black" alias="theme:contrasting selection"/>
-    <ColorAlias name="piano roll black outline" alias="neutral:foreground2"/>
+    <ColorAlias name="piano roll black outline" alias="neutral:background"/>
     <ColorAlias name="piano roll white" alias="neutral:foreground2"/>
     <ColorAlias name="pinrouting custom: led active" alias="alert:ruddy"/>
     <ColorAlias name="pinrouting sidechain: led active" alias="alert:green"/>
