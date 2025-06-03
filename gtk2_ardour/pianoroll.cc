@@ -522,35 +522,35 @@ Pianoroll::build_canvas ()
 	no_scroll_group = new ArdourCanvas::Container (_canvas->root());
 
 	h_scroll_group = new ArdourCanvas::ScrollGroup (_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
-	CANVAS_DEBUG_NAME (h_scroll_group, "canvas h scroll");
+	CANVAS_DEBUG_NAME (h_scroll_group, "pianoroll h scroll");
 	_canvas->add_scroller (*h_scroll_group);
 
 
 	v_scroll_group = new ArdourCanvas::ScrollGroup (_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsVertically);
-	CANVAS_DEBUG_NAME (v_scroll_group, "canvas v scroll");
+	CANVAS_DEBUG_NAME (v_scroll_group, "pianoroll v scroll");
 	_canvas->add_scroller (*v_scroll_group);
 
 	hv_scroll_group = new ArdourCanvas::ScrollGroup (_canvas->root(),
 	                                                 ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
 		                ArdourCanvas::ScrollGroup::ScrollsHorizontally));
-	CANVAS_DEBUG_NAME (hv_scroll_group, "cue canvas hv scroll");
+	CANVAS_DEBUG_NAME (hv_scroll_group, "pianoroll hv scroll");
 	_canvas->add_scroller (*hv_scroll_group);
 
 	cursor_scroll_group = new ArdourCanvas::ScrollGroup (_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
-	CANVAS_DEBUG_NAME (cursor_scroll_group, "cue canvas cursor scroll");
+	CANVAS_DEBUG_NAME (cursor_scroll_group, "pianoroll cursor scroll");
 	_canvas->add_scroller (*cursor_scroll_group);
 
 	/*a group to hold global rects like punch/loop indicators */
 	global_rect_group = new ArdourCanvas::Container (hv_scroll_group);
-	CANVAS_DEBUG_NAME (global_rect_group, "cue global rect group");
+	CANVAS_DEBUG_NAME (global_rect_group, "pianoroll global rect group");
 
         transport_loop_range_rect = new ArdourCanvas::Rectangle (global_rect_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
-	CANVAS_DEBUG_NAME (transport_loop_range_rect, "cue loop rect");
+	CANVAS_DEBUG_NAME (transport_loop_range_rect, "pianoroll loop rect");
 	transport_loop_range_rect->hide();
 
 	/*a group to hold time (measure) lines */
 	time_line_group = new ArdourCanvas::Container (h_scroll_group);
-	CANVAS_DEBUG_NAME (time_line_group, "cue  time line group");
+	CANVAS_DEBUG_NAME (time_line_group, "pianoroll time line group");
 
 	n_timebars = 0;
 
