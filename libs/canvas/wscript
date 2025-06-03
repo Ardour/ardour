@@ -44,6 +44,7 @@ canvas_sources = [
         'poly_line.cc',
         'polygon.cc',
         'rectangle.cc',
+        'rect_set.cc',
         'root_group.cc',
         'ruler.cc',
         'scroll_group.cc',
