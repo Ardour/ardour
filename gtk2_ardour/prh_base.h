@@ -47,7 +47,7 @@ class PianoRollHeaderBase : virtual public sigc::trackable {
 
 	void render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 
-	void instrument_info_change ();
+	virtual void instrument_info_change ();
 
 	void note_range_changed();
 	void set_note_highlight (uint8_t note);

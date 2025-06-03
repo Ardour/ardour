@@ -92,9 +92,7 @@ void
 PianoRollHeaderBase::set_view (MidiView* v)
 {
 	_view = v;
-	if (_view) {
-		_view->midi_context().NoteRangeChanged.connect (sigc::mem_fun (*this, &PianoRollHeaderBase::note_range_changed));
-	}
+	_midi_context.NoteRangeChanged.connect (sigc::mem_fun (*this, &PianoRollHeaderBase::note_range_changed));
 }
 
 bool
@@ -485,16 +483,6 @@ PianoRollHeaderBase::instrument_info_change ()
 	}
 
 	_queue_resize ();
-
-	/* need this to get editor to potentially sync all
-	   track header widths if our piano roll header changes
-	   width.
-	*/
-
-	if (_view) {
-		_view->midi_track()->gui_changed ("visible_tracks", (void *) 0); /* EMIT SIGNAL */
-	}
-
 }
 
 PianoRollHeaderBase::NoteName
@@ -645,17 +633,13 @@ PianoRollHeaderBase::button_press_handler (GdkEventButton* ev)
 	double ignore;
 	event_transform (ignore, evy);
 
-	if (!_view) {
-		return false;
-	}
-
 	/* Convert canvas-coordinates to item coordinates */
 
 	_scroomer_button_state = _scroomer_state;
 
 	if (ev->button == 1 && ev->x <= _scroomer_size){
 
-		if (ev->type == GDK_2BUTTON_PRESS) {
+		if (ev->type == GDK_2BUTTON_PRESS && _view) {
 			_view->set_visibility_note_range (MidiStreamView::ContentsRange, false);
 			return true;
 		}
@@ -780,11 +764,8 @@ PianoRollHeaderBase::enter_handler (GdkEventCrossing* ev)
 bool
 PianoRollHeaderBase::leave_handler (GdkEventCrossing*)
 {
-	if (!_scroomer_drag){
-		if (_view) {
-			/* XXX we used to pop the cursor stack here */
-		}
-	}
+	set_cursor (nullptr);
+
 	invalidate_note_range(_highlighted_note, _highlighted_note);
 
 	if (_clicked_note != NO_MIDI_NOTE) {

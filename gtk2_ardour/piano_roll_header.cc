@@ -44,7 +44,10 @@ using namespace Gtkmm2ext;
 PianoRollHeader::PianoRollHeader (MidiViewBackground& bg)
 	: PianoRollHeaderBase (bg)
  {
-	alloc_layouts (get_pango_context ());
+	 stream_view = dynamic_cast<MidiStreamView*> (&bg);
+	 assert (stream_view);
+
+	 alloc_layouts (get_pango_context ());
 
 	_adj.set_lower(0);
 	_adj.set_upper(127);
@@ -152,4 +155,17 @@ Glib::RefPtr<Gdk::Window>
 PianoRollHeader::cursor_window()
 {
 	return get_window ();
+}
+
+void
+PianoRollHeader::instrument_info_change ()
+{
+	PianoRollHeaderBase::instrument_info_change ();
+
+	/* need this to get editor to potentially sync all
+	   track header widths if our piano roll header changes
+	   width.
+	*/
+
+	stream_view->trackview().stripable()->gui_changed ("visible_tracks", (void *) 0); /* EMIT SIGNAL */
 }
