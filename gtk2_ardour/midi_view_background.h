@@ -108,7 +108,7 @@ class MidiViewBackground : public virtual ViewBackground
 	uint8_t y_to_note (int y) const;
 
 	uint8_t contents_note_range() const {
-		return highest_note() - lowest_note() + 1;
+		return highest_note() - lowest_note();
 	}
 
 	sigc::signal<void> NoteRangeChanged;

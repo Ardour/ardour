@@ -110,8 +110,7 @@ MidiViewBackground::note_range_adjustment_changed()
 uint8_t
 MidiViewBackground::y_to_note (int y) const
 {
-	int const n = floor (((contents_height() - (double) y) / contents_height() * (double) contents_note_range()))
-		+ lowest_note();
+	int const n = floor (((contents_height() - (double) y) / contents_height() * (double) ( contents_note_range() + 1))) + lowest_note();
 
 	if (n < 0) {
 		return 0;
@@ -171,7 +170,11 @@ MidiViewBackground::setup_note_lines()
 	int h = note_height();
 	int ch = contents_height();
 
-	for (int i = highest_note() + 5; i >= lowest_note(); --i) {
+	if (h < 1) {
+		return;
+	}
+
+	for (int i = highest_note(); i >= lowest_note(); --i) {
 
 		if (i > 127) {
 			continue;
@@ -207,9 +210,7 @@ MidiViewBackground::setup_note_lines()
 			break;
 		}
 
-		if (h > 1) {
-			_note_lines->add_rect (i, ArdourCanvas::Rect (0., y, ArdourCanvas::COORD_MAX, y + h), color);
-		}
+		_note_lines->add_rect (i, ArdourCanvas::Rect (0., y, ArdourCanvas::COORD_MAX, y + h), color);
 	}
 }
 
@@ -299,9 +300,15 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 	const int mnh = UIConfiguration::instance().get_max_note_height();
 	int const max_note_height = std::max<int> (mnh, mnh * uiscale);
 	int const range = _highest_note - _lowest_note;
+	int nh = contents_height() / range;
+	int additional_notes;
 
-	int const available_note_range = contents_height() / max_note_height;
-	int additional_notes = available_note_range - range;
+	if (nh > max_note_height) {
+		int const available_note_range = contents_height() / max_note_height;
+		additional_notes = available_note_range - range;
+	} else {
+		additional_notes = (contents_height() - (nh * range)) / nh;
+	}
 
 	/* distribute additional notes to higher and lower ranges, clamp at 0 and 127 */
 	for (int i = 0; i < additional_notes; i++){
