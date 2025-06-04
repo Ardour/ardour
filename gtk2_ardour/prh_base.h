@@ -29,7 +29,7 @@
 #include <ytkmm/adjustment.h>
 
 namespace Gdk {
-	class Window; 
+	class Window;
 }
 
 namespace ARDOUR {
@@ -70,6 +70,7 @@ class PianoRollHeaderBase : virtual public sigc::trackable {
 	virtual void do_grab() = 0;
 	virtual void do_ungrab() = 0;
 	virtual Glib::RefPtr<Gdk::Window> cursor_window() = 0;
+	virtual std::shared_ptr<ARDOUR::MidiTrack> midi_track() = 0;
 
   protected:
 	MidiViewBackground& _midi_context;
@@ -143,4 +144,3 @@ class PianoRollHeaderBase : virtual public sigc::trackable {
 	void alloc_layouts (Glib::RefPtr<Pango::Context>);
 	void set_cursor (Gdk::Cursor*);
 };
-

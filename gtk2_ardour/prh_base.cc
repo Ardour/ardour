@@ -53,9 +53,9 @@ PianoRollHeaderBase::PianoRollHeaderBase (MidiViewBackground& bg)
 	: _midi_context (bg)
 	, _adj (_midi_context.note_range_adjustment)
 	, _view (nullptr)
-	, _font_descript ("Sans Bold")
-	, _font_descript_big_c ("Sans")
-	, _font_descript_midnam ("Sans")
+	, _font_descript (UIConfiguration::instance().get_NormalFont())
+	, _font_descript_big_c (UIConfiguration::instance().get_NormalFont())
+	, _font_descript_midnam (UIConfiguration::instance().get_NormalFont())
 	, _highlighted_note (NO_MIDI_NOTE)
 	, _clicked_note (NO_MIDI_NOTE)
 	, _dragging (false)
@@ -177,12 +177,11 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 
 	double y2 = min (self.y1, (ArdourCanvas::Coord) _midi_context.contents_height());
 	double context_note_height = _midi_context.note_height();
-	int bc_height, bc_width;
 
 	//Reduce the frequency of Pango layout resizing
 	//if (int(_old_context_note_height) != int(context_note_height)) {
 	//Set Pango layout keyboard c's size
-	_font_descript.set_absolute_size (context_note_height * 0.7 * Pango::SCALE);
+	_font_descript.set_absolute_size (context_note_height * 0.5 * Pango::SCALE);
 	_layout->set_font_description(_font_descript);
 
 	//change mode of midnam display
@@ -384,13 +383,20 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 	   so that the top of the C is shown to maintain visual context
 	 */
 
+	int bc_height, c_height, ignore;
+
+	_big_c_layout->set_text ("C1");
+	_layout->set_text ("C1");
+
+	pango_layout_get_pixel_size (_big_c_layout->gobj(), &ignore, &bc_height);
+	pango_layout_get_pixel_size (_layout->gobj(), &ignore, &c_height);
+
 	for (std::vector<int>::size_type n = 0; n < numbers.size(); ++n) {
 
-		double x = 0.;
+		double h = heights[n];
+		double x = _scroomer_size;
 		double y = positions[n];
 		int oct_rel = numbers[n] % 12;
-
-		draw_transform (x, y);
 
 		if (oct_rel == 0 || (oct_rel == 7 && _adj.get_page_size() <=10)) {
 
@@ -403,20 +409,21 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 				str << 'G' << cn;
 			}
 
-			if (context_note_height > 12.0){
-				set_source_rgba(cr, black);
+			if (h > 12.){
+				/* Cn text shown in keys */
+				set_source_rgba (cr, black);
 				_layout->set_text (str.str());
-				cr->move_to(_scroomer_size, ceil (y+1.));
+				cr->move_to (x, y);
 				_layout->show_in_cairo_context (cr);
 			} else {
-				set_source_rgba(cr, textc);
+				/* Cn text shown to left of keys */
+				set_source_rgba (cr, textc);
 				_big_c_layout->set_text (str.str());
-				pango_layout_get_pixel_size (_big_c_layout->gobj(), &bc_width, &bc_height);
-				cr->move_to (_scroomer_size - 18, y - bc_height + context_note_height);
+				/* XXX magic number alert - negative offset to
+				 * get left of the keys
+				 */
+				cr->move_to (x - 18, y);
 				_big_c_layout->show_in_cairo_context (cr);
-				cr->move_to (_scroomer_size - 18, y + context_note_height);
-				cr->line_to (_scroomer_size, y + context_note_height);
-				cr->stroke();
 			}
 		}
 	}
@@ -823,7 +830,7 @@ PianoRollHeaderBase::show_scroomer () const
 void
 PianoRollHeaderBase::send_note_on (uint8_t note)
 {
-	std::shared_ptr<ARDOUR::MidiTrack> track = _view->midi_track ();
+	std::shared_ptr<ARDOUR::MidiTrack> track = midi_track ();
 
 	//cerr << "note on: " << (int) note << endl;
 
@@ -839,7 +846,7 @@ PianoRollHeaderBase::send_note_on (uint8_t note)
 void
 PianoRollHeaderBase::send_note_off (uint8_t note)
 {
-	std::shared_ptr<ARDOUR::MidiTrack> track = _view->midi_track ();
+	std::shared_ptr<ARDOUR::MidiTrack> track = midi_track ();
 
 	if (track) {
 		_event[0] = (MIDI_CMD_NOTE_OFF | _midi_context.get_preferred_midi_channel ());

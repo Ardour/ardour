@@ -210,5 +210,15 @@ PianoRollHeader::cursor_window()
 	return gc->get_window ();
 }
 
+std::shared_ptr<ARDOUR::MidiTrack>
+PianoRollHeader::midi_track()
+{
+	if (_view) {
+		return _view->midi_track ();
+	}
+
+	return nullptr;
+}
+
 
 } // namespace

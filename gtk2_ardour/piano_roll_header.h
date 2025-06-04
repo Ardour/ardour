@@ -47,6 +47,7 @@ class PianoRollHeader : public Gtk::DrawingArea, public PianoRollHeaderBase {
 	void do_grab() { add_modal_grab(); }
 	void do_ungrab() { remove_modal_grab(); }
 	Glib::RefPtr<Gdk::Window> cursor_window();
+	std::shared_ptr<ARDOUR::MidiTrack> midi_track();
 
 	void instrument_info_change ();
 

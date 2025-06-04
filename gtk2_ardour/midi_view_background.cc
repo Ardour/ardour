@@ -173,6 +173,10 @@ MidiViewBackground::setup_note_lines()
 
 	for (int i = highest_note() + 5; i >= lowest_note(); --i) {
 
+		if (i > 127) {
+			continue;
+		}
+
 		y = note_to_y (i);
 
 		/* if note is outside the range of our container, do not add it

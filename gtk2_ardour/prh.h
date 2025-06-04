@@ -42,6 +42,7 @@ class PianoRollHeader : public ArdourCanvas::Rectangle, public PianoRollHeaderBa
 	void do_grab() { ArdourCanvas::Rectangle::grab(); }
 	void do_ungrab() { ArdourCanvas::Rectangle::ungrab(); }
 	Glib::RefPtr<Gdk::Window> cursor_window();
+	std::shared_ptr<ARDOUR::MidiTrack> midi_track();
 
 	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 

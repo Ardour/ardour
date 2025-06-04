@@ -169,3 +169,15 @@ PianoRollHeader::instrument_info_change ()
 
 	stream_view->trackview().stripable()->gui_changed ("visible_tracks", (void *) 0); /* EMIT SIGNAL */
 }
+
+std::shared_ptr<ARDOUR::MidiTrack>
+PianoRollHeader::midi_track()
+{
+	std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (stream_view->trackview().stripable());
+
+	if (mt) {
+		return mt;
+	}
+
+	return nullptr;
+}
