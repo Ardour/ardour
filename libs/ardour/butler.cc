@@ -296,7 +296,7 @@ Butler::thread_work ()
 					case 0:
 						//DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill done %1\n", tr->name()));
 						break;
-					case 1:
+					case -1:
 						DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill unfinished %1\n", tr->name ()));
 						disk_work_outstanding = true;
 						break;
