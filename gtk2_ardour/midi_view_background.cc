@@ -33,8 +33,8 @@
 using namespace std;
 
 MidiViewBackground::MidiViewBackground (ArdourCanvas::Item* parent, EditingContext& ec)
-	: _editing_context (ec)
-	, note_range_adjustment (0.0f, 0.0f, 0.0f)
+	: note_range_adjustment (0.0f, 0.0f, 0.0f)
+	, _editing_context (ec)
 	, _range_dirty (false)
 	, _range_sum_cache (-1.0)
 	, _lowest_note (UIConfiguration::instance().get_default_lower_midi_note())
