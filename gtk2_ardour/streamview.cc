@@ -68,7 +68,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Container* canvas_g
 	, stream_base_color(0xFFFFFFFF)
 	, _layers (1)
 	, _layer_display (Overlaid)
-	, height (tv.height)
+	, _height (tv.height)
 	, last_rec_data_sample(0)
 {
 	CANVAS_DEBUG_NAME (_canvas_group, string_compose ("SV canvas group %1", _trackview.name()));
@@ -123,12 +123,12 @@ StreamView::set_height (double h)
 		return -1;
 	}
 
-	if (height == h) {
+	if (_height == h) {
 		return 0;
 	}
 
-	height = h;
-	canvas_rect->set_y1 (height);
+	_height = h;
+	canvas_rect->set_y1 (_height);
 	update_contents_height ();
 
 	return 0;
@@ -625,7 +625,7 @@ StreamView::_get_selectables (timepos_t const & start, timepos_t const & end, do
 					/* Note: EditorAutomationLine::get_selectables() uses trackview.current_height (),
 					 * disregarding Stacked layer display height
 					 */
-					double const c = height; // child_height (); // XXX
+					double const c = _height; // child_height (); // XXX
 					double const y = (*i)->get_canvas_group ()->position().y;
 					double t = 1.0 - std::min (1.0, std::max (0., (top - _trackview.y_position () - y) / c));
 					double b = 1.0 - std::min (1.0, std::max (0., (bottom - _trackview.y_position () - y) / c));
@@ -664,15 +664,15 @@ StreamView::child_height () const
 {
 	switch (_layer_display) {
 	case Overlaid:
-		return height;
+		return _height;
 	case Stacked:
-		return height / _layers;
+		return _height / _layers;
 	case Expanded:
-		return height / (_layers * 2 + 1);
+		return _height / (_layers * 2 + 1);
 	}
 
 	abort(); /* NOTREACHED */
-	return height;
+	return _height;
 }
 
 void
@@ -686,10 +686,10 @@ StreamView::update_contents_height ()
 			(*i)->set_y (0);
 			break;
 		case Stacked:
-			(*i)->set_y (height - ((*i)->region()->layer() + 1) * h);
+			(*i)->set_y (_height - ((*i)->region()->layer() + 1) * h);
 			break;
 		case Expanded:
-			(*i)->set_y (height - ((*i)->region()->layer() + 1) * 2 * h);
+			(*i)->set_y (_height - ((*i)->region()->layer() + 1) * 2 * h);
 			break;
 		}
 
@@ -699,7 +699,7 @@ StreamView::update_contents_height ()
 	for (vector<RecBoxInfo>::iterator i = rec_rects.begin(); i != rec_rects.end(); ++i) {
 		switch (_layer_display) {
 		case Overlaid:
-			i->rectangle->set_y1 (height);
+			i->rectangle->set_y1 (_height);
 			break;
 		case Stacked:
 		case Expanded:
@@ -780,4 +780,22 @@ StreamView::parameter_changed (string const & what)
 			(*i)->update_visibility ();
 		}
 	}
+}
+
+int
+StreamView::y_position () const
+{
+	return _trackview.y_position();
+}
+
+int
+StreamView::height() const
+{
+	return _height;
+}
+
+int
+StreamView::width () const
+{
+	return (int) ArdourCanvas::COORD_MAX;
 }

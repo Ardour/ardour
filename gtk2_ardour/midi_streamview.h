@@ -63,17 +63,14 @@ public:
 	MidiStreamView (MidiTimeAxisView&);
 	~MidiStreamView ();
 
+	int contents_height() const { return StreamView::contents_height(); }
+	int y_position() const { return StreamView::y_position(); }
+
 	void get_regions_with_selected_data (RegionSelection&);
 
 	void set_layer_display (LayerDisplay);
 	//bool can_change_layer_display() const { return false; } // revert this change for now.  Although stacked view is weirdly implemented wrt the "scroomer", it is still necessary to be able to manage layered regions.
 	void redisplay_track ();
-
-	int contents_height() const {
-		return child_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2;
-	}
-
-	int y_position () const;
 
 	RegionView* create_region_view (std::shared_ptr<ARDOUR::Region>, bool, bool);
 

@@ -531,8 +531,3 @@ MidiStreamView::record_layer_check (std::shared_ptr<ARDOUR::Region> r, samplepos
 	check_record_layers (r, t);
 }
 
-int
-MidiStreamView::y_position () const
-{
-	return _trackview.y_position();
-}

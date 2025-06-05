@@ -40,9 +40,9 @@ class ViewBackground : public sigc::trackable
 	ViewBackground ();
 	virtual ~ViewBackground ();
 
-	virtual int height() const { return 0; }
-	virtual int width() const { return 0; }
-	virtual int contents_height() const { return 0; }
+	virtual int height() const = 0;
+	virtual int width() const = 0;
+	virtual int contents_height() const = 0;
 
 	/** @return y position, or -1 if hidden */
 	virtual int y_position () const { return 0; }
