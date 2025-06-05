@@ -301,12 +301,12 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 	int const max_note_height = std::max<int> (mnh, mnh * uiscale);
 	int const range = _highest_note - _lowest_note;
 	int nh = contents_height() / range;
-	int additional_notes;
+	int additional_notes = 0;
 
 	if (nh > max_note_height) {
 		int const available_note_range = contents_height() / max_note_height;
 		additional_notes = available_note_range - range;
-	} else {
+	} else if (note_range_set) {
 		additional_notes = (contents_height() - (nh * range)) / nh;
 	}
 
