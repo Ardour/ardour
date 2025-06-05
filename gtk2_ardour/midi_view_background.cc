@@ -270,6 +270,10 @@ MidiViewBackground::maybe_apply_note_range (uint8_t lowest, uint8_t highest, boo
 void
 MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_children)
 {
+	if (contents_height() == 0) {
+		return;
+	}
+
 	bool changed = false;
 
 	/* Enforce a 1 octave minimum */
