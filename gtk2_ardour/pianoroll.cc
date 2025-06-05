@@ -2963,6 +2963,13 @@ Pianoroll::select_all_within (Temporal::timepos_t const & start, Temporal::timep
 }
 
 void
+Pianoroll::session_going_away ()
+{
+	unset (true);
+	CueEditor::session_going_away ();
+}
+
+void
 Pianoroll::set_session (ARDOUR::Session* s)
 {
 	CueEditor::set_session (s);
