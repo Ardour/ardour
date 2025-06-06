@@ -1406,7 +1406,7 @@ Playlist::duplicate_until (std::shared_ptr<Region> region, timepos_t & position,
 			PropertyList plist (region->derive_properties ());
 			plist.add (Properties::length, length);
 
-			std::shared_ptr<Region> sub = RegionFactory::create (region, plist, false, &rl.thawlist);
+			std::shared_ptr<Region> sub = RegionFactory::create (region, plist, true, &rl.thawlist);
 			sub->set_region_group(Region::get_region_operation_group_id(region->region_group(), Paste));
 			add_region_internal (sub, position, rl.thawlist);
 			set_layer (sub, DBL_MAX);
