@@ -497,8 +497,8 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 				if (_debug_emission) {
 					std::cerr << "signal @ " << this << " connection  " << c << " of " << _slots.size() << " was no longer in the slot list\n";
 				}
-			}
 #endif
+			}
 		}
 
 #ifdef DEBUG_PBD_SIGNAL_EMISSION
