@@ -1688,7 +1688,7 @@ MidiTimeAxisView::add_region (timepos_t const & f, timecnt_t const & length, boo
 		plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
 		plist.add (ARDOUR::Properties::opaque, _session->config.get_draw_opaque_midi_regions());
 
-		region = (RegionFactory::create (src, plist, true));
+		region = (RegionFactory::create (src, plist));
 	}
 
 	/* Now create the region that we will actually use within the playlist */
@@ -1696,7 +1696,7 @@ MidiTimeAxisView::add_region (timepos_t const & f, timecnt_t const & length, boo
 	{
 		PropertyList plist;
 		plist.add (ARDOUR::Properties::name, region->name());
-		region = RegionFactory::create (region, plist, false);
+		region = RegionFactory::create (region, plist);
 	}
 
 	region->set_position (pos);
