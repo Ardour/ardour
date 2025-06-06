@@ -435,7 +435,7 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 {
 #ifdef DEBUG_PBD_SIGNAL_EMISSION
 	if (_debug_emission) {
-		std::cerr << "------ Signal @ " << this << " emission process begins\n";
+		std::cerr << "------ Signal @ " << this << " emission process begins with " << _slots.size() << std::endl;
 		PBD::stacktrace (std::cerr, 19);
 	}
 #endif
@@ -455,7 +455,7 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 		 * allocation. That will only happen if the number of
 		 * connections to this signal exceeds the value of nslots
 		 * defined above. As of April 2025, the maximum number of
-		 * connections appears to be ntracks+1. 
+		 * connections appears to be ntracks+1.
 		 */
 		for (auto const & [connection,functor] : _slots) {
 			s.push_back (connection.get());
@@ -492,7 +492,13 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 				}
 #endif
 				functor (a...);
+			} else {
+#ifdef DEBUG_PBD_SIGNAL_EMISSION
+				if (_debug_emission) {
+					std::cerr << "signal @ " << this << " connection  " << c << " of " << _slots.size() << " was no longer in the slot list\n";
+				}
 			}
+#endif
 		}
 
 #ifdef DEBUG_PBD_SIGNAL_EMISSION
