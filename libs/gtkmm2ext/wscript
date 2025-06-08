@@ -39,6 +39,7 @@ gtkmm2ext_sources = [
         'keyboard.cc',
         'menu_elems.cc',
         'persistent_tooltip.cc',
+        'string_completion.cc',
         'textviewer.cc',
         'treeutils.cc',
         'utils.cc',
