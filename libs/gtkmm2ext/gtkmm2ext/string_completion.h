@@ -21,10 +21,11 @@
 #include <vector>
 #include <ytkmm/entry.h>
 #include <ytkmm/liststore.h>
+#include "gtkmm2ext/visibility.h"
 
 namespace Gtkmm2ext {
 
-class StringCompletion : public Gtk::EntryCompletion
+class LIBGTKMM2EXT_API StringCompletion : public Gtk::EntryCompletion
 {
   public:
 	StringCompletion ();
