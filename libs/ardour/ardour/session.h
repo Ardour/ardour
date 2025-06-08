@@ -382,11 +382,13 @@ public:
 	bool io_name_is_legal (const std::string&) const;
 	std::shared_ptr<Route> route_by_name (std::string) const;
 	std::shared_ptr<Route> route_by_id (PBD::ID) const;
+	std::shared_ptr<Stripable> stripable_by_name (std::string) const;
 	std::shared_ptr<Stripable> stripable_by_id (PBD::ID) const;
 	std::shared_ptr<Stripable> get_remote_nth_stripable (PresentationInfo::order_t n, PresentationInfo::Flag) const;
 	std::shared_ptr<Route> get_remote_nth_route (PresentationInfo::order_t n) const;
 	std::shared_ptr<Route> route_by_selected_count (uint32_t cnt) const;
 	void routes_using_input_from (const std::string& str, RouteList& rl);
+	void find_matching_stripables_by_partial_name (std::string const & partial, std::vector<std::string>&) const;
 
 	bool route_name_unique (std::string) const;
 	bool route_name_internal (std::string) const;
