@@ -51,6 +51,7 @@
 
 #include "temporal/tempo.h"
 
+#include "gtkmm2ext/string_completion.h"
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/choice.h"
@@ -9525,3 +9526,66 @@ Editor::edit_region_in_pianoroll_window ()
 	selection->foreach_midi_regionview (&MidiRegionView::edit_in_pianoroll_window);
 }
 
+
+void
+Editor::find_and_display_track ()
+{
+	ArdourDialog d (_("Find Track/Bus"), true, false);
+	Gtk::Entry text;
+	Gtk::HBox hpacker;
+	Gtk::Label l (_("Name:"));
+	hpacker.set_spacing (12);
+	hpacker.set_border_width (12);
+	hpacker.pack_start (l, true, false);
+	hpacker.pack_start (text, true, true);
+
+	d.get_vbox()->set_spacing (12);
+	d.get_vbox()->set_border_width (12);
+	d.get_vbox()->pack_start (hpacker, false, false);
+	d.get_vbox()->show_all ();
+
+	text.set_activates_default ();
+	text.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &Editor::find_and_display_text_change), &text));
+	d.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	d.add_button (Stock::OK, RESPONSE_OK);
+	d.set_default_response (RESPONSE_OK);
+
+	std::vector<Glib::ustring> matching_names;
+
+	{
+		ARDOUR::StripableList sl;
+		_session->get_stripables (sl, ARDOUR::PresentationInfo::AllStripables);
+
+		for (auto & s : sl) {
+			matching_names.push_back (s->name());
+		}
+	}
+
+	Glib::RefPtr<StringCompletion> comp = StringCompletion::create (matching_names);
+	comp->set_minimum_key_length (1);
+	text.set_completion (comp);
+
+	switch (d.run()) {
+	case RESPONSE_OK:
+		break;
+	default:
+		return;
+	}
+
+	std::shared_ptr<Stripable> s = _session->stripable_by_name (text.get_text());
+
+	if (!s) {
+		return;
+	}
+
+	StripableTimeAxisView* stv = get_stripable_time_axis_by_id (s->id());
+
+	if (stv) {
+		ensure_time_axis_view_is_visible (*stv, true);
+	}
+}
+
+void
+Editor::find_and_display_text_change (Gtk::Entry* text)
+{
+}

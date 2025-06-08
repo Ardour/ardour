@@ -513,6 +513,8 @@ public:
 	void temporal_zoom_session ();
 	void temporal_zoom_extents ();
 
+	void find_and_display_track ();
+
 protected:
 	void map_transport_state ();
 	void map_position_change (samplepos_t);
@@ -2292,6 +2294,9 @@ private:
 	void show_range_type (RangeBarType);
 	PBD::Signal<void()> VisibleMarkersChanged;
 	PBD::Signal<void()> VisibleRangesChanged;
+
+	void find_and_display_text_change (Gtk::Entry* text);
+	Gtk::Menu* find_and_display_menu;
 
 	friend class RegionMoveDrag;
 	friend class TrimDrag;

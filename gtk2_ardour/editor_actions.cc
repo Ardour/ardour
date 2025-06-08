@@ -350,6 +350,8 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "set-punch-from-edit-range", _("Set Punch from Selection"), sigc::mem_fun(*this, &Editor::set_punch_from_selection));
 	reg_sens (editor_actions, "set-session-from-edit-range", _("Set Session Start/End from Selection"), sigc::mem_fun(*this, &Editor::set_session_extents_from_selection));
 
+	reg_sens (editor_actions, "find-and-display-stripable", _("Find & Display Track/Bus"), sigc::mem_fun (*this, &Editor::find_and_display_track));
+
 	if (Profile->get_mixbus ()) {
 		reg_sens (editor_actions, "copy-paste-section", _("Copy/Paste Range Section to Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CopyPasteSection));
 		reg_sens (editor_actions, "cut-paste-section", _("Cut/Paste Range Section to Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CutPasteSection));
