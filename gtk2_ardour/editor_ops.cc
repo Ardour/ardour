@@ -9545,7 +9545,6 @@ Editor::find_and_display_track ()
 	d.get_vbox()->show_all ();
 
 	text.set_activates_default ();
-	text.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &Editor::find_and_display_text_change), &text));
 	d.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	d.add_button (Stock::OK, RESPONSE_OK);
 	d.set_default_response (RESPONSE_OK);
@@ -9583,9 +9582,4 @@ Editor::find_and_display_track ()
 	if (stv) {
 		ensure_time_axis_view_is_visible (*stv, true);
 	}
-}
-
-void
-Editor::find_and_display_text_change (Gtk::Entry* text)
-{
 }

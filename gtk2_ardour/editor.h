@@ -2295,9 +2295,6 @@ private:
 	PBD::Signal<void()> VisibleMarkersChanged;
 	PBD::Signal<void()> VisibleRangesChanged;
 
-	void find_and_display_text_change (Gtk::Entry* text);
-	Gtk::Menu* find_and_display_menu;
-
 	friend class RegionMoveDrag;
 	friend class TrimDrag;
 	friend class MappingTwistDrag;
