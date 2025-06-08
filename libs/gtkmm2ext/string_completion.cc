@@ -105,3 +105,16 @@ StringCompletion::insert_vector (std::vector<Glib::ustring> strVector, bool nore
 		this->add_string (s, norepeat);
 	}
 }
+
+bool
+StringCompletion::match_anywhere (Glib::ustring const & str,  Gtk::TreeModel::const_iterator const & iter)
+{
+	Glib::ustring r = Gtk::TreeModel::Row (*iter)[m_completionRecord.col_text];
+	return r.find (str) != Glib::ustring::npos;
+}
+
+void
+StringCompletion::set_match_anywhere ()
+{
+	set_match_func (sigc::mem_fun (this, &StringCompletion::match_anywhere));
+}

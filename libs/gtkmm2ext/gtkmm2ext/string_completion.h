@@ -38,11 +38,13 @@ class LIBGTKMM2EXT_API StringCompletion : public Gtk::EntryCompletion
 	void delete_string (Glib::ustring str);
 	void insert_vector (std::vector<Glib::ustring> strVector, bool norepeat = true);
 
+	void set_match_anywhere ();
+
 	static Glib::RefPtr<StringCompletion> create();
 	static Glib::RefPtr<StringCompletion> create (std::vector<Glib::ustring> strVector, bool norepeat = true);
 
   protected:
-	Glib::RefPtr<Gtk::ListStore> m_refCompletionModel; 
+	Glib::RefPtr<Gtk::ListStore> m_refCompletionModel;
 
 	class CompletionRecord : public Gtk::TreeModel::ColumnRecord
 	{
@@ -57,6 +59,8 @@ class LIBGTKMM2EXT_API StringCompletion : public Gtk::EntryCompletion
 	CompletionRecord m_completionRecord;
 	bool _delete_string (const Gtk::TreeModel::iterator &iter, const Glib::ustring &str);
 	bool _string_exists (const Glib::ustring &str);
+	bool match_anywhere (Glib::ustring const & str,  Gtk::TreeModel::const_iterator const & iter);
+
 	void init();
 };
 
