@@ -4483,19 +4483,6 @@ Session::stripable_by_name (string name) const
 	return nullptr;
 }
 
-void
-Session::find_matching_stripables_by_partial_name (std::string const & partial, std::vector<std::string>& matches) const
-{
-	StripableList sl;
-	get_stripables (sl);
-
-	for (auto & s : sl) {
-		if (s->name().find (partial) == 0) {
-			matches.push_back (s->name());
-		}
-	}
-}
-
 std::shared_ptr<Route>
 Session::route_by_id (PBD::ID id) const
 {
