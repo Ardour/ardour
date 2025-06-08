@@ -9562,6 +9562,7 @@ Editor::find_and_display_track ()
 
 	Glib::RefPtr<StringCompletion> comp = StringCompletion::create (matching_names);
 	comp->set_minimum_key_length (1);
+	comp->set_match_anywhere ();
 	text.set_completion (comp);
 
 	switch (d.run()) {
