@@ -473,6 +473,7 @@
               <menuitem action='lua-manage-tracks'/>
       </menu>
 #endif
+      <menuitem action='find-and-display-stripable'/>
       <menuitem action='duplicate-routes'/>
       <separator/>
       <menuitem action='track-record-enable-toggle'/>
