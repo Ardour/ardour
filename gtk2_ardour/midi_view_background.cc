@@ -110,7 +110,7 @@ MidiViewBackground::note_range_adjustment_changed()
 uint8_t
 MidiViewBackground::y_to_note (int y) const
 {
-	int const n = floor (((contents_height() - (double) y) / contents_height() * (double) ( contents_note_range() + 1))) + lowest_note();
+	int const n = highest_note() - (floor ((double) y / note_height()));
 
 	if (n < 0) {
 		return 0;
@@ -150,7 +150,6 @@ MidiViewBackground::setup_note_lines()
 		return;
 	}
 
-	double y;
 	Gtkmm2ext::Color black = UIConfiguration::instance().color_mod ("piano roll black", "piano roll black");
 	Gtkmm2ext::Color white = UIConfiguration::instance().color_mod ("piano roll white", "piano roll white");
 	Gtkmm2ext::Color divider = UIConfiguration::instance().color ("piano roll black outline");
@@ -168,25 +167,11 @@ MidiViewBackground::setup_note_lines()
 	 */
 
 	int h = note_height();
-	int ch = contents_height();
-
-	if (h < 1) {
-		return;
-	}
+	double y = 0;
 
 	for (int i = highest_note(); i >= lowest_note(); --i) {
 
 		if (i > 127) {
-			continue;
-		}
-
-		y = note_to_y (i);
-
-		/* if note is outside the range of our container, do not add it
-		 * to _note_lines.
-		 */
-
-		if (y + h <= 0 || y >= ch) {
 			continue;
 		}
 
@@ -211,6 +196,8 @@ MidiViewBackground::setup_note_lines()
 		}
 
 		_note_lines->add_rect (i, ArdourCanvas::Rect (0., y, ArdourCanvas::COORD_MAX, y + h), color);
+
+		y += h;
 	}
 }
 

@@ -847,11 +847,11 @@ MidiView::create_note_at (timepos_t const & source_relative_start, double y, Tem
 
 	Temporal::Beats t = source_relative_start.beats();
 
-	const double  note     = y_to_note(y);
+	const int  note     = y_to_note(y);
 	const uint8_t chan     = get_channel_for_add (t);
 	const uint8_t velocity = get_velocity_for_add (t);
 
-	const std::shared_ptr<NoteType> new_note (new NoteType (chan, t, length, (uint8_t)note, velocity));
+	const std::shared_ptr<NoteType> new_note (new NoteType (chan, t, length, note, velocity));
 
 	if (_model->contains (new_note)) {
 		return;
