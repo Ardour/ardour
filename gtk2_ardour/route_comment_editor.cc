@@ -139,19 +139,22 @@ RouteCommentEditor::open (std::shared_ptr<ARDOUR::Route> r)
 void
 RouteCommentEditor::comment_changed ()
 {
-	PBD::Unwinder<bool> uw (_ignore_change, true);
+	if (_ignore_change) {
+		return;
+	}
 	_comment_area.get_buffer ()->set_text (_route->comment ());
 }
 
 void
 RouteCommentEditor::commit_change ()
 {
-	if (!_route || _ignore_change) {
+	if (!_route) {
 		return;
 	}
 
 	std::string const str = _comment_area.get_buffer ()->get_text ();
 	if (str != _route->comment ()) {
+		PBD::Unwinder<bool> uw (_ignore_change, true);
 		_route->set_comment (str, this);
 	}
 }
