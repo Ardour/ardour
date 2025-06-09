@@ -484,9 +484,9 @@ void
 PortAudioIO::add_none_devices ()
 {
 	_input_devices.insert(std::pair<int, paDevice*>(
-	    DeviceNone, new paDevice(AudioBackend::get_standard_device_name(AudioBackend::DeviceNone), 0, 0)));
+	    DeviceNone, new paDevice (AudioBackend::get_none_device_name (), 0, 0)));
 	_output_devices.insert(std::pair<int, paDevice*>(
-	    DeviceNone, new paDevice(AudioBackend::get_standard_device_name(AudioBackend::DeviceNone), 0, 0)));
+	    DeviceNone, new paDevice (AudioBackend::get_none_device_name (), 0, 0)));
 }
 
 void
@@ -499,12 +499,12 @@ PortAudioIO::add_default_devices ()
 	const PaDeviceInfo* nfo_o = Pa_GetDeviceInfo(get_default_output_device());
 	if (nfo_i && nfo_o) {
 		_input_devices.insert (std::pair<int, paDevice*> (DeviceDefault,
-					new paDevice(AudioBackend::get_standard_device_name(AudioBackend::DeviceDefault),
+					new paDevice(AudioBackend::get_default_device_name (),
 						nfo_i->maxInputChannels,
 						nfo_o->maxOutputChannels
 						)));
 		_output_devices.insert (std::pair<int, paDevice*> (DeviceDefault,
-					new paDevice(AudioBackend::get_standard_device_name(AudioBackend::DeviceDefault),
+					new paDevice(AudioBackend::get_default_device_name (),
 						nfo_i->maxInputChannels,
 						nfo_o->maxOutputChannels
 						)));
