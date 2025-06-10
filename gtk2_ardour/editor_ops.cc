@@ -40,6 +40,7 @@
 
 #include <ytkmm/messagedialog.h>
 
+#include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/basename.h"
 #include "pbd/pthread_utils.h"
@@ -9563,6 +9564,9 @@ Editor::find_and_display_track ()
 	Glib::RefPtr<StringCompletion> comp = StringCompletion::create (matching_names);
 	comp->set_minimum_key_length (1);
 	comp->set_match_anywhere ();
+	comp->set_case_fold (true);
+	comp->set_inline_completion (true);
+	comp->set_inline_selection (true);
 	text.set_completion (comp);
 
 	switch (d.run()) {
