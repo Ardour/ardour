@@ -96,8 +96,7 @@ class MidiViewBackground : public virtual ViewBackground
 	void maybe_extend_note_range (uint8_t note_num);
 
 	int note_height() const {
-		/* Note: this effectively rounds down (truncates) due to integer arithmetic */
-		return contents_height() / contents_note_range();
+		return (int) ceil ((double) contents_height() / contents_note_range());
 	}
 
 	int note_to_y (uint8_t note) const {
@@ -112,8 +111,14 @@ class MidiViewBackground : public virtual ViewBackground
 	}
 
 	sigc::signal<void> NoteRangeChanged;
-	void apply_note_range (uint8_t lowest, uint8_t highest, bool to_children);
-	void maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children);
+
+	enum RangeCanMove {
+		CanMoveTop = 0x1,
+		CanMoveBottom = 0x2
+	};
+
+	void apply_note_range (uint8_t lowest, uint8_t highest, bool to_children, RangeCanMove = RangeCanMove (CanMoveTop|CanMoveBottom));
+	void maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children, RangeCanMove = RangeCanMove (CanMoveTop|CanMoveBottom));
 
 	/** @return y position, or -1 if hidden */
 	virtual int y_position () const { return 0; }

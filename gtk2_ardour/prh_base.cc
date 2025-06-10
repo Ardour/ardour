@@ -553,43 +553,45 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 
 	if (_scroomer_drag){
 
-		double pixel2val = 127.0 / height();
+		const double pixels_per_note = 127.0 / height();
 		double delta = _old_y - evy;
-		double val_at_pointer = (delta * pixel2val);
-		double real_val_at_pointer = 127.0 - (evy * pixel2val);
+		double val_at_pointer = (delta * pixels_per_note);
+		double real_val_at_pointer = 127.0 - (evy * pixels_per_note);
 		double note_range = _adj.get_page_size ();
 
 		switch (_scroomer_button_state){
-			case MOVE:
-				_fract += val_at_pointer;
-				_fract = (_fract + note_range > 127.0)? 127.0 - note_range : _fract;
-				_fract = max(0.0, _fract);
-				_adj.set_value (min(_fract, 127.0 - note_range));
-				break;
-			case TOP:
-				real_val_at_pointer = real_val_at_pointer <= _saved_top_val? _adj.get_value() + _adj.get_page_size() : real_val_at_pointer;
-				real_val_at_pointer = min(127.0, real_val_at_pointer);
-				if (_midi_context.note_height() >= UIConfiguration::instance().get_max_note_height()){
-					_saved_top_val  = min(_adj.get_value() + _adj.get_page_size (), 127.0);
-				} else {
-					_saved_top_val = 0.0;
-				}
-				//if we are at largest note size & the user is moving down don't do anything
-				//FIXME we are using a heuristic of 18.5 for max note size, but this changes when track size is small to 19.5?
-				_midi_context.apply_note_range (_adj.get_value (), real_val_at_pointer, true);
-				break;
-			case BOTTOM:
-				real_val_at_pointer = max(0.0, real_val_at_pointer);
-				real_val_at_pointer = real_val_at_pointer >= _saved_bottom_val? _adj.get_value() : real_val_at_pointer;
-				if (_midi_context.note_height() >= UIConfiguration::instance().get_max_note_height()){
-					_saved_bottom_val  = _adj.get_value();
-				} else {
-					_saved_bottom_val = 127.0;
-				}
-				_midi_context.apply_note_range (real_val_at_pointer, _adj.get_value () + _adj.get_page_size (), true);
-				break;
-			default:
-				break;
+		case MOVE:
+			_fract += val_at_pointer;
+			_fract = (_fract + note_range > 127.0)? 127.0 - note_range : _fract;
+			_fract = max(0.0, _fract);
+			_adj.set_value (min(_fract, 127.0 - note_range));
+			break;
+
+		case TOP:
+			real_val_at_pointer = real_val_at_pointer <= _saved_top_val? _adj.get_value() + _adj.get_page_size() : real_val_at_pointer;
+			real_val_at_pointer = min (127.0, ceil (real_val_at_pointer));
+
+			if (_midi_context.note_height() >= UIConfiguration::instance().get_max_note_height()){
+				_saved_top_val  = min (_adj.get_value() + _adj.get_page_size (), 127.0);
+			} else {
+				_saved_top_val = 0.0;
+				_midi_context.apply_note_range (_adj.get_value (), real_val_at_pointer, true, MidiViewBackground::CanMoveTop);
+			}
+			break;
+
+		case BOTTOM:
+			real_val_at_pointer = real_val_at_pointer >= _saved_bottom_val? _adj.get_value() : real_val_at_pointer;
+			real_val_at_pointer = max (0.0, floor (real_val_at_pointer));
+			if (_midi_context.note_height() >= UIConfiguration::instance().get_max_note_height()){
+				_saved_bottom_val  = _adj.get_value();
+			} else {
+				_saved_bottom_val = 127.0;
+				_midi_context.apply_note_range (real_val_at_pointer, _adj.get_value () + _adj.get_page_size (), true, MidiViewBackground::CanMoveBottom);
+			}
+			break;
+
+		default:
+			break;
 		}
 
 		redraw ();
