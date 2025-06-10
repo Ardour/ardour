@@ -199,6 +199,7 @@
     <ColorAlias name="location marker" alias="alert:yellow"/>
     <ColorAlias name="location punch" alias="alert:red"/>
     <ColorAlias name="location range" alias="alert:blue"/>
+    <ColorAlias name="location session" alias="alert:blue"/>
     <ColorAlias name="lock button: fill active" alias="widget:bg"/>
     <ColorAlias name="lock button: led active" alias="alert:red"/>
     <ColorAlias name="lua action button: fill" alias="widget:bg"/>

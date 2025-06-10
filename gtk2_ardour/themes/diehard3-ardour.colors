@@ -197,6 +197,7 @@
     <ColorAlias name="location marker" alias="theme:contrasting clock"/>
     <ColorAlias name="location punch" alias="alert:ruddy"/>
     <ColorAlias name="location range" alias="alert:green"/>
+    <ColorAlias name="location session" alias="alert:green"/>
     <ColorAlias name="location arrangement marker" alias="theme:contrasting alt"/>
     <ColorAlias name="lock button: fill active" alias="widget:bg"/>
     <ColorAlias name="lock button: led active" alias="alert:red"/>

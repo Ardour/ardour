@@ -146,6 +146,8 @@ Editor::add_new_location_internal (Location* location)
 		color = X_("location arrangement marker");
 	} else if (location->is_mark()) {
 		color = X_("location marker");
+	} else if (location->is_session_range()) {
+		color = X_("location session");
 	} else if (location->is_auto_loop()) {
 		color = X_("location loop");
 	} else if (location->is_auto_punch()) {
