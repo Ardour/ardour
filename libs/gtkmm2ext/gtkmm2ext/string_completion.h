@@ -39,12 +39,14 @@ class LIBGTKMM2EXT_API StringCompletion : public Gtk::EntryCompletion
 	void insert_vector (std::vector<Glib::ustring> strVector, bool norepeat = true);
 
 	void set_match_anywhere ();
+	void set_case_fold (bool);
 
 	static Glib::RefPtr<StringCompletion> create();
 	static Glib::RefPtr<StringCompletion> create (std::vector<Glib::ustring> strVector, bool norepeat = true);
 
   protected:
 	Glib::RefPtr<Gtk::ListStore> m_refCompletionModel;
+	bool case_fold;
 
 	class CompletionRecord : public Gtk::TreeModel::ColumnRecord
 	{

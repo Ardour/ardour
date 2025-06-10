@@ -16,19 +16,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iostream>
+
+#include "pbd/convert.h"
 #include "gtkmm2ext/string_completion.h"
 
 using namespace Gtkmm2ext;
 
 StringCompletion::StringCompletion()
+	: case_fold (true)
 {
-	this->init();
+	init();
 }
 
 StringCompletion::StringCompletion (std::vector < Glib::ustring > strVector, bool norepeat)
+	: case_fold (true)
 {
-	this->init();
-	this->insert_vector(strVector, norepeat);
+	init();
+	insert_vector(strVector, norepeat);
 }
 
 StringCompletion::~StringCompletion()
@@ -40,14 +45,14 @@ StringCompletion::init ()
 {
 	m_refCompletionModel = Gtk::ListStore::create(m_completionRecord);
 
-	this->set_model(m_refCompletionModel);
-	this->set_text_column (m_completionRecord.col_text);
+	set_model(m_refCompletionModel);
+	set_text_column (m_completionRecord.col_text);
 }
 
 void
 StringCompletion::add_string (Glib::ustring str, bool norepeat)
 {
-	if ((!norepeat) || (!this->_string_exists (str))) {
+	if ((!norepeat) || (!_string_exists (str))) {
 		Gtk::TreeModel::Row row =*(m_refCompletionModel->append());
 		row[m_completionRecord.col_text] = str;
 	}
@@ -102,7 +107,7 @@ void
 StringCompletion::insert_vector (std::vector<Glib::ustring> strVector, bool norepeat)
 {
 	for (auto & s : strVector) {
-		this->add_string (s, norepeat);
+		add_string (s, norepeat);
 	}
 }
 
@@ -110,6 +115,9 @@ bool
 StringCompletion::match_anywhere (Glib::ustring const & str,  Gtk::TreeModel::const_iterator const & iter)
 {
 	Glib::ustring r = Gtk::TreeModel::Row (*iter)[m_completionRecord.col_text];
+	if (case_fold) {
+		return PBD::downcase (r).find (PBD::downcase (str)) != Glib::ustring::npos;
+	}
 	return r.find (str) != Glib::ustring::npos;
 }
 
@@ -117,4 +125,10 @@ void
 StringCompletion::set_match_anywhere ()
 {
 	set_match_func (sigc::mem_fun (this, &StringCompletion::match_anywhere));
+}
+
+void
+StringCompletion::set_case_fold (bool yn)
+{
+	case_fold = yn;
 }
