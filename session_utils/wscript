@@ -25,7 +25,7 @@ def build_ardour_util(bld, util):
     obj.source   = ['common.cc', util + '.cc' ]
     obj.target   = pgmprefix + '-' + util
     obj.includes = ['.']
-    obj.linkflags= ''
+    obj.linkflags= bld.env['compiler_flags_dict']['execstack']
     obj.use      = [ 'libpbd',
                      'libardour',
                      'libardour_cp',
@@ -59,8 +59,6 @@ def build_ardour_util(bld, util):
         obj.use    += ' libappleutility'
     elif bld.env['build_target'] == 'mingw':
         obj.linkflags += ' -mwindows'
-    else:
-        obj.linkflags += ' -zexecstack'
 
     obj.includes += ['../libs']
 

@@ -655,7 +655,7 @@ def build(bld):
         'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
         ]
     obj.install_path = bld.env['DLLDIR']
-    obj.linkflags    = ''
+    obj.linkflags    = bld.env['compiler_flags_dict']['execstack']
     obj.uselib       = 'UUID FLAC FONTCONFIG GTHREAD OGG PANGOMM CURL DL CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
 
     if bld.is_defined('YTK'):
@@ -679,7 +679,6 @@ def build(bld):
         obj.source += [ 'bundle_env_mingw.cc' ]
         obj.source += [ 'windows_icon.rc' ]
     else:
-        obj.linkflags += ' -zexecstack'
         obj.source += [ 'bundle_env_linux.cc' ]
         obj.use += [ 'X11' ]
 

@@ -80,6 +80,8 @@ compiler_flags_dictionaries= {
         'pic': '-fPIC',
         # Flags required to compile C code with anonymous unions (only part of C11)
         'c-anonymous-union': '-fms-extensions',
+        # optional -zexecstack linkflag
+        'execstack': '',
     },
     'msvc' : {
         'debuggable' : ['/DDEBUG', '/Od', '/Zi', '/MDd', '/Gd', '/EHsc'],
@@ -113,6 +115,7 @@ compiler_flags_dictionaries= {
         'neon': '',
         'pic': '',
         'c-anonymous-union': '',
+        'execstack': '',
     },
 }
 
@@ -755,6 +758,13 @@ int main() { return 0; }''',
     # Do not use Boost.System library
     cxx_flags.append('-DBOOST_ERROR_CODE_HEADER_ONLY')
 
+    if platform == 'linux' and not conf.options.no_execstack:
+        if conf.check_cxx(linkflags=["-zexecstack"], mandatory = False, execute = False, msg = 'Checking for gcc/lld-style -zexecstack'):
+            flags_dict['execstack'] = "-zexecstack"
+        elif conf.check_cxx(linkflags=["-z execstack"], mandatory = False, execute = False, msg = 'Checking for clang execstack'):
+            flags_dict['execstack'] = "-z execstack"
+
+
     # use sparingly, prefer runtime profile
     if Options.options.program_name.lower().startswith('mixbus'):
         compiler_flags.append ('-DMIXBUS')
@@ -912,6 +922,8 @@ def options(opt):
                     help='Enable support to import PTS/PTF/PTX sessions')
     opt.add_option('--no-threaded-waveviews', action='store_true', default=False, dest='no_threaded_waveviews',
                     help='Disable threaded waveview rendering')
+    opt.add_option('--no-execstack', action='store_true', default=False, dest='no_execstack',
+                    help='Disable executable stack (may break some plugins)')
     opt.add_option('--no-futex-semaphore', action='store_true', default=False, dest='no_futex_semaphore',
                     help='Disable use of futex for semaphores (Linux only)')
     opt.add_option(

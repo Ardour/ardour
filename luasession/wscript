@@ -34,7 +34,7 @@ def build(bld):
     obj.source       = 'luasession.cc'
     obj.target       = 'luasession'
     obj.includes     = ['../libs']
-    obj.linkflags    = ''
+    obj.linkflags    = bld.env['compiler_flags_dict']['execstack']
     obj.use          = ['liblua',
                         'libpbd',
                         'libardour',
@@ -69,8 +69,6 @@ def build(bld):
         obj.use    += ' libappleutility'
     elif bld.env['build_target'] == 'mingw':
         obj.linkflags += ' -mwindows'
-    else:
-        obj.linkflags += ' -zexecstack'
 
     if bld.is_defined('NEED_INTL'):
         obj.linkflags += ' -lintl'

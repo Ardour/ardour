@@ -16,12 +16,8 @@ def build(bld):
     obj.source = 'exec_wrapper.c'
     obj.target = 'ardour-exec-wrapper'
     obj.install_path = os.path.join(bld.env['LIBDIR'])
+    obj.linkflags    = bld.env['compiler_flags_dict']['execstack']
     obj.defines = [
             '_POSIX_SOURCE',
             '_XOPEN_SOURCE=500',
     ]
-
-    if sys.platform == 'darwin':
-        pass
-    else:
-        obj.linkflags = ' -zexecstack'
