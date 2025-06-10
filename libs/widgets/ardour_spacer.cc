@@ -21,6 +21,14 @@
 
 using namespace ArdourWidgets;
 
+ArdourScalingSpacer::ArdourScalingSpacer (int natural_width, int natural_height)
+	: CairoWidget ()
+	, _natural_width (natural_width)
+	, _natural_height (natural_height)
+{
+}
+
+
 ArdourVSpacer::ArdourVSpacer (float r)
 	: CairoWidget ()
 	, ratio (r)
