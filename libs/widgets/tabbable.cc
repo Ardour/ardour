@@ -18,6 +18,7 @@
  */
 
 #include <ytkmm/action.h>
+#include <ytkmm/alignment.h>
 #include <ytkmm/frame.h>
 #include <ytkmm/notebook.h>
 #include <ytkmm/window.h>
@@ -149,7 +150,11 @@ Tabbable::default_layout ()
 		content_bottom_pane.add (content_att_bottom);
 	} else {
 		content_inner_hbox.pack_start (content_main_vbox, true, true);
-		content_main_vbox.pack_start (content_att_bottom, false, false);
+
+		Gtk::Alignment* btm_align = manage (new Gtk::Alignment());
+		btm_align->set_padding (5, 0, 0, 0); // 5px at top
+		btm_align->add (content_att_bottom);
+		content_main_vbox.pack_start (*btm_align, false, false);
 	}
 
 	content_inner_hbox.pack_start (content_bus_vbox, false, false);
