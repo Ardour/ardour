@@ -17,6 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <algorithm>
+
 #include "widgets/ardour_spacer.h"
 
 using namespace ArdourWidgets;
@@ -31,13 +33,13 @@ ArdourScalingSpacer::ArdourScalingSpacer (int natural_width, int natural_height)
 
 ArdourVSpacer::ArdourVSpacer (float r)
 	: CairoWidget ()
-	, ratio (r)
+	, _ratio (std::min (1.f, r))
 {
 }
 
 ArdourHSpacer::ArdourHSpacer (float r)
 	: CairoWidget ()
-	, ratio (r)
+	, _ratio (std::min (1.f, r))
 {
 }
 

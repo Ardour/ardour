@@ -60,9 +60,13 @@ public:
 protected:
 	void render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*) {
 
+		if (_ratio < 0) {
+			return;
+		}
+
 		float height = get_height();
 
-		float h = height * ratio;
+		float h = height * _ratio;
 		float t = .5f * (height - h);
 		ctx->rectangle (0, t, 1, h);
 		uint32_t c = UIConfigurationBase::instance().color ("neutral:backgroundest");
@@ -76,7 +80,8 @@ protected:
 		CairoWidget::on_size_request (req);
 	}
 
-	float ratio;
+private:
+	float _ratio;
 };
 
 class LIBWIDGETS_API ArdourHSpacer : public CairoWidget
@@ -87,9 +92,13 @@ public:
 protected:
 	void render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*) {
 
+		if (_ratio < 0) {
+			return;
+		}
+
 		float width = get_width();
 
-		float w = width * ratio;
+		float w = width * _ratio;
 		float t = .5f * (width - w);
 		ctx->rectangle (t, 0, w, 1);
 		uint32_t c = UIConfigurationBase::instance().color ("neutral:backgroundest");
@@ -103,7 +112,8 @@ protected:
 		CairoWidget::on_size_request (req);
 	}
 
-	float ratio;
+private:
+	float _ratio;
 };
 
 class LIBWIDGETS_API ArdourDropShadow : public CairoWidget
