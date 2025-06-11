@@ -378,6 +378,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	int visible_channel() const { return _visible_channel; }
 	void set_visible_channel (int, bool clear_selection = true);
+	int pick_visible_channel () const;
 	PBD::Signal<void()> VisibleChannelChanged;
 
   protected:

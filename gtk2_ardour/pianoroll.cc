@@ -2564,6 +2564,8 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 	view->show_start (true);
 	view->show_end (true);
 
+	set_visible_channel (view->pick_visible_channel());
+
 	r->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this, false), gui_context());
 	r->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::region_prop_change, this, _1), gui_context());
 

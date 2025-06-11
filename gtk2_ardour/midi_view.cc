@@ -357,6 +357,21 @@ MidiView::set_region (std::shared_ptr<MidiRegion> mr)
 	set_model (_midi_region->midi_source (0)->model());
 }
 
+int
+MidiView::pick_visible_channel () const
+{
+	int n = 0;
+
+	while (n < 16) {
+		if (_model->channels_present() & (1 << n)) {
+			return n;
+		}
+		++n;
+	}
+
+	return n;
+}
+
 void
 MidiView::set_model (std::shared_ptr<MidiModel> m)
 {
@@ -374,22 +389,7 @@ MidiView::set_model (std::shared_ptr<MidiModel> m)
 
 	//set_height (trackview.current_height());
 
-	if (_show_source) {
-		int n = 0;
-
-		while (n < 16) {
-			if (_model->channels_present() & (1 << n)) {
-				set_visible_channel (n);
-				break;
-			}
-			++n;
-		}
-
-		if (n == 16) {
-			/* No channel data in model, use channel 0 (1) */
-			set_visible_channel (0);
-		}
-	}
+	set_visible_channel (pick_visible_channel());
 
 	_model->ContentsChanged.connect (connections_requiring_model, invalidator (*this), std::bind (&MidiView::model_changed, this), gui_context());
 
@@ -5359,6 +5359,10 @@ MidiView::set_visibility_note_range (MidiViewBackground::VisibleNoteRange nvr, b
 void
 MidiView::set_visible_channel (int chn, bool clear_selection)
 {
+	if (!_show_source) {
+		return;
+	}
+
 	_visible_channel = chn;
 	VisibleChannelChanged(); /* EMIT SIGNAL */
 
