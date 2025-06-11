@@ -1744,28 +1744,28 @@ icon_cues_triggers (cairo_t* cr, const int width, const int height, const uint32
 	cairo_save (cr);
 
 	bool large = wh > 25;
-	const double grid = wh / (large ? 16.0 : 10.0);
+	const double grid = wh / (large ? 16.0 : 11.0);
 
-	cairo_translate (cr, 0.5 * (width - wh), 0.5 * (height - wh) + (large ? 0 : grid));
+	cairo_translate (cr, 0.5 * (width - wh), 0.5 * (height - wh) + (large ? grid * 2 : grid * 1.5));
 
-	for (int i = 0; i < (large ? 4 : 2); ++i) {
+	for (int i = 0; i < (large ? 3 : 2); ++i) {
 		cairo_save (cr);
 		cairo_translate (cr, 0, grid * 4 * i);
 
 		/* play triangle */
-		cairo_move_to (cr, grid * 3, grid * 2);
-		cairo_line_to (cr, grid * 1, grid * 1);
-		cairo_line_to (cr, grid * 1, grid * 3);
+		cairo_move_to (cr, grid * 4, grid * 2);
+		cairo_line_to (cr, grid * 2, grid * 1);
+		cairo_line_to (cr, grid * 2, grid * 3);
 		cairo_close_path (cr);
 		VECTORICONSTROKEFILLFG (0.9);
 
 		/* trigger box 1 */
-		cairo_rectangle (cr, grid * 4, grid * 1, grid * 5, grid * 2);
+		cairo_rectangle (cr, grid * 5, grid * 1, grid * 4, grid * 2);
 		VECTORICONSTROKEFILLFG (0.9);
 
 		if (large && i < 2) {
 			/* trigger box 2 */
-			cairo_rectangle (cr, grid * 10, grid * 1, grid * 5, grid * 2);
+			cairo_rectangle (cr, grid * 10, grid * 1, grid * 4, grid * 2);
 			VECTORICONSTROKEFILLFG (0.9);
 		}
 
