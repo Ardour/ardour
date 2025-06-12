@@ -1474,6 +1474,10 @@ namespace Gtk {
 	Gtkmm2ext::Application::instance()->ShouldQuit ();
 	return NSTerminateCancel;
 }
+- (BOOL) applicationSupportsSecureRestorableState:(NSApplication *) app
+{
+	return YES;
+}
 @end
 
 static void
