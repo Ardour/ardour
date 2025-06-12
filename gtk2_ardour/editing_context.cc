@@ -1783,8 +1783,12 @@ EditingContext::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* eve
 	   entered_regionview. */
 
 	MidiView&       mrv = note->midi_view();
-	const RegionSelection rs  = region_selection ();
 	const uint32_t sel_size = mrv.selection_size ();
+	MidiViews mvs (midiviews_from_region_selection (region_selection ()));
+
+	if (std::find (mvs.begin(), mvs.end(), &mrv) == mvs.end()) {
+		mvs.push_back (&mrv);
+	}
 
 	MenuList& items = _note_context_menu.items();
 	items.clear();
@@ -1794,17 +1798,17 @@ EditingContext::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* eve
 	}
 
 	items.push_back(MenuElem(_("Edit..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::edit_notes), &mrv)));
-	items.push_back(MenuElem(_("Transpose..."),  sigc::bind(sigc::mem_fun(*this, &EditingContext::transpose_regions), rs)));
-	items.push_back(MenuElem(_("Legatize"), sigc::bind(sigc::mem_fun(*this, &EditingContext::legatize_regions), rs, false)));
+	items.push_back(MenuElem(_("Transpose..."),  sigc::bind(sigc::mem_fun(*this, &EditingContext::transpose_regions), mvs)));
+	items.push_back(MenuElem(_("Legatize"), sigc::bind(sigc::mem_fun(*this, &EditingContext::legatize_regions), mvs, false)));
 	if (sel_size < 2) {
 		items.back().set_sensitive (false);
 	}
-	items.push_back(MenuElem(_("Quantize..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::quantize_regions), rs)));
-	items.push_back(MenuElem(_("Remove Overlap"), sigc::bind(sigc::mem_fun(*this, &EditingContext::legatize_regions), rs, true)));
+	items.push_back(MenuElem(_("Quantize..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::quantize_regions), mvs)));
+	items.push_back(MenuElem(_("Remove Overlap"), sigc::bind(sigc::mem_fun(*this, &EditingContext::legatize_regions), mvs, true)));
 	if (sel_size < 2) {
 		items.back().set_sensitive (false);
 	}
-	items.push_back(MenuElem(_("Transform..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::transform_regions), rs)));
+	items.push_back(MenuElem(_("Transform..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::transform_regions), mvs)));
 
 	_note_context_menu.popup (event->button.button, event->button.time);
 }
@@ -1822,13 +1826,19 @@ EditingContext::button_settings () const
 	return node;
 }
 
-std::vector<MidiView*>
+EditingContext::MidiViews
 EditingContext::filter_to_unique_midi_region_views (RegionSelection const & rs) const
+{
+	return filter_to_unique_midi_region_views (midiviews_from_region_selection (rs));
+}
+
+EditingContext::MidiViews
+EditingContext::filter_to_unique_midi_region_views (MidiViews const & mvs) const
 {
 	typedef std::pair<std::shared_ptr<MidiSource>,timepos_t> MapEntry;
 	std::set<MapEntry> single_region_set;
 
-	std::vector<MidiView*> views;
+	MidiViews views;
 
 	/* build a list of regions that are unique with respect to their source
 	 * and start position. Note: this is non-exhaustive... if someone has a
@@ -1839,17 +1849,26 @@ EditingContext::filter_to_unique_midi_region_views (RegionSelection const & rs) 
 	 * Solution: user should not select both regions, or should fork one of them.
 	 */
 
-	for (auto const & rv : rs) {
+	for (auto const & mv : mvs) {
 
-		MidiView* mrv = dynamic_cast<MidiView*> (rv);
-
-		if (!mrv) {
-			continue;
-		}
-
-		MapEntry entry = make_pair (mrv->midi_region()->midi_source(), mrv->midi_region()->start());
+		MapEntry entry = make_pair (mv->midi_region()->midi_source(), mv->midi_region()->start());
 
 		if (single_region_set.insert (entry).second) {
+			views.push_back (mv);
+		}
+	}
+
+	return views;
+}
+
+EditingContext::MidiViews
+EditingContext::midiviews_from_region_selection (RegionSelection const & rs) const
+{
+	MidiViews views;
+
+	for (auto & rv : rs) {
+		MidiView* mrv = dynamic_cast<MidiView*> (rv);
+		if (mrv) {
 			views.push_back (mrv);
 		}
 	}
@@ -1861,14 +1880,15 @@ void
 EditingContext::quantize_region ()
 {
 	if (_session) {
-		quantize_regions(region_selection ());
+		quantize_regions (midiviews_from_region_selection (region_selection()));
 	}
 }
 
 void
-EditingContext::quantize_regions (const RegionSelection& rs)
+EditingContext::quantize_regions (const MidiViews& rs)
 {
-	if (rs.n_midi_regions() == 0) {
+	if (rs.empty()) {
+		std::cerr << "no regions\n";
 		return;
 	}
 
@@ -1889,18 +1909,18 @@ void
 EditingContext::legatize_region (bool shrink_only)
 {
 	if (_session) {
-		legatize_regions(region_selection (), shrink_only);
+		legatize_regions (midiviews_from_region_selection (region_selection ()), shrink_only);
 	}
 }
 
 void
-EditingContext::legatize_regions (const RegionSelection& rs, bool shrink_only)
+EditingContext::legatize_regions (const MidiViews& rs, bool shrink_only)
 {
-	if (rs.n_midi_regions() == 0) {
+	if (rs.empty()) {
 		return;
 	}
 
-	Legatize legatize(shrink_only);
+	Legatize legatize (shrink_only);
 	apply_midi_note_edit_op (legatize, rs);
 }
 
@@ -1908,14 +1928,14 @@ void
 EditingContext::transform_region ()
 {
 	if (_session) {
-		transform_regions(region_selection ());
+		transform_regions (midiviews_from_region_selection (region_selection ()));
 	}
 }
 
 void
-EditingContext::transform_regions (const RegionSelection& rs)
+EditingContext::transform_regions (const MidiViews& rs)
 {
-	if (rs.n_midi_regions() == 0) {
+	if (rs.empty()) {
 		return;
 	}
 
@@ -1935,14 +1955,14 @@ void
 EditingContext::transpose_region ()
 {
 	if (_session) {
-		transpose_regions(region_selection ());
+		transpose_regions (midiviews_from_region_selection (region_selection ()));
 	}
 }
 
 void
-EditingContext::transpose_regions (const RegionSelection& rs)
+EditingContext::transpose_regions (const MidiViews& rs)
 {
-	if (rs.n_midi_regions() == 0) {
+	if (rs.empty()) {
 		return;
 	}
 
@@ -1987,8 +2007,6 @@ EditingContext::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiView& m
 		return 0;
 	}
 
-	std::cerr << "Apply op to " << selected.size() << std::endl;
-
 	std::vector<Evoral::Sequence<Temporal::Beats>::Notes> v;
 	v.push_back (selected);
 
@@ -1999,6 +2017,12 @@ EditingContext::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiView& m
 
 void
 EditingContext::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection& rs)
+{
+	apply_midi_note_edit_op (op, midiviews_from_region_selection (rs));
+}
+
+void
+EditingContext::apply_midi_note_edit_op (MidiOperator& op, const MidiViews& rs)
 {
 	if (rs.empty()) {
 		return;

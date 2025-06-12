@@ -1133,9 +1133,9 @@ Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, It
 				return true;
 			}
 		}
-	}
 
-	if (Keyboard::is_context_menu_event (&event->button)) {
+	} else {
+
 		switch (item_type) {
 		case NoteItem:
 			if (internal_editing()) {
@@ -1143,12 +1143,56 @@ Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, It
 				return true;
 			}
 			break;
+		case RegionItem:
+			if (internal_editing()) {
+				popup_region_context_menu (item, event);
+				return true;
+			}
+			break;
 		default:
 			break;
 		}
+
+		popup_note_context_menu (item, event);
+		return true;
 	}
 
 	return false;
+}
+
+void
+Pianoroll::popup_region_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
+{
+	using namespace Gtk::Menu_Helpers;
+
+	if (!view) {
+		return;
+	}
+
+	const uint32_t sel_size = view->selection_size ();
+	MidiViews mvs ({view});
+
+	MenuList& items = _region_context_menu.items();
+	items.clear();
+
+	if (sel_size > 0) {
+		items.push_back (MenuElem(_("Delete"), sigc::mem_fun (*view, &MidiView::delete_selection)));
+	}
+
+	items.push_back(MenuElem(_("Edit..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::edit_notes), view)));
+	items.push_back(MenuElem(_("Transpose..."),  sigc::bind(sigc::mem_fun(*this, &EditingContext::transpose_regions), mvs)));
+	items.push_back(MenuElem(_("Legatize"), sigc::bind(sigc::mem_fun(*this, &EditingContext::legatize_regions), mvs, false)));
+	if (sel_size < 2) {
+		items.back().set_sensitive (false);
+	}
+	items.push_back(MenuElem(_("Quantize..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::quantize_regions), mvs)));
+	items.push_back(MenuElem(_("Remove Overlap"), sigc::bind(sigc::mem_fun(*this, &EditingContext::legatize_regions), mvs, true)));
+	if (sel_size < 2) {
+		items.back().set_sensitive (false);
+	}
+	items.push_back(MenuElem(_("Transform..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::transform_regions), mvs)));
+
+	_region_context_menu.popup (event->button.button, event->button.time);
 }
 
 bool
@@ -1233,6 +1277,7 @@ RegionSelection
 Pianoroll::region_selection()
 {
 	RegionSelection rs;
+	/* there is never any region-level selection in a pianoroll */
 	return rs;
 }
 

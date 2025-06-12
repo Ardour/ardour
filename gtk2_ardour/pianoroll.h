@@ -349,4 +349,7 @@ class Pianoroll : public CueEditor
 	void ruler_locate (GdkEventButton*);
 	void scrolled ();
 	void update_tempo_based_rulers ();
+
+	Gtk::Menu _region_context_menu;
+	void popup_region_context_menu (ArdourCanvas::Item* item, GdkEvent* event);
 };

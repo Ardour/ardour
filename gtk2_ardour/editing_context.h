@@ -395,17 +395,28 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	PBD::Signal<void()> SnapChanged;
 	PBD::Signal<void()> MouseModeChanged;
 
+	typedef std::vector<MidiView*> MidiViews;
+
 	/* MIDI actions, proxied to selected MidiRegionView(s) */
 	ARDOUR::Quantize* get_quantize_op ();
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
+	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const MidiViews& rs);
 	PBD::Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiView& mrv);
 	virtual void midi_action (void (MidiView::*method)());
-	std::vector<MidiView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const;
+	std::vector<MidiView*> filter_to_unique_midi_region_views (RegionSelection const & rs) const;
+	std::vector<MidiView*> filter_to_unique_midi_region_views (MidiViews const & ms) const;
 
 	void quantize_region ();
 	void transform_region ();
 	void legatize_region (bool shrink_only);
 	void transpose_region ();
+
+	void quantize_regions (const MidiViews& rs);
+	void legatize_regions (const MidiViews& rs, bool shrink_only);
+	void transform_regions (const MidiViews& rs);
+	void transpose_regions (const MidiViews& rs);
+
+	void edit_notes (MidiView*);
 
 	static bool need_shared_actions;
 	void register_midi_actions (Gtkmm2ext::Bindings*, std::string const &);
@@ -666,13 +677,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	virtual RegionSelection region_selection() = 0;
 
-	void edit_notes (MidiView*);
 	void note_edit_done (int, EditNoteDialog*);
 
-	void quantize_regions (const RegionSelection& rs);
-	void legatize_regions (const RegionSelection& rs, bool shrink_only);
-	void transform_regions (const RegionSelection& rs);
-	void transpose_regions (const RegionSelection& rs);
+	MidiViews midiviews_from_region_selection (RegionSelection const &) const;
 
 	/** the adjustment that controls the overall editing vertical scroll position */
 	friend class EditorSummary;
