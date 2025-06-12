@@ -123,7 +123,7 @@ EditingContext::EditingContext (std::string const & name)
 	, _draw_channel (DRAW_CHAN_AUTO)
 	, _timeline_origin (0.)
 	, play_note_selection_button (ArdourButton::default_elements)
-	, follow_playhead_button (_("F"), ArdourButton::Text, true)
+	, follow_playhead_button (ArdourButton::default_elements, true)
 	, visible_channel_label (_("MIDI Channel"))
 	, _drags (new DragManager (this))
 	, _leftmost_sample (0)
@@ -213,6 +213,8 @@ EditingContext::EditingContext (std::string const & name)
 	note_mode_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::note_mode_clicked));
 	follow_playhead_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::follow_playhead_clicked));
 	full_zoom_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::full_zoom_clicked));
+
+	follow_playhead_button.set_icon (ArdourIcon::EditorFollowPlayhead);
 
 	zoom_in_button.set_name ("zoom button");
 	zoom_in_button.set_icon (ArdourIcon::ZoomIn);
