@@ -152,10 +152,11 @@ TriggerPage::TriggerPage ()
 	table.set_border_width (8);
 
 	int col = 0;
-	table.attach (_slot_prop_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
+	table.attach (_properties_box, col, col + 1, 0, 1, Gtk::EXPAND | Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
 	++col;
 	table.attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
 	clip_editor_column = ++col;
+	++col;
 
 	table.set_no_show_all ();
 
@@ -194,6 +195,7 @@ TriggerPage::TriggerPage ()
 	_trigger_clip_picker.show ();
 	_no_strips.show ();
 	_sidebar_vbox.show_all ();
+	_properties_box.show();
 
 	/* setup keybidings */
 	set_widget_bindings (contents(), *bindings, ARDOUR_BINDING_KEY);
@@ -365,7 +367,7 @@ TriggerPage::set_session (Session* s)
 
 	initial_track_display ();
 
-	_slot_prop_box.set_session (s);
+	_properties_box.set_session (s);
 
 	_audio_trig_box.set_session (s);
 
@@ -473,7 +475,6 @@ TriggerPage::trigger_arm_changed (Trigger const * trigger)
 
 	/* hide everything */
 
-	_slot_prop_box.hide ();
 	_audio_trig_box.hide ();
 	_midi_trig_box.hide ();
 	_midi_editor->viewport().hide ();
@@ -482,9 +483,6 @@ TriggerPage::trigger_arm_changed (Trigger const * trigger)
 
 	TriggerBox& box = trigger->box();
 	TriggerReference ref (trigger->boxptr(), trigger->index());
-
-	_slot_prop_box.set_slot (ref);
-	_slot_prop_box.show ();
 
 	if (box.data_type () == DataType::AUDIO) {
 		if (trigger->the_region()) {
@@ -513,7 +511,6 @@ TriggerPage::selection_changed ()
 
 	/* hide everything */
 
-	_slot_prop_box.hide ();
 	_audio_trig_box.hide ();
 	_midi_trig_box.hide ();
 
@@ -532,9 +529,6 @@ TriggerPage::selection_changed ()
 	TriggerReference ref     = entry->trigger_reference ();
 	TriggerPtr       trigger = entry->trigger ();
 	std::shared_ptr<TriggerBox> box = ref.box();
-
-	_slot_prop_box.set_slot (ref);
-	_slot_prop_box.show ();
 
 	if (box->data_type () == DataType::AUDIO) {
 

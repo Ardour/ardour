@@ -35,6 +35,7 @@ class TimeInfoBox;
 class RegionEditor;
 class RegionFxPropertiesBox;
 class RoutePropertiesBox;
+class SlotPropertiesBox;
 
 class SelectionPropertiesBox : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
@@ -52,6 +53,7 @@ private:
 
 	TimeInfoBox*           _time_info_box;
 	RoutePropertiesBox*    _route_prop_box;
+	SlotPropertiesBox*     _slot_prop_box;
 	Gtk::HBox              _region_editor_box;
 	RegionEditor*          _region_editor;
 	RegionFxPropertiesBox* _region_fx_box;

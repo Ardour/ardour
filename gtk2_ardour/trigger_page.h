@@ -37,7 +37,7 @@
 #include "fitted_canvas_widget.h"
 #include "midi_trigger_properties_box.h"
 #include "route_processor_selection.h"
-#include "slot_properties_box.h"
+#include "selection_properties_box.h"
 #include "trigger_clip_picker.h"
 #include "trigger_region_list.h"
 #include "trigger_route_list.h"
@@ -134,8 +134,7 @@ private:
 
 	bool _show_bottom_pane;
 
-	SlotPropertiesBox _slot_prop_box;
-
+	SelectionPropertiesBox    _properties_box;
 	AudioTriggerPropertiesBox _audio_trig_box;
 	MidiTriggerPropertiesBox _midi_trig_box;
 

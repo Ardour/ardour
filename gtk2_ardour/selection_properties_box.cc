@@ -31,8 +31,12 @@
 #include "region_fx_properties_box.h"
 #include "region_view.h"
 #include "route_properties_box.h"
-#include "selection_properties_box.h"
+#include "slot_properties_box.h"
 #include "time_info_box.h"
+#include "trigger_strip.h"
+#include "triggerbox_ui.h"
+
+#include "selection_properties_box.h"
 
 #include "pbd/i18n.h"
 
@@ -49,9 +53,11 @@ SelectionPropertiesBox::SelectionPropertiesBox ()
 
 	_time_info_box  = new TimeInfoBox ("EditorTimeInfo", true);
 	_route_prop_box = new RoutePropertiesBox ();
+	_slot_prop_box = new SlotPropertiesBox ();
 
 	pack_start(*_time_info_box, false, false, 0);
 	pack_start(*_route_prop_box, true, true, 0);
+	pack_start(*_slot_prop_box, true, true, 0);
 	pack_start(_region_editor_box, true, true, 0);
 
 	_time_info_box->set_no_show_all ();
@@ -69,6 +75,7 @@ SelectionPropertiesBox::~SelectionPropertiesBox ()
 	delete _route_prop_box;
 	delete _region_editor;
 	delete _region_fx_box;
+	delete _slot_prop_box;
 }
 
 void
@@ -102,6 +109,7 @@ SelectionPropertiesBox::set_session (Session* s)
 
 	_time_info_box->set_session(s);
 	_route_prop_box->set_session(s);
+	_slot_prop_box->set_session(s);
 
 	selection_changed();
 }
@@ -144,6 +152,21 @@ SelectionPropertiesBox::selection_changed ()
 		_time_info_box->show ();
 	} else {
 		_time_info_box->hide ();
+	}
+
+	bool show_slot_properties = false;
+	if (!selection.triggers.empty ()) {
+		TriggerSelection ts      = selection.triggers;
+		TriggerEntry*    entry   = *ts.begin ();
+		TriggerReference ref     = entry->trigger_reference ();
+
+		_slot_prop_box->set_slot(ref);
+		show_slot_properties = true;
+	}
+	if (show_slot_properties) {
+		_slot_prop_box->show();
+	} else {
+		_slot_prop_box->hide();
 	}
 
 	bool show_route_properties = false;
