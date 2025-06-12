@@ -805,7 +805,10 @@ ApplicationBar::set_session (Session *s)
 		_transport_hbox.remove (_editor_meter_table);
 	}
 	if (_editor_meter) {
-		_editor_meter_table.remove(*_editor_meter);
+		Gtk::Container *parent = _editor_meter->get_parent();
+		if (parent) {
+			parent->remove(*_editor_meter);
+		}
 		delete _editor_meter;
 		_editor_meter = 0;
 	}
