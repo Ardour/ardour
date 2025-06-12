@@ -2724,6 +2724,8 @@ Editor::setup_toolbar ()
 		mouse_mode_size_group->add_widget (zoom_focus_selector);
 		mouse_mode_size_group->add_widget (tav_shrink_button);
 		mouse_mode_size_group->add_widget (tav_expand_button);
+		mouse_mode_size_group->add_widget (follow_playhead_button);
+		mouse_mode_size_group->add_widget (follow_edits_button);
 	} else {
 		mouse_mode_size_group->add_widget (zoom_preset_selector);
 		mouse_mode_size_group->add_widget (visible_tracks_selector);
@@ -2862,6 +2864,12 @@ Editor::setup_toolbar ()
 
 	pack_draw_box ();
 
+	HBox* follow_mode_hbox = manage (new HBox);
+	follow_mode_hbox->set_spacing (2);
+	follow_mode_hbox->set_border_width (2);
+	follow_mode_hbox->pack_start (follow_playhead_button, false, false);
+	follow_mode_hbox->pack_start (follow_edits_button, false, false);
+
 	/* Pack everything in... */
 
 	toolbar_hbox.set_spacing (2);
@@ -2897,6 +2905,8 @@ Editor::setup_toolbar ()
 	toolbar_hbox.pack_end (_zoom_box, false, false, 2);
 	toolbar_hbox.pack_end (*(manage (new ArdourVSpacer ())), false, false, 3);
 	toolbar_hbox.pack_end (_track_box, false, false);
+	toolbar_hbox.pack_end (*(manage (new ArdourVSpacer ())), false, false, 3);
+	toolbar_hbox.pack_end (*follow_mode_hbox, false, false);
 
 	toolbar_hbox.show_all ();
 }

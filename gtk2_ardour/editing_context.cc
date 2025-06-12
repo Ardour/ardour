@@ -124,6 +124,7 @@ EditingContext::EditingContext (std::string const & name)
 	, _timeline_origin (0.)
 	, play_note_selection_button (ArdourButton::default_elements)
 	, follow_playhead_button (ArdourButton::default_elements, true)
+	, follow_edits_button (_("Follow Range"), ArdourButton::Element (ArdourButton::Edge | ArdourButton::Body | ArdourButton::VectorIcon), true)
 	, visible_channel_label (_("MIDI Channel"))
 	, _drags (new DragManager (this))
 	, _leftmost_sample (0)
@@ -206,6 +207,7 @@ EditingContext::EditingContext (std::string const & name)
 	set_tooltip (play_note_selection_button, _("Play notes when selected"));
 	set_tooltip (note_mode_button, _("Switch between sustained and percussive mode"));
 	set_tooltip (follow_playhead_button, _("Scroll automatically to keep playhead visible"));
+	set_tooltip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 	/* Leave tip for full zoom button to derived class */
 	set_tooltip (visible_channel_selector, _("Select visible MIDI channel"));
 
@@ -215,6 +217,7 @@ EditingContext::EditingContext (std::string const & name)
 	full_zoom_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::full_zoom_clicked));
 
 	follow_playhead_button.set_icon (ArdourIcon::EditorFollowPlayhead);
+	follow_edits_button.set_icon (ArdourIcon::EditorFollowEdits);
 
 	zoom_in_button.set_name ("zoom button");
 	zoom_in_button.set_icon (ArdourIcon::ZoomIn);
@@ -224,6 +227,10 @@ EditingContext::EditingContext (std::string const & name)
 
 	full_zoom_button.set_name ("zoom button");
 	full_zoom_button.set_icon (ArdourIcon::ZoomFull);
+
+	follow_edits_button.set_name ("transport option button");
+	follow_playhead_button.set_icon (ArdourIcon::EditorFollowPlayhead);
+	follow_playhead_button.set_elements (ArdourButton::Element (ArdourButton::Edge | ArdourButton::Body | ArdourButton::VectorIcon));
 
 	selection->PointsChanged.connect (sigc::mem_fun(*this, &EditingContext::point_selection_changed));
 
@@ -2160,6 +2167,9 @@ EditingContext::bind_mouse_mode_buttons ()
 	zoom_in_button.set_related_action (act);
 	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("temporal-zoom-out"));
 	zoom_out_button.set_related_action (act);
+
+	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
+	follow_edits_button.set_related_action (act);
 
 	mouse_move_button.set_related_action (get_mouse_mode_action (Editing::MouseObject));
 	mouse_move_button.set_icon (ArdourWidgets::ArdourIcon::ToolGrab);

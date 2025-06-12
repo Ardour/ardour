@@ -115,7 +115,6 @@ ApplicationBar::ApplicationBar ()
 	, _basic_ui (0)
 	, _latency_disable_button (ArdourButton::led_default_elements)
 	, _auto_return_button (ArdourButton::led_default_elements)
-	, _follow_edits_button (ArdourButton::led_default_elements)
 	, _primary_clock  (X_("primary"), X_("transport"), MainClock::PrimaryClock)
 	, _secondary_clock (X_("secondary"), X_("secondary"), MainClock::SecondaryClock)
 	, _secondary_clock_spacer (0)
@@ -179,7 +178,6 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_latency_disable_button.set_text (_("Disable PDC"));
 
 	_auto_return_button.set_text(_("Auto Return"));
-	_follow_edits_button.set_text(_("Follow Range"));
 
 	/* alert box sub-group */
 	VBox* alert_box = manage (new VBox);
@@ -243,7 +241,6 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (_latency_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
-	_table.attach (_follow_edits_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
 	_table.attach (_auto_return_button,  TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	++col;
 
@@ -319,7 +316,6 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	button_height_size_group->add_widget (_punch_out_button);
 	button_height_size_group->add_widget (_record_mode_selector);
 	button_height_size_group->add_widget (_latency_disable_button);
-	button_height_size_group->add_widget (_follow_edits_button);
 	button_height_size_group->add_widget (_auto_return_button);
 
 	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
@@ -367,7 +363,6 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_record_mode_selector.set_name ("record mode button");
 	_latency_disable_button.set_name ("latency button");
 	_auto_return_button.set_name ("transport option button");
-	_follow_edits_button.set_name ("transport option button");
 	_solo_alert_button.set_name ("rude solo");
 	_auditioning_alert_button.set_name ("rude audition");
 	_feedback_alert_button.set_name ("feedback alert");
@@ -447,11 +442,8 @@ ApplicationBar::ui_actions_ready ()
 
 	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
 	_auto_return_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
-	_follow_edits_button.set_related_action (act);
 
 	_auto_return_button.set_text(_("Auto Return"));
-	_follow_edits_button.set_text(_("Follow Range"));
 
 	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
 	act = ActionManager::get_action (X_("Main"), X_("cancel-solo"));

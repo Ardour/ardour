@@ -560,6 +560,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	ArdourWidgets::ArdourButton play_note_selection_button;
 	ArdourWidgets::ArdourButton note_mode_button;
 	ArdourWidgets::ArdourButton follow_playhead_button;
+	ArdourWidgets::ArdourButton follow_edits_button;
 
 	ArdourWidgets::ArdourButton zoom_in_button;
 	ArdourWidgets::ArdourButton zoom_out_button;
