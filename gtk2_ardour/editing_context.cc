@@ -123,7 +123,7 @@ EditingContext::EditingContext (std::string const & name)
 	, _draw_channel (DRAW_CHAN_AUTO)
 	, _timeline_origin (0.)
 	, play_note_selection_button (ArdourButton::default_elements)
-	, follow_playhead_button (ArdourButton::default_elements, true)
+	, follow_playhead_button (_("Follow Playhead"), ArdourButton::Element (ArdourButton::Edge | ArdourButton::Body | ArdourButton::VectorIcon), true)
 	, follow_edits_button (_("Follow Range"), ArdourButton::Element (ArdourButton::Edge | ArdourButton::Body | ArdourButton::VectorIcon), true)
 	, visible_channel_label (_("MIDI Channel"))
 	, _drags (new DragManager (this))
@@ -213,7 +213,6 @@ EditingContext::EditingContext (std::string const & name)
 
 	play_note_selection_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::play_note_selection_clicked));
 	note_mode_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::note_mode_clicked));
-	follow_playhead_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::follow_playhead_clicked));
 	full_zoom_button.signal_clicked.connect (sigc::mem_fun (*this, &EditingContext::full_zoom_clicked));
 
 	follow_playhead_button.set_icon (ArdourIcon::EditorFollowPlayhead);
@@ -228,9 +227,8 @@ EditingContext::EditingContext (std::string const & name)
 	full_zoom_button.set_name ("zoom button");
 	full_zoom_button.set_icon (ArdourIcon::ZoomFull);
 
+	follow_playhead_button.set_name ("transport option button");
 	follow_edits_button.set_name ("transport option button");
-	follow_playhead_button.set_icon (ArdourIcon::EditorFollowPlayhead);
-	follow_playhead_button.set_elements (ArdourButton::Element (ArdourButton::Edge | ArdourButton::Body | ArdourButton::VectorIcon));
 
 	selection->PointsChanged.connect (sigc::mem_fun(*this, &EditingContext::point_selection_changed));
 
@@ -2167,6 +2165,9 @@ EditingContext::bind_mouse_mode_buttons ()
 	zoom_in_button.set_related_action (act);
 	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("temporal-zoom-out"));
 	zoom_out_button.set_related_action (act);
+
+	act = ActionManager::get_action (X_("Editor"), X_("toggle-follow-playhead"));
+	follow_playhead_button.set_related_action (act);
 
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
 	follow_edits_button.set_related_action (act);
