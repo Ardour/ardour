@@ -125,7 +125,7 @@ EditingContext::EditingContext (std::string const & name)
 	, play_note_selection_button (ArdourButton::default_elements)
 	, follow_playhead_button (_("Follow Playhead"), ArdourButton::Element (ArdourButton::Edge | ArdourButton::Body | ArdourButton::VectorIcon), true)
 	, follow_edits_button (_("Follow Range"), ArdourButton::Element (ArdourButton::Edge | ArdourButton::Body | ArdourButton::VectorIcon), true)
-	, visible_channel_label (_("MIDI Channel"))
+	, visible_channel_label (S_("MIDI|Ch:"))
 	, _drags (new DragManager (this))
 	, _leftmost_sample (0)
 	, _playhead_cursor (nullptr)
@@ -2111,7 +2111,7 @@ EditingContext::pack_draw_box ()
 	draw_box.set_border_width (2);
 	draw_box.pack_start (*manage (new Label (_("Len:"))), false, false);
 	draw_box.pack_start (draw_length_selector, false, false, 4);
-	draw_box.pack_start (*manage (new Label (_("Ch:"))), false, false);
+	draw_box.pack_start (*manage (new Label (S_("MIDI|Ch:"))), false, false);
 	draw_box.pack_start (draw_channel_selector, false, false, 4);
 	draw_box.pack_start (*manage (new Label (_("Vel:"))), false, false);
 	draw_box.pack_start (draw_velocity_selector, false, false, 4);
