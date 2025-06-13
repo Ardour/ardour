@@ -19,14 +19,14 @@
 #include "pbd/demangle.h"
 #include "pbd/error.h"
 
+#include "ardour/boost_debug.h"
+#include "ardour/session.h"
+#include "ardour/session_handle.h"
+
 #ifdef TRACE_SETSESSION_NULL
 #include <cassert>
 #include "pbd/stacktrace.h"
 #endif
-
-#include "ardour/boost_debug.h"
-#include "ardour/session.h"
-#include "ardour/session_handle.h"
 
 #include "pbd/i18n.h"
 
