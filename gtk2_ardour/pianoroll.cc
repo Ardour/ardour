@@ -2651,6 +2651,8 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
 	}
 
+	bg->display_region (*view);
+
 	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Pianoroll::maybe_update));
 }
 

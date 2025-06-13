@@ -20,6 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ardour/smf_source.h"
+#include "ardour/midi_region.h"
+
 #include "pianoroll.h"
 #include "pianoroll_background.h"
 #include "midi_view.h"
@@ -100,4 +103,12 @@ PianorollMidiBackground::apply_note_range_to_children ()
 	if (view) {
 		view->apply_note_range (lowest_note(), highest_note());
 	}
+}
+
+void
+PianorollMidiBackground::display_region (MidiView& mv)
+{
+	std::shared_ptr<ARDOUR::SMFSource> smf (std::dynamic_pointer_cast<ARDOUR::SMFSource> (mv.midi_region()->source()));
+	assert (smf);
+	(void) update_data_note_range (smf->model()->lowest_note(), smf->model()->highest_note());
 }
