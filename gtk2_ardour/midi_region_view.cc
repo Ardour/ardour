@@ -592,7 +592,9 @@ uint32_t
 MidiRegionView::get_fill_color() const
 {
 	Gtkmm2ext::Color c;
-	if (_selected) {
+	Editing::MouseMode mm = trackview.editor().effective_mouse_mode ();
+
+	if (_selected && (mm != Editing::MouseDraw && mm != Editing::MouseContent)) {
 		c = UIConfiguration::instance().color ("selected region base");
 	} else if ((!UIConfiguration::instance().get_show_name_highlight() || high_enough_for_name) && !UIConfiguration::instance().get_color_regions_using_track_color()) {
 		c = UIConfiguration::instance().color (fill_color_name);
