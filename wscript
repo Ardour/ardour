@@ -1182,7 +1182,7 @@ def configure(conf):
                   define_name= 'HAVE_RUBBERBAND_3_0_0',
     fragment = '''
 #include <rubberband/RubberBandStretcher.h>
-#if RUBBERBAND_API_MAJOR_VERSION >= 2 && RUBBERBAND_API_MINOR_VERSION >= 7
+#if (RUBBERBAND_API_MAJOR_VERSION >= 2 && RUBBERBAND_API_MINOR_VERSION >= 7) || RUBBERBAND_API_MAJOR_VERSION >= 3
 int main () { return 0; }
 #else
 #error
