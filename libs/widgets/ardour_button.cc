@@ -292,8 +292,9 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	const float scale = UIConfigurationBase::instance().get_ui_scale();
 
 	float corner_radius = _corner_radius;
-	if (corner_radius==-1) {
-		corner_radius = get_height()-2*scale;
+	if (corner_radius < 0) {
+		/* L/R half circle */
+		corner_radius = get_height() / 2. - 2 * scale;
 	} else {
 		std::max(2.f, corner_radius * scale);
 	}
