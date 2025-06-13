@@ -688,7 +688,7 @@
         <menuitem action='attach-preferences'/>
         <menuitem action='detach-preferences'/>
       </menu>
-      <!-- Common Ardour Widows (all toggle) !-->
+      <!-- Common Ardour Windows (all toggle) !-->
       <menuitem action='toggle-meterbridge'/>
       <menuitem action='toggle-rtawindow'/>
       <menuitem action='toggle-locations'/>
