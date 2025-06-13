@@ -1140,7 +1140,6 @@ MixerStrip::build_route_ops_menu ()
 		denormal_menu_item->set_active (_route->denormal_protection());
 	}
 
-#ifndef NDEBUG
 	if (active && !is_singleton ()) {
 		items.push_back (CheckMenuElem (_("RTA")));
 		Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
@@ -1155,7 +1154,6 @@ MixerStrip::build_route_ops_menu ()
 				}
 			});
 	}
-#endif
 
 	/* Disk I/O */
 
