@@ -2698,8 +2698,10 @@ Editor::snap_to_marker (timepos_t const & presnap, Temporal::RoundMode direction
 void
 Editor::setup_toolbar ()
 {
+	const int spc = Profile->get_mixbus() ? 0 : 2;
+
 	HBox* mode_box = manage(new HBox);
-	mode_box->set_border_width (2);
+	mode_box->set_border_width (spc);
 	mode_box->set_spacing(2);
 
 	HBox* mouse_mode_box = manage (new HBox);
@@ -2747,7 +2749,7 @@ Editor::setup_toolbar ()
 	mouse_mode_size_group->add_widget (nudge_forward_button);
 	mouse_mode_size_group->add_widget (nudge_backward_button);
 
-	mouse_mode_hbox->set_spacing (2);
+	mouse_mode_hbox->set_spacing (spc);
 	mouse_mode_hbox->pack_start (smart_mode_button, false, false);
 
 	mouse_mode_hbox->pack_start (mouse_move_button, false, false);
@@ -2781,7 +2783,7 @@ Editor::setup_toolbar ()
 	/* Zoom */
 
 	_zoom_box.set_spacing (2);
-	_zoom_box.set_border_width (2);
+	_zoom_box.set_border_width (spc);
 
 	RefPtr<Action> act;
 
@@ -2802,14 +2804,10 @@ Editor::setup_toolbar ()
 
 	/* Track zoom buttons */
 	_track_box.set_spacing (2);
-	_track_box.set_border_width (2);
+	_track_box.set_border_width (spc);
 
 	visible_tracks_selector.set_name ("zoom button");
-	if (Profile->get_mixbus()) {
-		visible_tracks_selector.set_icon (ArdourIcon::TimeAxisExpand);
-	} else {
-		set_size_request_to_display_given_text (visible_tracks_selector, _("All"), 30, 2);
-	}
+	set_size_request_to_display_given_text (visible_tracks_selector, _("All"), 30, 2);
 
 	tav_expand_button.set_name ("zoom button");
 	tav_expand_button.set_icon (ArdourIcon::TimeAxisExpand);
@@ -2821,16 +2819,14 @@ Editor::setup_toolbar ()
 	act = ActionManager::get_action (X_("Editor"), X_("shrink-tracks"));
 	tav_shrink_button.set_related_action (act);
 
-	if (ARDOUR::Profile->get_mixbus()) {
-		_track_box.pack_start (visible_tracks_selector);
-	} else {
+	if (!ARDOUR::Profile->get_mixbus()) {
 		_track_box.pack_start (visible_tracks_selector);
 		_track_box.pack_start (tav_shrink_button);
 		_track_box.pack_start (tav_expand_button);
 	}
 
 	snap_box.set_spacing (2);
-	snap_box.set_border_width (2);
+	snap_box.set_border_width (spc);
 
 	stretch_marker_cb.set_name ("mouse mode button");
 
@@ -2844,20 +2840,20 @@ Editor::setup_toolbar ()
 
 	HBox *nudge_box = manage (new HBox);
 	nudge_box->set_spacing (2);
-	nudge_box->set_border_width (2);
+	nudge_box->set_border_width (spc);
 
 	nudge_forward_button.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::nudge_forward_release), false);
 	nudge_backward_button.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::nudge_backward_release), false);
 
 	nudge_box->pack_start (nudge_backward_button, false, false);
-	nudge_box->pack_start (nudge_forward_button, false, false);
 	nudge_box->pack_start (*nudge_clock, false, false);
+	nudge_box->pack_start (nudge_forward_button, false, false);
 
 	stretch_marker_cb.set_label (_("Adjust Markers"));
 	stretch_marker_cb.set_active (true);
 
 	grid_box.set_spacing (2);
-	grid_box.set_border_width (2);
+	grid_box.set_border_width (spc);
 	grid_box.pack_start (stretch_marker_cb, false, false, 4);
 
 	grid_type_selector.set_name ("mouse mode button");
@@ -2865,15 +2861,15 @@ Editor::setup_toolbar ()
 	pack_draw_box ();
 
 	HBox* follow_mode_hbox = manage (new HBox);
-	follow_mode_hbox->set_spacing (2);
-	follow_mode_hbox->set_border_width (2);
+	follow_mode_hbox->set_spacing (spc ? 2 : 1);
+	follow_mode_hbox->set_border_width (spc);
 	follow_mode_hbox->pack_start (follow_playhead_button, false, false);
 	follow_mode_hbox->pack_start (follow_edits_button, false, false);
 
 	/* Pack everything in... */
 
 	toolbar_hbox.set_spacing (2);
-	toolbar_hbox.set_border_width (1);
+	toolbar_hbox.set_border_width (spc ? 1 : 0);
 
 #ifndef MIXBUS
 	ArdourWidgets::ArdourDropShadow *tool_shadow = manage (new (ArdourWidgets::ArdourDropShadow));
