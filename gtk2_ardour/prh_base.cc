@@ -646,10 +646,21 @@ PianoRollHeaderBase::button_press_handler (GdkEventButton* ev)
 
 	_scroomer_button_state = _scroomer_state;
 
-	if (ev->button == 1 && ev->x <= _scroomer_size){
 
-		if (ev->type == GDK_2BUTTON_PRESS && _view) {
-			_view->set_visibility_note_range (MidiStreamView::ContentsRange, false);
+	if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
+		if (_midi_context.visibility_range_style () == MidiViewBackground::FullRange) {
+			_midi_context.set_note_visibility_range_style (MidiViewBackground::ContentsRange);
+		} else {
+			_midi_context.set_note_visibility_range_style (MidiViewBackground::FullRange);
+		}
+		return true;
+	}
+
+	if (ev->x <= _scroomer_size) {
+
+		/* button press on scroomer handler */
+
+		if (ev->button != 1) {
 			return true;
 		}
 
@@ -660,28 +671,27 @@ PianoRollHeaderBase::button_press_handler (GdkEventButton* ev)
 		return true;
 
 	} else {
-		int note = _midi_context.y_to_note(evy);
+
+		/* button press on note keys */
+
+		int note = _midi_context.y_to_note (evy);
 		bool tertiary = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 		bool primary = Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier);
+		bool is_selection_click = (ev->type == GDK_BUTTON_PRESS) &&
+			(((ev->button == 2) && Keyboard::no_modifiers_active (ev->state)) || ((ev->button == 1) && tertiary));
 
-		if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
-			if (primary) {
-				_adj.set_value (0.0);
-				_adj.set_page_size (127.0);
-				_adj.value_changed ();
-				redraw ();
-				return false;
-			}
-			return false;
-		} else if (ev->button == 2 && Keyboard::no_modifiers_active (ev->state)) {
-			SetNoteSelection (note); // EMIT SIGNAL
-			return true;
-		} else if (tertiary && (ev->button == 1 || ev->button == 2)) {
+
+		/* Note that shift-button1 actually ends up invoking
+		 * ExtendNoteSelection, but this has the same effect as
+		 * SetNoteSelection when there is no existing selection
+		 */
+
+		if (tertiary && (ev->button == 1 || ev->button == 2)) {
 			ExtendNoteSelection (note); // EMIT SIGNAL
-			return true;
+		} else if (is_selection_click ) {
+			SetNoteSelection (note); // EMIT SIGNAL
 		} else if (primary && (ev->button == 1 || ev->button == 2)) {
 			ToggleNoteSelection (note); // EMIT SIGNAL
-			return true;
 		} else if (ev->button == 1 && note >= 0 && note < 128) {
 			do_grab ();
 			_dragging = true;
@@ -689,14 +699,15 @@ PianoRollHeaderBase::button_press_handler (GdkEventButton* ev)
 			if (!_active_notes[note]) {
 				_active_notes[note] = true;
 				_clicked_note = note;
-				send_note_on(note);
+				send_note_on (note);
 
-				invalidate_note_range(note, note);
+				invalidate_note_range (note, note);
 			} else {
-				reset_clicked_note(note);
+				reset_clicked_note (note);
 			}
 		}
 	}
+
 	return true;
 }
 
