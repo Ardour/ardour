@@ -368,7 +368,8 @@ MidiView::pick_visible_channel () const
 		++n;
 	}
 
-	return n;
+	/* no data present, just use the first MIDI channel */
+	return 0;
 }
 
 void
