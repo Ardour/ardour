@@ -661,6 +661,7 @@ Editor::Editor ()
 
 	load_bindings ();
 	register_actions ();
+	bind_mouse_mode_buttons ();
 
 	setup_toolbar ();
 
@@ -1160,34 +1161,6 @@ Editor::map_position_change (samplepos_t sample)
 
 	update_section_box ();
 }
-
-void
-Editor::center_screen (samplepos_t sample)
-{
-	samplecnt_t const page = _visible_canvas_width * samples_per_pixel;
-
-	/* if we're off the page, then scroll.
-	 */
-
-	if (sample < _leftmost_sample || sample >= _leftmost_sample + page) {
-		center_screen_internal (sample, page);
-	}
-}
-
-void
-Editor::center_screen_internal (samplepos_t sample, float page)
-{
-	page /= 2;
-
-	if (sample > page) {
-		sample -= (samplepos_t) page;
-	} else {
-		sample = 0;
-	}
-
-	reset_x_origin (sample);
-}
-
 
 void
 Editor::update_title ()
@@ -2360,7 +2333,7 @@ Editor::set_state (const XMLNode& node, int version)
 		 */
 		RefPtr<ToggleAction> tact;
 
-		tact = ActionManager::get_toggle_action (X_("Editor"), X_("toggle-follow-playhead"));
+		tact = ActionManager::get_toggle_action ((editor_name () + X_("Editing")).c_str(), X_("toggle-follow-playhead"));
 		yn = _follow_playhead;
 		if (tact->get_active() != yn) {
 			tact->set_active (yn);
@@ -5221,55 +5194,6 @@ void
 Editor::scroll_release ()
 {
 	_scroll_connection.disconnect ();
-}
-
-/** Queue a change for the Editor viewport x origin to follow the playhead */
-void
-Editor::reset_x_origin_to_follow_playhead ()
-{
-	samplepos_t const sample = _playhead_cursor->current_sample ();
-
-	if (sample < _leftmost_sample || sample > _leftmost_sample + current_page_samples()) {
-
-		if (_session->transport_speed() < 0) {
-
-			if (sample > (current_page_samples() / 2)) {
-				center_screen (sample-(current_page_samples()/2));
-			} else {
-				center_screen (current_page_samples()/2);
-			}
-
-		} else {
-
-			samplepos_t l = 0;
-
-			if (sample < _leftmost_sample) {
-				/* moving left */
-				if (_session->transport_rolling()) {
-					/* rolling; end up with the playhead at the right of the page */
-					l = sample - current_page_samples ();
-				} else {
-					/* not rolling: end up with the playhead 1/4 of the way along the page */
-					l = sample - current_page_samples() / 4;
-				}
-			} else {
-				/* moving right */
-				if (_session->transport_rolling()) {
-					/* rolling: end up with the playhead on the left of the page */
-					l = sample;
-				} else {
-					/* not rolling: end up with the playhead 3/4 of the way along the page */
-					l = sample - 3 * current_page_samples() / 4;
-				}
-			}
-
-			if (l < 0) {
-				l = 0;
-			}
-
-			center_screen_internal (l + (current_page_samples() / 2), current_page_samples ());
-		}
-	}
 }
 
 void

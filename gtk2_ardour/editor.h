@@ -372,8 +372,6 @@ public:
 	double get_y_origin () const;
 	void reposition_and_zoom (samplepos_t, double);
 
-	void reset_x_origin_to_follow_playhead ();
-
 	void toggle_meter_updating();
 
 	void show_rhythm_ferret();
@@ -407,8 +405,6 @@ public:
 
 	void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const;
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const;
-
-	void center_screen (samplepos_t);
 
 	TrackViewList axis_views_from_routes (std::shared_ptr<ARDOUR::RouteList>) const;
 
@@ -1099,7 +1095,6 @@ private:
 	sigc::connection _tvl_redisplay_connection;
 
 	sigc::connection super_rapid_screen_update_connection;
-	void center_screen_internal (samplepos_t, float);
 
 	void super_rapid_screen_update ();
 

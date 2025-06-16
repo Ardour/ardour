@@ -397,8 +397,6 @@ public:
 	virtual void set_current_trimmable (std::shared_ptr<ARDOUR::Trimmable>) = 0;
 	virtual void set_current_movable (std::shared_ptr<ARDOUR::Movable>) = 0;
 
-	virtual void center_screen (samplepos_t) = 0;
-
 	virtual TrackViewList const & get_track_views () const = 0;
 
 	virtual MixerStrip* get_current_mixer_strip () const = 0;

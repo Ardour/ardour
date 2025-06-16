@@ -198,13 +198,6 @@ CueEditor::step_mouse_mode (bool next)
 {
 }
 
-
-void
-CueEditor::reset_x_origin_to_follow_playhead ()
-{
-}
-
-
 Gdk::Cursor*
 CueEditor::get_canvas_cursor () const
 {

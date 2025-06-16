@@ -97,8 +97,6 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	void end_local_tempo_map (std::shared_ptr<Temporal::TempoMap const>);
 
   protected:
-	void reset_x_origin_to_follow_playhead ();
-
 	void do_undo (uint32_t n);
 	void do_redo (uint32_t n);
 

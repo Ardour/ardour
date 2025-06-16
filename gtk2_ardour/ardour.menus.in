@@ -186,7 +186,7 @@
       <menuitem action='ToggleAutoPlay'/>
       <menuitem action='ToggleAutoReturn'/>
       <menuitem action='ToggleClick'/>
-      <menuitem action='toggle-follow-playhead'/>
+      <menuitem action='EditorEditing/toggle-follow-playhead'/>
       <menuitem action='toggle-stationary-playhead'/>
       <menuitem action='ToggleFollowEdits'/>
       <menuitem action='ToggleExternalSync'/>

@@ -92,6 +92,7 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 
 	load_bindings ();
 	register_actions ();
+	bind_mouse_mode_buttons ();
 
 	set_mouse_mode (Editing::MouseContent, true);
 }
@@ -754,6 +755,10 @@ Pianoroll::maybe_update ()
 
 	} else {
 		_playhead_cursor->set_position (0);
+	}
+
+	if (_follow_playhead) {
+		reset_x_origin_to_follow_playhead ();
 	}
 }
 

@@ -40,6 +40,7 @@
 #include "edit_note_dialog.h"
 #include "editing_context.h"
 #include "editing_convert.h"
+#include "editor_cursors.h"
 #include "editor_drag.h"
 #include "grid_lines.h"
 #include "gui_thread.h"
@@ -309,6 +310,8 @@ EditingContext::register_common_actions (Bindings* common_bindings, std::string 
 
 	reg_sens (_common_actions, "temporal-zoom-out", _("Zoom Out"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), true));
 	reg_sens (_common_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), false));
+
+	toggle_reg_sens (_common_actions, "toggle-follow-playhead", _("Follow Playhead"), (sigc::mem_fun(*this, &EditingContext::toggle_follow_playhead)));
 
 	undo_action = reg_sens (_common_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::undo), 1U));
 	redo_action = reg_sens (_common_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::redo), 1U));
@@ -1315,7 +1318,7 @@ EditingContext::time_domain () const
 void
 EditingContext::toggle_follow_playhead ()
 {
-	RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("toggle-follow-playhead"));
+	RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ((_name + X_("Editing")).c_str(), X_("toggle-follow-playhead"));
 	set_follow_playhead (tact->get_active());
 }
 
@@ -2166,7 +2169,7 @@ EditingContext::bind_mouse_mode_buttons ()
 	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("temporal-zoom-out"));
 	zoom_out_button.set_related_action (act);
 
-	act = ActionManager::get_action (X_("Editor"), X_("toggle-follow-playhead"));
+	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("toggle-follow-playhead"));
 	follow_playhead_button.set_related_action (act);
 
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
@@ -3395,3 +3398,83 @@ EditingContext::allow_trim_cursors () const
 {
 	return mouse_mode == MouseContent || mouse_mode == MouseTimeFX || mouse_mode == MouseDraw;
 }
+
+/** Queue a change for the Editor viewport x origin to follow the playhead */
+void
+EditingContext::reset_x_origin_to_follow_playhead ()
+{
+	assert (_session);
+
+	samplepos_t const sample = _playhead_cursor->current_sample ();
+
+	if (sample < _leftmost_sample || sample > _leftmost_sample + current_page_samples()) {
+
+		if (_session->transport_speed() < 0) {
+
+			if (sample > (current_page_samples() / 2)) {
+				center_screen (sample-(current_page_samples()/2));
+			} else {
+				center_screen (current_page_samples()/2);
+			}
+
+		} else {
+
+			samplepos_t l = 0;
+
+			if (sample < _leftmost_sample) {
+				/* moving left */
+				if (_session->transport_rolling()) {
+					/* rolling; end up with the playhead at the right of the page */
+					l = sample - current_page_samples ();
+				} else {
+					/* not rolling: end up with the playhead 1/4 of the way along the page */
+					l = sample - current_page_samples() / 4;
+				}
+			} else {
+				/* moving right */
+				if (_session->transport_rolling()) {
+					/* rolling: end up with the playhead on the left of the page */
+					l = sample;
+				} else {
+					/* not rolling: end up with the playhead 3/4 of the way along the page */
+					l = sample - 3 * current_page_samples() / 4;
+				}
+			}
+
+			if (l < 0) {
+				l = 0;
+			}
+
+			center_screen_internal (l + (current_page_samples() / 2), current_page_samples ());
+		}
+	}
+}
+
+
+void
+EditingContext::center_screen (samplepos_t sample)
+{
+	samplecnt_t const page = _visible_canvas_width * samples_per_pixel;
+
+	/* if we're off the page, then scroll.
+	 */
+
+	if (sample < _leftmost_sample || sample >= _leftmost_sample + page) {
+		center_screen_internal (sample, page);
+	}
+}
+
+void
+EditingContext::center_screen_internal (samplepos_t sample, float page)
+{
+	page /= 2;
+
+	if (sample > page) {
+		sample -= (samplepos_t) page;
+	} else {
+		sample = 0;
+	}
+
+	reset_x_origin (sample);
+}
+

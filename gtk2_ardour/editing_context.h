@@ -494,6 +494,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	virtual bool allow_trim_cursors () const;
 	virtual void make_a_region() {}
 
+	void center_screen (samplepos_t);
+	void reset_x_origin_to_follow_playhead ();
+
   protected:
 	std::string _name;
 	bool within_track_canvas;
@@ -592,7 +595,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	EditorCursor* _snapped_cursor;
 
 	bool _follow_playhead;
-	virtual void reset_x_origin_to_follow_playhead () = 0;
 
 	/* selection process */
 
@@ -813,4 +815,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	static Glib::RefPtr<Gtk::Action> reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
 	static void toggle_reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
 	static void radio_reg_sens (Glib::RefPtr<Gtk::ActionGroup> action_group, Gtk::RadioAction::Group& radio_group, char const* name, char const* label, sigc::slot<void> slot);
+
+	void center_screen_internal (samplepos_t, float);
+
 };
