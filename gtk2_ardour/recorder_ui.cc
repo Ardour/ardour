@@ -252,6 +252,7 @@ RecorderUI::RecorderUI ()
 	set_tooltip (_remain_info_box, _("Remaining Time:  Recording time available on the current disk with currently armed tracks"));
 	set_tooltip (_duration_info_box, _("Duration: Length of the most recent (or current) recording take"));
 	set_tooltip (_btn_rec_forget, _("Delete the region AND the audio files of the last recording take"));
+	set_tooltip (_auto_input_button, _("Auto-input: when enabled, track input monitoring automatically follows transport state"));
 
 	/* show [almost] all */
 	_btn_rec_all.show ();
