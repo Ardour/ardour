@@ -193,9 +193,13 @@ MidiViewBackground::set_note_visibility_range_style (VisibleNoteRange r)
 	_visibility_note_range = r;
 
 	if (_visibility_note_range == FullRange) {
-		apply_note_range (0, 127, true);
+		if (apply_note_range (_data_note_min, _data_note_max, true)) {
+			_visibility_note_range = ContentsRange;
+		}
 	} else {
-		apply_note_range (_data_note_min, _data_note_max, true);
+		if (apply_note_range (0, 127, true)) {
+			_visibility_note_range = FullRange;
+		}
 	}
 }
 
@@ -238,11 +242,11 @@ MidiViewBackground::maybe_apply_note_range (uint8_t lowest, uint8_t highest, boo
 	apply_note_range (lowest, highest, to_children, can_move);
 }
 
-void
+bool
 MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_children, RangeCanMove can_move)
 {
 	if (contents_height() == 0) {
-		return;
+		return false;
 	}
 
 	bool changed = false;
@@ -267,9 +271,8 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 		_lowest_note = lowest;
 	}
 
-
 	if (note_range_set && !changed) {
-		return;
+		return false;
 	}
 
 	float uiscale = UIConfiguration::instance().get_ui_scale();
@@ -281,10 +284,13 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 	if (nh < 5) {
 		_lowest_note = ol;
 		_highest_note = oh;
-		return;
+		return false;
 	}
 
 	if (note_range_set) {
+		/* how many notes do we need to add or remove to adequately
+		 * fill contents_height() with note lines?
+		 */
 		additional_notes = (int) ceil ((contents_height() - (nh * range)) / (double) nh);
 	}
 
@@ -332,6 +338,8 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 	note_range_set = true;
 
 	NoteRangeChanged(); /* EMIT SIGNAL*/
+
+	return true;
 }
 
 void

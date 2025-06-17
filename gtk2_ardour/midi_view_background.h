@@ -117,7 +117,7 @@ class MidiViewBackground : public virtual ViewBackground
 		CanMoveBottom = 0x2
 	};
 
-	void apply_note_range (uint8_t lowest, uint8_t highest, bool to_children, RangeCanMove = RangeCanMove (CanMoveTop|CanMoveBottom));
+	bool apply_note_range (uint8_t lowest, uint8_t highest, bool to_children, RangeCanMove = RangeCanMove (CanMoveTop|CanMoveBottom));
 	void maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children, RangeCanMove = RangeCanMove (CanMoveTop|CanMoveBottom));
 
 	/** @return y position, or -1 if hidden */
@@ -135,6 +135,8 @@ class MidiViewBackground : public virtual ViewBackground
 	void get_note_positions (std::vector<int>& numbers, std::vector<int>& pos, std::vector<int>& heights) const;
 
 	EditingContext& editing_context() const { return _editing_context; }
+
+	sigc::signal<void,bool> NoteVisibilityShouldChange;
 
   protected:
 	EditingContext&           _editing_context;

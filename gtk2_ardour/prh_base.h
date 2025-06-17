@@ -143,4 +143,11 @@ class PianoRollHeaderBase : virtual public sigc::trackable {
 	bool show_scroomer () const;
 	void alloc_layouts (Glib::RefPtr<Pango::Context>);
 	void set_cursor (Gdk::Cursor*);
+
+	void begin_scroomer_drag (double event_y);
+	void end_scroomer_drag ();
+	bool idle_apply_range ();
+	double idle_lower;
+	double idle_upper;
+	sigc::connection scroomer_drag_connection;
 };

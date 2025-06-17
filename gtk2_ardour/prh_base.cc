@@ -575,7 +575,12 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 				_saved_top_val  = min (_adj.get_value() + _adj.get_page_size (), 127.0);
 			} else {
 				_saved_top_val = 0.0;
-				_midi_context.apply_note_range (_adj.get_value (), real_val_at_pointer, true, MidiViewBackground::CanMoveTop);
+				// _midi_context.apply_note_range (_adj.get_value (), real_val_at_pointer, true, MidiViewBackground::CanMoveTop);
+				idle_lower = _adj.get_value();
+				idle_upper = real_val_at_pointer;
+				if (!scroomer_drag_connection.connected()) {
+					scroomer_drag_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &PianoRollHeaderBase::idle_apply_range));
+				}
 			}
 			break;
 
@@ -586,7 +591,12 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 				_saved_bottom_val  = _adj.get_value();
 			} else {
 				_saved_bottom_val = 127.0;
-				_midi_context.apply_note_range (real_val_at_pointer, _adj.get_value () + _adj.get_page_size (), true, MidiViewBackground::CanMoveBottom);
+				// _midi_context.apply_note_range (real_val_at_pointer, _adj.get_value () + _adj.get_page_size (), true, MidiViewBackground::CanMoveBottom);
+				idle_lower = real_val_at_pointer;
+				idle_upper = _adj.get_value();
+				if (!scroomer_drag_connection.connected()) {
+					scroomer_drag_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &PianoRollHeaderBase::idle_apply_range));
+				}
 			}
 			break;
 
@@ -636,6 +646,29 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 }
 
 bool
+PianoRollHeaderBase::idle_apply_range ()
+{
+	_midi_context.apply_note_range (idle_lower, idle_upper, true, MidiViewBackground::CanMoveBottom);
+	scroomer_drag_connection.disconnect ();
+	return false;
+}
+
+void
+PianoRollHeaderBase::begin_scroomer_drag (double evy)
+{
+	_scroomer_drag = true;
+	_old_y = evy;
+	_fract = _adj.get_value();
+	_fract_top = _adj.get_value() + _adj.get_page_size();
+}
+
+void
+PianoRollHeaderBase::end_scroomer_drag ()
+{
+	_scroomer_drag = false;
+}
+
+bool
 PianoRollHeaderBase::button_press_handler (GdkEventButton* ev)
 {
 	double evy = ev->y;
@@ -664,10 +697,7 @@ PianoRollHeaderBase::button_press_handler (GdkEventButton* ev)
 			return true;
 		}
 
-		_scroomer_drag = true;
-		_old_y = evy;
-		_fract = _adj.get_value();
-		_fract_top = _adj.get_value() + _adj.get_page_size();
+		begin_scroomer_drag (evy);
 		return true;
 
 	} else {
@@ -718,7 +748,7 @@ PianoRollHeaderBase::button_release_handler (GdkEventButton* ev)
 	double ignore;
 	event_transform (ignore, evy);
 
-	_scroomer_drag = false;
+	end_scroomer_drag ();
 
 	int note = _midi_context.y_to_note(evy);
 
