@@ -439,8 +439,20 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 		PBD::stacktrace (std::cerr, 19);
 	}
 #endif
+
+#ifdef _MSC_VER   /* Regarding the note (below) it was initially
+			       * thought that the problem got fixed in VS2015
+			       * but in fact it still persists even in VS2022 */
+		/* Use the older (heap based) mapping when building with MSVC.
+		 * Our StackAllocator class depends on 'boost::aligned_storage'
+		 * which is known to be troublesome with Visual C++ :-
+		 * https://www.boost.org/doc/libs/1_65_0/libs/type_traits/doc/html/boost_typetraits/reference/aligned_storage.html
+		 */
+	std::vector<Connection*> s;
+#else
 	const std::size_t nslots = 512;
 	std::vector<Connection*,PBD::StackAllocator<Connection*,nslots> > s;
+#endif
 
 	/* First, make a copy of the current connection state for us to iterate
 	 * over later (the connection state may be changed by a signal handler.
