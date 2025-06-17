@@ -1175,9 +1175,8 @@ MidiView::model_changed()
 		maybe_set_note_range (low_note, hi_note);
 	}
 
-	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
+	for (auto & note : notes) {
 
-		std::shared_ptr<NoteType> note (*n);
 		bool visible;
 
 		if (_extensible || note_in_region_range (note, visible)) {
