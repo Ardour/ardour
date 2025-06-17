@@ -304,6 +304,32 @@ EditingContext::set_selected_midi_region_view (MidiRegionView& mrv)
 }
 
 void
+EditingContext::register_automation_actions (Bindings* automation_bindings, std::string const & prefix)
+{
+	_automation_actions = ActionManager::create_action_group (automation_bindings, prefix + X_("Automation"));
+
+	reg_sens (_automation_actions, "create-point", _("Create Automation Point"), sigc::mem_fun (*this, &EditingContext::automation_create_point_at_edit_point));
+	reg_sens (_automation_actions, "move-points-later", _("Create Automation P (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_move_points_later));
+	reg_sens (_automation_actions, "move-points-earlier", _("Create Automation Point (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_move_points_earlier));
+	reg_sens (_automation_actions, "raise-points", _("Create Automation Point (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_raise_points));
+	reg_sens (_automation_actions, "lower-points", _("Create Automation Point (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_lower_points));
+
+	ActionManager::set_sensitive (_automation_actions, false);
+}
+
+void
+EditingContext::enable_automation_bindings ()
+{
+	ActionManager::set_sensitive (_automation_actions, true);
+}
+
+void
+EditingContext::disable_automation_bindings ()
+{
+	ActionManager::set_sensitive (_automation_actions, false);
+}
+
+void
 EditingContext::register_common_actions (Bindings* common_bindings, std::string const & prefix)
 {
 	_common_actions = ActionManager::create_action_group (common_bindings, prefix + X_("Editing"));
@@ -3254,10 +3280,12 @@ EditingContext::load_shared_bindings ()
 {
 	Bindings* m = Bindings::get_bindings (X_("MIDI"));
 	Bindings* b = Bindings::get_bindings (X_("Editing"));
+	Bindings* a = Bindings::get_bindings (X_("Automation"));
 
 	if (need_shared_actions) {
 		register_midi_actions (m, string());
 		register_common_actions (b, string());
+		register_automation_actions (a, string());
 		need_shared_actions = false;
 	}
 
@@ -3279,8 +3307,13 @@ EditingContext::load_shared_bindings ()
 	register_common_actions (shared_bindings, _name);
 	shared_bindings->associate ();
 
+	Bindings* automation_bindings = new Bindings (_name, *a);
+	register_automation_actions (automation_bindings, _name);
+	automation_bindings->associate ();
+
 	/* Attach bindings to the canvas for this editing context */
 
+	bindings.push_back (automation_bindings);
 	bindings.push_back (midi_bindings);
 	bindings.push_back (shared_bindings);
 }

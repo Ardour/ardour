@@ -1603,6 +1603,11 @@ private:
 
 protected:
 	void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update = false);
+	void automation_create_point_at_edit_point();
+	void automation_raise_points ();
+	void automation_lower_points ();
+	void automation_move_points_later ();
+	void automation_move_points_earlier ();
 
 private:
 	friend class DragManager;

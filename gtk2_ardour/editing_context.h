@@ -421,6 +421,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	static bool need_shared_actions;
 	void register_midi_actions (Gtkmm2ext::Bindings*, std::string const &);
 	void register_common_actions (Gtkmm2ext::Bindings*, std::string const &);
+	void register_automation_actions (Gtkmm2ext::Bindings*, std::string const &);
 
 	ArdourCanvas::Rectangle* rubberband_rect;
 
@@ -497,12 +498,16 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	void center_screen (samplepos_t);
 	void reset_x_origin_to_follow_playhead ();
 
+	void enable_automation_bindings ();
+	void disable_automation_bindings ();
+
   protected:
 	std::string _name;
 	bool within_track_canvas;
 
 	Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 	Glib::RefPtr<Gtk::ActionGroup> _common_actions;
+	Glib::RefPtr<Gtk::ActionGroup> _automation_actions;
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
 	Glib::RefPtr<Gtk::ActionGroup> snap_actions;
 	Glib::RefPtr<Gtk::ActionGroup> length_actions;
@@ -818,4 +823,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	void center_screen_internal (samplepos_t, float);
 
+	virtual void automation_create_point_at_edit_point() {}
+	virtual void automation_raise_points () {}
+	virtual void automation_lower_points () {};
+	virtual void automation_move_points_later () {};
+	virtual void automation_move_points_earlier () {};
 };

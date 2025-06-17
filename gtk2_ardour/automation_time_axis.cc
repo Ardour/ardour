@@ -971,6 +971,7 @@ AutomationTimeAxisView::entered()
 	if (_line) {
 		_line->track_entered();
 	}
+	_editor.enable_automation_bindings ();
 }
 
 void
@@ -979,6 +980,8 @@ AutomationTimeAxisView::exited ()
 	if (_line) {
 		_line->track_exited();
 	}
+
+	_editor.enable_automation_bindings ();
 }
 
 void
