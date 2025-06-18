@@ -529,14 +529,15 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	samplecnt_t latency = 0;
 
-	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+	for (auto const & proc : _processors) {
 
 		bool re_inject_oob_data = false;
-		if ((*i) == _disk_reader) {
+
+		if (proc == _disk_reader) {
 			/* ignore port-count from prior plugins, use DR's count.
 			 * see also Route::try_configure_processors_unlocked
 			 */
-			bufs.set_count ((*i)->output_streams());
+			bufs.set_count (proc->output_streams());
 
 			/* Well now, we've made it past the disk-writer and to the disk-reader.
 			 * Time to decide what to do about monitoring.
@@ -555,7 +556,7 @@ Route::process_output_buffers (BufferSet& bufs,
 		}
 
 		double pspeed = speed;
-		if ((!run_disk_reader && (((*i) == _disk_reader) || ((*i) == _triggerbox))) || (!run_disk_writer && (*i) == _disk_writer)) {
+		if ((!run_disk_reader && ((proc == _disk_reader) || (proc == _triggerbox))) || (!run_disk_writer && proc == _disk_writer)) {
 			/* run with speed 0, no-roll */
 			pspeed = 0;
 		}
@@ -574,28 +575,28 @@ Route::process_output_buffers (BufferSet& bufs,
 		 * repeat.
 		 */
 
-		if ((*i)->active ()) {
+		if (proc->active ()) {
 			if (speed < 0) {
-				latency -= (*i)->effective_latency ();
+				latency -= proc->effective_latency ();
 			} else {
-				latency += (*i)->effective_latency ();
+				latency += proc->effective_latency ();
 			}
 		}
 
 		if (speed < 0) {
-			(*i)->run (bufs, start_sample + latency, end_sample + latency, pspeed, nframes, *i != _processors.back());
+			proc->run (bufs, start_sample + latency, end_sample + latency, pspeed, nframes, proc != _processors.back());
 		} else {
-			(*i)->run (bufs, start_sample - latency, end_sample - latency, pspeed, nframes, *i != _processors.back());
+			proc->run (bufs, start_sample - latency, end_sample - latency, pspeed, nframes, proc != _processors.back());
 		}
 
-		bufs.set_count ((*i)->output_streams());
+		bufs.set_count (proc->output_streams());
 
 		if (re_inject_oob_data) {
 			write_out_of_band_data (bufs, nframes);
 		}
 
 #if 0
-		if ((*i) == _delayline) {
+		if (proc == _delayline) {
 			latency += _delayline->delay ();
 		}
 #endif
