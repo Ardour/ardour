@@ -108,7 +108,7 @@ RouteCommentEditor::open (std::shared_ptr<ARDOUR::Route> r)
 	_route->comment_changed.connect (_connections, invalidator (*this), std::bind (&RouteCommentEditor::comment_changed, this), gui_context ());
 	_route->DropReferences.connect (_connections, invalidator (*this), std::bind (&RouteCommentEditor::reset, this), gui_context ());
 
-	set_title (string_compose ("%1: %2", _route->name (), _ (": comment editor")));
+	set_title (string_compose ("%1: %2", _route->name (), _("Comment Editor")));
 	_comment_area.get_buffer ()->set_text (_route->comment ());
 
 	Gtkmm2ext::container_clear (_vbox, false);
