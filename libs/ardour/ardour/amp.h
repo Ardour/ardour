@@ -82,6 +82,7 @@ private:
 	/** Buffer that we should use for gain automation */
 	gain_t* _gain_automation_buffer;
 	bool _midi_amp;
+	bool _midi_muted;
 };
 
 

@@ -50,6 +50,7 @@ Amp::Amp (Session& s, const std::string& name, std::shared_ptr<GainControl> gc, 
 	, _gain_control (gc)
 	, _gain_automation_buffer(0)
 	, _midi_amp (control_midi_also)
+	, _midi_muted (false)
 {
 	set_display_name (name);
 	add_control (_gain_control);
@@ -126,6 +127,7 @@ Amp::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t /*end_sample*/,
 		 * called successfully.
 		*/
 		_apply_gain_automation = false;
+		_midi_muted = false;
 
 	} else { /* manual (scalar) gain */
 
@@ -137,6 +139,26 @@ Amp::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t /*end_sample*/,
 
 			_current_gain = Amp::apply_gain (bufs, _session.nominal_sample_rate(), nframes, _current_gain, target_gain, _midi_amp);
 
+			/* the target gain just changed by enough to have
+			 * called apply_gain(). If we're a midi amp and we've
+			 * reached effectively zero and MIDI has not been
+			 * muted, do so now.
+			 */
+
+			if (_midi_amp && _current_gain <= GAIN_COEFF_SMALL && !_midi_muted) {
+				/* queue MIDI all-note-off when going silent */
+				for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
+					MidiBuffer& mb (*i);
+					for (uint8_t channel = 0; channel <= 0xF; channel++) {
+						uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), ((uint8_t) MIDI_CTL_SUSTAIN), 0 };
+						mb.push_back (nframes - 1, Evoral::MIDI_EVENT, 3, ev);
+						ev[1] = MIDI_CTL_ALL_NOTES_OFF;
+						mb.push_back (nframes - 1, Evoral::MIDI_EVENT, 3, ev);
+					}
+				}
+				_midi_muted = true;
+			}
+
 			/* see note in PluginInsert::connect_and_run ()
 			 * set_value_unchecked() won't emit a signal since the value is effectively unchanged
 			 */
@@ -146,10 +168,12 @@ Amp::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t /*end_sample*/,
 
 			_current_gain = target_gain;
 			apply_simple_gain (bufs, nframes, _current_gain, _midi_amp);
+			_midi_muted = false;
 
 		} else {
 			/* unity target gain */
 			_current_gain = target_gain;
+			_midi_muted = false;
 		}
 	}
 }
@@ -227,16 +251,6 @@ Amp::apply_gain (BufferSet& bufs, samplecnt_t sample_rate, samplecnt_t nframes, 
 					}
 				}
 				++m;
-			}
-
-			/* queue MIDI all-note-off when going silent */
-			if (initial > GAIN_COEFF_SMALL && rv <= GAIN_COEFF_SMALL) {
-				for (uint8_t channel = 0; channel <= 0xF; channel++) {
-					uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), ((uint8_t) MIDI_CTL_SUSTAIN), 0 };
-					mb.push_back (nframes - 1, Evoral::MIDI_EVENT, 3, ev);
-					ev[1] = MIDI_CTL_ALL_NOTES_OFF;
-					mb.push_back (nframes - 1, Evoral::MIDI_EVENT, 3, ev);
-				}
 			}
 		}
 	}
