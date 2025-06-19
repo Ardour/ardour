@@ -1104,6 +1104,7 @@ style "pane"
       fg[NORMAL] = lighter(@background)
       fg[SELECTED] = @foreground
       fg[ACTIVE] = @somewhat_bright_indicator
+	bg[ACTIVE] = shade(1.2, @background)
 }
 
 style "vca_label_bar" = "medium_bold_text"
