@@ -1928,7 +1928,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		} else {
 			if (UIConfiguration::instance().get_follow_edits()) {
 				list<TimelineRange>& range = editor->get_selection().time;
-				if (!range.empty() && (range.front().start().samples() == _session->transport_sample())) { // if playhead is exactly at the start of a range, we assume it was placed there by follow_edits
+				if (!range.empty() && range.front().start().samples() == _session->transport_sample()) { // if playhead is exactly at the start of a range, we assume it was placed there by follow_edits
 					_session->request_play_range (&range, true);
 					_session->set_requested_return_sample (range.front().start().samples());  //force an auto-return here
 				}
