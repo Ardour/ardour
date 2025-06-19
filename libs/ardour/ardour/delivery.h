@@ -30,6 +30,7 @@
 #include "ardour/types.h"
 #include "ardour/chan_count.h"
 #include "ardour/io_processor.h"
+#include "ardour/midi_buffer.h"
 #include "ardour/gain_control.h"
 
 namespace ARDOUR {
@@ -88,6 +89,8 @@ public:
 	void deactivate ();
 
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
+
+	void set_midi_mute_mask (int);
 
 	/* supplemental method used with MIDI */
 
@@ -157,6 +160,7 @@ protected:
 	std::shared_ptr<Amp>         _amp;
 
 	gain_t target_gain ();
+	void maybe_merge_midi_mute (BufferSet&);
 
 private:
 	bool _no_outs_cuz_we_no_monitor;
@@ -176,6 +180,8 @@ private:
 	void output_changed (IOChange, void*);
 
 	bool _no_panner_reset;
+	std::atomic<int> _midi_mute_mask;
+	MidiBuffer _midi_mute_buffer;
 };
 
 

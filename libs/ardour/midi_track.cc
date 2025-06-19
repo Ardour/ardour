@@ -915,24 +915,18 @@ MidiTrack::act_on_mute ()
 
 	if (muted() || _mute_master->muted_by_others_soloing_at (MuteMaster::AllPoints)) {
 		/* only send messages for channels we are using */
-
-		uint16_t mask = _playback_filter.get_channel_mask();
-
-		for (uint8_t channel = 0; channel <= 0xF; channel++) {
-
-			if ((1<<channel) & mask) {
-
-				DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 delivers mute message to channel %2\n", name(), channel+1));
-				uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), MIDI_CTL_SUSTAIN, 0 };
-				write_immediate_event (Evoral::MIDI_EVENT, 3, ev);
-
-				/* Note we do not send MIDI_CTL_ALL_NOTES_OFF here, since this may
-				   silence notes that came from another non-muted track. */
+		foreach_processor ([this](std::weak_ptr<Processor> p) {
+			std::shared_ptr<Delivery> delivery = std::dynamic_pointer_cast<Delivery> (p.lock());
+			if (delivery) {
+				delivery->set_midi_mute_mask (_playback_filter.get_channel_mask());
 			}
-		}
+		});
 
 		/* Resolve active notes. */
-		_disk_reader->resolve_tracker (_immediate_events, 0);
+
+		if (!the_instrument()) {
+			_disk_reader->resolve_tracker (_immediate_events, 0);
+		}
 	}
 }
 

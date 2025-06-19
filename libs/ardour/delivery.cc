@@ -65,6 +65,8 @@ Delivery::Delivery (Session& s, std::shared_ptr<IO> io, std::shared_ptr<Pannable
 	, _mute_master (mm)
 	, _rta_active (false)
 	, _no_panner_reset (false)
+	, _midi_mute_mask (0)
+	, _midi_mute_buffer (0)
 {
 	if (pannable) {
 		bool is_send = false;
@@ -73,6 +75,11 @@ Delivery::Delivery (Session& s, std::shared_ptr<IO> io, std::shared_ptr<Pannable
 	}
 
 	_display_to_user = false;
+
+	const size_t stamp_size = sizeof(samplepos_t);
+	const size_t etype_size = sizeof(Evoral::EventType);
+	const size_t mmb_size = 16 * (stamp_size + etype_size + 3);
+	_midi_mute_buffer.resize (mmb_size);
 
 	if (_output) {
 		_output->changed.connect_same_thread (*this, std::bind (&Delivery::output_changed, this, _1, _2));
@@ -90,6 +97,8 @@ Delivery::Delivery (Session& s, std::shared_ptr<Pannable> pannable, std::shared_
 	, _mute_master (mm)
 	, _rta_active (false)
 	, _no_panner_reset (false)
+	, _midi_mute_mask (0)
+	, _midi_mute_buffer (0)
 {
 	if (pannable) {
 		bool is_send = false;
@@ -98,6 +107,10 @@ Delivery::Delivery (Session& s, std::shared_ptr<Pannable> pannable, std::shared_
 	}
 
 	_display_to_user = false;
+	const size_t stamp_size = sizeof(samplepos_t);
+	const size_t etype_size = sizeof(Evoral::EventType);
+	const size_t mmb_size = 16 * (stamp_size + etype_size + 3);
+	_midi_mute_buffer.resize (mmb_size);
 
 	if (_output) {
 		_output->changed.connect_same_thread (*this, std::bind (&Delivery::output_changed, this, _1, _2));
@@ -268,6 +281,38 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 }
 
 void
+Delivery::maybe_merge_midi_mute (BufferSet& bufs)
+{
+	if (bufs.available().n_midi()) {
+
+		int mask = _midi_mute_mask.load(); /* atomic */
+		MidiBuffer& pmbuf (bufs.get_midi (0));
+
+		if (mask && (_current_gain < GAIN_COEFF_SMALL)) {
+
+			/* mask set, and we have just been muted */
+
+			_midi_mute_buffer.clear ();
+
+			for (uint8_t channel = 0; channel <= 0xF; channel++) {
+
+				if ((1<<channel) & mask) {
+
+					uint8_t buf[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), MIDI_CTL_SUSTAIN, 0 };
+					Evoral::Event<samplepos_t> ev (Evoral::MIDI_EVENT, 0, 3, buf);
+					_midi_mute_buffer.push_back (ev);
+
+					/* Note we do not send MIDI_CTL_ALL_NOTES_OFF here, since this may
+					   silence notes that came from another non-muted track. */
+				}
+			}
+			pmbuf.merge_from (_midi_mute_buffer, 0, 0, 0); /* last 3 args do not matter for MIDI */
+			_midi_mute_mask = 0;
+		}
+	}
+}
+
+void
 Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required)
 {
 	assert (_output);
@@ -342,6 +387,8 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 		_amp->setup_gain_automation (start_sample, end_sample, nframes);
 		_amp->run (bufs, start_sample, end_sample, speed, nframes, true);
 	}
+
+	maybe_merge_midi_mute (bufs);
 
 	RTABufferListPtr rtabuffers = _rtabuffers;
 	if (_rta_active.load () && rtabuffers && !rtabuffers->empty ()) {
@@ -721,3 +768,8 @@ Delivery::panner () const
 	}
 }
 
+void
+Delivery::set_midi_mute_mask (int mask)
+{
+	_midi_mute_mask = mask; /* atomic */
+}
