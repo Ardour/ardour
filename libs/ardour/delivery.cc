@@ -75,11 +75,7 @@ Delivery::Delivery (Session& s, std::shared_ptr<IO> io, std::shared_ptr<Pannable
 	}
 
 	_display_to_user = false;
-
-	const size_t stamp_size = sizeof(samplepos_t);
-	const size_t etype_size = sizeof(Evoral::EventType);
-	const size_t mmb_size = 16 * (stamp_size + etype_size + 3);
-	_midi_mute_buffer.resize (mmb_size);
+	resize_midi_mute_buffer ();
 
 	if (_output) {
 		_output->changed.connect_same_thread (*this, std::bind (&Delivery::output_changed, this, _1, _2));
@@ -107,10 +103,7 @@ Delivery::Delivery (Session& s, std::shared_ptr<Pannable> pannable, std::shared_
 	}
 
 	_display_to_user = false;
-	const size_t stamp_size = sizeof(samplepos_t);
-	const size_t etype_size = sizeof(Evoral::EventType);
-	const size_t mmb_size = 16 * (stamp_size + etype_size + 3);
-	_midi_mute_buffer.resize (mmb_size);
+	resize_midi_mute_buffer ();
 
 	if (_output) {
 		_output->changed.connect_same_thread (*this, std::bind (&Delivery::output_changed, this, _1, _2));
@@ -131,6 +124,17 @@ Delivery::~Delivery()
 	ScopedConnectionList::drop_connections ();
 
 	delete _output_buffers;
+}
+
+void
+Delivery::resize_midi_mute_buffer ()
+{
+	const size_t stamp_size = sizeof (samplepos_t);
+	const size_t etype_size = sizeof (Evoral::EventType);
+
+	/* space for two 3-byte messages per channel */
+	const size_t mmb_size = 16 * (stamp_size + etype_size + 6);
+	_midi_mute_buffer.resize (mmb_size);
 }
 
 std::string

@@ -182,6 +182,8 @@ private:
 	bool _no_panner_reset;
 	std::atomic<int> _midi_mute_mask;
 	MidiBuffer _midi_mute_buffer;
+
+	void resize_midi_mute_buffer ();
 };
 
 
