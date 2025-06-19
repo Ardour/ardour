@@ -49,6 +49,8 @@ using namespace std;
 
 PBD::Signal<void(pframes_t)> InternalSend::CycleStart;
 
+#define GAIN_COEFF_DELTA (1e-5)
+
 InternalSend::InternalSend (Session&                      s,
                             std::shared_ptr<Pannable>   p,
                             std::shared_ptr<MuteMaster> mm,
@@ -213,7 +215,20 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 {
 	automation_run (start_sample, nframes);
 
-	if (!check_active() || !_send_to) {
+	/* Do not use check_active() here, because we need to continue running
+	 * until the gain has gone to zero.
+	 */
+
+	if (!_send_to) {
+		_meter->reset ();
+		return;
+	}
+
+	/* main gain control: * mute & bypass/enable */
+	const gain_t tgain = target_gain ();
+	const bool converged = fabsf (_current_gain - tgain) < GAIN_COEFF_DELTA;
+
+	if ((tgain == GAIN_COEFF_ZERO) && converged) {
 		_meter->reset ();
 		return;
 	}
@@ -317,9 +332,6 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		}
 	}
 
-	/* main gain control: * mute & bypass/enable */
-	gain_t tgain = target_gain ();
-
 	if (tgain != _current_gain) {
 		/* target gain has changed, fade in/out */
 		_current_gain = Amp::apply_gain (mixbufs, _session.nominal_sample_rate (), nframes, _current_gain, tgain);
@@ -353,7 +365,9 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 	_thru_delay->run (bufs, start_sample, end_sample, speed, nframes, true);
 
-	/* target will pick up our output when it is ready */
+	if (converged) {
+		_active = _pending_active;
+	}
 }
 
 void
