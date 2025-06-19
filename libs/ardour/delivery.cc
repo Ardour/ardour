@@ -303,8 +303,9 @@ Delivery::maybe_merge_midi_mute (BufferSet& bufs, bool always)
 				if (always || ((1<<channel) & mask)) {
 
 					uint8_t buf[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), MIDI_CTL_SUSTAIN, 0 };
-					Evoral::Event<samplepos_t> ev (Evoral::MIDI_EVENT, 0, 3, buf);
-					_midi_mute_buffer.push_back (ev);
+					_midi_mute_buffer.push_back (0, Evoral::MIDI_EVENT, 3, buf);
+					buf[1] = MIDI_CTL_ALL_NOTES_OFF;
+					_midi_mute_buffer.push_back (0, Evoral::MIDI_EVENT, 3, buf);
 
 					/* Note we do not send MIDI_CTL_ALL_NOTES_OFF here, since this may
 					   silence notes that came from another non-muted track. */
