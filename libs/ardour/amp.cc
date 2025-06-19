@@ -301,13 +301,33 @@ Amp::apply_simple_gain (BufferSet& bufs, samplecnt_t nframes, gain_t target, boo
 	} else if (target != GAIN_COEFF_UNITY) {
 
 		if (midi_amp) {
+			const gain_t abs_target (fabsf (target));
+
 			for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
 				MidiBuffer& mb (*i);
 
-				for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
-					Evoral::Event<MidiBuffer::TimeType> ev = *m;
+				/* Memory management is a little weird here:
+				 * MidiBuffer iterators return actual
+				 * Evoral::Events when indirected into, though
+				 * there is no memory copying done - the new
+				 * Event shares the same buffer as the event in
+				 * the buffer. Thus, modifying the value
+				 * changes the data in the buffer.
+				 *
+				 * Hence the rare construction
+				 *
+				 *    for (auto ev : mb)
+				 *
+				 * rather than the more typical reference-based
+				 * one:
+				 *
+				 *    for (auto & ev : mb)
+				 */
+
+				for (auto ev : mb) {
+					// Evoral::Event<MidiBuffer::TimeType> ev (*m, false);
 					if (ev.is_note_on()) {
-						ev.scale_velocity (fabsf (target));
+						ev.scale_velocity (abs_target);
 					}
 				}
 			}
