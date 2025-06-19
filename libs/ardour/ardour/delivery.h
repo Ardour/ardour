@@ -160,7 +160,7 @@ protected:
 	std::shared_ptr<Amp>         _amp;
 
 	gain_t target_gain ();
-	void maybe_merge_midi_mute (BufferSet&);
+	void maybe_merge_midi_mute (BufferSet&, bool always);
 
 private:
 	bool _no_outs_cuz_we_no_monitor;

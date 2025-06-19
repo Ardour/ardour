@@ -281,14 +281,14 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Delivery::maybe_merge_midi_mute (BufferSet& bufs)
+Delivery::maybe_merge_midi_mute (BufferSet& bufs, bool always)
 {
 	if (bufs.available().n_midi()) {
 
 		int mask = _midi_mute_mask.load(); /* atomic */
 		MidiBuffer& pmbuf (bufs.get_midi (0));
 
-		if (mask && (_current_gain < GAIN_COEFF_SMALL)) {
+		if ((always || mask) && (_current_gain < GAIN_COEFF_SMALL)) {
 
 			/* mask set, and we have just been muted */
 
@@ -296,7 +296,7 @@ Delivery::maybe_merge_midi_mute (BufferSet& bufs)
 
 			for (uint8_t channel = 0; channel <= 0xF; channel++) {
 
-				if ((1<<channel) & mask) {
+				if (always || ((1<<channel) & mask)) {
 
 					uint8_t buf[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), MIDI_CTL_SUSTAIN, 0 };
 					Evoral::Event<samplepos_t> ev (Evoral::MIDI_EVENT, 0, 3, buf);
@@ -388,7 +388,7 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 		_amp->run (bufs, start_sample, end_sample, speed, nframes, true);
 	}
 
-	maybe_merge_midi_mute (bufs);
+	maybe_merge_midi_mute (bufs, false);
 
 	RTABufferListPtr rtabuffers = _rtabuffers;
 	if (_rta_active.load () && rtabuffers && !rtabuffers->empty ()) {
