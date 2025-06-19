@@ -1101,9 +1101,9 @@ style "settings_notebook" = "big_text"
 
 style "pane"
 {
-      fg[NORMAL] = lighter(@background)
-      fg[SELECTED] = @foreground
-      fg[ACTIVE] = @somewhat_bright_indicator
+	fg[NORMAL] = lighter(@background)
+	fg[SELECTED] = @foreground
+	fg[ACTIVE] = @somewhat_bright_indicator
 	bg[ACTIVE] = shade(1.2, @background)
 }
 
