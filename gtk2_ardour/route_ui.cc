@@ -700,6 +700,18 @@ RouteUI::solo_press(GdkEventButton* ev)
 				DisplaySuspender ds;
 				_route->solo_control()->set_value (1.0, Controllable::NoGroup);
 
+				/* select exclusively soloed track */
+				if (!_solo_release && UIConfiguration::instance().get_exclusive_solo_selects_route ()) {
+					PublicEditor& pe  = PublicEditor::instance();
+					TimeAxisView* tav = pe.time_axis_view_from_stripable (_route);
+					if (tav) {
+						TrackViewList selected;
+						selected.push_back (tav);
+						pe.get_selection().set (selected);
+						pe.set_selected_mixer_strip (*tav);
+					}
+				}
+
 /*			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {   do not explicitly implement Primary Modifier; this is the default for Momentary */
 
 /*			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {   do not explicitly implement Tertiary Modifier; this is the default for Group-Override */
