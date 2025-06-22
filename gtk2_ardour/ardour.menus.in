@@ -411,14 +411,22 @@
       <menu action='RegionMenuPosition'>
         <menuitem action='naturalize-region'/>
         <menuitem action='snap-regions-to-grid'/>
+        <separator/>
+        <menuitem action='align-regions-start'/>
+        <menuitem action='align-regions-end'/>
+        <menuitem action='align-regions-sync'/>
+        <menuitem action='align-regions-start-relative'/>
+        <separator/>
         <menuitem action='toggle-region-lock'/>
         <menuitem action='toggle-region-video-lock'/>
         <menuitem action='set-region-sync-position'/>
         <menuitem action='remove-region-sync'/>
+        <separator/>
         <menuitem action='nudge-forward'/>
         <menuitem action='nudge-backward'/>
         <menuitem action='nudge-forward-by-capture-offset'/>
         <menuitem action='nudge-backward-by-capture-offset'/>
+        <separator/>
         <menuitem action='sequence-regions'/>
       </menu>
       <menu action='RegionMenuMarkers'>
