@@ -715,7 +715,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	ArdourWidgets::ArdourVSpacer _grid_box_spacer;
 	ArdourWidgets::ArdourVSpacer _draw_box_spacer;
 
-	void pack_draw_box ();
+	void pack_draw_box (bool with_channel);
 	void pack_snap_box ();
 
 	Gtkmm2ext::BindingSet bindings;

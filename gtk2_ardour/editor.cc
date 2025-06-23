@@ -2831,7 +2831,7 @@ Editor::setup_toolbar ()
 
 	grid_type_selector.set_name ("mouse mode button");
 
-	pack_draw_box ();
+	pack_draw_box (true);
 
 	HBox* follow_mode_hbox = manage (new HBox);
 	follow_mode_hbox->set_spacing (spc ? 2 : 1);

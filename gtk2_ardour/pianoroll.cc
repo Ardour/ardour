@@ -381,7 +381,7 @@ Pianoroll::build_upper_toolbar ()
 	mouse_mode_box->pack_start (*mouse_mode_align, false, false);
 
 	pack_snap_box ();
-	pack_draw_box ();
+	pack_draw_box (false);
 
 	Gtk::HBox* _toolbar_inner = manage (new Gtk::HBox);
 	Gtk::HBox* _toolbar_outer = manage (new Gtk::HBox);
