@@ -952,7 +952,9 @@ EditingContext::draw_length_changed ()
 void
 EditingContext::set_draw_velocity_to (int v)
 {
-	if ( v<0 || v>127 ) {  //range-check midi channel
+	std::cerr << "sdv = " << v << std::endl;
+
+	if (v < 0 || v > 127) {
 		v = DRAW_VEL_AUTO;
 	}
 
