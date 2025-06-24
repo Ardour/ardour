@@ -3293,12 +3293,6 @@ EditingContext::load_shared_bindings ()
 		need_shared_actions = false;
 	}
 
-	/* This set of bindings may expand in the future to include things
-	 * other than MIDI editing, but for now this is all we've got as far as
-	 * bindings that need to be distinct from the Editors (because some of
-	 * the keys may overlap.
-	 */
-
 	/* Copy each set of shared bindings but give them a new name, which will make them refer to actions
 	 * named after this EditingContext (ie. unique to this EC)
 	 */
