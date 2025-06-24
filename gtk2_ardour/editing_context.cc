@@ -1082,9 +1082,9 @@ EditingContext::draw_velocity_action (int v)
 	const char* action = 0;
 	RefPtr<Action> act;
 
-	if (v == DRAW_VEL_AUTO) {
+	if (DRAW_VEL_AUTO == v) {
 		action = "draw-velocity-auto";
-	} else if (v>=1 && v<=127) {
+	} else if (v >= 1 && v <= 127) {
 		snprintf (buf, sizeof (buf), X_("draw-velocity-%d"), v);  //we don't allow drawing a velocity 0;  some synths use that as note-off
 		action = buf;
 	}
