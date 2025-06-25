@@ -538,8 +538,6 @@ MidiRegionView::ghost_add_note (NoteBase* nb)
 
 		MidiGhostRegion* gr;
 
-		std::cerr << "GAN on " << ghost << std::endl;
-
 		if ((gr = dynamic_cast<MidiGhostRegion*>(ghost)) != 0) {
 			gr->add_note (nb);
 		}
