@@ -723,8 +723,10 @@ Selection::set (RegionView* r, bool /*also_clear_tracks*/)
 		clear_time(); // enforce region/object exclusivity
 		clear_tracks(); // enforce object/track exclusivity
 	}
-	clear_objects ();
-	add (r);
+	if (!regions.contains (r) || regions.size() != 1) {
+		clear_objects ();
+		add (r);
+	}
 }
 
 void

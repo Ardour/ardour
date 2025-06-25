@@ -2726,12 +2726,6 @@ MidiView::add_to_selection (NoteBase* ev)
 
 	if (_selection.empty()) {
 
-		/* we're about to select a note/some notes. Obey rule that only
-		 * 1 thing can be selected by clearing any current selection
-		 */
-
-		_editing_context.get_selection().clear ();
-
 		/* first note selected in this region, force Editor region
 		 * selection to this region.
 		 *
