@@ -546,8 +546,9 @@ APianoKeyboard::on_motion_notify_event (GdkEventMotion* event)
 {
 	int note;
 
-	if ((event->state & GDK_BUTTON1_MASK) == 0)
+	if ((event->state & GDK_BUTTON1_MASK) == 0) {
 		return true;
+	}
 
 	int x = event->x;
 	int y = event->y;
