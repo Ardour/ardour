@@ -717,7 +717,7 @@ APianoKeyboard::on_size_allocate (Gtk::Allocation& allocation)
 APianoKeyboard::APianoKeyboard ()
 {
 	using namespace Gdk;
-	add_events (KEY_PRESS_MASK | KEY_RELEASE_MASK | BUTTON_PRESS_MASK | BUTTON_RELEASE_MASK | POINTER_MOTION_MASK | POINTER_MOTION_HINT_MASK);
+	add_events (KEY_PRESS_MASK | KEY_RELEASE_MASK | BUTTON_PRESS_MASK | BUTTON_RELEASE_MASK | POINTER_MOTION_MASK);
 
 	_sustain_new_notes              = false;
 	_highlight_grand_piano_range    = true;
