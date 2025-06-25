@@ -352,4 +352,7 @@ class Pianoroll : public CueEditor
 
 	Gtk::Menu _region_context_menu;
 	void popup_region_context_menu (ArdourCanvas::Item* item, GdkEvent* event);
+
+	std::shared_ptr<ARDOUR::MidiRegion> _visible_pending_region;
+	void catch_pending_show_region ();
 };

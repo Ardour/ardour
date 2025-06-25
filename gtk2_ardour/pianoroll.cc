@@ -639,8 +639,17 @@ Pianoroll::build_canvas ()
 	_canvas->set_name ("MidiCueCanvas");
 	_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
 	_canvas->set_can_focus ();
-
+	_canvas->signal_show().connect (sigc::mem_fun (*this, &Pianoroll::catch_pending_show_region));
 	_toolbox.pack_start (*_canvas_viewport, true, true);
+}
+
+void
+Pianoroll::catch_pending_show_region ()
+{
+	if (_visible_pending_region) {
+		set_region (_visible_pending_region);
+		_visible_pending_region.reset ();
+	}
 }
 
 bool
@@ -2603,6 +2612,11 @@ Pianoroll::update_solo_display ()
 void
 Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 {
+	if (!get_canvas()->is_visible()) {
+		_visible_pending_region = r;
+		return;
+	}
+
 	unset (false);
 
 	if (!r) {
