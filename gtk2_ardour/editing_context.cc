@@ -485,7 +485,9 @@ EditingContext::register_midi_actions (Bindings* midi_bindings, std::string cons
 		snprintf(buf, sizeof (buf), X_("draw-velocity-%d"), i);
 		char vel[64];
 		sprintf(vel, _("Velocity %d"), i);
-		ActionManager::register_radio_action (velocity_actions, draw_velocity_group, buf, vel, sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), i));
+		Glib::RefPtr<Action> act = ActionManager::register_radio_action (velocity_actions, draw_velocity_group, buf, vel, sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), i));
+		snprintf (buf,sizeof (buf), "%d", i);
+		act->set_short_label (buf);
 	}
 
 	channel_actions = ActionManager::create_action_group (midi_bindings, prefix + X_("DrawChannel"));
@@ -1268,13 +1270,18 @@ EditingContext::build_draw_midi_menus ()
 	using namespace Menu_Helpers;
 
 	/* Note-Length when drawing */
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeat],     sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), (GridType) GridTypeBeat)));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv2], sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), (GridType) GridTypeBeatDiv2)));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv4], sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), (GridType) GridTypeBeatDiv4)));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv8], sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), (GridType) GridTypeBeatDiv8)));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv16],sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), (GridType) GridTypeBeatDiv16)));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv32],sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), (GridType) GridTypeBeatDiv32)));
-	draw_length_selector.AddMenuElem (MenuElem (_("Auto"),sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), (GridType) DRAW_LEN_AUTO)));
+
+	std::vector<int> grids ({GridTypeBeat,
+			GridTypeBeatDiv2,
+			GridTypeBeatDiv4,
+			GridTypeBeatDiv8,
+			GridTypeBeatDiv16,
+			GridTypeBeatDiv32,
+			GridTypeNone});
+
+	for (auto & g : grids) {
+		draw_length_selector.append (draw_length_action ((GridType) g));
+	}
 
 	{
 		std::vector<std::string> draw_grid_type_strings = {grid_type_strings.begin() + GridTypeBeat, grid_type_strings.begin() + GridTypeBeatDiv32 + 1};
@@ -1284,13 +1291,10 @@ EditingContext::build_draw_midi_menus ()
 
 	/* Note-Velocity when drawing */
 
-	draw_velocity_selector.AddMenuElem (MenuElem ("8",   sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), 8)));
-	draw_velocity_selector.AddMenuElem (MenuElem ("32",  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), 32)));
-	draw_velocity_selector.AddMenuElem (MenuElem ("64",  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), 64)));
-	draw_velocity_selector.AddMenuElem (MenuElem ("82",  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), 82)));
-	draw_velocity_selector.AddMenuElem (MenuElem ("100", sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), 100)));
-	draw_velocity_selector.AddMenuElem (MenuElem ("127", sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), 127)));
-	draw_velocity_selector.AddMenuElem (MenuElem (_("Auto"),sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), DRAW_VEL_AUTO)));
+	std::vector<int> preselected_velocities ({8,32,64,82,100,127, DRAW_VEL_AUTO});
+	for (auto & v : preselected_velocities) {
+		draw_velocity_selector.append (draw_velocity_action (v));
+	}
 
 	/* Note-Channel when drawing */
 	for (int i = 0; i<= 15; i++) {

@@ -405,13 +405,6 @@ Editor::Editor ()
 	rb_current_opt = 4;
 #endif
 
-	build_edit_mode_menu();
-	build_zoom_focus_menu();
-	build_track_count_menu();
-	build_grid_type_menu();
-	build_draw_midi_menus();
-	build_edit_point_menu();
-
 	timebar_height = std::max (13., ceil (17. * UIConfiguration::instance().get_ui_scale()));
 
 	TimeAxisView::setup_sizes ();
@@ -662,6 +655,13 @@ Editor::Editor ()
 	load_bindings ();
 	register_actions ();
 	bind_mouse_mode_buttons ();
+
+	build_edit_mode_menu();
+	build_zoom_focus_menu();
+	build_track_count_menu();
+	build_grid_type_menu();
+	build_draw_midi_menus();
+	build_edit_point_menu();
 
 	setup_toolbar ();
 

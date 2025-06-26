@@ -83,9 +83,6 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	mouse_mode = Editing::MouseContent;
 	autoscroll_vertical_allowed = false;
 
-	build_grid_type_menu ();
-	build_draw_midi_menus();
-
 	build_upper_toolbar ();
 	build_canvas ();
 	build_lower_toolbar ();
@@ -93,6 +90,9 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	load_bindings ();
 	register_actions ();
 	bind_mouse_mode_buttons ();
+
+	build_grid_type_menu ();
+	build_draw_midi_menus();
 
 	set_mouse_mode (Editing::MouseContent, true);
 }
