@@ -195,3 +195,9 @@ ArdourDropdown::default_text_handler (std::string const& text) {
 	set_text (text);
 	StateChanged (); /* EMIT SIGNAL */
 }
+
+void
+ArdourDropdown::append (Glib::RefPtr<Action> action)
+{
+	_menu.items().push_back (Menu_Helpers::MenuElem (action->get_short_label(), sigc::mem_fun (action.get(), &Action::activate)));
+}
