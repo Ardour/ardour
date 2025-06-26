@@ -864,21 +864,10 @@ externalAudioDataReaderCallback (unsigned char* buf, size_t offset, size_t reqle
 	const char* filename = (const char*)user2;
 	AAF_Iface*  aafi     = (AAF_Iface*)user3;
 
-#ifdef _WIN32
-	assert (offset < _I64_MAX);
-
-	if (_fseeki64 (fp, (__int64)offset, SEEK_SET) < 0) {
+	if (fseek64 (fp, (int64_t)offset, SEEK_SET) < 0) {
 		error ("Could not seek to %" PRIu64 " in file '%s' : %s", offset, filename, strerror (errno));
 		return RIFF_READER_ERROR;
 	}
-#else
-	assert (offset < LONG_MAX);
-
-	if (fseek (fp, (long)offset, SEEK_SET) < 0) {
-		error ("Could not seek to %" PRIu64 " in file '%s' : %s", offset, filename, strerror (errno));
-		return RIFF_READER_ERROR;
-	}
-#endif
 
 	size_t byteRead = fread (buf, sizeof (unsigned char), reqlen, fp);
 

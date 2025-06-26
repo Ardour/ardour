@@ -30,12 +30,10 @@
 #if defined(__linux__)
 #include <limits.h>
 #include <linux/limits.h>
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) || defined(__NetBSD__)
 #include <sys/syslimits.h>
 #elif defined(_WIN32)
 #include <windows.h> // MAX_PATH
-#include <limits.h>
-#else
 #include <limits.h>
 #endif
 
@@ -685,12 +683,12 @@ typedef struct CFB_Data {
  *             sector data.
  */
 
-#define CFB_foreachSectorInDiFATChain(cfbd, buf, id)                                       \
-	for (id = cfbd->hdr->_sectDifStart,                                                \
-	    buf = cfb_getSector (cfbd, id);                                                \
-	     id < CFB_MAX_REG_SECT;                                                        \
-	     memcpy (&id, (buf + (1 << cfbd->hdr->_uSectorShift) - 4), sizeof (uint32_t)), \
-	    free (buf),                                                                    \
+#define CFB_foreachSectorInDiFATChain(cfbd, buf, id)                                          \
+	for (id = cfbd->hdr->_sectDifStart,                                                   \
+	    buf = cfb_getSector (cfbd, id);                                                   \
+	     id < CFB_MAX_REG_SECT;                                                           \
+	     memcpy (&id, (buf + (1ULL << cfbd->hdr->_uSectorShift) - 4), sizeof (uint32_t)), \
+	    free (buf),                                                                       \
 	    buf = cfb_getSector (cfbd, id))
 
 /**
