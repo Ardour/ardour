@@ -287,6 +287,7 @@ void
 EditingContext::set_session (ARDOUR::Session* s)
 {
 	SessionHandlePtr::set_session (s);
+	disable_automation_bindings ();
 }
 
 void
