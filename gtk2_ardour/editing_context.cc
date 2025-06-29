@@ -315,7 +315,7 @@ EditingContext::register_automation_actions (Bindings* automation_bindings, std:
 	reg_sens (_automation_actions, "raise-points", _("Create Automation Point (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_raise_points));
 	reg_sens (_automation_actions, "lower-points", _("Create Automation Point (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_lower_points));
 
-	ActionManager::set_sensitive (_automation_actions, false);
+	disable_automation_bindings ();
 }
 
 void
