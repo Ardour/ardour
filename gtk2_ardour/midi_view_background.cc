@@ -190,9 +190,7 @@ MidiViewBackground::setup_note_lines()
 void
 MidiViewBackground::set_note_visibility_range_style (VisibleNoteRange r)
 {
-	_visibility_note_range = r;
-
-	if (_visibility_note_range == FullRange) {
+	if (r == ContentsRange) {
 		if (apply_note_range (_data_note_min, _data_note_max, true)) {
 			_visibility_note_range = ContentsRange;
 		}
@@ -278,14 +276,8 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 	float uiscale = UIConfiguration::instance().get_ui_scale();
 
 	int const range = _highest_note - _lowest_note;
-	int nh = std::min ((int) (UIConfiguration::instance().get_max_note_height() * uiscale), (int) ceil ((double) contents_height() / range));
+	int nh = std::max (5, std::min ((int) (UIConfiguration::instance().get_max_note_height() * uiscale), (int) ceil ((double) contents_height() / range)));
 	int additional_notes = 0;
-
-	if (nh < 5) {
-		_lowest_note = ol;
-		_highest_note = oh;
-		return false;
-	}
 
 	if (note_range_set) {
 		/* how many notes do we need to add or remove to adequately
@@ -313,14 +305,11 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 
 			if ((can_move & CanMoveTop) && (i % 2 && _highest_note < 127)) {
 				_highest_note--;
-			}
-			else if ((can_move & CanMoveBottom) && (i % 2)) {
+			} else if ((can_move & CanMoveBottom) && (i % 2)) {
 				_lowest_note++;
-			}
-			else if ((can_move & CanMoveBottom) && (_lowest_note > 0)) {
+			} else if ((can_move & CanMoveBottom) && (_lowest_note > 0)) {
 				_lowest_note++;
-			}
-			else if ((can_move & CanMoveTop)) {
+			} else if ((can_move & CanMoveTop)) {
 				_highest_note--;
 			}
 		}

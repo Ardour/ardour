@@ -955,8 +955,6 @@ EditingContext::draw_length_changed ()
 void
 EditingContext::set_draw_velocity_to (int v)
 {
-	std::cerr << "sdv = " << v << std::endl;
-
 	if (v < 0 || v > 127) {
 		v = DRAW_VEL_AUTO;
 	}
@@ -1272,30 +1270,40 @@ EditingContext::build_draw_midi_menus ()
 
 	/* Note-Length when drawing */
 
-	std::vector<int> grids ({GridTypeBeat,
+	std::vector<GridType> grids ({GridTypeBeat,
 			GridTypeBeatDiv2,
 			GridTypeBeatDiv4,
 			GridTypeBeatDiv8,
 			GridTypeBeatDiv16,
 			GridTypeBeatDiv32,
 			GridTypeNone});
+	std::vector<std::string> draw_grid_type_strings;
+
+	draw_length_action (GridTypeNone)->set_active(); /* default */
 
 	for (auto & g : grids) {
-		draw_length_selector.append (draw_length_action ((GridType) g));
+		Glib::RefPtr<RadioAction> ract = draw_length_action (g);
+		draw_length_selector.append (ract);
+		draw_grid_type_strings.push_back (ract->get_short_label());
+
 	}
 
-	{
-		std::vector<std::string> draw_grid_type_strings = {grid_type_strings.begin() + GridTypeBeat, grid_type_strings.begin() + GridTypeBeatDiv32 + 1};
-		draw_grid_type_strings.push_back (_("Auto"));
-		grid_type_selector.set_sizing_texts (draw_grid_type_strings);
-	}
+	grid_type_selector.set_sizing_texts (draw_grid_type_strings);
 
 	/* Note-Velocity when drawing */
 
 	std::vector<int> preselected_velocities ({8,32,64,82,100,127, DRAW_VEL_AUTO});
+	std::vector<std::string> draw_velocity_strings;
+
+	draw_velocity_action (DRAW_VEL_AUTO)->set_active (); /* default */
+
 	for (auto & v : preselected_velocities) {
-		draw_velocity_selector.append (draw_velocity_action (v));
+		Glib::RefPtr<RadioAction> ract = draw_velocity_action (v);
+		draw_velocity_selector.append (ract);
+		draw_velocity_strings.push_back (ract->get_short_label());
 	}
+
+	draw_velocity_selector.set_sizing_texts (draw_velocity_strings);
 
 	/* Note-Channel when drawing */
 	for (int i = 0; i<= 15; i++) {
@@ -3513,4 +3521,3 @@ EditingContext::center_screen_internal (samplepos_t sample, float page)
 
 	reset_x_origin (sample);
 }
-
