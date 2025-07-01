@@ -212,8 +212,8 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 	cr->set_line_width (1.0f);
 
 	Gtkmm2ext::Color white           = UIConfiguration::instance().color (X_("piano key white"));
-	Gtkmm2ext::Color white_highlight = UIConfiguration::instance().color (X_("piano key highlight"));
 	Gtkmm2ext::Color black           = UIConfiguration::instance().color (X_("piano key black"));
+	Gtkmm2ext::Color white_highlight = UIConfiguration::instance().color (X_("piano key highlight"));
 	Gtkmm2ext::Color black_highlight = UIConfiguration::instance().color (X_("piano key highlight"));
 	Gtkmm2ext::Color textc           = UIConfiguration::instance().color (X_("gtk_foreground"));
 
@@ -705,24 +705,25 @@ PianoRollHeaderBase::button_press_handler (GdkEventButton* ev)
 		/* button press on note keys */
 
 		int note = _midi_context.y_to_note (evy);
+
 		bool tertiary = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 		bool primary = Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier);
-		bool is_selection_click = (ev->type == GDK_BUTTON_PRESS) &&
-			(((ev->button == 2) && Keyboard::no_modifiers_active (ev->state)) || ((ev->button == 1) && tertiary));
-
+		bool is_selection_click = (ev->type == GDK_BUTTON_PRESS) && (ev->button < 3) && Keyboard::no_modifier_keys_pressed (ev);
 
 		/* Note that shift-button1 actually ends up invoking
 		 * ExtendNoteSelection, but this has the same effect as
 		 * SetNoteSelection when there is no existing selection
 		 */
 
-		if (tertiary && (ev->button == 1 || ev->button == 2)) {
-			ExtendNoteSelection (note); // EMIT SIGNAL
-		} else if (is_selection_click ) {
+		if (is_selection_click) {
 			SetNoteSelection (note); // EMIT SIGNAL
+		} else if (tertiary && (ev->button == 1 || ev->button == 2)) {
+			ExtendNoteSelection (note); // EMIT SIGNAL
 		} else if (primary && (ev->button == 1 || ev->button == 2)) {
 			ToggleNoteSelection (note); // EMIT SIGNAL
-		} else if (ev->button == 1 && note >= 0 && note < 128) {
+		}
+
+		if (ev->type == GDK_BUTTON_PRESS && ev->button == 1 && note >= 0 && note < 128) {
 			do_grab ();
 			_dragging = true;
 
@@ -750,29 +751,14 @@ PianoRollHeaderBase::button_release_handler (GdkEventButton* ev)
 
 	end_scroomer_drag ();
 
-	int note = _midi_context.y_to_note(evy);
+	int note = _midi_context.y_to_note (evy);
 
-	if (false /*editor().current_mouse_mode() == Editing::MouseRange*/) { //Todo:  this mode is buggy, and of questionable utility anyway
+	if (_dragging) {
 
-		if (Keyboard::no_modifiers_active (ev->state)) {
-			AddNoteSelection (note); // EMIT SIGNAL
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-			ToggleNoteSelection (note); // EMIT SIGNAL
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::RangeSelectModifier)) {
-			ExtendNoteSelection (note); // EMIT SIGNAL
-		}
-
-	} else {
-		if (_dragging) {
-			do_ungrab ();
-
-			if (note == _clicked_note) {
-				reset_clicked_note (note);
-			}
-		}
+		do_ungrab ();
+		reset_clicked_note (_clicked_note);
+		_dragging = false;
 	}
-
-	_dragging = false;
 	return true;
 }
 
@@ -806,6 +792,7 @@ PianoRollHeaderBase::enter_handler (GdkEventCrossing* ev)
 	event_transform (ignore, evy);
 
 	set_note_highlight (_midi_context.y_to_note (evy));
+	set_cursor (_midi_context.editing_context().cursors()->selector);
 	entered = true;
 	redraw ();
 	return true;
@@ -841,10 +828,10 @@ PianoRollHeaderBase::invalidate_note_range (int lowest, int highest)
 	lowest = max ((int) _midi_context.lowest_note(), lowest - 1);
 	highest = min ((int) _midi_context.highest_note(), highest + 2);
 
-	int y = _midi_context.note_to_y (highest);
-	int h = _midi_context.note_to_y (lowest - 1) - y;
+	double y = _midi_context.note_to_y (highest);
+	double h = _midi_context.note_to_y (lowest - 1) - y;
 
-	redraw (0., y, width(), h);
+	redraw (0, y, width(), h);
 }
 
 bool
@@ -874,8 +861,6 @@ void
 PianoRollHeaderBase::send_note_on (uint8_t note)
 {
 	std::shared_ptr<ARDOUR::MidiTrack> track = midi_track ();
-
-	//cerr << "note on: " << (int) note << endl;
 
 	if (track) {
 		_event[0] = (MIDI_CMD_NOTE_ON | _midi_context.get_preferred_midi_channel ());
