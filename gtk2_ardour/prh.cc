@@ -76,7 +76,10 @@ PianoRollHeader::redraw ()
 void
 PianoRollHeader::redraw (double x, double y, double w, double h)
 {
-	dynamic_cast<ArdourCanvas::GtkCanvas*>(_canvas)->queue_draw_area (x, y, w, h);
+	ArdourCanvas::Duple origin (x, y);
+	origin = item_to_window (origin);
+
+	dynamic_cast<ArdourCanvas::GtkCanvas*>(_canvas)->queue_draw_area (origin.x, origin.y, w, h);
 }
 
 void
