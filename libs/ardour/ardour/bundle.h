@@ -174,8 +174,18 @@ public:
 		return bundle != other.bundle || channel != other.channel;
 	}
 
+	ChanCount nchannels () const {
+		if (!_nchannels) {
+			_nchannels = bundle->nchannels ();
+		}
+		return _nchannels.value ();
+	}
+
 	std::shared_ptr<Bundle> bundle;
 	int channel; ///< channel index, or -1 for "all"
+
+private:
+	mutable std::optional<ChanCount> _nchannels;
 };
 
 }
