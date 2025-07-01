@@ -186,16 +186,15 @@ PortMatrixGrid::render (cairo_t* cr)
 
 				x = bx;
 				for (uint32_t k = 0; k < _matrix->count_of_our_type ((*i)->bundle->nchannels()); ++k) {
+					ARDOUR::BundleChannel c[2];
+
+					c[_matrix->column_index()] = ARDOUR::BundleChannel (
+						(*i)->bundle,
+						(*i)->bundle->type_channel_to_overall (_matrix->type (), k)
+						);
 
 					y = by;
 					for (uint32_t l = 0; l < _matrix->count_of_our_type ((*j)->bundle->nchannels()); ++l) {
-
-						ARDOUR::BundleChannel c[2];
-
-						c[_matrix->column_index()] = ARDOUR::BundleChannel (
-							(*i)->bundle,
-							(*i)->bundle->type_channel_to_overall (_matrix->type (), k)
-							);
 
 						c[_matrix->row_index()] = ARDOUR::BundleChannel (
 							(*j)->bundle,
