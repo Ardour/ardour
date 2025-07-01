@@ -162,7 +162,7 @@ IOSelector::set_state (ARDOUR::BundleChannel c[2], bool s)
 PortMatrixNode::State
 IOSelector::get_state (ARDOUR::BundleChannel c[2]) const
 {
-	if (c[0].bundle->nchannels() == ChanCount::ZERO || c[1].bundle->nchannels() == ChanCount::ZERO) {
+	if (c[0].nchannels() == ChanCount::ZERO || c[1].nchannels() == ChanCount::ZERO) {
 		return PortMatrixNode::NOT_ASSOCIATED;
 	}
 
