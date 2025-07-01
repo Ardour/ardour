@@ -100,7 +100,6 @@ class MidiViewBackground : public virtual ViewBackground
 	}
 
 	int note_to_y (uint8_t note) const {
-		/* Note: this effectively rounds down (truncates) due to integer arithmetic */
 		return (highest_note() - note) * note_height();
 	}
 
