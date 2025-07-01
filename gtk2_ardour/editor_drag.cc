@@ -6232,15 +6232,12 @@ NoteDrag::total_dy () const
 		return 0;
 	}
 
-	double const y = _view->midi_context().y_position ();
-	/* new current note */
-	uint8_t n = _view->y_to_note (current_pointer_y () - y);
-	/* clamp */
-	MidiViewBackground& mvb = _view->midi_context ();
-	n                   = max (mvb.lowest_note (), n);
-	n                   = min (mvb.highest_note (), n);
+	/* clamp y to the view-relative vertical boundaries of the view */
+	int o = _view->midi_context().y_position ();
+	int y = std::max (0, (std::min ((int) current_pointer_y(), o + _view->midi_context().contents_height() - _view->note_height())));
+
 	/* and work out delta */
-	return n - _view->y_to_note (grab_y () - y);
+	return _view->y_to_note (y - o) - _view->y_to_note (grab_y () - o);
 }
 
 void
