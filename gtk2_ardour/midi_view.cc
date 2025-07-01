@@ -1151,27 +1151,21 @@ MidiView::model_changed()
 
 	NoteBase* cne;
 
-	if (_midi_context.visibility_range_style() == MidiViewBackground::ContentsRange) {
+	uint8_t low_note = std::numeric_limits<uint8_t>::max();
+	uint8_t hi_note = std::numeric_limits<uint8_t>::min();
 
-		uint8_t low_note = std::numeric_limits<uint8_t>::max();
-		uint8_t hi_note = std::numeric_limits<uint8_t>::min();
-
-		for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
-			if ((*n)->note() < low_note) {
-				low_note = (*n)->note();
-			}
-			if ((*n)->note() > hi_note)  {
-				hi_note = (*n)->note();
-			}
-		}
-
+	if (!notes.empty()) {
+		low_note = _model->lowest_note ();
+		hi_note = _model->highest_note ();
+	} else {
 		/* Pick a reasonable default range if the model is mepty */
+		low_note = UIConfiguration::instance().get_default_lower_midi_note();
+		hi_note = UIConfiguration::instance().get_default_upper_midi_note();
+	}
 
-		if (notes.empty()) {
-			low_note = UIConfiguration::instance().get_default_lower_midi_note();
-			hi_note = UIConfiguration::instance().get_default_upper_midi_note();
-		}
+	_midi_context.update_data_note_range (low_note, hi_note);
 
+	if (_midi_context.visibility_range_style() == MidiViewBackground::ContentsRange) {
 		maybe_set_note_range (low_note, hi_note);
 	}
 
@@ -1755,8 +1749,8 @@ MidiView::note_in_region_range (const std::shared_ptr<NoteType> note, bool& visi
 	const std::shared_ptr<ARDOUR::MidiRegion> midi_reg = midi_region();
 
 	const bool outside = !note_in_region_time_range (note);
-
-	visible = (note->note() >= _midi_context.lowest_note()) && (note->note() <= _midi_context.highest_note());
+	const int y = _midi_context.note_to_y (note->note());
+	visible =  (y >= 0) && (y <= _midi_context.contents_height());
 
 	return !outside;
 }
@@ -1931,7 +1925,7 @@ MidiView::region_update_sustained (Note *ev, double& x0, double& x1, double& y0,
 		x1 = std::max(1., _editing_context.duration_to_pixels (_midi_region->length()));
 	}
 
-	y1 = y0 + std::max(1., floor(note_height()) - 1);
+	y1 = std::min ((double) _midi_context.contents_height(), y0 + std::max(1., floor(note_height()) - 1));
 }
 
 

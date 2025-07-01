@@ -137,6 +137,8 @@ class MidiViewBackground : public virtual ViewBackground
 
 	sigc::signal<void,bool> NoteVisibilityShouldChange;
 
+	bool update_data_note_range (uint8_t min, uint8_t max);
+
   protected:
 	EditingContext&           _editing_context;
 	bool                      _range_dirty;
@@ -156,7 +158,6 @@ class MidiViewBackground : public virtual ViewBackground
 	void parameter_changed (std::string const &);
 	void note_range_adjustment_changed();
 	void setup_note_lines();
-	bool update_data_note_range (uint8_t min, uint8_t max);
 	void update_contents_height ();
 	virtual void apply_note_range_to_children () = 0;
 	virtual bool updates_suspended() const { return false; }

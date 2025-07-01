@@ -275,9 +275,19 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 
 	float uiscale = UIConfiguration::instance().get_ui_scale();
 
-	int const range = _highest_note - _lowest_note;
-	int nh = std::max (5, std::min ((int) (UIConfiguration::instance().get_max_note_height() * uiscale), (int) ceil ((double) contents_height() / range)));
+	int range = _highest_note - _lowest_note;
+	int apparent_note_height = (int) ceil ((double) contents_height() / range);
+	int nh = std::min ((int) (UIConfiguration::instance().get_max_note_height() * uiscale), apparent_note_height);
 	int additional_notes = 0;
+
+	if (nh < 3) {
+		/* range does not fit, so center on the data range */
+		nh = 3;
+		range = _data_note_max - _data_note_min;
+		int center = _data_note_min + (range /2);
+		highest = center + ((contents_height() / nh) / 2);
+		lowest = center - ((contents_height() / nh) / 2);
+	}
 
 	if (note_range_set) {
 		/* how many notes do we need to add or remove to adequately
@@ -360,6 +370,7 @@ bool
 MidiViewBackground::update_data_note_range (uint8_t min, uint8_t max)
 {
 	bool dirty = false;
+
 	if (min < _data_note_min) {
 		_data_note_min = min;
 		dirty = true;
