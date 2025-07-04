@@ -2683,11 +2683,7 @@ Pianoroll::zoom_to_show (Temporal::timecnt_t const & duration)
 		return;
 	}
 
-	/* make it 20% wider than we need */
-	samplecnt_t samples = duration.samples();
-	samplecnt_t spp = floor (samples / _track_canvas_width);
-
-	reset_zoom (spp);
+	reset_zoom ((samplecnt_t) floor (duration.samples() / _track_canvas_width));
 }
 
 bool
