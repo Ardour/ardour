@@ -2678,7 +2678,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 void
 Pianoroll::zoom_to_show (Temporal::timecnt_t const & duration)
 {
-	if (!_visible_canvas_width) {
+	if (!_track_canvas_width) {
 		zoom_in_allocate = true;
 		return;
 	}
