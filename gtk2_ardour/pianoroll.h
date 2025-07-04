@@ -151,6 +151,8 @@ class Pianoroll : public CueEditor
 
 	ARDOUR::InstrumentInfo* instrument_info() const;
 
+	void set_show_source (bool);
+
   protected:
 	void load_bindings ();
 	void register_actions ();
@@ -355,4 +357,6 @@ class Pianoroll : public CueEditor
 
 	std::shared_ptr<ARDOUR::MidiRegion> _visible_pending_region;
 	void catch_pending_show_region ();
+
+	bool show_source;
 };

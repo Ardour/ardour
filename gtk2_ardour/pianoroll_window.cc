@@ -48,6 +48,12 @@ PianorollWindow::~PianorollWindow ()
 }
 
 void
+PianorollWindow::set_show_source (bool yn)
+{
+	pianoroll->set_show_source (yn);
+}
+
+void
 PianorollWindow::set (std::shared_ptr<MidiTrack> track, std::shared_ptr<MidiRegion> region)
 {
 	pianoroll->set_track (track);

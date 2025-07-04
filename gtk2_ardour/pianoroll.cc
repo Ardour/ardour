@@ -79,6 +79,7 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	, length_label (X_("Record:"))
 	, ignore_channel_changes (false)
 	, with_transport_controls (with_transport)
+	, show_source (false)
 {
 	mouse_mode = Editing::MouseContent;
 	autoscroll_vertical_allowed = false;
@@ -106,6 +107,15 @@ Pianoroll::~Pianoroll ()
 	delete view;
 	delete bg;
 	delete _canvas_viewport;
+}
+
+void
+Pianoroll::set_show_source (bool yn)
+{
+	show_source = yn;
+	if (view) {
+		view->set_show_source (yn);
+	}
 }
 
 void
@@ -610,6 +620,7 @@ Pianoroll::build_canvas ()
 	view = new PianorollMidiView (nullptr, *data_group, *no_scroll_group, *this, *bg, 0xff0000ff);
 	view->AutomationStateChange.connect (sigc::mem_fun (*this, &Pianoroll::automation_state_changed));
 	view->VisibleChannelChanged.connect (view_connections, invalidator (*this), std::bind (&Pianoroll::visible_channel_changed, this), gui_context());
+	view->set_show_source (show_source);
 
 	bg->set_view (view);
 	prh->set_view (view);
@@ -2830,12 +2841,17 @@ std::pair<Temporal::timepos_t,Temporal::timepos_t>
 Pianoroll::max_zoom_extent() const
 {
 	if (view && view->midi_region()) {
-		/* XXX make this dependent on view _show_source setting */
 
-		Temporal::Beats slen = view->midi_region()->midi_source()->length().beats();
+		Temporal::Beats len;
 
-		if (slen != Temporal::Beats()) {
-			return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (slen));
+		if (show_source) {
+			len = view->midi_region()->midi_source()->length().beats();
+		} else {
+			len = view->midi_region()->length().beats();
+		}
+
+		if (len != Temporal::Beats()) {
+			return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (len));
 		}
 	}
 

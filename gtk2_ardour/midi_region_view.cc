@@ -710,6 +710,7 @@ MidiRegionView::edit_in_pianoroll_window ()
 	PianorollWindow* pr = new PianorollWindow (string_compose (_("Pianoroll: %1"), _region->name()), track->session());
 
 	pr->set (track, midi_region());
+	pr->set_show_source (false);
 	pr->show_all ();
 	pr->present ();
 
