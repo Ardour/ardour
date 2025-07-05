@@ -32,22 +32,24 @@
 /******************************************************************************************/
 
 LIBARDOUR_API extern void (*vstfx_error_callback)(const char *msg);
-LIBARDOUR_API void  vstfx_error (const char *fmt, ...);
+LIBARDOUR_API void vstfx_error(const char *fmt, ...);
 
 /*API to vstfx*/
 
-LIBARDOUR_API extern int          vstfx_launch_editor (VSTState *);
-LIBARDOUR_API extern int          vstfx_init (void *);
-LIBARDOUR_API extern void         vstfx_exit ();
-LIBARDOUR_API extern VSTHandle *  vstfx_load (const char*);
-LIBARDOUR_API extern int          vstfx_unload (VSTHandle *);
+LIBARDOUR_API extern int vstfx_launch_editor(VSTState *);
+LIBARDOUR_API extern int vstfx_init(void *);
+LIBARDOUR_API extern void vstfx_exit();
+LIBARDOUR_API extern VSTHandle *vstfx_load(const char *);
+LIBARDOUR_API extern int vstfx_unload(VSTHandle *);
 
-LIBARDOUR_API extern VSTState *   vstfx_instantiate (VSTHandle *, audioMasterCallback, void *);
-LIBARDOUR_API extern void         vstfx_close (VSTState*);
+LIBARDOUR_API extern VSTState *vstfx_instantiate(VSTHandle *, audioMasterCallback, void *);
+LIBARDOUR_API extern void vstfx_close(VSTState *);
 
-LIBARDOUR_API extern int          vstfx_create_editor (VSTState *);
-LIBARDOUR_API extern int          vstfx_run_editor (VSTState *);
-LIBARDOUR_API extern void         vstfx_destroy_editor (VSTState *);
+LIBARDOUR_API extern int vstfx_create_editor(VSTState *);
+LIBARDOUR_API extern int vstfx_run_editor(VSTState *);
+LIBARDOUR_API extern void vstfx_destroy_editor(VSTState *);
 
-LIBARDOUR_API extern void         vstfx_event_loop_remove_plugin (VSTState *);
+LIBARDOUR_API extern void vstfx_event_loop_remove_plugin(VSTState *);
 
+LIBARDOUR_API extern int vstfx_init_headless(int flags);
+LIBARDOUR_API extern void vstfx_exit_headless();
