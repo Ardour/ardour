@@ -30,7 +30,7 @@ LIBARDOUR_API int mac_vst_init_headless(int flags)
     // Set up dummy Core Graphics context or use alternative context
     // Configure headless-specific VST host callbacks
 
-    return mac_vst_init(flags | MAC_VST_FLAG_HEADLESS);
+    return mac_vst_init(NULL);
 }
 
 LIBARDOUR_API void mac_vst_exit_headless()

@@ -41,20 +41,20 @@
 
 /*Simple error handler stuff for VSTFX*/
 
-void mac_vst_error (const char *fmt, ...)
+void mac_vst_error(const char *fmt, ...)
 {
 	va_list ap;
 	char buffer[512];
 
-	va_start (ap, fmt);
-	vsnprintf (buffer, sizeof (buffer), fmt, ap);
-	mac_vst_error_callback (buffer);
-	va_end (ap);
+	va_start(ap, fmt);
+	vsnprintf(buffer, sizeof(buffer), fmt, ap);
+	mac_vst_error_callback(buffer);
+	va_end(ap);
 }
 
 /*default error handler callback*/
 
-static void default_mac_vst_error_callback (const char *desc)
+static void default_mac_vst_error_callback(const char *desc)
 {
 	PBD::error << desc << endmsg;
 }
@@ -66,19 +66,19 @@ void (*mac_vst_error_callback)(const char *desc) = &default_mac_vst_error_callba
 /*Create and return a pointer to a new VSTFX handle*/
 
 static VSTHandle *
-mac_vst_handle_new ()
+mac_vst_handle_new()
 {
-	VSTHandle* mac_vst = (VSTHandle *) calloc (1, sizeof (VSTHandle));
+	VSTHandle *mac_vst = (VSTHandle *)calloc(1, sizeof(VSTHandle));
 	return mac_vst;
 }
 
 /*Create and return a pointer to a new mac_vst instance*/
 
 static VSTState *
-mac_vst_new ()
+mac_vst_new()
 {
-	VSTState* mac_vst = (VSTState *) calloc (1, sizeof (VSTState));
-	vststate_init (mac_vst);
+	VSTState *mac_vst = (VSTState *)calloc(1, sizeof(VSTState));
+	vststate_init(mac_vst);
 	return mac_vst;
 }
 
@@ -86,51 +86,56 @@ mac_vst_new ()
  * finds its main entry point etc */
 
 VSTHandle *
-mac_vst_load (const char *path)
+mac_vst_load(const char *path)
 {
-	VSTHandle* fhandle;
+	VSTHandle *fhandle;
 
 	/*Create a new handle we can use to reference the plugin*/
 
-	fhandle = mac_vst_handle_new ();
+	fhandle = mac_vst_handle_new();
 
 	fhandle->bundleRef = 0;
 
 	CFURLRef url;
-	if (!(url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*)path, (CFIndex) strlen (path), true))) {
+	if (!(url = CFURLCreateFromFileSystemRepresentation(0, (const UInt8 *)path, (CFIndex)strlen(path), true)))
+	{
 		return 0;
 	}
 
-	fhandle->bundleRef = CFBundleCreate (kCFAllocatorDefault, url);
-	CFRelease (url);
+	fhandle->bundleRef = CFBundleCreate(kCFAllocatorDefault, url);
+	CFRelease(url);
 
-	if (fhandle->bundleRef == 0) {
-		free (fhandle);
+	if (fhandle->bundleRef == 0)
+	{
+		free(fhandle);
 		return 0;
 	}
 
-	if (!CFBundleLoadExecutable (fhandle->bundleRef)) {
-		free (fhandle);
+	if (!CFBundleLoadExecutable(fhandle->bundleRef))
+	{
+		free(fhandle);
 		return 0;
 	}
 
-	fhandle->name = strdup (path);
+	fhandle->name = strdup(path);
 
 	fhandle->main_entry = (main_entry_t)
-		CFBundleGetFunctionPointerForName (fhandle->bundleRef, CFSTR("main_macho"));
+		CFBundleGetFunctionPointerForName(fhandle->bundleRef, CFSTR("main_macho"));
 
-	if (!fhandle->main_entry) {
+	if (!fhandle->main_entry)
+	{
 		fhandle->main_entry = (main_entry_t)
-			CFBundleGetFunctionPointerForName (fhandle->bundleRef, CFSTR("VSTPluginMain"));
+			CFBundleGetFunctionPointerForName(fhandle->bundleRef, CFSTR("VSTPluginMain"));
 	}
 
-	if (fhandle->main_entry == 0) {
-		PBD::error << string_compose (_("Missing entry method in VST2 plugin '%1'"), path) << endmsg;
-		mac_vst_unload (fhandle);
+	if (fhandle->main_entry == 0)
+	{
+		PBD::error << string_compose(_("Missing entry method in VST2 plugin '%1'"), path) << endmsg;
+		mac_vst_unload(fhandle);
 		return 0;
 	}
 
-	fhandle->res_file_id = CFBundleOpenBundleResourceMap (fhandle->bundleRef);
+	fhandle->res_file_id = CFBundleOpenBundleResourceMap(fhandle->bundleRef);
 
 	/*return the handle of the plugin*/
 	return fhandle;
@@ -138,8 +143,7 @@ mac_vst_load (const char *path)
 
 /*This unloads a plugin*/
 
-int
-mac_vst_unload (VSTHandle* fhandle)
+int mac_vst_unload(VSTHandle *fhandle)
 {
 	if (fhandle->plugincnt)
 	{
@@ -151,40 +155,40 @@ mac_vst_unload (VSTHandle* fhandle)
 
 	if (fhandle->bundleRef)
 	{
-		CFBundleCloseBundleResourceMap (fhandle->bundleRef, fhandle->res_file_id);
+		CFBundleCloseBundleResourceMap(fhandle->bundleRef, fhandle->res_file_id);
 		fhandle->bundleRef = 0;
 	}
 
 	if (fhandle->name)
 	{
-		free (fhandle->name);
+		free(fhandle->name);
 		fhandle->name = 0;
 	}
 
 	/*Don't need the plugin handle any more*/
 
-	free (fhandle);
+	free(fhandle);
 	return 0;
 }
 
 /*This instantiates a plugin*/
 
 VSTState *
-mac_vst_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
+mac_vst_instantiate(VSTHandle *fhandle, audioMasterCallback amc, void *userptr)
 {
-	VSTState* mac_vst = mac_vst_new ();
+	VSTState *mac_vst = mac_vst_new();
 
 	if (fhandle == 0)
 	{
-		mac_vst_error ( "** ERROR ** VSTFX : The handle was 0\n" );
-		free (mac_vst);
+		mac_vst_error("** ERROR ** VSTFX : The handle was 0\n");
+		free(mac_vst);
 		return 0;
 	}
 
-	if ((mac_vst->plugin = fhandle->main_entry (amc)) == 0)
+	if ((mac_vst->plugin = fhandle->main_entry(amc)) == 0)
 	{
-		mac_vst_error ("** ERROR ** VSTFX : %s could not be instantiated :(\n", fhandle->name);
-		free (mac_vst);
+		mac_vst_error("** ERROR ** VSTFX : %s could not be instantiated :(\n", fhandle->name);
+		free(mac_vst);
 		return 0;
 	}
 
@@ -193,23 +197,24 @@ mac_vst_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 
 	if (mac_vst->plugin->magic != kEffectMagic)
 	{
-		mac_vst_error ("** ERROR ** VSTFX : %s is not a VST plugin\n", fhandle->name);
-		free (mac_vst);
+		mac_vst_error("** ERROR ** VSTFX : %s is not a VST plugin\n", fhandle->name);
+		free(mac_vst);
 		return 0;
 	}
 
-	if (!userptr) {
+	if (!userptr)
+	{
 		/* scanning.. or w/o master-callback userptr == 0, open now.
 		 *
 		 * Session::vst_callback needs a pointer to the AEffect
 		 *     ((VSTPlugin*)userptr)->_plugin = vstfx->plugin
 		 * before calling effOpen, because effOpen may call back
 		 */
-		mac_vst->plugin->dispatcher (mac_vst->plugin, effOpen, 0, 0, 0, 0);
-		mac_vst->vst_version = mac_vst->plugin->dispatcher (mac_vst->plugin, effGetVstVersion, 0, 0, 0, 0);
+		mac_vst->plugin->dispatcher(mac_vst->plugin, effOpen, 0, 0, 0, 0);
+		mac_vst->vst_version = mac_vst->plugin->dispatcher(mac_vst->plugin, effGetVstVersion, 0, 0, 0, 0);
 
 		/* configure plugin to use Cocoa View */
-		mac_vst->plugin->dispatcher (mac_vst->plugin, effCanDo, 0, 0, const_cast<char*> ("hasCockosViewAsConfig"), 0.0f);
+		mac_vst->plugin->dispatcher(mac_vst->plugin, effCanDo, 0, 0, const_cast<char *>("hasCockosViewAsConfig"), 0.0f);
 	}
 
 	mac_vst->handle->plugincnt++;
@@ -220,22 +225,23 @@ mac_vst_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 
 /*Close a mac_vst instance*/
 
-void mac_vst_close (VSTState* mac_vst)
+void mac_vst_close(VSTState *mac_vst)
 {
 	// assert that the GUI object is destroyed
 
 	if (mac_vst->plugin)
 	{
-		mac_vst->plugin->dispatcher (mac_vst->plugin, effMainsChanged, 0, 0, 0, 0);
+		mac_vst->plugin->dispatcher(mac_vst->plugin, effMainsChanged, 0, 0, 0, 0);
 
 		/*Calling dispatcher with effClose will cause the plugin's destructor to
 		be called, which will also remove the editor if it exists*/
 
-		mac_vst->plugin->dispatcher (mac_vst->plugin, effClose, 0, 0, 0, 0);
+		mac_vst->plugin->dispatcher(mac_vst->plugin, effClose, 0, 0, 0, 0);
 	}
 
-	if (mac_vst->handle->plugincnt) {
-			mac_vst->handle->plugincnt--;
+	if (mac_vst->handle->plugincnt)
+	{
+		mac_vst->handle->plugincnt--;
 	}
 
 	/* mac_vst_unload will unload the dll if the instance count allows -
@@ -246,9 +252,9 @@ void mac_vst_close (VSTState* mac_vst)
 	 * the lib JUCE will never restart
 	 */
 
-	mac_vst_unload (mac_vst->handle);
+	mac_vst_unload(mac_vst->handle);
 
-	free (mac_vst);
+	free(mac_vst);
 }
 
 #if 0 // TODO wrap dispatch
@@ -270,3 +276,20 @@ mac_vst_dispatch (VSTState* mac_vst, int op, int idx, intptr_t val, void* ptr, f
 	}
 }
 #endif
+
+/*Initialize the MacVST system*/
+
+int mac_vst_init(void *ptr)
+{
+	// For now, just return success
+	// In a full implementation, this would initialize the MacVST environment
+	return 0;
+}
+
+/*Clean up the MacVST system*/
+
+void mac_vst_exit()
+{
+	// For now, do nothing
+	// In a full implementation, this would clean up the MacVST environment
+}
