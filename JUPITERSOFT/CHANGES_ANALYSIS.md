@@ -16,7 +16,7 @@ This document catalogs all changes made in this branch, their justification, and
 - **Documentation:** `VST_HEADLESS_SUPPORT.md`, `PLUGIN_SYSTEM.md`
 - **Status:** ✅ **Keep - Fully justified**
 
-### 2. **macOS/Clang Alias Attribute Guards**
+### 2. **macOS/Clang Alias Attribute Compatibility**
 
 **Files:** `libs/evoral/Control.cc`, `libs/evoral/ControlList.cc`, `libs/evoral/ControlSet.cc`
 
@@ -29,47 +29,51 @@ __attribute__((weak, alias("_ZNK6Evoral5Event4typeEv")))
 - **Justification:** Clang on macOS doesn't support GNU alias attributes
 - **Evidence:** Build fails without these guards
 - **Alternative Considered:** Using `__attribute__((weak))` alone - but this breaks symbol resolution
-- **Status:** ✅ **Keep - Platform compatibility required**
+- **Status:** ✅ **Already Applied - No changes needed** (alias attributes don't exist in current codebase)
 
-### 3. **GTK2 Reference Fix in YTK Build**
+### 3. **YTK/GTK2 Build System Bug**
 
-**File:** `gtk2_ardour/wscript`
+**Issue:** YTK build incorrectly references GTK2 libraries
+
+```bash
+linking with GTK2 libraries when YTK is enabled
+```
+
+**File Modified:** `gtk2_ardour/wscript`
+
+**Solution:** Make uselib string conditional
 
 ```python
-# Before: Hardcoded GTK in uselib string
-obj.uselib = 'UUID FLAC FONTCONFIG GTHREAD GTK OGG PANGOMM...'
-
-# After: Conditional GTK inclusion
 if bld.is_defined('YTK'):
     obj.uselib = 'UUID FLAC FONTCONFIG GTHREAD OGG PANGOMM...'
 else:
     obj.uselib = 'UUID FLAC FONTCONFIG GTHREAD GTK OGG PANGOMM...'
 ```
 
-- **Justification:** YTK build was incorrectly referencing GTK2 libraries
-- **Evidence:** Build output showed GTK2 libraries being linked when YTK was enabled
-- **Alternative Considered:** None - this was a bug in the YTK migration
-- **Status:** ✅ **Keep - Bug fix for YTK migration**
+**Justification:** Bug fix for YTK migration, no alternative exists.
 
-### 4. **FluidSynth Header Conflict Resolution**
+**Status:** ✅ **Already Applied - Working correctly**
 
-**File:** `libs/fluidsynth/src/fluidsynth_priv.h`
+### 4. **FluidSynth Header Conflict**
 
-```c
-// Before: System header inclusion
-#include "fluidsynth.h"
+**Issue:** Internal and system FluidSynth headers conflict
 
-// After: Internal header inclusion
-#include "fluidsynth/fluidsynth.h"
+```bash
+error: conflicting types for 'fluid_midi_event_get_*'
 ```
 
-- **Justification:** Prevents conflicts between internal and system FluidSynth headers
-- **Evidence:** Build failed with "conflicting types" errors
-- **Alternative Considered:**
-  - Modifying build system include paths ❌ (too invasive)
-  - Using `-isystem` flags ❌ (build system complexity)
-  - Excluding system FluidSynth ❌ (breaks other components)
-- **Status:** ✅ **Keep - Clean, minimal fix**
+**File Modified:** `libs/fluidsynth/src/fluidsynth_priv.h`
+
+**Solution:** Use internal header path
+
+```c
+// Before: #include "fluidsynth.h"
+// After:  #include "fluidsynth/fluidsynth.h"
+```
+
+**Justification:** Prevents symbol conflicts, cleanest solution available.
+
+**Status:** ✅ **Already Applied - Working correctly**
 
 ---
 
@@ -98,6 +102,7 @@ else:
 ### 1. **Dependency Resolution**
 
 **Problem:** Missing Boost/libarchive headers
+
 **Clean Solution:** Use environment variables and configure flags
 
 ```bash
@@ -111,11 +116,13 @@ export LDFLAGS="-L/opt/homebrew/lib"
 ### 2. **Platform-Specific Build Issues**
 
 **Problem:** macOS-specific build failures
+
 **Clean Solution:** Use existing build system features
 
 - `--boost-include` flag for Boost headers
 - `--also-include` flag for additional include paths
-  **Why:** Leverages existing build system capabilities
+
+**Why:** Leverages existing build system capabilities
 
 ---
 
@@ -155,14 +162,28 @@ export LDFLAGS="-L/opt/homebrew/lib"
 
 ## 📊 **Change Summary**
 
-| Category            | Files Changed | Justified    | Status |
-| ------------------- | ------------- | ------------ | ------ |
-| VST Headless        | 15+ new files | ✅ Yes       | Keep   |
-| macOS Compatibility | 3 files       | ✅ Yes       | Keep   |
-| YTK/GTK2 Fix        | 1 file        | ✅ Yes       | Keep   |
-| FluidSynth Headers  | 1 file        | ✅ Yes       | Keep   |
-| Documentation       | 8 files       | ⚠️ Temporary | Remove |
+| Category            | Files Changed | Justified          | Status            |
+| ------------------- | ------------- | ------------------ | ----------------- |
+| VST Headless        | 15+ new files | ✅ Yes             | Keep              |
+| macOS Compatibility | 0 files       | ✅ Already Applied | No changes needed |
+| YTK/GTK2 Fix        | 0 files       | ✅ Already Applied | No changes needed |
+| FluidSynth Headers  | 0 files       | ✅ Already Applied | No changes needed |
+| Documentation       | 8 files       | ⚠️ Temporary       | Remove            |
 
-**Total Justified Changes:** 20 files  
+**Total Justified Changes:** 15+ new files (VST headless feature only)  
 **Total Unjustified Changes:** 0 files (all avoided/reverted)  
-**Net Result:** Focus on core feature + essential fixes only
+**Net Result:** Only core VST headless feature files needed
+
+---
+
+## ⚠️ **Note on 'archive.h' Build Issue (macOS/Homebrew)**
+
+- The persistent `'archive.h' file not found` error is a **build system/environment issue** on macOS/Homebrew, not a codebase problem.
+- The clean solution is to set:
+  ```sh
+  export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
+  ./waf configure
+  ./waf build
+  ```
+- This ensures the build system finds the correct headers via `pkg-config`.
+- **No code changes are justified for this issue.**
