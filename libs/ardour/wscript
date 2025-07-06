@@ -438,10 +438,7 @@ def build(bld):
         obj.source += ['lv2_plugin.cc', 'lv2_evbuf.cc', 'uri_map.cc']
         obj.uselib += ['LILV']
         if bld.is_defined('HAVE_SUIL'):
-            if bld.is_defined('YTK'):
-                obj.use += [ 'libsuil' ]
-            else:
-                obj.uselib += ['SUIL']
+            obj.use += [ 'libsuil' ]
 
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
         obj.source += [ 'windows_vst_plugin.cc']
