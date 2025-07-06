@@ -1,5 +1,11 @@
 # macOS Development Guide
 
+## ⚠️ **Official Ardour Stance on Package Managers**
+
+**Important**: The official Ardour development team explicitly states that **package managers like Homebrew, MacPorts, or Fink are not recommended** for building Ardour. They prefer building dependencies from source.
+
+However, for **development and testing purposes**, Homebrew can work with proper environment configuration. This guide provides a practical approach for developers who prefer package managers.
+
 ## Platform-Specific Considerations
 
 ### Architecture Support
@@ -16,19 +22,75 @@
 4. **Clang compiler**: Different from GCC on Linux
 5. **No installation**: Run from build directory with `ardev` script
 
+## Prerequisites
+
+### Required System Tools
+
+```bash
+# XCode Command Line Tools (required)
+xcode-select --install
+
+# Verify installation
+gcc --version  # Should work if XCode is installed
+
+# Git (required)
+brew install git
+
+# Python 2.6+ (required for Waf build system)
+# macOS includes Python 2.7 by default
+python --version
+```
+
+### JACK Audio Server (Optional)
+
+```bash
+# JACK is not required but recommended for audio development
+# JackOSX: version 0.89 or newer
+# JACK1: version 0.121 or newer
+brew install jack
+```
+
 ## Homebrew Setup
 
 ### Essential Dependencies
 
+Based on official Ardour build dependencies:
+
 ```bash
-# Core dependencies
-brew install boost libarchive jack gtk+2
+# Core build dependencies
+brew install boost@1.68 libarchive jack gtk+2
 
 # Development tools
-brew install pkg-config autoconf automake
+brew install pkg-config autoconf automake cmake
+
+# Audio libraries
+brew install libsndfile libsamplerate fftw
+
+# GUI libraries
+brew install cairo cairomm glib glibmm gtkmm
+
+# Additional libraries
+brew install curl libxml2 libxslt expat
+brew install libogg libvorbis flac
+brew install libpng libjpeg fontconfig freetype
+brew install harfbuzz fribidi
 
 # Optional but recommended
-brew install cmake ninja
+brew install ninja ripgrep fd bat exa
+```
+
+### Version-Specific Requirements
+
+**Critical**: Some dependencies require specific versions for compatibility:
+
+```bash
+# Boost 1.68.0 is the official version used by Ardour
+brew install boost@1.68
+brew link boost@1.68 --force
+
+# Other version-sensitive dependencies
+brew install libsndfile@1.1.0  # Modified version used by Ardour
+brew install fftw@3.3.8        # Official version
 ```
 
 ### Path Configuration
@@ -52,6 +114,11 @@ export CPATH="/opt/homebrew/include:/opt/homebrew/opt/boost/include"
 export CPLUS_INCLUDE_PATH="$CPATH"
 export LDFLAGS="-L/opt/homebrew/opt/libarchive/lib"
 export CPPFLAGS="-I/opt/homebrew/opt/libarchive/include"
+
+# Boost-specific paths
+export BOOST_ROOT="/opt/homebrew/opt/boost@1.68"
+export BOOST_INCLUDEDIR="/opt/homebrew/opt/boost@1.68/include"
+export BOOST_LIBRARYDIR="/opt/homebrew/opt/boost@1.68/lib"
 ```
 
 ### Build Configuration
@@ -62,7 +129,8 @@ export CPPFLAGS="-I/opt/homebrew/opt/libarchive/include"
   --strict \
   --with-backends=jack,coreaudio,dummy \
   --ptformat \
-  --optimize
+  --optimize \
+  --boost-include=/opt/homebrew/opt/boost@1.68/include
 ```
 
 ## Known Issues & Solutions
@@ -97,6 +165,17 @@ if bld.is_defined('YTK'):
 **Issue**: Archive handling library not detected
 **Solution**: Add libarchive to `PKG_CONFIG_PATH` and set include paths
 
+### 6. Version Conflicts
+
+**Issue**: Homebrew packages may be newer than Ardour expects
+**Solution**: Pin specific versions or use `brew switch` to manage versions
+
+```bash
+# Example: Pin Boost to 1.68
+brew unlink boost
+brew link boost@1.68 --force
+```
+
 ## Runtime Considerations
 
 ### Audio Backend
@@ -118,6 +197,18 @@ if bld.is_defined('YTK'):
 cd gtk2_ardour
 ./ardev  # Sets up environment and runs Ardour
 ```
+
+### Creating Application Bundle
+
+For distribution or easier launching, you can create a macOS application bundle:
+
+```bash
+# Create a .app bundle (optional)
+cd tools/osx_packaging
+./osx_build --public
+```
+
+This creates a `Ardour.app` bundle that can be double-clicked to launch Ardour. The bundle contains all necessary libraries and dependencies.
 
 ## Development Tools
 
@@ -143,6 +234,10 @@ pkg-config --exists gtk+-2.0 && echo "Found" || echo "Missing"
 
 # Check configuration
 cat build/config.log | grep -i "not found"
+
+# Verify dependency versions
+pkg-config --modversion boost
+pkg-config --modversion libarchive
 ```
 
 ## Performance Optimization
@@ -169,9 +264,10 @@ cat build/config.log | grep -i "not found"
 
 1. ✅ Check environment variables are set
 2. ✅ Verify Homebrew dependencies are installed
-3. ✅ Run `./waf clean` and reconfigure
-4. ✅ Check `build/config.log` for specific errors
-5. ✅ Verify pkg-config can find libraries
+3. ✅ Check for version conflicts (especially Boost)
+4. ✅ Run `./waf clean` and reconfigure
+5. ✅ Check `build/config.log` for specific errors
+6. ✅ Verify pkg-config can find libraries
 
 ### Runtime Issues
 
@@ -186,12 +282,35 @@ cat build/config.log | grep -i "not found"
 2. ✅ Check GTK theme compatibility
 3. ✅ Verify display scaling settings
 
+## Alternative: Official Source Build
+
+If you encounter issues with Homebrew, consider the official approach:
+
+1. **Download all dependencies from source** (see [current_dependencies.html](https://ardour.org/current_dependencies.html))
+2. **Build each dependency manually** from source
+3. **Use the exact versions** specified in the nightly build dependencies
+
+This is more complex but ensures compatibility with the official build process.
+
+### Modified Libraries
+
+The official Ardour builds use modified versions of several libraries:
+
+- **cairo**: Patched to disable h/w gradient rendering on buggy Linux video drivers
+- **libsndfile**: Backported fix for Zoom R8/R24 file reading (large meta-data header chunks)
+- **libwebsockets**: Repacked with Windows build fixes
+- **LV2 stack (serd/lilv)**: Fixes for cross-platform use with waf
+
+These modifications are available from the [nightly build dependencies page](https://nightly.ardour.org/list.php#build_deps). For development purposes, the standard versions from Homebrew should work fine.
+
 ## Community Resources
 
 ### Official Documentation
 
 - [Ardour Development Guide](https://ardour.org/development.html)
 - [macOS Build Instructions](https://ardour.org/building_osx_native.html)
+- [Current Dependencies](https://ardour.org/current_dependencies.html)
+- [Nightly Build Dependencies](https://nightly.ardour.org/list.php#build_deps)
 
 ### Community Forums
 
@@ -227,55 +346,36 @@ libs/tk/ztk/          # Additional touch components
 libs/clearlooks-newer/ # Theme engine (supports both GTK and YTK)
 ```
 
+### **macOS-Specific GUI Considerations**
+
+- **Quartz backend**: YTK uses Quartz on macOS instead of X11
+- **Touch interface**: YTK designed for touch/pen input (relevant for iPad apps)
+- **High DPI**: Better support for Retina displays
+- **Native look**: More native macOS appearance
+
+### **Development Guidelines**
+
+- **Don't modify YTK/GTK code**: GUI migration is in progress
+- **Use feature flags**: Check `bld.is_defined('YTK')` before making changes
+- **Test both frameworks**: Ensure compatibility with GTK+2.0 and YTK
+- **Follow existing patterns**: Maintain consistency with current codebase
+
 ### **Build Configuration**
 
-```python
-# Example from libs/clearlooks-newer/wscript
-if bld.is_defined('YTK'):
-    obj.use     = [ 'libztk', 'libytk', 'libydk', 'libydk-pixbuf' ]
-    obj.uselib  = ' CAIRO PANGO GTK'  # GTK still needed for symbols
-else:
-    obj.uselib = 'GTK'
+```bash
+# Build with GTK+2.0 (default)
+./waf configure --strict
+
+# Build with YTK (experimental)
+./waf configure --strict --ytk
 ```
 
-### **⚠️ CRITICAL: Don't Modify GUI Code**
-
-**Rule**: Do NOT modify YTK/GTK code unless you're specifically working on the GUI migration.
-
-**Rationale**:
-
-- GUI migration is in progress and complex
-- Changes can break touch interface development
-- Your code doesn't touch the GUI, so avoid conflicts
-
-**What NOT to do**:
-
-- ❌ Modify `libs/tk/ytk/` files
-- ❌ Modify `libs/tk/ydk/` files
-- ❌ Modify `libs/clearlooks-newer/` files
-- ❌ Change GTK-related build configuration
-- ❌ Modify GUI-related wscript files
-
-**What IS allowed**:
-
-- ✅ Add missing library linkages (like adding `'GTK'` to uselib)
-- ✅ Fix build issues that prevent compilation
-- ✅ Add platform-specific guards (like `#ifndef __APPLE__`)
-
-### **macOS Considerations**
-
-- **Clang compatibility**: YTK uses GNU extensions not supported by Clang
-- **Alias attributes**: Fixed with `#ifndef __APPLE__` guards
-- **Library linkage**: YTK libraries need GTK symbols for compatibility
-
-### **Testing**
+### **Runtime Selection**
 
 ```bash
-# Test with GTK (default)
-./waf configure
-./waf build
+# GTK+2.0 (default)
+cd gtk2_ardour && ./ardev
 
-# Test with YTK
-./waf configure --ytk
-./waf build
+# YTK (if built with --ytk)
+cd gtk2_ardour && ./ardev --ytk
 ```
