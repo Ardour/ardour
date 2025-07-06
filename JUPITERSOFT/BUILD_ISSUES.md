@@ -277,3 +277,108 @@ export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
 - Mailing List: ardour-dev
 - Bug Tracker: For issues and features
 - GitHub Mirror: For pull requests and contributions
+
+---
+
+## 🛠️ **Build System Overview**
+
+### **Waf Build System**
+
+Ardour uses the **Waf** build system, a Python-based alternative to Make/CMake. Waf files (`wscript`) contain Python code that defines build targets, dependencies, and compilation rules.
+
+### **Key Waf Concepts**
+
+```python
+# Example from libs/clearlooks-newer/wscript
+def build(bld):
+    obj = bld.new_task_gen('c', 'cprogram', 'cshlib')
+    obj.source = '''
+        animation.c
+        cairo-support.c
+        clearlooks_draw.c
+    '''
+
+    if bld.is_defined('YTK'):
+        obj.use     = [ 'libztk', 'libytk', 'libydk', 'libydk-pixbuf' ]
+        obj.uselib  = ' CAIRO PANGO GTK'  # ← GTK added for macOS compatibility
+    else:
+        obj.uselib = 'GTK'
+```
+
+### **Build Configuration**
+
+- **`bld.is_defined('FEATURE')`** - Check if feature is enabled
+- **`obj.use = ['lib1', 'lib2']`** - Link against internal libraries
+- **`obj.uselib = 'LIB1 LIB2'`** - Link against external libraries (via pkg-config)
+- **`obj.includes = ['path1', 'path2']`** - Add include paths
+
+### **macOS Build Conventions**
+
+#### Essential Environment Setup
+
+```bash
+# Critical environment variables for macOS/Homebrew
+export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/libarchive/lib/pkgconfig"
+export CPATH="/opt/homebrew/include:/opt/homebrew/opt/boost/include"
+export CPLUS_INCLUDE_PATH="$CPATH"
+export LDFLAGS="-L/opt/homebrew/opt/libarchive/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/libarchive/include"
+```
+
+#### Build Commands
+
+```bash
+# Clean and reconfigure
+./waf clean
+./waf configure --strict --with-backends=jack,coreaudio,dummy --ptformat --optimize
+
+# Build with all cores
+./waf -j$(sysctl -n hw.logicalcpu)
+
+# Run without installing (macOS convention)
+cd gtk2_ardour && ./ardev
+```
+
+### **Key Dependencies**
+
+- **Boost** (≥1.68) - C++ libraries
+- **libarchive** - Archive handling
+- **GTK+2.0** (≥2.12.1) - GUI framework
+- **JACK** - Audio backend
+- **CoreAudio** - macOS audio backend
+
+### **Build System Quirks**
+
+#### Platform-Specific Guards
+
+```c
+// Example from libs/tk/ytk/gtkaliasdef.c
+#ifndef DISABLE_VISIBILITY
+#include <glib.h>
+#ifdef G_HAVE_GNUC_VISIBILITY
+#ifndef __APPLE__  // ← Prevents alias compilation on macOS
+    // ... alias definitions
+#endif
+#endif
+#endif
+```
+
+#### Library Linkage Issues
+
+- **Clearlooks + YTK**: Needs explicit GTK linkage when YTK is defined
+- **pkg-config paths**: Must be set correctly for Homebrew libraries
+- **ARM64 considerations**: Some libraries may need specific flags
+
+### **Troubleshooting Commands**
+
+```bash
+# Check configuration
+./waf configure --help
+cat build/config.log | grep -i "not found"
+
+# Verbose build
+./waf build -v
+
+# Check specific library
+pkg-config --exists gtk+-2.0 && echo "Found" || echo "Missing"
+```

@@ -38,6 +38,7 @@
 #include "ardour/revision.h"
 #include "ardour/session.h"
 #include "ardour/plugin_manager.h"
+#include "ardour/mac_vst_support.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -163,7 +164,7 @@ print_help()
 		 << "  -T, --plugin-timeout <ms>   Plugin processing timeout in milliseconds\n"
 		 << "  -S, --strict-plugins        Exit on plugin loading failure\n"
 		 << "  -V, --vst-path <path>       Additional VST plugin search path\n"
-		 << "  -B, --plugin-blacklist <f>  Plugin blacklist file\n"
+		 << "  -b, --plugin-blacklist <f>  Plugin blacklist file\n"
 #ifdef WINDOWS_VST_SUPPORT
 		 << "  -W, --novst                 Do not use VST support\n"
 #endif
@@ -172,7 +173,7 @@ print_help()
 
 int main(int argc, char *argv[])
 {
-	const char *optstring = "vhBdD:c:OU:PE:T:S:V:B:";
+	const char *optstring = "vhBdD:c:OU:PE:T:S:V:b:";
 
 	/* clang-format off */
 	const struct option longopts[] = {
@@ -188,7 +189,7 @@ int main(int argc, char *argv[])
 		{ "plugin-timeout",      required_argument, 0, 'T' },
 		{ "strict-plugins",      no_argument,       0, 'S' },
 		{ "vst-path",            required_argument, 0, 'V' },
-		{ "plugin-blacklist",    required_argument, 0, 'B' },
+		{ "plugin-blacklist",    required_argument, 0, 'b' },
 		{ 0, 0, 0, 0 }
 	};
 	/* clang-format on */
@@ -263,7 +264,7 @@ int main(int argc, char *argv[])
 			vst_path = optarg;
 			break;
 
-		case 'B':
+		case 'b':
 			plugin_blacklist_file = optarg;
 			break;
 

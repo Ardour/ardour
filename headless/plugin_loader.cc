@@ -21,7 +21,7 @@
 #include <iostream>
 #include <thread>
 
-#include "ardour/plugin_info.h"
+#include "ardour/plugin.h"
 #include "ardour/session.h"
 #include "ardour/libardour_visibility.h"
 

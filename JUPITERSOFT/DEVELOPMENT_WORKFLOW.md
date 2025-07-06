@@ -266,3 +266,62 @@ export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
 - Mailing List: ardour-dev
 - Bug Tracker: For issues and features
 - GitHub Mirror: For pull requests and contributions
+
+---
+
+## 📊 **Alignment Assessment**
+
+| Aspect                  | Ardour Approach          | Our Implementation         | ✅ Alignment |
+| ----------------------- | ------------------------ | -------------------------- | ------------ |
+| **Code Changes**        | Minimal, justified only  | 3 justified changes        | ✅ High      |
+| **Build System**        | Environment-first        | Environment variables      | ✅ High      |
+| **Plugin Architecture** | Non-sandboxed, direct    | Direct loading, no sandbox | ✅ High      |
+| **Documentation**       | Technical notes, focused | Technical focus, justified | ✅ High      |
+| **Community Process**   | IRC, mailing lists       | Prepared for review        | ✅ High      |
+| **Architecture**        | Async callbacks, MVC     | Integrated with patterns   | ✅ High      |
+
+**Overall Alignment**: ✅ **Excellent** - Our approach closely follows Ardour's development philosophy and practices.
+
+## 🎯 **Key Insights Applied**
+
+### **1. Architecture Respect**
+
+```cpp
+// ✅ DO: Integrate with existing async callback system
+// Our VST headless implementation uses existing signal mechanisms
+
+// ❌ DON'T: Create new communication patterns
+// Avoid introducing new coupling mechanisms
+```
+
+### **2. Plugin System Alignment**
+
+```cpp
+// ✅ DO: Direct plugin loading (non-sandboxed)
+// Follow Ardour's performance-focused approach
+
+// ❌ DON'T: Implement plugin sandboxing
+// Respect Ardour's explicit decision not to sandbox
+```
+
+### **3. Build System Philosophy**
+
+```bash
+# ✅ DO: Use environment variables and build flags
+export CPPFLAGS="-I/opt/homebrew/include"
+./waf configure --boost-include=/opt/homebrew/include
+
+# ❌ DON'T: Hardcode paths in wscript files
+# Avoid modifying build system unnecessarily
+```
+
+### **4. Development Process**
+
+```bash
+# ✅ DO: Prepare for community review
+# Submit to ardour-dev mailing list
+# Engage in IRC discussions
+
+# ❌ DON'T: Work in isolation
+# Community input is essential for Ardour development
+```

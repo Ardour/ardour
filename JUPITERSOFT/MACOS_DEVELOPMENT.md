@@ -195,10 +195,87 @@ cat build/config.log | grep -i "not found"
 
 ### Community Forums
 
-- [Ardour Discourse](https://discourse.ardour.org/) - Community support
-- [GitHub Issues](https://github.com/Ardour/ardour/issues) - Bug reports
+- [Ardour Community](https://discourse.ardour.org/)
+- [macOS Development](https://discourse.ardour.org/c/development/macos)
 
 ### Related Projects
 
 - [ardour-build](https://github.com/chapatt/ardour-build) - Community build scripts
 - [Homebrew](https://brew.sh/) - Package manager for macOS
+
+## 🖥️ **GUI Migration & Touch Interface**
+
+### **Current State**
+
+- **GTK+2.0**: Legacy GUI framework (stable, widely supported)
+- **YTK**: Custom GTK variant for touch interfaces (in development)
+- **YDK**: Custom GDK variant (companion to YTK)
+- **ZTK**: Additional touch interface components
+
+### **Migration Strategy**
+
+- **Incremental migration**: Components are migrated one at a time
+- **Backward compatibility**: GTK+2.0 remains functional during transition
+- **Feature flags**: `YTK` define controls which framework is used
+
+### **Key Components**
+
+```
+libs/tk/ytk/          # Main YTK implementation
+libs/tk/ydk/          # GDK variant for YTK
+libs/tk/ztk/          # Additional touch components
+libs/clearlooks-newer/ # Theme engine (supports both GTK and YTK)
+```
+
+### **Build Configuration**
+
+```python
+# Example from libs/clearlooks-newer/wscript
+if bld.is_defined('YTK'):
+    obj.use     = [ 'libztk', 'libytk', 'libydk', 'libydk-pixbuf' ]
+    obj.uselib  = ' CAIRO PANGO GTK'  # GTK still needed for symbols
+else:
+    obj.uselib = 'GTK'
+```
+
+### **⚠️ CRITICAL: Don't Modify GUI Code**
+
+**Rule**: Do NOT modify YTK/GTK code unless you're specifically working on the GUI migration.
+
+**Rationale**:
+
+- GUI migration is in progress and complex
+- Changes can break touch interface development
+- Your code doesn't touch the GUI, so avoid conflicts
+
+**What NOT to do**:
+
+- ❌ Modify `libs/tk/ytk/` files
+- ❌ Modify `libs/tk/ydk/` files
+- ❌ Modify `libs/clearlooks-newer/` files
+- ❌ Change GTK-related build configuration
+- ❌ Modify GUI-related wscript files
+
+**What IS allowed**:
+
+- ✅ Add missing library linkages (like adding `'GTK'` to uselib)
+- ✅ Fix build issues that prevent compilation
+- ✅ Add platform-specific guards (like `#ifndef __APPLE__`)
+
+### **macOS Considerations**
+
+- **Clang compatibility**: YTK uses GNU extensions not supported by Clang
+- **Alias attributes**: Fixed with `#ifndef __APPLE__` guards
+- **Library linkage**: YTK libraries need GTK symbols for compatibility
+
+### **Testing**
+
+```bash
+# Test with GTK (default)
+./waf configure
+./waf build
+
+# Test with YTK
+./waf configure --ytk
+./waf build
+```

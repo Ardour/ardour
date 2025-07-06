@@ -352,6 +352,8 @@ public:
 - [VST SDK Documentation](https://developer.steinberg.help/)
 - [FST Documentation](https://github.com/FreeStudio/fst)
 - [Ardour Plugin Development](https://ardour.org/development.html)
+- [VST Plugin Development](https://steinbergmedia.github.io/vst3_doc/)
+- [Audio Units Documentation](https://developer.apple.com/documentation/audiotoolbox)
 
 ### Community
 
@@ -362,3 +364,150 @@ public:
 
 - [VST Plugin Validator](https://github.com/steinbergmedia/vst3_pluginterfaces)
 - [Plugin Testing Framework](https://github.com/Ardour/ardour/tree/master/headless)
+
+## 🏗️ **Plugin System Architecture**
+
+### **Core Plugin System**
+
+```
+libs/ardour/
+├── plugin_manager.cc          # Main plugin management
+├── plugin.cc                  # Base plugin interface
+├── vst_plugin.cc             # VST plugin implementation
+├── au_plugin.cc              # Audio Units implementation
+├── lv2_plugin.cc             # LV2 plugin implementation
+└── plugin_scan.cc            # Plugin discovery and scanning
+```
+
+### **Headless Support**
+
+```
+headless/
+├── plugin_loader.cc          # Headless plugin loading
+├── plugin_error_handler.cc   # Error handling for plugins
+├── plugin_timeout_wrapper.h  # Timeout protection
+└── headless_config.cc        # Headless configuration
+```
+
+### **Platform-Specific Support**
+
+```
+libs/ardour/
+├── fst_headless.cc           # FST (Free VST) wrapper
+├── linux_vst_support_headless.cc  # Linux VST support
+└── mac_vst_support_headless.cc    # macOS VST support
+```
+
+### **Plugin Types**
+
+#### **VST (Virtual Studio Technology)**
+
+- **VST2**: Legacy format, widely supported
+- **VST3**: Modern format with improved features
+- **FST**: Free VST wrapper for cross-platform compatibility
+
+#### **Audio Units (AU)**
+
+- **macOS Native**: Apple's plugin format
+- **Core Audio Integration**: Native macOS audio system
+- **Performance**: Optimized for macOS
+
+#### **LV2 (Linux VST2)**
+
+- **Linux Native**: Open-source plugin format
+- **Extensible**: Modular design with extensions
+- **Cross-platform**: Available on multiple platforms
+
+### **Plugin Lifecycle**
+
+#### **1. Discovery**
+
+```cpp
+// Plugin discovery process
+class PluginScanner {
+public:
+    std::vector<PluginInfo> scan_directory(const std::string& path);
+    std::vector<PluginInfo> scan_system_paths();
+
+private:
+    bool is_valid_plugin(const std::string& path);
+    PluginInfo extract_plugin_info(const std::string& path);
+};
+```
+
+#### **2. Validation**
+
+```cpp
+// Plugin validation
+bool PluginManager::validate_plugin(const std::string& path) {
+    // Check file exists and is readable
+    if (!Glib::file_test(path, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR)) {
+        return false;
+    }
+
+    // Check architecture compatibility
+    if (!is_architecture_compatible(path)) {
+        return false;
+    }
+
+    // Check plugin format
+    if (!is_supported_format(path)) {
+        return false;
+    }
+
+    return true;
+}
+```
+
+#### **3. Loading**
+
+```cpp
+// Plugin loading with error handling
+std::shared_ptr<Plugin> PluginManager::load_plugin(const std::string& path) {
+    try {
+        // Validate plugin
+        if (!validate_plugin(path)) {
+            throw std::runtime_error("Invalid plugin: " + path);
+        }
+
+        // Load plugin binary
+        auto plugin = load_plugin_binary(path);
+        if (!plugin) {
+            throw std::runtime_error("Failed to load plugin binary: " + path);
+        }
+
+        // Initialize plugin
+        if (!plugin->initialize()) {
+            throw std::runtime_error("Failed to initialize plugin: " + path);
+        }
+
+        return plugin;
+    } catch (const std::exception& e) {
+        PluginErrorHandler::handle_plugin_error(path, e.what());
+        return nullptr;
+    }
+}
+```
+
+#### **4. Processing**
+
+```cpp
+// Audio processing
+void VSTPlugin::process(float* input, float* output, int frames) {
+    // Prepare input/output buffers
+    prepare_buffers(input, output, frames);
+
+    // Process audio through plugin
+    vst_plugin->process(frames);
+
+    // Copy output back
+    copy_output(output, frames);
+}
+```
+
+### **Ardour's Plugin Philosophy**
+
+- **No Sandboxing**: Explicitly doesn't sandbox plugins for performance reasons
+- **Direct Loading**: Plugins load directly into Ardour's process
+- **Performance Priority**: Real-time audio processing requirements
+- **Error Handling**: Proper timeout and crash protection
