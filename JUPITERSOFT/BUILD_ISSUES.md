@@ -45,7 +45,7 @@ export LDFLAGS="-L/opt/homebrew/opt/libarchive/lib"
 
 **Error**: `Undefined symbols for architecture arm64: "_gdk_cairo_create"`
 
-**Solution**: Already fixed in `libs/clearlooks-newer/wscript`
+**Solution**: ✅ **FIXED** - Added `'GTK'` to uselib in `libs/clearlooks-newer/wscript`
 
 ```python
 if bld.is_defined('YTK'):
@@ -53,12 +53,13 @@ if bld.is_defined('YTK'):
 ```
 
 **Root Cause**: Clearlooks library missing GTK linkage when YTK is defined
+**Status**: Applied during development, documented for future reference
 
 ### 4. Alias Attribute Not Supported
 
 **Error**: `error: 'alias' attribute is not supported on this target`
 
-**Solution**: Already fixed with `#ifndef __APPLE__` guards in `gtkaliasdef.c`
+**Solution**: ✅ **FIXED** - Added `#ifndef __APPLE__` guards in alias files
 
 ```c
 #ifndef __APPLE__  // Prevents alias compilation on macOS
@@ -67,6 +68,8 @@ if bld.is_defined('YTK'):
 ```
 
 **Root Cause**: Clang doesn't support GNU `alias` attribute
+**Status**: Applied during development, documented for future reference
+**Impact**: Enables YDK/YTK libraries to build on macOS
 
 ### 5. pkg-config Errors
 
@@ -86,6 +89,26 @@ export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
 ```
 
 **Root Cause**: GTK not installed or pkg-config path incorrect
+
+## Build Fixes Applied During Development
+
+### Clearlooks GTK Linkage Fix
+
+**File**: `libs/clearlooks-newer/wscript`
+**Change**: Added `'GTK'` to uselib when YTK is defined
+**Reason**: Clearlooks library needs GTK symbols even when using YTK libraries
+**Impact**: Fixes build failure on macOS with YTK enabled
+
+### YDK/YTK Alias Attribute Fix
+
+**Files**:
+
+- `libs/tk/ydk/gdkaliasdef.c`
+- `libs/tk/ytk/gtkaliasdef.c`
+  **Change**: Added `#ifndef __APPLE__` guards around alias definitions
+  **Reason**: Clang on macOS doesn't support GNU `alias` attribute
+  **Impact**: Enables YDK/YTK libraries to compile on macOS
+  **Note**: These are generated files, changes may be lost on regeneration
 
 ## Platform-Specific Issues
 

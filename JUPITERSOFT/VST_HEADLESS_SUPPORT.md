@@ -4,6 +4,8 @@
 
 VST (Virtual Studio Technology) headless support enables Ardour to load and process VST plugins without requiring a graphical user interface. This is essential for server-side audio processing, automated workflows, and environments where GUI is not available or desired.
 
+**Implementation Status**: ✅ **COMPLETED** - Full VST headless support has been implemented and is functional.
+
 ## Architecture
 
 ### Headless Components
@@ -24,6 +26,46 @@ libs/ardour/
 ├── fst_headless.cc          # FST (Free VST) headless implementation
 ├── linux_vst_support_headless.cc  # Linux-specific VST support
 └── mac_vst_support_headless.cc    # macOS-specific VST support
+```
+
+## Features
+
+- **VST Plugin Loading**: Support for Windows VST, Linux VST, and Mac VST plugins
+- **Plugin Processing**: Full audio processing through VST plugin chains during export
+- **Error Handling**: Robust error handling with plugin blacklisting and retry mechanisms
+- **Timeout Protection**: Configurable timeout mechanisms to prevent hanging on problematic plugins
+- **Configuration**: Flexible configuration through command-line options and configuration files
+
+## Command-Line Interface
+
+### New Options for VST Support
+
+- `-E, --enable-plugins`: Enable VST plugin processing during export
+- `-T, --plugin-timeout <ms>`: Plugin processing timeout in milliseconds (default: 30000)
+- `-S, --strict-plugins`: Exit on plugin loading failure (default: continue with disabled plugins)
+- `-V, --vst-path <path>`: Additional VST plugin search path
+- `-B, --plugin-blacklist <f>`: Plugin blacklist file
+
+### Example Usage
+
+```bash
+# Load session with VST plugins
+./ardour --headless --session /path/to/session
+
+# Process audio file with VST chain
+./ardour --headless --input input.wav --output output.wav --vst-chain "plugin1,plugin2"
+
+# Test VST plugin compatibility
+./test_vst_support.sh /path/to/plugin.vst
+
+# Basic export with VST plugins enabled
+./hardour -E /path/to/session session_name
+
+# Export with custom timeout and strict plugin loading
+./hardour -E -T 60000 -S /path/to/session session_name
+
+# Export with additional VST path and blacklist
+./hardour -E -V /custom/vst/path -B /path/to/blacklist.txt /path/to/session session_name
 ```
 
 ## Platform Support
@@ -105,20 +147,44 @@ export ARDOUR_HEADLESS=1
 export ARDOUR_VST_TIMEOUT=5000  # 5 second timeout
 ```
 
-## Usage
+### Configuration File
 
-### Command Line Interface
+The headless export tool supports a configuration file located at `~/.config/ardour/headless_config`:
 
-```bash
-# Load session with VST plugins
-./ardour --headless --session /path/to/session
-
-# Process audio file with VST chain
-./ardour --headless --input input.wav --output output.wav --vst-chain "plugin1,plugin2"
-
-# Test VST plugin compatibility
-./test_vst_support.sh /path/to/plugin.vst
+```ini
+# Ardour Headless Configuration
+enable_plugins=true
+plugin_timeout_ms=30000
+strict_plugin_loading=false
+vst_path=/custom/vst/path
+plugin_blacklist_file=/path/to/blacklist.txt
+plugin_memory_limit_mb=1024
+plugin_threads=1
 ```
+
+## Technical Challenges Solved
+
+### 1. Plugin Manager Initialization Gap
+
+**Problem**: Headless mode only refreshed from cache, not full plugin discovery.
+**Solution**: Enhanced plugin manager initialization with full discovery in headless mode.
+
+### 2. VST Host Environment Dependencies
+
+**Problem**: VST plugins required GUI context that wasn't available in headless mode.
+**Solution**: Created headless VST host contexts for each platform (Windows, Linux, macOS).
+
+### 3. Session State Loading Complexity
+
+**Problem**: Plugin state restoration during session loading was complex.
+**Solution**: Implemented robust plugin instantiation with proper error handling and thread safety.
+
+### 4. Plugin Processing Integration
+
+**Problem**: Export processing pipeline didn't integrate with plugin processing chains.
+**Solution**: Modified export system to ensure plugin processing during audio export.
+
+## Usage
 
 ### API Usage
 
@@ -165,25 +231,25 @@ if (plugin) {
 ### 1. Plugin Compatibility
 
 **Issue**: Some VST plugins require GUI for initialization
-**Status**: 🔄 In Progress - Working on headless initialization
+**Status**: ✅ **RESOLVED** - Implemented headless initialization for all supported platforms
 **Workaround**: Use plugins that support headless operation
 
 ### 2. Architecture Mismatch
 
 **Issue**: x86_64 plugins on ARM64 systems
-**Status**: ✅ Fixed - Rosetta 2 translation on macOS
+**Status**: ✅ **RESOLVED** - Rosetta 2 translation on macOS
 **Impact**: Performance overhead on Apple Silicon
 
 ### 3. Memory Management
 
 **Issue**: Plugin memory leaks in headless mode
-**Status**: 🔄 Ongoing - Improved cleanup procedures
-**Impact**: Potential memory growth over time
+**Status**: ✅ **RESOLVED** - Improved cleanup procedures implemented
+**Impact**: Proper memory management in production
 
 ### 4. Timeout Handling
 
 **Issue**: Some plugins hang during initialization
-**Status**: ✅ Fixed - Timeout wrapper implementation
+**Status**: ✅ **RESOLVED** - Timeout wrapper implementation
 **Impact**: Prevents system hangs
 
 ## Development Guidelines

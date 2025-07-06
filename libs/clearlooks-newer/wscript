@@ -30,7 +30,7 @@ def build(bld):
 
     if bld.is_defined('YTK'):
         obj.use     = [ 'libztk', 'libytk', 'libydk', 'libydk-pixbuf' ]
-        obj.uselib  = ' CAIRO PANGO GTK'
+        obj.uselib  = ' CAIRO PANGO GLIB GIO PANGOCAIRO GMODULE'
     else:
         obj.uselib = 'GTK'
 
