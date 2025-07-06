@@ -5,6 +5,7 @@
 #include <glib.h>
 
 #ifdef G_HAVE_GNUC_VISIBILITY
+
 #ifndef __APPLE__
 
 #undef IN_FILE

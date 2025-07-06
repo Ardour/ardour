@@ -13107,7 +13107,7 @@ extern __typeof(gtk_info_bar_set_message_type) gtk_info_bar_set_message_type __a
 extern __typeof(gtk_info_bar_get_message_type) gtk_info_bar_get_message_type __attribute((alias("IA__gtk_info_bar_get_message_type"), visibility("default")));
 
 #endif
-#endif
 #endif /* __APPLE__ */
+#endif
 #endif /* G_HAVE_GNUC_VISIBILITY */
 #endif /* DISABLE_VISIBILITY */
