@@ -149,9 +149,7 @@ export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
 ### **Official Documentation**
 
 - [Development Guide](https://ardour.org/development.html)
-- [Building on Linux](https://ardour.org/building_on_linux.html)
-- [Building on OS X](https://ardour.org/building_on_os_x.html)
-- [Coding Style Guide](https://ardour.org/coding_style.html)
+- [Building on macOS](https://ardour.org/building_osx_native.html)
 
 ### **Technical Notes**
 

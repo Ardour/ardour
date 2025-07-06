@@ -191,7 +191,7 @@ cat build/config.log | grep -i "not found"
 ### Official Documentation
 
 - [Ardour Development Guide](https://ardour.org/development.html)
-- [macOS Build Instructions](https://ardour.org/development.html#macos)
+- [macOS Build Instructions](https://ardour.org/building_osx_native.html)
 
 ### Community Forums
 

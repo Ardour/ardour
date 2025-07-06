@@ -113,8 +113,7 @@ graph LR
 ## 📚 **Resources**
 
 - [Ardour Development Guide](https://ardour.org/development.html)
-- [Building on OS X](https://ardour.org/building_on_os_x.html)
-- [Coding Style Guide](https://ardour.org/coding_style.html)
+- [Building on macOS](https://ardour.org/building_osx_native.html)
 
 **Scope:** VST2 headless support (VST3 planned)  
 **Platform:** macOS primary, Linux compatible  
