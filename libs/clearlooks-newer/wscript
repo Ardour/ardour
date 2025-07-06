@@ -29,8 +29,8 @@ def build(bld):
     autowaf.ensure_visible_symbols (obj, True)
 
     if bld.is_defined('YTK'):
-        obj.use     = [ 'libztk', 'libytk', 'libydk-pixbuf' ]
-        obj.uselib  = ' CAIRO PANGO'
+        obj.use     = [ 'libztk', 'libytk', 'libydk', 'libydk-pixbuf' ]
+        obj.uselib  = ' CAIRO PANGO GTK'
     else:
         obj.uselib = 'GTK'
 

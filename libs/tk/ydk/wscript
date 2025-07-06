@@ -12,7 +12,6 @@ I18N_PACKAGE = 'libydk'
 
 libydk_sources = [
     'gdk.c',
-    'gdkaliasdef.c',
     'gdkapplaunchcontext.c',
     'gdkcairo.c',
     'gdkcolor.c',
@@ -46,6 +45,10 @@ libydk_sources = [
     'gdkwindow.c',
     'gdkwindowimpl.c',
 ]
+
+# Add alias definitions only on platforms that support them
+if sys.platform != 'darwin':
+    libydk_sources.insert(1, 'gdkaliasdef.c')
 
 libydk_quartz_sources = [
     'gdkkeynames.c',
