@@ -10,6 +10,10 @@ def configure(conf):
     pass
 
 def build(bld):
+    # Skip clearlooks-newer theme engine when using YTK
+    if bld.is_defined('YTK'):
+        return
+        
     obj = bld(features = 'c cshlib')
     obj.source = '''
     animation.c
@@ -28,11 +32,7 @@ def build(bld):
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'engines')
     autowaf.ensure_visible_symbols (obj, True)
 
-    if bld.is_defined('YTK'):
-        obj.use     = [ 'libztk', 'libytk', 'libydk', 'libydk-pixbuf' ]
-        obj.uselib  = ' CAIRO PANGO GLIB GIO PANGOCAIRO GMODULE'
-    else:
-        obj.uselib = 'GTK'
+    obj.uselib = 'GTK'
 
     if sys.platform == 'darwin':
         # Bit of a hack: make a symlink to the .dylib that meets GTK's criteria for finding it (namely that the library must be a *.so

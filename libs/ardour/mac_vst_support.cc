@@ -289,15 +289,3 @@ void mac_vst_exit()
 {
 	/* Cleanup macOS VST support */
 }
-
-int mac_vst_init_headless(int flags)
-{
-	/* Initialize macOS VST support for headless mode */
-	return mac_vst_init(0);
-}
-
-void mac_vst_exit_headless()
-{
-	/* Cleanup macOS VST support for headless mode */
-	mac_vst_exit();
-}

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
 import os
+import sys
 
 I18N_PACKAGE = 'portaudio-backend'
 
@@ -15,11 +16,15 @@ def build_portaudio (bld, name, defines):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = [ 'portaudio_backend.cc',
                    'portaudio_io.cc',
-                   'winmmemidi_io.cc',
-                   'winmmemidi_input_device.cc',
-                   'winmmemidi_output_device.cc',
                    'midi_util.cc',
                  ]
+    
+    # Only include Windows MIDI files on Windows
+    if sys.platform == 'win32':
+        obj.source += [ 'winmmemidi_io.cc',
+                       'winmmemidi_input_device.cc',
+                       'winmmemidi_output_device.cc',
+                     ]
     obj.includes = ['.']
     obj.name     = name
     obj.target   = name
