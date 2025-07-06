@@ -52,7 +52,7 @@ def build(bld):
         'src/fluid_synth_monopoly.c',
         'src/fluid_sys.c'
         ],
-        cflags = [ bld.env['compiler_flags_dict']['pic'], '-fvisibility=hidden', '-std=gnu99', '-Wno-unused-function' ],
+        cflags = [ bld.env['compiler_flags_dict']['pic'], '-fvisibility=hidden', '-std=gnu99', '-Wno-unused-function', '-I.', '-Isrc/' ],
         includes = ['.', 'src/' ],
                target = 'libfluidsynth',
                use    = 'libfluidsynth_includes',

@@ -1,330 +1,228 @@
-# Development Workflow
+# 🔄 Development Workflow & Best Practices
 
-## Git Workflow
+## 📋 Overview
 
-### Branch Management
+This document outlines the **clean development workflow** established during this project, focusing on **minimal code changes** and **justified modifications only**.
 
-- **Master**: Upstream Ardour master branch (don't modify)
-- **jupitersoft**: Your development branch for JUPITERSOFT features
-- **Feature branches**: Create for specific features or fixes
+---
 
-### Critical Rules
+## 🎯 **Core Principles**
 
-1. **Never change branches without permission** - See `.cursor/rules/NO_BRANCH_CHANGE.md`
-2. **Don't modify upstream master** - This is an upstream project
-3. **Commit frequently** - Small, focused commits are better
-4. **Test before committing** - Ensure builds and basic functionality work
+### 1. **Minimal Code Changes**
 
-### Branch Operations
+- ✅ Only modify code when **absolutely necessary**
+- ✅ Prefer build system solutions over code changes
+- ✅ Use environment variables and configure flags first
 
-```bash
-# Check current branch
-git branch
+### 2. **Justified Changes Only**
 
-# Create feature branch
-git checkout -b feature/vst-headless-improvements
+- ✅ Platform compatibility issues with no clean alternative
+- ✅ Build system bugs that affect functionality
+- ✅ Header conflicts that break compilation
+- ❌ Environment-specific workarounds
+- ❌ Platform-specific guards for non-platform issues
 
-# Switch back to main development branch
-git checkout jupitersoft
+### 3. **Clean Alternatives First**
 
-# Merge feature branch
-git merge feature/vst-headless-improvements
+- ✅ Build system flags (`--boost-include`, `--also-include`)
+- ✅ Environment variables (`CPPFLAGS`, `LDFLAGS`)
+- ✅ pkg-config and standard build practices
+- ❌ Hardcoded paths in wscript files
+- ❌ Platform-specific code wrapping
 
-# Delete feature branch
-git branch -d feature/vst-headless-improvements
-```
+---
 
-### Commit Guidelines
+## 🔧 **Problem-Solving Workflow**
 
-```bash
-# Good commit message format
-git commit -m "Add timeout protection for VST plugin loading
-
-- Implement TimeoutWrapper class for plugin operations
-- Add 5-second default timeout for plugin initialization
-- Handle timeout errors gracefully with proper cleanup
-- Fixes issue #123: plugins hanging during load"
-
-# Bad commit message
-git commit -m "fix stuff"
-```
-
-## Development Process
-
-### 1. Environment Setup
+### **Step 1: Identify the Issue**
 
 ```bash
-# Set up build environment
-export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/libarchive/lib/pkgconfig"
-export CPATH="/opt/homebrew/include:/opt/homebrew/opt/boost/include"
-export CPLUS_INCLUDE_PATH="$CPATH"
-export LDFLAGS="-L/opt/homebrew/opt/libarchive/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/libarchive/include"
+# Get detailed error information
+./waf build -v 2>&1 | tee build.log
+
+# Analyze the error
+grep -i "error\|fatal\|not found" build.log
 ```
 
-### 2. Code Changes
+### **Step 2: Determine Root Cause**
 
-- **Focus on your domain**: Don't modify GUI code unless necessary
-- **Follow existing patterns**: Match the codebase style
-- **Add documentation**: Document new features and changes
-- **Test incrementally**: Test after each significant change
+- **Dependency Issue?** → Use build system flags
+- **Platform Compatibility?** → Check if code change is justified
+- **Build System Bug?** → Verify it's a real bug, not environment issue
+- **Header Conflict?** → Look for clean include path solutions
 
-### 3. Build Testing
+### **Step 3: Choose Solution Strategy**
+
+#### **Option A: Build System Solution (Preferred)**
 
 ```bash
-# Clean build
-./waf clean
+# Missing headers
+./waf configure --boost-include=/opt/homebrew/include
 
-# Configure
-./waf configure --strict --with-backends=jack,coreaudio,dummy --ptformat --optimize
+# Additional include paths
+./waf configure --also-include=/opt/homebrew/include
 
-# Build
-./waf -j$(sysctl -n hw.logicalcpu)
-
-# Test basic functionality
-cd gtk2_ardour && ./ardev
+# Environment variables
+export CPPFLAGS="-I/opt/homebrew/include"
+./waf configure
 ```
 
-### 4. Testing Procedures
-
-#### Unit Testing
-
-```bash
-# Run specific tests
-./waf test --test-name=test_vst_loading
-
-# Run all tests
-./waf test
-
-# Run tests with verbose output
-./waf test -v
-```
-
-#### Integration Testing
-
-```bash
-# Test VST plugin loading
-./headless/test_vst_support.sh
-
-# Test specific plugin
-./headless/test_vst_support.sh /path/to/plugin.vst
-
-# Test plugin directory
-./headless/test_vst_support.sh /path/to/plugin/directory
-```
-
-#### Manual Testing
-
-1. **Build verification**: Ensure clean build succeeds
-2. **Runtime testing**: Test basic Ardour functionality
-3. **Feature testing**: Test specific features you've added
-4. **Error handling**: Test error conditions and recovery
-
-## Code Quality
-
-### Code Style
-
-- **Follow existing conventions**: Match the codebase style
-- **Use consistent naming**: Follow established naming patterns
-- **Add comments**: Document complex logic
-- **Keep functions small**: Single responsibility principle
-
-### Error Handling
+#### **Option B: Code Change (Only if Justified)**
 
 ```cpp
-// Good error handling pattern
-try {
-    auto plugin = load_plugin(plugin_path);
-    if (!plugin) {
-        throw std::runtime_error("Failed to load plugin: " + plugin_path);
-    }
-    // Process plugin...
-} catch (const std::exception& e) {
-    PluginErrorHandler::handle_plugin_error(plugin_path, e.what());
-    return false;
-}
-```
-
-### Memory Management
-
-```cpp
-// Use smart pointers
-std::shared_ptr<Plugin> plugin = std::make_shared<Plugin>();
-
-// RAII for resources
-class PluginResource {
-public:
-    PluginResource() { /* acquire resource */ }
-    ~PluginResource() { /* release resource */ }
-};
-```
-
-## Debugging
-
-### Build Debugging
-
-```bash
-# Verbose build output
-./waf build -v
-
-# Check specific component
-./waf build -v headless
-
-# Check configuration
-cat build/config.log | grep -i "not found"
-```
-
-### Runtime Debugging
-
-```bash
-# Run with debug output
-./ardev --debug
-
-# Run with specific log level
-./ardev --log-level=debug
-
-# Run with plugin debugging
-./ardev --debug-plugins
-```
-
-### Code Debugging
-
-```cpp
-// Add debug output
-#ifdef DEBUG
-    std::cout << "Loading plugin: " << plugin_path << std::endl;
+// Platform compatibility with no alternative
+#ifndef __APPLE__
+__attribute__((weak, alias("symbol")))
 #endif
 
-// Use logging system
-PBD::info << "Plugin loaded successfully: " << plugin_name << endmsg;
+// Build system bug fix
+if bld.is_defined('YTK'):
+    obj.uselib = 'correct_libs'
+else:
+    obj.uselib = 'other_libs'
 ```
 
-## Documentation
+#### **Option C: Avoid/Work Around**
 
-### Code Documentation
+- Environment-specific issues
+- Temporary build problems
+- Issues caused by other problems
 
-- **Header comments**: Document class and function purposes
-- **Inline comments**: Explain complex logic
-- **API documentation**: Document public interfaces
-- **Examples**: Provide usage examples
+---
 
-### Update Documentation
+## 📊 **Decision Matrix**
 
-When making changes:
+| Issue Type             | Build System         | Code Change          | Avoid |
+| ---------------------- | -------------------- | -------------------- | ----- |
+| Missing Headers        | ✅ `--also-include`  | ❌                   | ❌    |
+| Library Paths          | ✅ `--boost-include` | ❌                   | ❌    |
+| Platform Compatibility | ❌                   | ✅ If no alternative | ❌    |
+| Build System Bug       | ❌                   | ✅ If real bug       | ❌    |
+| Header Conflicts       | ✅ Include path fix  | ✅ If cleanest       | ❌    |
+| Environment Issues     | ✅ Env vars          | ❌                   | ✅    |
+| Temporary Problems     | ❌                   | ❌                   | ✅    |
 
-1. **Update relevant docs**: Modify affected documentation
-2. **Add new docs**: Create documentation for new features
-3. **Update examples**: Ensure examples are current
-4. **Review existing docs**: Check for outdated information
+---
 
-## Code Review
+## 🔍 **Justification Checklist**
 
-### Self Review Checklist
+Before making any code change, verify:
 
-Before committing:
+### **✅ Is it Justified?**
 
-- [ ] Code compiles without warnings
-- [ ] All tests pass
-- [ ] Documentation is updated
-- [ ] Error handling is implemented
-- [ ] Memory management is correct
-- [ ] Code follows style guidelines
-- [ ] No debug code left in
+- [ ] **No clean alternative exists** (build system, environment, etc.)
+- [ ] **Platform compatibility issue** with no workaround
+- [ ] **Build system bug** that affects functionality
+- [ ] **Header conflict** that breaks compilation
 
-### Review Process
+### **✅ Is it Minimal?**
 
-1. **Self review**: Check your own code first
-2. **Build verification**: Ensure clean build
-3. **Test execution**: Run relevant tests
-4. **Documentation check**: Verify docs are current
-5. **Commit**: Only commit when satisfied
+- [ ] **Smallest possible change** to fix the issue
+- [ ] **No collateral damage** to other platforms/components
+- [ ] **Follows existing patterns** in the codebase
 
-## Performance Considerations
+### **✅ Is it Documented?**
 
-### Build Performance
+- [ ] **Clear justification** for why code change was needed
+- [ ] **Alternatives considered** and why they were rejected
+- [ ] **Impact assessment** on other platforms/components
 
-```bash
-# Use parallel builds
-./waf -j$(sysctl -n hw.logicalcpu)
+---
 
-# Incremental builds
-./waf  # Only rebuilds changed files
+## 🚫 **Anti-Patterns to Avoid**
 
-# Clean when needed
-./waf clean  # Force full rebuild
+### **1. Environment-Specific Code Changes**
+
+```cpp
+// ❌ DON'T: Hardcode paths for specific environment
+#ifdef __APPLE__
+#include "/opt/homebrew/include/boost/version.hpp"
+#endif
+
+// ✅ DO: Use build system or environment variables
+#include <boost/version.hpp>
 ```
 
-### Runtime Performance
+### **2. Platform Guards for Non-Platform Issues**
 
-- **Profile code**: Use profiling tools to identify bottlenecks
-- **Optimize algorithms**: Choose efficient algorithms
-- **Minimize allocations**: Reuse objects when possible
-- **Cache results**: Cache expensive computations
+```cpp
+// ❌ DON'T: Wrap code that's not platform-specific
+#ifdef _WIN32
+// Windows-specific code here
+#endif
 
-## Security
+// ✅ DO: Only wrap truly platform-specific code
+#ifdef _WIN32
+// Windows-specific API calls
+#endif
+```
 
-### Code Security
+### **3. Build System Workarounds**
 
-- **Validate inputs**: Always validate user inputs
-- **Check file paths**: Validate file paths before use
-- **Handle errors**: Don't expose internal errors to users
-- **Use secure defaults**: Choose secure default configurations
+```python
+# ❌ DON'T: Hardcode paths in wscript
+obj.includes = ['/opt/homebrew/include']
 
-### Plugin Security
+# ✅ DO: Use configure flags or environment
+obj.includes = ['.']
+# Then: ./waf configure --also-include=/opt/homebrew/include
+```
 
-- **Validate plugins**: Check plugin integrity before loading
-- **Sandbox when possible**: Isolate plugins from system
-- **Monitor behavior**: Watch for suspicious plugin activity
-- **Timeout operations**: Prevent hanging plugins
+---
 
-## Continuous Integration
+## 📝 **Documentation Standards**
 
-### Automated Testing
+### **For Code Changes:**
 
-- **Build verification**: Ensure code builds on all platforms
-- **Unit testing**: Run automated unit tests
-- **Integration testing**: Test component interactions
-- **Performance testing**: Monitor performance regressions
+```cpp
+// Justification: Platform compatibility - Clang doesn't support GNU alias attributes
+// Alternative considered: Using __attribute__((weak)) alone - breaks symbol resolution
+// Impact: Enables compilation on macOS, no impact on other platforms
+#ifndef __APPLE__
+__attribute__((weak, alias("symbol")))
+#endif
+```
 
-### Quality Gates
+### **For Build System Changes:**
 
-- **Build success**: All builds must pass
-- **Test coverage**: Maintain minimum test coverage
-- **Code quality**: Pass static analysis checks
-- **Documentation**: Ensure documentation is current
+```python
+# Justification: YTK build system bug - incorrectly references GTK2 when YTK enabled
+# Alternative considered: None - this was a bug in the YTK migration
+# Impact: Fixes YTK build, no impact on GTK2 builds
+if bld.is_defined('YTK'):
+    obj.uselib = 'correct_libs'
+```
 
-## Release Process
+### **For Documentation:**
 
-### Pre-release Checklist
+- **Clear problem statement** with error messages
+- **Root cause analysis** with evidence
+- **Solution justification** with alternatives considered
+- **Impact assessment** on other platforms/components
 
-- [ ] All tests pass
-- [ ] Documentation is complete
-- [ ] Performance is acceptable
-- [ ] Security review completed
-- [ ] Release notes prepared
-- [ ] Version numbers updated
+---
 
-### Release Steps
+## 🔄 **Review Process**
 
-1. **Final testing**: Comprehensive testing
-2. **Documentation review**: Verify all docs are current
-3. **Version bump**: Update version numbers
-4. **Tag release**: Create git tag
-5. **Build artifacts**: Create release builds
-6. **Announcement**: Notify community
+### **Before Committing:**
 
-## Community Interaction
+1. **Verify justification** using the checklist above
+2. **Test on multiple platforms** if possible
+3. **Document the change** with clear reasoning
+4. **Consider alternatives** and why they were rejected
 
-### Communication
+### **During Code Review:**
 
-- **Be respectful**: Treat community members with respect
-- **Provide context**: Explain your changes and reasoning
-- **Accept feedback**: Be open to suggestions and criticism
-- **Help others**: Assist other developers when possible
+1. **Challenge every code change** - is it really necessary?
+2. **Look for build system alternatives** first
+3. **Verify platform impact** assessment
+4. **Check documentation quality** and completeness
 
-### Contribution Guidelines
+---
 
-- **Follow conventions**: Adhere to project conventions
-- **Test thoroughly**: Ensure your changes work correctly
-- **Document changes**: Explain what and why you changed
-- **Be patient**: Understand that review takes time
+## 📚 **Related Documentation**
+
+- [Build Issues & Solutions](build_issues.md)
+- [macOS Development Guide](macos_development.md)
+- [Build System Usage](build_system.md)
+- [Codebase Patterns](codebase_patterns.md)
