@@ -115,6 +115,46 @@ export LDFLAGS="-L/opt/homebrew/lib"
 
 ---
 
+## 🛑 **Persistent Issue: 'archive.h' Not Found**
+
+### **Symptom**
+
+- Build fails at `libs/pbd/pbd/file_archive.h` with:
+  ```
+  fatal error: 'archive.h' file not found
+  #include <archive.h>
+  ```
+
+### **Troubleshooting Steps Tried**
+
+- Passed `--also-include=/opt/homebrew/include` to `./waf configure` ✅
+- Set `CPPFLAGS` and `LDFLAGS` to include Homebrew paths ✅
+- Confirmed `libarchive` is detected at configure time ✅
+- Build system still does **not** propagate the include path to all targets ❌
+
+### **Root Cause**
+
+- Waf-based build system is not picking up Homebrew's non-standard include path for all subprojects.
+- This is a common issue on macOS/Homebrew when dependencies are not in `/usr/include`.
+
+### **Clean Solution (Recommended)**
+
+- Ensure `pkg-config` is used for `libarchive` detection.
+- Set the environment variable:
+  ```sh
+  export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
+  ./waf configure
+  ./waf build
+  ```
+- This allows the build system to find the correct headers and libraries via `pkg-config`.
+
+### **Status**
+
+- This is an **environment/build system issue**, not a codebase problem.
+- No code changes are justified for this issue.
+
+---
+
 ## ❌ **AVOIDED CHANGES (Not Justified)**
 
 ### 1. **Windows-Specific Code Wrapping**

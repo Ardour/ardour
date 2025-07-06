@@ -204,3 +204,17 @@ This project successfully demonstrates **clean, justified development**:
 - **Comprehensive documentation** for knowledge transfer
 
 The result is a **production-ready VST headless plugin system** with **clean, maintainable code** that follows **established best practices**.
+
+---
+
+## ⚠️ **Note: 'archive.h' Build Issue on macOS/Homebrew**
+
+- The persistent `'archive.h' file not found` error is a **build system/environment issue** on macOS/Homebrew, not a codebase problem.
+- The clean solution is to set:
+  ```sh
+  export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
+  ./waf configure
+  ./waf build
+  ```
+- This ensures the build system finds the correct headers via `pkg-config`.
+- **No code changes are justified for this issue.**
