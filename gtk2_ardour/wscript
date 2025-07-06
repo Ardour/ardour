@@ -553,14 +553,15 @@ def build(bld):
                 'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
                 ]
         obj.linkflags = ''
-        obj.uselib       = 'UUID FLAC FONTCONFIG GTHREAD GTK OGG PANGOMM CURL DL CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
+        if bld.is_defined('YTK'):
+            obj.uselib = 'UUID FLAC FONTCONFIG GTHREAD OGG PANGOMM CURL DL CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
+            obj.use    += [ 'libytk', 'libytkmm' ]
+            obj.uselib += ' GLIBMM GIOMM PANGOFT2 LIBPNG'
+        else:
+            obj.uselib = 'UUID FLAC FONTCONFIG GTHREAD GTK OGG PANGOMM CURL DL CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
+            obj.uselib += ' GTKMM'
         obj.source += [ 'luadoc.cc', 'bundle_env_linux.cc' ]
         obj.use += [ 'X11' ]
-        if bld.is_defined('YTK'):
-            obj.use    += [ 'libytk', 'libytkmm' ]
-            obj.uselib += ' GLIBMM GIOMM PANGOMM PANGOFT2 LIBPNG'
-        else:
-            obj.uselib += ' GTKMM'
 
         if False and bld.is_defined('USE_EXTERNAL_LIBS'):
             obj.uselib += ' LIBAAF'

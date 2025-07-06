@@ -20,42 +20,48 @@
 #ifndef PBD_WINDOWS_MMCSS_H
 #define PBD_WINDOWS_MMCSS_H
 
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 #include <string>
 
 #include "pbd/libpbd_visibility.h"
 
-namespace PBD {
+namespace PBD
+{
 
-namespace MMCSS {
+	namespace MMCSS
+	{
 
-enum AVRT_PRIORITY {
-	AVRT_PRIORITY_VERYLOW = -2,
-	AVRT_PRIORITY_LOW,
-	AVRT_PRIORITY_NORMAL,
-	AVRT_PRIORITY_HIGH,
-	AVRT_PRIORITY_CRITICAL
-};
+		enum AVRT_PRIORITY
+		{
+			AVRT_PRIORITY_VERYLOW = -2,
+			AVRT_PRIORITY_LOW,
+			AVRT_PRIORITY_NORMAL,
+			AVRT_PRIORITY_HIGH,
+			AVRT_PRIORITY_CRITICAL
+		};
 
 #ifndef ERROR_INVALID_TASK_NAME
-enum error_codes {
-	ERROR_INVALID_TASK_NAME = 1550,
-	ERROR_INVALID_TASK_INDEX = 1551
-};
+		enum error_codes
+		{
+			ERROR_INVALID_TASK_NAME = 1550,
+			ERROR_INVALID_TASK_INDEX = 1551
+		};
 #endif
 
-bool LIBPBD_API initialize ();
+		bool LIBPBD_API initialize();
 
-bool LIBPBD_API deinitialize ();
+		bool LIBPBD_API deinitialize();
 
-bool LIBPBD_API set_thread_characteristics (const std::string& task_name, HANDLE *task_handle);
+#ifdef _WIN32
+		bool LIBPBD_API set_thread_characteristics(const std::string &task_name, HANDLE *task_handle);
+		bool LIBPBD_API revert_thread_characteristics(HANDLE task_handle);
+		bool LIBPBD_API set_thread_priority(HANDLE, AVRT_PRIORITY);
+#endif
 
-bool LIBPBD_API revert_thread_characteristics (HANDLE task_handle);
-
-bool LIBPBD_API set_thread_priority (HANDLE, AVRT_PRIORITY);
-
-} // namespace MMCSS
+	} // namespace MMCSS
 
 } // namespace PBD
 

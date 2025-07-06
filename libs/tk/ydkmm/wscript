@@ -49,6 +49,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'pangomm-1.4', uselib_store='PANGOMM', atleast_version='1.4', mandatory=True)
     autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0', mandatory=True)
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0', mandatory=True)
+    autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK2', atleast_version='2.24.0', mandatory=True)
 
 def build(bld):
     obj = bld.shlib(features = 'cxx cxxshlib', source=libydkmm_sources)
@@ -59,7 +60,7 @@ def build(bld):
     obj.name            = 'libydkmm'
     obj.target          = 'ydkmm'
     obj.use             = 'libztkmm libytk'
-    obj.uselib          = 'GLIBMM GIOMM SIGCPP CAIROMM PANGOMM'
+    obj.uselib          = 'GLIBMM GIOMM SIGCPP CAIROMM PANGOMM GTK2'
     obj.defines         = [ '_LARGEFILE64_SOURCE', '_REENTRANT', 'G_LOG_DOMAIN="gdkmm"', 'GDKMM_BUILD=1', '_FILE_OFFSET_BITS=64' ]
     obj.vnum            = LIBYDKMM_VERSION
     obj.install_path    = bld.env['LIBDIR']

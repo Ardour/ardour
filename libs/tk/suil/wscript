@@ -45,16 +45,18 @@ def build(bld):
     if sys.platform == 'darwin':
         obj.uselib  += ['DL']
 
-        bld(features     = 'cxx cshlib',
-            source       = 'cocoa_in_gtk2.mm',
-            target       = 'suil_cocoa_in_gtk2',
-            includes     = ['.'],
-            defines      = defines,
-            install_path = module_dir,
-            cflags       = cflags,
-            use          = [ 'libydk', 'libytk' ],
-            uselib       = 'LV2 DL GLIB PANGOCAIRO',
-            linkflags    = ['-framework', 'Cocoa'])
+        # Skip SUIL cocoa_in_gtk2 when using YTK (not compatible)
+        if not bld.is_defined('YTK'):
+            bld(features     = 'cxx cshlib',
+                source       = 'cocoa_in_gtk2.mm',
+                target       = 'suil_cocoa_in_gtk2',
+                includes     = ['.'],
+                defines      = defines,
+                install_path = module_dir,
+                cflags       = cflags,
+                use          = [ 'libydk', 'libytk' ],
+                uselib       = 'LV2 DL GLIB PANGOCAIRO',
+                linkflags    = ['-framework', 'Cocoa'])
 
     elif bld.env['build_target'] == 'mingw':
         bld(features     = 'cxx cxxshlib',

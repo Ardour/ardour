@@ -22,7 +22,6 @@ libytk_sources = [
     'gtkactiongroup.c',
     'gtkactivatable.c',
     'gtkadjustment.c',
-    'gtkaliasdef.c',
     'gtkalignment.c',
     'gtkarrow.c',
     'gtkaspectframe.c',
@@ -224,6 +223,10 @@ libytk_sources = [
     'gtkwindow-decorate.c',
     'gtkwindow.c',
 ]
+
+# Add alias definitions only on platforms that support them
+if sys.platform != 'darwin':
+    libytk_sources.insert(10, 'gtkaliasdef.c')
 
 libytk_x11_sources = [
     'gtkclipboard.c',

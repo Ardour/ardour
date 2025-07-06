@@ -27,10 +27,15 @@
 #include "ardour/vst_types.h"
 
 LIBARDOUR_API extern void (*mac_vst_error_callback)(const char *msg);
-LIBARDOUR_API void  mac_vst_error (const char *fmt, ...);
+LIBARDOUR_API void mac_vst_error(const char *fmt, ...);
 
-LIBARDOUR_API extern VSTHandle *  mac_vst_load (const char*);
-LIBARDOUR_API extern int          mac_vst_unload (VSTHandle *);
-LIBARDOUR_API extern VSTState *   mac_vst_instantiate (VSTHandle *, audioMasterCallback, void *);
-LIBARDOUR_API extern void         mac_vst_close (VSTState*);
+LIBARDOUR_API extern int mac_vst_init(void *);
+LIBARDOUR_API extern void mac_vst_exit();
 
+LIBARDOUR_API extern VSTHandle *mac_vst_load(const char *);
+LIBARDOUR_API extern int mac_vst_unload(VSTHandle *);
+LIBARDOUR_API extern VSTState *mac_vst_instantiate(VSTHandle *, audioMasterCallback, void *);
+LIBARDOUR_API extern void mac_vst_close(VSTState *);
+
+LIBARDOUR_API extern int mac_vst_init_headless(int flags);
+LIBARDOUR_API extern void mac_vst_exit_headless();

@@ -5,6 +5,9 @@ import sys
 hardour_sources = [
         'load_session.cc',
         'misc.cc',
+        'plugin_loader.cc',
+        'plugin_error_handler.cc',
+        'headless_config.cc',
 ]
 
 def options(opt):
@@ -39,6 +42,16 @@ def build(bld):
     obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GIOMM GTHREAD OGG CURL DL XML'
     obj.uselib       += ' AUDIOUNITS OSX'
     obj.uselib       += ' FFTW3F LO TAGLIB LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
+
+    # Add VST support to headless build
+    if bld.is_defined('WINDOWS_VST_SUPPORT'):
+        obj.uselib += ' FST'
+    if bld.is_defined('LXVST_SUPPORT'):
+        obj.uselib += ' LXVST'
+    if bld.is_defined('VST3_SUPPORT'):
+        obj.uselib += ' VST3'
+    if bld.is_defined('MACVST_SUPPORT'):
+        obj.uselib += ' MACVST'
 
     if bld.is_defined('HAVE_SUIL'):
         if bld.is_defined('YTK'):
