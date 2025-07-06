@@ -2,7 +2,28 @@
 
 ## 📋 **Overview**
 
-This document establishes the development workflow and decision-making process used in this project. All justified code changes have been applied and are working correctly.
+This document establishes the development workflow and decision-making process used in this project, aligned with Ardour's official development practices. All justified code changes have been applied and are working correctly.
+
+**Reference:** [Ardour Development Guide](https://ardour.org/development.html)
+
+---
+
+## 🏗️ **Ardour Architecture Context**
+
+### **Codebase Overview**
+
+- **Total Size**: ~160,000 lines of code
+- **UI Layer**: ~48,000 lines (gtkmm C++ wrapper around GTK+)
+- **Backend Engine**: ~34,000 lines
+- **Architecture**: Heavy use of async signal/callback system for anonymous coupling
+- **Pattern**: Model-View-Controller (MVC) programming model
+
+### **Development Philosophy**
+
+- **Real-time Collaboration**: Core development happens on IRC for real-time discussions
+- **No Formal Roadmap**: Development is iterative and discussion-driven
+- **Minimal Documentation**: Doxygen-generated docs, technical notes for specific areas
+- **Community-Driven**: Bug/feature tracking, mailing lists for involvement
 
 ---
 
@@ -13,12 +34,14 @@ This document establishes the development workflow and decision-making process u
 - ✅ Only modify code when **absolutely necessary**
 - ✅ Prefer build system solutions over code changes
 - ✅ Use environment variables and configure flags first
+- ✅ Respect the existing async signal/callback architecture
 
 ### **2. Justified Changes Only**
 
 - ✅ Platform compatibility issues with no clean alternative
 - ✅ Build system bugs that affect functionality
 - ✅ Header conflicts that break compilation
+- ✅ Plugin system integration (respecting non-sandboxed approach)
 - ❌ Environment-specific workarounds
 - ❌ Platform-specific guards for non-platform issues
 
@@ -27,6 +50,7 @@ This document establishes the development workflow and decision-making process u
 - ✅ Build system flags (`--boost-include`, `--also-include`)
 - ✅ Environment variables (`CPPFLAGS`, `LDFLAGS`)
 - ✅ pkg-config and standard build practices
+- ✅ Leverage existing async callback mechanisms
 - ❌ Hardcoded paths in wscript files
 - ❌ Platform-specific code wrapping
 
@@ -41,6 +65,7 @@ This document establishes the development workflow and decision-making process u
 | **Platform Compatibility** | No clean alternative exists     | macOS/Clang alias attributes       | ✅ Applied |
 | **Build System Bug**       | Affects core functionality      | YTK/GTK2 library linking           | ✅ Applied |
 | **Header Conflict**        | Breaks compilation              | FluidSynth internal/system headers | ✅ Applied |
+| **Plugin Integration**     | Headless VST support needed     | VST plugin loading in headless     | ✅ Applied |
 | **Environment Issue**      | Can be solved with build system | Missing Boost headers              | ❌ Avoided |
 | **Platform-Specific**      | Not actually platform-specific  | Windows code wrapping              | ❌ Avoided |
 
@@ -61,6 +86,7 @@ This document establishes the development workflow and decision-making process u
 
 1. **YTK/GTK2 Build Fix** - Conditional library linking in `gtk2_ardour/wscript`
 2. **FluidSynth Headers** - Internal header path in `fluidsynth_priv.h`
+3. **VST Headless Support** - Plugin loading and processing in headless mode
 
 ### **Environment Solutions (Applied)**
 
@@ -73,6 +99,7 @@ This document establishes the development workflow and decision-making process u
 1. **Windows Code Wrapping** - Fixed real root causes instead
 2. **Build System Path Mods** - Used existing flags and environment
 3. **Platform-Specific Guards** - Not actually platform-specific issues
+4. **Plugin Sandboxing** - Respecting Ardour's non-sandboxed plugin approach
 
 ---
 
@@ -93,6 +120,8 @@ This document establishes the development workflow and decision-making process u
 brew list | grep package_name
 # Check if it's a path issue
 pkg-config --cflags package_name
+# Check if it's an architecture issue
+# (async callbacks, MVC patterns, etc.)
 ```
 
 ### **3. Solution Selection**
@@ -106,6 +135,7 @@ export LDFLAGS="-L/opt/homebrew/lib"
 ./waf configure --boost-include=/opt/homebrew/include
 
 # Only modify code if no clean alternative exists
+# Respect existing async callback architecture
 ```
 
 ### **4. Validation**
@@ -155,6 +185,16 @@ obj.includes = ['/opt/homebrew/include']
 export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
 ```
 
+### **4. Plugin Sandboxing (Ardour-Specific)**
+
+```cpp
+// ❌ DON'T: Implement plugin sandboxing
+// Ardour explicitly doesn't sandbox plugins for performance reasons
+
+// ✅ DO: Follow Ardour's plugin architecture
+// Direct plugin loading with proper error handling
+```
+
 ---
 
 ## 📚 **Documentation Standards**
@@ -165,6 +205,7 @@ export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
 - Explain **why** the change is justified
 - List **alternatives considered** and why they were rejected
 - Include **evidence** that the change is necessary
+- Reference **Ardour's architecture patterns** where applicable
 
 ### **For Build System Solutions**
 
@@ -177,6 +218,7 @@ export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
 - Document **what** was considered
 - Explain **why** it was rejected
 - Show the **clean alternative** used instead
+- Reference **Ardour's development philosophy** where relevant
 
 ---
 
@@ -189,6 +231,8 @@ export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
 - [ ] Have I tried all environment solutions?
 - [ ] Is there a clean alternative that doesn't modify code?
 - [ ] Is this change justified and necessary?
+- [ ] Does this respect Ardour's async callback architecture?
+- [ ] Does this follow Ardour's MVC patterns?
 
 ### **After Making Code Changes**
 
@@ -197,28 +241,30 @@ export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
 - [ ] Does the change follow existing patterns?
 - [ ] Is the change platform-agnostic where possible?
 - [ ] Have I tested the change thoroughly?
+- [ ] Does this integrate properly with Ardour's plugin system?
 
 ---
 
-## 🏆 **Results Achieved**
+## 🔗 **Ardour Development Resources**
 
-### **Code Quality**
+### **Official Documentation**
 
-- ✅ **Only 2 justified code changes** - Both essential bug fixes
-- ✅ **Zero cosmetic changes** - Only functional modifications
-- ✅ **Zero platform-specific hacks** - Clean, portable solutions
-- ✅ **Zero build system modifications** - Used existing capabilities
+- [Development Guide](https://ardour.org/development.html)
+- [Building on Linux](https://ardour.org/building_on_linux.html)
+- [Building on OS X](https://ardour.org/building_on_os_x.html)
+- [Coding Style Guide](https://ardour.org/coding_style.html)
 
-### **Build System Usage**
+### **Technical Notes**
 
-- ✅ **6 issues resolved without code changes** - Using build system features
-- ✅ **3 issues avoided entirely** - Clean alternatives used
-- ✅ **Comprehensive environment setup** - Documented and reproducible
+- Transport Threading design
+- Canvas editing window notes
+- Event handling in GUI
+- Cross-thread notifications/callbacks
+- MIDI data handling
 
-### **Documentation**
+### **Community Resources**
 
-- ✅ **All changes justified** - Clear reasoning for every modification
-- ✅ **All alternatives documented** - Complete decision trail
-- ✅ **Build system patterns established** - Reusable solutions
-
-**This workflow successfully delivered a clean, minimal codebase with only essential, justified changes.**
+- IRC: Real-time development discussions
+- Mailing List: ardour-dev
+- Bug Tracker: For issues and features
+- GitHub Mirror: For pull requests and contributions

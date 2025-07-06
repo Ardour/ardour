@@ -4,6 +4,27 @@
 
 This document catalogs build issues encountered during development and their clean, justified solutions. All justified code changes have been applied and are working correctly.
 
+**Reference:** [Ardour Development Guide](https://ardour.org/development.html)
+
+---
+
+## 🏗️ **Ardour Codebase Context**
+
+### **Architecture Overview**
+
+- **Total Size**: ~160,000 lines of code
+- **UI Layer**: ~48,000 lines (gtkmm C++ wrapper around GTK+)
+- **Backend Engine**: ~34,000 lines
+- **Key Pattern**: Heavy use of async signal/callback system for anonymous coupling
+- **Development**: Real-time IRC discussions, no formal roadmap
+
+### **Build System Philosophy**
+
+- **Minimal Changes**: Prefer build system solutions over code modifications
+- **Environment-First**: Use environment variables and configure flags
+- **Community-Driven**: Leverage existing build system capabilities
+- **Documentation**: Doxygen-generated, technical notes for specific areas
+
 ---
 
 ## ✅ **RESOLVED ISSUES (All Applied)**
@@ -51,6 +72,23 @@ error: conflicting types for 'fluid_midi_event_get_*'
 ```
 
 **Justification:** Prevents symbol conflicts, cleanest solution available.
+
+---
+
+### **3. VST Headless Plugin Support**
+
+**Issue:** Need VST plugin support in headless mode
+
+**Root Cause:** Ardour's plugin system needs headless operation capability
+**Files:** Multiple new files in `headless/` and `libs/ardour/*_headless.cc`
+
+**Solution Applied:** ✅ **Implemented**
+
+- Direct plugin loading (respecting Ardour's non-sandboxed approach)
+- Async callback integration with existing architecture
+- Proper error handling and timeout protection
+
+**Justification:** Core functionality requirement for headless operation.
 
 ---
 
@@ -138,6 +176,13 @@ export LDFLAGS="-L/opt/homebrew/lib"
 **Clean Solution:** Used standard build system features and environment setup
 **Result:** ✅ **Avoided platform-specific code modifications**
 
+### **4. Plugin Sandboxing Implementation**
+
+**Problem:** Security concerns about plugin loading
+**Ardour's Approach:** Explicitly doesn't sandbox plugins for performance reasons
+**Clean Solution:** Follow Ardour's direct plugin loading architecture
+**Result:** ✅ **Respected Ardour's plugin system design**
+
 ---
 
 ## 📊 **Issue Resolution Summary**
@@ -146,12 +191,13 @@ export LDFLAGS="-L/opt/homebrew/lib"
 | ---------------------- | ----- | ------------ | -------- |
 | **Build System Bugs**  | 2     | ✅ Applied   | Resolved |
 | **Header Conflicts**   | 1     | ✅ Applied   | Resolved |
+| **Plugin Integration** | 1     | ✅ Applied   | Resolved |
 | **Environment Issues** | 3     | ❌ None      | Resolved |
-| **Avoided Issues**     | 3     | ❌ None      | Avoided  |
+| **Avoided Issues**     | 4     | ❌ None      | Avoided  |
 
-**Total Issues:** 9  
-**Code Changes Required:** 2 (both justified)  
-**Clean Alternatives Used:** 6
+**Total Issues:** 11  
+**Code Changes Required:** 3 (all justified)  
+**Clean Alternatives Used:** 7
 
 ---
 
@@ -181,6 +227,14 @@ export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
 export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
 ```
 
+### **4. Ardour Architecture Respect**
+
+```bash
+# Respect existing async callback patterns
+# Follow MVC programming model
+# Integrate with existing plugin system (non-sandboxed)
+```
+
 ---
 
 ## ⚠️ **Persistent Environment Issue**
@@ -201,20 +255,27 @@ export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
 
 ---
 
-## 🏆 **Key Achievements**
+## 🔗 **Ardour Development Resources**
 
-1. ✅ **Only 2 justified code changes** - Both essential bug fixes
-2. ✅ **6 issues resolved without code changes** - Using build system features
-3. ✅ **3 issues avoided entirely** - Clean alternatives used
-4. ✅ **Zero platform-specific hacks** - Portable, maintainable solutions
-5. ✅ **Comprehensive documentation** - All solutions documented
+### **Official Documentation**
 
-**Result:** Clean, minimal codebase with only essential, justified changes.
+- [Development Guide](https://ardour.org/development.html)
+- [Building on Linux](https://ardour.org/building_on_linux.html)
+- [Building on OS X](https://ardour.org/building_on_os_x.html)
+- [Coding Style Guide](https://ardour.org/coding_style.html)
 
----
+### **Technical Notes**
 
-## 📚 **Related Documentation**
+- Transport Threading design
+- Canvas editing window notes
+- Event handling in GUI
+- Cross-thread notifications/callbacks
+- MIDI data handling
+- Plugin system architecture (non-sandboxed approach)
 
-- [macOS Development Guide](macos_development.md)
-- [Build System Usage](build_system.md)
-- [Codebase Patterns](codebase_patterns.md)
+### **Community Resources**
+
+- IRC: Real-time development discussions
+- Mailing List: ardour-dev
+- Bug Tracker: For issues and features
+- GitHub Mirror: For pull requests and contributions
