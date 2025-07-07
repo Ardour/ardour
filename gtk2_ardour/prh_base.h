@@ -28,6 +28,8 @@
 
 #include <ytkmm/adjustment.h>
 
+#include "midi_view_background.h"
+
 namespace Gdk {
 	class Window;
 }
@@ -37,7 +39,6 @@ namespace ARDOUR {
 }
 
 class MidiView;
-class MidiViewBackground;
 class EditingContext;
 
 class PianoRollHeaderBase : virtual public sigc::trackable {
@@ -149,5 +150,6 @@ class PianoRollHeaderBase : virtual public sigc::trackable {
 	bool idle_apply_range ();
 	double idle_lower;
 	double idle_upper;
+	MidiViewBackground::RangeCanMove idle_range_move;
 	sigc::connection scroomer_drag_connection;
 };
