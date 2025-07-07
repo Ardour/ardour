@@ -13,9 +13,11 @@ Every track with "MIDI Program #" in its comments in activated when that PC is s
 
 The program number can be comma-separated ranges, as in "MIDI Program 0-7,9"
 
+Tracks can also be labeled "MIDI Bank # Program #", in which case both bank and program numbers have to match.
+
 Each such track can have MIDI CC lines with arbitrary Lua code.
 
-Variables route (the current route) and value (the CC value) are defined.
+In such code, variables route (the current route) and value (the CC value) are defined.
 
 The following are working MIDI CC lines.
 
@@ -39,7 +41,7 @@ MIDI CC 91: activate_processor_by_name(route, value, "Gigaverb")
 A convenience function to select a preset:
 MIDI CC 93: load_preset(route, "plugin", "preset")
 
-Remember that a "MIDI Program #" line is required for MIDI CC lines to be processed
+Remember that a "MIDI Program #" (or "MIDI Bank # Program #") line is required for MIDI CC lines to be processed
 ]]
 }
 
@@ -113,6 +115,115 @@ end
 -- it's a list of pairs, indexed by CC number, each pair a Route object and a Lua function
 CC_functions = { }
 
+-- global variables to track current bank and program
+bank_msb = 0
+bank_lsb = 0
+bank = 0
+program = 0
+
+-- return true/false if number (an integer) is in range (a string)
+-- format of range is a comma-separated list of items, each either START-STOP or VALUE
+function match_number_range(number, range)
+    local fieldstart = 1
+    local match = false
+    range = range .. ','
+    repeat
+       local r,_,start,stop = string.find(range, "^(%d+)-(%d+)", fieldstart)
+       if r and number >= tonumber(start) and number <= tonumber(stop) then
+          match = true
+       end
+       r,_,value = string.find(range, "^(%d+)", fieldstart)
+       if r and number == tonumber(value) then
+          match = true
+       end
+       local nexti = string.find(range, ",", fieldstart)
+       fieldstart = nexti + 1
+    until fieldstart > string.len(range)
+    return match
+end
+
+function program_change()
+   -- Program Change or Bank Change message
+   -- program and bank are global variables
+   -- Parse/reparse the comment blocks
+   -- Clear the global table of CC functions; it'll be recreated during the parse
+   CC_functions = { }
+   -- Run through all comment blocks on all routes looking for certain strings
+   for route in Session:get_routes():iter() do
+      local nextchar = 1
+      local MIDI_Program_seen = false
+      local route_comment = route:comment()
+      local route_active = false
+      local local_CC_functions = { }
+      -- Look for "MIDI Bank # Program #" statements that match both the program number and the bank number
+      while true do
+          local MIDI_Program_start, MIDI_Program_end, bank_list, program_list
+          MIDI_Program_start,MIDI_Program_end,bank_list,program_list = string.find(route_comment, "MIDI Bank (%d[-%d,]*) Program (%d[-%d,]*)", nextchar)
+          if bank_list then
+              route_active = route_active or (match_number_range(program, program_list) and match_number_range(bank, bank_list))
+              MIDI_Program_seen = true
+              nextchar = MIDI_Program_end + 1
+          else
+              break
+          end
+      end
+      -- Look for "MIDI Program #" statements that match just the program number
+      nextchar = 1
+      while true do
+          local MIDI_Program_start, MIDI_Program_end, program_list
+          MIDI_Program_start,MIDI_Program_end,program_list = string.find(route_comment, "MIDI Program (%d[-%d,]*)", nextchar)
+          if program_list then
+             route_active = route_active or match_number_range(program, program_list)
+             MIDI_Program_seen = true
+             nextchar = MIDI_Program_end + 1
+          else
+             break
+          end
+      end
+      -- if at least one of either kind of line was seen, there is further handling of this track
+      if MIDI_Program_seen then
+         -- all tracks with a "MIDI Program" line present are set either active or inactive, depending on if they matched
+         -- all other tracks (no "MIDI Progam" line) are not affected (they never get to this point)
+         route:set_active(route_active, nil);
+         -- if this route is active, parse any CC functions in the route's comment block
+         if route_active then
+           local nextchar = 1
+           local local_CC_functions = { }
+           -- we wrap the code inside "return function (route, value)" and "end"
+           -- so that when we pcall it with no argument it returns a function that takes two arguments
+           while true do
+              MIDI_CC_start, MIDI_CC_end, CC_num, CC_program = string.find(route_comment, "MIDI CC (%d+): ([^\n]+)", nextchar)
+              if MIDI_CC_start == nil then break end
+              if (local_CC_functions[CC_num] == nil) then
+                 local_CC_functions[CC_num] = "return function(route, value)\n"
+              end
+              local_CC_functions[CC_num] = local_CC_functions[CC_num] .. CC_program .. "\n"
+              nextchar = MIDI_CC_end + 1
+           end
+           -- done parsing (or at least gathering all of the lines together)
+           -- now compile the CC functions and insert them in the global table
+           for key, val in pairs(local_CC_functions) do
+              val = val .. "\nend"
+              local generator, err = load(val)
+              if generator then
+                  local ok, func = pcall(generator)
+                  if ok then
+                      if not CC_functions[tonumber(key)] then
+                          CC_functions[tonumber(key)] = { }
+                      end
+                      table.insert(CC_functions[tonumber(key)], { route, func })
+                  else
+                     print("Execution error:", func)
+                  end
+              else
+                  print("Compilation error:", err)
+              end
+           end
+         end
+      end
+   end
+end
+
 function process_midi_messages()
     for _,b in pairs (midiin) do
         local t = b["time"] -- t = [ 1 .. n_samples ]
@@ -128,86 +239,32 @@ function process_midi_messages()
         end
         if (event_type == 11) then
            -- Continuous Controller message
+           local num = d[2]
+           local val = d[3]
+           -- handle Bank Select messages
+           if num == 0 or num == 32 then
+               if num == 0 then
+                   bank_msb = val
+               else
+                   bank_lsb = val
+               end
+               bank = 128 * bank_msb + bank_lsb
+               program_change()
+           end
            -- if any functions are registered for this CC, call them with their respective Route objects and the value of the controller
-           local lst = CC_functions[d[2]]
+           local lst = CC_functions[num]
            if lst then
              for _, tbl in ipairs(lst) do
                    local route = tbl[1]
                    local func = tbl[2]
-                   func(route, d[3])
+                   func(route, val)
              end
            end
         end
         if (event_type == 12) then
            -- Program Change message
-	   -- Parse/reparse the comment blocks
-           local patch = d[2];
-	   -- Clear the global table of CC functions; it'll be recreated during the parse
-	   CC_functions = { }
-           -- Run through all comment blocks on all routes looking for certain strings
-           for route in Session:get_routes():iter() do
-              local nextchar = 1
-              local MIDI_Program_seen = false
-              local route_comment = route:comment()
-              local route_active = false
-              local local_CC_functions = { }
-              -- Look for "MIDI Program" statements that match the patch number in the Program Change message
-              local MIDI_Program_start,MIDI_Program_end,program_list = string.find(route_comment, "MIDI Program (%d[-%d,]*)", nextchar)
-              if MIDI_Program_start then
-                 local fieldstart = 1
-                 program_list = program_list .. ','
-                 repeat
-                    local r,_,start,stop = string.find(program_list, "^(%d+)-(%d+)", fieldstart)
-                    if r and patch >= tonumber(start) and patch <= tonumber(stop) then
-                       route_active = true
-                    end
-                    r,_,program = string.find(program_list, "^(%d+)", fieldstart)
-                    if r and patch == tonumber(program) then
-                       route_active = true
-                    end
-                    local nexti = string.find(program_list, ",", fieldstart)
-                    fieldstart = nexti + 1
-                 until fieldstart > string.len(program_list)
-                 -- all tracks with a "MIDI Program" line present are set either active or inactive, depending on if they matched
-                 -- all other tracks (no "MIDI Progam" line) are not affected (they never get to this point)
-                 route:set_active(route_active, nil);
-                 -- if this route is active, parse any CC functions in the route's comment block
-                 if route_active then
-                   local nextchar = 1
-                   local local_CC_functions = { }
-                   -- we wrap the code inside "return function (route, value)" and "end"
-                   -- so that when we pcall it with no argument it returns a function that takes two arguments
-                   while true do
-                      MIDI_CC_start, MIDI_CC_end, CC_num, CC_program = string.find(route_comment, "MIDI CC (%d+): ([^\n]+)", nextchar)
-                      if MIDI_CC_start == nil then break end
-                      if (local_CC_functions[CC_num] == nil) then
-                         local_CC_functions[CC_num] = "return function(route, value)\n"
-                      end
-                      local_CC_functions[CC_num] = local_CC_functions[CC_num] .. CC_program .. "\n"
-                      nextchar = MIDI_CC_end + 1
-                   end
-                   -- done parsing (or at least gathering all of the lines together)
-                   -- now compile the CC functions and insert them in the global table
-                   for key, val in pairs(local_CC_functions) do
-                      val = val .. "\nend"
-                      local generator, err = load(val)
-                      if generator then
-                          local ok, func = pcall(generator)
-                          if ok then
-                              if not CC_functions[tonumber(key)] then
-                                  CC_functions[tonumber(key)] = { }
-                              end
-                              table.insert(CC_functions[tonumber(key)], { route, func })
-                          else
-                             print("Execution error:", func)
-                          end
-                      else
-                          print("Compilation error:", err)
-                      end
-                   end
-                 end
-              end
-           end
+           program = d[2]
+           program_change()
         end
     end
 end
