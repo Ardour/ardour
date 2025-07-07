@@ -3151,16 +3151,6 @@ Pianoroll::update_tempo_based_rulers ()
 }
 
 void
-Pianoroll::goto_clip_start ()
-{
-}
-
-void
-Pianoroll::goto_clip_end ()
-{
-}
-
-void
 Pianoroll::set_note_selection (uint8_t note)
 {
 	if (!view) {
