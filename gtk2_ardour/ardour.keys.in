@@ -498,9 +498,7 @@ This mode provides many different operations on both regions and control points,
 @notes|Notes/increase-velocity-fine-smush|      <@PRIMARY@><@SECONDARY@><@TERTIARY@>Up|Increase Note Velocity (+1) allow mushing
 @notes|Notes/decrease-velocity-fine-smush|    <@PRIMARY@><@SECONDARY@><@TERTIARY@>Down|Increase Note Velocity (+1) allow mushing
 
-@notes|Notes/quantize-selected-notes|q|Quantize Selected Notes
-
-@notes|Main/Escape|			Clear selection
+@notes|Notes/quantize-selected-notes|                                    q|Quantize Selected Notes
 
 @notes|Notes/select-next|                                              Tab|Select next note
 @notes|Notes/select-previous|                               <@PRIMARY@>Tab|Select previous note
@@ -511,6 +509,7 @@ This mode provides many different operations on both regions and control points,
 @notes|Notes/extend-selection|                                <@TERTIARY@>e|Extend selection to end of region
 @notes|Notes/invert-selection|                                <@TERTIARY@>i|Invert note selection
 @notes|Notes/duplicate-selection|                             <@TERTIARY@>d|Duplicate note selection
+@notes|Notes/clear-selection|                                        Escape|Clear note selection
 
 @rec|Recorder/arm-all|                        <@PRIMARY@>r|record arm all tracks
 @rec|Recorder/arm-none|           <@PRIMARY@><@TERTIARY@>r|disable record arm of all tracks
