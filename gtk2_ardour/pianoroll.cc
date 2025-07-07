@@ -616,6 +616,10 @@ Pianoroll::build_canvas ()
 	CANVAS_DEBUG_NAME (rubberband_rect, X_("cue rubberband rect"));
 
 	prh = new ArdourCanvas::PianoRollHeader (v_scroll_group, *bg);
+	prh->SetNoteSelection.connect (sigc::mem_fun (*this, &Pianoroll::set_note_selection));
+	prh->AddNoteSelection.connect (sigc::mem_fun (*this, &Pianoroll::add_note_selection));
+	prh->ExtendNoteSelection.connect (sigc::mem_fun (*this, &Pianoroll::extend_note_selection));
+	prh->ToggleNoteSelection.connect (sigc::mem_fun (*this, &Pianoroll::toggle_note_selection));
 
 	view = new PianorollMidiView (nullptr, *data_group, *no_scroll_group, *this, *bg, 0xff0000ff);
 	view->AutomationStateChange.connect (sigc::mem_fun (*this, &Pianoroll::automation_state_changed));
@@ -3144,4 +3148,70 @@ Pianoroll::update_tempo_based_rulers ()
 	bbt_metric.units_per_pixel = samples_per_pixel;
 	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 	bbt_ruler->set_range (_leftmost_sample, _leftmost_sample+current_page_samples());
+}
+
+void
+Pianoroll::goto_clip_start ()
+{
+}
+
+void
+Pianoroll::goto_clip_end ()
+{
+}
+
+void
+Pianoroll::set_note_selection (uint8_t note)
+{
+	if (!view) {
+		return;
+	}
+
+	uint16_t chn_mask = view->midi_track()->get_playback_channel_mask();
+
+	begin_reversible_selection_op (X_("Set Note Selection"));
+	view->select_matching_notes (note, chn_mask, false, false);
+	commit_reversible_selection_op();
+}
+
+void
+Pianoroll::add_note_selection (uint8_t note)
+{
+	if (!view) {
+		return;
+	}
+
+	const uint16_t chn_mask = view->midi_track()->get_playback_channel_mask();
+
+	begin_reversible_selection_op (X_("Add Note Selection"));
+	view->select_matching_notes (note, chn_mask, true, false);
+	commit_reversible_selection_op();
+}
+
+void
+Pianoroll::extend_note_selection (uint8_t note)
+{
+	if (!view) {
+		return;
+	}
+
+	const uint16_t chn_mask = view->midi_track()->get_playback_channel_mask();
+
+	begin_reversible_selection_op (X_("Extend Note Selection"));
+	view->select_matching_notes (note, chn_mask, true, true);
+	commit_reversible_selection_op();
+}
+
+void
+Pianoroll::toggle_note_selection (uint8_t note)
+{
+	if (!view) {
+		return;
+	}
+
+	const uint16_t chn_mask = view->midi_track()->get_playback_channel_mask();
+
+	begin_reversible_selection_op (X_("Toggle Note Selection"));
+	view->toggle_matching_notes (note, chn_mask);
+	commit_reversible_selection_op();
 }

@@ -359,4 +359,8 @@ class Pianoroll : public CueEditor
 	void catch_pending_show_region ();
 
 	bool show_source;
+	void set_note_selection (uint8_t note);
+	void add_note_selection (uint8_t note);
+	void extend_note_selection (uint8_t note);
+	void toggle_note_selection (uint8_t note);
 };
