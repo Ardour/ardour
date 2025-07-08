@@ -375,14 +375,19 @@ MidiViewBackground::update_data_note_range (uint8_t min, uint8_t max)
 {
 	bool dirty = false;
 
-	if (min < _data_note_min) {
+	/* Note: pitches can come and go, so both min and max could be moving
+	 * up or down on any call.
+	 */
+
+	if (min != _data_note_min) {
 		_data_note_min = min;
 		dirty = true;
 	}
-	if (max > _data_note_max) {
+	if (max != _data_note_max) {
 		_data_note_max = max;
 		dirty = true;
 	}
+
 	return dirty;
 }
 
