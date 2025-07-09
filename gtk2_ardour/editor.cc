@@ -1198,7 +1198,7 @@ Editor::update_title ()
 void
 Editor::set_session (Session *t)
 {
-	SessionHandlePtr::set_session (t);
+	EditingContext::set_session (t);
 
 	section_marker_bar->clear (true);
 
