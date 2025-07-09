@@ -165,6 +165,14 @@ Editor::add_command (PBD::Command * cmd)
 }
 
 void
+Editor::add_commands (std::vector<PBD::Command *> cmds)
+{
+	if (_session) {
+		_session->add_commands (cmds);
+	}
+}
+
+void
 Editor::begin_reversible_command (string name)
 {
 	if (_session) {

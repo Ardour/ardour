@@ -174,6 +174,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	virtual PBD::HistoryOwner& history() = 0;
 
 	virtual void add_command (PBD::Command *) = 0;
+	virtual void add_commands (std::vector<PBD::Command *>) = 0;
 	virtual void begin_reversible_command (std::string cmd_name) = 0;
 	virtual void begin_reversible_command (GQuark) = 0;
 	virtual void abort_reversible_command () = 0;

@@ -416,7 +416,8 @@ public:
 	void abort_reversible_selection_op ();
 	void undo_selection_op ();
 	void redo_selection_op ();
-	void add_command (PBD::Command * cmd);
+	void add_command (PBD::Command* cmd);
+	void add_commands (std::vector<PBD::Command*> cmds);
 
 	PBD::HistoryOwner& history();
 

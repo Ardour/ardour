@@ -61,6 +61,7 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	PBD::ScopedConnection history_connection;
 
 	void add_command (PBD::Command * cmd) { HistoryOwner::add_command (cmd); }
+	void add_commands (std::vector<PBD::Command *> cmds) { HistoryOwner::add_commands (cmds); }
 	void begin_reversible_command (std::string cmd_name) { HistoryOwner::begin_reversible_command (cmd_name); }
 	void begin_reversible_command (GQuark gq) { HistoryOwner::begin_reversible_command (gq); }
 	void abort_reversible_command () { HistoryOwner::abort_reversible_command (); }
