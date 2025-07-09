@@ -124,6 +124,7 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	, _start_boundary_rect (nullptr)
 	, _end_boundary_rect (nullptr)
 	, _show_source (false)
+	, _on_timeline (true)
 	, selection_drag (nullptr)
 	, draw_drag (nullptr)
 	, _visible_channel (-1)
@@ -161,6 +162,7 @@ MidiView::MidiView (MidiView const & other)
 	, _start_boundary_rect (nullptr)
 	, _end_boundary_rect (nullptr)
 	, _show_source (false)
+	, _on_timeline (true)
 	, selection_drag (nullptr)
 	, draw_drag (nullptr)
 	, _visible_channel (-1)
@@ -1727,7 +1729,7 @@ MidiView::start_playing_midi_chord (vector<std::shared_ptr<NoteType> > notes)
 bool
 MidiView::note_in_region_time_range (const std::shared_ptr<NoteType> note) const
 {
-	if (_show_source) {
+	if (!_on_timeline) {
 		return true;
 	}
 
@@ -1777,7 +1779,7 @@ MidiView::update_sustained (Note* ev)
 	std::shared_ptr<NoteType> note = ev->note();
 	double x0, x1, y0, y1;
 
-	if (_midi_region && !_show_source) {
+	if (_midi_region && _on_timeline) {
 		region_update_sustained (ev, x0, x1, y0, y1);
 	} else {
 		clip_capture_update_sustained (ev, x0, x1, y0, y1);
@@ -1939,7 +1941,7 @@ MidiView::update_hit (Hit* ev)
 	std::shared_ptr<NoteType> note = ev->note();
 	double x;
 
-	if (_midi_region && !_show_source) {
+	if (_midi_region && _on_timeline) {
 		const timepos_t note_time = _midi_region->source_beats_to_absolute_time (note->time());
 		x = _editing_context.time_to_pixel(note_time) - _editing_context.time_to_pixel (_midi_region->position());
 	} else {
@@ -2642,7 +2644,7 @@ MidiView::update_drag_selection(timepos_t const & start, timepos_t const & end, 
 	double x0;
 	double x1;
 
-	if (_midi_region && !_show_source) {
+	if (_midi_region && _on_timeline) {
 		x0 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, _midi_region->region_relative_position (start).samples()));
 		x1 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, _midi_region->region_relative_position (end).samples()));
 	} else {
@@ -2773,7 +2775,7 @@ MidiView::move_selection (timecnt_t const & dx_qn, double dy, double cumulative_
 		Temporal::Beats note_time_qn;
 		double dx = 0.0;
 
-		if (_show_source) {
+		if (!_on_timeline) {
 			note_time_qn = n->note()->time ();
 		} else {
 			note_time_qn =  _midi_region->source_beats_to_absolute_beats (n->note()->time());
@@ -3075,7 +3077,7 @@ MidiView::snap_pixel_to_time (double x, bool ensure_snap)
 timecnt_t
 MidiView::view_position_to_model_position (timepos_t const & p) const
 {
-	if (!_midi_region || _show_source) {
+	if (!_midi_region || !_on_timeline) {
 		return timecnt_t (p, timepos_t (Temporal::Beats()));
 	}
 
@@ -3085,17 +3087,17 @@ MidiView::view_position_to_model_position (timepos_t const & p) const
 timepos_t
 MidiView::source_beats_to_timeline (Beats const & source_beats) const
 {
-	if (_midi_region && !_show_source) {
-		return _midi_region->source_beats_to_absolute_time (source_beats);
+	if (_midi_region && !_on_timeline) {
+		return timepos_t (source_beats);
 	}
 
-	return timepos_t (source_beats);
+	return _midi_region->source_beats_to_absolute_time (source_beats);
 }
 
 timepos_t
 MidiView::start() const
 {
-	if (_midi_region && !_show_source) {
+	if (_midi_region && _on_timeline) {
 		return _midi_region->start();
 	}
 	return timepos_t (Temporal::BeatTime);
@@ -3214,7 +3216,7 @@ MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 			current_x = 0;
 		}
 
-		if (!_show_source) {
+		if (_on_timeline) {
 			if (current_x > _editing_context.duration_to_pixels (_midi_region->length())) {
 				current_x = _editing_context.duration_to_pixels (_midi_region->length());
 			}
@@ -3264,7 +3266,7 @@ MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 			const timepos_t abs_beats (tmap->quarters_at (snapped_x));
 			Temporal::Beats src_beats;
 
-			if (_show_source) {
+			if (!_on_timeline) {
 				src_beats = abs_beats.beats();
 			} else {
 				src_beats = _midi_region->absolute_time_to_source_beats (abs_beats);
@@ -3350,7 +3352,7 @@ MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 			current_x = 0;
 		}
 
-		if (!_show_source) {
+		if (_on_timeline) {
 			if (current_x > _editing_context.duration_to_pixels (_midi_region->length())) {
 				current_x = _editing_context.duration_to_pixels (_midi_region->length());
 			}
@@ -3372,7 +3374,7 @@ MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 
 		Temporal::Beats src_beats;
 
-		if (_show_source) {
+		if (!_on_timeline) {
 			src_beats = timepos_t (_editing_context.pixel_to_sample (current_x)).beats();
 		} else {
 
@@ -4410,10 +4412,16 @@ MidiView::update_ghost_note (double x, double y, uint32_t state)
 	_note_group->canvas_to_item (x, y);
 
 	samplepos_t const unsnapped_sample = _editing_context.pixel_to_sample (global_x);
+
 	Temporal::timepos_t snapped_pos = timepos_t (unsnapped_sample);
 	_editing_context.snap_to (snapped_pos, RoundNearest, SnapToGrid_Scaled);
+	Temporal::Beats snapped_beats;
 
-	const Temporal::Beats snapped_beats = _midi_region->absolute_time_to_source_beats(snapped_pos);
+	if (_on_timeline) {
+		snapped_beats = _midi_region->absolute_time_to_source_beats (snapped_pos);
+	} else {
+		snapped_beats = snapped_pos.beats();
+	}
 
 	/* prevent Percussive mode from displaying a ghost hit at region end */
 	if ((_midi_context.note_mode() == Percussive) && (snapped_beats >= _midi_region->length().beats())) {
@@ -5249,7 +5257,7 @@ MidiView::shift_midi (timepos_t const & t, bool model)
 {
 	/* INTENDED FOR USE IN PIANOROLL CONTEXT ONLY */
 
-	assert (_show_source);
+	assert (!_on_timeline);
 
 	Beats beats (t.beats());
 
@@ -5273,7 +5281,7 @@ MidiView::shift_midi (timepos_t const & t, bool model)
 			Temporal::Beats note_time_qn;
 			double dx = 0.0;
 
-			if (_show_source) {
+			if (!_on_timeline) {
 				note_time_qn = note->time ();
 			} else {
 				note_time_qn = _midi_region->source_beats_to_absolute_beats (note->time());
@@ -5346,7 +5354,7 @@ MidiView::set_visibility_note_range (MidiViewBackground::VisibleNoteRange nvr, b
 void
 MidiView::set_visible_channel (int chn, bool clear_selection)
 {
-	if (!_show_source) {
+	if (_on_timeline) {
 		return;
 	}
 

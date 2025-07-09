@@ -107,6 +107,7 @@ PianorollMidiView::PianorollMidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	automation_group->set_data ("linemerger", this);
 
 	_show_source = true;
+	_on_timeline = false;
 	set_extensible (true);
 }
 

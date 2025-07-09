@@ -539,6 +539,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	StartBoundaryRect*                   _start_boundary_rect;
 	EndBoundaryRect*                     _end_boundary_rect;
 	bool                                 _show_source;
+	bool                                 _on_timeline;
 	Drag*                                 selection_drag;
 	Drag*                                 draw_drag;
 	int                                  _visible_channel;
