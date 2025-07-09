@@ -66,7 +66,6 @@ class PianoRollHeaderBase : virtual public sigc::trackable {
 	virtual double width() const = 0;
 	virtual double event_y_to_y (double evy) const = 0;
 	virtual void draw_transform (double& x, double& y) const = 0;
-	virtual void event_transform (double& x, double& y) const = 0;
 	virtual void _queue_resize () = 0;
 	virtual void do_grab() = 0;
 	virtual void do_ungrab() = 0;

@@ -196,15 +196,6 @@ PianoRollHeader::draw_transform (double& x, double& y) const
 	y = d.y;
 }
 
-void
-PianoRollHeader::event_transform (double& x, double& y) const
-{
-	Duple d (x, y);
-	d = canvas_to_item (d);
-	x = d.x;
-	y = d.y;
-}
-
 Glib::RefPtr<Gdk::Window>
 PianoRollHeader::cursor_window()
 {

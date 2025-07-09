@@ -42,7 +42,6 @@ class PianoRollHeader : public Gtk::DrawingArea, public PianoRollHeaderBase {
 	double width() const;
 	double event_y_to_y (double evy) const { return evy; }
 	void draw_transform (double& x, double& y) const {}
-	void event_transform (double& x, double& y) const {}
 	void _queue_resize () { queue_resize(); }
 	void do_grab() { add_modal_grab(); }
 	void do_ungrab() { remove_modal_grab(); }

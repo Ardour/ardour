@@ -37,7 +37,6 @@ class PianoRollHeader : public ArdourCanvas::Rectangle, public PianoRollHeaderBa
 	double width() const;
 	double event_y_to_y (double evy) const;
 	void draw_transform (double& x, double& y) const;
-	void event_transform (double& x, double& y) const;
 	void _queue_resize () { queue_resize(); }
 	void do_grab() { ArdourCanvas::Rectangle::grab(); }
 	void do_ungrab() { ArdourCanvas::Rectangle::ungrab(); }
