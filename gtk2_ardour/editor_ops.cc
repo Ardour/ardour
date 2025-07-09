@@ -3804,10 +3804,6 @@ Editor::trim_region (bool front)
 		commit_result = true;
 		pl->thaw ();
 
-		/* We might have removed regions, which alters other regions' layering_index,
-		   so we need to do a recursive diff here.
-		*/
-
 		vector<Command*> cmds;
 		pl->rdiff (cmds);
 		add_commands (cmds);
