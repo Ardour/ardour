@@ -3753,22 +3753,72 @@ Editor::trim_region (bool front)
 
 	begin_reversible_command (front ? _("trim front") : _("trim back"));
 
-	for (list<RegionView*>::const_iterator i = rs.by_layer().begin(); i != rs.by_layer().end(); ++i) {
-		if (!(*i)->region()->locked()) {
+	list<RegionView*> rsl (rs.by_layer());
+	vector<std::shared_ptr<Playlist> > playlists;
 
-			(*i)->region()->clear_changes ();
+	for (auto & rv : rsl) {
 
-			if (front) {
-				(*i)->region()->trim_front (where);
-			} else {
-				(*i)->region()->trim_end (where);
-			}
+		std::shared_ptr<Region> region (rv->region());
 
-			_session->add_command (new StatefulDiffCommand ((*i)->region()));
+		if (region->locked()) {
+			continue;
 		}
+
+		std::shared_ptr<Playlist> playlist = region->playlist();
+
+		if (!playlist) {
+			// is this check necessary?
+			continue;
+		}
+
+		if (std::find (playlists.begin(), playlists.end(), playlist) == playlists.end()) {
+			playlists.push_back (playlist);
+
+			playlist->clear_changes ();
+			playlist->clear_owned_changes ();
+			playlist->freeze ();
+		}
+
+		region->clear_changes ();
+		timepos_t old_pos = region->position();
+		timecnt_t delta;
+
+		if (front) {
+			delta = where.distance (region->position());
+			region->trim_front (where);
+		} else {
+			delta = region->end().distance (where);
+			region->trim_end (where);
+		}
+
+		if (should_ripple()) {
+			do_ripple (playlist, old_pos, delta, std::shared_ptr<Region>(), false);
+		}
+
+		add_command (new StatefulDiffCommand (region));
 	}
 
-	commit_reversible_command ();
+	bool commit_result = false;
+
+	for (auto & pl : playlists) {
+		commit_result = true;
+		pl->thaw ();
+
+		/* We might have removed regions, which alters other regions' layering_index,
+		   so we need to do a recursive diff here.
+		*/
+
+		vector<Command*> cmds;
+		pl->rdiff (cmds);
+		add_commands (cmds);
+		add_command (new StatefulDiffCommand (pl));
+	}
+
+	if (commit_result) {
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
 }
 
 /** Trim the end of the selected regions to the position of the edit cursor */
