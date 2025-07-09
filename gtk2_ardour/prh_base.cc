@@ -132,8 +132,6 @@ bool
 PianoRollHeaderBase::scroll_handler (GdkEventScroll* ev)
 {
 	double evy = ev->y;
-	double ignore;
-	event_transform (ignore, evy);
 
 	int note_range = _adj.get_page_size ();
 	int note_lower = _adj.get_value ();
@@ -524,8 +522,6 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 	/* event coordinates are in canvas/window space */
 
 	double evy = ev->y;
-	double ignore;
-	event_transform (ignore, evy);
 
 	if (!_scroomer_drag && ev->x < _scroomer_size){
 
@@ -673,8 +669,6 @@ bool
 PianoRollHeaderBase::button_press_handler (GdkEventButton* ev)
 {
 	double evy = ev->y;
-	double ignore;
-	event_transform (ignore, evy);
 
 	/* Convert canvas-coordinates to item coordinates */
 
@@ -747,8 +741,6 @@ bool
 PianoRollHeaderBase::button_release_handler (GdkEventButton* ev)
 {
 	double evy = ev->y;
-	double ignore;
-	event_transform (ignore, evy);
 
 	end_scroomer_drag ();
 
@@ -789,8 +781,6 @@ bool
 PianoRollHeaderBase::enter_handler (GdkEventCrossing* ev)
 {
 	double evy = ev->y;
-	double ignore;
-	event_transform (ignore, evy);
 
 	set_note_highlight (_midi_context.y_to_note (evy));
 	set_cursor (_midi_context.editing_context().cursors()->selector);
