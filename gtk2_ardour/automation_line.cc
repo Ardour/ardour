@@ -54,11 +54,13 @@
 
 #include "evoral/Curve.h"
 
+#include "canvas/canvas.h"
 #include "canvas/debug.h"
 
 #include "automation_line.h"
 #include "control_point.h"
 #include "editing_context.h"
+#include "floating_text_entry.h"
 #include "gui_thread.h"
 #include "rgb_macros.h"
 #include "public_editor.h"
@@ -113,6 +115,7 @@ AutomationLine::AutomationLine (const string&                   name,
 	, _control_points_inherit_color (true)
 	, _sensitive (true)
 	, atv (nullptr)
+	, automation_entry (nullptr)
 {
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple(0, 1.5));
 	CANVAS_DEBUG_NAME (group, "automation line group");
@@ -1079,6 +1082,37 @@ AutomationLine::set_selected_points (PointSelection const & points)
 	}
 
 	set_colors ();
+
+	if (points.size() == 1) {
+		ControlPoint* cp (points.front());
+		std::stringstream str;
+		str << (*cp->model())->value << ' ' << "Hz";
+
+		ArdourCanvas::GtkCanvas* cvp = dynamic_cast<ArdourCanvas::GtkCanvas*> (cp->item().canvas());
+		Gtk::Window* toplevel = static_cast<Gtk::Window*> (cvp->get_toplevel());
+		if (!toplevel) {
+			return;
+		}
+
+		automation_entry = new FloatingTextEntry (toplevel, str.str());
+		automation_entry->set_name (X_("LargeTextEntry"));
+		automation_entry->delete_on_focus_out ();
+		ArdourCanvas::Duple d (cp->get_x(), cp->get_y());
+		d = cp->item().item_to_window (d);
+
+		int wx, wy;
+
+		cvp->translate_coordinates (*toplevel, d.x, d.y, wx, wy);
+
+		/* Shift the text entry a bit to the right */
+		wx += 30 * UIConfiguration::instance().get_ui_scale();
+
+		gint rwx, rwy;
+
+		toplevel->get_position (rwx, rwy);
+		automation_entry->move (rwx + wx, rwy + wy);
+		automation_entry->show ();
+	}
 }
 
 void

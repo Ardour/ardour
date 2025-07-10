@@ -58,6 +58,7 @@ class TimeAxisView;
 class AutomationTimeAxisView;
 class Selection;
 class EditingContext;
+class FloatingTextEntry;
 
 /** A GUI representation of an ARDOUR::AutomationList */
 class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible, public SelectableOwner
@@ -275,6 +276,7 @@ private:
 	bool _control_points_inherit_color;
 	bool _sensitive;
 	AutomationTimeAxisView* atv;
+	FloatingTextEntry* automation_entry;
 
 	friend class AudioRegionGainLine;
 	friend class RegionFxLine;
