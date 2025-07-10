@@ -3787,6 +3787,7 @@ Editor::trim_region (bool front)
 			delta = where.distance (region->position());
 			region->trim_front (where);
 		} else {
+			old_pos = region->end();
 			delta = region->end().distance (where);
 			region->trim_end (where);
 		}
