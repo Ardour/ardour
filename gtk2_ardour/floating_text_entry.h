@@ -34,6 +34,7 @@ public:
 	 *  - move to previous editable field.
 	 */
 	sigc::signal2<void,std::string,int> use_text;
+	void delete_on_focus_out ();
 
 private:
 	Gtk::Entry entry;
