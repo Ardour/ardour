@@ -7235,9 +7235,14 @@ void
 LollipopDrag::setup_pointer_offset ()
 {
 	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("note")));
-#warning paul this needs to use some other math in the non-time axis view case
-	_pointer_offset = _display->midi_view().midi_region()->source_beats_to_absolute_time (note->note()->time ()).distance (raw_grab_time ());
+
+	if (_display->midi_view().show_source()) {
+		_pointer_offset = timepos_t (note->note()->time ()).distance (raw_grab_time ());
+	} else {
+		_pointer_offset = _display->midi_view().midi_region()->source_beats_to_absolute_time (note->note()->time ()).distance (raw_grab_time ());
+	}
 }
+
 
 /********/
 
