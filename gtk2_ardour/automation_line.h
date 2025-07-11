@@ -191,7 +191,7 @@ public:
 	ARDOUR::ParameterDescriptor const & param() const { return _desc; }
 	EditingContext& editing_context() const { return _editing_context; }
 
-	void add (std::shared_ptr<ARDOUR::AutomationControl>, GdkEvent*, Temporal::timepos_t const &, double y, bool with_guard_points);
+	void add (std::shared_ptr<ARDOUR::AutomationControl>, GdkEvent*, Temporal::timepos_t const &, double y, bool with_guard_points, bool from_kbd = false);
 
 protected:
 
@@ -276,6 +276,7 @@ private:
 	bool _control_points_inherit_color;
 	bool _sensitive;
 	AutomationTimeAxisView* atv;
+	bool entry_required_post_add;
 	FloatingTextEntry* automation_entry;
 
 	friend class AudioRegionGainLine;

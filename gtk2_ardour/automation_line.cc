@@ -115,6 +115,7 @@ AutomationLine::AutomationLine (const string&                   name,
 	, _control_points_inherit_color (true)
 	, _sensitive (true)
 	, atv (nullptr)
+	, entry_required_post_add (false)
 	, automation_entry (nullptr)
 {
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple(0, 1.5));
@@ -1067,12 +1068,17 @@ AutomationLine::get_inverted_selectables (Selection&, list<Selectable*>& /*resul
 void
 AutomationLine::set_selected_points (PointSelection const & points)
 {
+	bool one_of_ours = false;
+
 	for (auto & cp : control_points) {
 		cp->set_selected (false);
 	}
 
 	for (auto & p : points) {
-		p->set_selected (true);
+		if (&p->line() == this) {
+			one_of_ours = true;
+			p->set_selected (true);
+		}
 	}
 
 	if (points.empty()) {
@@ -1083,7 +1089,7 @@ AutomationLine::set_selected_points (PointSelection const & points)
 
 	set_colors ();
 
-	if (points.size() == 1) {
+	if (one_of_ours && entry_required_post_add && points.size() == 1) {
 		ControlPoint* cp (points.front());
 		std::stringstream str;
 		str << (*cp->model())->value << ' ' << "Hz";
@@ -1091,6 +1097,7 @@ AutomationLine::set_selected_points (PointSelection const & points)
 		ArdourCanvas::GtkCanvas* cvp = dynamic_cast<ArdourCanvas::GtkCanvas*> (cp->item().canvas());
 		Gtk::Window* toplevel = static_cast<Gtk::Window*> (cvp->get_toplevel());
 		if (!toplevel) {
+			entry_required_post_add = false;
 			return;
 		}
 
@@ -1112,6 +1119,10 @@ AutomationLine::set_selected_points (PointSelection const & points)
 		toplevel->get_position (rwx, rwy);
 		automation_entry->move (rwx + wx, rwy + wy);
 		automation_entry->show ();
+	}
+
+	if (one_of_ours) {
+		entry_required_post_add = false;
 	}
 }
 
@@ -1628,7 +1639,7 @@ AutomationLine::set_offset (timepos_t const & off)
 }
 
 void
-AutomationLine::add (std::shared_ptr<AutomationControl> control, GdkEvent* event, timepos_t const & pos, double y, bool with_guard_points)
+AutomationLine::add (std::shared_ptr<AutomationControl> control, GdkEvent* event, timepos_t const & pos, double y, bool with_guard_points, bool from_kbd)
 {
 	if (alist->in_write_pass()) {
 		/* do not allow the GUI to add automation events during an
@@ -1660,6 +1671,10 @@ AutomationLine::add (std::shared_ptr<AutomationControl> control, GdkEvent* event
 	XMLNode& before = alist->get_state();
 	std::list<Selectable*> results;
 
+	if (from_kbd) {
+		entry_required_post_add = true;
+	}
+
 	if (alist->editor_add (when, y, with_guard_points)) {
 
 		if (control->automation_state () == ARDOUR::Off) {
@@ -1682,6 +1697,7 @@ AutomationLine::add (std::shared_ptr<AutomationControl> control, GdkEvent* event
 		_editing_context.commit_reversible_command ();
 		session->set_dirty ();
 	}
+
 }
 
 void
