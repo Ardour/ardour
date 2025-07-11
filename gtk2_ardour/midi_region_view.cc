@@ -759,3 +759,21 @@ MidiRegionView::trim_front_ending ()
 		midi_region()->fix_negative_start (_editing_context.history());
 	}
 }
+
+bool
+MidiRegionView::post_paste (Temporal::timepos_t const & pos, const ::Selection& selection, PasteContext& ctx)
+{
+	// Paste control points to automation children, if available
+
+	typedef RouteTimeAxisView::AutomationTracks ATracks;
+	ATracks const & atracks = dynamic_cast<StripableTimeAxisView*>(&trackview)->automation_tracks();
+	bool commit = false;
+
+	for (auto & at : atracks) {
+		if (at.second->paste(pos, selection, ctx)) {
+			commit = true;
+		}
+	}
+
+	return commit;
+}

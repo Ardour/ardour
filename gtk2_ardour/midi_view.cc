@@ -4167,16 +4167,7 @@ MidiView::paste (timepos_t const & pos, const ::Selection& selection, PasteConte
 		paste_internal (pos, ctx.count, ctx.times, **m);
 	}
 
-#warning paul fix MRV/MV
-#if 0
-	// Paste control points to automation children, if available
-	for (auto & at : midi_view()->automation_tracks()) {
-		if (at.second->paste(pos, selection, ctx)) {
-			commit = true;
-		}
-	}
-#endif
-	return commit;
+	return post_paste (pos, selection, ctx) || commit;
 }
 
 /** undo commands were initiated at the 'action' level. ::paste and ::paste_internal should implement subcommands */
