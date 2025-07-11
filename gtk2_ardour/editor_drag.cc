@@ -6855,7 +6855,7 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 		assert (_midi_view->midi_region());
 	}
 
-	if (_midi_view->show_source()) {
+	if (!_midi_view->on_timeline()) {
 		Beats spos = _midi_view->midi_region()->source_position().beats() + min (_note[0], _note[1]).beats();
 		start = _midi_view->midi_region ()->absolute_time_to_source_beats (timepos_t (spos));
 	} else {
