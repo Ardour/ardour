@@ -340,6 +340,12 @@ MidiView::set_show_source (bool yn)
 }
 
 void
+MidiView::set_on_timeline (bool yn)
+{
+	_on_timeline = yn;
+}
+
+void
 MidiView::set_region (std::shared_ptr<MidiRegion> mr)
 {
 	_midi_region = mr;

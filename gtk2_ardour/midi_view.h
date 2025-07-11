@@ -147,6 +147,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	void set_show_source (bool yn);
 	bool show_source () const { return _show_source; }
+	bool on_timeline () const { return _on_timeline; }
+	void set_on_timeline (bool yn);
 
 	NoteBase* add_note(const std::shared_ptr<NoteType> note, bool visible);
 
