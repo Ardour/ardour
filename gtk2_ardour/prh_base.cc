@@ -744,8 +744,6 @@ PianoRollHeaderBase::button_release_handler (GdkEventButton* ev)
 
 	end_scroomer_drag ();
 
-	int note = _midi_context.y_to_note (evy);
-
 	if (_dragging) {
 
 		do_ungrab ();
