@@ -252,8 +252,6 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 	}
 
 	bool changed = false;
-	uint8_t ol = _lowest_note;
-	uint8_t oh = _highest_note;
 
 	/* Enforce a 1 octave minimum */
 
