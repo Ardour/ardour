@@ -90,7 +90,7 @@ void
 ArdourDisplay::add_controllable_preset (const char *txt, float val)
 {
 	using namespace Menu_Helpers;
-	AddMenuElem(MenuElem (txt, sigc::bind (sigc::mem_fun(*this, &ArdourDisplay::handle_controllable_preset), val)));
+	add_menu_elem(MenuElem (txt, sigc::bind (sigc::mem_fun(*this, &ArdourDisplay::handle_controllable_preset), val)));
 }
 
 static inline float dB_to_coefficient (float dB) {

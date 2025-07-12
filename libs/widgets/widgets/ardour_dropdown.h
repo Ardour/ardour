@@ -44,7 +44,7 @@ public:
 	void menu_size_request(Gtk::Requisition*);
 
 	void clear_items ();
-	void AddMenuElem (Gtk::Menu_Helpers::Element e);
+	void add_menu_elem (Gtk::Menu_Helpers::Element e);
 	void append (Glib::RefPtr<Gtk::Action>);
 
 	void disable_scrolling();
