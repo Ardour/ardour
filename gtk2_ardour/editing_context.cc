@@ -1299,19 +1299,24 @@ EditingContext::build_draw_midi_menus ()
 
 	for (auto & v : preselected_velocities) {
 		Glib::RefPtr<RadioAction> ract = draw_velocity_action (v);
+		assert (ract);
 		draw_velocity_selector.append (ract);
 		draw_velocity_strings.push_back (ract->get_short_label());
 	}
 
 	draw_velocity_selector.set_sizing_texts (draw_velocity_strings);
 
-	/* Note-Channel when drawing */
-	for (int i = 0; i<= 15; i++) {
-		char buf[64];
-		sprintf(buf, "%d", i+1);
-		draw_channel_selector.add_menu_elem (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_channel_chosen), i)));
+	std::vector<int> possible_channels ({0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15, DRAW_CHAN_AUTO});
+	std::vector<std::string> draw_channel_strings;
+
+	for (auto & c : possible_channels) {
+		Glib::RefPtr<RadioAction> ract = draw_channel_action (c);
+		assert (ract);
+		draw_channel_selector.append (ract);
+		draw_channel_strings.push_back (ract->get_short_label());
 	}
-	draw_channel_selector.add_menu_elem (MenuElem (_("Auto"),sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_channel_chosen), DRAW_CHAN_AUTO)));
+
+	draw_channel_selector.set_sizing_texts (draw_channel_strings);
 }
 
 bool
