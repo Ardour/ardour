@@ -442,7 +442,7 @@ MidiTimeAxisView::setup_midnam_patches ()
 
 	if (_route->instrument_info().have_custom_plugin_info ()) {
 		Menu_Helpers::MenuElem elem = Gtk::Menu_Helpers::MenuElem(_("Plugin Provided"), sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed), ""));
-		_midnam_model_selector.AddMenuElem(elem);
+		_midnam_model_selector.add_menu_elem(elem);
 	}
 
 	for (PatchManager::DeviceNamesByMaker::const_iterator m = patch_manager.devices_by_manufacturer().begin(); m != patch_manager.devices_by_manufacturer().end(); ++m) {
@@ -469,7 +469,7 @@ MidiTimeAxisView::setup_midnam_patches ()
 		}
 
 		/* Add manufacturer submenu to selector */
-		_midnam_model_selector.AddMenuElem(Menu_Helpers::MenuElem(m->first, *menu));
+		_midnam_model_selector.add_menu_elem(Menu_Helpers::MenuElem(m->first, *menu));
 	}
 
 	if (patch_manager.all_models().empty()) {
@@ -615,7 +615,7 @@ MidiTimeAxisView::model_changed (const std::string& m)
 
 	_midnam_custom_device_mode_selector.clear_items();
 	for (std::list<std::string>::const_iterator i = device_modes.begin(); i != device_modes.end(); ++i) {
-		_midnam_custom_device_mode_selector.AddMenuElem (Gtk::Menu_Helpers::MenuElem(*i, sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed), *i)));
+		_midnam_custom_device_mode_selector.add_menu_elem (Gtk::Menu_Helpers::MenuElem(*i, sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed), *i)));
 	}
 
 	if (device_modes.size() > 1) {

@@ -444,11 +444,11 @@ Pianoroll::build_upper_toolbar ()
 	rec_enable_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::rec_button_press), false);
 	rec_enable_button.set_name ("record enable button");
 
-	length_selector.AddMenuElem (MenuElem (_("Until Stopped"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_recording_length), Temporal::BBT_Offset ())));
-	length_selector.AddMenuElem (MenuElem (_("1 Bar"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_recording_length), Temporal::BBT_Offset (1, 0, 0))));
+	length_selector.add_menu_elem (MenuElem (_("Until Stopped"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_recording_length), Temporal::BBT_Offset ())));
+	length_selector.add_menu_elem (MenuElem (_("1 Bar"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_recording_length), Temporal::BBT_Offset (1, 0, 0))));
 	std::vector<int> b ({ 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 20, 24, 32 });
 	for (auto & n : b) {
-		length_selector.AddMenuElem (MenuElem (string_compose (_("%1 Bars"), n), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_recording_length), Temporal::BBT_Offset (n, 0, 0))));
+		length_selector.add_menu_elem (MenuElem (string_compose (_("%1 Bars"), n), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_recording_length), Temporal::BBT_Offset (n, 0, 0))));
 	}
 	length_selector.set_active (_("Until Stopped"));
 
@@ -2833,10 +2833,10 @@ Pianoroll::build_zoom_focus_menu ()
 	using namespace Gtk::Menu_Helpers;
 	using namespace Editing;
 
-	zoom_focus_selector.AddMenuElem (MenuElem (zoom_focus_strings[(int)ZoomFocusLeft], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusLeft)));
-	zoom_focus_selector.AddMenuElem (MenuElem (zoom_focus_strings[(int)ZoomFocusRight], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusRight)));
-	zoom_focus_selector.AddMenuElem (MenuElem (zoom_focus_strings[(int)ZoomFocusCenter], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusCenter)));
-	zoom_focus_selector.AddMenuElem (MenuElem (zoom_focus_strings[(int)ZoomFocusMouse], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusMouse)));
+	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusLeft], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusLeft)));
+	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusRight], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusRight)));
+	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusCenter], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusCenter)));
+	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusMouse], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusMouse)));
 	zoom_focus_selector.set_sizing_texts (zoom_focus_strings);
 }
 

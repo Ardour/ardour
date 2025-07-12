@@ -170,9 +170,9 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_punch_in_button.set_text (S_("Punch|In"));
 	_punch_out_button.set_text (S_("Punch|Out"));
 
-	_record_mode_selector.AddMenuElem (MenuElem (_record_mode_strings[(int)RecLayered], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecLayered)));
-	_record_mode_selector.AddMenuElem (MenuElem (_record_mode_strings[(int)RecNonLayered], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecNonLayered)));
-	_record_mode_selector.AddMenuElem (MenuElem (_record_mode_strings[(int)RecSoundOnSound], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecSoundOnSound)));
+	_record_mode_selector.add_menu_elem (MenuElem (_record_mode_strings[(int)RecLayered], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecLayered)));
+	_record_mode_selector.add_menu_elem (MenuElem (_record_mode_strings[(int)RecNonLayered], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecNonLayered)));
+	_record_mode_selector.add_menu_elem (MenuElem (_record_mode_strings[(int)RecSoundOnSound], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecSoundOnSound)));
 	_record_mode_selector.set_sizing_texts (_record_mode_strings);
 
 	_latency_disable_button.set_text (_("Disable PDC"));

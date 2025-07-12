@@ -751,7 +751,7 @@ GenericPluginUI::midi_refill_patches ()
 					const std::string pgm = (*j)->name ();
 					MIDI::Name::PatchPrimaryKey const& key = (*j)->patch_primary_key ();
 					const uint32_t bp = (key.bank() << 7) | key.program();
-					midi_pgmsel[chn]->AddMenuElem (MenuElemNoMnemonic (pgm, sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midi_bank_patch_select), chn, bp)));
+					midi_pgmsel[chn]->add_menu_elem (MenuElemNoMnemonic (pgm, sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midi_bank_patch_select), chn, bp)));
 					pgm_names[bp] = pgm;
 				}
 			}
@@ -952,7 +952,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			for (ARDOUR::ScalePoints::const_iterator i = control_ui->scale_points->begin();
 			     i != control_ui->scale_points->end();
 			     ++i) {
-				control_ui->combo->AddMenuElem(Menu_Helpers::MenuElem(
+				control_ui->combo->add_menu_elem(Menu_Helpers::MenuElem(
 						i->first,
 						sigc::bind(sigc::mem_fun(*this, &GenericPluginUI::control_combo_changed),
 						           control_ui,

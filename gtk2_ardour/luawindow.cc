@@ -605,9 +605,9 @@ LuaWindow::rebuild_menu ()
 	}
 
 	script_select.clear_items ();
-	script_select.AddMenuElem (Menu_Helpers::MenuElem ("Scratch", *_menu_scratch));
-	script_select.AddMenuElem (Menu_Helpers::MenuElem ("Snippets", *_menu_snippet));
-	script_select.AddMenuElem (Menu_Helpers::MenuElem ("Actions", *_menu_actions));
+	script_select.add_menu_elem (Menu_Helpers::MenuElem ("Scratch", *_menu_scratch));
+	script_select.add_menu_elem (Menu_Helpers::MenuElem ("Snippets", *_menu_snippet));
+	script_select.add_menu_elem (Menu_Helpers::MenuElem ("Actions", *_menu_actions));
 }
 
 void

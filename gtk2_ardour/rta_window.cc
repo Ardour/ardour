@@ -76,11 +76,11 @@ RTAWindow::RTAWindow ()
 
 	using namespace Gtkmm2ext;
 	using PA = ARDOUR::DSP::PerceptualAnalyzer;
-	_speed_dropdown.AddMenuElem (MenuElemNoMnemonic (_speed_strings[(int)PA::Rapid], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_speed), PA::Rapid)));
-	_speed_dropdown.AddMenuElem (MenuElemNoMnemonic (_speed_strings[(int)PA::Fast], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_speed), PA::Fast)));
-	_speed_dropdown.AddMenuElem (MenuElemNoMnemonic (_speed_strings[(int)PA::Moderate], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_speed), PA::Moderate)));
-	_speed_dropdown.AddMenuElem (MenuElemNoMnemonic (_speed_strings[(int)PA::Slow], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_speed), PA::Slow)));
-	_speed_dropdown.AddMenuElem (MenuElemNoMnemonic (_speed_strings[(int)PA::Noise], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_speed), PA::Noise)));
+	_speed_dropdown.add_menu_elem (MenuElemNoMnemonic (_speed_strings[(int)PA::Rapid], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_speed), PA::Rapid)));
+	_speed_dropdown.add_menu_elem (MenuElemNoMnemonic (_speed_strings[(int)PA::Fast], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_speed), PA::Fast)));
+	_speed_dropdown.add_menu_elem (MenuElemNoMnemonic (_speed_strings[(int)PA::Moderate], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_speed), PA::Moderate)));
+	_speed_dropdown.add_menu_elem (MenuElemNoMnemonic (_speed_strings[(int)PA::Slow], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_speed), PA::Slow)));
+	_speed_dropdown.add_menu_elem (MenuElemNoMnemonic (_speed_strings[(int)PA::Noise], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_speed), PA::Noise)));
 	_speed_dropdown.set_sizing_texts (_speed_strings);
 	_speed_dropdown.set_text (_speed_strings[(int)RTAManager::instance ()->rta_speed ()]);
 
@@ -88,9 +88,9 @@ RTAWindow::RTAWindow ()
 	_warp_strings.push_back (_("Medium"));
 	_warp_strings.push_back (_("High"));
 
-	_warp_dropdown.AddMenuElem (MenuElemNoMnemonic (_warp_strings[(int)PA::Bark], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_warp), PA::Bark)));
-	_warp_dropdown.AddMenuElem (MenuElemNoMnemonic (_warp_strings[(int)PA::Medium], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_warp), PA::Medium)));
-	_warp_dropdown.AddMenuElem (MenuElemNoMnemonic (_warp_strings[(int)PA::High], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_warp), PA::High)));
+	_warp_dropdown.add_menu_elem (MenuElemNoMnemonic (_warp_strings[(int)PA::Bark], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_warp), PA::Bark)));
+	_warp_dropdown.add_menu_elem (MenuElemNoMnemonic (_warp_strings[(int)PA::Medium], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_warp), PA::Medium)));
+	_warp_dropdown.add_menu_elem (MenuElemNoMnemonic (_warp_strings[(int)PA::High], sigc::bind (sigc::mem_fun (*this, &RTAWindow::set_rta_warp), PA::High)));
 	_warp_dropdown.set_sizing_texts (_warp_strings);
 	_warp_dropdown.set_text (_warp_strings[(int)RTAManager::instance ()->rta_warp ()]);
 

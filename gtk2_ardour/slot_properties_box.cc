@@ -137,11 +137,11 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_probability_slider.set_name("FollowAction");
 
 	_follow_left.set_name("FollowAction");
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::None)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::None), 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Stop)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Stop), 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Again), 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ReverseTrigger), 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ForwardTrigger), 0)));
+	_follow_left.add_menu_elem (MenuElem (follow_action_to_string(FollowAction (FollowAction::None)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::None), 0)));
+	_follow_left.add_menu_elem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Stop)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Stop), 0)));
+	_follow_left.add_menu_elem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Again), 0)));
+	_follow_left.add_menu_elem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ReverseTrigger), 0)));
+	_follow_left.add_menu_elem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ForwardTrigger), 0)));
 
 	Menu*     jump_menu = manage (new Menu);
 	MenuList& jitems      = jump_menu->items ();
@@ -151,15 +151,15 @@ SlotPropertyTable::SlotPropertyTable ()
 		jump_fa.targets.set(i);
 		jitems.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 0)));
 	}
-	_follow_left.AddMenuElem (MenuElem (_("Jump"), *jump_menu));
+	_follow_left.add_menu_elem (MenuElem (_("Jump"), *jump_menu));
 	_follow_left.set_sizing_text (longest_follow);
 
 	_follow_right.set_name("FollowAction");
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::None)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::None), 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Stop)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Stop), 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Again), 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ReverseTrigger), 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ForwardTrigger), 1)));
+	_follow_right.add_menu_elem (MenuElem (follow_action_to_string(FollowAction (FollowAction::None)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::None), 1)));
+	_follow_right.add_menu_elem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Stop)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Stop), 1)));
+	_follow_right.add_menu_elem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Again), 1)));
+	_follow_right.add_menu_elem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ReverseTrigger), 1)));
+	_follow_right.add_menu_elem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ForwardTrigger), 1)));
 	Menu*     jump_menu_1 = manage (new Menu);
 	MenuList& jitems_1      = jump_menu_1->items ();
 	jitems_1.push_back (MenuElem (_("Multi..."), sigc::bind (sigc::mem_fun (*this, &TriggerUI::edit_jump), true)));
@@ -168,16 +168,16 @@ SlotPropertyTable::SlotPropertyTable ()
 		jump_fa.targets.set(i);
 		jitems_1.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 1)));
 	}
-	_follow_right.AddMenuElem (MenuElem (_("Jump"), *jump_menu_1));
+	_follow_right.add_menu_elem (MenuElem (_("Jump"), *jump_menu_1));
 	_follow_right.set_sizing_text (longest_follow);
 
 	_launch_style_button.set_name("FollowAction");
 	_launch_style_button.set_sizing_text (longest_launch);
-	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::OneShot), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::OneShot)));
-	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::ReTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::ReTrigger)));
-	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Gate), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::Gate)));
-	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Toggle), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::Toggle)));
-	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Repeat), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::Repeat)));
+	_launch_style_button.add_menu_elem (MenuElem (launch_style_to_string (Trigger::OneShot), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::OneShot)));
+	_launch_style_button.add_menu_elem (MenuElem (launch_style_to_string (Trigger::ReTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::ReTrigger)));
+	_launch_style_button.add_menu_elem (MenuElem (launch_style_to_string (Trigger::Gate), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::Gate)));
+	_launch_style_button.add_menu_elem (MenuElem (launch_style_to_string (Trigger::Toggle), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::Toggle)));
+	_launch_style_button.add_menu_elem (MenuElem (launch_style_to_string (Trigger::Repeat), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::Repeat)));
 
 	_launch_style_button.set_name("FollowAction");
 
@@ -187,7 +187,7 @@ SlotPropertyTable::SlotPropertyTable ()
 	_isolate_button.set_text (_("Isolate"));
 	_isolate_button.signal_event().connect (sigc::mem_fun (*this, (&SlotPropertyTable::isolate_button_event)));
 
-#define quantize_item(b) _quantize_button.AddMenuElem (MenuElem (quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_quantize), b)));
+#define quantize_item(b) _quantize_button.add_menu_elem (MenuElem (quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_quantize), b)));
 
 #if TRIGGER_PAGE_GLOBAL_QUANTIZATION_IMPLEMENTED
 	quantize_item (BBT_Offset (0, 0, 0));

@@ -1057,13 +1057,13 @@ PlugUIBase::update_preset_list ()
 	// Add a menu entry for each preset
 	_preset_combo.clear_items ();
 	for (vector<ARDOUR::Plugin::PresetRecord>::const_iterator i = presets.begin (); i != presets.end (); ++i) {
-		_preset_combo.AddMenuElem (
+		_preset_combo.add_menu_elem (
 		    MenuElem (i->label, sigc::bind (sigc::mem_fun (*this, &PlugUIBase::preset_selected), *i)));
 	}
 
 	// Add an empty entry for un-setting current preset (see preset_selected)
 	Plugin::PresetRecord no_preset;
-	_preset_combo.AddMenuElem (
+	_preset_combo.add_menu_elem (
 	    MenuElem ("", sigc::bind (sigc::mem_fun (*this, &PlugUIBase::preset_selected), no_preset)));
 
 	--_no_load_preset;

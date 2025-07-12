@@ -328,7 +328,7 @@ LoudnessDialog::LoudnessDialog (Session* s, TimelineRange const& ar, bool as)
 	/* fill in presets */
 	for (size_t i = 0; i < _lp.n_presets (); ++i) {
 		using namespace Gtkmm2ext;
-		_preset_dropdown.AddMenuElem (MenuElemNoMnemonic (_lp[i].label, sigc::bind (sigc::mem_fun (*this, &LoudnessDialog::load_preset), i)));
+		_preset_dropdown.add_menu_elem (MenuElemNoMnemonic (_lp[i].label, sigc::bind (sigc::mem_fun (*this, &LoudnessDialog::load_preset), i)));
 	}
 
 	apply_preset ();
@@ -563,7 +563,7 @@ LoudnessDialog::save_preset ()
 		_preset_dropdown.clear_items ();
 		for (size_t i = 0; i < _lp.n_presets (); ++i) {
 			using namespace Gtkmm2ext;
-			_preset_dropdown.AddMenuElem (MenuElemNoMnemonic (_lp[i].label, sigc::bind (sigc::mem_fun (*this, &LoudnessDialog::load_preset), i)));
+			_preset_dropdown.add_menu_elem (MenuElemNoMnemonic (_lp[i].label, sigc::bind (sigc::mem_fun (*this, &LoudnessDialog::load_preset), i)));
 		}
 		PBD::Unwinder<bool> uw (_ignore_preset, true);
 		_preset_dropdown.set_active (_preset.label);
@@ -580,7 +580,7 @@ LoudnessDialog::remove_preset ()
 		_preset_dropdown.clear_items ();
 		for (size_t i = 0; i < _lp.n_presets (); ++i) {
 			using namespace Gtkmm2ext;
-			_preset_dropdown.AddMenuElem (MenuElemNoMnemonic (_lp[i].label, sigc::bind (sigc::mem_fun (*this, &LoudnessDialog::load_preset), i)));
+			_preset_dropdown.add_menu_elem (MenuElemNoMnemonic (_lp[i].label, sigc::bind (sigc::mem_fun (*this, &LoudnessDialog::load_preset), i)));
 		}
 		_preset.label = _("Custom");
 		update_settings ();
