@@ -1165,16 +1165,16 @@ MidiView::model_changed()
 	if (!notes.empty()) {
 		low_note = _model->lowest_note ();
 		hi_note = _model->highest_note ();
+
+		_midi_context.update_data_note_range (low_note, hi_note);
+
+		if (_midi_context.visibility_range_style() == MidiViewBackground::ContentsRange) {
+			maybe_set_note_range (low_note, hi_note);
+		}
 	} else {
 		/* Pick a reasonable default range if the model is mepty */
 		low_note = UIConfiguration::instance().get_default_lower_midi_note();
 		hi_note = UIConfiguration::instance().get_default_upper_midi_note();
-	}
-
-	_midi_context.update_data_note_range (low_note, hi_note);
-
-	if (_midi_context.visibility_range_style() == MidiViewBackground::ContentsRange) {
-		maybe_set_note_range (low_note, hi_note);
 	}
 
 	for (auto & note : notes) {

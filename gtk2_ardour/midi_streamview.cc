@@ -207,7 +207,9 @@ MidiStreamView::display_region (MidiRegionView* region_view, bool)
 		return;
 	}
 
-	_range_dirty = update_data_note_range (source->model()->lowest_note(), source->model()->highest_note());
+	if (!source->model()->empty()) {
+		_range_dirty = update_data_note_range (source->model()->lowest_note(), source->model()->highest_note());
+	}
 
 	// Display region contents
 	region_view->display_model (source->model());
