@@ -528,6 +528,10 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 		double scroomer_top = max (1.0, (1.0 - ((_adj.get_value()+_adj.get_page_size()) / 127.0)) * height());
 		double scroomer_bottom = (1.0 - (_adj.get_value () / 127.0)) * height();
 		double edge = 5. * UIConfiguration::instance().get_ui_scale();
+		double ignore;
+
+		draw_transform (ignore, scroomer_top);
+		draw_transform (ignore, scroomer_bottom);
 
 		if (evy > scroomer_top - edge && evy < scroomer_top + edge){
 			if (_scroomer_state != TOP) {
