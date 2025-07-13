@@ -68,7 +68,7 @@ playhead to the n-th marker.
 
 %rop Editor Region Operations
 
-%grid Editor Grid Settings + Editor Modes
+%grid Editing Grid Settings + Editor Modes
 
 %select Editor Selecting
 
@@ -398,9 +398,9 @@ This mode provides many different operations on both regions and control points,
 @eep|Editor/cycle-edit-point-with-marker|     <@PRIMARY@>2|next EP w/marker {playhead, mouse, marker}
 @emmode|Editor/set-mouse-mode-object-range|              3|Smart Mode (provide some Range tools in Object mode)
 @gmode|Transport/ToggleFollowEdits|           <@PRIMARY@>3|toggle playhead follows edits
-@grid|Editor/cycle-snap-mode|                            4|cycle to next snap mode {On/Off}
-@grid|Editor/prev-grid-choice|                           5|use prev grid unit
-@grid|Editor/next-grid-choice|                           6|use next grid unit
+@grid|Editing/cycle-snap-mode|                            4|cycle to next snap mode {On/Off}
+@grid|Editing/prev-grid-choice|                           5|use prev grid unit
+@grid|Editing/next-grid-choice|                           6|use next grid unit
 @gmode|Transport/ToggleAutoReturn|                       7|toggle auto return
 @gmode|Transport/ToggleAutoPlay|              <@PRIMARY@>7|toggle auto play
 @gmode|Transport/TogglePunch|                            8|toggle punch in+out

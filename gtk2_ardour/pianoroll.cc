@@ -134,7 +134,6 @@ Pianoroll::register_actions ()
 	editor_actions = ActionManager::create_action_group (own_bindings, editor_name());
 
 	bind_mouse_mode_buttons ();
-	register_grid_actions ();
 }
 
 ArdourCanvas::GtkCanvasViewport*
