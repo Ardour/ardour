@@ -6225,7 +6225,7 @@ Route::monitoring_state () const
 
 		if (clip_rec) {
 			/* actively recording into a slot */
-			return get_input_monitoring_state (true, auto_input_does_talkback) & auto_monitor_mask;
+			return MonitoringInput;
 		}
 
 		if (!roll) {
