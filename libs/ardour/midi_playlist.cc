@@ -357,20 +357,20 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 	} else {
 
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 layered regions to read\n", regs.size()));
-
-		bool top = true;
+		bool top = false;
 		std::vector<samplepos_t> bounds;
 		EventsSortByTimeAndType<samplepos_t> cmp;
+		int n = regs.size();
 
-		/* iterate, top-most region first */
+		/* iterate, bottom region first */
+
 		for (auto & mr : regs) {
 
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("maybe render from %1\n", mr->name()));
 
-			if (top) {
+			if (--n == 0) {
 				/* render topmost region as-is */
 				mr->render (evlist, 0, _note_mode, filter);
-				top = false;
 			} else {
 				Evoral::EventList<samplepos_t> tmp;
 				mr->render (tmp, 0, _note_mode, filter);
