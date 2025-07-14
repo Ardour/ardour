@@ -362,21 +362,24 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t\t%1 on layer %2\n", r->name(), r->layer()));
 		}
 #endif
-		bool top = false;
 		std::vector<samplepos_t> bounds;
 		EventsSortByTimeAndType<samplepos_t> cmp;
-		int n = regs.size();
+		bool top = true;
 
-		/* iterate, bottom region first */
+		/* iterate, top region first. Not eht use of ::rbegin() - this
+		 * is reverse iteration and should not auto-fied
+		 */
 
-		for (auto & mr : regs) {
+		for (auto i = regs.rbegin(); i != regs.rend(); ++i) {
+			std::shared_ptr<MidiRegion> mr = *i;
 
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("maybe render from %1\n", mr->name()));
 
-			if (--n == 0) {
+			if (top) {
 				/* render topmost region as-is */
 				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("render top region %1\n", mr->name()));
 				mr->render (evlist, 0, _note_mode, filter);
+				top = false;
 			} else {
 				Evoral::EventList<samplepos_t> tmp;
 				mr->render (tmp, 0, _note_mode, filter);
