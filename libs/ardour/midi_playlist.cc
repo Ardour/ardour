@@ -384,8 +384,7 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 				MidiStateTracker mtr;
 				Evoral::EventList<samplepos_t> const slist (evlist);
 
-				for (Evoral::EventList<samplepos_t>::iterator e = tmp.begin(); e != tmp.end(); ++e) {
-					Evoral::Event<samplepos_t>* ev (*e);
+				for (auto & ev : tmp) {
 					timepos_t t (ev->time());
 
 					if (ev->event_type () == Evoral::NO_EVENT) {
