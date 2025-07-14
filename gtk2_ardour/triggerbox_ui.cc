@@ -170,7 +170,7 @@ TriggerEntry::set_play_button_tooltip ()
 	switch (tref.box()->record_enabled()) {
 	case Recording:
 	case Enabled:
-		play_button->set_tooltip (_("Record into this clip\nRight-click to select Launch Options for this clip"));
+		play_button->set_tooltip (string_compose (_("Click to enable recording for the follow length\n%1-click to enable recording until stopped"), Keyboard::primary_modifier_name()));
 		break;
 	default:
 		play_button->set_tooltip (_("Stop other clips on this track.\nRight-click to select Launch Options for this clip"));
