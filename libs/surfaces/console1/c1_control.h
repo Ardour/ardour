@@ -57,8 +57,9 @@ class ControllerButton : public Controller
 
 	ControllerType get_type () { return CONTROLLER_BUTTON; }
 
-	void set_plugin_action (std::function<void (uint32_t)> action) { plugin_action = action; }
-	void set_plugin_shift_action (std::function<void (uint32_t)> action) { plugin_shift_action = action; }
+	void set_action (std::function<void (uint32_t)> new_action) { action = new_action; }
+	void set_plugin_action (std::function<void (uint32_t)> new_action) { plugin_action = new_action; }
+	void set_plugin_shift_action (std::function<void (uint32_t)> new_action) { plugin_shift_action = new_action; }
 
 	virtual void set_led_state (bool onoff)
 	{
@@ -122,8 +123,9 @@ class MultiStateButton : public Controller
 		console1->write (buf, 3);
 	}
 
-	void set_plugin_action (std::function<void (uint32_t)> action) { plugin_action = action; }
-	void set_plugin_shift_action (std::function<void (uint32_t)> action) { plugin_shift_action = action; }
+	void set_action (std::function<void (uint32_t)> new_action) { action = new_action; }
+	void set_plugin_action (std::function<void (uint32_t)> new_action) { plugin_action = new_action; }
+	void set_plugin_shift_action (std::function<void (uint32_t)> new_action) { plugin_shift_action = new_action; }
 
 	uint32_t state_count () { return state_values.size (); }
 
@@ -185,8 +187,9 @@ class Encoder : public Controller
 
 	ControllerType get_type () { return ENCODER; }
 
-	void set_plugin_action (std::function<void (uint32_t)> action) { plugin_action = action; }
-	void set_plugin_shift_action (std::function<void (uint32_t)> action) { plugin_shift_action = action; }
+	void set_action (std::function<void (uint32_t)> new_action) { action = new_action; }
+	void set_plugin_action (std::function<void (uint32_t)> new_action) { plugin_action = new_action; }
+	void set_plugin_shift_action (std::function<void (uint32_t)> new_action) { plugin_shift_action = new_action; }
 
 	virtual void set_value (uint32_t value)
 	{
