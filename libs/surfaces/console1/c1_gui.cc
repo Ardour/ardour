@@ -79,6 +79,7 @@ C1GUI::C1GUI (Console1& p)
   : c1 (p)
   , table (6, 4)
   , swap_solo_mute_cb ()
+  , band_q_as_send_cb ()
   , create_plugin_stubs_btn ()
   , ignore_active_change (false)
 {
@@ -116,6 +117,13 @@ C1GUI::C1GUI (Console1& p)
 	swap_solo_mute_cb.set_active (p.swap_solo_mute);
 	swap_solo_mute_cb.signal_toggled ().connect (sigc::mem_fun (*this, &C1GUI::set_swap_solo_mute));
 
+#ifdef MIXBUS
+	// before the ssl strips, the q knobs for low- and high mids where alwas used as sends, now this can be toggled
+	band_q_as_send_cb.set_tooltip_text (
+			_ ("If checked Ardour the Q-Factor knobs for Low and High are used as sends for Send 11 and send 12."));
+	band_q_as_send_cb.set_active (p.band_q_as_send);
+	band_q_as_send_cb.signal_toggled ().connect (sigc::mem_fun (*this, &C1GUI::set_band_q_as_send));
+#endif
 	// create_plugin_stubs (_ ("Create Plugin Mapping Stubs"));
 	create_plugin_stubs_btn.set_tooltip_text (_ ("If checked a mapping stub is created for every unknown plugin."));
 	create_plugin_stubs_btn.set_active (p.create_mapping_stubs);
@@ -141,6 +149,15 @@ C1GUI::C1GUI (Console1& p)
 	table.attach (*l, 0, 1, row, row + 1, AttachOptions (FILL | EXPAND), AttachOptions (0));
 	table.attach (swap_solo_mute_cb, 1, 2, row, row + 1);
 	row++;
+
+#ifdef MIXBUS
+	l = manage (new Gtk::Label);
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _ ("Use Mid-Q Buttons as send 11/12:")));
+	l->set_alignment (1.0, 0.5);
+	table.attach (*l, 0, 1, row, row + 1, AttachOptions (FILL | EXPAND), AttachOptions (0));
+	table.attach (band_q_as_send_cb, 1, 2, row, row + 1);
+	row++;
+#endif
 
 	l = manage (new Gtk::Label);
 	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _ ("Create Plugin Mapping Stubs:")));
@@ -175,6 +192,16 @@ void
 C1GUI::set_swap_solo_mute ()
 {
 	c1.swap_solo_mute = !c1.swap_solo_mute;
+}
+
+void
+C1GUI::set_band_q_as_send ()
+{
+	c1.band_q_as_send = !c1.band_q_as_send;
+	if(!c1.in_use()) {
+		return;
+	}
+	c1.EQBandQBindingChange();
 }
 
 void

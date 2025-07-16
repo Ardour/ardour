@@ -114,7 +114,13 @@ public:
 	int set_state (const XMLNode&, int version) override;
 
 	bool swap_solo_mute;
+	bool band_q_as_send = true;
 	bool create_mapping_stubs;
+	bool switch_eq_q_dials = true;
+
+	bool in_use(){
+		return _in_use;
+	}
 
 	PBD::Signal<void()> ConnectionChange;
 
@@ -126,6 +132,7 @@ public:
 	PBD::Signal<void()> BankChange;
 	PBD::Signal<void(bool)> ShiftChange;
 	PBD::Signal<void(bool)> PluginStateChange;
+	PBD::Signal<void()> EQBandQBindingChange;
 
 	enum ControllerID
 	{
@@ -202,6 +209,13 @@ public:
 		TRACK_COPY = 120,
 		TRACK_GROUP = 123,
 
+	};
+
+	enum EQ_MODE
+	{
+		EQM_UNDEFINED = -1,
+		EQM_HARRISON  = 0,
+		EQM_SSL       = 1
 	};
 
 	using ControllerMap = std::map<std::string, ControllerID>;
@@ -290,7 +304,12 @@ private:
 
 	// Shift button
 	bool shift_state = false;
+
+	// Plugin state
 	bool in_plugin_state = false;
+
+	// Selected EQ
+	EQ_MODE strip_eq_mode = EQM_UNDEFINED;
 
 	bool rolling = false;
 	uint32_t current_bank = 0;
@@ -420,6 +439,7 @@ private:
 	void map_stripable_state ();
 
 	void notify_parameter_changed (std::string) override;
+	void band_q_usage_changed ();
 
 	/* operations (defined in c1_operations.cc) */
 
@@ -457,8 +477,9 @@ private:
 
 	// EQ section
 	void eq (const uint32_t);
-	void eq_freq (const uint32_t band, uint32_t value);
-	void eq_gain (const uint32_t band, uint32_t value);
+    void eq_freq (const uint32_t band, uint32_t value);
+    void eq_gain (const uint32_t band, uint32_t value);
+	void eq_band_q (const uint32_t band, uint32_t value);
 	void eq_high_shape (const uint32_t value);
 	void eq_low_shape (const uint32_t value);
 
@@ -500,6 +521,27 @@ private:
 				break;
 		}
 		return eq_gain_id;
+	}
+
+  	ControllerID eq_q_controller_for_band (const uint32_t band)
+	{
+        if( band_q_as_send )
+            return ControllerID::CONTROLLER_NONE;
+        ControllerID eq_gain_id = ControllerID::CONTROLLER_NONE;
+        switch (band)
+        {
+        case 0:
+            break;
+        case 1:
+            eq_gain_id = ControllerID::LOW_MID_SHAPE;
+            break;
+        case 2:
+            eq_gain_id = ControllerID::HIGH_MID_SHAPE;
+            break;
+        case 3:
+            break;
+        }
+        return eq_gain_id;
 	}
 
 	// Mixbus sends
@@ -551,8 +593,10 @@ private:
 
 	// EQ section
 	void map_eq ();
-	void map_eq_freq (const uint32_t band);
+	void map_eq_mode ();
+	void map_eq_freq(const uint32_t band);
 	void map_eq_gain (const uint32_t band);
+	void map_eq_band_q (const uint32_t band);
 	void map_eq_low_shape ();
 	void map_eq_high_shape ();
 
@@ -608,7 +652,9 @@ private:
 
 	bool map_select_plugin (const int32_t plugin_index);
 
-	using PluginMappingMap = std::map<std::string, PluginMapping>;
+    void eqBandQChangeMapping();
+
+    using PluginMappingMap = std::map<std::string, PluginMapping>;
 	PluginMappingMap pluginMappingMap;
 };
 }
