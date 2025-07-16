@@ -40,7 +40,14 @@ class SlotPropertiesBox;
 class SelectionPropertiesBox : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
 public:
-	SelectionPropertiesBox ();
+	enum DispositionMask {
+		ShowRoutes   = 0x01,
+		ShowRegions  = 0x02,
+		ShowTriggers = 0x04,
+		ShowTimeInfo = 0x08,
+	};
+
+	SelectionPropertiesBox (DispositionMask dm = DispositionMask(0x07));
 	~SelectionPropertiesBox ();
 
 	void set_session (ARDOUR::Session*);
@@ -57,6 +64,8 @@ private:
 	Gtk::HBox              _region_editor_box;
 	RegionEditor*          _region_editor;
 	RegionFxPropertiesBox* _region_fx_box;
+
+	DispositionMask _disposition;
 
 	PBD::ScopedConnection _region_connection;
 	PBD::ScopedConnection _editor_connection;

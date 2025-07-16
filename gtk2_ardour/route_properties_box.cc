@@ -189,7 +189,7 @@ RoutePropertiesBox::refill_processors ()
 		float ui_scale = std::max<float> (1.f, UIConfiguration::instance().get_ui_scale());
 		int h = 100 * ui_scale;
 		for (auto const& ui : _proc_uis) {
-			h = std::max<int> (h, ui->get_preferred_height () + /* frame label */ 30 * ui_scale);
+			h = std::max<int> (h, ui->get_preferred_height () + /* frame label */ 34 * ui_scale);
 		}
 		h = std::min<int> (h, 300 * ui_scale);
 		_box.set_size_request (-1, h);

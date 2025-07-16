@@ -23,6 +23,7 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
 
+#include "ardour/profile.h"
 #include "ardour/session.h"
 
 #include "audio_region_editor.h"
@@ -45,9 +46,10 @@ using namespace ARDOUR;
 using std::min;
 using std::max;
 
-SelectionPropertiesBox::SelectionPropertiesBox ()
+SelectionPropertiesBox::SelectionPropertiesBox (DispositionMask mask)
 	: _region_editor (nullptr)
 	, _region_fx_box (nullptr)
+	, _disposition (mask)
 {
 	init ();
 
@@ -62,6 +64,7 @@ SelectionPropertiesBox::SelectionPropertiesBox ()
 
 	_time_info_box->set_no_show_all ();
 	_route_prop_box->set_no_show_all ();
+	_slot_prop_box->set_no_show_all ();
 	_region_editor_box.set_no_show_all ();
 	_region_editor_box.set_spacing (4);
 
@@ -142,20 +145,15 @@ SelectionPropertiesBox::selection_changed ()
 	if (!_session || _session->inital_connect_or_deletion_in_progress ()) {
 		_time_info_box->hide ();
 		_route_prop_box->hide ();
+		_slot_prop_box->hide ();
 		delete_region_editor ();
 		return;
 	}
 
 	Selection& selection (Editor::instance().get_selection());
 
-	if (!selection.time.empty ()) {
-		_time_info_box->show ();
-	} else {
-		_time_info_box->hide ();
-	}
-
 	bool show_slot_properties = false;
-	if (!selection.triggers.empty ()) {
+	if (!selection.triggers.empty () && 0 != (_disposition & ShowTriggers)) {
 		TriggerSelection ts      = selection.triggers;
 		TriggerEntry*    entry   = *ts.begin ();
 		TriggerReference ref     = entry->trigger_reference ();
@@ -163,14 +161,9 @@ SelectionPropertiesBox::selection_changed ()
 		_slot_prop_box->set_slot(ref);
 		show_slot_properties = true;
 	}
-	if (show_slot_properties) {
-		_slot_prop_box->show();
-	} else {
-		_slot_prop_box->hide();
-	}
 
-	bool show_route_properties = false;
-	if (!selection.tracks.empty ()) {
+	bool show_route_properties = ARDOUR::Profile->get_mixbus(); // XXX
+	if (!selection.tracks.empty () && 0 != (_disposition & ShowRoutes)) {
 		TimeAxisView *tav = selection.tracks.back (); //the LAST selected stripable is the clicked one. see selection.cc line ~92
 		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(tav);
 		if (rtav) {
@@ -178,13 +171,8 @@ SelectionPropertiesBox::selection_changed ()
 			show_route_properties = true;
 		}
 	}
-	if (show_route_properties) {
-		_route_prop_box->show();
-	} else {
-		_route_prop_box->hide();
-	}
 
-	if (selection.regions.size () == 1)  {
+	if (selection.regions.size () == 1 && 0 != (_disposition & ShowRegions)) {
 		RegionView* rv = (selection.regions.front ());
 		if (!_region_editor || _region_editor->region () != rv->region ()) {
 			delete_region_editor ();
@@ -203,14 +191,38 @@ SelectionPropertiesBox::selection_changed ()
 
 			_region_fx_box = new RegionFxPropertiesBox (rv->region ());
 			_region_editor_box.pack_start (*_region_fx_box);
-			_region_editor_box.show ();
 			rv->RegionViewGoingAway.connect_same_thread (_region_connection, std::bind (&SelectionPropertiesBox::delete_region_editor, this));
 		}
-		_region_editor_box.show ();
 	} else {
-		/* only hide region props when selecting a track or trigger ..*/
-		if (_route_prop_box->get_visible () || !selection.markers.empty () || !selection.playlists.empty () || !selection.triggers.empty ()) {
+		/* only hide region props when selecting a track or trigger,
+		 * but retain existing RegionEditor, when selecting another additional region.
+		 */
+		if (selection.regions.empty () || !selection.markers.empty () || !selection.playlists.empty () || !selection.triggers.empty ()) {
 			delete_region_editor ();
 		}
+	}
+
+	if (show_slot_properties) {
+		_slot_prop_box->show ();
+		_route_prop_box->hide ();
+		delete_region_editor ();
+	} else if (_region_editor) {
+		_slot_prop_box->hide ();
+		_route_prop_box->hide ();
+		_region_editor_box.show ();
+	} else if (show_route_properties) {
+		_slot_prop_box->hide ();
+		_route_prop_box->show ();
+		delete_region_editor ();
+	} else {
+		_slot_prop_box->hide ();
+		_route_prop_box->hide ();
+		delete_region_editor ();
+	}
+
+	if (!selection.time.empty () && 0 != (_disposition & ShowTimeInfo)) {
+		_time_info_box->show ();
+	} else {
+		_time_info_box->hide ();
 	}
 }

@@ -1740,10 +1740,8 @@ Editor::region_selection_changed ()
 		_pianoroll->contents().show_all ();
 		_properties_box->show ();
 	} else {
-		if (!selection->regions.empty()) {
-			_bottom_hbox.pack_start(*_properties_box, true, true);
-			_properties_box->show ();
-		}
+		_bottom_hbox.pack_start(*_properties_box, true, true);
+		_properties_box->show ();
 	}
 }
 
