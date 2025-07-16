@@ -62,14 +62,16 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	virtual ~ArdourButton ();
 
 	enum Tweaks {
-		Square         = 0x01,
-		TrackHeader    = 0x02,
-		OccasionalText = 0x04,
-		OccasionalLED  = 0x08,
-		ForceBoxy      = 0x10,
-		ForceFlat      = 0x20,
-		ExpandtoSquare = 0x40,
-		TransportIcon  = 0x80,
+		Square           = 0x001,
+		TrackHeader      = 0x002,
+		OccasionalText   = 0x004,
+		OccasionalLED    = 0x008,
+		ForceBoxy        = 0x010,
+		ForceFlat        = 0x020,
+		ExpandtoSquare   = 0x040,
+		TransportIcon    = 0x080,
+		NoConcave        = 0x100,
+		EnforceMinHeight = 0x200,
 	};
 
 	static Tweaks default_tweaks;

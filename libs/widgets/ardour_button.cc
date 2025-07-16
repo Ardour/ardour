@@ -40,9 +40,6 @@
 
 #include "pbd/i18n.h"
 
-#define BASELINESTRETCH (1.25)
-#define TRACKHEADERBTNW (3.10)
-
 using namespace Gtk;
 using namespace Glib;
 using namespace PBD;
@@ -54,7 +51,19 @@ using namespace std;
 ArdourButton::Element ArdourButton::default_elements = ArdourButton::Element (ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text);
 ArdourButton::Element ArdourButton::led_default_elements = ArdourButton::Element (ArdourButton::default_elements|ArdourButton::Indicator);
 ArdourButton::Element ArdourButton::just_led_default_elements = ArdourButton::Element (ArdourButton::Edge|ArdourButton::Body|ArdourButton::Indicator);
+
+#define BASELINESTRETCH (1.25)
+
+#ifdef MIXBUS
+ArdourButton::Tweaks  ArdourButton::default_tweaks = ArdourButton::Tweaks (ArdourButton::NoConcave | ArdourButton::EnforceMinHeight);
+#define TRACKHEADERBTNW (1.8)
+#elif defined LIVETRAX
+ArdourButton::Tweaks  ArdourButton::default_tweaks = ArdourButton::Tweaks (ArdourButton::EnforceMinHeight);
+#define TRACKHEADERBTNW (1.8)
+#else
 ArdourButton::Tweaks  ArdourButton::default_tweaks = ArdourButton::Tweaks (0);
+#define TRACKHEADERBTNW (3.10)
+#endif
 
 ArdourButton::ArdourButton (Element e, bool toggle)
 	: _markup (false)
@@ -394,8 +403,9 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 	//show the "convex" or "concave" gradient
 	if (!flat && (_elements & Body)==Body) {
-		if (active_state () == Gtkmm2ext::ExplicitActive && (!((_elements & Indicator)==Indicator) || use_custom_led_color)) {
-			//concave
+		const bool use_concave = 0 == (_tweaks & NoConcave);
+		if (use_concave && active_state() == Gtkmm2ext::ExplicitActive && (!((_elements & Indicator)==Indicator) || use_custom_led_color)) {
+			// concave
 			cairo_set_source (cr, concave_pattern);
 			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
 			cairo_fill (cr);
@@ -453,7 +463,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		}
 		if (_elements & VectorIcon) {
 			uint32_t fill_color = text_color;
-			if ( (active_state () == Gtkmm2ext::ExplicitActive) && ( ((_tweaks&TransportIcon)==TransportIcon))) {
+			if (active_state () == Gtkmm2ext::ExplicitActive && (_tweaks & TransportIcon) == TransportIcon) {
 				fill_color = fill_active_color;
 			}
 			ArdourIcon::render (cr, _icon, vw, vh, active_state(), fill_color);
@@ -836,6 +846,13 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		if ((req->width - _text_width) & 1) { ++req->width; }
 		if ((req->height - _text_height) & 1) { ++req->height; }
 	}
+
+	if (_tweaks & EnforceMinHeight) {
+		/* enforce a minumum em-based height (Mixbus: for all buttons) */
+		const int wh = std::max (rint (TRACKHEADERBTNW * char_pixel_height()), ceil (char_pixel_height() * BASELINESTRETCH + 1.));
+		req->height = std::max(req->height, wh);
+	}
+
 #if 0
 		printf("REQ: %s: %dx%d\n", get_name().c_str(), req->width, req->height);
 #endif
