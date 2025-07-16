@@ -128,7 +128,7 @@ public:
 		return _in_use;
 	}
 
-	PBD::Signal<void()> ConnectionChange;
+    PBD::Signal<void()> ConnectionChange;
 
 	/* Timer Events */
 	PBD::Signal<void(bool)> BlinkIt;
@@ -224,7 +224,7 @@ public:
 		EQM_SSL       = 1
 	};
 
-	using ControllerMap = std::map<std::string, ControllerID>;
+    using ControllerMap = std::map<std::string, ControllerID>;
 
 	ControllerMap controllerMap{ { "CONTROLLER_NONE", ControllerID::CONTROLLER_NONE },
 		                         { "VOLUME", ControllerID::VOLUME },
@@ -332,7 +332,7 @@ public:
 	// Selected EQ
 	EQ_MODE strip_eq_mode = EQM_UNDEFINED;
 
-	bool rolling = false;
+    bool rolling = false;
 	uint32_t current_bank = 0;
 	uint32_t current_strippable_index = 0;
 
@@ -451,7 +451,7 @@ public:
 	void drop_current_stripable ();
 	/*void use_master ();
 	void use_monitor ();*/
-	void stripable_selection_changed () override;
+    void stripable_selection_changed () override;
 	/*PBD::ScopedConnection selection_connection;*/
 	PBD::ScopedConnectionList stripable_connections;
 	PBD::ScopedConnectionList console1_connections;
@@ -462,7 +462,7 @@ public:
 	void notify_parameter_changed (std::string) override;
 	void band_q_usage_changed ();
 
-	/* operations (defined in c1_operations.cc) */
+    /* operations (defined in c1_operations.cc) */
 
 	void bank (bool up);
 	void drive (uint32_t value);
@@ -664,6 +664,8 @@ public:
 	bool select_plugin (const int32_t plugin_index);
 
 	bool map_select_plugin (const int32_t plugin_index);
+
+    void eqBandQChangeMapping();
 
     void eqBandQChangeMapping (bool mapValues);
 

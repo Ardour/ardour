@@ -73,6 +73,7 @@ private:
 	Gtk::Image image;
 	Gtk::CheckButton swap_solo_mute_cb;
 	Gtk::CheckButton band_q_as_send_cb;
+	Gtk::CheckButton band_q_as_send_cb;
 	Gtk::CheckButton create_plugin_stubs_btn;
 
 	Gtk::TreeView plugin_assignment_editor;
