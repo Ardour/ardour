@@ -897,7 +897,11 @@ ApplicationBar::session_latency_updated (bool for_playback)
 	} else {
 		samplecnt_t wrl = _session->worst_route_latency ();
 		float rate      = _session->nominal_sample_rate ();
-		_route_latency_value.set_text (samples_as_time_string (wrl, rate));
+		if (wrl == 0) {
+			_route_latency_value.set_text (_("No Latency"));
+		} else {
+			_route_latency_value.set_text (samples_as_time_string (wrl, rate));
+		}
 	}
 }
 
