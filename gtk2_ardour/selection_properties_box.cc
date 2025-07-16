@@ -23,7 +23,6 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
 
-#include "ardour/profile.h"
 #include "ardour/session.h"
 
 #include "audio_region_editor.h"
@@ -32,12 +31,11 @@
 #include "region_fx_properties_box.h"
 #include "region_view.h"
 #include "route_properties_box.h"
+#include "selection_properties_box.h"
 #include "slot_properties_box.h"
 #include "time_info_box.h"
 #include "trigger_strip.h"
 #include "triggerbox_ui.h"
-
-#include "selection_properties_box.h"
 
 #include "pbd/i18n.h"
 
@@ -162,7 +160,7 @@ SelectionPropertiesBox::selection_changed ()
 		show_slot_properties = true;
 	}
 
-	bool show_route_properties = ARDOUR::Profile->get_mixbus(); // XXX
+	bool show_route_properties = false;
 	if (!selection.tracks.empty () && 0 != (_disposition & ShowRoutes)) {
 		TimeAxisView *tav = selection.tracks.back (); //the LAST selected stripable is the clicked one. see selection.cc line ~92
 		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(tav);
