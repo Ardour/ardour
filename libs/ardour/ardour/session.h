@@ -1559,7 +1559,7 @@ private:
 	 *  know when to send full MTC messages every so often.
 	 */
 	pframes_t               _pframes_since_last_mtc;
-	bool                     play_loop;
+	std::atomic<bool>        play_loop;
 	bool                     loop_changing;
 	samplepos_t              last_loopend;
 
@@ -2199,6 +2199,8 @@ private:
 	static bool _bypass_all_loaded_plugins;
 
 	mutable bool have_looped; ///< Used in \ref audible_sample
+
+	bool roll_started_loop;
 
 	void update_route_record_state ();
 	std::atomic<int> _have_rec_enabled_track;

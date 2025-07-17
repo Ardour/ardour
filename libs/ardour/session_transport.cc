@@ -153,6 +153,10 @@ Session::realtime_stop (bool abort, bool clear_state)
 		waiting_for_sync_offset = true;
 	}
 
+	if (todo & PostTransportClearSubstate) {
+		roll_started_loop = false;
+	}
+
 	if (todo) {
 		TFSM_EVENT (TransportFSM::ButlerRequired);
 	}
@@ -474,6 +478,17 @@ Session::start_transport (bool after_loop)
 {
 	ENSURE_PROCESS_THREAD;
 	DEBUG_TRACE (DEBUG::Transport, "start_transport\n");
+
+	if (!after_loop && !roll_started_loop && !_exporting
+	    && Config->get_roll_will_loop ()
+	    && !get_play_loop ()
+	    && !transport_master_is_external ()
+	    && _locations->auto_loop_location ()) {
+		roll_started_loop = true;
+		SessionEvent* ev = new SessionEvent (SessionEvent::SetLoop, SessionEvent::Add, SessionEvent::Immediate, 0, _transport_fsm->default_speed(), true, true);
+		queue_event (ev);
+		return;
+	}
 
 	if (Config->get_loop_is_mode() && get_play_loop ()) {
 
@@ -1541,7 +1556,9 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished, bool will_
 
 	if (ptw & (PostTransportClearSubstate|PostTransportStop)) {
 		if (!Config->get_loop_is_mode() && get_play_loop() && !loop_changing) {
-			unset_play_loop ();
+			if (!Config->get_roll_will_loop () || (ptw & PostTransportClearSubstate)) {
+				unset_play_loop ();
+			}
 		}
 	}
 

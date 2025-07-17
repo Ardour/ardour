@@ -338,6 +338,7 @@ Session::Session (AudioEngine &eng,
 	, first_file_data_format_reset (true)
 	, first_file_header_format_reset (true)
 	, have_looped (false)
+	, roll_started_loop (false)
 	, _step_editors (0)
 	,  _speakers (new Speakers)
 	, _ignore_route_processor_changes (0)
