@@ -10,7 +10,7 @@ ardour {
 function presets ()
 	return
 	{
-		-- one can speficy parmaters by name..
+		-- one can specify parameters by name..
 		{ name = "1k", params = { Frequency = 1000, Gain = -18 } },
 		{ name = "440", params = { Frequency = 440, Gain = -3 } },
 		-- ..or using zero-based indexing as number.

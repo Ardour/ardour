@@ -29,8 +29,6 @@
 
 #include <cstdio>
 
-#include <boost/algorithm/string/erase.hpp>
-
 #include "pbd/i18n.h"
 
 #include "ardour/async_midi_port.h"
@@ -75,6 +73,7 @@ Session::remove_bundle (std::shared_ptr<Bundle> bundle)
 
 	if (removed) {
 		 BundleAddedOrRemoved (); /* EMIT SIGNAL */
+		 _bundles.flush ();
 	}
 
 	set_dirty();
@@ -237,7 +236,7 @@ Session::setup_bundles ()
 		if (!pn.empty()) {
 			n = pn;
 		} else {
-			boost::erase_first (n, X_("alsa_pcm:"));
+			n.erase (n.find_first_of (X_("alsa_pcm:")), 1);
 		}
 		std::shared_ptr<Bundle> c (new Bundle (n, false));
 		c->add_channel ("", DataType::MIDI);
@@ -253,7 +252,7 @@ Session::setup_bundles ()
 		if (!pn.empty()) {
 			n = pn;
 		} else {
-			boost::erase_first (n, X_("alsa_pcm:"));
+			n.erase (n.find_first_of (X_("alsa_pcm:")), 1);
 		}
 		std::shared_ptr<Bundle> c (new Bundle (n, true));
 		c->add_channel ("", DataType::MIDI);

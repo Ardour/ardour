@@ -77,9 +77,9 @@ Graph::Graph (Session& session)
 	/* pre-allocate memory */
 	_trigger_queue.reserve (1024);
 
-	ARDOUR::AudioEngine::instance ()->Running.connect_same_thread (engine_connections, boost::bind (&Graph::reset_thread_list, this));
-	ARDOUR::AudioEngine::instance ()->Stopped.connect_same_thread (engine_connections, boost::bind (&Graph::engine_stopped, this));
-	ARDOUR::AudioEngine::instance ()->Halted.connect_same_thread (engine_connections, boost::bind (&Graph::engine_stopped, this));
+	ARDOUR::AudioEngine::instance ()->Running.connect_same_thread (engine_connections, std::bind (&Graph::reset_thread_list, this));
+	ARDOUR::AudioEngine::instance ()->Stopped.connect_same_thread (engine_connections, std::bind (&Graph::engine_stopped, this));
+	ARDOUR::AudioEngine::instance ()->Halted.connect_same_thread (engine_connections, std::bind (&Graph::engine_stopped, this));
 
 	reset_thread_list ();
 
@@ -124,12 +124,12 @@ Graph::reset_thread_list ()
 	/* Allow threads to run */
 	_terminate.store (0);
 
-	if (AudioEngine::instance ()->create_process_thread (boost::bind (&Graph::main_thread, this)) != 0) {
+	if (AudioEngine::instance ()->create_process_thread (std::bind (&Graph::main_thread, this)) != 0) {
 		throw failed_constructor ();
 	}
 
 	for (uint32_t i = 1; i < num_threads; ++i) {
-		if (AudioEngine::instance ()->create_process_thread (boost::bind (&Graph::helper_thread, this))) {
+		if (AudioEngine::instance ()->create_process_thread (std::bind (&Graph::helper_thread, this))) {
 			throw failed_constructor ();
 		}
 	}

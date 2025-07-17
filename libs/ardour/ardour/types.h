@@ -28,8 +28,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_types_h__
-#define __ardour_types_h__
+#pragma once
 
 #include <bitset>
 #include <cstdint>
@@ -75,6 +74,7 @@ class Route;
 class Region;
 class Playlist;
 class Stripable;
+class Trigger;
 class VCA;
 class AutomationControl;
 class SlavableAutomationControl;
@@ -304,6 +304,7 @@ class AnyTime {
 	enum Type {
 		Timecode,
 		BBT,
+		BBT_Offset,
 		Samples,
 		Seconds
 	};
@@ -311,14 +312,21 @@ class AnyTime {
 	Type type;
 
 	Timecode::Time     timecode;
-	Temporal::BBT_Time bbt;
+	union {
+		Temporal::BBT_Time bbt;
+		Temporal::BBT_Offset bbt_offset;
+	};
 
 	union {
 		samplecnt_t     samples;
 		double         seconds;
 	};
 
-	AnyTime() { type = Samples; samples = 0; }
+	AnyTime () : type (Samples), samples (0) {}
+	AnyTime (Temporal::BBT_Offset bt) : type (BBT_Offset), bbt_offset (bt) {}
+	AnyTime (std::string const &);
+
+	std::string str() const;
 
 	bool operator== (AnyTime const & other) const {
 		if (type != other.type) { return false; }
@@ -328,6 +336,8 @@ class AnyTime {
 			return timecode == other.timecode;
 		case BBT:
 			return bbt == other.bbt;
+		case BBT_Offset:
+			return bbt_offset == other.bbt_offset;
 		case Samples:
 			return samples == other.samples;
 		case Seconds:
@@ -344,6 +354,8 @@ class AnyTime {
 				timecode.seconds != 0 || timecode.frames != 0;
 		case BBT:
 			return bbt.bars != 0 || bbt.beats != 0 || bbt.ticks != 0;
+		case BBT_Offset:
+			return bbt_offset.bars != 0 || bbt_offset.beats != 0 || bbt_offset.ticks != 0;
 		case Samples:
 			return samples != 0;
 		case Seconds:
@@ -503,6 +515,12 @@ enum MonitorChoice {
 	MonitorInput = 0x1,
 	MonitorDisk = 0x2,
 	MonitorCue = 0x3,
+};
+
+enum FastWindOp {
+	FastWindOff = 0,
+	FastWindVarispeed = 0x1,  //rewind/ffwd commands will varispeed the transport (incl reverse playback)
+	FastWindLocate = 0x2,     //rewind/ffwd commands will jump to next/prior marker
 };
 
 enum MonitorState {
@@ -848,6 +866,7 @@ enum PlaylistDisposition {
 enum MidiTrackNameSource {
 	SMFTrackNumber,
 	SMFTrackName,
+	SMFFileAndTrackName,
 	SMFInstrumentName
 };
 
@@ -969,10 +988,24 @@ struct ProcessedRanges {
 	ProcessedRanges() : start { 0, 0 }, end { 0, 0 }, cnt (0) {}
 };
 
+enum SelectionOperation {
+	SelectionSet,
+	SelectionAdd,
+	SelectionToggle,
+	SelectionRemove,
+	SelectionExtend /* UI only operation, not core */
+};
+
+enum RecordState {
+	Disabled = 0,
+	Enabled = 1,
+	Recording = 2
+};
+
+
 } // namespace ARDOUR
 
 /* for now, break the rules and use "using" to make this "global" */
 
 using ARDOUR::samplepos_t;
 
-#endif /* __ardour_types_h__ */

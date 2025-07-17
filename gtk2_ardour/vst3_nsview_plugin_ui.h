@@ -35,8 +35,8 @@
 #undef NO
 #endif
 
-#include <gtkmm/widget.h>
-#include <gtkmm/eventbox.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/eventbox.h>
 
 #include "vst3_plugin_ui.h"
 

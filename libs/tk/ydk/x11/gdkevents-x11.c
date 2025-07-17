@@ -62,6 +62,11 @@
 #include <X11/extensions/Xrandr.h>
 #endif
 
+#ifdef HAVE_XINPUT2
+#include <dlfcn.h>
+#include <X11/extensions/XInput2.h>
+#endif
+
 #include <X11/Xatom.h>
 
 typedef struct _GdkIOClosure GdkIOClosure;
@@ -237,6 +242,70 @@ _gdk_events_init (GdkDisplay *display)
 					 gdk_atom_intern_static_string ("WM_PROTOCOLS"), 
 					 gdk_wm_protocols_filter,   
 					 NULL);
+
+#ifdef HAVE_XINPUT2
+  void* lxi = dlopen ("libXi.so", RTLD_NOW | RTLD_GLOBAL);
+  if (lxi)
+    {
+      display_x11->xi.XISelectEvents   = dlsym (lxi, "XISelectEvents");
+      display_x11->xi.XIQueryDevice    = dlsym (lxi, "XIQueryDevice");
+      display_x11->xi.XIFreeDeviceInfo = dlsym (lxi, "XIFreeDeviceInfo");
+      if (display_x11->xi.XISelectEvents && display_x11->xi.XIQueryDevice && display_x11->xi.XIFreeDeviceInfo)
+	{
+	  display_x11->xi.libxi = lxi;
+	}
+      else
+	{
+	  dlclose (lxi);
+	}
+    }
+
+  int firstevent, firsterror;
+  if (display_x11->xi.libxi && XQueryExtension (display_x11->xdisplay, "XInputExtension", &display_x11->xid_opcode, &firstevent, &firsterror))
+  {
+#ifdef G_ENABLE_DEBUG
+    if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
+      g_message ("CHECK FOR TOUCHSCREENs\n");
+#endif
+
+    int n_devices;
+    XIDeviceInfo* info;
+
+    info = display_x11->xi.XIQueryDevice (display_x11->xdisplay, XIAllDevices, &n_devices);
+
+    for (int i = 0; i < n_devices; ++i) {
+      XIDeviceInfo* dev = &info[i];
+      if (!dev->enabled) {
+	continue;
+      }
+      if (!(dev->use == XISlavePointer || dev->use == XIFloatingSlave)) {
+	continue;
+      }
+
+      gboolean direct_touch = FALSE;
+      XITouchClassInfo* classInfo;
+
+      for (int j = 0; j < dev->num_classes; ++j) {
+	classInfo = (XITouchClassInfo*)(dev->classes[j]);
+
+	if (classInfo->type == XITouchClass && ((XITouchClassInfo *)dev->classes[j])->mode == XIDirectTouch) {
+	  direct_touch = TRUE;
+	}
+      }
+      if (direct_touch) {
+#ifdef G_ENABLE_DEBUG
+	if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
+	  g_message ("XI: touch-device id=%d name='%s' ntouch: %d\n", dev->deviceid, dev->name, classInfo->num_touches);
+#endif
+	if (!display_x11->touch_devices) {
+	  display_x11->touch_devices = g_hash_table_new (g_direct_hash, NULL);
+	}
+	g_hash_table_insert (display_x11->touch_devices, GUINT_TO_POINTER (dev->deviceid), GUINT_TO_POINTER(1));
+      }
+    }
+    display_x11->xi.XIFreeDeviceInfo (info);
+  }
+#endif
 }
 
 void
@@ -1233,7 +1302,7 @@ gdk_event_translate (GdkDisplay *display,
 	  event->button.state = (GdkModifierType) xevent->xbutton.state;
 	  event->button.button = xevent->xbutton.button;
 	  event->button.device = display->core_pointer;
-	  
+
 	  if (!set_screen_from_root (display, event, xevent->xbutton.root))
 	    {
 	      return_val = FALSE;
@@ -2124,6 +2193,9 @@ gdk_event_translate (GdkDisplay *display,
       break;
 
     default:
+      if (xevent->xcookie.type == GenericEvent) {
+	XGetEventData (display_x11->xdisplay, &xevent->xcookie);
+      }
 #ifdef HAVE_XKB
       if (xevent->type == display_x11->xkb_event_type)
 	{
@@ -2172,6 +2244,50 @@ gdk_event_translate (GdkDisplay *display,
 	{
           if (screen)
             _gdk_x11_screen_size_changed (screen, xevent);
+	}
+      else
+#endif
+#ifdef HAVE_XINPUT2
+      if (xevent->xcookie.type == GenericEvent && xevent->xcookie.extension == display_x11->xid_opcode
+          && display_x11->touch_devices && g_hash_table_lookup (display_x11->touch_devices, GUINT_TO_POINTER (((XIDeviceEvent *)xevent->xcookie.data)->deviceid)))
+	{
+	  XIDeviceEvent *xev = (XIDeviceEvent *) xevent->xcookie.data;
+#ifdef G_ENABLE_DEBUG
+	  if (_gdk_debug_flags & GDK_DEBUG_TOUCH)
+	    g_message ("TOUCH dev=%d src=%d | type: %d dt: %u flags: %x\n", xev->deviceid, xev->sourceid, xevent->xcookie.evtype, xev->detail, xev->flags);
+#endif
+	  window = gdk_window_lookup_for_display (display, xev->event);
+	  g_object_ref (window);
+
+	  event->touch.window   = window;
+	  event->touch.time     = xev->time;
+	  event->touch.x        = xev->event_x;
+	  event->touch.y        = xev->event_y;
+	  event->touch.x_root   = xev->root_x;
+	  event->touch.y_root   = xev->root_y;
+	  event->touch.state    = 0 ; (GdkModifierType) xevent->xbutton.state;
+	  event->touch.sequence = xev->detail;
+	  event->touch.flags    = xev->flags;
+	  event->touch.deviceid = xev->deviceid;
+
+	  switch (xevent->xcookie.evtype) {
+	    case XI_TouchBegin:
+	      event->touch.type = GDK_TOUCH_BEGIN;
+	      break;
+	    case XI_TouchUpdate:
+	      event->touch.type = GDK_TOUCH_UPDATE;
+	      break;
+	    case XI_TouchEnd:
+	      event->touch.type = GDK_TOUCH_END;
+	      break;
+	    default:
+	      return FALSE;
+	      break;
+	  }
+
+	  if (!set_screen_from_root (display, event, xev->root)) {
+	    return_val = FALSE;
+	  }
 	}
       else
 #endif

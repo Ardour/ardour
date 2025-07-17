@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "actions.h"
 #include "ruler_dialog.h"
@@ -36,10 +36,7 @@ RulerDialog::RulerDialog ()
 	get_vbox()->pack_start (meter_button);
 	get_vbox()->pack_start (tempo_button);
 	get_vbox()->pack_start (range_button);
-	get_vbox()->pack_start (loop_punch_button);
-	get_vbox()->pack_start (cdmark_button);
 	get_vbox()->pack_start (mark_button);
-	get_vbox()->pack_start (cuemark_button);
 	get_vbox()->pack_start (section_button);
 	get_vbox()->pack_start (video_button);
 
@@ -51,11 +48,8 @@ RulerDialog::RulerDialog ()
 	connect_action (bbt_button, "bbt-ruler");
 	connect_action (tempo_button, "tempo-ruler");
 	connect_action (meter_button, "meter-ruler");
-	connect_action (loop_punch_button, "loop-punch-ruler");
 	connect_action (range_button, "range-ruler");
 	connect_action (mark_button, "marker-ruler");
-	connect_action (cdmark_button, "cd-marker-ruler");
-	connect_action (cuemark_button, "cue-marker-ruler");
 	connect_action (section_button, "arrangement-ruler");
 	connect_action (video_button, "video-ruler");
 }

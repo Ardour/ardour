@@ -5774,7 +5774,7 @@ msgstr "Assistant de sonie"
 
 #: editor_actions.cc:443 rc_option_editor.cc:3347
 msgid "Split/Separate"
-msgstr "Découper/Séparer"
+msgstr "Découper/séparer"
 
 #: editor_actions.cc:448
 msgid "Fade Range Selection"
@@ -6963,7 +6963,7 @@ msgid ""
 "Master bus output gain control is disabled.\n"
 "Visit preferences to enable it?"
 msgstr ""
-"Le contrôle de gain de sortie du bus maître est désactivé.\n"
+"Le contrôle de gain de sortie du bus général est désactivé.\n"
 "Visiter les préférences pour l'activer ?"
 
 #: editor_export_audio.cc:167
@@ -6980,14 +6980,14 @@ msgstr "L'analyse de la sonie nécessite une intervalle-de-session."
 msgid "Loudness Analysis is only available for sessions with a master-bus"
 msgstr ""
 "L'analyse de la sonie n'est disponible que pour les sessions avec un bus-"
-"maître"
+"général"
 
 #: editor_export_audio.cc:180
 msgid ""
 "Loudness Analysis is only available for sessions with a stereo master-bus"
 msgstr ""
 "L'analyse de la sonie n'est disponible que pour les sessions avec un bus-"
-"maître stéréo"
+"général stéréo"
 
 #: editor_export_audio.cc:222
 msgid "Confirm MIDI File Overwrite"
@@ -9859,7 +9859,7 @@ msgstr "Créer un nouveau groupe à partir de..."
 
 #: group_tabs.cc:347
 msgid "Create New Group with Master From..."
-msgstr "Créer un nouveau groupe avec un Master à partir de..."
+msgstr "Créer un nouveau groupe avec un général à partir de..."
 
 #: group_tabs.cc:374 route_group_menu.cc:88
 msgid "Edit Group..."
@@ -10388,13 +10388,13 @@ msgid ""
 msgstr ""
 "<b>Si coché</b> un processeur d'amplification est utilisé pour appliquer le "
 "gain. Cela permet un positionnement personnalisé de l'étage de gain dans le "
-"flux de signaux du bus maître, éventuellement suivi d'un limiteur pour se "
+"flux de signaux du bus général, éventuellement suivi d'un limiteur pour se "
 "conformer aux exigences en matière d'intensité sonore et de crête. En "
 "fonction des réglages du limiteur ou du DSP après l'étage de gain, des "
 "mesures répétées de l'intensité sonore peuvent produire des résultats "
 "différents.\n"
 "<b>Si décoché</b>, le gain est appliqué directement à la sortie du bus "
-"maître. Cela permet un réglage efficace et fiable du volume."
+"général. Cela permet un réglage efficace et fiable du volume."
 
 #: loudness_dialog.cc:286
 msgid "<b>Loudness Analysis</b>\n"
@@ -10408,7 +10408,7 @@ msgid ""
 "profile."
 msgstr ""
 "Cela permet à l'utilisateur d'analyser et de conformer la sonie du signal à "
-"la sortie du bus maître de la session complète, comme s'il était exporté. "
+"la sortie du bus général de la session complète, comme s'il était exporté. "
 "Lorsque vous utilisez cette fonctionnalité, n'oubliez pas de désactiver la "
 "normalisation dans le profil d'exportation de la session."
 
@@ -11606,11 +11606,11 @@ msgstr "Sonie"
 
 #: mixer_strip.cc:648
 msgid "Master output volume"
-msgstr "Volume de sortie maître"
+msgstr "Volume de la sortie générale"
 
 #: mixer_strip.cc:649
 msgid "Measure loudness of the session, normalize master output volume"
-msgstr "Mesure la sonie de la session, normalise le volume de sortie maître"
+msgstr "Mesure la sonie de la session, normalise le volume de la sortie général"
 
 #: mixer_strip.cc:684
 msgid "Enable/Disable MIDI input"
@@ -12068,13 +12068,12 @@ msgid "(Right-Click to Store)"
 msgstr "(Clic-droit pour stocker)"
 
 #: mixer_ui.cc:4415
-#, fuzzy
 msgid ""
 "Disabling surround master will delete all existing surround panner state.\n"
 "This cannot be undonoe. Proceed anyway?"
 msgstr ""
 "La désactivation de l'option \"surround master\" supprimera tous les états "
-"existants de l'option \"surround panner\".\n"
+"de panneau de surround existants.\n"
 "Il n'est pas possible de revenir en arrière. Poursuivre quand même ?"
 
 #: meter_strip.cc:171
@@ -12476,7 +12475,7 @@ msgstr ""
 "\n"
 "Vous pouvez utiliser %1 pour enregistrer un orchestre, créer avec des "
 "boucles audios/MIDI, éditer la prise vocale parfaite, mixer un évènement en "
-"direct avec des effets , doubler une vidéo et masteriser vos morceaux pour "
+"direct avec des effets, doubler une vidéo et masteriser vos pistes pour "
 "une diffusion numérique. \n"
 "\n"
 "Quelques éléments doivent être configurés avant de commencer à utiliser le "
@@ -14478,7 +14477,7 @@ msgstr "RàZ vers les recommandations par défaut"
 
 #: rc_option_editor.cc:1110
 msgid "GUI and Font scaling"
-msgstr "Ajustement d'Interface et Police"
+msgstr "Ajustement d'interface et de police "
 
 #: rc_option_editor.cc:1134
 msgid ""
@@ -14523,12 +14522,14 @@ msgid "Waveform Clip Level (dBFS)"
 msgstr "Niveau d'écrêtage de la forme d'onde (dBFS) "
 
 #: rc_option_editor.cc:1206
+# extraspace needed to get a space before the semicolon
 msgid "Playback (seconds of buffering)"
-msgstr "Lecture (secondes en mémoire)"
+msgstr "Lecture (secondes en mémoire) "
 
 #: rc_option_editor.cc:1210
+# extraspace needed to get a space before the semicolon
 msgid "Recording (seconds of buffering)"
-msgstr "Enregistrement (secondes en mémoire)"
+msgstr "Enregistrement (secondes en mémoire) "
 
 #: rc_option_editor.cc:1219
 msgid "Small sessions (4-16 tracks)"
@@ -14818,8 +14819,9 @@ msgid "GUI Lock"
 msgstr "Verrouillage de l'interface"
 
 #: rc_option_editor.cc:2492
+# extraspace needed to get a space before the semicolon
 msgid "Lock timeout (seconds)"
-msgstr "Délai de temporisation du verrouillage (secondes)"
+msgstr "Délai de temporisation du verrouillage (secondes) "
 
 #: rc_option_editor.cc:2500
 msgid "Lock GUI after this many idle seconds (zero to never lock)"
@@ -14828,8 +14830,9 @@ msgstr ""
 "(zéro pour ne jamais verrouiller)"
 
 #: rc_option_editor.cc:2505
+# extraspace needed to get a space before the semicolon
 msgid "System Screensaver Mode"
-msgstr "Fonctionnement de l'écran de veille du système"
+msgstr "Fonctionnement de l'écran de veille du système "
 
 #: rc_option_editor.cc:2510
 msgid "Never Inhibit"
@@ -14864,8 +14867,9 @@ msgid "LED meter style"
 msgstr "Style d'afficheur LED"
 
 #: rc_option_editor.cc:2553
+# extraspace needed to get a space before the semicolon
 msgid "Icon Set"
-msgstr "Jeu d'icônes"
+msgstr "Jeu d'icônes "
 
 #: rc_option_editor.cc:2564
 msgid "Graphical User Interface"
@@ -14961,16 +14965,19 @@ msgid "Show Selection Marker"
 msgstr "Afficher les repères de sélection"
 
 #: rc_option_editor.cc:2675
+# extraspace needed to get a space before the semicolon
 msgid "Waveforms color gradient depth"
-msgstr "Profondeur de dégradé des couleurs de formes d'onde"
+msgstr "Profondeur de dégradé des couleurs de formes d'onde "
 
 #: rc_option_editor.cc:2686
+# extraspace needed to get a space before the semicolon
 msgid "Timeline item gradient depth"
-msgstr "Profondeur de dégradé des éléments de la ligne de temps"
+msgstr "Profondeur de dégradé des éléments de la ligne de temps "
 
 #: rc_option_editor.cc:2696
+# extraspace needed to get a space before the semicolon
 msgid "Track name ellipsize mode"
-msgstr "Mode elliptique du nom de la piste"
+msgstr "Mode elliptique du nom de la piste "
 
 #: rc_option_editor.cc:2700
 msgid "Ellipsize start of name"
@@ -14993,8 +15000,9 @@ msgstr ""
 "têtes des pistes de l'éditeur"
 
 #: rc_option_editor.cc:2709
+# extraspace needed to get a space before the semicolon
 msgid "Add a visual gap below Audio Regions"
-msgstr "Ajouter un espace visuel sous les régions audio"
+msgstr "Ajouter un espace visuel sous les régions audio "
 
 #: rc_option_editor.cc:2718
 msgid "Editor Meters"
@@ -15030,8 +15038,9 @@ msgid "Use colors to show note velocity"
 msgstr "Utiliser des couleurs pour afficher la vélocité des notes"
 
 #: rc_option_editor.cc:2773
+# extraspace needed to get a space before the semicolon
 msgid "Display note names in MIDI track headers"
-msgstr "Affichage des noms de notes dans les en-têtes de pistes MIDI"
+msgstr "Affichage des noms de notes dans les en-têtes de pistes MIDI "
 
 #: rc_option_editor.cc:2777
 msgid "Always"
@@ -15112,8 +15121,9 @@ msgstr ""
 "Utiliser par défaut des tranches de console étroites pour les nouvelles voies"
 
 #: rc_option_editor.cc:2878
+# extraspace needed to get a space before the semicolon
 msgid "Limit inline-mixer-strip controls per plugin"
-msgstr "Limiter les contrôles en-ligne dans le mixeur par greffon"
+msgstr "Limiter les contrôles en-ligne dans le mixeur par greffon "
 
 #: rc_option_editor.cc:2882 rc_option_editor.cc:4940
 msgid "Unlimited"
@@ -15168,7 +15178,7 @@ msgstr "Afficher la section info du moniteur"
 
 #: rc_option_editor.cc:2938
 msgid "Display Cue Rec/Play Controls"
-msgstr "Afficher enr. Cue/Controle lecture"
+msgstr "Afficher enr. Cue/Contrôles de lecture"
 
 #: rc_option_editor.cc:2946
 msgid "Display Navigation Timeline"
@@ -15176,7 +15186,7 @@ msgstr "Afficher la navigation chronologique"
 
 #: rc_option_editor.cc:2954
 msgid "Display Master Level Meter"
-msgstr "Afficher l'indicateur du niveau Master"
+msgstr "Afficher l'indicateur du niveau général"
 
 #: rc_option_editor.cc:2961
 msgid "Display Action-Buttons"
@@ -15188,7 +15198,7 @@ msgstr "Apparence/Taille et échelle"
 
 #: rc_option_editor.cc:2971
 msgid "User Interface Size and Scale"
-msgstr "Taille et echelle de l'interface utilisateur"
+msgstr "Taille et échelle de l'interface utilisateur"
 
 #: rc_option_editor.cc:2979 rc_option_editor.cc:2980 rc_option_editor.cc:2981
 #: rc_option_editor.cc:2993 rc_option_editor.cc:3005 rc_option_editor.cc:3018
@@ -15444,8 +15454,9 @@ msgid "Show cue markers in regions"
 msgstr "Afficherer les repères cue dans les régions"
 
 #: rc_option_editor.cc:3184
+# extraspace needed to get a space before the semicolon
 msgid "Show gain envelopes in audio regions"
-msgstr "Afficher les enveloppes de gain dans les régions audio"
+msgstr "Afficher les enveloppes de gain dans les régions audio "
 
 #: rc_option_editor.cc:3185
 msgid "in all modes"
@@ -15482,9 +15493,10 @@ msgstr ""
 "bords"
 
 #: rc_option_editor.cc:3243
+# extraspace needed to get a space before the semicolon
 msgid "Auto-scroll speed when dragging playhead"
 msgstr ""
-"Vitesse de défilement automatique lors du glissement de la tête de lecture"
+"Vitesse de défilement automatique lors du glissement de la tête de lecture "
 
 #: rc_option_editor.cc:3247
 msgid "5%"
@@ -15503,9 +15515,10 @@ msgid "50%"
 msgstr "50%"
 
 #: rc_option_editor.cc:3257
+# extraspace needed to get a space before the semicolon
 msgid "Limit zoom & summary view beyond session extents to"
 msgstr ""
-"Limiter le zoom et l'affichage du résumé au-delà des limites de la session"
+"Limiter le zoom et l'affichage du résumé au-delà des limites de la session "
 
 #: rc_option_editor.cc:3261
 msgid "1 minute"
@@ -15573,12 +15586,14 @@ msgstr ""
 "au toucher\" est utilisée."
 
 #: rc_option_editor.cc:3304
+# extraspace needed to get a space before the semicolon
 msgid "Default fade shape"
-msgstr "Forme du fondu par défaut"
+msgstr "Forme du fondu par défaut "
 
 #: rc_option_editor.cc:3323
+# extraspace needed to get a space before the semicolon
 msgid "Regions in edit groups are edited together"
-msgstr "Les régions des groupes d'édition sont éditées ensemble"
+msgstr "Les régions des groupes d'édition sont éditées ensemble "
 
 #: rc_option_editor.cc:3328
 msgid "whenever they overlap in time"
@@ -15597,8 +15612,9 @@ msgid "if they have identical length, position and layer"
 msgstr "s'ils ont une longueur, une position et une couche identiques"
 
 #: rc_option_editor.cc:3338
+# extraspace needed to get a space before the semicolon
 msgid "Layering model"
-msgstr "Type d'empilage"
+msgstr "Type d'empilage "
 
 #: rc_option_editor.cc:3343
 msgid "later is higher"
@@ -15609,8 +15625,9 @@ msgid "manual layering"
 msgstr "manuel"
 
 #: rc_option_editor.cc:3351
+# extraspace needed to get a space before the semicolon
 msgid "After a Separate operation, in Range mode"
-msgstr "Après une opération de Séparation, en mode Intervalle"
+msgstr "Après une opération de séparation, en mode Intervalle "
 
 #: rc_option_editor.cc:3355
 msgid "Clear the Range Selection"
@@ -15625,8 +15642,9 @@ msgid "Select the regions under the range."
 msgstr "Sélectionner les régions dans l'intervalle."
 
 #: rc_option_editor.cc:3363
+# extraspace needed to get a space before the semicolon
 msgid "After a Split operation, in Object mode"
-msgstr "Après une opération de Séparation, en mode Édition"
+msgstr "Après une opération de Séparation, en mode Édition "
 
 #: rc_option_editor.cc:3368
 msgid "Clear the Region Selection"
@@ -15670,12 +15688,14 @@ msgid "General Snap options:"
 msgstr "Options générales de l'aimant :"
 
 #: rc_option_editor.cc:3387
+# extraspace needed to get a space before the semicolon
 msgid "Snap Threshold (pixels)"
-msgstr "Seuil de l'aimant (pixels)"
+msgstr "Seuil de l'aimant (pixels) "
 
 #: rc_option_editor.cc:3397
+# extraspace needed to get a space before the semicolon
 msgid "Approximate Grid/Ruler granularity (pixels)"
-msgstr "Granularité approximative de la grille/règle (pixels)"
+msgstr "Granularité approximative de la grille/règle (pixels) "
 
 #: rc_option_editor.cc:3407
 msgid "Show \"snapped cursor\""
@@ -15705,8 +15725,9 @@ msgid "Snap Target Mode:"
 msgstr "Mode cibles aimantées :"
 
 #: rc_option_editor.cc:3449
+# extraspace needed to get a space before the semicolon
 msgid "When the Grid is enabled, snap to"
-msgstr "Lorsque la grille est activée, aimanter dessus"
+msgstr "Lorsque la grille est activée, aimanter dessus "
 
 #: rc_option_editor.cc:3454
 msgid "Snap Targets"
@@ -15738,7 +15759,7 @@ msgstr "Éditeur/Touches spéciales"
 
 #: rc_option_editor.cc:3500
 msgid "Keyboard Modifiers"
-msgstr "Touches Spéciales"
+msgstr "Touches spéciales"
 
 #: rc_option_editor.cc:3511
 msgid "Allow non quarter-note pulse"
@@ -15756,8 +15777,9 @@ msgstr ""
 "minute"
 
 #: rc_option_editor.cc:3524
+# extraspace needed to get a space before the semicolon
 msgid "Initial program change"
-msgstr "Modifier le programme initial (IPC)"
+msgstr "Modifier le programme initial (IPC) "
 
 #: rc_option_editor.cc:3530
 msgid "Editing"
@@ -15780,8 +15802,9 @@ msgid "Sound MIDI notes as they are selected in the editor"
 msgstr "Jouer les notes MIDI lorsqu'elles sont sélectionnées dans l'éditeur"
 
 #: rc_option_editor.cc:3562
+# extraspace needed to get a space before the semicolon
 msgid "Virtual Keyboard Layout"
-msgstr "Agencement du clavier virtuel"
+msgstr "Agencement du clavier virtuel "
 
 #: rc_option_editor.cc:3567
 msgid "Mouse-only (no keyboard)"
@@ -15820,16 +15843,19 @@ msgid "legal characters for MIDI note names|ABCDEFG#1234567890"
 msgstr "ABCDEFG#1234567890"
 
 #: rc_option_editor.cc:3581
+# extraspace needed to get a space before the semicolon
 msgid "Default lower visible MIDI note"
-msgstr "Note MIDI inférieure visible par défaut"
+msgstr "Note MIDI inférieure visible par défaut "
 
 #: rc_option_editor.cc:3586
+# extraspace needed to get a space before the semicolon
 msgid "Default upper visible MIDI note"
-msgstr "Note MIDI superieure visible par défaut"
+msgstr "Note MIDI superieure visible par défaut "
 
 #: rc_option_editor.cc:3591
+# extraspace needed to get a space before the semicolon
 msgid "Maximum note height"
-msgstr "Hauteur maximum de note"
+msgstr "Hauteur maximum de note "
 
 #: rc_option_editor.cc:3600
 msgid "MIDI Port Options"
@@ -15841,7 +15867,7 @@ msgstr "L'entrée MIDI suit la sélection de piste MIDI"
 
 #: rc_option_editor.cc:3610 rc_option_editor.cc:3611
 msgid "MIDI/MIDI Port Config"
-msgstr "Configuration de Port MIDI/MIDI"
+msgstr "MIDI/Configuration de Port MIDI"
 
 #: rc_option_editor.cc:3621
 msgid "Prompt for new marker names"
@@ -15892,9 +15918,10 @@ msgid ""
 "<b>When disabled</b> master record will be disabled when the transport "
 "transitions to stop."
 msgstr ""
-"<b>Si coché</b>, le rouge (master record) restera engagé en stoppant le "
-"défilement.\n"
-"<b>Si décoché</b>, le rouge sera désengagé en stoppant le défilement."
+"<b>Si coché</b>, l'enregistrement général restera engagé lorsque le "
+"transport passe à l'arrêt.\n"
+"<b>Si décoché</b>, l'enregistrement général sera désengagé lorsque le "
+"transport passe à l'arrêt.\n"
 
 #: rc_option_editor.cc:3655
 msgid "Reset default speed on stop"
@@ -15979,8 +16006,9 @@ msgstr ""
 "après les opérations de rembobinage/débobinage."
 
 #: rc_option_editor.cc:3711
+# extraspace needed to get a space before the semicolon
 msgid "Preroll"
-msgstr "Pré-roll"
+msgstr "Pré-roll "
 
 #: rc_option_editor.cc:3716
 msgid ""
@@ -16055,8 +16083,9 @@ msgstr ""
 "stoppe puis annule la lecture en boucle"
 
 #: rc_option_editor.cc:3748
+# extraspace needed to get a space before the semicolon
 msgid "Loop Fades"
-msgstr "Fondus de boucle"
+msgstr "Fondus de boucle "
 
 #: rc_option_editor.cc:3752
 msgid "No fades at loop boundaries"
@@ -16118,12 +16147,13 @@ msgid "Respond to MMC commands"
 msgstr "Réception des commandes MMC"
 
 #: rc_option_editor.cc:3800
+# extraspace needed to get a space before the semicolon
 msgid "Inbound MMC device ID"
-msgstr "Identifiant de l'appareil MMC en entrée"
+msgstr "Identifiant de l'appareil MMC en entrée "
 
 #: rc_option_editor.cc:3809
 msgid "Show Transport Masters Window"
-msgstr "Afficher la fenêtre du gestionnaire de transport"
+msgstr "Afficher la fenêtre du transport général"
 
 #: rc_option_editor.cc:3814
 msgid "Match session video frame rate to external timecode"
@@ -16221,8 +16251,9 @@ msgstr ""
 "(tête) est immobile"
 
 #: rc_option_editor.cc:3865
+# extraspace needed to get a space before the semicolon
 msgid "LTC generator level [dBFS]"
-msgstr "Niveau [dBFS] du générateur LTC"
+msgstr "Niveau [dBFS] du générateur LTC "
 
 #: rc_option_editor.cc:3873
 msgid ""
@@ -16242,7 +16273,7 @@ msgstr "Activer le générateur MTC"
 
 #: rc_option_editor.cc:3892
 msgid "Max MTC varispeed (%)"
-msgstr ""
+msgstr "Varispeed MTC maxi (%s) "
 
 #: rc_option_editor.cc:3897
 msgid "Percentage either side of normal transport speed to transmit MTC."
@@ -16255,8 +16286,9 @@ msgid "Send MMC commands"
 msgstr "Envoi des commandes MMC"
 
 #: rc_option_editor.cc:3913
+# extraspace needed to get a space before the semicolon
 msgid "Outbound MMC device ID"
-msgstr "Identifiant de l'appareil MMC en sortie"
+msgstr "Identifiant de l'appareil MMC en sortie "
 
 #: rc_option_editor.cc:3919
 msgid "MIDI Beat Clock (Mclk) Generator"
@@ -16416,8 +16448,9 @@ msgstr ""
 "graphique de greffon visibles est illimité"
 
 #: rc_option_editor.cc:4038
+# extraspace needed to get a space before the semicolon
 msgid "Closing a Plugin GUI Window"
-msgstr "Fermeture de la fenêtre d'interface graphique d'un greffon"
+msgstr "Fermeture de la fenêtre d'interface graphique d'un greffon "
 
 #: rc_option_editor.cc:4042
 msgid "only hides the window"
@@ -16642,22 +16675,22 @@ msgid "Plugin recent list length"
 msgstr "Longueur de la liste des greffons récents"
 
 #: rc_option_editor.cc:4310
+# extraspace needed to get a space before the semicolon
 msgid "Record monitoring handled by"
-msgstr "Écoute de contrôle de l'enregistrement géré par"
+msgstr "Écoute de contrôle de l'enregistrement géré par "
 
 #: rc_option_editor.cc:4328
 msgid "Auto Input does 'talkback'"
 msgstr "Toujours écouter l'entrée des pistes"
 
 #: rc_option_editor.cc:4334
-#, fuzzy
 msgid ""
 "<b>When enabled</b>, and Transport -> Auto-Input is enabled, %1 will always "
 "monitor audio inputs when transport is stopped, even if tracks aren't armed."
 msgstr ""
-"<b>Si coché</b>, et le bouton Entrée-auto allumé, %1 écoutera toujours "
-"l'entrée des pistes audio à l'arrêt du défilement, même si les pistes ne "
-"sont pas armées."
+"<b>Si coché</b>, et que le bouton Transport -> Entrée-auto est activé, %1 "
+"écoutera toujours les entrées audio lorsque le transport est arrêté, même "
+"si les pistes ne sont pas armées."
 
 #: rc_option_editor.cc:4341
 msgid "Solo controls are Listen controls"
@@ -16676,12 +16709,14 @@ msgid "Soloing overrides muting"
 msgstr "Solo surplante muet"
 
 #: rc_option_editor.cc:4375
+# extraspace needed to get a space before the semicolon
 msgid "Solo-in-place mute cut (dB)"
-msgstr "Diminution (en dB) des pistes NON solo-en-place"
+msgstr "Diminution (en dB) des pistes NON solo-en-place "
 
 #: rc_option_editor.cc:4382
+# extraspace needed to get a space before the semicolon
 msgid "Listen Position"
-msgstr "Position d'écoute"
+msgstr "Position d'écoute "
 
 #: rc_option_editor.cc:4387
 msgid "after-fader (AFL)"
@@ -16692,8 +16727,9 @@ msgid "pre-fader (PFL)"
 msgstr "pré-atténuateur (PFL)"
 
 #: rc_option_editor.cc:4394
+# extraspace needed to get a space before the semicolon
 msgid "PFL signals come from"
-msgstr "Les signaux PFL sont prélevés"
+msgstr "Les signaux PFL sont prélevés "
 
 #: rc_option_editor.cc:4399
 msgid "before pre-fader processors"
@@ -16704,8 +16740,9 @@ msgid "pre-fader but after pre-fader processors"
 msgstr "après les traitements pré-atténuateur"
 
 #: rc_option_editor.cc:4406
+# extraspace needed to get a space before the semicolon
 msgid "AFL signals come from"
-msgstr "Les signaux AFL sont prélevés"
+msgstr "Les signaux AFL sont prélevés "
 
 #: rc_option_editor.cc:4411
 msgid "immediately post-fader"
@@ -16721,11 +16758,12 @@ msgstr "Général"
 
 #: rc_option_editor.cc:4422
 msgid "Enable master-bus output gain control"
-msgstr "Activer le contrôle de gain de sortie du bus maître"
+msgstr "Activer le contrôle de gain de sortie du bus général"
 
 #: rc_option_editor.cc:4429
+# extraspace needed to get a space before the semicolon
 msgid "I/O Resampler (vari-speed) quality"
-msgstr "Qualité de rééchantillonage E/S (vari-speed)"
+msgstr "Qualité de rééchantillonage E/S (vari-speed) "
 
 #: rc_option_editor.cc:4434
 msgid "Off (no vari-speed)"
@@ -16832,7 +16870,7 @@ msgstr "Connexions piste et bus"
 #: rc_option_editor.cc:4520
 msgid "Auto-connect main output (master or monitor) bus to physical ports"
 msgstr ""
-"Connexion automatique du bus de sortie principal (master ou écoute de "
+"Connexion automatique du bus de sortie principal (général ou écoute de "
 "contrôle) aux ports physiques"
 
 #: rc_option_editor.cc:4526
@@ -16845,11 +16883,12 @@ msgstr ""
 "<b>Si coché</b>, le bus de sortie principal est auto-connecté aux N premiers "
 "ports physiques. Si la session comporte une section d'écoute de contrôle, "
 "son bus de sortie est connecté aux ports matériels d'écoute, sinon c'est la "
-"sortie du bus Master qui est directement utilisée pour la lecture."
+"sortie du bus général qui est directement utilisée pour la lecture."
 
 #: rc_option_editor.cc:4532
+# extraspace needed to get a space before the semicolon
 msgid "Connect track inputs"
-msgstr "Connecter les entrées des pistes"
+msgstr "Connecter les entrées des pistes "
 
 #: rc_option_editor.cc:4537
 msgid "automatically to physical inputs"
@@ -16860,8 +16899,9 @@ msgid "manually"
 msgstr "manuellement"
 
 #: rc_option_editor.cc:4544
+# extraspace needed to get a space before the semicolon
 msgid "Connect track and bus outputs"
-msgstr "Connecter les sorties de pistes et bus"
+msgstr "Connecter les sorties de pistes et bus "
 
 #: rc_option_editor.cc:4549
 msgid "automatically to physical outputs"
@@ -16900,8 +16940,9 @@ msgid "Meterbridge meters"
 msgstr "Bandeau de mesure"
 
 #: rc_option_editor.cc:4603
+# extraspace needed to get a space before the semicolon
 msgid "Peak hold time"
-msgstr "Durée de maintien de crête"
+msgstr "Durée de maintien de crête "
 
 #: rc_option_editor.cc:4609
 msgid "short"
@@ -16916,8 +16957,9 @@ msgid "long"
 msgstr "long"
 
 #: rc_option_editor.cc:4617
+# extraspace needed to get a space before the semicolon
 msgid "DPM fall-off"
-msgstr "Chute du pic"
+msgstr "Chute du pic "
 
 #: rc_option_editor.cc:4623
 msgid "slowest [6.6dB/sec]"
@@ -16944,8 +16986,9 @@ msgid "very fast [32dB/sec]"
 msgstr "très rapide [32dB/sec]"
 
 #: rc_option_editor.cc:4634
+# extraspace needed to get a space before the semicolon
 msgid "Meter line-up level; 0dBu"
-msgstr "Niveau ligne, 0 dBu"
+msgstr "Niveau ligne, 0 dBu "
 
 #: rc_option_editor.cc:4639 rc_option_editor.cc:4655
 msgid "-24dBFS (SMPTE US: 4dBu = -20dBFS)"
@@ -16973,16 +17016,18 @@ msgstr ""
 "et VU-mètre."
 
 #: rc_option_editor.cc:4650
+# extraspace needed to get a space before the semicolon
 msgid "IEC1/DIN Meter line-up level; 0dBu"
-msgstr "Niveau ligne IEC1/DIN, 0 dBu"
+msgstr "Niveau ligne IEC1/DIN, 0 dBu "
 
 #: rc_option_editor.cc:4660
 msgid "Reference level for IEC1/DIN meter."
 msgstr "Niveau de référence pour les indicateurs IEC1/DIN."
 
 #: rc_option_editor.cc:4666
+# extraspace needed to get a space before the semicolon
 msgid "VU Meter standard"
-msgstr "VU-mètre standard"
+msgstr "VU-mètre standard "
 
 #: rc_option_editor.cc:4671
 msgid "0VU = -2dBu (France)"
@@ -17001,8 +17046,9 @@ msgid "0VU = +8dBu"
 msgstr "0VU = +8dBu"
 
 #: rc_option_editor.cc:4679
+# extraspace needed to get a space before the semicolon
 msgid "Peak indicator threshold [dBFS]"
-msgstr "Seuil de l'indicateur de pic [dBFS]"
+msgstr "Seuil de l'indicateur de pic [dBFS] "
 
 #: rc_option_editor.cc:4687
 msgid ""
@@ -17022,19 +17068,22 @@ msgid ""
 "this will be when a new session is created."
 msgstr ""
 "Ces réglages s'appliquent aux pistes et bus nouvellement créés. Pour le bus "
-"Master, ce sera à la création d'une nouvelle session."
+"général, ce sera à la création d'une nouvelle session."
 
 #: rc_option_editor.cc:4698
+# extraspace needed to get a space before the semicolon
 msgid "Default Meter Type for Master Bus"
-msgstr "Type d'indicateur par défaut du bus Master"
+msgstr "Type d'indicateur par défaut du bus général "
 
 #: rc_option_editor.cc:4716
+# extraspace needed to get a space before the semicolon
 msgid "Default meter type for busses"
-msgstr "Type d'indicateur par défaut des bus"
+msgstr "Type d'indicateur par défaut des bus "
 
 #: rc_option_editor.cc:4734
+# extraspace needed to get a space before the semicolon
 msgid "Default meter type for tracks"
-msgstr "Type d'indicateur par défaut des pistes"
+msgstr "Type d'indicateur par défaut des pistes "
 
 #: rc_option_editor.cc:4750
 msgid "Region Analysis"
@@ -17057,8 +17106,9 @@ msgid "DSP CPU Utilization"
 msgstr "Utilisation processeur par les traitements audio"
 
 #: rc_option_editor.cc:4770
+# extraspace needed to get a space before the semicolon
 msgid "Signal processing uses"
-msgstr "Le traitement du signal utilise"
+msgstr "Le traitement du signal utilise "
 
 #: rc_option_editor.cc:4775
 msgid "all but one processor"
@@ -17079,8 +17129,9 @@ msgid "This setting will only take effect when %1 is restarted."
 msgstr "Cette option ne sera prise en compte qu'après un redémarrage d'%1."
 
 #: rc_option_editor.cc:4792
+# extraspace needed to get a space before the semicolon
 msgid "Power Management, CPU DMA latency"
-msgstr "Gestion de l'énergie, latence DMA du CPU"
+msgstr "Gestion de l'énergie, latence DMA du CPU "
 
 #: rc_option_editor.cc:4823
 msgid "Lowest (prevent CPU sleep states)"
@@ -17113,8 +17164,9 @@ msgid "Use DC bias to protect against denormals"
 msgstr "Utiliser un courant polarisé (DC) pour éviter les dénormalisations"
 
 #: rc_option_editor.cc:4853
+# extraspace needed to get a space before the semicolon
 msgid "Processor handling"
-msgstr "Gestion du traitement"
+msgstr "Gestion du traitement "
 
 #: rc_option_editor.cc:4859
 msgid "no processor handling"
@@ -17147,8 +17199,9 @@ msgid "Memory Usage"
 msgstr "Utilisation de la mémoire"
 
 #: rc_option_editor.cc:4901
+# extraspace needed to get a space before the semicolon
 msgid "Waveform image cache size (megabytes)"
-msgstr "Taille du cache d'images de signal (Mb)"
+msgstr "Taille du cache d'images de signal (Mb) "
 
 #: rc_option_editor.cc:4909
 msgid ""
@@ -17159,20 +17212,23 @@ msgstr ""
 "de signal, ce qui peut impacter les performances graphiques."
 
 #: rc_option_editor.cc:4917
+# extraspace needed to get a space before the semicolon
 msgid "Thinning factor (larger value => less data)"
-msgstr "Facteur d'espacement (plus => moins de données)"
+msgstr "Facteur d'espacement (plus => moins de données) "
 
 #: rc_option_editor.cc:4926
+# extraspace needed to get a space before the semicolon
 msgid "Automation sampling interval (milliseconds)"
-msgstr "Intervalle des points d'automation (msec)"
+msgstr "Intervalle des points d'automation (msec) "
 
 #: rc_option_editor.cc:4932
 msgid "Automatables"
 msgstr "Automatisables"
 
 #: rc_option_editor.cc:4936
+# extraspace needed to get a space before the semicolon
 msgid "Limit automatable parameters per plugin"
-msgstr "Limiter les paramètres d'automation par greffon"
+msgstr "Limiter les paramètres d'automation par greffon "
 
 #: rc_option_editor.cc:4943
 msgid "256 parameters"
@@ -17657,7 +17713,6 @@ msgid "Record enable"
 msgstr "Armement"
 
 #: route_group_dialog.cc:53
-#, fuzzy
 msgid "Surround Send enable"
 msgstr "Activation du départ Surround"
 
@@ -18004,7 +18059,6 @@ msgid "Main Outs"
 msgstr "Sorties principales"
 
 #: route_ui.cc:1479
-#, fuzzy
 msgid "Surround Send"
 msgstr "Départ Surround"
 
@@ -18901,7 +18955,7 @@ msgstr "Afficher les bus"
 
 #: session_option_editor.cc:306
 msgid "Include Master Bus"
-msgstr "Inclure le bus Master"
+msgstr "Inclure le bus général"
 
 #: session_option_editor.cc:311
 msgid "Button Area"
@@ -19372,7 +19426,7 @@ msgstr "<b>Noms de pistes MIDI :</b>"
 
 #: sfdb_ui.cc:1961
 msgid "<b>Audio conversion quality:</b>"
-msgstr "<b>Qualité de conversion ausio :</b>"
+msgstr "<b>Qualité de conversion audio :</b>"
 
 #: sfdb_ui.cc:1982 sfdb_ui.cc:2101
 msgid "Best"
@@ -19446,7 +19500,6 @@ msgid "> %+2d st"
 msgstr "> %+2d st"
 
 #: simple_export_dialog.cc:47
-#, fuzzy
 msgid "Surround Master Export"
 msgstr "Exportation Surround Master"
 
@@ -21717,7 +21770,7 @@ msgstr "Audio :"
 
 #: export_video_dialog.cc:132
 msgid "Master Bus"
-msgstr "Bus master"
+msgstr "Bus général"
 
 #: export_video_dialog.cc:142
 msgid "(default for codec)"
@@ -21838,7 +21891,7 @@ msgstr ""
 #: export_video_dialog.cc:608
 msgid "Export Video: No Master Out Ports to Connect for Audio Export"
 msgstr ""
-"Export vidéo : aucun port de sortie principal auquel se connecter pour "
+"Export vidéo : aucun port de sortie générale auquel se connecter pour "
 "l'export audio"
 
 #: export_video_dialog.cc:655
@@ -22617,9 +22670,6 @@ msgstr "Fichier vidéo d'entrée"
 #~ "\n"
 #~ "Nous allons configurer le logiciel avant que vous ne l'utilisiez.</span> "
 
-#~ msgid "GUI and Font scaling:"
-#~ msgstr "Ajustement d'interface et de police : "
-
 #~ msgid ""
 #~ "Each project that you work on with %1 has its own folder.\n"
 #~ "These can require a lot of disk space if you are recording audio.\n"
@@ -23094,10 +23144,6 @@ msgstr "Fichier vidéo d'entrée"
 #~ msgid "Transcoding Video.."
 #~ msgstr "Transcodage vidéo.."
 
-#, fuzzy
-#~ msgid "Scale Video (W x H):"
-#~ msgstr "Taille de vidéo (L x H) :"
-
 #~ msgid "Retain Aspect"
 #~ msgstr "Conserver l'aspect"
 
@@ -23112,9 +23158,6 @@ msgstr "Fichier vidéo d'entrée"
 
 #~ msgid "Codec Optimizations:"
 #~ msgstr "Optimisations du codec :"
-
-#~ msgid "Deinterlace"
-#~ msgstr "Désentrelacer"
 
 #~ msgid "Use [2] B-frames (MPEG 2 or 4 only)"
 #~ msgstr "Choisir [2] B-frames (MPEG 2 ou 4 uniquement)"
@@ -23468,26 +23511,6 @@ msgstr "Fichier vidéo d'entrée"
 #~ "<b>Si inactif</b> la boucle est réalisée en se repositionnant au début de "
 #~ "la boucle quand %1 atteint la fin, ce qui peut souvent causer un léger "
 #~ "clic ou délai."
-
-#~ msgid ""
-#~ "Rules for closing, minimizing, maximizing, and stay-on-top can vary with "
-#~ "each version of your OS, and the preferences that you've set in your OS.\n"
-#~ "\n"
-#~ "You can adjust the options, below, to change how %1's windows and dialogs "
-#~ "behave.\n"
-#~ "\n"
-#~ "These settings will only take effect after %1 is restarted.\n"
-#~ "\t"
-#~ msgstr ""
-#~ "Les règles pour fermer, minimiser, maximiser, and rester au-dessus "
-#~ "varient selon la version de votre SO, et les préférences que vous avez "
-#~ "réglées dans votre SO.\n"
-#~ "\n"
-#~ "Vous pouvez ajuster les options, ci-dessous, pour modifier le "
-#~ "comportement des fenêtres et boites de dialogue d'%1.\n"
-#~ "\n"
-#~ "Ces réglages ne prendront effet qu'après un redémarrage d'%1.\n"
-#~ "\t"
 
 #~ msgid "destructive-xfade-seconds"
 #~ msgstr "Secondes-de-fondu-destructif"

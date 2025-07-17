@@ -38,8 +38,6 @@
 #include <glib/gprintf.h>
 #include <glibmm.h>
 
-#include <boost/utility.hpp>
-
 #include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
 #include "pbd/compose.h"
@@ -64,6 +62,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/directory_names.h"
 #include "ardour/debug.h"
+#include "ardour/lv2_evbuf.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/session.h"
@@ -116,8 +115,6 @@
 #include <lv2/lv2plug.in/ns/ext/options/options.h>
 #endif
 
-#include "lv2_evbuf.h"
-
 #ifdef HAVE_SUIL
 #include <suil/suil.h>
 #endif
@@ -160,9 +157,11 @@ uint32_t      LV2Plugin::_ui_contrasting_color = 0x33ff33ff; // RGBA
 unsigned long LV2Plugin::_ui_transient_win_id  = 0;
 
 
-class LV2World : boost::noncopyable {
+class LV2World {
 public:
 	LV2World ();
+	LV2World (const LV2World&) = delete;
+	LV2World& operator= (const LV2World&) = delete;
 	~LV2World ();
 
 	void load_bundled_plugins(bool verbose=false);
@@ -189,6 +188,7 @@ public:
 	LilvNode* lv2_ControlPort;
 	LilvNode* lv2_InputPort;
 	LilvNode* lv2_OutputPort;
+	LilvNode* lv2_connectionOptional;
 	LilvNode* lv2_designation;
 	LilvNode* lv2_enumeration;
 	LilvNode* lv2_freewheeling;
@@ -453,6 +453,7 @@ LV2Plugin::LV2Plugin (AudioEngine& engine,
 	, _worker(NULL)
 	, _state_worker(NULL)
 	, _insert_id("0")
+	, _non_realtime (false)
 	, _bpm_control_port_index((uint32_t)-1)
 	, _patch_port_in_index((uint32_t)-1)
 	, _patch_port_out_index((uint32_t)-1)
@@ -472,6 +473,7 @@ LV2Plugin::LV2Plugin (const LV2Plugin& other)
 	, _worker(NULL)
 	, _state_worker(NULL)
 	, _insert_id(other._insert_id)
+	, _non_realtime (other._non_realtime)
 	, _bpm_control_port_index((uint32_t)-1)
 	, _patch_port_in_index((uint32_t)-1)
 	, _patch_port_out_index((uint32_t)-1)
@@ -607,7 +609,8 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	static const int32_t _min_block_length = 1;   // may happen during split-cycles
 	static const int32_t _max_block_length = 8192; // max possible (with all engines and during export)
 	static const int32_t rt_policy = PBD_SCHED_FIFO;
-	static const int32_t rt_priority = pbd_absolute_rt_priority (PBD_SCHED_FIFO, AudioEngine::instance()->client_real_time_priority () - 1);
+	static const int32_t rt_priority = pbd_absolute_rt_priority (PBD_SCHED_FIFO, PBD_RT_PRI_PROC);
+	static const int32_t hw_concurrency = how_many_dsp_threads ();
 	/* Consider updating max-block-size whenever the buffersize changes.
 	 * It requires re-instantiating the plugin (which is a non-realtime operation),
 	 * so it should be done lightly and only for plugins that require it.
@@ -630,6 +633,8 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		  sizeof(int32_t), atom_Int, &rt_policy },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://ardour.org/lv2/threads/#schedPriority"),
 		  sizeof(int32_t), atom_Int, &rt_priority },
+		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://ardour.org/lv2/threads/#concurrency"),
+		  sizeof(int32_t), atom_Int, &hw_concurrency },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#backgroundColor"),
 		  sizeof(int32_t), atom_Int, &_ui_background_color },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#foregroundColor"),
@@ -835,10 +840,10 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 			lilv_nodes_free(min_size_v);
 			lilv_nodes_free(buffer_types);
 			lilv_nodes_free(atom_supports);
+		} else if (lilv_port_has_property(_impl->plugin, port, _world.lv2_connectionOptional)) {
+			flags |= PORT_OTHOPT; // unknown data type but connection optional
 		} else {
-			error << string_compose(
-				"LV2: \"%1\" port %2 has no known data type",
-				lilv_node_as_string(_impl->name), i) << endmsg;
+			error << string_compose("LV2: \"%1\" port %2 has unsupported or unknown data type", lilv_node_as_string(_impl->name), i) << endmsg;
 			throw failed_constructor();
 		}
 
@@ -1104,7 +1109,7 @@ LV2Plugin::~LV2Plugin ()
 	if (_atom_ev_buffers) {
 		LV2_Evbuf**  b = _atom_ev_buffers;
 		while (*b) {
-			free(*b);
+			lv2_evbuf_free (*b);
 			b++;
 		}
 		free(_atom_ev_buffers);
@@ -1830,6 +1835,12 @@ LV2Plugin::remove_slave (std::shared_ptr<Plugin> p)
 	}
 }
 
+void
+LV2Plugin::set_non_realtime (bool yn)
+{
+	_non_realtime = yn;
+}
+
 bool
 LV2Plugin::has_message_output() const
 {
@@ -1856,7 +1867,7 @@ LV2Plugin::write_to(RingBuffer<uint8_t>* dest,
 		return false;
 	}
 
-	vector<uint8_t> buf(buf_size);
+	uint8_t* buf = (uint8_t*) g_alloca (sizeof (uint8_t) * buf_size);
 	UIMessage* msg = (UIMessage*)&buf[0];
 	msg->index    = index;
 	msg->protocol = protocol;
@@ -2790,7 +2801,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	TempoMetric metric (tmap->metric_at (timepos_t (start0)));
 
 	if (_freewheel_control_port) {
-		*_freewheel_control_port = _session.engine().freewheeling() ? 1.f : 0.f;
+		*_freewheel_control_port = _non_realtime || _session.engine().freewheeling() ? 1.f : 0.f;
 	}
 
 	if (_bpm_control_port) {
@@ -2845,12 +2856,12 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				index = in_map.get(DataType::AUDIO, audio_in_index++, &valid);
 				buf = (valid)
 					? bufs.get_audio(index).data(offset)
-					: silent_bufs.get_audio(0).data(offset);
+					: silent_bufs.get_audio(0).data(0);
 			} else {
 				index = out_map.get(DataType::AUDIO, audio_out_index++, &valid);
 				buf = (valid)
 					? bufs.get_audio(index).data(offset)
-					: scratch_bufs.get_audio(0).data(offset);
+					: scratch_bufs.get_audio(0).data(0);
 			}
 		} else if (flags & PORT_SEQUENCE) {
 			/* FIXME: The checks here for bufs.count().n_midi() > index shouldn't
@@ -2985,6 +2996,8 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			}
 
 			buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
+		} else if(flags & PORT_OTHOPT) {
+			// Explicitely connect optional ports that we can not handle to NULL
 		} else {
 			continue;  // Control port, leave buffer alone
 		}
@@ -3379,7 +3392,7 @@ LV2Plugin::run(pframes_t nframes, bool sync_work)
 
 	if (_worker) {
 		// Execute work synchronously if we're freewheeling (export)
-		_worker->set_synchronous(sync_work || session().engine().freewheeling());
+		_worker->set_synchronous(sync_work || _non_realtime || session().engine().freewheeling());
 	}
 
 	// Run the plugin for this cycle
@@ -3444,6 +3457,8 @@ LV2Plugin::latency_compute_run()
 			ev_buffers.push_back (lv2_evbuf_new (buf_size, _uri_map.urids.atom_Chunk, _uri_map.urids.atom_Sequence));
 			void* buf = lv2_evbuf_get_buffer (ev_buffers.back ());
 			lilv_instance_connect_port(_impl->instance, port_index, buf);
+		} else if (flags & PORT_OTHOPT) {
+			lilv_instance_connect_port(_impl->instance, port_index, NULL);
 		}
 	}
 
@@ -3486,58 +3501,59 @@ LV2World::LV2World()
 	: world(lilv_world_new())
 	, _bundle_checked(false)
 {
-	atom_AtomPort      = lilv_new_uri(world, LV2_ATOM__AtomPort);
-	atom_Chunk         = lilv_new_uri(world, LV2_ATOM__Chunk);
-	atom_Sequence      = lilv_new_uri(world, LV2_ATOM__Sequence);
-	atom_bufferType    = lilv_new_uri(world, LV2_ATOM__bufferType);
-	atom_supports      = lilv_new_uri(world, LV2_ATOM__supports);
-	atom_eventTransfer = lilv_new_uri(world, LV2_ATOM__eventTransfer);
-	ev_EventPort       = lilv_new_uri(world, LILV_URI_EVENT_PORT);
-	ext_logarithmic    = lilv_new_uri(world, LV2_PORT_PROPS__logarithmic);
-	ext_notOnGUI       = lilv_new_uri(world, LV2_PORT_PROPS__notOnGUI);
-	ext_expensive      = lilv_new_uri(world, LV2_PORT_PROPS__expensive);
-	ext_causesArtifacts= lilv_new_uri(world, LV2_PORT_PROPS__causesArtifacts);
-	ext_notAutomatic   = lilv_new_uri(world, LV2_PORT_PROPS__notAutomatic);
-	ext_rangeSteps     = lilv_new_uri(world, LV2_PORT_PROPS__rangeSteps);
-	ext_displayPriority= lilv_new_uri(world, LV2_PORT_PROPS__displayPriority);
-	groups_group       = lilv_new_uri(world, LV2_PORT_GROUPS__group);
-	groups_element     = lilv_new_uri(world, LV2_PORT_GROUPS__element);
-	lv2_AudioPort      = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
-	lv2_ControlPort    = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
-	lv2_InputPort      = lilv_new_uri(world, LILV_URI_INPUT_PORT);
-	lv2_OutputPort     = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
-	lv2_inPlaceBroken  = lilv_new_uri(world, LV2_CORE__inPlaceBroken);
-	lv2_isSideChain    = lilv_new_uri(world, LV2_CORE_PREFIX "isSideChain");
-	lv2_index          = lilv_new_uri(world, LV2_CORE__index);
-	lv2_integer        = lilv_new_uri(world, LV2_CORE__integer);
-	lv2_default        = lilv_new_uri(world, LV2_CORE__default);
-	lv2_minimum        = lilv_new_uri(world, LV2_CORE__minimum);
-	lv2_maximum        = lilv_new_uri(world, LV2_CORE__maximum);
-	lv2_reportsLatency = lilv_new_uri(world, LV2_CORE__reportsLatency);
-	lv2_sampleRate     = lilv_new_uri(world, LV2_CORE__sampleRate);
-	lv2_toggled        = lilv_new_uri(world, LV2_CORE__toggled);
-	lv2_designation    = lilv_new_uri(world, LV2_CORE__designation);
-	lv2_enumeration    = lilv_new_uri(world, LV2_CORE__enumeration);
-	lv2_freewheeling   = lilv_new_uri(world, LV2_CORE__freeWheeling);
-	midi_MidiEvent     = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
-	rdfs_comment       = lilv_new_uri(world, LILV_NS_RDFS "comment");
-	rdfs_label         = lilv_new_uri(world, LILV_NS_RDFS "label");
-	rdfs_range         = lilv_new_uri(world, LILV_NS_RDFS "range");
-	rsz_minimumSize    = lilv_new_uri(world, LV2_RESIZE_PORT__minimumSize);
-	time_Position      = lilv_new_uri(world, LV2_TIME__Position);
-	time_beatsPerMin   = lilv_new_uri(world, LV2_TIME__beatsPerMinute);
-	ui_GtkUI           = lilv_new_uri(world, LV2_UI__GtkUI);
-	ui_X11UI           = lilv_new_uri(world, LV2_UI__X11UI);
-	ui_external        = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
-	ui_externalkx      = lilv_new_uri(world, "http://kxstudio.sf.net/ns/lv2ext/external-ui#Widget");
-	units_unit         = lilv_new_uri(world, LV2_UNITS__unit);
-	units_render       = lilv_new_uri(world, LV2_UNITS__render);
-	units_hz           = lilv_new_uri(world, LV2_UNITS__hz);
-	units_midiNote     = lilv_new_uri(world, LV2_UNITS__midiNote);
-	units_db           = lilv_new_uri(world, LV2_UNITS__db);
-	patch_writable     = lilv_new_uri(world, LV2_PATCH__writable);
-	patch_Message      = lilv_new_uri(world, LV2_PATCH__Message);
-	opts_requiredOptions = lilv_new_uri(world, LV2_OPTIONS__requiredOption);
+	atom_AtomPort          = lilv_new_uri(world, LV2_ATOM__AtomPort);
+	atom_Chunk             = lilv_new_uri(world, LV2_ATOM__Chunk);
+	atom_Sequence          = lilv_new_uri(world, LV2_ATOM__Sequence);
+	atom_bufferType        = lilv_new_uri(world, LV2_ATOM__bufferType);
+	atom_supports          = lilv_new_uri(world, LV2_ATOM__supports);
+	atom_eventTransfer     = lilv_new_uri(world, LV2_ATOM__eventTransfer);
+	ev_EventPort           = lilv_new_uri(world, LILV_URI_EVENT_PORT);
+	ext_logarithmic        = lilv_new_uri(world, LV2_PORT_PROPS__logarithmic);
+	ext_notOnGUI           = lilv_new_uri(world, LV2_PORT_PROPS__notOnGUI);
+	ext_expensive          = lilv_new_uri(world, LV2_PORT_PROPS__expensive);
+	ext_causesArtifacts    = lilv_new_uri(world, LV2_PORT_PROPS__causesArtifacts);
+	ext_notAutomatic       = lilv_new_uri(world, LV2_PORT_PROPS__notAutomatic);
+	ext_rangeSteps         = lilv_new_uri(world, LV2_PORT_PROPS__rangeSteps);
+	ext_displayPriority    = lilv_new_uri(world, LV2_PORT_PROPS__displayPriority);
+	groups_group           = lilv_new_uri(world, LV2_PORT_GROUPS__group);
+	groups_element         = lilv_new_uri(world, LV2_PORT_GROUPS__element);
+	lv2_AudioPort          = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
+	lv2_ControlPort        = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
+	lv2_InputPort          = lilv_new_uri(world, LILV_URI_INPUT_PORT);
+	lv2_OutputPort         = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
+	lv2_connectionOptional = lilv_new_uri(world, LV2_CORE__connectionOptional);
+	lv2_inPlaceBroken      = lilv_new_uri(world, LV2_CORE__inPlaceBroken);
+	lv2_isSideChain        = lilv_new_uri(world, LV2_CORE_PREFIX "isSideChain");
+	lv2_index              = lilv_new_uri(world, LV2_CORE__index);
+	lv2_integer            = lilv_new_uri(world, LV2_CORE__integer);
+	lv2_default            = lilv_new_uri(world, LV2_CORE__default);
+	lv2_minimum            = lilv_new_uri(world, LV2_CORE__minimum);
+	lv2_maximum            = lilv_new_uri(world, LV2_CORE__maximum);
+	lv2_reportsLatency     = lilv_new_uri(world, LV2_CORE__reportsLatency);
+	lv2_sampleRate         = lilv_new_uri(world, LV2_CORE__sampleRate);
+	lv2_toggled            = lilv_new_uri(world, LV2_CORE__toggled);
+	lv2_designation        = lilv_new_uri(world, LV2_CORE__designation);
+	lv2_enumeration        = lilv_new_uri(world, LV2_CORE__enumeration);
+	lv2_freewheeling       = lilv_new_uri(world, LV2_CORE__freeWheeling);
+	midi_MidiEvent         = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
+	rdfs_comment           = lilv_new_uri(world, LILV_NS_RDFS "comment");
+	rdfs_label             = lilv_new_uri(world, LILV_NS_RDFS "label");
+	rdfs_range             = lilv_new_uri(world, LILV_NS_RDFS "range");
+	rsz_minimumSize        = lilv_new_uri(world, LV2_RESIZE_PORT__minimumSize);
+	time_Position          = lilv_new_uri(world, LV2_TIME__Position);
+	time_beatsPerMin       = lilv_new_uri(world, LV2_TIME__beatsPerMinute);
+	ui_GtkUI               = lilv_new_uri(world, LV2_UI__GtkUI);
+	ui_X11UI               = lilv_new_uri(world, LV2_UI__X11UI);
+	ui_external            = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
+	ui_externalkx          = lilv_new_uri(world, "http://kxstudio.sf.net/ns/lv2ext/external-ui#Widget");
+	units_unit             = lilv_new_uri(world, LV2_UNITS__unit);
+	units_render           = lilv_new_uri(world, LV2_UNITS__render);
+	units_hz               = lilv_new_uri(world, LV2_UNITS__hz);
+	units_midiNote         = lilv_new_uri(world, LV2_UNITS__midiNote);
+	units_db               = lilv_new_uri(world, LV2_UNITS__db);
+	patch_writable         = lilv_new_uri(world, LV2_PATCH__writable);
+	patch_Message          = lilv_new_uri(world, LV2_PATCH__Message);
+	opts_requiredOptions   = lilv_new_uri(world, LV2_OPTIONS__requiredOption);
 #ifdef LV2_EXTENDED
 	lv2_noSampleAccurateCtrl    = lilv_new_uri(world, "http://ardour.org/lv2/ext#noSampleAccurateControls"); // deprecated 2016-09-18
 	routing_connectAllOutputs   = lilv_new_uri(world, LV2_ROUTING__connectAllOutputs);
@@ -3608,6 +3624,7 @@ LV2World::~LV2World()
 	lilv_node_free(lv2_integer);
 	lilv_node_free(lv2_isSideChain);
 	lilv_node_free(lv2_inPlaceBroken);
+	lilv_node_free(lv2_connectionOptional);
 	lilv_node_free(lv2_OutputPort);
 	lilv_node_free(lv2_InputPort);
 	lilv_node_free(lv2_ControlPort);
@@ -3775,7 +3792,7 @@ LV2PluginInfo::get_presets (bool user_only) const
 }
 
 PluginInfoList*
-LV2PluginInfo::discover (boost::function <void (std::string const&, PluginScanLogEntry::PluginScanResult, std::string const&, bool)> cb)
+LV2PluginInfo::discover (std::function <void (std::string const&, PluginScanLogEntry::PluginScanResult, std::string const&, bool)> cb)
 {
 	LV2World world;
 	world.load_bundled_plugins();
@@ -3939,7 +3956,7 @@ LV2PluginInfo::discover (boost::function <void (std::string const&, PluginScanLo
 				}
 
 				if (!lilv_nodes_contains(buffer_types, world.atom_Sequence)) {
-					cb (uri, PluginScanLogEntry::Error, _("Found Atom port without sequence support, ignored"), false);
+					cb (uri, PluginScanLogEntry::Error, _("Found Atom port without sequence support."), false);
 					/* ignore non-sequence Atom ports */
 					err = 1;
 				}
@@ -3963,10 +3980,15 @@ LV2PluginInfo::discover (boost::function <void (std::string const&, PluginScanLo
 					count_ctrl_out++;
 				}
 			}
-			else if (!lilv_port_is_a (p, port, world.lv2_AudioPort)) {
+			else if (lilv_port_has_property(p, port, world.lv2_connectionOptional)) {
+				LilvNode* name = lilv_port_get_name(p, port);
+				cb (uri, PluginScanLogEntry::OK, string_compose (_("Ignored optional port %1 ('%2') which has unsupported data type."), i, lilv_node_as_string (name)), false);
+				lilv_node_free(name);
+			}
+			else if (!lilv_port_is_a(p, port, world.lv2_AudioPort)) {
 				err = 1;
 				LilvNode* name = lilv_port_get_name(p, port);
-				cb (uri, PluginScanLogEntry::Error, string_compose (_("Port %1 ('%2') has no known data type"), i, lilv_node_as_string (name)), false);
+				cb (uri, PluginScanLogEntry::Error, string_compose (_("Port %1 ('%2') has unsupported data type."), i, lilv_node_as_string (name)), false);
 				lilv_node_free(name);
 			}
 		}

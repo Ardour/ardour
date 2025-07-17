@@ -18,11 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_interthread_progress_window_h__
-#define __ardour_interthread_progress_window_h__
+#pragma once
 
-#include <gtkmm/label.h>
-#include <gtkmm/progressbar.h>
+#include <ytkmm/label.h>
+#include <ytkmm/progressbar.h>
 #include "ardour_dialog.h"
 
 namespace ARDOUR {
@@ -68,4 +67,3 @@ private:
 	ARDOUR::ImportStatus* _import_status;
 };
 
-#endif

@@ -20,9 +20,10 @@
 #ifndef _gtk_ardour_audio_trigger_properties_box_h_
 #define _gtk_ardour_audio_trigger_properties_box_h_
 
-#include <gtkmm/box.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
+#include <ytkmm/box.h>
+#include <ytkmm/label.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/table.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"

@@ -173,7 +173,7 @@ Automatable::add_control(std::shared_ptr<Evoral::Control> ac)
 	if ((!actl || !(actl->flags() & Controllable::NotAutomatable)) && al) {
 		al->automation_state_changed.connect_same_thread (
 			_list_connections,
-			boost::bind (&Automatable::automation_list_automation_state_changed,
+			std::bind (&Automatable::automation_list_automation_state_changed,
 			             this, ac->parameter(), _1));
 	}
 
@@ -554,7 +554,7 @@ Automatable::automation_list_automation_state_changed (Evoral::Parameter const& 
 std::shared_ptr<Evoral::Control>
 Automatable::control_factory(const Evoral::Parameter& param)
 {
-	Evoral::Control*                  control   = NULL;
+	Evoral::Control*                  control   = nullptr;
 	bool                              make_list = true;
 	ParameterDescriptor               desc(param);
 	std::shared_ptr<AutomationList> list;
@@ -569,7 +569,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 		PluginInsert* pi = dynamic_cast<PluginInsert*>(this);
 		if (pi) {
 			pi->plugin(0)->get_parameter_descriptor(param.id(), desc);
-			control = new PluginInsert::PluginControl(pi, param, desc);
+			control = new PluginInsert::PIControl (_a_session, pi, param, desc);
 		} else {
 			warning << "PluginAutomation for non-Plugin" << endl;
 		}
@@ -583,7 +583,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 				} else {
 					list = std::shared_ptr<AutomationList>(new AutomationList(param, desc, Temporal::TimeDomainProvider (Temporal::AudioTime)));
 				}
-				control = new PluginInsert::PluginPropertyControl(pi, param, desc, list);
+				control = new PluginInsert::PluginPropertyControl (_a_session, pi, param, desc, list);
 			}
 		} else {
 			warning << "PluginPropertyAutomation for non-Plugin" << endl;
@@ -722,7 +722,7 @@ Automatable::find_next_event (timepos_t const & start, timepos_t const & end, Ev
 }
 
 void
-Automatable::find_next_ac_event (std::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event) const
+Automatable::find_next_ac_event (std::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event)
 {
 	assert (start <= end);
 
@@ -749,7 +749,7 @@ Automatable::find_next_ac_event (std::shared_ptr<AutomationControl> c, timepos_t
 }
 
 void
-Automatable::find_prev_ac_event (std::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event) const
+Automatable::find_prev_ac_event (std::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event)
 {
 	assert (start > end);
 	std::shared_ptr<SlavableAutomationControl> sc

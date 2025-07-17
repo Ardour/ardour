@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_main_clock_h__
-#define __gtk_ardour_main_clock_h__
+#pragma once
 
 #include "audio_clock.h"
 
@@ -28,11 +27,30 @@
 class MainClock : public AudioClock
 {
 public:
-	MainClock (const std::string& clock_name, const std::string& widget_name);
+	enum ClockDisposition {
+		PrimaryClock,
+		SecondaryClock
+	};
+
+	MainClock (const std::string& clock_name, const std::string& widget_name, ClockDisposition d);
 	void set_session (ARDOUR::Session *s);
+
+	ARDOUR::ClockDeltaMode display_delta_mode () {return _delta_mode;}
 	void set_display_delta_mode (ARDOUR::ClockDeltaMode m);
-	void set (Temporal::timepos_t const &, bool force = false);
+
+	void set (Temporal::timepos_t const &, bool force = false, bool round_to_beat = false);
 	sigc::signal<bool, ARDOUR::ClockDeltaMode> change_display_delta_mode_signal;
+
+	sigc::signal<void> CanonicalClockChanged;
+
+	void clock_value_changed();
+
+	void parameter_changed (std::string p);
+
+protected:
+	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
+	void on_size_request (Gtk::Requisition* req);
+	ClockDisposition _disposition;
 
 private:
 	void build_ops_menu ();
@@ -43,7 +61,26 @@ private:
 	void insert_new_meter ();
 	bool _suspend_delta_mode_signal;
 	std::string _widget_name;
-	ARDOUR::ClockDeltaMode _delta_mode;
+
+	ARDOUR::ClockDeltaMode      _delta_mode;
+	Glib::RefPtr<Pango::Layout> _layout;
+	int _layout_width;
+	int _layout_height;
 };
 
-#endif // __gtk_ardour_main_clock_h__
+/** TransportClock is a clock widget that reflects the state of the canonical MainClocks in ARDOUR_UI (either Primary or Secondary)
+ * there are multiple Primary and Secondary clock widgets, but from the user's perspective they all represent the "same clock"
+ * The current position, display mode, and 'delta mode' are globally shared across Primary and Secondary clocks.
+ * Other state, such as the editing/text-entry state, remains per-widget.
+*/
+class TransportClock : public MainClock
+{
+public:
+	TransportClock (const std::string& clock_name, const std::string& widget_name, ClockDisposition d);
+
+protected:
+	void set_mode(Mode);  //override
+
+private:
+	void follow_canonical_clock();
+};

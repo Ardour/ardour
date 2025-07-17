@@ -26,7 +26,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include <gtkmm/menu.h>
+#include <ytkmm/menu.h>
 
 #include "pbd/convert.h"
 #include "pbd/unwind.h"
@@ -581,22 +581,22 @@ TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * sessio
 		select_menu.set_text (_("Selection Actions"));
 		select_menu.disable_scrolling ();
 
-		select_menu.AddMenuElem (MenuElem (_("Select all tracks"), sigc::bind (sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks), 3)));
-		select_menu.AddMenuElem (MenuElem (_("Select audio tracks"), sigc::bind (sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks), 1)));
-		select_menu.AddMenuElem (MenuElem (_("Select MIDI tracks"), sigc::bind (sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks), 2)));
-		select_menu.AddMenuElem (MenuElem (_("Select busses"), sigc::mem_fun (*this, &TrackExportChannelSelector::select_busses)));
-		select_menu.AddMenuElem (MenuElem (_("Deselect all"), sigc::mem_fun (*this, &TrackExportChannelSelector::select_none)));
-		select_menu.AddMenuElem (SeparatorElem ());
+		select_menu.add_menu_elem (MenuElem (_("Select all tracks"), sigc::bind (sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks), 3)));
+		select_menu.add_menu_elem (MenuElem (_("Select audio tracks"), sigc::bind (sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks), 1)));
+		select_menu.add_menu_elem (MenuElem (_("Select MIDI tracks"), sigc::bind (sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks), 2)));
+		select_menu.add_menu_elem (MenuElem (_("Select busses"), sigc::mem_fun (*this, &TrackExportChannelSelector::select_busses)));
+		select_menu.add_menu_elem (MenuElem (_("Deselect all"), sigc::mem_fun (*this, &TrackExportChannelSelector::select_none)));
+		select_menu.add_menu_elem (SeparatorElem ());
 
 		exclude_hidden = new Gtk::CheckMenuItem (_("Exclude Hidden"));
 		exclude_hidden->set_active (false);
 		exclude_hidden->show();
-		select_menu.AddMenuElem (*exclude_hidden);
+		select_menu.add_menu_elem (*exclude_hidden);
 
 		exclude_muted = new Gtk::CheckMenuItem (_("Exclude Muted"));
 		exclude_muted->set_active (true);
 		exclude_muted->show();
-		select_menu.AddMenuElem (*exclude_muted);
+		select_menu.add_menu_elem (*exclude_muted);
 	}
 
 	// Options
@@ -679,6 +679,8 @@ TrackExportChannelSelector::sync_with_manager_state ()
 		} else {
 			track_output_button.set_active (true);
 		}
+	} else {
+		track_output_button.set_active (false);
 	}
 
 	if (selected > 0) {
@@ -733,8 +735,8 @@ TrackExportChannelSelector::sync_with_manager_state ()
 					PortExportChannel::PortSet route_ports;
 					PortExportChannel::PortSet intersection;
 
-					PortSet& ps (route->output()->ports ());
-					for (PortSet::audio_iterator p = ps.audio_begin (); p != ps.audio_end (); ++p) {
+					std::shared_ptr<PortSet> ps (route->output()->ports ());
+					for (PortSet::audio_iterator p = ps->audio_begin (); p != ps->audio_end (); ++p) {
 						route_ports.insert (*p);
 					}
 

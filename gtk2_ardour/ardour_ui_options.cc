@@ -246,7 +246,13 @@ ARDOUR_UI::toggle_punch_out ()
 void
 ARDOUR_UI::show_loop_punch_ruler_and_disallow_hide ()
 {
-	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Rulers"), "toggle-loop-punch-ruler");
+	return;
+
+	/* This is what this method used to do  but after ruler consolidation
+	 * it is not clear what the correct semantics are/should be.
+	 */
+
+	Glib::RefPtr<ToggleAction> tact; //  = ActionManager::get_toggle_action (X_("Rulers"), "toggle-loop-punch-ruler");
 
 	tact->set_sensitive (false);
 
@@ -259,9 +265,15 @@ ARDOUR_UI::show_loop_punch_ruler_and_disallow_hide ()
 void
 ARDOUR_UI::reenable_hide_loop_punch_ruler_if_appropriate ()
 {
+	return;
+
+	/* This is what this method used to do  but after ruler consolidation
+	 * it is not clear what the correct semantics are/should be.
+	 */
+
 	if (!_session->config.get_punch_in() && !_session->config.get_punch_out()) {
 		/* if punch in/out are now both off, reallow hiding of the loop/punch ruler */
-		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Rulers"), "toggle-loop-punch-ruler");
+		Glib::RefPtr<Action> act; // = ActionManager::get_action (X_("Rulers"), "toggle-loop-punch-ruler");
 		if (act) {
 			act->set_sensitive (true);
 		}
@@ -296,8 +308,8 @@ ARDOUR_UI::toggle_latency_switch ()
 void
 ARDOUR_UI::setup_session_options ()
 {
-	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
-	boost::function<void (std::string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
+	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
+	std::function<void (std::string)> pc (std::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	_session->config.map_parameters (pc);
 }
 
@@ -311,7 +323,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ActionManager::map_some_state ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
 
 		if (!_session->config.get_external_sync()) {
-			sync_button.set_text (S_("SyncSource|Int."));
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (true);
@@ -327,18 +338,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 	} else if (p == "sync-source") {
 
-		/* app parameter (RC config) */
-
-		if (_session) {
-			if (!_session->config.get_external_sync()) {
-				sync_button.set_text (S_("SyncSource|Int."));
-			} else {
-				sync_button.set_text (TransportMasterManager::instance().current()->display_name());
-			}
-		} else {
-			/* changing sync source without a session is unlikely/impossible , except during startup */
-			sync_button.set_text (TransportMasterManager::instance().current()->display_name());
-		}
+		synchronize_sync_source_and_video_pullup ();
+		set_fps_timeout_connection ();
 
 	} else if (p == "follow-edits") {
 
@@ -380,17 +381,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ActionManager::map_some_state ("Transport", "ToggleClick", &RCConfiguration::get_clicking);
 	} else if (p == "use-video-sync") {
 		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_use_video_sync));
-	} else if (p == "sync-source") {
-
-		synchronize_sync_source_and_video_pullup ();
-		set_fps_timeout_connection ();
 
 	} else if (p == "show-track-meters") {
 		if (editor) editor->toggle_meter_updating();
-	} else if (p == "primary-clock-delta-mode") {
-		primary_clock->set_display_delta_mode(UIConfiguration::instance().get_primary_clock_delta_mode());
-	} else if (p == "secondary-clock-delta-mode") {
-		secondary_clock->set_display_delta_mode(UIConfiguration::instance().get_secondary_clock_delta_mode());
 	} else if (p == "super-rapid-clock-update") {
 		if (_session) {
 			stop_clocking ();
@@ -405,28 +398,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 	} else if (p == "waveform-gradient-depth") {
 		ArdourWaveView::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
-	} else if (p == "show-mini-timeline") {
-		repack_transport_hbox ();
-	} else if (p == "show-dsp-load-info") {
-		repack_transport_hbox ();
-	} else if (p == "show-disk-space-info") {
-		repack_transport_hbox ();
-	} else if (p == "show-toolbar-recpunch") {
-		repack_transport_hbox ();
-	} else if (p == "show-toolbar-monitoring") {
-		repack_transport_hbox ();
-	} else if (p == "show-toolbar-selclock") {
-		repack_transport_hbox ();
-	} else if (p == "show-toolbar-latency") {
-		repack_transport_hbox ();
-	} else if (p == "show-toolbar-cuectrl") {
-		repack_transport_hbox ();
-	} else if (p == "show-toolbar-monitor-info") {
-		repack_transport_hbox ();
-	} else if (p == "show-editor-meter") {
-		repack_transport_hbox ();
-	} else if (p == "show-secondary-clock") {
-		update_clock_visibility ();
 	} else if (p == "waveform-scale") {
 		ArdourWaveView::WaveView::set_global_logscaled (UIConfiguration::instance().get_waveform_scale() == Logarithmic);
 	} else if (p == "widget-prelight") {
@@ -441,28 +412,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ArdourWaveView::WaveView::set_image_cache_size (UIConfiguration::instance().get_waveform_cache_size() * 1048576);
 	} else if (p == "use-wm-visibility") {
 		VisibilityTracker::set_use_window_manager_visibility (UIConfiguration::instance().get_use_wm_visibility());
-	} else if (p == "action-table-columns") {
-		const uint32_t cols = UIConfiguration::instance().get_action_table_columns ();
-		for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
-			const int col = i / 2;
-			if (cols & (1<<col)) {
-				action_script_call_btn[i].show();
-			} else {
-				action_script_call_btn[i].hide();
-			}
-		}
-		if (cols == 0) {
-			scripts_spacer.hide ();
-		} else {
-			scripts_spacer.show ();
-		}
-	} else if (p == "cue-behavior") {
-		CueBehavior cb (_session->config.get_cue_behavior());
-		_cue_play_enable.set_active (cb & ARDOUR::FollowCues);
-	} else if (p == "record-mode") {
-		size_t m = _session->config.get_record_mode ();
-		assert (m < record_mode_strings.size ());
-		record_mode_selector.set_active (record_mode_strings[m]);
 	} else if (p == "flat-buttons") {
 		bool flat = UIConfiguration::instance().get_flat_buttons();
 		if (ArdourButton::flat_buttons () != flat) {
@@ -554,12 +503,8 @@ ARDOUR_UI::synchronize_sync_source_and_video_pullup ()
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
 
-	if (!act) {
+	if (!act || !_session) {
 		return;
-	}
-
-	if (!_session) {
-		goto just_label;
 	}
 
 	if (_session->config.get_video_pullup() == 0.0f) {
@@ -573,17 +518,4 @@ ARDOUR_UI::synchronize_sync_source_and_video_pullup ()
 			act->set_sensitive (true);
 		}
 	}
-
-	/* XXX should really be able to set the video pull up
-	   action to insensitive/sensitive, but there is no action.
-	   FIXME
-	*/
-
-  just_label:
-	if (act->get_sensitive ()) {
-		set_tip (sync_button, _("Enable/Disable external positional sync"));
-	} else {
-		set_tip (sync_button, _("Sync to JACK is not possible: video pull up/down is set"));
-	}
-
 }

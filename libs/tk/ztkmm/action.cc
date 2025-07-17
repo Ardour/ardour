@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/action.h>
-#include <atkmm/private/action_p.h>
+#include <ztkmm/action.h>
+#include <ztkmm/private/action_p.h>
 
 
 // -*- c++ -*-
@@ -27,7 +27,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atk/atkaction.h>
+#include <ztk/atkaction.h>
 
 
 namespace

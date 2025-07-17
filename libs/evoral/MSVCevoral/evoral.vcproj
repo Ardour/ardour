@@ -484,10 +484,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\MIDIXML.h"
-				>
-			</File>
-			<File
 				RelativePath="..\evoral\Note.h"
 				>
 			</File>
@@ -521,10 +517,6 @@
 			</File>
 			<File
 				RelativePath="..\libsmf\smf_private.h"
-				>
-			</File>
-			<File
-				RelativePath="..\evoral\SMFReader.h"
 				>
 			</File>
 			<File

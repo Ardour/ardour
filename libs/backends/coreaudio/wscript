@@ -32,9 +32,3 @@ def build(bld):
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
                    'ARDOURBACKEND_DLL_EXPORTS'
                   ]
-
-    # use new coreaudio API (the old one was deprecated in 10.6, yet still works)
-    # only use with OSX intel 10.6 or later, but for all OSX/PPC (<= 10.6)
-    if not bld.env['build_target'] in ['panther', 'tiger', 'leopard']:
-        if not (bld.env['build_target'] == 'snowleopard' and bld.env['build_arch'] == "ppc"):
-            obj.defines += ['COREAUDIO_108']

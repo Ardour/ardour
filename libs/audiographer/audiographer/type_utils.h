@@ -1,8 +1,6 @@
 #ifndef AUDIOGRAPHER_TYPE_UTILS_H
 #define AUDIOGRAPHER_TYPE_UTILS_H
 
-#include <boost/static_assert.hpp>
-#include <boost/type_traits.hpp>
 #include <memory>
 #include <algorithm>
 #include <cstring>
@@ -19,11 +17,11 @@ class LIBAUDIOGRAPHER_API TypeUtilsBase
   protected:
 
 	template<typename T, bool b>
-	static void do_zero_fill(T * buffer, samplecnt_t samples, const boost::integral_constant<bool, b>&)
+	static void do_zero_fill(T * buffer, samplecnt_t samples, const std::bool_constant<b>&)
 		{ std::uninitialized_fill_n (buffer, samples, T()); }
 
 	template<typename T>
-	static void do_zero_fill(T * buffer, samplecnt_t samples, const boost::true_type&)
+	static void do_zero_fill(T * buffer, samplecnt_t samples, const std::true_type&)
 		{ memset (buffer, 0, samples * sizeof(T)); }
 };
 
@@ -31,11 +29,10 @@ class LIBAUDIOGRAPHER_API TypeUtilsBase
 template<typename T = DefaultSampleType>
 class /*LIBAUDIOGRAPHER_API*/ TypeUtils : private TypeUtilsBase
 {
-	BOOST_STATIC_ASSERT (boost::has_trivial_destructor<T>::value);
+	static_assert (std::is_trivially_destructible<T>::value);
 
-	typedef boost::integral_constant<bool,
-			boost::is_floating_point<T>::value ||
-			boost::is_signed<T>::value> zero_fillable;
+	typedef std::bool_constant<std::is_floating_point<T>::value ||
+	                           std::is_signed<T>::value> zero_fillable;
   public:
 	/** Fill buffer with a zero value
 	  * The value used for filling is either 0 or the value of T()

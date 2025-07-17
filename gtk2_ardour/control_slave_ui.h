@@ -23,8 +23,8 @@
 #include <cstdint>
 #include <memory>
 
-#include <gtkmm/box.h>
-#include <gtkmm/checkmenuitem.h>
+#include <ytkmm/box.h>
+#include <ytkmm/checkmenuitem.h>
 
 #include "pbd/signals.h"
 #include "pbd/properties.h"

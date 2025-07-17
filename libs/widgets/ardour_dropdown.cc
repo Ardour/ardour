@@ -169,7 +169,7 @@ ArdourDropdown::clear_items ()
 }
 
 void
-ArdourDropdown::AddMenuElem (Menu_Helpers::Element e)
+ArdourDropdown::add_menu_elem (Menu_Helpers::Element e)
 {
 	using namespace Menu_Helpers;
 
@@ -187,11 +187,17 @@ ArdourDropdown::disable_scrolling()
 void
 ArdourDropdown::append_text_item (std::string const& text) {
 	using namespace Gtkmm2ext;
-	AddMenuElem (MenuElemNoMnemonic (text, sigc::bind (sigc::mem_fun (*this, &ArdourDropdown::default_text_handler), text)));
+	add_menu_elem (MenuElemNoMnemonic (text, sigc::bind (sigc::mem_fun (*this, &ArdourDropdown::default_text_handler), text)));
 }
 
 void
 ArdourDropdown::default_text_handler (std::string const& text) {
 	set_text (text);
 	StateChanged (); /* EMIT SIGNAL */
+}
+
+void
+ArdourDropdown::append (Glib::RefPtr<Action> action)
+{
+	_menu.items().push_back (Menu_Helpers::MenuElem (action->get_short_label(), sigc::mem_fun (action.get(), &Action::activate)));
 }

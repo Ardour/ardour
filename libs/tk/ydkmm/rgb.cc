@@ -19,8 +19,8 @@
  */
 
 #include <glibmm/listhandle.h>
-#include <gdkmm/rgb.h>
-#include <gdk/gdk.h>
+#include <ydkmm/rgb.h>
+#include <ydk/gdk.h>
 
 namespace Gdk
 {

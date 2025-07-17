@@ -38,7 +38,7 @@
 #include "ardour/port.h"
 #include "ardour/port_set.h"
 #include "ardour/lv2_plugin.h"
-#include "lv2_evbuf.h"
+#include "ardour/lv2_evbuf.h"
 #include "ardour/uri_map.h"
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
 #include "ardour/vestige/vestige.h"
@@ -89,7 +89,7 @@ BufferSet::clear()
 #endif
 
 	for (LV2Buffers::iterator i = _lv2_buffers.begin(); i != _lv2_buffers.end(); ++i) {
-		free ((*i).second);
+		lv2_evbuf_free ((*i).second);
 	}
 	_lv2_buffers.clear ();
 
@@ -102,7 +102,7 @@ BufferSet::clear()
  *  XXX: this *is* called in a process context; I'm not sure quite what `should not' means above.
  */
 void
-BufferSet::attach_buffers (PortSet& ports)
+BufferSet::attach_buffers (PortSet const& ports)
 {
 	const ChanCount& count (ports.count());
 
@@ -227,6 +227,19 @@ BufferSet::ensure_buffers(const ChanCount& chns, size_t buffer_capacity)
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
 		ensure_buffers (*i, chns.get (*i), buffer_capacity);
 	}
+}
+
+bool
+BufferSet::silent_data () const
+{
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		for (BufferSet::const_iterator i = begin (*t); i != end (*t); ++i) {
+			if (!i->silent_data ()) {
+				return false;
+			}
+		}
+	}
+	return true;
 }
 
 /** Get the capacity (size) of the available buffers of the given type.

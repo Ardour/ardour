@@ -22,8 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_location_h__
-#define __ardour_location_h__
+#pragma once
 
 #include <string>
 #include <list>
@@ -69,6 +68,7 @@ public:
 		IsXrun = 0x400,
 		IsCueMarker = 0x800,
 		IsSection = 0x1000,
+		IsScene = 0x2000
 	};
 
 	Location (Session &);
@@ -125,6 +125,7 @@ public:
 	bool is_skipping() const { return (_flags & IsSkip) && (_flags & IsSkipping); }
 	bool is_xrun() const { return _flags & IsXrun; }
 	bool is_section() const { return _flags & IsSection; }
+	bool is_scene() const { return (bool) _scene_change && _flags & IsScene; }
 	bool matches (Flags f) const { return _flags & f; }
 
 	/* any range with start < end  -- not a marker */
@@ -142,32 +143,32 @@ public:
 	 * locations at once.
 	 */
 
-	static PBD::Signal1<void,Location*> name_changed;
-	static PBD::Signal1<void,Location*> end_changed;
-	static PBD::Signal1<void,Location*> start_changed;
-	static PBD::Signal1<void,Location*> flags_changed;
-	static PBD::Signal1<void,Location*> lock_changed;
-	static PBD::Signal1<void,Location*> cue_change;
-	static PBD::Signal1<void,Location*> scene_changed;
-	static PBD::Signal1<void,Location*> time_domain_changed; /* unused */
+	static PBD::Signal<void(Location*)> name_changed;
+	static PBD::Signal<void(Location*)> end_changed;
+	static PBD::Signal<void(Location*)> start_changed;
+	static PBD::Signal<void(Location*)> flags_changed;
+	static PBD::Signal<void(Location*)> lock_changed;
+	static PBD::Signal<void(Location*)> cue_change;
+	static PBD::Signal<void(Location*)> scene_changed;
+	static PBD::Signal<void(Location*)> time_domain_changed; /* unused */
 
 	/* this is sent only when both start and end change at the same time */
-	static PBD::Signal1<void,Location*> changed;
+	static PBD::Signal<void(Location*)> changed;
 
 	/* these are member signals for objects that care only about
 	 * changes to this object
 	 */
 
-	PBD::Signal0<void> Changed;
+	PBD::Signal<void()> Changed;
 
-	PBD::Signal0<void> NameChanged;
-	PBD::Signal0<void> EndChanged;
-	PBD::Signal0<void> StartChanged;
-	PBD::Signal0<void> FlagsChanged;
-	PBD::Signal0<void> LockChanged;
-	PBD::Signal0<void> CueChanged;
-	PBD::Signal0<void> SceneChanged; /* unused */
-	PBD::Signal0<void> TimeDomainChanged;
+	PBD::Signal<void()> NameChanged;
+	PBD::Signal<void()> EndChanged;
+	PBD::Signal<void()> StartChanged;
+	PBD::Signal<void()> FlagsChanged;
+	PBD::Signal<void()> LockChanged;
+	PBD::Signal<void()> CueChanged;
+	PBD::Signal<void()> SceneChanged; /* unused */
+	PBD::Signal<void()> TimeDomainChanged;
 
 	/* CD Track / CD-Text info */
 
@@ -274,6 +275,7 @@ public:
 	bool clear_ranges ();
 
 	bool clear_cue_markers (samplepos_t start, samplepos_t end);
+	bool clear_scene_markers (samplepos_t start, samplepos_t end);
 
 	void cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, SectionOperation const op);
 
@@ -294,12 +296,19 @@ public:
 	int set_current (Location *, bool want_lock = true);
 	Location *current () const { return current_location; }
 
-	Location* mark_at (timepos_t const &, timecnt_t const & slop = timecnt_t::zero (Temporal::AudioTime)) const;
+	Location* mark_at (timepos_t const &, timecnt_t const & slop = timecnt_t::zero (Temporal::AudioTime), Location::Flags flags = Location::Flags (0)) const;
 
 	void set_clock_origin (Location*, void *src);
 
-	timepos_t first_mark_before (timepos_t const &, bool include_special_ranges = false);
-	timepos_t first_mark_after (timepos_t const &, bool include_special_ranges = false);
+	timepos_t first_mark_before_flagged (timepos_t const &, bool include_special_ranges = false, Location::Flags whitelist = Location::Flags (0), Location::Flags blacklist = Location::Flags (0), Location::Flags equalist = Location::Flags (0), Location** retval = nullptr);
+	timepos_t first_mark_after_flagged (timepos_t const &, bool include_special_ranges = false, Location::Flags whitelist = Location::Flags (0), Location::Flags blacklist = Location::Flags (0), Location::Flags equalist = Location::Flags (0), Location** retval = nullptr);
+
+	timepos_t first_mark_after (timepos_t const & t, bool include_special_ranges = false) {
+		return first_mark_after_flagged (t, include_special_ranges);
+	}
+	timepos_t first_mark_before (timepos_t const & t, bool include_special_ranges = false) {
+		return first_mark_before_flagged (t, include_special_ranges);
+	}
 
 	Location* next_section (Location*, timepos_t&, timepos_t&) const;
 	Location* next_section_iter (Location*, timepos_t&, timepos_t&, std::vector<LocationPair>& cache) const;
@@ -315,7 +324,7 @@ public:
 	 *
 	 * @return Location object or nil
 	 */
-	Location* range_starts_at (timepos_t const &, timecnt_t const & slop = timecnt_t (Temporal::AudioTime), bool incl = false) const;
+	Location* range_starts_at (timepos_t const & pos, timecnt_t const & slop = timecnt_t (Temporal::AudioTime), bool incl = false) const;
 
 	void find_all_between (timepos_t const & start, timepos_t const & end, LocationList&, Location::Flags);
 
@@ -325,15 +334,15 @@ public:
 
 	void time_domain_changed ();
 
-	PBD::Signal1<void,Location*> current_changed;
+	PBD::Signal<void(Location*)> current_changed;
 
 	/* Objects that care about individual addition and removal of Locations should connect to added/removed.
 	 * If an object additionally cares about potential mass clearance of Locations, they should connect to changed.
 	 */
 
-	PBD::Signal1<void,Location*> added;
-	PBD::Signal1<void,Location*> removed;
-	PBD::Signal0<void> changed; /* emitted when any action that could have added/removed more than 1 location actually removed 1 or more */
+	PBD::Signal<void(Location*)> added;
+	PBD::Signal<void(Location*)> removed;
+	PBD::Signal<void()> changed; /* emitted when any action that could have added/removed more than 1 location actually removed 1 or more */
 
 	template<class T> void apply (T& obj, void (T::*method)(const LocationList&)) const {
 		/* We don't want to hold the lock while the given method runs, so take a copy
@@ -361,4 +370,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_location_h__ */

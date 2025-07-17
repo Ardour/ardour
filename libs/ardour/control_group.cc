@@ -169,7 +169,7 @@ ControlGroup::add_control (std::shared_ptr<AutomationControl> ac, bool push)
 		ac->set_group (shared_from_this());
 	}
 
-	ac->DropReferences.connect_same_thread (member_connections, boost::bind (&ControlGroup::control_going_away, this, std::weak_ptr<AutomationControl>(ac)));
+	ac->DropReferences.connect_same_thread (member_connections, std::bind (&ControlGroup::control_going_away, this, std::weak_ptr<AutomationControl>(ac)));
 
 	return 0;
 }

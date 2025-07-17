@@ -46,6 +46,12 @@ GraphActivision::init_refcount (GraphChain const* const g) const
 	return m->at (g);
 }
 
+void
+GraphActivision::flush_graph_activision_rcu ()
+{
+	_activation_set.flush ();
+}
+
 /* ****************************************************************************/
 
 GraphNode::GraphNode (std::shared_ptr<Graph> graph)

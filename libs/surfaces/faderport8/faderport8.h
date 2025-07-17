@@ -78,7 +78,7 @@ public:
 	bool  has_editor () const { return true; }
 	void* get_gui () const;
 	void  tear_down_gui ();
-	PBD::Signal0<void> ConnectionChange;
+	PBD::Signal<void()> ConnectionChange;
 
 	void set_button_action (FP8Controls::ButtonId, bool, std::string const&);
 	std::string get_button_action (FP8Controls::ButtonId, bool);
@@ -343,7 +343,7 @@ private:
 
 		ActionType _type;
 		std::string _action_name;
-		//boost::function<void()> function; // unused
+		//std::function<void()> function; // unused
 
 		void clear ()
 		{

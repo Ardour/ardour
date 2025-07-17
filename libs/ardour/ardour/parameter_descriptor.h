@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_parameter_descriptor_h__
-#define __ardour_parameter_descriptor_h__
+#pragma once
 
 #include "pbd/natsort.h"
 #include "ardour/types.h"
@@ -125,4 +124,3 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 
 } // namespace ARDOUR
 
-#endif // __ardour_parameter_descriptor_h__

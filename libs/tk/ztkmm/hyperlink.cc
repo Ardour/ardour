@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/hyperlink.h>
-#include <atkmm/private/hyperlink_p.h>
+#include <ztkmm/hyperlink.h>
+#include <ztkmm/private/hyperlink_p.h>
 
 
 // -*- c++ -*-
@@ -27,9 +27,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/object.h>
-#include <atk/atkobject.h>
-#include <atk/atkhyperlink.h>
+#include <ztkmm/object.h>
+#include <ztk/atkobject.h>
+#include <ztk/atkhyperlink.h>
 
 
 namespace Atk

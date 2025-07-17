@@ -18,18 +18,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_port_matrix_h__
-#define __gtk_ardour_port_matrix_h__
+#pragma once
 
 #include <list>
 #include <memory>
 
-#include <gtkmm/box.h>
-#include <gtkmm/scrollbar.h>
-#include <gtkmm/table.h>
-#include <gtkmm/label.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/notebook.h>
+#include <ytkmm/box.h>
+#include <ytkmm/scrollbar.h>
+#include <ytkmm/table.h>
+#include <ytkmm/label.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/notebook.h>
 
 #include "ardour/bundle.h"
 #include "ardour/types.h"
@@ -239,4 +238,3 @@ private:
 	bool _ignore_notebook_page_selected;
 };
 
-#endif

@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_audio_streamview_h__
-#define __ardour_audio_streamview_h__
+#pragma once
 
 #include <cmath>
 #include <list>
@@ -55,6 +54,7 @@ class AudioStreamView : public StreamView
 {
 public:
 	AudioStreamView (AudioTimeAxisView&);
+	~AudioStreamView ();
 
 	int     set_amplitude_above_axis (gdouble app);
 	gdouble get_amplitude_above_axis () { return _amplitude_above_axis; }
@@ -94,4 +94,3 @@ private:
 	bool outline_region;
 };
 
-#endif /* __ardour_audio_streamview_h__ */

@@ -1,7 +1,7 @@
 #ifndef __bb_gui_h__
 #define __bb_gui_h__
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 #include <jack/jack.h>
 
 class BeatBox;

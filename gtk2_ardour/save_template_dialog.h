@@ -16,13 +16,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_save_template_dialog_h__
-#define __ardour_gtk_save_template_dialog_h__
+#pragma once
 
 #include <string>
 
-#include <gtkmm/entry.h>
-#include <gtkmm/textview.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/textview.h>
 
 #include "ardour_dialog.h"
 
@@ -40,4 +39,3 @@ private:
 	Gtk::TextView _description_editor;
 };
 
-#endif /* __ardour_gtk_save_template_dialog_h__ */

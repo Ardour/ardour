@@ -29,6 +29,29 @@
 
 namespace ArdourWidgets {
 
+class LIBWIDGETS_API ArdourScalingSpacer : public CairoWidget
+{
+public:
+	ArdourScalingSpacer (int natural_width = 16, int natural_height = 16);
+
+protected:
+	void render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*) {}
+
+	void on_size_request (Gtk::Requisition* req) {
+		if (_natural_width > 0) {
+			req->width = _natural_width * UIConfigurationBase::instance().get_ui_scale ();
+		}
+		if (_natural_height > 0) {
+			req->height = _natural_height * UIConfigurationBase::instance().get_ui_scale ();
+		}
+		CairoWidget::on_size_request (req);
+	}
+
+private:
+	int _natural_width;
+	int _natural_height;
+};
+
 class LIBWIDGETS_API ArdourVSpacer : public CairoWidget
 {
 public:
@@ -37,9 +60,13 @@ public:
 protected:
 	void render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*) {
 
+		if (_ratio < 0) {
+			return;
+		}
+
 		float height = get_height();
 
-		float h = height * ratio;
+		float h = height * _ratio;
 		float t = .5f * (height - h);
 		ctx->rectangle (0, t, 1, h);
 		uint32_t c = UIConfigurationBase::instance().color ("neutral:backgroundest");
@@ -53,7 +80,8 @@ protected:
 		CairoWidget::on_size_request (req);
 	}
 
-	float ratio;
+private:
+	float _ratio;
 };
 
 class LIBWIDGETS_API ArdourHSpacer : public CairoWidget
@@ -64,9 +92,13 @@ public:
 protected:
 	void render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*) {
 
+		if (_ratio < 0) {
+			return;
+		}
+
 		float width = get_width();
 
-		float w = width * ratio;
+		float w = width * _ratio;
 		float t = .5f * (width - w);
 		ctx->rectangle (t, 0, w, 1);
 		uint32_t c = UIConfigurationBase::instance().color ("neutral:backgroundest");
@@ -80,7 +112,8 @@ protected:
 		CairoWidget::on_size_request (req);
 	}
 
-	float ratio;
+private:
+	float _ratio;
 };
 
 class LIBWIDGETS_API ArdourDropShadow : public CairoWidget

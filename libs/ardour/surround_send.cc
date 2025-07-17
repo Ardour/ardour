@@ -57,12 +57,12 @@ SurroundSend::SurroundSend (Session& s, std::shared_ptr<MuteMaster> mm)
 	add_control (_gain_control);
 
 	_send_enable_control = std::shared_ptr<AutomationControl> (new AutomationControl (_session, BusSendEnable, ParameterDescriptor(BusSendEnable)));
-	_send_enable_control->Changed.connect_same_thread (*this, boost::bind (&SurroundSend::send_enable_changed, this));
+	_send_enable_control->Changed.connect_same_thread (*this, std::bind (&SurroundSend::send_enable_changed, this));
 	_send_enable_control->clear_flag (PBD::Controllable::RealTime);
 
-	ActiveChanged.connect_same_thread (*this, boost::bind (&SurroundSend::proc_active_changed, this));
+	ActiveChanged.connect_same_thread (*this, std::bind (&SurroundSend::proc_active_changed, this));
 
-	InternalSend::CycleStart.connect_same_thread (*this, boost::bind (&SurroundSend::cycle_start, this, _1));
+	InternalSend::CycleStart.connect_same_thread (*this, std::bind (&SurroundSend::cycle_start, this, _1));
 }
 
 SurroundSend::~SurroundSend ()

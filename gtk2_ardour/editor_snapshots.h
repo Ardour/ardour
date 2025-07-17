@@ -18,15 +18,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_editor_snapshots_h__
-#define __gtk_ardour_editor_snapshots_h__
+#pragma once
 
 #include "ardour/session_handle.h"
 
-#include <gtkmm/liststore.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/treeview.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/treeview.h>
 
 class EditorSnapshots : public ARDOUR::SessionHandlePtr
 {
@@ -69,4 +68,3 @@ private:
 	void rename (std::string);
 };
 
-#endif // __gtk_ardour_editor_snapshots_h__

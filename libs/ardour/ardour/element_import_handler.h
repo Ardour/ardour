@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_element_import_handler_h__
-#define __ardour_element_import_handler_h__
+#pragma once
 
 #include <list>
 #include <memory>
@@ -109,4 +108,3 @@ class LIBARDOUR_API ElementImportHandler
 
 } // namespace ARDOUR
 
-#endif

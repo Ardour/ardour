@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_speakers_h__
-#define __libardour_speakers_h__
+#pragma once
 
 #include <vector>
 #include <iostream>
@@ -55,7 +54,7 @@ public:
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
-	PBD::Signal0<void> Changed;
+	PBD::Signal<void()> Changed;
 
 protected:
 	std::vector<Speaker>  _speakers;
@@ -65,4 +64,3 @@ protected:
 
 } /* namespace */
 
-#endif /* __libardour_speakers_h__ */

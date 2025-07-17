@@ -19,16 +19,16 @@
 #ifndef _gtkardour_plugin_manager_h_
 #define _gtkardour_plugin_manager_h_
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/table.h>
-#include <gtkmm/textview.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/treerowreference.h>
-#include <gtkmm/treestore.h>
-#include <gtkmm/treeview.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/table.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/treerowreference.h>
+#include <ytkmm/treestore.h>
+#include <ytkmm/treeview.h>
 
 #include "widgets/ardour_button.h"
 #include "widgets/pane.h"

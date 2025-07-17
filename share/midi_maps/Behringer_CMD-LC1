@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Behringer CMD LC-1">
+
+<!-- MIDI Mapping for Behringer CMD LC-1 -->
+<!-- 2024-10-29  Toni Link (antonio.josian@gmail.com) -->
+
+	<DeviceInfo bank-size="4" motorised="no"/>
+
+<!-- Knobs mapped to selected tracks Sends 1 and 2  -->
+	<Binding channel="8" enc-b="16" uri="/route/send/gain B1 1"/> <!-- Selection 1 Send 1-->
+	<Binding channel="8" enc-b="17" uri="/route/send/gain B2 1"/> <!-- Selection 2 Send 1-->
+	<Binding channel="8" enc-b="18" uri="/route/send/gain B3 1"/> <!-- Selection 3 Send 1-->
+	<Binding channel="8" enc-b="19" uri="/route/send/gain B4 1"/> <!-- Selection 4 Send 1-->
+	<Binding channel="8" enc-b="20" uri="/route/send/gain B1 2"/> <!-- Selection 1 Send 2-->
+	<Binding channel="8" enc-b="21" uri="/route/send/gain B2 2"/> <!-- Selection 2 Send 2-->
+	<Binding channel="8" enc-b="22" uri="/route/send/gain B3 2"/> <!-- Selection 3 Send 2-->
+	<Binding channel="8" enc-b="23" uri="/route/send/gain B4 2"/> <!-- Selection 4 Send 2-->
+
+<!-- Assign function to 1-8 labeled buttons -->
+	<Binding channel="8" note="16" function="prev-bank"/>	<!-- [Button 1] shift the bank selection to the left -->
+	<Binding channel="8" note="17" function="next-bank"/>	<!-- [Button 2] shift the bank selection to the right -->
+	<Binding channel="8" note="18" function="transport-stop"/>		<!-- [Button 3] transport Stop -->
+	<Binding channel="8" note="19" function="toggle-rec-enable"/>	<!-- [Button 1] global Rec enable -->
+	<Binding channel="8" note="20" action=""/>
+	<Binding channel="8" note="21" action=""/>
+	<Binding channel="8" note="22" action=""/>
+	<Binding channel="8" note="23" action=""/>
+
+<!-- Buttons 32 to 63 reserved to Cue mode / Launch clip, but you can set then to other functions/actions -->
+<!--
+	<Binding channel="8" note="32" action=""/>
+	<Binding channel="8" note="33" action=""/>
+	<Binding channel="8" note="34" action=""/>
+	<Binding channel="8" note="35" action=""/>
+	<Binding channel="8" note="36" action=""/>
+	<Binding channel="8" note="37" action=""/>
+	<Binding channel="8" note="38" action=""/>
+	<Binding channel="8" note="39" action=""/>
+	<Binding channel="8" note="40" action=""/>
+	<Binding channel="8" note="41" action=""/>
+	<Binding channel="8" note="42" action=""/>
+	<Binding channel="8" note="43" action=""/>
+	<Binding channel="8" note="44" action=""/>
+	<Binding channel="8" note="45" action=""/>
+	<Binding channel="8" note="46" action=""/>
+	<Binding channel="8" note="47" action=""/>
+	<Binding channel="8" note="48" action=""/>
+	<Binding channel="8" note="49" action=""/>
+	<Binding channel="8" note="50" action=""/>
+	<Binding channel="8" note="51" action=""/>
+	<Binding channel="8" note="52" action=""/>
+	<Binding channel="8" note="53" action=""/>
+	<Binding channel="8" note="54" action=""/>
+	<Binding channel="8" note="55" action=""/>
+	<Binding channel="8" note="56" action=""/>
+	<Binding channel="8" note="57" action=""/>
+	<Binding channel="8" note="58" action=""/>
+	<Binding channel="8" note="59" action=""/>
+	<Binding channel="8" note="60" action=""/>
+	<Binding channel="8" note="61" action=""/>
+	<Binding channel="8" note="62" action=""/>
+	<Binding channel="8" note="63" action=""/>
+-->
+
+
+<!-- Assign Mute, Solo and Rec for selected tracks -->
+
+	<!-- Mute, Solo, Rec for bank track 1-->
+	<Binding channel="8" note="64" uri="/route/mute B1"/>
+	<Binding channel="8" note="68" uri="/route/solo B1"/>
+	<Binding channel="8" note="72" uri="/route/recenable B1"/>
+
+	<!-- Mute, Solo, Rec for bank track 2-->
+	<Binding channel="8" note="65" uri="/route/mute B2"/>
+	<Binding channel="8" note="69" uri="/route/solo B2"/>
+	<Binding channel="8" note="73" uri="/route/recenable B2"/>
+
+	<!-- Mute, Solo, Rec for bank track 3-->
+	<Binding channel="8" note="66" uri="/route/mute B3"/>
+	<Binding channel="8" note="70" uri="/route/solo B3"/>
+	<Binding channel="8" note="74" uri="/route/recenable B3"/>
+
+	<!-- Mute, Solo, Rec for bank track 4-->
+	<Binding channel="8" note="67" uri="/route/mute B4"/>
+	<Binding channel="8" note="71" uri="/route/solo B4"/>
+	<Binding channel="8" note="75" uri="/route/recenable B4"/>
+	
+</ArdourMIDIBindings>

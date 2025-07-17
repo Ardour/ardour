@@ -20,7 +20,6 @@
 #define EVORAL_CURVE_HPP
 
 #include <inttypes.h>
-#include <boost/utility.hpp>
 
 #include "temporal/timeline.h"
 
@@ -30,10 +29,12 @@ namespace Evoral {
 
 class ControlList;
 
-class LIBEVORAL_API Curve : public boost::noncopyable
+class LIBEVORAL_API Curve
 {
 public:
 	Curve (const ControlList& cl);
+	Curve (const Curve&) = delete;
+	Curve& operator= (const Curve&) = delete;
 
 	bool rt_safe_get_vector (Temporal::timepos_t const & x0, Temporal::timepos_t const & x1, float *arg, int32_t veclen) const;
 	void get_vector (Temporal::timepos_t const & x0, Temporal::timepos_t const & x1, float *arg, int32_t veclen) const;

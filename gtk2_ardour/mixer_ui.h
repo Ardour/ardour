@@ -22,22 +22,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_mixer_ui_h__
-#define __ardour_mixer_ui_h__
+#pragma once
 
 #include <list>
 
-#include <gtkmm/box.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/label.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/button.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/treeview.h>
-#include <gtkmm/treestore.h>
-#include <gtkmm/liststore.h>
+#include <ytkmm/box.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/label.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/button.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/treeview.h>
+#include <ytkmm/treestore.h>
+#include <ytkmm/liststore.h>
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
@@ -52,9 +51,13 @@
 #include "gtkmm2ext/dndtreeview.h"
 #include "gtkmm2ext/treeutils.h"
 
+#include "widgets/ardour_dropdown.h"
+#include "widgets/frame.h"
+#include "widgets/metabutton.h"
 #include "widgets/pane.h"
 #include "widgets/tabbable.h"
 
+#include "application_bar.h"
 #include "axis_provider.h"
 #include "enums.h"
 #include "monitor_section.h"
@@ -143,11 +146,14 @@ public:
 
 	void register_actions ();
 
+	void focus_on_clock();
+
 	void load_bindings ();
 	Gtkmm2ext::Bindings*  bindings;
 
 	void toggle_mixer_list ();
-	void showhide_mixer_list (bool yn);
+	void toggle_mixer_strip ();
+	void toggle_mixer_props ();
 
 	void toggle_surround_master ();
 
@@ -176,7 +182,7 @@ protected:
 private:
 	Mixer_UI ();
 	static Mixer_UI*     _instance;
-	Gtk::VBox            _content;
+
 	Gtk::HBox             global_hpacker;
 	Gtk::VBox             global_vpacker;
 	Gtk::ScrolledWindow   scroller;
@@ -189,16 +195,10 @@ private:
 	Gtk::ScrolledWindow   group_display_scroller;
 	Gtk::ScrolledWindow   favorite_plugins_scroller;
 	Gtk::VBox             group_display_vbox;
-	Gtk::Frame            track_display_frame;
-	Gtk::Frame            group_display_frame;
-	Gtk::Frame            favorite_plugins_frame;
 	Gtk::VBox             favorite_plugins_vbox;
 	Gtk::HBox             favorite_plugins_search_hbox;
-	Gtk::ComboBoxText     favorite_plugins_mode_combo;
 	Gtk::Entry            plugin_search_entry;
-	Gtk::Button           plugin_search_clear_button;
-	ArdourWidgets::VPane  rhs_pane1;
-	ArdourWidgets::VPane  rhs_pane2;
+	ArdourWidgets::ArdourButton plugin_search_clear_button;
 	ArdourWidgets::HPane  inner_pane;
 	Gtk::VBox             strip_group_box;
 	Gtk::HBox             strip_packer;
@@ -209,10 +209,13 @@ private:
 	Gtk::Label            vca_label;
 	Gtk::EventBox         vca_scroller_base;
 	Gtk::HBox             out_packer;
-	ArdourWidgets::HPane  list_hpane;
+
+	Gtk::Notebook             _sidebar_notebook;
+	ArdourWidgets::MetaButton _sidebar_pager1;
+	ArdourWidgets::MetaButton _sidebar_pager2;
 
 	Gtk::EventBox         _mixer_scene_spacer;
-	Gtk::Frame            _mixer_scene_frame;
+	ArdourWidgets::Frame  _mixer_scene_frame;
 	Gtk::Table            _mixer_scene_table;
 	Gtk::VBox             _mixer_scene_vbox;
 
@@ -246,6 +249,8 @@ private:
 	void add_stripables (ARDOUR::StripableList&);
 
 	void update_scene_buttons ();
+
+	void add_sidebar_page (std::string const&, std::string const&, Gtk::Widget&);
 
 	void add_routes (ARDOUR::RouteList&);
 	void remove_strip (MixerStrip *);
@@ -333,6 +338,8 @@ private:
 	Gtk::Menu *track_menu;
 	void track_column_click (gint);
 	void build_track_menu ();
+
+	ApplicationBar _application_bar;
 
 	MonitorSection   _monitor_section;
 	PluginSelector* _plugin_selector;
@@ -441,15 +448,18 @@ private:
 	enum PluginListMode {
 		PLM_Favorite,
 		PLM_Recent,
-		PLM_TopHits
+		PLM_TopHits,
+		PLM_SearchAll
 	};
+	enum PluginListMode plugin_list_mode;
+	void set_plugin_list_mode (PluginListMode plm);
+	void update_sidebar_pagers (guint);
 
 	void refiller (ARDOUR::PluginInfoList& result, const ARDOUR::PluginInfoList& plugs);
 	void refill_favorite_plugins ();
 	void maybe_refill_favorite_plugins (PluginListMode);
 	void store_current_favorite_order();
-	enum PluginListMode plugin_list_mode () const;
-	void plugin_list_mode_changed ();
+
 	void plugin_search_entry_changed ();
 	void plugin_search_clear_button_clicked ();
 	void favorite_plugins_deleted (const Gtk::TreeModel::Path&);
@@ -491,4 +501,3 @@ private:
 	void ab_plugins ();
 };
 
-#endif /* __ardour_mixer_ui_h__ */

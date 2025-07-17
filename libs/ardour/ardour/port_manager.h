@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_port_manager_h__
-#define __libardour_port_manager_h__
+#pragma once
 
 #include <atomic>
 #include <cstdint>
@@ -151,7 +150,7 @@ public:
 
 	bool connected (const std::string&);
 	bool physically_connected (const std::string&);
-	int  get_connections (const std::string&, std::vector<std::string>&);
+	int  get_connections (const std::string&, std::vector<std::string>&, bool process_context_safe = true);
 
 	/* Naming */
 
@@ -244,26 +243,26 @@ public:
 	void remove_midi_port_flags (std::string const&, MidiPortFlags);
 
 	/** Emitted if the list of ports to be used for MIDI selection tracking changes */
-	PBD::Signal0<void> MidiSelectionPortsChanged;
+	PBD::Signal<void()> MidiSelectionPortsChanged;
 	/** Emitted if anything other than the selection property for a MIDI port changes */
-	PBD::Signal0<void> MidiPortInfoChanged;
+	PBD::Signal<void()> MidiPortInfoChanged;
 	/** Emitted if pretty-name of a port changed */
-	PBD::Signal1<void, std::string> PortPrettyNameChanged;
+	PBD::Signal<void(std::string)> PortPrettyNameChanged;
 
 	/** Emitted if the backend notifies us of a graph order event */
-	PBD::Signal0<void> GraphReordered;
+	PBD::Signal<void()> GraphReordered;
 
 	/** Emitted if a Port is registered or unregistered */
-	PBD::Signal0<void> PortRegisteredOrUnregistered;
+	PBD::Signal<void()> PortRegisteredOrUnregistered;
 
 	/** Emitted if a Port is connected or disconnected.
 	 *  The Port parameters are the ports being connected / disconnected, or 0 if they are not known to Ardour.
 	 *  The std::string parameters are the (long) port names.
 	 *  The bool parameter is true if ports were connected, or false for disconnected.
 	 */
-	PBD::Signal5<void, std::weak_ptr<Port>, std::string, std::weak_ptr<Port>, std::string, bool> PortConnectedOrDisconnected;
+	PBD::Signal<void(std::weak_ptr<Port>, std::string, std::weak_ptr<Port>, std::string, bool)> PortConnectedOrDisconnected;
 
-	PBD::Signal3<void, DataType, std::vector<std::string>, bool> PhysInputChanged;
+	PBD::Signal<void(DataType, std::vector<std::string>, bool)> PhysInputChanged;
 
 	/* Input port meters and monitors */
 	void reset_input_meters ();
@@ -393,4 +392,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif /* __libardour_port_manager_h__ */

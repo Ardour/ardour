@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/builder.h>
-#include <gtkmm/private/builder_p.h>
+#include <ytkmm/builder.h>
+#include <ytkmm/private/builder_p.h>
 
 
 // -*- c++ -*-
@@ -27,7 +27,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // Allow GtkBuilder to instantiate a gtkmm derived GType instead of the regular 
 // GTK+ GType, so we can, for instance, use our vfuncs and default signal handlers.

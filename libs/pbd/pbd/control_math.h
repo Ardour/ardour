@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_control_math_h__
-#define __pbd_control_math_h__
+#pragma once
 
 #include <assert.h>
 #include <math.h>
@@ -119,4 +118,3 @@ interpolate_gain (double f, double t, double fraction, double upper)
 	return position_to_gain (g0 + fraction * (diff)) * upper / 2.;
 }
 
-#endif

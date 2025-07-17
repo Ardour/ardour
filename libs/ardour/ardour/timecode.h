@@ -17,9 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_timecode_h__
-#define __libardour_timecode_h__
+#pragma once
 
 #include "temporal/time.h"
 
-#endif  // __libardour_timecode_h__

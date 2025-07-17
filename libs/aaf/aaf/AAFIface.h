@@ -468,11 +468,11 @@ typedef struct aafiAudioClip {
 	 */
 
 	/*
-	  * set with CompoMob's SourceClip::StartTime. In the case of an OperationGroup(AudioChannelCombiner),
-		* There is one SourceClip per audio channel. So even though it's very unlikely, there could possibly
-		* be one essence_offset per channel.
-	  * Value is in edit unit, edit rate definition is aafiAudioTrack->edit_rate
-	  */
+	 * set with CompoMob's SourceClip::StartTime. In the case of an OperationGroup(AudioChannelCombiner),
+	 * There is one SourceClip per audio channel. So even though it's very unlikely, there could possibly
+	 * be one essence_offset per channel.
+	 * Value is in edit unit, edit rate definition is aafiAudioTrack->edit_rate
+	 */
 	aafPosition_t essence_offset;
 
 	aafiMetaData* metadata;
@@ -988,6 +988,9 @@ aafi_convertUnit (aafPosition_t value, aafRational_t* valueEditRate, aafRational
 uint64_t
 aafi_convertUnitUint64 (aafPosition_t value, aafRational_t* valueEditRate, aafRational_t* destEditRate);
 
+aafPosition_t
+aafi_getClipLength (AAF_Iface* aafi, aafiAudioClip* audioClip, aafRational_t* samplerate, char* isBeyondSource);
+
 int
 aafi_removeTimelineItem (AAF_Iface* aafi, aafiTimelineItem* timelineItem);
 
@@ -1060,7 +1063,7 @@ aafi_freeMarkers (aafiMarker** aafi);
 void
 aafi_freeMetadata (aafiMetaData** CommentList);
 
-void
+aafiAudioEssencePointer*
 aafi_freeAudioEssencePointer (aafiAudioEssencePointer* audioEssenceGroupEntry);
 
 void

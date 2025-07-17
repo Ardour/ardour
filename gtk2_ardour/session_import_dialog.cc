@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/failed_constructor.h"
 
@@ -105,8 +105,8 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session* target) :
 	ok_button->signal_clicked().connect (sigc::mem_fun (*this, &SessionImportDialog::do_merge));
 
 	// prompt signals XXX: problem - handlers to be in the same thread since they return values
-	ElementImporter::Rename.connect_same_thread (connections, boost::bind (&SessionImportDialog::open_rename_dialog, this, _1, _2));
-	ElementImporter::Prompt.connect_same_thread (connections, boost::bind (&SessionImportDialog::open_prompt_dialog, this, _1));
+	ElementImporter::Rename.connect_same_thread (connections, std::bind (&SessionImportDialog::open_rename_dialog, this, _1, _2));
+	ElementImporter::Prompt.connect_same_thread (connections, std::bind (&SessionImportDialog::open_prompt_dialog, this, _1));
 
 	// Finalize
 	show_all();

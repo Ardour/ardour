@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/table.h>
-#include <atkmm/private/table_p.h>
+#include <ztkmm/table.h>
+#include <ztkmm/private/table_p.h>
 
 
 // -*- c++ -*-
@@ -27,8 +27,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/object.h>
-#include <atk/atktable.h>
+#include <ztkmm/object.h>
+#include <ztk/atktable.h>
 
 
 namespace Atk

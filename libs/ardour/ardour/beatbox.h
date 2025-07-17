@@ -17,8 +17,7 @@
 
 */
 
-#ifndef __ardour_beatbox_h__
-#define __ardour_beatbox_h__
+#pragma once
 
 #include <algorithm>
 #include <vector>
@@ -31,7 +30,7 @@
 #include "pbd/ringbuffer.h"
 
 #include "temporal/bbt_time.h"
-#include "temporal/superclock.h
+#include "temporal/superclock.h"
 
 #include "ardour/midi_state_tracker.h"
 #include "ardour/processor.h"
@@ -71,4 +70,3 @@ class BeatBox : public ARDOUR::Processor {
 
 } /* namespace */
 
-#endif /* __ardour_beatbox_h__ */

@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/document.h>
-#include <atkmm/private/document_p.h>
+#include <ztkmm/document.h>
+#include <ztkmm/private/document_p.h>
 
 
 // -*- c++ -*-
@@ -27,8 +27,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/object.h>
-#include <atk/atkdocument.h>
+#include <ztkmm/object.h>
+#include <ztk/atkdocument.h>
 
 
 namespace Atk

@@ -31,7 +31,7 @@
 #include "gtkprivate.h"
 #include "gtkplugprivate.h"
 
-#include "gdk/gdkx.h"
+#include "ydk/gdkx.h"
 
 #include "gtkxembed.h"
 #include "gtkalias.h"

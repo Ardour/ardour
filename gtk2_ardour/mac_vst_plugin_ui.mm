@@ -16,9 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm.h>
-#include <gtk/gtk.h>
-#include <gdk/gdkquartz.h>
+#include <ytkmm/ytkmm.h>
+#include <ytk/ytk.h>
+#include <ydk/gdkquartz.h>
 
 #include "gui_thread.h"
 #include "ardour/plugin_insert.h"
@@ -81,7 +81,7 @@ MacVSTPluginUI::MacVSTPluginUI (std::shared_ptr<PlugInsertBase> pib, std::shared
 	pack_start (low_box, true, true);
 	low_box.show ();
 
-	vst->LoadPresetProgram.connect (_program_connection, invalidator (*this), boost::bind (&MacVSTPluginUI::set_program, this), gui_context());
+	vst->LoadPresetProgram.connect (_program_connection, invalidator (*this), std::bind (&MacVSTPluginUI::set_program, this), gui_context());
 
 	_ns_view = [[NSView new] retain];
 

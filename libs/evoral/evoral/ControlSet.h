@@ -26,7 +26,7 @@
 #include <map>
 #include <memory>
 
-#include <boost/utility.hpp>
+#include <boost/noncopyable.hpp>
 #include <glibmm/threads.h>
 #include "pbd/signals.h"
 

@@ -50,7 +50,7 @@ using namespace PBD;
 using namespace Glib;
 
 uint64_t BaseUI::rt_bit = 1;
-int BaseUI::_thread_priority = PBD_RT_PRI_PROC - 1;
+int BaseUI::_thread_priority = PBD_RT_PRI_CTRL;
 
 BaseUI::RequestType BaseUI::CallSlot = BaseUI::new_request_type();
 BaseUI::RequestType BaseUI::Quit = BaseUI::new_request_type();
@@ -94,7 +94,6 @@ BaseUI::set_thread_priority () const
 void
 BaseUI::main_thread ()
 {
-	pthread_set_name (string_compose ("UI:%1", event_loop_name ()).c_str ());
 	DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: event loop running in thread %2\n", event_loop_name(), pthread_name()));
 	set_event_loop_for_thread (this);
 	thread_init ();
@@ -122,7 +121,7 @@ BaseUI::run ()
 	attach_request_source ();
 
 	Glib::Threads::Mutex::Lock lm (_run_lock);
-	_run_loop_thread = PBD::Thread::create (boost::bind (&BaseUI::main_thread, this));
+	_run_loop_thread = PBD::Thread::create (std::bind (&BaseUI::main_thread, this), string_compose ("UI:%1", event_loop_name ()));
 	_running.wait (_run_lock);
 }
 

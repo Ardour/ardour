@@ -8,10 +8,10 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/pixbuf.h>
-#include <gdkmm/private/pixbuf_p.h>
+#include <ydkmm/pixbuf.h>
+#include <ydkmm/private/pixbuf_p.h>
 
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <ydk-pixbuf/ydk-pixbuf.h>
 
 // -*- c++ -*-
 /* $Id: pixbuf.ccg,v 1.8 2006/05/11 11:40:23 murrayc Exp $ */
@@ -33,8 +33,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdk/gdk.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <ydk/gdk.h>
+#include <ydk-pixbuf/ydk-pixbuf.h>
 
 //Turn off all deprecation warnings, to avoid the warning about
 //gdk_pixbuf_new_from_inline() in the generated code.

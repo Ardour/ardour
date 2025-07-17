@@ -19,16 +19,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_time_fx_dialog_h__
-#define __ardour_time_fx_dialog_h__
+#pragma once
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/progressbar.h>
-#include <gtkmm/box.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/label.h>
-#include <gtkmm/button.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/progressbar.h>
+#include <ytkmm/box.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/label.h>
+#include <ytkmm/button.h>
 
 #include "ardour/timefx_request.h"
 
@@ -108,4 +107,3 @@ private:
 	void timer_update ();
 };
 
-#endif /* __ardour_time_fx_dialog_h__ */

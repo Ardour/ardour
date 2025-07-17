@@ -8,36 +8,36 @@
 #undef  G_GNUC_CONST
 #define G_GNUC_CONST /* empty */
 
-#include <gdkmm/wrap_init.h>
+#include <ydkmm/wrap_init.h>
 #include <glibmm/error.h>
 #include <glibmm/object.h>
 
 // #include the widget headers so that we can call the get_type() static methods:
-#include "gdkmm/bitmap.h"
-#include "gdkmm/color.h"
-#include "gdkmm/colormap.h"
-#include "gdkmm/cursor.h"
-#include "gdkmm/device.h"
-#include "gdkmm/display.h"
-#include "gdkmm/displaymanager.h"
-#include "gdkmm/dragcontext.h"
-#include "gdkmm/drawable.h"
-#include "gdkmm/event.h"
-#include "gdkmm/gc.h"
-#include "gdkmm/image.h"
-#include "gdkmm/pixbuf.h"
-#include "gdkmm/pixbufanimation.h"
-#include "gdkmm/pixbufanimationiter.h"
-#include "gdkmm/pixbufformat.h"
-#include "gdkmm/pixbufloader.h"
-#include "gdkmm/pixmap.h"
-#include "gdkmm/rectangle.h"
-#include "gdkmm/region.h"
-#include "gdkmm/rgbcmap.h"
-#include "gdkmm/screen.h"
-#include "gdkmm/types.h"
-#include "gdkmm/visual.h"
-#include "gdkmm/window.h"
+#include "ydkmm/bitmap.h"
+#include "ydkmm/color.h"
+#include "ydkmm/colormap.h"
+#include "ydkmm/cursor.h"
+#include "ydkmm/device.h"
+#include "ydkmm/display.h"
+#include "ydkmm/displaymanager.h"
+#include "ydkmm/dragcontext.h"
+#include "ydkmm/drawable.h"
+#include "ydkmm/event.h"
+#include "ydkmm/gc.h"
+#include "ydkmm/image.h"
+#include "ydkmm/pixbuf.h"
+#include "ydkmm/pixbufanimation.h"
+#include "ydkmm/pixbufanimationiter.h"
+#include "ydkmm/pixbufformat.h"
+#include "ydkmm/pixbufloader.h"
+#include "ydkmm/pixmap.h"
+#include "ydkmm/rectangle.h"
+#include "ydkmm/region.h"
+#include "ydkmm/rgbcmap.h"
+#include "ydkmm/screen.h"
+#include "ydkmm/types.h"
+#include "ydkmm/visual.h"
+#include "ydkmm/window.h"
 
 extern "C"
 {

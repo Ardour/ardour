@@ -17,11 +17,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __floating_text_entry_h__
-#define __floating_text_entry_h__
+#pragma once
 
-#include <gtkmm/entry.h>
-#include <gtkmm/window.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/window.h>
 
 class FloatingTextEntry : public Gtk::Window
 {
@@ -35,6 +34,7 @@ public:
 	 *  - move to previous editable field.
 	 */
 	sigc::signal2<void,std::string,int> use_text;
+	void delete_on_focus_out ();
 
 private:
 	Gtk::Entry entry;
@@ -58,4 +58,3 @@ private:
 	void on_hide ();
 };
 
-#endif // __ardour_window_h__

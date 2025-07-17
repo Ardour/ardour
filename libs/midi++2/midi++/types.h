@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __midi_types_h__
-#define __midi_types_h__
+#pragma once
 
 #include <inttypes.h>
 
@@ -91,7 +90,6 @@ namespace MIDI {
 
 } // namespace MIDI
 
-#endif // __midi_types_h__
 
 
 

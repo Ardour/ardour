@@ -19,7 +19,7 @@
  */
 
 #include "config.h"
-#include "gdk-pixbuf.h"
+#include "ydk-pixbuf.h"
 #include "gdk-pixbuf-private.h"
 #include <stdlib.h>
 #include <string.h>

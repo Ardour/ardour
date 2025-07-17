@@ -16,15 +16,14 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __ardour_meterbridge_h__
-#define __ardour_meterbridge_h__
+#pragma once
 
 #include <glibmm/thread.h>
 
-#include <gtkmm/box.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/label.h>
-#include <gtkmm/window.h>
+#include <ytkmm/box.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/label.h>
+#include <ytkmm/window.h>
 
 #include "ardour/ardour.h"
 #include "ardour/types.h"
@@ -156,4 +155,3 @@ private:
 	bool on_configure_event (GdkEventConfigure* conf);
 };
 
-#endif

@@ -258,37 +258,33 @@ def options(opt):
     pass
 
 def configure(conf):
-    if conf.is_defined('YTK'):
-        autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
-        autowaf.check_pkg(conf, 'pango', uselib_store='PANGO', atleast_version='1.20', mandatory=True)
-        autowaf.check_pkg(conf, 'cairo', uselib_store='CAIRO', atleast_version='1.12', mandatory=True)
-        autowaf.check_pkg(conf, 'pangocairo', uselib_store='PANGOCAIRO', mandatory=True)
-        autowaf.check_pkg(conf, 'gmodule-2.0', uselib_store='GMODULE', mandatory=True)
-        if conf.env['build_target'] != 'mingw' and sys.platform != 'darwin': # Linux
-            autowaf.check_pkg(conf, 'x11', uselib_store='X11', system=True, mandatory=True)
-            autowaf.check_pkg(conf, 'xext', uselib_store='XEXT', system=True, mandatory=True)
+    autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
+    autowaf.check_pkg(conf, 'pango', uselib_store='PANGO', atleast_version='1.20', mandatory=True)
+    autowaf.check_pkg(conf, 'cairo', uselib_store='CAIRO', atleast_version='1.12', mandatory=True)
+    autowaf.check_pkg(conf, 'pangocairo', uselib_store='PANGOCAIRO', mandatory=True)
+    autowaf.check_pkg(conf, 'gmodule-2.0', uselib_store='GMODULE', mandatory=True)
+    if conf.env['build_target'] != 'mingw' and sys.platform != 'darwin': # Linux
+        autowaf.check_pkg(conf, 'x11', uselib_store='X11', system=True, mandatory=True)
+        autowaf.check_pkg(conf, 'xext', uselib_store='XEXT', system=True, mandatory=True)
 
 def build(bld):
-    if not bld.is_defined('YTK'):
-        return
-
     obj = bld.shlib(features = 'c cshlib')
     obj.cflags          = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
-    obj.export_includes = ['ytk']
-    obj.includes        = ['.', '..', 'ytk', 'ytk/gtk']
+    obj.export_includes = ['.']
+    obj.includes        = ['.', 'ytk']
     obj.name            = 'libytk'
     obj.target          = 'ytk'
     obj.use             = [ 'libztk', 'libydk-pixbuf', 'libydk' ]
     obj.uselib          = 'GLIB GIO PANGO CAIRO PANGOCAIRO GMODULE'
     obj.defines         = [ 'HAVE_CONFIG_H', '_LARGEFILE64_SOURCE', '_REENTRANT', 'G_LOG_DOMAIN="Gtk"', 'GTK_COMPILATION', '_FILE_OFFSET_BITS=64', 'GTK_DISABLE_DEPRECATED', 'G_DISABLE_CAST_CHECKS',
                             'G_DISABLE_SINGLE_INCLUDES', 'DATK_DISABLE_SINGLE_INCLUDES', 'GDK_PIXBUF_DISABLE_SINGLE_INCLUDES', 'GTK_DISABLE_SINGLE_INCLUDES', 'GDK_PIXBUF_DISABLE_DEPRECATED',
-                            'GTK_PRINT_BACKENDS="file,lpr"', 'GTK_PRINT_BACKEND_ENABLE_UNSUPPORTED', 'GTK_PRINT_PREVIEW_COMMAND=""',
+                            'GTK_PRINT_BACKENDS="file,lpr"', 'GTK_PRINT_BACKEND_ENABLE_UNSUPPORTED', 'GTK_PRINT_PREVIEW_COMMAND=""', '_POSIX_C_SOURCE=200809L',
                             'GTK_VERSION="2.24.23"', 'GTK_BINARY_VERSION="2.10.0"', 'GTK_HOST="ardour"',
                             'PACKAGE="' + I18N_PACKAGE + '"',
                             'GETTEXT_PACKAGE="' + I18N_PACKAGE + '"',
-                            'GTK_DATA_PREFIX="' + bld.env['PREFIX'] + '"', 
-                            'GTK_SYSCONFDIR="' + bld.env['SYSCONFDIR'] + '"', 
-                            'GTK_DATA_DIR="' + bld.env['DATADIR'] + '"', 
+                            'GTK_DATA_PREFIX="' + bld.env['PREFIX'] + '"',
+                            'GTK_SYSCONFDIR="' + bld.env['SYSCONFDIR'] + '"',
+                            'GTK_DATA_DIR="' + bld.env['DATADIR'] + '"',
                             'GTK_LIBDIR="' + bld.env['LIBDIR'] + '"',
                           ]
     obj.vnum            = LIBYDK_VERSION
@@ -314,14 +310,14 @@ def build(bld):
             lang = os.path.basename(mo.srcpath()).replace('.mo', '')
             bld.install_as(os.path.join(bld.env['LOCALEDIR'], lang, 'LC_MESSAGES', I18N_PACKAGE + bld.env['MAJOR'] + '.mo'),
                            mo)
-def i18n(bld):
+def i18n_func(bld):
     autowaf.build_i18n(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)
 
-def i18n_pot(bld):
-    autowaf.build_i18n(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)
+def i18n_pot_func(bld):
+    autowaf.build_i18n_pot(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)
 
-def i18n_po(bld):
+def i18n_po_func(bld):
     autowaf.build_i18n_po(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)
 
-def i18n_mo(bld):
+def i18n_mo_func(bld):
     autowaf.build_i18n_mo(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)

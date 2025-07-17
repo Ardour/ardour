@@ -23,6 +23,7 @@
 #include <string>
 
 #ifdef PLATFORM_WINDOWS
+#include <objidl.h>
 #include <windows.h>
 #else
 #include <signal.h>

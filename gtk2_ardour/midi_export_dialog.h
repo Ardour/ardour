@@ -22,7 +22,7 @@
 
 #include <memory>
 
-#include <gtkmm/filechooserwidget.h>
+#include <ytkmm/filechooserwidget.h>
 
 #include "ardour_dialog.h"
 #include "public_editor.h"

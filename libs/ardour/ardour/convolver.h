@@ -27,6 +27,7 @@
 #include "ardour/buffer_set.h"
 #include "ardour/chan_mapping.h"
 #include "ardour/readable.h"
+#include "ardour/session_handle.h"
 
 namespace ARDOUR { namespace DSP {
 

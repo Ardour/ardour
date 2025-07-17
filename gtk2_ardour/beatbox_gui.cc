@@ -20,8 +20,6 @@
 #include <cstdlib>
 #include <ctime>
 
-#include <boost/integer/common_factor.hpp>
-
 #include "pbd/compose.h"
 #include "pbd/i18n.h"
 
@@ -89,7 +87,7 @@ BBGUI::BBGUI (std::shared_ptr<BeatBox> bb)
 	export_as_region_button.signal_clicked.connect (sigc::mem_fun (*this, &BBGUI::export_as_region));
 	get_action_area()->pack_end (export_as_region_button);
 
-	bbox->sequencer().PropertyChanged.connect (sequencer_connection, invalidator (*this), boost::bind (&BBGUI::sequencer_changed, this, _1), gui_context());
+	bbox->sequencer().PropertyChanged.connect (sequencer_connection, invalidator (*this), std::bind (&BBGUI::sequencer_changed, this, _1), gui_context());
 
 	{
 		/* trigger initial draw */
@@ -347,7 +345,7 @@ SequencerView::SequencerView (StepSequencer& s, ArdourCanvas::Item *p)
 	velocity_mode_text->set_ignore_events (true);
 	timing_mode_text->set_ignore_events (true);
 
-	_sequencer.PropertyChanged.connect (sequencer_connection, invalidator (*this), boost::bind (&SequencerView::sequencer_changed, this, _1), gui_context());
+	_sequencer.PropertyChanged.connect (sequencer_connection, invalidator (*this), std::bind (&SequencerView::sequencer_changed, this, _1), gui_context());
 
 	{
 		/* trigger initial draw */
@@ -588,7 +586,7 @@ SequencerStepIndicator::SequencerStepIndicator (SequencerView& s, ArdourCanvas::
 	text->name = string_compose ("SI %1", n);
 
 	Event.connect (sigc::mem_fun (*this, &SequencerStepIndicator::on_event));
-	sv.sequencer().PropertyChanged.connect (sequencer_connection, invalidator (*this), boost::bind (&SequencerStepIndicator::sequencer_changed, this, _1), gui_context());
+	sv.sequencer().PropertyChanged.connect (sequencer_connection, invalidator (*this), std::bind (&SequencerStepIndicator::sequencer_changed, this, _1), gui_context());
 }
 
 void
@@ -744,7 +742,7 @@ StepView::StepView (SequenceView& sview, Step& s, ArdourCanvas::Canvas* c)
 	text->name = string_compose ("step %1", _step.index());
 
 	Event.connect (sigc::mem_fun (*this, &StepView::on_event));
-	_step.PropertyChanged.connect (step_connection, invalidator (*this), boost::bind (&StepView::step_changed, this, _1), gui_context());
+	_step.PropertyChanged.connect (step_connection, invalidator (*this), std::bind (&StepView::step_changed, this, _1), gui_context());
 }
 
 void
@@ -804,7 +802,7 @@ StepView::set_timing_text ()
 	if (_step.offset() == Temporal::Beats()) {
 		text->set (X_("0"));
 	} else {
-		const int64_t gcd = boost::integer::gcd (_step.offset().to_ticks(), int64_t (1920));
+		const int64_t gcd = std::gcd (_step.offset().to_ticks(), int64_t (1920));
 		const int64_t n = _step.offset().to_ticks() / gcd;
 		const int64_t d = 1920 / gcd;
 		text->set (string_compose ("%1/%2", n, d));

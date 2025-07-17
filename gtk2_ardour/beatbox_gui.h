@@ -23,13 +23,13 @@
 #include <memory>
 #include <string>
 
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/togglebutton.h>
-#include <gtkmm/button.h>
-#include <gtkmm/scrollbar.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/box.h>
-#include <gtkmm/notebook.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/togglebutton.h>
+#include <ytkmm/button.h>
+#include <ytkmm/scrollbar.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/box.h>
+#include <ytkmm/notebook.h>
 
 #include "gtkmm2ext/colors.h"
 

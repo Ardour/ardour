@@ -84,9 +84,9 @@ VBAPanner::VBAPanner (std::shared_ptr<Pannable> p, std::shared_ptr<Speakers> s)
 	: Panner (p)
 	, _speakers (new VBAPSpeakers (s))
 {
-	_pannable->pan_azimuth_control->Changed.connect_same_thread (*this, boost::bind (&VBAPanner::update, this));
-	_pannable->pan_elevation_control->Changed.connect_same_thread (*this, boost::bind (&VBAPanner::update, this));
-	_pannable->pan_width_control->Changed.connect_same_thread (*this, boost::bind (&VBAPanner::update, this));
+	_pannable->pan_azimuth_control->Changed.connect_same_thread (*this, std::bind (&VBAPanner::update, this));
+	_pannable->pan_elevation_control->Changed.connect_same_thread (*this, std::bind (&VBAPanner::update, this));
+	_pannable->pan_width_control->Changed.connect_same_thread (*this, std::bind (&VBAPanner::update, this));
 	if (!_pannable->has_state ()) {
 		reset ();
 	}

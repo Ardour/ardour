@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libtemporal_timeline_h__
-#define __libtemporal_timeline_h__
+#pragma once
 
 #include <ostream>
 #include <exception>
@@ -499,4 +498,3 @@ inline static bool operator>= (Temporal::Beats const & b, Temporal::timecnt_t co
 
 #undef TEMPORAL_DOMAIN_WARNING
 
-#endif /* __libtemporal_timeline_h__ */

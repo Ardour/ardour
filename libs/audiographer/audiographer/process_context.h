@@ -1,9 +1,7 @@
 #ifndef AUDIOGRAPHER_PROCESS_CONTEXT_H
 #define AUDIOGRAPHER_PROCESS_CONTEXT_H
 
-#include <boost/static_assert.hpp>
-#include <boost/type_traits.hpp>
-#include <boost/format.hpp>
+#include "pbd/compose.h"
 
 #include "audiographer/visibility.h"
 #include "exception.h"
@@ -29,7 +27,7 @@ class /*LIBAUDIOGRAPHER_API*/ ProcessContext
 	// This will need to be modified if if it's modified above
 	static const ThrowLevel throwLevel = DEFAULT_THROW_LEVEL;
 
-	BOOST_STATIC_ASSERT (boost::has_trivial_destructor<T>::value);
+	static_assert (std::is_trivially_destructible<T>::value);
 
 public:
 
@@ -73,9 +71,7 @@ public:
 	ProcessContext beginning (samplecnt_t samples)
 	{
 		if (throw_level (ThrowProcess) && samples > _samples) {
-			throw Exception (*this, boost::str (boost::format
-				("Trying to use too many samples of %1% for a new Context: %2% instead of %3%")
-				% DebugUtils::demangled_name (*this) % samples % _samples));
+			throw Exception (*this, string_compose ("Trying to use too many samples of %1 for a new Context: %2 instead of %3" ,DebugUtils::demangled_name (*this), samples, _samples));
 		}
 		validate_data ();
 
@@ -117,9 +113,7 @@ protected:
 	inline void validate_data()
 	{
 		if (throw_level (ThrowProcess) && (_samples % _channels != 0)) {
-			throw Exception (*this, boost::str (boost::format
-				("Number of samples given to %1% was not a multiple of channels: %2% samples with %3% channels")
-				% DebugUtils::demangled_name (*this) % _samples % _channels));
+			throw Exception (*this, string_compose ("Number of samples given to %1% was not a multiple of channels: %2 samples with %3 channels", DebugUtils::demangled_name (*this), _samples, _channels));
 		}
 	}
 };

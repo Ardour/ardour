@@ -18,13 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/label.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/table.h>
-#include <gtkmm/progressbar.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/label.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/table.h>
+#include <ytkmm/progressbar.h>
 
 #include "normalize_dialog.h"
 

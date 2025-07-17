@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/container.h>
+#include <ytkmm/container.h>
 
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gtk_ui.h"
@@ -37,9 +37,9 @@ PluginDisplay::PluginDisplay (std::shared_ptr<ARDOUR::Plugin> p, uint32_t max_he
 	, _scroll (false)
 {
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	_plug->DropReferences.connect (_death_connection, invalidator (*this), boost::bind (&PluginDisplay::plugin_going_away, this), gui_context());
+	_plug->DropReferences.connect (_death_connection, invalidator (*this), std::bind (&PluginDisplay::plugin_going_away, this), gui_context());
 	_plug->QueueDraw.connect (_qdraw_connection, invalidator (*this),
-			boost::bind (&Gtk::Widget::queue_draw, this), gui_context ());
+			std::bind (&Gtk::Widget::queue_draw, this), gui_context ());
 }
 
 PluginDisplay::~PluginDisplay ()
@@ -89,7 +89,7 @@ PluginDisplay::render_inline (cairo_t* cr, uint32_t width)
 	}
 
 	/* allocate a local image-surface,
-	 * We cannot re-use the data via cairo_image_surface_create_for_data(),
+	 * We cannot reuse the data via cairo_image_surface_create_for_data(),
 	 * since pixman keeps a reference to it.
 	 * we'd need to hand over the data and ha cairo_surface_destroy to free it.
 	 * it might be possible to work around via cairo_surface_set_user_data().

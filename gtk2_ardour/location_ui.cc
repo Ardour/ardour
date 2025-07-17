@@ -214,6 +214,7 @@ LocationEditRow::set_session (Session *sess)
 	SessionHandlePtr::set_session (sess);
 
 	if (!_session) {
+		set_location (0);
 		return;
 	}
 
@@ -351,12 +352,12 @@ LocationEditRow::set_location (Location *loc)
 
 	/* connect to per-location signals, since this row only cares about this location */
 
-	location->NameChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::name_changed, this), gui_context());
-	location->StartChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::start_changed, this), gui_context());
-	location->EndChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::end_changed, this), gui_context());
-	location->Changed.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::location_changed, this), gui_context());
-	location->FlagsChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::flags_changed, this), gui_context());
-	location->LockChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::lock_changed, this), gui_context());
+	location->NameChanged.connect (connections, invalidator (*this), std::bind (&LocationEditRow::name_changed, this), gui_context());
+	location->StartChanged.connect (connections, invalidator (*this), std::bind (&LocationEditRow::start_changed, this), gui_context());
+	location->EndChanged.connect (connections, invalidator (*this), std::bind (&LocationEditRow::end_changed, this), gui_context());
+	location->Changed.connect (connections, invalidator (*this), std::bind (&LocationEditRow::location_changed, this), gui_context());
+	location->FlagsChanged.connect (connections, invalidator (*this), std::bind (&LocationEditRow::flags_changed, this), gui_context());
+	location->LockChanged.connect (connections, invalidator (*this), std::bind (&LocationEditRow::lock_changed, this), gui_context());
 }
 
 void
@@ -1016,16 +1017,13 @@ void
 LocationUI::map_locations (const Locations::LocationList& locations)
 {
 	Locations::LocationList::iterator i;
-	gint n;
 	int mark_n = 0;
 	Locations::LocationList temp = locations;
 	LocationSortByStart cmp;
 
 	temp.sort (cmp);
 
-	for (n = 0, i = temp.begin(); i != temp.end(); ++n, ++i) {
-
-		Location* location = *i;
+	for (auto & location : temp) {
 
 		if (location->is_mark()) {
 			LocationEditRow* erow = manage (new LocationEditRow (_session, location, mark_n));
@@ -1127,18 +1125,18 @@ LocationUI::set_session(ARDOUR::Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
-		_session->locations()->added.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::location_added, this, _1), gui_context());
-		_session->locations()->removed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::location_removed, this, _1), gui_context());
-		_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::refresh_location_list, this), gui_context());
-		Location::start_changed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::start_changed, this, _1), gui_context());
+		_session->locations()->added.connect (_session_connections, invalidator (*this), std::bind (&LocationUI::location_added, this, _1), gui_context());
+		_session->locations()->removed.connect (_session_connections, invalidator (*this), std::bind (&LocationUI::location_removed, this, _1), gui_context());
+		_session->locations()->changed.connect (_session_connections, invalidator (*this), std::bind (&LocationUI::refresh_location_list, this), gui_context());
+		Location::start_changed.connect (_session_connections, invalidator (*this), std::bind (&LocationUI::start_changed, this, _1), gui_context());
 
 		_clock_group->set_clock_mode (clock_mode_from_session_instant_xml ());
+
+		loop_edit_row.set_session (s);
+		punch_edit_row.set_session (s);
 	} else {
 		_mode_set = false;
 	}
-
-	loop_edit_row.set_session (s);
-	punch_edit_row.set_session (s);
 
 	refresh_location_list ();
 }
@@ -1154,12 +1152,6 @@ LocationUI::session_going_away()
 
 	loc_children.clear();
 	range_children.clear();
-
-	loop_edit_row.set_session (0);
-	loop_edit_row.set_location (0);
-
-	punch_edit_row.set_session (0);
-	punch_edit_row.set_location (0);
 
 	_mode_set = false;
 
@@ -1243,8 +1235,10 @@ void
 LocationUIWindow::set_session (Session *s)
 {
 	ArdourWindow::set_session (s);
-	_ui.set_session (s);
-	_ui.show_all ();
+	if (s) {
+		_ui.set_session (s);
+		_ui.show_all ();
+	}
 }
 
 void

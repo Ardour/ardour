@@ -74,7 +74,7 @@ using namespace Glib;
 using namespace ArdourSurface;
 using namespace Gtkmm2ext;
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 #define ABLETON 0x2982
 #define PUSH2   0x1967
@@ -736,15 +736,15 @@ Push2::notify_record_state_changed ()
 	}
 
 	switch (session->record_status ()) {
-	case Session::Disabled:
+	case Disabled:
 		b->second->set_color (LED::White);
 		b->second->set_state (LED::NoTransition);
 		break;
-	case Session::Enabled:
+	case Enabled:
 		b->second->set_color (LED::Red);
 		b->second->set_state (LED::Blinking4th);
 		break;
-	case Session::Recording:
+	case Recording:
 		b->second->set_color (LED::Red);
 		b->second->set_state (LED::OneShot24th);
 		break;

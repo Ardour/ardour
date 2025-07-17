@@ -29,10 +29,10 @@
 
 #include "pbd/gstdio_compat.h"
 
-#include <gdk/gdkkeysyms.h>
-#include <gtkmm/accelmap.h>
-#include <gtkmm/widget.h>
-#include <gtkmm/window.h>
+#include <ydk/gdkkeysyms.h>
+#include <ytkmm/accelmap.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/window.h>
 
 #include "pbd/convert.h"
 #include "pbd/debug.h"

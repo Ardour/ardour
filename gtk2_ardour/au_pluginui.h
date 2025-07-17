@@ -44,11 +44,11 @@
 #undef NO
 #endif
 
-#include <gtkmm/box.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/combobox.h>
-#include <gtkmm/button.h>
-#include <gtkmm/label.h>
+#include <ytkmm/box.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/combobox.h>
+#include <ytkmm/button.h>
+#include <ytkmm/label.h>
 
 #include "widgets/eventboxext.h"
 

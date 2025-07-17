@@ -1,6 +1,9 @@
 #ifndef MIDI_DEVICE_INFO_H
 #define MIDI_DEVICE_INFO_H
 
+#include <cstdint>
+#include <string>
+
 /* midi settings */
 struct MidiDeviceInfo {
 	MidiDeviceInfo(const std::string& dev_name)

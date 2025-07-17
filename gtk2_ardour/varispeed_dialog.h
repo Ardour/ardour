@@ -19,7 +19,7 @@
 #ifndef _gtkardour_varispeed_dialog_h_
 #define _gtkardour_varispeed_dialog_h_
 
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/spinbutton.h>
 
 #include "ardour_dialog.h"
 

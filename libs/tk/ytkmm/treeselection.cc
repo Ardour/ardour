@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/treeselection.h>
-#include <gtkmm/private/treeselection_p.h>
+#include <ytkmm/treeselection.h>
+#include <ytkmm/private/treeselection_p.h>
 
 
 // -*- c++ -*-
@@ -27,8 +27,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/treeview.h>
-#include <gtk/gtk.h>
+#include <ytkmm/treeview.h>
+#include <ytk/ytk.h>
 
 
 static void proxy_foreach_selection_iter_callback(GtkTreeModel* model, GtkTreePath*, GtkTreeIter* iter, void* data)

@@ -202,14 +202,14 @@ class LIBPBD_API SystemExec
 #ifdef NOPBD  /* outside ardour */
 		sigc::signal<void, std::string,size_t> ReadStdout;
 #else
-		PBD::Signal2<void, std::string,size_t> ReadStdout;
+		PBD::Signal<void(std::string,size_t)> ReadStdout;
 #endif
 
 		/** The Terminated signal is emitted when application terminates. */
 #ifdef NOPBD  /* outside ardour */
 		sigc::signal<void> Terminated;
 #else
-		PBD::Signal0<void> Terminated;
+		PBD::Signal<void()> Terminated;
 #endif
 
 		/** interposer to emit signal for writes to STDOUT/ERR.

@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_disk_io_h__
-#define __ardour_disk_io_h__
+#pragma once
 
 #include <vector>
 #include <string>
@@ -27,10 +26,10 @@
 #include "pbd/ringbufferNPT.h"
 #include "pbd/rcu.h"
 
-#include "ardour/interpolation.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/processor.h"
 #include "ardour/rt_midibuffer.h"
+#include "types.h"
 
 namespace PBD {
 	template<class T> class PlaybackBuffer;
@@ -89,8 +88,8 @@ public:
 	bool slaved() const      { return _slaved; }
 	void set_slaved(bool yn) { _slaved = yn; }
 
-	PBD::Signal0<void>            SpeedChanged;
-	PBD::Signal0<void>            ReverseChanged;
+	PBD::Signal<void()>            SpeedChanged;
+	PBD::Signal<void()>            ReverseChanged;
 
 	int set_state (const XMLNode&, int version);
 
@@ -144,9 +143,11 @@ protected:
 	/** Information about one audio channel, playback or capture
 	 * (depending on the derived class)
 	 */
-	struct ChannelInfo : public boost::noncopyable {
+	struct ChannelInfo {
 
 		ChannelInfo (samplecnt_t buffer_size);
+		ChannelInfo (const ChannelInfo&) = delete;
+		ChannelInfo& operator= (const ChannelInfo&) = delete;
 		virtual ~ChannelInfo ();
 
 		/** A semi-random-access ringbuffers for data to be played back.
@@ -163,7 +164,6 @@ protected:
 
 		/* used only by capture */
 		std::shared_ptr<AudioFileSource> write_source;
-		PBD::RingBufferNPT<CaptureTransition>* capture_transition_buf;
 
 		/* used in the butler thread only */
 		samplecnt_t curr_capture_cnt;
@@ -193,4 +193,3 @@ protected:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_disk_io_h__ */

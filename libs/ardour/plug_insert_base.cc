@@ -16,11 +16,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ardour/plug_insert_base.h"
 #include "ardour/ardour.h"
 #include "ardour/automation_control.h"
-#include "ardour/lv2_plugin.h"
+#include "ardour/ladspa_plugin.h"
 #include "ardour/luaproc.h"
-#include "ardour/plug_insert_base.h"
+#include "ardour/lv2_plugin.h"
+
+#ifdef WINDOWS_VST_SUPPORT
+#include "ardour/windows_vst_plugin.h"
+#endif
+
+#ifdef LXVST_SUPPORT
+#include "ardour/lxvst_plugin.h"
+#endif
+
+#ifdef MACVST_SUPPORT
+#include "ardour/mac_vst_plugin.h"
+#endif
+
+#ifdef VST3_SUPPORT
+#include "ardour/vst3_plugin.h"
+#endif
+
+#ifdef AUDIOUNIT_SUPPORT
+#include "ardour/audio_unit.h"
+#endif
 
 #include "pbd/i18n.h"
 
@@ -145,7 +166,7 @@ PlugInsertBase::find_and_load_plugin (Session& s, XMLNode const& node, PluginTyp
 }
 
 void
-PlugInsertBase::set_control_ids (const XMLNode& node, int version)
+PlugInsertBase::set_control_ids (const XMLNode& node, int version, bool by_value)
 {
 	const XMLNodeList& nlist = node.children();
 	for (XMLNodeConstIterator iter = nlist.begin(); iter != nlist.end(); ++iter) {
@@ -169,14 +190,21 @@ PlugInsertBase::set_control_ids (const XMLNode& node, int version)
 			continue;
 		}
 
-		/* this may create the new controllable */
 		std::shared_ptr<Evoral::Control> c = control (Evoral::Parameter (PluginAutomation, 0, p));
-
 		if (!c) {
 			continue;
 		}
 		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (c);
-		if (ac) {
+		if (!ac) {
+			continue;
+		}
+
+		if (by_value) {
+			float val;
+			if ((*iter)->get_property (X_("value"), val)) {
+				ac->set_value (val, Controllable::NoGroup);
+			}
+		} else {
 			ac->set_state (**iter, version);
 		}
 	}
@@ -197,4 +225,206 @@ PlugInsertBase::preset_load_set_value (uint32_t p, float v)
 	ac->start_touch (timepos_t (ac->session ().audible_sample()));
 	ac->set_value (v, Controllable::NoGroup);
 	ac->stop_touch (timepos_t (ac->session ().audible_sample()));
+}
+
+/* ****************************************************************************/
+
+std::shared_ptr<Plugin>
+PlugInsertBase::plugin_factory (std::shared_ptr<Plugin> other)
+{
+	std::shared_ptr<LadspaPlugin> lp;
+	std::shared_ptr<LuaProc> lua;
+	std::shared_ptr<LV2Plugin> lv2p;
+#ifdef WINDOWS_VST_SUPPORT
+	std::shared_ptr<WindowsVSTPlugin> vp;
+#endif
+#ifdef LXVST_SUPPORT
+	std::shared_ptr<LXVSTPlugin> lxvp;
+#endif
+#ifdef MACVST_SUPPORT
+	std::shared_ptr<MacVSTPlugin> mvp;
+#endif
+#ifdef VST3_SUPPORT
+	std::shared_ptr<VST3Plugin> vst3;
+#endif
+#ifdef AUDIOUNIT_SUPPORT
+	std::shared_ptr<AUPlugin> ap;
+#endif
+
+	if ((lp = std::dynamic_pointer_cast<LadspaPlugin> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new LadspaPlugin (*lp));
+	} else if ((lua = std::dynamic_pointer_cast<LuaProc> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new LuaProc (*lua));
+	} else if ((lv2p = std::dynamic_pointer_cast<LV2Plugin> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new LV2Plugin (*lv2p));
+#ifdef WINDOWS_VST_SUPPORT
+	} else if ((vp = std::dynamic_pointer_cast<WindowsVSTPlugin> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new WindowsVSTPlugin (*vp));
+#endif
+#ifdef LXVST_SUPPORT
+	} else if ((lxvp = std::dynamic_pointer_cast<LXVSTPlugin> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new LXVSTPlugin (*lxvp));
+#endif
+#ifdef MACVST_SUPPORT
+	} else if ((mvp = std::dynamic_pointer_cast<MacVSTPlugin> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new MacVSTPlugin (*mvp));
+#endif
+#ifdef VST3_SUPPORT
+	} else if ((vst3 = std::dynamic_pointer_cast<VST3Plugin> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new VST3Plugin (*vst3));
+#endif
+#ifdef AUDIOUNIT_SUPPORT
+	} else if ((ap = std::dynamic_pointer_cast<AUPlugin> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new AUPlugin (*ap));
+#endif
+	}
+
+	fatal << string_compose (_("programming error: %1"),
+			  X_("unknown plugin type in PlugInsertBase::plugin_factory"))
+	      << endmsg;
+	abort(); /*NOTREACHED*/
+	return std::shared_ptr<Plugin> ((Plugin*) 0);
+}
+
+/* ****************************************************************************/
+
+PlugInsertBase::PluginControl::PluginControl (Session&                        s,
+                                              PlugInsertBase*                 p,
+                                              const Evoral::Parameter&        param,
+                                              const ParameterDescriptor&      desc,
+                                              std::shared_ptr<AutomationList> list)
+	: AutomationControl (s, param, desc, list, p->describe_parameter (param))
+	, _pib (p)
+{
+	if (alist ()) {
+		if (desc.toggled) {
+			list->set_interpolation (Evoral::ControlList::Discrete);
+		}
+	}
+}
+
+/** @param val `user' value */
+
+void
+PlugInsertBase::PluginControl::actually_set_value (double user_val, PBD::Controllable::GroupControlDisposition group_override)
+{
+	for (uint32_t i = 0; i < _pib->get_count (); ++i) {
+		_pib->plugin (i)->set_parameter (parameter ().id (), user_val, 0);
+	}
+
+	AutomationControl::actually_set_value (user_val, group_override);
+}
+
+void
+PlugInsertBase::PluginControl::catch_up_with_external_value (double user_val)
+{
+	AutomationControl::actually_set_value (user_val, Controllable::NoGroup);
+}
+
+XMLNode&
+PlugInsertBase::PluginControl::get_state () const
+{
+	XMLNode& node (AutomationControl::get_state ());
+	node.set_property (X_("parameter"), parameter ().id ());
+
+	std::shared_ptr<LV2Plugin> lv2plugin = std::dynamic_pointer_cast<LV2Plugin> (_pib->plugin (0));
+	if (lv2plugin) {
+		node.set_property (X_("symbol"), lv2plugin->port_symbol (parameter ().id ()));
+	}
+
+	return node;
+}
+
+/** @return `user' val */
+double
+PlugInsertBase::PluginControl::get_value () const
+{
+	std::shared_ptr<Plugin> plugin = _pib->plugin ();
+
+	if (!plugin) {
+		return 0.0;
+	}
+
+	return plugin->get_parameter (parameter ().id ());
+}
+
+std::string
+PlugInsertBase::PluginControl::get_user_string () const
+{
+	std::shared_ptr<Plugin> plugin = _pib->plugin ();
+	if (plugin) {
+		std::string pp;
+		if (plugin->print_parameter (parameter ().id (), pp) && pp.size () > 0) {
+			return pp;
+		}
+	}
+	return AutomationControl::get_user_string ();
+}
+
+PlugInsertBase::PluginPropertyControl::PluginPropertyControl (Session&                        s,
+                                                              PlugInsertBase*                 p,
+                                                              const Evoral::Parameter&        param,
+                                                              const ParameterDescriptor&      desc,
+                                                              std::shared_ptr<AutomationList> list)
+	: AutomationControl (s, param, desc, list)
+	, _pib (p)
+{
+}
+
+void
+PlugInsertBase::PluginPropertyControl::actually_set_value (double user_val, Controllable::GroupControlDisposition gcd)
+{
+	/* Old numeric set_value(), coerce to appropriate datatype if possible.
+	 * This is lossy, but better than nothing until Ardour's automation system
+	 * can handle various datatypes all the way down.
+	 */
+	const Variant value (_desc.datatype, user_val);
+	if (value.type () == Variant::NOTHING) {
+		error << "set_value(double) called for non-numeric property" << endmsg;
+		return;
+	}
+
+	for (uint32_t i = 0; i < _pib->get_count (); ++i) {
+		_pib->plugin (i)->set_property (parameter ().id (), value);
+	}
+
+	_value = value;
+
+	AutomationControl::actually_set_value (user_val, gcd);
+}
+
+XMLNode&
+PlugInsertBase::PluginPropertyControl::get_state () const
+{
+	XMLNode& node (AutomationControl::get_state ());
+	node.set_property (X_("property"), parameter ().id ());
+	node.remove_property (X_("value"));
+	return node;
+}
+
+double
+PlugInsertBase::PluginPropertyControl::get_value () const
+{
+	return _value.to_double ();
+}
+
+std::ostream& operator<<(std::ostream& o, const ARDOUR::PlugInsertBase::Match& m)
+{
+	switch (m.method) {
+		case PlugInsertBase::Impossible: o << "Impossible"; break;
+		case PlugInsertBase::Delegate:   o << "Delegate"; break;
+		case PlugInsertBase::NoInputs:   o << "NoInputs"; break;
+		case PlugInsertBase::ExactMatch: o << "ExactMatch"; break;
+		case PlugInsertBase::Replicate:  o << "Replicate"; break;
+		case PlugInsertBase::Split:      o << "Split"; break;
+		case PlugInsertBase::Hide:       o << "Hide"; break;
+	}
+	o << " cnt: " << m.plugins
+		<< (m.strict_io ? " strict-io" : "")
+		<< (m.custom_cfg ? " custom-cfg" : "");
+	if (m.method == PlugInsertBase::Hide) {
+		o << " hide: " << m.hide;
+	}
+	o << "\n";
+	return o;
 }

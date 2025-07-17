@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <iostream>
-#include <gtkmm/window.h>
+#include <ytkmm/window.h>
 
 #include "gtkmm2ext/visibility_tracker.h"
 

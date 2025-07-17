@@ -117,7 +117,7 @@ aafi_build_unique_audio_essence_name (AAF_Iface* aafi, aafiAudioEssenceFile* aud
 }
 
 char*
-aafi_locate_external_essence_file (AAF_Iface* aafi, const char* original_uri_filepath, const char* search_location)
+aafi_locate_external_essence_file (AAF_Iface* aafi, const char* original_uri_filepath, const char* commonPathPart, const char* search_location)
 {
 	/*
 	 * Absolute Uniform Resource Locator (URL) complying with RFC 1738 or relative
@@ -131,17 +131,18 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const char* original_uri_fil
 
 	char*       local_filepath = NULL;
 	char*       aaf_path       = NULL;
-	const char* foundpath      = NULL;
 	char*       retpath        = NULL;
+	const char* foundpath      = NULL;
 
-	struct uri* uri = NULL;
+	struct uri* uri               = NULL;
+	struct uri* commonPathPartURI = NULL;
 
 	if (original_uri_filepath == NULL) {
 		error ("Cant locate a NULL filepath");
 		goto err;
 	}
 
-	debug ("Original URI : %s", original_uri_filepath);
+	debug ("Encoded file URI : %s", original_uri_filepath);
 
 	uri = laaf_uri_parse (original_uri_filepath, URI_OPT_DECODE_ALL, aafi->log);
 
@@ -155,54 +156,95 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const char* original_uri_fil
 		goto err;
 	}
 
-	debug ("Decoded URI's path : %s", uri->path);
+	debug ("Decoded file URI : %s", uri->path);
 
-	/* extract relative path to essence file : "<firstparent>/<essence.file>" */
-
-	const char* relativeEssencePath = NULL;
-	const char* essenceFileName     = NULL;
-
-	int   sepcount = 0;
-	char* p        = uri->path + strlen (uri->path);
-
-	while (p > uri->path) {
-		if (*p == '/') { /* parsing URI, so will always be '/' as separator character */
-			sepcount++;
-			if (sepcount == 1) {
-				essenceFileName = (p + 1);
-			} else if (sepcount == 2) {
-				relativeEssencePath = (p + 1);
-				break;
-			}
-		}
-		p--;
-	}
-
-	if (!relativeEssencePath) {
-		error ("Could not retrieve relative file path out of URI : %s", uri->path);
-		goto err;
-	}
-
-	if (!essenceFileName) {
-		error ("Could not retrieve file name out of URI : %s", uri->path);
-		goto err;
-	}
-
-	debug ("Essence filename : %s", essenceFileName);
+	const char* local_path = NULL;
 
 	if (search_location) {
-		/*
-		 * "<search_location>/<essence.file>"
-		 */
+		local_path = search_location;
+	} else {
+		/* extract local path to AAF file */
+		aaf_path = laaf_util_c99strdup (aafi->aafd->cfbd->file);
 
-		local_filepath = laaf_util_build_path ("/", search_location, essenceFileName, NULL);
-
-		if (!local_filepath) {
-			error ("Could not build search filepath");
+		if (!aaf_path) {
+			error ("Could not duplicate AAF filepath : %s", aafi->aafd->cfbd->file);
 			goto err;
 		}
 
-		debug ("Search filepath : %s", local_filepath);
+		char* p = aaf_path + strlen (aaf_path);
+
+		while (p > aaf_path) {
+			if (IS_DIR_SEP (*p)) {
+				*p = 0x00;
+				break;
+			}
+			p--;
+		}
+
+		local_path = aaf_path;
+	}
+
+	if (commonPathPart && *commonPathPart != 0x00) {
+		/*
+		 * commonPathPart stores the first part of the filepath URI, which is common
+		 * to all essence file.
+		 *
+		 *		file:///localhost/C:/data/path/media/essence_a.wav
+		 *		file:///localhost/C:/data/path/media/essence_b.wav
+		 *		file:///localhost/C:/data/path/media/subdir/essence_c.wav
+		 *		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+		 */
+
+		debug ("Encoded commonPathPartURI : %s", commonPathPart);
+
+		commonPathPartURI = laaf_uri_parse (commonPathPart, URI_OPT_DECODE_ALL, aafi->log);
+
+		if (commonPathPartURI == NULL) {
+			error ("Could not parse commonPathPartURI");
+			goto err;
+		}
+
+		if (commonPathPartURI->path == NULL) {
+			error ("Could not retrieve <path> out of commonPathPartURI");
+			goto err;
+		}
+
+		debug ("Decoded commonPathPartURI : %s", commonPathPartURI->path);
+
+		/*
+		 * Most of the time, the last common directory in path will be the top
+		 * directory for essence media so we want to try it.
+		 *
+		 *		file:///localhost/C:/data/path/media/essence_a.wav
+		 *		file:///localhost/C:/data/path/media/essence_b.wav
+		 *		file:///localhost/C:/data/path/media/subdir/essence_c.wav
+		 *		                              ^^^^^^^
+		 */
+
+		const char* relativeEssencePathWCommonDir = NULL;
+
+		int   sepcount = 0;
+		char* p        = commonPathPartURI->path + strlen (commonPathPartURI->path);
+
+		while (p > commonPathPartURI->path) {
+			if (*p == '/') { /* parsing URI, so will always be '/' as separator character */
+				sepcount++;
+				if (sepcount == 2) {
+					relativeEssencePathWCommonDir = uri->path + (p - commonPathPartURI->path);
+					break;
+				}
+			}
+			p--;
+		}
+
+		local_filepath = laaf_util_build_path (DIR_SEP_STR, local_path, relativeEssencePathWCommonDir, NULL);
+
+		if (!local_filepath) {
+			error ("Could not build filepath");
+			goto err;
+		}
+
+		debug ("Trying relativeEssencePathWCommonDir : %s", local_filepath);
 
 		if (laaf_util_file_exists (local_filepath) == 1) {
 			foundpath = local_filepath;
@@ -213,17 +255,19 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const char* original_uri_fil
 		local_filepath = NULL;
 
 		/*
-		 * "<search_location>/<firstparentInOriginalEssencePath>/<essence.file>"
+		 * Try without the last common directory.
 		 */
 
-		local_filepath = laaf_util_build_path ("/", search_location, relativeEssencePath, NULL);
+		const char* relativeEssencePathWoCommonDir = uri->path + strlen (commonPathPartURI->path);
+
+		local_filepath = laaf_util_build_path (DIR_SEP_STR, local_path, relativeEssencePathWoCommonDir, NULL);
 
 		if (!local_filepath) {
-			error ("Could not build search filepath");
+			error ("Could not build filepath");
 			goto err;
 		}
 
-		debug ("Search filepath : %s", local_filepath);
+		debug ("Trying relativeEssencePathWoCommonDir : %s", local_filepath);
 
 		if (laaf_util_file_exists (local_filepath) == 1) {
 			foundpath = local_filepath;
@@ -232,6 +276,42 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const char* original_uri_fil
 
 		free (local_filepath);
 		local_filepath = NULL;
+	} else {
+		/*
+		 * If no commonPathPart was provided (eg. if AAF file has only one source file)
+		 * then we take the full URI path to essence file and try each subpath starting
+		 * from the end (filename).
+		 *
+		 *		                <local_path>/essence_a.wav
+		 *		          <local_path>/media/essence_a.wav
+		 *		     <local_path>/path/media/essence_a.wav
+		 *		<local_path>/data/path/media/essence_a.wav
+		 */
+
+		char* p = uri->path + strlen (uri->path);
+
+		while (p > uri->path) {
+			if (*p == '/') { /* parsing URI, so will always be '/' as separator character */
+
+				local_filepath = laaf_util_build_path (DIR_SEP_STR, local_path, p, NULL);
+
+				if (!local_filepath) {
+					error ("Could not build filepath");
+					goto err;
+				}
+
+				debug ("Trying filepath : %s", local_filepath);
+
+				if (laaf_util_file_exists (local_filepath) == 1) {
+					foundpath = local_filepath;
+					goto found;
+				}
+
+				free (local_filepath);
+				local_filepath = NULL;
+			}
+			p--;
+		}
 	}
 
 	/* Try raw essence's URI, just in case... */
@@ -247,76 +327,6 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const char* original_uri_fil
 		foundpath = uri->path;
 		goto found;
 	}
-
-	/*
-	 * Try to locate essence file from the AAF file location.
-	 *
-	 * e.g.
-	 *      AAF filepath : /home/user/AAFFile.aaf
-	 *    + Essence URI  : file://localhost/C:/Users/user/Desktop/AudioFiles/essence.wav
-	 *    = /home/user/AudioFiles/essence.file
-	 */
-
-	/* extract path to AAF file */
-
-	aaf_path = laaf_util_c99strdup (aafi->aafd->cfbd->file);
-
-	if (!aaf_path) {
-		error ("Could not duplicate AAF filepath : %s", aafi->aafd->cfbd->file);
-		goto err;
-	}
-
-	p = aaf_path + strlen (aaf_path);
-
-	while (p > aaf_path) {
-		if (IS_DIR_SEP (*p)) {
-			*p = 0x00;
-			break;
-		}
-		p--;
-	}
-
-	/*
-	 * "<localPathToAAFfile>/<essence.file>"
-	 */
-
-	local_filepath = laaf_util_build_path (DIR_SEP_STR, aaf_path, essenceFileName, NULL);
-
-	if (!local_filepath) {
-		error ("Could not build filepath");
-		goto err;
-	}
-
-	debug ("AAF relative filepath : %s", local_filepath);
-
-	if (laaf_util_file_exists (local_filepath) == 1) {
-		foundpath = local_filepath;
-		goto found;
-	}
-
-	free (local_filepath);
-	local_filepath = NULL;
-
-	/*
-	 * "<localPathToAAFfile>/<firstparentInOriginalEssencePath>/<essence.file>"
-	 */
-
-	local_filepath = laaf_util_build_path (DIR_SEP_STR, aaf_path, relativeEssencePath, NULL);
-
-	if (!local_filepath) {
-		error ("Could not build filepath");
-		goto err;
-	}
-
-	debug ("AAF relative sub filepath : %s", local_filepath);
-
-	if (laaf_util_file_exists (local_filepath) == 1) {
-		foundpath = local_filepath;
-		goto found;
-	}
-
-	free (local_filepath);
-	local_filepath = NULL;
 
 	debug ("File not found");
 
@@ -336,7 +346,7 @@ found:
 			goto err;
 		}
 
-		debug ("File found at : %s", foundpath);
+		debug ("File found : %s", foundpath);
 	}
 
 	goto end;
@@ -346,6 +356,7 @@ err:
 
 end:
 	laaf_uri_free (uri);
+	laaf_uri_free (commonPathPartURI);
 
 	free (local_filepath);
 	free (aaf_path);
@@ -774,10 +785,10 @@ aafi_parse_audio_essence (AAF_Iface* aafi, aafiAudioEssenceFile* audioEssenceFil
 	    laaf_util_is_fileext (audioEssenceFile->usable_file_path, "aif") ||
 	    laaf_util_is_fileext (audioEssenceFile->usable_file_path, "aiff") ||
 	    laaf_util_is_fileext (audioEssenceFile->usable_file_path, "aifc")) {
-		fp = fopen (audioEssenceFile->usable_file_path, "rb");
+		fp = laaf_util_fopen_utf8 (audioEssenceFile->usable_file_path, "rb");
 
 		if (fp == NULL) {
-			error ("Could not open external audio essence file for reading : %s", audioEssenceFile->usable_file_path);
+			error ("Could not open external audio essence file for reading (%i: %s) : %s", errno, strerror (errno), audioEssenceFile->usable_file_path);
 			goto err;
 		}
 
@@ -887,4 +898,45 @@ externalAudioDataReaderCallback (unsigned char* buf, size_t offset, size_t reqle
 	}
 
 	return byteRead;
+}
+
+aafiAudioEssencePointer*
+aafi_audioEssencePointer_exists_before (AAF_Iface* aafi, aafiAudioEssencePointer* audioEssencePointerList)
+{
+	aafiAudioTrack*   at = NULL;
+	aafiTimelineItem* ai = NULL;
+	aafiAudioClip*    ac = NULL;
+
+	aafiAudioEssencePointer* aep1 = NULL;
+	aafiAudioEssencePointer* aep2 = NULL;
+
+	AAFI_foreachAudioTrack (aafi, at)
+	{
+		AAFI_foreachTrackItem (at, ai)
+		{
+			if (ai->type != AAFI_AUDIO_CLIP) {
+				continue;
+			}
+
+			ac   = (aafiAudioClip*)ai->data;
+			aep1 = audioEssencePointerList;
+
+			int found = 1;
+
+			AAFI_foreachEssencePointer (ac->essencePointerList, aep2)
+			{
+				if (!aep1 || aep1->essenceFile != aep2->essenceFile || aep1->essenceChannel != aep2->essenceChannel) {
+					found = 0;
+					break;
+				}
+				aep1 = aep1->next;
+			}
+
+			if (found && aep1 == NULL) {
+				return ac->essencePointerList;
+			}
+		}
+	}
+
+	return NULL;
 }

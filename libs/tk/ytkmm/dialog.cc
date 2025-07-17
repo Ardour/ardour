@@ -3,10 +3,10 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/dialog.h>
-#include <gtkmm/private/dialog_p.h>
+#include <ytkmm/dialog.h>
+#include <ytkmm/private/dialog_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: dialog.ccg,v 1.3 2004/11/21 20:54:20 murrayc Exp $ */
@@ -28,7 +28,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

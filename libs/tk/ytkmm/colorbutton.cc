@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/colorbutton.h>
-#include <gtkmm/private/colorbutton_p.h>
+#include <ytkmm/colorbutton.h>
+#include <ytkmm/private/colorbutton_p.h>
 
 
 // -*- c++ -*-
@@ -29,8 +29,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
-#include <gdkmm/color.h>
+#include <ytk/ytk.h>
+#include <ydkmm/color.h>
 
 namespace Gtk
 {

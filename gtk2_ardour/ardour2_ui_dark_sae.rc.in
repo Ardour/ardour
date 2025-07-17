@@ -2,7 +2,7 @@
 # This is the GTK style file for Ardour
 #
 
-style "very_small_text"
+style "smaller_text"
 {
  	font_name = "%FONT_SMALLER%"
 }
@@ -431,7 +431,7 @@ style "transport_rec_button_alternate"
 	bg[ACTIVE] = { 0.91, 0.68, 0.68 }
 }
 
-style "shuttle_control" = "very_small_text"
+style "shuttle_control" = "smaller_text"
 {
 	fg[NORMAL] = { 0.85, 0.92, 0.98 }
 	fg[ACTIVE] = { 0.85, 0.92, 0.98 }
@@ -1060,7 +1060,7 @@ style "selected_strip_frame"
 	bg[NORMAL] = { 0.79, 0.28, 0.18 }
 }
 
-style "flashing_alert" = "very_small_text"
+style "flashing_alert" = "smaller_text"
 {
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 	bg[NORMAL] = { 0.26, 0.26, 0.31 }

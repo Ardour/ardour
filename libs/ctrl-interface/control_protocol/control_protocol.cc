@@ -41,21 +41,22 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-Signal0<void>       ControlProtocol::ZoomToSession;
-Signal0<void>       ControlProtocol::ZoomOut;
-Signal0<void>       ControlProtocol::ZoomIn;
-Signal0<void>       ControlProtocol::Enter;
-Signal0<void>       ControlProtocol::Undo;
-Signal0<void>       ControlProtocol::Redo;
-Signal1<void,float> ControlProtocol::ScrollTimeline;
-Signal1<void,uint32_t> ControlProtocol::GotoView;
-Signal0<void> ControlProtocol::CloseDialog;
-PBD::Signal0<void> ControlProtocol::VerticalZoomInAll;
-PBD::Signal0<void> ControlProtocol::VerticalZoomOutAll;
-PBD::Signal0<void> ControlProtocol::VerticalZoomInSelected;
-PBD::Signal0<void> ControlProtocol::VerticalZoomOutSelected;
-PBD::Signal0<void>          ControlProtocol::StepTracksDown;
-PBD::Signal0<void>          ControlProtocol::StepTracksUp;
+PBD::Signal<void()>       ControlProtocol::ZoomToSession;
+PBD::Signal<void()>       ControlProtocol::ZoomOut;
+PBD::Signal<void()>       ControlProtocol::ZoomIn;
+PBD::Signal<void()>       ControlProtocol::Enter;
+PBD::Signal<void()>       ControlProtocol::Undo;
+PBD::Signal<void()>       ControlProtocol::Redo;
+PBD::Signal<void(float)> ControlProtocol::ScrollTimeline;
+PBD::Signal<void(uint32_t)> ControlProtocol::GotoView;
+PBD::Signal<void()> ControlProtocol::CloseDialog;
+PBD::Signal<void()> ControlProtocol::VerticalZoomInAll;
+PBD::Signal<void()> ControlProtocol::VerticalZoomOutAll;
+PBD::Signal<void()> ControlProtocol::VerticalZoomInSelected;
+PBD::Signal<void()> ControlProtocol::VerticalZoomOutSelected;
+PBD::Signal<void()>          ControlProtocol::StepTracksDown;
+PBD::Signal<void()>          ControlProtocol::StepTracksUp;
+PBD::Signal<void(std::weak_ptr<PluginInsert> )> ControlProtocol::PluginSelected;
 
 StripableNotificationList ControlProtocol::_last_selected;
 PBD::ScopedConnection ControlProtocol::selection_connection;
@@ -66,12 +67,12 @@ const std::string ControlProtocol::state_node_name ("Protocol");
 ControlProtocol::ControlProtocol (Session& s, string str)
 	: BasicUI (s)
 	, _name (str)
-	, glib_event_callback (boost::bind (&ControlProtocol::event_loop_precall, this))
+	, glib_event_callback (std::bind (&ControlProtocol::event_loop_precall, this))
 	, _active (false)
 {
 	if (!selection_connected) {
 		/* this is all static, connect it only once (and early), for all ControlProtocols */
-		ControlProtocolManager::StripableSelectionChanged.connect_same_thread (selection_connection, boost::bind (&ControlProtocol::notify_stripable_selection_changed, _1));
+		ControlProtocolManager::StripableSelectionChanged.connect_same_thread (selection_connection, std::bind (&ControlProtocol::notify_stripable_selection_changed, _1));
 		selection_connected = true;
 	}
 }
@@ -362,25 +363,25 @@ ControlProtocol::first_selected_stripable () const
 void
 ControlProtocol::add_stripable_to_selection (std::shared_ptr<ARDOUR::Stripable> s)
 {
-	session->selection().add (s, std::shared_ptr<AutomationControl>());
+	session->selection().select_stripable_and_maybe_group (s, SelectionAdd);
 }
 
 void
 ControlProtocol::set_stripable_selection (std::shared_ptr<ARDOUR::Stripable> s)
 {
-	session->selection().select_stripable_and_maybe_group (s, true, true, 0);
+	session->selection().select_stripable_and_maybe_group (s, SelectionSet);
 }
 
 void
 ControlProtocol::toggle_stripable_selection (std::shared_ptr<ARDOUR::Stripable> s)
 {
-	session->selection().toggle (s, std::shared_ptr<AutomationControl>());
+	session->selection().select_stripable_and_maybe_group (s, SelectionToggle);
 }
 
 void
 ControlProtocol::remove_stripable_from_selection (std::shared_ptr<ARDOUR::Stripable> s)
 {
-	session->selection().remove (s, std::shared_ptr<AutomationControl>());
+	session->selection().select_stripable_and_maybe_group (s, SelectionRemove);
 }
 
 void
@@ -388,7 +389,7 @@ ControlProtocol::add_rid_to_selection (int rid)
 {
 	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
-		session->selection().add (s, std::shared_ptr<AutomationControl>());
+		session->selection().select_stripable_and_maybe_group (s, SelectionAdd);
 	}
 }
 
@@ -397,7 +398,7 @@ ControlProtocol::set_rid_selection (int rid)
 {
 	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
-		session->selection().select_stripable_and_maybe_group (s, true, true, 0);
+		session->selection().select_stripable_and_maybe_group (s, SelectionSet, true, true, 0);
 	}
 }
 
@@ -406,7 +407,7 @@ ControlProtocol::toggle_rid_selection (int rid)
 {
 	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
-		session->selection().toggle (s, std::shared_ptr<AutomationControl>());
+		session->selection().select_stripable_and_maybe_group (s, SelectionToggle);
 	}
 }
 
@@ -415,7 +416,7 @@ ControlProtocol::remove_rid_from_selection (int rid)
 {
 	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
-		session->selection().remove (s, std::shared_ptr<AutomationControl>());
+		session->selection().select_stripable_and_maybe_group (s, SelectionRemove);
 	}
 }
 

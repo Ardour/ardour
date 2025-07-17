@@ -278,9 +278,7 @@ SystemExec::~SystemExec ()
 static void*
 interposer_thread (void *arg) {
 	SystemExec *sex = static_cast<SystemExec *>(arg);
-	pthread_set_name ("ExecStdOut");
 	sex->output_interposer();
-	pthread_exit(0);
 	return 0;
 }
 
@@ -522,7 +520,7 @@ SystemExec::start (StdErrMode stderr_mode, const char * /*vfork_exec_wrapper*/)
 		return -1;
 	}
 
-	int rv = pthread_create (&thread_id_tt, NULL, interposer_thread, this);
+	int rv = pthread_create_and_store ("ExecStdOut", &thread_id_tt, interposer_thread, this, 0);
 	thread_active=true;
 	if (rv) {
 		thread_active=false;
@@ -560,7 +558,6 @@ SystemExec::output_interposer()
 		ReadStdout(rv, bytesRead); /* EMIT SIGNAL */
 	}
 	Terminated(); /* EMIT SIGNAL */
-	pthread_exit(0);
 }
 
 void
@@ -808,7 +805,7 @@ SystemExec::start (StdErrMode stderr_mode, const char *vfork_exec_wrapper)
 		close_fd (pout[1]);
 		close_fd (pin[0]);
 
-		int rv = pthread_create (&thread_id_tt, NULL, interposer_thread, this);
+		int rv = pthread_create_and_store ("ExecStdOut", &thread_id_tt, interposer_thread, this, 0);
 		thread_active=true;
 
 		if (rv) {
@@ -917,7 +914,6 @@ again:
 		ReadStdout (rv, r); /* EMIT SIGNAL */
 	}
 	Terminated (); /* EMIT SIGNAL */
-	pthread_exit (0);
 }
 
 void

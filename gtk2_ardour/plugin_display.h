@@ -19,7 +19,7 @@
 #ifndef __ardour_plugin_display__
 #define __ardour_plugin_display__
 
-#include <gtkmm/drawingarea.h>
+#include <ytkmm/drawingarea.h>
 
 #include "ardour/plugin.h"
 

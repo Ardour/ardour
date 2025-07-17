@@ -129,7 +129,7 @@ Stripable::is_selected() const
 }
 
 bool
-Stripable::Sorter::operator() (std::shared_ptr<ARDOUR::Stripable> a, std::shared_ptr<ARDOUR::Stripable> b)
+Stripable::Sorter::operator() (std::shared_ptr<ARDOUR::Stripable> a, std::shared_ptr<ARDOUR::Stripable> b) const
 {
 	const PresentationInfo::Flag a_flag = a->presentation_info().flags ();
 	const PresentationInfo::Flag b_flag = b->presentation_info().flags ();

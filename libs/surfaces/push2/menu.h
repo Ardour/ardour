@@ -66,8 +66,8 @@ class Push2Menu : public ArdourCanvas::Container
 	enum Direction { DirectionUp, DirectionDown, DirectionLeft, DirectionRight };
 	void scroll (Direction, bool page = false);
 
-	PBD::Signal0<void> ActiveChanged;
-	PBD::Signal0<void> Rearranged;
+	PBD::Signal<void()> ActiveChanged;
+	PBD::Signal<void()> Rearranged;
 
    private:
 	std::vector<ArdourCanvas::Text*> _displays;

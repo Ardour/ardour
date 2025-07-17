@@ -18,11 +18,11 @@
 
 #include <glib/gstdio.h>
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/filechooserdialog.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
@@ -40,6 +40,7 @@
 #include "ardour/triggerbox.h"
 
 #include "gtkmm2ext/colors.h"
+#include <gtkmm2ext/utils.h>
 
 #include "slot_properties_box.h"
 
@@ -129,14 +130,14 @@ TriggerUI::~TriggerUI()
 void
 TriggerUI::trigger_swap (uint32_t n)
 {
-	if (n != tref.slot) {
+	if (n != tref.slot()) {
 		/* some other slot in the same box got swapped. we don't care */
 		return;
 	}
 	trigger_connections.drop_connections ();
 
-	trigger()->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
-	tref.box->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
+	trigger()->PropertyChanged.connect (trigger_connections, invalidator (*this), std::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
+	tref.box()->PropertyChanged.connect (trigger_connections, invalidator (*this), std::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
 
 	trigger_changed (Properties::name);
 }
@@ -410,8 +411,7 @@ TriggerUI::context_menu ()
 	items.push_back (MenuElem (_("MIDI Learn"), sigc::mem_fun (*this, &TriggerUI::trigger_midi_learn)));
 	items.push_back (MenuElem (_("MIDI un-Learn"), sigc::mem_fun (*this, &TriggerUI::trigger_midi_unlearn)));
 
-
-	_context_menu->popup (3, gtk_get_current_event_time ());
+	_context_menu->popup (1, gtk_get_current_event_time ());
 }
 
 void
@@ -421,13 +421,13 @@ TriggerUI::trigger_midi_learn ()
 		return;
 	}
 
-	tref.box->begin_midi_learn (trigger()->index());
+	tref.box()->begin_midi_learn (trigger()->index());
 }
 
 void
 TriggerUI::trigger_midi_unlearn ()
 {
-	tref.box->midi_unlearn (trigger()->index());
+	tref.box()->midi_unlearn (trigger()->index());
 }
 
 void
@@ -546,7 +546,7 @@ TriggerUI::launch_context_menu ()
 		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
 	}
 
-	_launch_context_menu->popup (3, gtk_get_current_event_time ());
+	_launch_context_menu->popup (1, gtk_get_current_event_time ());
 }
 
 void
@@ -627,14 +627,6 @@ TriggerUI::clear_trigger ()
 void
 TriggerUI::edit_trigger ()
 {
-	SlotPropertyWindow* tw      = static_cast<SlotPropertyWindow*> (trigger()->ui ());
-
-	if (!tw) {
-		tw = new SlotPropertyWindow (TriggerReference (trigger()->box(), trigger()->index()));
-		trigger()->set_ui (tw);
-	}
-
-	tw->present ();
 }
 
 void
@@ -797,7 +789,6 @@ TriggerUI::trigger_changed (PropertyChange const& what)
 	on_trigger_changed(what);
 }
 
-
 void
 TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 {
@@ -808,10 +799,10 @@ TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 
 	trigger_changed (TriggerBox::all_trigger_props());
 
-	trigger()->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
-	tref.box->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
+	trigger()->PropertyChanged.connect (trigger_connections, invalidator (*this), std::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
+	tref.box()->PropertyChanged.connect (trigger_connections, invalidator (*this), std::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
 
-	tref.box->TriggerSwapped.connect (trigger_swap_connection, invalidator (*this), boost::bind (&TriggerUI::trigger_swap, this, _1), gui_context ());
+	tref.box()->TriggerSwapped.connect (trigger_swap_connection, invalidator (*this), std::bind (&TriggerUI::trigger_swap, this, _1), gui_context ());
 
 	on_trigger_set();  //derived classes can do initialization here
 }

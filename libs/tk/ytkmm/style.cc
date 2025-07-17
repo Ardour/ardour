@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/style.h>
-#include <gtkmm/private/style_p.h>
+#include <ytkmm/style.h>
+#include <ytkmm/private/style_p.h>
 
 
 // -*- c++ -*-
@@ -27,9 +27,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/widget.h>
-#include <gtkmm/rc.h>
-#include <gtk/gtk.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/rc.h>
+#include <ytk/ytk.h>
 
 
 namespace Gtk

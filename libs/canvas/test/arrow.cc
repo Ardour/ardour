@@ -27,11 +27,11 @@ ArrowTest::bounding_box ()
 
 	arrow.set_outline_width (0);
 
-	boost::optional<Rect> bbox = arrow.bounding_box ();
+	std::optional<Rect> bbox = arrow.bounding_box ();
 
 	CPPUNIT_ASSERT (bbox.is_initialized ());
-	CPPUNIT_ASSERT (bbox.get().x0 == -6);
-	CPPUNIT_ASSERT (bbox.get().y0 == 0);
-	CPPUNIT_ASSERT (bbox.get().x1 == 6);
-	CPPUNIT_ASSERT (bbox.get().y1 == 128);
+	CPPUNIT_ASSERT (bbox.value().x0 == -6);
+	CPPUNIT_ASSERT (bbox.value().y0 == 0);
+	CPPUNIT_ASSERT (bbox.value().x1 == 6);
+	CPPUNIT_ASSERT (bbox.value().y1 == 128);
 }

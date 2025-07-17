@@ -22,13 +22,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_time_axis_view_item_h__
-#define __gtk_ardour_time_axis_view_item_h__
+#pragma once
 
 #include <string>
-#include <gdk/gdk.h>
-#include <gdkmm/color.h>
+#include <ydk/gdk.h>
+#include <ydkmm/color.h>
 #include <pangomm/fontdescription.h>
+#include "ardour/types.h"
 #include "pbd/signals.h"
 #include "selectable.h"
 
@@ -85,7 +85,7 @@ public:
 	virtual uint32_t get_fill_color () const;
 
 	ArdourCanvas::Item* get_canvas_frame();
-	ArdourCanvas::Item* get_canvas_group();
+	ArdourCanvas::Item* get_canvas_group() const;
 	ArdourCanvas::Item* get_name_highlight();
 
 	virtual void set_samples_per_pixel (double);
@@ -237,4 +237,3 @@ private:
 
 }; /* class TimeAxisViewItem */
 
-#endif /* __gtk_ardour_time_axis_view_item_h__ */

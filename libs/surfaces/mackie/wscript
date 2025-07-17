@@ -38,14 +38,9 @@ def build(bld):
     obj.includes     = [ '.' ]
     obj.name         = 'libardour_mcp'
     obj.target       = 'ardour_mcp'
-    obj.uselib       = 'XML OSX PANGOMM'
-    obj.use          = 'libardour libardour_cp libgtkmm2ext'
+    obj.uselib       = 'XML OSX PANGOMM GLIBMM GIOMM'
+    obj.use          = 'libardour libardour_cp libgtkmm2ext libytkmm'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
-    if bld.is_defined('YTK'):
-        obj.use    += ' libytkmm'
-        obj.uselib += ' GLIBMM GIOMM'
-    else:
-        obj.uselib += ' GTKMM'
 
     obj = bld(features = 'cxx cxxshlib')
     obj.source       = list(mackie_sources)
@@ -56,11 +51,6 @@ def build(bld):
     obj.includes     = [ '.' ]
     obj.name         = 'libardour_ssl_uf8'
     obj.target       = 'ardour_ssl_uf8'
-    obj.uselib       = 'XML OSX PANGOMM'
-    obj.use          = 'libardour libardour_cp libgtkmm2ext'
+    obj.uselib       = 'XML OSX PANGOMM GLIBMM GIOMM'
+    obj.use          = 'libardour libardour_cp libgtkmm2ext libytkmm'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
-    if bld.is_defined('YTK'):
-        obj.use    += ' libytkmm'
-        obj.uselib += ' GLIBMM GIOMM'
-    else:
-        obj.uselib += ' GTKMM'

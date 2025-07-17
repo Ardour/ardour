@@ -32,7 +32,7 @@
 #include <arpa/inet.h>
 #include <mntent.h>
 #include <unistd.h> /* access() */
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) || defined(__NetBSD__)
 #include <sys/syslimits.h>
 #include <unistd.h> /* access() */
 #elif defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
@@ -263,7 +263,7 @@ laaf_util_build_path (const char* sep, const char* first, ...)
 
 		int written = snprintf (str + offset, len - offset, "%s%.*s",
 		                        ((element_count == 0 && has_leading_sep) || (element_count > 0)) ? sep : "",
-		                        (uint32_t) (arglen - argstart),
+		                        (uint32_t)(arglen - argstart),
 		                        arg + argstart);
 
 		if (written < 0 || (size_t)written >= (len - offset)) {
@@ -511,6 +511,43 @@ laaf_util_file_exists (const char* filepath)
 #endif
 
 	return 0;
+}
+
+FILE*
+laaf_util_fopen_utf8 (const char* filepath, const char* mode)
+{
+	FILE* fp = NULL;
+
+	if (!filepath) {
+		return NULL;
+	}
+
+#ifdef _WIN32
+	wchar_t* wfile = laaf_util_windows_utf8toutf16 (filepath);
+
+	if (!wfile) {
+		// error( "Unable to convert filepath to wide string : %s", cfbd->file );
+		return NULL;
+	}
+
+	const wchar_t* wmode = NULL;
+
+	if (strcmp (mode, "rb") == 0) {
+		wmode = L"rb";
+	} else if (strcmp (mode, "wb") == 0) {
+		wmode = L"wb";
+	} else {
+		return NULL;
+	}
+
+	fp = _wfopen (wfile, wmode);
+
+	free (wfile);
+#else
+	fp    = fopen (filepath, mode);
+#endif
+
+	return fp;
 }
 
 static int

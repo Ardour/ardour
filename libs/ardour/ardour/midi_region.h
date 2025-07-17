@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_midi_region_h__
-#define __ardour_midi_region_h__
+#pragma once
 
 #include <vector>
 
@@ -35,6 +34,10 @@
 #include "ardour/region.h"
 
 class XMLNode;
+
+namespace PBD {
+class HistoryOwner;
+}
 
 namespace Evoral {
 template<typename Time> class EventSink;
@@ -102,7 +105,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	std::shared_ptr<MidiModel> model();
 	std::shared_ptr<const MidiModel> model() const;
 
-	void fix_negative_start ();
+	void fix_negative_start (PBD::HistoryOwner&);
 
 	int render (Evoral::EventSink<samplepos_t>& dst,
 	            uint32_t                        chan_n,
@@ -166,4 +169,3 @@ class LIBARDOUR_API MidiRegion : public Region
 } /* namespace ARDOUR */
 
 
-#endif /* __ardour_midi_region_h__ */

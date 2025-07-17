@@ -22,7 +22,7 @@
 
 #include <vector>
 
-#include <gtkmm/togglebutton.h>
+#include <ytkmm/togglebutton.h>
 
 #include "widgets/visibility.h"
 

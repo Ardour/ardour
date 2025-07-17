@@ -20,11 +20,13 @@
 #define __gtkmm2ext_window_proxy_h__
 
 #include <string>
-#include <gdkmm/event.h>
+#include <ydkmm/event.h>
 #include <glibmm/refptr.h>
 #include <sigc++/trackable.h>
 
 #include "pbd/statefuldestructible.h"
+
+#include <ytkmm/action.h>
 
 #include "gtkmm2ext/visibility.h"
 

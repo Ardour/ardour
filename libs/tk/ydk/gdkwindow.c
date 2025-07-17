@@ -39,6 +39,8 @@
 
 #undef DEBUG_WINDOW_PRINTING
 
+#define FIRST_TOUCH_EMULATE_BUTTON_EVENT
+
 #ifdef GDK_WINDOWING_X11
 #include "gdkx.h"           /* For workaround */
 #endif
@@ -158,7 +160,6 @@ typedef struct {
   GdkRegion *dest_region; /* The destination region */
   int dx, dy; /* The amount that the source was moved to reach dest_region */
 } GdkWindowRegionMove;
-
 
 /* Global info */
 
@@ -6883,6 +6884,9 @@ gdk_window_show_internal (GdkWindow *window, gboolean raise)
 	_gdk_make_event (GDK_WINDOW (private), GDK_MAP, NULL, FALSE);
     }
 
+  if (!was_mapped && _gdk_modal_notify && private->modal_hint) 
+    _gdk_modal_notify (window, TRUE);
+
   if (!was_mapped || raise)
     {
       recompute_visible_regions (private, TRUE, FALSE);
@@ -7314,6 +7318,9 @@ gdk_window_hide (GdkWindow *window)
       _gdk_synthesize_crossing_events_for_geometry_change (GDK_WINDOW (private->parent));
     }
 
+  if (was_mapped && _gdk_modal_notify && private->modal_hint) 
+    _gdk_modal_notify (window, FALSE);
+  
   /* Invalidate the rect */
   if (was_mapped)
     gdk_window_invalidate_in_parent (private);
@@ -9882,6 +9889,9 @@ static const guint type_masks[] = {
   0, /* GDK_OWNER_CHANGE = 34 */
   0, /* GDK_GRAB_BROKEN = 35 */
   0, /* GDK_DAMAGE = 36 */
+  GDK_TOUCH_BEGIN_MASK, /* GDK_TOUCH_BEGIN             = 37 */
+  GDK_TOUCH_UPDATE_MASK, /* GDK_TOUCH_UPDATE           = 38 */
+  GDK_TOUCH_END_MASK, /* GDK_TOUCH_END                 = 39 */
 };
 G_STATIC_ASSERT (G_N_ELEMENTS (type_masks) == GDK_EVENT_LAST);
 
@@ -9922,6 +9932,36 @@ is_motion_type (GdkEventType type)
   return type == GDK_MOTION_NOTIFY ||
 	 type == GDK_ENTER_NOTIFY ||
 	 type == GDK_LEAVE_NOTIFY;
+}
+
+static gboolean
+is_touch_type (GdkEventType type)
+{
+  return type == GDK_TOUCH_BEGIN ||
+	 type == GDK_TOUCH_UPDATE ||
+	 type == GDK_TOUCH_END;
+}
+
+static gboolean
+is_button_press (GdkEvent* event)
+{
+#ifdef FIRST_TOUCH_EMULATE_BUTTON_EVENT
+  return event->any.type == GDK_BUTTON_PRESS ||
+	(event->any.type == GDK_TOUCH_BEGIN && event->touch.flags & 0x20000);
+#else
+  return event->any.type == GDK_BUTTON_PRESS;
+#endif
+}
+
+static gboolean
+is_button_release (GdkEvent* event)
+{
+#ifdef FIRST_TOUCH_EMULATE_BUTTON_EVENT
+  return event->any.type == GDK_BUTTON_RELEASE ||
+	(event->any.type == GDK_TOUCH_END && event->touch.flags & 0x20000);
+#else
+  return event->any.type == GDK_BUTTON_RELEASE;
+#endif
 }
 
 static GdkWindowObject *
@@ -10791,7 +10831,7 @@ proxy_button_event (GdkEvent *source_event,
 						       toplevel_x, toplevel_y,
 						       &toplevel_x, &toplevel_y);
 
-  if (type == GDK_BUTTON_PRESS &&
+  if (is_button_press (source_event) &&
       !source_event->any.send_event &&
       _gdk_display_has_pointer_grab (display, serial) == NULL)
     {
@@ -10832,6 +10872,68 @@ proxy_button_event (GdkEvent *source_event,
 				type, state,
 				NULL, serial);
 
+#ifdef FIRST_TOUCH_EMULATE_BUTTON_EVENT
+  if (is_touch_type (type) && source_event->touch.flags & 0x20000)
+    {
+    if (type == GDK_TOUCH_UPDATE)
+      {
+	/* first touch moves the mouse already (at least on Linux/X11).
+	 * So there is no need to emulate GDK_MOTION_NOTIFY events.
+	 */
+	return TRUE;
+      }
+
+      event_win = get_event_window (display,
+				    pointer_window,
+				    type == GDK_TOUCH_BEGIN ? GDK_BUTTON_PRESS : GDK_BUTTON_RELEASE, state,
+				    NULL, serial);
+      if (event_win != NULL)
+	{
+	  /* grab window to create MOTION_NOTIFY messages for first touch */
+	  switch (type)
+	    {
+	      case GDK_TOUCH_BEGIN:
+		gdk_pointer_grab (event_win, FALSE, GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK, NULL, NULL, time_);
+		break;
+	      case GDK_TOUCH_END:
+		gdk_pointer_ungrab (time_);
+		break;
+	      default:
+		g_assert (0);
+		break;
+	    }
+	}
+    }
+  else
+#endif
+  /* multitouch grab */
+  if (type == GDK_TOUCH_BEGIN && !source_event->any.send_event)
+    {
+      GdkEventTouch* tev = (GdkEventTouch*) source_event;
+      if (!display->touch_grabs) {
+	display->touch_grabs = g_hash_table_new (g_direct_hash, NULL);
+      }
+      event_win = _gdk_window_find_descendant_at (toplevel_window, toplevel_x, toplevel_y, NULL, NULL);
+      g_hash_table_insert (display->touch_grabs, GUINT_TO_POINTER (tev->sequence), event_win);
+    }
+  else if (type == GDK_TOUCH_END && display->touch_grabs)
+    {
+      GdkEventTouch* tev = (GdkEventTouch*) source_event;
+      void* w = g_hash_table_lookup (display->touch_grabs, GUINT_TO_POINTER (tev->sequence));
+      if (w) {
+	event_win = GDK_WINDOW (w);
+      }
+      g_hash_table_remove (display->touch_grabs, GUINT_TO_POINTER (tev->sequence));
+    }
+  else if (type == GDK_TOUCH_UPDATE && display->touch_grabs)
+    {
+      GdkEventTouch* tev = (GdkEventTouch*) source_event;
+      void* w = g_hash_table_lookup (display->touch_grabs, GUINT_TO_POINTER (tev->sequence));
+      if (w) {
+	event_win = GDK_WINDOW (w);
+      }
+    }
+
   if (event_win == NULL || display->ignore_core_events)
     return TRUE;
 
@@ -10866,6 +10968,41 @@ proxy_button_event (GdkEvent *source_event,
       event->scroll.has_deltas = source_event->scroll.has_deltas;
       event->scroll.delta_x = source_event->scroll.delta_x;
       event->scroll.delta_y = source_event->scroll.delta_y;
+      return TRUE;
+
+    case GDK_TOUCH_BEGIN:
+    case GDK_TOUCH_UPDATE:
+    case GDK_TOUCH_END:
+#ifdef FIRST_TOUCH_EMULATE_BUTTON_EVENT
+      if (source_event->touch.flags & 0x20000) {
+        if (type == GDK_TOUCH_UPDATE) {
+	  g_assert (0);
+          return TRUE;
+        }
+        convert_toplevel_coords_to_window (event_win,
+                                           toplevel_x, toplevel_y,
+                                           &event->button.x, &event->button.y);
+
+        event->button.type   = type == GDK_TOUCH_BEGIN ? GDK_BUTTON_PRESS : GDK_BUTTON_RELEASE;
+        event->button.time   = source_event->touch.time;
+        event->button.x_root = source_event->touch.x_root;
+        event->button.y_root = source_event->touch.y_root;
+        event->button.axes   = NULL;
+        event->button.state  = 0;
+        event->button.button = 1;
+        event->button.device = display->core_pointer;
+        return TRUE;
+      }
+#endif
+
+      convert_toplevel_coords_to_window (event_win,
+					 toplevel_x, toplevel_y,
+					 &event->touch.x, &event->touch.y);
+      event->touch.sequence = source_event->touch.sequence;
+      event->touch.deviceid = source_event->touch.deviceid;
+      event->touch.x_root = source_event->touch.x_root;
+      event->touch.y_root = source_event->touch.y_root;
+      event->touch.state  = state;
       return TRUE;
 
     default:
@@ -11019,8 +11156,7 @@ _gdk_windowing_got_event (GdkDisplay *display,
 	  _gdk_display_pointer_grab_update (display,
 					    serial);
 	}
-      if (event->type == GDK_BUTTON_RELEASE &&
-	  !event->any.send_event)
+      if (is_button_release (event) && !event->any.send_event)
 	{
 	  button_release_grab =
 	    _gdk_display_has_pointer_grab (display, serial);
@@ -11052,7 +11188,8 @@ _gdk_windowing_got_event (GdkDisplay *display,
     return;
 
   if (!(is_button_type (event->type) ||
-	is_motion_type (event->type)) ||
+	is_motion_type (event->type) ||
+	is_touch_type (event->type)) ||
       event_private->window_type == GDK_WINDOW_ROOT)
     return;
 
@@ -11142,9 +11279,11 @@ _gdk_windowing_got_event (GdkDisplay *display,
   else if (is_button_type (event->type))
     unlink_event = proxy_button_event (event,
 				       serial);
+  else if (is_touch_type (event->type))
+    unlink_event = proxy_button_event (event,
+				       serial);
 
-  if (event->type == GDK_BUTTON_RELEASE &&
-      !event->any.send_event)
+  if (is_button_release (event) && !event->any.send_event)
     {
       button_release_grab =
 	_gdk_display_has_pointer_grab (display, serial);
@@ -11408,6 +11547,11 @@ gdk_window_get_height (GdkWindow *window)
   return height;
 }
 
+void
+gdk_window_set_modal_notify (void (*modal_notify)(GdkWindow*,gboolean))
+{
+	_gdk_modal_notify = modal_notify;
+}
 
 #define __GDK_WINDOW_C__
 #include "gdkaliasdef.c"

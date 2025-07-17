@@ -18,11 +18,6 @@ def build(bld):
     obj.includes     = ['.', '../libs']
     obj.name         = 'libardour_wiimote'
     obj.target       = 'ardour_wiimote'
-    obj.uselib       = 'CWIID XML'
-    obj.use          = 'libardour libardour_cp libgtkmm2ext'
+    obj.uselib       = 'CWIID XML GLIBMM GIOMM PANGOMM'
+    obj.use          = 'libardour libardour_cp libgtkmm2ext libytkmm'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
-    if bld.is_defined('YTK'):
-        obj.use    += 'libytkmm'
-        obj.uselib += ' GLIBMM GIOMM PANGOMM'
-    else:
-        obj.uselib += ' GTKMM'

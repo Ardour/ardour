@@ -32,7 +32,7 @@
 #include "pbd/convert.h"
 #include "pbd/enumwriter.h"
 
-#include <gtkmm/style.h>
+#include <ytkmm/style.h>
 #include <sigc++/bind.h>
 
 #include "gtkmm2ext/utils.h"
@@ -101,6 +101,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, drag_field (Field (0))
 	, xscale (1.0)
 	, yscale (1.0)
+	, _hovering (false)
 {
 	if (editable) {
 		set_can_focus ();
@@ -130,7 +131,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &AudioClock::set_colors));
 	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &AudioClock::dpi_reset));
 
-	TempoMap::MapChanged.connect (tempo_map_connection, invalidator (*this), boost::bind (&AudioClock::tempo_map_changed, this), gui_context());
+	TempoMap::MapChanged.connect (tempo_map_connection, invalidator (*this), std::bind (&AudioClock::tempo_map_changed, this), gui_context());
 }
 
 AudioClock::~AudioClock ()
@@ -327,6 +328,16 @@ AudioClock::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 				cairo_fill (cr);
 			}
 		}
+	}
+
+	if (UIConfigurationBase::instance().get_widget_prelight() && (_hovering || editing)) {
+		if (corner_radius) {
+			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), corner_radius);
+		} else {
+			cairo_rectangle (cr, 0, 0, get_width(), get_height());
+		}
+		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.12);
+		cairo_fill (cr);
 	}
 }
 
@@ -920,7 +931,7 @@ AudioClock::set_duration (Temporal::timecnt_t const & dur, bool force)
 }
 
 void
-AudioClock::set (timepos_t const & w, bool force)
+AudioClock::set (timepos_t const & w, bool force, bool round_to_beat)
 {
 	is_duration = false;
 
@@ -950,6 +961,11 @@ AudioClock::set (timepos_t const & w, bool force)
 			break;
 
 		case BBT:
+			if (round_to_beat) {
+				TempoMap::SharedPtr tmap (TempoMap::use());
+				Temporal::BBT_Argument BBT = tmap->round_to_bar (tmap->bbt_at (when));
+				when = Temporal::timepos_t::from_superclock (tmap->superclock_at(BBT));
+			}
 			set_bbt (timecnt_t (when));
 			btn_en = true;
 			break;
@@ -1369,8 +1385,8 @@ AudioClock::set_session (Session *s)
 			_limit_pos = timepos_t (limit_sec * _session->sample_rate());
 		}
 
-		Config->ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
-		_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
+		Config->ParameterChanged.connect (_session_connections, invalidator (*this), std::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
+		_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), std::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
 
 		/* try load v6 style settings (session file) */
 		XMLNode* node = _session->extra_xml (X_("ClockModes"));
@@ -1753,6 +1769,28 @@ AudioClock::on_button_release_event (GdkEventButton *ev)
 }
 
 bool
+AudioClock::on_enter_notify_event (GdkEventCrossing* ev)
+{
+	if (UIConfigurationBase::instance().get_widget_prelight() && editable && !_off) {
+		_hovering = true;
+		CairoWidget::set_dirty ();
+	}
+	return CairoWidget::on_enter_notify_event (ev);
+}
+
+bool
+AudioClock::on_leave_notify_event (GdkEventCrossing* ev)
+{
+	_hovering = false;
+
+	if (UIConfigurationBase::instance().get_widget_prelight()) {
+		CairoWidget::set_dirty ();
+  }
+
+	return CairoWidget::on_leave_notify_event (ev);
+}
+
+bool
 AudioClock::on_focus_out_event (GdkEventFocus* ev)
 {
 	bool ret = CairoWidget::on_focus_out_event (ev);
@@ -1792,6 +1830,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 
 	Field f = index_to_field (index);
 	timepos_t step;
+	timecnt_t beat = timecnt_t (Temporal::Beats (1, 0));
 
 	switch (ev->direction) {
 
@@ -1804,7 +1843,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 			if (is_duration) {
 				AudioClock::set_duration (current_duration() + step, true); // XXX step is too small ?!
 			} else {
-				AudioClock::set (last_when() + step, true);
+				AudioClock::set (last_when() + step, true, step > beat);
 			}
 			ValueChanged (); /* EMIT_SIGNAL */
 		}
@@ -1823,7 +1862,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 			} else if (!_negative_allowed && last_when() < step) {
 				AudioClock::set (timepos_t (), true);
 			} else {
-				AudioClock::set (last_when().earlier (step), true);
+				AudioClock::set (last_when().earlier (step), true, step > beat);
 			}
 
 			ValueChanged (); /* EMIT_SIGNAL */
@@ -1855,6 +1894,7 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 
 		timepos_t pos = last_when ();
 		timepos_t step = get_incremental_step (drag_field, pos);
+		timecnt_t beat = timecnt_t (Temporal::Beats (1, 0));
 
 		step *= fabs (drag_accum);
 
@@ -1865,9 +1905,9 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 					AudioClock::set_duration (current_duration () - step, false);
 				}
 			} else if (!step.is_zero () && (step < pos)) {
-				AudioClock::set (pos.earlier (step), false);
+				AudioClock::set (pos.earlier (step), false, step > beat);
 			} else {
-				AudioClock::set (timepos_t () , false);
+				AudioClock::set (timepos_t (), false);
 			}
 
 		} else if (is_duration) {
@@ -1875,7 +1915,7 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 			AudioClock::set_duration (current_duration () + step, false);
 		} else {
 			/* negative so upward motion .. increment clock */
-			AudioClock::set (pos + step, false);
+			AudioClock::set (pos + step, false, step > beat);
 		}
 
 
@@ -2387,7 +2427,10 @@ AudioClock::dpi_reset ()
 	 */
 	first_width = 0;
 	first_height = 0;
-	queue_resize ();
+
+	if (get_realized ()) {
+		queue_resize ();
+	}
 }
 
 void

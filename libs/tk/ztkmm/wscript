@@ -37,19 +37,15 @@ def options(opt):
     pass
 
 def configure(conf):
-    if conf.is_defined('YTK'):
-        autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0', mandatory=True)
-        autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0', mandatory=True)
+    autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0', mandatory=True)
+    autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0', mandatory=True)
 
 def build(bld):
-    if not bld.is_defined('YTK'):
-        return
-
     obj = bld.shlib(features = 'cxx cxxshlib', source=libztkmm_sources)
     obj.cxxflags        = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
     obj.cflags          = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
-    obj.export_includes = ['ztkmm']
-    obj.includes        = ['ztkmm']
+    obj.export_includes = ['.']
+    obj.includes        = ['.']
     obj.name            = 'libztkmm'
     obj.target          = 'ztkmm'
     obj.use             = 'libztk'

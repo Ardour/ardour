@@ -275,18 +275,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\clearlooks_draw_glossy.c"
-				>
-			</File>
-			<File
-				RelativePath="..\clearlooks_draw_gummy.c"
-				>
-			</File>
-			<File
-				RelativePath="..\clearlooks_draw_inverted.c"
-				>
-			</File>
-			<File
 				RelativePath="..\clearlooks_rc_style.c"
 				>
 			</File>

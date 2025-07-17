@@ -43,11 +43,11 @@
 #include "gtkwindow.h"
 #include "gtkbindings.h"
 #include "gtkprivate.h"
-#include "gdk/gdk.h"
-#include "gdk/gdkprivate.h" /* Used in gtk_reset_shapes_recurse to avoid copy */
+#include "ydk/gdk.h"
+#include "ydk/gdkprivate.h" /* Used in gtk_reset_shapes_recurse to avoid copy */
 #include <gobject/gvaluecollector.h>
 #include <gobject/gobjectnotifyqueue.c>
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 #include "gtkaccessible.h"
 #include "gtktooltip.h"
 #include "gtkinvisible.h"
@@ -197,6 +197,9 @@ enum {
   KEYNAV_FAILED,
   DRAG_FAILED,
   DAMAGE_EVENT,
+  TOUCH_BEGIN,
+  TOUCH_UPDATE,
+  TOUCH_END,
   LAST_SIGNAL
 };
 
@@ -537,6 +540,9 @@ gtk_widget_class_init (GtkWidgetClass *klass)
   klass->drag_drop = NULL;
   klass->drag_data_received = NULL;
   klass->screen_changed = NULL;
+  klass->touch_begin_event = NULL;
+  klass->touch_update_event = NULL;
+  klass->touch_end_event = NULL;
   klass->can_activate_accel = gtk_widget_real_can_activate_accel;
   klass->grab_broken_event = NULL;
   klass->query_tooltip = gtk_widget_real_query_tooltip;
@@ -2376,6 +2382,39 @@ gtk_widget_class_init (GtkWidgetClass *klass)
 		  _gtk_marshal_VOID__OBJECT,
 		  G_TYPE_NONE, 1,
 		  GDK_TYPE_SCREEN);
+
+
+  /* YTK Touch */
+  widget_signals[TOUCH_BEGIN] =
+    g_signal_new (I_("touch-start"),
+		  G_TYPE_FROM_CLASS (gobject_class),
+		  G_SIGNAL_RUN_LAST,
+		  G_STRUCT_OFFSET (GtkWidgetClass, touch_begin_event),
+		  _gtk_boolean_handled_accumulator, NULL,
+		  _gtk_marshal_BOOLEAN__BOXED,
+		  G_TYPE_BOOLEAN, 1,
+		  GDK_TYPE_EVENT | G_SIGNAL_TYPE_STATIC_SCOPE);
+
+  widget_signals[TOUCH_UPDATE] =
+    g_signal_new (I_("touch-update"),
+		  G_TYPE_FROM_CLASS (gobject_class),
+		  G_SIGNAL_RUN_LAST,
+		  G_STRUCT_OFFSET (GtkWidgetClass, touch_update_event),
+		  _gtk_boolean_handled_accumulator, NULL,
+		  _gtk_marshal_BOOLEAN__BOXED,
+		  G_TYPE_BOOLEAN, 1,
+		  GDK_TYPE_EVENT | G_SIGNAL_TYPE_STATIC_SCOPE);
+
+  widget_signals[TOUCH_END] =
+    g_signal_new (I_("touch-end"),
+		  G_TYPE_FROM_CLASS (gobject_class),
+		  G_SIGNAL_RUN_LAST,
+		  G_STRUCT_OFFSET (GtkWidgetClass, touch_end_event),
+		  _gtk_boolean_handled_accumulator, NULL,
+		  _gtk_marshal_BOOLEAN__BOXED,
+		  G_TYPE_BOOLEAN, 1,
+		  GDK_TYPE_EVENT | G_SIGNAL_TYPE_STATIC_SCOPE);
+
 
   /**
    * GtkWidget::can-activate-accel:
@@ -5000,6 +5039,15 @@ gtk_widget_event_internal (GtkWidget *widget,
 	  break;
 	case GDK_DAMAGE:
 	  signal_num = DAMAGE_EVENT;
+	  break;
+	case GDK_TOUCH_BEGIN:
+	  signal_num = TOUCH_BEGIN;
+	  break;
+	case GDK_TOUCH_END:
+	  signal_num = TOUCH_END;
+	  break;
+	case GDK_TOUCH_UPDATE:
+	  signal_num = TOUCH_UPDATE;
 	  break;
 	default:
 	  g_warning ("gtk_widget_event(): unhandled event type: %d", event->type);

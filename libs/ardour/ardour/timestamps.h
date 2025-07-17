@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_timestamps_h__
-#define __ardour_timestamps_h__
+#pragma once
 
 #ifdef WITH_JACK_TIMESTAMPS
 #include <jack/timestamps.h>
@@ -28,4 +27,3 @@
 #define jack_reset_timestamps()
 #endif
 
-#endif /* __ardour_timestamps_h__ */

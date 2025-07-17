@@ -27,11 +27,11 @@
 //This whole C++ class is deprecated anyway.
 #undef GTK_DISABLE_DEPRECATED
 
-#include <gtkmm/comboboxentrytext.h>
+#include <ytkmm/comboboxentrytext.h>
 
-#include <gtkmm/liststore.h>
-#include <gtkmm/cellrenderertext.h>
-#include <gtk/gtk.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/cellrenderertext.h>
+#include <ytk/ytk.h>
 
 
 namespace Gtk

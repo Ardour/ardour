@@ -20,9 +20,12 @@ fi
 
 MIXBUS=
 WITH_HARRISON_LV2=
+WITH_HARRISON_VBM=
 WITH_COMMERCIAL_X42_LV2=
 WITH_GRATIS_X42_LV2=
+WITH_GMSYNYTH=
 WITH_HARVID=
+WITH_XJADEO=
 STRIP=all
 PRINT_SYSDEPS=
 WITH_NLS=
@@ -31,10 +34,11 @@ VENDOR=Ardour ;
 EXENAME=ardour
 BUILDTYPE=""
 NOSTRIP="libsuil|libserd|libsord|liblilv|libsratom|liblrdf|libardour|libpbd|libevoral"
+X42PLUGINS="x42-autotune x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner"
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
-: ${HARRISONDSPURL=http://rsrc.harrisonconsoles.com/plugins/releases/public}
+: ${HARRISONDSPURL=https://builder.harrisonconsoles.com/pub/dsp}
 
 if [ $# -eq 0 ] ; then
 	echo ""
@@ -58,26 +62,41 @@ while [ $# -gt 0 ] ; do
 		WITH_HARRISON_LV2=1 ;
 		WITH_COMMERCIAL_X42_LV2=1
 		WITH_GRATIS_X42_LV2=1
+		WITH_GMSYNYTH=1
+		WITH_HARVID=1
+		WITH_XJADEO=1
 		WITH_NLS=1 ;
 		STRIP=all
 		APPNAME=Mixbus ;
 		VENDOR=Harrison ;
 		EXENAME=mixbus ;
 		shift ;;
-	--mixbus32c)
-		MIXBUS=1;
+	--livetrax)
+		LIVETRAX=1 ;
+		STRIP=all ;
+		WITH_NLS=1 ;
+		APPNAME=LiveTrax ;
+		EXENAME=LiveTrax ;
+		shift ;;
+	--vbm)
+		VBM=1
 		WITH_HARRISON_LV2=1 ;
+		WITH_HARRISON_VBM=1 ;
 		WITH_COMMERCIAL_X42_LV2=1
 		WITH_GRATIS_X42_LV2=1
 		WITH_NLS=1 ;
 		STRIP=all
-		APPNAME=Mixbus32C ;
+		APPNAME=MixbusVBM ;
 		VENDOR=Harrison ;
-		EXENAME=mixbus32c ;
+		EXENAME=mixbusvbm ;
 		major_version=""
+		X42PLUGINS="$X42PLUGINS x42-testsignal x42-nodelay"
 		shift ;;
 	--public)
 		WITH_HARRISON_LV2=1 ;
+		WITH_GMSYNYTH=1
+		WITH_HARVID=1
+		WITH_XJADEO=1
 		WITH_NLS=1 ;
 		STRIP=all ;
 		APPNAME=Ardour ;
@@ -96,7 +115,7 @@ while [ $# -gt 0 ] ; do
 	--strip) STRIP=$2 ; shift ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
-	--harvid) WITH_HARVID=1 ; shift ;;
+	--harvid) shift ;;
 	--gcc5abi) shift ;;
 	--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
 
@@ -282,7 +301,7 @@ if test x$WITH_NLS != x ; then
 	LINGUAS=
 
         for pkg in gtk2_ardour libs/ardour libs/gtkmm2ext libs/tk/ytk ; do
-	    files=`find ../../$pkg -name "*.mo"`
+	    files=`find ../../$pkg -not -path "*/appdata/*" -name "*.mo"`
 
             #
             # the package name is appended with a number so that
@@ -345,9 +364,6 @@ echo "Copying GTK engines ..."
 cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Libraries
 (cd $GTK_ENGINE_DIR && ln -s ../../libclearlooks.so . )
 
-cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Libraries
-(cd $GTK_ENGINE_DIR && ln -s ../../libpixmap.so . )
-
 # Control Surfaces
 cp $BUILD_ROOT/libs/surfaces/*/libardour_*.so* $Surfaces
 cp $BUILD_ROOT/libs/ctrl-interface/*/libardour_*.so* $Libraries
@@ -395,7 +411,7 @@ for x in $BUILD_ROOT/../share/osc/*.preset ; do
 done
 
 # Mixbus MixerSettings (if any)
-for x in $BUILD_ROOT/../mixer_settings/*.lua ; do
+for x in $BUILD_ROOT/../share/mixer_settings/*.lua ; do
     mkdir -p $MixerSettings  # create on demand
     cp "$x" $MixerSettings
 done
@@ -656,6 +672,10 @@ cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Etc
 cp $BUILD_ROOT/gtk2_ardour/clearlooks.rc $Etc
 cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Etc
 
+if test -n "$LIVETRAX"; then
+	cp $BUILD_ROOT/gtk2_ardour/livetrax.keys $Resources
+fi
+
 # Copied directly from source tree
 
 mkdir ${Shared}/icons
@@ -679,7 +699,7 @@ if [ -d specialSauce ] ; then
 fi
 
 # install bundled LV2s to <app>/lib/LV2/
-cp -R $BUILD_ROOT/libs/LV2 $APPLIB/
+cp -R $BUILD_ROOT/libs/LV2 $APPLIB/ || true
 
 # lv2 core, classifications
 for file in $GTKSTACK_ROOT/lib/lv2/*.lv2; do
@@ -705,6 +725,17 @@ if test x$WITH_HARRISON_LV2 != x ; then
 		-o "${CACHEDIR}/${HARRISONLV2}.${HARCH}.zip" \
 		"${HARRISONDSPURL}/${HARRISONLV2}.${HARCH}.zip"
 	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/${HARRISONLV2}.${HARCH}.zip"
+fi
+
+if test x$WITH_HARRISON_VBM != x ; then
+	echo "Including Harrison VBM Channelstrip LV2"
+	mkdir -p $APPLIB/LV2
+
+	curl -s -S --fail -# \
+		-z "${CACHEDIR}/harrison_vbm.${HARCH}.zip" \
+		-o "${CACHEDIR}/harrison_vbm.${HARCH}.zip" \
+		"${HARRISONDSPURL}/harrison_vbm.${HARCH}.zip"
+	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/harrison_vbm.${HARCH}.zip"
 fi
 
 if test -n "$MIXBUS"; then
@@ -736,14 +767,14 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -#  \
 		-z "${CACHEDIR}/MixbusBundledMedia.zip" \
 		-o "${CACHEDIR}/MixbusBundledMedia.zip" \
-		"http://builder.harrisonconsoles.com/pub/share/MixbusBundledMedia.zip"
+		"https://builder.harrisonconsoles.com/pub/share/MixbusBundledMedia.zip"
 
 	if test -f "${CACHEDIR}/MixbusBundledMedia.zip"; then
 		echo "Adding Mixbus Bundled Content"
 		rm -f "${MediaClips}/"*.*
 		unzip -q -o -d "${MediaClips}" "${CACHEDIR}/MixbusBundledMedia.zip"
 	fi
-else
+elif test -z "$LIVETRAX" -a -z "$VBM"; then
     echo "Fetching Ardour bundled content"
 
     curl -s -S --fail -#  \
@@ -761,7 +792,7 @@ echo "Setting Bundled Media dir/file permissions"
 find "${MediaClips}" -type d -exec chmod 755 "{}" \;
 find "${MediaClips}" -type f -exec chmod 644 "{}" \;
 
-if true ; then
+if test x$WITH_GMSYNYTH != x ; then
 	mkdir -p $APPLIB/LV2
 
 	echo "Adding General MIDI Synth LV2"
@@ -795,7 +826,17 @@ if test x$WITH_GRATIS_X42_LV2 != x ; then
 
 	echo "Adding gratis x42 Plugins"
 
-	for proj in x42-autotune x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner; do
+	for proj in $X42PLUGINS; do
+
+		if test -n "$VBM"; then
+			if test "$proj" = "setBfree"; then
+				continue
+			fi
+			if test "$proj" = "x42-avldrums"; then
+				continue
+			fi
+		fi
+
 		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/linux/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://x42-plugins.com/x42/linux/${proj}-lv2-linux-${WARCH}-${X42_VERSION}.zip \
@@ -809,19 +850,24 @@ fi
 if test x$WITH_HARVID != x ; then
 	cd $APPBIN
 	HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
-	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
 
 	rsync -Pa \
 		rsync://ardour.org/video-tools/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz \
 		"$CACHEDIR/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz"
 
-	rsync -Pa \
-		rsync://ardour.org/video-tools/xjadeo-${MULTIARCH}-${XJADEO_VERSION}.tgz \
-		"$CACHEDIR/xjadeo-${MULTIARCH}-${XJADEO_VERSION}.tgz"
-
 	tar -x -z \
 		--exclude=README --exclude=harvid.1 --strip-components=1 \
 		-f "$CACHEDIR/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz" || exit 1
+	cd -
+fi
+
+if test x$WITH_XJADEO != x ; then
+	cd $APPBIN
+	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
+
+	rsync -Pa \
+		rsync://ardour.org/video-tools/xjadeo-${MULTIARCH}-${XJADEO_VERSION}.tgz \
+		"$CACHEDIR/xjadeo-${MULTIARCH}-${XJADEO_VERSION}.tgz"
 
 	tar -x -z \
 		--exclude=README --exclude=xjadeo.1 --strip-components=1 \

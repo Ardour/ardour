@@ -220,10 +220,10 @@ MachineControl::set_ports (MIDI::Port* ip, MIDI::Port* op)
 	_input_port = ip;
 	_output_port = op;
 
-	_input_port->parser()->mmc.connect_same_thread (port_connections, boost::bind (&MachineControl::process_mmc_message, this, _1, _2, _3));
-	_input_port->parser()->start.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_start, this));
-	_input_port->parser()->contineu.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_continue, this));
-	_input_port->parser()->stop.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_stop, this));
+	_input_port->parser()->mmc.connect_same_thread (port_connections, std::bind (&MachineControl::process_mmc_message, this, _1, _2, _3));
+	_input_port->parser()->start.connect_same_thread (port_connections, std::bind (&MachineControl::spp_start, this));
+	_input_port->parser()->contineu.connect_same_thread (port_connections, std::bind (&MachineControl::spp_continue, this));
+	_input_port->parser()->stop.connect_same_thread (port_connections, std::bind (&MachineControl::spp_stop, this));
 }
 
 void

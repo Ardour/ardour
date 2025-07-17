@@ -217,6 +217,62 @@ SMFSource::close ()
 
 extern PBD::Timing minsert;
 
+void
+SMFSource::render (const ReaderLock& lock, Evoral::EventSink<Temporal::Beats>& destination)
+{
+	int      ret  = 0;
+	Temporal::Beats time; // in SMF ticks, 1 tick per _ppqn
+
+	if (writable() && !_open) {
+		/* nothing to read since nothing has ben written */
+		return;
+	}
+
+	// Output parameters for read_event (which will allocate scratch in buffer as needed)
+	uint32_t ev_delta_t = 0;
+	uint32_t ev_size    = 0;
+	uint8_t* ev_buffer  = 0;
+	size_t   scratch_size = 0; // keep track of scratch to minimize reallocs
+
+	/* start of read in SMF ticks (which may differ from our own musical ticks */
+
+	Evoral::SMF::seek_to_start();
+
+	while (true) {
+
+		Evoral::event_id_t ignored; /* XXX don't ignore note id's ??*/
+
+		ret = read_event (&ev_delta_t, &ev_size, &ev_buffer, &ignored);
+
+		if (ret == -1) { // EOF
+			break;
+		}
+
+		if (ret == 0) { // meta-event (skipped, just accumulate time)
+			continue;
+		}
+
+		time += Temporal::Beats::ticks_at_rate (ev_delta_t, ppqn()); // accumulate delta time
+
+		DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF render delta %1, time %2, buf[0] %3\n",
+								  ev_delta_t, time, ev_buffer[0]));
+
+		/* Note that we add on the source start time (in session samples) here so that ev_sample_time
+		   is in session samples.
+		*/
+		destination.write (time, Evoral::MIDI_EVENT, ev_size, ev_buffer);
+
+		if (ev_size > scratch_size) {
+			scratch_size = ev_size;
+		}
+
+		ev_size = scratch_size; // ensure read_event only allocates if necessary
+	}
+
+	_smf_last_read_end = time;
+	_smf_last_read_time = time;
+}
+
 timecnt_t
 SMFSource::read_unlocked (const ReaderLock&               lock,
                           Evoral::EventSink<samplepos_t>& destination,
@@ -405,8 +461,21 @@ SMFSource::write_unlocked (const WriterLock&            lock,
 void
 SMFSource::update_length (timepos_t const & dur)
 {
+	/* no time domain switching here */
+
 	assert (!_length || (_length.time_domain() == dur.time_domain()));
+
+	if (_model) {
+		_model->set_duration (dur.beats());
+	}
+
 	_length = dur;
+}
+
+Temporal::Beats
+SMFSource::duration() const
+{
+	return _length.beats ();
 }
 
 /** Append an event with a timestamp in beats */
@@ -414,14 +483,14 @@ void
 SMFSource::append_event_beats (const WriterLock&   lock,
                                const Evoral::Event<Temporal::Beats>& ev)
 {
-	if (!_writing || ev.size() == 0)  {
+	if (!_writing || ev.size() == 0 || ev.is_realtime())  {
 		return;
 	}
 
 #if 0
-	printf("SMFSource: %s - append_event_beats ID = %d time = %lf, size = %u, data = ",
-               name().c_str(), ev.id(), ev.time(), ev.size());
-	       for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");
+	std::cerr << "SMFSource " << name() << " - append_event_beats ID = " << ev.id() << " time = " << ev.time() << " size " << ev.size() << " data: ";
+	for (size_t i = 0; i < ev.size(); ++i) std::cerr << "0x" << std::hex << (int) ev.buffer()[i];
+	std::cerr << std::dec << std::endl;
 #endif
 
 	Temporal::Beats time = ev.time();
@@ -460,7 +529,7 @@ SMFSource::append_event_beats (const WriterLock&   lock,
 	const Temporal::Beats delta_time_beats = time - _last_ev_time_beats;
 	const uint32_t      delta_time_ticks = delta_time_beats.to_ticks(ppqn());
 
-	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
+	Evoral::SMF::append_event_delta (delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_beats = time;
 	_flags = Source::Flag (_flags & ~Empty);
 	_flags = Source::Flag (_flags & ~Missing);
@@ -472,7 +541,7 @@ SMFSource::append_event_samples (const WriterLock& lock,
                                 const Evoral::Event<samplepos_t>&  ev,
                                 samplepos_t                        position)
 {
-	if (!_writing || ev.size() == 0)  {
+	if (!_writing || ev.size() == 0 || ev.is_realtime())  {
 		return;
 	}
 
@@ -566,15 +635,15 @@ SMFSource::mark_streaming_midi_write_started (const WriterLock& lock, NoteMode m
 }
 
 void
-SMFSource::mark_streaming_write_completed (const WriterLock& lock)
+SMFSource::mark_streaming_write_completed (const WriterLock& lm, Temporal::timecnt_t const & duration)
 {
-	mark_midi_streaming_write_completed (lock, Evoral::Sequence<Temporal::Beats>::DeleteStuckNotes);
+	mark_midi_streaming_write_completed (lm, Evoral::Sequence<Temporal::Beats>::DeleteStuckNotes, duration);
 }
 
 void
-SMFSource::mark_midi_streaming_write_completed (const WriterLock& lm, Evoral::Sequence<Temporal::Beats>::StuckNoteOption stuck_notes_option, Temporal::Beats when)
+SMFSource::mark_midi_streaming_write_completed (const WriterLock& lm, Evoral::Sequence<Temporal::Beats>::StuckNoteOption stuck_notes_option, Temporal::timecnt_t const & duration)
 {
-	MidiSource::mark_midi_streaming_write_completed (lm, stuck_notes_option, when);
+	MidiSource::mark_midi_streaming_write_completed (lm, stuck_notes_option, duration);
 
 	if (!writable()) {
 		warning << string_compose ("attempt to write to unwritable SMF file %1", _path) << endmsg;
@@ -582,10 +651,11 @@ SMFSource::mark_midi_streaming_write_completed (const WriterLock& lm, Evoral::Se
 	}
 
 	if (_model) {
-		_model->set_edited(false);
+		_model->set_edited (false);
 	}
 
 	try {
+		update_length (timepos_t (duration.beats()));
 		Evoral::SMF::end_write (_path);
 	} catch (std::exception & e) {
 		error << string_compose (_("Exception while writing %1, file may be corrupt/unusable"), _path) << endmsg;
@@ -682,7 +752,9 @@ SMFSource::load_model_unlocked (bool force_reload)
 	std::list< std::pair< Evoral::Event<Temporal::Beats>*, gint > > eventlist;
 
 	for (unsigned i = 1; i <= num_tracks(); ++i) {
-		if (seek_to_track(i)) continue;
+		if (seek_to_track(i)) {
+			continue;
+		}
 
 		time = 0;
 		have_event_id = false;
@@ -765,7 +837,30 @@ SMFSource::load_model_unlocked (bool force_reload)
 		delete it->first;
 	}
 
-        // cerr << "----SMF-SRC-----\n";
+	/* Length ought to be based on data in the file (TrkEnd meta-event, not
+	   the final true event.
+	*/
+
+	Temporal::Beats fd = file_duration();
+
+	if (duration_is_explicit()) {
+		/* SMF provides an explicit duration that differs from the data
+		   duration, use it
+		*/
+		_length = fd;
+	} else {
+		bool ignored;
+		std::shared_ptr<Temporal::TempoMap> tmap = tempo_map (ignored);
+		Temporal::BBT_Time bbt (tmap->bbt_at (fd));
+		std::cerr << "SMF file duration " << fd << " = " << bbt << ' ';
+		bbt = tmap->round_up_to_bar (Temporal::BBT_Argument (bbt));
+		_length = tmap->quarters_at (Temporal::BBT_Argument (bbt));
+		std::cerr << " rounded up to bar " << bbt << " aka " << _length.beats() << std::endl;
+	}
+
+	_model->set_duration (_length.beats());
+
+	// cerr << "----SMF-SRC-----\n";
         // _playback_buf->dump (cerr);
         // cerr << "----------------\n";
 

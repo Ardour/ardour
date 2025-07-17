@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/entry.h>
-#include <gtkmm/checkbutton.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/checkbutton.h>
 
 #include "ardour_dialog.h"
 

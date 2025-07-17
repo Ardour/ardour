@@ -32,7 +32,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal1<void,std::shared_ptr<Playlist>> PlaylistFactory::PlaylistCreated;
+PBD::Signal<void(std::shared_ptr<Playlist>)> PlaylistFactory::PlaylistCreated;
 
 std::shared_ptr<Playlist>
 PlaylistFactory::create (Session& s, const XMLNode& node, bool hidden)

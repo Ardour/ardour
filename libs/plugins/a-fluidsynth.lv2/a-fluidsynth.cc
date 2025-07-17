@@ -99,17 +99,20 @@ struct BankProgram {
 		: name (n)
 		, bank (b)
 		, program (p)
+		, user_set (false)
 	{}
 
 	BankProgram (const BankProgram& other)
 		: name (other.name)
 		, bank (other.bank)
 		, program (other.program)
+		, user_set (other.user_set)
 	{}
 
 	std::string name;
 	int         bank;
 	int         program;
+	bool        user_set;
 };
 
 typedef std::vector<BankProgram>   BPList;
@@ -186,7 +189,11 @@ typedef struct {
 static bool
 load_sf2 (AFluidSynth* self, const char* fn)
 {
-	const int synth_id = fluid_synth_sfload (self->synth, fn, 1);
+	while (fluid_synth_sfcount (self->synth) > 0) {
+		fluid_synth_remove_sfont (self->synth, fluid_synth_get_sfont (self->synth, 0));
+	}
+
+	const int synth_id = fluid_synth_sfload (self->synth, fn, 0);
 
 #ifdef LV2_EXTENDED
 	pthread_mutex_lock (&self->bp_lock);
@@ -224,13 +231,20 @@ load_sf2 (AFluidSynth* self, const char* fn)
 		        fluid_preset_get_num (preset)));
 #endif // LV2_EXTENDED
 	}
-	pthread_mutex_unlock (&self->bp_lock);
 
-	if (chn == 0) {
-		return false;
+	if (chn > 0 && chn < 16) {
+		/* fill remaining channels */
+		fluid_sfont_iteration_start (sfont);
+		fluid_preset_t* preset = fluid_sfont_iteration_next (sfont);
+		for (;chn < 16; ++chn) {
+			fluid_synth_program_select (self->synth, chn, synth_id,
+			                            fluid_preset_get_banknum (preset), fluid_preset_get_num (preset));
+		}
 	}
 
-	return true;
+	pthread_mutex_unlock (&self->bp_lock);
+
+	return chn > 0;
 }
 
 static const LV2_Atom*
@@ -472,6 +486,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 	self->queue_retune       = false;
 	for (int chn = 0; chn < 16; ++chn) {
 		self->program_state[chn].program = -1;
+		self->program_state[chn].user_set = false;
 	}
 
 	lv2_atom_forge_init (&self->forge, map);
@@ -676,8 +691,9 @@ run (LV2_Handle instance, uint32_t n_samples)
 				int chn = fluid_midi_event_get_channel (self->fmidi_event);
 				assert (chn >= 0 && chn < 16);
 				self->program_state[chn].program = data[1];
+				self->program_state[chn].user_set = true;
 #ifdef LV2_EXTENDED
-				if (self->bankpatch) {
+				if (self->bankpatch && self->initialized) {
 					self->bankpatch->notify (self->bankpatch->handle, chn,
 					                         self->program_state[chn].bank,
 					                         self->program_state[chn].program < 0 ? 255 : self->program_state[chn].program);
@@ -798,7 +814,7 @@ work_response (LV2_Handle  instance,
 		strcpy (self->current_sf2_file_path, self->queue_sf2_file_path);
 
 		for (int chn = 0; chn < 16; ++chn) {
-			if (self->program_state[chn].program < 0) {
+			if (self->program_state[chn].program < 0 || !self->program_state[chn].user_set) {
 				continue;
 			}
 			/* cannot direcly call fluid_channel_set_bank_msb/fluid_channel_set_bank_lsb, use CCs */
@@ -823,6 +839,8 @@ work_response (LV2_Handle  instance,
 			if (FLUID_OK == fluid_synth_get_program (self->synth, chn, &sfid, &bank, &program)) {
 				self->program_state[chn].bank    = bank;
 				self->program_state[chn].program = program;
+			} else {
+				self->program_state[chn].program = -1;
 			}
 		}
 		if (self->queue_retune) {

@@ -19,6 +19,8 @@
 #include <stdint.h>
 #include <sys/select.h>
 
+#include <cstddef>
+
 /* select() sleeps _at most_ a given time.
  * (compared to usleep() or nanosleep() which sleep at least a given time)
  */

@@ -16,10 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/frame.h>
-#include <gtkmm/label.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/table.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/table.h>
 
 #include "plugin_setup_dialog.h"
 #include "pbd/i18n.h"
@@ -119,7 +119,7 @@ PluginSetupDialog::setup_output_presets ()
 	using namespace Menu_Helpers;
 	PluginOutputConfiguration ppc (_pi->plugin (0)->possible_output ());
 
-	_out_presets.AddMenuElem (MenuElem (_("Automatic"), sigc::bind (sigc::mem_fun (*this, &PluginSetupDialog::select_output_preset), 0)));
+	_out_presets.add_menu_elem (MenuElem (_("Automatic"), sigc::bind (sigc::mem_fun (*this, &PluginSetupDialog::select_output_preset), 0)));
 
 	if (ppc.find (0) != ppc.end ()) {
 		// anything goes
@@ -139,12 +139,12 @@ PluginSetupDialog::setup_output_presets ()
 
 	bool have_matching_io = ppc.find (n_audio) != ppc.end ();
 	if (have_matching_io) {
-		_out_presets.AddMenuElem (MenuElem (preset_label (n_audio), sigc::bind (sigc::mem_fun (*this, &PluginSetupDialog::select_output_preset), n_audio)));
+		_out_presets.add_menu_elem (MenuElem (preset_label (n_audio), sigc::bind (sigc::mem_fun (*this, &PluginSetupDialog::select_output_preset), n_audio)));
 	}
 
 	if (ppc.size() > 6 && *ppc.rbegin () != n_audio) {
 		uint32_t all = *ppc.rbegin ();
-		_out_presets.AddMenuElem (MenuElem (string_compose (_("All (%1)"), preset_label (all)), sigc::bind (sigc::mem_fun (*this, &PluginSetupDialog::select_output_preset), all)));
+		_out_presets.add_menu_elem (MenuElem (string_compose (_("All (%1)"), preset_label (all)), sigc::bind (sigc::mem_fun (*this, &PluginSetupDialog::select_output_preset), all)));
 		ppc.erase (all);
 	}
 
@@ -154,7 +154,7 @@ PluginSetupDialog::setup_output_presets ()
 			assert (have_matching_io);
 			continue;
 		}
-		_out_presets.AddMenuElem (MenuElem (preset_label (*i), sigc::bind (sigc::mem_fun (*this, &PluginSetupDialog::select_output_preset), *i)));
+		_out_presets.add_menu_elem (MenuElem (preset_label (*i), sigc::bind (sigc::mem_fun (*this, &PluginSetupDialog::select_output_preset), *i)));
 		if (_out_presets.items ().size () > 6) {
 			break;
 		}

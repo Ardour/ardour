@@ -16,15 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_instrument_selector_h__
-#define __gtk_ardour_instrument_selector_h__
+#pragma once
 
 #include <string>
 
-#include <gtkmm/combobox.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/liststore.h>
+#include <ytkmm/combobox.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/liststore.h>
 
 #include "pbd/signals.h"
 
@@ -76,4 +75,3 @@ private:
 	PBD::ScopedConnection        _update_connection;
 };
 
-#endif /* __gtk_ardour_instrument_selector_h__ */

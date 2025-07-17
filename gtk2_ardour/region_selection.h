@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_region_selection_h__
-#define __ardour_gtk_region_selection_h__
+#pragma once
 
 #include <set>
 #include <list>
@@ -77,4 +76,3 @@ private:
 	std::list<RegionView *> _bylayer; ///< list of regions sorted by layer
 };
 
-#endif /* __ardour_gtk_region_selection_h__ */

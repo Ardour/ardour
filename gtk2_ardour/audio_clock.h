@@ -23,18 +23,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __audio_clock_h__
-#define __audio_clock_h__
+#pragma once
 
 #include <map>
 #include <vector>
 
 #include <pangomm.h>
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/label.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/label.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
@@ -74,12 +73,13 @@ public:
 	void focus ();
 
 	/* overridden by MainClock */
-	virtual void set (Temporal::timepos_t const &, bool force = false);
+	virtual void set (Temporal::timepos_t const &, bool force = false, bool round_to_beat = false);
 	void set_duration (Temporal::timecnt_t const &, bool force = false);
+
+	virtual	void set_mode (Mode);
 
 	void set_from_playhead ();
 	void locate ();
-	void set_mode (Mode);
 
 	void copy_text_to_clipboard () const;
 
@@ -117,6 +117,7 @@ protected:
 
 	bool on_button_press_event (GdkEventButton *ev);
 	bool on_button_release_event(GdkEventButton *ev);
+	void on_size_request (Gtk::Requisition* req);
 
 	ArdourWidgets::ArdourButton _left_btn;
 	ArdourWidgets::ArdourButton _right_btn;
@@ -198,9 +199,10 @@ private:
 	bool on_key_release_event (GdkEventKey *);
 	bool on_scroll_event (GdkEventScroll *ev);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
-	void on_size_request (Gtk::Requisition* req);
 	bool on_motion_notify_event (GdkEventMotion *ev);
 	bool on_focus_out_event (GdkEventFocus*);
+	bool on_enter_notify_event (GdkEventCrossing*);
+	bool on_leave_notify_event (GdkEventCrossing*);
 
 	void set_slave_info ();
 	void set_timecode (Temporal::timepos_t const &);
@@ -256,7 +258,8 @@ private:
 	double xscale;
 	double yscale;
 
+	bool _hovering;
+
 	PBD::ScopedConnection tempo_map_connection;
 };
 
-#endif /* __audio_clock_h__ */

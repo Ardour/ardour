@@ -202,6 +202,9 @@ Editor::reset_tempo_marks ()
 	TempoPoint const * prev_ts = 0;
 
 	for (auto & t : tempo_marks) {
+		if (entered_marker == t) {
+			entered_marker = 0;
+		}
 		delete t;
 	}
 
@@ -300,8 +303,9 @@ Editor::tempo_map_changed ()
 
 	 reset_metric_marks ();
 	 update_tempo_based_rulers ();
+	 update_section_rects();
 	 update_all_marker_lanes ();
-	 maybe_draw_grid_lines ();
+	 maybe_draw_grid_lines (time_line_group);
 }
 
 void
@@ -427,42 +431,6 @@ Editor::compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t 
 		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 128);
 		break;
 	}
-}
-
-void
-Editor::hide_grid_lines ()
-{
-	if (grid_lines) {
-		grid_lines->hide();
-	}
-}
-
-void
-Editor::maybe_draw_grid_lines ()
-{
-	if ( _session == 0 ) {
-		return;
-	}
-
-	if (grid_lines == 0) {
-		grid_lines = new GridLines (time_line_group, ArdourCanvas::LineSet::Vertical);
-	}
-
-	grid_marks.clear();
-	samplepos_t rightmost_sample = _leftmost_sample + current_page_samples();
-
-	if ( grid_musical() ) {
-		 metric_get_bbt (grid_marks, _leftmost_sample, rightmost_sample, 12);
-	} else if (_grid_type== GridTypeTimecode) {
-		 metric_get_timecode (grid_marks, _leftmost_sample, rightmost_sample, 12);
-	} else if (_grid_type == GridTypeCDFrame) {
-		metric_get_minsec (grid_marks, _leftmost_sample, rightmost_sample, 12);
-	} else if (_grid_type == GridTypeMinSec) {
-		metric_get_minsec (grid_marks, _leftmost_sample, rightmost_sample, 12);
-	}
-
-	grid_lines->draw (grid_marks);
-	grid_lines->show();
 }
 
 void
@@ -939,7 +907,7 @@ Editor::mid_tempo_change (MidTempoChanges what_changed)
 	}
 
 	update_tempo_based_rulers ();
-	maybe_draw_grid_lines ();
+	maybe_draw_grid_lines (time_line_group);
 
 	if (!(what_changed & (MappingChanged|BBTChanged))) {
 		/* Nothing changes in tracks when it is a tempo mapping

@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_convert_h__
-#define __pbd_convert_h__
+#pragma once
 
 #include <stdint.h>
 #include <string>
@@ -55,4 +54,3 @@ LIBPBD_API const char* sgettext (const char *, const char *);
 
 } //namespace PBD
 
-#endif /* __pbd_convert_h__ */

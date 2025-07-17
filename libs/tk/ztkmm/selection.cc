@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/selection.h>
-#include <atkmm/private/selection_p.h>
+#include <ztkmm/selection.h>
+#include <ztkmm/private/selection_p.h>
 
 
 // -*- c++ -*-
@@ -27,8 +27,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/object.h>
-#include <atk/atkselection.h>
+#include <ztkmm/object.h>
+#include <ztk/atkselection.h>
 
 
 namespace

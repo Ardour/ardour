@@ -23,11 +23,6 @@ def build(bld):
     obj.includes = ['.', './launch_control_xl']
     obj.name = 'libardour_launch_control_xl'
     obj.target = 'ardour_launch_control_xl'
-    obj.uselib = 'SIGCPP XML OSX PANGOMM'
-    obj.use = 'libardour libardour_cp libpbd libevoral libcanvas libtemporal'
+    obj.uselib = 'SIGCPP XML OSX PANGOMM GLIBMM GIOMM'
+    obj.use = 'libardour libardour_cp libpbd libevoral libcanvas libtemporal libytkmm'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
-    if bld.is_defined('YTK'):
-        obj.use    += ' libytkmm'
-        obj.uselib += ' GLIBMM GIOMM'
-    else:
-        obj.uselib += ' GTKMM'

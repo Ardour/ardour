@@ -213,8 +213,8 @@ DECLARE_CLASS_IID (IPlugFrame, 0x367FAF01, 0xAFA94693, 0x8D4DA2A0, 0xED0882A3)
 //------------------------------------------------------------------------
 namespace Linux {
 
-#define TimerInterval uint64
-#define FileDescriptor int
+using TimerInterval = uint64;
+using FileDescriptor = int;
 
 //------------------------------------------------------------------------
 /** Linux event handler interface

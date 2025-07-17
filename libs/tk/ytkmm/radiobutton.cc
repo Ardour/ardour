@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/private/radiobutton_p.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/private/radiobutton_p.h>
 
 
 // -*- c++ -*-
@@ -29,7 +29,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 typedef Gtk::RadioButton::Group Group; //So that the generate get_group return type is parsed.
 

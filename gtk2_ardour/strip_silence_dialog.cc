@@ -21,10 +21,10 @@
 
 #include <iostream>
 
-#include <gtkmm/table.h>
-#include <gtkmm/label.h>
-#include <gtkmm/progressbar.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/table.h>
+#include <ytkmm/label.h>
+#include <ytkmm/progressbar.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/pthread_utils.h"
 
@@ -130,9 +130,9 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	progress_idle_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &StripSilenceDialog::idle_update_progress));
 
 	/* Create a thread which runs while the dialogue is open to compute the silence regions */
-	Completed.connect (_completed_connection, invalidator(*this), boost::bind (&StripSilenceDialog::update, this), gui_context ());
+	Completed.connect (_completed_connection, invalidator(*this), std::bind (&StripSilenceDialog::update, this), gui_context ());
 	_thread_should_finish = false;
-	pthread_create (&_thread, 0, StripSilenceDialog::_detection_thread_work, this);
+	pthread_create_and_store ("SilenceDetect", &_thread, StripSilenceDialog::_detection_thread_work, this, 0);
 
 	signal_response().connect(sigc::mem_fun (*this, &StripSilenceDialog::finished));
 }
@@ -248,7 +248,6 @@ void *
 StripSilenceDialog::_detection_thread_work (void* arg)
 {
 	StripSilenceDialog* d = reinterpret_cast<StripSilenceDialog*> (arg);
-	pthread_set_name ("SilenceDetect");
 	return d->detection_thread_work ();
 }
 

@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_segment_descriptor_h__
-#define __libardour_segment_descriptor_h__
+#pragma once
 
 #include "temporal/timeline.h"
 #include "temporal/tempo.h"
@@ -84,4 +83,3 @@ private:
 
 }
 
-#endif /* __libardour_segment_descriptor_h__ */

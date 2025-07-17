@@ -21,7 +21,7 @@
 #include <cmath>
 #include <map>
 
-#include <gtkmm/cellrenderercombo.h>
+#include <ytkmm/cellrenderercombo.h>
 
 #include "evoral/Note.h"
 #include "evoral/midi_util.h"
@@ -150,9 +150,9 @@ MidiListEditor::MidiListEditor (Session* s, std::shared_ptr<MidiRegion> r, std::
 	redisplay_model ();
 
 	region->midi_source (0)->model ()->ContentsChanged.connect (content_connections, invalidator (*this),
-	                                                            boost::bind (&MidiListEditor::redisplay_model, this), gui_context ());
+	                                                            std::bind (&MidiListEditor::redisplay_model, this), gui_context ());
 	region->PropertyChanged.connect (content_connections, invalidator (*this),
-	                                 boost::bind (&MidiListEditor::redisplay_model, this), gui_context ());
+	                                 std::bind (&MidiListEditor::redisplay_model, this), gui_context ());
 
 	buttons.attach (sound_notes_button, 0, 1, 0, 1);
 	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action ("Editor", "sound-midi-notes");

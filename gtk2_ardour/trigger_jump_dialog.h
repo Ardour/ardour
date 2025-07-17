@@ -21,7 +21,7 @@
 
 #include "pbd/properties.h"
 
-#include <gtkmm/table.h>
+#include <ytkmm/table.h>
 
 namespace ArdourWidgets {
 	class ArdourButton;

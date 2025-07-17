@@ -34,8 +34,8 @@ while [ $# -gt 0 ] ; do
 	--mixbus)
 		APPNAME=Mixbus ;
 		shift ;;
-	--mixbus32c)
-		APPNAME=Mixbus32C ;
+	--livetrax)
+		APPNAME=LiveTrax ;
 		shift ;;
 	--public)
 		APPNAME=Ardour ;

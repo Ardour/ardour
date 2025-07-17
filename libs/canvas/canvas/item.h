@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 #include <cairomm/context.h>
 

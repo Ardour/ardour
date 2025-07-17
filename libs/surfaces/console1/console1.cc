@@ -16,9 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/optional.hpp>
+#include <optional>
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 #include "pbd/controllable.h"
 #include "pbd/i18n.h"
 
@@ -61,10 +61,10 @@ Console1::~Console1 ()
 {
 	all_lights_out ();
 
+	tear_down_gui ();
+
 	stop_event_loop ();
 	MIDISurface::drop ();
-
-	tear_down_gui ();
 
 	for (const auto& b : buttons) {
 		delete b.second;
@@ -213,45 +213,45 @@ Console1::connect_session_signals ()
 	DEBUG_TRACE (DEBUG::Console1, "connect_session_signals\n");
 	// receive routes added
 	session->RouteAdded.connect (
-	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::create_strip_inventory, this), this);
+	  session_connections, MISSING_INVALIDATOR, std::bind (&Console1::create_strip_inventory, this), this);
 	// receive VCAs added
 	session->vca_manager ().VCAAdded.connect (
-	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::create_strip_inventory, this), this);
+	  session_connections, MISSING_INVALIDATOR, std::bind (&Console1::create_strip_inventory, this), this);
 
 	// receive record state toggled
 	// session->RecordStateChanged.connect(session_connections,
-	// MISSING_INVALIDATOR, boost::bind
+	// MISSING_INVALIDATOR, std::bind
 	// (&MIDISurface::notify_record_state_changed, this), this); receive
 	// transport
 	session->TransportStateChange.connect (
-	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::notify_transport_state_changed, this), this);
+	  session_connections, MISSING_INVALIDATOR, std::bind (&Console1::notify_transport_state_changed, this), this);
 	// session->TransportLooped.connect (session_connections,
-	// MISSING_INVALIDATOR, boost::bind
+	// MISSING_INVALIDATOR, std::bind
 	// (&MIDISurface::notify_loop_state_changed, this), this); receive punch-in
 	// and punch-out
 	Config->ParameterChanged.connect (
-	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::notify_parameter_changed, this, _1), this);
+	  session_connections, MISSING_INVALIDATOR, std::bind (&Console1::notify_parameter_changed, this, _1), this);
 	session->config.ParameterChanged.connect (
-	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::notify_parameter_changed, this, _1), this);
+	  session_connections, MISSING_INVALIDATOR, std::bind (&Console1::notify_parameter_changed, this, _1), this);
 	// receive rude solo changed
 	session->SoloActive.connect (
-	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::notify_solo_active_changed, this, _1), this);
+	  session_connections, MISSING_INVALIDATOR, std::bind (&Console1::notify_solo_active_changed, this, _1), this);
 	session->MonitorBusAddedOrRemoved.connect (
-	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::master_monitor_has_changed, this), this);
+	  session_connections, MISSING_INVALIDATOR, std::bind (&Console1::master_monitor_has_changed, this), this);
 	session->MonitorChanged.connect (
-	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::master_monitor_has_changed, this), this);
+	  session_connections, MISSING_INVALIDATOR, std::bind (&Console1::master_monitor_has_changed, this), this);
 	session->RouteAdded.connect (
-	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::strip_inventory_changed, this, _1), this);
+	  session_connections, MISSING_INVALIDATOR, std::bind (&Console1::strip_inventory_changed, this, _1), this);
 }
 
 void
 Console1::connect_internal_signals ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "connect_internal_signals\n");
-	BankChange.connect (console1_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_bank, this), this);
-	ShiftChange.connect (console1_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_shift, this, _1), this);
+	BankChange.connect (console1_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_bank, this), this);
+	ShiftChange.connect (console1_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_shift, this, _1), this);
 	PluginStateChange.connect (
-	  console1_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_plugin_state, this, _1), this);
+	  console1_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_plugin_state, this, _1), this);
 	GotoView.connect (
 	  console1_connections,
 	  MISSING_INVALIDATOR,
@@ -270,151 +270,151 @@ Console1::setup_controls ()
 	for (uint32_t i = 0; i < 20; ++i) {
 		new ControllerButton (this,
 		                      ControllerID (FOCUS1 + i),
-		                      boost::function<void (uint32_t)> (boost::bind (&Console1::select, this, i)),
+		                      std::function<void (uint32_t)> (std::bind (&Console1::select, this, i)),
 		                      0,
-		                      boost::function<void (uint32_t)> (boost::bind (&Console1::select_plugin, this, i)));
+		                      std::function<void (uint32_t)> (std::bind (&Console1::select_plugin, this, i)));
 	}
 
 	new ControllerButton (
-	  this, ControllerID::PRESET, boost::function<void (uint32_t)> (boost::bind (&Console1::shift, this, _1)));
+	  this, ControllerID::PRESET, std::function<void (uint32_t)> (std::bind (&Console1::shift, this, _1)));
 
 	new ControllerButton (this,
 	                      ControllerID::TRACK_GROUP,
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::plugin_state, this, _1)));
+	                      std::function<void (uint32_t)> (std::bind (&Console1::plugin_state, this, _1)));
 
 	new ControllerButton (
-	  this, ControllerID::DISPLAY_ON, boost::function<void (uint32_t)> (boost::bind (&Console1::rude_solo, this, _1)));
+	  this, ControllerID::DISPLAY_ON, std::function<void (uint32_t)> (std::bind (&Console1::rude_solo, this, _1)));
 	new ControllerButton (
-	  this, ControllerID::MODE, boost::function<void (uint32_t)> (boost::bind (&Console1::zoom, this, _1)));
+	  this, ControllerID::MODE, std::function<void (uint32_t)> (std::bind (&Console1::zoom, this, _1)));
 	new MultiStateButton (this,
 	                      ControllerID::EXTERNAL_SIDECHAIN,
 	                      std::vector<uint32_t>{ 0, 63, 127 },
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::window, this, _1)));
+	                      std::function<void (uint32_t)> (std::bind (&Console1::window, this, _1)));
 
 	new ControllerButton (
-	  this, ControllerID::PAGE_UP, boost::function<void (uint32_t)> (boost::bind (&Console1::bank, this, true)));
+	  this, ControllerID::PAGE_UP, std::function<void (uint32_t)> (std::bind (&Console1::bank, this, true)));
 	new ControllerButton (
-	  this, ControllerID::PAGE_DOWN, boost::function<void (uint32_t)> (boost::bind (&Console1::bank, this, false)));
+	  this, ControllerID::PAGE_DOWN, std::function<void (uint32_t)> (std::bind (&Console1::bank, this, false)));
 
 	new ControllerButton (this,
 	                      swap_solo_mute ? ControllerID::SOLO : ControllerID::MUTE,
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::mute, this, _1)));
+	                      std::function<void (uint32_t)> (std::bind (&Console1::mute, this, _1)));
 	new ControllerButton (this,
 	                      swap_solo_mute ? ControllerID::MUTE : ControllerID::SOLO,
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::solo, this, _1)));
+	                      std::function<void (uint32_t)> (std::bind (&Console1::solo, this, _1)));
 
 	new ControllerButton (
-	  this, ControllerID::PHASE_INV, boost::function<void (uint32_t)> (boost::bind (&Console1::phase, this, _1)));
+	  this, ControllerID::PHASE_INV, std::function<void (uint32_t)> (std::bind (&Console1::phase, this, _1)));
 
 	/*
 	Console 1: Input Gain - Ardour / Mixbus: Trim
 	*/
-	new Encoder (this, ControllerID::GAIN, boost::function<void (uint32_t)> (boost::bind (&Console1::trim, this, _1)));
+	new Encoder (this, ControllerID::GAIN, std::function<void (uint32_t)> (std::bind (&Console1::trim, this, _1)));
 
 	/*
 	Console 1: Volume - Ardour / Mixbus: Gain
 	*/
 	new Encoder (
-	  this, ControllerID::VOLUME, boost::function<void (uint32_t)> (boost::bind (&Console1::gain, this, _1)));
+	  this, ControllerID::VOLUME, std::function<void (uint32_t)> (std::bind (&Console1::gain, this, _1)));
 
-	new Encoder (this, ControllerID::PAN, boost::function<void (uint32_t)> (boost::bind (&Console1::pan, this, _1)));
+	new Encoder (this, ControllerID::PAN, std::function<void (uint32_t)> (std::bind (&Console1::pan, this, _1)));
 
 	/* Filter Section*/
 	new ControllerButton (this,
 	                      ControllerID::FILTER_TO_COMPRESSORS,
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::filter, this, _1)));
+	                      std::function<void (uint32_t)> (std::bind (&Console1::filter, this, _1)));
 	new Encoder (
-	  this, ControllerID::LOW_CUT, boost::function<void (uint32_t)> (boost::bind (&Console1::low_cut, this, _1)));
+	  this, ControllerID::LOW_CUT, std::function<void (uint32_t)> (std::bind (&Console1::low_cut, this, _1)));
 	new Encoder (
-	  this, ControllerID::HIGH_CUT, boost::function<void (uint32_t)> (boost::bind (&Console1::high_cut, this, _1)));
+	  this, ControllerID::HIGH_CUT, std::function<void (uint32_t)> (std::bind (&Console1::high_cut, this, _1)));
 
 	/* Gate Section */
 	new ControllerButton (
-	  this, ControllerID::SHAPE, boost::function<void (uint32_t)> (boost::bind (&Console1::gate, this, _1)));
+	  this, ControllerID::SHAPE, std::function<void (uint32_t)> (std::bind (&Console1::gate, this, _1)));
 	new ControllerButton (this,
 	                      ControllerID::HARD_GATE,
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::gate_scf, this, _1)),
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::gate_listen, this, _1)));
+	                      std::function<void (uint32_t)> (std::bind (&Console1::gate_scf, this, _1)),
+	                      std::function<void (uint32_t)> (std::bind (&Console1::gate_listen, this, _1)));
 	new Encoder (this,
 	             ControllerID::SHAPE_GATE,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_thresh, this, _1)));
+	             std::function<void (uint32_t)> (std::bind (&Console1::gate_thresh, this, _1)));
 	new Encoder (this,
 	             ControllerID::SHAPE_RELEASE,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_release, this, _1)),
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_hyst, this, _1)));
+	             std::function<void (uint32_t)> (std::bind (&Console1::gate_release, this, _1)),
+	             std::function<void (uint32_t)> (std::bind (&Console1::gate_hyst, this, _1)));
 	new Encoder (this,
 	             ControllerID::SHAPE_SUSTAIN,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_attack, this, _1)),
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_hold, this, _1)));
+	             std::function<void (uint32_t)> (std::bind (&Console1::gate_attack, this, _1)),
+	             std::function<void (uint32_t)> (std::bind (&Console1::gate_hold, this, _1)));
 	new Encoder (this,
 	             ControllerID::SHAPE_PUNCH,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_depth, this, _1)),
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_filter_freq, this, _1)));
+	             std::function<void (uint32_t)> (std::bind (&Console1::gate_depth, this, _1)),
+	             std::function<void (uint32_t)> (std::bind (&Console1::gate_filter_freq, this, _1)));
 
-	new Meter (this, ControllerID::SHAPE_METER, boost::function<void ()> ([] () {}));
+	new Meter (this, ControllerID::SHAPE_METER, std::function<void ()> ([] () {}));
 
 	/* EQ Section */
 	new ControllerButton (
-	  this, ControllerID::EQ, boost::function<void (uint32_t)> (boost::bind (&Console1::eq, this, _1)));
+	  this, ControllerID::EQ, std::function<void (uint32_t)> (std::bind (&Console1::eq, this, _1)));
 
 	for (uint32_t i = 0; i < 4; ++i) {
 		new Encoder (this,
 		             eq_freq_controller_for_band (i),
-		             boost::function<void (uint32_t)> (boost::bind (&Console1::eq_freq, this, i, _1)),
-		             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, i, _1)));
+		             std::function<void (uint32_t)> (std::bind (&Console1::eq_freq, this, i, _1)),
+		             std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, i, _1)));
 		new Encoder (this,
 		             eq_gain_controller_for_band (i),
-		             boost::function<void (uint32_t)> (boost::bind (&Console1::eq_gain, this, i, _1)),
-		             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, i + 4, _1)));
+		             std::function<void (uint32_t)> (std::bind (&Console1::eq_gain, this, i, _1)),
+		             std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, i + 4, _1)));
 	}
 	new Encoder (this,
 	             ControllerID::LOW_MID_SHAPE,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 10, _1)),
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 8, _1)));
+	             std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 10, _1)),
+	             std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 8, _1)));
 	new Encoder (this,
 	             ControllerID::HIGH_MID_SHAPE,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 11, _1)),
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 9, _1)));
+	             std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 11, _1)),
+	             std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 9, _1)));
 
 	new ControllerButton (this,
 	                      ControllerID::LOW_SHAPE,
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::eq_low_shape, this, _1)));
+	                      std::function<void (uint32_t)> (std::bind (&Console1::eq_low_shape, this, _1)));
 	new ControllerButton (this,
 	                      ControllerID::HIGH_SHAPE,
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::eq_high_shape, this, _1)));
+	                      std::function<void (uint32_t)> (std::bind (&Console1::eq_high_shape, this, _1)));
 
 	new Encoder (
-	  this, ControllerID::CHARACTER, boost::function<void (uint32_t)> (boost::bind (&Console1::drive, this, _1)));
+	  this, ControllerID::CHARACTER, std::function<void (uint32_t)> (std::bind (&Console1::drive, this, _1)));
 
 	/* Compressor Section */
 	new ControllerButton (
-	  this, ControllerID::COMP, boost::function<void (uint32_t)> (boost::bind (&Console1::comp, this, _1)));
+	  this, ControllerID::COMP, std::function<void (uint32_t)> (std::bind (&Console1::comp, this, _1)));
 	new MultiStateButton (this,
 	                      ControllerID::ORDER,
 	                      std::vector<uint32_t>{ 0, 63, 127 },
-	                      boost::function<void (uint32_t)> (boost::bind (&Console1::comp_mode, this, _1)));
+	                      std::function<void (uint32_t)> (std::bind (&Console1::comp_mode, this, _1)));
 
 	new Encoder (this,
 	             ControllerID::COMP_THRESH,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::comp_thresh, this, _1)));
+	             std::function<void (uint32_t)> (std::bind (&Console1::comp_thresh, this, _1)));
 	new Encoder (this,
 	             ControllerID::COMP_ATTACK,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::comp_attack, this, _1)));
+	             std::function<void (uint32_t)> (std::bind (&Console1::comp_attack, this, _1)));
 	new Encoder (this,
 	             ControllerID::COMP_RELEASE,
-	             boost::function<void (uint32_t)> (boost::bind (&Console1::comp_release, this, _1)));
+	             std::function<void (uint32_t)> (std::bind (&Console1::comp_release, this, _1)));
 	new Encoder (
-	  this, ControllerID::COMP_RATIO, boost::function<void (uint32_t)> (boost::bind (&Console1::comp_ratio, this, _1)));
+	  this, ControllerID::COMP_RATIO, std::function<void (uint32_t)> (std::bind (&Console1::comp_ratio, this, _1)));
 	new Encoder (
-	  this, ControllerID::COMP_PAR, boost::function<void (uint32_t)> (boost::bind (&Console1::comp_makeup, this, _1)));
+	  this, ControllerID::COMP_PAR, std::function<void (uint32_t)> (std::bind (&Console1::comp_makeup, this, _1)));
 	new Encoder (
-	  this, ControllerID::DRIVE, boost::function<void (uint32_t)> (boost::bind (&Console1::comp_emph, this, _1)));
+	  this, ControllerID::DRIVE, std::function<void (uint32_t)> (std::bind (&Console1::comp_emph, this, _1)));
 
-	new Meter (this, ControllerID::COMP_METER, boost::function<void ()> ([] () {}));
+	new Meter (this, ControllerID::COMP_METER, std::function<void ()> ([] () {}));
 
 	/* Output Section */
-	new Meter (this, ControllerID::OUTPUT_METER_L, boost::function<void ()> ([] () {}));
-	new Meter (this, ControllerID::OUTPUT_METER_R, boost::function<void ()> ([] () {}));
+	new Meter (this, ControllerID::OUTPUT_METER_L, std::function<void ()> ([] () {}));
+	new Meter (this, ControllerID::OUTPUT_METER_R, std::function<void ()> ([] () {}));
 }
 
 void
@@ -545,7 +545,7 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 	if (_current_stripable) {
 		DEBUG_TRACE (DEBUG::Console1, "current_stripable found:  \n");
 
-		r->MappedControlsChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::set_current_stripable, this, r), this);
+		r->MappedControlsChanged.connect (stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::set_current_stripable, this, r), this);
 
 		current_plugin_index = -1;
 
@@ -575,154 +575,154 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 		std::shared_ptr<AutomationControl> pan_control = current_pan_control;
 		if (pan_control)
 			pan_control->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_pan, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_pan, this), this);
 
 		_current_stripable->DropReferences.connect (
-		  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::drop_current_stripable, this), this);
+		  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::drop_current_stripable, this), this);
 
 		if (_current_stripable->mute_control ()) {
 			_current_stripable->mute_control ()->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_mute, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_mute, this), this);
 		}
 
 		if (_current_stripable->solo_control ()) {
 			_current_stripable->solo_control ()->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_solo, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_solo, this), this);
 		}
 
 		if (_current_stripable->phase_control ()) {
 			_current_stripable->phase_control ()->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_phase, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_phase, this), this);
 		}
 
 		// Rec Enabled
 		std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track> (_current_stripable);
 		if (t) {
 			t->rec_enable_control ()->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_recenable, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_recenable, this), this);
 		}
 
 		// Monitor
 		if (_current_stripable->monitoring_control ()) {
 			_current_stripable->monitoring_control ()->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_monitoring, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_monitoring, this), this);
 		}
 
 		// Trim
 		std::shared_ptr<AutomationControl> trim_control = _current_stripable->trim_control ();
 		if (trim_control) {
 			trim_control->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_trim, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_trim, this), this);
 		}
 		// Gain
 		std::shared_ptr<AutomationControl> gain_control = _current_stripable->gain_control ();
 		if (gain_control) {
 			gain_control->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gain, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gain, this), this);
 
 			// control->alist()->automation_state_changed.connect
-			// (stripable_connections, MISSING_INVALIDATOR, boost::bind
+			// (stripable_connections, MISSING_INVALIDATOR, std::bind
 			// (&Console1::map_auto, this), this);
 		}
 
 		// Filter Section
 		if (_current_stripable->mapped_control (HPF_Enable)) {
 			_current_stripable->mapped_control (HPF_Enable)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_filter, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_filter, this), this);
 		}
 
 		if (_current_stripable->mapped_control (HPF_Freq)) {
 			_current_stripable->mapped_control (HPF_Freq)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_low_cut, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_low_cut, this), this);
 		}
 
 		if (_current_stripable->mapped_control (LPF_Freq)) {
 			_current_stripable->mapped_control (LPF_Freq)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_high_cut, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_high_cut, this), this);
 		}
 
 		// Gate Section
 		if (_current_stripable->mapped_control (Gate_Enable)) {
 			_current_stripable->mapped_control (Gate_Enable)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Gate_KeyFilterEnable)) {
 			_current_stripable->mapped_control (Gate_KeyFilterEnable)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_scf, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_scf, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Gate_KeyListen)) {
 			_current_stripable->mapped_control (Gate_KeyListen)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_listen, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_listen, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Gate_Threshold)) {
 			_current_stripable->mapped_control (Gate_Threshold)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_thresh, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_thresh, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Gate_Depth)) {
 			_current_stripable->mapped_control (Gate_Depth)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_depth, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_depth, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Gate_Release)) {
 			_current_stripable->mapped_control (Gate_Release)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_release, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_release, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Gate_Attack)) {
 			_current_stripable->mapped_control (Gate_Attack)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_attack, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_attack, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Gate_Hysteresis)) {
 			_current_stripable->mapped_control (Gate_Hysteresis)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_hyst, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_hyst, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Gate_Hold)) {
 			_current_stripable->mapped_control (Gate_Hold)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_hold, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_hold, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Gate_KeyFilterFreq)) {
 			_current_stripable->mapped_control (Gate_KeyFilterFreq)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_filter_freq, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_filter_freq, this), this);
 		}
 
 		// EQ Section
 		if (_current_stripable->mapped_control (EQ_Enable)) {
 			_current_stripable->mapped_control (EQ_Enable)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_eq, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq, this), this);
 		}
 
 		for (uint32_t i = 0; i < _current_stripable->eq_band_cnt (); ++i) {
 			if (_current_stripable->mapped_control (EQ_BandFreq, i)) {
 				_current_stripable->mapped_control (EQ_BandFreq, i)->Changed.connect (
-				  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_eq_freq, this, i), this);
+				  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq_freq, this, i), this);
 			}
 			if (_current_stripable->mapped_control (EQ_BandGain, i)) {
 				_current_stripable->mapped_control (EQ_BandGain, i)->Changed.connect (
-				  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_eq_gain, this, i), this);
+				  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq_gain, this, i), this);
 			}
 		}
 
 		if (_current_stripable->mapped_control (EQ_BandShape, 0)) {
 			_current_stripable->mapped_control (EQ_BandShape, 0)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_eq_low_shape, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq_low_shape, this), this);
 		}
 
 		if (_current_stripable->mapped_control (EQ_BandShape, 3)) {
 			_current_stripable->mapped_control (EQ_BandShape, 3)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_eq_high_shape, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq_high_shape, this), this);
 		}
 
 		// Drive
 		if (_current_stripable->mapped_control (TapeDrive_Drive)) {
 			_current_stripable->mapped_control (TapeDrive_Drive)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_drive, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_drive, this), this);
 		}
 
 		// Mixbus Sends
@@ -731,7 +731,7 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 				_current_stripable->send_level_controllable (i)->Changed.connect (
 				  stripable_connections,
 				  MISSING_INVALIDATOR,
-				  boost::bind (&Console1::map_mb_send_level, this, i),
+				  std::bind (&Console1::map_mb_send_level, this, i),
 				  this);
 			}
 		}
@@ -739,42 +739,42 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 		// Comp Section
 		if (_current_stripable->mapped_control (Comp_Enable)) {
 			_current_stripable->mapped_control (Comp_Enable)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Comp_Mode)) {
 			_current_stripable->mapped_control (Comp_Mode)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp_mode, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp_mode, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Comp_Threshold)) {
 			_current_stripable->mapped_control (Comp_Threshold)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp_thresh, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp_thresh, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Comp_Attack)) {
 			_current_stripable->mapped_control (Comp_Attack)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp_attack, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp_attack, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Comp_Release)) {
 			_current_stripable->mapped_control (Comp_Release)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp_release, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp_release, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Comp_Ratio)) {
 			_current_stripable->mapped_control (Comp_Ratio)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp_ratio, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp_ratio, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Comp_Makeup)) {
 			_current_stripable->mapped_control (Comp_Makeup)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp_makeup, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp_makeup, this), this);
 		}
 
 		if (_current_stripable->mapped_control (Comp_KeyFilterFreq)) {
 			_current_stripable->mapped_control (Comp_KeyFilterFreq)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp_emph, this), this);
+			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp_emph, this), this);
 		}
 
 		uint32_t index = get_index_by_inventory_order (pi.order ());
@@ -1112,7 +1112,7 @@ void
 Console1::create_strip_inventory ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "create_strip_inventory()\n");
-	boost::optional<order_t> master_order;
+	std::optional<order_t> master_order;
 	strip_inventory.clear ();
 	StripableList sl = session->get_stripables ();
 	uint32_t index = 0;
@@ -1195,7 +1195,7 @@ Console1::select_rid_by_index (uint32_t index)
 	}
 	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
-		session->selection ().select_stripable_and_maybe_group (s, true, false, 0);
+		session->selection ().select_stripable_and_maybe_group (s, SelectionSet, true, false, 0);
 	} else {
 		success = false;
 	}

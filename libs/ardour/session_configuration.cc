@@ -41,6 +41,8 @@
 using namespace ARDOUR;
 using namespace PBD;
 
+/* clang-format off */
+
 SessionConfiguration::SessionConfiguration ()
 	:
 /* construct variables */
@@ -48,7 +50,7 @@ SessionConfiguration::SessionConfiguration ()
 #undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(Type,var,name,value) var (name,value),
 #define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) var (name,value,mutator),
-#include "ardour/session_configuration_vars.h"
+#include "ardour/session_configuration_vars.inc.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 	foo (0) // needed because above macros end in a comma
@@ -60,7 +62,7 @@ SessionConfiguration::SessionConfiguration ()
 #undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(Type,var,name,value) _my_variables.insert (std::make_pair ((name), &(var)));
 #define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) _my_variables.insert (std::make_pair ((name), &(var)));
-#include "ardour/session_configuration_vars.h"
+#include "ardour/session_configuration_vars.inc.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 
@@ -95,7 +97,7 @@ SessionConfiguration::get_variables (std::string const & node_name) const
 	var.add_to_node (*node);
 #define CONFIG_VARIABLE_SPECIAL(type,var,Name,value,mutator) \
 	var.add_to_node (*node);
-#include "ardour/session_configuration_vars.h"
+#include "ardour/session_configuration_vars.inc.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 
@@ -134,23 +136,24 @@ SessionConfiguration::set_variables (const XMLNode& node)
     ParameterChanged (name);                                 \
   }
 
-#include "ardour/session_configuration_vars.h"
+#include "ardour/session_configuration_vars.inc.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 
 }
 void
-SessionConfiguration::map_parameters (boost::function<void (std::string)>& functor)
+SessionConfiguration::map_parameters (std::function<void (std::string)>& functor)
 {
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(type,var,name,value)                 functor (name);
 #define CONFIG_VARIABLE_SPECIAL(type,var,name,value,mutator) functor (name);
-#include "ardour/session_configuration_vars.h"
+#include "ardour/session_configuration_vars.inc.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 }
 
+/* clang-format on */
 
 bool
 SessionConfiguration::load_state ()

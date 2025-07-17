@@ -21,8 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_audio_region_view_h__
-#define __gtk_ardour_audio_region_view_h__
+#pragma once
 
 #ifdef interface
 #undef interface
@@ -41,7 +40,7 @@
 #include "line_merger.h"
 #include "region_view.h"
 #include "time_axis_view_item.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "enums.h"
 
 namespace ARDOUR {
@@ -50,10 +49,11 @@ namespace ARDOUR {
 };
 
 class AudioTimeAxisView;
-class AudioRegionGainLine;
 class GhostRegion;
 class AutomationTimeAxisView;
+class RegionFxLine;
 class RouteTimeAxisView;
+class PasteContext;
 
 class AudioRegionView : public RegionView, public LineMerger
 {
@@ -91,12 +91,19 @@ public:
 	void temporarily_hide_envelope (); ///< Dangerous!
 	void unhide_envelope ();           ///< Dangerous!
 
+	void set_region_gain_line ();
+	void set_ignore_line_change (bool v) { _ignore_line_change = v; };
+	bool set_region_fx_line (uint32_t, uint32_t);
+	bool set_region_fx_line (std::weak_ptr<PBD::Controllable>);
+	bool get_region_fx_line (PBD::ID&, uint32_t&);
 	void update_envelope_visibility ();
+	bool paste (Temporal::timepos_t const&, const Selection&, PasteContext&);
+
+	sigc::signal<void> region_line_changed;
 
 	void add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event, bool with_guard_points);
-	void remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
 
-	std::shared_ptr<AudioRegionGainLine> get_gain_line() const { return gain_line; }
+	std::shared_ptr<RegionFxLine> fx_line() const { return _fx_line; }
 
 	void region_changed (const PBD::PropertyChange&);
 	void envelope_active_changed ();
@@ -114,8 +121,6 @@ public:
 
 	void update_transient(float old_pos, float new_pos);
 	void remove_transient(float pos);
-
-	void show_region_editor ();
 
 	void     set_frame_color ();
 	uint32_t get_fill_color () const;
@@ -184,7 +189,7 @@ protected:
 	ArdourCanvas::Rectangle*  end_xfade_rect;
 	bool _end_xfade_visible;
 
-	std::shared_ptr<AudioRegionGainLine> gain_line;
+	std::shared_ptr<RegionFxLine> _fx_line;
 
 	double _amplitude_above_axis;
 
@@ -206,14 +211,15 @@ protected:
 
 	void set_colors ();
 	void set_waveform_colors ();
+	void set_fx_line_colors ();
 	void reset_width_dependent_items (double pixel_width);
 
 	void color_handler ();
 
 	void transients_changed();
 
-	AutomationLine::VisibleAspects automation_line_visibility () const;
-	void _redisplay (bool) {}
+	EditorAutomationLine::VisibleAspects automation_line_visibility () const;
+	void redisplay (bool) {}
 
 private:
 	void setup_fade_handle_positions ();
@@ -234,6 +240,13 @@ private:
 
 	bool trim_fade_in_drag_active;
 	bool trim_fade_out_drag_active;
+
+	void set_region_fx_line (std::shared_ptr<ARDOUR::AutomationControl>, std::shared_ptr<ARDOUR::RegionFxPlugin>, uint32_t);
+
+	PBD::ID  _rfx_id;
+	uint32_t _rdx_param;
+	bool     _ignore_line_change;
+
+	PBD::ScopedConnection _region_fx_connection;
 };
 
-#endif /* __gtk_ardour_audio_region_view_h__ */

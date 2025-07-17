@@ -19,14 +19,14 @@
 #ifndef _gtkardour_plugin_presets_ui_h_
 #define _gtkardour_plugin_presets_ui_h_
 
-#include <gtkmm/label.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/table.h>
-#include <gtkmm/textview.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/treestore.h>
-#include <gtkmm/treeview.h>
+#include <ytkmm/label.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/table.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/treestore.h>
+#include <ytkmm/treeview.h>
 
 #include "widgets/ardour_button.h"
 

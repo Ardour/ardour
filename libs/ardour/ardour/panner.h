@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_panner_h__
-#define __ardour_panner_h__
+#pragma once
 
 #include <cmath>
 #include <cassert>
@@ -104,7 +103,7 @@ public:
 	virtual void reset () = 0;
 
 	/* azimut, width or elevation updated -> recalc signal_position ->  emit Changed */
-	PBD::Signal0<void> SignalPositionChanged;
+	PBD::Signal<void()> SignalPositionChanged;
 
 	/**
 	 *  Pan some input buffers to a number of output buffers.
@@ -167,4 +166,3 @@ struct LIBARDOUR_API PanPluginDescriptor {
 };
 }
 
-#endif /* __ardour_panner_h__ */

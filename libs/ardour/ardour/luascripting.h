@@ -116,7 +116,7 @@ public:
 
 	LuaScriptList &scripts (LuaScriptInfo::ScriptType);
 	void refresh (bool run_scan = false);
-	PBD::Signal0<void> scripts_changed;
+	PBD::Signal<void()> scripts_changed;
 
 	LuaScriptInfoPtr by_name (const std::string&, LuaScriptInfo::ScriptType);
 

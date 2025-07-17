@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/streamablecontent.h>
-#include <atkmm/private/streamablecontent_p.h>
+#include <ztkmm/streamablecontent.h>
+#include <ztkmm/private/streamablecontent_p.h>
 
 
 // -*- c++ -*-
@@ -27,8 +27,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/object.h>
-#include <atk/atkstreamablecontent.h>
+#include <ztkmm/object.h>
+#include <ztk/atkstreamablecontent.h>
 
 
 namespace Atk

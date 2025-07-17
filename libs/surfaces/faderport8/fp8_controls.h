@@ -132,8 +132,8 @@ public:
 	bool button_name_to_enum (std::string const&, ButtonId&) const;
 	bool button_enum_to_name (ButtonId, std::string&) const;
 
-	PBD::Signal0<void> FaderModeChanged;
-	PBD::Signal0<void> MixModeChanged;
+	PBD::Signal<void()> FaderModeChanged;
+	PBD::Signal<void()> MixModeChanged;
 
 #ifdef FADERPORT2
 	FP8Types::FaderMode fader_mode () const { return FP8Types::ModeTrack; }

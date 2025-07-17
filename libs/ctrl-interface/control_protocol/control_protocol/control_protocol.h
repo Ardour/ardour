@@ -27,7 +27,6 @@
 #include <string>
 #include <vector>
 
-
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
 #include "pbd/glib_event_source.h"
@@ -42,6 +41,7 @@ class Route;
 class Session;
 class Bundle;
 class Stripable;
+class PluginInsert;
 
 class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI
 {
@@ -57,31 +57,32 @@ public:
 	virtual int set_feedback (bool /*yn*/) { return 0; }
 	virtual bool get_feedback () const { return false; }
 
-	virtual void midi_connectivity_established () {}
+	virtual void midi_connectivity_established (bool) {}
 
 	virtual void stripable_selection_changed () = 0;
 
-	PBD::Signal0<void> ActiveChanged;
+	PBD::Signal<void()> ActiveChanged;
 
 	/* signals that a control protocol can emit and other (presumably graphical)
 	 * user interfaces can respond to
 	 */
 
-	static PBD::Signal0<void> ZoomToSession;
-	static PBD::Signal0<void> ZoomIn;
-	static PBD::Signal0<void> ZoomOut;
-	static PBD::Signal0<void> Enter;
-	static PBD::Signal0<void> Undo;
-	static PBD::Signal0<void> Redo;
-	static PBD::Signal1<void, float> ScrollTimeline;
-	static PBD::Signal1<void, uint32_t> GotoView;
-	static PBD::Signal0<void> CloseDialog;
-	static PBD::Signal0<void> VerticalZoomInAll;
-	static PBD::Signal0<void> VerticalZoomOutAll;
-	static PBD::Signal0<void> VerticalZoomInSelected;
-	static PBD::Signal0<void> VerticalZoomOutSelected;
-	static PBD::Signal0<void> StepTracksDown;
-	static PBD::Signal0<void> StepTracksUp;
+	static PBD::Signal<void()> ZoomToSession;
+	static PBD::Signal<void()> ZoomIn;
+	static PBD::Signal<void()> ZoomOut;
+	static PBD::Signal<void()> Enter;
+	static PBD::Signal<void()> Undo;
+	static PBD::Signal<void()> Redo;
+	static PBD::Signal<void(float)> ScrollTimeline;
+	static PBD::Signal<void(uint32_t)> GotoView;
+	static PBD::Signal<void()> CloseDialog;
+	static PBD::Signal<void()> VerticalZoomInAll;
+	static PBD::Signal<void()> VerticalZoomOutAll;
+	static PBD::Signal<void()> VerticalZoomInSelected;
+	static PBD::Signal<void()> VerticalZoomOutSelected;
+	static PBD::Signal<void()> StepTracksDown;
+	static PBD::Signal<void()> StepTracksUp;
+	static PBD::Signal<void(std::weak_ptr<ARDOUR::PluginInsert> )> PluginSelected;
 
 	void add_stripable_to_selection (std::shared_ptr<ARDOUR::Stripable>);
 	void set_stripable_selection (std::shared_ptr<ARDOUR::Stripable>);

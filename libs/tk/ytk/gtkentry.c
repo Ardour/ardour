@@ -33,7 +33,7 @@
 #include <math.h>
 #include <string.h>
 
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 #include "gtkalignment.h"
 #include "gtkbindings.h"
 #include "gtkcelleditable.h"

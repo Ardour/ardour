@@ -34,20 +34,13 @@ NotePlayer::NotePlayer (std::shared_ptr<MidiTrack> mt)
 
 NotePlayer::~NotePlayer ()
 {
-	clear ();
 }
 
 void
 NotePlayer::add (std::shared_ptr<NoteType> note)
 {
+	/* Must not be called once play() has been called */
 	notes.push_back (note);
-}
-
-void
-NotePlayer::clear ()
-{
-	off ();
-	notes.clear ();
 }
 
 void
@@ -63,8 +56,7 @@ NotePlayer::play ()
 {
 	on ();
 
-	/* note: if there is more than 1 note, we will silence them all at the same time
-	 */
+	/* note: if there is more than 1 note, we will silence them all at the same time */
 
 	const uint32_t note_length_ms = 100;
 

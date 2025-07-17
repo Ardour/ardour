@@ -32,174 +32,48 @@
 
 #include "canvas/lollipop.h"
 
-#include "velocity_ghost_region.h"
 #include "editing.h"
 #include "editor.h"
 #include "editor_drag.h"
+#include "ghost_event.h"
 #include "gui_thread.h"
 #include "midi_automation_line.h"
 #include "midi_region_view.h"
 #include "note_base.h"
 #include "public_editor.h"
 #include "ui_config.h"
+#include "velocity_ghost_region.h"
 #include "verbose_cursor.h"
 
 #include "pbd/i18n.h"
 
 using namespace Temporal;
 
-static double const lollipop_radius = 6.0;
-
 VelocityGhostRegion::VelocityGhostRegion (MidiRegionView& mrv, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
 	: MidiGhostRegion (mrv, tv, source_tv, initial_unit_pos)
-	, dragging (false)
-	, dragging_line (nullptr)
-	, last_drag_x (-1)
-	, drag_did_change (false)
-	, selected (false)
+	, VelocityDisplay (trackview.editor(), *mrv.midi_stream_view(), mrv, *base_rect, *_note_group, MidiGhostRegion::events, MidiGhostRegion::_outline)
+
 {
-	base_rect->set_data (X_("ghostregionview"), this);
-	base_rect->Event.connect (sigc::mem_fun (*this, &VelocityGhostRegion::base_event));
-	base_rect->set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
-	base_rect->set_outline_color (UIConfiguration::instance().color ("automation track outline"));
-	base_rect->set_outline (true);
-	base_rect->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
 }
 
 VelocityGhostRegion::~VelocityGhostRegion ()
 {
 }
 
-bool
-VelocityGhostRegion::line_draw_motion (ArdourCanvas::Duple const & d, ArdourCanvas::Rectangle const & r, double last_x)
-{
-	std::vector<GhostEvent*> affected_lollis;
-
-	if (last_x < 0) {
-		lollis_close_to_x (d.x, 20., affected_lollis);
-	} else if (last_x < d.x) {
-		/* rightward, "later" motion */
-		lollis_between (last_x, d.x, affected_lollis);
-	} else {
-		/* leftward, "earlier" motion */
-		lollis_between (d.x, last_x, affected_lollis);
-	}
-
-	if (affected_lollis.empty()) {
-		return false;
-	}
-
-	int velocity = y_position_to_velocity (r.height() - (r.y1() - d.y));
-
-	for (auto & lolli : affected_lollis) {
-		lolli->velocity_while_editing = velocity;
-		set_size_and_position (*lolli);
-	}
-
-	return true;
-}
-
-bool
-VelocityGhostRegion::line_extended (ArdourCanvas::Duple const & from, ArdourCanvas::Duple const & to, ArdourCanvas::Rectangle const & r, double last_x)
-{
-	std::vector<GhostEvent*> affected_lollis;
-
-	lollis_between (from.x, to.x, affected_lollis);
-
-	if (affected_lollis.empty()) {
-		return false;
-	}
-
-	if (to.x == from.x) {
-		/* no x-axis motion */
-		return false;
-	}
-
-	double slope =  (to.y - from.y) / (to.x - from.x);
-
-	for (auto const & lolli : affected_lollis) {
-		ArdourCanvas::Item* item = lolli->item;
-		ArdourCanvas::Duple pos = item->item_to_canvas (ArdourCanvas::Duple (lolli->event->x0(), 0.0));
-		int y = from.y + (slope * (pos.x - from.x));
-		lolli->velocity_while_editing = y_position_to_velocity (r.height() - (r.y1() - y));
-		set_size_and_position (*lolli);
-	}
-
-	return true;
-}
-
-bool
-VelocityGhostRegion::base_event (GdkEvent* ev)
-{
-	return trackview.editor().canvas_velocity_base_event (ev, base_rect);
-}
-
-void
-VelocityGhostRegion::update_contents_height ()
-{
-	for (auto const & i : events) {
-		set_size_and_position (*i.second);
-	}
-}
-
-bool
-VelocityGhostRegion::lollevent (GdkEvent* ev, MidiGhostRegion::GhostEvent* gev)
-{
-	return trackview.editor().canvas_velocity_event (ev, gev->item);
-}
-
 void
 VelocityGhostRegion::add_note (NoteBase* nb)
 {
-	ArdourCanvas::Lollipop* l = new ArdourCanvas::Lollipop (_note_group);
-	l->set_bounding_parent (base_rect);
+	VelocityDisplay::add_note (nb);
+}
 
-	GhostEvent* event = new GhostEvent (nb, _note_group, l);
-	events.insert (std::make_pair (nb->note(), event));
-	_optimization_iterator = events.end();
+void
+VelocityGhostRegion::set_colors ()
+{
+	base_rect->set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
 
-	l->Event.connect (sigc::bind (sigc::mem_fun (*this, &VelocityGhostRegion::lollevent), event));
-	l->set_ignore_events (true);
-	l->raise_to_top ();
-	l->set_data (X_("ghostregionview"), this);
-	l->set_data (X_("note"), nb);
-	l->set_fill_color (nb->base_color());
-	l->set_outline_color (_outline);
-
-	MidiStreamView* mv = midi_view();
-
-	if (mv) {
-		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
-		if (mrv->note_in_region_time_range (nb->note())) {
-			set_size_and_position (*event);
-		} else {
-			l->hide();
-		}
+	for (auto & gev : MidiGhostRegion::events) {
+		gev.second->item->set_fill_color (gev.second->event->base_color());
 	}
-}
-
-void
-VelocityGhostRegion::set_size_and_position (GhostEvent& gev)
-{
-	ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (gev.item);
-	const double available_height = base_rect->y1();
-	const double actual_height = ((dragging ? gev.velocity_while_editing : gev.event->note()->velocity()) / 127.0) * available_height;
-	const double scale  = UIConfiguration::instance ().get_ui_scale ();
-	l->set (ArdourCanvas::Duple (gev.event->x0(), base_rect->y1() - actual_height), actual_height, lollipop_radius * scale);
-}
-
-void
-VelocityGhostRegion::update_note (GhostEvent* gev)
-{
-	set_size_and_position (*gev);
-	gev->item->set_fill_color (gev->event->base_color());
-}
-
-void
-VelocityGhostRegion::update_hit (GhostEvent* gev)
-{
-	set_size_and_position (*gev);
-	gev->item->set_fill_color (gev->event->base_color());
 }
 
 void
@@ -208,223 +82,44 @@ VelocityGhostRegion::remove_note (NoteBase* nb)
 	MidiGhostRegion::remove_note (nb);
 }
 
-void
-VelocityGhostRegion::set_colors ()
+bool
+VelocityGhostRegion::base_event (GdkEvent* ev)
 {
-	base_rect->set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
+	return trackview.editor().canvas_velocity_base_event (ev, base_rect);
+}
 
-	for (auto & gev : events) {
-		gev.second->item->set_fill_color (gev.second->event->base_color());
-	}
+bool
+VelocityGhostRegion::lollevent (GdkEvent* ev, GhostEvent* gev)
+{
+	return trackview.editor().canvas_velocity_event (ev, gev->item);
+}
+
+ArdourCanvas::Rectangle&
+VelocityGhostRegion::base_item()
+{
+	return VelocityDisplay::base_item();
 }
 
 void
-VelocityGhostRegion::drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev)
+VelocityGhostRegion::update_note (GhostEvent* ev)
 {
-	ArdourCanvas::Rect r (base_rect->item_to_canvas (base_rect->get()));
-
-	/* translate event y-coord so that zero matches the top of base_rect
-	 * (event coordinates use window coordinate space)
-	 */
-
-	ev->y -= r.y0;
-
-	/* clamp y to be within the range defined by the base_rect height minus
-	 * the lollipop radius at top and bottom
-	 */
-
-	const double effective_y = std::max (0.0, std::min (r.height(), ev->y));
-	const double newlen = r.height() - effective_y;
-	const double delta = newlen - l->length();
-
-	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
-	assert (mrv);
-
-	/* This will redraw the velocity bars for the selected notes, without
-	 * changing the note velocities.
-	 */
-
-	const double factor = newlen / base_rect->height();
-	mrv->sync_velocity_drag (factor);
-
-	MidiRegionView::Selection const & sel (mrv->selection());
-	int verbose_velocity = -1;
-	GhostEvent* primary_ghost = 0;
-	const double scale  = UIConfiguration::instance ().get_ui_scale ();
-
-	for (auto & s : sel) {
-		GhostEvent* x = find_event (s->note());
-
-		if (x) {
-			ArdourCanvas::Lollipop* lolli = dynamic_cast<ArdourCanvas::Lollipop*> (x->item);
-			lolli->set (ArdourCanvas::Duple (lolli->x(), lolli->y0() - delta), lolli->length() + delta, lollipop_radius * scale);
-			/* note: length is now set to the new value */
-			const int newvel = floor (127. * (l->length() / r.height()));
-			/* since we're not actually changing the note velocity
-			   (yet), we have to use the static method to compute
-			   the color.
-			*/
-			lolli->set_fill_color (NoteBase::base_color (newvel, mrv->color_mode(), mrv->midi_stream_view()->get_region_color(), x->event->note()->channel(), true));
-
-			if (l == lolli) {
-				/* This is the value we will display */
-				verbose_velocity = newvel;
-				primary_ghost = x;
-			}
-		}
-	}
-
-	assert (verbose_velocity >= 0);
-	char buf[128];
-	const int  oldvel = primary_ghost->event->note()->velocity();
-
-	if (verbose_velocity > oldvel) {
-		snprintf (buf, sizeof (buf), "Velocity %d (+%d)", verbose_velocity, verbose_velocity - oldvel);
-	} else if (verbose_velocity == oldvel) {
-		snprintf (buf, sizeof (buf), "Velocity %d", verbose_velocity);
-	} else {
-		snprintf (buf, sizeof (buf), "Velocity %d (%d)", verbose_velocity, verbose_velocity - oldvel);
-	}
-
-	trackview.editor().verbose_cursor()->set (buf);
-	trackview.editor().verbose_cursor()->show ();
-	trackview.editor().verbose_cursor()->set_offset (ArdourCanvas::Duple (10., 10.));
-}
-
-int
-VelocityGhostRegion::y_position_to_velocity (double y) const
-{
-	const ArdourCanvas::Rect r (base_rect->get());
-	int velocity;
-
-	if (y >= r.height())  {
-		velocity = 0;
-	} else if (y <= 0.) {
-		velocity = 127;
-	} else {
-		velocity = floor (127. * (1.0 - (y / r.height())));
-	}
-
-	return velocity;
+	VelocityDisplay::update_note (ev);
 }
 
 void
-VelocityGhostRegion::note_selected (NoteBase* ev)
+VelocityGhostRegion::note_selected (NoteBase* nb)
 {
-	GhostEvent* gev = find_event (ev->note());
-
-	if (!gev) {
-		return;
-	}
-
-	ArdourCanvas::Lollipop* lolli = dynamic_cast<ArdourCanvas::Lollipop*> (gev->item);
-	lolli->set_outline_color (ev->selected() ? UIConfiguration::instance().color ("midi note selected outline") : 0x000000ff);
-	lolli->raise_to_top();
+	VelocityDisplay::note_selected (nb);
 }
 
 void
-VelocityGhostRegion::lollis_between (int x0, int x1, std::vector<GhostEvent*>& within)
+VelocityGhostRegion::update_contents_height ()
 {
-	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
-	assert (mrv);
-	MidiRegionView::Selection const & sel (mrv->selection());
-	bool only_selected = !sel.empty();
-
-	for (auto & gev : events) {
-		if (only_selected) {
-			if (!gev.second->event->selected()) {
-				continue;
-			}
-		}
-		ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (gev.second->item);
-		if (l) {
-			ArdourCanvas::Duple pos = l->item_to_canvas (ArdourCanvas::Duple (l->x(), l->y0()));
-			if (pos.x >= x0 && pos.x < x1) {
-				within.push_back (gev.second);
-			}
-		}
-	}
+	VelocityDisplay::redisplay ();
 }
 
 void
-VelocityGhostRegion::lollis_close_to_x (int x, double distance, std::vector<GhostEvent*>& within)
+VelocityGhostRegion::update_hit (GhostEvent* gev)
 {
-	for (auto & gev : events) {
-		ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (gev.second->item);
-		if (l) {
-			ArdourCanvas::Duple pos = l->item_to_canvas (ArdourCanvas::Duple (l->x(), l->y0()));
-			if (std::abs (pos.x - x) < distance) {
-				within.push_back (gev.second);
-			}
-		}
-	}
-}
-
-void
-VelocityGhostRegion::start_line_drag ()
-{
-	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
-
-	mrv->begin_drag_edit (_("draw velocities"));
-
-	for (auto & e : events) {
-		GhostEvent* gev (e.second);
-		gev->velocity_while_editing = gev->event->note()->velocity();
-	}
-
-	dragging = true;
-	desensitize_lollis ();
-}
-
-void
-VelocityGhostRegion::end_line_drag (bool did_change)
-{
-	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
-
-	dragging = false;
-
-	if (did_change) {
-		std::vector<NoteBase*> notes;
-		std::vector<int> velocities;
-
-		for (auto & e : events) {
-			GhostEvent* gev (e.second);
-			if (gev->event->note()->velocity() != gev->velocity_while_editing) {
-				notes.push_back (gev->event);
-				velocities.push_back (gev->velocity_while_editing);
-			}
-		}
-
-		mrv->set_velocities_for_notes (notes, velocities);
-	}
-
-	mrv->end_drag_edit ();
-	sensitize_lollis ();
-}
-
-void
-VelocityGhostRegion::desensitize_lollis ()
-{
-	for (auto & gev : events) {
-		gev.second->item->set_ignore_events (true);
-	}
-}
-
-void
-VelocityGhostRegion::sensitize_lollis ()
-{
-	for (auto & gev : events) {
-		gev.second->item->set_ignore_events (false);
-	}
-}
-
-void
-VelocityGhostRegion::set_selected (bool yn)
-{
-	selected = yn;
-	set_colors ();
-
-	if (yn) {
-		group->raise_to_top ();
-	}
+	update_note (gev);
 }

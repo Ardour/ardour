@@ -24,11 +24,11 @@
 //Allow us to use deprecated GTK+ API.
 #undef GTK_DISABLE_DEPRECATED
 
-#include <gtkmm/comboboxtext.h>
+#include <ytkmm/comboboxtext.h>
 
-#include <gtkmm/liststore.h>
-#include <gtkmm/cellrenderertext.h>
-#include <gtk/gtk.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/cellrenderertext.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

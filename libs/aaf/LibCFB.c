@@ -458,22 +458,7 @@ cfb_openFile (CFB_Data* cfbd)
 		return -1;
 	}
 
-#ifdef _WIN32
-
-	wchar_t* wfile = laaf_util_windows_utf8toutf16 (cfbd->file);
-
-	if (!wfile) {
-		error ("Unable to convert filepath to wide string : %s", cfbd->file);
-		return -1;
-	}
-
-	cfbd->fp = _wfopen (wfile, L"rb");
-
-	free (wfile);
-
-#else
-	cfbd->fp    = fopen (cfbd->file, "rb");
-#endif
+	cfbd->fp = laaf_util_fopen_utf8 (cfbd->file, "rb");
 
 	if (!cfbd->fp) {
 		error ("%s.", strerror (errno));
@@ -729,7 +714,7 @@ cfb_getStream (CFB_Data* cfbd, cfbNode* node, unsigned char** stream, uint64_t* 
 				return 0;
 			}
 
-			cpy_sz = ((stream_len - offset) < (uint64_t) (1 << cfbd->hdr->_uMiniSectorShift)) ? (stream_len - offset) : (uint64_t) (1 << cfbd->hdr->_uMiniSectorShift);
+			cpy_sz = ((stream_len - offset) < (uint64_t)(1 << cfbd->hdr->_uMiniSectorShift)) ? (stream_len - offset) : (uint64_t)(1 << cfbd->hdr->_uMiniSectorShift);
 
 			memcpy (*stream + offset, buf, cpy_sz);
 
@@ -740,7 +725,7 @@ cfb_getStream (CFB_Data* cfbd, cfbNode* node, unsigned char** stream, uint64_t* 
 	} else {
 		CFB_foreachSectorInChain (cfbd, buf, id)
 		{
-			cpy_sz = ((stream_len - offset) < (uint64_t) (1 << cfbd->hdr->_uSectorShift)) ? (stream_len - offset) : (uint64_t) (1 << cfbd->hdr->_uSectorShift);
+			cpy_sz = ((stream_len - offset) < (uint64_t)(1 << cfbd->hdr->_uSectorShift)) ? (stream_len - offset) : (uint64_t)(1 << cfbd->hdr->_uSectorShift);
 
 			memcpy (*stream + offset, buf, cpy_sz);
 
@@ -1073,7 +1058,7 @@ cfb_retrieveMiniFAT (CFB_Data* cfbd)
  * its ID (a.k.a SID) :
  *
  * ```
-	cfbNode *node = CFB_Data.nodes[ID];
+        cfbNode *node = CFB_Data.nodes[ID];
  * ```
  *
  * @param cfbd Pointer to the CFB_Data structure.

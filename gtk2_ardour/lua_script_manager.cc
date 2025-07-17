@@ -16,9 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/box.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/box.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/messagedialog.h>
 
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
@@ -197,7 +197,7 @@ LuaScriptManager::set_session (ARDOUR::Session *s)
 		return;
 	}
 
-	_session->LuaScriptsChanged.connect (_session_script_connection,  invalidator (*this), boost::bind (&LuaScriptManager::setup_session_scripts, this), gui_context());
+	_session->LuaScriptsChanged.connect (_session_script_connection,  invalidator (*this), std::bind (&LuaScriptManager::setup_session_scripts, this), gui_context());
 	setup_session_scripts ();
 }
 

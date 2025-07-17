@@ -45,7 +45,7 @@ Inflater::~Inflater ()
 int
 Inflater::start ()
 {
-	return 0 != (thread = PBD::Thread::create (boost::bind (&Inflater::threaded_inflate, this)));
+	return 0 != (thread = PBD::Thread::create (std::bind (&Inflater::threaded_inflate, this), "Inflater"));
 }
 
 void

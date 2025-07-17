@@ -376,10 +376,10 @@ MidiSource::mark_streaming_write_started (const WriterLock& lock)
 void
 MidiSource::mark_midi_streaming_write_completed (const WriterLock&                                  lock,
                                                  Evoral::Sequence<Temporal::Beats>::StuckNoteOption option,
-                                                 Temporal::Beats                                    end)
+                                                 Temporal::timecnt_t const &                        duration)
 {
 	if (_model) {
-		_model->end_write (option, end);
+		_model->end_write (option, duration.beats());
 
 		/* Make captured controls discrete to play back user input exactly. */
 		for (MidiModel::Controls::iterator i = _model->controls().begin(); i != _model->controls().end(); ++i) {
@@ -395,9 +395,9 @@ MidiSource::mark_midi_streaming_write_completed (const WriterLock&              
 }
 
 void
-MidiSource::mark_streaming_write_completed (const WriterLock& lock)
+MidiSource::mark_streaming_write_completed (const WriterLock& lock, Temporal::timecnt_t const & duration)
 {
-	mark_midi_streaming_write_completed (lock, Evoral::Sequence<Temporal::Beats>::DeleteStuckNotes);
+	mark_midi_streaming_write_completed (lock, Evoral::Sequence<Temporal::Beats>::DeleteStuckNotes, duration);
 }
 
 int
@@ -497,6 +497,7 @@ void
 MidiSource::set_model (const WriterLock& lock, std::shared_ptr<MidiModel> m)
 {
 	_model = m;
+	std::cerr << "Source " << name() << " switched to model " << _model << std::endl;
 	invalidate(lock);
 	ModelChanged (); /* EMIT SIGNAL */
 }

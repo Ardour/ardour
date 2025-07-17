@@ -126,8 +126,8 @@ public:
 		return _shuttle_speeds[index];
 	}
 
-	PBD::Signal1<void, unsigned short> ButtonPress;
-	PBD::Signal1<void, unsigned short> ButtonRelease;
+	PBD::Signal<void(unsigned short)> ButtonPress;
+	PBD::Signal<void(unsigned short)> ButtonRelease;
 
 	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
 

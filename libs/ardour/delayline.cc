@@ -362,7 +362,7 @@ DelayLine::allocate_pending_buffers (samplecnt_t signal_delay, ChanCount const& 
 
 	AudioDlyBuf pending_buf;
 	for (uint32_t i = 0; i < cc.n_audio (); ++i) {
-		boost::shared_array<Sample> b (new Sample[rbs]);
+		std::shared_ptr<Sample[]> b (new Sample[rbs]);
 		pending_buf.push_back (b);
 		memset (b.get (), 0, rbs * sizeof (Sample));
 	}

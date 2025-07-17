@@ -16,19 +16,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_editor_component_h__
-#define __ardour_gtk_editor_component_h__
+#pragma once
 
 class Editor;
 
 class EditorComponent
 {
 public:
-	EditorComponent (Editor *);
+	EditorComponent (Editor&);
 	virtual ~EditorComponent() {}
 
 protected:
-	Editor* _editor;
+	Editor& _editor;
 };
 
-#endif

@@ -31,7 +31,7 @@
 #include "gtkalias.h"
 
 #ifdef GDK_WINDOWING_X11
-#include "gdk/gdkx.h"
+#include "ydk/gdkx.h"
 #include <pango/pangofc-fontmap.h>
 #endif
 

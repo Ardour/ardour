@@ -18,8 +18,8 @@
 
 #include <string>
 
-#include <gtkmm/treestore.h>
-#include <gtkmm/treemodelcolumn.h>
+#include <ytkmm/treestore.h>
+#include <ytkmm/treemodelcolumn.h>
 
 #include "gtkmm2ext/visibility.h"
 

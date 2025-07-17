@@ -16,13 +16,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtkardour_stripable_colorpicker_h__
-#define __gtkardour_stripable_colorpicker_h__
+#pragma once
 
 #include <memory>
 
-#include <gtkmm/colorbutton.h>
-#include <gtkmm/colorselection.h>
+#include <ytkmm/colorbutton.h>
+#include <ytkmm/colorselection.h>
 
 #include "ardour/stripable.h"
 
@@ -65,4 +64,3 @@ private:
 	StripableColorDialog _color_picker;
 };
 
-#endif

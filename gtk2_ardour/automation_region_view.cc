@@ -67,7 +67,7 @@ AutomationRegionView::AutomationRegionView (ArdourCanvas::Container*            
 	group->raise_to_top();
 
 	trackview.editor().MouseModeChanged.connect(_mouse_mode_connection, invalidator (*this),
-	                                            boost::bind (&AutomationRegionView::mouse_mode_changed, this),
+	                                            std::bind (&AutomationRegionView::mouse_mode_changed, this),
 	                                            gui_context ());
 }
 
@@ -96,14 +96,14 @@ AutomationRegionView::init (bool /*wfd*/)
 void
 AutomationRegionView::create_line (std::shared_ptr<ARDOUR::AutomationList> list)
 {
-	_line = std::shared_ptr<AutomationLine> (new MidiAutomationLine(
+	_line = std::shared_ptr<EditorAutomationLine> (new MidiAutomationLine(
 				ARDOUR::EventTypeMap::instance().to_symbol(list->parameter()),
 				trackview, *get_canvas_group(), list,
 				std::dynamic_pointer_cast<ARDOUR::MidiRegion> (_region),
 				_parameter));
 	_line->set_colors();
 	_line->set_height ((uint32_t)rint(trackview.current_height() - 2.5 - NAME_HIGHLIGHT_SIZE));
-	_line->set_visibility (AutomationLine::VisibleAspects (AutomationLine::Line|AutomationLine::ControlPoints));
+	_line->set_visibility (EditorAutomationLine::VisibleAspects (EditorAutomationLine::Line|EditorAutomationLine::ControlPoints));
 	_line->set_maximum_time (timepos_t (_region->length()));
 	_line->set_offset (_region->start ());
 }
@@ -184,7 +184,7 @@ AutomationRegionView::add_automation_event (timepos_t const & w, double y, bool 
 
 	/* snap time */
 
-	when = snap_region_time_to_region_time (_region->source_position().distance (when), false);
+	when = view->editor().snap_relative_time_to_relative_time (_region->position(), _region->source_position().distance (when), false);
 
 	/* map using line */
 
@@ -330,7 +330,6 @@ AutomationRegionView::entered ()
 	}
 }
 
-
 void
 AutomationRegionView::exited ()
 {
@@ -338,6 +337,7 @@ AutomationRegionView::exited ()
 		_line->track_exited();
 	}
 }
+
 void
 AutomationRegionView::set_selected (bool yn)
 {
@@ -361,5 +361,5 @@ AutomationRegionView::make_merger()
 {
 	std::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);
 	std::shared_ptr<ARDOUR::AutomationControl> ac = std::dynamic_pointer_cast<ARDOUR::AutomationControl>(c);
-	return new MergeableLine (_line, ac, boost::bind (&AutomationRegionView::drawn_time_filter, this, _1), nullptr, nullptr);
+	return new MergeableLine (_line, ac, std::bind (&AutomationRegionView::drawn_time_filter, this, _1), nullptr, nullptr);
 }

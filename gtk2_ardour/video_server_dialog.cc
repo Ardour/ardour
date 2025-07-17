@@ -22,10 +22,10 @@
 
 #include <sigc++/bind.h>
 
-#include <gtkmm/box.h>
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/table.h>
+#include <ytkmm/box.h>
+#include <ytkmm/filechooserdialog.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/table.h>
 
 #include "pbd/error.h"
 #include "pbd/file_utils.h"

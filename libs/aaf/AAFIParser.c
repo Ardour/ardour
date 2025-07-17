@@ -3078,12 +3078,91 @@ aafi_retrieveData (AAF_Iface* aafi)
 
 	/* Post processing */
 
-	aafiAudioEssenceFile* audioEssenceFile = NULL;
+	char* commonPathPart = NULL;
+
+	int                   externalAudioEssenceFileCount = 0;
+	aafiAudioEssenceFile* audioEssenceFile              = NULL;
 
 	AAFI_foreachAudioEssenceFile (aafi, audioEssenceFile)
 	{
 		if (!audioEssenceFile->is_embedded) {
-			audioEssenceFile->usable_file_path = aafi_locate_external_essence_file (aafi, audioEssenceFile->original_file_path, aafi->ctx.options.media_location);
+			if (!audioEssenceFile->original_file_path) {
+				continue;
+			}
+
+			externalAudioEssenceFileCount++;
+
+			if (!commonPathPart) {
+				int rc = laaf_util_snprintf_realloc (&commonPathPart, 0, 0, "%s", audioEssenceFile->original_file_path);
+
+				if (rc < 0) {
+					error ("Failed to set commonPathPart");
+					free (commonPathPart);
+					commonPathPart = NULL;
+				}
+
+				// printf("Firstinit: %s\n", commonPathPart);
+
+				continue;
+			}
+
+			char* a = commonPathPart;
+			char* b = audioEssenceFile->original_file_path;
+
+			char* aEnd = a + strlen (a);
+			char* bEnd = b + strlen (b);
+
+			while (a < aEnd && b < bEnd) {
+				if (*a != *b) {
+					// printf("%c != %c\n", *a, *b );
+					break;
+				}
+				a++;
+				b++;
+			}
+
+			// printf("Then: %s                         %s\n", commonPathPart, audioEssenceFile->original_file_path);
+
+			if (a < aEnd) {
+				*a = 0x00;
+			}
+
+			// audioEssenceFile->usable_file_path = aafi_locate_external_essence_file( aafi, audioEssenceFile->original_file_path, aafi->ctx.options.media_location );
+			//
+			// if ( audioEssenceFile->usable_file_path == NULL ) {
+			// 	warning( "Could not locate external audio essence file '%s'", audioEssenceFile->original_file_path );
+			// }
+		}
+	}
+
+	if (externalAudioEssenceFileCount <= 1) {
+		// printf("commonPathPart: %s\n", commonPathPart );
+		free (commonPathPart);
+		commonPathPart = NULL;
+	} else if (commonPathPart && *commonPathPart != 0x00) {
+		/*
+		 * Sometimes, all essence file names share a common prefix (Logic Pro).
+		 * That's why we need to trim from the end, up to the last dir sep.
+		 */
+
+		char* p = commonPathPart + strlen (commonPathPart);
+
+		while (p > commonPathPart) {
+			if (*p == '/') { /* parsing URI, so will always be '/' as separator character */
+				break;
+			} else {
+				*p = 0x00;
+			}
+			p--;
+		}
+	}
+
+	audioEssenceFile = NULL;
+
+	AAFI_foreachAudioEssenceFile (aafi, audioEssenceFile)
+	{
+		if (!audioEssenceFile->is_embedded) {
+			audioEssenceFile->usable_file_path = aafi_locate_external_essence_file (aafi, audioEssenceFile->original_file_path, commonPathPart, aafi->ctx.options.media_location);
 
 			if (audioEssenceFile->usable_file_path == NULL) {
 				warning ("Could not locate external audio essence file '%s'", audioEssenceFile->original_file_path);
@@ -3136,13 +3215,15 @@ aafi_retrieveData (AAF_Iface* aafi)
 			continue;
 		}
 
-		videoEssenceFile->usable_file_path = aafi_locate_external_essence_file (aafi, videoEssenceFile->original_file_path, aafi->ctx.options.media_location);
+		videoEssenceFile->usable_file_path = aafi_locate_external_essence_file (aafi, videoEssenceFile->original_file_path, commonPathPart, aafi->ctx.options.media_location);
 
 		if (videoEssenceFile->usable_file_path == NULL) {
 			error ("Could not locate external video essence file '%s'", videoEssenceFile->original_file_path);
 			continue;
 		}
 	}
+
+	free (commonPathPart);
 
 	aafPosition_t   trackEnd   = 0;
 	aafiAudioTrack* audioTrack = NULL;
@@ -3166,12 +3247,23 @@ aafi_retrieveData (AAF_Iface* aafi)
 
 		AAFI_foreachTrackItem (audioTrack, audioItem)
 		{
-			if (audioItem->type == AAFI_TRANS) {
+			if (audioItem->type != AAFI_AUDIO_CLIP) {
 				continue;
 			}
 
 			audioClip           = (aafiAudioClip*)audioItem->data;
 			audioClip->channels = aafi_getAudioEssencePointerChannelCount (audioClip->essencePointerList);
+
+			/*
+			 * we check if any previous clip is using the exact same essence pointer,
+			 * to avoid duplication and allow to detect when multiple clips are using
+			 * the same essence.
+			 */
+			aafiAudioEssencePointer* prev = aafi_audioEssencePointer_exists_before (aafi, audioClip->essencePointerList);
+
+			if (prev) {
+				audioClip->essencePointerList = prev;
+			}
 		}
 	}
 

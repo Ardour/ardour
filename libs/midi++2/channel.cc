@@ -40,15 +40,15 @@ Channel::Channel (MIDI::byte channelnum, Port &p)
 void
 Channel::connect_signals ()
 {
-	_port.parser()->channel_pressure[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_chanpress, this, _1, _2));
-	_port.parser()->channel_note_on[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_note_on, this, _1, _2));
-	_port.parser()->channel_note_off[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_note_off, this, _1, _2));
-	_port.parser()->channel_poly_pressure[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_polypress, this, _1, _2));
-	_port.parser()->channel_program_change[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_program_change, this, _1, _2));
-	_port.parser()->channel_controller[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_controller, this, _1, _2));
-	_port.parser()->channel_pitchbend[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_pitchbend, this, _1, _2));
+	_port.parser()->channel_pressure[_channel_number].connect_same_thread (*this, std::bind (&Channel::process_chanpress, this, _1, _2));
+	_port.parser()->channel_note_on[_channel_number].connect_same_thread (*this, std::bind (&Channel::process_note_on, this, _1, _2));
+	_port.parser()->channel_note_off[_channel_number].connect_same_thread (*this, std::bind (&Channel::process_note_off, this, _1, _2));
+	_port.parser()->channel_poly_pressure[_channel_number].connect_same_thread (*this, std::bind (&Channel::process_polypress, this, _1, _2));
+	_port.parser()->channel_program_change[_channel_number].connect_same_thread (*this, std::bind (&Channel::process_program_change, this, _1, _2));
+	_port.parser()->channel_controller[_channel_number].connect_same_thread (*this, std::bind (&Channel::process_controller, this, _1, _2));
+	_port.parser()->channel_pitchbend[_channel_number].connect_same_thread (*this, std::bind (&Channel::process_pitchbend, this, _1, _2));
 
-	_port.parser()->reset.connect_same_thread (*this, boost::bind (&Channel::process_reset, this, _1));
+	_port.parser()->reset.connect_same_thread (*this, std::bind (&Channel::process_reset, this, _1));
 }
 
 void
@@ -272,8 +272,8 @@ Channel::process_controller (Parser & parser, EventTwoBytes *tb)
 	if (tb->controller_number < 32) { /* unsigned: no test for >= 0 */
 
 		/* if this controller is already known to use 14 bits,
-		   then treat this value as the MSB, and combine it
-		   with the existing LSB.
+		   then treat this value as the MSB, and as per MIDI spec, set
+		   LSB to zero.
 
 		   otherwise, just treat it as a 7 bit value, and set
 		   it directly.
@@ -282,7 +282,7 @@ Channel::process_controller (Parser & parser, EventTwoBytes *tb)
 		cv = (unsigned short) _controller_val[tb->controller_number];
 
 		if (_controller_14bit[tb->controller_number]) {
-			cv = ((tb->value & 0x7f) << 7) | (cv & 0x7f);
+			cv = (tb->value & 0x7f) << 7;
 		} else {
 			cv = tb->value;
 		}

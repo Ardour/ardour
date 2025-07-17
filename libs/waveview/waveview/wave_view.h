@@ -23,8 +23,6 @@
 
 #include <memory>
 
-#include <boost/scoped_ptr.hpp>
-
 #include <glibmm/refptr.h>
 
 #include "ardour/types.h"
@@ -139,7 +137,7 @@ public:
 	double amplitude_above_axis () const;
 
 	static void set_clip_level (double dB);
-	static PBD::Signal0<void> ClipLevelChanged;
+	static PBD::Signal<void()> ClipLevelChanged;
 
 	static void start_drawing_thread ();
 	static void stop_drawing_thread ();
@@ -152,7 +150,7 @@ private:
 
 	std::shared_ptr<ARDOUR::AudioRegion> _region;
 
-	boost::scoped_ptr<WaveViewProperties> _props;
+	const std::unique_ptr<WaveViewProperties> _props;
 
 	mutable std::shared_ptr<WaveViewImage> _image;
 
@@ -204,7 +202,7 @@ private:
 	static bool _global_show_waveform_clipping;
 	static double _global_clip_level;
 
-	static PBD::Signal0<void> VisualPropertiesChanged;
+	static PBD::Signal<void()> VisualPropertiesChanged;
 
 	void handle_visual_property_change ();
 	void handle_clip_level_change ();

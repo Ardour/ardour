@@ -68,7 +68,7 @@ ARDOUR_UI_UTILS::inhibit_screensaver (bool inhibit)
 #include "ardour_ui.h"
 #include "ardour/system_exec.h"
 
-#include <gdk/gdkx.h>
+#include <ydk/gdkx.h>
 
 static sigc::connection glib_timer;
 

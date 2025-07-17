@@ -22,3 +22,4 @@
 
 PBD::DebugBits PBD::DEBUG::Keyboard = PBD::new_debug_bit ("keyboard");
 PBD::DebugBits PBD::DEBUG::Bindings = PBD::new_debug_bit ("bindings");
+PBD::DebugBits PBD::DEBUG::Actions = PBD::new_debug_bit ("actions");

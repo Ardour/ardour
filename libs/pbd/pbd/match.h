@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_match_h__
-#define __libpbd_match_h__
+#pragma once
 
 #include <string>
 #include <boost/tokenizer.hpp>
@@ -41,4 +40,3 @@ match_search_strings (std::string const& haystack, std::string const& needle)
 
 }
 
-#endif /* __libpbd_match_h__ */

@@ -39,7 +39,7 @@
 #include "gdkscreen-x11.h"
 #include "gdkdisplay-x11.h"
 
-#include <gdk/gdkinternals.h>
+#include <ydk/gdkinternals.h>
 #include "gdkalias.h"
 
 typedef struct

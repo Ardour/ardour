@@ -35,7 +35,7 @@
 #include "gtkmarshalers.h"
 #include "gtkpango.h"
 #include "gtkwindow.h"
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 #include "gtkclipboard.h"
 #include "gtkimagemenuitem.h"
 #include "gtkintl.h"

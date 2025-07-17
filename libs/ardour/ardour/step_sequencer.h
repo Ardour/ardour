@@ -16,15 +16,13 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef __libardour_step_sequencer_h__
-#define __libardour_step_sequencer_h__
+#pragma once
 
 #include <vector>
 #include <unistd.h>
 
-#include <boost/atomic.hpp>
-#include <boost/rational.hpp>
 #include <boost/intrusive/list.hpp>
+#include <boost/rational.hpp>
 
 #include <glibmm/threads.h>
 
@@ -40,6 +38,8 @@
 #include "ardour/mode.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/types.h"
+
+#include "midi++/types.h"
 
 namespace ARDOUR {
 
@@ -302,7 +302,7 @@ class StepSequencer : public PBD::Stateful
 		size_t          start_step;
 		size_t          end_step;
 
-		static MultiAllocSingleReleasePool pool;
+		static PBD::MultiAllocSingleReleasePool pool;
 
 		void *operator new (size_t) {
 			return pool.alloc ();
@@ -325,7 +325,7 @@ class StepSequencer : public PBD::Stateful
 		Temporal::Beats when;
 		uint8_t buf[3];
 
-		static Pool pool;
+		static PBD::Pool pool;
 
 		void *operator new (size_t) {
 			return pool.alloc ();
@@ -352,4 +352,3 @@ class StepSequencer : public PBD::Stateful
 
 } /* namespace */
 
-#endif /* __libardour_step_sequencer_h__ */

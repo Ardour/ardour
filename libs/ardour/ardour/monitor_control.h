@@ -16,13 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_monitor_control_h__
-#define __ardour_monitor_control_h__
+#pragma once
 
 #include <memory>
 #include <string>
-
-#include <boost/dynamic_bitset.hpp>
 
 #include "ardour/slavable_automation_control.h"
 #include "ardour/monitorable.h"
@@ -55,4 +52,3 @@ class LIBARDOUR_API MonitorControl : public SlavableAutomationControl
 
 } /* namespace */
 
-#endif /* __libardour_monitor_control_h__ */

@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/checkmenuitem.h>
-#include <gtkmm/private/checkmenuitem_p.h>
+#include <ytkmm/checkmenuitem.h>
+#include <ytkmm/private/checkmenuitem_p.h>
 
 
 // -*- c++ -*-
@@ -29,9 +29,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
-#include <gtkmm/misc.h>
-#include <gtkmm/label.h>
+#include <ytk/ytk.h>
+#include <ytkmm/misc.h>
+#include <ytkmm/label.h>
 
 namespace Gtk
 {

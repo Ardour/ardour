@@ -69,6 +69,8 @@
   _gdk_quartz_window_attach_to_parent (window);
 
   gdk_synthesize_window_state (window, GDK_WINDOW_STATE_ICONIFIED, 0);
+
+  [[self contentView] setNeedsDisplay:TRUE];
 }
 
 -(void)windowDidBecomeKey:(NSNotification *)aNotification

@@ -19,7 +19,7 @@
 
 #include "editor_component.h"
 
-EditorComponent::EditorComponent (Editor* e)
+EditorComponent::EditorComponent (Editor& e)
 	: _editor (e)
 {
 }

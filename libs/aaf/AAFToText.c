@@ -1912,19 +1912,19 @@ aaft_PIDToText (AAF_Data* aafd, aafPID_t pid)
 			return "PID_BWFImportDescriptor_UnknownBWFChunks";
 
 			/* the following is marked as "dynamic" in ref implementation :
-		 * AAF/ref-impl/include/ref-api/AAFTypes.h
-		 *
-		 * case PID_MPEGVideoDescriptor_SingleSequence:
-		 * case PID_MPEGVideoDescriptor_ConstantBPictureCount:
-		 * case PID_MPEGVideoDescriptor_CodedContentScanning:
-		 * case PID_MPEGVideoDescriptor_LowDelay:
-		 * case PID_MPEGVideoDescriptor_ClosedGOP:
-		 * case PID_MPEGVideoDescriptor_IdenticalGOP:
-		 * case PID_MPEGVideoDescriptor_MaxGOP:
-		 * case PID_MPEGVideoDescriptor_MaxBPictureCount:
-		 * case PID_MPEGVideoDescriptor_BitRate:
-		 * case PID_MPEGVideoDescriptor_ProfileAndLevel:
-		 */
+			 * AAF/ref-impl/include/ref-api/AAFTypes.h
+			 *
+			 * case PID_MPEGVideoDescriptor_SingleSequence:
+			 * case PID_MPEGVideoDescriptor_ConstantBPictureCount:
+			 * case PID_MPEGVideoDescriptor_CodedContentScanning:
+			 * case PID_MPEGVideoDescriptor_LowDelay:
+			 * case PID_MPEGVideoDescriptor_ClosedGOP:
+			 * case PID_MPEGVideoDescriptor_IdenticalGOP:
+			 * case PID_MPEGVideoDescriptor_MaxGOP:
+			 * case PID_MPEGVideoDescriptor_MaxBPictureCount:
+			 * case PID_MPEGVideoDescriptor_BitRate:
+			 * case PID_MPEGVideoDescriptor_ProfileAndLevel:
+			 */
 
 		case PID_ClassDefinition_ParentClass:
 			return "PID_ClassDefinition_ParentClass";

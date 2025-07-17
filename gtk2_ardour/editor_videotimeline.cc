@@ -40,9 +40,9 @@
 using namespace std;
 
 void
-Editor::set_video_timeline_height (const int h)
+Editor::set_video_timeline_height (const int h, bool force)
 {
-	if (videotl_bar_height == h) { return; }
+	if (videotl_bar_height == h && !force) { return; }
 	if (h < 2 || h > 8) { return; }
   videotl_bar_height = h;
 	videotl_label.set_size_request (-1, (int)timebar_height * videotl_bar_height);

@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm.h>
+#include <ytkmm/ytkmm.h>
 #include "ardour/auditioner.h"
 #include "ardour/session.h"
 #include "ardour/vst_plugin.h"
@@ -28,11 +28,11 @@
 #include "vst_plugin_ui.h"
 
 #ifdef PLATFORM_WINDOWS
-#include <gdk/gdkwin32.h>
+#include <ydk/gdkwin32.h>
 #elif defined __APPLE__
 // TODO
 #else
-#include <gdk/gdkx.h>
+#include <ydk/gdkx.h>
 #endif
 
 VSTPluginUI::VSTPluginUI (std::shared_ptr<ARDOUR::PlugInsertBase> pib, std::shared_ptr<ARDOUR::VSTPlugin> plugin)

@@ -8,16 +8,13 @@ def options(ctx):
     pass
 
 def configure(conf):
-    if not conf.is_defined('YTK'):
-        return
-
     autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
     autowaf.check_pkg(conf, 'lv2', uselib_store='LV2_1_16_0', atleast_version='1.16.0', mandatory=False)
     if conf.env['build_target'] != 'mingw' and sys.platform != 'darwin': # Linux
         autowaf.check_pkg(conf, 'x11', uselib_store='X11', system=True, mandatory=True)
 
 def build(bld):
-    if not bld.is_defined('YTK') or not bld.is_defined('HAVE_LV2_1_16_0'):
+    if not bld.is_defined('HAVE_LV2_1_16_0'):
         return
 
     module_dir = bld.env['LIBDIR']

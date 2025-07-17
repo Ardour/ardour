@@ -22,7 +22,7 @@
 #include "gtk2ardour-version.h"
 #endif
 
-#include <gtkmm/progressbar.h>
+#include <ytkmm/progressbar.h>
 
 #include "pbd/basename.h"
 
@@ -98,8 +98,8 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* paren
 	vbox->show_all ();
 
 	/* connect to signals */
-	ARDOUR::PluginScanMessage.connect (connections, MISSING_INVALIDATOR, boost::bind (&PluginScanDialog::message_handler, this, _1, _2, _3), gui_context ());
-	ARDOUR::PluginScanTimeout.connect (connections, MISSING_INVALIDATOR, boost::bind (&PluginScanDialog::plugin_scan_timeout, this, _1), gui_context ());
+	ARDOUR::PluginScanMessage.connect (connections, MISSING_INVALIDATOR, std::bind (&PluginScanDialog::message_handler, this, _1, _2, _3), gui_context ());
+	ARDOUR::PluginScanTimeout.connect (connections, MISSING_INVALIDATOR, std::bind (&PluginScanDialog::plugin_scan_timeout, this, _1), gui_context ());
 
 	btn_cancel_all.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_all));
 	btn_cancel_one.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_one));

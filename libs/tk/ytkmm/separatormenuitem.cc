@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/separatormenuitem.h>
-#include <gtkmm/private/separatormenuitem_p.h>
+#include <ytkmm/separatormenuitem.h>
+#include <ytkmm/private/separatormenuitem_p.h>
 
 
 // -*- c++ -*-
@@ -29,7 +29,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace
 {

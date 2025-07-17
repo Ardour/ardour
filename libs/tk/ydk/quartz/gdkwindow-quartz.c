@@ -23,6 +23,7 @@
 #include <Carbon/Carbon.h>
 
 #include "gdk.h"
+#include "gdkinternals.h"
 #include "gdkwindowimpl.h"
 #include "gdkprivate-quartz.h"
 #include "gdkscreen-quartz.h"
@@ -196,7 +197,10 @@ gdk_window_impl_quartz_finalize (GObject *object)
 {
   GdkWindowImplQuartz *impl = GDK_WINDOW_IMPL_QUARTZ (object);
 
-  check_grab_destroy (GDK_DRAWABLE_IMPL_QUARTZ (object)->wrapper);
+  GdkWindow *window = GDK_DRAWABLE_IMPL_QUARTZ (object)->wrapper;
+  GdkWindowObject *private = (GdkWindowObject*) window;
+
+  check_grab_destroy (window);
 
   if (impl->paint_clip_region)
     gdk_region_destroy (impl->paint_clip_region);
@@ -224,52 +228,6 @@ static void
 gdk_window_impl_quartz_init (GdkWindowImplQuartz *impl)
 {
   impl->type_hint = GDK_WINDOW_TYPE_HINT_NORMAL;
-}
-
-static void
-_gdk_window_quartz_clear_region (GdkWindow *window, const GdkRegion* region, bool ignored)
-{
-  if (gdk_drawable_get_colormap (window) != gdk_screen_get_rgba_colormap (_gdk_screen)) {
-
-	  /* Window is opaque. We no longer use backing store on Quartz, so the code that fill the backing store with the background
-	   * color is no longer in use. We do that here, if there is a background color.
-	   */
-
-	  GdkWindowObject *private = GDK_WINDOW_OBJECT(window);
-	  GdkWindowImplQuartz *impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
-
-	  GdkColor bg_color = private->bg_color;
-	  CGContextRef cg_context = [[NSGraphicsContext currentContext] graphicsPort];
-	  CGContextSaveGState (cg_context);
-
-	  if (g_getenv ("GDK_HARLEQUIN_DEBUGGING")) {
-		  CGContextSetRGBFillColor (cg_context,
-		                            (random() % 65535) / 65335.0,
-		                            (random() % 65535) / 65335.0,
-		                            (random() % 65535) / 65335.0,
-		                            1.0);
-	  } else {
-		  CGContextSetRGBFillColor (cg_context,
-		                            bg_color.red / 65335.0,
-		                            bg_color.green / 65335.0,
-		                            bg_color.blue / 65335.0,
-		                            1.0);
-	  }
-
-	  GdkRectangle *rects;
-	  gint n_rects, i;
-
-	  gdk_region_get_rectangles (region, &rects, &n_rects);
-
-	  for (i = 0; i < n_rects; i++)
-	  {
-		  CGRect cg_rect = CGRectMake (rects[i].x + 0.5, rects[i].y + 0.5, rects[i].width, rects[i].height);
-
-		  CGContextFillRect (cg_context, cg_rect);
-	  }
-
-	  CGContextRestoreGState (cg_context);
-  }
 }
 
 void
@@ -2365,6 +2323,10 @@ gdk_window_set_type_hint (GdkWindow        *window,
   [impl->toplevel setHasShadow: window_type_hint_to_shadow (hint)];
   [impl->toplevel setLevel: window_type_hint_to_level (hint)];
   [impl->toplevel setHidesOnDeactivate: window_type_hint_to_hides_on_deactivate (hint)];
+
+	bool allow_minimize_and_maximize = window_type_hint_to_level (hint) != NSFloatingWindowLevel;
+	[[impl->toplevel standardWindowButton:NSWindowMiniaturizeButton] setEnabled:allow_minimize_and_maximize];
+	[[impl->toplevel standardWindowButton:NSWindowZoomButton] setEnabled:allow_minimize_and_maximize];
 }
 
 GdkWindowTypeHint
@@ -2381,11 +2343,23 @@ void
 gdk_window_set_modal_hint (GdkWindow *window,
 			   gboolean   modal)
 {
+  GdkWindowObject *private;
+  gboolean is_mapped;
+  
   if (GDK_WINDOW_DESTROYED (window) ||
       !WINDOW_IS_TOPLEVEL (window))
     return;
 
-  /* FIXME: Implement */
+  private = (GdkWindowObject*) window;
+
+  if (_gdk_modal_notify &&  private->modal_hint != modal) {
+    gboolean is_mapped = GDK_WINDOW_IS_MAPPED (window);
+    if (is_mapped) {
+      _gdk_modal_notify (window, modal);
+    }
+  }
+
+  private->modal_hint = modal;
 }
 
 void
@@ -2825,6 +2799,13 @@ gdk_window_fullscreen (GdkWindow *window)
   if (GDK_WINDOW_DESTROYED (window) ||
       !WINDOW_IS_TOPLEVEL (window))
     return;
+
+	if ([impl->toplevel styleMask] & NSWindowStyleMaskFullScreen) {
+		/* already in full screen, this can happen when a user
+		 * uses the "green button" to maximize the window.
+		 */
+		return;
+	}
 
   geometry = get_fullscreen_geometry (window);
   if (!geometry)

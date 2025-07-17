@@ -22,6 +22,8 @@
 #include <stdint.h>
 #include "pbd/signals.h"
 
+#include <cmath>
+
 namespace ArdourSurface {
 
 class M2PadInterface
@@ -31,11 +33,11 @@ class M2PadInterface
 		virtual ~M2PadInterface () {}
 
 		/* user API */
-		PBD::Signal1<void, float> pressed;
-		PBD::Signal0<void> released;
-		PBD::Signal1<void, float> aftertouch;
-		PBD::Signal2<void, float, bool> event;
-		PBD::Signal1<void, float> changed;
+		PBD::Signal<void(float)> pressed;
+		PBD::Signal<void()> released;
+		PBD::Signal<void(float)> aftertouch;
+		PBD::Signal<void(float, bool)> event;
+		PBD::Signal<void(float)> changed;
 
 		virtual uint16_t value () const { return 0; }
 		virtual float pressure () const { return 0.f; }
@@ -106,7 +108,7 @@ class M2Pad : public M2PadInterface
 					released (); /* EMIT SIGNAL */
 					event (_pressure, true); /* EMIT SIGNAL */
 				} else {
-					if (fabsf (_last - _pressure) > mindelta) {
+					if (std::fabsf (_last - _pressure) > mindelta) {
 						_last = _pressure;
 						aftertouch (_pressure); /* EMIT SIGNAL */
 						event (_pressure, false); /* EMIT SIGNAL */

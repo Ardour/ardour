@@ -20,7 +20,7 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 #include "feedback.h"
 #include "transport.h"
@@ -227,11 +227,11 @@ ArdourFeedback::observe_transport ()
 {
 	ARDOUR::Session& sess = session ();
 	sess.TransportStateChange.connect (_transport_connections, MISSING_INVALIDATOR,
-	                                   boost::bind<void> (TransportObserver (), this), event_loop ());
+	                                   std::bind<void> (TransportObserver (), this), event_loop ());
 	sess.RecordStateChanged.connect (_transport_connections, MISSING_INVALIDATOR,
-	                                 boost::bind<void> (RecordStateObserver (), this), event_loop ());
+	                                 std::bind<void> (RecordStateObserver (), this), event_loop ());
 
-	Temporal::TempoMap::MapChanged.connect (_transport_connections, MISSING_INVALIDATOR, boost::bind<void> (TempoObserver (), this), event_loop ());
+	Temporal::TempoMap::MapChanged.connect (_transport_connections, MISSING_INVALIDATOR, std::bind<void> (TempoObserver (), this), event_loop ());
 }
 
 void
@@ -244,15 +244,15 @@ ArdourFeedback::observe_mixer ()
 		std::shared_ptr<Stripable> stripable = strip->stripable ();
 
 		stripable->gain_control ()->Changed.connect (*it->second, MISSING_INVALIDATOR,
-		                                         boost::bind<void> (StripGainObserver (), this, strip_id), event_loop ());
+		                                         std::bind<void> (StripGainObserver (), this, strip_id), event_loop ());
 
 		if (stripable->pan_azimuth_control ()) {
 			stripable->pan_azimuth_control ()->Changed.connect (*it->second, MISSING_INVALIDATOR,
-			                                                boost::bind<void> (StripPanObserver (), this, strip_id), event_loop ());
+			                                                std::bind<void> (StripPanObserver (), this, strip_id), event_loop ());
 		}
 
 		stripable->mute_control ()->Changed.connect (*it->second, MISSING_INVALIDATOR,
-		                                         boost::bind<void> (StripMuteObserver (), this, strip_id), event_loop ());
+		                                         std::bind<void> (StripMuteObserver (), this, strip_id), event_loop ());
 
 		observe_strip_plugins (strip_id, strip->plugins ());
 	}
@@ -271,7 +271,7 @@ ArdourFeedback::observe_strip_plugins (uint32_t strip_id, ArdourMixerStrip::Plug
 
 		if (control) {
 			control->Changed.connect (*plugin, MISSING_INVALIDATOR,
-			                          boost::bind<void> (PluginBypassObserver (), this, strip_id, plugin_id), event_loop ());
+			                          std::bind<void> (PluginBypassObserver (), this, strip_id, plugin_id), event_loop ());
 		}
 
 		for (uint32_t param_id = 0; param_id < plugin->param_count (); ++param_id) {
@@ -279,7 +279,7 @@ ArdourFeedback::observe_strip_plugins (uint32_t strip_id, ArdourMixerStrip::Plug
 				std::shared_ptr<AutomationControl> control = plugin->param_control (param_id);
 
 				control->Changed.connect (*plugin, MISSING_INVALIDATOR,
-				                          boost::bind<void> (PluginParamValueObserver (), this, strip_id, plugin_id, param_id,
+				                          std::bind<void> (PluginParamValueObserver (), this, strip_id, plugin_id, param_id,
 				                                             std::weak_ptr<AutomationControl>(control)),
 				                          event_loop ());
 			} catch (ArdourMixerNotFoundException& e) {

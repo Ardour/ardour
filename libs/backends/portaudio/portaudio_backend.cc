@@ -84,8 +84,6 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _midi_driver_option(winmme_driver_name)
 	, _samplerate (48000)
 	, _samples_per_period (1024)
-	, _n_inputs (0)
-	, _n_outputs (0)
 	, _systemic_audio_input_latency (0)
 	, _systemic_audio_output_latency (0)
 	, _dsp_load (0)
@@ -245,18 +243,6 @@ PortAudioBackend::available_buffer_sizes (const std::string&) const
 	return bs;
 }
 
-uint32_t
-PortAudioBackend::available_input_channel_count (const std::string&) const
-{
-	return 128; // TODO query current device
-}
-
-uint32_t
-PortAudioBackend::available_output_channel_count (const std::string&) const
-{
-	return 128; // TODO query current device
-}
-
 bool
 PortAudioBackend::can_change_sample_rate_when_running () const
 {
@@ -318,20 +304,6 @@ PortAudioBackend::set_interleaved (bool yn)
 {
 	if (!yn) { return 0; }
 	return -1;
-}
-
-int
-PortAudioBackend::set_input_channels (uint32_t cc)
-{
-	_n_inputs = cc;
-	return 0;
-}
-
-int
-PortAudioBackend::set_output_channels (uint32_t cc)
-{
-	_n_outputs = cc;
-	return 0;
 }
 
 int
@@ -407,18 +379,6 @@ bool
 PortAudioBackend::interleaved () const
 {
 	return false;
-}
-
-uint32_t
-PortAudioBackend::input_channels () const
-{
-	return _n_inputs;
-}
-
-uint32_t
-PortAudioBackend::output_channels () const
-{
-	return _n_outputs;
 }
 
 uint32_t
@@ -650,15 +610,6 @@ PortAudioBackend::_start (bool for_latency_measurement)
 		return AudioDeviceOpenError;
 	}
 
-	if (_n_outputs != _pcmio->n_playback_channels ()) {
-		_n_outputs = _pcmio->n_playback_channels ();
-		PBD::info << get_error_string(OutputChannelCountNotSupportedError) << endmsg;
-	}
-
-	if (_n_inputs != _pcmio->n_capture_channels ()) {
-		_n_inputs = _pcmio->n_capture_channels ();
-		PBD::info << get_error_string(InputChannelCountNotSupportedError) << endmsg;
-	}
 #if 0
 	if (_pcmio->samples_per_period() != _samples_per_period) {
 		_samples_per_period = _pcmio->samples_per_period();
@@ -824,7 +775,7 @@ PortAudioBackend::process_callback(const float* input,
 bool
 PortAudioBackend::start_blocking_process_thread ()
 {
-	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_PROC,
+	if (pbd_realtime_pthread_create ("PortAudio Main", PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_PROC,
 				&_main_blocking_thread, blocking_thread_func, this))
 	{
 		if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &_main_blocking_thread, blocking_thread_func, this))
@@ -905,7 +856,7 @@ static void* freewheel_thread(void* arg)
 bool
 PortAudioBackend::start_freewheel_process_thread ()
 {
-	if (pthread_create(&_pthread_freewheel, NULL, freewheel_thread, this)) {
+	if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &_pthread_freewheel, freewheel_thread, this)) {
 		DEBUG_AUDIO("Failed to create main audio thread\n");
 		return false;
 	}
@@ -1124,7 +1075,7 @@ void *
 PortAudioBackend::portaudio_process_thread (void *arg)
 {
 	ThreadData* td = reinterpret_cast<ThreadData*> (arg);
-	boost::function<void ()> f = td->f;
+	std::function<void ()> f = td->f;
 	delete td;
 
 #ifdef USE_MMCSS_THREAD_PRIORITIES
@@ -1147,12 +1098,12 @@ PortAudioBackend::portaudio_process_thread (void *arg)
 }
 
 int
-PortAudioBackend::create_process_thread (boost::function<void()> func)
+PortAudioBackend::create_process_thread (std::function<void()> func)
 {
 	pthread_t   thread_id;
 	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);
 
-	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_PROC, PBD_RT_STACKSIZE_PROC,
+	if (pbd_realtime_pthread_create ("PortAudio Proc", PBD_SCHED_FIFO, PBD_RT_PRI_PROC, PBD_RT_STACKSIZE_PROC,
 				&thread_id, portaudio_process_thread, td)) {
 		if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &thread_id, portaudio_process_thread, td)) {
 			DEBUG_AUDIO("Cannot create process thread.");
@@ -1234,8 +1185,8 @@ PortAudioBackend::register_system_audio_ports()
 {
 	LatencyRange lr;
 
-	const uint32_t a_ins = _n_inputs;
-	const uint32_t a_out = _n_outputs;
+	const uint32_t a_ins = _pcmio->n_capture_channels ();
+	const uint32_t a_out = _pcmio->n_playback_channels ();
 
 	/* audio ports */
 	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_input_latency);
@@ -1477,7 +1428,7 @@ PortAudioBackend::set_latency_range (PortEngine::PortHandle port_handle, bool fo
 {
 	std::shared_ptr<BackendPort> port = std::dynamic_pointer_cast<BackendPort>(port_handle);
 	if (!valid_port (port)) {
-		DEBUG_PORTS("BackendPort::set_latency_range (): invalid port.\n");
+		DEBUG_PORTS ("PortAudioBackend::set_latency_range (): invalid port.\n");
 		return;
 	}
 	port->set_latency_range (latency_range, for_playback);
@@ -1489,7 +1440,7 @@ PortAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool fo
 	std::shared_ptr<BackendPort> port = std::dynamic_pointer_cast<BackendPort>(port_handle);
 	LatencyRange r;
 	if (!valid_port (port)) {
-		DEBUG_PORTS("BackendPort::get_latency_range (): invalid port.\n");
+		DEBUG_PORTS ("PortAudioBackend::get_latency_range (): invalid port.\n");
 		r.min = 0;
 		r.max = 0;
 		return r;

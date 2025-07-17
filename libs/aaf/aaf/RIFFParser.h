@@ -103,7 +103,7 @@ PACK (struct wavBextChunk {
 	unsigned char umid[64];
 
 	/* since bext v2 (2011)
-   *
+	 *
 	 * If any loudness parameter is not
 	 * being used,  its  value shall be
 	 * set to 0x7fff. Any value outside
@@ -118,11 +118,11 @@ PACK (struct wavBextChunk {
 	char reserved[180];
 
 	/*
-		Because it is variable size, we
-		do not  include  coding history
-		in the bext structure. However,
-		we know  it  starts at  the end
-		of bext structure when parsing.
+	        Because it is variable size, we
+	        do not  include  coding history
+	        in the bext structure. However,
+	        we know  it  starts at  the end
+	        of bext structure when parsing.
 	*/
 });
 

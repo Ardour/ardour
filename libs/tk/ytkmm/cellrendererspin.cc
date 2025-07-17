@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/cellrendererspin.h>
-#include <gtkmm/private/cellrendererspin_p.h>
+#include <ytkmm/cellrendererspin.h>
+#include <ytkmm/private/cellrendererspin_p.h>
 
 
 /* Copyright (C) 2006 The gtkmm Development Team
@@ -24,7 +24,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

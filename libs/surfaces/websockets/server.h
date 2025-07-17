@@ -19,7 +19,7 @@
 #ifndef _ardour_surface_websockets_server_h_
 #define _ardour_surface_websockets_server_h_
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <glibmm.h>
 #include <libwebsockets.h>
 
@@ -63,7 +63,7 @@ private:
 	struct lws_context_creation_info  _lws_info;
 	struct lws_context*               _lws_context;
 
-	typedef boost::unordered_map<Client, ClientContext> ClientContextMap;
+	typedef std::unordered_map<Client, ClientContext> ClientContextMap;
 	ClientContextMap                                    _client_ctx;
 
 	ServerResources _resources;
@@ -90,7 +90,7 @@ private:
 
 	Glib::RefPtr<Glib::IOChannel> _channel;
 
-	typedef boost::unordered_map<lws_sockfd_type, LwsPollFdGlibSource> LwsPollFdGlibSourceMap;
+	typedef std::unordered_map<lws_sockfd_type, LwsPollFdGlibSource> LwsPollFdGlibSourceMap;
 	LwsPollFdGlibSourceMap _fd_ctx;
 
 	bool _fd_callbacks;

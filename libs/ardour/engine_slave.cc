@@ -50,13 +50,13 @@ Engine_TransportMaster::init ()
 bool
 Engine_TransportMaster::usable () const
 {
-	return AudioEngine::instance()->current_backend_name() == X_("JACK");
+	return AudioEngine::instance()->is_jack();
 }
 
 void
 Engine_TransportMaster::check_backend()
 {
-	if (AudioEngine::instance()->current_backend_name() == X_("JACK")) {
+	if (AudioEngine::instance()->is_jack ()) {
 		_connected = true;
 	} else {
 		_connected = false;
@@ -82,7 +82,7 @@ Engine_TransportMaster::ok() const
 }
 
 void
-Engine_TransportMaster::pre_process (pframes_t, samplepos_t, boost::optional<samplepos_t>)
+Engine_TransportMaster::pre_process (pframes_t, samplepos_t, std::optional<samplepos_t>)
 {
 	/* nothing to do */
 }

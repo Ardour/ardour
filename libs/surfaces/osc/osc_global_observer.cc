@@ -17,8 +17,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "boost/lambda/lambda.hpp"
-
 #include "pbd/control_math.h"
 
 #include "ardour/amp.h"
@@ -62,7 +60,7 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 
 	if (feedback[16]) {
 		//Mixer Scenes
-		MixerScene::Change.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::update_mixer_scene_state, this), OSC::instance());
+		MixerScene::Change.connect (session_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::update_mixer_scene_state, this), OSC::instance());
 		update_mixer_scene_state();
 	}
 
@@ -80,21 +78,21 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 		std::shared_ptr<Stripable> strip = session->master_out();
 
 		std::shared_ptr<Controllable> mute_controllable = std::dynamic_pointer_cast<Controllable>(strip->mute_control());
-		mute_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/master/mute"), strip->mute_control()), OSC::instance());
+		mute_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::send_change_message, this, X_("/master/mute"), strip->mute_control()), OSC::instance());
 		send_change_message (X_("/master/mute"), mute_controllable);
 
 		std::shared_ptr<Controllable> trim_controllable = std::dynamic_pointer_cast<Controllable>(strip->trim_control());
-		trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_trim_message, this, X_("/master/trimdB"), strip->trim_control()), OSC::instance());
+		trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::send_trim_message, this, X_("/master/trimdB"), strip->trim_control()), OSC::instance());
 		send_trim_message (X_("/master/trimdB"), trim_controllable);
 
 		std::shared_ptr<Controllable> pan_controllable = std::dynamic_pointer_cast<Controllable>(strip->pan_azimuth_control());
 		if (pan_controllable) {
-			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/master/pan_stereo_position"), strip->pan_azimuth_control()), OSC::instance());
+			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::send_change_message, this, X_("/master/pan_stereo_position"), strip->pan_azimuth_control()), OSC::instance());
 			send_change_message (X_("/master/pan_stereo_position"), pan_controllable);
 		}
 
 		std::shared_ptr<Controllable> gain_controllable = std::dynamic_pointer_cast<Controllable>(strip->gain_control());
-		gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_gain_message, this, X_("/master/"), strip->gain_control()), OSC::instance());
+		gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::send_gain_message, this, X_("/master/"), strip->gain_control()), OSC::instance());
 		send_gain_message (X_("/master/"), gain_controllable);
 
 		// monitor stuff next
@@ -103,43 +101,43 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 			_osc.text_message (X_("/monitor/name"), "Monitor", addr);
 
 			std::shared_ptr<Controllable> mon_mute_cont = strip->monitor_control()->cut_control();
-			mon_mute_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/mute"), mon_mute_cont), OSC::instance());
+			mon_mute_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/mute"), mon_mute_cont), OSC::instance());
 			send_change_message (X_("/monitor/mute"), mon_mute_cont);
 
 			std::shared_ptr<Controllable> mon_dim_cont = strip->monitor_control()->dim_control();
-			mon_dim_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/dim"), mon_dim_cont), OSC::instance());
+			mon_dim_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/dim"), mon_dim_cont), OSC::instance());
 			send_change_message (X_("/monitor/dim"), mon_dim_cont);
 
 			std::shared_ptr<Controllable> mon_mono_cont = strip->monitor_control()->mono_control();
-			mon_mono_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/mono"), mon_mono_cont), OSC::instance());
+			mon_mono_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/mono"), mon_mono_cont), OSC::instance());
 			send_change_message (X_("/monitor/mono"), mon_mono_cont);
 
 			gain_controllable = std::dynamic_pointer_cast<Controllable>(strip->gain_control());
-			gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_gain_message, this, X_("/monitor/"), strip->gain_control()), OSC::instance());
+			gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::send_gain_message, this, X_("/monitor/"), strip->gain_control()), OSC::instance());
 			send_gain_message (X_("/monitor/"), gain_controllable);
 		}
 
 		//Transport feedback
-		session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_transport_state_changed, this), OSC::instance());
+		session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::send_transport_state_changed, this), OSC::instance());
 		send_transport_state_changed ();
-		session->TransportLooped.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_transport_state_changed, this), OSC::instance());
-		session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_record_state_changed, this), OSC::instance());
+		session->TransportLooped.connect(session_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::send_transport_state_changed, this), OSC::instance());
+		session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::send_record_state_changed, this), OSC::instance());
 		send_record_state_changed ();
 		marks_changed ();
 
 		// session feedback
-		session->StateSaved.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::session_name, this, X_("/session_name"), _1), OSC::instance());
+		session->StateSaved.connect(session_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::session_name, this, X_("/session_name"), _1), OSC::instance());
 		session_name (X_("/session_name"), session->snap_name());
-		session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::solo_active, this, _1), OSC::instance());
+		session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::solo_active, this, _1), OSC::instance());
 		solo_active (session->soloing() || session->listening());
 
 		std::shared_ptr<Controllable> click_controllable = std::dynamic_pointer_cast<Controllable>(session->click_gain()->gain_control());
-		click_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/click/level"), click_controllable), OSC::instance());
+		click_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::send_change_message, this, X_("/click/level"), click_controllable), OSC::instance());
 		send_change_message (X_("/click/level"), click_controllable);
 
-		session->route_group_added.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::group_changed, this, _1), OSC::instance());
-		session->route_group_removed.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::group_changed, this), OSC::instance());
-		session->route_groups_reordered.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::group_changed, this), OSC::instance());
+		session->route_group_added.connect (session_connections, MISSING_INVALIDATOR, std::bind (static_cast<void (OSCGlobalObserver::*)(ARDOUR::RouteGroup*)>(&OSCGlobalObserver::group_changed), this, _1), OSC::instance());
+		session->route_group_removed.connect (session_connections, MISSING_INVALIDATOR, std::bind (static_cast<void (OSCGlobalObserver::*)(void)>(&OSCGlobalObserver::group_changed), this), OSC::instance());
+		session->route_groups_reordered.connect (session_connections, MISSING_INVALIDATOR, std::bind (static_cast<void (OSCGlobalObserver::*)(void)>(&OSCGlobalObserver::group_changed), this), OSC::instance());
 		_osc.send_group_list (addr);
 
 		extra_check ();

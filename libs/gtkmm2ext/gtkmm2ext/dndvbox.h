@@ -19,8 +19,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/window.h>
-#include <gtkmm/box.h>
+#pragma once
+
+#include <ytkmm/window.h>
+#include <ytkmm/box.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/label.h>
 
 #include "gtkmm2ext/visibility.h"
 #include "gtkmm2ext/widget_state.h"
@@ -58,8 +62,9 @@ template <class T>
 class /*LIBGTKMM2EXT_API*/ DnDVBox : public Gtk::EventBox
 {
 public:
-	DnDVBox (std::list<Gtk::TargetEntry> targets)
+	DnDVBox (std::list<Gtk::TargetEntry> targets, Gdk::DragAction actions = Gdk::ACTION_COPY)
 		: _targets (targets)
+		, _actions (actions)
 		, _active (0)
 		, _drag_icon (0)
 		, _expecting_unwanted_button_event (false)
@@ -81,7 +86,7 @@ public:
 
 		_internal_vbox.show ();
 
-		drag_dest_set (_targets);
+		drag_dest_set (_targets, Gtk::DEST_DEFAULT_ALL, _actions);
 		signal_drag_data_received().connect (mem_fun (*this, &DnDVBox::drag_data_received));
 	}
 
@@ -96,9 +101,9 @@ public:
 	void add_child (T* child, std::list<Gtk::TargetEntry> targets = std::list<Gtk::TargetEntry>())
 	{
 		if (targets.empty ()) {
-			child->action_widget().drag_source_set (_targets);
+			child->action_widget().drag_source_set (_targets, Gdk::MODIFIER_MASK, _actions);
 		} else {
-			child->action_widget().drag_source_set (targets);
+			child->action_widget().drag_source_set (targets, Gdk::MODIFIER_MASK, _actions);
 		}
 		child->action_widget().signal_drag_begin().connect (sigc::bind (mem_fun (*this, &DnDVBox::drag_begin), child));
 		child->action_widget().signal_drag_data_get().connect (sigc::bind (mem_fun (*this, &DnDVBox::drag_data_get), child));
@@ -249,6 +254,9 @@ public:
 	sigc::signal<void, DnDVBox*, T*, Glib::RefPtr<Gdk::DragContext> const & > DropFromAnotherBox;
 	sigc::signal<void, Gtk::SelectionData const &, T*, Glib::RefPtr<Gdk::DragContext> const & > DropFromExternal;
 	sigc::signal<void> SelectionChanged;
+	sigc::signal<void,T&> SelectionAdded;
+
+	sigc::signal<bool, DnDVBox*, T*> DragRefuse;
 
 private:
 
@@ -473,6 +481,13 @@ private:
 		bool top_half = (c - int (c)) < .5;
 		bool bottom_half = !top_half;
 
+		if (_drag_source != this) {
+			if (DragRefuse (_drag_source, at)) {
+				ctx->drag_refuse (tme);
+				return true;
+			}
+		}
+
 		if (_drag_source != this /* re-order */
 				&& _drag_source && at
 				&& _drag_source->_drag_child
@@ -507,7 +522,7 @@ private:
 			if (_drag_source == this /* re-order */) {
 				ctx->drag_status (Gdk::ACTION_MOVE, tme);
 			} else {
-				ctx->drag_status (Gdk::ACTION_COPY, tme);
+				ctx->drag_status (ctx->get_suggested_action (), tme);
 			}
 		} else {
 			ctx->drag_status (Gdk::ACTION_LINK, tme);
@@ -625,10 +640,12 @@ private:
 
 	void add_to_selection (T* child)
 	{
-		if ( !child->is_selectable() )
+		if (!child->is_selectable()) {
 			return;
+		}
 		_selection.push_back (child);
 		setup_child_state (child);
+		SelectionAdded (*child); /* EMIT SIGNAL */
 	}
 
 	void remove_from_selection (T* child)
@@ -657,6 +674,7 @@ private:
 
 	Gtk::VBox _internal_vbox;
 	std::list<Gtk::TargetEntry> _targets;
+	Gdk::DragAction _actions;
 	std::list<T*> _children;
 	std::list<T*> _selection;
 	T* _active;

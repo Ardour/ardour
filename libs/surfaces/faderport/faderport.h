@@ -131,7 +131,7 @@ class FaderPort : public MIDISurface {
 		ShiftDown = 0x1,
 		RewindDown = 0x2,
 		StopDown = 0x4,
-		UserDown = 0x8,
+		/* gap when we removed UserMode as a modifier */
 		LongPress = 0x10
 	};
 
@@ -192,7 +192,7 @@ class FaderPort : public MIDISurface {
 		{}
 
 		void set_action (std::string const& action_name, bool on_press, FaderPort::ButtonState = ButtonState (0));
-		void set_action (boost::function<void()> function, bool on_press, FaderPort::ButtonState = ButtonState (0));
+		void set_action (std::function<void()> function, bool on_press, FaderPort::ButtonState = ButtonState (0));
 		std::string get_action (bool press, FaderPort::ButtonState bs = ButtonState (0));
 
 		void set_led_state (bool onoff);
@@ -214,11 +214,11 @@ class FaderPort : public MIDISurface {
 
 		struct ToDo {
 			ActionType type;
-			/* could be a union if boost::function didn't require a
+			/* could be a union if std::function didn't require a
 			 * constructor
 			 */
 			std::string action_name;
-			boost::function<void()> function;
+			std::function<void()> function;
 		};
 
 		typedef std::map<FaderPort::ButtonState,ToDo> ToDoMap;

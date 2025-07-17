@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/label.h>
-#include <gtkmm/treemodelsort.h>
+#include <ytkmm/label.h>
+#include <ytkmm/treemodelsort.h>
 
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gui_thread.h"

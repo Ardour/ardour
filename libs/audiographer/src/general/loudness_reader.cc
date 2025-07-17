@@ -17,6 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cassert>
+
 #include "audiographer/general/loudness_reader.h"
 #include "pbd/fastlog.h"
 

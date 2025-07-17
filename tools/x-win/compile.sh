@@ -34,7 +34,7 @@ fi
 if [ "$(id -u)" = "0" ]; then
 	apt-get -qq -y install build-essential \
 		${DEBIANPKGS} \
-		git autoconf automake libtool pkg-config yasm python
+		git autoconf automake libtool pkg-config yasm python3 python-is-python3
 
 	#fixup mingw64 ccache for now
 	if test -d /usr/lib/ccache -a -f /usr/bin/ccache; then

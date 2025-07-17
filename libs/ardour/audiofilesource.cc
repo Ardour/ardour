@@ -72,7 +72,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
 
-PBD::Signal0<void> AudioFileSource::HeaderPositionOffsetChanged;
+PBD::Signal<void()> AudioFileSource::HeaderPositionOffsetChanged;
 samplecnt_t         AudioFileSource::header_position_offset = 0;
 
 /* XXX maybe this too */
@@ -249,13 +249,13 @@ AudioFileSource::set_state (const XMLNode& node, int version)
 }
 
 void
-AudioFileSource::mark_streaming_write_completed (const WriterLock& lock)
+AudioFileSource::mark_streaming_write_completed (const WriterLock& lock, Temporal::timecnt_t const & duration)
 {
 	if (!writable()) {
 		return;
 	}
 
-	AudioSource::mark_streaming_write_completed (lock);
+	AudioSource::mark_streaming_write_completed (lock, duration);
 }
 
 int
@@ -340,6 +340,7 @@ AudioFileSource::safe_audio_file_extension(const string& file)
 		".vwe", ".VWE",
 		".w64", ".W64",
 		".wav", ".WAV",
+		".rf64", ".RF64",
 		/* minimp3 can read mp2, mp3 */
 		".mp2", ".MP2",
 		".mp3", ".MP3",

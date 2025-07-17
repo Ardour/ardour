@@ -18,10 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_comparable_shared_ptr_h__
-#define __ardour_comparable_shared_ptr_h__
+#pragma once
 
 #include "ardour/libardour_visibility.h"
+
+#include <boost/operators.hpp>
+
+#include <memory>
 
 namespace ARDOUR {
 
@@ -60,4 +63,3 @@ class /*LIBARDOUR_API*/ ComparableSharedPtr : public std::shared_ptr<T>
 
 } // namespace ARDOUR
 
-#endif // __ardour_comparable_shared_ptr_h__

@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_inflater_h__
-#define __libpbd_inflater_h__
+#pragma once
 
 #include <string>
 
@@ -41,7 +40,7 @@ class LIBPBD_API Inflater : public PBD::FileArchive , public PBD::Progress
 	bool running() const { return thread != 0; }
 	int  status() const { return _status; }
 
-	PBD::Signal1<void, float> Progress;
+	PBD::Signal<void(float)> Progress;
 
 private:
 	PBD::Thread* thread;
@@ -56,4 +55,3 @@ private:
 
 } /* namespace */
 
-#endif 

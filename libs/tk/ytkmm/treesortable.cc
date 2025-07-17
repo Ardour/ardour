@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/treesortable.h>
-#include <gtkmm/private/treesortable_p.h>
+#include <ytkmm/treesortable.h>
+#include <ytkmm/private/treesortable_p.h>
 
 
 // -*- c++ -*-

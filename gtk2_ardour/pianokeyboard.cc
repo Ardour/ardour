@@ -27,8 +27,8 @@
 #include <pango/pango.h>
 #include <pango/pangocairo.h>
 
-#include <gdk/gdkkeysyms.h>
-#include <gtk/gtk.h>
+#include <ydk/gdkkeysyms.h>
+#include <ytk/ytk.h>
 
 #include "gtkmm2ext/keyboard.h"
 
@@ -546,8 +546,9 @@ APianoKeyboard::on_motion_notify_event (GdkEventMotion* event)
 {
 	int note;
 
-	if ((event->state & GDK_BUTTON1_MASK) == 0)
+	if ((event->state & GDK_BUTTON1_MASK) == 0) {
 		return true;
+	}
 
 	int x = event->x;
 	int y = event->y;
@@ -716,7 +717,7 @@ APianoKeyboard::on_size_allocate (Gtk::Allocation& allocation)
 APianoKeyboard::APianoKeyboard ()
 {
 	using namespace Gdk;
-	add_events (KEY_PRESS_MASK | KEY_RELEASE_MASK | BUTTON_PRESS_MASK | BUTTON_RELEASE_MASK | POINTER_MOTION_MASK | POINTER_MOTION_HINT_MASK);
+	add_events (KEY_PRESS_MASK | KEY_RELEASE_MASK | BUTTON_PRESS_MASK | BUTTON_RELEASE_MASK | POINTER_MOTION_MASK);
 
 	_sustain_new_notes              = false;
 	_highlight_grand_piano_range    = true;

@@ -16,18 +16,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_recorder_ui_h__
-#define __gtk_ardour_recorder_ui_h__
+#pragma once
 
 #include <list>
 #include <memory>
 #include <vector>
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/sizegroup.h>
-#include <gtkmm/table.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/sizegroup.h>
+#include <ytkmm/table.h>
 
 #include "pbd/natsort.h"
 
@@ -44,10 +43,10 @@
 #include "widgets/pane.h"
 #include "widgets/tabbable.h"
 
+#include "application_bar.h"
 #include "input_port_monitor.h"
 #include "rec_info_box.h"
 #include "shuttle_control.h"
-#include "transport_control_ui.h"
 
 namespace ARDOUR {
 	class SoloMuteRelease;
@@ -73,6 +72,8 @@ public:
 
 	void spill_port (std::string const&);
 	void add_track (std::string const&);
+
+	void focus_on_clock();
 
 private:
 	void load_bindings ();
@@ -100,7 +101,6 @@ private:
 	void tra_name_edit (TrackRecordAxis*, bool);
 	void update_rec_table_layout ();
 	void update_spacer_width (Gtk::Allocation&, TrackRecordAxis*);
-	void tabbed_changed (bool);
 
 	void set_connections (std::string const&);
 	void port_connected_or_disconnected (std::string, std::string);
@@ -128,7 +128,6 @@ private:
 	static int calc_columns (int child_width, int parent_width);
 
 	Gtkmm2ext::Bindings*  bindings;
-	Gtk::VBox            _content;
 	Gtk::HBox            _toolbar;
 	Gtk::Table           _button_table;
 	ArdourWidgets::VPane _pane;
@@ -155,7 +154,7 @@ private:
 	DurationInfoBox              _duration_info_box;
 	XrunInfoBox                  _xrun_info_box;
 	RemainInfoBox                _remain_info_box;
-	TransportControlUI           _transport_ctrl;
+	ApplicationBar               _application_bar;
 	Glib::RefPtr<Gtk::SizeGroup> _toolbar_button_height;
 	Glib::RefPtr<Gtk::SizeGroup> _toolbar_recarm_width;
 	Glib::RefPtr<Gtk::SizeGroup> _toolbar_monitoring_width;
@@ -281,4 +280,3 @@ public:
 	std::list<TrackRecordAxis*> visible_recorders () const;
 };
 
-#endif /* __gtk_ardour_recorder_ui_h__ */

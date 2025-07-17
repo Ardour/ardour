@@ -29,7 +29,7 @@
 #include <unistd.h>
 #include <climits>
 
-#include <gtkmm/messagedialog.h>
+#include <ytkmm/messagedialog.h>
 
 #include "pbd/gstdio_compat.h"
 
@@ -184,10 +184,11 @@ Editor::measure_master_loudness (samplepos_t start, samplepos_t end, bool is_ran
 	ARDOUR::TimelineRange ar (timepos_t (start), timepos_t (end), 0);
 
 	LoudnessDialog ld (_session, ar, is_range_selection);
-
+#ifndef __APPLE__
 	if (own_window ()) {
 		ld.set_transient_for (*own_window ());
 	}
+#endif
 
 	ld.run ();
 }
@@ -364,7 +365,7 @@ Editor::bounce_region_selection (bool with_processing)
 
 			for (int c = 0; c < TriggerBox::default_triggers_per_box; ++c) {
 				std::string lbl = cue_marker_name (c);
-				tslot->AddMenuElem (Menu_Helpers::MenuElem (lbl, sigc::bind ([] (uint32_t* t, uint32_t v, ArdourWidgets::ArdourDropdown* s, std::string l) {*t = v; s->set_text (l);}, &trigger_slot, c, tslot, lbl)));
+				tslot->add_menu_elem (Menu_Helpers::MenuElem (lbl, sigc::bind ([] (uint32_t* t, uint32_t v, ArdourWidgets::ArdourDropdown* s, std::string l) {*t = v; s->set_text (l);}, &trigger_slot, c, tslot, lbl)));
 			}
 			tslot->set_active ("A");
 
@@ -416,7 +417,7 @@ Editor::bounce_region_selection (bool with_processing)
 			if (!track) {
 				continue;
 			}
-			if (track->triggerbox()->trigger(trigger_slot)->region()) {
+			if (track->triggerbox()->trigger(trigger_slot)->playable()) {
 				overwriting = true;
 			}
 		}

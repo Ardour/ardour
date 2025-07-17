@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_chan_mapping_h__
-#define __ardour_chan_mapping_h__
+#pragma once
 
 #include <map>
 #include <cassert>
@@ -107,12 +106,24 @@ public:
 #if defined(_MSC_VER) /* && (_MSC_VER < 1900)
 	                   * Regarding the note (below) it was initially
 	                   * thought that this got fixed in VS2015 - but
-	                   * in fact it's still faulty (JE - Feb 2021) */
+	                   * in fact it's still faulty (JE - Feb 2021).
+	                   * 2024-09-03 update: Faulty compile up to
+	                   * VS2022 17.4. From there it compiles but does
+	                   * not link with the exception of the arm64
+	                   * platform. This quirk is actually a bug that
+	                   * Microsoft seems to have failed to
+	                   * acknowledge as such for years judging from
+	                   * web search results about MSVC's std::map,
+					   * and have not even fixed correctly when they
+					   * tried.
+	                   */
 	/* Use the older (heap based) mapping for early versions of MSVC.
-	 * In fact it might be safer to use this for all MSVC builds - as
-	 * our StackAllocator class depends on 'boost::aligned_storage'
-	 * which is known to be troublesome with Visual C++ :-
-	 * https://www.boost.org/doc/libs/1_65_0/libs/type_traits/doc/html/boost_typetraits/reference/aligned_storage.html
+	 * In fact it might be safer to use this for all MSVC builds. It
+	 * was thought that this was related to issues with
+	 * boost::aligned_storage, but actually it seems to be that there
+	 * are bugs in the std::map implementation of MSVC that are being
+	 * triggered, messing with the copy constructor of
+	 * PBD::StackAllocator.
 	 */
 	typedef std::map<uint32_t, uint32_t>    TypeMapping;
 	typedef std::map<DataType, TypeMapping> Mappings;
@@ -140,5 +151,4 @@ private:
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanMapping& m);
 
-#endif // __ardour_chan_mapping_h__
 

@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_audio_unit_h__
-#define __ardour_audio_unit_h__
+#pragma once
 
 #include <atomic>
 #include <cstdint>
@@ -81,6 +80,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	void deactivate ();
 	void flush ();
 	int set_block_size (pframes_t nframes);
+	void set_non_realtime (bool);
 
 	int connect_and_run (BufferSet& bufs,
 			samplepos_t start, samplepos_t end, double speed,
@@ -166,6 +166,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	std::shared_ptr<CAAudioUnit> unit;
 
 	bool initialized;
+	bool process_offline;
 	int32_t input_channels;
 	int32_t output_channels;
 	std::vector<std::pair<int,int> > io_configs;
@@ -270,4 +271,3 @@ typedef std::shared_ptr<AUPluginInfo> AUPluginInfoPtr;
 
 } // namespace ARDOUR
 
-#endif // __ardour_audio_unit_h__

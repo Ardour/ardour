@@ -3,10 +3,10 @@
 
 #include <glibmm.h>
 
-#include <atkmm/text.h>
-#include <atkmm/private/text_p.h>
+#include <ztkmm/text.h>
+#include <ztkmm/private/text_p.h>
 
-#include <atk/atk-enum-types.h>
+#include <ztk/atk-enum-types.h>
 
 // -*- c++ -*-
 /* $Id: text.ccg,v 1.1 2003/01/21 13:37:07 murrayc Exp $ */
@@ -28,7 +28,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atkmm/object.h>
+#include <ztkmm/object.h>
 #include <glib.h>
 #include <algorithm> /* for std::swap() */
 

@@ -43,7 +43,7 @@
 
 #include "audio_clip_editor.h"
 #include "audio_clock.h"
-#include "automation_line.h"
+#include "editor_automation_line.h"
 #include "control_point.h"
 #include "editor.h"
 #include "region_view.h"
@@ -68,8 +68,6 @@ ClipEditorBox::init ()
 	Bindings* bindings = Bindings::get_bindings (X_("Clip Editing"));
 
 	register_clip_editor_actions (bindings);
-
-	//_track_canvas_viewport->canvas()->set_data ("ardour-bindings", midi_bindings);
 }
 
 void
@@ -625,7 +623,7 @@ AudioClipEditorBox::set_region (std::shared_ptr<Region> r, TriggerReference tref
 	PBD::PropertyChange interesting_stuff;
 	region_changed (interesting_stuff);
 
-	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&AudioClipEditorBox::region_changed, this, _1), gui_context ());
+	_region->PropertyChanged.connect (state_connection, invalidator (*this), std::bind (&AudioClipEditorBox::region_changed, this, _1), gui_context ());
 }
 
 void

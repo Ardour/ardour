@@ -21,7 +21,7 @@
  * and by Alexander Larsson <alexl@redhat.com>
  * Modified by Richard Stellingwerff <remenic@gmail.com>
  */
-#include <gtk/gtkstyle.h>
+#include <ytk/gtkstyle.h>
 
 #ifndef CLEARLOOKS_STYLE_H
 #define CLEARLOOKS_STYLE_H

@@ -18,10 +18,10 @@
 
 #include <vector>
 
-#include <gtkmm/dialog.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/dialog.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/basename.h"
 #include "pbd/file_archive.h"
@@ -76,7 +76,7 @@ StartupFSM::StartupFSM (EngineControl& amd)
 	, session_name_edited (false)
 	, session_loaded (false)
 	, new_user (NewUserWizard::required())
-	, new_session_required (ARDOUR_COMMAND_LINE::new_session || (!ARDOUR::Profile->get_mixbus() && new_user))
+	, new_session_required (ARDOUR_COMMAND_LINE::new_session || new_user)
 	, _state (new_user ? WaitingForNewUser : WaitingForSessionPath)
 	, audiomidi_dialog (amd)
 	, new_user_dialog (0)
@@ -437,7 +437,7 @@ void
 StartupFSM::show_session_dialog (bool new_session_required)
 {
 	set_state (WaitingForSessionPath);
-	session_dialog = new SessionDialog (new_session_required, session_name, session_path, session_template, false);
+	session_dialog = new SessionDialog (new_session_required ? SessionDialog::New : SessionDialog::Recent, session_name, session_path, session_template, false);
 	current_dialog_connection = session_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), NewSessionDialog));
 	session_dialog->set_position (WIN_POS_CENTER);
 	session_dialog->present ();
@@ -986,11 +986,17 @@ StartupFSM::show_pre_release_dialog ()
 	pre_release_dialog->add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
 	Label* label = manage (new Label);
+/*
 	label->set_markup (string_compose (_("<span size=\"x-large\" weight=\"bold\">Welcome to this pre-release build of %1 %2</span>\n\n\
 <span size=\"large\">There are still several issues and bugs to be worked on,\n\
 as well as general workflow improvements, before this can be considered\n\
 release software. So, a few guidelines:\n\
-\n\
+*/
+	label->set_markup (string_compose (_("<span size=\"x-large\" weight=\"bold\">Welcome to this very-much-not-ready build of %1 %2</span>\n\n\
+<span size=\"large\">This is still very much a work-in-progress and many pre-existing\n\
+editing features may be broken. In addition the functionality of the MIDI clip editing\n\
+on the cue page is rapidly evolving, but if you are seeing this message it is not\n\
+considered finished at this time.\n\
 1) Please do <b>NOT</b> use this software with the expectation that it is stable or reliable\n\
    though it may be so, depending on your workflow.\n\
 2) Please wait for a helpful writeup of new features.\n\

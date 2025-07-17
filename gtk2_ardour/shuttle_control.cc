@@ -79,7 +79,7 @@ ShuttleInfoButton::ShuttleInfoButton ()
 	set_elements (ArdourButton::Text);
 	parameter_changed ("shuttle-units");
 
-	Config->ParameterChanged.connect (parameter_connection, MISSING_INVALIDATOR, boost::bind (&ShuttleInfoButton::parameter_changed, this, _1), gui_context ());
+	Config->ParameterChanged.connect (parameter_connection, MISSING_INVALIDATOR, std::bind (&ShuttleInfoButton::parameter_changed, this, _1), gui_context ());
 
 	add_events (Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::POINTER_MOTION_MASK | Gdk::SCROLL_MASK);
 }
@@ -187,8 +187,8 @@ ShuttleControl::ShuttleControl ()
 		shuttle_max_speed = 1.5f;
 	}
 
-	Config->ParameterChanged.connect (parameter_connection, MISSING_INVALIDATOR, boost::bind (&ShuttleControl::parameter_changed, this, _1), gui_context ());
-	Port::ResamplerQualityChanged.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&ShuttleControl::parameter_changed, this, "external-sync"), gui_context ());
+	Config->ParameterChanged.connect (parameter_connection, MISSING_INVALIDATOR, std::bind (&ShuttleControl::parameter_changed, this, _1), gui_context ());
+	Port::ResamplerQualityChanged.connect (port_connection, MISSING_INVALIDATOR, std::bind (&ShuttleControl::parameter_changed, this, "external-sync"), gui_context ());
 
 	UIConfiguration::instance ().ColorsChanged.connect (sigc::mem_fun (*this, &ShuttleControl::set_colors));
 	Timers::blink_connect (sigc::mem_fun (*this, &ShuttleControl::do_blink));
@@ -272,12 +272,12 @@ void
 ShuttleControl::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
-	_vari_dialog.set_session (_session);
 
 	if (_session) {
+		_vari_dialog.set_session (_session);
 		_session->add_controllable (_controllable);
 		_info_button.set_session (s);
-		_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ShuttleControl::parameter_changed, this, _1), gui_context());
+		_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ShuttleControl::parameter_changed, this, _1), gui_context());
 		/* set sensitivity */
 		parameter_changed ("external-sync");
 	} else {

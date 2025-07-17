@@ -43,7 +43,7 @@ static void usage ()
 	printf ("\n\
 This tool creates a new empty Ardour session.\n\
 \n\
-If the session-name is unspecified, the sesion-dir-name is used.\n\
+If the session-name is unspecified, the session-dir-name is used.\n\
 If specified, the tool expects a session-name without .ardour\n\
 file-name extension.\n\
 \n");

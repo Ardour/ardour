@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __lib_pbd_memento_command_h__
-#define __lib_pbd_memento_command_h__
+#pragma once
 
 #include <iostream>
 
@@ -73,7 +72,7 @@ public:
 	SimpleMementoCommandBinder (obj_T& o)
 		: _object (o)
 	{
-		_object.Destroyed.connect_same_thread (_object_death_connection, boost::bind (&SimpleMementoCommandBinder::object_died, this));
+		_object.Destroyed.connect_same_thread (_object_death_connection, std::bind (&SimpleMementoCommandBinder::object_died, this));
 	}
 
 	void set_state (XMLNode const & node , int version) const { _object.set_state (node, version); }
@@ -108,14 +107,14 @@ public:
 		: _binder (new SimpleMementoCommandBinder<obj_T> (a_object)), before (a_before), after (a_after)
 	{
 		/* The binder's object died, so we must die */
-		_binder->DropReferences.connect_same_thread (_binder_death_connection, boost::bind (&MementoCommand::binder_dying, this));
+		_binder->DropReferences.connect_same_thread (_binder_death_connection, std::bind (&MementoCommand::binder_dying, this));
 	}
 
 	MementoCommand (MementoCommandBinder<obj_T>* b, XMLNode* a_before, XMLNode* a_after)
 		: _binder (b), before (a_before), after (a_after)
 	{
 		/* The binder's object died, so we must die */
-		_binder->DropReferences.connect_same_thread (_binder_death_connection, boost::bind (&MementoCommand::binder_dying, this));
+		_binder->DropReferences.connect_same_thread (_binder_death_connection, std::bind (&MementoCommand::binder_dying, this));
 	}
 
 	~MementoCommand () {
@@ -174,4 +173,3 @@ protected:
 	PBD::ScopedConnection _binder_death_connection;
 };
 
-#endif // __lib_pbd_memento_h__

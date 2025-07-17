@@ -50,6 +50,7 @@ Amp::Amp (Session& s, const std::string& name, std::shared_ptr<GainControl> gc, 
 	, _gain_control (gc)
 	, _gain_automation_buffer(0)
 	, _midi_amp (control_midi_also)
+	, _midi_muted (false)
 {
 	set_display_name (name);
 	add_control (_gain_control);
@@ -73,7 +74,7 @@ Amp::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Amp::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t nframes, bool)
+Amp::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t /*end_sample*/, double /*speed*/, pframes_t nframes, bool)
 {
 	if (!check_active()) {
 		/* disregard potentially prepared gain-automation. */
@@ -126,14 +127,37 @@ Amp::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sampl
 		 * called successfully.
 		*/
 		_apply_gain_automation = false;
+		_midi_muted = false;
 
 	} else { /* manual (scalar) gain */
+
+		_gain_control->automation_run (start_sample, nframes);
 
 		gain_t const target_gain = _gain_control->get_value();
 
 		if (fabsf (_current_gain - target_gain) >= GAIN_COEFF_DELTA) {
 
 			_current_gain = Amp::apply_gain (bufs, _session.nominal_sample_rate(), nframes, _current_gain, target_gain, _midi_amp);
+
+			/* the target gain just changed by enough to have
+			 * called apply_gain(). If we're a midi amp and we've
+			 * reached effectively zero and MIDI has not been
+			 * muted, do so now.
+			 */
+
+			if (_midi_amp && _current_gain <= GAIN_COEFF_SMALL && !_midi_muted) {
+				/* queue MIDI all-note-off when going silent */
+				for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
+					MidiBuffer& mb (*i);
+					for (uint8_t channel = 0; channel <= 0xF; channel++) {
+						uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), ((uint8_t) MIDI_CTL_SUSTAIN), 0 };
+						mb.push_back (nframes - 1, Evoral::MIDI_EVENT, 3, ev);
+						ev[1] = MIDI_CTL_ALL_NOTES_OFF;
+						mb.push_back (nframes - 1, Evoral::MIDI_EVENT, 3, ev);
+					}
+				}
+				_midi_muted = true;
+			}
 
 			/* see note in PluginInsert::connect_and_run ()
 			 * set_value_unchecked() won't emit a signal since the value is effectively unchanged
@@ -144,10 +168,12 @@ Amp::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sampl
 
 			_current_gain = target_gain;
 			apply_simple_gain (bufs, nframes, _current_gain, _midi_amp);
+			_midi_muted = false;
 
 		} else {
 			/* unity target gain */
 			_current_gain = target_gain;
+			_midi_muted = false;
 		}
 	}
 }
@@ -168,10 +194,14 @@ Amp::apply_gain (BufferSet& bufs, samplecnt_t sample_rate, samplecnt_t nframes, 
 		return target;
 	}
 
-	/* Apply Audio Gain first, calculate target LFP'ed gain coefficient
+	/* Apply Audio Gain first, calculate 1 pole IIR time constant
 	 *
-	 * Low pass filter coefficient: 1.0 - e^(-2.0 * π * f / 48000) f in Hz.
-	 * for f << SR,  approx a ~= 6.2 * f / SR;
+	 * H(z) = a / (1 - (1 - a)  z^-1)
+	 * a = -y + sqrt (y^2 + 2y); y = 1 - cos (w) ;  w = 2 * π f/SR
+	 * a ~= 1.0 - e^(-2.0 * π * f / SR)
+	 *
+	 * and for very small w (f << SR)
+	 * a ~= 6.2 * f / SR;
 	 */
 	const gain_t a = 156.825f / (gain_t)sample_rate; // 25 Hz LPF
 
@@ -221,16 +251,6 @@ Amp::apply_gain (BufferSet& bufs, samplecnt_t sample_rate, samplecnt_t nframes, 
 					}
 				}
 				++m;
-			}
-
-			/* queue MIDI all-note-off when going silent */
-			if (initial > GAIN_COEFF_SMALL && rv <= GAIN_COEFF_SMALL) {
-				for (uint8_t channel = 0; channel <= 0xF; channel++) {
-					uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), ((uint8_t) MIDI_CTL_SUSTAIN), 0 };
-					mb.push_back (nframes - 1, Evoral::MIDI_EVENT, 3, ev);
-					ev[1] = MIDI_CTL_ALL_NOTES_OFF;
-					mb.push_back (nframes - 1, Evoral::MIDI_EVENT, 3, ev);
-				}
 			}
 		}
 	}
@@ -295,13 +315,33 @@ Amp::apply_simple_gain (BufferSet& bufs, samplecnt_t nframes, gain_t target, boo
 	} else if (target != GAIN_COEFF_UNITY) {
 
 		if (midi_amp) {
+			const gain_t abs_target (fabsf (target));
+
 			for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
 				MidiBuffer& mb (*i);
 
-				for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
-					Evoral::Event<MidiBuffer::TimeType> ev = *m;
+				/* Memory management is a little weird here:
+				 * MidiBuffer iterators return actual
+				 * Evoral::Events when indirected into, though
+				 * there is no memory copying done - the new
+				 * Event shares the same buffer as the event in
+				 * the buffer. Thus, modifying the value
+				 * changes the data in the buffer.
+				 *
+				 * Hence the rare construction
+				 *
+				 *    for (auto ev : mb)
+				 *
+				 * rather than the more typical reference-based
+				 * one:
+				 *
+				 *    for (auto & ev : mb)
+				 */
+
+				for (auto ev : mb) {
+					// Evoral::Event<MidiBuffer::TimeType> ev (*m, false);
 					if (ev.is_note_on()) {
-						ev.scale_velocity (fabsf (target));
+						ev.scale_velocity (abs_target);
 					}
 				}
 			}
@@ -380,7 +420,7 @@ Amp::setup_gain_automation (samplepos_t start_sample, samplepos_t end_sample, sa
 
 		_apply_gain_automation = _gain_control->get_masters_curve ( start_sample, end_sample, _gain_automation_buffer, nframes);
 
-		if (start_sample != _current_automation_sample && _session.bounce_processing ()) {
+		if (start_sample != _current_automation_sample) {
 			_current_gain = _gain_automation_buffer[0];
 		}
 		_current_automation_sample = end_sample;

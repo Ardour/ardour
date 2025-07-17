@@ -176,7 +176,7 @@ typedef unsigned int nfds_t;
 extern "C" {
 #endif /* __cplusplus */
 
-LIBPBD_API int      __cdecl         gettimeofday(struct timeval *__restrict tv, __timezone_ptr_t tz);
+LIBPBD_API int      __cdecl         gettimeofday(struct timeval *__restrict tv, __timezone_ptr_t tz) __THROW;
 LIBPBD_API ssize_t  PBD_APICALLTYPE pread(int handle, void *buf, size_t nbytes, off_t offset);
 LIBPBD_API ssize_t  PBD_APICALLTYPE pwrite(int handle, const void *buf, size_t nbytes, off_t offset);
 

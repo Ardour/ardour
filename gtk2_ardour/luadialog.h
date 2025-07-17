@@ -20,9 +20,9 @@
 #define _gtk2ardour_luadialog_h_
 
 #include <cassert>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/table.h>
-#include <gtkmm/progressbar.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/table.h>
+#include <ytkmm/progressbar.h>
 
 #include "LuaBridge/LuaBridge.h"
 

@@ -16,12 +16,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ui_pingback_h__
-#define __gtk_ui_pingback_h__
+#pragma once
+
+#include <string>
 
 namespace ARDOUR {
 	void pingback (const std::string& this_version,
 		       const std::string& announce_path);
 };
 
-#endif /* __gtk_ui_pingback_h__ */

@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/button.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/button.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/unwind.h"
 
@@ -161,19 +161,19 @@ PlaylistSelector::prepare (RouteUI* ruix, plMode mode)
 			this_track->PlaylistChanged.connect (
 			    _track_connections,
 			    invalidator (*this),
-			    boost::bind (&PlaylistSelector::redisplay, this),
+			    std::bind (&PlaylistSelector::redisplay, this),
 			    gui_context ());
 
 			this_track->PlaylistAdded.connect (
 			    _track_connections,
 			    invalidator (*this),
-			    boost::bind (&PlaylistSelector::redisplay, this),
+			    std::bind (&PlaylistSelector::redisplay, this),
 			    gui_context ());
 
 			this_track->DropReferences.connect (
 			    _track_connections,
 			    invalidator (*this),
-			    boost::bind (&PlaylistSelector::ok_button_click, this),
+			    std::bind (&PlaylistSelector::ok_button_click, this),
 			    gui_context ());
 		}
 	}
@@ -268,7 +268,7 @@ PlaylistSelector::redisplay ()
 		sort (pls.begin (), pls.end (), cmp);
 
 		for (vector<std::shared_ptr<Playlist> >::iterator p = pls.begin (); p != pls.end (); ++p) {
-			(*p)->PropertyChanged.connect (_playlist_connections, invalidator (*this), boost::bind (&PlaylistSelector::pl_property_changed, this, _1), gui_context ());
+			(*p)->PropertyChanged.connect (_playlist_connections, invalidator (*this), std::bind (&PlaylistSelector::pl_property_changed, this, _1), gui_context ());
 
 			TreeModel::Row child_row;
 

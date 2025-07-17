@@ -395,6 +395,12 @@ MidiPort::set_trace (std::weak_ptr<MIDI::Parser> p)
 	_trace_parser = p;
 }
 
+std::shared_ptr<MIDI::Parser>
+MidiPort::trace_parser() const
+{
+	return _trace_parser.lock();
+}
+
 void
 MidiPort::set_input_active (bool yn)
 {

@@ -86,7 +86,7 @@
 #include <shlobj.h>
 #include <shlguid.h>
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include <glib/gstdio.h>
 
 typedef struct _GdkDragContextPrivateWin32 GdkDragContextPrivateWin32;

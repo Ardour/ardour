@@ -35,6 +35,7 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/route.h"
+#include "ardour/search_paths.h"
 #include "ardour/session.h"
 #include "ardour/system_exec.h"
 
@@ -42,6 +43,7 @@
 
 #include "ardour_http.h"
 #include "ardour_ui.h"
+#include "audio_region_view.h"
 #include "public_editor.h"
 #include "region_selection.h"
 #include "luadialog.h"
@@ -355,15 +357,15 @@ class PangoLayout {
 
 namespace LuaSignal {
 
-#define STATIC(name,c,p) else if (!strcmp(type, #name)) {return name;}
-#define SESSION(name,c,p) else if (!strcmp(type, #name)) {return name;}
-#define ENGINE(name,c,p) else if (!strcmp(type, #name)) {return name;}
+#define STATIC(name,c) else if (!strcmp(type, #name)) {return name;}
+#define SESSION(name,c) else if (!strcmp(type, #name)) {return name;}
+#define ENGINE(name,c) else if (!strcmp(type, #name)) {return name;}
 
 LuaSignal
 str2luasignal (const std::string &str) {
 	const char* type = str.c_str();
 	if (0) { }
-#	include "luasignal_syms.h"
+#	include "luasignal_syms.inc.h"
 	else {
 		PBD::fatal << string_compose (_("programming error: %1: %2"), "Impossible LuaSignal type", str) << endmsg;
 		abort(); /*NOTREACHED*/
@@ -373,11 +375,11 @@ str2luasignal (const std::string &str) {
 #undef SESSION
 #undef ENGINE
 
-#define STATIC(name,c,p) N_(#name),
-#define SESSION(name,c,p) N_(#name),
-#define ENGINE(name,c,p) N_(#name),
+#define STATIC(name,c) N_(#name),
+#define SESSION(name,c) N_(#name),
+#define ENGINE(name,c) N_(#name),
 const char *luasignalstr[] = {
-#	include "luasignal_syms.h"
+#	include "luasignal_syms.inc.h"
 	0
 };
 
@@ -433,7 +435,7 @@ lua_forkexec (lua_State *L)
 	args[argc] = 0;
 
 	ARDOUR::SystemExec* x = new ARDOUR::SystemExec (args[0], args, true);
-	x->Terminated.connect (_luaexecs, MISSING_INVALIDATOR, boost::bind (&reaper, x), gui_context());
+	x->Terminated.connect (_luaexecs, MISSING_INVALIDATOR, std::bind (&reaper, x), gui_context());
 
 	if (x->start()) {
 		reaper (x);
@@ -535,21 +537,21 @@ lua_translate_order (RouteDialogs::InsertAt place)
 
 using namespace ARDOUR;
 
-PBD::Signal0<void> LuaInstance::LuaTimerS;
-PBD::Signal0<void> LuaInstance::LuaTimerDS;
-PBD::Signal0<void> LuaInstance::SetSession;
-PBD::Signal0<void> LuaInstance::SelectionChanged;
+PBD::Signal<void()> LuaInstance::LuaTimerS;
+PBD::Signal<void()> LuaInstance::LuaTimerDS;
+PBD::Signal<void()> LuaInstance::SetSession;
+PBD::Signal<void()> LuaInstance::SelectionChanged;
 
 void
 LuaInstance::register_hooks (lua_State* L)
 {
 
-#define ENGINE(name,c,p) .addConst (stringify(name), (LuaSignal::LuaSignal)LuaSignal::name)
-#define STATIC(name,c,p) .addConst (stringify(name), (LuaSignal::LuaSignal)LuaSignal::name)
-#define SESSION(name,c,p) .addConst (stringify(name), (LuaSignal::LuaSignal)LuaSignal::name)
+#define ENGINE(name,c) .addConst (stringify(name), (LuaSignal::LuaSignal)LuaSignal::name)
+#define STATIC(name,c) .addConst (stringify(name), (LuaSignal::LuaSignal)LuaSignal::name)
+#define SESSION(name,c) .addConst (stringify(name), (LuaSignal::LuaSignal)LuaSignal::name)
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("LuaSignal")
-#		include "luasignal_syms.h"
+#		include "luasignal_syms.inc.h"
 		.endNamespace ();
 #undef ENGINE
 #undef SESSION
@@ -826,6 +828,14 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.endClass ()
 
 		.deriveClass <RegionView, TimeAxisViewItem> ("RegionView")
+		.addCast<AudioRegionView> ("to_audioregionview")
+		.addFunction ("show_region_editor", &RegionView::show_region_editor)
+		.addFunction ("hide_region_editor", &RegionView::hide_region_editor)
+		.endClass ()
+
+		.deriveClass <AudioRegionView, RegionView> ("RegionView")
+		.addFunction ("set_region_gain_line", &AudioRegionView::set_region_gain_line)
+		.addFunction ("set_region_fx_line", (bool (AudioRegionView::*)(uint32_t, uint32_t))&AudioRegionView::set_region_fx_line)
 		.endClass ()
 
 		.deriveClass <RouteUI, Selectable> ("RouteUI")
@@ -889,26 +899,56 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 #endif
 		.endClass ()
 
-		.beginClass <PublicEditor> ("Editor")
-		.addFunction ("grid_type", &PublicEditor::grid_type)
-		.addFunction ("snap_mode", &PublicEditor::snap_mode)
-		.addFunction ("set_snap_mode", &PublicEditor::set_snap_mode)
+		.beginClass <EditingContext> ("EditingContext")
+		.addFunction ("set_mouse_mode", &EditingContext::set_mouse_mode)
+		.addFunction ("current_mouse_mode", &EditingContext::current_mouse_mode)
 
-		.addFunction ("undo", &PublicEditor::undo)
-		.addFunction ("redo", &PublicEditor::redo)
+		.addFunction ("pixel_to_sample", &EditingContext::pixel_to_sample)
+		.addFunction ("sample_to_pixel", &EditingContext::sample_to_pixel)
 
-		.addFunction ("set_mouse_mode", &PublicEditor::set_mouse_mode)
-		.addFunction ("current_mouse_mode", &PublicEditor::current_mouse_mode)
+		.addFunction ("get_selection", &EditingContext::get_selection)
+		.addFunction ("get_cut_buffer", &EditingContext::get_cut_buffer)
+
+		.addFunction ("set_zoom_focus", &EditingContext::set_zoom_focus)
+		.addFunction ("zoom_focus", &EditingContext::zoom_focus)
+		.addFunction ("get_current_zoom", &EditingContext::get_current_zoom)
+		.addFunction ("reset_zoom", &EditingContext::reset_zoom)
+
+		.addFunction ("reset_x_origin", &EditingContext::reset_x_origin)
+		.addFunction ("get_y_origin", &EditingContext::get_y_origin)
+		.addFunction ("reset_y_origin", &EditingContext::reset_y_origin)
+
+		.addRefFunction ("get_nudge_distance", &EditingContext::get_nudge_distance)
+
+		.addFunction ("get_grid_beat_divisions", &EditingContext::get_grid_beat_divisions)
+		.addRefFunction ("get_grid_type_as_beats", &EditingContext::get_grid_type_as_beats)
+		.addRefFunction ("get_draw_length_as_beats", &EditingContext::get_draw_length_as_beats)
+
+		.addFunction ("grid_type", &EditingContext::grid_type)
+		.addFunction ("snap_mode", &EditingContext::snap_mode)
+		.addFunction ("set_snap_mode", &EditingContext::set_snap_mode)
+
+		.addFunction ("undo", &EditingContext::undo)
+		.addFunction ("redo", &EditingContext::redo)
+
+		.addFunction ("get_stripable_time_axis_by_id", &EditingContext::get_stripable_time_axis_by_id)
+		.addFunction ("axis_views_from_routes", &EditingContext::axis_views_from_routes)
+
+		.addRefFunction ("find_location_from_marker", &EditingContext::find_location_from_marker)
+		.addFunction ("find_marker_from_location_id", &EditingContext::find_marker_from_location_id)
+#if 0
+		.addFunction ("get_regionviews_by_id", &EditingContext::get_regionviews_by_id)
+		.addFunction ("get_per_region_note_selection", &EditingContext::get_per_region_note_selection)
+#endif
+		.endClass ()
+
+		.deriveClass <PublicEditor, EditingContext> ("Editor")
 
 		.addFunction ("consider_auditioning", &PublicEditor::consider_auditioning)
 
 		.addFunction ("new_region_from_selection", &PublicEditor::new_region_from_selection)
 		.addFunction ("separate_region_from_selection", &PublicEditor::separate_region_from_selection)
-		.addFunction ("pixel_to_sample", &PublicEditor::pixel_to_sample)
-		.addFunction ("sample_to_pixel", &PublicEditor::sample_to_pixel)
 
-		.addFunction ("get_selection", &PublicEditor::get_selection)
-		.addFunction ("get_cut_buffer", &PublicEditor::get_cut_buffer)
 		.addRefFunction ("get_selection_extents", &PublicEditor::get_selection_extents)
 
 		.addFunction ("current_mixer_stripable", &PublicEditor::current_mixer_stripable)
@@ -923,6 +963,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addFunction ("add_location_from_playhead_cursor", &PublicEditor::add_location_from_playhead_cursor)
 		.addFunction ("remove_location_at_playhead_cursor", &PublicEditor::remove_location_at_playhead_cursor)
 		.addFunction ("add_location_mark", &PublicEditor::add_location_mark)
+		.addFunction ("mouse_add_new_marker", &PublicEditor::add_location_mark) // deprecated use add_location_mark
 
 		.addFunction ("update_grid", &PublicEditor::update_grid)
 		.addFunction ("remove_tracks", &PublicEditor::remove_tracks)
@@ -940,11 +981,6 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addFunction ("export_selection", &PublicEditor::export_selection)
 		.addFunction ("export_range", &PublicEditor::export_range)
 		.addFunction ("quick_export", &PublicEditor::quick_export)
-
-		.addFunction ("set_zoom_focus", &PublicEditor::set_zoom_focus)
-		.addFunction ("get_zoom_focus", &PublicEditor::get_zoom_focus)
-		.addFunction ("get_current_zoom", &PublicEditor::get_current_zoom)
-		.addFunction ("reset_zoom", &PublicEditor::reset_zoom)
 
 		.addFunction ("clear_playlist", &PublicEditor::clear_playlist)
 		.addFunction ("clear_grouped_playlists", &PublicEditor::clear_grouped_playlists)
@@ -986,10 +1022,6 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addFunction ("scroll_down_one_track", &PublicEditor::scroll_down_one_track)
 		.addFunction ("scroll_up_one_track", &PublicEditor::scroll_up_one_track)
 
-		.addFunction ("reset_x_origin", &PublicEditor::reset_x_origin)
-		.addFunction ("get_y_origin", &PublicEditor::get_y_origin)
-		.addFunction ("reset_y_origin", &PublicEditor::reset_y_origin)
-
 		.addFunction ("remove_last_capture", &PublicEditor::remove_last_capture)
 
 		.addFunction ("maximise_editing_space", &PublicEditor::maximise_editing_space)
@@ -999,11 +1031,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		//.addFunction ("get_preferred_edit_position", &PublicEditor::get_preferred_edit_position)
 		//.addFunction ("split_regions_at", &PublicEditor::split_regions_at)
 
-		.addRefFunction ("get_nudge_distance", &PublicEditor::get_nudge_distance)
 		.addFunction ("get_paste_offset", &PublicEditor::get_paste_offset)
-		.addFunction ("get_grid_beat_divisions", &PublicEditor::get_grid_beat_divisions)
-		.addRefFunction ("get_grid_type_as_beats", &PublicEditor::get_grid_type_as_beats)
-		.addRefFunction ("get_draw_length_as_beats", &PublicEditor::get_draw_length_as_beats)
 
 		.addFunction ("toggle_ruler_video", &PublicEditor::toggle_ruler_video)
 		.addFunction ("toggle_xjadeo_proc", &PublicEditor::toggle_xjadeo_proc)
@@ -1014,26 +1042,18 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addFunction ("get_equivalent_regions", &PublicEditor::get_equivalent_regions)
 		.addFunction ("drags", &PublicEditor::drags)
 #endif
-
-		.addFunction ("get_stripable_time_axis_by_id", &PublicEditor::get_stripable_time_axis_by_id)
 		.addFunction ("get_track_views", &PublicEditor::get_track_views)
 		.addFunction ("rtav_from_route", &PublicEditor::rtav_from_route)
-		.addFunction ("axis_views_from_routes", &PublicEditor::axis_views_from_routes)
 
 		.addFunction ("center_screen", &PublicEditor::center_screen)
 
 		.addFunction ("get_smart_mode", &PublicEditor::get_smart_mode)
 		.addRefFunction ("get_pointer_position", &PublicEditor::get_pointer_position)
 
-		.addRefFunction ("find_location_from_marker", &PublicEditor::find_location_from_marker)
-		.addFunction ("find_marker_from_location_id", &PublicEditor::find_marker_from_location_id)
-		.addFunction ("mouse_add_new_marker", &PublicEditor::mouse_add_new_marker)
 #if 0
 		.addFunction ("get_regions_at", &PublicEditor::get_regions_at)
 		.addFunction ("get_regions_after", &PublicEditor::get_regions_after)
 		.addFunction ("get_regions_from_selection_and_mouse", &PublicEditor::get_regions_from_selection_and_mouse)
-		.addFunction ("get_regionviews_by_id", &PublicEditor::get_regionviews_by_id)
-		.addFunction ("get_per_region_note_selection", &PublicEditor::get_per_region_note_selection)
 #endif
 
 #if 0
@@ -1072,10 +1092,10 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.endNamespace ()
 
 		.beginNamespace ("SelectionOp")
-		.addConst ("Toggle", Selection::Operation(Selection::Toggle))
-		.addConst ("Set", Selection::Operation(Selection::Set))
-		.addConst ("Extend", Selection::Operation(Selection::Extend))
-		.addConst ("Add", Selection::Operation(Selection::Add))
+		.addConst ("Toggle", SelectionOperation(SelectionToggle))
+		.addConst ("Set", SelectionOperation(SelectionSet))
+		.addConst ("Extend", SelectionOperation(SelectionExtend))
+		.addConst ("Add", SelectionOperation(SelectionAdd))
 		.endNamespace ()
 
 		.beginNamespace ("TrackHeightMode")
@@ -1094,7 +1114,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addFunction ("set_" # var, &UIConfiguration::set_##var) \
 		.addProperty (#var, &UIConfiguration::get_##var, &UIConfiguration::set_##var)
 
-#include "ui_config_vars.h"
+#include "ui_config_vars.inc.h"
 
 #undef UI_CONFIG_VARIABLE
 		.endClass()
@@ -1126,7 +1146,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 #define NOTENAMEDISPLAY(NAME) .addConst (stringify(NAME), (Editing::NoteNameDisplay)Editing::NAME)
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("Editing")
-#		include "editing_syms.h"
+#		include "editing_syms.inc.h"
 		.endNamespace ();
 
 	if (!sandbox) {
@@ -1198,11 +1218,16 @@ LuaInstance::~LuaInstance ()
 }
 
 static std::string
-lua_read_script (std::string const& fn)
+lua_read_script (std::string fn)
 {
 	if (!UIConfiguration::instance().get_update_action_scripts ()) {
 		return "";
 	}
+
+	if (Glib::path_is_absolute (fn) && !Glib::file_test (fn, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR)) {
+		PBD::find_file (lua_search_path (), Glib::path_get_basename (fn), fn);
+	}
+
 	try {
 		return Glib::file_get_contents (fn);
 	} catch (...) { }
@@ -1538,7 +1563,7 @@ LuaInstance::set_state (const XMLNode& node)
 			try {
 				LuaCallbackPtr p (new LuaCallback (_session, *(*n)));
 				_callbacks.insert (std::make_pair(p->id(), p));
-				p->drop_callback.connect (_slotcon, MISSING_INVALIDATOR, boost::bind (&LuaInstance::unregister_lua_slot, this, p->id()), gui_context());
+				p->drop_callback.connect (_slotcon, MISSING_INVALIDATOR, std::bind (&LuaInstance::unregister_lua_slot, this, p->id()), gui_context());
 				SlotChanged (p->id(), p->name(), p->signals()); /* EMIT SIGNAL */
 			} catch (luabridge::LuaException const& e) {
 #ifndef NDEBUG
@@ -1924,7 +1949,7 @@ LuaInstance::register_lua_slot (const std::string& name, const std::string& scri
 	try {
 		LuaCallbackPtr p (new LuaCallback (_session, name, script, ah, args));
 		_callbacks.insert (std::make_pair(p->id(), p));
-		p->drop_callback.connect (_slotcon, MISSING_INVALIDATOR, boost::bind (&LuaInstance::unregister_lua_slot, this, p->id()), gui_context());
+		p->drop_callback.connect (_slotcon, MISSING_INVALIDATOR, std::bind (&LuaInstance::unregister_lua_slot, this, p->id()), gui_context());
 		SlotChanged (p->id(), p->name(), p->signals()); /* EMIT SIGNAL */
 		set_dirty ();
 		return true;
@@ -2350,11 +2375,11 @@ LuaCallback::reconnect_object (T obj)
 {
 	for (uint32_t i = 0; i < LuaSignal::LAST_SIGNAL; ++i) {
 		if (_signals[i]) {
-#define ENGINE(n,c,p) else if (i == LuaSignal::n) { connect_ ## p (LuaSignal::n, AudioEngine::instance(), &(AudioEngine::instance()->c)); }
-#define SESSION(n,c,p) else if (i == LuaSignal::n) { if (_session) { connect_ ## p (LuaSignal::n, _session, &(_session->c)); } }
-#define STATIC(n,c,p) else if (i == LuaSignal::n) { connect_ ## p (LuaSignal::n, obj, c); }
+#define ENGINE(n,c) else if (i == LuaSignal::n) { connect (LuaSignal::n, AudioEngine::instance(), &(AudioEngine::instance()->c)); }
+#define SESSION(n,c) else if (i == LuaSignal::n) { if (_session) { connect (LuaSignal::n, _session, &(_session->c)); } }
+#define STATIC(n,c) else if (i == LuaSignal::n) { connect (LuaSignal::n, obj, c); }
 			if (0) {}
-#			include "luasignal_syms.h"
+#			include "luasignal_syms.inc.h"
 			else {
 				PBD::fatal << string_compose (_("programming error: %1: %2"), "Impossible LuaSignal type", i) << endmsg;
 				abort(); /*NOTREACHED*/
@@ -2366,112 +2391,25 @@ LuaCallback::reconnect_object (T obj)
 	}
 }
 
-template <typename T, typename S> void
-LuaCallback::connect_0 (enum LuaSignal::LuaSignal ls, T ref, S *signal) {
+template <typename T, typename... C> void
+LuaCallback::connect (enum LuaSignal::LuaSignal ls, T ref, PBD::Signal<void(C...)> *signal) {
 	signal->connect (
-			_connections, invalidator (*this),
-			boost::bind (&LuaCallback::proxy_0<T>, this, ls, ref),
-			gui_context());
+	        _connections,
+	        invalidator (*this),
+	        [=] (C... a) { return proxy(ls, ref, a...); },
+	        gui_context());
 }
 
-template <typename T, typename C1> void
-LuaCallback::connect_1 (enum LuaSignal::LuaSignal ls, T ref, PBD::Signal1<void, C1> *signal) {
-	signal->connect (
-			_connections, invalidator (*this),
-			boost::bind (&LuaCallback::proxy_1<T, C1>, this, ls, ref, _1),
-			gui_context());
-}
-
-template <typename T, typename C1, typename C2> void
-LuaCallback::connect_2 (enum LuaSignal::LuaSignal ls, T ref, PBD::Signal2<void, C1, C2> *signal) {
-	signal->connect (
-			_connections, invalidator (*this),
-			boost::bind (&LuaCallback::proxy_2<T, C1, C2>, this, ls, ref, _1, _2),
-			gui_context());
-}
-
-template <typename T, typename C1, typename C2, typename C3> void
-LuaCallback::connect_3 (enum LuaSignal::LuaSignal ls, T ref, PBD::Signal3<void, C1, C2, C3> *signal) {
-	signal->connect (
-			_connections, invalidator (*this),
-			boost::bind (&LuaCallback::proxy_3<T, C1, C2, C3>, this, ls, ref, _1, _2, _3),
-			gui_context());
-}
-
-template <typename T, typename C1, typename C2, typename C3, typename C4> void
-LuaCallback::connect_4 (enum LuaSignal::LuaSignal ls, T ref, PBD::Signal4<void, C1, C2, C3, C4> *signal) {
-	signal->connect (
-			_connections, invalidator (*this),
-			boost::bind (&LuaCallback::proxy_4<T, C1, C2, C3, C4>, this, ls, ref, _1, _2, _3, _4),
-			gui_context());
-}
-
-template <typename T> void
-LuaCallback::proxy_0 (enum LuaSignal::LuaSignal ls, T ref) {
+template <typename T, typename... C> void
+LuaCallback::proxy (enum LuaSignal::LuaSignal ls, T ref, C... a) {
 	bool ok = true;
 	{
-		const luabridge::LuaRef& rv ((*_lua_call)((int)ls, ref));
+		const luabridge::LuaRef& rv ((*_lua_call)((int)ls, ref, a...));
 		if (! rv.cast<bool> ()) {
 			ok = false;
 		}
 	}
 	/* destroy LuaRef ^^ first before calling drop_callback() */
-	if (!ok) {
-		drop_callback (); /* EMIT SIGNAL */
-	}
-}
-
-template <typename T, typename C1> void
-LuaCallback::proxy_1 (enum LuaSignal::LuaSignal ls, T ref, C1 a1) {
-	bool ok = true;
-	{
-		const luabridge::LuaRef& rv ((*_lua_call)((int)ls, ref, a1));
-		if (! rv.cast<bool> ()) {
-			ok = false;
-		}
-	}
-	if (!ok) {
-		drop_callback (); /* EMIT SIGNAL */
-	}
-}
-
-template <typename T, typename C1, typename C2> void
-LuaCallback::proxy_2 (enum LuaSignal::LuaSignal ls, T ref, C1 a1, C2 a2) {
-	bool ok = true;
-	{
-		const luabridge::LuaRef& rv ((*_lua_call)((int)ls, ref, a1, a2));
-		if (! rv.cast<bool> ()) {
-			ok = false;
-		}
-	}
-	if (!ok) {
-		drop_callback (); /* EMIT SIGNAL */
-	}
-}
-
-template <typename T, typename C1, typename C2, typename C3> void
-LuaCallback::proxy_3 (enum LuaSignal::LuaSignal ls, T ref, C1 a1, C2 a2, C3 a3) {
-	bool ok = true;
-	{
-		const luabridge::LuaRef& rv ((*_lua_call)((int)ls, ref, a1, a2, a3));
-		if (! rv.cast<bool> ()) {
-			ok = false;
-		}
-	}
-	if (!ok) {
-		drop_callback (); /* EMIT SIGNAL */
-	}
-}
-
-template <typename T, typename C1, typename C2, typename C3, typename C4> void
-LuaCallback::proxy_4 (enum LuaSignal::LuaSignal ls, T ref, C1 a1, C2 a2, C3 a3, C4 a4) {
-	bool ok = true;
-	{
-		const luabridge::LuaRef& rv ((*_lua_call)((int)ls, ref, a1, a2, a3, a4));
-		if (! rv.cast<bool> ()) {
-			ok = false;
-		}
-	}
 	if (!ok) {
 		drop_callback (); /* EMIT SIGNAL */
 	}

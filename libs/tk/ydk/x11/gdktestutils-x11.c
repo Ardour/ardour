@@ -17,8 +17,8 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-#include <gdk/gdktestutils.h>
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdktestutils.h>
+#include <ydk/gdkkeysyms.h>
 #include <x11/gdkx.h>
 #include "gdkalias.h"
 

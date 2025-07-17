@@ -36,7 +36,7 @@ public:
 	RegionPeakCursor (ArdourCanvas::Item*);
 	~RegionPeakCursor ();
 
-	void set (AudioRegionView*, samplepos_t, samplecnt_t);
+	void set (AudioRegionView*, samplepos_t, ARDOUR::samplecnt_t);
 	void hide ();
 	bool visible () const;
 

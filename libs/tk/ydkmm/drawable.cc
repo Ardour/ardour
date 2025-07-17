@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/drawable.h>
-#include <gdkmm/private/drawable_p.h>
+#include <ydkmm/drawable.h>
+#include <ydkmm/private/drawable_p.h>
 
 
 // -*- c++ -*-
@@ -27,10 +27,10 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdkmm/gc.h>
-#include <gdkmm/display.h>
-#include <gdkmm/pixbuf.h>
-#include <gdk/gdk.h>
+#include <ydkmm/gc.h>
+#include <ydkmm/display.h>
+#include <ydkmm/pixbuf.h>
+#include <ydk/gdk.h>
 
 namespace Gdk
 {

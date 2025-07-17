@@ -499,132 +499,23 @@ gtk_recent_manager_monitor_changed (GFileMonitor      *monitor,
  *
  * Retrieves the default storage file
  *
- * The default file is under XDG_DATA_HOME/recently-used.xbel but we also
- * check if the old $HOME/.recently-used.xbel is still there, and rename it
- * if needed.
+ * The default file is under XDG_DATA_HOME/recently-used.xbel
  *
  * Return value: a newly allocated string with the new file
  */
 static char *
 get_default_recent_file (void)
 {
-  char *old_file = g_build_filename (g_get_home_dir (),
-                                     "." GTK_RECENTLY_USED_FILE,
-                                     NULL);
-  char *new_file = g_build_filename (g_get_user_data_dir (),
-                                     GTK_RECENTLY_USED_FILE,
-                                     NULL);
-  GBookmarkFile *bf_old = NULL, *bf_new = NULL;
-  char **uris;
-  gsize n_uris, i;
+  char* dirname = g_get_user_data_dir ();
 
-  /* simple case: the old file does not exist, so we just use the new one */
-  if (!g_file_test (old_file, G_FILE_TEST_EXISTS))
+  if (!g_file_test (dirname, G_FILE_TEST_EXISTS))
     {
-      g_free (old_file);
-      return new_file;
+      g_mkdir_with_parents (dirname, 0700); /* 0700 per the XDG basedir spec */
     }
 
-  /* less simple case: the old file still exists but the new one doesn't,
-   * so we rename the old one to the new one
-   */
-  if (!g_file_test (new_file, G_FILE_TEST_EXISTS))
-    {
-      if (g_rename (old_file, new_file) == -1)
-        filename_warning ("Unable to rename '%s': %s",
-                          old_file,
-                          g_strerror (errno));
-
-      g_free (old_file);
-      return new_file;
-    }
-
-  /* complex case: both the old file and the new file exist, so we do
-   * a preliminary parse pass and merge the contents, then remove the
-   * old file
-   */
-  bf_old = g_bookmark_file_new ();
-  if (!g_bookmark_file_load_from_file (bf_old, old_file, NULL))
-    goto unlink_and_return;
-
-  bf_new = g_bookmark_file_new ();
-  if (!g_bookmark_file_load_from_file (bf_new, new_file, NULL))
-    goto unlink_and_return;
-
-  uris = g_bookmark_file_get_uris (bf_old, &n_uris);
-  for (i = 0; i < n_uris; i++)
-    {
-      char *mime, *title, *description;
-      gboolean is_private;
-      char **apps;
-      gsize n_apps, j;
-
-      /* the new file always wins */
-      if (g_bookmark_file_has_item (bf_new, uris[i]))
-        continue;
-
-      mime = g_bookmark_file_get_mime_type (bf_old, uris[i], NULL);
-      title = g_bookmark_file_get_title (bf_old, uris[i], NULL);
-      description = g_bookmark_file_get_description (bf_old, uris[i], NULL);
-      is_private = g_bookmark_file_get_is_private (bf_old, uris[i], NULL);
-
-      g_bookmark_file_set_mime_type (bf_new, uris[i], mime);
-
-      if (title != NULL)
-        g_bookmark_file_set_title (bf_new, uris[i], title);
-
-      if (description != NULL)
-        g_bookmark_file_set_description (bf_new, uris[i], description);
-
-      g_free (mime);
-      g_free (title);
-      g_free (description);
-
-      g_bookmark_file_set_is_private (bf_new, uris[i], is_private);
-
-      apps = g_bookmark_file_get_applications (bf_old, uris[i], &n_apps, NULL);
-      for (j = 0; j < n_apps; j++)
-        {
-          char *exec;
-          guint count;
-          time_t stamp;
-
-          g_bookmark_file_get_app_info (bf_old, uris[i], apps[j],
-                                        &exec,
-                                        &count,
-                                        &stamp,
-                                        NULL);
-
-          g_bookmark_file_set_app_info (bf_new, uris[i], apps[j],
-                                        exec,
-                                        count,
-                                        stamp,
-                                        NULL);
-
-          g_free (exec);
-        }
-
-      g_strfreev (apps);
-    }
-
-  g_strfreev (uris);
-
-  /* we don't particularly care about errors here; if it fails then
-   * we start with a blank slate anyhow
-   */
-  g_bookmark_file_to_file (bf_new, new_file, NULL);
-
-unlink_and_return:
-  if (bf_old != NULL)
-    g_bookmark_file_free (bf_old);
-
-  if (bf_new != NULL)
-    g_bookmark_file_free (bf_new);
-
-  g_unlink (old_file);
-  g_free (old_file);
-
-  return new_file;
+  return g_build_filename (g_get_user_data_dir (),
+                           GTK_RECENTLY_USED_FILE,
+                           NULL);
 }
 
 static void

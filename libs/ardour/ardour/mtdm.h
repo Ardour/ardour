@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_mtdm_h__
-#define __libardour_mtdm_h__
+#pragma once
 
 #include <stddef.h>
 
@@ -71,4 +70,3 @@ private:
 	float  _peak;
 };
 
-#endif /* __libardour_mtdm_h__ */

@@ -21,12 +21,12 @@
 #ifndef __gtk2_ardour_step_entry_h__
 #define __gtk2_ardour_step_entry_h__
 
-#include <gtkmm/togglebutton.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/box.h>
-#include <gtkmm/adjustment.h>
-#include <gtkmm/sizegroup.h>
+#include <ytkmm/togglebutton.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/box.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/sizegroup.h>
 
 #include <gtkmm2ext/bindings.h>
 #include "temporal/tempo.h"
@@ -44,7 +44,7 @@ class StepEditor;
  * accomplish that.
  *
  * The StepEntry is a singleton, used over and over each time the user wants to
- * step edit; the StepEditor is owned by a MidiTimeAxisView and re-used for any
+ * step edit; the StepEditor is owned by a MidiTimeAxisView and reused for any
  * step editing in the MidiTrack for which the MidiTimeAxisView is a view.
  */
 

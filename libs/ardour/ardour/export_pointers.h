@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_export_pointers_h__
-#define __ardour_export_pointers_h__
+#pragma once
 
 #include <memory>
 
@@ -63,4 +62,3 @@ typedef std::shared_ptr<AudioGrapher::BroadcastInfo> BroadcastInfoPtr;
 
 } // namespace ARDOUR
 
-#endif // __ardour_export_pointers_h__

@@ -65,9 +65,9 @@
 #include "gtkdebug.h"
 #include "gtkalias.h"
 #include "gtkmenu.h"
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 
-#include "gdk/gdkprivate.h" /* for GDK_WINDOW_DESTROYED */
+#include "ydk/gdkprivate.h" /* for GDK_WINDOW_DESTROYED */
 
 #ifdef G_OS_WIN32
 
@@ -1427,6 +1427,11 @@ rewrite_event_for_grabs (GdkEvent *event)
 	return NULL;
       break;
 
+    case GDK_TOUCH_BEGIN:
+    case GDK_TOUCH_END:
+    case GDK_TOUCH_UPDATE:
+      return NULL;
+
     default:
       return NULL;
     }
@@ -1639,6 +1644,12 @@ gtk_main_do_event (GdkEvent *event)
     case GDK_PROXIMITY_IN:
     case GDK_PROXIMITY_OUT:
       gtk_propagate_event (grab_widget, event);
+      break;
+
+    case GDK_TOUCH_BEGIN:
+    case GDK_TOUCH_UPDATE:
+    case GDK_TOUCH_END:
+      gtk_propagate_event (event_widget, event);
       break;
       
     case GDK_ENTER_NOTIFY:

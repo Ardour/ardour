@@ -26,7 +26,7 @@
 #include "gdkspawn.h"
 
 #include <glib.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 #include "gdkalias.h"
   
 typedef struct {

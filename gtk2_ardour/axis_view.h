@@ -21,19 +21,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_axis_view_h__
-#define __ardour_gtk_axis_view_h__
+#pragma once
 
 #include <list>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
-#include <gdkmm/color.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
+#include <ydkmm/color.h>
 
 #include "pbd/xml++.h"
 #include "pbd/signals.h"
 
+#include "ardour/automation_control.h"
 #include "ardour/session_handle.h"
 
 #include "gui_object.h"
@@ -134,7 +134,6 @@ protected:
 	Gtk::Label inactive_label;
 	Gtk::Table inactive_table;
 
-	mutable boost::unordered_map<std::string, std::string> property_hashtable;
+	mutable std::unordered_map<std::string, std::string> property_hashtable;
 }; /* class AxisView */
 
-#endif /* __ardour_gtk_axis_view_h__ */

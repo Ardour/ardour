@@ -55,15 +55,15 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Temporal;
 
-PBD::Signal1<void,Location*> Location::name_changed;
-PBD::Signal1<void,Location*> Location::end_changed;
-PBD::Signal1<void,Location*> Location::start_changed;
-PBD::Signal1<void,Location*> Location::flags_changed;
-PBD::Signal1<void,Location*> Location::lock_changed;
-PBD::Signal1<void,Location*> Location::cue_change;
-PBD::Signal1<void,Location*> Location::scene_changed;
-PBD::Signal1<void,Location*> Location::time_domain_changed;
-PBD::Signal1<void,Location*> Location::changed;
+PBD::Signal<void(Location*)> Location::name_changed;
+PBD::Signal<void(Location*)> Location::end_changed;
+PBD::Signal<void(Location*)> Location::start_changed;
+PBD::Signal<void(Location*)> Location::flags_changed;
+PBD::Signal<void(Location*)> Location::lock_changed;
+PBD::Signal<void(Location*)> Location::cue_change;
+PBD::Signal<void(Location*)> Location::scene_changed;
+PBD::Signal<void(Location*)> Location::time_domain_changed;
+PBD::Signal<void(Location*)> Location::changed;
 
 Location::Location (Session& s)
 	: SessionHandleRef (s)
@@ -801,6 +801,11 @@ Location::set_scene_change (std::shared_ptr<SceneChange>  sc)
 {
 	if (_scene_change != sc) {
 		_scene_change = sc;
+		if (_scene_change) {
+			_flags = Flags (_flags | IsScene);
+		} else {
+			_flags = Flags (_flags & ~IsScene);
+		}
 		_session.set_dirty ();
 		emit_signal (Scene); /* EMIT SIGNAL */
 	}
@@ -1089,13 +1094,11 @@ Locations::clear_ranges ()
 			tmp = i;
 			++tmp;
 
-			/* We do not remove these ranges as part of this
+			/* We do not remove the session ranges as part of this
 			 * operation
 			 */
 
-			if ((*i)->is_auto_punch() ||
-			    (*i)->is_auto_loop() ||
-			    (*i)->is_session_range()) {
+			if ((*i)->is_session_range()) {
 				i = tmp;
 				continue;
 			}
@@ -1414,7 +1417,7 @@ struct LocationStartLaterComparison
 };
 
 timepos_t
-Locations::first_mark_before (timepos_t const & pos, bool include_special_ranges)
+Locations::first_mark_before_flagged (timepos_t const & pos, bool include_special_ranges, Location::Flags whitelist, Location::Flags blacklist, Location::Flags equalist, Location** retval)
 {
 	vector<LocationPair> locs;
 	{
@@ -1433,15 +1436,33 @@ Locations::first_mark_before (timepos_t const & pos, bool include_special_ranges
 
 	/* locs is sorted in ascending order */
 
-	for (vector<LocationPair>::iterator i = locs.begin(); i != locs.end(); ++i) {
-		if ((*i).second->is_hidden()) {
+	for (auto & loc : locs) {
+		if (loc.second->is_hidden()) {
 			continue;
 		}
-		if (!include_special_ranges && ((*i).second->is_auto_loop() || (*i).second->is_auto_punch())) {
+		if (!include_special_ranges && (loc.second->is_auto_loop() || loc.second->is_auto_punch())) {
 			continue;
 		}
-		if ((*i).first < pos) {
-			return (*i).first;
+		if (whitelist != Location::Flags (0)) {
+			if (!(loc.second->flags() & whitelist)) {
+				continue;
+			}
+		}
+		if (blacklist != Location::Flags (0)) {
+			if (loc.second->flags() & blacklist) {
+				continue;
+			}
+		}
+		if (equalist != Location::Flags (0)) {
+			if (!(loc.second->flags() == equalist)) {
+				continue;
+			}
+		}
+		if (loc.first < pos) {
+			if (retval) {
+				*retval = loc.second;
+			}
+			return loc.first;
 		}
 	}
 
@@ -1449,7 +1470,7 @@ Locations::first_mark_before (timepos_t const & pos, bool include_special_ranges
 }
 
 Location*
-Locations::mark_at (timepos_t const & pos, timecnt_t const & slop) const
+Locations::mark_at (timepos_t const & pos, timecnt_t const & slop, Location::Flags flags) const
 {
 	Location* closest = 0;
 	timecnt_t mindelta = timecnt_t::max (pos.time_domain());
@@ -1462,7 +1483,7 @@ Locations::mark_at (timepos_t const & pos, timecnt_t const & slop) const
 	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 
-		if ((*i)->is_mark()) {
+		if ((*i)->is_mark() && (!flags || ((*i)->flags() == flags))) {
 			if (pos > (*i)->start()) {
 				delta = (*i)->start().distance (pos);
 			} else {
@@ -1487,7 +1508,7 @@ Locations::mark_at (timepos_t const & pos, timecnt_t const & slop) const
 }
 
 timepos_t
-Locations::first_mark_after (timepos_t const & pos, bool include_special_ranges)
+Locations::first_mark_after_flagged (timepos_t const & pos, bool include_special_ranges, Location::Flags whitelist, Location::Flags blacklist, Location::Flags equalist, Location** retval)
 {
 	vector<LocationPair> locs;
 
@@ -1507,15 +1528,33 @@ Locations::first_mark_after (timepos_t const & pos, bool include_special_ranges)
 
 	/* locs is sorted in reverse order */
 
-	for (vector<LocationPair>::iterator i = locs.begin(); i != locs.end(); ++i) {
-		if ((*i).second->is_hidden()) {
+	for (auto & loc : locs) {
+		if (loc.second->is_hidden()) {
 			continue;
 		}
-		if (!include_special_ranges && ((*i).second->is_auto_loop() || (*i).second->is_auto_punch())) {
+		if (!include_special_ranges && (loc.second->is_auto_loop() || loc.second->is_auto_punch())) {
 			continue;
 		}
-		if ((*i).first > pos) {
-			return (*i).first;
+		if (whitelist != Location::Flags (0)) {
+			if (!(loc.second->flags() & whitelist)) {
+				continue;
+			}
+		}
+		if (blacklist != Location::Flags (0)) {
+			if (loc.second->flags() & blacklist) {
+				continue;
+			}
+		}
+		if (equalist != Location::Flags (0)) {
+			if (!(loc.second->flags() == equalist)) {
+				continue;
+			}
+		}
+		if (loc.first > pos) {
+			if (retval) {
+				*retval = loc.second;
+			}
+			return loc.first;
 		}
 	}
 
@@ -2008,6 +2047,60 @@ Locations::clear_cue_markers (samplepos_t start, samplepos_t end)
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
 
 			if ((*i)->is_cue_marker()) {
+				Location* l (*i);
+
+				if (l->start().time_domain() == AudioTime) {
+					samplepos_t when = l->start().samples();
+					if (when >= start && when < end) {
+						i = locations.erase (i);
+						r.push_back (l);
+						continue;
+					}
+				} else {
+					if (!have_beats) {
+						sb = tmap->quarters_at (timepos_t (start));
+						eb = tmap->quarters_at (timepos_t (end));
+						have_beats = true;
+					}
+
+					Temporal::Beats when = l->start().beats();
+					if (when >= sb && when < eb) {
+						r.push_back (l);
+						i = locations.erase (i);
+						continue;
+					}
+				}
+				removed_at_least_one = true;
+			}
+
+			++i;
+		}
+	} /* end lock scope */
+
+	for (auto & l : r) {
+		removed (l); /* EMIT SIGNAL */
+		delete l;
+	}
+
+	return removed_at_least_one;
+}
+
+bool
+Locations::clear_scene_markers (samplepos_t start, samplepos_t end)
+{
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	Temporal::Beats sb;
+	Temporal::Beats eb;
+	bool have_beats = false;
+	vector<Location*> r;
+	bool removed_at_least_one = false;
+
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+
+		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
+
+			if ((*i)->is_scene()) {
 				Location* l (*i);
 
 				if (l->start().time_domain() == AudioTime) {

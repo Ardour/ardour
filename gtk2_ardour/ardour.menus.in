@@ -186,7 +186,7 @@
       <menuitem action='ToggleAutoPlay'/>
       <menuitem action='ToggleAutoReturn'/>
       <menuitem action='ToggleClick'/>
-      <menuitem action='toggle-follow-playhead'/>
+      <menuitem action='EditorEditing/toggle-follow-playhead'/>
       <menuitem action='toggle-stationary-playhead'/>
       <menuitem action='ToggleFollowEdits'/>
       <menuitem action='ToggleExternalSync'/>
@@ -195,15 +195,15 @@
     </menu>
 
     <menu name='Edit' action='Edit'>
-      <menuitem action='undo'/>
-      <menuitem action='redo'/>
+      <menuitem action='EditorEditing/undo'/>
+      <menuitem action='EditorEditing/redo'/>
       <separator/>
       <menuitem action='undo-last-selection-op'/>
       <menuitem action='redo-last-selection-op'/>
       <separator/>
-      <menuitem action='editor-cut'/>
-      <menuitem action='editor-copy'/>
-      <menuitem action='editor-paste'/>
+      <menuitem action='EditorEditing/editor-cut'/>
+      <menuitem action='EditorEditing/editor-copy'/>
+      <menuitem action='EditorEditing/editor-paste'/>
       <separator/>
       <menuitem action='cut-paste-section'/>
       <menuitem action='copy-paste-section'/>
@@ -241,7 +241,7 @@
         <menuitem action='select-prev-route'/>
       </menu>
       <separator/>
-      <menuitem action='editor-delete'/>
+      <menuitem action='EditorEditing/editor-delete'/>
       <menuitem action='editor-crop'/>
       <menuitem action='split-region'/>
       <menu action="SeparateMenu">
@@ -411,14 +411,22 @@
       <menu action='RegionMenuPosition'>
         <menuitem action='naturalize-region'/>
         <menuitem action='snap-regions-to-grid'/>
+        <separator/>
+        <menuitem action='align-regions-start'/>
+        <menuitem action='align-regions-end'/>
+        <menuitem action='align-regions-sync'/>
+        <menuitem action='align-regions-start-relative'/>
+        <separator/>
         <menuitem action='toggle-region-lock'/>
         <menuitem action='toggle-region-video-lock'/>
         <menuitem action='set-region-sync-position'/>
         <menuitem action='remove-region-sync'/>
+        <separator/>
         <menuitem action='nudge-forward'/>
         <menuitem action='nudge-backward'/>
         <menuitem action='nudge-forward-by-capture-offset'/>
         <menuitem action='nudge-backward-by-capture-offset'/>
+        <separator/>
         <menuitem action='sequence-regions'/>
       </menu>
       <menu action='RegionMenuMarkers'>
@@ -473,6 +481,7 @@
               <menuitem action='lua-manage-tracks'/>
       </menu>
 #endif
+      <menuitem action='find-and-display-stripable'/>
       <menuitem action='duplicate-routes'/>
       <separator/>
       <menuitem action='track-record-enable-toggle'/>
@@ -548,11 +557,8 @@
         <menuitem action="toggle-meter-ruler"/>
         <menuitem action="toggle-tempo-ruler"/>
         <menuitem action="toggle-range-ruler"/>
-        <menuitem action="toggle-loop-punch-ruler"/>
-        <menuitem action="toggle-cd-marker-ruler"/>
         <menuitem action="toggle-arrangement-ruler"/>
         <menuitem action="toggle-marker-ruler"/>
-        <menuitem action="toggle-cue-marker-ruler"/>
         <separator/>
         <menuitem action="toggle-video-ruler"/>
       </menu>
@@ -570,13 +576,13 @@
         <menuitem action='shrink-tracks'/>
       </menu>
       <menu name='ZoomFocus' action='ZoomFocus'>
-        <menuitem action='zoom-focus-left'/>
-        <menuitem action='zoom-focus-right'/>
-        <menuitem action='zoom-focus-center'/>
-        <menuitem action='zoom-focus-playhead'/>
-        <menuitem action='zoom-focus-mouse'/>
-        <menuitem action='zoom-focus-edit'/>
-        <menuitem action='cycle-zoom-focus'/>
+        <menuitem action='EditorZoom/zoom-focus-left'/>
+        <menuitem action='EditorZoom/zoom-focus-right'/>
+        <menuitem action='EditorZoom/zoom-focus-center'/>
+        <menuitem action='EditorZoom/zoom-focus-playhead'/>
+        <menuitem action='EditorZoom/zoom-focus-mouse'/>
+        <menuitem action='EditorZoom/zoom-focus-edit'/>
+        <menuitem action='EditorZoom/cycle-zoom-focus'/>
       </menu>
       <menu action="ScrollMenu">
         <menuitem action='scroll-tracks-down'/>
@@ -634,6 +640,14 @@
       <menuitem action='show-marker-lines'/>
 
       <separator/>
+      <menuitem action='ToggleTriggerList'/>
+      <menuitem action='ToggleTriggerProps'/>
+
+      <separator/>
+      <menuitem action='ToggleMixerStrip'/>
+#ifdef MIXBUS
+      <menuitem action='ToggleMixerProps'/>
+#endif
       <menuitem action='ToggleMixerList'/>
 #ifdef MIXBUS
       <menuitem action='ToggleMixbusPane'/>
@@ -682,8 +696,9 @@
         <menuitem action='attach-preferences'/>
         <menuitem action='detach-preferences'/>
       </menu>
-      <!-- Common Ardour Widows (all toggle) !-->
+      <!-- Common Ardour Windows (all toggle) !-->
       <menuitem action='toggle-meterbridge'/>
+      <menuitem action='toggle-rtawindow'/>
       <menuitem action='toggle-locations'/>
       <menuitem action='toggle-big-clock'/>
       <menuitem action='toggle-big-transport'/>
@@ -692,6 +707,8 @@
 
       <separator/><!-- Video Monitor !-->
       <menuitem action='ToggleJadeo'/>
+
+      <separator/>
 
       <separator/><!-- Connection dialogs !-->
       <menuitem action='toggle-audio-connection-manager'/>
@@ -710,10 +727,6 @@
       <menuitem action='toggle-plugin-manager'/>
 #ifndef MIXBUS
       <menuitem action='toggle-io-plugins'/>
-#endif
-#ifdef MIXBUS
-      <separator/>
-      <menuitem action='license-manager'/>
 #endif
 
       <separator/><!-- Misc Configuration !-->
@@ -801,10 +814,7 @@
     <menuitem action="toggle-meter-ruler"/>
     <menuitem action="toggle-tempo-ruler"/>
     <menuitem action="toggle-range-ruler"/>
-    <menuitem action="toggle-loop-punch-ruler"/>
-    <menuitem action="toggle-cd-marker-ruler"/>
     <menuitem action="toggle-marker-ruler"/>
-    <menuitem action="toggle-cue-marker-ruler"/>
     <separator/>
     <menuitem action="toggle-video-ruler"/>
   </popup>
@@ -869,6 +879,22 @@
     <menuitem action='removeUnusedRegions'/>
   </popup>
 
+<popup name='MarkerShowMenu' accelerators='true'>
+   <menuitem action='show-all-markers'/>
+   <menuitem action='show-cd-markers'/>
+   <menuitem action='show-cue-markers'/>
+   <menuitem action='show-scene-markers'/>
+   <menuitem action='show-location-markers'/>
+</popup>
+
+<popup name='RangeShowMenu' accelerators='true'>
+   <menuitem action='show-all-ranges'/>
+   <menuitem action='show-session-range'/>
+   <menuitem action='show-punch-range'/>
+   <menuitem action='show-loop-range'/>
+   <menuitem action='show-other-ranges'/>
+</popup>
+
   <popup name='PopupRegionMenu' action='PopupRegionMenu' accelerators='true'>
     <menuitem action='play-selected-regions'/>
     <menuitem action='tag-selected-regions'/>
@@ -879,6 +905,7 @@
     <menuitem action='loop-region'/>
     <menuitem action='rename-region'/>
     <menuitem action='show-region-properties'/>
+    <menuitem action='edit-region-pianoroll-window'/>
     <menu action='RegionMenuEdit'>
       <menuitem action='combine-regions'/>
       <menuitem action='uncombine-regions'/>

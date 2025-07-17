@@ -18,14 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_speaker_dialog_h__
-#define __ardour_gtk_speaker_dialog_h__
+#pragma once
 
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/box.h>
-#include <gtkmm/adjustment.h>
-#include <gtkmm/aspectframe.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/box.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/aspectframe.h>
 
 #include "ardour/speakers.h"
 
@@ -83,4 +82,3 @@ private:
 	void speaker_position_changed ();
 };
 
-#endif /* __ardour_gtk_speaker_dialog_h__ */

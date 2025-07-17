@@ -7,8 +7,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/colorselection.h>
-#include <gtkmm/private/colorselection_p.h>
+#include <ytkmm/colorselection.h>
+#include <ytkmm/private/colorselection_p.h>
 
 
 // -*- c++ -*-
@@ -31,7 +31,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 namespace

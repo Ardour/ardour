@@ -20,7 +20,7 @@
 #ifndef _WIDGETS_FOCUS_ENTRY_H_
 #define _WIDGETS_FOCUS_ENTRY_H_
 
-#include <gtkmm/entry.h>
+#include <ytkmm/entry.h>
 
 #include "widgets/visibility.h"
 

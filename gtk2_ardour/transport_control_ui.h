@@ -19,7 +19,7 @@
 #ifndef _transport_control_ui_h_
 #define _transport_control_ui_h_
 
-#include <gtkmm/box.h>
+#include <ytkmm/box.h>
 
 #include "pbd/signals.h"
 #include "ardour/session_handle.h"
@@ -40,7 +40,17 @@ public:
 	void map_actions ();
 	void set_session (ARDOUR::Session *s);
 
-	ArdourWidgets::ArdourButton& size_button () { return stop_button; }
+	ArdourWidgets::ArdourButton& size_button () { return _stop_button; }
+
+	ArdourWidgets::ArdourButton& roll_button () { return _roll_button; }
+	ArdourWidgets::ArdourButton& stop_button () { return _stop_button; }
+	ArdourWidgets::ArdourButton& goto_start_button () { return _goto_start_button; }
+	ArdourWidgets::ArdourButton& goto_end_button () { return _goto_end_button; }
+	ArdourWidgets::ArdourButton& auto_loop_button () { return _auto_loop_button; }
+	ArdourWidgets::ArdourButton& play_selection_button () { return _play_selection_button; }
+	ArdourWidgets::ArdourButton& rec_button () { return _rec_button; }
+	ArdourWidgets::ArdourButton& midi_panic_button () { return _midi_panic_button; }
+	ArdourWidgets::ArdourButton& click_button () { return _click_button; }
 
 protected:
 
@@ -54,15 +64,15 @@ protected:
 
 	bool click_button_scroll (GdkEventScroll* ev);
 
-	ArdourWidgets::ArdourButton roll_button;
-	ArdourWidgets::ArdourButton stop_button;
-	ArdourWidgets::ArdourButton goto_start_button;
-	ArdourWidgets::ArdourButton goto_end_button;
-	ArdourWidgets::ArdourButton auto_loop_button;
-	ArdourWidgets::ArdourButton play_selection_button;
-	ArdourWidgets::ArdourButton rec_button;
-	ArdourWidgets::ArdourButton midi_panic_button;
-	ArdourWidgets::ArdourButton click_button;
+	ArdourWidgets::ArdourButton _roll_button;
+	ArdourWidgets::ArdourButton _stop_button;
+	ArdourWidgets::ArdourButton _goto_start_button;
+	ArdourWidgets::ArdourButton _goto_end_button;
+	ArdourWidgets::ArdourButton _auto_loop_button;
+	ArdourWidgets::ArdourButton _play_selection_button;
+	ArdourWidgets::ArdourButton _rec_button;
+	ArdourWidgets::ArdourButton _midi_panic_button;
+	ArdourWidgets::ArdourButton _click_button;
 
 private:
 	PBD::ScopedConnection config_connection;

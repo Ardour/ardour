@@ -47,7 +47,7 @@
 
 #include "config.h"
 
-#include <atk/atk.h>
+#include <ztk/atk.h>
 
 #include "gtkassistant.h"
 

@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/textview.h>
-#include <gtkmm/scrolledwindow.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/scrolledwindow.h>
 
 #include "ardour_dialog.h"
 

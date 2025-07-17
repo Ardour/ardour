@@ -16,10 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/filechooserdialog.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
@@ -87,7 +87,7 @@ Loopster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 		return;
 	}
 
-	context->set_identity_matrix ();
+	context->save ();
 	context->translate (self.x0, self.y0);
 
 	float size = _rect.height ();
@@ -110,7 +110,7 @@ Loopster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 	context->stroke ();
 
 	context->set_line_width (1);
-	context->set_identity_matrix ();
+	context->restore ();
 }
 
 TriggerMaster::TriggerMaster (Item* parent)
@@ -129,7 +129,7 @@ TriggerMaster::TriggerMaster (Item* parent)
 	set_tooltip (_("Click to stop all clips in this track\nRight-click to select properties for all clips in this track"));
 
 #if 0 /* XXX trigger changes */
-	_triggerbox->PropertyChanged.connect (_trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerMaster::prop_change, this, _1), gui_context());
+	_triggerbox->PropertyChanged.connect (_trigger_prop_connection, MISSING_INVALIDATOR, std::bind (&TriggerMaster::prop_change, this, _1), gui_context());
 	PropertyChange changed;
 	changed.add (ARDOUR::Properties::name);
 	changed.add (ARDOUR::Properties::running);
@@ -137,7 +137,7 @@ TriggerMaster::TriggerMaster (Item* parent)
 #endif
 
 #if 0 /* XXX route changes */
-	dynamic_cast<Stripable*> (_triggerbox->owner())->presentation_info().Change.connect (_owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerMaster::owner_prop_change, this, _1), gui_context());
+	dynamic_cast<Stripable*> (_triggerbox->owner())->presentation_info().Change.connect (_owner_prop_connection, MISSING_INVALIDATOR, std::bind (&TriggerMaster::owner_prop_change, this, _1), gui_context());
 #endif
 
 	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &TriggerMaster::maybe_update));
@@ -267,6 +267,9 @@ TriggerMaster::event_handler (GdkEvent* ev)
 				} else {
 					_triggerbox->stop_all_quantized ();
 				}
+				break;
+			} else if (Gtkmm2ext::Keyboard::is_context_menu_event (&ev->button)) {
+				context_menu (&ev->button);
 			}
 			break;
 		case GDK_ENTER_NOTIFY:
@@ -281,11 +284,7 @@ TriggerMaster::event_handler (GdkEvent* ev)
 			}
 			redraw ();
 			break;
-		case GDK_BUTTON_RELEASE:
-			switch (ev->button.button) {
-				case 3:
-					context_menu ();
-			}
+
 		default:
 			break;
 	}
@@ -294,7 +293,7 @@ TriggerMaster::event_handler (GdkEvent* ev)
 }
 
 void
-TriggerMaster::context_menu ()
+TriggerMaster::context_menu (GdkEventButton* ev)
 {
 	using namespace Gtk;
 	using namespace Gtk::Menu_Helpers;
@@ -358,7 +357,7 @@ TriggerMaster::context_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Clear All..."), sigc::mem_fun (*this, &TriggerMaster::clear_all_triggers)));
 
-	_context_menu->popup (1, gtk_get_current_event_time ());
+	_context_menu->popup (ev->button, gtk_get_current_event_time ());
 }
 
 void
@@ -576,36 +575,32 @@ bool
 CueMaster::event_handler (GdkEvent* ev)
 {
 	switch (ev->type) {
-		case GDK_BUTTON_PRESS:
-			if (ev->button.button == 1) {
-				if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
-					_session->trigger_stop_all (true);  //stop 'now'
-				} else {
-					_session->trigger_stop_all (false);  //stop quantized (bar end)
-				}
-				return true;
+	case GDK_BUTTON_PRESS:
+		if (ev->button.button == 1) {
+			if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
+				_session->trigger_stop_all (true);  //stop 'now'
+			} else {
+				_session->trigger_stop_all (false);  //stop quantized (bar end)
 			}
-			break;
-		case GDK_BUTTON_RELEASE:
-			switch (ev->button.button) {
-				case 3:
-					context_menu ();
-					return true;
-			}
-			break;
-		case GDK_ENTER_NOTIFY:
-			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				stop_shape->set_fill_color (UIConfiguration::instance ().color ("neutral:foreground"));
-				set_fill_color (HSV (fill_color ()).lighter (0.25).color ());
-			}
-			break;
-		case GDK_LEAVE_NOTIFY:
-			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				set_default_colors ();
-			}
-			break;
-		default:
-			break;
+			return true;
+		} else if (Gtkmm2ext::Keyboard::is_context_menu_event (&ev->button)) {
+			context_menu (&ev->button);
+		}
+		break;
+	case GDK_ENTER_NOTIFY:
+		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			stop_shape->set_fill_color (UIConfiguration::instance ().color ("neutral:foreground"));
+			set_fill_color (HSV (fill_color ()).lighter (0.25).color ());
+		}
+		break;
+	case GDK_LEAVE_NOTIFY:
+		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			set_default_colors ();
+		}
+		break;
+
+	default:
+		break;
 	}
 
 	return false;
@@ -652,7 +647,7 @@ CueMaster::ui_parameter_changed (std::string const& p)
 }
 
 void
-CueMaster::context_menu ()
+CueMaster::context_menu (GdkEventButton* ev)
 {
 	using namespace Gtk;
 	using namespace Gtk::Menu_Helpers;
@@ -721,7 +716,7 @@ CueMaster::context_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Clear All..."), sigc::mem_fun (*this, &CueMaster::clear_all_triggers)));
 
-	_context_menu->popup (3, gtk_get_current_event_time ());
+	_context_menu->popup (ev->button, gtk_get_current_event_time ());
 }
 
 void

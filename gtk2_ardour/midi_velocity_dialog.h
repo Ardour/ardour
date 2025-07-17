@@ -22,8 +22,8 @@
 
 #include <stdint.h>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/spinbutton.h>
 
 #include "ardour_dialog.h"
 

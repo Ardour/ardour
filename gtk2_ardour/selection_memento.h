@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_selection_memento_h__
-#define __ardour_gtk_selection_memento_h__
+#pragma once
 
 #include "pbd/statefuldestructible.h"
 
@@ -30,4 +29,3 @@ public:
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 };
-#endif /* __ardour_gtk_selection_memento_h__ */

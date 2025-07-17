@@ -22,7 +22,7 @@
 
 #include "config.h"
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 #include "gtkshow.h"
 

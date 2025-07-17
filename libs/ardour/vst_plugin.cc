@@ -191,10 +191,9 @@ VSTPlugin::set_parameter (uint32_t which, float newval, sampleoffset_t when)
 		if (0 != rv) {
 			_eff_bypassed = (value == 1);
 		} else {
-			cerr << "effSetBypass failed rv=" << rv << endl; // XXX DEBUG
-#ifdef ALLOW_VST_BYPASS_TO_FAIL // yet unused, see also vst_plugin.cc
-			// emit signal.. hard un/bypass from here?!
-#endif
+			/* TODO: hard-bypass effect, emit signal, and ensure that the
+			 * plugin is reactivated on the next call to this function..
+			 */
 		}
 		return;
 	}
@@ -461,7 +460,8 @@ VSTPlugin::load_plugin_preset (PresetRecord r)
 	sscanf (r.uri.c_str(), "VST:%d:%d", &id, &index);
 #endif
 	_state->want_program = index;
-	if (!has_editor () || 0 == plugin_insert ()->window_proxy ()) {
+	PluginInsert* pi = dynamic_cast<PluginInsert*> (plugin_insert ());
+	if (!has_editor () || (!pi || 0 == pi->window_proxy ())) {
 		vststate_maybe_set_program (_state);
 		_state->want_chunk = 0;
 		_state->want_program = -1;
@@ -509,7 +509,8 @@ VSTPlugin::load_user_preset (PresetRecord r)
 					_state->wanted_chunk = raw_data;
 					_state->wanted_chunk_size = size;
 					_state->want_chunk = 1;
-					if (!has_editor () || (plugin_insert () && 0 == plugin_insert ()->window_proxy ())) {
+					PluginInsert* pi = dynamic_cast<PluginInsert*> (plugin_insert ());
+					if (!has_editor () || (!pi || 0 == pi->window_proxy ())) {
 						vststate_maybe_set_program (_state);
 						_state->want_chunk = 0;
 						_state->want_program = -1;
@@ -724,7 +725,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		index = in_map.get(DataType::AUDIO, in_index++, &valid);
 		ins[i] = (valid)
 					? bufs.get_audio(index).data(offset)
-					: silent_bufs.get_audio(0).data(offset);
+					: silent_bufs.get_audio(0).data(0);
 	}
 
 	uint32_t out_index = 0;
@@ -734,7 +735,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		index = out_map.get(DataType::AUDIO, out_index++, &valid);
 		outs[i] = (valid)
 			? bufs.get_audio(index).data(offset)
-			: scratch_bufs.get_audio(0).data(offset);
+			: scratch_bufs.get_audio(0).data(0);
 	}
 
 	if (bufs.count().n_midi() > 0) {

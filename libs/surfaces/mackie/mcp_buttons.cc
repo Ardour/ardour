@@ -1144,6 +1144,7 @@ MackieControlProtocol::latch_press (MACKIE_NAMESPACE::Button&)
 MACKIE_NAMESPACE::LedState
 MackieControlProtocol::latch_release (MACKIE_NAMESPACE::Button&)
 {
+	set_automation_state (ARDOUR::Latch);
 	return none;
 }
 MACKIE_NAMESPACE::LedState

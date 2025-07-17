@@ -16,10 +16,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_note_h__
-#define __gtk_ardour_note_h__
+#pragma once
 
 #include <iostream>
+
+#include "canvas/rectangle.h"
+
 #include "note_base.h"
 #include "midi_util.h"
 
@@ -33,7 +35,7 @@ class Note : public NoteBase
 public:
 	typedef Evoral::Note<Temporal::Beats> NoteType;
 
-	Note (MidiRegionView&                   region,
+	Note (MidiView&                   region,
 	      ArdourCanvas::Item*               parent,
 	      const std::shared_ptr<NoteType> note = std::shared_ptr<NoteType>(),
 	      bool with_events = true);
@@ -71,4 +73,3 @@ private:
 	ArdourCanvas::Note* _visual_note;
 };
 
-#endif /* __gtk_ardour_note_h__ */

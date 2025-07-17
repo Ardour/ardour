@@ -21,11 +21,11 @@
 #define _WIDGETS_PROMPTER_H_
 
 #include <string>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/label.h>
-#include <gtkmm/dialog.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/label.h>
+#include <ytkmm/dialog.h>
 #include <sigc++/sigc++.h>
 
 #include "widgets/visibility.h"

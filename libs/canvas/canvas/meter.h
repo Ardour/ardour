@@ -20,8 +20,7 @@
 #define __push2_meter_h__
 
 #include <map>
-#include <boost/tuple/tuple.hpp>
-#include <boost/tuple/tuple_comparison.hpp>
+#include <tuple>
 
 #include <cairomm/pattern.h>
 #include <cairomm/region.h>
@@ -156,9 +155,9 @@ class Meter : public Item {
 				|| (dim == rhs.dim && stp == rhs.stp && cols < rhs.cols)
 				|| (dim == rhs.dim && stp == rhs.stp && cols == rhs.cols && style < rhs.style);
 		}
-		boost::tuple<int, int> dim;
-		boost::tuple<float, float, float, float> stp;
-		boost::tuple<int, int, int, int, int, int, int, int, int, int> cols;
+		std::tuple<int, int> dim;
+		std::tuple<float, float, float, float> stp;
+		std::tuple<int, int, int, int, int, int, int, int, int, int> cols;
 		int style;
 	};
 	typedef std::map<Pattern10MapKey, Cairo::RefPtr<Cairo::Pattern> > Pattern10Map;
@@ -172,8 +171,8 @@ class Meter : public Item {
 		inline bool operator<(const PatternBgMapKey& rhs) const {
 			return (dim < rhs.dim) || (dim == rhs.dim && cols < rhs.cols) || (dim == rhs.dim && cols == rhs.cols && (sh && !rhs.sh));
 		}
-		boost::tuple<int, int> dim;
-		boost::tuple<int, int> cols;
+		std::tuple<int, int> dim;
+		std::tuple<int, int> cols;
 		bool sh;
 	};
 	typedef std::map<PatternBgMapKey, Cairo::RefPtr<Cairo::Pattern> > PatternBgMap;

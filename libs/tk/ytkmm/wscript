@@ -187,22 +187,18 @@ def options(opt):
     pass
 
 def configure(conf):
-    if conf.is_defined('YTK'):
-        autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2', mandatory=True)
-        autowaf.check_pkg(conf, 'cairomm-1.0', uselib_store='CAIROMM', atleast_version='1.8.4', mandatory=True)
-        autowaf.check_pkg(conf, 'pangomm-1.4', uselib_store='PANGOMM', atleast_version='1.4', mandatory=True)
-        autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0', mandatory=True)
-        autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0', mandatory=True)
+    autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2', mandatory=True)
+    autowaf.check_pkg(conf, 'cairomm-1.0', uselib_store='CAIROMM', atleast_version='1.8.4', mandatory=True)
+    autowaf.check_pkg(conf, 'pangomm-1.4', uselib_store='PANGOMM', atleast_version='1.4', mandatory=True)
+    autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0', mandatory=True)
+    autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0', mandatory=True)
 
 def build(bld):
-    if not bld.is_defined('YTK'):
-        return
-
     obj = bld.shlib(features = 'cxx cxxshlib', source=libytkmm_sources)
     obj.cxxflags        = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
     obj.cflags          = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
-    obj.export_includes = ['ytkmm']
-    obj.includes        = ['.', 'ytkmm']
+    obj.export_includes = ['.']
+    obj.includes        = ['.']
     obj.name            = 'libytkmm'
     obj.target          = 'ytkmm'
     obj.use             = ['libztk', 'libytk', 'libztkmm', 'libydkmm' ]

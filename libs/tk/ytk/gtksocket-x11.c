@@ -28,7 +28,7 @@
 #include "config.h"
 #include <string.h>
 
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 #include "gtkmain.h"
 #include "gtkmarshalers.h"
 #include "gtkwindow.h"
@@ -38,7 +38,7 @@
 #include "gtksocketprivate.h"
 #include "gtkdnd.h"
 
-#include "gdk/gdkx.h"
+#include "ydk/gdkx.h"
 
 #ifdef HAVE_XFIXES
 #include <X11/extensions/Xfixes.h>

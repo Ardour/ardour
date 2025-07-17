@@ -17,13 +17,13 @@
  */
 
 /* include order matter due to apple defines */
-#include <gtkmm/window.h>
+#include <ytkmm/window.h>
 
 #include "gtkmm2ext/cairo_canvas.h"
 #include "gtkmm2ext/nsglview.h"
 #include "gtkmm2ext/rgb_macros.h"
 
-#include <gdk/gdkquartz.h>
+#include <ydk/gdkquartz.h>
 
 //#define NSVIEW_PROFILE
 //#define DEBUG_NSVIEW_EXPOSURE
@@ -394,6 +394,14 @@ Gtkmm2ext::nsglview_create (Gtkmm2ext::CairoCanvas* canvas, bool use_backing_sca
 	[gl_view setCairoCanvas:canvas];
 	[gl_view setHidden:YES];
 	return gl_view;
+}
+
+void
+Gtkmm2ext::nsglview_destroy (void* glv)
+{
+	ArdourCanvasOpenGLView* gl_view = (ArdourCanvasOpenGLView*) glv;
+	[gl_view removeFromSuperview];
+	[gl_view release];
 }
 
 void

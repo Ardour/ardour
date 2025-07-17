@@ -24,12 +24,12 @@
 #include <glibmm.h>
 #include <glibmm/refptr.h>
 
-#include <gdkmm/gc.h>
+#include <ydkmm/gc.h>
 
-#include <gtkmm/widget.h>
-#include <gtkmm/style.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/treepath.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/style.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/treepath.h>
 
 #include "pbd/stl_delete.h"
 
@@ -92,6 +92,7 @@ FFTGraph::setWindowSize_internal (int windowSize)
 	_windowSize = windowSize;
 	_dataSize = windowSize / 2;
 	if (_in != 0) {
+		Glib::Threads::Mutex::Lock lk (ARDOUR::fft_planner_lock);
 		fftwf_destroy_plan (_plan);
 		free (_in);
 		_in = 0;
@@ -143,6 +144,7 @@ FFTGraph::setWindowSize_internal (int windowSize)
 	for (unsigned int i = 0; i < _dataSize; i++) {
 		_logScale[i] = 0;
 	}
+	Glib::Threads::Mutex::Lock lk (ARDOUR::fft_planner_lock);
 	_plan = fftwf_plan_r2r_1d (_windowSize, _in, _out, FFTW_R2HC, FFTW_MEASURE);
 }
 

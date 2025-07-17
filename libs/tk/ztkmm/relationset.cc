@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/relationset.h>
-#include <atkmm/private/relationset_p.h>
+#include <ztkmm/relationset.h>
+#include <ztkmm/private/relationset_p.h>
 
 
 // -*- c++ -*-
@@ -27,8 +27,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atk/atkobject.h>
-#include <atk/atkrelationset.h>
+#include <ztk/atkobject.h>
+#include <ztk/atkrelationset.h>
 
 
 namespace

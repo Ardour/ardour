@@ -5,8 +5,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/cellview.h>
-#include <gtkmm/private/cellview_p.h>
+#include <ytkmm/cellview.h>
+#include <ytkmm/private/cellview_p.h>
 
 
 // -*- c++ -*-
@@ -31,9 +31,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/cellrenderertext.h>
-#include <gtkmm/cellrendererpixbuf.h>
-#include <gtk/gtk.h>
+#include <ytkmm/cellrenderertext.h>
+#include <ytkmm/cellrendererpixbuf.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

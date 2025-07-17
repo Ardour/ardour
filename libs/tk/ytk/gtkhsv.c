@@ -34,7 +34,7 @@
 #include <math.h>
 #include <string.h>
 
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 
 #include "gtkhsv.h"
 #include "gtkbindings.h"

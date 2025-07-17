@@ -1,4 +1,4 @@
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 #include "general-support.h"
 #include "widget-information.h"

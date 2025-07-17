@@ -16,13 +16,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_midi_scene_change_h__
-#define __libardour_midi_scene_change_h__
+#pragma once
 
 #include "evoral/PatchChange.h"
 
 #include "pbd/signals.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/scene_change.h"
 
 namespace ARDOUR
@@ -30,7 +30,7 @@ namespace ARDOUR
 
 class MidiPort;
 
-class MIDISceneChange : public SceneChange
+class LIBARDOUR_API MIDISceneChange : public SceneChange
 {
   public:
 	MIDISceneChange (int channel, int bank = -1, int program = -1);
@@ -63,4 +63,3 @@ class MIDISceneChange : public SceneChange
 } /* namespace */
 
 
-#endif /* __libardour_scene_change_h__ */

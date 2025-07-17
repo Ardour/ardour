@@ -25,8 +25,6 @@
 
 #include <string>
 
-#include "boost/shared_ptr.hpp"
-
 #include "pbd/signals.h"
 
 #include "ardour/libardour_visibility.h"
@@ -35,7 +33,7 @@ namespace ARDOUR {
 
 class Region;
 
-extern LIBARDOUR_API PBD::Signal2<void, std::string, void*> LibraryClipAdded;
+extern LIBARDOUR_API PBD::Signal<void(std::string, void*)> LibraryClipAdded;
 
 LIBARDOUR_API std::string clip_library_dir (bool create_if_missing = false);
 LIBARDOUR_API bool export_to_clip_library (std::shared_ptr<Region> r, void* src = NULL);

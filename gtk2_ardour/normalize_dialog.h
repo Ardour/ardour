@@ -21,6 +21,7 @@
 #include "progress_reporter.h"
 
 namespace Gtk {
+	class CheckButton;
 	class RadioButton;
 	class SpinButton;
 	class ProgressBar;

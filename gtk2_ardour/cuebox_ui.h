@@ -20,8 +20,9 @@
 #ifndef _gtk_ardour_cuebox_ui_h_
 #define _gtk_ardour_cuebox_ui_h_
 
-#include <gtkmm/window.h>
-#include <gtkmm/colorselection.h>
+#include <ytkmm/window.h>
+#include <ytkmm/colorselection.h>
+#include <ytkmm/menu.h>
 
 #include "pbd/properties.h"
 
@@ -65,8 +66,6 @@ private:
 	PBD::ScopedConnectionList _session_connections;
 
 	uint64_t _cue_idx;
-	double   _poly_size;
-	double   _poly_margin;
 	bool _grabbed;
 };
 
@@ -85,7 +84,7 @@ private:
 	bool text_event (GdkEvent*, uint64_t);
 	void build ();
 
-	void context_menu (uint64_t idx);
+	void context_menu (GdkEventButton*, uint64_t idx);
 	void get_slots (TriggerList &triggerlist, uint64_t idx);
 
 	void clear_all_triggers(uint64_t idx);
@@ -107,7 +106,12 @@ class CueBoxWidget : public FittedCanvasWidget, public ARDOUR::SessionHandlePtr
 public:
 	CueBoxWidget (float w, float h);
 
-	void set_session (ARDOUR::Session* s) {ui->set_session(s); SessionHandlePtr::set_session(s);}
+	void set_session (ARDOUR::Session* s) {
+		SessionHandlePtr::set_session(s);
+		if (s) {
+			ui->set_session(s);
+		}
+	}
 
 	void on_map ();
 	void on_unmap ();

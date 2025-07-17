@@ -27,8 +27,6 @@
 #include <string>
 #include <stdint.h>
 
-#include <boost/smart_ptr.hpp>
-
 #include "pbd/controllable.h"
 #include "pbd/signals.h"
 

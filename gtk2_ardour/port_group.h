@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef  __gtk_ardour_port_group_h__
-#define  __gtk_ardour_port_group_h__
+#pragma once
 
 #include <memory>
 #include <set>
@@ -28,15 +27,15 @@
 
 #include "pbd/signals.h"
 
-#include <gtkmm/widget.h>
-#include <gtkmm/checkbutton.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/checkbutton.h>
 
+#include "ardour/bundle.h"
 #include "ardour/data_type.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
 	class Session;
-	class Bundle;
 	class Processor;
 	class IO;
 }
@@ -68,10 +67,10 @@ public:
 	bool has_port (std::string const &) const;
 
 	/** The bundle list has changed in some way; a bundle has been added or removed, or the list cleared etc. */
-	PBD::Signal0<void> Changed;
+	PBD::Signal<void()> Changed;
 
 	/** An individual bundle on our list has changed in some way */
-	PBD::Signal1<void,ARDOUR::Bundle::Change> BundleChanged;
+	PBD::Signal<void(ARDOUR::Bundle::Change)> BundleChanged;
 
 	struct BundleRecord {
 	    std::shared_ptr<ARDOUR::Bundle> bundle;
@@ -133,10 +132,10 @@ public:
 	bool empty () const;
 
 	/** The group list has changed in some way; a group has been added or removed, or the list cleared etc. */
-	PBD::Signal0<void> Changed;
+	PBD::Signal<void()> Changed;
 
 	/** A bundle in one of our groups has changed */
-	PBD::Signal1<void,ARDOUR::Bundle::Change> BundleChanged;
+	PBD::Signal<void(ARDOUR::Bundle::Change)> BundleChanged;
 
 private:
 	bool port_has_prefix (std::string const &, std::string const &) const;
@@ -157,4 +156,3 @@ private:
 	ARDOUR::Bundle::Change _pending_bundle_change;
 };
 
-#endif /* __gtk_ardour_port_group_h__ */

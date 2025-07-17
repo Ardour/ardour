@@ -460,10 +460,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\cursor_context.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\curvetest.cc"
 				>
 			</File>
@@ -1324,10 +1320,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\tempo_lines.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\time_axis_view.cc"
 				>
 			</File>
@@ -1606,7 +1598,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\canvas_vars.h"
+				RelativePath="..\gtk2_ardour\canvas_vars.inc.h"
 				>
 			</File>
 			<File
@@ -1646,14 +1638,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\crossfade_view.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\cursor_context.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\debug.h"
 				>
 			</File>
@@ -1682,7 +1666,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\editing_syms.h"
+				RelativePath="..\gtk2_ardour\editing_syms.inc.h"
 				>
 			</File>
 			<File
@@ -1942,7 +1926,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\luasignal_syms.h"
+				RelativePath="..\gtk2_ardour\luasignal_syms.inc.h"
 				>
 			</File>
 			<File
@@ -2538,10 +2522,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\tempo_lines.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\time_axis_view.h"
 				>
 			</File>
@@ -2610,7 +2590,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\ui_config_vars.h"
+				RelativePath="..\gtk2_ardour\ui_config_vars.inc.h"
 				>
 			</File>
 			<File

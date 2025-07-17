@@ -23,7 +23,7 @@
 #include <math.h>
 #include <fftw3.h>
 
-#include <gdkmm/color.h>
+#include <ydkmm/color.h>
 
 #include <string>
 #include <vector>

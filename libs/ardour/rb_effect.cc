@@ -32,6 +32,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
 #include "ardour/pitch.h"
+#include "ardour/region_fx_plugin.h"
 #include "ardour/session.h"
 #include "ardour/stretch.h"
 #include "ardour/types.h"
@@ -77,7 +78,6 @@ RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 	SourceList        nsrcs;
 	int               ret         = -1;
 	const samplecnt_t bufsize     = 8192;
-	gain_t*           gain_buffer = 0;
 	Sample**          buffers     = 0;
 	char              suffix[32];
 	string            new_name;
@@ -201,8 +201,7 @@ RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 		goto out;
 	}
 
-	gain_buffer = new gain_t[bufsize];
-	buffers     = new float*[channels];
+	buffers = new float*[channels];
 
 	for (uint32_t i = 0; i < channels; ++i) {
 		buffers[i] = new float[bufsize];
@@ -225,8 +224,6 @@ RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 				                region->start_sample () + region->position_sample ();
 
 				this_read = region->master_read_at (buffers[i],
-				                                    buffers[i],
-				                                    gain_buffer,
 				                                    this_position,
 				                                    this_time,
 				                                    i);
@@ -262,8 +259,6 @@ RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 				                region->start_sample () + region->position_sample ();
 
 				this_read = region->master_read_at (buffers[i],
-				                                    buffers[i],
-				                                    gain_buffer,
 				                                    this_position,
 				                                    this_time,
 				                                    i);
@@ -351,6 +346,23 @@ RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 		ret = finish (region, nsrcs, new_name);
 	}
 
+
+	/* apply automation scaling before calling set_length, which trims automation */
+	if (ret == 0 && !tsr.time_fraction.is_unity()) {
+		for (auto& r : results) {
+			std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (r);
+			assert (ar);
+			ar->envelope ()->x_scale (tsr.time_fraction);
+			ar->foreach_plugin ([&](std::weak_ptr<RegionFxPlugin> wfx)
+			{
+				shared_ptr<RegionFxPlugin> rfx = wfx.lock ();
+				if (rfx) {
+					rfx->x_scale_automation (tsr.time_fraction);
+				}
+			});
+		}
+	}
+
 	/* now reset ancestral data for each new region */
 
 	for (vector<std::shared_ptr<Region> >::iterator x = results.begin (); x != results.end (); ++x) {
@@ -366,18 +378,7 @@ RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 		(*x)->set_whole_file (true);
 	}
 
-	/* stretch region gain envelope */
-	/* XXX: assuming we've only processed one input region into one result here */
-
-	if (ret == 0 && !tsr.time_fraction.is_unity()) {
-		std::shared_ptr<AudioRegion> result = std::dynamic_pointer_cast<AudioRegion> (results.front ());
-		assert (result);
-		result->envelope ()->x_scale (tsr.time_fraction);
-	}
-
 out:
-
-	delete[] gain_buffer;
 
 	if (buffers) {
 		for (uint32_t i = 0; i < channels; ++i) {

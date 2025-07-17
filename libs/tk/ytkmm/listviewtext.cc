@@ -15,7 +15,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/listviewtext.h>
+#include <ytkmm/listviewtext.h>
 
 namespace Gtk
 {

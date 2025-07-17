@@ -32,7 +32,7 @@
 using namespace ARDOUR;
 using namespace ArdourSurface;
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 ArdourWebsockets::ArdourWebsockets (Session& s)
     : ControlProtocol (s, X_ (surface_name))
@@ -76,7 +76,6 @@ ArdourWebsockets::set_active (bool yn)
 void
 ArdourWebsockets::thread_init ()
 {
-	pthread_set_name (event_loop_name ().c_str ());
 	PBD::notify_event_loops_about_thread_creation (pthread_self (), event_loop_name (), 2048);
 	SessionEvent::create_per_thread_pool (event_loop_name (), 128);
 }

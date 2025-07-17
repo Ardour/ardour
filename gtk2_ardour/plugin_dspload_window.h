@@ -16,13 +16,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_plugin_dspload_window_h__
-#define __ardour_plugin_dspload_window_h__
+#pragma once
 
 #include <memory>
 
-#include <gtkmm/box.h>
-#include <gtkmm/scrolledwindow.h>
+#include <ytkmm/box.h>
+#include <ytkmm/scrolledwindow.h>
 
 #include "widgets/ardour_button.h"
 #include "pbd/signals.h"
@@ -70,5 +69,4 @@ private:
 	PBD::ScopedConnectionList _processor_connections;
 	PBD::ScopedConnectionList _route_connections;
 };
-#endif
 

@@ -16,18 +16,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_http_h__
-#define __gtk_ardour_http_h__
+#pragma once
 
-#include <curl/curl.h>
 #include <string>
 #include <map>
+
+#include "pbd/ccurl.h"
 
 namespace ArdourCurl {
 
 class HttpGet {
 public:
-	HttpGet (bool persist = false, bool ssl = true);
+	HttpGet (bool persist = false);
 	~HttpGet ();
 
 	struct MemStruct {
@@ -55,11 +55,11 @@ public:
 	std::map<std::string, std::string> header () const { return nfo.h; }
 
 	char* escape (const char* s, int l) const {
-		return curl_easy_escape (_curl, s, l);
+		return curl_easy_escape (_ccurl.curl (), s, l);
 	}
 
 	char* unescape (const char* s, int l, int *o) const {
-		return curl_easy_unescape (_curl, s, l, o);
+		return curl_easy_unescape (_ccurl.curl (), s, l, o);
 	}
 
 	/* this is only to be used for data returned by from
@@ -70,15 +70,13 @@ public:
 
 	std::string error () const;
 
-	CURL* curl () const { return _curl; }
-
-	// called from fixup_bundle_environment
-	static void setup_certificate_paths ();
+	CURL* curl () const { return _ccurl.curl (); }
 
 	static void ca_setopt (CURL*);
 
 private:
-	CURL* _curl;
+	PBD::CCurl _ccurl;
+
 	bool  persist;
 
 	long int _status;
@@ -88,9 +86,6 @@ private:
 
 	struct MemStruct mem;
 	struct HeaderInfo nfo;
-
-	static const char* ca_path;
-	static const char* ca_info;
 };
 
 char* http_get (const char* url, int* status, bool with_error_logging);
@@ -98,4 +93,3 @@ std::string http_get (const std::string& url, bool with_error_logging);
 
 } // namespace
 
-#endif /* __gtk_ardour_http_h__ */

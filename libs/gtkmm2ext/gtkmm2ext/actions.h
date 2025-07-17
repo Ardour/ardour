@@ -24,11 +24,11 @@
 #include <vector>
 #include <exception>
 
-#include <gtkmm/action.h>
-#include <gtkmm/radioaction.h>
-#include <gtkmm/toggleaction.h>
-#include <gtkmm/actiongroup.h>
-#include <gtkmm/accelkey.h>
+#include <ytkmm/action.h>
+#include <ytkmm/radioaction.h>
+#include <ytkmm/toggleaction.h>
+#include <ytkmm/actiongroup.h>
+#include <ytkmm/accelkey.h>
 
 #include "gtkmm2ext/visibility.h"
 
@@ -105,6 +105,8 @@ namespace ActionManager {
 	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::ToggleAction> get_toggle_action (char const * group_name, char const * action_name, bool or_die = true);
 	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::RadioAction>  get_radio_action (const std::string& name, bool or_die = true);
 	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::RadioAction>  get_radio_action (char const * group_name, char const * action_name, bool or_die = true);
+
+	LIBGTKMM2EXT_API extern void drop_action_group (Glib::RefPtr<Gtk::ActionGroup>);
 
 	LIBGTKMM2EXT_API extern void get_actions (void* owner, std::vector<Glib::RefPtr<Gtk::Action> >&);
 

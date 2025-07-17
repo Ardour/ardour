@@ -22,10 +22,11 @@
 #include <sigc++/bind.h>
 #include <curl/curl.h>
 
-#include <gtkmm/box.h>
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/filechooserdialog.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
@@ -219,7 +220,7 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	//ok_button->set_sensitive(false);
 	set_action_ok(false);
 
-	/* connect signals after eveything has been initialized */
+	/* connect signals after everything has been initialized */
 	chooser.signal_selection_changed().connect (mem_fun (*this, &AddVideoDialog::file_selection_changed));
 	chooser.signal_file_activated().connect (mem_fun (*this, &AddVideoDialog::file_activated));
 	//chooser.signal_update_preview().connect(sigc::mem_fun(*this, &AddVideoDialog::update_preview));

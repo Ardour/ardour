@@ -230,7 +230,7 @@ WinMMEMidiOutputDevice::start_midi_output_thread ()
 	m_thread_quit = false;
 
 	// TODO Use native threads
-	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MIDI, PBD_RT_STACKSIZE_HELP,
+	if (pbd_realtime_pthread_create ("WinMME Output", PBD_SCHED_FIFO, PBD_RT_PRI_MIDI, PBD_RT_STACKSIZE_HELP,
 				&m_output_thread_handle, midi_output_thread, this)) {
 		return false;
 	}

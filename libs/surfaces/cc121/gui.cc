@@ -17,9 +17,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/label.h>
-#include <gtkmm/liststore.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/label.h>
+#include <ytkmm/liststore.h>
 
 #include "pbd/unwind.h"
 #include "pbd/strsplit.h"
@@ -288,9 +288,9 @@ CC121GUI::CC121GUI (CC121& p)
 
 	/* catch future changes to connection state */
 
-	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), boost::bind (&CC121GUI::connection_handler, this), gui_context());
-	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), boost::bind (&CC121GUI::connection_handler, this), gui_context());
-	fp.ConnectionChange.connect (_port_connections, invalidator (*this), boost::bind (&CC121GUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), std::bind (&CC121GUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), std::bind (&CC121GUI::connection_handler, this), gui_context());
+	fp.ConnectionChange.connect (_port_connections, invalidator (*this), std::bind (&CC121GUI::connection_handler, this), gui_context());
 }
 
 CC121GUI::~CC121GUI ()

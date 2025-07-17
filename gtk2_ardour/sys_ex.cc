@@ -17,14 +17,20 @@
  */
 
 #include <iostream>
+
 #include "canvas/flag.h"
+
+#include "gtkmm2ext/keyboard.h"
+
+#include "editor.h"
+#include "midi_view.h"
 #include "sys_ex.h"
 #include "ui_config.h"
 
 using namespace std;
 
 SysEx::SysEx (
-	MidiRegionView&             region,
+	MidiView&                   view,
 	ArdourCanvas::Container*    parent,
 	string&                     text,
 	double                      height,
@@ -32,6 +38,7 @@ SysEx::SysEx (
 	double                      y,
 	ARDOUR::MidiModel::SysExPtr sysex)
 	: _sysex (sysex)
+	, _view (view)
 {
 	_flag = new ArdourCanvas::Flag (
 		parent,
@@ -41,15 +48,14 @@ SysEx::SysEx (
 		ArdourCanvas::Duple (x, y)
 		);
 
+	_flag->Event.connect (sigc::mem_fun (*this, &SysEx::event_handler));
+	_flag->set_font_description (UIConfiguration::instance ().get_SmallFont ());
 	_flag->set_text (text);
 }
 
 SysEx::~SysEx()
 {
-	/* do not delete flag because it was added to a parent/container which
-	   will delete it.
-	*/
-	_flag = 0;
+	/* _flag is deleted by the canvas container/parent it is placed in */
 }
 
 bool
@@ -57,7 +63,8 @@ SysEx::event_handler (GdkEvent* ev)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-		if (ev->button.button == 3) {
+		if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
+			_view.delete_sysex (this);
 			return true;
 		}
 		break;

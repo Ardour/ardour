@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_rc_configuration_h__
-#define __ardour_rc_configuration_h__
+#pragma once
 
 #include <map>
 #include <string>
@@ -43,7 +42,7 @@ class LIBARDOUR_API RCConfiguration : public PBD::Configuration
 	RCConfiguration();
 	~RCConfiguration();
 
-	void map_parameters (boost::function<void (std::string)>&);
+	void map_parameters (std::function<void (std::string)>&);
 	int set_state (XMLNode const &, int version);
 	XMLNode& get_state () const;
 	XMLNode& get_variables (std::string const & nodename) const;
@@ -72,7 +71,7 @@ class LIBARDOUR_API RCConfiguration : public PBD::Configuration
 #define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) \
 	Type get_##var () const { return var.get(); } \
 	bool set_##var (Type val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret; }
-#include "ardour/rc_configuration_vars.h"
+#include "ardour/rc_configuration_vars.inc.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 
@@ -84,7 +83,7 @@ class LIBARDOUR_API RCConfiguration : public PBD::Configuration
 #undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(Type,var,name,value) PBD::ConfigVariable<Type> var;
 #define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) PBD::ConfigVariableWithMutation<Type> var;
-#include "ardour/rc_configuration_vars.h"
+#include "ardour/rc_configuration_vars.inc.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 
@@ -100,4 +99,3 @@ LIBARDOUR_API extern gain_t speed_quietning; /* see comment in configuration.cc 
 
 } // namespace ARDOUR
 
-#endif /* __ardour_configuration_h__ */

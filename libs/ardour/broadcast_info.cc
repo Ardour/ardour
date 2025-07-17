@@ -39,15 +39,15 @@ namespace ARDOUR
 static void
 snprintf_bounded_null_filled (char* target, size_t target_size, char const * fmt, ...)
 {
-	std::vector<char> buf(target_size+1);
+	std::unique_ptr<char[]> buf (new char [target_size + 1]);
 	va_list ap;
 
 	va_start (ap, fmt);
-	vsnprintf (&buf[0], target_size+1, fmt, ap);
+	vsnprintf (buf.get (), target_size+1, fmt, ap);
 	va_end (ap);
 
 	memset (target, 0, target_size);
-	memcpy (target, &buf[0], target_size);
+	memcpy (target, buf.get (), target_size);
 
 }
 

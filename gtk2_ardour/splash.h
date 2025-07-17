@@ -18,16 +18,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_splash_h__
-#define __ardour_gtk_splash_h__
+#pragma once
 
 #include <set>
 
-#include <gtkmm/window.h>
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/box.h>
-#include <gtkmm/label.h>
-#include <gdkmm/pixbuf.h>
+#include <ytkmm/window.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/box.h>
+#include <ytkmm/label.h>
+#include <ydkmm/pixbuf.h>
 
 #include "pbd/signals.h"
 
@@ -73,4 +72,3 @@ private:
 	bool idle_after_expose ();
 };
 
-#endif /* __ardour_gtk_splash_h__ */

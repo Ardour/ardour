@@ -15,8 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __ardour_transcode_ffmpeg_h__
-#define __ardour_transcode_ffmpeg_h__
+#pragma once
 
 #include <string>
 
@@ -168,10 +167,10 @@ public:
 	 * during \ref encode \ref transcode and \ref extract_audio
 	 * The parameters are current and last video-frame.
 	 */
-	PBD::Signal2<void, ARDOUR::samplecnt_t, ARDOUR::samplecnt_t> Progress;
+	PBD::Signal<void(ARDOUR::samplecnt_t, ARDOUR::samplecnt_t)> Progress;
 
 	/** signal emitted when the transcoder process terminates. */
-	PBD::Signal1<void, int> Finished;
+	PBD::Signal<void(int)> Finished;
 
 protected:
 	bool probe ();
@@ -203,4 +202,3 @@ protected:
 	bool                debug_enable;
 };
 
-#endif /* __ardour_transcode_ffmpeg_h__ */

@@ -19,7 +19,7 @@
 #ifndef _gtk_ardour_triggerbox_ui_h_
 #define _gtk_ardour_triggerbox_ui_h_
 
-#include <gtkmm/colorselection.h>
+#include <ytkmm/colorselection.h>
 
 #include "pbd/properties.h"
 
@@ -27,6 +27,8 @@
 
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
+
+#include "gtkmm2ext/colors.h"
 
 #include "fitted_canvas_widget.h"
 
@@ -43,16 +45,20 @@ namespace ArdourCanvas
 	class Polygon;
 }
 
+class TriggerStrip;
+
 class TriggerEntry : public ArdourCanvas::Rectangle, public TriggerUI
 {
 public:
-	TriggerEntry (ArdourCanvas::Item* item, ARDOUR::TriggerReference rf);
+	TriggerEntry (ArdourCanvas::Item* item, TriggerStrip&, ARDOUR::TriggerReference rf);
 	~TriggerEntry ();
 
 	ArdourCanvas::Rectangle* play_button;
 	ArdourCanvas::Rectangle* name_button;
 	ArdourCanvas::Rectangle* follow_button;
 	ArdourCanvas::Text*      name_text;
+
+	void box_rec_enable_changed ();
 
 	void draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float size, float scale) const;
 	void draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, ARDOUR::FollowAction const & icon, float size, float scale) const;
@@ -76,14 +82,16 @@ public:
 
 	bool name_button_event (GdkEvent*);
 
+	TriggerStrip& strip() const { return _strip; }
+
 private:
+	TriggerStrip& _strip;
 	bool   _grabbed;
-	double _poly_size;
-	double _poly_margin;
 
 	int  _drag_start_x;
 	int  _drag_start_y;
 	bool _drag_active;
+	bool  rec_blink_on;
 
 	bool event (GdkEvent*);
 	void drag_begin (Glib::RefPtr<Gdk::DragContext> const&);
@@ -97,17 +105,25 @@ private:
 
 	void owner_prop_change (PBD::PropertyChange const&);
 	void owner_color_changed ();
+	void rec_enable_change ();
+	void set_play_button_tooltip ();
+	Gtkmm2ext::Color bg_color () const;
+	void blink_rec_enable (bool);
+	sigc::connection rec_blink_connection;
 
 	PBD::ScopedConnection _owner_prop_connection;
+	PBD::ScopedConnectionList _rec_enable_connections;
 };
 
 class TriggerBoxUI : public ArdourCanvas::Rectangle
 {
 public:
-	TriggerBoxUI (ArdourCanvas::Item* parent, ARDOUR::TriggerBox&);
+	TriggerBoxUI (ArdourCanvas::Item* parent, TriggerStrip&, ARDOUR::TriggerBox&);
 	~TriggerBoxUI ();
 
 	void _size_allocate (ArdourCanvas::Rect const&);
+
+	TriggerStrip& strip() const { return _strip; }
 
 	static Glib::RefPtr<Gtk::TargetList> dnd_src ()
 	{
@@ -119,6 +135,7 @@ private:
 
 	ARDOUR::TriggerBox& _triggerbox;
 	Slots               _slots;
+	TriggerStrip&       _strip;
 
 	static Glib::RefPtr<Gtk::TargetList> _dnd_src;
 
@@ -140,12 +157,14 @@ private:
 class TriggerBoxWidget : public FittedCanvasWidget
 {
 public:
-	TriggerBoxWidget (float w, float h);
+	TriggerBoxWidget (TriggerStrip&, float w, float h);
 
 	void set_triggerbox (ARDOUR::TriggerBox* tb);
+	TriggerStrip& strip() const { return _strip; }
 
 private:
 	TriggerBoxUI* ui;
+	TriggerStrip& _strip;
 };
 
 #endif

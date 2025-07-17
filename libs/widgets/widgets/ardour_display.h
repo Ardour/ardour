@@ -23,9 +23,9 @@
 #include <list>
 #include <stdint.h>
 
-#include <gtkmm/action.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/action.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
 
 #include "widgets/ardour_dropdown.h"
 #include "widgets/visibility.h"

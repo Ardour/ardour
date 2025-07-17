@@ -159,8 +159,8 @@ MixLayout::MixLayout (Push2& p, Session & s, std::string const & name)
 
 	_mode_button = _p2.button_by_id (Push2::Upper1);
 
-	_session.RouteAdded.connect (_session_connections, invalidator(*this), boost::bind (&MixLayout::stripables_added, this), &_p2);
-	_session.vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), boost::bind (&MixLayout::stripables_added, this), &_p2);
+	_session.RouteAdded.connect (_session_connections, invalidator(*this), std::bind (&MixLayout::stripables_added, this), &_p2);
+	_session.vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), std::bind (&MixLayout::stripables_added, this), &_p2);
 }
 
 MixLayout::~MixLayout ()
@@ -414,7 +414,7 @@ MixLayout::button_lower (uint32_t n)
 		return;
 	}
 
-	_session.selection().set (_stripable[n], std::shared_ptr<AutomationControl>());
+	_session.selection().select_stripable_and_maybe_group (_stripable[n], SelectionSet);
 }
 
 void
@@ -543,13 +543,9 @@ MixLayout::switch_bank (uint32_t base)
 	/* work backwards so we can tell if we should actually switch banks */
 
 	std::shared_ptr<Stripable> s[8];
-	uint32_t different = 0;
 
 	for (int n = 0; n < 8; ++n) {
 		s[n] = _session.get_remote_nth_stripable (base+n, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-		if (s[n] != _stripable[n]) {
-			different++;
-		}
 	}
 
 	if (!s[0]) {
@@ -583,10 +579,10 @@ MixLayout::switch_bank (uint32_t base)
 
 			/* stripable goes away? refill the bank, starting at the same point */
 
-			_stripable[n]->DropReferences.connect (_stripable_connections, invalidator (*this), boost::bind (&MixLayout::switch_bank, this, _bank_start), &_p2);
-			_stripable[n]->presentation_info().PropertyChanged.connect (_stripable_connections, invalidator (*this), boost::bind (&MixLayout::stripable_property_change, this, _1, n), &_p2);
-			_stripable[n]->solo_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&MixLayout::solo_changed, this, n), &_p2);
-			_stripable[n]->mute_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&MixLayout::mute_changed, this, n), &_p2);
+			_stripable[n]->DropReferences.connect (_stripable_connections, invalidator (*this), std::bind (&MixLayout::switch_bank, this, _bank_start), &_p2);
+			_stripable[n]->presentation_info().PropertyChanged.connect (_stripable_connections, invalidator (*this), std::bind (&MixLayout::stripable_property_change, this, _1, n), &_p2);
+			_stripable[n]->solo_control()->Changed.connect (_stripable_connections, invalidator (*this), std::bind (&MixLayout::solo_changed, this, n), &_p2);
+			_stripable[n]->mute_control()->Changed.connect (_stripable_connections, invalidator (*this), std::bind (&MixLayout::mute_changed, this, n), &_p2);
 
 			if (_stripable[n]->is_selected()) {
 				show_selection (n);
@@ -690,7 +686,7 @@ MixLayout::button_select_release ()
 		/* no visible track selected, select first (if any) */
 
 		if (_stripable[0]) {
-			_session.selection().set (_stripable[0], std::shared_ptr<AutomationControl>());
+			_session.selection().select_stripable_and_maybe_group (_stripable[0], SelectionSet);
 		}
 
 	} else {
@@ -706,7 +702,7 @@ MixLayout::button_select_release ()
 					_session.selection().clear_stripables ();
 					switch_bank (_bank_start - 1);
 					if (_stripable[0]) {
-						_session.selection().set (_stripable[0], std::shared_ptr<AutomationControl>());
+						_session.selection().select_stripable_and_maybe_group (_stripable[0], SelectionSet);
 					}
 				}
 			} else {
@@ -716,7 +712,7 @@ MixLayout::button_select_release ()
 					--n;
 				}
 				if (n >= 0) {
-					_session.selection().set (_stripable[n], std::shared_ptr<AutomationControl>());
+					_session.selection().select_stripable_and_maybe_group (_stripable[n], SelectionSet);
 				}
 			}
 
@@ -728,10 +724,10 @@ MixLayout::button_select_release ()
 				/* current selected is rightmost ... cancel selection,
 				   switch banks by one, and select righmost
 				*/
-				_session.selection().toggle (_stripable[selected], std::shared_ptr<AutomationControl>());
+				_session.selection().select_stripable_and_maybe_group (_stripable[selected], SelectionToggle);
 				switch_bank (_bank_start + 1);
 				if (_stripable[7]) {
-					_session.selection().set (_stripable[7], std::shared_ptr<AutomationControl>());
+					_session.selection().select_stripable_and_maybe_group (_stripable[7], SelectionSet);
 				}
 			} else {
 				/* select next, if any */
@@ -741,7 +737,7 @@ MixLayout::button_select_release ()
 				}
 
 				if (n != 8) {
-					_session.selection().set (_stripable[n], std::shared_ptr<AutomationControl>());
+					_session.selection().select_stripable_and_maybe_group (_stripable[n], SelectionSet);
 				}
 			}
 		}

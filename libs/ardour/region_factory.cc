@@ -42,7 +42,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-PBD::Signal1<void, std::shared_ptr<Region> > RegionFactory::CheckNewRegion;
+PBD::Signal<void(std::shared_ptr<Region> )> RegionFactory::CheckNewRegion;
 Glib::Threads::Mutex                           RegionFactory::region_map_lock;
 RegionFactory::RegionMap                       RegionFactory::region_map;
 PBD::ScopedConnectionList*                     RegionFactory::region_list_connections = 0;
@@ -308,8 +308,8 @@ RegionFactory::map_add (std::shared_ptr<Region> r)
 		region_list_connections = new ScopedConnectionList;
 	}
 
-	r->DropReferences.connect_same_thread (*region_list_connections, boost::bind (&RegionFactory::map_remove, std::weak_ptr<Region> (r)));
-	r->PropertyChanged.connect_same_thread (*region_list_connections, boost::bind (&RegionFactory::region_changed, _1, std::weak_ptr<Region> (r)));
+	r->DropReferences.connect_same_thread (*region_list_connections, std::bind (&RegionFactory::map_remove, std::weak_ptr<Region> (r)));
+	r->PropertyChanged.connect_same_thread (*region_list_connections, std::bind (&RegionFactory::region_changed, _1, std::weak_ptr<Region> (r)));
 
 	add_to_region_name_maps (r);
 }

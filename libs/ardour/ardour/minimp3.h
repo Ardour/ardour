@@ -1,5 +1,8 @@
 #ifndef MINIMP3_H
 #define MINIMP3_H
+
+/* clang-format off */
+
 /*
     https://github.com/lieff/minimp3
     To the extent possible under law, the author(s) have dedicated all copyright and related and neighboring rights to this software to the public domain worldwide.

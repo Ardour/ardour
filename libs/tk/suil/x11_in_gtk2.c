@@ -26,12 +26,12 @@
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <gdk/gdk.h>
-#include <gdk/gdkx.h>
+#include <ydk/gdk.h>
+#include <ydk/gdkx.h>
 #include <glib-object.h>
 #include <glib.h>
 #include <gobject/gclosure.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 #include <stdbool.h>
 #include <stdint.h>

@@ -35,7 +35,7 @@
 #endif
 #define WIN32_MEAN_AND_LEAN
 #include <windows.h>
-#include "gdk/gdkwin32.h"
+#include "ydk/gdkwin32.h"
 #endif /* G_OS_WIN32 */
 
 #include "gtkicontheme.h"

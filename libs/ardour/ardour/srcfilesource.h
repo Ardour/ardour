@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_srcfilesource_h__
-#define __ardour_srcfilesource_h__
+#pragma once
 
 #include <cstring>
 #include <samplerate.h>
@@ -52,7 +51,7 @@ public:
 protected:
 	void close ();
 	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const;
-	samplecnt_t write_unlocked (Sample */*dst*/, samplecnt_t /*cnt*/) { return 0; }
+	samplecnt_t write_unlocked (Sample const */*src*/, samplecnt_t /*cnt*/) { return 0; }
 
 	int read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos_t /*start*/, samplecnt_t /*cnt*/,
 				 double /*samples_per_unit*/, samplecnt_t /*fpp*/) const {
@@ -78,5 +77,4 @@ private:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_audiofilesource_h__ */
 

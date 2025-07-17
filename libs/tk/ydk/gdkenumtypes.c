@@ -229,6 +229,9 @@ gdk_event_mask_get_type (void)
             { GDK_PROXIMITY_OUT_MASK, "GDK_PROXIMITY_OUT_MASK", "proximity-out-mask" },
             { GDK_SUBSTRUCTURE_MASK, "GDK_SUBSTRUCTURE_MASK", "substructure-mask" },
             { GDK_SCROLL_MASK, "GDK_SCROLL_MASK", "scroll-mask" },
+            { GDK_TOUCH_BEGIN_MASK, "GDK_TOUCH_BEGIN_MASK", "touch-begin-mask" },
+            { GDK_TOUCH_UPDATE_MASK, "GDK_TOUCH_UPDATE_MASK", "touch-update-mask" },
+            { GDK_TOUCH_END_MASK, "GDK_TOUCH_END_MASK", "touch-end-mask" },
             { GDK_ALL_EVENTS_MASK, "GDK_ALL_EVENTS_MASK", "all-events-mask" },
             { 0, NULL, NULL }
         };

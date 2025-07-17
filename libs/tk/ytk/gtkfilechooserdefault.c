@@ -21,7 +21,7 @@
 
 #include "config.h"
 
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 #include "gtkalignment.h"
 #include "gtkbindings.h"
 #include "gtkcelllayout.h"
@@ -320,6 +320,8 @@ static void           gtk_file_chooser_default_get_default_size       (GtkFileCh
 								       gint                *default_height);
 static gboolean       gtk_file_chooser_default_should_respond         (GtkFileChooserEmbed *chooser_embed);
 static void           gtk_file_chooser_default_initial_focus          (GtkFileChooserEmbed *chooser_embed);
+
+static void           gtk_file_chooser_activate_location_entry        (GtkWidget *item, gpointer user_data);
 
 static void add_selection_to_recent_list (GtkFileChooserDefault *impl);
 
@@ -4442,7 +4444,10 @@ location_entry_create (GtkFileChooserDefault *impl)
   _gtk_file_chooser_entry_set_local_only (GTK_FILE_CHOOSER_ENTRY (impl->location_entry), impl->local_only);
   _gtk_file_chooser_entry_set_action (GTK_FILE_CHOOSER_ENTRY (impl->location_entry), impl->action);
   gtk_entry_set_width_chars (GTK_ENTRY (impl->location_entry), 45);
-  gtk_entry_set_activates_default (GTK_ENTRY (impl->location_entry), TRUE);
+  if (impl->action == GTK_FILE_CHOOSER_ACTION_OPEN)
+    g_signal_connect (impl->location_entry, "activate", G_CALLBACK (gtk_file_chooser_activate_location_entry), impl);
+  else
+    gtk_entry_set_activates_default (GTK_ENTRY (impl->location_entry), TRUE);
 }
 
 /* Creates the widgets specific to Save mode */
@@ -7744,7 +7749,7 @@ static void
 show_filters (GtkFileChooserDefault *impl,
 	      gboolean               show)
 {
-  if (show)
+  if (show && impl->filters && g_slist_length (impl->filters) > 1)
     gtk_widget_show (impl->filter_combo_hbox);
   else
     gtk_widget_hide (impl->filter_combo_hbox);
@@ -8520,7 +8525,10 @@ file_exists_get_info_cb (GCancellable *cancellable,
       else
 	{
 	  if (file_exists)
-	    request_response_and_add_to_recent_list (data->impl); /* user typed an existing filename; we are done */
+	    {
+		gtk_file_chooser_default_select_file (GTK_FILE_CHOOSER (data->impl), data->file, NULL);
+		request_response_and_add_to_recent_list (data->impl); /* user typed an existing filename; we are done */
+	    }
 	  else
 	    needs_parent_check = TRUE; /* file doesn't exist; see if its parent exists */
 	}
@@ -8915,6 +8923,68 @@ gtk_file_chooser_default_should_respond (GtkFileChooserEmbed *chooser_embed)
     add_selection_to_recent_list (impl);
 
   return retval;
+}
+
+static void
+gtk_file_chooser_activate_location_entry (GtkWidget *item, gpointer user_data)
+{
+  /* This is similar to gtk_file_chooser_default_should_respond,
+   * and used in case the default handler is not activated by
+   * the location entry.
+   */
+  GtkFileChooserDefault *impl = GTK_FILE_CHOOSER_DEFAULT (user_data);
+  GFile *file;
+  gboolean is_well_formed, is_empty, is_file_part_empty;
+  gboolean is_folder;
+  GtkFileChooserEntry *entry;
+  GError *error;
+
+  g_assert (impl->action == GTK_FILE_CHOOSER_ACTION_OPEN);
+
+  entry = GTK_FILE_CHOOSER_ENTRY (impl->location_entry);
+  check_save_entry (impl, &file, &is_well_formed, &is_empty, &is_file_part_empty, &is_folder);
+
+  if (!is_well_formed || is_empty)
+    return;
+
+  g_assert (file != NULL);
+
+  error = NULL;
+  if (is_folder)
+    {
+      change_folder_and_display_error (impl, file, TRUE);
+    }
+  else
+    {
+      struct FileExistsData *data;
+
+      /* We need to check whether file exists and whether it is a folder -
+       * the GtkFileChooserEntry *does* report is_folder==FALSE as a false
+       * negative (it doesn't know yet if your last path component is a
+       * folder).
+       */
+
+      data = g_new0 (struct FileExistsData, 1);
+      data->impl = g_object_ref (impl);
+      data->file = g_object_ref (file);
+      data->parent_file = _gtk_file_chooser_entry_get_current_folder (entry);
+
+      if (impl->file_exists_get_info_cancellable)
+	g_cancellable_cancel (impl->file_exists_get_info_cancellable);
+
+      impl->file_exists_get_info_cancellable =
+	_gtk_file_system_get_info (impl->file_system, file,
+				   "standard::type",
+				   file_exists_get_info_cb,
+				   data);
+
+      set_busy_cursor (impl, TRUE);
+
+      if (error != NULL)
+	g_error_free (error);
+    }
+
+  g_object_unref (file);
 }
 
 /* Implementation for GtkFileChooserEmbed::initial_focus() */

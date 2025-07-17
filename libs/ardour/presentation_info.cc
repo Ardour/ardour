@@ -46,7 +46,7 @@ using std::string;
 
 string PresentationInfo::state_node_name = X_("PresentationInfo");
 
-PBD::Signal1<void,PropertyChange const &> PresentationInfo::Change;
+PBD::Signal<void(PropertyChange const &)> PresentationInfo::Change;
 Glib::Threads::Mutex PresentationInfo::static_signal_lock;
 std::atomic<int> PresentationInfo::_change_signal_suspended (0);
 PBD::PropertyChange PresentationInfo::_pending_static_changes;

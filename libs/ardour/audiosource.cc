@@ -49,8 +49,6 @@
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 
-#include <boost/scoped_ptr.hpp>
-
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
@@ -179,7 +177,7 @@ AudioSource::update_length (timepos_t const & dur)
  *  @param event_loop Event loop for doThisWhenReady to be called in.
  */
 bool
-AudioSource::peaks_ready (boost::function<void()> doThisWhenReady, ScopedConnection** connect_here_if_not, EventLoop* event_loop) const
+AudioSource::peaks_ready (std::function<void()> doThisWhenReady, ScopedConnection** connect_here_if_not, EventLoop* event_loop) const
 {
 	bool ret;
 	Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
@@ -327,12 +325,12 @@ AudioSource::read (Sample *dst, samplepos_t start, samplecnt_t cnt, int /*channe
 }
 
 samplecnt_t
-AudioSource::write (Sample *dst, samplecnt_t cnt)
+AudioSource::write (Sample const * src, samplecnt_t cnt)
 {
 	WriterLock lm (_lock);
 	/* any write makes the file not removable */
 	_flags = Flag (_flags & ~Removable);
-	return write_unlocked (dst, cnt);
+	return write_unlocked (src, cnt);
 }
 
 int
@@ -359,7 +357,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		samplecnt_t peak = 0;
 
 #if 1 // direct read
-		boost::scoped_array<Sample> buf(new Sample[scm]);
+		std::unique_ptr<Sample[]> buf(new Sample[scm]);
 		while (peak < npeaks && cnt > 0) {
 			samplecnt_t samples_read = read_unlocked (buf.get(), start, scm);
 			if (samples_read == 0) {
@@ -423,10 +421,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		 * least large enough for all the data in the audio file. if it
 		 * is too short, assume that a crash or other error truncated
 		 * it, and rebuild it from scratch.
-		 *
-		 * XXX this may not work for destructive recording, but we
-		 * might decided to get rid of that anyway.
-		 *
 		 */
 
 		const off_t expected_file_size = (_length.samples() / (double) samples_per_file_peak) * sizeof (PeakData);
@@ -457,7 +451,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 
 
 	DEBUG_TRACE (DEBUG::Peaks, string_compose (" ======>RP: npeaks = %1 start = %2 cnt = %3 len = %4 samples_per_visual_peak = %5 expected was %6 ... scale =  %7 PD ptr = %8 pf = %9\n"
-			, npeaks, start, cnt, _length, samples_per_visual_peak, expected_peaks, scale, peaks, _peakpath));
+			, npeaks, start, cnt, _length.samples (), samples_per_visual_peak, expected_peaks, scale, peaks, _peakpath));
 
 	/* fix for near-end-of-file conditions */
 
@@ -482,7 +476,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		   both max and min peak values.
 		*/
 
-		boost::scoped_array<Sample> raw_staging(new Sample[cnt]);
+		std::unique_ptr<Sample[]> raw_staging(new Sample[cnt]);
 
 		if (read_unlocked (raw_staging.get(), start, cnt) != cnt) {
 			error << _("cannot read sample data for unscaled peak computation") << endmsg;
@@ -551,6 +545,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 			munmap (addr, map_length);
 #endif
 			if (zero_fill) {
+				assert (read_npeaks < npeaks);
 				memset (&peak_cache[read_npeaks], 0, sizeof (PeakData) * zero_fill);
 			}
 
@@ -579,93 +574,127 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		 * to avoid confusion, I'll refer to the requested peaks as visual_peaks and the peakfile peaks as stored_peaks
 		 */
 
-		const samplecnt_t chunksize = (samplecnt_t) expected_peaks; // we read all the peaks we need in one hit.
-
 		/* compute the rounded up sample position  */
 
-		samplepos_t current_stored_peak = (samplepos_t) ceil (start / (double) samples_per_file_peak);
-		samplepos_t next_visual_peak  = (samplepos_t) ceil (start / samples_per_visual_peak);
-		double     next_visual_peak_sample = next_visual_peak * samples_per_visual_peak;
+		samplepos_t next_visual_peak        = (samplepos_t) ceil (start / samples_per_visual_peak);
+		double      next_visual_peak_sample = next_visual_peak * samples_per_visual_peak;
+		samplepos_t current_stored_peak     = (samplepos_t) ceil (next_visual_peak_sample / (double) samples_per_file_peak);
+
 		samplepos_t stored_peak_before_next_visual_peak = (samplepos_t) next_visual_peak_sample / samples_per_file_peak;
 		samplecnt_t nvisual_peaks = 0;
 		uint32_t i = 0;
 
-		/* handle the case where the initial visual peak is on a pixel boundary */
-
-		current_stored_peak = min (current_stored_peak, stored_peak_before_next_visual_peak);
-
 		/* open ... close during out: handling */
 
-		off_t  map_off =  (uint32_t) (ceil (start / (double) samples_per_file_peak)) * sizeof(PeakData);
+		off_t  map_off      =  (uint32_t) (current_stored_peak) * sizeof(PeakData);
 		off_t  read_map_off = map_off & ~(bufsize - 1);
-		off_t  map_delta = map_off - read_map_off;
+		off_t  map_delta    = map_off - read_map_off;
+
+		samplecnt_t max_chunk = (statbuf.st_size - read_map_off - map_delta) / sizeof(PeakData);
+
+		if (map_off > statbuf.st_size) {
+			/* next_visual_peak is after peak-file end */
+			assert (npeaks == 1);
+			/* only process (next_visual_peak_sample - start), do not use peak-file */
+			max_chunk = 0;
+			map_delta = 0;
+			read_map_off = 0;
+		}
+		samplecnt_t chunksize = std::min<samplecnt_t> (expected_peaks, max_chunk);
+
 		size_t raw_map_length = chunksize * sizeof(PeakData);
-		size_t map_length = (chunksize * sizeof(PeakData)) + map_delta;
+		size_t map_length     = raw_map_length + map_delta;
+
+		assert (read_map_off + (off_t)map_length <= statbuf.st_size);
+		assert (read_map_off + map_delta + (off_t)raw_map_length <= statbuf.st_size);
 
 		if (_first_run || (_last_scale != samples_per_visual_peak) || (_last_map_off != map_off) || (_last_raw_map_length < raw_map_length)) {
+
+			/* offset between requested start, and first peak-file peak */
+			samplecnt_t start_offset = next_visual_peak_sample - start;
+
 			peak_cache.reset (new PeakData[npeaks]);
-			boost::scoped_array<PeakData> staging (new PeakData[chunksize]);
+			if (chunksize > 0) {
+				std::unique_ptr<PeakData[]> staging (new PeakData[chunksize]);
 
-			char* addr;
+				char* addr;
 #ifdef PLATFORM_WINDOWS
-			HANDLE file_handle =  (HANDLE) _get_osfhandle(int(sfd));
-			HANDLE map_handle;
-			LPVOID view_handle;
-			bool err_flag;
+				HANDLE file_handle = (HANDLE) _get_osfhandle(int(sfd));
+				HANDLE map_handle;
+				LPVOID view_handle;
+				bool err_flag;
 
-			map_handle = CreateFileMapping(file_handle, NULL, PAGE_READONLY, 0, 0, NULL);
-			if (map_handle == NULL) {
-				error << string_compose (_("map failed - could not create file mapping for peakfile %1."), _peakpath) << endmsg;
-				return -1;
-			}
-
-			view_handle = MapViewOfFile(map_handle, FILE_MAP_READ, 0, read_map_off, map_length);
-			if (view_handle == NULL) {
-				error << string_compose (_("map failed - could not map peakfile %1."), _peakpath) << endmsg;
-				return -1;
-			}
-
-			addr = (char *) view_handle;
-
-			memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length);
-
-			err_flag = UnmapViewOfFile (view_handle);
-			err_flag = CloseHandle(map_handle);
-			if(!err_flag) {
-				error << string_compose (_("unmap failed - could not unmap peakfile %1."), _peakpath) << endmsg;
-				return -1;
-			}
-#else
-			addr = (char*) mmap (0, map_length, PROT_READ, MAP_PRIVATE, sfd, read_map_off);
-			if (addr ==  MAP_FAILED) {
-				error << string_compose (_("map failed - could not mmap peakfile %1."), _peakpath) << endmsg;
-				return -1;
-			}
-
-			memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length);
-			munmap (addr, map_length);
-#endif
-			while (nvisual_peaks < read_npeaks) {
-
-				xmax = -1.0;
-				xmin = 1.0;
-
-				while ((current_stored_peak <= stored_peak_before_next_visual_peak) && (i < chunksize)) {
-
-					xmax = max (xmax, staging[i].max);
-					xmin = min (xmin, staging[i].min);
-					++i;
-					++current_stored_peak;
+				map_handle = CreateFileMapping(file_handle, NULL, PAGE_READONLY, 0, 0, NULL);
+				if (map_handle == NULL) {
+					error << string_compose (_("map failed - could not create file mapping for peakfile %1."), _peakpath) << endmsg;
+					return -1;
 				}
 
-				peak_cache[nvisual_peaks].max = xmax;
-				peak_cache[nvisual_peaks].min = xmin;
-				++nvisual_peaks;
-				next_visual_peak_sample = min ((double) start + cnt, (next_visual_peak_sample + samples_per_visual_peak));
-				stored_peak_before_next_visual_peak = (uint32_t) next_visual_peak_sample / samples_per_file_peak;
+				view_handle = MapViewOfFile(map_handle, FILE_MAP_READ, 0, read_map_off, map_length);
+				if (view_handle == NULL) {
+					error << string_compose (_("map failed - could not map peakfile %1."), _peakpath) << endmsg;
+					return -1;
+				}
+
+				addr = (char *) view_handle;
+
+				memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length);
+
+				err_flag = UnmapViewOfFile (view_handle);
+				err_flag = CloseHandle(map_handle);
+				if(!err_flag) {
+					error << string_compose (_("unmap failed - could not unmap peakfile %1."), _peakpath) << endmsg;
+					return -1;
+				}
+#else
+				addr = (char*) mmap (0, map_length, PROT_READ, MAP_PRIVATE, sfd, read_map_off);
+				if (addr ==  MAP_FAILED) {
+					error << string_compose (_("map failed - could not mmap peakfile %1."), _peakpath) << endmsg;
+					return -1;
+				}
+
+				memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length);
+				munmap (addr, map_length);
+#endif
+				while (nvisual_peaks < read_npeaks) {
+
+					xmax = -1.0;
+					xmin = 1.0;
+
+					while ((current_stored_peak <= stored_peak_before_next_visual_peak) && (i < chunksize)) {
+
+						xmax = max (xmax, staging[i].max);
+						xmin = min (xmin, staging[i].min);
+						++i;
+						++current_stored_peak;
+					}
+
+					peak_cache[nvisual_peaks].max = xmax;
+					peak_cache[nvisual_peaks].min = xmin;
+					++nvisual_peaks;
+					next_visual_peak_sample = min ((double) start + cnt, (next_visual_peak_sample + samples_per_visual_peak));
+					stored_peak_before_next_visual_peak = (uint32_t) next_visual_peak_sample / samples_per_file_peak;
+				}
+			}
+
+			/* add data between start and sample corresponding to map_off */
+			if (start_offset > 0) {
+				std::unique_ptr<Sample[]> buf (new Sample[start_offset]);
+				samplecnt_t samples_read = read_unlocked (buf.get(), start, start_offset);
+				find_peaks (buf.get(), samples_read, &peak_cache[0].min, &peak_cache[0].max);
+			}
+
+			/* fix end, add data not covered by Peak File */
+			samplecnt_t last_sample_from_peakfile = current_stored_peak * samples_per_file_peak;
+			if (last_sample_from_peakfile < start + cnt && nvisual_peaks > 0) {
+				samplecnt_t to_read = start + cnt - last_sample_from_peakfile;
+				std::unique_ptr<Sample[]> buf (new Sample[to_read]);
+				samplecnt_t samples_read = read_unlocked (buf.get(), last_sample_from_peakfile, to_read);
+				find_peaks (buf.get(), samples_read, &peak_cache[nvisual_peaks - 1].min, &peak_cache[nvisual_peaks - 1].max);
 			}
 
 			if (zero_fill) {
+				assert (read_npeaks < npeaks);
 #ifndef NDEBUG
 				cerr << "Zero fill '" << _name << "' end of peaks (@ " << read_npeaks << " with " << zero_fill << ")" << endl;
 #endif
@@ -697,7 +726,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		samplecnt_t i = 0;
 		samplecnt_t nvisual_peaks = 0;
 		samplecnt_t chunksize = (samplecnt_t) min (cnt, (samplecnt_t) 4096);
-		boost::scoped_array<Sample> raw_staging(new Sample[chunksize]);
+		std::unique_ptr<Sample[]> raw_staging(new Sample[chunksize]);
 
 		double pixel_pos         = start / samples_per_visual_peak;
 		double next_pixel_pos    = 1.0 + floor (pixel_pos);
@@ -769,7 +798,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 int
 AudioSource::build_peaks_from_scratch ()
 {
-	const samplecnt_t bufsize = 65536; // 256kB per disk read for mono data is about ideal
+	constexpr samplecnt_t bufsize = 65536; // 256kB per disk read for mono data is about ideal
 
 	DEBUG_TRACE (DEBUG::Peaks, "Building peaks from scratch\n");
 
@@ -788,7 +817,7 @@ AudioSource::build_peaks_from_scratch ()
 		samplecnt_t cnt = _length.samples();
 
 		_peaks_built = false;
-		boost::scoped_array<Sample> buf(new Sample[bufsize]);
+		std::unique_ptr<Sample[]> buf (new Sample[bufsize]);
 
 		while (cnt) {
 
@@ -900,14 +929,14 @@ AudioSource::done_with_peakfile_writes (bool done)
  * process. _lock MUST be held by caller.
 */
 int
-AudioSource::compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, samplecnt_t cnt,
+AudioSource::compute_and_write_peaks (Sample const * buf, samplecnt_t first_sample, samplecnt_t cnt,
 				      bool force, bool intermediate_peaks_ready)
 {
 	return compute_and_write_peaks (buf, first_sample, cnt, force, intermediate_peaks_ready, _FPP);
 }
 
 int
-AudioSource::compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, samplecnt_t cnt,
+AudioSource::compute_and_write_peaks (Sample const * buf, samplecnt_t first_sample, samplecnt_t cnt,
 				      bool force, bool intermediate_peaks_ready, samplecnt_t fpp)
 {
 	samplecnt_t to_do;
@@ -916,7 +945,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, sam
 	samplecnt_t samples_done;
 	const size_t blocksize = (128 * 1024);
 	off_t first_peak_byte;
-	boost::scoped_array<Sample> buf2;
+	std::unique_ptr<Sample[]> buf2;
 
 	if (-1 == _peakfile_fd) {
 		if (prepare_for_peakfile_writes ()) {
@@ -1000,7 +1029,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, sam
 		to_do = cnt;
 	}
 
-	boost::scoped_array<PeakData> peakbuf(new PeakData[(to_do/fpp)+1]);
+	std::unique_ptr<PeakData[]> peakbuf(new PeakData[(to_do/fpp)+1]);
 	peaks_computed = 0;
 	current_sample = first_sample;
 	samples_done = 0;
@@ -1135,7 +1164,7 @@ AudioSource::available_peaks (double zoom_factor) const
 }
 
 void
-AudioSource::mark_streaming_write_completed (const WriterLock& lock)
+AudioSource::mark_streaming_write_completed (const WriterLock& lock, Temporal::timecnt_t const &)
 {
 	Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
 

@@ -21,16 +21,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_audio_time_axis_h__
-#define __ardour_audio_time_axis_h__
+#pragma once
 
-#include <gtkmm/table.h>
-#include <gtkmm/button.h>
-#include <gtkmm/box.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/radiomenuitem.h>
-#include <gtkmm/checkmenuitem.h>
+#include <ytkmm/table.h>
+#include <ytkmm/button.h>
+#include <ytkmm/box.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/radiomenuitem.h>
+#include <ytkmm/checkmenuitem.h>
 
 #include <list>
 
@@ -58,7 +57,7 @@ class Selection;
 class Selectable;
 class RegionView;
 class AudioRegionView;
-class AutomationLine;
+class EditorAutomationLine;
 class AutomationGainLine;
 class AutomationPanLine;
 class TimeSelection;
@@ -97,5 +96,4 @@ private:
 	void update_control_names ();
 };
 
-#endif /* __ardour_audio_time_axis_h__ */
 

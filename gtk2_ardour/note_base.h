@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_note_base_h__
-#define __gtk_ardour_note_base_h__
+#pragma once
 
 #include <memory>
 
@@ -33,7 +32,7 @@
 #include "ui_config.h"
 
 class Editor;
-class MidiRegionView;
+class MidiView;
 
 namespace Evoral {
 	template<typename T> class Note;
@@ -67,7 +66,7 @@ class NoteBase : public sigc::trackable
   public:
 	typedef Evoral::Note<Temporal::Beats> NoteType;
 
-	NoteBase (MidiRegionView& region, bool, const std::shared_ptr<NoteType> note = std::shared_ptr<NoteType>());
+	NoteBase (MidiView& region, bool, const std::shared_ptr<NoteType> note = std::shared_ptr<NoteType>());
 	virtual ~NoteBase ();
 
 	void set_item (ArdourCanvas::Item *);
@@ -92,9 +91,6 @@ class NoteBase : public sigc::trackable
 	void show_velocity();
 	void hide_velocity();
 
-	/** Channel changed for this specific event */
-	void on_channel_change(uint8_t channel);
-
 	/** Channel selection changed */
 	void on_channel_selection_change(uint16_t selection);
 
@@ -115,7 +111,7 @@ class NoteBase : public sigc::trackable
 	float mouse_y_fraction() const { return _mouse_y_fraction; }
 
 	const std::shared_ptr<NoteType> note() const { return _note; }
-	MidiRegionView& region_view() const { return _region; }
+	MidiView& midi_view() const { return _view; }
 
 	static void set_colors ();
 
@@ -139,7 +135,7 @@ class NoteBase : public sigc::trackable
 protected:
 	enum State { None, Pressed, Dragging };
 
-	MidiRegionView&                   _region;
+	MidiView&                         _view;
 	ArdourCanvas::Item*               _item;
 	ArdourCanvas::Text*               _text;
 	State                             _state;
@@ -162,4 +158,3 @@ private:
 	static bool _color_init;
 };
 
-#endif /* __gtk_ardour_note_h__ */

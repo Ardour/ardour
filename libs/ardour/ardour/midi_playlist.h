@@ -20,13 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_midi_playlist_h__
-#define __ardour_midi_playlist_h__
+#pragma once
 
 #include <vector>
 #include <list>
-
-#include <boost/utility.hpp>
 
 #include "evoral/Parameter.h"
 
@@ -47,7 +44,6 @@ class                         Beats;
 namespace ARDOUR
 {
 
-class BeatsSamplesConverter;
 class MidiChannelFilter;
 class MidiRegion;
 class Session;
@@ -97,4 +93,3 @@ public:
 
 } /* namespace ARDOUR */
 
-#endif /* __ardour_midi_playlist_h__ */

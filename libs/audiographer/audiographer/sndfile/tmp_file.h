@@ -21,7 +21,7 @@ class TmpFile
 {
   public:
 	virtual ~TmpFile () {}
-	PBD::Signal0<void> FileFlushed;
+	PBD::Signal<void()> FileFlushed;
 
 };
 

@@ -27,13 +27,13 @@
 #include <stack>
 
 
-#include <gtk/gtkaccelmap.h>
-#include <gtk/gtkuimanager.h>
-#include <gtk/gtkactiongroup.h>
+#include <ytk/gtkaccelmap.h>
+#include <ytk/gtkuimanager.h>
+#include <ytk/gtkactiongroup.h>
 
-#include <gtkmm.h>
-#include <gtkmm/accelmap.h>
-#include <gtkmm/uimanager.h>
+#include <ytkmm/ytkmm.h>
+#include <ytkmm/accelmap.h>
+#include <ytkmm/uimanager.h>
 
 #include <glibmm/miscutils.h>
 
@@ -41,6 +41,7 @@
 #include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/debug.h"
 #include "gtkmm2ext/utils.h"
 
 #include "pbd/i18n.h"
@@ -76,6 +77,7 @@ ActionManager::MissingActionException::MissingActionException (std::string const
 	: missing_action_name (str)
 {
 	std::cerr << "MAE: " << str << std::endl;
+	PBD::stacktrace (std::cerr, 9);
 }
 
 const char *
@@ -118,9 +120,11 @@ ActionManager::set_sensitive (Glib::RefPtr<ActionGroup> group, bool yn)
 
 	GtkActionGroup* grp = group->gobj();
 
-	for (GList* acts = gtk_action_group_list_actions (grp); acts; acts = g_list_next (acts)) {
-		GtkAction* action = (GtkAction*) acts->data;
-		gtk_action_set_sensitive (action, yn);
+	if (grp) {
+		for (GList* acts = gtk_action_group_list_actions (grp); acts; acts = g_list_next (acts)) {
+			GtkAction* action = (GtkAction*) acts->data;
+			gtk_action_set_sensitive (action, yn);
+		}
 	}
 }
 
@@ -260,6 +264,7 @@ ActionManager::get_action (const string& name, bool or_die)
 	}
 
 	cerr << "Failed to find action: [" << name << ']' << endl;
+	PBD::stacktrace (std::cerr, 8);
 	return RefPtr<Action>();
 }
 
@@ -387,6 +392,7 @@ ActionManager::register_action (RefPtr<ActionGroup> group, const char* name, con
 	string fullpath;
 
 	RefPtr<Action> act = Action::create (name, label);
+	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created action %1 in %2 success: %3\n", name, group->get_name(), (bool) act));
 
 	fullpath = group->get_name();
 	fullpath += '/';
@@ -409,6 +415,7 @@ ActionManager::register_action (RefPtr<ActionGroup> group,
 	string fullpath;
 
 	RefPtr<Action> act = Action::create (name, label);
+	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created action %1 in %2 success: %3\n", name, group->get_name(), (bool) act));
 
 	fullpath = group->get_name();
 	fullpath += '/';
@@ -431,7 +438,9 @@ ActionManager::register_radio_action (RefPtr<ActionGroup> group,
 {
 	string fullpath;
 
+	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("creating action %1 in %2\n", name, group->get_name()));
 	RefPtr<Action> act = RadioAction::create (rgroup, name, label);
+	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created action %1 in %2 success: %3\n", name, group->get_name(), (bool) act));
 	RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 
 	fullpath = group->get_name();
@@ -457,6 +466,7 @@ ActionManager::register_radio_action (RefPtr<ActionGroup> group,
 	string fullpath;
 
 	RefPtr<Action> act = RadioAction::create (rgroup, name, label);
+	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created radio-action %1 in %2 success: %3\n", name, group->get_name(), (bool) act));
 	RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 	ract->property_value() = value;
 
@@ -485,6 +495,7 @@ ActionManager::register_toggle_action (RefPtr<ActionGroup> group,
 	fullpath += name;
 
 	RefPtr<Action> act = ToggleAction::create (name, label);
+	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created action %1 in %2 success: %3\n", name, group->get_name(), (bool) act));
 
 	if (actions.insert (ActionMap::value_type (fullpath, act)).second) {
 		group->add (act, sl);
@@ -551,4 +562,38 @@ ActionManager::get_all_actions (std::vector<std::string>& paths,
 		keys.push_back (string());
 #endif
 	}
+}
+
+void
+ActionManager::drop_action_group (Glib::RefPtr<ActionGroup> group)
+{
+	/* Although ActionGroups are refcnt'ed we hold a reference on the
+	   actions they contain in our global actions map. So an action group, if
+	   to be deleted fully, needs to be passed in here first so that we can
+	   drop those references.
+	*/
+
+	string group_name = group->get_name();
+	string::size_type group_name_length = group_name.length();
+
+	for (auto iter = actions.begin(); iter != actions.end(); ) {
+
+		string::size_type pos = iter->first.find (group_name);
+
+		if (pos == 0 && iter->first.length() >= pos+group_name_length && iter->first[group_name_length] == '/') {
+			iter = actions.erase (iter);
+		} else {
+			iter++;
+		}
+	}
+
+	for (auto iter = groups.begin(); iter != groups.end(); ++iter) {
+		/* could use ptr equivalence here too */
+		if ((*iter)->get_name() == group_name) {
+			groups.erase (iter);
+			break;
+		}
+	}
+
+	ActionManager::ui_manager->remove_action_group (group);
 }

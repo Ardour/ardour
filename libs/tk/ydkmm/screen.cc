@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/screen.h>
-#include <gdkmm/private/screen_p.h>
+#include <ydkmm/screen.h>
+#include <ydkmm/private/screen_p.h>
 
 
 // -*- c++ -*-
@@ -29,11 +29,11 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdkmm/display.h>
-#include <gdkmm/visual.h>
-#include <gdkmm/window.h>
-#include <gdkmm/rectangle.h>
-#include <gdk/gdk.h>
+#include <ydkmm/display.h>
+#include <ydkmm/visual.h>
+#include <ydkmm/window.h>
+#include <ydkmm/rectangle.h>
+#include <ydk/gdk.h>
 
 namespace Gdk
 {

@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/radioaction.h>
-#include <gtkmm/private/radioaction_p.h>
+#include <ytkmm/radioaction.h>
+#include <ytkmm/private/radioaction_p.h>
 
 
 // -*- c++ -*-
@@ -27,7 +27,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 typedef Gtk::RadioAction::Group Group; //So that the generate get_group return type is parsed.

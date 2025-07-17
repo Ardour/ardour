@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef  __midi_parse_h__
-#define  __midi_parse_h__
+#pragma once
 
 #include <string>
 #include <iostream>
@@ -35,16 +34,16 @@ namespace MIDI {
 class Port;
 class Parser;
 
-typedef PBD::Signal1<void,Parser&>                   ZeroByteSignal;
-typedef PBD::Signal2<void,Parser&,unsigned short>    BankSignal;
-typedef PBD::Signal2<void,Parser&,samplecnt_t>       TimestampedSignal;
-typedef PBD::Signal2<void,Parser&, byte>             OneByteSignal;
-typedef PBD::Signal2<void,Parser &, EventTwoBytes *> TwoByteSignal;
-typedef PBD::Signal2<void,Parser &, pitchbend_t>     PitchBendSignal;
-typedef PBD::Signal3<void,Parser &, uint16_t, int>   RPNSignal;
-typedef PBD::Signal3<void,Parser &, uint16_t, float> RPNValueSignal;
-typedef PBD::Signal3<void,Parser &, byte *, size_t>  Signal;
-typedef PBD::Signal4<void,Parser &, byte *, size_t, samplecnt_t> AnySignal;
+typedef PBD::Signal<void(Parser&)>                   ZeroByteSignal;
+typedef PBD::Signal<void(Parser&,unsigned short)>    BankSignal;
+typedef PBD::Signal<void(Parser&,samplecnt_t)>       TimestampedSignal;
+typedef PBD::Signal<void(Parser&, byte)>             OneByteSignal;
+typedef PBD::Signal<void(Parser &, EventTwoBytes *)> TwoByteSignal;
+typedef PBD::Signal<void(Parser &, pitchbend_t)>     PitchBendSignal;
+typedef PBD::Signal<void(Parser &, uint16_t, int)>   RPNSignal;
+typedef PBD::Signal<void(Parser &, uint16_t, float)> RPNValueSignal;
+typedef PBD::Signal<void(Parser &, byte *, size_t)>  Signal;
+typedef PBD::Signal<void(Parser &, byte *, size_t, samplecnt_t)> AnySignal;
 
 class LIBMIDIPP_API Parser {
  public:
@@ -120,9 +119,9 @@ class LIBMIDIPP_API Parser {
 
 	void set_offline (bool);
 	bool offline() const { return _offline; }
-	PBD::Signal0<void> OfflineStatusChanged;
+	PBD::Signal<void()> OfflineStatusChanged;
 
-	PBD::Signal2<int,byte *, size_t> edit;
+	PBD::Signal<int(byte *, size_t)> edit;
 
 	void set_mmc_forwarding (bool yn) {
 		_mmc_forward = yn;
@@ -135,10 +134,10 @@ class LIBMIDIPP_API Parser {
 	const byte *mtc_current() const { return _mtc_time; }
 	bool        mtc_locked() const  { return _mtc_locked; }
 
-	PBD::Signal3<void, Parser &, int, samplecnt_t>      mtc_qtr;
-	PBD::Signal3<void, const byte *, bool, samplecnt_t> mtc_time;
-	PBD::Signal1<void, MTC_Status>                     mtc_status;
-	PBD::Signal0<bool>                                 mtc_skipped;
+	PBD::Signal<void(Parser &, int, samplecnt_t)>      mtc_qtr;
+	PBD::Signal<void(const byte *, bool, samplecnt_t)> mtc_time;
+	PBD::Signal<void(MTC_Status)>                     mtc_status;
+	PBD::Signal<bool()>                                 mtc_skipped;
 
 	void set_mtc_forwarding (bool yn) {
 		_mtc_forward = yn;
@@ -199,5 +198,4 @@ class LIBMIDIPP_API Parser {
 
 } // namespace MIDI
 
-#endif   // __midi_parse_h__
 

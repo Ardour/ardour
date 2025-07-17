@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtkardour_plugin_setup_dialog_h__
-#define __gtkardour_plugin_setup_dialog_h__
+#pragma once
 
 #include "ardour/plugin_insert.h"
 #include "ardour/route.h"
@@ -55,4 +54,3 @@ private:
 	ARDOUR::ChanCount _cur_outputs;
 };
 
-#endif

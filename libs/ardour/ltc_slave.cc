@@ -27,6 +27,7 @@
 #include "pbd/pthread_utils.h"
 
 #include "ardour/debug.h"
+#include "ardour/dsp_filter.h"
 #include "ardour/profile.h"
 #include "ardour/transport_master.h"
 #include "ardour/session.h"
@@ -58,10 +59,11 @@ LTC_TransportMaster::LTC_TransportMaster (std::string const & name)
 	, ltc_detect_fps_max (0)
 	, sync_lock_broken (false)
 	, samples_per_timecode_frame (0)
+	, _filter_enable (false)
 {
 	memset (&prev_frame, 0, sizeof(LTCFrameExt));
 
-	AudioEngine::instance()->Xrun.connect_same_thread (port_connection, boost::bind (&LTC_TransportMaster::resync_xrun, this));
+	AudioEngine::instance()->Xrun.connect_same_thread (port_connection, std::bind (&LTC_TransportMaster::resync_xrun, this));
 
 }
 
@@ -97,11 +99,26 @@ LTC_TransportMaster::set_session (Session *s)
 
 		decoder = ltc_decoder_create((int) samples_per_ltc_frame, 128 /*queue size*/);
 
+		DSP::Biquad bq (AudioEngine::instance()->sample_rate());
+		bq.compute (DSP::Biquad::LowPass, 3500, 0.9, 0);
+		bq.coefficients (_lpf.a1, _lpf.a2, _lpf.b0, _lpf.b1, _lpf.b2);
+		bq.compute (DSP::Biquad::HighPass, 100, 0.707, 0);
+		bq.coefficients (_hpf.a1, _hpf.a2, _hpf.b0, _hpf.b1, _hpf.b2);
+		_lpf.reset ();
+		_hpf.reset ();
+
+		// TODO add a per master preference to enable filter (and set gain)
+		//_filter_enable = true;
+
 		parse_timecode_offset();
 		reset (true);
 
-		_session->config.ParameterChanged.connect_same_thread (session_connections, boost::bind (&LTC_TransportMaster::parameter_changed, this, _1));
-		_session->LatencyUpdated.connect_same_thread (session_connections, boost::bind (&LTC_TransportMaster::resync_latency, this, _1));
+		fps_detected = false;
+
+		_session->config.ParameterChanged.connect_same_thread (session_connections, std::bind (&LTC_TransportMaster::parameter_changed, this, _1));
+		_session->LatencyUpdated.connect_same_thread (session_connections, std::bind (&LTC_TransportMaster::resync_latency, this, _1));
+	} else {
+		_filter_enable = false;
 	}
 }
 
@@ -121,6 +138,7 @@ LTC_TransportMaster::connection_handler (std::weak_ptr<ARDOUR::Port> w0, std::st
 	std::shared_ptr<Port> p = w1.lock ();
 	if (p == _port) {
 		resync_latency (false);
+		fps_detected = false;
 	}
 }
 
@@ -206,6 +224,8 @@ LTC_TransportMaster::resync_latency (bool playback)
 	if (old != ltc_slave_latency.max) {
 		sync_lock_broken = false;
 	}
+	_lpf.reset ();
+	_hpf.reset ();
 }
 
 void
@@ -228,26 +248,40 @@ LTC_TransportMaster::reset (bool with_position)
 }
 
 void
-LTC_TransportMaster::parse_ltc (const ARDOUR::pframes_t nframes, const Sample* const in, const ARDOUR::samplecnt_t posinfo)
+LTC_TransportMaster::parse_ltc (pframes_t const n_samples, Sample const* in, samplecnt_t posinfo)
 {
-	pframes_t i;
-	unsigned char sound[8192];
+	pframes_t remain = n_samples;
 
-	if (nframes > 8192) {
-		/* TODO warn once or wrap, loop conversion below
-		 * does jack/A3 support > 8192 spp anyway?
-		 */
-		return;
-	}
+	bool  const fe   = _filter_enable;
+	float const gain = 127.0; // relative to signed 8bit, 127.0 == 0dB
 
-	for (i = 0; i < nframes; i++) {
-		const int snd=(int) rint ((127.0*in[i])+128.0);
-		sound[i] = (unsigned char) (snd&0xff);
-	}
-
-	ltc_decoder_write (decoder, sound, nframes, posinfo);
-
-	return;
+	while (remain > 0) {
+    ltcsnd_sample_t sound[8192];
+    pframes_t c = std::min<pframes_t> (remain, 8192);
+		if (fe) {
+			for (pframes_t i = 0; i < c; ++i) {
+				/* LPF */
+				float xn = *in++;
+				float z  = _lpf.b0 * xn + _lpf.z1;
+				_lpf.z1  = _lpf.b1 * xn - _lpf.a1 * z + _lpf.z2;
+				_lpf.z2  = _lpf.b2 * xn - _lpf.a2 * z;
+				/* HPF */
+				xn       = z;
+				z        = _hpf.b0 * xn + _hpf.z1;
+				_hpf.z1  = _hpf.b1 * xn - _hpf.a1 * z + _hpf.z2;
+				_hpf.z2  = _hpf.b2 * xn - _hpf.a2 * z;
+				/* convert */
+				sound[i] = 128 + min (127, max<int> (-127, gain * z));
+			}
+		} else {
+			for (pframes_t i = 0; i < c; ++i) {
+				sound[i] = 128 + min (127, max<int> (-127, gain * (*in++)));
+			}
+		}
+    ltc_decoder_write (decoder, sound, c, posinfo);
+    posinfo += c;
+    remain -= c;
+  }
 }
 
 bool
@@ -354,12 +388,12 @@ LTC_TransportMaster::detect_ltc_fps(int frameno, bool df)
 				}
 			}
 
-			timecode_format_valid = true; /* SET FLAG */
+			if (!timecode_format_valid) {
+				fps_changed = true;
+			}
 
 			if (timecode.rate != detected_fps || timecode.drop != df) {
 				DEBUG_TRACE (DEBUG::LTC, string_compose ("detected FPS: %1%2\n", detected_fps, df?"df":"ndf"));
-			} else {
-				detected_fps = 0; /* no change */
 			}
 		}
 		ltc_detect_fps_cnt = ltc_detect_fps_max = 0;
@@ -413,6 +447,7 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 		if (!ltc_is_stationary && detect_ltc_fps (stime.frame, (ltc_frame.ltc.dfbit) ? true : false)) {
 			reset (true);
 			fps_detected = true;
+			timecode_format_valid = true; /* SET FLAG */
 		}
 
 #ifndef NDEBUG
@@ -529,7 +564,7 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 }
 
 void
-LTC_TransportMaster::pre_process (ARDOUR::pframes_t nframes, samplepos_t now, boost::optional<samplepos_t> session_pos)
+LTC_TransportMaster::pre_process (ARDOUR::pframes_t nframes, samplepos_t now, std::optional<samplepos_t> session_pos)
 {
 	if (!_port) {
 		reset (true);

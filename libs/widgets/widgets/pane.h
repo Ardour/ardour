@@ -26,9 +26,9 @@
 #include <algorithm>
 
 
-#include <gdkmm/cursor.h>
-#include <gtkmm/container.h>
-#include <gtkmm/eventbox.h>
+#include <ydkmm/cursor.h>
+#include <ytkmm/container.h>
+#include <ytkmm/eventbox.h>
 
 #include "widgets/visibility.h"
 

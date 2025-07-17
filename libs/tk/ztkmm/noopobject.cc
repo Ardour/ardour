@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <atkmm/noopobject.h>
-#include <atkmm/private/noopobject_p.h>
+#include <ztkmm/noopobject.h>
+#include <ztkmm/private/noopobject_p.h>
 
 
 // -*- c++ -*-
@@ -27,7 +27,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atk/atknoopobject.h>
+#include <ztk/atknoopobject.h>
 
 
 namespace

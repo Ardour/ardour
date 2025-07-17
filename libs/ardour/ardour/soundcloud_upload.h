@@ -4,8 +4,7 @@
 
 *****************************************************************************/
 
-#ifndef __ardour_soundcloud_upload_h__
-#define __ardour_soundcloud_upload_h__
+#pragma once
 
 #include <string>
 #include <stdio.h>
@@ -50,4 +49,3 @@ private:
 
 };
 
-#endif /* __ardour_soundcloud_upload_h__ */

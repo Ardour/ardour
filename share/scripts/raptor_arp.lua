@@ -1116,7 +1116,7 @@ function arpeggio:pulse()
       local wmin, wmax = self.wmin, self.wmax
       if w1 >= wmin and w1 <= wmax then
 	 local pmin, pmax = self.pmin, self.pmax
-	 -- Calculate the filter probablity. We allow for negative pmod values
+	 -- Calculate the filter probability. We allow for negative pmod values
 	 -- here, in which case stronger pulses tend to be filtered out first
 	 -- rather than weaker ones.
 	 local p = mod_value(pmin, pmax, self.pmod, w1)
@@ -1724,7 +1724,7 @@ function dsp_options ()
    -- right at the end of a loop. This sometimes causes hanging notes with
    -- automation when transport wraps around to the loop start. It's unclear
    -- whether the issue is in Ardour (caused by split cycles with automation)
-   -- or some unkown bug in the plugin. But the option makes it go away (which
+   -- or some unknown bug in the plugin. But the option makes it go away (which
    -- seems to indicate that the issue is on the Ardour side).
    return { time_info = true, regular_block_length = true }
 end
@@ -1878,7 +1878,7 @@ function dsp_run (_, _, n_samples)
    -- rolling state: It seems that we need to check the transport state (as
    -- given by Ardour's "transport finite state machine" = TFSM) here, even if
    -- the transport is not actually moving yet. Otherwise some input notes may
-   -- errorneously slip through before playback really starts.
+   -- erroneously slip through before playback really starts.
    local rolling = Session:transport_state_rolling ()
 
    -- detect param changes (subdiv is caught as a meter change below)
@@ -2034,7 +2034,7 @@ function dsp_run (_, _, n_samples)
 	 -- next beat is due immediately
 	 bt, ts = time.beat, time.sample
       elseif bf2 > bf1 and bf2 ~= b2 then
-	 -- next beat is due some time in this cycle (we're assuming contant
+	 -- next beat is due some time in this cycle (we're assuming constant
 	 -- tempo here, hence this number may be off in case the tempo is
 	 -- changing very quickly during the cycle -- so don't do that)
 	 local d = math.ceil((b2-bf2)/(b2-b1)*(s2-s1))

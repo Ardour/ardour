@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_rt_midi_buffer_h__
-#define __ardour_rt_midi_buffer_h__
+#pragma once
 
 #include <map>
 
@@ -40,7 +39,8 @@ class MidiNoteTracker;
 class MidiStateTracker;
 
 /**  */
-class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
+template<typename TimeType, typename DistanceType>
+class LIBARDOUR_API RTMidiBufferBase : public Evoral::EventSink<TimeType>
 {
   private:
 	struct Blob {
@@ -49,28 +49,32 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
 	};
 
   public:
-	typedef samplepos_t TimeType;
+	RTMidiBufferBase ();
+	~RTMidiBufferBase ();
 
-	RTMidiBuffer ();
-	~RTMidiBuffer();
+	/* After calling convert(), this RTMidiBufferBase no longer owns or has
+	   a reference to any data. The data is all "moved" to the returned
+	   RTMidiBufferBase and timestamps modified to its time domain if nececssary.
+	*/
+	void convert (RTMidiBufferBase<Temporal::Beats,Temporal::Beats>&);
 
 	void clear();
 	void resize(size_t);
 	size_t size() const { return _size; }
 	bool empty() const { return _size == 0; }
 
-	samplecnt_t span() const;
+	DistanceType span() const;
 
 	uint32_t write (TimeType time, Evoral::EventType type, uint32_t size, const uint8_t* buf);
-	uint32_t read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiNoteTracker& tracker, samplecnt_t offset = 0);
-	void track (MidiStateTracker&, samplepos_t start, samplepos_t end);
+	uint32_t read (MidiBuffer& dst, TimeType start, TimeType end, MidiNoteTracker& tracker, DistanceType offset = 0);
+	void track (MidiStateTracker&, TimeType start, TimeType end);
 
 	void dump (uint32_t);
 	void reverse ();
 	bool reversed() const;
 
 	struct Item {
-		samplepos_t timestamp;
+		TimeType timestamp;
 		union {
 			uint8_t  bytes[4];
 			uint32_t offset;
@@ -84,7 +88,7 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
 		return _data[n];
 	}
 
-	uint8_t const * bytes (Item const & item, uint32_t& size) {
+	uint8_t const * bytes (Item const & item, uint32_t& size) const {
 		if (!item.bytes[0]) {
 			size = Evoral::midi_event_size (item.bytes[1]);
 			return &item.bytes[1];
@@ -97,17 +101,22 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
 		}
 	}
 
-	void shift (sampleoffset_t distance) {
-		if (_size == 0) {
-			return;
-		}
+	/* XXX this really requires a 3rd template argument for a potentially
+	 * negative offset
+	 */
+
+	void shift (DistanceType distance) {
 		for (size_t n = 0; n < _size; ++n) {
 			_data[n].timestamp += distance;
 		}
 	}
 
+	void track_state (TimeType when, MidiStateTracker& mst) const;
+
   private:
 	friend struct WriteProtectRender;
+	/* any cousin of ours is a friend */
+	template<typename T, typename D> friend class RTMidiBufferBase;
 
 	/* The main store. Holds Items (timestamp+up to 3 bytes of data OR
 	 * offset into secondary storage below)
@@ -130,7 +139,7 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
   public:
 	class WriteProtectRender {
           public:
-		WriteProtectRender (RTMidiBuffer& rtm) : lm (rtm._lock, Glib::Threads::NOT_LOCK) {}
+		WriteProtectRender (RTMidiBufferBase& rtm) : lm (rtm._lock, Glib::Threads::NOT_LOCK) {}
 		void acquire () { lm.acquire(); }
 
           private:
@@ -138,6 +147,7 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
 	};
 };
 
+typedef RTMidiBufferBase<samplepos_t,samplecnt_t> RTMidiBuffer;
+
 } // namespace ARDOUR
 
-#endif // __ardour_rt_midi_buffer_h__

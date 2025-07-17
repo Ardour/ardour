@@ -19,6 +19,7 @@
 #ifndef MIDI_UTIL_H
 #define MIDI_UTIL_H
 
+#include <cstddef>
 #include <stdint.h>
 
 struct MidiEventHeader {

@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_hit_h__
-#define __gtk_ardour_hit_h__
+#pragma once
 
 #include <iostream>
 #include "note_base.h"
@@ -32,7 +31,7 @@ class Hit : public NoteBase
 public:
 	typedef Evoral::Note<Temporal::Beats> NoteType;
 
-	Hit (MidiRegionView&                   region,
+	Hit (MidiView&                         region,
 	     ArdourCanvas::Item*               parent,
 	     double                            size,
 	     const std::shared_ptr<NoteType> note        = std::shared_ptr<NoteType>(),
@@ -72,4 +71,3 @@ private:
 	ArdourCanvas::Polygon* _polygon;
 };
 
-#endif /* __gtk_ardour_hit_h__ */

@@ -3,10 +3,10 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/sizegroup.h>
-#include <gtkmm/private/sizegroup_p.h>
+#include <ytkmm/sizegroup.h>
+#include <ytkmm/private/sizegroup_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: sizegroup.ccg,v 1.1 2003/01/21 13:40:37 murrayc Exp $ */
@@ -30,7 +30,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

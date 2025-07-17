@@ -101,7 +101,7 @@ class CC121 : public ARDOUR::ControlProtocol, public AbstractUI<CC121Request> {
 
 	void thread_init ();
 
-	PBD::Signal0<void> ConnectionChange;
+	PBD::Signal<void()> ConnectionChange;
 
 	std::shared_ptr<ARDOUR::Port> input_port();
 	std::shared_ptr<ARDOUR::Port> output_port();
@@ -225,7 +225,7 @@ class CC121 : public ARDOUR::ControlProtocol, public AbstractUI<CC121Request> {
 		{}
 
 		void set_action (std::string const& action_name, bool on_press, CC121::ButtonState = ButtonState (0));
-		void set_action (boost::function<void()> function, bool on_press, CC121::ButtonState = ButtonState (0));
+		void set_action (std::function<void()> function, bool on_press, CC121::ButtonState = ButtonState (0));
 		std::string get_action (bool press, CC121::ButtonState bs = ButtonState (0));
 
 		void set_led_state (std::shared_ptr<MIDI::Port>, bool onoff);
@@ -246,11 +246,11 @@ class CC121 : public ARDOUR::ControlProtocol, public AbstractUI<CC121Request> {
 
 		struct ToDo {
 			ActionType type;
-			/* could be a union if boost::function didn't require a
+			/* could be a union if std::function didn't require a
 			 * constructor
 			 */
 			std::string action_name;
-			boost::function<void()> function;
+			std::function<void()> function;
 		};
 
 		typedef std::map<CC121::ButtonState,ToDo> ToDoMap;

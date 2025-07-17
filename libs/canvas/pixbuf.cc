@@ -19,7 +19,7 @@
  */
 
 #include <cairomm/cairomm.h>
-#include <gdkmm/general.h>
+#include <ydkmm/general.h>
 
 #include "canvas/pixbuf.h"
 

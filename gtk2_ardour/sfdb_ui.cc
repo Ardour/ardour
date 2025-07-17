@@ -45,9 +45,9 @@
 #include "pbd/gstdio_compat.h"
 #include <glibmm/fileutils.h>
 
-#include <gtkmm/box.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/box.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/stock.h>
 
 #include "ardour/debug.h"
 
@@ -111,6 +111,8 @@ string2miditracknamesource (string const & str)
 		return SMFTrackNumber;
 	} else if (str == _("by track name")) {
 		return SMFTrackName;
+	} else if (str == _("by file and track name")) {
+		return SMFFileAndTrackName;
 	} else if (str == _("by instrument name")) {
 		return SMFInstrumentName;
 	}
@@ -277,17 +279,18 @@ SoundFileBox::set_session(Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
-	length_clock.set_session (s);
-	timecode_clock.set_session (s);
-
 	if (!_session) {
 		play_btn.set_sensitive (false);
 		stop_btn.set_sensitive (false);
 		auditioner_connections.drop_connections();
 	} else {
+		length_clock.set_session (s);
+		timecode_clock.set_session (s);
 		auditioner_connections.drop_connections();
-		_session->AuditionActive.connect(auditioner_connections, invalidator (*this), boost::bind (&SoundFileBox::audition_active, this, _1), gui_context());
-		_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), boost::bind (&SoundFileBox::audition_progress, this, _1, _2), gui_context());
+		if (_session->the_auditioner()) {
+			_session->AuditionActive.connect(auditioner_connections, invalidator (*this), std::bind (&SoundFileBox::audition_active, this, _1), gui_context());
+			_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), std::bind (&SoundFileBox::audition_progress, this, _1, _2), gui_context());
+		}
 	}
 }
 
@@ -310,15 +313,19 @@ SoundFileBox::audition_progress(ARDOUR::samplecnt_t pos, ARDOUR::samplecnt_t len
 }
 
 bool
-SoundFileBox::seek_button_press(GdkEventButton*) {
+SoundFileBox::seek_button_press (GdkEventButton*)
+{
 	_seeking = true;
 	return false; // pass on to slider
 }
 
 bool
-SoundFileBox::seek_button_release(GdkEventButton*) {
+SoundFileBox::seek_button_release (GdkEventButton*)
+{
 	_seeking = false;
-	_session->the_auditioner()->seek_to_percent(seek_slider.get_value() / 10.0);
+	if (_session->the_auditioner()) {
+		_session->the_auditioner()->seek_to_percent(seek_slider.get_value() / 10.0);
+	}
 	seek_slider.set_sensitive (false);
 	return false; // pass on to slider
 }
@@ -690,11 +697,13 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 
 	chooser.set_border_width (12);
 
-	audio_and_midi_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun (*this, &SoundFileBrowser::on_audio_and_midi_filter));
-	audio_and_midi_filter.set_name (_("Audio and MIDI files"));
-
 	audio_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun(*this, &SoundFileBrowser::on_audio_filter));
 	audio_filter.set_name (_("Audio files"));
+	chooser.add_filter (audio_filter);
+
+#ifndef LIVETRAX
+	audio_and_midi_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun (*this, &SoundFileBrowser::on_audio_and_midi_filter));
+	audio_and_midi_filter.set_name (_("Audio and MIDI files"));
 
 	midi_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun(*this, &SoundFileBrowser::on_midi_filter));
 	midi_filter.set_name (_("MIDI files"));
@@ -703,9 +712,9 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	matchall_filter.set_name (_("All files"));
 
 	chooser.add_filter (audio_and_midi_filter);
-	chooser.add_filter (audio_filter);
 	chooser.add_filter (midi_filter);
 	chooser.add_filter (matchall_filter);
+#endif
 	chooser.set_select_multiple (true);
 	chooser.signal_update_preview().connect(sigc::mem_fun(*this, &SoundFileBrowser::update_preview));
 	chooser.signal_file_activated().connect (sigc::mem_fun (*this, &SoundFileBrowser::chooser_file_activated));
@@ -730,6 +739,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 
 	add (vpacker);
 
+#ifndef LIVETRAX
 	//add tag search
 
 	VBox* vbox;
@@ -864,6 +874,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	freesound_more_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_more_clicked));
 	freesound_similar_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_similar_clicked));
 	notebook.append_page (*vbox, _("Search Freesound"));
+#endif
 
 	notebook.set_size_request (500, -1);
 	notebook.signal_switch_page().connect (sigc::hide_return (sigc::hide (sigc::hide (sigc::mem_fun (*this, &SoundFileBrowser::reset_options)))));
@@ -977,9 +988,9 @@ void
 SoundFileBrowser::set_session (Session* s)
 {
 	ArdourWindow::set_session (s);
-	preview.set_session (s);
 
 	if (_session) {
+		preview.set_session (s);
 		add_gain_meter ();
 	} else {
 		remove_gain_meter ();
@@ -991,18 +1002,20 @@ SoundFileBrowser::add_gain_meter ()
 {
 	delete gm;
 
-	gm = new GainMeter (_session, 250);
-
 	std::shared_ptr<Route> r = _session->the_auditioner ();
 
-	gm->set_controls (r, r->shared_peak_meter(), r->amp(), r->gain_control());
-	gm->set_fader_name (X_("GainFader"));
+	if (r) {
+		gm = new GainMeter (_session, 250);
 
-	meter_packer.set_border_width (12);
-	meter_packer.pack_start (*gm, false, true);
-	hpacker.pack_end (meter_packer, false, false);
-	meter_packer.show_all ();
-	start_metering ();
+		gm->set_controls (r, r->shared_peak_meter(), r->amp(), r->gain_control());
+		gm->set_fader_name (X_("GainFader"));
+
+		meter_packer.set_border_width (12);
+		meter_packer.pack_start (*gm, false, true);
+		hpacker.pack_end (meter_packer, false, false);
+		meter_packer.show_all ();
+		start_metering ();
+	}
 }
 
 void
@@ -1387,18 +1400,18 @@ SoundFileBrowser::handle_freesound_results(std::string theString) {
 
 			double duration_seconds = atof (duration);
 			double h, m, s;
-			char duration_hhmmss[16];
+			char duration_hhmmss[32];
 			if (duration_seconds > 99 * 60 * 60) {
 				strcpy(duration_hhmmss, ">99h");
 			} else {
 				s = modf(duration_seconds/60, &m) * 60;
 				m = modf(m/60, &h) * 60;
 				if (h > 0) {
-					sprintf(duration_hhmmss, "%2.fh:%02.fm:%04.1fs", h, m, s);
+					snprintf(duration_hhmmss, sizeof (duration), "%2.fh:%02.fm:%04.1fs", h, m, s);
 				} else if (m > 0) {
-					sprintf(duration_hhmmss, "%2.fm:%04.1fs", m, s);
+					snprintf(duration_hhmmss, sizeof (duration), "%2.fm:%04.1fs", m, s);
 				} else {
-					sprintf(duration_hhmmss, "%4.1fs", s);
+					snprintf(duration_hhmmss, sizeof (duration), "%4.1fs", s);
 				}
 			}
 
@@ -1937,6 +1950,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	vspace->set_size_request (16, 2);
 	options.attach (*vspace, 2, 3, 6, 7, SHRINK, SHRINK, 0, 0);
 
+#ifndef LIVETRAX
 	l = manage (new Label);
 	l->set_markup (_("<b>MIDI Instrument:</b>"));
 	l->set_alignment(Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
@@ -1948,7 +1962,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	l->set_alignment(Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 	options.attach (*l, 3, 4, 1, 2, FILL, SHRINK, 4, 0);
 	options.attach (midi_track_name_combo, 4, 5, 1, 2, FILL, SHRINK, 2, 0);
-
+#endif
 	options.attach (smf_tempo_btn, 4, 5, 2, 3, FILL, SHRINK, 2, 0);
 	options.attach (smf_marker_btn, 4, 5, 3, 4, FILL, SHRINK, 2, 0);
 
@@ -1968,6 +1982,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	str.clear ();
 	str.push_back (_("by track number"));
 	str.push_back (_("by track name"));
+	str.push_back (_("by file and track name"));
 	str.push_back (_("by instrument name"));
 	set_popdown_strings (midi_track_name_combo, str);
 	midi_track_name_combo.set_active_text (str.front());
@@ -2126,7 +2141,9 @@ SoundFileOmega::where_combo_changed()
 void
 SoundFileOmega::instrument_combo_changed()
 {
-	_session->the_auditioner()->set_audition_synth_info( instrument_combo.selected_instrument() );
+	if (_session->the_auditioner()) {
+		_session->the_auditioner()->set_audition_synth_info( instrument_combo.selected_instrument() );
+	}
 }
 
 MidiTrackNameSource

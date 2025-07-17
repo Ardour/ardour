@@ -25,7 +25,7 @@
 using namespace ARDOUR;
 using namespace Gtk;
 
-EditorLocations::EditorLocations (Editor* e)
+EditorLocations::EditorLocations (Editor& e)
 	: EditorComponent (e)
 {
 	_locations = new LocationUI (X_("EditorLocations"));
@@ -37,7 +37,9 @@ void
 EditorLocations::set_session (ARDOUR::Session* s)
 {
 	SessionHandlePtr::set_session (s);
-	_locations->set_session (s);
+	if (s) {
+		_locations->set_session (s);
+	}
 }
 
 Widget&

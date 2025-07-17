@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_selection_templates_h__
-#define __ardour_gtk_selection_templates_h__
+#pragma once
 
 /* these inlines require knowledge of Region and Route classes,
    and so they are in a separate header file from selection.h to
@@ -64,4 +63,3 @@ Selection::foreach_region (void (ARDOUR::Region::*method)(A), A arg) {
 	}
 }
 
-#endif /* __ardour_gtk_selection_templates_h__ */

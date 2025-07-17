@@ -18,59 +18,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_velocity_region_view_h__
-#define __gtk_ardour_velocity_region_view_h__
+#pragma once
 
 #include "canvas/poly_line.h"
 
 #include "ghostregion.h"
+#include "velocity_display.h"
 
 namespace ArdourCanvas {
-class Lollipop;
+	class Lollipop;
 }
 
-class VelocityGhostRegion : public MidiGhostRegion
+class GhostEvent;
+
+class VelocityGhostRegion : public MidiGhostRegion, public VelocityDisplay
 {
-public:
+  public:
 	VelocityGhostRegion (MidiRegionView&, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
 	~VelocityGhostRegion ();
 
-	void update_contents_height();
-	void add_note(NoteBase*);
-	void update_note (GhostEvent* note);
-	void update_hit (GhostEvent* hit);
 	void remove_note (NoteBase*);
+	void add_note (NoteBase*);
 	void note_selected (NoteBase*);
+	void update_note (GhostEvent*);
+	void update_contents_height ();
+	void update_hit (GhostEvent*);
+
+	ArdourCanvas::Rectangle& base_item();
 
 	void set_colors ();
-	void drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev);
-
-	int y_position_to_velocity (double y) const;
-
-	void set_selected (bool);
-
-	bool line_draw_motion (ArdourCanvas::Duple const & d, ArdourCanvas::Rectangle const & r, double last_x);
-	bool line_extended (ArdourCanvas::Duple const & from, ArdourCanvas::Duple const & to, ArdourCanvas::Rectangle const & r, double last_x);
-
-	void start_line_drag ();
-	void end_line_drag (bool did_change);
-
-	ArdourCanvas::Rectangle& base_item() { return *base_rect; }
-
-private:
-	bool dragging;
-	ArdourCanvas::PolyLine* dragging_line;
-	int last_drag_x;
-	bool drag_did_change;
-	bool selected;
-
+  private:
 	bool base_event (GdkEvent*);
-	bool lollevent (GdkEvent*, MidiGhostRegion::GhostEvent*);
-	void set_size_and_position (MidiGhostRegion::GhostEvent&);
-	void lollis_close_to_x (int x, double distance, std::vector<GhostEvent*>& events);
-	void lollis_between (int x0, int x1, std::vector<GhostEvent*>& events);
-	void desensitize_lollis ();
-	void sensitize_lollis ();
+	bool lollevent (GdkEvent*, GhostEvent*);
 };
 
-#endif /* __gtk_ardour_velocity_region_view_h__ */

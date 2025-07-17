@@ -20,7 +20,7 @@
 #ifndef _gtk_ardour_trigger_master_h_
 #define _gtk_ardour_trigger_master_h_
 
-#include <gtkmm/colorselection.h>
+#include <ytkmm/colorselection.h>
 
 #include "pbd/properties.h"
 
@@ -79,7 +79,7 @@ public:
 	void selection_change ();
 
 private:
-	void context_menu ();
+	void context_menu (GdkEventButton*);
 
 	void clear_all_triggers();
 	void set_all_colors();
@@ -127,7 +127,7 @@ public:
 	bool event_handler (GdkEvent*);
 
 private:
-	void context_menu ();
+	void context_menu (GdkEventButton*);
 
 	void get_boxen (TriggerBoxList &boxlist);
 	void clear_all_triggers();

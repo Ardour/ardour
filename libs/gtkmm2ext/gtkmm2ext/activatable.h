@@ -20,7 +20,7 @@
 #ifndef __libgtkmm2ext_activatable_h__
 #define __libgtkmm2ext_activatable_h__
 
-#include <gtkmm/action.h>
+#include <ytkmm/action.h>
 
 #include "gtkmm2ext/visibility.h"
 

@@ -19,10 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/stock.h>
-#include <gtkmm/table.h>
-
-#include <boost/algorithm/string.hpp>
+#include <ytkmm/stock.h>
+#include <ytkmm/table.h>
 
 #include "gtkmm2ext/utils.h"
 
@@ -140,7 +138,7 @@ PatchChangeDialog::PatchChangeDialog (
 	bank_combo_changed ();
 
 	_info.Changed.connect (_info_changed_connection, invalidator (*this),
-			       boost::bind (&PatchChangeDialog::instrument_info_changed, this), gui_context());
+			       std::bind (&PatchChangeDialog::instrument_info_changed, this), gui_context());
 
 	show_all ();
 }
@@ -204,7 +202,7 @@ PatchChangeDialog::fill_bank_combo ()
 
 	for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = cns->patch_banks().begin(); i != cns->patch_banks().end(); ++i) {
 		string n = (*i)->name ();
-		boost::replace_all (n, "_", " ");
+		std::replace (n.begin (), n.end (), '_', ' ');
 		_bank_combo.append (n);
 	}
 }
@@ -224,7 +222,7 @@ PatchChangeDialog::set_active_bank_combo ()
 	for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = cns->patch_banks().begin(); i != cns->patch_banks().end(); ++i) {
 
 		string n = (*i)->name ();
-		boost::replace_all (n, "_", " ");
+		std::replace (n.begin (), n.end (), '_', ' ');
 
 		if ((*i)->number() == get_14bit_bank()) {
 			_current_patch_bank = *i;
@@ -260,7 +258,7 @@ PatchChangeDialog::bank_combo_changed ()
 
 	for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = cns->patch_banks().begin(); i != cns->patch_banks().end(); ++i) {
 		string n = (*i)->name ();
-		boost::replace_all (n, "_", " ");
+		std::replace (n.begin (), n.end (), '_', ' ');
 		if (n == _bank_combo.get_active_text()) {
 			_current_patch_bank = *i;
 		}
@@ -296,7 +294,7 @@ PatchChangeDialog::fill_patch_combo ()
 	const MIDI::Name::PatchNameList& patches = _current_patch_bank->patch_name_list ();
 	for (MIDI::Name::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
 		string n = (*j)->name ();
-		boost::replace_all (n, "_", " ");
+		std::replace (n.begin (), n.end (), '_', ' ');
 		_patch_combo.append (n);
 	}
 }
@@ -319,7 +317,7 @@ PatchChangeDialog::set_active_patch_combo ()
 	const MIDI::Name::PatchNameList& patches = _current_patch_bank->patch_name_list ();
 	for (MIDI::Name::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
 		string n = (*j)->name ();
-		boost::replace_all (n, "_", " ");
+		std::replace (n.begin (), n.end (), '_', ' ');
 
 		MIDI::Name::PatchPrimaryKey const & key = (*j)->patch_primary_key ();
 		if (key.program() == _program.get_value() - 1) {
@@ -347,7 +345,7 @@ PatchChangeDialog::patch_combo_changed ()
 
 	for (MIDI::Name::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
 		string n = (*j)->name ();
-		boost::replace_all (n, "_", " ");
+		std::replace (n.begin (), n.end (), '_', ' ');
 
 		if (n == _patch_combo.get_active_text ()) {
 			_ignore_signals = true;

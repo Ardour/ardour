@@ -15,8 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __gtk_ardour_add_video_dialog_h__
-#define __gtk_ardour_add_video_dialog_h__
+#pragma once
 
 #include <string>
 
@@ -24,22 +23,22 @@
 #undef interface
 #endif
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/cellrendererpixbuf.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/filechooserwidget.h>
-#include <gtkmm/image.h>
-#include <gtkmm/label.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/scale.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/treeview.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/cellrendererpixbuf.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/filechooserwidget.h>
+#include <ytkmm/image.h>
+#include <ytkmm/label.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/scale.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/treeview.h>
 
 #include "ardour/types.h"
 #include "ardour/template_utils.h"
-#include <gtkmm/filechooserwidget.h>
+#include <ytkmm/filechooserwidget.h>
 #include "ardour_dialog.h"
 
 enum VtlImportOption {
@@ -126,4 +125,3 @@ private:
 	bool loaded_docroot;
 };
 
-#endif /* __gtk_ardour_add_video_dialog_h__ */

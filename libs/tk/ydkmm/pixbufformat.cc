@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/pixbufformat.h>
-#include <gdkmm/private/pixbufformat_p.h>
+#include <ydkmm/pixbufformat.h>
+#include <ydkmm/private/pixbufformat_p.h>
 
 
 // -*- c++ -*-
@@ -28,7 +28,7 @@
  */
 
 #include <glibmm/utility.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <ydk-pixbuf/ydk-pixbuf.h>
 
 namespace Gdk
 {

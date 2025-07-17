@@ -32,7 +32,7 @@
 #include <pango/pangoft2.h> // for fontmap resolution control for GnomeCanvas
 #include <pango/pangocairo.h> // for fontmap resolution control for GnomeCanvas
 
-#include <gtkmm/settings.h>
+#include <ytkmm/settings.h>
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
@@ -84,8 +84,8 @@ UIConfiguration::UIConfiguration ()
 #undef  UI_CONFIG_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,name,val) var (name,val),
 #define CANVAS_FONT_VARIABLE(var,name) var (name),
-#include "ui_config_vars.h"
-#include "canvas_vars.h"
+#include "ui_config_vars.inc.h"
+#include "canvas_vars.inc.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_FONT_VARIABLE
 
@@ -101,7 +101,7 @@ UIConfiguration::UIConfiguration ()
 #undef  UI_CONFIG_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,name,value) _my_variables.insert (std::make_pair ((name), &(var)));
 #define CANVAS_FONT_VARIABLE(var,name) /* no need for metadata for these */
-#include "ui_config_vars.h"
+#include "ui_config_vars.inc.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_FONT_VARIABLE
 
@@ -125,7 +125,7 @@ UIConfiguration::UIConfiguration ()
 		}
 	}
 
-	ColorsChanged.connect (boost::bind (&UIConfiguration::colors_changed, this));
+	ColorsChanged.connect (std::bind (&UIConfiguration::colors_changed, this));
 
 	ParameterChanged.connect (sigc::mem_fun (*this, &UIConfiguration::parameter_changed));
 }
@@ -218,11 +218,11 @@ UIConfiguration::get_ui_scale ()
 }
 
 void
-UIConfiguration::map_parameters (boost::function<void (std::string)>& functor)
+UIConfiguration::map_parameters (std::function<void (std::string)>& functor)
 {
 #undef  UI_CONFIG_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,Name,value) functor (Name);
-#include "ui_config_vars.h"
+#include "ui_config_vars.inc.h"
 #undef  UI_CONFIG_VARIABLE
 }
 
@@ -289,7 +289,7 @@ UIConfiguration::load_defaults ()
 }
 
 std::string
-UIConfiguration::color_file_name (bool use_my, bool with_version) const
+UIConfiguration::color_file_name (bool use_my, bool with_version, bool fallback) const
 {
 	string basename;
 
@@ -298,6 +298,11 @@ UIConfiguration::color_file_name (bool use_my, bool with_version) const
 	}
 
 	std::string color_name = color_file.get();
+
+	if (fallback) {
+		color_name = "dark";
+	}
+
 	size_t sep = color_name.find_first_of("-");
 	if (sep != string::npos) {
 		color_name = color_name.substr (0, sep);
@@ -310,7 +315,7 @@ UIConfiguration::color_file_name (bool use_my, bool with_version) const
 	std::string rev (revision);
 	std::size_t pos = rev.find_first_of("-");
 
-	if (with_version && pos != string::npos && pos > 0) {
+	if (with_version && pos > 0) {
 		basename += "-";
 		basename += rev.substr (0, pos); // COLORFILE_VERSION - program major.minor
 	}
@@ -349,26 +354,8 @@ UIConfiguration::load_color_theme (bool allow_own)
 	 */
 	PBD::Unwinder<uint32_t> uw (block_save, block_save + 1);
 
-	if (find_file (theme_search_path(), color_file_name (false, true), cfile)) {
-		found = true;
-	}
-
-	if (!found) {
-		if (find_file (theme_search_path(), color_file_name (false, false), cfile)) {
-			found = true;
-		}
-	}
-
-	if (!found) {
-		warning << string_compose (_("Color file for %1 not found along %2"), color_file.get(), theme_search_path().to_string()) << endmsg;
-		return -1;
-	}
-
-	(void) load_color_file (cfile);
-
+	/* first search for the user's customized settings (for this major.minor version)*/
 	if (allow_own) {
-
-		found = false;
 
 		PBD::Searchpath sp (user_config_directory());
 
@@ -377,17 +364,33 @@ UIConfiguration::load_color_theme (bool allow_own)
 		if (find_file (sp, color_file_name (true, true), cfile)) {
 			found = true;
 		}
+	}
 
-		if (!found) {
-			if (find_file (sp, color_file_name (true, false), cfile)) {
-				found = true;
-			}
+	/* now search for a versioned color file (for this major.minor version) CURRENTLY UNUSED */
+	if (!found) {
+		if (find_file (theme_search_path(), color_file_name (false, true), cfile)) {
+			found = true;
 		}
+	}
 
-		if (found) {
-			(void) load_color_file (cfile);
+	/* now search for the theme file that the user last selected */
+	if (!found) {
+		if (find_file (theme_search_path(), color_file_name (false, false), cfile)) {
+			found = true;
 		}
+	}
 
+	/* still not found? use the 'dark' theme */
+	if (!found) {
+		if (find_file (theme_search_path(), color_file_name (false, false, true), cfile)) {
+			found = true;
+		}
+	}
+
+	if (found) {
+		(void) load_color_file (cfile);
+	} else {
+		error << _("no theme file was found; colors will be odd") << endmsg;
 	}
 
 	ColorsChanged ();
@@ -430,7 +433,7 @@ UIConfiguration::store_color_theme ()
 	root->add_child_nocopy (*parent);
 
 	XMLTree tree;
-	std::string colorfile = Glib::build_filename (user_config_directory(), color_file_name (true, true));;
+	std::string colorfile = Glib::build_filename (user_config_directory(), color_file_name (true, true));
 
 	tree.set_root (root);
 
@@ -569,8 +572,8 @@ UIConfiguration::get_variables (std::string const & node_name) const
 #undef  CANVAS_FONT_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,Name,value) if (node->name() == "UI") { var.add_to_node (*node); }
 #define CANVAS_FONT_VARIABLE(var,Name) if (node->name() == "Canvas") { var.add_to_node (*node); }
-#include "ui_config_vars.h"
-#include "canvas_vars.h"
+#include "ui_config_vars.inc.h"
+#include "canvas_vars.inc.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_FONT_VARIABLE
 
@@ -704,8 +707,8 @@ UIConfiguration::set_variables (const XMLNode& node)
 #undef  UI_CONFIG_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,name,val) if (var.set_from_node (node)) { ParameterChanged (name); }
 #define CANVAS_FONT_VARIABLE(var,name)        if (var.set_from_node (node)) { ParameterChanged (name); }
-#include "ui_config_vars.h"
-#include "canvas_vars.h"
+#include "ui_config_vars.inc.h"
+#include "canvas_vars.inc.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_FONT_VARIABLE
 }
@@ -864,4 +867,4 @@ UIConfiguration::color_to_hex_string_no_alpha (Gtkmm2ext::Color c)
 	return buf;
 }
 
-#include "configuration_metadata.h"
+#include "configuration_metadata.inc.h"

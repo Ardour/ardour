@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/iconfactory.h>
-#include <gtkmm/private/iconfactory_p.h>
+#include <ytkmm/iconfactory.h>
+#include <ytkmm/private/iconfactory_p.h>
 
 
 // -*- c++ -*-
@@ -29,8 +29,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/settings.h>
-#include <gtk/gtk.h>
+#include <ytkmm/settings.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

@@ -19,6 +19,8 @@
 #ifndef __osc_oscglobalobserver_h__
 #define __osc_oscglobalobserver_h__
 
+#include "osc.h"
+
 #include <memory>
 #include <string>
 
@@ -27,6 +29,9 @@
 
 #include "pbd/controllable.h"
 #include "pbd/stateful.h"
+
+#include "ardour/route_group.h"
+#include "ardour/session.h"
 #include "ardour/types.h"
 
 class OSCGlobalObserver

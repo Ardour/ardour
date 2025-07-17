@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_slavable_automation_control_h__
-#define __ardour_slavable_automation_control_h__
+#pragma once
 
 #include "ardour/automation_control.h"
 #include "ardour/libardour_visibility.h"
@@ -71,7 +70,7 @@ public:
 	*/
 	int32_t   get_boolean_masters () const;
 
-	PBD::Signal0<void> MasterStatusChange;
+	PBD::Signal<void()> MasterStatusChange;
 
 	void use_saved_master_ratios ();
 
@@ -157,4 +156,3 @@ protected:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_slavable_automation_control_h__ */

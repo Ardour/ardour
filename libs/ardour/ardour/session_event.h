@@ -19,13 +19,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_session_event_h__
-#define __ardour_session_event_h__
+#pragma once
 
 #include <list>
 #include <memory>
 
-#include <boost/function.hpp>
 
 #include "pbd/pool.h"
 #include "pbd/ringbuffer.h"
@@ -108,11 +106,11 @@ public:
 
 	/* 5 members to handle a multi-group event handled in RT context */
 
-	typedef boost::function<void (SessionEvent*)> RTeventCallback;
+	typedef std::function<void (SessionEvent*)> RTeventCallback;
 
 	std::shared_ptr<AutomationControlList> controls; /* apply to */
 	std::shared_ptr<RouteList> routes;     /* apply to */
-	boost::function<void (void)> rt_slot;    /* what to call in RT context */
+	std::function<void (void)> rt_slot;    /* what to call in RT context */
 	RTeventCallback              rt_return;  /* called after rt_slot, with this event as an argument */
 	PBD::EventLoop*              event_loop;
 
@@ -167,7 +165,7 @@ public:
 
 	virtual void queue_event (SessionEvent *ev) = 0;
 	void clear_events (SessionEvent::Type type);
-	void clear_events (SessionEvent::Type type, boost::function<void (void)> after);
+	void clear_events (SessionEvent::Type type, std::function<void (void)> after);
 
 protected:
 	PBD::RingBuffer<SessionEvent*> pending_events;
@@ -202,4 +200,3 @@ protected:
 
 LIBARDOUR_API std::ostream& operator<<(std::ostream&, const ARDOUR::SessionEvent&);
 
-#endif /* __ardour_session_event_h__ */

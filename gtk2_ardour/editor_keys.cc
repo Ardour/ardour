@@ -26,7 +26,7 @@
 #include <cmath>
 #include <string>
 
-#include <gtkmm/treeview.h>
+#include <ytkmm/treeview.h>
 
 #include "pbd/error.h"
 

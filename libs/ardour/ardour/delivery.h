@@ -20,15 +20,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_delivery_h__
-#define __ardour_delivery_h__
+#pragma once
 
 #include <string>
+
+#include "pbd/ringbuffer.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/chan_count.h"
 #include "ardour/io_processor.h"
+#include "ardour/midi_buffer.h"
 #include "ardour/gain_control.h"
 
 namespace ARDOUR {
@@ -56,10 +58,14 @@ public:
 		/* aux - internal send used to deliver to any bus, by user request */
 		Aux    = 0x10,
 		/* foldback - internal send used only to deliver to a personal monitor bus */
-		Foldback = 0x20
+		Foldback = 0x20,
+		/* direct outs - used only with LiveTrax, delivers to master bus */
+		DirectOuts = 0x40
 	};
 
-	static bool role_requires_output_ports (Role r) { return r == Main || r == Send || r == Insert; }
+	static bool role_from_xml (const XMLNode&, Role&);
+
+	static bool role_requires_output_ports (Role r) { return r == Main || r == Send || r == Insert || r == DirectOuts; }
 
 	bool does_routing() const { return true; }
 
@@ -84,6 +90,8 @@ public:
 
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
 
+	void set_midi_mute_mask (int);
+
 	/* supplemental method used with MIDI */
 
 	void flush_buffers (samplecnt_t nframes);
@@ -93,7 +101,7 @@ public:
 
 	BufferSet& output_buffers() { return *_output_buffers; }
 
-	PBD::Signal0<void> MuteChange;
+	PBD::Signal<void()> MuteChange;
 
 	int set_state (const XMLNode&, int version);
 
@@ -106,6 +114,17 @@ public:
 	std::shared_ptr<Panner> panner() const;
 
 	void set_gain_control (std::shared_ptr<GainControl> gc);
+
+	using RTARingBuffer    = PBD::RingBuffer<ARDOUR::Sample>;
+	using RTARingBufferPtr = std::shared_ptr<RTARingBuffer>;
+	using RTABufferList    = std::vector<RTARingBufferPtr>;
+	using RTABufferListPtr = std::shared_ptr<RTABufferList>;
+
+	void set_analysis_buffers (RTABufferListPtr rb) {
+		_rtabuffers = rb;
+	}
+	bool analysis_active () const;
+	void set_analysis_active (bool);
 
 	void set_polarity_control (std::shared_ptr<AutomationControl> ac) {
 		_polarity_control = ac;
@@ -141,6 +160,7 @@ protected:
 	std::shared_ptr<Amp>         _amp;
 
 	gain_t target_gain ();
+	void maybe_merge_midi_mute (BufferSet&, bool always);
 
 private:
 	bool _no_outs_cuz_we_no_monitor;
@@ -149,18 +169,22 @@ private:
 	std::shared_ptr<GainControl>       _gain_control;
 	std::shared_ptr<AutomationControl> _polarity_control;
 
+	RTABufferListPtr  _rtabuffers;
+	std::atomic<bool> _rta_active;
+
 	static bool panners_legal;
-	static PBD::Signal0<void> PannersLegal;
+	static PBD::Signal<void()> PannersLegal;
 
 	void panners_became_legal ();
 	PBD::ScopedConnection panner_legal_c;
 	void output_changed (IOChange, void*);
 
 	bool _no_panner_reset;
+	std::atomic<int> _midi_mute_mask;
+	MidiBuffer _midi_mute_buffer;
+
+	void resize_midi_mute_buffer ();
 };
 
 
 } // namespace ARDOUR
-
-#endif // __ardour__h__
-

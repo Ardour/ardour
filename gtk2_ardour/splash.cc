@@ -122,7 +122,7 @@ Splash::Splash ()
 	expose_is_the_one = false;
 
 	if (!ARDOUR_COMMAND_LINE::no_splash) {
-		ARDOUR::BootMessage.connect (msg_connection, invalidator (*this), boost::bind (&Splash::boot_message, this, _1), gui_context());
+		ARDOUR::BootMessage.connect (msg_connection, invalidator (*this), std::bind (&Splash::boot_message, this, _1), gui_context());
 		present ();
 	}
 }
@@ -237,6 +237,10 @@ bool
 Splash::expose (GdkEventExpose* ev)
 {
 	RefPtr<Gdk::Window> window = darea.get_window();
+
+	/* clear background (for transparent splash images */
+	Glib::RefPtr<Gdk::GC> bg = get_style()->get_bg_gc (STATE_NORMAL);
+	window->draw_rectangle(bg, true, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 
 	/* note: height & width need to be constrained to the pixbuf size
 	   in case a WM provides us with a screwy allocation

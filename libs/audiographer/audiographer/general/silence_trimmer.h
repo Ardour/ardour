@@ -1,6 +1,8 @@
 #ifndef AUDIOGRAPHER_SILENCE_TRIMMER_H
 #define AUDIOGRAPHER_SILENCE_TRIMMER_H
 
+#include <cassert>
+
 #include "audiographer/visibility.h"
 #include "audiographer/debug_utils.h"
 #include "audiographer/flag_debuggable.h"
@@ -8,6 +10,7 @@
 #include "audiographer/exception.h"
 #include "audiographer/utils/listed_source.h"
 
+#include <cmath>
 #include <cstring>
 
 namespace AudioGrapher {

@@ -60,6 +60,7 @@ ArdourCtrlBase::ArdourCtrlBase (Flags flags)
 	, _dead_zone_delta (0)
 {
 	UIConfigurationBase::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourCtrlBase::color_handler));
+	add_events (Gdk::TOUCH_UPDATE_MASK | Gdk::TOUCH_BEGIN_MASK | Gdk::TOUCH_END_MASK);
 
 #ifdef VBM
 	_flags = (Flags)(static_cast <int>(_flags) | (int)NoHorizontal);
@@ -257,6 +258,41 @@ ArdourCtrlBase::on_button_release_event (GdkEventButton *ev)
 	return true;
 }
 
+bool
+ArdourCtrlBase::on_touch_begin_event (GdkEventTouch *ev)
+{
+	_grabbed_x = ev->x;
+	_grabbed_y = ev->y;
+	_dead_zone_delta = 0;
+	_grabbed = true;
+	_tooltip.start_drag();
+	set_active_state (Gtkmm2ext::ExplicitActive);
+	StartGesture (ev->state);
+	return true;
+}
+
+bool
+ArdourCtrlBase::on_touch_end_event (GdkEventTouch *ev)
+{
+	_tooltip.stop_drag();
+	_grabbed = false;
+	StopGesture (ev->state);
+	unset_active_state ();
+	return true;
+}
+
+bool
+ArdourCtrlBase::on_touch_update_event (GdkEventTouch* ev)
+{
+	GdkEventMotion mev;
+	mev.window = ev->window;
+	mev.time   = ev->time;
+	mev.x      = ev->x;
+	mev.y      = ev->y;
+	mev.state  = Gdk::BUTTON1_MASK;
+	return ArdourCtrlBase::on_motion_notify_event (&mev);
+}
+
 void
 ArdourCtrlBase::color_handler ()
 {
@@ -272,7 +308,7 @@ ArdourCtrlBase::set_controllable (std::shared_ptr<Controllable> c)
 
 	binding_proxy.set_controllable (c);
 
-	c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&ArdourCtrlBase::controllable_changed, this, false), gui_context());
+	c->Changed.connect (watch_connection, invalidator(*this), std::bind (&ArdourCtrlBase::controllable_changed, this, false), gui_context());
 
 	_normal = c->internal_to_interface(c->normal());
 

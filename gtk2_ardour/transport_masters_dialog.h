@@ -16,22 +16,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_transport_masters_dialog_h__
-#define __ardour_gtk_transport_masters_dialog_h__
+#pragma once
 
 #include <vector>
 #include <string>
 
-#include <gtkmm/button.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/box.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/treestore.h>
+#include <ytkmm/button.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/box.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/treestore.h>
 
 #include "ardour/types.h"
 #include "pbd/property_basics.h"
@@ -198,4 +197,3 @@ class TransportMastersWindow : public ArdourWindow
 };
 
 
-#endif /* __ardour_gtk_transport_masters_dialog_h__ */

@@ -6,8 +6,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/range.h>
-#include <gtkmm/private/range_p.h>
+#include <ytkmm/range.h>
+#include <ytkmm/private/range_p.h>
 
 
 // -*- c++ -*-
@@ -30,8 +30,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
-#include <gtkmm/adjustment.h>
+#include <ytk/ytk.h>
+#include <ytkmm/adjustment.h>
 
 namespace Gtk
 {

@@ -18,15 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_sequence_property_h__
-#define __libpbd_sequence_property_h__
+#pragma once
 
 #include <iostream>
 
 #include <set>
 #include <list>
 
-#include <boost/function.hpp>
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/convert.h"
@@ -82,7 +80,7 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 		ChangeContainer removed;
 	};
 
-	SequenceProperty (PropertyID id, const boost::function<void(const ChangeRecord&)>& update)
+	SequenceProperty (PropertyID id, const std::function<void(const ChangeRecord&)>& update)
                 : PropertyBase (id), _update_callback (update) {}
 
         void invert () {
@@ -174,7 +172,7 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 			*/
 
 			for (typename ChangeContainer::const_iterator i = a->changes().added.begin(); i != a->changes().added.end(); ++i) {
-				(*i)->DropReferences.connect_same_thread (*cmd, boost::bind (&Destructible::drop_references, cmd));
+				(*i)->DropReferences.connect_same_thread (*cmd, std::bind (&Destructible::drop_references, cmd));
 			}
 		}
         }
@@ -360,7 +358,7 @@ protected:
 
 	Container _val; ///< our actual container of things
 	ChangeRecord _changes; ///< changes to the container (adds/removes) that have happened since clear_changes() was last called
-	boost::function<void(const ChangeRecord&)> _update_callback;
+	std::function<void(const ChangeRecord&)> _update_callback;
 
 private:
 	virtual SequenceProperty<Container>* create () const = 0;
@@ -368,4 +366,3 @@ private:
 
 }
 
-#endif /* __libpbd_sequence_property_h__ */

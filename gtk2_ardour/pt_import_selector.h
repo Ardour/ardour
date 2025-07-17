@@ -15,8 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __pt_import_selector_h__
-#define __pt_import_selector_h__
+#pragma once
 
 #include <string>
 #include <stdio.h>
@@ -29,10 +28,10 @@
 
 #include "ardour_dialog.h"
 #include "ardour/session.h"
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/filechooserwidget.h>
-#include <gtkmm/textview.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/filechooserwidget.h>
+#include <ytkmm/textview.h>
 
 class PTImportSelector : public ArdourDialog
 {
@@ -50,4 +49,3 @@ private:
 	Gtk::Button ptimport_cancel_button;
 };
 
-#endif

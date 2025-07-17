@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 #include "gtkprivate.h"
 #include "gtkaccelgroup.h"
 #include "gtkimcontextsimple.h"
@@ -32,7 +32,7 @@
 #include "gtkalias.h"
 
 #ifdef GDK_WINDOWING_WIN32
-#include <gdk/gdkwin32keys.h>
+#include <ydk/gdkwin32keys.h>
 #endif
 
 typedef struct _GtkComposeTable GtkComposeTable;

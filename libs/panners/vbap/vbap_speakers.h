@@ -22,8 +22,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/utility.hpp>
-
 #include <pbd/signals.h>
 
 #include "ardour/panner.h"
@@ -33,10 +31,12 @@ namespace ARDOUR
 {
 class Speakers;
 
-class VBAPSpeakers : public boost::noncopyable
+class VBAPSpeakers
 {
 public:
 	VBAPSpeakers (std::shared_ptr<Speakers>);
+	VBAPSpeakers (const VBAPSpeakers&) = delete;
+	VBAPSpeakers& operator= (const VBAPSpeakers&) = delete;
 
 	typedef std::vector<double> dvector;
 

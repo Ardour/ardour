@@ -24,7 +24,7 @@
 #include <cstring>
 #include <cmath>
 
-#include <gtkmm/window.h>
+#include <ytkmm/window.h>
 #include <pangomm/layout.h>
 
 #include "pbd/compose.h"
@@ -97,11 +97,11 @@ StereoPanner::StereoPanner (std::shared_ptr<PannerShell> p)
 		have_font = true;
 	}
 
-	position_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
-	width_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
+	position_control->Changed.connect (panvalue_connections, invalidator(*this), std::bind (&StereoPanner::value_change, this), gui_context());
+	width_control->Changed.connect (panvalue_connections, invalidator(*this), std::bind (&StereoPanner::value_change, this), gui_context());
 
-	_panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&StereoPanner::bypass_handler, this), gui_context());
-	_panner_shell->PannableChanged.connect (panshell_connections, invalidator (*this), boost::bind (&StereoPanner::pannable_handler, this), gui_context());
+	_panner_shell->Changed.connect (panshell_connections, invalidator (*this), std::bind (&StereoPanner::bypass_handler, this), gui_context());
+	_panner_shell->PannableChanged.connect (panshell_connections, invalidator (*this), std::bind (&StereoPanner::pannable_handler, this), gui_context());
 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &StereoPanner::color_handler));
 
@@ -724,8 +724,8 @@ StereoPanner::pannable_handler ()
 	position_binder.set_controllable(position_control);
 	width_binder.set_controllable(width_control);
 
-	position_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
-	width_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
+	position_control->Changed.connect (panvalue_connections, invalidator(*this), std::bind (&StereoPanner::value_change, this), gui_context());
+	width_control->Changed.connect (panvalue_connections, invalidator(*this), std::bind (&StereoPanner::value_change, this), gui_context());
 	queue_draw ();
 }
 

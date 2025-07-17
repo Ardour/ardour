@@ -32,11 +32,11 @@
 #include "gtkalias.h"
 
 #ifdef GDK_WINDOWING_X11
-#include "gdk/gdkx.h"
+#include "ydk/gdkx.h"
 #endif
 
 #ifdef GDK_WINDOWING_WIN32
-#include "gdk/gdkwin32.h"
+#include "ydk/gdkwin32.h"
 #endif
 
 enum {

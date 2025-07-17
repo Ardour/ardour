@@ -88,7 +88,7 @@ function factory () return function ()
 
 				local pos = bs - b_off
 				local len = be - bs
-				local note = ARDOUR.LuaAPI.new_noteptr (1, pos, len, fn + 1, 0x7f)
+				local note = ARDOUR.LuaAPI.new_noteptr (0, pos, len, fn + 1, 0x7f)
 				midi_command:add (note)
 			end
 			mm:apply_command (Session, midi_command)

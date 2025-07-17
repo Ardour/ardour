@@ -47,7 +47,9 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace std;
 
-PBD::Signal1<void, pframes_t> InternalSend::CycleStart;
+PBD::Signal<void(pframes_t)> InternalSend::CycleStart;
+
+#define GAIN_COEFF_DELTA (1e-5)
 
 InternalSend::InternalSend (Session&                      s,
                             std::shared_ptr<Pannable>   p,
@@ -68,8 +70,8 @@ InternalSend::InternalSend (Session&                      s,
 
 	init_gain ();
 
-	_send_from->DropReferences.connect_same_thread (source_connection, boost::bind (&InternalSend::send_from_going_away, this));
-	CycleStart.connect_same_thread (*this, boost::bind (&InternalSend::cycle_start, this, _1));
+	_send_from->DropReferences.connect_same_thread (source_connection, std::bind (&InternalSend::send_from_going_away, this));
+	CycleStart.connect_same_thread (*this, std::bind (&InternalSend::cycle_start, this, _1));
 }
 
 InternalSend::~InternalSend ()
@@ -175,9 +177,9 @@ InternalSend::use_target (std::shared_ptr<Route> sendto, bool update_name)
 
 	target_connections.drop_connections ();
 
-	_send_to->DropReferences.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_going_away, this));
-	_send_to->PropertyChanged.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_property_changed, this, _1));
-	_send_to->io_changed.connect_same_thread (target_connections, boost::bind (&InternalSend::target_io_changed, this));
+	_send_to->DropReferences.connect_same_thread (target_connections, std::bind (&InternalSend::send_to_going_away, this));
+	_send_to->PropertyChanged.connect_same_thread (target_connections, std::bind (&InternalSend::send_to_property_changed, this, _1));
+	_send_to->io_changed.connect_same_thread (target_connections, std::bind (&InternalSend::target_io_changed, this));
 
 	return 0;
 }
@@ -213,7 +215,20 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 {
 	automation_run (start_sample, nframes);
 
-	if (!check_active() || !_send_to) {
+	/* Do not use check_active() here, because we need to continue running
+	 * until the gain has gone to zero.
+	 */
+
+	if (!_send_to) {
+		_meter->reset ();
+		return;
+	}
+
+	/* main gain control: * mute & bypass/enable */
+	const gain_t tgain = target_gain ();
+	const bool converged = fabsf (_current_gain - tgain) < GAIN_COEFF_DELTA;
+
+	if ((tgain == GAIN_COEFF_ZERO) && converged) {
 		_meter->reset ();
 		return;
 	}
@@ -290,8 +305,16 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		}
 
 	} else {
-		/* no panner or panner is bypassed */
-		assert (mixbufs.available () >= bufs.count ());
+		/* no panner or panner is bypassed
+		 * 1: if source has more channels than the destination bus
+		 *    only send as many channels as there ae on the destination
+		 *    (ignore excess channels)
+		 * 2: if desination has more channels than the source:
+		 *    silence additional channels.
+		 *
+		 * The following assert() would go off in case of (1)
+		 */
+		//assert (mixbufs.available () >= bufs.count ());
 		/* BufferSet::read_from() changes the channel-conut,
 		 * so we manually copy bufs -> mixbufs
 		 */
@@ -309,9 +332,6 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		}
 	}
 
-	/* main gain control: * mute & bypass/enable */
-	gain_t tgain = target_gain ();
-
 	if (tgain != _current_gain) {
 		/* target gain has changed, fade in/out */
 		_current_gain = Amp::apply_gain (mixbufs, _session.nominal_sample_rate (), nframes, _current_gain, tgain);
@@ -324,6 +344,8 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		/* target gain has not changed, but is not zero or unity */
 		Amp::apply_simple_gain (mixbufs, nframes, tgain);
 	}
+
+	maybe_merge_midi_mute (mixbufs, tgain == GAIN_COEFF_ZERO);
 
 	/* apply fader gain automation */
 	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
@@ -343,7 +365,9 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 	_thru_delay->run (bufs, start_sample, end_sample, speed, nframes, true);
 
-	/* target will pick up our output when it is ready */
+	if (converged) {
+		_active = _pending_active;
+	}
 }
 
 void
@@ -424,7 +448,7 @@ InternalSend::set_state (const XMLNode& node, int version)
 		 */
 
 		if (_session.loading()) {
-			Session::AfterConnect.connect_same_thread (connect_c, boost::bind (&InternalSend::after_connect, this));
+			Session::AfterConnect.connect_same_thread (connect_c, std::bind (&InternalSend::after_connect, this));
 		} else {
 			after_connect ();
 		}

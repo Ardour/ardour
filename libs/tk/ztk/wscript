@@ -50,18 +50,14 @@ def options(opt):
     pass
 
 def configure(conf):
-    if conf.is_defined('YTK'):
-        autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
-        autowaf.check_pkg(conf, 'gobject-2.0', uselib_store='GOBJECT', mandatory=True)
+    autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
+    autowaf.check_pkg(conf, 'gobject-2.0', uselib_store='GOBJECT', mandatory=True)
 
 def build(bld):
-    if not bld.is_defined('YTK'):
-        return
-
     obj = bld.shlib(features = 'c cshlib', source = libztk_sources)
     obj.cflags          = [ bld.env['compiler_flags_dict']['pic'] ]
-    obj.export_includes = ['ztk']
-    obj.includes        = ['.', '..', 'ztk', 'ztk/atk']
+    obj.export_includes = ['.']
+    obj.includes        = ['.', '..', 'ztk']
     obj.name            = 'libztk'
     obj.target          = 'ztk'
     obj.use             = 'libztk-pixbuf'

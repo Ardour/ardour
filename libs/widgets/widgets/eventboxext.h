@@ -19,7 +19,7 @@
 #ifndef _WIDGETS_EVENTBOX_EXT_H_
 #define _WIDGETS_EVENTBOX_EXT_H_
 
-#include <gtkmm/eventbox.h>
+#include <ytkmm/eventbox.h>
 
 #include "widgets/visibility.h"
 

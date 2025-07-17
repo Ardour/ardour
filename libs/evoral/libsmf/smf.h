@@ -33,7 +33,7 @@
 
 /**
  *
- * \page libsmf libsmf - general usage instructions
+ * \page libsmf libsmf - Standard MIDI File format library
  *
  * An smf_t structure represents a "song".  Every valid smf contains one or more tracks.
  * Tracks contain zero or more events.  Libsmf doesn't care about actual MIDI data, as long
@@ -346,6 +346,7 @@ int  smf_seek_to_event(smf_t *smf, const smf_event_t *event) WARN_UNUSED_RESULT;
 
 size_t smf_get_length_pulses(const smf_t *smf) WARN_UNUSED_RESULT;
 int    smf_event_is_last(const smf_event_t *event) WARN_UNUSED_RESULT;
+int    smf_length_is_explicit(const smf_t *event) WARN_UNUSED_RESULT;
 
 void smf_add_track(smf_t *smf, smf_track_t *track);
 void smf_track_remove_from_smf(smf_track_t *track);

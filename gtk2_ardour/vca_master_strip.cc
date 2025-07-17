@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/string_convert.h"
 
@@ -49,7 +49,7 @@ using namespace Gtk;
 using namespace PBD;
 using std::string;
 
-PBD::Signal1<void,VCAMasterStrip*> VCAMasterStrip::CatchDeletion;
+PBD::Signal<void(VCAMasterStrip*)> VCAMasterStrip::CatchDeletion;
 
 static bool no_propagate (GdkEventButton*) { return false; }
 
@@ -166,17 +166,17 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 
 	Mixer_UI::instance()->show_spill_change.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill_change));
 
-	_vca->PropertyChanged.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::vca_property_changed, this, _1), gui_context());
-	_vca->presentation_info().PropertyChanged.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::vca_property_changed, this, _1), gui_context());
-	_vca->DropReferences.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::self_delete, this), gui_context());
+	_vca->PropertyChanged.connect (vca_connections, invalidator (*this), std::bind (&VCAMasterStrip::vca_property_changed, this, _1), gui_context());
+	_vca->presentation_info().PropertyChanged.connect (vca_connections, invalidator (*this), std::bind (&VCAMasterStrip::vca_property_changed, this, _1), gui_context());
+	_vca->DropReferences.connect (vca_connections, invalidator (*this), std::bind (&VCAMasterStrip::self_delete, this), gui_context());
 
-	_vca->solo_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::solo_changed, this), gui_context());
-	_vca->mute_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::mute_changed, this), gui_context());
+	_vca->solo_control()->Changed.connect (vca_connections, invalidator (*this), std::bind (&VCAMasterStrip::solo_changed, this), gui_context());
+	_vca->mute_control()->Changed.connect (vca_connections, invalidator (*this), std::bind (&VCAMasterStrip::mute_changed, this), gui_context());
 
-	_session->MonitorBusAddedOrRemoved.connect (*this, invalidator (*this), boost::bind (&VCAMasterStrip::set_button_names, this), gui_context());
+	_session->MonitorBusAddedOrRemoved.connect (*this, invalidator (*this), std::bind (&VCAMasterStrip::set_button_names, this), gui_context());
 
-	s->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&VCAMasterStrip::parameter_changed, this, _1), gui_context());
-	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&VCAMasterStrip::parameter_changed, this, _1), gui_context());
+	s->config.ParameterChanged.connect (*this, invalidator (*this), std::bind (&VCAMasterStrip::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&VCAMasterStrip::parameter_changed, this, _1), gui_context());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &VCAMasterStrip::parameter_changed));
 }
 

@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_midi_automation_list_binder_h__
-#define __ardour_midi_automation_list_binder_h__
+#pragma once
 
 #include "pbd/memento_command.h"
 #include "evoral/Parameter.h"
@@ -55,4 +54,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif // __ardour_midi_automation_list_binder_h__

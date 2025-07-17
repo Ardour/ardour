@@ -22,6 +22,7 @@
 
 #include <glibmm.h>
 
+#include "pbd/history_owner.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/openuri.h"
 #include "pbd/progress.h"
@@ -31,6 +32,7 @@
 
 #include "evoral/Control.h"
 #include "evoral/ControlList.h"
+#include "evoral/PatchChange.h"
 
 #include "ardour/amp.h"
 #include "ardour/async_midi_port.h"
@@ -85,6 +87,7 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
+#include "ardour/region_fx_plugin.h"
 #include "ardour/return.h"
 #include "ardour/revision.h"
 #include "ardour/route_group.h"
@@ -201,7 +204,7 @@ luabridge::getIdentityKey ()
 /* ...and this is the ugly part of it.
  *
  * We need to forward declare classes from gtk2_ardour
- * AND explicily list classes which are used by gtk2_ardour's bindings.
+ * AND explicitly list classes which are used by gtk2_ardour's bindings.
  *
  * This is required because some of the GUI classes use objects from libardour
  * as function parameters or return values and the .exe would re-create
@@ -220,8 +223,10 @@ luabridge::getIdentityKey ()
 	template void const* luabridge::ClassInfo< CLS >::getConstKey();
 
 CLASSINFO(ArdourMarker);
+CLASSINFO(AudioRegionView);
 CLASSINFO(AxisView);
 CLASSINFO(MarkerSelection);
+CLASSINFO(EditingContext);
 CLASSINFO(PublicEditor);
 CLASSINFO(RegionSelection);
 CLASSINFO(RegionView);
@@ -266,6 +271,7 @@ CLASSKEYS(ARDOUR::LuaOSC::Address);
 CLASSKEYS(ARDOUR::LuaProc);
 CLASSKEYS(ARDOUR::LuaTableRef);
 CLASSKEYS(ARDOUR::MidiModel::NoteDiffCommand);
+CLASSKEYS(ARDOUR::MidiModel::SysExDiffCommand);
 CLASSKEYS(ARDOUR::MonitorProcessor);
 CLASSKEYS(ARDOUR::RouteGroup);
 CLASSKEYS(ARDOUR::ParameterDescriptor);
@@ -291,6 +297,7 @@ CLASSKEYS(Temporal::superclock_t)
 
 CLASSKEYS(PBD::ID);
 CLASSKEYS(PBD::Configuration);
+CLASSKEYS(PBD::HistoryOwner);
 CLASSKEYS(PBD::PropertyChange);
 CLASSKEYS(PBD::StatefulDestructible);
 
@@ -339,13 +346,17 @@ CLASSKEYS(std::shared_ptr<ARDOUR::MidiPlaylist>);
 CLASSKEYS(std::shared_ptr<ARDOUR::MidiRegion>);
 CLASSKEYS(std::shared_ptr<ARDOUR::MidiSource>);
 CLASSKEYS(std::shared_ptr<ARDOUR::PluginInfo>);
+CLASSKEYS(std::shared_ptr<ARDOUR::PluginInsert>);
+CLASSKEYS(std::shared_ptr<ARDOUR::RegionFxPlugin>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Processor>);
 CLASSKEYS(std::shared_ptr<ARDOUR::AudioReadable>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Region>);
 CLASSKEYS(std::shared_ptr<ARDOUR::SessionPlaylists>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Track>);
 CLASSKEYS(std::shared_ptr<Evoral::ControlList>);
+CLASSKEYS(std::shared_ptr<Evoral::Event<Temporal::Beats> >);
 CLASSKEYS(std::shared_ptr<Evoral::Note<Temporal::Beats> >);
+CLASSKEYS(std::shared_ptr<Evoral::PatchChange<Temporal::Beats> >);
 CLASSKEYS(std::shared_ptr<Evoral::Sequence<Temporal::Beats> >);
 
 CLASSKEYS(std::shared_ptr<ARDOUR::Playlist>);
@@ -493,6 +504,16 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginClass <PBD::Progress> ("Progress")
+		.endClass ()
+
+		.beginClass <PBD::HistoryOwner> ("HistoryOwner")
+			.addFunction ("begin_reversible_command", (void (PBD::HistoryOwner::*)(const std::string&))&PBD::HistoryOwner::begin_reversible_command)
+			.addFunction ("commit_reversible_command", &PBD::HistoryOwner::commit_reversible_command)
+			.addFunction ("abort_reversible_command", &PBD::HistoryOwner::abort_reversible_command)
+			.addFunction ("collected_undo_commands", &PBD::HistoryOwner::collected_undo_commands)
+			.addFunction ("abort_empty_reversible_command", &PBD::HistoryOwner::abort_empty_reversible_command)
+			.addFunction ("add_command", &PBD::HistoryOwner::add_command)
+			.addFunction ("add_stateful_diff_command", &PBD::HistoryOwner::add_stateful_diff_command)
 		.endClass ()
 
 		.beginClass <PBD::Stateful> ("Stateful")
@@ -968,6 +989,18 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("channel", &Evoral::Note<Temporal::Beats>::channel)
 		.endClass ()
 
+		.beginWSPtrClass <Evoral::Event<Temporal::Beats> > ("EventPtr")
+		.addFunction ("time", &Evoral::Event<Temporal::Beats>::time)
+		.addFunction ("size", &Evoral::Event<Temporal::Beats>::size)
+		//.addFunction ("buffer", (uint8_t*) &Evoral::Event<Temporal::Beats>::buffer)
+		.endClass ()
+
+		.beginWSPtrClass <Evoral::PatchChange<Temporal::Beats> > ("PatchChangePtr")
+		.addFunction ("time", &Evoral::PatchChange<Temporal::Beats>::time)
+		.addFunction ("bank", &Evoral::PatchChange<Temporal::Beats>::bank)
+		.addFunction ("program", &Evoral::PatchChange<Temporal::Beats>::program)
+		.endClass ()
+
 		/* libevoral enums */
 		.beginNamespace ("InterpolationStyle")
 		.addConst ("Discrete", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Discrete))
@@ -1226,6 +1259,12 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("is_cue_marker", &Location::is_cue_marker)
 		.addFunction ("is_session_range", &Location::is_session_range)
 		.addFunction ("is_range_marker", &Location::is_range_marker)
+		.addFunction ("is_skip", &Location::is_skip)
+		.addFunction ("is_clock_origin", &Location::is_clock_origin)
+		.addFunction ("is_skipping", &Location::is_skipping)
+		.addFunction ("is_xrun", &Location::is_xrun)
+		.addFunction ("is_section", &Location::is_section)
+		.addFunction ("is_scene", &Location::is_scene)
 		.endClass ()
 
 		.deriveClass <Locations, PBD::StatefulDestructible> ("Locations")
@@ -1634,6 +1673,11 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("has_transients", &Region::has_transients)
 		.addFunction ("transients", (AnalysisFeatureList (Region::*)())&Region::transients)
 
+		.addFunction ("load_plugin", &Region::load_plugin)
+		.addFunction ("add_plugin", &Region::add_plugin)
+		.addFunction ("remove_plugin", &Region::add_plugin)
+		.addFunction ("nth_plugin", &Region::nth_plugin)
+
 		/* editing operations */
 		.addFunction ("set_length", &Region::set_length)
 		.addFunction ("set_start", &Region::set_start)
@@ -1683,7 +1727,11 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("envelope_active", &AudioRegion::envelope_active)
 		.addFunction ("fade_in_active", &AudioRegion::fade_in_active)
 		.addFunction ("fade_out_active", &AudioRegion::fade_out_active)
+		.addFunction ("fade_in_length", &AudioRegion::fade_in_length)
+		.addFunction ("fade_out_length", &AudioRegion::fade_out_length)
+		.addFunction ("fade_before_fx", &AudioRegion::fade_before_fx)
 		.addFunction ("set_envelope_active", &AudioRegion::set_envelope_active)
+		.addFunction ("set_fade_before_fx", &AudioRegion::set_fade_before_fx)
 		.addFunction ("set_fade_in_active", &AudioRegion::set_fade_in_active)
 		.addFunction ("set_fade_in_shape", &AudioRegion::set_fade_in_shape)
 		.addFunction ("set_fade_in_length", &AudioRegion::set_fade_in_length)
@@ -1777,9 +1825,11 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <MidiModel, AutomatableSequence<Temporal::Beats> > ("MidiModel")
-		.addFunction ("apply_command", (void (MidiModel::*)(Session*, PBD::Command*))&MidiModel::apply_diff_command_as_commit) /* deprecated: left here in case any extant scripts use apply_command */
-		.addFunction ("apply_diff_command_as_commit", (void (MidiModel::*)(Session*, PBD::Command*))&MidiModel::apply_diff_command_as_commit)
+		.addFunction ("apply_command", (void (MidiModel::*)(PBD::HistoryOwner*, PBD::Command*))&MidiModel::apply_diff_command_as_commit) /* deprecated: left here in case any extant scripts use apply_command */
+		.addFunction ("apply_diff_command_as_commit", (void (MidiModel::*)(PBD::HistoryOwner*, PBD::Command*))&MidiModel::apply_diff_command_as_commit)
 		.addFunction ("new_note_diff_command", &MidiModel::new_note_diff_command)
+		.addFunction ("new_sysex_diff_command", &MidiModel::new_sysex_diff_command)
+		.addFunction ("new_patch_change_diff_command", &MidiModel::new_patch_change_diff_command)
 		.endClass ()
 
 		.beginNamespace ("MidiModel")
@@ -1789,6 +1839,16 @@ LuaBindings::common (lua_State* L)
 		.deriveClass<ARDOUR::MidiModel::NoteDiffCommand, ARDOUR::MidiModel::DiffCommand> ("NoteDiffCommand")
 		.addFunction ("add", &ARDOUR::MidiModel::NoteDiffCommand::add)
 		.addFunction ("remove", &ARDOUR::MidiModel::NoteDiffCommand::remove)
+		.endClass ()
+
+		.deriveClass<ARDOUR::MidiModel::SysExDiffCommand, ARDOUR::MidiModel::DiffCommand> ("NoteDiffCommand")
+		.addFunction ("change", &ARDOUR::MidiModel::SysExDiffCommand::change)
+		.addFunction ("remove", &ARDOUR::MidiModel::SysExDiffCommand::remove)
+		.endClass ()
+
+		.deriveClass<ARDOUR::MidiModel::PatchChangeDiffCommand, ARDOUR::MidiModel::DiffCommand> ("NoteDiffCommand")
+		.addFunction ("add", &ARDOUR::MidiModel::PatchChangeDiffCommand::add)
+		.addFunction ("remove", &ARDOUR::MidiModel::PatchChangeDiffCommand::remove)
 		.endClass ()
 
 		.endNamespace () /* ARDOUR::MidiModel */
@@ -2029,6 +2089,14 @@ LuaBindings::common (lua_State* L)
 		.addRefFunction ("get_stats", &PluginInsert::get_stats)
 		.endClass ()
 
+		.deriveWSPtrClass <RegionFxPlugin, SessionObject> ("RegionFxPlugin")
+		.addFunction ("plugin", &RegionFxPlugin::plugin)
+		.addFunction ("signal_latency", &RegionFxPlugin::signal_latency)
+		.addFunction ("get_count", &RegionFxPlugin::get_count)
+		.addFunction ("type", &RegionFxPlugin::type)
+		.addFunction ("reset_parameters_to_default", &RegionFxPlugin::reset_parameters_to_default)
+		.endClass ()
+
 		.deriveWSPtrClass <MPControl<gain_t>, PBD::Controllable> ("MPGainControl")
 		.addFunction ("set_value", &MPControl<gain_t>::set_value)
 		.addFunction ("get_value", &MPControl<gain_t>::get_value)
@@ -2167,7 +2235,13 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("delay", &DelayLine::delay)
 		.endClass ()
 
-		.deriveWSPtrClass <PluginInsert::PluginControl, AutomationControl> ("PluginControl")
+		.deriveWSPtrClass <PlugInsertBase::PluginControl, AutomationControl> ("PluginControl")
+		.endClass ()
+
+		.deriveWSPtrClass <PlugInsertBase::PluginPropertyControl, AutomationControl> ("PluginPropertyControl")
+		.endClass ()
+
+		.deriveWSPtrClass <PluginInsert::PIControl, PlugInsertBase::PluginControl> ("PIControl")
 		.endClass ()
 
 		.beginClass <RawMidiParser> ("RawMidiParser")
@@ -2317,6 +2391,12 @@ LuaBindings::common (lua_State* L)
 		.beginStdList <std::shared_ptr<Evoral::Note<Temporal::Beats> > > ("NotePtrList")
 		.endClass ()
 
+		.beginStdList <std::shared_ptr<Evoral::Event<Temporal::Beats> > > ("EventPtrList")
+		.endClass ()
+
+		.beginStdList <std::shared_ptr<Evoral::PatchChange<Temporal::Beats> > > ("PatchChangePtrList")
+		.endClass ()
+
 		.beginConstStdCPtrList <Evoral::ControlEvent> ("EventList")
 		.endClass ()
 
@@ -2350,6 +2430,14 @@ LuaBindings::common (lua_State* L)
 		.addStaticCFunction ("midi",  &LuaAPI::datatype_ctor_midi)
 		.addFunction ("to_string",  &DataType::to_string) // TODO Lua __tostring
 		// TODO add uint32_t cast, add operator==  !=
+		.endClass()
+
+		/* libardour class-enums */
+		.beginClass <AnyTime> ("AnyTime")
+		.addConstructor <void (*) (std::string)> ()
+		.addFunction ("str", &AnyTime::str)
+		.addFunction ("not_zero", &AnyTime::not_zero)
+		//.addData ("type", &AnyTime::type)
 		.endClass()
 
 		/* libardour enums */
@@ -2468,6 +2556,12 @@ LuaBindings::common (lua_State* L)
 		.addConst ("MonitoringCue", ARDOUR::MonitorState(MonitoringCue))
 		.endNamespace ()
 
+		.beginNamespace ("FastWindOp")
+		.addConst ("FastWindOff", ARDOUR::FastWindOp(FastWindOff))
+		.addConst ("FastWindVarispeed", ARDOUR::FastWindOp(FastWindVarispeed))
+		.addConst ("FastWindLocate", ARDOUR::FastWindOp(FastWindLocate))
+		.endNamespace ()
+
 		.beginNamespace ("MutePoint")
 		.addConst ("PreFader", ARDOUR::MuteMaster::MutePoint(MuteMaster::PreFader))
 		.addConst ("PostFader", ARDOUR::MuteMaster::MutePoint(MuteMaster::PostFader))
@@ -2510,6 +2604,7 @@ LuaBindings::common (lua_State* L)
 		.beginNamespace ("MidiTrackNameSource")
 		.addConst ("SMFTrackNumber", ARDOUR::MidiTrackNameSource(SMFTrackNumber))
 		.addConst ("SMFTrackName", ARDOUR::MidiTrackNameSource(SMFTrackName))
+		.addConst ("SMFFileAndTrackName", ARDOUR::MidiTrackNameSource(SMFFileAndTrackName))
 		.addConst ("SMFInstrumentName", ARDOUR::MidiTrackNameSource(SMFInstrumentName))
 		.endNamespace ()
 
@@ -2843,8 +2938,6 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("sample_rate", &AudioBackend::sample_rate)
 		.addFunction ("buffer_size", &AudioBackend::buffer_size)
 		.addFunction ("period_size", &AudioBackend::period_size)
-		.addFunction ("input_channels", &AudioBackend::input_channels)
-		.addFunction ("output_channels", &AudioBackend::output_channels)
 		.addFunction ("dsp_load", &AudioBackend::dsp_load)
 
 		.addFunction ("set_sample_rate", &AudioBackend::set_sample_rate)
@@ -2935,7 +3028,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_" # var, &RCConfiguration::set_##var) \
 		.addProperty (#var, &RCConfiguration::get_##var, &RCConfiguration::set_##var)
 
-#include "ardour/rc_configuration_vars.h"
+#include "ardour/rc_configuration_vars.inc.h"
 
 #undef CONFIG_VARIABLE
 #undef CONFIG_VARIABLE_SPECIAL
@@ -2954,7 +3047,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_" # var, &SessionConfiguration::set_##var) \
 		.addProperty (#var, &SessionConfiguration::get_##var, &SessionConfiguration::set_##var)
 
-#include "ardour/session_configuration_vars.h"
+#include "ardour/session_configuration_vars.inc.h"
 
 #undef CONFIG_VARIABLE
 #undef CONFIG_VARIABLE_SPECIAL
@@ -2969,7 +3062,7 @@ LuaBindings::common (lua_State* L)
 	// functions which can be used from realtime and non-realtime contexts
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ARDOUR")
-		.beginClass <Session> ("Session")
+		.deriveClass <Session, PBD::HistoryOwner> ("Session")
 		.addFunction ("scripts_changed", &Session::scripts_changed) // used internally
 		.addFunction ("engine_speed", &Session::engine_speed)
 		.addFunction ("actual_speed", &Session::actual_speed)
@@ -3055,13 +3148,6 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_controls", &Session::set_controls)
 		.addFunction ("set_control", &Session::set_control)
 		.addFunction ("set_exclusive_input_active", &Session::set_exclusive_input_active)
-		.addFunction ("begin_reversible_command", (void (Session::*)(const std::string&))&Session::begin_reversible_command)
-		.addFunction ("commit_reversible_command", &Session::commit_reversible_command)
-		.addFunction ("abort_reversible_command", &Session::abort_reversible_command)
-		.addFunction ("collected_undo_commands", &Session::collected_undo_commands)
-		.addFunction ("abort_empty_reversible_command", &Session::abort_empty_reversible_command)
-		.addFunction ("add_command", &Session::add_command)
-		.addFunction ("add_stateful_diff_command", &Session::add_stateful_diff_command)
 		.addFunction ("playlists", &Session::playlists)
 		.addFunction ("engine", (AudioEngine& (Session::*)())&Session::engine)
 		.addFunction ("get_block_size", &Session::get_block_size)
@@ -3098,9 +3184,9 @@ LuaBindings::common (lua_State* L)
 		.beginNamespace ("Session")
 
 		.beginNamespace ("RecordState")
-		.addConst ("Disabled", ARDOUR::Session::RecordState(Session::Disabled))
-		.addConst ("Enabled", ARDOUR::Session::RecordState(Session::Enabled))
-		.addConst ("Recording", ARDOUR::Session::RecordState(Session::Recording))
+		.addConst ("Disabled", ARDOUR::RecordState(ARDOUR::Disabled))
+		.addConst ("Enabled", ARDOUR::RecordState(ARDOUR::Enabled))
+		.addConst ("Recording", ARDOUR::RecordState(ARDOUR::Recording))
 		.endNamespace ()
 
 		.endNamespace () // end Session enums
@@ -3112,12 +3198,15 @@ LuaBindings::common (lua_State* L)
 		.addConst ("IsAutoLoop", ARDOUR::Location::Flags(Location::IsAutoLoop))
 		.addConst ("IsHidden", ARDOUR::Location::Flags(Location::IsHidden))
 		.addConst ("IsCDMarker", ARDOUR::Location::Flags(Location::IsCDMarker))
-		.addConst ("IsCueMarker", ARDOUR::Location::Flags(Location::IsCueMarker))
-		.addConst ("IsSection", ARDOUR::Location::Flags(Location::IsSection))
 		.addConst ("IsRangeMarker", ARDOUR::Location::Flags(Location::IsRangeMarker))
 		.addConst ("IsSessionRange", ARDOUR::Location::Flags(Location::IsSessionRange))
 		.addConst ("IsSkip", ARDOUR::Location::Flags(Location::IsSkip))
 		.addConst ("IsSkipping", ARDOUR::Location::Flags(Location::IsSkipping))
+		.addConst ("IsClockOrigin", ARDOUR::Location::Flags(Location::IsClockOrigin))
+		.addConst ("IsXrun", ARDOUR::Location::Flags(Location::IsXrun))
+		.addConst ("IsCueMarker", ARDOUR::Location::Flags(Location::IsCueMarker))
+		.addConst ("IsSection", ARDOUR::Location::Flags(Location::IsSection))
+		.addConst ("IsScene", ARDOUR::Location::Flags(Location::IsScene))
 		.endNamespace ()
 
 		.beginNamespace ("LuaAPI")
@@ -3132,6 +3221,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("new_plugin_with_time_domain", ARDOUR::LuaAPI::new_plugin_with_time_domain)
 		.addFunction ("set_processor_param", ARDOUR::LuaAPI::set_processor_param)
 		.addFunction ("set_plugin_insert_param", ARDOUR::LuaAPI::set_plugin_insert_param)
+		.addFunction ("set_plugin_insert_property", ARDOUR::LuaAPI::set_plugin_insert_property)
+		.addCFunction ("get_plugin_insert_property", ARDOUR::LuaAPI::get_plugin_insert_property)
 		.addFunction ("reset_processor_to_default", ARDOUR::LuaAPI::reset_processor_to_default)
 		.addFunction ("set_automation_data", ARDOUR::LuaAPI::set_automation_data)
 		.addRefFunction ("get_processor_param", ARDOUR::LuaAPI::get_processor_param)
@@ -3149,6 +3240,8 @@ LuaBindings::common (lua_State* L)
 		.addCFunction ("build_filename", ARDOUR::LuaAPI::build_filename)
 		.addFunction ("new_noteptr", ARDOUR::LuaAPI::new_noteptr)
 		.addFunction ("note_list", ARDOUR::LuaAPI::note_list)
+		.addFunction ("sysex_list", ARDOUR::LuaAPI::sysex_list)
+		.addFunction ("patch_change_list", ARDOUR::LuaAPI::patch_change_list)
 		.addCFunction ("sample_to_timecode", ARDOUR::LuaAPI::sample_to_timecode)
 		.addCFunction ("timecode_to_sample", ARDOUR::LuaAPI::timecode_to_sample)
 		.addFunction ("wait_for_process_callback", ARDOUR::LuaAPI::wait_for_process_callback)
@@ -3228,6 +3321,12 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("execute", &DSP::FFTSpectrum::execute)
 		.addFunction ("power_at_bin", &DSP::FFTSpectrum::power_at_bin)
 		.addFunction ("freq_at_bin", &DSP::FFTSpectrum::freq_at_bin)
+		.endClass ()
+		.beginClass <DSP::StereoCorrelation> ("StereoCorrelation")
+		.addConstructor <void (*) (float, float, float)> ()
+		.addFunction ("process", &DSP::StereoCorrelation::process)
+		.addFunction ("read", &DSP::StereoCorrelation::read)
+		.addFunction ("reset", &DSP::StereoCorrelation::reset)
 		.endClass ()
 		.beginClass <DSP::Generator> ("Generator")
 		.addVoidConstructor ()
@@ -3416,6 +3515,9 @@ LuaBindings::session (lua_State* L)
 		.addFunction ("unknown_processors", &Session::unknown_processors)
 		.addFunction ("export_track_state", &Session::export_track_state)
 		.addFunction ("selection", &Session::selection)
+		.addFunction ("have_external_connections_for_current_backend", &Session::have_external_connections_for_current_backend)
+		.addFunction ("unnamed", &Session::unnamed)
+		.addFunction ("writable", &Session::writable)
 
 		.addFunction<RouteList (Session::*)(uint32_t, PresentationInfo::order_t, const std::string&, const std::string&, PlaylistDisposition)> ("new_route_from_template", &Session::new_route_from_template)
 		// TODO  session_add_audio_track  session_add_midi_track  session_add_mixed_track
@@ -3423,6 +3525,20 @@ LuaBindings::session (lua_State* L)
 		.endClass ()
 
 		.endNamespace (); // ARDOUR
+}
+
+void
+ARDOUR::Session::luabindings_session_rt (lua_State* L)
+{
+	/* declaration need to be in this file due to Windows CLASSKEYS */
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("ARDOUR")
+		.beginClass <Session> ("Session")
+		/* thse are private to Session */
+		.addFunction ("rt_set_controls", &Session::rt_set_controls)
+		.addFunction ("rt_clear_all_solo_state", &Session::rt_clear_all_solo_state)
+		.endClass ()
+		.endNamespace ();
 }
 
 void

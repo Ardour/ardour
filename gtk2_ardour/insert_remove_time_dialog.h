@@ -20,6 +20,7 @@
 #include "public_editor.h"
 #include "editing.h"
 #include "audio_clock.h"
+#include <ytkmm/comboboxtext.h>
 
 class InsertRemoveTimeDialog : public ArdourDialog
 {

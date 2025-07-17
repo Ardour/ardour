@@ -20,10 +20,10 @@
 #ifndef _WIDGETS_TEAROFF_H_
 #define _WIDGETS_TEAROFF_H_
 
-#include <gtkmm/arrow.h>
-#include <gtkmm/box.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/window.h>
+#include <ytkmm/arrow.h>
+#include <ytkmm/box.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/window.h>
 
 #include "widgets/visibility.h"
 

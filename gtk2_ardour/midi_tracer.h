@@ -19,20 +19,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_midi_tracer_h__
-#define __ardour_gtk_midi_tracer_h__
+#pragma once
 
 #include <atomic>
 
-#include <gtkmm/textview.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/togglebutton.h>
-#include <gtkmm/adjustment.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/label.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/box.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/togglebutton.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/label.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/box.h>
 
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"
@@ -124,4 +123,3 @@ private:
 	static unsigned int window_count;
 };
 
-#endif /* __ardour_gtk_midi_tracer_h__ */

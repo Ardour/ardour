@@ -48,7 +48,6 @@
 #include "ptformat/ptformat.h"
 
 #include "ardour_ui.h"
-#include "cursor_context.h"
 #include "editor.h"
 #include "sfdb_ui.h"
 #include "editing.h"

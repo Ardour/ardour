@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/treemodelfilter.h>
-#include <gtkmm/private/treemodelfilter_p.h>
+#include <ytkmm/treemodelfilter.h>
+#include <ytkmm/private/treemodelfilter_p.h>
 
 
 // -*- c++ -*-

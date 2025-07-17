@@ -26,17 +26,17 @@
 #include <algorithm>
 #include <iostream>
 
-#include <gtk/gtkpaned.h>
-#include <gtk/gtk.h>
+#include <ytk/gtkpaned.h>
+#include <ytk/ytk.h>
 
-#include <gtkmm/widget.h>
-#include <gtkmm/button.h>
-#include <gtkmm/window.h>
-#include <gtkmm/paned.h>
-#include <gtkmm/label.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/tooltip.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/button.h>
+#include <ytkmm/window.h>
+#include <ytkmm/paned.h>
+#include <ytkmm/label.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/tooltip.h>
+#include <ytkmm/menuitem.h>
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/persistent_tooltip.h"
@@ -194,10 +194,10 @@ Gtkmm2ext::pixbuf_from_string(const string& name, const Pango::FontDescription& 
 		int width, height;
 		pixel_size (name, font, width, height);
 		if (clip_width <= 0) {
-			clip_width = width - clip_width;
+			clip_width = width - clip_width;    /* this is an addition because clip_width is negative */
 		}
 		if (clip_height <= 0) {
-			clip_height = height - clip_height;
+			clip_height = height - clip_height; /* this is an addition because clip_height is negative */
 		}
 	}
 
@@ -589,6 +589,12 @@ Gtkmm2ext::container_clear (Gtk::Container& c, bool and_delete)
 }
 
 void
+Gtkmm2ext::rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double /*r*/)
+{
+	cairo_rectangle (context->cobj(), x, y, w, h);
+}
+
+void
 Gtkmm2ext::rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r)
 {
 	rounded_rectangle (context->cobj(), x, y, w, h, r);
@@ -607,6 +613,16 @@ void
 Gtkmm2ext::rounded_top_right_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r)
 {
 	rounded_top_right_rectangle (context->cobj(), x, y, w, h, r);
+}
+void
+Gtkmm2ext::rounded_bottom_left_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r)
+{
+	rounded_bottom_left_rectangle (context->cobj(), x, y, w, h, r);
+}
+void
+Gtkmm2ext::rounded_bottom_right_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r)
+{
+	rounded_bottom_right_rectangle (context->cobj(), x, y, w, h, r);
 }
 void
 Gtkmm2ext::rounded_top_half_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r)
@@ -632,6 +648,12 @@ Gtkmm2ext::rounded_right_half_rectangle (Cairo::RefPtr<Cairo::Context> context, 
 }
 
 void
+Gtkmm2ext::rectangle (cairo_t* cr, double x, double y, double w, double h, double /*r*/)
+{
+	cairo_rectangle (cr, x, y, w, h);
+}
+
+void
 Gtkmm2ext::rounded_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
 {
 	static const double degrees = M_PI / 180.0;
@@ -641,10 +663,10 @@ Gtkmm2ext::rounded_rectangle (cairo_t* cr, double x, double y, double w, double 
 	}
 
 	cairo_new_sub_path (cr);
-	cairo_arc (cr, x + w - r, y + r, r, -90 * degrees, 0 * degrees);  //tr
-	cairo_arc (cr, x + w - r, y + h - r, r, 0 * degrees, 90 * degrees);  //br
-	cairo_arc (cr, x + r, y + h - r, r, 90 * degrees, 180 * degrees);  //bl
-	cairo_arc (cr, x + r, y + r, r, 180 * degrees, 270 * degrees);  //tl
+	cairo_arc (cr, x + w - r, y + r, r, -90 * degrees, 0 * degrees); // tr
+	cairo_arc (cr, x + w - r, y + h - r, r, 0 * degrees, 90 * degrees); // br
+	cairo_arc (cr, x + r, y + h - r, r, 90 * degrees, 180 * degrees); // bl
+	cairo_arc (cr, x + r, y + r, r, 180 * degrees, 270 * degrees); // tl
 	cairo_close_path (cr);
 }
 
@@ -656,8 +678,8 @@ Gtkmm2ext::rounded_left_half_rectangle (cairo_t* cr, double x, double y, double 
 	cairo_new_sub_path (cr);
 	cairo_line_to (cr, x+w, y); // tr
 	cairo_line_to (cr, x+w, y + h); // br
-	cairo_arc (cr, x + r, y + h - r, r, 90 * degrees, 180 * degrees);  //bl
-	cairo_arc (cr, x + r, y + r, r, 180 * degrees, 270 * degrees);  //tl
+	cairo_arc (cr, x + r, y + h - r, r, 90 * degrees, 180 * degrees); // bl
+	cairo_arc (cr, x + r, y + r, r, 180 * degrees, 270 * degrees); // tl
 	cairo_close_path (cr);
 }
 
@@ -667,8 +689,8 @@ Gtkmm2ext::rounded_right_half_rectangle (cairo_t* cr, double x, double y, double
 	static const double degrees = M_PI / 180.0;
 
 	cairo_new_sub_path (cr);
-	cairo_arc (cr, x + w - r, y + r, r, -90 * degrees, 0 * degrees);  //tr
-	cairo_arc (cr, x + w - r, y + h - r, r, 0 * degrees, 90 * degrees);  //br
+	cairo_arc (cr, x + w - r, y + r, r, -90 * degrees, 0 * degrees); // tr
+	cairo_arc (cr, x + w - r, y + h - r, r, 0 * degrees, 90 * degrees); // br
 	cairo_line_to (cr, x, y + h); // bl
 	cairo_line_to (cr, x, y); // tl
 	cairo_close_path (cr);
@@ -682,8 +704,8 @@ Gtkmm2ext::rounded_top_half_rectangle (cairo_t* cr, double x, double y, double w
 	cairo_new_sub_path (cr);
 	cairo_move_to (cr, x+w, y+h);
 	cairo_line_to (cr, x, y+h);
-	cairo_arc (cr, x + r, y + r, r, 180 * degrees, 270 * degrees);  //tl
-	cairo_arc (cr, x + w - r, y + r, r, -90 * degrees, 0 * degrees);  //tr
+	cairo_arc (cr, x + r, y + r, r, 180 * degrees, 270 * degrees); // tl
+	cairo_arc (cr, x + w - r, y + r, r, -90 * degrees, 0 * degrees); // tr
 	cairo_close_path (cr);
 }
 
@@ -695,8 +717,8 @@ Gtkmm2ext::rounded_bottom_half_rectangle (cairo_t* cr, double x, double y, doubl
 	cairo_new_sub_path (cr);
 	cairo_move_to (cr, x, y);
 	cairo_line_to (cr, x+w, y);
-	cairo_arc (cr, x + w - r, y + h - r, r, 0 * degrees, 90 * degrees);  //br
-	cairo_arc (cr, x + r, y + h - r, r, 90 * degrees, 180 * degrees);  //bl
+	cairo_arc (cr, x + w - r, y + h - r, r, 0 * degrees, 90 * degrees); // br
+	cairo_arc (cr, x + r, y + h - r, r, 90 * degrees, 180 * degrees); // bl
 	cairo_close_path (cr);
 }
 
@@ -709,15 +731,17 @@ Gtkmm2ext::rounded_top_rectangle (cairo_t* cr, double x, double y, double w, dou
 	cairo_new_sub_path (cr);
 	cairo_move_to (cr, x+w, y+h);
 	cairo_line_to (cr, x, y+h);
-	cairo_arc (cr, x + r, y + r, r, 180 * degrees, 270 * degrees);  //tl
-	cairo_arc (cr, x + w - r, y + r, r, -90 * degrees, 0 * degrees);  //tr
+	cairo_arc (cr, x + r, y + r, r, 180 * degrees, 270 * degrees); // tl
+	cairo_arc (cr, x + w - r, y + r, r, -90 * degrees, 0 * degrees); // tr
 	cairo_close_path (cr);
 }
 
 void
 Gtkmm2ext::rounded_top_left_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
 {
-/*    A****B
+	static const double degrees = M_PI / 180.0;
+
+/*     A***B
       H    *
       *    *
       *    *
@@ -728,13 +752,15 @@ Gtkmm2ext::rounded_top_left_rectangle (cairo_t* cr, double x, double y, double w
 	cairo_line_to (cr, x+w,y+h); // Move to E
 	cairo_line_to (cr, x,y+h); // Line to F
 	cairo_line_to (cr, x,y+r); // Line to H
-	cairo_curve_to (cr, x,y,x,y,x+r,y); // Curve to A
+	cairo_arc (cr, x + r, y + r, r, 180 * degrees, 270 * degrees); // tl
 }
 
 void
 Gtkmm2ext::rounded_top_right_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
 {
-/*    A****BQ
+	static const double degrees = M_PI / 180.0;
+
+/*    A***BX
       *    C
       *    *
       *    *
@@ -742,9 +768,47 @@ Gtkmm2ext::rounded_top_right_rectangle (cairo_t* cr, double x, double y, double 
 */
 	cairo_move_to (cr, x,y); // Move to A
 	cairo_line_to (cr, x+w-r,y); // Straight line to B
-	cairo_curve_to (cr, x+w,y,x+w,y,x+w,y+r); // Curve to C, Control points are both at Q
+	cairo_arc (cr, x + w - r, y + r, r, -90 * degrees, 0 * degrees); // tr
 	cairo_line_to (cr, x+w,y+h); // Move to E
 	cairo_line_to (cr, x,y+h); // Line to F
+	cairo_line_to (cr, x,y); // Line to A
+}
+
+void
+Gtkmm2ext::rounded_bottom_left_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
+{
+	static const double degrees = M_PI / 180.0;
+
+/*    A****B
+      *    *
+      *    *
+      G    *
+       F***E
+*/
+	cairo_move_to (cr, x,y); // Move to A
+	cairo_line_to (cr, x+w,y); // Straight line to B
+	cairo_line_to (cr, x+w,y+h); // Move to E
+	cairo_line_to (cr, x+r,y+h); // Line to F
+	cairo_arc (cr, x + r, y + h - r, r, 90 * degrees, 180 * degrees); // bl
+	cairo_line_to (cr, x,y); // Line to A
+}
+
+void
+Gtkmm2ext::rounded_bottom_right_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
+{
+	static const double degrees = M_PI / 180.0;
+
+/*    A****B
+      *    *
+      *    *
+      *    C
+      E***DX
+*/
+	cairo_move_to (cr, x,y); // Move to A
+	cairo_line_to (cr, x+w,y); // Straight line to B
+	cairo_line_to (cr, x+w,y+h-r); // to C
+	cairo_arc (cr, x + w - r, y + h - r, r, 0 * degrees, 90 * degrees); // br
+	cairo_line_to (cr, x,y+h); // Line to E
 	cairo_line_to (cr, x,y); // Line to A
 }
 

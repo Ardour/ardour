@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_vca_manager_h__
-#define __libardour_vca_manager_h__
+#pragma once
 
 #include <string>
 #include <list>
@@ -53,8 +52,8 @@ public:
 	VCAList vcas() const;
 	VCAList::size_type n_vcas() const { return _vcas.size(); }
 
-	PBD::Signal1<void,VCAList&> VCAAdded;
-	PBD::Signal0<void> VCACreated; /*<< is not emitted during set_state */
+	PBD::Signal<void(VCAList&)> VCAAdded;
+	PBD::Signal<void()> VCACreated; /*<< is not emitted during set_state */
 
 	XMLNode& get_state() const;
 	int set_state (XMLNode const&, int version);
@@ -74,4 +73,3 @@ private:
 
 } // namespace
 
-#endif /* __libardour_vca_manager_h__ */

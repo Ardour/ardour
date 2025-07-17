@@ -24,6 +24,8 @@
 #include "pbd/error.h"
 #include "pbd/debug.h"
 
+#include "temporal/beats.h"
+
 #include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_state_tracker.h"
@@ -33,7 +35,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-RTMidiBuffer::RTMidiBuffer ()
+template<class TimeType, class DistanceType>
+RTMidiBufferBase<TimeType,DistanceType>::RTMidiBufferBase ()
 	: _size (0)
 	, _capacity (0)
 	, _data (0)
@@ -44,14 +47,16 @@ RTMidiBuffer::RTMidiBuffer ()
 {
 }
 
-RTMidiBuffer::~RTMidiBuffer()
+template<class TimeType, class DistanceType>
+RTMidiBufferBase<TimeType,DistanceType>::~RTMidiBufferBase()
 {
 	cache_aligned_free (_data);
 	cache_aligned_free (_pool);
 }
 
+template<class TimeType, class DistanceType>
 void
-RTMidiBuffer::resize (size_t size)
+RTMidiBufferBase<TimeType,DistanceType>::resize (size_t size)
 {
 	if (_data && size < _capacity) {
 
@@ -69,21 +74,23 @@ RTMidiBuffer::resize (size_t size)
 
 	if (_size) {
 		assert (old_data);
-		memcpy (_data, old_data, _size * sizeof (Item));
+		memcpy ((void*) _data, (void*) old_data, _size * sizeof (Item));
 		cache_aligned_free (old_data);
 	}
 
 	_capacity = size;
 }
 
+template<class TimeType, class DistanceType>
 bool
-RTMidiBuffer::reversed () const
+RTMidiBufferBase<TimeType,DistanceType>::reversed () const
 {
 	return _reversed;
 }
 
+template<class TimeType, class DistanceType>
 void
-RTMidiBuffer::reverse ()
+RTMidiBufferBase<TimeType,DistanceType>::reverse ()
 {
 	if (_size == 0) {
 		return;
@@ -148,8 +155,9 @@ RTMidiBuffer::reverse ()
 	_reversed = !_reversed;
 }
 
+template<class TimeType, class DistanceType>
 void
-RTMidiBuffer::dump (uint32_t cnt)
+RTMidiBufferBase<TimeType,DistanceType>::dump (uint32_t cnt)
 {
 	cerr << this << " total items: " << _size << " within " << _capacity << " blob pool: " << _pool_capacity << " used " << _pool_size << endl;
 
@@ -187,8 +195,9 @@ RTMidiBuffer::dump (uint32_t cnt)
 	}
 }
 
+template<class TimeType, class DistanceType>
 uint32_t
-RTMidiBuffer::write (TimeType time, Evoral::EventType /*type*/, uint32_t size, const uint8_t* buf)
+RTMidiBufferBase<TimeType,DistanceType>::write (TimeType time, Evoral::EventType /*type*/, uint32_t size, const uint8_t* buf)
 {
 	/* This buffer stores only MIDI, we don't care about the value of "type" */
 
@@ -238,21 +247,16 @@ RTMidiBuffer::write (TimeType time, Evoral::EventType /*type*/, uint32_t size, c
 /*
 static
 bool
-item_timestamp_earlier (ARDOUR::RTMidiBuffer::Item const & item, samplepos_t const & time)
+item_timestamp_earlier (ARDOUR::template<class TimeType, class DistanceType>
+RTMidiBufferBase<TimeType,DistanceType>::Item const & item, samplepos_t const & time)
 {
 	return item.timestamp < time;
 }
 */
 
-static
-bool
-item_item_earlier (ARDOUR::RTMidiBuffer::Item const & item, ARDOUR::RTMidiBuffer::Item const & other)
-{
-	return item.timestamp < other.timestamp;
-}
-
+template<class TimeType, class DistanceType>
 void
-RTMidiBuffer::track (MidiStateTracker& mst, samplepos_t start, samplepos_t end)
+RTMidiBufferBase<TimeType,DistanceType>::track (MidiStateTracker& mst, TimeType start, TimeType end)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_lock, Glib::Threads::TRY_LOCK);
 
@@ -268,13 +272,13 @@ RTMidiBuffer::track (MidiStateTracker& mst, samplepos_t start, samplepos_t end)
 
 	if (start < end) {
 		iend = _data+_size;
-		item = lower_bound (_data, iend, foo, item_item_earlier);
+		item = lower_bound (_data, iend, foo, [](Item const & a, Item const & b) { return a.timestamp < b.timestamp; });
 		reverse = false;
 	} else {
 		iend = _data;
 		--iend; /* yes, this is technically "illegal" but we will never indirect */
 		Item* uend = _data + _size;
-		item = upper_bound (_data, uend, foo, item_item_earlier);
+		item = upper_bound (_data, uend, foo, [](Item const & a, Item const & b) { return a.timestamp < b.timestamp; });
 
 		if (item == uend) {
 			--item;
@@ -330,8 +334,9 @@ RTMidiBuffer::track (MidiStateTracker& mst, samplepos_t start, samplepos_t end)
 	}
 }
 
+template<class TimeType, class DistanceType>
 uint32_t
-RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiNoteTracker& tracker, samplecnt_t offset)
+RTMidiBufferBase<TimeType,DistanceType>::read (MidiBuffer& dst, TimeType start, TimeType  end, MidiNoteTracker& tracker, DistanceType offset)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_lock, Glib::Threads::TRY_LOCK);
 
@@ -348,13 +353,13 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiNot
 
 	if (start < end) {
 		iend = _data+_size;
-		item = lower_bound (_data, iend, foo, item_item_earlier);
+		item = lower_bound (_data, iend, foo, [](Item const & a, Item const & b) { return a.timestamp < b.timestamp; });
 		reverse = false;
 	} else {
 		iend = _data;
 		--iend; /* yes, this is technically "illegal" but we will never indirect */
 		Item* uend = _data + _size;
-		item = upper_bound (_data, uend, foo, item_item_earlier);
+		item = upper_bound (_data, uend, foo, [](Item const & a, Item const & b) { return a.timestamp < b.timestamp; });
 
 		if (item == uend) {
 			--item;
@@ -418,7 +423,9 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiNot
 
 		}
 
-		if (!dst.push_back (evtime, Evoral::MIDI_EVENT, size, addr)) {
+		const samplepos_t evsamples (timepos_t (evtime).samples());
+
+		if (!dst.push_back (evsamples, Evoral::MIDI_EVENT, size, addr)) {
 			DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("MidiRingBuffer: overflow in destination MIDI buffer, stopped after %1 events, dst size = %2\n", count, dst.size()));
 			break;
 		}
@@ -448,8 +455,9 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiNot
 	return count;
 }
 
+template<class TimeType, class DistanceType>
 uint32_t
-RTMidiBuffer::alloc_blob (uint32_t size)
+RTMidiBufferBase<TimeType,DistanceType>::alloc_blob (uint32_t size)
 {
 	if (_pool_size + size > _pool_capacity) {
 		uint8_t* old_pool = _pool;
@@ -471,8 +479,9 @@ RTMidiBuffer::alloc_blob (uint32_t size)
 	return offset;
 }
 
+template<class TimeType, class DistanceType>
 uint32_t
-RTMidiBuffer::store_blob (uint32_t size, uint8_t const * data)
+RTMidiBufferBase<TimeType,DistanceType>::store_blob (uint32_t size, uint8_t const * data)
 {
 	uint32_t offset = alloc_blob (size);
 	uint8_t* addr = &_pool[offset];
@@ -484,8 +493,9 @@ RTMidiBuffer::store_blob (uint32_t size, uint8_t const * data)
 	return offset;
 }
 
+template<class TimeType, class DistanceType>
 void
-RTMidiBuffer::clear ()
+RTMidiBufferBase<TimeType,DistanceType>::clear ()
 {
 	/* mark main array as empty */
 	_size = 0;
@@ -495,11 +505,12 @@ RTMidiBuffer::clear ()
 	_reversed = false;
 }
 
-samplecnt_t
-RTMidiBuffer::span() const
+template<class TimeType, class DistanceType>
+DistanceType
+RTMidiBufferBase<TimeType,DistanceType>::span() const
 {
 	if (_size == 0 || _size == 1) {
-		return 0;
+		return DistanceType ();
 	}
 
 	const Item* last = &_data[_size-1];
@@ -508,3 +519,56 @@ RTMidiBuffer::span() const
 	return last->timestamp - first->timestamp;
 }
 
+template<class TimeType, class DistanceType>
+void
+RTMidiBufferBase<TimeType,DistanceType>::track_state (TimeType when, MidiStateTracker& mst) const
+{
+	uint32_t evsize;
+
+	for (uint32_t index = 0; index < _size; ++index) {
+		if (_data[index].timestamp >= when) {
+			break;
+		}
+		mst.track (bytes (_data[index], evsize));
+	}
+}
+
+template<class TimeType, class DistanceType>
+void
+RTMidiBufferBase<TimeType,DistanceType>::convert (RTMidiBufferBase<Temporal::Beats,Temporal::Beats>& beats)
+{
+	/* Convert timestamps, taking advantage of the fact that beats and
+	 * samples are both 64 bit integers, and thus Item::timestamp is the
+	 * same size and type for both.
+	 */
+
+	for (uint32_t n = 0; n < _size; ++n) {
+		auto item = &_data[n];
+		Temporal::Beats b = timepos_t (item->timestamp).beats ();
+		item->timestamp = b.to_ticks ();
+	}
+
+	/* Hand over all the data */
+
+	beats._data = reinterpret_cast<RTMidiBufferBase<Temporal::Beats,Temporal::Beats>::Item*> (_data);
+	beats._size = _size;
+	beats._capacity = _capacity;
+	beats._reversed = _reversed;
+	beats._pool = _pool;
+	beats._pool_size = _pool_size;
+	beats._pool_size = _pool_size;
+
+	_data = nullptr;
+	_pool = nullptr;
+	_size = 0;
+	_pool_size = 0;
+	_pool_capacity = 0;
+}
+
+
+
+// Explicit instantiation
+namespace ARDOUR {
+template class RTMidiBufferBase<samplepos_t,samplecnt_t>;
+template class RTMidiBufferBase<Temporal::Beats,Temporal::Beats>;
+}

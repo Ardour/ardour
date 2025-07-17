@@ -1,7 +1,7 @@
 #ifndef SUPPORT_H
 #define SUPPORT_H
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 #include <math.h>
 #include <string.h>
 

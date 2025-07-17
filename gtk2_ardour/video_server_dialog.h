@@ -15,18 +15,17 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __gtk_ardour_video_server_dialog_h__
-#define __gtk_ardour_video_server_dialog_h__
+#pragma once
 
 #include <string>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/button.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/label.h>
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/button.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/label.h>
+#include <ytkmm/spinbutton.h>
 
 #include "ardour/types.h"
 #include "ardour/template_utils.h"
@@ -69,4 +68,3 @@ private:
 	Gtk::CheckButton  showagain_checkbox;
 };
 
-#endif /* __gtk_ardour_video_server_dialog_h__ */

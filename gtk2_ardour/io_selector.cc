@@ -65,7 +65,7 @@ IOSelector::IOSelector (Gtk::Window* p, ARDOUR::Session* session, std::shared_pt
 	_port_group.reset (new PortGroup (io->name()));
 	_ports[_ours].add_group (_port_group);
 
-	io->changed.connect (_io_connection, invalidator (*this), boost::bind (&IOSelector::io_changed_proxy, this), gui_context ());
+	io->changed.connect (_io_connection, invalidator (*this), std::bind (&IOSelector::io_changed_proxy, this), gui_context ());
 
 	setup_all_ports ();
 	init ();
@@ -79,7 +79,7 @@ IOSelector::setup_type ()
 	int N = 0;
 	DataType type_with_ports = DataType::NIL;
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-		if (_io->ports().num_ports (*i)) {
+		if (_io->ports()->num_ports (*i)) {
 			type_with_ports = *i;
 			++N;
 		}
@@ -162,7 +162,7 @@ IOSelector::set_state (ARDOUR::BundleChannel c[2], bool s)
 PortMatrixNode::State
 IOSelector::get_state (ARDOUR::BundleChannel c[2]) const
 {
-	if (c[0].bundle->nchannels() == ChanCount::ZERO || c[1].bundle->nchannels() == ChanCount::ZERO) {
+	if (c[0].nchannels() == ChanCount::ZERO || c[1].nchannels() == ChanCount::ZERO) {
 		return PortMatrixNode::NOT_ASSOCIATED;
 	}
 

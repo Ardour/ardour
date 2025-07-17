@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_editing_h__
-#define __gtk_ardour_editing_h__
+#pragma once
 
 #include <string>
 #include <map>
@@ -51,7 +50,7 @@ namespace Editing {
 #undef GRIDTYPE
 #define GRIDTYPE(a) a,
 enum GridType {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 };
 
 static const int      DRAW_VEL_AUTO = -1;
@@ -69,7 +68,7 @@ GridType str2gridtype(const std::string &);
 #undef SNAPMODE
 #define SNAPMODE(a) a,
 enum SnapMode {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 };
 
 extern const char *snapmodestrs[];
@@ -83,7 +82,7 @@ SnapMode str2snapmode(const std::string &);
 #undef REGIONLISTSORTTYPE
 #define REGIONLISTSORTTYPE(a) a,
 enum RegionListSortType {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 };
 
 extern const char *regionlistsorttypestrs[];
@@ -97,7 +96,7 @@ RegionListSortType str2regionlistsorttype(const std::string &);
 #undef MOUSEMODE
 #define MOUSEMODE(a) a,
 enum MouseMode {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 };
 
 extern const char *mousemodestrs[];
@@ -111,7 +110,7 @@ MouseMode str2mousemode(const std::string &);
 #undef MIDIEDITMODE
 #define MIDIEDITMODE(a) a,
 enum MidiEditMode {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 };
 
 extern const char *midieditmodestrs[];
@@ -125,7 +124,7 @@ MidiEditMode str2midieditmode(const std::string &);
 #undef ZOOMFOCUS
 #define ZOOMFOCUS(a) a,
 enum ZoomFocus {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 };
 
 extern const char *zoomfocusstrs[];
@@ -139,7 +138,7 @@ ZoomFocus str2zoomfocus(const std::string &);
 #undef DISPLAYCONTROL
 #define DISPLAYCONTROL(a) a,
 enum DisplayControl {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 };
 
 extern const char *displaycontrolstrs[];
@@ -154,7 +153,7 @@ DisplayControl str2displaycontrol (const std::string &);
 #undef IMPORTMODE
 #define IMPORTMODE(a) a,
 enum ImportMode {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 };
 
 #undef IMPORTMODE
@@ -164,7 +163,7 @@ enum ImportMode {
 #undef IMPORTPOSITION
 #define IMPORTPOSITION(a) a,
 enum ImportPosition {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 };
 
 #undef IMPORTPOSITION
@@ -174,7 +173,7 @@ enum ImportPosition {
 #undef IMPORTDISPOSITION
 #define IMPORTDISPOSITION(a) a,
 enum ImportDisposition {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 };
 
 #undef IMPORTDISPOSITION
@@ -184,7 +183,7 @@ enum ImportDisposition {
 #undef EDITPOINT
 #define EDITPOINT(a) a,
 enum EditPoint {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 };
 
 #undef EDITPOINT
@@ -194,7 +193,7 @@ enum EditPoint {
 #undef INSERTTIMEOPT
 #define INSERTTIMEOPT(a) a,
 enum InsertTimeOption {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 };
 
 #undef INSERTTIMEOPT
@@ -203,7 +202,7 @@ enum InsertTimeOption {
 #undef NOTENAMEDISPLAY
 #define NOTENAMEDISPLAY(a) a,
 enum NoteNameDisplay {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 };
 
 extern const char *notenamedisplaystrs[];
@@ -215,7 +214,7 @@ inline const char* enum2str(NoteNameDisplay m) {return notenamedisplaystrs[m];}
 #undef MARKERCLICKBEHAVIOR
 #define MARKERCLICKBEHAVIOR(a) a,
 enum MarkerClickBehavior {
-	#include "editing_syms.h"
+	#include "editing_syms.inc.h"
 };
 #undef MARKERCLICKBEHAVIOR
 #define MARKERCLICKBEHAVIOR(a) /*empty*/
@@ -261,4 +260,3 @@ enum RegionActionTarget {
 
 } // namespace Editing
 
-#endif // __gtk_ardour_editing_h__

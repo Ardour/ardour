@@ -33,7 +33,7 @@
 #include "gtkaccelmap.h"
 #include "gtkintl.h"
 #include "gtkmain.h"		/* For _gtk_boolean_handled_accumulator */
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 #include "gtkmarshalers.h"
 #include "gtkprivate.h"
 #include "gtkalias.h"

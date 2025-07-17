@@ -17,16 +17,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __pbd_gtkmm_textviewer_h__
-#define __pbd_gtkmm_textviewer_h__
+#pragma once
 
 #include <string>
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/textview.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/window.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/window.h>
 
 #include "pbd/transmitter.h"
 
@@ -59,4 +58,3 @@ class LIBGTKMM2EXT_API TextViewer : public Gtk::Window, public Transmitter
 
 } /* namespace */
 
-#endif  // __pbd_gtkmm_textviewer_h__

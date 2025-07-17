@@ -150,7 +150,7 @@ MIDIControllable::set_controllable (std::shared_ptr<PBD::Controllable> c)
 	last_incoming = 256;
 
 	if (c) {
-		c->DropReferences.connect_same_thread (controllable_death_connection, boost::bind (&MIDIControllable::drop_controllable, this));
+		c->DropReferences.connect_same_thread (controllable_death_connection, std::bind (&MIDIControllable::drop_controllable, this));
 	}
 }
 
@@ -161,7 +161,7 @@ MIDIControllable::bind_remap (std::shared_ptr<ARDOUR::Stripable> s)
 	if (!s) {
 		return;
 	}
-	s->MappedControlsChanged.connect (controllable_remapped_connection, MISSING_INVALIDATOR, boost::bind (&MIDIControllable::lookup_controllable, this), _surface);
+	s->MappedControlsChanged.connect (controllable_remapped_connection, MISSING_INVALIDATOR, std::bind (&MIDIControllable::lookup_controllable, this), _surface);
 }
 
 void
@@ -178,7 +178,7 @@ void
 MIDIControllable::learn_about_external_control ()
 {
 	drop_external_control ();
-	_parser.any.connect_same_thread (midi_learn_connection, boost::bind (&MIDIControllable::midi_receiver, this, _1, _2, _3));
+	_parser.any.connect_same_thread (midi_learn_connection, std::bind (&MIDIControllable::midi_receiver, this, _1, _2, _3));
 }
 
 void
@@ -327,6 +327,10 @@ MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /*is_on*/)
 void
 MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 {
+	if (control_additional != msg->controller_number) {
+		return;
+	}
+
 	if (!_controllable) {
 		if (lookup_controllable ()) {
 			return;
@@ -337,109 +341,106 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 
 	_surface->maybe_start_touch (_controllable);
 
-	if (control_additional == msg->controller_number) {
+	if (!_controllable->is_toggle()) {
+		if (get_encoder() == No_enc) {
+			float new_value = msg->value;
+			float max_value = max(last_controllable_value, new_value);
+			float min_value = min(last_controllable_value, new_value);
+			float range = max_value - min_value;
+			float threshold = (float) _surface->threshold ();
 
-		if (!_controllable->is_toggle()) {
-			if (get_encoder() == No_enc) {
-				float new_value = msg->value;
-				float max_value = max(last_controllable_value, new_value);
-				float min_value = min(last_controllable_value, new_value);
-				float range = max_value - min_value;
-				float threshold = (float) _surface->threshold ();
+			bool const in_sync = (
+				range < threshold &&
+				_controllable->get_value() <= midi_to_control(max_value) &&
+				_controllable->get_value() >= midi_to_control(min_value)
+				);
 
-				bool const in_sync = (
-					range < threshold &&
-					_controllable->get_value() <= midi_to_control(max_value) &&
-					_controllable->get_value() >= midi_to_control(min_value)
-					);
+			/* If the surface is not motorised, we try to prevent jumps when
+			   the MIDI controller and controllable are out of sync.
+			   There might be a better way of doing this.
+			*/
 
-				/* If the surface is not motorised, we try to prevent jumps when
-				   the MIDI controller and controllable are out of sync.
-				   There might be a better way of doing this.
-				*/
-
-				if (in_sync || _surface->motorised ()) {
-					_controllable->set_value (midi_to_control (new_value), Controllable::UseGroup);
-				}
-				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (float) midi_to_control(new_value), current_uri() ));
-
-				last_controllable_value = new_value;
-			} else {
-				uint32_t cur_val = control_to_midi(_controllable->get_value ());
-				int offset = (msg->value & 0x3f);
-				switch (get_encoder()) {
-					case Enc_L:
-						if (msg->value & 0x40) {
-							_controllable->set_value (midi_to_control (cur_val - offset), Controllable::UseGroup);
-						} else {
-							_controllable->set_value (midi_to_control (cur_val + offset + 1), Controllable::UseGroup);
-						}
-						break;
-					case Enc_R:
-						if (msg->value & 0x40) {
-							_controllable->set_value (midi_to_control (cur_val + offset + 1), Controllable::UseGroup);
-						} else {
-							_controllable->set_value (midi_to_control (cur_val - offset), Controllable::UseGroup);
-						}
-						break;
-					case Enc_2:
-						// 0x40 is max pos offset
-						if (msg->value > 0x40) {
-							_controllable->set_value (midi_to_control (cur_val - (0x7f - msg->value)), Controllable::UseGroup);
-						} else {
-							_controllable->set_value (midi_to_control (cur_val + msg->value + 1), Controllable::UseGroup);
-						}
-						break;
-					case Enc_B:
-						if (msg->value > 0x40) {
-							_controllable->set_value (midi_to_control (cur_val + offset + 1), Controllable::UseGroup);
-						} else if (msg->value < 0x40) {
-							_controllable->set_value (midi_to_control (cur_val - (0x40 - msg->value)), Controllable::UseGroup);
-						} // 0x40 = 0 do nothing
-						break;
-					default:
-						break;
-				}
-				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (int) cur_val, current_uri() ));
-
+			if (in_sync || _surface->motorised ()) {
+				_controllable->set_value (midi_to_control (new_value), Controllable::UseGroup);
 			}
-		} else {
+			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (float) midi_to_control(new_value), current_uri() ));
 
-			switch (get_ctltype()) {
-			case Ctl_Dial:
-				/* toggle value whenever direction of knob motion changes */
-				if (last_incoming > 127) {
-					/* relax ... first incoming message */
-				} else {
-					if (msg->value > last_incoming) {
-						_controllable->set_value (1.0, Controllable::UseGroup);
+			last_controllable_value = new_value;
+		} else {
+			uint32_t cur_val = control_to_midi(_controllable->get_value ());
+			int offset = (msg->value & 0x3f);
+			switch (get_encoder()) {
+				case Enc_L:
+					if (msg->value & 0x40) {
+						_controllable->set_value (midi_to_control (cur_val - offset), Controllable::UseGroup);
 					} else {
-						_controllable->set_value (0.0, Controllable::UseGroup);
+						_controllable->set_value (midi_to_control (cur_val + offset + 1), Controllable::UseGroup);
 					}
-					DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("dial Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
-				}
-				last_incoming = msg->value;
-				break;
-			case Ctl_Momentary:
-				/* toggle it if over 64, otherwise leave it alone. This behaviour that works with buttons which send a value > 64 each
-				 * time they are pressed.
-				 */
-				if (msg->value >= 0x40) {
-					_controllable->set_value (_controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
-					DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("toggle Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
-				}
-				break;
-			case Ctl_Toggle:
-				/* toggle if value is over 64, otherwise turn it off. This is behaviour designed for buttons which send a value > 64 when pressed,
-				   maintain state (i.e. they know they were pressed) and then send zero the next time.
-				*/
-				if (msg->value >= 0x40) {
-					_controllable->set_value (_controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
-				} else {
-					_controllable->set_value (0.0, Controllable::NoGroup);
-					DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 0  %2\n", (int) msg->controller_number, current_uri()));
 					break;
+				case Enc_R:
+					if (msg->value & 0x40) {
+						_controllable->set_value (midi_to_control (cur_val + offset + 1), Controllable::UseGroup);
+					} else {
+						_controllable->set_value (midi_to_control (cur_val - offset), Controllable::UseGroup);
+					}
+					break;
+				case Enc_2:
+					// 0x40 is max pos offset
+					if (msg->value > 0x40) {
+						_controllable->set_value (midi_to_control (cur_val - (0x7f - msg->value)), Controllable::UseGroup);
+					} else {
+						_controllable->set_value (midi_to_control (cur_val + msg->value + 1), Controllable::UseGroup);
+					}
+					break;
+				case Enc_B:
+					if (msg->value > 0x40) {
+						_controllable->set_value (midi_to_control (cur_val + offset + 1), Controllable::UseGroup);
+					} else if (msg->value < 0x40) {
+						_controllable->set_value (midi_to_control (cur_val - (0x40 - msg->value)), Controllable::UseGroup);
+					} // 0x40 = 0 do nothing
+					break;
+				default:
+					break;
+			}
+			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (int) cur_val, current_uri() ));
+
+		}
+	} else {
+
+		switch (get_ctltype()) {
+		case Ctl_Dial:
+			/* toggle value whenever direction of knob motion changes */
+			if (last_incoming > 127) {
+				/* relax ... first incoming message */
+			} else {
+				if (msg->value > last_incoming) {
+					_controllable->set_value (1.0, Controllable::UseGroup);
+				} else {
+					_controllable->set_value (0.0, Controllable::UseGroup);
 				}
+				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("dial Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
+			}
+			last_incoming = msg->value;
+			break;
+		case Ctl_Momentary:
+			/* toggle it if over 64, otherwise leave it alone. This behaviour that works with buttons which send a value > 64 each
+			 * time they are pressed.
+			 */
+			if (msg->value >= 0x40) {
+				_controllable->set_value (_controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
+				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("toggle Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
+			}
+			break;
+		case Ctl_Toggle:
+			/* toggle if value is over 64, otherwise turn it off. This is behaviour designed for buttons which send a value > 64 when pressed,
+			   maintain state (i.e. they know they were pressed) and then send zero the next time.
+			*/
+			if (msg->value >= 0x40) {
+				_controllable->set_value (_controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
+			} else {
+				_controllable->set_value (0.0, Controllable::NoGroup);
+				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 0  %2\n", (int) msg->controller_number, current_uri()));
+				break;
 			}
 		}
 	}
@@ -448,6 +449,10 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 void
 MIDIControllable::midi_sense_program_change (Parser &, MIDI::byte msg)
 {
+	if (msg != control_additional) {
+		return;
+	}
+
 	if (!_controllable) {
 		if (lookup_controllable ()) {
 			return;
@@ -458,16 +463,13 @@ MIDIControllable::midi_sense_program_change (Parser &, MIDI::byte msg)
 
 	_surface->maybe_start_touch (_controllable);
 
-	if (msg == control_additional) {
-
-		if (!_controllable->is_toggle()) {
-			_controllable->set_value (1.0, Controllable::UseGroup);
-			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value 1.0  %3\n", (int) msg, current_uri() ));
-		} else  {
-			float new_value = _controllable->get_value() > 0.5f ? 0.0f : 1.0f;
-			_controllable->set_value (new_value, Controllable::UseGroup);
-			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value %2  %3\n", (int) msg, (float) new_value, current_uri()));
-		}
+	if (!_controllable->is_toggle()) {
+		_controllable->set_value (1.0, Controllable::UseGroup);
+		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value 1.0  %3\n", (int) msg, current_uri() ));
+	} else  {
+		float new_value = _controllable->get_value() > 0.5f ? 0.0f : 1.0f;
+		_controllable->set_value (new_value, Controllable::UseGroup);
+		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value %2  %3\n", (int) msg, (float) new_value, current_uri()));
 	}
 
 	last_value = (MIDI::byte) (_controllable->get_value() * 127.0); // to prevent feedback fights
@@ -585,7 +587,7 @@ MIDIControllable::bind_rpn_value (channel_t chn, uint16_t rpn)
 	drop_external_control ();
 	control_rpn = rpn;
 	control_channel = chn;
-	_parser.channel_rpn[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::rpn_value_change, this, _1, _2, _3));
+	_parser.channel_rpn[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::rpn_value_change, this, _1, _2, _3));
 }
 
 void
@@ -595,7 +597,7 @@ MIDIControllable::bind_nrpn_value (channel_t chn, uint16_t nrpn)
 	drop_external_control ();
 	control_nrpn = nrpn;
 	control_channel = chn;
-	_parser.channel_nrpn[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::rpn_value_change, this, _1, _2, _3));
+	_parser.channel_nrpn[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::rpn_value_change, this, _1, _2, _3));
 }
 
 void
@@ -605,7 +607,7 @@ MIDIControllable::bind_nrpn_change (channel_t chn, uint16_t nrpn)
 	drop_external_control ();
 	control_nrpn = nrpn;
 	control_channel = chn;
-	_parser.channel_nrpn_change[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::rpn_change, this, _1, _2, _3));
+	_parser.channel_nrpn_change[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::rpn_change, this, _1, _2, _3));
 }
 
 void
@@ -615,7 +617,7 @@ MIDIControllable::bind_rpn_change (channel_t chn, uint16_t rpn)
 	drop_external_control ();
 	control_rpn = rpn;
 	control_channel = chn;
-	_parser.channel_rpn_change[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::nrpn_change, this, _1, _2, _3));
+	_parser.channel_rpn_change[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::nrpn_change, this, _1, _2, _3));
 }
 
 void
@@ -632,40 +634,40 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	int chn_i = chn;
 	switch (ev) {
 	case MIDI::off:
-		_parser.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
+		_parser.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
 
 		/* if this is a togglee, connect to noteOn as well,
 		   and we'll toggle back and forth between the two.
 		*/
 
 		if (_momentary) {
-			_parser.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[1], boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
+			_parser.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[1], std::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
 		}
 
 		_control_description = "MIDI control: NoteOff";
 		break;
 
 	case MIDI::on:
-		_parser.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
+		_parser.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
 		if (_momentary) {
-			_parser.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[1], boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
+			_parser.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[1], std::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
 		}
 		_control_description = "MIDI control: NoteOn";
 		break;
 
 	case MIDI::controller:
-		_parser.channel_controller[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_controller, this, _1, _2));
+		_parser.channel_controller[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::midi_sense_controller, this, _1, _2));
 		snprintf (buf, sizeof (buf), "MIDI control: Controller %d", control_additional);
 		_control_description = buf;
 		break;
 
 	case MIDI::program:
-		_parser.channel_program_change[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_program_change, this, _1, _2));
+		_parser.channel_program_change[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::midi_sense_program_change, this, _1, _2));
 		_control_description = "MIDI control: ProgramChange";
 		break;
 
 	case MIDI::pitchbend:
-		_parser.channel_pitchbend[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_pitchbend, this, _1, _2));
+		_parser.channel_pitchbend[chn_i].connect_same_thread (midi_sense_connection[0], std::bind (&MIDIControllable::midi_sense_pitchbend, this, _1, _2));
 		_control_description = "MIDI control: Pitchbend";
 		break;
 

@@ -32,6 +32,7 @@
 #include "pbd/compose.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
+#include "pbd/history_owner.h"
 
 #include "evoral/Control.h"
 
@@ -62,15 +63,23 @@ MidiModel::MidiModel (MidiSource& s)
 	: AutomatableSequence<TimeType> (s.session(), Temporal::TimeDomainProvider (Temporal::BeatTime))
 	, _midi_source (s)
 {
-	_midi_source.InterpolationChanged.connect_same_thread (_midi_source_connections, boost::bind (&MidiModel::source_interpolation_changed, this, _1, _2));
-	_midi_source.AutomationStateChanged.connect_same_thread (_midi_source_connections, boost::bind (&MidiModel::source_automation_state_changed, this, _1, _2));
+	_midi_source.InterpolationChanged.connect_same_thread (_midi_source_connections, std::bind (&MidiModel::source_interpolation_changed, this, _1, _2));
+	_midi_source.AutomationStateChanged.connect_same_thread (_midi_source_connections, std::bind (&MidiModel::source_automation_state_changed, this, _1, _2));
+}
+
+MidiModel::MidiModel (MidiModel const & other, MidiSource & s)
+	: AutomatableSequence<TimeType> (other)
+	, _midi_source (s)
+{
+	_midi_source.InterpolationChanged.connect_same_thread (_midi_source_connections, std::bind (&MidiModel::source_interpolation_changed, this, _1, _2));
+	_midi_source.AutomationStateChanged.connect_same_thread (_midi_source_connections, std::bind (&MidiModel::source_automation_state_changed, this, _1, _2));
 }
 
 MidiModel::NoteDiffCommand*
 MidiModel::new_note_diff_command (const string& name)
 {
-	/* return via the MidiSource to get a shared_ptr to
-	 *  ourselves. Probably faster than shared_from_this()
+	/* go via the MidiSource to get a shared_ptr to
+	 * ourselves. Probably faster than shared_from_this()
 	 */
 	return new NoteDiffCommand (_midi_source.model(), name);
 }
@@ -92,24 +101,24 @@ MidiModel::new_patch_change_diff_command (const string& name)
 
 
 void
-MidiModel::apply_diff_command_as_commit(Session& session, Command* cmd)
+MidiModel::apply_diff_command_as_commit(HistoryOwner& history, Command* cmd)
 {
-	session.begin_reversible_command (cmd->name());
+	history.begin_reversible_command (cmd->name());
 	(*cmd)();
-	session.commit_reversible_command (cmd);
+	history.commit_reversible_command (cmd);
 	set_edited (true);
 }
 
 void
-MidiModel::apply_diff_command_as_subcommand(Session& session, Command* cmd)
+MidiModel::apply_diff_command_as_subcommand (HistoryOwner& history, Command* cmd)
 {
 	(*cmd)();
-	session.add_command (cmd);
+	history.add_command (cmd);
 	set_edited (true);
 }
 
 void
-MidiModel::apply_diff_command_only(Session& session, Command* cmd)
+MidiModel::apply_diff_command_only (Command* cmd)
 {
 	(*cmd)();
 	set_edited (true);
@@ -117,6 +126,7 @@ MidiModel::apply_diff_command_only(Session& session, Command* cmd)
 
 /* ************* DIFF COMMAND ********************/
 
+#define SHIFT_COMMAND_ELEMENT "ShiftCommand"
 #define NOTE_DIFF_COMMAND_ELEMENT "NoteDiffCommand"
 #define DIFF_NOTES_ELEMENT "ChangedNotes"
 #define ADDED_NOTES_ELEMENT "AddedNotes"
@@ -135,6 +145,55 @@ MidiModel::DiffCommand::DiffCommand(std::shared_ptr<MidiModel> m, const std::str
 	, _name (name)
 {
 	assert(_model);
+}
+
+MidiModel::ShiftCommand::ShiftCommand (std::shared_ptr<MidiModel> m, std::string const & name, MidiModel::TimeType distance)
+	: DiffCommand (m, name)
+	, _distance (distance)
+{
+	assert (_model);
+}
+
+MidiModel::ShiftCommand::ShiftCommand (std::shared_ptr<MidiModel> m, const XMLNode& node)
+	: DiffCommand (m, "")
+{
+	assert (_model);
+	set_state (node, Stateful::loading_state_version);
+	// _name = string_compose (_("Shift MIDI by %1"), _distance.str());
+}
+
+void
+MidiModel::ShiftCommand::operator() ()
+{
+	_model->shift (_distance);
+	_model->ContentsChanged (); /* EMIT SIGNAL */
+}
+
+void
+MidiModel::ShiftCommand::undo ()
+{
+	_model->shift (-_distance);
+	_model->ContentsChanged (); /* EMIT SIGNAL */
+}
+
+int
+MidiModel::ShiftCommand::set_state (XMLNode const & diff_command, int /* version */)
+{
+	if (diff_command.name() != string (SHIFT_COMMAND_ELEMENT)) {
+		return 1;
+	}
+
+	diff_command.get_property (X_("distance"), _distance);
+
+	return 0;
+}
+
+XMLNode&
+MidiModel::ShiftCommand::get_state () const
+{
+	XMLNode* node = new XMLNode (SHIFT_COMMAND_ELEMENT);
+	node->set_property (X_("distance"), _distance);
+	return *node;
 }
 
 MidiModel::NoteDiffCommand::NoteDiffCommand (std::shared_ptr<MidiModel> m, const XMLNode& node)
@@ -597,7 +656,7 @@ MidiModel::NoteDiffCommand::set_state (const XMLNode& diff_command, int /*versio
 	if (added_notes) {
 		XMLNodeList notes = added_notes->children();
 		transform(notes.begin(), notes.end(), back_inserter(_added_notes),
-		          boost::bind (&NoteDiffCommand::unmarshal_note, this, _1));
+		          std::bind (&NoteDiffCommand::unmarshal_note, this, _1));
 	}
 
 
@@ -608,7 +667,7 @@ MidiModel::NoteDiffCommand::set_state (const XMLNode& diff_command, int /*versio
 	if (removed_notes) {
 		XMLNodeList notes = removed_notes->children();
 		transform(notes.begin(), notes.end(), back_inserter(_removed_notes),
-		          boost::bind (&NoteDiffCommand::unmarshal_note, this, _1));
+		          std::bind (&NoteDiffCommand::unmarshal_note, this, _1));
 	}
 
 
@@ -621,7 +680,7 @@ MidiModel::NoteDiffCommand::set_state (const XMLNode& diff_command, int /*versio
 	if (changed_notes) {
 		XMLNodeList notes = changed_notes->children();
 		transform (notes.begin(), notes.end(), back_inserter(_changes),
-		           boost::bind (&NoteDiffCommand::unmarshal_change, this, _1));
+		           std::bind (&NoteDiffCommand::unmarshal_change, this, _1));
 
 	}
 
@@ -649,21 +708,21 @@ MidiModel::NoteDiffCommand::get_state () const
 
 	XMLNode* changes = diff_command->add_child(DIFF_NOTES_ELEMENT);
 	for_each(_changes.cbegin(), _changes.cend(),
-	         boost::bind (
-		         boost::bind (&XMLNode::add_child_nocopy, changes, _1),
-		         boost::bind (&NoteDiffCommand::marshal_change, this, _1)));
+	         std::bind (
+		         std::bind (&XMLNode::add_child_nocopy, changes, _1),
+		         std::bind (&NoteDiffCommand::marshal_change, this, _1)));
 
 	XMLNode* added_notes = diff_command->add_child(ADDED_NOTES_ELEMENT);
 	for_each(_added_notes.cbegin(), _added_notes.cend(),
-	         boost::bind(
-		         boost::bind (&XMLNode::add_child_nocopy, added_notes, _1),
-		         boost::bind (&NoteDiffCommand::marshal_note, this, _1)));
+	         std::bind(
+		         std::bind (&XMLNode::add_child_nocopy, added_notes, _1),
+		         std::bind (&NoteDiffCommand::marshal_note, this, _1)));
 
 	XMLNode* removed_notes = diff_command->add_child(REMOVED_NOTES_ELEMENT);
 	for_each(_removed_notes.cbegin(), _removed_notes.cend(),
-	         boost::bind (
-		         boost::bind (&XMLNode::add_child_nocopy, removed_notes, _1),
-		         boost::bind (&NoteDiffCommand::marshal_note, this, _1)));
+	         std::bind (
+		         std::bind (&XMLNode::add_child_nocopy, removed_notes, _1),
+		         std::bind (&NoteDiffCommand::marshal_note, this, _1)));
 
 	/* if this command had side-effects, store that state too
 	 */
@@ -671,9 +730,9 @@ MidiModel::NoteDiffCommand::get_state () const
 	if (!side_effect_removals.empty()) {
 		XMLNode* side_effect_notes = diff_command->add_child(SIDE_EFFECT_REMOVALS_ELEMENT);
 		for_each(side_effect_removals.begin(), side_effect_removals.end(),
-		         boost::bind (
-			         boost::bind (&XMLNode::add_child_nocopy, side_effect_notes, _1),
-			         boost::bind (&NoteDiffCommand::marshal_note, this, _1)));
+		         std::bind (
+			         std::bind (&XMLNode::add_child_nocopy, side_effect_notes, _1),
+			         std::bind (&NoteDiffCommand::marshal_note, this, _1)));
 	}
 
 	return *diff_command;
@@ -834,7 +893,7 @@ MidiModel::SysExDiffCommand::set_state (const XMLNode& diff_command, int /*versi
 	if (changed_sysexes) {
 		XMLNodeList sysexes = changed_sysexes->children();
 		transform (sysexes.begin(), sysexes.end(), back_inserter (_changes),
-		           boost::bind (&SysExDiffCommand::unmarshal_change, this, _1));
+		           std::bind (&SysExDiffCommand::unmarshal_change, this, _1));
 
 	}
 
@@ -849,9 +908,9 @@ MidiModel::SysExDiffCommand::get_state () const
 
 	XMLNode* changes = diff_command->add_child(DIFF_SYSEXES_ELEMENT);
 	for_each (_changes.begin(), _changes.end(),
-	          boost::bind (
-		          boost::bind (&XMLNode::add_child_nocopy, changes, _1),
-		          boost::bind (&SysExDiffCommand::marshal_change, this, _1)));
+	          std::bind (
+		          std::bind (&XMLNode::add_child_nocopy, changes, _1),
+		          std::bind (&SysExDiffCommand::marshal_change, this, _1)));
 
 	return *diff_command;
 }
@@ -1166,21 +1225,21 @@ MidiModel::PatchChangeDiffCommand::set_state (const XMLNode& diff_command, int /
 	XMLNode* added = diff_command.child (ADDED_PATCH_CHANGES_ELEMENT);
 	if (added) {
 		XMLNodeList p = added->children ();
-		transform (p.begin(), p.end(), back_inserter (_added), boost::bind (&PatchChangeDiffCommand::unmarshal_patch_change, this, _1));
+		transform (p.begin(), p.end(), back_inserter (_added), std::bind (&PatchChangeDiffCommand::unmarshal_patch_change, this, _1));
 	}
 
 	_removed.clear ();
 	XMLNode* removed = diff_command.child (REMOVED_PATCH_CHANGES_ELEMENT);
 	if (removed) {
 		XMLNodeList p = removed->children ();
-		transform (p.begin(), p.end(), back_inserter (_removed), boost::bind (&PatchChangeDiffCommand::unmarshal_patch_change, this, _1));
+		transform (p.begin(), p.end(), back_inserter (_removed), std::bind (&PatchChangeDiffCommand::unmarshal_patch_change, this, _1));
 	}
 
 	_changes.clear ();
 	XMLNode* changed = diff_command.child (DIFF_PATCH_CHANGES_ELEMENT);
 	if (changed) {
 		XMLNodeList p = changed->children ();
-		transform (p.begin(), p.end(), back_inserter (_changes), boost::bind (&PatchChangeDiffCommand::unmarshal_change, this, _1));
+		transform (p.begin(), p.end(), back_inserter (_changes), std::bind (&PatchChangeDiffCommand::unmarshal_change, this, _1));
 	}
 
 	return 0;
@@ -1194,25 +1253,25 @@ MidiModel::PatchChangeDiffCommand::get_state () const
 
 	XMLNode* added = diff_command->add_child (ADDED_PATCH_CHANGES_ELEMENT);
 	for_each (_added.cbegin(), _added.cend(),
-		  boost::bind (
-			  boost::bind (&XMLNode::add_child_nocopy, added, _1),
-			  boost::bind (&PatchChangeDiffCommand::marshal_patch_change, this, _1)
+		  std::bind (
+			  std::bind (&XMLNode::add_child_nocopy, added, _1),
+			  std::bind (&PatchChangeDiffCommand::marshal_patch_change, this, _1)
 			  )
 		);
 
 	XMLNode* removed = diff_command->add_child (REMOVED_PATCH_CHANGES_ELEMENT);
 	for_each (_removed.cbegin(), _removed.cend(),
-		  boost::bind (
-			  boost::bind (&XMLNode::add_child_nocopy, removed, _1),
-			  boost::bind (&PatchChangeDiffCommand::marshal_patch_change, this, _1)
+		  std::bind (
+			  std::bind (&XMLNode::add_child_nocopy, removed, _1),
+			  std::bind (&PatchChangeDiffCommand::marshal_patch_change, this, _1)
 			  )
 		);
 
 	XMLNode* changes = diff_command->add_child (DIFF_PATCH_CHANGES_ELEMENT);
 	for_each (_changes.cbegin(), _changes.cend(),
-		  boost::bind (
-			  boost::bind (&XMLNode::add_child_nocopy, changes, _1),
-			  boost::bind (&PatchChangeDiffCommand::marshal_change, this, _1)
+		  std::bind (
+			  std::bind (&XMLNode::add_child_nocopy, changes, _1),
+			  std::bind (&PatchChangeDiffCommand::marshal_change, this, _1)
 			  )
 		);
 
@@ -1235,15 +1294,15 @@ MidiModel::write_to (std::shared_ptr<MidiSource>     source,
 {
 	ReadLock lock (read_lock()); /* Sequence read-lock */
 
-	source->drop_model(source_lock);
+	source->drop_model (source_lock);
 	/* as of March 2022 or long before , the note mode argument does nothing */
 	source->mark_streaming_midi_write_started (source_lock, Sustained);
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
-		source->append_event_beats(source_lock, *i);
+		source->append_event_beats (source_lock, *i);
 	}
 
-	source->mark_streaming_write_completed(source_lock);
+	source->mark_streaming_write_completed (source_lock, timecnt_t (duration()));
 
 	/* no call to set_edited() because writing to "newsrc" doesn't remove
 	 * the need to write to "our own" source in ::sync_to_source()
@@ -1260,11 +1319,11 @@ MidiModel::write_to (std::shared_ptr<MidiSource>     source,
 bool
 MidiModel::sync_to_source (const Source::WriterLock& source_lock)
 {
-	ReadLock lock(read_lock());
+	ReadLock lock (read_lock());
 
 	/* Invalidate and store active notes, which will be picked up by the iterator
 	   on the next roll if time progresses linearly. */
-	_midi_source.invalidate(source_lock);
+	_midi_source.invalidate (source_lock);
 
 	/* as of March 2022 or long before , the note mode argument does nothing */
 	_midi_source.mark_streaming_midi_write_started (source_lock, Sustained);
@@ -1273,7 +1332,7 @@ MidiModel::sync_to_source (const Source::WriterLock& source_lock)
 		_midi_source.append_event_beats(source_lock, *i);
 	}
 
-	_midi_source.mark_streaming_write_completed (source_lock);
+	_midi_source.mark_streaming_write_completed (source_lock, timecnt_t (duration()));
 
 	set_edited (false);
 
@@ -1289,10 +1348,10 @@ MidiModel::sync_to_source (const Source::WriterLock& source_lock)
  */
 bool
 MidiModel::write_section_to (std::shared_ptr<MidiSource>     source,
-                             const Source::WriterLock&         source_lock,
-                             TimeType                          begin_time,
-                             TimeType                          end_time,
-                             bool                              offset_events)
+                             const Source::WriterLock&       source_lock,
+                             TimeType                        begin_time,
+                             TimeType                        end_time,
+                             bool                            offset_events)
 {
 	ReadLock lock(read_lock());
 	MidiNoteTracker mst;
@@ -1337,7 +1396,11 @@ MidiModel::write_section_to (std::shared_ptr<MidiSource>     source,
 	}
 	mst.resolve_notes (*source, source_lock, end_time);
 
-	source->mark_streaming_write_completed(source_lock);
+	/* the new source will have precisely the length given by begin_time
+	 * and end_time. That might not be quite right in some cases.
+	 */
+
+	source->mark_streaming_write_completed (source_lock, timecnt_t (end_time - begin_time));
 
 	set_edited(false);
 
@@ -1422,14 +1485,14 @@ MidiModel::find_sysex (Evoral::event_id_t sysex_id)
 MidiModel::WriteLock
 MidiModel::edit_lock()
 {
-	Source::WriterLock*   source_lock = 0;
+	Source::WriterLock*   source_lock = nullptr;
 
 	/* Take source lock and invalidate iterator to release its lock on model.
 	 * Add currently active notes to _active_notes so we can restore them
 	 * if playback resumes at the same point after the edit.
 	 */
 	source_lock = new Source::WriterLock (_midi_source.mutex());
-	_midi_source.invalidate(*source_lock);
+	_midi_source.invalidate (*source_lock);
 	return WriteLock (new WriteLockImpl (source_lock, _lock, _control_lock));
 }
 
@@ -1700,55 +1763,13 @@ MidiModel::control_factory (Evoral::Parameter const & p)
  *  Adds commands to the session's current undo stack to reflect the movements.
  */
 void
-MidiModel::insert_silence_at_start (TimeType t)
+MidiModel::insert_silence_at_start (TimeType t, HistoryOwner& history)
 {
-	/* Notes */
-
-	if (!notes().empty ()) {
-		NoteDiffCommand* c = new_note_diff_command ("insert silence");
-
-		for (Notes::const_iterator i = notes().begin(); i != notes().end(); ++i) {
-			c->change (*i, NoteDiffCommand::StartTime, (*i)->time() + t);
-		}
-
-		apply_diff_command_as_subcommand (_midi_source.session(), c);
-	}
-
-	/* Patch changes */
-
-	if (!patch_changes().empty ()) {
-		PatchChangeDiffCommand* c = new_patch_change_diff_command ("insert silence");
-
-		for (PatchChanges::const_iterator i = patch_changes().begin(); i != patch_changes().end(); ++i) {
-			c->change_time (*i, (*i)->time() + t);
-		}
-
-		apply_diff_command_as_subcommand (_midi_source.session(), c);
-	}
-
-	/* Controllers */
-
-	for (Controls::iterator i = controls().begin(); i != controls().end(); ++i) {
-		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i->second);
-		XMLNode& before = ac->alist()->get_state ();
-		i->second->list()->shift (timepos_t::zero (i->second->list()->time_domain()), timecnt_t (t));
-		XMLNode& after = ac->alist()->get_state ();
-		_midi_source.session().add_command (new MementoCommand<AutomationList> (new MidiAutomationListBinder (_midi_source, i->first), &before, &after));
-	}
-
-	/* Sys-ex */
-
-	if (!sysexes().empty()) {
-		SysExDiffCommand* c = new_sysex_diff_command ("insert silence");
-
-		for (SysExes::iterator i = sysexes().begin(); i != sysexes().end(); ++i) {
-			c->change (*i, (*i)->time() + t);
-		}
-
-		apply_diff_command_as_subcommand (_midi_source.session(), c);
-	}
-
-	ContentsShifted (timecnt_t (t));
+	/* go via the MidiSource to get a shared_ptr to
+	 * ourselves. Probably faster than shared_from_this()
+	 */
+	apply_diff_command_as_subcommand (history, new MidiModel::ShiftCommand (_midi_source.model(), std::string(), t));
+	ContentsShifted (timecnt_t (t)); /* EMIT SIGNAL */
 }
 
 void
@@ -1863,4 +1884,20 @@ MidiModel::rebuild_from_mapping_stash (Temporal::Beats const & src_pos_offset)
 	apply_diff_command_as_subcommand (_midi_source.session(), pc_cmd);
 
 	tempo_mapping_stash.clear ();
+}
+
+void
+MidiModel::track_state (timepos_t const & when, MidiStateTracker& mst) const
+{
+	for (auto const & ev : *this) {
+		mst.track (ev.buffer());
+	}
+}
+
+void
+MidiModel::render (const ReadLock& lock, Evoral::EventSink<Temporal::Beats>& dst)
+{
+	for (auto const & ev : *this) {
+		dst.write (ev.time(), Evoral::MIDI_EVENT, ev.size(), ev.buffer());
+	}
 }

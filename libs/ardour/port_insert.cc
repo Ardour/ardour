@@ -73,8 +73,8 @@ PortInsert::PortInsert (Session& s, std::shared_ptr<Pannable> pannable, std::sha
 
 	_io_latency = _session.engine().samples_per_cycle();
 
-	input ()->changed.connect_same_thread (*this, boost::bind (&PortInsert::io_changed, this, _1, _2));
-	output ()->changed.connect_same_thread (*this, boost::bind (&PortInsert::io_changed, this, _1, _2));
+	input ()->changed.connect_same_thread (*this, std::bind (&PortInsert::io_changed, this, _1, _2));
+	output ()->changed.connect_same_thread (*this, std::bind (&PortInsert::io_changed, this, _1, _2));
 }
 
 PortInsert::~PortInsert ()
@@ -147,8 +147,8 @@ PortInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		if (_input->n_ports().n_audio() != 0) {
 
-			AudioBuffer& outbuf (_output->ports().nth_audio_port(0)->get_audio_buffer (nframes));
-			Sample* in = _input->ports().nth_audio_port(0)->get_audio_buffer (nframes).data();
+			AudioBuffer& outbuf (_output->ports()->nth_audio_port(0)->get_audio_buffer (nframes));
+			Sample* in = _input->ports()->nth_audio_port(0)->get_audio_buffer (nframes).data();
 			Sample* out = outbuf.data();
 
 			_mtdm->process (nframes, in, out);

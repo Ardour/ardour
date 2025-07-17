@@ -22,10 +22,10 @@
  */
 
 #include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/label.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/treeiter.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/label.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/treeiter.h>
 
 #include "ardour/audioregion.h"
 #include "ardour/audioplaylist.h"

@@ -19,10 +19,10 @@
 #ifndef _gtkardour_dspstats_ui_h_
 #define _gtkardour_dspstats_ui_h_
 
-#include <gtkmm/button.h>
-#include <gtkmm/box.h>
-#include <gtkmm/table.h>
-#include <gtkmm/label.h>
+#include <ytkmm/button.h>
+#include <ytkmm/box.h>
+#include <ytkmm/table.h>
+#include <ytkmm/label.h>
 
 #include "ardour/session_handle.h"
 

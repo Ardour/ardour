@@ -23,22 +23,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_gain_meter_h__
-#define __ardour_gtk_gain_meter_h__
+#pragma once
 
 #include <vector>
 #include <map>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/alignment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/table.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/table.h>
 
-//#include <gdkmm/colormap.h>
+//#include <ydkmm/colormap.h>
 
 #include "pbd/signals.h"
 
@@ -48,7 +47,6 @@
 
 #include "widgets/ardour_button.h"
 #include "widgets/focus_entry.h"
-#include "widgets/slider_controller.h"
 
 #include "enums.h"
 #include "level_meter.h"
@@ -68,6 +66,10 @@ namespace ARDOUR {
 
 namespace Gtk {
 	class Menu;
+}
+
+namespace ArdourWidgets {
+	class SliderController;
 }
 
 enum MeterPointChangeTarget {
@@ -106,12 +108,12 @@ public:
 	std::shared_ptr<PBD::Controllable> get_controllable();
 
 	LevelMeterHBox& get_level_meter() const { return *level_meter; }
-	ArdourWidgets::SliderController& get_gain_slider() const { return *gain_slider; }
+	CairoWidget& get_gain_slider() const;
 
 	/** Emitted in the GUI thread when a button is pressed over the level meter;
 	 *  return true if the event is handled.
 	 */
-	PBD::Signal1<bool, GdkEventButton *> LevelMeterButtonPress;
+	PBD::Signal<bool(GdkEventButton *)> LevelMeterButtonPress;
 
 	static std::string meterpt_string (ARDOUR::MeterPoint);
 	static std::string astate_string (ARDOUR::AutoState);
@@ -208,19 +210,24 @@ protected:
 
 	void redraw_metrics ();
 	void on_theme_changed ();
-	void color_handler(bool);
+	void color_handler();
+	virtual void reset_dpi ();
 	ARDOUR::DataType _data_type;
 	ARDOUR::ChanCount _previous_amp_output_streams;
 
 	std::shared_ptr<ARDOUR::Route> route();
 
 private:
-
 	bool level_meter_button_press (GdkEventButton *);
-	PBD::ScopedConnection _level_meter_connection;
 
 	bool _clear_meters;
 	bool _meter_peaked;
+
+	int _unscaled_fader_length;
+	int _unscaled_fader_girth;
+
+	PBD::ScopedConnection _level_meter_connection;
+
 };
 
 class GainMeter : public GainMeterBase, public Gtk::VBox
@@ -240,6 +247,8 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 
   protected:
 	void hide_all_meters ();
+
+	void reset_dpi ();
 
 	gint meter_metrics_expose (GdkEventExpose *);
 	gint meter_ticks1_expose (GdkEventExpose *);
@@ -261,5 +270,4 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	std::vector<ARDOUR::DataType> _types;
 };
 
-#endif /* __ardour_gtk_gain_meter_h__ */
 

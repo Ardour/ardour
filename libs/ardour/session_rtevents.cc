@@ -18,7 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/bind.hpp>
 #include <glibmm/timer.h>
 
 #include "pbd/error.h"
@@ -104,13 +103,13 @@ Session::rt_set_controls (std::shared_ptr<WeakAutomationControlList> cl, double 
 		return;
 	}
 
-	AutomationType type = NullAutomation;
+	bool update_solo_state = false;
 
 	for (auto const& c : *cl) {
 		std::shared_ptr<AutomationControl> ac = c.lock ();
 		if (ac) {
 			ac->set_value (val, gcd);
-			type = ac->desc().type;
+			update_solo_state |= SoloAutomation == ac->desc().type;
 		}
 	}
 
@@ -118,12 +117,8 @@ Session::rt_set_controls (std::shared_ptr<WeakAutomationControlList> cl, double 
 	 * that here.
 	 */
 
-	switch (type) {
-	case SoloAutomation:
+	if (update_solo_state) {
 		update_route_solo_state ();
-		break;
-	default:
-		break;
 	}
 }
 
@@ -195,9 +190,9 @@ Session::process_rtop (SessionEvent* ev)
 	ev->rt_slot ();
 
 	if (ev->event_loop) {
-		if (!ev->event_loop->call_slot (MISSING_INVALIDATOR, boost::bind (ev->rt_return, ev))) {
+		if (!ev->event_loop->call_slot (MISSING_INVALIDATOR, std::bind (ev->rt_return, ev))) {
 			/* The event must be deleted, otherwise the SessionEvent Pool may fill up */
-			if (!butler ()->delegate (boost::bind (ev->rt_return, ev))) {
+			if (!butler ()->delegate (std::bind (ev->rt_return, ev))) {
 				ev->rt_return (ev);
 			}
 		}

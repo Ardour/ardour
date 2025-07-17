@@ -19,11 +19,11 @@
 #ifndef _gtkardour_plugin_dspload_ui_h_
 #define _gtkardour_plugin_dspload_ui_h_
 
-#include <gtkmm/widget.h>
-#include <gtkmm/table.h>
-#include <gtkmm/label.h>
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/separator.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/table.h>
+#include <ytkmm/label.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/separator.h>
 
 #include "widgets/ardour_button.h"
 

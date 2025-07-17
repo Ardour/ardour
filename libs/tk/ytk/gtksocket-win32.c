@@ -35,7 +35,7 @@
 #include "gtksocket.h"
 #include "gtksocketprivate.h"
 
-#include "gdk/gdkwin32.h"
+#include "ydk/gdkwin32.h"
 
 #include "gtkwin32embed.h"
 #include "gtkalias.h"

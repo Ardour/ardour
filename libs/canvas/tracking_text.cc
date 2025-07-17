@@ -101,6 +101,7 @@ TrackingText::pointer_motion (Duple const& winpos)
 	/* move */
 
 	set_position (pos);
+	set_bbox_dirty ();
 }
 
 void

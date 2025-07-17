@@ -24,8 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_playlist_h__
-#define __ardour_playlist_h__
+#pragma once
 
 #include <atomic>
 #include <list>
@@ -36,8 +35,7 @@
 
 #include <sys/stat.h>
 
-#include <boost/optional.hpp>
-#include <boost/utility.hpp>
+#include <optional>
 
 #include <glib.h>
 
@@ -188,7 +186,7 @@ public:
 	virtual std::shared_ptr<Region> combine (const RegionList&, std::shared_ptr<Track>);
 	virtual void uncombine (std::shared_ptr<Region>);
 	void fade_range (std::list<TimelineRange>&);
-	void remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_gap, boost::function<void (timepos_t, timecnt_t)> gap_callback);
+	void remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_gap, std::function<void (timepos_t, timecnt_t)> gap_callback);
 
 	void shuffle (std::shared_ptr<Region>, int dir);
 
@@ -242,26 +240,26 @@ public:
 
 	samplepos_t find_next_transient (timepos_t const & position, int dir);
 
-	void foreach_region (boost::function<void(std::shared_ptr<Region>)>);
+	void foreach_region (std::function<void(std::shared_ptr<Region>)>);
 
 	XMLNode&    get_state () const;
 	virtual int set_state (const XMLNode&, int version);
 	XMLNode&    get_template ();
 
-	PBD::Signal1<void, bool>                     InUse;
-	PBD::Signal0<void>                           ContentsChanged;
-	PBD::Signal1<void, std::weak_ptr<Region> > RegionAdded;
-	PBD::Signal1<void, std::weak_ptr<Region> > RegionRemoved;
-	PBD::Signal0<void>                           NameChanged;
-	PBD::Signal0<void>                           LayeringChanged;
+	PBD::Signal<void(bool)>                     InUse;
+	PBD::Signal<void()>                           ContentsChanged;
+	PBD::Signal<void(std::weak_ptr<Region> )> RegionAdded;
+	PBD::Signal<void(std::weak_ptr<Region> )> RegionRemoved;
+	PBD::Signal<void()>                           NameChanged;
+	PBD::Signal<void()>                           LayeringChanged;
 
 	/** Emitted when regions have moved (not when regions have only been trimmed) */
-	PBD::Signal2<void,std::list< Temporal::RangeMove> const &, bool> RangesMoved;
+	PBD::Signal<void(std::list< Temporal::RangeMove> const &, bool)> RangesMoved;
 
 	/** Emitted when regions are extended; the ranges passed are the new extra time ranges
 	    that these regions now occupy.
 	*/
-	PBD::Signal1<void,std::list< Temporal::Range> const &> RegionsExtended;
+	PBD::Signal<void(std::list< Temporal::Range> const &)> RegionsExtended;
 
 	static std::string bump_name (std::string old_name, Session&);
 
@@ -402,7 +400,7 @@ protected:
 
 	void _set_sort_id ();
 
-	std::shared_ptr<RegionList> regions_touched_locked (timepos_t const & start, timepos_t const & end);
+	std::shared_ptr<RegionList> regions_touched_locked (timepos_t const & start, timepos_t const & end, bool with_tail);
 
 	void notify_region_removed (std::shared_ptr<Region>);
 	void notify_region_added (std::shared_ptr<Region>);
@@ -473,7 +471,7 @@ private:
 	void coalesce_and_check_crossfades (std::list<Temporal::TimeRange>);
 	std::shared_ptr<RegionList> find_regions_at (timepos_t const &);
 
-	mutable boost::optional<std::pair<timepos_t, timepos_t> > _cached_extent;
+	mutable std::optional<std::pair<timepos_t, timepos_t> > _cached_extent;
 	timepos_t _end_space;  //this is used when we are pasting a range with extra space at the end
 	bool _playlist_shift_active;
 
@@ -482,5 +480,4 @@ private:
 
 } /* namespace ARDOUR */
 
-#endif /* __ardour_playlist_h__ */
 

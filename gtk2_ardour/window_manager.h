@@ -24,12 +24,15 @@
 #include <string>
 #include <map>
 
-#include <boost/function.hpp>
-#include <glibmm/refptr.h>
 #include <sigc++/trackable.h>
 
+#include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/window_proxy.h"
+
+#include <glibmm/refptr.h>
+
+#include "ardour/session_handle.h"
 
 class XMLNode;
 
@@ -117,10 +120,10 @@ template<typename T>
 class ProxyWithConstructor: public ProxyBase
 {
 public:
-	ProxyWithConstructor (const std::string& name, const std::string& menu_name, const boost::function<T*()>& c)
+	ProxyWithConstructor (const std::string& name, const std::string& menu_name, const std::function<T*()>& c)
 		: ProxyBase (name, menu_name) , creator (c) {}
 
-	ProxyWithConstructor (const std::string& name, const std::string& menu_name, const boost::function<T*()>& c, const XMLNode* node)
+	ProxyWithConstructor (const std::string& name, const std::string& menu_name, const std::function<T*()>& c, const XMLNode* node)
 		: ProxyBase (name, menu_name, *node) , creator (c) {}
 
 	Gtk::Window* get (bool create = false) {
@@ -150,6 +153,9 @@ public:
 
 	void set_session(ARDOUR::Session *s) {
 		SessionHandlePtr::set_session (s);
+		if (!s) {
+			return;
+		}
 		ARDOUR::SessionHandlePtr* sp = session_handle ();
 		if (sp) {
 			sp->set_session (s);
@@ -163,7 +169,7 @@ public:
 	}
 
 private:
-	boost::function<T*()>	creator;
+	std::function<T*()>	creator;
 };
 
 template<typename T>
@@ -203,6 +209,9 @@ public:
 
 	void set_session(ARDOUR::Session *s) {
 		SessionHandlePtr::set_session (s);
+		if (!s) {
+			return;
+		}
 		ARDOUR::SessionHandlePtr* sp = session_handle ();
 		if (sp) {
 			sp->set_session (s);
@@ -216,7 +225,7 @@ public:
 	}
 
 private:
-	boost::function<T*()>	creator;
+	std::function<T*()>	creator;
 };
 
 } /* namespace */

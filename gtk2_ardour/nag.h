@@ -16,14 +16,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_nag_h__
-#define __gtk_ardour_nag_h__
+#pragma once
 
 #include "ardour_dialog.h"
 
-#include <gtkmm/label.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/buttonbox.h>
+#include <ytkmm/label.h>
+#include <ytkmm/radiobutton.h>
+#include <ytkmm/buttonbox.h>
 
 class NagScreen : public ArdourDialog
 {
@@ -53,4 +52,3 @@ private:
 	static bool is_subscribed (bool& really);
 };
 
-#endif /* __gtk_ardour_nag_h__ */

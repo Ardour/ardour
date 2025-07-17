@@ -19,15 +19,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_route_group_dialog_h__
-#define __gtk_ardour_route_group_dialog_h__
+#pragma once
 
-#include <gtkmm/dialog.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/checkbutton.h>
+#include <ytkmm/dialog.h>
+#include <ytkmm/entry.h>
+#include <ytkmm/checkbutton.h>
 
 #include "ardour_dialog.h"
 #include "stripable_colorpicker.h"
+
+namespace ARDOUR {
+	class RouteGroup;
+}
 
 class RouteGroupDialog : public ArdourDialog
 {
@@ -59,7 +62,7 @@ private:
 	void gain_toggled ();
 	void update ();
 	bool unique_name (std::string const name) const;
+
+	PBD::ScopedConnection _group_connection;
 };
 
-
-#endif

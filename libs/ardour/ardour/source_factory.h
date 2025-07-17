@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_source_factory_h__
-#define __ardour_source_factory_h__
+#pragma once
 
 #include <memory>
 #include <stdint.h>
@@ -41,7 +40,7 @@ public:
 	static void init ();
 	static void terminate ();
 
-	static PBD::Signal1<void, std::shared_ptr<Source>> SourceCreated;
+	static PBD::Signal<void(std::shared_ptr<Source>)> SourceCreated;
 
 	static std::shared_ptr<Source> create (Session&, const XMLNode& node, bool async = false);
 	static std::shared_ptr<Source> createSilent (Session&, const XMLNode& node, samplecnt_t, float sample_rate);
@@ -64,4 +63,3 @@ public:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_source_factory_h__ */

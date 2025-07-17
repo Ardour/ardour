@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/stockitem.h>
-#include <gtkmm/private/stockitem_p.h>
+#include <ytkmm/stockitem.h>
+#include <ytkmm/private/stockitem_p.h>
 
 
 // -*- c++ -*-
@@ -27,7 +27,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
  
 namespace Gtk
 {

@@ -17,10 +17,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_editor_group_tabs_h__
-#define __gtk_ardour_editor_group_tabs_h__
+#pragma once
 
-#include <gtkmm/menu.h>
+#include <ytkmm/menu.h>
 #include "group_tabs.h"
 
 class Editor;
@@ -28,18 +27,18 @@ class Editor;
 class EditorGroupTabs : public GroupTabs, public EditorComponent
 {
 public:
-	EditorGroupTabs (Editor *);
+	EditorGroupTabs (Editor&);
 
 private:
 	std::list<Tab> compute_tabs () const;
 	void draw_tab (cairo_t *, Tab const &);
 	double primary_coordinate (double, double) const;
 	ARDOUR::RouteList routes_for_tab (Tab const *) const;
-	double extent () const {
-		return get_height();
-	}
 	void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *);
 	ARDOUR::RouteList selected_routes () const;
+
+	double visible_extent () const { 
+		return get_height();
+	}
 };
 
-#endif // __gtk_ardour_editor_group_tabs_h__

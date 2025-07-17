@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __gtk_ardour_midi_cut_buffer_h__
-#define __gtk_ardour_midi_cut_buffer_h__
+#pragma once
 
 #include "temporal/beats.h"
 
@@ -45,4 +44,3 @@ private:
 	TimeType _origin;
 };
 
-#endif /* __gtk_ardour_midi_cut_buffer_h__ */

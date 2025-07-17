@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/accelgroup.h>
-#include <gtkmm/private/accelgroup_p.h>
+#include <ytkmm/accelgroup.h>
+#include <ytkmm/private/accelgroup_p.h>
 
 
 // -*- c++ -*-
@@ -27,7 +27,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 
 namespace Gtk

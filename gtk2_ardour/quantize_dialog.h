@@ -22,10 +22,10 @@
 #include <vector>
 #include <string>
 
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/adjustment.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/spinbutton.h>
 
 #include "temporal/beats.h"
 
@@ -38,12 +38,12 @@ namespace ARDOUR {
 	class MidiModel;
 };
 
-class PublicEditor;
+class EditingContext;
 
 class QuantizeDialog : public ArdourDialog
 {
 public:
-	QuantizeDialog (PublicEditor&);
+	QuantizeDialog (EditingContext&);
 	~QuantizeDialog ();
 
 	Temporal::Beats start_grid_size() const;
@@ -55,7 +55,7 @@ public:
 	float  swing () const;
 
 private:
-	PublicEditor& editor;
+	EditingContext& editor;
 
 	Gtk::ComboBoxText start_grid_combo;
 	Gtk::ComboBoxText end_grid_combo;

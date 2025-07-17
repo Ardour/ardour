@@ -20,8 +20,8 @@
 #define _gtkardour_export_report_h_
 
 #include <cairo/cairo.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/togglebutton.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/togglebutton.h>
 
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/gui_thread.h"

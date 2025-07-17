@@ -1,5 +1,5 @@
 #include <gmodule.h>
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 #include "clearlooks_style.h"
 #include "clearlooks_rc_style.h"

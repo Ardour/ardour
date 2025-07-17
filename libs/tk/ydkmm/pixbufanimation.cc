@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/pixbufanimation.h>
-#include <gdkmm/private/pixbufanimation_p.h>
+#include <ydkmm/pixbufanimation.h>
+#include <ydkmm/private/pixbufanimation_p.h>
 
 
 // -*- c++ -*-
@@ -29,7 +29,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 namespace Gdk
 {

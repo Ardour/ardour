@@ -133,13 +133,17 @@ Filter::finish (std::shared_ptr<Region> region, SourceList& nsrcs, string region
 	}
 	results.clear ();
 
-	PropertyList plist (region->derive_properties (true, false));
+	PropertyList plist (region->derive_properties (true, true));
 
 	plist.add (Properties::start, std::numeric_limits<timepos_t>::min());
 	plist.add (Properties::name, region_name);
 	plist.add (Properties::whole_file, true);
 
 	std::shared_ptr<Region> r = RegionFactory::create (nsrcs, plist);
+	std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (r);
+	if (ar) {
+		ar->copy_plugin_state (static_pointer_cast<AudioRegion const> (region));
+	}
 	results.push_back (r);
 
 	return 0;

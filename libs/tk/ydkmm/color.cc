@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/color.h>
-#include <gdkmm/private/color_p.h>
+#include <ydkmm/color.h>
+#include <ydkmm/private/color_p.h>
 
 
 // -*- c++ -*-
@@ -29,8 +29,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdkmm/colormap.h>
-#include <gdk/gdk.h>
+#include <ydkmm/colormap.h>
+#include <ydk/gdk.h>
 
 namespace Gdk
 {

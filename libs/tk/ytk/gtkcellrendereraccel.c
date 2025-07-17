@@ -26,7 +26,7 @@
 #include "gtkeventbox.h"
 #include "gtkmain.h"
 #include "gtkprivate.h"
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 #include "gtkalias.h"
 
 

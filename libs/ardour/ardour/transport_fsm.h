@@ -5,13 +5,14 @@
 #include <queue>
 
 #include <boost/intrusive/list.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <string>
 #include <utility>
 #include <iostream>
 
 #include "pbd/demangle.h"
+#include "pbd/pool.h"
 
 #include "ardour/debug.h"
 #include "ardour/types.h"
@@ -208,7 +209,7 @@ struct TransportFSM
 	EventList queued_events;
 	EventList deferred_events;
 	int processing;
-	mutable boost::optional<bool> current_roll_after_locate_status;
+	mutable std::optional<bool> current_roll_after_locate_status;
 	mutable double most_recently_requested_speed;
 	mutable double _default_speed;
 	int _reverse_after_declick;

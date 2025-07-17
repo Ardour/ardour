@@ -140,6 +140,9 @@ tags
 /icons/win32/msvc_resources.rc
 
 /tools/osx_packaging/Ardour/*.app
+/tools/osx_packaging/Ardour/*.dmg
+/tools/osx_packaging/file_list.txt
+
 /tools/doxy2json/doxy2json
 /tools/icons/icon
 

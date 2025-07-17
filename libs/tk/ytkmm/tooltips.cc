@@ -7,8 +7,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/tooltips.h>
-#include <gtkmm/private/tooltips_p.h>
+#include <ytkmm/tooltips.h>
+#include <ytkmm/private/tooltips_p.h>
 
 
 // -*- c++ -*-
@@ -31,9 +31,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdkmm/color.h>
-#include <gtkmm/widget.h>
-#include <gtk/gtk.h>
+#include <ydkmm/color.h>
+#include <ytkmm/widget.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

@@ -17,8 +17,7 @@
 
 */
 
-#ifndef __ardour_gtk_time_selection_h__
-#define __ardour_gtk_time_selection_h__
+#pragma once
 
 #include <list>
 #include "ardour/types.h"
@@ -46,4 +45,3 @@ public:
 };
 
 
-#endif /* __ardour_gtk_time_selection_h__ */

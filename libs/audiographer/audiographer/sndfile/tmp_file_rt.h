@@ -6,6 +6,7 @@
 
 #include <glib.h>
 
+#include "pbd/compose.h"
 #include "pbd/gstdio_compat.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/ringbuffer.h"
@@ -63,15 +64,16 @@ class TmpFileRt
 		SndfileWriter<T>::check_flags (*this, c);
 
 		if (SndfileWriter<T>::throw_level (ThrowStrict) && c.channels() != SndfileHandle::channels()) {
-			throw Exception (*this, boost::str (boost::format
-				("Wrong number of channels given to process(), %1% instead of %2%")
-				% c.channels() % SndfileHandle::channels()));
+			throw Exception (*this, string_compose
+					("Wrong number of channels given to process(), %1 instead of %2",
+					 c.channels(), SndfileHandle::channels()));
 		}
 
 		if (SndfileWriter<T>::throw_level (ThrowProcess) && _rb.write_space() < (size_t) c.samples()) {
-			throw Exception (*this, boost::str (boost::format
-				("Could not write data to ringbuffer/output file (%1%)")
-				% SndfileHandle::strError()));
+			throw Exception (*this, string_compose
+					("Could not write data to ringbuffer/output file (%1)",
+					 SndfileHandle::strError()));
+
 		}
 
 		_rb.write (c.data(), c.samples());
@@ -136,9 +138,7 @@ class TmpFileRt
 	static void * _disk_thread (void *arg)
 	{
 		TmpFileRt *d = static_cast<TmpFileRt *>(arg);
-		pthread_set_name ("ExportDiskIO");
 		d->disk_thread ();
-		pthread_exit (0);
 		return 0;
 	}
 
@@ -158,7 +158,7 @@ class TmpFileRt
 		pthread_mutex_init (&_disk_thread_lock, 0);
 		pthread_cond_init  (&_data_ready, 0);
 
-		if (pthread_create (&_thread_id, NULL, _disk_thread, this)) {
+		if (pthread_create_and_store ("ExportDiskIO", &_thread_id, _disk_thread, this, 0)) {
 			_capture = false;
 			if (SndfileWriter<T>::throw_level (ThrowStrict)) {
 				throw Exception (*this, "Cannot create export disk writer");

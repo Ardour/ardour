@@ -1,0 +1,601 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+	<Author>Schmitty2005</Author>
+	<MasterDeviceNames>
+		<Manufacturer>Roland</Manufacturer>
+		<Model>Boss GT-8</Model>
+		<CustomDeviceMode Name="Mode 1">
+			<ChannelNameSetAssignments>
+				<ChannelNameSetAssign Channel="1" NameSet="Name Set 1" />
+				<ChannelNameSetAssign Channel="2" NameSet="Name Set 1" />
+				<ChannelNameSetAssign Channel="3" NameSet="Name Set 1" />
+				<ChannelNameSetAssign Channel="4" NameSet="Name Set 1" />
+				<ChannelNameSetAssign Channel="5" NameSet="Name Set 1" />
+				<ChannelNameSetAssign Channel="6" NameSet="Name Set 1" />
+				<ChannelNameSetAssign Channel="7" NameSet="Name Set 1" />
+				<ChannelNameSetAssign Channel="8" NameSet="Name Set 1" />
+				<ChannelNameSetAssign Channel="9" NameSet="Name Set 1" />
+				<ChannelNameSetAssign Channel="10" NameSet="Name Set 1" />
+				<ChannelNameSetAssign Channel="11" NameSet="Name Set 1" />
+				<ChannelNameSetAssign Channel="12" NameSet="Name Set 1" />
+				<ChannelNameSetAssign Channel="13" NameSet="Name Set 1" />
+				<ChannelNameSetAssign Channel="14" NameSet="Name Set 1" />
+				<ChannelNameSetAssign Channel="15" NameSet="Name Set 1" />
+				<ChannelNameSetAssign Channel="16" NameSet="Name Set 1" />
+			</ChannelNameSetAssignments>
+		</CustomDeviceMode>
+		<ChannelNameSet Name="Name Set 1">
+			<AvailableForChannels>
+				<AvailableChannel Channel="1" Available="true" />
+				<AvailableChannel Channel="2" Available="true" />
+				<AvailableChannel Channel="3" Available="true" />
+				<AvailableChannel Channel="4" Available="true" />
+				<AvailableChannel Channel="5" Available="true" />
+				<AvailableChannel Channel="6" Available="true" />
+				<AvailableChannel Channel="7" Available="true" />
+				<AvailableChannel Channel="8" Available="true" />
+				<AvailableChannel Channel="9" Available="true" />
+				<AvailableChannel Channel="10" Available="true" />
+				<AvailableChannel Channel="11" Available="true" />
+				<AvailableChannel Channel="12" Available="true" />
+				<AvailableChannel Channel="13" Available="true" />
+				<AvailableChannel Channel="14" Available="true" />
+				<AvailableChannel Channel="15" Available="true" />
+				<AvailableChannel Channel="16" Available="true" />
+			</AvailableForChannels>
+      <UsesControlNameList Name="Controls" />
+
+
+	  <PatchBank Name ="User Presets 1-1 to 25-4">
+		<MIDICommands>
+				<ControlChange Control="0" Value="0" />
+				<ControlChange Control="32" Value="0" />
+		</MIDICommands>
+		<PatchNameList>
+			<Patch Number="U 1-1" Name="U 1-1 User Patch" ProgramChange="0" />
+			<Patch Number="U 1-2" Name="U 1-2 User Patch" ProgramChange="1" />
+			<Patch Number="U 1-3" Name="U 1-3 User Patch" ProgramChange="2" />
+			<Patch Number="U 1-4" Name="U 1-4 User Patch" ProgramChange="3" />
+			<Patch Number="U 2-1" Name="U 2-1 User Patch" ProgramChange="4" />
+			<Patch Number="U 2-2" Name="U 2-2 User Patch" ProgramChange="5" />
+			<Patch Number="U 2-3" Name="U 2-3 User Patch" ProgramChange="6" />
+			<Patch Number="U 2-4" Name="U 2-4 User Patch" ProgramChange="7" />
+			<Patch Number="U 3-1" Name="U 3-1 User Patch" ProgramChange="8" />
+			<Patch Number="U 3-2" Name="U 3-2 User Patch" ProgramChange="9" />
+			<Patch Number="U 3-3" Name="U 3-3 User Patch" ProgramChange="10" />
+			<Patch Number="U 3-4" Name="U 3-4 User Patch" ProgramChange="11" />
+			<Patch Number="U 4-1" Name="U 4-1 User Patch" ProgramChange="12" />
+			<Patch Number="U 4-2" Name="U 4-2 User Patch" ProgramChange="13" />
+			<Patch Number="U 4-3" Name="U 4-3 User Patch" ProgramChange="14" />
+			<Patch Number="U 4-4" Name="U 4-4 User Patch" ProgramChange="15" />
+			<Patch Number="U 5-1" Name="U 5-1 User Patch" ProgramChange="16" />
+			<Patch Number="U 5-2" Name="U 5-2 User Patch" ProgramChange="17" />
+			<Patch Number="U 5-3" Name="U 5-3 User Patch" ProgramChange="18" />
+			<Patch Number="U 5-4" Name="U 5-4 User Patch" ProgramChange="19" />
+			<Patch Number="U 6-1" Name="U 6-1 User Patch" ProgramChange="20" />
+			<Patch Number="U 6-2" Name="U 6-2 User Patch" ProgramChange="21" />
+			<Patch Number="U 6-3" Name="U 6-3 User Patch" ProgramChange="22" />
+			<Patch Number="U 6-4" Name="U 6-4 User Patch" ProgramChange="23" />
+			<Patch Number="U 7-1" Name="U 7-1 User Patch" ProgramChange="24" />
+			<Patch Number="U 7-2" Name="U 7-2 User Patch" ProgramChange="25" />
+			<Patch Number="U 7-3" Name="U 7-3 User Patch" ProgramChange="26" />
+			<Patch Number="U 7-4" Name="U 7-4 User Patch" ProgramChange="27" />
+			<Patch Number="U 8-1" Name="U 8-1 User Patch" ProgramChange="28" />
+			<Patch Number="U 8-2" Name="U 8-2 User Patch" ProgramChange="29" />
+			<Patch Number="U 8-3" Name="U 8-3 User Patch" ProgramChange="30" />
+			<Patch Number="U 8-4" Name="U 8-4 User Patch" ProgramChange="31" />
+			<Patch Number="U 9-1" Name="U 9-1 User Patch" ProgramChange="32" />
+			<Patch Number="U 9-2" Name="U 9-2 User Patch" ProgramChange="33" />
+			<Patch Number="U 9-3" Name="U 9-3 User Patch" ProgramChange="34" />
+			<Patch Number="U 9-4" Name="U 9-4 User Patch" ProgramChange="35" />
+			<Patch Number="U10-1" Name="U10-1 User Patch" ProgramChange="36" />
+			<Patch Number="U10-2" Name="U10-2 User Patch" ProgramChange="37" />
+			<Patch Number="U10-3" Name="U10-3 User Patch" ProgramChange="38" />
+			<Patch Number="U10-4" Name="U10-4 User Patch" ProgramChange="39" />
+			<Patch Number="U11-1" Name="U11-1 User Patch" ProgramChange="40" />
+			<Patch Number="U11-2" Name="U11-2 User Patch" ProgramChange="41" />
+			<Patch Number="U11-3" Name="U11-3 User Patch" ProgramChange="42" />
+			<Patch Number="U11-4" Name="U11-4 User Patch" ProgramChange="43" />
+			<Patch Number="U12-1" Name="U12-1 User Patch" ProgramChange="44" />
+			<Patch Number="U12-2" Name="U12-2 User Patch" ProgramChange="45" />
+			<Patch Number="U12-3" Name="U12-3 User Patch" ProgramChange="46" />
+			<Patch Number="U12-4" Name="U12-4 User Patch" ProgramChange="47" />
+			<Patch Number="U13-1" Name="U13-1 User Patch" ProgramChange="48" />
+			<Patch Number="U13-2" Name="U13-2 User Patch" ProgramChange="49" />
+			<Patch Number="U13-3" Name="U13-3 User Patch" ProgramChange="50" />
+			<Patch Number="U13-4" Name="U13-4 User Patch" ProgramChange="51" />
+			<Patch Number="U14-1" Name="U14-1 User Patch" ProgramChange="52" />
+			<Patch Number="U14-2" Name="U14-2 User Patch" ProgramChange="53" />
+			<Patch Number="U14-3" Name="U14-3 User Patch" ProgramChange="54" />
+			<Patch Number="U14-4" Name="U14-4 User Patch" ProgramChange="55" />
+			<Patch Number="U15-1" Name="U15-1 User Patch" ProgramChange="56" />
+			<Patch Number="U15-2" Name="U15-2 User Patch" ProgramChange="57" />
+			<Patch Number="U15-3" Name="U15-3 User Patch" ProgramChange="58" />
+			<Patch Number="U15-4" Name="U15-4 User Patch" ProgramChange="59" />
+			<Patch Number="U16-1" Name="U16-1 User Patch" ProgramChange="60" />
+			<Patch Number="U16-2" Name="U16-2 User Patch" ProgramChange="61" />
+			<Patch Number="U16-3" Name="U16-3 User Patch" ProgramChange="62" />
+			<Patch Number="U16-4" Name="U16-4 User Patch" ProgramChange="63" />
+			<Patch Number="U17-1" Name="U17-1 User Patch" ProgramChange="64" />
+			<Patch Number="U17-2" Name="U17-2 User Patch" ProgramChange="65" />
+			<Patch Number="U17-3" Name="U17-3 User Patch" ProgramChange="66" />
+			<Patch Number="U17-4" Name="U17-4 User Patch" ProgramChange="67" />
+			<Patch Number="U18-1" Name="U18-1 User Patch" ProgramChange="68" />
+			<Patch Number="U18-2" Name="U18-2 User Patch" ProgramChange="69" />
+			<Patch Number="U18-3" Name="U18-3 User Patch" ProgramChange="70" />
+			<Patch Number="U18-4" Name="U18-4 User Patch" ProgramChange="71" />
+			<Patch Number="U19-1" Name="U19-1 User Patch" ProgramChange="72" />
+			<Patch Number="U19-2" Name="U19-2 User Patch" ProgramChange="73" />
+			<Patch Number="U19-3" Name="U19-3 User Patch" ProgramChange="74" />
+			<Patch Number="U19-4" Name="U19-4 User Patch" ProgramChange="75" />
+			<Patch Number="U20-1" Name="U20-1 User Patch" ProgramChange="76" />
+			<Patch Number="U20-2" Name="U20-2 User Patch" ProgramChange="77" />
+			<Patch Number="U20-3" Name="U20-3 User Patch" ProgramChange="78" />
+			<Patch Number="U20-4" Name="U20-4 User Patch" ProgramChange="79" />
+			<Patch Number="U21-1" Name="U21-1 User Patch" ProgramChange="80" />
+			<Patch Number="U21-2" Name="U21-2 User Patch" ProgramChange="81" />
+			<Patch Number="U21-3" Name="U21-3 User Patch" ProgramChange="82" />
+			<Patch Number="U21-4" Name="U21-4 User Patch" ProgramChange="83" />
+			<Patch Number="U22-1" Name="U22-1 User Patch" ProgramChange="84" />
+			<Patch Number="U22-2" Name="U22-2 User Patch" ProgramChange="85" />
+			<Patch Number="U22-3" Name="U22-3 User Patch" ProgramChange="86" />
+			<Patch Number="U22-4" Name="U22-4 User Patch" ProgramChange="87" />
+			<Patch Number="U23-1" Name="U23-1 User Patch" ProgramChange="88" />
+			<Patch Number="U23-2" Name="U23-2 User Patch" ProgramChange="89" />
+			<Patch Number="U23-3" Name="U23-3 User Patch" ProgramChange="90" />
+			<Patch Number="U23-4" Name="U23-4 User Patch" ProgramChange="91" />
+			<Patch Number="U24-1" Name="U24-1 User Patch" ProgramChange="92" />
+			<Patch Number="U24-2" Name="U24-2 User Patch" ProgramChange="93" />
+			<Patch Number="U24-3" Name="U24-3 User Patch" ProgramChange="94" />
+			<Patch Number="U24-4" Name="U24-4 User Patch" ProgramChange="95" />
+			<Patch Number="U25-1" Name="U25-1 User Patch" ProgramChange="96" />
+			<Patch Number="U25-2" Name="U25-2 User Patch" ProgramChange="97" />
+			<Patch Number="U25-3" Name="U25-3 User Patch" ProgramChange="98" />
+			<Patch Number="U25-4" Name="U25-4 User Patch" ProgramChange="99" />
+
+		</PatchNameList>
+	</PatchBank>
+
+	<PatchBank Name ="User Presets 26-4 to 34-4">
+		<MIDICommands>
+				<ControlChange Control="0" Value="1" />
+				<ControlChange Control="32" Value="0" />
+		</MIDICommands>
+		<PatchNameList>
+			<Patch Number="U25-1" Name="U25-1 User Patch" ProgramChange="0" />
+			<Patch Number="U25-2" Name="U25-2 User Patch" ProgramChange="1" />
+			<Patch Number="U25-3" Name="U25-3 User Patch" ProgramChange="2" />
+			<Patch Number="U25-4" Name="U25-4 User Patch" ProgramChange="3" />
+			<Patch Number="U26-1" Name="U26-1 User Patch" ProgramChange="4" />
+			<Patch Number="U26-2" Name="U26-2 User Patch" ProgramChange="5" />
+			<Patch Number="U26-3" Name="U26-3 User Patch" ProgramChange="6" />
+			<Patch Number="U26-4" Name="U26-4 User Patch" ProgramChange="7" />
+			<Patch Number="U27-1" Name="U27-1 User Patch" ProgramChange="8" />
+			<Patch Number="U27-2" Name="U27-2 User Patch" ProgramChange="9" />
+			<Patch Number="U27-3" Name="U27-3 User Patch" ProgramChange="10" />
+			<Patch Number="U27-4" Name="U27-4 User Patch" ProgramChange="11" />
+			<Patch Number="U28-1" Name="U28-1 User Patch" ProgramChange="12" />
+			<Patch Number="U28-2" Name="U28-2 User Patch" ProgramChange="13" />
+			<Patch Number="U28-3" Name="U28-3 User Patch" ProgramChange="14" />
+			<Patch Number="U28-4" Name="U28-4 User Patch" ProgramChange="15" />
+			<Patch Number="U29-1" Name="U29-1 User Patch" ProgramChange="16" />
+			<Patch Number="U29-2" Name="U29-2 User Patch" ProgramChange="17" />
+			<Patch Number="U29-3" Name="U29-3 User Patch" ProgramChange="18" />
+			<Patch Number="U29-4" Name="U29-4 User Patch" ProgramChange="19" />
+			<Patch Number="U30-1" Name="U30-1 User Patch" ProgramChange="20" />
+			<Patch Number="U30-2" Name="U30-2 User Patch" ProgramChange="21" />
+			<Patch Number="U30-3" Name="U30-3 User Patch" ProgramChange="22" />
+			<Patch Number="U30-4" Name="U30-4 User Patch" ProgramChange="23" />
+			<Patch Number="U31-1" Name="U31-1 User Patch" ProgramChange="24" />
+			<Patch Number="U31-2" Name="U31-2 User Patch" ProgramChange="25" />
+			<Patch Number="U31-3" Name="U31-3 User Patch" ProgramChange="26" />
+			<Patch Number="U31-4" Name="U31-4 User Patch" ProgramChange="27" />
+			<Patch Number="U32-1" Name="U32-1 User Patch" ProgramChange="28" />
+			<Patch Number="U32-2" Name="U32-2 User Patch" ProgramChange="29" />
+			<Patch Number="U32-3" Name="U32-3 User Patch" ProgramChange="30" />
+			<Patch Number="U32-4" Name="U32-4 User Patch" ProgramChange="31" />
+			<Patch Number="U33-1" Name="U33-1 User Patch" ProgramChange="32" />
+			<Patch Number="U33-2" Name="U33-2 User Patch" ProgramChange="33" />
+			<Patch Number="U33-3" Name="U33-3 User Patch" ProgramChange="34" />
+			<Patch Number="U33-4" Name="U33-4 User Patch" ProgramChange="35" />
+			<Patch Number="U34-1" Name="U34-1 User Patch" ProgramChange="36" />
+			<Patch Number="U34-2" Name="U34-2 User Patch" ProgramChange="37" />
+			<Patch Number="U34-3" Name="U34-3 User Patch" ProgramChange="38" />
+			<Patch Number="U34-4" Name="U34-4 User Patch" ProgramChange="39" />
+
+		</PatchNameList>
+	</PatchBank>
+
+	<!--
+			<PatchBank Name="Bank 1">
+				<MIDICommands>
+					<ControlChange Control="0" Value="0" />
+					<ControlChange Control="32" Value="0" />
+				</MIDICommands>
+				<PatchNameList>
+					<Patch Number="U 1-1" Name="U 1-1 HiGAIN STACK" ProgramChange="0" />
+					<Patch Number="U 1-2" Name="U 1-2 MS1959 LEAD" ProgramChange="1" />
+					<Patch Number="U 1-3" Name="U 1-3 STACK CRUNCH" ProgramChange="2" />
+					<Patch Number="U 1-4" Name="U 1-4 CLEAN+DD+CH" ProgramChange="3" />
+					<Patch Number="U 2-1" Name="U 2-1 HEAVY METAL DRV" ProgramChange="4" />
+					<Patch Number="U 2-2" Name="U 2-2 5150 LEAD" ProgramChange="5" />
+					<Patch Number="U 2-3" Name="U 2-3 TWEED CRUNCH" ProgramChange="6" />
+					<Patch Number="U 2-4" Name="U 2-4 TWO CLEAN STEREO" ProgramChange="7" />
+					<Patch Number="U 3-1" Name="U 3-1 OD-1 + MS1959" ProgramChange="8" />
+					<Patch Number="U 3-2" Name="U 3-2 R-FIER LEAD" ProgramChange="9" />
+					<Patch Number="U 3-3" Name="U 3-3 WARM CRUNCH" ProgramChange="10" />
+					<Patch Number="U 3-4" Name="U 3-4 WARM JAZZ" ProgramChange="11" />
+					<Patch Number="U 4-1" Name="U 4-1 HiGAIN COMBO" ProgramChange="12" />
+					<Patch Number="U 4-2" Name="U 4-2 FAT OD LEAD" ProgramChange="13" />
+					<Patch Number="U 4-3" Name="U 4-3 MATCH CRUNCH" ProgramChange="14" />
+					<Patch Number="U 4-4" Name="U 4-4 CRUNCH ROTARY" ProgramChange="15" />
+					<Patch Number="U 5-1" Name="U 5-1 WARM OVERDRIVE" ProgramChange="16" />
+					<Patch Number="U 5-2" Name="U 5-2 TWEED LEAD" ProgramChange="17" />
+					<Patch Number="U 5-3" Name="U 5-3 TAX GUY" ProgramChange="18" />
+					<Patch Number="U 5-4" Name="U 5-4 CLEAN←→ LEAD CTL" ProgramChange="19" />
+					<Patch Number="U 6-1" Name="U 6-1 METAL STACK" ProgramChange="20" />
+					<Patch Number="U 6-2" Name="U 6-2 T-AMP LEAD" ProgramChange="21" />
+					<Patch Number="U 6-3" Name="U 6-3 DRIVE YOUR CAR" ProgramChange="22" />
+					<Patch Number="U 6-4" Name="U 6-4 SUPER CLEAN" ProgramChange="23" />
+					<Patch Number="U 7-1" Name="U 7-1 OD-1 + TWEED" ProgramChange="24" />
+					<Patch Number="U 7-2" Name="U 7-2 SLDN LEAD SOLO" ProgramChange="25" />
+					<Patch Number="U 7-3" Name="U 7-3 VOODOO WAH" ProgramChange="26" />
+					<Patch Number="U 7-4" Name="U 7-4 BRIGHT CLEAN" ProgramChange="27" />
+					<Patch Number="U 8-1" Name="U 8-1 POWER STACK" ProgramChange="28" />
+					<Patch Number="U 8-2" Name="U 8-2 BG LEAD SOLO" ProgramChange="29" />
+					<Patch Number="U 8-3" Name="U 8-3 50s ROCK&apos;N&apos;ROLL" ProgramChange="30" />
+					<Patch Number="U 8-4" Name="U 8-4 MELLOW FRETLESS" ProgramChange="31" />
+					<Patch Number="U 9-1" Name="U 9-1 SMOOTH DRIVE" ProgramChange="32" />
+					<Patch Number="U 9-2" Name="U 9-2 MATCH LEAD" ProgramChange="33" />
+					<Patch Number="U 9-3" Name="U 9-3 MILD CRUNCH" ProgramChange="34" />
+					<Patch Number="U 9-4" Name="U 9-4 MILD CLEAN" ProgramChange="35" />
+					<Patch Number="U10-1" Name="U10-1 DRIVE STACK" ProgramChange="36" />
+					<Patch Number="U10-2" Name="U10-2 EDGE LEAD" ProgramChange="37" />
+					<Patch Number="U10-3" Name="U10-3 COMP TWEED" ProgramChange="38" />
+					<Patch Number="U10-4" Name="U10-4 MELLOW HOLLOW" ProgramChange="39" />
+					<Patch Number="U11-1" Name="U11-1 BOTTOM COMBO DRV" ProgramChange="40" />
+					<Patch Number="U11-2" Name="U11-2 FAT COMP LEAD" ProgramChange="41" />
+					<Patch Number="U11-3" Name="U11-3 BLUES LEAD" ProgramChange="42" />
+					<Patch Number="U11-4" Name="U11-4 BIG HALL CLEAN" ProgramChange="43" />
+					<Patch Number="U12-1" Name="U12-1 HiGAIN TWEED" ProgramChange="44" />
+					<Patch Number="U12-2" Name="U12-2 HiGAIN MILD LEAD" ProgramChange="45" />
+					<Patch Number="U12-3" Name="U12-3 BRIGHT CRUNCH" ProgramChange="46" />
+					<Patch Number="U12-4" Name="U12-4 COOL SITAR" ProgramChange="47" />
+					<Patch Number="U13-1" Name="U13-1 PLEX/T-AMP" ProgramChange="48" />
+					<Patch Number="U13-2" Name="U13-2 COMP + OD-1" ProgramChange="49" />
+					<Patch Number="U13-3" Name="U13-3 TREMOLO CRUNCH" ProgramChange="50" />
+					<Patch Number="U13-4" Name="U13-4 MODULATED CLEAN" ProgramChange="51" />
+					<Patch Number="U14-1" Name="U14-1 PLEX + EDGE LEAD" ProgramChange="52" />
+					<Patch Number="U14-2" Name="U14-2 FAT STEREO LEAD" ProgramChange="53" />
+					<Patch Number="U14-3" Name="U14-3 DRY MATCH" ProgramChange="54" />
+					<Patch Number="U14-4" Name="U14-4 LOW TONE JAZZ" ProgramChange="55" />
+					<Patch Number="U15-1" Name="U15-1 NATURAL SPEED" ProgramChange="56" />
+					<Patch Number="U15-2" Name="U15-2 MID RANGE STEREO" ProgramChange="57" />
+					<Patch Number="U15-3" Name="U15-3 TWIN CRUNCH" ProgramChange="58" />
+					<Patch Number="U15-4" Name="U15-4 SMALL WING" ProgramChange="59" />
+					<Patch Number="U16-1" Name="U16-1 POWER STACK DRV" ProgramChange="60" />
+					<Patch Number="U16-2" Name="U16-2 T-SCREAM+MS1959" ProgramChange="61" />
+					<Patch Number="U16-3" Name="U16-3 BLUES OD CRUNCH" ProgramChange="62" />
+					<Patch Number="U16-4" Name="U16-4 WAVE SYNTH" ProgramChange="63" />
+					<Patch Number="U17-1" Name="U17-1 VINTAGE 1959" ProgramChange="64" />
+					<Patch Number="U17-2" Name="U17-2 80s SPANDEX LEAD" ProgramChange="65" />
+					<Patch Number="U17-3" Name="U17-3 60&apos;s TWEED" ProgramChange="66" />
+					<Patch Number="U17-4" Name="U17-4 CLEAN STACK" ProgramChange="67" />
+					<Patch Number="U18-1" Name="U18-1 TREAD AMP" ProgramChange="68" />
+					<Patch Number="U18-2" Name="U18-2 FAT BOY" ProgramChange="69" />
+					<Patch Number="U18-3" Name="U18-3 PRO CRUNCH WAH" ProgramChange="70" />
+					<Patch Number="U18-4" Name="U18-4 HEARTACHE HOTEL" ProgramChange="71" />
+					<Patch Number="U19-1" Name="U19-1 FAT MS HiGAIN" ProgramChange="72" />
+					<Patch Number="U19-2" Name="U19-2 PINK ECHO" ProgramChange="73" />
+					<Patch Number="U19-3" Name="U19-3 CRUNCH←→ DRV EXP" ProgramChange="74" />
+					<Patch Number="U19-4" Name="U19-4 DEEP REV TWIN" ProgramChange="75" />
+					<Patch Number="U20-1" Name="U20-1 WHOLE STACK" ProgramChange="76" />
+					<Patch Number="U20-2" Name="U20-2 DIST + MS HiGAIN" ProgramChange="77" />
+					<Patch Number="U20-3" Name="U20-3 TWEED ANALOG DLY" ProgramChange="78" />
+					<Patch Number="U20-4" Name="U20-4 PANNING PHASER" ProgramChange="79" />
+					<Patch Number="U21-1" Name="U21-1 WEST COAST DRIVE" ProgramChange="80" />
+					<Patch Number="U21-2" Name="U21-2 MILD LEAD" ProgramChange="81" />
+					<Patch Number="U21-3" Name="U21-3 VO DRIVE+LIMITER" ProgramChange="82" />
+					<Patch Number="U21-4" Name="U21-4 JAZZ COMBO" ProgramChange="83" />
+					<Patch Number="U22-1" Name="U22-1 BLUES DRIVE" ProgramChange="84" />
+					<Patch Number="U22-2" Name="U22-2 MID DS+BG LEAD" ProgramChange="85" />
+					<Patch Number="U22-3" Name="U22-3 COMP CRUNCH" ProgramChange="86" />
+					<Patch Number="U22-4" Name="U22-4 FAT CLEAN" ProgramChange="87" />
+					<Patch Number="U23-1" Name="U23-1 60s SUNSHINE" ProgramChange="88" />
+					<Patch Number="U23-2" Name="U23-2 HiGAIN WAH LEAD" ProgramChange="89" />
+					<Patch Number="U23-3" Name="U23-3 BIG CRUNCH" ProgramChange="90" />
+					<Patch Number="U23-4" Name="U23-4 COUNTRY TWIN" ProgramChange="91" />
+					<Patch Number="U24-1" Name="U24-1 FOXY DRIVE" ProgramChange="92" />
+					<Patch Number="U24-2" Name="U24-2 DRIVE STK STEREO" ProgramChange="93" />
+					<Patch Number="U24-3" Name="U24-3 ANOTHER BRICK" ProgramChange="94" />
+					<Patch Number="U24-4" Name="U24-4 WARP DELAY CTL" ProgramChange="95" />
+					<Patch Number="U25-1" Name="U25-1 BLACK ROOM WAH" ProgramChange="96" />
+					<Patch Number="U25-2" Name="U25-2 DEEP STACK LEAD" ProgramChange="97" />
+					<Patch Number="U25-3" Name="U25-3 CHORUS CRUNCH" ProgramChange="98" />
+					<Patch Number="U25-4" Name="U25-4 A.Gt SIMULATOR" ProgramChange="99" />
+				</PatchNameList>
+			</PatchBank>
+			<PatchBank Name="Factory Bank">
+				<MIDICommands>
+					<ControlChange Control="0" Value="1" />
+					<ControlChange Control="32" Value="0" />
+				</MIDICommands>
+				<PatchNameList>
+					<Patch Number="U26-1" Name="U26-1 CAN&apos;T GET DRIVE" ProgramChange="0" />
+					<Patch Number="U26-2" Name="U26-2 BIG LEAD" ProgramChange="1" />
+					<Patch Number="U26-3" Name="U26-3 DEEP COMP JC" ProgramChange="2" />
+					<Patch Number="U26-4" Name="U26-4 CLEAN MOD" ProgramChange="3" />
+					<Patch Number="U27-1" Name="U27-1 SCHOOL DRIVE" ProgramChange="4" />
+					<Patch Number="U27-2" Name="U27-2 LONG SUSTAIN DRV" ProgramChange="5" />
+					<Patch Number="U27-3" Name="U27-3 PHASE CRUNCH" ProgramChange="6" />
+					<Patch Number="U27-4" Name="U27-4 JUMBO ACOUSTIC" ProgramChange="7" />
+					<Patch Number="U28-1" Name="U28-1 MS1959 ch MIX" ProgramChange="8" />
+					<Patch Number="U28-2" Name="U28-2 MILKY WAY" ProgramChange="9" />
+					<Patch Number="U28-3" Name="U28-3 CRUNCH WAH" ProgramChange="10" />
+					<Patch Number="U28-4" Name="U28-4 PANNING WAH" ProgramChange="11" />
+					<Patch Number="U29-1" Name="U29-1 POWER MS" ProgramChange="12" />
+					<Patch Number="U29-2" Name="U29-2 COMP + TURBO OD" ProgramChange="13" />
+					<Patch Number="U29-3" Name="U29-3 MS HiGAIN/JC-120" ProgramChange="14" />
+					<Patch Number="U29-4" Name="U29-4 SHIMMER" ProgramChange="15" />
+					<Patch Number="U30-1" Name="U30-1 MechaDS+CRUNCH" ProgramChange="16" />
+					<Patch Number="U30-2" Name="U30-2 DAYDREAM" ProgramChange="17" />
+					<Patch Number="U30-3" Name="U30-3 COUNTRY CRUNCH" ProgramChange="18" />
+					<Patch Number="U30-4" Name="U30-4 FUNKYTOWN" ProgramChange="19" />
+					<Patch Number="U31-1" Name="U31-1 STEREO MODERN" ProgramChange="20" />
+					<Patch Number="U31-2" Name="U31-2 DYNA LEAD/CLEAN" ProgramChange="21" />
+					<Patch Number="U31-3" Name="U31-3 LIQUID CRUNCH" ProgramChange="22" />
+					<Patch Number="U31-4" Name="U31-4 FUNKY FREAK" ProgramChange="23" />
+					<Patch Number="U32-1" Name="U32-1 MID DISTORTION" ProgramChange="24" />
+					<Patch Number="U32-2" Name="U32-2 DYNA LEAD/DRIVE" ProgramChange="25" />
+					<Patch Number="U32-3" Name="U32-3 DUAL COMBO CRNCH" ProgramChange="26" />
+					<Patch Number="U32-4" Name="U32-4 PHASE FLANGER" ProgramChange="27" />
+					<Patch Number="U33-1" Name="U33-1 HOT BRIT COMBO" ProgramChange="28" />
+					<Patch Number="U33-2" Name="U33-2 BLUES+MS1959 MIX" ProgramChange="29" />
+					<Patch Number="U33-3" Name="U33-3 5150 CTL→ SOLO" ProgramChange="30" />
+					<Patch Number="U33-4" Name="U33-4 CLEAN UNI-V" ProgramChange="31" />
+					<Patch Number="U34-1" Name="U34-1 AMERICAN DS" ProgramChange="32" />
+					<Patch Number="U34-2" Name="U34-2 R-FIRE Vint1→ 2" ProgramChange="33" />
+					<Patch Number="U34-3" Name="U34-3 SMOOTH DETUNE" ProgramChange="34" />
+					<Patch Number="U34-4" Name="U34-4 ROCKABILLY" ProgramChange="35" />
+					<Patch Number="U35-1" Name="U35-1 HEAVY STACK" ProgramChange="36" />
+					<Patch Number="U35-2" Name="U35-2 D.STACK CTL→ WARP" ProgramChange="37" />
+					<Patch Number="U35-3" Name="U35-3 WAH FUZZ" ProgramChange="38" />
+					<Patch Number="U35-4" Name="U35-4 CLEAN SCREAM" ProgramChange="39" />
+
+-->
+	<PatchBank Name="Factory Bank P36 to P50">
+				<MIDICommands>
+					<ControlChange Control="0" Value="1" />
+					<ControlChange Control="32" Value="0" />
+				</MIDICommands>	
+				<PatchNameList>			
+					<Patch Number="P36-1" Name="P36-1 HiGAIN STACK" ProgramChange="40" />
+					<Patch Number="P36-2" Name="P36-2 HEAVY METAL DRV" ProgramChange="41" />
+					<Patch Number="P36-3" Name="P36-3 OD-1 + MS1959" ProgramChange="42" />
+					<Patch Number="P36-4" Name="P36-4 HiGAIN COMBO" ProgramChange="43" />
+					<Patch Number="P37-1" Name="P37-1 WARM OVERDRIVE" ProgramChange="44" />
+					<Patch Number="P37-2" Name="P37-2 METAL STACK" ProgramChange="45" />
+					<Patch Number="P37-3" Name="P37-3 OD-1 + TWEED" ProgramChange="46" />
+					<Patch Number="P37-4" Name="P37-4 POWER STACK" ProgramChange="47" />
+					<Patch Number="P38-1" Name="P38-1 SMOOTH DRIVE" ProgramChange="48" />
+					<Patch Number="P38-2" Name="P38-2 DRIVE STACK" ProgramChange="49" />
+					<Patch Number="P38-3" Name="P38-3 BOTTOM COMBO DRV" ProgramChange="50" />
+					<Patch Number="P38-4" Name="P38-4 HiGAIN TWEED" ProgramChange="51" />
+					<Patch Number="P39-1" Name="P39-1 PLEX/T-AMP" ProgramChange="52" />
+					<Patch Number="P39-2" Name="P39-2 PLEX + EDGE LEAD" ProgramChange="53" />
+					<Patch Number="P39-3" Name="P39-3 NATURAL SPEED" ProgramChange="54" />
+					<Patch Number="P39-4" Name="P39-4 POWER STACK DRV" ProgramChange="55" />
+					<Patch Number="P40-1" Name="P40-1 VINTAGE 1959" ProgramChange="56" />
+					<Patch Number="P40-2" Name="P40-2 TREAD AMP" ProgramChange="57" />
+					<Patch Number="P40-3" Name="P40-3 FAT MS HiGAIN" ProgramChange="58" />
+					<Patch Number="P40-4" Name="P40-4 WHOLE STACK" ProgramChange="59" />
+					<Patch Number="P41-1" Name="P41-1 WEST COAST DRIVE" ProgramChange="60" />
+					<Patch Number="P41-2" Name="P41-2 BLUES DRIVE" ProgramChange="61" />
+					<Patch Number="P41-3" Name="P41-3 60s SUNSHINE" ProgramChange="62" />
+					<Patch Number="P41-4" Name="P41-4 FOXY DRIVE" ProgramChange="63" />
+					<Patch Number="P42-1" Name="P42-1 BLACK ROOM WAH" ProgramChange="64" />
+					<Patch Number="P42-2" Name="P42-2 CAN&apos;T GET DRIVE" ProgramChange="65" />
+					<Patch Number="P42-3" Name="P42-3 SCHOOL DRIVE" ProgramChange="66" />
+					<Patch Number="P42-4" Name="P42-4 MS1959 ch MIX" ProgramChange="67" />
+					<Patch Number="P43-1" Name="P43-1 POWER MS" ProgramChange="68" />
+					<Patch Number="P43-2" Name="P43-2 MechaDS+CRUNCH" ProgramChange="69" />
+					<Patch Number="P43-3" Name="P43-3 STEREO MODERN" ProgramChange="70" />
+					<Patch Number="P43-4" Name="P43-4 MID DISTORTION" ProgramChange="71" />
+					<Patch Number="P44-1" Name="P44-1 HOT BRIT COMBO" ProgramChange="72" />
+					<Patch Number="P44-2" Name="P44-2 AMERICAN DS" ProgramChange="73" />
+					<Patch Number="P44-3" Name="P44-3 HEAVY STACK" ProgramChange="74" />
+					<Patch Number="P44-4" Name="P44-4 BLUES+MS1959 MIX" ProgramChange="75" />
+					<Patch Number="P45-1" Name="P45-1 R-FIRE Vint1→ 2" ProgramChange="76" />
+					<Patch Number="P45-2" Name="P45-2 D.STACK CTL→ WARP" ProgramChange="77" />
+					<Patch Number="P45-3" Name="P45-3 5150 CTL→ SOLO" ProgramChange="78" />
+					<Patch Number="P45-4" Name="P45-4 SMOOTH DETUNE" ProgramChange="79" />
+					<Patch Number="P46-1" Name="P46-1 WAH FUZZ" ProgramChange="80" />
+					<Patch Number="P46-2" Name="P46-2 L:HvyLEAD R:5150" ProgramChange="81" />
+					<Patch Number="P46-3" Name="P46-3 MASSIVE" ProgramChange="82" />
+					<Patch Number="P46-4" Name="P46-4 WIDE STACK" ProgramChange="83" />
+					<Patch Number="P47-1" Name="P47-1 DOUBLE TRACK" ProgramChange="84" />
+					<Patch Number="P47-2" Name="P47-2 HiGAIN VO DRIVE" ProgramChange="85" />
+					<Patch Number="P47-3" Name="P47-3 MUFF STACK" ProgramChange="86" />
+					<Patch Number="P47-4" Name="P47-4 DROPPED D" ProgramChange="87" />
+					<Patch Number="P48-1" Name="P48-1 R-FIER SCREAM" ProgramChange="88" />
+					<Patch Number="P48-2" Name="P48-2 STEREO MS HiGAIN" ProgramChange="89" />
+					<Patch Number="P48-3" Name="P48-3 GOT IT" ProgramChange="90" />
+					<Patch Number="P48-4" Name="P48-4 GUITARS&amp;STRIPES" ProgramChange="91" />
+					<Patch Number="P49-1" Name="P49-1 MILD 1959" ProgramChange="92" />
+					<Patch Number="P49-2" Name="P49-2 DOUBLE AMP" ProgramChange="93" />
+					<Patch Number="P49-3" Name="P49-3 5150/1959 DUAL" ProgramChange="94" />
+					<Patch Number="P49-4" Name="P49-4 DUAL DRY 1959" ProgramChange="95" />
+					<Patch Number="P50-1" Name="P50-1 HEAVY 5150" ProgramChange="96" />
+					<Patch Number="P50-2" Name="P50-2 HEAVY BTM METAL" ProgramChange="97" />
+					<Patch Number="P50-3" Name="P50-3 WALL OF 8x12 !" ProgramChange="98" />
+					<Patch Number="P50-4" Name="P50-4 METAL ZONE CHO" ProgramChange="99" />
+				</PatchNameList>
+			</PatchBank>
+
+			
+			<PatchBank Name="Factory Bank P51 to P75">
+				<MIDICommands>
+					<ControlChange Control="0" Value="2" />
+					<ControlChange Control="32" Value="0" />
+				</MIDICommands>
+				<PatchNameList>
+					<Patch Number="P51-1" Name="P51-1 60s OCT FUZZ" ProgramChange="0" />
+					<Patch Number="P51-2" Name="P51-2 70s 1959 STACK" ProgramChange="1" />
+					<Patch Number="P51-3" Name="P51-3 ROCK WOMAN" ProgramChange="2" />
+					<Patch Number="P51-4" Name="P51-4 MILD DRIVE" ProgramChange="3" />
+					<Patch Number="P52-1" Name="P52-1 MS1959 LEAD" ProgramChange="4" />
+					<Patch Number="P52-2" Name="P52-2 5150 LEAD" ProgramChange="5" />
+					<Patch Number="P52-3" Name="P52-3 R-FIER LEAD" ProgramChange="6" />
+					<Patch Number="P52-4" Name="P52-4 FAT OD LEAD" ProgramChange="7" />
+					<Patch Number="P53-1" Name="P53-1 TWEED LEAD" ProgramChange="8" />
+					<Patch Number="P53-2" Name="P53-2 T-AMP LEAD" ProgramChange="9" />
+					<Patch Number="P53-3" Name="P53-3 SLDN LEAD SOLO" ProgramChange="10" />
+					<Patch Number="P53-4" Name="P53-4 BG LEAD SOLO" ProgramChange="11" />
+					<Patch Number="P54-1" Name="P54-1 MATCH LEAD" ProgramChange="12" />
+					<Patch Number="P54-2" Name="P54-2 EDGE LEAD" ProgramChange="13" />
+					<Patch Number="P54-3" Name="P54-3 FAT COMP LEAD" ProgramChange="14" />
+					<Patch Number="P54-4" Name="P54-4 HiGAIN MILD LEAD" ProgramChange="15" />
+					<Patch Number="P55-1" Name="P55-1 COMP + OD-1" ProgramChange="16" />
+					<Patch Number="P55-2" Name="P55-2 FAT STEREO LEAD" ProgramChange="17" />
+					<Patch Number="P55-3" Name="P55-3 MID RANGE STEREO" ProgramChange="18" />
+					<Patch Number="P55-4" Name="P55-4 T-SCREAM+MS1959" ProgramChange="19" />
+					<Patch Number="P56-1" Name="P56-1 80s SPANDEX LEAD" ProgramChange="20" />
+					<Patch Number="P56-2" Name="P56-2 FAT BOY" ProgramChange="21" />
+					<Patch Number="P56-3" Name="P56-3 PINK ECHO" ProgramChange="22" />
+					<Patch Number="P56-4" Name="P56-4 DIST + MS HiGAIN" ProgramChange="23" />
+					<Patch Number="P57-1" Name="P57-1 MILD LEAD" ProgramChange="24" />
+					<Patch Number="P57-2" Name="P57-2 MID DS+BG LEAD" ProgramChange="25" />
+					<Patch Number="P57-3" Name="P57-3 HiGAIN WAH LEAD" ProgramChange="26" />
+					<Patch Number="P57-4" Name="P57-4 DRIVE STK STEREO" ProgramChange="27" />
+					<Patch Number="P58-1" Name="P58-1 DEEP STACK LEAD" ProgramChange="28" />
+					<Patch Number="P58-2" Name="P58-2 BIG LEAD" ProgramChange="29" />
+					<Patch Number="P58-3" Name="P58-3 LONG SUSTAIN DRV" ProgramChange="30" />
+					<Patch Number="P58-4" Name="P58-4 MILKY WAY" ProgramChange="31" />
+					<Patch Number="P59-1" Name="P59-1 COMP + TURBO OD" ProgramChange="32" />
+					<Patch Number="P59-2" Name="P59-2 DAYDREAM" ProgramChange="33" />
+					<Patch Number="P59-3" Name="P59-3 DYNA LEAD/CLEAN" ProgramChange="34" />
+					<Patch Number="P59-4" Name="P59-4 DYNA LEAD/DRIVE" ProgramChange="35" />
+					<Patch Number="P60-1" Name="P60-1 STACK CRUNCH" ProgramChange="36" />
+					<Patch Number="P60-2" Name="P60-2 TWEED CRUNCH" ProgramChange="37" />
+					<Patch Number="P60-3" Name="P60-3 WARM CRUNCH" ProgramChange="38" />
+					<Patch Number="P60-4" Name="P60-4 MATCH CRUNCH" ProgramChange="39" />
+					<Patch Number="P61-1" Name="P61-1 TAX GUY" ProgramChange="40" />
+					<Patch Number="P61-2" Name="P61-2 DRIVE YOUR CAR" ProgramChange="41" />
+					<Patch Number="P61-3" Name="P61-3 VOODOO WAH" ProgramChange="42" />
+					<Patch Number="P61-4" Name="P61-4 50s ROCK&apos;N&apos;ROLL" ProgramChange="43" />
+					<Patch Number="P62-1" Name="P62-1 MILD CRUNCH" ProgramChange="44" />
+					<Patch Number="P62-2" Name="P62-2 COMP TWEED" ProgramChange="45" />
+					<Patch Number="P62-3" Name="P62-3 BLUES LEAD" ProgramChange="46" />
+					<Patch Number="P62-4" Name="P62-4 BRIGHT CRUNCH" ProgramChange="47" />
+					<Patch Number="P63-1" Name="P63-1 TREMOLO CRUNCH" ProgramChange="48" />
+					<Patch Number="P63-2" Name="P63-2 DRY MATCH" ProgramChange="49" />
+					<Patch Number="P63-3" Name="P63-3 TWIN CRUNCH" ProgramChange="50" />
+					<Patch Number="P63-4" Name="P63-4 BLUES OD CRUNCH" ProgramChange="51" />
+					<Patch Number="P64-1" Name="P64-1 60&apos;s TWEED" ProgramChange="52" />
+					<Patch Number="P64-2" Name="P64-2 PRO CRUNCH WAH" ProgramChange="53" />
+					<Patch Number="P64-3" Name="P64-3 CRUNCH←→ DRV EXP" ProgramChange="54" />
+					<Patch Number="P64-4" Name="P64-4 TWEED ANALOG DLY" ProgramChange="55" />
+					<Patch Number="P65-1" Name="P65-1 VO DRIVE+LIMITER" ProgramChange="56" />
+					<Patch Number="P65-2" Name="P65-2 COMP CRUNCH" ProgramChange="57" />
+					<Patch Number="P65-3" Name="P65-3 BIG CRUNCH" ProgramChange="58" />
+					<Patch Number="P65-4" Name="P65-4 ANOTHER BRICK" ProgramChange="59" />
+					<Patch Number="P66-1" Name="P66-1 CHORUS CRUNCH" ProgramChange="60" />
+					<Patch Number="P66-2" Name="P66-2 DEEP COMP JC" ProgramChange="61" />
+					<Patch Number="P66-3" Name="P66-3 PHASE CRUNCH" ProgramChange="62" />
+					<Patch Number="P66-4" Name="P66-4 CRUNCH WAH" ProgramChange="63" />
+					<Patch Number="P67-1" Name="P67-1 MS HiGAIN/JC-120" ProgramChange="64" />
+					<Patch Number="P67-2" Name="P67-2 COUNTRY CRUNCH" ProgramChange="65" />
+					<Patch Number="P67-3" Name="P67-3 LIQUID CRUNCH" ProgramChange="66" />
+					<Patch Number="P67-4" Name="P67-4 DUAL COMBO CRNCH" ProgramChange="67" />
+					<Patch Number="P68-1" Name="P68-1 CLEAN+DD+CH" ProgramChange="68" />
+					<Patch Number="P68-2" Name="P68-2 TWO CLEAN STEREO" ProgramChange="69" />
+					<Patch Number="P68-3" Name="P68-3 WARM JAZZ" ProgramChange="70" />
+					<Patch Number="P68-4" Name="P68-4 CLEAN←→ LEAD CTL" ProgramChange="71" />
+					<Patch Number="P69-1" Name="P69-1 SUPER CLEAN" ProgramChange="72" />
+					<Patch Number="P69-2" Name="P69-2 BRIGHT CLEAN" ProgramChange="73" />
+					<Patch Number="P69-3" Name="P69-3 MILD CLEAN" ProgramChange="74" />
+					<Patch Number="P69-4" Name="P69-4 MELLOW HOLLOW" ProgramChange="75" />
+					<Patch Number="P70-1" Name="P70-1 BIG HALL CLEAN" ProgramChange="76" />
+					<Patch Number="P70-2" Name="P70-2 MODULATED CLEAN" ProgramChange="77" />
+					<Patch Number="P70-3" Name="P70-3 LOW TONE JAZZ" ProgramChange="78" />
+					<Patch Number="P70-4" Name="P70-4 SMALL WING" ProgramChange="79" />
+					<Patch Number="P71-1" Name="P71-1 CLEAN STACK" ProgramChange="80" />
+					<Patch Number="P71-2" Name="P71-2 HEARTACHE HOTEL" ProgramChange="81" />
+					<Patch Number="P71-3" Name="P71-3 DEEP REV TWIN" ProgramChange="82" />
+					<Patch Number="P71-4" Name="P71-4 JAZZ COMBO" ProgramChange="83" />
+					<Patch Number="P72-1" Name="P72-1 FAT CLEAN" ProgramChange="84" />
+					<Patch Number="P72-2" Name="P72-2 COUNTRY TWIN" ProgramChange="85" />
+					<Patch Number="P72-3" Name="P72-3 A.Gt SIMULATOR" ProgramChange="86" />
+					<Patch Number="P72-4" Name="P72-4 CLEAN MOD" ProgramChange="87" />
+					<Patch Number="P73-1" Name="P73-1 JUMBO ACOUSTIC" ProgramChange="88" />
+					<Patch Number="P73-2" Name="P73-2 SHIMMER" ProgramChange="89" />
+					<Patch Number="P73-3" Name="P73-3 FUNKYTOWN" ProgramChange="90" />
+					<Patch Number="P73-4" Name="P73-4 FUNKY FREAK" ProgramChange="91" />
+					<Patch Number="P74-1" Name="P74-1 CLEAN UNI-V" ProgramChange="92" />
+					<Patch Number="P74-2" Name="P74-2 ROCKABILLY" ProgramChange="93" />
+					<Patch Number="P74-3" Name="P74-3 CLEAN SCREAM" ProgramChange="94" />
+					<Patch Number="P74-4" Name="P74-4 ACOUSTIC GUITAR" ProgramChange="95" />
+					<Patch Number="P75-1" Name="P75-1 CLEAN DLY CHORUS" ProgramChange="96" />
+					<Patch Number="P75-2" Name="P75-2 CLEAN / CRUNCH" ProgramChange="97" />
+					<Patch Number="P75-3" Name="P75-3 WET JAZZ" ProgramChange="98" />
+					<Patch Number="P75-4" Name="P75-4 PIEZO → ACOUSTIC" ProgramChange="99" />
+				</PatchNameList>
+			</PatchBank>
+			<PatchBank Name="Factory Bank P76 to P85">
+				<MIDICommands>
+					<ControlChange Control="0" Value="3" />
+					<ControlChange Control="32" Value="0" />
+				</MIDICommands>
+				<PatchNameList>
+					<Patch Number="P76-1" Name="P76-1 CRUNCH ROTARY" ProgramChange="0" />
+					<Patch Number="P76-2" Name="P76-2 MELLOW FRETLESS" ProgramChange="1" />
+					<Patch Number="P76-3" Name="P76-3 COOL SITAR" ProgramChange="2" />
+					<Patch Number="P76-4" Name="P76-4 WAVE SYNTH" ProgramChange="3" />
+					<Patch Number="P77-1" Name="P77-1 PANNING PHASER" ProgramChange="4" />
+					<Patch Number="P77-2" Name="P77-2 WARP DELAY CTL" ProgramChange="5" />
+					<Patch Number="P77-3" Name="P77-3 PANNING WAH" ProgramChange="6" />
+					<Patch Number="P77-4" Name="P77-4 PHASE FLANGER" ProgramChange="7" />
+					<Patch Number="P78-1" Name="P78-1 E.PIANO GUITAR" ProgramChange="8" />
+					<Patch Number="P78-2" Name="P78-2 PANNING RHYTHM" ProgramChange="9" />
+					<Patch Number="P78-3" Name="P78-3 BLACK SWIRL" ProgramChange="10" />
+					<Patch Number="P78-4" Name="P78-4 SYNTH CTL→ HOLD" ProgramChange="11" />
+					<Patch Number="P79-1" Name="P79-1 SLOW GEAR PS" ProgramChange="12" />
+					<Patch Number="P79-2" Name="P79-2 DEFRETTER CTL→ SH" ProgramChange="13" />
+					<Patch Number="P79-3" Name="P79-3 OCTAVE FLANGE" ProgramChange="14" />
+					<Patch Number="P79-4" Name="P79-4 SYNTH SEQUENCE" ProgramChange="15" />
+					<Patch Number="P80-1" Name="P80-1 PAD" ProgramChange="16" />
+					<Patch Number="P80-2" Name="P80-2 GUITAR + PAD" ProgramChange="17" />
+					<Patch Number="P80-3" Name="P80-3 REVERSE" ProgramChange="18" />
+					<Patch Number="P80-4" Name="P80-4 AUTO PAD" ProgramChange="19" />
+					<Patch Number="P81-1" Name="P81-1 LOVELY" ProgramChange="20" />
+					<Patch Number="P81-2" Name="P81-2 EDGE DELAY" ProgramChange="21" />
+					<Patch Number="P81-3" Name="P81-3 SANCTUARY" ProgramChange="22" />
+					<Patch Number="P81-4" Name="P81-4 SPEAKER KILLER" ProgramChange="23" />
+					<Patch Number="P82-1" Name="P82-1 OCTIVIOUS" ProgramChange="24" />
+					<Patch Number="P82-2" Name="P82-2 RISING WAH" ProgramChange="25" />
+					<Patch Number="P82-3" Name="P82-3 STEREO SITAR" ProgramChange="26" />
+					<Patch Number="P82-4" Name="P82-4 FRETLESS OCT" ProgramChange="27" />
+					<Patch Number="P83-1" Name="P83-1 FUNK FOOD" ProgramChange="28" />
+					<Patch Number="P83-2" Name="P83-2 NOT FORWARD" ProgramChange="29" />
+					<Patch Number="P83-3" Name="P83-3 BASS &amp; GUITAR" ProgramChange="30" />
+					<Patch Number="P83-4" Name="P83-4 FAR FROM HUMAN" ProgramChange="31" />
+					<Patch Number="P84-1" Name="P84-1 JAZZ ORGAN" ProgramChange="32" />
+					<Patch Number="P84-2" Name="P84-2 STEP PHASE" ProgramChange="33" />
+					<Patch Number="P84-3" Name="P84-3 SYNTH BRASS" ProgramChange="34" />
+					<Patch Number="P84-4" Name="P84-4 SYNCHRO PAN" ProgramChange="35" />
+					<Patch Number="P85-1" Name="P85-1 DOUBLE TALK" ProgramChange="36" />
+					<Patch Number="P85-2" Name="P85-2 RING MOD" ProgramChange="37" />
+					<Patch Number="P85-3" Name="P85-3 GATED DRIVE" ProgramChange="38" />
+					<Patch Number="P85-4" Name="P85-4 HEAVY OCT" ProgramChange="39" />
+				</PatchNameList>
+			</PatchBank>
+		</ChannelNameSet>
+    <ControlNameList Name="Controls">
+      <Control Type="7bit" Number="80" Name="CTRL Pedal" />
+      <Control Type="7bit" Number="81" Name="Expression Switch" />
+      <Control Type="7bit" Number="7" Name="Wah / Volume Pedal" />
+    </ControlNameList>
+
+	</MasterDeviceNames>
+</MIDINameDocument>

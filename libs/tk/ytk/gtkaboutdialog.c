@@ -32,7 +32,7 @@
 
 #include <string.h>
 
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 
 #include "gtkaboutdialog.h"
 #include "gtkbutton.h"

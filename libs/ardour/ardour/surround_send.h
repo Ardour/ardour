@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_surround_send_h__
-#define __ardour_surround_send_h__
+#pragma once
 
 #include "ardour/processor.h"
 #include "ardour/send.h"
@@ -42,8 +41,8 @@ public:
 
 	uint32_t n_pannables () const;
 
-	PBD::Signal0<void> NPannablesChanged;
-	PBD::Signal0<void> PanChanged;
+	PBD::Signal<void()> NPannablesChanged;
+	PBD::Signal<void()> PanChanged;
 
 	/* Route/processor interface */
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) { return in == out; }
@@ -104,4 +103,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_surround_send_h__ */

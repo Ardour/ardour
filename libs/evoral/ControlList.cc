@@ -300,7 +300,7 @@ ControlList::extend_to (timepos_t const& end)
 }
 
 void
-ControlList::y_transform (boost::function<double (double)> callback)
+ControlList::y_transform (std::function<double (double)> callback)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
@@ -313,7 +313,7 @@ ControlList::y_transform (boost::function<double (double)> callback)
 }
 
 void
-ControlList::list_merge (ControlList const& other, boost::function<double (double, double)> callback)
+ControlList::list_merge (ControlList const& other, std::function<double (double, double)> callback)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
@@ -732,8 +732,8 @@ ControlList::editor_add_ordered (OrderedPoints const & points, bool with_guard)
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
 
-		Temporal::timepos_t earliest = points.front().when;
-		Temporal::timepos_t latest = points.back().when;
+		Temporal::timepos_t earliest = ensure_time_domain (points.front().when);
+		Temporal::timepos_t latest   = ensure_time_domain (points.back().when);
 
 		assert (earliest <= latest);
 
@@ -742,20 +742,12 @@ ControlList::editor_add_ordered (OrderedPoints const & points, bool with_guard)
 		(void) erase_range_internal (earliest, latest, _events);
 
 		if (with_guard) {
-			ControlEvent cp (earliest, 0.0);
-			double v = unlocked_eval (earliest);
-			iterator     s = lower_bound (_events.begin (), _events.end (), &cp, time_comparator);
-			if (s != _events.end ()) {
-				_events.insert (s, new ControlEvent (earliest, v));
-			}
+			unlocked_invalidate_insert_iterator ();
+			add_guard_point (earliest, -GUARD_POINT_DELTA (*this));
 		}
 		if (with_guard && !distance.is_zero()) {
-			ControlEvent cp (latest, 0.0);
-			double v = unlocked_eval (latest);
-			iterator     s = lower_bound (_events.begin (), _events.end (), &cp, time_comparator);
-			if (s != _events.end ()) {
-				_events.insert (s, new ControlEvent (latest, v));
-			}
+			unlocked_invalidate_insert_iterator ();
+			add_guard_point (latest, GUARD_POINT_DELTA (*this));
 		}
 
 		/* Get the iterator where we should start insertion */
@@ -1214,6 +1206,23 @@ ControlList::shift (timepos_t const& time, timecnt_t const& distance)
 			ControlEvent cp (pos, 0.0);
 			iterator     s = lower_bound (_events.begin (), _events.end (), &cp, time_comparator);
 			_events.insert (s, new ControlEvent (pos, s == _events.end () ? v0 : v1));
+		}
+
+		mark_dirty ();
+	}
+	maybe_signal_changed ();
+}
+
+/* Note: timepos_t is used here instead of timecnt_t because there's an
+ * implicit origin for the magnitude of the distance.
+ */
+void
+ControlList::simple_shift (timepos_t const & distance)
+{
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+		for (auto & e : _events) {
+			e->when = e->when + distance;
 		}
 
 		mark_dirty ();

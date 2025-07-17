@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ringbuffer_npt_h
-#define ringbuffer_npt_h
+#pragma once
 
 //#include <sys/mman.h>
 
@@ -290,4 +289,3 @@ RingBufferNPT<T>::get_write_vector (typename RingBufferNPT<T>::rw_vector *vec)
 
 } /* namespace */
 
-#endif /* __ringbuffer_npt_h__ */

@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_demangle_h__
-#define __libpbd_demangle_h__
+#pragma once
 
 #include <string>
 #include <cstdlib>
@@ -50,4 +49,3 @@ std::string demangled_name(T const& obj)
 
 } // namespace
 
-#endif // __libpbd_demangle_h__

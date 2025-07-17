@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_value_as_string_h__
-#define __ardour_value_as_string_h__
+#pragma once
 
 #include <stddef.h>
 
@@ -93,4 +92,3 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 
 }  // namespace ARDOUR
 
-#endif /* __ardour_value_as_string_h__ */

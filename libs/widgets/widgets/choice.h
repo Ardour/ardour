@@ -23,10 +23,10 @@
 #include <string>
 #include <vector>
 
-#include <gtkmm/dialog.h>
-#include <gtkmm/image.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/box.h>
+#include <ytkmm/dialog.h>
+#include <ytkmm/image.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/box.h>
 
 #include "widgets/visibility.h"
 

@@ -56,7 +56,6 @@
 
 #include "ardour_message.h"
 #include "ardour_ui.h"
-#include "cursor_context.h"
 #include "editor.h"
 #include "sfdb_ui.h"
 #include "editing.h"
@@ -279,47 +278,11 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 		return;
 	}
 
-	const size_t num_tempos = smf.num_tempos ();
+	bool provided;
+	TempoMap::WritableSharedPtr new_map (smf.tempo_map (provided));
 
-	if (num_tempos == 0) {
+	if (!provided) {
 		return;
-	}
-
-	/* cannot create an empty TempoMap, so create one with "default" single
-	   values for tempo and meter, then overwrite them.
-	*/
-
-	TempoMap::WritableSharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
-
-	Meter last_meter (4, 4);
-	bool have_initial_meter = false;
-
-	for (size_t n = 0; n < num_tempos; ++n) {
-
-		Evoral::SMF::Tempo* t = smf.nth_tempo (n);
-		assert (t);
-
-		Tempo tempo (t->tempo(), 32.0 / (double) t->notes_per_note);
-		Meter meter (t->numerator, t->denominator);
-
-		Temporal::BBT_Argument bbt; /* 1|1|0 which is correct for the no-meter case */
-
-		if (have_initial_meter) {
-
-			bbt = new_map->bbt_at (timepos_t (Temporal::Beats (int_div_round (t->time_pulses, (size_t) smf.ppqn()), 0)));
-			new_map->set_tempo (tempo, bbt);
-
-			if (!(meter == last_meter)) {
-				new_map->set_meter (meter, bbt);
-			}
-
-		} else {
-			new_map->set_meter (meter, bbt);
-			new_map->set_tempo (tempo, bbt);
-			have_initial_meter = true;
-		}
-
-		last_meter = meter;
 	}
 
 	TempoMap::WritableSharedPtr wmap = TempoMap::write_copy ();
@@ -611,8 +574,7 @@ Editor::import_sndfiles (vector<string>            paths,
 	import_status.track = track;
 	import_status.replace = replace;
 
-	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
-	gdk_flush ();
+	CursorRAII cr (*this, _cursors->wait);
 
 	/* start import thread for this spec. this will ultimately call Session::import_files()
 	   which, if successful, will add the files as regions to the region list. its up to us
@@ -674,8 +636,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 	/* skip periodic saves while importing */
 	Session::StateProtector sp (_session);
 
-	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
-	gdk_flush ();
+	CursorRAII cr (*this, _cursors->wait);
 
 	for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
 
@@ -1151,7 +1112,7 @@ Editor::finish_bringing_in_material (std::shared_ptr<Region> region,
 		if (mode == ImportAsTrigger) {
 			std::shared_ptr<Region> copy (RegionFactory::create (region, true));
 			for (int s = 0; s < TriggerBox::default_triggers_per_box; ++s) {
-				if (!existing_track->triggerbox ()->trigger (s)->region ()) {
+				if (!existing_track->triggerbox ()->trigger (s)->playable ()) {
 					existing_track->triggerbox ()->set_from_selection (s, copy);
 #if 1 /* assume drop from sidebar */
 					ARDOUR_UI_UTILS::copy_patch_changes (_session->the_auditioner (), existing_track->triggerbox ()->trigger (s));

@@ -22,17 +22,17 @@
 #include <cmath>
 #include <vector>
 
-#include <gtkmm/adjustment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/label.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/sizegroup.h>
-#include <gtkmm/textview.h>
-#include <gtkmm/togglebutton.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/eventbox.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/sizegroup.h>
+#include <ytkmm/textview.h>
+#include <ytkmm/togglebutton.h>
 
 #include "pbd/stateful.h"
 
@@ -139,9 +139,9 @@ public:
 	}
 
 	/** The delivery that we are handling the level for with our fader has changed */
-	PBD::Signal1<void, std::weak_ptr<ARDOUR::Delivery> > DeliveryChanged;
+	PBD::Signal<void(std::weak_ptr<ARDOUR::Delivery> )> DeliveryChanged;
 
-	static PBD::Signal1<void, FoldbackStrip*> CatchDeletion;
+	static PBD::Signal<void(FoldbackStrip*)> CatchDeletion;
 
 	void route_active_changed ();
 

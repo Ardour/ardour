@@ -80,7 +80,7 @@ using namespace ArdourSurface;
 using namespace ArdourSurface::LAUNCHPAD_NAMESPACE;
 using namespace Gtkmm2ext;
 
-#include "pbd/abstract_ui.cc" // instantiate template
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 #define NOVATION     0x1235
 
@@ -174,11 +174,11 @@ LaunchPadX::LaunchPadX (ARDOUR::Session& s)
 	build_color_map ();
 	build_pad_map ();
 
-	Trigger::TriggerPropertyChange.connect (trigger_connections, invalidator (*this), boost::bind (&LaunchPadX::trigger_property_change, this, _1, _2), this);
+	Trigger::TriggerPropertyChange.connect (trigger_connections, invalidator (*this), std::bind (&LaunchPadX::trigger_property_change, this, _1, _2), this);
 
-	session->RecordStateChanged.connect (session_connections, invalidator(*this), boost::bind (&LaunchPadX::record_state_changed, this), this);
-	session->TransportStateChange.connect (session_connections, invalidator(*this), boost::bind (&LaunchPadX::transport_state_changed, this), this);
-	session->RouteAdded.connect (session_connections, invalidator(*this), boost::bind (&LaunchPadX::viewport_changed, this), this);
+	session->RecordStateChanged.connect (session_connections, invalidator(*this), std::bind (&LaunchPadX::record_state_changed, this), this);
+	session->TransportStateChange.connect (session_connections, invalidator(*this), std::bind (&LaunchPadX::transport_state_changed, this), this);
+	session->RouteAdded.connect (session_connections, invalidator(*this), std::bind (&LaunchPadX::viewport_changed, this), this);
 }
 
 LaunchPadX::~LaunchPadX ()
@@ -193,8 +193,8 @@ LaunchPadX::~LaunchPadX ()
 		p.second.timeout_connection.disconnect ();
 	}
 
-	stop_event_loop ();
 	tear_down_gui ();
+	stop_event_loop ();
 
 	MIDISurface::drop ();
 
@@ -1262,7 +1262,7 @@ LaunchPadX::trigger_property_change (PropertyChange pc, Trigger* t)
 		MidiByteArray msg;
 		std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + x);
 
-		if (!r || !t->region()) {
+		if (!r || !t->playable()) {
 			msg.push_back (0x90);
 			msg.push_back (pid);
 			msg.push_back (0x0);
@@ -1337,7 +1337,7 @@ LaunchPadX::map_triggerbox (int x)
 
 		TriggerPtr t = session->trigger_at (xp, yp);
 
-		if (!t || !t->region()) {
+		if (!t || !t->playable()) {
 			msg[2] = 0x0;
 		} else {
 			msg[2] = palette_index;
@@ -1553,8 +1553,8 @@ LaunchPadX::viewport_changed ()
 	for (int n = 0; n < 8; ++n) {
 		std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + n);
 		if (r) {
-			r->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&LaunchPadX::viewport_changed, this), this);
-			r->presentation_info().PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&LaunchPadX::route_property_change, this, _1, n), this);
+			r->DropReferences.connect (route_connections, invalidator (*this), std::bind (&LaunchPadX::viewport_changed, this), this);
+			r->presentation_info().PropertyChanged.connect (route_connections, invalidator (*this), std::bind (&LaunchPadX::route_property_change, this, _1, n), this);
 		} else {
 			if (n == 0) {
 				/* not even the first stripable ... so do nothing */
@@ -1766,7 +1766,7 @@ LaunchPadX::map_faders ()
 		}
 
 		if (ac) {
-			ac->Changed.connect (control_connections, invalidator (*this), boost::bind (&LaunchPadX::automation_control_change, this, n, std::weak_ptr<AutomationControl> (ac)), this);
+			ac->Changed.connect (control_connections, invalidator (*this), std::bind (&LaunchPadX::automation_control_change, this, n, std::weak_ptr<AutomationControl> (ac)), this);
 		}
 
 		daw_write (msg, 3);

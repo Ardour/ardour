@@ -25,6 +25,8 @@
 
 #include "types.h"
 
+#include <cstdint>
+
 namespace ArdourSurface { namespace MACKIE_NAMESPACE {
 
 /**

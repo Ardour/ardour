@@ -16,17 +16,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_trigger_ui_h__
-#define __ardour_gtk_trigger_ui_h__
+#pragma once
 
-#include "gtkmm/colorselection.h"
+#include "ytkmm/colorselection.h"
+#include "ytkmm/entry.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/bindings.h"
 
 #include "ardour/triggerbox.h"
 #include "widgets/ardour_button.h"
-#include "widgets/slider_controller.h"
 #include "widgets/frame.h"
 
 namespace Gtk
@@ -133,4 +132,3 @@ protected:
 
 
 
-#endif /* __ardour_gtk_trigger_ui_h__ */

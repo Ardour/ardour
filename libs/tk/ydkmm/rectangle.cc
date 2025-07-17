@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/rectangle.h>
-#include <gdkmm/private/rectangle_p.h>
+#include <ydkmm/rectangle.h>
+#include <ydkmm/private/rectangle_p.h>
 
 #include <cstring> // std::memset()
 

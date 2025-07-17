@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/texttag.h>
-#include <gtkmm/private/texttag_p.h>
+#include <ytkmm/texttag.h>
+#include <ytkmm/private/texttag_p.h>
 
 
 // -*- c++ -*-
@@ -29,9 +29,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/textbuffer.h>
-#include <gtkmm/textiter.h>
-#include <gtk/gtk.h>
+#include <ytkmm/textbuffer.h>
+#include <ytkmm/textiter.h>
+#include <ytk/ytk.h>
 
 namespace
 {

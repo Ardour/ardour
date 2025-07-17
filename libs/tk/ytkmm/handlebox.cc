@@ -7,8 +7,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/handlebox.h>
-#include <gtkmm/private/handlebox_p.h>
+#include <ytkmm/handlebox.h>
+#include <ytkmm/private/handlebox_p.h>
 
 
 // -*- c++ -*-
@@ -33,8 +33,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtk/gtk.h>
-#include <gdkmm/window.h>
+#include <ytk/ytk.h>
+#include <ydkmm/window.h>
 
 namespace Gtk
 {

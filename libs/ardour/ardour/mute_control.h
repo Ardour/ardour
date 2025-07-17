@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_mute_control_h__
-#define __ardour_mute_control_h__
+#pragma once
 
 #include <memory>
 #include <string>
@@ -83,4 +82,3 @@ private:
 
 } /* namespace */
 
-#endif /* __libardour_mute_control_h__ */

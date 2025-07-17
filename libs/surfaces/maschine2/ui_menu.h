@@ -24,6 +24,7 @@
 
 #include "pbd/signals.h"
 #include "canvas/container.h"
+#include "canvas/rectangle.h"
 
 namespace ArdourCanvas {
 	class Text;
@@ -55,7 +56,7 @@ class Maschine2Menu : public ArdourCanvas::Container
 		uint32_t active () const { return _active; }
 		uint32_t items() const { return _displays.size(); }
 
-		PBD::Signal0<void> ActiveChanged;
+		PBD::Signal<void()> ActiveChanged;
 
 		void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 

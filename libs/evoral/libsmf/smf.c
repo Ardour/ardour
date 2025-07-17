@@ -1024,6 +1024,45 @@ smf_get_length_pulses(const smf_t *smf)
 }
 
 /**
+ * \return nonzero if the last event in the file has a non-zero delta time,
+ * and zero otherwise. A non-zero delta time is taken to indicate that the
+ * file creator explicitly set the length, although it is possible that
+ * this was done even with a zero delta time (if the last "real" event happened
+ * to be at the right time.
+ */
+int
+smf_length_is_explicit (const smf_t *smf)
+{
+	int i;
+	size_t pulses = 0;
+	smf_event_t* last_event = NULL;
+
+	for (i = 1; i <= smf->number_of_tracks; i++) {
+		smf_track_t *track;
+		smf_event_t *event;
+
+		track = smf_get_track_by_number(smf, i);
+		assert(track);
+
+		event = smf_track_get_last_event(track);
+		/* Empty track? */
+		if (event == NULL)
+			continue;
+
+		if (event->time_pulses > pulses) {
+			pulses = event->time_pulses;
+			last_event = event;
+		}
+	}
+
+	if (last_event) {
+		return last_event->delta_time_pulses != 0;
+	}
+
+	return 0;
+}
+
+/**
   * \return Nonzero, if there are no events in the SMF after this one.
   * Note that may be more than one "last event", if they occur at the same time.
   */

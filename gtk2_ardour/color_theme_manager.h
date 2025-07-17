@@ -17,14 +17,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_gtk_color_manager_h__
-#define __ardour_gtk_color_manager_h__
+#pragma once
 
-#include <gtkmm/treeview.h>
-#include <gtkmm/treestore.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/colorselection.h>
-#include <gtkmm/button.h>
+#include <ytkmm/treeview.h>
+#include <ytkmm/treestore.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/colorselection.h>
+#include <ytkmm/button.h>
 
 #include "canvas/types.h"
 #include "canvas/canvas.h"
@@ -164,4 +163,3 @@ private:
 
 };
 
-#endif /* __ardour_gtk_color_manager_h__ */

@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ringbuffer_h
-#define ringbuffer_h
+#pragma once
 
 #include <atomic>
 #include <cstring>
@@ -291,4 +290,3 @@ RingBuffer<T>::get_write_vector (typename RingBuffer<T>::rw_vector *vec)
 
 } /* end namespace */
 
-#endif /* __ringbuffer_h__ */

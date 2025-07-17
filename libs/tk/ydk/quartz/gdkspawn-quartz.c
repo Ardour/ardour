@@ -24,7 +24,7 @@
 #include "gdkspawn.h"
 
 #include <glib.h>
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 gboolean
 gdk_spawn_on_screen (GdkScreen             *screen,

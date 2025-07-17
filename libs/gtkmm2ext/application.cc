@@ -21,8 +21,8 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include <gtkmm/menushell.h>
-#include <gtkmm/menuitem.h>
+#include <ytkmm/menushell.h>
+#include <ytkmm/menuitem.h>
 
 #include "gtkmm2ext/application.h"
 #include "gtkmm2ext/gtkapplication.h"

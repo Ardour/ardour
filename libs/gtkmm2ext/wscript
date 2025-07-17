@@ -39,6 +39,7 @@ gtkmm2ext_sources = [
         'keyboard.cc',
         'menu_elems.cc',
         'persistent_tooltip.cc',
+        'string_completion.cc',
         'textviewer.cc',
         'treeutils.cc',
         'utils.cc',
@@ -51,9 +52,7 @@ def options(opt):
     pass
 
 def configure(conf):
-    if not conf.is_defined('YTK'):
-        autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM', atleast_version='2.8')
-        autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.12.1')
+    pass
 
 def build(bld):
     # operate on copy to avoid adding sources twice
@@ -72,19 +71,14 @@ def build(bld):
     obj.includes     = ['.']
     obj.name         = 'libgtkmm2ext'
     obj.target       = 'gtkmm2ext'
-    obj.uselib       = 'XML CAIROMM PANGOMM'
-    obj.use          = [ 'libpbd' ]
+    obj.uselib       = 'XML CAIROMM PANGOMM GLIBMM GIOMM'
+    obj.use          = [ 'libpbd', 'libydk', 'libydkmm', 'libytkmm' ]
     obj.vnum         = GTKMM2EXT_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines     += [
                     'PACKAGE="' + I18N_PACKAGE + '"',
                     'LOCALEDIR="' + os.path.join(
                             os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
-    if bld.is_defined('YTK'):
-        obj.use    += [ 'libydk', 'libydkmm', 'libytkmm' ]
-        obj.uselib += ' GLIBMM GIOMM'
-    else:
-        obj.uselib += ' GTKMM GTK'
     if sys.platform == 'darwin':
         obj.source += ['gtkapplication_quartz.mm', 'nsglview.mm']
         obj.uselib += ' OSX'
@@ -99,18 +93,18 @@ def build(bld):
             bld.install_as (os.path.join(os.path.normpath(bld.env['LOCALEDIR']), lang, 'LC_MESSAGES', I18N_PACKAGE + '.mo'),
                             mo)
 
-def i18n(bld):
+def i18n_func(bld):
     autowaf.build_i18n(bld, '.', 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
                        'Paul Davis')
 
-def i18n_pot(bld):
+def i18n_pot_func(bld):
     autowaf.build_i18n_pot(bld, '.', 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
                        'Paul Davis')
 
-def i18n_po(bld):
+def i18n_po_func(bld):
     autowaf.build_i18n_po(bld, '.', 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
                        'Paul Davis')
 
-def i18n_mo(bld):
+def i18n_mo_func(bld):
     autowaf.build_i18n_mo(bld, '.', 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
                        'Paul Davis')

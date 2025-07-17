@@ -27,16 +27,16 @@
 #include <string>
 #include <vector>
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/buttonbox.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/expander.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/table.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/buttonbox.h>
+#include <ytkmm/checkbutton.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/expander.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/table.h>
 
 #include "pbd/signals.h"
 #include "pbd/xml++.h"

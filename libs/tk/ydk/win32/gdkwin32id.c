@@ -25,7 +25,7 @@
  */
 
 #include "config.h"
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 #include "gdkprivate-win32.h"
 

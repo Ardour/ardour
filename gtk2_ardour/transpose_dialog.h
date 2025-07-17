@@ -16,10 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_transpose_dialog_h__
-#define __ardour_transpose_dialog_h__
+#pragma once
 
-#include <gtkmm/spinbutton.h>
+#include <ytkmm/spinbutton.h>
 #include "ardour_dialog.h"
 
 
@@ -42,4 +41,3 @@ private:
 	Gtk::SpinButton _semitones_spinner;
 };
 
-#endif /* __ardour_transpose_dialog_h__ */

@@ -137,7 +137,7 @@ PortGroup::add_bundle_internal (std::shared_ptr<Bundle> b, std::shared_ptr<IO> i
 	}
 
 	BundleRecord* br = new BundleRecord (b, io, colour, has_colour);
-	b->Changed.connect (br->changed_connection, invalidator (*this), boost::bind (&PortGroup::bundle_changed, this, _1), gui_context());
+	b->Changed.connect (br->changed_connection, invalidator (*this), std::bind (&PortGroup::bundle_changed, this, _1), gui_context());
 	_bundles.push_back (br);
 
 	Changed ();
@@ -292,15 +292,21 @@ PortGroupList::~PortGroupList()
 }
 
 void
-PortGroupList::maybe_add_processor_to_list (
-	std::weak_ptr<Processor> wp, list<std::shared_ptr<IO> >* route_ios, bool inputs, set<std::shared_ptr<IO> >& used_io
-	)
+PortGroupList::maybe_add_processor_to_list (std::weak_ptr<Processor> wp, list<std::shared_ptr<IO> >* route_ios, bool inputs, set<std::shared_ptr<IO> >& used_io)
 {
 	std::shared_ptr<Processor> p (wp.lock());
 
 	if (!p) {
 		return;
 	}
+
+#ifdef LIVETRAX
+	std::shared_ptr<Delivery> d = std::dynamic_pointer_cast<Delivery> (p);
+
+	if (d && d->role() == Delivery::Main) {
+		return;
+	}
+#endif
 
 	std::shared_ptr<IOProcessor> iop = std::dynamic_pointer_cast<IOProcessor> (p);
 
@@ -318,7 +324,9 @@ PortGroupList::maybe_add_processor_to_list (
 struct RouteIOs {
 	RouteIOs (std::shared_ptr<Route> r, std::shared_ptr<IO> i) {
 		route = r;
-		ios.push_back (i);
+		if (i) {
+			ios.push_back (i);
+		}
 	}
 
 	std::shared_ptr<Route> route;
@@ -365,11 +373,11 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	std::shared_ptr<RouteList const> routes = session->get_routes ();
 	list<RouteIOs> route_ios;
 
-	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+	for (auto const & r : *routes) {
 
 		/* we never show the monitor bus inputs */
 
-		if (inputs && (*i)->is_monitor()) {
+		if (inputs && r->is_monitor()) {
 			continue;
 		}
 
@@ -379,12 +387,20 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
                 */
 
 		set<std::shared_ptr<IO> > used_io;
-		std::shared_ptr<IO> io = inputs ? (*i)->input() : (*i)->output();
+		std::shared_ptr<IO> io;
+
+#ifdef LIVETRAX
+		if (inputs) {
+			io = r->input();
+			used_io.insert (io);
+		}
+#else
+		io = inputs ? r->input() : r->output();
 		used_io.insert (io);
+#endif
 
-		RouteIOs rb (*i, io);
-		(*i)->foreach_processor (boost::bind (&PortGroupList::maybe_add_processor_to_list, this, _1, &rb.ios, inputs, used_io));
-
+		RouteIOs rb (r, io);
+		r->foreach_processor (std::bind (&PortGroupList::maybe_add_processor_to_list, this, _1, &rb.ios, inputs, used_io));
 		route_ios.push_back (rb);
 	}
 
@@ -393,25 +409,25 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	/* Now put the bundles that belong to these sorted RouteIOs into the PortGroup. */
 
-	for (list<RouteIOs>::iterator i = route_ios.begin(); i != route_ios.end(); ++i) {
-		TimeAxisView* tv = PublicEditor::instance().time_axis_view_from_stripable (i->route);
+	for (auto & rio : route_ios) {
+		TimeAxisView* tv = PublicEditor::instance().time_axis_view_from_stripable (rio.route);
 
 		/* Work out which group to put these IOs' bundles in */
 		std::shared_ptr<PortGroup> g;
-		if (std::dynamic_pointer_cast<Track> (i->route)) {
+		if (std::dynamic_pointer_cast<Track> (rio.route)) {
 			g = track;
 		} else {
 			g = bus;
 		}
 
-		for (list<std::shared_ptr<IO> >::iterator j = i->ios.begin(); j != i->ios.end(); ++j) {
+		for (auto & io : rio.ios) {
 			/* Only add the bundle if there is at least one port
 			 * with a type that's been asked for */
-			if (type == DataType::NIL || (*j)->bundle()->nchannels().n(type) > 0) {
+			if (type == DataType::NIL || io->bundle()->nchannels().n(type) > 0) {
 				if (tv) {
-					g->add_bundle ((*j)->bundle(), *j, tv->color ());
+					g->add_bundle (io->bundle(), io, tv->color ());
 				} else {
-					g->add_bundle ((*j)->bundle(), *j);
+					g->add_bundle (io->bundle(), io);
 				}
 			}
 		}
@@ -419,7 +435,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		/* When on input side, let's look for sidechains in the route's plugins
 		   to display them right next to their route */
 		for (uint32_t n = 0; inputs; ++n) {
-			std::shared_ptr<Processor> p = (i->route)->nth_plugin (n);
+			std::shared_ptr<Processor> p = (rio.route)->nth_plugin (n);
 			if (!p) {
 				break;
 			}
@@ -462,7 +478,9 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	if (type == DataType::AUDIO || type == DataType::NIL) {
 		if (!inputs) {
 
-			program->add_bundle (session->the_auditioner()->output()->bundle());
+			if (session->the_auditioner()) {
+				program->add_bundle (session->the_auditioner()->output()->bundle());
+			}
 			if (session->click_io()) {
 				program->add_bundle (session->click_io()->bundle());
 			}
@@ -475,11 +493,11 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 			std::shared_ptr<Bundle> sync (new Bundle (_("Sync"), inputs));
 			AudioEngine* ae = AudioEngine::instance();
-			TransportMasterManager::TransportMasters const & tm (TransportMasterManager::instance().transport_masters());
+			TransportMasterManager::TransportMasters const & tms (TransportMasterManager::instance().transport_masters());
 
-			for (TransportMasterManager::TransportMasters::const_iterator i = tm.begin(); i != tm.end(); ++i) {
+			for (auto const & tm : tms) {
 
-				std::shared_ptr<Port> port = (*i)->port ();
+				std::shared_ptr<Port> port = tm->port ();
 
 				if (!port) {
 					continue;
@@ -489,7 +507,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 					continue;
 				}
 
-				sync->add_channel ((*i)->name(), DataType::AUDIO, ae->make_port_name_non_relative (port->name()));
+				sync->add_channel (tm->name(), DataType::AUDIO, ae->make_port_name_non_relative (port->name()));
 			}
 
 			program->add_bundle (sync);
@@ -505,15 +523,19 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	if ((type == DataType::MIDI || type == DataType::NIL)) {
 		ControlProtocolManager& m = ControlProtocolManager::instance ();
+		std::shared_ptr<Bundle> sf (new Bundle (_("Control Surface"), inputs));
 		for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
 			if ((*i)->protocol) {
 				list<std::shared_ptr<Bundle> > b = (*i)->protocol->bundles ();
 				for (list<std::shared_ptr<Bundle> >::iterator j = b.begin(); j != b.end(); ++j) {
 					if ((*j)->ports_are_inputs() == inputs) {
-						program->add_bundle (*j);
+						sf->add_channels_from_bundle (*j);
 					}
 				}
 			}
+		}
+		if (sf->n_total () > 0) {
+			program->add_bundle (sf);
 		}
 	}
 
@@ -606,10 +628,19 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	if (ports.size () > 0) {
 
 		struct SortByPortName {
+			bool _use_pretty_name;
+			SortByPortName (bool use_pretty_name) : _use_pretty_name (use_pretty_name) {}
 			bool operator() (std::string const& lhs, std::string const& rhs) const {
-				return PBD::naturally_less (lhs.c_str (), rhs.c_str ());
+				if (_use_pretty_name) {
+					/* add port-name as suffix (in case pretty-name is unset) */
+					std::string l = AudioEngine::instance()->get_hardware_port_name_by_name (lhs) + lhs;
+					std::string r = AudioEngine::instance()->get_hardware_port_name_by_name (rhs) + rhs;
+					return PBD::naturally_less (l.c_str (), r.c_str ());
+				} else {
+					return PBD::naturally_less (lhs.c_str (), rhs.c_str ());
+				}
 			}
-		} port_sorter;
+		} port_sorter (type == DataType::MIDI);
 
 		std::sort (ports.begin (), ports.end (), port_sorter);
 
@@ -676,11 +707,6 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 					} else if (port_has_prefix (p, lpnc)) {
 
 						/* we own this port (named after the program) */
-
-						/* Hide scene ports for now */
-						if (p.find (_("Scene ")) != string::npos) {
-							continue;
-						}
 
 						extra_program[t].push_back (p);
 
@@ -753,7 +779,7 @@ PortGroupList::add_bundles_for_ports (std::vector<std::string> const & p, ARDOUR
 		if (pf != cp && !nb.empty()) {
 				std::shared_ptr<Bundle> b = make_bundle_from_ports (nb, type, inputs);
 				group->add_bundle (b, allow_dups);
-				nb.clear();			
+				nb.clear();
 		}
 		cp = pf;
 		nb.push_back(s);
@@ -888,8 +914,8 @@ PortGroupList::add_group (std::shared_ptr<PortGroup> g)
 {
 	_groups.push_back (g);
 
-	g->Changed.connect (_changed_connections, invalidator (*this), boost::bind (&PortGroupList::emit_changed, this), gui_context());
-	g->BundleChanged.connect (_bundle_changed_connections, invalidator (*this), boost::bind (&PortGroupList::emit_bundle_changed, this, _1), gui_context());
+	g->Changed.connect (_changed_connections, invalidator (*this), std::bind (&PortGroupList::emit_changed, this), gui_context());
+	g->BundleChanged.connect (_bundle_changed_connections, invalidator (*this), std::bind (&PortGroupList::emit_bundle_changed, this, _1), gui_context());
 
 	emit_changed ();
 }

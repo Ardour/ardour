@@ -37,9 +37,9 @@
 # define ISNAN(val) std::isnan((val))
 #endif
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/checkbutton.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/checkbutton.h>
 
 #include "gtkmm2ext/utils.h"
 
@@ -197,7 +197,7 @@ PluginEqGui::start_listening ()
 	_block_size = 0; // re-initialize the plugin next time.
 
 	/* Connect the realtime signal collection callback */
-	_plugin_insert->AnalysisDataGathered.connect (analysis_connection, invalidator (*this), boost::bind (&PluginEqGui::signal_collect_callback, this, _1, _2), gui_context());
+	_plugin_insert->AnalysisDataGathered.connect (analysis_connection, invalidator (*this), std::bind (&PluginEqGui::signal_collect_callback, this, _1, _2), gui_context());
 }
 
 void

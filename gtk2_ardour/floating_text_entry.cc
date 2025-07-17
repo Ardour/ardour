@@ -62,6 +62,12 @@ FloatingTextEntry::changed ()
 }
 
 void
+FloatingTextEntry::delete_on_focus_out ()
+{
+	_connections.push_back (signal_focus_out_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::entry_focus_out)));
+}
+
+void
 FloatingTextEntry::on_realize ()
 {
 	Gtk::Window::on_realize ();

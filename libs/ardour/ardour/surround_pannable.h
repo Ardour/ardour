@@ -55,13 +55,13 @@ public:
 
 	void set_automation_state (AutoState);
 	AutoState automation_state() const { return _auto_state; }
-	PBD::Signal1<void, AutoState> automation_state_changed;
+	PBD::Signal<void(AutoState)> automation_state_changed;
 
 	bool automation_playback() const {
 		return (_auto_state & Play) || ((_auto_state & (Touch | Latch)) && !touching());
 	}
 
-	void foreach_pan_control (boost::function<void(std::shared_ptr<AutomationControl>)>) const;
+	void foreach_pan_control (std::function<void(std::shared_ptr<AutomationControl>)>) const;
 
 	void setup_visual_links ();
 	void sync_visual_link_to (std::shared_ptr<SurroundPannable>);

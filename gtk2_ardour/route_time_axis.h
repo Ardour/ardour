@@ -22,20 +22,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_route_time_axis_h__
-#define __ardour_route_time_axis_h__
+#pragma once
 
 #include <list>
 #include <set>
 
-#include <gtkmm/table.h>
-#include <gtkmm/button.h>
-#include <gtkmm/box.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/radiomenuitem.h>
-#include <gtkmm/checkmenuitem.h>
-#include <gtkmm/adjustment.h>
+#include <ytkmm/table.h>
+#include <ytkmm/button.h>
+#include <ytkmm/box.h>
+#include <ytkmm/menu.h>
+#include <ytkmm/menuitem.h>
+#include <ytkmm/radiomenuitem.h>
+#include <ytkmm/checkmenuitem.h>
+#include <ytkmm/adjustment.h>
 
 #include "widgets/ardour_button.h"
 
@@ -69,7 +68,7 @@ class Selection;
 class RegionSelection;
 class Selectable;
 class AutomationTimeAxisView;
-class AutomationLine;
+class EditorAutomationLine;
 class TimeSelection;
 class RouteGroupMenu;
 class ItemCounts;
@@ -99,7 +98,7 @@ public:
 	void selection_click (GdkEventButton*);
 	void set_selected_points (PointSelection&);
 	void set_selected_regionviews (RegionSelection&);
-	void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double top, double bot, std::list<Selectable *>&, bool within = false);
+	void _get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double top, double bot, std::list<Selectable *>&, bool within);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>&);
 	void get_regionviews_at_or_after (Temporal::timepos_t const &, RegionSelection&);
 
@@ -201,7 +200,7 @@ protected:
 	std::shared_ptr<AutomationTimeAxisView>
 	find_atav_by_ctrl (std::shared_ptr<ARDOUR::AutomationControl>, bool route_owned_only = true);
 
-	std::shared_ptr<AutomationLine>
+	std::shared_ptr<EditorAutomationLine>
 	find_processor_automation_curve (std::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
 
 	void add_processor_automation_curve (std::shared_ptr<ARDOUR::Processor> r, Evoral::Parameter);
@@ -270,7 +269,7 @@ protected:
 
 	std::map<std::shared_ptr<PBD::Controllable>, Gtk::CheckMenuItem*> ctrl_item_map;
 
-	typedef std::vector<std::shared_ptr<AutomationLine> > ProcessorAutomationCurves;
+	typedef std::vector<std::shared_ptr<EditorAutomationLine> > ProcessorAutomationCurves;
 	ProcessorAutomationCurves processor_automation_curves;
 	/** parameter -> menu item map for the plugin automation menu */
 	ParameterMenuMap _subplugin_menu_map;
@@ -311,4 +310,3 @@ private:
 	sigc::connection      ctrl_autohide_connection;
 };
 
-#endif /* __ardour_route_time_axis_h__ */

@@ -495,7 +495,7 @@ PortMatrixColumnLabels::motion (double x, double y)
 {
 	ARDOUR::BundleChannel const w = position_to_channel (x, y, _matrix->visible_columns());
 
-	if (w.bundle == 0) {
+	if (!w.bundle) {
 		_body->set_mouseover (PortMatrixNode ());
 		return;
 	}

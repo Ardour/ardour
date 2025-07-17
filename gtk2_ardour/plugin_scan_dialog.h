@@ -19,11 +19,12 @@
 #ifndef __gtk2_ardour_plugin_scan_dialog_h__
 #define __gtk2_ardour_plugin_scan_dialog_h__
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/label.h>
-#include <gtkmm/progressbar.h>
-#include <gtkmm/sizegroup.h>
+#include <ytkmm/box.h>
+#include <ytkmm/button.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/progressbar.h>
+#include <ytkmm/sizegroup.h>
 
 #include "widgets/ardour_button.h"
 

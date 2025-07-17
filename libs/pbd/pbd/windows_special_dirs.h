@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_windows_special_dirs_h__
-#define __libpbd_windows_special_dirs_h__
+#pragma once
 
 #include <windows.h>
 #include <string>
@@ -47,4 +46,3 @@ LIBPBD_API bool windows_query_registry (const char* regkey, const char* regval, 
 
 }
 
-#endif /* __libpbd_windows_special_dirs_h__ */

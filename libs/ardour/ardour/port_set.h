@@ -18,13 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_port_set_h__
-#define __ardour_port_set_h__
+#pragma once
 
 #include <vector>
 #include "ardour/chan_count.h"
-#include <boost/utility.hpp>
-
 namespace ARDOUR {
 
 class Port;
@@ -41,7 +38,7 @@ class MidiPort;
  * and once in a vector of all port (_all_ports).  This is to speed up the
  * fairly common case of iterating over all ports.
  */
-class LIBARDOUR_API PortSet : public boost::noncopyable {
+class LIBARDOUR_API PortSet {
 public:
 	PortSet();
 
@@ -89,8 +86,12 @@ public:
 	private:
 		friend class PortSet;
 
-		iterator_base<PS,P>(PS& list, DataType type, size_t index)
-			: _set(list), _type(type), _index(index) {}
+		iterator_base (PS& list, DataType type, size_t index)
+		        : _set (list)
+		        , _type (type)
+		        , _index (index)
+		{
+		}
 
 		PS&      _set;
 		DataType _type; ///< Ignored if NIL (to iterator over entire set)
@@ -152,4 +153,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif // __ardour_port_set_h__

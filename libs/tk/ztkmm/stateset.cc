@@ -3,10 +3,10 @@
 
 #include <glibmm.h>
 
-#include <atkmm/stateset.h>
-#include <atkmm/private/stateset_p.h>
+#include <ztkmm/stateset.h>
+#include <ztkmm/private/stateset_p.h>
 
-#include <atk/atk-enum-types.h>
+#include <ztk/atk-enum-types.h>
 
 // -*- c++ -*-
 /* $Id: stateset.ccg,v 1.1 2003/01/21 13:37:07 murrayc Exp $ */
@@ -28,8 +28,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <atk/atkobject.h>
-#include <atk/atkstateset.h>
+#include <ztk/atkobject.h>
+#include <ztk/atkstateset.h>
 
 
 namespace Atk

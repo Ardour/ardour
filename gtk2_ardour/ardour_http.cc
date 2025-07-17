@@ -37,10 +37,6 @@
 #include "gtk2ardour-version.h"
 #endif
 
-#ifndef ARDOUR_CURL_TIMEOUT
-#define ARDOUR_CURL_TIMEOUT (60)
-#endif
-
 #ifdef ARDOURCURLDEBUG
 #define CCERR(msg) do { if (cc != CURLE_OK) { std::cerr << string_compose ("curl_easy_setopt(%1) failed: %2", msg, cc) << std::endl; } } while (0)
 #else
@@ -48,63 +44,6 @@
 #endif
 
 using namespace ArdourCurl;
-
-const char* HttpGet::ca_path = NULL;
-const char* HttpGet::ca_info = NULL;
-
-void
-HttpGet::ca_setopt (CURL* c)
-{
-	if (ca_info) {
-		curl_easy_setopt (c, CURLOPT_CAINFO, ca_info);
-	}
-	if (ca_path) {
-		curl_easy_setopt (c, CURLOPT_CAPATH, ca_path);
-	}
-	if (ca_info || ca_path) {
-		curl_easy_setopt (c, CURLOPT_SSL_VERIFYPEER, 1);
-	}
-}
-
-void
-HttpGet::setup_certificate_paths ()
-{
-	/* this is only needed for Linux Bundles.
-	 * (on OSX, Windows, we use system-wide ssl (darwinssl, winssl)
-	 * Gnu/Linux distro will link against system-wide libcurl.
-	 *
-	 * but for linux-bundles we get to enjoy:
-	 * https://www.happyassassin.net/2015/01/12/a-note-about-ssltls-trusted-certificate-stores-and-platforms/
-	 *
-	 * (we do ship curl + nss + nss-pem)
-	 *
-	 * Short of this mess: we could simply bundle a .crt of
-	 * COMODO (ardour) and ghandi (freesound) and be done with it.
-	 * Alternatively, ship the Mozilla CA list, perhaps using https://mkcert.org/ .
-	 */
-	assert (!ca_path && !ca_info); // call once
-
-	if (Glib::file_test ("/etc/pki/tls/certs/ca-bundle.crt", Glib::FILE_TEST_IS_REGULAR)) {
-		// Fedora / RHEL, Arch
-		ca_info = "/etc/pki/tls/certs/ca-bundle.crt";
-	}
-	else if (Glib::file_test ("/etc/ssl/certs/ca-certificates.crt", Glib::FILE_TEST_IS_REGULAR)) {
-		// Debian and derivatives
-		ca_info = "/etc/ssl/certs/ca-certificates.crt";
-	}
-	else if (Glib::file_test ("/etc/pki/tls/cert.pem", Glib::FILE_TEST_IS_REGULAR)) {
-		// GNU/TLS can keep extra stuff here
-		ca_info = "/etc/pki/tls/cert.pem";
-	}
-	// else NULL: use default (currently) "/etc/ssl/certs/ca-certificates.crt" if it exists
-
-	/* If we don't set anything, defaults are used. At the time of writing we compile bundled curl on debian
-	 * and it'll default to ca_path = /etc/ssl/certs and ca_info = /etc/ssl/certs/ca-certificates.crt .
-	 * That works on Debian and derivs + openSUSE. It has historically not
-	 * worked on RHEL / Fedora, but worst case the directory exists and doesn't
-	 * prevent ca_info from working. https://bugzilla.redhat.com/show_bug.cgi?id=1053882
-	 */
-}
 
 static size_t
 WriteMemoryCallback (void *ptr, size_t size, size_t nmemb, void *data) {
@@ -143,13 +82,13 @@ static size_t headerCallback (char* ptr, size_t size, size_t nmemb, void* data)
 	return realsize;
 }
 
-HttpGet::HttpGet (bool p, bool ssl)
+HttpGet::HttpGet (bool p)
 	: persist (p)
 	, _status (-1)
 	, _result (-1)
 {
+	CURL* _curl     = curl ();
 	error_buffer[0] = 0;
-	_curl = curl_easy_init ();
 
 	if (!_curl) {
 		std::cerr << "HttpGet::HttpGet curl_easy_init() failed." << std::endl;
@@ -162,23 +101,12 @@ HttpGet::HttpGet (bool p, bool ssl)
 	cc = curl_easy_setopt (_curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback); CCERR ("CURLOPT_WRITEFUNCTION");
 	cc = curl_easy_setopt (_curl, CURLOPT_HEADERDATA, (void *)&nfo); CCERR ("CURLOPT_HEADERDATA");
 	cc = curl_easy_setopt (_curl, CURLOPT_HEADERFUNCTION, headerCallback); CCERR ("CURLOPT_HEADERFUNCTION");
-	cc = curl_easy_setopt (_curl, CURLOPT_USERAGENT, PROGRAM_NAME VERSIONSTRING); CCERR ("CURLOPT_USERAGENT");
-	cc = curl_easy_setopt (_curl, CURLOPT_TIMEOUT, ARDOUR_CURL_TIMEOUT); CCERR ("CURLOPT_TIMEOUT");
-	cc = curl_easy_setopt (_curl, CURLOPT_NOSIGNAL, 1); CCERR ("CURLOPT_NOSIGNAL");
 	cc = curl_easy_setopt (_curl, CURLOPT_ERRORBUFFER, error_buffer); CCERR ("CURLOPT_ERRORBUFFER");
 	// cc = curl_easy_setopt (_curl, CURLOPT_FOLLOWLOCATION, 1); CCERR ("CURLOPT_FOLLOWLOCATION");
-
-	// by default use curl's default.
-	if (ssl) {
-		ca_setopt (_curl);
-	}
 }
 
 HttpGet::~HttpGet ()
 {
-	if (_curl) {
-		curl_easy_cleanup (_curl);
-	}
 	if (!persist) {
 		::free (mem.data);
 	}
@@ -187,6 +115,7 @@ HttpGet::~HttpGet ()
 char*
 HttpGet::get (const char* url, bool with_error_logging)
 {
+	CURL* _curl = curl ();
 #ifdef ARDOURCURLDEBUG
 	std::cerr << "HttpGet::get() ---- new request ---"<< std::endl;
 #endif
@@ -213,7 +142,7 @@ HttpGet::get (const char* url, bool with_error_logging)
 
 	if (!persist) {
 		::free (mem.data);
-	} // otherwise caller is expected to have free()d or re-used it.
+	} // otherwise caller is expected to have free()d or reused it.
 
 	error_buffer[0] = 0;
 	mem.data = NULL;

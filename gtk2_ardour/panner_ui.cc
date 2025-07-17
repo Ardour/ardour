@@ -125,7 +125,7 @@ PannerUI::set_panner (std::shared_ptr<PannerShell> ps, std::shared_ptr<Panner> p
 		return;
 	}
 
-	_panshell->Changed.connect (connections, invalidator (*this), boost::bind (&PannerUI::panshell_changed, this), gui_context());
+	_panshell->Changed.connect (connections, invalidator (*this), std::bind (&PannerUI::panshell_changed, this), gui_context());
 
 	/* new panner object, force complete reset of panner GUI
 	 */

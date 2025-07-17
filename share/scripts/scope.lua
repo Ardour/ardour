@@ -59,8 +59,8 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 
 	for c = 1,audio_ins do
 		-- Note: lua starts counting at 1, ardour's ChanMapping::get() at 0
-		local ib = in_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped input buffer for given cannel
-		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped output buffer for given cannel
+		local ib = in_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped input buffer for given channel
+		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped output buffer for given channel
 		local chn_off = 4 + bufsiz * (c - 1)
 		if (ib ~= ARDOUR.ChanMapping.Invalid) then
 			if (write_ptr + n_samples < bufsiz) then
@@ -85,8 +85,8 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	end
 	-- clear unconnected inplace buffers
 	for c = 1,audio_ins do
-		local ib = in_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped input buffer for given cannel
-		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped output buffer for given cannel
+		local ib = in_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped input buffer for given channel
+		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped output buffer for given channel
 		if (ib == ARDOUR.ChanMapping.Invalid and ob ~= ARDOUR.ChanMapping.Invalid) then
 			bufs:get_audio (ob):silence (n_samples, offset)
 		end

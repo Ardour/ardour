@@ -83,7 +83,7 @@ public:
 
 	void initialize (); // call only when connected, sends midi
 
-	void set_select_cb (boost::function<void ()>&);
+	void set_select_cb (std::function<void ()>&);
 
 	enum DisplayMode {
 		Stripables,
@@ -156,7 +156,7 @@ private:
 	std::shared_ptr<ARDOUR::ReadOnlyControl> _redux_ctrl;
 
 	void set_x_select_controllable (std::shared_ptr<ARDOUR::AutomationControl>);
-	boost::function<void ()> _select_plugin_functor;
+	std::function<void ()> _select_plugin_functor;
 
 	void drop_automation_controls ();
 

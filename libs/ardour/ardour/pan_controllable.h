@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_pan_controllable_h__
-#define __libardour_pan_controllable_h__
+#pragma once
 
 #include <memory>
 #include <string>
@@ -54,4 +53,3 @@ class LIBARDOUR_API PanControllable : public AutomationControl
 
 } // namespace
 
-#endif /* __libardour_pan_controllable_h__ */

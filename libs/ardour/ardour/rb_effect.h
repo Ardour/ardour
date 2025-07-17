@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_rbeffect_h__
-#define __ardour_rbeffect_h__
+#pragma once
 
 #include "ardour/filter.h"
 #include "ardour/timefx_request.h"
@@ -40,4 +39,3 @@ class LIBARDOUR_API RBEffect : public Filter {
 
 } /* namespace */
 
-#endif /* __ardour_rbeffect_h__ */

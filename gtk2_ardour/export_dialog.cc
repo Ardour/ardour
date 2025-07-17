@@ -28,8 +28,8 @@
 
 #include <sigc++/signal.h>
 
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/gstdio_compat.h"
 #include "pbd/file_utils.h"
@@ -126,7 +126,7 @@ ExportDialog::set_session (ARDOUR::Session* s)
 
 	_initialized = true;
 
-	_session->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&ExportDialog::parameter_changed, this, _1), gui_context());
+	_session->config.ParameterChanged.connect (*this, invalidator (*this), std::bind (&ExportDialog::parameter_changed, this, _1), gui_context());
 }
 
 void
@@ -369,12 +369,12 @@ ExportDialog::do_export (bool analysis_only)
 
 		handler->SoundcloudProgress.connect_same_thread(
 				*this,
-				boost::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3)
+				std::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3)
 				);
 #if 0
 		handler->SoundcloudProgress.connect(
 				*this, invalidator (*this),
-				boost::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3),
+				std::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3),
 				gui_context()
 				);
 #endif
@@ -423,7 +423,7 @@ ExportDialog::show_progress ()
 		for (auto const& x : _files_to_reimport) {
 			timepos_t pos (x.first);
 			Editing::ImportDisposition disposition = Editing::ImportDistinctFiles;
-			editor.do_import (x.second, disposition, Editing::ImportAsTrack, SrcBest, SMFTrackNumber, SMFTempoIgnore, pos);
+			editor.do_import (x.second, disposition, Editing::ImportAsTrack, SrcBest, SMFFileAndTrackName, SMFTempoIgnore, pos);
 		}
 	}
 
@@ -477,7 +477,7 @@ ExportDialog::show_progress ()
 
 	if (!status->aborted()) {
 		hide();
-		if (!ARDOUR::Profile->get_mixbus()) {
+		if (!ARDOUR::Profile->get_mixbus () && !ARDOUR::Profile->get_livetrax ()) {
 			NagScreen* ns = NagScreen::maybe_nag (_("export"));
 			if (ns) {
 				ns->nag ();

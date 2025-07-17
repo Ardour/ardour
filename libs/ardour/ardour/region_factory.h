@@ -21,8 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_region_factory_h__
-#define __ardour_region_factory_h__
+#pragma once
 
 #include <glibmm/threads.h>
 #include <map>
@@ -65,7 +64,7 @@ public:
 	 * itself, to permit dynamic_cast<> to be used to
 	 * infer the type of Region.
 	 */
-	static PBD::Signal1<void, std::shared_ptr<Region> > CheckNewRegion;
+	static PBD::Signal<void(std::shared_ptr<Region> )> CheckNewRegion;
 
 	/** create a "pure copy" of Region \p other */
 	static std::shared_ptr<Region> create (std::shared_ptr<const Region> other, bool announce, bool fork = false, ThawList* tl = 0);
@@ -107,7 +106,7 @@ public:
 
 	static uint32_t nregions ();
 
-	static void foreach_region (boost::function<void (std::shared_ptr<Region>)> f)
+	static void foreach_region (std::function<void (std::shared_ptr<Region>)> f)
 	{
 		Glib::Threads::Mutex::Lock ls (region_map_lock);
 		for (RegionMap::const_iterator i = region_map.begin (); i != region_map.end (); ++i) {
@@ -172,4 +171,3 @@ private:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_region_factory_h__  */

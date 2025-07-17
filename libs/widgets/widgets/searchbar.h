@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <gtkmm/entry.h>
+#include <ytkmm/entry.h>
 #include <string>
 
 #include "widgets/visibility.h"

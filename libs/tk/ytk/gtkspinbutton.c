@@ -33,7 +33,7 @@
 #include <math.h>
 #include <string.h>
 #include <locale.h>
-#include "gdk/gdkkeysyms.h"
+#include "ydk/gdkkeysyms.h"
 #include "gtkbindings.h"
 #include "gtkspinbutton.h"
 #include "gtkentryprivate.h"

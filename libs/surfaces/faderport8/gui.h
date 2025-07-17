@@ -23,12 +23,12 @@
 #include <vector>
 #include <string>
 
-#include <gtkmm/box.h>
-#include <gtkmm/combobox.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/image.h>
-#include <gtkmm/table.h>
-#include <gtkmm/treestore.h>
+#include <ytkmm/box.h>
+#include <ytkmm/combobox.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/image.h>
+#include <ytkmm/table.h>
+#include <ytkmm/treestore.h>
 
 namespace Gtk {
 	class CellRendererCombo;

@@ -21,6 +21,8 @@
 
 #include <cassert>
 
+#include <pangomm/fontdescription.h>
+
 #include "pbd/configuration.h"
 #include "gtkmm2ext/colors.h"
 
@@ -44,6 +46,12 @@ public:
 	virtual bool get_all_floating_windows_are_dialogs () const = 0;
 	virtual bool get_widget_prelight () const = 0;
 	virtual Gtkmm2ext::Color color (const std::string&, bool* failed = 0) const = 0;
+
+	virtual Pango::FontDescription get_NormalFont () const = 0;
+	virtual Pango::FontDescription get_SmallFont () const = 0;
+	virtual Pango::FontDescription get_NormalMonospaceFont () const = 0;
+	virtual Pango::FontDescription get_SmallMonospaceFont () const = 0;
+	virtual Pango::FontDescription get_ArdourSmallFont () const = 0;
 };
 
 }

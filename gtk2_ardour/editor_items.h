@@ -27,17 +27,15 @@ enum ItemType {
 	WaveItem,
 	PlayheadCursorItem,
 	MarkerItem,
+	SceneMarkerItem,
 	MarkerBarItem,
 	RangeMarkerBarItem,
-	CdMarkerBarItem,
 	SectionMarkerBarItem,
-	CueMarkerBarItem,
 	VideoBarItem,
-	TransportMarkerBarItem,
 	SelectionItem,
 	ControlPointItem,
 	GainLineItem,
-	AutomationLineItem,
+	EditorAutomationLineItem,
 	MeterMarkerItem,
 	BBTMarkerItem,
 	TempoCurveItem,
@@ -71,6 +69,8 @@ enum ItemType {
 	GridZoneItem,
 	VelocityItem,
 	VelocityBaseItem,
+	ClipStartItem,
+	ClipEndItem,
 
 	/* don't remove this */
 

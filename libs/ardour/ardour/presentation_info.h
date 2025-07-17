@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_presentation_info_h__
-#define __libardour_presentation_info_h__
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -261,7 +260,7 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	/* for things concerned about *any* PresentationInfo.
 	 */
 
-	static PBD::Signal1<void,PBD::PropertyChange const &> Change;
+	static PBD::Signal<void(PBD::PropertyChange const &)> Change;
 	static void send_static_change (const PBD::PropertyChange&);
 
 	static void make_property_quarks ();
@@ -305,4 +304,3 @@ namespace std {
 std::ostream& operator<<(std::ostream& o, ARDOUR::PresentationInfo const& rid);
 }
 
-#endif /* __libardour_presentation_info_h__ */

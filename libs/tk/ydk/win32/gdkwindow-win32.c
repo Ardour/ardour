@@ -30,6 +30,8 @@
 #include "config.h"
 #include <stdlib.h>
 
+#include <windows.h>
+
 #include "gdk.h"
 #include "gdkwindowimpl.h"
 #include "gdkprivate-win32.h"
@@ -51,6 +53,17 @@ static gpointer parent_class = NULL;
 static GSList *modal_window_stack = NULL;
 
 typedef struct _FullscreenInfo FullscreenInfo;
+
+#ifndef GC_ALLGESTURES
+typedef struct tagGESTURECONFIG {
+  DWORD dwID;
+  DWORD dwWant;
+  DWORD dwBlock;
+} GESTURECONFIG,*PGESTURECONFIG;
+#endif
+
+typedef BOOL (WINAPI *PFN_SetGestureConfig) (HWND, DWORD, UINT, PGESTURECONFIG, UINT);
+static PFN_SetGestureConfig setGestureConfig = 0;
 
 struct _FullscreenInfo
 {
@@ -168,6 +181,8 @@ gdk_window_impl_win32_class_init (GdkWindowImplWin32Class *klass)
   drawable_class->set_colormap = gdk_window_impl_win32_set_colormap;
   drawable_class->get_colormap = gdk_window_impl_win32_get_colormap;
   drawable_class->get_size = gdk_window_impl_win32_get_size;
+
+  setGestureConfig = (PFN_SetGestureConfig) GetProcAddress (GetModuleHandle ("user32.dll"), "SetGestureConfig");
 }
 
 static void
@@ -314,6 +329,12 @@ _gdk_windowing_window_init (GdkScreen *screen)
   private->viewable = TRUE;
 
   gdk_win32_handle_table_insert ((HANDLE *) &draw_impl->handle, _gdk_root);
+
+  if (setGestureConfig)
+    {
+      GESTURECONFIG gc[1] = {{0, 0, 1 /*GC_ALLGESTURES*/}};
+      setGestureConfig (GDK_WINDOW_HWND (_gdk_root), 0, 1, gc, sizeof (gc));
+    }
 
   GDK_NOTE (MISC, g_print ("_gdk_root=%p\n", GDK_WINDOW_HWND (_gdk_root)));
 }

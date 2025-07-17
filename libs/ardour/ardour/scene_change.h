@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_scene_change_h__
-#define __libardour_scene_change_h__
+#pragma once
 
 #include "pbd/stateful.h"
 
@@ -43,8 +42,8 @@ class SceneChange : public PBD::Stateful
         bool active () const { return _active; }
         void set_active (bool);
 
-        PBD::Signal0<void> ColorChanged;
-        PBD::Signal0<void> ActiveChanged;
+        PBD::Signal<void()> ColorChanged;
+        PBD::Signal<void()> ActiveChanged;
 
     protected:
         /* derived classes are responsible for serializing & deserializing this value */
@@ -55,4 +54,3 @@ class SceneChange : public PBD::Stateful
 } /* namespace */
 
 
-#endif /* __libardour_scene_change_h__ */

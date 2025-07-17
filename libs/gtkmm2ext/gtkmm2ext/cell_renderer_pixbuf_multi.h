@@ -22,11 +22,10 @@
 #include <map>
 #include <stdint.h>
 
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/adjustment.h>
-#include <gtkmm/widget.h>
-#include <gtkmm/cellrenderer.h>
-#include <gdkmm.h>
+#include <ytkmm/drawingarea.h>
+#include <ytkmm/adjustment.h>
+#include <ytkmm/widget.h>
+#include <ytkmm/cellrenderer.h>
 
 #include "gtkmm2ext/visibility.h"
 

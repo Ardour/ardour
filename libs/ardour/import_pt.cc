@@ -38,6 +38,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/midi_model.h"
 #include "ardour/operations.h"
+#include "ardour/debug.h"
 #include "ardour/region_factory.h"
 #include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
@@ -331,6 +332,8 @@ Session::import_pt_rest (PTFFormat& ptf)
 		}
 	}
 
+	std::map<std::string, shared_ptr<AudioTrack>> track_map;
+
 	/* Check for no audio */
 	if (ptf.tracks ().size () == 0) {
 		goto no_audio_tracks;
@@ -343,13 +346,14 @@ Session::import_pt_rest (PTFFormat& ptf)
 			nth++;
 			if (!(existing_track = dynamic_pointer_cast<AudioTrack> (route_by_name (a->name)))) {
 				/* Create missing track */
-				DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\tcreate tr(%1) %2\n", nth, a->name.c_str()));
+				DEBUG_TRACE (DEBUG::PTImport, string_compose ("Create tr(%1) '%2'\n", nth, a->name));
 				list<std::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, a->name.c_str(), PresentationInfo::max_order, Normal));
 				if (at.empty ()) {
 					return;
 				}
 				existing_track = at.back();
 			}
+			track_map[a->name] = existing_track;
 			std::shared_ptr<Playlist> playlist = existing_track->playlist();
 
 			PlaylistState before;
@@ -370,10 +374,10 @@ Session::import_pt_rest (PTFFormat& ptf)
 
 				/* Matched a ptf active region to an ardour region */
 				std::shared_ptr<Region> r = RegionFactory::region_by_id (p->id);
-				DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) tr(%3)\n", a->reg.wave.filename.c_str (), a->reg.index, a->index));
+				DEBUG_TRACE (DEBUG::PTImport, string_compose ("wav(%1) reg(%2) tr(%3) '%4'\n", a->reg.wave.filename, a->reg.index, a->index, a->name));
 
 				/* Use audio track we know exists */
-				existing_track = dynamic_pointer_cast<AudioTrack> (route_by_name (a->name));
+				existing_track = track_map[a->name];
 				assert (existing_track);
 
 				/* Put on existing track */
@@ -391,6 +395,8 @@ Session::import_pt_rest (PTFFormat& ptf)
 			}
 		}
 	}
+
+	track_map.clear ();
 
 	maybe_update_session_range (timepos_t (0), latest);
 
@@ -466,7 +472,7 @@ no_audio_tracks:
 			/* PT C-2 = 0, Ardour C-1 = 0, subtract twelve to convert ? */
 			midicmd->add (std::shared_ptr<Evoral::Note<Temporal::Beats> > (new Evoral::Note<Temporal::Beats> ((uint8_t)1, start, len, j->note, j->velocity)));
 		}
-		mm->apply_diff_command_only (*this, midicmd);
+		mm->apply_diff_command_only (midicmd);
 		delete midicmd;
 		std::shared_ptr<Region> copy (RegionFactory::create (mr, true));
 		playlist->clear_changes ();

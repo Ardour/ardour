@@ -15,8 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __msvc_libardour_h__
-#define __msvc_libardour_h__
+#pragma once
 
 #include <ardour/libardour_visibility.h>
 #include <limits.h>
@@ -69,4 +68,3 @@ LIBARDOUR_API int    LIBARDOUR_APICALLTYPE readlink(const char *__restrict short
 }  // namespace ARDOUR
 
 #endif // COMPILER_MSVC
-#endif // __mavc_libardour_h__

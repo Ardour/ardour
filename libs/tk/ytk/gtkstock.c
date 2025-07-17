@@ -31,7 +31,7 @@
 #include "gtkstock.h"
 #include "gtkiconfactory.h"
 #include "gtkintl.h"
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 #include "gtkprivate.h"
 #include "gtkalias.h"
 

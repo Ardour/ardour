@@ -27,17 +27,15 @@
 #include <map>
 #include <vector>
 
-#include <boost/scoped_ptr.hpp>
-
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/locale_guard.h"
 #include "pbd/unwind.h"
 #include "pbd/xml++.h"
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/alignment.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/stock.h>
 #include <gtkmm2ext/utils.h>
 
 #include "widgets/tooltips.h"
@@ -321,16 +319,16 @@ EngineControl::EngineControl ()
 	set_tooltip (try_autostart_button,
 	             string_compose (_("Always try these settings when starting %1, if the same device is available"), PROGRAM_NAME));
 
-	ARDOUR::Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&EngineControl::config_parameter_changed, this, _1), gui_context ());
+	ARDOUR::Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&EngineControl::config_parameter_changed, this, _1), gui_context ());
 
 	/* Pick up any existing audio setup configuration, if appropriate */
 
 	XMLNode* audio_setup = ARDOUR::Config->extra_xml ("AudioMIDISetup");
 
-	ARDOUR::AudioEngine::instance ()->Running.connect (running_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_running, this), gui_context ());
-	ARDOUR::AudioEngine::instance ()->Stopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context ());
-	ARDOUR::AudioEngine::instance ()->Halted.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context ());
-	ARDOUR::AudioEngine::instance ()->DeviceListChanged.connect (devicelist_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::device_list_changed, this), gui_context ());
+	ARDOUR::AudioEngine::instance ()->Running.connect (running_connection, MISSING_INVALIDATOR, std::bind (&EngineControl::engine_running, this), gui_context ());
+	ARDOUR::AudioEngine::instance ()->Stopped.connect (stopped_connection, MISSING_INVALIDATOR, std::bind (&EngineControl::engine_stopped, this), gui_context ());
+	ARDOUR::AudioEngine::instance ()->Halted.connect (stopped_connection, MISSING_INVALIDATOR, std::bind (&EngineControl::engine_stopped, this), gui_context ());
+	ARDOUR::AudioEngine::instance ()->DeviceListChanged.connect (devicelist_connection, MISSING_INVALIDATOR, std::bind (&EngineControl::device_list_changed, this), gui_context ());
 
 	config_parameter_changed ("try-autostart-engine");
 	config_parameter_changed ("monitoring-model");
@@ -584,6 +582,9 @@ EngineControl::build_full_control_notebook ()
 		settings_table.attach (update_devices_button, 3, 4, btn, btn + ht, xopt, xopt);
 	}
 
+	settings_table.attach (*manage (new ArdourHSpacer(1.0)),   0, 4, row, row + 1, xopt, SHRINK, 4, 12);
+	row++;
+
 	if (backend->requires_driver_selection ()) {
 		settings_table.attach (lbl_driver,   0, 1, row, row + 1, xopt, SHRINK);
 		settings_table.attach (driver_combo, 1, 2, row, row + 1, xopt, SHRINK);
@@ -630,6 +631,9 @@ EngineControl::build_full_control_notebook ()
 
 	/* button spans 2 or 3 rows: Sample rate, Buffer size, Periods */
 	settings_table.attach (control_app_button, 3, 4, row - ctrl_btn_span, row + 1, xopt, xopt);
+	++row;
+
+	settings_table.attach (*manage (new ArdourHSpacer(1.0)),   0, 4, row, row + 1, xopt, SHRINK, 4, 12);
 	++row;
 
 	/* Monitor settings */
@@ -2863,6 +2867,9 @@ EngineControl::on_latency_expand ()
 		lbl_midi_system.hide ();
 		midi_option_combo.hide ();
 		midi_devices_button.hide ();
+		if (!UIConfiguration::instance().get_allow_to_resize_engine_dialog ()) {
+			resize (1, 1); // shrink window
+		}
 	}
 }
 

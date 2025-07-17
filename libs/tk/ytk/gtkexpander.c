@@ -32,7 +32,7 @@
 #include "gtkmain.h"
 #include "gtkintl.h"
 #include "gtkprivate.h"
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 #include "gtkdnd.h"
 #include "gtkalias.h"
 

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_stacktrace_h__
-#define __libpbd_stacktrace_h__
+#pragma once
 
 #ifdef HAVE_WAFBUILD
 #include "libpbd-config.h"
@@ -38,6 +37,8 @@
 
 #include "pbd/libpbd_visibility.h"
 
+
+extern "C" { void libpbd_c_stacktrace (int levels); }
 
 namespace PBD {
 
@@ -119,4 +120,3 @@ template<typename T> /*LIBPBD_API*/ Glib::Threads::Mutex PBD::thing_with_backtra
 
 } // namespace PBD
 
-#endif /* __libpbd_stacktrace_h__ */

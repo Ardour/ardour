@@ -19,7 +19,7 @@
 #ifndef _ardour_surface_websockets_dispatcher_h_
 #define _ardour_surface_websockets_dispatcher_h_
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include "client.h"
 #include "component.h"
@@ -39,7 +39,7 @@ public:
 
 private:
 	typedef void (WebsocketsDispatcher::*DispatcherMethod) (Client, const NodeStateMessage&);
-	typedef boost::unordered_map<std::string, DispatcherMethod> NodeMethodMap;
+	typedef std::unordered_map<std::string, DispatcherMethod> NodeMethodMap;
 
 	static NodeMethodMap _node_to_method;
 

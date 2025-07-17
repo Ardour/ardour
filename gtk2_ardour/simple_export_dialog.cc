@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/messagedialog.h>
+#include <ytkmm/stock.h>
 
 #include <glib.h>
 
@@ -345,7 +345,7 @@ SimpleExportDialog::start_export ()
 		if (_post_export_combo.get_active_row_number () == 0) {
 			PBD::open_folder (folder ());
 		}
-		if (!ARDOUR::Profile->get_mixbus ()) {
+		if (!ARDOUR::Profile->get_mixbus () && !ARDOUR::Profile->get_livetrax ()) {
 			NagScreen* ns = NagScreen::maybe_nag (_("Export"));
 			if (ns) {
 				ns->nag ();

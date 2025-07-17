@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/treeiter.h>
-#include <gtkmm/private/treeiter_p.h>
+#include <ytkmm/treeiter.h>
+#include <ytkmm/private/treeiter_p.h>
 
 #include <cstring> // std::memset()
 
@@ -28,7 +28,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/treemodel.h>
+#include <ytkmm/treemodel.h>
 
 namespace
 {

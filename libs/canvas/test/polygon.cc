@@ -29,12 +29,12 @@ PolygonTest::bounding_box ()
 	/* should now have a bounding box around those points,
 	   taking into account default line width
 	*/
-	boost::optional<Rect> bbox = polygon.bounding_box ();
+	std::optional<Rect> bbox = polygon.bounding_box ();
 	CPPUNIT_ASSERT (bbox.is_initialized ());
-	CPPUNIT_ASSERT (bbox.get().x0 == -6.25);
-	CPPUNIT_ASSERT (bbox.get().x1 ==  6.25);
-	CPPUNIT_ASSERT (bbox.get().y0 == -6.25);
-	CPPUNIT_ASSERT (bbox.get().y1 ==  6.25);
+	CPPUNIT_ASSERT (bbox.value().x0 == -6.25);
+	CPPUNIT_ASSERT (bbox.value().x1 ==  6.25);
+	CPPUNIT_ASSERT (bbox.value().y0 == -6.25);
+	CPPUNIT_ASSERT (bbox.value().y1 ==  6.25);
 
 	/* and its parent group should have noticed and adjusted
 	   its bounding box
@@ -42,8 +42,8 @@ PolygonTest::bounding_box ()
 
 	bbox = group.bounding_box ();
 	CPPUNIT_ASSERT (bbox.is_initialized ());
-	CPPUNIT_ASSERT (bbox.get().x0 == -6.25);
-	CPPUNIT_ASSERT (bbox.get().x1 ==  6.25);
-	CPPUNIT_ASSERT (bbox.get().y0 == -6.25);
-	CPPUNIT_ASSERT (bbox.get().y1 ==  6.25);
+	CPPUNIT_ASSERT (bbox.value().x0 == -6.25);
+	CPPUNIT_ASSERT (bbox.value().x1 ==  6.25);
+	CPPUNIT_ASSERT (bbox.value().y0 == -6.25);
+	CPPUNIT_ASSERT (bbox.value().y1 ==  6.25);
 }

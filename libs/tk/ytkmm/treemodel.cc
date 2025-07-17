@@ -3,15 +3,15 @@
 //Include this before the other headers, such as treeiter.h,
 //so that the undef in GdkRegion is used.
 #include <glibmm/listhandle.h>
-#include <gtkmm/treepath.h>
+#include <ytkmm/treepath.h>
  
 
 #include <glibmm.h>
 
-#include <gtkmm/treemodel.h>
-#include <gtkmm/private/treemodel_p.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/private/treemodel_p.h>
 
-#include <gtk/gtk.h>
+#include <ytk/ytk.h>
 
 // -*- c++ -*-
 /* $Id: treemodel.ccg,v 1.13 2006/05/11 11:40:24 murrayc Exp $ */
@@ -33,7 +33,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/treepath.h>
+#include <ytkmm/treepath.h>
 
 
 namespace

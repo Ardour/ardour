@@ -20,9 +20,9 @@
 #include <algorithm>
 
 #include <pangomm/layout.h>
-#include <gtkmm/label.h>
-#include <gtkmm/table.h>
-#include <gtkmm/stock.h>
+#include <ytkmm/label.h>
+#include <ytkmm/table.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/openuri.h"
 #include "pbd/basename.h"
@@ -597,7 +597,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 
 		if (channels > 0 && file_length > 0 && sample_rate > 0)
 		{
-			/* Time Axis  -- re-use waveform width */
+			/* Time Axis  -- reuse waveform width */
 			const size_t width = p->width;
 			Cairo::RefPtr<Cairo::ImageSurface> ytme = ArdourGraphs::time_axis (get_pango_context (), width, m_l, start_off, file_length, sample_rate);
 
@@ -831,19 +831,19 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 	get_vbox ()->set_spacing (4);
 	get_vbox ()->pack_start (pages, false, false);
 
-	if (_session) {
-		_session->AuditionActive.connect(auditioner_connections, invalidator (*this), boost::bind (&ExportReport::audition_active, this, _1), gui_context());
-		_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), boost::bind (&ExportReport::audition_progress, this, _1, _2), gui_context());
+	if (_session && _session->the_auditioner()) {
+		_session->AuditionActive.connect(auditioner_connections, invalidator (*this), std::bind (&ExportReport::audition_active, this, _1), gui_context());
+		_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), std::bind (&ExportReport::audition_progress, this, _1, _2), gui_context());
 	}
 
-	if (_session && with_file) {
+	if (_session && with_file && _session->the_auditioner()) {
 		play_btn = add_button (Stock::MEDIA_PLAY, RESPONSE_ACCEPT);
 		stop_btn = add_button (Stock::MEDIA_STOP, RESPONSE_ACCEPT);
 	}
 	add_button (Stock::CLOSE, RESPONSE_CLOSE);
 
 	set_default_response (RESPONSE_CLOSE);
-	if (_session && with_file) {
+	if (_session && with_file && _session->the_auditioner()) {
 		stop_btn->signal_clicked().connect (sigc::mem_fun (*this, &ExportReport::stop_audition));
 		play_btn->signal_clicked().connect (sigc::mem_fun (*this, &ExportReport::play_audition));
 		stop_btn->set_sensitive (false);
@@ -856,7 +856,7 @@ ExportReport::run ()
 {
 	do {
 		int i = ArdourDialog::run ();
-		if (i == Gtk::RESPONSE_DELETE_EVENT || i == RESPONSE_CLOSE) {
+		if (i == Gtk::RESPONSE_DELETE_EVENT || i == RESPONSE_CLOSE || i == RESPONSE_CANCEL) {
 			break;
 		}
 	} while (1);
@@ -908,7 +908,7 @@ ExportReport::audition_active (bool active)
 void
 ExportReport::audition (std::string path, unsigned n_chn, int page)
 {
-	assert (_session);
+	assert (_session && _session->the_auditioner());
 	_session->cancel_audition();
 
 	if (n_chn ==0) { return; }

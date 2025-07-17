@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/iconinfo.h>
-#include <gtkmm/private/iconinfo_p.h>
+#include <ytkmm/iconinfo.h>
+#include <ytkmm/private/iconinfo_p.h>
 
 
 /* Copyright 2003 The gtkmm Development Team
@@ -24,8 +24,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/icontheme.h>
-#include <gtk/gtk.h>
+#include <ytkmm/icontheme.h>
+#include <ytk/ytk.h>
 
 namespace Gtk
 {

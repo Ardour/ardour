@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libpbd_path_expand_h__
-#define __libpbd_path_expand_h__
+#pragma once
 
 #include <string>
 #include <vector>
@@ -31,5 +30,4 @@ namespace PBD {
 	LIBPBD_API std::vector<std::string> parse_path(std::string path, bool check_if_exists = false);
 }
 
-#endif /* __libpbd_path_expand_h__ */
 

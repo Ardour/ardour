@@ -601,7 +601,7 @@ typedef struct _aafData {
  */
 
 #define aafRationalToint64(r) \
-	(((r).denominator == 0) ? 0 : (int64_t) ((r).numerator / (r).denominator))
+	(((r).denominator == 0) ? 0 : (int64_t)((r).numerator / (r).denominator))
 
 /**
  * Loops through each aafPropertyIndexEntry_t of a "properties" node stream.

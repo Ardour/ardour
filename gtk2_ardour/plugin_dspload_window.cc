@@ -16,9 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/frame.h>
-#include <gtkmm/label.h>
-#include <gtkmm/viewport.h>
+#include <ytkmm/frame.h>
+#include <ytkmm/label.h>
+#include <ytkmm/viewport.h>
 
 #include "ardour/io_plug.h"
 #include "ardour/session.h"
@@ -171,7 +171,7 @@ PluginDSPLoadWindow::refill_processors ()
 	}
 
 	_session->RouteAdded.connect (
-			_route_connections, invalidator (*this), boost::bind (&PluginDSPLoadWindow::refill_processors, this), gui_context()
+			_route_connections, invalidator (*this), std::bind (&PluginDSPLoadWindow::refill_processors, this), gui_context()
 			);
 
 	RouteList routes = _session->get_routelist ();
@@ -180,16 +180,16 @@ PluginDSPLoadWindow::refill_processors ()
 		(*i)->foreach_processor (sigc::bind (sigc::mem_fun (*this, &PluginDSPLoadWindow::add_processor_to_display), (*i)->name()));
 
 		(*i)->processors_changed.connect (
-				_route_connections, invalidator (*this), boost::bind (&PluginDSPLoadWindow::refill_processors, this), gui_context()
+				_route_connections, invalidator (*this), std::bind (&PluginDSPLoadWindow::refill_processors, this), gui_context()
 				);
 
 		(*i)->DropReferences.connect (
-				_route_connections, invalidator (*this), boost::bind (&PluginDSPLoadWindow::refill_processors, this), gui_context()
+				_route_connections, invalidator (*this), std::bind (&PluginDSPLoadWindow::refill_processors, this), gui_context()
 				);
 	}
 
 	_session->IOPluginsChanged.connect (
-			_route_connections, invalidator (*this), boost::bind (&PluginDSPLoadWindow::refill_processors, this), gui_context()
+			_route_connections, invalidator (*this), std::bind (&PluginDSPLoadWindow::refill_processors, this), gui_context()
 			);
 
 	for (auto const& iop : *_session->io_plugs ()) {
@@ -221,7 +221,7 @@ PluginDSPLoadWindow::add_pluginsert_to_display (std::shared_ptr<PlugInsertBase> 
 	if (!p->provides_stats ()) {
 		return;
 	}
-	p->DropReferences.connect (_processor_connections, MISSING_INVALIDATOR, boost::bind (&PluginDSPLoadWindow::refill_processors, this), gui_context());
+	p->DropReferences.connect (_processor_connections, MISSING_INVALIDATOR, std::bind (&PluginDSPLoadWindow::refill_processors, this), gui_context());
 	PluginLoadStatsGui* plsg = new PluginLoadStatsGui (p);
 
 	std::string name = route_name + " - " + p->plugin ()->name ();

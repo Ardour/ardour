@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_keyboard_h__
-#define __ardour_keyboard_h__
+#pragma once
 
 #include <map>
 #include <string>
@@ -43,7 +42,7 @@ public:
 
 	void setup_keybindings ();
 
-	static Selection::Operation selection_type (guint state);
+	static ARDOUR::SelectionOperation selection_type (guint state);
 
 	ARDOUR_UI& ui;
 
@@ -108,4 +107,3 @@ private:
 	void find_bindings_files (std::map<std::string,std::string>& files);
 };
 
-#endif /* __ardour_keyboard_h__ */

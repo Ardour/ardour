@@ -120,8 +120,6 @@ class PortAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 
 		std::vector<float> available_sample_rates (const std::string& device) const;
 		std::vector<uint32_t> available_buffer_sizes (const std::string& device) const;
-		uint32_t available_input_channel_count (const std::string& device) const;
-		uint32_t available_output_channel_count (const std::string& device) const;
 
 		bool can_change_sample_rate_when_running () const;
 		bool can_change_buffer_size_when_running () const;
@@ -132,8 +130,6 @@ class PortAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		int set_sample_rate (float);
 		int set_buffer_size (uint32_t);
 		int set_interleaved (bool yn);
-		int set_input_channels (uint32_t);
-		int set_output_channels (uint32_t);
 		int set_systemic_input_latency (uint32_t);
 		int set_systemic_output_latency (uint32_t);
 		int set_systemic_midi_input_latency (std::string const, uint32_t);
@@ -148,8 +144,6 @@ class PortAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		float        sample_rate () const;
 		uint32_t     buffer_size () const;
 		bool         interleaved () const;
-		uint32_t     input_channels () const;
-		uint32_t     output_channels () const;
 		uint32_t     systemic_input_latency () const;
 		uint32_t     systemic_output_latency () const;
 		uint32_t     systemic_midi_input_latency (std::string const) const;
@@ -185,7 +179,7 @@ class PortAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		samplepos_t sample_time_at_cycle_start ();
 		pframes_t samples_since_cycle_start ();
 
-		int create_process_thread (boost::function<void()> func);
+		int create_process_thread (std::function<void()> func);
 		int join_process_threads ();
 		bool in_process_thread ();
 		uint32_t process_thread_count ();
@@ -328,9 +322,6 @@ class PortAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		size_t _samples_per_period;
 		static size_t _max_buffer_size;
 
-		uint32_t _n_inputs;
-		uint32_t _n_outputs;
-
 		uint32_t _systemic_audio_input_latency;
 		uint32_t _systemic_audio_output_latency;
 
@@ -358,10 +349,10 @@ class PortAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 
 		struct ThreadData {
 			PortAudioBackend* engine;
-			boost::function<void ()> f;
+			std::function<void ()> f;
 			size_t stacksize;
 
-			ThreadData (PortAudioBackend* e, boost::function<void ()> fp, size_t stacksz)
+			ThreadData (PortAudioBackend* e, std::function<void ()> fp, size_t stacksz)
 				: engine (e) , f (fp) , stacksize (stacksz) {}
 		};
 

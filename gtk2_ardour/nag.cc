@@ -22,7 +22,7 @@
 #endif
 
 #include "pbd/gstdio_compat.h"
-#include <gtkmm/stock.h>
+#include <ytkmm/stock.h>
 
 #include "pbd/openuri.h"
 

@@ -16,8 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef  __gtk_ardour_port_matrix_grid_h__
-#define  __gtk_ardour_port_matrix_grid_h__
+#pragma once
 
 #include <memory>
 #include <string>
@@ -30,10 +29,6 @@
 
 class PortMatrix;
 class PortMatrixBody;
-
-namespace ARDOUR {
-	class Bundle;
-}
 
 /**  The grid part of the port matrix */
 class PortMatrixGrid : public PortMatrixComponent
@@ -76,4 +71,3 @@ private:
 	int _drag_y;
 };
 
-#endif

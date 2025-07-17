@@ -20,13 +20,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/stock.h>
-#include <gtkmm/table.h>
+#include <ytkmm/stock.h>
+#include <ytkmm/table.h>
 #include "gtkmm2ext/utils.h"
 
 #include "pbd/convert.h"
 #include "quantize_dialog.h"
-#include "public_editor.h"
+#include "editing_context.h"
 
 #include "pbd/i18n.h"
 #include "pbd/integer_division.h"
@@ -71,7 +71,7 @@ static const int _grid_beats[] = {
 
 std::vector<std::string> QuantizeDialog::grid_strings;
 
-QuantizeDialog::QuantizeDialog (PublicEditor& e)
+QuantizeDialog::QuantizeDialog (EditingContext& e)
 	: ArdourDialog (_("Quantize"), false, false)
 	, editor (e)
 	, strength_adjustment (100.0, 0.0, 100.0, 1.0, 10.0)

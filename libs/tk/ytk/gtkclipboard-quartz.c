@@ -23,7 +23,7 @@
 #include "config.h"
 #include <string.h>
 
-#include "gdk/gdkquartz.h"
+#include "ydk/gdkquartz.h"
 #import <Cocoa/Cocoa.h>
 
 /* NSInteger only exists in Leopard and newer.  This check has to be

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_audiobackend_h__
-#define __libardour_audiobackend_h__
+#pragma once
 
 #include <string>
 #include <vector>
@@ -27,7 +26,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include <boost/function.hpp>
 
 #include "ardour/audioengine.h"
 #include "ardour/libardour_visibility.h"
@@ -161,7 +159,10 @@ public:
 	 */
 	virtual bool is_realtime () const = 0;
 
-	virtual int client_real_time_priority () { return PBD_RT_PRI_PROC; }
+	/** Return true if the backed is JACK */
+	virtual bool is_jack () const { return false; }
+
+	virtual int client_real_time_priority () { return 0; }
 
 	/* Discovering devices and parameters */
 
@@ -406,23 +407,6 @@ public:
 	{
 		return 1024;
 	}
-
-	/** Returns the maximum number of input channels that are potentially
-	 * usable with the hardware identified by \p device . Any number from 1
-	 * to the value returned may be supplied in other calls to this backend as
-	 * the input channel count to use with the name device, but the requested
-	 * count may turn out to be unavailable, or become invalid at any time.
-	 */
-	virtual uint32_t available_input_channel_count (const std::string& device) const = 0;
-
-	/** Returns the maximum number of output channels that are potentially
-	 * usable with the hardware identified by \p device . Any number from 1
-	 * to the value returned may be supplied in other calls to this backend as
-	 * the output channel count to use with the name device, but the requested
-	 * count may turn out to be unavailable, or become invalid at any time.
-	 */
-	virtual uint32_t available_output_channel_count (const std::string& device) const = 0;
-
 	/* Return true if the derived class can change the sample rate of the
 	 * device in use while the device is already being used. Return false
 	 * otherwise. (example: JACK cannot do this as of September 2013)
@@ -511,12 +495,6 @@ public:
 	 */
 	virtual int set_interleaved (bool yn) = 0;
 
-	/** Set the number of input channels that should be used */
-	virtual int set_input_channels (uint32_t) = 0;
-
-	/** Set the number of output channels that should be used */
-	virtual int set_output_channels (uint32_t) = 0;
-
 	/** Set the (additional) input latency that cannot be determined via
 	 * the implementation's underlying code (e.g. latency from
 	 * external D-A/D-A converters. Units are samples.
@@ -555,8 +533,6 @@ public:
 	virtual float    sample_rate () const                                   = 0;
 	virtual uint32_t buffer_size () const                                   = 0;
 	virtual bool     interleaved () const                                   = 0;
-	virtual uint32_t input_channels () const                                = 0;
-	virtual uint32_t output_channels () const                               = 0;
 	virtual uint32_t systemic_input_latency () const                        = 0;
 	virtual uint32_t systemic_output_latency () const                       = 0;
 	virtual uint32_t systemic_midi_input_latency (std::string const) const  = 0;
@@ -807,7 +783,7 @@ public:
 	 *
 	 * @param func process function to run
 	 */
-	virtual int create_process_thread (boost::function<void()> func) = 0;
+	virtual int create_process_thread (std::function<void()> func) = 0;
 
 	/** Wait for all processing threads to exit.
 	 *
@@ -863,4 +839,3 @@ protected:
 
 } // namespace ARDOUR
 
-#endif /* __libardour_audiobackend_h__ */

@@ -40,7 +40,7 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-PBD::Signal2<void, std::string, void*> ARDOUR::LibraryClipAdded;
+PBD::Signal<void(std::string, void*)> ARDOUR::LibraryClipAdded;
 
 string
 ARDOUR::clip_library_dir (bool create_if_missing)

@@ -5,10 +5,10 @@
 
 #include <glibmm.h>
 
-#include <gdkmm/event.h>
-#include <gdkmm/private/event_p.h>
+#include <ydkmm/event.h>
+#include <ydkmm/private/event_p.h>
 
-#include <gdk/gdk.h>
+#include <ydk/gdk.h>
 
 // -*- c++ -*-
 /* $Id: event.ccg,v 1.2 2004/02/10 17:29:54 mxpxpod Exp $ */
@@ -32,7 +32,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gdkmm/display.h>
+#include <ydkmm/display.h>
 
 namespace Gdk
 {

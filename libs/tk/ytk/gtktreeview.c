@@ -20,7 +20,7 @@
 
 #include "config.h"
 #include <string.h>
-#include <gdk/gdkkeysyms.h>
+#include <ydk/gdkkeysyms.h>
 
 #include "gtktreeview.h"
 #include "gtkrbtree.h"
@@ -833,7 +833,7 @@ gtk_tree_view_class_init (GtkTreeViewClass *class)
   /**
    * GtkTreeView:row-ending-details:
    *
-   * Enable extended row background themeing
+   * Enable extended row background theming
    *
    * Deprecated: 2.22: This style property will be removed in GTK+ 3
    */

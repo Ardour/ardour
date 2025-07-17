@@ -19,11 +19,11 @@
 #ifndef __libgtkmm2ext_treeutils_h__
 #define __libgtkmm2ext_treeutils_h__
 
-#include <gtkmm/treeview.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/treeselection.h>
-#include <gtkmm/treepath.h>
-#include <gtkmm/treeiter.h>
+#include <ytkmm/treeview.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/treeselection.h>
+#include <ytkmm/treepath.h>
+#include <ytkmm/treeiter.h>
 
 #include "gtkmm2ext/visibility.h"
 

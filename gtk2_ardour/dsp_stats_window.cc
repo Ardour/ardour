@@ -41,7 +41,10 @@ DspStatisticsWindow::~DspStatisticsWindow ()
 void
 DspStatisticsWindow::set_session (Session* s)
 {
-	ui->set_session (s);
+	ArdourWindow::set_session (s);
+	if (s) {
+		ui->set_session (s);
+	}
 }
 
 void

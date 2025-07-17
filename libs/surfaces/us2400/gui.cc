@@ -18,17 +18,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/box.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/table.h>
-#include <gtkmm/treeview.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/treestore.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/cellrenderercombo.h>
-#include <gtkmm/scale.h>
-#include <gtkmm/alignment.h>
+#include <ytkmm/comboboxtext.h>
+#include <ytkmm/box.h>
+#include <ytkmm/spinbutton.h>
+#include <ytkmm/table.h>
+#include <ytkmm/treeview.h>
+#include <ytkmm/liststore.h>
+#include <ytkmm/treestore.h>
+#include <ytkmm/notebook.h>
+#include <ytkmm/cellrenderercombo.h>
+#include <ytkmm/scale.h>
+#include <ytkmm/alignment.h>
 
 #include "pbd/error.h"
 #include "pbd/unwind.h"
@@ -105,10 +105,10 @@ US2400ProtocolGUI::US2400ProtocolGUI (US2400Protocol& p)
 	table.set_border_width (12);
 	table.set_homogeneous (false);
 
-	_cp.DeviceChanged.connect (device_change_connection, invalidator (*this), boost::bind (&US2400ProtocolGUI::device_changed, this), gui_context());
-	_cp.ConnectionChange.connect (_port_connections, invalidator (*this), boost::bind (&US2400ProtocolGUI::connection_handler, this), gui_context());
-	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), boost::bind (&US2400ProtocolGUI::connection_handler, this), gui_context());
-	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), boost::bind (&US2400ProtocolGUI::connection_handler, this), gui_context());
+	_cp.DeviceChanged.connect (device_change_connection, invalidator (*this), std::bind (&US2400ProtocolGUI::device_changed, this), gui_context());
+	_cp.ConnectionChange.connect (_port_connections, invalidator (*this), std::bind (&US2400ProtocolGUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), std::bind (&US2400ProtocolGUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), std::bind (&US2400ProtocolGUI::connection_handler, this), gui_context());
 
 	/* device-dependent part */
 

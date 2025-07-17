@@ -3,8 +3,8 @@
 
 #include <glibmm.h>
 
-#include <gtkmm/treedragsource.h>
-#include <gtkmm/private/treedragsource_p.h>
+#include <ytkmm/treedragsource.h>
+#include <ytkmm/private/treedragsource_p.h>
 
 
 // -*- c++ -*-
@@ -27,9 +27,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtkmm/treepath.h>
-#include <gtkmm/selectiondata_private.h> //For SelectionData_WithoutOwnership
-#include <gtk/gtk.h>
+#include <ytkmm/treepath.h>
+#include <ytkmm/selectiondata_private.h> //For SelectionData_WithoutOwnership
+#include <ytk/ytk.h>
 
 
 namespace Gtk

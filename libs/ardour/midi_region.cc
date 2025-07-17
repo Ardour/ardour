@@ -76,7 +76,7 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 	 */
 	override_opaqueness (false);
 
-	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
+	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, std::bind (&MidiRegion::model_changed, this));
 	model_changed ();
 	assert(_name.val().find("/") == string::npos);
 	assert(_type == DataType::MIDI);
@@ -87,7 +87,7 @@ MidiRegion::MidiRegion (std::shared_ptr<const MidiRegion> other)
 	, _ignore_shift (false)
 {
 	assert(_name.val().find("/") == string::npos);
-	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
+	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, std::bind (&MidiRegion::model_changed, this));
 	model_changed ();
 }
 
@@ -98,7 +98,7 @@ MidiRegion::MidiRegion (std::shared_ptr<const MidiRegion> other, timecnt_t const
 {
 
 	assert(_name.val().find("/") == string::npos);
-	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
+	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, std::bind (&MidiRegion::model_changed, this));
 	model_changed ();
 }
 
@@ -462,11 +462,11 @@ MidiRegion::model_changed ()
 
 	/* watch for changes to controls' AutoState */
 	midi_source()->AutomationStateChanged.connect_same_thread (
-		_model_connection, boost::bind (&MidiRegion::model_automation_state_changed, this, _1)
+		_model_connection, std::bind (&MidiRegion::model_automation_state_changed, this, _1)
 		);
 
-	model()->ContentsShifted.connect_same_thread (_model_shift_connection, boost::bind (&MidiRegion::model_shifted, this, _1));
-	model()->ContentsChanged.connect_same_thread (_model_changed_connection, boost::bind (&MidiRegion::model_contents_changed, this));
+	model()->ContentsShifted.connect_same_thread (_model_shift_connection, std::bind (&MidiRegion::model_shifted, this, _1));
+	model()->ContentsChanged.connect_same_thread (_model_changed_connection, std::bind (&MidiRegion::model_contents_changed, this));
 }
 
 void
@@ -484,13 +484,18 @@ MidiRegion::model_shifted (timecnt_t distance)
 
 	if (!_ignore_shift) {
 		PropertyChange what_changed;
-		/* _start is a Property, so we cannot call timepos_t methods on
+		/* _length is a Property, so we cannot call timepos_t methods on
 		   it directly. ::val() only provides a const, so use
 		   operator+() rather than operator+=()
 		*/
-		_start = _start.val() + distance;
-		what_changed.add (Properties::start);
+		_length = _length.val() + distance;
+		if (!_start.val().is_zero()) {
+			_length = _length.val() + _start.val();
+			_start = timepos_t::zero (_start.val().time_domain());
+			what_changed.add (Properties::start);
+		}
 		what_changed.add (Properties::contents);
+		what_changed.add (Properties::length);
 		send_change (what_changed);
 	} else {
 		_ignore_shift = false;
@@ -526,11 +531,11 @@ MidiRegion::model_automation_state_changed (Evoral::Parameter const & p)
  *  Fix it up by adding some empty space to the source.
  */
 void
-MidiRegion::fix_negative_start ()
+MidiRegion::fix_negative_start (HistoryOwner& history)
 {
 	_ignore_shift = true;
 
-	model()->insert_silence_at_start (-start().beats());
+	model()->insert_silence_at_start (-start().beats(), history);
 
 	_start = timepos_t::zero (start().time_domain());
 }
@@ -643,5 +648,5 @@ MidiRegion::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
 
 	_model_changed_connection.disconnect ();
 	model()->ContentsChanged ();
-	model()->ContentsChanged.connect_same_thread (_model_changed_connection, boost::bind (&MidiRegion::model_contents_changed, this));
+	model()->ContentsChanged.connect_same_thread (_model_changed_connection, std::bind (&MidiRegion::model_contents_changed, this));
 }

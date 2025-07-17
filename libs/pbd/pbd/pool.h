@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __qm_pool_h__
-#define __qm_pool_h__
+#pragma once
 
 #include <string>
 #include <vector>
@@ -175,4 +174,3 @@ private:
 
 } // namespace PBD
 
-#endif // __qm_pool_h__

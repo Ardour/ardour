@@ -36,7 +36,7 @@
 #include "aaf/AAFIface.h"
 
 char*
-aafi_locate_external_essence_file (AAF_Iface* aafi, const char* original_uri_filepath, const char* search_location);
+aafi_locate_external_essence_file (AAF_Iface* aafi, const char* original_uri_filepath, const char* commonPathPart, const char* search_location);
 
 /**
  * Extract audio essence file.
@@ -54,6 +54,9 @@ aafi_parse_audio_essence (AAF_Iface* aafi, aafiAudioEssenceFile* audioEssenceFil
 
 int
 aafi_build_unique_audio_essence_name (AAF_Iface* aafi, aafiAudioEssenceFile* audioEssenceFile);
+
+aafiAudioEssencePointer*
+aafi_audioEssencePointer_exists_before (AAF_Iface* aafi, aafiAudioEssencePointer* audioEssencePointerList);
 
 /**
  * @}

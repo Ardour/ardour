@@ -25,6 +25,8 @@
 
 #include <cairomm/cairomm.h>
 
+#include "pbd/search_path.h"
+
 #include "canvas/item.h"
 
 class XMLNode;

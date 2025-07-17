@@ -231,7 +231,7 @@ ParseSwitches(
 						if (++i < argc) {
 							string	op = argv[i];
 							if (op[0] == '-') {
-								// reqiured option for this switch is missing
+								// required option for this switch is missing
 								--i;
 								OK = false;
 								break;
@@ -240,7 +240,7 @@ ParseSwitches(
 							break;
 						}
 						else {
-							// reqiured option for this switch is missing
+							// required option for this switch is missing
 							--i;
 							OK = false;
 							break;

@@ -19,9 +19,9 @@
 
 #include "config.h"
 
-#include <atk/atkgobjectaccessible.h>
-#include <atk/atkregistry.h>
-#include <atk/atkutil.h>
+#include <ztk/atkgobjectaccessible.h>
+#include <ztk/atkregistry.h>
+#include <ztk/atkutil.h>
 
 /**
  * SECTION:atkgobjectaccessible

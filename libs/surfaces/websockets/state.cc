@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/unordered_set.hpp>
+#include <boost/functional/hash.hpp>
 #include <sstream>
 
 #include "state.h"
