@@ -120,8 +120,9 @@ Console1::get_state () const
 {
 	XMLNode& node = MIDISurface::get_state ();
 	node.set_property ("swap-solo-mute", swap_solo_mute);
-	node.set_property ("create-mapping-stubs", create_mapping_stubs);
-	return node;
+    node.set_property ("band-q-as-send", band_q_as_send);
+    node.set_property ("create-mapping-stubs", create_mapping_stubs);
+    return node;
 }
 
 int
@@ -131,8 +132,13 @@ Console1::set_state (const XMLNode& node, int version)
 	std::string tmp;
 	node.get_property ("swap-solo-mute", tmp);
 	swap_solo_mute = (tmp == "1");
-	node.get_property ("create-mapping-stubs", tmp);
-	create_mapping_stubs = (tmp == "1");
+    if (node.property("band-q-as-send"))
+        node.get_property("band-q-as-send", tmp);
+    else
+        tmp = "1";
+    band_q_as_send = (tmp == "1");
+    node.get_property("create-mapping-stubs", tmp);
+    create_mapping_stubs = (tmp == "1");
 	return 0;
 }
 
@@ -250,9 +256,10 @@ Console1::connect_internal_signals ()
 	DEBUG_TRACE (DEBUG::Console1, "connect_internal_signals\n");
 	BankChange.connect (console1_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_bank, this), this);
 	ShiftChange.connect (console1_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_shift, this, _1), this);
-	PluginStateChange.connect (
-	  console1_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_plugin_state, this, _1), this);
-	GotoView.connect (
+    EQBandQBindingChange.connect (console1_connections, MISSING_INVALIDATOR, std::bind(&Console1::eqBandQChangeMapping, this), this);
+    PluginStateChange.connect(
+        console1_connections, MISSING_INVALIDATOR, std::bind(&Console1::map_plugin_state, this, _1), this);
+    GotoView.connect (
 	  console1_connections,
 	  MISSING_INVALIDATOR,
 	  [] (uint32_t val) { DEBUG_TRACE (DEBUG::Console1, string_compose ("GotooView: %1\n", val)); },
@@ -261,6 +268,7 @@ Console1::connect_internal_signals ()
 	  console1_connections, MISSING_INVALIDATOR, [] () { DEBUG_TRACE (DEBUG::Console1, "VerticalZoomIn\n"); }, this);
 	VerticalZoomOutSelected.connect (
 	  console1_connections, MISSING_INVALIDATOR, [] () { DEBUG_TRACE (DEBUG::Console1, "VerticalZoomOut\n"); }, this);
+
 }
 
 void
@@ -367,14 +375,27 @@ Console1::setup_controls ()
 		             std::function<void (uint32_t)> (std::bind (&Console1::eq_gain, this, i, _1)),
 		             std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, i + 4, _1)));
 	}
-	new Encoder (this,
-	             ControllerID::LOW_MID_SHAPE,
-	             std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 10, _1)),
-	             std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 8, _1)));
-	new Encoder (this,
-	             ControllerID::HIGH_MID_SHAPE,
-	             std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 11, _1)),
-	             std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 9, _1)));
+
+    
+    if (band_q_as_send) {
+        new Encoder (this,
+                    ControllerID::LOW_MID_SHAPE,
+                    std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 10, _1)),
+                    std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 8, _1)));
+        new Encoder (this,
+                    ControllerID::HIGH_MID_SHAPE,
+                    std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 11, _1)),
+                    std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 9, _1)));
+    } else {
+        new Encoder (this,
+                    ControllerID::LOW_MID_SHAPE,
+                    std::function<void (uint32_t)> (std::bind (&Console1::eq_band_q, this, 1, _1)),
+                    std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 8, _1)));
+        new Encoder (this,
+                    ControllerID::HIGH_MID_SHAPE,
+                    std::function<void (uint32_t)> (std::bind (&Console1::eq_band_q, this, 2, _1)),
+                    std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 9, _1)));
+    }
 
 	new ControllerButton (this,
 	                      ControllerID::LOW_SHAPE,
@@ -491,6 +512,13 @@ Console1::notify_solo_active_changed (bool state)
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "button not found");
 	}
+}
+
+void 
+Console1::band_q_usage_changed( )
+{
+    Encoder *e = get_encoder (ControllerID (EQ_BandQ) );
+	DEBUG_TRACE (DEBUG::Console1, string_compose ("notify_parameter_changed: %1\n", e->id()));
 }
 
 void
@@ -697,7 +725,19 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 			_current_stripable->mapped_control (EQ_Enable)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq, this), this);
 		}
-
+#ifdef MIXBUS
+        std::shared_ptr<ARDOUR::Route> rt = std::dynamic_pointer_cast<ARDOUR::Route>( _current_stripable );
+        if (rt)
+        {
+            DEBUG_TRACE(DEBUG::Console1, "Cast to Route ok \n");
+            if( rt->eq_mode_control() )
+            {
+                DEBUG_TRACE(DEBUG::Console1, "Control EQ_Mode available \n");
+                 rt->eq_mode_control()->Changed.connect(
+                  stripable_connections, MISSING_INVALIDATOR, std::bind(&Console1::map_eq_mode, this), this);
+            }
+        }
+#endif
 		for (uint32_t i = 0; i < _current_stripable->eq_band_cnt (); ++i) {
 			if (_current_stripable->mapped_control (EQ_BandFreq, i)) {
 				_current_stripable->mapped_control (EQ_BandFreq, i)->Changed.connect (
@@ -708,6 +748,16 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 				  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq_gain, this, i), this);
 			}
 		}
+
+        if (_current_stripable->mapped_control (EQ_BandQ, 1) && !band_q_as_send ) {
+            _current_stripable->mapped_control (EQ_BandQ, 1)->Changed.connect (
+            stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq_band_q, this, 1), this);
+        }
+
+        if (_current_stripable->mapped_control (EQ_BandQ, 2) && !band_q_as_send) {
+            _current_stripable->mapped_control (EQ_BandQ, 2)->Changed.connect (
+            stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq_band_q, this, 2), this);
+        }
 
 		if (_current_stripable->mapped_control (EQ_BandShape, 0)) {
 			_current_stripable->mapped_control (EQ_BandShape, 0)->Changed.connect (
@@ -726,7 +776,7 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 		}
 
 		// Mixbus Sends
-		for (uint32_t i = 0; i < 12; ++i) {
+		for (uint32_t i = 0; i < (band_q_as_send ? 12 : 10); ++i) {
 			if (_current_stripable->send_level_controllable (i)) {
 				_current_stripable->send_level_controllable (i)->Changed.connect (
 				  stripable_connections,
@@ -836,11 +886,15 @@ Console1::map_stripable_state ()
 
 		// EQ Section
 		map_eq ();
-		for (uint32_t i = 0; i < _current_stripable->eq_band_cnt (); ++i) {
-			map_eq_freq (i);
+        map_eq_mode();
+        for (uint32_t i = 0; i < _current_stripable->eq_band_cnt(); ++i)
+        {
+            map_eq_freq (i);
 			map_eq_gain (i);
-		}
-		map_eq_low_shape ();
+            if( (!switch_eq_q_dials) && i > 0 && i < 3 )
+                map_eq_band_q (i);
+        }
+        map_eq_low_shape ();
 		map_eq_high_shape ();
 
 		for (int i = 0; i < 12; ++i) {

@@ -57,6 +57,7 @@ private:
 	Gtk::ComboBox output_combo;
 	Gtk::Image image;
 	Gtk::CheckButton swap_solo_mute_cb;
+	Gtk::CheckButton band_q_as_send_cb;
 	Gtk::CheckButton create_plugin_stubs_btn;
 
 	void update_port_combos ();
@@ -80,8 +81,8 @@ private:
 	void active_port_changed (Gtk::ComboBox*,bool for_input);
 
 	void set_swap_solo_mute ();
-	void set_create_mapping_stubs ();
-
+    void set_band_q_as_send();
+    void set_create_mapping_stubs();
 };
 
 }
