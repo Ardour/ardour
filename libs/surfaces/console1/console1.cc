@@ -174,7 +174,7 @@ Console1::begin_using_device ()
 	  f0 7d 20 00 00 00 01 00 7f 49 6f 6c 73 00 f7
 	*/
 
-	load_mappings ();
+    load_mappings ();
 	setup_controls ();
 
 	/* Connection to the blink-timer */
@@ -509,7 +509,7 @@ Console1::notify_transport_state_changed ()
 void
 Console1::stripable_selection_changed ()
 {
-	DEBUG_TRACE (DEBUG::Console1, "stripable_selection_changed \n");
+    	DEBUG_TRACE (DEBUG::Console1, "stripable_selection_changed \n");
 	if (!_in_use)
 		return;
 
@@ -1211,4 +1211,13 @@ Console1::master_monitor_has_changed ()
 	bool monitor_active = session->monitor_active ();
 	DEBUG_TRACE (DEBUG::Console1, string_compose ("master_monitor_has_changed - monitor active %1\n", monitor_active));
 	create_strip_inventory ();
+}
+
+const std::string Console1::findControllerNameById (const ControllerID id){
+    for( const auto &controller : controllerMap ){
+        if( controller.second == id ){
+			return controller.first;
+		}
+	}
+	return std::string();
 }
