@@ -112,31 +112,29 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 
 	eTempoBox->show_all();
 
-	Gtk::Table* audio_t = manage (new Gtk::Table ());
-	audio_t->set_homogeneous (true);
-	audio_t->set_spacings (4);
-
 	/* -------------- Clip start&length (redundant with the trimmer gui handles?)  ----------*/
 	row = 0;
 
 	label = manage (new Gtk::Label (_("Start:")));
 	label->set_alignment (1.0, 0.5);
-	audio_t->attach (*label,       0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	audio_t->attach (_start_clock, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	_table.attach (*label,       0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	_table.attach (_start_clock, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
 
 	label = manage (new Gtk::Label (_("Clip Length:")));
 	label->set_alignment (1.0, 0.5);
-	audio_t->attach (*label,        0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	audio_t->attach (_length_clock, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	_table.attach (*label,        0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	_table.attach (_length_clock, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
 
-	audio_t->set_homogeneous (false);
-	audio_t->set_spacings (4);
-	audio_t->set_border_width (2);
+	_table.set_homogeneous (false);
+	_table.set_spacings (4);
+	_table.set_border_width (2);
 
-	attach (*eTempoBox, 0,1, 0,1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL);
-	attach (*audio_t,   0,1, 1,2, Gtk::FILL, Gtk::SHRINK);
+	attach (*eTempoBox,    0,1, 0,1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL);
+#if 0
+	attach (_table,        0,1, 1,2, Gtk::FILL, Gtk::SHRINK);
+#endif
 
 	_start_clock.ValueChanged.connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::start_clock_changed));
 	_length_clock.ValueChanged.connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::length_clock_changed));

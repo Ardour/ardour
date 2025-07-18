@@ -144,7 +144,6 @@ TriggerPage::TriggerPage ()
 	_sidebar_pager2.set_index (3);
 
 	_midi_editor = new Pianoroll (X_("MIDICueEditor"));
-	_audio_editor = new AudioClipEditor (X_("AudioClipEditor"), true);
 
 	/* Bottom -- Properties of selected Slot/Region */
 
@@ -476,7 +475,9 @@ TriggerPage::trigger_arm_changed (Trigger const * trigger)
 
 	/* hide everything */
 
-	hide_all ();
+	_audio_trig_box.hide ();
+	_midi_trig_box.hide ();
+	_midi_editor->viewport().hide ();
 
 	Tabbable::showhide_att_bottom (false);
 
@@ -484,12 +485,10 @@ TriggerPage::trigger_arm_changed (Trigger const * trigger)
 	TriggerReference ref (trigger->boxptr(), trigger->index());
 
 	if (box.data_type () == DataType::AUDIO) {
-
-		_audio_trig_box.set_trigger (ref);
-		_audio_trig_box.show ();
-
-		// _audio_editor->set_trigger (ref);
-		_audio_editor->viewport().show ();
+		if (trigger->the_region()) {
+			_audio_trig_box.set_trigger (ref);
+			_audio_trig_box.show ();
+		}
 
 	} else {
 
@@ -506,27 +505,17 @@ TriggerPage::trigger_arm_changed (Trigger const * trigger)
 }
 
 void
-TriggerPage::hide_all ()
-{
-	_audio_trig_box.hide ();
-	_audio_editor->viewport().hide ();
-	_audio_trig_box.hide ();
-	_midi_trig_box.hide ();
-}
-
-void
 TriggerPage::selection_changed ()
 {
 	Selection& selection (Editor::instance ().get_selection ());
 
-	hide_all ();
+	/* hide everything */
+
+	_audio_trig_box.hide ();
+	_midi_trig_box.hide ();
 
 	if (_midi_editor->contents().get_parent()) {
 		_midi_editor->contents().get_parent()->remove (_midi_editor->contents());
-	}
-
-	if (_audio_editor->contents().get_parent()) {
-		_audio_editor->contents().get_parent()->remove (_audio_editor->contents());
 	}
 
 	Tabbable::showhide_att_bottom (false);

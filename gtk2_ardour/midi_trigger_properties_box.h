@@ -25,7 +25,7 @@
 #include "ardour/ardour.h"
 #include "ardour/triggerbox.h"
 
-#include "trigger_properties_box.h"
+#include "audio_trigger_properties_box.h"
 
 class MidiTriggerPropertiesBox : public TriggerPropertiesBox
 {

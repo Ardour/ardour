@@ -309,7 +309,7 @@ Trigger::_arm (Temporal::BBT_Offset const & duration)
 
 	/* trigger arming is mutually exclusive within a given TriggerBox */
 
-	_box.disarm_all (true);
+	_box.disarm_all ();
 
 	int chns;
 
@@ -329,17 +329,13 @@ Trigger::_arm (Temporal::BBT_Offset const & duration)
 }
 
 void
-Trigger::disarm (bool disarm_box)
+Trigger::disarm ()
 {
 	if (_armed) {
 		_armed = false;
-		if (disarm_box) {
-			_box.disarm ();
-		}
+		_box.disarm ();
 		ArmChanged(); /* EMIT SIGNAL */
-		if (disarm_box) {
-			TriggerArmChanged (this);
-		}
+		TriggerArmChanged (this);
 	}
 }
 
@@ -1044,7 +1040,7 @@ Trigger::compute_start (Temporal::TempoMap::SharedPtr const & tmap, samplepos_t 
 bool
 Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
                                        Temporal::BBT_Argument& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
-                                       Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Offset const & q, int multiplier)
+                                       Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Offset const & q)
 {
 	/* XXX need to use global grid here is quantization == zero */
 
@@ -1065,9 +1061,7 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 
 	} else if (q.bars == 0) {
 
-		Temporal::Beats qb (q.beats, q.ticks);
-		possible_beats = start_beats.round_up_to_multiple (qb);
-		possible_beats += (qb * multiplier);
+		possible_beats = start_beats.round_up_to_multiple (Temporal::Beats (q.beats, q.ticks));
 		possible_bbt = tmap->bbt_at (possible_beats);
 		possible_samples = tmap->sample_at (possible_beats);
 
@@ -1084,7 +1078,6 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 		if (possible_beats % qb != Temporal::Beats()) {
 			possible_beats = ((tmap->quarters_at (start) + (qb/2)) / qb) * qb;
 		}
-		possible_beats += (qb * multiplier);
 		possible_bbt = tmap->bbt_at (possible_beats);
 		possible_samples = tmap->sample_at (possible_beats);
 
@@ -1109,7 +1102,7 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 pframes_t
 Trigger::compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes,
                                   Temporal::BBT_Argument& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
-                                  Temporal::TempoMap::SharedPtr const & tmap, int multiple)
+                                  Temporal::TempoMap::SharedPtr const & tmap)
 {
 	using namespace Temporal;
 
@@ -1134,7 +1127,7 @@ Trigger::compute_next_transition (samplepos_t start_sample, Temporal::Beats cons
 
 	}
 
-	if (!compute_quantized_transition (start_sample, start, end, t_bbt, t_beats, t_samples, tmap, q, multiple)) {
+	if (!compute_quantized_transition (start_sample, start, end, t_bbt, t_beats, t_samples, tmap, q)) {
 		/* no transition */
 		return 0;
 	}
@@ -2542,16 +2535,16 @@ MIDITrigger::_arm (Temporal::BBT_Offset const & duration)
 }
 
 void
-MIDITrigger::disarm (bool disarm_box)
+MIDITrigger::disarm ()
 {
-	Trigger::disarm (disarm_box);
+	Trigger::disarm ();
 }
 
 void
 MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 {
 	if (ai.midi_buf->size() == 0) {
-		disarm (true);
+		disarm ();
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 captured but with no MIDI data\n", _box.order(), index()));
 		return;
 	}
@@ -2580,7 +2573,7 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 	// std::cerr << "capture done, ask for a source of length " << dur.beats().str() << std::endl;
 	TriggerBox::worker->request_build_source (this, timecnt_t (dur.beats()));
 
-	disarm (true);
+	disarm ();
 }
 
 void
@@ -3700,8 +3693,6 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 {
 	using namespace Temporal;
 
-	std::cerr << "AFAT...\n";
-
 	SlotArmInfo* ai = &_the_arm_info;
 
 	/* Delete any dangling RTMidiBuffer and Stretcher from previous capture
@@ -3729,9 +3720,8 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 	Beats now_beats = tmap->quarters_at (timepos_t (now));
 
 	slot.compute_quantized_transition (now, now_beats, std::numeric_limits<Beats>::max(),
-	                                   t_bbt, t_beats, t_samples, tmap, slot.quantization(), 2);
+	                                   t_bbt, t_beats, t_samples, tmap, slot.quantization());
 
-	std::cerr << " from " << now_beats.str() << " compute start at " << t_beats.str() << std::endl;
 	ai->start_samples = t_samples;
 	ai->start_beats = t_beats;
 
@@ -3748,10 +3738,10 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 }
 
 void
-TriggerBox::disarm_all (bool disarm_box)
+TriggerBox::disarm_all ()
 {
 	for (auto & t : all_triggers) {
-		t->disarm (disarm_box);
+		t->disarm ();
 	}
 }
 
@@ -3760,8 +3750,6 @@ TriggerBox::disarm ()
 {
 	/* This must be called as an alternative to ::finish_recording() */
 
-	std::cerr << "disarmed\n";
-	PBD::stacktrace (std::cerr, 17);
 	_arm_info = nullptr;
 }
 
@@ -3780,7 +3768,6 @@ TriggerBox::finish_recording (BufferSet& bufs)
 	/* XXX this should likely be dependent on what the post-record action is */
 
 	_record_state = Disabled;
-	std::cerr << "all done!\n";
 	RecEnableChanged (); /* EMIT SIGNAL */
 }
 
@@ -3792,7 +3779,6 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 	SlotArmInfo* ai = _arm_info.load();
 
 	if (!ai) {
-		std::cerr << "no AI\n";
 		return;
 	}
 
@@ -3800,7 +3786,6 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 	bool reached_end = false;
 
 	if (!ai->slot->armed()) {
-		std::cerr << "not armed!\n";
 		/* since _arm_info is set, we have been capturing for a slot,
 		   but now the slot is no longer armed.
 		*/
@@ -3820,13 +3805,10 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 			Beats now_beats = tmap->quarters_at (timepos_t (start_sample));
 
 			ai->slot->compute_quantized_transition (start_sample, now_beats, std::numeric_limits<Beats>::max(),
-			                                        t_bbt, t_beats, t_samples, tmap, ai->slot->quantization());
+			                                       t_bbt, t_beats, t_samples, tmap, ai->slot->quantization());
 			ai->end_samples = t_samples;
 			ai->end_beats = t_beats;
-			std::cerr << "will stop at " << t_beats.str() << std::endl;
 		}
-	} else {
-		std::cerr << "still armed\n";
 	}
 
 	if (speed <= 0.) {
@@ -3834,7 +3816,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 			/* We stopped the transport, so just stop immediately (no quantization) */
 			finish_recording (bufs);
 		}
-	/* we stopped or reversed, but were not recording. Nothing to do here */
+		/* we stopped or reversed, but were not recording. Nothing to do here */
 		return;
 	}
 
@@ -3942,7 +3924,9 @@ TriggerBox::set_record_enabled (bool yn)
 	_record_state = yn ? Enabled : Disabled;
 
 	if (_record_state == Disabled) {
-		disarm_all (false);
+		for (auto & trig : all_triggers) {
+			trig->disarm ();
+		}
 	}
 
 	RecEnableChanged (); /* EMIT SIGNAL */
@@ -5974,11 +5958,10 @@ TriggerBox::start_time (bool& is_set) const
 {
 	SlotArmInfo* ai = _arm_info.load ();
 	if (!ai) {
-		std::cerr << "no slot\n";
 		is_set = false;
 		return Temporal::Beats();
 	}
-	std::cerr << "have slot\n";
+
 	is_set = true;
 	return ai->start_beats;
 }
