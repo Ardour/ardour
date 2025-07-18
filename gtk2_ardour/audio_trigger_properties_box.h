@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _gtk_ardour_audio_trigger_properties_box_h_
-#define _gtk_ardour_audio_trigger_properties_box_h_
+#pragma once
 
 #include <ytkmm/box.h>
 #include <ytkmm/label.h>
@@ -34,18 +33,7 @@
 
 #include "audio_clock.h"
 #include "trigger_ui.h"
-
-class TriggerPropertiesBox : public Gtk::Table, public ARDOUR::SessionHandlePtr, public TriggerUI
-{
-public:
-	TriggerPropertiesBox () {}
-	~TriggerPropertiesBox () {}
-
-protected:
-	Gtk::Label _header_label;
-
-	PBD::ScopedConnection _state_connection;
-};
+#include "trigger_properties_box.h"
 
 class AudioTriggerPropertiesBox : public TriggerPropertiesBox
 {
@@ -72,8 +60,6 @@ private:
 
 	void MultiplyTempo(float mult);
 
-	Gtk::Table _table;
-
 	AudioClock _length_clock;
 	AudioClock _start_clock;
 
@@ -98,5 +84,3 @@ private:
 
 	bool _ignore_changes;
 };
-
-#endif

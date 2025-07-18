@@ -287,8 +287,6 @@ public:
 	/** @return true if the playhead is currently being dragged, otherwise false */
 	virtual bool dragging_playhead () const = 0;
 	virtual samplepos_t leftmost_sample() const = 0;
-	virtual samplecnt_t current_page_samples() const = 0;
-	virtual double visible_canvas_height () const = 0;
 	virtual void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top = false) = 0;
 	virtual void override_visible_track_count () = 0;
 	virtual void scroll_tracks_down_line () = 0;

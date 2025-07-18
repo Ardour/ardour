@@ -300,7 +300,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void arm (Temporal::BBT_Offset duration = Temporal::BBT_Offset()) {
 		_arm (duration);
 	}
-	virtual void disarm ();
+	virtual void disarm (bool disarm_box = true);
 	bool armed() const { return _armed; }
 	PBD::Signal<void()> ArmChanged;
 	static PBD::Signal<void(Trigger const *)> TriggerArmChanged;
@@ -353,11 +353,11 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	bool compute_quantized_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end,
 	                                   Temporal::BBT_Argument& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
-	                                   Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Offset const & q);
+	                                   Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Offset const & q, int multiple = 0);
 
 	pframes_t compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes,
 	                                   Temporal::BBT_Argument& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
-	                                   Temporal::TempoMap::SharedPtr const & tmap);
+	                                   Temporal::TempoMap::SharedPtr const & tmap, int multiple = 0);
 
 
 	template<typename TriggerType>
@@ -616,7 +616,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	bool playable() const { return rt_midibuffer.load() || _region; }
 
 	void captured (SlotArmInfo&, BufferSet&);
-	void disarm ();
+	void disarm (bool disarm_box);
 
 	template<bool actually_run> pframes_t midi_run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample,
 	                                                Temporal::Beats const & start_beats, Temporal::Beats const & end_beats, pframes_t nframes, pframes_t offset, double bpm, pframes_t& quantize_offset);
@@ -848,8 +848,8 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	static PBD::Signal<void()> TriggerRecEnableChanged;
 
 	void arm_from_another_thread (Trigger& slot, samplepos_t, uint32_t chans, Temporal::BBT_Offset const &);
-	void disarm();
-	void disarm_all();
+	void disarm ();
+	void disarm_all(bool disarm_box);
 	bool armed() const { return (bool) _arm_info.load(); }
 	PBD::Signal<void()> ArmedChanged;
 

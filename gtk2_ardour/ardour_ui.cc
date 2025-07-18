@@ -1852,17 +1852,6 @@ ARDOUR_UI::get_smart_mode() const
 void
 ARDOUR_UI::spacebar_action (bool with_abort, bool roll_out_of_bounded_mode)
 {
-	if (!_session) {
-		return;
-	}
-
-	std::shared_ptr<TriggerBox> armed_tb = _session->armed_triggerbox();
-
-	if (armed_tb && _session->transport_rolling()) {
-		armed_tb->disarm_all ();
-		return;
-	}
-
 	toggle_roll (with_abort, roll_out_of_bounded_mode);
 }
 
@@ -1892,7 +1881,10 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 
 	if (rolling) {
 
+		std::cerr << "TR rolling\n";
+
 		if (roll_out_of_bounded_mode) {
+			std::cerr << "roobm\n";
 			/* drop out of loop/range playback but leave transport rolling */
 
 			if (_session->get_play_loop()) {
@@ -1914,6 +1906,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 			}
 
 		} else {
+			std::cerr << "stip\n";
 			_session->request_stop (with_abort, true);
 		}
 

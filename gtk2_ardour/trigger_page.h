@@ -30,6 +30,7 @@
 #include "widgets/tabbable.h"
 
 #include "application_bar.h"
+#include "audio_clip_editor.h"
 #include "audio_region_operations_box.h"
 #include "audio_trigger_properties_box.h"
 #include "axis_provider.h"
@@ -76,7 +77,7 @@ private:
 	void remove_route (TriggerStrip*);
 
 	void clear_selected_slot ();
-
+	void hide_all ();
 	void redisplay_track_list ();
 	void pi_property_changed (PBD::PropertyChange const&);
 	void stripable_property_changed (PBD::PropertyChange const&, std::weak_ptr<ARDOUR::Stripable>);
@@ -140,10 +141,10 @@ private:
 
 #if REGION_PROPERTIES_BOX_TODO
 	AudioRegionOperationsBox  _audio_ops_box;
-	AudioClipEditorBox        _audio_trim_box;
 #endif
 
 	Pianoroll*           _midi_editor;
+	AudioClipEditor*     _audio_editor;
 
 	RouteProcessorSelection  _selection;
 	std::list<TriggerStrip*> _strips;

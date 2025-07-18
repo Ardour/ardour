@@ -20,14 +20,24 @@
 
 #include "pbd/history_owner.h"
 
+#include "widgets/ardour_button.h"
+#include "widgets/eventboxext.h"
+
 #include "editing.h"
 #include "editing_context.h"
+
+namespace Gtk {
+	class HScrollbar;
+}
 
 class CueEditor : public EditingContext, public PBD::HistoryOwner
 {
   public:
-	CueEditor (std::string const & name);
+	CueEditor (std::string const & name, bool with_transport_controls);
 	~CueEditor ();
+
+	virtual Gtk::Widget& viewport() = 0;
+	virtual Gtk::Widget& contents () = 0;
 
 	void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const;
 	StripableTimeAxisView* get_stripable_time_axis_by_id (const PBD::ID& id) const;
@@ -46,6 +56,7 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 
 	void redisplay_grid (bool immediate_redraw);
 	Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) const;
+	std::list<SelectableOwner*> selectable_owners() { return std::list<SelectableOwner*>(); }
 
 	void instant_save();
 
@@ -97,10 +108,89 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	std::shared_ptr<Temporal::TempoMap const> start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>);
 	void end_local_tempo_map (std::shared_ptr<Temporal::TempoMap const>);
 
+	void scrolled ();
+	bool canvas_pre_event (GdkEvent*);
+	void catch_pending_show_region ();
+
   protected:
+	ARDOUR::TriggerReference ref;
+	std::shared_ptr<ARDOUR::MidiTrack> _track;
+	bool with_transport_controls;
+	ArdourWidgets::EventBoxExt _contents;
+	Gtk::VBox                  _toolbox;
+	Gtk::HBox                   button_bar;
+	Gtk::HScrollbar*           _canvas_hscrollbar;
+
+	/* The group containing all other groups that are scrolled vertically
+	   and horizontally.
+	*/
+	ArdourCanvas::ScrollGroup* hv_scroll_group;
+
+	/* The group containing all other groups that are scrolled horizontally ONLY
+	*/
+	ArdourCanvas::ScrollGroup* h_scroll_group;
+	ArdourCanvas::ScrollGroup* v_scroll_group;
+
+	/* Scroll group for cursors, scrolled horizontally, above everything else
+	*/
+	ArdourCanvas::ScrollGroup* cursor_scroll_group;
+
+	ArdourCanvas::Container* global_rect_group;
+	ArdourCanvas::Container* no_scroll_group;
+	ArdourCanvas::Container* data_group;
+
+	Gtk::Label length_label;
+	Gtk::HBox   rec_box;
+	Gtk::HBox   play_box;
+
+	virtual void pack_inner (Gtk::Box&) = 0;
+	virtual void pack_outer (Gtk::Box&) = 0;
+	void build_zoom_focus_menu ();
+
+	virtual void update_rulers() {}
+	virtual bool canvas_enter_leave (GdkEventCrossing* ev) = 0;
+
+	void build_upper_toolbar ();
 	void do_undo (uint32_t n);
 	void do_redo (uint32_t n);
 
 	Temporal::timepos_t _get_preferred_edit_position (Editing::EditIgnoreOption, bool use_context_click, bool from_outside_canvas);
-};
 
+	ArdourWidgets::ArdourButton rec_enable_button;
+	ArdourWidgets::ArdourButton play_button;
+	ArdourWidgets::ArdourButton solo_button;
+	ArdourWidgets::ArdourButton loop_button;
+
+	ArdourCanvas::Rectangle* transport_loop_range_rect;
+
+	bool play_button_press (GdkEventButton*);
+	bool solo_button_press (GdkEventButton*);
+	bool bang_button_press (GdkEventButton*);
+	bool loop_button_press (GdkEventButton*);
+
+	ArdourWidgets::ArdourDropdown length_selector;
+	Temporal::BBT_Offset rec_length;
+
+	bool zoom_in_allocate;
+
+	void set_recording_length (Temporal::BBT_Offset bars);
+	virtual void set_region (std::shared_ptr<ARDOUR::Region>) = 0;
+
+	bool rec_button_press (GdkEventButton*);
+	void rec_enable_change ();
+	void blink_rec_enable (bool);
+	sigc::connection rec_blink_connection;
+
+	void trigger_arm_change ();
+
+	double timebar_height;
+	size_t n_timebars;
+
+	/* autoscrolling */
+
+	bool autoscroll_canvas ();
+	void start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary);
+	void visual_changer (const VisualChange&);
+
+	std::shared_ptr<ARDOUR::Region> _visible_pending_region;
+};

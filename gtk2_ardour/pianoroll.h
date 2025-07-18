@@ -63,7 +63,6 @@ class Pianoroll : public CueEditor
 	Gtk::Widget& viewport();
 	Gtk::Widget& contents ();
 
-	double visible_canvas_width() const { return _visible_canvas_width; }
 	samplecnt_t current_page_samples() const;
 
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const {}
@@ -84,6 +83,7 @@ class Pianoroll : public CueEditor
 
 	void set_trigger (ARDOUR::TriggerReference&);
 	void set_region (std::shared_ptr<ARDOUR::MidiRegion>);
+	void set_region (std::shared_ptr<ARDOUR::Region> r);
 	void set_track (std::shared_ptr<ARDOUR::MidiTrack>);
 
 	ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
@@ -97,19 +97,11 @@ class Pianoroll : public CueEditor
 	Editing::MouseMode current_mouse_mode () const;
 	bool internal_editing() const;
 
-	void trigger_arm_change ();
-
-	double timebar_height;
-	size_t n_timebars;
-
 	ArdourCanvas::GtkCanvasViewport* get_canvas_viewport() const;
 	ArdourCanvas::GtkCanvas* get_canvas() const;
 
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state () const;
-
-	void maybe_autoscroll (bool, bool, bool);
-	bool autoscroll_active() const;
 
 	void midi_action (void (MidiView::*method)());
 
@@ -183,41 +175,14 @@ class Pianoroll : public CueEditor
 	void escape ();
 
  private:
-	ARDOUR::TriggerReference ref;
-	std::shared_ptr<ARDOUR::MidiTrack> _track;
 	ArdourCanvas::GtkCanvasViewport* _canvas_viewport;
 	ArdourCanvas::GtkCanvas* _canvas;
 
-	Gtk::HScrollbar* _canvas_hscrollbar;
-
-	/* The group containing all other groups that are scrolled vertically
-	   and horizontally.
-	*/
-	ArdourCanvas::ScrollGroup* hv_scroll_group;
-
-	/* The group containing all other groups that are scrolled horizontally ONLY
-	*/
-	ArdourCanvas::ScrollGroup* h_scroll_group;
-	ArdourCanvas::ScrollGroup* v_scroll_group;
-
-	/* Scroll group for cursors, scrolled horizontally, above everything else
-	*/
-	ArdourCanvas::ScrollGroup* cursor_scroll_group;
-
-	ArdourCanvas::Container* global_rect_group;
-	ArdourCanvas::Container* no_scroll_group;
-	ArdourCanvas::Container* data_group;
 	ArdourCanvas::Ruler*     bbt_ruler;
 	ArdourCanvas::Rectangle* tempo_bar;
 	ArdourCanvas::Rectangle* meter_bar;
 	ArdourCanvas::PianoRollHeader* prh;
 
-	ArdourCanvas::Rectangle* transport_loop_range_rect;
-
-	ArdourWidgets::EventBoxExt _contents;
-	Gtk::VBox     _toolbox;
-
-	Gtk::HBox                    button_bar;
 	ArdourWidgets::ArdourButton* velocity_button;
 	ArdourWidgets::ArdourButton* bender_button;
 	ArdourWidgets::ArdourButton* pressure_button;
@@ -260,14 +225,6 @@ class Pianoroll : public CueEditor
 
 	BBTMetric bbt_metric;
 
-	bool canvas_pre_event (GdkEvent*);
-
-	/* autoscrolling */
-
-	bool autoscroll_canvas ();
-	void start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary);
-	void stop_canvas_autoscroll ();
-
 	sigc::connection _update_connection;
 	PBD::ScopedConnectionList object_connections;
 	PBD::ScopedConnectionList view_connections;
@@ -277,7 +234,6 @@ class Pianoroll : public CueEditor
 
 	void unset (bool trigger_too);
 
-	void visual_changer (const VisualChange&);
 	void bindings_changed ();
 
 	void data_captured (samplecnt_t);
@@ -299,36 +255,9 @@ class Pianoroll : public CueEditor
 
 	void automation_state_changed ();
 
-	void build_zoom_focus_menu ();
-
 	std::pair<Temporal::timepos_t,Temporal::timepos_t> max_zoom_extent() const;
 
 	void point_selection_changed ();
-
-	bool zoom_in_allocate;
-
-	ArdourWidgets::ArdourButton rec_enable_button;
-	ArdourWidgets::ArdourButton play_button;
-	ArdourWidgets::ArdourButton solo_button;
-	ArdourWidgets::ArdourButton loop_button;
-
-	bool play_button_press (GdkEventButton*);
-	bool bang_button_press (GdkEventButton*);
-	bool solo_button_press (GdkEventButton*);
-	bool loop_button_press (GdkEventButton*);
-
-	ArdourWidgets::ArdourDropdown length_selector;
-	Temporal::BBT_Offset rec_length;
-	Gtk::Label length_label;
-	Gtk::HBox   rec_box;
-	Gtk::HBox   play_box;
-
-	void set_recording_length (Temporal::BBT_Offset bars);
-
-	bool rec_button_press (GdkEventButton*);
-	void rec_enable_change ();
-	void blink_rec_enable (bool);
-	sigc::connection rec_blink_connection;
 
 	void add_single_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name, ArdourWidgets::MetaButton*);
 	void add_multi_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, uint16_t channels, int ctl, const std::string& name, ArdourWidgets::MetaButton*);
@@ -349,18 +278,18 @@ class Pianoroll : public CueEditor
 
 	bool bbt_ruler_event (GdkEvent*);
 	void ruler_locate (GdkEventButton*);
-	void scrolled ();
 	void update_tempo_based_rulers ();
+	void update_rulers() { update_tempo_based_rulers (); }
 
 	Gtk::Menu _region_context_menu;
 	void popup_region_context_menu (ArdourCanvas::Item* item, GdkEvent* event);
-
-	std::shared_ptr<ARDOUR::MidiRegion> _visible_pending_region;
-	void catch_pending_show_region ();
 
 	bool show_source;
 	void set_note_selection (uint8_t note);
 	void add_note_selection (uint8_t note);
 	void extend_note_selection (uint8_t note);
 	void toggle_note_selection (uint8_t note);
+
+	void pack_inner (Gtk::Box&);
+	void pack_outer (Gtk::Box&);
 };

@@ -909,6 +909,19 @@ Session::request_stop (bool abort, bool clear_state, TransportRequestSource orig
 		return;
 	}
 
+	std::shared_ptr<RouteList const> rl (routes.reader());
+	for (auto & r : *rl) {
+		std::shared_ptr<TriggerBox> tb = r->triggerbox();
+		bool was_clip_recording = false;
+		if (tb && tb->record_enabled() == Recording) {
+			tb->disarm_all (false);
+			was_clip_recording = true;
+		}
+		if (was_clip_recording) {
+			return;
+		}
+	}
+
 	/* clear our solo-selection, if there is one */
 	if ( solo_selection_active() ) {
 		solo_selection ( _soloSelection, false );

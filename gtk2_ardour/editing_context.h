@@ -258,6 +258,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	double timeline_to_canvas (double p) const { return p + _timeline_origin; }
 	double canvas_to_timeline (double p) const { return p - _timeline_origin; }
 
+	double visible_canvas_width () const { return _visible_canvas_width; }
+	double visible_canvas_height () const { return _visible_canvas_height; }
+
 	/** computes the timeline position for an event whose coordinates
 	 * are in canvas units (pixels, scroll offset included). The time
 	 * domain used by the return value will match ::default_time_domain()
@@ -633,7 +636,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	                               bool                 ensure_snap = false) const = 0;
 
 	void check_best_snap (Temporal::timepos_t const & presnap, Temporal::timepos_t &test, Temporal::timepos_t &dist, Temporal::timepos_t &best) const;
-	virtual double visible_canvas_width() const = 0;
 
 	enum BBTRulerScale {
 		bbt_show_many,

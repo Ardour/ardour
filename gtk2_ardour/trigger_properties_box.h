@@ -17,29 +17,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _gtk_ardour_midi_trigger_properties_box_h_
-#define _gtk_ardour_midi_trigger_properties_box_h_
+#pragma once
 
 #include <ytkmm/label.h>
+#include <ytkmm/table.h>
 
-#include "ardour/ardour.h"
-#include "ardour/triggerbox.h"
+#include "pbd/signals.h"
 
-#include "trigger_properties_box.h"
+#include "ardour/session_handle.h"
 
-class MidiTriggerPropertiesBox : public TriggerPropertiesBox
+#include "trigger_ui.h"
+
+class TriggerPropertiesBox : public Gtk::Table, public ARDOUR::SessionHandlePtr, public TriggerUI
 {
 public:
-	MidiTriggerPropertiesBox ();
-	~MidiTriggerPropertiesBox ();
+	TriggerPropertiesBox () {}
+	~TriggerPropertiesBox () {}
 
 protected:
-	virtual void on_trigger_changed (const PBD::PropertyChange& what_changed);
+	Gtk::Label _header_label;
 
-private:
-	ArdourWidgets::ArdourButton _patch_enable_button;
-	ArdourWidgets::ArdourButton _cc_enable_button;
-
+	PBD::ScopedConnection _state_connection;
 };
 
-#endif

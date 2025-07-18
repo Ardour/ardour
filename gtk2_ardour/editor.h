@@ -177,9 +177,6 @@ public:
 		return (samplecnt_t) _visible_canvas_width* samples_per_pixel;
 	}
 
-	double visible_canvas_height () const {
-		return _visible_canvas_height;
-	}
 	double trackviews_height () const;
 
 	XMLNode& get_state () const;
@@ -2124,8 +2121,6 @@ private:
 
 	Temporal::timepos_t snap_to_marker (Temporal::timepos_t const & presnap,
 	                                    Temporal::RoundMode direction = Temporal::RoundNearest) const;
-
-	double visible_canvas_width() const { return _visible_canvas_width; }
 
 	RhythmFerret* rhythm_ferret;
 
