@@ -807,13 +807,13 @@ SessionDialog::setup_new_session_page ()
 
 		template_desc_frame.set_name (X_("TextHighlightFrame"));
 		template_desc_frame.add (*desc_scroller);
-		template_hbox->pack_start (template_desc_frame, true, true);
+		template_hbox->pack_start (template_desc_frame, false, false);
 	}
 
 	//template_desc is the textview that displays the currently selected template's description
 	template_desc.set_editable (false);
 	template_desc.set_wrap_mode (Gtk::WRAP_WORD);
-	template_desc.set_size_request (300,300);
+	template_desc.set_size_request (200,300);
 	template_desc.set_name (X_("TextOnBackground"));
 	template_desc.set_border_width (6);
 
