@@ -943,7 +943,7 @@ Console1::map_eq_mode (){
 void
 Console1::map_eq_band_q (const uint32_t band)
 {
-    DEBUG_TRACE (DEBUG::Console1, string_compose( "map_eq_band_q band: %1 \n", band));
+	DEBUG_TRACE (DEBUG::Console1, string_compose( "map_eq_band_q band: %1 \n", band));
 	if (shift_state || switch_eq_q_dials) {
 		DEBUG_TRACE (DEBUG::Console1, "Exit map_eq_band_q 1\n");
 		return;
@@ -952,9 +952,8 @@ Console1::map_eq_band_q (const uint32_t band)
 	if (map_encoder (controllerID)) {
 		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (EQ_BandQ, band);
 		map_encoder (controllerID, control);
-    }
+	}
 }
-
 
 void
 Console1::map_eq_freq (const uint32_t band)
@@ -1198,7 +1197,6 @@ Console1::map_encoder (ControllerID controllerID)
 void
 Console1::map_encoder (ControllerID controllerID, std::shared_ptr<ARDOUR::AutomationControl> control)
 {
-
 	if (!_current_stripable) {
 		try {
 			get_encoder (controllerID)->set_value (0);
