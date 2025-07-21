@@ -893,48 +893,47 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 
 	++render_depth;
 
-	for (std::vector<Item*>::const_iterator i = items.begin(); i != items.end(); ++i) {
+	for (auto const & item : items) {
 
-		if (!(*i)->visible ()) {
+		if (!item->visible ()) {
 #ifdef CANVAS_DEBUG
 			if (_canvas->debug_render() || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-				cerr << _canvas->render_indent() << "Item " << (*i)->whoami() << " invisible - skipped\n";
+				cerr << _canvas->render_indent() << "Item " << item->whoami() << " invisible - skipped\n";
 			}
 #endif
 			continue;
 		}
 
-		Rect item_bbox = (*i)->bounding_box ();
+		Rect item_bbox = item->bounding_box ();
 
 		if (!item_bbox) {
 #ifdef CANVAS_DEBUG
 			if (_canvas->debug_render() || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-				cerr << _canvas->render_indent() << "Item " << (*i)->whoami() << " empty - skipped\n";
+				cerr << _canvas->render_indent() << "Item " << item->whoami() << " empty - skipped\n";
 			}
 #endif
 			continue;
 		}
 
-		Rect item = (*i)->item_to_window (item_bbox, false);
-		Rect d = item.intersection (area);
+		Rect window_bbox = item->item_to_window (item_bbox, false);
+		Rect d = window_bbox.intersection (area);
 
 		if (d) {
-			Rect draw = d;
-			if (draw.width() && draw.height()) {
+			if (d.width() && d.height()) {
 #ifdef CANVAS_DEBUG
 				if (_canvas->debug_render() || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-					if (dynamic_cast<Container*>(*i) == 0) {
+					if (!dynamic_cast<Container*> (item)) {
 						cerr << _canvas->render_indent() << "render "
 						     << ' '
-						     << (*i)
+						     << area
 						     << ' '
-						     << (*i)->whoami()
+						     << item->whoami()
 						     << " item "
 						     << item_bbox
 						     << " window = "
-						     << item
+						     << window_bbox
 						     << " intersect = "
-						     << draw
+						     << d
 						     << " @ "
 						     << _position
 						     << endl;
@@ -944,7 +943,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 				if (_canvas->item_save_restore) {
 					context->save();
 				}
-				(*i)->render (area, context);
+				item->render (area, context);
 				if (_canvas->item_save_restore) {
 					context->restore();
 				}
@@ -955,7 +954,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 
 #ifdef CANVAS_DEBUG
 			if (_canvas->debug_render() || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-				cerr << string_compose ("%1skip render of %2, no intersection between %3 and %4\n", _canvas->render_indent(), (*i)->whoami(), item, area);
+				cerr << string_compose ("%1skip render of %2, no intersection between %3 and %4\n", _canvas->render_indent(), item->whoami(), item, area);
 			}
 #endif
 
