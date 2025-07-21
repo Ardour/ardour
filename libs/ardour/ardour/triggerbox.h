@@ -1112,6 +1112,10 @@ class TriggerReference
 	uint32_t slot() const { return _slot; }
 	std::shared_ptr<ARDOUR::TriggerBox> box() const { return weak_box.lock(); }
 
+	bool operator== (TriggerReference const & other) {
+		return _slot == other._slot && box() == other.box();
+	}
+
  private:
 	std::weak_ptr<ARDOUR::TriggerBox> weak_box;
 	uint32_t              _slot;
