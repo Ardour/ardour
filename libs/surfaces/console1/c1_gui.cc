@@ -198,10 +198,10 @@ void
 C1GUI::set_band_q_as_send ()
 {
 	c1.band_q_as_send = !c1.band_q_as_send;
-	if(!c1.in_use()) {
+	if (!c1.in_use()) {
 		return;
 	}
-	c1.EQBandQBindingChange();
+	c1.EQBandQBindingChange (false);
 }
 
 void

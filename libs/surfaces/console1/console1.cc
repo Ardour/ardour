@@ -257,7 +257,7 @@ Console1::connect_internal_signals ()
 	DEBUG_TRACE (DEBUG::Console1, "connect_internal_signals\n");
 	BankChange.connect (console1_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_bank, this), this);
 	ShiftChange.connect (console1_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_shift, this, _1), this);
-	EQBandQBindingChange.connect (console1_connections, MISSING_INVALIDATOR, std::bind(&Console1::eqBandQChangeMapping, this), this);
+	EQBandQBindingChange.connect (console1_connections, MISSING_INVALIDATOR, std::bind(&Console1::eqBandQChangeMapping, this, _1), this);
 	PluginStateChange.connect(console1_connections, MISSING_INVALIDATOR, std::bind(&Console1::map_plugin_state, this, _1), this);
 	GotoView.connect (
 			console1_connections,
