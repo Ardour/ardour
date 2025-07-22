@@ -19,10 +19,10 @@
 #include "c1_gui.h"
 
 #include <ytkmm/alignment.h>
+#include <ytkmm/combobox.h>
 #include <ytkmm/label.h>
 #include <ytkmm/liststore.h>
 
-#include <gtkmm/alignment.h>
 #include "pbd/file_utils.h"
 #include "pbd/i18n.h"
 #include "pbd/strsplit.h"

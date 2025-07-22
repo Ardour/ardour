@@ -23,11 +23,13 @@
 #include <string>   
 
 #include <ytkmm/box.h>
-#include <ytkmm/combobox.h>
 #include <ytkmm/checkbutton.h>
+#include <ytkmm/combobox.h>
+#include <ytkmm/cellrenderercombo.h>
 #include <ytkmm/image.h>
 #include <ytkmm/table.h>
 #include <ytkmm/treestore.h>
+#include <ytkmm/scrolledwindow.h>
 #include <ytkmm/spinbutton.h>
 #include <ytkmm/notebook.h>
 #include <gtkmm/box.h>
@@ -41,8 +43,7 @@
 #include <gtkmm/spinbutton.h>
 
 namespace Gtk {
-	class CellRendererCombo;
-	class ListStore;
+    class ListStore;
 }
 
 namespace ActionManager {

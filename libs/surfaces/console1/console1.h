@@ -23,14 +23,15 @@
 #include <map>
 #include <set>
 
-#include <gtkmm/treemodel.h>
-#include <gtkmm/liststore.h>
+#include <ytkmm/treemodel.h>
+#include <ytkmm/liststore.h>
 
 #include <glibmm/threads.h>
 
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
 
+#include "ardour/parameter_descriptor.h"
 #include "ardour/presentation_info.h"
 
 #include "control_protocol/control_protocol.h"
@@ -654,11 +655,34 @@ public:
 	/* plugin handling */
 	bool ensure_config_dir ();
 	bool load_mapping (XMLNode* fin);
-	void create_mapping (const std::shared_ptr<ARDOUR::Processor> proc, const std::shared_ptr<ARDOUR::Plugin> plugin);
+    
+    /**
+     * @brief Creates mapping stubs for a given plugin processor.
+     *
+     * This function sets up the necessary mapping stubs to associate the specified
+     * plugin with its processor, enabling control surface integration or automation.
+     *
+     * @param proc   Shared pointer to the ARDOUR::Processor instance to be mapped.
+     * @param plugin Shared pointer to the ARDOUR::Plugin instance for which mapping stubs are created.
+     */
+	void create_plugin_mapping_stubs (const std::shared_ptr<ARDOUR::Processor> proc, const std::shared_ptr<ARDOUR::Plugin> plugin);
 
 	bool spill_plugins (const int32_t plugin_index);
+    bool setup_plugin_mute_button (const std::shared_ptr<ARDOUR::PluginInsert> &plugin_insert);
+    
+    bool setup_plugin_encoder (const PluginParameterMapping &ppm, int32_t n_controls,
+                               const ARDOUR::ParameterDescriptor &parameterDescriptor,
+                               const std::shared_ptr<ARDOUR::AutomationControl> &c);
+    
+    bool setup_plugin_button (const PluginParameterMapping &ppm, int32_t n_controls,
+                              const ARDOUR::ParameterDescriptor &parameterDescriptor,
+                              const std::shared_ptr<ARDOUR::AutomationControl> &c);
 
-	/* plugin operations */
+    bool handle_plugin_parameter (const PluginParameterMapping &ppm, int32_t n_controls,
+                                  const ARDOUR::ParameterDescriptor &parameterDescriptor,
+                                  const std::shared_ptr<ARDOUR::AutomationControl> &c);
+
+    /* plugin operations */
 	void remove_plugin_operations ();
 	std::shared_ptr<ARDOUR::Processor> find_plugin (const int32_t plugin_index);
 	bool select_plugin (const int32_t plugin_index);

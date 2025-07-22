@@ -153,8 +153,9 @@ Console1::load_mapping (XMLNode* mapping_xml)
 }
 
 void
-Console1::create_mapping (const std::shared_ptr<Processor> proc, const std::shared_ptr<Plugin> plugin)
+Console1::create_plugin_mapping_stubs (const std::shared_ptr<Processor> proc, const std::shared_ptr<Plugin> plugin)
 {
+    DEBUG_TRACE (DEBUG::Console1, "create_plugin_mapping_stubs \n");
 	XMLTree* tree = new XMLTree ();
 	XMLNode node = XMLNode ("c1plugin-mapping");
 	node.set_property ("ID", plugin->unique_id ());
@@ -165,7 +166,7 @@ Console1::create_mapping (const std::shared_ptr<Processor> proc, const std::shar
 	for (set<Evoral::Parameter>::iterator j = p.begin (); j != p.end (); ++j) {
 		++n_controls;
 		std::string n = proc->describe_parameter (*j);
-		DEBUG_TRACE (DEBUG::Console1, string_compose ("Plugin parameter %1: %2\n", n_controls, n));
+		DEBUG_TRACE (DEBUG::Console1, string_compose ("create_plugin_mapping_stubs: Plugin parameter %1: %2\n", n_controls, n));
 		if (n == "hidden") {
 			continue;
 		}
@@ -203,7 +204,7 @@ Console1::write_plugin_mapping (PluginMapping &mapping)
 	node.set_property ("NAME", mapping.name);
 
 	for (const auto& plugin_param : mapping.parameters ) {
-		DEBUG_TRACE (DEBUG::Console1, string_compose ("Plugin parameter %1: %2\n",plugin_param.first ,plugin_param.second.name));
+		DEBUG_TRACE (DEBUG::Console1, string_compose ("write_plugin_mapping: Plugin parameter %1: %2\n",plugin_param.first ,plugin_param.second.name));
 		XMLNode param = XMLNode ("param-mapping");
 		param.set_property ("id", plugin_param.second.paramIndex);
 		XMLNode name = XMLNode ("name");
@@ -350,147 +351,204 @@ Console1::find_plugin (const int32_t plugin_index)
 }
 
 bool
+Console1::setup_plugin_mute_button(const std::shared_ptr<PluginInsert>& plugin_insert)
+{
+    int32_t n_controls = -1;
+    try {
+        ControllerButton* cb = get_button (ControllerID::MUTE);
+        std::function<void ()> plugin_mapping = [=] () -> void { cb->set_led_state (!plugin_insert->enabled ()); };
+        cb->set_plugin_action ([=] (uint32_t val) {
+            plugin_insert->enable (val == 0);
+            DEBUG_TRACE (DEBUG::Console1,
+                         string_compose ("ControllerButton Plugin parameter %1: %2 \n", n_controls, val));
+        });
+
+        plugin_insert->ActiveChanged.connect (
+          plugin_connections, MISSING_INVALIDATOR, std::bind (plugin_mapping), this);
+        plugin_insert->ActiveChanged ();
+        return true;
+    } catch (ControlNotFoundException const&) {
+        DEBUG_TRACE (DEBUG::Console1, string_compose ("No ControllerButton found %1\n", n_controls));
+        return false;
+    }
+}
+
+bool
+Console1::setup_plugin_encoder(const PluginParameterMapping& ppm, int32_t n_controls,
+                              const ParameterDescriptor& parameterDescriptor,
+                              const std::shared_ptr<AutomationControl>& c)
+{
+    try {
+        Encoder* e = get_encoder (ppm.controllerId);
+        std::function<void(bool b, PBD::Controllable::GroupControlDisposition d)> plugin_mapping =
+            [=](bool b, PBD::Controllable::GroupControlDisposition d) -> void {
+            double origin = c->get_value();
+            double v = parameterDescriptor.to_interface(origin, true);
+            e->set_value (v * 127);
+            DEBUG_TRACE (
+              DEBUG::Console1,
+              string_compose ("to: <-Encoder Plugin parameter %1: origin %2 translated %3 - %4\n", n_controls, origin,  v , v * 127));
+        };
+        if( !ppm.shift )
+            e->set_plugin_action ([=] (uint32_t val) {
+                double v = val / 127.f;
+                double translated = parameterDescriptor.from_interface(v, true);
+                c->set_value( translated,
+                            PBD::Controllable::GroupControlDisposition::UseGroup);
+                DEBUG_TRACE (
+                DEBUG::Console1,
+                string_compose ("from: ->Encoder Plugin parameter %1: origin %2 calculated %3 translated %4\n", n_controls, val, v, translated ));
+            });
+        else 
+            e->set_plugin_shift_action ([=] (uint32_t val) {
+                double v = val / 127.f;
+                double translated = parameterDescriptor.from_interface(v, true);
+                c->set_value( translated,
+                            PBD::Controllable::GroupControlDisposition::UseGroup);
+                DEBUG_TRACE (
+                DEBUG::Console1,
+                string_compose ("from: ->Encoder Plugin shift-parameter %1: origin %2 calculated %3 translated %4\n", n_controls, val, v, translated ));
+            });
+        c->Changed.connect (
+        plugin_connections, MISSING_INVALIDATOR, std::bind (plugin_mapping, _1, _2), this);
+        c->Changed (true, PBD::Controllable::GroupControlDisposition::UseGroup);
+        return true;
+    } catch (ControlNotFoundException const&) {
+        DEBUG_TRACE (DEBUG::Console1, string_compose ("No Encoder found %1\n", n_controls));
+        return false;
+    }
+}
+
+bool
+Console1::setup_plugin_button(const PluginParameterMapping& ppm, int32_t n_controls,
+                             const ParameterDescriptor& parameterDescriptor,
+                             const std::shared_ptr<AutomationControl>& c)
+{
+    try {
+        ControllerButton* cb = get_button (ppm.controllerId);
+        std::function<void (bool b, PBD::Controllable::GroupControlDisposition d)> plugin_mapping =
+          [=] (bool b, PBD::Controllable::GroupControlDisposition d) -> void {
+            cb->set_led_state (c->get_value ());
+            DEBUG_TRACE (DEBUG::Console1,
+                         string_compose ("<-ControllerButton Plugin parameter %1: %2 \n",
+                                         n_controls,
+                                         c->get_value ()));
+        };
+        cb->set_plugin_action ([=] (uint32_t val) {
+            double v = val / 127.f;
+            c->set_value (parameterDescriptor.from_interface (v, true),
+                          PBD::Controllable::GroupControlDisposition::UseGroup);
+            DEBUG_TRACE (
+              DEBUG::Console1,
+              string_compose ("->ControllerButton Plugin parameter %1: %2 - %3\n", n_controls, val, v));
+        });
+
+        c->Changed.connect (
+          plugin_connections, MISSING_INVALIDATOR, std::bind (plugin_mapping, _1, _2), this);
+        c->Changed (true, PBD::Controllable::GroupControlDisposition::UseGroup);
+        return true;
+    } catch (ControlNotFoundException const&) {
+        DEBUG_TRACE (DEBUG::Console1, string_compose ("No ControllerButton found %1\n", n_controls));
+        return false;
+    }
+}
+
+bool
+Console1::handle_plugin_parameter(const PluginParameterMapping& ppm, int32_t n_controls,
+                                  const ParameterDescriptor& parameterDescriptor,
+                                  const std::shared_ptr<AutomationControl>& c)
+{
+    bool swtch = false;
+    if (parameterDescriptor.integer_step && parameterDescriptor.upper == 1) {
+        swtch = true;
+    } else if (ppm.is_switch) {
+        swtch = true;
+    }
+    if (!swtch) {
+        return setup_plugin_encoder(ppm, n_controls, parameterDescriptor, c);
+    } else {
+        return setup_plugin_button(ppm, n_controls, parameterDescriptor, c);
+    }
+}
+
+bool
 Console1::spill_plugins (const int32_t plugin_index)
 {
-	bool mapping_found = false;
+    bool mapping_found = false;
 
-	remove_plugin_operations ();
+    remove_plugin_operations ();
 
-	std::shared_ptr<Processor> proc = find_plugin (plugin_index);
-	if (!proc)
-		return false;
+    std::shared_ptr<Processor> proc = find_plugin (plugin_index);
+    if (!proc)
+        return false;
 
-	int32_t n_controls = -1;
-	DEBUG_TRACE (DEBUG::Console1, string_compose ("Found plugin %1\n", proc->name ()));
-	std::shared_ptr<PluginInsert> plugin_insert = std::dynamic_pointer_cast<PluginInsert> (proc);
-	if (!plugin_insert)
-		return false;
+    int32_t n_controls = -1;
+    DEBUG_TRACE (DEBUG::Console1, string_compose ("Found plugin %1\n", proc->name ()));
+    std::shared_ptr<PluginInsert> plugin_insert = std::dynamic_pointer_cast<PluginInsert> (proc);
+    if (!plugin_insert)
+        return false;
 
-	std::shared_ptr<Plugin> plugin = plugin_insert->plugin ();
-	if (!plugin)
-		return false;
+    std::shared_ptr<Plugin> plugin = plugin_insert->plugin ();
+    if (!plugin)
+        return false;
 
-	DEBUG_TRACE (DEBUG::Console1, string_compose ("Found plugin id %1\n", plugin->unique_id ()));
+    DEBUG_TRACE (DEBUG::Console1, string_compose ("Found plugin id %1\n", plugin->unique_id ()));
 
-	try {
-		ControllerButton* cb = get_button (ControllerID::MUTE);
-		std::function<void ()> plugin_mapping = [=] () -> void { cb->set_led_state (!plugin_insert->enabled ()); };
-		cb->set_plugin_action ([=] (uint32_t val) {
-			plugin_insert->enable (val == 0);
-			DEBUG_TRACE (DEBUG::Console1,
-			             string_compose ("ControllerButton Plugin parameter %1: %2 \n", n_controls, val));
-		});
+    // Setup mute button
+    setup_plugin_mute_button(plugin_insert);
 
-		plugin_insert->ActiveChanged.connect (
-		  plugin_connections, MISSING_INVALIDATOR, std::bind (plugin_mapping), this);
-		plugin_insert->ActiveChanged ();
-	} catch (ControlNotFoundException const&) {
-		DEBUG_TRACE (DEBUG::Console1, string_compose ("No ControllerButton found %1\n", n_controls));
-	}
-	PluginMappingMap::iterator pmmit = pluginMappingMap.find (plugin->unique_id ());
-	mapping_found = (pmmit != pluginMappingMap.end ());
+    PluginMappingMap::iterator pmmit = pluginMappingMap.find (plugin->unique_id ());
+    mapping_found = (pmmit != pluginMappingMap.end ());
 
-	if (!mapping_found) {
-		if (create_mapping_stubs) {
-			create_mapping (proc, plugin);
-		}
-		return true;
-	}
+    if (!mapping_found) {
+        if (create_mapping_stubs) {
+            create_plugin_mapping_stubs (proc, plugin);
+        }
+        return true;
+    }
 
-	PluginMapping pluginMapping = pmmit->second;
+    PluginMapping pluginMapping = pmmit->second;
 
-	DEBUG_TRACE (DEBUG::Console1,
-	             string_compose ("Plugin mapping found for id %1, name %2\n", pluginMapping.id, pluginMapping.name));
+    DEBUG_TRACE (DEBUG::Console1,
+                 string_compose ("Plugin mapping found for id %1, name %2\n", pluginMapping.id, pluginMapping.name));
 
-	set<Evoral::Parameter> p = proc->what_can_be_automated ();
+    set<Evoral::Parameter> p = proc->what_can_be_automated ();
 
-	for (set<Evoral::Parameter>::iterator j = p.begin (); j != p.end (); ++j) {
-		++n_controls;
-		std::string n = proc->describe_parameter (*j);
-		DEBUG_TRACE (DEBUG::Console1, string_compose ("Plugin parameter %1: %2\n", n_controls, n));
-		if (n == "hidden") {
-			continue;
-		}
-		ParameterDescriptor parameterDescriptor;
-		plugin->get_parameter_descriptor (n_controls, parameterDescriptor);
-		if (plugin->parameter_is_control (n_controls)) {
-			DEBUG_TRACE (DEBUG::Console1, "parameter is control\n");
-		}
-		if (plugin->parameter_is_output (n_controls)) {
-			DEBUG_TRACE (DEBUG::Console1, "parameter is output\n");
-		}
-		if (plugin->parameter_is_audio (n_controls)) {
-			DEBUG_TRACE (DEBUG::Console1, "parameter is audio\n");
-		}
-		if (plugin->parameter_is_input (n_controls)) {
-			std::shared_ptr<AutomationControl> c =
-			  plugin_insert->automation_control (Evoral::Parameter (PluginAutomation, 0, n_controls));
-			if (c) {
-				PluginParameterMapping ppm = pluginMapping.parameters[n_controls];
-				bool swtch = false;
-				if (parameterDescriptor.integer_step && parameterDescriptor.upper == 1) {
-					swtch = true;
-				} else if (ppm.is_switch) {
-					swtch = true;
-				}
-				if (!swtch) {
-					try {
-						Encoder* e = get_encoder (ppm.controllerId);
-						std::function<void (bool b, PBD::Controllable::GroupControlDisposition d)> plugin_mapping =
-						  [=] (bool b, PBD::Controllable::GroupControlDisposition d) -> void {
-							double v = parameterDescriptor.to_interface (c->get_value (), true);
-							e->set_value (v * 127);
-							DEBUG_TRACE (
-							  DEBUG::Console1,
-							  string_compose ("<-Encoder Plugin parameter %1: %2 - %3\n", n_controls, v * 127, v));
-						};
-						e->set_plugin_action ([=] (uint32_t val) {
-							double v = val / 127.f;
-							c->set_value (parameterDescriptor.from_interface (v, true),
-							              PBD::Controllable::GroupControlDisposition::UseGroup);
-							DEBUG_TRACE (
-							  DEBUG::Console1,
-							  string_compose ("->Encoder Plugin parameter %1: %2 - %3\n", n_controls, val, v));
-						});
-						c->Changed.connect (
-						  plugin_connections, MISSING_INVALIDATOR, std::bind (plugin_mapping, _1, _2), this);
-						c->Changed (true, PBD::Controllable::GroupControlDisposition::UseGroup);
-						continue;
-					} catch (ControlNotFoundException const&) {
-						DEBUG_TRACE (DEBUG::Console1, string_compose ("No Encoder found %1\n", n_controls));
-					}
-				} else {
-					try {
-						ControllerButton* cb = get_button (ppm.controllerId);
-						std::function<void (bool b, PBD::Controllable::GroupControlDisposition d)> plugin_mapping =
-						  [=] (bool b, PBD::Controllable::GroupControlDisposition d) -> void {
-							cb->set_led_state (c->get_value ());
-							DEBUG_TRACE (DEBUG::Console1,
-							             string_compose ("<-ControllerButton Plugin parameter %1: %2 \n",
-							                             n_controls,
-							                             c->get_value ()));
-						};
-						cb->set_plugin_action ([=] (uint32_t val) {
-							double v = val / 127.f;
-							c->set_value (parameterDescriptor.from_interface (v, true),
-							              PBD::Controllable::GroupControlDisposition::UseGroup);
-							DEBUG_TRACE (
-							  DEBUG::Console1,
-							  string_compose ("->ControllerButton Plugin parameter %1: %2 - %3\n", n_controls, val, v));
-						});
-
-						c->Changed.connect (
-						  plugin_connections, MISSING_INVALIDATOR, std::bind (plugin_mapping, _1, _2), this);
-						c->Changed (true, PBD::Controllable::GroupControlDisposition::UseGroup);
-						continue;
-					} catch (ControlNotFoundException const&) {
-						DEBUG_TRACE (DEBUG::Console1, string_compose ("No ControllerButton found %1\n", n_controls));
-					}
-				}
-			}
-		}
-	}
-	return true;
+    for (set<Evoral::Parameter>::iterator j = p.begin (); j != p.end (); ++j) {
+        ++n_controls;
+        std::string n = proc->describe_parameter (*j);
+        DEBUG_TRACE (DEBUG::Console1, string_compose ("Plugin parameter %1: %2\n", n_controls, n));
+        if (n == "hidden") {
+            continue;
+        }
+        ParameterDescriptor parameterDescriptor;
+        plugin->get_parameter_descriptor (n_controls, parameterDescriptor);
+        if (plugin->parameter_is_control (n_controls)) {
+            DEBUG_TRACE (DEBUG::Console1, "parameter is control\n");
+            DEBUG_TRACE (DEBUG::Console1, string_compose("normal: %1, lower %2, upper %3, toogled %4, log %5, num steps %6\n", 
+                parameterDescriptor.normal,
+                parameterDescriptor.lower,
+                parameterDescriptor.upper,
+                parameterDescriptor.toggled,
+                parameterDescriptor.logarithmic,
+                parameterDescriptor.rangesteps ) )
+        }
+        if (plugin->parameter_is_output (n_controls)) {
+            DEBUG_TRACE (DEBUG::Console1, "parameter is output\n");
+        }
+        if (plugin->parameter_is_audio (n_controls)) {
+            DEBUG_TRACE (DEBUG::Console1, "parameter is audio\n");
+        }
+        if (plugin->parameter_is_input (n_controls)) {
+            std::shared_ptr<AutomationControl> c =
+              plugin_insert->automation_control (Evoral::Parameter (PluginAutomation, 0, n_controls));
+            if (c) {
+                PluginParameterMapping ppm = pluginMapping.parameters[n_controls];
+                handle_plugin_parameter(ppm, n_controls, parameterDescriptor, c);
+            }
+        }
+    }
+    return true;
 }
 
 Glib::RefPtr<Gtk::ListStore> Console1::getPluginControllerModel()
