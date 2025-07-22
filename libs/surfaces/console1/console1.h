@@ -132,7 +132,7 @@ public:
 	PBD::Signal<void()> BankChange;
 	PBD::Signal<void(bool)> ShiftChange;
 	PBD::Signal<void(bool)> PluginStateChange;
-	PBD::Signal<void()> EQBandQBindingChange;
+	PBD::Signal<void(bool)> EQBandQBindingChange;
 
 	enum ControllerID
 	{
@@ -652,7 +652,7 @@ private:
 
 	bool map_select_plugin (const int32_t plugin_index);
 
-    void eqBandQChangeMapping();
+    void eqBandQChangeMapping( bool mapValues );
 
     using PluginMappingMap = std::map<std::string, PluginMapping>;
 	PluginMappingMap pluginMappingMap;

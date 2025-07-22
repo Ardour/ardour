@@ -923,36 +923,36 @@ Console1::map_eq ()
 void
 Console1::map_eq_mode (){
 #ifdef MIXBUS
-	DEBUG_TRACE (DEBUG::Console1, "Enter map_eq_mode()\n");
-	if (!_current_stripable) {
-		return;
-	}
-	std::shared_ptr<ARDOUR::Route> rt = std::dynamic_pointer_cast<ARDOUR::Route>( _current_stripable );
-	if (!rt) {
-		return;
-	}
-	EQ_MODE current_eq_mode = EQ_MODE (rt->eq_mode_control() ? rt->eq_mode_control()->get_value() : -1);
-	DEBUG_TRACE (DEBUG::Console1, string_compose ("map_eq_mode() - mode: %1\n", current_eq_mode));
-	if (current_eq_mode != strip_eq_mode) {
-		strip_eq_mode = current_eq_mode;
-		EQBandQBindingChange();
-	}
+    DEBUG_TRACE (DEBUG::Console1, "Enter map_eq_mode()\n");
+    if (!_current_stripable) {
+        return;
+    }
+    std::shared_ptr<ARDOUR::Route> rt = std::dynamic_pointer_cast<ARDOUR::Route>( _current_stripable );
+    if (!rt) {
+        return;
+    }
+    EQ_MODE current_eq_mode = EQ_MODE (rt->eq_mode_control() ? rt->eq_mode_control()->get_value() : -1);
+    DEBUG_TRACE (DEBUG::Console1, string_compose ("map_eq_mode() - mode: %1\n", current_eq_mode));
+    if (current_eq_mode != strip_eq_mode) {
+        strip_eq_mode = current_eq_mode;
+        EQBandQBindingChange (true);
+    }
 #endif
 }
 
 void
 Console1::map_eq_band_q (const uint32_t band)
 {
-	DEBUG_TRACE (DEBUG::Console1, string_compose( "map_eq_band_q band: %1 \n", band));
-	if (shift_state || switch_eq_q_dials) {
-		DEBUG_TRACE (DEBUG::Console1, "Exit map_eq_band_q 1\n");
-		return;
-	}
-	ControllerID controllerID = eq_q_controller_for_band (band);
-	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (EQ_BandQ, band);
-		map_encoder (controllerID, control);
-	}
+    DEBUG_TRACE (DEBUG::Console1, string_compose( "map_eq_band_q band: %1 \n", band));
+    if (shift_state || switch_eq_q_dials) {
+        DEBUG_TRACE (DEBUG::Console1, "Exit map_eq_band_q 1\n");
+        return;
+    }
+    ControllerID controllerID = eq_q_controller_for_band (band);
+    if (map_encoder (controllerID)) {
+        std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (EQ_BandQ, band);
+        map_encoder (controllerID, control);
+    }
 }
 
 void
@@ -1152,31 +1152,37 @@ Console1::map_comp_emph ()
 	}
 }
 
-void Console1::eqBandQChangeMapping()
+void Console1::eqBandQChangeMapping( bool mapValues )
 {
-	DEBUG_TRACE(DEBUG::Console1, string_compose("eqBandQChangeMapping(): band_q_as_send = %1, strip_eq_mode = %2\n", band_q_as_send, strip_eq_mode));
-	Encoder* lme = get_encoder (LOW_MID_SHAPE);
-	Encoder* hme = get_encoder (HIGH_MID_SHAPE);
-	switch_eq_q_dials = band_q_as_send || (strip_eq_mode == EQM_HARRISON );
+    DEBUG_TRACE(DEBUG::Console1, string_compose("eqBandQChangeMapping(): band_q_as_send = %1, strip_eq_mode = %2, mapValues = %3 \n", band_q_as_send, strip_eq_mode, mapValues));
+    Encoder* lme = get_encoder (LOW_MID_SHAPE);
+    Encoder* hme = get_encoder (HIGH_MID_SHAPE);
+    switch_eq_q_dials = band_q_as_send || (strip_eq_mode == EQM_HARRISON );
 
-	if (!lme || !hme) {
-		DEBUG_TRACE (DEBUG::Console1, "eqBandQChangeMapping: Controller not found \n");
-		return;
-	}
+    if (!lme || !hme) {
+        DEBUG_TRACE (DEBUG::Console1, "eqBandQChangeMapping: Controller not found \n");
+        return;
+    }
 
-	if (switch_eq_q_dials) {
-		DEBUG_TRACE (DEBUG::Console1, "eqBandQChangeMapping() set harrison or send mode\n");
-		lme->set_action(std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 10, _1)));
-		hme->set_action(std::function<void (uint32_t)> (std::bind (&Console1::mb_send_level, this, 11, _1)));
-		map_mb_send_level (10);
-		map_mb_send_level (11);
-	} else {
-		DEBUG_TRACE (DEBUG::Console1, "eqBandQChangeMapping() set ssl q mode\n");
-		lme->set_action(std::function<void (uint32_t)> (std::bind (&Console1::eq_band_q, this, 1, _1)));
-		hme->set_action(std::function<void (uint32_t)> (std::bind (&Console1::eq_band_q, this, 2, _1)));
-		map_eq_band_q (1);
-		map_eq_band_q (2);
-	}
+    if (switch_eq_q_dials) {
+        DEBUG_TRACE (DEBUG::Console1, "eqBandQChangeMapping() set harrison or send mode\n");
+        lme->set_action(std::function<void(uint32_t)>(std::bind(&Console1::mb_send_level, this, 10, _1)));
+        hme->set_action(std::function<void(uint32_t)>(std::bind(&Console1::mb_send_level, this, 11, _1)));
+        if (mapValues)
+        {
+            map_mb_send_level (10);
+            map_mb_send_level (11);
+        }
+    } else {
+        DEBUG_TRACE (DEBUG::Console1, "eqBandQChangeMapping() set ssl q mode\n");
+        lme->set_action(std::function<void(uint32_t)>(std::bind(&Console1::eq_band_q, this, 1, _1)));
+        hme->set_action(std::function<void (uint32_t)> (std::bind (&Console1::eq_band_q, this, 2, _1)));
+        if (mapValues)
+        {
+            map_eq_band_q (1);
+            map_eq_band_q (2);
+        }
+    }
 }
 
 bool
