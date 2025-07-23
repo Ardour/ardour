@@ -437,6 +437,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		}
 		goto out;
 	}
+
 	catch (SessionException const& e) {
 		gchar* escaped_error_txt = 0;
 		stringstream ss;
@@ -465,6 +466,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 
 		goto out;
 	}
+
 	catch (ARDOUR::WrongProgram const & wp) {
 
 		std::string first_word = wp.creator.substr (0, wp.creator.find (' '));
@@ -480,6 +482,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		msg.hide ();
 		goto out;
 	}
+
 	catch (Glib::Error const& e) {
 		const std::string& glib_what = e.what();
 		gchar* escaped_error_txt = 0;
@@ -511,6 +514,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 
 		goto out;
 	}
+
 	catch (...) {
 		gchar* escaped_error_txt = 0;
 		stringstream ss;
