@@ -689,8 +689,6 @@ public:
 
 	bool map_select_plugin (const int32_t plugin_index);
 
-    void eqBandQChangeMapping();
-
     void eqBandQChangeMapping (bool mapValues);
 
 

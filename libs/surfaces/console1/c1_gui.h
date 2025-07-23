@@ -32,15 +32,6 @@
 #include <ytkmm/scrolledwindow.h>
 #include <ytkmm/spinbutton.h>
 #include <ytkmm/notebook.h>
-#include <gtkmm/box.h>
-#include <gtkmm/combobox.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/image.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/table.h>
-#include <gtkmm/treestore.h>
-#include <gtkmm/spinbutton.h>
 
 namespace Gtk {
     class ListStore;
@@ -73,7 +64,6 @@ private:
 	Gtk::ScrolledWindow plugin_mapping_scroller;
 	Gtk::Image image;
 	Gtk::CheckButton swap_solo_mute_cb;
-	Gtk::CheckButton band_q_as_send_cb;
 	Gtk::CheckButton band_q_as_send_cb;
 	Gtk::CheckButton create_plugin_stubs_btn;
 
