@@ -59,8 +59,7 @@ public:
 	{
 		New = 0,
 		Recent,
-		Open,
-		Prefs
+		Open
 	};
 
 	SessionDialog (DialogTab initial_tab, const std::string& session_name, const std::string& session_path,
@@ -96,14 +95,12 @@ private:
 	ArdourWidgets::ArdourButton new_button;
 	ArdourWidgets::ArdourButton recent_button;
 	ArdourWidgets::ArdourButton existing_button;
-	ArdourWidgets::ArdourButton prefs_button;
 
 	Gtk::ComboBoxText  timebase_chooser;
 
 	bool new_button_pressed (GdkEventButton*);
 	bool recent_button_pressed (GdkEventButton*);
 	bool existing_button_pressed (GdkEventButton*);
-	bool prefs_button_pressed (GdkEventButton*);
 
 	bool open_button_pressed (GdkEventButton*);
 

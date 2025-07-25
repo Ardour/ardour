@@ -129,11 +129,6 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	existing_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::existing_button_pressed), false);
 	existing_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
 
-	prefs_button.set_text("SETTINGS");
-	prefs_button.set_name ("tab button");
-	prefs_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::prefs_button_pressed), false);
-	prefs_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
-
 	Glib::RefPtr<SizeGroup> grp = SizeGroup::create (Gtk::SIZE_GROUP_BOTH);
 	grp->add_widget(new_button);
 	grp->add_widget(recent_button);
@@ -262,7 +257,6 @@ SessionDialog::tab_page_switched(GtkNotebookPage*, guint page_number)
 	new_button.set_active_state      (page_number==0 ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	recent_button.set_active_state   (page_number==1 ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	existing_button.set_active_state (page_number==2 ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
-	prefs_button.set_active_state    (page_number==3 ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	/* clang-format on */
 
 	//check the status of each tab and sensitize the 'open' button appropriately
@@ -589,16 +583,6 @@ bool
 SessionDialog::existing_button_pressed (GdkEventButton*)
 {
 	_tabs.set_current_page(2);
-
-	return true;
-}
-
-bool
-SessionDialog::prefs_button_pressed (GdkEventButton*)
-{
-	_tabs.set_current_page(3);
-
-	open_button->set_sensitive(false);  //do not allow to open a session from this page
 
 	return true;
 }
