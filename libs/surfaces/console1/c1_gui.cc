@@ -40,10 +40,12 @@
 
 using namespace PBD;
 using namespace ARDOUR;
-using namespace ArdourSurface;
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+
+namespace Console1
+{
 
 void*
 Console1::get_gui () const
@@ -383,7 +385,7 @@ C1GUI::change_controller (const Glib::ustring &sPath, const TreeModel::iterator 
 
 		string controllerName = (*iter)[c1.plugin_controller_columns.controllerName];
 	    int controllerId = (*iter)[c1.plugin_controller_columns.controllerId];
-    	pc.parameters[index].controllerId = ArdourSurface::Console1::ControllerID (controllerId);
+    	pc.parameters[index].controllerId = Console1::ControllerID (controllerId);
 		(*row).set_value (plugin_assignment_editor_columns.controllerName, controllerName);
 		DEBUG_TRACE (DEBUG::Console1,
 		             string_compose ("Column Name: Controller, index %1, name %2 \n", index, controllerName));
@@ -488,3 +490,5 @@ void C1GUI::write_plugin_assignment(){
 	c1.write_plugin_mapping (pc);
 	assignement_changed = false;
 }
+
+} // namespace Console1

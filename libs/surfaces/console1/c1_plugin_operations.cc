@@ -35,12 +35,12 @@
 #include "console1.h"
 
 using namespace ARDOUR;
-using namespace ArdourSurface;
 using namespace PBD;
 using namespace Glib;
 using namespace std;
 
-namespace ArdourSurface {
+namespace Console1
+{
 
 bool
 Console1::ensure_config_dir ()
@@ -136,8 +136,8 @@ Console1::load_mapping (XMLNode* mapping_xml)
 		parmap.name = param_name;
    		parmap.is_switch = (param_type == "switch");
 		if (!param_mapping.empty ()) {
-			ControllerMap::const_iterator m = controllerMap.find (param_mapping);
-			if (m != controllerMap.end ())
+			ControllerNameIdMap::const_iterator m = controllerNameIdMap.find (param_mapping);
+			if (m != controllerNameIdMap.end ())
             {
     			parmap.controllerId = m->second;
             }
@@ -289,24 +289,23 @@ Console1::remove_plugin_operations ()
 {
 	plugin_connections.drop_connections ();
 
-	for (auto& e : encoders) {
-		e.second->set_plugin_action (0);
-		e.second->set_plugin_shift_action (0);
-		e.second->set_value (0);
-	}
-	for (auto& b : buttons) {
-		if (b.first == ControllerID::TRACK_GROUP)
+	for (auto& c : controllerMap) {
+		if (c.first == ControllerID::TRACK_GROUP)
 			continue;
-		if (b.first >= ControllerID::FOCUS1 && b.first <= ControllerID::FOCUS20)
+		if (c.first >= ControllerID::FOCUS1 && c.first <= ControllerID::FOCUS20)
 			continue;
-		b.second->set_plugin_action (0);
-		b.second->set_plugin_shift_action (0);
-		b.second->set_led_state (false);
-	}
-	for (auto& m : multi_buttons) {
-		m.second->set_plugin_action (0);
-		m.second->set_plugin_shift_action (0);
-		m.second->set_led_state (false);
+		c.second->set_plugin_action (0);
+		c.second->set_plugin_shift_action (0);
+		c.second->clear_value ();
+        if( c.second->get_type() == ControllerType::CONTROLLER_BUTTON )
+        {
+	    	ControllerButton* b = dynamic_cast<ControllerButton *> (c.second);
+            b->set_led_state (false);
+        } else if (c.second->get_type () == ControllerType::MULTISTATE_BUTTON )
+        {
+            MultiStateButton* b = dynamic_cast<MultiStateButton *> (c.second);
+            b->set_led_state (false);
+        }
 	}
 }
 
@@ -326,12 +325,15 @@ Console1::find_plugin (const int32_t plugin_index)
 	while ((ext_plugin_index < plugin_index) && (int_plugin_index < (int)bank_size)) {
 		++int_plugin_index;
 
+		DEBUG_TRACE (DEBUG::Console1, string_compose ("find_plugin: int index %1, ext index %2\n", int_plugin_index, ext_plugin_index));
 		proc = r->nth_plugin (int_plugin_index);
 		if (!proc) {
+			DEBUG_TRACE (DEBUG::Console1, "find_plugin: plugin not found\n");
 			continue;
-			;
 		}
+		DEBUG_TRACE (DEBUG::Console1, "find_plugin: plugin found\n");
 		if (!proc->display_to_user ()) {
+			DEBUG_TRACE (DEBUG::Console1, "find_plugin: display to user failed\n");
 			continue;
 		}
 
@@ -483,7 +485,7 @@ Console1::spill_plugins (const int32_t plugin_index)
         return false;
 
     int32_t n_controls = -1;
-    DEBUG_TRACE (DEBUG::Console1, string_compose ("Found plugin %1\n", proc->name ()));
+    DEBUG_TRACE (DEBUG::Console1, string_compose ("spill_plugins: Found plugin %1\n", proc->name ()));
     std::shared_ptr<PluginInsert> plugin_insert = std::dynamic_pointer_cast<PluginInsert> (proc);
     if (!plugin_insert)
         return false;
@@ -492,7 +494,7 @@ Console1::spill_plugins (const int32_t plugin_index)
     if (!plugin)
         return false;
 
-    DEBUG_TRACE (DEBUG::Console1, string_compose ("Found plugin id %1\n", plugin->unique_id ()));
+    DEBUG_TRACE (DEBUG::Console1, string_compose ("spill_plugins: Found plugin id %1\n", plugin->unique_id ()));
 
     // Setup mute button
     setup_plugin_mute_button(plugin_insert);
@@ -510,15 +512,15 @@ Console1::spill_plugins (const int32_t plugin_index)
     PluginMapping pluginMapping = pmmit->second;
 
     DEBUG_TRACE (DEBUG::Console1,
-                 string_compose ("Plugin mapping found for id %1, name %2\n", pluginMapping.id, pluginMapping.name));
+	         string_compose ("spill_plugins: Plugin mapping found for id %1, name %2\n", pluginMapping.id, pluginMapping.name));
 
     set<Evoral::Parameter> p = proc->what_can_be_automated ();
 
     for (set<Evoral::Parameter>::iterator j = p.begin (); j != p.end (); ++j) {
         ++n_controls;
         std::string n = proc->describe_parameter (*j);
-        DEBUG_TRACE (DEBUG::Console1, string_compose ("Plugin parameter %1: %2\n", n_controls, n));
-        if (n == "hidden") {
+	    DEBUG_TRACE (DEBUG::Console1, string_compose ("spill_plugins: Plugin parameter %1: %2\n", n_controls, n));
+	    if (n == "hidden") {
             continue;
         }
         ParameterDescriptor parameterDescriptor;
@@ -555,7 +557,7 @@ Glib::RefPtr<Gtk::ListStore> Console1::getPluginControllerModel()
 {
     plugin_controller_model = Gtk::ListStore::create (plugin_controller_columns);
 	Gtk::TreeModel::Row plugin_controller_combo_row;
-    for( const auto &controller : controllerMap ){
+    for( const auto &controller : controllerNameIdMap ){
         plugin_controller_combo_row = *(plugin_controller_model->append ());
 		plugin_controller_combo_row[plugin_controller_columns.controllerId] = controller.second;
 		plugin_controller_combo_row[plugin_controller_columns.controllerName] = X_(controller.first);
@@ -563,4 +565,4 @@ Glib::RefPtr<Gtk::ListStore> Console1::getPluginControllerModel()
 	return plugin_controller_model;
 }
 
-}
+} // namespace Console1

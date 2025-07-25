@@ -61,19 +61,14 @@ namespace PBD {
 class Controllable;
 }
 
+namespace Console1
+{
+
 class MIDIControllable;
 class MIDIFunction;
 class MIDIAction;
 
-namespace ArdourSurface {
-
 class C1GUI;
-
-// XXX TODO: these classes should not be in the ArdourSurface namespace
-// which is shared with all other ctrl surfaces.
-//
-// ArdourSurface::Meter etc may cause conflicts.
-// best add a C1 prefix, or additional namespace
 
 class Controller;
 class ControllerButton;
@@ -90,6 +85,14 @@ class ControlNotFoundException : public std::exception
 {
 public:
 	ControlNotFoundException () {}
+};
+
+enum ControllerType {
+	CONTROLLER,
+	CONTROLLER_BUTTON,
+	MULTISTATE_BUTTON,
+	ENCODER,
+	METER
 };
 
 class Console1 : public MIDISurface
@@ -141,18 +144,17 @@ public:
 	PBD::Signal<void(bool)> PluginStateChange;
 	PBD::Signal<void(bool)> EQBandQBindingChange;
 
-	enum ControllerID
-	{
-		CONTROLLER_NONE = 0,
-		VOLUME = 7,
-		PAN = 10,
-		MUTE = 12,
-		SOLO = 13,
-		ORDER = 14,
-		DRIVE = 15,
+	enum ControllerID {
+		CONTROLLER_NONE    = 0,
+		VOLUME             = 7,
+		PAN                = 10,
+		MUTE               = 12,
+		SOLO               = 13,
+		ORDER              = 14,
+		DRIVE              = 15,
 		EXTERNAL_SIDECHAIN = 17,
-		CHARACTER = 18,
-		FOCUS1 = 21,
+		CHARACTER          = 18,
+		FOCUS1             = 21,
 		FOCUS2,
 		FOCUS3,
 		FOCUS4,
@@ -171,63 +173,62 @@ public:
 		FOCUS17,
 		FOCUS18,
 		FOCUS19,
-		FOCUS20 = 40,
-		COMP = 46,
-		COMP_THRESH = 47,
-		COMP_RELEASE = 48,
-		COMP_RATIO = 49,
-		COMP_PAR = 50,
-		COMP_ATTACK = 51,
-		SHAPE = 53,
-		SHAPE_GATE = 54,
-		SHAPE_SUSTAIN = 55,
-		SHAPE_RELEASE = 56,
-		SHAPE_PUNCH = 57,
-		PRESET = 58,
-		HARD_GATE = 59,
+		FOCUS20               = 40,
+		COMP                  = 46,
+		COMP_THRESH           = 47,
+		COMP_RELEASE          = 48,
+		COMP_RATIO            = 49,
+		COMP_PAR              = 50,
+		COMP_ATTACK           = 51,
+		SHAPE                 = 53,
+		SHAPE_GATE            = 54,
+		SHAPE_SUSTAIN         = 55,
+		SHAPE_RELEASE         = 56,
+		SHAPE_PUNCH           = 57,
+		PRESET                = 58,
+		HARD_GATE             = 59,
 		FILTER_TO_COMPRESSORS = 61,
-		HIGH_SHAPE = 65,
-		EQ = 80,
-		HIGH_GAIN = 82,
-		HIGH_FREQ = 83,
-		HIGH_MID_GAIN = 85,
-		HIGH_MID_FREQ = 86,
-		HIGH_MID_SHAPE = 87,
-		LOW_MID_GAIN = 88,
-		LOW_MID_FREQ = 89,
-		LOW_MID_SHAPE = 90,
-		LOW_GAIN = 91,
-		LOW_FREQ = 92,
-		LOW_SHAPE = 93,
-		PAGE_UP = 96,
-		PAGE_DOWN = 97,
-		DISPLAY_ON = 102,
-		LOW_CUT = 103,
-		MODE = 104,
-		HIGH_CUT = 105,
-		GAIN = 107,
-		PHASE_INV = 108,
-		INPUT_METER_L = 110,
-		INPUT_METER_R = 111,
-		OUTPUT_METER_L = 112,
-		OUTPUT_METER_R = 113,
-		SHAPE_METER = 114,
-		COMP_METER = 115,
-		TRACK_COPY = 120,
-		TRACK_GROUP = 123,
+		HIGH_SHAPE            = 65,
+		EQ                    = 80,
+		HIGH_GAIN             = 82,
+		HIGH_FREQ             = 83,
+		HIGH_MID_GAIN         = 85,
+		HIGH_MID_FREQ         = 86,
+		HIGH_MID_SHAPE        = 87,
+		LOW_MID_GAIN          = 88,
+		LOW_MID_FREQ          = 89,
+		LOW_MID_SHAPE         = 90,
+		LOW_GAIN              = 91,
+		LOW_FREQ              = 92,
+		LOW_SHAPE             = 93,
+		PAGE_UP               = 96,
+		PAGE_DOWN             = 97,
+		DISPLAY_ON            = 102,
+		LOW_CUT               = 103,
+		MODE                  = 104,
+		HIGH_CUT              = 105,
+		GAIN                  = 107,
+		PHASE_INV             = 108,
+		INPUT_METER_L         = 110,
+		INPUT_METER_R         = 111,
+		OUTPUT_METER_L        = 112,
+		OUTPUT_METER_R        = 113,
+		SHAPE_METER           = 114,
+		COMP_METER            = 115,
+		TRACK_COPY            = 120,
+		TRACK_GROUP           = 123,
 
 	};
 
-	enum EQ_MODE
-	{
-		EQM_UNDEFINED = -1,
-		EQM_HARRISON  = 0,
-		EQM_SSL       = 1
-	};
+    enum EQ_MODE {
+	    EQM_UNDEFINED = -1,
+	    EQM_HARRISON  = 0,
+	    EQM_SSL       = 1
+    };
 
-    using ControllerMap = std::map<std::string, ControllerID>;
+    using ControllerNameIdMap = std::map<std::string, ControllerID>;
 
-	ControllerMap controllerMap{ { "CONTROLLER_NONE", ControllerID::CONTROLLER_NONE },
+	ControllerNameIdMap controllerNameIdMap{ { "CONTROLLER_NONE", ControllerID::CONTROLLER_NONE },
 		                         { "VOLUME", ControllerID::VOLUME },
 		                         { "PAN", ControllerID::PAN },
 		                         { "MUTE", ControllerID::MUTE },
@@ -394,74 +395,72 @@ public:
 	void select_rid_by_index (const uint32_t index);
 
 	/* Controller Maps*/
-	typedef std::map<ControllerID, ArdourSurface::ControllerButton*> ButtonMap;
-	typedef std::map<ControllerID, ArdourSurface::MultiStateButton*> MultiStateButtonMap;
-	typedef std::map<ControllerID, ArdourSurface::Meter*> MeterMap;
-	typedef std::map<ControllerID, ArdourSurface::Encoder*> EncoderMap;
+	typedef std::map<ControllerID, Meter*> MeterMap;
 
-	ButtonMap buttons;
-	ControllerButton* get_button (ControllerID) const;
+    typedef std::map<ControllerID, Controller*> ControllerMap;
 
-	MultiStateButtonMap multi_buttons;
-	MultiStateButton* get_mbutton (ControllerID id) const;
+    MeterMap          meters;
+    Meter*            get_meter (ControllerID) const;
+    ControllerButton* get_button (ControllerID) const;
 
-	MeterMap meters;
-	Meter* get_meter (ControllerID) const;
+    MultiStateButton* get_mbutton (ControllerID id) const;
 
-	EncoderMap encoders;
-	Encoder* get_encoder (ControllerID) const;
+    Encoder* get_encoder (ControllerID) const;
 
-	typedef std::map<uint32_t, ControllerID> SendControllerMap;
-	SendControllerMap send_controllers{ { 0, LOW_FREQ },       { 1, LOW_MID_FREQ },   { 2, HIGH_MID_FREQ },
-		                                { 3, HIGH_FREQ },      { 4, LOW_GAIN },       { 5, LOW_MID_GAIN },
-		                                { 6, HIGH_MID_GAIN },  { 7, HIGH_GAIN },      { 8, LOW_MID_SHAPE },
-		                                { 9, HIGH_MID_SHAPE }, { 10, LOW_MID_SHAPE }, { 11, HIGH_MID_SHAPE } };
+    ControllerMap controllerMap;
+    Controller*     get_controller (ControllerID id) const;
+    Controller*     get_controller (ControllerID id, ControllerType controllerType) const;
 
-	ControllerID get_send_controllerid (uint32_t);
+    typedef std::map<uint32_t, ControllerID> SendControllerMap;
+    SendControllerMap                        send_controllers{ { 0, LOW_FREQ }, { 1, LOW_MID_FREQ }, { 2, HIGH_MID_FREQ }, { 3, HIGH_FREQ }, 
+                                                               { 4, LOW_GAIN }, { 5, LOW_MID_GAIN }, { 6, HIGH_MID_GAIN }, { 7, HIGH_GAIN }, 
+                                                               { 8, LOW_MID_SHAPE }, { 9, HIGH_MID_SHAPE }, { 10, LOW_MID_SHAPE }, { 11, HIGH_MID_SHAPE } };
 
-	/* */
-	void all_lights_out ();
+    ControllerID get_send_controllerid (uint32_t);
 
-	void notify_transport_state_changed () override;
-	void notify_solo_active_changed (bool) override;
+    /* */
+    void all_lights_out ();
 
-	sigc::connection periodic_connection;
+    void notify_transport_state_changed () override;
+    void notify_solo_active_changed (bool) override;
 
-	bool periodic ();
-	void periodic_update_meter ();
+    sigc::connection periodic_connection;
 
-	// Meter Handlig
-	uint32_t last_output_meter_l = 0;
-	uint32_t last_output_meter_r = 0;
+    bool periodic ();
+    void periodic_update_meter ();
 
-	std::shared_ptr<ARDOUR::ReadOnlyControl> gate_redux_meter = 0;
-	uint32_t last_gate_meter = 0;
+    // Meter Handlig
+    uint32_t last_output_meter_l = 0;
+    uint32_t last_output_meter_r = 0;
 
-	std::shared_ptr<ARDOUR::ReadOnlyControl> comp_redux_meter = 0;
-	uint32_t last_comp_redux = 0;
+    std::shared_ptr<ARDOUR::ReadOnlyControl> gate_redux_meter = 0;
+    uint32_t                                 last_gate_meter  = 0;
 
-	sigc::connection blink_connection;
-	typedef std::list<ControllerID> Blinkers;
-	Blinkers blinkers;
-	bool blink_state;
-	bool blinker ();
-	void start_blinking (ControllerID);
-	void stop_blinking (ControllerID);
+    std::shared_ptr<ARDOUR::ReadOnlyControl> comp_redux_meter = 0;
+    uint32_t                                 last_comp_redux  = 0;
 
-	void set_current_stripable (std::shared_ptr<ARDOUR::Stripable>);
-	void drop_current_stripable ();
-	/*void use_master ();
-	void use_monitor ();*/
+    sigc::connection                blink_connection;
+    typedef std::list<ControllerID> Blinkers;
+    Blinkers                        blinkers;
+    bool                            blink_state;
+    bool                            blinker ();
+    void                            start_blinking (ControllerID);
+    void                            stop_blinking (ControllerID);
+
+    void set_current_stripable (std::shared_ptr<ARDOUR::Stripable>);
+    void drop_current_stripable ();
+    /*void use_master ();
+    void use_monitor ();*/
     void stripable_selection_changed () override;
-	/*PBD::ScopedConnection selection_connection;*/
-	PBD::ScopedConnectionList stripable_connections;
-	PBD::ScopedConnectionList console1_connections;
-	PBD::ScopedConnectionList plugin_connections;
+    /*PBD::ScopedConnection selection_connection;*/
+    PBD::ScopedConnectionList stripable_connections;
+    PBD::ScopedConnectionList console1_connections;
+    PBD::ScopedConnectionList plugin_connections;
 
-	void map_stripable_state ();
+    void map_stripable_state ();
 
-	void notify_parameter_changed (std::string) override;
-	void band_q_usage_changed ();
+    void notify_parameter_changed (std::string) override;
+    void band_q_usage_changed ();
 
     /* operations (defined in c1_operations.cc) */
 
@@ -707,5 +706,5 @@ public:
     Glib::RefPtr<Gtk::ListStore> getPluginControllerModel();
 	void write_plugin_mapping (PluginMapping &mapping);
 };
-}
+} // namespace Console1
 #endif /* ardour_surface_console1_h */

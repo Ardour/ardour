@@ -45,7 +45,7 @@ namespace ActionManager {
 
 #include "console1.h"
 
-namespace ArdourSurface {
+namespace Console1 {
 
 class C1GUI : public Gtk::Notebook
 {
@@ -120,7 +120,7 @@ private:
 
 	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (std::vector<std::string> const & ports, bool for_input);
 
-	ArdourSurface::Console1::PluginMapping pc;
+	Console1::PluginMapping pc;
 	Gtk::CellRendererCombo* make_action_renderer (Glib::RefPtr<Gtk::ListStore> model, Gtk::TreeModelColumnBase column);
 	void build_plugin_assignment_editor ();
 
@@ -135,6 +135,6 @@ private:
 	void active_plugin_changed (Gtk::ComboBox* combo);
 	void write_plugin_assignment ();
 };
-}
+} // namespace Console1
 
 #endif /* __ardour_console1_gui_h__ */
