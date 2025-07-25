@@ -173,7 +173,8 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	open_button = add_button (Stock::OPEN, RESPONSE_ACCEPT);
 	open_button->signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::open_button_pressed), false);
 
-	_disable_plugins.set_label (_("Safe Mode: Disable all Plugins"));
+	_disable_plugins.set_label (_("Safe Mode: _Disable all Plugins"));
+	_disable_plugins.set_use_underline ();
 	_disable_plugins.set_relief (Gtk::RELIEF_NORMAL);
 	_disable_plugins.set_mode (true);
 	_disable_plugins.set_active (ARDOUR::Session::get_disable_all_loaded_plugins());
@@ -707,7 +708,9 @@ SessionDialog::setup_new_session_page ()
 	session_new_vbox.set_spacing (8);
 
 	Label* name_label = manage (new Label);
-	name_label->set_text (_("Session name:"));
+	name_label->set_text (_("_Session name:"));
+	name_label->set_use_underline ();
+	name_label->set_mnemonic_widget (new_name_entry);
 
 	HBox* name_hbox = manage (new HBox);
 	name_hbox->set_spacing (8);
@@ -720,7 +723,9 @@ SessionDialog::setup_new_session_page ()
 
 	//Folder location for the new session
 	Label* new_folder_label = manage (new Label);
-	new_folder_label->set_text (_("Create session folder in:"));
+	new_folder_label->set_text (_("_Create session folder in:"));
+	new_folder_label->set_use_underline ();
+	new_folder_label->set_mnemonic_widget (new_folder_chooser);
 	HBox* folder_box = manage (new HBox);
 	folder_box->set_spacing (8);
 	folder_box->pack_start (*new_folder_label, false, false);
@@ -748,7 +753,9 @@ SessionDialog::setup_new_session_page ()
 
 	//Timebase for the new session
 	Label* session_domain_label = manage (new Label);
-	session_domain_label->set_text (_("Default Time Domain:"));
+	session_domain_label->set_text (_("_Default Time Domain:"));
+	session_domain_label->set_use_underline ();
+	session_domain_label->set_mnemonic_widget (timebase_chooser);
 	HBox* timebase_box = manage (new HBox);
 	timebase_box->set_spacing (8);
 	timebase_box->pack_start (*session_domain_label, false, false);
