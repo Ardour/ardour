@@ -92,14 +92,6 @@ private:
 	Gtk::Button* open_button;
 	Gtk::Button* quit_button;
 
-	ArdourWidgets::ArdourButton new_button;
-	ArdourWidgets::ArdourButton recent_button;
-	ArdourWidgets::ArdourButton existing_button;
-
-	bool new_button_pressed (GdkEventButton*);
-	bool recent_button_pressed (GdkEventButton*);
-	bool existing_button_pressed (GdkEventButton*);
-
 	bool open_button_pressed (GdkEventButton*);
 
 	Gtk::Table _open_table;
@@ -117,6 +109,7 @@ private:
 	/* tabs */
 
 	Gtk::Notebook _tabs;
+	Gtk::VBox     logo_empty_page;
 	void          tab_page_switched (GtkNotebookPage*, guint page_number);
 
 	/* recent sessions */

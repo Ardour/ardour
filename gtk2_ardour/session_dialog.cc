@@ -77,9 +77,10 @@ using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 
 enum tab_page_numbers {
-	page_number_new    = 0,
-	page_number_recent = 1,
-	page_number_open   = 2,
+	page_number_logo   = 0,
+	page_number_new    = 1,
+	page_number_recent = 2,
+	page_number_open   = 3,
 	page_number_unused
 };
 
@@ -120,41 +121,20 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	/* no update message for trax, show license here */
 	_open_table.attach (_info_box, 1,3, 0,1, FILL, FILL, 0, 6);
 #endif
-	
-	new_button.set_text("NEW");
-	new_button.set_name ("tab button");
-	new_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::new_button_pressed), false);
-	new_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
-
-	recent_button.set_text("RECENT");
-	recent_button.set_name ("tab button");
-	recent_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::recent_button_pressed), false);
-	recent_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
-
-	existing_button.set_text("OPEN");
-	existing_button.set_name ("tab button");
-	existing_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::existing_button_pressed), false);
-	existing_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
-
-	Glib::RefPtr<SizeGroup> grp = SizeGroup::create (Gtk::SIZE_GROUP_BOTH);
-	grp->add_widget(new_button);
-	grp->add_widget(recent_button);
-	grp->add_widget(existing_button);
 
 	int top = 0;
 	int row = 0;
 
+	// page_number_logo = 0
+	Gtk::Image* image;
 	if (find_file (rc, PROGRAM_NAME "-small-splash.png", image_path)) {
-		Gtk::Image* image;
-		if ((image = manage (new Gtk::Image (image_path))) != 0) {
-			_open_table.attach (*image, 0,1,  row , row + 1, FILL, FILL); ++row;
-			grp->add_widget (*image);
-		}
+		image = manage (new Gtk::Image (image_path));
 	}
-
-	_open_table.attach (new_button,        0,1, row, row + 1, FILL, FILL); ++row;
-	_open_table.attach (recent_button,     0,1, row, row + 1, FILL, FILL); ++row;
-	_open_table.attach (existing_button,   0,1, row, row + 1, FILL, FILL); ++row;
+	if (image != 0) {
+		_tabs.append_page (logo_empty_page, *image);
+	} else {
+		_tabs.append_page (logo_empty_page, PROGRAM_NAME);
+	}
 
 	++row;
 	Label *vspacer = manage (new Label());
@@ -162,15 +142,15 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	_open_table.attach (*vspacer,          1,2, top, row, FILL,        FILL|EXPAND, 0, 0);
 	_open_table.attach (_tabs,             2,3, top, row, FILL|EXPAND, FILL|EXPAND, 0, 0);
 
-	_tabs.set_show_tabs(false);
+	_tabs.set_tab_pos (POS_LEFT);
 	_tabs.set_show_border(false);
 
-	// add page_number_new = 0
-	_tabs.append_page(session_new_vbox);
-	// add page_number_recent = 1
-	_tabs.append_page(recent_vbox);
-	// add page_number_open = 2
-	_tabs.append_page(existing_session_chooser);
+	// add page_number_new = 1
+	_tabs.append_page (session_new_vbox, "_New", true);
+	// add page_number_recent = 2
+	_tabs.append_page (recent_vbox, "_Recent", true);
+	// add page_number_open = 3
+	_tabs.append_page (existing_session_chooser, "Op_en", true);
 
 	session_new_vbox.show_all();
 	recent_vbox.show_all();
@@ -263,15 +243,12 @@ SessionDialog::on_show ()
 void
 SessionDialog::tab_page_switched(GtkNotebookPage*, guint page_number)
 {
-	/* clang-format off */
-	new_button.set_active_state      (page_number==page_number_new    ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
-	recent_button.set_active_state   (page_number==page_number_recent ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
-	existing_button.set_active_state (page_number==page_number_open   ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
-	/* clang-format on */
-
 	//check the status of each tab and sensitize the 'open' button appropriately
 	open_button->set_sensitive(false);
 	switch (page_number) {
+		case page_number_logo:
+			_tabs.set_current_page (1);
+			break;
 		case page_number_new:
 			new_name_changed();
 			new_name_entry.select_region (0, -1);
@@ -280,6 +257,7 @@ SessionDialog::tab_page_switched(GtkNotebookPage*, guint page_number)
 			break;
 		case page_number_recent:
 			recent_session_row_selected();
+			recent_session_display.grab_focus ();
 			_disable_plugins.show ();
 			break;
 		case page_number_open:
@@ -566,30 +544,6 @@ SessionDialog::existing_file_selected ()
 		}
 		open_button->set_sensitive(true);  //still potentially openable; checks for session archives, .ptf, and .aaf will have to occur later
 	}
-}
-
-bool
-SessionDialog::new_button_pressed (GdkEventButton*)
-{
-	_tabs.set_current_page (page_number_new);
-
-	return true;
-}
-
-bool
-SessionDialog::recent_button_pressed (GdkEventButton*)
-{
-	_tabs.set_current_page (page_number_recent);
-
-	return true;
-}
-
-bool
-SessionDialog::existing_button_pressed (GdkEventButton*)
-{
-	_tabs.set_current_page (page_number_open);
-
-	return true;
 }
 
 bool
