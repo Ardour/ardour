@@ -230,8 +230,6 @@ private:
 
 	/* always there */
 
-	Glib::RefPtr<Pango::Layout> layout;
-
 	Gtk::Label info_scroller_label;
 	std::string::size_type info_scroller_count;
 	bool info_scroller_update();
