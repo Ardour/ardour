@@ -96,23 +96,15 @@ private:
 	ArdourWidgets::ArdourButton recent_button;
 	ArdourWidgets::ArdourButton existing_button;
 
-	Gtk::ComboBoxText  timebase_chooser;
-
 	bool new_button_pressed (GdkEventButton*);
 	bool recent_button_pressed (GdkEventButton*);
 	bool existing_button_pressed (GdkEventButton*);
 
 	bool open_button_pressed (GdkEventButton*);
 
-	Gtk::HBox _info_box;
-
 	Gtk::Table _open_table;
 
 	/* initial choice page */
-
-	void setup_existing_box ();
-	void setup_recent_sessions ();
-	Gtk::VBox recent_vbox;
 
 	DialogTab _initial_tab;
 
@@ -122,9 +114,15 @@ private:
 	void license_button_clicked ();
 #endif
 
+	/* tabs */
+
+	Gtk::Notebook _tabs;
+	void          tab_page_switched (GtkNotebookPage*, guint page_number);
+
 	/* recent sessions */
 
-	void setup_existing_session_page ();
+	void      setup_recent_sessions ();
+	Gtk::VBox recent_vbox;
 
 	struct RecentSessionsSorter
 	{
@@ -160,7 +158,7 @@ private:
 	Glib::RefPtr<Gtk::TreeStore> recent_session_model;
 	Gtk::ScrolledWindow          recent_scroller;
 	Gtk::Label                   recent_label;
-	Gtk::FileChooserWidget       existing_session_chooser;
+
 	int redisplay_recent_sessions ();
 	void recent_session_row_selected ();
 	void recent_session_sort_changed ();
@@ -169,10 +167,7 @@ private:
 	void recent_context_mennu (GdkEventButton*);
 	void recent_remove_selected ();
 
-	void existing_file_selected();
-	void existing_file_activated ();
-
-	/* new sessions */
+	/* new sessions (and template stuff) */
 
 	void setup_new_session_page ();
 	Gtk::Entry new_name_entry;
@@ -219,7 +214,15 @@ private:
 	void new_name_activated ();
 	void populate_session_templates ();
 
-	void tab_page_switched(GtkNotebookPage*, guint page_number);
+	Gtk::ComboBoxText timebase_chooser;
+
+	/* open existing session */
+
+	void                   setup_existing_session_page ();
+	void                   setup_existing_box ();
+	Gtk::FileChooserWidget existing_session_chooser;
+	void                   existing_file_selected ();
+	void                   existing_file_activated ();
 
 	/* --disable plugins UI */
 	Gtk::CheckButton _disable_plugins;
@@ -230,13 +233,12 @@ private:
 
 	/* always there */
 
+	Gtk::HBox _info_box;
 	Gtk::Label info_scroller_label;
 	std::string::size_type info_scroller_count;
 	bool info_scroller_update();
 	sigc::connection info_scroller_connection;
 	void updates_button_clicked ();
-
-	Gtk::Notebook _tabs;
 };
 
 #endif /* __gtk2_ardour_session_dialog_h__ */
