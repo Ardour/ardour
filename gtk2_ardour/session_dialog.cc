@@ -76,6 +76,13 @@ using namespace ARDOUR;
 using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 
+enum tab_page_numbers {
+	page_number_new    = 0,
+	page_number_recent = 1,
+	page_number_open   = 2,
+	page_number_unused
+};
+
 SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_name, const std::string& session_path, const std::string& template_name, bool cancel_not_quit)
 	: ArdourDialog (_("Select Session"), true, true)
 	, _initial_tab (initial_tab)
@@ -158,8 +165,11 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	_tabs.set_show_tabs(false);
 	_tabs.set_show_border(false);
 
+	// add page_number_new = 0
 	_tabs.append_page(session_new_vbox);
+	// add page_number_recent = 1
 	_tabs.append_page(recent_vbox);
+	// add page_number_open = 2
 	_tabs.append_page(existing_session_chooser);
 
 	session_new_vbox.show_all();
@@ -236,16 +246,16 @@ SessionDialog::on_show ()
 {
 	ArdourDialog::on_show ();
 
-	_tabs.set_current_page(3); // force change
+	_tabs.set_current_page (page_number_unused); // force change
 	switch (_initial_tab) {
 		case New:
-			_tabs.set_current_page(0);
+			_tabs.set_current_page (page_number_new);
 			break;
 		case Open:
-			_tabs.set_current_page(2);
+			_tabs.set_current_page (page_number_open);
 			break;
 		default:
-			_tabs.set_current_page(1);
+			_tabs.set_current_page (page_number_recent);
 			break;
 	}
 }
@@ -254,25 +264,25 @@ void
 SessionDialog::tab_page_switched(GtkNotebookPage*, guint page_number)
 {
 	/* clang-format off */
-	new_button.set_active_state      (page_number==0 ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
-	recent_button.set_active_state   (page_number==1 ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
-	existing_button.set_active_state (page_number==2 ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	new_button.set_active_state      (page_number==page_number_new    ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	recent_button.set_active_state   (page_number==page_number_recent ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	existing_button.set_active_state (page_number==page_number_open   ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	/* clang-format on */
 
 	//check the status of each tab and sensitize the 'open' button appropriately
 	open_button->set_sensitive(false);
 	switch (page_number) {
-		case 0:
+		case page_number_new:
 			new_name_changed();
 			new_name_entry.select_region (0, -1);
 			new_name_entry.grab_focus ();
 			_disable_plugins.hide ();
 			break;
-		case 1:
+		case page_number_recent:
 			recent_session_row_selected();
 			_disable_plugins.show ();
 			break;
-		case 2:
+		case page_number_open:
 			existing_file_selected();
 			_disable_plugins.show ();
 			break;
@@ -385,13 +395,13 @@ std::string
 SessionDialog::session_name (bool& should_be_new)
 {
 	switch (_tabs.get_current_page()) {
-	case 0: {
+	case page_number_new: {
 		should_be_new = true;
 		string val = new_name_entry.get_text ();
 		strip_whitespace_edges (val);
 		return val;
 	} break;
-	case 1: {
+	case page_number_recent: {
 		/* Try recent session selection */
 		TreeIter iter = recent_session_display.get_selection()->get_selected();
 		if (iter) {
@@ -403,7 +413,7 @@ SessionDialog::session_name (bool& should_be_new)
 			return (*iter)[recent_session_columns.visible_name];
 		}
 	} break;
-	case 2: {
+	case page_number_open: {
 		/* existing session chosen from file chooser */
 		should_be_new = false;
 		return existing_session_chooser.get_filename ();
@@ -417,14 +427,14 @@ std::string
 SessionDialog::session_folder ()
 {
 	switch (_tabs.get_current_page()) {
-		case 0:
+		case page_number_new:
 			{
 				std::string val = new_name_entry.get_text();
 				strip_whitespace_edges (val);
 				std::string legal_session_folder_name = legalize_for_path (val);
 				return Glib::build_filename (new_folder_chooser.get_filename (), legal_session_folder_name);
 			}
-		case 1:
+		case page_number_recent:
 			{
 				/* Try recent session selection */
 				TreeIter iter = recent_session_display.get_selection()->get_selected();
@@ -437,7 +447,7 @@ SessionDialog::session_folder ()
 				}
 			}
 			break;
-		case 2:
+		case page_number_open:
 			/* existing session chosen from file chooser */
 			return Glib::path_get_dirname (existing_session_chooser.get_current_folder ());
 		default:
@@ -523,7 +533,7 @@ SessionDialog::setup_existing_box ()
 void
 SessionDialog::existing_file_selected ()
 {
-	if (_tabs.get_current_page()!=2) {
+	if (_tabs.get_current_page () != page_number_open) {
 		//gtk filechooser is threaded; don't allow it to mess with open_button sensitivity when it's not actually visible
 		return;
 	}
@@ -561,7 +571,7 @@ SessionDialog::existing_file_selected ()
 bool
 SessionDialog::new_button_pressed (GdkEventButton*)
 {
-	_tabs.set_current_page(0);
+	_tabs.set_current_page (page_number_new);
 
 	return true;
 }
@@ -569,7 +579,7 @@ SessionDialog::new_button_pressed (GdkEventButton*)
 bool
 SessionDialog::recent_button_pressed (GdkEventButton*)
 {
-	_tabs.set_current_page(1);
+	_tabs.set_current_page (page_number_recent);
 
 	return true;
 }
@@ -577,7 +587,7 @@ SessionDialog::recent_button_pressed (GdkEventButton*)
 bool
 SessionDialog::existing_button_pressed (GdkEventButton*)
 {
-	_tabs.set_current_page(2);
+	_tabs.set_current_page (page_number_open);
 
 	return true;
 }
