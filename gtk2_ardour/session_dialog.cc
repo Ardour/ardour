@@ -558,11 +558,6 @@ SessionDialog::existing_file_selected ()
 	}
 }
 
-void
-SessionDialog::session_selected ()
-{
-}
-
 bool
 SessionDialog::new_button_pressed (GdkEventButton*)
 {
@@ -865,7 +860,6 @@ SessionDialog::new_name_changed ()
 	}
 
 	if (!new_name_entry.get_text().empty()) {
-		session_selected ();
 		open_button->set_sensitive (true);
 	} else {
 		open_button->set_sensitive (false);
@@ -1126,7 +1120,6 @@ SessionDialog::recent_session_row_selected ()
 {
 	if (recent_session_display.get_selection()->count_selected_rows() > 0) {
 		open_button->set_sensitive (true);
-		session_selected ();
 	} else {
 		open_button->set_sensitive (false);
 	}

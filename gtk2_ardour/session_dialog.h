@@ -169,8 +169,6 @@ private:
 	void recent_context_mennu (GdkEventButton*);
 	void recent_remove_selected ();
 
-	void session_selected ();
-
 	void existing_file_selected();
 	void existing_file_activated ();
 
