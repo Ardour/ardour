@@ -769,12 +769,9 @@ SessionDialog::setup_new_session_page ()
 	//template_chooser is the treeview showing available templates
 	template_model = TreeStore::create (session_template_columns);
 	template_chooser.set_model (template_model);
-	template_chooser.append_column (_("Template"), session_template_columns.name);
+	template_chooser.append_column (_("_Template"), session_template_columns.name); // single column header has value as mnemonic
 #ifdef MIXBUS
 	template_chooser.append_column (_("Modified With"), session_template_columns.modified_with_short);
-	template_chooser.set_headers_visible (true);
-#else
-	template_chooser.set_headers_visible (false);  //there is only one column and its purpose should be obvious
 #endif
 	template_chooser.get_selection()->set_mode (SELECTION_SINGLE);
 	template_chooser.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::template_row_selected));
