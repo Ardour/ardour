@@ -430,7 +430,7 @@ ActionManager::register_action (RefPtr<ActionGroup> group,
 	return RefPtr<Action>();
 }
 
-RefPtr<Action>
+RefPtr<RadioAction>
 ActionManager::register_radio_action (RefPtr<ActionGroup> group,
                                       Gtk::RadioAction::Group& rgroup,
                                       const char* name, const char* label,
@@ -439,9 +439,8 @@ ActionManager::register_radio_action (RefPtr<ActionGroup> group,
 	string fullpath;
 
 	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("creating action %1 in %2\n", name, group->get_name()));
-	RefPtr<Action> act = RadioAction::create (rgroup, name, label);
+	RefPtr<RadioAction> act = RadioAction::create (rgroup, name, label);
 	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created action %1 in %2 success: %3\n", name, group->get_name(), (bool) act));
-	RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 
 	fullpath = group->get_name();
 	fullpath += '/';
@@ -453,22 +452,20 @@ ActionManager::register_radio_action (RefPtr<ActionGroup> group,
 	}
 
 	/* already registered */
-	return RefPtr<Action>();
+	return RefPtr<RadioAction>();
 }
 
-RefPtr<Action>
+RefPtr<RadioAction>
 ActionManager::register_radio_action (RefPtr<ActionGroup> group,
                                       Gtk::RadioAction::Group& rgroup,
                                       const char* name, const char* label,
-                                      sigc::slot<void,GtkAction*> sl,
+                                      sigc::slot<void,GtkRadioAction*> sl,
                                       int value)
 {
 	string fullpath;
 
-	RefPtr<Action> act = RadioAction::create (rgroup, name, label);
+	RefPtr<RadioAction> act = RadioAction::create (rgroup, name, label);
 	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created radio-action %1 in %2 success: %3\n", name, group->get_name(), (bool) act));
-	RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-	ract->property_value() = value;
 
 	fullpath = group->get_name();
 	fullpath += '/';
@@ -481,10 +478,10 @@ ActionManager::register_radio_action (RefPtr<ActionGroup> group,
 
 	/* already registered */
 
-	return RefPtr<Action>();
+	return RefPtr<RadioAction>();
 }
 
-RefPtr<Action>
+RefPtr<ToggleAction>
 ActionManager::register_toggle_action (RefPtr<ActionGroup> group,
                                    const char* name, const char* label, sigc::slot<void> sl)
 {
@@ -494,7 +491,7 @@ ActionManager::register_toggle_action (RefPtr<ActionGroup> group,
 	fullpath += '/';
 	fullpath += name;
 
-	RefPtr<Action> act = ToggleAction::create (name, label);
+	RefPtr<ToggleAction> act = ToggleAction::create (name, label);
 	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created action %1 in %2 success: %3\n", name, group->get_name(), (bool) act));
 
 	if (actions.insert (ActionMap::value_type (fullpath, act)).second) {
@@ -503,7 +500,7 @@ ActionManager::register_toggle_action (RefPtr<ActionGroup> group,
 	}
 
 	/* already registered */
-	return RefPtr<Action>();
+	return RefPtr<ToggleAction>();
 }
 
 void
