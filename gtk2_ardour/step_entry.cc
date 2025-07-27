@@ -649,10 +649,10 @@ StepEntry::toggle_chord ()
 }
 
 void
-StepEntry::dot_change (GtkAction* act)
+StepEntry::dot_change (GtkRadioAction* act)
 {
 	if (gtk_toggle_action_get_active (GTK_TOGGLE_ACTION(act))) {
-		gint v = gtk_radio_action_get_current_value (GTK_RADIO_ACTION (act));
+		gint v = gtk_radio_action_get_current_value (act);
 		dot_adjustment.set_value (v);
 	}
 }
@@ -804,7 +804,7 @@ StepEntry::insert_b ()
 }
 
 void
-StepEntry::note_length_change (GtkAction* act)
+StepEntry::note_length_change (GtkRadioAction* act)
 {
 	/* it doesn't matter which note length action we look up - we are interested
 	   in the current_value which is global across the whole group of note length
@@ -815,13 +815,13 @@ StepEntry::note_length_change (GtkAction* act)
 	*/
 
 	if (gtk_toggle_action_get_active (GTK_TOGGLE_ACTION(act))) {
-		gint v = gtk_radio_action_get_current_value (GTK_RADIO_ACTION (act));
+		gint v = gtk_radio_action_get_current_value (act);
 		length_divisor_adjustment.set_value (v);
 	}
 }
 
 void
-StepEntry::note_velocity_change (GtkAction* act)
+StepEntry::note_velocity_change (GtkRadioAction* act)
 {
 	/* it doesn't matter which note velocity action we look up - we are interested
 	   in the current_value which is global across the whole group of note velocity
@@ -832,7 +832,7 @@ StepEntry::note_velocity_change (GtkAction* act)
 	*/
 
 	if (gtk_toggle_action_get_active (GTK_TOGGLE_ACTION(act))) {
-		gint v = gtk_radio_action_get_current_value (GTK_RADIO_ACTION (act));
+		gint v = gtk_radio_action_get_current_value (act);
 		velocity_adjustment.set_value (v);
 	}
 }
