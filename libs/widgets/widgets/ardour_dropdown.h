@@ -45,14 +45,16 @@ public:
 
 	void clear_items ();
 	void add_menu_elem (Gtk::Menu_Helpers::Element e);
+	void append_text_item (std::string const& text);
+	void add_separator ();
 	void append (Glib::RefPtr<Gtk::Action>);
+	void append (Gtk::Menu&, Glib::RefPtr<Gtk::Action>);
 
 	void disable_scrolling();
 
 	Gtk::Menu_Helpers::MenuList& items () { return _menu.items (); }
 	Gtk::Menu& menu () { return _menu; }
 
-	void append_text_item (std::string const& text);
 	void set_active (std::string const& text);
 
 protected:

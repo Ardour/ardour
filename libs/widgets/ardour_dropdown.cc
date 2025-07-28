@@ -169,6 +169,13 @@ ArdourDropdown::clear_items ()
 }
 
 void
+ArdourDropdown::add_separator ()
+{
+	using namespace Menu_Helpers;
+	add_menu_elem (SeparatorElem());
+}
+
+void
 ArdourDropdown::add_menu_elem (Menu_Helpers::Element e)
 {
 	using namespace Menu_Helpers;
@@ -200,4 +207,10 @@ void
 ArdourDropdown::append (Glib::RefPtr<Action> action)
 {
 	_menu.items().push_back (Menu_Helpers::MenuElem (action->get_short_label(), sigc::mem_fun (action.get(), &Action::activate)));
+}
+
+void
+ArdourDropdown::append (Gtk::Menu& submenu, Glib::RefPtr<Action> action)
+{
+	submenu.items().push_back (Menu_Helpers::MenuElem (action->get_short_label(), sigc::mem_fun (action.get(), &Action::activate)));
 }
