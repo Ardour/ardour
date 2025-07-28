@@ -1498,9 +1498,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_strict_io", &Route::set_strict_io)
 		.addFunction ("reset_plugin_insert", &Route::reset_plugin_insert)
 		.addFunction ("customize_plugin_insert", &Route::customize_plugin_insert)
-		.addFunction ("add_sidechain", &Route::add_sidechain)
 		.addFunction ("add_aux_send", &Route::add_aux_send)
-		.addFunction ("remove_sidechain", &Route::remove_sidechain)
 		.addFunction ("main_outs", &Route::main_outs)
 		.addFunction ("muted", &Route::muted)
 		.addFunction ("soloed", &Route::soloed)
@@ -3097,12 +3095,6 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("current_start_sample", &Session::current_start_sample)
 		.addFunction ("current_end_sample", &Session::current_end_sample)
 		.addFunction ("actively_recording", &Session::actively_recording)
-		.addFunction ("new_audio_track", &Session::new_audio_track)
-		.addFunction ("new_audio_route", &Session::new_audio_route)
-		.addFunction ("new_midi_track", &Session::new_midi_track)
-		.addFunction ("new_midi_route", &Session::new_midi_route)
-
-		.addFunction ("add_master_bus", &Session::add_master_bus)
 
 		.addFunction ("get_routes", &Session::get_routes)
 		.addFunction ("get_tracks", &Session::get_tracks)
@@ -3159,7 +3151,6 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("worst_latency_preroll_buffer_size_ceil", &Session::worst_latency_preroll_buffer_size_ceil)
 		.addFunction ("cfg", &Session::cfg)
 		.addFunction ("route_groups", &Session::route_groups)
-		.addFunction ("new_route_group", &Session::new_route_group)
 		.addFunction ("session_range_is_free", &Session::session_range_is_free)
 		.addFunction ("set_session_range_is_free", &Session::set_session_range_is_free)
 		.addFunction ("set_session_extents", &Session::set_session_extents)
@@ -3505,7 +3496,9 @@ LuaBindings::dsp (lua_State* L)
 void
 LuaBindings::non_rt (lua_State* L)
 {
-	// non-realtime session functions
+	/* non-realtime session functions
+	 * must be called after ::common()
+	 */
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ARDOUR")
 		.beginClass <Session> ("Session")
@@ -3520,8 +3513,18 @@ LuaBindings::non_rt (lua_State* L)
 		.addFunction ("writable", &Session::writable)
 
 		.addFunction<RouteList (Session::*)(uint32_t, PresentationInfo::order_t, const std::string&, const std::string&, PlaylistDisposition)> ("new_route_from_template", &Session::new_route_from_template)
-		// TODO  session_add_audio_track  session_add_midi_track  session_add_mixed_track
-		//.addFunction ("new_midi_track", &Session::new_midi_track)
+		.addFunction ("new_audio_track", &Session::new_audio_track)
+		.addFunction ("new_audio_route", &Session::new_audio_route)
+		.addFunction ("new_midi_track", &Session::new_midi_track)
+		.addFunction ("new_midi_route", &Session::new_midi_route)
+		.addFunction ("new_route_group", &Session::new_route_group)
+		.addFunction ("add_master_bus", &Session::add_master_bus)
+		.endClass ()
+
+		.deriveWSPtrClass <Route, Stripable> ("Route")
+		.addFunction ("save_as_template", &Route::save_as_template)
+		.addFunction ("add_sidechain", &Route::add_sidechain)
+		.addFunction ("remove_sidechain", &Route::remove_sidechain)
 		.endClass ()
 
 		.endNamespace (); // ARDOUR
