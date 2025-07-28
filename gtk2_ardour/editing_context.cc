@@ -1055,8 +1055,9 @@ EditingContext::set_grid_to (GridType gt)
 	}
 
 	bool grid_type_changed = true;
-	if ( grid_type_is_musical(_grid_type) && grid_type_is_musical(gt))
+	if ( grid_type_is_musical(_grid_type) && grid_type_is_musical(gt)) {
 		grid_type_changed = false;
+	}
 
 	_grid_type = gt;
 
