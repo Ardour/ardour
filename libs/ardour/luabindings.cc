@@ -3503,7 +3503,7 @@ LuaBindings::dsp (lua_State* L)
 }
 
 void
-LuaBindings::session (lua_State* L)
+LuaBindings::non_rt (lua_State* L)
 {
 	// non-realtime session functions
 	luabridge::getGlobalNamespace (L)

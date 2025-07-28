@@ -783,7 +783,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 {
 	LuaBindings::stddef (L);
 	LuaBindings::common (L);
-	LuaBindings::session (L);
+	LuaBindings::non_rt (L);
 	LuaBindings::osc (L);
 
 	bind_cairo (L);
