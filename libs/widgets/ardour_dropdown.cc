@@ -92,8 +92,8 @@ ArdourDropdown::set_active (std::string const& text)
 	int c = 0;
 	for (MenuList::const_iterator i = items.begin(); i != items.end(); ++i, ++c) {
 		if (i->get_label() == text) {
-			_menu.set_active(c);
-			_menu.activate_item(*i);
+			_menu.set_active (c);
+			_menu.activate_item (*i);
 			break;
 		}
 	}
