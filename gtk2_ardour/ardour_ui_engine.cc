@@ -80,6 +80,7 @@ ARDOUR_UI::audioengine_became_silent ()
 	pay_button.signal_clicked().connect (sigc::hide_return (sigc::bind (sigc::ptr_fun (openuri), (const char*) "https://ardour.org/download")));
 	subscribe_button.signal_clicked().connect (sigc::hide_return (sigc::bind (sigc::ptr_fun (openuri), (const char*) "https://ardour.org/subscribe")));
 
+	
 	msg.get_vbox()->pack_start (pay_label);
 	msg.get_vbox()->pack_start (pay_button_box);
 	msg.get_vbox()->pack_start (subscribe_label);

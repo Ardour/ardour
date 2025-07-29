@@ -379,7 +379,6 @@ Editor::Editor ()
 	, _last_cut_copy_source_track (nullptr)
 	, _region_selection_change_updates_region_list (true)
 	, _following_mixer_selection (false)
-	, _show_touched_automation (false)
 	, _control_point_toggled_on_press (false)
 	, _stepping_axis_view (nullptr)
 	, _main_menu_disabler (nullptr)
@@ -1151,7 +1150,7 @@ Editor::map_position_change (samplepos_t sample)
 		return;
 	}
 
-	if (_follow_playhead) {
+	if (follow_playhead()) {
 		center_screen (sample);
 	}
 
@@ -1229,7 +1228,7 @@ Editor::set_session (Session *t)
 	if (!_pianoroll) {
 		// XXX this should really not happen here
 		_pianoroll = new Pianoroll ("editor pianoroll", true);
-		_pianoroll->viewport().set_size_request (-1, 120);
+		_pianoroll->get_canvas_viewport()->set_size_request (-1, 120);
 	}
 	_pianoroll->set_session (_session);
 
@@ -2068,6 +2067,8 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 void
 Editor::show_rulers_for_grid ()
 {
+	GridType gt (grid_type());
+
 	/* show appropriate rulers for this grid setting. */
 	if (grid_musical()) {
 		ruler_tempo_action->set_active(true);
@@ -2079,7 +2080,7 @@ Editor::show_rulers_for_grid ()
 			ruler_minsec_action->set_active(false);
 			ruler_samples_action->set_active(false);
 		}
-	} else if (_grid_type == GridTypeTimecode) {
+	} else if (gt == GridTypeTimecode) {
 		ruler_timecode_action->set_active(true);
 
 		if (UIConfiguration::instance().get_rulers_follow_grid()) {
@@ -2089,7 +2090,7 @@ Editor::show_rulers_for_grid ()
 			ruler_minsec_action->set_active(false);
 			ruler_samples_action->set_active(false);
 		}
-	} else if (_grid_type == GridTypeMinSec) {
+	} else if (gt == GridTypeMinSec) {
 		ruler_minsec_action->set_active(true);
 
 		if (UIConfiguration::instance().get_rulers_follow_grid()) {
@@ -2099,7 +2100,7 @@ Editor::show_rulers_for_grid ()
 			ruler_timecode_action->set_active(false);
 			ruler_samples_action->set_active(false);
 		}
-	} else if (_grid_type == GridTypeCDFrame) {
+	} else if (gt == GridTypeCDFrame) {
 		ruler_minsec_action->set_active(true);
 
 		if (UIConfiguration::instance().get_rulers_follow_grid()) {
@@ -2334,7 +2335,7 @@ Editor::set_state (const XMLNode& node, int version)
 		RefPtr<ToggleAction> tact;
 
 		tact = ActionManager::get_toggle_action ((editor_name () + X_("Editing")).c_str(), X_("toggle-follow-playhead"));
-		yn = _follow_playhead;
+		yn = follow_playhead();
 		if (tact->get_active() != yn) {
 			tact->set_active (yn);
 		}
@@ -2374,19 +2375,14 @@ Editor::get_state () const
 	node->set_property ("y-origin", vertical_adjustment.get_value ());
 
 	node->set_property ("maximised", _maximised);
-	node->set_property ("follow-playhead", _follow_playhead);
+	node->set_property ("follow-playhead", follow_playhead());
 	node->set_property ("stationary-playhead", _stationary_playhead);
 	node->set_property ("mouse-mode", mouse_mode);
 	node->set_property ("join-object-range", smart_mode_action->get_active ());
 
-	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-mixer"));
-	node->set_property (X_("show-editor-mixer"), tact->get_active());
-
-	tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-list"));
-	node->set_property (X_("show-editor-list"), tact->get_active());
-
-	tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-props"));
-	node->set_property (X_("show-editor-props"), tact->get_active());
+	node->set_property (X_("show-editor-mixer"), show_editor_mixer_action->get_active());
+	node->set_property (X_("show-editor-list"), show_editor_list_action->get_active());
+	node->set_property (X_("show-editor-props"), show_editor_props_action->get_active());
 
 	node->set_property (X_("editor-list-page"), _the_notebook.get_current_page ());
 	node->set_property (X_("editor-list-btn1"), _notebook_tab1.index ());
@@ -2399,7 +2395,7 @@ Editor::get_state () const
 	}
 
 	node->set_property (X_("show-marker-lines"), _show_marker_lines);
-	node->set_property (X_("show-touched-automation"), _show_touched_automation);
+	node->set_property (X_("show-touched-automation"), show_touched_automation());
 
 	node->add_child_nocopy (selection->get_state ());
 
@@ -2615,7 +2611,7 @@ Editor::snap_to_grid (timepos_t const & presnap, Temporal::RoundMode direction, 
 		ret = snap_to_bbt (presnap, direction, gpref);
 	}
 
-	switch (_grid_type) {
+	switch (grid_type()) {
 	case GridTypeTimecode:
 		ret = snap_to_timecode(presnap, direction, gpref);
 		break;
@@ -3458,28 +3454,29 @@ Editor::set_stationary_playhead (bool yn)
 }
 
 bool
-Editor::show_touched_automation () const
+Editor::show_touched_automation() const
 {
 	if (!contents().get_mapped()) {
 		return false;
 	}
-	return _show_touched_automation;
+
+	if (!show_touched_automation_action) {
+		return false;
+	}
+
+	return show_touched_automation_action->get_active ();
 }
 
 void
 Editor::toggle_show_touched_automation ()
 {
-	RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-touched-automation"));
-	set_show_touched_automation (tact->get_active());
+	set_show_touched_automation (show_touched_automation_action->get_active());
 }
 
 void
 Editor::set_show_touched_automation (bool yn)
 {
-	if (_show_touched_automation == yn) {
-		return;
-	}
-	_show_touched_automation = yn;
+	show_touched_automation_action->set_active (yn);
 	if (!yn) {
 		RouteTimeAxisView::signal_ctrl_touched (true);
 	}
@@ -4546,7 +4543,7 @@ Editor::located ()
 
 	if (_session) {
 		_playhead_cursor->set_position (_session->audible_sample ());
-		if (_follow_playhead && !_pending_initial_locate) {
+		if (follow_playhead() && !_pending_initial_locate) {
 			reset_x_origin_to_follow_playhead ();
 		}
 		update_section_box ();
@@ -5330,7 +5327,7 @@ Editor::super_rapid_screen_update ()
 		return;
 	}
 
-	if (!_follow_playhead || pending_visual_change.being_handled) {
+	if (!follow_playhead() || pending_visual_change.being_handled) {
 		/* We only do this if we aren't already
 		 * handling a visual change (ie if
 		 * pending_visual_change.being_handled is
@@ -5721,7 +5718,7 @@ Editor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapP
 	timepos_t best = timepos_t::max (start.time_domain()); // this records the best snap-result we've found so far
 
 	/* check Grid */
-	if ( (_grid_type != GridTypeNone) && (uic.get_snap_target () != SnapTargetOther) ) {
+	if ( (grid_type() != GridTypeNone) && (uic.get_snap_target () != SnapTargetOther) ) {
 		timepos_t pre (presnap);
 		timepos_t post (snap_to_grid (pre, direction, pref));
 		check_best_snap (presnap, post, dist, best);

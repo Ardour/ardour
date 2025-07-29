@@ -2251,6 +2251,9 @@ ARDOUR_UI::save_state_canfail (string name, bool switch_to_it)
 		if ((ret = _session->save_state (name, false, switch_to_it)) != 0) {
 			return ret;
 		}
+
+		std::string rus_path = Glib::build_filename (_session->session_directory().root_path(), "rus.xml");
+		region_ui_settings_manager.save (rus_path);
 	}
 
 	save_ardour_state (); /* XXX cannot fail? yeah, right ... */

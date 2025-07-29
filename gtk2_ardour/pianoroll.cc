@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ytkmm/scrollbar.h"
+
 #include "pbd/stateful_diff_command.h"
 #include "pbd/unwind.h"
 
@@ -32,8 +34,6 @@
 #include "canvas/rectangle.h"
 #include "canvas/widget.h"
 
-#include "ytkmm/scrollbar.h"
-
 #include "gtkmm2ext/actions.h"
 
 #include "widgets/ardour_button.h"
@@ -42,6 +42,7 @@
 #include "widgets/tooltips.h"
 
 #include "ardour_ui.h"
+#include "editing_convert.h"
 #include "editor_cursors.h"
 #include "editor_drag.h"
 #include "gui_thread.h"
@@ -66,20 +67,13 @@ using namespace Gtkmm2ext;
 using namespace Temporal;
 
 Pianoroll::Pianoroll (std::string const & name, bool with_transport)
-	: CueEditor (name)
-	, timebar_height (15.)
-	, n_timebars (0)
+	: CueEditor (name, with_transport)
 	, prh (nullptr)
 	, bg (nullptr)
 	, view (nullptr)
 	, bbt_metric (*this)
 	, _note_mode (Sustained)
-	, zoom_in_allocate (false)
-	, solo_button (S_("Solo|S"))
-	, length_label (X_("Record:"))
 	, ignore_channel_changes (false)
-	, with_transport_controls (with_transport)
-	, show_source (false)
 {
 	mouse_mode = Editing::MouseContent;
 	autoscroll_vertical_allowed = false;
@@ -90,7 +84,6 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 
 	load_bindings ();
 	register_actions ();
-	bind_mouse_mode_buttons ();
 
 	build_grid_type_menu ();
 	build_draw_midi_menus();
@@ -100,69 +93,19 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 
 Pianoroll::~Pianoroll ()
 {
-	delete own_bindings;
-
 	drop_grid (); // unparent gridlines before deleting _canvas_viewport
 
 	delete view;
 	delete bg;
-	delete _canvas_viewport;
 }
 
 void
 Pianoroll::set_show_source (bool yn)
 {
-	show_source = yn;
+	CueEditor::set_show_source (yn);
 	if (view) {
 		view->set_show_source (yn);
 	}
-}
-
-void
-Pianoroll::load_bindings ()
-{
-	load_shared_bindings ();
-	for (auto & b : bindings) {
-		b->associate ();
-	}
-	set_widget_bindings (*get_canvas(), bindings, ARDOUR_BINDING_KEY);
-}
-
-void
-Pianoroll::register_actions ()
-{
-	editor_actions = ActionManager::create_action_group (own_bindings, editor_name());
-
-	bind_mouse_mode_buttons ();
-}
-
-ArdourCanvas::GtkCanvasViewport*
-Pianoroll::get_canvas_viewport() const
-{
-	return _canvas_viewport;
-}
-
-ArdourCanvas::GtkCanvas*
-Pianoroll::get_canvas() const
-{
-	return _canvas;
-}
-
-bool
-Pianoroll::canvas_pre_event (GdkEvent* ev)
-{
-	switch (ev->type) {
-	case GDK_ENTER_NOTIFY:
-	case GDK_LEAVE_NOTIFY:
-		if (canvas_enter_leave (&ev->crossing)) {
-			return true;
-		}
-		break;
-	default:
-		break;
-	}
-
-	return false;
 }
 
 void
@@ -274,23 +217,12 @@ Pianoroll::add_multi_controller_item (Gtk::Menu_Helpers::MenuList&,
 	mb->add_item (name, menu_text, *chn_menu, [](){});
 }
 
-
-void
-Pianoroll::scrolled ()
-{
-	pending_visual_change.add (VisualChange::TimeOrigin);
-	pending_visual_change.time_origin = horizontal_adjustment.get_value() * samples_per_pixel;
-	ensure_visual_change_idle_handler ();
-}
-
 void
 Pianoroll::build_lower_toolbar ()
 {
 	horizontal_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Pianoroll::scrolled));
 
 	ArdourButton::Element elements = ArdourButton::Element (ArdourButton::Text|ArdourButton::Indicator|ArdourButton::Edge|ArdourButton::Body);
-
-	_canvas_hscrollbar = manage (new Gtk::HScrollbar (horizontal_adjustment));
 
 	velocity_button = new ArdourButton (_("Velocity"), elements);
 	bender_button = new ArdourButton (_("Bender"), elements);
@@ -355,145 +287,25 @@ Pianoroll::build_lower_toolbar ()
 }
 
 void
-Pianoroll::build_upper_toolbar ()
+Pianoroll::pack_inner (Gtk::Box& box)
 {
-	using namespace Gtk::Menu_Helpers;
-
-	Gtk::HBox* mode_box = manage(new Gtk::HBox);
-	mode_box->set_border_width (2);
-	mode_box->set_spacing(2);
-
-	Gtk::HBox* mouse_mode_box = manage (new Gtk::HBox);
-	Gtk::HBox* mouse_mode_hbox = manage (new Gtk::HBox);
-	Gtk::VBox* mouse_mode_vbox = manage (new Gtk::VBox);
-	Gtk::Alignment* mouse_mode_align = manage (new Gtk::Alignment);
-
-	Glib::RefPtr<Gtk::SizeGroup> mouse_mode_size_group = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_VERTICAL);
-	mouse_mode_size_group->add_widget (mouse_draw_button);
-	mouse_mode_size_group->add_widget (mouse_content_button);
-
-	mouse_mode_size_group->add_widget (grid_type_selector);
-	mouse_mode_size_group->add_widget (draw_length_selector);
-	mouse_mode_size_group->add_widget (draw_velocity_selector);
-	mouse_mode_size_group->add_widget (draw_channel_selector);
-	mouse_mode_size_group->add_widget (snap_mode_button);
-
-	mouse_mode_hbox->set_spacing (2);
-	mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
-	mouse_mode_hbox->pack_start (mouse_content_button, false, false);
-
-	mouse_mode_vbox->pack_start (*mouse_mode_hbox);
-
-	mouse_mode_align->add (*mouse_mode_vbox);
-	mouse_mode_align->set (0.5, 1.0, 0.0, 0.0);
-
-	mouse_mode_box->pack_start (*mouse_mode_align, false, false);
-
-	pack_snap_box ();
-	pack_draw_box (false);
-
-	Gtk::HBox* _toolbar_inner = manage (new Gtk::HBox);
-	Gtk::HBox* _toolbar_outer = manage (new Gtk::HBox);
-	Gtk::HBox* _toolbar_left = manage (new Gtk::HBox);
-
-	_toolbar_inner->pack_start (*mouse_mode_box, false, false);
-	_toolbar_inner->pack_start (snap_box, false, false);
-	_toolbar_inner->pack_start (grid_box, false, false);
-	_toolbar_inner->pack_start (draw_box, false, false);
-
-	set_tooltip (full_zoom_button, _("Zoom to full clip"));
-	set_tooltip (note_mode_button, _("Toggle between drum and regular note drawing"));
-	note_mode_button.set_icon (ArdourIcon::Drum);
-
-	play_note_selection_button.set_icon (ArdourIcon::ToolAudition);
-
-#define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
-	note_mode_button.set_size_request (PX_SCALE(50), -1);
-	note_mode_button.set_active_color (UIConfiguration::instance().color ("alert:yellow"));
-
-	play_button.set_icon (ArdourIcon::TransportPlay);
-	play_button.set_name ("transport button");
-	play_button.show();
-
-	if (with_transport_controls) {
-		loop_button.set_icon (ArdourIcon::TransportLoop);
-		loop_button.set_name ("transport button");
-
-		solo_button.set_name ("solo button");
-
-		play_box.set_spacing (8);
-		play_box.pack_start (play_button, false, false);
-		play_box.pack_start (loop_button, false, false);
-		play_box.pack_start (solo_button, false, false);
-		loop_button.show();
-		solo_button.show();
-		play_box.set_no_show_all (true);
-		play_box.show ();
-
-		play_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::play_button_press), false);
-		solo_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::solo_button_press), false);
-		loop_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::loop_button_press), false);
-	} else {
-		rec_box.pack_start (play_button, false, false);
-		play_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::bang_button_press), false);
-	}
-
-	rec_enable_button.set_icon (ArdourIcon::RecButton);
-	rec_enable_button.set_sensitive (false);
-	rec_enable_button.signal_button_release_event().connect (sigc::mem_fun (*this, &Pianoroll::rec_button_press), false);
-	rec_enable_button.set_name ("record enable button");
-
-	length_selector.add_menu_elem (MenuElem (_("Until Stopped"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_recording_length), Temporal::BBT_Offset ())));
-	length_selector.add_menu_elem (MenuElem (_("1 Bar"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_recording_length), Temporal::BBT_Offset (1, 0, 0))));
-	std::vector<int> b ({ 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 20, 24, 32 });
-	for (auto & n : b) {
-		length_selector.add_menu_elem (MenuElem (string_compose (_("%1 Bars"), n), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_recording_length), Temporal::BBT_Offset (n, 0, 0))));
-	}
-	length_selector.set_active (_("Until Stopped"));
-
-	rec_box.set_spacing (12);
-	rec_box.pack_start (rec_enable_button, false, false);
-	rec_box.pack_start (length_label, false, false);
-	rec_box.pack_start (length_selector, false, false);
-	rec_enable_button.show();
-	length_label.show ();
-	length_selector.show ();
-	rec_box.set_no_show_all (true);
-	/* rec box not shown */
-
-	_toolbar_outer->set_border_width (6);
-	_toolbar_outer->set_spacing (12);
-	if (with_transport_controls) {
-		_toolbar_outer->pack_start (play_box, false, false);
-	}
-	_toolbar_outer->pack_start (rec_box, false, false);
-	_toolbar_outer->pack_start (visible_channel_label, false, false);
-	_toolbar_outer->pack_start (visible_channel_selector, false, false);
-	_toolbar_outer->pack_start (play_note_selection_button, false, false);
-	_toolbar_outer->pack_start (note_mode_button, false, false);
-	_toolbar_outer->pack_start (follow_playhead_button, false, false);
-	_toolbar_outer->pack_start (*_toolbar_inner, true, false);
-
-	build_zoom_focus_menu ();
-	zoom_focus_selector.set_text (zoom_focus_strings[(int)_zoom_focus]);
-
-	_toolbar_left->pack_start (zoom_in_button, false, false);
-	_toolbar_left->pack_start (zoom_out_button, false, false);
-	_toolbar_left->pack_start (full_zoom_button, false, false);
-	_toolbar_left->pack_start (zoom_focus_selector, false, false);
-
-	_toolbar_outer->pack_start (*_toolbar_left, true, false);
-	_toolbox.pack_start (*_toolbar_outer, false, false);
-
-	_contents.add (_toolbox);
-	_contents.signal_unmap().connect ([this]() {_canvas_viewport->unmap ();}, false);
-	_contents.signal_map().connect ([this]() {_canvas_viewport->map ();}, false);
+	box.pack_start (snap_box, false, false);
+	box.pack_start (grid_box, false, false);
+	box.pack_start (draw_box, false, false);
 }
 
 void
-Pianoroll::set_recording_length (Temporal::BBT_Offset dur)
+Pianoroll::pack_outer (Gtk::Box& box)
 {
-	rec_length = dur;
+	if (with_transport_controls) {
+		box.pack_start (play_box, false, false);
+	}
+
+	box.pack_start (rec_box, false, false);
+	box.pack_start (visible_channel_label, false, false);
+	box.pack_start (visible_channel_selector, false, false);
+	box.pack_start (note_mode_button, false, false);
+	box.pack_start (follow_playhead_button, false, false);
 }
 
 void
@@ -517,38 +329,35 @@ Pianoroll::set_visible_channel (int n)
 void
 Pianoroll::build_canvas ()
 {
-	_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
+	_canvas.set_background_color (UIConfiguration::instance().color ("arrange base"));
+	_canvas.signal_event().connect (sigc::mem_fun (*this, &Pianoroll::canvas_pre_event), false);
+	dynamic_cast<ArdourCanvas::GtkCanvas*>(&_canvas)->use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
 
-	_canvas = _canvas_viewport->canvas ();
-	_canvas->set_background_color (UIConfiguration::instance().color ("midi track base"));
-	_canvas->signal_event().connect (sigc::mem_fun (*this, &Pianoroll::canvas_pre_event), false);
-	dynamic_cast<ArdourCanvas::GtkCanvas*>(_canvas)->use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
-
-	_canvas->PreRender.connect (sigc::mem_fun(*this, &EditingContext::pre_render));
+	_canvas.PreRender.connect (sigc::mem_fun(*this, &EditingContext::pre_render));
 
 	/* scroll group for items that should not automatically scroll
 	 *  (e.g verbose cursor). It shares the canvas coordinate space.
 	*/
-	no_scroll_group = new ArdourCanvas::Container (_canvas->root());
+	no_scroll_group = new ArdourCanvas::Container (_canvas.root());
 
-	h_scroll_group = new ArdourCanvas::ScrollGroup (_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
+	h_scroll_group = new ArdourCanvas::ScrollGroup (_canvas.root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
 	CANVAS_DEBUG_NAME (h_scroll_group, "pianoroll h scroll");
-	_canvas->add_scroller (*h_scroll_group);
+	_canvas.add_scroller (*h_scroll_group);
 
 
-	v_scroll_group = new ArdourCanvas::ScrollGroup (_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsVertically);
+	v_scroll_group = new ArdourCanvas::ScrollGroup (_canvas.root(), ArdourCanvas::ScrollGroup::ScrollsVertically);
 	CANVAS_DEBUG_NAME (v_scroll_group, "pianoroll v scroll");
-	_canvas->add_scroller (*v_scroll_group);
+	_canvas.add_scroller (*v_scroll_group);
 
-	hv_scroll_group = new ArdourCanvas::ScrollGroup (_canvas->root(),
+	hv_scroll_group = new ArdourCanvas::ScrollGroup (_canvas.root(),
 	                                                 ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
 		                ArdourCanvas::ScrollGroup::ScrollsHorizontally));
 	CANVAS_DEBUG_NAME (hv_scroll_group, "pianoroll hv scroll");
-	_canvas->add_scroller (*hv_scroll_group);
+	_canvas.add_scroller (*hv_scroll_group);
 
-	cursor_scroll_group = new ArdourCanvas::ScrollGroup (_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
+	cursor_scroll_group = new ArdourCanvas::ScrollGroup (_canvas.root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
 	CANVAS_DEBUG_NAME (cursor_scroll_group, "pianoroll cursor scroll");
-	_canvas->add_scroller (*cursor_scroll_group);
+	_canvas.add_scroller (*cursor_scroll_group);
 
 	/*a group to hold global rects like punch/loop indicators */
 	global_rect_group = new ArdourCanvas::Container (hv_scroll_group);
@@ -599,13 +408,13 @@ Pianoroll::build_canvas ()
 
 	n_timebars++;
 
-	bbt_ruler->Event.connect (sigc::mem_fun (*this, &Pianoroll::bbt_ruler_event));
+	bbt_ruler->Event.connect (sigc::mem_fun (*this, &CueEditor::ruler_event));
 
 	data_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
 
 	bg = new PianorollMidiBackground (data_group, *this);
-	_canvas_viewport->signal_size_allocate().connect (sigc::mem_fun(*this, &Pianoroll::canvas_allocate), false);
+	_canvas_viewport.signal_size_allocate().connect (sigc::mem_fun(*this, &Pianoroll::canvas_allocate), false);
 
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::Rectangle (data_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
@@ -650,57 +459,12 @@ Pianoroll::build_canvas ()
 	_playhead_cursor->canvas_item().raise_to_top();
 	h_scroll_group->raise_to_top ();
 
-	_canvas->set_name ("MidiCueCanvas");
-	_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
-	_canvas->set_can_focus ();
-	_canvas->signal_show().connect (sigc::mem_fun (*this, &Pianoroll::catch_pending_show_region));
-	_toolbox.pack_start (*_canvas_viewport, true, true);
-}
+	_canvas.set_name ("MidiCueCanvas");
+	_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
+	_canvas.set_can_focus ();
+	_canvas.signal_show().connect (sigc::mem_fun (*this, &CueEditor::catch_pending_show_region));
 
-void
-Pianoroll::catch_pending_show_region ()
-{
-	if (_visible_pending_region) {
-		set_region (_visible_pending_region);
-		_visible_pending_region.reset ();
-	}
-}
-
-bool
-Pianoroll::bbt_ruler_event (GdkEvent* ev)
-{
-	switch (ev->type) {
-	case GDK_BUTTON_RELEASE:
-		if (ev->button.button == 1) {
-			ruler_locate (&ev->button);
-		}
-		return true;
-	default:
-		break;
-	}
-
-	return false;
-}
-
-void
-Pianoroll::ruler_locate (GdkEventButton* ev)
-{
-	if (!_session) {
-		return;
-	}
-
-	if (ref.box()) {
-		/* we don't locate when working with triggers */
-		return;
-	}
-
-	if (!view->midi_region()) {
-		return;
-	}
-
-	samplepos_t sample = pixel_to_sample_from_event (ev->x);
-	sample += view->midi_region()->source_position().samples();
-	_session->request_locate (sample);
+	_toolbox.pack_start (_canvas_viewport, true, true);
 }
 
 void
@@ -780,7 +544,7 @@ Pianoroll::maybe_update ()
 		_playhead_cursor->set_position (0);
 	}
 
-	if (_follow_playhead) {
+	if (follow_playhead()) {
 		reset_x_origin_to_follow_playhead ();
 	}
 }
@@ -791,7 +555,7 @@ Pianoroll::canvas_enter_leave (GdkEventCrossing* ev)
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
 		if (ev->detail != GDK_NOTIFY_INFERIOR) {
-			_canvas_viewport->canvas()->grab_focus ();
+			_canvas.grab_focus ();
 			ActionManager::set_sensitive (_midi_actions, true);
 			within_track_canvas = true;
 		}
@@ -800,8 +564,8 @@ Pianoroll::canvas_enter_leave (GdkEventCrossing* ev)
 		if (ev->detail != GDK_NOTIFY_INFERIOR) {
 			ActionManager::set_sensitive (_midi_actions, false);
 			within_track_canvas = false;
-			ARDOUR_UI::instance()->reset_focus (_canvas_viewport);
-			gdk_window_set_cursor (_canvas_viewport->get_window()->gobj(), nullptr);
+			ARDOUR_UI::instance()->reset_focus (&_canvas_viewport);
+			gdk_window_set_cursor (_canvas_viewport.get_window()->gobj(), nullptr);
 		}
 	default:
 		break;
@@ -963,25 +727,9 @@ Pianoroll::set_trigger_end (Temporal::timepos_t const & p)
 }
 
 Gtk::Widget&
-Pianoroll::viewport()
-{
-	return *_canvas_viewport;
-}
-
-Gtk::Widget&
 Pianoroll::contents ()
 {
 	return _contents;
-}
-
-void
-Pianoroll::data_captured (samplecnt_t total_duration)
-{
-	data_capture_duration = total_duration;
-
-	if (!idle_update_queued.exchange (1)) {
-		Glib::signal_idle().connect (sigc::mem_fun (*this, &Pianoroll::idle_data_captured));
-	}
 }
 
 bool
@@ -991,23 +739,12 @@ Pianoroll::idle_data_captured ()
 		return false;
 	}
 
-	switch (ref.box()->record_enabled()) {
-	case Recording:
-		break;
-	default:
-		return false;
-	}
-
-	double where = sample_to_pixel_unrounded (data_capture_duration);
-
-	if (where > _visible_canvas_width * 0.80) {
-		set_samples_per_pixel (samples_per_pixel * 1.5);
-	}
+	CueEditor::idle_data_captured ();
 
 	if (view) {
 		view->clip_data_recorded (data_capture_duration);
 	}
-	idle_update_queued.store (0);
+
 	return false;
 }
 
@@ -1285,781 +1022,6 @@ Pianoroll::set_mouse_mode (Editing::MouseMode m, bool force)
 }
 
 void
-Pianoroll::step_mouse_mode (bool next)
-{
-}
-
-Editing::MouseMode
-Pianoroll::current_mouse_mode () const
-{
-	return mouse_mode;
-}
-
-bool
-Pianoroll::internal_editing() const
-{
-	return true;
-}
-
-RegionSelection
-Pianoroll::region_selection()
-{
-	RegionSelection rs;
-	/* there is never any region-level selection in a pianoroll */
-	return rs;
-}
-
-static void
-edit_last_mark_label (std::vector<ArdourCanvas::Ruler::Mark>& marks, const std::string& newlabel)
-{
-	ArdourCanvas::Ruler::Mark copy = marks.back();
-	copy.label = newlabel;
-	marks.pop_back ();
-	marks.push_back (copy);
-}
-
-void
-Pianoroll::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, samplepos_t leftmost, samplepos_t rightmost, gint /*maxchars*/)
-{
-	if (!_session) {
-		return;
-	}
-
-	bool provided = false;
-	std::shared_ptr<Temporal::TempoMap> tmap;
-
-	if (view && view->midi_region()) {
-		std::shared_ptr<SMFSource> smf (std::dynamic_pointer_cast<SMFSource> (view->midi_region()->midi_source()));
-
-		if (smf) {
-			tmap = smf->tempo_map (provided);
-		}
-	}
-
-	if (!provided) {
-		tmap.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
-	}
-
-	EditingContext::TempoMapScope tms (*this, tmap);
-	Temporal::TempoMapPoints::const_iterator i;
-
-	char buf[64];
-	Temporal::BBT_Time next_beat;
-	double bbt_position_of_helper;
-	bool helper_active = false;
-	ArdourCanvas::Ruler::Mark mark;
-	const samplecnt_t sr (_session->sample_rate());
-
-	Temporal::TempoMapPoints grid;
-	grid.reserve (4096);
-
-
-	/* prevent negative values of leftmost from creeping into tempomap
-	 */
-
-	const Beats left = tmap->quarters_at_sample (leftmost).round_down_to_beat();
-	const Beats lower_beat = (left < Beats() ? Beats() : left);
-
-	using std::max;
-
-	switch (bbt_ruler_scale) {
-
-	case bbt_show_quarters:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 1);
-		break;
-	case bbt_show_eighths:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 2);
-		break;
-	case bbt_show_sixteenths:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 4);
-		break;
-	case bbt_show_thirtyseconds:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 8);
-		break;
-	case bbt_show_sixtyfourths:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 16);
-		break;
-	case bbt_show_onetwentyeighths:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 32);
-		break;
-
-	case bbt_show_1:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 1);
-		break;
-
-	case bbt_show_4:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 4);
-		break;
-
-	case bbt_show_16:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 16);
-		break;
-
-	case bbt_show_64:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 64);
-		break;
-
-	default:
-		/* bbt_show_many */
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 128);
-		break;
-	}
-
-#if 0 // DEBUG GRID
-	for (auto const& g : grid) {
-		std::cout << "Grid " << g.time() <<  " Beats: " << g.beats() << " BBT: " << g.bbt() << " sample: " << g.sample(_session->nominal_sample_rate ()) << "\n";
-	}
-#endif
-
-	if (distance (grid.begin(), grid.end()) == 0) {
-		return;
-	}
-
-	/* we can accent certain lines depending on the user's Grid choice */
-	/* for example, even in a 4/4 meter we can draw a grid with triplet-feel */
-	/* and in this case you will want the accents on '3s' not '2s' */
-	uint32_t bbt_divisor = 2;
-
-	using namespace Editing;
-
-	switch (_grid_type) {
-	case GridTypeBeatDiv3:
-		bbt_divisor = 3;
-		break;
-	case GridTypeBeatDiv5:
-		bbt_divisor = 5;
-		break;
-	case GridTypeBeatDiv6:
-		bbt_divisor = 3;
-		break;
-	case GridTypeBeatDiv7:
-		bbt_divisor = 7;
-		break;
-	case GridTypeBeatDiv10:
-		bbt_divisor = 5;
-		break;
-	case GridTypeBeatDiv12:
-		bbt_divisor = 3;
-		break;
-	case GridTypeBeatDiv14:
-		bbt_divisor = 7;
-		break;
-	case GridTypeBeatDiv16:
-		break;
-	case GridTypeBeatDiv20:
-		bbt_divisor = 5;
-		break;
-	case GridTypeBeatDiv24:
-		bbt_divisor = 6;
-		break;
-	case GridTypeBeatDiv28:
-		bbt_divisor = 7;
-		break;
-	case GridTypeBeatDiv32:
-		break;
-	default:
-		bbt_divisor = 2;
-		break;
-	}
-
-	uint32_t bbt_beat_subdivision = 1;
-	switch (bbt_ruler_scale) {
-	case bbt_show_quarters:
-		bbt_beat_subdivision = 1;
-		break;
-	case bbt_show_eighths:
-		bbt_beat_subdivision = 1;
-		break;
-	case bbt_show_sixteenths:
-		bbt_beat_subdivision = 2;
-		break;
-	case bbt_show_thirtyseconds:
-		bbt_beat_subdivision = 4;
-		break;
-	case bbt_show_sixtyfourths:
-		bbt_beat_subdivision = 8;
-		break;
-	case bbt_show_onetwentyeighths:
-		bbt_beat_subdivision = 16;
-		break;
-	default:
-		bbt_beat_subdivision = 1;
-		break;
-	}
-
-	bbt_beat_subdivision *= bbt_divisor;
-
-	switch (bbt_ruler_scale) {
-
-	case bbt_show_many:
-		snprintf (buf, sizeof(buf), "cannot handle %" PRIu32 " bars", bbt_bars);
-		mark.style = ArdourCanvas::Ruler::Mark::Major;
-		mark.label = buf;
-		mark.position = leftmost;
-		marks.push_back (mark);
-		break;
-
-	case bbt_show_64:
-			for (i = grid.begin(); i != grid.end(); i++) {
-				BBT_Time bbt ((*i).bbt());
-				if (bbt.is_bar()) {
-					if (bbt.bars % 64 == 1) {
-						if (bbt.bars % 256 == 1) {
-							snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
-							mark.style = ArdourCanvas::Ruler::Mark::Major;
-						} else {
-							buf[0] = '\0';
-							if (bbt.bars % 256 == 129)  {
-								mark.style = ArdourCanvas::Ruler::Mark::Minor;
-							} else {
-								mark.style = ArdourCanvas::Ruler::Mark::Micro;
-							}
-						}
-						mark.label = buf;
-						mark.position = (*i).sample (sr);
-						marks.push_back (mark);
-					}
-				}
-			}
-			break;
-
-	case bbt_show_16:
-		for (i = grid.begin(); i != grid.end(); i++) {
-			BBT_Time bbt ((*i).bbt());
-			if (bbt.is_bar()) {
-			  if (bbt.bars % 16 == 1) {
-				if (bbt.bars % 64 == 1) {
-					snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
-					mark.style = ArdourCanvas::Ruler::Mark::Major;
-				} else {
-					buf[0] = '\0';
-					if (bbt.bars % 64 == 33)  {
-						mark.style = ArdourCanvas::Ruler::Mark::Minor;
-					} else {
-						mark.style = ArdourCanvas::Ruler::Mark::Micro;
-					}
-				}
-				mark.label = buf;
-				mark.position = (*i).sample(sr);
-				marks.push_back (mark);
-			  }
-			}
-		}
-	  break;
-
-	case bbt_show_4:
-		for (i = grid.begin(); i != grid.end(); ++i) {
-			BBT_Time bbt ((*i).bbt());
-			if (bbt.is_bar()) {
-				if (bbt.bars % 4 == 1) {
-					if (bbt.bars % 16 == 1) {
-						snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
-						mark.style = ArdourCanvas::Ruler::Mark::Major;
-				} else {
-						buf[0] = '\0';
-						mark.style = ArdourCanvas::Ruler::Mark::Minor;
-					}
-					mark.label = buf;
-					mark.position = (*i).sample (sr);
-					marks.push_back (mark);
-				}
-			}
-		}
-	  break;
-
-	case bbt_show_1:
-		for (i = grid.begin(); i != grid.end(); ++i) {
-			BBT_Time bbt ((*i).bbt());
-			if (bbt.is_bar()) {
-				snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
-				mark.style = ArdourCanvas::Ruler::Mark::Major;
-				mark.label = buf;
-				mark.position = (*i).sample (sr);
-				marks.push_back (mark);
-			}
-		}
-	break;
-
-	case bbt_show_quarters:
-
-		mark.label = "";
-		mark.position = leftmost;
-		mark.style = ArdourCanvas::Ruler::Mark::Micro;
-		marks.push_back (mark);
-
-		for (i = grid.begin(); i != grid.end(); ++i) {
-
-			BBT_Time bbt ((*i).bbt());
-
-			if ((*i).sample (sr) < leftmost && (bbt_bar_helper_on)) {
-				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, bbt.bars, bbt.beats);
-				edit_last_mark_label (marks, buf);
-			} else {
-
-				if (bbt.is_bar()) {
-					mark.style = ArdourCanvas::Ruler::Mark::Major;
-					snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
-				} else if ((bbt.beats % 2) == 1) {
-					mark.style = ArdourCanvas::Ruler::Mark::Minor;
-					buf[0] = '\0';
-				} else {
-					mark.style = ArdourCanvas::Ruler::Mark::Micro;
-					buf[0] = '\0';
-				}
-				mark.label = buf;
-				mark.position = (*i).sample (sr);
-				marks.push_back (mark);
-			}
-		}
-		break;
-
-	case bbt_show_eighths:
-	case bbt_show_sixteenths:
-	case bbt_show_thirtyseconds:
-	case bbt_show_sixtyfourths:
-	case bbt_show_onetwentyeighths:
-
-		bbt_position_of_helper = leftmost + (3 * get_current_zoom ());
-
-		mark.label = "";
-		mark.position = leftmost;
-		mark.style = ArdourCanvas::Ruler::Mark::Micro;
-		marks.push_back (mark);
-
-		for (i = grid.begin(); i != grid.end(); ++i) {
-
-			BBT_Time bbt ((*i).bbt());
-
-			if ((*i).sample (sr) < leftmost && (bbt_bar_helper_on)) {
-				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, bbt.bars, bbt.beats);
-				edit_last_mark_label (marks, buf);
-				helper_active = true;
-			} else {
-
-				if (bbt.is_bar()) {
-					mark.style = ArdourCanvas::Ruler::Mark::Major;
-					snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
-				} else if (bbt.ticks == 0) {
-					mark.style = ArdourCanvas::Ruler::Mark::Minor;
-					snprintf (buf, sizeof(buf), "%" PRIu32, bbt.beats);
-				} else {
-					mark.style = ArdourCanvas::Ruler::Mark::Micro;
-					buf[0] = '\0';
-				}
-
-				if (((*i).sample(sr) < bbt_position_of_helper) && helper_active) {
-					buf[0] = '\0';
-				}
-				mark.label =  buf;
-				mark.position = (*i).sample (sr);
-				marks.push_back (mark);
-			}
-		}
-
-		break;
-	}
-}
-
-
-void
-Pianoroll::mouse_mode_toggled (Editing::MouseMode m)
-{
-	Glib::RefPtr<Gtk::Action>       act  = get_mouse_mode_action (m);
-	Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
-
-	if (!tact->get_active()) {
-		/* this was just the notification that the old mode has been
-		 * left. we'll get called again with the new mode active in a
-		 * jiffy.
-		 */
-		return;
-	}
-
-	mouse_mode = m;
-
-	/* this should generate a new enter event which will
-	   trigger the appropriate cursor.
-	*/
-
-	if (_canvas) {
-		_canvas->re_enter ();
-	}
-}
-
-int
-Pianoroll::set_state (XMLNode const & node, int version)
-{
-	set_common_editing_state (node);
-	return 0;
-}
-
-XMLNode&
-Pianoroll::get_state () const
-{
-	XMLNode* node (new XMLNode (editor_name()));
-	get_common_editing_state (*node);
-	return *node;
-}
-
-/** @param allow_horiz true to allow horizontal autoscroll, otherwise false.
- *
- *  @param allow_vert true to allow vertical autoscroll, otherwise false.
- *
- */
-void
-Pianoroll::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
-{
-	if (!UIConfiguration::instance().get_autoscroll_editor () || autoscroll_active ()) {
-		return;
-	}
-
-	/* define a rectangular boundary for scrolling. If the mouse moves
-	 * outside of this area and/or continue to be outside of this area,
-	 * then we will continuously auto-scroll the canvas in the appropriate
-	 * direction(s)
-	 *
-	 * the boundary is defined in coordinates relative to canvas' own
-	 * window since that is what we're going to call ::get_pointer() on
-	 * during autoscrolling to determine if we're still outside the
-	 * boundary or not.
-	 */
-
-	ArdourCanvas::Rect scrolling_boundary;
-	Gtk::Allocation alloc;
-
-	alloc = get_canvas()->get_allocation ();
-
-	alloc.set_x (0);
-	alloc.set_y (0);
-
-	if (allow_vert) {
-		/* reduce height by the height of the timebars, which happens
-		   to correspond to the position of the data_group.
-		*/
-
-		alloc.set_height (alloc.get_height() - data_group->position().y);
-		alloc.set_y (alloc.get_y() + data_group->position().y);
-
-		/* now reduce it again so that we start autoscrolling before we
-		 * move off the top or bottom of the canvas
-		 */
-
-		alloc.set_height (alloc.get_height() - 20);
-		alloc.set_y (alloc.get_y() + 10);
-	}
-
-	if (allow_horiz && (alloc.get_width() > 20)) {
-
-		if (prh) {
-			double w, h;
-			prh->size_request (w, h);
-
-			alloc.set_width (alloc.get_width() - w);
-			alloc.set_x (alloc.get_x() + w);
-		}
-
-		/* the effective width of the autoscroll boundary so
-		   that we start scrolling before we hit the edge.
-
-		   this helps when the window is slammed up against the
-		   right edge of the screen, making it hard to scroll
-		   effectively.
-		*/
-
-		alloc.set_width (alloc.get_width() - 20);
-		alloc.set_x (alloc.get_x() + 10);
-	}
-
-	scrolling_boundary = ArdourCanvas::Rect (alloc.get_x(), alloc.get_y(), alloc.get_x() + alloc.get_width(), alloc.get_y() + alloc.get_height());
-
-	int x, y;
-	Gdk::ModifierType mask;
-
-	get_canvas()->get_window()->get_pointer (x, y, mask);
-
-	if ((allow_horiz && ((x < scrolling_boundary.x0 && _leftmost_sample > 0) || x >= scrolling_boundary.x1)) ||
-	    (allow_vert && ((y < scrolling_boundary.y0 && vertical_adjustment.get_value() > 0)|| y >= scrolling_boundary.y1))) {
-		start_canvas_autoscroll (allow_horiz, allow_vert, scrolling_boundary);
-	}
-}
-
-bool
-Pianoroll::autoscroll_active () const
-{
-	return autoscroll_connection.connected ();
-}
-
-bool
-Pianoroll::autoscroll_canvas ()
-{
-	using std::max;
-	using std::min;
-	int x, y;
-	Gdk::ModifierType mask;
-	sampleoffset_t dx = 0;
-	bool no_stop = false;
-	Gtk::Window* toplevel = dynamic_cast<Gtk::Window*>(_canvas_viewport->get_toplevel());
-
-	if (!toplevel) {
-		return false;
-	}
-
-	get_canvas()->get_window()->get_pointer (x, y, mask);
-
-	VisualChange vc;
-	bool vertical_motion = false;
-
-	if (autoscroll_horizontal_allowed) {
-
-		samplepos_t new_sample = _leftmost_sample;
-
-		/* horizontal */
-
-		if (x > autoscroll_boundary.x1) {
-
-			/* bring it back into view */
-			dx = x - autoscroll_boundary.x1;
-			dx += 10 + (2 * (autoscroll_cnt/2));
-
-			dx = pixel_to_sample (dx);
-
-			dx *= UIConfiguration::instance().get_draggable_playhead_speed();
-
-			if (_leftmost_sample < max_samplepos - dx) {
-				new_sample = _leftmost_sample + dx;
-			} else {
-				new_sample = max_samplepos;
-			}
-
-			no_stop = true;
-
-		} else if (x < autoscroll_boundary.x0) {
-
-			dx = autoscroll_boundary.x0 - x;
-			dx += 10 + (2 * (autoscroll_cnt/2));
-
-			dx = pixel_to_sample (dx);
-
-			dx *= UIConfiguration::instance().get_draggable_playhead_speed();
-
-			if (_leftmost_sample >= dx) {
-				new_sample = _leftmost_sample - dx;
-			} else {
-				new_sample = 0;
-			}
-
-			no_stop = true;
-		}
-
-		if (new_sample != _leftmost_sample) {
-			vc.time_origin = new_sample;
-			vc.add (VisualChange::TimeOrigin);
-		}
-	}
-
-	if (autoscroll_vertical_allowed) {
-
-		// const double vertical_pos = vertical_adjustment.get_value();
-		const int speed_factor = 10;
-
-		/* vertical */
-
-		if (y < autoscroll_boundary.y0) {
-
-			/* scroll to make higher tracks visible */
-
-			if (autoscroll_cnt && (autoscroll_cnt % speed_factor == 0)) {
-				// XXX SCROLL UP
-				vertical_motion = true;
-			}
-			no_stop = true;
-
-		} else if (y > autoscroll_boundary.y1) {
-
-			if (autoscroll_cnt && (autoscroll_cnt % speed_factor == 0)) {
-				// XXX SCROLL DOWN
-				vertical_motion = true;
-			}
-			no_stop = true;
-		}
-
-	}
-
-	if (vc.pending || vertical_motion) {
-
-		/* change horizontal first */
-
-		if (vc.pending) {
-			visual_changer (vc);
-		}
-
-		/* now send a motion event to notify anyone who cares
-		   that we have moved to a new location (because we scrolled)
-		*/
-
-		GdkEventMotion ev;
-
-		ev.type = GDK_MOTION_NOTIFY;
-		ev.state = Gdk::BUTTON1_MASK;
-
-		/* the motion handler expects events in canvas coordinate space */
-
-		/* we asked for the mouse position above (::get_pointer()) via
-		 * our own top level window (we being the Editor). Convert into
-		 * coordinates within the canvas window.
-		 */
-
-		int cx;
-		int cy;
-
-		//toplevel->translate_coordinates (*get_canvas(), x, y, cx,
-		//cy);
-		cx = x;
-		cy = y;
-
-		/* clamp x and y to remain within the autoscroll boundary,
-		 * which is defined in window coordinates
-		 */
-
-		x = min (max ((ArdourCanvas::Coord) cx, autoscroll_boundary.x0), autoscroll_boundary.x1);
-		y = min (max ((ArdourCanvas::Coord) cy, autoscroll_boundary.y0), autoscroll_boundary.y1);
-
-		/* now convert from Editor window coordinates to canvas
-		 * window coordinates
-		 */
-
-		ArdourCanvas::Duple d = get_canvas()->window_to_canvas (ArdourCanvas::Duple (cx, cy));
-		ev.x = d.x;
-		ev.y = d.y;
-		ev.state = mask;
-
-		motion_handler (0, (GdkEvent*) &ev, true);
-
-	} else if (no_stop) {
-
-		/* not changing visual state but pointer is outside the scrolling boundary
-		 * so we still need to deliver a fake motion event
-		 */
-
-		GdkEventMotion ev;
-
-		ev.type = GDK_MOTION_NOTIFY;
-		ev.state = Gdk::BUTTON1_MASK;
-
-		/* the motion handler expects events in canvas coordinate space */
-
-		/* first convert from Editor window coordinates to canvas
-		 * window coordinates
-		 */
-
-		int cx;
-		int cy;
-
-		/* clamp x and y to remain within the visible area. except
-		 * .. if horizontal scrolling is allowed, always allow us to
-		 * move back to zero
-		 */
-
-		if (autoscroll_horizontal_allowed) {
-			x = min (max ((ArdourCanvas::Coord) x, 0.0), autoscroll_boundary.x1);
-		} else {
-			x = min (max ((ArdourCanvas::Coord) x, autoscroll_boundary.x0), autoscroll_boundary.x1);
-		}
-		y = min (max ((ArdourCanvas::Coord) y, autoscroll_boundary.y0), autoscroll_boundary.y1);
-
-		// toplevel->translate_coordinates (*get_canvas_viewport(), x,
-		// y, cx, cy);
-		cx = x;
-		cy = y;
-
-		ArdourCanvas::Duple d = get_canvas()->window_to_canvas (ArdourCanvas::Duple (cx, cy));
-		ev.x = d.x;
-		ev.y = d.y;
-		ev.state = mask;
-
-		motion_handler (0, (GdkEvent*) &ev, true);
-
-	} else {
-		stop_canvas_autoscroll ();
-		return false;
-	}
-
-	autoscroll_cnt++;
-
-	return true; /* call me again */
-}
-
-void
-Pianoroll::start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary)
-{
-	if (!_session) {
-		return;
-	}
-
-	stop_canvas_autoscroll ();
-
-	autoscroll_horizontal_allowed = allow_horiz;
-	autoscroll_vertical_allowed = allow_vert;
-	autoscroll_boundary = boundary;
-
-	/* do the first scroll right now
-	*/
-
-	autoscroll_canvas ();
-
-	/* scroll again at very very roughly 30FPS */
-
-	autoscroll_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &Pianoroll::autoscroll_canvas), 30);
-}
-
-void
-Pianoroll::stop_canvas_autoscroll ()
-{
-	autoscroll_connection.disconnect ();
-	autoscroll_cnt = 0;
-}
-
-void
-Pianoroll::visual_changer (const VisualChange& vc)
-{
-	/**
-	 * Changed first so the correct horizontal canvas position is calculated in
-	 * EditingContext::set_horizontal_position
-	 */
-	if (vc.pending & VisualChange::ZoomLevel) {
-		set_samples_per_pixel (vc.samples_per_pixel);
-	}
-
-	if (vc.pending & VisualChange::TimeOrigin) {
-		double new_time_origin = sample_to_pixel_unrounded (vc.time_origin);
-		set_horizontal_position (new_time_origin);
-		update_tempo_based_rulers ();
-	}
-
-	if (vc.pending & VisualChange::YOrigin) {
-		vertical_adjustment.set_value (vc.y_origin);
-	}
-
-	if (vc.pending & VisualChange::ZoomLevel) {
-		if (!(vc.pending & VisualChange::TimeOrigin)) {
-			update_tempo_based_rulers ();
-		}
-	} else {
-		/* If the canvas is not being zoomed then the canvas items will not change
-		 * and cause Item::prepare_for_render to be called so do it here manually.
-		 * Not ideal, but I can't think of a better solution atm.
-		 */
-		get_canvas()->prepare_for_render();
-	}
-
-	/* If we are only scrolling vertically there is no need to update these */
-	if (vc.pending != VisualChange::YOrigin) {
-		// XXX update_fixed_rulers ();
-		redisplay_grid (true);
-	}
-}
-
-void
 Pianoroll::midi_action (void (MidiView::*method)())
 {
 	if (!view) {
@@ -2296,222 +1258,15 @@ Pianoroll::region_prop_change (PBD::PropertyChange const & what_changed)
 }
 
 void
-Pianoroll::blink_rec_enable (bool onoff)
-{
-	if (onoff) {
-		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
-	} else {
-		rec_enable_button.set_active_state (Gtkmm2ext::Off);
-	}
-}
-
-void
-Pianoroll::trigger_arm_change ()
-{
-	if (!ref.trigger()) {
-		return;
-	}
-
-	if (!ref.trigger()->armed()) {
-		view->end_write ();
-	}
-
-	rec_enable_change ();
-}
-
-void
-Pianoroll::rec_enable_change ()
-{
-	if (!ref.box()) {
-		return;
-	}
-
-	rec_blink_connection.disconnect ();
-	count_in_connection.disconnect ();
-
-	switch (ref.box()->record_enabled()) {
-	case Recording:
-		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
-		rec_blink_connection.disconnect ();
-		if (view) {
-			view->begin_write ();
-		}
-		break;
-	case Enabled:
-		if (!UIConfiguration::instance().get_no_strobe() && ref.trigger()->armed()) {
-			rec_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &Pianoroll::blink_rec_enable));
-		} else {
-			rec_enable_button.set_active_state (Gtkmm2ext::Off);
-		}
-		maybe_set_count_in ();
-		break;
-	case Disabled:
-		rec_enable_button.set_active_state (Gtkmm2ext::Off);
-		break;
-	}
-}
-
-void
-Pianoroll::maybe_set_count_in ()
-{
-	if (!ref.box()) {
-		return;
-	}
-
-	count_in_connection.disconnect ();
-
-	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-	bool valid;
-	count_in_to = ref.box()->start_time (valid);
-
-	if (!valid) {
-		return;
-	}
-
-	samplepos_t audible (_session->audible_sample());
-	Temporal::Beats const & a_q (tmap->quarters_at_sample (audible));
-
-	if ((count_in_to - a_q).get_beats() == 0) {
-		return;
-	}
-
-	count_in_connection = ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::count_in),  ARDOUR_UI::clock_signal_interval()));
-}
-
-void
-Pianoroll::count_in (Temporal::timepos_t audible, unsigned int clock_interval_msecs)
-{
-	if (!_session) {
-		return;
-	}
-
-	if (!_session->transport_rolling()) {
-		return;
-	}
-
-	TempoMapPoints grid_points;
-	TempoMap::SharedPtr tmap (TempoMap::use());
-	Temporal::Beats audible_beats = tmap->quarters_at_sample (audible.samples());
-	samplepos_t audible_samples = audible.samples ();
-
-	if (audible_beats >= count_in_to) {
-		/* passed the count_in_to time */
-		view->hide_overlay_text ();
-		count_in_connection.disconnect ();
-		return;
-	}
-
-	tmap->get_grid (grid_points, samples_to_superclock (audible_samples, _session->sample_rate()), samples_to_superclock ((audible_samples + ((_session->sample_rate() / 1000) * clock_interval_msecs)), _session->sample_rate()));
-
-	if (!grid_points.empty()) {
-
-		/* At least one click in the time between now and the next
-		 * Clock signal
-		 */
-
-		Temporal::Beats current_delta = count_in_to - audible_beats;
-
-		if (current_delta.get_beats() < 1) {
-			view->hide_overlay_text ();
-			count_in_connection.disconnect ();
-			return;
-		}
-
-		std::string str (string_compose ("%1", current_delta.get_beats()));
-		view->set_overlay_text (str);
-	}
-}
-
-bool
-Pianoroll::play_button_press (GdkEventButton* ev)
-{
-	_session->request_locate (view->midi_region()->position().samples());
-	_session->request_roll ();
-	return true;
-}
-
-
-bool
-Pianoroll::bang_button_press (GdkEventButton* ev)
-{
-	if (!ref.trigger()) {
-		return true;
-	}
-
-	ref.trigger()->bang ();
-
-	return true;
-}
-
-bool
-Pianoroll::loop_button_press (GdkEventButton* ev)
-{
-	if (!view) {
-		return true;
-	}
-	if (!view->midi_region()) {
-		return true;
-	}
-
-	if (_session->get_play_loop()) {
-		_session->request_play_loop (false);
-	} else {
-		set_loop_range (view->midi_region()->position(), view->midi_region()->end(), _("loop region"));
-		_session->request_play_loop (true);
-	}
-
-	return true;
-}
-
-bool
-Pianoroll::solo_button_press (GdkEventButton* ev)
-{
-	if (!view) {
-		return true;
-	}
-
-	if (!view->midi_track()) {
-		return true;
-	}
-
-	view->midi_track()->solo_control()->set_value (!view->midi_track()->solo_control()->get_value(), Controllable::NoGroup);
-
-	return true;
-}
-
-bool
-Pianoroll::rec_button_press (GdkEventButton* ev)
-{
-	if (ev->button != 1) {
-		return false;
-	}
-
-	TriggerPtr trigger (ref.trigger());
-
-	if (!trigger) {
-		return true;
-	}
-
-	if (trigger->armed()) {
-		trigger->disarm ();
-	} else {
-		trigger->arm (rec_length);
-	}
-
-	return true;
-}
-
-void
 Pianoroll::set_trigger (TriggerReference & tref)
 {
-	if (tref.trigger() == ref.trigger()) {
+	if (ref == tref) {
 		return;
 	}
 
-	_update_connection.disconnect ();
-	object_connections.drop_connections ();
+	TriggerPtr trigger (tref.trigger());
 
-	ref = tref;
+	CueEditor::set_trigger (tref);
 
 	rec_box.show ();
 	rec_enable_button.set_sensitive (true);
@@ -2519,31 +1274,22 @@ Pianoroll::set_trigger (TriggerReference & tref)
 	idle_update_queued.store (0);
 
 	ref.box()->Captured.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::data_captured, this, _1), gui_context());
-	/* Don't bind a shared_ptr<TriggerBox> within the lambda */
-	TriggerBox* tb (ref.box().get());
-	tb->RecEnableChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::rec_enable_change, this), gui_context());
+	ref.box()->RecEnableChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::rec_enable_change, this), gui_context());
+	maybe_set_count_in ();
 
-	Stripable* st = dynamic_cast<Stripable*> (ref.box()->owner());
-	assert (st);
-	_track = std::dynamic_pointer_cast<MidiTrack> (st->shared_from_this());
-	assert (_track);
-
-	set_track (_track);
-
-	_track->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this, true), gui_context());
-	ref.trigger()->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_prop_change, this, _1), gui_context());
-	ref.trigger()->ArmChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_arm_change, this), gui_context());
-
-	std::shared_ptr<MidiRegion> mr;
-
-	if (ref.trigger()->the_region()) {
-		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (ref.trigger()->the_region());
-		if (mr) {
-			set_region (mr);
-		}
+	if (_track) {
+		_track->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this, true), gui_context());
 	}
 
-	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Pianoroll::maybe_update));
+	trigger->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_prop_change, this, _1), gui_context());
+	trigger->ArmChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_arm_change, this), gui_context());
+	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &CueEditor::maybe_update));
+
+	if (trigger) {
+		set_region (trigger->the_region());
+	} else {
+		set_region (nullptr);
+	}
 }
 
 void
@@ -2574,21 +1320,17 @@ Pianoroll::make_a_region ()
 void
 Pianoroll::unset (bool trigger_too)
 {
-	_history.clear ();
-	_update_connection.disconnect();
-	object_connections.drop_connections ();
-	_track.reset ();
+	CueEditor::unset (trigger_too);
 	view->set_region (nullptr);
-	if (trigger_too) {
-		ref = TriggerReference ();
-	}
 }
 
 void
-Pianoroll::set_track (std::shared_ptr<ARDOUR::MidiTrack> track)
+Pianoroll::set_track (std::shared_ptr<ARDOUR::Track> track)
 {
+	CueEditor::set_track (track);
+
 	if (view) {
-		view->set_track (track);
+		view->set_track (std::dynamic_pointer_cast<MidiTrack> (track));
 	}
 
 	cc_dropdown1->menu().items().clear ();
@@ -2605,36 +1347,23 @@ Pianoroll::set_track (std::shared_ptr<ARDOUR::MidiTrack> track)
 	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_single_controller_item), cc_dropdown3),
 	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), cc_dropdown3), 12);
 
-	track->solo_control()->Changed.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::update_solo_display, this), gui_context());
-	update_solo_display ();
-
 	// reset_user_cc_choice (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE1), cc_dropdown1);
 	// reset_user_cc_choice (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE2), cc_dropdown2);
 	// reset_user_cc_choice (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE3), cc_dropdown3);
 }
 
 void
-Pianoroll::update_solo_display ()
+Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 {
-	if (view->midi_track()->solo_control()->get_value()) {
-		solo_button.set_active_state (Gtkmm2ext::ExplicitActive);
-	} else {
-		solo_button.set_active_state (Gtkmm2ext::Off);
-	}
-}
+	CueEditor::set_region (region);
 
-void
-Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
-{
-	if (!get_canvas()->is_visible()) {
-		_visible_pending_region = r;
+	if (_visible_pending_region) {
 		return;
 	}
 
-	unset (false);
+	std::shared_ptr<MidiRegion> r (std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region));
 
-	if (!r) {
-		view->set_region (nullptr);
+	if (!r || !region) {
 		return;
 	}
 
@@ -2687,17 +1416,8 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::MidiRegion> r)
 	bg->display_region (*view);
 
 	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Pianoroll::maybe_update));
-}
 
-void
-Pianoroll::zoom_to_show (Temporal::timecnt_t const & duration)
-{
-	if (!_track_canvas_width) {
-		zoom_in_allocate = true;
-		return;
-	}
-
-	reset_zoom ((samplecnt_t) floor (duration.samples() / _track_canvas_width));
+	maybe_set_from_rsu ();
 }
 
 bool
@@ -2819,57 +1539,11 @@ Pianoroll::set_note_mode (NoteMode nm)
 	if (nm != bg->note_mode()) {
 		bg->set_note_mode (nm);
 		if (bg->note_mode() == Percussive) {
-			note_mode_button.set_active (true);
+			note_mode_button.set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
-			note_mode_button.set_active (false);
+			note_mode_button.set_active_state (Gtkmm2ext::Off);
 		}
 	}
-}
-
-void
-Pianoroll::build_zoom_focus_menu ()
-{
-	using namespace Gtk::Menu_Helpers;
-	using namespace Editing;
-
-	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusLeft], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusLeft)));
-	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusRight], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusRight)));
-	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusCenter], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusCenter)));
-	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusMouse], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusMouse)));
-	zoom_focus_selector.set_sizing_texts (zoom_focus_strings);
-}
-
-
-std::pair<Temporal::timepos_t,Temporal::timepos_t>
-Pianoroll::max_zoom_extent() const
-{
-	if (view && view->midi_region()) {
-
-		Temporal::Beats len;
-
-		if (show_source) {
-			len = view->midi_region()->midi_source()->length().beats();
-		} else {
-			len = view->midi_region()->length().beats();
-		}
-
-		if (len != Temporal::Beats()) {
-			return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (len));
-		}
-	}
-
-	/* this needs to match the default empty region length used in ::make_a_region() */
-	return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (Temporal::Beats (32, 0)));
-}
-
-void
-Pianoroll::full_zoom_clicked()
-{
-	/* XXXX NEED LOCAL TEMPO MAP */
-
-	std::pair<Temporal::timepos_t,Temporal::timepos_t> dur (max_zoom_extent());
-	samplecnt_t s = dur.second.samples() - dur.first.samples();
-	reposition_and_zoom (0,  (s / (double) _visible_canvas_width));
 }
 
 void
@@ -3046,13 +1720,6 @@ Pianoroll::select_all_within (Temporal::timepos_t const & start, Temporal::timep
 }
 
 void
-Pianoroll::session_going_away ()
-{
-	unset (true);
-	CueEditor::session_going_away ();
-}
-
-void
 Pianoroll::set_session (ARDOUR::Session* s)
 {
 	CueEditor::set_session (s);
@@ -3204,3 +1871,60 @@ Pianoroll::toggle_note_selection (uint8_t note)
 	view->toggle_matching_notes (note, chn_mask);
 	commit_reversible_selection_op();
 }
+
+void
+Pianoroll::begin_write ()
+{
+	if (view) {
+		view->begin_write ();
+	}
+}
+
+void
+Pianoroll::end_write ()
+{
+	if (view) {
+		view->end_write ();
+	}
+}
+
+void
+Pianoroll::manage_possible_header (Gtk::Allocation& alloc)
+{
+	if (prh) {
+		double w, h;
+		prh->size_request (w, h);
+
+		alloc.set_width (alloc.get_width() - w);
+		alloc.set_x (alloc.get_x() + w);
+	}
+}
+
+void
+Pianoroll::show_count_in (std::string const & str)
+{
+	if (view) {
+		view->set_overlay_text (str);
+	}
+}
+
+void
+Pianoroll::hide_count_in ()
+{
+	if (view) {
+		view->hide_overlay_text ();
+	}
+}
+
+void
+Pianoroll::instant_save ()
+{
+	region_ui_settings.draw_length = draw_length();
+	region_ui_settings.draw_velocity = draw_velocity();
+	region_ui_settings.channel = draw_channel();
+	region_ui_settings.note_min = bg->lowest_note ();
+	region_ui_settings.note_max = bg->highest_note();
+
+	CueEditor::instant_save ();
+}
+

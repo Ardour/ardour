@@ -88,7 +88,6 @@ ARDOUR_UI::we_have_dependents ()
 	mixer->monitor_section().use_others_actions ();
 
 	StepEntry::setup_actions_and_bindings ();
-	ClipEditorBox::init ();
 	RegionEditor::setup_actions_and_bindings ();
 
 	setup_action_tooltips ();

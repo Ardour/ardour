@@ -30,6 +30,7 @@
 #include "widgets/tabbable.h"
 
 #include "application_bar.h"
+#include "audio_clip_editor.h"
 #include "audio_region_operations_box.h"
 #include "audio_trigger_properties_box.h"
 #include "axis_provider.h"
@@ -76,7 +77,7 @@ private:
 	void remove_route (TriggerStrip*);
 
 	void clear_selected_slot ();
-
+	void hide_all ();
 	void redisplay_track_list ();
 	void pi_property_changed (PBD::PropertyChange const&);
 	void stripable_property_changed (PBD::PropertyChange const&, std::weak_ptr<ARDOUR::Stripable>);
@@ -117,7 +118,6 @@ private:
 	Gtk::EventBox             _no_strips;
 	Gtk::Alignment            _cue_area_frame;
 	Gtk::VBox                 _cue_area_box;
-	Gtk::HBox                 _parameter_box;
 	Gtk::VBox                 _sidebar_vbox;
 	ArdourWidgets::MetaButton _sidebar_pager1;
 	ArdourWidgets::MetaButton _sidebar_pager2;
@@ -126,7 +126,7 @@ private:
 	TriggerSourceList         _trigger_source_list;
 	TriggerRegionList         _trigger_region_list;
 	TriggerRouteList          _trigger_route_list;
-	Gtk::Table                 table;
+	Gtk::HBox                  hpacker;
 
 	CueBoxWidget       _cue_box;
 	FittedCanvasWidget _master_widget;
@@ -140,10 +140,10 @@ private:
 
 #if REGION_PROPERTIES_BOX_TODO
 	AudioRegionOperationsBox  _audio_ops_box;
-	AudioClipEditorBox        _audio_trim_box;
 #endif
 
 	Pianoroll*           _midi_editor;
+	AudioClipEditor*     _audio_editor;
 
 	RouteProcessorSelection  _selection;
 	std::list<TriggerStrip*> _strips;

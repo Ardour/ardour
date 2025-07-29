@@ -19,6 +19,7 @@
 #include "pbd/compose.h"
 
 #include "ardour/midi_region.h"
+#include "ardour/midi_track.h"
 
 #include "gtkmm2ext/doi.h"
 
@@ -35,7 +36,7 @@ PianorollWindow::PianorollWindow (std::string const & name, Session& s)
 	, region_editor (nullptr)
 {
 	pianoroll->set_session (&s);
-	pianoroll->viewport().set_size_request (600, 120);
+	pianoroll->get_canvas_viewport()->set_size_request (600, 120);
 
 	add (hpacker);
 	hpacker.show ();

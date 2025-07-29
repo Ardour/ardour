@@ -117,11 +117,6 @@ EditingContext::EditingContext (std::string const & name)
 	, pre_internal_snap_mode (SnapOff)
 	, internal_grid_type (GridTypeBeat)
 	, internal_snap_mode (SnapOff)
-	, _grid_type (GridTypeBeat)
-	, _snap_mode (SnapOff)
-	, _draw_length (GridTypeNone)
-	, _draw_velocity (DRAW_VEL_AUTO)
-	, _draw_channel (DRAW_CHAN_AUTO)
 	, _timeline_origin (0.)
 	, play_note_selection_button (ArdourButton::default_elements)
 	, follow_playhead_button (_("Follow Playhead"), ArdourButton::Element (ArdourButton::Edge | ArdourButton::Body | ArdourButton::VectorIcon), true)
@@ -131,7 +126,6 @@ EditingContext::EditingContext (std::string const & name)
 	, _leftmost_sample (0)
 	, _playhead_cursor (nullptr)
 	, _snapped_cursor (nullptr)
-	, _follow_playhead (false)
 	, selection (new Selection (this, true))
 	, cut_buffer (new Selection (this, false))
 	, _selection_memento (new SelectionMemento())
@@ -194,10 +188,6 @@ EditingContext::EditingContext (std::string const & name)
 		std::cerr << "Set cursor set to " << UIConfiguration::instance().get_icon_set() << std::endl;
 	}
 
-	DrawLengthChanged.connect (sigc::mem_fun (*this, &EditingContext::draw_length_changed));
-	DrawVelocityChanged.connect (sigc::mem_fun (*this, &EditingContext::draw_velocity_changed));
-	DrawChannelChanged.connect (sigc::mem_fun (*this, &EditingContext::draw_channel_changed));
-
 	set_tooltip (draw_length_selector, _("Note Length to Draw (AUTO uses the current Grid setting)"));
 	set_tooltip (draw_velocity_selector, _("Note Velocity to Draw (AUTO uses the nearest note's velocity)"));
 	set_tooltip (draw_channel_selector, _("Note Channel to Draw (AUTO uses the nearest note's channel)"));
@@ -230,6 +220,11 @@ EditingContext::EditingContext (std::string const & name)
 
 	follow_playhead_button.set_name ("transport option button");
 	follow_edits_button.set_name ("transport option button");
+
+	note_mode_button.set_icon (ArdourIcon::Drum);
+#define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
+	note_mode_button.set_size_request (PX_SCALE(50), -1);
+	note_mode_button.set_active_color (UIConfiguration::instance().color ("alert:yellow"));
 
 	selection->PointsChanged.connect (sigc::mem_fun(*this, &EditingContext::point_selection_changed));
 
@@ -321,13 +316,17 @@ EditingContext::register_automation_actions (Bindings* automation_bindings, std:
 void
 EditingContext::enable_automation_bindings ()
 {
-	ActionManager::set_sensitive (_automation_actions, true);
+	if (_automation_actions) {
+		ActionManager::set_sensitive (_automation_actions, true);
+	}
 }
 
 void
 EditingContext::disable_automation_bindings ()
 {
-	ActionManager::set_sensitive (_automation_actions, false);
+	if (_automation_actions) {
+		ActionManager::set_sensitive (_automation_actions, false);
+	}
 }
 
 void
@@ -338,7 +337,7 @@ EditingContext::register_common_actions (Bindings* common_bindings, std::string 
 	reg_sens (_common_actions, "temporal-zoom-out", _("Zoom Out"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), true));
 	reg_sens (_common_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), false));
 
-	toggle_reg_sens (_common_actions, "toggle-follow-playhead", _("Follow Playhead"), (sigc::mem_fun(*this, &EditingContext::toggle_follow_playhead)));
+	follow_playhead_action = toggle_reg_sens (_common_actions, "toggle-follow-playhead", _("Follow Playhead"), (sigc::mem_fun(*this, &EditingContext::toggle_follow_playhead)));
 
 	undo_action = reg_sens (_common_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::undo), 1U));
 	redo_action = reg_sens (_common_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::redo), 1U));
@@ -379,9 +378,9 @@ EditingContext::register_common_actions (Bindings* common_bindings, std::string 
 	ActionManager::register_action (_common_actions, X_("GridChoice"), _("Snap & Grid"));
 
 	RadioAction::Group snap_mode_group;
-	/* deprecated */  ActionManager::register_radio_action (_common_actions, snap_mode_group, X_("snap-off"), _("No Grid"), (sigc::bind (sigc::mem_fun(*this, &EditingContext::snap_mode_chosen), Editing::SnapOff)));
-	/* deprecated */  ActionManager::register_radio_action (_common_actions, snap_mode_group, X_("snap-normal"), _("Grid"), (sigc::bind (sigc::mem_fun(*this, &EditingContext::snap_mode_chosen), Editing::SnapNormal)));  //deprecated
-	/* deprecated */  ActionManager::register_radio_action (_common_actions, snap_mode_group, X_("snap-magnetic"), _("Magnetic"), (sigc::bind (sigc::mem_fun(*this, &EditingContext::snap_mode_chosen), Editing::SnapMagnetic)));
+	snap_mode_actions[Editing::SnapOff] = ActionManager::register_radio_action (_common_actions, snap_mode_group, X_("snap-off"), _("No Grid"), (sigc::bind (sigc::mem_fun(*this, &EditingContext::snap_mode_chosen), Editing::SnapOff)));
+	snap_mode_actions[Editing::SnapNormal] =  ActionManager::register_radio_action (_common_actions, snap_mode_group, X_("snap-normal"), _("Grid"), (sigc::bind (sigc::mem_fun(*this, &EditingContext::snap_mode_chosen), Editing::SnapNormal)));  //deprecated
+	snap_mode_actions[Editing::SnapMagnetic] = ActionManager::register_radio_action (_common_actions, snap_mode_group, X_("snap-magnetic"), _("Magnetic"), (sigc::bind (sigc::mem_fun(*this, &EditingContext::snap_mode_chosen), Editing::SnapMagnetic)));
 
 	ActionManager::register_action (_common_actions, X_("cycle-snap-mode"), _("Toggle Snap"), sigc::mem_fun (*this, &EditingContext::cycle_snap_mode));
 	ActionManager::register_action (_common_actions, X_("next-grid-choice"), _("Next Quantize Grid Choice"), sigc::mem_fun (*this, &EditingContext::next_grid_choice));
@@ -390,30 +389,30 @@ EditingContext::register_common_actions (Bindings* common_bindings, std::string 
 	snap_actions = ActionManager::create_action_group (common_bindings, prefix + X_("Snap"));
 	RadioAction::Group grid_choice_group;
 
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv32)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-twentyeighths"),  grid_type_strings[(int)GridTypeBeatDiv28].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv28)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-twentyfourths"),  grid_type_strings[(int)GridTypeBeatDiv24].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv24)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-twentieths"),     grid_type_strings[(int)GridTypeBeatDiv20].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv20)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-asixteenthbeat"), grid_type_strings[(int)GridTypeBeatDiv16].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv16)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-fourteenths"),    grid_type_strings[(int)GridTypeBeatDiv14].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv14)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-twelfths"),       grid_type_strings[(int)GridTypeBeatDiv12].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv12)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-tenths"),         grid_type_strings[(int)GridTypeBeatDiv10].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv10)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-eighths"),        grid_type_strings[(int)GridTypeBeatDiv8].c_str(),  (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv8)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-sevenths"),       grid_type_strings[(int)GridTypeBeatDiv7].c_str(),  (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv7)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-sixths"),         grid_type_strings[(int)GridTypeBeatDiv6].c_str(),  (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv6)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-fifths"),         grid_type_strings[(int)GridTypeBeatDiv5].c_str(),  (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv5)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-quarters"),       grid_type_strings[(int)GridTypeBeatDiv4].c_str(),  (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv4)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-thirds"),         grid_type_strings[(int)GridTypeBeatDiv3].c_str(),  (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv3)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-halves"),         grid_type_strings[(int)GridTypeBeatDiv2].c_str(),  (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv2)));
+	grid_actions[Editing::GridTypeBeatDiv32] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv32)));
+	grid_actions[Editing::GridTypeBeatDiv28] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-twentyeighths"),  grid_type_strings[(int)GridTypeBeatDiv28].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv28)));
+	grid_actions[Editing::GridTypeBeatDiv24] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-twentyfourths"),  grid_type_strings[(int)GridTypeBeatDiv24].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv24)));
+	grid_actions[Editing::GridTypeBeatDiv20] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-twentieths"),     grid_type_strings[(int)GridTypeBeatDiv20].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv20)));
+	grid_actions[Editing::GridTypeBeatDiv16] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-asixteenthbeat"), grid_type_strings[(int)GridTypeBeatDiv16].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv16)));
+	grid_actions[Editing::GridTypeBeatDiv14] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-fourteenths"),    grid_type_strings[(int)GridTypeBeatDiv14].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv14)));
+	grid_actions[Editing::GridTypeBeatDiv12] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-twelfths"),       grid_type_strings[(int)GridTypeBeatDiv12].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv12)));
+	grid_actions[Editing::GridTypeBeatDiv10] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-tenths"),         grid_type_strings[(int)GridTypeBeatDiv10].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv10)));
+	grid_actions[Editing::GridTypeBeatDiv8] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-eighths"),        grid_type_strings[(int)GridTypeBeatDiv8].c_str(),  (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv8)));
+	grid_actions[Editing::GridTypeBeatDiv7] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-sevenths"),       grid_type_strings[(int)GridTypeBeatDiv7].c_str(),  (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv7)));
+	grid_actions[Editing::GridTypeBeatDiv6] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-sixths"),         grid_type_strings[(int)GridTypeBeatDiv6].c_str(),  (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv6)));
+	grid_actions[Editing::GridTypeBeatDiv5] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-fifths"),         grid_type_strings[(int)GridTypeBeatDiv5].c_str(),  (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv5)));
+	grid_actions[Editing::GridTypeBeatDiv4] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-quarters"),       grid_type_strings[(int)GridTypeBeatDiv4].c_str(),  (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv4)));
+	grid_actions[Editing::GridTypeBeatDiv3] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-thirds"),         grid_type_strings[(int)GridTypeBeatDiv3].c_str(),  (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv3)));
+	grid_actions[Editing::GridTypeBeatDiv2] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-halves"),         grid_type_strings[(int)GridTypeBeatDiv2].c_str(),  (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeatDiv2)));
 
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-timecode"),       grid_type_strings[(int)GridTypeTimecode].c_str(),      (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeTimecode)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-minsec"),         grid_type_strings[(int)GridTypeMinSec].c_str(),    (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeMinSec)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-cdframe"),        grid_type_strings[(int)GridTypeCDFrame].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeCDFrame)));
+	grid_actions[Editing::GridTypeTimecode] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-timecode"),       grid_type_strings[(int)GridTypeTimecode].c_str(),      (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeTimecode)));
+	grid_actions[Editing::GridTypeMinSec] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-minsec"),         grid_type_strings[(int)GridTypeMinSec].c_str(),    (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeMinSec)));
+	grid_actions[Editing::GridTypeCDFrame] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-cdframe"),        grid_type_strings[(int)GridTypeCDFrame].c_str(), (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeCDFrame)));
 
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeat)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBar)));
+	grid_actions[Editing::GridTypeBeat] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBeat)));
+	grid_actions[Editing::GridTypeBar] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBar)));
 
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-none"),           grid_type_strings[(int)GridTypeNone].c_str(),      (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeNone)));
+	grid_actions[Editing::GridTypeNone] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-none"),           grid_type_strings[(int)GridTypeNone].c_str(),      (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeNone)));
 }
 
 void
@@ -500,47 +499,47 @@ EditingContext::register_midi_actions (Bindings* midi_bindings, std::string cons
 	length_actions = ActionManager::create_action_group (midi_bindings, prefix + X_("DrawLength"));
 	RadioAction::Group draw_length_group;
 
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv32));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentyeighths"),  grid_type_strings[(int)GridTypeBeatDiv28].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv28));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentyfourths"),  grid_type_strings[(int)GridTypeBeatDiv24].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv24));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentieths"),     grid_type_strings[(int)GridTypeBeatDiv20].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv20));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-asixteenthbeat"), grid_type_strings[(int)GridTypeBeatDiv16].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv16));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fourteenths"),    grid_type_strings[(int)GridTypeBeatDiv14].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv14));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twelfths"),       grid_type_strings[(int)GridTypeBeatDiv12].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv12));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-tenths"),         grid_type_strings[(int)GridTypeBeatDiv10].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv10));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-eighths"),        grid_type_strings[(int)GridTypeBeatDiv8].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv8));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sevenths"),       grid_type_strings[(int)GridTypeBeatDiv7].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv7));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sixths"),         grid_type_strings[(int)GridTypeBeatDiv6].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv6));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fifths"),         grid_type_strings[(int)GridTypeBeatDiv5].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv5));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-quarters"),       grid_type_strings[(int)GridTypeBeatDiv4].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv4));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirds"),         grid_type_strings[(int)GridTypeBeatDiv3].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv3));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-halves"),         grid_type_strings[(int)GridTypeBeatDiv2].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv2));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeat));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBar));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-auto"),           _("Auto"),                                         sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), DRAW_LEN_AUTO));
+	draw_length_actions[Editing::GridTypeBeatDiv32] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv32));
+	draw_length_actions[Editing::GridTypeBeatDiv28] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentyeighths"),  grid_type_strings[(int)GridTypeBeatDiv28].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv28));
+	draw_length_actions[Editing::GridTypeBeatDiv24] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentyfourths"),  grid_type_strings[(int)GridTypeBeatDiv24].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv24));
+	draw_length_actions[Editing::GridTypeBeatDiv20] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentieths"),     grid_type_strings[(int)GridTypeBeatDiv20].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv20));
+	draw_length_actions[Editing::GridTypeBeatDiv16] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-asixteenthbeat"), grid_type_strings[(int)GridTypeBeatDiv16].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv16));
+	draw_length_actions[Editing::GridTypeBeatDiv14] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fourteenths"),    grid_type_strings[(int)GridTypeBeatDiv14].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv14));
+	draw_length_actions[Editing::GridTypeBeatDiv12] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twelfths"),       grid_type_strings[(int)GridTypeBeatDiv12].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv12));
+	draw_length_actions[Editing::GridTypeBeatDiv10] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-tenths"),         grid_type_strings[(int)GridTypeBeatDiv10].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv10));
+	draw_length_actions[Editing::GridTypeBeatDiv8] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-eighths"),        grid_type_strings[(int)GridTypeBeatDiv8].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv8));
+	draw_length_actions[Editing::GridTypeBeatDiv7] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sevenths"),       grid_type_strings[(int)GridTypeBeatDiv7].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv7));
+	draw_length_actions[Editing::GridTypeBeatDiv6] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sixths"),         grid_type_strings[(int)GridTypeBeatDiv6].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv6));
+	draw_length_actions[Editing::GridTypeBeatDiv5] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fifths"),         grid_type_strings[(int)GridTypeBeatDiv5].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv5));
+	draw_length_actions[Editing::GridTypeBeatDiv4] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-quarters"),       grid_type_strings[(int)GridTypeBeatDiv4].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv4));
+	draw_length_actions[Editing::GridTypeBeatDiv3] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirds"),         grid_type_strings[(int)GridTypeBeatDiv3].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv3));
+	draw_length_actions[Editing::GridTypeBeatDiv2] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-halves"),         grid_type_strings[(int)GridTypeBeatDiv2].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv2));
+	draw_length_actions[Editing::GridTypeBeat] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeat));
+	draw_length_actions[Editing::GridTypeBar] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBar));
+	draw_length_actions[DRAW_LEN_AUTO] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-auto"),           _("Auto"),                                         sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), DRAW_LEN_AUTO));
 
 	velocity_actions = ActionManager::create_action_group (midi_bindings, prefix + X_("DrawVelocity"));
 	RadioAction::Group draw_velocity_group;
-	ActionManager::register_radio_action (velocity_actions, draw_velocity_group, X_("draw-velocity-auto"),  _("Auto"), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), DRAW_VEL_AUTO));
+	draw_velocity_actions[DRAW_VEL_AUTO] = ActionManager::register_radio_action (velocity_actions, draw_velocity_group, X_("draw-velocity-auto"),  _("Auto"), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), DRAW_VEL_AUTO));
 	for (int i = 1; i <= 127; i++) {
 		char buf[64];
 		snprintf(buf, sizeof (buf), X_("draw-velocity-%d"), i);
 		char vel[64];
 		sprintf(vel, _("Velocity %d"), i);
-		Glib::RefPtr<Action> act = ActionManager::register_radio_action (velocity_actions, draw_velocity_group, buf, vel, sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), i));
+		draw_velocity_actions[i] = ActionManager::register_radio_action (velocity_actions, draw_velocity_group, buf, vel, sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_velocity_chosen), i));
 		snprintf (buf,sizeof (buf), "%d", i);
-		act->set_short_label (buf);
+		draw_velocity_actions[i]->set_short_label (buf);
 	}
 
 	channel_actions = ActionManager::create_action_group (midi_bindings, prefix + X_("DrawChannel"));
 	RadioAction::Group draw_channel_group;
-	ActionManager::register_radio_action (channel_actions, draw_channel_group, X_("draw-channel-auto"),  _("Auto"), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_channel_chosen), DRAW_CHAN_AUTO));
+	draw_channel_actions[DRAW_CHAN_AUTO] = ActionManager::register_radio_action (channel_actions, draw_channel_group, X_("draw-channel-auto"),  _("Auto"), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_channel_chosen), DRAW_CHAN_AUTO));
 	for (int i = 0; i <= 15; i++) {
 		char buf[64];
 		snprintf(buf, sizeof (buf), X_("draw-channel-%d"), i+1);
 		char ch[64];
 		sprintf(ch, X_("Channel %d"), i+1);
-		ActionManager::register_radio_action (channel_actions, draw_channel_group, buf, ch, sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_channel_chosen), i));
+		draw_channel_actions[i] = ActionManager::register_radio_action (channel_actions, draw_channel_group, buf, ch, sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_channel_chosen), i));
 	}
 
 	ActionManager::set_sensitive (_midi_actions, false);
@@ -574,141 +573,32 @@ EditingContext::midi_action (void (MidiView::*method)())
 }
 
 void
-EditingContext::grid_type_selection_done (GridType gridtype)
-{
-	RefPtr<RadioAction> ract = grid_type_action (gridtype);
-	if (ract && ract->get_active()) {  /*radio-action is already set*/
-		set_grid_to(gridtype);         /*so we must set internal state here*/
-	} else {
-		ract->set_active ();
-	}
-}
-
-void
-EditingContext::snap_mode_selection_done (SnapMode mode)
-{
-	RefPtr<RadioAction> ract = snap_mode_action (mode);
-
-	if (ract) {
-		ract->set_active (true);
-	}
-}
-
-RefPtr<RadioAction>
-EditingContext::grid_type_action (GridType type)
-{
-	const char* action = 0;
-	RefPtr<Action> act;
-
-	switch (type) {
-	case Editing::GridTypeBeatDiv32:
-		action = "grid-type-thirtyseconds";
-		break;
-	case Editing::GridTypeBeatDiv28:
-		action = "grid-type-twentyeighths";
-		break;
-	case Editing::GridTypeBeatDiv24:
-		action = "grid-type-twentyfourths";
-		break;
-	case Editing::GridTypeBeatDiv20:
-		action = "grid-type-twentieths";
-		break;
-	case Editing::GridTypeBeatDiv16:
-		action = "grid-type-asixteenthbeat";
-		break;
-	case Editing::GridTypeBeatDiv14:
-		action = "grid-type-fourteenths";
-		break;
-	case Editing::GridTypeBeatDiv12:
-		action = "grid-type-twelfths";
-		break;
-	case Editing::GridTypeBeatDiv10:
-		action = "grid-type-tenths";
-		break;
-	case Editing::GridTypeBeatDiv8:
-		action = "grid-type-eighths";
-		break;
-	case Editing::GridTypeBeatDiv7:
-		action = "grid-type-sevenths";
-		break;
-	case Editing::GridTypeBeatDiv6:
-		action = "grid-type-sixths";
-		break;
-	case Editing::GridTypeBeatDiv5:
-		action = "grid-type-fifths";
-		break;
-	case Editing::GridTypeBeatDiv4:
-		action = "grid-type-quarters";
-		break;
-	case Editing::GridTypeBeatDiv3:
-		action = "grid-type-thirds";
-		break;
-	case Editing::GridTypeBeatDiv2:
-		action = "grid-type-halves";
-		break;
-	case Editing::GridTypeBeat:
-		action = "grid-type-beat";
-		break;
-	case Editing::GridTypeBar:
-		action = "grid-type-bar";
-		break;
-	case Editing::GridTypeNone:
-		action = "grid-type-none";
-		break;
-	case Editing::GridTypeTimecode:
-		action = "grid-type-timecode";
-		break;
-	case Editing::GridTypeCDFrame:
-		action = "grid-type-cdframe";
-		break;
-	case Editing::GridTypeMinSec:
-		action = "grid-type-minsec";
-		break;
-	default:
-		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible snap-to type", (int) type) << endmsg;
-		abort(); /*NOTREACHED*/
-	}
-
-	std::string action_name = editor_name() + X_("Snap");
-	act = ActionManager::get_action (action_name.c_str(), action);
-
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		return ract;
-
-	} else  {
-		error << string_compose (_("programming error: %1"), "EditingContext::grid_type_chosen could not find action to match type.") << endmsg;
-		return RefPtr<RadioAction>();
-	}
-}
-
-void
 EditingContext::next_grid_choice ()
 {
-	switch (_grid_type) {
+	switch (grid_type()) {
 	case Editing::GridTypeBeatDiv32:
-		set_grid_to (Editing::GridTypeNone);
+		set_grid_type (Editing::GridTypeNone);
 		break;
 	case Editing::GridTypeBeatDiv16:
-		set_grid_to (Editing::GridTypeBeatDiv32);
+		set_grid_type (Editing::GridTypeBeatDiv32);
 		break;
 	case Editing::GridTypeBeatDiv8:
-		set_grid_to (Editing::GridTypeBeatDiv16);
+		set_grid_type (Editing::GridTypeBeatDiv16);
 		break;
 	case Editing::GridTypeBeatDiv4:
-		set_grid_to (Editing::GridTypeBeatDiv8);
+		set_grid_type (Editing::GridTypeBeatDiv8);
 		break;
 	case Editing::GridTypeBeatDiv2:
-		set_grid_to (Editing::GridTypeBeatDiv4);
+		set_grid_type (Editing::GridTypeBeatDiv4);
 		break;
 	case Editing::GridTypeBeat:
-		set_grid_to (Editing::GridTypeBeatDiv2);
+		set_grid_type (Editing::GridTypeBeatDiv2);
 		break;
 	case Editing::GridTypeBar:
-		set_grid_to (Editing::GridTypeBeat);
+		set_grid_type (Editing::GridTypeBeat);
 		break;
 	case Editing::GridTypeNone:
-		set_grid_to (Editing::GridTypeBar);
+		set_grid_type (Editing::GridTypeBar);
 		break;
 	case Editing::GridTypeBeatDiv3:
 	case Editing::GridTypeBeatDiv6:
@@ -730,30 +620,30 @@ EditingContext::next_grid_choice ()
 void
 EditingContext::prev_grid_choice ()
 {
-	switch (_grid_type) {
+	switch (grid_type()) {
 	case Editing::GridTypeBeatDiv32:
-		set_grid_to (Editing::GridTypeBeatDiv16);
+		set_grid_type (Editing::GridTypeBeatDiv16);
 		break;
 	case Editing::GridTypeBeatDiv16:
-		set_grid_to (Editing::GridTypeBeatDiv8);
+		set_grid_type (Editing::GridTypeBeatDiv8);
 		break;
 	case Editing::GridTypeBeatDiv8:
-		set_grid_to (Editing::GridTypeBeatDiv4);
+		set_grid_type (Editing::GridTypeBeatDiv4);
 		break;
 	case Editing::GridTypeBeatDiv4:
-		set_grid_to (Editing::GridTypeBeatDiv2);
+		set_grid_type (Editing::GridTypeBeatDiv2);
 		break;
 	case Editing::GridTypeBeatDiv2:
-		set_grid_to (Editing::GridTypeBeat);
+		set_grid_type (Editing::GridTypeBeat);
 		break;
 	case Editing::GridTypeBeat:
-		set_grid_to (Editing::GridTypeBar);
+		set_grid_type (Editing::GridTypeBar);
 		break;
 	case Editing::GridTypeBar:
-		set_grid_to (Editing::GridTypeNone);
+		set_grid_type (Editing::GridTypeNone);
 		break;
 	case Editing::GridTypeNone:
-		set_grid_to (Editing::GridTypeBeatDiv32);
+		set_grid_type (Editing::GridTypeBeatDiv32);
 		break;
 	case Editing::GridTypeBeatDiv3:
 	case Editing::GridTypeBeatDiv6:
@@ -773,18 +663,55 @@ EditingContext::prev_grid_choice ()
 }
 
 void
-EditingContext::grid_type_chosen (GridType type)
+EditingContext::grid_type_chosen (GridType gt)
 {
 	/* this is driven by a toggle on a radio group, and so is invoked twice,
 	   once for the item that became inactive and once for the one that became
 	   active.
 	*/
 
-	RefPtr<RadioAction> ract = grid_type_action (type);
+	auto ti = grid_actions.find (gt);
+	assert (ti != grid_actions.end());
 
-	if (ract && ract->get_active()) {
-		set_grid_to (type);
+	std::cerr << "gt chosen, type " << enum_2_string (gt) << " active ? " << ti->second->get_active () << std::endl;
+
+	if (!ti->second->get_active()) {
+		return;
 	}
+
+	unsigned int grid_ind = (unsigned int) gt;
+
+	if (internal_editing() && UIConfiguration::instance().get_grid_follows_internal()) {
+		internal_grid_type = gt;
+	} else {
+		pre_internal_grid_type = gt;
+	}
+
+	grid_type_selector.set_active (grid_type_strings[grid_ind]);
+
+	if (UIConfiguration::instance().get_show_grids_ruler()) {
+		show_rulers_for_grid ();
+	}
+
+	instant_save ();
+
+	const bool grid_is_musical = grid_musical ();
+
+	if (grid_is_musical) {
+		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
+		update_tempo_based_rulers ();
+	} else if (current_mouse_mode () == Editing::MouseGrid) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (get_mouse_mode_action (Editing::MouseObject));
+		ract->set_active (true);
+	}
+
+	get_mouse_mode_action (Editing::MouseGrid)->set_sensitive (grid_is_musical);
+
+	mark_region_boundary_cache_dirty ();
+
+	redisplay_grid (false);
+
+	SnapChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -795,12 +722,24 @@ EditingContext::draw_length_chosen (GridType type)
 	   active.
 	*/
 
-	RefPtr<RadioAction> ract = draw_length_action (type);
+	RefPtr<RadioAction> ract = draw_length_actions[type];
 
-	if (ract && ract->get_active()) {
-		/* It doesn't really matter which EditingContext executes this */
-		set_draw_length_to (type);
+	if (!ract->get_active()) {
+		return;
 	}
+
+	if (!grid_type_is_musical (type) ) {  // is this is sensible sanity check ?
+		set_draw_length (DRAW_LEN_AUTO);
+		return;
+	}
+
+	if (DRAW_LEN_AUTO == (unsigned int) type) {
+		draw_length_selector.set_active (_("Auto"));
+	} else {
+		draw_length_selector.set_active (grid_type_strings[(unsigned int) type]);
+	}
+
+	instant_save ();
 }
 
 void
@@ -811,12 +750,27 @@ EditingContext::draw_velocity_chosen (int v)
 	   active.
 	*/
 
-	RefPtr<RadioAction> ract = draw_velocity_action (v);
+	RefPtr<RadioAction> ract;
 
-	if (ract && ract->get_active()) {
-		/* It doesn't really matter which EditingContext executes this */
-		set_draw_velocity_to (v);
+	if (v == DRAW_VEL_AUTO) {
+		ract = draw_velocity_actions[DRAW_VEL_AUTO];
+	} else {
+		ract = draw_velocity_actions[std::max (std::min (v, 127), 0)];
 	}
+
+	if (!ract->get_active()) {
+		return;
+	}
+
+	if (DRAW_VEL_AUTO == v) {
+		draw_velocity_selector.set_active (_("Auto"));
+	} else {
+		char buf[64];
+		snprintf (buf, sizeof (buf), "%d", v);
+		draw_velocity_selector.set_text (buf);
+	}
+
+	instant_save ();
 }
 
 void
@@ -827,51 +781,33 @@ EditingContext::draw_channel_chosen (int c)
 	   active.
 	*/
 
-	RefPtr<RadioAction> ract = draw_channel_action (c);
+	RefPtr<RadioAction> ract;
 
-	if (ract && ract->get_active()) {
-		/* It doesn't really matter which EditingContext executes this */
-		set_draw_channel_to (c);
-	}
-}
-
-RefPtr<RadioAction>
-EditingContext::snap_mode_action (SnapMode mode)
-{
-	const char* action = 0;
-	RefPtr<Action> act;
-
-	switch (mode) {
-	case Editing::SnapOff:
-		action = X_("snap-off");
-		break;
-	case Editing::SnapNormal:
-		action = X_("snap-normal");
-		break;
-	case Editing::SnapMagnetic:
-		action = X_("snap-magnetic");
-		break;
-	default:
-		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible snap mode type", (int) mode) << endmsg;
-		abort(); /*NOTREACHED*/
+	if (c == DRAW_CHAN_AUTO) {
+		ract = draw_channel_actions[DRAW_CHAN_AUTO];
+	} else {
+		ract = draw_channel_actions[std::max (std::min (c, 5), 0)];
 	}
 
-	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), action);
-
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		return ract;
-
-	} else  {
-		error << string_compose (_("programming error: %1: %2"), "EditingContext::snap_mode_chosen could not find action to match mode.", action) << endmsg;
-		return RefPtr<RadioAction> ();
+	if (!ract->get_active()) {
+		return;
 	}
+
+	if (DRAW_CHAN_AUTO == c) {
+		draw_channel_selector.set_active (_("Auto"));
+	} else {
+		char buf[64];
+		snprintf (buf, sizeof (buf), "%d", c+1 );
+		draw_channel_selector.set_active (buf);
+	}
+
+	instant_save ();
 }
 
 void
 EditingContext::cycle_snap_mode ()
 {
-	switch (_snap_mode) {
+	switch (snap_mode()) {
 	case SnapOff:
 	case SnapNormal:
 		set_snap_mode (SnapMagnetic);
@@ -894,41 +830,80 @@ EditingContext::snap_mode_chosen (SnapMode mode)
 		mode = SnapMagnetic;
 	}
 
-	RefPtr<RadioAction> ract = snap_mode_action (mode);
+	auto si = snap_mode_actions.find (mode);
+	assert (si != snap_mode_actions.end());
 
-	if (ract && ract->get_active()) {
-		set_snap_mode (mode);
+	if (!si->second->get_active()) {
+		return;
 	}
+
+	if (internal_editing()) {
+		internal_snap_mode = mode;
+	} else {
+		pre_internal_snap_mode = mode;
+	}
+
+	if (mode == SnapOff) {
+		snap_mode_button.set_active_state (Gtkmm2ext::Off);
+	} else {
+		snap_mode_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	}
+
+	instant_save ();
 }
 
 GridType
 EditingContext::grid_type() const
 {
-	return _grid_type;
+	for (auto const & [grid_type,action] : grid_actions) {
+		if (action->get_active()) {
+			return grid_type;
+		}
+	}
+
+	return Editing::GridTypeNone;
 }
 
 GridType
 EditingContext::draw_length() const
 {
-	return _draw_length;
+	for (auto const & [len,action] : draw_length_actions) {
+		if (action->get_active()) {
+			return len;
+		}
+	}
+
+	return GridTypeBeat;
 }
 
 int
 EditingContext::draw_velocity() const
 {
-	return _draw_velocity;
+	for (auto const & [vel,action] : draw_velocity_actions) {
+		if (action->get_active()) {
+			return vel;
+		}
+	}
+
+	return 64;
 }
 
 int
 EditingContext::draw_channel() const
 {
-	return _draw_channel;
+	for (auto const & [chn,action] : draw_channel_actions) {
+		if (action->get_active()) {
+			return chn;
+		}
+	}
+
+	return 0;
 }
 
 bool
 EditingContext::grid_musical() const
 {
-	return grid_type_is_musical (_grid_type);
+	return grid_type_is_musical (grid_type());
 }
 
 bool
@@ -965,286 +940,51 @@ EditingContext::grid_type_is_musical(GridType gt) const
 SnapMode
 EditingContext::snap_mode() const
 {
-	return _snap_mode;
-}
-
-void
-EditingContext::set_draw_length_to (GridType gt)
-{
-	if ( !grid_type_is_musical(gt) ) {  //range-check
-		gt = DRAW_LEN_AUTO;
+	for (auto const & [mode,action] : snap_mode_actions) {
+		if (action->get_active()) {
+			return mode;
+		}
 	}
 
-	_draw_length = gt;
-	DrawLengthChanged (); /* EMIT SIGNAL */
+	return Editing::SnapOff;
 }
 
 void
-EditingContext::draw_length_changed ()
+EditingContext::set_draw_length (GridType gt)
 {
-	if (DRAW_LEN_AUTO == _draw_length) {
-		draw_length_selector.set_text (_("Auto"));
-		return;
-	}
-
-	unsigned int grid_index = (unsigned int) _draw_length;
-	std::string str = grid_type_strings[grid_index];
-	draw_length_selector.set_text (str);
-	instant_save ();
+	draw_length_actions[gt]->set_active (true);
 }
 
 void
-EditingContext::set_draw_velocity_to (int v)
+EditingContext::set_draw_velocity (int v)
 {
-	if (v < 0 || v > 127) {
-		v = DRAW_VEL_AUTO;
-	}
-
-	_draw_velocity = v;
-	DrawVelocityChanged (); /* EMIT SIGNAL */
-}
-
-void
-EditingContext::draw_velocity_changed ()
-{
-	if (DRAW_VEL_AUTO == _draw_velocity) {
-		draw_velocity_selector.set_text (_("Auto"));
-		return;
-	}
-
-	char buf[64];
-	snprintf (buf, sizeof (buf), "%d", _draw_velocity);
-	draw_velocity_selector.set_text (buf);
-	instant_save ();
-}
-
-void
-EditingContext::set_draw_channel_to (int c)
-{
-	if (c < 0 || c > 15)  {  //range-check midi channel
-		c = DRAW_CHAN_AUTO;
-	}
-
-	_draw_channel = c;
-	DrawChannelChanged (); /* EMIT SIGNAL */
-}
-
-void
-EditingContext::draw_channel_changed ()
-{
-	if (DRAW_CHAN_AUTO == _draw_channel) {
-		draw_channel_selector.set_text (_("Auto"));
-		return;
-	}
-
-	char buf[64];
-	snprintf (buf, sizeof (buf), "%d", _draw_channel+1 );
-	draw_channel_selector.set_text (buf);
-	instant_save ();
-}
-
-void
-EditingContext::set_grid_to (GridType gt)
-{
-	unsigned int grid_ind = (unsigned int)gt;
-
-	if (internal_editing() && UIConfiguration::instance().get_grid_follows_internal()) {
-		internal_grid_type = gt;
+	if (v == DRAW_VEL_AUTO) {
+		draw_velocity_actions[v]->set_active (true);
 	} else {
-		pre_internal_grid_type = gt;
+		draw_velocity_actions[std::max (std::min (v, 127), 0)]->set_active (true);
 	}
+}
 
-	bool grid_type_changed = true;
-	if ( grid_type_is_musical(_grid_type) && grid_type_is_musical(gt)) {
-		grid_type_changed = false;
+void
+EditingContext::set_draw_channel (int c)
+{
+	if (c == DRAW_CHAN_AUTO) {
+		draw_channel_actions[c]->set_active (true);
+	} else {
+		draw_channel_actions[std::max (std::min (c, 15), 0)]->set_active (true);
 	}
+}
 
-	_grid_type = gt;
-
-	if (grid_ind > grid_type_strings.size() - 1) {
-		grid_ind = 0;
-		_grid_type = (GridType)grid_ind;
-	}
-
-	std::string str = grid_type_strings[grid_ind];
-
-	if (str != grid_type_selector.get_text()) {
-		grid_type_selector.set_text (str);
-	}
-
-	if (grid_type_changed && UIConfiguration::instance().get_show_grids_ruler()) {
-		show_rulers_for_grid ();
-	}
-
-	instant_save ();
-
-	const bool grid_is_musical = grid_musical ();
-
-	if (grid_is_musical) {
-		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
-		update_tempo_based_rulers ();
-	} else if (current_mouse_mode () == Editing::MouseGrid) {
-		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (get_mouse_mode_action (Editing::MouseObject));
-		ract->set_active (true);
-	}
-
-	get_mouse_mode_action (Editing::MouseGrid)->set_sensitive (grid_is_musical);
-
-	mark_region_boundary_cache_dirty ();
-
-	redisplay_grid (false);
-
-	SnapChanged (); /* EMIT SIGNAL */
+void
+EditingContext::set_grid_type (GridType gt)
+{
+	grid_actions[gt]->set_active (true);
 }
 
 void
 EditingContext::set_snap_mode (SnapMode mode)
 {
-	if (internal_editing()) {
-		internal_snap_mode = mode;
-	} else {
-		pre_internal_snap_mode = mode;
-	}
-
-	_snap_mode = mode;
-
-	if (_snap_mode == SnapOff) {
-		snap_mode_button.set_active_state (Gtkmm2ext::Off);
-	} else {
-		snap_mode_button.set_active_state (Gtkmm2ext::ExplicitActive);
-	}
-
-	instant_save ();
-}
-
-
-RefPtr<RadioAction>
-EditingContext::draw_velocity_action (int v)
-{
-	char buf[64];
-	const char* action = 0;
-	RefPtr<Action> act;
-
-	if (DRAW_VEL_AUTO == v) {
-		action = "draw-velocity-auto";
-	} else if (v >= 1 && v <= 127) {
-		snprintf (buf, sizeof (buf), X_("draw-velocity-%d"), v);  //we don't allow drawing a velocity 0;  some synths use that as note-off
-		action = buf;
-	}
-
-	act = ActionManager::get_action ((_name + X_("DrawVelocity")).c_str(), action);
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		return ract;
-	} else  {
-		error << string_compose (_("programming error: %1"), "EditingContext::draw_velocity_action could not find action to match velocity.") << endmsg;
-		return RefPtr<RadioAction>();
-	}
-}
-
-RefPtr<RadioAction>
-EditingContext::draw_channel_action (int c)
-{
-	char buf[64];
-	const char* action = 0;
-	RefPtr<Action> act;
-
-	if (c==DRAW_CHAN_AUTO) {
-		action = "draw-channel-auto";
-	} else if (c>=0 && c<=15) {
-		snprintf (buf, sizeof (buf), X_("draw-channel-%d"), c+1);
-		action = buf;
-	}
-
-	act = ActionManager::get_action ((_name + X_("DrawChannel")).c_str(), action);
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		return ract;
-	} else  {
-		error << string_compose (_("programming error: %1"), "EditingContext::draw_channel_action could not find action to match channel.") << endmsg;
-		return RefPtr<RadioAction>();
-	}
-}
-
-RefPtr<RadioAction>
-EditingContext::draw_length_action (GridType type)
-{
-	const char* action = 0;
-	RefPtr<Action> act;
-
-	switch (type) {
-	case Editing::GridTypeBeatDiv32:
-		action = "draw-length-thirtyseconds";
-		break;
-	case Editing::GridTypeBeatDiv28:
-		action = "draw-length-twentyeighths";
-		break;
-	case Editing::GridTypeBeatDiv24:
-		action = "draw-length-twentyfourths";
-		break;
-	case Editing::GridTypeBeatDiv20:
-		action = "draw-length-twentieths";
-		break;
-	case Editing::GridTypeBeatDiv16:
-		action = "draw-length-asixteenthbeat";
-		break;
-	case Editing::GridTypeBeatDiv14:
-		action = "draw-length-fourteenths";
-		break;
-	case Editing::GridTypeBeatDiv12:
-		action = "draw-length-twelfths";
-		break;
-	case Editing::GridTypeBeatDiv10:
-		action = "draw-length-tenths";
-		break;
-	case Editing::GridTypeBeatDiv8:
-		action = "draw-length-eighths";
-		break;
-	case Editing::GridTypeBeatDiv7:
-		action = "draw-length-sevenths";
-		break;
-	case Editing::GridTypeBeatDiv6:
-		action = "draw-length-sixths";
-		break;
-	case Editing::GridTypeBeatDiv5:
-		action = "draw-length-fifths";
-		break;
-	case Editing::GridTypeBeatDiv4:
-		action = "draw-length-quarters";
-		break;
-	case Editing::GridTypeBeatDiv3:
-		action = "draw-length-thirds";
-		break;
-	case Editing::GridTypeBeatDiv2:
-		action = "draw-length-halves";
-		break;
-	case Editing::GridTypeBeat:
-		action = "draw-length-beat";
-		break;
-	case Editing::GridTypeBar:
-		action = "draw-length-bar";
-		break;
-	case Editing::GridTypeNone:
-		action = "draw-length-auto";
-		break;
-	case Editing::GridTypeTimecode:
-	case Editing::GridTypeCDFrame:
-	case Editing::GridTypeMinSec:
-	default:
-		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible grid length type", (int) type) << endmsg;
-		abort(); /*NOTREACHED*/
-	}
-
-	act = ActionManager::get_action ((_name + X_("DrawLength")).c_str(), action);
-
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		return ract;
-
-	} else  {
-		error << string_compose (_("programming error: %1"), "EditingContext::draw_length_chosen could not find action to match type.") << endmsg;
-		return RefPtr<RadioAction>();
-	}
+	snap_mode_actions[mode]->set_active (true);;
 }
 
 void
@@ -1253,54 +993,51 @@ EditingContext::build_grid_type_menu ()
 	using namespace Menu_Helpers;
 
 	/* there's no Grid, but if Snap is engaged, the Snap preferences will be applied */
-	grid_type_selector.add_menu_elem (MenuElem (grid_type_strings[(int)GridTypeNone],      sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeNone)));
-	grid_type_selector.add_menu_elem(SeparatorElem());
+	grid_type_selector.append (grid_actions[GridTypeNone]);
+	grid_type_selector.add_separator ();
 
 	/* musical grid: bars, quarter-notes, etc */
-	grid_type_selector.add_menu_elem (MenuElem (grid_type_strings[(int)GridTypeBar],       sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBar)));
-	grid_type_selector.add_menu_elem (MenuElem (grid_type_strings[(int)GridTypeBeat],      sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeat)));
-	grid_type_selector.add_menu_elem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv2],  sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeatDiv2)));
-	grid_type_selector.add_menu_elem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv4],  sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeatDiv4)));
-	grid_type_selector.add_menu_elem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv8],  sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeatDiv8)));
-	grid_type_selector.add_menu_elem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv16], sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeatDiv16)));
-	grid_type_selector.add_menu_elem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv32], sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeatDiv32)));
+	grid_type_selector.append (grid_actions[GridTypeBar]);
+	grid_type_selector.append (grid_actions[GridTypeBeat]);
+	grid_type_selector.append (grid_actions[GridTypeBeatDiv4]);
+	grid_type_selector.append (grid_actions[GridTypeBeatDiv8]);
+	grid_type_selector.append (grid_actions[GridTypeBeatDiv16]);
+	grid_type_selector.append (grid_actions[GridTypeBeatDiv32]);
 
 	/* triplet grid */
-	grid_type_selector.add_menu_elem(SeparatorElem());
-	Gtk::Menu *_triplet_menu = manage (new Menu);
-	MenuList& triplet_items (_triplet_menu->items());
+	grid_type_selector.add_separator ();;
+	Gtk::Menu *triplet_menu = manage (new Menu);
 	{
-		triplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv3],  sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeatDiv3)));
-		triplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv6],  sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeatDiv6)));
-		triplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv12], sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeatDiv12)));
-		triplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv24], sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeatDiv24)));
+		grid_type_selector.append (*triplet_menu, grid_actions[GridTypeBeatDiv3]);
+		grid_type_selector.append (*triplet_menu, grid_actions[GridTypeBeatDiv6]);
+		grid_type_selector.append (*triplet_menu, grid_actions[GridTypeBeatDiv12]);
+		grid_type_selector.append (*triplet_menu, grid_actions[GridTypeBeatDiv24]);
 	}
-	grid_type_selector.add_menu_elem (Menu_Helpers::MenuElem (_("Triplets"), *_triplet_menu));
+	grid_type_selector.add_menu_elem (Menu_Helpers::MenuElem (_("Triplets"), *triplet_menu));
 
 	/* quintuplet grid */
-	Gtk::Menu *_quintuplet_menu = manage (new Menu);
-	MenuList& quintuplet_items (_quintuplet_menu->items());
+	Gtk::Menu *quintuplet_menu = manage (new Menu);
 	{
-		quintuplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv5],  sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeatDiv5)));
-		quintuplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv10], sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeatDiv10)));
-		quintuplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv20], sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeatDiv20)));
+		grid_type_selector.append (*quintuplet_menu, grid_actions[GridTypeBeatDiv5]);
+		grid_type_selector.append (*quintuplet_menu, grid_actions[GridTypeBeatDiv10]);
+		grid_type_selector.append (*quintuplet_menu, grid_actions[GridTypeBeatDiv20]);
 	}
-	grid_type_selector.add_menu_elem (Menu_Helpers::MenuElem (_("Quintuplets"), *_quintuplet_menu));
+
+	grid_type_selector.add_menu_elem (Menu_Helpers::MenuElem (_("Quintuplets"), *quintuplet_menu));
 
 	/* septuplet grid */
-	Gtk::Menu *_septuplet_menu = manage (new Menu);
-	MenuList& septuplet_items (_septuplet_menu->items());
+	Gtk::Menu *septuplet_menu = manage (new Menu);
 	{
-		septuplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv7],  sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeatDiv7)));
-		septuplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv14], sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeatDiv14)));
-		septuplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv28], sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeBeatDiv28)));
+		grid_type_selector.append (*septuplet_menu, grid_actions[GridTypeBeatDiv7]);
+		grid_type_selector.append (*septuplet_menu, grid_actions[GridTypeBeatDiv14]);
+		grid_type_selector.append (*septuplet_menu, grid_actions[GridTypeBeatDiv28]);
 	}
-	grid_type_selector.add_menu_elem (Menu_Helpers::MenuElem (_("Septuplets"), *_septuplet_menu));
+	grid_type_selector.add_menu_elem (Menu_Helpers::MenuElem (_("Septuplets"), *septuplet_menu));
 
-	grid_type_selector.add_menu_elem(SeparatorElem());
-	grid_type_selector.add_menu_elem (MenuElem (grid_type_strings[(int)GridTypeTimecode], sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeTimecode)));
-	grid_type_selector.add_menu_elem (MenuElem (grid_type_strings[(int)GridTypeMinSec], sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeMinSec)));
-	grid_type_selector.add_menu_elem (MenuElem (grid_type_strings[(int)GridTypeCDFrame], sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_selection_done), (GridType) GridTypeCDFrame)));
+	grid_type_selector.add_separator ();
+	grid_type_selector.append (grid_actions[GridTypeTimecode]);
+	grid_type_selector.append (grid_actions[GridTypeMinSec]);
+	grid_type_selector.append (grid_actions[GridTypeCDFrame]);
 
 	grid_type_selector.set_sizing_texts (grid_type_strings);
 }
@@ -1312,7 +1049,8 @@ EditingContext::build_draw_midi_menus ()
 
 	/* Note-Length when drawing */
 
-	std::vector<GridType> grids ({GridTypeBeat,
+	std::vector<GridType> grids ({
+			GridTypeBeat,
 			GridTypeBeatDiv2,
 			GridTypeBeatDiv4,
 			GridTypeBeatDiv8,
@@ -1321,26 +1059,22 @@ EditingContext::build_draw_midi_menus ()
 			GridTypeNone});
 	std::vector<std::string> draw_grid_type_strings;
 
-	draw_length_action (GridTypeNone)->set_active(); /* default */
-
 	for (auto & g : grids) {
-		Glib::RefPtr<RadioAction> ract = draw_length_action (g);
+		Glib::RefPtr<RadioAction> ract = draw_length_actions[g];
 		draw_length_selector.append (ract);
 		draw_grid_type_strings.push_back (ract->get_short_label());
 
 	}
 
-	grid_type_selector.set_sizing_texts (draw_grid_type_strings);
+	draw_length_selector.set_sizing_texts (draw_grid_type_strings);
 
 	/* Note-Velocity when drawing */
 
 	std::vector<int> preselected_velocities ({8,32,64,82,100,127, DRAW_VEL_AUTO});
 	std::vector<std::string> draw_velocity_strings;
 
-	draw_velocity_action (DRAW_VEL_AUTO)->set_active (); /* default */
-
 	for (auto & v : preselected_velocities) {
-		Glib::RefPtr<RadioAction> ract = draw_velocity_action (v);
+		Glib::RefPtr<RadioAction> ract = draw_velocity_actions[v];
 		assert (ract);
 		draw_velocity_selector.append (ract);
 		draw_velocity_strings.push_back (ract->get_short_label());
@@ -1352,13 +1086,17 @@ EditingContext::build_draw_midi_menus ()
 	std::vector<std::string> draw_channel_strings;
 
 	for (auto & c : possible_channels) {
-		Glib::RefPtr<RadioAction> ract = draw_channel_action (c);
+		Glib::RefPtr<RadioAction> ract = draw_channel_actions[c];
 		assert (ract);
 		draw_channel_selector.append (ract);
 		draw_channel_strings.push_back (ract->get_short_label());
 	}
 
 	draw_channel_selector.set_sizing_texts (draw_channel_strings);
+
+	draw_channel_chosen (draw_channel());
+	draw_length_chosen (draw_length());
+	draw_velocity_chosen (draw_velocity());
 }
 
 bool
@@ -1382,11 +1120,11 @@ EditingContext::time_domain () const
 
 	/* Probably never reached */
 
-	if (_snap_mode == SnapOff) {
+	if (snap_mode() == SnapOff) {
 		return Temporal::AudioTime;
 	}
 
-	switch (_grid_type) {
+	switch (grid_type()) {
 		case GridTypeNone:
 			/* fallthrough */
 		case GridTypeMinSec:
@@ -1416,11 +1154,14 @@ EditingContext::toggle_follow_playhead ()
 void
 EditingContext::set_follow_playhead (bool yn, bool catch_up)
 {
-	if (_follow_playhead != yn) {
-		if ((_follow_playhead = yn) == true && catch_up) {
+	assert (follow_playhead_action);
+	if (follow_playhead() != yn) {
+		follow_playhead_action->set_active (yn);
+		if (yn && catch_up) {
 			/* catch up */
 			reset_x_origin_to_follow_playhead ();
 		}
+		std::cerr << editor_name() << " SFP instant save\n";
 		instant_save ();
 	}
 }
@@ -1468,12 +1209,12 @@ EditingContext::snap_to_with_modifier (timepos_t& start, GdkEvent const * event,
 	}
 
 	if (ArdourKeyboard::indicates_snap (event->button.state)) {
-		if (_snap_mode == SnapOff) {
+		if (snap_mode() == SnapOff) {
 			snap_to_internal (start, direction, pref, ensure_snap);
 		}
 
 	} else {
-		if (_snap_mode != SnapOff) {
+		if (snap_mode() != SnapOff) {
 			snap_to_internal (start, direction, pref);
 		} else if (ArdourKeyboard::indicates_snap_delta (event->button.state)) {
 			/* SnapOff, but we pressed the snap_delta modifier */
@@ -1485,7 +1226,7 @@ EditingContext::snap_to_with_modifier (timepos_t& start, GdkEvent const * event,
 void
 EditingContext::snap_to (timepos_t& start, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap) const
 {
-	if (!_session || (_snap_mode == SnapOff && !ensure_snap)) {
+	if (!_session || (snap_mode() == SnapOff && !ensure_snap)) {
 		return;
 	}
 
@@ -1495,7 +1236,7 @@ EditingContext::snap_to (timepos_t& start, Temporal::RoundMode direction, SnapPr
 timepos_t
 EditingContext::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref) const
 {
-	return snap_to_bbt_via_grid (presnap, direction, gpref, _grid_type);
+	return snap_to_bbt_via_grid (presnap, direction, gpref, grid_type());
 }
 
 timepos_t
@@ -1522,7 +1263,7 @@ EditingContext::snap_to_bbt_via_grid (timepos_t const & presnap, Temporal::Round
 		 */
 
 		int divisor;
-		switch (_grid_type) {
+		switch (grid_type) {
 			case GridTypeBeatDiv3:
 			case GridTypeBeatDiv6:
 			case GridTypeBeatDiv12:
@@ -1738,10 +1479,11 @@ EditingContext::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	/* Now that we know how fine a grid (Ruler) is allowable on this screen, limit it to the coarseness selected by the user */
 	/* note: GridType and RulerScale are not the same enums, so it's not a simple mathematical operation */
 	int suggested_scale = (int) bbt_ruler_scale;
-	int divs = get_grid_music_divisions(_grid_type, 0);
-	if (_grid_type == GridTypeBar) {
+	GridType gt (grid_type());
+	int divs = get_grid_music_divisions(gt, 0);
+	if (gt == GridTypeBar) {
 		suggested_scale = std::min(suggested_scale, (int) bbt_show_1);
-	} else if (_grid_type == GridTypeBeat) {
+	} else if (gt == GridTypeBeat) {
 		suggested_scale = std::min(suggested_scale, (int) bbt_show_quarters);
 	}  else if ( divs < 4 ) {
 		suggested_scale = std::min(suggested_scale, (int) bbt_show_eighths);
@@ -2338,7 +2080,7 @@ EditingContext::on_velocity_scroll_event (GdkEventScroll* ev)
 		default:
 			return false;
 	}
-	set_draw_velocity_to(v);
+	set_draw_velocity (v);
 	return true;
 }
 
@@ -2355,39 +2097,15 @@ EditingContext::set_common_editing_state (XMLNode const & node)
 
 	GridType grid_type;
 	if (!node.get_property ("grid-type", grid_type)) {
-		grid_type = _grid_type;
+		grid_type = GridTypeNone;
 	}
-	grid_type_selection_done (grid_type);
-
-	GridType draw_length;
-	if (!node.get_property ("draw-length", draw_length)) {
-		draw_length = _draw_length;
-	}
-	draw_length_chosen (draw_length);
-
-	int draw_vel;
-	if (!node.get_property ("draw-velocity", draw_vel)) {
-		draw_vel = _draw_velocity;
-	}
-	draw_velocity_chosen (draw_vel);
-
-	int draw_chan;
-	if (!node.get_property ("draw-channel", draw_chan)) {
-		draw_chan = DRAW_CHAN_AUTO;
-	}
-	draw_channel_chosen (draw_chan);
+	set_grid_type (grid_type);
 
 	SnapMode sm;
-	if (node.get_property ("snap-mode", sm)) {
-		snap_mode_selection_done(sm);
-		/* set text of Dropdown. in case _snap_mode == SnapOff (default)
-		 * snap_mode_selection_done() will only mark an already active item as active
-		 * which does not trigger set_text().
-		 */
-		set_snap_mode (sm);
-	} else {
-		set_snap_mode (_snap_mode);
+	if (!node.get_property ("snap-mode", sm)) {
+		sm = SnapOff;
 	}
+	set_snap_mode (sm);
 
 	node.get_property ("internal-grid-type", internal_grid_type);
 	node.get_property ("internal-snap-mode", internal_snap_mode);
@@ -2415,15 +2133,12 @@ void
 EditingContext::get_common_editing_state (XMLNode& node) const
 {
 	node.set_property ("zoom", samples_per_pixel);
-	node.set_property ("grid-type", _grid_type);
-	node.set_property ("snap-mode", _snap_mode);
+	node.set_property ("grid-type", grid_type());
+	node.set_property ("snap-mode", snap_mode());
 	node.set_property ("internal-grid-type", internal_grid_type);
 	node.set_property ("internal-snap-mode", internal_snap_mode);
 	node.set_property ("pre-internal-grid-type", pre_internal_grid_type);
 	node.set_property ("pre-internal-snap-mode", pre_internal_snap_mode);
-	node.set_property ("draw-length", _draw_length);
-	node.set_property ("draw-velocity", _draw_velocity);
-	node.set_property ("draw-channel", _draw_channel);
 	node.set_property ("left-frame", _leftmost_sample);
 }
 
@@ -2538,10 +2253,6 @@ EditingContext::reset_zoom (samplecnt_t spp)
 
 	pending_visual_change.add (VisualChange::ZoomLevel);
 	pending_visual_change.samples_per_pixel = spp;
-	if (spp == 0.0) {
-		std::cerr << "spp set to zero\n";
-		PBD::stacktrace (std::cerr, 12);
-	}
 	ensure_visual_change_idle_handler ();
 }
 
@@ -2565,18 +2276,20 @@ EditingContext::reg_sens (RefPtr<ActionGroup> group, char const * name, char con
 	return act;
 }
 
-void
+Glib::RefPtr<ToggleAction>
 EditingContext::toggle_reg_sens (RefPtr<ActionGroup> group, char const * name, char const * label, sigc::slot<void> slot)
 {
-	RefPtr<Action> act = ActionManager::register_toggle_action (group, name, label, slot);
+	RefPtr<ToggleAction> act = ActionManager::register_toggle_action (group, name, label, slot);
 	ActionManager::session_sensitive_actions.push_back (act);
+	return act;
 }
 
-void
+Glib::RefPtr<Gtk::RadioAction>
 EditingContext::radio_reg_sens (RefPtr<ActionGroup> action_group, RadioAction::Group& radio_group, char const * name, char const * label, sigc::slot<void> slot)
 {
-	RefPtr<Action> act = ActionManager::register_radio_action (action_group, radio_group, name, label, slot);
+	RefPtr<RadioAction> act = ActionManager::register_radio_action (action_group, radio_group, name, label, slot);
 	ActionManager::session_sensitive_actions.push_back (act);
+	return act;
 }
 
 void
@@ -2655,7 +2368,7 @@ EditingContext::get_grid_type_as_beats (bool& success, timepos_t const & positio
 {
 	success = true;
 
-	int32_t const divisions = get_grid_beat_divisions (_grid_type);
+	int32_t const divisions = get_grid_beat_divisions (grid_type());
 	/* Beat (+1), and Bar (-1) are handled below */
 	if (divisions > 1) {
 		/* grid divisions are divisions of a 1/4 note */
@@ -2664,7 +2377,7 @@ EditingContext::get_grid_type_as_beats (bool& success, timepos_t const & positio
 
 	TempoMap::SharedPtr tmap (TempoMap::use());
 
-	switch (_grid_type) {
+	switch (grid_type()) {
 	case GridTypeBar:
 		if (_session) {
 			const Meter& m = tmap->meter_at (position);
@@ -3358,18 +3071,20 @@ EditingContext::maybe_draw_grid_lines (ArdourCanvas::Container* group)
 
 	if (!grid_lines) {
 		grid_lines = new GridLines (*this, group, ArdourCanvas::LineSet::Vertical);
+
 	}
 
 	grid_marks.clear();
 	samplepos_t rightmost_sample = _leftmost_sample + current_page_samples();
+	GridType gt (grid_type());
 
 	if (grid_musical()) {
-		 metric_get_bbt (grid_marks, _leftmost_sample, rightmost_sample, 12);
-	} else if (_grid_type== GridTypeTimecode) {
-		 metric_get_timecode (grid_marks, _leftmost_sample, rightmost_sample, 12);
-	} else if (_grid_type == GridTypeCDFrame) {
+		metric_get_bbt (grid_marks, _leftmost_sample, rightmost_sample, 12);
+	} else if (gt == GridTypeTimecode) {
+		metric_get_timecode (grid_marks, _leftmost_sample, rightmost_sample, 12);
+	} else if (gt == GridTypeCDFrame) {
 		metric_get_minsec (grid_marks, _leftmost_sample, rightmost_sample, 12);
-	} else if (_grid_type == GridTypeMinSec) {
+	} else if (gt == GridTypeMinSec) {
 		metric_get_minsec (grid_marks, _leftmost_sample, rightmost_sample, 12);
 	}
 
@@ -3385,15 +3100,8 @@ EditingContext::update_grid ()
 		return;
 	}
 
-	if (_grid_type == GridTypeNone) {
+	if (grid_type() == GridTypeNone) {
 		hide_grid_lines ();
-	} else if (grid_musical()) {
-//		Temporal::TempoMapPoints grid;
-//		grid.reserve (4096);
-//		if (bbt_ruler_scale != bbt_show_many) {
-//			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
-//		}
-		maybe_draw_grid_lines (time_line_group);
 	} else {
 		maybe_draw_grid_lines (time_line_group);
 	}
@@ -3524,4 +3232,14 @@ EditingContext::center_screen_internal (samplepos_t sample, float page)
 	}
 
 	reset_x_origin (sample);
+}
+
+bool
+EditingContext::follow_playhead() const
+{
+	if (!follow_playhead_action) {
+		return false;
+	}
+
+	return follow_playhead_action->get_active ();
 }

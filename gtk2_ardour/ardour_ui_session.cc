@@ -599,6 +599,15 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		msg.hide ();
 	}
 
+	{
+		if (new_session) {
+			std::string rus_path = Glib::build_filename (new_session->session_directory().root_path(), "rus.xml");
+			region_ui_settings_manager.load (rus_path);
+		} else {
+			region_ui_settings_manager.clear ();
+		}
+	}
+
 
 	/* Now the session been created, add the transport controls */
 	new_session->add_controllable(roll_controllable);
@@ -611,6 +620,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 
 	set_session (new_session);
 
+
 	if (_session) {
 		_session->set_clean ();
 	}
@@ -619,6 +629,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		Timers::TimerSuspender t;
 		flush_pending (10);
 	}
+
 
 	retval = 0;
 

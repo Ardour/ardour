@@ -2620,7 +2620,7 @@ Editor::maybe_locate_with_edit_preroll (samplepos_t location)
 	}
 
 	//if follow_playhead is on, keep the playhead on the screen
-	if (_follow_playhead)
+	if (follow_playhead())
 		if (location < _leftmost_sample)
 			location = _leftmost_sample;
 
@@ -7801,7 +7801,7 @@ Editor::playhead_forward_to_grid ()
 
 	timepos_t pos (_playhead_cursor->current_sample ());
 
-	if (_grid_type == GridTypeNone) {
+	if (grid_type() == GridTypeNone) {
 		timepos_t const decipage (samplepos_t(floor (current_page_samples() * 0.1)));
 		if (pos < timepos_t::max (pos.time_domain()).earlier (decipage)) {
 			pos += timepos_t (decipage);
@@ -7830,7 +7830,7 @@ Editor::playhead_backward_to_grid ()
 
 	timepos_t pos (_playhead_cursor->current_sample ());
 
-	if (_grid_type == GridTypeNone) {
+	if (grid_type() == GridTypeNone) {
 		samplepos_t const decipage (floor (current_page_samples() * 0.1));
 		if (pos.samples() > decipage) {
 			pos.shift_earlier (timepos_t (decipage));

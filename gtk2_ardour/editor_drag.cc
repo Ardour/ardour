@@ -3106,7 +3106,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 		/* only snap to bars. */
 
-		editing_context.set_grid_to (GridTypeBar);
+		editing_context.set_grid_type (GridTypeBar);
 		editing_context.set_snap_mode (SnapMagnetic);
 	}
 
@@ -3143,7 +3143,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	/* reinstate old snap setting */
-	editing_context.set_grid_to (_old_grid_type);
+	editing_context.set_grid_type (_old_grid_type);
 	editing_context.set_snap_mode (_old_snap_mode);
 
 	_editor.commit_tempo_map_edit (map);
@@ -3167,7 +3167,7 @@ MeterMarkerDrag::aborted (bool moved)
 
 	if (moved) {
 		/* reinstate old snap setting */
-		editing_context.set_grid_to (_old_grid_type);
+		editing_context.set_grid_type (_old_grid_type);
 		editing_context.set_snap_mode (_old_snap_mode);
 
 		// delete the dummy marker we used for visual representation while moving.

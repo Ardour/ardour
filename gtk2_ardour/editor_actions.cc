@@ -187,17 +187,17 @@ Editor::register_actions ()
 
 	/* attachments visibility (editor-mixer-strip, bottom properties, sidebar list) */
 
-	act = ActionManager::register_toggle_action (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Tabbable::att_right_button_toggled));
-	ActionManager::session_sensitive_actions.push_back (act);
-	right_attachment_button.set_related_action (act);
+	show_editor_list_action = ActionManager::register_toggle_action (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Tabbable::att_right_button_toggled));
+	ActionManager::session_sensitive_actions.push_back (show_editor_list_action);
+	right_attachment_button.set_related_action (show_editor_list_action);
 
-	act = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
-	ActionManager::session_sensitive_actions.push_back (act);
-	left_attachment_button.set_related_action (act);
+	show_editor_mixer_action = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
+	ActionManager::session_sensitive_actions.push_back (show_editor_mixer_action);
+	left_attachment_button.set_related_action (show_editor_mixer_action);
 
-	act = ActionManager::register_toggle_action (editor_actions, "show-editor-props", _("Show Editor Properties Box"), sigc::mem_fun (*this, &Tabbable::att_bottom_button_toggled));
-	ActionManager::session_sensitive_actions.push_back (act);
-	bottom_attachment_button.set_related_action (act);
+	show_editor_props_action = ActionManager::register_toggle_action (editor_actions, "show-editor-props", _("Show Editor Properties Box"), sigc::mem_fun (*this, &Tabbable::att_bottom_button_toggled));
+	ActionManager::session_sensitive_actions.push_back (show_editor_props_action);
+	bottom_attachment_button.set_related_action (show_editor_props_action);
 
 	reg_sens (editor_actions, "playhead-to-next-region-boundary", _("Playhead to Next Region Boundary"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_to_next_region_boundary), true));
 	reg_sens (editor_actions, "playhead-to-next-region-boundary-noselection", _("Playhead to Next Region Boundary (No Track Selection)"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_to_next_region_boundary), false));
@@ -480,7 +480,7 @@ Editor::register_actions ()
 
 	ActionManager::register_toggle_action (editor_actions, "toggle-stationary-playhead", _("Stationary Playhead"), (mem_fun(*this, &Editor::toggle_stationary_playhead)));
 
-	ActionManager::register_toggle_action (editor_actions, "show-touched-automation", _("Show Automation Lane on Touch"), (mem_fun(*this, &Editor::toggle_show_touched_automation)));
+	show_touched_automation_action = ActionManager::register_toggle_action (editor_actions, "show-touched-automation", _("Show Automation Lane on Touch"), (mem_fun(*this, &Editor::toggle_show_touched_automation)));
 
 	act = reg_sens (editor_actions, "insert-time", _("Insert Time"), (sigc::mem_fun(*this, &Editor::do_insert_time)));
 	ActionManager::track_selection_sensitive_actions.push_back (act);

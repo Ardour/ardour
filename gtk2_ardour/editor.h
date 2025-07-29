@@ -2065,6 +2065,11 @@ private:
 	Glib::RefPtr<Gtk::Action>              selection_undo_action;
 	Glib::RefPtr<Gtk::Action>              selection_redo_action;
 
+	Glib::RefPtr<Gtk::ToggleAction> show_editor_mixer_action;
+	Glib::RefPtr<Gtk::ToggleAction> show_editor_list_action;
+	Glib::RefPtr<Gtk::ToggleAction> show_editor_props_action;
+	Glib::RefPtr<Gtk::ToggleAction> show_touched_automation_action;
+
 	void history_changed ();
 
 	Editing::EditPoint _edit_point;
@@ -2200,7 +2205,6 @@ private:
 	/* RTAV Automation display option */
 	void toggle_show_touched_automation ();
 	void set_show_touched_automation (bool);
-	bool _show_touched_automation;
 
 	int time_fx (ARDOUR::RegionList&, Temporal::ratio_t ratio, bool pitching, bool fixed_end);
 	void toggle_sound_midi_notes ();

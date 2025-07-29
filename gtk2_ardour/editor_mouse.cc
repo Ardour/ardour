@@ -150,14 +150,14 @@ Editor::mouse_mode_toggled (MouseMode m)
 	   this must toggle the actions and not call set_snap_*() directly,
 	   otherwise things get out of sync and the combo box stops working. */
 	if (!UIConfiguration::instance().get_grid_follows_internal()) {
-		grid_type_action(pre_internal_grid_type)->set_active(true);
-		snap_mode_action(pre_internal_snap_mode)->set_active(true);
+		grid_actions[pre_internal_grid_type]->set_active(true);
+		snap_mode_actions[pre_internal_snap_mode]->set_active(true);
 	} else if (!was_internal && internal_editing()) {
-		grid_type_action(internal_grid_type)->set_active(true);
-		snap_mode_action(internal_snap_mode)->set_active(true);
+		grid_actions[internal_grid_type]->set_active(true);
+		snap_mode_actions[internal_snap_mode]->set_active(true);
 	} else if (was_internal && !internal_editing()) {
-		grid_type_action(pre_internal_grid_type)->set_active(true);
-		snap_mode_action(pre_internal_snap_mode)->set_active(true);
+		grid_actions[pre_internal_grid_type]->set_active(true);
+		snap_mode_actions[pre_internal_snap_mode]->set_active(true);
 	}
 
 	instant_save ();
@@ -2108,7 +2108,7 @@ void
 Editor::mouse_brush_insert_region (RegionView* rv, timepos_t const & pos)
 {
 	/* no brushing without a useful quantize setting */
-	if (_grid_type == GridTypeNone)
+	if (grid_type() == GridTypeNone)
 		return;
 
 	/* don't brush a copy over the original */

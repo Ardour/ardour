@@ -89,6 +89,7 @@
 #include "ardour_window.h"
 #include "editing.h"
 #include "enums.h"
+#include "region_ui_settings.h"
 #include "shuttle_control.h"
 #include "startup_fsm.h"
 #include "transport_control.h"
@@ -418,6 +419,8 @@ public:
 	std::map<std::string, std::string> route_setup_info (const std::string& script_path);
 
 	void gui_idle_handler ();
+
+	RegionUISettingsManager region_ui_settings_manager;
 
 protected:
 	friend class PublicEditor;
