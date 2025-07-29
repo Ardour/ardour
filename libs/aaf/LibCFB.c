@@ -411,26 +411,15 @@ cfb_is_valid (CFB_Data* cfbd)
 static int
 cfb_getFileSize (CFB_Data* cfbd)
 {
-#ifdef _WIN32
-	if (_fseeki64 (cfbd->fp, 0L, SEEK_END) < 0) {
-		error ("fseek() failed : %s.", strerror (errno));
+	if (fseek64 (cfbd->fp, 0LL, SEEK_END) < 0) {
+		error ("fseek64() failed : %s.", strerror (errno));
 		return -1;
 	}
 
-	__int64 filesz = _ftelli64 (cfbd->fp);
-
-#else
-	if (fseek (cfbd->fp, 0L, SEEK_END) < 0) {
-		error ("fseek() failed : %s.", strerror (errno));
-		return -1;
-	}
-
-	long filesz = ftell (cfbd->fp);
-
-#endif
+	int64_t filesz = ftell64 (cfbd->fp);
 
 	if (filesz < 0) {
-		error ("ftell() failed : %s.", strerror (errno));
+		error ("ftell64() failed : %s.", strerror (errno));
 		return -1;
 	}
 
@@ -486,17 +475,17 @@ cfb_readFile (CFB_Data* cfbd, unsigned char* buf, size_t offset, size_t reqlen)
 
 	// debug( "Requesting file read @ offset %"PRIu64" of length %"PRIu64, offset, reqlen );
 
-	if (offset >= LONG_MAX) {
-		error ("Requested data offset is bigger than LONG_MAX");
-		return 0;
-	}
-
 	if (reqlen + offset > cfbd->file_sz) {
 		error ("Requested data goes %" PRIu64 " bytes beyond the EOF : offset %" PRIu64 " | length %" PRIu64 "", (reqlen + offset) - cfbd->file_sz, offset, reqlen);
 		return 0;
 	}
 
-	int rc = fseek (fp, (long)offset, SEEK_SET);
+	if (offset > INT64_MAX) {
+		error ("File offset %" PRIu64 " is beyond INT64_MAX", offset);
+		return 0;
+	}
+
+	int rc = fseek64 (fp, (int64_t)offset, SEEK_SET);
 
 	if (rc < 0) {
 		error ("%s.", strerror (errno));
@@ -565,8 +554,8 @@ cfb_getSector (CFB_Data* cfbd, cfbSectorID_t id)
 		return NULL;
 	}
 
-	uint64_t sectorSize = (1 << cfbd->hdr->_uSectorShift);
-	uint64_t fileOffset = (id + 1) << cfbd->hdr->_uSectorShift;
+	uint64_t sectorSize = (1ULL << cfbd->hdr->_uSectorShift);
+	uint64_t fileOffset = (id + 1ULL) << cfbd->hdr->_uSectorShift;
 
 	unsigned char* buf = calloc (1, sectorSize);
 
@@ -652,8 +641,8 @@ cfb_getMiniSector (CFB_Data* cfbd, cfbSectorID_t id)
 		fatId = cfbd->fat[fatId];
 	}
 
-	offset = ((fatId + 1) << cfbd->hdr->_uSectorShift);
-	offset += ((id % fatDiv) << cfbd->hdr->_uMiniSectorShift);
+	offset = (fatId + 1ULL) << cfbd->hdr->_uSectorShift;
+	offset += (id % fatDiv) << cfbd->hdr->_uMiniSectorShift;
 
 	if (cfb_readFile (cfbd, buf, offset, MiniSectorSize) == 0) {
 		goto err;
@@ -714,24 +703,24 @@ cfb_getStream (CFB_Data* cfbd, cfbNode* node, unsigned char** stream, uint64_t* 
 				return 0;
 			}
 
-			cpy_sz = ((stream_len - offset) < (uint64_t)(1 << cfbd->hdr->_uMiniSectorShift)) ? (stream_len - offset) : (uint64_t)(1 << cfbd->hdr->_uMiniSectorShift);
+			cpy_sz = ((stream_len - offset) < (1ULL << cfbd->hdr->_uMiniSectorShift)) ? (stream_len - offset) : (1ULL << cfbd->hdr->_uMiniSectorShift);
 
 			memcpy (*stream + offset, buf, cpy_sz);
 
 			free (buf);
 
-			offset += (1 << cfbd->hdr->_uMiniSectorShift);
+			offset += (1ULL << cfbd->hdr->_uMiniSectorShift);
 		}
 	} else {
 		CFB_foreachSectorInChain (cfbd, buf, id)
 		{
-			cpy_sz = ((stream_len - offset) < (uint64_t)(1 << cfbd->hdr->_uSectorShift)) ? (stream_len - offset) : (uint64_t)(1 << cfbd->hdr->_uSectorShift);
+			cpy_sz = ((stream_len - offset) < (1ULL << cfbd->hdr->_uSectorShift)) ? (stream_len - offset) : (1ULL << cfbd->hdr->_uSectorShift);
 
 			memcpy (*stream + offset, buf, cpy_sz);
 
 			free (buf);
 
-			offset += (1 << cfbd->hdr->_uSectorShift);
+			offset += (1ULL << cfbd->hdr->_uSectorShift);
 		}
 	}
 
@@ -780,12 +769,12 @@ cfb__foreachSectorInStream (CFB_Data* cfbd, cfbNode* node, unsigned char** buf, 
 	if (stream_sz < cfbd->hdr->_ulMiniSectorCutoff) {
 		/* Mini-Stream */
 		*buf       = cfb_getMiniSector (cfbd, *sectID);
-		*bytesRead = (1 << cfbd->hdr->_uMiniSectorShift);
+		*bytesRead = (1ULL << cfbd->hdr->_uMiniSectorShift);
 		*sectID    = cfbd->miniFat[*sectID];
 	} else {
 		/* Stream */
 		*buf       = cfb_getSector (cfbd, *sectID);
-		*bytesRead = (1 << cfbd->hdr->_uSectorShift);
+		*bytesRead = (1ULL << cfbd->hdr->_uSectorShift);
 		*sectID    = cfbd->fat[*sectID];
 	}
 
@@ -868,7 +857,7 @@ cfb_retrieveDiFAT (CFB_Data* cfbd)
 	 * _uSectorShift is guaranted to be 9 or 12, so DiFAT_sz will never override UINT_MAX
 	 */
 
-	size_t DiFAT_sz = cfbd->hdr->_csectDif * (((1 << cfbd->hdr->_uSectorShift) / sizeof (cfbSectorID_t)) - 1) + 109;
+	size_t DiFAT_sz = cfbd->hdr->_csectDif * (((1ULL << cfbd->hdr->_uSectorShift) / sizeof (cfbSectorID_t)) - 1) + 109;
 
 	if (DiFAT_sz >= UINT_MAX) {
 		error ("DiFAT size is bigger than UINT_MAX : %lu", DiFAT_sz);
@@ -894,7 +883,11 @@ cfb_retrieveDiFAT (CFB_Data* cfbd)
 
 	uint64_t cnt = 0;
 
-	/* _uSectorShift is guaranted to be 9 or 12, so sectorSize will never be negative */
+	/*
+	 * _uSectorShift is guaranted to be 9 or 12, so sectorSize will never be negative.
+	 * -4U excludes the last 4bytes of the sector (those represents next DiFAT sector
+	 * index, in DiFAT chain).
+	 */
 	uint32_t sectorSize = (1U << cfbd->hdr->_uSectorShift) - 4U;
 
 	CFB_foreachSectorInDiFATChain (cfbd, buf, id)
@@ -904,31 +897,28 @@ cfb_retrieveDiFAT (CFB_Data* cfbd)
 			goto err;
 		}
 
+		// debug( "Retrieved DiFAT[%i]", id );
+
 		memcpy ((unsigned char*)DiFAT + offset, buf, sectorSize);
 
 		offset += sectorSize;
 		cnt++;
 
-		/*
-		 * If we count more DiFAT sector when parsing than
-		 * there should be, it means the sector list does
-		 * not end by a proper CFB_END_OF_CHAIN.
-		 */
+		/* done */
+		if (cnt >= cfbd->hdr->_csectDif) {
+			/* retrieves next DiFAT index of the last sector, to ensure chain is ending properly */
+			memcpy (&id, buf + sectorSize, sizeof (uint32_t));
 
-		if (cnt >= cfbd->hdr->_csectDif)
+			if (id != CFB_END_OF_CHAIN /*&& id != CFB_FREE_SECT*/) {
+				warning ("Incorrect end of DiFAT Chain 0x%08x (%d)", id, id);
+			}
+
 			break;
+		}
 	}
 
 	free (buf);
 	buf = NULL;
-
-	/*
-	 * Standard says DIFAT should end with a CFB_END_OF_CHAIN index,
-	 * however it has been observed that some files end with CFB_FREE_SECT.
-	 * So we consider it ok.
-	 */
-	if (id != CFB_END_OF_CHAIN /*&& id != CFB_FREE_SECT*/)
-		warning ("Incorrect end of DiFAT Chain 0x%08x (%d)", id, id);
 
 	cfbd->DiFAT    = DiFAT;
 	cfbd->DiFAT_sz = (uint32_t)DiFAT_sz;
@@ -975,7 +965,7 @@ cfb_retrieveFAT (CFB_Data* cfbd)
 		if (cfbd->DiFAT[id] == CFB_FREE_SECT)
 			continue;
 
-		// debug( "cfbd->DiFAT[id]: %u", cfbd->DiFAT[id] );
+		// debug( "cfbd->DiFAT[%u]: %u", id, cfbd->DiFAT[id] );
 
 		/* observed in fairlight's AAFs.. */
 		if (cfbd->DiFAT[id] == 0x00000000 && id > 0) {
@@ -992,11 +982,11 @@ cfb_retrieveFAT (CFB_Data* cfbd)
 			return -1;
 		}
 
-		memcpy (((unsigned char*)FAT) + offset, buf, (1 << cfbd->hdr->_uSectorShift));
+		memcpy (((unsigned char*)FAT) + offset, buf, (1ULL << cfbd->hdr->_uSectorShift));
 
 		free (buf);
 
-		offset += (1 << cfbd->hdr->_uSectorShift);
+		offset += (1ULL << cfbd->hdr->_uSectorShift);
 	}
 
 	return 0;
@@ -1032,11 +1022,11 @@ cfb_retrieveMiniFAT (CFB_Data* cfbd)
 			return -1;
 		}
 
-		memcpy ((unsigned char*)miniFat + offset, buf, (1 << cfbd->hdr->_uSectorShift));
+		memcpy ((unsigned char*)miniFat + offset, buf, (1ULL << cfbd->hdr->_uSectorShift));
 
 		free (buf);
 
-		offset += (1 << cfbd->hdr->_uSectorShift);
+		offset += (1ULL << cfbd->hdr->_uSectorShift);
 	}
 
 	cfbd->miniFat    = miniFat;
@@ -1145,10 +1135,10 @@ cfb_retrieveNodes (CFB_Data* cfbd)
 		/* handle non-standard sector size, that is different than 512B or 4kB */
 		/* TODO has not been tested yet, should not even exist anyway */
 
-		warning ("Parsing non-standard sector size !!! (%u bytes)", (1 << cfbd->hdr->_uSectorShift));
+		warning ("Parsing non-standard sector size !!! (%u bytes)", (1U << cfbd->hdr->_uSectorShift));
 
 		/* _uSectorShift is guaranted to be 9 or 12, so nodesPerSect will never override UINT_MAX */
-		uint32_t nodesPerSect = (1U << cfbd->hdr->_uMiniSectorShift) / sizeof (cfbNode);
+		size_t nodesPerSect = (1ULL << cfbd->hdr->_uMiniSectorShift) / sizeof (cfbNode);
 
 		CFB_foreachSectorInChain (cfbd, buf, id)
 		{
