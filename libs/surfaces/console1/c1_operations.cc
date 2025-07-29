@@ -932,7 +932,7 @@ Console1::map_eq_mode ()
 	if (!rt) {
 		return;
 	}
-	EQ_MODE current_eq_mode = EQ_MODE (rt->eq_mode_control() ? rt->eq_mode_control()->get_value() : -1);
+	EQ_MODE current_eq_mode = EQ_MODE (rt->eq_type_control() ? rt->eq_type_control()->get_value() : -1);
 	DEBUG_TRACE (DEBUG::Console1, string_compose ("map_eq_mode() - mode: %1\n", current_eq_mode));
 	if (current_eq_mode != strip_eq_mode) {
 		strip_eq_mode = current_eq_mode;
