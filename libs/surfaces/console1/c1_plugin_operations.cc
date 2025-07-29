@@ -204,7 +204,7 @@ Console1::write_plugin_mapping (PluginMapping &mapping)
 	node.set_property ("NAME", mapping.name);
 
 	for (const auto& plugin_param : mapping.parameters ) {
-		DEBUG_TRACE (DEBUG::Console1, string_compose ("write_plugin_mapping: Plugin parameter %1: %2\n",plugin_param.first ,plugin_param.second.name));
+		DEBUG_TRACE (DEBUG::Console1, string_compose ("write_plugin_mapping: Plugin parameter %1: %2 - shift: %3\n", plugin_param.first, plugin_param.second.name, plugin_param.second.shift));
 		XMLNode param = XMLNode ("param-mapping");
 		param.set_property ("id", plugin_param.second.paramIndex);
 		XMLNode name = XMLNode ("name");

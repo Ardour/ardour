@@ -23,6 +23,8 @@
 #include <map>
 #include <set>
 
+#include <sigc++/trackable.h>
+
 #include <ytkmm/treemodel.h>
 #include <ytkmm/liststore.h>
 
@@ -128,6 +130,8 @@ public:
 	bool create_mapping_stubs;
 	bool switch_eq_q_dials = true;
 
+	bool midi_assign_mode = false;
+
 	bool in_use(){
 		return _in_use;
 	}
@@ -135,90 +139,91 @@ public:
     PBD::Signal<void()> ConnectionChange;
 
 	/* Timer Events */
-	PBD::Signal<void(bool)> BlinkIt;
-	PBD::Signal<void()> Periodic;
+    PBD::Signal<void (bool)> BlinkIt;
+    PBD::Signal<void ()>     Periodic;
 
-	/* Local Signals */
-	PBD::Signal<void()> BankChange;
-	PBD::Signal<void(bool)> ShiftChange;
-	PBD::Signal<void(bool)> PluginStateChange;
-	PBD::Signal<void(bool)> EQBandQBindingChange;
+    /* Local Signals */
+    PBD::Signal<void ()>     BankChange;
+    PBD::Signal<void (bool)> ShiftChange;
+    PBD::Signal<void (bool)> PluginStateChange;
+    PBD::Signal<void (bool)> EQBandQBindingChange;
+    sigc::signal2<void, int, bool> SendControllerNumber;
 
-	enum ControllerID {
-		CONTROLLER_NONE    = 0,
-		VOLUME             = 7,
-		PAN                = 10,
-		MUTE               = 12,
-		SOLO               = 13,
-		ORDER              = 14,
-		DRIVE              = 15,
-		EXTERNAL_SIDECHAIN = 17,
-		CHARACTER          = 18,
-		FOCUS1             = 21,
-		FOCUS2,
-		FOCUS3,
-		FOCUS4,
-		FOCUS5,
-		FOCUS6,
-		FOCUS7,
-		FOCUS8,
-		FOCUS9,
-		FOCUS10,
-		FOCUS11,
-		FOCUS12,
-		FOCUS13,
-		FOCUS14,
-		FOCUS15,
-		FOCUS16,
-		FOCUS17,
-		FOCUS18,
-		FOCUS19,
-		FOCUS20               = 40,
-		COMP                  = 46,
-		COMP_THRESH           = 47,
-		COMP_RELEASE          = 48,
-		COMP_RATIO            = 49,
-		COMP_PAR              = 50,
-		COMP_ATTACK           = 51,
-		SHAPE                 = 53,
-		SHAPE_GATE            = 54,
-		SHAPE_SUSTAIN         = 55,
-		SHAPE_RELEASE         = 56,
-		SHAPE_PUNCH           = 57,
-		PRESET                = 58,
-		HARD_GATE             = 59,
-		FILTER_TO_COMPRESSORS = 61,
-		HIGH_SHAPE            = 65,
-		EQ                    = 80,
-		HIGH_GAIN             = 82,
-		HIGH_FREQ             = 83,
-		HIGH_MID_GAIN         = 85,
-		HIGH_MID_FREQ         = 86,
-		HIGH_MID_SHAPE        = 87,
-		LOW_MID_GAIN          = 88,
-		LOW_MID_FREQ          = 89,
-		LOW_MID_SHAPE         = 90,
-		LOW_GAIN              = 91,
-		LOW_FREQ              = 92,
-		LOW_SHAPE             = 93,
-		PAGE_UP               = 96,
-		PAGE_DOWN             = 97,
-		DISPLAY_ON            = 102,
-		LOW_CUT               = 103,
-		MODE                  = 104,
-		HIGH_CUT              = 105,
-		GAIN                  = 107,
-		PHASE_INV             = 108,
-		INPUT_METER_L         = 110,
-		INPUT_METER_R         = 111,
-		OUTPUT_METER_L        = 112,
-		OUTPUT_METER_R        = 113,
-		SHAPE_METER           = 114,
-		COMP_METER            = 115,
-		TRACK_COPY            = 120,
-		TRACK_GROUP           = 123,
+    enum ControllerID {
+	    CONTROLLER_NONE    = 0,
+	    VOLUME             = 7,
+	    PAN                = 10,
+	    MUTE               = 12,
+	    SOLO               = 13,
+	    ORDER              = 14,
+	    DRIVE              = 15,
+	    EXTERNAL_SIDECHAIN = 17,
+	    CHARACTER          = 18,
+	    FOCUS1             = 21,
+	    FOCUS2,
+	    FOCUS3,
+	    FOCUS4,
+	    FOCUS5,
+	    FOCUS6,
+	    FOCUS7,
+	    FOCUS8,
+	    FOCUS9,
+	    FOCUS10,
+	    FOCUS11,
+	    FOCUS12,
+	    FOCUS13,
+	    FOCUS14,
+	    FOCUS15,
+	    FOCUS16,
+	    FOCUS17,
+	    FOCUS18,
+	    FOCUS19,
+	    FOCUS20               = 40,
+	    COMP                  = 46,
+	    COMP_THRESH           = 47,
+	    COMP_RELEASE          = 48,
+	    COMP_RATIO            = 49,
+	    COMP_PAR              = 50,
+	    COMP_ATTACK           = 51,
+	    SHAPE                 = 53,
+	    SHAPE_GATE            = 54,
+	    SHAPE_SUSTAIN         = 55,
+	    SHAPE_RELEASE         = 56,
+	    SHAPE_PUNCH           = 57,
+	    PRESET                = 58,
+	    HARD_GATE             = 59,
+	    FILTER_TO_COMPRESSORS = 61,
+	    HIGH_SHAPE            = 65,
+	    EQ                    = 80,
+	    HIGH_GAIN             = 82,
+	    HIGH_FREQ             = 83,
+	    HIGH_MID_GAIN         = 85,
+	    HIGH_MID_FREQ         = 86,
+	    HIGH_MID_SHAPE        = 87,
+	    LOW_MID_GAIN          = 88,
+	    LOW_MID_FREQ          = 89,
+	    LOW_MID_SHAPE         = 90,
+	    LOW_GAIN              = 91,
+	    LOW_FREQ              = 92,
+	    LOW_SHAPE             = 93,
+	    PAGE_UP               = 96,
+	    PAGE_DOWN             = 97,
+	    DISPLAY_ON            = 102,
+	    LOW_CUT               = 103,
+	    MODE                  = 104,
+	    HIGH_CUT              = 105,
+	    GAIN                  = 107,
+	    PHASE_INV             = 108,
+	    INPUT_METER_L         = 110,
+	    INPUT_METER_R         = 111,
+	    OUTPUT_METER_L        = 112,
+	    OUTPUT_METER_R        = 113,
+	    SHAPE_METER           = 114,
+	    COMP_METER            = 115,
+	    TRACK_COPY            = 120,
+	    TRACK_GROUP           = 123,
 
-	};
+    };
 
     enum EQ_MODE {
 	    EQM_UNDEFINED = -1,

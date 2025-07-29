@@ -56,22 +56,23 @@ public:
 private:
 	Console1& c1;
 	PBD::ScopedConnectionList lcxl_connections;
-	Gtk::VBox hpacker;
-	Gtk::Table table;
-	Gtk::ComboBox input_combo;
-	Gtk::ComboBox output_combo;
-	Gtk::ComboBox plugins_combo;
-	Gtk::ScrolledWindow plugin_mapping_scroller;
-	Gtk::Image image;
+	Gtk::VBox                 hpacker;
+	Gtk::Table                table;
+	Gtk::ComboBox             input_combo;
+	Gtk::ComboBox             output_combo;
+
+	Gtk::Image       image;
 	Gtk::CheckButton swap_solo_mute_cb;
 	Gtk::CheckButton band_q_as_send_cb;
 	Gtk::CheckButton create_plugin_stubs_btn;
 
-	Gtk::TreeView plugin_assignment_editor;
+	Gtk::ScrolledWindow plugin_mapping_scroller;
+	Gtk::ComboBox       plugins_combo;
+	Gtk::TreeView      plugin_assignment_editor;
+	Gtk::ToggleButton* midi_assign_button;
+	Gtk::VBox          plugin_packer;
 
-	Gtk::VBox plugin_packer;
-
-    bool assignement_changed = false;
+	sigc::signal<void> plugin_assignment_changed;
 
 	void update_port_combos ();
 	PBD::ScopedConnection connection_change_connection;
@@ -120,17 +121,20 @@ private:
 
 	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (std::vector<std::string> const & ports, bool for_input);
 
+
 	Console1::PluginMapping pc;
+	Gtk::VBox*              build_plugin_assignment_page ();
 	Gtk::CellRendererCombo* make_action_renderer (Glib::RefPtr<Gtk::ListStore> model, Gtk::TreeModelColumnBase column);
-	void build_plugin_assignment_editor ();
-
-	void change_controller (const Glib::ustring &, const Gtk::TreeIter&);
-	void toggle_shift ( const Glib::ustring& );
-
-	void active_port_changed (Gtk::ComboBox*, bool for_input);
+	void                    build_plugin_assignment_editor ();
+	void                    plugin_assignment_editor_selection_changed ();
+	void                    change_controller_number (int controllerNumber, bool shiftState);
+	void                    midi_assign_button_toggled (Gtk::ToggleButton* b);
+	void                    change_controller (const Glib::ustring&, const Gtk::TreeIter&);
+	void                    toggle_shift (const Glib::ustring&);
+	void                    active_port_changed (Gtk::ComboBox*, bool for_input);
 
 	void set_swap_solo_mute ();
-	void set_band_q_as_send();
+	void set_band_q_as_send ();
 	void set_create_mapping_stubs ();
 	void active_plugin_changed (Gtk::ComboBox* combo);
 	void write_plugin_assignment ();

@@ -177,55 +177,28 @@ C1GUI::C1GUI (Console1& p)
     // Create the page for plugin mappings
     p.load_mappings ();
 
-  	VBox* plugconfig_packer = manage (new VBox);
-	HBox* plugselect_packer = manage (new HBox);
+    VBox* plugconfig_packer = build_plugin_assignment_page();
 
-	l = manage (new Gtk::Label (_("Select Plugin")));
-  	plugselect_packer->pack_start (*l, false, false);
+    append_page (*plugconfig_packer, _ ("Plugin Mappings"));
+    plugconfig_packer->show_all ();
 
-	plugconfig_packer->pack_start (*plugselect_packer, false, false);
-    
-    Glib::RefPtr<Gtk::ListStore> plugin_store_model = ListStore::create (plugin_columns);
-	TreeModel::Row plugin_combo_row;
-    for( const auto &pm : c1.getPluginMappingMap() ){
-        plugin_combo_row = *(plugin_store_model->append ());
-		plugin_combo_row[plugin_columns.plugin_name] = pm.second.name;
-		plugin_combo_row[plugin_columns.plugin_id] = pm.first;
-		DEBUG_TRACE (DEBUG::Console1, string_compose ("Add Plugin: name %1 / %2\n", pm.second.name, pm.first));
-	}
-	plugins_combo.pack_start (plugin_columns.plugin_name);
-	plugins_combo.signal_changed ().connect (
-	  sigc::bind (sigc::mem_fun (*this, &C1GUI::active_plugin_changed), &plugins_combo));
-	plugins_combo.set_model (plugin_store_model);
+    /* update the port connection combos */
 
-	plugselect_packer->pack_start (plugins_combo, true, true);
-	plugin_mapping_scroller.property_shadow_type() = Gtk::SHADOW_NONE;
-    plugin_mapping_scroller.set_policy(Gtk::PolicyType::POLICY_AUTOMATIC, Gtk::PolicyType::POLICY_AUTOMATIC);
+    update_port_combos ();
 
-	plugin_mapping_scroller.add (plugin_assignment_editor);
-	plugconfig_packer->pack_start (plugin_mapping_scroller, true, true, 20);
+    /* catch future changes to connection state */
 
-	build_plugin_assignment_editor ();
-
-	append_page (*plugconfig_packer, _ ("Plugin Mappings"));
-	plugconfig_packer->show_all ();
-
-	/* update the port connection combos */
-
-	update_port_combos ();
-
-	/* catch future changes to connection state */
-
-	ARDOUR::AudioEngine::instance ()->PortRegisteredOrUnregistered.connect (
-	  _port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
-	ARDOUR::AudioEngine::instance ()->PortPrettyNameChanged.connect (
-	  _port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
-	c1.ConnectionChange.connect (
-	  _port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
+    ARDOUR::AudioEngine::instance ()->PortRegisteredOrUnregistered.connect (
+	_port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
+    ARDOUR::AudioEngine::instance ()->PortPrettyNameChanged.connect (
+	_port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
+    c1.ConnectionChange.connect (
+	_port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
 }
 
 C1GUI::~C1GUI () {
-    write_plugin_assignment();
+	DEBUG_TRACE (DEBUG::Console1, "1GUI::~C1GUI ()\n");
+	c1.midi_assign_mode = false;
 }
 
 void
@@ -375,120 +348,5 @@ C1GUI::active_port_changed (Gtk::ComboBox* combo, bool for_input)
 	}
 }
 
-void
-C1GUI::change_controller (const Glib::ustring &sPath, const TreeModel::iterator &iter)
-{
-	Gtk::TreePath path(sPath);
-	Gtk::TreeModel::iterator row = plugin_assignment_store->get_iter(path);
-	int index = *path.begin ();
-	if (row) {
-
-		string controllerName = (*iter)[c1.plugin_controller_columns.controllerName];
-	    int controllerId = (*iter)[c1.plugin_controller_columns.controllerId];
-    	pc.parameters[index].controllerId = Console1::ControllerID (controllerId);
-		(*row).set_value (plugin_assignment_editor_columns.controllerName, controllerName);
-		DEBUG_TRACE (DEBUG::Console1,
-		             string_compose ("Column Name: Controller, index %1, name %2 \n", index, controllerName));
-		assignement_changed = true;
-	}
-}
-
-void C1GUI::toggle_shift( const Glib::ustring& s){
-	int index = atoi (s.c_str());
-	Gtk::TreeModel::iterator row = plugin_assignment_store->get_iter (s);
-    if( row )
-    {
-		bool value = !pc.parameters[index].shift;
-		pc.parameters[index].shift = value;
-		(*row).set_value (plugin_assignment_editor_columns.shift, value);
-	    DEBUG_TRACE (DEBUG::Console1, string_compose ("Column Name: Shift, value %1\n", value));
-		assignement_changed = true;
-	}
-}
-
-CellRendererCombo*
-C1GUI::make_action_renderer (Glib::RefPtr<ListStore> model, Gtk::TreeModelColumnBase column)
-{
-	CellRendererCombo* renderer = manage (new CellRendererCombo);
-	renderer->property_model() = model;
-	renderer->property_editable() = true;
-	renderer->property_text_column () = 0;
-	renderer->property_has_entry () = false;
-	renderer->signal_changed().connect (sigc::mem_fun(*this, &C1GUI::change_controller));
-
-	return renderer;
-}
-
-void
-C1GUI::build_plugin_assignment_editor ()
-{
-	plugin_assignment_editor.append_column (_("Key"), plugin_assignment_editor_columns.index);
-	plugin_assignment_editor.append_column (_("Name"), plugin_assignment_editor_columns.name);
-	plugin_assignment_editor.append_column (_("Switch"), plugin_assignment_editor_columns.is_switch);
-
-	TreeViewColumn* col;
-	CellRendererCombo* renderer;
-
-	CellRendererToggle* boolRenderer = manage (new CellRendererToggle);
-	boolRenderer->set_active ();
-	boolRenderer->property_activatable() = true;
-	col = manage (new TreeViewColumn (_ ("Shift"), *boolRenderer));
-	col->add_attribute (boolRenderer->property_active (), plugin_assignment_editor_columns.shift);
-	boolRenderer->signal_toggled().connect (sigc::mem_fun(*this, &C1GUI::toggle_shift));
-	plugin_assignment_editor.append_column (*col);
-
-
-	renderer = make_action_renderer (c1.getPluginControllerModel(), plugin_assignment_editor_columns.controllerName);
-	col = manage (new TreeViewColumn (_("Control"), *renderer));
-	col->add_attribute (renderer->property_text(), plugin_assignment_editor_columns.controllerName);
-	plugin_assignment_editor.append_column (*col);
-
-	plugin_assignment_store = ListStore::create (plugin_assignment_editor_columns);
-	plugin_assignment_editor.set_model (plugin_assignment_store);
-}
-
-
-void
-C1GUI::active_plugin_changed(Gtk::ComboBox* combo ){
-    DEBUG_TRACE (DEBUG::Console1, "C1GUI active_plugin_changed\n");
-
-	write_plugin_assignment ();
-
-	plugin_assignment_editor.set_model (Glib::RefPtr<TreeModel>());
-	plugin_assignment_store->clear ();
-
-	TreeModel::iterator active = combo->get_active ();
-	TreeModel::Row plugin_assignment_row;
-
-	string new_plugin_name = (*active)[plugin_columns.plugin_name];
-	string new_plugin_id = (*active)[plugin_columns.plugin_id];
-    DEBUG_TRACE (DEBUG::Console1, string_compose ("Plugin: selected %1 / %2\n", new_plugin_name, new_plugin_id));
-	pc = c1.getPluginMappingMap ()[new_plugin_id];
-
-    for( auto &parm : pc.parameters ){
-		plugin_assignment_row = *(plugin_assignment_store->append ());
-		plugin_assignment_row[plugin_assignment_editor_columns.index] = parm.first;
-		plugin_assignment_row[plugin_assignment_editor_columns.name] = parm.second.name;
-		plugin_assignment_row[plugin_assignment_editor_columns.controllerName] = c1.findControllerNameById(parm.second.controllerId);
-		plugin_assignment_row[plugin_assignment_editor_columns.is_switch] = parm.second.is_switch;
-		plugin_assignment_row[plugin_assignment_editor_columns.shift] = parm.second.shift;
-
-		DEBUG_TRACE (DEBUG::Console1, string_compose ("Parameter Name %1 \n", parm.second.name));
-		DEBUG_TRACE (DEBUG::Console1, string_compose ("Parameter Index: %1 - index %2 \n", parm.first, parm.second.paramIndex));
-        DEBUG_TRACE (DEBUG::Console1, string_compose ("ControllerId: %1 \n", parm.second.controllerId));
-        DEBUG_TRACE (DEBUG::Console1, string_compose ("is switch? %1 \n", parm.second.is_switch));
-        DEBUG_TRACE (DEBUG::Console1, string_compose ("is shift? %1 \n", parm.second.shift));
-    }
-	plugin_assignment_editor.set_model (plugin_assignment_store);
-
-}
-
-void C1GUI::write_plugin_assignment(){
-    DEBUG_TRACE (DEBUG::Console1, "write_plugin_assignment\n");
-    if( !assignement_changed )
-		return;
-	c1.write_plugin_mapping (pc);
-	assignement_changed = false;
-}
 
 } // namespace Console1

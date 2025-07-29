@@ -439,10 +439,16 @@ Console1::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* tb
 {
 	uint32_t controller_number = static_cast<uint32_t> (tb->controller_number);
 	uint32_t value             = static_cast<uint32_t> (tb->value);
-	DEBUG_TRACE (DEBUG::Console1,
+
+    DEBUG_TRACE (DEBUG::Console1,
 	             string_compose ("handle_midi_controller_message cn: '%1' val: '%2'\n", controller_number, value));
 	DEBUG_TRACE (DEBUG::Console1,
 	             string_compose ("handle_midi_controller_message shift state: '%1' plugin state: '%2'\n", shift_state, in_plugin_state));
+
+	if (midi_assign_mode && (controller_number != ControllerID::PRESET)) {
+		SendControllerNumber (controller_number, shift_state);
+		return;
+    }
 
 	try {
 		Controller* controller = controllerMap[ControllerID (controller_number)];

@@ -15,6 +15,7 @@ def build(bld):
             console1.cc
             c1_operations.cc
             c1_plugin_operations.cc
+            c1_plugin_control_assignment.cc
             c1_gui.cc
     '''
     obj.defines      = [ 'PACKAGE="ardour_console1"' ]
