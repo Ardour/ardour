@@ -975,27 +975,27 @@ Item::prepare_for_render_children (Rect const & area) const
 	ensure_lut ();
 	std::vector<Item*> items = _lut->get (area);
 
-	for (std::vector<Item*>::const_iterator i = items.begin(); i != items.end(); ++i) {
+	for (auto const & item : items) {
 
-		if (!(*i)->visible ()) {
+		if (!item->needs_prepare_for_render()) {
 			continue;
 		}
 
-		Rect item_bbox = (*i)->bounding_box ();
+		if (!item->visible ()) {
+			continue;
+		}
+
+		Rect item_bbox = item->bounding_box ();
 
 		if (!item_bbox) {
 			continue;
 		}
 
-		Rect item = (*i)->item_to_window (item_bbox, false);
-		Rect d = item.intersection (area);
+		Rect item_rect = item->item_to_window (item_bbox, false);
+		Rect draw = item_rect.intersection (area);
 
-		if (d) {
-			Rect draw = d;
-			if (draw.width() && draw.height()) {
-				(*i)->prepare_for_render (area);
-			}
-
+		if (draw.width() && draw.height()) {
+			item->prepare_for_render (area);
 		} else {
 			// Item does not intersect with visible canvas area
 		}
