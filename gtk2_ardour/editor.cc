@@ -2233,40 +2233,29 @@ Editor::set_state (const XMLNode& node, int version)
 		set_edit_point_preference (_edit_point);
 	}
 
-	if (node.get_property ("follow-playhead", yn)) {
-		set_follow_playhead (yn);
-	}
+#ifndef LIVETRAX
+	yn = false;
+#else
+	yn = true;
+#endif
+	node.get_property ("follow-playhead", yn);
+	set_follow_playhead (yn);
 
-	if (node.get_property ("stationary-playhead", yn)) {
-		set_stationary_playhead (yn);
-	}
+	yn = false;
+	node.get_property ("stationary-playhead", yn);
+	set_stationary_playhead (yn);
 
 	yn = true;
 	node.get_property ("show-editor-mixer", yn);
-	{
-		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-mixer"));
-		/* do it twice to force the change */
-		tact->set_active (!yn);
-		tact->set_active (yn);
-	}
+	show_editor_mixer_action->set_active (yn);
 
 	yn = false;
 	node.get_property ("show-editor-list", yn);
-	{
-		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-list"));
-		/* do it twice to force the change */
-		tact->set_active (!yn);
-		tact->set_active (yn);
-	}
+	show_editor_list_action->set_active (yn);
 
 	yn = false;
+	show_editor_props_action->set_active (yn);
 	node.get_property ("show-editor-props", yn);
-	{
-		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-props"));
-		/* do it twice to force the change */
-		tact->set_active (!yn);
-		tact->set_active (yn);
-	}
 
 	guint index;
 	if (node.get_property (X_("editor-list-btn1"), index)) {
