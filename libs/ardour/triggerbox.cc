@@ -1719,7 +1719,6 @@ AudioTrigger::set_region_in_worker_thread_internal (std::shared_ptr<Region> r, b
 
 	if (!r) {
 		data.reset ();
-		std::cerr << "T " << _box.order() << " / " << index() << " cleared, now playable ? " << playable() << " dl " << data.length() << std::endl;
 		return 0;
 	}
 
