@@ -131,8 +131,8 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 		session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::solo_active, this, _1), OSC::instance());
 		solo_active (session->soloing() || session->listening());
 
-		std::shared_ptr<Controllable> click_controllable = std::dynamic_pointer_cast<Controllable>(session->click_gain()->gain_control());
-		if (click_controllable) {
+		if (session->click_gain()) {
+			std::shared_ptr<Controllable> click_controllable = std::dynamic_pointer_cast<Controllable>(session->click_gain()->gain_control());
 			click_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::send_change_message, this, X_("/click/level"), click_controllable), OSC::instance());
 			send_change_message (X_("/click/level"), click_controllable);
 		}
