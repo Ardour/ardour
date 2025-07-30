@@ -744,8 +744,6 @@ PianoRollHeaderBase::button_press_handler (GdkEventButton* ev)
 bool
 PianoRollHeaderBase::button_release_handler (GdkEventButton* ev)
 {
-	double evy = ev->y;
-
 	end_scroomer_drag ();
 
 	if (_dragging) {
