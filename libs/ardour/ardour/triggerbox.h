@@ -572,6 +572,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 		samplecnt_t append (Sample const * src, samplecnt_t cnt, uint32_t chan);
 		void alloc (samplecnt_t cnt, uint32_t nchans);
+		void reset () { length = 0; }
 	};
 
 

@@ -729,16 +729,6 @@ Trigger::set_region (std::shared_ptr<Region> r, bool use_thread)
 }
 
 void
-Trigger::clear_region ()
-{
-	/* Called from RT process thread */
-
-	_region.reset ();
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("cleared region for %1\n", _index));
-	set_name ("");
-}
-
-void
 Trigger::set_region_internal (std::shared_ptr<Region> r)
 {
 	region_connection.disconnect ();
@@ -1728,7 +1718,8 @@ AudioTrigger::set_region_in_worker_thread_internal (std::shared_ptr<Region> r, b
 	set_region_internal (r);
 
 	if (!r) {
-		/* unset */
+		data.reset ();
+		std::cerr << "T " << _box.order() << " / " << index() << " cleared, now playable ? " << playable() << " dl " << data.length() << std::endl;
 		return 0;
 	}
 
@@ -4297,7 +4288,7 @@ TriggerBox::maybe_swap_pending (uint32_t slot)
 					empty_changed = true;
 				}
 			}
-			all_triggers[slot]->clear_region ();
+			all_triggers[slot]->set_region (nullptr);
 		} else {
 			if (!all_triggers[slot]->playable()) {
 				if (_active_slots == 0) {
