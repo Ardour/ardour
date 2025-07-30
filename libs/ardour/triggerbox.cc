@@ -712,9 +712,14 @@ Trigger::set_region (std::shared_ptr<Region> r, bool use_thread)
 	/* Called from (G)UI thread */
 
 	if (!r) {
-		/* clear operation, no need to talk to the worker thread */
-		set_pending (Trigger::MagicClearPointerValue);
-		request_stop ();
+		TriggerPtr cp (_box.currently_playing());
+		if (!cp || cp.get() != this) {
+			set_region_in_worker_thread (r);
+		} else {
+			/* clear operation, no need to talk to the worker thread */
+			set_pending (Trigger::MagicClearPointerValue);
+			request_stop ();
+		}
 	} else if (use_thread) {
 		/* load data, do analysis in another thread */
 		TriggerBox::worker->set_region (_box, index(), r);
@@ -746,6 +751,10 @@ Trigger::set_region_internal (std::shared_ptr<Region> r)
 		_region = RegionFactory::create (r, r->derive_properties ());
 	} else {
 		_region = r;
+	}
+
+	if (!_region) {
+		set_name ("");
 	}
 
 	if (_region) {
@@ -3084,7 +3093,10 @@ MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 	if (!r) {
 		set_region_internal (r);
 		content_connection.disconnect ();
+		RTMidiBufferBeats* old = rt_midibuffer.exchange (nullptr);
+		delete old;
 		_model.reset ();
+		set_name ("");
 		return 0;
 	}
 
