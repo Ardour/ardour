@@ -131,7 +131,6 @@ EditingContext::EditingContext (std::string const & name)
 	, _selection_memento (new SelectionMemento())
 	, _verbose_cursor (nullptr)
 	, samples_per_pixel (2048)
-	, _zoom_focus (ZoomFocusPlayhead)
 	, bbt_ruler_scale (bbt_show_many)
 	, bbt_bars (0)
 	, bbt_bar_helper_on (0)
@@ -142,7 +141,6 @@ EditingContext::EditingContext (std::string const & name)
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
 	, horizontal_adjustment (0.0, 0.0, 1e16)
 	, own_bindings (nullptr)
-	, mouse_mode (MouseObject)
 	, visual_change_queued (false)
 	, autoscroll_horizontal_allowed (false)
 	, autoscroll_vertical_allowed (false)
@@ -330,6 +328,34 @@ EditingContext::disable_automation_bindings ()
 }
 
 void
+EditingContext::set_action_defaults ()
+{
+#ifndef LIVETRAX
+	follow_playhead_action->set_active (true);
+#else
+	follow_playhead_action->set_active (false);
+#endif
+	mouse_mode_actions[Editing::MouseObject]->set_active (true);
+	zoom_focus_actions[Editing::ZoomFocusLeft]->set_active (true);
+
+	if (snap_mode_actions[Editing::SnapMagnetic]) {
+		snap_mode_actions[Editing::SnapMagnetic]->set_active (true);
+	}
+	if (grid_actions[Editing::GridTypeBeat]) {
+		grid_actions[Editing::GridTypeBeat]->set_active (true);
+	}
+	if (draw_length_actions[DRAW_LEN_AUTO]) {
+		draw_length_actions[DRAW_LEN_AUTO]->set_active (true);
+	}
+	if (draw_velocity_actions[DRAW_VEL_AUTO]) {
+		draw_velocity_actions[DRAW_VEL_AUTO]->set_active (true);
+	}
+	if (draw_channel_actions[DRAW_CHAN_AUTO]) {
+		draw_channel_actions[DRAW_CHAN_AUTO]->set_active (true);
+	}
+}
+
+void
 EditingContext::register_common_actions (Bindings* common_bindings, std::string const & prefix)
 {
 	_common_actions = ActionManager::create_action_group (common_bindings, prefix + X_("Editing"));
@@ -337,7 +363,10 @@ EditingContext::register_common_actions (Bindings* common_bindings, std::string 
 	reg_sens (_common_actions, "temporal-zoom-out", _("Zoom Out"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), true));
 	reg_sens (_common_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), false));
 
-	follow_playhead_action = toggle_reg_sens (_common_actions, "toggle-follow-playhead", _("Follow Playhead"), (sigc::mem_fun(*this, &EditingContext::toggle_follow_playhead)));
+	/* toggle action that represents state */
+	follow_playhead_action = toggle_reg_sens (_common_actions, "follow-playhead", _("Follow Playhead"), sigc::mem_fun (*this, &EditingContext::follow_playhead_chosen));
+	/* invokable action that toggles the stateful action */
+	reg_sens (_common_actions, "toggle-follow-playhead", _("Follow Playhead"), sigc::mem_fun (*this, &EditingContext::toggle_follow_playhead));
 
 	undo_action = reg_sens (_common_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::undo), 1U));
 	redo_action = reg_sens (_common_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::redo), 1U));
@@ -353,23 +382,23 @@ EditingContext::register_common_actions (Bindings* common_bindings, std::string 
 
 	RadioAction::Group mouse_mode_group;
 
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseObject));
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseRange));
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseDraw));
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseTimeFX));
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseGrid));
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseContent));
-	ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_toggled), Editing::MouseCut));
+	mouse_mode_actions[Editing::MouseObject] = ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_chosen), Editing::MouseObject));
+	mouse_mode_actions[Editing::MouseRange] = ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_chosen), Editing::MouseRange));
+	mouse_mode_actions[Editing::MouseDraw] = ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_chosen), Editing::MouseDraw));
+	mouse_mode_actions[Editing::MouseTimeFX] = ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_chosen), Editing::MouseTimeFX));
+	mouse_mode_actions[Editing::MouseGrid] = ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_chosen), Editing::MouseGrid));
+	mouse_mode_actions[Editing::MouseContent] = ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_chosen), Editing::MouseContent));
+	mouse_mode_actions[Editing::MouseCut] = ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_chosen), Editing::MouseCut));
 
 	zoom_actions = ActionManager::create_action_group (common_bindings, prefix + X_("Zoom"));
 	RadioAction::Group zoom_group;
 
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusLeft));
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-right", _("Zoom Focus Right"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusRight));
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-center", _("Zoom Focus Center"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusCenter));
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-playhead", _("Zoom Focus Playhead"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusPlayhead));
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-mouse", _("Zoom Focus Mouse"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusMouse));
-	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-edit", _("Zoom Focus Edit Point"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusEdit));
+	zoom_focus_actions[Editing::ZoomFocusLeft] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusLeft));
+	zoom_focus_actions[Editing::ZoomFocusRight] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-right", _("Zoom Focus Right"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusRight));
+	zoom_focus_actions[Editing::ZoomFocusCenter] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-center", _("Zoom Focus Center"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusCenter));
+	zoom_focus_actions[Editing::ZoomFocusPlayhead] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-playhead", _("Zoom Focus Playhead"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusPlayhead));
+	zoom_focus_actions[Editing::ZoomFocusMouse] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-mouse", _("Zoom Focus Mouse"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusMouse));
+	zoom_focus_actions[Editing::ZoomFocusEdit] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-edit", _("Zoom Focus Edit Point"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusEdit));
 
 	ActionManager::register_action (zoom_actions, X_("cycle-zoom-focus"), _("Next Zoom Focus"), sigc::mem_fun (*this, &EditingContext::cycle_zoom_focus));
 
@@ -507,16 +536,16 @@ EditingContext::register_midi_actions (Bindings* midi_bindings, std::string cons
 	draw_length_actions[Editing::GridTypeBeatDiv14] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fourteenths"),    grid_type_strings[(int)GridTypeBeatDiv14].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv14));
 	draw_length_actions[Editing::GridTypeBeatDiv12] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twelfths"),       grid_type_strings[(int)GridTypeBeatDiv12].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv12));
 	draw_length_actions[Editing::GridTypeBeatDiv10] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-tenths"),         grid_type_strings[(int)GridTypeBeatDiv10].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv10));
-	draw_length_actions[Editing::GridTypeBeatDiv8] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-eighths"),        grid_type_strings[(int)GridTypeBeatDiv8].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv8));
-	draw_length_actions[Editing::GridTypeBeatDiv7] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sevenths"),       grid_type_strings[(int)GridTypeBeatDiv7].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv7));
-	draw_length_actions[Editing::GridTypeBeatDiv6] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sixths"),         grid_type_strings[(int)GridTypeBeatDiv6].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv6));
-	draw_length_actions[Editing::GridTypeBeatDiv5] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fifths"),         grid_type_strings[(int)GridTypeBeatDiv5].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv5));
-	draw_length_actions[Editing::GridTypeBeatDiv4] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-quarters"),       grid_type_strings[(int)GridTypeBeatDiv4].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv4));
-	draw_length_actions[Editing::GridTypeBeatDiv3] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirds"),         grid_type_strings[(int)GridTypeBeatDiv3].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv3));
-	draw_length_actions[Editing::GridTypeBeatDiv2] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-halves"),         grid_type_strings[(int)GridTypeBeatDiv2].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv2));
-	draw_length_actions[Editing::GridTypeBeat] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeat));
-	draw_length_actions[Editing::GridTypeBar] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBar));
-	draw_length_actions[DRAW_LEN_AUTO] = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-auto"),           _("Auto"),                                         sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), DRAW_LEN_AUTO));
+	draw_length_actions[Editing::GridTypeBeatDiv8]  = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-eighths"),        grid_type_strings[(int)GridTypeBeatDiv8].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv8));
+	draw_length_actions[Editing::GridTypeBeatDiv7]  = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sevenths"),       grid_type_strings[(int)GridTypeBeatDiv7].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv7));
+	draw_length_actions[Editing::GridTypeBeatDiv6]  = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sixths"),         grid_type_strings[(int)GridTypeBeatDiv6].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv6));
+	draw_length_actions[Editing::GridTypeBeatDiv5]  = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fifths"),         grid_type_strings[(int)GridTypeBeatDiv5].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv5));
+	draw_length_actions[Editing::GridTypeBeatDiv4]  = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-quarters"),       grid_type_strings[(int)GridTypeBeatDiv4].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv4));
+	draw_length_actions[Editing::GridTypeBeatDiv3]  = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirds"),         grid_type_strings[(int)GridTypeBeatDiv3].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv3));
+	draw_length_actions[Editing::GridTypeBeatDiv2]  = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-halves"),         grid_type_strings[(int)GridTypeBeatDiv2].c_str(),  sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeatDiv2));
+	draw_length_actions[Editing::GridTypeBeat]      = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeat));
+	draw_length_actions[Editing::GridTypeBar]       = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBar));
+	draw_length_actions[DRAW_LEN_AUTO]              = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-auto"),           _("Auto"),                                         sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), DRAW_LEN_AUTO));
 
 	velocity_actions = ActionManager::create_action_group (midi_bindings, prefix + X_("DrawVelocity"));
 	RadioAction::Group draw_velocity_group;
@@ -673,8 +702,6 @@ EditingContext::grid_type_chosen (GridType gt)
 	auto ti = grid_actions.find (gt);
 	assert (ti != grid_actions.end());
 
-	std::cerr << "gt chosen, type " << enum_2_string (gt) << " active ? " << ti->second->get_active () << std::endl;
-
 	if (!ti->second->get_active()) {
 		return;
 	}
@@ -701,11 +728,10 @@ EditingContext::grid_type_chosen (GridType gt)
 		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 		update_tempo_based_rulers ();
 	} else if (current_mouse_mode () == Editing::MouseGrid) {
-		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (get_mouse_mode_action (Editing::MouseObject));
-		ract->set_active (true);
+		mouse_mode_actions[Editing::MouseObject]->set_active (true);
 	}
 
-	get_mouse_mode_action (Editing::MouseGrid)->set_sensitive (grid_is_musical);
+	mouse_mode_actions[Editing::MouseGrid]->set_sensitive (grid_is_musical);
 
 	mark_region_boundary_cache_dirty ();
 
@@ -728,7 +754,7 @@ EditingContext::draw_length_chosen (GridType type)
 		return;
 	}
 
-	if (!grid_type_is_musical (type) ) {  // is this is sensible sanity check ?
+	if ((DRAW_LEN_AUTO != type) && !grid_type_is_musical (type) ) {  // is this is sensible sanity check ?
 		set_draw_length (DRAW_LEN_AUTO);
 		return;
 	}
@@ -830,10 +856,7 @@ EditingContext::snap_mode_chosen (SnapMode mode)
 		mode = SnapMagnetic;
 	}
 
-	auto si = snap_mode_actions.find (mode);
-	assert (si != snap_mode_actions.end());
-
-	if (!si->second->get_active()) {
+	if (!snap_mode_actions[mode]->get_active()) {
 		return;
 	}
 
@@ -1144,8 +1167,13 @@ EditingContext::time_domain () const
 void
 EditingContext::toggle_follow_playhead ()
 {
-	RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ((_name + X_("Editing")).c_str(), X_("toggle-follow-playhead"));
-	set_follow_playhead (tact->get_active());
+	set_follow_playhead (!follow_playhead_action->get_active(), true);
+}
+
+void
+EditingContext::follow_playhead_chosen ()
+{
+	instant_save ();
 }
 
 /** @param yn true to follow playhead, otherwise false.
@@ -1155,14 +1183,10 @@ void
 EditingContext::set_follow_playhead (bool yn, bool catch_up)
 {
 	assert (follow_playhead_action);
-	if (follow_playhead() != yn) {
-		follow_playhead_action->set_active (yn);
-		if (yn && catch_up) {
-			/* catch up */
-			reset_x_origin_to_follow_playhead ();
-		}
-		std::cerr << editor_name() << " SFP instant save\n";
-		instant_save ();
+	follow_playhead_action->set_active (yn);
+	if (yn && catch_up) {
+		/* catch up */
+		reset_x_origin_to_follow_playhead ();
 	}
 }
 
@@ -1969,28 +1993,6 @@ EditingContext::pack_snap_box ()
 	snap_box.pack_start (grid_type_selector, false, false);
 }
 
-Glib::RefPtr<Action>
-EditingContext::get_mouse_mode_action (MouseMode m) const
-{
-	switch (m) {
-	case MouseRange:
-		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-range"));
-	case MouseObject:
-		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-object"));
-	case MouseCut:
-		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-cut"));
-	case MouseDraw:
-		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-draw"));
-	case MouseTimeFX:
-		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-timefx"));
-	case MouseGrid:
-		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-grid"));
-	case MouseContent:
-		return ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("set-mouse-mode-content"));
-	}
-	return Glib::RefPtr<Action>();
-}
-
 void
 EditingContext::bind_mouse_mode_buttons ()
 {
@@ -2001,37 +2003,36 @@ EditingContext::bind_mouse_mode_buttons ()
 	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("temporal-zoom-out"));
 	zoom_out_button.set_related_action (act);
 
-	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("toggle-follow-playhead"));
-	follow_playhead_button.set_related_action (act);
+	follow_playhead_button.set_related_action (follow_playhead_action);
 
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
 	follow_edits_button.set_related_action (act);
 
-	mouse_move_button.set_related_action (get_mouse_mode_action (Editing::MouseObject));
+	mouse_move_button.set_related_action (mouse_mode_actions[Editing::MouseObject]);
 	mouse_move_button.set_icon (ArdourWidgets::ArdourIcon::ToolGrab);
 	mouse_move_button.set_name ("mouse mode button");
 
-	mouse_select_button.set_related_action (get_mouse_mode_action (Editing::MouseRange));
+	mouse_select_button.set_related_action (mouse_mode_actions[Editing::MouseRange]);
 	mouse_select_button.set_icon (ArdourWidgets::ArdourIcon::ToolRange);
 	mouse_select_button.set_name ("mouse mode button");
 
-	mouse_draw_button.set_related_action (get_mouse_mode_action (Editing::MouseDraw));
+	mouse_draw_button.set_related_action (mouse_mode_actions[Editing::MouseDraw]);
 	mouse_draw_button.set_icon (ArdourWidgets::ArdourIcon::ToolDraw);
 	mouse_draw_button.set_name ("mouse mode button");
 
-	mouse_timefx_button.set_related_action (get_mouse_mode_action (Editing::MouseTimeFX));
+	mouse_timefx_button.set_related_action (mouse_mode_actions[Editing::MouseTimeFX]);
 	mouse_timefx_button.set_icon (ArdourWidgets::ArdourIcon::ToolStretch);
 	mouse_timefx_button.set_name ("mouse mode button");
 
-	mouse_grid_button.set_related_action (get_mouse_mode_action (Editing::MouseGrid));
+	mouse_grid_button.set_related_action (mouse_mode_actions[Editing::MouseGrid]);
 	mouse_grid_button.set_icon (ArdourWidgets::ArdourIcon::ToolGrid);
 	mouse_grid_button.set_name ("mouse mode button");
 
-	mouse_content_button.set_related_action (get_mouse_mode_action (Editing::MouseContent));
+	mouse_content_button.set_related_action (mouse_mode_actions[Editing::MouseContent]);
 	mouse_content_button.set_icon (ArdourWidgets::ArdourIcon::ToolContent);
 	mouse_content_button.set_name ("mouse mode button");
 
-	mouse_cut_button.set_related_action (get_mouse_mode_action (Editing::MouseCut));
+	mouse_cut_button.set_related_action (mouse_mode_actions[Editing::MouseCut]);
 	mouse_cut_button.set_icon (ArdourWidgets::ArdourIcon::ToolCut);
 	mouse_cut_button.set_name ("mouse mode button");
 
@@ -2044,6 +2045,18 @@ EditingContext::bind_mouse_mode_buttons ()
 	set_tooltip (mouse_content_button, _("Internal Edit Mode (edit notes and automation points)"));
 }
 
+Editing::MouseMode
+EditingContext::current_mouse_mode() const
+{
+	for (auto & [mode,action] : mouse_mode_actions) {
+		if (action->get_active()) {
+			return mode;
+		}
+	}
+
+	return MouseObject;
+}
+
 void
 EditingContext::set_mouse_mode (MouseMode m, bool force)
 {
@@ -2051,20 +2064,12 @@ EditingContext::set_mouse_mode (MouseMode m, bool force)
 		return;
 	}
 
-	if (!force && m == mouse_mode) {
-		return;
+	if (force && mouse_mode_actions[m]->get_active()) {
+		mouse_mode_actions[m]->set_active (false);
 	}
 
-	Glib::RefPtr<Action>       act  = get_mouse_mode_action(m);
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-
-	/* go there and back to ensure that the toggled handler is called to set up mouse_mode */
-	tact->set_active (false);
-	tact->set_active (true);
-
-	/* NOTE: this will result in a call to mouse_mode_toggled which does the heavy lifting */
+	mouse_mode_actions[m]->set_active (true);
 }
-
 
 bool
 EditingContext::on_velocity_scroll_event (GdkEventScroll* ev)
@@ -2545,7 +2550,7 @@ EditingContext::follow_playhead_clicked ()
 void
 EditingContext::cycle_zoom_focus ()
 {
-	switch (_zoom_focus) {
+	switch (zoom_focus()) {
 	case ZoomFocusLeft:
 		set_zoom_focus (ZoomFocusRight);
 		break;
@@ -2570,7 +2575,8 @@ EditingContext::cycle_zoom_focus ()
 void
 EditingContext::temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale)
 {
-	PBD::Unwinder<Editing::ZoomFocus> zf (_zoom_focus, Editing::ZoomFocusMouse);
+#warning paul how to unwind a failed attempt here
+	// PBD::Unwinder<Editing::ZoomFocus> zf (zoom_focus(), Editing::ZoomFocusMouse);
 	temporal_zoom_step_scale (zoom_out, scale);
 }
 
@@ -2931,47 +2937,16 @@ EditingContext::window_event_sample (GdkEvent const * event, double* pcx, double
 	return pixel_to_sample (canvas_to_timeline (d.x));
 }
 
-void
-EditingContext::zoom_focus_selection_done (ZoomFocus f)
+Editing::ZoomFocus
+EditingContext::zoom_focus () const
 {
-	RefPtr<RadioAction> ract = zoom_focus_action (f);
-	if (ract) {
-		ract->set_active ();
-	}
-}
-
-RefPtr<RadioAction>
-EditingContext::zoom_focus_action (ZoomFocus focus)
-{
-	const char* action = 0;
-	RefPtr<Action> act;
-
-	switch (focus) {
-	case ZoomFocusLeft:
-		action = X_("zoom-focus-left");
-		break;
-	case ZoomFocusRight:
-		action = X_("zoom-focus-right");
-		break;
-	case ZoomFocusCenter:
-		action = X_("zoom-focus-center");
-		break;
-	case ZoomFocusPlayhead:
-		action = X_("zoom-focus-playhead");
-		break;
-	case ZoomFocusMouse:
-		action = X_("zoom-focus-mouse");
-		break;
-	case ZoomFocusEdit:
-		action = X_("zoom-focus-edit");
-		break;
-	default:
-		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible focus type", (int) focus) << endmsg;
-		abort(); /*NOTREACHED*/
+	for (auto & [mode,action] : zoom_focus_actions) {
+		if (action->get_active()) {
+			return mode;
+		}
 	}
 
-
-	return ActionManager::get_radio_action ((_name + X_("Zoom")).c_str(), action);
+	return ZoomFocusLeft;
 }
 
 void
@@ -2982,11 +2957,13 @@ EditingContext::zoom_focus_chosen (ZoomFocus focus)
 	   active.
 	*/
 
-	RefPtr<RadioAction> ract = zoom_focus_action (focus);
-
-	if (ract && ract->get_active()) {
-		set_zoom_focus (focus);
+	if (!zoom_focus_actions[focus]->get_active()) {
+		return;
 	}
+
+	zoom_focus_selector.set_active (zoom_focus_strings[(int)focus]);
+
+	instant_save ();
 }
 
 void
@@ -3152,6 +3129,7 @@ EditingContext::set_loop_range (timepos_t const & start, timepos_t const & end, 
 bool
 EditingContext::allow_trim_cursors () const
 {
+	auto mouse_mode = current_mouse_mode();
 	return mouse_mode == MouseContent || mouse_mode == MouseTimeFX || mouse_mode == MouseDraw;
 }
 

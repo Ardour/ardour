@@ -101,13 +101,9 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	 * @param next true to move to the next, otherwise move to the previous
 	 */
 	void step_mouse_mode (bool next);
-	/** @return The current mouse mode (gain, object, range, timefx etc.)
-	 * (defined in editing_syms.inc.h)
-	 */
-	Editing::MouseMode current_mouse_mode () const;
 	/** cue editors are *always* used for internal editing */
 	bool internal_editing() const { return true; }
-	void mouse_mode_toggled (Editing::MouseMode);
+	void mouse_mode_chosen (Editing::MouseMode);
 
 	Gdk::Cursor* get_canvas_cursor () const;
 	MouseCursors const* cursors () const {

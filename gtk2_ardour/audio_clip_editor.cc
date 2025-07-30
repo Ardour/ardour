@@ -109,14 +109,17 @@ AudioClipEditor::AudioClipEditor (std::string const & name, bool with_transport)
 	, scroll_fraction (0)
 	, current_line_drag (0)
 {
-	build_upper_toolbar ();
-	build_canvas ();
-	build_lower_toolbar ();
-
 	load_bindings ();
 	register_actions ();
 
+	build_canvas ();
+
 	build_grid_type_menu ();
+
+	build_upper_toolbar ();
+	build_lower_toolbar ();
+
+	set_action_defaults ();
 }
 
 void

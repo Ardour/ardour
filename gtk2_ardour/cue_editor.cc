@@ -61,7 +61,6 @@ CueEditor::CueEditor (std::string const & name, bool with_transport)
 	horizontal_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &CueEditor::scrolled));
 
 	_history.Changed.connect (history_connection, invalidator (*this), std::bind (&CueEditor::history_changed, this), gui_context());
-	set_zoom_focus (Editing::ZoomFocusLeft);
 }
 
 CueEditor::~CueEditor ()
@@ -203,16 +202,7 @@ CueEditor::set_zoom_focus (Editing::ZoomFocus zf)
 		return;
 	}
 
-	std::string str = zoom_focus_strings[(int)zf];
-
-	if (str != zoom_focus_selector.get_text()) {
-		zoom_focus_selector.set_text (str);
-	}
-
-	if (_zoom_focus != zf) {
-		_zoom_focus = zf;
-		ZoomFocusChanged (); /* EMIT SIGNAL */
-	}
+	zoom_focus_actions[zf]->set_active (true);
 }
 
 void
@@ -415,7 +405,7 @@ CueEditor::build_upper_toolbar ()
 	_toolbar_outer->pack_start (*_toolbar_inner, true, false);
 
 	build_zoom_focus_menu ();
-	zoom_focus_selector.set_text (zoom_focus_strings[(int)_zoom_focus]);
+	zoom_focus_selector.set_text (zoom_focus_strings[(int)zoom_focus()]);
 
 	_toolbar_left->pack_start (zoom_in_button, false, false);
 	_toolbar_left->pack_start (zoom_out_button, false, false);
@@ -436,10 +426,10 @@ CueEditor::build_zoom_focus_menu ()
 	using namespace Gtk::Menu_Helpers;
 	using namespace Editing;
 
-	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusLeft], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusLeft)));
-	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusRight], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusRight)));
-	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusCenter], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusCenter)));
-	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusMouse], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusMouse)));
+	zoom_focus_selector.append (zoom_focus_actions[ZoomFocusLeft]);
+	zoom_focus_selector.append (zoom_focus_actions[ZoomFocusRight]);
+	zoom_focus_selector.append (zoom_focus_actions[ZoomFocusCenter]);
+	zoom_focus_selector.append (zoom_focus_actions[ZoomFocusMouse]);
 	zoom_focus_selector.set_sizing_texts (zoom_focus_strings);
 }
 
@@ -968,12 +958,6 @@ CueEditor::catch_pending_show_region ()
 	}
 }
 
-Editing::MouseMode
-CueEditor::current_mouse_mode () const
-{
-	return mouse_mode;
-}
-
 RegionSelection
 CueEditor::region_selection()
 {
@@ -983,20 +967,15 @@ CueEditor::region_selection()
 }
 
 void
-CueEditor::mouse_mode_toggled (Editing::MouseMode m)
+CueEditor::mouse_mode_chosen (Editing::MouseMode m)
 {
-	Glib::RefPtr<Gtk::Action>       act  = get_mouse_mode_action (m);
-	Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
-
-	if (!tact->get_active()) {
+	if (!mouse_mode_actions[m]->get_active()) {
 		/* this was just the notification that the old mode has been
 		 * left. we'll get called again with the new mode active in a
 		 * jiffy.
 		 */
 		return;
 	}
-
-	mouse_mode = m;
 
 	/* this should generate a new enter event which will
 	   trigger the appropriate cursor.

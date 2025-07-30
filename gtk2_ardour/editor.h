@@ -1768,7 +1768,7 @@ private:
 	ArdourWidgets::ArdourButton smart_mode_button;
 	Glib::RefPtr<Gtk::ToggleAction> smart_mode_action;
 
-	void                     mouse_mode_toggled (Editing::MouseMode m);
+	void                     mouse_mode_chosen (Editing::MouseMode m);
 	void			 mouse_mode_object_range_toggled ();
 	bool                     ignore_mouse_mode_toggle;
 

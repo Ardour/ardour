@@ -75,19 +75,20 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	, _note_mode (Sustained)
 	, ignore_channel_changes (false)
 {
-	mouse_mode = Editing::MouseContent;
 	autoscroll_vertical_allowed = false;
-
-	build_upper_toolbar ();
-	build_canvas ();
-	build_lower_toolbar ();
 
 	load_bindings ();
 	register_actions ();
 
+	build_upper_toolbar ();
+	build_canvas ();
+
 	build_grid_type_menu ();
 	build_draw_midi_menus();
 
+	build_lower_toolbar ();
+
+	set_action_defaults ();
 	set_mouse_mode (Editing::MouseContent, true);
 }
 
@@ -780,7 +781,7 @@ bool
 Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	NoteBase* note = nullptr;
-
+	Editing::MouseMode mouse_mode = current_mouse_mode();
 	switch (item_type) {
 	case NoteItem:
 		if (mouse_mode == Editing::MouseContent) {
@@ -1052,7 +1053,7 @@ Pianoroll::which_mode_cursor () const
 {
 	Gdk::Cursor* mode_cursor = MouseCursors::invalid_cursor ();
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case Editing::MouseContent:
 		mode_cursor = _cursors->grabber;
 		break;
@@ -1081,6 +1082,7 @@ Gdk::Cursor*
 Pianoroll::which_canvas_cursor (ItemType type) const
 {
 	Gdk::Cursor* cursor = which_mode_cursor ();
+	Editing::MouseMode mouse_mode = current_mouse_mode ();
 
 	if (mouse_mode == Editing::MouseContent) {
 
@@ -1618,7 +1620,7 @@ Pianoroll::cut_copy (Editing::CutCopyOp op)
 		cut_buffer->clear ();
 	}
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseDraw:
 	case MouseContent:
 		if (view) {
@@ -1781,6 +1783,7 @@ Pianoroll::map_transport_state ()
 bool
 Pianoroll::allow_trim_cursors () const
 {
+	auto mouse_mode = current_mouse_mode ();
 	return mouse_mode == Editing::MouseContent || mouse_mode == Editing::MouseTimeFX;
 }
 

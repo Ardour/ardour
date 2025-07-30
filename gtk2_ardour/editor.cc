@@ -654,6 +654,7 @@ Editor::Editor ()
 	load_bindings ();
 	register_actions ();
 	bind_mouse_mode_buttons ();
+	set_action_defaults ();
 
 	build_edit_mode_menu();
 	build_zoom_focus_menu();
@@ -2199,8 +2200,11 @@ Editor::set_state (const XMLNode& node, int version)
 
 	node.get_property ("mixer-width", editor_mixer_strip_width);
 
-	node.get_property ("zoom-focus", _zoom_focus);
-	zoom_focus_selection_done (_zoom_focus);
+	ZoomFocus zf;
+	if (!node.get_property ("zoom-focus", zf)) {
+		zf = ZoomFocusLeft;
+	}
+	set_zoom_preset (zf);
 
 	node.get_property ("marker-click-behavior", marker_click_behavior);
 	marker_click_behavior_selection_done (marker_click_behavior);
@@ -2223,7 +2227,7 @@ Editor::set_state (const XMLNode& node, int version)
 		/* do it twice to force the change */
 		smart_mode_action->set_active (!yn);
 		smart_mode_action->set_active (yn);
-		set_mouse_mode (mouse_mode, true);
+		set_mouse_mode (current_mouse_mode(), true);
 	}
 
 	EditPoint ep;
@@ -2316,26 +2320,6 @@ Editor::set_state (const XMLNode& node, int version)
 		nudge_clock->set_duration (timecnt_t (_session->sample_rate() * 5), true);
 	}
 
-	{
-		/* apply state
-		 * Not all properties may have been in XML, but
-		 * those that are linked to a private variable may need changing
-		 */
-		RefPtr<ToggleAction> tact;
-
-		tact = ActionManager::get_toggle_action ((editor_name () + X_("Editing")).c_str(), X_("toggle-follow-playhead"));
-		yn = follow_playhead();
-		if (tact->get_active() != yn) {
-			tact->set_active (yn);
-		}
-
-		tact = ActionManager::get_toggle_action (X_("Editor"), X_("toggle-stationary-playhead"));
-		yn = _stationary_playhead;
-		if (tact->get_active() != yn) {
-			tact->set_active (yn);
-		}
-	}
-
 	return 0;
 }
 
@@ -2352,7 +2336,7 @@ Editor::get_state () const
 
 	maybe_add_mixer_strip_width (*node);
 
-	node->set_property ("zoom-focus", _zoom_focus);
+	node->set_property ("zoom-focus", zoom_focus());
 
 	node->set_property ("edit-point", _edit_point);
 	node->set_property ("visible-track-count", _visible_track_count);
@@ -2366,7 +2350,7 @@ Editor::get_state () const
 	node->set_property ("maximised", _maximised);
 	node->set_property ("follow-playhead", follow_playhead());
 	node->set_property ("stationary-playhead", _stationary_playhead);
-	node->set_property ("mouse-mode", mouse_mode);
+	node->set_property ("mouse-mode", current_mouse_mode());
 	node->set_property ("join-object-range", smart_mode_action->get_active ());
 
 	node->set_property (X_("show-editor-mixer"), show_editor_mixer_action->get_active());
@@ -3210,12 +3194,12 @@ Editor::build_zoom_focus_menu ()
 {
 	using namespace Menu_Helpers;
 
-	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusLeft], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusLeft)));
-	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusRight], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusRight)));
-	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusCenter], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusCenter)));
-	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusPlayhead], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusPlayhead)));
-	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusMouse], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusMouse)));
-	zoom_focus_selector.add_menu_elem (MenuElem (zoom_focus_strings[(int)ZoomFocusEdit], sigc::bind (sigc::mem_fun(*this, &EditingContext::zoom_focus_selection_done), (ZoomFocus) ZoomFocusEdit)));
+	zoom_focus_selector.append (zoom_focus_actions[ZoomFocusLeft]);
+	zoom_focus_selector.append (zoom_focus_actions[ZoomFocusRight]);
+	zoom_focus_selector.append (zoom_focus_actions[ZoomFocusCenter]);
+	zoom_focus_selector.append (zoom_focus_actions[ZoomFocusPlayhead]);
+	zoom_focus_selector.append (zoom_focus_actions[ZoomFocusMouse]);
+	zoom_focus_selector.append (zoom_focus_actions[ZoomFocusEdit]);
 	zoom_focus_selector.set_sizing_texts (zoom_focus_strings);
 }
 
@@ -3384,17 +3368,7 @@ Editor::mouse_select_button_release (GdkEventButton* ev)
 void
 Editor::set_zoom_focus (ZoomFocus f)
 {
-	string str = zoom_focus_strings[(int)f];
-
-	if (str != zoom_focus_selector.get_text()) {
-		zoom_focus_selector.set_text (str);
-	}
-
-	if (_zoom_focus != f) {
-		_zoom_focus = f;
-		instant_save ();
-		ZoomFocusChanged (); /* EMIT SIGNAL */
-	}
+	zoom_focus_actions[f]->set_active (true);
 }
 
 void
@@ -3812,7 +3786,7 @@ Editor::current_visual_state (bool with_tracks)
 	vs->y_position = vertical_adjustment.get_value();
 	vs->samples_per_pixel = samples_per_pixel;
 	vs->_leftmost_sample = _leftmost_sample;
-	vs->zoom_focus = _zoom_focus;
+	vs->zoom_focus = zoom_focus();
 
 	if (with_tracks) {
 		vs->gui_state->set_state (ARDOUR_UI::instance()->gui_object_state->get_state());

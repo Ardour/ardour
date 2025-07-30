@@ -332,12 +332,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	virtual void cycle_zoom_focus ();
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
-	Editing::ZoomFocus zoom_focus () const { return _zoom_focus; }
-	sigc::signal<void> ZoomFocusChanged;
+	Editing::ZoomFocus zoom_focus () const;
 
-	void zoom_focus_selection_done (Editing::ZoomFocus);
 	void zoom_focus_chosen (Editing::ZoomFocus);
-	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
 
 	virtual void reposition_and_zoom (samplepos_t, double) = 0;
 
@@ -363,8 +360,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	/** @return The current mouse mode (gain, object, range, timefx etc.)
 	 * (defined in editing_syms.inc.h)
 	 */
-	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
-	virtual Editing::MouseMode effective_mouse_mode () const { return mouse_mode; }
+	Editing::MouseMode current_mouse_mode () const;
+	virtual Editing::MouseMode effective_mouse_mode () const { return current_mouse_mode(); }
 	virtual void use_appropriate_mouse_mode_for_sections () {}
 
 	/** @return Whether the current mouse mode is an "internal" editing mode. */
@@ -426,6 +423,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	void register_midi_actions (Gtkmm2ext::Bindings*, std::string const &);
 	void register_common_actions (Gtkmm2ext::Bindings*, std::string const &);
 	void register_automation_actions (Gtkmm2ext::Bindings*, std::string const &);
+	void set_action_defaults ();
 
 	ArdourCanvas::Rectangle* rubberband_rect;
 
@@ -445,7 +443,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	virtual ArdourCanvas::GtkCanvasViewport* get_canvas_viewport() const = 0;
 	virtual ArdourCanvas::GtkCanvas* get_canvas() const = 0;
 
-	virtual void mouse_mode_toggled (Editing::MouseMode) = 0;
+	virtual void mouse_mode_chosen (Editing::MouseMode) = 0;
 
 	bool on_velocity_scroll_event (GdkEventScroll*);
 	void pre_render ();
@@ -531,6 +529,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	std::map<Editing::GridType, Glib::RefPtr<Gtk::RadioAction> > grid_actions;
 	std::map<Editing::SnapMode, Glib::RefPtr<Gtk::RadioAction> > snap_mode_actions;
 	std::map<Editing::GridType, Glib::RefPtr<Gtk::RadioAction> > draw_length_actions;
+	std::map<Editing::MouseMode, Glib::RefPtr<Gtk::RadioAction> > mouse_mode_actions;
+	std::map<Editing::ZoomFocus, Glib::RefPtr<Gtk::RadioAction> > zoom_focus_actions;
 	std::map<int, Glib::RefPtr<Gtk::RadioAction> > draw_velocity_actions;
 	std::map<int, Glib::RefPtr<Gtk::RadioAction> > draw_channel_actions;
 
@@ -594,6 +594,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	EditorCursor* _snapped_cursor;
 
 	Glib::RefPtr<Gtk::ToggleAction> follow_playhead_action;
+	void follow_playhead_chosen ();
 
 	/* selection process */
 
@@ -608,8 +609,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	VerboseCursor* _verbose_cursor;
 
 	samplecnt_t        samples_per_pixel;
-	Editing::ZoomFocus _zoom_focus;
-	virtual Editing::ZoomFocus effective_zoom_focus() const { return _zoom_focus; }
+
+	virtual Editing::ZoomFocus effective_zoom_focus() const { return zoom_focus(); }
 
 	Temporal::timepos_t snap_to_bbt_via_grid (Temporal::timepos_t const & start,
 	                                          Temporal::RoundMode   direction,
@@ -698,7 +699,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	virtual void register_actions() = 0;
 	void register_grid_actions ();
 
-	Glib::RefPtr<Gtk::Action> get_mouse_mode_action (Editing::MouseMode m) const;
 	void bind_mouse_mode_buttons ();
 
 	Gtk::HBox snap_box;
@@ -713,8 +713,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	Gtkmm2ext::BindingSet bindings;
 	Gtkmm2ext::Bindings* own_bindings;
-
-	Editing::MouseMode mouse_mode;
 
 	void set_common_editing_state (XMLNode const & node);
 	void get_common_editing_state (XMLNode& node) const;

@@ -1710,7 +1710,7 @@ Editor::region_selection_changed ()
 		/* if in TimeFX mode and there's just 1 region selected
 		 * (i.e. we just clicked on it), leave things as they are
 		 */
-		if (selection->regions.size() > 1 || mouse_mode != Editing::MouseTimeFX) {
+		if (selection->regions.size() > 1 || current_mouse_mode() != Editing::MouseTimeFX) {
 			set_mouse_mode (MouseObject, false);
 		}
 	}
@@ -1998,7 +1998,7 @@ Editor::set_selection_from_region ()
 
 	selection->set (tvl);
 
-	if (!get_smart_mode () || !(mouse_mode == Editing::MouseObject) ) {
+	if (!get_smart_mode () || !(current_mouse_mode() == Editing::MouseObject) ) {
 		set_mouse_mode (Editing::MouseRange, false);
 	}
 }
@@ -2041,7 +2041,7 @@ Editor::set_selection_from_range (Location& loc)
 
 	commit_reversible_selection_op ();
 
-	if (!get_smart_mode () || mouse_mode != Editing::MouseObject) {
+	if (!get_smart_mode () || current_mouse_mode() != Editing::MouseObject) {
 		set_mouse_mode (MouseRange, false);
 	}
 }
@@ -2312,7 +2312,7 @@ Editor::select_range_between ()
 		return;
 	}
 
-	if (!get_smart_mode () || mouse_mode != Editing::MouseObject) {
+	if (!get_smart_mode () || current_mouse_mode() != Editing::MouseObject) {
 		set_mouse_mode (MouseRange, false);
 	}
 
@@ -2326,16 +2326,16 @@ Editor::get_edit_op_range (timepos_t& start, timepos_t& end) const
 {
 	/* if an explicit range exists, use it */
 
-	if ((mouse_mode == MouseRange || get_smart_mode()) &&  !selection->time.empty()) {
+	if ((current_mouse_mode() == MouseRange || get_smart_mode()) &&  !selection->time.empty()) {
 		/* we know that these are ordered */
 		start = selection->time.start_time();
 		end = selection->time.end_time();
 		return true;
-	} else {
-		start = timepos_t ();
-		end = timepos_t ();
-		return false;
 	}
+
+	start = timepos_t ();
+	end = timepos_t ();
+	return false;
 }
 
 void

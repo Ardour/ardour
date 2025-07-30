@@ -1123,7 +1123,7 @@ Editor::which_mode_cursor () const
 {
 	Gdk::Cursor* mode_cursor = MouseCursors::invalid_cursor ();
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseRange:
 		mode_cursor = _cursors->selector;
 		break;
@@ -1213,6 +1213,7 @@ Gdk::Cursor*
 Editor::which_canvas_cursor(ItemType type) const
 {
 	Gdk::Cursor* cursor = which_mode_cursor ();
+	auto mouse_mode = current_mouse_mode();
 
 	if (mouse_mode == MouseRange) {
 		switch (type) {
@@ -1385,6 +1386,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	TempoMarker* t_marker = 0;
 	double fraction;
 	bool ret = true;
+	auto mouse_mode = current_mouse_mode();
 
 	/* by the time we reach here, entered_regionview and entered trackview
 	 * will have already been set as appropriate. Things are done this

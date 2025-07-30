@@ -380,7 +380,7 @@ Editor::split_regions_at (timepos_t const & where, RegionSelection& regions)
 	}
 
 	//if the user wants newly-created regions to be selected, then select them:
-	if (mouse_mode == MouseObject) {
+	if (current_mouse_mode() == MouseObject) {
 		for (RegionSelection::iterator ri = latest_regionviews.begin(); ri != latest_regionviews.end(); ri++) {
 			if ((*ri)->region()->position() < where) {
 				// new regions created before the split
@@ -1201,7 +1201,7 @@ Editor::cursor_to_selection_start (EditorCursor *cursor)
 {
 	timepos_t pos;
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseObject:
 		if (!selection->regions.empty()) {
 			pos = selection->regions.start_time();
@@ -1230,7 +1230,7 @@ Editor::cursor_to_selection_end (EditorCursor *cursor)
 {
 	timepos_t pos;
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseObject:
 		if (!selection->regions.empty()) {
 			pos = selection->regions.end_time();
@@ -1400,7 +1400,7 @@ Editor::selected_marker_to_selection_start ()
 		return;
 	}
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseObject:
 		if (!selection->regions.empty()) {
 			pos = selection->regions.start_time();
@@ -1435,7 +1435,7 @@ Editor::selected_marker_to_selection_end ()
 		return;
 	}
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseObject:
 		if (!selection->regions.empty()) {
 			pos = selection->regions.end_time();
@@ -4394,7 +4394,7 @@ Editor::cut_copy (CutCopyOp op)
 		return;
 	}
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseDraw:
 	case MouseContent:
 		begin_reversible_command (opname + ' ' + X_("MIDI"));
@@ -9451,11 +9451,13 @@ Editor::ripple_marks (std::shared_ptr<Playlist> target_playlist, timepos_t at, t
 Editing::ZoomFocus
 Editor::effective_zoom_focus() const
 {
-	if (_zoom_focus == ZoomFocusEdit && _edit_point == EditAtMouse) {
+	auto zf = zoom_focus();
+
+	if (zf == ZoomFocusEdit && _edit_point == EditAtMouse) {
 		return ZoomFocusMouse;
 	}
 
-	return _zoom_focus;
+	return zf;
 }
 
 void
