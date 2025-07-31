@@ -1215,6 +1215,7 @@ MeterPoint*
 TempoMap::add_meter (MeterPoint* mp)
 {
 	bool replaced;
+	bool reset = _points.back().beats() > mp->beats();
 	MeterPoint* ret = core_add_meter (mp, replaced);
 
 	if (!replaced) {
@@ -1223,7 +1224,10 @@ TempoMap::add_meter (MeterPoint* mp)
 		delete mp;
 	}
 
-	reset_starting_at (ret->sclock());
+	if (reset) {
+		reset_starting_at (ret->sclock());
+	}
+
 	return ret;
 }
 
@@ -1519,6 +1523,7 @@ TempoPoint*
 TempoMap::add_tempo (TempoPoint * tp)
 {
 	bool replaced;
+	bool reset = _points.back().beats() > tp->beats();
 	TempoPoint* ret = core_add_tempo (tp, replaced);
 
 	if (!replaced) {
@@ -1527,11 +1532,13 @@ TempoMap::add_tempo (TempoPoint * tp)
 		delete tp;
 	}
 
-	TempoPoint* prev = const_cast<TempoPoint*> (previous_tempo (*ret));
-	if (prev) {
-		reset_starting_at (prev->sclock());
-	} else {
-		reset_starting_at (ret->sclock());
+	if (reset) {
+		TempoPoint* prev = const_cast<TempoPoint*> (previous_tempo (*ret));
+		if (prev) {
+			reset_starting_at (prev->sclock());
+		} else {
+			reset_starting_at (ret->sclock());
+		}
 	}
 
 	return ret;
@@ -1907,8 +1914,8 @@ TempoMap::reset_section (Points::iterator& begin, Points::iterator& end, supercl
 				++pp;
 			}
 
-			DEBUG_TRACE (DEBUG::MapReset, string_compose ("considering omega comp for %1 with nxt = %2\n", *tp, nxt_tempo));
 			if (tp->ramped() && nxt_tempo) {
+				DEBUG_TRACE (DEBUG::MapReset, string_compose ("computing omega for %1 with nxt = %2\n", *tp, nxt_tempo));
 				tp->compute_omega_from_next_tempo (*nxt_tempo);
 			}
 		}
