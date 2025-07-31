@@ -152,6 +152,7 @@ EditingContext::EditingContext (std::string const & name)
 	, clear_entered_track (false)
 	, grid_lines (nullptr)
 	, time_line_group (nullptr)
+	, temporary_zoom_focus_change (false)
 {
 	using namespace Gtk::Menu_Helpers;
 
@@ -2575,9 +2576,11 @@ EditingContext::cycle_zoom_focus ()
 void
 EditingContext::temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale)
 {
-#warning paul how to unwind a failed attempt here
-	// PBD::Unwinder<Editing::ZoomFocus> zf (zoom_focus(), Editing::ZoomFocusMouse);
+	ZoomFocus old_zf (zoom_focus());
+	PBD::Unwinder<bool> uw (temporary_zoom_focus_change, true);
+	set_zoom_focus (Editing::ZoomFocusMouse);
 	temporal_zoom_step_scale (zoom_out, scale);
+	set_zoom_focus (old_zf);
 }
 
 void
@@ -2952,6 +2955,11 @@ EditingContext::zoom_focus () const
 void
 EditingContext::zoom_focus_chosen (ZoomFocus focus)
 {
+	if (temporary_zoom_focus_change) {
+		/* we are just changing settings momentarily, no need to do anything */
+		return;
+	}
+
 	/* this is driven by a toggle on a radio group, and so is invoked twice,
 	   once for the item that became inactive and once for the one that became
 	   active.
@@ -2962,7 +2970,6 @@ EditingContext::zoom_focus_chosen (ZoomFocus focus)
 	}
 
 	zoom_focus_selector.set_active (zoom_focus_strings[(int)focus]);
-
 	instant_save ();
 }
 
