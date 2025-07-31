@@ -2251,14 +2251,22 @@ Editor::set_state (const XMLNode& node, int version)
 
 	yn = true;
 	node.get_property ("show-editor-mixer", yn);
+	/* force a change to sync action state and actual attachment visibility.
+	 * Otherwise after creating a new session from a running instance
+	 * the editor-mixer and bottom attachment are not visible, even though
+	 * the actions are enabled.
+	 */
+	show_editor_mixer_action->set_active (!yn);
 	show_editor_mixer_action->set_active (yn);
 
 	yn = false;
 	node.get_property ("show-editor-list", yn);
+	show_editor_list_action->set_active (!yn); // ditto
 	show_editor_list_action->set_active (yn);
 
 	yn = false;
 	node.get_property ("show-editor-props", yn);
+	show_editor_props_action->set_active (!yn); // ditto
 	show_editor_props_action->set_active (yn);
 
 	guint index;
