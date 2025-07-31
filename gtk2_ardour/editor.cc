@@ -2258,8 +2258,8 @@ Editor::set_state (const XMLNode& node, int version)
 	show_editor_list_action->set_active (yn);
 
 	yn = false;
-	show_editor_props_action->set_active (yn);
 	node.get_property ("show-editor-props", yn);
+	show_editor_props_action->set_active (yn);
 
 	guint index;
 	if (node.get_property (X_("editor-list-btn1"), index)) {
