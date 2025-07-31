@@ -111,4 +111,5 @@ PianorollMidiBackground::display_region (MidiView& mv)
 	std::shared_ptr<ARDOUR::SMFSource> smf (std::dynamic_pointer_cast<ARDOUR::SMFSource> (mv.midi_region()->source()));
 	assert (smf);
 	(void) update_data_note_range (smf->model()->lowest_note(), smf->model()->highest_note());
+	apply_note_range (smf->model()->lowest_note(), smf->model()->highest_note(), true, RangeCanMove (CanMoveTop|CanMoveBottom));
 }

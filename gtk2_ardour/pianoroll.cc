@@ -588,7 +588,11 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 	_track_canvas_width = _visible_canvas_width - prh->x1();
 
 	if (zoom_in_allocate) {
+
 		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
+		if (_region) {
+			bg->display_region (*view);
+		}
 		zoom_in_allocate = false;
 	}
 
