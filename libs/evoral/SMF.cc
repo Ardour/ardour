@@ -760,9 +760,12 @@ SMF::tempo_map (bool& provided) const
 
 		Temporal::BBT_Argument bbt; /* 1|1|0 which is correct for the no-meter case */
 
+		uint64_t b = t->time_pulses / (uint64_t) ppqn();
+		uint64_t tk = ((t->time_pulses % (uint64_t) ppqn()) * Temporal::ticks_per_beat) / ppqn();
+
 		if (have_initial_meter) {
 
-			bbt = new_map->bbt_at (Temporal::timepos_t (Temporal::Beats (int_div_round (t->time_pulses, (size_t) ppqn()), 0)));
+			bbt = new_map->bbt_at (Temporal::timepos_t (Temporal::Beats (b, tk)));
 			new_map->set_tempo (tempo, bbt);
 
 			if (!(meter == last_meter)) {
