@@ -200,7 +200,7 @@ GenericPluginUI::GenericPluginUI (std::shared_ptr<PlugInsertBase> pib, bool scro
 	prefheight = -1;
 	build ();
 
-	if (_pib->plugin()->has_midnam() && _pib->plugin()->knows_bank_patch()) {
+	if (!ctrls_only && _pib->plugin()->has_midnam() && _pib->plugin()->knows_bank_patch()) {
 		build_midi_table ();
 	}
 
