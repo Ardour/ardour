@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <glibmm/fileutils.h>
+
 #include "pbd/types_convert.h"
 #include "pbd/error.h"
 #include "pbd/xml++.h"
@@ -150,6 +152,10 @@ RegionUISettingsManager::load (std::string const & xmlpath)
 	XMLTree state_tree;
 
 	clear ();
+
+	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
+		return -1;
+	}
 
 	if (!state_tree.read (xmlpath)) {
 		std::cerr << "bad xmlpath " << xmlpath << std::endl;
