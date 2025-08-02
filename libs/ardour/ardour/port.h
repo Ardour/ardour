@@ -135,6 +135,8 @@ public:
 	uint32_t externally_connected () const { return _externally_connected; }
 	uint32_t internally_connected () const { return _internally_connected; }
 
+	void rename_connected_port (std::string const&, std::string const&);
+
 	void increment_external_connections ();
 	void decrement_external_connections ();
 

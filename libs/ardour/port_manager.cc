@@ -551,6 +551,9 @@ PortManager::port_renamed (const std::string& old_relative_name, const std::stri
 	if (x != p->end ()) {
 		std::shared_ptr<Port> port = x->second;
 		p->erase (x);
+		for (auto& [pn, pt] : *p) {
+			pt->rename_connected_port (old_relative_name, new_relative_name);
+		}
 		p->insert (make_pair (new_relative_name, port));
 	}
 }

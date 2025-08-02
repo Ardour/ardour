@@ -225,6 +225,17 @@ Port::erase_connection (std::string const& pn)
 }
 
 void
+Port::rename_connected_port (std::string const& old_name, std::string const& new_name)
+{
+	Glib::Threads::RWLock::WriterLock lm (_connections_lock);
+	if (_int_connections.find (old_name) == _int_connections.end()) {
+		return;
+	}
+	_int_connections.erase (old_name);
+	_int_connections.insert (new_name);
+}
+
+void
 Port::increment_external_connections ()
 {
 	_externally_connected++;
