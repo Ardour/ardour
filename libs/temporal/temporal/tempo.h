@@ -775,6 +775,12 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API TempoMap (XMLNode const&, int version);
 	LIBTEMPORAL_API ~TempoMap();
 
+	/* For use ONLY when building a tempo map from an SMF tempo map */
+	LIBTEMPORAL_API void smf_begin ();
+	LIBTEMPORAL_API void smf_end ();
+	LIBTEMPORAL_API void smf_add (TempoPoint&);
+	LIBTEMPORAL_API void smf_add (MeterPoint&);
+
 	LIBTEMPORAL_API TempoMap& operator= (TempoMap const&);
 
 	LIBTEMPORAL_API void sample_rate_changed (samplecnt_t new_sr);

@@ -1436,6 +1436,44 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time, Beats const & beat
 }
 
 void
+TempoMap::smf_begin ()
+{
+	_tempos.clear ();
+	_meters.clear ();
+	_points.clear ();
+	_bartimes.clear ();
+}
+
+void
+TempoMap::smf_end ()
+{
+}
+
+void
+TempoMap::smf_add (TempoPoint & tp)
+{
+	assert (&tp.map() == this);
+	std::cerr << "TP add " << tp << std::endl;
+	/* all other tempos must be earlier; other points must be earlier or identical */
+	assert (_tempos.empty() || _tempos.back().sclock() < tp.sclock());
+	assert (_points.empty() || _points.back().sclock() <= tp.sclock());
+	_points.push_back (tp);
+	_tempos.push_back (tp);
+}
+
+void
+TempoMap::smf_add (MeterPoint & mp)
+{
+	assert (&mp.map() == this);
+	std::cerr << "MP add " << mp << std::endl;
+	/* all other meters must be earlier; other points must be earlier or identical */
+	assert (_meters.empty() || _meters.back().sclock() < mp.sclock());
+	assert (_points.empty() || _points.back().sclock() <= mp.sclock());
+	_points.push_back (mp);
+	_meters.push_back (mp);
+}
+
+void
 TempoMap::core_add_point (Point* pp)
 {
 	Points::iterator p;
