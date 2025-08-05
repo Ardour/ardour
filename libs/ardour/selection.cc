@@ -64,14 +64,6 @@ CoreSelection::do_select (std::shared_ptr<Stripable> s, std::shared_ptr<Automati
 
 		if (r) {
 
-			/* no selection of inactive routes, though they can be selected
-			 * and made inactive.
-			 */
-
-			if (!r->active()) {
-				return false;
-			}
-
 			if (!c && with_group) {
 
 				if (!not_allowed_in_group || !r->route_group() || r->route_group() != not_allowed_in_group) {
