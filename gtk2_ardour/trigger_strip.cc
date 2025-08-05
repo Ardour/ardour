@@ -377,7 +377,7 @@ TriggerStrip::build_route_ops_menu ()
 	 * sane thing for users anyway.
 	 */
 	StripableTimeAxisView* stav = PublicEditor::instance().get_stripable_time_axis_by_id (_route->id());
-	if (active && stav) {
+	if (stav) {
 		Selection& selection (PublicEditor::instance().get_selection());
 		if (!selection.selected (stav)) {
 			selection.set (stav);
@@ -390,12 +390,16 @@ TriggerStrip::build_route_ops_menu ()
 		}
 #endif
 
-		if (!_route->is_singleton ()) {
+		if (_route->is_singleton ()) {
+			return;
+		}
+
+		if (active) {
 			items.push_back (SeparatorElem());
 			items.push_back (MenuElem (_("Duplicate..."), sigc::mem_fun (*this, &RouteUI::duplicate_selected_routes)));
-			items.push_back (SeparatorElem());
-			items.push_back (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
 		}
+		items.push_back (SeparatorElem());
+		items.push_back (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
 	}
 }
 
