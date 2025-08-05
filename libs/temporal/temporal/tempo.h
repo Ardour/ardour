@@ -872,6 +872,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API void shift (timepos_t const & at, BBT_Offset const & by);
 	LIBTEMPORAL_API void shift (timepos_t const & at, timecnt_t const & by);
 
+	LIBTEMPORAL_API timepos_t duration (TimeDomain) const;
+
   private:
 	template<typename TimeType, typename Comparator> TempoPoint const & _tempo_at (TimeType when, Comparator cmp) const {
 		assert (!_tempos.empty());

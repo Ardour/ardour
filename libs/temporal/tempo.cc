@@ -4768,6 +4768,20 @@ TempoMap::min_notes_per_minute() const
 	return npm;
 }
 
+timepos_t
+TempoMap::duration(TimeDomain td) const
+{
+	if (_points.empty()) {
+		return timepos_t::zero (td);
+	}
+
+	if (td == BeatTime) {
+		return timepos_t (_points.back().beats() + Beats (1, 0));
+	}
+
+	return timepos_t::from_superclock (_points.back().sclock() + 1);
+}
+
 #if 0
 void
 TempoMap::fix_legacy_session ()
