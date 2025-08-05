@@ -252,16 +252,22 @@ style "treeview_display" = "small_bold_text"
 
 style "track_header_inactive"  = "large_text"
 {
-        bg[NORMAL] =      @track_header_inactive
+	bg[NORMAL] =      @track_header_inactive
 	bg[ACTIVE] =      @track_header_inactive
 	bg[INSENSITIVE] = @track_header_inactive
 	bg[SELECTED] =    @track_header_inactive
 	bg[PRELIGHT] =    @track_header_inactive
 }
 
+style "track_header_inactive_selected" = "track_header_inactive"
+{
+	bg[NORMAL] = mix(0.7,@track_header_inactive,@track_header_selected)
+	bg[SELECTED] = mix(0.7,@track_header_inactive,@track_header_selected)
+}
+
 style "track_header_selected" = "track_header"
 {
-        bg[NORMAL] = @track_header_selected
+	bg[NORMAL] = @track_header_selected
 	bg[ACTIVE] = @track_header_selected
 	bg[INSENSITIVE] = @track_header_selected
 	bg[SELECTED] = @track_header_selected
@@ -1212,8 +1218,10 @@ widget "*CrossfadeEditCurveButton*" style:highest "bright_when_active"
 widget "*CrossfadeEditFrame" style:highest "base_frame"
 widget "*AudioTrackControlsBaseInactiveUnselected" style:highest "track_header_inactive"
 widget "*BusControlsBaseInactiveUnselected" style:highest "track_header_inactive"
-widget "*AudioTrackControlsBaseInactiveSelected" style:highest "track_header_inactive"
-widget "*BusControlsBaseInactiveSelected" style:highest "track_header_inactive"
+widget "*MidiTrackControlsBaseInactiveUnselected" style:highest "track_header_inactive"
+widget "*AudioTrackControlsBaseInactiveSelected" style:highest "track_header_inactive_selected"
+widget "*BusControlsBaseInactiveSelected" style:highest "track_header_inactive_selected"
+widget "*MidiTrackControlsBaseInactiveSelected" style:highest "track_header_inactive_selected"
 widget "*AudioTrackControlsBaseSelected" style:highest "track_header_selected"
 widget "*MidiTrackControlsBaseSelected" style:highest "track_header_selected"
 widget "*BusControlsBaseSelected" style:highest "track_header_selected"
