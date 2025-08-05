@@ -289,7 +289,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 	TempoMapCutBuffer* tmcb;
 	// XMLNode& tm_before (wmap->get_state());
 
-	tmcb = new_map->copy (timepos_t (0), timepos_t::max (Temporal::AudioTime));
+	tmcb = new_map->copy (timepos_t::zero (Temporal::AudioTime), timepos_t::from_superclock (new_map->duration(Temporal::AudioTime).superclocks()));
 
 	if (tmcb && !tmcb->empty()) {
 		wmap->paste (*tmcb, pos, false, _("import"));
