@@ -946,7 +946,6 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 
 	for (Points::iterator p = _points.begin(); p != _points.end(); ) {
 
-
 		/* XXX might to check time domain of start/end, and use beat
 		 * time here.
 		 */
@@ -1062,6 +1061,8 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 		}
 	}
 
+	MeterPoint const * current_meter = &meter_at (position);
+	BBT_Offset bbt_offset = BBT_Offset (cb.points().front().bbt()) - BBT_Offset (pos_bbt);
 
 	for (auto const & p : cb.points()) {
 		TempoPoint const * tp;
@@ -1072,33 +1073,40 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 
 		s = p.sclock() + position.superclocks();
 		b = quarters_at_superclock (s);
-		bb = bbt_at (s);
 
 		if ((mtp = dynamic_cast<MusicTimePoint const *> (&p))) {
 
 			tp = dynamic_cast<TempoPoint const *> (&p);
 			mp = dynamic_cast<MeterPoint const *> (&p);
 
+			/* not entirely clear what the semantics of this ought
+			 * to be. Do we paste the precise same BBT markers, or
+			 * do we shift by the paste position
+			 */
+			bb = p.bbt ();
+
 			MusicTimePoint *ntp = new MusicTimePoint (*this, s, b, bb, *tp, *mp, mtp->name());
 			core_add_bartime (ntp, replaced);
 
 			if (!replaced) {
 				core_add_tempo (ntp, ignored);
-				core_add_meter (ntp, ignored);
+				current_meter = core_add_meter (ntp, ignored);
 				core_add_point (ntp);
 			}
 
 		} else {
 
 			if ((tp = dynamic_cast<TempoPoint const *> (&p))) {
+				bb = current_meter->bbt_add (p.bbt(), bbt_offset);
 				TempoPoint *ntp = new TempoPoint (*this, *tp, s, b, bb);
 				core_add_tempo (ntp, replaced);
 				if (!replaced) {
 					core_add_point (ntp);
 				}
 			} else if ((mp = dynamic_cast<MeterPoint const *> (&p))) {
+				bb = current_meter->bbt_add (p.bbt(), bbt_offset);
 				MeterPoint *ntp = new MeterPoint (*this, *mp, s, b, bb);
-				core_add_meter (ntp, replaced);
+				current_meter = core_add_meter (ntp, replaced);
 				if (!replaced) {
 					core_add_point (ntp);
 				}
