@@ -250,4 +250,5 @@ class Pianoroll : public CueEditor
 	void hide_count_in ();
 
 	void instant_save ();
+	void parameter_changed (std::string param);
 };

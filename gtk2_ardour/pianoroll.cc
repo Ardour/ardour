@@ -90,6 +90,8 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 
 	set_action_defaults ();
 	set_mouse_mode (Editing::MouseContent, true);
+
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &Pianoroll::parameter_changed));
 }
 
 Pianoroll::~Pianoroll ()
@@ -1935,3 +1937,12 @@ Pianoroll::instant_save ()
 	CueEditor::instant_save ();
 }
 
+void
+Pianoroll::parameter_changed (std::string param)
+{
+	if (param == X_("note-name-display")) {
+		if (prh) {
+			prh->instrument_info_change ();
+		}
+	}
+}
