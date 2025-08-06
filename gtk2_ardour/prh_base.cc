@@ -241,7 +241,6 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 		origin_y -= 1;
 	}
 
-
 	cr->translate (origin_x, origin_y);
 
 	// Render the MIDNAM text or its equivalent.  First, set up a clip
@@ -351,13 +350,14 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 
 		}
 
-
 		Gtkmm2ext::set_source_rgba (cr, bg);
 
-		double x = _scroomer_size;;
+		assert (_scroomer_size = width() - kbd_width);
+
+		double x = _scroomer_size;
 		double y = positions[n];
 
-		cr->rectangle (x, y, width() - 1., heights[n]);
+		cr->rectangle (x, y, kbd_width, heights[n]);
 		cr->fill ();
 
 		if ((oct_rel == 4 || oct_rel == 11) && y > 0) {
@@ -369,7 +369,7 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 			   which are rects
 			*/
 			cr->move_to (x, y + 0.5);
-			cr->line_to (x + width(), y + 0.5);
+			cr->line_to (x + kbd_width, y + 0.5);
 			cr->stroke ();
 		}
 	}
