@@ -714,12 +714,12 @@ Strip::handle_button (Button& button, ButtonState bs)
 
 std::string
 Strip::remove_units (std::string s) {
-       s = std::regex_replace (s, std::regex(" kHz$"), "k");
-       s = std::regex_replace (s, std::regex(" Hz$"), "");
-       s = std::regex_replace (s, std::regex(" dB$"), "");
-       s = std::regex_replace (s, std::regex(" ms$"), "");
+		s = std::regex_replace (s, std::regex(" kHz$"), "k");
+		s = std::regex_replace (s, std::regex(" Hz$"), "");
+		s = std::regex_replace (s, std::regex(" dB$"), "");
+		s = std::regex_replace (s, std::regex(" ms$"), "");
 
-       return s;
+		return s;
 }
 
 std::string
