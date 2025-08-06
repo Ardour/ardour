@@ -654,7 +654,6 @@ Editor::Editor ()
 	load_bindings ();
 	register_actions ();
 	bind_mouse_mode_buttons ();
-	set_action_defaults ();
 
 	build_edit_mode_menu();
 	build_zoom_focus_menu();
@@ -664,6 +663,8 @@ Editor::Editor ()
 	build_edit_point_menu();
 
 	setup_toolbar ();
+
+	set_action_defaults ();
 
 	ARDOUR_UI::instance()->ActionsReady.connect_same_thread (*this, std::bind (&Editor::initialize_ruler_actions, this));
 
