@@ -332,26 +332,35 @@ void
 EditingContext::set_action_defaults ()
 {
 #ifndef LIVETRAX
+	follow_playhead_action->set_active (false);
 	follow_playhead_action->set_active (true);
 #else
+	follow_playhead_action->set_active (true);
 	follow_playhead_action->set_active (false);
 #endif
+	mouse_mode_actions[Editing::MouseObject]->set_active (false);
 	mouse_mode_actions[Editing::MouseObject]->set_active (true);
+	zoom_focus_actions[Editing::ZoomFocusLeft]->set_active (false);
 	zoom_focus_actions[Editing::ZoomFocusLeft]->set_active (true);
 
 	if (snap_mode_actions[Editing::SnapMagnetic]) {
+		snap_mode_actions[Editing::SnapMagnetic]->set_active (false);
 		snap_mode_actions[Editing::SnapMagnetic]->set_active (true);
 	}
 	if (grid_actions[Editing::GridTypeBeat]) {
+		grid_actions[Editing::GridTypeBeat]->set_active (false);
 		grid_actions[Editing::GridTypeBeat]->set_active (true);
 	}
 	if (draw_length_actions[DRAW_LEN_AUTO]) {
+		draw_length_actions[DRAW_LEN_AUTO]->set_active (false);
 		draw_length_actions[DRAW_LEN_AUTO]->set_active (true);
 	}
 	if (draw_velocity_actions[DRAW_VEL_AUTO]) {
+		draw_velocity_actions[DRAW_VEL_AUTO]->set_active (false);
 		draw_velocity_actions[DRAW_VEL_AUTO]->set_active (true);
 	}
 	if (draw_channel_actions[DRAW_CHAN_AUTO]) {
+		draw_channel_actions[DRAW_CHAN_AUTO]->set_active (false);
 		draw_channel_actions[DRAW_CHAN_AUTO]->set_active (true);
 	}
 }
