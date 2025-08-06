@@ -215,7 +215,7 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 	Gtkmm2ext::Color black_highlight = UIConfiguration::instance().color (X_("piano key highlight"));
 	Gtkmm2ext::Color textc           = UIConfiguration::instance().color (X_("gtk_foreground"));
 
-	std::vector<int> numbers;;
+	std::vector<int> numbers;
 	std::vector<int> positions;
 	std::vector<int> heights;
 
