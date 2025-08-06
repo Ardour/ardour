@@ -92,6 +92,8 @@ public:
 	MidiByteArray display (uint32_t lcd_number, uint32_t line_number, const std::string&);
 	MidiByteArray blank_display (uint32_t lcd_number, uint32_t line_number);
 	
+	static std::string remove_units (std::string s);
+
 	static std::string format_parameter_for_display(
 		ARDOUR::ParameterDescriptor const& desc, 
 		float val, 

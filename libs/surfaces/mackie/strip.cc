@@ -24,6 +24,7 @@
 #include <sstream>
 #include <vector>
 #include <climits>
+#include <regex>
 
 #include <stdint.h>
 
@@ -709,6 +710,16 @@ Strip::handle_button (Button& button, ButtonState bs)
 		}
 		break;
 	}
+}
+
+std::string
+Strip::remove_units (std::string s) {
+       s = std::regex_replace (s, std::regex(" kHz$"), "k");
+       s = std::regex_replace (s, std::regex(" Hz$"), "");
+       s = std::regex_replace (s, std::regex(" dB$"), "");
+       s = std::regex_replace (s, std::regex(" ms$"), "");
+
+       return s;
 }
 
 std::string
