@@ -140,9 +140,12 @@ Selection::clear_objects (bool with_signal)
 void
 Selection::clear_time (bool with_signal)
 {
-	time.clear();
-	if (with_signal) {
-		TimeChanged ();
+	if (!time.empty()) {
+		time.clear();
+
+		if (with_signal) {
+			TimeChanged ();
+		}
 	}
 }
 
