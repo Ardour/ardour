@@ -2205,7 +2205,6 @@ Editor::set_state (const XMLNode& node, int version)
 	if (!node.get_property ("zoom-focus", zf)) {
 		zf = ZoomFocusLeft;
 	}
-	std::cerr << "from state, set ZF to " << enum_2_string (zf) << std::endl;
 	set_zoom_focus (zf);
 
 	node.get_property ("marker-click-behavior", marker_click_behavior);
