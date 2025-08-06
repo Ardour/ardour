@@ -273,10 +273,13 @@ MidiPort::flush_buffers (pframes_t nframes)
 
 	void* port_buffer = 0;
 
-	if (_resolve_required) {
+	if (_resolve_required && (_global_port_buffer_offset + nframes) > 0) {
 		port_buffer = port_engine.get_buffer (_port_handle, nframes);
-		/* resolve all notes at the start of the buffer */
-		resolve_notes (port_buffer, _global_port_buffer_offset);
+		/* This is called from ARDOUR::PortManager::cycle_end() at which
+		 * point other MIDI data has already been written to the port.
+		 * So we "resolve notes" (panic) at the end of he buffer.
+		 */
+		resolve_notes (port_buffer, _global_port_buffer_offset + nframes -1);
 		_resolve_required = false;
 	}
 
