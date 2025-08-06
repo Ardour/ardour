@@ -588,6 +588,12 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 	prh->set (ArdourCanvas::Rect (0, 0, prh->x1(), view->midi_context().height()));
 
 	_track_canvas_width = _visible_canvas_width - prh->x1();
+	_timeline_origin = prh->x1();
+
+	data_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
+	no_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
+	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
+	h_scroll_group->set_position (Duple (_timeline_origin, 0.));
 
 	if (zoom_in_allocate) {
 
