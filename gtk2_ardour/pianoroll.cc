@@ -1909,7 +1909,6 @@ Pianoroll::manage_possible_header (Gtk::Allocation& alloc)
 	if (prh) {
 		double w, h;
 		prh->size_request (w, h);
-
 		alloc.set_width (alloc.get_width() - w);
 		alloc.set_x (alloc.get_x() + w);
 	}
