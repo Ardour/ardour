@@ -98,14 +98,14 @@ UI_CONFIG_VARIABLE (ARDOUR::InputMeterLayout, input_meter_layout, "input-meter-l
 UI_CONFIG_VARIABLE (bool, input_meter_scopes, "input-meter-scopes", true)
 UI_CONFIG_VARIABLE (float, meter_peak, "meter-peak", 0.0f)
 UI_CONFIG_VARIABLE (bool, meter_style_led, "meter-style-led", false)
-UI_CONFIG_VARIABLE (bool, show_editor_meter, "show-editor-meter", true)
+UI_CONFIG_VARIABLE (bool, show_editor_meter, "show-editor-meter", false)
 UI_CONFIG_VARIABLE (bool, show_toolbar_recpunch, "show-toolbar-recpunch", true)
 UI_CONFIG_VARIABLE (bool, show_toolbar_monitoring, "show-toolbar-monitoring", false) /* deprecated */
 UI_CONFIG_VARIABLE (bool, show_toolbar_selclock, "show-toolbar-selclock", false)
 UI_CONFIG_VARIABLE (bool, show_toolbar_latency, "show-toolbar-latency", false)
-UI_CONFIG_VARIABLE (bool, show_toolbar_cuectrl, "show-toolbar-cuectrl", true)
+UI_CONFIG_VARIABLE (bool, show_toolbar_cuectrl, "show-toolbar-cuectrl", false)
 UI_CONFIG_VARIABLE (bool, show_toolbar_monitor_info, "show-toolbar-monitor-info", false)
-UI_CONFIG_VARIABLE (bool, show_mini_timeline, "show-mini-timeline", true)
+UI_CONFIG_VARIABLE (bool, show_mini_timeline, "show-mini-timeline", false)
 UI_CONFIG_VARIABLE (bool, show_secondary_clock, "show-secondary-clock", true)
 UI_CONFIG_VARIABLE (double, waveform_clip_level, "waveform-clip-level", -0.0933967) /* units of dB */
 UI_CONFIG_VARIABLE (bool, buggy_gradients, "buggy-gradients", false)
