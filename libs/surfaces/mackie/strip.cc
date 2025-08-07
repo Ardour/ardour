@@ -719,6 +719,17 @@ Strip::remove_units (std::string s) {
 		s = std::regex_replace (s, std::regex(" dB$"), "");
 		s = std::regex_replace (s, std::regex(" ms$"), "");
 
+		// convert seconds to milliseconds
+		if (s.rfind(" s") != string::npos) {
+			char buf[32];
+			s = std::regex_replace (s, std::regex(" s$"), "");
+			if (sprintf(buf, "%2.0f", 1000.0*stof(s)) >= 0) {
+				s = std::string (buf);
+			} else {
+				DEBUG_TRACE (DEBUG::MackieControl, "couldn't convert string to float\n");
+			}
+		}
+
 		return s;
 }
 
