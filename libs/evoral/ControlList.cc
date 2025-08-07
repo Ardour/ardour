@@ -1883,20 +1883,33 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const& 
 	}
 
 	/* This method is ONLY used for interpolating to generate value/time
-	 * duples not present in the actual ControlList, and because of this,
-	 * the desired time domain is always audio time.
+	 * duples not present in the actual ControlList
 	 */
 
-	double       a     = first->when.superclocks ();
-	double       b     = next->when.superclocks ();
-	const double slope = (b - a) / (next->value - first->value);
-	assert (slope != 0);
+	double slope;
 
-	double t  = start_time.superclocks ();
-	double dt = fmod (t, fabs (slope));
-	t += fabs (slope) - dt;
-	x = timecnt_t::from_superclock (t + 1);
-	y = rint (first->value + (t - a) / slope);
+	if (time_domain() == Temporal::AudioTime) {
+		double       a     = first->when.superclocks ();
+		double       b     = next->when.superclocks ();
+		slope = (b - a) / (next->value - first->value);
+		assert (slope != 0);
+		double t  = start_time.superclocks ();
+		double dt = fmod (t, fabs (slope));
+		t += fabs (slope) - dt;
+		x = timecnt_t::from_superclock (t + 1);
+		y = rint (first->value + (t - a) / slope);
+	} else {
+		double       a     = first->when.beats().to_ticks();
+		double       b     = next->when.beats().to_ticks();
+		slope = (b - a) / (next->value - first->value);
+		assert (slope != 0);
+		double t  = start_time.beats ().to_ticks();
+		double dt = fmod (t, fabs (slope));
+		t += fabs (slope) - dt;
+		x = timecnt_t::from_ticks (t + 1);
+		y = rint (first->value + (t - a) / slope);
+	}
+
 	if (slope > 0) {
 		y = std::max (first->value, std::min (next->value, y));
 	} else {
