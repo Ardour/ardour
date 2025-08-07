@@ -117,19 +117,18 @@ C1GUI::C1GUI (Console1& p)
 
 	// swap_solo_mute (_ ("Swap Solo and Mute"));
 	swap_solo_mute_cb.set_tooltip_text (
-	  _ ("If checked Ardour the mute and solo buttons are swept so they have the same order as in the GUI."));
+	  _("If checked Ardour the mute and solo buttons are swept so they have the same order as in the GUI."));
 	swap_solo_mute_cb.set_active (p.swap_solo_mute);
 	swap_solo_mute_cb.signal_toggled ().connect (sigc::mem_fun (*this, &C1GUI::set_swap_solo_mute));
 
 #ifdef MIXBUS
-	// before the ssl strips, the q knobs for low- and high mids where alwas used as sends, now this can be toggled
-	band_q_as_send_cb.set_tooltip_text (
-			_ ("If checked Ardour the Q-Factor knobs for Low and High are used as sends for Send 11 and send 12."));
+	    // before the ssl strips, the q knobs for low- and high mids where always used as sends, now this can be toggled
+	    band_q_as_send_cb.set_tooltip_text (
+	        _("If checked Ardour the Q-Factor knobs for Low and High are used as sends for Send 11 and send 12."));
 	band_q_as_send_cb.set_active (p.band_q_as_send);
 	band_q_as_send_cb.signal_toggled ().connect (sigc::mem_fun (*this, &C1GUI::set_band_q_as_send));
 #endif
-	// create_plugin_stubs (_ ("Create Plugin Mapping Stubs"));
-	create_plugin_stubs_btn.set_tooltip_text (_ ("If checked a mapping stub is created for every unknown plugin."));
+	create_plugin_stubs_btn.set_tooltip_text (_("If checked a mapping stub is created for every unknown plugin."));
 	create_plugin_stubs_btn.set_active (p.create_mapping_stubs);
 	create_plugin_stubs_btn.signal_toggled ().connect (sigc::mem_fun (*this, &C1GUI::set_create_mapping_stubs));
 
@@ -141,14 +140,14 @@ C1GUI::C1GUI (Console1& p)
 	row++;
 
 	l = manage (new Gtk::Label);
-	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _ ("Outgoing MIDI on:")));
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Outgoing MIDI on:")));
 	l->set_alignment (1.0, 0.5);
 	table.attach (*l, 0, 1, row, row + 1, AttachOptions (FILL | EXPAND), AttachOptions (0));
 	table.attach (output_combo, 1, 2, row, row + 1, AttachOptions (FILL | EXPAND), AttachOptions (0), 0, 0);
 	row++;
 
 	l = manage (new Gtk::Label);
-	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _ ("Swap Solo and Mute:")));
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Swap Solo and Mute:")));
 	l->set_alignment (1.0, 0.5);
 	table.attach (*l, 0, 1, row, row + 1, AttachOptions (FILL | EXPAND), AttachOptions (0));
 	table.attach (swap_solo_mute_cb, 1, 2, row, row + 1);
@@ -156,7 +155,7 @@ C1GUI::C1GUI (Console1& p)
 
 #ifdef MIXBUS
 	l = manage (new Gtk::Label);
-	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _ ("Use Mid-Q Buttons as send 11/12:")));
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Use Mid-Q Buttons as send 11/12:")));
 	l->set_alignment (1.0, 0.5);
 	table.attach (*l, 0, 1, row, row + 1, AttachOptions (FILL | EXPAND), AttachOptions (0));
 	table.attach (band_q_as_send_cb, 1, 2, row, row + 1);
@@ -164,7 +163,7 @@ C1GUI::C1GUI (Console1& p)
 #endif
 
 	l = manage (new Gtk::Label);
-	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _ ("Create Plugin Mapping Stubs:")));
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Create Plugin Mapping Stubs:")));
 	l->set_alignment (1.0, 0.5);
 	table.attach (*l, 0, 1, row, row + 1, AttachOptions (FILL | EXPAND), AttachOptions (0));
 	table.attach (create_plugin_stubs_btn, 1, 2, row, row + 1);
@@ -179,7 +178,7 @@ C1GUI::C1GUI (Console1& p)
 
     VBox* plugconfig_packer = build_plugin_assignment_page();
 
-    append_page (*plugconfig_packer, _ ("Plugin Mappings"));
+    append_page (*plugconfig_packer, _("Plugin Mappings"));
     plugconfig_packer->show_all ();
 
     /* update the port connection combos */
@@ -189,11 +188,14 @@ C1GUI::C1GUI (Console1& p)
     /* catch future changes to connection state */
 
     ARDOUR::AudioEngine::instance ()->PortRegisteredOrUnregistered.connect (
-	_port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
+	port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
     ARDOUR::AudioEngine::instance ()->PortPrettyNameChanged.connect (
-	_port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
+	port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
     c1.ConnectionChange.connect (
-	_port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
+	port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
+
+    c1.PluginStubAdded.connect (
+	plugin_connections, invalidator (*this), std::bind (&C1GUI::load_plugin_combo_rows, this), gui_context ());
 }
 
 C1GUI::~C1GUI () {

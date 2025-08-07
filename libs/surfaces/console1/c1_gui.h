@@ -54,7 +54,7 @@ public:
 	~C1GUI ();
 
 private:
-	Console1& c1;
+	Console1&                 c1;
 	PBD::ScopedConnectionList lcxl_connections;
 	Gtk::VBox                 hpacker;
 	Gtk::Table                table;
@@ -77,8 +77,9 @@ private:
 	void update_port_combos ();
 	PBD::ScopedConnection connection_change_connection;
 	void connection_handler ();
-	PBD::ScopedConnectionList _port_connections;
-    
+	PBD::ScopedConnectionList port_connections;
+	PBD::ScopedConnectionList plugin_connections;
+
 	struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
 		MidiPortColumns() {
 			add (short_name);
@@ -122,9 +123,10 @@ private:
 	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (std::vector<std::string> const & ports, bool for_input);
 
 
-	Console1::PluginMapping pc;
+	Console1::PluginMapping plugin_mapping;
 	Gtk::VBox*              build_plugin_assignment_page ();
 	Gtk::CellRendererCombo* make_action_renderer (Glib::RefPtr<Gtk::ListStore> model, Gtk::TreeModelColumnBase column);
+	void                    load_plugin_combo_rows ();
 	void                    build_plugin_assignment_editor ();
 	void                    plugin_assignment_editor_selection_changed ();
 	void                    change_controller_number (int controllerNumber, bool shiftState);

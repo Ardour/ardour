@@ -1265,4 +1265,12 @@ const std::string Console1::findControllerNameById (const ControllerID id){
 	}
 	return std::string();
 }
+
+void
+Console1::reset_midi_assign_mode ()
+{
+	DEBUG_TRACE (DEBUG::Console1, "console1::reset_midi_assign_mode()\n");
+	midi_assign_mode = false;
+}
+
 } // namespace Console1

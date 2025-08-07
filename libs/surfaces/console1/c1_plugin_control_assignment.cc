@@ -43,19 +43,7 @@ C1GUI::build_plugin_assignment_page ()
 
 	plugconfig_packer->pack_start (*plugselect_packer, false, false);
 
-	Glib::RefPtr<Gtk::ListStore> plugin_store_model = ListStore::create (plugin_columns);
-	TreeModel::Row               plugin_combo_row;
-	for (const auto& pm : c1.getPluginMappingMap ()) {
-		plugin_combo_row                             = *(plugin_store_model->append ());
-		plugin_combo_row[plugin_columns.plugin_name] = pm.second.name;
-		plugin_combo_row[plugin_columns.plugin_id]   = pm.first;
-		DEBUG_TRACE (DEBUG::Console1, string_compose ("Add Plugin: name %1 / %2\n", pm.second.name, pm.first));
-	}
-	plugins_combo.pack_start (plugin_columns.plugin_name);
-	plugins_combo.signal_changed ().connect (
-	    sigc::bind (sigc::mem_fun (*this, &C1GUI::active_plugin_changed), &plugins_combo));
-	plugins_combo.set_model (plugin_store_model);
-
+	load_plugin_combo_rows ();
 	plugselect_packer->pack_start (plugins_combo, true, true);
 	plugin_mapping_scroller.property_shadow_type () = Gtk::SHADOW_NONE;
 	plugin_mapping_scroller.set_policy (Gtk::PolicyType::POLICY_AUTOMATIC, Gtk::PolicyType::POLICY_AUTOMATIC);
@@ -74,6 +62,23 @@ C1GUI::build_plugin_assignment_page ()
 	return plugconfig_packer;
 }
 
+void C1GUI::load_plugin_combo_rows()
+{
+	Glib::RefPtr<Gtk::ListStore> plugin_store_model = ListStore::create (plugin_columns);
+	TreeModel::Row               plugin_combo_row;
+
+	for (const auto& pm : c1.plugin_mapping_map) {
+		plugin_combo_row                             = *(plugin_store_model->append ());
+		plugin_combo_row[plugin_columns.plugin_name] = pm.second.name;
+		plugin_combo_row[plugin_columns.plugin_id]   = pm.first;
+		DEBUG_TRACE (DEBUG::Console1, string_compose ("Add Plugin: name %1 / %2\n", pm.second.name, pm.first));
+	}
+	plugins_combo.pack_start (plugin_columns.plugin_name);
+	plugins_combo.signal_changed ().connect (
+	    sigc::bind (sigc::mem_fun (*this, &C1GUI::active_plugin_changed), &plugins_combo));
+	plugins_combo.set_model (plugin_store_model);
+}
+
 void
 C1GUI::build_plugin_assignment_editor ()
 {
@@ -82,23 +87,23 @@ C1GUI::build_plugin_assignment_editor ()
 	plugin_assignment_editor.append_column (_ ("Switch"), plugin_assignment_editor_columns.is_switch);
 
 	TreeViewColumn*    col;
-	CellRendererCombo* controlRenderer;
+    CellRendererCombo* controlRenderer;
 
-	CellRendererToggle* boolRenderer = manage (new CellRendererToggle);
-	boolRenderer->set_active ();
-	boolRenderer->property_activatable () = true;
-	col                                   = manage (new TreeViewColumn (_ ("Shift"), *boolRenderer));
-	col->add_attribute (boolRenderer->property_active (), plugin_assignment_editor_columns.shift);
-	boolRenderer->signal_toggled ().connect (sigc::mem_fun (*this, &C1GUI::toggle_shift));
-	plugin_assignment_editor.append_column (*col);
+    CellRendererToggle* boolRendererShift = manage (new CellRendererToggle);
+    boolRendererShift->set_active ();
+    boolRendererShift->property_activatable () = true;
+    col                                        = manage (new TreeViewColumn (_ ("Shift"), *boolRendererShift));
+    col->add_attribute (boolRendererShift->property_active (), plugin_assignment_editor_columns.shift);
+    boolRendererShift->signal_toggled ().connect (sigc::mem_fun (*this, &C1GUI::toggle_shift));
+    plugin_assignment_editor.append_column (*col);
 
-	controlRenderer = make_action_renderer (c1.getPluginControllerModel (), plugin_assignment_editor_columns.controllerName);
-	col             = manage (new TreeViewColumn (_ ("Control"), *controlRenderer));
-	col->add_attribute (controlRenderer->property_text (), plugin_assignment_editor_columns.controllerName);
-	plugin_assignment_editor.append_column (*col);
+    controlRenderer = make_action_renderer (c1.getPluginControllerModel (), plugin_assignment_editor_columns.controllerName);
+    col             = manage (new TreeViewColumn (_ ("Control"), *controlRenderer));
+    col->add_attribute (controlRenderer->property_text (), plugin_assignment_editor_columns.controllerName);
+    plugin_assignment_editor.append_column (*col);
 
-	plugin_assignment_store = ListStore::create (plugin_assignment_editor_columns);
-	plugin_assignment_editor.set_model (plugin_assignment_store);
+    plugin_assignment_store = ListStore::create (plugin_assignment_editor_columns);
+    plugin_assignment_editor.set_model (plugin_assignment_store);
 }
 
 void
@@ -117,9 +122,9 @@ C1GUI::active_plugin_changed (Gtk::ComboBox* combo)
 	string new_plugin_name = (*active)[plugin_columns.plugin_name];
 	string new_plugin_id   = (*active)[plugin_columns.plugin_id];
 	DEBUG_TRACE (DEBUG::Console1, string_compose ("Plugin: selected %1 / %2\n", new_plugin_name, new_plugin_id));
-	pc = c1.getPluginMappingMap ()[new_plugin_id];
+	plugin_mapping = c1.plugin_mapping_map[new_plugin_id];
 
-	for (auto& parm : pc.parameters) {
+	for (auto& parm : plugin_mapping.parameters) {
 		plugin_assignment_row                                                  = *(plugin_assignment_store->append ());
 		plugin_assignment_row[plugin_assignment_editor_columns.index]          = parm.first;
 		plugin_assignment_row[plugin_assignment_editor_columns.name]           = parm.second.name;
@@ -162,7 +167,7 @@ C1GUI::change_controller (const Glib::ustring& sPath, const TreeModel::iterator&
 	if (row) {
 		string controllerName             = (*iter)[c1.plugin_controller_columns.controllerName];
 		int    controllerId               = (*iter)[c1.plugin_controller_columns.controllerId];
-		pc.parameters[index].controllerId = Console1::ControllerID (controllerId);
+		plugin_mapping.parameters[index].controllerId = Console1::ControllerID (controllerId);
 		(*row).set_value (plugin_assignment_editor_columns.controllerName, controllerName);
 		DEBUG_TRACE (DEBUG::Console1,
 		             string_compose ("Column Name: Controller, index %1, name %2 \n", index, controllerName));
@@ -183,7 +188,8 @@ void
 C1GUI::write_plugin_assignment ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "write_plugin_assignment\n");
-	c1.write_plugin_mapping (pc);
+	c1.plugin_mapping_map[plugin_mapping.id] = plugin_mapping;
+	c1.write_plugin_mapping (plugin_mapping);
 }
 
 void 
@@ -196,12 +202,11 @@ C1GUI::change_controller_number( int controllerNumber, bool shiftState ){
 		(*row).set_value (plugin_assignment_editor_columns.controllerName, name);
 		(*row).set_value (plugin_assignment_editor_columns.shift, shiftState);
 		int index                         = (*row).get_value (plugin_assignment_editor_columns.index);
-		pc.parameters[index].controllerId = Console1::ControllerID (controllerNumber);
-		pc.parameters[index].shift        = shiftState ? 1 : 0;
+		plugin_mapping.parameters[index].controllerId = Console1::ControllerID (controllerNumber);
+		plugin_mapping.parameters[index].shift        = shiftState ? 1 : 0;
 		plugin_assignment_changed ();
 	}
 	midi_assign_button->set_active (false);
-	midi_assign_button->set_sensitive (false);
 }
 
 void
@@ -211,7 +216,9 @@ C1GUI::midi_assign_button_toggled (Gtk::ToggleButton* b)
 	bool en = b->get_active ();
 	c1.midi_assign_mode = en;
     if( en )
+    {
         c1.SendControllerNumber.connect (std::bind ( &C1GUI::change_controller_number, this, _1, _2));
+    }
 }
 
 void
@@ -220,8 +227,8 @@ C1GUI::toggle_shift (const Glib::ustring& s)
 	int                      index = atoi (s.c_str ());
 	Gtk::TreeModel::iterator row   = plugin_assignment_store->get_iter (s);
 	if (row) {
-		bool value                 = !pc.parameters[index].shift;
-		pc.parameters[index].shift = value;
+		bool value                 = !plugin_mapping.parameters[index].shift;
+		plugin_mapping.parameters[index].shift = value;
 		(*row).set_value (plugin_assignment_editor_columns.shift, value);
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("Column Name: Shift, value %1\n", value));
 		plugin_assignment_changed ();

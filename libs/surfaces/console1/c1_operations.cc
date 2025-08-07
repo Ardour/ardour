@@ -680,7 +680,10 @@ Console1::map_shift (bool shift)
 	try {
 		ControllerButton* controllerButton = get_button (PRESET);
 		controllerButton->set_led_state (shift);
-		map_stripable_state ();
+        if( in_plugin_state )
+            remap_plugin_parameter (current_plugin_index);
+        else
+            map_stripable_state ();
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}

@@ -132,6 +132,8 @@ public:
 
 	bool midi_assign_mode = false;
 
+	void reset_midi_assign_mode ();
+
 	bool in_use(){
 		return _in_use;
 	}
@@ -143,10 +145,11 @@ public:
     PBD::Signal<void ()>     Periodic;
 
     /* Local Signals */
-    PBD::Signal<void ()>     BankChange;
-    PBD::Signal<void (bool)> ShiftChange;
-    PBD::Signal<void (bool)> PluginStateChange;
-    PBD::Signal<void (bool)> EQBandQBindingChange;
+    PBD::Signal<void ()>           PluginStubAdded;
+    PBD::Signal<void ()>           BankChange;
+    PBD::Signal<void (bool)>       ShiftChange;
+    PBD::Signal<void (bool)>       PluginStateChange;
+    PBD::Signal<void (bool)>       EQBandQBindingChange;
     sigc::signal2<void, int, bool> SendControllerNumber;
 
     enum ControllerID {
@@ -672,31 +675,31 @@ public:
 	void create_plugin_mapping_stubs (const std::shared_ptr<ARDOUR::Processor> proc, const std::shared_ptr<ARDOUR::Plugin> plugin);
 
 	bool spill_plugins (const int32_t plugin_index);
-    bool setup_plugin_mute_button (const std::shared_ptr<ARDOUR::PluginInsert> &plugin_insert);
-    
-    bool setup_plugin_encoder (const PluginParameterMapping &ppm, int32_t n_controls,
-                               const ARDOUR::ParameterDescriptor &parameterDescriptor,
-                               const std::shared_ptr<ARDOUR::AutomationControl> &c);
-    
-    bool setup_plugin_button (const PluginParameterMapping &ppm, int32_t n_controls,
-                              const ARDOUR::ParameterDescriptor &parameterDescriptor,
-                              const std::shared_ptr<ARDOUR::AutomationControl> &c);
+	
+    bool setup_plugin_mute_button (const std::shared_ptr<ARDOUR::PluginInsert>& plugin_insert);
 
-    bool handle_plugin_parameter (const PluginParameterMapping &ppm, int32_t n_controls,
-                                  const ARDOUR::ParameterDescriptor &parameterDescriptor,
-                                  const std::shared_ptr<ARDOUR::AutomationControl> &c);
+	bool setup_plugin_controller (const PluginParameterMapping& ppm, int32_t n_controls,
+	                            const ARDOUR::ParameterDescriptor&                parameterDescriptor,
+	                           const std::shared_ptr<ARDOUR::AutomationControl>& ac);
 
-    /* plugin operations */
-	void remove_plugin_operations ();
+	bool handle_plugin_parameter (const PluginParameterMapping& ppm, int32_t n_controls,
+	                              const ARDOUR::ParameterDescriptor&                parameterDescriptor,
+	                              const std::shared_ptr<ARDOUR::AutomationControl>& c);
+
+	bool set_plugin_receive_connection (Controller* controller, const std::shared_ptr<ARDOUR::AutomationControl>& ac, const ARDOUR::ParameterDescriptor& parameterDescriptor, const PluginParameterMapping& ppm);
+
+	bool remap_plugin_parameter (int plugin_index);
+
+	/* plugin operations */
+	void                               remove_plugin_operations ();
 	std::shared_ptr<ARDOUR::Processor> find_plugin (const int32_t plugin_index);
-	bool select_plugin (const int32_t plugin_index);
+	bool                               select_plugin (const int32_t plugin_index);
 
 	bool map_select_plugin (const int32_t plugin_index);
 
-    void eqBandQChangeMapping (bool mapValues);
+	void eqBandQChangeMapping (bool mapValues);
 
-
-  public:
+public:
 	struct PluginMapping
 	{
 		std::string id;
@@ -705,9 +708,8 @@ public:
 		ParameterMap parameters;
 	};
 	using PluginMappingMap = std::map<std::string, PluginMapping>;
-	PluginMappingMap pluginMappingMap;
+	PluginMappingMap plugin_mapping_map;
 
-	PluginMappingMap getPluginMappingMap () { return pluginMappingMap; }
     Glib::RefPtr<Gtk::ListStore> getPluginControllerModel();
 	void write_plugin_mapping (PluginMapping &mapping);
 };
