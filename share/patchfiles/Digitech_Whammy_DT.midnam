@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Gian Fontanilla</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Digitech</Manufacturer>
+    <Model>Whammy DT</Model>
+    <CustomDeviceMode Name="Default">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Preset">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="1" Name="▼OCT△OCT Active" ProgramChange="20"/>
+          <Patch Number="2" Name="▼OCT△OCT Bypass" ProgramChange="41"/>
+          <Patch Number="3" Name="▼5TH▽4TH Active" ProgramChange="19"/>
+          <Patch Number="4" Name="▼5TH▽4TH Bypass" ProgramChange="40"/>
+          <Patch Number="5" Name="▼4TH▽3RD Active" ProgramChange="18"/>
+          <Patch Number="6" Name="▼4TH▽3RD Bypass" ProgramChange="39"/>
+          <Patch Number="7" Name="▲5TH△7TH Active" ProgramChange="17"/>
+          <Patch Number="8" Name="▲5TH△7TH Bypass" ProgramChange="38"/>
+          <Patch Number="9" Name="▲5TH△6TH Active" ProgramChange="16"/>
+          <Patch Number="10" Name="▲5TH△6TH Bypass" ProgramChange="37"/>
+          <Patch Number="11" Name="▲4TH△5TH Active" ProgramChange="15"/>
+          <Patch Number="12" Name="▲4TH△5TH Bypass" ProgramChange="36"/>
+          <Patch Number="13" Name="▲3RD△4TH Active" ProgramChange="14"/>
+          <Patch Number="14" Name="▲3RD△4TH Bypass" ProgramChange="35"/>
+          <Patch Number="15" Name="▲♭3RD△4TH Active" ProgramChange="13"/>
+          <Patch Number="16" Name="▲♭3RD△4TH Bypass" ProgramChange="34"/>
+          <Patch Number="17" Name="▲2ND△3RD Active" ProgramChange="12"/>
+          <Patch Number="18" Name="▲2ND△3RD Bypass" ProgramChange="33"/>
+          <Patch Number="19" Name="SHALLOW Active" ProgramChange="11"/>
+          <Patch Number="20" Name="SHALLOW Bypass" ProgramChange="32"/>
+          <Patch Number="21" Name="△2 OCT Active" ProgramChange="0"/>
+          <Patch Number="22" Name="△2 OCT Bypass" ProgramChange="21"/>
+          <Patch Number="23" Name="△OCT Active" ProgramChange="1"/>
+          <Patch Number="24" Name="△OCT Bypass" ProgramChange="22"/>
+          <Patch Number="25" Name="△5TH Active" ProgramChange="2"/>
+          <Patch Number="26" Name="△5TH Bypass" ProgramChange="23"/>
+          <Patch Number="27" Name="△4TH Active" ProgramChange="3"/>
+          <Patch Number="28" Name="△4TH Bypass" ProgramChange="24"/>
+          <Patch Number="29" Name="▽2ND Active" ProgramChange="4"/>
+          <Patch Number="30" Name="▽2ND Bypass" ProgramChange="25"/>
+          <Patch Number="31" Name="▽4TH Active" ProgramChange="5"/>
+          <Patch Number="32" Name="▽4TH Bypass" ProgramChange="26"/>
+          <Patch Number="33" Name="▽5TH Active" ProgramChange="6"/>
+          <Patch Number="34" Name="▽5TH Bypass" ProgramChange="27"/>
+          <Patch Number="35" Name="▽OCT Active" ProgramChange="7"/>
+          <Patch Number="36" Name="▽OCT Bypass" ProgramChange="28"/>
+          <Patch Number="37" Name="▽2 OCT Active" ProgramChange="8"/>
+          <Patch Number="38" Name="▽2 OCT Bypass" ProgramChange="29"/>
+          <Patch Number="39" Name="DIVEBOMB Active" ProgramChange="9"/>
+          <Patch Number="40" Name="DIVEBOMB Bypass" ProgramChange="30"/>
+          <Patch Number="39" Name="DEEP Active" ProgramChange="10"/>
+          <Patch Number="40" Name="DEEP Bypass" ProgramChange="31"/>
+          <Patch Number="41" Name="SU 1 Active" ProgramChange="42"/>
+          <Patch Number="42" Name="SU 1 Bypass" ProgramChange="60"/>
+          <Patch Number="43" Name="SU 2 Active" ProgramChange="43"/>
+          <Patch Number="44" Name="SU 2 Bypass" ProgramChange="61"/>
+          <Patch Number="45" Name="SU 3 Active" ProgramChange="44"/>
+          <Patch Number="46" Name="SU 3 Bypass" ProgramChange="62"/>
+          <Patch Number="47" Name="SU 4 Active" ProgramChange="45"/>
+          <Patch Number="48" Name="SU 4 Bypass" ProgramChange="63"/>
+          <Patch Number="49" Name="SU 5 Active" ProgramChange="46"/>
+          <Patch Number="50" Name="SU 5 Bypass" ProgramChange="64"/>
+          <Patch Number="51" Name="SU 6 Active" ProgramChange="47"/>
+          <Patch Number="52" Name="SU 6 Bypass" ProgramChange="65"/>
+          <Patch Number="53" Name="SU 7 Active" ProgramChange="48"/>
+          <Patch Number="54" Name="SU 7 Bypass" ProgramChange="66"/>
+          <Patch Number="55" Name="SU OCT Active" ProgramChange="49"/>
+          <Patch Number="56" Name="SU OCT Bypass" ProgramChange="67"/>
+          <Patch Number="57" Name="SU OCT+DRY Active" ProgramChange="50"/>
+          <Patch Number="58" Name="SU OCT+DRY Bypass" ProgramChange="68"/>
+          <Patch Number="59" Name="SD 1 Active" ProgramChange="59"/>
+          <Patch Number="60" Name="SD 1 Bypass" ProgramChange="77"/>
+          <Patch Number="43" Name="SD 2 Active" ProgramChange="58"/>
+          <Patch Number="44" Name="SD 2 Bypass" ProgramChange="76"/>
+          <Patch Number="45" Name="SD 3 Active" ProgramChange="57"/>
+          <Patch Number="46" Name="SD 3 Bypass" ProgramChange="75"/>
+          <Patch Number="47" Name="SD 4 Active" ProgramChange="56"/>
+          <Patch Number="48" Name="SD 4 Bypass" ProgramChange="74"/>
+          <Patch Number="49" Name="SD 5 Active" ProgramChange="55"/>
+          <Patch Number="50" Name="SD 5 Bypass" ProgramChange="73"/>
+          <Patch Number="51" Name="SD 6 Active" ProgramChange="54"/>
+          <Patch Number="52" Name="SD 6 Bypass" ProgramChange="72"/>
+          <Patch Number="53" Name="SD 7 Active" ProgramChange="53"/>
+          <Patch Number="54" Name="SD 7 Bypass" ProgramChange="71"/>
+          <Patch Number="55" Name="SD OCT Active" ProgramChange="52"/>
+          <Patch Number="56" Name="SD OCT Bypass" ProgramChange="70"/>
+          <Patch Number="57" Name="SD OCT+DRY Active" ProgramChange="51"/>
+          <Patch Number="58" Name="SD OCT+DRY Bypass" ProgramChange="69"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

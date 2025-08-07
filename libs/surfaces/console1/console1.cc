@@ -705,17 +705,15 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq, this), this);
 		}
 #ifdef MIXBUS
-        std::shared_ptr<ARDOUR::Route> rt = std::dynamic_pointer_cast<ARDOUR::Route>( _current_stripable );
-        if (rt)
-        {
-            DEBUG_TRACE(DEBUG::Console1, "Cast to Route ok \n");
-            if( rt->eq_mode_control() )
-            {
-                DEBUG_TRACE(DEBUG::Console1, "Control EQ_Mode available \n");
-                 rt->eq_mode_control()->Changed.connect(
-                  stripable_connections, MISSING_INVALIDATOR, std::bind(&Console1::map_eq_mode, this), this);
-            }
-        }
+		std::shared_ptr<ARDOUR::Route> rt = std::dynamic_pointer_cast<ARDOUR::Route>( _current_stripable );
+		if (rt) {
+			DEBUG_TRACE(DEBUG::Console1, "Cast to Route ok \n");
+			if (rt->eq_type_control()) {
+				DEBUG_TRACE(DEBUG::Console1, "Control EQ_Mode available \n");
+				rt->eq_type_control()->Changed.connect(
+						stripable_connections, MISSING_INVALIDATOR, std::bind(&Console1::map_eq_mode, this), this);
+			}
+		}
 #endif
 		for (uint32_t i = 0; i < _current_stripable->eq_band_cnt (); ++i) {
 			if (_current_stripable->mapped_control (EQ_BandFreq, i)) {

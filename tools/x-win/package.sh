@@ -16,6 +16,7 @@ test -f gtk2_ardour/wscript || exit 1
 : ${MAKEFLAGS=-j4}
 : ${TMPDIR=/var/tmp}
 : ${SRCCACHE=/var/tmp/winsrc}  # source-code tgz cache
+: ${CURLOPT="-s -S --retry-connrefused --retry 3"}
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
@@ -259,7 +260,7 @@ du -sh $DESTDIR
 
 if test -n "$WITH_HARVID"; then
 	echo " === Including harvid"
-	HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
+	HARVID_VERSION=$(curl ${CURLOPT} http://ardour.org/files/video-tools/harvid_version.txt)
 
 	rsync -a -q --partial \
 		rsync://ardour.org/video-tools/harvid_${WARCH}-${HARVID_VERSION}.tar.xz \
@@ -271,7 +272,7 @@ fi
 
 if test -n "$WITH_XJADEO"; then
 	echo " === Including video-monitor"
-	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
+	XJADEO_VERSION=$(curl ${CURLOPT} http://ardour.org/files/video-tools/xjadeo_version.txt)
 
 	rsync -a -q --partial \
 		rsync://ardour.org/video-tools/xjadeo_${WARCH}-${XJADEO_VERSION}.tar.xz \
@@ -327,7 +328,7 @@ if test x$WITH_GMSYNTH != x ; then
 	echo "Adding General MIDI Synth LV2"
 
 	for proj in x42-gmsynth; do
-		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/${proj}.latest.txt)
+		X42_VERSION=$(curl ${CURLOPT} http://x42-plugins.com/x42/win/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://x42-plugins.com/x42/win/${proj}-lv2-${WARCH}-${X42_VERSION}.zip \
 			"${SRCCACHE}/${proj}-lv2-${WARCH}-${X42_VERSION}.zip"
@@ -341,7 +342,7 @@ if test x$WITH_COMMERCIAL_X42_LV2 != x ; then
 	echo "Adding commercial x42 Plugins"
 
 	for proj in x42-meters x42-eq x42-whirl; do
-		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/${proj}.latest.txt)
+		X42_VERSION=$(curl ${CURLOPT} http://x42-plugins.com/x42/win/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://x42-plugins.com/x42/win/${proj}-lv2-${WARCH}-${X42_VERSION}.zip \
 			"${SRCCACHE}/${proj}-lv2-${WARCH}-${X42_VERSION}.zip"
@@ -366,7 +367,7 @@ if test x$WITH_GRATIS_X42_LV2 != x ; then
 			fi
 		fi
 
-		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/${proj}.latest.txt)
+		X42_VERSION=$(curl ${CURLOPT} http://x42-plugins.com/x42/win/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://x42-plugins.com/x42/win/${proj}-lv2-${WARCH}-${X42_VERSION}.zip \
 			"${SRCCACHE}/${proj}-lv2-${WARCH}-${X42_VERSION}.zip"
@@ -379,7 +380,7 @@ if test x$WITH_HARRISON_LV2 != x ; then
 
 	echo "Including Harrison LV2s"
 
-	curl -s -S --fail -# \
+	curl ${CURLOPT} --fail -# \
 		-z "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip" \
 		-o "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip" \
 		"${HARRISONDSPURL}/${HARRISONLV2}.${WARCH}.zip"
@@ -391,7 +392,7 @@ if test x$WITH_HARRISON_VBM != x ; then
 
 	echo "Including Harrison VBM Channelstrip LV2"
 
-	curl -s -S --fail -# \
+	curl ${CURLOPT} --fail -# \
 		-z "${SRCCACHE}/harrison_vbm.${WARCH}.zip" \
 		-o "${SRCCACHE}/harrison_vbm.${WARCH}.zip" \
 		"${HARRISONDSPURL}/harrison_vbm.${WARCH}.zip"
@@ -405,7 +406,7 @@ if test -n "$MIXBUS"; then
 	echo "Deploying Harrison Mixbus Channelstrip"
 
 	mkdir -p $ALIBDIR/ladspa/strip
-	curl -s -S --fail -# \
+	curl ${CURLOPT} --fail -# \
 		-z "${SRCCACHE}/${HARRISONCHANNELSTRIP}.${WARCH}.dll" \
 		-o "${SRCCACHE}/${HARRISONCHANNELSTRIP}.${WARCH}.dll" \
 		"${HARRISONDSPURL}/${HARRISONCHANNELSTRIP}.${WARCH}.dll"
@@ -415,7 +416,7 @@ if test -n "$MIXBUS"; then
 
 	echo "Deploying Harrison Vamp Plugins"
 	mkdir -p $ALIBDIR/vamp
-	curl -s -S --fail -# \
+	curl ${CURLOPT} --fail -# \
 		-z "${SRCCACHE}/harrison_vamp.${WARCH}.dll" \
 		-o "${SRCCACHE}/harrison_vamp.${WARCH}.dll" \
 		"${HARRISONDSPURL}/harrison_vamp.${WARCH}.dll"
@@ -424,7 +425,7 @@ if test -n "$MIXBUS"; then
 		"$ALIBDIR/vamp/harrison_vamp.dll"
 
 	# Mixbus Bundled Media Content
-	curl -s -S --fail -#  \
+	curl ${CURLOPT} --fail -#  \
 		-z "${SRCCACHE}/MixbusBundledMedia.zip" \
 		-o "${SRCCACHE}/MixbusBundledMedia.zip" \
 		"https://builder.harrisonconsoles.com/pub/share/MixbusBundledMedia.zip"
@@ -436,7 +437,7 @@ if test -n "$MIXBUS"; then
 	fi
 elif test -z "$LIVETRAX" -a -z "$VBM"; then
 	echo "Fetching Ardour bundled media"
-	curl -s -S --fail -#  \
+	curl ${CURLOPT} --fail -#  \
 		-z "${SRCCACHE}/ArdourBundledMedia.zip" \
 		-o "${SRCCACHE}/ArdourBundledMedia.zip" \
 		"http://stuff.ardour.org/loops/ArdourBundledMedia.zip"
@@ -452,9 +453,9 @@ fi
 
 if test x$DEMO_SESSION_URL != x ; then
 	mkdir -p $DESTDIR/share/${LOWERCASE_DIRNAME}/sessions
-	DEMO_SESSIONS=$(curl -s -S --fail $DEMO_SESSION_URL/index.txt)
+	DEMO_SESSIONS=$(curl ${CURLOPT} --fail $DEMO_SESSION_URL/index.txt)
 	for demo in $DEMO_SESSIONS; do
-		curl -s -S --fail -# -o $DESTDIR/share/${LOWERCASE_DIRNAME}/sessions/$demo $DEMO_SESSION_URL/$demo
+		curl ${CURLOPT} --fail -# -o $DESTDIR/share/${LOWERCASE_DIRNAME}/sessions/$demo $DEMO_SESSION_URL/$demo
 	done
 fi
 

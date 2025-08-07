@@ -59,7 +59,7 @@ PianoRollHeaderBase::PianoRollHeaderBase (MidiViewBackground& bg)
 	, _highlighted_note (NO_MIDI_NOTE)
 	, _clicked_note (NO_MIDI_NOTE)
 	, _dragging (false)
-	, _scroomer_size (63.f)
+	, _scroomer_size (60.f)
 	, _scroomer_drag (false)
 	, _old_y (0.0)
 	, _fract (0.0)
@@ -215,7 +215,7 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 	Gtkmm2ext::Color black_highlight = UIConfiguration::instance().color (X_("piano key highlight"));
 	Gtkmm2ext::Color textc           = UIConfiguration::instance().color (X_("gtk_foreground"));
 
-	std::vector<int> numbers;;
+	std::vector<int> numbers;
 	std::vector<int> positions;
 	std::vector<int> heights;
 
@@ -240,7 +240,6 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 	if (origin_y == 0.) {
 		origin_y -= 1;
 	}
-
 
 	cr->translate (origin_x, origin_y);
 
@@ -351,13 +350,14 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 
 		}
 
-
 		Gtkmm2ext::set_source_rgba (cr, bg);
 
-		double x = _scroomer_size;;
+		assert (_scroomer_size = width() - kbd_width);
+
+		double x = _scroomer_size;
 		double y = positions[n];
 
-		cr->rectangle (x, y, width() - 1., heights[n]);
+		cr->rectangle (x, y, kbd_width, heights[n]);
 		cr->fill ();
 
 		if ((oct_rel == 4 || oct_rel == 11) && y > 0) {
@@ -369,7 +369,7 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 			   which are rects
 			*/
 			cr->move_to (x, y + 0.5);
-			cr->line_to (x + width(), y + 0.5);
+			cr->line_to (x + kbd_width, y + 0.5);
 			cr->stroke ();
 		}
 	}
@@ -744,8 +744,6 @@ PianoRollHeaderBase::button_press_handler (GdkEventButton* ev)
 bool
 PianoRollHeaderBase::button_release_handler (GdkEventButton* ev)
 {
-	double evy = ev->y;
-
 	end_scroomer_drag ();
 
 	if (_dragging) {

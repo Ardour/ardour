@@ -712,25 +712,20 @@ Trigger::set_region (std::shared_ptr<Region> r, bool use_thread)
 	/* Called from (G)UI thread */
 
 	if (!r) {
-		/* clear operation, no need to talk to the worker thread */
-		set_pending (Trigger::MagicClearPointerValue);
-		request_stop ();
+		TriggerPtr cp (_box.currently_playing());
+		if (!cp || cp.get() != this) {
+			set_region_in_worker_thread (r);
+		} else {
+			/* clear operation, no need to talk to the worker thread */
+			set_pending (Trigger::MagicClearPointerValue);
+			request_stop ();
+		}
 	} else if (use_thread) {
 		/* load data, do analysis in another thread */
 		TriggerBox::worker->set_region (_box, index(), r);
 	} else {
 		set_region_in_worker_thread (r);
 	}
-}
-
-void
-Trigger::clear_region ()
-{
-	/* Called from RT process thread */
-
-	_region.reset ();
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("cleared region for %1\n", _index));
-	set_name ("");
 }
 
 void
@@ -746,6 +741,10 @@ Trigger::set_region_internal (std::shared_ptr<Region> r)
 		_region = RegionFactory::create (r, r->derive_properties ());
 	} else {
 		_region = r;
+	}
+
+	if (!_region) {
+		set_name ("");
 	}
 
 	if (_region) {
@@ -1719,7 +1718,7 @@ AudioTrigger::set_region_in_worker_thread_internal (std::shared_ptr<Region> r, b
 	set_region_internal (r);
 
 	if (!r) {
-		/* unset */
+		data.reset ();
 		return 0;
 	}
 
@@ -3084,7 +3083,10 @@ MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 	if (!r) {
 		set_region_internal (r);
 		content_connection.disconnect ();
+		RTMidiBufferBeats* old = rt_midibuffer.exchange (nullptr);
+		delete old;
 		_model.reset ();
+		set_name ("");
 		return 0;
 	}
 
@@ -4285,7 +4287,7 @@ TriggerBox::maybe_swap_pending (uint32_t slot)
 					empty_changed = true;
 				}
 			}
-			all_triggers[slot]->clear_region ();
+			all_triggers[slot]->set_region (nullptr);
 		} else {
 			if (!all_triggers[slot]->playable()) {
 				if (_active_slots == 0) {

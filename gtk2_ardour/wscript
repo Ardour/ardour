@@ -257,6 +257,7 @@ gtk2_ardour_sources = [
         'region_list_base.cc',
         'region_peak_cursor.cc',
         'region_selection.cc',
+        'region_ui_settings.cc',
         'region_view.cc',
         'return_ui.cc',
         'rhythm_ferret.cc',

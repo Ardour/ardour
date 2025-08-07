@@ -735,11 +735,12 @@ SMF::load_markers ()
 std::shared_ptr<Temporal::TempoMap>
 SMF::tempo_map (bool& provided) const
 {
+	using namespace Temporal;
 	/* cannot create an empty TempoMap, so create one with "default" single
 	   values for tempo and meter, then overwrite them.
 	*/
 
-	std::shared_ptr<Temporal::TempoMap> new_map (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
+	std::shared_ptr<TempoMap> new_map (new TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
 	const size_t ntempos = num_tempos ();
 
 	if (ntempos == 0) {
@@ -747,8 +748,10 @@ SMF::tempo_map (bool& provided) const
 		return new_map;
 	}
 
-	Temporal::Meter last_meter (4, 4);
+	Meter last_meter (4, 4);
 	bool have_initial_meter = false;
+	bool empty (true);
+	new_map->smf_begin ();
 
 	for (size_t n = 0; n < ntempos; ++n) {
 
@@ -756,27 +759,36 @@ SMF::tempo_map (bool& provided) const
 		assert (t);
 
 		Temporal::Tempo tempo (t->tempo(), 32.0 / (double) t->notes_per_note);
-		Temporal::Meter meter (t->numerator, t->denominator);
+		Meter meter (t->numerator, t->denominator);
 
-		Temporal::BBT_Argument bbt; /* 1|1|0 which is correct for the no-meter case */
+		Beats beats (t->time_pulses / (uint64_t) ppqn(),
+		                       ((t->time_pulses % (uint64_t) ppqn()) * ticks_per_beat) / ppqn());;
+		BBT_Argument bbt; /* 1|1|0 which is correct for the no-meter case */
+		superclock_t sc;
+
+		if (empty) {
+			sc = 0;
+		} else {
+			sc =  new_map->superclock_at (beats);
+		}
 
 		if (have_initial_meter) {
+			bbt = new_map->bbt_at (timepos_t (beats));
+		}
 
-			bbt = new_map->bbt_at (Temporal::timepos_t (Temporal::Beats (int_div_round (t->time_pulses, (size_t) ppqn()), 0)));
-			new_map->set_tempo (tempo, bbt);
+		TempoPoint* tp = new TempoPoint (*new_map, tempo, sc, beats, bbt);
+		new_map->smf_add (*tp);
 
-			if (!(meter == last_meter)) {
-				new_map->set_meter (meter, bbt);
-			}
-
-		} else {
-			new_map->set_meter (meter, bbt);
-			new_map->set_tempo (tempo, bbt);
+		if (!have_initial_meter || !(meter == last_meter)) {
+			MeterPoint* mp = new MeterPoint (*new_map, meter, sc, beats, bbt);
+			new_map->smf_add (*mp);
 			have_initial_meter = true;
 		}
 
 		last_meter = meter;
+		empty = false;
 	}
+	new_map->smf_end();
 
 	provided = true;
 	return new_map;

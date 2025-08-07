@@ -121,16 +121,13 @@ Editor::set_current_movable (std::shared_ptr<Movable> m)
 void
 Editor::mouse_mode_object_range_toggled()
 {
-	set_mouse_mode (mouse_mode, true); /* updates set-mouse-mode-range */
+	set_mouse_mode (current_mouse_mode(), true); /* updates set-mouse-mode-range */
 }
 
 void
-Editor::mouse_mode_toggled (MouseMode m)
+Editor::mouse_mode_chosen (MouseMode m)
 {
-	Glib::RefPtr<Action>       act  = get_mouse_mode_action(m);
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-
-	if (!tact->get_active()) {
+	if (!mouse_mode_actions[m]->get_active()) {
 		/* this was just the notification that the old mode has been
 		 * left. we'll get called again with the new mode active in a
 		 * jiffy.
@@ -140,8 +137,6 @@ Editor::mouse_mode_toggled (MouseMode m)
 
 	const bool was_internal = internal_editing();
 
-	mouse_mode = m;
-
 	/* Ben ToDo:  once we have a dedicated 'region edit panel', we can store
 	 * one snap mode in the editor canvas and another one in the editor,
 	 * relieving the complexity here */
@@ -150,14 +145,14 @@ Editor::mouse_mode_toggled (MouseMode m)
 	   this must toggle the actions and not call set_snap_*() directly,
 	   otherwise things get out of sync and the combo box stops working. */
 	if (!UIConfiguration::instance().get_grid_follows_internal()) {
-		grid_type_action(pre_internal_grid_type)->set_active(true);
-		snap_mode_action(pre_internal_snap_mode)->set_active(true);
+		grid_actions[pre_internal_grid_type]->set_active(true);
+		snap_mode_actions[pre_internal_snap_mode]->set_active(true);
 	} else if (!was_internal && internal_editing()) {
-		grid_type_action(internal_grid_type)->set_active(true);
-		snap_mode_action(internal_snap_mode)->set_active(true);
+		grid_actions[internal_grid_type]->set_active(true);
+		snap_mode_actions[internal_snap_mode]->set_active(true);
 	} else if (was_internal && !internal_editing()) {
-		grid_type_action(pre_internal_grid_type)->set_active(true);
-		snap_mode_action(pre_internal_snap_mode)->set_active(true);
+		grid_actions[pre_internal_grid_type]->set_active(true);
+		snap_mode_actions[pre_internal_snap_mode]->set_active(true);
 	}
 
 	instant_save ();
@@ -173,6 +168,8 @@ Editor::mouse_mode_toggled (MouseMode m)
 	set_gain_envelope_visibility ();
 
 	update_time_selection_display ();
+
+	auto mouse_mode = current_mouse_mode ();
 
 	if (mouse_mode == MouseDraw) {
 		draw_box.show();
@@ -239,12 +236,14 @@ Editor::mouse_mode_toggled (MouseMode m)
 bool
 Editor::internal_editing() const
 {
+	auto mouse_mode = current_mouse_mode ();
 	return mouse_mode == Editing::MouseContent || mouse_mode == Editing::MouseDraw;
 }
 
 void
 Editor::update_time_selection_display ()
 {
+	auto mouse_mode = current_mouse_mode ();
 	switch (mouse_mode) {
 	case MouseRange:
 		selection->clear_objects ();
@@ -328,6 +327,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	 */
 
 	MouseMode eff_mouse_mode = effective_mouse_mode ();
+	auto mouse_mode = current_mouse_mode ();
 
 	if (eff_mouse_mode == MouseCut) {
 		/* never change selection in cut mode */
@@ -1751,6 +1751,8 @@ Editor::determine_mapping_grid_snap (timepos_t t)
 bool
 Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_autoscroll)
 {
+	auto mouse_mode = current_mouse_mode ();
+
 	_last_motion_y = event->motion.y;
 
 	if (event->motion.is_hint) {
@@ -2108,7 +2110,7 @@ void
 Editor::mouse_brush_insert_region (RegionView* rv, timepos_t const & pos)
 {
 	/* no brushing without a useful quantize setting */
-	if (_grid_type == GridTypeNone)
+	if (grid_type() == GridTypeNone)
 		return;
 
 	/* don't brush a copy over the original */
@@ -2274,6 +2276,8 @@ Editor::escape ()
 void
 Editor::update_join_object_range_location (double y)
 {
+	auto mouse_mode = current_mouse_mode ();
+
 	if (!get_smart_mode()) {
 		_join_object_range_state = JOIN_OBJECT_RANGE_NONE;
 		return;
@@ -2352,7 +2356,7 @@ Editor::effective_mouse_mode () const
 		return MouseRange;
 	}
 
-	return mouse_mode;
+	return current_mouse_mode ();
 }
 
 void
@@ -2382,16 +2386,7 @@ Editor::use_appropriate_mouse_mode_for_sections ()
 			/*fallthrough*/
 		default:
 			/* switch to range mode */
-			Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_static (get_mouse_mode_action (Editing::MouseRange));
-			if (!ract) {
-				/* missing action */
-				fatal << X_("programming error: missing mouse-mode-range action") << endmsg;
-				/*NOTREACHED*/
-				break;
-			}
-			if (ract) {
-				ract->set_active (true);
-			}
+			mouse_mode_actions[Editing::MouseRange]->set_active (true);
 			break;
 	}
 }
@@ -2417,6 +2412,7 @@ Editor::get_pointer_position (double& x, double& y) const
 void
 Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 {
+
 	/* In a departure from convention, this event is not handled by a widget
 	 * 'on' the ruler-bar, like a tempo marker, but is instead handled by the
 	 * whole canvas. The intent is for the user to feel that they
@@ -2433,6 +2429,8 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 
 	/* if tempo-mapping, set a cursor to indicate whether we are close to a bar line, beat line, or neither */
 	bool ramped = false;
+	auto mouse_mode = current_mouse_mode ();
+
 	if (mouse_mode == MouseGrid && item ==_canvas_grid_zone) {
 		GridType gt = determine_mapping_grid_snap (timepos_t (where));
 		if (gt == GridTypeBar) {

@@ -572,6 +572,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 		samplecnt_t append (Sample const * src, samplecnt_t cnt, uint32_t chan);
 		void alloc (samplecnt_t cnt, uint32_t nchans);
+		void reset () { length = 0; }
 	};
 
 
@@ -1111,6 +1112,10 @@ class TriggerReference
 	void set (std::shared_ptr<ARDOUR::TriggerBox> b, uint32_t s) { weak_box = b; _slot = s; }
 	uint32_t slot() const { return _slot; }
 	std::shared_ptr<ARDOUR::TriggerBox> box() const { return weak_box.lock(); }
+
+	bool operator== (TriggerReference const & other) {
+		return _slot == other._slot && box() == other.box();
+	}
 
  private:
 	std::weak_ptr<ARDOUR::TriggerBox> weak_box;

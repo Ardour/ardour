@@ -423,7 +423,7 @@ setup_lua ()
 
 	LuaBindings::stddef (L);
 	LuaBindings::common (L);
-	LuaBindings::session (L);
+	LuaBindings::non_rt (L);
 	LuaBindings::osc (L);
 
 	luabridge::getGlobalNamespace (L)

@@ -946,7 +946,6 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 
 	for (Points::iterator p = _points.begin(); p != _points.end(); ) {
 
-
 		/* XXX might to check time domain of start/end, and use beat
 		 * time here.
 		 */
@@ -1062,6 +1061,8 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 		}
 	}
 
+	MeterPoint const * current_meter = &meter_at (position);
+	BBT_Offset bbt_offset = BBT_Offset (cb.points().front().bbt()) - BBT_Offset (pos_bbt);
 
 	for (auto const & p : cb.points()) {
 		TempoPoint const * tp;
@@ -1072,33 +1073,40 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 
 		s = p.sclock() + position.superclocks();
 		b = quarters_at_superclock (s);
-		bb = bbt_at (s);
 
 		if ((mtp = dynamic_cast<MusicTimePoint const *> (&p))) {
 
 			tp = dynamic_cast<TempoPoint const *> (&p);
 			mp = dynamic_cast<MeterPoint const *> (&p);
 
+			/* not entirely clear what the semantics of this ought
+			 * to be. Do we paste the precise same BBT markers, or
+			 * do we shift by the paste position
+			 */
+			bb = p.bbt ();
+
 			MusicTimePoint *ntp = new MusicTimePoint (*this, s, b, bb, *tp, *mp, mtp->name());
 			core_add_bartime (ntp, replaced);
 
 			if (!replaced) {
 				core_add_tempo (ntp, ignored);
-				core_add_meter (ntp, ignored);
+				current_meter = core_add_meter (ntp, ignored);
 				core_add_point (ntp);
 			}
 
 		} else {
 
 			if ((tp = dynamic_cast<TempoPoint const *> (&p))) {
+				bb = current_meter->bbt_add (p.bbt(), bbt_offset);
 				TempoPoint *ntp = new TempoPoint (*this, *tp, s, b, bb);
 				core_add_tempo (ntp, replaced);
 				if (!replaced) {
 					core_add_point (ntp);
 				}
 			} else if ((mp = dynamic_cast<MeterPoint const *> (&p))) {
+				bb = current_meter->bbt_add (p.bbt(), bbt_offset);
 				MeterPoint *ntp = new MeterPoint (*this, *mp, s, b, bb);
-				core_add_meter (ntp, replaced);
+				current_meter = core_add_meter (ntp, replaced);
 				if (!replaced) {
 					core_add_point (ntp);
 				}
@@ -1215,6 +1223,7 @@ MeterPoint*
 TempoMap::add_meter (MeterPoint* mp)
 {
 	bool replaced;
+	bool reset = _points.back().beats() > mp->beats();
 	MeterPoint* ret = core_add_meter (mp, replaced);
 
 	if (!replaced) {
@@ -1223,7 +1232,10 @@ TempoMap::add_meter (MeterPoint* mp)
 		delete mp;
 	}
 
-	reset_starting_at (ret->sclock());
+	if (reset) {
+		reset_starting_at (ret->sclock());
+	}
+
 	return ret;
 }
 
@@ -1432,6 +1444,42 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time, Beats const & beat
 }
 
 void
+TempoMap::smf_begin ()
+{
+	_tempos.clear ();
+	_meters.clear ();
+	_points.clear ();
+	_bartimes.clear ();
+}
+
+void
+TempoMap::smf_end ()
+{
+}
+
+void
+TempoMap::smf_add (TempoPoint & tp)
+{
+	assert (&tp.map() == this);
+	/* all other tempos must be earlier; other points must be earlier or identical */
+	assert (_tempos.empty() || _tempos.back().sclock() < tp.sclock());
+	assert (_points.empty() || _points.back().sclock() <= tp.sclock());
+	_points.push_back (tp);
+	_tempos.push_back (tp);
+}
+
+void
+TempoMap::smf_add (MeterPoint & mp)
+{
+	assert (&mp.map() == this);
+	/* all other meters must be earlier; other points must be earlier or identical */
+	assert (_meters.empty() || _meters.back().sclock() < mp.sclock());
+	assert (_points.empty() || _points.back().sclock() <= mp.sclock());
+	_points.push_back (mp);
+	_meters.push_back (mp);
+}
+
+void
 TempoMap::core_add_point (Point* pp)
 {
 	Points::iterator p;
@@ -1519,6 +1567,7 @@ TempoPoint*
 TempoMap::add_tempo (TempoPoint * tp)
 {
 	bool replaced;
+	bool reset = _points.back().beats() > tp->beats();
 	TempoPoint* ret = core_add_tempo (tp, replaced);
 
 	if (!replaced) {
@@ -1527,11 +1576,13 @@ TempoMap::add_tempo (TempoPoint * tp)
 		delete tp;
 	}
 
-	TempoPoint* prev = const_cast<TempoPoint*> (previous_tempo (*ret));
-	if (prev) {
-		reset_starting_at (prev->sclock());
-	} else {
-		reset_starting_at (ret->sclock());
+	if (reset) {
+		TempoPoint* prev = const_cast<TempoPoint*> (previous_tempo (*ret));
+		if (prev) {
+			reset_starting_at (prev->sclock());
+		} else {
+			reset_starting_at (ret->sclock());
+		}
 	}
 
 	return ret;
@@ -1907,8 +1958,8 @@ TempoMap::reset_section (Points::iterator& begin, Points::iterator& end, supercl
 				++pp;
 			}
 
-			DEBUG_TRACE (DEBUG::MapReset, string_compose ("considering omega comp for %1 with nxt = %2\n", *tp, nxt_tempo));
 			if (tp->ramped() && nxt_tempo) {
+				DEBUG_TRACE (DEBUG::MapReset, string_compose ("computing omega for %1 with nxt = %2\n", *tp, nxt_tempo));
 				tp->compute_omega_from_next_tempo (*nxt_tempo);
 			}
 		}
@@ -4759,6 +4810,20 @@ TempoMap::min_notes_per_minute() const
 	}
 
 	return npm;
+}
+
+timepos_t
+TempoMap::duration(TimeDomain td) const
+{
+	if (_points.empty()) {
+		return timepos_t::zero (td);
+	}
+
+	if (td == BeatTime) {
+		return timepos_t (_points.back().beats() + Beats (1, 0));
+	}
+
+	return timepos_t::from_superclock (_points.back().sclock() + 1);
 }
 
 #if 0

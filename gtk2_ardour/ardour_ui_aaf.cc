@@ -496,7 +496,8 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 
 	aafRational_t samplerate_r;
 
-	samplerate_r.numerator   = aafi->Audio->samplerate;
+	/* if AAF contains no audio clip, then samplerate is 0 */
+	samplerate_r.numerator   = (aafi->Audio->samplerate) ? aafi->Audio->samplerate : 48000;
 	samplerate_r.denominator = 1;
 
 	std::string restore_backend;

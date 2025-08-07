@@ -363,7 +363,7 @@ Editor::compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t 
 	const samplecnt_t sr (_session->sample_rate());
 
 	float divisor;
-	switch (_grid_type) {
+	switch (grid_type()) {
 		case GridTypeBeatDiv3:
 		case GridTypeBeatDiv6:
 		case GridTypeBeatDiv12:

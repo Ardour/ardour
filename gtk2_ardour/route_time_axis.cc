@@ -892,13 +892,16 @@ RouteTimeAxisView::build_display_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), sigc::bind (sigc::mem_fun(_editor, &PublicEditor::hide_track_in_display), this, !_editor.get_selection().tracks.empty ())));
 
-	if (active && _route && !_route->is_singleton ()) {
+	if (!_route || _route->is_singleton ()) {
+		return;
+	}
+
+	if (active) {
 		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Duplicate..."), std::bind (&ARDOUR_UI::start_duplicate_routes, ARDOUR_UI::instance())));
-
-		items.push_back (SeparatorElem());
-		items.push_back (MenuElem (_("Remove"), sigc::mem_fun(_editor, &PublicEditor::remove_tracks)));
 	}
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(_editor, &PublicEditor::remove_tracks)));
 }
 
 void

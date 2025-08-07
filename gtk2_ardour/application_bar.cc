@@ -117,7 +117,6 @@ ApplicationBar::ApplicationBar ()
 	, _auto_return_button (ArdourButton::led_default_elements)
 	, _primary_clock  (X_("primary"), X_("transport"), MainClock::PrimaryClock)
 	, _secondary_clock (X_("secondary"), X_("secondary"), MainClock::SecondaryClock)
-	, _secondary_clock_spacer (0)
 	, _auditioning_alert_button (_("Audition"))
 	, _solo_alert_button (_("Solo"))
 	, _feedback_alert_button (_("Feedback"))
@@ -176,7 +175,6 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_record_mode_selector.set_sizing_texts (_record_mode_strings);
 
 	_latency_disable_button.set_text (_("Disable PDC"));
-
 	_auto_return_button.set_text(_("Auto Return"));
 
 	/* alert box sub-group */
@@ -216,7 +214,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (*ssbox,         TCOL, 1, 2 , FILL,   SHRINK, 0, 0);
 	++col;
 
-	_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	_table.attach (_recpunch_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	_table.attach (_punch_label, TCOL, 0, 1 , FILL, SHRINK, 3, 0);
@@ -229,7 +227,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (_record_mode_selector, col,      col + 3, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	col += 3;
 
-	_table.attach (_recpunch_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	_table.attach (_latency_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	_table.attach (_latency_disable_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
@@ -238,13 +236,11 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 
 	_route_latency_value.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 
-	_table.attach (_latency_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	_left_hbox.set_spacing (3);
+	_table.attach (_left_hbox, TCOL, 0, 2, EXPAND|FILL, EXPAND|FILL, hpadding, 0);
 	++col;
 
-	_table.attach (_auto_return_button,  TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
-	++col;
-
-	_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	_table.attach (_primary_clock_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	_table.attach (_primary_clock,                col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, 0);
@@ -252,10 +248,10 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (*(_primary_clock.right_btn()), col + 1, col + 2, 1, 2 , FILL, SHRINK, hpadding, 0);
 	col += 2;
 
-	_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-	++col;
-
 	if (!ARDOUR::Profile->get_small_screen()) {
+		_table.attach (_secondary_clock_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+		++col;
+
 		_table.attach (_secondary_clock,                col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, 0);
 		_table.attach (*(_secondary_clock.left_btn()),  col,     col + 1, 1, 2 , FILL, SHRINK, hpadding, 0);
 		_table.attach (*(_secondary_clock.right_btn()), col + 1, col + 2, 1, 2 , FILL, SHRINK, hpadding, 0);
@@ -263,20 +259,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 		(ARDOUR_UI::instance()->secondary_clock)->left_btn()->set_no_show_all (true);
 		(ARDOUR_UI::instance()->secondary_clock)->right_btn()->set_no_show_all (true);
 		col += 2;
-
-		_secondary_clock_spacer = manage (new ArdourVSpacer ());
-		_table.attach (*_secondary_clock_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-		++col;
 	}
-
-	_table.attach (*alert_box, TCOL, 0, 2, SHRINK, EXPAND|FILL, hpadding, 0);
-	++col;
-
-	_table.attach (_monitor_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-	++col;
-
-	_table.attach (*monitor_box, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-	++col;
 
 	_table.attach (_cuectrl_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
@@ -288,6 +271,15 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	/* editor-meter, mini-timeline and selection clock are options in the transport_hbox */
 	_transport_hbox.set_spacing (3);
 	_table.attach (_transport_hbox, TCOL, 0, 2, EXPAND|FILL, EXPAND|FILL, hpadding, 0);
+	++col;
+
+	_table.attach (*monitor_box, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
+	_table.attach (*alert_box, TCOL, 0, 2, SHRINK, EXPAND|FILL, hpadding, 0);
+	++col;
+
+	_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	/* lua script action buttons */
@@ -304,6 +296,27 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.set_spacings (0);
 	_table.set_row_spacings (4);
 	_table.set_border_width (1);
+
+	/* mark any optional widgets as no-show, so they don't expand the toolbar on load */
+	//_transport_spacer.set_no_show_all ();
+	_punch_in_button.set_no_show_all ();
+	_punch_out_button.set_no_show_all ();
+	_record_mode_selector.set_no_show_all ();
+	_recpunch_spacer.set_no_show_all ();
+	_latency_spacer.set_no_show_all ();
+	_latency_disable_button.set_no_show_all ();
+	_route_latency_value.set_no_show_all ();
+	_auto_return_button.set_no_show_all ();
+	_primary_clock_spacer.set_no_show_all ();
+	_secondary_clock_spacer.set_no_show_all ();
+	_monitor_dim_button.set_no_show_all ();
+	_monitor_mono_button.set_no_show_all ();
+	_monitor_mute_button.set_no_show_all ();
+	_cue_rec_enable.set_no_show_all ();
+	_cue_play_enable.set_no_show_all ();
+	_cuectrl_spacer.set_no_show_all ();
+	_mini_timeline.set_no_show_all();
+	_left_hbox.set_no_show_all();
 
 	_table.show_all (); // TODO: update visibility somewhere else
 	pack_start (_table, true, true);
@@ -501,6 +514,11 @@ ApplicationBar::repack_transport_hbox ()
 	if (UIConfiguration::instance().get_show_mini_timeline ()) {
 		_transport_hbox.pack_start (_mini_timeline, true, true);
 		_mini_timeline.show();
+		_left_hbox.hide ();
+		_primary_clock_spacer.show ();
+	} else {
+		_left_hbox.show ();
+		_primary_clock_spacer.hide ();
 	}
 
 	if (_editor_meter) {
@@ -567,12 +585,10 @@ ApplicationBar::repack_transport_hbox ()
 		_monitor_dim_button.show ();
 		_monitor_mono_button.show ();
 		_monitor_mute_button.show ();
-		_monitor_spacer.show ();
 	} else {
 		_monitor_dim_button.hide ();
 		_monitor_mono_button.hide ();
 		_monitor_mute_button.hide ();
-		_monitor_spacer.hide ();
 	}
 }
 
@@ -874,10 +890,12 @@ ApplicationBar::update_clock_visibility ()
 		_secondary_clock.show();
 		_secondary_clock.left_btn()->show();
 		_secondary_clock.right_btn()->show();
+		_secondary_clock_spacer.show();
 	} else {
 		_secondary_clock.hide();
 		_secondary_clock.left_btn()->hide();
 		_secondary_clock.right_btn()->hide();
+		_secondary_clock_spacer.hide();
 	}
 }
 

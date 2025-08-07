@@ -82,6 +82,8 @@ DEF_CLASS_IID (Presonus::IPlugInViewScaling)
 
 #if SMTG_OS_LINUX
 DEF_CLASS_IID (Linux::IRunLoop);
+DEF_CLASS_IID (Linux::ITimerHandler);
+DEF_CLASS_IID (Linux::IEventHandler);
 
 class AVST3Runloop : public Linux::IRunLoop
 {
@@ -212,7 +214,14 @@ public:
 
 	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
 	uint32 PLUGIN_API release () SMTG_OVERRIDE { return 1; }
-	tresult queryInterface (const TUID, void**) SMTG_OVERRIDE { return kNoInterface; }
+
+	tresult queryInterface (const TUID iid, void** obj) SMTG_OVERRIDE {
+		if (FUnknownPrivate::iidEqual (iid, Linux::IRunLoop::iid)) {
+			*obj = this;
+			return kResultOk;
+		}
+		return kNoInterface;
+	}
 
 private:
 	Glib::Threads::Mutex _lock;

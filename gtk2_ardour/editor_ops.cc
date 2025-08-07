@@ -380,7 +380,7 @@ Editor::split_regions_at (timepos_t const & where, RegionSelection& regions)
 	}
 
 	//if the user wants newly-created regions to be selected, then select them:
-	if (mouse_mode == MouseObject) {
+	if (current_mouse_mode() == MouseObject) {
 		for (RegionSelection::iterator ri = latest_regionviews.begin(); ri != latest_regionviews.end(); ri++) {
 			if ((*ri)->region()->position() < where) {
 				// new regions created before the split
@@ -1201,7 +1201,7 @@ Editor::cursor_to_selection_start (EditorCursor *cursor)
 {
 	timepos_t pos;
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseObject:
 		if (!selection->regions.empty()) {
 			pos = selection->regions.start_time();
@@ -1230,7 +1230,7 @@ Editor::cursor_to_selection_end (EditorCursor *cursor)
 {
 	timepos_t pos;
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseObject:
 		if (!selection->regions.empty()) {
 			pos = selection->regions.end_time();
@@ -1400,7 +1400,7 @@ Editor::selected_marker_to_selection_start ()
 		return;
 	}
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseObject:
 		if (!selection->regions.empty()) {
 			pos = selection->regions.start_time();
@@ -1435,7 +1435,7 @@ Editor::selected_marker_to_selection_end ()
 		return;
 	}
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseObject:
 		if (!selection->regions.empty()) {
 			pos = selection->regions.end_time();
@@ -2620,7 +2620,7 @@ Editor::maybe_locate_with_edit_preroll (samplepos_t location)
 	}
 
 	//if follow_playhead is on, keep the playhead on the screen
-	if (_follow_playhead)
+	if (follow_playhead())
 		if (location < _leftmost_sample)
 			location = _leftmost_sample;
 
@@ -4394,7 +4394,7 @@ Editor::cut_copy (CutCopyOp op)
 		return;
 	}
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseDraw:
 	case MouseContent:
 		begin_reversible_command (opname + ' ' + X_("MIDI"));
@@ -7801,7 +7801,7 @@ Editor::playhead_forward_to_grid ()
 
 	timepos_t pos (_playhead_cursor->current_sample ());
 
-	if (_grid_type == GridTypeNone) {
+	if (grid_type() == GridTypeNone) {
 		timepos_t const decipage (samplepos_t(floor (current_page_samples() * 0.1)));
 		if (pos < timepos_t::max (pos.time_domain()).earlier (decipage)) {
 			pos += timepos_t (decipage);
@@ -7830,7 +7830,7 @@ Editor::playhead_backward_to_grid ()
 
 	timepos_t pos (_playhead_cursor->current_sample ());
 
-	if (_grid_type == GridTypeNone) {
+	if (grid_type() == GridTypeNone) {
 		samplepos_t const decipage (floor (current_page_samples() * 0.1));
 		if (pos.samples() > decipage) {
 			pos.shift_earlier (timepos_t (decipage));
@@ -9451,11 +9451,13 @@ Editor::ripple_marks (std::shared_ptr<Playlist> target_playlist, timepos_t at, t
 Editing::ZoomFocus
 Editor::effective_zoom_focus() const
 {
-	if (_zoom_focus == ZoomFocusEdit && _edit_point == EditAtMouse) {
+	auto zf = zoom_focus();
+
+	if (zf == ZoomFocusEdit && _edit_point == EditAtMouse) {
 		return ZoomFocusMouse;
 	}
 
-	return _zoom_focus;
+	return zf;
 }
 
 void

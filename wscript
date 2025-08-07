@@ -1382,7 +1382,7 @@ int main () { __int128 x = 0; return 0; }
 
     if backends == ['']:
         backends = ['dummy']
-        autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.121.0', mandatory=False)
+        autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='1.9.10', mandatory=False)
         if conf.is_defined('HAVE_JACK'):
             backends += ['jack']
         if conf.is_defined('HAVE_PULSEAUDIO'):

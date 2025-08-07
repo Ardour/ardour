@@ -50,6 +50,9 @@ enum WellKnownCtrl : int
 	Comp_Release,
 	Comp_KeyFilterFreq,
 	Comp_Lookahead,
+	Comp_FastAttack,
+	Comp_Mix,
+	Comp_RMSPeak,
 
 	Gate_Enable,
 	Gate_Mode,
@@ -65,6 +68,7 @@ enum WellKnownCtrl : int
 	Gate_KeyFilterEnable,
 	Gate_KeyFilterFreq,
 	Gate_Lookahead,
+	Gate_FastAttack,
 
 	Master_Limiter_Enable,
 };

@@ -410,7 +410,7 @@ void EQSubview::notify_change (std::weak_ptr<ARDOUR::AutomationControl> pc, uint
 	std::shared_ptr<AutomationControl> control = pc.lock ();
 	if (control) {
 		float val = control->get_value();
-		do_parameter_display(pending_display[1], control->desc(), val, strip, true);
+		pending_display[1] = Strip::remove_units(control->get_user_string());
 		/* update pot/encoder */
 		strip->surface()->write (vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
