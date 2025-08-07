@@ -22,15 +22,14 @@
 #include "console1.h"
 
 using namespace ARDOUR;
-using namespace ArdourSurface;
 
 static ControlProtocol*
 new_console1 (Session* s)
 {
-	Console1* console1 = 0;
+	Console1::Console1* console1 = 0;
 
 	try {
-		console1 =  new Console1 (*s);
+		console1 =  new Console1::Console1 (*s);
 	} catch (failed_constructor& err) {
 		delete console1;
 		console1 = 0;
