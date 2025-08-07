@@ -1378,6 +1378,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	std::shared_ptr<MidiRegion> r (std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region));
 
 	if (!r || !region) {
+		_update_connection.disconnect ();
 		return;
 	}
 
@@ -1748,9 +1749,7 @@ Pianoroll::set_session (ARDOUR::Session* s)
 		map_transport_state ();
 	}
 
-	if (!_session) {
-		_update_connection.disconnect ();
-	} else {
+	if (_session) {
 		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
 	}
 }
