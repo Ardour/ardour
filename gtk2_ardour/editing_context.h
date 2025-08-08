@@ -833,8 +833,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	bool temporary_zoom_focus_change;
 	bool _dragging_playhead;
 
-	std::shared_ptr<Temporal::TempoMap> _local_tempo_map;
-	void ensure_local_tempo_scope () {
+	mutable std::shared_ptr<Temporal::TempoMap> _local_tempo_map;
+	void ensure_local_tempo_scope () const {
 		if (_local_tempo_map) {
 			Temporal::TempoMap::set (_local_tempo_map);
 			_local_tempo_map.reset ();
