@@ -1629,11 +1629,17 @@ EditingContext::snap_relative_time_to_relative_time (timepos_t const & origin, t
 	return origin.distance (snapped);
 }
 
-std::shared_ptr<Temporal::TempoMap const>
-EditingContext::start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>)
+void
+EditingContext::start_local_tempo_map (std::shared_ptr<TempoMap> map)
 {
-	/* default is a no-op */
-	return Temporal::TempoMap::use ();
+	_local_tempo_map = map;
+}
+
+void
+EditingContext::end_local_tempo_map ()
+{
+	_local_tempo_map.reset ();
+	Temporal::TempoMap::fetch ();
 }
 
 bool
