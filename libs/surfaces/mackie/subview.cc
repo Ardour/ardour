@@ -278,6 +278,7 @@ void NoneSubview::setup_vpot(
 
 EQSubview::EQSubview(MackieControlProtocol& mcp, std::shared_ptr<ARDOUR::Stripable> subview_stripable)
 	: Subview(mcp, subview_stripable)
+	, _current_bank(0)
 {}
 
 EQSubview::~EQSubview()
@@ -308,8 +309,8 @@ void EQSubview::setup_vpot(
 		Pot* vpot,
 		std::string pending_display[2])
 {
-	const uint32_t global_strip_position = _mcp.global_index (*strip);
-	store_pointers(strip, vpot, pending_display, global_strip_position);
+	const uint32_t global_strip_position = _mcp.global_index (*strip) + _current_bank;
+	store_pointers(strip, vpot, pending_display, global_strip_position - _current_bank);
 
 	if (!_subview_stripable) {
 		return;
@@ -414,7 +415,7 @@ void EQSubview::notify_change (std::weak_ptr<ARDOUR::AutomationControl> pc, uint
 	Strip* strip = 0;
 	Pot* vpot = 0;
 	std::string* pending_display = 0;
-	if (!retrieve_pointers(&strip, &vpot, &pending_display, global_strip_position))
+	if (!retrieve_pointers(&strip, &vpot, &pending_display, global_strip_position - _current_bank))
 	{
 		return;
 	}
@@ -426,6 +427,27 @@ void EQSubview::notify_change (std::weak_ptr<ARDOUR::AutomationControl> pc, uint
 		/* update pot/encoder */
 		strip->surface()->write (vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
+}
+
+bool EQSubview::handle_cursor_left_press()
+{
+	if (_current_bank >= 1)
+	{
+		_current_bank -= 1;
+		mcp().redisplay_subview_mode();
+	}
+
+	return true;
+}
+
+bool EQSubview::handle_cursor_right_press()
+{
+	if (/* todo: generate this value on redisplay */ 14 > _current_bank + 1) {
+		_current_bank += 1;
+		mcp().redisplay_subview_mode();
+	}
+
+	return true;
 }
 
 
