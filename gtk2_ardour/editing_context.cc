@@ -129,7 +129,6 @@ EditingContext::EditingContext (std::string const & name)
 	, selection (new Selection (this, true))
 	, cut_buffer (new Selection (this, false))
 	, _selection_memento (new SelectionMemento())
-	, _verbose_cursor (nullptr)
 	, samples_per_pixel (2048)
 	, bbt_ruler_scale (bbt_show_many)
 	, bbt_bars (0)
@@ -256,9 +255,6 @@ EditingContext::~EditingContext()
 	ActionManager::drop_action_group (channel_actions);
 	ActionManager::drop_action_group (velocity_actions);
 	ActionManager::drop_action_group (zoom_actions);
-
-	delete _verbose_cursor;
-	delete grid_lines;
 }
 
 void
@@ -3080,8 +3076,7 @@ void
 EditingContext::drop_grid ()
 {
 	hide_grid_lines ();
-	delete grid_lines;
-	grid_lines = nullptr;
+	grid_lines.reset ();
 }
 
 void
@@ -3100,7 +3095,7 @@ EditingContext::maybe_draw_grid_lines (ArdourCanvas::Container* group)
 	}
 
 	if (!grid_lines) {
-		grid_lines = new GridLines (*this, group, ArdourCanvas::LineSet::Vertical);
+		grid_lines.reset (new GridLines (*this, group, ArdourCanvas::LineSet::Vertical));
 
 	}
 

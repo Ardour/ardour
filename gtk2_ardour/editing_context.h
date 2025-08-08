@@ -385,8 +385,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	static MouseCursors const* cursors () {
 		return _cursors;
 	}
-	virtual VerboseCursor* verbose_cursor () const {
-		return _verbose_cursor;
+	virtual VerboseCursor& verbose_cursor () const {
+		return *_verbose_cursor;
 	}
 
 	virtual void set_snapped_cursor_position (Temporal::timepos_t const & pos) = 0;
@@ -616,7 +616,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	static MouseCursors* _cursors;
 
-	VerboseCursor* _verbose_cursor;
+	std::unique_ptr<VerboseCursor> _verbose_cursor;
 
 	samplecnt_t        samples_per_pixel;
 
@@ -785,7 +785,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	ARDOUR::Location* transport_loop_location();
 
 	std::vector<ArdourCanvas::Ruler::Mark> grid_marks;
-	GridLines* grid_lines;
+	std::unique_ptr<GridLines> grid_lines;
 	ArdourCanvas::Container* time_line_group;
 
 	void drop_grid ();

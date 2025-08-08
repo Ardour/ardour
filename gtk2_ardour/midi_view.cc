@@ -4478,7 +4478,7 @@ MidiView::remove_ghost_note ()
 void
 MidiView::hide_verbose_cursor ()
 {
-	_editing_context.verbose_cursor()->hide ();
+	_editing_context.verbose_cursor().hide ();
 	_midi_context.set_note_highlight (NO_MIDI_NOTE);
 }
 
@@ -4865,9 +4865,9 @@ MidiView::show_verbose_cursor (std::shared_ptr<NoteType> n) const
 void
 MidiView::show_verbose_cursor (string const & text, double xoffset, double yoffset) const
 {
-	_editing_context.verbose_cursor()->set (text);
-	_editing_context.verbose_cursor()->show ();
-	_editing_context.verbose_cursor()->set_offset (ArdourCanvas::Duple (xoffset, yoffset));
+	_editing_context.verbose_cursor().set (text);
+	_editing_context.verbose_cursor().show ();
+	_editing_context.verbose_cursor().set_offset (ArdourCanvas::Duple (xoffset, yoffset));
 }
 
 

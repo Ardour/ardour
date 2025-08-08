@@ -230,8 +230,6 @@ AudioClipEditor::build_canvas ()
 	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
 	h_scroll_group->set_position (Duple (_timeline_origin, 0.));
 
-	_verbose_cursor = new VerboseCursor (*this);
-
 	// _playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event, X_("playhead"));
 	_playhead_cursor = new EditorCursor (*this, X_("playhead"));
 	_playhead_cursor->set_sensitive (UIConfiguration::instance().get_sensitize_playhead());

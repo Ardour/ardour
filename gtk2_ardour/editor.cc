@@ -738,7 +738,6 @@ Editor::~Editor()
 	delete _track_canvas_viewport;
 	delete _drags;
 	delete nudge_clock;
-	delete _verbose_cursor;
 	delete _region_peak_cursor;
 	delete quantize_dialog;
 	delete _summary;
