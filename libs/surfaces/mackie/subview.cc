@@ -357,6 +357,18 @@ void EQSubview::setup_vpot(
 				pc = _subview_stripable->mapped_control(EQ_Enable);
 				pot_id = "EQ";
 				break;
+			case 11:
+				pc = _subview_stripable->mapped_control(LPF_Freq);
+				pot_id = "LPF";
+				break;
+			case 12:
+				pc = _subview_stripable->mapped_control(HPF_Freq);
+				pot_id = "HPF";
+				break;
+			case 13:
+				pc = _subview_stripable->mapped_control(HPF_Enable); // shared HP/LP
+				pot_id = "Filter";
+				break;
 		}
 
 	} else {  //mixbus or master bus ( these are currently the same for MB & 32C )
@@ -460,10 +472,6 @@ void DynamicsSubview::setup_vpot(
 
 	available.clear();
 
-	std::shared_ptr<AutomationControl> hpfc = _subview_stripable->mapped_control (HPF_Freq);
-	std::shared_ptr<AutomationControl> lpfc = _subview_stripable->mapped_control (LPF_Freq);
-	std::shared_ptr<AutomationControl> fec = _subview_stripable->mapped_control (HPF_Enable); // shared HP/LP
-
 	std::shared_ptr<AutomationControl> ctc = _subview_stripable->mapped_control (Comp_Threshold);
 	std::shared_ptr<AutomationControl> crc = _subview_stripable->mapped_control (Comp_Ratio);
 	std::shared_ptr<AutomationControl> cac = _subview_stripable->mapped_control (Comp_Attack);
@@ -482,11 +490,6 @@ void DynamicsSubview::setup_vpot(
 	 */
 
 	std::vector<AutomationType> params;
-
-	//Mixbus32C needs to spill the filter controls into the comp section
-	if (hpfc) { available.push_back (std::make_pair (hpfc, "HPF")); }
-	if (lpfc) { available.push_back (std::make_pair (lpfc, "LPF")); }
-	if (fec)  { available.push_back (std::make_pair (fec, "FiltIn")); }
 
 	if (ctc) { available.push_back (std::make_pair (ctc, "Thresh")); }
 	if (crc) { available.push_back (std::make_pair (crc, "Ratio")); }
