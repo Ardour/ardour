@@ -71,11 +71,15 @@ CueEditor::~CueEditor ()
 void
 CueEditor::set_snapped_cursor_position (Temporal::timepos_t const & pos)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 std::vector<MidiRegionView*>
 CueEditor::filter_to_unique_midi_region_views (RegionSelection const & ms) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	std::vector<MidiRegionView*> mrv;
 	return mrv;
 }
@@ -83,17 +87,23 @@ CueEditor::filter_to_unique_midi_region_views (RegionSelection const & ms) const
 void
 CueEditor::get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 StripableTimeAxisView*
 CueEditor::get_stripable_time_axis_by_id (const PBD::ID& id) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return nullptr;
 }
 
 TrackViewList
 CueEditor::axis_views_from_routes (std::shared_ptr<ARDOUR::RouteList>) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	TrackViewList tvl;
 	return tvl;
 }
@@ -101,42 +111,56 @@ CueEditor::axis_views_from_routes (std::shared_ptr<ARDOUR::RouteList>) const
 ARDOUR::Location*
 CueEditor::find_location_from_marker (ArdourMarker*, bool&) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return nullptr;
 }
 
 ArdourMarker*
 CueEditor::find_marker_from_location_id (PBD::ID const&, bool) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return nullptr;
 }
 
 TempoMarker*
 CueEditor::find_marker_for_tempo (Temporal::TempoPoint const &)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return nullptr;
 }
 
 MeterMarker*
 CueEditor::find_marker_for_meter (Temporal::MeterPoint const &)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return nullptr;
 }
 
 void
 CueEditor::redisplay_grid (bool immediate_redraw)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	update_grid ();
 }
 
 Temporal::timecnt_t
 CueEditor::get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return Temporal::timecnt_t (Temporal::AudioTime);
 }
 
 void
 CueEditor::instant_save()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_region) {
 		return;
 	}
@@ -158,42 +182,58 @@ CueEditor::instant_save()
 void
 CueEditor::begin_selection_op_history ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 void
 CueEditor::begin_reversible_selection_op (std::string cmd_name)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 void
 CueEditor::commit_reversible_selection_op ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 void
 CueEditor::abort_reversible_selection_op ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 void
 CueEditor::undo_selection_op ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 void
 CueEditor::redo_selection_op ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 double
 CueEditor::get_y_origin () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return 0.;
 }
 
 void
 CueEditor::set_zoom_focus (Editing::ZoomFocus zf)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	using namespace Editing;
 
 	/* We don't allow playhead for zoom focus here */
@@ -208,6 +248,8 @@ CueEditor::set_zoom_focus (Editing::ZoomFocus zf)
 void
 CueEditor::set_samples_per_pixel (samplecnt_t n)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	samples_per_pixel = n;
 	ZoomChanged(); /* EMIT SIGNAL */
 }
@@ -215,12 +257,16 @@ CueEditor::set_samples_per_pixel (samplecnt_t n)
 samplecnt_t
 CueEditor::get_current_zoom () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return samples_per_pixel;
 }
 
 void
 CueEditor::reposition_and_zoom (samplepos_t pos, double spp)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	pending_visual_change.add (VisualChange::ZoomLevel);
 	pending_visual_change.samples_per_pixel = spp;
 
@@ -233,22 +279,30 @@ CueEditor::reposition_and_zoom (samplepos_t pos, double spp)
 void
 CueEditor::set_mouse_mode (Editing::MouseMode, bool force)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 void
 CueEditor::step_mouse_mode (bool next)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 Gdk::Cursor*
 CueEditor::get_canvas_cursor () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return nullptr;
 }
 
 std::shared_ptr<Temporal::TempoMap const>
 CueEditor::start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> map)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	std::shared_ptr<Temporal::TempoMap const> tmp = Temporal::TempoMap::use();
 	Temporal::TempoMap::set (map);
 	return tmp;
@@ -257,12 +311,16 @@ CueEditor::start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> map)
 void
 CueEditor::end_local_tempo_map (std::shared_ptr<Temporal::TempoMap const> map)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	Temporal::TempoMap::set (map);
 }
 
 void
 CueEditor::do_undo (uint32_t n)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_drags->active ()) {
 		_drags->abort ();
 	}
@@ -273,6 +331,8 @@ CueEditor::do_undo (uint32_t n)
 void
 CueEditor::do_redo (uint32_t n)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_drags->active ()) {
 		_drags->abort ();
 	}
@@ -283,12 +343,16 @@ CueEditor::do_redo (uint32_t n)
 void
 CueEditor::history_changed ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	update_undo_redo_actions (_history);
 }
 
 Temporal::timepos_t
 CueEditor::_get_preferred_edit_position (Editing::EditIgnoreOption ignore, bool from_context_menu, bool from_outside_canvas)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	samplepos_t where;
 	bool in_track_canvas = false;
 
@@ -302,6 +366,8 @@ CueEditor::_get_preferred_edit_position (Editing::EditIgnoreOption ignore, bool 
 void
 CueEditor::build_upper_toolbar ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	using namespace Gtk::Menu_Helpers;
 
 	Gtk::HBox* mode_box = manage(new Gtk::HBox);
@@ -423,6 +489,8 @@ CueEditor::build_upper_toolbar ()
 void
 CueEditor::build_zoom_focus_menu ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	using namespace Gtk::Menu_Helpers;
 	using namespace Editing;
 
@@ -436,6 +504,8 @@ CueEditor::build_zoom_focus_menu ()
 bool
 CueEditor::bang_button_press (GdkEventButton* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!ref.trigger()) {
 		return true;
 	}
@@ -448,6 +518,8 @@ CueEditor::bang_button_press (GdkEventButton* ev)
 bool
 CueEditor::play_button_press (GdkEventButton* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_session && _region) {
 		_session->request_locate (_region->position().samples());
 		_session->request_roll ();
@@ -459,6 +531,8 @@ CueEditor::play_button_press (GdkEventButton* ev)
 bool
 CueEditor::loop_button_press (GdkEventButton* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_region) {
 		return true;
 	}
@@ -476,6 +550,8 @@ CueEditor::loop_button_press (GdkEventButton* ev)
 bool
 CueEditor::solo_button_press (GdkEventButton* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_track) {
 		return true;
 	}
@@ -488,6 +564,8 @@ CueEditor::solo_button_press (GdkEventButton* ev)
 bool
 CueEditor::rec_button_press (GdkEventButton* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (ev->button != 1) {
 		return false;
 	}
@@ -510,6 +588,8 @@ CueEditor::rec_button_press (GdkEventButton* ev)
 void
 CueEditor::blink_rec_enable (bool onoff)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (onoff) {
 		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
@@ -520,6 +600,8 @@ CueEditor::blink_rec_enable (bool onoff)
 void
 CueEditor::trigger_arm_change ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!ref.trigger()) {
 		return;
 	}
@@ -536,6 +618,8 @@ CueEditor::trigger_arm_change ()
 void
 CueEditor::rec_enable_change ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!ref.box()) {
 		return;
 	}
@@ -568,12 +652,16 @@ CueEditor::rec_enable_change ()
 void
 CueEditor::set_recording_length (Temporal::BBT_Offset dur)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	rec_length = dur;
 }
 
 void
 CueEditor::scrolled ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	pending_visual_change.add (VisualChange::TimeOrigin);
 	pending_visual_change.time_origin = horizontal_adjustment.get_value() * samples_per_pixel;
 	ensure_visual_change_idle_handler ();
@@ -582,6 +670,8 @@ CueEditor::scrolled ()
 bool
 CueEditor::canvas_pre_event (GdkEvent* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
 	case GDK_LEAVE_NOTIFY:
@@ -599,6 +689,8 @@ CueEditor::canvas_pre_event (GdkEvent* ev)
 bool
 CueEditor::autoscroll_active () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return autoscroll_connection.connected ();
 }
 
@@ -610,6 +702,8 @@ CueEditor::autoscroll_active () const
 void
 CueEditor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!UIConfiguration::instance().get_autoscroll_editor () || autoscroll_active ()) {
 		return;
 	}
@@ -681,6 +775,8 @@ CueEditor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_header
 bool
 CueEditor::autoscroll_canvas ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	using std::max;
 	using std::min;
 	int x, y;
@@ -881,6 +977,8 @@ CueEditor::autoscroll_canvas ()
 void
 CueEditor::start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_session) {
 		return;
 	}
@@ -904,6 +1002,8 @@ CueEditor::start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const Ard
 void
 CueEditor::stop_canvas_autoscroll ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	autoscroll_connection.disconnect ();
 	autoscroll_cnt = 0;
 }
@@ -911,6 +1011,8 @@ CueEditor::stop_canvas_autoscroll ()
 void
 CueEditor::visual_changer (const VisualChange& vc)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/**
 	 * Changed first so the correct horizontal canvas position is calculated in
 	 * EditingContext::set_horizontal_position
@@ -951,6 +1053,8 @@ CueEditor::visual_changer (const VisualChange& vc)
 void
 CueEditor::catch_pending_show_region ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_visible_pending_region) {
 		std::shared_ptr<Region> r (_visible_pending_region);
 		_visible_pending_region.reset ();
@@ -961,6 +1065,8 @@ CueEditor::catch_pending_show_region ()
 RegionSelection
 CueEditor::region_selection()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	RegionSelection rs;
 	/* there is never any region-level selection in a pianoroll */
 	return rs;
@@ -969,6 +1075,8 @@ CueEditor::region_selection()
 void
 CueEditor::mouse_mode_chosen (Editing::MouseMode m)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!mouse_mode_actions[m]->get_active()) {
 		/* this was just the notification that the old mode has been
 		 * left. we'll get called again with the new mode active in a
@@ -989,6 +1097,8 @@ CueEditor::mouse_mode_chosen (Editing::MouseMode m)
 std::pair<Temporal::timepos_t,Temporal::timepos_t>
 CueEditor::max_zoom_extent() const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_region) {
 
 		Temporal::Beats len;
@@ -1011,6 +1121,8 @@ CueEditor::max_zoom_extent() const
 void
 CueEditor::zoom_to_show (Temporal::timecnt_t const & duration)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_track_canvas_width) {
 		zoom_in_allocate = true;
 		return;
@@ -1022,6 +1134,8 @@ CueEditor::zoom_to_show (Temporal::timecnt_t const & duration)
 void
 CueEditor::full_zoom_clicked()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* XXXX NEED LOCAL TEMPO MAP */
 
 	std::pair<Temporal::timepos_t,Temporal::timepos_t> dur (max_zoom_extent());
@@ -1032,12 +1146,16 @@ CueEditor::full_zoom_clicked()
 void
 CueEditor::set_show_source (bool yn)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	show_source = yn;
 }
 
 void
 CueEditor::update_solo_display ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_track->solo_control()->get_value()) {
 		solo_button.set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
@@ -1048,6 +1166,8 @@ CueEditor::update_solo_display ()
 void
 CueEditor::set_track (std::shared_ptr<Track> t)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	_track = t;
 	_track->solo_control()->Changed.connect (object_connections, invalidator (*this), std::bind (&CueEditor::update_solo_display, this), gui_context());
 	update_solo_display ();
@@ -1056,6 +1176,8 @@ CueEditor::set_track (std::shared_ptr<Track> t)
 void
 CueEditor::set_region (std::shared_ptr<Region> r)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (r == _region) {
 		return;
 	}
@@ -1074,6 +1196,8 @@ CueEditor::set_region (std::shared_ptr<Region> r)
 void
 CueEditor::maybe_set_from_rsu ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	RegionUISettingsManager::iterator rsu = ARDOUR_UI::instance()->region_ui_settings_manager.find (_region->id());
 	if (rsu != ARDOUR_UI::instance()->region_ui_settings_manager.end()) {
 		set_from_rsu (rsu->second);
@@ -1083,6 +1207,8 @@ CueEditor::maybe_set_from_rsu ()
 void
 CueEditor::set_from_rsu (RegionUISettings& rsu)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	follow_playhead_action->set_active (rsu.follow_playhead);
 
 	/* XXXX play selection */
@@ -1101,6 +1227,8 @@ CueEditor::set_from_rsu (RegionUISettings& rsu)
 void
 CueEditor::set_trigger (TriggerReference& tref)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (tref == ref) {
 		return;
 	}
@@ -1122,6 +1250,8 @@ CueEditor::set_trigger (TriggerReference& tref)
 void
 CueEditor::ruler_locate (GdkEventButton* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_session) {
 		return;
 	}
@@ -1143,6 +1273,8 @@ CueEditor::ruler_locate (GdkEventButton* ev)
 void
 CueEditor::maybe_set_count_in ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!ref.box()) {
 		std::cerr << "msci no box\n";
 		return;
@@ -1179,6 +1311,8 @@ CueEditor::maybe_set_count_in ()
 void
 CueEditor::count_in (Temporal::timepos_t audible, unsigned int clock_interval_msecs)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_session) {
 		return;
 	}
@@ -1224,6 +1358,8 @@ CueEditor::count_in (Temporal::timepos_t audible, unsigned int clock_interval_ms
 bool
 CueEditor::ruler_event (GdkEvent* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	switch (ev->type) {
 	case GDK_BUTTON_RELEASE:
 		if (ev->button.button == 1) {
@@ -1240,6 +1376,8 @@ CueEditor::ruler_event (GdkEvent* ev)
 void
 CueEditor::data_captured (samplecnt_t total_duration)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	data_capture_duration = total_duration;
 
 	if (!idle_update_queued.exchange (1)) {
@@ -1250,6 +1388,8 @@ CueEditor::data_captured (samplecnt_t total_duration)
 bool
 CueEditor::idle_data_captured ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!ref.box()) {
 		return false;
 	}
@@ -1274,6 +1414,8 @@ CueEditor::idle_data_captured ()
 void
 CueEditor::unset (bool trigger_too)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	_history.clear ();
 	history_connection.disconnect();
 	_update_connection.disconnect();
@@ -1293,6 +1435,8 @@ CueEditor::unset (bool trigger_too)
 void
 CueEditor::session_going_away ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	EditingContext::session_going_away ();
 	unset (true);
 }
@@ -1300,6 +1444,8 @@ CueEditor::session_going_away ()
 void
 CueEditor::load_bindings ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	load_shared_bindings ();
 	for (auto & b : bindings) {
 		b->associate ();
@@ -1310,6 +1456,8 @@ CueEditor::load_bindings ()
 void
 CueEditor::register_actions ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	editor_actions = ActionManager::create_action_group (own_bindings, editor_name());
 	bind_mouse_mode_buttons ();
 }
@@ -1317,12 +1465,16 @@ CueEditor::register_actions ()
 ArdourCanvas::GtkCanvasViewport*
 CueEditor::get_canvas_viewport() const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return const_cast<ArdourCanvas::GtkCanvasViewport*>(&_canvas_viewport);
 }
 
 ArdourCanvas::GtkCanvas*
 CueEditor::get_canvas() const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return &_canvas;
 }
 
@@ -1330,6 +1482,8 @@ CueEditor::get_canvas() const
 int
 CueEditor::set_state (XMLNode const & node, int version)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	set_common_editing_state (node);
 	return 0;
 }
@@ -1337,6 +1491,8 @@ CueEditor::set_state (XMLNode const & node, int version)
 XMLNode&
 CueEditor::get_state () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	XMLNode* node (new XMLNode (editor_name()));
 	get_common_editing_state (*node);
 	return *node;
@@ -1354,6 +1510,8 @@ edit_last_mark_label (std::vector<ArdourCanvas::Ruler::Mark>& marks, const std::
 void
 CueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, samplepos_t leftmost, samplepos_t rightmost, gint /*maxchars*/)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_session) {
 		return;
 	}

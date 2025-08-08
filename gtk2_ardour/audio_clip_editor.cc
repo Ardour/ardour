@@ -123,6 +123,8 @@ AudioClipEditor::AudioClipEditor (std::string const & name, bool with_transport)
 void
 AudioClipEditor::load_shared_bindings ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* Full shared binding loading must have preceded this in some other EditingContext */
 	assert (!need_shared_actions);
 
@@ -144,6 +146,8 @@ AudioClipEditor::load_shared_bindings ()
 void
 AudioClipEditor::pack_inner (Gtk::Box& box)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	box.pack_start (snap_box, false, false);
 	box.pack_start (grid_box, false, false);
 }
@@ -151,6 +155,8 @@ AudioClipEditor::pack_inner (Gtk::Box& box)
 void
 AudioClipEditor::pack_outer (Gtk::Box& box)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (with_transport_controls) {
 		box.pack_start (play_box, false, false);
 	}
@@ -162,12 +168,16 @@ AudioClipEditor::pack_outer (Gtk::Box& box)
 void
 AudioClipEditor::build_lower_toolbar ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	_toolbox.pack_start (*_canvas_hscrollbar, false, false);
 }
 
 void
 AudioClipEditor::build_canvas ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	_canvas.set_background_color (UIConfiguration::instance().color ("arrange base"));
 	_canvas.signal_event().connect (sigc::mem_fun (*this, &CueEditor::canvas_pre_event), false);
 	_canvas.use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
@@ -270,6 +280,8 @@ AudioClipEditor::build_canvas ()
 
 AudioClipEditor::~AudioClipEditor ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	drop_waves ();
 	delete clip_metric;
 }
@@ -277,6 +289,8 @@ AudioClipEditor::~AudioClipEditor ()
 bool
 AudioClipEditor::line_event_handler (GdkEvent* ev, ArdourCanvas::Line* l)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	std::cerr << "event type " << Gtkmm2ext::event_type_string (ev->type) << " on line " << std::endl;
 
 	switch (ev->type) {
@@ -313,12 +327,16 @@ AudioClipEditor::line_event_handler (GdkEvent* ev, ArdourCanvas::Line* l)
 bool
 AudioClipEditor::key_press (GdkEventKey* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return false;
 }
 
 void
 AudioClipEditor::position_lines ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_region) {
 		return;
 	}
@@ -358,6 +376,8 @@ AudioClipEditor::LineDrag::motion (GdkEventMotion* ev)
 void
 AudioClipEditor::set_colors ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	_canvas.set_background_color (UIConfiguration::instance ().color (X_("theme:bg")));
 
 	start_line->set_outline_color (UIConfiguration::instance ().color (X_("theme:contrasting clock")));
@@ -370,6 +390,8 @@ AudioClipEditor::set_colors ()
 void
 AudioClipEditor::drop_waves ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	for (auto& wave : waves) {
 		delete wave;
 	}
@@ -380,6 +402,8 @@ AudioClipEditor::drop_waves ()
 void
 AudioClipEditor::set_trigger (TriggerReference& tr)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (tr == ref) {
 		return;
 	}
@@ -394,6 +418,8 @@ AudioClipEditor::set_trigger (TriggerReference& tr)
 void
 AudioClipEditor::set_region (std::shared_ptr<Region> region)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	CueEditor::set_region (region);
 
 	if (_visible_pending_region) {
@@ -470,6 +496,8 @@ AudioClipEditor::set_region (std::shared_ptr<Region> region)
 void
 AudioClipEditor::canvas_allocate (Gtk::Allocation& alloc)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	_canvas.size_allocate (alloc);
 
 	_visible_canvas_width = alloc.get_width();
@@ -496,6 +524,8 @@ AudioClipEditor::canvas_allocate (Gtk::Allocation& alloc)
 void
 AudioClipEditor::set_spp_from_length (samplecnt_t len)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_visible_canvas_width) {
 		set_samples_per_pixel (floor (len / _visible_canvas_width));
 	}
@@ -504,6 +534,8 @@ AudioClipEditor::set_spp_from_length (samplecnt_t len)
 void
 AudioClipEditor::set_wave_heights ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (waves.empty ()) {
 		return;
 	}
@@ -522,6 +554,8 @@ AudioClipEditor::set_wave_heights ()
 void
 AudioClipEditor::set_waveform_colors ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	Gtkmm2ext::Color clip    = UIConfiguration::instance ().color ("clipped waveform");
 	Gtkmm2ext::Color zero    = UIConfiguration::instance ().color ("zero line");
 	Gtkmm2ext::Color fill    = UIConfiguration::instance ().color ("waveform fill");
@@ -538,17 +572,23 @@ AudioClipEditor::set_waveform_colors ()
 Gtk::Widget&
 AudioClipEditor::contents ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return _contents;
 }
 
 void
 AudioClipEditor::region_changed (const PBD::PropertyChange& what_changed)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 void
 AudioClipEditor::set_samples_per_pixel (samplecnt_t spp)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	CueEditor::set_samples_per_pixel (spp);
 
 	clip_metric->units_per_pixel = samples_per_pixel;
@@ -568,12 +608,16 @@ AudioClipEditor::set_samples_per_pixel (samplecnt_t spp)
 samplecnt_t
 AudioClipEditor::current_page_samples() const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return (samplecnt_t) _track_canvas_width * samples_per_pixel;
 }
 
 bool
 AudioClipEditor::canvas_enter_leave (GdkEventCrossing* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
 		if (ev->detail != GDK_NOTIFY_INFERIOR) {
@@ -598,26 +642,36 @@ AudioClipEditor::canvas_enter_leave (GdkEventCrossing* ev)
 void
 AudioClipEditor::begin_write ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 void
 AudioClipEditor::end_write ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 void
 AudioClipEditor::show_count_in (std::string const &)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 void
 AudioClipEditor::hide_count_in ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 void
 AudioClipEditor::maybe_update ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	ARDOUR::TriggerPtr playing_trigger;
 
 	if (ref.trigger()) {
@@ -675,6 +729,8 @@ AudioClipEditor::maybe_update ()
 void
 AudioClipEditor::unset (bool trigger_too)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	drop_waves ();
 	CueEditor::unset (trigger_too);
 }

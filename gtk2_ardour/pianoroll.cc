@@ -105,6 +105,8 @@ Pianoroll::~Pianoroll ()
 void
 Pianoroll::set_show_source (bool yn)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	CueEditor::set_show_source (yn);
 	if (view) {
 		view->set_show_source (yn);
@@ -114,6 +116,8 @@ Pianoroll::set_show_source (bool yn)
 void
 Pianoroll::rebuild_parameter_button_map()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	parameter_button_map.clear ();
 	parameter_button_map.insert (std::make_pair (velocity_button, Evoral::Parameter (ARDOUR::MidiVelocityAutomation, _visible_channel)));
 	parameter_button_map.insert (std::make_pair (bender_button, Evoral::Parameter (ARDOUR::MidiPitchBenderAutomation, _visible_channel)));
@@ -129,6 +133,8 @@ Pianoroll::rebuild_parameter_button_map()
 void
 Pianoroll::reset_user_cc_choice (std::string name, Evoral::Parameter param, MetaButton* metabutton)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	ParameterButtonMap::iterator iter;
 
 	for (iter = parameter_button_map.begin(); iter != parameter_button_map.end(); ++iter) {
@@ -149,6 +155,8 @@ Pianoroll::add_single_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items,
                                        const std::string&      name,
                                        ArdourWidgets::MetaButton* mb)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	using namespace Gtk::Menu_Helpers;
 
 	const uint16_t selected_channels = 0xffff;
@@ -174,6 +182,8 @@ Pianoroll::add_multi_controller_item (Gtk::Menu_Helpers::MenuList&,
                                       const std::string&      name,
                                       MetaButton*             mb)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	using namespace Gtk;
 	using namespace Gtk::Menu_Helpers;
 
@@ -223,6 +233,8 @@ Pianoroll::add_multi_controller_item (Gtk::Menu_Helpers::MenuList&,
 void
 Pianoroll::build_lower_toolbar ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	horizontal_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Pianoroll::scrolled));
 
 	ArdourButton::Element elements = ArdourButton::Element (ArdourButton::Text|ArdourButton::Indicator|ArdourButton::Edge|ArdourButton::Body);
@@ -292,6 +304,8 @@ Pianoroll::build_lower_toolbar ()
 void
 Pianoroll::pack_inner (Gtk::Box& box)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	box.pack_start (snap_box, false, false);
 	box.pack_start (grid_box, false, false);
 	box.pack_start (draw_box, false, false);
@@ -300,6 +314,8 @@ Pianoroll::pack_inner (Gtk::Box& box)
 void
 Pianoroll::pack_outer (Gtk::Box& box)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (with_transport_controls) {
 		box.pack_start (play_box, false, false);
 	}
@@ -314,6 +330,8 @@ Pianoroll::pack_outer (Gtk::Box& box)
 void
 Pianoroll::set_visible_channel (int n)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	PBD::Unwinder<bool> uw (ignore_channel_changes, true);
 
 	_visible_channel = n;
@@ -332,6 +350,8 @@ Pianoroll::set_visible_channel (int n)
 void
 Pianoroll::build_canvas ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	_canvas.set_background_color (UIConfiguration::instance().color ("arrange base"));
 	_canvas.signal_event().connect (sigc::mem_fun (*this, &Pianoroll::canvas_pre_event), false);
 	dynamic_cast<ArdourCanvas::GtkCanvas*>(&_canvas)->use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
@@ -473,6 +493,8 @@ Pianoroll::build_canvas ()
 void
 Pianoroll::visible_channel_changed ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (ignore_channel_changes) {
 		/* We're changing it */
 		return;
@@ -491,6 +513,8 @@ Pianoroll::visible_channel_changed ()
 void
 Pianoroll::bindings_changed ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	bindings.clear ();
 	load_shared_bindings ();
 }
@@ -498,6 +522,8 @@ Pianoroll::bindings_changed ()
 void
 Pianoroll::maybe_update ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	ARDOUR::TriggerPtr playing_trigger;
 
 	if (ref.trigger()) {
@@ -555,6 +581,8 @@ Pianoroll::maybe_update ()
 bool
 Pianoroll::canvas_enter_leave (GdkEventCrossing* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
 		if (ev->detail != GDK_NOTIFY_INFERIOR) {
@@ -579,6 +607,8 @@ Pianoroll::canvas_enter_leave (GdkEventCrossing* ev)
 void
 Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	_visible_canvas_width = alloc.get_width();
 	_visible_canvas_height = alloc.get_height();
 
@@ -610,6 +640,8 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 timepos_t
 Pianoroll::snap_to_grid (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* BBT time only */
 	return snap_to_bbt (presnap, direction, gpref);
 }
@@ -617,6 +649,8 @@ Pianoroll::snap_to_grid (timepos_t const & presnap, Temporal::RoundMode directio
 void
 Pianoroll::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	UIConfiguration const& uic (UIConfiguration::instance ());
 	const timepos_t presnap = start;
 
@@ -649,6 +683,8 @@ Pianoroll::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, Sn
 void
 Pianoroll::set_samples_per_pixel (samplecnt_t spp)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	CueEditor::set_samples_per_pixel (spp);
 
 	if (view) {
@@ -666,54 +702,72 @@ Pianoroll::set_samples_per_pixel (samplecnt_t spp)
 samplecnt_t
 Pianoroll::current_page_samples() const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return (samplecnt_t) _track_canvas_width * samples_per_pixel;
 }
 
 bool
 Pianoroll::canvas_bg_event (GdkEvent* event, ArdourCanvas::Item* item)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return typed_event (item, event, RegionItem);
 }
 
 bool
 Pianoroll::canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item* item, ControlPoint* cp)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return typed_event (item, event, ControlPointItem);
 }
 
 bool
 Pianoroll::canvas_note_event (GdkEvent* event, ArdourCanvas::Item* item)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return typed_event (item, event, NoteItem);
 }
 
 bool
 Pianoroll::canvas_velocity_base_event (GdkEvent* event, ArdourCanvas::Item* item)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return typed_event (item, event, VelocityBaseItem);
 }
 
 bool
 Pianoroll::canvas_velocity_event (GdkEvent* event, ArdourCanvas::Item* item)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return typed_event (item, event, VelocityItem);
 }
 
 bool
 Pianoroll::canvas_cue_start_event (GdkEvent* event, ArdourCanvas::Item* item)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return typed_event (item, event, ClipStartItem);
 }
 
 bool
 Pianoroll::canvas_cue_end_event (GdkEvent* event, ArdourCanvas::Item* item)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return typed_event (item, event, ClipEndItem);
 }
 
 void
 Pianoroll::set_trigger_start (Temporal::timepos_t const & p)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (ref.trigger()) {
 		ref.trigger()->the_region()->trim_front (p);
 	} else {
@@ -728,6 +782,8 @@ Pianoroll::set_trigger_start (Temporal::timepos_t const & p)
 void
 Pianoroll::set_trigger_end (Temporal::timepos_t const & p)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (ref.trigger()) {
 		ref.trigger()->the_region()->trim_end (p);
 	} else {
@@ -742,12 +798,16 @@ Pianoroll::set_trigger_end (Temporal::timepos_t const & p)
 Gtk::Widget&
 Pianoroll::contents ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return _contents;
 }
 
 bool
 Pianoroll::idle_data_captured ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!ref.box()) {
 		return false;
 	}
@@ -764,6 +824,8 @@ Pianoroll::idle_data_captured ()
 bool
 Pianoroll::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (event->type != GDK_BUTTON_PRESS) {
 		return false;
 	}
@@ -792,6 +854,8 @@ Pianoroll::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, Item
 bool
 Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	NoteBase* note = nullptr;
 	Editing::MouseMode mouse_mode = current_mouse_mode();
 	switch (item_type) {
@@ -894,12 +958,16 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 bool
 Pianoroll::button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return true;
 }
 
 bool
 Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!Keyboard::is_context_menu_event (&event->button)) {
 
 		/* see if we're finishing a drag */
@@ -941,6 +1009,8 @@ Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, It
 void
 Pianoroll::popup_region_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	using namespace Gtk::Menu_Helpers;
 
 	if (!view) {
@@ -976,6 +1046,8 @@ Pianoroll::popup_region_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
 bool
 Pianoroll::button_press_dispatch (GdkEventButton* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* this function is intended only for buttons 4 and above. */
 
 	Gtkmm2ext::MouseButton b (ev->state, ev->button);
@@ -985,6 +1057,8 @@ Pianoroll::button_press_dispatch (GdkEventButton* ev)
 bool
 Pianoroll::button_release_dispatch (GdkEventButton* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* this function is intended only for buttons 4 and above. */
 
 	Gtkmm2ext::MouseButton b (ev->state, ev->button);
@@ -994,6 +1068,8 @@ Pianoroll::button_release_dispatch (GdkEventButton* ev)
 bool
 Pianoroll::motion_handler (ArdourCanvas::Item*, GdkEvent* event, bool from_autoscroll)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_drags->active ()) {
 		//drags change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor
 		return _drags->motion_handler (event, from_autoscroll);
@@ -1005,6 +1081,8 @@ Pianoroll::motion_handler (ArdourCanvas::Item*, GdkEvent* event, bool from_autos
 bool
 Pianoroll::key_press_handler (ArdourCanvas::Item*, GdkEvent* ev, ItemType)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 
 	switch (ev->key.keyval) {
 	case GDK_d:
@@ -1021,12 +1099,16 @@ Pianoroll::key_press_handler (ArdourCanvas::Item*, GdkEvent* ev, ItemType)
 bool
 Pianoroll::key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return true;
 }
 
 void
 Pianoroll::set_mouse_mode (Editing::MouseMode m, bool force)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (m != Editing::MouseDraw && m != Editing::MouseContent) {
 		return;
 	}
@@ -1037,6 +1119,8 @@ Pianoroll::set_mouse_mode (Editing::MouseMode m, bool force)
 void
 Pianoroll::midi_action (void (MidiView::*method)())
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!view) {
 		return;
 	}
@@ -1047,6 +1131,8 @@ Pianoroll::midi_action (void (MidiView::*method)())
 void
 Pianoroll::escape ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!view) {
 		return;
 	}
@@ -1057,12 +1143,16 @@ Pianoroll::escape ()
 Gdk::Cursor*
 Pianoroll::which_track_cursor () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return _cursors->grabber;
 }
 
 Gdk::Cursor*
 Pianoroll::which_mode_cursor () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	Gdk::Cursor* mode_cursor = MouseCursors::invalid_cursor ();
 
 	switch (current_mouse_mode()) {
@@ -1084,6 +1174,8 @@ Pianoroll::which_mode_cursor () const
 Gdk::Cursor*
 Pianoroll::which_trim_cursor (bool left_side) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	abort ();
 	/*NOTREACHED*/
 	return nullptr;
@@ -1093,6 +1185,8 @@ Pianoroll::which_trim_cursor (bool left_side) const
 Gdk::Cursor*
 Pianoroll::which_canvas_cursor (ItemType type) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	Gdk::Cursor* cursor = which_mode_cursor ();
 	Editing::MouseMode mouse_mode = current_mouse_mode ();
 
@@ -1180,6 +1274,8 @@ Pianoroll::which_canvas_cursor (ItemType type) const
 bool
 Pianoroll::enter_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	choose_canvas_cursor_on_entry (item_type);
 
 	switch (item_type) {
@@ -1209,6 +1305,8 @@ Pianoroll::enter_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_
 bool
 Pianoroll::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	EditorAutomationLine* al;
 
 	set_canvas_cursor (which_mode_cursor());
@@ -1242,6 +1340,8 @@ Pianoroll::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_
 std::list<SelectableOwner*>
 Pianoroll::selectable_owners()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (view) {
 		return view->selectable_owners();
 	}
@@ -1252,6 +1352,8 @@ Pianoroll::selectable_owners()
 void
 Pianoroll::trigger_prop_change (PBD::PropertyChange const & what_changed)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (what_changed.contains (Properties::region)) {
 		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (ref.trigger()->the_region());
 		if (mr) {
@@ -1263,6 +1365,8 @@ Pianoroll::trigger_prop_change (PBD::PropertyChange const & what_changed)
 void
 Pianoroll::region_prop_change (PBD::PropertyChange const & what_changed)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (what_changed.contains (Properties::length)) {
 		std::shared_ptr<MidiRegion> mr = view->midi_region();
 		if (mr) {
@@ -1274,6 +1378,8 @@ Pianoroll::region_prop_change (PBD::PropertyChange const & what_changed)
 void
 Pianoroll::set_trigger (TriggerReference & tref)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (ref == tref) {
 		return;
 	}
@@ -1309,6 +1415,8 @@ Pianoroll::set_trigger (TriggerReference & tref)
 void
 Pianoroll::make_a_region ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	std::shared_ptr<MidiSource> new_source = _session->create_midi_source_for_session (_track->name());
 	SourceList sources;
 	sources.push_back (new_source);
@@ -1334,6 +1442,8 @@ Pianoroll::make_a_region ()
 void
 Pianoroll::unset (bool trigger_too)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	CueEditor::unset (trigger_too);
 	view->set_region (nullptr);
 }
@@ -1341,6 +1451,8 @@ Pianoroll::unset (bool trigger_too)
 void
 Pianoroll::set_track (std::shared_ptr<ARDOUR::Track> track)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	CueEditor::set_track (track);
 
 	if (view) {
@@ -1369,6 +1481,8 @@ Pianoroll::set_track (std::shared_ptr<ARDOUR::Track> track)
 void
 Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	CueEditor::set_region (region);
 
 	if (_visible_pending_region) {
@@ -1438,6 +1552,8 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 bool
 Pianoroll::user_automation_button_event (GdkEventButton* ev, MetaButton* mb)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (mb->is_menu_popup_event (ev)) {
 		return false;
 	}
@@ -1462,6 +1578,8 @@ Pianoroll::user_automation_button_event (GdkEventButton* ev, MetaButton* mb)
 void
 Pianoroll::user_led_click (GdkEventButton* ev, MetaButton* metabutton)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (ev->button != 1) {
 		return;
 	}
@@ -1478,6 +1596,8 @@ Pianoroll::user_led_click (GdkEventButton* ev, MetaButton* metabutton)
 bool
 Pianoroll::automation_button_event (GdkEventButton* ev, Evoral::ParameterType type, int id)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (ev->button != 1) {
 		return false;
 	}
@@ -1492,6 +1612,8 @@ Pianoroll::automation_button_event (GdkEventButton* ev, Evoral::ParameterType ty
 void
 Pianoroll::automation_led_click (GdkEventButton* ev, Evoral::ParameterType type, int id)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (ev->button != 1) {
 		return;
 	}
@@ -1511,6 +1633,8 @@ Pianoroll::automation_led_click (GdkEventButton* ev, Evoral::ParameterType type,
 void
 Pianoroll::automation_state_changed ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	assert (view);
 
 	for (ParameterButtonMap::iterator i = parameter_button_map.begin(); i != parameter_button_map.end(); ++i) {
@@ -1537,6 +1661,8 @@ Pianoroll::automation_state_changed ()
 void
 Pianoroll::note_mode_clicked ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	assert (bg);
 
 	if (bg->note_mode() == Sustained) {
@@ -1549,6 +1675,8 @@ Pianoroll::note_mode_clicked ()
 void
 Pianoroll::set_note_mode (NoteMode nm)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	assert (bg);
 
 	if (nm != bg->note_mode()) {
@@ -1564,6 +1692,8 @@ Pianoroll::set_note_mode (NoteMode nm)
 void
 Pianoroll::point_selection_changed ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (view) {
 		view->point_selection_changed ();
 	}
@@ -1572,6 +1702,8 @@ Pianoroll::point_selection_changed ()
 void
 Pianoroll::delete_ ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* Editor has a lot to do here, potentially. But we don't */
 	cut_copy (Editing::Delete);
 }
@@ -1579,6 +1711,8 @@ Pianoroll::delete_ ()
 void
 Pianoroll::paste (float times, bool from_context_menu)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (view) {
 		// view->paste (Editing::Cut);
 	}
@@ -1587,6 +1721,8 @@ Pianoroll::paste (float times, bool from_context_menu)
 void
 Pianoroll::keyboard_paste ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 /** Cut, copy or clear selected regions, automation points or a time range.
@@ -1596,6 +1732,8 @@ Pianoroll::keyboard_paste ()
 void
 Pianoroll::cut_copy (Editing::CutCopyOp op)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	using namespace Editing;
 
 	/* only cancel selection if cut/copy is successful.*/
@@ -1655,6 +1793,8 @@ Pianoroll::cut_copy (Editing::CutCopyOp op)
 void
 Pianoroll::select_all_within (Temporal::timepos_t const & start, Temporal::timepos_t const & end, double y0, double y1, std::list<SelectableOwner*> const & ignored, ARDOUR::SelectionOperation op, bool preserve_if_selected)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	std::list<Selectable*> found;
 
 	if (!view) {
@@ -1737,6 +1877,8 @@ Pianoroll::select_all_within (Temporal::timepos_t const & start, Temporal::timep
 void
 Pianoroll::set_session (ARDOUR::Session* s)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	CueEditor::set_session (s);
 
 	if (with_transport_controls) {
@@ -1757,6 +1899,8 @@ Pianoroll::set_session (ARDOUR::Session* s)
 void
 Pianoroll::map_transport_state ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_session) {
 		loop_button.unset_active_state ();
 		play_button.unset_active_state ();
@@ -1794,6 +1938,8 @@ Pianoroll::map_transport_state ()
 bool
 Pianoroll::allow_trim_cursors () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	auto mouse_mode = current_mouse_mode ();
 	return mouse_mode == Editing::MouseContent || mouse_mode == Editing::MouseTimeFX;
 }
@@ -1801,6 +1947,8 @@ Pianoroll::allow_trim_cursors () const
 void
 Pianoroll::shift_midi (timepos_t const & t, bool model)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!view) {
 		return;
 	}
@@ -1811,6 +1959,8 @@ Pianoroll::shift_midi (timepos_t const & t, bool model)
 InstrumentInfo*
 Pianoroll::instrument_info () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!view || !view->midi_track()) {
 		return nullptr;
 	}
@@ -1821,6 +1971,8 @@ Pianoroll::instrument_info () const
 void
 Pianoroll::update_tempo_based_rulers ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_session) {
 		return;
 	}
@@ -1833,6 +1985,8 @@ Pianoroll::update_tempo_based_rulers ()
 void
 Pianoroll::set_note_selection (uint8_t note)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!view) {
 		return;
 	}
@@ -1847,6 +2001,8 @@ Pianoroll::set_note_selection (uint8_t note)
 void
 Pianoroll::add_note_selection (uint8_t note)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!view) {
 		return;
 	}
@@ -1861,6 +2017,8 @@ Pianoroll::add_note_selection (uint8_t note)
 void
 Pianoroll::extend_note_selection (uint8_t note)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!view) {
 		return;
 	}
@@ -1875,6 +2033,8 @@ Pianoroll::extend_note_selection (uint8_t note)
 void
 Pianoroll::toggle_note_selection (uint8_t note)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!view) {
 		return;
 	}
@@ -1889,6 +2049,8 @@ Pianoroll::toggle_note_selection (uint8_t note)
 void
 Pianoroll::begin_write ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (view) {
 		view->begin_write ();
 	}
@@ -1897,6 +2059,8 @@ Pianoroll::begin_write ()
 void
 Pianoroll::end_write ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (view) {
 		view->end_write ();
 	}
@@ -1905,6 +2069,8 @@ Pianoroll::end_write ()
 void
 Pianoroll::manage_possible_header (Gtk::Allocation& alloc)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (prh) {
 		double w, h;
 		prh->size_request (w, h);
@@ -1916,6 +2082,8 @@ Pianoroll::manage_possible_header (Gtk::Allocation& alloc)
 void
 Pianoroll::show_count_in (std::string const & str)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (view) {
 		view->set_overlay_text (str);
 	}
@@ -1924,6 +2092,8 @@ Pianoroll::show_count_in (std::string const & str)
 void
 Pianoroll::hide_count_in ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (view) {
 		view->hide_overlay_text ();
 	}
@@ -1932,6 +2102,8 @@ Pianoroll::hide_count_in ()
 void
 Pianoroll::instant_save ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	region_ui_settings.draw_length = draw_length();
 	region_ui_settings.draw_velocity = draw_velocity();
 	region_ui_settings.channel = draw_channel();
@@ -1944,6 +2116,8 @@ Pianoroll::instant_save ()
 void
 Pianoroll::parameter_changed (std::string param)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (param == X_("note-name-display")) {
 		if (prh) {
 			prh->instrument_info_change ();
