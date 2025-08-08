@@ -155,8 +155,6 @@ EditingContext::EditingContext (std::string const & name)
  	, _dragging_playhead (false)
 
 {
-	EC_LOCAL_TEMPO_SCOPE;
-
 	using namespace Gtk::Menu_Helpers;
 
 	if (!button_bindings) {
@@ -249,8 +247,6 @@ EditingContext::EditingContext (std::string const & name)
 
 EditingContext::~EditingContext()
 {
-	EC_LOCAL_TEMPO_SCOPE;
-
 	ActionManager::drop_action_group (_midi_actions);
 	ActionManager::drop_action_group (_common_actions);
 	ActionManager::drop_action_group (editor_actions);
