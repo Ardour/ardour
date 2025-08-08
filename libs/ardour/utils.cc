@@ -60,8 +60,14 @@
 #include "pbd/strsplit.h"
 #include "pbd/replace_all.h"
 
-#include "ardour/utils.h"
+#include "temporal/tempo.h"
+
+#include "ardour/minibpm.h"
+#include "ardour/region.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/segment_descriptor.h"
+#include "ardour/source.h"
+#include "ardour/utils.h"
 
 #include "pbd/i18n.h"
 
@@ -793,3 +799,126 @@ ARDOUR::compute_sha1_of_file (std::string path)
 	sha1_result_hash (&s, hash);
 	return std::string (hash);
 }
+
+bool
+ARDOUR::estimate_audio_tempo (std::shared_ptr<Region> region, Sample* data, samplecnt_t data_length, samplecnt_t sample_rate, double& qpm, Temporal::Meter& meter, double& beatcount)
+{
+	using namespace Temporal;
+	TempoMap::SharedPtr tm (TempoMap::use());
+
+	TimelineRange range (region->start(), region->start() + region->length(), 0);
+	SegmentDescriptor segment;
+	bool have_segment;
+
+	have_segment = region->source (0)->get_segment_descriptor (range, segment);
+
+	if (have_segment) {
+
+		qpm = segment.tempo().quarter_notes_per_minute ();
+		meter = segment.meter();
+		// DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: tempo and meter from segment descriptor\n", index()));
+
+	} else {
+		/* not a great guess, but what else can we do? */
+
+		TempoMetric const & metric (tm->metric_at (timepos_t (AudioTime)));
+
+		meter = metric.meter ();
+
+		/* check the name to see if there's a (heuristically obvious) hint
+		 * about the tempo.
+		 */
+
+		string str = region->name();
+		string::size_type bi;
+		string::size_type ni;
+		double text_tempo = -1.;
+
+		if (((bi = str.find (" bpm")) != string::npos) ||
+		    ((bi = str.find ("bpm")) != string::npos)  ||
+		    ((bi = str.find (" BPM")) != string::npos) ||
+		    ((bi = str.find ("BPM")) != string::npos)  ){
+
+			string sub (str.substr (0, bi));
+
+			if ((ni = sub.find_last_of ("0123456789.,_-")) != string::npos) {
+
+				int nni = ni; /* ni is unsigned, nni is signed */
+
+				while (nni >= 0) {
+					if (!isdigit (sub[nni]) &&
+					    (sub[nni] != '.') &&
+					    (sub[nni] != ',')) {
+						break;
+					}
+					--nni;
+				}
+
+				if (nni > 0) {
+					std::stringstream p (sub.substr (nni + 1));
+					p >> text_tempo;
+					if (!p) {
+						text_tempo = -1.;
+					} else {
+						qpm = text_tempo;
+					}
+				}
+			}
+		}
+
+		if (text_tempo < 0) {
+
+			breakfastquay::MiniBPM mbpm (sample_rate);
+
+			qpm = mbpm.estimateTempoOfSamples (data, data_length);
+
+			//cerr << name() << "MiniBPM Estimated: " << qpm << " bpm from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
+		}
+	}
+
+	const double seconds = (double) data_length  / sample_rate;
+
+	/* now check the determined tempo and force it to a value that gives us
+	   an integer beat/quarter count. This is a heuristic that tries to
+	   avoid clips that slightly over- or underrun a quantization point,
+	   resulting in small or larger gaps in output if they are repeating.
+	*/
+
+	if ((qpm != 0.)) {
+		/* fractional beatcnt */
+		double maybe_beats = (seconds / 60.) * qpm;
+		beatcount = round (maybe_beats);
+
+		/* the vast majority of third-party clips are 1,2,4,8, or 16-bar 'beats'.
+		 *  Given no other metadata, it makes things 'just work' if we assume 4/4 time signature, and power-of-2 bars  (1,2,4,8 or 16)
+		 *  TODO:  someday we could provide a widget for users who have unlabeled, un-metadata'd, clips that they *know* are 3/4 or 5/4 or 11/4 */
+		{
+			double barcount = round (beatcount/4);
+			if (barcount <= 18) {  /* why not 16 here? fuzzy logic allows minibpm to misjudge the clip a bit */
+				for (int pwr = 0; pwr <= 4; pwr++) {
+					float bc = pow(2,pwr);
+					if (barcount <= bc) {
+						barcount = bc;
+						break;
+					}
+				}
+			}
+			beatcount = round(barcount * 4);
+		}
+
+		// DEBUG_RESULT (double, est, qpm);
+		qpm = beatcount / (seconds/60.);
+		// DEBUG_TRACE (DEBUG::Triggers, string_compose ("given original estimated tempo %1, rounded beatcnt is %2 : resulting in working bpm = %3\n", est, _beatcnt, qpm));
+
+	}
+
+#if 0
+	cerr << "estimated tempo: " << qpm << endl;
+	const samplecnt_t one_beat = tm->bbt_duration_at (timepos_t (AudioTime), BBT_Offset (0, 1, 0)).samples();
+	cerr << "one beat in samples: " << one_beat << endl;
+	cerr << "rounded beatcount = " << round (beatcount) << endl;
+#endif
+
+	return true;
+}
+
