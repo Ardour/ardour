@@ -211,14 +211,14 @@ AudioClipEditor::build_canvas ()
 	CANVAS_DEBUG_NAME (time_line_group, "audioclip time line group");
 
 	n_timebars = 0;
-	minsec_ruler = new ArdourCanvas::Ruler (time_line_group, clip_metric, ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	// minsec_ruler->set_name ("audio clip editor ruler");
-	minsec_ruler->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
-	minsec_ruler->set_fill_color (UIConfiguration::instance().color (X_("theme:bg1")));
-	minsec_ruler->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting less")));
+	main_ruler = new ArdourCanvas::Ruler (time_line_group, clip_metric, ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
+	// main_ruler->set_name ("audio clip editor ruler");
+	main_ruler->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
+	main_ruler->set_fill_color (UIConfiguration::instance().color (X_("ruler base")));
+	main_ruler->set_outline_color (UIConfiguration::instance().color (X_("ruler text")));
 	n_timebars++;
 
-	minsec_ruler->Event.connect (sigc::mem_fun (*this, &CueEditor::ruler_event));
+	main_ruler->Event.connect (sigc::mem_fun (*this, &CueEditor::ruler_event));
 
 	data_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
@@ -387,8 +387,8 @@ AudioClipEditor::set_trigger (TriggerReference& tr)
 	CueEditor::set_trigger (tr);
 	rec_box.show ();
 
-	minsec_ruler->show ();
-	minsec_ruler->set_range (0, pixel_to_sample (_visible_canvas_width - 2.));
+	main_ruler->show ();
+	main_ruler->set_range (0, pixel_to_sample (_visible_canvas_width - 2.));
 }
 
 void
@@ -421,7 +421,7 @@ AudioClipEditor::set_region (std::shared_ptr<Region> region)
 
 	delete clip_metric;
 	clip_metric = new ClipBBTMetric (ref);
-	minsec_ruler->set_metric (clip_metric);
+	main_ruler->set_metric (clip_metric);
 
 	uint32_t    n_chans = r->n_channels ();
 	samplecnt_t len;
@@ -478,7 +478,7 @@ AudioClipEditor::canvas_allocate (Gtk::Allocation& alloc)
 	/* no track header here, "track width" is the whole canvas */
 	_track_canvas_width = _visible_canvas_width;
 
-	minsec_ruler->set (ArdourCanvas::Rect (2, 2, alloc.get_width() - 4, timebar_height));
+	main_ruler->set (ArdourCanvas::Rect (2, 2, alloc.get_width() - 4, timebar_height));
 
 	position_lines ();
 

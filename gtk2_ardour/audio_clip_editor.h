@@ -134,7 +134,7 @@ public:
 	ArdourCanvas::Line*              end_line;
 	ArdourCanvas::Line*              loop_line;
 	ArdourCanvas::Container*         ruler_container;
-	ArdourCanvas::Ruler*             minsec_ruler;
+	ArdourCanvas::Ruler*             main_ruler;
 
 	class ClipBBTMetric : public ArdourCanvas::Ruler::Metric
 	{
