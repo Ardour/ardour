@@ -3528,7 +3528,7 @@ LuaBindings::non_rt (lua_State* L)
 		.addFunction ("add_master_bus", &Session::add_master_bus)
 		.endClass ()
 
-		.deriveWSPtrClass <Route, Stripable> ("Route")
+		.beginWSPtrClass <Route> ("Route")
 		.addFunction ("save_as_template", &Route::save_as_template)
 		.addFunction ("add_sidechain", &Route::add_sidechain)
 		.addFunction ("remove_sidechain", &Route::remove_sidechain)
