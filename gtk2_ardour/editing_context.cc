@@ -1754,16 +1754,12 @@ EditingContext::snap_relative_time_to_relative_time (timepos_t const & origin, t
 void
 EditingContext::start_local_tempo_map (std::shared_ptr<TempoMap> map)
 {
-	EC_LOCAL_TEMPO_SCOPE;
-
 	_local_tempo_map = map;
 }
 
 void
 EditingContext::end_local_tempo_map ()
 {
-	EC_LOCAL_TEMPO_SCOPE;
-
 	_local_tempo_map.reset ();
 	Temporal::TempoMap::fetch ();
 }

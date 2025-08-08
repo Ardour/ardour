@@ -837,7 +837,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	void ensure_local_tempo_scope () const {
 		if (_local_tempo_map) {
 			Temporal::TempoMap::set (_local_tempo_map);
-			_local_tempo_map.reset ();
 		}
 	}
 };
