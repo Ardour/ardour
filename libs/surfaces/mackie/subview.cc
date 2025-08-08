@@ -472,18 +472,18 @@ void DynamicsSubview::setup_vpot(
 
 	available.clear();
 
+	std::shared_ptr<AutomationControl> cec = _subview_stripable->mapped_control (Comp_Enable);
 	std::shared_ptr<AutomationControl> ctc = _subview_stripable->mapped_control (Comp_Threshold);
 	std::shared_ptr<AutomationControl> crc = _subview_stripable->mapped_control (Comp_Ratio);
 	std::shared_ptr<AutomationControl> cac = _subview_stripable->mapped_control (Comp_Attack);
 	std::shared_ptr<AutomationControl> csc = _subview_stripable->mapped_control (Comp_Release);
 	std::shared_ptr<AutomationControl> ckc = _subview_stripable->mapped_control (Comp_Makeup);
-	std::shared_ptr<AutomationControl> cec = _subview_stripable->mapped_control (Comp_Enable);
 
+	std::shared_ptr<AutomationControl> gec = _subview_stripable->mapped_control (Gate_Enable);
 	std::shared_ptr<AutomationControl> gtc = _subview_stripable->mapped_control (Gate_Threshold);
 	std::shared_ptr<AutomationControl> gdc = _subview_stripable->mapped_control (Gate_Depth);
 	std::shared_ptr<AutomationControl> gac = _subview_stripable->mapped_control (Gate_Attack);
 	std::shared_ptr<AutomationControl> gsc = _subview_stripable->mapped_control (Gate_Release);
-	std::shared_ptr<AutomationControl> gec = _subview_stripable->mapped_control (Gate_Enable);
 
 	/* we will control the global_strip_position-th available parameter, from the list in the
 	 * order shown above.
@@ -491,18 +491,18 @@ void DynamicsSubview::setup_vpot(
 
 	std::vector<AutomationType> params;
 
-	if (ctc) { available.push_back (std::make_pair (ctc, "Thresh")); }
-	if (crc) { available.push_back (std::make_pair (crc, "Ratio")); }
-	if (cac) { available.push_back (std::make_pair (cac, "Attk")); }
-	if (csc) { available.push_back (std::make_pair (csc, "Rels")); }
-	if (ckc) { available.push_back (std::make_pair (ckc, "Makeup")); }
-	if (cec) { available.push_back (std::make_pair (cec, "on/off")); }
+	if (cec) { available.push_back (std::make_pair (cec, "Comp")); }
+	if (ctc) { available.push_back (std::make_pair (ctc, "CThrsh")); }
+	if (crc) { available.push_back (std::make_pair (crc, "CRatio")); }
+	if (cac) { available.push_back (std::make_pair (cac, "CAttk")); }
+	if (csc) { available.push_back (std::make_pair (csc, "CRels")); }
+	if (ckc) { available.push_back (std::make_pair (ckc, "CMkup")); }
 
-	if (gtc) { available.push_back (std::make_pair (gtc, "Thresh")); }
-	if (gdc) { available.push_back (std::make_pair (gdc, "Depth")); }
-	if (gac) { available.push_back (std::make_pair (gac, "Attk")); }
-	if (gsc) { available.push_back (std::make_pair (gsc, "Rels")); }
-	if (gec) { available.push_back (std::make_pair (gec, "on/off")); }
+	if (gec) { available.push_back (std::make_pair (gec, "Gate")); }
+	if (gtc) { available.push_back (std::make_pair (gtc, "GThrsh")); }
+	if (gdc) { available.push_back (std::make_pair (gdc, "GDepth")); }
+	if (gac) { available.push_back (std::make_pair (gac, "GAttk")); }
+	if (gsc) { available.push_back (std::make_pair (gsc, "GRels")); }
 
 	if (global_strip_position >= available.size()) {
 		/* this knob is not needed to control the available parameters */
