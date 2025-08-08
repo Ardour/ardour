@@ -153,6 +153,8 @@ EditingContext::EditingContext (std::string const & name)
 	, grid_lines (nullptr)
 	, time_line_group (nullptr)
 	, temporary_zoom_focus_change (false)
+ 	, _dragging_playhead (false)
+
 {
 	using namespace Gtk::Menu_Helpers;
 
@@ -338,6 +340,10 @@ EditingContext::set_action_defaults ()
 	follow_playhead_action->set_active (true);
 	follow_playhead_action->set_active (false);
 #endif
+
+	stationary_playhead_action->set_active (true);
+	stationary_playhead_action->set_active (false);
+
 	mouse_mode_actions[Editing::MouseObject]->set_active (false);
 	mouse_mode_actions[Editing::MouseObject]->set_active (true);
 	zoom_focus_actions[Editing::ZoomFocusLeft]->set_active (false);
@@ -373,10 +379,8 @@ EditingContext::register_common_actions (Bindings* common_bindings, std::string 
 	reg_sens (_common_actions, "temporal-zoom-out", _("Zoom Out"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), true));
 	reg_sens (_common_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), false));
 
-	/* toggle action that represents state */
-	follow_playhead_action = toggle_reg_sens (_common_actions, "follow-playhead", _("Follow Playhead"), sigc::mem_fun (*this, &EditingContext::follow_playhead_chosen));
-	/* invokable action that toggles the stateful action */
-	reg_sens (_common_actions, "toggle-follow-playhead", _("Follow Playhead"), sigc::mem_fun (*this, &EditingContext::toggle_follow_playhead));
+	follow_playhead_action = toggle_reg_sens (_common_actions, "toggle-follow-playhead", _("Follow Playhead"), sigc::mem_fun (*this, &EditingContext::follow_playhead_chosen));
+	stationary_playhead_action = toggle_reg_sens (_common_actions, "toggle-stationary-playhead", _("Stationary Playhead"), (mem_fun(*this, &EditingContext::stationary_playhead_chosen)));
 
 	undo_action = reg_sens (_common_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::undo), 1U));
 	redo_action = reg_sens (_common_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::redo), 1U));
@@ -1175,6 +1179,34 @@ EditingContext::time_domain () const
 }
 
 void
+EditingContext::toggle_stationary_playhead ()
+{
+	stationary_playhead_action->set_active (!stationary_playhead_action->get_active ());
+}
+
+void
+EditingContext::stationary_playhead_chosen ()
+{
+	instant_save ();
+}
+
+void
+EditingContext::set_stationary_playhead (bool yn)
+{
+	stationary_playhead_action->set_active (yn);
+}
+
+bool
+EditingContext::stationary_playhead () const
+{
+	if (!stationary_playhead_action) {
+		return false;
+	}
+
+	return stationary_playhead_action->get_active ();
+}
+
+void
 EditingContext::toggle_follow_playhead ()
 {
 	set_follow_playhead (!follow_playhead_action->get_active(), true);
@@ -1198,6 +1230,16 @@ EditingContext::set_follow_playhead (bool yn, bool catch_up)
 		/* catch up */
 		reset_x_origin_to_follow_playhead ();
 	}
+}
+
+bool
+EditingContext::follow_playhead() const
+{
+	if (!follow_playhead_action) {
+		return false;
+	}
+
+	return follow_playhead_action->get_active ();
 }
 
 double
@@ -2553,11 +2595,6 @@ EditingContext::play_note_selection_clicked ()
 }
 
 void
-EditingContext::follow_playhead_clicked ()
-{
-}
-
-void
 EditingContext::cycle_zoom_focus ()
 {
 	switch (zoom_focus()) {
@@ -3226,14 +3263,4 @@ EditingContext::center_screen_internal (samplepos_t sample, float page)
 	}
 
 	reset_x_origin (sample);
-}
-
-bool
-EditingContext::follow_playhead() const
-{
-	if (!follow_playhead_action) {
-		return false;
-	}
-
-	return follow_playhead_action->get_active ();
 }

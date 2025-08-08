@@ -315,9 +315,7 @@ Editor::Editor ()
 	, ignore_gui_changes (false)
 	, lock_dialog (nullptr)
 	, _last_event_time (g_get_monotonic_time ())
-	, _dragging_playhead (false)
 	, ignore_map_change (false)
-	, _stationary_playhead (false)
 	, _maximised (false)
 	, global_rect_group (nullptr)
 	, tempo_marker_menu (nullptr)
@@ -2358,7 +2356,7 @@ Editor::get_state () const
 
 	node->set_property ("maximised", _maximised);
 	node->set_property ("follow-playhead", follow_playhead());
-	node->set_property ("stationary-playhead", _stationary_playhead);
+	node->set_property ("stationary-playhead", stationary_playhead());
 	node->set_property ("mouse-mode", current_mouse_mode());
 	node->set_property ("join-object-range", smart_mode_action->get_active ());
 
@@ -3403,25 +3401,6 @@ Editor::cycle_marker_click_behavior ()
 	case MarkerClickLocateWhenStopped:
 		set_marker_click_behavior (MarkerClickSelectOnly);
 		break;
-	}
-}
-
-void
-Editor::toggle_stationary_playhead ()
-{
-	RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("toggle-stationary-playhead"));
-	set_stationary_playhead (tact->get_active());
-}
-
-void
-Editor::set_stationary_playhead (bool yn)
-{
-	if (_stationary_playhead != yn) {
-		if ((_stationary_playhead = yn) == true) {
-			/* catch up -- FIXME need a 3.0 equivalent of this 2.X call */
-			// update_current_screen ();
-		}
-		instant_save ();
 	}
 }
 
@@ -5310,7 +5289,7 @@ Editor::super_rapid_screen_update ()
 		return;
 	}
 
-	if (!_stationary_playhead) {
+	if (!stationary_playhead()) {
 		reset_x_origin_to_follow_playhead ();
 	} else {
 		samplepos_t const sample = _playhead_cursor->current_sample ();

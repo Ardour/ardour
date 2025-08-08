@@ -278,14 +278,9 @@ public:
 	virtual void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false) = 0;
 	virtual void show_track_in_display (TimeAxisView* tv, bool move_into_view = false) = 0;
 
-	virtual void set_stationary_playhead (bool yn) = 0;
-	virtual void toggle_stationary_playhead () = 0;
-	virtual bool stationary_playhead() const = 0;
-
 	virtual void toggle_cue_behavior () = 0;
 
 	/** @return true if the playhead is currently being dragged, otherwise false */
-	virtual bool dragging_playhead () const = 0;
 	virtual samplepos_t leftmost_sample() const = 0;
 	virtual samplecnt_t current_page_samples() const = 0;
 	virtual double visible_canvas_height () const = 0;

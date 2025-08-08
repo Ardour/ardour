@@ -210,8 +210,8 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/multi-duplicate|                             <@SECONDARY@>d|duplicate (multi)
 @select|Editor/select-all-in-punch-range|                  <@TERTIARY@>d|select all in punch range
 @vis|Editor/fit-selection|                                             f|fit selection vertically
-@edit|Editing/toggle-follow-playhead|                       <@PRIMARY@>f|toggle playhead tracking
-@edit|Editor/toggle-stationary-playhead|                   <@TERTIARY@>f|toggle stationary playhead
+@edit|EditorEditing/toggle-follow-playhead|                 <@PRIMARY@>f|toggle playhead tracking
+@edit|EditorEditing/toggle-stationary-playhead|            <@TERTIARY@>f|toggle stationary playhead
 @rop|Region/show-rhythm-ferret|                           <@SECONDARY@>f|show rhythm ferret window 
 @wvis|Common/ToggleMaximalEditor|              <@PRIMARY@><@SECONDARY@>f|maximise editor space
 @wvis|Common/ToggleMaximalMixer|                <@PRIMARY@><@TERTIARY@>f|maximise mixer space

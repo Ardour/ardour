@@ -503,6 +503,14 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	void enable_automation_bindings ();
 	void disable_automation_bindings ();
 
+	/* playhead/screen stuff */
+
+	void set_stationary_playhead (bool yn);
+	void toggle_stationary_playhead ();
+	bool stationary_playhead() const;
+
+	bool dragging_playhead () const { return _dragging_playhead; }
+
   protected:
 	std::string _name;
 	bool within_track_canvas;
@@ -573,7 +581,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	virtual void play_note_selection_clicked();
 	virtual void note_mode_clicked() {}
-	virtual void follow_playhead_clicked ();
 	virtual void full_zoom_clicked() {};
 	virtual void set_visible_channel (int) {}
 
@@ -595,6 +602,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	Glib::RefPtr<Gtk::ToggleAction> follow_playhead_action;
 	void follow_playhead_chosen ();
+
+	Glib::RefPtr<Gtk::ToggleAction> stationary_playhead_action;
+	void stationary_playhead_chosen ();
 
 	/* selection process */
 
@@ -821,4 +831,5 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	virtual void automation_move_points_earlier () {};
 
 	bool temporary_zoom_focus_change;
+	bool _dragging_playhead;
 };
