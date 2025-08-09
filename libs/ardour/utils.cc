@@ -62,6 +62,7 @@
 
 #include "temporal/tempo.h"
 
+#include "ardour/debug.h"
 #include "ardour/minibpm.h"
 #include "ardour/region.h"
 #include "ardour/rc_configuration.h"
@@ -816,7 +817,7 @@ ARDOUR::estimate_audio_tempo (std::shared_ptr<Region> region, Sample* data, samp
 
 		qpm = segment.tempo().quarter_notes_per_minute ();
 		meter = segment.meter();
-		// DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: tempo and meter from segment descriptor\n", index()));
+		DEBUG_TRACE (DEBUG::TempoEstimation, string_compose ("%1: tempo and meter from segment descriptor\n", region->name()));
 
 	} else {
 		/* not a great guess, but what else can we do? */
@@ -906,9 +907,9 @@ ARDOUR::estimate_audio_tempo (std::shared_ptr<Region> region, Sample* data, samp
 			beatcount = round(barcount * 4);
 		}
 
-		// DEBUG_RESULT (double, est, qpm);
+		DEBUG_RESULT (double, est, qpm);
 		qpm = beatcount / (seconds/60.);
-		// DEBUG_TRACE (DEBUG::Triggers, string_compose ("given original estimated tempo %1, rounded beatcnt is %2 : resulting in working bpm = %3\n", est, _beatcnt, qpm));
+		DEBUG_TRACE (DEBUG::TempoEstimation, string_compose ("given original estimated tempo %1, rounded beatcnt is %2 : resulting in working bpm = %3\n", est, beatcount, qpm));
 
 	}
 
