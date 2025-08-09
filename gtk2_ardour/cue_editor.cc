@@ -298,24 +298,6 @@ CueEditor::get_canvas_cursor () const
 	return nullptr;
 }
 
-std::shared_ptr<Temporal::TempoMap const>
-CueEditor::start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> map)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	std::shared_ptr<Temporal::TempoMap const> tmp = Temporal::TempoMap::use();
-	Temporal::TempoMap::set (map);
-	return tmp;
-}
-
-void
-CueEditor::end_local_tempo_map (std::shared_ptr<Temporal::TempoMap const> map)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	Temporal::TempoMap::set (map);
-}
-
 void
 CueEditor::do_undo (uint32_t n)
 {
@@ -1186,6 +1168,9 @@ CueEditor::set_region (std::shared_ptr<Region> r)
 
 	_region = r;
 
+	std::shared_ptr<TempoMap> tmap (new TempoMap (_region->tempo(), _region->meter()));
+	start_local_tempo_map (tmap);
+
 	if (!get_canvas()->is_visible()) {
 		_visible_pending_region = r;
 	} else {
@@ -1414,8 +1399,7 @@ CueEditor::idle_data_captured ()
 void
 CueEditor::unset (bool trigger_too)
 {
-	EC_LOCAL_TEMPO_SCOPE;
-
+	end_local_tempo_map ();
 	_history.clear ();
 	history_connection.disconnect();
 	_update_connection.disconnect();
