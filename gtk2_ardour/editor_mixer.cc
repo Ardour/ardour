@@ -113,6 +113,10 @@ Editor::show_editor_mixer (bool yn)
 
 				if ((atv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 					r = atv->route();
+					if (r && r->is_hidden ()) {
+						r.reset ();
+						continue;
+					}
 					break;
 				}
 			}
