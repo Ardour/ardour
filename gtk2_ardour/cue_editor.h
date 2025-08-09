@@ -113,9 +113,6 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 
 	std::vector<MidiRegionView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const;
 
-	std::shared_ptr<Temporal::TempoMap const> start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>);
-	void end_local_tempo_map (std::shared_ptr<Temporal::TempoMap const>);
-
 	void scrolled ();
 	bool canvas_pre_event (GdkEvent*);
 	void catch_pending_show_region ();

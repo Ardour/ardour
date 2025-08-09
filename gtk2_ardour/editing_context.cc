@@ -129,7 +129,6 @@ EditingContext::EditingContext (std::string const & name)
 	, selection (new Selection (this, true))
 	, cut_buffer (new Selection (this, false))
 	, _selection_memento (new SelectionMemento())
-	, _verbose_cursor (nullptr)
 	, samples_per_pixel (2048)
 	, bbt_ruler_scale (bbt_show_many)
 	, bbt_bars (0)
@@ -153,6 +152,8 @@ EditingContext::EditingContext (std::string const & name)
 	, grid_lines (nullptr)
 	, time_line_group (nullptr)
 	, temporary_zoom_focus_change (false)
+ 	, _dragging_playhead (false)
+
 {
 	using namespace Gtk::Menu_Helpers;
 
@@ -254,14 +255,13 @@ EditingContext::~EditingContext()
 	ActionManager::drop_action_group (channel_actions);
 	ActionManager::drop_action_group (velocity_actions);
 	ActionManager::drop_action_group (zoom_actions);
-
-	delete _verbose_cursor;
-	delete grid_lines;
 }
 
 void
 EditingContext::ui_parameter_changed (string parameter)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (parameter == "sound-midi-notes") {
 		if (UIConfiguration::instance().get_sound_midi_notes()) {
 			play_note_selection_button.set_active_state (Gtkmm2ext::ExplicitActive);
@@ -275,11 +275,15 @@ EditingContext::ui_parameter_changed (string parameter)
 void
 EditingContext::parameter_changed (string parameter)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 void
 EditingContext::set_session (ARDOUR::Session* s)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	SessionHandlePtr::set_session (s);
 	disable_automation_bindings ();
 }
@@ -287,6 +291,8 @@ EditingContext::set_session (ARDOUR::Session* s)
 void
 EditingContext::set_selected_midi_region_view (MidiRegionView& mrv)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* clear note selection in all currently selected MidiRegionViews */
 
 	if (get_selection().regions.contains (&mrv) && get_selection().regions.size() == 1) {
@@ -301,6 +307,8 @@ EditingContext::set_selected_midi_region_view (MidiRegionView& mrv)
 void
 EditingContext::register_automation_actions (Bindings* automation_bindings, std::string const & prefix)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	_automation_actions = ActionManager::create_action_group (automation_bindings, prefix + X_("Automation"));
 
 	reg_sens (_automation_actions, "create-point", _("Create Automation Point"), sigc::mem_fun (*this, &EditingContext::automation_create_point_at_edit_point));
@@ -315,6 +323,8 @@ EditingContext::register_automation_actions (Bindings* automation_bindings, std:
 void
 EditingContext::enable_automation_bindings ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_automation_actions) {
 		ActionManager::set_sensitive (_automation_actions, true);
 	}
@@ -323,6 +333,8 @@ EditingContext::enable_automation_bindings ()
 void
 EditingContext::disable_automation_bindings ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_automation_actions) {
 		ActionManager::set_sensitive (_automation_actions, false);
 	}
@@ -331,6 +343,8 @@ EditingContext::disable_automation_bindings ()
 void
 EditingContext::set_action_defaults ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 #ifndef LIVETRAX
 	follow_playhead_action->set_active (false);
 	follow_playhead_action->set_active (true);
@@ -338,6 +352,10 @@ EditingContext::set_action_defaults ()
 	follow_playhead_action->set_active (true);
 	follow_playhead_action->set_active (false);
 #endif
+
+	stationary_playhead_action->set_active (true);
+	stationary_playhead_action->set_active (false);
+
 	mouse_mode_actions[Editing::MouseObject]->set_active (false);
 	mouse_mode_actions[Editing::MouseObject]->set_active (true);
 	zoom_focus_actions[Editing::ZoomFocusLeft]->set_active (false);
@@ -368,15 +386,15 @@ EditingContext::set_action_defaults ()
 void
 EditingContext::register_common_actions (Bindings* common_bindings, std::string const & prefix)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	_common_actions = ActionManager::create_action_group (common_bindings, prefix + X_("Editing"));
 
 	reg_sens (_common_actions, "temporal-zoom-out", _("Zoom Out"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), true));
 	reg_sens (_common_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun (*this, &EditingContext::temporal_zoom_step), false));
 
-	/* toggle action that represents state */
-	follow_playhead_action = toggle_reg_sens (_common_actions, "follow-playhead", _("Follow Playhead"), sigc::mem_fun (*this, &EditingContext::follow_playhead_chosen));
-	/* invokable action that toggles the stateful action */
-	reg_sens (_common_actions, "toggle-follow-playhead", _("Follow Playhead"), sigc::mem_fun (*this, &EditingContext::toggle_follow_playhead));
+	follow_playhead_action = toggle_reg_sens (_common_actions, "toggle-follow-playhead", _("Follow Playhead"), sigc::mem_fun (*this, &EditingContext::follow_playhead_chosen));
+	stationary_playhead_action = toggle_reg_sens (_common_actions, "toggle-stationary-playhead", _("Stationary Playhead"), (mem_fun(*this, &EditingContext::stationary_playhead_chosen)));
 
 	undo_action = reg_sens (_common_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::undo), 1U));
 	redo_action = reg_sens (_common_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::redo), 1U));
@@ -457,6 +475,8 @@ EditingContext::register_common_actions (Bindings* common_bindings, std::string 
 void
 EditingContext::register_midi_actions (Bindings* midi_bindings, std::string const & prefix)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	_midi_actions = ActionManager::create_action_group (midi_bindings, prefix + X_("Notes"));
 
 	/* two versions to allow same action for Delete and Backspace */
@@ -587,6 +607,8 @@ EditingContext::register_midi_actions (Bindings* midi_bindings, std::string cons
 void
 EditingContext::midi_action (void (MidiView::*method)())
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	MidiRegionSelection ms = get_selection().midi_regions();
 
 	if (ms.empty()) {
@@ -614,6 +636,8 @@ EditingContext::midi_action (void (MidiView::*method)())
 void
 EditingContext::next_grid_choice ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	switch (grid_type()) {
 	case Editing::GridTypeBeatDiv32:
 		set_grid_type (Editing::GridTypeNone);
@@ -659,6 +683,8 @@ EditingContext::next_grid_choice ()
 void
 EditingContext::prev_grid_choice ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	switch (grid_type()) {
 	case Editing::GridTypeBeatDiv32:
 		set_grid_type (Editing::GridTypeBeatDiv16);
@@ -704,6 +730,8 @@ EditingContext::prev_grid_choice ()
 void
 EditingContext::grid_type_chosen (GridType gt)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* this is driven by a toggle on a radio group, and so is invoked twice,
 	   once for the item that became inactive and once for the one that became
 	   active.
@@ -753,6 +781,8 @@ EditingContext::grid_type_chosen (GridType gt)
 void
 EditingContext::draw_length_chosen (GridType type)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* this is driven by a toggle on a radio group, and so is invoked twice,
 	   once for the item that became inactive and once for the one that became
 	   active.
@@ -781,6 +811,8 @@ EditingContext::draw_length_chosen (GridType type)
 void
 EditingContext::draw_velocity_chosen (int v)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* this is driven by a toggle on a radio group, and so is invoked twice,
 	   once for the item that became inactive and once for the one that became
 	   active.
@@ -812,6 +844,8 @@ EditingContext::draw_velocity_chosen (int v)
 void
 EditingContext::draw_channel_chosen (int c)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* this is driven by a toggle on a radio group, and so is invoked twice,
 	   once for the item that became inactive and once for the one that became
 	   active.
@@ -843,6 +877,8 @@ EditingContext::draw_channel_chosen (int c)
 void
 EditingContext::cycle_snap_mode ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	switch (snap_mode()) {
 	case SnapOff:
 	case SnapNormal:
@@ -857,6 +893,8 @@ EditingContext::cycle_snap_mode ()
 void
 EditingContext::snap_mode_chosen (SnapMode mode)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* this is driven by a toggle on a radio group, and so is invoked twice,
 	   once for the item that became inactive and once for the one that became
 	   active.
@@ -888,6 +926,8 @@ EditingContext::snap_mode_chosen (SnapMode mode)
 GridType
 EditingContext::grid_type() const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	for (auto const & [grid_type,action] : grid_actions) {
 		if (action->get_active()) {
 			return grid_type;
@@ -900,6 +940,8 @@ EditingContext::grid_type() const
 GridType
 EditingContext::draw_length() const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	for (auto const & [len,action] : draw_length_actions) {
 		if (action->get_active()) {
 			return len;
@@ -912,6 +954,8 @@ EditingContext::draw_length() const
 int
 EditingContext::draw_velocity() const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	for (auto const & [vel,action] : draw_velocity_actions) {
 		if (action->get_active()) {
 			return vel;
@@ -924,6 +968,8 @@ EditingContext::draw_velocity() const
 int
 EditingContext::draw_channel() const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	for (auto const & [chn,action] : draw_channel_actions) {
 		if (action->get_active()) {
 			return chn;
@@ -936,12 +982,16 @@ EditingContext::draw_channel() const
 bool
 EditingContext::grid_musical() const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return grid_type_is_musical (grid_type());
 }
 
 bool
 EditingContext::grid_type_is_musical(GridType gt) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	switch (gt) {
 	case GridTypeBeatDiv32:
 	case GridTypeBeatDiv28:
@@ -973,6 +1023,8 @@ EditingContext::grid_type_is_musical(GridType gt) const
 SnapMode
 EditingContext::snap_mode() const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	for (auto const & [mode,action] : snap_mode_actions) {
 		if (action->get_active()) {
 			return mode;
@@ -985,12 +1037,16 @@ EditingContext::snap_mode() const
 void
 EditingContext::set_draw_length (GridType gt)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	draw_length_actions[gt]->set_active (true);
 }
 
 void
 EditingContext::set_draw_velocity (int v)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (v == DRAW_VEL_AUTO) {
 		draw_velocity_actions[v]->set_active (true);
 	} else {
@@ -1001,6 +1057,8 @@ EditingContext::set_draw_velocity (int v)
 void
 EditingContext::set_draw_channel (int c)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (c == DRAW_CHAN_AUTO) {
 		draw_channel_actions[c]->set_active (true);
 	} else {
@@ -1011,18 +1069,24 @@ EditingContext::set_draw_channel (int c)
 void
 EditingContext::set_grid_type (GridType gt)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	grid_actions[gt]->set_active (true);
 }
 
 void
 EditingContext::set_snap_mode (SnapMode mode)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	snap_mode_actions[mode]->set_active (true);;
 }
 
 void
 EditingContext::build_grid_type_menu ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	using namespace Menu_Helpers;
 
 	/* there's no Grid, but if Snap is engaged, the Snap preferences will be applied */
@@ -1078,6 +1142,8 @@ EditingContext::build_grid_type_menu ()
 void
 EditingContext::build_draw_midi_menus ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	using namespace Menu_Helpers;
 
 	/* Note-Length when drawing */
@@ -1135,18 +1201,24 @@ EditingContext::build_draw_midi_menus ()
 bool
 EditingContext::drag_active () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return _drags->active();
 }
 
 bool
 EditingContext::preview_video_drag_active () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return _drags->preview_video ();
 }
 
 Temporal::TimeDomain
 EditingContext::time_domain () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_session) {
 		return _session->config.get_default_time_domain();
 	}
@@ -1175,14 +1247,54 @@ EditingContext::time_domain () const
 }
 
 void
+EditingContext::toggle_stationary_playhead ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	stationary_playhead_action->set_active (!stationary_playhead_action->get_active ());
+}
+
+void
+EditingContext::stationary_playhead_chosen ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	instant_save ();
+}
+
+void
+EditingContext::set_stationary_playhead (bool yn)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	stationary_playhead_action->set_active (yn);
+}
+
+bool
+EditingContext::stationary_playhead () const
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (!stationary_playhead_action) {
+		return false;
+	}
+
+	return stationary_playhead_action->get_active ();
+}
+
+void
 EditingContext::toggle_follow_playhead ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	set_follow_playhead (!follow_playhead_action->get_active(), true);
 }
 
 void
 EditingContext::follow_playhead_chosen ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	instant_save ();
 }
 
@@ -1192,6 +1304,8 @@ EditingContext::follow_playhead_chosen ()
 void
 EditingContext::set_follow_playhead (bool yn, bool catch_up)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	assert (follow_playhead_action);
 	follow_playhead_action->set_active (yn);
 	if (yn && catch_up) {
@@ -1200,33 +1314,55 @@ EditingContext::set_follow_playhead (bool yn, bool catch_up)
 	}
 }
 
+bool
+EditingContext::follow_playhead() const
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (!follow_playhead_action) {
+		return false;
+	}
+
+	return follow_playhead_action->get_active ();
+}
+
 double
 EditingContext::time_to_pixel (timepos_t const & pos) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return sample_to_pixel (pos.samples());
 }
 
 double
 EditingContext::time_to_pixel_unrounded (timepos_t const & pos) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return sample_to_pixel_unrounded (pos.samples());
 }
 
 double
 EditingContext::time_delta_to_pixel (timepos_t const& start, timepos_t const& end) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return sample_to_pixel (end.samples()) - sample_to_pixel (start.samples ());
 }
 
 double
 EditingContext::duration_to_pixels (timecnt_t const & dur) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return sample_to_pixel (dur.samples());
 }
 
 double
 EditingContext::duration_to_pixels_unrounded (timecnt_t const & dur) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return sample_to_pixel_unrounded (dur.samples());
 }
 
@@ -1238,6 +1374,8 @@ EditingContext::duration_to_pixels_unrounded (timecnt_t const & dur) const
 void
 EditingContext::snap_to_with_modifier (timepos_t& start, GdkEvent const * event, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_session || !event) {
 		return;
 	}
@@ -1260,6 +1398,8 @@ EditingContext::snap_to_with_modifier (timepos_t& start, GdkEvent const * event,
 void
 EditingContext::snap_to (timepos_t& start, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_session || (snap_mode() == SnapOff && !ensure_snap)) {
 		return;
 	}
@@ -1270,12 +1410,16 @@ EditingContext::snap_to (timepos_t& start, Temporal::RoundMode direction, SnapPr
 timepos_t
 EditingContext::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return snap_to_bbt_via_grid (presnap, direction, gpref, grid_type());
 }
 
 timepos_t
 EditingContext::snap_to_bbt_via_grid (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref, GridType grid_type) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	timepos_t ret(presnap);
 	TempoMap::SharedPtr tmap (TempoMap::use());
 
@@ -1378,6 +1522,8 @@ EditingContext::snap_to_bbt_via_grid (timepos_t const & presnap, Temporal::Round
 void
 EditingContext::check_best_snap (timepos_t const & presnap, timepos_t &test, timepos_t &dist, timepos_t &best) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	timepos_t diff = timepos_t (presnap.distance (test).abs ());
 	if (diff < dist) {
 		dist = diff;
@@ -1390,6 +1536,8 @@ EditingContext::check_best_snap (timepos_t const & presnap, timepos_t &test, tim
 timepos_t
 EditingContext::canvas_event_time (GdkEvent const * event, double* pcx, double* pcy) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	timepos_t pos (canvas_event_sample (event, pcx, pcy));
 
 	if (time_domain() == Temporal::AudioTime) {
@@ -1402,6 +1550,8 @@ EditingContext::canvas_event_time (GdkEvent const * event, double* pcx, double* 
 samplepos_t
 EditingContext::canvas_event_sample (GdkEvent const * event, double* pcx, double* pcy) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	double x;
 	double y;
 
@@ -1431,6 +1581,8 @@ EditingContext::canvas_event_sample (GdkEvent const * event, double* pcx, double
 uint32_t
 EditingContext::count_bars (Beats const & start, Beats const & end) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	TempoMapPoints bar_grid;
 	TempoMap::SharedPtr tmap (TempoMap::use());
 	bar_grid.reserve (4096);
@@ -1443,6 +1595,8 @@ EditingContext::count_bars (Beats const & start, Beats const & end) const
 void
 EditingContext::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_session == 0) {
 		return;
 	}
@@ -1537,6 +1691,8 @@ EditingContext::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 Quantize*
 EditingContext::get_quantize_op ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!quantize_dialog) {
 		quantize_dialog = new QuantizeDialog (*this);
 	}
@@ -1562,6 +1718,8 @@ EditingContext::get_quantize_op ()
 timecnt_t
 EditingContext::relative_distance (timepos_t const & origin, timecnt_t const & duration, Temporal::TimeDomain domain)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return Temporal::TempoMap::use()->convert_duration (duration, origin, domain);
 }
 
@@ -1574,6 +1732,8 @@ EditingContext::relative_distance (timepos_t const & origin, timecnt_t const & d
 timecnt_t
 EditingContext::snap_relative_time_to_relative_time (timepos_t const & origin, timecnt_t const & x, bool ensure_snap) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* x is relative to origin, convert it to global absolute time */
 	timepos_t const session_pos = origin + x;
 
@@ -1591,16 +1751,24 @@ EditingContext::snap_relative_time_to_relative_time (timepos_t const & origin, t
 	return origin.distance (snapped);
 }
 
-std::shared_ptr<Temporal::TempoMap const>
-EditingContext::start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>)
+void
+EditingContext::start_local_tempo_map (std::shared_ptr<TempoMap> map)
 {
-	/* default is a no-op */
-	return Temporal::TempoMap::use ();
+	_local_tempo_map = map;
+}
+
+void
+EditingContext::end_local_tempo_map ()
+{
+	_local_tempo_map.reset ();
+	Temporal::TempoMap::fetch ();
 }
 
 bool
 EditingContext::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType type)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!session () || session()->loading () || session()->deletion_in_progress ()) {
 		return false;
 	}
@@ -1645,6 +1813,8 @@ EditingContext::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType
 void
 EditingContext::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	using namespace Menu_Helpers;
 
 	NoteBase* note = reinterpret_cast<NoteBase*>(item->get_data("notebase"));
@@ -1690,6 +1860,8 @@ EditingContext::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* eve
 XMLNode*
 EditingContext::button_settings () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	XMLNode* settings = ARDOUR_UI::instance()->editor_settings();
 	XMLNode* node = find_named_node (*settings, X_("Buttons"));
 
@@ -1703,12 +1875,16 @@ EditingContext::button_settings () const
 EditingContext::MidiViews
 EditingContext::filter_to_unique_midi_region_views (RegionSelection const & rs) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return filter_to_unique_midi_region_views (midiviews_from_region_selection (rs));
 }
 
 EditingContext::MidiViews
 EditingContext::filter_to_unique_midi_region_views (MidiViews const & mvs) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	typedef std::pair<std::shared_ptr<MidiSource>,timepos_t> MapEntry;
 	std::set<MapEntry> single_region_set;
 
@@ -1738,6 +1914,8 @@ EditingContext::filter_to_unique_midi_region_views (MidiViews const & mvs) const
 EditingContext::MidiViews
 EditingContext::midiviews_from_region_selection (RegionSelection const & rs) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	MidiViews views;
 
 	for (auto & rv : rs) {
@@ -1753,6 +1931,8 @@ EditingContext::midiviews_from_region_selection (RegionSelection const & rs) con
 void
 EditingContext::quantize_region ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_session) {
 		quantize_regions (midiviews_from_region_selection (region_selection()));
 	}
@@ -1761,6 +1941,8 @@ EditingContext::quantize_region ()
 void
 EditingContext::quantize_regions (const MidiViews& rs)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (rs.empty()) {
 		std::cerr << "no regions\n";
 		return;
@@ -1782,6 +1964,8 @@ EditingContext::quantize_regions (const MidiViews& rs)
 void
 EditingContext::legatize_region (bool shrink_only)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_session) {
 		legatize_regions (midiviews_from_region_selection (region_selection ()), shrink_only);
 	}
@@ -1790,6 +1974,8 @@ EditingContext::legatize_region (bool shrink_only)
 void
 EditingContext::legatize_regions (const MidiViews& rs, bool shrink_only)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (rs.empty()) {
 		return;
 	}
@@ -1801,6 +1987,8 @@ EditingContext::legatize_regions (const MidiViews& rs, bool shrink_only)
 void
 EditingContext::transform_region ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_session) {
 		transform_regions (midiviews_from_region_selection (region_selection ()));
 	}
@@ -1809,6 +1997,8 @@ EditingContext::transform_region ()
 void
 EditingContext::transform_regions (const MidiViews& rs)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (rs.empty()) {
 		return;
 	}
@@ -1828,6 +2018,8 @@ EditingContext::transform_regions (const MidiViews& rs)
 void
 EditingContext::transpose_region ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_session) {
 		transpose_regions (midiviews_from_region_selection (region_selection ()));
 	}
@@ -1836,6 +2028,8 @@ EditingContext::transpose_region ()
 void
 EditingContext::transpose_regions (const MidiViews& rs)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (rs.empty()) {
 		return;
 	}
@@ -1852,6 +2046,8 @@ EditingContext::transpose_regions (const MidiViews& rs)
 void
 EditingContext::edit_notes (MidiView* mrv)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	MidiView::Selection const & s = mrv->selection();
 
 	if (s.empty ()) {
@@ -1867,6 +2063,8 @@ EditingContext::edit_notes (MidiView* mrv)
 void
 EditingContext::note_edit_done (int r, EditNoteDialog* d)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	d->done (r);
 	delete d;
 }
@@ -1874,6 +2072,8 @@ EditingContext::note_edit_done (int r, EditNoteDialog* d)
 PBD::Command*
 EditingContext::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiView& mrv)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	Evoral::Sequence<Temporal::Beats>::Notes selected;
 	mrv.selection_as_notelist (selected, true);
 
@@ -1892,12 +2092,16 @@ EditingContext::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiView& m
 void
 EditingContext::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection& rs)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	apply_midi_note_edit_op (op, midiviews_from_region_selection (rs));
 }
 
 void
 EditingContext::apply_midi_note_edit_op (MidiOperator& op, const MidiViews& rs)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (rs.empty()) {
 		return;
 	}
@@ -1928,12 +2132,16 @@ EditingContext::apply_midi_note_edit_op (MidiOperator& op, const MidiViews& rs)
 double
 EditingContext::horizontal_position () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return horizontal_adjustment.get_value();
 }
 
 void
 EditingContext::set_horizontal_position (double p)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	p = std::max (0., p);
 
 	horizontal_adjustment.set_value (p);
@@ -1943,6 +2151,8 @@ EditingContext::set_horizontal_position (double p)
 Gdk::Cursor*
 EditingContext::get_canvas_cursor () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	Glib::RefPtr<Gdk::Window> win = get_canvas_viewport()->get_window();
 
 	if (win) {
@@ -1955,6 +2165,8 @@ EditingContext::get_canvas_cursor () const
 void
 EditingContext::set_canvas_cursor (Gdk::Cursor* cursor)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	Glib::RefPtr<Gdk::Window> win = get_canvas()->get_window();
 
 	if (win && !_cursors->is_invalid (cursor)) {
@@ -1973,6 +2185,8 @@ EditingContext::set_canvas_cursor (Gdk::Cursor* cursor)
 void
 EditingContext::pack_draw_box (bool with_channel)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* Draw  - these MIDI tools are only visible when in Draw mode */
 	draw_box.set_spacing (2);
 	draw_box.set_border_width (2);
@@ -1999,6 +2213,8 @@ EditingContext::pack_draw_box (bool with_channel)
 void
 EditingContext::pack_snap_box ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	snap_box.pack_start (snap_mode_button, false, false);
 	snap_box.pack_start (grid_type_selector, false, false);
 }
@@ -2006,6 +2222,8 @@ EditingContext::pack_snap_box ()
 void
 EditingContext::bind_mouse_mode_buttons ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	RefPtr<Action> act;
 
 	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("temporal-zoom-in"));
@@ -2058,6 +2276,8 @@ EditingContext::bind_mouse_mode_buttons ()
 Editing::MouseMode
 EditingContext::current_mouse_mode() const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	for (auto & [mode,action] : mouse_mode_actions) {
 		if (action->get_active()) {
 			return mode;
@@ -2070,6 +2290,8 @@ EditingContext::current_mouse_mode() const
 void
 EditingContext::set_mouse_mode (MouseMode m, bool force)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_drags->active ()) {
 		return;
 	}
@@ -2084,6 +2306,8 @@ EditingContext::set_mouse_mode (MouseMode m, bool force)
 bool
 EditingContext::on_velocity_scroll_event (GdkEventScroll* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	int v = PBD::atoi (draw_velocity_selector.get_text ());
 	switch (ev->direction) {
 		case GDK_SCROLL_DOWN:
@@ -2102,6 +2326,8 @@ EditingContext::on_velocity_scroll_event (GdkEventScroll* ev)
 void
 EditingContext::set_common_editing_state (XMLNode const & node)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	double z;
 	if (node.get_property ("zoom", z)) {
 		/* older versions of ardour used floating point samples_per_pixel */
@@ -2147,6 +2373,8 @@ EditingContext::set_common_editing_state (XMLNode const & node)
 void
 EditingContext::get_common_editing_state (XMLNode& node) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	node.set_property ("zoom", samples_per_pixel);
 	node.set_property ("grid-type", grid_type());
 	node.set_property ("snap-mode", snap_mode());
@@ -2160,6 +2388,8 @@ EditingContext::get_common_editing_state (XMLNode& node) const
 bool
 EditingContext::snap_mode_button_clicked (GdkEventButton* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (ev->button != 3) {
 		cycle_snap_mode();
 		return true;
@@ -2177,6 +2407,8 @@ EditingContext::snap_mode_button_clicked (GdkEventButton* ev)
 void
 EditingContext::ensure_visual_change_idle_handler ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (pending_visual_change.idle_handler_id < 0) {
 		/* see comment in add_to_idle_resize above. */
 		pending_visual_change.idle_handler_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE + 10, _idle_visual_changer, this, NULL);
@@ -2193,6 +2425,8 @@ EditingContext::_idle_visual_changer (void* arg)
 int
 EditingContext::idle_visual_changer ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	pending_visual_change.idle_handler_id = -1;
 
 	if (pending_visual_change.pending == 0) {
@@ -2235,6 +2469,8 @@ EditingContext::idle_visual_changer ()
 void
 EditingContext::reset_x_origin (samplepos_t sample)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	pending_visual_change.add (VisualChange::TimeOrigin);
 	pending_visual_change.time_origin = sample;
 	ensure_visual_change_idle_handler ();
@@ -2243,6 +2479,8 @@ EditingContext::reset_x_origin (samplepos_t sample)
 void
 EditingContext::reset_y_origin (double y)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	pending_visual_change.add (VisualChange::YOrigin);
 	pending_visual_change.y_origin = y;
 	ensure_visual_change_idle_handler ();
@@ -2251,6 +2489,8 @@ EditingContext::reset_y_origin (double y)
 void
 EditingContext::reset_zoom (samplecnt_t spp)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_track_canvas_width <= 0) {
 		return;
 	}
@@ -2274,6 +2514,8 @@ EditingContext::reset_zoom (samplecnt_t spp)
 void
 EditingContext::pre_render ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	visual_change_queued = false;
 
 	if (pending_visual_change.pending != 0) {
@@ -2310,6 +2552,8 @@ EditingContext::radio_reg_sens (RefPtr<ActionGroup> action_group, RadioAction::G
 void
 EditingContext::update_undo_redo_actions (PBD::UndoHistory const & history)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	string label;
 
 	if (undo_action) {
@@ -2338,6 +2582,8 @@ EditingContext::update_undo_redo_actions (PBD::UndoHistory const & history)
 int32_t
 EditingContext::get_grid_beat_divisions (GridType gt) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	switch (gt) {
 	case GridTypeBeatDiv32:  return 32;
 	case GridTypeBeatDiv28:  return 28;
@@ -2375,12 +2621,16 @@ EditingContext::get_grid_beat_divisions (GridType gt) const
 int32_t
 EditingContext::get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return get_grid_beat_divisions (gt);
 }
 
 Temporal::Beats
 EditingContext::get_grid_type_as_beats (bool& success, timepos_t const & position) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	success = true;
 
 	int32_t const divisions = get_grid_beat_divisions (grid_type());
@@ -2460,6 +2710,8 @@ EditingContext::get_grid_type_as_beats (bool& success, timepos_t const & positio
 Temporal::Beats
 EditingContext::get_draw_length_as_beats (bool& success, timepos_t const & position) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	success = true;
 	GridType grid_to_use = draw_length() == DRAW_LEN_AUTO ? grid_type() : draw_length();
 	int32_t const divisions = get_grid_beat_divisions (grid_to_use);
@@ -2475,6 +2727,8 @@ EditingContext::get_draw_length_as_beats (bool& success, timepos_t const & posit
 void
 EditingContext::select_automation_line (GdkEventButton* event, ArdourCanvas::Item* item, ARDOUR::SelectionOperation op)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	AutomationLine* al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
 	std::list<Selectable*> selectables;
 	double mx = event->x;
@@ -2525,6 +2779,8 @@ EditingContext::select_automation_line (GdkEventButton* event, ArdourCanvas::Ite
 void
 EditingContext::reset_point_selection ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
 		ARDOUR::AutomationList::iterator j = (*i)->model ();
 		(*j)->value = (*i)->line().the_list()->descriptor ().normal;
@@ -2534,6 +2790,8 @@ EditingContext::reset_point_selection ()
 void
 EditingContext::choose_canvas_cursor_on_entry (ItemType type)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_drags->active()) {
 		return;
 	}
@@ -2549,17 +2807,16 @@ EditingContext::choose_canvas_cursor_on_entry (ItemType type)
 void
 EditingContext::play_note_selection_clicked ()
 {
-	UIConfiguration::instance().set_sound_midi_notes (!UIConfiguration::instance().get_sound_midi_notes());
-}
+	EC_LOCAL_TEMPO_SCOPE;
 
-void
-EditingContext::follow_playhead_clicked ()
-{
+	UIConfiguration::instance().set_sound_midi_notes (!UIConfiguration::instance().get_sound_midi_notes());
 }
 
 void
 EditingContext::cycle_zoom_focus ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	switch (zoom_focus()) {
 	case ZoomFocusLeft:
 		set_zoom_focus (ZoomFocusRight);
@@ -2585,6 +2842,8 @@ EditingContext::cycle_zoom_focus ()
 void
 EditingContext::temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	ZoomFocus old_zf (zoom_focus());
 	PBD::Unwinder<bool> uw (temporary_zoom_focus_change, true);
 	set_zoom_focus (Editing::ZoomFocusMouse);
@@ -2595,18 +2854,24 @@ EditingContext::temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scal
 void
 EditingContext::temporal_zoom_step_mouse_focus (bool zoom_out)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	temporal_zoom_step_mouse_focus_scale (zoom_out, 2.0);
 }
 
 void
 EditingContext::temporal_zoom_step (bool zoom_out)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	temporal_zoom_step_scale (zoom_out, 2.0);
 }
 
 void
 EditingContext::temporal_zoom_step_scale (bool zoom_out, double scale)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	ENSURE_GUI_THREAD (*this, &EditingContext::temporal_zoom_step, zoom_out, scale)
 
 	samplecnt_t nspp = samples_per_pixel;
@@ -2637,6 +2902,8 @@ EditingContext::temporal_zoom_step_scale (bool zoom_out, double scale)
 void
 EditingContext::temporal_zoom (samplecnt_t spp)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_session) {
 		return;
 	}
@@ -2768,6 +3035,8 @@ EditingContext::temporal_zoom (samplecnt_t spp)
 void
 EditingContext::calc_extra_zoom_edges (samplepos_t &start, samplepos_t &end)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* this func helps make sure we leave a little space
 	   at each end of the editor so that the zoom doesn't fit the region
 	   precisely to the screen.
@@ -2800,6 +3069,8 @@ EditingContext::calc_extra_zoom_edges (samplepos_t &start, samplepos_t &end)
 void
 EditingContext::temporal_zoom_by_sample (samplepos_t start, samplepos_t end)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_session) return;
 
 	if ((start == 0 && end == 0) || end < start) {
@@ -2828,6 +3099,8 @@ EditingContext::temporal_zoom_by_sample (samplepos_t start, samplepos_t end)
 void
 EditingContext::temporal_zoom_to_sample (bool coarser, samplepos_t sample)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_session) {
 		return;
 	}
@@ -2879,6 +3152,8 @@ EditingContext::temporal_zoom_to_sample (bool coarser, samplepos_t sample)
 bool
 EditingContext::mouse_sample (samplepos_t& where, bool& in_track_canvas) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	/* gdk_window_get_pointer() has X11's XQueryPointer semantics in that it only
 	 * pays attentions to subwindows. this means that menu windows are ignored, and
 	 * if the pointer is in a menu, the return window from the call will be the
@@ -2927,6 +3202,8 @@ EditingContext::mouse_sample (samplepos_t& where, bool& in_track_canvas) const
 samplepos_t
 EditingContext::window_event_sample (GdkEvent const * event, double* pcx, double* pcy) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	ArdourCanvas::Duple d;
 
 	if (!gdk_event_get_coords (event, &d.x, &d.y)) {
@@ -2952,6 +3229,8 @@ EditingContext::window_event_sample (GdkEvent const * event, double* pcx, double
 Editing::ZoomFocus
 EditingContext::zoom_focus () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	for (auto & [mode,action] : zoom_focus_actions) {
 		if (action->get_active()) {
 			return mode;
@@ -2964,6 +3243,8 @@ EditingContext::zoom_focus () const
 void
 EditingContext::zoom_focus_chosen (ZoomFocus focus)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (temporary_zoom_focus_change) {
 		/* we are just changing settings momentarily, no need to do anything */
 		return;
@@ -2985,6 +3266,8 @@ EditingContext::zoom_focus_chosen (ZoomFocus focus)
 void
 EditingContext::alt_delete_ ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	delete_ ();
 }
 
@@ -2992,6 +3275,8 @@ EditingContext::alt_delete_ ()
 void
 EditingContext::cut ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	cut_copy (Cut);
 }
 
@@ -2999,12 +3284,16 @@ EditingContext::cut ()
 void
 EditingContext::copy ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	cut_copy (Copy);
 }
 
 void
 EditingContext::load_shared_bindings ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	Bindings* m = Bindings::get_bindings (X_("MIDI"));
 	Bindings* b = Bindings::get_bindings (X_("Editing"));
 	Bindings* a = Bindings::get_bindings (X_("Automation"));
@@ -3042,14 +3331,17 @@ EditingContext::load_shared_bindings ()
 void
 EditingContext::drop_grid ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	hide_grid_lines ();
-	delete grid_lines;
-	grid_lines = nullptr;
+	grid_lines.reset ();
 }
 
 void
 EditingContext::hide_grid_lines ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (grid_lines) {
 		grid_lines->hide();
 	}
@@ -3058,12 +3350,14 @@ EditingContext::hide_grid_lines ()
 void
 EditingContext::maybe_draw_grid_lines (ArdourCanvas::Container* group)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_session) {
 		return;
 	}
 
 	if (!grid_lines) {
-		grid_lines = new GridLines (*this, group, ArdourCanvas::LineSet::Vertical);
+		grid_lines.reset (new GridLines (*this, group, ArdourCanvas::LineSet::Vertical));
 
 	}
 
@@ -3089,6 +3383,8 @@ EditingContext::maybe_draw_grid_lines (ArdourCanvas::Container* group)
 void
 EditingContext::update_grid ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_session) {
 		return;
 	}
@@ -3103,6 +3399,8 @@ EditingContext::update_grid ()
 Location*
 EditingContext::transport_loop_location()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (_session) {
 		return _session->locations()->auto_loop_location();
 	} else {
@@ -3113,6 +3411,8 @@ EditingContext::transport_loop_location()
 void
 EditingContext::set_loop_range (timepos_t const & start, timepos_t const & end, string cmd)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!_session) {
 		return;
 	}
@@ -3145,6 +3445,8 @@ EditingContext::set_loop_range (timepos_t const & start, timepos_t const & end, 
 bool
 EditingContext::allow_trim_cursors () const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	auto mouse_mode = current_mouse_mode();
 	return mouse_mode == MouseContent || mouse_mode == MouseTimeFX || mouse_mode == MouseDraw;
 }
@@ -3153,6 +3455,8 @@ EditingContext::allow_trim_cursors () const
 void
 EditingContext::reset_x_origin_to_follow_playhead ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	assert (_session);
 
 	samplepos_t const sample = _playhead_cursor->current_sample ();
@@ -3204,6 +3508,8 @@ EditingContext::reset_x_origin_to_follow_playhead ()
 void
 EditingContext::center_screen (samplepos_t sample)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	samplecnt_t const page = _visible_canvas_width * samples_per_pixel;
 
 	/* if we're off the page, then scroll.
@@ -3217,6 +3523,8 @@ EditingContext::center_screen (samplepos_t sample)
 void
 EditingContext::center_screen_internal (samplepos_t sample, float page)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	page /= 2;
 
 	if (sample > page) {
@@ -3226,14 +3534,4 @@ EditingContext::center_screen_internal (samplepos_t sample, float page)
 	}
 
 	reset_x_origin (sample);
-}
-
-bool
-EditingContext::follow_playhead() const
-{
-	if (!follow_playhead_action) {
-		return false;
-	}
-
-	return follow_playhead_action->get_active ();
 }

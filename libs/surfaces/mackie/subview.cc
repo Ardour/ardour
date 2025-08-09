@@ -278,6 +278,7 @@ void NoneSubview::setup_vpot(
 
 EQSubview::EQSubview(MackieControlProtocol& mcp, std::shared_ptr<ARDOUR::Stripable> subview_stripable)
 	: Subview(mcp, subview_stripable)
+	, _current_bank(0)
 {}
 
 EQSubview::~EQSubview()
@@ -308,8 +309,8 @@ void EQSubview::setup_vpot(
 		Pot* vpot,
 		std::string pending_display[2])
 {
-	const uint32_t global_strip_position = _mcp.global_index (*strip);
-	store_pointers(strip, vpot, pending_display, global_strip_position);
+	const uint32_t global_strip_position = _mcp.global_index (*strip) + _current_bank;
+	store_pointers(strip, vpot, pending_display, global_strip_position - _current_bank);
 
 	if (!_subview_stripable) {
 		return;
@@ -357,6 +358,18 @@ void EQSubview::setup_vpot(
 				pc = _subview_stripable->mapped_control(EQ_Enable);
 				pot_id = "EQ";
 				break;
+			case 11:
+				pc = _subview_stripable->mapped_control(LPF_Freq);
+				pot_id = "LPF";
+				break;
+			case 12:
+				pc = _subview_stripable->mapped_control(HPF_Freq);
+				pot_id = "HPF";
+				break;
+			case 13:
+				pc = _subview_stripable->mapped_control(HPF_Enable); // shared HP/LP
+				pot_id = "Filter";
+				break;
 		}
 
 	} else {  //mixbus or master bus ( these are currently the same for MB & 32C )
@@ -402,7 +415,7 @@ void EQSubview::notify_change (std::weak_ptr<ARDOUR::AutomationControl> pc, uint
 	Strip* strip = 0;
 	Pot* vpot = 0;
 	std::string* pending_display = 0;
-	if (!retrieve_pointers(&strip, &vpot, &pending_display, global_strip_position))
+	if (!retrieve_pointers(&strip, &vpot, &pending_display, global_strip_position - _current_bank))
 	{
 		return;
 	}
@@ -416,10 +429,32 @@ void EQSubview::notify_change (std::weak_ptr<ARDOUR::AutomationControl> pc, uint
 	}
 }
 
+bool EQSubview::handle_cursor_left_press()
+{
+	if (_current_bank >= 1)
+	{
+		_current_bank -= 1;
+		mcp().redisplay_subview_mode();
+	}
+
+	return true;
+}
+
+bool EQSubview::handle_cursor_right_press()
+{
+	if (/* todo: generate this value on redisplay */ 14 > _current_bank + 1) {
+		_current_bank += 1;
+		mcp().redisplay_subview_mode();
+	}
+
+	return true;
+}
+
 
 
 DynamicsSubview::DynamicsSubview(MackieControlProtocol& mcp, std::shared_ptr<ARDOUR::Stripable> subview_stripable)
 	: Subview(mcp, subview_stripable)
+	, _current_bank(0)
 {}
 
 DynamicsSubview::~DynamicsSubview()
@@ -450,54 +485,46 @@ void DynamicsSubview::setup_vpot(
 		Pot* vpot,
 		std::string pending_display[2])
 {
-	const uint32_t global_strip_position = _mcp.global_index (*strip);
-	store_pointers(strip, vpot, pending_display, global_strip_position);
+	const uint32_t global_strip_position = _mcp.global_index (*strip) + _current_bank;
+	store_pointers(strip, vpot, pending_display, global_strip_position - _current_bank);
 
 	if (!_subview_stripable) {
 		return;
 	}
 
-	std::shared_ptr<AutomationControl> hpfc = _subview_stripable->mapped_control (HPF_Freq);
-	std::shared_ptr<AutomationControl> lpfc = _subview_stripable->mapped_control (LPF_Freq);
-	std::shared_ptr<AutomationControl> fec = _subview_stripable->mapped_control (HPF_Enable); // shared HP/LP
+	available.clear();
 
+	std::shared_ptr<AutomationControl> cec = _subview_stripable->mapped_control (Comp_Enable);
 	std::shared_ptr<AutomationControl> ctc = _subview_stripable->mapped_control (Comp_Threshold);
 	std::shared_ptr<AutomationControl> crc = _subview_stripable->mapped_control (Comp_Ratio);
 	std::shared_ptr<AutomationControl> cac = _subview_stripable->mapped_control (Comp_Attack);
 	std::shared_ptr<AutomationControl> csc = _subview_stripable->mapped_control (Comp_Release);
 	std::shared_ptr<AutomationControl> ckc = _subview_stripable->mapped_control (Comp_Makeup);
-	std::shared_ptr<AutomationControl> cec = _subview_stripable->mapped_control (Comp_Enable);
 
+	std::shared_ptr<AutomationControl> gec = _subview_stripable->mapped_control (Gate_Enable);
 	std::shared_ptr<AutomationControl> gtc = _subview_stripable->mapped_control (Gate_Threshold);
 	std::shared_ptr<AutomationControl> gdc = _subview_stripable->mapped_control (Gate_Depth);
 	std::shared_ptr<AutomationControl> gac = _subview_stripable->mapped_control (Gate_Attack);
 	std::shared_ptr<AutomationControl> gsc = _subview_stripable->mapped_control (Gate_Release);
-	std::shared_ptr<AutomationControl> gec = _subview_stripable->mapped_control (Gate_Enable);
 
 	/* we will control the global_strip_position-th available parameter, from the list in the
 	 * order shown above.
 	 */
 
-	std::vector<std::pair<std::shared_ptr<AutomationControl>, std::string > > available;
 	std::vector<AutomationType> params;
 
-	//Mixbus32C needs to spill the filter controls into the comp section
-	if (hpfc) { available.push_back (std::make_pair (hpfc, "HPF")); }
-	if (lpfc) { available.push_back (std::make_pair (lpfc, "LPF")); }
-	if (fec)  { available.push_back (std::make_pair (fec, "FiltIn")); }
+	if (cec) { available.push_back (std::make_pair (cec, "Comp")); }
+	if (ctc) { available.push_back (std::make_pair (ctc, "CThrsh")); }
+	if (crc) { available.push_back (std::make_pair (crc, "CRatio")); }
+	if (cac) { available.push_back (std::make_pair (cac, "CAttk")); }
+	if (csc) { available.push_back (std::make_pair (csc, "CRels")); }
+	if (ckc) { available.push_back (std::make_pair (ckc, "CMkup")); }
 
-	if (ctc) { available.push_back (std::make_pair (ctc, "Thresh")); }
-	if (crc) { available.push_back (std::make_pair (crc, "Ratio")); }
-	if (cac) { available.push_back (std::make_pair (cac, "Attk")); }
-	if (csc) { available.push_back (std::make_pair (csc, "Rels")); }
-	if (ckc) { available.push_back (std::make_pair (ckc, "Makeup")); }
-	if (cec) { available.push_back (std::make_pair (cec, "on/off")); }
-
-	if (gtc) { available.push_back (std::make_pair (gtc, "Thresh")); }
-	if (gdc) { available.push_back (std::make_pair (gdc, "Depth")); }
-	if (gac) { available.push_back (std::make_pair (gac, "Attk")); }
-	if (gsc) { available.push_back (std::make_pair (gsc, "Rels")); }
-	if (gec) { available.push_back (std::make_pair (gec, "on/off")); }
+	if (gec) { available.push_back (std::make_pair (gec, "Gate")); }
+	if (gtc) { available.push_back (std::make_pair (gtc, "GThrsh")); }
+	if (gdc) { available.push_back (std::make_pair (gdc, "GDepth")); }
+	if (gac) { available.push_back (std::make_pair (gac, "GAttk")); }
+	if (gsc) { available.push_back (std::make_pair (gsc, "GRels")); }
 
 	if (global_strip_position >= available.size()) {
 		/* this knob is not needed to control the available parameters */
@@ -535,7 +562,7 @@ DynamicsSubview::notify_change (std::weak_ptr<ARDOUR::AutomationControl> pc, uin
 	Strip* strip = 0;
 	Pot* vpot = 0;
 	std::string* pending_display = 0;
-	if (!retrieve_pointers(&strip, &vpot, &pending_display, global_strip_position))
+	if (!retrieve_pointers(&strip, &vpot, &pending_display, global_strip_position - _current_bank))
 	{
 		return;
 	}
@@ -550,14 +577,31 @@ DynamicsSubview::notify_change (std::weak_ptr<ARDOUR::AutomationControl> pc, uin
 
 	if (control) {
 		float val = control->get_value();
-		if (control == _subview_stripable->mapped_control (Comp_Mode)) {
-			pending_display[1] = control->get_user_string ();
-		} else {
-			do_parameter_display(pending_display[1], control->desc(), val, strip, true);
-		}
+		pending_display[1] = Strip::remove_units(control->get_user_string());
 		/* update pot/encoder */
 		strip->surface()->write (vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
+}
+
+bool DynamicsSubview::handle_cursor_left_press()
+{
+	if (_current_bank >= 1)
+	{
+		_current_bank -= 1;
+		mcp().redisplay_subview_mode();
+	}
+
+	return true;
+}
+
+bool DynamicsSubview::handle_cursor_right_press()
+{
+	if (available.size() > _current_bank + 1) {
+		_current_bank += 1;
+		mcp().redisplay_subview_mode();
+	}
+
+	return true;
 }
 
 

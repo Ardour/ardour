@@ -425,8 +425,8 @@ Drag::end_grab (GdkEvent* event)
 	_item->ungrab ();
 
 	finished (event, _starting_point_passed);
-
-	editing_context.verbose_cursor ()->hide ();
+ 
+	editing_context.verbose_cursor().hide ();
 
 	return _starting_point_passed;
 }
@@ -595,28 +595,28 @@ Drag::abort ()
 	aborted (_move_threshold_passed);
 
 	editing_context.stop_canvas_autoscroll ();
-	editing_context.verbose_cursor ()->hide ();
+	editing_context.verbose_cursor().hide ();
 }
 
 void
 Drag::show_verbose_cursor_time (timepos_t const& pos)
 {
-	editing_context.verbose_cursor ()->set_time (pos.samples ());
-	editing_context.verbose_cursor ()->show ();
+	editing_context.verbose_cursor().set_time (pos.samples ());
+	editing_context.verbose_cursor().show ();
 }
 
 void
 Drag::show_verbose_cursor_duration (timepos_t const& start, timepos_t const& end, double /*xoffset*/)
 {
-	editing_context.verbose_cursor ()->set_duration (start.samples (), end.samples ());
-	editing_context.verbose_cursor ()->show ();
+	editing_context.verbose_cursor().set_duration (start.samples (), end.samples ());
+	editing_context.verbose_cursor().show ();
 }
 
 void
 Drag::show_verbose_cursor_text (string const& text)
 {
-	editing_context.verbose_cursor ()->set (text);
-	editing_context.verbose_cursor ()->show ();
+	editing_context.verbose_cursor().set (text);
+	editing_context.verbose_cursor().show ();
 }
 
 void

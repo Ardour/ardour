@@ -87,18 +87,17 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	Temporal::TimeDomain time_domain () const;
 
-
 	struct TempoMapScope {
 		TempoMapScope (EditingContext& context, std::shared_ptr<Temporal::TempoMap> map)
 			: ec (context)
 		{
-			old_map = ec.start_local_tempo_map (map);
+			ec.start_local_tempo_map (map);
+			ec.ensure_local_tempo_scope ();
 		}
 		~TempoMapScope () {
-			ec.end_local_tempo_map (old_map);
+			ec.end_local_tempo_map ();
 		}
 		EditingContext& ec;
-		std::shared_ptr<Temporal::TempoMap const> old_map;
 	};
 
 	DragManager* drags () const {
@@ -385,8 +384,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	static MouseCursors const* cursors () {
 		return _cursors;
 	}
-	virtual VerboseCursor* verbose_cursor () const {
-		return _verbose_cursor;
+	virtual VerboseCursor& verbose_cursor () const {
+		return *_verbose_cursor;
 	}
 
 	virtual void set_snapped_cursor_position (Temporal::timepos_t const & pos) = 0;
@@ -503,6 +502,14 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	void enable_automation_bindings ();
 	void disable_automation_bindings ();
 
+	/* playhead/screen stuff */
+
+	void set_stationary_playhead (bool yn);
+	void toggle_stationary_playhead ();
+	bool stationary_playhead() const;
+
+	bool dragging_playhead () const { return _dragging_playhead; }
+
   protected:
 	std::string _name;
 	bool within_track_canvas;
@@ -573,7 +580,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	virtual void play_note_selection_clicked();
 	virtual void note_mode_clicked() {}
-	virtual void follow_playhead_clicked ();
 	virtual void full_zoom_clicked() {};
 	virtual void set_visible_channel (int) {}
 
@@ -596,6 +602,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	Glib::RefPtr<Gtk::ToggleAction> follow_playhead_action;
 	void follow_playhead_chosen ();
 
+	Glib::RefPtr<Gtk::ToggleAction> stationary_playhead_action;
+	void stationary_playhead_chosen ();
+
 	/* selection process */
 
 	Selection* selection;
@@ -606,7 +615,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	static MouseCursors* _cursors;
 
-	VerboseCursor* _verbose_cursor;
+	std::unique_ptr<VerboseCursor> _verbose_cursor;
 
 	samplecnt_t        samples_per_pixel;
 
@@ -656,8 +665,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	QuantizeDialog* quantize_dialog;
 
 	friend struct TempoMapScope;
-	virtual std::shared_ptr<Temporal::TempoMap const> start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>);
-	virtual void end_local_tempo_map (std::shared_ptr<Temporal::TempoMap const>) { /* no-op by default */ }
+	void set_local_tempo_map (std::shared_ptr<Temporal::TempoMap>);
+	void start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>);
+	void end_local_tempo_map ();
 
 	virtual bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
 	virtual bool button_press_handler_1 (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
@@ -775,7 +785,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	ARDOUR::Location* transport_loop_location();
 
 	std::vector<ArdourCanvas::Ruler::Mark> grid_marks;
-	GridLines* grid_lines;
+	std::unique_ptr<GridLines> grid_lines;
 	ArdourCanvas::Container* time_line_group;
 
 	void drop_grid ();
@@ -821,4 +831,15 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	virtual void automation_move_points_earlier () {};
 
 	bool temporary_zoom_focus_change;
+	bool _dragging_playhead;
+
+	mutable std::shared_ptr<Temporal::TempoMap> _local_tempo_map;
+	void ensure_local_tempo_scope () const {
+		if (_local_tempo_map) {
+			Temporal::TempoMap::set (_local_tempo_map);
+		}
+	}
 };
+
+#define EC_LOCAL_TEMPO_SCOPE ensure_local_tempo_scope ()
+#define EC_GIVEN_LOCAL_TEMPO_SCOPE(ec) ec.ensure_local_tempo_scope ()

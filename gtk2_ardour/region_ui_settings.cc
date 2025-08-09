@@ -141,8 +141,8 @@ RegionUISettingsManager::save (std::string const & path)
 	state_tree.set_root (&get_state());
 	state_tree.set_filename (path);
 
-	if (state_tree.write()) {
-		error << string_compose (_("could not save region GUI settings to %1"), path) << endmsg;
+	if (!state_tree.write()) {
+		error << string_compose (_("Could not save region GUI settings to %1"), path) << endmsg;
 	}
 }
 

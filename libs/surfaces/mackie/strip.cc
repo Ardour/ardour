@@ -234,7 +234,7 @@ Strip::set_stripable (std::shared_ptr<Stripable> r, bool /*with_messages*/)
 	_stripable->solo_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_solo_changed, this), ui_context());
 	_stripable->mute_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_mute_changed, this), ui_context());
 
-	_stripable->MappedControlsChanged.connect (stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_eq_type_changed, this), ui_context());
+	_stripable->MappedControlsChanged.connect (stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_subview_type_changed, this), ui_context());
 
 	std::shared_ptr<AutomationControl> pan_control = _stripable->pan_azimuth_control();
 	if (pan_control) {
@@ -350,7 +350,7 @@ Strip::notify_record_enable_changed ()
 }
 
 void
-Strip::notify_eq_type_changed ()
+Strip::notify_subview_type_changed ()
 {
 	if (_stripable) {
 		_surface->mcp().MackieControlProtocol::redisplay_subview_mode();
@@ -718,6 +718,17 @@ Strip::remove_units (std::string s) {
 		s = std::regex_replace (s, std::regex(" Hz$"), "");
 		s = std::regex_replace (s, std::regex(" dB$"), "");
 		s = std::regex_replace (s, std::regex(" ms$"), "");
+
+		// convert seconds to milliseconds
+		if (s.rfind(" s") != string::npos) {
+			char buf[32];
+			s = std::regex_replace (s, std::regex(" s$"), "");
+			if (sprintf(buf, "%2.0f", 1000.0*stof(s)) >= 0) {
+				s = std::string (buf);
+			} else {
+				DEBUG_TRACE (DEBUG::MackieControl, "couldn't convert string to float\n");
+			}
+		}
 
 		return s;
 }

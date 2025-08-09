@@ -320,14 +320,6 @@ public:
 
 	void sequence_regions ();
 
-	/* playhead/screen stuff */
-
-	void set_stationary_playhead (bool yn);
-	void toggle_stationary_playhead ();
-	bool stationary_playhead() const { return _stationary_playhead; }
-
-	bool dragging_playhead () const { return _dragging_playhead; }
-
 	void toggle_zero_line_visibility ();
 	void set_summary ();
 	void set_group_tabs ();
@@ -1488,8 +1480,6 @@ private:
 
 	ARDOUR::PlaylistSet motion_frozen_playlists;
 
-	bool _dragging_playhead;
-
 	void marker_drag_motion_callback (GdkEvent*);
 	void marker_drag_finished_callback (GdkEvent*);
 
@@ -1645,8 +1635,6 @@ private:
 
 	/* display control */
 
-	/// true if we scroll the tracks rather than the playhead
-	bool _stationary_playhead;
 	/// true if we are in fullscreen mode
 	bool _maximised;
 

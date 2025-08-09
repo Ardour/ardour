@@ -29,6 +29,7 @@
 #include "temporal/domain_swap.h"
 #include "temporal/timeline.h"
 #include "temporal/range.h"
+#include "temporal/tempo.h"
 
 #include "pbd/undo.h"
 #include "pbd/signals.h"
@@ -541,6 +542,9 @@ public:
 		}
 	}
 
+	Temporal::Tempo tempo() const { return _tempo; }
+	Temporal::Meter meter() const { return _meter; }
+
 protected:
 	virtual XMLNode& state () const;
 
@@ -592,6 +596,9 @@ protected:
 	uint32_t                      _fx_latency;
 	uint32_t                      _fx_tail;
 	RegionFxList                  _plugins;
+
+	Temporal::Tempo _tempo;
+	Temporal::Meter _meter;
 
 	PBD::Property<bool>      _sync_marked;
 	PBD::Property<bool>      _left_of_split;

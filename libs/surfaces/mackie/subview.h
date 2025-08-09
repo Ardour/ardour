@@ -127,6 +127,10 @@ class EQSubview : public Subview {
 		Pot* vpot,
 		std::string pending_display[2]);
 	void notify_change (std::weak_ptr<ARDOUR::AutomationControl>, uint32_t global_strip_position, bool force);
+	virtual bool handle_cursor_left_press();
+	virtual bool handle_cursor_right_press();
+  protected:
+	uint32_t _current_bank;
 };
 
 class DynamicsSubview : public Subview {
@@ -142,6 +146,11 @@ class DynamicsSubview : public Subview {
 		Pot* vpot,
 		std::string pending_display[2]);
 	void notify_change (std::weak_ptr<ARDOUR::AutomationControl>, uint32_t global_strip_position, bool force, bool propagate_mode_change);
+	virtual bool handle_cursor_left_press();
+	virtual bool handle_cursor_right_press();
+  protected:
+	uint32_t _current_bank;
+	std::vector<std::pair<std::shared_ptr<ARDOUR::AutomationControl>, std::string>> available;
 };
 
 class SendsSubview : public Subview {

@@ -122,11 +122,11 @@ MidiStreamView::create_region_view (std::shared_ptr<Region> r, bool /*wfd*/, boo
 	if (recording) {
 		region_view = new MidiRegionView (
 			_region_group, _trackview.editor(), _trackview, region,
-			_samples_per_pixel, MidiViewBackground::region_color(), recording,
+			_samples_per_pixel, StreamView::region_color, recording,
 			TimeAxisViewItem::Visibility(TimeAxisViewItem::ShowFrame));
 	} else {
 		region_view = new MidiRegionView (_region_group, _trackview.editor(), _trackview, region,
-		                                  _samples_per_pixel, MidiViewBackground::region_color());
+		                                  _samples_per_pixel, StreamView::region_color);
 	}
 
 	region_view->init (false);

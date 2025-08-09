@@ -91,7 +91,7 @@ A few specific libraries are compiled statically (e.g. fluidsynth for use in plu
    Mini Ardour inside Ardour to export audio-files from sessions.
 
    It is a combination of AudioGrapher::Source and AudioGrapher::Sink classes that are chained together by ARDOUR::ExportGraphBuilder as shown in the ASCII art
-   [Export Graph](https://git.ardour.org/ardour/ardour/src/commit/0df0e14e2309a00d433827fa34b87638b87f4fff/libs/ardour/export_graph_builder.cc#L73-L154).
+   [Export Graph](https://github.com/Ardour/ardour/blob/56647acc25aa91ccf920e5ac21452bccf35b78e7/libs/ardour/export_graph_builder.cc#L73-L154).
 
 * `libs/ardour/`
 

@@ -228,7 +228,9 @@ Region::register_properties ()
 }
 
 #define REGION_DEFAULT_STATE(s,l) \
-	_sync_marked (Properties::sync_marked, false) \
+	  _tempo (120, 4) \
+	, _meter (4, 4) \
+	, _sync_marked (Properties::sync_marked, false) \
 	, _left_of_split (Properties::left_of_split, false) \
 	, _right_of_split (Properties::right_of_split, false) \
 	, _valid_transients (Properties::valid_transients, false) \
@@ -259,7 +261,9 @@ Region::register_properties ()
 	, _contents (Properties::contents, false)
 
 #define REGION_COPY_STATE(other) \
-	  _sync_marked (Properties::sync_marked, other->_sync_marked) \
+	  _tempo (other->_tempo) \
+	, _meter (other->_meter) \
+	, _sync_marked (Properties::sync_marked, other->_sync_marked) \
 	, _left_of_split (Properties::left_of_split, other->_left_of_split) \
 	, _right_of_split (Properties::right_of_split, other->_right_of_split) \
 	, _valid_transients (Properties::valid_transients, other->_valid_transients) \
@@ -1420,6 +1424,9 @@ Region::state () const
 	node->set_property ("id", id ());
 	node->set_property ("type", _type);
 
+	node->add_child_nocopy (_tempo.get_state());
+	node->add_child_nocopy (_meter.get_state());
+
 	std::string fe;
 
 	switch (_first_edit) {
@@ -1619,6 +1626,10 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 				}
 				_plugins.push_back (rfx);
 				changed = true;
+			} else  if (child->name() == Temporal::Tempo::xml_node_name) {
+				_tempo.set_state (*child, version);
+			} else  if (child->name() == Temporal::Meter::xml_node_name) {
+				_meter.set_state (*child, version);
 			}
 		}
 		lm.release ();
