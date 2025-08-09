@@ -157,6 +157,8 @@ class LIBARDOUR_API MidiRegion : public Region
 	void model_shifted (timecnt_t qn_distance);
 	void model_automation_state_changed (Evoral::Parameter const &);
 
+	void set_tempo_stuff_from_source ();
+
 	std::set<Evoral::Parameter> _filtered_parameters; ///< parameters that we ask our source not to return when reading
 	PBD::ScopedConnection _model_connection;
 	PBD::ScopedConnection _model_shift_connection;
