@@ -2645,14 +2645,9 @@ SegmentDescriptor
 MIDITrigger::get_segment_descriptor () const
 {
 	SegmentDescriptor sd;
-	std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (_region);
-	assert (mr);
 
-	sd.set_extent (Temporal::Beats(), mr->length().beats());
-
-	/* we don't really have tempo information for MIDI yet */
-	sd.set_tempo (Temporal::Tempo (120, 4));
-
+	sd.set_extent (Temporal::Beats(), _region->length().beats());
+	sd.set_tempo (_region->tempo());
 	return sd;
 }
 
