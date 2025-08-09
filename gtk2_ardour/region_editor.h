@@ -74,6 +74,7 @@ protected:
 
 	Gtk::Table _table_main;
 	Gtk::Table _table_clocks;
+	Gtk::Table _table_tempo;
 
 private:
 	class RegionFxEntry : public Gtkmm2ext::DnDVBoxChild, public sigc::trackable
@@ -165,6 +166,11 @@ private:
 	Gtk::Label _sync_absolute_label;
 	Gtk::Label _start_label;
 	Gtk::Label _region_fx_label;
+	Gtk::Label _region_tempo_label;
+	Gtk::Label _region_meter_label;
+
+	Gtk::Entry _region_tempo_entry;
+	Gtk::Entry _region_meter_entry;
 
 	Gtk::ToggleButton _audition_button;
 

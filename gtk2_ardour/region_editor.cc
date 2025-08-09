@@ -131,6 +131,10 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 	_sources_label.set_name ("RegionEditorLabel");
 	_region_fx_label.set_text (_("Region Effects"));
 	_region_fx_label.set_name ("RegionEditorLabel");
+	_region_tempo_label.set_name ("RegionEditorLabel");
+	_region_tempo_label.set_text (_("Region Tempo"));
+	_region_meter_label.set_name ("RegionEditorLabel");
+	_region_meter_label.set_text (_("Region Meter"));
 
 	if (_region->sources ().size () > 1) {
 		_sources_label.set_text (_("Sources:"));
@@ -155,12 +159,28 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 	_sync_relative_label.set_alignment (1, 0.5);
 	_start_label.set_alignment (0, 0.5);
 	_sync_absolute_label.set_alignment (1, 0.5);
+	_region_tempo_label.set_alignment (0, 0.5);
+	_region_meter_label.set_alignment (1, 0.5);
 
 	/* Name & Audition Box */
 	Gtk::HBox* nb = Gtk::manage (new Gtk::HBox);
 	nb->set_spacing (6);
 	nb->pack_start (_name_entry);
 	nb->pack_start (_audition_button, false, false);
+
+	/* Tempo Layout */
+
+	_table_tempo.set_col_spacings (12);
+	_table_tempo.set_row_spacings (6);
+	_table_tempo.set_border_width (0);
+	_table_tempo.set_homogeneous ();
+
+	_table_tempo.attach (_region_tempo_label, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
+	_table_tempo.attach (_region_meter_label, 1, 2, 0, 1, Gtk::FILL, Gtk::FILL);
+	_table_tempo.attach (_region_tempo_entry, 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
+	_table_tempo.attach (_region_meter_entry, 1, 2, 1, 2, Gtk::FILL, Gtk::FILL);
+
+	_table_tempo.show_all ();
 
 	/* Clock Layout */
 
@@ -187,7 +207,6 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 
 	_table_clocks.attach (_start_clock, 0, 2, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
 	_table_clocks.attach (_sync_offset_absolute_clock, 2, 4, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
-	++row;
 
 	/* Main layout */
 
@@ -198,9 +217,12 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 	_table_main.attach (_sources,       1, 3, 1, 2, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 
 	_table_main.attach (_table_clocks,  1, 2, 2, 3, Gtk::FILL, Gtk::SHRINK);
+	_table_main.attach (_table_tempo,   1, 2, 3, 4, Gtk::FILL, Gtk::SHRINK);
+
+	/* AudioRegionEditor inserts stuff into _table_main here */
 
 	_table_main.attach (*manage (new ArdourWidgets::ArdourVSpacer (0)), 2, 3, 2, 4, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
-	_table_main.attach (*manage (new ArdourWidgets::ArdourHSpacer (0)), 0, 3, 4, 5, Gtk::FILL, Gtk::FILL | Gtk::EXPAND);
+	_table_main.attach (*manage (new ArdourWidgets::ArdourHSpacer (0)), 0, 3, 5, 6, Gtk::FILL, Gtk::FILL | Gtk::EXPAND);
 
 	_table_main.attach (_region_fx_label, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK);
 	_table_main.attach (_region_fx_box,   3, 4, 1, 5, Gtk::FILL, Gtk::EXPAND | Gtk::FILL);

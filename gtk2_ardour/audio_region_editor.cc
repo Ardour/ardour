@@ -92,6 +92,8 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	gain_table->attach (_peak_amplitude_label, 2, 4, row, row + 1, Gtk::FILL, Gtk::FILL);
 	++row;
 
+	gain_table->show_all ();
+
 	Gtk::HBox* b = Gtk::manage (new Gtk::HBox);
 	b->set_spacing (6);
 	b->pack_start (_gain_entry);
@@ -111,10 +113,12 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 
 	/* Add to main layout */
 
-	_table_main.attach (*gain_table,        1, 2, 3, 4, Gtk::FILL, Gtk::SHRINK);
-	_table_main.attach (_region_line_label, 0, 1, 5, 6, Gtk::FILL, Gtk::SHRINK);
-	_table_main.attach (_region_line,       1, 3, 5, 6, Gtk::EXPAND | Gtk::FILL, Gtk::SHRINK);
-	_table_main.attach (_show_on_touch,     3, 4, 5, 6, Gtk::FILL, Gtk::SHRINK);
+	row = 4; /* see RegionEditor table packing for why this is 4 */
+	_table_main.attach (*gain_table,        1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK);
+	row++;
+	_table_main.attach (_region_line_label, 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK);
+	_table_main.attach (_region_line,       1, 3, row, row+1, Gtk::EXPAND | Gtk::FILL, Gtk::SHRINK);
+	_table_main.attach (_show_on_touch,     3, 4, row, row+1, Gtk::FILL, Gtk::SHRINK);
 
 	UI::instance()->set_tip (_polarity_toggle, _("Invert the signal polarity (180deg phase shift)"));
 	UI::instance()->set_tip (_fade_before_fx_toggle, _("Apply region effects after the region fade.\nThis is useful if the effect(s) have tail, which would otherwise be faded out by the region fade (e.g. reverb, delay)"));
