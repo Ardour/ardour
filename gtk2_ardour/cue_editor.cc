@@ -1158,8 +1158,6 @@ CueEditor::set_track (std::shared_ptr<Track> t)
 void
 CueEditor::set_region (std::shared_ptr<Region> r)
 {
-	EC_LOCAL_TEMPO_SCOPE;
-
 	if (r == _region) {
 		return;
 	}
@@ -1168,8 +1166,8 @@ CueEditor::set_region (std::shared_ptr<Region> r)
 
 	_region = r;
 
-	if (_region->tempo() && _region->meter()) {
-		std::shared_ptr<TempoMap> tmap (new TempoMap (_region->tempo().value(), _region->meter().value()));
+	std::shared_ptr<TempoMap> tmap = _region->tempo_map();
+	if (tmap) {
 		start_local_tempo_map (tmap);
 	}
 
