@@ -85,6 +85,8 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<uint64_t> reg_group;
 		PBD::PropertyDescriptor<bool> contents;
 		PBD::PropertyDescriptor<bool> region_fx;
+		PBD::PropertyDescriptor<bool> region_tempo;
+		PBD::PropertyDescriptor<bool> region_meter;
 
 /* these properties are used as a convenience for announcing changes to state, but aren't stored as properties */
 		PBD::PropertyDescriptor<Temporal::TimeDomain> time_domain;
