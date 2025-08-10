@@ -2532,3 +2532,13 @@ Region::set_meter (Temporal::Meter const & m)
 		send_change (Properties::region_meter);
 	}
 }
+
+std::shared_ptr<Temporal::TempoMap>
+Region::tempo_map () const
+{
+	if (!_tempo || !_meter) {
+		return nullptr;
+	}
+
+	return std::make_shared<Temporal::TempoMap> (_tempo.value(), _meter.value());
+}

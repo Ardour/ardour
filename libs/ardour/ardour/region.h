@@ -550,6 +550,8 @@ public:
 	std::optional<Temporal::Meter> meter() const { return _meter; }
 	void set_meter (Temporal::Meter const &);
 
+	std::shared_ptr<Temporal::TempoMap> tempo_map() const;
+
 protected:
 	virtual XMLNode& state () const;
 
