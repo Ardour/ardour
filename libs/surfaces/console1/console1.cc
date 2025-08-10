@@ -41,11 +41,15 @@
 #include "c1_control.h"
 #include "c1_gui.h"
 
+
+
 using namespace ARDOUR;
-using namespace ArdourSurface;
 using namespace PBD;
 using namespace Glib;
 using namespace std;
+
+namespace Console1
+{
 
 Console1::Console1 (Session& s)
   : MIDISurface (s, X_ ("Softube Console1"), X_ ("Console1"), false)
@@ -66,25 +70,17 @@ Console1::~Console1 ()
 	stop_event_loop ();
 	MIDISurface::drop ();
 
-	for (const auto& b : buttons) {
-		delete b.second;
-	}
-	for (const auto& e : encoders) {
-		delete e.second;
-	}
-	for (const auto& m : meters) {
-		delete m.second;
-	}
-	for (const auto& mb : multi_buttons) {
-		delete mb.second;
+	for (const auto& c : controllerMap) {
+		delete c.second;
 	}
 }
 
 void
 Console1::all_lights_out ()
 {
-	for (ButtonMap::iterator b = buttons.begin (); b != buttons.end (); ++b) {
-		b->second->set_led_state (false);
+	for (ControllerMap::iterator b = controllerMap.begin (); b != controllerMap.end (); ++b) {
+        if( b->second->get_type() == ControllerType::CONTROLLER_BUTTON )
+		    (dynamic_cast<ControllerButton*>(b->second))->set_led_state (false);
 	}
 }
 
@@ -181,7 +177,7 @@ Console1::begin_using_device ()
 	  f0 7d 20 00 00 00 01 00 7f 49 6f 6c 73 00 f7
 	*/
 
-	load_mappings ();
+    load_mappings ();
 	setup_controls ();
 
 	/* Connection to the blink-timer */
@@ -277,18 +273,22 @@ Console1::setup_controls ()
 
 	for (uint32_t i = 0; i < 20; ++i) {
 		new ControllerButton (this,
-				ControllerID (FOCUS1 + i),
-				std::function<void (uint32_t)> (std::bind (&Console1::select, this, i)),
-				0,
-				std::function<void (uint32_t)> (std::bind (&Console1::select_plugin, this, i)));
+		                      ControllerID (FOCUS1 + i),
+		                      std::function<void (uint32_t)> (std::bind (&Console1::select, this, i)),
+		                      std::function<void (uint32_t)> (std::bind (&Console1::select, this, i)),
+		                      std::function<void (uint32_t)> (std::bind (&Console1::select_plugin, this, i)),
+		                      std::function<void (uint32_t)> (std::bind (&Console1::select_plugin, this, i)));
 	}
 
 	new ControllerButton (
 			this, ControllerID::PRESET, std::function<void (uint32_t)> (std::bind (&Console1::shift, this, _1)));
 
 	new ControllerButton (this,
-			ControllerID::TRACK_GROUP,
-			std::function<void (uint32_t)> (std::bind (&Console1::plugin_state, this, _1)));
+	                      ControllerID::TRACK_GROUP,
+	                      std::function<void (uint32_t)> (std::bind (&Console1::plugin_state, this, _1)),
+	                      std::function<void (uint32_t)> (std::bind (&Console1::plugin_state, this, _1)),
+	                      std::function<void (uint32_t)> (std::bind (&Console1::plugin_state, this, _1)),
+	                      std::function<void (uint32_t)> (std::bind (&Console1::plugin_state, this, _1)));
 
 	new ControllerButton (
 			this, ControllerID::DISPLAY_ON, std::function<void (uint32_t)> (std::bind (&Console1::rude_solo, this, _1)));
@@ -438,60 +438,44 @@ void
 Console1::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* tb)
 {
 	uint32_t controller_number = static_cast<uint32_t> (tb->controller_number);
-	uint32_t value = static_cast<uint32_t> (tb->value);
-DEBUG_TRACE (DEBUG::Console1,
+	uint32_t value             = static_cast<uint32_t> (tb->value);
+
+    DEBUG_TRACE (DEBUG::Console1,
 	             string_compose ("handle_midi_controller_message cn: '%1' val: '%2'\n", controller_number, value));
-	try {
-		Encoder* e = get_encoder (ControllerID (controller_number));
-		if (in_plugin_state && e->plugin_action) {
-			e->plugin_action (value);
-		} else if (shift_state && e->shift_action) {
-			e->shift_action (value);
-		} else {
-			e->action (value);
-		}
+	DEBUG_TRACE (DEBUG::Console1,
+	             string_compose ("handle_midi_controller_message shift state: '%1' plugin state: '%2'\n", shift_state, in_plugin_state));
+
+	if (midi_assign_mode && (controller_number != ControllerID::PRESET)) {
+		SendControllerNumber (controller_number, shift_state);
 		return;
-	} catch (ControlNotFoundException const&) {
+    }
+
+	try {
+		Controller* controller = controllerMap[ControllerID (controller_number)];
+		if (controller ) {
+			DEBUG_TRACE (DEBUG::Console1, "handle_midi_controller_message; Controller Found'\n");
+			if (shift_state && in_plugin_state && controller->get_plugin_shift_action ()) {
+				controller->get_plugin_shift_action () (value);
+				DEBUG_TRACE (DEBUG::Console1, "handle_midi_controller_message: plugin_shift_action'\n" );
+			} else if (in_plugin_state && controller->get_plugin_action ()) {
+				controller->get_plugin_action () (value);
+				DEBUG_TRACE (DEBUG::Console1, "handle_midi_controller_message: plugin_action'\n");
+			} else if (shift_state && controller->get_shift_action ()) {
+				controller->get_shift_action () (value);
+				DEBUG_TRACE (DEBUG::Console1, "handle_midi_controller_message: shift_action'\n");
+			} else {
+				controller->get_action () (value);
+				DEBUG_TRACE (DEBUG::Console1, "handle_midi_controller_message: action'\n");
+			}
+			return;
+		}
+        else {
+			DEBUG_TRACE (DEBUG::Console1, "handle_midi_controller_message: Controller not found'\n");
+	    }
+    }
+	catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1,
 		             string_compose ("handle_midi_controller_message: encoder not found cn: "
-		                             "'%1' val: '%2'\n",
-		                             controller_number,
-		                             value));
-	}
-
-	try {
-		ControllerButton* b = get_button (ControllerID (controller_number));
-		if (in_plugin_state && b->plugin_action) {
-			DEBUG_TRACE (DEBUG::Console1, "Executing plugin_action\n");
-			b->plugin_action (value);
-		} else if (shift_state && b->shift_action) {
-			DEBUG_TRACE (DEBUG::Console1, "Executing shift_action\n");
-			b->shift_action (value);
-		} else {
-			DEBUG_TRACE (DEBUG::Console1, "Executing action\n");
-			b->action (value);
-		}
-		return;
-	} catch (ControlNotFoundException const&) {
-		DEBUG_TRACE (DEBUG::Console1,
-		             string_compose ("handle_midi_controller_message: button not found cn: "
-		                             "'%1' val: '%2'\n",
-		                             controller_number,
-		                             value));
-	}
-
-	try {
-		MultiStateButton* mb = get_mbutton (ControllerID (controller_number));
-		if (shift_state && mb->shift_action) {
-			mb->shift_action (value);
-		} else {
-			mb->action (value);
-		}
-
-		return;
-	} catch (ControlNotFoundException const&) {
-		DEBUG_TRACE (DEBUG::Console1,
-		             string_compose ("handle_midi_controller_message: mbutton not found cn: "
 		                             "'%1' val: '%2'\n",
 		                             controller_number,
 		                             value));
@@ -532,7 +516,7 @@ Console1::notify_transport_state_changed ()
 void
 Console1::stripable_selection_changed ()
 {
-	DEBUG_TRACE (DEBUG::Console1, "stripable_selection_changed \n");
+    	DEBUG_TRACE (DEBUG::Console1, "stripable_selection_changed \n");
 	if (!_in_use)
 		return;
 
@@ -953,15 +937,6 @@ Console1::blinker ()
 	return true;
 }
 
-ControllerButton*
-Console1::get_button (ControllerID id) const
-{
-	ButtonMap::const_iterator b = buttons.find (id);
-	if (b == buttons.end ())
-		throw (ControlNotFoundException ());
-	return const_cast<ControllerButton*> (b->second);
-}
-
 Meter*
 Console1::get_meter (ControllerID id) const
 {
@@ -971,22 +946,42 @@ Console1::get_meter (ControllerID id) const
 	return const_cast<Meter*> (m->second);
 }
 
+Controller*
+Console1::get_controller (ControllerID id) const
+{
+	ControllerMap::const_iterator c = controllerMap.find (id);
+	if (c == controllerMap.end ())
+		throw (ControlNotFoundException ());
+	return (c->second);
+}
+
+Controller*
+Console1::get_controller (ControllerID id, ControllerType controllerType) const
+{
+	ControllerMap::const_iterator c = controllerMap.find (id);
+	if ((c == controllerMap.end ()) || (c->second->get_type () != controllerType))
+		throw (ControlNotFoundException ());
+	return (c->second);
+}
+
 Encoder*
 Console1::get_encoder (ControllerID id) const
 {
-	EncoderMap::const_iterator m = encoders.find (id);
-	if (m == encoders.end ())
-		throw (ControlNotFoundException ());
-	return const_cast<Encoder*> (m->second);
+	return dynamic_cast<Encoder*> (get_controller (id, ControllerType::ENCODER));
 }
+
+ControllerButton*
+Console1::get_button (ControllerID id) const
+{
+	return dynamic_cast<ControllerButton*> (get_controller (id, ControllerType::CONTROLLER_BUTTON));
+}
+
+
 
 MultiStateButton*
 Console1::get_mbutton (ControllerID id) const
 {
-	MultiStateButtonMap::const_iterator m = multi_buttons.find (id);
-	if (m == multi_buttons.end ())
-		throw (ControlNotFoundException ());
-	return const_cast<MultiStateButton*> (m->second);
+	return dynamic_cast<MultiStateButton*> (get_controller (id, ControllerType::MULTISTATE_BUTTON));
 }
 
 ControllerID
@@ -1259,3 +1254,21 @@ Console1::master_monitor_has_changed ()
 	DEBUG_TRACE (DEBUG::Console1, string_compose ("master_monitor_has_changed - monitor active %1\n", monitor_active));
 	create_strip_inventory ();
 }
+
+const std::string Console1::findControllerNameById (const ControllerID id){
+    for( const auto &controller : controllerNameIdMap ){
+        if( controller.second == id ){
+			return controller.first;
+	}
+	}
+	return std::string();
+}
+
+void
+Console1::reset_midi_assign_mode ()
+{
+	DEBUG_TRACE (DEBUG::Console1, "console1::reset_midi_assign_mode()\n");
+	midi_assign_mode = false;
+}
+
+} // namespace Console1
