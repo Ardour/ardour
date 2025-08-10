@@ -352,7 +352,7 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 
 		Gtkmm2ext::set_source_rgba (cr, bg);
 
-		assert (_scroomer_size = width() - kbd_width);
+		assert (_scroomer_size == width() - kbd_width);
 
 		double x = _scroomer_size;
 		double y = positions[n];

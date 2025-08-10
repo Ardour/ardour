@@ -1168,8 +1168,10 @@ CueEditor::set_region (std::shared_ptr<Region> r)
 
 	_region = r;
 
-	std::shared_ptr<TempoMap> tmap (new TempoMap (_region->tempo(), _region->meter()));
-	start_local_tempo_map (tmap);
+	if (_region->tempo() && _region->meter()) {
+		std::shared_ptr<TempoMap> tmap (new TempoMap (_region->tempo().value(), _region->meter().value()));
+		start_local_tempo_map (tmap);
+	}
 
 	if (!get_canvas()->is_visible()) {
 		_visible_pending_region = r;

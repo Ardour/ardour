@@ -318,12 +318,20 @@ void
 RegionEditor::tempo_changed (PBD::PropertyChange const & changed)
 {
 	if (changed.contains (Properties::region_tempo)) {
-		Temporal::Tempo tempo (_region->tempo());
-		_region_tempo_entry.set_text (string_compose ("%1 bpm", tempo.quarter_notes_per_minute()));
+		if (_region->tempo()) {
+			Temporal::Tempo tempo (_region->tempo().value());
+			_region_tempo_entry.set_text (string_compose ("%1 bpm", tempo.quarter_notes_per_minute()));
+		} else {
+			_region_tempo_entry.set_text (_("undefined"));
+		}
 	}
 	if (changed.contains (Properties::region_meter)) {
-		Temporal::Meter meter (_region->meter());
-		_region_meter_entry.set_text (string_compose ("%1/%2", meter.divisions_per_bar(), meter.note_value()));
+		if (_region->meter()) {
+			Temporal::Meter meter (_region->meter().value());
+			_region_meter_entry.set_text (string_compose ("%1/%2", meter.divisions_per_bar(), meter.note_value()));
+		} else {
+			_region_meter_entry.set_text (_("undefined"));
+		}
 	}
 }
 
