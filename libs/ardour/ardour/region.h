@@ -545,7 +545,9 @@ public:
 	}
 
 	Temporal::Tempo tempo() const { return _tempo; }
+	void set_tempo (Temporal::Tempo const &);
 	Temporal::Meter meter() const { return _meter; }
+	void set_meter (Temporal::Meter const &);
 
 protected:
 	virtual XMLNode& state () const;

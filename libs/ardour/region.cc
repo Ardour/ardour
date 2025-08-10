@@ -2508,3 +2508,21 @@ Region::fx_tail_changed (bool)
 	}
 	_fx_tail = t;
 }
+
+void
+Region::set_tempo (Temporal::Tempo const & t)
+{
+	if (_tempo != t) {
+		_tempo = t;
+		send_change (Properties::region_tempo);
+	}
+}
+
+void
+Region::set_meter (Temporal::Meter const & m)
+{
+	if (_meter != m) {
+		_meter = m;
+		send_change (Properties::region_meter);
+	}
+}
