@@ -2646,8 +2646,10 @@ MIDITrigger::get_segment_descriptor () const
 {
 	SegmentDescriptor sd;
 
-	sd.set_extent (Temporal::Beats(), _region->length().beats());
-	sd.set_tempo (_region->tempo());
+	if (_region->tempo()) {
+		sd.set_extent (Temporal::Beats(), _region->length().beats());
+		sd.set_tempo (_region->tempo().value());
+	}
 	return sd;
 }
 

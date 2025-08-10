@@ -24,6 +24,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "temporal/domain_swap.h"
@@ -544,9 +545,9 @@ public:
 		}
 	}
 
-	Temporal::Tempo tempo() const { return _tempo; }
+	std::optional<Temporal::Tempo> tempo() const { return _tempo; }
 	void set_tempo (Temporal::Tempo const &);
-	Temporal::Meter meter() const { return _meter; }
+	std::optional<Temporal::Meter> meter() const { return _meter; }
 	void set_meter (Temporal::Meter const &);
 
 protected:
@@ -601,8 +602,8 @@ protected:
 	uint32_t                      _fx_tail;
 	RegionFxList                  _plugins;
 
-	Temporal::Tempo _tempo;
-	Temporal::Meter _meter;
+	std::optional<Temporal::Tempo> _tempo;
+	std::optional<Temporal::Meter> _meter;
 
 	PBD::Property<bool>      _sync_marked;
 	PBD::Property<bool>      _left_of_split;

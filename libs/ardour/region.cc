@@ -230,9 +230,7 @@ Region::register_properties ()
 }
 
 #define REGION_DEFAULT_STATE(s,l) \
-	  _tempo (120, 4) \
-	, _meter (4, 4) \
-	, _sync_marked (Properties::sync_marked, false) \
+	  _sync_marked (Properties::sync_marked, false) \
 	, _left_of_split (Properties::left_of_split, false) \
 	, _right_of_split (Properties::right_of_split, false) \
 	, _valid_transients (Properties::valid_transients, false) \
@@ -1426,8 +1424,12 @@ Region::state () const
 	node->set_property ("id", id ());
 	node->set_property ("type", _type);
 
-	node->add_child_nocopy (_tempo.get_state());
-	node->add_child_nocopy (_meter.get_state());
+	if (_tempo) {
+		node->add_child_nocopy (_tempo.value().get_state());
+	}
+	if (_meter) {
+		node->add_child_nocopy (_meter.value().get_state());
+	}
 
 	std::string fe;
 
@@ -1629,9 +1631,11 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 				_plugins.push_back (rfx);
 				changed = true;
 			} else  if (child->name() == Temporal::Tempo::xml_node_name) {
-				_tempo.set_state (*child, version);
+				Temporal::Tempo t (*child);
+				_tempo = t;
 			} else  if (child->name() == Temporal::Meter::xml_node_name) {
-				_meter.set_state (*child, version);
+				Temporal::Meter m (*child);
+				_meter = m;
 			}
 		}
 		lm.release ();

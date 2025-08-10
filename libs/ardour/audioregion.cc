@@ -442,9 +442,11 @@ AudioRegion::set_tempo_stuff_from_source ()
 	if (read (data.get(), 0, data_size, 0) == data_size) {
 		double tempo;
 		double beatcount;
+		Temporal::Meter m (4, 4);
 
-		estimate_audio_tempo (shared_from_this(), data.get(), data_size, _session.sample_rate(), tempo, _meter, beatcount);
+		estimate_audio_tempo (shared_from_this(), data.get(), data_size, _session.sample_rate(), tempo, m, beatcount);
 		_tempo = Temporal::Tempo (tempo, 4);
+		_meter = m;
 	}
 }
 
