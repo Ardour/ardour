@@ -250,8 +250,10 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 	change.add (ARDOUR::Properties::start);
 	change.add (ARDOUR::Properties::length);
 	change.add (ARDOUR::Properties::sync_position);
+	change.add (ARDOUR::Properties::region_tempo);
+	change.add (ARDOUR::Properties::region_meter);
 
-	bounds_changed (change);
+	region_changed (change);
 
 	_region->PropertyChanged.connect (_state_connection, invalidator (*this), std::bind (&RegionEditor::region_changed, this, _1), gui_context ());
 	_region->RegionFxChanged.connect (_region_connection, invalidator (*this), std::bind (&RegionEditor::region_fx_changed, this), gui_context ());
@@ -300,6 +302,28 @@ RegionEditor::region_changed (const PBD::PropertyChange& what_changed)
 
 	if (what_changed.contains (interesting_stuff)) {
 		bounds_changed (what_changed);
+	}
+
+	PropertyChange tempo_stuff;
+
+	tempo_stuff.add (ARDOUR::Properties::region_tempo);
+	tempo_stuff.add (ARDOUR::Properties::region_meter);
+
+	if (what_changed.contains (tempo_stuff)) {
+		tempo_changed (what_changed);
+	}
+}
+
+void
+RegionEditor::tempo_changed (PBD::PropertyChange const & changed)
+{
+	if (changed.contains (Properties::region_tempo)) {
+		Temporal::Tempo tempo (_region->tempo());
+		_region_tempo_entry.set_text (string_compose ("%1 bpm", tempo.quarter_notes_per_minute()));
+	}
+	if (changed.contains (Properties::region_meter)) {
+		Temporal::Meter meter (_region->meter());
+		_region_meter_entry.set_text (string_compose ("%1/%2", meter.divisions_per_bar(), meter.note_value()));
 	}
 }
 

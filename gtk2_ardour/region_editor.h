@@ -195,6 +195,7 @@ private:
 	PBD::ScopedConnection _region_connection;
 
 	void bounds_changed (const PBD::PropertyChange&);
+	void tempo_changed (const PBD::PropertyChange&);
 	void name_changed ();
 
 	void audition_state_changed (bool);
