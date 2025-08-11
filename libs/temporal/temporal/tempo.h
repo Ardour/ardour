@@ -744,7 +744,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API static void      update_thread_tempo_map() { _tempo_map_p = _map_mgr.reader(); }
 	LIBTEMPORAL_API static SharedPtr use() { assert (_tempo_map_p); return _tempo_map_p; }
-	LIBTEMPORAL_API static SharedPtr fetch() { update_thread_tempo_map(); return _tempo_map_p; }
+	LIBTEMPORAL_API static SharedPtr fetch() { assert (!_tempo_map_p || !_tempo_map_p->scope_owner()); update_thread_tempo_map(); return _tempo_map_p; }
 
 	/* Used only by the ARDOUR::AudioEngine API to reset the process thread
 	 * tempo map only when it has changed.
@@ -1012,7 +1012,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	void set_scope_owner (ScopedTempoMapOwner&);
 	ScopedTempoMapOwner* scope_owner() const { return _scope_owner; }
-	
+
   private:
 	Tempos       _tempos;
 	Meters       _meters;
@@ -1315,4 +1315,3 @@ LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::MeterPoint
 LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::MusicTimePoint const &);
 LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::TempoMetric const &);
 }
-
