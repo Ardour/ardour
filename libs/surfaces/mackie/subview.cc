@@ -69,8 +69,11 @@ std::shared_ptr<Subview> SubviewFactory::create_subview(
 	switch (svm) {
 		case Subview::EQ:
 			return std::shared_ptr<EQSubview>(new EQSubview (mcp, subview_stripable));
-		case Subview::Dynamics:
-			return std::shared_ptr<DynamicsSubview>(new DynamicsSubview (mcp, subview_stripable));
+		case Subview::Dynamics: {
+			auto subview = std::shared_ptr<DynamicsSubview>(new DynamicsSubview (mcp, subview_stripable));
+			subview->init_params();
+			return subview;
+		}
 		case Subview::Sends:
 			return std::shared_ptr<SendsSubview>(new SendsSubview (mcp, subview_stripable));
 		case Subview::TrackView:
@@ -480,18 +483,7 @@ void DynamicsSubview::update_global_buttons()
 	_mcp.update_global_button (Button::Pan, off);
 }
 
-void DynamicsSubview::setup_vpot(
-		Strip* strip,
-		Pot* vpot,
-		std::string pending_display[2])
-{
-	const uint32_t global_strip_position = _mcp.global_index (*strip) + _current_bank;
-	store_pointers(strip, vpot, pending_display, global_strip_position - _current_bank);
-
-	if (!_subview_stripable) {
-		return;
-	}
-
+void DynamicsSubview::init_params() {
 	available.clear();
 
 	std::shared_ptr<AutomationControl> cec = _subview_stripable->mapped_control (Comp_Enable);
@@ -511,8 +503,6 @@ void DynamicsSubview::setup_vpot(
 	 * order shown above.
 	 */
 
-	std::vector<AutomationType> params;
-
 	if (cec) { available.push_back (std::make_pair (cec, "Comp")); }
 	if (ctc) { available.push_back (std::make_pair (ctc, "CThrsh")); }
 	if (crc) { available.push_back (std::make_pair (crc, "CRatio")); }
@@ -525,6 +515,19 @@ void DynamicsSubview::setup_vpot(
 	if (gdc) { available.push_back (std::make_pair (gdc, "GDepth")); }
 	if (gac) { available.push_back (std::make_pair (gac, "GAttk")); }
 	if (gsc) { available.push_back (std::make_pair (gsc, "GRels")); }
+}
+
+void DynamicsSubview::setup_vpot(
+		Strip* strip,
+		Pot* vpot,
+		std::string pending_display[2])
+{
+	const uint32_t global_strip_position = _mcp.global_index (*strip) + _current_bank;
+	store_pointers(strip, vpot, pending_display, global_strip_position - _current_bank);
+
+	if (!_subview_stripable) {
+		return;
+	}
 
 	if (global_strip_position >= available.size()) {
 		/* this knob is not needed to control the available parameters */

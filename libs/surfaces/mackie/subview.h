@@ -61,6 +61,7 @@ class Subview {
 	virtual Mode subview_mode () const = 0;
 	virtual void update_global_buttons() = 0;
 	virtual bool permit_flipping_faders_and_pots() { return false; }
+	virtual void init_params(){}
 	virtual void setup_vpot(
 		Strip* strip,
 		Pot* vpot,
@@ -141,6 +142,7 @@ class DynamicsSubview : public Subview {
 	virtual Subview::Mode subview_mode () const { return Subview::Dynamics; }
 	static bool subview_mode_would_be_ok (std::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	virtual void update_global_buttons();
+	virtual void init_params();
 	virtual void setup_vpot(
 		Strip* strip,
 		Pot* vpot,

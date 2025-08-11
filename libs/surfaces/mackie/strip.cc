@@ -353,6 +353,7 @@ void
 Strip::notify_subview_type_changed ()
 {
 	if (_stripable) {
+		_surface->mcp().subview()->init_params();
 		_surface->mcp().MackieControlProtocol::redisplay_subview_mode();
 	}
 }
