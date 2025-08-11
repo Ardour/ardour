@@ -33,7 +33,6 @@ namespace PBD {
                 extern DebugBits EngineControl;
 		extern DebugBits GuiStartup;
 		extern DebugBits TrackDrag;
-		extern DebugBits ScopedTempoMap;
 	}
 }
 

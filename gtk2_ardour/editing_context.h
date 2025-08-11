@@ -35,6 +35,7 @@
 #include "pbd/signals.h"
 
 #include "temporal/timeline.h"
+#include "temporal/scope.h"
 
 #include "ardour/midi_operator.h"
 #include "ardour/session_handle.h"
@@ -47,7 +48,6 @@
 #include "widgets/ardour_spacer.h"
 
 #include "axis_provider.h"
-#include "debug.h"
 #include "editing.h"
 #include "editor_items.h"
 #include "selection.h"
@@ -76,13 +76,14 @@ class Selection;
 class SelectionMemento;
 class SelectableOwner;
 
-class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider, public virtual sigc::trackable
+class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider, public Temporal::ScopedTempoMapOwner, public virtual sigc::trackable
 {
  public:
 	EditingContext (std::string const &);
 	~EditingContext ();
 
 	std::string editor_name() const { return _name; }
+	std::string scope_name() const { return _name; }
 
 	void set_session (ARDOUR::Session*);
 
@@ -652,37 +653,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	QuantizeDialog* quantize_dialog;
 
-	friend struct TempoMapScope;
-
-	void start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> map) {
-		_local_tempo_map = map;
-		local_tempo_map_in ();
-		DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: starting local tempo scope\n", editor_name()));
-	}
-
-	void end_local_tempo_map () {
-		DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: ending local tempo scope\n", editor_name()));
-		local_tempo_map_depth = 1;
-		local_tempo_map_out ();
-	}
-
-	void local_tempo_map_in () const {
-		if (local_tempo_map_depth++ == 0 ) {
-			DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: in to local tempo  %2\n", editor_name(), local_tempo_map_depth));
-			if (_local_tempo_map) {
-				Temporal::TempoMap::set (_local_tempo_map);
-				_local_tempo_map.reset ();
-			}
-		}
-	}
-
-	void local_tempo_map_out () const {
-		DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: out to local tempo  %2\n", editor_name(), local_tempo_map_depth));
-		if (local_tempo_map_depth && --local_tempo_map_depth == 0) {
-			DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: done with local tempo, depth now %2\n", editor_name(), local_tempo_map_depth));
-			Temporal::TempoMap::fetch (); /* get current global map into thread-local pointer */
-		}
-	}
 
 	virtual bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
 	virtual bool button_press_handler_1 (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
@@ -848,21 +818,5 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	bool temporary_zoom_focus_change;
 	bool _dragging_playhead;
 
-	mutable std::shared_ptr<Temporal::TempoMap> _local_tempo_map;
-	mutable std::shared_ptr<Temporal::TempoMap> _pre_local_tempo_map;
-	mutable uint64_t local_tempo_map_depth;
-
-	struct TempoMapScope {
-		TempoMapScope (EditingContext const & context)
-			: ec (context)
-		{
-			ec.local_tempo_map_in ();
-		}
-		~TempoMapScope () {
-			ec.local_tempo_map_out ();
-		}
-		EditingContext const & ec;
-	};
 };
 
-#define EC_LOCAL_TEMPO_SCOPE TempoMapScope __tms (*this);

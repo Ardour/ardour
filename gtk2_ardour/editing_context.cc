@@ -153,7 +153,6 @@ EditingContext::EditingContext (std::string const & name)
 	, time_line_group (nullptr)
 	, temporary_zoom_focus_change (false)
  	, _dragging_playhead (false)
-	, local_tempo_map_depth (0)
 
 {
 	using namespace Gtk::Menu_Helpers;
