@@ -1397,8 +1397,8 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 		break;
 
 	default:
-		error << "MidiTimeAxisView: unknown automation child "
-		      << EventTypeMap::instance().to_symbol(param) << endmsg;
+		warning << "MidiTimeAxisView: unknown automation child "
+		        << EventTypeMap::instance().to_symbol(param) << endmsg;
 	}
 }
 

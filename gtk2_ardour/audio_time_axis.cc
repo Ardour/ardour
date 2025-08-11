@@ -214,7 +214,7 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 
 
 	} else {
-		error << "AudioTimeAxisView: unknown automation child " << EventTypeMap::instance().to_symbol(param) << endmsg;
+		warning << "AudioTimeAxisView: unknown automation child " << EventTypeMap::instance().to_symbol(param) << endmsg;
 	}
 }
 
