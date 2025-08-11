@@ -27,4 +27,5 @@ PBD::DebugBits PBD::DEBUG::Grid = PBD::new_debug_bit ("Grid");
 PBD::DebugBits PBD::DEBUG::SnapBBT = PBD::new_debug_bit ("SnapBBT");
 PBD::DebugBits PBD::DEBUG::Beats = PBD::new_debug_bit ("Beats");
 PBD::DebugBits PBD::DEBUG::MapReset = PBD::new_debug_bit ("MapReset");
+PBD::DebugBits PBD::DEBUG::ScopedTempoMap = PBD::new_debug_bit ("scopedtempomap");
 

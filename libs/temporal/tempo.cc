@@ -825,6 +825,7 @@ GridIterator::valid_for (TempoMap const & m, superclock_t start, uint32_t bmod, 
 /* TEMPOMAP */
 
 TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter)
+	: _scope_owner (nullptr)
 {
 	TempoPoint* tp = new TempoPoint (*this, initial_tempo, 0, Beats(), BBT_Time());
 	MeterPoint* mp = new MeterPoint (*this, initial_meter, 0, Beats(), BBT_Time());
@@ -841,13 +842,21 @@ TempoMap::~TempoMap()
 }
 
 TempoMap::TempoMap (XMLNode const & node, int version)
+	: _scope_owner (nullptr)
 {
 	set_state (node, version);
 }
 
 TempoMap::TempoMap (TempoMap const & other)
+	: _scope_owner (nullptr)
 {
 	copy_points (other);
+}
+
+void
+TempoMap::set_scope_owner (ScopedTempoMapOwner& sco)
+{
+	_scope_owner = &sco;
 }
 
 TempoMap&

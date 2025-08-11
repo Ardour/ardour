@@ -62,6 +62,7 @@ namespace Temporal {
 class Meter;
 class TempoMap;
 class TempoMapCutBuffer;
+class ScopedTempoMapOwner;
 
 class MapOwned {
  protected:
@@ -1009,11 +1010,15 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	static void map_assert (bool expr, char const * exprstr, char const * file, int line);
 
+	void set_scope_owner (ScopedTempoMapOwner&);
+	ScopedTempoMapOwner* scope_owner() const { return _scope_owner; }
+	
   private:
 	Tempos       _tempos;
 	Meters       _meters;
 	MusicTimes   _bartimes;
 	Points       _points;
+	ScopedTempoMapOwner* _scope_owner;
 
 	int set_tempos_from_state (XMLNode const &);
 	int set_meters_from_state (XMLNode const &);
