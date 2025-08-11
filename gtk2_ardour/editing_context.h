@@ -47,6 +47,7 @@
 #include "widgets/ardour_spacer.h"
 
 #include "axis_provider.h"
+#include "debug.h"
 #include "editing.h"
 #include "editor_items.h"
 #include "selection.h"
@@ -652,10 +653,36 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	QuantizeDialog* quantize_dialog;
 
 	friend struct TempoMapScope;
-	void start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>);
-	void end_local_tempo_map ();
-	void local_tempo_map_in () const;
-	void local_tempo_map_out () const;
+
+	void start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> map) {
+		_local_tempo_map = map;
+		local_tempo_map_in ();
+		DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: starting local tempo scope\n", editor_name()));
+	}
+
+	void end_local_tempo_map () {
+		DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: ending local tempo scope\n", editor_name()));
+		local_tempo_map_depth = 1;
+		local_tempo_map_out ();
+	}
+
+	void local_tempo_map_in () const {
+		if (local_tempo_map_depth++ == 0 ) {
+			DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: in to local tempo  %2\n", editor_name(), local_tempo_map_depth));
+			if (_local_tempo_map) {
+				Temporal::TempoMap::set (_local_tempo_map);
+				_local_tempo_map.reset ();
+			}
+		}
+	}
+
+	void local_tempo_map_out () const {
+		DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: out to local tempo  %2\n", editor_name(), local_tempo_map_depth));
+		if (local_tempo_map_depth && --local_tempo_map_depth == 0) {
+			DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: done with local tempo, depth now %2\n", editor_name(), local_tempo_map_depth));
+			Temporal::TempoMap::fetch (); /* get current global map into thread-local pointer */
+		}
+	}
 
 	virtual bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
 	virtual bool button_press_handler_1 (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
