@@ -859,6 +859,12 @@ TempoMap::set_scope_owner (ScopedTempoMapOwner& sco)
 	_scope_owner = &sco;
 }
 
+void
+TempoMap::clear_scope_owner ()
+{
+	_scope_owner = nullptr;
+}
+
 TempoMap&
 TempoMap::operator= (TempoMap const & other)
 {

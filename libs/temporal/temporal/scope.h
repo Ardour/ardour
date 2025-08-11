@@ -35,16 +35,20 @@ class ScopedTempoMapOwner
 	virtual ~ScopedTempoMapOwner () {}
 
 	void start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> map) {
-		_local_tempo_map = map;
-		in ();
 		DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: starting local tempo scope\n", scope_name()));
+		map->set_scope_owner (*this);
+		_local_tempo_map = map;
+		Temporal::TempoMap::set (_local_tempo_map);
+		local_tempo_map_depth = 1;
 	}
 
 	void end_local_tempo_map () {
 		DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: ending local tempo scope\n", scope_name()));
-		local_tempo_map_depth = 1; /* force exit in out() */
-		out ();
+		assert (_local_tempo_map);
+		local_tempo_map_depth = 0;
+		_local_tempo_map->clear_scope_owner ();
 		_local_tempo_map.reset ();
+		Temporal::TempoMap::fetch ();
 	}
 
 	uint64_t depth() const { return local_tempo_map_depth; }
