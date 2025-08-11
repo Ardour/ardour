@@ -1481,8 +1481,6 @@ Pianoroll::set_track (std::shared_ptr<ARDOUR::Track> track)
 void
 Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 {
-	EC_LOCAL_TEMPO_SCOPE;
-
 	CueEditor::set_region (region);
 
 	if (_visible_pending_region) {
@@ -1505,42 +1503,9 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	r->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this, false), gui_context());
 	r->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::region_prop_change, this, _1), gui_context());
 
-	bool provided = false;
-	std::shared_ptr<Temporal::TempoMap> map;
-	std::shared_ptr<SMFSource> smf (std::dynamic_pointer_cast<SMFSource> (r->midi_source()));
+	/* Compute zoom level to show entire source plus some margin if possible */
 
-	if (smf) {
-		map = smf->tempo_map (provided);
-	}
-
-	if (!provided) {
-		Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-
-		if (with_transport_controls) {
-			/* clip editing, timeline irrelevant, sort of */
-
-			if (tmap->n_tempos() == 1 && tmap->n_meters() == 1) {
-				/* Single entry tempo map, use the values there */
-				map.reset (new Temporal::TempoMap (tmap->tempo_at (timepos_t (0)), tmap->meter_at (timepos_t (0))));
-			}  else {
-
-				map.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
-			}
-
-		} else {
-			/* COPY MAIN SESSION TEMPO MAP? */
-			Meter m (tmap->meter_at (r->source_position()));
-			Tempo t (tmap->tempo_at (r->source_position()));
-
-			map.reset (new Temporal::TempoMap (t, m));
-		}
-	}
-
-	{
-		EditingContext::TempoMapScope tms (*this, map);
-		/* Compute zoom level to show entire source plus some margin if possible */
-		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
-	}
+	zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
 
 	bg->display_region (*view);
 

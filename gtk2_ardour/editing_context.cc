@@ -37,6 +37,7 @@
 #include "ardour_ui.h"
 #include "automation_line.h"
 #include "control_point.h"
+#include "debug.h"
 #include "edit_note_dialog.h"
 #include "editing_context.h"
 #include "editing_convert.h"
@@ -153,6 +154,7 @@ EditingContext::EditingContext (std::string const & name)
 	, time_line_group (nullptr)
 	, temporary_zoom_focus_change (false)
  	, _dragging_playhead (false)
+	, local_tempo_map_depth (0)
 
 {
 	using namespace Gtk::Menu_Helpers;
@@ -1752,16 +1754,41 @@ EditingContext::snap_relative_time_to_relative_time (timepos_t const & origin, t
 }
 
 void
-EditingContext::start_local_tempo_map (std::shared_ptr<TempoMap> map)
+EditingContext::start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> map)
 {
 	_local_tempo_map = map;
+	local_tempo_map_in ();
+	DEBUG_TRACE (DEBUG::ScopedTempoMap, string_compose ("%1: starting local tempo scope\n", editor_name()));
 }
 
 void
 EditingContext::end_local_tempo_map ()
 {
-	_local_tempo_map.reset ();
-	Temporal::TempoMap::fetch ();
+	DEBUG_TRACE (DEBUG::ScopedTempoMap, string_compose ("%1: ending local tempo scope\n", editor_name()));
+	local_tempo_map_depth = 1;
+	local_tempo_map_out ();
+}
+
+void
+EditingContext::local_tempo_map_in () const
+{
+	if (local_tempo_map_depth++ == 0 ) {
+		DEBUG_TRACE (DEBUG::ScopedTempoMap, string_compose ("%1: in to local tempo  %2\n", editor_name(), local_tempo_map_depth));
+		if (_local_tempo_map) {
+			Temporal::TempoMap::set (_local_tempo_map);
+			_local_tempo_map.reset ();
+		}
+	}
+}
+
+void
+EditingContext::local_tempo_map_out () const
+{
+	DEBUG_TRACE (DEBUG::ScopedTempoMap, string_compose ("%1: out to local tempo  %2\n", editor_name(), local_tempo_map_depth));
+	if (local_tempo_map_depth && --local_tempo_map_depth == 0) {
+		DEBUG_TRACE (DEBUG::ScopedTempoMap, string_compose ("%1: done with local tempo, depth now %2\n", editor_name(), local_tempo_map_depth));
+		Temporal::TempoMap::fetch (); /* get current global map into thread-local pointer */
+	}
 }
 
 bool

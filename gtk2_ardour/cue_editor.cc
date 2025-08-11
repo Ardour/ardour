@@ -1516,7 +1516,6 @@ CueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sample
 		tmap.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
 	}
 
-	EditingContext::TempoMapScope tms (*this, tmap);
 	Temporal::TempoMapPoints::const_iterator i;
 
 	char buf[64];

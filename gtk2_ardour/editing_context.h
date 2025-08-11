@@ -87,19 +87,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	Temporal::TimeDomain time_domain () const;
 
-	struct TempoMapScope {
-		TempoMapScope (EditingContext& context, std::shared_ptr<Temporal::TempoMap> map)
-			: ec (context)
-		{
-			ec.start_local_tempo_map (map);
-			ec.ensure_local_tempo_scope ();
-		}
-		~TempoMapScope () {
-			ec.end_local_tempo_map ();
-		}
-		EditingContext& ec;
-	};
-
 	DragManager* drags () const {
 		return _drags;
 	}
@@ -665,9 +652,10 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	QuantizeDialog* quantize_dialog;
 
 	friend struct TempoMapScope;
-	void set_local_tempo_map (std::shared_ptr<Temporal::TempoMap>);
 	void start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>);
 	void end_local_tempo_map ();
+	void local_tempo_map_in () const;
+	void local_tempo_map_out () const;
 
 	virtual bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
 	virtual bool button_press_handler_1 (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
@@ -834,12 +822,20 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	bool _dragging_playhead;
 
 	mutable std::shared_ptr<Temporal::TempoMap> _local_tempo_map;
-	void ensure_local_tempo_scope () const {
-		if (_local_tempo_map) {
-			Temporal::TempoMap::set (_local_tempo_map);
+	mutable std::shared_ptr<Temporal::TempoMap> _pre_local_tempo_map;
+	mutable uint64_t local_tempo_map_depth;
+
+	struct TempoMapScope {
+		TempoMapScope (EditingContext const & context)
+			: ec (context)
+		{
+			ec.local_tempo_map_in ();
 		}
-	}
+		~TempoMapScope () {
+			ec.local_tempo_map_out ();
+		}
+		EditingContext const & ec;
+	};
 };
 
-#define EC_LOCAL_TEMPO_SCOPE ensure_local_tempo_scope ()
-#define EC_GIVEN_LOCAL_TEMPO_SCOPE(ec) ec.ensure_local_tempo_scope ()
+#define EC_LOCAL_TEMPO_SCOPE TempoMapScope __tms (*this);
