@@ -1158,6 +1158,8 @@ CueEditor::set_track (std::shared_ptr<Track> t)
 void
 CueEditor::set_region (std::shared_ptr<Region> r)
 {
+	/* NO LOCAL TEMPO SCOPE HERE */
+
 	if (r == _region) {
 		return;
 	}
@@ -1166,13 +1168,17 @@ CueEditor::set_region (std::shared_ptr<Region> r)
 
 	_region = r;
 
-	std::shared_ptr<TempoMap> tmap = _region->tempo_map();
-	if (tmap) {
-		start_local_tempo_map (tmap);
-	}
+	if (_region) {
+		std::shared_ptr<TempoMap> tmap = _region->tempo_map();
+		if (tmap) {
+			start_local_tempo_map (tmap);
+		}
 
-	if (!get_canvas()->is_visible()) {
-		_visible_pending_region = r;
+		if (!get_canvas()->is_visible()) {
+			_visible_pending_region = r;
+		} else {
+			_visible_pending_region.reset ();
+		}
 	} else {
 		_visible_pending_region.reset ();
 	}
@@ -1212,7 +1218,7 @@ CueEditor::set_from_rsu (RegionUISettings& rsu)
 void
 CueEditor::set_trigger (TriggerReference& tref)
 {
-	EC_LOCAL_TEMPO_SCOPE;
+	/* NO TEMPO SCOPE */
 
 	if (tref == ref) {
 		return;
@@ -1399,7 +1405,11 @@ CueEditor::idle_data_captured ()
 void
 CueEditor::unset (bool trigger_too)
 {
-	end_local_tempo_map ();
+	/* NO LOCAL TEMPO SCOPE HERE */
+
+	if (_local_tempo_map) {
+		end_local_tempo_map ();
+	}
 	_history.clear ();
 	history_connection.disconnect();
 	_update_connection.disconnect();
