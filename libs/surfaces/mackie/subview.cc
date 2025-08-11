@@ -515,6 +515,10 @@ void DynamicsSubview::init_params() {
 	if (gdc) { available.push_back (std::make_pair (gdc, "GDepth")); }
 	if (gac) { available.push_back (std::make_pair (gac, "GAttk")); }
 	if (gsc) { available.push_back (std::make_pair (gsc, "GRels")); }
+
+	if (available.size() <= _current_bank + 1) {
+		_current_bank = available.size() - 1;
+	}
 }
 
 void DynamicsSubview::setup_vpot(
