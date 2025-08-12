@@ -1378,7 +1378,7 @@ Pianoroll::region_prop_change (PBD::PropertyChange const & what_changed)
 void
 Pianoroll::set_trigger (TriggerReference & tref)
 {
-	/* NO LOCAL TEMPO SCOPE */
+	EC_LOCAL_TEMPO_SCOPE;
 
 	if (ref == tref) {
 		return;

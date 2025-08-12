@@ -1158,7 +1158,7 @@ CueEditor::set_track (std::shared_ptr<Track> t)
 void
 CueEditor::set_region (std::shared_ptr<Region> r)
 {
-	/* NO LOCAL TEMPO SCOPE HERE */
+	EC_LOCAL_TEMPO_SCOPE;
 
 	if (r == _region) {
 		return;
@@ -1218,7 +1218,7 @@ CueEditor::set_from_rsu (RegionUISettings& rsu)
 void
 CueEditor::set_trigger (TriggerReference& tref)
 {
-	/* NO TEMPO SCOPE */
+	EC_LOCAL_TEMPO_SCOPE;
 
 	if (tref == ref) {
 		return;
@@ -1405,7 +1405,7 @@ CueEditor::idle_data_captured ()
 void
 CueEditor::unset (bool trigger_too)
 {
-	/* NO LOCAL TEMPO SCOPE HERE */
+	EC_LOCAL_TEMPO_SCOPE;
 
 	if (_local_tempo_map) {
 		end_local_tempo_map ();

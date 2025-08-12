@@ -402,7 +402,7 @@ AudioClipEditor::drop_waves ()
 void
 AudioClipEditor::set_trigger (TriggerReference& tr)
 {
-	/* NO LOCAL TEMPO SCOPE */
+	EC_LOCAL_TEMPO_SCOPE;
 
 	if (tr == ref) {
 		return;
@@ -418,7 +418,7 @@ AudioClipEditor::set_trigger (TriggerReference& tr)
 void
 AudioClipEditor::set_region (std::shared_ptr<Region> region)
 {
-	/* NO LOCAL TEMPO SCOPE */
+	EC_LOCAL_TEMPO_SCOPE;
 
 	CueEditor::set_region (region);
 
