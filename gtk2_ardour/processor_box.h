@@ -228,6 +228,7 @@ private:
 		Gtk::Alignment box;
 
 	private:
+		bool build_ui ();
 		void slider_adjusted ();
 		void button_clicked ();
 		void button_clicked_event (GdkEventButton *);
@@ -252,6 +253,7 @@ private:
 		bool _ignore_ui_adjustment;
 		PBD::ScopedConnectionList _connections;
 		bool _visible;
+		bool _have_ui;
 		std::string _name;
 	};
 
