@@ -57,6 +57,7 @@
 #include "region_editor.h"
 #include "region_view.h"
 #include "timers.h"
+#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -132,7 +133,7 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 	_region_fx_label.set_text (_("Region Effects"));
 	_region_fx_label.set_name ("RegionEditorLabel");
 	_region_tempo_label.set_name ("RegionEditorLabel");
-	_region_tempo_label.set_text (_("Region Tempo"));
+	_region_tempo_label.set_text (_("Region Tempo (bpm)"));
 	_region_meter_label.set_name ("RegionEditorLabel");
 	_region_meter_label.set_text (_("Region Meter"));
 
@@ -174,6 +175,11 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 	_table_tempo.set_row_spacings (6);
 	_table_tempo.set_border_width (0);
 	_table_tempo.set_homogeneous ();
+
+	_region_tempo_entry.signal_key_press_event().connect (sigc::mem_fun (*this, &RegionEditor::tempo_entry_key), false);
+	_region_meter_entry.signal_key_press_event().connect (sigc::mem_fun (*this, &RegionEditor::meter_entry_key), false);
+	_region_tempo_entry.signal_focus_in_event().connect (sigc::mem_fun (*this, &RegionEditor::tempo_entry_focused));
+	_region_meter_entry.signal_focus_in_event().connect (sigc::mem_fun (*this, &RegionEditor::meter_entry_focused));
 
 	_table_tempo.attach (_region_tempo_label, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
 	_table_tempo.attach (_region_meter_label, 1, 2, 0, 1, Gtk::FILL, Gtk::FILL);
@@ -320,7 +326,7 @@ RegionEditor::tempo_changed (PBD::PropertyChange const & changed)
 	if (changed.contains (Properties::region_tempo)) {
 		if (_region->tempo()) {
 			Temporal::Tempo tempo (_region->tempo().value());
-			_region_tempo_entry.set_text (string_compose ("%1 bpm", tempo.quarter_notes_per_minute()));
+			_region_tempo_entry.set_text (string_compose ("%1", tempo.quarter_notes_per_minute()));
 		} else {
 			_region_tempo_entry.set_text (_("undefined"));
 		}
@@ -1231,4 +1237,123 @@ RegionEditor::RegionFxEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const
 	}
 	data.set (data.get_target (), 8, (const guchar*)&_plugin_preset_pointer, sizeof (PluginPresetPtr));
 	return true;
+}
+
+bool
+RegionEditor::tempo_entry_key (GdkEventKey* ev)
+{
+	if (!ARDOUR_UI_UTILS::key_is_legal_for_numeric_entry (ev->keyval)) {
+		return true;
+	}
+
+	switch (ev->keyval) {
+	case GDK_Return:
+	case GDK_KP_Enter:
+		break;
+
+	default:
+		return false;
+	}
+
+	string str = _region_tempo_entry.get_text ();
+	float bpm;
+
+	if (sscanf (str.c_str(), "%g", &bpm) != 1) {
+		_region_tempo_entry.set_text ("");
+		return true;
+	}
+
+	_region->set_tempo (Temporal::Tempo (bpm, 4));
+
+	return true;
+}
+
+bool
+RegionEditor::meter_entry_key (GdkEventKey* ev)
+{
+	switch (ev->keyval) {
+	case GDK_0:
+	case GDK_1:
+	case GDK_2:
+	case GDK_3:
+	case GDK_4:
+	case GDK_5:
+	case GDK_6:
+	case GDK_7:
+	case GDK_8:
+	case GDK_9:
+	case GDK_KP_0:
+	case GDK_KP_1:
+	case GDK_KP_2:
+	case GDK_KP_3:
+	case GDK_KP_4:
+	case GDK_KP_5:
+	case GDK_KP_6:
+	case GDK_KP_7:
+	case GDK_KP_8:
+	case GDK_KP_9:
+	case GDK_BackSpace:
+	case GDK_Delete:
+	case GDK_Home:
+	case GDK_End:
+	case GDK_Left:
+	case GDK_Right:
+		return false;
+
+	case GDK_slash:
+		if (_region_meter_entry.get_text().find ('/') != string::npos || _region_meter_entry.get_text().empty()) {
+			return true;
+		} else {
+			return false;
+		}
+		break;
+
+	case GDK_Return:
+	case GDK_KP_Enter:
+		break;
+
+	default:
+		return true;
+	}
+
+	string str = _region_meter_entry.get_text ();
+	int num;
+	int den;
+
+	if (sscanf (str.c_str(), "%d/%d", &num, &den) != 2) {
+		_region_meter_entry.set_text ("");
+		return true;
+	}
+
+	_region->set_meter (Temporal::Meter (num, den));
+
+	return true;
+}
+
+void
+RegionEditor::filter_tempo_text (const Glib::ustring&, int*)
+{
+	return;
+}
+
+void
+RegionEditor::filter_meter_text (const Glib::ustring&, int*)
+{
+	return;
+}
+
+bool
+RegionEditor::tempo_entry_focused (GdkEventFocus*)
+{
+	std::cerr << "tempo focused\n";
+	_region_tempo_entry.select_region (0, -1);
+	return false;
+}
+
+bool
+RegionEditor::meter_entry_focused (GdkEventFocus*)
+{
+	std::cerr << "meter focused\n";
+	_region_meter_entry.select_region (0, -1);
+	return false;
 }

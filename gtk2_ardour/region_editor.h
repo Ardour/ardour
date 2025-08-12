@@ -217,4 +217,11 @@ private:
 	bool on_delete_event (GdkEventAny*);
 
 	void set_clock_mode_from_primary ();
+
+	bool tempo_entry_key (GdkEventKey*);
+	bool meter_entry_key (GdkEventKey*);
+	void filter_tempo_text (const Glib::ustring&, int*);
+	void filter_meter_text (const Glib::ustring&, int*);
+	bool tempo_entry_focused (GdkEventFocus*);
+	bool meter_entry_focused (GdkEventFocus*);
 };
