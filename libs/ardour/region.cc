@@ -195,6 +195,10 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for time_domain = %1\n",	Properties::time_domain.property_id));
 	Properties::reg_group.property_id = g_quark_from_static_string (X_("rgroup"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for region_group = %1\n", Properties::reg_group.property_id));
+	Properties::region_tempo.property_id = g_quark_from_static_string (X_("region-tempo"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for region_tempo = %1\n", Properties::region_tempo.property_id));
+	Properties::region_meter.property_id = g_quark_from_static_string (X_("region-meter"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for region_meter = %1\n", Properties::region_meter.property_id));
 }
 
 void
