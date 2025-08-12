@@ -123,6 +123,7 @@ class EQSubview : public Subview {
 	virtual Mode subview_mode () const { return Subview::EQ; }
 	static bool subview_mode_would_be_ok (std::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	virtual void update_global_buttons();
+	virtual void init_params();
 	virtual void setup_vpot(
 		Strip* strip,
 		Pot* vpot,
@@ -132,6 +133,7 @@ class EQSubview : public Subview {
 	virtual bool handle_cursor_right_press();
   protected:
 	uint32_t _current_bank;
+	std::vector<std::pair<std::shared_ptr<ARDOUR::AutomationControl>, std::string>> available;
 };
 
 class DynamicsSubview : public Subview {

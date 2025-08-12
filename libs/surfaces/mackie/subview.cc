@@ -67,8 +67,11 @@ std::shared_ptr<Subview> SubviewFactory::create_subview(
 		std::shared_ptr<ARDOUR::Stripable> subview_stripable)
 {
 	switch (svm) {
-		case Subview::EQ:
-			return std::shared_ptr<EQSubview>(new EQSubview (mcp, subview_stripable));
+		case Subview::EQ: {
+			auto subview = std::shared_ptr<EQSubview>(new EQSubview (mcp, subview_stripable));
+			subview->init_params();
+			return subview;
+		}
 		case Subview::Dynamics: {
 			auto subview = std::shared_ptr<DynamicsSubview>(new DynamicsSubview (mcp, subview_stripable));
 			subview->init_params();
@@ -307,6 +310,56 @@ void EQSubview::update_global_buttons()
 	_mcp.update_global_button (Button::Pan, off);
 }
 
+void EQSubview::init_params() {
+	available.clear();
+
+	std::shared_ptr<AutomationControl> elfc = _subview_stripable->mapped_control (EQ_BandFreq, 0);
+	std::shared_ptr<AutomationControl> elgc = _subview_stripable->mapped_control (EQ_BandGain, 0);
+	std::shared_ptr<AutomationControl> elmfc = _subview_stripable->mapped_control (EQ_BandFreq, 1);
+	std::shared_ptr<AutomationControl> elmgc = _subview_stripable->mapped_control (EQ_BandGain, 1);
+	std::shared_ptr<AutomationControl> elmqc = _subview_stripable->mapped_control (EQ_BandQ, 1);
+	std::shared_ptr<AutomationControl> ehmfc = _subview_stripable->mapped_control (EQ_BandFreq, 2);
+	std::shared_ptr<AutomationControl> ehmgc = _subview_stripable->mapped_control (EQ_BandGain, 2);
+	std::shared_ptr<AutomationControl> ehmqc = _subview_stripable->mapped_control (EQ_BandQ, 2);
+	std::shared_ptr<AutomationControl> ehfc = _subview_stripable->mapped_control (EQ_BandFreq, 3);
+	std::shared_ptr<AutomationControl> ehgc = _subview_stripable->mapped_control (EQ_BandGain, 3);
+	std::shared_ptr<AutomationControl> elsc = _subview_stripable->mapped_control (EQ_BandShape, 0);
+	std::shared_ptr<AutomationControl> ehsc = _subview_stripable->mapped_control (EQ_BandShape, 3);
+	std::shared_ptr<AutomationControl> emc = _subview_stripable->mapped_control (EQ_Mode);
+	std::shared_ptr<AutomationControl> eec = _subview_stripable->mapped_control (EQ_Enable);
+
+	std::shared_ptr<AutomationControl> flc = _subview_stripable->mapped_control (LPF_Freq);
+	std::shared_ptr<AutomationControl> fhc = _subview_stripable->mapped_control (HPF_Freq);
+	std::shared_ptr<AutomationControl> fec = _subview_stripable->mapped_control (HPF_Enable);
+
+	/* we will control the global_strip_position-th available parameter, from the list in the
+	 * order shown above.
+	 */
+
+	if (elfc) { available.push_back (std::make_pair (elfc, "loFreq")); }
+	if (elgc) { available.push_back (std::make_pair (elgc, "loGain")); }
+	if (elmfc) { available.push_back (std::make_pair (elmfc, "lmFreq")); }
+	if (elmgc) { available.push_back (std::make_pair (elmgc, "lmGain")); }
+	if (elmqc) { available.push_back (std::make_pair (elmqc, "lm Q")); }
+	if (ehmfc) { available.push_back (std::make_pair (ehmfc, "hmFreq")); }
+	if (ehmgc) { available.push_back (std::make_pair (ehmgc, "hmGain")); }
+	if (ehmqc) { available.push_back (std::make_pair (ehmqc, "hm Q")); }
+	if (ehfc) { available.push_back (std::make_pair (ehfc, "hiFreq")); }
+	if (ehgc) { available.push_back (std::make_pair (ehgc, "hiGain")); }
+	if (elsc) { available.push_back (std::make_pair (elsc, "lo Shp")); }
+	if (ehsc) { available.push_back (std::make_pair (ehsc, "hi Shp")); }
+	if (emc) { available.push_back (std::make_pair (emc, "EQMode")); }
+	if (eec) { available.push_back (std::make_pair (eec, "EQ")); }
+
+	if (flc) { available.push_back (std::make_pair (flc, "LPF")); }
+	if (fhc) { available.push_back (std::make_pair (fhc, "HPF")); }
+	if (fec) { available.push_back (std::make_pair (fec, "Filter")); }
+
+	if (available.size() <= _current_bank + 1) {
+		_current_bank = available.size() - 1;
+	}
+}
+
 void EQSubview::setup_vpot(
 		Strip* strip,
 		Pot* vpot,
@@ -319,75 +372,18 @@ void EQSubview::setup_vpot(
 		return;
 	}
 
+	if (global_strip_position >= available.size()) {
+		/* this knob is not needed to control the available parameters */
+		vpot->set_control (std::shared_ptr<AutomationControl>());
+		pending_display[0] = std::string();
+		pending_display[1] = std::string();
+		return;
+	}
 
 	std::shared_ptr<AutomationControl> pc;
-	std::string pot_id;
 
-#ifdef MIXBUS
-	int eq_band = -1;
-	std::string band_name;
-	if (_subview_stripable->is_input_strip ()) {
-
-		switch (global_strip_position) {
-			case 0:
-			case 2:
-			case 4:
-			case 6:
-				eq_band = global_strip_position / 2;
-				pc = _subview_stripable->mapped_control (EQ_BandFreq, eq_band);
-				band_name = _subview_stripable->eq_band_name (eq_band);
-				pot_id = band_name + "Freq";
-				break;
-			case 1:
-			case 3:
-			case 5:
-			case 7:
-				eq_band = global_strip_position / 2;
-				pc = _subview_stripable->mapped_control (EQ_BandGain, eq_band);
-				band_name = _subview_stripable->eq_band_name (eq_band);
-				pot_id = band_name + "Gain";
-				break;
-			case 8:
-				pc = _subview_stripable->mapped_control (EQ_BandShape, 0);  //low band "bell" button
-				band_name = "lo";
-				pot_id = band_name + " Shp";
-				break;
-			case 9:
-				pc = _subview_stripable->mapped_control (EQ_BandShape, 3);  //high band "bell" button
-				band_name = "hi";
-				pot_id = band_name + " Shp";
-				break;
-			case 10:
-				pc = _subview_stripable->mapped_control(EQ_Enable);
-				pot_id = "EQ";
-				break;
-			case 11:
-				pc = _subview_stripable->mapped_control(LPF_Freq);
-				pot_id = "LPF";
-				break;
-			case 12:
-				pc = _subview_stripable->mapped_control(HPF_Freq);
-				pot_id = "HPF";
-				break;
-			case 13:
-				pc = _subview_stripable->mapped_control(HPF_Enable); // shared HP/LP
-				pot_id = "Filter";
-				break;
-		}
-
-	} else {  //mixbus or master bus ( these are currently the same for MB & 32C )
-		switch (global_strip_position) {
-			case 0:
-			case 1:
-			case 2:
-				eq_band = global_strip_position;
-				pc = _subview_stripable->mapped_control (EQ_BandGain, eq_band);
-				band_name = _subview_stripable->eq_band_name (eq_band);
-				pot_id = band_name + "Gain";
-				break;
-		}
-	}
-#endif
+	pc = available[global_strip_position].first;
+	std::string pot_id = available[global_strip_position].second;
 
 	//If a controllable was found, connect it up, and put the labels in the display.
 	if (pc) {
@@ -445,7 +441,7 @@ bool EQSubview::handle_cursor_left_press()
 
 bool EQSubview::handle_cursor_right_press()
 {
-	if (/* todo: generate this value on redisplay */ 14 > _current_bank + 1) {
+	if (available.size() > _current_bank + 1) {
 		_current_bank += 1;
 		mcp().redisplay_subview_mode();
 	}
