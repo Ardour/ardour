@@ -2183,8 +2183,14 @@ void
 PluginPinDialog::route_processors_changed (ARDOUR::RouteProcessorChange c)
 {
 	if (c.type == RouteProcessorChange::CustomPinChange) {
+		/* only a pin change, don't do anything */
 		return;
 	}
+	if (c.type == RouteProcessorChange::MeterPointChange && c.meter_visibly_changed == false) {
+		/* the meter has moved, but it was and still is invisible to the user, so nothing to do */
+		return;
+	}
+
 	ppw.clear ();
 	_height_mapped = false;
 	scroller->remove ();
