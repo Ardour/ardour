@@ -55,6 +55,7 @@
 #include "tempo_map_change.h"
 
 #include "pbd/i18n.h"
+#include "pbd/stacktrace.h"
 
 using namespace std;
 using namespace ARDOUR;
