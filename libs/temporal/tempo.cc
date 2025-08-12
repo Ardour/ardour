@@ -32,6 +32,7 @@
 #include "pbd/string_convert.h"
 
 #include "temporal/debug.h"
+#include "temporal/scope.h"
 #include "temporal/tempo.h"
 #include "temporal/types_convert.h"
 
@@ -5171,4 +5172,62 @@ TempoMapCutBuffer::clear ()
 	_meters.clear ();
 	_bartimes.clear ();
 	_points.clear ();
+}
+
+void
+ScopedTempoMapOwner::start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> map)
+{
+	/* This one is a little complicated to explain. This is where we set
+	 * the _local_tempo_map pointer which holds the local tempo map that
+	 * this ScopedTempoMapOwner wants to use every time one of its methods
+	 * is used. But we must also emulate the side effects of calling
+	 * ::in(), which include incrementing the depth and setting the
+	 * thread-local tempo map pointer.
+	 *
+	 * The caller should have placed an EC_LOCAL_TEMPO_SCOPE macro before
+	 * the call to this method, so that when the caller returns, we will
+	 * call ::out() and decrement the depth back to zero.
+	 *
+	 * Subsequent to that, all later in() and out() calls will install and
+	 * uninstall the local tempo map as the depth transitions from and to
+	 * zero, and will maintain the depth counter appropriately.
+	 */
+
+
+	DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: starting local tempo scope\n", scope_name()));
+	map->set_scope_owner (*this);
+	_local_tempo_map = map;
+	local_tempo_map_depth = 1;
+	Temporal::TempoMap::set (_local_tempo_map);
+}
+
+void
+ScopedTempoMapOwner::end_local_tempo_map ()
+{
+	/* Like ::start_local_tempo_map() and ::in(), this needs to emulate the
+	 * side effects of calling ::out(), ehich are reducing the depth
+	 * counter to zero and resetting the thread local tempo map pointer to
+	 * the current global tempo map.
+	 *
+	 * The caller need not have used EC_LOCAL_TEMPO_SCOPE before calling
+	 * this, however, since there are no side effects to undo when we leave
+	 * the caller's scope.
+	 */
+
+	DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: ending local tempo scope\n", scope_name()));
+	assert (_local_tempo_map);
+	_local_tempo_map->clear_scope_owner ();
+	_local_tempo_map.reset ();
+	local_tempo_map_depth = 0;
+	Temporal::TempoMap::fetch ();
+}
+
+/* This is defined here for use in an assert() made in tempo.h. Circular
+ * dependencies between ScopedTempoMapOwner and TempoMap mean that we can't
+ * place uses of a ScopedTempoMapOwner in tempo.h
+ */
+bool
+TempoMap::fetch_condition ()
+{
+	return !_tempo_map_p || !_tempo_map_p->scope_owner() || _tempo_map_p->scope_owner()->depth() == 0;
 }

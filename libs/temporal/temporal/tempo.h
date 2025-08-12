@@ -739,12 +739,13 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
   private:
 	static thread_local SharedPtr _tempo_map_p;
 	static SerializedRCUManager<TempoMap> _map_mgr;
+	static bool fetch_condition ();
   public:
 	LIBTEMPORAL_API static void init ();
 
 	LIBTEMPORAL_API static void      update_thread_tempo_map() { _tempo_map_p = _map_mgr.reader(); }
 	LIBTEMPORAL_API static SharedPtr use() { assert (_tempo_map_p); return _tempo_map_p; }
-	LIBTEMPORAL_API static SharedPtr fetch() { assert (!_tempo_map_p || !_tempo_map_p->scope_owner()); update_thread_tempo_map(); return _tempo_map_p; }
+	LIBTEMPORAL_API static SharedPtr fetch() { assert (fetch_condition()); update_thread_tempo_map(); return _tempo_map_p; }
 
 	/* Used only by the ARDOUR::AudioEngine API to reset the process thread
 	 * tempo map only when it has changed.
@@ -1010,8 +1011,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	static void map_assert (bool expr, char const * exprstr, char const * file, int line);
 
-	void set_scope_owner (ScopedTempoMapOwner&);
-	void clear_scope_owner ();
+	void LIBTEMPORAL_API set_scope_owner (ScopedTempoMapOwner&);
+	void LIBTEMPORAL_API clear_scope_owner ();
 	ScopedTempoMapOwner* scope_owner() const { return _scope_owner; }
 
   private:
