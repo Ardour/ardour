@@ -32,6 +32,7 @@
 #include "pbd/string_convert.h"
 
 #include "temporal/debug.h"
+#include "temporal/scope.h"
 #include "temporal/tempo.h"
 #include "temporal/types_convert.h"
 

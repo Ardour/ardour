@@ -25,10 +25,11 @@
 
 #include "temporal/debug.h"
 #include "temporal/tempo.h"
+#include "temporal/visibility.h"
 
 namespace Temporal {
 
-class ScopedTempoMapOwner
+class LIBTEMPORAL_API ScopedTempoMapOwner
 {
  public:
 	ScopedTempoMapOwner () : local_tempo_map_depth (0) {}
