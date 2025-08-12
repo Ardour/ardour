@@ -1055,6 +1055,10 @@ inline Route::PluginSetupOptions operator&= (Route::PluginSetupOptions& a, const
 	return a = static_cast<Route::PluginSetupOptions> (static_cast <int>(a) & static_cast<int> (b));
 }
 
+inline RouteProcessorChange::Type operator|= (RouteProcessorChange::Type& a, const RouteProcessorChange::Type& b) {
+	return a = static_cast<RouteProcessorChange::Type> (static_cast <int>(a) | static_cast<int> (b));
+}
+
 int
 Route::add_processors (const ProcessorList& others, std::shared_ptr<Processor> before, ProcessorStreams* err)
 {
@@ -4231,20 +4235,20 @@ void
 Route::emit_pending_signals ()
 {
 	int sig = _pending_signals.fetch_and (0);
-	if (sig & EmitMeterChanged) {
-		_meter->emit_configuration_changed();
-		meter_change (); /* EMIT SIGNAL */
-		if (sig & EmitMeterVisibilityChange) {
-		processors_changed (RouteProcessorChange (RouteProcessorChange::MeterPointChange, true)); /* EMIT SIGNAL */
-		} else {
-		processors_changed (RouteProcessorChange (RouteProcessorChange::MeterPointChange, false)); /* EMIT SIGNAL */
+
+	if (sig != 0) {
+		bool meter_viz_changed = (sig & (EmitMeterVisibilityChange | EmitMeterChanged)) == (EmitMeterVisibilityChange | EmitMeterChanged);
+		RouteProcessorChange::Type t = RouteProcessorChange::NoProcessorChange;
+		if (sig & EmitRtProcessorChange) {
+			t |= RouteProcessorChange::RealTimeChange;
 		}
-	}
-	if (sig & EmitRtProcessorChange) {
-		processors_changed (RouteProcessorChange (RouteProcessorChange::RealTimeChange)); /* EMIT SIGNAL */
-	}
-	if (sig & EmitSendReturnChange) {
-		processors_changed (RouteProcessorChange (RouteProcessorChange::SendReturnChange, false)); /* EMIT SIGNAL */
+		if (sig & EmitSendReturnChange) {
+			t |= RouteProcessorChange::SendReturnChange;
+		}
+		if (sig & EmitMeterVisibilityChange) {
+			t |= RouteProcessorChange::MeterPointChange;
+		}
+		processors_changed (RouteProcessorChange (t, meter_viz_changed));
 	}
 
 	/* this would be a job for the butler.

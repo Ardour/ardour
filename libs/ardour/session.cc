@@ -8166,15 +8166,8 @@ Session::ProcessorChangeBlocker::~ProcessorChangeBlocker ()
 	if (PBD::atomic_dec_and_test (_session->_ignore_route_processor_changes)) {
 		RouteProcessorChange::Type type = (RouteProcessorChange::Type) _session->_ignored_a_processor_change.fetch_and (0);
 		if (_reconfigure_on_delete) {
-			if (type & RouteProcessorChange::GeneralChange) {
-				_session->route_processors_changed (RouteProcessorChange ());
-			} else {
-				if (type & RouteProcessorChange::MeterPointChange) {
-					_session->route_processors_changed (RouteProcessorChange (RouteProcessorChange::MeterPointChange));
-				}
-				if (type & RouteProcessorChange::RealTimeChange) {
-					_session->route_processors_changed (RouteProcessorChange (RouteProcessorChange::RealTimeChange));
-				}
+			if (type != RouteProcessorChange::NoProcessorChange) {
+				_session->route_processors_changed (type);
 			}
 		}
 	}

@@ -1963,21 +1963,25 @@ Session::route_processors_changed (RouteProcessorChange c)
 		return;
 	}
 
-	if (c.type == RouteProcessorChange::MeterPointChange) {
-		/* sort rec-armed routes first */
+	if (c.type == RouteProcessorChange::NoProcessorChange) {
+		return;
+	}
+
+	if (c.type & RouteProcessorChange::MeterPointChange) {
+		/* sort rec-armed routes to be processed first */
 		resort_routes ();
 		set_dirty ();
 		return;
 	}
 
-	if (c.type == RouteProcessorChange::RealTimeChange) {
+	if (c.type & RouteProcessorChange::RealTimeChange) {
 		set_dirty ();
 		return;
 	}
 
 	resort_routes ();
 
-	if (c.type == RouteProcessorChange::SendReturnChange) {
+	if (c.type & RouteProcessorChange::SendReturnChange) {
 		update_latency_compensation (true, false);
 	} else {
 		update_latency_compensation (false, false);
