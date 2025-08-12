@@ -1877,7 +1877,6 @@ Editor::edit_location (Location& loc, bool with_scene, bool with_command)
 		dialog.set_title (string_compose (_("%1 Range"), verb));
 	} else {
 		dialog.set_title (string_compose (_("%1 Mark"), verb));
-		PBD::stacktrace (std::cerr, 17);
 	}
 
 	dialog.set_name ("MarkRenameWindow");
