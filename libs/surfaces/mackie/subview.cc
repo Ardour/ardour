@@ -487,34 +487,62 @@ void DynamicsSubview::init_params() {
 	available.clear();
 
 	std::shared_ptr<AutomationControl> cec = _subview_stripable->mapped_control (Comp_Enable);
+	std::shared_ptr<AutomationControl> cmc = _subview_stripable->mapped_control (Comp_Mode);
 	std::shared_ptr<AutomationControl> ctc = _subview_stripable->mapped_control (Comp_Threshold);
 	std::shared_ptr<AutomationControl> crc = _subview_stripable->mapped_control (Comp_Ratio);
 	std::shared_ptr<AutomationControl> cac = _subview_stripable->mapped_control (Comp_Attack);
+	std::shared_ptr<AutomationControl> cfac = _subview_stripable->mapped_control (Comp_FastAttack);
 	std::shared_ptr<AutomationControl> csc = _subview_stripable->mapped_control (Comp_Release);
 	std::shared_ptr<AutomationControl> ckc = _subview_stripable->mapped_control (Comp_Makeup);
+	std::shared_ptr<AutomationControl> cfc = _subview_stripable->mapped_control (Comp_KeyFilterFreq);
+	std::shared_ptr<AutomationControl> cpc = _subview_stripable->mapped_control (Comp_RMSPeak);
+	std::shared_ptr<AutomationControl> cxc = _subview_stripable->mapped_control (Comp_Mix);
 
 	std::shared_ptr<AutomationControl> gec = _subview_stripable->mapped_control (Gate_Enable);
+	std::shared_ptr<AutomationControl> gmc = _subview_stripable->mapped_control (Gate_Mode);
 	std::shared_ptr<AutomationControl> gtc = _subview_stripable->mapped_control (Gate_Threshold);
 	std::shared_ptr<AutomationControl> gdc = _subview_stripable->mapped_control (Gate_Depth);
 	std::shared_ptr<AutomationControl> gac = _subview_stripable->mapped_control (Gate_Attack);
-	std::shared_ptr<AutomationControl> gsc = _subview_stripable->mapped_control (Gate_Release);
+	std::shared_ptr<AutomationControl> gfac = _subview_stripable->mapped_control (Gate_FastAttack);
+	std::shared_ptr<AutomationControl> grc = _subview_stripable->mapped_control (Gate_Release);
+	std::shared_ptr<AutomationControl> gyc = _subview_stripable->mapped_control (Gate_Hysteresis);
+	std::shared_ptr<AutomationControl> ghc = _subview_stripable->mapped_control (Gate_Hold);
+	std::shared_ptr<AutomationControl> gkc = _subview_stripable->mapped_control (Gate_Knee);
+	std::shared_ptr<AutomationControl> grac = _subview_stripable->mapped_control (Gate_Ratio);
+	std::shared_ptr<AutomationControl> gfc = _subview_stripable->mapped_control (Gate_KeyFilterEnable);
+	std::shared_ptr<AutomationControl> gfrc = _subview_stripable->mapped_control (Gate_KeyFilterFreq);
+	std::shared_ptr<AutomationControl> glc = _subview_stripable->mapped_control (Gate_KeyListen);
 
 	/* we will control the global_strip_position-th available parameter, from the list in the
 	 * order shown above.
 	 */
 
 	if (cec) { available.push_back (std::make_pair (cec, "Comp")); }
+	if (cmc) { available.push_back (std::make_pair (cmc, "CMode")); }
 	if (ctc) { available.push_back (std::make_pair (ctc, "CThrsh")); }
 	if (crc) { available.push_back (std::make_pair (crc, "CRatio")); }
 	if (cac) { available.push_back (std::make_pair (cac, "CAttk")); }
+	if (cfac) { available.push_back (std::make_pair (cfac, "CFstAt")); }
 	if (csc) { available.push_back (std::make_pair (csc, "CRels")); }
 	if (ckc) { available.push_back (std::make_pair (ckc, "CMkup")); }
+	if (cfc) { available.push_back (std::make_pair (cfc, "CEmph")); }
+	if (cpc) { available.push_back (std::make_pair (cpc, "CPeak")); }
+	if (cxc) { available.push_back (std::make_pair (cxc, "CMmix")); }
 
 	if (gec) { available.push_back (std::make_pair (gec, "Gate")); }
+	if (gmc) { available.push_back (std::make_pair (gmc, "GMode")); }
 	if (gtc) { available.push_back (std::make_pair (gtc, "GThrsh")); }
 	if (gdc) { available.push_back (std::make_pair (gdc, "GDepth")); }
 	if (gac) { available.push_back (std::make_pair (gac, "GAttk")); }
-	if (gsc) { available.push_back (std::make_pair (gsc, "GRels")); }
+	if (gfac) { available.push_back (std::make_pair (gfac, "GFstAt")); }
+	if (grc) { available.push_back (std::make_pair (grc, "GRels")); }
+	if (gyc) { available.push_back (std::make_pair (gyc, "GHyst")); }
+	if (ghc) { available.push_back (std::make_pair (ghc, "GHold")); }
+	if (gkc) { available.push_back (std::make_pair (gkc, "GKnee")); }
+	if (grac) { available.push_back (std::make_pair (grac, "GRatio")); }
+	if (gfc) { available.push_back (std::make_pair (gfc, "GSdChn")); }
+	if (gfrc) { available.push_back (std::make_pair (gfrc, "GFreq")); }
+	if (glc) { available.push_back (std::make_pair (glc, "GList")); }
 
 	if (available.size() <= _current_bank + 1) {
 		_current_bank = available.size() - 1;
