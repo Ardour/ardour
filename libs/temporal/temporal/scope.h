@@ -96,4 +96,5 @@ struct TempoMapScope {
 
 } // namespace 
 
-#define EC_LOCAL_TEMPO_SCOPE Temporal::TempoMapScope __tms (*this);
+// #define EC_LOCAL_TEMPO_SCOPE Temporal::TempoMapScope __tms (*this);
+#define EC_LOCAL_TEMPO_SCOPE
