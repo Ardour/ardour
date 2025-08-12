@@ -297,6 +297,7 @@ RecorderUI::RecorderUI ()
 	PresentationInfo::Change.connect (*this, invalidator (*this), std::bind (&RecorderUI::presentation_info_changed, this, _1), gui_context());
 	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&RecorderUI::parameter_changed, this, _1), gui_context ());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RecorderUI::parameter_changed));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &RecorderUI::dpi_reset));
 	//ARDOUR_UI::instance()->Escape.connect (*this, invalidator (*this), std::bind (&RecorderUI::escape, this), gui_context());
 
 	/* init */
@@ -507,6 +508,12 @@ RecorderUI::update_monitorstate (std::string pn, bool en)
 	if (im != _input_ports.end()) {
 		im->second->update_monitorstate (en);
 	}
+}
+
+void
+RecorderUI::dpi_reset ()
+{
+	start_updating ();
 }
 
 void

@@ -81,6 +81,7 @@ private:
 	void update_title ();
 	void session_going_away ();
 	void parameter_changed (std::string const&);
+	void dpi_reset ();
 	void presentation_info_changed (PBD::PropertyChange const&);
 	void gui_extents_changed ();
 	void regions_changed (std::shared_ptr<ARDOUR::RegionList>, PBD::PropertyChange const&);
