@@ -1768,12 +1768,14 @@ AutomationLine::add (std::shared_ptr<AutomationControl> control, GdkEvent* event
 
 	_editing_context.snap_to_with_modifier (when, event);
 
-	if (UIConfiguration::instance().get_new_automation_points_on_lane() || control->list()->size () == 0) {
+	if (!from_kbd && (UIConfiguration::instance().get_new_automation_points_on_lane() || control->list()->size () == 0)) {
 		if (control->list()->size () == 0) {
 			y = control->get_value ();
 		} else {
 			y = control->list()->eval (when);
 		}
+	} else if (from_kbd) {
+		/* relax, y is in model space already */
 	} else {
 		double x = 0;
 		grab_item().canvas_to_item (x, y);
