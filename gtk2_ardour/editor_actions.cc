@@ -1340,7 +1340,7 @@ Editor::automation_create_point_at_edit_point ()
 		return;
 	}
 
-	timepos_t where (get_preferred_edit_position());;
+	timepos_t where (get_preferred_edit_position());
 	GdkEvent event;
 
 	event.type = GDK_KEY_PRESS;
