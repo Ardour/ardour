@@ -838,10 +838,6 @@ TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter)
 	_points.push_back (*mp);
 }
 
-TempoMap::~TempoMap()
-{
-}
-
 TempoMap::TempoMap (XMLNode const & node, int version)
 	: _scope_owner (nullptr)
 {
@@ -858,6 +854,10 @@ void
 TempoMap::set_scope_owner (ScopedTempoMapOwner& sco)
 {
 	_scope_owner = &sco;
+}
+
+TempoMap::~TempoMap()
+{
 }
 
 void
