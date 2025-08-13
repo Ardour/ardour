@@ -88,5 +88,78 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 	return value_as_string(desc, val.to_double());
 }
 
-}  // namespace ARDOUR
+inline double
+string_as_value (const ARDOUR::ParameterDescriptor& desc,
+                 std::string const & str,
+                 bool& legal)
+{
+	legal = true; /* be optimistic */
 
+	if (desc.scale_points) {
+		// Check if label matches a scale point
+		for (auto const & [label,value] : *desc.scale_points) {
+			if (label == str) {
+				return value;  // Found it, return scale point value
+			}
+		}
+		legal = false;
+		return 0.;
+	}
+
+	if (desc.toggled) {
+		if (str == _("on") || str == _("yes") || str == "1") {
+			return 1.0;
+		} else if (str == _("off") || str == _("no") || str == "0") {
+			return 0.0;
+		} else {
+			legal = false;
+			return 0.;
+		}
+	}
+
+	// Value is not a scale point, print it normally
+	if (desc.unit == ARDOUR::ParameterDescriptor::MIDI_NOTE) {
+
+		uint8_t nn = ARDOUR::ParameterDescriptor::midi_note_num (str);
+		legal = (nn == 255);
+		return nn;
+
+	} else if (desc.type == GainAutomation ||
+	           desc.type == TrimAutomation ||
+	           desc.type == BusSendLevel ||
+	           desc.type == EnvelopeAutomation ||
+	           desc.type == MainOutVolume ||
+	           desc.type == SurroundSendLevel ||
+	           desc.type == InsertReturnLevel ||
+	           desc.unit == ARDOUR::ParameterDescriptor::DB) {
+
+		float f;
+		legal = (sscanf (str.c_str(), "%f", &f) == 1);
+		if (!legal) {
+			return 0.;
+		}
+
+		/* clamp to range */
+
+		float max_dB = accurate_coefficient_to_dB (desc.upper);
+		float min_dB = accurate_coefficient_to_dB (desc.lower);
+
+		f = std::max (std::min (f, max_dB), min_dB);
+
+		return dB_to_coefficient(f);
+
+	} else if (desc.type == PanWidthAutomation) {
+		int tmp;
+		legal = (sscanf (str.c_str(), "%d", &tmp) == 1);
+		return tmp;
+	} else if (desc.integer_step) {
+		float tmp;
+		legal = (sscanf (str.c_str(), "%g", &tmp) == 1);
+		return (int) tmp;
+	}
+
+	legal = false;
+	return 0.;
+}
+
+}  // namespace ARDOUR
