@@ -1347,7 +1347,7 @@ Editor::automation_create_point_at_edit_point ()
 	event.button.button = 1;
 	event.button.state = 0;
 
-	atv->line()->add (atv->control(), &event, where, atv->line()->the_list()->eval (where), false, true);
+	atv->line()->add (atv->control(), &event, where, atv->line()->the_list()->eval (where), true, true);
 }
 
 void
