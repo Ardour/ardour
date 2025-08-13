@@ -5,5 +5,7 @@
      <Binding key="Left" action="Automation/move-points-earlier"/>
      <Binding key="Up" action="Automation/raise-points"/>
      <Binding key="Down" action="Automation/lower-points"/>
+     <Binding key="Primary-Return" action="Automation/begin-edit"/>
+     <Binding key="Escape" action="Automation/end-edit"/>
   </Press>
 </Bindings>

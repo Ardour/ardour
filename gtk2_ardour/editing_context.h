@@ -814,6 +814,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	virtual void automation_lower_points () {};
 	virtual void automation_move_points_later () {};
 	virtual void automation_move_points_earlier () {};
+	virtual void automation_begin_edit () {};
+	virtual void automation_end_edit () {};
 
 	bool temporary_zoom_focus_change;
 	bool _dragging_playhead;

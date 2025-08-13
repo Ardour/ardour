@@ -316,6 +316,8 @@ EditingContext::register_automation_actions (Bindings* automation_bindings, std:
 	reg_sens (_automation_actions, "move-points-earlier", _("Create Automation Point (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_move_points_earlier));
 	reg_sens (_automation_actions, "raise-points", _("Create Automation Point (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_raise_points));
 	reg_sens (_automation_actions, "lower-points", _("Create Automation Point (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_lower_points));
+	reg_sens (_automation_actions, "begin-edit", _("Open value entry window for automation editing"), sigc::mem_fun (*this, &EditingContext::automation_begin_edit));
+	reg_sens (_automation_actions, "end-edit", _("Close value entry window for automation editing"), sigc::mem_fun (*this, &EditingContext::automation_end_edit));
 
 	disable_automation_bindings ();
 }

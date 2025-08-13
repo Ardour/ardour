@@ -50,6 +50,7 @@ gtk2_ardour_sources = [
         'automation_line.cc',
         'automation_region_view.cc',
         'automation_streamview.cc',
+        'automation_text_entry.cc',
         'automation_time_axis.cc',
         'axis_view.cc',
         # 'beatbox_gui.cc',

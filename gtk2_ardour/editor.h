@@ -1599,6 +1599,8 @@ protected:
 	void automation_lower_points ();
 	void automation_move_points_later ();
 	void automation_move_points_earlier ();
+	void automation_begin_edit ();
+	void automation_end_edit ();
 
 private:
 	friend class DragManager;

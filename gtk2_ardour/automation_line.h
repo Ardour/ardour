@@ -58,7 +58,7 @@ class TimeAxisView;
 class AutomationTimeAxisView;
 class Selection;
 class EditingContext;
-class FloatingTextEntry;
+class AutomationTextEntry;
 
 /** A GUI representation of an ARDOUR::AutomationList */
 class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible, public SelectableOwner
@@ -192,6 +192,8 @@ public:
 	EditingContext& editing_context() const { return _editing_context; }
 
 	void add (std::shared_ptr<ARDOUR::AutomationControl>, GdkEvent*, Temporal::timepos_t const &, double y, bool with_guard_points, bool from_kbd = false);
+	void end_edit ();
+	void begin_edit ();
 
 protected:
 
@@ -277,7 +279,11 @@ private:
 	bool _sensitive;
 	AutomationTimeAxisView* atv;
 	bool entry_required_post_add;
-	FloatingTextEntry* automation_entry;
+	AutomationTextEntry* automation_entry;
+
+	void value_edited (std::string, int, ControlPoint*);
+	void automation_text_deleted (AutomationTextEntry*);
+	void text_edit_control_point (ControlPoint& cp, bool grab_focus);
 
 	friend class AudioRegionGainLine;
 	friend class RegionFxLine;

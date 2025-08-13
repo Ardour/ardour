@@ -1351,6 +1351,30 @@ Editor::automation_create_point_at_edit_point ()
 }
 
 void
+Editor::automation_begin_edit ()
+{
+	AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (entered_track);
+
+	if (!atv) {
+		return;
+	}
+
+	atv->line()->begin_edit ();
+}
+
+void
+Editor::automation_end_edit ()
+{
+	AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (entered_track);
+
+	if (!atv) {
+		return;
+	}
+
+	atv->line()->end_edit ();
+}
+
+void
 Editor::automation_lower_points ()
 {
 	PointSelection& points (selection->points);
@@ -1364,6 +1388,8 @@ Editor::automation_lower_points ()
 	if (!atv) {
 		return;
 	}
+
+	atv->line()->end_edit ();
 
 	begin_reversible_command (_("automation event lower"));
 	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
@@ -1391,6 +1417,8 @@ Editor::automation_raise_points ()
 		return;
 	}
 
+	atv->line()->end_edit ();
+
 	begin_reversible_command (_("automation event raise"));
 	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
 	atv->line()->the_list()->freeze ();
@@ -1416,6 +1444,8 @@ Editor::automation_move_points_later ()
 	if (!atv) {
 		return;
 	}
+
+	atv->line()->end_edit ();
 
 	begin_reversible_command (_("automation points move later"));
 	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
@@ -1444,6 +1474,8 @@ Editor::automation_move_points_earlier ()
 	if (!atv) {
 		return;
 	}
+
+	atv->line()->end_edit ();
 
 	begin_reversible_command (_("automation points move earlier"));
 	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));

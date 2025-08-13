@@ -57,10 +57,12 @@
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
 
+#include "gtkmm2ext/doi.h"
+
 #include "automation_line.h"
+#include "automation_text_entry.h"
 #include "control_point.h"
 #include "editing_context.h"
-#include "floating_text_entry.h"
 #include "gui_thread.h"
 #include "rgb_macros.h"
 #include "public_editor.h"
@@ -1089,40 +1091,151 @@ AutomationLine::set_selected_points (PointSelection const & points)
 
 	set_colors ();
 
+	if (points.empty() || !one_of_ours) {
+		return;
+	}
+
 	if (one_of_ours && entry_required_post_add && points.size() == 1) {
-		ControlPoint* cp (points.front());
-		std::stringstream str;
-		str << (*cp->model())->value << ' ' << "Hz";
-
-		ArdourCanvas::GtkCanvas* cvp = dynamic_cast<ArdourCanvas::GtkCanvas*> (cp->item().canvas());
-		Gtk::Window* toplevel = static_cast<Gtk::Window*> (cvp->get_toplevel());
-		if (!toplevel) {
-			entry_required_post_add = false;
-			return;
+		text_edit_control_point (*points.front(), false);
+	} else {
+		if (points.size() > 1 && automation_entry) {
+			delete_when_idle (automation_entry);
 		}
-
-		automation_entry = new FloatingTextEntry (toplevel, str.str());
-		automation_entry->set_name (X_("LargeTextEntry"));
-		automation_entry->delete_on_focus_out ();
-		ArdourCanvas::Duple d (cp->get_x(), cp->get_y());
-		d = cp->item().item_to_window (d);
-
-		int wx, wy;
-
-		cvp->translate_coordinates (*toplevel, d.x, d.y, wx, wy);
-
-		/* Shift the text entry a bit to the right */
-		wx += 30 * UIConfiguration::instance().get_ui_scale();
-
-		gint rwx, rwy;
-
-		toplevel->get_position (rwx, rwy);
-		automation_entry->move (rwx + wx, rwy + wy);
-		automation_entry->show ();
 	}
 
 	if (one_of_ours) {
 		entry_required_post_add = false;
+	}
+}
+
+void
+AutomationLine::text_edit_control_point (ControlPoint& cp, bool grab_focus)
+{
+	switch (_desc.type) {
+	case GainAutomation:
+	case PanAzimuthAutomation:
+	case PanElevationAutomation:
+	case PanWidthAutomation:
+	case PanFrontBackAutomation:
+	case PanLFEAutomation:
+	case MidiCCAutomation:
+	case MidiPitchBenderAutomation:
+	case MidiChannelPressureAutomation:
+	case MidiNotePressureAutomation:
+	case FadeInAutomation:
+	case FadeOutAutomation:
+	case EnvelopeAutomation:
+	case TrimAutomation:
+	case PhaseAutomation:
+	case MonitoringAutomation:
+	case BusSendLevel:
+	case BusSendEnable:
+	case SurroundSendLevel:
+	case InsertReturnLevel:
+	case MainOutVolume:
+	case MidiVelocityAutomation:
+	case PanSurroundX:
+	case PanSurroundY:
+	case PanSurroundZ:
+	case PanSurroundSize:
+	case PanSurroundSnap:
+	case BinauralRenderMode:
+	case PanSurroundElevationEnable:
+	case PanSurroundZones:
+	case PanSurroundRamp:
+	case SendLevelAutomation:
+	case SendEnableAutomation:
+	case SendAzimuthAutomation:
+		break;
+	default:
+		/* No text editing values for this type of automation */
+		entry_required_post_add = false;
+		return;
+	}
+
+	std::string txt = ARDOUR::value_as_string (_desc, (*cp.model())->value);
+
+	ArdourCanvas::GtkCanvas* cvp = dynamic_cast<ArdourCanvas::GtkCanvas*> (cp.item().canvas());
+	Gtk::Window* toplevel = static_cast<Gtk::Window*> (cvp->get_toplevel());
+	if (!toplevel) {
+		entry_required_post_add = false;
+		return;
+	}
+
+	if (automation_entry) {
+		delete_when_idle (automation_entry);
+		automation_entry = nullptr;
+	}
+
+	automation_entry = new AutomationTextEntry (toplevel, txt);
+	automation_entry->set_name (X_("BigTextEntry"));
+	automation_entry->use_text.connect (sigc::bind (sigc::mem_fun (*this, &AutomationLine::value_edited), &cp));
+	automation_entry->going_away.connect (sigc::mem_fun (*this, &AutomationLine::automation_text_deleted));
+
+	ArdourCanvas::Duple d (cp.get_x(), cp.get_y());
+	d = cp.item().item_to_window (d);
+
+	int wx, wy;
+
+	cvp->translate_coordinates (*toplevel, d.x, d.y, wx, wy);
+
+	/* Shift the text entry a bit to the right */
+	wx += 30 * UIConfiguration::instance().get_ui_scale();
+
+	gint rwx, rwy;
+
+	toplevel->get_position (rwx, rwy);
+	automation_entry->move (rwx + wx, rwy + wy);
+	automation_entry->show ();
+
+	if (grab_focus) {
+		automation_entry->activate_entry ();
+	}
+}
+
+void
+AutomationLine::begin_edit ()
+{
+	if (automation_entry) {
+		return;
+	}
+
+	PointSelection& points (_editing_context.get_selection().points);
+
+	if (points.size() != 1) {
+		return;
+	}
+
+	if (&(points.front()->line()) == this) {
+		text_edit_control_point (*points.front(), true);
+	}
+}
+
+void
+AutomationLine::end_edit ()
+{
+	if (automation_entry) {
+		delete_when_idle (automation_entry);
+	}
+}
+
+void
+AutomationLine::automation_text_deleted (AutomationTextEntry* ate)
+{
+	if (ate == automation_entry) {
+		automation_entry = nullptr;
+	}
+}
+
+void
+AutomationLine::value_edited (std::string str, int /* what_next*/, ControlPoint* cp)
+{
+	bool legal;
+	double val = ARDOUR::string_as_value (_desc, str, legal);
+
+	if (legal) {
+		alist->modify (cp->model(), (*cp->model())->when, val);
+		automation_entry->hide ();
 	}
 }
 
@@ -1307,7 +1420,9 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		update_visibility ();
 	}
 
-	set_selected_points (_editing_context.get_selection().points);
+	if (!entry_required_post_add) {
+		set_selected_points (_editing_context.get_selection().points);
+	}
 }
 
 void
