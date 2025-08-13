@@ -8648,6 +8648,71 @@ Editor::toggle_region_mute ()
 }
 
 void
+Editor::region_mute_comp ()
+{
+	if (_ignore_region_action) {
+		return;
+	}
+
+	RegionSelection rs = selection->regions;
+
+	if (rs.empty ()) {
+		return;
+	}
+
+	if (rs.size() > 1) {
+		begin_reversible_command (_("mute/comp regions"));
+	} else {
+		begin_reversible_command (_("mute/comp region"));
+	}
+
+	bool changed = false;
+
+	/* unmute selected region(s),
+	 * mute other regions in the playlist at the same position
+	 */
+	for (auto const& region_view : rs) {
+
+		std::shared_ptr<Region> r   = region_view->region ();
+		std::shared_ptr<Playlist> p = r->playlist ();
+
+		if (r->muted ()) {
+			r->clear_changes ();
+			r->set_muted (false);
+			_session->add_command (new StatefulDiffCommand (r));
+			changed = true;
+		}
+
+		/* p->get_equivalent_regions (r, equivalent_regions); with Config->get_region_equivalence () == Exact */
+		vector<std::shared_ptr<Region>> equivalent_regions;
+		std::shared_ptr<RegionList> rl = p->region_list ();
+		for (auto const& ri : *rl) {
+			if (ri->exact_equivalent (r)) {
+				equivalent_regions.push_back (ri);
+			}
+		}
+
+		for (auto const& ri: equivalent_regions) {
+			if (r == ri) {
+				continue;
+			}
+			if (!ri->muted ()) {
+				ri->clear_changes ();
+				ri->set_muted (true);
+				_session->add_command (new StatefulDiffCommand (ri));
+				changed = true;
+			}
+		}
+	}
+
+	if (changed) {
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
+}
+
+void
 Editor::combine_regions ()
 {
 	/* foreach track with selected regions, take all selected regions

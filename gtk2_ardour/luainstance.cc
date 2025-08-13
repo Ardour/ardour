@@ -1031,6 +1031,8 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		//.addFunction ("get_preferred_edit_position", &PublicEditor::get_preferred_edit_position)
 		//.addFunction ("split_regions_at", &PublicEditor::split_regions_at)
 
+		.addFunction ("region_mute_comp", &PublicEditor::region_mute_comp)
+
 		.addFunction ("get_paste_offset", &PublicEditor::get_paste_offset)
 
 		.addFunction ("toggle_ruler_video", &PublicEditor::toggle_ruler_video)

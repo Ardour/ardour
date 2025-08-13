@@ -1626,6 +1626,7 @@ private:
 	void set_playhead_cursor ();
 
 	void toggle_region_mute ();
+	void region_mute_comp ();
 
 	void initialize_canvas ();
 

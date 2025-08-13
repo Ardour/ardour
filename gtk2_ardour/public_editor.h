@@ -300,6 +300,7 @@ public:
 	virtual void maximise_editing_space () = 0;
 	virtual void restore_editing_space () = 0;
 	virtual void toggle_meter_updating() = 0;
+	virtual void region_mute_comp () = 0;
 	virtual void split_regions_at (Temporal::timepos_t const &, RegionSelection&) = 0;
 	virtual void split_region_at_points (std::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
