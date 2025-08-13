@@ -2655,7 +2655,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t rstart, superclock_t end, 
 		dump (std::cout);
 	}
 #endif
-	DEBUG_TRACE (DEBUG::Grid, string_compose (">>> GRID START %1 .. %2 (barmod = %3)\n", rstart, end, bar_mod));
+	DEBUG_TRACE (DEBUG::Grid, string_compose (">>> GRID START %1 .. %2 (barmod = %3, beat_div = %4)\n", rstart, end, bar_mod, beat_div));
 
 	/* The fast path: one tempo, one meter, just do (relatively) simple math */
 
