@@ -36,6 +36,7 @@
 #include "ardour/amp.h"
 #include "ardour/control_group.h"
 #include "ardour/logmeter.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/route_group.h"
 #include "ardour/selection.h"
 #include "ardour/session_route.h"
@@ -538,10 +539,11 @@ GainMeterBase::gain_activated ()
 
 	/* clamp to displayable values */
 	if (_data_type == DataType::AUDIO) {
-		f = min (f, 6.0f);
+		float max_dB = accurate_coefficient_to_dB (Config->get_max_gain());
+		f = min (f, max_dB);
 		_control->set_value (dB_to_coefficient(f), Controllable::UseGroup);
 	} else {
-		f = min (fabs (f), 2.0f);
+		f = min (fabs (f), Config->get_max_gain());
 		_control->set_value (f, Controllable::UseGroup);
 	}
 
