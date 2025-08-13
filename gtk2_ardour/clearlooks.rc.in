@@ -1307,6 +1307,6 @@ widget "*Pane.Divider" style:highest "pane"
 widget "*VCALabelBar*" style:highest "vca_label_bar"
 widget "*TextOnBackground" style:highest "text_on_bg"
 widget "*LargeTextEntry" style:highest "large_text"
-widget "*LargeTextEntry*" style:highest "large_text"
+widget "*BigTextEntry*" style:highest "big_text"
 
 widget "*ShadedEntry" style:highest "shaded_entry"
