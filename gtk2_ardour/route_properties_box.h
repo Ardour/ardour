@@ -28,6 +28,8 @@
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
+#include "widgets/frame.h"
+
 namespace ARDOUR {
 	class Route;
 	class Processor;
@@ -35,6 +37,7 @@ namespace ARDOUR {
 }
 
 class GenericPluginUI;
+class ProcessorBox;
 
 class RoutePropertiesBox : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
@@ -42,10 +45,14 @@ public:
 	RoutePropertiesBox ();
 	~RoutePropertiesBox ();
 
+	void set_session (ARDOUR::Session*);
 	void set_route (std::shared_ptr<ARDOUR::Route>);
 
 private:
 	void property_changed (const PBD::PropertyChange& what_changed);
+	void map_frozen ();
+	void ui_actions_ready ();
+	void update_processor_box_visibility ();
 	void session_going_away ();
 	void drop_route ();
 	void drop_plugin_uis ();
@@ -61,9 +68,14 @@ private:
 	std::shared_ptr<ARDOUR::Route> _route;
 	std::vector <GenericPluginUI*> _proc_uis;
 
+	ArdourWidgets::Frame _insert_frame;
+	ProcessorBox*        _insert_box;
+	bool                 _show_insert;
+
 	int _idle_refill_processors_id;
 
 	PBD::ScopedConnectionList _processor_connections;
 	PBD::ScopedConnectionList _route_connections;
+	PBD::ScopedConnectionList _forever_connections;
 };
 
