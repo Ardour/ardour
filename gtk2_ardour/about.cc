@@ -140,7 +140,7 @@ static const char* authors[] = {
 	N_("Sakari Bergen"),
 	N_("Christian Borss"),
 	N_("Thomas Brand"),
-	N_("Frankie Burgarino"),
+	N_("Franke Burgarino"),
 	N_("Chris Cannam"),
 	N_("Jeremy Carter"),
 	N_("Enrico Castella"),
