@@ -546,7 +546,9 @@ int main() { return 0; }''',
         if conf.env['build_target'] == 'armhf' or conf.env['build_target'] == 'aarch64':
             conf.define('ARM_NEON_SUPPORT', 1)
         elif conf.env['build_target'] == 'mingw':
-            if re.search ('x86_64-w64', str(conf.env['CC'])) is not None:
+            # usability of the 64 bit windows assembler depends on the compiler target,
+            # not the build host.
+            if re.search ('x86_64-w64', os.popen(str(conf.env['CC'][0]) + " -dumpmachine").read()) is not None:
                 conf.define ('FPU_AVX_FMA_SUPPORT', 1)
                 conf.define ('FPU_AVX512F_SUPPORT', 1)
         elif conf.env['build_target'] == 'i386' or conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
@@ -636,6 +638,16 @@ int main() { return 0; }''',
             compiler_flags.extend ([ flags_dict['sse'], flags_dict['fpmath-sse'], flags_dict['xmmintrinsics'] ])
 
         if (conf.env['build_target'] == 'mingw'):
+            flag_line = os.popen ("cat /proc/cpuinfo | grep '^flags'").read()[:-1]
+            x86_flags = flag_line.split (": ")[1:][0].split ()
+
+            if "mmx" in x86_flags:
+                compiler_flags.append ("-mmmx")
+            if "sse" in x86_flags:
+                build_host_supports_sse = True
+            if "3dnow" in x86_flags:
+                compiler_flags.append ("-m3dnow")
+
             if (re.search ("(x86_64|AMD64)", cpu) is not None):
                 # on Windows sse is supported by 64 bit platforms only
                 build_host_supports_sse = True
@@ -660,10 +672,9 @@ int main() { return 0; }''',
             compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         elif conf.env['build_target'] == 'mingw':
             # usability of the 64 bit windows assembler depends on the compiler target,
-            # not the build host, which in turn can only be inferred from the name
-            # of the compiler.
-            if re.search ('x86_64-w64', str(conf.env['CC'])) is not None:
-                    compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+            # not the build host.
+            if re.search ('x86_64-w64', os.popen(str(conf.env['CC'][0]) + " -dumpmachine").read()):
+                compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if not build_host_supports_sse:
             print("\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)")
 

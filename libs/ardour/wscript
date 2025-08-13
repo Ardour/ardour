@@ -512,9 +512,8 @@ def build(bld):
             avx512f_sources = [ 'x86_functions_avx512f.cc' ]
         elif bld.env['build_target'] == 'mingw':
             # usability of the 64 bit windows assembler depends on the compiler target,
-            # not the build host, which in turn can only be inferred from the name
-            # of the compiler.
-            if re.search ('x86_64-w64', str(bld.env['CC'])):
+            # not the build host.
+            if re.search ('x86_64-w64', os.popen(str(bld.env['CC'][0]) + " -dumpmachine").read()):
                 obj.source += [ 'sse_functions_xmm.cc' ]
                 obj.source += [ 'sse_functions_64bit_win.s',  'sse_avx_functions_64bit_win.s' ]
                 avx_sources = [ 'sse_functions_avx.cc' ]
