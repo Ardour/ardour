@@ -36,11 +36,9 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 
 	if (desc.scale_points) {
 		// Check if value is on a scale point
-		for (ARDOUR::ScalePoints::const_iterator i = desc.scale_points->begin();
-		     i != desc.scale_points->end();
-		     ++i) {
-			if (i->second == v) {
-				return i->first;  // Found it, return scale point label
+		for (auto const & [label,val] : *desc.scale_points) {
+			if (val == v) {
+				return label;
 			}
 		}
 	}
