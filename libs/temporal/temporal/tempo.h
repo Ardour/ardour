@@ -1011,8 +1011,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	static void map_assert (bool expr, char const * exprstr, char const * file, int line);
 
-	void LIBTEMPORAL_API set_scope_owner (ScopedTempoMapOwner&);
-	void LIBTEMPORAL_API clear_scope_owner ();
+	LIBTEMPORAL_API void set_scope_owner (ScopedTempoMapOwner&);
+	LIBTEMPORAL_API void clear_scope_owner ();
 	ScopedTempoMapOwner* scope_owner() const { return _scope_owner; }
 
   private:

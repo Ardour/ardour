@@ -69,15 +69,15 @@ class TempoMap;
 class LIBTEMPORAL_API ScopedTempoMapOwner
 {
  public:
-	LIBTEMPORAL_API ScopedTempoMapOwner () : local_tempo_map_depth (0) {}
-	virtual LIBTEMPORAL_API ~ScopedTempoMapOwner () {}
+	ScopedTempoMapOwner () : local_tempo_map_depth (0) {}
+	virtual ~ScopedTempoMapOwner () {}
 
-	void LIBTEMPORAL_API start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> map);
-	void LIBTEMPORAL_API end_local_tempo_map ();
+	void start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> map);
+	void end_local_tempo_map ();
 
-	uint64_t LIBTEMPORAL_API depth() const { return local_tempo_map_depth; }
+	uint64_t depth() const { return local_tempo_map_depth; }
 
-	virtual LIBTEMPORAL_API std::string scope_name() const = 0;
+	virtual std::string scope_name() const = 0;
 
   protected:
 	mutable std::shared_ptr<Temporal::TempoMap> _local_tempo_map;
