@@ -1098,6 +1098,7 @@ EditingContext::build_grid_type_menu ()
 	/* musical grid: bars, quarter-notes, etc */
 	grid_type_selector.append (grid_actions[GridTypeBar]);
 	grid_type_selector.append (grid_actions[GridTypeBeat]);
+	grid_type_selector.append (grid_actions[GridTypeBeatDiv2]);
 	grid_type_selector.append (grid_actions[GridTypeBeatDiv4]);
 	grid_type_selector.append (grid_actions[GridTypeBeatDiv8]);
 	grid_type_selector.append (grid_actions[GridTypeBeatDiv16]);
