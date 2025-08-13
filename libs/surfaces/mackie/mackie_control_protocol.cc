@@ -1787,21 +1787,20 @@ MackieControlProtocol::set_subview_mode (MACKIE_NAMESPACE::Subview::Mode sm, std
 
 		DEBUG_TRACE (DEBUG::MackieControl, "subview mode not OK\n");
 
-		if (r) {
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
-			Glib::Threads::Mutex::Lock lm (surfaces_lock);
-
-			if (!surfaces.empty()) {
-				if (!reason_why_subview_not_possible.empty()) {
-					surfaces.front()->display_message_for (reason_why_subview_not_possible, 1000);
-					if (_subview->subview_mode() != MACKIE_NAMESPACE::Subview::None) {
-						/* redisplay current subview mode after
-						   that message goes away.
-						*/
-						Glib::RefPtr<Glib::TimeoutSource> redisplay_timeout = Glib::TimeoutSource::create (1000); // milliseconds
-						redisplay_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::redisplay_subview_mode));
-						redisplay_timeout->attach (main_loop()->get_context());
-					}
+		if (!surfaces.empty()) {
+			if (!reason_why_subview_not_possible.empty()) {
+				r ?
+					surfaces.front()->display_message_for (reason_why_subview_not_possible, 1000) :
+					surfaces.front()->display_message_for ("no track/bus selected", 1000);
+				if (_subview->subview_mode() != MACKIE_NAMESPACE::Subview::None) {
+					/* redisplay current subview mode after
+						that message goes away.
+					*/
+					Glib::RefPtr<Glib::TimeoutSource> redisplay_timeout = Glib::TimeoutSource::create (1000); // milliseconds
+					redisplay_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::redisplay_subview_mode));
+					redisplay_timeout->attach (main_loop()->get_context());
 				}
 			}
 		}
