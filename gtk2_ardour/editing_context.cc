@@ -2128,14 +2128,14 @@ EditingContext::horizontal_position () const
 }
 
 void
-EditingContext::set_horizontal_position (double p)
+EditingContext::set_horizontal_position (double pixel)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	p = std::max (0., p);
+	pixel = std::max (0., pixel);
 
-	horizontal_adjustment.set_value (p);
-	_leftmost_sample = (samplepos_t) floor (p * samples_per_pixel);
+	_leftmost_sample = (samplepos_t) floor (pixel * samples_per_pixel);
+	horizontal_adjustment.set_value (pixel);
 }
 
 Gdk::Cursor*
