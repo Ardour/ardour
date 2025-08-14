@@ -55,9 +55,13 @@ CueEditor::CueEditor (std::string const & name, bool with_transport)
 	, zoom_in_allocate (false)
 	, timebar_height (15.)
 	, n_timebars (0)
+	, _scroll_drag (false)
 {
 	_canvas_hscrollbar = manage (new Gtk::HScrollbar (horizontal_adjustment));
 	_canvas_hscrollbar->show ();
+	_canvas_hscrollbar->signal_button_press_event().connect (sigc::mem_fun (*this, &CueEditor::hscroll_press), false);
+	_canvas_hscrollbar->signal_button_release_event().connect (sigc::mem_fun (*this, &CueEditor::hscroll_release), false);
+
 	horizontal_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &CueEditor::scrolled));
 
 	_history.Changed.connect (history_connection, invalidator (*this), std::bind (&CueEditor::history_changed, this), gui_context());
@@ -66,6 +70,20 @@ CueEditor::CueEditor (std::string const & name, bool with_transport)
 CueEditor::~CueEditor ()
 {
 	delete own_bindings;
+}
+
+bool
+CueEditor::hscroll_press (GdkEventButton* ev)
+{
+	_scroll_drag = true;
+	return false;
+}
+
+bool
+CueEditor::hscroll_release (GdkEventButton* ev)
+{
+	_scroll_drag = false;
+	return false;
 }
 
 void

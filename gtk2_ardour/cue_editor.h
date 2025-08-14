@@ -258,5 +258,9 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	virtual void set_from_rsu (RegionUISettings&);
 
 	void metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>&, samplepos_t, samplepos_t, gint);
+
+	bool _scroll_drag;
+	bool hscroll_press (GdkEventButton*);
+	bool hscroll_release (GdkEventButton*);
 };
 
