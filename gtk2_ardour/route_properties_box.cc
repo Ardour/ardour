@@ -81,6 +81,7 @@ RoutePropertiesBox::session_going_away ()
 	ENSURE_GUI_THREAD (*this, &RoutePropertiesBox::session_going_away);
 	SessionHandlePtr::session_going_away ();
 
+	_insert_frame.remove ();
 	drop_plugin_uis ();
 	drop_route ();
 	delete _insert_box;
@@ -98,6 +99,7 @@ RoutePropertiesBox::set_session (ARDOUR::Session* s) {
 	_insert_box->show_all ();
 
 	float ui_scale = std::max<float> (1.f, UIConfiguration::instance().get_ui_scale());
+	_insert_frame.remove ();
 	_insert_frame.add (*_insert_box);
 	_insert_frame.set_padding (4);
 	_insert_frame.set_size_request (144 * ui_scale, 236 * ui_scale);
