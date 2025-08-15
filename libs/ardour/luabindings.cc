@@ -22,6 +22,7 @@
 
 #include <glibmm.h>
 
+#include "pbd/cpus.h"
 #include "pbd/history_owner.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/openuri.h"
@@ -608,6 +609,9 @@ LuaBindings::common (lua_State* L)
 		.addConst ("NoGroup", PBD::Controllable::GroupControlDisposition(PBD::Controllable::NoGroup))
 		.addConst ("UseGroup", PBD::Controllable::GroupControlDisposition(PBD::Controllable::UseGroup))
 		.endNamespace ()
+
+		.addFunction ("hardware_concurrency", hardware_concurrency)
+		.addFunction ("max_mmcss_threads_per_process", max_mmcss_threads_per_process)
 
 		.endNamespace (); // PBD
 

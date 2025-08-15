@@ -39,6 +39,27 @@
 #include <ardourext/pthread.h>  // Gets us 'PTW32_VERSION'
 #endif
 
+int32_t
+max_mmcss_threads_per_process ()
+{
+#ifdef PLATFORM_WINDOWS
+	DWORD dwType = REG_DWORD;
+	DWORD dwSize = 4;
+	int32_t rv   = 32;
+	HKEY hKey;
+	if (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile", 0, KEY_READ, &hKey)) {
+		if (ERROR_SUCCESS == RegQueryValueExA (hKey, "MaxThreadsPerProcess", 0, &dwType, (LPBYTE)&rv, &dwSize)) {
+			if (dwType == REG_DWORD && dwSize == 4) {
+				return rv;
+			}
+		}
+	}
+	return 32;
+#else
+	return INT32_MAX;
+#endif
+}
+
 uint32_t
 hardware_concurrency()
 {

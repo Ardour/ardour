@@ -23,4 +23,4 @@
 #include "pbd/libpbd_visibility.h"
 
 LIBPBD_API extern uint32_t hardware_concurrency ();
-
+LIBPBD_API extern int32_t max_mmcss_threads_per_process ();
