@@ -432,6 +432,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	virtual ArdourCanvas::GtkCanvas* get_canvas() const = 0;
 
 	virtual void mouse_mode_chosen (Editing::MouseMode) = 0;
+	Editing::MouseMode old_mouse_mode;
 
 	bool on_velocity_scroll_event (GdkEventScroll*);
 	void pre_render ();

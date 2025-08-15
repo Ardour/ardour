@@ -111,6 +111,7 @@ static const gchar *_zoom_focus_strings[] = {
 
 EditingContext::EditingContext (std::string const & name)
 	: rubberband_rect (0)
+	, old_mouse_mode (Editing::MouseObject)
 	, _name (name)
 	, within_track_canvas (false)
 	, pre_internal_grid_type (GridTypeBeat)

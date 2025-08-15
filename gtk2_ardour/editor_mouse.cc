@@ -132,10 +132,11 @@ Editor::mouse_mode_chosen (MouseMode m)
 		 * left. we'll get called again with the new mode active in a
 		 * jiffy.
 		 */
+		old_mouse_mode = m;
 		return;
 	}
 
-	const bool was_internal = internal_editing();
+	const bool was_internal = (old_mouse_mode == Editing::MouseDraw || old_mouse_mode == Editing::MouseContent);
 
 	/* Ben ToDo:  once we have a dedicated 'region edit panel', we can store
 	 * one snap mode in the editor canvas and another one in the editor,

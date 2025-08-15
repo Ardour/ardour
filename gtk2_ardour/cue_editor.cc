@@ -1082,6 +1082,7 @@ CueEditor::mouse_mode_chosen (Editing::MouseMode m)
 		 * left. we'll get called again with the new mode active in a
 		 * jiffy.
 		 */
+		old_mouse_mode = m;
 		return;
 	}
 
