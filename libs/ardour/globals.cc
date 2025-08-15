@@ -749,7 +749,7 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 	 * WaveViewThreads::start_threads adds `min (8, hw - 1)`
 	 *
 	 */
-	BufferManager::init (hardware_concurrency () * 3 + 6);
+	BufferManager::init (PBD::hardware_concurrency () * 3 + 6);
 
 	PannerManager::instance ().discover_panners ();
 

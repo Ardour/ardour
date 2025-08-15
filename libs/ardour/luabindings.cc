@@ -610,8 +610,8 @@ LuaBindings::common (lua_State* L)
 		.addConst ("UseGroup", PBD::Controllable::GroupControlDisposition(PBD::Controllable::UseGroup))
 		.endNamespace ()
 
-		.addFunction ("hardware_concurrency", hardware_concurrency)
-		.addFunction ("max_mmcss_threads_per_process", max_mmcss_threads_per_process)
+		.addFunction ("hardware_concurrency", PBD::hardware_concurrency)
+		.addFunction ("max_mmcss_threads_per_process", PBD::max_mmcss_threads_per_process)
 
 		.endNamespace (); // PBD
 

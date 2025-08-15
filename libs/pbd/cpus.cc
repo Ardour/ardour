@@ -40,7 +40,7 @@
 #endif
 
 int32_t
-max_mmcss_threads_per_process ()
+PBD::max_mmcss_threads_per_process ()
 {
 #ifdef PLATFORM_WINDOWS
 	DWORD dwType = REG_DWORD;
@@ -61,7 +61,7 @@ max_mmcss_threads_per_process ()
 }
 
 uint32_t
-hardware_concurrency()
+PBD::hardware_concurrency()
 {
 	if (getenv("ARDOUR_CONCURRENCY")) {
 		int c = atoi (getenv("ARDOUR_CONCURRENCY"));

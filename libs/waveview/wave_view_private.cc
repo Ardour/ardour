@@ -342,7 +342,7 @@ WaveViewThreads::start_threads ()
 {
 	assert (!_threads.size());
 
-	const int num_cpus = hardware_concurrency ();
+	const int num_cpus = PBD::hardware_concurrency ();
 
 	/* the upper limit of 8 here is entirely arbitrary. It just doesn't
 	 * seem worthwhile having "ncpus" of low priority threads for

@@ -45,7 +45,7 @@ IOTaskList::IOTaskList (uint32_t n_threads)
 	, _exec_sem ("io thread exec", 0)
 	, _idle_sem ("io thread idle", 0)
 {
-	assert (n_threads <= hardware_concurrency ());
+	assert (n_threads <= PBD::hardware_concurrency ());
 
 	if (n_threads < 2) {
 		return;

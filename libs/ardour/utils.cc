@@ -718,7 +718,7 @@ ARDOUR::how_many_dsp_threads ()
 {
         /* CALLER MUST HOLD PROCESS LOCK */
 
-        int num_cpu = hardware_concurrency();
+        int num_cpu = PBD::hardware_concurrency();
         int pu = Config->get_processor_usage ();
         uint32_t num_threads = max (num_cpu - 1, 2); // default to number of cpus minus one, or 2, whichever is larger
 
@@ -750,7 +750,7 @@ ARDOUR::how_many_dsp_threads ()
 uint32_t
 ARDOUR::how_many_io_threads ()
 {
-	int num_cpu = hardware_concurrency();
+	int num_cpu = PBD::hardware_concurrency();
 	int pu = Config->get_io_thread_count ();
 	uint32_t num_threads = max (num_cpu - 2, 2);
 	if (pu < 0) {

@@ -157,7 +157,7 @@ namespace ARDOUR {
 
 ExportGraphBuilder::ExportGraphBuilder (Session const & session)
 	: session (session)
-	, thread_pool (hardware_concurrency())
+	, thread_pool (PBD::hardware_concurrency())
 {
 	process_buffer_samples = session.engine().samples_per_cycle();
 }
