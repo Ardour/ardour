@@ -352,6 +352,9 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 
 		Gtkmm2ext::set_source_rgba (cr, bg);
 
+		if (_scroomer_size != width() - kbd_width) {
+			std::cerr << "about to crash, scroomer width " << _scroomer_size << " w " << width() << " kbd width " << kbd_width << std::endl;
+		}
 		assert (_scroomer_size == width() - kbd_width);
 
 		double x = _scroomer_size;
