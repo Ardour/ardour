@@ -111,6 +111,10 @@
 
 #include "LuaBridge/LuaBridge.h"
 
+#ifdef PLATFORM_WINDOWS
+#include "pbd/windows_mmcss.h"
+#endif
+
 #ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>
 #endif
@@ -335,6 +339,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, last_configure_time (0)
 	, last_peak_grab (0)
 	, have_disk_speed_dialog_displayed (false)
+	, have_mmcss_error_dialog_displayed (false)
 	, _status_bar_visibility (X_("status-bar"))
 	, _log_not_acknowledged (LogLevelNone)
 	, duplicate_routes_dialog (0)
@@ -420,6 +425,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	ARDOUR::DiskReader::Underrun.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::disk_underrun_handler, this), gui_context());
 
 	ARDOUR::Session::VersionMismatch.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::session_format_mismatch, this, _1, _2), gui_context());
+
+#ifdef PLATFORM_WINDOWS
+	PBD::MMCSS::MMCSSError.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::mmcss_error_handler, this), gui_context());
+#endif
 
 	/* handle dialog requests */
 
@@ -575,6 +584,7 @@ ARDOUR_UI::engine_stopped ()
 	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, true);
 	update_sample_rate ();
 	update_cpu_load ();
+	have_mmcss_error_dialog_displayed = false;
 }
 
 void
@@ -2961,6 +2971,33 @@ ARDOUR_UI::disk_speed_dialog_gone (int /*ignored_response*/, MessageDialog* msg)
 {
 	have_disk_speed_dialog_displayed = false;
 	delete msg;
+}
+
+void
+ARDOUR_UI::mmcss_error_handler ()
+{
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::mmcss_error_handler)
+
+	if (!have_mmcss_error_dialog_displayed) {
+		have_mmcss_error_dialog_displayed = true;
+		ArdourMessageDialog msg (_("<b>MMCSS priority can not be set!</b>\n\n"
+		                           "Windows Multimedia Class Scheduler Service (MCSS) is used for time-critical audio processing. "
+		                           "By default, Microsoft has limited the number of MMCSS threads to 32, and this limit has been reached.\n\n"
+															 "You can reduce the number of process threads in Preferences &gt; Performance, but that may be insufficient, "
+		                           "because MCSS threads are also used for Audio and MIDI I/O.\n"
+		                           "One solution is to increase the number of available MCSS threads by modifying the windows registry. "
+															 "A tool to do that conveniently can be found <a href=\"https://helpcenter.steinberg.de/hc/en-us/articles/13338094735762-Error-message-on-Windows-MMCSS-priority-cannot-be-set\">here</a>."),
+		                     true, MESSAGE_ERROR);
+
+		for (auto const& w: msg.get_message_area ()->get_children ()) {
+			Gtk::Label* l = dynamic_cast<Gtk::Label*> (w);
+			if (l) {
+				l->property_track_visited_links() = false;
+				l->signal_activate_link().connect ([](std::string const& url) { std::cout << url << "\n"; return PBD::open_uri (url); }, false);
+			}
+		}
+		msg.run ();
+	}
 }
 
 void

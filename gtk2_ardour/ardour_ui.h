@@ -765,6 +765,8 @@ private:
 	void disk_speed_dialog_gone (int ignored_response, Gtk::MessageDialog*);
 	void disk_overrun_handler ();
 	void disk_underrun_handler ();
+	bool have_mmcss_error_dialog_displayed;
+	void mmcss_error_handler ();
 
 	void session_format_mismatch (std::string, std::string);
 
