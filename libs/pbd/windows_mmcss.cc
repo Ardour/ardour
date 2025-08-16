@@ -41,6 +41,8 @@ namespace PBD {
 
 namespace MMCSS {
 
+Signal<void()> MMCSSError;
+
 bool
 initialize ()
 {
@@ -133,6 +135,8 @@ set_thread_characteristics (const std::string& task_name, HANDLE* task_handle)
 			DEBUG_THREADS("MMCSS: Privilege not held\n");
 			break;
 		default:
+			/* this is likely because the maximum number of MMCSS threads has been reached */
+			MMCSSError (); /* EMIT SIGNAL */
 			DEBUG_THREADS("MMCSS: Unknown error setting thread characteristics\n");
 			break;
 		}

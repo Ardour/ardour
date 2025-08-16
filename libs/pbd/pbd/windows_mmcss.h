@@ -24,6 +24,7 @@
 
 #include <string>
 
+#include "pbd/signals.h"
 #include "pbd/libpbd_visibility.h"
 
 namespace PBD {
@@ -54,6 +55,8 @@ bool LIBPBD_API set_thread_characteristics (const std::string& task_name, HANDLE
 bool LIBPBD_API revert_thread_characteristics (HANDLE task_handle);
 
 bool LIBPBD_API set_thread_priority (HANDLE, AVRT_PRIORITY);
+
+extern Signal<void()> MMCSSError;
 
 } // namespace MMCSS
 
