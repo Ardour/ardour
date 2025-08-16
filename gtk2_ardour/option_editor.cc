@@ -113,7 +113,7 @@ OptionEditorComponent::maybe_add_note (OptionEditorPage* p, int n)
 		p->table.attach (*l, 1, 3, n, n + 1, FILL | EXPAND);
 		if (_note.find ("<a href=") != _note.npos) {
 			l->property_track_visited_links() = false;
-			l->signal_activate_link().connect ([](std::string const& url) { return PBD::open_uri (url); });
+			l->signal_activate_link().connect ([](std::string const& url) { return PBD::open_uri (url); }, false);
 		}
 	}
 }
