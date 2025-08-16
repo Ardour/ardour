@@ -75,6 +75,7 @@ UI_CONFIG_VARIABLE (bool, preview_video_frame_on_drag, "preview-video-frame-on-d
 UI_CONFIG_VARIABLE (bool, use_double_click_to_zoom_to_selection, "use-double-click-to-zoom-to-selection", false)
 UI_CONFIG_VARIABLE (bool, widget_prelight, "widget-prelight", true)
 UI_CONFIG_VARIABLE (bool, use_tooltips, "use-tooltips", true)
+UI_CONFIG_VARIABLE (bool, render_plus_hints, "render-plus-hints", true)
 UI_CONFIG_VARIABLE (std::string, mixer_strip_visibility, "mixer-element-visibility", "Input,PhaseInvert,RecMon,SoloIsoLock,Output,Comments")
 UI_CONFIG_VARIABLE (bool, allow_non_quarter_pulse, "allow-non-quarter-pulse", false)
 UI_CONFIG_VARIABLE (bool, show_region_gain, "show-region-gain", false)

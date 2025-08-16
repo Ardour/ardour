@@ -144,7 +144,9 @@ IOPluginWindow::PluginBox::PluginBox (bool is_pre)
 {
 	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
 	signal_button_press_event ().connect (sigc::mem_fun (*this, &IOPluginWindow::PluginBox::button_press_event));
-	_base.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &_base, ArdourWidgets::ArdourIcon::ShadedPlusSign, _("Right-click or Double-click here\nto add I/O Plugins")));
+	if (UIConfiguration::instance().get_render_plus_hints ()) {
+		_base.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &_base, ArdourWidgets::ArdourIcon::ShadedPlusSign, _("Right-click or Double-click here\nto add I/O Plugins")));
+	}
 
 	std::vector<Gtk::TargetEntry> target_table;
 	target_table.push_back (Gtk::TargetEntry ("x-ardour/plugin.favorite", Gtk::TARGET_SAME_APP)); // from sidebar

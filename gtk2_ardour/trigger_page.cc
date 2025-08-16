@@ -114,8 +114,9 @@ TriggerPage::TriggerPage ()
 	_no_strips.set_can_focus ();
 	_no_strips.add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
 	_no_strips.set_size_request (PX_SCALE (20), -1);
-	_no_strips.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &_no_strips, ArdourWidgets::ArdourIcon::ShadedPlusSign,
-			_("Drop a clip here\nto create a new Track")));
+	if (UIConfiguration::instance().get_render_plus_hints ()) {
+		_no_strips.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &_no_strips, ArdourWidgets::ArdourIcon::ShadedPlusSign, _("Drop a clip here\nto create a new Track")));
+	}
 	_no_strips.signal_button_press_event ().connect (sigc::mem_fun (*this, &TriggerPage::no_strip_button_event));
 	_no_strips.signal_button_release_event ().connect (sigc::mem_fun (*this, &TriggerPage::no_strip_button_event));
 	_no_strips.signal_drag_motion ().connect (sigc::mem_fun (*this, &TriggerPage::no_strip_drag_motion));

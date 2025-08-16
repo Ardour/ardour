@@ -185,8 +185,9 @@ Mixer_UI::Mixer_UI ()
 	/* add as last item of strip packer */
 	strip_packer.pack_end (scroller_base, true, true);
 	scroller_base.set_size_request (PX_SCALE (20), -1);
-	scroller_base.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign,
-			_("Right-click or Double-click here\nto add Track, Bus, or VCA channels")));
+	if (UIConfiguration::instance().get_render_plus_hints ()) {
+		scroller_base.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign, _("Right-click or Double-click here\nto add Track, Bus, or VCA channels")));
+	}
 
 #ifdef MIXBUS
 	/* create a drop-shadow at the end of the mixer strips */
@@ -1778,8 +1779,9 @@ Mixer_UI::redisplay_track_list ()
 
 	vca_hpacker.pack_end (vca_scroller_base, true, true);
 	vca_scroller_base.set_size_request (PX_SCALE (20), -1);
-	vca_scroller_base.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &vca_scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign,
-			_("Right-click or Double-click here\nto add Track, Bus, or VCA channels")));
+	if (UIConfiguration::instance().get_render_plus_hints ()) {
+		vca_scroller_base.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &vca_scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign, _("Right-click or Double-click here\nto add Track, Bus, or VCA channels")));
+	}
 	vca_scroller_base.show();
 
 	for (i = rows.begin(); i != rows.end(); ++i) {

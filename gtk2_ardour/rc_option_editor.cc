@@ -2580,6 +2580,13 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_tooltips)
 		     ));
 
+	add_option (_("Appearance"), new BoolOption (
+				"render-plus-hints",
+				_("Render + hints on page background (requires restart)"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_render_plus_hints),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_render_plus_hints)
+				));
+
 	bo = new BoolOption (
 			"super-rapid-clock-update",
 			_("Update clocks at TC Frame rate"),
