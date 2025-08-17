@@ -248,6 +248,10 @@ Pianoroll::build_lower_toolbar ()
 	cc_dropdown2 = new MetaButton ();
 	cc_dropdown3 = new MetaButton ();
 
+	cc_dropdown1->disable_scrolling ();
+	cc_dropdown2->disable_scrolling ();
+	cc_dropdown3->disable_scrolling ();
+
 	cc_dropdown1->add_elements (ArdourButton::Indicator);
 	cc_dropdown2->add_elements (ArdourButton::Indicator);
 	cc_dropdown3->add_elements (ArdourButton::Indicator);
