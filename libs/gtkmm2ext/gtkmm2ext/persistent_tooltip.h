@@ -38,7 +38,6 @@ class LIBGTKMM2EXT_API PersistentTooltip : public sigc::trackable
 
 	void set_tip (std::string);
 	void set_font (Pango::FontDescription font);
-	void set_center_alignment (bool align_to_center);
 
 	virtual bool dragging () const;
 	static void set_tooltips_enabled (bool en) { _tooltips_enabled = en; }
@@ -47,6 +46,7 @@ class LIBGTKMM2EXT_API PersistentTooltip : public sigc::trackable
   private:
 	static bool _tooltips_enabled;
 	static unsigned int _tooltip_timeout;
+	void update_position ();
 	bool timeout ();
 	void show ();
 	void hide ();
@@ -54,6 +54,8 @@ class LIBGTKMM2EXT_API PersistentTooltip : public sigc::trackable
 	bool leave (GdkEventCrossing *);
 	bool press (GdkEventButton *);
 	bool release (GdkEventButton *);
+	void realized ();
+	bool parent_focus_out (GdkEventFocus *);
 
 	/** The widget that we are providing a tooltip for */
 	Gtk::Widget* _target;
@@ -74,7 +76,6 @@ class LIBGTKMM2EXT_API PersistentTooltip : public sigc::trackable
 	/** The tip text */
 	std::string _tip;
 	Pango::FontDescription _font;
-	bool _align_to_center;
 	int _margin_y;
 };
 
