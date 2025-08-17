@@ -148,6 +148,7 @@ class Pianoroll : public CueEditor
 	bool key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 
 	void escape ();
+	void session_going_away ();
 
  private:
 	ArdourCanvas::Ruler*     bbt_ruler;
