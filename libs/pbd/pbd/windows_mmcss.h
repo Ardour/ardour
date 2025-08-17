@@ -56,7 +56,7 @@ bool LIBPBD_API revert_thread_characteristics (HANDLE task_handle);
 
 bool LIBPBD_API set_thread_priority (HANDLE, AVRT_PRIORITY);
 
-extern Signal<void()> MMCSSError;
+extern LIBPBD_API Signal<void()> MMCSSError;
 
 } // namespace MMCSS
 
