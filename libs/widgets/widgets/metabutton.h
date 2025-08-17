@@ -49,9 +49,15 @@ public:
 
 	bool is_menu_popup_event (GdkEventButton* ev) const;
 
+	void disable_scrolling ()
+	{
+		_scrolling_disabled = true;
+	}
+
 protected:
 	bool on_button_press_event (GdkEventButton*);
 	bool on_motion_notify_event (GdkEventMotion*);
+	bool on_scroll_event (GdkEventScroll*);
 	void menu_size_request (Gtk::Requisition*);
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 
@@ -126,6 +132,7 @@ private:
 	Gtk::Menu _menu;
 	guint     _active;
 	bool      _hover_dropdown;
+	bool      _scrolling_disabled;
 };
 
 } // namespace ArdourWidgets
