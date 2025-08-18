@@ -50,7 +50,7 @@ namespace Evoral {
 
 SMF::SMF()
 	: _smf (nullptr)
-	, _smf_track (0)
+	, _smf_track (nullptr)
 	, _empty (true)
 	, _n_note_on_events (0)
 	, _has_pgm_change (false)
