@@ -413,6 +413,35 @@ SMF::read_event(uint32_t* delta_t, uint32_t* bufsize, uint8_t** buf, event_id_t*
 
 void
 SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, event_id_t note_id)
+bool
+SMF::is_meta (uint8_t const* buf, uint32_t size)
+{
+	if (buf[0] == 0xff) {
+		switch (buf[1]) {
+		case 0x00: /* seq num */
+		case 0x01: /* text */
+		case 0x02: /* copyright */
+		case 0x03: /* track name */
+		case 0x04: /* instrument name */
+		case 0x05: /* lyric */
+		case 0x06: /* marker */
+		case 0x07: /* cue point */
+		case 0x20: /* channel prefix */
+		case 0x2f: /* end of track */
+		case 0x51: /* set tempo */
+		case 0x54: /* smpte offset */
+		case 0x58: /* time signature */
+		case 0x59: /* key signaturey */
+		case 0x7f: /* seq-specific */
+			return true;
+		default:
+			break;
+		}
+	}
+
+	return false;
+}
+
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
 
