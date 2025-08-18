@@ -367,7 +367,6 @@ write_midi_type0_data_to_one_file (Evoral::SMF* source, ImportStatus& status, si
 {
 	uint32_t bufsize = 4;
 	uint8_t* buf     = (uint8_t*) malloc (bufsize);
-	bool had_meta = false;
 	Evoral::event_id_t ignored_note_id; /* imported files either don't have noted IDs or we ignore them */
 
 	Source::WriterLock target_lock (smfs->mutex());
@@ -387,21 +386,34 @@ write_midi_type0_data_to_one_file (Evoral::SMF* source, ImportStatus& status, si
 
 			size = bufsize;
 
-			int ret = source->read_event (&delta_t, &size, &buf, &ignored_note_id);
+			/* ret will be:
 
-			if (size > bufsize) {
-				bufsize = size;
-			}
+			   < 0 : error/end-of-track
+			   0   : metadata event, size gives the byte count
+			   > 0 : regular event for our consideration
+
+			*/
+
+			int ret = source->read_event (&delta_t, &size, &buf, &ignored_note_id);
 
 			if (ret < 0) { // EOT
 				break;
+			}
+
+			if (size == 0) {
+				/* metadata not meant for us */
+				continue;
+			}
+
+			if (size > bufsize) {
+				bufsize = size;
 			}
 
 			t += delta_t;
 
 			/* if requested by user, each sourcefile gets only a single channel's data */
 
-			if (split_midi_channels) {
+			if (ret > 0 && split_midi_channels) {
 				uint8_t type = buf[0] & 0xf0;
 				uint8_t chan = buf[0] & 0x0f;
 				if (type >= 0x80 && type <= 0xE0) {
@@ -426,7 +438,7 @@ write_midi_type0_data_to_one_file (Evoral::SMF* source, ImportStatus& status, si
 			}
 		}
 
-		if (had_meta || written) {
+		if (written) {
 
 			/* we wrote something */
 
