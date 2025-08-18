@@ -62,7 +62,8 @@ setup_gtk_ardour_enums ()
 	AddRouteDialog::TypeWanted type_wanted;
 	NoteNameDisplay note_name_display;
 	MarkerClickBehavior marker_click_behavior;
-
+	RegionEditDisposition region_edit_disposition;
+	
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.emplace_back (e); s.emplace_back (#e)
@@ -250,4 +251,10 @@ setup_gtk_ardour_enums ()
 	REGISTER_CLASS_ENUM (Editing, WithMIDNAM);
 	REGISTER_CLASS_ENUM (Editing, Never);
 	REGISTER (note_name_display);
+
+	REGISTER_ENUM(BottomPaneOnly);
+	REGISTER_ENUM(OpenBottomPane);
+	REGISTER_ENUM(PreferBottomPane);
+	REGISTER_ENUM(NeverBottomPane);
+	REGISTER (region_edit_disposition);
 }
