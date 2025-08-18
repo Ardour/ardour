@@ -548,7 +548,15 @@ SMF::begin_write()
 	assert(_smf_track);
 
 	smf_add_track(_smf, _smf_track);
-	assert(_smf->number_of_tracks == 1);
+}
+
+void
+SMF::end_track ()
+{
+	/* nothing to do in libsmf API to "close" the track, it seems */
+	_smf_track = smf_track_new();
+	assert (_smf_track);
+	smf_add_track(_smf, _smf_track);
 }
 
 void
