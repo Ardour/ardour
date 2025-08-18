@@ -635,6 +635,14 @@ SMFSource::mark_streaming_midi_write_started (const WriterLock& lock, NoteMode m
 }
 
 void
+SMFSource::end_track (const WriterLock& lock)
+{
+	Evoral::SMF::end_track ();
+	_last_ev_time_beats  = Temporal::Beats();
+	_last_ev_time_samples = 0;
+}
+
+void
 SMFSource::mark_streaming_write_completed (const WriterLock& lm, Temporal::timecnt_t const & duration)
 {
 	mark_midi_streaming_write_completed (lm, Evoral::Sequence<Temporal::Beats>::DeleteStuckNotes, duration);
