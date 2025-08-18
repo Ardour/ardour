@@ -39,6 +39,7 @@
 #include "pbd/basename.h"
 #include "pbd/types_convert.h"
 
+#include "ardour/file_source.h"
 #include "ardour/automation_control.h"
 #include "ardour/midi_cursor.h"
 #include "ardour/midi_model.h"
@@ -98,6 +99,7 @@ MidiRegion::MidiRegion (std::shared_ptr<const MidiRegion> other, timecnt_t const
 	: Region (other, offset)
 	, _ignore_shift (false)
 {
+	set_tempo_stuff_from_source ();
 
 	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, std::bind (&MidiRegion::model_changed, this));
@@ -118,7 +120,9 @@ MidiRegion::set_tempo_stuff_from_source ()
 	Temporal::TempoMap::SharedPtr new_map (smf->tempo_map (provided));
 
 	if (!provided) {
-		new_map.reset (new Temporal::TempoMap());
+		_tempo = Temporal::Tempo (120, 4);
+		_meter = Temporal::Meter (4, 4);
+		return;
 	}
 
 	Temporal::TempoPoint const tp (new_map->tempo_at (start()));
