@@ -156,7 +156,10 @@ TriggerPage::TriggerPage ()
 	hpacker.set_spacing (8);  //match to slot_properties_box::set_spacings
 	hpacker.set_border_width (8);
 
-	hpacker.pack_start (_properties_box, false, false);
+	/* note thse are re-packed as needed below. see
+	 * hide_all(), selection_changed(), trigger_arm_changed()
+	 */
+	hpacker.pack_start (_properties_box, true, true);
 	hpacker.pack_start (_midi_trig_box, false, false);
 	hpacker.pack_start (_audio_trig_box, false, false);
 	hpacker.set_no_show_all ();
@@ -483,6 +486,8 @@ TriggerPage::trigger_arm_changed (Trigger const * trigger)
 
 	Tabbable::showhide_att_bottom (false);
 
+	gtk_box_set_child_packing (GTK_BOX(hpacker.gobj()), GTK_WIDGET(_properties_box.gobj()), false, false, 0, GTK_PACK_START);
+
 	TriggerBox& box = trigger->box();
 	TriggerReference ref (trigger->boxptr(), trigger->index());
 
@@ -535,8 +540,11 @@ TriggerPage::selection_changed ()
 	Tabbable::showhide_att_bottom (false);
 
 	if (selection.triggers.empty ()) {
+		gtk_box_set_child_packing (GTK_BOX(hpacker.gobj()), GTK_WIDGET(_properties_box.gobj()), true, true, 0, GTK_PACK_START);
 		return;
 	}
+
+	gtk_box_set_child_packing (GTK_BOX(hpacker.gobj()), GTK_WIDGET(_properties_box.gobj()), false, false, 0, GTK_PACK_START);
 
 	TriggerReference ref     = selection.triggers.front()->trigger_reference ();
 	std::shared_ptr<TriggerBox> box = ref.box();
