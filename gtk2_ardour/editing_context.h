@@ -820,6 +820,5 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	bool temporary_zoom_focus_change;
 	bool _dragging_playhead;
-
 };
 
