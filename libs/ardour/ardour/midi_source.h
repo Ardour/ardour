@@ -123,10 +123,14 @@ class LIBARDOUR_API MidiSource : virtual public Source
 
 	/** Append a single event with a timestamp in beats.
 	 *
-	 * Caller must ensure that the event is later than the last written event.
+	 * Caller must ensure that the event is later than the last written
+	 * event since the last ::begin_write() or ::end_track() call.
 	 */
-	virtual void append_event_beats(const WriterLock& lock,
-	                                const Evoral::Event<Temporal::Beats>& ev) = 0;
+	virtual void _append_event_beats(const WriterLock& lock, const Evoral::Event<Temporal::Beats>& ev, bool allow_meta) = 0;
+
+	void append_event_beats(const WriterLock& lock, const Evoral::Event<Temporal::Beats>& ev, bool allow_meta = false) {
+		_append_event_beats (lock, ev, allow_meta);
+	}
 
 	/** Append a single event with a timestamp in samples.
 	 *
