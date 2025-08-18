@@ -168,6 +168,8 @@ public:
 	bool         _has_pgm_change;
 	int          _num_channels;
 	UsedChannels _used_channels;
+
+	void end_track ();
 };
 
 }; /* namespace Evoral */
