@@ -512,16 +512,17 @@ TriggerPage::trigger_arm_changed (Trigger const * trigger)
 void
 TriggerPage::hide_all ()
 {
+	_audio_trig_box.hide ();
+	_midi_trig_box.hide ();
 	if (_audio_editor->contents().get_parent()) {
+		_audio_editor->contents().unmap ();
 		_audio_editor->contents().get_parent()->remove (_audio_editor->contents());
 	}
 
 	if (_midi_editor->contents().get_parent()) {
+		_midi_editor->contents().unmap ();
 		_midi_editor->contents().get_parent()->remove (_midi_editor->contents());
 	}
-
-	_audio_trig_box.hide ();
-	_midi_trig_box.hide ();
 }
 
 void
