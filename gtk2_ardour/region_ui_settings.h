@@ -41,7 +41,11 @@ struct RegionUISettings
 	Editing::MouseMode mouse_mode;
 	Temporal::timepos_t x_origin;
 	Temporal::BBT_Offset recording_length;
-
+	int width;
+	int height;
+	int x;
+	int y;
+	
 	/* MIDI specific */
 
 	Editing::GridType draw_length;

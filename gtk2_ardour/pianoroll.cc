@@ -639,6 +639,8 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 	}
 
 	update_grid ();
+
+	instant_save ();
 }
 
 timepos_t
@@ -2100,3 +2102,5 @@ Pianoroll::parameter_changed (std::string param)
 		}
 	}
 }
+
+

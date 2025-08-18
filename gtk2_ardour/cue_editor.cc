@@ -189,6 +189,28 @@ CueEditor::instant_save()
 	region_ui_settings.samples_per_pixel = samples_per_pixel;
 	region_ui_settings.grid_type = grid_type ();
 
+	/* If we're inside an ArdourWindow, get it's geometry */
+	Gtk::Widget* toplevel = contents().get_toplevel ();
+	ArdourWindow* aw = dynamic_cast<ArdourWindow*> (toplevel);
+
+	if (aw) {
+		Glib::RefPtr<Gdk::Window> win (aw->get_window());
+
+		if (win) {
+			gint x, y;
+			gint wx, wy;
+			gint width, height, depth;
+
+			aw->get_window()->get_geometry (x, y, width, height, depth);
+			aw->get_window()->get_origin (wx, wy);
+
+			region_ui_settings.height = height;
+			region_ui_settings.width = width;
+			region_ui_settings.x = wx;
+			region_ui_settings.y = wy;;
+		}
+	}
+
 	std::pair<RegionUISettingsManager::iterator,bool> res (ARDOUR_UI::instance()->region_ui_settings_manager.insert (std::make_pair (_region->id(), region_ui_settings)));
 
 	if (!res.second) {
@@ -1232,6 +1254,16 @@ CueEditor::set_from_rsu (RegionUISettings& rsu)
 	set_draw_length (rsu.draw_length);
 	set_draw_velocity (rsu.draw_velocity);
 	set_draw_channel (rsu.channel);
+
+	if (rsu.width > 0) {
+		/* If we're inside an ArdourWindow, set it's geometry */
+		Gtk::Widget* toplevel = contents().get_toplevel ();
+		ArdourWindow* aw = dynamic_cast<ArdourWindow*> (toplevel);
+		if (aw) {
+			aw->move (rsu.x, rsu.y);
+			aw->set_size_request (rsu.width, rsu.height);
+		}
+	}
 }
 
 void
@@ -1862,4 +1894,3 @@ CueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sample
 		break;
 	}
 }
-

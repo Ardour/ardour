@@ -47,6 +47,10 @@ RegionUISettings::RegionUISettings ()
 	, channel (0)
 	, note_min (32)
 	, note_max (96)
+	, width (-1)
+	, height (-1)
+	, x (-1)
+	, y (-1)
 {
 }
 
@@ -69,6 +73,11 @@ RegionUISettings::get_state () const
 	node->set_property (X_("channel"), channel);
 	node->set_property (X_("note-min"), note_min);
 	node->set_property (X_("note-max"), note_max);
+
+	node->set_property (X_("width"), width);
+	node->set_property (X_("height"), height);
+	node->set_property (X_("x"), x);
+	node->set_property (X_("y"), y);
 
 	return *node;
 }
@@ -94,6 +103,10 @@ RegionUISettings::set_state (XMLNode const & state, int)
 	state.get_property (X_("channel"), channel);
 	state.get_property (X_("note-min"), note_min);
 	state.get_property (X_("note-max"), note_max);
+	state.get_property (X_("width"), width);
+	state.get_property (X_("height"), height);
+	state.get_property (X_("x"), x);
+	state.get_property (X_("y"), y);
 
 	return 0;
 }
