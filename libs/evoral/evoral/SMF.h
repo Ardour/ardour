@@ -91,7 +91,7 @@ public:
 	static bool is_meta (uint8_t const * buf, uint32_t size);
 
 	void begin_write();
-	void append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, event_id_t note_id);
+	int append_event_delta (uint32_t delta_t, uint32_t size, const uint8_t* buf, event_id_t note_id, bool allow_meta = false);
 	void end_write(std::string const &);
 
 	void flush() {};

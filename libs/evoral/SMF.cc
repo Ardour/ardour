@@ -411,8 +411,6 @@ SMF::read_event(uint32_t* delta_t, uint32_t* bufsize, uint8_t** buf, event_id_t*
 	}
 }
 
-void
-SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, event_id_t note_id)
 bool
 SMF::is_meta (uint8_t const* buf, uint32_t size)
 {
@@ -442,11 +440,13 @@ SMF::is_meta (uint8_t const* buf, uint32_t size)
 	return false;
 }
 
+int
+SMF::append_event_delta (uint32_t delta_t, uint32_t size, const uint8_t* buf, event_id_t note_id, bool allow_meta)
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
 
 	if (size == 0) {
-		return;
+		return 0;
 	}
 
 	/* printf("SMF::append_event_delta @ %u:", delta_t);
@@ -468,15 +468,24 @@ SMF::is_meta (uint8_t const* buf, uint32_t size)
 	case 0xfc:
 	case 0xfd:
 	case 0xfe:
-	case 0xff:
 		/* System Real Time or System Common event: not valid in SMF
 		 */
-		return;
+		return 0;
 	}
 
-	if (!midi_event_is_valid(buf, size)) {
-		cerr << "WARNING: SMF ignoring illegal MIDI event" << endl;
-		return;
+	if (buf[0] == 0xff) { /* meta event */
+
+		if (!is_meta (buf, size) || !allow_meta) {
+			return 0;
+		}
+
+	} else {
+
+		if (!midi_event_is_valid(buf, size)) {
+			cerr << "WARNING: SMF ignoring illegal MIDI event" << endl;
+			return 0;
+		}
+
 	}
 
 	smf_event_t* event;
@@ -534,6 +543,8 @@ SMF::is_meta (uint8_t const* buf, uint32_t size)
 	assert(_smf_track);
 	smf_track_add_event_delta_pulses(_smf_track, event, delta_t);
 	_empty = false;
+
+	return size;
 }
 
 void
