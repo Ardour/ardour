@@ -63,6 +63,7 @@ public:
 	void mark_midi_streaming_write_completed (const WriterLock& lock,
 	                                          Evoral::Sequence<Temporal::Beats>::StuckNoteOption,
 	                                          Temporal::timecnt_t const & duration);
+	void end_track (const WriterLock&);
 
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
