@@ -414,6 +414,14 @@ SMF::read_event(uint32_t* delta_t, uint32_t* bufsize, uint8_t** buf, event_id_t*
 bool
 SMF::is_meta (uint8_t const* buf, uint32_t size)
 {
+	if (size < 2) {
+		return false;
+	}
+
+	/* unlike the libsmf version of this functionality, this explicitly
+	 * tests for known metadata event types, and only allows them.
+	 */
+
 	if (buf[0] == 0xff) {
 		switch (buf[1]) {
 		case 0x00: /* seq num */
