@@ -323,20 +323,22 @@ SMF::seek_to_start() const
  * a meta event, or -1 on EOF (or end of track).
  */
 int
-SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* note_id) const
+SMF::read_event(uint32_t* delta_t, uint32_t* bufsize, uint8_t** buf, event_id_t* note_id) const
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
 
 	smf_event_t* event;
+	bool is_meta;
 
-	assert(delta_t);
-	assert(size);
-	assert(buf);
-	assert(note_id);
+	assert (delta_t);
+	assert (bufsize);
+	assert (buf);
+	assert (note_id);
 
 	if ((event = smf_track_get_next_event(_smf_track)) != NULL) {
 
 		*delta_t = event->delta_time_pulses;
+		is_meta = false;
 
 		if (smf_event_is_metadata(event)) {
 			*note_id = -1; // "no note id in this meta-event */
@@ -356,32 +358,45 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* no
 
 						if (smf_extract_vlq (&event->midi_buffer[4+lenlen], event->midi_buffer_length-(4+lenlen), &id, &idlen) == 0) {
 							*note_id = id;
+							return 0;
 						}
 					}
 				}
+
+				/* We do not return sequencer-specific events
+				 * that are not known to us.
+				 */
+
+				return 0;
 			}
-			return 0; /* this is a meta-event */
+
+			is_meta = true;
 		}
 
 		uint32_t event_size = (uint32_t) event->midi_buffer_length;
 		assert(event_size > 0);
 
 		// Make sure we have enough scratch buffer
-		if (*size < (unsigned)event_size) {
+		if (*bufsize < (unsigned)event_size) {
 			*buf = (uint8_t*)realloc(*buf, event_size);
 		}
 		assert (*buf);
 		memcpy(*buf, event->midi_buffer, size_t(event_size));
-		*size = event_size;
+		*bufsize = event_size;
+
 		if (((*buf)[0] & 0xF0) == 0x90 && (*buf)[2] == 0) {
 			/* normalize note on with velocity 0 to proper note off */
 			(*buf)[0] = 0x80 | ((*buf)[0] & 0x0F);  /* note off */
 			(*buf)[2] = 0x40;  /* default velocity */
 		}
 
-		if (!midi_event_is_valid(*buf, *size)) {
+		if (is_meta) {
+			return 0;
+		}
+
+		if (!midi_event_is_valid (*buf, *bufsize)) {
 			cerr << "WARNING: SMF ignoring illegal MIDI event" << endl;
-			*size = 0;
+			*bufsize = 0;
 			return -1;
 		}
 
