@@ -480,8 +480,7 @@ SMFSource::duration() const
 
 /** Append an event with a timestamp in beats */
 void
-SMFSource::append_event_beats (const WriterLock&   lock,
-                               const Evoral::Event<Temporal::Beats>& ev)
+SMFSource::_append_event_beats (const WriterLock& lock, const Evoral::Event<Temporal::Beats>& ev, bool allow_meta)
 {
 	if (!_writing || ev.size() == 0 || ev.is_realtime())  {
 		return;
@@ -519,20 +518,22 @@ SMFSource::append_event_beats (const WriterLock&   lock,
 		event_id = ev.id();
 	}
 
-	if (_model) {
-		_model->append (ev, event_id);
-	}
-
-	assert (!_length || (_length.time_domain() == Temporal::BeatTime));
-	_length  = timepos_t (max (_length.beats(), time));
-
 	const Temporal::Beats delta_time_beats = time - _last_ev_time_beats;
 	const uint32_t      delta_time_ticks = delta_time_beats.to_ticks(ppqn());
 
-	Evoral::SMF::append_event_delta (delta_time_ticks, ev.size(), ev.buffer(), event_id);
-	_last_ev_time_beats = time;
-	_flags = Source::Flag (_flags & ~Empty);
-	_flags = Source::Flag (_flags & ~Missing);
+	if (Evoral::SMF::append_event_delta (delta_time_ticks, ev.size(), ev.buffer(), event_id, allow_meta)) {
+
+		_last_ev_time_beats = time;
+		_flags = Source::Flag (_flags & ~Empty);
+		_flags = Source::Flag (_flags & ~Missing);
+
+		if (_model && !Evoral::SMF::is_meta (ev.buffer(), ev.size())) {
+			_model->append (ev, event_id);
+		}
+
+		assert (!_length || (_length.time_domain() == Temporal::BeatTime));
+		_length  = timepos_t (max (_length.beats(), time));
+	}
 }
 
 /** Append an event with a timestamp in samples (samplepos_t) */
@@ -569,17 +570,6 @@ SMFSource::append_event_samples (const WriterLock& lock,
 		event_id = ev.id();
 	}
 
-	if (_model) {
-		const Evoral::Event<Temporal::Beats> beat_ev (ev.event_type(),
-		                                              ev_time_beats,
-		                                              ev.size(),
-		                                              const_cast<uint8_t*>(ev.buffer()));
-		_model->append (beat_ev, event_id);
-	}
-
-	assert (!_length || (_length.time_domain() == Temporal::BeatTime));
-	_length = timepos_t (max (_length.beats(), ev_time_beats));
-
 	/* a distance measure that starts at @p _last_ev_time_samples (audio time) and
 	   extends for ev.time() (audio time)
 	*/
@@ -587,10 +577,22 @@ SMFSource::append_event_samples (const WriterLock& lock,
 	const Temporal::Beats delta_time_beats = delta_distance.beats ();
 	const uint32_t        delta_time_ticks = delta_time_beats.to_ticks(ppqn());
 
-	Evoral::SMF::append_event_delta (delta_time_ticks, ev.size(), ev.buffer(), event_id);
-	_last_ev_time_samples = ev.time();
-	_flags = Source::Flag (_flags & ~Empty);
-	_flags = Source::Flag (_flags & ~Missing);
+	if (Evoral::SMF::append_event_delta (delta_time_ticks, ev.size(), ev.buffer(), event_id) > 0) {;
+		_last_ev_time_samples = ev.time();
+		_flags = Source::Flag (_flags & ~Empty);
+		_flags = Source::Flag (_flags & ~Missing);
+
+		if (_model && !Evoral::SMF::is_meta (ev.buffer(), ev.size())) {
+			const Evoral::Event<Temporal::Beats> beat_ev (ev.event_type(),
+			                                              ev_time_beats,
+			                                              ev.size(),
+			                                              const_cast<uint8_t*>(ev.buffer()));
+			_model->append (beat_ev, event_id);
+		}
+
+		assert (!_length || (_length.time_domain() == Temporal::BeatTime));
+		_length = timepos_t (max (_length.beats(), ev_time_beats));
+	}
 }
 
 XMLNode&
