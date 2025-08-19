@@ -2210,7 +2210,8 @@ Session::flush_cue_recording ()
 
 	while (TriggerBox::cue_records.read (&cr, 1) == 1) {
 		BBT_Argument bbt = tmap->bbt_at (timepos_t (cr.when));
-		bbt = BBT_Argument (bbt.reference(), bbt.round_up_to_bar ());
+		Meter const & meter (tmap->meter_at (timepos_t (cr.when)));
+		bbt = BBT_Argument (bbt.reference(), meter.round_up_to_bar (bbt));
 
 		const timepos_t when (tmap->quarters_at (bbt));
 
