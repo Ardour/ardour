@@ -134,6 +134,22 @@ void Box::pack_end(Widget& child, PackOptions options, guint padding)
   gtk_box_pack_end(gobj(), child.gobj(), (gboolean)expand, (gboolean)fill, padding);
 }
 
+void Box::set_child_packing(Widget& child, bool expand, bool fill, guint padding)
+{
+  gboolean    p_expand = 0;
+  gboolean    p_fill = 0;
+  guint       p_padding = 0;
+  GtkPackType p_pack_type = GTK_PACK_START;
+
+  gtk_box_query_child_packing (gobj(), (child).gobj(), &p_expand, &p_fill, &p_padding, &p_pack_type);
+
+  if (p_expand == expand && p_fill == fill && p_padding == padding) {
+    return;
+  }
+
+  gtk_box_set_child_packing(gobj(), (child).gobj(), expand, fill, padding, p_pack_type);
+}
+
 
 } /* namespace Gtk */
 
