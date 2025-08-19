@@ -70,6 +70,7 @@ using std::string;
 sigc::signal<void> EditingContext::DropDownKeys;
 Gtkmm2ext::Bindings* EditingContext::button_bindings = nullptr;
 std::vector<std::string> EditingContext::grid_type_strings;
+std::vector<std::string> EditingContext::grid_type_short_labels;
 MouseCursors* EditingContext::_cursors = nullptr;
 bool EditingContext::need_shared_actions = true;
 
@@ -92,6 +93,31 @@ static const gchar *_grid_type_strings[] = {
 	N_("1/7 (8th septuplet)"),
 	N_("1/14 (16th septuplet)"),
 	N_("1/28 (32nd septuplet)"),
+	N_("Timecode"),
+	N_("MinSec"),
+	N_("CD Frames"),
+	0
+};
+
+static const gchar *_grid_type_labels[] = {
+	N_("No Grid"),
+	N_("Bar"),
+	N_("1/4"),
+	N_("1/8"),
+	N_("1/16"),
+	N_("1/32"),
+	N_("1/64"),
+	N_("1/128"),
+	N_("1/3"), // or "1/12" ?
+	N_("1/6"),
+	N_("1/12"),
+	N_("1/24"),
+	N_("1/5"),
+	N_("1/10"),
+	N_("1/20"),
+	N_("1/7"),
+	N_("1/14"),
+	N_("1/28"),
 	N_("Timecode"),
 	N_("MinSec"),
 	N_("CD Frames"),
@@ -173,6 +199,10 @@ EditingContext::EditingContext (std::string const & name)
 
 	if (grid_type_strings.empty()) {
 		grid_type_strings =  I18N (_grid_type_strings);
+	}
+
+	if (grid_type_short_labels.empty()) {
+		grid_type_short_labels =  I18N (_grid_type_labels);
 	}
 
 	if (zoom_focus_strings.empty()) {
@@ -475,6 +505,30 @@ EditingContext::register_common_actions (Bindings* common_bindings, std::string 
 	grid_actions[Editing::GridTypeBar] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeBar)));
 
 	grid_actions[Editing::GridTypeNone] = ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-none"),           grid_type_strings[(int)GridTypeNone].c_str(),      (sigc::bind (sigc::mem_fun(*this, &EditingContext::grid_type_chosen), Editing::GridTypeNone)));
+
+
+	grid_actions[Editing::GridTypeBeatDiv32]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv32]);
+	grid_actions[Editing::GridTypeBeatDiv28]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv28]);
+	grid_actions[Editing::GridTypeBeatDiv24]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv24]);
+	grid_actions[Editing::GridTypeBeatDiv20]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv20]);
+	grid_actions[Editing::GridTypeBeatDiv16]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv16]);
+	grid_actions[Editing::GridTypeBeatDiv14]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv14]);
+	grid_actions[Editing::GridTypeBeatDiv12]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv12]);
+	grid_actions[Editing::GridTypeBeatDiv10]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv10]);
+	grid_actions[Editing::GridTypeBeatDiv8]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv8]);
+	grid_actions[Editing::GridTypeBeatDiv7]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv7]);
+	grid_actions[Editing::GridTypeBeatDiv6]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv6]);
+	grid_actions[Editing::GridTypeBeatDiv5]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv5]);
+	grid_actions[Editing::GridTypeBeatDiv4]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv4]);
+	grid_actions[Editing::GridTypeBeatDiv3]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv3]);
+	grid_actions[Editing::GridTypeBeatDiv2]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv2]);
+
+	grid_actions[Editing::GridTypeTimecode]->set_short_label (grid_type_short_labels[Editing::GridTypeTimecode]);
+	grid_actions[Editing::GridTypeMinSec]->set_short_label (grid_type_short_labels[Editing::GridTypeMinSec]);
+	grid_actions[Editing::GridTypeCDFrame]->set_short_label (grid_type_short_labels[Editing::GridTypeCDFrame]);
+	grid_actions[Editing::GridTypeBeat]->set_short_label (grid_type_short_labels[Editing::GridTypeBeat]);
+	grid_actions[Editing::GridTypeBar]->set_short_label (grid_type_short_labels[Editing::GridTypeBar]);
+	grid_actions[Editing::GridTypeNone]->set_short_label (grid_type_short_labels[Editing::GridTypeNone]);
 }
 
 void
@@ -581,6 +635,23 @@ EditingContext::register_midi_actions (Bindings* midi_bindings, std::string cons
 	draw_length_actions[Editing::GridTypeBeat]      = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBeat));
 	draw_length_actions[Editing::GridTypeBar]       = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), Editing::GridTypeBar));
 	draw_length_actions[DRAW_LEN_AUTO]              = ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-auto"),           _("Auto"),                                         sigc::bind (sigc::mem_fun (*this, &EditingContext::draw_length_chosen), DRAW_LEN_AUTO));
+
+	draw_length_actions[Editing::GridTypeBeatDiv32]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv32]);
+	draw_length_actions[Editing::GridTypeBeatDiv28]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv28]);
+	draw_length_actions[Editing::GridTypeBeatDiv24]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv24]);
+	draw_length_actions[Editing::GridTypeBeatDiv20]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv20]);
+	draw_length_actions[Editing::GridTypeBeatDiv16]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv16]);
+	draw_length_actions[Editing::GridTypeBeatDiv14]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv14]);
+	draw_length_actions[Editing::GridTypeBeatDiv12]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv12]);
+	draw_length_actions[Editing::GridTypeBeatDiv10]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv10]);
+	draw_length_actions[Editing::GridTypeBeatDiv8]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv8]);
+	draw_length_actions[Editing::GridTypeBeatDiv7]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv7]);
+	draw_length_actions[Editing::GridTypeBeatDiv6]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv6]);
+	draw_length_actions[Editing::GridTypeBeatDiv5]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv5]);
+	draw_length_actions[Editing::GridTypeBeatDiv4]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv4]);
+	draw_length_actions[Editing::GridTypeBeatDiv3]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv3]);
+	draw_length_actions[Editing::GridTypeBeatDiv2]->set_short_label (grid_type_short_labels[Editing::GridTypeBeatDiv2]);
+	draw_length_actions[Editing::DRAW_LEN_AUTO]->set_short_label (_("Auto"));
 
 	velocity_actions = ActionManager::create_action_group (midi_bindings, prefix + X_("DrawVelocity"));
 	RadioAction::Group draw_velocity_group;
@@ -757,7 +828,7 @@ EditingContext::grid_type_chosen (GridType gt)
 		pre_internal_grid_type = gt;
 	}
 
-	grid_type_selector.set_active (grid_type_strings[grid_ind]);
+	grid_type_selector.set_active (grid_type_short_labels[grid_ind]);
 
 	if (UIConfiguration::instance().get_show_grids_ruler()) {
 		show_rulers_for_grid ();
@@ -807,7 +878,7 @@ EditingContext::draw_length_chosen (GridType type)
 	if (DRAW_LEN_AUTO == (unsigned int) type) {
 		draw_length_selector.set_active (_("Auto"));
 	} else {
-		draw_length_selector.set_active (grid_type_strings[(unsigned int) type]);
+		draw_length_selector.set_active (grid_type_short_labels[(unsigned int) type]);
 	}
 
 	instant_save ();
@@ -1142,7 +1213,7 @@ EditingContext::build_grid_type_menu ()
 	grid_type_selector.append (grid_actions[GridTypeMinSec]);
 	grid_type_selector.append (grid_actions[GridTypeCDFrame]);
 
-	grid_type_selector.set_sizing_texts (grid_type_strings);
+	grid_type_selector.set_sizing_texts (grid_type_short_labels);
 }
 
 void
