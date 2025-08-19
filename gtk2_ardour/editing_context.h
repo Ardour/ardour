@@ -522,6 +522,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	Editing::SnapMode  internal_snap_mode;
 
 	static std::vector<std::string> grid_type_strings;
+	static std::vector<std::string> grid_type_short_labels;
 
 	std::map<Editing::GridType, Glib::RefPtr<Gtk::RadioAction> > grid_actions;
 	std::map<Editing::SnapMode, Glib::RefPtr<Gtk::RadioAction> > snap_mode_actions;
