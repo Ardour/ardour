@@ -2805,6 +2805,7 @@ Editor::setup_toolbar ()
 	grid_box.set_spacing (2);
 	grid_box.set_border_width (spc);
 	grid_box.pack_start (stretch_marker_cb, false, false, 4);
+	stretch_marker_cb.show ();
 
 	grid_type_selector.set_name ("mouse mode button");
 
@@ -2854,9 +2855,11 @@ Editor::setup_toolbar ()
 	toolbar_hbox.pack_end (*(manage (new ArdourVSpacer ())), false, false, 3);
 	toolbar_hbox.pack_end (*follow_mode_hbox, false, false);
 
+	_draw_box_spacer.set_no_show_all ();
+	_grid_box_spacer.set_no_show_all ();
+
 	toolbar_hbox.show_all ();
 }
-
 
 void
 Editor::build_edit_point_menu ()
