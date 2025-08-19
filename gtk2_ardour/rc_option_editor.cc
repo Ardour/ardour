@@ -3421,6 +3421,23 @@ These settings will only take effect after %1 is restarted.\n\
 			    1, 10
 			    ));
 
+	add_option (_("Editor"), new OptionEditorHeading (_("Region Editing")));
+	ComboOption<Editing::RegionEditDisposition>* red = new ComboOption<Editing::RegionEditDisposition> (
+			"region-edit-disposition",
+			_("Region Editing Preference"),
+			sigc::mem_fun (UIConfiguration::instance(),
+				&UIConfiguration::get_region_edit_disposition),
+			sigc::mem_fun (UIConfiguration::instance(),
+				&UIConfiguration::set_region_edit_disposition)
+			);
+
+	red->add (Editing::BottomPaneOnly, _("Only ever use the bottom pane"));
+	red->add (Editing::OpenBottomPane, _("Open bottom pane, if necessary"));
+	red->add (Editing::PreferBottomPane, _("Use bottom pane if visible, or own window"));
+	red->add (Editing::BottomPaneOnly, _("Always use a separate window"));
+
+	add_option (_("Editor"), red);
+
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
 		     "show-snapped-cursor",
