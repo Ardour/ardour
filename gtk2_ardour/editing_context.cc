@@ -169,6 +169,8 @@ EditingContext::EditingContext (std::string const & name)
 		}
 	}
 
+	grid_box.set_no_show_all ();
+
 	if (grid_type_strings.empty()) {
 		grid_type_strings =  I18N (_grid_type_strings);
 	}
@@ -2199,6 +2201,9 @@ EditingContext::pack_draw_box (bool with_channel)
 
 	draw_velocity_selector.disable_scrolling ();
 	draw_velocity_selector.signal_scroll_event().connect (sigc::mem_fun(*this, &EditingContext::on_velocity_scroll_event), false);
+
+	draw_box.show_all_children ();
+	draw_box.set_no_show_all ();
 }
 
 void
