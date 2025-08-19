@@ -1721,27 +1721,21 @@ Editor::region_selection_changed ()
 		assert (rv);
 		maybe_edit_region_in_bottom_pane (*rv);
 	} else {
-		Gtkmm2ext::container_clear (_bottom_hbox);
-		_bottom_hbox.pack_start (*_properties_box, true, true);
-		_properties_box->show ();
+		gtk_box_set_child_packing (GTK_BOX(_bottom_hbox.gobj()), GTK_WIDGET(_properties_box->gobj()), true, true, 0, GTK_PACK_START);
+		if (_pianoroll->contents().get_parent()) {
+			_pianoroll->contents().unmap ();
+			_pianoroll->contents().get_parent()->remove (_pianoroll->contents());
+		}
 	}
 }
 
 void
 Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
 {
-	Gtkmm2ext::container_clear (_bottom_hbox);
-
-	if (UIConfiguration::instance().get_region_edit_disposition() == Editing::NeverBottomPane) {
-		_bottom_hbox.pack_start (*_properties_box, true, true);
-		_properties_box->show ();
-		return;
-	}
-
 	bool pack_pianoroll = false;
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&rv);
 
-	if (mrv) {
+	if (mrv && UIConfiguration::instance().get_region_edit_disposition() != Editing::NeverBottomPane) {
 		std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
 		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
 		if (mrv && mt && mr) {
@@ -1752,14 +1746,18 @@ Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
 	}
 
 	if (pack_pianoroll) {
-		_bottom_hbox.pack_start (*_properties_box, false, false);
-		_bottom_hbox.pack_start (_pianoroll->contents(), true, true);
-		_pianoroll->contents().hide ();
+		gtk_box_set_child_packing (GTK_BOX(_bottom_hbox.gobj()), GTK_WIDGET(_properties_box->gobj()), false, false, 0, GTK_PACK_START);
+		if (!_pianoroll->contents().get_parent()) {
+			_bottom_hbox.pack_start (_pianoroll->contents(), true, true);
+		}
+		_pianoroll->contents().hide (); // Why is this needed?
 		_pianoroll->contents().show_all ();
-		_properties_box->show ();
 	} else {
-		_bottom_hbox.pack_start (*_properties_box, true, true);
-		_properties_box->show ();
+		if (_pianoroll->contents().get_parent()) {
+			_pianoroll->contents().unmap ();
+			_pianoroll->contents().get_parent()->remove (_pianoroll->contents());
+		}
+		gtk_box_set_child_packing (GTK_BOX(_bottom_hbox.gobj()), GTK_WIDGET(_properties_box->gobj()), true, true, 0, GTK_PACK_START);
 	}
 }
 
