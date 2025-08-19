@@ -1011,8 +1011,6 @@ private:
 
 	Gtk::HBox           toplevel_hpacker;
 
-	Gtk::HBox           bottom_hbox;
-
 	Gtk::Table          edit_packer;
 
 	Gtk::Adjustment     unused_adjustment; // yes, really; Gtk::Layout constructor requires refs
