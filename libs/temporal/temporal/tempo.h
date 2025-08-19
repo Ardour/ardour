@@ -981,6 +981,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API	BBT_Argument bbt_walk (BBT_Argument const &, BBT_Offset const &) const;
 
+	LIBTEMPORAL_API BBT_Offset bbt_distance (BBT_Argument const & a, BBT_Argument const & b) const;
+
 	Tempos const & tempos() const { return _tempos; }
 	Meters const & meters() const { return _meters; }
 	MusicTimes const & bartimes() const { return _bartimes; }
