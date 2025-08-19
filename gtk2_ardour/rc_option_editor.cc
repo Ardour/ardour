@@ -2984,6 +2984,13 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance/Size and Scale"), new FontScalingOptions ());
 #endif
 
+	HSliderOption* ds = new HSliderOption ("drag-sensitivity", _("Drag Sensitivity"),
+	                                       sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_drag_sensitivity),
+	                                       sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_drag_sensitivity),
+	                                       1, 10, 1, 2);
+	ds->scale().set_digits (0);
+	add_option (_("Appearance/Size and Scale"), ds);
+
 	add_option (_("Appearance/Colors"), new OptionEditorHeading (_("Colors")));
 	add_option (_("Appearance/Colors"), new ColorThemeManager);
 	add_option (_("Appearance/Colors"), new OptionEditorBlank ());
