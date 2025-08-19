@@ -71,7 +71,7 @@ DeviceInfo::DeviceInfo()
 	, _single_fader_follows_selection (false)
 	, _device_type (MCU)
 #ifdef UF8
-	, _name (X_("UF8/UF1"))
+	, _name (X_("UF8"))
 #else
 	, _name (X_("Mackie Control Universal Pro"))
 #endif
