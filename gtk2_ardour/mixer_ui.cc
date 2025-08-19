@@ -4308,7 +4308,7 @@ Mixer_UI::update_scene_buttons ()
 			                                  "Right-Click for Context menu")
 			                                  , Keyboard::momentary_push_name() ) );
 			if (last) {
-				l->set_markup(string_compose ("<b>>%1</b>", scn->name()));
+				l->set_markup(string_compose ("<b>%1</b>", Gtkmm2ext::markup_escape_text (scn->name())));
 			} else {
 				l->set_text (scn->name());
 			}
