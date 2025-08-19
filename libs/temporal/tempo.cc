@@ -1096,10 +1096,11 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 			core_add_meter (mtp, ignored);
 			core_add_point (mtp);
 		}
+
+		reset_starting_at (position.superclocks());
 	}
 
 	MeterPoint const * current_meter = &meter_at (position);
-	BBT_Offset bbt_offset = BBT_Offset (cb.points().front().bbt()) - BBT_Offset (pos_bbt);
 
 	for (auto const & p : cb.points()) {
 		TempoPoint const * tp;
@@ -1134,21 +1135,21 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 		} else {
 
 			if ((tp = dynamic_cast<TempoPoint const *> (&p))) {
-				bb = current_meter->bbt_add (p.bbt(), bbt_offset);
-				TempoPoint *ntp = new TempoPoint (*this, *tp, s, b, bb);
+				TempoPoint *ntp = new TempoPoint (*this, *tp, s, b, p.bbt());
 				core_add_tempo (ntp, replaced);
 				if (!replaced) {
 					core_add_point (ntp);
 				}
 			} else if ((mp = dynamic_cast<MeterPoint const *> (&p))) {
-				bb = current_meter->bbt_add (p.bbt(), bbt_offset);
-				MeterPoint *ntp = new MeterPoint (*this, *mp, s, b, bb);
+				MeterPoint *ntp = new MeterPoint (*this, *mp, s, b, p.bbt());
 				current_meter = core_add_meter (ntp, replaced);
 				if (!replaced) {
 					core_add_point (ntp);
 				}
 			}
 		}
+
+		reset_starting_at (s);
 	}
 
 	pos_bbt = bbt_at (end_position);
@@ -1169,9 +1170,9 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 			core_add_meter (mtp, ignored);
 			core_add_point (mtp);
 		}
-	}
 
-	reset_starting_at (s);
+		reset_starting_at (s);
+	}
 }
 
 void
