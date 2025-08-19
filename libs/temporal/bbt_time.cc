@@ -42,39 +42,6 @@ BBT_Time::from_integer (int64_t v)
 	return BBT_Time (B, b, t);
 }
 
-BBT_Time
-BBT_Time::round_up_to_bar() const
-{
-	if (ticks == 0 && beats == 1) {
-		return *this;
-	}
-	BBT_Time b = round_up_to_beat ();
-	if (b.beats > 1) {
-		b.bars += 1;
-		b.beats = 1;
-	}
-	return b;
-}
-
-BBT_Time
-BBT_Time::round_up_to_beat_div (int beat_div) const
-{
-	/* XXX this doesn't work where "beats" are not quarters, because
-	   we could have B|b|0 and this is not on a beat_div, even though it is
-	   an integer beat position (think triplets.
-	*/
-
-	const int32_t div_ticks = ticks_per_beat / beat_div;
-	int32_t rounded_up = ticks + div_ticks - 1;
-	rounded_up -= rounded_up % div_ticks;
-
-	if (rounded_up == ticks_per_beat) {
-		return BBT_Time (bars, beats+1, 0);
-	}
-
-	return BBT_Time (bars, beats, rounded_up);
-}
-
 BBT_Offset::BBT_Offset (double dbeats)
 {
 	/* NOTE: this does not construct a BBT time in a canonical form,

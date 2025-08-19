@@ -54,7 +54,7 @@ Beats::round_to_subdivision (int subdivision, RoundMode dir) const {
 			if (dir == RoundUpAlways && bbt.ticks == 0) {
 				bbt.ticks += 1;
 			}
-			bbt = bbt.round_up_to_bar ();
+			bbt = metric.meter().round_up_to_bar (bbt);
 		} else {
 			bbt = metric.meter().round_to_bar (bbt);
 		}

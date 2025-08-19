@@ -354,6 +354,31 @@ Meter::round_to_beat (Temporal::Beats const & b) const
 }
 
 Temporal::BBT_Time
+Meter::round_to_beat (Temporal::BBT_Time const & bbt) const
+{
+	if (bbt.ticks == 0) {
+		return bbt;
+	}
+
+	BBT_Time b (bbt);
+
+	if (bbt.ticks >= ticks_per_grid()) {
+		/* Round up */
+		b.ticks = 0;
+		b.beats += 1;
+		if (b.beats > _divisions_per_bar) {
+			b.beats = 0;
+			b.bars++;
+		}
+	} else {
+		/* Round down */
+		b.ticks = 0;
+	}
+
+	return b;
+}
+
+Temporal::BBT_Time
 Meter::round_to_bar (Temporal::BBT_Time const & bbt) const
 {
 	Beats b (bbt.beats, bbt.ticks);
@@ -380,23 +405,20 @@ Meter::round_up_to_bar (Temporal::BBT_Time const & bbt) const
 Temporal::BBT_Time
 Meter::round_up_to_beat_div (Temporal::BBT_Time const & bbt, int beat_div) const
 {
-	Temporal::BBT_Time b = bbt.round_up_to_beat_div (beat_div);
-	if (b.beats > _divisions_per_bar) {
-		b.bars++;
-		b.beats = 1;
-	}
-	return b;
-}
+	const int32_t div_ticks = ticks_per_grid() / beat_div;
+	int32_t rounded_up = bbt.ticks + div_ticks - 1;
+	rounded_up -= rounded_up % div_ticks;
 
-Temporal::BBT_Time
-Meter::round_to_beat (Temporal::BBT_Time const & bbt) const
-{
-	Temporal::BBT_Time b = bbt.round_to_beat ();
-	if (b.beats > _divisions_per_bar) {
-		b.bars++;
-		b.beats = 1;
+	if (rounded_up == ticks_per_grid()) {
+		/* round up next beat count, which may be in next bar */
+		if (bbt.beats + 1 > _divisions_per_bar) {
+			return BBT_Time (bbt.bars+1, 1, 0);
+		} else {
+			return BBT_Time (bbt.bars, bbt.beats+1, 0);
+		}
 	}
-	return b;
+
+	return BBT_Time (bbt.bars, bbt.beats, rounded_up);
 }
 
 Temporal::Beats
@@ -2689,7 +2711,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t rstart, superclock_t end, 
 
 		if (rstart != 0) {
 			if (bar_mod == 1) {
-				on_bar = bbt.round_up_to_bar ();
+				on_bar = metric.meter().round_up_to_bar (bbt);
 			} else {
 				on_bar = metric.meter().round_up_to_beat_div (bbt, beat_div);
 			}
@@ -2955,7 +2977,7 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 					BBT_Time on_bar;
 
 					if (bar_mod == 1) {
-						on_bar = p->bbt().round_up_to_bar ();
+						on_bar = mp->round_up_to_bar (p->bbt());
 					} else {
 						on_bar = mp->round_up_to_beat_div (p->bbt(), beat_div);
 					}
