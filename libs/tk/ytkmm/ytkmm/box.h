@@ -392,6 +392,24 @@ public:
    */
   void pack_end(Widget& child, PackOptions options = PACK_EXPAND_WIDGET, guint padding = 0);
 
+  /** Updates the way @child is packed into @a box The pack-type (start, end) is retained.
+   *
+   * @param child The Widget to be update
+   * @param expand <tt>true</tt> if the new child is to be given extra space allocated to
+   *  @a box.  The extra space will be divided evenly between all children of
+   *  @a box that use this option.
+   * @param fill <tt>true</tt> if space given to @a child by the @a expand option is
+   * actually allocated to @a child, rather than just padding it.  This
+   * parameter has no effect if @a expand is set to <tt>false</tt>.  A child is
+   * always allocated the full height of a Gtk::HBox and the full width 
+   * of a Gtk::VBox. This option affects the other dimension.
+   * @param padding Extra space in pixels to put between this child and its
+   * neighbors, over and above the global amount specified by
+   * Gtk::Box::property_spacing() property.  If @a child is a widget at one of the 
+   * reference ends of @a box, then @a padding pixels are also put between 
+   *  @a child and the reference edge of @a box.
+   */
+  void set_child_packing(Widget& child, bool expand, bool fill, guint padding = 0);
   
   /** Sets the Gtk::Box::property_homogeneous() property of @a box, controlling 
    * whether or not all children of @a box are given equal space 
