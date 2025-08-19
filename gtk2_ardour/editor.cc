@@ -523,9 +523,6 @@ Editor::Editor ()
 	/* canvas */
 	edit_packer.attach (*_track_canvas_viewport, 3, 4, 0, 2,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
-	bottom_hbox.set_border_width (2);
-	bottom_hbox.set_spacing (3);
-
 	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, std::bind (&Editor::presentation_info_changed, this, _1), gui_context());
 
 	_route_groups = new EditorRouteGroups (*this);
