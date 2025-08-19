@@ -3194,7 +3194,7 @@ std::operator<<(std::ostream& str, TempoPoint const & t)
 std::ostream&
 std::operator<<(std::ostream& str, MusicTimePoint const & p)
 {
-	str << "MP @ "
+	str << "MP " << p.name() << " @ "
 	    << *((Point const *) &p) << ' '
 	    << *((Tempo const *) &p) << ' '
 	    << *((Meter const *) &p);
