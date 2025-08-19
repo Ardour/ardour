@@ -251,6 +251,29 @@ struct StripableByPresentationOrder
 	}
 };
 
+struct mcpStripableSorter
+{
+	bool operator () (const std::shared_ptr<Stripable> & a, const std::shared_ptr<Stripable> & b) const
+	{
+		const PresentationInfo::Flag a_flag = a->presentation_info().flags ();
+		const PresentationInfo::Flag b_flag = b->presentation_info().flags ();
+
+		if (a_flag == b_flag) {
+			return a->presentation_info().order() < b->presentation_info().order();
+		}
+
+		int cmp_a = 0;
+		int cmp_b = 0;
+
+		if (a->is_master ())         { cmp_a = 1; }
+		if (b->is_master ())         { cmp_b = 1; }
+		if (a->is_monitor ())         { cmp_a = 2; }
+		if (b->is_monitor ())         { cmp_b = 2; }
+
+		return cmp_a < cmp_b;
+	}
+};
+
 MackieControlProtocol::Sorted
 MackieControlProtocol::get_sorted_stripables()
 {
@@ -268,7 +291,7 @@ MackieControlProtocol::get_sorted_stripables()
 
 		std::shared_ptr<Stripable> s = *it;
 
-		if (s->presentation_info().special()) {
+		if (this->device_info().has_master_fader() && s->presentation_info().special()) {
 			continue;
 		}
 
@@ -280,7 +303,7 @@ MackieControlProtocol::get_sorted_stripables()
 
 		switch (_view_mode) {
 		case Mixer:
-			if (!s->presentation_info().hidden()) {
+			if ((!this->device_info().has_master_fader() && (s == this->get_session().master_out() || s == this->get_session().monitor_out())) || !s->presentation_info().hidden()) {
 				sorted.push_back (s);
 			}
 			break;
@@ -340,7 +363,7 @@ MackieControlProtocol::get_sorted_stripables()
 		}
 	}
 
-	sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());
+	sort (sorted.begin(), sorted.end(), mcpStripableSorter());
 	return sorted;
 }
 
