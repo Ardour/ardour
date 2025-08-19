@@ -537,6 +537,9 @@ Editor::Editor ()
 	_locations = new EditorLocations (*this);
 	_properties_box = new SelectionPropertiesBox ();
 
+	_bottom_hbox.pack_start (*_properties_box, true, true);
+	_properties_box->show ();
+
 	/* these are static location signals */
 
 	Location::start_changed.connect (*this, invalidator (*this), std::bind (&Editor::location_changed, this, _1), gui_context());
