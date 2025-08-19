@@ -1912,8 +1912,29 @@ Editor::edit_region (RegionView* rv)
 {
 	if (UIConfiguration::instance().get_use_double_click_to_zoom_to_selection()) {
 		temporal_zoom_selection (Both);
-	} else {
+		return;
+	}
+
+	switch (UIConfiguration::instance().get_region_edit_disposition()) {
+	case Editing::BottomPaneOnly:
+		maybe_edit_region_in_bottom_pane (*rv);
+		break;
+	case Editing::OpenBottomPane:
+		if (!att_bottom_visible()) {
+			/* XXX do something */
+		}
+		maybe_edit_region_in_bottom_pane (*rv);
+		break;
+	case Editing::PreferBottomPane:
+		if (att_bottom_visible()) {
+			maybe_edit_region_in_bottom_pane (*rv);
+		} else {
+			rv->show_region_editor ();
+		}
+		break;
+	case Editing::NeverBottomPane:
 		rv->show_region_editor ();
+		break;
 	}
 }
 

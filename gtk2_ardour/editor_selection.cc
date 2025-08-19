@@ -1716,31 +1716,48 @@ Editor::region_selection_changed ()
 	}
 	update_selection_markers ();
 
-	bool pack_pianoroll = false;
 	if (selection->regions.size () == 1)  {
 		RegionView* rv = (selection->regions.front ());
-		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
-		if (mrv) {
-			std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
-			std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
-			if (mrv && mt && mr) {
-				_pianoroll->set_track (mt);
-				_pianoroll->set_region (mr);
-				pack_pianoroll = true;
-			}
+		assert (rv);
+		maybe_edit_region_in_bottom_pane (*rv);
+	} else {
+		Gtkmm2ext::container_clear (_bottom_hbox);
+	}
+}
+
+void
+Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
+{
+	Gtkmm2ext::container_clear (_bottom_hbox);
+
+	if (UIConfiguration::instance().get_region_edit_disposition() == Editing::NeverBottomPane) {
+		/* Just the properties box. XXX does that make sense ? */
+		_bottom_hbox.pack_start (*_properties_box, true, true);
+		_properties_box->show ();
+		return;
+	}
+
+	bool pack_pianoroll = false;
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&rv);
+
+	if (mrv) {
+		std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
+		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
+		if (mrv && mt && mr) {
+			_pianoroll->set_track (mt);
+			_pianoroll->set_region (mr);
+			pack_pianoroll = true;
 		}
 	}
 
-	Gtkmm2ext::container_clear (_bottom_hbox);
-
 	if (pack_pianoroll) {
-		_bottom_hbox.pack_start(*_properties_box, false, false);
-		_bottom_hbox.pack_start(_pianoroll->contents(), true, true);
+		_bottom_hbox.pack_start (*_properties_box, false, false);
+		_bottom_hbox.pack_start (_pianoroll->contents(), true, true);
 		_pianoroll->contents().hide ();
 		_pianoroll->contents().show_all ();
 		_properties_box->show ();
 	} else {
-		_bottom_hbox.pack_start(*_properties_box, true, true);
+		_bottom_hbox.pack_start (*_properties_box, true, true);
 		_properties_box->show ();
 	}
 }
