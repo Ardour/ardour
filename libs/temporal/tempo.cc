@@ -3362,6 +3362,132 @@ TempoMap::bbt_walk (BBT_Argument const & bbt, BBT_Offset const & o) const
 	return BBT_Argument (metric.reftime(), start);
 }
 
+BBT_Offset
+TempoMap::bbt_distance (BBT_Argument const & strt, BBT_Argument const & nd) const
+{
+	BBT_Offset offset;
+	BBT_Time start (strt);
+	BBT_Time end (nd);
+	bool reversed = false;
+	Tempos::const_iterator t, prev_t, next_t;
+	Meters::const_iterator m, prev_m, next_m;
+
+	if (start > end) {
+		std::swap (start, end);
+		reversed = true;
+	}
+
+	TEMPO_MAP_ASSERT (!_tempos.empty());
+	TEMPO_MAP_ASSERT (!_meters.empty());
+
+	/* trivial (and common) case: single tempo, single meter */
+
+	if (_tempos.size() == 1 && _meters.size() == 1) {
+		if (reversed) {
+			return BBT_Offset (start.bars - end.bars, start.beats - end.beats, start.ticks - end.ticks);
+
+		} else {
+			return BBT_Offset (end.bars - start.bars, end.beats - start.beats, end.ticks - start.ticks);
+		}
+	}
+
+	/* Find tempo,meter pair for bbt, and also for the next tempo and meter
+	 * after each (if any)
+	 */
+
+	/* Yes, linear search because the typical size of _tempos and _meters
+	 * is 1, and extreme sizes are on the order of 10
+	 */
+
+	next_t = _tempos.end();
+	next_m = _meters.end();
+
+	for (t = _tempos.begin(), prev_t = t; t != _tempos.end() && t->bbt() < start;) {
+		prev_t = t;
+		++t;
+
+		if (t != _tempos.end()) {
+			next_t = t;
+			++next_t;
+		}
+	}
+
+	for (m = _meters.begin(), prev_m = m; m != _meters.end() && m->bbt() < start;) {
+		prev_m = m;
+		++m;
+
+		if (m != _meters.end()) {
+			next_m = m;
+			++next_m;
+		}
+	}
+
+	/* may have found tempo and/or meter precisely at the time given */
+
+	if (t != _tempos.end() && t->bbt() == start) {
+		prev_t = t;
+	}
+
+	if (m != _meters.end() && m->bbt() == start) {
+		prev_m = m;
+	}
+
+	/* see ::metric_at() for comments about the use of const_cast here
+	 */
+
+	TempoMetric metric (*const_cast<TempoPoint*>(&*prev_t), *const_cast<MeterPoint*>(&*prev_m));
+
+	/* add each beat, 1 by 1, rechecking to see if there's a new
+	 * TempoMetric in effect after each addition
+	 */
+
+#define TEMPO_CHECK_FOR_NEW_METRIC(b)                                   \
+	{ \
+		/* need new metric */ \
+		bool advance_t = false; \
+		bool advance_m = false; \
+		if (next_t != _tempos.end() && (b >= next_t->bbt())) { \
+			advance_t = true; \
+		}\
+		if (next_m != _meters.end() && (b >= next_m->bbt())) { \
+			advance_m = true; \
+		} \
+		if (advance_t && advance_m) { \
+			metric = TempoMetric (*const_cast<TempoPoint*>(&*next_t), *const_cast<MeterPoint*>(&*next_m)); \
+			++next_t; \
+			++next_m; \
+		} else if (advance_t && !advance_m) { \
+			metric = TempoMetric (*const_cast<TempoPoint*>(&*next_t), metric.meter()); \
+			++next_t; \
+		} else if (advance_m && !advance_t) { \
+			metric = TempoMetric (metric.tempo(), *const_cast<MeterPoint*>(&*next_m)); \
+			++next_m; \
+		} \
+	}
+
+	for (;;) {
+		BBT_Time s = metric.meter().bbt_add (start, BBT_Offset (0, 1, 0));
+		if (s > end) {
+			break;
+		}
+		start = s;
+		offset += BBT_Offset (0, 1, 0);
+		TEMPO_CHECK_FOR_NEW_METRIC (s);
+	}
+
+#undef TEMPO_CHECK_FOR_NEW_METRIC
+
+	/* Deal with ticks */
+
+	offset.ticks = end.ticks - start.ticks;
+
+	if (reversed) {
+		offset = -offset;
+	}
+
+	return offset;
+}
+
 Temporal::Beats
 TempoMap::quarters_at (timepos_t const & pos) const
 {
