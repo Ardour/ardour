@@ -82,11 +82,14 @@ ArdourDropdown::on_button_press_event (GdkEventButton* ev)
 void
 ArdourDropdown::set_active (std::string const& text)
 {
-	LblMenuItem const* current_active = dynamic_cast<LblMenuItem*> (_menu.get_active ());
-	if (current_active && current_active->label() == text) {
+	MenuItem const*    current_active  = _menu.get_active();
+	LblMenuItem const* current_lblitem = dynamic_cast<LblMenuItem const*> (current_active);
+
+	if ((current_lblitem && current_lblitem->label() == text) || (current_active && current_active->get_label() == text)) {
 		set_text (text);
 		return;
 	}
+
 	using namespace Menu_Helpers;
 	int c = 0;
 	for (auto& i : _menu.items()) {
