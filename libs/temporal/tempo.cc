@@ -3350,6 +3350,8 @@ TempoMap::bbt_walk (BBT_Argument const & bbt, BBT_Offset const & o) const
 		}
 	}
 
+#undef TEMPO_CHECK_FOR_NEW_METRIC
+
 	start.ticks += offset.ticks;
 
 	if (start.ticks >= ticks_per_beat) {
