@@ -309,6 +309,16 @@ Drag::~Drag ()
 	DEBUG_TRACE (DEBUG::Drags, "drag destroyed\n");
 }
 
+Drag::MoveThreshold
+Drag::move_threshold () const
+{
+	int basic_pixels = 4;
+	int x = _copy ? basic_pixels * 3 : basic_pixels;
+	int y = basic_pixels;
+
+	return std::make_pair (x, y);
+}
+
 void
 Drag::set_time_domain (Temporal::TimeDomain td)
 {
@@ -504,7 +514,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 		return false;
 	}
 
-	pair<timecnt_t, int> const threshold = move_threshold ();
+	MoveThreshold const threshold = move_threshold ();
 
 	bool const old_move_threshold_passed = _move_threshold_passed;
 
