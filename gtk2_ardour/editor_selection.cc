@@ -1721,7 +1721,7 @@ Editor::region_selection_changed ()
 		assert (rv);
 		maybe_edit_region_in_bottom_pane (*rv);
 	} else {
-		gtk_box_set_child_packing (GTK_BOX(_bottom_hbox.gobj()), GTK_WIDGET(_properties_box->gobj()), true, true, 0, GTK_PACK_START);
+		_bottom_hbox.set_child_packing (*_properties_box, true, true);
 		if (_pianoroll->contents().get_parent()) {
 			_pianoroll->contents().unmap ();
 			_pianoroll->contents().get_parent()->remove (_pianoroll->contents());
@@ -1746,7 +1746,7 @@ Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
 	}
 
 	if (pack_pianoroll) {
-		gtk_box_set_child_packing (GTK_BOX(_bottom_hbox.gobj()), GTK_WIDGET(_properties_box->gobj()), false, false, 0, GTK_PACK_START);
+		_bottom_hbox.set_child_packing (*_properties_box, false, false);
 		if (!_pianoroll->contents().get_parent()) {
 			_bottom_hbox.pack_start (_pianoroll->contents(), true, true);
 		}
@@ -1757,7 +1757,7 @@ Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
 			_pianoroll->contents().unmap ();
 			_pianoroll->contents().get_parent()->remove (_pianoroll->contents());
 		}
-		gtk_box_set_child_packing (GTK_BOX(_bottom_hbox.gobj()), GTK_WIDGET(_properties_box->gobj()), true, true, 0, GTK_PACK_START);
+		_bottom_hbox.set_child_packing (*_properties_box, true, true);
 	}
 }
 

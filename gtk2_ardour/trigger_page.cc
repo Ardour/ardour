@@ -486,7 +486,7 @@ TriggerPage::trigger_arm_changed (Trigger const * trigger)
 
 	Tabbable::showhide_att_bottom (false);
 
-	gtk_box_set_child_packing (GTK_BOX(hpacker.gobj()), GTK_WIDGET(_properties_box.gobj()), false, false, 0, GTK_PACK_START);
+	hpacker.set_child_packing (_properties_box, false, false);
 
 	TriggerBox& box = trigger->box();
 	TriggerReference ref (trigger->boxptr(), trigger->index());
@@ -540,11 +540,11 @@ TriggerPage::selection_changed ()
 	Tabbable::showhide_att_bottom (false);
 
 	if (selection.triggers.empty ()) {
-		gtk_box_set_child_packing (GTK_BOX(hpacker.gobj()), GTK_WIDGET(_properties_box.gobj()), true, true, 0, GTK_PACK_START);
+		hpacker.set_child_packing (_properties_box, true, true);
 		return;
 	}
 
-	gtk_box_set_child_packing (GTK_BOX(hpacker.gobj()), GTK_WIDGET(_properties_box.gobj()), false, false, 0, GTK_PACK_START);
+	hpacker.set_child_packing (_properties_box, false, false);
 
 	TriggerReference ref     = selection.triggers.front()->trigger_reference ();
 	std::shared_ptr<TriggerBox> box = ref.box();
