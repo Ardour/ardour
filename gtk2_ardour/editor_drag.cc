@@ -286,6 +286,7 @@ Drag::Drag (EditingContext& ec, ArdourCanvas::Item* i, Temporal::TimeDomain td, 
 	, _y_constrained (false)
 	, _was_rolling (false)
 	, _earliest_time_limit (0)
+	, _copy (false)
 	, _hide_snapped_cursor (hide_snapped_cursor)
 	, _move_threshold_passed (false)
 	, _starting_point_passed (false)
@@ -2237,11 +2238,11 @@ RegionMotionDrag::aborted (bool)
  */
 RegionMoveDrag::RegionMoveDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, bool c, TimeDomain td)
 	: RegionMotionDrag (e, i, p, v, td)
-	, _copy (c)
 	, _new_region_view (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionMoveDrag\n");
 
+	_copy = c;
 	_last_position = _primary->region ()->position ();
 }
 
@@ -5891,10 +5892,10 @@ SelectionMarkerDrag::aborted (bool movement_occurred)
 RangeMarkerBarDrag::RangeMarkerBarDrag (Editor& e, ArdourCanvas::Item* i, Operation o)
 	: EditorDrag (e, i, e.time_domain (), nullptr)
 	, _operation (o)
-	, _copy (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RangeMarkerBarDrag\n");
 
+	_copy = false;
 	_drag_rect = new ArdourCanvas::Rectangle (_editor.time_line_group,
 	                                          ArdourCanvas::Rect (0.0, 0.0, 0.0,
 	                                                              physical_screen_height (_editor.current_toplevel ()->get_window ())));
@@ -6124,10 +6125,10 @@ NoteDrag::NoteDrag (EditingContext& ec, ArdourCanvas::Item* i)
 	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group(), false)
 	, _cumulative_dy (0)
 	, _was_selected (false)
-	, _copy (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New NoteDrag\n");
 
+	_copy = false;
 	_primary = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
 	assert (_primary);
 	_view      = &_primary->midi_view ();

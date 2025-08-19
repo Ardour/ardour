@@ -331,6 +331,7 @@ protected:
 	bool _y_constrained; ///< true if y motion is constrained, otherwise false
 	bool _was_rolling; ///< true if the session was rolling before the drag started, otherwise false
 	ARDOUR::timepos_t _earliest_time_limit; ///< time we cannot drag before (defaults to 0, indicating no such limit)
+	bool _copy;
 
 private:
 	bool _trackview_only; ///< true if pointer y value should always be relative to the top of the trackview group
@@ -557,7 +558,6 @@ private:
 	void collect_new_region_view (RegionView *);
 	RouteTimeAxisView* create_destination_time_axis (std::shared_ptr<ARDOUR::Region>, TimeAxisView* original);
 
-	bool _copy;
 	RegionView* _new_region_view;
 };
 
@@ -655,7 +655,6 @@ private:
 	Temporal::timepos_t  _earliest; // earliest note in note selection
 	bool   _was_selected;
 	double _note_height;
-	bool   _copy;
 };
 
 class NoteCreateDrag : public Drag
@@ -1435,7 +1434,6 @@ private:
 
 	Operation _operation;
 	ArdourCanvas::Rectangle* _drag_rect;
-	bool _copy;
 };
 
 /** Drag of rectangle to set zoom */
