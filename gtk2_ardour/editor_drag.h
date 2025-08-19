@@ -222,9 +222,9 @@ public:
 	}
 
 	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
-	std::pair<Temporal::timecnt_t,int> move_threshold () const {
-		return std::make_pair (Temporal::timecnt_t (1, Temporal::AudioTime), 1);
-	}
+	typedef std::pair<int,int> MoveThreshold;
+
+	virtual MoveThreshold move_threshold () const;
 
 	virtual bool allow_vertical_autoscroll () const {
 		return true;
@@ -519,10 +519,6 @@ public:
 		return true;
 	}
 
-	std::pair<Temporal::timecnt_t,int> move_threshold () const {
-		return std::make_pair (Temporal::timecnt_t (4, Temporal::AudioTime), 4);
-	}
-
 	void setup_pointer_offset ();
 
 private:
@@ -684,11 +680,6 @@ private:
 	double y_to_region (double) const;
 	Temporal::Beats round_to_grid (Temporal::timepos_t const & pos, GdkEvent const * event) const;
 
-	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
-	std::pair<Temporal::timecnt_t,int> move_threshold () const {
-		return std::make_pair (Temporal::timecnt_t (0, Temporal::AudioTime), 0);
-	}
-
 	MidiView* _midi_view;
 	ArdourCanvas::Rectangle* _drag_rect;
 	Temporal::timepos_t _note[2];
@@ -715,11 +706,6 @@ public:
 
 private:
 	double y_to_region (double) const;
-
-	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
-	std::pair<Temporal::timecnt_t,int> move_threshold () const {
-		return std::make_pair (Temporal::timecnt_t::zero (Temporal::AudioTime), 0);
-	}
 
 	MidiView*           _midi_view;
 	Temporal::timepos_t _last_pos;
@@ -1292,10 +1278,6 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	std::pair<Temporal::timecnt_t,int> move_threshold () const {
-		return std::make_pair (Temporal::timecnt_t (8, Temporal::AudioTime), 1);
-	}
-
 	void do_select_things (GdkEvent *, bool);
 
 	/** Select some things within a rectangle.
@@ -1447,10 +1429,6 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	std::pair<Temporal::timecnt_t,int> move_threshold () const {
-		return std::make_pair (Temporal::timecnt_t (4, Temporal::AudioTime), 4);
-	}
-
 private:
 	bool _zoom_out;
 };
@@ -1510,10 +1488,6 @@ public:
 
 	bool y_movement_matters () const {
 		return false;
-	}
-
-	std::pair<Temporal::timecnt_t,int> move_threshold () const {
-		return std::make_pair (Temporal::timecnt_t (4, Temporal::AudioTime), 4);
 	}
 
 private:
