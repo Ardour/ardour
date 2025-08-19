@@ -316,6 +316,12 @@ Drag::move_threshold () const
 	int x = _copy ? basic_pixels * 3 : basic_pixels;
 	int y = basic_pixels;
 
+	x *= UIConfiguration::instance().get_drag_sensitivity ();
+	y *= UIConfiguration::instance().get_drag_sensitivity ();
+
+	x *= UIConfiguration::instance().get_ui_scale ();
+	y *= UIConfiguration::instance().get_ui_scale ();
+
 	return std::make_pair (x, y);
 }
 
