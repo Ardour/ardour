@@ -2480,7 +2480,7 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 	 */
 
 	timepos_t pointer_time (canvas_event_sample (event, nullptr, nullptr));
-	Temporal::TempoPoint& tempo = const_cast<Temporal::TempoPoint&>(map->tempo_at (pointer_time));
+	TempoPoint& tempo = const_cast<TempoPoint&>(map->tempo_at (pointer_time));
 
 	TempoPoint* before = const_cast<TempoPoint*> (map->previous_tempo (tempo));
 	TempoPoint* after = const_cast<TempoPoint*> (map->next_tempo (tempo));
@@ -2494,14 +2494,8 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 
 	BBT_Argument bbt = map->bbt_at (pointer_time);
-	bbt = BBT_Argument (bbt.reference(), bbt.round_to_beat ());
-
-	/* BBT_Argument is meter-agnostic so we need to use the map's meter to resolve bar boundaries */
-	const Meter& m = map->meter_at (pointer_time);
-	if (bbt.beats > m.divisions_per_bar()){
-		bbt.beats = 1;
-		bbt.bars++;
-	}
+	Meter const & m = map->meter_at (pointer_time);
+	bbt = BBT_Argument (bbt.reference(), m.round_to_beat (bbt));
 
 	/* Create a new marker, or use the one under the mouse */
 
