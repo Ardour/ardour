@@ -525,7 +525,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 	bool const old_move_threshold_passed = _move_threshold_passed;
 
 	if (!_move_threshold_passed) {
-		bool const xp = (_raw_grab_time.distance (_drags->current_pointer_time ()).abs () >= threshold.first);
+		bool const xp = (::fabs (current_pointer_x() - _grab_x) >= threshold.first);
 		bool const yp = (::fabs ((current_pointer_y () - _grab_y)) >= threshold.second);
 
 		_move_threshold_passed = ((xp && x_movement_matters ()) || (yp && y_movement_matters ()));
