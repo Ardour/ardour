@@ -1921,7 +1921,11 @@ Editor::edit_region (RegionView* rv)
 		break;
 	case Editing::OpenBottomPane:
 		if (!att_bottom_visible()) {
-			/* XXX do something */
+			Glib::RefPtr<Gtk::Action> act = bottom_attachment_button.get_related_action();
+			Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
+			if (tact) {
+				tact->set_active (true);
+			}
 		}
 		maybe_edit_region_in_bottom_pane (*rv);
 		break;
