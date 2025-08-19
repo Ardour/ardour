@@ -232,6 +232,7 @@ public:
 	bool extend_selection_to_track (TimeAxisView&);
 
 	void edit_region_in_pianoroll_window ();
+	void maybe_edit_region_in_bottom_pane (RegionView&);
 
 	void play_selection ();
 	void maybe_locate_with_edit_preroll (samplepos_t);
