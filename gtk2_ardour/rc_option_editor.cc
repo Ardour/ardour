@@ -3434,7 +3434,7 @@ These settings will only take effect after %1 is restarted.\n\
 	red->add (Editing::BottomPaneOnly, _("Only ever use the bottom pane"));
 	red->add (Editing::OpenBottomPane, _("Open bottom pane, if necessary"));
 	red->add (Editing::PreferBottomPane, _("Use bottom pane if visible, or own window"));
-	red->add (Editing::BottomPaneOnly, _("Always use a separate window"));
+	red->add (Editing::NeverBottomPane, _("Always use a separate window"));
 
 	add_option (_("Editor"), red);
 
