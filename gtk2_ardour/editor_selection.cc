@@ -1722,6 +1722,8 @@ Editor::region_selection_changed ()
 		maybe_edit_region_in_bottom_pane (*rv);
 	} else {
 		Gtkmm2ext::container_clear (_bottom_hbox);
+		_bottom_hbox.pack_start (*_properties_box, true, true);
+		_properties_box->show ();
 	}
 }
 
@@ -1731,7 +1733,6 @@ Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
 	Gtkmm2ext::container_clear (_bottom_hbox);
 
 	if (UIConfiguration::instance().get_region_edit_disposition() == Editing::NeverBottomPane) {
-		/* Just the properties box. XXX does that make sense ? */
 		_bottom_hbox.pack_start (*_properties_box, true, true);
 		_properties_box->show ();
 		return;
