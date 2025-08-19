@@ -313,6 +313,7 @@ Pianoroll::pack_inner (Gtk::Box& box)
 	box.pack_start (snap_box, false, false);
 	box.pack_start (grid_box, false, false);
 	box.pack_start (draw_box, false, false);
+	draw_box.show ();
 }
 
 void
