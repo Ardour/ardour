@@ -61,6 +61,43 @@ protected:
 	void default_text_handler (std::string const&);
 
 private:
+	class LblMenuItem : public Gtk::MenuItem
+	{
+	public:
+		LblMenuItem (std::string const& label, std::string const& menutext)
+			: Gtk::MenuItem (menutext, false)
+			, _label (label)
+		{
+		}
+
+		std::string label () const
+		{
+			return _label;
+		}
+
+		std::string menutext () const
+		{
+			return get_label ();
+		}
+
+	private:
+		std::string _label;
+	};
+
+	class LblMenuElement : public Gtk::Menu_Helpers::MenuElem
+	{
+	public:
+		LblMenuElement (Glib::RefPtr<Gtk::Action> action)
+			: Gtk::Menu_Helpers::MenuElem ("")
+		{
+			LblMenuItem* mmi = manage (new LblMenuItem (action->get_short_label(), action->get_label()));
+			child_->unreference ();
+			set_child (mmi);
+			child_->signal_activate ().connect (sigc::mem_fun (action.get(), &Gtk::Action::activate));
+			child_->show ();
+		}
+	};
+
 	Gtk::Menu      _menu;
 
 	bool _scrolling_disabled;

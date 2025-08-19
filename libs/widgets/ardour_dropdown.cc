@@ -82,20 +82,23 @@ ArdourDropdown::on_button_press_event (GdkEventButton* ev)
 void
 ArdourDropdown::set_active (std::string const& text)
 {
-	const MenuItem* current_active = _menu.get_active();
-	if (current_active && current_active->get_label() == text) {
+	LblMenuItem const* current_active = dynamic_cast<LblMenuItem*> (_menu.get_active ());
+	if (current_active && current_active->label() == text) {
 		set_text (text);
 		return;
 	}
 	using namespace Menu_Helpers;
-	const MenuList& items = _menu.items ();
 	int c = 0;
-	for (MenuList::const_iterator i = items.begin(); i != items.end(); ++i, ++c) {
-		if (i->get_label() == text) {
+	for (auto& i : _menu.items()) {
+		LblMenuItem const* m = dynamic_cast<LblMenuItem const*> (&i);
+		if ((m && (m->label() == text || m->menutext() == text))
+		    ||
+		    (!m && i.get_label() == text)) {
 			_menu.set_active (c);
-			_menu.activate_item (*i);
+			_menu.activate_item (i);
 			break;
 		}
+		++c;
 	}
 	set_text (text);
 	StateChanged (); /* EMIT SIGNAL */
@@ -206,11 +209,11 @@ ArdourDropdown::default_text_handler (std::string const& text) {
 void
 ArdourDropdown::append (Glib::RefPtr<Action> action)
 {
-	_menu.items().push_back (Menu_Helpers::MenuElem (action->get_short_label(), sigc::mem_fun (action.get(), &Action::activate)));
+	_menu.items().push_back (LblMenuElement (action));
 }
 
 void
 ArdourDropdown::append (Gtk::Menu& submenu, Glib::RefPtr<Action> action)
 {
-	submenu.items().push_back (Menu_Helpers::MenuElem (action->get_short_label(), sigc::mem_fun (action.get(), &Action::activate)));
+	submenu.items().push_back (LblMenuElement (action));
 }
