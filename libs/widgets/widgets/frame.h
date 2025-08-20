@@ -56,6 +56,8 @@ protected:
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 	void on_name_changed ();
 
+	static void child_destroyed (GtkWidget*, gpointer);
+
 private:
 	Glib::RefPtr<Gtk::Style> get_parent_style ();
 
