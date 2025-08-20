@@ -286,7 +286,6 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	ghost->set_height ();
 	ghost->set_duration (_region->length().samples() / samples_per_pixel);
 
-	std::cerr << "Adding " << _events.size() << " notes to ghost\n";
 	for (auto const & i : _events) {
 		ghost->add_note (i.second);
 	}
