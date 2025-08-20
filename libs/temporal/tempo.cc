@@ -1217,8 +1217,6 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 		reset_starting_at (position.superclocks());
 	}
 
-	MeterPoint const * current_meter = &meter_at (position);
-
 	for (auto const & p : cb.points()) {
 		TempoPoint const * tp;
 		MeterPoint const * mp;
@@ -1245,7 +1243,7 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 
 			if (!replaced) {
 				core_add_tempo (ntp, ignored);
-				current_meter = core_add_meter (ntp, ignored);
+				(void) core_add_meter (ntp, ignored);
 				core_add_point (ntp);
 			}
 
@@ -1259,7 +1257,7 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 				}
 			} else if ((mp = dynamic_cast<MeterPoint const *> (&p))) {
 				MeterPoint *ntp = new MeterPoint (*this, *mp, s, b, p.bbt());
-				current_meter = core_add_meter (ntp, replaced);
+				core_add_meter (ntp, replaced);
 				if (!replaced) {
 					core_add_point (ntp);
 				}
