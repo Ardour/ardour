@@ -44,6 +44,7 @@ using namespace ARDOUR;
 RTAWindow::RTAWindow ()
 	: ArdourWindow (_("Realtime Perceptual Analyzer"))
 	, _pause (_("Freeze"), ArdourWidgets::ArdourButton::default_elements, true)
+	, _clear (_("Clear"), ArdourWidgets::ArdourButton::default_elements)
 	, _visible (false)
 	, _margin (24)
 	, _min_dB (-60)
@@ -55,6 +56,8 @@ RTAWindow::RTAWindow ()
 {
 	_pause.signal_clicked.connect (mem_fun (*this, &RTAWindow::pause_toggled));
 	_pause.set_name ("rta freeze button");
+
+	_clear.signal_clicked.connect (mem_fun (*this, &RTAWindow::clear_clicked));
 
 	_darea.add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK | Gdk::LEAVE_NOTIFY_MASK);
 	_darea.signal_size_request ().connect (sigc::mem_fun (*this, &RTAWindow::darea_size_request));
@@ -101,6 +104,7 @@ RTAWindow::RTAWindow ()
 	_ctrlbox.pack_start (_warp_dropdown, false, false);
 	_ctrlbox.pack_start (_pointer_info, false, false, 5);
 	_ctrlbox.pack_end (_pause, false, false);
+	_ctrlbox.pack_end (_clear, false, false);
 
 	_vpacker.pack_start (_darea, true, true);
 	_vpacker.pack_start (_ctrlbox, false, false, 5);
@@ -242,6 +246,12 @@ void
 RTAWindow::pause_toggled ()
 {
 	RTAManager::instance ()->set_active (_visible && !_pause.get_active ());
+}
+
+void
+RTAWindow::clear_clicked ()
+{
+	RTAManager::instance ()->clear ();
 }
 
 void

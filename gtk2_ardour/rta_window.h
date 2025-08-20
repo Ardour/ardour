@@ -65,6 +65,7 @@ private:
 	void set_rta_warp (ARDOUR::DSP::PerceptualAnalyzer::Warp);
 
 	void pause_toggled ();
+	void clear_clicked ();
 
 	enum DragStatus {
 		DragNone,
@@ -82,6 +83,7 @@ private:
 	Gtk::DrawingArea                   _darea;
 	Gtk::Label                         _pointer_info;
 	ArdourWidgets::ArdourButton        _pause;
+	ArdourWidgets::ArdourButton        _clear;
 	ArdourWidgets::ArdourDropdown      _speed_dropdown;
 	ArdourWidgets::ArdourDropdown      _warp_dropdown;
 	Cairo::RefPtr<Cairo::ImageSurface> _grid;
