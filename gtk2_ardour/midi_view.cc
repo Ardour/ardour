@@ -1971,7 +1971,7 @@ MidiView::update_hit (Hit* ev)
 	ev->set_outline_color(ev->calculate_outline(base_col, ev->selected()));
 
 	color_note (ev, _visible_channel);
-	ev->set_ignore_events (!ev);
+	ev->set_ignore_events (!note_editable (ev));
 }
 
 /** Add a MIDI note to the view (with length).
