@@ -280,15 +280,33 @@ EditingContext::EditingContext (std::string const & name)
 
 EditingContext::~EditingContext()
 {
-	ActionManager::drop_action_group (_midi_actions);
-	ActionManager::drop_action_group (_common_actions);
-	ActionManager::drop_action_group (editor_actions);
-	ActionManager::drop_action_group (snap_actions);
-	ActionManager::drop_action_group (length_actions);
-	ActionManager::drop_action_group (channel_actions);
-	ActionManager::drop_action_group (velocity_actions);
-	ActionManager::drop_action_group (zoom_actions);
-	ActionManager::drop_action_group (_automation_actions);
+	if (_midi_actions) {
+		ActionManager::drop_action_group (_midi_actions);
+	}
+	if (_common_actions) {
+		ActionManager::drop_action_group (_common_actions);
+	}
+	if (editor_actions) {
+		ActionManager::drop_action_group (editor_actions);
+	}
+	if (snap_actions) {
+		ActionManager::drop_action_group (snap_actions);
+	}
+	if (length_actions) {
+		ActionManager::drop_action_group (length_actions);
+	}
+	if (channel_actions) {
+		ActionManager::drop_action_group (channel_actions);
+	}
+	if (velocity_actions) {
+		ActionManager::drop_action_group (velocity_actions);
+	}
+	if (zoom_actions) {
+		ActionManager::drop_action_group (zoom_actions);
+	}
+	if (_automation_actions) {
+		ActionManager::drop_action_group (_automation_actions);
+	}
 }
 
 void
