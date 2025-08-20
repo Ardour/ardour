@@ -211,6 +211,8 @@ TriggerPage::TriggerPage ()
 
 TriggerPage::~TriggerPage ()
 {
+	delete _midi_editor;
+	delete _audio_editor;
 }
 
 Gtk::Window*
