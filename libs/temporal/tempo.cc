@@ -810,7 +810,10 @@ MeterPoint::MeterPoint (TempoMap const & map, XMLNode const & node)
 Temporal::Beats
 MeterPoint::quarters_at (Temporal::BBT_Time const & bbt) const
 {
-	Temporal::BBT_Offset offset = bbt_delta (bbt, _bbt);
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%1 computing quarters for bbt %2\n", *this, bbt));
+	BBT_Offset offset (bbt_delta (bbt, _bbt));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("getting quarters at %1 from %2, offset is %3 as quarters %4 so %5\n",
+	                                                 bbt, *this, offset, to_quarters (offset), _quarters + to_quarters (offset)));
 	return _quarters + to_quarters (offset);
 }
 
@@ -890,7 +893,7 @@ TempoMetric::bbt_at (timepos_t const & pos) const
 
 	const Beats dq = _tempo->quarters_at_superclock (sc) - reference_point->beats();
 
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("qn @ %1 = %2, meter @ %3 , delta %4\n", sc, _tempo->quarters_at_superclock (sc), _meter->beats(), dq));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("qn @ %1 = %2, meter @ %3 , delta %4 from ref %5\n", sc, _tempo->quarters_at_superclock (sc), reference_point->beats(), dq, *reference_point));
 
 	/* dq is delta in quarters (beats). Convert to delta in note types of
 	   the current meter, which we'll call "grid"
@@ -898,14 +901,15 @@ TempoMetric::bbt_at (timepos_t const & pos) const
 
 	const int64_t note_value_count = muldiv_round (dq.get_beats(), _meter->note_value(), int64_t (4));
 
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("which converts to %1 note value count\n", note_value_count));
+
 	/* now construct a BBT_Offset using the count in grid units */
 
 	const BBT_Offset bbt_offset (0, note_value_count, dq.get_ticks());
 
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("BBT offset from %3 @ %1: %2\n", (_tempo->beats() < _meter->beats() ?  _meter->bbt() : _tempo->bbt()), bbt_offset,
-	                                                 (_tempo->beats() < _meter->beats() ? "meter" : "tempo")));
-	superclock_t ref (std::min (_meter->sclock(), _tempo->sclock()));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("BBT offset from %1 = %2, so final BBT = %3\n", reference_point->bbt(), bbt_offset, _meter->bbt_add (reference_point->bbt(), bbt_offset)));
 
+	superclock_t ref (std::min (_meter->sclock(), _tempo->sclock()));
 	return BBT_Argument (ref, _meter->bbt_add (reference_point->bbt(), bbt_offset));
 }
 
@@ -3044,6 +3048,8 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 			   time position of @v bbt ?
 			*/
 			start = metric.superclock_at (bbt);
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("reset start to %1 based on %2 using %3\n", start, bbt, metric));
+
 			if (start >= p->sclock()) {
 				/* Yep, too far. So we need to reset and take
 				   the next (music time point) into account.
@@ -3166,6 +3172,13 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 
 				}
 
+				if (p != _points.end()) {
+					DEBUG_TRACE (DEBUG::Grid, string_compose ("left loop with %5, to find next, p->bbt %1 vs bbt %2 p->sc %3 vs %4\n",
+					                                          p->bbt(), bbt, p->sclock(), sc, *p));
+				} else {
+					DEBUG_TRACE (DEBUG::Grid, "left loop because we reached the end of points\n");
+				}
+
 				/* reset the metric to use the most recent tempo & meter */
 
 				if (rebuild_metric) {
@@ -3179,12 +3192,14 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 
 		}
 
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("reset done, bbt now at %1 with metric %2, get superclock\n", bbt, metric));
 		start = metric.superclock_at (bbt);
 
 		/* Update the quarter-note time value to match the BBT and
 		 * audio time positions
 		 */
 
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("get quarters for %1 from %2\n", bbt, metric));
 		beats = metric.quarters_at (bbt);
 
 		/* we have a candidate grid point (start,beats,bbt). It might
