@@ -288,6 +288,7 @@ EditingContext::~EditingContext()
 	ActionManager::drop_action_group (channel_actions);
 	ActionManager::drop_action_group (velocity_actions);
 	ActionManager::drop_action_group (zoom_actions);
+	ActionManager::drop_action_group (_automation_actions);
 }
 
 void
@@ -2596,6 +2597,7 @@ RefPtr<Action>
 EditingContext::reg_sens (RefPtr<ActionGroup> group, char const * name, char const * label, sigc::slot<void> slot)
 {
 	RefPtr<Action> act = ActionManager::register_action (group, name, label, slot);
+	assert(act);
 	ActionManager::session_sensitive_actions.push_back (act);
 	return act;
 }
@@ -2604,6 +2606,7 @@ Glib::RefPtr<ToggleAction>
 EditingContext::toggle_reg_sens (RefPtr<ActionGroup> group, char const * name, char const * label, sigc::slot<void> slot)
 {
 	RefPtr<ToggleAction> act = ActionManager::register_toggle_action (group, name, label, slot);
+	assert(act);
 	ActionManager::session_sensitive_actions.push_back (act);
 	return act;
 }
@@ -2612,6 +2615,7 @@ Glib::RefPtr<Gtk::RadioAction>
 EditingContext::radio_reg_sens (RefPtr<ActionGroup> action_group, RadioAction::Group& radio_group, char const * name, char const * label, sigc::slot<void> slot)
 {
 	RefPtr<RadioAction> act = ActionManager::register_radio_action (action_group, radio_group, name, label, slot);
+	assert(act);
 	ActionManager::session_sensitive_actions.push_back (act);
 	return act;
 }
