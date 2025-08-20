@@ -282,6 +282,7 @@ AudioClipEditor::~AudioClipEditor ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
+	drop_grid ();
 	drop_waves ();
 	delete clip_metric;
 }
