@@ -347,6 +347,115 @@ Meter::bbt_subtract (Temporal::BBT_Time const & bbt, Temporal::BBT_Offset const 
 	return Temporal::BBT_Time (r.bars, r.beats, r.ticks);
 }
 
+/* Compute BBT_offset between two BBT_Times (assumed to have the same reference
+ * point), The Meter object this is called upon MUST cover both BBT_Times,
+ * otherwise the return value is undefined.
+ */
+Temporal::BBT_Offset
+Meter::bbt_delta (BBT_Time const & later, BBT_Time const & earlier) const
+{
+	if (later == earlier) {
+		return BBT_Offset();
+	}
+
+	assert (later > earlier);
+
+#if 0 // more efficient but broken
+
+	BBT_Offset d;
+	BBT_Time a (earlier);
+	BBT_Time b (later);
+
+	if (a.ticks == ticks_per_grid()) {
+
+		/* Next tick is the next beat */
+
+		a.beats++;
+		d.beats++;
+
+		if (a.beats == _divisions_per_bar) {
+			a.beats = 1;
+			a.bars++;
+			d.bars++;
+		}
+	} else {
+
+		/* tick delta is just the remainder to the next beat */
+
+		d.ticks = ticks_per_grid() - earlier.ticks;
+	}
+
+	if (a.beats == _divisions_per_bar) {
+
+		/* next beat is the next bar */
+
+
+		a.beats = 1;
+		a.bars++;
+		d.bars++;
+
+	} else {
+
+		/* beat delta is just the remainder to the next bar */
+
+		d.beats = _divisions_per_bar - earlier.beats;
+	}
+
+	/* count bars */
+
+	d.bars = b.bars - a.bars;
+
+	return d;
+
+#else
+	BBT_Time a (earlier);
+	BBT_Time b (later);
+	int32_t d_bars = 0;
+	int32_t d_beats = 0;
+	int32_t d_ticks = 0;
+
+	/* Walk to next grid-beat, counting ticks (and wrapped beats and bars
+	 * if necessary)
+	 */
+
+	while (a.ticks < b.ticks) {
+		if (a.ticks == ticks_per_grid()) {
+			a.ticks = 0; /* not necessary but here for consistency */
+			a.beats++;
+			d_beats++;
+			if (a.beats == _divisions_per_bar) {
+				a.beats = 1;
+				a.bars++;
+				d_bars++;
+			}
+			break;
+		}
+		a.ticks++;
+		d_ticks++;
+	}
+
+	/* Walk to next bar, counting beats (and bars
+	 * if necessary)
+	 */
+	while (a.beats < b.beats) {
+		if (a.beats == _divisions_per_bar) {
+			a.beats = 1;
+			a.bars++;
+			d_bars++;
+			break;
+		}
+		a.beats++;
+		d_beats++;
+	}
+
+	/* count bars */
+
+	d_bars = b.bars - a.bars;
+
+	return BBT_Offset (d_bars, d_beats, d_ticks);
+#endif
+}
+
 Temporal::Beats
 Meter::round_to_beat (Temporal::Beats const & b) const
 {
@@ -2717,7 +2826,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t rstart, superclock_t end, 
 				on_bar = metric.meter().round_up_to_beat_div (bbt, beat_div);
 			}
 
-			BBT_Offset delta = Temporal::bbt_delta (on_bar, bbt);
+			BBT_Offset delta = metric.meter().bbt_delta (on_bar, bbt);
 
 			if (delta != BBT_Offset ()) {
 				bbt = on_bar;
@@ -2984,7 +3093,7 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 					}
 
 					bbt = BBT_Argument (metric.reftime(), on_bar);
-					BBT_Offset delta = Temporal::bbt_delta (on_bar, p->bbt());
+					BBT_Offset delta = metric.meter().bbt_delta (on_bar, p->bbt());
 
 					if (delta != BBT_Offset ()) {
 						Beats beats_delta = mp->to_quarters (delta);

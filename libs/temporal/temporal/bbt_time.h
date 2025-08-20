@@ -257,10 +257,6 @@ struct LIBTEMPORAL_API BBT_Offset
 	}
 };
 
-inline BBT_Offset LIBTEMPORAL_API bbt_delta (Temporal::BBT_Time const & a, Temporal::BBT_Time const & b) {
-	return Temporal::BBT_Offset (a.bars - b.bars, a.beats - b.beats, a.ticks - b.ticks);
-}
-
 inline bool
 BBT_Time::operator< (const BBT_Offset& other) const
 {
