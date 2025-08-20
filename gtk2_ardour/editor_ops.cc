@@ -9581,9 +9581,8 @@ Editor::temporal_zoom_extents ()
 void
 Editor::edit_region_in_pianoroll_window ()
 {
-	selection->foreach_midi_regionview (&MidiRegionView::edit_in_pianoroll_window);
+	selection->foreach_midi_regionview (&MidiRegionView::show_region_editor);
 }
-
 
 void
 Editor::find_and_display_track ()
