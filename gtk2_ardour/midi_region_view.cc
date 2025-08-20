@@ -701,23 +701,6 @@ MidiRegionView::add_control_points_to_selection (timepos_t const & start, timepo
 	}
 }
 
-void
-MidiRegionView::edit_in_pianoroll_window ()
-{
-	std::shared_ptr<MidiTrack> track = std::dynamic_pointer_cast<MidiTrack> (trackview.stripable());
-	assert (track);
-
-	PianorollWindow* pr = new PianorollWindow (string_compose (_("Pianoroll: %1"), _region->name()), track->session());
-
-	pr->set (track, midi_region());
-	pr->set_show_source (false);
-	pr->show_all ();
-	pr->present ();
-
-	pr->signal_delete_event().connect (sigc::mem_fun (*this, &MidiRegionView::pianoroll_window_deleted), false);
-	_editor = pr;
-}
-
 bool
 MidiRegionView::pianoroll_window_deleted (GdkEventAny*)
 {
@@ -728,7 +711,21 @@ MidiRegionView::pianoroll_window_deleted (GdkEventAny*)
 void
 MidiRegionView::show_region_editor ()
 {
-	edit_in_pianoroll_window ();
+	if (!_editor) {
+		std::shared_ptr<MidiTrack> track = std::dynamic_pointer_cast<MidiTrack> (trackview.stripable());
+		assert (track);
+
+		PianorollWindow* pr = new PianorollWindow (string_compose (_("Pianoroll: %1"), _region->name()), track->session());
+
+		pr->set (track, midi_region());
+		pr->set_show_source (false);
+
+		pr->signal_delete_event().connect (sigc::mem_fun (*this, &MidiRegionView::pianoroll_window_deleted), false);
+		_editor = pr;
+	}
+
+	_editor->show_all ();
+	_editor->present ();
 }
 
 void
