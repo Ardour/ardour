@@ -292,8 +292,12 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 	tmcb = new_map->copy (timepos_t::zero (Temporal::AudioTime), timepos_t::from_superclock (new_map->duration(Temporal::AudioTime).superclocks()));
 
 	if (tmcb && !tmcb->empty()) {
+		std::cerr << "CB\n";
+		tmcb->dump (std::cerr); 
 		wmap->paste (*tmcb, pos, false, _("import"));
 		TempoMap::update (wmap);
+		std::cerr << "final map\n";
+		TempoMap::use()->dump (std::cerr);
 		delete tmcb;
 		// XMLNode& tm_after (wmap->get_state());
 		// _session->add_command (new TempoCommand (_("cut tempo map"), &tm_before, &tm_after));
