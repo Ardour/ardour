@@ -1947,7 +1947,9 @@ LaunchKey4::loop_start_move (int step)
 		BBT_Time bbt_start = map->bbt_at (start);
 		BBT_Time bbt_end = map->bbt_at (l->end());
 
-		dur = bbt_delta (bbt_end, bbt_start);
+		/* XXX this is not correct since start/end may cross meter boundaries */
+
+		dur = map->metric_at (BBT_Argument (bbt_start)).meter().bbt_delta (bbt_end, bbt_start);
 	}
 
 	std::stringstream str;
@@ -1984,7 +1986,9 @@ LaunchKey4::loop_end_move (int step)
 		BBT_Time bbt_start = map->bbt_at (l->start());
 		BBT_Time bbt_end = map->bbt_at (end);
 
-		dur = bbt_delta (bbt_end, bbt_start);
+		/* XXX this is not correct since start/end may cross meter boundaries */
+
+		dur = map->metric_at (BBT_Argument (bbt_start)).meter().bbt_delta (bbt_end, bbt_start);
 	}
 
 	std::stringstream str;
