@@ -302,6 +302,7 @@ class LIBTEMPORAL_API Meter {
 		return *this;
 	}
 
+	BBT_Offset bbt_delta (BBT_Time const & later, BBT_Time const &earlier) const;
 	BBT_Time bbt_add (BBT_Time const & bbt, BBT_Offset const & add) const;
 	BBT_Time bbt_subtract (BBT_Time const & bbt, BBT_Offset const & sub) const;
 	BBT_Time round_to_bar (BBT_Time const &) const;
