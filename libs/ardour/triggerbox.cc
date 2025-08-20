@@ -960,7 +960,9 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 			case Gate:
 			case Repeat:
 				if (_box.active_scene() >= 0) {
+#ifndef NDEBUG
 					std::cerr << "should not happen, cue launching but launch_style() said " << enum_2_string (launch_style()) << std::endl;
+#endif
 				} else {
 					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 gate/repeat => %3\n", index(), enum_2_string (Running), enum_2_string (WaitingToStop)));
 					stop_quantized ();
@@ -3168,7 +3170,10 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 	while (iter < rtmb->size() && !_playout) {
 
 		RTMidiBufferBeats::Item const & item ((*rtmb)[iter]);
+#ifndef NDEBUG
+#warning paul, please remove these debug messages
 		std::cerr << "Looking at event #" << iter << " @ " << item.timestamp << " transition was " << transition_beats << " rs " << region_start << std::endl;
+#endif
 
 		/* Event times are in beats, relative to start of source
 		 * file. We need to conv+ert to region-relative time, and then
@@ -3181,24 +3186,32 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		/* check that the event is within the bounds for this run() call */
 
 		if (maybe_last_event_timeline_beats < start_beats) {
+#ifndef NDEBUG
 			std::cerr << "out1\n";
+#endif
 			break;
 		}
 
 		if (iter >= last_event_index) {
 			iter = rtmb->size();
+#ifndef NDEBUG
 			std::cerr << "out2\n";
+#endif
 			break;
 		}
 
 		if (maybe_last_event_timeline_beats > final_beat) {
 			iter = rtmb->size();
+#ifndef NDEBUG
 			std::cerr << "out3\n";
+#endif
 			break;
 		}
 
 		if (maybe_last_event_timeline_beats >= end_beats) {
+#ifndef NDEBUG
 			std::cerr << "out4\n";
+#endif
 			break;
 		}
 
@@ -3206,7 +3219,9 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		const samplepos_t timeline_samples = tmap->sample_at (maybe_last_event_timeline_beats);
 
+#ifndef NDEBUG
 		std::cerr << "Plays at " << timeline_samples << std::endl;
+#endif
 
 		uint32_t evsize;
 		uint8_t const * buf = rtmb->bytes (item, evsize);
@@ -3841,7 +3856,9 @@ TriggerBox::input_port_check ()
 		return;
 	}
 
+#ifndef NDEBUG
 	std::cerr << "Reconnect to "  << Config->get_default_trigger_input_port() << std::endl;
+#endif
 	session->trigger_input_port()->connect (Config->get_default_trigger_input_port());
 }
 
@@ -5192,7 +5209,9 @@ TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		if (nframes == 0 && _currently_playing->state() == Trigger::Stopped) {
 			if (!_stop_all && !_currently_playing->explicitly_stopped()) {
+#ifndef NDEBUG
 				std::cerr << "stopped, do handle thing\n";
+#endif
 				(void) handle_stopped_trigger (bufs, dest_offset);
 			} else {
 				_currently_playing = 0;
