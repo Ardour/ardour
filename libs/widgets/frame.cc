@@ -65,6 +65,13 @@ Frame::~Frame ()
 }
 
 void
+Frame::child_destroyed (GtkWidget*, gpointer data)
+{
+	Frame* self = static_cast<Frame*>(data);
+	self->_w = 0;
+}
+
+void
 Frame::on_add (Widget* w)
 {
 	if (_w || !w) {
@@ -73,6 +80,7 @@ Frame::on_add (Widget* w)
 
 	Bin::on_add (w);
 	_w = w;
+	g_signal_connect (w->gobj(), "destroy", G_CALLBACK(child_destroyed), this);
 	queue_resize ();
 }
 
