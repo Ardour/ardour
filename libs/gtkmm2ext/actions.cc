@@ -564,6 +564,10 @@ ActionManager::get_all_actions (std::vector<std::string>& paths,
 void
 ActionManager::drop_action_group (Glib::RefPtr<ActionGroup> group)
 {
+	if (!group) {
+		return;
+	}
+
 	/* Although ActionGroups are refcnt'ed we hold a reference on the
 	   actions they contain in our global actions map. So an action group, if
 	   to be deleted fully, needs to be passed in here first so that we can
