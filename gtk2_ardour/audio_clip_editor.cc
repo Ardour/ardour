@@ -160,7 +160,7 @@ AudioClipEditor::pack_outer (Gtk::Box& box)
 	if (with_transport_controls) {
 		box.pack_start (play_box, false, false);
 	}
-	std::cerr << "pack up rec box\n";
+
 	box.pack_start (rec_box, false, false);
 	box.pack_start (follow_playhead_button, false, false);
 }
