@@ -255,10 +255,7 @@ struct mcpStripableSorter
 {
 	bool operator () (const std::shared_ptr<Stripable> & a, const std::shared_ptr<Stripable> & b) const
 	{
-		const PresentationInfo::Flag a_flag = a->presentation_info().flags ();
-		const PresentationInfo::Flag b_flag = b->presentation_info().flags ();
-
-		if (a_flag == b_flag) {
+		if (!(a->is_monitor() || b->is_monitor() || a->is_master() || b->is_master())) {
 			return a->presentation_info().order() < b->presentation_info().order();
 		}
 
