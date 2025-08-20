@@ -35,6 +35,7 @@
 #include "cue_editor.h"
 #include "editor_drag.h"
 #include "gui_thread.h"
+#include "public_editor.h"
 #include "timers.h"
 #include "ui_config.h"
 
@@ -562,7 +563,7 @@ CueEditor::loop_button_press (GdkEventButton* ev)
 	if (_session->get_play_loop()) {
 		_session->request_play_loop (false);
 	} else {
-		set_loop_range (_region->position(), _region->end(), _("loop region"));
+		PublicEditor::instance().set_loop_range (_region->position(), _region->end(), _("loop region"));
 		_session->request_play_loop (true);
 	}
 

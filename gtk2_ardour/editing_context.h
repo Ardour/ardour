@@ -481,8 +481,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	virtual void update_grid ();
 
-	void set_loop_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd);
-
 	virtual bool allow_trim_cursors () const;
 	virtual void make_a_region() {}
 
