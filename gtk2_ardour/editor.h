@@ -1413,6 +1413,7 @@ private:
 
 	void set_loop_from_region (bool play);
 
+	void set_loop_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd);
 	void set_punch_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd);
 
 	void add_tempo_from_playhead_cursor ();
