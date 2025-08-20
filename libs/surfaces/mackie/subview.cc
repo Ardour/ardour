@@ -880,38 +880,45 @@ void TrackViewSubview::setup_vpot(
 		}
 		break;
 	case 2:
-		pc = _subview_stripable->solo_isolate_control ();
-		if (pc) {
-			pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&TrackViewSubview::notify_change, this, SoloIsolateAutomation, global_strip_position, false), ui_context());
-			notify_change (SoloIsolateAutomation, global_strip_position, true);
-			pending_display[0] = "S-Iso";
+		if (!_subview_stripable->is_master()) {
+			pc = _subview_stripable->solo_isolate_control ();
+			if (pc) {
+				pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&TrackViewSubview::notify_change, this, SoloIsolateAutomation, global_strip_position, false), ui_context());
+				notify_change (SoloIsolateAutomation, global_strip_position, true);
+				pending_display[0] = "S-Iso";
+			}
 		}
 		break;
 	case 3:
-		pc = _subview_stripable->solo_safe_control ();
-		if (pc) {
-			pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&TrackViewSubview::notify_change, this, SoloSafeAutomation, global_strip_position, false), ui_context());
-			notify_change (SoloSafeAutomation, global_strip_position, true);
-			pending_display[0] = "S-Safe";
+		if (!_subview_stripable->is_master()) {
+			pc = _subview_stripable->solo_safe_control ();
+			if (pc) {
+				pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&TrackViewSubview::notify_change, this, SoloSafeAutomation, global_strip_position, false), ui_context());
+				notify_change (SoloSafeAutomation, global_strip_position, true);
+				pending_display[0] = "S-Safe";
+			}
 		}
 		break;
 	case 4:
-		pc = _subview_stripable->phase_control();
-		if (pc) {
-			pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&TrackViewSubview::notify_change, this, PhaseAutomation, global_strip_position, false), ui_context());
-			notify_change (PhaseAutomation, global_strip_position, true);
-			pending_display[0] = "Phase";
+	if (!_subview_stripable->is_master()) {
+			pc = _subview_stripable->phase_control();
+			if (pc) {
+				pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&TrackViewSubview::notify_change, this, PhaseAutomation, global_strip_position, false), ui_context());
+				notify_change (PhaseAutomation, global_strip_position, true);
+				pending_display[0] = "Phase";
+			}
 		}
 		break;
 	}
 
 	if (!pc) {
+		vpot->set_control (std::shared_ptr<AutomationControl>());
 		pending_display[0] = std::string();
 		pending_display[1] = std::string();
 		return;
+	} else {
+		vpot->set_control (pc);
 	}
-
-	vpot->set_control (pc);
 }
 
 void
