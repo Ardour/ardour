@@ -4001,18 +4001,6 @@ MidiView::get_modifier_name () const
 	return "editable region";
 }
 
-uint32_t
-MidiView::get_fill_color() const
-{
-	std::string mod_name = get_modifier_name();
-
-	if (mod_name.empty ()) {
-		return get_fill_color();
-	} else {
-		return UIConfiguration::instance().color_mod (get_fill_color(), mod_name);
-	}
-}
-
 void
 MidiView::midi_channel_mode_changed ()
 {
