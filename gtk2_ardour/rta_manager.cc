@@ -195,6 +195,25 @@ RTAManager::remove (std::shared_ptr<ARDOUR::Route> route)
 	}
 }
 
+void
+RTAManager::clear ()
+{
+	std::list<RTA>::iterator i = _rta.begin ();
+	while (i != _rta.end ()) {
+		std::shared_ptr<ARDOUR::Route> route = i->route ();
+		if (route->is_master ()) {
+			++i;
+			continue;
+		}
+		i = _rta.erase (i);
+		route->gui_changed ("rta", this); /* EMIT SIGNAL */
+	}
+
+	if (_rta.empty ()) {
+		SignalReady (); /* EMIT SIGNAL */
+	}
+}
+
 bool
 RTAManager::attached (std::shared_ptr<ARDOUR::Route> route) const
 {

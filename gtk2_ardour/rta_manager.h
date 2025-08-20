@@ -85,6 +85,7 @@ public:
 	void attach (std::shared_ptr<ARDOUR::Route>);
 	void remove (std::shared_ptr<ARDOUR::Route>);
 	bool attached (std::shared_ptr<ARDOUR::Route>) const;
+	void clear ();
 
 	std::list<RTA> const& rta () const
 	{
