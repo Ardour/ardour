@@ -626,10 +626,18 @@ void
 ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 {
 	if (tabbables_table.get_parent ()) {
-		editor->tab_btn_box ().remove ();
-		mixer->tab_btn_box ().remove ();
-		recorder->tab_btn_box ().remove ();
-		trigger_page->tab_btn_box ().remove ();
+		if (editor) {
+			editor->tab_btn_box ().remove ();
+		}
+		if (mixer) {
+			mixer->tab_btn_box ().remove ();
+		}
+		if (recorder) {
+			recorder->tab_btn_box ().remove ();
+		}
+		if (trigger_page) {
+			trigger_page->tab_btn_box ().remove ();
+		}
 	}
 
 	//pack the tabbables selector in this tab, and set button sensitivity appropriately
