@@ -927,7 +927,7 @@ void
 ApplicationBar::parameter_changed (std::string p)
 {
 	if (p == "external-sync") {
-		if (!session || !_session->config.get_external_sync()) {
+		if (!_session || !_session->config.get_external_sync()) {
 			_sync_button.set_text (S_("SyncSource|Int."));
 		} else {
 			_sync_button.set_text (TransportMasterManager::instance().current()->display_name());
