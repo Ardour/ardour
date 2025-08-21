@@ -1396,7 +1396,13 @@ GtkCanvas::on_touch_end_event (GdkEventTouch *ev)
 bool
 GtkCanvas::on_enter_notify_event (GdkEventCrossing* ev)
 {
-	pick_current_item (Duple (ev->x, ev->y), ev->state);
+	if (ev->mode == GDK_CROSSING_GTK_UNGRAB) {
+		int px, py;
+		get_pointer (px, py);
+		pick_current_item (Duple (px, py), ev->state);
+	} else {
+		pick_current_item (Duple (ev->x, ev->y), ev->state);
+	}
 	return true;
 }
 
