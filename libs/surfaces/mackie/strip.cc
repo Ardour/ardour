@@ -719,6 +719,7 @@ Strip::remove_units (std::string s) {
 		s = std::regex_replace (s, std::regex(" Hz$"), "");
 		s = std::regex_replace (s, std::regex(" dB$"), "");
 		s = std::regex_replace (s, std::regex(" ms$"), "");
+		s = std::regex_replace (s, std::regex(" °$"), "");
 
 		// convert seconds to milliseconds
 		if (s.rfind(" s") != string::npos) {
@@ -738,7 +739,7 @@ std::string
 Strip::format_parameter_for_display(
 		ARDOUR::ParameterDescriptor const& desc,
 		float val,
-		std::shared_ptr<ARDOUR::Stripable> stripable_for_non_mixbus_azimuth_automation,
+		std::shared_ptr<ARDOUR::Stripable> stripable_for_azimuth_automation,
 		bool& overwrite_screen_hold)
 {
 	std::string formatted_parameter_display;
@@ -762,18 +763,11 @@ Strip::format_parameter_for_display(
 		break;
 
 	case PanAzimuthAutomation:
-		if (Profile->get_mixbus()) {
-			// XXX no _stripable check?
-			snprintf (buf, sizeof (buf), "%2.1f", val);
-			formatted_parameter_display = buf;
-			overwrite_screen_hold = true;
-		} else {
-			if (stripable_for_non_mixbus_azimuth_automation) {
-				std::shared_ptr<AutomationControl> pa = stripable_for_non_mixbus_azimuth_automation->pan_azimuth_control();
-				if (pa) {
-					formatted_parameter_display = pa->get_user_string ();
-					overwrite_screen_hold = true;
-				}
+		if (stripable_for_azimuth_automation) {
+			std::shared_ptr<AutomationControl> pa = stripable_for_azimuth_automation->pan_azimuth_control();
+			if (pa) {
+				formatted_parameter_display = Profile->get_mixbus() ? remove_units(pa->get_user_string()) : pa->get_user_string();
+				overwrite_screen_hold = true;
 			}
 		}
 		break;

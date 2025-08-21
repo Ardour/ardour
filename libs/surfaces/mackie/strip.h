@@ -97,7 +97,7 @@ public:
 	static std::string format_parameter_for_display(
 		ARDOUR::ParameterDescriptor const& desc, 
 		float val, 
-		std::shared_ptr<ARDOUR::Stripable> stripable_for_non_mixbus_azimuth_automation, 
+		std::shared_ptr<ARDOUR::Stripable> stripable_for_azimuth_automation, 
 		bool& overwrite_screen_hold);
 
 	void zero ();
