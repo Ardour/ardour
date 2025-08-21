@@ -927,11 +927,12 @@ void
 ApplicationBar::parameter_changed (std::string p)
 {
 	if (p == "external-sync") {
-		if (!_session->config.get_external_sync()) {
+		if (!session || !_session->config.get_external_sync()) {
 			_sync_button.set_text (S_("SyncSource|Int."));
 		} else {
 			_sync_button.set_text (TransportMasterManager::instance().current()->display_name());
 		}
+		UI::instance()->set_tip (_sync_button, _("Enable/Disable external positional sync"));
 	} else if (p == "sync-source") {
 		if (_session) {
 			if (!_session->config.get_external_sync()) {
@@ -939,14 +940,15 @@ ApplicationBar::parameter_changed (std::string p)
 			} else {
 				_sync_button.set_text (TransportMasterManager::instance().current()->display_name());
 			}
+			if (_session->config.get_video_pullup() == 0.0f || TransportMasterManager::instance().current()->type() != Engine) {
+				UI::instance()->set_tip (_sync_button, _("Enable/Disable external positional sync"));
+			} else {
+				UI::instance()->set_tip (_sync_button, _("External sync is not possible: video pull up/down is set"));
+			}
 		} else {
 			/* changing sync source without a session is unlikely/impossible , except during startup */
 			_sync_button.set_text (TransportMasterManager::instance().current()->display_name());
-		}
-		if (_session->config.get_video_pullup() == 0.0f || TransportMasterManager::instance().current()->type() != Engine) {
-			UI::instance()->set_tip (_sync_button, _("Enable/Disable external positional sync"));
-		} else {
-			UI::instance()->set_tip (_sync_button, _("External sync is not possible: video pull up/down is set"));
+			UI::instance()->set_tip (_sync_button, X_("Waiting for session to load.."));
 		}
 	} else if (p == "show-mini-timeline") {
 		repack_transport_hbox ();
