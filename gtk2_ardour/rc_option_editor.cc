@@ -2984,12 +2984,20 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance/Size and Scale"), new FontScalingOptions ());
 #endif
 
-	HSliderOption* ds = new HSliderOption ("drag-sensitivity", _("Drag Sensitivity"),
+	HSliderOption* ds = new HSliderOption ("drag-sensitivity", _("Drag Deadzone"),
 	                                       sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_drag_sensitivity),
 	                                       sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_drag_sensitivity),
 	                                       1, 10, 1, 2);
 	ds->scale().set_digits (0);
+	ds->scale().set_draw_value(false);
+	ds->scale().add_mark(1,  Gtk::POS_TOP, _("Small"));
+	ds->scale().add_mark(5,  Gtk::POS_TOP, _("Larger"));
+	ds->scale().add_mark(10,  Gtk::POS_TOP, _("Huge"));
 	add_option (_("Appearance/Size and Scale"), ds);
+	Gtkmm2ext::UI::instance()->set_tip (ds->tip_widget(),
+	                                    _("This controls how far you need to move the mouse/pad before a drag operation begins.\n"
+	                                      "Larger values require more movement to start a drag, smaller values will make them begin "
+	                                      "after much less movement"));
 
 	add_option (_("Appearance/Colors"), new OptionEditorHeading (_("Colors")));
 	add_option (_("Appearance/Colors"), new ColorThemeManager);
