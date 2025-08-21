@@ -1105,8 +1105,12 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 
 		std::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 
+		const timepos_t np (capture_info.front()->start);
+		rx->set_tempo (Temporal::TempoMap::use()->tempo_at (np));
+		rx->set_meter (Temporal::TempoMap::use()->meter_at (np));
+
 		midi_region = std::dynamic_pointer_cast<MidiRegion> (rx);
-		midi_region->special_set_position (timepos_t (capture_info.front()->start));
+		midi_region->special_set_position (np);
 	}
 
 	catch (failed_constructor& err) {
@@ -1185,6 +1189,7 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 			if (preroll_off > 0) {
 				midi_region->trim_front (timepos_t ((*ci)->start - initial_capture + preroll_off));
 			}
+
 		}
 
 		catch (failed_constructor& err) {
@@ -1194,9 +1199,14 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 
 		if (time_domain() == Temporal::BeatTime) {
 			const timepos_t b ((*ci)->start + preroll_off);
+			midi_region->set_tempo (Temporal::TempoMap::use()->tempo_at (b.beats()));
+			midi_region->set_meter (Temporal::TempoMap::use()->meter_at (b.beats()));
 			pl->add_region (midi_region, timepos_t (b.beats()), 1, rmode == RecNonLayered);
 		} else {
-			pl->add_region (midi_region, timepos_t ((*ci)->start + preroll_off), 1, rmode == RecNonLayered);
+			const timepos_t p ((*ci)->start + preroll_off);
+			midi_region->set_tempo (Temporal::TempoMap::use()->tempo_at (p));
+			midi_region->set_meter (Temporal::TempoMap::use()->meter_at (p));
+			pl->add_region (midi_region, p, 1, rmode == RecNonLayered);
 		}
 	}
 
@@ -1241,8 +1251,12 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 		rx->set_automatic (true);
 		rx->set_whole_file (true);
 
+		const timepos_t np (afs->natural_position());
+		rx->set_tempo (Temporal::TempoMap::use()->tempo_at (np));
+		rx->set_meter (Temporal::TempoMap::use()->meter_at (np));
+
 		region = std::dynamic_pointer_cast<AudioRegion> (rx);
-		region->special_set_position (timepos_t (afs->natural_position()));
+		region->special_set_position (np);
 	}
 
 
@@ -1298,7 +1312,10 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 			continue; /* XXX is this OK? */
 		}
 
-		pl->add_region (region, timepos_t ((*ci)->start + preroll_off), 1, RecNonLayered == rmode);
+		const timepos_t p ((*ci)->start + preroll_off);
+		region->set_tempo (Temporal::TempoMap::use()->tempo_at (p));
+		region->set_meter (Temporal::TempoMap::use()->meter_at (p));
+		pl->add_region (region, p, 1, RecNonLayered == rmode);
 		pl->set_layer (region, DBL_MAX);
 
 		buffer_position += (*ci)->samples;
