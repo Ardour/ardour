@@ -81,6 +81,8 @@ private:
 	int  _alloc_y0;
 	bool _boxy;
 	bool _draw;
+
+	gulong _destroy_connection;
 };
 
 } // namespace ArdourWidgets
