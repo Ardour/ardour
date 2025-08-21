@@ -119,25 +119,36 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 		/* single bit indicates that the group order is set */
 		OrderSet = 0x400,
 
-#ifdef MIXBUS
+		/* Mixbus specific */
 		MixbusEditorHidden = 0x800,
 		Mixbus = 0x1000,
-#endif
+
 		/* bus type for monitor mixes */
 		FoldbackBus = 0x2000,
 
 		/* has TriggerBox, show on TriggerUI page */
 		TriggerTrack = 0x4000,
 
+#ifndef VBM
 		/* bus is the surround master */
 		SurroundMaster = 0x8000,
-
-		/* special mask to delect out "state" bits */
-#ifdef MIXBUS
-		StatusMask = (Hidden | MixbusEditorHidden | TriggerTrack),
 #else
-		StatusMask = (Hidden | TriggerTrack),
+		SurroundMaster = 0, // for compatibility
 #endif
+
+		/* VBM */
+		V2Program   = 0x4000,  // deprecated (conflicts with TriggerTrack)
+		V2MixMinus  = 0x8000,  // deprecated (conflicts with SurroundMaster)
+		VBMProgram  = 0x10000,
+		VBMMixMinus = 0x20000,
+#ifdef VBM
+		VBMAny      = 0x3c000,
+#else
+		VBMAny      = 0x30000,
+#endif
+
+		/* special mask to detect out "state" bits */
+		StatusMask = (Hidden | MixbusEditorHidden | TriggerTrack),
 
 		/* dedicated [output] busses */
 		MainBus = (MasterOut|MonitorOut|FoldbackBus|SurroundMaster),
@@ -145,8 +156,8 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 		/* These can exist only once and require special attention to be removed */
 		Singleton = (MasterOut|MonitorOut|SurroundMaster),
 
-		/* special mask to delect select type bits */
-		TypeMask = (AudioBus|AudioTrack|MidiTrack|MidiBus|VCA|MasterOut|MonitorOut|Auditioner|FoldbackBus|SurroundMaster)
+		/* special mask to detect select type bits */
+		TypeMask = (AudioBus|AudioTrack|MidiTrack|MidiBus|Mixbus|VCA|MasterOut|MonitorOut|Auditioner|FoldbackBus|SurroundMaster|VBMAny)
 	};
 
 	static const Flag AllStripables; /* mask to use for any route or VCA (but not auditioner) */
