@@ -132,6 +132,7 @@ class MackieControlProtocol
 	bool is_audio_track (std::shared_ptr<ARDOUR::Stripable>) const;
 	bool is_midi_track (std::shared_ptr<ARDOUR::Stripable>) const;
 	bool is_trigger_track (std::shared_ptr<ARDOUR::Stripable>) const;
+	bool is_bus (std::shared_ptr<ARDOUR::Stripable>) const;
 	bool is_foldback_bus (std::shared_ptr<ARDOUR::Stripable>) const;
 	bool is_vca (std::shared_ptr<ARDOUR::Stripable>) const;
 	bool has_instrument (std::shared_ptr<ARDOUR::Stripable>) const;

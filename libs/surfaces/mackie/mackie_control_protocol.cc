@@ -2381,6 +2381,12 @@ MackieControlProtocol::is_trigger_track (std::shared_ptr<Stripable> r) const
 }
 
 bool
+MackieControlProtocol::is_bus (std::shared_ptr<Stripable> r) const
+{
+	return ((r)->presentation_info ().flags () & PresentationInfo::Bus);
+}
+
+bool
 MackieControlProtocol::is_foldback_bus (std::shared_ptr<Stripable> r) const
 {
 	return ((r)->presentation_info ().flags () & PresentationInfo::FoldbackBus);
