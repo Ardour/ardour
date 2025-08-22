@@ -255,19 +255,27 @@ struct mcpStripableSorter
 {
 	bool operator () (const std::shared_ptr<Stripable> & a, const std::shared_ptr<Stripable> & b) const
 	{
-		if (!(a->is_monitor() || b->is_monitor() || a->is_master() || b->is_master())) {
+		if (!(a->is_monitor() || b->is_monitor() ||
+		      a->is_master() || b->is_master() ||
+		      a->is_foldbackbus() || b->is_foldbackbus())) {
 			return a->presentation_info().order() < b->presentation_info().order();
 		}
 
 		int cmp_a = 0;
 		int cmp_b = 0;
 
-		if (a->is_master ())         { cmp_a = 1; }
-		if (b->is_master ())         { cmp_b = 1; }
-		if (a->is_monitor ())         { cmp_a = 2; }
-		if (b->is_monitor ())         { cmp_b = 2; }
+		if (a->is_foldbackbus()) { cmp_a = 1; }
+		if (b->is_foldbackbus()) { cmp_b = 1; }
+		if (a->is_master ())     { cmp_a = 2; }
+		if (b->is_master ())     { cmp_b = 2; }
+		if (a->is_monitor ())    { cmp_a = 3; }
+		if (b->is_monitor ())    { cmp_b = 3; }
 
-		return cmp_a < cmp_b;
+		if (cmp_a == cmp_b) {
+			return a->presentation_info().order() < b->presentation_info().order();
+		} else {
+			return cmp_a < cmp_b;
+		}
 	}
 };
 
@@ -279,7 +287,7 @@ MackieControlProtocol::get_sorted_stripables()
 	// fetch all stripables
 	StripableList stripables;
 
-	session->get_stripables (stripables);
+	session->get_stripables (stripables, PresentationInfo::AllStripables);
 
 	// sort in presentation order, and exclude master, control and hidden stripables
 	// and any stripables that are already set.
