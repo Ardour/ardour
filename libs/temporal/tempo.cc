@@ -360,50 +360,32 @@ Meter::bbt_delta (BBT_Time const & later, BBT_Time const & earlier) const
 
 	assert (later > earlier);
 
-#if 0 // more efficient but broken
+#if 1 // more efficient than iterative method below
 
 	BBT_Offset d;
 	BBT_Time a (earlier);
 	BBT_Time b (later);
 
-	if (a.ticks == ticks_per_grid()) {
-
-		/* Next tick is the next beat */
-
-		a.beats++;
-		d.beats++;
-
+	if (a.ticks > b.ticks) {
+		d.ticks = b.ticks + (ticks_per_grid() - a.ticks);
 		if (a.beats == _divisions_per_bar) {
 			a.beats = 1;
 			a.bars++;
-			d.bars++;
+		} else {
+			a.beats++;
 		}
 	} else {
-
-		/* tick delta is just the remainder to the next beat */
-
-		d.ticks = ticks_per_grid() - earlier.ticks;
+		d.ticks = b.ticks - a.ticks;
 	}
 
-	if (a.beats == _divisions_per_bar) {
-
-		/* next beat is the next bar */
-
-
-		a.beats = 1;
+	if (a.beats > b.beats) {
+		d.beats = b.beats + (_divisions_per_bar - a.beats);
 		a.bars++;
-		d.bars++;
-
 	} else {
-
-		/* beat delta is just the remainder to the next bar */
-
-		d.beats = _divisions_per_bar - earlier.beats;
+		d.beats = b.beats - a.beats;
 	}
 
-	/* count bars */
-
-	d.bars = b.bars - a.bars;
+	d.bars  = b.bars - a.bars;
 
 	return d;
 
