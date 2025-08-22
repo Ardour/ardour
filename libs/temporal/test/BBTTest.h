@@ -10,6 +10,7 @@ class BBTTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(multiplyTest);
 	CPPUNIT_TEST(convertTest);
 	CPPUNIT_TEST(roundTest);
+	CPPUNIT_TEST(deltaTest);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -19,4 +20,5 @@ public:
 	void multiplyTest();
 	void convertTest();
 	void roundTest();
+	void deltaTest();
 };
