@@ -296,6 +296,8 @@ MackieControlProtocol::get_sorted_stripables()
 
 		std::shared_ptr<Stripable> s = *it;
 
+		if (s->is_auditioner()) { continue; }
+		if (s->is_hidden()) { continue; }
 		if (this->device_info().has_master_fader() && s->presentation_info().special()) {
 			continue;
 		}
@@ -308,50 +310,46 @@ MackieControlProtocol::get_sorted_stripables()
 
 		switch (_view_mode) {
 		case Mixer:
-			if ((!this->device_info().has_master_fader() && (s == this->get_session().master_out() || s == this->get_session().monitor_out())) || !s->presentation_info().hidden()) {
-				sorted.push_back (s);
-			}
+			sorted.push_back (s);
 			break;
 		case AudioTracks:
-			if (is_audio_track(s) && !s->presentation_info().hidden()) {
+			if (is_audio_track(s)) {
 				sorted.push_back (s);
 			}
 			break;
 		case Busses:
-			if (Profile->get_mixbus()) {
 #ifdef MIXBUS
-				if (s->mixbus()) {
-					sorted.push_back (s);
-				}
-#endif
-			} else {
-				if (!is_track (s) && !is_vca (s) && !is_foldback_bus (s)  && !s->presentation_info().hidden()) {
-					sorted.push_back (s);
-				}
+			if (s->mixbus()) {
+				sorted.push_back (s);
 			}
+#else
+			if (is_bus(s)) {
+				sorted.push_back (s);
+			}
+#endif
 			break;
 		case MidiTracks:
-			if (is_midi_track(s) && !s->presentation_info().hidden()) {
+			if (is_midi_track(s)) {
 				sorted.push_back (s);
 			}
 			break;
 		case Auxes: // in ardour, for now aux and buss are same. for mixbus, "Busses" are mixbuses, "Auxes" are ardour buses
 #ifdef MIXBUS
-			if (!s->mixbus() && !is_track(s) && !is_vca (s) && !is_foldback_bus (s) && !s->presentation_info().hidden())
+			if (is_bus(s) && !s->mixbus())
 #else
-			if (!is_track (s) && !is_vca (s) && !is_foldback_bus (s) && !s->presentation_info().hidden())
+			if (is_bus(s))
 #endif
 			{
 				sorted.push_back (s);
 			}
 			break;
 		case Outputs:
-			if (is_foldback_bus (s) && !s->presentation_info().hidden()) {
+			if (is_foldback_bus (s)) {
 				sorted.push_back (s);
 			}
 			break;
 		case Selected: // For example: a group (this is USER)
-			if (s->is_selected() && !s->presentation_info().hidden()) {
+			if (s->is_selected()) {
 				sorted.push_back (s);
 			}
 			break;
@@ -361,7 +359,7 @@ MackieControlProtocol::get_sorted_stripables()
 			}
 			break;
 		case Inputs:
-			if (is_trigger_track (s) && !s->presentation_info().hidden()){
+			if (is_trigger_track (s)){
 				sorted.push_back (s);
 			}
 			break;
