@@ -2350,4 +2350,15 @@ ControlList::dump (ostream& o)
 	}
 }
 
+bool
+ControlList::has_event_at (Temporal::timepos_t const & pos) const
+{
+	const ControlEvent fake (pos, 0.);
+	EventList::const_iterator i = std::lower_bound (_events.begin(), _events.end(), &fake, time_comparator);
+	if ((i == _events.end()) || ((*i)->when != pos)) {
+			return false;
+	}
+	return true;
+}
+
 } // namespace Evoral

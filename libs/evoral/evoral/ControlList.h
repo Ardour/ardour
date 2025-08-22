@@ -213,6 +213,8 @@ public:
 	std::shared_ptr<ControlList> cut (Temporal::timepos_t const &, Temporal::timepos_t const &);
 	std::shared_ptr<ControlList> copy (Temporal::timepos_t const &, Temporal::timepos_t const &);
 
+	bool has_event_at (Temporal::timepos_t const &) const;
+
 	/** Remove all events in the given time range from this list.
 	 *
 	 * @param start start of range (inclusive) in audio samples
