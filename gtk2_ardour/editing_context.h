@@ -809,7 +809,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	void center_screen_internal (samplepos_t, float);
 
-	virtual void automation_create_point_at_edit_point() {}
+	virtual void automation_create_point_at_edit_point(bool with_guard_points) {}
 	virtual void automation_raise_points () {}
 	virtual void automation_lower_points () {};
 	virtual void automation_move_points_later () {};

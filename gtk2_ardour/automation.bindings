@@ -1,6 +1,7 @@
 <Bindings name="Automation">
   <Press>
      <Binding key="Return" action="Automation/create-point"/>
+     <Binding key="Secondary-Return" action="Automation/create-point-with-guards"/>
      <Binding key="Right" action="Automation/move-points-later"/>
      <Binding key="Left" action="Automation/move-points-earlier"/>
      <Binding key="Up" action="Automation/raise-points"/>

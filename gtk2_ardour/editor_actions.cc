@@ -1333,7 +1333,7 @@ Editor::register_region_actions ()
 }
 
 void
-Editor::automation_create_point_at_edit_point ()
+Editor::automation_create_point_at_edit_point (bool with_guard_points)
 {
 	AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (entered_track);
 	if (!atv) {
@@ -1347,7 +1347,12 @@ Editor::automation_create_point_at_edit_point ()
 	event.button.button = 1;
 	event.button.state = 0;
 
-	atv->line()->add (atv->control(), &event, where, atv->line()->the_list()->eval (where), true, true);
+	if (atv->line()->the_list()->has_event_at (where)) {
+		atv->line()->begin_edit();
+	} else {
+		atv->line()->add (atv->control(), &event, where, atv->line()->the_list()->eval (where), with_guard_points, true);
+
+	}
 }
 
 void

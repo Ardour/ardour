@@ -1789,7 +1789,7 @@ AutomationLine::add (std::shared_ptr<AutomationControl> control, GdkEvent* event
 	std::list<Selectable*> results;
 
 	if (from_kbd) {
-		entry_required_post_add = true;
+		entry_required_post_add = false;
 	}
 
 	if (alist->editor_add (when, y, with_guard_points)) {
