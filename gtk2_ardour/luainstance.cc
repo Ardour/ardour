@@ -54,6 +54,7 @@
 #include "region_view.h"
 #include "processor_box.h"
 #include "time_axis_view.h"
+#include "midi_time_axis.h"
 #include "time_axis_view_item.h"
 #include "selection.h"
 #include "script_selector.h"
@@ -811,11 +812,16 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.endClass ()
 
 		.deriveClass <TimeAxisView, AxisView> ("TimeAxisView")
+		.addCast<MidiTimeAxisView> ("to_midi_time_axis_view")
 		.addFunction ("order", &TimeAxisView::order)
 		.addFunction ("y_position", &TimeAxisView::y_position)
 		.addFunction ("effective_height", &TimeAxisView::effective_height)
 		.addFunction ("current_height", &TimeAxisView::current_height)
 		.addFunction ("set_height", &TimeAxisView::set_height)
+		.endClass ()
+
+		.deriveClass <MidiTimeAxisView, TimeAxisView> ("MidiTimeAxisView")
+		.addFunction ("add_region", &MidiTimeAxisView::add_region)
 		.endClass ()
 
 		.deriveClass <StripableTimeAxisView, TimeAxisView> ("StripableTimeAxisView")
@@ -825,6 +831,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.endClass ()
 
 		.deriveClass <TimeAxisViewItem, Selectable> ("TimeAxisViewItem")
+		.addFunction ("get_time_axis_view", &TimeAxisViewItem::get_time_axis_view)
 		.endClass ()
 
 		.deriveClass <RegionView, TimeAxisViewItem> ("RegionView")

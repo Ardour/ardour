@@ -238,6 +238,7 @@ CLASSINFO(Selectable);
 CLASSINFO(Selection);
 CLASSINFO(TimeAxisView);
 CLASSINFO(TimeAxisViewItem);
+CLASSINFO(MidiTimeAxisView);
 CLASSINFO(TimeSelection);
 CLASSINFO(TrackSelection);
 CLASSINFO(TrackViewList);
