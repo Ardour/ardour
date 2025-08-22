@@ -287,6 +287,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 		const int r = i % 2;
 		const int c = col + i / 2;
 		_table.attach (_action_script_call_btn[i], c, c + 1, r, r + 1, FILL, SHRINK, 1, vpadding);
+		_action_script_call_btn[i].set_no_show_all ();
 	}
 	col += MAX_LUA_ACTION_BUTTONS / 2;
 
@@ -483,7 +484,6 @@ ApplicationBar::ui_actions_ready ()
 			_action_script_call_btn[i].set_visual_state (Gtkmm2ext::VisualState (_action_script_call_btn[i].visual_state() | Gtkmm2ext::Insensitive));
 		}
 		_action_script_call_btn[i].set_sizing_text ("88");
-		_action_script_call_btn[i].set_no_show_all ();
 	}
 
 	if (_session && _have_layout) {
