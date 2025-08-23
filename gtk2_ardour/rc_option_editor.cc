@@ -2433,6 +2433,19 @@ RCOptionEditor::RCOptionEditor ()
 		     0, 1000, 1, 20
 		     ));
 
+	add_option (_("General"), new OptionEditorHeading (_("Selection")));
+
+	bo = new BoolOption (
+			"implicit-selection-op-groups",
+			_("Group operations on selected tracks"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_implicit_selection_op_groups),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_implicit_selection_op_groups)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> all selected tracks are assumed to be in a group. Operations like toggling solo, mute or changing gain are synchronized."));
+
+	add_option (_("General"), bo);
+
 	add_option (_("General"), new OptionEditorHeading (_("Import")));
 
 	add_option (_("General"),
