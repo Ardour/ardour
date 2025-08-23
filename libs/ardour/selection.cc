@@ -654,7 +654,7 @@ CoreSelection::get_stripables_for_op (StripableList& sl, std::shared_ptr<Stripab
 
 	} else {
 
-		if (target->is_selected()) {
+		if (target->is_selected() && Config->get_implicit_selection_op_groups ()) {
 
 			/* Use full selection */
 

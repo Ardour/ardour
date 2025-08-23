@@ -203,6 +203,7 @@ CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right"
 CONFIG_VARIABLE (bool, replicate_missing_region_channels, "replicate-missing-region-channels", true)
 CONFIG_VARIABLE (bool, hiding_groups_deactivates_groups, "deprecated-hiding-groups-deactivates-groups", false)  /*deprecated*/
 CONFIG_VARIABLE (bool, group_override_inverts, "group-override-inverts", true)
+CONFIG_VARIABLE (bool, implicit_selection_op_groups, "implicit-selection-op-groups", true)
 CONFIG_VARIABLE (bool, verify_remove_last_capture, "verify-remove-last-capture", true)
 CONFIG_VARIABLE (bool, save_history, "save-history", true)
 CONFIG_VARIABLE (int32_t, saved_history_depth, "save-history-depth", 20)
