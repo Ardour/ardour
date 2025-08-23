@@ -1106,9 +1106,10 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 
 		.addCFunction ("actionlist", &lua_actionlist)
 
-
 		.beginClass <UIConfiguration> ("UIConfiguration")
+		.addFunction ("set_modifier", (void (UIConfiguration::*)(std::string const&, std::string const&))&UIConfiguration::set_modifier)
 #undef  UI_CONFIG_VARIABLE
+
 #define UI_CONFIG_VARIABLE(Type,var,name,value) \
 		.addFunction ("get_" # var, &UIConfiguration::get_##var) \
 		.addFunction ("set_" # var, &UIConfiguration::set_##var) \

@@ -81,6 +81,7 @@ public:
 	void set_alias (std::string const& name, std::string const& alias);
 	void set_color (const std::string& name, Gtkmm2ext::Color);
 	void set_modifier (std::string const&, Gtkmm2ext::SVAModifier svam);
+	void set_modifier (std::string const& name, std::string const& mod_str);
 
 	Gtkmm2ext::Color quantized (Gtkmm2ext::Color) const;
 
