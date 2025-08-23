@@ -825,6 +825,13 @@ UIConfiguration::set_modifier (string const & name, SVAModifier svam)
 }
 
 void
+UIConfiguration::set_modifier (string const & name, string const & mod_str)
+{
+	SVAModifier svam (mod_str);
+	set_modifier (name, svam);
+}
+
+void
 UIConfiguration::load_rc_file (bool themechange, bool allow_own)
 {
 	string basename = ui_rc_file.get();
