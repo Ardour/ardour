@@ -1199,12 +1199,6 @@ CueEditor::set_track (std::shared_ptr<Track> t)
 void
 CueEditor::set_region (std::shared_ptr<Region> r)
 {
-	EC_LOCAL_TEMPO_SCOPE;
-
-	if (r == _region) {
-		return;
-	}
-
 	unset (false);
 
 	_region = r;
@@ -1456,8 +1450,6 @@ CueEditor::idle_data_captured ()
 void
 CueEditor::unset (bool trigger_too)
 {
-	EC_LOCAL_TEMPO_SCOPE;
-
 	if (_local_tempo_map) {
 		end_local_tempo_map ();
 	}
@@ -1465,6 +1457,7 @@ CueEditor::unset (bool trigger_too)
 	history_connection.disconnect();
 	_update_connection.disconnect();
 	object_connections.drop_connections ();
+	std::cerr << "CE:unset, oc now " << object_connections.size() << std::endl;
 	rec_blink_connection.disconnect ();
 	count_in_connection.disconnect ();
 	capture_connections.drop_connections ();
