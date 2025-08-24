@@ -111,7 +111,12 @@ RoutePropertiesBox::set_route (std::shared_ptr<Route> r)
 	if (r == _route) {
 		return;
 	}
-	assert (r);
+
+	if (!r) {
+		drop_route ();
+		return;
+	}
+
 	_route = r;
 	_route_connections.drop_connections ();
 
