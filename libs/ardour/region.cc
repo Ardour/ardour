@@ -1049,8 +1049,6 @@ Region::modify_front_unchecked (timepos_t const & npos, bool reset_fade)
 		source_zero = timepos_t (source_position().time_domain()); // its actually negative, but this will work for us
 	}
 
-	std::cerr << "source zero " << source_zero << std::endl;
-
 	if (new_position >= last) { /* can't trim it zero or negative length */
 		return;
 	}
