@@ -1384,7 +1384,7 @@ Editor::automation_lower_points ()
 {
 	PointSelection& points (selection->points);
 
-	if (points.empty()) {
+	if (points.size() != 1) {
 		return;
 	}
 
@@ -1398,11 +1398,8 @@ Editor::automation_lower_points ()
 
 	begin_reversible_command (_("automation event lower"));
 	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
-	atv->line()->the_list()->freeze ();
-	for (auto & p : points) {
-		atv->line()->the_list()->modify (p->model(), (*p->model())->when, max (0.0, (*p->model())->value - 0.1));
-	}
-	atv->line()->the_list()->thaw ();
+	ControlPoint* point (points.front());
+	atv->line()->the_list()->modify (point->model(), (*point->model())->when, max (0.0, (*point->model())->value - 0.1));
 	add_command (new MementoCommand<AutomationList>(atv->line()->memento_command_binder (), 0, &atv->line()->the_list()->get_state()));
 	commit_reversible_command ();
 }
@@ -1412,7 +1409,7 @@ Editor::automation_raise_points ()
 {
 	PointSelection& points (selection->points);
 
-	if (points.empty()) {
+	if (points.size() != 1) {
 		return;
 	}
 
@@ -1426,10 +1423,8 @@ Editor::automation_raise_points ()
 
 	begin_reversible_command (_("automation event raise"));
 	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
-	atv->line()->the_list()->freeze ();
-	for (auto & p : points) {
-		atv->line()->the_list()->modify (p->model(), (*p->model())->when, min (1.0, (*p->model())->value + 0.1));
-	}
+	ControlPoint* point (points.front());
+	atv->line()->the_list()->modify (point->model(), (*point->model())->when, max (0.0, (*point->model())->value + 0.1));
 	atv->line()->the_list()->thaw ();
 	add_command (new MementoCommand<AutomationList>(atv->line()->memento_command_binder (), 0, &atv->line()->the_list()->get_state()));
 	commit_reversible_command ();
@@ -1440,7 +1435,7 @@ Editor::automation_move_points_later ()
 {
 	PointSelection& points (selection->points);
 
-	if (points.empty()) {
+	if (points.size() != 1) {
 		return;
 	}
 
@@ -1454,13 +1449,10 @@ Editor::automation_move_points_later ()
 
 	begin_reversible_command (_("automation points move later"));
 	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
-	atv->line()->the_list()->freeze ();
-	for (auto & p : points) {
-		timepos_t model_time ((*p->model())->when);
-		model_time += Temporal::BBT_Offset (0, 1, 0);
-		atv->line()->the_list()->modify (p->model(), model_time, (*p->model())->value);
-	}
-	atv->line()->the_list()->thaw ();
+	ControlPoint* point (points.front());
+	timepos_t model_time ((*point->model())->when);
+	model_time += Temporal::BBT_Offset (0, 1, 0);
+	atv->line()->the_list()->modify (point->model(), model_time, (*point->model())->value);
 	add_command (new MementoCommand<AutomationList>(atv->line()->memento_command_binder (), 0, &atv->line()->the_list()->get_state()));
 	commit_reversible_command ();
 }
@@ -1470,7 +1462,7 @@ Editor::automation_move_points_earlier ()
 {
 	PointSelection& points (selection->points);
 
-	if (points.empty()) {
+	if (points.size() != 1) {
 		return;
 	}
 
@@ -1484,13 +1476,10 @@ Editor::automation_move_points_earlier ()
 
 	begin_reversible_command (_("automation points move earlier"));
 	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
-	atv->line()->the_list()->freeze ();
-	for (auto & p : points) {
-		timepos_t model_time ((*p->model())->when);
-		model_time = model_time.earlier (Temporal::BBT_Offset (0, 1, 0));
-		atv->line()->the_list()->modify (p->model(), model_time, (*p->model())->value);
-	}
-	atv->line()->the_list()->thaw ();
+	ControlPoint* point (points.front());
+	timepos_t model_time ((*point->model())->when);
+	model_time = model_time.earlier (Temporal::BBT_Offset (0, 1, 0));
+	atv->line()->the_list()->modify (point->model(), model_time, (*point->model())->value);
 	add_command (new MementoCommand<AutomationList>(atv->line()->memento_command_binder (), 0, &atv->line()->the_list()->get_state()));
 	commit_reversible_command ();
 }
