@@ -1457,7 +1457,6 @@ CueEditor::unset (bool trigger_too)
 	history_connection.disconnect();
 	_update_connection.disconnect();
 	object_connections.drop_connections ();
-	std::cerr << "CE:unset, oc now " << object_connections.size() << std::endl;
 	rec_blink_connection.disconnect ();
 	count_in_connection.disconnect ();
 	capture_connections.drop_connections ();
