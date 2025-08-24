@@ -541,11 +541,10 @@ CueEditor::bang_button_press (GdkEventButton* ev)
 bool
 CueEditor::play_button_press (GdkEventButton* ev)
 {
-	EC_LOCAL_TEMPO_SCOPE;
+	// EC_LOCAL_TEMPO_SCOPE;
 
 	if (_session && _region) {
-		_session->request_locate (_region->position().samples());
-		_session->request_roll ();
+		_session->request_locate (_region->position().samples(), true, MustRoll);
 	}
 
 	return true;
