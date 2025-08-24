@@ -44,6 +44,9 @@ private:
 	void on_map ();
 	void on_unmap ();
 
+	bool on_key_press_event (GdkEventKey*);
+	bool on_key_release_event (GdkEventKey*);
+
 	void session_going_away ();
 	void update_title ();
 	void on_theme_changed ();

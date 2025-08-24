@@ -136,6 +136,24 @@ RTAWindow::on_theme_changed ()
 	_darea.queue_draw ();
 }
 
+bool
+RTAWindow::on_key_press_event (GdkEventKey* ev)
+{
+	if (gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
+		return true;
+	}
+	return ARDOUR_UI_UTILS::relay_key_press (ev, this);
+}
+
+bool
+RTAWindow::on_key_release_event (GdkEventKey* ev)
+{
+	if (gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
+		return true;
+	}
+	return ARDOUR_UI_UTILS::relay_key_press (ev, this);
+}
+
 XMLNode&
 RTAWindow::get_state () const
 {
