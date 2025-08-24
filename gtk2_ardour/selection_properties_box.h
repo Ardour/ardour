@@ -58,6 +58,9 @@ private:
 	void track_mouse_mode ();
 	void delete_region_editor ();
 
+	void on_map ();
+	void on_unmap ();
+
 	TimeInfoBox*           _time_info_box;
 	RoutePropertiesBox*    _route_prop_box;
 	SlotPropertiesBox*     _slot_prop_box;

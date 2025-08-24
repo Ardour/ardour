@@ -122,6 +122,24 @@ SelectionPropertiesBox::track_mouse_mode ()
 }
 
 void
+SelectionPropertiesBox::on_map ()
+{
+	HBox::on_map ();
+	SelectionPropertiesBox::selection_changed ();
+}
+
+void
+SelectionPropertiesBox::on_unmap ()
+{
+	/* This also triggers when switching pages, or hiding the GUI
+	 * perhaps consider show/hide get_visible() instead.
+	 */
+	HBox::on_unmap ();
+	SelectionPropertiesBox::selection_changed ();
+	_route_prop_box->set_route (std::shared_ptr<Route>());
+}
+
+void
 SelectionPropertiesBox::delete_region_editor ()
 {
 	if (!_region_editor) {
@@ -140,7 +158,7 @@ SelectionPropertiesBox::delete_region_editor ()
 void
 SelectionPropertiesBox::selection_changed ()
 {
-	if (!_session || _session->inital_connect_or_deletion_in_progress ()) {
+	if (!_session || _session->inital_connect_or_deletion_in_progress () || !get_mapped ()) {
 		_time_info_box->hide ();
 		_route_prop_box->hide ();
 		_slot_prop_box->hide ();
