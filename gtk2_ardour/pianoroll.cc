@@ -1388,10 +1388,7 @@ Pianoroll::region_prop_change (PBD::PropertyChange const & what_changed)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (what_changed.contains (Properties::length)) {
-		std::shared_ptr<MidiRegion> mr = view->midi_region();
-		if (mr) {
-			set_region (mr);
-		}
+		/* XXX what, if anything, should we do here ? */
 	}
 }
 
