@@ -66,7 +66,7 @@ FaderWidget::set_tweaks (Tweaks t)
 bool
 FaderWidget::on_button_press_event (GdkEventButton* ev)
 {
-	if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS && (_tweaks & DoubleClickReset)) {
+	if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS && (_tweaks & DoubleClickReset) && !Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 		_adjustment.set_value (_default_value);
 		return true;
 	}
@@ -172,6 +172,11 @@ FaderWidget::on_button_release_event (GdkEventButton* ev)
 			if (ev_pos == _grab_start) {
 				/* no motion - just a click */
 				ev_pos = rint(ev_pos);
+
+				if ((_tweaks & DoubleClickReset) && Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+					/* switch to edit mode */
+					return true;
+				}
 
 				if (ev->state & Keyboard::TertiaryModifier) {
 					_adjustment.set_value (_default_value);
