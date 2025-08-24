@@ -747,6 +747,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API static void      update_thread_tempo_map() { _tempo_map_p = _map_mgr.reader(); }
 	LIBTEMPORAL_API static SharedPtr use() { assert (_tempo_map_p); return _tempo_map_p; }
 	LIBTEMPORAL_API static SharedPtr fetch() { assert (fetch_condition()); update_thread_tempo_map(); return _tempo_map_p; }
+	/* No fetch condition for this, to be used only in association with LocalTempoMapScope */
+	LIBTEMPORAL_API static SharedPtr global_fetch() { return _map_mgr.reader(); }
 
 	/* Used only by the ARDOUR::AudioEngine API to reset the process thread
 	 * tempo map only when it has changed.
