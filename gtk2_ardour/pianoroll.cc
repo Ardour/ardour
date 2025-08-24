@@ -560,14 +560,27 @@ Pianoroll::maybe_update ()
 
 	} else if (view->midi_region()) {
 
+		Temporal::TempoMap::SharedPtr global_tempo_map (Temporal::TempoMap::global_fetch());
+		Temporal::TempoMap::SharedPtr local_tempo_map (Temporal::TempoMap::use());
+
 		/* Timeline region editor */
 
 		if (!_session) {
 			return;
 		}
 
-		samplepos_t pos = _session->transport_sample();
-		samplepos_t spos = view->midi_region()->source_position().samples();
+		samplepos_t pos = _session->audible_sample();
+
+		/* find out the beat time represented by pos in the global map,
+		 * convert back to sample position with the local map
+		 */
+
+		pos = local_tempo_map->sample_at (global_tempo_map->quarters_at (timepos_t (pos)));
+
+		/* Do the same for the source position */
+
+		samplepos_t spos = local_tempo_map->sample_at (global_tempo_map->quarters_at (view->midi_region()->source_position()));
+
 		if (pos < spos) {
 			_playhead_cursor->set_position (0);
 		} else {
