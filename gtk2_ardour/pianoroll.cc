@@ -1424,7 +1424,7 @@ Pianoroll::set_trigger (TriggerReference & tref)
 	trigger->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_prop_change, this, _1), gui_context());
 	trigger->ArmChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_arm_change, this), gui_context());
 	_update_connection.disconnect ();
-	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &CueEditor::maybe_update));
+	_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &CueEditor::maybe_update));
 
 	if (trigger) {
 		set_region (trigger->the_region());
