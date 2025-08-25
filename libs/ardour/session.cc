@@ -138,6 +138,7 @@
 #include "ardour/vca.h"
 
 #ifdef VST3_SUPPORT
+#include "ardour/vst3_host.h"
 #include "ardour/vst3_plugin.h"
 #endif // VST3_SUPPORT
 
@@ -541,6 +542,10 @@ Session::Session (AudioEngine &eng,
 	_engine.set_session (this);
 	_engine.reset_timebase ();
 
+#ifdef VST3_SUPPORT
+	Steinberg::HostApplication::theHostContext ()->set_session (this);
+#endif
+
 	if (!mix_template.empty ()) {
 		/* ::create() unsets _is_new after creating the session.
 		 * But for templated sessions, the sample-rate is initially unset
@@ -909,6 +914,7 @@ Session::destroy ()
 	for (auto const& nfo : PluginManager::instance().vst3_plugin_info()) {
 		std::dynamic_pointer_cast<VST3PluginInfo> (nfo)->m.reset ();
 	}
+	Steinberg::HostApplication::theHostContext ()->set_session (0);
 #endif // VST3_SUPPORT
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
