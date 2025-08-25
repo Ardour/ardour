@@ -1396,10 +1396,12 @@ Editor::automation_lower_points ()
 
 	atv->line()->end_edit ();
 
+	std::shared_ptr<AutomationControl> c (atv->control());
+
 	begin_reversible_command (_("automation event lower"));
 	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
 	ControlPoint* point (points.front());
-	atv->line()->the_list()->modify (point->model(), (*point->model())->when, max (0.0, (*point->model())->value - 0.1));
+	atv->line()->the_list()->modify (point->model(), (*point->model())->when, c->interface_to_internal (max (0.0, c->internal_to_interface ((*point->model())->value) - 0.1)));
 	add_command (new MementoCommand<AutomationList>(atv->line()->memento_command_binder (), 0, &atv->line()->the_list()->get_state()));
 	commit_reversible_command ();
 }
@@ -1421,11 +1423,12 @@ Editor::automation_raise_points ()
 
 	atv->line()->end_edit ();
 
+	std::shared_ptr<AutomationControl> c (atv->control());
+
 	begin_reversible_command (_("automation event raise"));
 	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
 	ControlPoint* point (points.front());
-	atv->line()->the_list()->modify (point->model(), (*point->model())->when, max (0.0, (*point->model())->value + 0.1));
-	atv->line()->the_list()->thaw ();
+	atv->line()->the_list()->modify (point->model(), (*point->model())->when, c->interface_to_internal (min (1.0, c->internal_to_interface ((*point->model())->value) + 0.1)));
 	add_command (new MementoCommand<AutomationList>(atv->line()->memento_command_binder (), 0, &atv->line()->the_list()->get_state()));
 	commit_reversible_command ();
 }
