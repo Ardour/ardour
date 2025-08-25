@@ -864,8 +864,6 @@ MidiView::create_note_at (timepos_t const & source_relative_start, double y, Tem
 		return;
 	}
 
-	_midi_context.maybe_extend_note_range (new_note->note());
-
 	start_note_diff_command(_("add note"));
 	note_diff_add_note (new_note, true, false);
 	apply_note_diff();
