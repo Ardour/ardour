@@ -2,8 +2,8 @@ ardour {
 	["type"]    = "EditorAction",
 	name        = "Scala to MIDI Tuning",
 	license     = "MIT",
-	author      = "Ardour Team",
-	description = [[Read scala (.scl) tuning from a file, generate MIDI tuning standard (MTS) messages and send them to a MIDI port]]
+	author      = "Ardour Team / chmaha",
+	description = [[Set pitch, Read scala (.scl) tuning from a file, generate MIDI tuning standard (MTS) messages and send them to a MIDI port]]
 }
 
 function factory () return function ()
@@ -55,7 +55,7 @@ function factory () return function ()
 	--
 	function freq_to_mts (hz)
 		local note = math.floor (12. * log2 (hz / 440) + 69.0)
-		local freq = 440.0 * 2.0 ^ ((note - 69) / 12);
+		local freq = 440 * 2.0 ^ ((note - 69) / 12);
 		local cent = 1200.0 * log2 (hz / freq)
 		-- fixup rounding errors
 		if cent >= 99.99 then
@@ -69,6 +69,7 @@ function factory () return function ()
 	end
 
 	local dialog_options = {
+		{ type = "number", key = "tuning", title = "Tuning A4 (Hz)", min= 220.0, max = 880.0, default = 440.0, digits = 1, step = 0.1 },
 		{ type = "file", key = "file", title = "Select .scl file" },
 		{ type = "checkbox", key = "bulk", default = false, title = "Bulk Transfer (not realtime)" },
 		{ type = "dropdown", key = "tx", title = "MIDI SysEx Target", values = midi_targets () }
@@ -138,7 +139,7 @@ function factory () return function ()
 	-- TODO consider reading a .kbm file or make these configurable in the dialog
 	-- http://www.huygens-fokker.org/scala/help.htm#mappings
 	local ref_note = 69    -- Reference note for which frequency is given
-	local ref_freq = 440.0 -- Frequency to tune the above note to
+	local ref_freq = rv['tuning'] -- Frequency to tune the above note to
 	local ref_root = 60    -- root-note of the scale, note where the first entry of the scale is mapped to
 	local note_start = 0
 	local note_end = 127
