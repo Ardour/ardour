@@ -1276,6 +1276,7 @@ Strip::subview_mode_changed ()
 	switch (_surface->mcp().subview()->subview_mode()) {
 	case Subview::None:
 		set_vpot_parameter (_pan_mode);
+		notify_panner_azi_changed();
 		/* need to show strip name again */
 		show_stripable_name ();
 		if (!_stripable) {
