@@ -2864,7 +2864,7 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 		return kNotInitialized;
 	}
 	if (0 == strcmp (id, ContextInfo::kIndexMode)) {
-		value = ContextInfo::kFlatIndex;
+		value = ContextInfo::kPerTypeIndex;
 	} else if (0 == strcmp (id, ContextInfo::kType)) {
 		if (s->is_singleton ()) {
 			value = ContextInfo::kOut;
