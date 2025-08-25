@@ -2954,7 +2954,7 @@ VST3PI::getContextInfoString (Vst::TChar* string, int32 max_len, FIDString id)
 		}
 		utf8_to_tchar (string, ac->get_user_string (), max_len);
 	}
-	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<string> %1 = %2\n", id, tchar_to_utf8 (string)));
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoString<string> %1 = %2\n", id, tchar_to_utf8 (string)));
 	return kResultOk;
 }
 
