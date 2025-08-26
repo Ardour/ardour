@@ -1141,6 +1141,8 @@ void PluginSelect::setup_vpot(
 		return;
 	}
 
+	vpot->set_control (std::shared_ptr<AutomationControl>());
+
 	uint32_t virtual_strip_position = calculate_virtual_strip_position(global_strip_position);
 
 	std::shared_ptr<Processor> plugin = route->nth_plugin(virtual_strip_position);
