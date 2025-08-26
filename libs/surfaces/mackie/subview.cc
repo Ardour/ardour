@@ -377,6 +377,7 @@ void EQSubview::setup_vpot(
 		vpot->set_control (std::shared_ptr<AutomationControl>());
 		pending_display[0] = std::string();
 		pending_display[1] = std::string();
+		strip->surface()->write (vpot->set (0, false, Pot::wrap));
 		return;
 	}
 
@@ -400,6 +401,7 @@ void EQSubview::setup_vpot(
 		vpot->set_control (std::shared_ptr<AutomationControl>());
 		pending_display[0] = std::string();
 		pending_display[1] = std::string();
+		strip->surface()->write (vpot->set (0, false, Pot::wrap));
 	}
 
 	notify_change (std::weak_ptr<AutomationControl>(pc), global_strip_position, true);
@@ -562,6 +564,7 @@ void DynamicsSubview::setup_vpot(
 		vpot->set_control (std::shared_ptr<AutomationControl>());
 		pending_display[0] = std::string();
 		pending_display[1] = std::string();
+		strip->surface()->write (vpot->set (0, false, Pot::wrap));
 		return;
 	}
 
@@ -684,6 +687,7 @@ void SendsSubview::setup_vpot(
 		vpot->set_control (std::shared_ptr<AutomationControl>());
 		pending_display[0] = std::string();
 		pending_display[1] = std::string();
+		strip->surface()->write (vpot->set (0, false, Pot::wrap));
 		return;
 	}
 
@@ -850,6 +854,7 @@ void TrackViewSubview::setup_vpot(
 		vpot->set_control (std::shared_ptr<AutomationControl>());
 		pending_display[0] = std::string();
 		pending_display[1] = std::string();
+		strip->surface()->write (vpot->set (0, false, Pot::wrap));
 		return;
 	}
 
@@ -915,6 +920,7 @@ void TrackViewSubview::setup_vpot(
 		vpot->set_control (std::shared_ptr<AutomationControl>());
 		pending_display[0] = std::string();
 		pending_display[1] = std::string();
+		strip->surface()->write (vpot->set (0, false, Pot::wrap));
 		return;
 	} else {
 		vpot->set_control (pc);
@@ -1148,6 +1154,7 @@ void PluginSelect::setup_vpot(
 		pending_display[0] = "";
 		pending_display[1] = "";
 	}
+	strip->surface()->write (vpot->set (0, false, Pot::wrap));
 }
 
 void PluginSelect::handle_vselect_event(uint32_t global_strip_position,
@@ -1312,6 +1319,7 @@ void PluginEdit::setup_vpot(
 		vpot->set_control (std::shared_ptr<AutomationControl>());
 		pending_display[0] = std::string();
 		pending_display[1] = std::string();
+		strip->surface()->write (vpot->set (0, false, Pot::wrap));
 		return;
 	}
 

@@ -1280,7 +1280,7 @@ Strip::subview_mode_changed ()
 		/* need to show strip name again */
 		show_stripable_name ();
 		if (!_stripable) {
-			_surface->write (_vpot->set (0, true, Pot::wrap));
+			_surface->write (_vpot->set (0, false, Pot::wrap));
 			_surface->write (_fader->set_position (0.0));
 		}
 		notify_metering_state_changed ();
