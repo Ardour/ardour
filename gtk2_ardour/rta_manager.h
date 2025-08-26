@@ -120,6 +120,6 @@ private:
 	bool                                   _active;
 	ARDOUR::DSP::PerceptualAnalyzer::Speed _speed;
 	ARDOUR::DSP::PerceptualAnalyzer::Warp  _warp;
-
+	bool                                   _clearing;
 	sigc::connection _update_connection;
 };
