@@ -1162,11 +1162,6 @@ void PluginSelect::setup_vpot(
 void PluginSelect::handle_vselect_event(uint32_t global_strip_position,
 		std::shared_ptr<ARDOUR::Stripable> subview_stripable)
 {
-	/* adjust global_strip_position to make sure we're accessing the
-	 * correct controllable since we might be banked within the subview.
-	 */
-	global_strip_position += _current_bank;
-
 	/* PluginSelect mode: press selects the plugin shown on the strip's LCD */
 	if (!subview_stripable) {
 		return;
