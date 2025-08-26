@@ -1179,8 +1179,8 @@ void PluginSelect::handle_vselect_event(uint32_t global_strip_position,
 
 	std::shared_ptr<Processor> processor = route->nth_plugin(virtual_strip_position);
 	std::shared_ptr<PluginInsert> plugin = std::dynamic_pointer_cast<PluginInsert>(processor);
-	processor->ShowUI();
 	if (plugin) {
+		processor->ShowUI();
 		_context.set_state (std::shared_ptr<PluginEdit> (new PluginEdit (_context, std::weak_ptr<PluginInsert>(plugin))));
 	}
 }
