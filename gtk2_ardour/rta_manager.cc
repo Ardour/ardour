@@ -20,6 +20,7 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#include "pbd/unwind.h"
 #include "pbd/types_convert.h"
 
 #include "ardour/rt_safe_delete.h"
@@ -49,6 +50,7 @@ RTAManager::RTAManager ()
 	: _active (false)
 	, _speed (ARDOUR::DSP::PerceptualAnalyzer::Moderate)
 	, _warp (ARDOUR::DSP::PerceptualAnalyzer::Medium)
+	, _clearing (false)
 {
 }
 
@@ -187,6 +189,9 @@ RTAManager::attach (std::shared_ptr<ARDOUR::Route> route)
 void
 RTAManager::remove (std::shared_ptr<ARDOUR::Route> route)
 {
+	if (_clearing) {
+		return;
+	}
 	_rta.remove_if ([route] (RTAManager::RTA const& r) { return r.route () == route; });
 	route->gui_changed ("rta", this); /* EMIT SIGNAL */
 
@@ -198,6 +203,8 @@ RTAManager::remove (std::shared_ptr<ARDOUR::Route> route)
 void
 RTAManager::clear ()
 {
+	PBD::Unwinder<bool> uw (_clearing, true);
+
 	std::list<RTA>::iterator i = _rta.begin ();
 	while (i != _rta.end ()) {
 		std::shared_ptr<ARDOUR::Route> route = i->route ();
