@@ -39,6 +39,7 @@
 
 #include "canvas/rectangle.h"
 
+#include "boundary.h"
 #include "editing.h"
 #include "region_view.h"
 #include "midi_view_background.h"
@@ -78,26 +79,6 @@ class VelocityGhostRegion;
 class EditingContext;
 class PasteContext;
 class Drag;
-
-class StartBoundaryRect : public ArdourCanvas::Rectangle
-{
-  public:
-	StartBoundaryRect (ArdourCanvas::Item* p) : ArdourCanvas::Rectangle (p) {}
-
-	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
-	bool covers (ArdourCanvas::Duple const& point) const;
-	void compute_bounding_box () const;
-};
-
-class EndBoundaryRect : public ArdourCanvas::Rectangle
-{
-  public:
-	EndBoundaryRect (ArdourCanvas::Item* p) : ArdourCanvas::Rectangle (p) {}
-
-	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
-	bool covers (ArdourCanvas::Duple const& point) const;
-	void compute_bounding_box () const;
-};
 
 class MidiView : public virtual sigc::trackable, public LineMerger
 {

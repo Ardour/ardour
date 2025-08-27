@@ -118,12 +118,13 @@ class Pianoroll : public CueEditor
 	void set_session (ARDOUR::Session*);
 	bool allow_trim_cursors () const;
 
-	void shift_midi (Temporal::timepos_t const &, bool model);
+	void shift_contents (Temporal::timepos_t const &, bool model);
 	void make_a_region();
 
 	ARDOUR::InstrumentInfo* instrument_info() const;
 
 	void set_show_source (bool);
+	Temporal::timepos_t source_to_timeline (Temporal::timepos_t const & source_pos) const;
 
   protected:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,

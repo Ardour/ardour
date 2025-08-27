@@ -63,6 +63,7 @@
 #include "automation_time_axis.h"
 #include "bbt_marker_dialog.h"
 #include "control_point.h"
+#include "cue_editor.h"
 #include "debug.h"
 #include "editor.h"
 #include "editor_cursors.h"
@@ -6890,6 +6891,7 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 	if (UIConfiguration::instance().get_select_last_drawn_note_only()) {
 		_midi_view->clear_note_selection ();
 	}
+
 	_midi_view->create_note_at (timepos_t (start), _drag_rect->y0 (), length, ev->button.state, false);
 }
 
@@ -7570,12 +7572,13 @@ VelocityLineDrag::aborted (bool)
 	vd->end_line_drag (false);
 }
 
-ClipStartDrag::ClipStartDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Pianoroll& m)
-	: Drag (ec, &r, Temporal::BeatTime, nullptr, false)
-	, mce (m)
+ClipStartDrag::ClipStartDrag (CueEditor& cedit, ArdourCanvas::Rectangle& r)
+	: Drag (cedit, &r, Temporal::BeatTime, nullptr, false)
+	, ce (cedit)
 	, dragging_rect (&r)
 	, original_rect (r.get())
 {
+	DEBUG_TRACE (DEBUG::Drags, "start ClipStartDrag\n");
 }
 
 ClipStartDrag::~ClipStartDrag ()
@@ -7603,15 +7606,15 @@ ClipStartDrag::motion (GdkEvent* event, bool first_move)
 	double x, y;
 	gdk_event_get_coords (event, &x, &y);
 
-	if (x >= editing_context.timeline_origin()) {
+	if (x >= ce.timeline_origin()) {
 
 		/* Compute snapped position and adjust rect item if appropriate */
 
 		timepos_t pos = adjusted_current_time (event);
-		editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
-		double pix = editing_context.timeline_to_canvas (editing_context.time_to_pixel (pos));
+		ce.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+		double pix = ce.timeline_to_canvas (ce.time_to_pixel (pos));
 
-		if (pix >= editing_context.timeline_origin()) {
+		if (pix >= ce.timeline_origin()) {
 			r.x1 = dragging_rect->parent()->canvas_to_item (Duple (pix, 0.0)).x;
 		}
 
@@ -7621,10 +7624,10 @@ ClipStartDrag::motion (GdkEvent* event, bool first_move)
 		 * coordinates are clamped to zero (no negative values).
 		 */
 
-		x -= editing_context.timeline_origin();
-		timepos_t tp (mce.pixel_to_sample (x));
+		x -= ce.timeline_origin();
+		timepos_t tp (ce.pixel_to_sample (x));
 		Beats b (tp.beats() * -1);
-		mce.shift_midi (timepos_t (b), false);
+		ce.shift_contents (timepos_t (b), false);
 
 		/* ensure the line is in the right place */
 
@@ -7645,22 +7648,17 @@ ClipStartDrag::finished (GdkEvent* event, bool movement_occured)
 	double x, y;
 	gdk_event_get_coords (event, &x, &y);
 
-	if (x >= editing_context.timeline_origin()) {
+	if (x >= ce.timeline_origin()) {
 
 		timepos_t pos = adjusted_current_time (event);
-		editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
-		double pix = editing_context.timeline_to_canvas (editing_context.time_to_pixel (pos));
+		ce.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+		double pix = ce.timeline_to_canvas (ce.time_to_pixel (pos));
 
-		if (pix >= editing_context.timeline_origin()) {
+		if (pix >= ce.timeline_origin()) {
 
-			assert (mce.midi_view());
-
-			if (mce.midi_view()->show_source()) {
-				pos = mce.midi_view()->source_beats_to_timeline (pos.beats());
-			}
-
-			editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
-			mce.set_trigger_start (pos);
+			pos = ce.source_to_timeline (pos);
+			ce.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+			ce.set_start (pos);
 		}
 
 	} else {
@@ -7669,10 +7667,10 @@ ClipStartDrag::finished (GdkEvent* event, bool movement_occured)
 		 * coordinates are clamped to zero (no negative values).
 		 */
 
-		x -= editing_context.timeline_origin();
-		timepos_t tp (mce.pixel_to_sample (x));
+		x -= ce.timeline_origin();
+		timepos_t tp (ce.pixel_to_sample (x));
 		Beats b (tp.beats() * -1);
-		mce.shift_midi (timepos_t (b), true);
+		ce.shift_contents (timepos_t (b), true);
 
 	}
 }
@@ -7684,16 +7682,17 @@ ClipStartDrag::aborted (bool movement_occured)
 
 	if (movement_occured) {
 		/* redraw to get notes back to the right places */
-		mce.shift_midi (timepos_t (Temporal::Beats()), false);
+		ce.shift_contents (timepos_t (Temporal::Beats()), false);
 	}
 }
 
-ClipEndDrag::ClipEndDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Pianoroll& m)
-	: Drag (ec, &r, Temporal::BeatTime, nullptr, false)
-	, mce (m)
+ClipEndDrag::ClipEndDrag (CueEditor& cedit, ArdourCanvas::Rectangle& r)
+	: Drag (cedit, &r, Temporal::BeatTime, nullptr, false)
+	, ce (cedit)
 	, dragging_rect (&r)
 	, original_rect (r.get())
 {
+	DEBUG_TRACE (DEBUG::Drags, "start ClipEndDrag\n");
 }
 
 ClipEndDrag::~ClipEndDrag ()
@@ -7719,10 +7718,10 @@ ClipEndDrag::motion (GdkEvent* event, bool)
 	ArdourCanvas::Rect r (original_rect);
 
 	timepos_t pos (adjusted_current_time (event));
-	editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
-	double pix = editing_context.timeline_to_canvas (editing_context.time_to_pixel (pos));
+	ce.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+	double pix = ce.timeline_to_canvas (ce.time_to_pixel (pos));
 
-	if (pix > editing_context.timeline_origin()) {
+	if (pix > ce.timeline_origin()) {
 		r.x0 = dragging_rect->parent()->canvas_to_item (Duple (pix, 0.0)).x;
 	} else {
 		r.x0 = r.x1 - 1.;
@@ -7740,8 +7739,8 @@ ClipEndDrag::finished (GdkEvent* event, bool movement_occured)
 	}
 
 	timepos_t pos = adjusted_current_time (event);
-	editing_context.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
-	mce.set_trigger_end (pos);
+	ce.snap_to_with_modifier (pos, event, Temporal::RoundNearest, ARDOUR::SnapToGrid_Scaled, true);
+	ce.set_end (pos);
 }
 
 void

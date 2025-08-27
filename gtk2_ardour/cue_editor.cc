@@ -1885,3 +1885,35 @@ CueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sample
 		break;
 	}
 }
+
+void
+CueEditor::set_start (Temporal::timepos_t const & p)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (ref.trigger()) {
+		ref.trigger()->the_region()->trim_front (p);
+	} else if (_region) {
+		begin_reversible_command (_("trim region front"));
+		_region->clear_changes ();
+		_region->trim_front (_region->source_position() + p);
+		add_command (new PBD::StatefulDiffCommand (_region));
+		commit_reversible_command ();
+	}
+}
+
+void
+CueEditor::set_end (Temporal::timepos_t const & p)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (ref.trigger()) {
+		ref.trigger()->the_region()->trim_end (p);
+	} else if (_region) {
+		begin_reversible_command (_("trim region end"));
+		_region->clear_changes ();
+		_region->trim_end (_region->source_position() + p);
+		add_command (new PBD::StatefulDiffCommand (_region));
+		commit_reversible_command ();
+	}
+}

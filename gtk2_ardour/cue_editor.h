@@ -137,6 +137,11 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state () const;
 
+	void set_start (Temporal::timepos_t const & p);
+	void set_end (Temporal::timepos_t const & p);
+	virtual void shift_contents (Temporal::timepos_t const &, bool model_too) {}
+	virtual Temporal::timepos_t source_to_timeline (Temporal::timepos_t const & source_pos) const { return source_pos; }
+
   protected:
 	ArdourCanvas::GtkCanvasViewport _canvas_viewport;
 	ArdourCanvas::GtkCanvas& _canvas;
@@ -263,4 +268,3 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	bool hscroll_press (GdkEventButton*);
 	bool hscroll_release (GdkEventButton*);
 };
-

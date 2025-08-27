@@ -784,38 +784,6 @@ Pianoroll::canvas_cue_end_event (GdkEvent* event, ArdourCanvas::Item* item)
 	return typed_event (item, event, ClipEndItem);
 }
 
-void
-Pianoroll::set_trigger_start (Temporal::timepos_t const & p)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	if (ref.trigger()) {
-		ref.trigger()->the_region()->trim_front (p);
-	} else {
-		begin_reversible_command (_("trim region front"));
-		view->midi_region()->clear_changes ();
-		view->midi_region()->trim_front (view->midi_region()->source_position() + p);
-		add_command (new StatefulDiffCommand (view->midi_region()));
-		commit_reversible_command ();
-	}
-}
-
-void
-Pianoroll::set_trigger_end (Temporal::timepos_t const & p)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	if (ref.trigger()) {
-		ref.trigger()->the_region()->trim_end (p);
-	} else {
-		begin_reversible_command (_("trim region end"));
-		view->midi_region()->clear_changes ();
-		view->midi_region()->trim_end (view->midi_region()->source_position() + p);
-		add_command (new StatefulDiffCommand (view->midi_region()));
-		commit_reversible_command ();
-	}
-}
-
 Gtk::Widget&
 Pianoroll::contents ()
 {
@@ -954,7 +922,7 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 	case ClipStartItem: {
 		ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (item);
 		if (r) {
-			_drags->set (new ClipStartDrag (*this, *r, *this), event);
+			_drags->set (new ClipStartDrag (*this, *r), event);
 		}
 		return true;
 		break;
@@ -963,7 +931,7 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 	case ClipEndItem: {
 		ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (item);
 		if (r) {
-			_drags->set (new ClipEndDrag (*this, *r, *this), event);
+			_drags->set (new ClipEndDrag (*this, *r), event);
 		}
 		return true;
 		break;
@@ -1937,7 +1905,7 @@ Pianoroll::allow_trim_cursors () const
 }
 
 void
-Pianoroll::shift_midi (timepos_t const & t, bool model)
+Pianoroll::shift_contents (timepos_t const & t, bool model)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
@@ -2117,4 +2085,14 @@ Pianoroll::parameter_changed (std::string param)
 	}
 }
 
+timepos_t
+Pianoroll::source_to_timeline (timepos_t const & source_pos) const
+{
+	assert (midi_view());
 
+	if (midi_view()->show_source()) {
+		return midi_view()->source_beats_to_timeline (source_pos.beats());
+	}
+
+	return source_pos;
+}

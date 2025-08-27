@@ -64,6 +64,7 @@ namespace PBD {
 	class StatefulDiffCommand;
 }
 
+class CueEditor;
 class PatchChange;
 class EditingContext;
 class Editor;
@@ -1615,7 +1616,7 @@ class VelocityLineDrag : public FreehandLineDrag<Evoral::ControlList::OrderedPoi
 class ClipStartDrag : public Drag
 {
   public:
-	ClipStartDrag (EditingContext&, ArdourCanvas::Rectangle &, Pianoroll& m);
+	ClipStartDrag (CueEditor&, ArdourCanvas::Rectangle &);
 	~ClipStartDrag ();
 
 	void start_grab (GdkEvent*,Gdk::Cursor*);
@@ -1625,7 +1626,7 @@ class ClipStartDrag : public Drag
 	void aborted (bool);
 
   private:
-	Pianoroll& mce;
+	CueEditor& ce;
 	ArdourCanvas::Rectangle* dragging_rect;
 	ArdourCanvas::Rect original_rect;
 };
@@ -1633,7 +1634,7 @@ class ClipStartDrag : public Drag
 class ClipEndDrag : public Drag
 {
   public:
-	ClipEndDrag (EditingContext&, ArdourCanvas::Rectangle &, Pianoroll& m);
+	ClipEndDrag (CueEditor&, ArdourCanvas::Rectangle &);
 	~ClipEndDrag ();
 
 	void start_grab (GdkEvent*,Gdk::Cursor*);
@@ -1643,7 +1644,7 @@ class ClipEndDrag : public Drag
 	void aborted (bool);
 
   private:
-	Pianoroll& mce;
+	CueEditor& ce;
 	ArdourCanvas::Rectangle* dragging_rect;
 	ArdourCanvas::Rect original_rect;
 };
