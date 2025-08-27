@@ -1883,8 +1883,8 @@ Pianoroll::set_session (ARDOUR::Session* s)
 void
 Pianoroll::session_going_away ()
 {
-	CueEditor::session_going_away ();
 	_update_connection.disconnect ();
+	CueEditor::session_going_away ();
 }
 
 void
