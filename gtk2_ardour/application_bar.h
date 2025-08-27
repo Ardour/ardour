@@ -70,6 +70,7 @@ private:
 
 	void parameter_changed (std::string);
 	void ui_actions_ready ();
+	void setup_tooltips ();
 
 	void repack_transport_hbox ();
 
