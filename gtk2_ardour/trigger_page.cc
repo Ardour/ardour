@@ -154,7 +154,7 @@ TriggerPage::TriggerPage ()
 
 	hpacker.set_homogeneous (false);
 	hpacker.set_spacing (8);  //match to slot_properties_box::set_spacings
-	hpacker.set_border_width (8);
+	hpacker.set_border_width (1);
 
 	/* note thse are re-packed as needed below. see
 	 * hide_all(), selection_changed(), trigger_arm_changed()
