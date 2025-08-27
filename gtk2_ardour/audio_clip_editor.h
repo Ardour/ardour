@@ -65,6 +65,9 @@ namespace ArdourWaveView
 	class WaveView;
 }
 
+class StartBoundaryRect;
+class EndBoundaryRect;
+
 class AudioClipEditor :  public CueEditor
 {
 public:
@@ -85,15 +88,17 @@ public:
 	 * these
 	 */
 
-	bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) { return true; }
-	bool button_press_handler_1 (ArdourCanvas::Item*, GdkEvent*, ItemType) { return true; }
-	bool button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType) { return true; }
-	bool button_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) { return true; }
+	bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool button_press_handler_1 (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool button_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_dispatch (GdkEventButton*) { return true; }
 	bool button_release_dispatch (GdkEventButton*) { return true; }
-	bool motion_handler (ArdourCanvas::Item*, GdkEvent*, bool from_autoscroll = false) { return true; }
-	bool enter_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) { return true; }
-	bool leave_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) { return true; }
+
+	bool motion_handler (ArdourCanvas::Item*, GdkEvent*, bool from_autoscroll = false);
+
+	bool enter_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool leave_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool key_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) { return true; }
 	bool key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) { return true; }
 
@@ -109,7 +114,7 @@ public:
 	Gdk::Cursor* which_track_cursor () const { return nullptr; }
 	Gdk::Cursor* which_mode_cursor () const { return nullptr; }
 	Gdk::Cursor* which_trim_cursor (bool left_side) const { return nullptr; }
-	Gdk::Cursor* which_canvas_cursor (ItemType type) const { return nullptr; }
+	Gdk::Cursor* which_canvas_cursor (ItemType type) const;
 
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start, Temporal::RoundMode direction, ARDOUR::SnapPref gpref) const { return start; }
 	void snap_to_internal (Temporal::timepos_t& first, Temporal::RoundMode direction = Temporal::RoundNearest, ARDOUR::SnapPref gpref = ARDOUR::SnapToAny_Visual, bool ensure_snap = false) const {}
@@ -130,8 +135,8 @@ public:
 
  private:
 	ArdourCanvas::Container*         line_container;
-	ArdourCanvas::Line*              start_line;
-	ArdourCanvas::Line*              end_line;
+	StartBoundaryRect*               start_line;
+	EndBoundaryRect*                 end_line;
 	ArdourCanvas::Line*              loop_line;
 	ArdourCanvas::Container*         ruler_container;
 	ArdourCanvas::Ruler*             main_ruler;
@@ -159,14 +164,9 @@ public:
 	void scroll_left ();
 	void scrol_right ();
 
-	enum LineType {
-		StartLine,
-		EndLine,
-		LoopLine,
-	};
-
 	bool event_handler (GdkEvent* ev);
-	bool line_event_handler (GdkEvent* ev, ArdourCanvas::Line*);
+	bool start_line_event_handler (GdkEvent* ev, StartBoundaryRect*);
+	bool end_line_event_handler (GdkEvent* ev, EndBoundaryRect*);
 	void drop_waves ();
 	void set_wave_heights ();
 	void set_spp_from_length (ARDOUR::samplecnt_t);
@@ -174,23 +174,6 @@ public:
 	void set_colors ();
 	void position_lines ();
 	void scroll_changed ();
-
-	class LineDrag
-	{
-	public:
-		LineDrag (AudioClipEditor&, ArdourCanvas::Line&);
-
-		void begin (GdkEventButton*);
-		void end (GdkEventButton*);
-		void motion (GdkEventMotion*);
-
-	private:
-		AudioClipEditor&    editor;
-		ArdourCanvas::Line& line;
-	};
-
-	friend class LineDrag;
-	LineDrag* current_line_drag;
 
 	PBD::ScopedConnection state_connection;
 

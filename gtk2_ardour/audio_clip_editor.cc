@@ -44,11 +44,13 @@
 #include "ardour_ui.h"
 #include "audio_clip_editor.h"
 #include "audio_clock.h"
+#include "boundary.h"
 #include "editor_automation_line.h"
 #include "editor_cursors.h"
 #include "editor_drag.h"
 #include "control_point.h"
 #include "editor.h"
+#include "keyboard.h"
 #include "region_view.h"
 #include "verbose_cursor.h"
 #include "ui_config.h"
@@ -107,7 +109,6 @@ AudioClipEditor::AudioClipEditor (std::string const & name, bool with_transport)
 	: CueEditor (name, with_transport)
 	, clip_metric (nullptr)
 	, scroll_fraction (0)
-	, current_line_drag (0)
 {
 	load_bindings ();
 	register_actions ();
@@ -260,20 +261,26 @@ AudioClipEditor::build_canvas ()
 	const double line_width = 3.;
 	double scale = UIConfiguration::instance().get_ui_scale();
 
-	start_line = new Line (line_container);
-	start_line->set_outline_width (line_width * scale);
-	end_line = new Line (line_container);
-	end_line->set_outline_width (line_width * scale);
-	loop_line = new Line (line_container);
-	loop_line->set_outline_width (line_width * scale);
+	start_line = new StartBoundaryRect (line_container);
+	start_line->set_outline_what (ArdourCanvas::Rectangle::RIGHT);
+	CANVAS_DEBUG_NAME (start_line, "start boundary rect");
 
-	start_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::line_event_handler), start_line));
-	end_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::line_event_handler), end_line));
-	loop_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::line_event_handler), loop_line));
+	end_line = new EndBoundaryRect (line_container);
+	end_line->set_outline_what (ArdourCanvas::Rectangle::LEFT);
+	CANVAS_DEBUG_NAME (end_line, "end boundary rect");
+
+	// loop_line = new Line (line_container);
+	// loop_line->set_outline_width (line_width * scale);
+
+	start_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::start_line_event_handler), start_line));
+	end_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::end_line_event_handler), end_line));
+	// loop_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::line_event_handler), loop_line));
 
 	/* hide lines until there is a region */
 
-	line_container->hide ();
+	// line_container->hide ();
+
+	_verbose_cursor.reset (new VerboseCursor (*this));
 
 	set_colors ();
 }
@@ -288,41 +295,144 @@ AudioClipEditor::~AudioClipEditor ()
 }
 
 bool
-AudioClipEditor::line_event_handler (GdkEvent* ev, ArdourCanvas::Line* l)
+AudioClipEditor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	std::cerr << "event type " << Gtkmm2ext::event_type_string (ev->type) << " on line " << std::endl;
+	if (event->type != GDK_BUTTON_PRESS) {
+		return false;
+	}
 
-	switch (ev->type) {
-		case GDK_BUTTON_PRESS:
-			current_line_drag = new LineDrag (*this, *l);
-			return true;
+	switch (event->button.button) {
+	case 1:
+		return button_press_handler_1 (item, event, item_type);
+		break;
 
-		case GDK_BUTTON_RELEASE:
-			if (current_line_drag) {
-				current_line_drag->end (&ev->button);
-				delete current_line_drag;
-				current_line_drag = 0;
-				return true;
-			}
-			break;
+	case 2:
+		return button_press_handler_2 (item, event, item_type);
+		break;
 
-		case GDK_MOTION_NOTIFY:
-			if (current_line_drag) {
-				current_line_drag->motion (&ev->motion);
-				return true;
-			}
-			break;
+	case 3:
+		break;
 
-		case GDK_KEY_PRESS:
-			return key_press (&ev->key);
+	default:
+		return button_press_dispatch (&event->button);
+		break;
 
-		default:
-			break;
 	}
 
 	return false;
+}
+
+bool
+AudioClipEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	switch (item_type) {
+	case ClipStartItem: {
+		ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (item);
+		if (r) {
+			_drags->set (new ClipStartDrag (*this, *r), event);
+		}
+		return true;
+		break;
+	}
+
+	case ClipEndItem: {
+		ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (item);
+		if (r) {
+			_drags->set (new ClipEndDrag (*this, *r), event);
+		}
+		return true;
+		break;
+	}
+
+	default:
+		break;
+	}
+
+	return false;
+}
+
+bool
+AudioClipEditor::button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	return true;
+}
+
+bool
+AudioClipEditor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (!Keyboard::is_context_menu_event (&event->button)) {
+
+		/* see if we're finishing a drag */
+
+		if (_drags->active ()) {
+			bool const r = _drags->end_grab (event);
+			if (r) {
+				/* grab dragged, so do nothing else */
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool
+AudioClipEditor::motion_handler (ArdourCanvas::Item*, GdkEvent* event, bool from_autoscroll)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (_drags->active ()) {
+		//drags change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor
+		return _drags->motion_handler (event, from_autoscroll);
+	}
+
+	return true;
+}
+
+bool
+AudioClipEditor::enter_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	choose_canvas_cursor_on_entry (item_type);
+
+	return true;
+}
+
+bool
+AudioClipEditor::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	EditorAutomationLine* al;
+
+	set_canvas_cursor (which_mode_cursor());
+
+	return true;
+}
+
+bool
+AudioClipEditor::start_line_event_handler (GdkEvent* ev, StartBoundaryRect* l)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	return typed_event (start_line, ev, ClipStartItem);
+}
+
+bool
+AudioClipEditor::end_line_event_handler (GdkEvent* ev, EndBoundaryRect* l)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	return typed_event (end_line, ev, ClipEndItem);
 }
 
 bool
@@ -342,36 +452,12 @@ AudioClipEditor::position_lines ()
 		return;
 	}
 
-	start_line->set_x0 (sample_to_pixel (_region->start ().samples ()));
-	start_line->set_x1 (sample_to_pixel (_region->start ().samples ()));
+	double width = sample_to_pixel (_region->start().samples());
+	start_line->set (ArdourCanvas::Rect (0., 0., width, _visible_canvas_height));
 
-	end_line->set_x0 (sample_to_pixel (_region->end ().samples ()));
-	end_line->set_x1 (sample_to_pixel (_region->end ().samples ()));
-}
-
-AudioClipEditor::LineDrag::LineDrag (AudioClipEditor& ed, ArdourCanvas::Line& l)
-    : editor (ed)
-    , line (l)
-{
-	line.grab ();
-}
-
-void
-AudioClipEditor::LineDrag::begin (GdkEventButton* ev)
-{
-}
-
-void
-AudioClipEditor::LineDrag::end (GdkEventButton* ev)
-{
-	line.ungrab ();
-}
-
-void
-AudioClipEditor::LineDrag::motion (GdkEventMotion* ev)
-{
-	line.set_x0 (ev->x);
-	line.set_x1 (ev->x);
+	double offset = sample_to_pixel ((_region->start() + _region->length()).samples());
+	end_line->set_position (ArdourCanvas::Duple (offset, 0.));
+	end_line->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, _visible_canvas_height));
 }
 
 void
@@ -381,9 +467,13 @@ AudioClipEditor::set_colors ()
 
 	_canvas.set_background_color (UIConfiguration::instance ().color (X_("theme:bg")));
 
-	start_line->set_outline_color (UIConfiguration::instance ().color (X_("theme:contrasting clock")));
-	end_line->set_outline_color (UIConfiguration::instance ().color (X_("theme:contrasting alt")));
-	loop_line->set_outline_color (UIConfiguration::instance ().color (X_("theme:contrasting selection")));
+	start_line->set_fill_color (UIConfiguration::instance().color_mod ("cue editor start rect fill", "cue boundary alpha"));
+	start_line->set_outline_color (UIConfiguration::instance().color ("cue editor start rect outline"));
+
+	end_line->set_fill_color (UIConfiguration::instance().color_mod ("cue editor end rect fill", "cue boundary alpha"));
+	end_line->set_outline_color (UIConfiguration::instance().color ("cue editor end rect outline"));
+
+	// loop_line->set_outline_color (UIConfiguration::instance ().color (X_("theme:contrasting selection")));
 
 	set_waveform_colors ();
 }
@@ -480,7 +570,7 @@ AudioClipEditor::set_region (std::shared_ptr<Region> region)
 	set_wave_heights ();
 	set_waveform_colors ();
 
-	line_container->show ();
+	// line_container->show ();
 	line_container->raise_to_top ();
 
 	set_session (&r->session ());
@@ -513,7 +603,7 @@ AudioClipEditor::canvas_allocate (Gtk::Allocation& alloc)
 
 	start_line->set_y1 (_visible_canvas_height - 2.);
 	end_line->set_y1 (_visible_canvas_height - 2.);
-	loop_line->set_y1 (_visible_canvas_height - 2.);
+	// loop_line->set_y1 (_visible_canvas_height - 2.);
 
 	set_wave_heights ();
 
@@ -734,4 +824,26 @@ AudioClipEditor::unset (bool trigger_too)
 
 	drop_waves ();
 	CueEditor::unset (trigger_too);
+}
+
+Gdk::Cursor*
+AudioClipEditor::which_canvas_cursor (ItemType type) const
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	std::cerr << "which canvas cursor for " << enum_2_string (type) << std::endl;
+
+	Gdk::Cursor* cursor = which_mode_cursor ();
+
+	switch (type) {
+	case ClipEndItem:
+	case ClipStartItem:
+		cursor = _cursors->expand_left_right;
+		break;
+
+	default:
+		break;
+	}
+
+	return cursor;
 }
