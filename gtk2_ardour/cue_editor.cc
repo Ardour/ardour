@@ -1317,7 +1317,6 @@ CueEditor::maybe_set_count_in ()
 	}
 
 	if (ref.box()->record_enabled() == Disabled) {
-		std::cerr << "msci RE\n";
 		return;
 	}
 
