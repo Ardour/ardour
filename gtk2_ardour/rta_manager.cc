@@ -172,15 +172,23 @@ RTAManager::attach (std::shared_ptr<ARDOUR::Route> route)
 			return;
 		}
 	}
+	std::list<RTA>::iterator i;
 	try {
-		_rta.emplace_back (route);
+		/* render master first (as background) because it is the sum of other individual channels */
+		if (route->is_master ()) {
+			_rta.emplace_front (route);
+			i = _rta.begin();
+		} else {
+			_rta.emplace_back (route);
+			i = --_rta.end();
+		}
 	} catch (...) {
 		return;
 	}
 
-	_rta.back ().set_rta_speed (_speed);
-	_rta.back ().set_rta_warp (_warp);
-	_rta.back ().delivery ()->set_analysis_active (_active);
+	i->set_rta_speed (_speed);
+	i->set_rta_warp (_warp);
+	i->delivery ()->set_analysis_active (_active);
 
 	route->gui_changed ("rta", this); /* EMIT SIGNAL */
 	route->DropReferences.connect (*this, invalidator (*this), std::bind (&RTAManager::route_removed, this, std::weak_ptr<Route> (route)), gui_context ());
