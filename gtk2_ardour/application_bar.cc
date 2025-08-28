@@ -439,10 +439,6 @@ ApplicationBar::setup_tooltips ()
 void
 ApplicationBar::ui_actions_ready ()
 {
-	_blink_connection = Timers::blink_connect (sigc::mem_fun(*this, &ApplicationBar::blink_handler));
-
-	_point_zero_something_second_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &ApplicationBar::every_point_zero_something_seconds));
-
 	LuaInstance::instance()->ActionChanged.connect (sigc::mem_fun (*this, &ApplicationBar::action_script_changed));
 
 	Glib::RefPtr<Action> act;
@@ -862,6 +858,9 @@ ApplicationBar::set_session (Session *s)
 	if (_have_layout) {
 		repack_transport_hbox();
 	}
+
+	_blink_connection = Timers::blink_connect (sigc::mem_fun(*this, &ApplicationBar::blink_handler));
+	_point_zero_something_second_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &ApplicationBar::every_point_zero_something_seconds));
 }
 
 void
