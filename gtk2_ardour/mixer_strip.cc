@@ -1140,7 +1140,7 @@ MixerStrip::build_route_ops_menu ()
 		denormal_menu_item->set_active (_route->denormal_protection());
 	}
 
-	if (active && !is_singleton ()) {
+	if (active && !_route->presentation_info().special (false)) {
 		items.push_back (CheckMenuElem (_("RTA")));
 		Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 		bool attached = RTAManager::instance ()->attached (_route);
