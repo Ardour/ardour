@@ -221,8 +221,8 @@ This mode provides many different operations on both regions and control points,
 @edit|Region/play-selected-regions|                                    h|play selected region(s)
 @eep|Region/trim-front|                                                j|trim front
 @eep|Region/trim-back|                                                 k|trim back
-@wvis|Window/toggle-virtual-keyboard|                     <@SECONDARY@>k|show virtual MIDI keyboard
-@wvis|Window/toggle-rtawindow|                <@SECONDARY@><@TERTIARY@>s|show realtime spectrum analyzer
+@wvis|Window/toggle-virtual-keyboard|                     <@SECONDARY@>k|show Virtual MIDI keyboard
+@wvis|Window/toggle-rtawindow|                <@SECONDARY@><@TERTIARY@>s|show Realtime Analyzer
 @trans|Transport/Loop|                                                 l|loop play (the loop range)
 @select|Editor/select-all-in-loop-range|                    <@PRIMARY@>l|select all in loop range
 @wvis|Window/toggle-locations|                            <@SECONDARY@>l|toggle locations dialog
