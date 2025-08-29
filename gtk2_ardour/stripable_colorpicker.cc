@@ -105,7 +105,7 @@ StripableColorDialog::reset ()
 }
 
 void
-StripableColorDialog::popup (const std::string& name, uint32_t color)
+StripableColorDialog::popup (const std::string& name, uint32_t color, Gtk::Window* parent)
 {
 	set_title (string_compose (_("Color Selection: %1"), name));
 	_initial_color = color;
@@ -120,25 +120,39 @@ StripableColorDialog::popup (const std::string& name, uint32_t color)
 	_color_changed_connection.disconnect ();
 	_color_changed_connection = get_color_selection()->signal_color_changed().connect (sigc::mem_fun (*this, &StripableColorDialog::color_changed));
 
+	if (parent) {
+		set_transient_for (*parent);
+	}
+	set_position (Gtk::WIN_POS_MOUSE);
 	present ();
 }
 
 void
-StripableColorDialog::popup (std::shared_ptr<ARDOUR::Stripable> s)
+StripableColorDialog::popup (std::shared_ptr<ARDOUR::Stripable> s, Gtk::Window* parent)
 {
 	if (s && s->active_color_picker()) {
+		if (parent) {
+			s->active_color_picker()->set_transient_for (*parent);
+		}
+		s->active_color_picker()->set_position (Gtk::WIN_POS_CENTER_ALWAYS); // force update
+		s->active_color_picker()->set_position (Gtk::WIN_POS_MOUSE);
 		s->active_color_picker()->present ();
 		return;
 	}
 	if (_stripable == s) {
 		/* keep modified color */
+		if (parent) {
+			set_transient_for (*parent);
+		}
+		set_position (Gtk::WIN_POS_CENTER_ALWAYS); // force update
+		set_position (Gtk::WIN_POS_MOUSE);
 		present ();
 		return;
 	}
 
 	_stripable = s;
 	_stripable->set_active_color_picker (this);
-	popup (s->name(), _stripable->presentation_info().color ());
+	popup (s->name(), _stripable->presentation_info().color (), parent);
 }
 
 void
@@ -177,7 +191,7 @@ ArdourColorButton::ArdourColorButton ()
 void
 ArdourColorButton::on_clicked ()
 {
-	_color_picker.popup ("", Gtkmm2ext::gdk_color_to_rgba (get_color ()));
+	_color_picker.popup ("", Gtkmm2ext::gdk_color_to_rgba (get_color ()), dynamic_cast<Gtk::Window*> (get_toplevel()));
 	_color_picker.get_window ()->set_transient_for (get_window ());
 }
 

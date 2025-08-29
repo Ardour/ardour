@@ -561,5 +561,5 @@ VCATimeAxisView::drop_all_slaves ()
 
 void
 VCATimeAxisView::choose_color () {
-	_color_picker.popup (_vca);
+	_color_picker.popup (_vca, PublicEditor::instance ().current_toplevel());
 }

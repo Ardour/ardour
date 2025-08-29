@@ -1069,8 +1069,9 @@ MixerStrip::build_route_ops_menu ()
 	MenuList& items = route_ops_menu->items();
 
 	if (active) {
+		Gtk::Window* top = dynamic_cast<Gtk::Window*> (get_toplevel());
 
-		items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
+		items.push_back (MenuElem (_("Color..."), sigc::bind (sigc::mem_fun (*this, &RouteUI::choose_color), top)));
 
 		items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
 
@@ -1248,7 +1249,7 @@ gboolean
 MixerStrip::number_button_button_press (GdkEventButton* ev)
 {
 	if (ev->type == GDK_2BUTTON_PRESS) {
-		choose_color ();
+		choose_color (dynamic_cast<Gtk::Window*> (get_toplevel()));
 		return true;
 	}
 

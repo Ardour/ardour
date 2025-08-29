@@ -635,7 +635,7 @@ RouteTimeAxisView::build_display_menu ()
 
 	/* now fill it with our stuff */
 	if (active) {
-		items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
+		items.push_back (MenuElem (_("Color..."), sigc::bind (sigc::mem_fun (*this, &RouteUI::choose_color), PublicEditor::instance ().current_toplevel())));
 
 		items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
 

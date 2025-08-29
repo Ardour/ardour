@@ -585,7 +585,7 @@ VCAMasterStrip::state_id () const
 void
 VCAMasterStrip::start_color_edit ()
 {
-	_color_picker.popup (_vca);
+	_color_picker.popup (_vca, dynamic_cast<Gtk::Window*> (get_toplevel()));
 }
 
 bool

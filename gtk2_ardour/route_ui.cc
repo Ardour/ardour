@@ -1694,9 +1694,9 @@ RouteUI::select_midi_patch ()
 
 /** Ask the user to choose a colour, and then apply that color to my route */
 void
-RouteUI::choose_color ()
+RouteUI::choose_color (Gtk::Window* parent)
 {
-	_color_picker.popup (_route);
+	_color_picker.popup (_route, parent);
 }
 
 /** Set the route's own color.  This may not be used for display if

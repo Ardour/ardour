@@ -129,7 +129,7 @@ public:
 	void edit_input_configuration ();
 	void edit_output_configuration ();
 	void select_midi_patch ();
-	void choose_color ();
+	void choose_color (Gtk::Window*);
 	void route_rename ();
 	void manage_pins ();
 	void duplicate_selected_routes ();

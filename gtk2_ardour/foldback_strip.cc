@@ -789,7 +789,7 @@ FoldbackStrip::build_route_ops_menu ()
 	bool active = _route->active ();
 
 	if (active) {
-		items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
+		items.push_back (MenuElem (_("Color..."), sigc::bind (sigc::mem_fun (*this, &RouteUI::choose_color), dynamic_cast<Gtk::Window*> (get_toplevel()))));
 		items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
 
 		items.push_back (MenuElem (_("Outputs..."), sigc::mem_fun (*this, &RouteUI::edit_output_configuration)));
@@ -879,7 +879,7 @@ FoldbackStrip::number_button_press (GdkEventButton* ev)
 	_mixer.select_none();
 	
 	if (ev->type == GDK_2BUTTON_PRESS) {
-		choose_color ();
+		choose_color (dynamic_cast<Gtk::Window*> (get_toplevel()));
 		return true;
 	}
 	

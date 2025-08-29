@@ -145,6 +145,7 @@ TriggerUI::trigger_swap (uint32_t n)
 void
 TriggerUI::choose_color ()
 {
+	// TODO use StripableColorDialog and see note there regarding eyedropper..
 	if (!_color_dialog) {
 		_color_dialog = new Gtk::ColorSelectionDialog;
 	}

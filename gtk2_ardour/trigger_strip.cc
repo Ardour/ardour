@@ -301,7 +301,7 @@ TriggerStrip::build_route_ops_menu ()
 	MenuList& items = _route_ops_menu->items();
 	if (active) {
 
-		items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
+		items.push_back (MenuElem (_("Color..."), sigc::bind (sigc::mem_fun (*this, &RouteUI::choose_color), dynamic_cast<Gtk::Window*> (get_toplevel()))));
 
 		items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
 

@@ -31,8 +31,8 @@ public:
 	StripableColorDialog ();
 	~StripableColorDialog ();
 	void reset ();
-	void popup (std::shared_ptr<ARDOUR::Stripable> s);
-	void popup (const std::string&, uint32_t);
+	void popup (std::shared_ptr<ARDOUR::Stripable> s, Gtk::Window*);
+	void popup (const std::string&, uint32_t, Gtk::Window*);
 	sigc::signal<void, uint32_t> ColorChanged;
 
 private:
