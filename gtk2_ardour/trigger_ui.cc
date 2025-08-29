@@ -49,6 +49,7 @@
 #include "keyboard.h"
 #include "public_editor.h"
 #include "region_view.h"
+#include "stripable_colorpicker.h"
 #include "trigger_jump_dialog.h"
 #include "ui_config.h"
 
@@ -143,34 +144,17 @@ TriggerUI::trigger_swap (uint32_t n)
 }
 
 void
-TriggerUI::choose_color ()
+TriggerUI::choose_color (Gtk::Window* parent)
 {
-	// TODO use StripableColorDialog and see note there regarding eyedropper..
 	if (!_color_dialog) {
-		_color_dialog = new Gtk::ColorSelectionDialog;
+		_color_dialog = new StripableColorDialog;
+		color_connection.disconnect ();
 	}
 
-	_color_dialog->get_color_selection()->set_has_opacity_control (false);
-	_color_dialog->get_color_selection()->set_has_palette (true);
-	_color_dialog->get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (_color_dialog, &Gtk::Dialog::response), Gtk::RESPONSE_ACCEPT));
-	_color_dialog->get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (_color_dialog, &Gtk::Dialog::response), Gtk::RESPONSE_CANCEL));
+	tref.box()->DropReferences.connect (trigger_connections,invalidator (*this), [this]() { _color_dialog->reset (); color_connection.disconnect (); }, gui_context());
+	color_connection = _color_dialog->ColorChanged.connect ([this](uint32_t color) { if (trigger ()) { trigger()->set_color(color); }});
 
-	Gdk::Color c = Gtkmm2ext::gdk_color_from_rgba(trigger()->color());
-
-	_color_dialog->get_color_selection()->set_previous_color (c);
-	_color_dialog->get_color_selection()->set_current_color (c);
-
-	switch (_color_dialog->run()) {
-		case Gtk::RESPONSE_ACCEPT: {
-			c = _color_dialog->get_color_selection()->get_current_color();
-			color_t ct = Gtkmm2ext::gdk_color_to_rgba(c);
-			trigger()->set_color(ct);
-		} break;
-		default:
-			break;
-	}
-
-	_color_dialog->hide ();
+	_color_dialog->popup (_("Set Trigger Color"), trigger()->color(), parent);
 }
 
 void
@@ -406,7 +390,7 @@ TriggerUI::context_menu ()
 
 	items.push_back (MenuElem (_("Load..."), sigc::bind(sigc::mem_fun (*this, (&TriggerUI::choose_sample)), true)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &TriggerUI::choose_color)));
+	items.push_back (MenuElem (_("Color..."), sigc::bind (sigc::mem_fun (*this, &TriggerUI::choose_color), (Gtk::Window*)NULL)));
 	items.push_back (MenuElem (_("Clear"), sigc::mem_fun (*this, &TriggerUI::clear_trigger)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("MIDI Learn"), sigc::mem_fun (*this, &TriggerUI::trigger_midi_learn)));
@@ -804,6 +788,17 @@ TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 	tref.box()->PropertyChanged.connect (trigger_connections, invalidator (*this), std::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
 
 	tref.box()->TriggerSwapped.connect (trigger_swap_connection, invalidator (*this), std::bind (&TriggerUI::trigger_swap, this, _1), gui_context ());
+
+	if (_color_dialog) {
+		if (trigger()) {
+			Gdk::Color c = Gtkmm2ext::gdk_color_from_rgba(trigger()->color());
+			_color_dialog->get_color_selection()->set_previous_color (c);
+			_color_dialog->get_color_selection()->set_current_color (c);
+		} else {
+			color_connection.disconnect ();
+			_color_dialog->reset ();
+		}
+	}
 
 	on_trigger_set();  //derived classes can do initialization here
 }
