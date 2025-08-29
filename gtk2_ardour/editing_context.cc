@@ -629,6 +629,9 @@ EditingContext::register_midi_actions (Bindings* midi_bindings, std::string cons
 	ActionManager::register_action (_midi_actions, X_("split-notes-less"), _("Split Selected Notes into less pieces"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::split_notes_less));
 	ActionManager::register_action (_midi_actions, X_("join-notes"), _("Join Selected Notes"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::join_notes));
 
+	ActionManager::register_action (_midi_actions, X_("strum-forward"), _("Strum notes forward"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::strum_notes_forward));
+	ActionManager::register_action (_midi_actions, X_("strum-backward"), _("Strum notes backward"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::strum_notes_backward));
+
 	ActionManager::register_action (_midi_actions, X_("edit-channels"), _("Edit Note Channels"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::channel_edit));
 	ActionManager::register_action (_midi_actions, X_("edit-velocities"), _("Edit Note Velocities"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::velocity_edit));
 
@@ -1746,8 +1749,6 @@ EditingContext::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	} else if (beat_density > 64) {
 		bbt_ruler_scale = bbt_show_4;
 	} else if (beat_density > 16) {
-		bbt_ruler_scale = bbt_show_1;
-	} else if (beat_density > 4) {
 		bbt_ruler_scale =  bbt_show_quarters;
 	} else  if (beat_density > 2) {
 		bbt_ruler_scale =  bbt_show_eighths;
@@ -1936,7 +1937,17 @@ EditingContext::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* eve
 	if (sel_size < 2) {
 		items.back().set_sensitive (false);
 	}
-	items.push_back(MenuElem(_("Transform..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::transform_regions), mvs)));
+
+	Menu* transform_menu = manage (new Menu);
+	MenuList& transform_items = transform_menu->items();
+	transform_menu->set_name ("ArdourContextMenu");
+
+	transform_items.push_back(MenuElem(_("Velocity, etc..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::transform_regions), mvs)));
+	transform_items.push_back (SeparatorElem());
+	transform_items.push_back(MenuElem(_("Strum forward"), sigc::mem_fun(mrv, &MidiView::strum_notes_forward)));
+	transform_items.push_back(MenuElem(_("Strum backward"), sigc::mem_fun(mrv, &MidiView::strum_notes_backward)));
+
+	items.push_back(MenuElem(_("Transform"), *transform_menu));
 
 	_note_context_menu.popup (event->button.button, event->button.time);
 }
@@ -2550,7 +2561,7 @@ EditingContext::idle_visual_changer ()
 }
 
 
-/** Queue up a change to the viewport x origin.
+/** Queue up a change to the Editor viewport x origin.
  *  @param sample New x origin.
  */
 void
