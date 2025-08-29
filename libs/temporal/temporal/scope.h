@@ -84,7 +84,7 @@ class LIBTEMPORAL_API ScopedTempoMapOwner
 	mutable uint64_t local_tempo_map_depth;
 
   private:
-	friend class TempoMapScope;
+	friend struct TempoMapScope;
 
 	void in () const {
 		if (_local_tempo_map && local_tempo_map_depth++ == 0 ) {
