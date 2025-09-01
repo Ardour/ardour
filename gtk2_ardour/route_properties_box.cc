@@ -103,12 +103,20 @@ RoutePropertiesBox::set_session (ARDOUR::Session* s) {
 	_insert_frame.add (*_insert_box);
 	_insert_frame.set_padding (4);
 	_insert_frame.set_size_request (144 * ui_scale, 236 * ui_scale);
+
+	_session->SurroundMasterAddedOrRemoved.connect (_session_connections, invalidator (*this), std::bind (&RoutePropertiesBox::surround_master_added_or_removed, this), gui_context());
 }
 
 void
-RoutePropertiesBox::set_route (std::shared_ptr<Route> r)
+RoutePropertiesBox::surround_master_added_or_removed ()
 {
-	if (r == _route) {
+	set_route (_route, true);
+}
+
+void
+RoutePropertiesBox::set_route (std::shared_ptr<Route> r, bool force_update)
+{
+	if (r == _route && !force_update) {
 		return;
 	}
 

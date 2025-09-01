@@ -46,7 +46,7 @@ public:
 	~RoutePropertiesBox ();
 
 	void set_session (ARDOUR::Session*);
-	void set_route (std::shared_ptr<ARDOUR::Route>);
+	void set_route (std::shared_ptr<ARDOUR::Route>, bool force = false);
 
 private:
 	void property_changed (const PBD::PropertyChange& what_changed);
@@ -59,6 +59,7 @@ private:
 	void refill_processors ();
 	void add_processor_to_display (std::weak_ptr<ARDOUR::Processor> w);
 	void idle_refill_processors ();
+	void surround_master_added_or_removed ();
 
 	static int _idle_refill_processors (gpointer);
 
