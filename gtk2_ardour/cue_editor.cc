@@ -1471,8 +1471,6 @@ CueEditor::unset (bool trigger_too)
 void
 CueEditor::session_going_away ()
 {
-	EC_LOCAL_TEMPO_SCOPE;
-
 	EditingContext::session_going_away ();
 	unset (true);
 }
