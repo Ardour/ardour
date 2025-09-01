@@ -1429,8 +1429,6 @@ Pianoroll::make_a_region ()
 void
 Pianoroll::unset (bool trigger_too)
 {
-	EC_LOCAL_TEMPO_SCOPE;
-
 	CueEditor::unset (trigger_too);
 	view->set_region (nullptr);
 }
