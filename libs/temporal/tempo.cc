@@ -5392,10 +5392,6 @@ ScopedTempoMapOwner::start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> 
 	 * ::in(), which include incrementing the depth and setting the
 	 * thread-local tempo map pointer.
 	 *
-	 * The caller should have placed an EC_LOCAL_TEMPO_SCOPE macro before
-	 * the call to this method, so that when the caller returns, we will
-	 * call ::out() and decrement the depth back to zero.
-	 *
 	 * Subsequent to that, all later in() and out() calls will install and
 	 * uninstall the local tempo map as the depth transitions from and to
 	 * zero, and will maintain the depth counter appropriately.
@@ -5405,7 +5401,7 @@ ScopedTempoMapOwner::start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> 
 	DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: starting local tempo scope\n", scope_name()));
 	map->set_scope_owner (*this);
 	_local_tempo_map = map;
-	local_tempo_map_depth = 1;
+	local_tempo_map_depth = 0;
 	Temporal::TempoMap::set (_local_tempo_map);
 }
 
