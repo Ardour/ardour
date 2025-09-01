@@ -5399,6 +5399,11 @@ ScopedTempoMapOwner::start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> 
 
 
 	DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: starting local tempo scope\n", scope_name()));
+#ifndef NDEBUG
+	if (DEBUG_ENABLED (PBD::DEBUG::ScopedTempoMap)) {
+		PBD::stacktrace (std::cerr, 29);
+	}
+#endif
 	map->set_scope_owner (*this);
 	_local_tempo_map = map;
 	local_tempo_map_depth = 0;
@@ -5419,6 +5424,11 @@ ScopedTempoMapOwner::end_local_tempo_map ()
 	 */
 
 	DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: ending local tempo scope\n", scope_name()));
+#ifndef NDEBUG
+	if (DEBUG_ENABLED (PBD::DEBUG::ScopedTempoMap)) {
+		PBD::stacktrace (std::cerr, 29);
+	}
+#endif
 	assert (_local_tempo_map);
 	_local_tempo_map->clear_scope_owner ();
 	_local_tempo_map.reset ();
