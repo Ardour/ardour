@@ -6948,7 +6948,7 @@ HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 
 	Beats start;
 
-	if (_midi_view->show_source()) {
+	if (!_midi_view->on_timeline()) {
 		Beats spos = _midi_view->midi_region()->source_position().beats() + aligned_beats;
 		start = _midi_view->midi_region ()->absolute_time_to_source_beats (timepos_t (spos));
 	} else {
