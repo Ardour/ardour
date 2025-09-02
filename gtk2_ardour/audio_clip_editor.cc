@@ -88,6 +88,16 @@ AudioClipEditor::AudioClipEditor (std::string const & name, bool with_transport)
 	set_action_defaults ();
 }
 
+
+AudioClipEditor::~AudioClipEditor ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	drop_grid ();
+	drop_waves ();
+	delete clip_metric;
+}
+
 void
 AudioClipEditor::load_shared_bindings ()
 {
@@ -252,16 +262,6 @@ AudioClipEditor::build_canvas ()
 
 	set_colors ();
 }
-
-AudioClipEditor::~AudioClipEditor ()
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	drop_grid ();
-	drop_waves ();
-	delete clip_metric;
-}
-
 bool
 AudioClipEditor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
