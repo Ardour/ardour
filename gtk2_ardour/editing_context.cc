@@ -178,6 +178,9 @@ EditingContext::EditingContext (std::string const & name)
 	, clear_entered_track (false)
 	, grid_lines (nullptr)
 	, time_line_group (nullptr)
+	, minsec_mark_interval (0)
+	, minsec_mark_modulo (0)
+	, minsec_nmarks (0)
 	, temporary_zoom_focus_change (false)
  	, _dragging_playhead (false)
 
@@ -3590,4 +3593,285 @@ EditingContext::center_screen_internal (samplepos_t sample, float page)
 	}
 
 	reset_x_origin (sample);
+}
+
+void
+EditingContext::sample_to_clock_parts (samplepos_t sample,
+                                       samplepos_t sample_rate,
+                                       long*       hrs_p,
+                                       long*       mins_p,
+                                       long*       secs_p,
+                                       long*       millisecs_p)
+{
+	samplepos_t left;
+	long hrs;
+	long mins;
+	long secs;
+	long millisecs;
+
+	left = sample;
+	hrs = left / (sample_rate * 60 * 60 * 1000);
+	left -= hrs * sample_rate * 60 * 60 * 1000;
+	mins = left / (sample_rate * 60 * 1000);
+	left -= mins * sample_rate * 60 * 1000;
+	secs = left / (sample_rate * 1000);
+	left -= secs * sample_rate * 1000;
+	millisecs = left / sample_rate;
+
+	*millisecs_p = millisecs;
+	*secs_p = secs;
+	*mins_p = mins;
+	*hrs_p = hrs;
+
+	return;
+}
+
+
+
+void
+EditingContext::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, gint /*maxchars*/)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	samplepos_t pos;
+	samplepos_t spacer;
+	long hrs, mins, secs, millisecs;
+	gchar buf[16];
+	gint n;
+	ArdourCanvas::Ruler::Mark mark;
+
+	if (_session == 0) {
+		return;
+	}
+
+	/* to prevent 'flashing' */
+	if (lower > (spacer = (samplepos_t) (128 * get_current_zoom ()))) {
+		lower = lower - spacer;
+	} else {
+		lower = 0;
+	}
+
+	if (minsec_mark_interval == 0) {  //we got here too early; divide-by-zero imminent
+		return;
+	}
+
+	pos = (((1000 * (samplepos_t) floor(lower)) + (minsec_mark_interval/2))/minsec_mark_interval) * minsec_mark_interval;
+
+	switch (minsec_ruler_scale) {
+
+	case minsec_show_msecs:
+		for (n = 0; n < minsec_nmarks && n < upper; pos += minsec_mark_interval, ++n) {
+			sample_to_clock_parts (pos, _session->sample_rate(), &hrs, &mins, &secs, &millisecs);
+			if (millisecs % minsec_mark_modulo == 0) {
+				if (millisecs == 0) {
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
+				} else {
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
+				}
+				snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld.%03ld", hrs, mins, secs, millisecs);
+			} else {
+				buf[0] = '\0';
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
+			}
+			mark.label = buf;
+			mark.position = pos/1000.0;
+			marks.push_back (mark);
+		}
+		break;
+
+	case minsec_show_seconds:
+		for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {
+			sample_to_clock_parts (pos, _session->sample_rate(), &hrs, &mins, &secs, &millisecs);
+			if (secs % minsec_mark_modulo == 0) {
+				if (secs == 0) {
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
+				} else {
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
+				}
+				snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld", hrs, mins, secs);
+			} else {
+				buf[0] = '\0';
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
+			}
+			mark.label = buf;
+			mark.position = pos/1000.0;
+			marks.push_back (mark);
+		}
+		break;
+
+	case minsec_show_minutes:
+		for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {
+			sample_to_clock_parts (pos, _session->sample_rate(), &hrs, &mins, &secs, &millisecs);
+			if (mins % minsec_mark_modulo == 0) {
+				if (mins == 0) {
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
+				} else {
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
+				}
+				snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld", hrs, mins, secs);
+			} else {
+				buf[0] = '\0';
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
+			}
+			mark.label = buf;
+			mark.position = pos/1000.0;
+			marks.push_back (mark);
+		}
+		break;
+
+	case minsec_show_hours:
+		 for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {
+			sample_to_clock_parts (pos, _session->sample_rate(), &hrs, &mins, &secs, &millisecs);
+			if (hrs % minsec_mark_modulo == 0) {
+				mark.style = ArdourCanvas::Ruler::Mark::Major;
+				snprintf (buf, sizeof(buf), "%02ld:%02ld", hrs, mins);
+			} else {
+				buf[0] = '\0';
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
+			}
+			mark.label = buf;
+			mark.position = pos/1000.0;
+			marks.push_back (mark);
+		 }
+		 break;
+
+	case minsec_show_many_hours:
+		for (n = 0; n < minsec_nmarks;) {
+			sample_to_clock_parts (pos, _session->sample_rate(), &hrs, &mins, &secs, &millisecs);
+			if (hrs % minsec_mark_modulo == 0) {
+				mark.style = ArdourCanvas::Ruler::Mark::Major;
+				snprintf (buf, sizeof(buf), "%02ld:00", hrs);
+				mark.label = buf;
+				mark.position = pos/1000.0;
+				marks.push_back (mark);
+				++n;
+			}
+			pos += minsec_mark_interval;
+		}
+		break;
+	}
+}
+
+void
+EditingContext::set_minsec_ruler_scale (samplepos_t lower, samplepos_t upper)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	samplepos_t fr = _session->sample_rate() * 1000;
+	samplepos_t spacer;
+
+	if (_session == 0) {
+		return;
+	}
+
+
+	/* to prevent 'flashing' */
+	if (lower > (spacer = (samplepos_t)(128 * get_current_zoom ()))) {
+		lower -= spacer;
+	} else {
+		lower = 0;
+	}
+	upper += spacer;
+	samplecnt_t const range = (upper - lower) * 1000;
+
+	if (range <= (fr / 10)) { /* 0-0.1 second */
+		minsec_mark_interval = fr / 1000; /* show 1/1000 seconds */
+		minsec_ruler_scale = minsec_show_msecs;
+		minsec_mark_modulo = 10;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= (fr / 2)) { /* 0-0.5 second */
+		minsec_mark_interval = fr / 100;  /* show 1/100 seconds */
+		minsec_ruler_scale = minsec_show_msecs;
+		minsec_mark_modulo = 100;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= fr) { /* 0-1 second */
+		minsec_mark_interval = fr / 10;  /* show 1/10 seconds */
+		minsec_ruler_scale = minsec_show_msecs;
+		minsec_mark_modulo = 200;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 2 * fr) { /* 1-2 seconds */
+		minsec_mark_interval = fr / 10; /* show 1/10 seconds */
+		minsec_ruler_scale = minsec_show_msecs;
+		minsec_mark_modulo = 500;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 8 * fr) { /* 2-5 seconds */
+		minsec_mark_interval =  fr / 5; /* show 2 seconds */
+		minsec_ruler_scale = minsec_show_msecs;
+		minsec_mark_modulo = 1000;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 16 * fr) { /* 8-16 seconds */
+		minsec_mark_interval =  fr; /* show 1 seconds */
+		minsec_ruler_scale = minsec_show_seconds;
+		minsec_mark_modulo = 2;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 30 * fr) { /* 10-30 seconds */
+		minsec_mark_interval =  fr; /* show 1 seconds */
+		minsec_ruler_scale = minsec_show_seconds;
+		minsec_mark_modulo = 5;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 60 * fr) { /* 30-60 seconds */
+		minsec_mark_interval = fr; /* show 1 seconds */
+		minsec_ruler_scale = minsec_show_seconds;
+		minsec_mark_modulo = 5;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 2 * 60 * fr) { /* 1-2 minutes */
+		minsec_mark_interval = 5 * fr; /* show 5 seconds */
+		minsec_ruler_scale = minsec_show_seconds;
+		minsec_mark_modulo = 3;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 4 * 60 * fr) { /* 4 minutes */
+		minsec_mark_interval = 5 * fr; /* show 10 seconds */
+		minsec_ruler_scale = minsec_show_seconds;
+		minsec_mark_modulo = 30;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 10 * 60 * fr) { /* 10 minutes */
+		minsec_mark_interval = 30 * fr; /* show 30 seconds */
+		minsec_ruler_scale = minsec_show_seconds;
+		minsec_mark_modulo = 120;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 30 * 60 * fr) { /* 10-30 minutes */
+		minsec_mark_interval =  60 * fr; /* show 1 minute */
+		minsec_ruler_scale = minsec_show_minutes;
+		minsec_mark_modulo = 5;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 60 * 60 * fr) { /* 30 minutes - 1hr */
+		minsec_mark_interval = 2 * 60 * fr; /* show 2 minutes */
+		minsec_ruler_scale = minsec_show_minutes;
+		minsec_mark_modulo = 10;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 4 * 60 * 60 * fr) { /* 1 - 4 hrs*/
+		minsec_mark_interval = 5 * 60 * fr; /* show 10 minutes */
+		minsec_ruler_scale = minsec_show_minutes;
+		minsec_mark_modulo = 30;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 8 * 60 * 60 * fr) { /* 4 - 8 hrs*/
+		minsec_mark_interval = 20 * 60 * fr; /* show 20 minutes */
+		minsec_ruler_scale = minsec_show_minutes;
+		minsec_mark_modulo = 60;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 16 * 60 * 60 * fr) { /* 16-24 hrs*/
+		minsec_mark_interval =  60 * 60 * fr; /* show 60 minutes */
+		minsec_ruler_scale = minsec_show_hours;
+		minsec_mark_modulo = 2;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else {
+
+		const samplecnt_t hours_in_range = range / (60 * 60 * fr);
+		const int text_width_rough_guess = 70; /* pixels, very very approximate guess at how wide the tick mark text is */
+
+		/* Normally we do not need to know anything about the width of the canvas
+		   to set the ruler scale, because the caller has already determined
+		   the width and set lower + upper arguments to this function to match that.
+
+		   But in this case, where the range defined by lower and upper can vary
+		   substantially (anything from 24hrs+ to several billion years)
+		   trying to decide which tick marks to show does require us to know
+		   about the available width.
+		*/
+
+		minsec_nmarks = get_canvas()->width() / text_width_rough_guess;
+		minsec_mark_modulo = std::max ((samplecnt_t) 1, 1 + (hours_in_range / minsec_nmarks));
+		minsec_mark_interval = minsec_mark_modulo * (60 * 60 * fr);
+		minsec_ruler_scale = minsec_show_many_hours;
+	}
 }

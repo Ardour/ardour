@@ -1296,37 +1296,6 @@ Editor::metric_get_samples (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64
 	}
 }
 
-static void
-sample_to_clock_parts (samplepos_t sample,
-                       samplepos_t sample_rate,
-                       long*       hrs_p,
-                       long*       mins_p,
-                       long*       secs_p,
-                       long*       millisecs_p)
-{
-	samplepos_t left;
-	long hrs;
-	long mins;
-	long secs;
-	long millisecs;
-
-	left = sample;
-	hrs = left / (sample_rate * 60 * 60 * 1000);
-	left -= hrs * sample_rate * 60 * 60 * 1000;
-	mins = left / (sample_rate * 60 * 1000);
-	left -= mins * sample_rate * 60 * 1000;
-	secs = left / (sample_rate * 1000);
-	left -= secs * sample_rate * 1000;
-	millisecs = left / sample_rate;
-
-	*millisecs_p = millisecs;
-	*secs_p = secs;
-	*mins_p = mins;
-	*hrs_p = hrs;
-
-	return;
-}
-
 void
 Editor::set_minsec_ruler_scale (samplepos_t lower, samplepos_t upper)
 {

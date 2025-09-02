@@ -780,7 +780,29 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	virtual void metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
 	virtual void metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
 	virtual void metric_get_samples (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
-	virtual void metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
+
+	enum MinsecRulerScale {
+		minsec_show_msecs,
+		minsec_show_seconds,
+		minsec_show_minutes,
+		minsec_show_hours,
+		minsec_show_many_hours
+	};
+
+	MinsecRulerScale minsec_ruler_scale;
+
+	samplecnt_t minsec_mark_interval;
+	gint minsec_mark_modulo;
+	gint minsec_nmarks;
+
+	void metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint);
+	void set_minsec_ruler_scale (samplepos_t lower, samplepos_t upper);
+	void sample_to_clock_parts (samplepos_t sample,
+	                            samplepos_t sample_rate,
+	                            long*       hrs_p,
+	                            long*       mins_p,
+	                            long*       secs_p,
+	                            long*       millisecs_p);
 
 	virtual void set_entered_track (TimeAxisView*) {};
 

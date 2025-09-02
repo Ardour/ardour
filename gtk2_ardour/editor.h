@@ -875,19 +875,6 @@ private:
 	void restore_ruler_visibility ();
 	void show_rulers_for_grid ();
 
-	enum MinsecRulerScale {
-		minsec_show_msecs,
-		minsec_show_seconds,
-		minsec_show_minutes,
-		minsec_show_hours,
-		minsec_show_many_hours
-	};
-
-	MinsecRulerScale minsec_ruler_scale;
-
-	samplecnt_t minsec_mark_interval;
-	gint minsec_mark_modulo;
-	gint minsec_nmarks;
 	void set_minsec_ruler_scale (samplepos_t, samplepos_t);
 
 	enum TimecodeRulerScale {
