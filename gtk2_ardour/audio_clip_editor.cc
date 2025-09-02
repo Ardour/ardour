@@ -236,9 +236,6 @@ AudioClipEditor::build_canvas ()
 	line_container = new ArdourCanvas::Container (data_group);
 	CANVAS_DEBUG_NAME (line_container, "audio clip line container");
 
-	const double line_width = 3.;
-	double scale = UIConfiguration::instance().get_ui_scale();
-
 	start_line = new StartBoundaryRect (line_container);
 	start_line->set_outline_what (ArdourCanvas::Rectangle::RIGHT);
 	CANVAS_DEBUG_NAME (start_line, "start boundary rect");
