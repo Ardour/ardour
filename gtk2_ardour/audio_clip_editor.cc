@@ -377,8 +377,6 @@ AudioClipEditor::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	EditorAutomationLine* al;
-
 	set_canvas_cursor (which_mode_cursor());
 
 	return true;
