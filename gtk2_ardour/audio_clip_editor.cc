@@ -67,42 +67,9 @@ using std::max;
 using std::min;
 
 void
-AudioClipEditor::ClipBBTMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const
+AudioClipEditor::ClipMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const
 {
-	TriggerPtr trigger (tref.trigger());
-	if (!trigger) {
-		return;
-	}
-
-	std::shared_ptr<AudioTrigger> at = std::dynamic_pointer_cast<AudioTrigger> (trigger);
-	if (!at) {
-		return;
-	}
-
-	ArdourCanvas::Ruler::Mark mark;
-
-	assert (at->segment_tempo() > 0.);
-
-	Temporal::Tempo tempo (at->segment_tempo(), at->meter().divisions_per_bar());
-
-	std::cerr << "get marks between " << lower << " .. " << upper << " with tempo " << tempo << " upp = " << units_per_pixel << std::endl;
-
-	samplecnt_t samples_per_beat = tempo.samples_per_note_type (TEMPORAL_SAMPLE_RATE);
-	int64_t beat_number = (lower + (samples_per_beat/2)) / samples_per_beat;
-	int64_t last = INT64_MIN;
-	const double scale = UIConfiguration::instance ().get_ui_scale ();
-
-	for (int64_t n = beat_number * samples_per_beat; n < upper; n += samples_per_beat) {
-		/* ensure at least a 15 pixel (scaled) gap between marks */
-		if (marks.empty() || (((n - last) / units_per_pixel) > (15. * scale))) {
-			mark.style    = ArdourCanvas::Ruler::Mark::Major;
-			mark.label    = string_compose ("%1", beat_number);
-			mark.position = n;
-			marks.push_back (mark);
-			beat_number++;
-			last = n;
-		}
-	}
+	ace.metric_get_minsec (marks, lower, upper, maxchars);
 }
 
 AudioClipEditor::AudioClipEditor (std::string const & name, bool with_transport)
@@ -222,8 +189,9 @@ AudioClipEditor::build_canvas ()
 	CANVAS_DEBUG_NAME (time_line_group, "audioclip time line group");
 
 	n_timebars = 0;
+
+	clip_metric = new ClipMetric (*this);
 	main_ruler = new ArdourCanvas::Ruler (time_line_group, clip_metric, ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	// main_ruler->set_name ("audio clip editor ruler");
 	main_ruler->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
 	main_ruler->set_fill_color (UIConfiguration::instance().color (X_("ruler base")));
 	main_ruler->set_outline_color (UIConfiguration::instance().color (X_("ruler text")));
@@ -529,17 +497,6 @@ AudioClipEditor::set_region (std::shared_ptr<Region> region)
 		return;
 	}
 
-	/* Ruler has to reflect tempo of the region, so we have to recreate it
-	 * every time. Note that we retain ownership of the metric, and that
-	 * because the GUI is single-threaded, we can set it and delete it
-	 * safely here (there will be no calls to use it from within the
-	 * ruler).
-	 */
-
-	delete clip_metric;
-	clip_metric = new ClipBBTMetric (ref);
-	main_ruler->set_metric (clip_metric);
-
 	uint32_t    n_chans = r->n_channels ();
 	samplecnt_t len;
 
@@ -600,6 +557,7 @@ AudioClipEditor::canvas_allocate (Gtk::Allocation& alloc)
 	main_ruler->set (ArdourCanvas::Rect (2, 2, alloc.get_width() - 4, timebar_height));
 
 	position_lines ();
+	update_fixed_rulers ();
 
 	start_line->set_y1 (_visible_canvas_height - 2.);
 	end_line->set_y1 (_visible_canvas_height - 2.);
@@ -847,3 +805,23 @@ AudioClipEditor::which_canvas_cursor (ItemType type) const
 
 	return cursor;
 }
+
+void
+AudioClipEditor::compute_fixed_ruler_scale ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (_session == 0) {
+		return;
+	}
+
+	set_minsec_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
+}
+
+void
+AudioClipEditor::update_fixed_rulers ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+	compute_fixed_ruler_scale ();
+}
+

@@ -141,21 +141,21 @@ public:
 	ArdourCanvas::Container*         ruler_container;
 	ArdourCanvas::Ruler*             main_ruler;
 
-	class ClipBBTMetric : public ArdourCanvas::Ruler::Metric
+	class ClipMetric : public ArdourCanvas::Ruler::Metric
 	{
 	  public:
-		ClipBBTMetric (ARDOUR::TriggerReference tr) : tref (tr) {
+		ClipMetric (AudioClipEditor & ac) : ace (ac) {
 			units_per_pixel = 1;
 		}
 
 		void get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const;
 
 	  private:
-		ARDOUR::TriggerReference tref;
+		AudioClipEditor & ace;
 
 	};
 
-	ClipBBTMetric*                         clip_metric;
+	ClipMetric*                            clip_metric;
 	std::vector<ArdourWaveView::WaveView*> waves;
 	double                                 non_wave_height;
 	samplepos_t                            left_origin;
@@ -192,4 +192,10 @@ public:
 
 	void unset (bool trigger_too);
 	void load_shared_bindings ();
+
+	void compute_fixed_ruler_scale ();
+	void update_fixed_rulers ();
+
+	void update_rulers () { update_fixed_rulers(); }
+	void set_action_defaults ();
 };
