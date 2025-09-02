@@ -784,8 +784,6 @@ AudioClipEditor::which_canvas_cursor (ItemType type) const
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	std::cerr << "which canvas cursor for " << enum_2_string (type) << std::endl;
-
 	Gdk::Cursor* cursor = which_mode_cursor ();
 
 	switch (type) {
