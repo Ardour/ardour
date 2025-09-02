@@ -411,7 +411,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	void register_midi_actions (Gtkmm2ext::Bindings*, std::string const &);
 	void register_common_actions (Gtkmm2ext::Bindings*, std::string const &);
 	void register_automation_actions (Gtkmm2ext::Bindings*, std::string const &);
-	void set_action_defaults ();
+	virtual void set_action_defaults ();
 
 	ArdourCanvas::Rectangle* rubberband_rect;
 
@@ -552,8 +552,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	ArdourWidgets::ArdourDropdown draw_channel_selector;
 	void build_draw_midi_menus ();
 
-	void snap_mode_chosen (Editing::SnapMode);
-	void grid_type_chosen (Editing::GridType);
+	virtual void snap_mode_chosen (Editing::SnapMode);
+	virtual void grid_type_chosen (Editing::GridType);
 
 	ArdourWidgets::ArdourButton play_note_selection_button;
 	ArdourWidgets::ArdourButton note_mode_button;

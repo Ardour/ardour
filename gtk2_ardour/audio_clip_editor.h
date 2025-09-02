@@ -198,4 +198,9 @@ public:
 
 	void update_rulers () { update_fixed_rulers(); }
 	void set_action_defaults ();
+
+	void snap_mode_chosen (Editing::SnapMode);
+	void grid_type_chosen (Editing::GridType);
+
+	Gtk::Box* pack_mouse_mode_box () { return nullptr; }
 };

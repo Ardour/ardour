@@ -182,6 +182,7 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 
 	virtual void pack_inner (Gtk::Box&) = 0;
 	virtual void pack_outer (Gtk::Box&) = 0;
+	virtual Gtk::Box* pack_mouse_mode_box ();
 	void build_zoom_focus_menu ();
 
 	virtual void update_rulers() {}

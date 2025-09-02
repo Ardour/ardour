@@ -99,6 +99,19 @@ AudioClipEditor::~AudioClipEditor ()
 }
 
 void
+AudioClipEditor::set_action_defaults ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	CueEditor::set_action_defaults ();
+
+	if (grid_actions[Editing::GridTypeMinSec]) {
+		grid_actions[Editing::GridTypeMinSec]->set_active (false);
+		grid_actions[Editing::GridTypeMinSec]->set_active (true);
+	}
+}
+
+void
 AudioClipEditor::load_shared_bindings ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
@@ -126,8 +139,9 @@ AudioClipEditor::pack_inner (Gtk::Box& box)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	box.pack_start (snap_box, false, false);
-	box.pack_start (grid_box, false, false);
+	/* No snap, no grid selections until elastic audio */
+	// box.pack_start (snap_box, false, false);
+	// box.pack_start (grid_box, false, false);
 }
 
 void
@@ -816,5 +830,20 @@ AudioClipEditor::update_fixed_rulers ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 	compute_fixed_ruler_scale ();
+}
+
+void
+AudioClipEditor::snap_mode_chosen (Editing::SnapMode)
+{
+}
+
+void
+AudioClipEditor::grid_type_chosen (Editing::GridType gt)
+{
+	if (gt != Editing::GridTypeMinSec && grid_actions[gt] && grid_actions[gt]->get_active()) {
+		assert (grid_actions[Editing::GridTypeMinSec]);
+		grid_actions[Editing::GridTypeMinSec]->set_active (false);
+		grid_actions[Editing::GridTypeMinSec]->set_active (true);
+	}
 }
 

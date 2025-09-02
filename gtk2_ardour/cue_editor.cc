@@ -386,14 +386,10 @@ CueEditor::_get_preferred_edit_position (Editing::EditIgnoreOption ignore, bool 
 	return Temporal::timepos_t (where);
 }
 
-void
-CueEditor::build_upper_toolbar ()
+Gtk::Box*
+CueEditor::pack_mouse_mode_box ()
 {
-	EC_LOCAL_TEMPO_SCOPE;
-
-	using namespace Gtk::Menu_Helpers;
-
-	Gtk::HBox* mode_box = manage(new Gtk::HBox);
+	Gtk::HBox* mode_box (manage(new Gtk::HBox));
 	mode_box->set_border_width (2);
 	mode_box->set_spacing(2);
 
@@ -423,6 +419,18 @@ CueEditor::build_upper_toolbar ()
 
 	mouse_mode_box->pack_start (*mouse_mode_align, false, false);
 
+	return mouse_mode_box;
+}
+
+void
+CueEditor::build_upper_toolbar ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	using namespace Gtk::Menu_Helpers;
+
+	Gtk::Box* mouse_mode_box = pack_mouse_mode_box ();
+
 	pack_snap_box ();
 	pack_draw_box (false);
 
@@ -430,7 +438,10 @@ CueEditor::build_upper_toolbar ()
 	Gtk::HBox* _toolbar_outer = manage (new Gtk::HBox);
 	Gtk::HBox* _toolbar_left = manage (new Gtk::HBox);
 
-	_toolbar_inner->pack_start (*mouse_mode_box, false, false);
+	if (mouse_mode_box) {
+		_toolbar_inner->pack_start (*mouse_mode_box, false, false);
+	}
+
 	pack_inner (*_toolbar_inner);
 
 	set_tooltip (full_zoom_button, _("Zoom to full clip"));
