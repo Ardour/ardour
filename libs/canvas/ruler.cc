@@ -170,11 +170,11 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 		Pango::FontDescription* last_font_description = nullptr;
 		Coord prev = -1;
 
-		for (vector<Mark>::const_iterator m = marks.begin(); m != marks.end(); ++m) {
+		for (auto const & mark : marks) {
 			Duple pos;
 			Pango::FontDescription* fd;
 
-			switch (m->style) {
+			switch (mark.style) {
 			case Mark::Major:
 				fd = _font_description;
 				break;
@@ -187,7 +187,7 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 				break;
 			}
 
-			pos.x = round (m->position/_metric->units_per_pixel) + self.x0;
+			pos.x = round (mark.position/_metric->units_per_pixel) + self.x0;
 			pos.y = self.y1; /* bottom edge */
 
 			if (pos.x < 0) {
@@ -201,10 +201,10 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 
 			/* and the text */
 
-			if (!m->label.empty()) {
+			if (!mark.label.empty()) {
 				Pango::Rectangle logical;
 
-				layout->set_text (m->label);
+				layout->set_text (mark.label);
 				logical = layout->get_pixel_logical_extents ();
 
 				if ((prev >= 0.) && ((pos.x - prev) < (6. + logical.get_width()))) {
@@ -228,7 +228,7 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 				cr->move_to (pos.x, pos.y);
 			}
 
-			switch (m->style) {
+			switch (mark.style) {
 			case Mark::Major:
 				if (_divide_height >= 0) {
 					cr->rel_line_to (0, -_divide_height);
