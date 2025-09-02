@@ -29,6 +29,8 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
 
+#include "widgets/tooltips.h"
+
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "keyboard.h"
@@ -57,6 +59,7 @@ RTAWindow::RTAWindow ()
 	_pause.signal_clicked.connect (mem_fun (*this, &RTAWindow::pause_toggled));
 	_pause.set_name ("rta freeze button");
 
+	_clear.signal_clicked.connect (mem_fun (*this, &RTAWindow::clear_clicked));
 	_clear.signal_clicked.connect (mem_fun (*this, &RTAWindow::clear_clicked));
 
 	_darea.add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK | Gdk::LEAVE_NOTIFY_MASK);
@@ -116,6 +119,11 @@ RTAWindow::RTAWindow ()
 	Gtkmm2ext::UI::instance ()->theme_changed.connect (sigc::mem_fun (*this, &RTAWindow::on_theme_changed));
 	UIConfiguration::instance ().ColorsChanged.connect (sigc::mem_fun (*this, &RTAWindow::on_theme_changed));
 	UIConfiguration::instance ().DPIReset.connect (sigc::mem_fun (*this, &RTAWindow::on_theme_changed));
+
+	ArdourWidgets::set_tooltip (_clear, _("Clear current set of analyzed signals (except for the master bus)."));
+	ArdourWidgets::set_tooltip (_pause, _("Toggle analysis enable, pause the visual update. Left mouse press on the analysis area can temporary freeze the display"));
+	ArdourWidgets::set_tooltip (_speed_dropdown, _("Set analysis return time. Noise Measurement has a fallback time of 1dB in 2 seconds. Slow mode falls 5dB/s, Moderate 48dB/sec. Fast and Rapid mode are fast enough to be freqency dependent with Fast mode falling 96dB/s."));
+	ArdourWidgets::set_tooltip (_warp_dropdown, _("Frequency warp the spectrum to focus on given range. A high warp factor increases resolution in the low freqncy range, while the bark scale is a frequency scale on which equal distances correspond with perceptually equal distances."));
 
 	on_theme_changed ();
 }
