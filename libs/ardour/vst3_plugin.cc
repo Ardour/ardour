@@ -2880,10 +2880,11 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 	} else if (0 == strcmp (id, ContextInfo::kIndex)) {
 		value = s->presentation_info ().order ();
 	} else if (0 == strcmp (id, ContextInfo::kColor)) {
-		value = s->presentation_info ().color ();
-#if BYTEORDER == kBigEndian
+		value = s->presentation_info ().color (); // RGBA
+		/* spec says "int32: RGBA, starts with red value in lowest byte" so effectively ABGR
+		 * https://github.com/fenderdigital/presonus-plugin-extensions/blob/ff17b53f7e0c871921f0983aebca6d657542a67f/ipslcontextinfo.h#L195
+		 */
 		SWAP_32 (value) // RGBA32 -> ABGR32
-#endif
 	} else if (0 == strcmp (id, ContextInfo::kVisibility)) {
 		value = s->is_hidden () ? 0 : 1;
 	} else if (0 == strcmp (id, ContextInfo::kSelected)) {
