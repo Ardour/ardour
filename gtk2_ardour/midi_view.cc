@@ -47,6 +47,7 @@
 #include "ardour/operations.h"
 #include "ardour/quantize.h"
 #include "ardour/session.h"
+#include "ardour/strum.h"
 
 #include "evoral/Parameter.h"
 #include "evoral/Event.h"
@@ -5371,44 +5372,17 @@ MidiView::strum_notes (bool forward, bool fine)
 		return;
 	}
 
-	start_note_diff_command (_("Strum"));
+	ARDOUR::Strum strum(forward, fine);
 
-	Notes notes;
-	selection_as_notelist (notes, false);
+	PBD::Command* cmd = _editing_context.apply_midi_note_edit_op_to_region (strum, *this);
 
-	if (notes.size() < 2) {
-		abort_note_diff();
-		return;
+	if (cmd) {
+		_editing_context.begin_reversible_command (strum.name ());
+		(*cmd)();
+		_editing_context.add_command (cmd);
+		_editing_context.commit_reversible_command ();
+		_editing_context.session()->set_dirty ();
 	}
-
-	Temporal::Beats total_offset;
-	Temporal::Beats offset;
-
-	if (fine) {
-		offset = Temporal::Beats::ticks (Temporal::ticks_per_beat / 128);
-	} else {
-		offset = Temporal::Beats::ticks (Temporal::ticks_per_beat / 32);
-	}
-
-	if (forward) {
-		for (auto const & n : notes) {
-			NoteBase* cne = find_canvas_note (n);
-			if (cne) {
-				change_note_time (cne, total_offset, true);
-				total_offset += offset;
-			}
-		}
-	} else { // backward
-		for (auto it = notes.rbegin(); it != notes.rend(); ++it) {
-			NoteBase* cne = find_canvas_note (*it);
-			if (cne) {
-				change_note_time (cne, total_offset, true);
-				total_offset += offset;
-			}
-		}
-	}
-
-	apply_note_diff ();
 }
 
 void
