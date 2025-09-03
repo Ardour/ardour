@@ -137,8 +137,8 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 #endif
 
 		/* VBM */
-		V2Program   = 0x4000,  // deprecated (conflicts with TriggerTrack)
-		V2MixMinus  = 0x8000,  // deprecated (conflicts with SurroundMaster)
+		Program     = 0x4000,  // deprecated (conflicts with TriggerTrack)
+		MixMinus    = 0x8000,  // deprecated (conflicts with SurroundMaster)
 		VBMProgram  = 0x10000,
 		VBMMixMinus = 0x20000,
 #ifdef VBM

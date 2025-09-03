@@ -833,6 +833,12 @@ setup_enum_writer ()
 #ifdef MIXBUS
 	REGISTER_CLASS_ENUM (PresentationInfo, MixbusEditorHidden);
 #endif
+#ifdef VBM
+	REGISTER_CLASS_ENUM (PresentationInfo, Program);
+	REGISTER_CLASS_ENUM (PresentationInfo, MixMinus);
+	REGISTER_CLASS_ENUM (PresentationInfo, VBMProgram);
+	REGISTER_CLASS_ENUM (PresentationInfo, VBMMixMinus);
+#endif
 	REGISTER_BITS (_PresentationInfo_Flag);
 
 	REGISTER_CLASS_ENUM (MusicalMode,Dorian);
