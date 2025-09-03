@@ -3057,9 +3057,7 @@ VST3PI::setContextInfoValue (FIDString id, int32 value)
 		return kResultOk;
 	}
 	if (0 == strcmp (id, ContextInfo::kColor)) {
-#if BYTEORDER == kBigEndian
 		SWAP_32 (value) // ABGR32 -> RGBA32
-#endif
 		s->presentation_info ().set_color (value);
 	} else if (0 == strcmp (id, ContextInfo::kSelected)) {
 		std::shared_ptr<Stripable> stripable = s->session ().stripable_by_id (s->id ());
