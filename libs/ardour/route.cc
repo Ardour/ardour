@@ -4236,6 +4236,11 @@ Route::emit_pending_signals ()
 {
 	int sig = _pending_signals.fetch_and (0);
 
+	if (sig & EmitMeterChanged) {
+		_meter->emit_configuration_changed();
+		meter_change (); /* EMIT SIGNAL */
+	}
+
 	if (sig != 0) {
 		bool meter_viz_changed = (sig & (EmitMeterVisibilityChange | EmitMeterChanged)) == (EmitMeterVisibilityChange | EmitMeterChanged);
 		RouteProcessorChange::Type t = RouteProcessorChange::NoProcessorChange;
