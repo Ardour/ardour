@@ -40,9 +40,11 @@ Strum::operator()(std::shared_ptr<ARDOUR::MidiModel> model,
 	}
 
 	// Get all notes from all sequences and sort them by start time
-	Notes all_notes;
+	std::vector<NotePtr> all_notes;
 	for (std::vector<Notes>::iterator s = seqs.begin(); s != seqs.end(); ++s) {
-		all_notes.insert(all_notes.end(), (*s).begin(), (*s).end());
+		for (Notes::const_iterator i = (*s).begin(); i != (*s).end(); ++i) {
+			all_notes.push_back(*i);
+		}
 	}
 
 	if (all_notes.size() < 2) {
@@ -65,14 +67,14 @@ Strum::operator()(std::shared_ptr<ARDOUR::MidiModel> model,
 	}
 
 	if (_forward) {
-		for (Notes::const_iterator i = all_notes.begin(); i != all_notes.end(); ++i) {
+		for (std::vector<NotePtr>::const_iterator i = all_notes.begin(); i != all_notes.end(); ++i) {
 			const NotePtr note = *i;
 			Temporal::Beats new_start = note->time() + total_offset;
 			cmd->change(note, MidiModel::NoteDiffCommand::StartTime, new_start);
 			total_offset += offset;
 		}
 	} else { // backward
-		for (Notes::const_reverse_iterator i = all_notes.rbegin(); i != all_notes.rend(); ++i) {
+		for (std::vector<NotePtr>::const_reverse_iterator i = all_notes.rbegin(); i != all_notes.rend(); ++i) {
 			const NotePtr note = *i;
 			Temporal::Beats new_start = note->time() + total_offset;
 			cmd->change(note, MidiModel::NoteDiffCommand::StartTime, new_start);

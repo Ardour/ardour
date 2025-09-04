@@ -1939,17 +1939,9 @@ EditingContext::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* eve
 	if (sel_size < 2) {
 		items.back().set_sensitive (false);
 	}
-
-	Menu* transform_menu = manage (new Menu);
-	MenuList& transform_items = transform_menu->items();
-	transform_menu->set_name ("ArdourContextMenu");
-
-	transform_items.push_back(MenuElem(_("Velocity, etc..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::transform_regions), mvs)));
-	transform_items.push_back (SeparatorElem());
-	transform_items.push_back(MenuElem(_("Strum forward"), sigc::mem_fun(mrv, &MidiView::strum_notes_forward)));
-	transform_items.push_back(MenuElem(_("Strum backward"), sigc::mem_fun(mrv, &MidiView::strum_notes_backward)));
-
-	items.push_back(MenuElem(_("Transform"), *transform_menu));
+	items.push_back(MenuElem(_("Mathematical Operations..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::transform_regions), mvs)));
+	items.push_back(MenuElem(_("Strum Forward"), sigc::mem_fun(mrv, &MidiView::strum_notes_forward)));
+	items.push_back(MenuElem(_("Strum Backward"), sigc::mem_fun(mrv, &MidiView::strum_notes_backward)));
 
 	_note_context_menu.popup (event->button.button, event->button.time);
 }
