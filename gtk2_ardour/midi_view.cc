@@ -47,6 +47,7 @@
 #include "ardour/operations.h"
 #include "ardour/quantize.h"
 #include "ardour/session.h"
+#include "ardour/strum.h"
 
 #include "evoral/Parameter.h"
 #include "evoral/Event.h"
@@ -3295,7 +3296,7 @@ MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 			*/
 			len = std::max (Temporal::Beats (0, 128), len);
 
-			char buf[16];
+			char buf[24];
 			/* represent as float frac to help out the user */
 			snprintf (buf, sizeof (buf), "%.3f beats", len.get_beats() + (len.get_ticks()/(double)Temporal::ticks_per_beat));
 			show_verbose_cursor (buf, 0, 0);
@@ -5362,5 +5363,37 @@ MidiView::set_visible_channel (int chn, bool clear_selection)
 	if (clear_selection) {
 		clear_selection_internal ();
 	}
+}
+
+void
+MidiView::strum_notes (bool forward, bool fine)
+{
+	if (_selection.empty()) {
+		return;
+	}
+
+	ARDOUR::Strum strum(forward, fine);
+
+	PBD::Command* cmd = _editing_context.apply_midi_note_edit_op_to_region (strum, *this);
+
+	if (cmd) {
+		_editing_context.begin_reversible_command (strum.name ());
+		(*cmd)();
+		_editing_context.add_command (cmd);
+		_editing_context.commit_reversible_command ();
+		_editing_context.session()->set_dirty ();
+	}
+}
+
+void
+MidiView::strum_notes_forward ()
+{
+	strum_notes (true, false);
+}
+
+void
+MidiView::strum_notes_backward ()
+{
+	strum_notes (false, false);
 }
 

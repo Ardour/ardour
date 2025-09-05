@@ -250,6 +250,7 @@ libardour_sources = [
         'stripable.cc',
         # 'step_sequencer.cc',
         'strip_silence.cc',
+        'strum.cc',
         'surround_pannable.cc',
         'surround_return.cc',
         'surround_send.cc',
