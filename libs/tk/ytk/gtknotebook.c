@@ -6596,8 +6596,8 @@ gtk_notebook_mnemonic_activate_switch_page (GtkWidget *child,
       GtkNotebookPage *page = list->data;
 
       gtk_widget_grab_focus (GTK_WIDGET (notebook));	/* Do this first to avoid focusing new page */
-      gtk_notebook_switch_page (notebook, page);
       focus_tabs_in (notebook);
+      gtk_notebook_switch_page (notebook, page);
     }
 
   return TRUE;
