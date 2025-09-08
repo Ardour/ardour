@@ -1471,11 +1471,14 @@ CueEditor::unset (bool trigger_too)
 	count_in_connection.disconnect ();
 	capture_connections.drop_connections ();
 
-	_track.reset ();
 	_region.reset ();
 
 	if (trigger_too) {
 		ref = TriggerReference ();
+		_track.reset ();
+	} else if (_track) {
+		/* re-subscribe to object_connections */
+		set_track (_track);
 	}
 }
 
