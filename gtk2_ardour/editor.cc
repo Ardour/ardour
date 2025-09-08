@@ -529,7 +529,7 @@ Editor::Editor ()
 	_sections = new EditorSections (*this);
 	_snapshots = new EditorSnapshots ();
 	_locations = new EditorLocations (*this);
-	_properties_box = new SelectionPropertiesBox ();
+	_properties_box = new SelectionPropertiesBox (SelectionPropertiesBox::DispositionMask (SelectionPropertiesBox::ShowRegions | SelectionPropertiesBox::ShowRoutes));
 
 	_bottom_hbox.pack_start (*_properties_box, true, true);
 	_properties_box->show ();
