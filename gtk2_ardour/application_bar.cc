@@ -809,7 +809,7 @@ ApplicationBar::set_session (Session *s)
 	/* initialize */
 	session_latency_updated (true);
 
-	_solo_alert_button.set_active (_session->soloing());
+	_solo_alert_button.set_active (_session->soloing () || _session->listening ());
 
 	if (_editor_meter_table.get_parent()) {
 		_transport_hbox.remove (_editor_meter_table);
