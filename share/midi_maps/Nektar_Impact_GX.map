@@ -52,7 +52,7 @@ Set the "Smoothing" parameter above 15 and see if you like that setting
 
   <DeviceInfo bank-size="1"/>
 
-  <!-- The volume pot controles the fader for the selected track -->
+  <!-- The volume pot controls the fader for the selected track -->
   <Binding channel="16" ctl-dial="20" uri="/route/gain S1"/>
 
   <!-- Transport controls -->

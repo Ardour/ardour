@@ -156,7 +156,7 @@ TriggerPage::TriggerPage ()
 	hpacker.set_spacing (8);  //match to slot_properties_box::set_spacings
 	hpacker.set_border_width (1);
 
-	/* note thse are re-packed as needed below. see
+	/* note these are re-packed as needed below. see
 	 * hide_all(), selection_changed(), trigger_arm_changed()
 	 */
 	hpacker.pack_start (_properties_box, true, true);

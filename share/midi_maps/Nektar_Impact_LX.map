@@ -7,7 +7,7 @@ Ardour MIDI Binding Map for the Nektar Impact LX series of controllers (mainly L
 Device configuration (HW)
 
 The Impact LX indeed uses channel 16 as a fixed one, this does not seem to be editable.
-The Impact internal USB Port "000" (out of 0/1/2) should work fine. Otherways check Nektar's manual about changing USB Port config (in short: "Setup" then on keybed "A2" and "C3/D3" to adjust).
+The Impact internal USB Port "000" (out of 0/1/2) should work fine. Otherwise, check Nektar's manual about changing USB Port config (in short: "Setup" then on keybed "A2" and "C3/D3" to adjust).
 
 Ardour configuration:
 
