@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2025 Brent Baccala <cosine@freesoft.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,12 +97,18 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 		sprintf (buf, "%d", t);
 		_transpose_output.append_text_item (buf);
 	}
+	for (int p = 0; p < 128; ++p) {
+		char buf[16];
+		sprintf (buf, "%d", p);
+		_program_change.append_text_item (buf);
+	}
 
 	_midi_channel.set_active ("1");
 	_piano_velocity.set_active ("100");
 	_piano_octave_key.set_active ("4");
 	_piano_octave_range.set_active ("7");
 	_transpose_output.set_active ("0");
+	_program_change.set_active ("0");
 
 	_pitchbend            = std::shared_ptr<VKBDControl> (new VKBDControl ("PB", 8192, 16383));
 	_pitch_slider         = manage (new VSliderController (&_pitch_adjustment, _pitchbend, 0, PX_SCALE (15)));
@@ -117,6 +124,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	set_tooltip (_piano_octave_range, _("Available octave range, centered around the key-octave."));
 	set_tooltip (_piano_velocity, _("The velocity to use with keyboard control. Use mouse-scroll for fine-grained control"));
 	set_tooltip (_transpose_output, _("Chromatic transpose note events. Notes transposed outside the range of 0,,127 are discarded."));
+	set_tooltip (_program_change, _("Send MIDI Program Change message to switch instrument patches."));
 
 	set_tooltip (_send_panic, _("Send MIDI Panic message for current channel"));
 
@@ -167,6 +175,9 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 
 	tbl->attach (*manage (new ArdourVSpacer),       col, col + 1, 0, 2, SHRINK, FILL, 4, 0);
 	++col;
+	tbl->attach (_program_change,                   col, col + 1, 0, 1, SHRINK, SHRINK, 4, 0);
+	tbl->attach (*manage (new Label (_("Program"))), col, col + 1, 1, 2, SHRINK, SHRINK, 4, 0);
+	++col;
 	tbl->attach (_piano_octave_key,                 col, col + 1, 0, 1, SHRINK, SHRINK, 4, 0);
 	tbl->attach (*manage (new Label (_("Octave"))), col, col + 1, 1, 2, SHRINK, SHRINK, 4, 0);
 	++col;
@@ -199,6 +210,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	set_size_request_to_display_given_text (_piano_octave_key,   "88", 19, 2);
 	set_size_request_to_display_given_text (_piano_octave_range, "88", 19, 2);
 	set_size_request_to_display_given_text (_piano_velocity,    "888", 19, 2);
+	set_size_request_to_display_given_text (_program_change,    "888", 19, 2);
 
 	/* GUI signals */
 
@@ -212,6 +224,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_piano_velocity.StateChanged.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_velocity_settings));
 	_piano_octave_key.StateChanged.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_octave_key));
 	_piano_octave_range.StateChanged.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_octave_range));
+	_program_change.StateChanged.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::program_change_event_handler));
 
 	_send_panic.signal_button_release_event ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::send_panic_message), false);
 
@@ -272,6 +285,7 @@ VirtualKeyboardWindow::get_state () const
 	node->set_property (X_("KeyVelocity"), _piano_velocity.get_text ());
 	node->set_property (X_("Octave"), _piano_octave_key.get_text ());
 	node->set_property (X_("Range"), _piano_octave_range.get_text ());
+	node->set_property (X_("Program"), _program_change.get_text ());
 	for (int i = 0; i < VKBD_NCTRLS; ++i) {
 		char buf[16];
 		sprintf (buf, "CC-%d", i);
@@ -316,6 +330,9 @@ VirtualKeyboardWindow::set_state (const XMLNode& root)
 	}
 	if (node->get_property (X_("Range"), s)) {
 		_piano_octave_range.set_active (s);
+	}
+	if (node->get_property (X_("Program"), s)) {
+		_program_change.set_active (s);
 	}
 
 	update_velocity_settings ();
@@ -620,4 +637,18 @@ void
 VirtualKeyboardWindow::pitch_bend_release (int)
 {
 	_pitch_adjustment.set_value (8192);
+}
+
+void
+VirtualKeyboardWindow::program_change_event_handler ()
+{
+	if (!_session) {
+		return;
+	}
+	uint8_t channel = PBD::atoi (_midi_channel.get_text ()) - 1;
+	uint8_t program = PBD::atoi (_program_change.get_text ());
+	uint8_t ev[2];
+	ev[0] = MIDI_CMD_PGM_CHANGE | channel;
+	ev[1] = program & 0x7f;
+	_session->vkbd_output_port ()->write (ev, 2, 0);
 }

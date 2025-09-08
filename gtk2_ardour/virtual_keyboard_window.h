@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2025 Brent Baccala <cosine@freesoft.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,6 +132,7 @@ private:
 	void update_cc (size_t, int);
 	bool send_panic_message (GdkEventButton*);
 	bool on_velocity_scroll_event (GdkEventScroll*);
+	void program_change_event_handler ();
 
 	APianoKeyboard  _piano;
 
@@ -139,6 +141,7 @@ private:
 	ArdourWidgets::ArdourDropdown  _piano_octave_key;
 	ArdourWidgets::ArdourDropdown  _piano_octave_range;
 	ArdourWidgets::ArdourDropdown  _transpose_output;
+	ArdourWidgets::ArdourDropdown  _program_change;
 	ArdourWidgets::ArdourButton    _send_panic;
 
 	std::shared_ptr<VKBDControl>    _pitchbend;
