@@ -257,6 +257,8 @@ public:
 	bool ask_about_loading_existing_session (const std::string& session_path);
 	int load_session_from_startup_fsm ();
 
+	bool loading_session () const { return _loading_session; }
+
 	/// @return true if session was successfully unloaded.
 	int unload_session (bool hide_stuff = false, bool force_unload = false);
 	void close_session();
@@ -873,6 +875,8 @@ private:
 
 	void ask_about_scratch_deletion ();
 	bool nsm_first_session_opened;
+
+	bool _loading_session;
 
 	PBD::ScopedConnectionList clock_state_connection;
 };

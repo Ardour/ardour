@@ -244,6 +244,10 @@ Editor::internal_editing() const
 void
 Editor::update_time_selection_display ()
 {
+	if (ARDOUR_UI::instance()->loading_session ()) {
+		/* leave selection alone */
+		return;
+	}
 	auto mouse_mode = current_mouse_mode ();
 	switch (mouse_mode) {
 	case MouseRange:

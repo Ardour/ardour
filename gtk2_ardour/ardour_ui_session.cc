@@ -404,6 +404,8 @@ ARDOUR_UI::audio_midi_setup_reconfigure_done (int response, std::string path, st
 int
 ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& snap_name, std::string mix_template)
 {
+	PBD::Unwinder uw (_loading_session, true);
+
 	Session *new_session;
 	int retval = -1;
 
