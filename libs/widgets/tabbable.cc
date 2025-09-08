@@ -119,11 +119,16 @@ Tabbable::default_layout ()
 		content_hbox.pack_start (content_midlevel_vbox, true, true);
 	}
 
+	content_att_left.set_no_show_all ();
+	content_att_bottom.set_no_show_all ();
+	content_right_vbox.set_no_show_all ();
+
 	if (_panelayout & PaneRight) {
 		content_midlevel_vbox.pack_start (content_right_pane, true, true);
 		content_right_pane.add (content_inner_hbox);
 		content_right_pane.add (content_right_vbox);
 		content_right_vbox.pack_start (content_att_right, true, true);
+		content_att_right.show ();
 	} else {
 		content_midlevel_vbox.pack_start (content_inner_hbox, true, true);
 	}
