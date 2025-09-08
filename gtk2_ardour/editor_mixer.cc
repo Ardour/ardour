@@ -62,6 +62,7 @@ using namespace PBD;
 void
 Editor::showhide_att_left (bool yn)
 {
+	Tabbable::showhide_att_left (yn);
 	show_editor_mixer (yn);
 }
 

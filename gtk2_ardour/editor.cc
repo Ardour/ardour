@@ -645,6 +645,7 @@ Editor::Editor ()
 	ebox_hpacker.show();
 	global_vpacker.show();
 	_bottom_hbox.show();
+	_editor_list_vbox.show ();
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 

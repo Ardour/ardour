@@ -403,7 +403,7 @@ Mixer_UI::Mixer_UI ()
 	scroller_base.show();
 	scroller_hpacker.show();
 	mixer_scroller_vpacker.show();
-	list_vpacker.show();
+	list_vpacker.show_all();
 	group_display_button_label.show();
 	group_display_scroller.show();
 	favorite_plugins_scroller.show();
