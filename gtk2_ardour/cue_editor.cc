@@ -1464,7 +1464,6 @@ CueEditor::unset (bool trigger_too)
 		end_local_tempo_map ();
 	}
 	_history.clear ();
-	history_connection.disconnect();
 	_update_connection.disconnect();
 	object_connections.drop_connections ();
 	rec_blink_connection.disconnect ();
