@@ -1269,7 +1269,23 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 bool
 Mixer_UI::vca_button_release_event (GdkEventButton *ev, VCAMasterStrip *strip)
 {
-	_selection.set (strip);
+	if (ev->button == 1) {
+		if (_selection.selected (strip)) {
+			/* primary-click: toggle selection state of strip */
+			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+				_selection.remove (strip, false);
+			} else if (_selection.axes.size() > 1) {
+				/* de-select others */
+				_selection.set (strip);
+			}
+		} else {
+			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+				_selection.add (strip, true);
+			} else {
+				_selection.set (strip);
+			}
+		}
+	}
 	return true;
 }
 
