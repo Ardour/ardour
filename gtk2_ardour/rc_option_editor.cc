@@ -4608,7 +4608,6 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_replicate_missing_region_channels)
 		     ));
 
-	if (!Profile->get_mixbus()) {
 
 		add_option (_("Signal Flow"), new OptionEditorHeading (_("Track and Bus Connections")));
 
@@ -4635,6 +4634,8 @@ These settings will only take effect after %1 is restarted.\n\
 		iac->add (ManualConnect, _("manually"));
 
 		add_option (_("Signal Flow"), iac);
+
+	if (!Profile->get_mixbus()) {
 
 		ComboOption<AutoConnectOption>* oac = new ComboOption<AutoConnectOption> (
 				"output-auto-connect",
