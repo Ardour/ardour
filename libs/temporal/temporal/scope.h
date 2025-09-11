@@ -123,3 +123,4 @@ struct TempoMapScope {
 } // namespace 
 
 #define EC_LOCAL_TEMPO_SCOPE Temporal::TempoMapScope __tms (*this);
+#define EC_LOCAL_TEMPO_SCOPE_ARG(arg) Temporal::TempoMapScope __tms (arg);
