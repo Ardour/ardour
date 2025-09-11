@@ -570,7 +570,7 @@ UIConfiguration::get_variables (std::string const & node_name) const
 
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_FONT_VARIABLE
-#define UI_CONFIG_VARIABLE(Type,var,Name,value) if (node->name() == "UI") { var.add_to_node (*node); }
+#define UI_CONFIG_VARIABLE(Type,var,Name,value) if (node->name() == "UI") { var.add_to_node_if_modified (*node, ConfigVariable<Type> (Name, value).get_as_string ()); }
 #define CANVAS_FONT_VARIABLE(var,Name) if (node->name() == "Canvas") { var.add_to_node (*node); }
 #include "ui_config_vars.inc.h"
 #include "canvas_vars.inc.h"
