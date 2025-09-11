@@ -119,6 +119,8 @@ PianorollMidiView::~PianorollMidiView ()
 bool
 PianorollMidiView::midi_canvas_group_event (GdkEvent* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE_ARG (_editing_context);
+
 	/* Let MidiView do its thing */
 
 	if (MidiView::midi_canvas_group_event (ev)) {
