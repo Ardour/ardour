@@ -43,6 +43,21 @@ ConfigVariableBase::add_to_node (XMLNode& node) const
 	node.add_child_nocopy (*child);
 }
 
+void
+ConfigVariableBase::add_to_node_if_modified (XMLNode& node, std::string const& dflt) const
+{
+	const std::string v = get_as_string ();
+	if (v == dflt) {
+		DEBUG_TRACE (DEBUG::Configuration, string_compose ("Config variable '%1' used default, not saved\n", _name));
+		return;
+	}
+	DEBUG_TRACE (DEBUG::Configuration, string_compose ("Config variable '%1' stored as [%2]\n", _name, v));
+	XMLNode* child = new XMLNode ("Option");
+	child->set_property ("name", _name);
+	child->set_property ("value", v);
+	node.add_child_nocopy (*child);
+}
+
 bool
 ConfigVariableBase::set_from_node (XMLNode const & node)
 {

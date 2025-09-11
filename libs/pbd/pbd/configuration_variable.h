@@ -34,6 +34,7 @@ class LIBPBD_API ConfigVariableBase {
 
 	std::string name () const { return _name; }
 	void add_to_node (XMLNode&) const;
+	void add_to_node_if_modified (XMLNode&, std::string const&) const;
 	bool set_from_node (XMLNode const &);
 
 	virtual std::string get_as_string () const = 0;
