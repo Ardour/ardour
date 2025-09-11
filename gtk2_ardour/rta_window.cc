@@ -121,9 +121,9 @@ RTAWindow::RTAWindow ()
 	UIConfiguration::instance ().DPIReset.connect (sigc::mem_fun (*this, &RTAWindow::on_theme_changed));
 
 	ArdourWidgets::set_tooltip (_clear, _("Clear current set of analyzed signals (except for the master bus)."));
-	ArdourWidgets::set_tooltip (_pause, _("Toggle analysis enable, pause the visual update. Left mouse press on the analysis area can temporary freeze the display"));
+	ArdourWidgets::set_tooltip (_pause, _("Toggle analysis enable, pause the visual update. Left mouse press on the analysis area can temporarily freeze the display"));
 	ArdourWidgets::set_tooltip (_speed_dropdown, _("Set analysis return time. Noise Measurement has a fallback time of 1dB in 2 seconds. Slow mode falls 5dB/s, Moderate 48dB/sec. Fast and Rapid mode are fast enough to be freqency dependent with Fast mode falling 96dB/s."));
-	ArdourWidgets::set_tooltip (_warp_dropdown, _("Frequency warp the spectrum to focus on given range. A high warp factor increases resolution in the low freqncy range, while the bark scale is a frequency scale on which equal distances correspond with perceptually equal distances."));
+	ArdourWidgets::set_tooltip (_warp_dropdown, _("Frequency warp the spectrum to focus on given range. A high warp factor increases resolution in the low frequency range, while the bark scale is a frequency scale on which equal distances correspond with perceptually equal distances."));
 
 	on_theme_changed ();
 }
