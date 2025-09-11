@@ -673,20 +673,8 @@ Pianoroll::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, Sn
 	EC_LOCAL_TEMPO_SCOPE;
 
 	UIConfiguration const& uic (UIConfiguration::instance ());
-	const timepos_t presnap = start;
 
-
-	timepos_t dist = timepos_t::max (start.time_domain()); // this records the distance of the best snap result we've found so far
-	timepos_t best = timepos_t::max (start.time_domain()); // this records the best snap-result we've found so far
-
-	timepos_t pre (presnap);
-	timepos_t post (snap_to_grid (pre, direction, pref));
-
-	check_best_snap (presnap, post, dist, best);
-
-	if (timepos_t::max (start.time_domain()) == best) {
-		return;
-	}
+	timepos_t post (snap_to_grid (start, direction, pref));
 
 	/* now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
 	 * this also helps to avoid snapping to somewhere the user can't see.  (i.e.: I clicked on a region and it disappeared!!)
@@ -694,11 +682,11 @@ Pianoroll::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, Sn
 	 */
 	samplecnt_t snap_threshold_s = pixel_to_sample (uic.get_snap_threshold ());
 
-	if (!ensure_snap && ::llabs (best.distance (presnap).samples()) > snap_threshold_s) {
+	if (!ensure_snap && ::llabs (post.distance (start).samples()) > snap_threshold_s) {
 		return;
 	}
 
-	start = best;
+	start = post;
 }
 
 void
