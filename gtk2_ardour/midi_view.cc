@@ -1163,9 +1163,12 @@ MidiView::model_changed()
 		low_note = _model->lowest_note ();
 		hi_note = _model->highest_note ();
 
+		uint8_t old_low = _midi_context.lowest_data_note ();
+		uint8_t old_high = _midi_context.highest_data_note ();
+
 		_midi_context.update_data_note_range (low_note, hi_note);
 
-		if (_midi_context.visibility_range_style() == MidiViewBackground::ContentsRange) {
+		if (((old_low != low_note) || (old_high != hi_note)) && _midi_context.visibility_range_style() == MidiViewBackground::ContentsRange) {
 			maybe_set_note_range (low_note, hi_note);
 		}
 	} else {
