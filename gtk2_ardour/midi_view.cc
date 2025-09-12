@@ -3298,7 +3298,7 @@ MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 			*/
 			len = std::max (Temporal::Beats (0, 128), len);
 
-			char buf[16];
+			char buf[24];
 			/* represent as float frac to help out the user */
 			snprintf (buf, sizeof (buf), "%.3f beats", len.get_beats() + (len.get_ticks()/(double)Temporal::ticks_per_beat));
 			show_verbose_cursor (buf, 0, 0);
