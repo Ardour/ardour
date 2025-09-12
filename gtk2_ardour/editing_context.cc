@@ -1752,8 +1752,6 @@ EditingContext::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	} else if (beat_density > 64) {
 		bbt_ruler_scale = bbt_show_4;
 	} else if (beat_density > 16) {
-		bbt_ruler_scale = bbt_show_1;
-	} else if (beat_density > 4) {
 		bbt_ruler_scale =  bbt_show_quarters;
 	} else  if (beat_density > 2) {
 		bbt_ruler_scale =  bbt_show_eighths;
@@ -2559,7 +2557,7 @@ EditingContext::idle_visual_changer ()
 }
 
 
-/** Queue up a change to the viewport x origin.
+/** Queue up a change to the Editor viewport x origin.
  *  @param sample New x origin.
  */
 void
