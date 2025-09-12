@@ -5367,3 +5367,62 @@ MidiView::set_visible_channel (int chn, bool clear_selection)
 	}
 }
 
+void
+MidiView::strum_notes (bool forward, bool fine)
+{
+	if (_selection.empty()) {
+		return;
+	}
+
+	start_note_diff_command (_("Strum"));
+
+	Notes notes;
+	selection_as_notelist (notes, false);
+
+	if (notes.size() < 2) {
+		abort_note_diff();
+		return;
+	}
+
+	Temporal::Beats total_offset;
+	Temporal::Beats offset;
+
+	if (fine) {
+		offset = Temporal::Beats::ticks (Temporal::ticks_per_beat / 128);
+	} else {
+		offset = Temporal::Beats::ticks (Temporal::ticks_per_beat / 32);
+	}
+
+	if (forward) {
+		for (auto const & n : notes) {
+			NoteBase* cne = find_canvas_note (n);
+			if (cne) {
+				change_note_time (cne, total_offset, true);
+				total_offset += offset;
+			}
+		}
+	} else { // backward
+		for (auto it = notes.rbegin(); it != notes.rend(); ++it) {
+			NoteBase* cne = find_canvas_note (*it);
+			if (cne) {
+				change_note_time (cne, total_offset, true);
+				total_offset += offset;
+			}
+		}
+	}
+
+	apply_note_diff ();
+}
+
+void
+MidiView::strum_notes_forward ()
+{
+	strum_notes (true, false);
+}
+
+void
+MidiView::strum_notes_backward ()
+{
+	strum_notes (false, false);
+}
+
