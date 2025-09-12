@@ -138,6 +138,8 @@ class MidiViewBackground : public virtual ViewBackground
 	sigc::signal<void,bool> NoteVisibilityShouldChange;
 
 	bool update_data_note_range (uint8_t min, uint8_t max);
+	uint8_t highest_data_note() const { return _data_note_max; }
+	uint8_t lowest_data_note() const { return _data_note_min; }
 
   protected:
 	EditingContext&           _editing_context;
