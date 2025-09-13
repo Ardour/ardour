@@ -52,7 +52,7 @@ function factory (params) return function ()
 			local r_front = r:position():samples()
 			local r_end = r_front + r:length():samples()
 
-			-- region can be finally splited into many segments
+			-- region can be finally split into many segments
 			-- 'segments' is a table containing segments with the form
 			-- {{seg1_start, seg1_end}, {seg2_start, seg2_finish}...}
 			-- segments will finally be regions
