@@ -464,16 +464,17 @@ ActionManager::register_radio_action (RefPtr<ActionGroup> group,
 {
 	string fullpath;
 
-	RefPtr<RadioAction> act = RadioAction::create (rgroup, name, label);
-	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created radio-action %1 in %2 success: %3\n", name, group->get_name(), (bool) act));
+	RefPtr<RadioAction> ract = RadioAction::create (rgroup, name, label);
+	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created radio-action %1 in %2 success: %3\n", name, group->get_name(), (bool) ract))
+	ract->property_value() = value;
 
 	fullpath = group->get_name();
 	fullpath += '/';
 	fullpath += name;
 
-	if (actions.insert (ActionMap::value_type (fullpath, act)).second) {
-		group->add (act, sigc::bind (sl, act->gobj()));
-		return act;
+	if (actions.insert (ActionMap::value_type (fullpath, ract)).second) {
+		group->add (ract, sigc::bind (sl, ract->gobj()));
+		return ract;
 	}
 
 	/* already registered */
