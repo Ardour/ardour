@@ -132,7 +132,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	NoteBase* add_note(const std::shared_ptr<NoteType> note, bool visible);
 
-	void cut_copy_clear (Editing::CutCopyOp);
+	virtual void cut_copy_clear (::Selection&, Editing::CutCopyOp);
 	bool paste (Temporal::timepos_t const & pos, const ::Selection& selection, PasteContext& ctx);
 	void paste_internal (Temporal::timepos_t const & pos, unsigned paste_count, float times, const MidiCutBuffer&);
 

@@ -4034,7 +4034,7 @@ MidiView::instrument_settings_changed ()
 }
 
 void
-MidiView::cut_copy_clear (Editing::CutCopyOp op)
+MidiView::cut_copy_clear (::Selection& /* ignored */, Editing::CutCopyOp op)
 {
 	if (_selection.empty()) {
 		return;

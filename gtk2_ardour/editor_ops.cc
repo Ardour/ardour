@@ -4463,16 +4463,6 @@ Editor::cut_copy (CutCopyOp op)
 	}
 }
 
-
-struct AutomationRecord {
-	AutomationRecord () : state (0) , line (nullptr) {}
-	AutomationRecord (XMLNode* s, const AutomationLine* l) : state (s) , line (l) {}
-
-	XMLNode* state; ///< state before any operation
-	const AutomationLine* line; ///< line this came from
-	std::shared_ptr<Evoral::ControlList> copy; ///< copied events for the cut buffer
-};
-
 struct PointsSelectionPositionSorter {
 	bool operator() (ControlPoint* a, ControlPoint* b) {
 		return (*(a->model()))->when < (*(b->model()))->when;
@@ -4602,7 +4592,7 @@ Editor::cut_copy_midi (CutCopyOp op)
 		if (!mrv->selection().empty()) {
 			earliest = std::min (earliest, (*mrv->selection().begin())->note()->time());
 		}
-		mrv->cut_copy_clear (op);
+		mrv->cut_copy_clear (*selection, op);
 
 		/* XXX: not ideal, as there may be more than one track involved in the selection */
 		_last_cut_copy_source_track = &mrv->get_time_axis_view();

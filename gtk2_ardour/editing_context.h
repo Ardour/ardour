@@ -498,6 +498,15 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	bool dragging_playhead () const { return _dragging_playhead; }
 
+	struct AutomationRecord {
+		AutomationRecord () : state (0) , line (nullptr) {}
+		AutomationRecord (XMLNode* s, const AutomationLine* l) : state (s) , line (l) {}
+
+		XMLNode* state; ///< state before any operation
+		const AutomationLine* line; ///< line this came from
+		std::shared_ptr<Evoral::ControlList> copy; ///< copied events for the cut buffer
+	};
+
   protected:
 	std::string _name;
 	bool within_track_canvas;
@@ -842,4 +851,3 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	bool temporary_zoom_focus_change;
 	bool _dragging_playhead;
 };
-

@@ -30,6 +30,7 @@
 #include "canvas/debug.h"
 #include "canvas/text.h"
 
+#include "control_point.h"
 #include "editing_context.h"
 #include "editor_drag.h"
 #include "hit.h"
@@ -758,5 +759,164 @@ PianorollMidiView::hide_overlay_text ()
 {
 	if (overlay_text) {
 		overlay_text->hide ();
+	}
+}
+void
+PianorollMidiView::cut_copy_clear (::Selection& selection, Editing::CutCopyOp op)
+{
+	MidiView::cut_copy_clear (selection, op);
+
+	cut_copy_points (op, timepos_t::zero (Temporal::BeatTime));
+}
+
+struct PointsSelectionPositionSorter {
+	bool operator() (ControlPoint* a, ControlPoint* b) {
+		return (*(a->model()))->when < (*(b->model()))->when;
+	}
+};
+
+/** Cut, copy or clear selected automation points.
+ *  @param op Operation (Cut, Copy or Clear)
+ */
+void
+PianorollMidiView::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
+{
+	using namespace Editing;
+
+	::Selection& selection (_editing_context.get_selection());
+
+	if (selection.points.empty ()) {
+		return;
+	}
+
+	timepos_t earliest (earliest_time);
+
+	/* Keep a record of the AutomationLists that we end up using in this operation */
+	typedef std::map<std::shared_ptr<AutomationList>, EditingContext::AutomationRecord> Lists;
+	Lists lists;
+
+	/* user could select points in any order */
+	selection.points.sort (PointsSelectionPositionSorter ());
+
+	/* Go through all selected points, making an AutomationRecord for each distinct AutomationList */
+	for (auto & selected_point : selection.points) {
+		const AutomationLine& line (selected_point->line());
+		const std::shared_ptr<AutomationList> al   = line.the_list();
+		if (lists.find (al) == lists.end ()) {
+			/* We haven't seen this list yet, so make a record for it.  This includes
+			   taking a copy of its current state, in case this is needed for undo later.
+			*/
+			lists[al] = EditingContext::AutomationRecord (&al->get_state (), &line);
+		}
+	}
+
+	if (op == Cut || op == Copy) {
+		/* This operation will involve putting things in the cut buffer, so create an empty
+		   ControlList for each of our source lists to put the cut buffer data in.
+		*/
+		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
+			i->second.copy = i->first->create (i->first->parameter (), i->first->descriptor(), *i->first);
+		}
+
+		/* Add all selected points to the relevant copy ControlLists */
+
+		for (auto & selected_point : selection.points) {
+			std::shared_ptr<AutomationList>    al = selected_point->line().the_list();
+			AutomationList::const_iterator ctrl_evt = selected_point->model ();
+
+			lists[al].copy->fast_simple_add ((*ctrl_evt)->when, (*ctrl_evt)->value);
+			earliest = std::min (earliest, (*ctrl_evt)->when);
+		}
+
+		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
+			/* Correct this copy list so that it is relative to the earliest
+			   start time, so relative ordering between points is preserved
+			   when copying from several lists and the paste starts at the
+			   earliest copied piece of data.
+			*/
+			std::shared_ptr<Evoral::ControlList> &al_cpy = i->second.copy;
+			for (AutomationList::iterator ctrl_evt = al_cpy->begin(); ctrl_evt != al_cpy->end(); ++ctrl_evt) {
+				(*ctrl_evt)->when.shift_earlier (earliest);
+			}
+
+			/* And add it to the cut buffer */
+			_editing_context.get_cut_buffer().add (al_cpy);
+		}
+	}
+
+	if (op == Delete || op == Cut) {
+		/* This operation needs to remove things from the main AutomationList, so do that now */
+
+		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
+			i->first->freeze ();
+		}
+
+		/* Remove each selected point from its AutomationList */
+		for (auto & selected_point : selection.points) {
+			AutomationLine& line (selected_point->line ());
+			std::shared_ptr<AutomationList> al = line.the_list();
+			al->erase (selected_point->model ());
+		}
+
+		/* Thaw the lists and add undo records for them */
+		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
+			std::shared_ptr<AutomationList> al = i->first;
+			al->thaw ();
+			_editing_context.add_command (new MementoCommand<AutomationList> (*al.get(), i->second.state, &(al->get_state ())));
+		}
+	}
+}
+
+void
+PianorollMidiView::cut_copy_clear_one (AutomationLine& line, ::Selection& selection, Editing::CutCopyOp op)
+{
+	using namespace Editing;
+
+	std::shared_ptr<Evoral::ControlList> what_we_got;
+	std::shared_ptr<AutomationList> alist (line.the_list());
+
+	XMLNode &before = alist->get_state();
+
+	/* convert time selection to automation list model coordinates */
+	timepos_t start = selection.time.front().start().earlier (line.get_origin());
+	timepos_t end = selection.time.front().end().earlier (line.get_origin());
+
+	std::cerr << "CCCO from " << start << " .. " << end << " based on " << selection.time.front().start() << " .. " << selection.time.front().end() << std::endl;
+
+	switch (op) {
+	case Delete:
+		if (alist->cut (start, end) != 0) {
+			_editing_context.add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+		}
+		break;
+
+	case Cut:
+
+		if ((what_we_got = alist->cut (start, end)) != 0) {
+			_editing_context.get_cut_buffer().add (what_we_got);
+			_editing_context.add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+		}
+		break;
+	case Copy:
+		if ((what_we_got = alist->copy (start, end)) != 0) {
+			_editing_context.get_cut_buffer().add (what_we_got);
+		}
+		break;
+
+	case Clear:
+		if ((what_we_got = alist->cut (start, end)) != 0) {
+			_editing_context.add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+		}
+		break;
+	}
+
+	if (what_we_got) {
+		for (AutomationList::iterator x = what_we_got->begin(); x != what_we_got->end(); ++x) {
+			timepos_t when = (*x)->when;
+			double val  = (*x)->value;
+			val = line.model_to_view_coord_y (val);
+			(*x)->when = when;
+			(*x)->value = val;
+		}
 	}
 }

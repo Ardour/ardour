@@ -1715,7 +1715,7 @@ Pianoroll::cut_copy (Editing::CutCopyOp op)
 	case MouseContent:
 		if (view) {
 			begin_reversible_command (opname + ' ' + X_("MIDI"));
-			view->cut_copy_clear (op);
+			view->cut_copy_clear (*selection, op);
 			commit_reversible_command ();
 		}
 		return;

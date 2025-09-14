@@ -90,6 +90,8 @@ class PianorollMidiView : public MidiView
 	void hide_overlay_text ();
 	void show_overlay_text ();
 
+	void cut_copy_clear (::Selection& selection, Editing::CutCopyOp);
+
   protected:
 	bool scroll (GdkEventScroll* ev);
 
@@ -143,4 +145,7 @@ class PianorollMidiView : public MidiView
 
 	void reset_width_dependent_items (double pixel_width);
 	bool have_visible_automation () const;
+
+	void cut_copy_clear_one (AutomationLine& line, ::Selection& selection, Editing::CutCopyOp op);
+	void cut_copy_points (Editing::CutCopyOp op, Temporal::timepos_t const & earliest_time);
 };
