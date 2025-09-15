@@ -2067,8 +2067,6 @@ MidiView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
 	note_diff_add_note (new_note, true, false);
 
 	apply_note_diff();
-
-	// last_step_edit_note = new_note;
 }
 
 void
