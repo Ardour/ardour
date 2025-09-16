@@ -190,6 +190,9 @@ CueEditor::instant_save()
 	region_ui_settings.samples_per_pixel = samples_per_pixel;
 	region_ui_settings.grid_type = grid_type ();
 	region_ui_settings.zoom_focus = zoom_focus();
+	region_ui_settings.mouse_mode = current_mouse_mode();
+	region_ui_settings.x_origin = _leftmost_sample;
+	region_ui_settings.snap_mode = snap_mode ();
 
 	/* If we're inside an ArdourWindow, get it's geometry */
 	Gtk::Widget* toplevel = contents().get_toplevel ();
