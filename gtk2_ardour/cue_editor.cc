@@ -189,6 +189,7 @@ CueEditor::instant_save()
 	region_ui_settings.follow_playhead = follow_playhead();
 	region_ui_settings.samples_per_pixel = samples_per_pixel;
 	region_ui_settings.grid_type = grid_type ();
+	region_ui_settings.zoom_focus = zoom_focus();
 
 	/* If we're inside an ArdourWindow, get it's geometry */
 	Gtk::Widget* toplevel = contents().get_toplevel ();
