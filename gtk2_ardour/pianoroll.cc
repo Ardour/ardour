@@ -301,6 +301,10 @@ Pianoroll::build_lower_toolbar ()
 	cc_dropdown2->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_led_click), cc_dropdown2));
 	cc_dropdown3->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_led_click), cc_dropdown3));
 
+	cc_dropdown1->signal_map().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::build_cc_menu), cc_dropdown1));
+	cc_dropdown2->signal_map().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::build_cc_menu), cc_dropdown2));
+	cc_dropdown3->signal_map().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::build_cc_menu), cc_dropdown3));
+
 	_toolbox.pack_start (*_canvas_hscrollbar, false, false);
 	_toolbox.pack_start (button_bar, false, false);
 }
@@ -1422,6 +1426,23 @@ Pianoroll::unset (bool trigger_too)
 }
 
 void
+Pianoroll::build_cc_menu (ArdourWidgets::MetaButton* ccbtn)
+{
+	if (!ccbtn->menu().items().empty () || !_track) {
+		return;
+	}
+
+	/* note this can take a long time, and also is not entirely correct.
+	 * ::add_multi_controller_item() add items directly to the top-level
+	 * while keeping empty sub-menus for grouped controls 1-31, 32-64, etc.
+	 */
+	build_controller_menu (ccbtn->menu(), _track->instrument_info(), 0xffff,
+	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_single_controller_item), ccbtn),
+	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), ccbtn),  12);
+	// reset_user_cc_choice (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE1), ccbtn);
+}
+
+void
 Pianoroll::set_track (std::shared_ptr<ARDOUR::Track> track)
 {
 	if (_track == track) {
@@ -1435,29 +1456,19 @@ Pianoroll::set_track (std::shared_ptr<ARDOUR::Track> track)
 		view->set_track (std::dynamic_pointer_cast<MidiTrack> (track));
 	}
 
-	/* XXX this is very slow when the menus are populated */
 	cc_dropdown1->menu().items().clear ();
 	cc_dropdown2->menu().items().clear ();
 	cc_dropdown3->menu().items().clear ();
 
-	/* XXX and this can take seconds for some synths.
-	 * called from Editor::maybe_edit_region_in_bottom_pane
-	 * -> set_track ()
-	 * -> set_region () (via CueEditor::set_region)
-	 * */
-	build_controller_menu (cc_dropdown1->menu(), track->instrument_info(), 0xffff,
-	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_single_controller_item), cc_dropdown1),
-	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), cc_dropdown1),  12);
-	build_controller_menu (cc_dropdown2->menu(), track->instrument_info(), 0xffff,
-	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_single_controller_item), cc_dropdown2),
-	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), cc_dropdown2), 12);
-	build_controller_menu (cc_dropdown3->menu(), track->instrument_info(), 0xffff,
-	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_single_controller_item), cc_dropdown3),
-	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), cc_dropdown3), 12);
-
-	// reset_user_cc_choice (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE1), cc_dropdown1);
-	// reset_user_cc_choice (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE2), cc_dropdown2);
-	// reset_user_cc_choice (Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE3), cc_dropdown3);
+	if (cc_dropdown1->get_mapped ()) {
+		build_cc_menu (cc_dropdown1);
+	}
+	if (cc_dropdown2->get_mapped ()) {
+		build_cc_menu (cc_dropdown2);
+	}
+	if (cc_dropdown3->get_mapped ()) {
+		build_cc_menu (cc_dropdown3);
+	}
 }
 
 void

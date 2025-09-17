@@ -176,6 +176,7 @@ class Pianoroll : public CueEditor
 	void build_canvas ();
 	void canvas_allocate (Gtk::Allocation);
 	void build_lower_toolbar ();
+	void build_cc_menu (ArdourWidgets::MetaButton*);
 
 	bool canvas_enter_leave (GdkEventCrossing* ev);
 
