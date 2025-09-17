@@ -1424,6 +1424,9 @@ Pianoroll::unset (bool trigger_too)
 void
 Pianoroll::set_track (std::shared_ptr<ARDOUR::Track> track)
 {
+	if (_track == track) {
+		return;
+	}
 	EC_LOCAL_TEMPO_SCOPE;
 
 	CueEditor::set_track (track);
@@ -1432,10 +1435,16 @@ Pianoroll::set_track (std::shared_ptr<ARDOUR::Track> track)
 		view->set_track (std::dynamic_pointer_cast<MidiTrack> (track));
 	}
 
+	/* XXX this is very slow when the menus are populated */
 	cc_dropdown1->menu().items().clear ();
 	cc_dropdown2->menu().items().clear ();
 	cc_dropdown3->menu().items().clear ();
 
+	/* XXX and this can take seconds for some synths.
+	 * called from Editor::maybe_edit_region_in_bottom_pane
+	 * -> set_track ()
+	 * -> set_region () (via CueEditor::set_region)
+	 * */
 	build_controller_menu (cc_dropdown1->menu(), track->instrument_info(), 0xffff,
 	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_single_controller_item), cc_dropdown1),
 	                       sigc::bind (sigc::mem_fun (*this, &Pianoroll::add_multi_controller_item), cc_dropdown1),  12);
