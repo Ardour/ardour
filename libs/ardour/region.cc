@@ -1574,8 +1574,14 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 			   non-silently just force the region length to the
 			   correct value.
 			*/
-			error << "Correcting length of region " << _name << " to match it's (first) source's length of " << _sources.front()->length().str() << endmsg;
-			_length = timecnt_t (start().distance (_sources.front()->length()), _length.val().position());
+			error << "Correcting region " << _name << " with start offset " << start() << " length " << _length << " to match it's (first) source's length of " << _sources.front()->length().str() << endmsg;
+			if (start() >= _sources.front()->length()) {
+				_length = timecnt_t (0, _length.val().position());
+				error << "Truncated region " << _name << " length to " << _length << endmsg;
+			} else {
+				_length = timecnt_t (start().distance (_sources.front()->length()), _length.val().position());
+				error << "Corrected region " << _name << " length to " << _length << endmsg;
+			}
 		}
 	}
 
