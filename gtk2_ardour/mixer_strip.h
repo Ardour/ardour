@@ -177,6 +177,8 @@ private:
 	Width _width;
 	void*  _width_owner;
 
+	static int _scrollbar_spacer_height;
+
 	ArdourWidgets::ArdourButton hide_button;
 	ArdourWidgets::ArdourButton width_button;
 	ArdourWidgets::ArdourButton number_label;
@@ -282,6 +284,7 @@ private:
 	void name_button_resized (Gtk::Allocation&);
 	void name_changed ();
 	void dpi_reset ();
+	void update_spacer ();
 	void update_speed_display ();
 	void map_frozen ();
 	void hide_processor_editor (std::weak_ptr<ARDOUR::Processor> processor);

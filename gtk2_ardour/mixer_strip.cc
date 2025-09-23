@@ -105,6 +105,7 @@ using namespace ArdourMeter;
 
 MixerStrip* MixerStrip::_entered_mixer_strip;
 PBD::Signal<void(MixerStrip*)> MixerStrip::CatchDeletion;
+int MixerStrip::_scrollbar_spacer_height = 0;
 
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 
@@ -352,23 +353,10 @@ MixerStrip::init ()
 	midi_input_enable_button.signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_release), false);
 	set_tooltip (midi_input_enable_button, _("Enable/Disable MIDI input"));
 
-#ifndef MIXBUS
-	//add a spacer underneath the master bus;
-	//this fills the area that is taken up by the scrollbar on the tracks;
-	//and therefore keeps the faders "even" across the bottom
-	int scrollbar_height = 0;
-	{
-		Gtk::Window window (WINDOW_TOPLEVEL);
-		HScrollbar scrollbar;
-		window.add (scrollbar);
-		scrollbar.set_name ("MixerWindow");
-		scrollbar.ensure_style();
-		Gtk::Requisition requisition(scrollbar.size_request ());
-		scrollbar_height = requisition.height;
-		scrollbar_height += 3; // track_display_frame border/shadow
-	}
-	spacer.set_size_request (-1, scrollbar_height);
+	update_spacer ();
 	spacer.set_name ("AudioBusStripBase");
+
+#ifndef MIXBUS
 	global_vpacker.pack_end (spacer, false, false);
 #endif
 
@@ -796,9 +784,35 @@ MixerStrip::set_stuff_from_route ()
 }
 
 void
+MixerStrip::update_spacer ()
+{
+	if (_scrollbar_spacer_height == 0) {
+		Gtk::Window window (WINDOW_TOPLEVEL);
+		Gtk::ScrolledWindow scroller;
+		scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_ALWAYS);
+		scroller.set_name ("MixerWindow");
+		window.add (scroller);
+		scroller.ensure_style();
+
+		const Scrollbar* scrollbar = scroller.get_hscrollbar();
+		Gtk::Requisition requisition(scrollbar->size_request ());
+		_scrollbar_spacer_height = requisition.height;
+
+		gint scrollbar_spacing = 0;
+		gtk_widget_style_get (GTK_WIDGET (scroller.gobj()), "scrollbar-spacing", &scrollbar_spacing, NULL);
+		_scrollbar_spacer_height += scrollbar_spacing;
+
+		_scrollbar_spacer_height += 6; // track_display_frame border/shadow
+	}
+	spacer.set_size_request (-1, _scrollbar_spacer_height);
+}
+
+void
 MixerStrip::dpi_reset ()
 {
 	set_width_enum (_width, _width_owner);
+	_scrollbar_spacer_height = 0;
+	update_spacer ();
 }
 
 void
