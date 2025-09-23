@@ -142,7 +142,10 @@ Send::deactivate ()
 	_meter->deactivate ();
 	_meter->reset ();
 
-	Delivery::deactivate ();
+	/* DO NOT CALL Delivery::deactivate (); that deactivates _amp.
+	 * InternalSend still runs and uses _amp until fade out has converged.
+	 */
+	Processor::deactivate ();
 }
 
 samplecnt_t
