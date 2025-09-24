@@ -233,7 +233,9 @@ Strip::set_stripable (std::shared_ptr<Stripable> r, bool /*with_messages*/)
 
 	_stripable->solo_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_solo_changed, this), ui_context());
 	_stripable->mute_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_mute_changed, this), ui_context());
-
+	if (_stripable->is_monitor() || _stripable->is_surround_master()) {
+		_stripable->monitor_control()->cut_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_monitor_cut_changed, this), ui_context());
+	}
 	_stripable->MappedControlsChanged.connect (stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_subview_type_changed, this), ui_context());
 
 	std::shared_ptr<AutomationControl> pan_control = _stripable->pan_azimuth_control();
@@ -335,6 +337,26 @@ Strip::notify_mute_changed ()
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("mute message: %1\n", _mute->set_state (_stripable->mute_control()->muted() ? on : off)));
 
 		_surface->write (_mute->set_state (_stripable->mute_control()->muted() ? on : off));
+	}
+}
+
+void
+Strip::notify_monitor_cut_changed ()
+{
+	DEBUG_TRACE (DEBUG::MackieControl, "Monitor cut changed\n");
+	if ((_stripable->is_monitor() || _stripable->is_surround_master()) && _mute) {
+		_surface->write (_mute->set_state (_stripable->monitor_control()->cut_control()->get_value() ? 1.0 : 0.0));
+		if (_stripable->mute_control()->get_value() != _stripable->monitor_control()->cut_control()->get_value()) {
+			Controllable::GroupControlDisposition gcd;
+
+			if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
+				gcd = Controllable::InverseGroup;
+			} else {
+				gcd = Controllable::UseGroup;
+			}
+
+			_stripable->mute_control()->set_value (_stripable->monitor_control()->cut_control()->get_value() ? 1.0 : 0.0, gcd);
+		}
 	}
 }
 
@@ -702,6 +724,11 @@ Strip::handle_button (Button& button, ButtonState bs)
 
 				for (MackieControlProtocol::ControlList::iterator c = controls.begin(); c != controls.end(); ++c) {
 					(*c)->set_value (new_value, gcd);
+				}
+
+				if (_stripable->is_monitor() || _stripable->is_surround_master()) {
+					std::shared_ptr<MonitorProcessor> mp = _stripable->monitor_control();
+					mp->set_cut_all (!mp->cut_all());
 				}
 
 			} else {

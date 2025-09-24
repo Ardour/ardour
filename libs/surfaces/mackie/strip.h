@@ -156,6 +156,7 @@ private:
 
 	void notify_solo_changed ();
 	void notify_mute_changed ();
+	void notify_monitor_cut_changed ();
 	void notify_record_enable_changed ();
 	void notify_subview_type_changed ();
 	void notify_gain_changed (bool force_update = true);
