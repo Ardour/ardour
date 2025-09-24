@@ -645,12 +645,9 @@
       <menuitem action='ToggleTriggerProps'/>
 
       <separator/>
-      <menuitem action='ToggleMixerStrip'/>
-#ifdef MIXBUS
-      <menuitem action='ToggleMixerProps'/>
-#endif
       <menuitem action='ToggleMixerList'/>
 #ifdef MIXBUS
+      <menuitem action='ToggleMixerProps'/>
       <menuitem action='ToggleMixbusPane'/>
 #endif
       <menuitem action='ToggleVCAPane'/>

@@ -3779,18 +3779,15 @@ Mixer_UI::register_actions ()
 
 	RefPtr<Action> act;
 	if (!Profile->get_mixbus ()) {
-		act = ActionManager::register_toggle_action (group, "ToggleMixerList", _("(Mixer) Show Sidebar List"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
+		act = ActionManager::register_toggle_action (group, "ToggleMixerList", _("Mixer: Show Sidebar List"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
 		left_attachment_button.set_related_action (act);
-		act = ActionManager::register_toggle_action (group, "ToggleMixerStrip", _("(Mixer) Show Sidebar Strip"), []{});
 	} else {
-		act = ActionManager::register_toggle_action (group, "ToggleMixerList", _("(Mixer) Show Sidebar List"), sigc::mem_fun (*this, &Tabbable::att_right_button_toggled));
+		act = ActionManager::register_toggle_action (group, "ToggleMixerList", _("Mixer: Show Sidebar List"), sigc::mem_fun (*this, &Tabbable::att_right_button_toggled));
 		right_attachment_button.set_related_action (act);
-		act = ActionManager::register_toggle_action (group, "ToggleMixerStrip", _("(Mixer) Show Sidebar Strip"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
-		left_attachment_button.set_related_action (act);
 	}
 
 #ifdef MIXBUS
-	act = ActionManager::register_toggle_action (group, "ToggleMixerProps", _("(Mixer) Show Properties Bottom"), sigc::mem_fun (*this, &Tabbable::att_bottom_button_toggled));
+	act = ActionManager::register_toggle_action (group, "ToggleMixerProps", _("Mixer: Show Properties Bottom"), sigc::mem_fun (*this, &Tabbable::att_bottom_button_toggled));
 	bottom_attachment_button.set_related_action (act);
 #endif
 
