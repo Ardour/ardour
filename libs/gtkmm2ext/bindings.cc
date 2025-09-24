@@ -855,15 +855,21 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 		return;
 	}
 
-
+	ostr << "<!DOCTYPE html>\n";
 	ostr << "<html>\n<head>\n<title>";
 	ostr << PROGRAM_NAME;
 	ostr << "</title>\n";
 	ostr << "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n";
+	ostr << "<style>\n";
+	ostr << "  table { border: 2px outset gray; line-height: 0.8em; box-sizing: border-box; }\n";
+	ostr << "  h2 { margin: 1em 0; }\n";
+	ostr << "  td, th { padding: 6px; border: 1px inset; }\n";
+	ostr << "  span { font-family:monospace; margin: 0px; }\n";
+	ostr << "</style>\n";
 
 	ostr << "</head>\n<body>\n";
 
-	ostr << "<table border=\"2\" cellpadding=\"6\"><tbody>\n\n";
+	ostr << "<table><tbody>\n\n";
 	ostr << "<tr>\n\n";
 
 	/* first column: separate by group */
@@ -884,7 +890,8 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 	ostr << "</tr>\n\n";
 	ostr << "</tbody></table>\n\n";
 
-	ostr << "</br></br>\n\n";
+	ostr << "<br/>\n\n";
+	ostr << "<div style=\"page-break-before: always;\"></div>\n\n";
 	ostr << "<table border=\"2\" cellpadding=\"6\"><tbody>\n\n";
 	ostr << "<tr>\n\n";
 	ostr << "<td>\n\n";
@@ -905,9 +912,9 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 		for (p = paths.begin(), k = keys.begin(), l = labels.begin(); p != paths.end(); ++k, ++p, ++l) {
 
 			if ((*k).empty()) {
-				ostr << *p  << " ( " << *l << " ) "  << "</br>" << endl;
+				ostr << *p  << " ( " << *l << " ) "  << "<br/>" << endl;
 			} else {
-				ostr << *p << " ( " << *l << " ) " << " => " << *k << "</br>" << endl;
+				ostr << *p << " ( " << *l << " ) " << " => " << *k << "<br/>" << endl;
 			}
 		}
 	}
@@ -1020,8 +1027,8 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 				while (key_name.length()<28)
 					key_name.append("-");
 
-				ostr << "<span style=\"font-family:monospace;\">" << key_name;
-				ostr << "<i>" << action->get_label() << "</i></span></br>\n";
+				ostr << "<span>" << key_name;
+				ostr << "<i>" << action->get_label() << "</i></span><br/>\n";
 			}
 			ostr << "\n\n";
 
