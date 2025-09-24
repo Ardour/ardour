@@ -1221,11 +1221,15 @@ ArdourButton::controllable_changed ()
 {
 	float val = binding_proxy.get_controllable()->get_value();
 
-	if (fabs (val) >= 0.5f) {
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(_action);
+	if (tact) {
+		tact->set_active (fabs (val) >= 0.5f);
+	} else if (fabs (val) >= 0.5f) {
 		set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		unset_active_state ();
 	}
+
 	CairoWidget::set_dirty ();
 }
 
