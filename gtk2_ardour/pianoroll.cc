@@ -1445,15 +1445,16 @@ Pianoroll::build_cc_menu (ArdourWidgets::MetaButton* ccbtn)
 void
 Pianoroll::set_track (std::shared_ptr<ARDOUR::Track> track)
 {
-	if (_track == track) {
-		return;
-	}
 	EC_LOCAL_TEMPO_SCOPE;
 
 	CueEditor::set_track (track);
 
 	if (view) {
 		view->set_track (std::dynamic_pointer_cast<MidiTrack> (track));
+	}
+
+	if (_track == track) {
+		return;
 	}
 
 	cc_dropdown1->menu().items().clear ();
