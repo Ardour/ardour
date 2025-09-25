@@ -1194,11 +1194,19 @@ CueEditor::update_solo_display ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (_track->solo_control()->get_value()) {
-		solo_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	std::shared_ptr<SoloControl> sc = _track->solo_control();
+	Gtkmm2ext::ActiveState state;
+
+	if (!sc || !sc->can_solo()) {
+		state = Gtkmm2ext::Off;
+	} else if (sc->self_soloed()) {
+		state = Gtkmm2ext::ExplicitActive;
+	} else if (sc->soloed_by_others()) {
+		state = Gtkmm2ext::ImplicitActive;
 	} else {
-		solo_button.set_active_state (Gtkmm2ext::Off);
+		state = Gtkmm2ext::Off;
 	}
+	solo_button.set_active_state (state);
 }
 
 void
@@ -1208,6 +1216,7 @@ CueEditor::set_track (std::shared_ptr<Track> t)
 
 	_track = t;
 	_track->solo_control()->Changed.connect (object_connections, invalidator (*this), std::bind (&CueEditor::update_solo_display, this), gui_context());
+	solo_button.set_sensitive (true);
 	update_solo_display ();
 }
 
@@ -1478,6 +1487,8 @@ CueEditor::unset (bool trigger_too)
 
 	if (trigger_too) {
 		ref = TriggerReference ();
+		solo_button.set_active_state (Gtkmm2ext::Off);
+		solo_button.set_sensitive (false);
 		_track.reset ();
 	} else if (_track) {
 		/* re-subscribe to object_connections */
