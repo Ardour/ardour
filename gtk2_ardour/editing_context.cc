@@ -632,9 +632,6 @@ EditingContext::register_midi_actions (Bindings* midi_bindings, std::string cons
 	ActionManager::register_action (_midi_actions, X_("split-notes-less"), _("Split Selected Notes into less pieces"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::split_notes_less));
 	ActionManager::register_action (_midi_actions, X_("join-notes"), _("Join Selected Notes"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::join_notes));
 
-	ActionManager::register_action (_midi_actions, X_("strum-forward"), _("Strum notes forward"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::strum_notes_forward));
-	ActionManager::register_action (_midi_actions, X_("strum-backward"), _("Strum notes backward"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::strum_notes_backward));
-
 	ActionManager::register_action (_midi_actions, X_("edit-channels"), _("Edit Note Channels"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::channel_edit));
 	ActionManager::register_action (_midi_actions, X_("edit-velocities"), _("Edit Note Velocities"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::velocity_edit));
 
@@ -1941,9 +1938,6 @@ EditingContext::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* eve
 		items.back().set_sensitive (false);
 	}
 	items.push_back(MenuElem(_("Transform..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::transform_regions), mvs)));
-	items.push_back (SeparatorElem());
-	items.push_back(MenuElem(_("Strum forward"), sigc::mem_fun(mrv, &MidiView::strum_notes_forward)));
-	items.push_back(MenuElem(_("Strum backward"), sigc::mem_fun(mrv, &MidiView::strum_notes_backward)));
 
 	_note_context_menu.popup (event->button.button, event->button.time);
 }

@@ -431,11 +431,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	void quantize_selected_notes ();
 
-	void strum_notes_forward ();
-	void strum_notes_backward ();
-
   protected:
-	void strum_notes (bool forward, bool end);
 	friend class MidiRubberbandSelectDrag;
 	friend class MidiVerticalSelectDrag;
 	friend class NoteDrag;
