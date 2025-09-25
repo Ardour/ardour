@@ -59,6 +59,10 @@ namespace Temporal {
 	class TempoMap;
 }
 
+namespace ARDOUR {
+	class Strum;
+}
+
 class XMLNode;
 
 class ControlPoint;
@@ -388,6 +392,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	/* MIDI actions, proxied to selected MidiRegionView(s) */
 	ARDOUR::Quantize* get_quantize_op ();
+	ARDOUR::Strum* get_strum_op (bool, bool);
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const MidiViews& rs);
 	PBD::Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiView& mrv);
@@ -402,6 +407,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	void quantize_regions (const MidiViews& rs);
 	void legatize_regions (const MidiViews& rs, bool shrink_only);
+	void strum_notes (const MidiViews& rs, bool forward);
 	void transform_regions (const MidiViews& rs);
 	void transpose_regions (const MidiViews& rs);
 

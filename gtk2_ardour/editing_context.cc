@@ -28,6 +28,7 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/transpose.h"
 #include "ardour/quantize.h"
+#include "ardour/strum.h"
 
 #include "gtkmm2ext/bindings.h"
 
@@ -631,6 +632,9 @@ EditingContext::register_midi_actions (Bindings* midi_bindings, std::string cons
 	ActionManager::register_action (_midi_actions, X_("split-notes-more"), _("Split Selected Notes into more pieces"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::split_notes_more));
 	ActionManager::register_action (_midi_actions, X_("split-notes-less"), _("Split Selected Notes into less pieces"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::split_notes_less));
 	ActionManager::register_action (_midi_actions, X_("join-notes"), _("Join Selected Notes"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::join_notes));
+
+	ActionManager::register_action (_midi_actions, X_("strum-forward"), _("Strum notes forward"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::strum_notes_forward));
+	ActionManager::register_action (_midi_actions, X_("strum-backward"), _("Strum notes backward"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::strum_notes_backward));
 
 	ActionManager::register_action (_midi_actions, X_("edit-channels"), _("Edit Note Channels"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::channel_edit));
 	ActionManager::register_action (_midi_actions, X_("edit-velocities"), _("Edit Note Velocities"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::velocity_edit));
@@ -1813,6 +1817,14 @@ EditingContext::get_quantize_op ()
 	                     quantize_dialog->threshold());
 }
 
+Strum*
+EditingContext::get_strum_op (bool forward, bool fine)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	return new Strum (forward, fine);
+}
+
 timecnt_t
 EditingContext::relative_distance (timepos_t const & origin, timecnt_t const & duration, Temporal::TimeDomain domain)
 {
@@ -1938,6 +1950,9 @@ EditingContext::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* eve
 		items.back().set_sensitive (false);
 	}
 	items.push_back(MenuElem(_("Transform..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::transform_regions), mvs)));
+	items.push_back (SeparatorElem());
+	items.push_back(MenuElem(_("Strum forward"), sigc::bind(sigc::mem_fun(*this, &EditingContext::strum_notes), mvs, true)));
+	items.push_back(MenuElem(_("Strum backward"), sigc::bind(sigc::mem_fun(*this, &EditingContext::strum_notes), mvs, false)));
 
 	_note_context_menu.popup (event->button.button, event->button.time);
 }
@@ -2126,6 +2141,19 @@ EditingContext::transpose_regions (const MidiViews& rs)
 		Transpose transpose(d.semitones ());
 		apply_midi_note_edit_op (transpose, rs);
 	}
+}
+
+void
+EditingContext::strum_notes (const MidiViews& rs, bool forward)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (rs.empty()) {
+		return;
+	}
+
+	Strum strum (forward, false);
+	apply_midi_note_edit_op (strum, rs);
 }
 
 void

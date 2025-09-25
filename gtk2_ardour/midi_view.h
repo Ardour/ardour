@@ -301,6 +301,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	bool set_velocities_for_notes (std::vector<NoteBase*>& notes, std::vector<int>& velocities);
 	void transpose (bool up, bool fine, bool allow_smush);
 	void nudge_notes (bool forward, bool fine);
+	void strum_notes (bool forward, bool fine);
 	void channel_edit ();
 	void velocity_edit ();
 
@@ -430,6 +431,9 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void nudge_notes_earlier_fine () { nudge_notes (false, true); }
 
 	void quantize_selected_notes ();
+
+	void strum_notes_forward () { strum_notes (true, false); }
+	void strum_notes_backward () { strum_notes (false, false); }
 
   protected:
 	friend class MidiRubberbandSelectDrag;

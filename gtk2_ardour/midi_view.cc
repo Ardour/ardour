@@ -47,6 +47,7 @@
 #include "ardour/operations.h"
 #include "ardour/quantize.h"
 #include "ardour/session.h"
+#include "ardour/strum.h"
 
 #include "evoral/Parameter.h"
 #include "evoral/Event.h"
@@ -5008,6 +5009,28 @@ MidiView::quantize_selected_notes ()
 	}
 
 	delete quant;
+}
+
+void
+MidiView::strum_notes (bool forward, bool fine)
+{
+	Strum* strum = _editing_context.get_strum_op (forward, fine);
+
+	if (!strum) {
+		return;
+	}
+
+	PBD::Command* cmd = _editing_context.apply_midi_note_edit_op_to_region (*strum, *this);
+
+	if (cmd) {
+	       _editing_context.begin_reversible_command (strum->name ());
+	       (*cmd)();
+	       _editing_context.add_command (cmd);
+	       _editing_context.commit_reversible_command ();
+	       _editing_context.session()->set_dirty ();
+	}
+
+	delete strum;
 }
 
 void
