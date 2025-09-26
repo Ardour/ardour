@@ -593,6 +593,9 @@ RegionFxPlugin::set_default_automation (timepos_t end)
 {
 	for (auto const& i : _controls) {
 		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i.second);
+		if (!ac->alist ()) {
+			continue;
+		}
 		if (ac->alist ()->empty ()) {
 			ac->alist ()->fast_simple_add (timepos_t (time_domain ()), ac->normal ());
 			ac->alist ()->fast_simple_add (end, ac->normal ());
@@ -807,7 +810,9 @@ RegionFxPlugin::flush ()
 	}
 	for (auto const& i : _controls) {
 		shared_ptr<TimedPluginControl> tpc = std::dynamic_pointer_cast<TimedPluginControl>(i.second);
-		tpc->flush ();
+		if (tpc) {
+			tpc->flush ();
+		}
 	}
 }
 
@@ -1448,7 +1453,7 @@ RegionFxPlugin::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t
 
 	for (auto const& i : _controls) {
 		shared_ptr<TimedPluginControl> tpc = std::dynamic_pointer_cast<TimedPluginControl>(i.second);
-		if (tpc->automation_playback ()) {
+		if (tpc && tpc->automation_playback ()) {
 			tpc->store_value (start + pos, end + pos);
 		}
 	}
@@ -1480,7 +1485,7 @@ RegionFxPlugin::maybe_emit_changed_signals () const
 	Glib::Threads::Mutex::Lock lp (_process_lock);
 	for (auto const& i : _controls) {
 		shared_ptr<TimedPluginControl> tpc = std::dynamic_pointer_cast<TimedPluginControl>(i.second);
-		if (tpc->automation_playback ()) {
+		if (tpc && tpc->automation_playback ()) {
 			tpc->maybe_emit_changed ();
 		}
 	}
