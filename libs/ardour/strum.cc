@@ -51,11 +51,20 @@ Strum::operator()(std::shared_ptr<ARDOUR::MidiModel> model,
 		return cmd;
 	}
 
-	// Sort notes by start time
-	std::sort(all_notes.begin(), all_notes.end(),
-	          [](const NotePtr& a, const NotePtr& b) {
-	              return a->time() < b->time();
-	          });
+	bool forward = _forward;
+
+	// Sort notes
+	std::sort(all_notes.begin(), all_notes.end(), [forward](const NotePtr& a, const NotePtr& b) {
+		if (a->time() == b->time()) {
+			if (forward) {
+				return a->note() < b->note();
+			} else {
+				return a->note() > b->note();
+			}
+		} else {
+			return a->time() < b->time();
+		}
+	});
 
 	Temporal::Beats total_offset;
 	Temporal::Beats offset;
@@ -66,20 +75,28 @@ Strum::operator()(std::shared_ptr<ARDOUR::MidiModel> model,
 		offset = Temporal::Beats::ticks(Temporal::ticks_per_beat / 32);
 	}
 
-	if (_forward) {
-		for (std::vector<NotePtr>::const_iterator i = all_notes.begin(); i != all_notes.end(); ++i) {
-			const NotePtr note = *i;
-			Temporal::Beats new_start = note->time() + total_offset;
-			cmd->change(note, MidiModel::NoteDiffCommand::StartTime, new_start);
-			total_offset += offset;
+	Temporal::Beats prev_time = all_notes.at(0)->time();
+
+	for (std::vector<NotePtr>::const_iterator i = all_notes.begin(); i != all_notes.end(); ++i) {
+		const NotePtr note = *i;
+		std::cout << (*i)->note() << std::endl;
+		if ((*i)->time() != prev_time) {
+			total_offset = 0;
 		}
-	} else { // backward
-		for (std::vector<NotePtr>::const_reverse_iterator i = all_notes.rbegin(); i != all_notes.rend(); ++i) {
-			const NotePtr note = *i;
-			Temporal::Beats new_start = note->time() + total_offset;
-			cmd->change(note, MidiModel::NoteDiffCommand::StartTime, new_start);
-			total_offset += offset;
+
+		Temporal::Beats new_start;
+		Temporal::Beats new_length = note->length() - total_offset;
+		if (new_length <= Temporal::Beats::ticks(0)) {
+			new_start = note->end_time() - Temporal::Beats::ticks(1);
+			new_length = Temporal::Beats::ticks(1);
+		} else {
+			new_start = note->time() + total_offset;
 		}
+
+		cmd->change(note, MidiModel::NoteDiffCommand::StartTime, new_start);
+		cmd->change(note, MidiModel::NoteDiffCommand::Length, new_length);
+		total_offset += offset;
+		prev_time = (*i)->time();
 	}
 
 	return cmd;
