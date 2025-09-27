@@ -225,13 +225,12 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 	_table_main.attach (_table_clocks,  1, 2, 2, 3, Gtk::FILL, Gtk::SHRINK);
 	_table_main.attach (_table_tempo,   1, 2, 3, 4, Gtk::FILL, Gtk::SHRINK);
 
-	/* AudioRegionEditor inserts stuff into _table_main here */
+	/* AudioRegionEditor inserts stuff into _table_main here, row 4 .. 6 */
 
 	_table_main.attach (*manage (new ArdourWidgets::ArdourVSpacer (0)), 2, 3, 2, 4, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
-	_table_main.attach (*manage (new ArdourWidgets::ArdourHSpacer (0)), 0, 3, 5, 6, Gtk::FILL, Gtk::FILL | Gtk::EXPAND);
 
 	_table_main.attach (_region_fx_label, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK);
-	_table_main.attach (_region_fx_box,   3, 4, 1, 5, Gtk::FILL, Gtk::EXPAND | Gtk::FILL);
+	_table_main.attach (_region_fx_box,   3, 4, 1, 5, Gtk::FILL,  Gtk::FILL);
 
 	add (_table_main);
 

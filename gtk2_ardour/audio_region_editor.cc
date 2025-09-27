@@ -119,6 +119,8 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	_table_main.attach (_region_line_label, 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK);
 	_table_main.attach (_region_line,       1, 3, row, row+1, Gtk::EXPAND | Gtk::FILL, Gtk::SHRINK);
 	_table_main.attach (_show_on_touch,     3, 4, row, row+1, Gtk::FILL, Gtk::SHRINK);
+	row++;
+	_table_main.attach (*manage (new ArdourWidgets::ArdourHSpacer (0)), 0, 3, row, row + 1, Gtk::FILL, Gtk::FILL | Gtk::EXPAND);
 
 	UI::instance()->set_tip (_polarity_toggle, _("Invert the signal polarity (180deg phase shift)"));
 	UI::instance()->set_tip (_fade_before_fx_toggle, _("Apply region effects after the region fade.\nThis is useful if the effect(s) have tail, which would otherwise be faded out by the region fade (e.g. reverb, delay)"));
@@ -127,6 +129,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	gain_changed ();
 	fade_before_fx_changed ();
 	refill_region_line ();
+	_table_main.show_all ();
 
 	_gain_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
 	_polarity_toggle.signal_toggled ().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
