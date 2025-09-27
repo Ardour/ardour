@@ -44,6 +44,7 @@
 #include "ardour_http.h"
 #include "ardour_ui.h"
 #include "audio_region_view.h"
+#include "control_point.h"
 #include "public_editor.h"
 #include "region_selection.h"
 #include "luadialog.h"
@@ -802,6 +803,12 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.beginStdCPtrList <ArdourMarker> ("ArdourMarkerList")
 		.endClass ()
 
+		.beginStdCPtrList <ControlPoint> ("ControlPointList")
+		.endClass ()
+
+		.beginStdList <std::shared_ptr<ARDOUR::AutomationList> > ("ARDOUR::AutomationListList")
+		.endClass ()
+
 		.beginClass <ArdourMarker> ("ArdourMarker")
 		.addFunction ("name", &ArdourMarker::name)
 		.addFunction ("position", &ArdourMarker::position)
@@ -861,6 +868,9 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.beginConstStdCPtrList <TimeAxisView> ("TrackViewStdList")
 		.endClass ()
 
+		.deriveClass <ControlPoint, Selectable> ("ControlPoint")
+		//.addFunction ("line", &ControlPoint::line) // AutomationLine&
+		.endClass ()
 
 		.beginClass <RegionSelection> ("RegionSelection")
 		.addFunction ("start_time", &RegionSelection::start_time)
@@ -880,6 +890,12 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.deriveClass <MarkerSelection, std::list<ArdourMarker*> > ("MarkerSelection")
 		.endClass ()
 
+		.deriveClass <PointSelection, std::list<ControlPoint*> > ("PointSelection")
+		.endClass ()
+
+		.deriveClass <AutomationSelection, std::list<std::shared_ptr<ARDOUR::AutomationList>> > ("AutomationSelection")
+		.endClass ()
+
 		.beginClass <TrackViewList> ("TrackViewList")
 		.addCast<std::list<TimeAxisView*> > ("to_tav_list")
 		.addFunction ("contains", &TrackViewList::contains)
@@ -897,10 +913,10 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addData ("regions", &Selection::regions)
 		.addData ("time", &Selection::time)
 		.addData ("markers", &Selection::markers)
-#if 0
 		.addData ("lines", &Selection::lines)
-		.addData ("playlists", &Selection::playlists)
 		.addData ("points", &Selection::points)
+#if 0
+		.addData ("playlists", &Selection::playlists)
 		.addData ("midi_regions", &Selection::midi_regions)
 		.addData ("midi_notes", &Selection::midi_notes) // cut buffer only
 #endif
