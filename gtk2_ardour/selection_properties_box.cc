@@ -27,7 +27,9 @@
 
 #include "audio_region_editor.h"
 #include "audio_region_view.h"
+#include "control_point.h"
 #include "editor.h"
+#include "region_fx_line.h"
 #include "region_fx_properties_box.h"
 #include "region_view.h"
 #include "route_properties_box.h"
@@ -188,8 +190,17 @@ SelectionPropertiesBox::selection_changed ()
 		}
 	}
 
-	if (selection.regions.size () == 1 && 0 != (_disposition & ShowRegions)) {
-		RegionView* rv = (selection.regions.front ());
+	RegionView* rv = 0;
+	if (selection.regions.size () == 1) {
+		rv = selection.regions.front ();
+	} else if (!selection.points.empty ()) {
+		RegionFxLine *rfx = dynamic_cast<RegionFxLine*>(&selection.points.back()->line ());
+		if (rfx) {
+			rv = &rfx->region_view();
+		}
+	}
+
+	if (rv && 0 != (_disposition & ShowRegions)) {
 		if (!_region_editor || _region_editor->region () != rv->region ()) {
 			delete_region_editor ();
 			AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
@@ -211,9 +222,10 @@ SelectionPropertiesBox::selection_changed ()
 		}
 	} else {
 		/* only hide region props when selecting a track or trigger,
-		 * but retain existing RegionEditor, when selecting another additional region.
+		 * retain existing RegionEditor, when selecting another additional region, or
+		 * when switching tools (grab -> draw) to edit region-gain, or note entry.
 		 */
-		if (selection.regions.empty () || !selection.markers.empty () || !selection.playlists.empty () || !selection.triggers.empty ()) {
+		if (!selection.tracks.empty ()|| !selection.markers.empty () || !selection.playlists.empty () || !selection.triggers.empty ()) {
 			delete_region_editor ();
 		}
 	}
