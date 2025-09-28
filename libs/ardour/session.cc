@@ -4345,6 +4345,8 @@ Session::get_routes_with_internal_returns() const
 			rl->push_back (i);
 		}
 	}
+
+	rl->sort (Stripable::Sorter ());
 	return rl;
 }
 
