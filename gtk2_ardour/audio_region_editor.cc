@@ -258,13 +258,9 @@ AudioRegionEditor::peak_amplitude_found (double p)
 	_peak_amplitude.set_text (s.str ());
 }
 
-void
-AudioRegionEditor::show_touched_automation (std::weak_ptr<PBD::Controllable> wac)
+static void
+switch_tool_to_show_rfx_line ()
 {
-	if (!_arv->set_region_fx_line (wac)) {
-		return;
-	}
-
 	switch (PublicEditor::instance ().current_mouse_mode ()) {
 		case Editing::MouseObject:
 		case Editing::MouseTimeFX:
@@ -275,6 +271,16 @@ AudioRegionEditor::show_touched_automation (std::weak_ptr<PBD::Controllable> wac
 		default:
 			break;
 	}
+}
+
+void
+AudioRegionEditor::show_touched_automation (std::weak_ptr<PBD::Controllable> wac)
+{
+	if (!_arv->set_region_fx_line (wac)) {
+		return;
+	}
+
+	switch_tool_to_show_rfx_line ();
 }
 
 void
@@ -310,7 +316,7 @@ AudioRegionEditor::refill_region_line ()
 	rm_items.push_back (RadioMenuElem (grp, _("Gain Envelope")));
 	Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*> (&rm_items.back ());
 	cmi->set_active (rfx_id == 0 || param_id == UINT32_MAX);
-	cmi->signal_activate ().connect ([cmi, arv] () { if (cmi->get_active ()) {arv->set_region_gain_line (); } });
+	cmi->signal_activate ().connect ([cmi, arv] () { if (cmi->get_active ()) { arv->set_region_gain_line (); switch_tool_to_show_rfx_line ();} });
 
 	_audio_region->foreach_plugin ([&rm_items, arv, &nth, &grp, &active_text, rfx_id, param_id] (std::weak_ptr<RegionFxPlugin> wfx) {
 		std::shared_ptr<RegionFxPlugin> fx (wfx.lock ());
@@ -344,7 +350,7 @@ AudioRegionEditor::refill_region_line ()
 			acm_items.push_back (RadioMenuElem (grp, label));
 			Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*> (&acm_items.back ());
 			cmi->set_active (active);
-			cmi->signal_activate ().connect ([cmi, arv, nth, i] () { if (cmi->get_active ()) {arv->set_region_fx_line (nth, i); } });
+			cmi->signal_activate ().connect ([cmi, arv, nth, i] () { if (cmi->get_active ()) { arv->set_region_fx_line (nth, i); switch_tool_to_show_rfx_line (); } });
 			if (active) {
 				active_text = fx->name () + ": " + label;
 			}
