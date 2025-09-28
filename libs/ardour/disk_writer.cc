@@ -1462,6 +1462,28 @@ DiskWriter::steal_write_source_name ()
 }
 
 bool
+DiskWriter::can_support_io_configuration (const ChanCount& in, ChanCount& out)
+{
+	if (record_enabled() && _session.actively_recording()) {
+		bool changed = false;
+		std::shared_ptr<ChannelList const> c = channels.reader();
+		if (in.n_audio() != c->size()) {
+			changed = true;
+		}
+		if ((0 == in.n_midi ()) != (0 == _midi_buf)) {
+			changed = true;
+		}
+		if (changed) {
+			out.set (DataType::AUDIO, c->size());
+			out.set (DataType::MIDI, (0 == _midi_buf) ? 0 : 1);
+			return false;
+		}
+	}
+
+	return DiskIOProcessor::can_support_io_configuration (in, out);
+}
+
+bool
 DiskWriter::configure_io (ChanCount in, ChanCount out)
 {
 	bool changed = false;
@@ -1479,6 +1501,14 @@ DiskWriter::configure_io (ChanCount in, ChanCount out)
 
 	if (!DiskIOProcessor::configure_io (in, out)) {
 		return false;
+	}
+
+	if (record_enabled() && _session.actively_recording()) {
+		/* Cannot reset write source, while recording.
+		 * see also ::can_support_io_configuration() above.
+		 */
+		assert (0);
+		return !changed;
 	}
 
 	if (record_enabled() || changed) {
