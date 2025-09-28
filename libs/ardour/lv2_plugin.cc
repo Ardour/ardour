@@ -203,6 +203,7 @@ public:
 	LilvNode* lv2_sampleRate;
 	LilvNode* lv2_toggled;
 	LilvNode* midi_MidiEvent;
+	LilvNode* rdf_type;
 	LilvNode* rdfs_comment;
 	LilvNode* rdfs_label;
 	LilvNode* rdfs_range;
@@ -2493,36 +2494,48 @@ LV2Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 	LilvNodes* groups = lilv_port_get_value (_impl->plugin, pport, _world.groups_group);
 	if (lilv_nodes_size (groups) > 0) {
 		const LilvNode* group = lilv_nodes_get_first (groups);
-		LilvNodes* grouplabel = lilv_world_find_nodes (_world.world, group, _world.rdfs_label, NULL);
 
 		/* get the name of the port-group */
-		if (lilv_nodes_size (grouplabel) > 0) {
-			const LilvNode* grpname = lilv_nodes_get_first (grouplabel);
+		LilvNode* grpname = lilv_world_get (_world.world, group, _world.rdfs_label, NULL);
+		if (grpname) {
 			iod.group_name = lilv_node_as_string (grpname);
 			// TODO set iod.bus_number (nth group)
 		}
-		lilv_nodes_free (grouplabel);
+		lilv_node_free (grpname);
 
 		/* get all port designations.
 		 * we're interested in e.g. lv2:designation pg:right */
 		LilvNodes* designations = lilv_port_get_value (_impl->plugin, pport, _world.lv2_designation);
 		if (lilv_nodes_size (designations) > 0) {
 			/* get all pg:elements of the pg:group */
-			LilvNodes* group_childs = lilv_world_find_nodes (_world.world, group, _world.groups_element, NULL);
-			if (lilv_nodes_size (group_childs) > 0) {
-				/* iterate over all port designations .. */
-				LILV_FOREACH (nodes, i, designations) {
-					const LilvNode* designation = lilv_nodes_get (designations, i);
-					/* match the lv2:designation's element against the port-group's element */
-					LILV_FOREACH (nodes, j, group_childs) {
-						const LilvNode* group_element = lilv_nodes_get (group_childs, j);
-						LilvNodes* elem = lilv_world_find_nodes (_world.world, group_element, _world.lv2_designation, designation);
+			LilvNodes* elements = lilv_world_find_nodes (_world.world, group, _world.groups_element, NULL);
+			if (!elements) {
+				/* group itself doesn't have elements, try its classes (like pg:StereoGroup) */
+				LilvNodes* group_classes = lilv_world_find_nodes (_world.world, group, _world.rdf_type, NULL);
+				LILV_FOREACH (nodes, i, group_classes) {
+					const LilvNode* group_class = lilv_nodes_get (group_classes, i);
+					elements = lilv_world_find_nodes (_world.world, group_class, _world.groups_element, NULL);
+					if (elements) {
+						break;
+					}
+				}
+				lilv_nodes_free(group_classes);
+			}
+
+			/* iterate over all port designations .. */
+			LILV_FOREACH (nodes, i, designations) {
+				const LilvNode* designation = lilv_nodes_get (designations, i);
+				/* search the group for an element with the same designation as the port */
+				LILV_FOREACH (nodes, j, elements) {
+					const LilvNode* element = lilv_nodes_get (elements, j);
+					if (lilv_world_ask (_world.world, element, _world.lv2_designation, designation)) {
 						/* found it. Now look up the index (channel-number) of the pg:Element */
-						if (lilv_nodes_size (elem) > 0) {
-							LilvNodes* idx = lilv_world_find_nodes (_world.world, lilv_nodes_get_first (elem), _world.lv2_index, NULL);
-							if (lilv_node_is_int (lilv_nodes_get_first (idx))) {
-								iod.group_channel = lilv_node_as_int(lilv_nodes_get_first (idx));
-							}
+						LilvNode* idx = lilv_world_get (_world.world, element, _world.lv2_index, NULL);
+						const bool is_int = lilv_node_is_int(idx);
+						iod.group_channel = lilv_node_as_int(idx);
+						lilv_node_free(idx);
+						if (is_int) {
+							break;
 						}
 					}
 				}
@@ -3536,6 +3549,7 @@ LV2World::LV2World()
 	lv2_enumeration        = lilv_new_uri(world, LV2_CORE__enumeration);
 	lv2_freewheeling       = lilv_new_uri(world, LV2_CORE__freeWheeling);
 	midi_MidiEvent         = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
+	rdf_type               = lilv_new_uri(world, LILV_NS_RDF "type");
 	rdfs_comment           = lilv_new_uri(world, LILV_NS_RDFS "comment");
 	rdfs_label             = lilv_new_uri(world, LILV_NS_RDFS "label");
 	rdfs_range             = lilv_new_uri(world, LILV_NS_RDFS "range");
@@ -3613,6 +3627,7 @@ LV2World::~LV2World()
 	lilv_node_free(rdfs_comment);
 	lilv_node_free(rdfs_label);
 	lilv_node_free(rdfs_range);
+	lilv_node_free(rdf_type);
 	lilv_node_free(midi_MidiEvent);
 	lilv_node_free(lv2_designation);
 	lilv_node_free(lv2_enumeration);
