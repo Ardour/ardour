@@ -698,6 +698,13 @@ Pianoroll::set_samples_per_pixel (samplecnt_t spp)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
+	assert (spp > 0);
+#ifndef NDEBUG
+	if (spp < 1) {
+		spp = 1;
+	}
+#endif
+
 	CueEditor::set_samples_per_pixel (spp);
 
 	if (view) {
