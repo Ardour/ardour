@@ -225,9 +225,11 @@ luabridge::getIdentityKey ()
 
 CLASSINFO(ArdourMarker);
 CLASSINFO(AudioRegionView);
+CLASSINFO(AutomationSelection);
 CLASSINFO(AxisView);
 CLASSINFO(MarkerSelection);
 CLASSINFO(EditingContext);
+CLASSINFO(PointSelection);
 CLASSINFO(PublicEditor);
 CLASSINFO(RegionSelection);
 CLASSINFO(RegionView);
@@ -255,6 +257,7 @@ CLASSKEYS(unsigned char);
 
 CLASSKEYS(ArdourMarker*);
 CLASSKEYS(Selectable*);
+CLASSKEYS(std::list<ControlPoint*>);
 CLASSKEYS(std::list<Selectable*>);
 
 CLASSKEYS(ARDOUR::AudioEngine);
@@ -334,6 +337,7 @@ CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Region> >);
 CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Route> >);
 CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Stripable> >);
 CLASSKEYS(std::shared_ptr<std::list<std::shared_ptr<ARDOUR::Route> > >);
+CLASSKEYS(std::shared_ptr<std::list<std::shared_ptr<ARDOUR::AutomationList> > >);
 CLASSKEYS(std::shared_ptr<std::vector<std::shared_ptr<ARDOUR::Bundle> > >);
 
 CLASSKEYS(std::shared_ptr<ARDOUR::AudioRegion>);
