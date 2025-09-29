@@ -79,7 +79,6 @@ Strum::operator()(std::shared_ptr<ARDOUR::MidiModel> model,
 
 	for (std::vector<NotePtr>::const_iterator i = all_notes.begin(); i != all_notes.end(); ++i) {
 		const NotePtr note = *i;
-		std::cout << (*i)->note() << std::endl;
 		if ((*i)->time() != prev_time) {
 			total_offset = 0;
 		}
