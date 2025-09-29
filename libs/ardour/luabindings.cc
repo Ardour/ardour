@@ -247,7 +247,6 @@ CLASSINFO(TrackSelection);
 CLASSINFO(TrackViewList);
 CLASSINFO(UIConfiguration);
 
-
 /* this needs to match gtk2_ardour/luasignal.h */
 CLASSKEYS(std::bitset<50ul>); // LuaSignal::LAST_SIGNAL
 
@@ -256,10 +255,21 @@ CLASSKEYS(float);
 CLASSKEYS(double);
 CLASSKEYS(unsigned char);
 
+CLASSKEYS(std::vector<std::string>);
+CLASSKEYS(std::vector<uint8_t>);
+CLASSKEYS(std::vector<float>);
+CLASSKEYS(std::vector<float*>);
+CLASSKEYS(std::vector<double>);
+CLASSKEYS(std::list<int64_t>);
+CLASSKEYS(std::vector<samplepos_t>);
+
 CLASSKEYS(ArdourMarker*);
 CLASSKEYS(Selectable*);
+
+CLASSKEYS(std::list<ArdourMarker*>);
 CLASSKEYS(std::list<ControlPoint*>);
 CLASSKEYS(std::list<Selectable*>);
+CLASSKEYS(std::list<TimeAxisView*>);
 
 CLASSKEYS(ARDOUR::AudioEngine);
 CLASSKEYS(ARDOUR::BufferSet);
@@ -300,6 +310,7 @@ CLASSKEYS(ARDOUR::VCAManager);
 CLASSKEYS(Temporal::timepos_t)
 CLASSKEYS(Temporal::timecnt_t)
 CLASSKEYS(Temporal::superclock_t)
+CLASSKEYS(Temporal::Beats);
 
 CLASSKEYS(PBD::ID);
 CLASSKEYS(PBD::Configuration);
@@ -307,37 +318,26 @@ CLASSKEYS(PBD::HistoryOwner);
 CLASSKEYS(PBD::PropertyChange);
 CLASSKEYS(PBD::StatefulDestructible);
 
-CLASSKEYS(Temporal::Beats);
 CLASSKEYS(Evoral::Event<samplepos_t>);
 CLASSKEYS(Evoral::ControlEvent);
 
-
-CLASSKEYS(std::vector<std::string>);
-CLASSKEYS(std::vector<uint8_t>);
-CLASSKEYS(std::vector<float>);
-CLASSKEYS(std::vector<float*>);
-CLASSKEYS(std::vector<double>);
-CLASSKEYS(std::list<int64_t>);
-CLASSKEYS(std::vector<samplepos_t>);
-
 CLASSKEYS(std::list<Evoral::ControlEvent*>);
+CLASSKEYS(std::list<ARDOUR::TimelineRange>);
 
+CLASSKEYS(std::vector<Evoral::Parameter>);
 CLASSKEYS(std::vector<ARDOUR::Plugin::PresetRecord>);
+
 CLASSKEYS(std::vector<std::shared_ptr<ARDOUR::Processor> >);
 CLASSKEYS(std::vector<std::shared_ptr<ARDOUR::Source> >);
 CLASSKEYS(std::vector<std::shared_ptr<ARDOUR::AudioReadable> >);
-CLASSKEYS(std::vector<Evoral::Parameter>);
-CLASSKEYS(std::list<std::shared_ptr<ARDOUR::PluginInfo> >); // PluginInfoList
-
-CLASSKEYS(std::list<ArdourMarker*>);
-CLASSKEYS(std::list<TimeAxisView*>);
-CLASSKEYS(std::list<ARDOUR::TimelineRange>);
 
 CLASSKEYS(std::list<std::shared_ptr<ARDOUR::AutomationList> >);
+CLASSKEYS(std::list<std::shared_ptr<ARDOUR::PluginInfo> >); // PluginInfoList
 CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Port> >);
 CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Region> >);
 CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Route> >);
 CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Stripable> >);
+
 CLASSKEYS(std::shared_ptr<std::list<std::shared_ptr<ARDOUR::Route> > >);
 CLASSKEYS(std::shared_ptr<std::vector<std::shared_ptr<ARDOUR::Bundle> > >);
 
@@ -347,6 +347,7 @@ CLASSKEYS(std::shared_ptr<ARDOUR::AudioSource>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Automatable>);
 CLASSKEYS(std::shared_ptr<ARDOUR::AutomatableSequence<Temporal::Beats> >);
 CLASSKEYS(std::shared_ptr<ARDOUR::AutomationList>);
+CLASSKEYS(std::shared_ptr<ARDOUR::Bundle>);
 CLASSKEYS(std::shared_ptr<ARDOUR::FileSource>);
 CLASSKEYS(std::shared_ptr<ARDOUR::MidiModel>);
 CLASSKEYS(std::shared_ptr<ARDOUR::MidiPlaylist>);
@@ -355,27 +356,26 @@ CLASSKEYS(std::shared_ptr<ARDOUR::MidiSource>);
 CLASSKEYS(std::shared_ptr<ARDOUR::PluginInfo>);
 CLASSKEYS(std::shared_ptr<ARDOUR::PluginInsert>);
 CLASSKEYS(std::shared_ptr<ARDOUR::RegionFxPlugin>);
+CLASSKEYS(std::shared_ptr<ARDOUR::Route>);
+CLASSKEYS(std::shared_ptr<ARDOUR::Playlist>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Processor>);
 CLASSKEYS(std::shared_ptr<ARDOUR::AudioReadable>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Region>);
+CLASSKEYS(std::shared_ptr<ARDOUR::RegionList>);
 CLASSKEYS(std::shared_ptr<ARDOUR::SessionPlaylists>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Track>);
+CLASSKEYS(std::shared_ptr<ARDOUR::VCA>);
+
 CLASSKEYS(std::shared_ptr<Evoral::ControlList>);
 CLASSKEYS(std::shared_ptr<Evoral::Event<Temporal::Beats> >);
 CLASSKEYS(std::shared_ptr<Evoral::Note<Temporal::Beats> >);
 CLASSKEYS(std::shared_ptr<Evoral::PatchChange<Temporal::Beats> >);
 CLASSKEYS(std::shared_ptr<Evoral::Sequence<Temporal::Beats> >);
 
-CLASSKEYS(std::shared_ptr<ARDOUR::Playlist>);
-CLASSKEYS(std::shared_ptr<ARDOUR::Bundle>);
-CLASSKEYS(std::shared_ptr<ARDOUR::Route>);
-CLASSKEYS(std::shared_ptr<ARDOUR::VCA>);
 CLASSKEYS(std::weak_ptr<ARDOUR::Bundle>);
 CLASSKEYS(std::weak_ptr<ARDOUR::Route>);
 CLASSKEYS(std::weak_ptr<ARDOUR::Track>);
 CLASSKEYS(std::weak_ptr<ARDOUR::VCA>);
-
-CLASSKEYS(std::shared_ptr<ARDOUR::RegionList>);
 
 CLASSKEYS(Vamp::RealTime);
 CLASSKEYS(Vamp::PluginBase);
