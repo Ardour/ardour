@@ -227,6 +227,7 @@ CLASSINFO(ArdourMarker);
 CLASSINFO(AudioRegionView);
 CLASSINFO(AutomationSelection);
 CLASSINFO(AxisView);
+CLASSINFO(ControlPoint);
 CLASSINFO(MarkerSelection);
 CLASSINFO(EditingContext);
 CLASSINFO(PointSelection);
@@ -332,12 +333,12 @@ CLASSKEYS(std::list<ArdourMarker*>);
 CLASSKEYS(std::list<TimeAxisView*>);
 CLASSKEYS(std::list<ARDOUR::TimelineRange>);
 
+CLASSKEYS(std::list<std::shared_ptr<ARDOUR::AutomationList> >);
 CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Port> >);
 CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Region> >);
 CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Route> >);
 CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Stripable> >);
 CLASSKEYS(std::shared_ptr<std::list<std::shared_ptr<ARDOUR::Route> > >);
-CLASSKEYS(std::shared_ptr<std::list<std::shared_ptr<ARDOUR::AutomationList> > >);
 CLASSKEYS(std::shared_ptr<std::vector<std::shared_ptr<ARDOUR::Bundle> > >);
 
 CLASSKEYS(std::shared_ptr<ARDOUR::AudioRegion>);
