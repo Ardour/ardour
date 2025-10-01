@@ -118,6 +118,7 @@ private:
 	std::string ensure_io_name (std::string) const;
 	void create_parameters ();
 	void parameter_changed_externally (uint32_t, float);
+	void property_changed_externally (uint32_t, Variant);
 
 	void setup ();
 

@@ -393,6 +393,14 @@ PlugInsertBase::PluginPropertyControl::actually_set_value (double user_val, Cont
 	AutomationControl::actually_set_value (user_val, gcd);
 }
 
+void
+PlugInsertBase::PluginPropertyControl::catch_up_with_external_value (double user_val)
+{
+	if (user_val != Control::get_double ()) {
+		PluginPropertyControl::actually_set_value (user_val, Controllable::NoGroup);
+	}
+}
+
 XMLNode&
 PlugInsertBase::PluginPropertyControl::get_state () const
 {

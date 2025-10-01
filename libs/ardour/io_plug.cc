@@ -256,6 +256,7 @@ IOPlug::setup ()
 
 	 _plugin->reconfigure_io (_n_in, aux_in, _n_out);
 	 _plugin->ParameterChangedExternally.connect_same_thread (*this, std::bind (&IOPlug::parameter_changed_externally, this, _1, _2));
+	 _plugin->PropertyChanged.connect_same_thread (*this, std::bind (&IOPlug::property_changed_externally, this, _1, _2));
 	 _plugin->activate ();
 	 _plugin->set_insert (this, 0);
 }
@@ -369,6 +370,17 @@ IOPlug::parameter_changed_externally (uint32_t which, float val)
 	std::shared_ptr<PluginControl> pc = std::dynamic_pointer_cast<PluginControl> (c);
 	if (pc) {
 		pc->catch_up_with_external_value (val);
+	}
+}
+
+void
+IOPlug::property_changed_externally (uint32_t which, Variant val)
+{
+	std::shared_ptr<Evoral::Control>        c  = control (Evoral::Parameter (PluginPropertyAutomation, 0, which));
+	std::shared_ptr<PluginPropertyControl>  pc = std::dynamic_pointer_cast<PluginPropertyControl> (c);
+
+	if (pc) {
+		pc->catch_up_with_external_value (val.to_double ());
 	}
 }
 

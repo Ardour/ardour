@@ -430,6 +430,7 @@ RegionFxPlugin::add_plugin (std::shared_ptr<Plugin> plugin)
 	if (_plugins.empty ()) {
 		/* first (and probably only) plugin instance - connect to relevant signals */
 		plugin->ParameterChangedExternally.connect_same_thread (*this, std::bind (&RegionFxPlugin::parameter_changed_externally, this, _1, _2));
+		plugin->PropertyChanged.connect_same_thread (*this, std::bind (&RegionFxPlugin::property_changed_externally, this, _1, _2));
 		plugin->StartTouch.connect_same_thread (*this, std::bind (&RegionFxPlugin::start_touch, this, _1));
 		plugin->EndTouch.connect_same_thread (*this, std::bind (&RegionFxPlugin::end_touch, this, _1));
 	}
@@ -691,6 +692,34 @@ RegionFxPlugin::parameter_changed_externally (uint32_t which, float val)
 		++i;
 		for (; i != _plugins.end (); ++i) {
 			(*i)->set_parameter (which, val, 0);
+		}
+	}
+}
+
+void
+RegionFxPlugin::property_changed_externally (uint32_t which, Variant val)
+{
+	std::shared_ptr<Evoral::Control>        c  = control (Evoral::Parameter (PluginPropertyAutomation, 0, which));
+	std::shared_ptr<PluginPropertyControl>  pc = std::dynamic_pointer_cast<PluginPropertyControl> (c);
+
+	if (pc) {
+		pc->catch_up_with_external_value (val.to_double ());
+	}
+
+	/* Second propagation: tell all plugins except the first to
+	 * update the value of this parameter. For sane plugin APIs,
+	 * there are no other plugins, so this is a no-op in those
+	 * cases.
+	 */
+
+	Plugins::iterator i = _plugins.begin ();
+
+	/* don't set the first plugin, just all the slaves */
+
+	if (i != _plugins.end ()) {
+		++i;
+		for (; i != _plugins.end (); ++i) {
+			(*i)->set_property (which, val);
 		}
 	}
 }

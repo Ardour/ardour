@@ -660,6 +660,39 @@ PluginInsert::parameter_changed_externally (uint32_t which, float val)
 	}
 }
 
+void
+PluginInsert::property_changed_externally (uint32_t which, Variant val)
+{
+	std::shared_ptr<Evoral::Control>        c  = control (Evoral::Parameter (PluginPropertyAutomation, 0, which));
+	std::shared_ptr<PluginPropertyControl>  pc = std::dynamic_pointer_cast<PluginPropertyControl> (c);
+
+	if (pc) {
+		pc->catch_up_with_external_value (val.to_double ());
+	}
+
+	/* Second propagation: tell all plugins except the first to
+	 * update the value of this parameter. For sane plugin APIs,
+	 * there are no other plugins, so this is a no-op in those
+	 * cases.
+	 */
+
+	Plugins::iterator i = _plugins.begin ();
+
+	/* don't set the first plugin, just all the slaves */
+
+	if (i != _plugins.end ()) {
+		++i;
+		for (; i != _plugins.end (); ++i) {
+			(*i)->set_property (which, val);
+		}
+	}
+
+	std::shared_ptr<Plugin> iasp = _impulseAnalysisPlugin.lock();
+	if (iasp) {
+		iasp->set_property (which, val);
+	}
+}
+
 int
 PluginInsert::set_block_size (pframes_t nframes)
 {
@@ -3021,6 +3054,7 @@ PluginInsert::add_plugin (std::shared_ptr<Plugin> plugin)
 		/* first (and probably only) plugin instance - connect to relevant signals */
 
 		plugin->ParameterChangedExternally.connect_same_thread (*this, std::bind (&PluginInsert::parameter_changed_externally, this, _1, _2));
+		plugin->PropertyChanged.connect_same_thread (*this, std::bind (&PluginInsert::property_changed_externally, this, _1, _2));
 		plugin->StartTouch.connect_same_thread (*this, std::bind (&PluginInsert::start_touch, this, _1));
 		plugin->EndTouch.connect_same_thread (*this, std::bind (&PluginInsert::end_touch, this, _1));
 		_custom_sinks = plugin->get_info()->n_inputs;
