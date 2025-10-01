@@ -119,6 +119,10 @@
 #include <suil/suil.h>
 #endif
 
+#ifdef HAVE_SRATOM
+#include <sratom/sratom.h>
+#endif
+
 // Compatibility for old LV2
 #ifndef LV2_ATOM_CONTENTS_CONST
 #define LV2_ATOM_CONTENTS_CONST(type, atom) \
@@ -1916,6 +1920,24 @@ LV2Plugin::write_from_ui(uint32_t       index,
 		return false;
 	}
 
+#ifdef HAVE_SRATOM
+	if (DEBUG_ENABLED (DEBUG::LV2AtomFromUI)) {
+		Sratom* sratom = sratom_new (_uri_map.urid_map());
+		const LV2_Atom* atom = (LV2_Atom const*)(body);
+		char* const str = sratom_to_turtle (sratom,
+				_uri_map.urid_unmap(),
+				"ardour:",
+				NULL,
+				NULL,
+				atom->type,
+				atom->size,
+				LV2_ATOM_BODY_CONST(atom));
+		DEBUG_TRACE (DEBUG::LV2AtomFromUI, string_compose ("Plugin[%1] <- UI: port %2 (%3 bytes)\n%4\n", name(), index, atom->size, str));
+		free (str);
+		sratom_free (sratom);
+	}
+#endif
+
 	Glib::Threads::Mutex::Lock lm (_slave_lock, Glib::Threads::TRY_LOCK);
 	if (lm.locked()) {
 		for (auto const& i : _slaves) {
@@ -3282,6 +3304,24 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				}
 
 				if (!_to_ui) continue;
+
+#ifdef HAVE_SRATOM
+				if (DEBUG_ENABLED (DEBUG::LV2AtomToUI)) {
+					Sratom* sratom = sratom_new (_uri_map.urid_map());
+					LV2_Atom const* atom = (LV2_Atom*)(data - sizeof(LV2_Atom));
+					char* const str = sratom_to_turtle (sratom,
+							_uri_map.urid_unmap(),
+							"ardour:",
+							NULL,
+							NULL,
+							atom->type,
+							atom->size,
+							LV2_ATOM_BODY_CONST(atom));
+					DEBUG_TRACE (DEBUG::LV2AtomToUI, string_compose ("Plugin[%1] -> UI: port %2 (%3 bytes)\n%4\n", name(), port_index, atom->size, str));
+					free (str);
+					sratom_free (sratom);
+				}
+#endif
 				write_to_ui(port_index, URIMap::instance().urids.atom_eventTransfer,
 				            size + sizeof(LV2_Atom),
 				            data - sizeof(LV2_Atom));
