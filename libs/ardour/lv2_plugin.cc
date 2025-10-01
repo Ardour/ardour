@@ -3259,9 +3259,13 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 										const char* path          = (const char*)LV2_ATOM_BODY_CONST(value);
 										_property_values[prop_id] = Variant(Variant::PATH, path);
 									}
-									if (value->type == _uri_map.urids.atom_Float) {
+									else if (value->type == _uri_map.urids.atom_Float) {
 										const float* val          = (const float*)LV2_ATOM_BODY_CONST(value);
 										_property_values[prop_id] = Variant(Variant::FLOAT, *val);
+									}
+									else if (value->type == _uri_map.urids.atom_Bool) {
+										const float* val          = (const float*)LV2_ATOM_BODY_CONST(value);
+										_property_values[prop_id] = Variant(Variant::BOOL, *val);
 									}
 									// TODO add support for other props (Int, Bool, ..)
 
