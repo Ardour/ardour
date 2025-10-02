@@ -1346,11 +1346,15 @@ GenericPluginUI::set_path_property (const ParameterDescriptor& desc,
 void
 GenericPluginUI::path_property_changed (uint32_t key, const Variant& value)
 {
-	FilePathControls::iterator c = _filepath_controls.find(key);
-	if (c != _filepath_controls.end()) {
-		c->second->set_filename(value.get_path());
-	} else {
-		std::cerr << "warning: property change for property with no control" << std::endl;
+	if (value.type () == Variant::PATH) {
+		FilePathControls::iterator c = _filepath_controls.find(key);
+		if (c != _filepath_controls.end()) {
+			c->second->set_filename(value.get_path());
+		} else {
+			std::cerr << "warning: property change for property with no control" << std::endl;
+		}
+	} else if (Variant::type_is_numeric (value.type ())) {
+		//printf ("Prop Change %d %f\n", key, value.to_double());
 	}
 }
 
