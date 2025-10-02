@@ -223,6 +223,7 @@ public:
 	LilvNode* units_unit;
 	LilvNode* units_render;
 	LilvNode* units_midiNote;
+	LilvNode* patch_readable;
 	LilvNode* patch_writable;
 	LilvNode* patch_Message;
 	LilvNode* opts_requiredOptions;
@@ -1015,7 +1016,8 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		}
 	}
 
-	load_supported_properties(_property_descriptors);
+	load_supported_properties(_property_descriptors, true);
+	load_supported_properties(_ro_property_descriptors, false);
 	allocate_atom_event_buffers();
 
 	/* Load default state */
@@ -2075,6 +2077,10 @@ LV2Plugin::get_property_descriptor(uint32_t id) const
 	if (p != _property_descriptors.end()) {
 		return p->second;
 	}
+	p = _ro_property_descriptors.find(id);
+	if (p != _ro_property_descriptors.end()) {
+		return p->second;
+	}
 	return Plugin::get_property_descriptor(id);
 }
 
@@ -2158,16 +2164,20 @@ load_parameter_descriptor(LV2World&            world,
 }
 
 void
-LV2Plugin::load_supported_properties(PropertyDescriptors& descs)
+LV2Plugin::load_supported_properties(PropertyDescriptors& descs, bool writable)
 {
 	LilvWorld*       lworld     = _world.world;
 	const LilvNode*  subject    = lilv_plugin_get_uri(_impl->plugin);
-	LilvNodes*       properties = lilv_world_find_nodes(
-		lworld, subject, _world.patch_writable, NULL);
+	LilvNodes*       properties = lilv_world_find_nodes(lworld, subject, writable ? _world.patch_writable : _world.patch_readable, NULL);
 	LILV_FOREACH(nodes, p, properties) {
-		// Get label and range
 		const LilvNode* prop  = lilv_nodes_get(properties, p);
-		LilvNode*       range = get_value(lworld, prop, _world.rdfs_range);
+		/* check if contrl is r/w */
+		if (!writable &&  lilv_world_ask(lworld, subject,_world.patch_writable, prop)) {
+			continue;
+		}
+
+		// Get label and range
+		LilvNode* range = get_value(lworld, prop, _world.rdfs_range);
 		if (!range) {
 			warning << string_compose(_("LV2<%1>: property <%2> has no range datatype, ignoring"),
 			                          name(), lilv_node_as_uri(prop)) << endmsg;
@@ -3609,6 +3619,7 @@ LV2World::LV2World()
 	units_hz               = lilv_new_uri(world, LV2_UNITS__hz);
 	units_midiNote         = lilv_new_uri(world, LV2_UNITS__midiNote);
 	units_db               = lilv_new_uri(world, LV2_UNITS__db);
+	patch_readable         = lilv_new_uri(world, LV2_PATCH__readable);
 	patch_writable         = lilv_new_uri(world, LV2_PATCH__writable);
 	patch_Message          = lilv_new_uri(world, LV2_PATCH__Message);
 	opts_requiredOptions   = lilv_new_uri(world, LV2_OPTIONS__requiredOption);
@@ -3656,6 +3667,7 @@ LV2World::~LV2World()
 	lilv_node_free(patch_Message);
 	lilv_node_free(opts_requiredOptions);
 	lilv_node_free(patch_writable);
+	lilv_node_free(patch_readable);
 	lilv_node_free(units_hz);
 	lilv_node_free(units_midiNote);
 	lilv_node_free(units_db);

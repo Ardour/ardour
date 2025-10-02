@@ -347,7 +347,7 @@ public:
 	 * For LV2 plugins, properties are implemented by sending/receiving set/get
 	 * messages to/from the plugin via event ports.
 	 */
-	virtual const PropertyDescriptors& get_supported_properties () const
+	virtual const PropertyDescriptors& get_supported_properties (bool readonly = false) const
 	{
 		static const PropertyDescriptors nothing;
 		return nothing;
