@@ -365,6 +365,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	static uint32_t      _ui_foreground_color;
 	static uint32_t      _ui_contrasting_color;
 	static unsigned long _ui_transient_win_id;
+	static float         _ui_update_hz;
 
 	mutable unsigned _state_version;
 

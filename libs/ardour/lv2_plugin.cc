@@ -159,6 +159,7 @@ uint32_t      LV2Plugin::_ui_background_color  = 0x000000ff; // RGBA
 uint32_t      LV2Plugin::_ui_foreground_color  = 0xffffffff; // RGBA
 uint32_t      LV2Plugin::_ui_contrasting_color = 0x33ff33ff; // RGBA
 unsigned long LV2Plugin::_ui_transient_win_id  = 0;
+float         LV2Plugin::_ui_update_hz         = 25;
 
 
 class LV2World {
@@ -655,6 +656,10 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		  sizeof(int32_t), atom_Bool, &_ui_style_flat },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://kxstudio.sf.net/ns/lv2ext/props#TransientWindowId"),
 		  sizeof(int32_t), atom_Long, &_ui_transient_win_id },
+#if 0
+		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#updateRate"),
+		  sizeof(int32_t), atom_Float, &_ui_update_hz },
+#endif
 		{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }
 	};
 
