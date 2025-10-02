@@ -196,6 +196,7 @@ public:
 	LilvNode* lv2_connectionOptional;
 	LilvNode* lv2_designation;
 	LilvNode* lv2_enumeration;
+	LilvNode* lv2_enabled;
 	LilvNode* lv2_freewheeling;
 	LilvNode* lv2_inPlaceBroken;
 	LilvNode* lv2_isSideChain;
@@ -2595,8 +2596,11 @@ LV2Plugin::describe_parameter(Evoral::Parameter which)
 
 		const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, which.id());
 
-		if (lilv_port_has_property(_impl->plugin, port, _world.ext_notOnGUI)) {
-			return X_("hidden");
+		if (lilv_port_has_property(_impl->plugin, port, _world.ext_notOnGUI)) { //
+			const LilvPort* bypass = lilv_plugin_get_port_by_designation(_impl->plugin, _world.lv2_InputPort, _world.lv2_enabled);
+			if (port != bypass) {
+				return X_("hidden");
+			}
 		}
 
 		const LilvPort* fwport = lilv_plugin_get_port_by_designation(_impl->plugin, _world.lv2_InputPort, _world.lv2_freewheeling);
@@ -3405,23 +3409,10 @@ uint32_t
 LV2Plugin::designated_bypass_port ()
 {
 	const LilvPort* port = NULL;
-	LilvNode* designation = lilv_new_uri (_world.world, LV2_CORE_PREFIX "enabled");
-	port = lilv_plugin_get_port_by_designation (
-			_impl->plugin, _world.lv2_InputPort, designation);
-	lilv_node_free(designation);
+	port = lilv_plugin_get_port_by_designation (_impl->plugin, _world.lv2_InputPort, _world.lv2_enabled);
 	if (port) {
 		return lilv_port_get_index (_impl->plugin, port);
 	}
-#ifdef LV2_EXTENDED
-	/* deprecated on 2016-Sep-18 in favor of lv2:enabled */
-	designation = lilv_new_uri (_world.world, LV2_PROCESSING_URI__enable);
-	port = lilv_plugin_get_port_by_designation (
-			_impl->plugin, _world.lv2_InputPort, designation);
-	lilv_node_free(designation);
-	if (port) {
-		return lilv_port_get_index (_impl->plugin, port);
-	}
-#endif
 	return UINT32_MAX;
 }
 
