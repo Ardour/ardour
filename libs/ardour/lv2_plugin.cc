@@ -120,6 +120,7 @@
 #endif
 
 #ifdef HAVE_SRATOM
+#include <serd/serd.h>
 #include <sratom/sratom.h>
 #endif
 
@@ -246,6 +247,10 @@ public:
 	LilvNode* inline_display_in_gui; // lv2:optionalFeature
 	LilvNode* inline_mixer_control; // lv2:PortProperty
 	LilvNode* export_interface; // lv2:extensionData
+#endif
+
+#ifdef HAVE_SRATOM
+	SerdEnv* serd_env;
 #endif
 
 private:
@@ -1931,6 +1936,7 @@ LV2Plugin::write_from_ui(uint32_t       index,
 #ifdef HAVE_SRATOM
 	if (DEBUG_ENABLED (DEBUG::LV2AtomFromUI)) {
 		Sratom* sratom = sratom_new (_uri_map.urid_map());
+		sratom_set_env(sratom, _world.serd_env);
 		const LV2_Atom* atom = (LV2_Atom const*)(body);
 		char* const str = sratom_to_turtle (sratom,
 				_uri_map.urid_unmap(),
@@ -3327,6 +3333,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 #ifdef HAVE_SRATOM
 				if (DEBUG_ENABLED (DEBUG::LV2AtomToUI)) {
 					Sratom* sratom = sratom_new (_uri_map.urid_map());
+					sratom_set_env(sratom, _world.serd_env);
 					LV2_Atom const* atom = (LV2_Atom*)(data - sizeof(LV2_Atom));
 					char* const str = sratom_to_turtle (sratom,
 							_uri_map.urid_unmap(),
@@ -3597,6 +3604,7 @@ LV2World::LV2World()
 	lv2_toggled            = lilv_new_uri(world, LV2_CORE__toggled);
 	lv2_designation        = lilv_new_uri(world, LV2_CORE__designation);
 	lv2_enumeration        = lilv_new_uri(world, LV2_CORE__enumeration);
+	lv2_enabled            = lilv_new_uri(world, LV2_CORE_PREFIX "enabled");
 	lv2_freewheeling       = lilv_new_uri(world, LV2_CORE__freeWheeling);
 	midi_MidiEvent         = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
 	rdf_type               = lilv_new_uri(world, LILV_NS_RDF "type");
@@ -3636,6 +3644,14 @@ LV2World::LV2World()
 	bufz_nominalBlockLength  = lilv_new_uri(world, "http://lv2plug.in/ns/ext/buf-size#nominalBlockLength");
 	bufz_coarseBlockLength   = lilv_new_uri(world, "http://lv2plug.in/ns/ext/buf-size#coarseBlockLength");
 	state_loadDefaultState   = lilv_new_uri(world, LV2_STATE_PREFIX "loadDefaultState");
+
+#ifdef HAVE_SRATOM
+	serd_env = serd_env_new (NULL);
+	serd_env_set_prefix_from_strings(serd_env, (const uint8_t*)"patch", (const uint8_t*)LV2_PATCH_PREFIX);
+	serd_env_set_prefix_from_strings(serd_env, (const uint8_t*)"time", (const uint8_t*)LV2_TIME_PREFIX);
+	serd_env_set_prefix_from_strings(serd_env, (const uint8_t*)"xsd", (const uint8_t*)"http://www.w3.org/2001/XMLSchema#");
+#endif
+
 }
 
 LV2World::~LV2World()
@@ -3643,6 +3659,9 @@ LV2World::~LV2World()
 	if (!world) {
 		return;
 	}
+#ifdef HAVE_SRATOM
+	serd_env_free (serd_env);
+#endif
 	lilv_node_free(state_loadDefaultState);
 	lilv_node_free(bufz_coarseBlockLength);
 	lilv_node_free(bufz_nominalBlockLength);
@@ -3683,6 +3702,7 @@ LV2World::~LV2World()
 	lilv_node_free(midi_MidiEvent);
 	lilv_node_free(lv2_designation);
 	lilv_node_free(lv2_enumeration);
+	lilv_node_free(lv2_enabled);
 	lilv_node_free(lv2_freewheeling);
 	lilv_node_free(lv2_toggled);
 	lilv_node_free(lv2_sampleRate);
