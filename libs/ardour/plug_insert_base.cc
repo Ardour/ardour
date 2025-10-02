@@ -369,6 +369,8 @@ PlugInsertBase::PluginPropertyControl::PluginPropertyControl (Session&          
 	: AutomationControl (s, param, desc, list)
 	, _pib (p)
 {
+	_value = _desc.normal;
+	AutomationControl::actually_set_value (_desc.normal, PBD::Controllable::NoGroup);
 }
 
 void
