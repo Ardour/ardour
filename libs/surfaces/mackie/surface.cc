@@ -139,8 +139,8 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 
 		if ( is_qcon ) {
 			_has_master_display = (mcp.device_info().has_master_fader() && mcp.device_info().has_qcon_second_lcd());
-			_has_master_meter = mcp.device_info().has_qcon_master_meters();
 		}
+		_has_master_meter = mcp.device_info().has_qcon_master_meters();
 
 		if (_mcp.device_info().has_global_controls()) {
 			init_controls ();

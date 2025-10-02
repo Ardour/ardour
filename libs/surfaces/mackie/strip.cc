@@ -108,7 +108,7 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<MACKIE_N
 	, _controls_locked (false)
 	, _transport_is_rolling (false)
 	, _metering_active (true)
-	, _lcd2_available (true)
+	, _lcd2_available (false)
 	, _lcd2_label_pitch (7)
 	, _block_screen_redisplay_until (0)
 	, return_to_vpot_mode_display_at (UINT64_MAX)
@@ -128,9 +128,9 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<MACKIE_N
 	if (s.mcp().device_info().has_qcon_second_lcd()) {
 		_lcd2_available = true;
 
-		// The main unit has 9 faders under the second display.
+		// The Qcon Pro X has 9 faders under the second display.
 		// Extenders have 8 faders.
-		if (s.number() == s.mcp().device_info().master_position()) {
+		if (s.mcp().device_info().is_qcon() && s.number() == s.mcp().device_info().master_position()) {
 			_lcd2_label_pitch = 6;
 		}
 	}
@@ -947,31 +947,44 @@ Strip::redisplay (PBD::microseconds_t now, bool force)
 		_block_screen_redisplay_until = 0;
 	}
 
+	bool changed = false;
+
 	if (force || (current_display[0] != pending_display[0])) {
 		_surface->write (display (0, 0, pending_display[0]));
 		current_display[0] = pending_display[0];
+		changed = true;
 	}
 
 	if (return_to_vpot_mode_display_at <= now) {
 		return_to_vpot_mode_display_at = UINT64_MAX;
 		return_to_vpot_mode_display ();
+		changed = true;
 	}
 
 	if (force || (current_display[1] != pending_display[1])) {
 		_surface->write (display (0, 1, pending_display[1]));
 		current_display[1] = pending_display[1];
+		changed = true;
 	}
 
 	if (_lcd2_available) {
 		if (force || (lcd2_current_display[0] != lcd2_pending_display[0])) {
 			_surface->write (display (1, 0, lcd2_pending_display[0]));
 			lcd2_current_display[0] = lcd2_pending_display[0];
+			changed = true;
 		}
 		if (force || (lcd2_current_display[1] != lcd2_pending_display[1])) {
 			_surface->write (display (1, 1, lcd2_pending_display[1]));
 			lcd2_current_display[1] = lcd2_pending_display[1];
+			changed = true;
 		}
 	}
+
+	/* The iCON V1-M cannot handle many messages in quick succession.
+	 *
+	 * A small delay is necessary to ensure none are skipped.
+	 */
+	if (_surface->mcp().device_info().is_v1m() && changed) { g_usleep(2500); }
 }
 
 void
@@ -1045,6 +1058,12 @@ Strip::zero ()
 		lcd2_current_display[1] = string();
 
 	}
+
+	/* The iCON V1-M cannot handle many messages in quick succession.
+	 *
+	 * A small delay is necessary to ensure none are skipped.
+	 */
+	if (_surface->mcp().device_info().is_v1m()) { g_usleep(5000); }
 }
 
 MidiByteArray
@@ -1093,18 +1112,23 @@ Strip::display (uint32_t lcd_number, uint32_t line_number, const std::string& li
 		// code for display
 		retval << 0x13;
 
-		if (lcd_label_pitch == 6) {
-			if (_index == 0) {
-				add_left_pad_char = true;
-			}
-			else {
-				left_pad_offset = 1;
-			}
+		if (_index == 0 && lcd_label_pitch == 6) {
+			add_left_pad_char = true;
+		} else if (_index != 0) {
+			left_pad_offset = 1;
 		}
 	}
 
 	// offset (0 to 0x37 first line, 0x38 to 0x6f for second line)
-	retval << (_index * lcd_label_pitch + (line_number * 0x38) + left_pad_offset);
+	if (_surface->mcp().device_info().is_v1m() && lcd_number == 1) {
+		if (line_number == 0) {
+			retval << (_index * (lcd_label_pitch - 1) + (line_number * 0x38) + left_pad_offset);
+		} else {
+			retval << (_index * lcd_label_pitch + (line_number * 0x38));
+		}
+	} else {
+		retval << (_index * lcd_label_pitch + (line_number * 0x38) + left_pad_offset);
+	}
 
 	if (add_left_pad_char) {
 		retval << ' ';	// add the left pad space

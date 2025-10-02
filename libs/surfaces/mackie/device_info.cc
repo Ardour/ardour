@@ -61,6 +61,7 @@ DeviceInfo::DeviceInfo()
 	, _uses_ipmidi (false)
 	, _no_handshake (false)
 	, _is_qcon(false)
+	, _is_v1m(false)
 	, _is_platformMp(false)
 	, _is_proG2(false)
 	, _is_xtouch(false)
@@ -347,6 +348,12 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		_is_qcon = false;
 	}
 	
+	if ((child = node.child ("IsV1M")) != 0) {
+		child->get_property ("value", _is_v1m);
+	} else {
+		_is_v1m = false;
+	}
+
 	if ((child = node.child ("IsXTouch")) != 0) {
 		child->get_property ("value", _is_xtouch);
 	} else {
@@ -523,6 +530,12 @@ bool
 DeviceInfo::is_qcon () const
 {
 	return _is_qcon;
+}
+
+bool
+DeviceInfo::is_v1m () const
+{
+	return _is_v1m;
 }
 
 bool DeviceInfo::is_platformMp () const
