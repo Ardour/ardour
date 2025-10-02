@@ -677,23 +677,6 @@ RegionFxPlugin::parameter_changed_externally (uint32_t which, float val)
 	if (pc) {
 		pc->catch_up_with_external_value (val);
 	}
-
-	/* Second propagation: tell all plugins except the first to
-	 * update the value of this parameter. For sane plugin APIs,
-	 * there are no other plugins, so this is a no-op in those
-	 * cases.
-	 */
-
-	Plugins::iterator i = _plugins.begin ();
-
-	/* don't set the first plugin, just all the slaves */
-
-	if (i != _plugins.end ()) {
-		++i;
-		for (; i != _plugins.end (); ++i) {
-			(*i)->set_parameter (which, val, 0);
-		}
-	}
 }
 
 void
