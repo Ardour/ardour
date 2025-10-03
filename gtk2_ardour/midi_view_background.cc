@@ -190,7 +190,9 @@ MidiViewBackground::setup_note_lines()
 void
 MidiViewBackground::set_note_visibility_range_style (VisibleNoteRange r)
 {
-	if (r == ContentsRange) {
+	if (r == UserRange) {
+		_visibility_note_range = UserRange;
+	} else if (r == ContentsRange) {
 		if (apply_note_range (_data_note_min, _data_note_max, true)) {
 			_visibility_note_range = ContentsRange;
 		}

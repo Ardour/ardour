@@ -75,7 +75,8 @@ class MidiViewBackground : public virtual ViewBackground
 
 	enum VisibleNoteRange {
 		FullRange,
-		ContentsRange
+		ContentsRange,
+		UserRange
 	};
 
 	ARDOUR::NoteMode  note_mode() const { return _note_mode; }

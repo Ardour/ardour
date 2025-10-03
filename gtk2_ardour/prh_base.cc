@@ -665,6 +665,7 @@ void
 PianoRollHeaderBase::end_scroomer_drag ()
 {
 	_scroomer_drag = false;
+	_midi_context.set_note_visibility_range_style (MidiViewBackground::UserRange);
 }
 
 bool
