@@ -866,7 +866,7 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 #else
 					"JACK",
 #endif
-					ARDOUR_COMMAND_LINE::backend_client_name, "")) {
+					ARDOUR_COMMAND_LINE::backend_session_id, "")) {
 			error << _("NSM: The JACK backend is mandatory and can not be loaded.") << endmsg;
 			return;
 		}
