@@ -914,6 +914,9 @@ struct PluginMenuCompareByCreator {
 Gtk::Menu*
 PluginSelector::plugin_menu()
 {
+	if (_plugin_menu->get_attach_widget ()) {
+		_plugin_menu->detach ();
+	}
 	return _plugin_menu;
 }
 
