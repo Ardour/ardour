@@ -34,6 +34,7 @@ CONFIG_VARIABLE (Temporal::TimeDomain, preferred_time_domain, "preferred_time_do
 
 /* IO connection */
 
+CONFIG_VARIABLE (bool, restore_hardware_connections, "restore-hardware-connections", true)
 CONFIG_VARIABLE (bool, auto_connect_standard_busses, "auto-connect-standard-busses", true)
 /* this variable is used to indicate output mode in Waves Tracks:
    "Multi Out" == AutoConnectPhysical and "Stereo Out" == AutoConnectMaster

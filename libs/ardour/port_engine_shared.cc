@@ -839,6 +839,54 @@ PortEngineSharedImpl::process_connection_queue_locked (PortManager& mgr)
 	_port_connection_queue.clear ();
 }
 
+XMLNode*
+PortEngineSharedImpl::get_state () const
+{
+	XMLNode* node (new XMLNode (X_("PortEngine")));
+	for (auto const& port : _system_inputs) {
+		assert (port->is_physical () && port->is_terminal ());
+		const std::set<BackendPortPtr>& connected_ports = port->get_connections ();
+		for (auto const& other : connected_ports) {
+			if (!other->is_physical () || !other->is_terminal ()) {
+				continue;
+			}
+			XMLNode* child = node->add_child (X_("HWConnection"));
+			child->set_property (X_("source"), port->name ());
+			child->set_property (X_("sink"), other->name ());
+		}
+	}
+	for (auto const& port : _system_midi_in) {
+		assert (port->is_physical () && port->is_terminal ());
+		const std::set<BackendPortPtr>& connected_ports = port->get_connections ();
+		for (auto const& other : connected_ports) {
+			if (!other->is_physical () || !other->is_terminal ()) {
+				continue;
+			}
+			XMLNode* child = node->add_child (X_("HWConnection"));
+			child->set_property (X_("source"), port->name ());
+			child->set_property (X_("sink"), other->name ());
+		}
+	}
+
+	return node;
+}
+
+int
+PortEngineSharedImpl::set_state (XMLNode const & node, int)
+{
+	assert (node.name() == X_("PortEngine"));
+	const XMLNodeList& children (node.children());
+	for (auto const* c : children) {
+		std::string src;
+		std::string dst;
+		if (c->name() != X_("HWConnection") || !c->get_property (X_("source"), src) || !c->get_property (X_("sink"), dst)) {
+			continue;
+		}
+		connect (src, dst);
+	}
+	return 0;
+}
+
 #ifndef NDEBUG
 void
 PortEngineSharedImpl::list_ports () const

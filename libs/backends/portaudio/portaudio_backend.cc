@@ -1949,3 +1949,48 @@ PortMidiEvent::PortMidiEvent (const PortMidiEvent& other)
 		memcpy (_data, other._data, other._size);
 	}
 };
+
+
+/* ****************************************************************************/
+
+XMLNode*
+PortAudioBackend::get_state () const {
+	XMLNode& node = PortEngineSharedImpl::get_state ();
+	node.set_property ("backend", name ());
+	node.set_property ("driver", driver_name ());
+	node.set_property ("input-device", input_device_name ());
+	node.set_property ("output-device", output_device_name ());
+	return node;
+}
+
+int
+PortAudioBackend::set_state (XMLNode const& node, int version)
+{
+	if (match_state (node, version)) {
+		return PortEngineSharedImpl::set_state (node, version);
+	}
+	return -1;
+}
+
+bool
+PortAudioBackend::match_state (XMLNode const& node, int version)
+{
+	if (node.name() != X_("PortEngine")) {
+		return false;
+	}
+	std::string val;
+
+	if (!node.get_property ("backend", val) || val != name ()) {
+		return false;
+	}
+	if (!node.get_property ("driver", val) || val != driver_name ()) {
+		return false;
+	}
+	if (!node.get_property ("input-device", val) || val != input_device_name ()) {
+		return false;
+	}
+	if (!node.get_property ("output-device", val) || val != output_device_name ()) {
+		return false;
+	}
+	return true;
+}

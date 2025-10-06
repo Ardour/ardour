@@ -2084,6 +2084,8 @@ private:
 	XMLNode* _bundle_xml_node;
 	int load_bundles (XMLNode const &);
 
+	mutable XMLNode* _engine_state;
+
 	int  backend_sync_callback (TransportState, samplepos_t);
 
 	void process_rtop (SessionEvent*);

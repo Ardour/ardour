@@ -1909,6 +1909,17 @@ Session::engine_running ()
 {
 	_transport_fsm->start ();
 	reset_xrun_count ();
+
+	if (_engine_state && Config->get_restore_hardware_connections ()) {
+		/* Note this restores the connections from the most recent [pending] save.
+		 * Which may or may not be idendical to the ones used before the engine 
+		 * re-started.
+		 */
+		std::shared_ptr<AudioBackend> backend = _engine.current_backend();
+		for (auto const& s: _engine_state->children ()) {
+			backend->set_state (*s, Stateful::loading_state_version);
+		}
+	}
 }
 
 void

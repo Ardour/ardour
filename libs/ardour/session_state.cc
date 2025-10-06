@@ -1238,6 +1238,9 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 		node->set_property ("name", _name);
 		node->set_property ("sample-rate", _base_sample_rate);
 
+		if (!_engine_state) {
+			_engine_state = new XMLNode (X_("EngineState"));
+		}
 		/* store the last engine device we we can avoid autostarting on a different device with wrong i/o count */
 		std::shared_ptr<AudioBackend> backend = _engine.current_backend();
 		if (!for_archive && _engine.running () && backend && _engine.setup_required ()) {
@@ -1250,7 +1253,21 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 				child->set_property ("input-device", backend->device_name ());
 				child->set_property ("output-device", backend->device_name ());
 			}
+			/* store port-engine external connections */
+			XMLNode* backend_state = backend->get_state();
+			if (backend_state) {
+				XMLNode* engine_state = new XMLNode (X_("EngineState"));
+				for (auto const& s : _engine_state->children ()) {
+					if (!backend->match_state (*s, CURRENT_SESSION_FILE_VERSION)) {
+						engine_state->add_child_copy (*s);
+					}
+				}
+				engine_state->add_child_nocopy (*backend_state);
+				delete _engine_state;
+				_engine_state = engine_state;
+			}
 		}
+		node->add_child_copy (*_engine_state);
 
 		if (session_dirs.size() > 1) {
 
@@ -1844,6 +1861,16 @@ Session::set_state (const XMLNode& node, int version)
 
 	if ((child = find_named_node (node, "MIDIPorts")) != 0) {
 		_midi_ports->set_midi_port_states (child->children());
+	}
+
+	if ((child = find_named_node (node, "EngineState")) != 0) {
+		_engine_state = new XMLNode (*child);
+		if (Config->get_restore_hardware_connections ()) {
+			std::shared_ptr<AudioBackend> backend = _engine.current_backend();
+			for (auto const& s: _engine_state->children ()) {
+				backend->set_state (*s, version);
+			}
+		}
 	}
 
 	Stateful::save_extra_xml (node);

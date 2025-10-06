@@ -322,6 +322,7 @@ Session::Session (AudioEngine &eng,
 	, no_questions_about_missing_files (false)
 	, _bundles (new BundleList)
 	, _bundle_xml_node (0)
+	, _engine_state (0)
 	, _clicking (false)
 	, _click_rec_only (false)
 	, click_data (0)
@@ -712,6 +713,8 @@ Session::destroy ()
 	_history.clear ();
 
 	/* clear state tree so that no references to objects are held any more */
+
+	delete _engine_state;
 
 	delete state_tree;
 	state_tree = 0;
