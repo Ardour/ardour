@@ -1005,7 +1005,9 @@ PortManager::connect_callback (const string& a, const string& b, bool conn)
 	}
 
 	if (!port_a && !port_b && Config->get_restore_hardware_connections () && !AudioEngine::instance ()->is_jack ()) {
-		AudioEngine::instance ()->session ()->set_dirty ();
+		if (AudioEngine::instance ()->session ()) {
+			AudioEngine::instance ()->session ()->set_dirty ();
+		}
 	}
 
 	PortConnectedOrDisconnected (
