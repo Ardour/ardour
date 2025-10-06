@@ -4663,6 +4663,20 @@ These settings will only take effect after %1 is restarted.\n\
 
 	}  // !mixbus
 
+	add_option (_("Signal Flow"), new OptionEditorHeading (_("Hardware Patchbay")));
+
+	bo = new BoolOption (
+			"restore-hardware-connections",
+			_("Restore hardware to hardware connections"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_restore_hardware_connections),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_restore_hardware_connections)
+			);
+
+	add_option (_("Signal Flow"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("When enabled, external per session hardware to hardware connections are restored on session load. This applies to internal backends (ALSA, Portaudio/ASIO, CoreAudio) only."));
+
+
 	/* Click */
 
 	add_option (_("Metronome"), new OptionEditorHeading (_("Metronome")));
