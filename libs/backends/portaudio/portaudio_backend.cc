@@ -1955,7 +1955,7 @@ PortMidiEvent::PortMidiEvent (const PortMidiEvent& other)
 
 XMLNode*
 PortAudioBackend::get_state () const {
-	XMLNode& node = PortEngineSharedImpl::get_state ();
+	XMLNode* node = PortEngineSharedImpl::get_state ();
 	node.set_property ("backend", name ());
 	node.set_property ("driver", driver_name ());
 	node.set_property ("input-device", input_device_name ());
