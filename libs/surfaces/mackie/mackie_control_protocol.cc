@@ -1860,6 +1860,12 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 	_view_mode = m;
 	_last_bank[old_view_mode] = _current_initial_bank;
 
+	if (Sorted sorted = get_sorted_stripables(); sorted.empty()) {
+		surfaces.front()->display_message_for ("This view is empty", 1000);
+		_view_mode = old_view_mode;
+		return;
+	}
+
 	if (switch_banks(_last_bank[m], true)) {
 		_view_mode = old_view_mode;
 		return;
