@@ -429,7 +429,7 @@ def build(bld):
 
     if bld.is_defined('HAVE_SOUNDTOUCH'):
         obj.source += ['st_stretch.cc']
-        #obj.source += ' st_stretch.cc st_pitch.cc '
+        #obj.source += ' st_stretch.cc '
         obj.uselib += ['SOUNDTOUCH']
     #obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'
 
