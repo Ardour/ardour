@@ -1,0 +1,10 @@
+StaffPad - Time and Pitch
+=========================
+
+This library was copied from Audacity [1] in October 2025.
+
+Licensed in terms of the GNU GNU GENERAL PUBLIC LICENSE V2 or later, unless unless otherwise noted.
+(https://github.com/audacity/audacity?tab=readme-ov-file#license)
+
+[1] https://github.com/audacity/audacity/tree/master/au3/libraries/lib-time-and-pitch/StaffPad
+    git rev 4cdd78b4326456cb77c7102a4f9a6435e0d474a2

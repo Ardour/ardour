@@ -332,6 +332,7 @@ children = [
         'libs/clearlooks-newer',
         'libs/zita-resampler',
         'libs/zita-convolver',
+        'libs/staffpad',
         # optionally external libraries
         'libs/fluidsynth',
         'libs/hidapi',
