@@ -245,6 +245,7 @@ libardour_sources = [
         'soundcloud_upload.cc',
         'source.cc',
         'source_factory.cc',
+        'sp_stretch.cc',
         'speakers.cc',
         'srcfilesource.cc',
         'stripable.cc',
@@ -408,6 +409,7 @@ def build(bld):
                         'libtemporal',
                         'liblua',
                         'libptformat',
+                        'staffpad',
                         'zita-resampler',
                         'zita-convolver',
                         ]
