@@ -202,8 +202,7 @@ static const gchar *_ripple_mode_strings[] = {
 	0
 };
 
-#ifdef USE_RUBBERBAND
-static const gchar *_rb_opt_strings[] = {
+static const gchar *_timefx_opt_strings[] = {
 	N_("Mushy"),
 	N_("Smooth"),
 	N_("Balanced multitimbral mixture"),
@@ -211,12 +210,12 @@ static const gchar *_rb_opt_strings[] = {
 	N_("Crisp monophonic instrumental"),
 	N_("Unpitched solo percussion"),
 	N_("Resample without preserving pitch"),
+	N_("Irrelevant"), // StaffPad
 #ifdef HAVE_SOUNDTOUCH
 	N_("Vocal"),
 #endif
 	0
 };
-#endif
 
 Editor::Editor ()
 	: PublicEditor ()
@@ -394,10 +393,9 @@ Editor::Editor ()
 	edit_mode_strings = I18N (_edit_mode_strings);
 	ripple_mode_strings = I18N (_ripple_mode_strings);
 	edit_point_strings = I18N (_edit_point_strings);
-#ifdef USE_RUBBERBAND
-	rb_opt_strings = I18N (_rb_opt_strings);
-	rb_current_opt = 4;
-#endif
+	timefx_opt_strings = I18N (_timefx_opt_strings);
+
+	timefx_mode = 4;
 
 	timebar_height = std::max (13., ceil (17. * UIConfiguration::instance().get_ui_scale()));
 

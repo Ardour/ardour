@@ -49,14 +49,15 @@ public:
 	Gtk::ProgressBar      progress_bar;
 	ARDOUR::RegionList    regions;
 
+	Gtk::ComboBoxText     stretch_opts_selector;
+	Gtk::Label            stretch_opts_label;
+	Gtk::VBox             upper_button_box;
+
 	/* SoundTouch */
 	Gtk::CheckButton      quick_button;
 	Gtk::CheckButton      antialias_button;
-	Gtk::VBox             upper_button_box;
 
 	/* RubberBand */
-	Gtk::ComboBoxText     stretch_opts_selector;
-	Gtk::Label            stretch_opts_label;
 	Gtk::CheckButton      precise_button;
 	Gtk::CheckButton      preserve_formants_button;
 
@@ -105,5 +106,6 @@ private:
 	void duration_clock_changed ();
 	void duration_adjustment_changed ();
 	void timer_update ();
+	void options_changed ();
 };
 

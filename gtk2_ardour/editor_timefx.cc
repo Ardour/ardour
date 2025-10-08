@@ -51,10 +51,8 @@
 #include "region_selection.h"
 #include "time_fx_dialog.h"
 
-#ifdef USE_RUBBERBAND
 #include <rubberband/RubberBandStretcher.h>
 using namespace RubberBand;
-#endif
 
 #include "pbd/i18n.h"
 
@@ -200,7 +198,6 @@ Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching, bo
 		return 0;
 	}
 
-#ifdef USE_RUBBERBAND
 	/* parse options */
 
 	RubberBandStretcher::Options options = 0;
@@ -224,14 +221,14 @@ Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching, bo
 
 	txt = current_timefx->stretch_opts_selector.get_active_text ();
 
-	for (size_t i = 0; i < rb_opt_strings.size(); i++) {
-		if (txt == rb_opt_strings[i]) {
-			rb_current_opt = i;
+	for (size_t i = 0; i < timefx_opt_strings.size(); i++) {
+		if (txt == timefx_opt_strings[i]) {
+			timefx_mode = i;
 			break;
 		}
 	}
 
-	int rb_mode = rb_current_opt;
+	int mode = timefx_mode;
 
 	if (pitching /*&& rb_current_opt == 6*/) {
 		/* The timefx dialog does not show the "stretch_opts_selector"
@@ -252,10 +249,10 @@ Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching, bo
 		 *   -c 5   default processing options
 		 *   -c 6   equivalent to --no-lamination --window-short (may be good for drums)
 		 */
-		rb_mode = 4;
+		mode = 4;
 	}
 
-	switch (rb_mode) {
+	switch (mode) {
 		case 0:
 			transients = NoTransients; peaklock = false; longwin = true; shortwin = false;
 			break;
@@ -279,9 +276,11 @@ Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching, bo
 			shortwin = true;
 			// peaklock = false;
 			break;
-	#ifdef HAVE_SOUNDTOUCH
 		case 7:
-			current_timefx->request.use_soundtouch = true;
+			current_timefx->request.algorithm = TimeFXRequest::StaffPad;
+	#ifdef HAVE_SOUNDTOUCH
+		case 8:
+			current_timefx->request.algorithm = TimeFXRequest::SoundTouch;
 			break;
 	#endif
 		default:
@@ -316,10 +315,12 @@ Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching, bo
 #endif
 
 	current_timefx->request.opts = (int) options;
-#else
+
+#ifdef HAVE_SOUNDTOUCH
 	current_timefx->request.quick_seek = current_timefx->quick_button.get_active();
 	current_timefx->request.antialias = !current_timefx->antialias_button.get_active();
 #endif
+
 	current_timefx->request.done = false;
 	current_timefx->request.cancel = false;
 
@@ -386,19 +387,19 @@ Editor::do_timefx (bool fixed_end)
 		if (current_timefx->pitching) {
 			fx = new Pitch (*_session, current_timefx->request);
 		} else {
-#ifdef USE_RUBBERBAND
-		#ifdef HAVE_SOUNDTOUCH
-			if (current_timefx->request.use_soundtouch) {
-				fx = new STStretch (*_session, current_timefx->request);
-			} else {
-				fx = new RBStretch (*_session, current_timefx->request);
-			}
-		#else
-			fx = new RBStretch (*_session, current_timefx->request);
-		#endif
-#else
-			fx = new STStretch (*_session, current_timefx->request);
+			switch (current_timefx->request.algorithm) {
+				case TimeFXRequest::StaffPad:
+					fx = new SPStretch (*_session, current_timefx->request);
+					break;
+#ifdef HAVE_SOUNDTOUCH
+				case TimeFXRequest::SoundTouch:
+					fx = new STStretch (*_session, current_timefx->request);
+					break;
 #endif
+				default:
+					fx = new RBStretch (*_session, current_timefx->request);
+					break;
+			}
 		}
 
 		current_timefx->descend (1.0 / N);

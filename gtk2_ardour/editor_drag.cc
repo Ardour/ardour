@@ -5433,14 +5433,6 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 		ratio = ratio_t (newlen.samples (), _primary->region ()->length ().samples ());
 	}
 
-#ifndef USE_RUBBERBAND
-	// Soundtouch uses fraction / 100 instead of normal (/ 1)
-#warning NUTEMPO timefx request now uses a rational type so this needs revisiting
-	if (_primary->region ()->data_type () == DataType::AUDIO) {
-		ratio = ((newlen - _primary->region ()->length ()) / newlen) * 100;
-	}
-#endif
-
 	/* primary will already be included in the selection, and edit
 	   group shared editing will propagate selection across
 	   equivalent regions, so just use the current region

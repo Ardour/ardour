@@ -199,10 +199,8 @@ public:
 	void hide_a_region (std::shared_ptr<ARDOUR::Region>);
 	void show_a_region (std::shared_ptr<ARDOUR::Region>);
 
-#ifdef USE_RUBBERBAND
-	std::vector<std::string> rb_opt_strings;
-	int rb_current_opt;
-#endif
+	std::vector<std::string> timefx_opt_strings;
+	int                      timefx_mode;
 
 	/* things that need to be public to be used in the main menubar */
 

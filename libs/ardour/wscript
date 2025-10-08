@@ -342,10 +342,6 @@ def configure(conf):
     autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW35F',
                       atleast_version='3.3.5', mandatory=False)
 
-    # controls whether we actually use it in preference to soundtouch
-    # Note: as of 2104, soundtouch (WSOLA) has been out-of-use for years.
-    conf.define('USE_RUBBERBAND', 1)
-
     conf.define('CURRENT_SESSION_FILE_VERSION', CURRENT_SESSION_FILE_VERSION)
 
     conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H',mandatory=False)
