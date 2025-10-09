@@ -111,9 +111,10 @@ This mode provides many different operations on both regions and control points,
 @editing|Editing/temporal-zoom-in|                                           equal|zoom in
 @editing|Editing/temporal-zoom-out|                                          minus|zoom out
 
-@vis|Editor/expand-tracks|                                   <@TERTIARY@>plus|expand track height
-@vis|Editor/shrink-tracks|                      <@SECONDARY@><@TERTIARY@>plus|shrink track height
-@vis|Editor/zoom-to-session|              <@SECONDARY@><@TERTIARY@>underscore|zoom to session
+@vis|Editor/expand-tracks|                                 <@SECONDARY@>equal|expand track height
+@vis|Editor/shrink-tracks|                                 <@SECONDARY@>minus|shrink track height
+@vis|Editor/zoom-to-session|                          <@SECONDARY@>underscore|zoom to session
+
 @eep|Editor/edit-cursor-to-previous-region-sync|                   apostrophe|EP to prev region sync
 @eep|Editor/edit-cursor-to-next-region-sync|                        semicolon|EP to next region sync
 
