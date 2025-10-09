@@ -92,6 +92,7 @@ class PianoRollHeaderBase : virtual public sigc::trackable {
 	bool _dragging;
 	mutable double _scroomer_size;
 	bool _scroomer_drag;
+	bool scroomer_did_drag;
 	double _old_y;
 	double _fract;
 	double _fract_top;
