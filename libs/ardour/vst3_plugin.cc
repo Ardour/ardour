@@ -112,7 +112,7 @@ VST3Plugin::init ()
 	}
 
 	/* pre-configure from GUI thread */
-	_plug->enable_io (_connected_inputs, _connected_outputs);
+	_plug->enable_io (_connected_inputs, _connected_outputs, true);
 }
 
 void
@@ -2240,9 +2240,9 @@ VST3PI::set_event_bus_state (bool enable)
 }
 
 void
-VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
+VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs, bool force)
 {
-	if (_enabled_audio_in == ins && _enabled_audio_out == outs) {
+	if (_enabled_audio_in == ins && _enabled_audio_out == outs && !force) {
 		return;
 	}
 

@@ -201,7 +201,7 @@ public:
 	void set_owner (ARDOUR::SessionObject* o);
 	void set_non_realtime (bool);
 
-	void enable_io (std::vector<bool> const&, std::vector<bool> const&);
+	void enable_io (std::vector<bool> const&, std::vector<bool> const&, bool force = false);
 
 	void process (float** ins, float** outs, uint32_t n_samples);
 
