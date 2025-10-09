@@ -210,7 +210,7 @@ static const gchar *_timefx_opt_strings[] = {
 	N_("Crisp monophonic instrumental"),
 	N_("Unpitched solo percussion"),
 	N_("Resample without preserving pitch"),
-	N_("Irrelevant"), // StaffPad
+	N_("Any"), // StaffPad
 #ifdef HAVE_SOUNDTOUCH
 	N_("Vocal"),
 #endif
@@ -395,7 +395,7 @@ Editor::Editor ()
 	edit_point_strings = I18N (_edit_point_strings);
 	timefx_opt_strings = I18N (_timefx_opt_strings);
 
-	timefx_mode = 4;
+	timefx_mode = 7;
 
 	timebar_height = std::max (13., ceil (17. * UIConfiguration::instance().get_ui_scale()));
 
