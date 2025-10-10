@@ -109,6 +109,7 @@ private:
 	void unassign_all_selected ();
 
 	void parameter_changed (std::string const& p);
+	void dpi_reset ();
 	void set_button_names ();
 	void update_bottom_padding ();
 

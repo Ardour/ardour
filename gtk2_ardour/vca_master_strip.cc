@@ -111,8 +111,6 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	number_label.set_inactive_color (_vca->presentation_info().color ());
 	number_label.signal_button_press_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::number_button_press), false);
 
-	update_bottom_padding ();
-
 	//Glib::RefPtr<Pango::Layout> layout = vertical_button.get_layout ();
 	// layout->set_justify (JUSTIFY_CENTER);
 	/* horizontally centered, with a little space (5%) at the top */
@@ -178,6 +176,8 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	s->config.ParameterChanged.connect (*this, invalidator (*this), std::bind (&VCAMasterStrip::parameter_changed, this, _1), gui_context());
 	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&VCAMasterStrip::parameter_changed, this, _1), gui_context());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &VCAMasterStrip::parameter_changed));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &VCAMasterStrip::dpi_reset));
+	gain_meter.gain_automation_state_button.signal_size_allocate().connect ([&] (Allocation&) { update_bottom_padding (); });
 }
 
 VCAMasterStrip::~VCAMasterStrip ()
@@ -207,6 +207,12 @@ VCAMasterStrip::self_delete ()
 	                         std::shared_ptr<Amp>(),
 	                         std::shared_ptr<GainControl>());
 	delete_when_idle (this);
+}
+
+void
+VCAMasterStrip::dpi_reset ()
+{
+	update_bottom_padding ();
 }
 
 void
@@ -256,7 +262,8 @@ VCAMasterStrip::update_bottom_padding ()
 		control_slave_ui.show ();
 	}
 
-	int h = 0;
+	int h =  gain_meter.gain_automation_state_button.get_height() + 2; /* group / rta */
+
 	if (viz.find ("Output") != std::string::npos) {
 		Gtk::Window window (WINDOW_TOPLEVEL);
 		window.add (output_button);
@@ -269,6 +276,7 @@ VCAMasterStrip::update_bottom_padding ()
 		Gtk::Requisition requisition(comment_button.size_request ());
 		h += requisition.height + 2;
 	}
+
 	if (h <= 0) {
 		bottom_padding.set_size_request (-1, 1);
 		bottom_padding.hide ();
