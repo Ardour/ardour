@@ -37,4 +37,6 @@ EditorRoutes::init ()
 	append_col_rec_safe ();
 	append_col_mute ();
 	append_col_solo ();
+
+	setup_col (append_toggle (_columns.rta_enabled, _columns.active, sigc::mem_fun (*this, &EditorRoutes::on_tv_rta_enable_toggled)), S_("RTA|RA"),  _("Realtime Analyzer active?"));
 }

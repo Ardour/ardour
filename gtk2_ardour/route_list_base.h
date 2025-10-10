@@ -117,6 +117,7 @@ protected:
 	void on_tv_solo_enable_toggled (std::string const&);
 	void on_tv_solo_isolate_toggled (std::string const&);
 	void on_tv_solo_safe_toggled (std::string const&);
+	void on_tv_rta_enable_toggled (std::string const&);
 	void on_tv_visible_changed (std::string const&);
 	void on_tv_trigger_changed (std::string const&);
 	void on_tv_active_changed (std::string const&);
@@ -135,6 +136,7 @@ protected:
 			add (solo_lock_iso_visible);
 			add (solo_isolate_state);
 			add (solo_safe_state);
+			add (rta_enabled);
 			add (is_track);
 			add (stripable);
 			add (name_editable);
@@ -156,6 +158,7 @@ protected:
 		Gtk::TreeModelColumn<bool>                                 solo_lock_iso_visible;
 		Gtk::TreeModelColumn<uint32_t>                             solo_isolate_state;
 		Gtk::TreeModelColumn<uint32_t>                             solo_safe_state;
+		Gtk::TreeModelColumn<bool>                                 rta_enabled;
 		Gtk::TreeModelColumn<bool>                                 is_track;
 		Gtk::TreeModelColumn<std::shared_ptr<ARDOUR::Stripable>> stripable;
 		Gtk::TreeModelColumn<bool>                                 name_editable;
@@ -194,6 +197,7 @@ private:
 	void queue_idle_update ();
 	bool idle_update_mute_rec_solo_etc ();
 	void update_input_active_display ();
+	void handle_gui_changes (std::string const&);
 
 	void route_property_changed (const PBD::PropertyChange&, std::weak_ptr<ARDOUR::Stripable>);
 	void presentation_info_changed (PBD::PropertyChange const&);
