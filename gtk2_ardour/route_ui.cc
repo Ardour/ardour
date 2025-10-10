@@ -262,7 +262,8 @@ RouteUI::init ()
 	rec_enable_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_press), false);
 	rec_enable_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_release), false);
 
-	rta_button->signal_clicked.connect (sigc::mem_fun(*this, &RouteUI::rta_clicked));
+	rta_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::rta_press), false);
+	rta_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::rta_release), false);
 
 	show_sends_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_press), false);
 	show_sends_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_release), false);
@@ -1213,9 +1214,25 @@ RouteUI::send_blink (bool onoff)
 	}
 }
 
-void
-RouteUI::rta_clicked ()
+bool
+RouteUI::rta_press (GdkEventButton*)
 {
+	return false;
+}
+
+bool
+RouteUI::rta_release (GdkEventButton* ev)
+{
+	if (ev->button == 3) {
+		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-rtawindow");
+		tact->set_active (!tact->get_active ());
+		return true;
+	}
+
+	if (ev->button != 1) {
+		return false;
+	}
+
 	bool attached = RTAManager::instance ()->attached (_route);
 	if (attached) {
 		RTAManager::instance ()->remove (_route);
@@ -1223,6 +1240,7 @@ RouteUI::rta_clicked ()
 		RTAManager::instance ()->attach (_route);
 		ARDOUR_UI::instance()->show_realtime_analyzer ();
 	}
+	return true;
 }
 
 void

@@ -289,7 +289,7 @@ MixerStrip::init ()
 	set_tooltip (&group_button, _("Mix group"));
 	group_button.set_name ("mixer strip button");
 
-	set_tooltip (rta_button, _("Realtime Analyzer"));
+	set_tooltip (rta_button, _("Realtime Analyzer\nLeft-click to toggle track analysis\nRight-click to toggle RTA window visibility"));
 	rta_button->set_name ("mixer strip button");
 
 	Gtk::Requisition mpb_size = gpm.meter_point_button.size_request();

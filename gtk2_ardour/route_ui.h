@@ -147,7 +147,8 @@ public:
 	bool show_sends_release (GdkEventButton*);
 	bool solo_isolate_button_release (GdkEventButton*);
 	bool solo_safe_button_release (GdkEventButton*);
-	void rta_clicked ();
+	bool rta_press (GdkEventButton*);
+	bool rta_release (GdkEventButton*);
 
 	bool monitor_release (GdkEventButton*, ARDOUR::MonitorChoice);
 	bool monitor_input_press (GdkEventButton*);
