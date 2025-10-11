@@ -434,6 +434,14 @@ Pane::constrain_fract (Dividers::size_type div, float fract)
 	float size = horizontal ? get_allocation().get_width() : get_allocation().get_height();
 	size = max<float> (0, size - (children.size() - 1) * divider_width);
 
+	/* compare to Pane::reallocate */
+	Dividers::iterator d = dividers.begin();
+	for (Dividers::size_type i = 0 ; i < div; ++i, ++d) {
+		if (children.at (i)->w->get_visible ()) {
+			size -= size * (*d)->fract;
+		}
+	}
+
 	// TODO: optimize: cache in Pane::on_size_request
 	Gtk::Requisition prev_req(children.at (div)->w->size_request ());
 	Gtk::Requisition next_req(children.at (div + 1)->w->size_request ());
