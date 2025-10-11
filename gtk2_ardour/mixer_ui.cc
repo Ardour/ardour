@@ -390,6 +390,7 @@ Mixer_UI::Mixer_UI ()
 
 	if (!Profile->get_mixbus ()) {
 		content_att_left.add (list_vpacker);
+		content_left_pane.set_child_minsize (content_att_left, 150);
 	} else {
 		content_att_right.add (list_vpacker);
 	}
