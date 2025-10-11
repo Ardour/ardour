@@ -152,23 +152,13 @@ Tabbable::default_layout ()
 	content_inner_hbox.pack_start (content_bus_vbox, false, false);
 	content_bus_vbox.pack_start (content_bus, true, true);
 
-	/* set pane min. sizes */
-
-	if (_panelayout & PaneRight) {
-		content_right_pane.set_child_minsize (content_att_right, 160); /* rough guess at width of notebook tabs */
-	}
+	/* set default pane positions */
 	content_right_pane.set_check_divider_position (true);
 	content_right_pane.set_divider (0, 0.85);
 
-	if (_panelayout & PaneLeft) {
-		content_left_pane.set_child_minsize (content_att_left, 80);
-	}
 	content_left_pane.set_check_divider_position (true);
 	content_left_pane.set_divider (0, 0.15);
 
-	if (_panelayout & PaneBottom) {
-		content_bottom_pane.set_child_minsize (content_right_pane, 300);
-	}
 	content_bottom_pane.set_check_divider_position (true);
 	content_bottom_pane.set_divider (0, 0.85);
 
