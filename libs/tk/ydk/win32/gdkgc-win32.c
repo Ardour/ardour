@@ -744,7 +744,7 @@ static GdkDrawableImplWin32 *
 get_impl_drawable (GdkDrawable *drawable)
 {
   if (GDK_IS_OFFSCREEN_WINDOW (drawable))
-    return _gdk_offscreen_window_get_real_drawable (GDK_OFFSCREEN_WINDOW (drawable));
+    return GDK_DRAWABLE_IMPL_WIN32 (_gdk_offscreen_window_get_real_drawable (GDK_OFFSCREEN_WINDOW (drawable)));
   if (GDK_IS_DRAWABLE_IMPL_WIN32 (drawable))
     return GDK_DRAWABLE_IMPL_WIN32(drawable);
   else if (GDK_IS_WINDOW (drawable))
