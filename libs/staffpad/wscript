@@ -27,7 +27,8 @@ def configure(conf):
     pass
 
 def build(bld):
-    obj = bld.stlib(features = 'cxx cxxstlib', source = staffpad_sources)
+    obj = bld.stlib(features = 'c cxx cxxstlib', source = staffpad_sources)
+    obj.cflags          = [ bld.env['compiler_flags_dict']['pic'], '-O3', '-ffast-math' ]
     obj.cxxflags        = [ bld.env['compiler_flags_dict']['pic'], '-O3', '-ffast-math' ]
     obj.export_includes = ['.']
     obj.includes        = ['.', 'pffft']
