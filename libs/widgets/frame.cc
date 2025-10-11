@@ -147,7 +147,6 @@ Frame::on_size_allocate (Allocation& alloc)
 	if (alloc.get_width () < _min_size.width || alloc.get_height () < _min_size.height) {
 #ifndef NDEBUG
 		printf ("Frame::on_size_allocate %dx%d < %dx%d\n", alloc.get_width (), alloc.get_height (), _min_size.width, _min_size.height);
-		return;
 #endif
 	}
 
