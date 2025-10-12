@@ -242,6 +242,7 @@ AudioClipEditor::build_canvas ()
 	_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
 	_canvas.set_can_focus ();
 	_canvas_viewport.signal_size_allocate().connect (sigc::mem_fun(*this, &AudioClipEditor::canvas_allocate), false);
+	_canvas_viewport.set_size_request (1, 1);
 
 	_toolbox.pack_start (_canvas_viewport, true, true);
 
