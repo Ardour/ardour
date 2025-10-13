@@ -147,6 +147,9 @@ TriggerPage::TriggerPage ()
 	_midi_editor = new Pianoroll (X_("MIDICueEditor"));
 	_audio_editor = new AudioClipEditor (X_("AudioClipEditor"));
 
+	_audio_editor->get_canvas_viewport()->set_size_request (1, 1);
+	_midi_editor->get_canvas_viewport()->set_size_request (1, 1);
+
 	_audio_editor->get_canvas_viewport()->show ();
 	_midi_editor->get_canvas_viewport()->show ();
 
