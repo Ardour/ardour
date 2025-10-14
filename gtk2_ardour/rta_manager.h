@@ -115,6 +115,8 @@ private:
 	void run_rta ();
 	void session_going_away ();
 	void route_removed (std::weak_ptr<ARDOUR::Route>);
+	void limit_active_rta ();
+	void parameter_changed (std::string);
 
 	std::list<RTA>                         _rta;
 	bool                                   _active;

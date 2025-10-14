@@ -52,6 +52,7 @@ RTAManager::RTAManager ()
 	, _warp (ARDOUR::DSP::PerceptualAnalyzer::Medium)
 	, _clearing (false)
 {
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RTAManager::parameter_changed));
 }
 
 RTAManager::~RTAManager ()
@@ -120,6 +121,14 @@ RTAManager::session_going_away ()
 }
 
 void
+RTAManager::parameter_changed (std::string p)
+{
+	if (p == "max-active-rta") {
+		limit_active_rta ();
+	}
+}
+
+void
 RTAManager::set_active (bool en)
 {
 	if (_active == en) {
@@ -165,6 +174,25 @@ RTAManager::set_rta_warp (DSP::PerceptualAnalyzer::Warp w)
 }
 
 void
+RTAManager::limit_active_rta ()
+{
+	uint32_t max_rta = UIConfiguration::instance().get_max_active_rta ();
+	if (max_rta > 1 && _rta.size () >= max_rta) {
+#if 0
+		remove (_rta.back ().route ());
+#else
+		for (auto const& r : _rta) {
+			if (r.route()->is_master ()) {
+				continue;
+			}
+			remove (r.route ());
+			break;
+		}
+#endif
+	}
+}
+
+void
 RTAManager::attach (std::shared_ptr<ARDOUR::Route> route)
 {
 	for (auto const& r : _rta) {
@@ -172,6 +200,9 @@ RTAManager::attach (std::shared_ptr<ARDOUR::Route> route)
 			return;
 		}
 	}
+
+	limit_active_rta ();
+
 	std::list<RTA>::iterator i;
 	try {
 		/* render master first (as background) because it is the sum of other individual channels */

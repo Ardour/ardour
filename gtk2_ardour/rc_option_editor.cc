@@ -4869,6 +4869,23 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_analyse_audio)
 		     ));
 
+	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Realtime Analyzer"))); 
+
+	ComboOption<uint32_t>* rta = new ComboOption<uint32_t> (
+	  "max-active-rta",
+	  _("Limit concurrent RTA specta"),
+	  sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_max_active_rta),
+	  sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_max_active_rta)
+		);
+	rta->add ( 4, _("4"));
+	rta->add ( 8, _("8"));
+	rta->add (12, _("12"));
+	rta->add (16, _("16 (fast CPUs)"));
+	rta->add (16, _("20 (very fast CPUs)"));
+	rta->add ( 0, _("No Limt"));
+
+	add_option (S_("Preferences|Metering"), rta);
+
 
 	/* PERFORMANCE **************************************************************/
 
