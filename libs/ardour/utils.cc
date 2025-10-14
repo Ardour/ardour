@@ -68,6 +68,7 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/segment_descriptor.h"
 #include "ardour/source.h"
+#include "ardour/types.h"
 #include "ardour/utils.h"
 
 #include "pbd/i18n.h"
@@ -802,79 +803,85 @@ ARDOUR::compute_sha1_of_file (std::string path)
 }
 
 bool
-ARDOUR::estimate_audio_tempo (std::shared_ptr<Region> region, Sample* data, samplecnt_t data_length, samplecnt_t sample_rate, double& qpm, Temporal::Meter& meter, double& beatcount)
+ARDOUR::estimate_audio_tempo_region (std::shared_ptr<Region> region, Sample* data, samplecnt_t data_length, samplecnt_t sample_rate, double& qpm, Temporal::Meter& meter, double& beatcount)
 {
-	using namespace Temporal;
-	TempoMap::SharedPtr tm (TempoMap::use());
+	assert (region->source());
 
 	TimelineRange range (region->start(), region->start() + region->length(), 0);
 	SegmentDescriptor segment;
-	bool have_segment;
 
-	have_segment = region->source (0)->get_segment_descriptor (range, segment);
-
-	if (have_segment) {
+	if (region->source()->get_segment_descriptor (range, segment)) {
 
 		qpm = segment.tempo().quarter_notes_per_minute ();
 		meter = segment.meter();
 		DEBUG_TRACE (DEBUG::TempoEstimation, string_compose ("%1: tempo and meter from segment descriptor\n", region->name()));
 
-	} else {
-		/* not a great guess, but what else can we do? */
+		return true;
+	}
 
-		TempoMetric const & metric (tm->metric_at (timepos_t (AudioTime)));
+	return estimate_audio_tempo_source (range, region->source(), data, data_length, sample_rate, qpm, meter, beatcount);
+}
 
-		meter = metric.meter ();
+bool
+ARDOUR::estimate_audio_tempo_source (TimelineRange const & range, std::shared_ptr<Source> source, Sample* data, samplecnt_t data_length, samplecnt_t sample_rate, double& qpm, Temporal::Meter& meter, double& beatcount)
+{
+	using namespace Temporal;
+	TempoMap::SharedPtr tm (TempoMap::use());
 
-		/* check the name to see if there's a (heuristically obvious) hint
-		 * about the tempo.
-		 */
+	/* not a great guess, but what else can we do? */
 
-		string str = region->name();
-		string::size_type bi;
-		string::size_type ni;
-		double text_tempo = -1.;
+	TempoMetric const & metric (tm->metric_at (timepos_t (AudioTime)));
 
-		if (((bi = str.find (" bpm")) != string::npos) ||
-		    ((bi = str.find ("bpm")) != string::npos)  ||
-		    ((bi = str.find (" BPM")) != string::npos) ||
-		    ((bi = str.find ("BPM")) != string::npos)  ){
+	meter = metric.meter ();
 
-			string sub (str.substr (0, bi));
+	/* check the name to see if there's a (heuristically obvious) hint
+	 * about the tempo.
+	 */
 
-			if ((ni = sub.find_last_of ("0123456789.,_-")) != string::npos) {
+	string str = source->name();
+	string::size_type bi;
+	string::size_type ni;
+	double text_tempo = -1.;
 
-				int nni = ni; /* ni is unsigned, nni is signed */
+	if (((bi = str.find (" bpm")) != string::npos) ||
+	    ((bi = str.find ("bpm")) != string::npos)  ||
+	    ((bi = str.find (" BPM")) != string::npos) ||
+	    ((bi = str.find ("BPM")) != string::npos)  ){
 
-				while (nni >= 0) {
-					if (!isdigit (sub[nni]) &&
-					    (sub[nni] != '.') &&
-					    (sub[nni] != ',')) {
-						break;
-					}
-					--nni;
+		string sub (str.substr (0, bi));
+
+		if ((ni = sub.find_last_of ("0123456789.,_-")) != string::npos) {
+
+			int nni = ni; /* ni is unsigned, nni is signed */
+
+			while (nni >= 0) {
+				if (!isdigit (sub[nni]) &&
+				    (sub[nni] != '.') &&
+				    (sub[nni] != ',')) {
+					break;
 				}
+				--nni;
+			}
 
-				if (nni > 0) {
-					std::stringstream p (sub.substr (nni + 1));
-					p >> text_tempo;
-					if (!p) {
-						text_tempo = -1.;
-					} else {
-						qpm = text_tempo;
-					}
+			if (nni > 0) {
+				std::stringstream p (sub.substr (nni + 1));
+				p >> text_tempo;
+				if (!p) {
+					text_tempo = -1.;
+				} else {
+					qpm = text_tempo;
 				}
 			}
 		}
+	}
 
-		if (text_tempo < 0) {
+	if (text_tempo < 0) {
 
-			breakfastquay::MiniBPM mbpm (sample_rate);
+		breakfastquay::MiniBPM mbpm (sample_rate);
 
-			qpm = mbpm.estimateTempoOfSamples (data, data_length);
+		qpm = mbpm.estimateTempoOfSamples (data, data_length);
 
-			//cerr << name() << "MiniBPM Estimated: " << qpm << " bpm from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
-		}
+		//cerr << name() << "MiniBPM Estimated: " << qpm << " bpm from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
 	}
 
 	const double seconds = (double) data_length  / sample_rate;
