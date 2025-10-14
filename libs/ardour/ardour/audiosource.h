@@ -95,6 +95,8 @@ class LIBARDOUR_API AudioSource : virtual public Source, public ARDOUR::AudioRea
 	/** @return true if the each source sample s must be clamped to -1 < s < 1 */
 	virtual bool clamped_at_unity () const = 0;
 
+	void estimate_tempo ();
+
   protected:
 	static bool _build_missing_peakfiles;
 	static bool _build_peakfiles;

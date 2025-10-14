@@ -61,6 +61,7 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/runtime_functions.h"
 #include "ardour/session.h"
+#include "ardour/utils.h"
 
 #include "pbd/i18n.h"
 
@@ -129,6 +130,46 @@ AudioSource::~AudioSource ()
 	}
 
 	delete [] peak_leftovers;
+}
+
+void
+AudioSource::estimate_tempo ()
+{
+	/* CALLER MUST HOLD WRITER LOCK */
+
+	const samplecnt_t ten_seconds = _session.sample_rate() * 10;
+
+	if (length().samples() < ten_seconds) {
+		return;
+	}
+
+	samplecnt_t data_size = ten_seconds;
+	std::unique_ptr<Sample[]> data (new Sample[data_size]);
+
+	/* Read ten seconds from the middle of the data */
+
+	if (read_unlocked (data.get(), std::max ((samplecnt_t) 0, (length().samples() - data_size) / 2), data_size) == data_size) {
+
+		double tempo;
+		double beatcount;
+		Temporal::Tempo t (120, 4);
+		Temporal::Meter m (4, 4);
+		TimelineRange r (timepos_t (0), timepos_t (0) + length(), 0);
+
+		estimate_audio_tempo_source (r, shared_from_this(), data.get(), data_size, _session.sample_rate(), tempo, m, beatcount);
+		t = Temporal::Tempo (tempo, 4);
+
+		SegmentDescriptor sd;
+
+		sd.set_tempo (t);
+		sd.set_meter (m);
+		sd.set_position (0);
+		sd.set_duration (length().samples());
+
+		/* One segment descriptor to rule them all */
+
+		set_segment_descriptor (sd, true);
+	}
 }
 
 XMLNode&
@@ -1166,9 +1207,14 @@ AudioSource::available_peaks (double zoom_factor) const
 void
 AudioSource::mark_streaming_write_completed (const WriterLock& lock, Temporal::timecnt_t const &)
 {
-	Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
+	estimate_tempo ();
 
-	if (_peaks_built) {
-		PeaksReady (); /* EMIT SIGNAL */
+	{
+		Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
+
+		if (_peaks_built) {
+			PeaksReady (); /* EMIT SIGNAL */
+		}
 	}
 }
+

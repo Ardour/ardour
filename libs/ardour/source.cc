@@ -582,3 +582,9 @@ Source::set_segment_descriptor (SegmentDescriptor const & sr, bool replace)
 
 	return 0;
 }
+
+void
+Source::copy_segment_descriptors (Source const & other)
+{
+	segment_descriptors = other.segment_descriptors;
+}

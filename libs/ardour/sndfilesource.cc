@@ -329,6 +329,8 @@ SndFileSource::SndFileSource (Session& s, const AudioFileSource& other, const st
 		tbuf.modtime = statbuf.st_mtime; // = time ((time_t*) 0);
 		g_utime (path.c_str(), &tbuf);
 	}
+
+	copy_segment_descriptors (other);
 }
 
 void
