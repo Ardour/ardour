@@ -559,14 +559,22 @@ Source::get_segment_descriptor (TimelineRange const & range, SegmentDescriptor& 
 }
 
 int
-Source::set_segment_descriptor (SegmentDescriptor const & sr)
+Source::set_segment_descriptor (SegmentDescriptor const & sr, bool replace)
 {
 	/* We disallow any overlap between segments. They must describe non-overlapping ranges */
 
-	for (auto const & sd : segment_descriptors) {
+	for (auto i = segment_descriptors.begin(); i != segment_descriptors.end(); ++i) {
+
+		SegmentDescriptor& sd (*i);
+
 		if (coverage_exclusive_ends (sd.position(), sd.position() + sd.extent(),
 		                             sr.position(), sr.position() + sr.extent()) != Temporal::OverlapNone) {
-			return -1;
+			if (replace) {
+				segment_descriptors.erase (i);
+				break;
+			} else {
+				return -1;
+			}
 		}
 	}
 
