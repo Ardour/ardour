@@ -77,7 +77,7 @@ SegmentDescriptor::set_duration (samplepos_t s)
 		/* XXX error */
 		return;
 	}
-	_position_samples = s;
+	_duration_samples = s;
 }
 
 void
