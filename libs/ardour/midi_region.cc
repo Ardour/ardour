@@ -71,8 +71,6 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 	: Region (srcs)
 	, _ignore_shift (false)
 {
-	set_tempo_stuff_from_source ();
-
 	/* by default MIDI regions are transparent,
 	 * this should probably be set depending on use-case,
 	 * (eg. loop recording, vs copy/edit/paste)
@@ -99,8 +97,6 @@ MidiRegion::MidiRegion (std::shared_ptr<const MidiRegion> other, timecnt_t const
 	: Region (other, offset)
 	, _ignore_shift (false)
 {
-	set_tempo_stuff_from_source ();
-
 	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, std::bind (&MidiRegion::model_changed, this));
 	model_changed ();
@@ -108,28 +104,6 @@ MidiRegion::MidiRegion (std::shared_ptr<const MidiRegion> other, timecnt_t const
 
 MidiRegion::~MidiRegion ()
 {
-}
-
-void
-MidiRegion::set_tempo_stuff_from_source ()
-{
-	std::shared_ptr<Evoral::SMF> smf = std::dynamic_pointer_cast<Evoral::SMF> (midi_source ());
-	assert (smf);
-
-	bool provided;
-	Temporal::TempoMap::SharedPtr new_map (smf->tempo_map (provided));
-
-	if (!provided) {
-		_tempo = Temporal::Tempo (120, 4);
-		_meter = Temporal::Meter (4, 4);
-		return;
-	}
-
-	Temporal::TempoPoint const tp (new_map->tempo_at (start()));
-	Temporal::MeterPoint const mp (new_map->meter_at (start()));
-
-	_tempo = tp;
-	_meter = mp;
 }
 
 /** Export the MIDI data of the MidiRegion to a new MIDI file (SMF).

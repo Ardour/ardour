@@ -434,23 +434,6 @@ AudioRegion::~AudioRegion ()
 }
 
 void
-AudioRegion::set_tempo_stuff_from_source ()
-{
-	samplecnt_t data_size = _session.sample_rate() * 10;
-	std::unique_ptr<Sample> data (new Sample[data_size]);
-
-	if (read (data.get(), 0, data_size, 0) == data_size) {
-		double tempo;
-		double beatcount;
-		Temporal::Meter m (4, 4);
-
-		estimate_audio_tempo (shared_from_this(), data.get(), data_size, _session.sample_rate(), tempo, m, beatcount);
-		_tempo = Temporal::Tempo (tempo, 4);
-		_meter = m;
-	}
-}
-
-void
 AudioRegion::post_set (const PropertyChange& /*ignored*/)
 {
 	ensure_length_sanity ();

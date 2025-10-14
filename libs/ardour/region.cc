@@ -265,9 +265,7 @@ Region::register_properties ()
 	, _contents (Properties::contents, false)
 
 #define REGION_COPY_STATE(other) \
-	  _tempo (other->_tempo) \
-	, _meter (other->_meter) \
-	, _sync_marked (Properties::sync_marked, other->_sync_marked) \
+     	  _sync_marked (Properties::sync_marked, other->_sync_marked) \
 	, _left_of_split (Properties::left_of_split, other->_left_of_split) \
 	, _right_of_split (Properties::right_of_split, other->_right_of_split) \
 	, _valid_transients (Properties::valid_transients, other->_valid_transients) \
@@ -1426,13 +1424,6 @@ Region::state () const
 	node->set_property ("id", id ());
 	node->set_property ("type", _type);
 
-	if (_tempo) {
-		node->add_child_nocopy (_tempo.value().get_state());
-	}
-	if (_meter) {
-		node->add_child_nocopy (_meter.value().get_state());
-	}
-
 	std::string fe;
 
 	switch (_first_edit) {
@@ -1638,12 +1629,6 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 				}
 				_plugins.push_back (rfx);
 				changed = true;
-			} else  if (child->name() == Temporal::Tempo::xml_node_name) {
-				Temporal::Tempo t (*child);
-				_tempo = t;
-			} else  if (child->name() == Temporal::Meter::xml_node_name) {
-				Temporal::Meter m (*child);
-				_meter = m;
 			}
 		}
 		lm.release ();
@@ -2526,27 +2511,94 @@ Region::fx_tail_changed (bool)
 void
 Region::set_tempo (Temporal::Tempo const & t)
 {
-	if (_tempo != t) {
-		_tempo = t;
-		send_change (Properties::region_tempo);
+	assert (!_sources.empty());
+
+	bool changed = false;
+	TimelineRange r (start(), start() + length(), 0); /* ID doesn't matter */
+	SegmentDescriptor sd;
+
+	if (_sources.front()->get_segment_descriptor (r, sd)) {
+		if (t != sd.tempo()) {
+			changed = true;
+		}
 	}
+
+	if (!changed) {
+		return;
+	}
+
+	sd.set_position (start().samples());
+	sd.set_duration (length().samples());
+	sd.set_tempo (t);
+
+	for (auto & s : _sources) {
+		s->set_segment_descriptor (sd, true);
+	}
+
+	send_change (Properties::region_tempo);
 }
 
 void
 Region::set_meter (Temporal::Meter const & m)
 {
-	if (_meter != m) {
-		_meter = m;
-		send_change (Properties::region_meter);
+	assert (!_sources.empty());
+
+	bool changed = false;
+	TimelineRange r (start(), start() + length(), 0); /* ID doesn't matter */
+	SegmentDescriptor sd;
+
+	if (_sources.front()->get_segment_descriptor (r, sd)) {
+		if (m != sd.meter()) {
+			changed = true;
+		}
 	}
+
+	if (!changed) {
+		return;
+	}
+
+	sd.set_position (start().samples());
+	sd.set_duration (length().samples());
+	sd.set_meter (m);
+
+	for (auto & s : _sources) {
+		s->set_segment_descriptor (sd, true);
+	}
+
+	send_change (Properties::region_meter);
 }
 
 std::shared_ptr<Temporal::TempoMap>
 Region::tempo_map () const
 {
-	if (!_tempo || !_meter) {
+	assert (!_sources.empty());
+
+	TimelineRange r (start(), start() + length(), 0); /* ID doesn't matter */
+	SegmentDescriptor sd;
+
+	if (!_sources.front()->get_segment_descriptor (r, sd)) {
 		return nullptr;
 	}
 
-	return std::make_shared<Temporal::TempoMap> (_tempo.value(), _meter.value());
+	return std::make_shared<Temporal::TempoMap> (sd.tempo(), sd.meter());
+}
+
+std::optional<Temporal::Tempo>
+Region::tempo() const
+{
+	std::shared_ptr<Temporal::TempoMap> tmap = tempo_map ();
+	if (!tmap) {
+		return std::optional<Temporal::Tempo>();
+	}
+	return tmap->tempo_at (0);
+}
+
+std::optional<Temporal::Meter>
+Region::meter() const
+{
+	std::shared_ptr<Temporal::TempoMap> tmap = tempo_map ();
+	if (!tmap) {
+		return std::optional<Temporal::Meter>();
+	}
+	return tmap->meter_at (0);
 }

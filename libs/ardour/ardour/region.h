@@ -545,9 +545,9 @@ public:
 		}
 	}
 
-	std::optional<Temporal::Tempo> tempo() const { return _tempo; }
+	std::optional<Temporal::Tempo> tempo() const;
 	void set_tempo (Temporal::Tempo const &);
-	std::optional<Temporal::Meter> meter() const { return _meter; }
+	std::optional<Temporal::Meter> meter() const;
 	void set_meter (Temporal::Meter const &);
 
 	std::shared_ptr<Temporal::TempoMap> tempo_map() const;
@@ -603,9 +603,6 @@ protected:
 	uint32_t                      _fx_latency;
 	uint32_t                      _fx_tail;
 	RegionFxList                  _plugins;
-
-	std::optional<Temporal::Tempo> _tempo;
-	std::optional<Temporal::Meter> _meter;
 
 	PBD::Property<bool>      _sync_marked;
 	PBD::Property<bool>      _left_of_split;
