@@ -1776,7 +1776,7 @@ void
 AudioTrigger::estimate_tempo ()
 {
 	double beatcount;
-	ARDOUR::estimate_audio_tempo (_region, data[0], data.length, _box.session().sample_rate(), _estimated_tempo, _meter, beatcount);
+	ARDOUR::estimate_audio_tempo_region (_region, data[0], data.length, _box.session().sample_rate(), _estimated_tempo, _meter, beatcount);
 	/* initialize our follow_length to match the beatcnt ... user can later change this value to have the clip end sooner or later than its data length */
 	set_follow_length(Temporal::BBT_Offset( 0, rint(beatcount), 0));
 
