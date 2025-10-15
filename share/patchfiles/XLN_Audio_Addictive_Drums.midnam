@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Antti-Pekka Meronen</Author>
+  <MasterDeviceNames>
+    <Manufacturer>XLN Audio</Manufacturer>
+    <Model>Addictive Drums</Model>
+    <CustomDeviceMode Name="Drumkit Keymap">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Names"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Names">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+      </AvailableForChannels>
+      <UsesNoteNameList Name="Notes"/>
+      <PatchBank Name="User Patches">
+        <PatchNameList Name="User Patches"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <NoteNameList Name="Notes">
+      <Note Number="4" Name="Ride CCpos (Tip/Bell)"/>
+      <Note Number="5" Name="-"/>
+      <Note Number="6" Name="Snare CCpos (Open/Shallow)"/>
+      <Note Number="7" Name="HiHat CC Hihat Shaft"/>
+      <Note Number="8" Name="HiHat CC Hihat Tip"/>
+      <Note Number="9" Name="HiHat CC Hihat Bell"/>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="37" Name="Snare Rimshot"/>
+      <Note Number="38" Name="Snare Open Hit"/>
+      <Note Number="39" Name="Snare Rimshot (double)"/>
+      <Note Number="40" Name="Snare Open Hit (double)"/>
+      <Note Number="41" Name="Snare Shallow Rimshot"/>
+      <Note Number="42" Name="Snare SideStick"/>
+      <Note Number="43" Name="Snare Shallow Hit"/>
+      <Note Number="44" Name="Snare RimClick"/>
+      <Note Number="45" Name="Ride Tip (double)"/>
+      <Note Number="46" Name="Cymbal 1 (double)"/>
+      <Note Number="47" Name="Xtra A"/>
+      <Note Number="48" Name="HiHat Pedal Closed"/>
+      <Note Number="49" Name="HiHat Closed 1 Tip"/>
+      <Note Number="50" Name="HiHat Closed 1 Shaft"/>
+      <Note Number="51" Name="HiHat Closed 2 Tip"/>
+      <Note Number="52" Name="HiHat Closed 2 Shaft"/>
+      <Note Number="53" Name="HiHat Closed Bell"/>
+      <Note Number="54" Name="HiHat Open A"/>
+      <Note Number="55" Name="HiHat Open B"/>
+      <Note Number="56" Name="HiHat Open C"/>
+      <Note Number="57" Name="HiHat Open D"/>
+      <Note Number="58" Name="HiHat Open Bell"/>
+      <Note Number="59" Name="HiHat Pedal Open"/>
+      <Note Number="60" Name="Ride Tip"/>
+      <Note Number="61" Name="Ride Bell"/>
+      <Note Number="62" Name="Ride Shaft"/>
+      <Note Number="63" Name="Ride Choke"/>
+      <Note Number="64" Name="-"/>
+      <Note Number="65" Name="Tom 4 Open Hit"/>
+      <Note Number="66" Name="Tom 4 Rimshot"/>
+      <Note Number="67" Name="Tom 3 Open Hit"/>
+      <Note Number="68" Name="Tom 3 Rimshot"/>
+      <Note Number="69" Name="Tom 2 Open Hit"/>
+      <Note Number="70" Name="Tom 2 Rimshot"/>
+      <Note Number="71" Name="Tom 1 Open Hit"/>
+      <Note Number="72" Name="Tom 1 Rimshot"/>
+      <Note Number="73" Name="Xtra B"/>
+      <Note Number="74" Name="Xtra C"/>
+      <Note Number="75" Name="Snare Sticks"/>
+      <Note Number="76" Name="Xtra D"/>
+      <Note Number="77" Name="Cymbal 1"/>
+      <Note Number="78" Name="Cymbal 1 Choke"/>
+      <Note Number="79" Name="Cymbal 2"/>
+      <Note Number="80" Name="Cymbal 2 Choke"/>
+      <Note Number="81" Name="Cymbal 3"/>
+      <Note Number="82" Name="Cymbal 3 Choke"/>
+    </NoteNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>
