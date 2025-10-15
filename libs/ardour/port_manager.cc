@@ -920,7 +920,7 @@ PortManager::set_pretty_names (std::vector<std::string> const& port_names, DataT
 }
 
 int
-PortManager::reconnect_ports ()
+PortManager::reconnect_ports (Session* s)
 {
 	std::shared_ptr<Ports const> p = _ports.reader ();
 
@@ -928,7 +928,10 @@ PortManager::reconnect_ports ()
 
 	DEBUG_TRACE (DEBUG::Ports, string_compose ("reconnect %1 ports\n", p->size ()));
 
-	Session* s = AudioEngine::instance ()->session ();
+	if (!s) {
+		s = AudioEngine::instance ()->session ();
+	}
+
 	if (s && s->master_out() && !s->master_out ()->output()->has_ext_connection()) {
 		s->auto_connect_master_bus ();
 	}

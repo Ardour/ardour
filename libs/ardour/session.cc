@@ -1670,7 +1670,7 @@ Session::hookup_io ()
 
 	/* Get everything connected */
 
-	AudioEngine::instance()->reconnect_ports ();
+	AudioEngine::instance()->reconnect_ports (this);
 
 	AfterConnect (); /* EMIT SIGNAL */
 
