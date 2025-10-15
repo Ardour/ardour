@@ -23,7 +23,7 @@
     </ChannelNameSet>
     <NoteNameList Name="Notes">
       <Note Number="4" Name="Ride CCpos (Tip/Bell)"/>
-      <Note Number="5" Name="Snare CCpos [only brush] (Closed/Shallow)"/>
+      <Note Number="5" Name="-"/>
       <Note Number="6" Name="Snare CCpos (Open/Shallow)"/>
       <Note Number="7" Name="HiHat CC Hihat Shaft"/>
       <Note Number="8" Name="HiHat CC Hihat Tip"/>
