@@ -38,6 +38,12 @@ class VST3PluginModule;
 class AutomationList;
 }
 
+namespace ARA
+{
+class ARAFactory;
+class ARADocumentControllerInstance;
+}
+
 #if defined(__clang__)
 # pragma clang diagnostic push
 # pragma clang diagnostic ignored "-Wnon-virtual-dtor"
@@ -282,6 +288,11 @@ private:
 	IPtr<Vst::IAudioProcessor> _processor;
 	Vst::ProcessContext        _context;
 	Glib::Threads::Mutex       _process_lock;
+
+#ifdef HAVE_ARA
+	ARA::ARAFactory const* _ara_factory;
+	ARA::ARADocumentControllerInstance const* _ara_document_controller;
+#endif
 
 	/* Parameters */
 	Vst3ParameterChanges _input_param_changes;

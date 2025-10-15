@@ -25,6 +25,10 @@
 #include "ardour/session_directory.h"
 #endif
 
+#ifdef HAVE_ARA
+#include "ara/ARAVST3.h"
+#endif
+
 #include "ardour/vst3_host.h"
 
 #include "pbd/atomic.h"
@@ -84,6 +88,12 @@ DEF_CLASS_IID (Presonus::IEditControllerExtra)
 DEF_CLASS_IID (Presonus::ISlaveControllerHandler)
 DEF_CLASS_IID (Presonus::IPlugInViewEmbedding)
 DEF_CLASS_IID (Presonus::IPlugInViewScaling)
+
+#ifdef HAVE_ARA
+	DEF_CLASS_IID (ARA::IMainFactory)
+	DEF_CLASS_IID (ARA::IPlugInEntryPoint)
+	DEF_CLASS_IID (ARA::IPlugInEntryPoint2)
+#endif
 
 #if SMTG_OS_LINUX
 DEF_CLASS_IID (Linux::IRunLoop);

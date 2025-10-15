@@ -36,6 +36,10 @@
 #include <shlobj.h> // CSIDL_*
 #endif
 
+#ifdef HAVE_ARA
+#include "ara/ARAVST3.h"
+#endif
+
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
@@ -55,6 +59,9 @@ using namespace ARDOUR;
 using namespace Temporal;
 using namespace Steinberg;
 using namespace Presonus;
+#ifdef HAVE_ARA
+using namespace ARA;
+#endif
 
 VST3Plugin::VST3Plugin (AudioEngine& engine, Session& session, VST3PI* plug)
 	: Plugin (engine, session)
@@ -1183,6 +1190,10 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 	, _component (0)
 	, _controller (0)
 	, _view (0)
+#ifdef HAVE_ARA
+	, _ara_factory (0)
+	, _ara_document_controller (0)
+#endif
 	, _is_loading_state (false)
 	, _is_processing (false)
 	, _block_size (0)
@@ -1262,6 +1273,42 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 		_component->release ();
 		throw failed_constructor ();
 	}
+
+#ifdef HAVE_ARA
+	IPtr<ARA::IMainFactory> ara_main_factory = nullptr;
+
+	DEBUG_TRACE (DEBUG::VST3Config, "VST3PI: looking for ARA Main Factory...\n");
+	for (int32 i = 0; i < factory->countClasses (); ++i) {
+		PClassInfo ci;
+		if (factory->getClassInfo (i, &ci) == kResultTrue) {
+			if (std::strcmp (kARAMainFactoryClass, ci.category)) {
+				continue;
+			}
+			if (factory->createInstance (ci.cid, ARA::IMainFactory::iid, (void**) &ara_main_factory) == kResultOk) {
+				_ara_factory = ara_main_factory->getFactory ();
+				DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI: found ARA Main Factory for '%1'.\n", _ara_factory->plugInName));
+				break; // XXX check if there is more than one
+			}
+		}
+	}
+
+	if (_ara_factory) {
+		if (_ara_factory->lowestSupportedApiGeneration > kARAAPIGeneration_2_0_Final) {
+			DEBUG_TRACE (DEBUG::VST3Config, "VST3PI: only supports newer generations of ARA.\n");
+			_ara_factory = nullptr;
+		}
+		if (_ara_factory->highestSupportedApiGeneration < kARAAPIGeneration_2_0_Final) {
+			DEBUG_TRACE (DEBUG::VST3Config, "VST3PI: only supports older generations of ARA.\n");
+			_ara_factory = nullptr;
+		}
+	}
+	if (_ara_factory) {
+		static ARAInterfaceConfiguration ara_interface_config = { ARA_IMPLEMENTED_STRUCT_SIZE (ARAInterfaceConfiguration, assertFunctionAddress), kARAAPIGeneration_2_0_Final, NULL };
+		_ara_factory->initializeARAWithConfiguration (&ara_interface_config);
+		DEBUG_TRACE (DEBUG::VST3Config, "VST3PI: initialized ARA.\n");
+	}
+#endif
+
 
 	/* The official Steinberg SDK's source/vst/hosting/plugprovider.cpp
 	 * only initializes the controller if it is separate of the component.
@@ -1451,6 +1498,15 @@ VST3PI::terminate ()
 		_component->terminate ();
 		_component->release ();
 	}
+
+#ifdef HAVE_ARA
+	if (_ara_factory) {
+		if (_ara_document_controller) {
+			_ara_document_controller->documentControllerInterface->destroyDocumentController (_ara_document_controller->documentControllerRef);
+		}
+		_ara_factory->uninitializeARA ();
+	}
+#endif
 
 	_controller = 0;
 	_component  = 0;
@@ -1825,6 +1881,78 @@ VST3PI::plugin_tailtime ()
 	return _plugin_tail.value ();
 }
 
+#ifdef HAVE_ARA
+static ARAAudioReaderHostRef ARA_CALL ARACreateAudioReaderForSource (ARAAudioAccessControllerHostRef controller_host_ref,
+                                                                     ARAAudioSourceHostRef           audio_source_host_ref,
+                                                                     ARABool                         use_64_bit_samples)
+{
+	return (ARAAudioReaderHostRef) (use_64_bit_samples ? 0xaffeb00b : 0x00c0ffee);
+}
+static ARABool ARA_CALL ARAReadAudioSamples (ARAAudioAccessControllerHostRef controller_host_ref,
+                                             ARAAudioReaderHostRef           audio_reader_host_ref,
+                                             ARASamplePosition               sample_position,
+                                             ARASampleCount                  samples_per_channel,
+                                             void * const                    buffers[])
+{
+	if (audio_reader_host_ref == (ARAAudioReaderHostRef) 0xaffeb00b) {
+		memset (buffers[0], 0, sizeof (double) * samples_per_channel);
+	} else {
+		memset (buffers[0], 0, sizeof (float) * samples_per_channel);
+	}
+	return kARATrue;
+}
+
+static void ARA_CALL ARADestroyAudioReader (ARAAudioAccessControllerHostRef controller_host_ref,
+                                            ARAAudioReaderHostRef           audio_reader_host_ref)
+{
+	printf ("destroyAudioReader() called for fake host ref %p", audio_reader_host_ref);
+}
+
+static const ARAAudioAccessControllerInterface host_audio_access_controller_interface = { ARA_IMPLEMENTED_STRUCT_SIZE(ARAAudioAccessControllerInterface, destroyAudioReader),
+                                                                                          &ARACreateAudioReaderForSource, &ARAReadAudioSamples, &ARADestroyAudioReader };
+
+static ARASize ARA_CALL ARAGetArchiveSize (ARAArchivingControllerHostRef controllerHostRef,
+                                           ARAArchiveReaderHostRef archiveReaderHostRef)
+{
+    return 0;
+}
+static ARABool ARA_CALL ARAReadBytesFromArchive (ARAArchivingControllerHostRef controller_host_ref,
+                                                 ARAArchiveReaderHostRef       archive_reader_host_ref,
+                                                 ARASize                       position,
+                                                 ARASize                       length,
+                                                 ARAByte                       buffer[])
+{
+    memset (&buffer[position], 0, length);
+    return kARAFalse;
+}
+
+static ARABool ARA_CALL ARAWriteBytesToArchive (ARAArchivingControllerHostRef controller_host_ref,
+                                                ARAArchiveWriterHostRef       archive_writer_host_ref,
+                                                ARASize                       position,
+                                                ARASize                       length,
+                                                const ARAByte                 buffer[])
+{
+    return kARATrue;
+}
+static void ARA_CALL ARANotifyDocumentArchivingProgress (ARAArchivingControllerHostRef controller_host_ref, float value)
+{
+}
+
+static void ARA_CALL ARANotifyDocumentUnarchivingProgress (ARAArchivingControllerHostRef controller_host_ref, float value)
+{
+}
+
+static ARAPersistentID ARA_CALL ARAGetDocumentArchiveID (ARAArchivingControllerHostRef controller_host_ref, ARAArchiveReaderHostRef archive_reader_host_ref)
+{
+    return NULL;
+}
+
+static const ARAArchivingControllerInterface host_archiving_interface = { ARA_IMPLEMENTED_STRUCT_SIZE(ARAArchivingControllerInterface, getDocumentArchiveID),
+                                                                          &ARAGetArchiveSize, &ARAReadBytesFromArchive, &ARAWriteBytesToArchive,
+                                                                          &ARANotifyDocumentArchivingProgress, &ARANotifyDocumentUnarchivingProgress,
+                                                                          &ARAGetDocumentArchiveID };
+#endif
+
 void
 VST3PI::set_owner (SessionObject* o)
 {
@@ -1836,6 +1964,23 @@ VST3PI::set_owner (SessionObject* o)
 		return;
 	}
 
+	Stripable*  s = dynamic_cast<Stripable*> (_owner);
+	//AudioTrack* t = dynamic_cast<AudioTrack*> (s);
+	assert (s);
+
+	ARADocumentControllerHostInstance documentEntry = { ARA_IMPLEMENTED_STRUCT_SIZE(ARADocumentControllerHostInstance, playbackControllerInterface),
+		(ARAAudioAccessControllerHostRef)this, &host_audio_access_controller_interface, // XXX  pass track as ref?
+		(ARAArchivingControllerHostRef) this, &host_archiving_interface, // XXX
+		(ARAContentAccessControllerHostRef) this, NULL, // optional
+		(ARAModelUpdateControllerHostRef) this, NULL, // optional
+		(ARAPlaybackControllerHostRef) NULL, NULL // optional
+	};
+
+	printf ("TOWARDS ARA...\n");
+	std::string session_name (s->session ().name ());
+	ARADocumentProperties documentProperties = { ARA_IMPLEMENTED_STRUCT_SIZE(ARADocumentProperties, name), session_name.c_str() };
+	_ara_document_controller = _ara_factory->createDocumentControllerWithDocument (&documentEntry, &documentProperties);
+	
 	_in_set_owner.store (true);
 
 	if (!setup_psl_info_handler ()) {
