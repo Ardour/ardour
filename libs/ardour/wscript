@@ -405,6 +405,7 @@ def build(bld):
                         'libtemporal',
                         'liblua',
                         'libptformat',
+                        'ara',
                         'staffpad',
                         'zita-resampler',
                         'zita-convolver',

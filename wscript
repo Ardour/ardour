@@ -333,6 +333,7 @@ children = [
         'libs/zita-resampler',
         'libs/zita-convolver',
         'libs/staffpad',
+        'libs/ara',
         # optionally external libraries
         'libs/fluidsynth',
         'libs/hidapi',

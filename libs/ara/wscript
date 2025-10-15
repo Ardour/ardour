@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+
+def options(opt):
+    pass
+
+def configure(conf):
+    conf.define('HAVE_ARA', 1)
+    pass
+
+def build(bld):
+    bld (name = 'ara', export_includes = ['.'])
