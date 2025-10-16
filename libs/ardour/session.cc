@@ -5297,7 +5297,7 @@ Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t cha
 	string legalized;
 	bool some_related_source_name_exists = false;
 
-	legalized = legalize_for_path (base);
+	legalized = legalize_for_universal_path (base);
 
 	// Find a "version" of the base name that doesn't exist in any of the possible directories.
 
