@@ -2521,6 +2521,8 @@ Region::set_tempo (Temporal::Tempo const & t)
 		if (t != sd.tempo()) {
 			changed = true;
 		}
+	} else {
+		changed = true;
 	}
 
 	if (!changed) {
@@ -2551,6 +2553,8 @@ Region::set_meter (Temporal::Meter const & m)
 		if (m != sd.meter()) {
 			changed = true;
 		}
+	} else {
+		changed = true;
 	}
 
 	if (!changed) {
