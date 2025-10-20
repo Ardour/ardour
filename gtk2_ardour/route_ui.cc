@@ -1747,19 +1747,16 @@ RouteUI::set_color_from_route ()
 bool
 RouteUI::verify_new_route_name (const std::string& name)
 {
-	if (name.find (':') == string::npos) {
+	if (name == legalize_for_universal_path (name)) {
 		return true;
 	}
 
-	MessageDialog colon_msg (
-		_("The use of colons (':') is discouraged in track and bus names.\nDo you want to use this new name?"),
-		false, MESSAGE_QUESTION, BUTTONS_NONE
-		);
+	MessageDialog (
+		_("The name includes special characters (<>:\"/\\|?*) which is discouraged in track and bus names, due to filename restrictiosn on some systems.\n"),
+		false, MESSAGE_INFO, BUTTONS_OK
+		).run ();
 
-	colon_msg.add_button (_("Use the new name"), Gtk::RESPONSE_ACCEPT);
-	colon_msg.add_button (_("Re-edit the name"), Gtk::RESPONSE_CANCEL);
-
-	return (colon_msg.run () == Gtk::RESPONSE_ACCEPT);
+	return false;
 }
 
 void
