@@ -87,11 +87,17 @@ class LIBTEMPORAL_API ScopedTempoMapOwner
 	friend struct TempoMapScope;
 
 	void in () const {
-		if (_local_tempo_map && local_tempo_map_depth++ == 0 ) {
-			DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: in to local tempo  %2, TMAP set\n", scope_name(), local_tempo_map_depth));
-			Temporal::TempoMap::set (_local_tempo_map);
+		if (_local_tempo_map) {
+			Temporal::TempoMap::SharedPtr gtmap (Temporal::TempoMap::use());
+			++local_tempo_map_depth;
+			if (gtmap->scope_owner() != this) {
+				DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: in to local tempo  %2, TMAP set\n", scope_name(), local_tempo_map_depth));
+				Temporal::TempoMap::set (_local_tempo_map);
+			} else {
+				DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: in to local tempo %s, map left unset\n", scope_name(), local_tempo_map_depth));
+			}
 		} else {
-			DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: in to local tempo  %2, no tm set\n", scope_name(), local_tempo_map_depth));
+			DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: in to local tempo scope\n", scope_name()));
 		}
 	}
 
