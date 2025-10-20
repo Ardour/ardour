@@ -546,10 +546,9 @@ Source::get_segment_descriptor (TimelineRange const & range, SegmentDescriptor& 
 	/* Note: since we disallow overlapping segments, any overlap between
 	   the @p range and an existing segment counts as a match.
 	*/
-
 	for (auto const & sd : segment_descriptors) {
 		if (coverage_exclusive_ends (sd.position(), sd.position() + sd.extent(),
-		                             segment.position(), segment.position() + segment.extent()) != Temporal::OverlapNone) {
+		                             range.start(), range.end()) != Temporal::OverlapNone) {
 			segment = sd;
 			return true;
 		}
