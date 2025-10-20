@@ -45,7 +45,7 @@ SegmentDescriptor::SegmentDescriptor (XMLNode const & node, int version)
 	, _tempo (120, 4)
 	, _meter (4, 4)
 {
-	if (!set_state (node, version)) {
+	if (set_state (node, version)) {
 		throw failed_constructor ();
 	}
 }
@@ -156,22 +156,22 @@ SegmentDescriptor::set_state (XMLNode const & node, int version)
 		return -1;
 	}
 
-	if (node.get_property (X_("time-domain"), _time_domain)) {
+	if (!node.get_property (X_("time-domain"), _time_domain)) {
 		return -1;
 	}
 
 	if (_time_domain == Temporal::AudioTime) {
-		if (node.get_property (X_("position"), _position_samples)) {
+		if (!node.get_property (X_("position"), _position_samples)) {
 			return -1;
 		}
-		if (node.get_property (X_("duration"), _duration_samples)) {
+		if (!node.get_property (X_("duration"), _duration_samples)) {
 			return -1;
 		}
 	} else {
-		if (node.get_property (X_("position"), _position_beats)) {
+		if (!node.get_property (X_("position"), _position_beats)) {
 			return -1;
 		}
-		if (node.get_property (X_("duration"), _duration_beats)) {
+		if (!node.get_property (X_("duration"), _duration_beats)) {
 			return -1;
 		}
 	}
