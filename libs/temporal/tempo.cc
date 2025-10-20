@@ -5402,6 +5402,7 @@ ScopedTempoMapOwner::start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> 
 #ifndef NDEBUG
 	if (DEBUG_ENABLED (PBD::DEBUG::ScopedTempoMap)) {
 		PBD::stacktrace (std::cerr, 29);
+		map->dump (std::cerr);
 	}
 #endif
 	map->set_scope_owner (*this);
