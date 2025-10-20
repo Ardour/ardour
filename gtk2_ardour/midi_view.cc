@@ -1117,6 +1117,8 @@ MidiView::model_changed()
 		return;
 	}
 
+	EC_LOCAL_TEMPO_SCOPE_ARG (_editing_context);
+
 	MidiViewBackground::NoteRangeSuspender nrs (_midi_context);
 
 	if (_active_notes) {
@@ -1280,6 +1282,9 @@ MidiView::view_changed()
 	}
 
 	if (_active_notes) {
+
+		EC_LOCAL_TEMPO_SCOPE_ARG (_editing_context);
+
 		for (auto & [ note, gui ] : _events) {
 			if (note->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
 				update_note (gui);
@@ -1291,6 +1296,8 @@ MidiView::view_changed()
 	if (!_model) {
 		return;
 	}
+
+	EC_LOCAL_TEMPO_SCOPE_ARG (_editing_context);
 
 	for (auto & [ note, gui] : _events) {
 
