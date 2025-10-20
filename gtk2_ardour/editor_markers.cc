@@ -1859,10 +1859,6 @@ Editor::edit_location (Location& loc, bool with_scene, bool with_command)
 	string txt;
 	string verb;
 
-	if (!Profile->get_livetrax()) {
-		with_scene = false;
-	}
-
 	if (with_scene) {
 		verb = _("Edit");
 	} else {
