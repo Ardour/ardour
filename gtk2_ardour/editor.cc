@@ -1221,13 +1221,9 @@ Editor::set_session (Session *t)
 	_locations->set_session (_session);
 	_properties_box->set_session (_session);
 
-	/* Cannot initialize in constructor, because pianoroll needs Actions */
-	if (!_pianoroll) {
-		// XXX this should really not happen here
-		_pianoroll = new Pianoroll ("editor pianoroll", true);
-		_pianoroll->get_canvas_viewport()->set_size_request (-1, 120);
+	if (_pianoroll) {
+		_pianoroll->set_session (_session);
 	}
-	_pianoroll->set_session (_session);
 
 	/* _pianoroll is packed on demand in Editor::region_selection_changed */
 	_bottom_hbox.show_all();
