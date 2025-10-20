@@ -1212,6 +1212,142 @@
 					<Patch Number="128" Name="Passing by" ProgramChange="127"/>
 				</PatchNameList>
 			</PatchBank>
+			<PatchBank Name="User" >
+				<MIDICommands>
+					<ControlChange Control="0" Value="87"/>
+					<ControlChange Control="32" Value="1"/>
+				</MIDICommands>
+				<PatchNameList>
+					<Patch Number="129" Name="INIT PATCH 129" ProgramChange="0"/>
+					<Patch Number="130" Name="INIT PATCH 130" ProgramChange="1"/>
+					<Patch Number="131" Name="INIT PATCH 131" ProgramChange="2"/>
+					<Patch Number="132" Name="INIT PATCH 132" ProgramChange="3"/>
+					<Patch Number="133" Name="INIT PATCH 133" ProgramChange="4"/>
+					<Patch Number="134" Name="INIT PATCH 134" ProgramChange="5"/>
+					<Patch Number="135" Name="INIT PATCH 135" ProgramChange="6"/>
+					<Patch Number="136" Name="INIT PATCH 136" ProgramChange="7"/>
+					<Patch Number="137" Name="INIT PATCH 137" ProgramChange="8"/>
+					<Patch Number="138" Name="INIT PATCH 138" ProgramChange="9"/>
+					<Patch Number="139" Name="INIT PATCH 139" ProgramChange="10"/>
+					<Patch Number="140" Name="INIT PATCH 140" ProgramChange="11"/>
+					<Patch Number="141" Name="INIT PATCH 141" ProgramChange="12"/>
+					<Patch Number="142" Name="INIT PATCH 142" ProgramChange="13"/>
+					<Patch Number="143" Name="INIT PATCH 143" ProgramChange="14"/>
+					<Patch Number="144" Name="INIT PATCH 144" ProgramChange="15"/>
+					<Patch Number="145" Name="INIT PATCH 145" ProgramChange="16"/>
+					<Patch Number="146" Name="INIT PATCH 146" ProgramChange="17"/>
+					<Patch Number="147" Name="INIT PATCH 147" ProgramChange="18"/>
+					<Patch Number="148" Name="INIT PATCH 148" ProgramChange="19"/>
+					<Patch Number="149" Name="INIT PATCH 149" ProgramChange="20"/>
+					<Patch Number="150" Name="INIT PATCH 150" ProgramChange="21"/>
+					<Patch Number="151" Name="INIT PATCH 151" ProgramChange="22"/>
+					<Patch Number="152" Name="INIT PATCH 152" ProgramChange="23"/>
+					<Patch Number="153" Name="INIT PATCH 153" ProgramChange="24"/>
+					<Patch Number="154" Name="INIT PATCH 154" ProgramChange="25"/>
+					<Patch Number="155" Name="INIT PATCH 155" ProgramChange="26"/>
+					<Patch Number="156" Name="INIT PATCH 156" ProgramChange="27"/>
+					<Patch Number="157" Name="INIT PATCH 157" ProgramChange="28"/>
+					<Patch Number="158" Name="INIT PATCH 158" ProgramChange="29"/>
+					<Patch Number="159" Name="INIT PATCH 159" ProgramChange="30"/>
+					<Patch Number="160" Name="INIT PATCH 160" ProgramChange="31"/>
+					<Patch Number="161" Name="INIT PATCH 161" ProgramChange="32"/>
+					<Patch Number="162" Name="INIT PATCH 162" ProgramChange="33"/>
+					<Patch Number="163" Name="INIT PATCH 163" ProgramChange="34"/>
+					<Patch Number="164" Name="INIT PATCH 164" ProgramChange="35"/>
+					<Patch Number="165" Name="INIT PATCH 165" ProgramChange="36"/>
+					<Patch Number="166" Name="INIT PATCH 166" ProgramChange="37"/>
+					<Patch Number="167" Name="INIT PATCH 167" ProgramChange="38"/>
+					<Patch Number="168" Name="INIT PATCH 168" ProgramChange="39"/>
+					<Patch Number="169" Name="INIT PATCH 169" ProgramChange="40"/>
+					<Patch Number="170" Name="INIT PATCH 170" ProgramChange="41"/>
+					<Patch Number="171" Name="INIT PATCH 171" ProgramChange="42"/>
+					<Patch Number="172" Name="INIT PATCH 172" ProgramChange="43"/>
+					<Patch Number="173" Name="INIT PATCH 173" ProgramChange="44"/>
+					<Patch Number="174" Name="INIT PATCH 174" ProgramChange="45"/>
+					<Patch Number="175" Name="INIT PATCH 175" ProgramChange="46"/>
+					<Patch Number="176" Name="INIT PATCH 176" ProgramChange="47"/>
+					<Patch Number="177" Name="INIT PATCH 177" ProgramChange="48"/>
+					<Patch Number="178" Name="INIT PATCH 178" ProgramChange="49"/>
+					<Patch Number="179" Name="INIT PATCH 179" ProgramChange="50"/>
+					<Patch Number="180" Name="INIT PATCH 180" ProgramChange="51"/>
+					<Patch Number="181" Name="INIT PATCH 181" ProgramChange="52"/>
+					<Patch Number="182" Name="INIT PATCH 182" ProgramChange="53"/>
+					<Patch Number="183" Name="INIT PATCH 183" ProgramChange="54"/>
+					<Patch Number="184" Name="INIT PATCH 184" ProgramChange="55"/>
+					<Patch Number="185" Name="INIT PATCH 185" ProgramChange="56"/>
+					<Patch Number="186" Name="INIT PATCH 186" ProgramChange="57"/>
+					<Patch Number="187" Name="INIT PATCH 187" ProgramChange="58"/>
+					<Patch Number="188" Name="INIT PATCH 188" ProgramChange="59"/>
+					<Patch Number="189" Name="INIT PATCH 189" ProgramChange="60"/>
+					<Patch Number="190" Name="INIT PATCH 190" ProgramChange="61"/>
+					<Patch Number="191" Name="INIT PATCH 191" ProgramChange="62"/>
+					<Patch Number="192" Name="INIT PATCH 192" ProgramChange="63"/>
+					<Patch Number="193" Name="INIT PATCH 193" ProgramChange="64"/>
+					<Patch Number="194" Name="INIT PATCH 194" ProgramChange="65"/>
+					<Patch Number="195" Name="INIT PATCH 195" ProgramChange="66"/>
+					<Patch Number="196" Name="INIT PATCH 196" ProgramChange="67"/>
+					<Patch Number="197" Name="INIT PATCH 197" ProgramChange="68"/>
+					<Patch Number="198" Name="INIT PATCH 198" ProgramChange="69"/>
+					<Patch Number="199" Name="INIT PATCH 199" ProgramChange="70"/>
+					<Patch Number="200" Name="INIT PATCH 200" ProgramChange="71"/>
+					<Patch Number="201" Name="INIT PATCH 201" ProgramChange="72"/>
+					<Patch Number="202" Name="INIT PATCH 202" ProgramChange="73"/>
+					<Patch Number="203" Name="INIT PATCH 203" ProgramChange="74"/>
+					<Patch Number="204" Name="INIT PATCH 204" ProgramChange="75"/>
+					<Patch Number="205" Name="INIT PATCH 205" ProgramChange="76"/>
+					<Patch Number="206" Name="INIT PATCH 206" ProgramChange="77"/>
+					<Patch Number="207" Name="INIT PATCH 207" ProgramChange="78"/>
+					<Patch Number="208" Name="INIT PATCH 208" ProgramChange="79"/>
+					<Patch Number="209" Name="INIT PATCH 209" ProgramChange="80"/>
+					<Patch Number="210" Name="INIT PATCH 210" ProgramChange="81"/>
+					<Patch Number="211" Name="INIT PATCH 211" ProgramChange="82"/>
+					<Patch Number="212" Name="INIT PATCH 212" ProgramChange="83"/>
+					<Patch Number="213" Name="INIT PATCH 213" ProgramChange="84"/>
+					<Patch Number="214" Name="INIT PATCH 214" ProgramChange="85"/>
+					<Patch Number="215" Name="INIT PATCH 215" ProgramChange="86"/>
+					<Patch Number="216" Name="INIT PATCH 216" ProgramChange="87"/>
+					<Patch Number="217" Name="INIT PATCH 217" ProgramChange="88"/>
+					<Patch Number="218" Name="INIT PATCH 218" ProgramChange="89"/>
+					<Patch Number="219" Name="INIT PATCH 219" ProgramChange="90"/>
+					<Patch Number="220" Name="INIT PATCH 220" ProgramChange="91"/>
+					<Patch Number="221" Name="INIT PATCH 221" ProgramChange="92"/>
+					<Patch Number="222" Name="INIT PATCH 222" ProgramChange="93"/>
+					<Patch Number="223" Name="INIT PATCH 223" ProgramChange="94"/>
+					<Patch Number="224" Name="INIT PATCH 224" ProgramChange="95"/>
+					<Patch Number="225" Name="INIT PATCH 225" ProgramChange="96"/>
+					<Patch Number="226" Name="INIT PATCH 226" ProgramChange="97"/>
+					<Patch Number="227" Name="INIT PATCH 227" ProgramChange="98"/>
+					<Patch Number="228" Name="INIT PATCH 228" ProgramChange="99"/>
+					<Patch Number="229" Name="INIT PATCH 229" ProgramChange="100"/>
+					<Patch Number="230" Name="INIT PATCH 230" ProgramChange="101"/>
+					<Patch Number="231" Name="INIT PATCH 231" ProgramChange="102"/>
+					<Patch Number="232" Name="INIT PATCH 232" ProgramChange="103"/>
+					<Patch Number="233" Name="INIT PATCH 233" ProgramChange="104"/>
+					<Patch Number="234" Name="INIT PATCH 234" ProgramChange="105"/>
+					<Patch Number="235" Name="INIT PATCH 235" ProgramChange="106"/>
+					<Patch Number="236" Name="INIT PATCH 236" ProgramChange="107"/>
+					<Patch Number="237" Name="INIT PATCH 237" ProgramChange="108"/>
+					<Patch Number="238" Name="INIT PATCH 238" ProgramChange="109"/>
+					<Patch Number="239" Name="INIT PATCH 239" ProgramChange="110"/>
+					<Patch Number="240" Name="INIT PATCH 240" ProgramChange="111"/>
+					<Patch Number="241" Name="INIT PATCH 241" ProgramChange="112"/>
+					<Patch Number="242" Name="INIT PATCH 242" ProgramChange="113"/>
+					<Patch Number="243" Name="INIT PATCH 243" ProgramChange="114"/>
+					<Patch Number="244" Name="INIT PATCH 244" ProgramChange="115"/>
+					<Patch Number="245" Name="INIT PATCH 245" ProgramChange="116"/>
+					<Patch Number="246" Name="INIT PATCH 246" ProgramChange="117"/>
+					<Patch Number="247" Name="INIT PATCH 247" ProgramChange="118"/>
+					<Patch Number="248" Name="INIT PATCH 248" ProgramChange="119"/>
+					<Patch Number="249" Name="INIT PATCH 249" ProgramChange="120"/>
+					<Patch Number="250" Name="INIT PATCH 250" ProgramChange="121"/>
+					<Patch Number="251" Name="INIT PATCH 251" ProgramChange="122"/>
+					<Patch Number="252" Name="INIT PATCH 252" ProgramChange="123"/>
+					<Patch Number="253" Name="INIT PATCH 253" ProgramChange="124"/>
+					<Patch Number="254" Name="INIT PATCH 254" ProgramChange="125"/>
+					<Patch Number="255" Name="INIT PATCH 255" ProgramChange="126"/>
+					<Patch Number="256" Name="INIT PATCH 256" ProgramChange="127"/>
+				</PatchNameList>
+			</PatchBank>
 			<PatchBank Name="GM2: A" >
 				<MIDICommands>
 					<ControlChange Control="0" Value="121"/>
