@@ -1572,25 +1572,17 @@ edit_last_mark_label (std::vector<ArdourCanvas::Ruler::Mark>& marks, const std::
 void
 CueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, samplepos_t leftmost, samplepos_t rightmost, gint /*maxchars*/)
 {
-	EC_LOCAL_TEMPO_SCOPE;
+	// no EC_LOCAL_TEMPO_SCOPE here since we use an explicit TempoMap for
+	// all calculations
 
-	if (!_session) {
+	if (!_session || !_region) {
 		return;
 	}
 
 	bool provided = false;
-	std::shared_ptr<Temporal::TempoMap> tmap;
-	std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (_region);
+	std::shared_ptr<Temporal::TempoMap const> tmap (_region->tempo_map());
 
-	if (mr) {
-		std::shared_ptr<SMFSource> smf (std::dynamic_pointer_cast<SMFSource> (mr->midi_source()));
-
-		if (smf) {
-			tmap = smf->tempo_map (provided);
-		}
-	}
-
-	if (!provided) {
+	if (!tmap) {
 		tmap.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
 	}
 
