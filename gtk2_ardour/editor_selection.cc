@@ -1764,7 +1764,7 @@ Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
 		_pianoroll->contents().hide (); // Why is this needed?
 		_pianoroll->contents().show_all ();
 	} else {
-		if (_pianoroll->contents().get_parent()) {
+		if (_pianoroll && _pianoroll->contents().get_parent()) {
 			_pianoroll->contents().unmap ();
 			_pianoroll->contents().get_parent()->remove (_pianoroll->contents());
 		}
