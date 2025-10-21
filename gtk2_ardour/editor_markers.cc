@@ -566,10 +566,10 @@ void Editor::ensure_marker_updated (LocationMarkers* lam, Location* location)
 {
 	if (location->is_cd_marker()) {
 		reparent_location_markers (lam, marker_group);
-	} else if (location->is_scene()) {
-		reparent_location_markers (lam, marker_group);
 	} else if (location->is_section()) {
 		reparent_location_markers (lam, section_marker_group);
+	} else if (location->is_scene()) {
+		reparent_location_markers (lam, marker_group);
 	} else if (location->is_cue_marker()) {
 		reparent_location_markers (lam, marker_group);
 	} else if (location->is_mark() || location->matches (Location::Flags(0))) {
