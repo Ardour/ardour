@@ -837,6 +837,7 @@ Trigger::shutdown_from_fwd ()
 {
 	if (_state == Stopped) {
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 [%3] already stopped\n", _box.order(), index(), name()));
+		send_property_change (ARDOUR::Properties::running);
 		return;
 	}
 	_state = Stopped;
