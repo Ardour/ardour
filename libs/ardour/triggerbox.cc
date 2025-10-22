@@ -1878,7 +1878,8 @@ AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
 	   using Amp::apply_gain() possible.
 	*/
 	AudioBuffer buf (0);
-	const samplecnt_t fade_duration = std::min (_box.session().sample_rate()/4, data.length/2);
+	const samplecnt_t fade_duration = std::min (_box.session().sample_rate()/1000, data.length/2);
+
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("apply fade in/out over %1\n", fade_duration));
 
 	for (auto & s : ai.audio_buf) {
