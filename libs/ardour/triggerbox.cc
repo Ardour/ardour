@@ -1872,11 +1872,14 @@ AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
 	data.length = ai.audio_buf.length;
 	data.capacity = ai.audio_buf.capacity;
 
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 captured a total of %3\n", _box.order(), _index, data.length));
+
 	/* This AudioBuffer does not own any data, it is just a shell to make
 	   using Amp::apply_gain() possible.
 	*/
 	AudioBuffer buf (0);
 	const samplecnt_t fade_duration = std::min (_box.session().sample_rate()/4, data.length/2);
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("apply fade in/out over %1\n", fade_duration));
 
 	for (auto & s : ai.audio_buf) {
 		data.push_back (s);
@@ -3762,6 +3765,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 			AudioBuffer& buf (bufs.get_audio (n));
 			ai->audio_buf.append (buf.data() + offset, nframes, n);
 		}
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: append another %2 frames to reach %3\n", _order, nframes, ai->audio_buf.length));
 	}
 
 	n_buffers = bufs.count().n_midi();
@@ -4790,7 +4794,7 @@ TriggerBox::handle_stopped_trigger (BufferSet& bufs, pframes_t dest_offset)
 	} else {
 		_currently_playing = 0;
 		send_property_change (Properties::currently_playing);
-		DEBUG_TRACE (DEBUG::Triggers, "currently playing was stopped, but stop_all was set #1, leaving nf loop\n");
+		DEBUG_TRACE (DEBUG::Triggers, "currently playing was stopped, no follow action set, leaving nf loop\n");
 		/* leave nframes loop */
 		return 1;
 	}
@@ -5145,7 +5149,7 @@ TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 			}
 		}
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("currently playing: %1, state now %2 stop all ? %3\n", _currently_playing->name(), enum_2_string (_currently_playing->state()), _stop_all));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("currently playing: %1 (%4/%5), state now %2 stop all ? %3\n", _currently_playing->name(), enum_2_string (_currently_playing->state()), _stop_all, order(), _currently_playing->index()));
 
 		/* if we're not in the process of stopping all active triggers,
 		 * but the current one has stopped, decide which (if any)
