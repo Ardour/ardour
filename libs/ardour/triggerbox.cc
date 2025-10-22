@@ -837,7 +837,6 @@ Trigger::shutdown_from_fwd ()
 {
 	if (_state == Stopped) {
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 [%3] already stopped\n", _box.order(), index(), name()));
-		send_property_change (ARDOUR::Properties::running);
 		return;
 	}
 	_state = Stopped;
@@ -1256,6 +1255,8 @@ Trigger::when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset)
 
 		} else {
 
+			State old_state = _state;
+
 			if ((launch_style() != Repeat) && (launch_style() != Gate) && (_loop_cnt == _follow_count)) {
 
 				/* have played the specified number of times, we're done */
@@ -1287,8 +1288,9 @@ Trigger::when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset)
 				*/
 				_state = WaitingToStart;
 				retrigger ();
-				send_property_change (ARDOUR::Properties::running);
 			}
+
+			send_property_change (ARDOUR::Properties::running);
 		}
 	}
 }
