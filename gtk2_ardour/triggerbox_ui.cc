@@ -395,11 +395,10 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 			if (active) {
 				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
 				context->fill ();
-				context->stroke ();
 			} else {
 				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
-				context->stroke ();
 			}
+			context->stroke ();
 			break;
 		case Trigger::ReTrigger:
 			/* line + boxy arrow + line */
@@ -526,7 +525,6 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 	{
 		context->save ();
 		context->translate (self.x0, self.y0 - 0.5);
-		context->translate (0, 0); // left side of the widget
 		draw_launch_icon (context, height, scale);
 		context->restore ();
 	}
