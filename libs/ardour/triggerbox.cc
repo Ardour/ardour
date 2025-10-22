@@ -1738,7 +1738,9 @@ AudioTrigger::set_region_in_worker_thread_internal (std::shared_ptr<Region> r, b
 	 *  this may be reset momentarily with user-settings (UIState) from a d+d operation */
 	set_segment_tempo(_estimated_tempo);
 
-	setup_stretcher ();
+	if (!from_capture) {
+		setup_stretcher ();
+	}
 
 	/* Given what we know about the tempo and duration, set the defaults
 	 * for the trigger properties.
