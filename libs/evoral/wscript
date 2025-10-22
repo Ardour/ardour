@@ -62,7 +62,7 @@ def build(bld):
     libsmf.uselib       = 'GLIB'
     libsmf.use          = [ 'libtemporal' ]
     libsmf.install_path = None
-    if bld.env['build_target'] != 'mingw':
+    if bld.env['build_target'] != 'mingw' and bld.env['build_target'] != 'msvc':
         libsmf.cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ]
         libsmf.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
 

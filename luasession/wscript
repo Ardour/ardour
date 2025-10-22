@@ -19,7 +19,7 @@ def build(bld):
         return
 
     # commandline luasession wrapper script
-    if bld.env['build_target'] != 'mingw':
+    if bld.env['build_target'] != 'mingw' and bld.env['build_target'] != 'msvc':
         obj              = bld(features = 'subst')
         obj.source       = 'ardour-lua.sh.in'
         obj.target       = 'ardour' + bld.env['MAJOR'] + '-lua'
@@ -64,13 +64,13 @@ def build(bld):
     if sys.platform == 'darwin':
         obj.uselib += ' AUDIOUNITS OSX'
         obj.use    += ' libappleutility'
-    elif bld.env['build_target'] == 'mingw':
+    elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj.linkflags += ' -mwindows'
 
     if bld.is_defined('NEED_INTL'):
         obj.linkflags += ' -lintl'
 
-    if bld.env['build_target'] == 'mingw':
+    if bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj.install_path = bld.env['BINDIR']
         obj.target       = 'ardour' + bld.env['MAJOR'] + '-lua'
     else:

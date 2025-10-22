@@ -577,7 +577,7 @@ def build(bld):
             obj.source += [ 'vst3_plugin_ui.cc' ]
             if sys.platform == 'darwin':
                 obj.source += [ 'vst3_nsview_plugin_ui.mm' ]
-            elif bld.env['build_target'] == 'mingw':
+            elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
                 obj.source += [ 'vst3_hwnd_plugin_ui.cc' ]
             else:
                 obj.source += [ 'vst3_x11_plugin_ui.cc' ]
@@ -613,7 +613,7 @@ def build(bld):
 #        obj.source += [ 'toolbar_test.cc', 'enums.cc']
 
     # executable version of the GTK GUI
-    if bld.env['build_target'] == 'mingw':
+    if bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj = bld (features = 'cxx c cxxprogram winres')
     else:
         obj = bld (features = 'cxx c cxxprogram')
@@ -664,7 +664,7 @@ def build(bld):
         obj.uselib += ' AUDIOUNITS OSX '
         obj.use    += ' libappleutility'
         obj.source += [ 'cocoacarbon.mm', 'bundle_env_cocoa.cc' ]
-    elif bld.env['build_target'] == 'mingw':
+    elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj.source += [ 'bundle_env_mingw.cc' ]
         obj.source += [ 'windows_icon.rc' ]
     else:
@@ -674,7 +674,7 @@ def build(bld):
     obj.includes += ['../libs']
     obj.includes += ['../libs/vst3']
 
-    if bld.env['build_target'] == 'mingw':
+    if bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj.linkflags += ' -mwindows'
         obj.use += [ 'PANGOFT2' ]
 
@@ -682,7 +682,7 @@ def build(bld):
         obj.source += [ 'lv2_plugin_ui.cc' ]
         obj.use += [ 'SUIL' ]
 
-    if bld.is_defined('HAVE_FFTW35F') and bld.env['build_target'] != 'mingw':
+    if bld.is_defined('HAVE_FFTW35F') and bld.env['build_target'] != 'mingw' and bld.env['build_target'] != 'msvc':
         bld.env['LIB_FFTW3F'] += ['fftw3f_threads']
 
     if bld.is_defined('NEED_INTL'):
@@ -717,7 +717,7 @@ def build(bld):
         obj.source += [ 'vst3_plugin_ui.cc' ]
         if sys.platform == 'darwin':
             obj.source += [ 'vst3_nsview_plugin_ui.mm' ]
-        elif bld.env['build_target'] == 'mingw':
+        elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
             obj.source += [ 'vst3_hwnd_plugin_ui.cc' ]
         else:
             obj.source += [ 'vst3_x11_plugin_ui.cc' ]
@@ -948,7 +948,7 @@ def build(bld):
     pgmname = bld.env['PROGRAM_NAME']
     bld.install_files(os.path.join(bld.env['DATADIR'], 'resources'), bld.path.ant_glob('resources/' + pgmname + '*'))
 
-    if bld.env['build_target'] == 'mingw':
+    if bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         # These icons need to overwrite the files already installed in the icons
         # directory above. Do this in the external packaging scripts for now.
         #bld.install_files(os.path.join (bld.env['DATADIR'], 'icons'), bld.path.ant_glob('icons/cursor_square/*.png'))

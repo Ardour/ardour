@@ -35,7 +35,7 @@ def build(bld):
 
         if sys.platform == 'darwin':
             obj.uselib += ' OSX'
-        elif bld.env['build_target'] == 'mingw':
+        elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc:
             obj.uselib += ' GDI32'
             obj.linkflags += ' -mwindows'
 
@@ -63,7 +63,7 @@ def build(bld):
 
         if sys.platform == 'darwin':
             pass
-        elif bld.env['build_target'] == 'mingw':
+        elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
             obj.linkflags += ' -mwindows'
 
         obj.includes  = [ '../pbd/', '../ardour/', '.' ]

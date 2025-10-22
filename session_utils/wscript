@@ -52,12 +52,12 @@ def build_ardour_util(bld, util):
     if sys.platform == 'darwin':
         obj.uselib += ' AUDIOUNITS OSX'
         obj.use    += ' libappleutility'
-    elif bld.env['build_target'] == 'mingw':
+    elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj.linkflags += ' -mwindows'
 
     obj.includes += ['../libs']
 
-    if bld.env['build_target'] == 'mingw':
+    if bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj.install_path = bld.env['BINDIR']
 
     if bld.is_defined('NEED_INTL'):
@@ -75,10 +75,10 @@ def build(bld):
     for util in utils:
         fn = os.path.splitext(os.path.basename(str(util)))[0]
         build_ardour_util(bld, fn)
-        if bld.env['build_target'] != 'mingw':
+        if bld.env['build_target'] != 'mingw' and bld.env['build_target'] != 'msvc':
             bld.symlink_as(bld.env['BINDIR'] + '/' + pgmprefix + "-" + fn, bld.env['LIBDIR'] + '/utils/ardour-util.sh')
 
-    if bld.env['build_target'] == 'mingw':
+    if bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         return
 
     obj              = bld(features = 'subst')
