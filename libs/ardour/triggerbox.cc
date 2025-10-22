@@ -1255,8 +1255,6 @@ Trigger::when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset)
 
 		} else {
 
-			State old_state = _state;
-
 			if ((launch_style() != Repeat) && (launch_style() != Gate) && (_loop_cnt == _follow_count)) {
 
 				/* have played the specified number of times, we're done */
