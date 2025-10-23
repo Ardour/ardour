@@ -82,19 +82,21 @@ compiler_flags_dictionaries= {
         'c-anonymous-union': '-fms-extensions',
         # optional -zexecstack linkflag
         'execstack': '',
+        # force C++17
+        'cxx17': ['-std=c++17'],
     },
     'msvc' : {
         'debuggable' : ['/DDEBUG', '/Od', '/Zi', '/MDd', '/Gd', '/EHsc'],
         'linker-debuggable' : ['/DEBUG', '/INCREMENTAL' ],
         'nondebuggable' : ['/DNDEBUG', '/Ob1', '/MD', '/Gd', '/EHsc'],
-        'profile' : '/Oy-',
+        'profile' : ['/Oy-'],
         'silence-unused-arguments' : '',
         'sse' : '',
         'xsaveintrin' : '',
         'fpmath-sse' : '',
         'xmmintrinsics' : '',
         'pipe' : '',
-        'full-optimization' : '/O2',
+        'full-optimization' : ['/O2'],
         'no-frame-pointer' : '',
         'fast-math' : '',
         'strength-reduce' : '',
@@ -116,6 +118,7 @@ compiler_flags_dictionaries= {
         'pic': '',
         'c-anonymous-union': '',
         'execstack': '',
+        'cxx17': ['/std:c++17'],
     },
 }
 
@@ -551,8 +554,8 @@ int main() { return 0; }''',
         linker_flags.append('--stdlib=libc++')
 
     if conf.options.cxx17 or platform == "darwin":
-        conf.check_cxx(cxxflags=["-std=c++17"])
-        cxx_flags.append('-std=c++17')
+        conf.check_cxx(cxxflags=flags_dict['cxx17'])
+        cxx_flags += flags_dict['cxx17']
 
     if conf.options.cxx17 or platform == "darwin":
         if platform == "darwin":
