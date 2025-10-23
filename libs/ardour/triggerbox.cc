@@ -5771,6 +5771,7 @@ TriggerBoxThread::build_audio_source (AudioTrigger* t, Temporal::timecnt_t const
 	for (auto & src : sources) {
 		fs = std::dynamic_pointer_cast<FileSource> (src);
 		fs->mark_immutable ();
+		SourceFactory::setup_peakfile (src, false);
 	}
 
 	fs = std::dynamic_pointer_cast<FileSource> (sources.front());
