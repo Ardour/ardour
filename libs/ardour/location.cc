@@ -658,6 +658,17 @@ Location::cd_info_node(const string & name, const string & value)
 	return *root;
 }
 
+XMLNode&
+Location::chapter_info_node(const string & name, const string & value)
+{
+	XMLNode* root = new XMLNode("Chapter-Info");
+
+	root->set_property("name", name);
+	root->set_property("value", value);
+
+	return *root;
+}
+
 
 XMLNode&
 Location::get_state () const
@@ -668,6 +679,10 @@ Location::get_state () const
 
 	for(CI m = cd_info.begin(); m != cd_info.end(); ++m){
 		node->add_child_nocopy(cd_info_node(m->first, m->second));
+	}
+
+	for(CI m = chapter_info.begin(); m != chapter_info.end(); ++m){
+		node->add_child_nocopy(chapter_info_node(m->first, m->second));
 	}
 
 	node->set_property ("id", id ());
@@ -751,19 +766,30 @@ Location::set_state (const XMLNode& node, int version)
 
 		cd_node = *cd_iter;
 
-		if (cd_node->name() != "CD-Info") {
-			continue;
-		}
+		if (cd_node->name() == "CD-Info") {
+			if (!cd_node->get_property ("name", cd_name)) {
+				throw failed_constructor ();
+			}
 
-		if (!cd_node->get_property ("name", cd_name)) {
-			throw failed_constructor ();
-		}
+			if (!cd_node->get_property ("value", cd_value)) {
+				throw failed_constructor ();
+			}
 
-		if (!cd_node->get_property ("value", cd_value)) {
-			throw failed_constructor ();
-		}
+			cd_info[cd_name] = cd_value;
+		} else if (cd_node->name() == "Chapter-Info") {
+			string chapter_name;
+			string chapter_value;
 
-		cd_info[cd_name] = cd_value;
+			if (!cd_node->get_property ("name", chapter_name)) {
+				throw failed_constructor ();
+			}
+
+			if (!cd_node->get_property ("value", chapter_value)) {
+				throw failed_constructor ();
+			}
+
+			chapter_info[chapter_name] = chapter_value;
+		}
 	}
 
 	XMLNode* scene_child = find_named_node (node, SceneChange::xml_node_name);

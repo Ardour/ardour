@@ -175,6 +175,11 @@ public:
 	std::map<std::string, std::string> cd_info;
 	static XMLNode& cd_info_node (const std::string &, const std::string &);
 
+	/* Audiobook Chapter info */
+
+	std::map<std::string, std::string> chapter_info;
+	static XMLNode& chapter_info_node (const std::string &, const std::string &);
+
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 

@@ -95,6 +95,7 @@ protected:
 
 	AudioClock    length_clock;
 	Gtk::CheckButton cd_check_button;
+	Gtk::CheckButton chapter_check_button;
 	Gtk::CheckButton section_check_button;
 	Gtk::CheckButton hide_check_button;
 	Gtk::CheckButton lock_check_button;
@@ -114,6 +115,15 @@ protected:
 	Gtk::Label         scms_label;
 	Gtk::CheckButton   preemph_check_button;
 	Gtk::Label         preemph_label;
+
+	Gtk::HBox     chapter_details_hbox;
+	Gtk::Label    chapter_title_label;
+	Gtk::Entry    chapter_title_entry;
+	Gtk::Label    chapter_description_label;
+	Gtk::Entry    chapter_description_entry;
+	Gtk::Label    chapter_author_label;
+	Gtk::Entry    chapter_author_entry;
+
 	ClockGroup* _clock_group;
 
 	guint32 i_am_the_modifier;
@@ -124,6 +134,10 @@ protected:
 	void performer_entry_changed ();
 	void composer_entry_changed ();
 
+	void chapter_title_entry_changed ();
+	void chapter_description_entry_changed ();
+	void chapter_author_entry_changed ();
+
 	void to_playhead_button_pressed (LocationPart part);
 	void locate_button_pressed (LocationPart part);
 
@@ -131,6 +145,7 @@ protected:
 	bool locate_to_clock (GdkEventButton*, AudioClock*);
 
 	void cd_toggled ();
+	void chapter_toggled ();
 	void section_toggled ();
 	void hide_toggled ();
 	void lock_toggled ();
@@ -148,6 +163,7 @@ protected:
 
 	void set_clock_editable_status ();
 	void show_cd_track_details ();
+	void show_chapter_details ();
 
 	PBD::ScopedConnectionList connections;
 };

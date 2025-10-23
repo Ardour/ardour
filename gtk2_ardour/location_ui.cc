@@ -65,6 +65,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	, locate_to_end_button (_("Goto"))
 	, length_clock (X_("locationlength"), true, "", true, false, true)
 	, cd_check_button (_("CD"))
+	, chapter_check_button (_("Chapter"))
 	, section_check_button (S_("Arrangement|Arr."))
 	, hide_check_button (_("Hide"))
 	, lock_check_button (_("Lock"))
@@ -136,6 +137,43 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	scms_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::scms_toggled));
 	preemph_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::preemph_toggled));
 
+	chapter_check_button.set_name ("LocationEditCdButton");
+	chapter_title_label.set_name ("LocationEditNumberLabel");
+	chapter_title_entry.set_name ("LocationEditNameEntry");
+	chapter_description_label.set_name ("LocationEditNumberLabel");
+	chapter_description_entry.set_name ("LocationEditNameEntry");
+	chapter_author_label.set_name ("LocationEditNumberLabel");
+	chapter_author_entry.set_name ("LocationEditNameEntry");
+
+	chapter_title_label.set_text (_("Chapter Title:"));
+	chapter_description_label.set_text (_("Description:"));
+	chapter_author_label.set_text (_("Author:"));
+
+	chapter_title_entry.set_size_request (150, -1);
+	chapter_title_entry.set_editable (true);
+
+	chapter_description_entry.set_size_request (200, -1);
+	chapter_description_entry.set_editable (true);
+
+	chapter_author_entry.set_size_request (120, -1);
+	chapter_author_entry.set_editable (true);
+
+	Gtk::HBox* chapter_front_spacing = manage (new HBox);
+	chapter_front_spacing->set_size_request (20, -1);
+
+	chapter_details_hbox.set_spacing (4);
+	chapter_details_hbox.pack_start (*chapter_front_spacing, false, false);
+	chapter_details_hbox.pack_start (chapter_title_label, false, false);
+	chapter_details_hbox.pack_start (chapter_title_entry, true, true);
+	chapter_details_hbox.pack_start (chapter_description_label, false, false);
+	chapter_details_hbox.pack_start (chapter_description_entry, true, true);
+	chapter_details_hbox.pack_start (chapter_author_label, false, false);
+	chapter_details_hbox.pack_start (chapter_author_entry, true, true);
+
+	chapter_title_entry.signal_changed().connect (sigc::mem_fun(*this, &LocationEditRow::chapter_title_entry_changed));
+	chapter_description_entry.signal_changed().connect (sigc::mem_fun(*this, &LocationEditRow::chapter_description_entry_changed));
+	chapter_author_entry.signal_changed().connect (sigc::mem_fun(*this, &LocationEditRow::chapter_author_entry_changed));
+
 	set_session (sess);
 
 	start_hbox.set_spacing (2);
@@ -166,6 +204,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	length_clock.ValueChanged.connect (sigc::bind ( sigc::mem_fun(*this, &LocationEditRow::clock_changed), LocLength));
 
 	cd_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::cd_toggled));
+	chapter_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::chapter_toggled));
 	section_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::section_toggled));
 	hide_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::hide_toggled));
 	lock_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::lock_toggled));
@@ -290,6 +329,10 @@ LocationEditRow::set_location (Location *loc)
 			item_table.attach (cd_check_button, 3, 4, 0, 1, FILL, Gtk::AttachOptions (0), 4, 0);
 		}
 
+		if (!chapter_check_button.get_parent()) {
+			item_table.attach (chapter_check_button, 7, 8, 0, 1, FILL, Gtk::AttachOptions (0), 4, 0);
+		}
+
 		if (!section_check_button.get_parent()) {
 			item_table.attach (section_check_button, 4, 5, 0, 1, FILL, Gtk::AttachOptions (0), 4, 0);
 		}
@@ -301,6 +344,7 @@ LocationEditRow::set_location (Location *loc)
 		flags_changed ();
 
 		cd_check_button.show();
+		chapter_check_button.show();
 		section_check_button.show();
 		hide_check_button.show();
 		lock_check_button.show();
@@ -325,6 +369,10 @@ LocationEditRow::set_location (Location *loc)
 
 		if (location->is_cd_marker()) {
 			show_cd_track_details ();
+		}
+
+		if (!location->chapter_info.empty()) {
+			show_chapter_details ();
 		}
 
 		set_tooltip (&remove_button, _("Remove this range"));
@@ -414,6 +462,48 @@ LocationEditRow::composer_entry_changed ()
 		location->cd_info["composer"] = composer_entry.get_text();
 	} else {
 		location->cd_info.erase("composer");
+	}
+}
+
+void
+LocationEditRow::chapter_title_entry_changed ()
+{
+	ENSURE_GUI_THREAD (*this, &LocationEditRow::chapter_title_entry_changed);
+
+	if (i_am_the_modifier || !location) return;
+
+	if (chapter_title_entry.get_text() != "") {
+		location->chapter_info["title"] = chapter_title_entry.get_text();
+	} else {
+		location->chapter_info.erase("title");
+	}
+}
+
+void
+LocationEditRow::chapter_description_entry_changed ()
+{
+	ENSURE_GUI_THREAD (*this, &LocationEditRow::chapter_description_entry_changed);
+
+	if (i_am_the_modifier || !location) return;
+
+	if (chapter_description_entry.get_text() != "") {
+		location->chapter_info["description"] = chapter_description_entry.get_text();
+	} else {
+		location->chapter_info.erase("description");
+	}
+}
+
+void
+LocationEditRow::chapter_author_entry_changed ()
+{
+	ENSURE_GUI_THREAD (*this, &LocationEditRow::chapter_author_entry_changed);
+
+	if (i_am_the_modifier || !location) return;
+
+	if (chapter_author_entry.get_text() != "") {
+		location->chapter_info["author"] = chapter_author_entry.get_text();
+	} else {
+		location->chapter_info.erase("author");
 	}
 }
 
@@ -535,6 +625,40 @@ LocationEditRow::cd_toggled ()
 
 		item_table.remove (cd_track_details_hbox);
 		//	  item_table.resize(1, 7);
+		redraw_ranges(); /* EMIT_SIGNAL */
+	}
+}
+
+void
+LocationEditRow::show_chapter_details ()
+{
+	if (location->chapter_info.find("title") != location->chapter_info.end()) {
+		chapter_title_entry.set_text(location->chapter_info["title"]);
+	}
+	if (location->chapter_info.find("description") != location->chapter_info.end()) {
+		chapter_description_entry.set_text(location->chapter_info["description"]);
+	}
+	if (location->chapter_info.find("author") != location->chapter_info.end()) {
+		chapter_author_entry.set_text(location->chapter_info["author"]);
+	}
+
+	if (!chapter_details_hbox.get_parent()) {
+		item_table.attach (chapter_details_hbox, 0, 9, 2, 3, FILL | EXPAND, FILL, 4, 0);
+	}
+	chapter_details_hbox.show_all();
+}
+
+void
+LocationEditRow::chapter_toggled ()
+{
+	if (i_am_the_modifier || !location) {
+		return;
+	}
+
+	if (chapter_check_button.get_active()) {
+		show_chapter_details ();
+	} else if (chapter_details_hbox.get_parent()){
+		item_table.remove (chapter_details_hbox);
 		redraw_ranges(); /* EMIT_SIGNAL */
 	}
 }
