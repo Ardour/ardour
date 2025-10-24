@@ -376,6 +376,10 @@ PianorollMidiView::line_color_for (Evoral::Parameter const & param)
 PianorollMidiView::AutomationDisplayState*
 PianorollMidiView::find_or_create_automation_display_state (Evoral::Parameter const & param)
 {
+	if (!midi_region()) {
+		editing_context().make_a_region();
+	}
+
 	CueAutomationMap::iterator i = automation_map.find (param);
 
 	/* Step one: find the AutomationDisplayState object for this parameter,
