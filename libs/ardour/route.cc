@@ -6233,7 +6233,7 @@ Route::monitoring_state () const
 		assert (track_rec != clip_rec);
 
 		if (clip_rec) {
-			/* actively recording into a slot */
+			/* preparing to, or actively recording into a slot */
 			return MonitoringInput;
 		}
 
