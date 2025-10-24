@@ -6200,7 +6200,7 @@ Route::monitoring_state () const
 	bool session_rec       = _session.get_record_enabled ();
 	bool const roll        = _session.transport_state_rolling ();
 	bool const auto_input  = _session.config.get_auto_input ();
-	bool const clip_rec    = _triggerbox && _triggerbox->record_enabled() == Recording && !session_rec;
+	bool const clip_rec    = _triggerbox && (_triggerbox->record_enabled() >= Enabled) && !session_rec;
 	bool const track_rec   = _disk_writer->record_enabled ();
 
 	bool const auto_input_does_talkback = Config->get_auto_input_does_talkback ();
