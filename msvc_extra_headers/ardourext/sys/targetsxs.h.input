@@ -1,7 +1,28 @@
 #ifndef _TARGETSXS_H_
 #define _TARGETSXS_H_
 
-#pragma warning( disable : 4244 4250 4275 4996 )
+#ifdef _MSVC_LANG
+/* With Visual Studio the above is valid for both MSVC and Clang */
+#ifdef __clang__
+#if 0
+#undef  __EDG_VERSION__      /* Experiment - hopefully will fix LIBBOOST errors (to allow an entire build with Clang...) */
+#define __EDG_VERSION__  1   /* Experiment - hopefully will fix LIBBOOST errors (to allow an entire build with Clang...) */
+#define __EDG_VERSION__  300 /* Experiment - hopefully will fix LIBBOOST errors (to allow an entire build with Clang...) */
+/* JE - 13-10-2025 !!!! - All three of the above experiments failed!! :-( */
+/* (see my eventual fix in 'include/boost/mpl/aux_/integral_wrapper.hpp') */
+#endif
+#define SIGC_GCC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
+#else /* MSVC */
+#pragma warning( disable : 4244 4250 4275 4334 4996 )
+#endif
+#if __cplusplus > 201699
+/* We're building with C++17 or later */
+# define   BOOST_BIND_GLOBAL_PLACEHOLDERS
+#  ifndef _HAS_AUTO_PTR_ETC
+#  define _HAS_AUTO_PTR_ETC 0
+#  endif
+# endif
+#endif
 
 #ifndef LV2_SUPPORT
 #define LV2_SUPPORT   1
@@ -30,9 +51,9 @@
 
 #ifndef CURRENT_SESSION_FILE_VERSION
 #ifdef  MIXBUS
-#define CURRENT_SESSION_FILE_VERSION 6000
+#define CURRENT_SESSION_FILE_VERSION 7003
 #else
-#define CURRENT_SESSION_FILE_VERSION 6000
+#define CURRENT_SESSION_FILE_VERSION 7003
 #endif
 #endif
 
