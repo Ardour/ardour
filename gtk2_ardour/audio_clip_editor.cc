@@ -472,9 +472,9 @@ AudioClipEditor::set_trigger (TriggerReference& tr)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (tr == ref) {
-		return;
-	}
+//	if (tr == ref) {
+//		return;
+//	}
 
 	CueEditor::set_trigger (tr);
 	rec_box.show ();
