@@ -1126,6 +1126,18 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 	context->drag_finish (true, false, time);
 }
 
+TriggerEntry*
+TriggerBoxUI::entry_by_trigger (Trigger const & trigger) const
+{
+	for (auto & slot : _slots) {
+		if (slot->trigger().get() == &trigger) {
+			return slot;
+		}
+	}
+
+	return nullptr;
+}
+
 /* ********************************************** */
 
 TriggerBoxWidget::TriggerBoxWidget (TriggerStrip& s, float w, float h)

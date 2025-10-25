@@ -124,6 +124,7 @@ public:
 	void _size_allocate (ArdourCanvas::Rect const&);
 
 	TriggerStrip& strip() const { return _strip; }
+	TriggerEntry* entry_by_trigger (ARDOUR::Trigger const &) const;
 
 	static Glib::RefPtr<Gtk::TargetList> dnd_src ()
 	{
