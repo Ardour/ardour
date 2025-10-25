@@ -1579,7 +1579,6 @@ CueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sample
 		return;
 	}
 
-	bool provided = false;
 	std::shared_ptr<Temporal::TempoMap const> tmap (_region->tempo_map());
 
 	if (!tmap) {
