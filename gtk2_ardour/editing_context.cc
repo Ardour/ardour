@@ -2044,7 +2044,6 @@ EditingContext::quantize_regions (const MidiViews& rs)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (rs.empty()) {
-		std::cerr << "no regions\n";
 		return;
 	}
 
