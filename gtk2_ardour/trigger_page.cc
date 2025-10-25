@@ -376,6 +376,7 @@ TriggerPage::set_session (Session* s)
 
 	Editor::instance ().get_selection ().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerPage::selection_changed));
 	Trigger::TriggerArmChanged.connect (*this, invalidator (*this), std::bind (&TriggerPage::trigger_arm_changed, this, _1), gui_context());
+	TriggerBox::RegionCaptured.connect (*this, invalidator (*this), std::bind (&TriggerPage::region_captured, this, _1), gui_context());
 
 	initial_track_display ();
 
@@ -477,11 +478,9 @@ TriggerPage::clear_selected_slot ()
 }
 
 void
-TriggerPage::trigger_arm_changed (Trigger const * trigger)
+TriggerPage::region_captured (Trigger const * trigger)
 {
-	assert (trigger);
-
-	if (!trigger->armed()) {
+	if (!trigger) {
 		return;
 	}
 
@@ -502,8 +501,10 @@ TriggerPage::trigger_arm_changed (Trigger const * trigger)
 		_audio_trig_box.show ();
 
 		_audio_editor->set_trigger (ref);
+		_audio_editor->get_canvas_viewport()->show ();
 
 		hpacker.pack_start (_audio_editor->contents(), true, true);
+		_audio_editor->contents().show_all ();
 
 	} else {
 
@@ -511,11 +512,36 @@ TriggerPage::trigger_arm_changed (Trigger const * trigger)
 		_midi_trig_box.show ();
 
 		_midi_editor->set_trigger (ref);
+		_midi_editor->get_canvas_viewport()->show ();
+
 		hpacker.pack_start (_midi_editor->contents(), true, true);
+		_midi_editor->contents().show_all ();
 	}
 
 	if (_show_bottom_pane) {
 		Tabbable::showhide_att_bottom (true);
+	}
+}
+
+void
+TriggerPage::trigger_arm_changed (Trigger const * trigger)
+{
+	if (!trigger) {
+		return;
+	}
+	for (auto & strip : _strips) {
+		TriggerBoxWidget& tbw (strip->triggerbox_widget());
+		TriggerBoxUI* ui (tbw.ui());
+
+		if (!ui) {
+			continue;
+		}
+
+		TriggerEntry* entry = ui->entry_by_trigger (*trigger);
+		if (entry) {
+			PublicEditor::instance ().get_selection ().set (entry);
+			break;
+		}
 	}
 }
 

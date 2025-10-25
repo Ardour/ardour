@@ -102,6 +102,7 @@ private:
 
 	void                      selection_changed ();
 	void                      trigger_arm_changed (ARDOUR::Trigger const *);
+	void                      region_captured (ARDOUR::Trigger const *);
 	PBD::ScopedConnectionList editor_connections;
 
 	gint start_updating ();
