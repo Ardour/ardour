@@ -1772,6 +1772,10 @@ AudioTrigger::set_region_in_worker_thread_internal (std::shared_ptr<Region> r, b
 
 	send_property_change (ARDOUR::Properties::region);
 
+	if (from_capture) {
+		box().RegionCaptured (this);
+	}
+
 	return 0;
 }
 
@@ -2968,6 +2972,8 @@ MIDITrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> r
 
 	send_property_change (ARDOUR::Properties::region);
 
+	box().RegionCaptured (this);
+
 	return 0;
 }
 
@@ -3513,6 +3519,7 @@ TriggerBoxThread* TriggerBox::worker = 0;
 CueRecords TriggerBox::cue_records (256);
 std::atomic<bool> TriggerBox::_cue_recording (false);
 PBD::Signal<void()> TriggerBox::CueRecordingChanged;
+PBD::Signal<void(Trigger const *)> TriggerBox::RegionCaptured;
 bool TriggerBox::roll_requested = false;
 bool TriggerBox::_learning = false;
 TriggerBox::CustomMidiMap TriggerBox::_custom_midi_map;

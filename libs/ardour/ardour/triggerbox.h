@@ -847,6 +847,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	RecordState record_enabled() const { return _record_state; }
 	PBD::Signal<void()> RecEnableChanged;
 	static PBD::Signal<void()> TriggerRecEnableChanged;
+	static PBD::Signal<void(Trigger const *)> RegionCaptured;
 
 	void arm_from_another_thread (Trigger& slot, samplepos_t, uint32_t chans, Temporal::BBT_Offset const &);
 	void disarm();
