@@ -64,6 +64,8 @@ public:
 
 	void fast_update ();
 
+	TriggerBoxWidget & triggerbox_widget() { return _trigger_display; }
+
 	static PBD::Signal<void(TriggerStrip*)> CatchDeletion;
 
 protected:
