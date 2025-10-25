@@ -870,12 +870,13 @@ SMFSource::load_model_unlocked (bool force_reload)
 
 	_model->set_duration (_length.beats());
 
-	// cerr << "----SMF-SRC-----\n";
-        // _playback_buf->dump (cerr);
-        // cerr << "----------------\n";
-
 	_model->end_write (Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, _length.beats());
 	_model->set_edited (false);
+
+#if 0
+	cerr << "----SMF-SRC----- " << name() << " - " << _length << " --\n";
+	_model->dump (cerr, _model->begin());
+#endif
 
 	free (buf);
 }
