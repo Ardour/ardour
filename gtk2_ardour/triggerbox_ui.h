@@ -161,9 +161,9 @@ public:
 
 	void set_triggerbox (ARDOUR::TriggerBox* tb);
 	TriggerStrip& strip() const { return _strip; }
-
+	TriggerBoxUI* ui() const { return _ui; }
 private:
-	TriggerBoxUI* ui;
+	TriggerBoxUI* _ui;
 	TriggerStrip& _strip;
 };
 

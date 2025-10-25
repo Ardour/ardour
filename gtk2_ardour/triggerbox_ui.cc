@@ -1130,7 +1130,7 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 
 TriggerBoxWidget::TriggerBoxWidget (TriggerStrip& s, float w, float h)
 	: FittedCanvasWidget (w, h)
-	, ui (nullptr)
+	, _ui (nullptr)
 	, _strip (s)
 {
 	use_intermediate_surface (false);
@@ -1140,16 +1140,16 @@ TriggerBoxWidget::TriggerBoxWidget (TriggerStrip& s, float w, float h)
 void
 TriggerBoxWidget::set_triggerbox (TriggerBox* tb)
 {
-	if (ui) {
-		root ()->remove (ui);
-		delete ui;
-		ui = nullptr;
+	if (_ui) {
+		root ()->remove (_ui);
+		delete _ui;
+		_ui = nullptr;
 	}
 
 	if (!tb) {
 		return;
 	}
 
-	ui = new TriggerBoxUI (root (), _strip, *tb);
+	_ui = new TriggerBoxUI (root (), _strip, *tb);
 	repeat_size_allocation ();
 }
