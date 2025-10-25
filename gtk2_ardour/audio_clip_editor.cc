@@ -481,6 +481,8 @@ AudioClipEditor::set_trigger (TriggerReference& tr)
 
 	main_ruler->show ();
 	main_ruler->set_range (0, pixel_to_sample (_visible_canvas_width - 2.));
+
+	set_region (tr.trigger()->the_region());
 }
 
 void
