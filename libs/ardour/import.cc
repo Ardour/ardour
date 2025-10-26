@@ -485,6 +485,7 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 		 */
 
 		if (track >= source->num_tracks() - 1) {
+			error << _("Type 1 SMF lacks required meta-data track.") << endmsg;
 			return;
 		}
 
