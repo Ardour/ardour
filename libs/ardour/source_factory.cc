@@ -259,7 +259,10 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 				throw failed_constructor ();
 			}
 			ret->check_for_analysis_data_on_disk ();
-			src->estimate_tempo ();
+			{
+				Source::WriterLock lm (src->mutex ());
+				src->estimate_tempo ();
+			}
 			if (announce) {
 				SourceCreated (ret);
 			}
@@ -276,7 +279,10 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 				throw failed_constructor ();
 			}
 			ret->check_for_analysis_data_on_disk ();
-			src->estimate_tempo ();
+			{
+				Source::WriterLock lm (src->mutex ());
+				src->estimate_tempo ();
+			}
 			if (announce) {
 				SourceCreated (ret);
 			}
@@ -425,7 +431,10 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, std::shared_ptr<Pl
 				}
 
 				ret->check_for_analysis_data_on_disk ();
-				src->estimate_tempo ();
+				{
+					Source::WriterLock lm (src->mutex ());
+					src->estimate_tempo ();
+				}
 				SourceCreated (ret);
 				return ret;
 			}

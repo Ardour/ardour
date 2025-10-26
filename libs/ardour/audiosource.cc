@@ -135,7 +135,10 @@ AudioSource::~AudioSource ()
 void
 AudioSource::estimate_tempo ()
 {
+#ifndef NDEBUG
 	/* CALLER MUST HOLD WRITER LOCK */
+	assert (!_lock.writer_trylock());
+#endif
 
 	const samplecnt_t ten_seconds = _session.sample_rate() * 10;
 
