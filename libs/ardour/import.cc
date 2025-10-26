@@ -465,18 +465,28 @@ write_midi_type0_data_to_one_file (Evoral::SMF* source, ImportStatus& status, si
 
 }
 
-static void
+/* return true if only meta-data was found */
+static bool
 write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, std::shared_ptr<SMFSource> smfs,
                                    int track, bool split_midi_channels, int channel)
 {
 	uint32_t bufsize = 4;
 	uint8_t* buf     = (uint8_t*) malloc (bufsize);
-	bool had_meta = false;
+	bool had_meta    = false;
+	bool had_notes   = false;
+
 	Evoral::event_id_t ignored_note_id; /* imported files either don't have noted IDs or we ignore them */
 
 	Source::WriterLock target_lock (smfs->mutex());
 	smfs->mark_streaming_write_started (target_lock);
 	smfs->drop_model (target_lock);
+
+	/* When a type 1 file has only one track, use it as-is.
+	 * If there are more tracks, assume track 1 contains meta-data.
+	 */
+	int track_offset = (source->num_tracks() == 1) ? 1 : 2;
+
+	track += track_offset;
 
 	try {
 
@@ -484,9 +494,8 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 		 * real tracks is one less than the number of tracks reported via libsmf.
 		 */
 
-		if (track >= source->num_tracks() - 1) {
-			error << _("Type 1 SMF lacks required meta-data track.") << endmsg;
-			return;
+		if (track > source->num_tracks()) {
+			return false;
 		}
 
 		/* Get metadata first */
@@ -543,7 +552,7 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 
 		uint32_t written = 0;
 
-		if (source->seek_to_track (track+2) == 0) { /* type 1 has metadata in track 1, so the nth real track is track n+2 */
+		if (source->seek_to_track (track) == 0) {
 
 			uint64_t t       = 0;
 			uint32_t delta_t = 0;
@@ -573,6 +582,8 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 
 				if (ret > 0) { // non-meta event
 
+					had_notes = true;
+
 					/* if requested by user, each sourcefile gets only a single channel's data */
 
 					if (split_midi_channels) {
@@ -595,12 +606,25 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 					written++;
 				}
 
+				else if (ret == 0 && track > 1) { // meta event
+
+					had_meta = true;
+
+					smfs->append_event_beats (
+						target_lock,
+						Evoral::Event<Temporal::Beats>(
+							Evoral::MIDI_EVENT,
+							Temporal::Beats::ticks_at_rate(t, source->ppqn()),
+							size,
+							buf), true); /* allow meta-events */
+				}
+
 				if (status.progress < 0.99) {
 					status.progress += 0.01;
 				}
 			}
 		} else {
-			std::cerr << "could not seek to " << track + 2 << std::endl;
+			std::cerr << "could not seek to " << track << std::endl;
 		}
 
 		if (had_meta || written) {
@@ -627,6 +651,8 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 	}
 
 	free (buf);
+
+	return had_meta && !had_notes;
 }
 
 static void
@@ -634,7 +660,6 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
                               vector<std::shared_ptr<Source> >& newsrcs,
                               bool split_midi_channels)
 {
-	int track;
 	int channel;
 
 	status.progress = 0.0f;
@@ -664,18 +689,15 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 		break;
 
 	case 1:
-		track = 0;
 		channel = 0;
 
 		for (auto & newsrc : newsrcs) {
 			std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (newsrc);
 			assert (smfs);
 
-			write_midi_type1_data_to_one_file (source, status, smfs, track, split_midi_channels, channel);
+			bool meta_only = write_midi_type1_data_to_one_file (source, status, smfs, n, split_midi_channels, channel);
 
-			track = (track + 1) % 16;
-
-			if (split_midi_channels) {
+			if (split_midi_channels && !meta_only) {
 				channel = (channel + 1) % 16;
 			}
 
