@@ -2581,7 +2581,8 @@ Region::tempo_map () const
 	SegmentDescriptor sd;
 
 	if (!_sources.front()->get_segment_descriptor (r, sd)) {
-		return nullptr;
+		Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+		return std::make_shared<Temporal::TempoMap> (tmap->tempo_at (position()), tmap->meter_at (position()));
 	}
 
 	return std::make_shared<Temporal::TempoMap> (sd.tempo(), sd.meter());
