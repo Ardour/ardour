@@ -214,12 +214,14 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	void set_recording_length (Temporal::BBT_Offset bars);
 
 	bool rec_button_press (GdkEventButton*);
-	void rec_enable_change ();
+	virtual void rec_enable_change ();
 	void blink_rec_enable (bool);
 	sigc::connection rec_blink_connection;
 
 	sigc::connection _update_connection;
-	PBD::ScopedConnectionList object_connections;
+	PBD::ScopedConnectionList region_connections;
+	PBD::ScopedConnectionList trigger_connections;
+	PBD::ScopedConnectionList track_connections;
 
 	void trigger_arm_change ();
 
@@ -257,7 +259,8 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	PBD::ScopedConnectionList capture_connections;
 	samplecnt_t data_capture_duration;
 
-	virtual void unset (bool trigger_too);
+	virtual void unset_region ();
+	virtual void unset_trigger ();
 
 	RegionUISettings region_ui_settings;
 	void maybe_set_from_rsu ();
@@ -268,4 +271,7 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	bool _scroll_drag;
 	bool hscroll_press (GdkEventButton*);
 	bool hscroll_release (GdkEventButton*);
+
+	virtual void region_prop_change (PBD::PropertyChange const & what_changed) {}
+	virtual void trigger_prop_change (PBD::PropertyChange const & what_changed) {}
 };

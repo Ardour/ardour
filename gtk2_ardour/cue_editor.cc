@@ -664,8 +664,6 @@ CueEditor::rec_enable_change ()
 	rec_blink_connection.disconnect ();
 	count_in_connection.disconnect ();
 
-	std::cerr << "REC, state " << ref.box()->record_enabled() << std::endl;
-
 	switch (ref.box()->record_enabled()) {
 	case Recording:
 		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
@@ -1214,33 +1212,125 @@ CueEditor::set_track (std::shared_ptr<Track> t)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
+	track_connections.drop_connections ();
+
 	_track = t;
-	_track->solo_control()->Changed.connect (object_connections, invalidator (*this), std::bind (&CueEditor::update_solo_display, this), gui_context());
+	_track->solo_control()->Changed.connect (track_connections, invalidator (*this), std::bind (&CueEditor::update_solo_display, this), gui_context());
 	solo_button.set_sensitive (true);
 	update_solo_display ();
 }
 
 void
+CueEditor::set_trigger (TriggerReference& tref)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	unset_trigger ();
+
+	ref = tref;
+
+	TriggerPtr trigger (ref.trigger());
+
+	if (!trigger) {
+		return;
+	}
+
+	rec_box.show ();
+	rec_enable_button.set_sensitive (true);
+
+	idle_update_queued.store (0);
+
+	ref.box()->Captured.connect (trigger_connections, invalidator (*this), std::bind (&CueEditor::data_captured, this, _1), gui_context());
+	ref.box()->RecEnableChanged.connect (trigger_connections, invalidator (*this), std::bind (&CueEditor::rec_enable_change, this), gui_context());
+	maybe_set_count_in ();
+
+	Stripable* st = dynamic_cast<Stripable*> (ref.box()->owner());
+	assert (st);
+
+	set_track (std::dynamic_pointer_cast<Track> (st->shared_from_this()));
+
+	if (_track) {
+		_track->DropReferences.connect (track_connections, invalidator (*this), std::bind (&CueEditor::unset_trigger, this), gui_context());
+	}
+
+	trigger->PropertyChanged.connect (trigger_connections, invalidator (*this), std::bind (&CueEditor::trigger_prop_change, this, _1), gui_context());
+	trigger->ArmChanged.connect (trigger_connections, invalidator (*this), std::bind (&CueEditor::trigger_arm_change, this), gui_context());
+
+	if (trigger) {
+		set_region (trigger->the_region());
+	} else {
+		set_region (nullptr);
+	}
+
+	_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &CueEditor::maybe_update));
+}
+
+void
 CueEditor::set_region (std::shared_ptr<Region> r)
 {
-	unset (false);
+	unset_region ();
 
 	_region = r;
 
-	if (_region) {
-		std::shared_ptr<TempoMap> tmap = _region->tempo_map();
-		if (tmap) {
-			start_local_tempo_map (tmap);
-		}
-
-		if (!get_canvas()->is_visible()) {
-			_visible_pending_region = r;
-		} else {
-			_visible_pending_region.reset ();
-		}
-	} else {
+	if (!_region) {
 		_visible_pending_region.reset ();
+		return;
 	}
+
+
+	std::shared_ptr<TempoMap> tmap = _region->tempo_map();
+
+	if (tmap) {
+		start_local_tempo_map (tmap);
+	}
+
+	if (!get_canvas()->is_visible()) {
+		/* We can't really handle a region until we have a size, so
+		   defer the rest of this until we do.
+
+		   XXX visibility is not a very good proxy for size (though
+		   it's not terrible either.
+		*/
+		_visible_pending_region = r;
+		return;
+	}
+
+	_visible_pending_region.reset ();
+
+	r->DropReferences.connect (region_connections, invalidator (*this), std::bind (&CueEditor::unset_region, this), gui_context());
+	r->PropertyChanged.connect (region_connections, invalidator (*this), std::bind (&CueEditor::region_prop_change, this, _1), gui_context());
+}
+
+void
+CueEditor::unset_region ()
+{
+	if (_local_tempo_map) {
+		end_local_tempo_map ();
+	}
+
+	_history.clear ();
+	_update_connection.disconnect();
+	region_connections.drop_connections ();
+	rec_blink_connection.disconnect ();
+	capture_connections.drop_connections ();
+	_region.reset ();
+}
+
+void
+CueEditor::unset_trigger ()
+{
+	ref = TriggerReference ();
+	solo_button.set_active_state (Gtkmm2ext::Off);
+	solo_button.set_sensitive (false);
+	trigger_connections.drop_connections ();
+	track_connections.drop_connections ();
+	_track.reset ();
+
+	/* Since set_trigger() calls set_region(), we need the symmetry here
+	 * that calling unset_trigger() also calls unset_region().
+	 */
+
+	unset_region ();
 }
 
 void
@@ -1285,29 +1375,6 @@ CueEditor::set_from_rsu (RegionUISettings& rsu)
 }
 
 void
-CueEditor::set_trigger (TriggerReference& tref)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	if (tref == ref) {
-		return;
-	}
-
-	_update_connection.disconnect ();
-	object_connections.drop_connections ();
-
-	ref = tref;
-
-	Stripable* st = dynamic_cast<Stripable*> (ref.box()->owner());
-	assert (st);
-
-	set_track (std::dynamic_pointer_cast<Track> (st->shared_from_this()));
-	set_region (ref.trigger()->the_region());
-
-	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &CueEditor::maybe_update));
-}
-
-void
 CueEditor::ruler_locate (GdkEventButton* ev)
 {
 	EC_LOCAL_TEMPO_SCOPE;
@@ -1336,7 +1403,6 @@ CueEditor::maybe_set_count_in ()
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (!ref.box()) {
-		std::cerr << "msci no box\n";
 		return;
 	}
 
@@ -1351,7 +1417,6 @@ CueEditor::maybe_set_count_in ()
 	count_in_to = ref.box()->start_time (valid);
 
 	if (!valid) {
-		std::cerr << "no start time\n";
 		return;
 	}
 
@@ -1359,12 +1424,10 @@ CueEditor::maybe_set_count_in ()
 	Temporal::Beats const & a_q (tmap->quarters_at_sample (audible));
 
 	if ((count_in_to - a_q).get_beats() == 0) {
-		std::cerr << "not enough time\n";
 		return;
 	}
 
 	count_in_connection = ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (*this, &CueEditor::count_in),  ARDOUR_UI::clock_signal_interval()));
-	std::cerr << "count in started" << std::endl;
 }
 
 void
@@ -1471,36 +1534,11 @@ CueEditor::idle_data_captured ()
 }
 
 void
-CueEditor::unset (bool trigger_too)
-{
-	if (_local_tempo_map) {
-		end_local_tempo_map ();
-	}
-	_history.clear ();
-	_update_connection.disconnect();
-	object_connections.drop_connections ();
-	rec_blink_connection.disconnect ();
-	count_in_connection.disconnect ();
-	capture_connections.drop_connections ();
-
-	_region.reset ();
-
-	if (trigger_too) {
-		ref = TriggerReference ();
-		solo_button.set_active_state (Gtkmm2ext::Off);
-		solo_button.set_sensitive (false);
-		_track.reset ();
-	} else if (_track) {
-		/* re-subscribe to object_connections */
-		set_track (_track);
-	}
-}
-
-void
 CueEditor::session_going_away ()
 {
 	EditingContext::session_going_away ();
-	unset (true);
+	unset_region ();
+	unset_trigger ();
 }
 
 void

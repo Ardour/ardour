@@ -52,8 +52,9 @@
 #include "editor.h"
 #include "keyboard.h"
 #include "region_view.h"
-#include "verbose_cursor.h"
+#include "timers.h"
 #include "ui_config.h"
+#include "verbose_cursor.h"
 
 #include "pbd/i18n.h"
 
@@ -469,24 +470,6 @@ AudioClipEditor::drop_waves ()
 }
 
 void
-AudioClipEditor::set_trigger (TriggerReference& tr)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-//	if (tr == ref) {
-//		return;
-//	}
-
-	CueEditor::set_trigger (tr);
-	rec_box.show ();
-
-	main_ruler->show ();
-	main_ruler->set_range (0, pixel_to_sample (_visible_canvas_width - 2.));
-
-	set_region (tr.trigger()->the_region());
-}
-
-void
 AudioClipEditor::set_region (std::shared_ptr<Region> region)
 {
 	EC_LOCAL_TEMPO_SCOPE;
@@ -791,16 +774,20 @@ AudioClipEditor::maybe_update ()
 
 		if (!playing_trigger) {
 
-			if (_drags->active() || !_region || !_track || !_track->triggerbox()) {
+			if (_drags->active() || !_track || !_track->triggerbox()) {
 				return;
 			}
 
 			if (_track->triggerbox()->record_enabled() == Recording) {
-
 				_playhead_cursor->set_position (data_capture_duration);
 			}
 
+			if (!_region) {
+				return;
+			}
+
 		} else {
+
 			if (playing_trigger->active ()) {
 				if (playing_trigger->the_region()) {
 					_playhead_cursor->set_position (playing_trigger->current_pos().samples() + playing_trigger->the_region()->start().samples());
@@ -809,6 +796,7 @@ AudioClipEditor::maybe_update ()
 				_playhead_cursor->set_position (0);
 			}
 		}
+
 #if 0
 	} else if (view->midi_region()) {
 
@@ -836,12 +824,20 @@ AudioClipEditor::maybe_update ()
 }
 
 void
-AudioClipEditor::unset (bool trigger_too)
+AudioClipEditor::unset_region ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
 	drop_waves ();
-	CueEditor::unset (trigger_too);
+
+	CueEditor::unset_region ();
+}
+
+void
+AudioClipEditor::unset_trigger ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+	CueEditor::unset_trigger ();
 }
 
 Gdk::Cursor*
@@ -897,4 +893,3 @@ AudioClipEditor::grid_type_chosen (Editing::GridType gt)
 		grid_actions[Editing::GridTypeMinSec]->set_active (true);
 	}
 }
-

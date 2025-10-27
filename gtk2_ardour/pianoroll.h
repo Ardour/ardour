@@ -78,7 +78,6 @@ class Pianoroll : public CueEditor
 	int32_t get_grid_beat_divisions (Editing::GridType gt) const { return 1; }
 	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const { return 1; }
 
-	void set_trigger (ARDOUR::TriggerReference&);
 	void set_region (std::shared_ptr<ARDOUR::Region>);
 	void set_track (std::shared_ptr<ARDOUR::Track>);
 
@@ -198,9 +197,9 @@ class Pianoroll : public CueEditor
 	PBD::ScopedConnectionList view_connections;
 	void maybe_update ();
 	void trigger_prop_change (PBD::PropertyChange const &);
-	void region_prop_change (PBD::PropertyChange const &);
 
-	void unset (bool trigger_too);
+	void unset_region ();
+	void unset_trigger ();
 
 	void bindings_changed ();
 

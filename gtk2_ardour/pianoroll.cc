@@ -1351,54 +1351,6 @@ Pianoroll::trigger_prop_change (PBD::PropertyChange const & what_changed)
 }
 
 void
-Pianoroll::region_prop_change (PBD::PropertyChange const & what_changed)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	if (what_changed.contains (Properties::length)) {
-		/* XXX what, if anything, should we do here ? */
-	}
-}
-
-void
-Pianoroll::set_trigger (TriggerReference & tref)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	if (ref == tref) {
-		return;
-	}
-
-	TriggerPtr trigger (tref.trigger());
-
-	CueEditor::set_trigger (tref);
-
-	rec_box.show ();
-	rec_enable_button.set_sensitive (true);
-
-	idle_update_queued.store (0);
-
-	ref.box()->Captured.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::data_captured, this, _1), gui_context());
-	ref.box()->RecEnableChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::rec_enable_change, this), gui_context());
-	maybe_set_count_in ();
-
-	if (_track) {
-		_track->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this, true), gui_context());
-	}
-
-	trigger->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_prop_change, this, _1), gui_context());
-	trigger->ArmChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::trigger_arm_change, this), gui_context());
-	_update_connection.disconnect ();
-	_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &CueEditor::maybe_update));
-
-	if (trigger) {
-		set_region (trigger->the_region());
-	} else {
-		set_region (nullptr);
-	}
-}
-
-void
 Pianoroll::make_a_region ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
@@ -1426,10 +1378,16 @@ Pianoroll::make_a_region ()
 }
 
 void
-Pianoroll::unset (bool trigger_too)
+Pianoroll::unset_region ()
 {
-	CueEditor::unset (trigger_too);
+	CueEditor::unset_region ();
 	view->set_region (nullptr);
+}
+
+void
+Pianoroll::unset_trigger ()
+{
+	CueEditor::unset_trigger ();
 }
 
 void
@@ -1490,7 +1448,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 
 	std::shared_ptr<MidiRegion> r (std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region));
 
-	if (!r || !region) {
+	if (!r) {
 		_update_connection.disconnect ();
 		return;
 	}
@@ -1501,17 +1459,11 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 
 	set_visible_channel (view->pick_visible_channel());
 
-	r->DropReferences.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::unset, this, false), gui_context());
-	r->PropertyChanged.connect (object_connections, invalidator (*this), std::bind (&Pianoroll::region_prop_change, this, _1), gui_context());
-
 	/* Compute zoom level to show entire source plus some margin if possible */
 
 	zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
 
 	bg->display_region (*view);
-
-	_update_connection.disconnect ();
-	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Pianoroll::maybe_update));
 
 	maybe_set_from_rsu ();
 }

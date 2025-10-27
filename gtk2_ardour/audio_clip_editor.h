@@ -78,7 +78,6 @@ public:
 
 	Gtk::Widget& contents ();
 
-	void set_trigger (ARDOUR::TriggerReference&);
 	void set_region (std::shared_ptr<ARDOUR::Region> r);
 	void region_changed (const PBD::PropertyChange& what_changed);
 
@@ -131,7 +130,11 @@ public:
 
 	void maybe_update ();
 
-	bool idle_data_captured () { return false; }
+	bool idle_data_captured ();
+
+	void set_overlay_text (std::string const &);
+	void hide_overlay_text ();
+	void show_overlay_text ();
 
  private:
 	ArdourCanvas::Container*         line_container;
@@ -191,7 +194,9 @@ public:
 	void show_count_in (std::string const &);
 	void hide_count_in ();
 
-	void unset (bool trigger_too);
+	void unset_region ();
+	void unset_trigger ();
+
 	void load_shared_bindings ();
 
 	void compute_fixed_ruler_scale ();
