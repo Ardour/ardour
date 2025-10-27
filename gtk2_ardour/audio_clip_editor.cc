@@ -74,6 +74,7 @@ AudioClipEditor::ClipMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark>& 
 
 AudioClipEditor::AudioClipEditor (std::string const & name, bool with_transport)
 	: CueEditor (name, with_transport)
+	, overlay_text (nullptr)
 	, clip_metric (nullptr)
 	, scroll_fraction (0)
 {
@@ -714,17 +715,65 @@ AudioClipEditor::end_write ()
 }
 
 void
-AudioClipEditor::show_count_in (std::string const &)
+AudioClipEditor::set_overlay_text (std::string const & str)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
+	if (!overlay_text) {
+		overlay_text = new ArdourCanvas::Text (data_group);
+		Pango::FontDescription font ("Sans 200");
+		overlay_text->set_font_description (font);
+		overlay_text->set_color (0xff000088);
+		overlay_text->set ("0"); /* not shown, used for positioning math */
+		overlay_text->set_position (ArdourCanvas::Duple ((_visible_canvas_width / 2.0) - (overlay_text->text_width()/2.), (_visible_canvas_height / 2.0) - (overlay_text->text_height() / 2.)));
+	}
+
+	overlay_text->set (str);
+	show_overlay_text ();
+}
+
+void
+AudioClipEditor::show_overlay_text ()
+{
+	if (overlay_text) {
+		overlay_text->show ();
+	}
+}
+
+void
+AudioClipEditor::hide_overlay_text ()
+{
+	if (overlay_text) {
+		overlay_text->hide ();
+	}
+}
+
+void
+AudioClipEditor::show_count_in (std::string const & str)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+	set_overlay_text (str);
 }
 
 void
 AudioClipEditor::hide_count_in ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
+	hide_overlay_text ();
+}
 
+bool
+AudioClipEditor::idle_data_captured ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (!ref.box()) {
+		return false;
+	}
+
+	CueEditor::idle_data_captured ();
+
+	return false;
 }
 
 void

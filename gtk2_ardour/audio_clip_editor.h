@@ -135,6 +135,7 @@ public:
 
  private:
 	ArdourCanvas::Container*         line_container;
+	ArdourCanvas::Text* overlay_text;
 	StartBoundaryRect*               start_line;
 	EndBoundaryRect*                 end_line;
 	ArdourCanvas::Line*              loop_line;
