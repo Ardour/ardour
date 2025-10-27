@@ -1864,7 +1864,7 @@ AudioTrigger::drop_data ()
 }
 
 void
-AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
+AudioTrigger::captured (SlotArmInfo& ai)
 {
 	if (ai.audio_buf.length == 0) {
 		/* Nothing captured */
@@ -2441,7 +2441,7 @@ MIDITrigger::disarm ()
 }
 
 void
-MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
+MIDITrigger::captured (SlotArmInfo& ai)
 {
 	if (ai.midi_buf->size() == 0) {
 		disarm ();
@@ -3670,7 +3670,7 @@ TriggerBox::disarm ()
 }
 
 void
-TriggerBox::finish_recording (BufferSet& bufs)
+TriggerBox::finish_recording ()
 {
 	SlotArmInfo* ai = _arm_info.load();
 	assert (ai);
@@ -3678,7 +3678,7 @@ TriggerBox::finish_recording (BufferSet& bufs)
 	/* This transfers responsibility for the SlotArmInfo object to the
 	   trigger
 	*/
-	ai->slot->captured (*ai, bufs);
+	ai->slot->captured (*ai);
 	_arm_info = nullptr;
 
 	/* XXX this should likely be dependent on what the post-record action is */
@@ -3729,8 +3729,9 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 
 	if (speed <= 0.) {
 		if (_record_state == Recording) {
+			std::cerr << "time to stop record\n";
 			/* We stopped the transport, so just stop immediately (no quantization) */
-			finish_recording (bufs);
+			finish_recording ();
 		}
 		/* we stopped or reversed, but were not recording. Nothing to do here */
 		return;
@@ -3831,7 +3832,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 	}
 
 	if (reached_end) {
-		finish_recording (bufs);
+		finish_recording ();
 	}
 }
 

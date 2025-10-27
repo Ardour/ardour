@@ -296,7 +296,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	timepos_t current_pos() const;
 	double position_as_fraction() const;
 
-	virtual void captured (SlotArmInfo&, BufferSet&) {}
+	virtual void captured (SlotArmInfo&) {}
 	void arm (Temporal::BBT_Offset duration = Temporal::BBT_Offset()) {
 		_arm (duration);
 	}
@@ -542,7 +542,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void io_change ();
 	bool probably_oneshot () const;
 
-	void captured (SlotArmInfo&, BufferSet&);
+	void captured (SlotArmInfo&);
 
 	int set_region_in_worker_thread (std::shared_ptr<Region>);
 	int set_region_in_worker_thread_from_capture (std::shared_ptr<Region>);
@@ -616,7 +616,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
 	bool playable() const { return rt_midibuffer.load() || _region; }
 
-	void captured (SlotArmInfo&, BufferSet&);
+	void captured (SlotArmInfo&);
 	void disarm ();
 
 	template<bool actually_run> pframes_t midi_run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample,
@@ -985,6 +985,8 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	/* return start time for capture; only valid if is_set is true upon return */
 	Temporal::Beats start_time (bool& is_set) const;
 
+	void finish_recording ();
+
   private:
 	struct Requests {
 		std::atomic<bool> stop_all;
@@ -1016,7 +1018,6 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	PBD::PCGRand _pcg;
 
 	void maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes);
-	void finish_recording (BufferSet& bufs);
 	void set_armed (SlotArmInfo*);
 
 	/* These four are accessed (read/write) only from process() context */
