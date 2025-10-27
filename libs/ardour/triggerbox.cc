@@ -3729,7 +3729,6 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 
 	if (speed <= 0.) {
 		if (_record_state == Recording) {
-			std::cerr << "time to stop record\n";
 			/* We stopped the transport, so just stop immediately (no quantization) */
 			finish_recording ();
 		}
