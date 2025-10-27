@@ -5795,7 +5795,7 @@ TriggerBoxThread::build_audio_source (AudioTrigger* t, Temporal::timecnt_t const
 	plist.add (ARDOUR::Properties::opaque, true);
 
 	std::shared_ptr<Region> whole = RegionFactory::create (sources, plist);
-	/* ... and insert a discrete copy into the playlist*/
+	/* ... and use a discrete copy as the region for the slot/trigger */
 	PropertyList plist2;
 	plist2.add (ARDOUR::Properties::whole_file, false);
 	std::shared_ptr<Region> copy (RegionFactory::create (whole, plist2));
