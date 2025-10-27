@@ -5771,19 +5771,26 @@ TriggerBoxThread::build_audio_source (AudioTrigger* t, Temporal::timecnt_t const
 		++n;
 	}
 
-	/* now build region */
-
-	PropertyList plist;
 	std::shared_ptr<FileSource> fs;
+
+	SegmentDescriptor segment;
+	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+	segment.set_extent (0, t->data_length());
+	segment.set_tempo (tmap->tempo_at (pos));
+	segment.set_meter (tmap->meter_at (pos));
 
 	for (auto & src : sources) {
 		fs = std::dynamic_pointer_cast<FileSource> (src);
 		fs->mark_immutable ();
+		src->set_segment_descriptor (segment);
 		SourceFactory::setup_peakfile (src, false);
 	}
 
 	fs = std::dynamic_pointer_cast<FileSource> (sources.front());
 	assert (fs);
+	/* now build region */
+
+	PropertyList plist;
 
 	std::string region_name = region_name_from_path (fs->path(), true, false);
 
