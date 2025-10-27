@@ -748,7 +748,7 @@ class LIBARDOUR_API TriggerBoxThread
 
 	void set_region (TriggerBox&, uint32_t slot, std::shared_ptr<Region>);
 	void request_delete_trigger (Trigger* t);
-	void request_build_source (Trigger* t, Temporal::timecnt_t const & duration);
+	void request_build_source (Trigger* t, Temporal::timecnt_t const & duration, Temporal::timepos_t const &);
 
 	void summon();
 	void stop();
@@ -777,6 +777,7 @@ class LIBARDOUR_API TriggerBoxThread
 		/* for DeleteTrigger and BuildSourceAndRegion */
 		Trigger* trigger;
 		Temporal::timecnt_t duration;
+		Temporal::timepos_t position;
 
 		void* operator new (size_t);
 		void  operator delete (void* ptr, size_t);
@@ -791,9 +792,9 @@ class LIBARDOUR_API TriggerBoxThread
 	CrossThreadChannel _xthread;
 	void queue_request (Request*);
 	void delete_trigger (Trigger*);
-	void build_source (Trigger*, Temporal::timecnt_t const & duration);
-	void build_midi_source (MIDITrigger*, Temporal::timecnt_t const &);
-	void build_audio_source (AudioTrigger*, Temporal::timecnt_t const &);
+	void build_source (Trigger*, Temporal::timecnt_t const & duration, Temporal::timepos_t const &);
+	void build_midi_source (MIDITrigger*, Temporal::timecnt_t const &, Temporal::timepos_t const &);
+	void build_audio_source (AudioTrigger*, Temporal::timecnt_t const &, Temporal::timepos_t const &);
 };
 
 struct CueRecord {

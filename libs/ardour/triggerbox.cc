@@ -1910,7 +1910,7 @@ AudioTrigger::captured (SlotArmInfo& ai, BufferSet&)
 
 	_box.queue_explict (index());
 
-	TriggerBox::worker->request_build_source (this, timecnt_t (data.length));
+	TriggerBox::worker->request_build_source (this, timecnt_t (data.length), timepos_t (ai.start_beats));
 
 	disarm ();
 }
@@ -2471,7 +2471,7 @@ MIDITrigger::captured (SlotArmInfo& ai, BufferSet& bufs)
 	/* Meanwhile, build a new source and region from the data now in rt_midibuffer */
 
 	// std::cerr << "capture done, ask for a source of length " << dur.beats().str() << std::endl;
-	TriggerBox::worker->request_build_source (this, timecnt_t (dur.beats()));
+	TriggerBox::worker->request_build_source (this, timecnt_t (dur.beats()), timepos_t (ai.start_beats));
 
 	disarm ();
 }
@@ -5656,7 +5656,7 @@ TriggerBoxThread::thread_work ()
 					delete_trigger (req->trigger);
 					break;
 				case BuildSourceAndRegion:
-					build_source (req->trigger, req->duration);
+					build_source (req->trigger, req->duration, req->position);
 					break;
 				default:
 					break;
@@ -5726,11 +5726,12 @@ TriggerBoxThread::request_delete_trigger (Trigger* t)
 }
 
 void
-TriggerBoxThread::request_build_source (Trigger* t, Temporal::timecnt_t const & len)
+TriggerBoxThread::request_build_source (Trigger* t, Temporal::timecnt_t const & len, Temporal::timepos_t const & timeline_pos)
 {
 	TriggerBoxThread::Request* req = new TriggerBoxThread::Request (BuildSourceAndRegion);
 	req->trigger  = t;
 	req->duration = len;
+	req->position = timeline_pos;
 	queue_request (req);
 }
 
@@ -5741,20 +5742,20 @@ TriggerBoxThread::delete_trigger (Trigger* t)
 }
 
 void
-TriggerBoxThread::build_source (Trigger* t, Temporal::timecnt_t const & duration)
+TriggerBoxThread::build_source (Trigger* t, Temporal::timecnt_t const & duration, Temporal::timepos_t const & pos)
 {
 	MIDITrigger* mt = dynamic_cast<MIDITrigger*> (t);
 	AudioTrigger* at;
 
 	if (mt) {
-		build_midi_source (mt, duration);
+		build_midi_source (mt, duration, pos);
 	} else if ((at = dynamic_cast<AudioTrigger*> (t))) {
-		build_audio_source (at, duration);
+		build_audio_source (at, duration, pos);
 	}
 }
 
 void
-TriggerBoxThread::build_audio_source (AudioTrigger* t, Temporal::timecnt_t const & duration)
+TriggerBoxThread::build_audio_source (AudioTrigger* t, Temporal::timecnt_t const & duration, Temporal::timepos_t const & pos)
 {
 	Track* trk = static_cast<Track*> (t->box().owner());
 	SourceList sources;
@@ -5806,7 +5807,7 @@ TriggerBoxThread::build_audio_source (AudioTrigger* t, Temporal::timecnt_t const
 }
 
 void
-TriggerBoxThread::build_midi_source (MIDITrigger* t, Temporal::timecnt_t const & duration)
+TriggerBoxThread::build_midi_source (MIDITrigger* t, Temporal::timecnt_t const & duration, Temporal::timepos_t const & pos)
 {
 	Track* trk = static_cast<Track*> (t->box().owner());
 	std::shared_ptr<MidiSource> ms = t->box().session().create_midi_source_for_session (trk->name());
