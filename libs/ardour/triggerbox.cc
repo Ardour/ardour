@@ -3638,6 +3638,12 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 	slot.compute_quantized_transition (now, now_beats, std::numeric_limits<Beats>::max(),
 	                                   t_bbt, t_beats, t_samples, tmap, slot.quantization());
 
+	if (t_beats == now_beats) {
+		t_bbt = tmap->bbt_walk (t_bbt, slot.quantization());
+		t_beats = tmap->quarters_at (t_bbt);
+		t_samples = tmap->sample_at (t_beats);
+	}
+
 	ai->start_samples = t_samples;
 	ai->start_beats = t_beats;
 
