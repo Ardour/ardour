@@ -278,6 +278,7 @@ Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching, bo
 			break;
 		case 7:
 			current_timefx->request.algorithm = TimeFXRequest::StaffPad;
+			break;
 	#ifdef HAVE_SOUNDTOUCH
 		case 8:
 			current_timefx->request.algorithm = TimeFXRequest::SoundTouch;
