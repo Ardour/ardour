@@ -660,7 +660,10 @@ Editor::Editor ()
 
 	setup_toolbar ();
 
-	set_action_defaults ();
+	{
+		PBD::Unwinder<bool> uw (no_ruler_shown_update, true);
+		set_action_defaults ();
+	}
 
 	ARDOUR_UI::instance()->ActionsReady.connect_same_thread (*this, std::bind (&Editor::initialize_ruler_actions, this));
 

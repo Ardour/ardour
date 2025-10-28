@@ -777,6 +777,8 @@ Editor::toggle_ruler_visibility ()
 		return;
 	}
 
+	assert (_session);
+
 	update_ruler_visibility ();
 	store_ruler_visibility ();
 }
