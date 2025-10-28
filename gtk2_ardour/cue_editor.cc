@@ -1455,26 +1455,16 @@ CueEditor::count_in (Temporal::timepos_t audible, unsigned int clock_interval_ms
 		return;
 	}
 
-	tmap->get_grid (grid_points, samples_to_superclock (audible_samples, _session->sample_rate()), samples_to_superclock ((audible_samples + ((_session->sample_rate() / 1000) * clock_interval_msecs)), _session->sample_rate()));
+	Temporal::Beats current_delta = count_in_to - audible_beats;
 
-	if (!grid_points.empty()) {
-
-		/* At least one click in the time between now and the next
-		 * Clock signal
-		 */
-
-		Temporal::Beats current_delta = count_in_to - audible_beats;
-
-		if (current_delta.get_beats() < 1) {
-			hide_count_in ();
-			count_in_connection.disconnect ();
-			return;
-		}
-
-		std::string str (string_compose ("%1", current_delta.get_beats()));
-		std::cerr << str << std::endl;
-		show_count_in (str);
+	if (current_delta.get_beats() < 1) {
+		hide_count_in ();
+		count_in_connection.disconnect ();
+		return;
 	}
+
+	std::string str (string_compose ("%1", current_delta.get_beats()));
+	show_count_in (str);
 }
 
 bool
