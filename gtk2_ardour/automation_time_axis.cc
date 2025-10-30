@@ -981,7 +981,7 @@ AutomationTimeAxisView::exited ()
 		_line->track_exited();
 	}
 
-	_editor.enable_automation_bindings ();
+	_editor.disable_automation_bindings ();
 }
 
 void
