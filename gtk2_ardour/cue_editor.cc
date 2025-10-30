@@ -1260,9 +1260,8 @@ CueEditor::set_trigger (TriggerReference& tref)
 		set_region (trigger->the_region());
 	} else {
 		set_region (nullptr);
+		_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &CueEditor::maybe_update));
 	}
-
-	_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &CueEditor::maybe_update));
 }
 
 void
@@ -1299,6 +1298,8 @@ CueEditor::set_region (std::shared_ptr<Region> r)
 
 	r->DropReferences.connect (region_connections, invalidator (*this), std::bind (&CueEditor::unset_region, this), gui_context());
 	r->PropertyChanged.connect (region_connections, invalidator (*this), std::bind (&CueEditor::region_prop_change, this, _1), gui_context());
+
+	_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &CueEditor::maybe_update));
 }
 
 void
