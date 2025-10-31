@@ -564,15 +564,23 @@ MidiView::button_press (GdkEventButton* ev)
 
 		_editing_context.set_canvas_cursor (_editing_context.cursors()->midi_pencil);
 
+		int stride_multiple;
+
+		if (Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier)) {
+			stride_multiple = 2;
+		} else {
+			stride_multiple = 1;
+		}
+
 		if (_midi_context.note_mode() == Percussive) {
 			if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
-				draw_drag = new HitBrushDrag (_editing_context, drag_group(), this, Temporal::Beats (0, 60)); /* 1/128th notes */
+				draw_drag = new HitBrushDrag (_editing_context, drag_group(), this, Temporal::Beats (0, 60), stride_multiple); /* 1/128th notes */
 			} else {
 				draw_drag = new HitCreateDrag (_editing_context, drag_group(), this);
 			}
 		} else {
 			if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
-				draw_drag = new HitBrushDrag (_editing_context, drag_group(), this);
+				draw_drag = new HitBrushDrag (_editing_context, drag_group(), this, Temporal::Beats(), stride_multiple);
 			} else {
 				draw_drag = new NoteCreateDrag (_editing_context, drag_group(), this);
 			}

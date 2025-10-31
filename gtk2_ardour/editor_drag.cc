@@ -6963,13 +6963,14 @@ HitCreateDrag::y_to_region (double y) const
 
 /*-----------------------*/
 
-HitBrushDrag::HitBrushDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv, Temporal::Beats slen)
+HitBrushDrag::HitBrushDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv, Temporal::Beats slen, int sm)
 	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group())
 	, _midi_view (mv)
 	, _last_pos (Temporal::Beats ())
 	, _y (0)
 	, added_notes (false)
 	, specified_length (slen)
+	, stride_multiple (sm)
 {
 
 }
@@ -7007,12 +7008,12 @@ HitBrushDrag::get_stride (Temporal::Beats const & pos, Temporal::BBT_Offset cons
 
 	} else if (q.bars == 0) {
 
-		return Temporal::Beats (q.beats, q.ticks);
+		return Temporal::Beats (q.beats, q.ticks) * stride_multiple;
 
 	}
 
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-	return tmap->meter_at (pos).to_quarters (q); /* Quantization as beats */
+	return tmap->meter_at (pos).to_quarters (q) * stride_multiple; /* Quantization as beats */
 }
 
 void

@@ -716,7 +716,7 @@ private:
 class HitBrushDrag : public Drag
 {
 public:
-	HitBrushDrag (EditingContext&, ArdourCanvas::Item *, MidiView *, Temporal::Beats specified_length = Temporal::Beats());
+	HitBrushDrag (EditingContext&, ArdourCanvas::Item *, MidiView *, Temporal::Beats specified_length = Temporal::Beats(), int stride_multiple = 1);
 	~HitBrushDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -743,6 +743,7 @@ private:
 	Temporal::Beats      next_grid;
 	bool                 added_notes;
 	Temporal::Beats      specified_length;
+	int                  stride_multiple;
 
 };
 
