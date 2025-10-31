@@ -76,7 +76,7 @@ class Pianoroll : public CueEditor
 	bool canvas_bg_event (GdkEvent* event, ArdourCanvas::Item*);
 
 	int32_t get_grid_beat_divisions (Editing::GridType gt) const { return 1; }
-	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const { return 1; }
+	int32_t get_grid_music_divisions (Editing::GridType gt) const { return 1; }
 
 	void set_region (std::shared_ptr<ARDOUR::Region>);
 	void set_track (std::shared_ptr<ARDOUR::Track>);

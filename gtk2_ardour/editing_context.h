@@ -277,7 +277,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) const;
 
 	int32_t get_grid_beat_divisions (Editing::GridType gt) const;
-	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const;
+	int32_t get_grid_music_divisions (Editing::GridType gt) const;
 
 	Editing::GridType  grid_type () const;
 	bool  grid_type_is_musical (Editing::GridType) const;

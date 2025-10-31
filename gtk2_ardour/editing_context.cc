@@ -1770,7 +1770,7 @@ EditingContext::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	/* note: GridType and RulerScale are not the same enums, so it's not a simple mathematical operation */
 	int suggested_scale = (int) bbt_ruler_scale;
 	GridType gt (grid_type());
-	int divs = get_grid_music_divisions(gt, 0);
+	int divs = get_grid_music_divisions(gt);
 	if (gt == GridTypeBar) {
 		suggested_scale = std::min(suggested_scale, (int) bbt_show_1);
 	} else if (gt == GridTypeBeat) {
@@ -2737,7 +2737,7 @@ EditingContext::get_grid_beat_divisions (GridType gt) const
  * @return Music grid beat divisions
  */
 int32_t
-EditingContext::get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const
+EditingContext::get_grid_music_divisions (Editing::GridType gt) const
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
