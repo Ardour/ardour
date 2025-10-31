@@ -749,7 +749,7 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 	bool erased = false;
 	bool id_matched = false;
 
-	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 remove note #%2 %3 @ %4\n", this, note->id(), (int)note->note(), note->time()));
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 remove note #%2 %3 @ %4 of %5\n", this, note->id(), (int)note->note(), note->time(), _notes.size()));
 
 	/* first try searching for the note using the time index, which is
 	 * faster since the container is "indexed" by time. (technically, this
@@ -794,9 +794,9 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1\ttime-based lookup did not find note #%2 %3 @ %4\n", this, note->id(), (int)note->note(), note->time()));
-
 	if (!erased) {
+
+		DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1\ttime-based lookup did not find note #%2 %3 @ %4\n", this, note->id(), (int)note->note(), note->time()));
 
 		/* if the note's time property was changed in tandem with some
 		 * other property as the next operation after it was added to
