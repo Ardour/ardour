@@ -443,7 +443,7 @@ Drag::end_grab (GdkEvent* event)
 	_item->ungrab ();
 
 	finished (event, _starting_point_passed);
- 
+
 	editing_context.verbose_cursor().hide ();
 
 	return _starting_point_passed;
@@ -6903,7 +6903,6 @@ NoteCreateDrag::aborted (bool)
 HitCreateDrag::HitCreateDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv)
 	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group())
 	, _midi_view (mv)
-	, _last_pos (Temporal::Beats ())
 	, _y (0)
 {
 }
@@ -6961,6 +6960,120 @@ HitCreateDrag::y_to_region (double y) const
 	_midi_view->drag_group ()->canvas_to_item (x, y);
 	return y;
 }
+
+/*-----------------------*/
+
+HitBrushDrag::HitBrushDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv)
+	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group())
+	, _midi_view (mv)
+	, _last_pos (Temporal::Beats ())
+	, _y (0)
+	, added_notes (false)
+{
+
+}
+
+HitBrushDrag::~HitBrushDrag ()
+{
+}
+
+void
+HitBrushDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+{
+	Drag::start_grab (event, cursor);
+
+	_y = _midi_view->note_to_y (_midi_view->y_to_note (y_to_region (event->button.y)));
+
+	timepos_t pos (_drags->current_pointer_time ());
+	assert (Config->get_default_quantization().type == AnyTime::BBT_Offset);
+	stride = get_stride (pos.beats(), Config->get_default_quantization().bbt_offset);
+	Temporal::Beats dl = _midi_view->get_draw_length_beats (pos);
+
+	if (dl > stride) {
+		stride = dl;
+	}
+
+	editing_context.snap_to (pos, RoundNearest, SnapToGrid_Scaled);
+	next_grid = pos.beats ();
+}
+
+Temporal::Beats
+HitBrushDrag::get_stride (Temporal::Beats const & pos, Temporal::BBT_Offset const & q)
+{
+	if (q < Temporal::BBT_Offset (0, 0, 0)) {
+		/* negative quantization == do not quantize */
+		return Temporal::Beats ();
+
+	} else if (q.bars == 0) {
+
+		return Temporal::Beats (q.beats, q.ticks);
+
+	}
+
+	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+	return tmap->meter_at (pos).to_quarters (q); /* Quantization as beats */
+}
+
+void
+HitBrushDrag::motion (GdkEvent* event, bool first_move)
+{
+	Beats length;
+
+	if (last_pointer_x() >= current_pointer_x()) {
+		/* nothing to if we move earlier in time */
+		return;
+	}
+
+	if (first_move) {
+		_midi_view->start_note_diff_command (_("brush notes"), true);
+	}
+
+	const timepos_t pos = _drags->current_pointer_time ();
+
+	while (pos.beats() >= next_grid) {
+
+		if (!_midi_view->midi_region()) {
+			editing_context.make_a_region ();
+			assert (_midi_view->midi_region());
+		}
+
+		length = _midi_view->get_draw_length_beats (timepos_t (next_grid));
+
+		Beats start;
+
+		if (!_midi_view->on_timeline()) {
+			Beats spos = _midi_view->midi_region()->source_position().beats() + next_grid;
+			start = _midi_view->midi_region ()->absolute_time_to_source_beats (timepos_t (spos));
+		} else {
+			start = _midi_view->midi_region ()->absolute_time_to_source_beats (timepos_t (next_grid));
+		}
+
+		_midi_view->create_note_at (timepos_t (start), _y, length, event->button.state, false, false);
+		added_notes = true;
+
+		next_grid += stride;
+	}
+}
+
+void
+HitBrushDrag::finished (GdkEvent* event, bool had_movement)
+{
+	if (added_notes) {
+		_midi_view->end_note_diff_command ();
+	} else {
+		_midi_view->abort_note_diff ();
+	}
+}
+
+double
+HitBrushDrag::y_to_region (double y) const
+{
+	double x = 0;
+	_midi_view->drag_group ()->canvas_to_item (x, y);
+	return y;
+}
+
+/*-------------------*/
 
 CrossfadeEdgeDrag::CrossfadeEdgeDrag (Editor& e, AudioRegionView* rv, ArdourCanvas::Item* i, bool start_yn)
 	: Drag (e, i, Temporal::AudioTime, e.get_trackview_group())

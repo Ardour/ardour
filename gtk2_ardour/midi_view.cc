@@ -568,7 +568,11 @@ MidiView::button_press (GdkEventButton* ev)
 			draw_drag = new HitCreateDrag (_editing_context, drag_group(), this);
 			_editing_context.drags()->set (draw_drag, (GdkEvent *) ev);
 		} else {
-			draw_drag = new NoteCreateDrag (_editing_context, drag_group(), this);
+			if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
+				draw_drag = new HitBrushDrag (_editing_context, drag_group(), this);
+			} else {
+				draw_drag = new NoteCreateDrag (_editing_context, drag_group(), this);
+			}
 			_editing_context.drags()->set (draw_drag, (GdkEvent *) ev);
 		}
 

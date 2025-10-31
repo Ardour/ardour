@@ -709,8 +709,39 @@ private:
 	double y_to_region (double) const;
 
 	MidiView*           _midi_view;
+	int                 _y;
+
+};
+
+class HitBrushDrag : public Drag
+{
+public:
+	HitBrushDrag (EditingContext&, ArdourCanvas::Item *, MidiView *);
+	~HitBrushDrag ();
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool) {}
+
+	bool active (Editing::MouseMode mode) {
+		return mode == Editing::MouseDraw || mode == Editing::MouseContent;
+	}
+
+	bool y_movement_matters () const {
+		return false;
+	}
+
+private:
+	double y_to_region (double) const;
+	Temporal::Beats get_stride (Temporal::Beats const & pos, Temporal::BBT_Offset const & quantization);
+
+	MidiView*           _midi_view;
 	Temporal::timepos_t _last_pos;
 	int                 _y;
+	Temporal::Beats      stride;
+	Temporal::Beats      next_grid;
+	bool                 added_notes;
 
 };
 

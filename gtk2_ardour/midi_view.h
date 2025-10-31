@@ -442,6 +442,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	friend class NoteDrag;
 	friend class NoteCreateDrag;
 	friend class HitCreateDrag;
+	friend class HitBrushDrag;
 	friend class MidiGhostRegion;
 
 	friend class EditNoteDialog;
