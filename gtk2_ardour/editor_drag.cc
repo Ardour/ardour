@@ -6963,12 +6963,13 @@ HitCreateDrag::y_to_region (double y) const
 
 /*-----------------------*/
 
-HitBrushDrag::HitBrushDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv)
+HitBrushDrag::HitBrushDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv, Temporal::Beats slen)
 	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group())
 	, _midi_view (mv)
 	, _last_pos (Temporal::Beats ())
 	, _y (0)
 	, added_notes (false)
+	, specified_length (slen)
 {
 
 }
@@ -7037,7 +7038,11 @@ HitBrushDrag::motion (GdkEvent* event, bool first_move)
 			assert (_midi_view->midi_region());
 		}
 
-		length = _midi_view->get_draw_length_beats (timepos_t (next_grid));
+		if (specified_length == Beats()) {
+			length = _midi_view->get_draw_length_beats (timepos_t (next_grid));
+		} else {
+			length = specified_length;
+		}
 
 		Beats start;
 
