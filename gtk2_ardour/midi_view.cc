@@ -841,7 +841,7 @@ MidiView::show_list_editor ()
  * \param snap_t true to snap t to the grid, otherwise false.
  */
 void
-MidiView::create_note_at (timepos_t const & source_relative_start, double y, Temporal::Beats length, uint32_t state, bool shift_snap)
+MidiView::create_note_at (timepos_t const & source_relative_start, double y, Temporal::Beats length, uint32_t state, bool shift_snap, bool control_reversible_command)
 {
 	if (!_model) {
 		return;
@@ -865,16 +865,18 @@ MidiView::create_note_at (timepos_t const & source_relative_start, double y, Tem
 		return;
 	}
 
-	start_note_diff_command(_("add note"));
+	start_note_diff_command(_("add note"), control_reversible_command);
 	note_diff_add_note (new_note, true, false);
-	apply_note_diff();
+	apply_note_diff (!control_reversible_command);
 
 	// XXX _editing_context.set_selected_midi_region_view (*this);
 	list<Evoral::event_id_t> to_be_selected;
 	to_be_selected.push_back (new_note->id());
 	select_notes (to_be_selected, true);
 
-	play_midi_note (new_note);
+	if (do_commit) {
+		play_midi_note (new_note);
+	}
 }
 
 void
@@ -906,18 +908,31 @@ MidiView::display_model (std::shared_ptr<MidiModel> model)
 }
 
 void
-MidiView::start_note_diff_command (string name)
+MidiView::start_note_diff_command (string name, bool with_reversible_command)
 {
 	if (!_model) {
 		return;
 	}
 
 	if (!_note_diff_command) {
-		_editing_context.begin_reversible_command (name);
+		if (with_reversible_command) {
+			_editing_context.begin_reversible_command (name);
+		}
 		_note_diff_command = _model->new_note_diff_command (name);
 	} else {
 		std::cerr << "ERROR: start_note_diff_command command called, but a note_diff_command was already underway" << std::endl;
 	}
+}
+
+void
+MidiView::end_note_diff_command ()
+{
+	if (!_model) {
+		return;
+	}
+
+	_editing_context.commit_reversible_command ();
+	_note_diff_command = nullptr;
 }
 
 void

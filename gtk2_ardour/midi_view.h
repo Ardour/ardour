@@ -193,7 +193,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	std::shared_ptr<ARDOUR::MidiModel> model() const { return _model; }
 
 	/* note_diff commands should start here; this initiates an undo record */
-	void start_note_diff_command (std::string name = "midi edit");
+	void start_note_diff_command (std::string name = "midi edit", bool with_reversible_command = true);
+	void end_note_diff_command ();
 
 	void note_diff_add_change (NoteBase* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, uint8_t val);
 	void note_diff_add_change (NoteBase* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, Temporal::Beats val);
@@ -328,7 +329,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	 * \param state the keyboard modifier mask for the canvas event (click).
 	 * \param shift_snap true alters snap behavior to round down always (false if the gui has already done that).
 	 */
-	void create_note_at (Temporal::timepos_t const & t, double y, Temporal::Beats length, uint32_t state, bool shift_snap);
+	void create_note_at (Temporal::timepos_t const & t, double y, Temporal::Beats length, uint32_t state, bool shift_snap, bool control_reversible_command = true);
 
 	/** An external request to clear the note selection, remove MRV from editor
 	 * selection.
