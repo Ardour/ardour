@@ -878,7 +878,7 @@ MidiView::create_note_at (timepos_t const & source_relative_start, double y, Tem
 	to_be_selected.push_back (new_note->id());
 	select_notes (to_be_selected, true);
 
-	if (do_commit) {
+	if (control_reversible_command) {
 		play_midi_note (new_note);
 	}
 }
