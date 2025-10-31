@@ -7026,7 +7026,7 @@ HitBrushDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	if (first_move) {
-		_midi_view->start_note_diff_command (_("brush notes"), true);
+		editing_context.begin_reversible_command (_("brush notes"));
 	}
 
 	const timepos_t pos = _drags->current_pointer_time ();

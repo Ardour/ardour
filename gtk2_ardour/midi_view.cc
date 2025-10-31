@@ -921,13 +921,15 @@ MidiView::start_note_diff_command (string name, bool with_reversible_command)
 		return;
 	}
 
+	if (with_reversible_command) {
+		_editing_context.begin_reversible_command (name);
+	}
+
 	if (!_note_diff_command) {
-		if (with_reversible_command) {
-			_editing_context.begin_reversible_command (name);
-		}
 		_note_diff_command = _model->new_note_diff_command (name);
 	} else {
 		std::cerr << "ERROR: start_note_diff_command command called, but a note_diff_command was already underway" << std::endl;
+		PBD::stacktrace (std::cerr, 19);
 	}
 }
 
@@ -940,6 +942,15 @@ MidiView::end_note_diff_command ()
 
 	_editing_context.commit_reversible_command ();
 	_note_diff_command = nullptr;
+}
+
+void
+MidiView::abort_note_diff()
+{
+	delete _note_diff_command;
+	_note_diff_command = nullptr;
+	_editing_context.abort_reversible_command();
+	clear_selection_internal ();
 }
 
 void
@@ -1022,15 +1033,6 @@ MidiView::apply_note_diff (bool as_subcommand, bool was_copy)
 
 	_marked_for_velocity.clear();
 
-}
-
-void
-MidiView::abort_note_diff()
-{
-	delete _note_diff_command;
-	_note_diff_command = 0;
-	_editing_context.abort_reversible_command();
-	clear_selection_internal ();
 }
 
 NoteBase*
