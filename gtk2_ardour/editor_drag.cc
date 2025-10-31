@@ -6963,7 +6963,7 @@ HitCreateDrag::y_to_region (double y) const
 
 /*-----------------------*/
 
-HitBrushDrag::HitBrushDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv, Temporal::Beats slen, int sm)
+NoteBrushDrag::NoteBrushDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv, Temporal::Beats slen, int sm)
 	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group())
 	, _midi_view (mv)
 	, _last_pos (Temporal::Beats ())
@@ -6975,12 +6975,12 @@ HitBrushDrag::HitBrushDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView*
 
 }
 
-HitBrushDrag::~HitBrushDrag ()
+NoteBrushDrag::~NoteBrushDrag ()
 {
 }
 
 void
-HitBrushDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+NoteBrushDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
@@ -7000,7 +7000,7 @@ HitBrushDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 }
 
 Temporal::Beats
-HitBrushDrag::get_stride (Temporal::Beats const & pos, Temporal::BBT_Offset const & q)
+NoteBrushDrag::get_stride (Temporal::Beats const & pos, Temporal::BBT_Offset const & q)
 {
 	if (q < Temporal::BBT_Offset (0, 0, 0)) {
 		/* negative quantization == do not quantize */
@@ -7017,7 +7017,7 @@ HitBrushDrag::get_stride (Temporal::Beats const & pos, Temporal::BBT_Offset cons
 }
 
 void
-HitBrushDrag::motion (GdkEvent* event, bool first_move)
+NoteBrushDrag::motion (GdkEvent* event, bool first_move)
 {
 	Beats length;
 
@@ -7062,7 +7062,7 @@ HitBrushDrag::motion (GdkEvent* event, bool first_move)
 }
 
 void
-HitBrushDrag::finished (GdkEvent* event, bool had_movement)
+NoteBrushDrag::finished (GdkEvent* event, bool had_movement)
 {
 	if (added_notes) {
 		_midi_view->end_note_diff_command ();
@@ -7072,7 +7072,7 @@ HitBrushDrag::finished (GdkEvent* event, bool had_movement)
 }
 
 double
-HitBrushDrag::y_to_region (double y) const
+NoteBrushDrag::y_to_region (double y) const
 {
 	double x = 0;
 	_midi_view->drag_group ()->canvas_to_item (x, y);

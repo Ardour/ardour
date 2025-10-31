@@ -713,11 +713,11 @@ private:
 
 };
 
-class HitBrushDrag : public Drag
+class NoteBrushDrag : public Drag
 {
 public:
-	HitBrushDrag (EditingContext&, ArdourCanvas::Item *, MidiView *, Temporal::Beats specified_length = Temporal::Beats(), int stride_multiple = 1);
-	~HitBrushDrag ();
+	NoteBrushDrag (EditingContext&, ArdourCanvas::Item *, MidiView *, Temporal::Beats specified_length = Temporal::Beats(), int stride_multiple = 1);
+	~NoteBrushDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
