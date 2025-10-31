@@ -175,6 +175,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("ZoomFocus"), _("Zoom Focus"));
 	ActionManager::register_action (editor_menu_actions, X_("ZoomMenu"), _("Zoom"));
 	ActionManager::register_action (editor_menu_actions, X_("LuaScripts"), _("Lua Scripts"));
+	ActionManager::register_action (editor_menu_actions, X_("GlobalQuantize"), _("Global Quantization"));
 
 	register_region_actions ();
 
@@ -685,6 +686,42 @@ Editor::register_actions ()
 	smart_mode_button.set_related_action (smart_mode_action);
 	smart_mode_button.set_text (_("Smart"));
 	smart_mode_button.set_name ("mouse mode button");
+
+	RadioAction::Group global_quantize_group;
+
+	struct GTStrings {
+		Editing::GridType gt;
+		char const * const action_name;
+		char const * const menu_text;
+
+		GTStrings (Editing::GridType gtype, char const * const an, char const * const mt)
+			: gt (gtype), action_name (an), menu_text (mt) {}
+	};
+
+	/* Limited grid types for global quantization, for now */
+
+	std::vector<GTStrings> grid_types ({
+			{ GridTypeBar, X_("1-bar"), _("1 bar") },
+			{ GridTypeBeat, X_("quarter-note"), _("1/4 Note" ) },
+			{ GridTypeBeatDiv2, X_("eighth-note"), _("1/8 Note") },
+			{ GridTypeBeatDiv4, X_("sixteenth-note"), _("1/16 Note") },
+			{ GridTypeBeatDiv8, X_("thirtysecond-note"), _("1/32 Note") },
+			{ GridTypeBeatDiv16, X_("sixtyfourth-note"), _("1/64 Note") },
+			{ GridTypeBeatDiv32, X_("onetwentyeighth-note"), _("1/128 Note") }
+		});
+
+	for (auto & gts : grid_types) {
+		char buf[64];
+		snprintf (buf, sizeof (buf), X_("set-global-quantization-%s"), gts.action_name);
+		quantization_actions[gts.gt] = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (editor_actions, global_quantize_group, buf, gts.menu_text, sigc::bind (sigc::mem_fun(*this, &Editor::global_quantization_chosen), gts.gt)));
+	}
+
+	Editing::GridType gt;
+	AnyTime at (Config->get_default_quantization());
+
+	if (at.type == AnyTime::BBT_Offset && bbt_to_grid (Config->get_default_quantization().bbt_offset, gt)) {
+		quantization_actions[gt]->set_active (true);
+	}
 }
 
 static void _lua_print (std::string s) {
@@ -692,6 +729,135 @@ static void _lua_print (std::string s) {
 	std::cout << "LuaInstance: " << s << "\n";
 #endif
 	PBD::info << "LuaInstance: " << s << endmsg;
+}
+
+bool
+Editor::bbt_to_grid (Temporal::BBT_Offset const & bbt, GridType& gt) const
+{
+	using namespace Temporal;
+
+	if (bbt.bars > 1) {
+		return false;
+	}
+
+	if (bbt == BBT_Offset (1, 0, 0)) {
+		gt = GridTypeBar;
+	} else if (bbt == BBT_Offset (0, 0, 60)) {
+		gt = GridTypeBeatDiv32;
+	} else if (bbt == BBT_Offset (0, 0, 69)) {
+		gt = GridTypeBeatDiv28;
+	} else if (bbt == BBT_Offset (0, 0, 80)) {
+		gt = GridTypeBeatDiv24;
+	} else if (bbt == BBT_Offset (0, 0, 96)) {
+		gt = GridTypeBeatDiv20;
+	} else if (bbt == BBT_Offset (0, 0, 120)) {
+		gt = GridTypeBeatDiv16;
+	} else if (bbt == BBT_Offset (0, 0, 137)) {
+		gt = GridTypeBeatDiv14;
+	} else if (bbt == BBT_Offset (0, 0, 160)) {
+		gt = GridTypeBeatDiv12;
+	} else if (bbt == BBT_Offset (0, 0, 192)) {
+		gt = GridTypeBeatDiv10;
+	} else if (bbt == BBT_Offset (0, 0, 240)) {
+		gt = GridTypeBeatDiv8;
+	} else if (bbt == BBT_Offset (0, 0, 274)) {
+		gt = GridTypeBeatDiv7;
+	} else if (bbt == BBT_Offset (0, 0, 320)) {
+		gt = GridTypeBeatDiv6;
+	} else if (bbt == BBT_Offset (0, 0, 384)) {
+		gt = GridTypeBeatDiv5;
+	} else if (bbt == BBT_Offset (0, 0, 480)) {
+		gt = GridTypeBeatDiv4;
+	} else if (bbt == BBT_Offset (0, 0, 640)) {
+		gt = GridTypeBeatDiv3;
+	} else if (bbt == BBT_Offset (0, 0, 960)) {
+		gt = GridTypeBeatDiv2;
+	} else if (bbt == BBT_Offset (0, 1, 0)) {
+		gt = GridTypeBeat;
+	} else {
+		return false;
+	}
+
+	return true;
+}
+
+void
+Editor::set_global_quantization (GridType gt)
+{
+	Temporal::BBT_Offset bbt;
+
+	switch (gt) {
+	case GridTypeBeatDiv32:
+		bbt.ticks = 60;
+		break;
+	case GridTypeBeatDiv28:
+		bbt.ticks = 69;
+		break;
+	case GridTypeBeatDiv24:
+		bbt.ticks = 80;
+		break;
+	case GridTypeBeatDiv20:
+		bbt.ticks = 96;
+		break;
+	case GridTypeBeatDiv16:
+		bbt.ticks = 120;
+		break;
+	case GridTypeBeatDiv14:
+		bbt.ticks = 137;
+		break;
+	case GridTypeBeatDiv12:
+		bbt.ticks = 160;
+		break;
+	case GridTypeBeatDiv10:
+		bbt.ticks = 192;
+		break;
+	case GridTypeBeatDiv8:
+		bbt.ticks = 240;
+		break;
+	case GridTypeBeatDiv7:
+		bbt.ticks = 274;
+		break;
+	case GridTypeBeatDiv6:
+		bbt.ticks = 320;
+		break;
+	case GridTypeBeatDiv5:
+		bbt.ticks = 384;
+		break;
+	case GridTypeBeatDiv4:
+		bbt.ticks = 480;
+		break;
+	case GridTypeBeatDiv3:
+		bbt.ticks = 640;
+		break;
+	case GridTypeBeatDiv2:
+		bbt.ticks = 960;
+		break;
+	case GridTypeBeat:
+		bbt.beats = 1;
+		break;
+	case GridTypeBar:
+		bbt.bars = 1;
+		break;
+
+	case GridTypeNone:
+	case GridTypeTimecode:
+	case GridTypeMinSec:
+	case GridTypeCDFrame:
+	default:
+		return;
+	}
+
+	Config->set_default_quantization (bbt);
+}
+
+void
+Editor::global_quantization_chosen (GridType gt)
+{
+	if (!quantization_actions[gt]->get_active()) {
+		return;
+	}
+
+	set_global_quantization (gt);
 }
 
 void

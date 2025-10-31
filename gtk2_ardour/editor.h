@@ -520,6 +520,8 @@ protected:
 
 	Temporal::timepos_t _get_preferred_edit_position (Editing::EditIgnoreOption, bool use_context_click, bool from_outside_canvas);
 
+	void set_global_quantization (Editing::GridType);
+
 private:
 
 	void color_handler ();
@@ -2274,6 +2276,10 @@ private:
 	void show_range_type (RangeBarType);
 	PBD::Signal<void()> VisibleMarkersChanged;
 	PBD::Signal<void()> VisibleRangesChanged;
+
+	std::map<Editing::GridType,Glib::RefPtr<Gtk::RadioAction> > quantization_actions;
+	void global_quantization_chosen (Editing::GridType);
+	bool bbt_to_grid (Temporal::BBT_Offset const & bbt, Editing::GridType& gt) const;
 
 	friend class RegionMoveDrag;
 	friend class TrimDrag;
