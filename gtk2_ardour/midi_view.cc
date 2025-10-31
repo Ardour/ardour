@@ -565,17 +565,20 @@ MidiView::button_press (GdkEventButton* ev)
 		_editing_context.set_canvas_cursor (_editing_context.cursors()->midi_pencil);
 
 		if (_midi_context.note_mode() == Percussive) {
-			draw_drag = new HitCreateDrag (_editing_context, drag_group(), this);
-			_editing_context.drags()->set (draw_drag, (GdkEvent *) ev);
+			if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
+				draw_drag = new HitBrushDrag (_editing_context, drag_group(), this, Temporal::Beats (0, 60)); /* 1/128th notes */
+			} else {
+				draw_drag = new HitCreateDrag (_editing_context, drag_group(), this);
+			}
 		} else {
 			if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
 				draw_drag = new HitBrushDrag (_editing_context, drag_group(), this);
 			} else {
 				draw_drag = new NoteCreateDrag (_editing_context, drag_group(), this);
 			}
-			_editing_context.drags()->set (draw_drag, (GdkEvent *) ev);
 		}
 
+		_editing_context.drags()->set (draw_drag, (GdkEvent *) ev);
 		remove_ghost_note ();
 		hide_verbose_cursor ();
 
