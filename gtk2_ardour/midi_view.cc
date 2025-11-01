@@ -2990,6 +2990,8 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 	uint8_t highest_note_in_selection = 0;
 	uint8_t highest_note_difference   = 0;
 
+	Temporal::Beats last_note_off;
+
 	if (!copy) {
 		// find highest and lowest notes first
 
@@ -3023,6 +3025,8 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 			if (new_time < Temporal::Beats()) {
 				continue;
 			}
+
+			last_note_off = std::max (last_note_off, new_time + sel->note()->length());
 
 			if (new_time != sel->note()->time()) {
 				note_diff_add_change (sel, MidiModel::NoteDiffCommand::StartTime, new_time);
@@ -3068,6 +3072,7 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 			}
 
 			copy_event->note()->set_time (new_time);
+			last_note_off = std::max (last_note_off, copy_event->note()->end_time());
 
 			/* update pitch */
 
@@ -3090,7 +3095,25 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 		_copy_drag_events.clear ();
 	}
 
+
 	apply_note_diff (true /*subcommand, we don't want this to start a new commit*/, copy);
+
+	if (_midi_region) {
+		Temporal::Beats lno (_midi_region->source_beats_to_absolute_time (last_note_off).beats());
+		if (lno > _midi_region->end().beats()) {
+			_midi_region->playlist()->clear_owned_changes ();
+			_midi_region->trim_end (timepos_t (lno));
+			_editing_context.add_command (new StatefulDiffCommand (_midi_region));
+		}
+
+		/* front trim is significantly more complex, and requires
+		   ::shift_midi(). Also, as of Nov 2025, we never allow drags
+		   to move a note before the beginning of a region, and it is
+		   not completely obvious how this accomplished. Changing that
+		   will likely break some assumptions.
+		*/
+	}
+
 	_editing_context.commit_reversible_command ();
 
 	// care about notes being moved beyond the upper/lower bounds on the canvas
@@ -5425,4 +5448,3 @@ MidiView::set_visible_channel (int chn, bool clear_selection)
 		clear_selection_internal ();
 	}
 }
-
