@@ -937,7 +937,6 @@ MidiView::start_note_diff_command (string name, bool with_reversible_command)
 		_note_diff_command = _model->new_note_diff_command (name);
 	} else {
 		std::cerr << "ERROR: start_note_diff_command command called, but a note_diff_command was already underway" << std::endl;
-		PBD::stacktrace (std::cerr, 19);
 	}
 }
 
