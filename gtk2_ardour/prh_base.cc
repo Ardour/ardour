@@ -133,6 +133,7 @@ bool
 PianoRollHeaderBase::scroll_handler (GdkEventScroll* ev)
 {
 	double evy = ev->y;
+	bool in_scroomer = ev->x < _scroomer_size;
 
 	int note_range = _adj.get_page_size ();
 	int note_lower = _adj.get_value ();
@@ -161,7 +162,9 @@ PianoRollHeaderBase::scroll_handler (GdkEventScroll* ev)
 		}
 	}
 
-	set_note_highlight (_midi_context.y_to_note (event_y_to_y (evy)));
+	if (!in_scroomer) {
+		set_note_highlight (_midi_context.y_to_note (event_y_to_y (evy)));
+	}
 
 	_adj.value_changed ();
 	redraw ();
@@ -521,8 +524,9 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 	/* event coordinates are in canvas/window space */
 
 	double evy = ev->y;
+	bool in_scroomer = ev->x < _scroomer_size;
 
-	if (!_scroomer_drag && ev->x < _scroomer_size){
+	if (!_scroomer_drag && in_scroomer) {
 
 		double scroomer_top = max (1.0, (1.0 - ((_adj.get_value()+_adj.get_page_size()) / 127.0)) * height());
 		double scroomer_bottom = (1.0 - (_adj.get_value () / 127.0)) * height();
@@ -612,7 +616,15 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 	} else {
 
 		int note = _midi_context.y_to_note(evy);
-		set_note_highlight (note);
+
+		if (!in_scroomer) {
+			set_note_highlight (note);
+		} else {
+			if (_highlighted_note != NO_MIDI_NOTE) {
+				invalidate_note_range (_highlighted_note, _highlighted_note);
+				_highlighted_note = NO_MIDI_NOTE;
+			}
+		}
 
 		if (_dragging) {
 
@@ -788,8 +800,12 @@ bool
 PianoRollHeaderBase::enter_handler (GdkEventCrossing* ev)
 {
 	double evy = ev->y;
+	bool in_scroomer = ev->x < _scroomer_size;
 
-	set_note_highlight (_midi_context.y_to_note (evy));
+	if (!in_scroomer) {
+		set_note_highlight (_midi_context.y_to_note (evy));
+	}
+
 	set_cursor (_midi_context.editing_context().cursors()->selector);
 	entered = true;
 	redraw ();
