@@ -572,15 +572,14 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 			break;
 
 		case TOP:
-			real_val_at_pointer = real_val_at_pointer <= _saved_top_val? _adj.get_value() + _adj.get_page_size() : real_val_at_pointer;
 			real_val_at_pointer = min (127.0, ceil (real_val_at_pointer));
 
-			if (_midi_context.note_height() >= UIConfiguration::instance().get_max_note_height()){
+			if (_midi_context.note_height() >= UIConfiguration::instance().get_max_note_height() && real_val_at_pointer <= _saved_top_val){
 				_saved_top_val  = min (_adj.get_value() + _adj.get_page_size (), 127.0);
 			} else {
-				_saved_top_val = 0.0;
-				idle_lower = _adj.get_value();
-				idle_upper = real_val_at_pointer;
+				idle_lower      = _adj.get_value();
+				idle_upper      = real_val_at_pointer;
+				_saved_top_val  = idle_upper;
 				idle_range_move = MidiViewBackground::CanMoveTop;
 				if (!scroomer_drag_connection.connected()) {
 					scroomer_drag_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &PianoRollHeaderBase::idle_apply_range));
@@ -590,16 +589,15 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 			break;
 
 		case BOTTOM:
-			real_val_at_pointer = real_val_at_pointer >= _saved_bottom_val? _adj.get_value() : real_val_at_pointer;
 			real_val_at_pointer = max (0.0, floor (real_val_at_pointer));
 
-			if (_midi_context.note_height() >= UIConfiguration::instance().get_max_note_height()){
+			if (_midi_context.note_height() >= UIConfiguration::instance().get_max_note_height() && real_val_at_pointer >= _saved_bottom_val){
 				_saved_bottom_val  = _adj.get_value();
 			} else {
-				_saved_bottom_val = 127.0;
-				idle_upper = _adj.get_value() + _adj.get_page_size();
-				idle_lower = real_val_at_pointer;
-				idle_range_move = MidiViewBackground::CanMoveBottom;
+				idle_upper        = _adj.get_value() + _adj.get_page_size();
+				idle_lower        = real_val_at_pointer;
+				_saved_bottom_val = idle_lower;
+				idle_range_move   = MidiViewBackground::CanMoveBottom;
 				if (!scroomer_drag_connection.connected()) {
 					scroomer_drag_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &PianoRollHeaderBase::idle_apply_range));
 					scroomer_did_drag = true;
