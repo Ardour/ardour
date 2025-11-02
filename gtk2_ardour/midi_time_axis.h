@@ -147,7 +147,6 @@ private:
 	void update_scroomer_visbility (uint32_t, LayerDisplay);
 
 	void update_control_names ();
-	void update_midi_controls_visibility (uint32_t);
 
 	bool                          _ignore_signals;
 	bool                          _asked_all_automation;
@@ -162,9 +161,11 @@ private:
 	Gtk::RadioMenuItem*           _track_color_mode_item;
 	Gtk::VBox                     _midi_controls_box;
 	MidiChannelSelectorWindow*    _channel_selector;
+
 	ArdourWidgets::ArdourDropdown _midnam_model_selector;
 	ArdourWidgets::ArdourDropdown _midnam_custom_device_mode_selector;
 	ArdourWidgets::ArdourDropdown _midnam_channel_selector;
+	ArdourWindow*                  midnam_selector;
 
 	Gtk::CheckMenuItem*          _step_edit_item;
 	Gtk::Menu*                    default_channel_menu;
@@ -180,6 +181,7 @@ private:
 	void build_controller_menu ();
 	void toggle_restore_pgm_on_load ();
 	void toggle_channel_selector ();
+	void toggle_midnam_selector ();
 	void channel_selector_hidden ();
 	void set_channel_mode (ARDOUR::ChannelMode, uint16_t);
 
