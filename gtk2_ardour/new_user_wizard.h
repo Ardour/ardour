@@ -84,6 +84,12 @@ private:
 	void setup_first_page ();
 	Gtk::FileChooserButton new_folder_chooser;
 
+	/* Clip lib page */
+	Gtk::FileChooserButton* clip_lib_chooser;
+	Gtk::Label* clip_lib_label;
+	void clip_lib_changed();
+	void setup_clip_lib_page ();
+
 	/* final page */
 	void setup_final_page ();
 	void move_along_now ();
