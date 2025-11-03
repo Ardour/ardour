@@ -694,9 +694,18 @@ void SendsSubview::setup_vpot(
 	pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&SendsSubview::notify_send_level_change, this, global_strip_position, false), ui_context());
 	vpot->set_control (pc);
 
+	pc = _subview_stripable->send_enable_controllable (global_strip_position);
+	if (pc) {
+		pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, std::bind (&SendsSubview::notify_send_enable_change, this, global_strip_position, false), ui_context());
+	}
+
 	pending_display[0] = PBD::short_version (_subview_stripable->send_name (global_strip_position), 6);
 
-	notify_send_level_change (global_strip_position, true);
+	if (pc && (bool)_subview_stripable->send_enable_controllable(global_strip_position)->get_value() == false) {
+		notify_send_enable_change (global_strip_position, true);
+	} else {
+		notify_send_level_change (global_strip_position, true);
+	}
 }
 
 void
@@ -730,6 +739,31 @@ SendsSubview::notify_send_level_change (uint32_t global_strip_position, bool for
 	}
 }
 
+void
+SendsSubview::notify_send_enable_change (uint32_t global_strip_position, bool force)
+{
+	std::shared_ptr<AutomationControl> control = _subview_stripable->send_enable_controllable(global_strip_position);
+	bool currently_enabled = (bool) control->get_value();
+
+	Strip* strip = 0;
+	Pot* vpot = 0;
+	std::string* pending_display = 0;
+	if (!retrieve_pointers(&strip, &vpot, &pending_display, global_strip_position - _current_bank))
+	{
+		return;
+	}
+
+	if (!currently_enabled) {
+		/* we just turned it off */
+		pending_display[1] = "off";
+	} else {
+		/* we just turned it on, show the level
+		*/
+		control = _subview_stripable->send_level_controllable (global_strip_position);
+		do_parameter_display(pending_display[1], control->desc(), control->get_value(), strip, false);
+	}
+}
+
 void SendsSubview::handle_vselect_event(uint32_t global_strip_position)
 {
 	/* adjust global_strip_position to make sure we're accessing the
@@ -748,14 +782,6 @@ void SendsSubview::handle_vselect_event(uint32_t global_strip_position)
 		return;
 	}
 
-	Strip* strip = 0;
-	Pot* vpot = 0;
-	std::string* pending_display = 0;
-	if (!retrieve_pointers(&strip, &vpot, &pending_display, global_strip_position - _current_bank))
-	{
-		return;
-	}
-
 	std::shared_ptr<AutomationControl> control = _subview_stripable->send_enable_controllable(global_strip_position);
 
 	if (control) {
@@ -770,15 +796,7 @@ void SendsSubview::handle_vselect_event(uint32_t global_strip_position)
 
 		control->set_value (!currently_enabled, gcd);
 
-		if (currently_enabled) {
-			/* we just turned it off */
-			pending_display[1] = "off";
-		} else {
-			/* we just turned it on, show the level
-			*/
-			control = _subview_stripable->send_level_controllable (global_strip_position);
-			do_parameter_display(pending_display[1], control->desc(), control->get_value(), strip, false);
-		}
+		SendsSubview::notify_send_enable_change(global_strip_position, false);
 	}
 }
 

@@ -171,6 +171,7 @@ class SendsSubview : public Subview {
 		Pot* vpot,
 		std::string pending_display[2]);
 	void notify_send_level_change (uint32_t global_strip_position, bool force);
+	void notify_send_enable_change (uint32_t global_strip_position, bool force);
 
 	virtual void handle_vselect_event(uint32_t global_strip_position);
 	virtual bool handle_cursor_right_press();
