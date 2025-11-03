@@ -265,7 +265,7 @@ Where would you like new %1 sessions to be stored by default?\n\n\
 	Gtkmm2ext::add_volume_shortcuts (*default_dir_chooser);
 	default_dir_chooser->set_title (_("Default Session Location"));
 	default_dir_chooser->set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
-	default_dir_chooser->signal_file_set().connect (sigc::mem_fun (*this, &NewUserWizard::default_dir_changed));
+	default_dir_chooser->signal_selection_changed().connect (sigc::mem_fun (*this, &NewUserWizard::default_dir_changed));
 	default_dir_chooser->show ();
 
 	vbox->show_all ();
@@ -314,7 +314,8 @@ Where would you like new %1 sessions to be stored by default?\n\n\
 
 	Gtkmm2ext::add_volume_shortcuts (*clip_lib_chooser);
 	clip_lib_chooser->set_title (_("Default sample library location"));
-	clip_lib_chooser->signal_file_set().connect (sigc::mem_fun (*this, &NewUserWizard::clip_lib_changed));
+	clip_lib_chooser->set_current_folder (ARDOUR::platform_default_clip_library_dir());
+	clip_lib_chooser->signal_selection_changed().connect (sigc::mem_fun (*this, &NewUserWizard::clip_lib_changed));
 	clip_lib_chooser->show ();
 
 	vbox->show_all ();
