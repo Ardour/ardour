@@ -534,34 +534,48 @@ SessionDialog::existing_file_selected ()
 		return;
 	}
 
-	open_button->set_sensitive(false);
+	open_button->set_sensitive (false);
 
-	float sr;
-	SampleFormat sf;
-	string pv;
-	XMLNode   engine_hints ("EngineHints");
+	std::string const& s = existing_session_chooser.get_filename ();
+	if (!Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
+		return;
+	}
 
-	std::string s = existing_session_chooser.get_filename ();
-	if (Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
-		switch (Session::get_info_from_path (s, sr, sf, pv, &engine_hints)) {
-			case 0: {
+	std::string suffix = s.substr (s.find_last_of ('.'));
+
+	if (PBD::downcase (suffix).find (advanced_authoring_format_suffix) == 0) {
+		// OK
+	}  else if (suffix.find (session_archive_suffix) == 0) {
+		// OK
+	} else {
+		float        sr;
+		SampleFormat sf;
+		string       pv;
+
+		switch (Session::get_info_from_path (s, sr, sf, pv)) {
+			case 1:
+				/* OK */
+				break;
+			case 0:
 				//TODO: display the rate somewhere? check that our engine can open this rate?
 				/* OK */
-			} break;
+				break;
 			case -1:
 				error << string_compose (_("Session file %1 does not exist"), s) << endmsg;
 				return;
-			break;
+				break;
 			case -3:
 				error << string_compose (_("Session %1 is from a newer version of %2"), s, PROGRAM_NAME) << endmsg;
 				return;
-			break;
+				break;
 			default:
 				error << string_compose (_("Cannot get existing session information from %1"), s) << endmsg;
-				//fallthrough
+				return;
+				break;
 		}
-		open_button->set_sensitive(true);  //still potentially openable; checks for session archives, .ptf, and .aaf will have to occur later
 	}
+
+	open_button->set_sensitive(true);  //still potentially openable; checks for session archives, .ptf, and .aaf will have to occur later
 }
 
 void
