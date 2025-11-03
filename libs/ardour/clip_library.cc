@@ -43,34 +43,43 @@ using namespace PBD;
 PBD::Signal<void(std::string, void*)> ARDOUR::LibraryClipAdded;
 
 string
+ARDOUR::platform_default_clip_library_dir ()
+{
+	std::string p;
+	const char* c = nullptr;
+
+	if ((c = getenv ("XDG_DATA_HOME")) != 0) {
+		/* default:  $HOME/.local/share */
+		p = c;
+		p = Glib::build_filename (p, "sounds", "clips");
+	} else {
+#ifdef __APPLE__
+		/* Logic Saves "loops" to  '~Library/Audio/Apple Loops/Apple/'
+		 * and "samples" to '~/Library/Application Support/Logic/XYZ/'
+		 * By default the following folders also exist
+		 *  '~/Library/Audio/Sounds/Alerts/'
+		 *  '~/Library/Audio/Sounds/Banks/'
+		 */
+		p = Glib::build_filename (Glib::get_home_dir (), "Library/Audio/Sounds/Clips");
+#elif defined PLATFORM_WINDOWS
+		/* %localappdata%\ClipLibrary */
+		p = Glib::build_filename (Glib::get_user_data_dir (), "Clip Library");
+#else
+		/* Linux, *BSD: use XDG_DATA_HOME prefix, version-independent app folder */
+		p = Glib::build_filename (Glib::get_user_data_dir (), "sounds", "clips");
+#endif
+	}
+
+	return p;
+}
+
+string
 ARDOUR::clip_library_dir (bool create_if_missing)
 {
 	std::string p = Config->get_clip_library_dir ();
 
 	if (p == X_("@default@")) {
-		const char* c = 0;
-		if ((c = getenv ("XDG_DATA_HOME")) != 0) {
-			/* default:  $HOME/.local/share */
-			p = c;
-			p = Glib::build_filename (p, "sounds", "clips");
-		} else {
-#ifdef __APPLE__
-			/* Logic Saves "loops" to  '~Library/Audio/Apple Loops/Apple/'
-			 * and "samples" to '~/Library/Application Support/Logic/XYZ/'
-			 * By default the following folders also exist
-			 *  '~/Library/Audio/Sounds/Alerts/'
-			 *  '~/Library/Audio/Sounds/Banks/'
-			 */
-			p = Glib::build_filename (Glib::get_home_dir (), "Library/Audio/Sounds/Clips");
-#elif defined PLATFORM_WINDOWS
-			/* %localappdata%\ClipLibrary */
-			p = Glib::build_filename (Glib::get_user_data_dir (), "Clip Library");
-#else
-			/* Linux, *BSD: use XDG_DATA_HOME prefix, version-independent app folder */
-			p = Glib::build_filename (Glib::get_user_data_dir (), "sounds", "clips");
-#endif
-		}
-
+		p = platform_default_clip_library_dir ();
 		info << string_compose (_("Set Clip Library directory to '%1'"), p) << endmsg;
 		Config->set_clip_library_dir (p);
 	}
