@@ -220,7 +220,7 @@ ExportProfileManager::load_presets ()
 std::string
 ExportProfileManager::preset_filename (std::string const& preset_name)
 {
-	string safe_name = legalize_for_path (preset_name);
+	string safe_name = legalize_for_universal_path (preset_name);
 	return Glib::build_filename (export_config_dir, safe_name + export_preset_suffix);
 }
 
@@ -617,7 +617,7 @@ ExportProfileManager::save_format_to_disk (ExportFormatSpecPtr format)
 	new_name += export_format_suffix;
 
 	/* make sure its legal for the filesystem */
-	new_name = legalize_for_path (new_name);
+	new_name = legalize_for_universal_path (new_name);
 
 	std::string new_path = Glib::build_filename (export_config_dir, new_name);
 

@@ -5339,7 +5339,7 @@ Session::new_midi_source_path (const string& base, bool need_lock)
 	string possible_path;
 	string possible_name;
 
-	possible_name = legalize_for_path (base);
+	possible_name = legalize_for_universal_path (base);
 
 	// Find a "version" of the file name that doesn't exist in any of the possible directories.
 	std::vector<string> sdirs = source_search_path(DataType::MIDI);
@@ -6248,7 +6248,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 	samplepos_t len = end - start;
 	bool need_block_size_reset = false;
 	ChanCount const max_proc = track.max_processor_streams ();
-	string legal_name;
+	string base_name;
 	string possible_path;
 	MidiBuffer resolved (256);
 	MidiNoteTracker tracker;
@@ -6287,17 +6287,17 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 	}
 
 	if (source_name.length() > 0) {
-		/*if the user passed in a name, we will use it, and also prepend the resulting sources with that name*/
-		legal_name = legalize_for_path (source_name);
+		/*if the user passed in a name, we will use it, and also prepend the resulting sources with that name */
+		base_name = source_name;
 	} else {
-		legal_name = legalize_for_path (playlist->name ());
+		base_name = playlist->name ();
 	}
 
 	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n(data_type); ++chan_n) {
 
 		string path = ((data_type == DataType::AUDIO)
-		               ? new_audio_source_path (legal_name, diskstream_channels.n_audio(), chan_n, false)
-		               : new_midi_source_path (legal_name));
+		               ? new_audio_source_path (base_name, diskstream_channels.n_audio(), chan_n, false)
+		               : new_midi_source_path (base_name));
 
 		if (path.empty()) {
 			goto out;
@@ -6541,7 +6541,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 		if (region_name.empty ()) {
 			/* setting name in the properties didn't seem to work, but this does */
-			result->set_name(legal_name);
+			result->set_name(legalize_for_universal_path (base_name));
 		} else {
 			result->set_name(region_name);
 		}
