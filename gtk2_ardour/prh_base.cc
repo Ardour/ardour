@@ -132,7 +132,6 @@ PianoRollHeaderBase::event_handler (GdkEvent* ev)
 bool
 PianoRollHeaderBase::scroll_handler (GdkEventScroll* ev)
 {
-	double evy = ev->y;
 	bool in_scroomer = ev->x < _scroomer_size;
 
 	int note_range = _adj.get_page_size ();
@@ -163,7 +162,7 @@ PianoRollHeaderBase::scroll_handler (GdkEventScroll* ev)
 	}
 
 	if (!in_scroomer) {
-		set_note_highlight (_midi_context.y_to_note (event_y_to_y (evy)));
+		set_note_highlight (_midi_context.y_to_note (event_y_to_y (ev->y)));
 	}
 
 	_adj.value_changed ();
@@ -523,7 +522,6 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 {
 	/* event coordinates are in canvas/window space */
 
-	double evy = ev->y;
 	bool in_scroomer = ev->x < _scroomer_size;
 
 	if (!_scroomer_drag && in_scroomer) {
@@ -536,12 +534,12 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 		draw_transform (ignore, scroomer_top);
 		draw_transform (ignore, scroomer_bottom);
 
-		if (evy > scroomer_top - edge && evy < scroomer_top + edge){
+		if (ev->y > scroomer_top - edge && ev->y < scroomer_top + edge){
 			if (_scroomer_state != TOP) {
 				set_cursor (_midi_context.editing_context().cursors()->resize_top);
 				_scroomer_state = TOP;
 			}
-		} else if (evy > scroomer_bottom - edge && evy < scroomer_bottom + edge){
+		} else if (ev->y > scroomer_bottom - edge && ev->y < scroomer_bottom + edge){
 			if (_scroomer_state != BOTTOM) {
 				set_cursor (_midi_context.editing_context().cursors()->resize_bottom);
 				_scroomer_state = BOTTOM;
@@ -557,9 +555,9 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 	if (_scroomer_drag){
 
 		const double pixels_per_note = 127.0 / height();
-		double delta = _old_y - evy;
+		double delta = _old_y - ev->y;
 		double val_at_pointer = (delta * pixels_per_note);
-		double real_val_at_pointer = 127.0 - (evy * pixels_per_note);
+		double real_val_at_pointer = 127.0 - (ev->y * pixels_per_note);
 		double note_range = _adj.get_page_size ();
 
 		switch (_scroomer_button_state){
@@ -613,7 +611,7 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 
 	} else {
 
-		int note = _midi_context.y_to_note(evy);
+		int note = _midi_context.y_to_note(ev->y);
 
 		if (!in_scroomer) {
 			set_note_highlight (note);
@@ -653,7 +651,7 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 
 	}
 
-	_old_y = evy;
+	_old_y = ev->y;
 
 	return true;
 }
@@ -689,8 +687,6 @@ PianoRollHeaderBase::end_scroomer_drag ()
 bool
 PianoRollHeaderBase::button_press_handler (GdkEventButton* ev)
 {
-	double evy = ev->y;
-
 	/* Convert canvas-coordinates to item coordinates */
 
 	_scroomer_button_state = _scroomer_state;
@@ -713,14 +709,14 @@ PianoRollHeaderBase::button_press_handler (GdkEventButton* ev)
 			return true;
 		}
 
-		begin_scroomer_drag (evy);
+		begin_scroomer_drag (ev->y);
 		return true;
 
 	} else {
 
 		/* button press on note keys */
 
-		int note = _midi_context.y_to_note (evy);
+		int note = _midi_context.y_to_note (ev->y);
 
 		bool tertiary = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 		bool primary = Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier);
@@ -797,11 +793,10 @@ PianoRollHeaderBase::set_note_highlight (uint8_t note)
 bool
 PianoRollHeaderBase::enter_handler (GdkEventCrossing* ev)
 {
-	double evy = ev->y;
 	bool in_scroomer = ev->x < _scroomer_size;
 
 	if (!in_scroomer) {
-		set_note_highlight (_midi_context.y_to_note (evy));
+		set_note_highlight (_midi_context.y_to_note (ev->y));
 	}
 
 	set_cursor (_midi_context.editing_context().cursors()->selector);
