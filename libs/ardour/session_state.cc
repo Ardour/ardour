@@ -683,7 +683,7 @@ Session::remove_pending_capture_state ()
 {
 	std::string pending_state_file_path(_session_dir->root_path());
 
-	pending_state_file_path = Glib::build_filename (pending_state_file_path, legalize_for_path (_current_snapshot_name) + pending_suffix);
+	pending_state_file_path = Glib::build_filename (pending_state_file_path, legalize_for_path (_current_snapshot_name + pending_suffix));
 
 	if (!Glib::file_test (pending_state_file_path, Glib::FILE_TEST_EXISTS)) {
 		return;
@@ -712,8 +712,8 @@ Session::rename_state (string old_name, string new_name)
 		return;
 	}
 
-	const string old_xml_filename = legalize_for_path (old_name) + statefile_suffix;
-	const string new_xml_filename = legalize_for_path (new_name) + statefile_suffix;
+	const string old_xml_filename = legalize_for_path (old_name + statefile_suffix);
+	const string new_xml_filename = legalize_for_path (new_name + statefile_suffix);
 
 	const std::string old_xml_path(Glib::build_filename (_session_dir->root_path(), old_xml_filename));
 	const std::string new_xml_path(Glib::build_filename (_session_dir->root_path(), new_xml_filename));
@@ -737,7 +737,7 @@ Session::remove_state (string snapshot_name)
 
 	std::string xml_path(_session_dir->root_path());
 
-	xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name) + statefile_suffix);
+	xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name + statefile_suffix));
 
 	if (!create_backup_file (xml_path)) {
 		// don't remove it if a backup can't be made
@@ -857,7 +857,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 		/* proper save: use statefile_suffix (.ardour in English) */
 
-		xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name) + statefile_suffix);
+		xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name + statefile_suffix));
 
 		/* make a backup copy of the old file */
 
@@ -869,11 +869,11 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	} else {
 		assert (snapshot_name == _current_snapshot_name);
 		/* pending save: use pending_suffix (.pending in English) */
-		xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name) + pending_suffix);
+		xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name + pending_suffix));
 	}
 
 	std::string tmp_path(_session_dir->root_path());
-	tmp_path = Glib::build_filename (tmp_path, legalize_for_path (snapshot_name) + temp_suffix);
+	tmp_path = Glib::build_filename (tmp_path, legalize_for_path (snapshot_name + temp_suffix));
 
 	DEBUG_TRACE (DEBUG::SaveState, string_compose ("writing state to '%1'\n", tmp_path));
 
@@ -979,7 +979,7 @@ Session::load_state (string snapshot_name, bool from_template)
 	/* check for leftover pending state from a crashed capture attempt */
 
 	std::string xmlpath(_session_dir->root_path());
-	xmlpath = Glib::build_filename (xmlpath, legalize_for_path (snapshot_name) + pending_suffix);
+	xmlpath = Glib::build_filename (xmlpath, legalize_for_path (snapshot_name + pending_suffix));
 
 	if (Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 
@@ -998,7 +998,7 @@ Session::load_state (string snapshot_name, bool from_template)
 	}
 
 	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
-		xmlpath = Glib::build_filename (_session_dir->root_path(), legalize_for_path (snapshot_name) + statefile_suffix);
+		xmlpath = Glib::build_filename (_session_dir->root_path(), legalize_for_path (snapshot_name + statefile_suffix));
 		if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 			error << string_compose(_("%1: session file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
 			return 1;
@@ -1045,7 +1045,7 @@ Session::load_state (string snapshot_name, bool from_template)
 			}
 		}
 
-		std::string backup_filename = string_compose ("%1-%2%3", legalize_for_path (snapshot_name), Stateful::loading_state_version, statefile_suffix);
+		std::string backup_filename = legalize_for_universal_path (string_compose ("%1-%2%3", snapshot_name, Stateful::loading_state_version, statefile_suffix));
 		backup_path = Glib::build_filename (backup_path, backup_filename);
 
 		// only create a backup for a given statefile version once
@@ -4095,7 +4095,7 @@ Session::save_history (string snapshot_name)
 		snapshot_name = _current_snapshot_name;
 	}
 
-	const string history_filename = legalize_for_path (snapshot_name) + history_suffix;
+	const string history_filename = legalize_for_path (snapshot_name + history_suffix);
 	const string backup_filename = history_filename + backup_suffix;
 	const std::string xml_path(Glib::build_filename (_session_dir->root_path(), history_filename));
 	const std::string backup_path(Glib::build_filename (_session_dir->root_path(), backup_filename));
@@ -4142,7 +4142,7 @@ Session::restore_history (string snapshot_name)
 		snapshot_name = _current_snapshot_name;
 	}
 
-	const std::string xml_filename = legalize_for_path (snapshot_name) + history_suffix;
+	const std::string xml_filename = legalize_for_path (snapshot_name + history_suffix);
 	const std::string xml_path(Glib::build_filename (_session_dir->root_path(), xml_filename));
 
 	info << "Loading history from " << xml_path << endmsg;
