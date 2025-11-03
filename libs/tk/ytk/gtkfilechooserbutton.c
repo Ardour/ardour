@@ -614,11 +614,8 @@ gtk_file_chooser_button_select_file (GtkFileChooser *chooser,
   update_label_and_image (button);
   update_combo_box (button);
 
-  if (priv->active) {
+  if (priv->active)
     gtk_file_chooser_select_file (GTK_FILE_CHOOSER (priv->dialog), file, NULL);
-  } else {
-      g_signal_emit (button, file_chooser_button_signals[FILE_SET], 0);
-  }
 
   return TRUE;
 }
