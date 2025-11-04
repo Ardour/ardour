@@ -52,6 +52,7 @@
 #include "editor_cursors.h"
 #include "keyboard.h"
 #include "midi_region_view.h"
+#include "mixer_strip.h"
 #include "pianoroll.h"
 #include "selection_properties_box.h"
 #include "sfdb_ui.h"
@@ -1218,6 +1219,13 @@ Editor::presentation_info_changed (PropertyChange const & what_changed)
 			}
 
 			sfbrowser->reset (audio_track_cnt, midi_track_cnt);
+		}
+	}
+
+	if (current_mixer_strip && what_changed.contains (Properties::hidden)) {
+		/* don't show hidden tracks in editor mixer */
+		if (current_mixer_strip->route()->is_hidden () && att_left_visible ()) {
+			show_editor_mixer (true);
 		}
 	}
 
