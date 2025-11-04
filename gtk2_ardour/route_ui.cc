@@ -2289,6 +2289,9 @@ RouteUI::route_gui_changed (PropertyChange const& what_changed)
 			route_color_changed ();
 		}
 	}
+	if (what_changed.contains (Properties::hidden) && _route->is_hidden ()) {
+		_session->selection().select_stripable_and_maybe_group (_route, SelectionRemove, false, false);
+	}
 }
 
 void
