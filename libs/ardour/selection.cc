@@ -48,7 +48,7 @@ CoreSelection::do_select (std::shared_ptr<Stripable> s, std::shared_ptr<Automati
 	 */
 
 	if (s)  {
-		if (s->is_hidden()) {
+		if (s->is_hidden() && op != SelectionRemove) {
 			return false;
 		}
 
@@ -363,7 +363,7 @@ CoreSelection::remove (StripableList & sl, std::shared_ptr<AutomationControl> c)
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
 
-		for (auto & s : sl) {
+		for (auto const& s : sl) {
 			SelectedStripable ss (s, c, 0);
 
 			SelectedStripables::iterator i = _stripables.find (ss);
@@ -375,6 +375,7 @@ CoreSelection::remove (StripableList & sl, std::shared_ptr<AutomationControl> c)
 			}
 
 			if (s == _first_selected_stripable.lock ()) {
+				DEBUG_TRACE (DEBUG::Selection, "Reset _first_selected_stripable\n");
 				_first_selected_stripable.reset ();
 			}
 		}
