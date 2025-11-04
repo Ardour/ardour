@@ -29,13 +29,13 @@
 #include "pbd/gstdio_compat.h"
 
 #if defined COMPILER_MINGW || defined COMPILER_MSVC
-#if defined COMPILER_MINGW
-#include <io.h> // For W_OK
-#include <windows.h>
-#endif
-#include <sys/utime.h>
-#else
-#include <utime.h>
+# include <windows.h>
+# include <sys/utime.h>
+# if defined COMPILER_MINGW
+#   include <io.h> // For W_OK
+# endif
+#else // not windows
+# include <utime.h>
 #endif
 
 #include <glibmm/convert.h>
