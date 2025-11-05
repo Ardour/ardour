@@ -167,6 +167,15 @@ RoutePropertiesBox::update_processor_box_visibility ()
 	} else {
 		_insert_frame.show ();
 	}
+
+#ifndef MIXBUS
+	if (_show_insert || !_proc_uis.empty ()) {
+		float ui_scale = std::max<float> (1.f, UIConfiguration::instance().get_ui_scale());
+		set_size_request (-1, 365 * ui_scale); // match with SelectionPropertiesBox
+	} else {
+		set_size_request (-1, -1);
+	}
+#endif
 }
 
 void
