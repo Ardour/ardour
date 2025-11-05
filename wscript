@@ -1123,13 +1123,10 @@ def configure(conf):
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
 
     if Options.options.also_include != '':
-        for incdir in Options.options.also_include.split(','):
-            conf.env.append_value('CXXFLAGS', '-I' + incdir)
-            conf.env.append_value('CFLAGS', '-I' + incdir)
+        conf.env.append_value('INCLUDES', [os.path.normpath(p) for p in Options.options.also_include.split(',')])
 
     if Options.options.also_libdir != '':
-        for libdir in Options.options.also_libdir.split(','):
-            conf.env.append_value('LDFLAGS', '-L' + libdir)
+        conf.env.append_value('LIBPATH', [os.path.normpath(p) for p in Options.options.also_libdir.split(',')])
 
     if Options.options.boost_sp_debug:
         conf.env.append_value('CXXFLAGS', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
