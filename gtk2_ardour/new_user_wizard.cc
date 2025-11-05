@@ -303,8 +303,9 @@ If you have an existing collection of samples, telling %1\n\
 where they are will make it easier to find them in the program.\
 \n\
 \n\
-Where would you like new %1 sessions to be stored by default?\n\n\
-<i>(You can store samples anywhere you want, this is just a default)</i></span>"), PROGRAM_NAME));
+Where would you like %1 to look for samples by default? If you\n\
+don't have any samples, just leave this setting as it is.\n\n\
+<i>(You can store samples anywhere you want, this is just an initial default)</i></span>"), PROGRAM_NAME));
 	txt->set_alignment (0.0, 0.0);
 	txt->set_justify (JUSTIFY_FILL);
 
