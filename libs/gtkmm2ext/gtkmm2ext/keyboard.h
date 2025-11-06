@@ -64,6 +64,7 @@ public:
 	static const uint32_t SecondaryModifier;
 	static const uint32_t TertiaryModifier;
 	static const uint32_t Level4Modifier;
+	static const uint32_t CapsLockModifier;
 
 	static uint32_t CopyModifier;
 	static uint32_t RangeSelectModifier;
@@ -79,11 +80,13 @@ public:
 	static const char* secondary_modifier_name ();
 	static const char* tertiary_modifier_name ();
 	static const char* level4_modifier_name ();
+	static const char* caps_lock_modifier_name ();
 
 	static const char* primary_modifier_short_name ();
 	static const char* secondary_modifier_short_name ();
 	static const char* tertiary_modifier_short_name ();
 	static const char* level4_modifier_short_name ();
+	static const char* caps_lock_modifier_short_name ();
 
 	static const char* button2_name ();
 	static const char* momentary_push_name ();
