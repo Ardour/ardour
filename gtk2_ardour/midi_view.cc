@@ -559,6 +559,7 @@ MidiView::button_press (GdkEventButton* ev)
 	}
 
 	MouseMode m = _editing_context.current_mouse_mode();
+	int held_note = -1;
 
 	if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
 
@@ -574,13 +575,19 @@ MidiView::button_press (GdkEventButton* ev)
 
 		if (_midi_context.note_mode() == Percussive) {
 			if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
-				draw_drag = new NoteBrushDrag (_editing_context, drag_group(), this, Temporal::Beats (0, 60), stride_multiple); /* 1/128th notes */
+				if (_midi_track && Keyboard::modifier_state_contains (ev->state, Keyboard::CapsLockModifier)) {
+					held_note = _midi_track->last_seen_external_midi_note();
+				}
+				draw_drag = new NoteBrushDrag (_editing_context, drag_group(), this, Temporal::Beats (0, 60), stride_multiple, held_note); /* 1/128th notes */
 			} else {
 				draw_drag = new HitCreateDrag (_editing_context, drag_group(), this);
 			}
 		} else {
 			if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
-				draw_drag = new NoteBrushDrag (_editing_context, drag_group(), this, Temporal::Beats(), stride_multiple);
+				if (_midi_track && Keyboard::modifier_state_contains (ev->state, Keyboard::CapsLockModifier)) {
+					held_note = _midi_track->last_seen_external_midi_note();
+				}
+				draw_drag = new NoteBrushDrag (_editing_context, drag_group(), this, Temporal::Beats(), stride_multiple, held_note);
 			} else {
 				draw_drag = new NoteCreateDrag (_editing_context, drag_group(), this);
 			}
