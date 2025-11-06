@@ -2909,9 +2909,9 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Appearance/Mixer"), new OptionEditorBlank ());
 
-	add_option (_("Appearance/Toolbar"), new OptionEditorHeading (_("Main Transport Toolbar Items")));
+	add_option (_("Appearance/Application Bar"), new OptionEditorHeading (_("Main Application Toolbar Items")));
 
-	add_option (_("Appearance/Toolbar"),
+	add_option (_("Appearance/Application Bar"),
 	     new BoolOption (
 		     "show-toolbar-recpunch",
 		     _("Display Record/Punch Options"),
@@ -2919,7 +2919,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_recpunch)
 		     ));
 
-	add_option (_("Appearance/Toolbar"),
+	add_option (_("Appearance/Application Bar"),
 	     new BoolOption (
 		     "show-toolbar-latency",
 		     _("Plugin Delay Compensation"),
@@ -2928,7 +2928,7 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 	if (!ARDOUR::Profile->get_small_screen()) {
-		add_option (_("Appearance/Toolbar"),
+		add_option (_("Appearance/Application Bar"),
 				new BoolOption (
 					"show-secondary-clock",
 					_("Display Secondary Clock"),
@@ -2937,23 +2937,7 @@ RCOptionEditor::RCOptionEditor ()
 					));
 	}
 
-	add_option (_("Appearance/Toolbar"),
-	     new BoolOption (
-		     "show-toolbar-selclock",
-		     _("Display Selection Clock"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_selclock),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_selclock)
-		     ));
-
-	add_option (_("Appearance/Toolbar"),
-	     new BoolOption (
-		     "show-toolbar-monitor-info",
-		     _("Display Monitor Section Info"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_monitor_info),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_monitor_info)
-		     ));
-
-	add_option (_("Appearance/Toolbar"),
+	add_option (_("Appearance/Application Bar"),
 	     new BoolOption (
 		     "show-toolbar-cuectrl",
 		     _("Display Cue Rec/Play Controls"),
@@ -2961,7 +2945,16 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_cuectrl)
 		     ));
 
-	add_option (_("Appearance/Toolbar"),
+
+	add_option (_("Appearance/Application Bar"),
+	     new BoolOption (
+		     "show-toolbar-selclock",
+		     _("Display Selection Clock"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_selclock),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_selclock)
+		     ));
+
+	add_option (_("Appearance/Application Bar"),
 	     new BoolOption (
 		     "show-mini-timeline",
 		     _("Display Navigation Timeline"),
@@ -2969,7 +2962,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_mini_timeline)
 		     ));
 
-	add_option (_("Appearance/Toolbar"),
+	add_option (_("Appearance/Application Bar"),
 	     new BoolOption (
 		     "show-editor-meter",
 		     _("Display Master Level Meter"),
@@ -2977,14 +2970,22 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_editor_meter)
 		     ));
 
-	add_option (_("Appearance/Toolbar"),
+	add_option (_("Appearance/Application Bar"),
+	     new BoolOption (
+		     "show-toolbar-monitor-info",
+		     _("Display Monitor Section Info"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_monitor_info),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_monitor_info)
+		     ));
+
+	add_option (_("Appearance/Application Bar"),
 			new ColumVisibilityOption (
 				"action-table-columns", _("Display Action-Buttons"), MAX_LUA_ACTION_BUTTONS / 2,
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_action_table_columns),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
 				)
 			);
-	add_option (_("Appearance/Toolbar"), new OptionEditorBlank ());
+	add_option (_("Appearance/Application Bar"), new OptionEditorBlank ());
 
 	/* size and scale */
 
