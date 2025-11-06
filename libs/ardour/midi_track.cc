@@ -985,6 +985,7 @@ void
 MidiTrack::input_change_handler (IOChange change, void *src)
 {
 	note_connections.drop_connections ();
+	_last_seen_external_midi_note = -1;
 
 	for (auto const & p : *_input->ports()) {
 		std::shared_ptr<MidiPort> mp = std::dynamic_pointer_cast<MidiPort> (p);
