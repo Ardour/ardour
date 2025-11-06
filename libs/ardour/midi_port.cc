@@ -152,6 +152,14 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 
 			timestamp -= _global_port_buffer_offset;
 
+			if (size == 3) {
+				if (((buf[0] & 0xF0) == 0x90) && (buf[2] != 0)) {
+					NoteOn (buf[1]);
+				} else if (((buf[0] & 0xF0) == 0x80) || (((buf[0] & 0xF0) == 0x90) && (buf[2] == 0))) {
+					NoteOff (buf[1]);
+				}
+			}
+
 			if ((buf[0] & 0xF0) == 0x90 && buf[2] == 0) {
 				/* normalize note on with velocity 0 to proper note off */
 				uint8_t ev[3];

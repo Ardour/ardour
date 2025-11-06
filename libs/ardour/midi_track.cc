@@ -90,6 +90,7 @@ MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	, _step_editing (false)
 	, _input_active (true)
 	, _restore_pgm_on_load (true)
+	, _last_seen_external_midi_note (-1)
 {
 	_session.SessionLoaded.connect_same_thread (*this, std::bind (&MidiTrack::restore_controls, this));
 
@@ -978,4 +979,25 @@ void
 MidiTrack::playlist_contents_changed ()
 
 {
+}
+
+void
+MidiTrack::input_change_handler (IOChange change, void *src)
+{
+	note_connections.drop_connections ();
+
+	for (auto const & p : *_input->ports()) {
+		std::shared_ptr<MidiPort> mp = std::dynamic_pointer_cast<MidiPort> (p);
+		if (mp) {
+			mp->NoteOn.connect_same_thread (note_connections, std::bind (&MidiTrack::note_on_handler, this, _1));
+		}
+	}
+
+	Track::input_change_handler (change, src);
+}
+
+void
+MidiTrack::note_on_handler (int notenum)
+{
+	_last_seen_external_midi_note = notenum;
 }

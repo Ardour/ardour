@@ -142,6 +142,8 @@ public:
 	void realtime_handle_transport_stopped ();
 	void region_edited (std::shared_ptr<Region>);
 
+	int last_seen_external_midi_note () const { return _last_seen_external_midi_note; }
+
 protected:
 
 	XMLNode& state (bool save_template) const;
@@ -151,6 +153,8 @@ protected:
 
 	void snapshot_out_of_band_data (samplecnt_t nframes);
 	void write_out_of_band_data (BufferSet& bufs, samplecnt_t /* nframes */) const;
+
+	void input_change_handler (IOChange, void *src);
 
 
 private:
@@ -165,6 +169,7 @@ private:
 	bool                        _restore_pgm_on_load;
 	MidiChannelFilter           _playback_filter;
 	MidiChannelFilter           _capture_filter;
+	int                         _last_seen_external_midi_note;
 
 	std::shared_ptr<VelocityControl>  _velocity_control;
 
@@ -185,7 +190,9 @@ private:
 
 	void playlist_contents_changed ();
 	PBD::ScopedConnection playlist_content_change_connection;
+
+	PBD::ScopedConnectionList note_connections;
+	void note_on_handler (int);
 };
 
 } /* namespace ARDOUR*/
-
