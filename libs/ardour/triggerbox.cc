@@ -3148,7 +3148,21 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
                        Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
                        pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t& quantize_offset)
 {
-	assert (rt_midibuffer);
+	/* We can get here if our Triggerbox is in an inactive track, and some
+	   transport operations (load, stop) are called. That's OK, but the
+	   route must be inactive. A null rt_midibuffer value in any condition
+	   is a coding error.
+	*/
+
+	if (!rt_midibuffer) {
+		Route* rt = static_cast<Route*> (box().owner());
+
+		if (!rt || !rt->active()) {
+			return nframes;
+		}
+
+		assert (false);
+	}
 
 	MidiBuffer* mb (in_process_context? &bufs.get_midi (0) : nullptr);
 	typedef Evoral::Event<MidiModel::TimeType> MidiEvent;
