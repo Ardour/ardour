@@ -6963,7 +6963,7 @@ HitCreateDrag::y_to_region (double y) const
 
 /*-----------------------*/
 
-NoteBrushDrag::NoteBrushDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv, Temporal::Beats slen, int sm)
+NoteBrushDrag::NoteBrushDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv, Temporal::Beats slen, int sm, int hn)
 	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group())
 	, _midi_view (mv)
 	, _last_pos (Temporal::Beats ())
@@ -6971,6 +6971,7 @@ NoteBrushDrag::NoteBrushDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiVie
 	, added_notes (false)
 	, specified_length (slen)
 	, stride_multiple (sm)
+	, held_note (hn)
 {
 
 }
@@ -6984,7 +6985,11 @@ NoteBrushDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-	_y = _midi_view->note_to_y (_midi_view->y_to_note (y_to_region (event->button.y)));
+	if (held_note >= 0) {
+		_y = _midi_view->note_to_y (held_note);
+	} else {
+		_y = _midi_view->note_to_y (_midi_view->y_to_note (y_to_region (event->button.y)));
+	}
 
 	timepos_t pos (_drags->current_pointer_time ());
 	assert (Config->get_default_quantization().type == AnyTime::BBT_Offset);

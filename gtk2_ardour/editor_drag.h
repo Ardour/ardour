@@ -716,7 +716,7 @@ private:
 class NoteBrushDrag : public Drag
 {
 public:
-	NoteBrushDrag (EditingContext&, ArdourCanvas::Item *, MidiView *, Temporal::Beats specified_length = Temporal::Beats(), int stride_multiple = 1);
+	NoteBrushDrag (EditingContext&, ArdourCanvas::Item *, MidiView *, Temporal::Beats specified_length = Temporal::Beats(), int stride_multiple = 1, int held_note = -1);
 	~NoteBrushDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -744,7 +744,7 @@ private:
 	bool                 added_notes;
 	Temporal::Beats      specified_length;
 	int                  stride_multiple;
-
+	int                  held_note;
 };
 
 /** Drag to move MIDI patch changes */
