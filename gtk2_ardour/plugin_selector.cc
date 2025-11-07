@@ -108,7 +108,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 		tvc = manage (new Gtk::TreeViewColumn (S_("Favorite|Fav"), *cell));
 		tvc->add_attribute (cell->property_state (), plugin_columns.favorite);
-		tvc->set_sizing (Gtk::TREE_VIEW_COLUMN_AUTOSIZE);
+		tvc->set_sizing (Gtk::TREE_VIEW_COLUMN_GROW_ONLY);
 		tvc->set_alignment (Gtk::ALIGN_CENTER);
 		tvc->set_expand (false);
 		tvc->set_resizable (false);
