@@ -3814,6 +3814,8 @@ MidiView::change_velocities (bool up, bool fine, bool allow_smush, bool all_toge
 void
 MidiView::transpose (bool up, bool fine, bool allow_smush)
 {
+	typedef vector<std::shared_ptr<NoteType> > PossibleChord;
+
 	if (_selection.empty()) {
 		return;
 	}
@@ -3863,6 +3865,26 @@ MidiView::transpose (bool up, bool fine, bool allow_smush)
 	if (lowest < _midi_context.lowest_note() || highest > _midi_context.highest_note()) {
 		_midi_context.maybe_extend_note_range (lowest);
 		_midi_context.maybe_extend_note_range (highest);
+	}
+
+	if (!_no_sound_notes && UIConfiguration::instance().get_sound_midi_notes()) {
+		if (_selection.size() == 1) {
+			start_playing_midi_note ((*(_selection.begin()))->note());
+		} else {
+			Temporal::Beats earliest = earliest_in_selection();
+			PossibleChord to_play;
+
+			/* Only play the notes in the first transposed chord or
+			 * the earliest note.
+			 */
+
+			for (auto & nb : _selection) {
+				if (nb->note()->time() == earliest) {
+					to_play.push_back (nb->note());
+				}
+			}
+			start_playing_midi_chord (to_play);
+		}
 	}
 }
 
