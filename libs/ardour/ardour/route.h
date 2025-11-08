@@ -432,6 +432,7 @@ public:
 	XMLNode& get_state() const;
 	XMLNode& get_template();
 	virtual int set_state (const XMLNode&, int version);
+	virtual int import_state (const XMLNode&, bool use_pbd_ids = true, bool processor_only = true);
 
 	XMLNode& get_processor_state ();
 	void set_processor_state (const XMLNode&, int version);

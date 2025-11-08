@@ -2379,6 +2379,12 @@ LuaBindings::common (lua_State* L)
 		.beginStdList <std::shared_ptr<Processor> > ("ProcessorList")
 		.endClass ()
 
+		.beginStdMap <PBD::ID, std::string> ("IDNameMap")
+		.endClass ()
+
+		.beginStdMap <PBD::ID, PBD::ID> ("IDMap")
+		.endClass ()
+
 		//std::list<std::shared_ptr<Port> > PortList
 		.beginConstStdList <std::shared_ptr<Port> > ("PortList")
 		.endClass ()
@@ -3532,6 +3538,8 @@ LuaBindings::non_rt (lua_State* L)
 		.addFunction ("set_dirty", &Session::set_dirty)
 		.addFunction ("unknown_processors", &Session::unknown_processors)
 		.addFunction ("export_track_state", &Session::export_track_state)
+		.addFunction ("import_track_state", &Session::import_track_state)
+		.addFunction ("parse_track_state", &Session::parse_track_state)
 		.addFunction ("selection", &Session::selection)
 		.addFunction ("have_external_connections_for_current_backend", &Session::have_external_connections_for_current_backend)
 		.addFunction ("unnamed", &Session::unnamed)
