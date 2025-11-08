@@ -65,6 +65,7 @@
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 #include "pbd/locale_guard.h"
+#include "pbd/strsplit.h"
 
 #include <glibmm.h>
 #include <glibmm/threads.h>
@@ -1114,7 +1115,7 @@ Session::get_template ()
 typedef std::set<std::shared_ptr<Source> > SourceSet;
 
 bool
-Session::export_track_state (std::shared_ptr<RouteList> rl, const string& path)
+Session::export_route_state (std::shared_ptr<RouteList> rl, const string& path, bool with_sources)
 {
 	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS))  {
 		return false;
@@ -1126,62 +1127,284 @@ Session::export_track_state (std::shared_ptr<RouteList> rl, const string& path)
 	PBD::Unwinder<std::string> uw (_template_state_dir, path);
 
 	LocaleGuard lg;
-	XMLNode* node = new XMLNode("TrackState"); // XXX
+	XMLNode* node = new XMLNode("RouteState");
 	XMLNode* child;
 
-		PlaylistSet playlists; // SessionPlaylists
-		SourceSet sources;
+	node->set_property ("uuid", _uuid.to_s());
 
-	// these will work with  new_route_from_template()
-	// TODO: LV2 plugin-state-dir needs to be relative (on load?)
+	PlaylistSet playlists; // SessionPlaylists
+	SourceSet sources;
+
+	/* these will work with  new_route_from_template()
+	 * TODO: LV2 plugin-state-dir needs to be relative (on load?)
+	 */
 	child = node->add_child ("Routes");
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if ((*i)->is_auditioner()) {
+	for (auto const& r: *rl) {
+		if (r->is_auditioner()) {
 			continue;
 		}
-		if ((*i)->is_singleton()) {
+		if (r->is_singleton() && !r->is_master ()) {
 			continue;
 		}
-		child->add_child_nocopy ((*i)->get_state());
-		std::shared_ptr<Track> track = std::dynamic_pointer_cast<Track> (*i);
+		if (r->is_foldbackbus()) {
+			continue;
+		}
+		child->add_child_nocopy (r->get_state());
+		std::shared_ptr<Track> track = std::dynamic_pointer_cast<Track> (r);
 		if (track) {
 			playlists.insert (track->playlist ());
 		}
 	}
 
-	// on load, Regions in the playlists need to resolve and map Source-IDs
-	// also playlist needs to be merged or created with new-name..
-	// ... and Diskstream in tracks adjusted to use the correct playlist
-	child = node->add_child ("Playlists"); // SessionPlaylists::add_state
-	for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
-		child->add_child_nocopy ((*i)->get_state ());
-		std::shared_ptr<RegionList> prl = (*i)->region_list ();
-		for (RegionList::const_iterator s = prl->begin(); s != prl->end(); ++s) {
-			const Region::SourceList& sl = (*s)->sources ();
-			for (Region::SourceList::const_iterator sli = sl.begin(); sli != sl.end(); ++sli) {
-				sources.insert (*sli);
+	child = node->add_child ("RouteGroups");
+	for (auto const& rg : _route_groups) {
+		child->add_child_nocopy (rg->get_state ());
+	}
+
+	if (with_sources) {
+		/* on load, Regions in the playlists need to resolve and map Source-IDs
+		 * also playlist needs to be merged or created with new-name..
+		 * ... and Diskstream in tracks adjusted to use the correct playlist
+		 */
+		child = node->add_child ("Playlists"); // SessionPlaylists::add_state
+		for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+			child->add_child_nocopy ((*i)->get_state ());
+			std::shared_ptr<RegionList> prl = (*i)->region_list ();
+			for (RegionList::const_iterator s = prl->begin(); s != prl->end(); ++s) {
+				const Region::SourceList& sl = (*s)->sources ();
+				for (Region::SourceList::const_iterator sli = sl.begin(); sli != sl.end(); ++sli) {
+					sources.insert (*sli);
+				}
+			}
+		}
+
+		child = node->add_child ("Sources");
+		for (SourceSet::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+			child->add_child_nocopy ((*i)->get_state ());
+			std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (*i);
+			if (fs) {
+#ifdef PLATFORM_WINDOWS
+				fs->close ();
+#endif
+				string p = fs->path ();
+				PBD::copy_file (p, Glib::build_filename (path, Glib::path_get_basename (p)));
 			}
 		}
 	}
 
-	child = node->add_child ("Sources");
-	for (SourceSet::const_iterator i = sources.begin(); i != sources.end(); ++i) {
-		child->add_child_nocopy ((*i)->get_state ());
-		std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (*i);
-		if (fs) {
-#ifdef PLATFORM_WINDOWS
-			fs->close ();
-#endif
-			string p = fs->path ();
-			PBD::copy_file (p, Glib::build_filename (path, Glib::path_get_basename (p)));
-		}
-	}
-
-	std::string sn = Glib::build_filename (path, "share.axml");
+	std::string sn = Glib::build_filename (path, PBD::basename_nosuffix (path) + routestate_suffix);
 
 	XMLTree tree;
 	tree.set_root (node);
 	return tree.write (sn.c_str());
+}
+
+static bool
+allow_import_route_state (XMLNode const& node, int version)
+{
+	XMLNode* pnode = node.child (PresentationInfo::state_node_name.c_str ());
+	if (!pnode) {
+		return false;
+	}
+
+	PresentationInfo pi (PresentationInfo::Flag (0));
+	pi.set_state (*pnode, version);
+
+	if (pi.special (false)) { // |SurroundMaster|MonitorOut|Auditioner
+		return false;
+	}
+
+	if (pi.flags() & (PresentationInfo::FoldbackBus | PresentationInfo::VBMAny)) {
+		return false;
+	}
+	return true;
+}
+
+std::map<PBD::ID, std::string>
+Session::parse_route_state (const string& path, bool& match_pbd_id)
+{
+	std::map<PBD::ID, std::string> rv;
+
+	XMLTree tree;
+	if (!tree.read (path)) {
+		error << string_compose (_("Could not understand state file \"%1\""), path) << endmsg;
+		return rv;
+	}
+	if (tree.root()->name() != X_("RouteState") && tree.root()->name() != X_("Session")) {
+		return rv;
+	}
+
+	XMLProperty const* prop;
+	if ((prop = tree.root()->property ("uuid")) && _uuid == PBD::UUID (prop->value())) {
+		match_pbd_id = true;
+	} else {
+		match_pbd_id = false;
+	}
+
+	XMLNode* xroutes = tree.root()->child ("Routes");
+	if (xroutes) {
+		/* foreach route .. */
+		for (auto const rxml : xroutes->children()) {
+			int version = 0;
+			if (!rxml->get_property ("version", version)) {
+				continue;
+			}
+			PBD::ID id;
+			if (!rxml->get_property ("id", id)) {
+				continue;
+			}
+			std::string name;
+			if (!rxml->get_property ("name", name)) {
+				continue;
+			}
+
+			if (!allow_import_route_state (*rxml, version)) {
+				continue;
+			}
+
+			rv[id] = name;
+		}
+	}
+	return rv;
+}
+
+int
+Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> const& idmap, RouteGroupImportMode rgim)
+{
+	/* idmap:  <local route ID : extern/XML route ID>
+	 * a given route may only be set to the state of one extern ID,
+	 * but extern state can be applied to multiple routes (or create new ones)
+	 */
+	XMLTree tree;
+	if (!tree.read (path)) {
+		error << string_compose (_("Could not understand state file \"%1\""),_path) << endmsg;
+		return -1;
+	}
+	if (tree.root()->name() != X_("RouteState") && tree.root()->name() != X_("Session")) { // XXX
+		return -2;
+	}
+
+	int version = 0;
+
+	/* session has a global property */
+	tree.root()->get_property ("version", version);
+
+	bool from_this_session;
+	XMLProperty const* prop;
+	if ((prop = tree.root()->property ("uuid")) && _uuid == PBD::UUID (prop->value())) {
+		from_this_session = true;
+	} else {
+		from_this_session = false;
+	}
+
+	std::map<PBD::ID, std::string> route_groupname;
+
+	XMLNode* xgroups = tree.root()->child ("RouteGroups");
+	if (xgroups) {
+		for (auto const& rgxml : xgroups->children()) {
+			/* see also Session::load_route_groups */
+			if (rgxml->name() != "RouteGroup") {
+				continue;
+			}
+			std::string name;
+			if (!rgxml->get_property ("name", name)) {
+				continue;
+			}
+			/* see also RouteGroup::set_state */
+			std::string routes;
+			if (rgxml->get_property ("routes", routes)) {
+				stringstream str (routes);
+				vector<string> ids;
+				split (str.str(), ids, ' ');
+				for (auto const& i : ids) {
+					PBD::ID id (i);
+					route_groupname[id] = name;
+				}
+			}
+		}
+	}
+
+	XMLNode* xroutes = tree.root()->child ("Routes");
+	if (xroutes) {
+		/* foreach route .. */
+		for (auto const rxml : xroutes->children()) {
+			/* track-state includes version per route */
+			if (!rxml->get_property ("version", version) || version == 0) {
+				continue;
+			}
+			PBD::ID id;
+			if (!rxml->get_property ("id", id)) {
+				continue;
+			}
+			for (auto [dst, src] : idmap) {
+				if (src != id) {
+					continue;
+				}
+
+				XMLNode* pnode = rxml->child (PresentationInfo::state_node_name.c_str ());
+				PresentationInfo pi (PresentationInfo::Flag (0));
+				pi.set_state (*pnode, version);
+
+				std::shared_ptr<Route> r = route_by_id (dst);
+
+				/* note: audtioner, monitor-out, etc are skipped in `allow_import_route_state` */
+#ifdef MIXBUS
+				static const int special_pi = PresentationInfo::Mixbus | PresentationInfo::VBMAny | PresentationInfo::MasterOut;
+#else
+				static const int special_pi = PresentationInfo::Mixbus | PresentationInfo::VBMAny;
+#endif
+
+				/* special case, new track from special routes */
+				if (!r && 0 != (pi.flags () & special_pi)) {
+					auto rl = new_audio_track (1, 2, 0, 1, "", PresentationInfo::max_order, Normal, true, false);
+					assert (rl.size () < 2);
+					if (rl.size () > 0) {
+						r = rl.front ();
+					}
+				}
+
+				if (r) {
+					r->import_state (*rxml, from_this_session);
+				} else if (allow_import_route_state (*rxml, version)) {
+					/* invalid ID (e.g. 0, -1 (int64_t max) -> new track */
+					if (pi.flags () & special_pi) {
+						continue;
+					}
+					pi.set_flags (PresentationInfo::Flag (pi.flags () & (PresentationInfo::AudioTrack | PresentationInfo::MidiTrack | PresentationInfo::AudioBus | PresentationInfo::MidiBus)));
+
+					XMLNode copy (*rxml);
+					copy.remove_nodes_and_delete ("PresentationInfo"); // "Master"
+					copy.add_child_nocopy (pi.get_state());
+
+					RouteList rl = new_route_from_template (1, PresentationInfo::max_order, copy, "", NewPlaylist);
+					assert (rl.size () < 2);
+					if (rl.size () > 0) {
+						r = rl.front ();
+					}
+				}
+				/* set route-group */
+				if (r && route_groupname.find (src) != route_groupname.end ()) {
+					RouteGroup* rg;
+					switch (rgim) {
+						case IgnoreRouteGroup:
+							rg = nullptr;
+							break;
+						case UseRouteGroup:
+							rg = route_group_by_name (route_groupname[src]);
+							break;
+						case CreateRouteGroup:
+							rg = new_route_group (route_groupname[src]);
+							break;
+					}
+					if (rg) {
+						rg->add (r);
+					}
+				}
+			}
+		}
+	}
+
+	return 0;
 }
 
 static void
