@@ -3139,6 +3139,263 @@ Route::set_state_2X (const XMLNode& node, int version)
 	return 0;
 }
 
+int
+Route::import_state (const XMLNode& node, bool use_pbd_ids, bool processor_only)
+{
+	if (!processor_only) {
+		/* not yet supported */
+		return -1;
+	}
+
+	if (node.name() != "Route") {
+		error << string_compose(_("Bad node sent to Route::import_state() [%1]"), node.name()) << endmsg;
+		return -1;
+	}
+
+	int version = 0;
+	if (!node.get_property ("version", version) || version < 7000) {
+		error << string_compose(_("Invalid version sent to Route::import_state() [%1]"), version) << endmsg;
+		return -2;
+	}
+
+	node.get_property (X_("strict-io"), _strict_io);
+
+	MeterType meter_type;
+	if (node.get_property (X_("meter-type"), meter_type)) {
+		set_meter_type (meter_type);
+	}
+
+	DiskIOPoint diop;
+	if (node.get_property (X_("disk-io-point"), diop)) {
+		if (_disk_writer) {
+			_disk_writer->set_display_to_user (diop == DiskIOCustom);
+		}
+		if (_disk_reader) {
+			_disk_reader->set_display_to_user (diop == DiskIOCustom);
+		}
+		if (_triggerbox) {
+			_triggerbox->set_display_to_user (diop == DiskIOCustom);
+		}
+		set_disk_io_point (diop);
+	}
+
+	XMLNode processor_state (X_("processor_state"));
+
+
+	Temporal::TimeDomainProvider const& tdp (*this);
+	ProcessorList        new_processors;
+	std::vector<PBD::ID> old;
+	std::vector<PBD::ID> reuse;
+
+	/* when using state from other sessions, don't match PBD::IDs */
+	if (use_pbd_ids) {
+		foreach_processor ([&old](std::weak_ptr<Processor> wp) { std::shared_ptr<Processor> p (wp.lock ()); if (p) { old.push_back (p->id()); } } );
+	}
+
+	for (auto const& child : node.children ()) {
+		if (child->name() == X_("Processor")) {
+			XMLProperty* prop = child->property ("type");
+			if (!prop) {
+				continue;
+			}
+
+			PBD::ID id;
+			if (!child->get_property ("id", id)) {
+				continue;
+			}
+
+			if (prop->value() == "ladspa" ||
+			    prop->value() == "lv2" ||
+			    prop->value() == "windows-vst" ||
+			    prop->value() == "mac-vst" ||
+			    prop->value() == "lxvst" ||
+			    prop->value() == "luaproc" ||
+			    prop->value() == "vst3" ||
+			    prop->value() == "audiounit") {
+
+				if (std::find (old.begin (), old.end(), id) == old.end()) {
+
+					/* skip Mixbus channelstrip */
+					if (prop->value() == "ladspa") {
+						const XMLProperty *prop_id = child->property ("unique-id");
+						if (!prop_id) {
+							continue;
+						}
+						int id = atoi (prop_id->value());
+						if (id >= 9300 && id <= 9399) {
+							std::shared_ptr<Processor> strip = plugin_by_uri (prop_id->value());
+							if (strip) {
+								XMLNode* proc = new XMLNode (*child);
+								proc->set_property ("id", strip->id());
+								processor_state.add_child_nocopy (*proc);
+							}
+							continue;
+						}
+					} else if (prop->value() == "lv2") {
+						const XMLProperty *prop_id = node.property ("unique-id");
+						if (prop_id) {
+							if (strstr (prop_id->value().c_str(), "http://harrisonconsoles.com/lv2/vbm-")) {
+								std::shared_ptr<Processor> strip = plugin_by_uri (prop_id->value());
+								if (strip) {
+									XMLNode* proc = new XMLNode (*child);
+									proc->set_property ("id", strip->id());
+									processor_state.add_child_nocopy (*proc);
+								}
+								continue;
+							}
+						}
+					}
+
+					/* Add new plugin with new ID */
+					PBD::Stateful::ForceIDRegeneration force_ids;
+					/* compare to .. Route::set_processor_state */
+					std::shared_ptr<Processor> processor;
+					processor.reset (new PluginInsert (_session, tdp));
+					processor->set_owner (this);
+
+					if (processor->set_state (*child, version) != 0) {
+						cout << "Failed to configure new proc.\n";
+						continue;
+					}
+
+					std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (processor);
+					if (pi && _strict_io) {
+						pi->set_strict_io (true);
+					}
+					/* subscribe to Sidechain IO changes */
+					if (pi && pi->has_sidechain ()) {
+						pi->sidechain_input ()->changed.connect_same_thread (*pi, std::bind (&Route::sidechain_change_handler, this, _1, _2));
+					}
+					new_processors.push_back (processor);
+					processor_state.add_child_copy (*child);
+				} else {
+					/* processor was found, reuse it */
+					reuse.push_back (id);
+					processor_state.add_child_copy (*child);
+				}
+				continue;
+			}
+
+			if (prop->value() == "intsend") {
+				/* ignore Aux sends that may not apply here */
+				if (std::find (old.begin (), old.end(), id) != old.end()) {
+					processor_state.add_child_copy (*child);
+				}
+				continue;
+			}
+
+			/* special case processors with controls */
+
+			float value;
+			if (prop->value() == "amp" && _gain_control) {
+				XMLNode* ctl = child->child (Controllable::xml_node_name.c_str());
+				if (ctl) {
+					if (ctl->get_property ("value", value)) {
+						_session.set_control (_gain_control, value, Controllable::NoGroup);
+					}
+				}
+			}
+			if (prop->value() == "trim" && _trim_control) {
+				XMLNode* ctl = child->child (Controllable::xml_node_name.c_str());
+				if (ctl) {
+					if (ctl->get_property ("value", value)) {
+						_session.set_control (_trim_control, value, Controllable::NoGroup);
+					}
+				}
+			}
+
+			/* internal processor, only retain order and active state */
+
+			XMLNode* node = new XMLNode (X_("Processor"));
+			node->set_property ("type", prop->value());
+			prop = child->property ("active");
+			if (prop) {
+				node->set_property ("active", prop->value());
+			}
+			processor_state.add_child_nocopy (*node);
+
+		} else if (child->name() == Controllable::xml_node_name) {
+			std::string control_name;
+			if (!child->get_property (X_("name"), control_name)) {
+				continue;
+			}
+
+			float value;
+			if (control_name == _solo_isolate_control->name()) {
+				if (child->get_property ("solo-isolated", value)) {
+					_session.set_control (_solo_isolate_control, value, Controllable::NoGroup);
+				}
+			} else if (control_name == _mute_control->name()) {
+				if (child->get_property ("value", value)) {
+					_session.set_control (_mute_control, value, Controllable::NoGroup);
+				}
+			} else if (control_name == _solo_safe_control->name()) {
+				if (child->get_property ("solo-safe", value)) {
+					_session.set_control (_solo_safe_control, value, Controllable::NoGroup);
+				}
+			} else if (control_name == _phase_control->name()) {
+				std::string str;
+				if (child->get_property (X_("phase-invert"), str)) {
+					_phase_control->set_phase_invert (boost::dynamic_bitset<> (str));
+				}
+			}
+		} else if (child->name() == MuteMaster::xml_node_name) {
+			std::string mute_point;
+			if (child->get_property ("mute-point", mute_point)) {
+				_mute_master->set_mute_points (mute_point);
+			}
+		}
+	}
+
+	assert (use_pbd_ids || reuse.empty ());
+
+	/* now remove any plugins not present in the list.. */
+	ProcessorList to_remove;
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		for (auto const& p : _processors) {
+			if (is_internal_processor (p)) {
+				continue;
+			}
+			std::shared_ptr<PluginInsert> pi;
+			if ((pi = std::dynamic_pointer_cast<PluginInsert>(p)) != 0) {
+				if (std::find (reuse.begin (), reuse.end(), pi->id ()) == reuse.end()) {
+					to_remove.push_back (p);
+				}
+			}
+		}
+	}
+
+	remove_processors (to_remove, nullptr);
+
+	int rv = add_processors (new_processors, std::shared_ptr<Processor> (), nullptr);
+
+	/* drop references */
+	to_remove.clear ();
+	new_processors.clear ();
+
+	if (rv) {
+		/* adding processors failed above, so ensure that
+		 * set_processor_state does override IDs
+		 */
+		PBD::Stateful::ForceIDRegeneration force_ids;
+		set_processor_state (processor_state, version);
+	} else {
+		set_processor_state (processor_state, version);
+	}
+
+	reset_instrument_info();
+
+	MeterPoint mp;
+	if (node.get_property (X_("meter-point"), mp)) {
+		set_meter_point (mp);
+		if (_meter) {
+			_meter->set_display_to_user (_meter_point == MeterCustom);
+		}
+	}
+	return 0;
+}
+
 XMLNode&
 Route::get_processor_state ()
 {
