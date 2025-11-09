@@ -83,7 +83,7 @@ PBD::hardware_concurrency()
 	int count;
 	size_t size=sizeof(count);
 	return sysctlbyname("hw.ncpu",&count,&size,NULL,0)?0:count;
-#elif defined(HAVE_UNISTD) && defined(_SC_NPROCESSORS_ONLN)
+#elif defined(HAVE_UNISTD_H) && defined(_SC_NPROCESSORS_ONLN)
 	int const count=sysconf(_SC_NPROCESSORS_ONLN);
 	return (count>0)?count:0;
 #elif defined(PLATFORM_WINDOWS)

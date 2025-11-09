@@ -44,7 +44,7 @@ PBD::trace_twb ()
 
 /* Obtain a backtrace and print it to stdout. */
 
-#ifdef HAVE_EXECINFO
+#ifdef HAVE_EXECINFO_H
 
 #include <execinfo.h>
 

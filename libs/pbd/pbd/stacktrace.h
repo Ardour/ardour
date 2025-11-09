@@ -30,7 +30,7 @@
 #include <glibmm/threads.h>
 #include <list>
 
-#ifdef HAVE_EXECINFO
+#ifdef HAVE_EXECINFO_H
 #include <execinfo.h>
 #include <cstdlib>
 #endif
@@ -51,7 +51,7 @@ class /*LIBPBD_API*/ thing_with_backtrace
 public:
 	thing_with_backtrace () {
 		trace_twb();
-#ifdef HAVE_EXECINFO
+#ifdef HAVE_EXECINFO_H
 		allocation_backtrace = new void*[50];
 		allocation_backtrace_size = backtrace (allocation_backtrace, 50);
 #else
@@ -63,7 +63,7 @@ public:
 
 	thing_with_backtrace (const thing_with_backtrace<T>& other) {
 		trace_twb();
-#ifdef HAVE_EXECINFO
+#ifdef HAVE_EXECINFO_H
 		allocation_backtrace = new void*[50];
 		allocation_backtrace_size = backtrace (allocation_backtrace, 50);
 #else
@@ -87,7 +87,7 @@ public:
 	}
 
 	static void peek_a_boo (std::ostream& stream) {
-#ifdef HAVE_EXECINFO
+#ifdef HAVE_EXECINFO_H
 		typename std::list<thing_with_backtrace<T>*>::iterator x;
 		for (x = all.begin(); x != all.end(); ++x) {
 			char **strings;
