@@ -63,34 +63,3 @@ class LIBARDOUR_API CycleTimer {
 #endif
 	}
 };
-
-class LIBARDOUR_API StoringTimer
-{
-public:
-	StoringTimer (int);
-	void ref ();
-	void check (int);
-#ifndef NDEBUG
-	void dump (std::string const &);
-#endif
-
-private:
-	cycles_t _current_ref;
-	int* _point;
-	cycles_t* _value;
-	cycles_t* _ref;
-	int _points;
-	int _max_points;
-};
-
-#ifdef PT_TIMING
-extern StoringTimer ST;
-#define PT_TIMING_REF ST.ref();
-#define PT_TIMING_CHECK(x) ST.check(x);
-#endif
-
-#ifndef PT_TIMING
-#define PT_TIMING_REF
-#define PT_TIMING_CHECK(x)
-#endif
-

@@ -238,9 +238,6 @@ AudioEngine::process_callback (pframes_t nframes)
 	Glib::Threads::Mutex::Lock tm (_process_lock, Glib::Threads::TRY_LOCK);
 	Port::set_varispeed_ratio (1.0);
 
-	PT_TIMING_REF;
-	PT_TIMING_CHECK (1);
-
 	/// The number of samples that will have been processed when we've finished
 	pframes_t next_processed_samples;
 
@@ -635,8 +632,6 @@ AudioEngine::process_callback (pframes_t nframes)
 	}
 
 	_processed_samples = next_processed_samples;
-
-	PT_TIMING_CHECK (2);
 
 	return 0;
 }

@@ -578,9 +578,6 @@ Session::Session (AudioEngine &eng,
 
 Session::~Session ()
 {
-#ifdef PT_TIMING
-	ST.dump ("ST.dump");
-#endif
 	destroy ();
 }
 
