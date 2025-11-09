@@ -25,6 +25,10 @@
 #include <set>
 #include <vector>
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 
@@ -56,7 +60,6 @@
 #include <io.h> // Microsoft's nearest equivalent to <unistd.h>
 #include <ardourext/misc.h>
 #else
-#include <unistd.h>
 #include <regex.h>
 #endif
 
