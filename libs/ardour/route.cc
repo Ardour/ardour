@@ -5631,6 +5631,24 @@ Route::processor_by_id (PBD::ID id) const
 	return std::shared_ptr<Processor> ();
 }
 
+std::shared_ptr<Processor>
+Route::plugin_by_uri (std::string const& uri, int offset) const
+{
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	for (auto const& p : _processors) {
+		std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert>(p);
+		if (!pi) {
+			continue;
+		}
+		if (pi->plugin()->unique_id () == uri) {
+			if (offset-- <= 0) {
+				return p;
+			}
+		}
+	}
+	return std::shared_ptr<Processor> ();
+}
+
 bool
 Route::can_freeze_processor (std::shared_ptr<Processor> p, bool allow_routing) const
 {
