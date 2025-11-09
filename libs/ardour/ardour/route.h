@@ -251,6 +251,7 @@ public:
 	}
 
 	std::shared_ptr<Processor> processor_by_id (PBD::ID) const;
+	std::shared_ptr<Processor> plugin_by_uri (std::string const&, int offset = 0) const;
 
 	std::shared_ptr<Processor> nth_plugin (uint32_t n) const;
 	std::shared_ptr<Processor> nth_send (uint32_t n) const;
