@@ -266,6 +266,7 @@ def configure(conf):
     if conf.env['build_target'] != 'mingw' and conf.env['build_target'] != 'msvc' and sys.platform != 'darwin': # Linux
         autowaf.check_pkg(conf, 'x11', uselib_store='X11', system=True, mandatory=True)
         autowaf.check_pkg(conf, 'xext', uselib_store='XEXT', system=True, mandatory=True)
+    conf.check(header_name='unistd.h', define_name='HAVE_UNISTD_H',mandatory=False)
 
 def build(bld):
     obj = bld.shlib(features = 'c cshlib')
