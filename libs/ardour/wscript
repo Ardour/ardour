@@ -472,6 +472,8 @@ def build(bld):
     lua_use = list(obj.use);
     if bld.env['build_target'] == 'mingw' and bld.env['DEBUG']:
         lua_cxxflags += " -Og -Wa,-mbig-obj"
+    elif bld.env['build_target'] == 'msvc' and bld.env['DEBUG']:
+        lua_cxxflags += " /bigobj"
 
     bld(features = 'cxx cxxstlib asm',
         source   = "luabindings.cc" ,

@@ -1332,7 +1332,7 @@ int main () { __int128 x = 0; return 0; }
     if opts.single_tests:
         conf.env['SINGLE_TESTS'] = opts.single_tests
     if not opts.no_windows_vst:
-        if Options.options.dist_target == 'mingw':
+        if Options.options.dist_target == 'mingw' or Options.options.dist_target == 'msvc':
             conf.define('WINDOWS_VST_SUPPORT', 1)
             conf.env['WINDOWS_VST_SUPPORT'] = True
         else:
@@ -1340,7 +1340,7 @@ int main () { __int128 x = 0; return 0; }
     if not opts.no_lxvst:
         if sys.platform == 'darwin':
             conf.env['LXVST_SUPPORT'] = False
-        elif Options.options.dist_target == 'mingw':
+        elif Options.options.dist_target == 'mingw' or Options.options.dist_target == 'msvc':
             conf.env['LXVST_SUPPORT'] = False
         else:
             conf.define('LXVST_SUPPORT', 1)
@@ -1390,7 +1390,7 @@ int main () { __int128 x = 0; return 0; }
             backends += ['alsa']
         if sys.platform == 'darwin':
             backends += ['coreaudio']
-        if Options.options.dist_target == 'mingw':
+        if Options.options.dist_target == 'mingw' or Options.options.dist_target == 'msvc':
             backends += ['portaudio']
 
     if 'dummy' not in backends:
@@ -1447,7 +1447,7 @@ int main () { __int128 x = 0; return 0; }
         sub_config_and_use(conf, 'libs/appleutility')
     elif re.search ("openbsd", sys.platform) is not None:
         pass
-    elif Options.options.dist_target != 'mingw':
+    elif Options.options.dist_target != 'mingw' and Options.options.dist_target != 'msvc':
         sub_config_and_use(conf, 'tools/sanity_check')
 
     # explicitly link against libm. This is possible on all POSIX systems
