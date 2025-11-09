@@ -33,7 +33,6 @@
 #include "ardour/buffer_set.h"
 #include "ardour/chan_count.h"
 #include "ardour/chan_mapping.h"
-#include "ardour/cycles.h"
 #include "ardour/latent.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/midi_ring_buffer.h"
@@ -325,9 +324,6 @@ public:
 
 	virtual void set_owner (SessionObject* o) { _owner = o; }
 	SessionObject* owner () const { return _owner; }
-
-	void set_cycles (uint32_t c) { _cycles = c; }
-	cycles_t cycles () const { return _cycles; }
 
 	void use_for_impulse_analysis ()
 	{
