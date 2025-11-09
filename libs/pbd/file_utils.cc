@@ -24,6 +24,7 @@
 #include <climits>
 #include <set>
 #include <vector>
+#include <regex>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -60,7 +61,6 @@
 #include <io.h> // Microsoft's nearest equivalent to <unistd.h>
 #include <ardourext/misc.h>
 #else
-#include <regex.h>
 #endif
 
 #include "pbd/compose.h"
@@ -243,8 +243,8 @@ static
 bool
 regexp_filter (const string& str, void *arg)
 {
-	regex_t* pattern = (regex_t*)arg;
-	return regexec (pattern, str.c_str(), 0, 0, 0) == 0;
+	std::regex* pattern = static_cast<std::regex*>(arg);
+	return std::regex_search(str, *pattern);
 }
 
 void
@@ -253,21 +253,11 @@ find_files_matching_regex (vector<string>& result,
                            const std::string& regexp,
                            bool recurse)
 {
-	int err;
-	char msg[256];
-	regex_t compiled_pattern;
-
-	if ((err = regcomp (&compiled_pattern, regexp.c_str(),
-			    REG_EXTENDED|REG_NOSUB))) {
-
-		regerror (err, &compiled_pattern,
-			  msg, sizeof (msg));
-
-		error << "Cannot compile soundfile regexp for use ("
-		      << msg
-		      << ")"
-		      << endmsg;
-
+	std::regex compiled_pattern;
+	try {
+		compiled_pattern = std::regex(regexp);
+	} catch (const std::regex_error& e) {
+		error << "Cannot compile soundfile regexp for use (" << e.what() << ")" << endmsg;
 		return;
 	}
 
@@ -277,8 +267,6 @@ find_files_matching_regex (vector<string>& result,
 	find_files_matching_filter (result, paths,
 	                            regexp_filter, &compiled_pattern,
 	                            true, true, recurse);
-
-	regfree (&compiled_pattern);
 }
 
 void
