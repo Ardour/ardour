@@ -194,7 +194,7 @@ fake_thread_start (void* arg)
 	pthread_mutex_lock (&thread_map_lock);
 
 	for (auto const& t : all_threads) {
-		if (pthread_equal (t.first, pthread_self ())) {
+		if (pthread_equal (t.first, pthread_self ()) != 0) {
 			DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Terminated: '%1'\n", t.second));
 			all_threads.erase (t.first);
 			break;
@@ -262,7 +262,7 @@ pthread_kill_all (int signum)
 {
 	pthread_mutex_lock (&thread_map_lock);
 	for (auto const& t : all_threads) {
-		if (pthread_equal (t.first, pthread_self ())) {
+		if (pthread_equal (t.first, pthread_self ()) != 0) {
 			continue;
 		}
 		DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Kill: '%1'\n", t.second));
@@ -277,7 +277,7 @@ pthread_cancel_all ()
 {
 	pthread_mutex_lock (&thread_map_lock);
 	for (auto const& t : all_threads) {
-		if (pthread_equal (t.first, pthread_self ())) {
+		if (pthread_equal (t.first, pthread_self ()) != 0) {
 			continue;
 		}
 		DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Cancel: '%1'\n", t.second));
@@ -292,7 +292,7 @@ pthread_cancel_one (pthread_t thread)
 {
 	pthread_mutex_lock (&thread_map_lock);
 	for (auto const& t : all_threads) {
-		if (pthread_equal (t.first, thread)) {
+		if (pthread_equal (t.first, thread) != 0) {
 			all_threads.erase (t.first);
 			break;
 		}
@@ -443,7 +443,7 @@ pbd_set_thread_priority (pthread_t thread, int policy, int priority)
 	DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Change '%1' to policy = %2 priority = %3\n", pthread_name(), policy, param.sched_priority));
 
 #ifdef PLATFORM_WINDOWS
-	if (is_pthread_active (thread) && param.sched_priority >= 12) {
+	if (thread.p != 0 && param.sched_priority >= 12) {
 		if (set_win_set_realtime_policy (thread, param.sched_priority)) {
 			return 0;
 		}
@@ -588,7 +588,7 @@ PBD::Thread::_run (void* arg)
 	/* cleanup */
 	pthread_mutex_lock (&thread_map_lock);
 	for (auto const& t : all_threads) {
-		if (pthread_equal (t.first, pthread_self ())) {
+		if (pthread_equal (t.first, pthread_self ()) != 0) {
 			DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Terminated: '%1'\n", t.second));
 			all_threads.erase (t.first);
 			break;

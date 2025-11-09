@@ -23,6 +23,10 @@
 
 #include "pbd/windows_special_dirs.h"
 
+#if defined (COMPILER_MSVC) && !defined (PATH_MAX)
+#define PATH_MAX _MAX_PATH
+#endif
+
 std::string
 PBD::get_win_special_folder_path (int csidl)
 {
