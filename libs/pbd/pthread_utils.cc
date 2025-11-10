@@ -443,7 +443,7 @@ pbd_set_thread_priority (pthread_t thread, int policy, int priority)
 	DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Change '%1' to policy = %2 priority = %3\n", pthread_name(), policy, param.sched_priority));
 
 #ifdef PLATFORM_WINDOWS
-	if (thread.p != 0 && param.sched_priority >= 12) {
+-	if (is_pthread_active (thread) && param.sched_priority >= 12) {
 		if (set_win_set_realtime_policy (thread, param.sched_priority)) {
 			return 0;
 		}
