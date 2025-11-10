@@ -1227,6 +1227,10 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
             conf.env.append_value('LIB', 'uuid')
         # needed for mingw64 packages, not harmful on normal mingw build
         conf.env.append_value('LIB', 'intl')
+        conf.check_cc(function_name='regcomp', header_name='regex.h',
+                      lib='regex', uselib_store="REGEX", define_name='HAVE_REGEX_H')
+        # TODO put this only where it is needed
+        conf.env.append_value('LIB', 'regex')
         # TODO this should only be necessary for a debug build
         conf.env.append_value('LIB', 'dbghelp')
 
