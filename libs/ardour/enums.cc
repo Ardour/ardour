@@ -168,6 +168,7 @@ setup_enum_writer ()
 	FollowAction::Type _FollowAction;
 	Trigger::StretchMode _TriggerStretchMode;
 	CueBehavior _CueBehavior;
+	VST3KnobMode _VST3KnobMode;
 	DSP::PerceptualAnalyzer::Speed _DSPAnalyzerSpeed;
 	DSP::PerceptualAnalyzer::Warp _DSPAnalyzerWarp;
 
@@ -957,6 +958,12 @@ setup_enum_writer ()
 	REGISTER_ENUM (FollowCues);
 	REGISTER_ENUM (ImplicitlyIgnoreCues);
 	REGISTER_BITS (_CueBehavior);
+
+	REGISTER_ENUM (VST3KnobPluginDefault);
+	REGISTER_ENUM (VST3KnobCircularMode);
+	REGISTER_ENUM (VST3KnobRelativCircularMode);
+	REGISTER_ENUM (VST3KnobLinearMode);
+	REGISTER (_VST3KnobMode);
 
 	REGISTER_CLASS_ENUM (DSP::PerceptualAnalyzer, Rapid);
 	REGISTER_CLASS_ENUM (DSP::PerceptualAnalyzer, Fast);

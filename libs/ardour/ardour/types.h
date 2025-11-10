@@ -1003,6 +1003,14 @@ enum RecordState {
 };
 
 
+/* compare to IEditController */
+enum VST3KnobMode {
+	VST3KnobPluginDefault = -1,
+	VST3KnobCircularMode = 0,
+	VST3KnobRelativCircularMode,
+	VST3KnobLinearMode
+};
+
 } // namespace ARDOUR
 
 /* for now, break the rules and use "using" to make this "global" */
