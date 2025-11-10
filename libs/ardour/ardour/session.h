@@ -60,6 +60,7 @@
 #include "pbd/statefuldestructible.h"
 #include "pbd/signals.h"
 #include "pbd/undo.h"
+#include "pbd/uuid.h"
 
 #ifdef USE_TLSF
 #  include "pbd/tlsf.h"
@@ -233,6 +234,7 @@ public:
 	 * internal, not user-visible IDs */
 	static unsigned int next_name_id ();
 
+	std::string uuid() const { return _uuid.to_s(); }
 	std::string path() const { return _path; }
 	std::string name() const { return _name; }
 	std::string snap_name() const { return _current_snapshot_name; }
@@ -1555,6 +1557,7 @@ private:
 	bool maybe_stop (samplepos_t limit);
 	bool maybe_sync_start (pframes_t &);
 
+	PBD::UUID               _uuid;
 	std::string             _path;
 	std::string             _name;
 	bool                    _is_new;

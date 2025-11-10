@@ -3136,6 +3136,7 @@ LuaBindings::common (lua_State* L)
 
 		.addFunction ("name", &Session::name)
 		.addFunction ("path", &Session::path)
+		.addFunction ("uuid", &Session::uuid)
 		.addFunction ("record_status", &Session::record_status)
 		.addFunction ("maybe_enable_record", &Session::maybe_enable_record)
 		.addFunction ("disable_record", &Session::disable_record)

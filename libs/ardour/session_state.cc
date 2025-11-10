@@ -831,6 +831,8 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	PBD::Unwinder<bool> uw (LV2Plugin::force_state_save, for_archive);
 
+	PBD::Unwinder<PBD::UUID> uw2 (_uuid, fork_state != NormalSave ? PBD::UUID () : _uuid);
+
 	SessionSaveUnderway (); /* EMIT SIGNAL */
 
 	bool mark_as_clean = true;
@@ -1235,6 +1237,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 
 	if (!save_template) {
 
+		node->set_property ("uuid", _uuid.to_s());
 		node->set_property ("name", _name);
 		node->set_property ("sample-rate", _base_sample_rate);
 
@@ -1817,6 +1820,13 @@ Session::set_state (const XMLNode& node, int version)
 			throw WrongProgram (modified_with);
 		}
 #endif
+	}
+
+	{
+		std::string str;
+		if (node.get_property ("uuid", str)) {
+			_uuid = str;
+		}
 	}
 
 	setup_raid_path(_session_dir->root_path());
