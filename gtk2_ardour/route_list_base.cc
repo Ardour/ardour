@@ -602,6 +602,9 @@ RouteListBase::add_stripables (StripableList& slist)
 			if (route->is_surround_master ()) {
 				continue;
 			}
+			if (route->is_foldbackbus ()) {
+				continue;
+			}
 
 			row = *(_model->insert (insert_iter));
 
