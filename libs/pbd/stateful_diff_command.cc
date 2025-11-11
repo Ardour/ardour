@@ -42,7 +42,9 @@ StatefulDiffCommand::StatefulDiffCommand (std::shared_ptr<StatefulDestructible> 
            be sure to notify owners of this command.
         */
 
-	s->DropReferences.connect_same_thread (*this, std::bind (&Destructible::drop_references, this));
+	if (!_changes || _changes->empty()) {
+		s->DropReferences.connect_same_thread (*this, std::bind (Destructible::drop_and_kill, this));
+	}
 }
 
 StatefulDiffCommand::StatefulDiffCommand (std::shared_ptr<StatefulDestructible> s, XMLNode const& n)
@@ -63,7 +65,9 @@ StatefulDiffCommand::StatefulDiffCommand (std::shared_ptr<StatefulDestructible> 
            be sure to notify owners of this command.
         */
 
-	s->DropReferences.connect_same_thread (*this, std::bind (&Destructible::drop_references, this));
+	if (_changes->empty()) {
+		s->DropReferences.connect_same_thread (*this, std::bind (Destructible::drop_and_kill, this));
+	}
 }
 
 StatefulDiffCommand::~StatefulDiffCommand ()
