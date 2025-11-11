@@ -2927,6 +2927,13 @@ LuaBindings::common (lua_State* L)
 		.addConst ("NameAfterDriver", ARDOUR::TracksAutoNamingRule(NameAfterDriver))
 		.endNamespace ()
 
+		.beginNamespace ("VST3KnobMode")
+		.addConst ("VST3KnobPluginDefault", ARDOUR::VST3KnobMode(VST3KnobPluginDefault))
+		.addConst ("VST3KnobCircularMode", ARDOUR::VST3KnobMode(VST3KnobCircularMode))
+		.addConst ("VST3KnobRelativCircularMode", ARDOUR::VST3KnobMode(VST3KnobRelativCircularMode))
+		.addConst ("VST3KnobLinearMode", ARDOUR::VST3KnobMode(VST3KnobLinearMode))
+		.endNamespace ()
+
 		.endNamespace (); // end ARDOUR
 
 	luabridge::getGlobalNamespace (L)

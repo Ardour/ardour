@@ -1322,7 +1322,19 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 
 	FUnknownPtr<Vst::IEditController2> controller2 (_controller);
 	if (controller2) {
-		controller2->setKnobMode (Vst::kLinearMode);
+		switch (Config->get_vst3_knob_mode ()) {
+			case VST3KnobLinearMode:
+				controller2->setKnobMode (Vst::kLinearMode);
+				break;
+			case VST3KnobCircularMode:
+				controller2->setKnobMode (Vst::kCircularMode);
+				break;
+			case VST3KnobRelativCircularMode:
+				controller2->setKnobMode (Vst::kRelativCircularMode);
+				break;
+			default:
+				break;
+		}
 	}
 
 	int32 n_params = _controller->getParameterCount ();

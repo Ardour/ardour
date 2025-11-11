@@ -259,6 +259,7 @@ CONFIG_VARIABLE (bool, setup_sidechain, "setup-sidechain", false)
 CONFIG_VARIABLE (uint32_t, plugin_scan_timeout, "plugin-scan-timeout", 150) /* deci-seconds */
 CONFIG_VARIABLE (uint32_t, limit_n_automatables, "limit-n-automatables", 512)
 CONFIG_VARIABLE (uint32_t, plugin_cache_version, "plugin-cache-version", 0)
+CONFIG_VARIABLE (VST3KnobMode, vst3_knob_mode, "vst3-knob-mode", VST3KnobLinearMode)
 
 CONFIG_VARIABLE (float, tail_duration_sec, "tail-duration-sec", 2.0)
 CONFIG_VARIABLE (uint32_t, max_tail_samples, "max-tail-samples", 0xffffffff) // aka kInfiniteTail
