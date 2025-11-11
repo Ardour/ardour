@@ -5444,5 +5444,11 @@ ScopedTempoMapOwner::end_local_tempo_map ()
 bool
 TempoMap::fetch_condition ()
 {
-	return !_tempo_map_p || !_tempo_map_p->scope_owner() || _tempo_map_p->scope_owner()->depth() == 0;
+	bool ret (!_tempo_map_p || !_tempo_map_p->scope_owner() || _tempo_map_p->scope_owner()->depth() == 0);
+#ifndef NDEBUG
+	if (!ret) {
+		PBD::stacktrace (std::cerr, 29);
+	}
+#endif
+	return ret;
 }
