@@ -59,7 +59,7 @@ StatefulDiffCommand::StatefulDiffCommand (std::shared_ptr<StatefulDestructible> 
 		}
 	}
 
-	assert (_changes != 0);
+	assert (_changes);
 
 	/* if the stateful object that this command refers to goes away,
            be sure to notify owners of this command.
