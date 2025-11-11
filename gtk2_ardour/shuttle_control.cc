@@ -203,6 +203,7 @@ ShuttleControl::ShuttleControl ()
 	/* gtkmm 2.4: the C++ wrapper doesn't work */
 	g_signal_connect ((GObject*)gobj (), "query-tooltip", G_CALLBACK (qt), NULL);
 	// signal_query_tooltip().connect (sigc::mem_fun (*this, &ShuttleControl::on_query_tooltip));
+	set_colors ();
 }
 
 ShuttleControl::~ShuttleControl ()
