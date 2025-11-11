@@ -27,9 +27,11 @@
 
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <errno.h>
-#include <regex.h>
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
@@ -688,11 +690,6 @@ SMFSource::valid_midi_file (const string& file)
 bool
 SMFSource::safe_midi_file_extension (const string& file)
 {
-	static regex_t compiled_pattern;
-	static bool compile = true;
-	const int nmatches = 2;
-	regmatch_t matches[nmatches];
-
 	if (Glib::file_test (file, Glib::FILE_TEST_EXISTS)) {
 		if (!Glib::file_test (file, Glib::FILE_TEST_IS_REGULAR)) {
 			/* exists but is not a regular file */
@@ -700,17 +697,14 @@ SMFSource::safe_midi_file_extension (const string& file)
 		}
 	}
 
-	if (compile && regcomp (&compiled_pattern, "\\.[mM][iI][dD][iI]?$", REG_EXTENDED)) {
-		return false;
-	} else {
-		compile = false;
-	}
-
-	if (regexec (&compiled_pattern, file.c_str(), nmatches, matches, 0)) {
+	const size_t dot_pos = file.rfind ('.');
+	if (dot_pos == string::npos) {
 		return false;
 	}
 
-	return true;
+	std::string const ext = PBD::downcase (file.substr(dot_pos + 1));
+
+	return ext == "mid" || ext == "midi";
 }
 
 static bool compare_eventlist (

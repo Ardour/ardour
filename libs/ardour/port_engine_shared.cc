@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <regex.h>
+#include <regex>
 
 #include "pbd/error.h"
 
@@ -289,11 +289,14 @@ PortEngineSharedImpl::get_ports (
 	std::vector<std::string>& port_names) const
 {
 	int rv = 0;
-	regex_t port_regex;
+	std::regex port_regex;
 	bool use_regexp = false;
-	if (port_name_pattern.size () > 0) {
-		if (!regcomp (&port_regex, port_name_pattern.c_str (), REG_EXTENDED|REG_NOSUB)) {
+	if (!port_name_pattern.empty()) {
+		try {
+			port_regex.assign (port_name_pattern, std::regex::extended);
 			use_regexp = true;
+		} catch (const std::regex_error&) {
+			use_regexp = false;
 		}
 	}
 
@@ -301,14 +304,11 @@ PortEngineSharedImpl::get_ports (
 
 	for (auto const& port : *p) {
 		if ((port->type () == type) && flags == (port->flags () & flags)) {
-			if (!use_regexp || !regexec (&port_regex, port->name ().c_str (), 0, NULL, 0)) {
+			if (!use_regexp || std::regex_search (port->name(), port_regex)) {
 				port_names.push_back (port->name ());
 				++rv;
 			}
 		}
-	}
-	if (use_regexp) {
-		regfree (&port_regex);
 	}
 	return rv;
 }
