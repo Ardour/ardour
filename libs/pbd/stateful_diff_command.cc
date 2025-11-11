@@ -34,7 +34,7 @@ using namespace PBD;
 
 StatefulDiffCommand::StatefulDiffCommand (std::shared_ptr<StatefulDestructible> s)
 	: _object (s)
-	, _changes (0)
+	, _changes (nullptr)
 {
 	_changes = s->get_changes_as_properties (this);
 
@@ -47,7 +47,7 @@ StatefulDiffCommand::StatefulDiffCommand (std::shared_ptr<StatefulDestructible> 
 
 StatefulDiffCommand::StatefulDiffCommand (std::shared_ptr<StatefulDestructible> s, XMLNode const& n)
 	: _object (s)
-	, _changes (0)
+	, _changes (nullptr)
 {
 	const XMLNodeList& children (n.children ());
 
