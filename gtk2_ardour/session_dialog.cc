@@ -166,9 +166,9 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 		}
 	}
 
-	_open_table.attach (new_button,        0,1, row, row + 1, FILL, FILL); ++row;
 	_open_table.attach (recent_button,     0,1, row, row + 1, FILL, FILL); ++row;
 	_open_table.attach (existing_button,   0,1, row, row + 1, FILL, FILL); ++row;
+	_open_table.attach (new_button,        0,1, row, row + 1, FILL, FILL); ++row;
 
 	++row;
 	Label *vspacer = manage (new Label());
