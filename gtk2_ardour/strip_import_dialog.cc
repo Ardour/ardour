@@ -16,9 +16,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "strip_import_dialog.h"
+#include <ytkmm/sizegroup.h>
+#include <ytkmm/stock.h>
 
+#include "pbd/replace_all.h"
+
+#include "ardour/filename_extensions.h"
 #include "ardour/session.h"
+
+#include "gtkmm2ext/utils.h"
+
+#include "widgets/ardour_button.h"
+#include "widgets/ardour_dropdown.h"
+#include "widgets/ardour_spacer.h"
+
+#include "strip_import_dialog.h"
 
 #include "pbd/i18n.h"
 
@@ -26,12 +38,438 @@ using namespace Gtk;
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 
 StripImportDialog::StripImportDialog (Session* s)
 	: ArdourDialog (_("Import Track/Bus State"))
+	, _add_rid (0)
+	, _add_eid (0)
 {
+	set_session (s);
+
+	setup_file_page ();
+
+	get_vbox ()->pack_start (_page_file);
+
+	/* Buttons */
+
+	_open_button = manage (new Button (Stock::GO_FORWARD));
+	_ok_button   = manage (new Button (Stock::OK));
+
+	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	get_action_area ()->pack_end (*_open_button);
+	get_action_area ()->pack_end (*_ok_button);
+
+	_open_button->show ();
+	_ok_button->hide ();
+
+	_open_button->signal_clicked ().connect (mem_fun (*this, &StripImportDialog::file_activated), false);
+	_ok_button->signal_clicked ().connect (mem_fun (*this, &StripImportDialog::ok_activated), false);
+
+	_open_button->set_sensitive (false);
+	_ok_button->set_sensitive (false);
 }
 
 StripImportDialog::~StripImportDialog ()
 {
+	_notebook_connection.disconnect ();
+}
+
+/* ****************************************************************************
+ * Page One .. pick file to import 
+ */
+
+void
+StripImportDialog::setup_file_page ()
+{
+	/* file-chooser */
+	_chooser.set_size_request (450, 300);
+	_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir ()));
+
+	FileFilter tracks_filter;
+	tracks_filter.add_pattern (string_compose (X_("*%1"), ".axml"));
+	tracks_filter.set_name (string_compose (_("%1 tracks"), PROGRAM_NAME));
+	_chooser.add_filter (tracks_filter);
+
+	FileFilter template_filter;
+	template_filter.add_pattern (string_compose (X_("*%1"), ".template"));
+	template_filter.set_name (string_compose (_("%1 tracks"), PROGRAM_NAME));
+	_chooser.add_filter (template_filter);
+
+	FileFilter session_filter;
+	session_filter.add_pattern (string_compose (X_("*%1"), ARDOUR::statefile_suffix));
+	session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
+	_chooser.add_filter (session_filter);
+
+	FileFilter all_filter;
+	all_filter.add_pattern (string_compose (X_("*%1"), ARDOUR::statefile_suffix));
+	all_filter.add_pattern (string_compose (X_("*%1"), ".template"));
+	all_filter.add_pattern (string_compose (X_("*%1"), ".axml"));
+	all_filter.set_name (_("All supported files"));
+	_chooser.add_filter (all_filter);
+	_chooser.set_filter (all_filter);
+
+	Gtkmm2ext::add_volume_shortcuts (_chooser);
+
+	_chooser.signal_selection_changed ().connect (mem_fun (*this, &StripImportDialog::file_selection_changed));
+	_chooser.signal_file_activated ().connect (sigc::mem_fun (*this, &StripImportDialog::file_activated));
+
+	/* template list */
+	_template_model = ListStore::create (_template_columns);
+
+	vector<TemplateInfo> templates;
+	find_session_templates (templates, false);
+	setup_template_model (templates);
+
+	_template_treeview.set_model (_template_model);
+	_template_treeview.append_column (_("Name"), _template_columns.name);
+	_template_treeview.set_headers_visible (true);
+
+	_template_treeview.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &StripImportDialog::template_selection_changed));
+
+	_template_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
+	_template_scroller.add (_template_treeview);
+
+	_notebook.append_page (_chooser, _("File"));
+	_notebook.append_page (_template_scroller, _("Session Templates"));
+	_notebook.append_page (*manage (new VBox ()), _("Local Presets"));
+	_notebook.append_page (*manage (new VBox ()), _("Global Presets"));
+
+	// TODO unselect, or re-apply selection of given tab..
+	_notebook_connection = _notebook.signal_switch_page ().connect (sigc::mem_fun (*this, &StripImportDialog::page_changed));
+
+	_page_file.pack_start (_notebook);
+	_page_file.show_all ();
+}
+
+void
+StripImportDialog::page_changed (GtkNotebookPage*, guint page)
+{
+	switch (page) {
+		case 0:
+			file_selection_changed ();
+			break;
+		case 1:
+			template_selection_changed ();
+			break;
+		default:
+			break;
+	}
+}
+
+void
+StripImportDialog::setup_template_model (vector<TemplateInfo> const& templates)
+{
+	for (auto const& t : templates) {
+		TreeModel::Row row;
+		row = *(_template_model->append ());
+
+		row[_template_columns.name] = t.name;
+		row[_template_columns.path] = t.path;
+	}
+}
+
+void
+StripImportDialog::file_selection_changed ()
+{
+	parse_track_state (_chooser.get_filename ());
+}
+
+void
+StripImportDialog::file_activated ()
+{
+	/* Note: this can only happen after file_selection_changed.
+	 * so _page is set.
+	 */
+	maybe_switch_to_import_page ();
+}
+
+void
+StripImportDialog::template_selection_changed ()
+{
+	Gtk::TreeModel::const_iterator selection = _template_treeview.get_selection ()->get_selected ();
+	if (selection) {
+		parse_track_state (session_template_dir_to_file ((*selection)[_template_columns.path]));
+	} else {
+		parse_track_state ("");
+	}
+}
+
+void
+StripImportDialog::parse_track_state (std::string const& path)
+{
+	_extern_map.clear ();
+	_path = path;
+
+	if (path.empty ()) {
+		goto out;
+	}
+	if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
+		goto out;
+	}
+
+	_extern_map = _session->parse_track_state (path, _match_pbd_id);
+
+out:
+	_open_button->set_sensitive (!_extern_map.empty ());
+}
+
+bool
+StripImportDialog::maybe_switch_to_import_page ()
+{
+	if (_extern_map.empty ()) {
+		return false;
+	}
+
+	// TODO cleanup managed items on _page_file
+
+	/* -> next page */
+	setup_strip_import_page ();
+	get_vbox ()->remove (_page_file);
+	get_vbox ()->pack_start (_page_strip);
+
+	_open_button->hide ();
+	_ok_button->show ();
+	return true;
+}
+
+/* ****************************************************************************
+ * Page Two map Tracks/State 
+ */
+
+void
+StripImportDialog::refill_import_table ()
+{
+	Gtk::Label* l;
+	Gtkmm2ext::container_clear (_strip_table, true);
+
+	_strip_table.set_spacings (3);
+
+	Glib::RefPtr<SizeGroup> col_size_group (SizeGroup::create (SIZE_GROUP_HORIZONTAL));
+
+	l = manage (new Label (string_compose ("<b>%1</b>", _("Local Track/Bus"))));
+	l->set_use_markup ();
+	_strip_table.attach (*l, 0, 1, 0, 1, Gtk::FILL, Gtk::SHRINK);
+	col_size_group->add_widget (*l);
+
+	l = manage (new Label (string_compose ("<b>%1</b>", _("External State"))));
+	l->set_use_markup ();
+	_strip_table.attach (*l, 2, 3, 0, 1, Gtk::FILL, Gtk::SHRINK);
+	col_size_group->add_widget (*l);
+
+	/* clang-format off */
+	_strip_table.attach (*manage (new ArdourVSpacer (1.0)), 1, 2, 0, 1, SHRINK       , EXPAND | FILL, 8, 4);
+	_strip_table.attach (*manage (new ArdourHSpacer (1.0)), 0, 4, 1, 2, EXPAND | FILL, SHRINK,        4, 8);
+	/* clang-format on */
+
+	/* Refill table */
+	int r = 1;
+	for (auto& [rid, eid] : _import_map) {
+		++r;
+		if (_route_map.find (rid) != _route_map.end ()) {
+			l = manage (new Label (_route_map[rid], 0, 0.5));
+		} else {
+			l = manage (new Label (_("<i>New Track</i>"), 0, 0.5));
+			l->set_use_markup ();
+		}
+		_strip_table.attach (*l, 0, 1, r, r + 1, EXPAND | FILL, SHRINK);
+		l = manage (new Label (_extern_map[eid], 1.0, 0.5));
+		_strip_table.attach (*l, 2, 3, r, r + 1, EXPAND | FILL, SHRINK);
+
+		ArdourButton* rm = manage (new ArdourButton ());
+		rm->set_icon (ArdourIcon::CloseCross);
+		rm->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &StripImportDialog::remove_mapping), rid));
+		_strip_table.attach (*rm, 3, 4, r, r + 1, Gtk::SHRINK, Gtk::SHRINK, 4, 2);
+	}
+
+	if (r > 1) {
+		++r;
+		_strip_table.attach (*manage (new ArdourVSpacer (1.0)), 1, 2, 2, r, SHRINK, EXPAND | FILL, 8, 4);
+	}
+
+	++r;
+
+	/* Add options */
+	using namespace Menu_Helpers;
+
+	_add_rid = PBD::ID (0);
+	_add_eid = PBD::ID (0);
+
+	int64_t next_id  = std::numeric_limits<uint64_t>::max () - 1;
+	PBD::ID next_new = PBD::ID (next_id);
+
+	while (_import_map.find (next_new) != _import_map.end ()) {
+		--next_id;
+		next_new = PBD::ID (next_id);
+	}
+
+	/* accumulate both dropdowns, so colums are equally spaced */
+	std::vector<std::string> sizing_texts;
+
+	_add_rid_dropdown = manage (new ArdourWidgets::ArdourDropdown ());
+	_add_rid_dropdown->add_menu_elem (MenuElem (_(" -- New Track -- "), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::prepare_mapping), false, next_new, _("New Track"))));
+	sizing_texts.push_back (_(" -- New Track -- "));
+
+	for (auto& [rid, rname] : _route_map) {
+		if (_import_map.find (rid) != _import_map.end ()) {
+			continue;
+		}
+		_add_rid_dropdown->add_menu_elem (MenuElem (Gtkmm2ext::markup_escape_text (rname), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::prepare_mapping), false, rid, rname)));
+		sizing_texts.push_back (rname);
+	}
+
+	_add_eid_dropdown = manage (new ArdourWidgets::ArdourDropdown ());
+	for (auto& [eid, ename] : _extern_map) {
+		_add_eid_dropdown->add_menu_elem (MenuElem (Gtkmm2ext::markup_escape_text (ename), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::prepare_mapping), true, eid, ename)));
+		sizing_texts.push_back (ename);
+	}
+
+	_add_rid_dropdown->set_sizing_texts (sizing_texts);
+	_add_eid_dropdown->set_sizing_texts (sizing_texts);
+	col_size_group->add_widget (*_add_rid_dropdown);
+	col_size_group->add_widget (*_add_eid_dropdown);
+
+	_add_new_mapping = manage (new ArdourButton ());
+	_add_new_mapping->set_icon (ArdourIcon::PlusSign);
+	_add_new_mapping->signal_clicked.connect (sigc::mem_fun (*this, &StripImportDialog::add_mapping));
+
+	/* clang-format off */
+	_strip_table.attach (*_add_rid_dropdown, 0, 1, r, r + 1, EXPAND | FILL, SHRINK);
+	_strip_table.attach (*_add_eid_dropdown, 2, 3, r, r + 1, EXPAND | FILL, SHRINK);
+	_strip_table.attach (*_add_new_mapping,  3, 4, r, r + 1, Gtk::SHRINK,   SHRINK);
+	/* clang-format on */
+
+	bool can_add = !_add_rid_dropdown->items ().empty () && !_add_eid_dropdown->items ().empty ();
+
+	_add_rid_dropdown->set_sensitive (can_add);
+	_add_eid_dropdown->set_sensitive (can_add);
+	_add_new_mapping->set_sensitive (false);
+
+	_ok_button->set_sensitive (!_import_map.empty ());
+
+	_strip_table.show_all ();
+}
+
+void
+StripImportDialog::idle_refill_import_table ()
+{
+	Glib::signal_idle ().connect ([&] () { refill_import_table (); return false; }, Glib::PRIORITY_HIGH_IDLE + 10);
+}
+
+void
+StripImportDialog::prepare_mapping (bool ext, PBD::ID const& id, std::string const& name)
+{
+	if (ext) {
+		_add_eid_dropdown->set_text (name);
+		_add_eid = id;
+	} else {
+		_add_rid_dropdown->set_text (name);
+		_add_rid = id;
+	}
+
+	_add_new_mapping->set_sensitive (_add_rid != PBD::ID (0) && _add_eid != PBD::ID (0));
+}
+
+void
+StripImportDialog::add_mapping ()
+{
+	assert (_add_rid != PBD::ID (0));
+	assert (_add_eid != PBD::ID (0));
+
+	_default_mapping      = false;
+	_import_map[_add_rid] = _add_eid;
+
+	idle_refill_import_table ();
+}
+
+void
+StripImportDialog::remove_mapping (PBD::ID const& id)
+{
+	if (1 == _import_map.erase (id)) {
+		_default_mapping = false;
+		idle_refill_import_table ();
+	}
+}
+
+void
+StripImportDialog::clear_mapping ()
+{
+	_default_mapping = false;
+	_import_map.clear ();
+	idle_refill_import_table ();
+}
+
+void
+StripImportDialog::set_default_mapping (bool and_idle_update)
+{
+	_import_map.clear ();
+	_default_mapping = true;
+
+	if (_match_pbd_id) {
+		/* try a 1:1 mapping */
+		for (auto& [eid, ename] : _extern_map) {
+			try {
+				_import_map[_route_map.at (eid)] = eid;
+			} catch (const std::out_of_range&) {
+			}
+		}
+	} else {
+		/* match by name */
+		for (auto& [eid, ename] : _extern_map) {
+			// TODO consider building a reverse [pointer] map
+			for (auto& [rid, rname] : _route_map) {
+				if (ename == rname) {
+					_import_map[rid] = eid;
+					break;
+				}
+			}
+		}
+	}
+	if (and_idle_update) {
+		idle_refill_import_table ();
+	}
+}
+
+void
+StripImportDialog::setup_strip_import_page ()
+{
+	_route_map.clear ();
+
+	for (auto const& r : *_session->get_routes ()) {
+		_route_map[r->id ()] = r->name ();
+	}
+
+	set_default_mapping (false);
+
+	refill_import_table ();
+
+	_clear_mapping = new ArdourButton (_("Clear Mapping"));
+	_reset_mapping = new ArdourButton (_match_pbd_id ? _("Reset - auto-map by ID") : _("Reset - auto-map by name"));
+
+	_clear_mapping->signal_clicked.connect (mem_fun (*this, &StripImportDialog::clear_mapping));
+	_reset_mapping->signal_clicked.connect (sigc::bind (mem_fun (*this, &StripImportDialog::set_default_mapping), true));
+
+	HBox* hbox = manage (new HBox ());
+	hbox->set_spacing (4);
+	hbox->pack_start (*_clear_mapping, false, false);
+	hbox->pack_start (*_reset_mapping, false, false);
+
+	VBox* vbox = manage (new VBox ());
+	vbox->set_spacing (4);
+	vbox->pack_start (_strip_table, false, false);
+	vbox->pack_end (*hbox, false, false);
+
+	_strip_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
+	_strip_scroller.add (*vbox);
+	_page_strip.pack_start (_strip_scroller);
+	_page_strip.show_all ();
+
+	_ok_button->set_sensitive (true); // XXX
+}
+
+void
+StripImportDialog::ok_activated ()
+{
+	_session->import_track_state (_path, _import_map);
+	ArdourDialog::on_response (RESPONSE_ACCEPT);
 }

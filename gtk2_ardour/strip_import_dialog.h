@@ -17,17 +17,30 @@
  */
 
 #pragma once
+#include <string>
 
 #include <ytkmm/box.h>
 #include <ytkmm/filechooserwidget.h>
+#include <ytkmm/liststore.h>
 #include <ytkmm/notebook.h>
+#include <ytkmm/scrolledwindow.h>
 #include <ytkmm/table.h>
+#include <ytkmm/treeview.h>
 
+#include "pbd/id.h"
+
+#include "ardour/template_utils.h"
 #include "ardour_dialog.h"
 
 namespace ARDOUR
 {
 	class Session;
+}
+
+namespace ArdourWidgets
+{
+	class ArdourButton;
+	class ArdourDropdown;
 }
 
 class StripImportDialog : public ArdourDialog, public PBD::ScopedConnectionList
@@ -37,17 +50,69 @@ public:
 	~StripImportDialog ();
 
 private:
-
-	/* file chooser related */
-	void file_selection_changed ();
+	void page_changed (GtkNotebookPage*, guint);
+	void setup_file_page ();
 	void file_activated ();
+	void file_selection_changed ();
+	void template_selection_changed ();
+	void template_row_selection_changed ();
+	void setup_template_model (std::vector<ARDOUR::TemplateInfo> const&);
+	void parse_track_state (std::string const&);
+
+	void setup_strip_import_page ();
+	void refill_import_table ();
+	void idle_refill_import_table ();
+	bool maybe_switch_to_import_page ();
+	void add_mapping ();
+	void prepare_mapping (bool, PBD::ID const&, std::string const&);
+	void remove_mapping (PBD::ID const&);
+	void clear_mapping ();
+	void set_default_mapping (bool and_idle_update);
+	void update_sensitivity_ok ();
+	void ok_activated ();
+
+	struct SessionTemplateColumns : public Gtk::TreeModel::ColumnRecord {
+		SessionTemplateColumns ()
+		{
+			add (name);
+			add (path);
+		}
+
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> path;
+	};
+
+	Glib::RefPtr<Gtk::ListStore> _template_model;
+	SessionTemplateColumns       _template_columns;
 
 	Gtk::VBox _page_file;
-	Gtk::VBox _page_strips;
+	Gtk::VBox _page_strip;
 
 	Gtk::Notebook          _notebook;
 	Gtk::FileChooserWidget _chooser;
+	Gtk::Button*           _open_button;
+	Gtk::Button*           _ok_button;
+	Gtk::ScrolledWindow    _template_scroller;
+	Gtk::TreeView          _template_treeview;
 
-	Gtk::Table             _strip_table;
+	Gtk::Table          _strip_table;
+	Gtk::ScrolledWindow _strip_scroller;
 
+	ArdourWidgets::ArdourDropdown* _add_rid_dropdown;
+	ArdourWidgets::ArdourDropdown* _add_eid_dropdown;
+	ArdourWidgets::ArdourButton*   _add_new_mapping;
+	ArdourWidgets::ArdourButton*   _clear_mapping;
+	ArdourWidgets::ArdourButton*   _reset_mapping;
+
+	bool                           _match_pbd_id;
+	std::string                    _path;
+	std::map<PBD::ID, std::string> _extern_map;
+	std::map<PBD::ID, std::string> _route_map;
+	std::map<PBD::ID, PBD::ID>     _import_map;
+
+	PBD::ID _add_rid;
+	PBD::ID _add_eid;
+	bool    _default_mapping;
+
+	sigc::connection _notebook_connection;
 };
