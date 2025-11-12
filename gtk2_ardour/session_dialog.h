@@ -105,6 +105,10 @@ private:
 	bool existing_button_pressed (GdkEventButton*);
 	bool prefs_button_pressed (GdkEventButton*);
 
+	void new_button_choice_action ();
+	void recent_button_choice_action ();
+	void existing_button_choice_action ();
+
 	bool open_button_pressed (GdkEventButton*);
 
 	Gtk::HBox _info_box;

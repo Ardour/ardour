@@ -586,27 +586,42 @@ SessionDialog::session_selected ()
 {
 }
 
+void
+SessionDialog::new_button_choice_action ()
+{
+	_tabs.set_current_page(0);
+}
+
+void
+SessionDialog::recent_button_choice_action ()
+{
+	_tabs.set_current_page(1);
+}
+
+void
+SessionDialog::existing_button_choice_action ()
+{
+	_tabs.set_current_page(2);
+}
+
 bool
 SessionDialog::new_button_pressed (GdkEventButton*)
 {
-	_tabs.set_current_page(0);
-
+	new_button_choice_action ();
 	return true;
 }
 
 bool
 SessionDialog::recent_button_pressed (GdkEventButton*)
 {
-	_tabs.set_current_page(1);
-
+	recent_button_choice_action ();
 	return true;
 }
 
 bool
 SessionDialog::existing_button_pressed (GdkEventButton*)
 {
-	_tabs.set_current_page(2);
-
+	existing_button_choice_action ();
 	return true;
 }
 
