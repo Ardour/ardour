@@ -4783,17 +4783,20 @@ Editor::maybe_show_instrument_plugin (std::shared_ptr<MidiTrack> mt)
 	if (!UIConfiguration::instance().get_open_gui_after_creating_instrument_track ()) {
 		return;
 	}
-	std::shared_ptr<Processor> iproc = mt->the_instrument();
-	if (!iproc) {
+	std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (mt->the_instrument ());
+	if (!pi) {
+		return;
+	}
+	if (pi->what_can_be_automated ().size () == 0) {
 		return;
 	}
 
-	ProcessorWindowProxy* proxy = iproc->window_proxy();
+	ProcessorWindowProxy* proxy = pi->window_proxy();
 	if (!proxy) {
 		return;
 	}
 
-	proxy->set_custom_ui_mode (true);
+	proxy->set_custom_ui_mode (pi->plugin ()->has_editor ());
 	proxy->show_the_right_window ();
 	Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (edit_controls_vbox.get_toplevel ());
 	if (tlw) {
