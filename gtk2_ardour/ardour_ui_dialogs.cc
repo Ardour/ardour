@@ -61,6 +61,7 @@
 #include "gui_object.h"
 #include "gui_thread.h"
 #include "keyeditor.h"
+#include "strip_import_dialog.h"
 #include "library_download_dialog.h"
 #include "location_ui.h"
 #include "lua_script_manager.h"
@@ -996,6 +997,14 @@ ARDOUR_UI::create_rtawindow ()
 {
 	RTAWindow* rtawindow = new RTAWindow ();
 	return rtawindow;
+}
+
+void ARDOUR_UI::import_strips ()
+{
+	if (_session) {
+		StripImportDialog isd (_session);
+		isd.run();
+	}
 }
 
 void
