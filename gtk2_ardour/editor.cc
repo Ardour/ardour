@@ -4695,22 +4695,22 @@ Editor::add_stripables (StripableList& sl)
 
 	DisplaySuspender ds;
 
-	for (StripableList::iterator s = sl.begin(); s != sl.end(); ++s) {
+	for (auto & s : sl) {
 
-		if ((*s)->is_foldbackbus()) {
+		if (s->is_foldbackbus()) {
 			continue;
 		}
 
-		if ((v = std::dynamic_pointer_cast<VCA> (*s)) != 0) {
+		if ((v = std::dynamic_pointer_cast<VCA> (s)) != 0) {
 
 			VCATimeAxisView* vtv = new VCATimeAxisView (*this, _session, *_track_canvas);
 			vtv->set_vca (v);
 			track_views.push_back (vtv);
 
-			(*s)->gui_changed.connect (*this, invalidator (*this), std::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
+			s->gui_changed.connect (*this, invalidator (*this), std::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
 			changed = true;
 
-		} else if ((r = std::dynamic_pointer_cast<Route> (*s)) != 0) {
+		} else if ((r = std::dynamic_pointer_cast<Route> (s)) != 0) {
 
 			if (r->is_auditioner() || r->is_monitor() || r->is_surround_master ()) {
 				continue;
@@ -4736,7 +4736,7 @@ Editor::add_stripables (StripableList& sl)
 
 			rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
 			rtv->view()->RegionViewRemoved.connect (sigc::mem_fun (*this, &Editor::region_view_removed));
-			(*s)->gui_changed.connect (*this, invalidator (*this), std::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
+			s->gui_changed.connect (*this, invalidator (*this), std::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
 			changed = true;
 		}
 	}
