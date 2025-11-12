@@ -4122,6 +4122,14 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_open_gui_after_adding_plugin)
 		     ));
 
+	add_option (_("Plugins/GUI"),
+	     new BoolOption (
+		     "open-gui-after-creating-instrument-track",
+		     _("Automatically open instrument plugin GUI when adding a new MIDI Track/Bus"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_open_gui_after_creating_instrument_track),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_open_gui_after_creating_instrument_track)
+		     ));
+
 	bo = new BoolOption (
 		"one-plugin-window-only",
 		_("Show only one plugin window at a time"),

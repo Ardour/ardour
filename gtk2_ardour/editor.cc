@@ -4780,6 +4780,9 @@ Editor::add_instrument_routes (RouteList& rl)
 void
 Editor::maybe_show_instrument_plugin (std::shared_ptr<MidiTrack> mt)
 {
+	if (!UIConfiguration::instance().get_open_gui_after_creating_instrument_track ()) {
+		return;
+	}
 	std::shared_ptr<Processor> iproc = mt->the_instrument();
 	if (!iproc) {
 		return;
