@@ -113,21 +113,24 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	/* no update message for trax, show license here */
 	_open_table.attach (_info_box, 1,3, 0,1, FILL, FILL, 0, 6);
 #endif
-	
+
 	new_button.set_text("NEW");
 	new_button.set_name ("tab button");
 	new_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::new_button_pressed), false);
 	new_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
+	new_button.set_can_focus (true);
 
 	recent_button.set_text("RECENT");
 	recent_button.set_name ("tab button");
 	recent_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::recent_button_pressed), false);
 	recent_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
+	recent_button.set_can_focus (true);
 
 	existing_button.set_text("OPEN");
 	existing_button.set_name ("tab button");
 	existing_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::existing_button_pressed), false);
 	existing_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
+	existing_button.set_can_focus (true);
 
 	prefs_button.set_text("SETTINGS");
 	prefs_button.set_name ("tab button");
