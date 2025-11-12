@@ -2828,6 +2828,9 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 
 		add_routes (new_routes, input_auto_connect, !instrument, order);
 		load_and_connect_instruments (new_routes, strict_io, instrument, pset, existing_outputs);
+		if (instrument) {
+			InstrumentRouteAdded (new_routes);
+		}
 	}
 
 	return ret;
@@ -2908,6 +2911,9 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 
 		add_routes (ret, false, !instrument, order);
 		load_and_connect_instruments (ret, strict_io, instrument, pset, existing_outputs);
+		if (instrument) {
+			InstrumentRouteAdded (ret);
+		}
 	}
 
 	return ret;

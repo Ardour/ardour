@@ -458,6 +458,10 @@ public:
 	PBD::Signal<void()> Located;
 
 	PBD::Signal<void(RouteList&)> RouteAdded;
+	/* This is emitted after one or more routes are added that are actually
+	   Tracks with an instrument plugin.
+	*/
+	PBD::Signal<void(RouteList&)> InstrumentRouteAdded;
 	/** Emitted when a property of one of our route groups changes.
 	 *  The parameter is the RouteGroup that has changed.
 	 */
