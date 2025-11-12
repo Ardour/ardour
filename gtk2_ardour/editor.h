@@ -761,6 +761,7 @@ private:
 	void initial_display ();
 	void add_stripables (ARDOUR::StripableList&);
 	void add_routes (ARDOUR::RouteList&);
+	void add_instrument_routes (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView*);
 	void add_vcas (ARDOUR::VCAList&);
 
@@ -1578,6 +1579,7 @@ private:
 
 	void set_visible_marker_types (MarkerBarType);
 	void set_visible_range_types (RangeBarType);
+	void maybe_show_instrument_plugin (std::shared_ptr<ARDOUR::MidiTrack> mt);
 
 protected:
 	void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update = false);

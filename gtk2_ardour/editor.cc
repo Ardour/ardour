@@ -80,6 +80,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/lmath.h"
 #include "ardour/location.h"
+#include "ardour/midi_track.h"
 #include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
@@ -1299,6 +1300,7 @@ Editor::set_session (Session *t)
 	_session->PositionChanged.connect (_session_connections, invalidator (*this), std::bind (&Editor::map_position_change, this, _1), gui_context());
 	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), std::bind (&Editor::add_vcas, this, _1), gui_context());
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), std::bind (&Editor::add_routes, this, _1), gui_context());
+	_session->InstrumentRouteAdded.connect (_session_connections, invalidator (*this), std::bind (&Editor::add_instrument_routes, this, _1), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), std::bind (&Editor::update_title, this), gui_context());
 	_session->Located.connect (_session_connections, invalidator (*this), std::bind (&Editor::located, this), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), std::bind (&Editor::parameter_changed, this, _1), gui_context());
@@ -4756,6 +4758,43 @@ Editor::add_stripables (StripableList& sl)
 
 	if (show_editor_mixer_when_tracks_arrive && !new_selection.empty()) {
 		show_editor_mixer (true);
+	}
+}
+
+void
+Editor::add_instrument_routes (RouteList& rl)
+{
+	std::vector<std::shared_ptr<MidiTrack> > midi_tracks;
+	for (auto & r : rl) {
+		std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (r);
+		if (mt) {
+			midi_tracks.push_back (mt);
+		}
+	}
+
+	if (!midi_tracks.empty()) {
+		maybe_show_instrument_plugin (midi_tracks.front());
+	}
+}
+
+void
+Editor::maybe_show_instrument_plugin (std::shared_ptr<MidiTrack> mt)
+{
+	std::shared_ptr<Processor> iproc = mt->the_instrument();
+	if (!iproc) {
+		return;
+	}
+
+	ProcessorWindowProxy* proxy = iproc->window_proxy();
+	if (!proxy) {
+		return;
+	}
+
+	proxy->set_custom_ui_mode (true);
+	proxy->show_the_right_window ();
+	Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (edit_controls_vbox.get_toplevel ());
+	if (tlw) {
+		proxy->set_transient_for (*tlw);
 	}
 }
 
