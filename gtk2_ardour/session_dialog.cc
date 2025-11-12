@@ -82,6 +82,16 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	, new_name_was_edited (false)
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
 {
+	action_group = ActionGroup::create (X_("SessionDialog"));
+
+	/* No string translation because these don't show anywhere */
+	new_session_action = Action::create (X_("New"));
+	action_group->add (new_session_action, sigc::mem_fun (this, &SessionDialog::new_button_choice_action));
+	recent_session_action = Action::create (X_("Recent"));
+	action_group->add (recent_session_action, sigc::mem_fun (this, &SessionDialog::recent_button_choice_action));
+	existing_session_action = Action::create (X_("Open"));
+	action_group->add (existing_session_action, sigc::mem_fun (this, &SessionDialog::existing_button_choice_action));
+
 	set_position (WIN_POS_CENTER);
 	get_vbox()->set_spacing (6);
 	get_vbox()->pack_start (_open_table, false, false);
