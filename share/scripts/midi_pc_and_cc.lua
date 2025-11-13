@@ -35,6 +35,9 @@ MIDI CC 93: end
 There's a convenience function to roll transport at a start time in seconds:
 MIDI CC 93: roll_transport(value, 0)
 
+You can also roll transport at a marker:
+MIDI CC 93: roll_transport(value, "01")
+
 Another convenience function to activate or deactivate a plugin:
 MIDI CC 91: activate_processor_by_name(route, value, "Gigaverb")
 
@@ -97,17 +100,34 @@ end
 --
 -- a convenience function to start or stop the transport
 -- value is 0 to stop transport and not 0 to start transport
--- location is a value in seconds
+-- location is either a value in seconds or a string matching a marker
+
+function string.starts(String,Start)
+   return string.sub(String,1,string.len(Start))==Start
+end
 
 function roll_transport(value, location)
    if value==0 then
       Session:request_stop (false, false, ARDOUR.TransportRequestSource.TRS_UI)
    else
       -- default value of location is 0 (start of session)
-      if not location then location = 0 end
-      start_sample = Session:nominal_sample_rate() * location;
-      Session:request_locate(location, false, ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_UI)
-      Session:request_roll (ARDOUR.TransportRequestSource.TRS_UI)
+      if not location then
+        start_sample = 0
+      elseif type(location) == "string" then
+        for loc in Session:locations():list():iter() do
+          if loc:is_mark() then
+            if string.starts(loc:name(), location) then
+              start_sample = loc:start():samples();
+            end
+          end
+        end
+      else
+        start_sample = Session:nominal_sample_rate() * location;
+      end
+      if start_sample then
+        Session:request_locate(start_sample, false, ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_UI)
+        Session:request_roll (ARDOUR.TransportRequestSource.TRS_UI)
+      end
    end
 end
 
