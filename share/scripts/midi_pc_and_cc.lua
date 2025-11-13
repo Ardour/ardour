@@ -111,6 +111,7 @@ function roll_transport(value, location)
       Session:request_stop (false, false, ARDOUR.TransportRequestSource.TRS_UI)
    else
       -- default value of location is 0 (start of session)
+      local start_sample
       if not location then
         start_sample = 0
       elseif type(location) == "string" then
