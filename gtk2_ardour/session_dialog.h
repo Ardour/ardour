@@ -100,9 +100,6 @@ private:
 
 	Gtk::ComboBoxText  timebase_chooser;
 
-	bool new_button_pressed (GdkEventButton*);
-	bool recent_button_pressed (GdkEventButton*);
-	bool existing_button_pressed (GdkEventButton*);
 	bool prefs_button_pressed (GdkEventButton*);
 
 	void new_button_choice_action ();

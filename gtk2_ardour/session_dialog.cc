@@ -126,21 +126,18 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 
 	new_button.set_text("NEW");
 	new_button.set_name ("tab button");
-	new_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::new_button_pressed), false);
 	new_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
 	new_button.set_can_focus (true);
 	new_button.set_related_action (new_session_action);
 
 	recent_button.set_text("RECENT");
 	recent_button.set_name ("tab button");
-	recent_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::recent_button_pressed), false);
 	recent_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
 	recent_button.set_can_focus (true);
 	recent_button.set_related_action (recent_session_action);
 
 	existing_button.set_text("OPEN");
 	existing_button.set_name ("tab button");
-	existing_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::existing_button_pressed), false);
 	existing_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
 	existing_button.set_can_focus (true);
 	existing_button.set_related_action (existing_session_action);
@@ -615,27 +612,6 @@ void
 SessionDialog::existing_button_choice_action ()
 {
 	_tabs.set_current_page(2);
-}
-
-bool
-SessionDialog::new_button_pressed (GdkEventButton*)
-{
-	new_button_choice_action ();
-	return true;
-}
-
-bool
-SessionDialog::recent_button_pressed (GdkEventButton*)
-{
-	recent_button_choice_action ();
-	return true;
-}
-
-bool
-SessionDialog::existing_button_pressed (GdkEventButton*)
-{
-	existing_button_choice_action ();
-	return true;
 }
 
 bool
