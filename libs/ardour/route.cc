@@ -1957,6 +1957,7 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 			DEBUG_TRACE (DEBUG::Processors, "}\n");
 			return list<pair<ChanCount, ChanCount> > ();
 		}
+		++index;
 	}
 
 	DEBUG_TRACE (DEBUG::Processors, "}\n");
@@ -2020,7 +2021,8 @@ Route::configure_processors_unlocked (ProcessorStreams* err, Glib::Threads::RWLo
 	Glib::Threads::RWLock::ReaderLock lr (_processor_lock);
 
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
-	for (auto & proc : _processors) {
+	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
+		std::shared_ptr<Processor> proc = *p;
 
 		if (!proc->configure_io(c->first, c->second)) {
 			DEBUG_TRACE (DEBUG::Processors, string_compose ("%1: configuration failed\n", _name));
