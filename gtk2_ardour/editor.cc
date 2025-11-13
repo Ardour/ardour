@@ -4787,7 +4787,8 @@ Editor::maybe_show_instrument_plugin (std::shared_ptr<MidiTrack> mt)
 	if (!pi) {
 		return;
 	}
-	if (pi->what_can_be_automated ().size () == 0) {
+
+	if (pi->what_can_be_automated ().size () == 0 && !pi->plugin ()->has_editor ()) {
 		return;
 	}
 
