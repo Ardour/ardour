@@ -835,10 +835,9 @@ SMFSource::load_model_unlocked (bool force_reload)
 
 	eventlist.sort(compare_eventlist);
 
-	std::list< std::pair< Evoral::Event<Temporal::Beats>*, gint > >::iterator it;
-	for (it=eventlist.begin(); it!=eventlist.end(); ++it) {
-		_model->append (*it->first, it->second);
-		delete it->first;
+	for (auto & it : eventlist) {
+		_model->append (*it.first, it.second);
+		delete it.first;
 	}
 
 	/* Length ought to be based on data in the file (TrkEnd meta-event, not
