@@ -1162,7 +1162,8 @@ MidiView::model_changed()
 		if (zoom != _last_display_zoom) {
 			/* Update resolved canvas notes to reflect changes in zoom without
 			   touching model.  Leave active notes (with length max) alone since
-			   they are being extended. */
+			   they are being extended in a timer/signal driven callback.
+			*/
 			for (auto & [ note, gui ] : _events) {
 				if (note->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
 					update_note (gui);
