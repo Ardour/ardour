@@ -54,7 +54,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/search_paths.h"
 #include "ardour/buffer.h"
-#include "ardour/cycle_timer.h"
+#include "ardour/debug.h"
 #include "ardour/internal_send.h"
 #include "ardour/meter.h"
 #include "ardour/midi_port.h"

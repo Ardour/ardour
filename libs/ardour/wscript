@@ -53,7 +53,6 @@ libardour_sources = [
         'control_group.cc',
         'control_protocol_manager.cc',
         'convolver.cc',
-        'cycle_timer.cc',
         'data_type.cc',
         'default_click.cc',
         'debug.cc',
