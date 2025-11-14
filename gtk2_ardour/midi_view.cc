@@ -180,6 +180,7 @@ MidiView::MidiView (MidiView const & other)
 	, in_note_split (false)
 	, split_tuple (0)
 	, note_splitting (false)
+	, _extensible (false)
 {
 	init (other._midi_track);
 }
