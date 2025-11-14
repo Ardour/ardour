@@ -656,6 +656,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	uint32_t split_tuple;
 	bool     note_splitting;
 	bool    _extensible; /* if true, we can add data beyond the current region/source end */
+	bool    _redisplaying; /* if true, in the middle of a call to ::redisplay() */
 
 	bool extensible() const { return _extensible; }
 	void set_extensible (bool yn) { _extensible = yn; }

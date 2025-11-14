@@ -143,6 +143,7 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	, split_tuple (0)
 	, note_splitting (false)
 	, _extensible (false)
+	, _redisplaying (false)
 {
 	init (mt);
 }
@@ -181,6 +182,7 @@ MidiView::MidiView (MidiView const & other)
 	, split_tuple (0)
 	, note_splitting (false)
 	, _extensible (false)
+	, _redisplaying (false)
 {
 	init (other._midi_track);
 }
@@ -1140,6 +1142,11 @@ MidiView::redisplay (bool view_only)
 
 		region_resized (what_changed);
 	} else {
+		/* Block calls to update note range at all as we add notes in
+		   ::model_changed()
+		*/
+
+		PBD::Unwinder<bool> uw (_redisplaying, true);
 		model_changed ();
 	}
 }
@@ -2038,7 +2045,10 @@ MidiView::add_note (const std::shared_ptr<NoteType> note, bool visible)
 {
 	NoteBase* event = 0;
 
-	_midi_context.maybe_extend_note_range (note->note());
+	if (!_redisplaying) {
+		/* We will catch up on note range somewhere later in ::redisplay() */
+		_midi_context.maybe_extend_note_range (note->note());
+	}
 
 	if (_midi_context.note_mode() == Sustained) {
 
