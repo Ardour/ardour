@@ -264,27 +264,59 @@ function program_change()
            local local_CC_functions = { }
            -- we wrap the code inside "return function (route, value)" and "end"
            -- so that when we pcall it with no argument it returns a function that takes two arguments
+           -- First parse "MIDI Bank # Program # CC #: code" patterns with bank and program restrictions
+           while true do
+              MIDI_CC_start, MIDI_CC_end, bank_list, program_list, CC_num, CC_program = string.find(route_comment, "MIDI Bank (%d[-%d,]*) Program (%d[-%d,]*) CC (%d+): ([^\n]+)", nextchar)
+              if MIDI_CC_start == nil then break end
+              local key = CC_num .. "|" .. bank_list .. "|" .. program_list
+              if (local_CC_functions[key] == nil) then
+                 local_CC_functions[key] = { code = "return function(route, value)\n", bank_list = bank_list, program_list = program_list, CC_num = CC_num }
+              end
+              local_CC_functions[key].code = local_CC_functions[key].code .. CC_program .. "\n"
+              nextchar = MIDI_CC_end + 1
+           end
+           -- Then parse "MIDI Program # CC #: code" patterns with only program restrictions
+           nextchar = 1
+           while true do
+              MIDI_CC_start, MIDI_CC_end, program_list, CC_num, CC_program = string.find(route_comment, "MIDI Program (%d[-%d,]*) CC (%d+): ([^\n]+)", nextchar)
+              if MIDI_CC_start == nil then break end
+              local key = CC_num .. "||" .. program_list
+              if (local_CC_functions[key] == nil) then
+                 local_CC_functions[key] = { code = "return function(route, value)\n", bank_list = nil, program_list = program_list, CC_num = CC_num }
+              end
+              local_CC_functions[key].code = local_CC_functions[key].code .. CC_program .. "\n"
+              nextchar = MIDI_CC_end + 1
+           end
+           -- Finally parse "MIDI CC #: code" patterns without restrictions
+           nextchar = 1
            while true do
               MIDI_CC_start, MIDI_CC_end, CC_num, CC_program = string.find(route_comment, "MIDI CC (%d+): ([^\n]+)", nextchar)
               if MIDI_CC_start == nil then break end
               if (local_CC_functions[CC_num] == nil) then
-                 local_CC_functions[CC_num] = "return function(route, value)\n"
+                 local_CC_functions[CC_num] = { code = "return function(route, value)\n", bank_list = nil, program_list = nil, CC_num = CC_num }
               end
-              local_CC_functions[CC_num] = local_CC_functions[CC_num] .. CC_program .. "\n"
+              local_CC_functions[CC_num].code = local_CC_functions[CC_num].code .. CC_program .. "\n"
               nextchar = MIDI_CC_end + 1
            end
            -- done parsing (or at least gathering all of the lines together)
            -- now compile the CC functions and insert them in the global table
-           for key, val in pairs(local_CC_functions) do
-              val = val .. "\nend"
-              local generator, err = load(val)
+           for key, entry in pairs(local_CC_functions) do
+              local code = entry.code .. "\nend"
+              local generator, err = load(code)
               if generator then
                   local ok, func = pcall(generator)
                   if ok then
-                      if not CC_functions[tonumber(key)] then
-                          CC_functions[tonumber(key)] = { }
+                      local cc_num = tonumber(entry.CC_num)
+                      if not CC_functions[cc_num] then
+                          CC_functions[cc_num] = { }
                       end
-                      table.insert(CC_functions[tonumber(key)], { route, func })
+                      -- Store route, function, and program/bank restrictions
+                      table.insert(CC_functions[cc_num], {
+                          route = route,
+                          func = func,
+                          program_list = entry.program_list,
+                          bank_list = entry.bank_list
+                      })
                   else
                      print("Execution error:", func)
                   end
@@ -327,10 +359,22 @@ function process_midi_messages()
            -- if any functions are registered for this CC, call them with their respective Route objects and the value of the controller
            local lst = CC_functions[num]
            if lst then
-             for _, tbl in ipairs(lst) do
-                   local route = tbl[1]
-                   local func = tbl[2]
-                   func(route, val)
+             for _, entry in ipairs(lst) do
+                   -- Check if program/bank restrictions match current program/bank
+                   local program_match = true
+                   local bank_match = true
+
+                   if entry.program_list then
+                       program_match = match_number_range(program, entry.program_list)
+                   end
+                   if entry.bank_list then
+                       bank_match = match_number_range(bank, entry.bank_list)
+                   end
+
+                   -- Only execute if restrictions match (or no restrictions)
+                   if program_match and bank_match then
+                       entry.func(entry.route, val)
+                   end
              end
            end
         end
