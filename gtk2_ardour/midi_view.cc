@@ -1734,9 +1734,11 @@ MidiView::extend_active_notes (timecnt_t const & duration)
 		return;
 	}
 
+	double x1 = _editing_context.duration_to_pixels (duration);
+
 	for (int i = 0; i < 128; ++i) {
 		if (_active_notes[i]) {
-			_active_notes[i]->set_x1 (_editing_context.duration_to_pixels (duration));
+			_active_notes[i]->set_x1 (x1);
 		}
 	}
 }
