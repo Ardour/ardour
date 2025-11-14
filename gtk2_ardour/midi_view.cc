@@ -1162,8 +1162,6 @@ MidiView::model_changed()
 
 	EC_LOCAL_TEMPO_SCOPE_ARG (_editing_context);
 
-	MidiViewBackground::NoteRangeSuspender nrs (_midi_context);
-
 	if (_active_notes) {
 		// Currently recording
 		const samplecnt_t zoom = _editing_context.get_current_zoom();
@@ -1181,6 +1179,8 @@ MidiView::model_changed()
 		}
 		return;
 	}
+
+	MidiViewBackground::NoteRangeSuspender nrs (_midi_context);
 
 	for (_optimization_iterator = _events.begin(); _optimization_iterator != _events.end(); ++_optimization_iterator) {
 		_optimization_iterator->second->invalidate ();
