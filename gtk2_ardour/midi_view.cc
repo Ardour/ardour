@@ -1319,6 +1319,8 @@ MidiView::view_changed()
 
 	if (_active_notes) {
 
+		/* Recording */
+
 		EC_LOCAL_TEMPO_SCOPE_ARG (_editing_context);
 
 		for (auto & [ note, gui ] : _events) {
