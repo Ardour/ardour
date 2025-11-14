@@ -1323,9 +1323,12 @@ MidiView::view_changed()
 
 		EC_LOCAL_TEMPO_SCOPE_ARG (_editing_context);
 
-		for (auto & [ note, gui ] : _events) {
-			if (note->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
-				update_note (gui);
+		const samplecnt_t zoom = _editing_context.get_current_zoom();
+		if (zoom != _last_display_zoom) {
+			for (auto & [ note, gui ] : _events) {
+				if (note->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
+					update_note (gui);
+				}
 			}
 		}
 		return;
