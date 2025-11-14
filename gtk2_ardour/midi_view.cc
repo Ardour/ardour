@@ -1137,9 +1137,6 @@ MidiView::redisplay (bool view_only)
 		what_changed.add (Properties::start);
 		what_changed.add (Properties::length);
 
-		/* this calls reset_width_dependent_items() which calls
-		   view_changed() in the right way.
-		*/
 		region_resized (what_changed);
 	} else {
 		model_changed ();
