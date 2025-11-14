@@ -5438,11 +5438,13 @@ TriggerBox::set_state (const XMLNode& node, int version)
 {
 	Processor::set_state (node, version);
 
+	XMLNode* tnode (node.child (X_("Triggers")));
+	if (!tnode) {
+		return -1;
+	}
+
 	node.get_property (X_("data-type"), _data_type);
 	node.get_property (X_("order"), _order);
-
-	XMLNode* tnode (node.child (X_("Triggers")));
-	assert (tnode);
 
 	XMLNodeList const & tchildren (tnode->children());
 
