@@ -176,7 +176,25 @@ function program_change()
       local route_comment = route:comment()
       local route_active = false
       local local_CC_functions = { }
+      local program_functions = { }  -- to store functions to execute after track activation
+      -- Look for "MIDI Bank # Program #: code" statements with function calls
+      while true do
+          local MIDI_Program_start, MIDI_Program_end, bank_list, program_list, code
+          MIDI_Program_start,MIDI_Program_end,bank_list,program_list,code = string.find(route_comment, "MIDI Bank (%d[-%d,]*) Program (%d[-%d,]*): ([^\n]+)", nextchar)
+          if bank_list then
+              local matches = match_number_range(program, program_list) and match_number_range(bank, bank_list)
+              route_active = route_active or matches
+              MIDI_Program_seen = true
+              if matches and code then
+                  table.insert(program_functions, code)
+              end
+              nextchar = MIDI_Program_end + 1
+          else
+              break
+          end
+      end
       -- Look for "MIDI Bank # Program #" statements that match both the program number and the bank number
+      nextchar = 1
       while true do
           local MIDI_Program_start, MIDI_Program_end, bank_list, program_list
           MIDI_Program_start,MIDI_Program_end,bank_list,program_list = string.find(route_comment, "MIDI Bank (%d[-%d,]*) Program (%d[-%d,]*)", nextchar)
@@ -186,6 +204,23 @@ function program_change()
               nextchar = MIDI_Program_end + 1
           else
               break
+          end
+      end
+      -- Look for "MIDI Program #: code" statements with function calls
+      nextchar = 1
+      while true do
+          local MIDI_Program_start, MIDI_Program_end, program_list, code
+          MIDI_Program_start,MIDI_Program_end,program_list,code = string.find(route_comment, "MIDI Program (%d[-%d,]*): ([^\n]+)", nextchar)
+          if program_list then
+             local matches = match_number_range(program, program_list)
+             route_active = route_active or matches
+             MIDI_Program_seen = true
+             if matches and code then
+                 table.insert(program_functions, code)
+             end
+             nextchar = MIDI_Program_end + 1
+          else
+             break
           end
       end
       -- Look for "MIDI Program #" statements that match just the program number
@@ -206,8 +241,25 @@ function program_change()
          -- all tracks with a "MIDI Program" line present are set either active or inactive, depending on if they matched
          -- all other tracks (no "MIDI Progam" line) are not affected (they never get to this point)
          route:set_active(route_active, nil);
-         -- if this route is active, parse any CC functions in the route's comment block
+         -- if this route is active, execute any program change functions and parse any CC functions in the route's comment block
          if route_active then
+           -- execute program change functions after track activation
+           for _, code in ipairs(program_functions) do
+              local func, err = load("return function(route) " .. code .. " end")
+              if func then
+                  local ok, generated_func = pcall(func)
+                  if ok then
+                      local success, exec_err = pcall(generated_func, route)
+                      if not success then
+                          print("Program function execution error:", exec_err)
+                      end
+                  else
+                      print("Program function generation error:", generated_func)
+                  end
+              else
+                  print("Program function compilation error:", err)
+              end
+           end
            local nextchar = 1
            local local_CC_functions = { }
            -- we wrap the code inside "return function (route, value)" and "end"
