@@ -124,25 +124,25 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	_open_table.attach (_info_box, 1,3, 0,1, FILL, FILL, 0, 6);
 #endif
 
-	new_button.set_text("NEW");
+	new_button.set_text (_("NEW"));
 	new_button.set_name ("tab button");
 	new_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
 	new_button.set_can_focus (true);
 	new_button.set_related_action (new_session_action);
 
-	recent_button.set_text("RECENT");
+	recent_button.set_text (_("RECENT"));
 	recent_button.set_name ("tab button");
 	recent_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
 	recent_button.set_can_focus (true);
 	recent_button.set_related_action (recent_session_action);
 
-	existing_button.set_text("OPEN");
+	existing_button.set_text (_("OPEN"));
 	existing_button.set_name ("tab button");
 	existing_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
 	existing_button.set_can_focus (true);
 	existing_button.set_related_action (existing_session_action);
 
-	prefs_button.set_text("SETTINGS");
+	prefs_button.set_text(_("SETTINGS"));
 	prefs_button.set_name ("tab button");
 	prefs_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::prefs_button_pressed), false);
 	prefs_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
