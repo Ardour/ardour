@@ -73,15 +73,8 @@ protected:
 	};
 	typedef typename RequestBuffer::rw_vector RequestBufferVector;
 
-	struct pthread_cmp
-	{
-		bool operator()(const pthread_t& a, const pthread_t& b) const noexcept
-		{
-			return memcmp(&a, &b, sizeof(pthread_t)) < 0;
-		}
-	};
-	typedef typename std::map<pthread_t,RequestBuffer*, pthread_cmp>::iterator RequestBufferMapIterator;
-	typedef std::map<pthread_t,RequestBuffer*, pthread_cmp> RequestBufferMap;
+	typedef typename std::map<pthread_t, RequestBuffer*, std::less<>>::iterator RequestBufferMapIterator;
+	typedef std::map<pthread_t, RequestBuffer*, std::less<>> RequestBufferMap;
 
 	RequestBufferMap request_buffers;
 
