@@ -4054,7 +4054,7 @@ These settings will only take effect after %1 is restarted.\n\
 
 	bo = new BoolOption (
 			"discover-plugins-on-start",
-			_("Scan for [new] Plugins on Application Start"),
+			_("Scan for [New] Plugins on Application Start"),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::get_discover_plugins_on_start),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::set_discover_plugins_on_start)
 			);
