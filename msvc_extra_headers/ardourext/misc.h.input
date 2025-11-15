@@ -242,14 +242,6 @@ inline int64_t abs(int64_t val) throw()
 #if defined(LIBPBD_DLL) || defined(PBD_IS_IN_WIN_STATIC_LIB)
 #include <pbd/msvc_pbd.h>
 
-#ifdef LIBPBD_DLL
-#define DEFAULT_COMPARISONS_DEFINED
-#define DECLARE_DEFAULT_COMPARISONS(Type) \
-	LIBPBD_API bool operator >  (const Type& lhs, const Type& rhs); \
-	LIBPBD_API bool operator <  (const Type& lhs, const Type& rhs); \
-	LIBPBD_API bool operator != (const Type& lhs, const Type& rhs); \
-	LIBPBD_API bool operator == (const Type& lhs, const Type& rhs);
-#endif
 #endif
 #if defined(BUILDING_LIBARDOUR) || defined(LIBARDOUR_IS_IN_WIN_STATIC_LIB)
 #include <ardour/msvc_libardour.h>
@@ -258,15 +250,6 @@ inline int64_t abs(int64_t val) throw()
 #include <rubberband/msvc_rubberband.h>
 #endif
 #endif // __cplusplus
-
-#ifndef DEFAULT_COMPARISONS_DEFINED
-#define DEFAULT_COMPARISONS_DEFINED
-#define DECLARE_DEFAULT_COMPARISONS(Type) \
-	extern bool operator >  (const Type& lhs, const Type& rhs); \
-	extern bool operator <  (const Type& lhs, const Type& rhs); \
-	extern bool operator != (const Type& lhs, const Type& rhs); \
-	extern bool operator == (const Type& lhs, const Type& rhs);
-#endif
 
 #if !defined(LIBPBD_API) || defined(PBD_IS_IN_WIN_STATIC_LIB)
 // Emulate some C99 math functions which MSVC itself didn't
