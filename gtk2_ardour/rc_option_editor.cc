@@ -4911,7 +4911,7 @@ These settings will only take effect after %1 is restarted.\n\
 	rta->add (12, _("12"));
 	rta->add (16, _("16 (fast CPUs)"));
 	rta->add (16, _("20 (very fast CPUs)"));
-	rta->add ( 0, _("No Limt"));
+	rta->add ( 0, _("No Limit"));
 
 	add_option (S_("Preferences|Metering"), rta);
 
