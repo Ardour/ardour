@@ -199,7 +199,7 @@ MidiBuffer::push_back(TimeType time, Evoral::EventType event_type, size_t size, 
 extern PBD::Timing minsert;
 
 bool
-MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
+MidiBuffer::insert_event (const Evoral::Event<TimeType>& ev)
 {
 	if (size() == 0) {
 		return push_back(ev);
