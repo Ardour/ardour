@@ -112,7 +112,9 @@ MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t ds
 		const Evoral::Event<TimeType> ev(*i, false);
 
 		if (ev.time() >= src_offset && ev.time() < nframes + src_offset) {
-			push_back (ev.time() + dst_offset - src_offset, ev.event_type (), ev.size(), ev.buffer());
+			if (!push_back (ev.time() + dst_offset - src_offset, ev.event_type (), ev.size(), ev.buffer())) {
+				std::cerr << "MidiBuffer::push_back() failed\n";
+			}
 		}
 	}
 
