@@ -573,8 +573,8 @@ SMFSource::append_event_samples (const WriterLock& lock,
 		event_id = ev.id();
 	}
 
-	/* a distance measure that starts at @p _last_ev_time_samples (audio time) and
-	   extends for ev.time() (audio time)
+	/* a distance measure that holds the distance between ev.time() and
+	   _last_ev_time_samples (in audio time).
 	*/
 	const timecnt_t       delta_distance (timepos_t (ev.time() - _last_ev_time_samples), timepos_t (_last_ev_time_samples));
 	const Temporal::Beats delta_time_beats = delta_distance.beats ();
