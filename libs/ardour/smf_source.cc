@@ -443,9 +443,9 @@ SMFSource::write_unlocked (const WriterLock&            lock,
 		}
 		time -= pos_samples;
 
-		ev.set(buf, size, time);
-		ev.set_event_type(Evoral::MIDI_EVENT);
-		ev.set_id(Evoral::next_event_id());
+		ev.set (buf, size, time);
+		ev.set_event_type (Evoral::MIDI_EVENT);
+		ev.set_id (Evoral::next_event_id());
 
 		if (!(ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex())) {
 			continue;
