@@ -452,7 +452,7 @@ SMFSource::write_unlocked (const WriterLock&            lock,
 			continue;
 		}
 
-		append_event_samples(lock, ev, pos_samples);
+		append_event_samples (lock, ev, pos_samples);
 	}
 
 	Evoral::SMF::flush ();
