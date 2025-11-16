@@ -412,7 +412,9 @@ SMFSource::write_unlocked (const WriterLock&            lock,
 		if ((dur != timecnt_t::max (dur.time_domain())) &&
 		    (time > pos_samples + _capture_length + dur_samples)) {
 			/* The diskstream doesn't want us to write everything, and this
-			   event is past the end of this block, so we're done for now. */
+			   event is past the end of this block, so we're done
+			   for now.
+			*/
 			break;
 		}
 
