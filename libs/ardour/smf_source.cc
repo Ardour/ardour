@@ -381,21 +381,20 @@ timecnt_t
 SMFSource::write_unlocked (const WriterLock&            lock,
                            MidiRingBuffer<samplepos_t>& source,
                            timepos_t const &            position,
-                           timecnt_t const &            cnt)
+                           timecnt_t const &            dur)
 {
 
 	if (!_writing) {
 		mark_streaming_write_started (lock);
 	}
 
-	samplepos_t        time;
-	const samplepos_t        pos_samples = position.samples();
-	const samplecnt_t        cnt_samples = cnt.samples();
+	samplepos_t       time;
+	const samplepos_t pos_samples = position.samples();
+	const samplecnt_t dur_samples = dur.samples();
 	Evoral::EventType type;
 	uint32_t          size;
-
-	size_t   buf_capacity = 4;
-	uint8_t* buf          = (uint8_t*)malloc(buf_capacity);
+	size_t            buf_capacity = 4;
+	uint8_t*          buf = (uint8_t*) malloc (buf_capacity);
 
 	if (_model && !_model->writing()) {
 		_model->start_write();
@@ -410,8 +409,8 @@ SMFSource::write_unlocked (const WriterLock&            lock,
 			break;
 		}
 
-		if ((cnt != timecnt_t::max (cnt.time_domain())) &&
-		    (time > pos_samples + _capture_length + cnt_samples)) {
+		if ((dur != timecnt_t::max (dur.time_domain())) &&
+		    (time > pos_samples + _capture_length + dur_samples)) {
 			/* The diskstream doesn't want us to write everything, and this
 			   event is past the end of this block, so we're done for now. */
 			break;
@@ -457,7 +456,7 @@ SMFSource::write_unlocked (const WriterLock&            lock,
 	Evoral::SMF::flush ();
 	free (buf);
 
-	return cnt;
+	return dur;
 }
 
 void
