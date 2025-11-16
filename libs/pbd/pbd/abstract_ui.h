@@ -73,20 +73,18 @@ protected:
 	};
 	typedef typename RequestBuffer::rw_vector RequestBufferVector;
 
-#if defined(COMPILER_MINGW) && defined(PTW32_VERSION)
 	struct pthread_cmp
 	{
-		bool operator() (const ptw32_handle_t& thread1, const ptw32_handle_t& thread2)
+		bool operator() (const pthread_t& a, const pthread_t& b) const noexcept
 		{
-			return thread1.p < thread2.p;
+			if constexpr (std::is_class_v<pthread_t>) //pthread_t is a struct for ptw32, so this filter works.
+				return a.p < b.p;
+			else
+				return a < b;
 		}
 	};
 	typedef typename std::map<pthread_t,RequestBuffer*, pthread_cmp>::iterator RequestBufferMapIterator;
 	typedef std::map<pthread_t,RequestBuffer*, pthread_cmp> RequestBufferMap;
-#else
-	typedef typename std::map<pthread_t,RequestBuffer*>::iterator RequestBufferMapIterator;
-	typedef std::map<pthread_t,RequestBuffer*> RequestBufferMap;
-#endif
 
 	RequestBufferMap request_buffers;
 
