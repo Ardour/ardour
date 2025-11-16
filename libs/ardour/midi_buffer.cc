@@ -258,8 +258,11 @@ MidiBuffer::insert_event (const Evoral::Event<TimeType>& ev)
 uint32_t
 MidiBuffer::write (TimeType time, Evoral::EventType type, uint32_t size, const uint8_t* buf)
 {
-	insert_event(Evoral::Event<TimeType>(type, time, size, const_cast<uint8_t*>(buf)));
-	return size;
+	if (insert_event (Evoral::Event<TimeType>(type, time, size, const_cast<uint8_t*>(buf)))) {
+		return size;
+	} else {
+		return 0;
+	}
 }
 
 /** Reserve space for a new event in the buffer.
