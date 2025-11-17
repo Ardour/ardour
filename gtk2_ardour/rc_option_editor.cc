@@ -2922,7 +2922,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance/Application Bar"),
 	     new BoolOption (
 		     "show-toolbar-latency",
-		     _("Plugin Delay Compensation"),
+		     _("Display Plugin Delay Compensation Control and Info"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_latency),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_latency)
 		     ));
