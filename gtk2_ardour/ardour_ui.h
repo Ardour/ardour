@@ -671,6 +671,7 @@ private:
 	void archive_session ();
 	void rename_session (bool for_unnamed);
 	void import_strips ();
+	void export_strips ();
 
 	int         create_mixer ();
 	int         create_editor ();
