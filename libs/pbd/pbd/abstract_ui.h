@@ -23,6 +23,7 @@
 #include <map>
 #include <string>
 #include <pthread.h>
+#include <cstring>
 
 #include <glibmm/threads.h>
 
@@ -77,10 +78,7 @@ protected:
 	{
 		bool operator() (const pthread_t& a, const pthread_t& b) const noexcept
 		{
-			if constexpr (std::is_class_v<pthread_t>) //pthread_t is a struct for ptw32, so this filter works.
-				return a.p < b.p;
-			else
-				return a < b;
+			return std::memcmp(&a, &b, sizeof(pthread_t)) < 0;
 		}
 	};
 	typedef typename std::map<pthread_t,RequestBuffer*, pthread_cmp>::iterator RequestBufferMapIterator;
