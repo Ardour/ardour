@@ -434,7 +434,7 @@ MidiStreamView::update_rec_box ()
 	region->set_length (timecnt_t (_trackview.track()->current_capture_end () - _trackview.track()->current_capture_start()));
 
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rec_regions.back().second);
-	mrv->extend_active_notes ();
+	mrv->extend_unfinished_live_notes ();
 }
 
 

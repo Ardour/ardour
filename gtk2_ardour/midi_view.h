@@ -183,8 +183,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	void begin_write ();
 	void end_write ();
-	void extend_active_notes ();
-	void extend_active_notes (Temporal::timecnt_t const &);
+	void extend_unfinished_live_notes ();
+	void extend_unfinished_live_notes (Temporal::timecnt_t const &);
 
 	virtual void begin_drag_edit (std::string const & why);
 	void end_drag_edit ();
@@ -308,8 +308,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	void show_list_editor ();
 
-	void set_note_range (uint8_t low, uint8_t high);
-	void maybe_set_note_range (uint8_t low, uint8_t high);
+	bool set_note_range (uint8_t low, uint8_t high);
+	bool maybe_set_note_range (uint8_t low, uint8_t high);
 	virtual void set_visibility_note_range (MidiViewBackground::VisibleNoteRange, bool);
 
 	typedef std::set<NoteBase*> Selection;
@@ -513,8 +513,9 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	CopyDragEvents                       _copy_drag_events;
 	PatchChanges                         _patch_changes;
 	SysExes                              _sys_exes;
-	Note**                               _active_notes;
-	Temporal::timecnt_t                   active_note_end;
+	Note**                               _unfinished_live_notes;
+	std::vector<Note*>                   _finished_live_notes;
+	Temporal::timecnt_t                   live_note_end;
 	ArdourCanvas::Container*             _note_group;
 	ARDOUR::MidiModel::NoteDiffCommand*  _note_diff_command;
 	NoteBase*                            _ghost_note;
