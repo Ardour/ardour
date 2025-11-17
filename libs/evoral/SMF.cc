@@ -490,7 +490,13 @@ SMF::append_event_delta (uint32_t delta_t, uint32_t size, const uint8_t* buf, ev
 	} else {
 
 		if (!midi_event_is_valid(buf, size)) {
-			cerr << "WARNING: SMF ignoring illegal MIDI event" << endl;
+			std::cerr << "WARNING: SMF ignoring illegal MIDI event (size " << size << "): ";
+			std::cerr << std::hex;
+			for (size_t n = 0; n < size; ++n) {
+				std::cerr << "0x" << (int) buf[n] << ' ';
+			}
+			std::cerr << std::dec << std::endl;
+			PBD::stacktrace (std::cerr, 9);
 			return 0;
 		}
 
