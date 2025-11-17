@@ -20,6 +20,7 @@
       <separator/>
       <menuitem action='addExistingAudioFiles'/>
       <menuitem action='ImportStrips'/>
+      <menuitem action='ExportStrips'/>
 #ifdef PTFORMAT
       <menuitem action='addExistingPTFiles'/>
 #endif

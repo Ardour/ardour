@@ -257,6 +257,9 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("ManageTemplates"), _("Templates"), sigc::mem_fun(*this, &ARDOUR_UI::manage_templates));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (main_actions, X_("ExportStrips"), _("Export Strips..."), sigc::mem_fun (*this, &ARDOUR_UI::export_strips));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (main_actions, X_("ImportStrips"), _("Import Strips..."), sigc::mem_fun (*this, &ARDOUR_UI::import_strips));
 	ActionManager::session_sensitive_actions.push_back (act);
 

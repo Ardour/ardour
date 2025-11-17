@@ -61,6 +61,7 @@
 #include "gui_object.h"
 #include "gui_thread.h"
 #include "keyeditor.h"
+#include "strip_export_dialog.h"
 #include "strip_import_dialog.h"
 #include "library_download_dialog.h"
 #include "location_ui.h"
@@ -997,6 +998,14 @@ ARDOUR_UI::create_rtawindow ()
 {
 	RTAWindow* rtawindow = new RTAWindow ();
 	return rtawindow;
+}
+
+void ARDOUR_UI::export_strips ()
+{
+	if (_session) {
+		StripExportDialog esd (*editor, _session);
+		esd.run();
+	}
 }
 
 void ARDOUR_UI::import_strips ()
