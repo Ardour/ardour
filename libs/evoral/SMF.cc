@@ -400,11 +400,12 @@ SMF::read_event(uint32_t* delta_t, uint32_t* bufsize, uint8_t** buf, event_id_t*
 			return -1;
 		}
 
-		/* printf("SMF::read_event @ %u: ", *delta_t);
-		   for (size_t i = 0; i < *size; ++i) {
+		/*
+		  printf("SMF::read_event @ %u: ", *delta_t);
+		   for (size_t i = 0; i < *bufsize; ++i) {
 		   printf("%X ", (*buf)[i]);
-		   } printf("\n") */
-
+		   } printf("\n");
+		*/
 		return event_size;
 	} else {
 		return -1;
