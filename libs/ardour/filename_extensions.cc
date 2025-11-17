@@ -38,5 +38,6 @@ const char* const session_archive_suffix = X_(".ardour-session-archive");
 const char* const template_archive_suffix = X_(".ardour-template-archive");
 const char* const midi_map_suffix = X_(".map");
 const char* const advanced_authoring_format_suffix = X_(".aaf");
+const char* const routestate_suffix = X_(".routestate");
 
 }
