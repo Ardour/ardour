@@ -17,6 +17,9 @@
  */
 
 #pragma once
+#include <ytkmm/table.h>
+
+#include "ardour/types.h"
 
 #include "ardour_dialog.h"
 #include "public_editor.h"
@@ -30,5 +33,19 @@ class StripExportDialog : public ArdourDialog
 {
 public:
 	StripExportDialog (PublicEditor&, ARDOUR::Session*);
-	~StripExportDialog ();
+
+private:
+	void path_changed ();
+	void update_sensitivty ();
+	void export_strips ();
+
+	ArdourWidgets::ArdourDropdown _what_to_export;
+	ArdourWidgets::ArdourDropdown _where_to_export;
+
+	Gtk::Button* _ok_button;
+	Gtk::Entry   _name_entry;
+	Gtk::Table   _table;
+
+	PublicEditor& _editor;
+	std::string   _path;
 };
