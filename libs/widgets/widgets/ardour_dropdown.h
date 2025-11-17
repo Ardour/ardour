@@ -57,6 +57,9 @@ public:
 
 	void set_active (std::string const& text);
 
+	void set_active (int);
+	int get_active_row_number () const;
+
 protected:
 	void default_text_handler (std::string const&);
 
