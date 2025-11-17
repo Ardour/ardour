@@ -37,6 +37,7 @@ const char* const export_dir_name = X_("export");
 const char* const backup_dir_name = X_("backup");
 const char* const export_formats_dir_name = X_("export");
 const char* const templates_dir_name = X_("templates");
+const char* const routestates_dir_name = X_("routestates");
 const char* const plugin_metadata_dir_name = X_("plugin_metadata");
 const char* const route_templates_dir_name = X_("route_templates");
 const char* const surfaces_dir_name = X_("surfaces");
