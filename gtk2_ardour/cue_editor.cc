@@ -689,6 +689,20 @@ CueEditor::set_recording_length (Temporal::BBT_Offset dur)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
+	std::string label;
+
+	switch (dur.bars) {
+	case 0:
+		label = _("Until Stopped");
+		break;
+	case 1:
+		label = _("1 Bar");
+		break;
+	default:
+		label = (string_compose (_("%1 Bars"), dur.bars));
+	}
+
+	length_selector.set_active (label);
 	rec_length = dur;
 }
 
