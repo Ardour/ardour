@@ -503,6 +503,7 @@ This mode provides many different operations on both regions and control points,
 
 @notes|Notes/quantize-selected-notes|                                    q|Quantize Selected Notes
 
+@notes|Notes/select-all|                                      <@PRIMARY@>a|Select all notes
 @notes|Notes/select-next|                                              Tab|Select next note
 @notes|Notes/select-previous|                               <@PRIMARY@>Tab|Select previous note
 @notes|Notes/add-select-next|                              <@TERTIARY@>Tab|Select next note

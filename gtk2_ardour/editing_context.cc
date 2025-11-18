@@ -586,6 +586,8 @@ EditingContext::register_midi_actions (Bindings* midi_bindings, std::string cons
 
 	/* Alt versions allow bindings for both Tab and ISO_Left_Tab, if desired */
 
+	ActionManager::register_action (_midi_actions, X_("select-all"), _("Select All"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::select_all_notes));
+	ActionManager::register_action (_midi_actions, X_("alt-select-all"), _("Select All (alternate)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::select_all_notes));
 	ActionManager::register_action (_midi_actions, X_("select-next"), _("Select Next"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::select_next_note));
 	ActionManager::register_action (_midi_actions, X_("alt-select-next"), _("Select Next (alternate)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::select_next_note));
 	ActionManager::register_action (_midi_actions, X_("select-previous"), _("Select Previous"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::select_previous_note));
