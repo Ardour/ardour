@@ -292,8 +292,6 @@ CueEditor::set_zoom_focus (Editing::ZoomFocus zf)
 
 	/* We don't allow playhead for zoom focus here */
 
-	std::cerr << "CE:szf " << enum_2_string (zf) << std::endl;
-
 	if (zf == ZoomFocusPlayhead) {
 		return;
 	}
