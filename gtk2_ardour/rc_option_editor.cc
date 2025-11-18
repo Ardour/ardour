@@ -4902,7 +4902,7 @@ These settings will only take effect after %1 is restarted.\n\
 
 	ComboOption<uint32_t>* rta = new ComboOption<uint32_t> (
 	  "max-active-rta",
-	  _("Limit concurrent RTA specta"),
+	  _("Limit concurrent RTA spectra"),
 	  sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_max_active_rta),
 	  sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_max_active_rta)
 		);
