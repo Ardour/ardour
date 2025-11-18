@@ -483,11 +483,15 @@ CueEditor::build_upper_toolbar ()
 	rec_enable_button.signal_button_release_event().connect (sigc::mem_fun (*this, &CueEditor::rec_button_press), false);
 	rec_enable_button.set_name ("record enable button");
 
+	std::string label;
+	std::string noun;
+
 	length_selector.add_menu_elem (MenuElem (_("Until Stopped"), sigc::bind (sigc::mem_fun (*this, &CueEditor::set_recording_length), Temporal::BBT_Offset ())));
-	length_selector.add_menu_elem (MenuElem (_("1 Bar"), sigc::bind (sigc::mem_fun (*this, &CueEditor::set_recording_length), Temporal::BBT_Offset (1, 0, 0))));
-	std::vector<int> b ({ 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 20, 24, 32 });
+	std::vector<int> b ({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 20, 24, 32 });
 	for (auto & n : b) {
-		length_selector.add_menu_elem (MenuElem (string_compose (_("%1 Bars"), n), sigc::bind (sigc::mem_fun (*this, &CueEditor::set_recording_length), Temporal::BBT_Offset (n, 0, 0))));
+		noun = P_("Bar", "Bars", n);
+		label = string_compose (X_("%1 %2"), n, noun);
+		length_selector.add_menu_elem (MenuElem (label, sigc::bind (sigc::mem_fun (*this, &CueEditor::set_recording_length), Temporal::BBT_Offset (n, 0, 0))));
 	}
 	length_selector.set_active (_("Until Stopped"));
 
@@ -690,16 +694,14 @@ CueEditor::set_recording_length (Temporal::BBT_Offset dur)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	std::string label;
-
+	std::string noun;
 	switch (dur.bars) {
 	case 0:
 		label = _("Until Stopped");
 		break;
-	case 1:
-		label = _("1 Bar");
-		break;
 	default:
-		label = (string_compose (_("%1 Bars"), dur.bars));
+		noun = P_("Bar", "Bars", dur.bars);
+		label = string_compose (X_("%1 %2"), dur.bars, noun);
 	}
 
 	length_selector.set_active (label);
