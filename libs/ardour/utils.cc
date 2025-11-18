@@ -737,6 +737,8 @@ ARDOUR::how_many_io_threads ()
 	if (pu < 0) {
 		if (-pu < num_cpu) {
 			num_threads = num_cpu + pu;
+		} else {
+			num_threads = 1;
 		}
 	} else if (pu == 0) {
 		num_threads = num_cpu;
