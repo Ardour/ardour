@@ -497,7 +497,6 @@ SMF::append_event_delta (uint32_t delta_t, uint32_t size, const uint8_t* buf, ev
 				std::cerr << "0x" << (int) buf[n] << ' ';
 			}
 			std::cerr << std::dec << std::endl;
-			PBD::stacktrace (std::cerr, 9);
 			return 0;
 		}
 
