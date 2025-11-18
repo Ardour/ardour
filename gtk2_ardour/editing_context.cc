@@ -480,12 +480,12 @@ EditingContext::register_common_actions (Bindings* common_bindings, std::string 
 	zoom_actions = ActionManager::create_action_group (common_bindings, prefix + X_("Zoom"));
 	RadioAction::Group zoom_group;
 
-	zoom_focus_actions[Editing::ZoomFocusLeft] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusLeft));
-	zoom_focus_actions[Editing::ZoomFocusRight] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-right", _("Zoom Focus Right"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusRight));
-	zoom_focus_actions[Editing::ZoomFocusCenter] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-center", _("Zoom Focus Center"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusCenter));
-	zoom_focus_actions[Editing::ZoomFocusPlayhead] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-playhead", _("Zoom Focus Playhead"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusPlayhead));
-	zoom_focus_actions[Editing::ZoomFocusMouse] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-mouse", _("Zoom Focus Mouse"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusMouse));
-	zoom_focus_actions[Editing::ZoomFocusEdit] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-edit", _("Zoom Focus Edit Point"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusEdit));
+	zoom_focus_actions[Editing::ZoomFocusLeft] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", zoom_focus_strings[Editing::ZoomFocusLeft].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusLeft));
+	zoom_focus_actions[Editing::ZoomFocusRight] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-right", zoom_focus_strings[Editing::ZoomFocusRight].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusRight));
+	zoom_focus_actions[Editing::ZoomFocusCenter] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-center", zoom_focus_strings[Editing::ZoomFocusCenter].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusCenter));
+	zoom_focus_actions[Editing::ZoomFocusPlayhead] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-playhead", zoom_focus_strings[Editing::ZoomFocusPlayhead].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusPlayhead));
+	zoom_focus_actions[Editing::ZoomFocusMouse] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-mouse", zoom_focus_strings[Editing::ZoomFocusMouse].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusMouse));
+	zoom_focus_actions[Editing::ZoomFocusEdit] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-edit", zoom_focus_strings[Editing::ZoomFocusEdit].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusEdit));
 
 	ActionManager::register_action (zoom_actions, X_("cycle-zoom-focus"), _("Next Zoom Focus"), sigc::mem_fun (*this, &EditingContext::cycle_zoom_focus));
 
@@ -3377,7 +3377,8 @@ EditingContext::zoom_focus_chosen (ZoomFocus focus)
 		return;
 	}
 
-	zoom_focus_selector.set_active (zoom_focus_strings[(int)focus]);
+	zoom_focus_selector.set_active (zoom_focus_strings[focus]);
+	set_zoom_focus (focus);
 	instant_save ();
 }
 
