@@ -453,7 +453,7 @@ RTAWindow::darea_motion_notify_event (GdkEventMotion* ev)
 			changed = _min_dB != new_dB;
 			_min_dB = new_dB;
 		} else {
-			float min_dB = rintf (std::max (_dB_min, std::min (new_dB, _max_dB - _dB_span)));
+			float min_dB = rintf (std::max (_dB_min, std::min (new_dB, 1 + _max_dB - _dB_span)));
 			float dbd    = (min_dB - _min_dB);
 			float max_dB = rintf (std::min (_dB_min + _dB_range, std::max (_max_dB + dbd, _min_dB + _dB_span)));
 			dbd          = std::min<float> (dbd, max_dB - _max_dB);
@@ -543,7 +543,7 @@ RTAWindow::darea_scroll_event (GdkEventScroll* ev)
 	} else {
 		float new_dB = _min_dB + delta;
 		/* compare to DragRange */
-		float min_dB = rintf (std::max (_dB_min, std::min (new_dB, _max_dB - _dB_span)));
+		float min_dB = rintf (std::max (_dB_min, std::min (new_dB, 1 + _max_dB - _dB_span)));
 		float dbd    = (min_dB - _min_dB);
 		float max_dB = rintf (std::min (_dB_min + _dB_range, std::max (_max_dB + dbd, _min_dB + _dB_span)));
 		dbd          = std::min<float> (dbd, max_dB - _max_dB);
