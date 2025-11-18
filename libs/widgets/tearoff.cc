@@ -25,7 +25,7 @@
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/tearoff.h"
-#include "widgets/ui_config.h"
+#include "gtkmm2ext/ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -33,6 +33,7 @@ using namespace std;
 using namespace Glib;
 using namespace Gdk;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 
 TearOff::TearOff (Widget& c, bool allow_resize)

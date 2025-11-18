@@ -44,8 +44,7 @@ widgets_sources = [
         'stateful_button.cc',
         'tabbable.cc',
         'tearoff.cc',
-        'tooltips.cc',
-        'ui_config.cc',
+        'tooltips.cc'
 ]
 
 def options(opt):

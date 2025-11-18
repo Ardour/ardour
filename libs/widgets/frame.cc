@@ -22,10 +22,11 @@
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/frame.h"
-#include "widgets/ui_config.h"
+#include "gtkmm2ext/ui_config.h"
 
 using namespace std;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 
 Frame::Frame (Orientation orientation, bool boxy)

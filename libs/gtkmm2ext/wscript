@@ -42,6 +42,7 @@ gtkmm2ext_sources = [
         'string_completion.cc',
         'textviewer.cc',
         'treeutils.cc',
+        'ui_config.cc',
         'utils.cc',
         'visibility_tracker.cc',
         'window_proxy.cc',

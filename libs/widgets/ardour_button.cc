@@ -36,13 +36,14 @@
 
 #include "widgets/ardour_button.h"
 #include "widgets/tooltips.h"
-#include "widgets/ui_config.h"
+#include "gtkmm2ext/ui_config.h"
 
 #include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace Glib;
 using namespace PBD;
+using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 using std::max;
 using std::min;

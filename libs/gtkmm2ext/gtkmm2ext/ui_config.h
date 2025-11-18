@@ -28,11 +28,11 @@
 #include "pbd/configuration.h"
 #include "gtkmm2ext/colors.h"
 
-#include "widgets/visibility.h"
+#include "gtkmm2ext/visibility.h"
 
-namespace ArdourWidgets {
+namespace Gtkmm2ext {
 
-class LIBWIDGETS_API UIConfigurationBase : public PBD::Configuration
+class LIBGTKMM2EXT_API UIConfigurationBase : public PBD::Configuration
 {
 protected:
 	virtual ~UIConfigurationBase() { _instance = 0; }

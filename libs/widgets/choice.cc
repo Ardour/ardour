@@ -20,11 +20,12 @@
 #include <ytkmm/label.h>
 
 #include "widgets/choice.h"
-#include "widgets/ui_config.h"
+#include "gtkmm2ext/ui_config.h"
 
 using namespace std;
 using namespace sigc;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 
 Choice::Choice (string title, string prompt, vector<string> choices, bool center)
