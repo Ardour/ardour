@@ -39,12 +39,12 @@
 #include "pbd/xml++.h"
 
 #include "gtkmm2ext/colors.h"
-#include "widgets/ui_config.h"
+#include "gtkmm2ext/ui_config.h"
 
 #include "editing.h"
 #include "utils.h"
 
-class UIConfiguration : public ArdourWidgets::UIConfigurationBase
+class UIConfiguration : public Gtkmm2ext::UIConfigurationBase
 {
 private:
 	UIConfiguration ();

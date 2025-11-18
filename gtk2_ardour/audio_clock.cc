@@ -63,6 +63,7 @@ using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace std;
 using namespace Temporal;
 
