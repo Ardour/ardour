@@ -28,6 +28,7 @@
 #include <iostream>
 #include <map>
 
+#include "ytkmm/enums.h"
 
 #include "ardour/types.h" // required for operators used in pbd/configuration_variable.h
 #include "ardour/types_convert.h"
