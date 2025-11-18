@@ -983,7 +983,7 @@ Session::load_state (string snapshot_name, bool from_template)
 	std::string xmlpath(_session_dir->root_path());
 	xmlpath = Glib::build_filename (xmlpath, legalize_for_path (snapshot_name + pending_suffix));
 
-	if (Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
+	if (Glib::file_test (xmlpath, Glib::FILE_TEST_IS_REGULAR)) {
 
 		/* there is pending state from a crashed capture attempt */
 
@@ -999,9 +999,9 @@ Session::load_state (string snapshot_name, bool from_template)
 		xmlpath = Glib::build_filename (_session_dir->root_path(), snapshot_name);
 	}
 
-	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
+	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_IS_REGULAR)) {
 		xmlpath = Glib::build_filename (_session_dir->root_path(), legalize_for_path (snapshot_name + statefile_suffix));
-		if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
+		if (!Glib::file_test (xmlpath, Glib::FILE_TEST_IS_REGULAR)) {
 			error << string_compose(_("%1: session file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
 			return 1;
 		}
