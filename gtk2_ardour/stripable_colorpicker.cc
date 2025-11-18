@@ -98,7 +98,7 @@ StripableColorDialog::popup (const std::string& name, uint32_t color, Gtk::Windo
 	if (parent) {
 		set_transient_for (*parent);
 	}
-	set_position (Gtk::WIN_POS_MOUSE);
+	set_position (UIConfiguration::instance().get_default_window_position());
 	present ();
 }
 
@@ -110,7 +110,7 @@ StripableColorDialog::popup (std::shared_ptr<ARDOUR::Stripable> s, Gtk::Window* 
 			s->active_color_picker()->set_transient_for (*parent);
 		}
 		s->active_color_picker()->set_position (Gtk::WIN_POS_CENTER_ALWAYS); // force update
-		s->active_color_picker()->set_position (Gtk::WIN_POS_MOUSE);
+		s->active_color_picker()->set_position (UIConfiguration::instance().get_default_window_position());
 		s->active_color_picker()->present ();
 		return;
 	}
@@ -120,7 +120,7 @@ StripableColorDialog::popup (std::shared_ptr<ARDOUR::Stripable> s, Gtk::Window* 
 			set_transient_for (*parent);
 		}
 		set_position (Gtk::WIN_POS_CENTER_ALWAYS); // force update
-		set_position (Gtk::WIN_POS_MOUSE);
+		set_position (UIConfiguration::instance().get_default_window_position());
 		present ();
 		return;
 	}

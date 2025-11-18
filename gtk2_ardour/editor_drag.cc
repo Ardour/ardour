@@ -7284,7 +7284,7 @@ RegionMarkerDrag::finished (GdkEvent*, bool did_move)
 		d.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 		d.add_button (Stock::OK, RESPONSE_OK);
 		d.set_default_response (RESPONSE_OK);
-		d.set_position (WIN_POS_MOUSE);
+		d.set_position (UIConfiguration::instance().get_default_window_position());
 
 		int    result = d.run ();
 		string str    = e.get_text ();

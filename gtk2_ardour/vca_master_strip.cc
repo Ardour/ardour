@@ -543,7 +543,7 @@ VCAMasterStrip::remove ()
 
 	checker.set_name (X_("RemoveVcaDialog"));
 	checker.set_wmclass (X_("ardour_vca_remove"), PROGRAM_NAME);
-	checker.set_position (Gtk::WIN_POS_MOUSE);
+	checker.set_position (UIConfiguration::instance().get_default_window_position());
 
 	switch (checker.run()) {
 	case RESPONSE_ACCEPT:

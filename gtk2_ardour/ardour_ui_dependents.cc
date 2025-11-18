@@ -214,7 +214,7 @@ ARDOUR_UI::idle_ask_about_quit ()
 		                         Gtk::BUTTONS_YES_NO,
 		                         true); /* modal */
 		msg.set_default_response (Gtk::RESPONSE_YES);
-		msg.set_position (WIN_POS_MOUSE);
+		msg.set_position (UIConfiguration::instance().get_default_window_position());
 
 		if (msg.run () == Gtk::RESPONSE_YES) {
 			finish ();

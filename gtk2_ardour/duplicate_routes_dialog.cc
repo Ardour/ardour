@@ -25,6 +25,7 @@
 #include "editor.h"
 #include "duplicate_routes_dialog.h"
 #include "selection.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -207,7 +208,7 @@ DuplicateRouteDialog::on_response (int response)
 	if (err) {
 		MessageDialog msg (_("1 or more tracks/busses could not be duplicated"),
 		                     true, MESSAGE_ERROR, BUTTONS_OK, true);
-		msg.set_position (WIN_POS_MOUSE);
+		msg.set_position (UIConfiguration::instance().get_default_window_position());
 		msg.run ();
 	}
 }

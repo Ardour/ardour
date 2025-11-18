@@ -1124,7 +1124,7 @@ ARDOUR_UI::ask_about_scratch_deletion ()
 	msg.add_button (_("Delete this session (IRREVERSIBLE!)"), RESPONSE_OK);
 	msg.add_button (_("Do not delete"), RESPONSE_CANCEL);
 	msg.set_default_response (RESPONSE_CANCEL);
-	msg.set_position (Gtk::WIN_POS_MOUSE);
+	msg.set_position (UIConfiguration::instance().get_default_window_position());
 
 	int r = msg.run ();
 
@@ -2595,7 +2595,7 @@ will release an additional %3 %4bytes of disk space.\n", removed),
 	results.get_vbox()->pack_start (ddhbox, true, false, 5);
 	results.add_button (Stock::CLOSE, RESPONSE_CLOSE);
 	results.set_default_response (RESPONSE_CLOSE);
-	results.set_position (Gtk::WIN_POS_MOUSE);
+	results.set_position (UIConfiguration::instance().get_default_window_position());
 
 	results_display.show();
 	list_scroller.show();
@@ -2638,7 +2638,7 @@ Clean-up will move all unused files to a \"dead\" location."));
 
 	checker.set_name (_("CleanupDialog"));
 	checker.set_wmclass (X_("ardour_cleanup"), PROGRAM_NAME);
-	checker.set_position (Gtk::WIN_POS_MOUSE);
+	checker.set_position (UIConfiguration::instance().get_default_window_position());
 
 	switch (checker.run()) {
 	case RESPONSE_ACCEPT:
@@ -2789,7 +2789,7 @@ ARDOUR_UI::add_route ()
 		return;
 	}
 
-	add_route_dialog->set_position (WIN_POS_MOUSE);
+	add_route_dialog->set_position (UIConfiguration::instance().get_default_window_position());
 	add_route_dialog->present();
 }
 
@@ -2879,7 +2879,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 		d.add_button(Stock::CANCEL, RESPONSE_CANCEL);
 		d.add_button(Stock::OK, RESPONSE_OK);
 		d.set_default_response (RESPONSE_OK);
-		d.set_position (WIN_POS_MOUSE);
+		d.set_position (UIConfiguration::instance().get_default_window_position());
 		d.show_all ();
 
 		if (d.run () == RESPONSE_OK) {

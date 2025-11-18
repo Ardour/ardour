@@ -33,6 +33,7 @@
 #include "gui_thread.h"
 #include "route_group_dialog.h"
 #include "group_tabs.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -205,7 +206,7 @@ RouteGroupDialog::name_check () const
 		true
 		);
 
-	msg.set_position (WIN_POS_MOUSE);
+	msg.set_position (UIConfiguration::instance().get_default_window_position());
 	msg.run ();
 
 	return false;
