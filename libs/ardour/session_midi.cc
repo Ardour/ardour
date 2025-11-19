@@ -29,7 +29,9 @@
 #include <memory>
 #include <string>
 
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include <glibmm/main.h>
 
