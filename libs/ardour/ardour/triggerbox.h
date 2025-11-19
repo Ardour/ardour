@@ -505,6 +505,20 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void send_property_change (PBD::PropertyChange pc);
 
 	virtual void _arm (Temporal::BBT_Offset const &);
+
+	struct PendingSwap {
+		Temporal::Beats play_start;
+		Temporal::Beats play_end;
+		Temporal::Beats loop_start;
+		Temporal::Beats loop_end;
+		Temporal::Beats length;
+
+
+		virtual ~PendingSwap() {}
+	};
+
+	std::atomic<PendingSwap*> pending_swap;
+	std::atomic<PendingSwap*> old_pending_swap;
 };
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
@@ -714,20 +728,12 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	std::atomic<RTMidiBufferBeats*> rt_midibuffer;
 	uint32_t iter; /* index into the above RTMidiBufferBeats for current playback */
 
-	struct PendingSwap {
+	struct MIDIPendingSwap : public PendingSwap {
 		RTMidiBufferBeats* rt_midibuffer;
-		Temporal::Beats play_start;
-		Temporal::Beats play_end;
-		Temporal::Beats loop_start;
-		Temporal::Beats loop_end;
-		Temporal::Beats length;
 
-		PendingSwap() : rt_midibuffer (nullptr) {}
-		~PendingSwap() { delete rt_midibuffer; }
+		MIDIPendingSwap() : rt_midibuffer (nullptr) {}
+		~MIDIPendingSwap() { delete rt_midibuffer; }
 	};
-
-	std::atomic<PendingSwap*> pending_swap;
-	std::atomic<PendingSwap*> old_pending_swap;
 
 	bool         map_change;
 

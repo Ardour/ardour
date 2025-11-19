@@ -256,6 +256,8 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, expected_end_sample (0)
 	, _pending (nullptr)
 	, last_property_generation (0)
+	, pending_swap (nullptr)
+	, old_pending_swap (nullptr)
 {
 	add_property (_launch_style);
 	add_property (_follow_action0);
@@ -2294,8 +2296,6 @@ MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	, first_event_index (0)
 	, last_event_index (0)
 	, rt_midibuffer (nullptr)
-	, pending_swap (nullptr)
-	, old_pending_swap (nullptr)
 	, map_change (false)
 {
 	_channel_map.assign (16, -1);
@@ -2315,7 +2315,7 @@ MIDITrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& b
 	   pending swap.
 	*/
 
-	PendingSwap* pending = pending_swap.exchange (nullptr);
+	MIDIPendingSwap* pending = dynamic_cast<MIDIPendingSwap*> (pending_swap.exchange (nullptr));
 	RTMidiBufferBeats* old_rtmb = nullptr;
 
 	if (!pending) {
@@ -3094,7 +3094,7 @@ MIDITrigger::tempo_map_changed ()
 void
 MIDITrigger::model_contents_changed ()
 {
-	PendingSwap* pending = new PendingSwap;
+	MIDIPendingSwap* pending = new MIDIPendingSwap;
 	pending->rt_midibuffer = new RTMidiBufferBeats;
 
 	pending->play_start = _play_start;
@@ -3122,7 +3122,7 @@ MIDITrigger::model_contents_changed ()
 void
 MIDITrigger::bounds_changed (Temporal::timepos_t const & start, Temporal::timepos_t const & end)
 {
-	PendingSwap* pending = new PendingSwap;
+	MIDIPendingSwap* pending = new MIDIPendingSwap;
 
 	pending->play_start = start.beats();
 	pending->play_end = end.beats();
