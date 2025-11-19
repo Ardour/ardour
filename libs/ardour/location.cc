@@ -27,7 +27,9 @@
 #include <algorithm>
 #include <set>
 #include <cstdio> /* for sprintf */
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <cerrno>
 #include <ctime>
 #include <list>
