@@ -30,7 +30,9 @@
 
 #include <cmath>
 #include <cerrno>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "pbd/atomic.h"
 #include "pbd/error.h"
