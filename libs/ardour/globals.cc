@@ -37,7 +37,9 @@
 #include <sstream>
 
 #include <sys/stat.h>
+#ifndef COMPILER_MSVC
 #include <sys/time.h>
+#endif
 #include <sys/types.h>
 #ifndef PLATFORM_WINDOWS
 #include <sys/resource.h>
@@ -45,7 +47,9 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <time.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
