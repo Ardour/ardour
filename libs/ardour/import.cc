@@ -29,7 +29,9 @@
 #include <string>
 #include <climits>
 #include <cerrno>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <sys/stat.h>
 #include <time.h>
 #include <stdint.h>
