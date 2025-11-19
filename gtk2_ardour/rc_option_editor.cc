@@ -3124,7 +3124,7 @@ These settings will only take effect after %1 is restarted.\n\
 #if !(defined PLATFORM_WINDOWS || defined __APPLE__)
 	bo = new BoolOption (
 			"allow-to-resize-engine-dialog",
-			_("Allow to resize Engine Dialog"),
+			_("Allow resizing the audio/MIDI setup dialog"),
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_to_resize_engine_dialog),
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_to_resize_engine_dialog)
 			);
