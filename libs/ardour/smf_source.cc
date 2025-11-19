@@ -25,9 +25,13 @@
 
 #include <vector>
 
+#ifndef COMPILER_MSVC
 #include <sys/time.h>
+#endif
 #include <sys/stat.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <errno.h>
 #include <regex.h>
 
