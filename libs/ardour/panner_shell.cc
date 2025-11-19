@@ -29,7 +29,9 @@
 #include <string>
 #include <cstdio>
 #include <locale.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <float.h>
 #include <iomanip>
 
