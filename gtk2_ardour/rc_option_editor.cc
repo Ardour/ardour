@@ -3191,6 +3191,18 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Appearance"), bgo);
 #endif
 
+	ComboOption<Gtk::WindowPosition>* winpos = new ComboOption<Gtk::WindowPosition> (
+		     "default-window-position",
+		     _("Default location of new windows"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_default_window_position),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_window_position)
+		     );
+	winpos->add (Gtk::WIN_POS_CENTER, _("Center of screen"));
+	winpos->add (Gtk::WIN_POS_MOUSE, _("Mouse position"));
+	winpos->add (Gtk::WIN_POS_CENTER_ALWAYS, _("Center of screen, really"));
+	winpos->add (Gtk::WIN_POS_CENTER_ON_PARENT, _("Center of parent window"));
+	add_option (_("Appearance"), winpos);
+
 #if ENABLE_NLS
 
 	add_option (_("Appearance/Translation"), new OptionEditorHeading (_("Internationalization")));
