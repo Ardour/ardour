@@ -26,10 +26,14 @@
 
 #include <vector>
 
+#ifndef COMPILER_MSVC
 #include <sys/time.h>
+#endif
 #include <sys/stat.h>
 #include <stdio.h> // for rename(), sigh
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <errno.h>
 
