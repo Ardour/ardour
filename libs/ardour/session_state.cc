@@ -40,10 +40,14 @@
 #include <cstdio> /* snprintf(3) ... grrr */
 #include <cmath>
 
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <climits>
 #include <signal.h>
+#ifndef COMPILER_MSVC
 #include <sys/time.h>
+#endif
 /* for open(2) */
 #include <sys/types.h>
 #include <sys/stat.h>
