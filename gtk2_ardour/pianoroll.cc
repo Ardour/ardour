@@ -326,7 +326,7 @@ Pianoroll::pack_inner (Gtk::Box& box)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	box.pack_start (snap_box, false, false);
-	box.pack_start (grid_box, false, false);
+	box.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 	box.pack_start (draw_box, false, false);
 	draw_box.show ();
 }
@@ -337,14 +337,13 @@ Pianoroll::pack_outer (Gtk::Box& box)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (with_transport_controls) {
-		box.pack_start (play_box, false, false);
+		box.pack_start (play_box, false, false, 12);
 	}
 
 	box.pack_start (rec_box, false, false);
 	box.pack_start (visible_channel_label, false, false);
 	box.pack_start (visible_channel_selector, false, false);
 	box.pack_start (note_mode_button, false, false);
-	box.pack_start (follow_playhead_button, false, false);
 }
 
 void

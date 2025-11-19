@@ -2772,8 +2772,8 @@ Editor::setup_toolbar ()
 		_track_box.pack_start (tav_expand_button);
 	}
 
-	snap_box.set_spacing (2);
 	snap_box.set_border_width (spc);
+	draw_box.set_border_width (spc);
 
 	stretch_marker_cb.set_name ("mouse mode button");
 

@@ -402,37 +402,12 @@ CueEditor::_get_preferred_edit_position (Editing::EditIgnoreOption ignore, bool 
 Gtk::Box*
 CueEditor::pack_mouse_mode_box ()
 {
-	Gtk::HBox* mode_box (manage(new Gtk::HBox));
-	mode_box->set_border_width (2);
-	mode_box->set_spacing(2);
-
-	Gtk::HBox* mouse_mode_box = manage (new Gtk::HBox);
 	Gtk::HBox* mouse_mode_hbox = manage (new Gtk::HBox);
-	Gtk::VBox* mouse_mode_vbox = manage (new Gtk::VBox);
-	Gtk::Alignment* mouse_mode_align = manage (new Gtk::Alignment);
-
-	Glib::RefPtr<Gtk::SizeGroup> mouse_mode_size_group = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_VERTICAL);
-	mouse_mode_size_group->add_widget (mouse_draw_button);
-	mouse_mode_size_group->add_widget (mouse_content_button);
-
-	mouse_mode_size_group->add_widget (grid_type_selector);
-	mouse_mode_size_group->add_widget (draw_length_selector);
-	mouse_mode_size_group->add_widget (draw_velocity_selector);
-	mouse_mode_size_group->add_widget (draw_channel_selector);
-	mouse_mode_size_group->add_widget (snap_mode_button);
-
 	mouse_mode_hbox->set_spacing (2);
 	mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
 	mouse_mode_hbox->pack_start (mouse_content_button, false, false);
-
-	mouse_mode_vbox->pack_start (*mouse_mode_hbox);
-
-	mouse_mode_align->add (*mouse_mode_vbox);
-	mouse_mode_align->set (0.5, 1.0, 0.0, 0.0);
-
-	mouse_mode_box->pack_start (*mouse_mode_align, false, false);
-
-	return mouse_mode_box;
+	mouse_mode_hbox->pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
+	return mouse_mode_hbox;
 }
 
 void
@@ -442,20 +417,45 @@ CueEditor::build_upper_toolbar ()
 
 	using namespace Gtk::Menu_Helpers;
 
+	/*
+	 * +----------------
+	 * | Vbox: toolbox
+	 * | +----------------------------------------------------------------------------
+	 * | | Hbox: toolbar_outer (border: 6px, spc: 2)
+	 * | |
+	 * | |                  +---------------------------------------+  +-------------
+	 * | | [ PACK OUTER ]   | HBox: toolbar_inner (spc: 2)          |  | Hbox: toolbar_right (spc: 2)
+	 * | | [ - play_box ]   |                                       |  | [ Zoom etc ]
+	 * | | [ - rec_box  ]   |  +------------------+  [ PACK INNER ] |  |
+	 * | | [ - buttons  ]   |  | Hbox: mouse mode |  [ P snap_box ] |  |
+	 * | |                  |  | (pianoroll only) |  [ P grid_box ] |  |
+	 * | |                  |  |                  |  [ P draw_box ] |  |
+	 * | |                  |  +------------------+  [ A   -      ] |  |
+	 * | |                  |                                       |  |
+	 * | |                  +---------------------------------------+  +-------
+	 * | |
+	 */
+
+	Gtk::HBox* toolbar_inner = manage (new Gtk::HBox);
+	Gtk::HBox* toolbar_outer = manage (new Gtk::HBox);
+	Gtk::HBox* toolbar_right = manage (new Gtk::HBox);
+
+	toolbar_outer->set_border_width (6);
+	toolbar_outer->set_spacing (2);
+	toolbar_inner->set_spacing (2);
+	toolbar_right->set_spacing (2);
+	grid_box.set_spacing (2);
+
 	Gtk::Box* mouse_mode_box = pack_mouse_mode_box ();
 
 	pack_snap_box ();
 	pack_draw_box (false);
 
-	Gtk::HBox* _toolbar_inner = manage (new Gtk::HBox);
-	Gtk::HBox* _toolbar_outer = manage (new Gtk::HBox);
-	Gtk::HBox* _toolbar_left = manage (new Gtk::HBox);
-
 	if (mouse_mode_box) {
-		_toolbar_inner->pack_start (*mouse_mode_box, false, false);
+		toolbar_inner->pack_start (*mouse_mode_box, false, false);
 	}
 
-	pack_inner (*_toolbar_inner);
+	pack_inner (*toolbar_inner);
 
 	set_tooltip (full_zoom_button, _("Zoom to full clip"));
 	set_tooltip (note_mode_button, _("Toggle between drum and regular note drawing"));
@@ -470,14 +470,24 @@ CueEditor::build_upper_toolbar ()
 
 		solo_button.set_name ("solo button");
 
-		play_box.set_spacing (8);
+		play_box.set_spacing (2);
 		play_box.pack_start (play_button, false, false);
 		play_box.pack_start (loop_button, false, false);
-		play_box.pack_start (solo_button, false, false);
+		play_box.pack_start (solo_button, false, false, 4);
 		loop_button.show();
 		solo_button.show();
 		play_box.set_no_show_all (true);
 		play_box.show ();
+
+		/* compare to TransportControlUI::setup */
+		Glib::RefPtr<Gtk::SizeGroup> transport_button_size_group = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_BOTH);
+		transport_button_size_group->add_widget (play_button);
+		transport_button_size_group->add_widget (loop_button);
+		transport_button_size_group->add_widget (solo_button);
+
+#define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
+		play_button.set_size_request (PX_SCALE(20), PX_SCALE(20));
+#undef PX_SCALE
 
 		play_button.signal_button_release_event().connect (sigc::mem_fun (*this, &CueEditor::play_button_press), false);
 		solo_button.signal_button_release_event().connect (sigc::mem_fun (*this, &CueEditor::solo_button_press), false);
@@ -504,33 +514,37 @@ CueEditor::build_upper_toolbar ()
 	}
 	length_selector.set_active (_("Until Stopped"));
 
-	rec_box.set_spacing (12);
+	ArdourVSpacer* rec_spacer = manage (new ArdourVSpacer (0));
+	rec_box.set_spacing (2);
 	rec_box.pack_start (rec_enable_button, false, false);
+	rec_box.pack_start (*rec_spacer, false, false, 6);
 	rec_box.pack_start (length_label, false, false);
 	rec_box.pack_start (length_selector, false, false);
 	rec_enable_button.show();
 	length_label.show ();
 	length_selector.show ();
+	rec_spacer->show ();
 	rec_box.set_no_show_all (true);
 	/* rec box not shown */
 
-	_toolbar_outer->set_border_width (6);
-	_toolbar_outer->set_spacing (12);
+	pack_outer (*toolbar_outer);
 
-	pack_outer (*_toolbar_outer);
-
-	_toolbar_outer->pack_start (*_toolbar_inner, true, false);
+	toolbar_outer->pack_start (*(manage (new ArdourScalingSpacer (16, 1))), false, false);
+	toolbar_outer->pack_start (*toolbar_inner, true, false);
 
 	build_zoom_focus_menu ();
 	zoom_focus_selector.set_text (zoom_focus_strings[(int)zoom_focus()]);
 
-	_toolbar_left->pack_start (zoom_in_button, false, false);
-	_toolbar_left->pack_start (zoom_out_button, false, false);
-	_toolbar_left->pack_start (full_zoom_button, false, false);
-	_toolbar_left->pack_start (zoom_focus_selector, false, false);
+	toolbar_right->pack_start (*(manage (new ArdourScalingSpacer (16, 1))), false, false);
+	toolbar_right->pack_start (follow_playhead_button, false, false);
+	toolbar_right->pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
+	toolbar_right->pack_start (zoom_in_button, false, false);
+	toolbar_right->pack_start (zoom_out_button, false, false);
+	toolbar_right->pack_start (full_zoom_button, false, false);
+	toolbar_right->pack_start (zoom_focus_selector, false, false);
 
-	_toolbar_outer->pack_start (*_toolbar_left, true, false);
-	_toolbox.pack_start (*_toolbar_outer, false, false);
+	toolbar_outer->pack_end (*toolbar_right, false, false);
+	_toolbox.pack_start (*toolbar_outer, false, false); // VBox
 
 	_contents.add (_toolbox);
 	_contents.signal_unmap().connect ([this]()  { get_canvas_viewport()->unmap (); }, false);
