@@ -18,9 +18,13 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef COMPILER_MSVC
 #include <sys/time.h>
+#endif
 #include <errno.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <algorithm>
 #include <glibmm.h>
 
