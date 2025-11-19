@@ -38,7 +38,9 @@
 #include <cerrno>
 #include <iostream>
 #include <sys/types.h>
+#ifndef COMPILER_MSVC
 #include <sys/time.h>
+#endif
 #include <fcntl.h>
 #ifndef COMPILER_MSVC
 #include <dirent.h>
