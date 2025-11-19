@@ -20,7 +20,9 @@
  */
 
 #include <cmath>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
