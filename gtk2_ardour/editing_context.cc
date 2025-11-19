@@ -2613,7 +2613,18 @@ EditingContext::reset_zoom (samplecnt_t spp)
 	}
 
 	std::pair<timepos_t, timepos_t> ext = max_zoom_extent();
-	samplecnt_t max_extents_pp = max_extents_scale() * ((ext.second.samples() - ext.first.samples())  / _track_canvas_width);
+	samplecnt_t p = (ext.second.samples() - ext.first.samples())  / _track_canvas_width;
+
+	if (spp == 0) {
+		/* less samples than pixels */
+		spp = 1;
+	}
+
+	if (p == 0) {
+		/* Less samples to display than there are pixels, use spp = 1 */
+		p = 1;
+	}
+	samplecnt_t max_extents_pp = max_extents_scale() * p;
 
 	if (spp > max_extents_pp) {
 		spp = max_extents_pp;
@@ -2622,6 +2633,8 @@ EditingContext::reset_zoom (samplecnt_t spp)
 	if (spp == samples_per_pixel) {
 		return;
 	}
+
+	assert (spp != 0);
 
 	pending_visual_change.add (VisualChange::ZoomLevel);
 	pending_visual_change.samples_per_pixel = spp;
