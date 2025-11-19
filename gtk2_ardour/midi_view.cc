@@ -207,7 +207,9 @@ void
 MidiView::note_mode_changed ()
 {
 	clear_events ();
-	model_changed ();
+	if (_model) {
+		model_changed ();
+	}
 }
 
 void
@@ -1141,7 +1143,7 @@ MidiView::redisplay (bool view_only)
 		what_changed.add (Properties::length);
 
 		region_resized (what_changed);
-	} else {
+	} else if (_model) {
 		/* Block calls to update note range at all as we add notes in
 		   ::model_changed()
 		*/
