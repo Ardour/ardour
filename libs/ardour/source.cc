@@ -24,7 +24,9 @@
  */
 
 #include <sys/stat.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <float.h>
 #include <cerrno>
 #include <ctime>
