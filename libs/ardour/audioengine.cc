@@ -24,7 +24,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <cerrno>
 #include <vector>
 #include <exception>
