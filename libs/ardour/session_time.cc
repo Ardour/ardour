@@ -25,7 +25,9 @@
 
 #include <iostream>
 #include <cmath>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "ardour/timestamps.h"
 
