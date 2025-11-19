@@ -24,7 +24,9 @@
 #include <cmath>
 #include <cerrno>
 #include <algorithm>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "pbd/i18n.h"
 #include "pbd/error.h"
