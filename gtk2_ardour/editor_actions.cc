@@ -1541,10 +1541,13 @@ Editor::automation_end_edit ()
 	AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (entered_track);
 
 	if (!atv) {
+		ARDOUR_UI::instance()->Escape ();
 		return;
 	}
 
-	atv->line()->end_edit ();
+	if (!atv->line()->end_edit ()) {
+		ARDOUR_UI::instance()->Escape ();
+	}
 }
 
 void

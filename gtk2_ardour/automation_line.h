@@ -192,7 +192,7 @@ public:
 	EditingContext& editing_context() const { return _editing_context; }
 
 	void add (std::shared_ptr<ARDOUR::AutomationControl>, GdkEvent*, Temporal::timepos_t const &, double y, bool with_guard_points, bool from_kbd = false);
-	void end_edit ();
+	bool end_edit ();
 	void begin_edit ();
 
 protected:

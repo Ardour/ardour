@@ -1211,12 +1211,14 @@ AutomationLine::begin_edit ()
 	}
 }
 
-void
+bool
 AutomationLine::end_edit ()
 {
 	if (automation_entry) {
 		delete_when_idle (automation_entry);
+		return true;
 	}
+	return false;
 }
 
 void
