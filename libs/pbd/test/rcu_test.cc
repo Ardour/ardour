@@ -15,9 +15,6 @@ CPPUNIT_TEST_SUITE_REGISTRATION (RCUTest);
 void
 RCUTest::setUp ()
 {
-	if (!Glib::thread_supported ()) {
-		Glib::thread_init ();
-	}
 }
 
 static void*
