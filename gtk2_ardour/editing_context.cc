@@ -428,15 +428,15 @@ EditingContext::set_action_defaults ()
 		grid_actions[Editing::GridTypeBeat]->set_active (false);
 		grid_actions[Editing::GridTypeBeat]->set_active (true);
 	}
-	if (draw_length_actions[DRAW_LEN_AUTO]) {
+	if (draw_length_actions.find (DRAW_LEN_AUTO) != draw_length_actions.end()) {
 		draw_length_actions[DRAW_LEN_AUTO]->set_active (false);
 		draw_length_actions[DRAW_LEN_AUTO]->set_active (true);
 	}
-	if (draw_velocity_actions[DRAW_VEL_AUTO]) {
+	if (draw_velocity_actions.find (DRAW_VEL_AUTO) != draw_velocity_actions.end()) {
 		draw_velocity_actions[DRAW_VEL_AUTO]->set_active (false);
 		draw_velocity_actions[DRAW_VEL_AUTO]->set_active (true);
 	}
-	if (draw_channel_actions[DRAW_CHAN_AUTO]) {
+	if (draw_channel_actions.find (DRAW_CHAN_AUTO) != draw_channel_actions.end()) {
 		draw_channel_actions[DRAW_CHAN_AUTO]->set_active (false);
 		draw_channel_actions[DRAW_CHAN_AUTO]->set_active (true);
 	}
@@ -1144,7 +1144,9 @@ EditingContext::set_draw_length (GridType gt)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	draw_length_actions[gt]->set_active (true);
+	if (draw_length_actions.find (gt) != draw_length_actions.end() && draw_length_actions[gt]) {
+		draw_length_actions[gt]->set_active (true);
+	}
 }
 
 void
