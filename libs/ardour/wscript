@@ -440,7 +440,7 @@ def build(bld):
 
     if bld.is_defined('HAVE_LILV') :
         obj.source += ['lv2_plugin.cc', 'lv2_evbuf.cc', 'uri_map.cc']
-        obj.uselib += ['LILV', 'SERD', 'SORD', 'SRATOM']
+        obj.uselib += ['LILV']
         if bld.is_defined('HAVE_SUIL'):
             obj.use += [ 'libsuil' ]
 
