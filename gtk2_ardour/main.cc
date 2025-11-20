@@ -261,11 +261,9 @@ int main (int argc, char *argv[])
 
 	load_custom_fonts(); /* needs to happen before any gtk and pango init calls */
 
-#if !GLIB_CHECK_VERSION(2,32,0)
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();
 	}
-#endif
 
 #ifdef LXVST_SUPPORT
 	XInitThreads ();

@@ -28,9 +28,7 @@
 
 #include <giomm.h>
 
-#if !GLIB_CHECK_VERSION(2,32,0)
 #include <glibmm/thread.h>
-#endif
 
 #include "pbd/pbd.h"
 #include "pbd/ccurl.h"
@@ -89,13 +87,11 @@ PBD::init ()
 	}
 #endif
 
-#if !GLIB_CHECK_VERSION(2,32,0)
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();
 	}
 
 	Gio::init ();
-#endif
 
 	PBD::ID::init ();
 
