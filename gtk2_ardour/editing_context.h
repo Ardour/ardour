@@ -529,6 +529,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	virtual void load_shared_bindings ();
 
+	virtual Gtk::Window* transient_parent () = 0;
+
 	Editing::GridType  pre_internal_grid_type;
 	Editing::SnapMode  pre_internal_snap_mode;
 	Editing::GridType  internal_grid_type;

@@ -158,6 +158,8 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	void load_bindings ();
 	void register_actions ();
 
+	Gtk::Window* transient_parent () { return dynamic_cast<Gtk::Window*> (contents().get_toplevel ()); }
+
 	/* The group containing all other groups that are scrolled vertically
 	   and horizontally.
 	*/
