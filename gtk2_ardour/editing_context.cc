@@ -1798,7 +1798,7 @@ EditingContext::get_quantize_op ()
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (!quantize_dialog) {
-		quantize_dialog = new QuantizeDialog (*this);
+		quantize_dialog = new QuantizeDialog (*transient_parent (), *this);
 	}
 
 	quantize_dialog->present ();
