@@ -2104,7 +2104,7 @@ EditingContext::transform_regions (const MidiViews& rs)
 		return;
 	}
 
-	TransformDialog td;
+	TransformDialog td (*transient_parent ());
 
 	td.present();
 	const int r = td.run();
@@ -2135,7 +2135,7 @@ EditingContext::transpose_regions (const MidiViews& rs)
 		return;
 	}
 
-	TransposeDialog d;
+	TransposeDialog d (*transient_parent ());
 	int const r = d.run ();
 
 	if (r == RESPONSE_ACCEPT) {
@@ -2168,7 +2168,7 @@ EditingContext::edit_notes (MidiView* mrv)
 		return;
 	}
 
-	EditNoteDialog* d = new EditNoteDialog (mrv, s);
+	EditNoteDialog* d = new EditNoteDialog (*transient_parent (), mrv, s);
 	d->show_all ();
 
 	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &EditingContext::note_edit_done), d));

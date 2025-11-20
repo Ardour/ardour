@@ -49,7 +49,7 @@
 class TransformDialog : public ArdourDialog
 {
 public:
-	TransformDialog();
+	TransformDialog(Gtk::Window&);
 
 	ARDOUR::Transform::Program get();
 

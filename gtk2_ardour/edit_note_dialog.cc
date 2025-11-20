@@ -43,8 +43,8 @@ using namespace Gtkmm2ext;
  *    @param n Notes to edit.
  */
 
-EditNoteDialog::EditNoteDialog (MidiView* rv, set<NoteBase*> n)
-	: ArdourDialog (_("Note"))
+EditNoteDialog::EditNoteDialog (Gtk::Window& parent, MidiView* rv, set<NoteBase*> n)
+	: ArdourDialog (parent, _("Note"))
 	, _region_view (rv)
 	, _events (n)
 	, _channel_all (_("Set selected notes to this channel"))

@@ -28,7 +28,7 @@ class NoteBase;
 class EditNoteDialog : public ArdourDialog
 {
 public:
-	EditNoteDialog (MidiView* rv, std::set<NoteBase*> n);
+	EditNoteDialog (Gtk::Window&, MidiView* rv, std::set<NoteBase*> n);
 
 	void done (int);
 
