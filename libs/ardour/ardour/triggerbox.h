@@ -431,12 +431,12 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void get_ui_state (UIState &state) const;
 	void set_ui_state (UIState &state);
 
-	virtual void check_edit_swap (timepos_t const & time, bool playing, BufferSet& bufs) {}
+	virtual void check_edit_swap (timepos_t const & time, bool playing, BufferSet& bufs) = 0;
 
 	static PBD::Signal<void(PBD::PropertyChange,Trigger*)> TriggerPropertyChange;
 
 	void region_property_change (PBD::PropertyChange const &);
-	virtual void bounds_changed (Temporal::timepos_t const & start, Temporal::timepos_t const & end) {}
+	virtual void bounds_changed (Temporal::timepos_t const & start, Temporal::timepos_t const & end);
 
   protected:
 	struct UIRequests {
@@ -519,6 +519,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	std::atomic<PendingSwap*> pending_swap;
 	std::atomic<PendingSwap*> old_pending_swap;
+
+	virtual void adjust_bounds (Temporal::Beats const & start, Temporal::Beats const & end, Temporal::Beats const & length, bool from_region) = 0;
 };
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
@@ -593,14 +595,16 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	Sample const * audio_data (size_t n) const;
 	size_t data_length() const { return data.length; }
 
+	void check_edit_swap (timepos_t const &, bool playing, BufferSet&);
+
   protected:
 	void retrigger ();
+	void adjust_bounds (Temporal::Beats const & start, Temporal::Beats const & end, Temporal::Beats const & length, bool from_region);
 
   private:
 	AudioData        data;
 	RubberBand::RubberBandStretcher*  _stretcher;
 	samplepos_t _start_offset;
-
 
 	/* computed during run */
 
@@ -691,8 +695,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void check_edit_swap (timepos_t const &, bool playing, BufferSet&);
 	RTMidiBufferBeats const & rt_midi_buffer() const { return *rt_midibuffer.load(); }
 
-	void bounds_changed (Temporal::timepos_t const & start, Temporal::timepos_t const & end);
-
 	Temporal::Beats play_start() const { return _play_start; }
 	Temporal::Beats play_end() const { return _play_end; }
 	Temporal::Beats loop_start() const { return _loop_start; }
@@ -701,6 +703,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
   protected:
 	void retrigger ();
 	void _arm (Temporal::BBT_Offset const &);
+	void adjust_bounds (Temporal::Beats const & start, Temporal::Beats const & end, Temporal::Beats const & length, bool from_region);
 
   private:
 	PBD::ID data_source;
@@ -741,7 +744,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void compute_and_set_length ();
 	void _startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const &);
 	void setup_event_indices ();
-	void adjust_bounds (Temporal::Beats const & start, Temporal::Beats const & end, Temporal::Beats const & length, bool from_region);
 };
 
 class LIBARDOUR_API TriggerBoxThread

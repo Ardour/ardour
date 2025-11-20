@@ -1345,7 +1345,30 @@ Trigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position, Tri
 	}
 }
 
+void
+Trigger::bounds_changed (Temporal::timepos_t const & start, Temporal::timepos_t const & end)
+{
+	PendingSwap* pending = new PendingSwap;
 
+	pending->play_start = start.beats();
+	pending->play_end = end.beats();
+	pending->loop_start = pending->play_start;
+	pending->loop_end = pending->play_end;
+	pending->length = pending->play_end - pending->play_start;
+
+	/* And set it. RT thread will find this and do what needs to be done */
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 pushed pending swap @ %3 for bounds change\n", _box.order(), index(), pending));
+	pending_swap.store (pending);
+
+	/* Clean up a previous RT midi buffer swap (if there is one) */
+
+	PendingSwap* old = old_pending_swap.exchange (nullptr);
+
+	if (old) {
+		delete old;
+	}
+}
 
 /*--------------------*/
 
@@ -2284,6 +2307,40 @@ AudioTrigger::reload (BufferSet&, void*)
 {
 }
 
+void
+AudioTrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& bufs)
+{
+	/* NOTE: this method runs synchronously with respect to the process
+	   cycle. The trigger will not be in ::run() while we execute this.
+
+	   On the other hand, another (UI) thread could be queing another
+	   pending swap.
+	*/
+
+	PendingSwap* pending = pending_swap.exchange (nullptr);
+
+	if (!pending) {
+		return;
+	}
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 noticed pending swap @ %3\n", _box.order(), index(), pending));
+
+	adjust_bounds (pending->play_start, pending->play_end, pending->length, true);
+	old_pending_swap.store (pending);
+}
+
+
+void
+AudioTrigger::adjust_bounds (Temporal::Beats const & start, Temporal::Beats const & end, Temporal::Beats const & length, bool)
+{
+	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+	set_start (timepos_t (tmap->sample_at (start)));
+	std::cerr << "Old beatcnt: " << _beatcnt;
+	_beatcnt = Temporal::DoubleableBeats (end - start).to_double();
+	std::cerr << " new " << _beatcnt << std::endl;
+
+}
+
 /*--------------------*/
 
 MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
@@ -3111,31 +3168,6 @@ MIDITrigger::model_contents_changed ()
 	pending_swap.store (pending);
 
 	/* Clean up a previous RT midi buffer swap */
-
-	PendingSwap* old = old_pending_swap.exchange (nullptr);
-
-	if (old) {
-		delete old;
-	}
-}
-
-void
-MIDITrigger::bounds_changed (Temporal::timepos_t const & start, Temporal::timepos_t const & end)
-{
-	MIDIPendingSwap* pending = new MIDIPendingSwap;
-
-	pending->play_start = start.beats();
-	pending->play_end = end.beats();
-	pending->loop_start = pending->play_start;
-	pending->loop_end = pending->play_end;
-	pending->length = pending->play_end - pending->play_start;
-
-	/* And set it. RT thread will find this and do what needs to be done */
-
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 pushed pending swap @ %3 for bounds change\n", _box.order(), index(), pending));
-	pending_swap.store (pending);
-
-	/* Clean up a previous RT midi buffer swap (if there is one) */
 
 	PendingSwap* old = old_pending_swap.exchange (nullptr);
 
