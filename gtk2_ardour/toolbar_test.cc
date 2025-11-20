@@ -272,10 +272,6 @@ int main (int argc, char **argv)
 		::exit (EXIT_FAILURE);
 	}
 
-	if (!Glib::thread_supported()) {
-		Glib::thread_init();
-	}
-
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
 	log_receiver.listen_to (info);
