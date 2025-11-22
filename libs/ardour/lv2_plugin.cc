@@ -3317,10 +3317,14 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 									// TODO: This should emit the control's Changed signal
 									PropertyChanged(prop_id, _property_values[prop_id]);
 								} else {
+#ifndef NDEBUG
 									std::cerr << "warning: patch:Set for unknown property" << std::endl;
+#endif
 								}
 							} else {
+#ifndef NDEBUG
 								std::cerr << "warning: patch:Set for unsupported property" << std::endl;
+#endif
 							}
 						}
 					}
