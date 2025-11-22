@@ -388,7 +388,7 @@ IOPlug::property_changed_externally (uint32_t which, Variant val)
 void
 IOPlug::processor_change (RouteProcessorChange const& rpc)
 {
-	if (rpc & RouteProcessorChange::PortNameChange) {
+	if (rpc.type & RouteProcessorChange::PortNameChange) {
 		set_pretty_port_names ();
 	}
 }
