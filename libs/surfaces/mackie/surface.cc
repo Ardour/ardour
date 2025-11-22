@@ -118,6 +118,8 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	, _has_master_meter (false)
 	, connection_state (0)
 	, is_qcon (false)
+	, is_v1m (false)
+	, is_platformMp (false)
 	, input_source (0)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::Surface init\n");
@@ -131,6 +133,10 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	//Store Qcon flag
 	is_qcon = mcp.device_info().is_qcon();
 
+	//Store iCON P1-M and V1-M flag
+	is_v1m = mcp.device_info().is_v1m();
+	is_platformMp = mcp.device_info().is_platformMp();
+
 	/* only the first Surface object has global controls */
 	/* lets use master_position instead */
 	uint32_t mp = _mcp.device_info().master_position();
@@ -138,6 +144,10 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 		DEBUG_TRACE (DEBUG::MackieControl, "Surface matches MasterPosition. Might have global controls.\n");
 
 		if ( is_qcon ) {
+			_has_master_display = (mcp.device_info().has_master_fader() && mcp.device_info().has_qcon_second_lcd());
+		}
+
+		if ( is_v1m ) {
 			_has_master_display = (mcp.device_info().has_master_fader() && mcp.device_info().has_qcon_second_lcd());
 		}
 		_has_master_meter = mcp.device_info().has_qcon_master_meters();
@@ -1158,6 +1168,38 @@ Surface::redisplay (PBD::microseconds_t now, bool force)
 		}
 	}
 
+	/* iCON P1-M/V1-M color update: full RGB SysEx for all 8 strips */
+	if ( is_v1m || is_platformMp ) {
+		uint8_t rgb_bytes[24] = {0};  // 8 strips × 3 bytes (init black/off)
+		uint32_t byte_idx = 0;
+		uint32_t strip_idx = 0;
+
+		for (Strips::const_iterator s = strips.begin(); s != strips.end() && strip_idx < 8; ++s, ++strip_idx) {
+			if ((*s)->stripable()) {
+				uint32_t ardour_color = (*s)->stripable()->presentation_info().color();  // 0xRRGGBBAA
+
+				/* Extract & scale RGB (0-255 → 0-127 for MIDI) */
+				uint8_t r = ((ardour_color >> 24) & 0xFF) >> 1;  // Clamp/scale to 0-127
+				uint8_t g = ((ardour_color >> 16) & 0xFF) >> 1;
+				uint8_t b = ((ardour_color >> 8) & 0xFF) >> 1;
+
+				/* Optional: Boost low values for better visibility on V1-M LCDs */
+				if (r < 20) r = 0; else r = std::min(127, r + 20);  // Dark → off or brighter
+				if (g < 20) g = 0; else g = std::min(127, g + 20);
+				if (b < 20) b = 0; else b = std::min(127, b + 20);
+
+				rgb_bytes[byte_idx++] = r;
+				rgb_bytes[byte_idx++] = g;
+				rgb_bytes[byte_idx++] = b;
+			} else {
+				/* No stripable: black (already 0) */
+				byte_idx += 3;
+			}
+		}
+
+		write (display_colors_on_p1m_v1m(rgb_bytes));
+	}
+
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
 		(*s)->redisplay (now, force);
 	}
@@ -1638,6 +1680,31 @@ Surface::display_message_for (string const& msg, uint64_t msecs)
 	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
 		(*s)->block_screen_display_for (msecs);
 	}
+}
+
+/** display color_values on the 8 scribble strips of the iCON P1-M and V1-M **/
+MidiByteArray
+Surface::display_colors_on_p1m_v1m (const uint8_t rgb_values[24]) const
+{
+	/* Icon P1-M and V1-M color SysEx: F0 00 02 4E 16 14 [8×(R G B)] F7
+	 * rgb_values: 24 bytes (8 strips × 3 RGB, each 0-127 / 0x00-0x7F)
+	 * Wrong device ID? If 16 14 fails, try 10 14 or sniff.
+	 */
+	MidiByteArray midi_msg;
+	midi_msg << MIDI::sysex;
+	midi_msg << 0x00;  // Icon universal?
+	midi_msg << 0x02;  // ?
+	midi_msg << 0x4E;  // Icon Manufacturer ID
+	midi_msg << 0x16;  // Device ID
+	midi_msg << 0x14;  // Color command
+
+	/* Append 8 strips × 3 RGB bytes */
+	for (int i = 0; i < 24; ++i) {
+		midi_msg << rgb_values[i];
+	}
+
+	midi_msg << MIDI::eox;
+	return midi_msg;
 }
  
 /** display @p color_values on the 8 scribble strips of the X-Touch
