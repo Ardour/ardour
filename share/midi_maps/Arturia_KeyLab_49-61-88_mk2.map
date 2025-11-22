@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Arturia Keylab 49/61/88 mk2 (MCU/Analog Lab mode)">
+<!-- MCU MIDI Mapping for Arturia Keylab 49/61/88 mk2 in "Analog Lab" mode. -->
+
+<!--
+    11/11/25 Binding MIDI Map Template v1 - contributed by ardour@iokm.uk
+    Intended for use with Arturia Keylab 49/61/88 mk2 in "Analog Lab" mode with DAW Map = MCU
+    This template maps controllers and buttons for Editing & Mixing and not
+    for SoftSynth parameter control. However, modify as required.
+
+    The following Keylab 49/61/88 mk2 controllers & buttons are mapped in this template:
+	* 16x Pad cluster (all 16x Pads work; none assigned in this template)
+	* DAW Command cluster (all 10x buttons work and assigned)
+	* Transport cluster (all 6x buttons work and assigned)
+	* Middle Analog Lab cluster (all 4x buttons & knob push/rotate work and assigned)
+	* Bank change cluster (all 3x buttons work and assigned)
+	* Encoders & Faders cluster (all 9x sets of Encoders & Faders work and assigned)
+	* Select toggles row (Ardour limitation can only be assigned to "Actions" or "Functions")
+	    *NOTE: The MIDI bindings for "Select" toggles do match MIDI events but uri="/route/mute B1"
+	    won't work with msg="" being an Ardour limitation - can only be assigned to "Actions" or
+	    "Functions".  Would have preferred to use "Select" toggles for corresponding Mute/Solo but
+	    unable; to not waste the use of "Select" toggles currently mapped to trigger cues A to I.
+	* Sustain Pedal (works and assigned)
+
+    Keylab 49/61/88 mk2 has three modes:
+	* "Analog Lab" default (hardcoded controller codes).
+	    Provides access to nearly all the controllers & buttons (total of 69): Pads, Transport,
+	    DAW, Analog Lab, Encoders & Faders.  Some controllers like the "Select" buttons toggles
+	    have non-standard MIDI events which are difficult or impossible to bind to some Ardour
+	    actions.  This Binding MIDI Map Template supports Keylab "Audio Lab" mode.
+	* "DAW" (hardcoded controller codes are mostly Note/Pitch Blend events)
+	    Different to "Analog Lab" mode. Provides access to most (62) of the controllers & buttons
+	    except for the middle Analog Lab cluster.  Similar limitations as "Analog Lab" mode where
+	    many controllers like Faders send non-standard MIDI events like Note On/Off with Pitch Blend
+	    events which are difficult or impossible to bind to Ardour actions.
+	    *NOTE: this version of Binding MIDI Map Template doesn't support Keylab "DAW" mode.
+	* "USER" (different controller codes but can with effort be user assigned/reassigned)
+	    A flexible and more MIDI standard event mode.  Provides access to many (59) of the
+	    controllers & buttons except for the bank selection and middle Analog Lab cluster.
+	    Although the controllers & buttons events are more MIDI standard they have different
+	    default controller codes to what is hardcoded in the "Analog Lab" or "DAW" modes. The
+	    majority of the controllers & buttons can be user assigned/reassigned; however, doing so
+	    requires significant time & effort.  Currently within Linux there is no easy way to
+	    download/export the assigned/reassigned user configuration from the Keylab 49/61/88 mk2.
+	    *NOTE: this version of Binding MIDI Map Template doesn't support Keylab "USER" mode.
+
+    Arturia MIDI Control Center doesn't support Linux; you can set the DAW map to MCU via SysEx Controls:
+    https://github.com/soyersoyer/sysex-controls  (Thank you, Gergo Koteles).
+
+    For reasons only known to Arturia, command events are split between a DAW port and a MIDI port.
+	    Dir Device    Name
+	    IO  hw:3,0,0  KeyLab mkII 61 MIDI
+	    IO  hw:3,0,1  KeyLab mkII 61 DAW
+    Transport and DAW events are only via the DAW port using "channel 1".  Encoders & Faders are only
+    via the MIDI port using "channel 1" which is ALSO THE DEFAULT PIANO KEYBOARD CHANNEL and will
+    CONFLICT IF THE PIANO KEYBOARD IS NOT CHANGED to a midi channel 2-9, 11-16 !!  Pads are Channel 10.
+    To be able to use Transport + DAW commands + Encoders & Faders at the same time - the DAW port *and*
+    MIDI port need to be both connected to Ardour's "MIDI Control In" port.  This can be achieved via
+    Ardour's MIDI Connection Manager by connecting both Hardware MIDI ports to "Generic MIDI Control In".
+    Or via a JACK/Pipewire virtual patchbay like qpwgraph.  https://github.com/rncbc/qpwgraph
+
+
+    To get everything to work Ardour + qpwgraph + SysEx Controls + Keylab the configuration needs to be:
+
+    * Ardour MIDI and Control Surface configuration: [Setup Control Surface]
+    ==================================================
+	MIDI Port Config
+	    Keylab MIDI:  Music Data + Control Data + Follow Selection
+	    Keylab DAW:                Control Data
+
+	Control Surfaces (Generic MIDI)
+	    Incoming MIDI			= Keylab DAW
+	    Outgoing MIDI			= KeyLab DAW
+	    Current Bank 			= 1
+	    Enable Feedback			= Y
+	    Smoothing				= 10
+
+
+    * Ardour's MIDI Connection Manager (Option 1): [Bridge MIDI & DAW Controllers to MIDI Control In]
+    ==================================================
+
+	Hardware Tab vs. Ardour Misc Tab
+	    Midi-Bridge->MIDI		X
+	    Midi-Bridge->DAW		X
+					    Generic MIDI Control In
+						<-Control Surface
+
+    * qpwgraph virtual patchbay config (Option 2): [Bridge MIDI & DAW Controllers to MIDI Control In]
+    ==================================================
+	    +================+          +=================+
+	    |   Midi-Bridge  |          |     ardour      |
+	    |                |          |                 |
+	    |    KeyLab MIDI +==========+                 |
+	    |                |          | MIDI Control In |
+	    |     Keylab DAW +==========+                 |
+	    +================+          +=================+
+
+
+    * SysEx Controls (Keylab) configuration: [Setup Keylab Controllers]
+    ==================================================
+	    User MIDI Channel		= 2  (Sometimes need to set this via Keylab Piano Keyboard)
+	    DAW Map					= Default MCU
+	    DAW Buttons				= DAW
+	    Track Control Buttons	= Single Track
+	    DAW Fader Mode			= Jump
+	    USER Fader Mode			= Jump
+
+
+    * KeyLab Piano Keyboard MIDI Channel configuration: [Avoid Controllers conflicting with Keyboard]
+    ==================================================
+	    Piano Keyboard MIDI Channel	= Anything other than 1 or 10 !!
+	    [ Set by Keylab MIDI Channel button & associated Piano key ]
+
+	    * Channel 1  		 = Transport (Notes) + DAW (Notes) + Encoders & Faders (Controllers)
+	    * Channel 10 		 = Default Percussion (Notes)
+	    * Channel 2-9, 11-16 = Piano Keyboard (Notes)
+
+	    *NOTE: Some SoftSynths like "General Midi Synth" as default have instruments on all 16 MIDI
+	    channels. So you'll hear something out of the box.  Whereas, SoftSynths like "ZynAddSybFX"
+	    default to MIDI channel 1 unless configured otherwise. So if you don't hear anything check
+	    that an instrument has been assigned to whatever MIDI Channel defined for the Piano Keyboard.
+
+-->
+
+    <!-- START Arturia Keylab 49/61/88 mk2 in "Analog Lab" mode with DAW Map = MCU Binding MIDI Map -->
+
+    <!-- 16x Pads - Reassign to Actions.  "Pad" on keylab must be selected. -->
+    <!-- Pad note events via KeyLab mkII 61 3:(capture_0) KeyLab mkII 61 MIDI Port -->
+    <!-- Reserved for Cue mode / Launch clip, but you can set then to other functions/actions -->
+	<!-- <Binding channel="10" note="48" action="Cues/trigger-cue-0"/>  -->		<!-- Pad 01 -->
+	<!-- <Binding channel="10" note="49" action="Cues/trigger-cue-1"/>  -->		<!-- Pad 02 -->
+	<!-- <Binding channel="10" note="50" action="Cues/trigger-cue-2"/>  -->		<!-- Pad 03 -->
+	<!-- <Binding channel="10" note="51" action="Cues/trigger-cue-3"/>  -->		<!-- Pad 04 -->
+	<!-- <Binding channel="10" note="44" action="Cues/trigger-cue-4"/>  -->		<!-- Pad 05 -->
+	<!-- <Binding channel="10" note="45" action="Cues/trigger-cue-5"/>  -->		<!-- Pad 06 -->
+	<!-- <Binding channel="10" note="46" action="Cues/trigger-cue-6"/>  -->		<!-- Pad 07 -->
+	<!-- <Binding channel="10" note="47" action="Cues/trigger-cue-7"/>  -->		<!-- Pad 08 -->
+	<!-- <Binding channel="10" note="40" action="Cues/trigger-cue-8"/>  -->		<!-- Pad 09 -->
+	<!-- <Binding channel="10" note="41" action="Cues/trigger-cue-9"/>  -->		<!-- Pad 10 -->
+	<!-- <Binding channel="10" note="42" action="Cues/trigger-cue-10"/> -->		<!-- Pad 11 -->
+	<!-- <Binding channel="10" note="43" action="Cues/trigger-cue-11"/> -->		<!-- Pad 12 -->
+	<!-- <Binding channel="10" note="36" action="Cues/trigger-cue-12"/> -->		<!-- Pad 13 -->
+	<!-- <Binding channel="10" note="37" action="Cues/trigger-cue-13"/> -->		<!-- Pad 14 -->
+	<!-- <Binding channel="10" note="38" action="Cues/trigger-cue-14"/> -->		<!-- Pad 15 -->
+	<!-- <Binding channel="10" note="39" action="Cues/trigger-cue-15"/> -->		<!-- Pad 16 -->
+
+    <!-- DAW Commands / User Controls. -->
+    <!-- DAW note events via KeyLab mkII 61 3:(capture_1) KeyLab mkII 61 DAW Port -->
+    <!-- *NOTE: If not configured correctly - Piano keyboard *WILL* conflict with DAW Command note events !! -->
+	<Binding channel="1" note="8"  uri="/route/solo S1"/>						<!-- Solo -->
+	<Binding channel="1" note="16" uri="/route/mute S1"/>						<!-- Mute -->
+	<Binding channel="1" note="0"  uri="/route/recenable S1"/>					<!-- Record -->
+	<Binding channel="1" note="74" action="Recorder/arm-none" momentary="yes"/>	<!-- Read: Arm -->
+	<Binding channel="1" note="75" action="Main/QuickSnapshotStay" momentary="yes"/> <!-- Write: Re-Enable -->
+	<Binding channel="1" note="80" action="Common/Save" momentary="yes"/>		<!-- Save / View -->
+	<Binding channel="1" note="87" action="Transport/TogglePunchIn"/>			<!-- In: Punch / Zoom -->
+	<Binding channel="1" note="88" action="Transport/TogglePunchOut"/>			<!-- Out: Punch / Zoom -->
+	<Binding channel="1" note="89" action="Transport/ToggleClick"/>				<!-- Metro -->
+	<Binding channel="1" note="81" action="Editor/undo" momentary="yes"/>		<!-- Undo -->
+
+    <!-- Transport Controls. -->
+    <!-- Transport note events via KeyLab mkII 61 3:(capture_1) KeyLab mkII 61 DAW Port -->
+    <!-- *NOTE: If not configured correctly - Piano keyboard *WILL* conflict with Transport Command note events !! -->
+	<Binding channel="1" note="91" action="Transport/GotoStart"/>				<!-- Rewind -->
+	<Binding channel="1" note="92" action="Transport/Forward"/>					<!-- Fast Forward -->
+	<Binding channel="1" note="93" function="transport-stop"/>					<!-- Stop -->
+	<Binding channel="1" note="94" function="transport-roll"/> 					<!-- Play -->
+	<Binding channel="1" note="95" action="Transport/record-roll"/>				<!-- Record -->
+	<Binding channel="1" note="86" function="Region/loop-region"/>				<!-- Loop -->
+
+    <!-- Analog Lab Controls. -->
+    <!-- Control events via KeyLab mkII 61 3:(capture_0) KeyLab mkII 61 MIDI Port -->
+	<!-- "Category" and "Preset" buttons are mapped to show editor or mixer. -->
+	<Binding channel="1" ctl="116" action="Common/show-editor"/>				<!-- Category -->
+	<Binding channel="1" ctl="117" action="Common/show-mixer"/>					<!-- Preset -->
+	<Binding channel="1" ctl="28" action="Editor/select-prev-route"/>			<!-- Left Arrow -->
+	<Binding channel="1" ctl="29" action="Editor/select-next-route"/>			<!-- Right Arrow -->
+	<Binding channel="1" ctl="113" action="MIDI/panic"/>						<!-- Big Knob Push -->
+	<Binding msg="B0 70 3f" action="Common/playhead-backward-to-grid"/>			<!-- Big Knob Rotate Left -->
+	<Binding msg="B0 70 41" action="Common/playhead-forward-to-grid"/>			<!-- Big Knob Rotate Right -->
+	<!-- Center Knob Rotate: Left = Value 63 then Value 64; Right = Value 64 then Value 65 -->
+
+    <!-- Encoders, Faders, Buttons -->
+    <!-- Control events via KeyLab mkII 61 3:(capture_0) KeyLab mkII 61 MIDI Port -->
+    <!-- *NOTE: Audio Lab mode "Next" / "Previous" buttons (MAY) conflict with "USER" mode "Select" toggles. -->
+    <DeviceInfo bank-size="8" motorised="no"/>
+    <Binding channel="1" ctl="22" function="next-bank"/>						<!-- Part 1 / Next -->
+    <Binding channel="1" ctl="23" function="prev-bank"/>						<!-- Part 2 / Previous -->
+    <Binding channel="1" ctl="24" action="Mixer/unity-gain"/>					<!-- Live / Bank -->
+
+    <!-- 9x Encoders, Faders, Buttons - Audio Lab mode Control Bank 1. -->
+	<!-- Group 1: ( Pan 1 / CH 1 / Select 1 ) -->
+	    <Binding channel="1" ctl="74" uri="/route/pandirection B1"/>			<!-- Encoder -->
+	    <Binding channel="1" ctl="73" uri="/route/gain B1"/>					<!-- Fader -->
+	    <Binding msg="B0 1e 01" action="Cues/trigger-cue-0"/>					<!-- Select -->
+	    <!-- <Binding msg="B0 1e 01" uri="/route/mute B1"/> -->					<!-- Ardour Limitation -->
+	    <!-- Select 1 = CC 30 - Value 1 then Value 0 -->
+	<!-- Group 2: ( Pan 2 / CH 2 / Select 2 ) -->
+	    <Binding channel="1" ctl="71" uri="/route/pandirection B2"/>			<!-- Encoder -->
+	    <Binding channel="1" ctl="75" uri="/route/gain B2"/>					<!-- Fader -->
+	    <Binding msg="B0 1e 03" action="Cues/trigger-cue-1"/>					<!-- Select -->
+	    <!-- <Binding msg="B0 1e 03" uri="/route/mute B2"/> -->					<!-- Ardour Limitation -->
+	    <!-- Select 2 = CC 30 - Value 3 then Value 2 -->
+	<!-- Group 3: ( Pan 3 / CH 3 / Select 3 ) -->
+	    <Binding channel="1" ctl="76" uri="/route/pandirection B3"/>			<!-- Encoder -->
+	    <Binding channel="1" ctl="79" uri="/route/gain B3"/>					<!-- Fader -->
+	    <Binding msg="B0 1e 05" action="Cues/trigger-cue-2"/>					<!-- Select -->
+	    <!-- <Binding msg="B0 1e 05" uri="/route/mute B3"/> -->					<!-- Ardour Limitation -->
+	    <!-- Select 3 = CC 30 - Value 5 then Value 4 -->
+	<!-- Group 4: ( Pan 4 / CH 4 / Select 4 ) -->
+	    <Binding channel="1" ctl="77" uri="/route/pandirection B4"/>			<!-- Encoder -->
+	    <Binding channel="1" ctl="72" uri="/route/gain B4"/>					<!-- Fader -->
+	    <Binding msg="B0 1e 07" action="Cues/trigger-cue-3"/>					<!-- Select -->
+	    <!-- <Binding msg="B0 1e 07" uri="/route/mute B4"/> -->					<!-- Ardour Limitation -->
+	    <!-- Select 4 = CC 30 - Value 7 then Value 6 -->
+	<!-- Group 5: ( Pan 5 / CH 5 / Select 5 ) -->
+	    <Binding channel="1" ctl="93" uri="/route/pandirection B5"/>			<!-- Encoder -->
+	    <Binding channel="1" ctl="80" uri="/route/gain B5"/>					<!-- Fader -->
+	    <Binding msg="B0 1e 09" action="Cues/trigger-cue-4"/>					<!-- Select -->
+	    <!-- <Binding msg="B0 1e 09" uri="/route/mute B5"/> -->					<!-- Ardour Limitation -->
+	    <!-- Select 5 = CC 30 - Value 9 then Value 8 -->
+	<!-- Group 6: ( Pan 6 / CH 6 / Select 6 ) -->
+	    <Binding channel="1" ctl="18" uri="/route/pandirection B6"/>			<!-- Encoder -->
+	    <Binding channel="1" ctl="81" uri="/route/gain B6"/>					<!-- Fader -->
+	    <Binding msg="B0 1e 0b" action="Cues/trigger-cue-5"/>					<!-- Select -->
+	    <!-- <Binding msg="B0 1e 0b" uri="/route/mute B6"/> -->					<!-- Ardour Limitation -->
+	    <!-- Select 6 = CC 30 - Value 11 then Value 10 -->
+	<!-- Group 7: ( Pan 7 / CH 7 / Select 7 ) -->
+	    <Binding channel="1" ctl="19" uri="/route/pandirection B7"/>			<!-- Encoder -->
+	    <Binding channel="1" ctl="82" uri="/route/gain B7"/>					<!-- Fader -->
+	    <Binding msg="B0 1e 0d" action="Cues/trigger-cue-6"/>					<!-- Select -->
+	    <!-- <Binding msg="B0 1e 0d" uri="/route/mute B7"/> -->					<!-- Ardour Limitation -->
+	    <!-- Select 7 = CC 30 - Value 13 then Value 12 -->
+	<!-- Group 8: ( Pan 8 / CH 8 / Select 8 ) -->
+	    <Binding channel="1" ctl="16" uri="/route/pandirection B8"/>			<!-- Encoder -->
+	    <Binding channel="1" ctl="83" uri="/route/gain B8"/>					<!-- Fader -->
+	    <Binding msg="B0 1e 0f" action="Cues/trigger-cue-7"/>					<!-- Select -->
+	    <!-- <Binding msg="B0 1e 0f" uri="/route/mute B8"/> -->					<!-- Ardour Limitation -->
+	    <!-- Select 8 = CC 30 - Value 15 then Value 14 -->
+
+    <!-- Last Fader Binding On Control Bank reserved for Master Bus  -->
+    <!-- Group 9: ( Pan 9 / CH 9 / Select 9 / Master ) -->
+	<Binding channel="1" ctl="17" uri="/bus/pandirection master"/>				<!-- Encoder -->
+	<Binding channel="1" ctl="85" uri="/bus/gain master"/>						<!-- Fader -->
+	<Binding msg="B0 1e 11" action="Cues/trigger-cue-8"/>						<!-- Select -->
+	<!-- <Binding msg="B0 1e 11" uri="/route/mute master"/> -->					<!-- Ardour Limitation -->
+	<!-- Select 9 = CC 30 - Value 17 then Value 16 -->
+
+    <!-- Sustain Pedal -->
+    <!-- Control events via KeyLab mkII 61 3:(capture_0) KeyLab mkII 61 MIDI Port -->
+	<Binding channel="1" ctl="64" action="Transport/alternate-ToggleRoll"/>		<!-- Sustain Pedal -->
+
+    <!-- END Arturia Keylab 49/61/88 mk2 in "Analog Lab" mode with DAW Map = MCU Binding MIDI Map -->
+
+</ArdourMIDIBindings>
