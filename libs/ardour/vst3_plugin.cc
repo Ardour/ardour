@@ -97,6 +97,7 @@ VST3Plugin::init ()
 	_plug->set_block_size (_session.get_block_size ());
 	_plug->OnResizeView.connect_same_thread (_connections, std::bind (&VST3Plugin::forward_resize_view, this, _1, _2));
 	_plug->OnParameterChange.connect_same_thread (_connections, std::bind (&VST3Plugin::parameter_change_handler, this, _1, _2, _3));
+	_plug->OnProcessorChange.connect_same_thread (_connections, [&](ARDOUR::RouteProcessorChange const& rpc) { Plugin::send_processors_changed (rpc); });
 
 	/* assume only default active busses are connected */
 	for (auto const& abi : _plug->bus_info_in ()) {
@@ -3316,9 +3317,8 @@ VST3PI::resume_notifications ()
 	ARDOUR::RouteProcessorChange rpc (RouteProcessorChange::NoProcessorChange, false);
 	std::swap (rpc, _rpc_queue);
 
-	Route* r = dynamic_cast<Route*> (_owner);
-	if (r && _rpc_queue.type != RouteProcessorChange::NoProcessorChange) {
-		r->processors_changed (rpc); /* EMIT SIGNAL */
+	if (_rpc_queue.type != RouteProcessorChange::NoProcessorChange) {
+		OnProcessorChange (rpc);
 	}
 }
 
@@ -3330,9 +3330,5 @@ VST3PI::send_processors_changed (RouteProcessorChange const& rpc)
 		_rpc_queue.meter_visibly_changed |= rpc.meter_visibly_changed;
 		return;
 	}
-
-	Route* r = dynamic_cast<Route*> (_owner);
-	if (r) {
-		r->processors_changed (rpc); /* EMIT SIGNAL */
-	}
+	OnProcessorChange (rpc);
 }

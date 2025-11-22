@@ -179,6 +179,7 @@ public:
 	                     };
 
 	PBD::Signal<void(ParameterChange, uint32_t, float)> OnParameterChange;
+	PBD::Signal<void(ARDOUR::RouteProcessorChange)>     OnProcessorChange;
 
 	/* API for Ardour -- Setup/Processing */
 	uint32_t plugin_latency ();

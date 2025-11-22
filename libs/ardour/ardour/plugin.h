@@ -378,11 +378,19 @@ public:
 	PBD::Signal<void(uint32_t)> StartTouch;
 	PBD::Signal<void(uint32_t)> EndTouch;
 
+	PBD::Signal<void(RouteProcessorChange)> ProcessorChange;
+
 protected:
 	friend class PluginInsert;
 	friend class PlugInsertBase;
 	friend class RegionFxPlugin;
 	friend class Session;
+
+	/* Notifiy owner (Route) that some config property changed.
+	 * -> ProcessorChange ()
+	 * -> route->processors_changed ()
+	 */
+	virtual void send_processors_changed (ARDOUR::RouteProcessorChange const&);
 
 	/* Called when a parameter of the plugin is changed outside of this
 	 * host's control (typical via a plugin's own GUI/editor)

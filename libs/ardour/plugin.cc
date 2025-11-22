@@ -541,6 +541,17 @@ Plugin::parameter_changed_externally (uint32_t which, float /* value */)
 }
 
 void
+Plugin::send_processors_changed (ARDOUR::RouteProcessorChange const& rpc)
+{
+	ProcessorChange (rpc);
+
+	Route* r = dynamic_cast<Route*> (_owner);
+	if (r) {
+		r->processors_changed (rpc); /* EMIT SIGNAL */
+	}
+}
+
+void
 Plugin::state_changed ()
 {
 	_parameter_changed_since_last_preset = true;
