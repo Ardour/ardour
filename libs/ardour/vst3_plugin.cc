@@ -1626,6 +1626,7 @@ VST3PI::restartComponent (int32 flags)
 				}
 			}
 		}
+		send_processors_changed (RouteProcessorChange (RouteProcessorChange::PortNameChange, false)); /* EMIT SIGNAL */
 	}
 	if (flags & Vst::kParamTitlesChanged) {
 		/* titles or default values or flags have changed */
@@ -1647,7 +1648,7 @@ VST3PI::restartComponent (int32 flags)
 				p.normal = pi.defaultNormalizedValue;
 			}
 		}
-		send_processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+		send_processors_changed (RouteProcessorChange (RouteProcessorChange::ParameterNameChange, false)); /* EMIT SIGNAL */
 	}
 	if (flags & Vst::kIoChanged) {
 		warning << "VST3: Vst::kIoChanged (not implemented)" << endmsg;
