@@ -1154,11 +1154,11 @@ EditingContext::set_draw_velocity (int v)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (v == DRAW_VEL_AUTO) {
-		draw_velocity_actions[v]->set_active (true);
-	} else {
-		draw_velocity_actions[std::max (std::min (v, 127), 0)]->set_active (true);
+	if (draw_velocity_actions.find (v) == draw_velocity_actions.end() || draw_velocity_actions[v]) {
+		return;
 	}
+
+	draw_velocity_actions[v]->set_active (true);
 }
 
 void
@@ -1166,11 +1166,11 @@ EditingContext::set_draw_channel (int c)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (c == DRAW_CHAN_AUTO) {
-		draw_channel_actions[c]->set_active (true);
-	} else {
-		draw_channel_actions[std::max (std::min (c, 15), 0)]->set_active (true);
+	if (draw_channel_actions.find (c) == draw_channel_actions.end() || draw_channel_actions[c]) {
+		return;
 	}
+
+	draw_channel_actions[c]->set_active (true);
 }
 
 void
