@@ -7533,11 +7533,16 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 	}
 
 	if (child_call) {
+		/* Coordinates passed to these two methods use *canvas*
+		 * coordinate space for the x-axis
+		 */
+
 		x = editing_context.timeline_to_canvas (timeline_x);
+
 		if (straight_line && !first_move) {
-			line_extended (ArdourCanvas::Duple (line_start_x, line_start_y), ArdourCanvas::Duple (x, y), base_rect, first_move ? -1 : edge_x);
+			line_extended (ArdourCanvas::Duple (line_start_x, line_start_y), ArdourCanvas::Duple (x, y), base_rect, first_move ? -1 : x);
 		} else {
-			point_added (ArdourCanvas::Duple (x, y), base_rect, first_move ? -1 : edge_x);
+			point_added (ArdourCanvas::Duple (x, y), base_rect, first_move ? -1 : editing_context.timeline_to_canvas (edge_x));
 		}
 	}
 
