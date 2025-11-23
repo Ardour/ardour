@@ -29,7 +29,7 @@
 #define PTHREAD_MACROS_DEFINED
 #ifdef  PTW32_VERSION  /* pthread_win32 */
 #define mark_pthread_inactive(threadID)  threadID.p=0
-#define is_pthread_active(threadID)      threadID.p!=0
+#define is_pthread_active(threadID)      (threadID.p!=0)
 #else                 /* normal pthread */
 #define mark_pthread_inactive(threadID)  threadID=0
 #define is_pthread_active(threadID)      threadID!=0

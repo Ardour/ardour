@@ -431,12 +431,12 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void get_ui_state (UIState &state) const;
 	void set_ui_state (UIState &state);
 
-	virtual void check_edit_swap (timepos_t const & time, bool playing, BufferSet& bufs) {}
+	virtual void check_edit_swap (timepos_t const & time, bool playing, BufferSet& bufs) = 0;
 
 	static PBD::Signal<void(PBD::PropertyChange,Trigger*)> TriggerPropertyChange;
 
 	void region_property_change (PBD::PropertyChange const &);
-	virtual void bounds_changed (Temporal::timepos_t const & start, Temporal::timepos_t const & end) {}
+	virtual void bounds_changed (Temporal::timepos_t const & start, Temporal::timepos_t const & end, Temporal::timecnt_t const & len);
 
   protected:
 	struct UIRequests {
@@ -505,6 +505,21 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void send_property_change (PBD::PropertyChange pc);
 
 	virtual void _arm (Temporal::BBT_Offset const &);
+
+	struct PendingSwap {
+		timepos_t play_start;
+		timepos_t play_end;
+		timepos_t loop_start;
+		timepos_t loop_end;
+		timecnt_t length;
+
+		virtual ~PendingSwap() {}
+	};
+
+	std::atomic<PendingSwap*> pending_swap;
+	std::atomic<PendingSwap*> old_pending_swap;
+
+	virtual void adjust_bounds (Temporal::timepos_t const & start, Temporal::timepos_t const & end, Temporal::timecnt_t const & length, bool from_region) = 0;
 };
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
@@ -535,6 +550,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void set_end (timepos_t const &);
 	void set_legato_offset (timepos_t const &);
 	void set_length (timecnt_t const &);
+	void set_user_data_length (samplecnt_t);
 	timepos_t start_offset () const; /* offset from start of data */
 	timepos_t current_length() const; /* offset from start of data */
 	timepos_t natural_length() const; /* offset from start of data */
@@ -578,15 +594,19 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	Sample const * audio_data (size_t n) const;
 	size_t data_length() const { return data.length; }
+	samplecnt_t user_data_length() const { return _user_data_length; }
+
+	void check_edit_swap (timepos_t const &, bool playing, BufferSet&);
 
   protected:
 	void retrigger ();
+	void adjust_bounds (Temporal::timepos_t const & start, Temporal::timepos_t const & end, Temporal::timecnt_t const & length, bool from_region);
 
   private:
 	AudioData        data;
+	samplecnt_t      _user_data_length;
 	RubberBand::RubberBandStretcher*  _stretcher;
 	samplepos_t _start_offset;
-
 
 	/* computed during run */
 
@@ -677,8 +697,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void check_edit_swap (timepos_t const &, bool playing, BufferSet&);
 	RTMidiBufferBeats const & rt_midi_buffer() const { return *rt_midibuffer.load(); }
 
-	void bounds_changed (Temporal::timepos_t const & start, Temporal::timepos_t const & end);
-
 	Temporal::Beats play_start() const { return _play_start; }
 	Temporal::Beats play_end() const { return _play_end; }
 	Temporal::Beats loop_start() const { return _loop_start; }
@@ -687,6 +705,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
   protected:
 	void retrigger ();
 	void _arm (Temporal::BBT_Offset const &);
+	void adjust_bounds (Temporal::timepos_t const & start, Temporal::timepos_t const & end, Temporal::timecnt_t const & length, bool from_region);
 
   private:
 	PBD::ID data_source;
@@ -714,20 +733,12 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	std::atomic<RTMidiBufferBeats*> rt_midibuffer;
 	uint32_t iter; /* index into the above RTMidiBufferBeats for current playback */
 
-	struct PendingSwap {
+	struct MIDIPendingSwap : public PendingSwap {
 		RTMidiBufferBeats* rt_midibuffer;
-		Temporal::Beats play_start;
-		Temporal::Beats play_end;
-		Temporal::Beats loop_start;
-		Temporal::Beats loop_end;
-		Temporal::Beats length;
 
-		PendingSwap() : rt_midibuffer (nullptr) {}
-		~PendingSwap() { delete rt_midibuffer; }
+		MIDIPendingSwap() : rt_midibuffer (nullptr) {}
+		~MIDIPendingSwap() { delete rt_midibuffer; }
 	};
-
-	std::atomic<PendingSwap*> pending_swap;
-	std::atomic<PendingSwap*> old_pending_swap;
 
 	bool         map_change;
 
@@ -735,7 +746,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void compute_and_set_length ();
 	void _startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const &);
 	void setup_event_indices ();
-	void adjust_bounds (Temporal::Beats const & start, Temporal::Beats const & end, Temporal::Beats const & length, bool from_region);
 };
 
 class LIBARDOUR_API TriggerBoxThread

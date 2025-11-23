@@ -171,8 +171,8 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 			   with this diff().
 			*/
 
-			for (typename ChangeContainer::const_iterator i = a->changes().added.begin(); i != a->changes().added.end(); ++i) {
-				(*i)->DropReferences.connect_same_thread (*cmd, std::bind (&Destructible::drop_references, cmd));
+			for (auto const & change : a->changes().added) {
+				change->DropReferences.connect_same_thread (*cmd, std::bind (Destructible::drop_and_kill, cmd));
 			}
 		}
         }

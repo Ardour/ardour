@@ -468,7 +468,7 @@ midi:
 
 	/* MIDI data handling */
 
-	const bool no_playlist_modification_pending = !(pending_overwrite () & PlaylistModified);
+	const bool no_playlist_modification_pending = !(_pending_overwrite.load () & PlaylistModified);
 
 	if (bufs.count ().n_midi ()) {
 		MidiBuffer& dst (bufs.get_midi (0));

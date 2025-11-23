@@ -697,8 +697,11 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				}
 
 				if (!filter || !filter->filter(ev.buffer(), ev.size())) {
-					_midi_buf->write (event_time, ev.event_type(), ev.size(), ev.buffer());
-					cnt++;
+					if (_midi_buf->write (event_time, ev.event_type(), ev.size(), ev.buffer()) == ev.size()) {
+						cnt++;
+					} else {
+						/* what? */
+					}
 				}
 			}
 

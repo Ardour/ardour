@@ -400,11 +400,12 @@ SMF::read_event(uint32_t* delta_t, uint32_t* bufsize, uint8_t** buf, event_id_t*
 			return -1;
 		}
 
-		/* printf("SMF::read_event @ %u: ", *delta_t);
-		   for (size_t i = 0; i < *size; ++i) {
+		/*
+		  printf("SMF::read_event @ %u: ", *delta_t);
+		   for (size_t i = 0; i < *bufsize; ++i) {
 		   printf("%X ", (*buf)[i]);
-		   } printf("\n") */
-
+		   } printf("\n");
+		*/
 		return event_size;
 	} else {
 		return -1;
@@ -490,7 +491,12 @@ SMF::append_event_delta (uint32_t delta_t, uint32_t size, const uint8_t* buf, ev
 	} else {
 
 		if (!midi_event_is_valid(buf, size)) {
-			cerr << "WARNING: SMF ignoring illegal MIDI event" << endl;
+			std::cerr << "WARNING: SMF ignoring illegal MIDI event (size " << size << "): ";
+			std::cerr << std::hex;
+			for (size_t n = 0; n < size; ++n) {
+				std::cerr << "0x" << (int) buf[n] << ' ';
+			}
+			std::cerr << std::dec << std::endl;
 			return 0;
 		}
 

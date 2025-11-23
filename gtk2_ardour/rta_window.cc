@@ -123,7 +123,7 @@ RTAWindow::RTAWindow ()
 	ArdourWidgets::set_tooltip (_clear, _("Clear current set of analyzed signals (except for the master bus)."));
 	ArdourWidgets::set_tooltip (_pause, _("Toggle analysis enable, pause the visual update. Left mouse press on the analysis area can temporarily freeze the display"));
 	ArdourWidgets::set_tooltip (_speed_dropdown, _("Set analysis return time. Noise Measurement has a fallback time of 1dB in 2 seconds. Slow mode falls 5dB/s, Moderate 48dB/sec. Fast and Rapid mode are fast enough to be frequency dependent with Fast mode falling 96dB/s."));
-	ArdourWidgets::set_tooltip (_warp_dropdown, _("Frequency warp the spectrum to focus on given range. A high warp factor increases resolution in the low frequency range, while the bark scale is a frequency scale on which equal distances correspond with perceptually equal distances."));
+	ArdourWidgets::set_tooltip (_warp_dropdown, _("Frequency warp the spectrum to focus on given range. A high warp factor increases resolution in the low frequency range, while the Bark scale is a frequency scale on which equal distances correspond with perceptually equal distances."));
 
 	on_theme_changed ();
 }
@@ -453,7 +453,7 @@ RTAWindow::darea_motion_notify_event (GdkEventMotion* ev)
 			changed = _min_dB != new_dB;
 			_min_dB = new_dB;
 		} else {
-			float min_dB = rintf (std::max (_dB_min, std::min (new_dB, _max_dB - _dB_span)));
+			float min_dB = rintf (std::max (_dB_min, std::min (new_dB, 1 + _max_dB - _dB_span)));
 			float dbd    = (min_dB - _min_dB);
 			float max_dB = rintf (std::min (_dB_min + _dB_range, std::max (_max_dB + dbd, _min_dB + _dB_span)));
 			dbd          = std::min<float> (dbd, max_dB - _max_dB);
@@ -543,7 +543,7 @@ RTAWindow::darea_scroll_event (GdkEventScroll* ev)
 	} else {
 		float new_dB = _min_dB + delta;
 		/* compare to DragRange */
-		float min_dB = rintf (std::max (_dB_min, std::min (new_dB, _max_dB - _dB_span)));
+		float min_dB = rintf (std::max (_dB_min, std::min (new_dB, 1 + _max_dB - _dB_span)));
 		float dbd    = (min_dB - _min_dB);
 		float max_dB = rintf (std::min (_dB_min + _dB_range, std::max (_max_dB + dbd, _min_dB + _dB_span)));
 		dbd          = std::min<float> (dbd, max_dB - _max_dB);

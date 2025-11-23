@@ -10,9 +10,6 @@ CPPUNIT_TEST_SUITE_REGISTRATION (SignalsTest);
 void
 SignalsTest::setUp ()
 {
-	if (!Glib::thread_supported ()) {
-		Glib::thread_init ();
-	}
 }
 
 class Emitter {

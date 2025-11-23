@@ -1282,7 +1282,7 @@ RecorderUI::new_track_for_port (DataType dt, string const& port_name)
 	d.add_button(Stock::CANCEL, RESPONSE_CANCEL);
 	d.add_button(Stock::OK, RESPONSE_OK);
 	d.set_default_response (RESPONSE_OK);
-	d.set_position (WIN_POS_MOUSE);
+	d.set_position (UIConfiguration::instance().get_default_window_position());
 	d.show_all ();
 
 	track_name_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (d, &Dialog::response), RESPONSE_OK));

@@ -21,7 +21,7 @@
 #include "pbd/unwind.h"
 
 #include "widgets/metabutton.h"
-#include "widgets/ui_config.h"
+#include "gtkmm2ext/ui_config.h"
 
 using namespace Gtk;
 using namespace std;
@@ -245,6 +245,7 @@ MetaButton::set_index (guint index)
 void
 MetaButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t* rect)
 {
+	using namespace Gtkmm2ext;
 	{
 		PBD::Unwinder uw (_hovering, false);
 		ArdourButton::render (ctx, rect);

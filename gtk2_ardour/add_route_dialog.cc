@@ -89,7 +89,7 @@ AddRouteDialog::AddRouteDialog ()
 	set_name ("AddRouteDialog");
 	set_skip_taskbar_hint (true);
 	set_resizable (false);
-	set_position (WIN_POS_MOUSE);
+	set_position (UIConfiguration::instance().get_default_window_position());
 
 	name_template_entry.set_name (X_("AddRouteDialogNameTemplateEntry"));
 	// routes_spinner.set_name (X_("AddRouteDialogSpinner"));

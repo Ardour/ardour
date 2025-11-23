@@ -231,15 +231,15 @@ MidiViewBackground::maybe_extend_note_range (uint8_t note_num)
 	}
 }
 
-void
+bool
 MidiViewBackground::maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children, RangeCanMove can_move)
 {
 	if (note_range_set && _lowest_note <= lowest && _highest_note >= highest) {
 		/* already large enough */
-		return;
+		return false;
 	}
 
-	apply_note_range (lowest, highest, to_children, can_move);
+	return apply_note_range (lowest, highest, to_children, can_move);
 }
 
 bool

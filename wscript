@@ -881,8 +881,6 @@ def options(opt):
                     help='Build with debugging for the STL')
     opt.add_option('--rt-alloc-debug', action='store_true', default=False, dest='rt_alloc_debug',
                     help='Build with debugging for memory allocation in the real-time thread')
-    opt.add_option('--pt-timing', action='store_true', default=False, dest='pt_timing',
-                    help='Build with logging of timing in the process thread(s)')
     opt.add_option('--denormal-exception', action='store_true', default=False, dest='denormal_exception',
                     help='Raise a floating point exception if a denormal is detected')
     opt.add_option('--test', action='store_true', default=False, dest='build_tests',
@@ -1123,13 +1121,10 @@ def configure(conf):
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
 
     if Options.options.also_include != '':
-        for incdir in Options.options.also_include.split(','):
-            conf.env.append_value('CXXFLAGS', '-I' + incdir)
-            conf.env.append_value('CFLAGS', '-I' + incdir)
+        conf.env.append_value('INCLUDES', [os.path.normpath(p) for p in Options.options.also_include.split(',')])
 
     if Options.options.also_libdir != '':
-        for libdir in Options.options.also_libdir.split(','):
-            conf.env.append_value('LDFLAGS', '-L' + libdir)
+        conf.env.append_value('LIBPATH', [os.path.normpath(p) for p in Options.options.also_libdir.split(',')])
 
     if Options.options.boost_sp_debug:
         conf.env.append_value('CXXFLAGS', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
@@ -1232,10 +1227,6 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
             conf.env.append_value('LIB', 'uuid')
         # needed for mingw64 packages, not harmful on normal mingw build
         conf.env.append_value('LIB', 'intl')
-        conf.check_cc(function_name='regcomp', header_name='regex.h',
-                      lib='regex', uselib_store="REGEX", define_name='HAVE_REGEX_H')
-        # TODO put this only where it is needed
-        conf.env.append_value('LIB', 'regex')
         # TODO this should only be necessary for a debug build
         conf.env.append_value('LIB', 'dbghelp')
 
@@ -1337,7 +1328,7 @@ int main () { __int128 x = 0; return 0; }
     if opts.single_tests:
         conf.env['SINGLE_TESTS'] = opts.single_tests
     if not opts.no_windows_vst:
-        if Options.options.dist_target == 'mingw':
+        if Options.options.dist_target == 'mingw' or Options.options.dist_target == 'msvc':
             conf.define('WINDOWS_VST_SUPPORT', 1)
             conf.env['WINDOWS_VST_SUPPORT'] = True
         else:
@@ -1345,7 +1336,7 @@ int main () { __int128 x = 0; return 0; }
     if not opts.no_lxvst:
         if sys.platform == 'darwin':
             conf.env['LXVST_SUPPORT'] = False
-        elif Options.options.dist_target == 'mingw':
+        elif Options.options.dist_target == 'mingw' or Options.options.dist_target == 'msvc':
             conf.env['LXVST_SUPPORT'] = False
         else:
             conf.define('LXVST_SUPPORT', 1)
@@ -1357,9 +1348,6 @@ int main () { __int128 x = 0; return 0; }
     if opts.rt_alloc_debug:
         conf.define('DEBUG_RT_ALLOC', 1)
         conf.env['DEBUG_RT_ALLOC'] = True
-    if opts.pt_timing:
-        conf.define('PT_TIMING', 1)
-        conf.env['PT_TIMING'] = True
     if opts.denormal_exception:
         conf.define('DEBUG_DENORMAL_EXCEPTION', 1)
         conf.env['DEBUG_DENORMAL_EXCEPTION'] = True
@@ -1398,7 +1386,7 @@ int main () { __int128 x = 0; return 0; }
             backends += ['alsa']
         if sys.platform == 'darwin':
             backends += ['coreaudio']
-        if Options.options.dist_target == 'mingw':
+        if Options.options.dist_target == 'mingw' or Options.options.dist_target == 'msvc':
             backends += ['portaudio']
 
     if 'dummy' not in backends:
@@ -1455,7 +1443,7 @@ int main () { __int128 x = 0; return 0; }
         sub_config_and_use(conf, 'libs/appleutility')
     elif re.search ("openbsd", sys.platform) is not None:
         pass
-    elif Options.options.dist_target != 'mingw':
+    elif Options.options.dist_target != 'mingw' and Options.options.dist_target != 'msvc':
         sub_config_and_use(conf, 'tools/sanity_check')
 
     # explicitly link against libm. This is possible on all POSIX systems
@@ -1535,7 +1523,6 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('NI-Maschine',           opts.maschine)
     write_config_text('OGG',                   conf.is_defined('HAVE_OGG'))
     write_config_text('Phone home',            conf.is_defined('PHONE_HOME'))
-    write_config_text('Process thread timing', conf.is_defined('PT_TIMING'))
     write_config_text('Program name',          opts.program_name)
     write_config_text('Samplerate',            conf.is_defined('HAVE_SAMPLERATE'))
     write_config_text('PT format',             conf.is_defined('PTFORMAT'))

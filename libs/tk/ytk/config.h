@@ -77,9 +77,6 @@
 /* Define to 1 if sys/systeminfo.h is available */
 /* #undef HAVE_SYS_SYSTEMINFO_H */
 
-/* Define to 1 if you have the <unistd.h> header file. */
-#define HAVE_UNISTD_H 1
-
 /* Have wchar.h include file */
 #define HAVE_WCHAR_H 1
 

@@ -21,7 +21,6 @@
 
 #include <math.h>
 #include <sys/time.h>
-#include <regex.h>
 #include <stdlib.h>
 
 #include <glibmm.h>

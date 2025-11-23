@@ -223,7 +223,9 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 	_table_main.attach (_sources,       1, 3, 1, 2, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 
 	_table_main.attach (_table_clocks,  1, 2, 2, 3, Gtk::FILL, Gtk::SHRINK);
+#if 0 // no tempo table for now, save precious vertical space
 	_table_main.attach (_table_tempo,   1, 2, 3, 4, Gtk::FILL, Gtk::SHRINK);
+#endif
 
 	/* AudioRegionEditor inserts stuff into _table_main here, row 4 .. 6 */
 

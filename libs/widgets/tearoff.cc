@@ -25,7 +25,7 @@
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/tearoff.h"
-#include "widgets/ui_config.h"
+#include "gtkmm2ext/ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -33,6 +33,7 @@ using namespace std;
 using namespace Glib;
 using namespace Gdk;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 
 TearOff::TearOff (Widget& c, bool allow_resize)
@@ -165,7 +166,7 @@ TearOff::tear_it_off ()
 	own_window.set_name (get_name());
 	close_event_box.set_name (get_name());
 	if (own_window_width == 0) {
-		own_window.set_position (WIN_POS_MOUSE);
+		own_window.set_position (UIConfigurationBase::instance().get_default_window_position());
 	}
 	own_window.show_all ();
 	own_window.present ();

@@ -36,7 +36,7 @@
 #include "loudness_settings.h"
 
 namespace ARDOUR {
-	class TimelineRange;
+	struct TimelineRange;
 	class ExportAnalysis;
 	class ExportStatus;
 	class PluginInsert;

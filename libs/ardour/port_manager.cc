@@ -24,8 +24,6 @@
 #ifdef COMPILER_MSVC
 #include <ardourext/misc.h>
 #include <io.h> // Microsoft's nearest equivalent to <unistd.h>
-#else
-#include <regex.h>
 #endif
 
 #include <glibmm/fileutils.h>
@@ -1493,40 +1491,29 @@ PortManager::port_engine ()
 bool
 PortManager::port_is_control_only (std::string const& name)
 {
-	static regex_t compiled_pattern;
-	static string  pattern;
+	/* This is a list of substrings that identify ports related
+	 * to physical MIDI devices that we do not want to expose as
+	 * normal physical ports.
+	 */
 
-	if (pattern.empty ()) {
-		/* This is a list of regular expressions that match ports
-		 * related to physical MIDI devices that we do not want to
-		 * expose as normal physical ports.
-		 */
+	static const char* const control_only_ports[] = {
+		X_("Ableton Push"),
+		X_("FaderPort "),
+		X_("FaderPort8 "),
+		X_("FaderPort16 "),
+		X_("FaderPort2 "),
+		X_("US-2400 "),
+		X_("Mackie "),
+		X_("MIDI Control "),
+		X_("Console1 "),
+	};
 
-		const char* const control_only_ports[] = {
-			X_(".*Ableton Push.*"),
-			X_(".*FaderPort .*"),
-			X_(".*FaderPort8 .*"),
-			X_(".*FaderPort16 .*"),
-			X_(".*FaderPort2 .*"),
-			X_(".*US-2400 .*"),
-			X_(".*Mackie .*"),
-			X_(".*MIDI Control .*"),
-			X_(".*Console1 .*"),
-		};
-
-		pattern = "(";
-		for (size_t n = 0; n < sizeof (control_only_ports) / sizeof (control_only_ports[0]); ++n) {
-			if (n > 0) {
-				pattern += '|';
-			}
-			pattern += control_only_ports[n];
+	for (size_t n = 0; n < sizeof (control_only_ports) / sizeof (control_only_ports[0]); ++n) {
+		if (name.find (control_only_ports[n]) != string::npos) {
+			return true;
 		}
-		pattern += ')';
-
-		regcomp (&compiled_pattern, pattern.c_str (), REG_EXTENDED | REG_NOSUB);
 	}
-
-	return regexec (&compiled_pattern, name.c_str (), 0, 0, 0) == 0;
+	return false;
 }
 
 static bool

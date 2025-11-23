@@ -38,6 +38,7 @@
 #include "time_info_box.h"
 #include "trigger_strip.h"
 #include "triggerbox_ui.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -219,6 +220,12 @@ SelectionPropertiesBox::selection_changed ()
 			_region_fx_box = new RegionFxPropertiesBox (rv->region ());
 			_region_editor_box.pack_start (*_region_fx_box);
 			rv->RegionViewGoingAway.connect_same_thread (_region_connection, std::bind (&SelectionPropertiesBox::delete_region_editor, this));
+
+#ifndef MIXBUS
+			float min_h = _region_editor->size_request().height;
+			float ui_scale = std::max<float> (1.f, UIConfiguration::instance().get_ui_scale());
+			_region_editor_box.set_size_request (-1, std::max (365 * ui_scale, min_h));
+#endif
 		}
 	} else {
 		/* only hide region props when selecting a track or trigger,

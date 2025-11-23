@@ -54,6 +54,14 @@ RoutePropertiesBox::RoutePropertiesBox ()
 	_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
 	_scroller.add (_box);
 
+	/* the return of the ScrolledWindowViewport mess:
+	 * remove shadow from scrollWindow's viewport
+	 * see http://www.mail-archive.com/gtkmm-list@gnome.org/msg03509.html
+	 */
+	Gtk::Viewport* viewport = (Gtk::Viewport*) _scroller.get_child();
+	viewport->set_shadow_type(Gtk::SHADOW_NONE);
+	viewport->set_border_width(0);
+
 	_box.set_spacing (4);
 	_insert_frame.set_no_show_all ();
 
@@ -167,6 +175,15 @@ RoutePropertiesBox::update_processor_box_visibility ()
 	} else {
 		_insert_frame.show ();
 	}
+
+#ifndef MIXBUS
+	if (_show_insert || !_proc_uis.empty ()) {
+		float ui_scale = std::max<float> (1.f, UIConfiguration::instance().get_ui_scale());
+		set_size_request (-1, 365 * ui_scale); // match with SelectionPropertiesBox
+	} else {
+		set_size_request (-1, -1);
+	}
+#endif
 }
 
 void

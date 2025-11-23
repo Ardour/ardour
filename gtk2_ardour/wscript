@@ -4,6 +4,7 @@ from waflib import Options, TaskGen
 import waflib.Logs as Logs, waflib.Utils as Utils
 import os
 import sys
+import platform as PLATFORM
 import re
 import subprocess
 import glob
@@ -733,6 +734,15 @@ def build(bld):
             'VERSION'        : bld.env['VERSION'],
             'EXECUTABLE'     : 'build/gtk2_ardour/ardour-' + bld.env['VERSION']
     }
+
+    if bld.env['build_target'] == 'mingw' and sys.platform == "win32":
+        wrapper_subst_dict.update({
+            'LD_LIBRARY_PATH': 'PATH'
+        })
+    else:
+        wrapper_subst_dict.update({
+            'LD_LIBRARY_PATH': 'LD_LIBRARY_PATH'
+        })
 
     def set_subst_dict(obj, dict):
         for i in dict:

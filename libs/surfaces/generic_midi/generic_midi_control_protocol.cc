@@ -25,6 +25,7 @@
 
 #include <sstream>
 #include <algorithm>
+#include <regex>
 
 #ifdef COMPILER_MSVC
 #include <io.h> // Microsoft's nearest equivalent to <unistd.h>
@@ -1029,24 +1030,13 @@ GenericMidiControlProtocol::lookup_controllable (const string & str, MIDIControl
 	int id = 1;
 	string name;
 
-	static regex_t compiled_pattern;
-	static bool compiled = false;
-
-	if (!compiled) {
-		const char * const pattern = "^[BS]?[0-9]+";
-		/* this pattern compilation is not going to fail */
-		regcomp (&compiled_pattern, pattern, REG_EXTENDED|REG_NOSUB);
-		/* leak compiled pattern */
-		compiled = true;
-	}
-
 	/* Step 3: identify what "rest" looks like - name, or simple nueric, or
 	 * banked/selection specifier
 	 */
 
-	bool matched = (regexec (&compiled_pattern, rest[0].c_str(), 0, 0, 0) == 0);
+	static const std::regex pattern ("^[BS]?[0-9]+", std::regex::extended);
 
-	if (matched) {
+	if (std::regex_search (rest[0], pattern)) {
 		bool banked = false;
 
 		if (rest[0][0] == 'B') {

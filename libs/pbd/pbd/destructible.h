@@ -30,7 +30,12 @@ public:
 	PBD::Signal<void()> Destroyed;
 	PBD::Signal<void()> DropReferences;
 
-	virtual void drop_references () { DropReferences();  }
+	virtual void drop_references () { DropReferences(); }
+	static void drop_and_kill (Destructible* d) {
+		assert (d);
+		d->DropReferences();
+		delete d;
+	}
 };
 
 }

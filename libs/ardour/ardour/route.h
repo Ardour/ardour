@@ -710,6 +710,8 @@ protected:
 
 	SlavableAutomationControlList slavables () const;
 
+	virtual void input_change_handler (IOChange, void *src);
+
 private:
 	/* no copy construction */
 	Route (Route const &);
@@ -717,7 +719,6 @@ private:
 	int set_state_2X (const XMLNode&, int);
 	void set_processor_state_2X (XMLNodeList const &, int);
 
-	void input_change_handler (IOChange, void *src);
 	void output_change_handler (IOChange, void *src);
 	void sidechain_change_handler (IOChange, void *src);
 

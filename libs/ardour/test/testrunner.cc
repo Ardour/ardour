@@ -19,10 +19,6 @@ static const char* localedir = LOCALEDIR;
 int
 main(int argc, char* argv[])
 {
-	if (!Glib::thread_supported()) {
-		Glib::thread_init();
-	}
-
 	const struct option longopts[] = {
 		{ "debug", 1, 0, 'D' },
 		{ 0, 0, 0, 0 }

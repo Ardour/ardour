@@ -405,6 +405,11 @@ write_midi_type0_data_to_one_file (Evoral::SMF* source, ImportStatus& status, si
 				continue;
 			}
 
+			if (ret == 0) {
+				/* set note id, but we ignored it */
+				continue;
+			}
+
 			if (size > bufsize) {
 				bufsize = size;
 			}

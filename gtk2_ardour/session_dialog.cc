@@ -82,6 +82,16 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	, new_name_was_edited (false)
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
 {
+	action_group = ActionGroup::create (X_("SessionDialog"));
+
+	/* No string translation because these don't show anywhere */
+	new_session_action = Action::create (X_("New"));
+	action_group->add (new_session_action, sigc::mem_fun (this, &SessionDialog::new_button_choice_action));
+	recent_session_action = Action::create (X_("Recent"));
+	action_group->add (recent_session_action, sigc::mem_fun (this, &SessionDialog::recent_button_choice_action));
+	existing_session_action = Action::create (X_("Open"));
+	action_group->add (existing_session_action, sigc::mem_fun (this, &SessionDialog::existing_button_choice_action));
+
 	set_position (WIN_POS_CENTER);
 	get_vbox()->set_spacing (6);
 	get_vbox()->pack_start (_open_table, false, false);
@@ -113,23 +123,26 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	/* no update message for trax, show license here */
 	_open_table.attach (_info_box, 1,3, 0,1, FILL, FILL, 0, 6);
 #endif
-	
-	new_button.set_text("NEW");
+
+	new_button.set_text (_("NEW"));
 	new_button.set_name ("tab button");
-	new_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::new_button_pressed), false);
 	new_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
+	new_button.set_can_focus (true);
+	new_button.set_related_action (new_session_action);
 
-	recent_button.set_text("RECENT");
+	recent_button.set_text (_("RECENT"));
 	recent_button.set_name ("tab button");
-	recent_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::recent_button_pressed), false);
 	recent_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
+	recent_button.set_can_focus (true);
+	recent_button.set_related_action (recent_session_action);
 
-	existing_button.set_text("OPEN");
+	existing_button.set_text (_("OPEN"));
 	existing_button.set_name ("tab button");
-	existing_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::existing_button_pressed), false);
 	existing_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
+	existing_button.set_can_focus (true);
+	existing_button.set_related_action (existing_session_action);
 
-	prefs_button.set_text("SETTINGS");
+	prefs_button.set_text(_("SETTINGS"));
 	prefs_button.set_name ("tab button");
 	prefs_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::prefs_button_pressed), false);
 	prefs_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
@@ -150,9 +163,9 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 		}
 	}
 
-	_open_table.attach (new_button,        0,1, row, row + 1, FILL, FILL); ++row;
 	_open_table.attach (recent_button,     0,1, row, row + 1, FILL, FILL); ++row;
 	_open_table.attach (existing_button,   0,1, row, row + 1, FILL, FILL); ++row;
+	_open_table.attach (new_button,        0,1, row, row + 1, FILL, FILL); ++row;
 
 	++row;
 	Label *vspacer = manage (new Label());
@@ -583,28 +596,22 @@ SessionDialog::session_selected ()
 {
 }
 
-bool
-SessionDialog::new_button_pressed (GdkEventButton*)
+void
+SessionDialog::new_button_choice_action ()
 {
 	_tabs.set_current_page(0);
-
-	return true;
 }
 
-bool
-SessionDialog::recent_button_pressed (GdkEventButton*)
+void
+SessionDialog::recent_button_choice_action ()
 {
 	_tabs.set_current_page(1);
-
-	return true;
 }
 
-bool
-SessionDialog::existing_button_pressed (GdkEventButton*)
+void
+SessionDialog::existing_button_choice_action ()
 {
 	_tabs.set_current_page(2);
-
-	return true;
 }
 
 bool

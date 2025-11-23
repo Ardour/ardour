@@ -194,7 +194,7 @@ fake_thread_start (void* arg)
 	pthread_mutex_lock (&thread_map_lock);
 
 	for (auto const& t : all_threads) {
-		if (pthread_equal (t.first, pthread_self ())) {
+		if (pthread_equal (t.first, pthread_self ()) != 0) {
 			DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Terminated: '%1'\n", t.second));
 			all_threads.erase (t.first);
 			break;
@@ -262,7 +262,7 @@ pthread_kill_all (int signum)
 {
 	pthread_mutex_lock (&thread_map_lock);
 	for (auto const& t : all_threads) {
-		if (pthread_equal (t.first, pthread_self ())) {
+		if (pthread_equal (t.first, pthread_self ()) != 0) {
 			continue;
 		}
 		DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Kill: '%1'\n", t.second));
@@ -277,7 +277,7 @@ pthread_cancel_all ()
 {
 	pthread_mutex_lock (&thread_map_lock);
 	for (auto const& t : all_threads) {
-		if (pthread_equal (t.first, pthread_self ())) {
+		if (pthread_equal (t.first, pthread_self ()) != 0) {
 			continue;
 		}
 		DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Cancel: '%1'\n", t.second));
@@ -292,7 +292,7 @@ pthread_cancel_one (pthread_t thread)
 {
 	pthread_mutex_lock (&thread_map_lock);
 	for (auto const& t : all_threads) {
-		if (pthread_equal (t.first, thread)) {
+		if (pthread_equal (t.first, thread) != 0) {
 			all_threads.erase (t.first);
 			break;
 		}
@@ -588,7 +588,7 @@ PBD::Thread::_run (void* arg)
 	/* cleanup */
 	pthread_mutex_lock (&thread_map_lock);
 	for (auto const& t : all_threads) {
-		if (pthread_equal (t.first, pthread_self ())) {
+		if (pthread_equal (t.first, pthread_self ()) != 0) {
 			DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Terminated: '%1'\n", t.second));
 			all_threads.erase (t.first);
 			break;

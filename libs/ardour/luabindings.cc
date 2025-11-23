@@ -2927,6 +2927,13 @@ LuaBindings::common (lua_State* L)
 		.addConst ("NameAfterDriver", ARDOUR::TracksAutoNamingRule(NameAfterDriver))
 		.endNamespace ()
 
+		.beginNamespace ("VST3KnobMode")
+		.addConst ("VST3KnobPluginDefault", ARDOUR::VST3KnobMode(VST3KnobPluginDefault))
+		.addConst ("VST3KnobCircularMode", ARDOUR::VST3KnobMode(VST3KnobCircularMode))
+		.addConst ("VST3KnobRelativCircularMode", ARDOUR::VST3KnobMode(VST3KnobRelativCircularMode))
+		.addConst ("VST3KnobLinearMode", ARDOUR::VST3KnobMode(VST3KnobLinearMode))
+		.endNamespace ()
+
 		.endNamespace (); // end ARDOUR
 
 	luabridge::getGlobalNamespace (L)
@@ -3129,6 +3136,7 @@ LuaBindings::common (lua_State* L)
 
 		.addFunction ("name", &Session::name)
 		.addFunction ("path", &Session::path)
+		.addFunction ("uuid", &Session::uuid)
 		.addFunction ("record_status", &Session::record_status)
 		.addFunction ("maybe_enable_record", &Session::maybe_enable_record)
 		.addFunction ("disable_record", &Session::disable_record)

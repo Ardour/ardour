@@ -256,6 +256,8 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, expected_end_sample (0)
 	, _pending (nullptr)
 	, last_property_generation (0)
+	, pending_swap (nullptr)
+	, old_pending_swap (nullptr)
 {
 	add_property (_launch_style);
 	add_property (_follow_action0);
@@ -755,11 +757,37 @@ Trigger::set_region_internal (std::shared_ptr<Region> r)
 void
 Trigger::region_property_change (PropertyChange const & what_changed)
 {
-	//std::cerr << "region prop change\n";
+	if (!_region) {
+		return;
+	}
+
 	if (what_changed.contains (Properties::start) || what_changed.contains (Properties::length)) {
-		//std::cerr << "bounds changed\n";
-		//PBD::stacktrace (std::cerr, 23);
-		bounds_changed (_region->start(), _region->end());
+		bounds_changed (_region->start(), _region->end(), _region->length());
+	}
+}
+
+void
+Trigger::bounds_changed (Temporal::timepos_t const & start, Temporal::timepos_t const & end, Temporal::timecnt_t const & len)
+{
+	PendingSwap* pending = new PendingSwap;
+
+	pending->play_start = start;
+	pending->play_end = end;
+	pending->loop_start = pending->play_start;
+	pending->loop_end = pending->play_end;
+	pending->length = len;
+
+	/* And set it. RT thread will find this and do what needs to be done */
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 pushed pending swap @ %3 for bounds change\n", _box.order(), index(), pending));
+	pending_swap.store (pending);
+
+	/* Clean up a previous RT midi buffer swap (if there is one) */
+
+	PendingSwap* old = old_pending_swap.exchange (nullptr);
+
+	if (old) {
+		delete old;
 	}
 }
 
@@ -1343,8 +1371,6 @@ Trigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position, Tri
 	}
 }
 
-
-
 /*--------------------*/
 
 AudioTrigger::AudioData::~AudioData ()
@@ -1582,8 +1608,8 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 	/* Our task here is to set:
 
 	   expected_end_sample: (TIMELINE!) the sample position where the data for the clip should run out (taking stretch into account)
-           last_readable_sample: the sample in the data where we stop reading
-           final_processed_sample: the sample where the trigger stops and the follow action if any takes effect
+           last_readable_sample: (DATA RELATIVE!) the sample in the data where we stop reading
+           final_processed_sample: (DATA RELATIVE!) the sample where the trigger stops and the follow action if any takes effect
 
            Things that affect these values:
 
@@ -1595,19 +1621,27 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 
 	const Temporal::BBT_Argument transition_bba (superclock_t (0), transition_bbt);
 
-	samplepos_t end_by_follow_length = tmap->sample_at (tmap->bbt_walk (transition_bba, _follow_length));
-	samplepos_t end_by_data_length = transition_sample + (data.length - _start_offset);
 	/* this could still blow up if the data is less than 1 tick long, but
 	   we should handle that elsewhere.
 	*/
 	const Temporal::Beats bc (Temporal::Beats::from_double (_beatcnt));
+
+	samplepos_t end_by_follow_length = tmap->sample_at (tmap->bbt_walk (transition_bba, _follow_length));
 	samplepos_t end_by_beatcnt = tmap->sample_at (tmap->bbt_walk (transition_bba, Temporal::BBT_Offset (0, bc.get_beats(), bc.get_ticks())));
+	samplepos_t end_by_user_data_length = transition_sample + (_user_data_length - _start_offset);
+	samplepos_t end_by_data_length = transition_sample + (data.length - _start_offset);
+	samplepos_t end_by_fixed_samples = std::min (end_by_user_data_length, end_by_data_length);
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 SO %9 @ %2 / %3 / %4 ends: FL %5 (from %6) BC %7 DL %8\n",
 	                                              index(), transition_sample, transition_beats, transition_bbt,
 	                                              end_by_follow_length, _follow_length, end_by_beatcnt, end_by_data_length, _start_offset));
 
 	if (stretching()) {
+		/* NOTES: beatcnt here will reflect the stretch, which is OK
+		   Because we are stretching. But .. that's wrong when we're not
+		   stretching. So we really need another value: something like
+		   data_length but user-definable.
+		*/
 		if (internal_use_follow_length()) {
 			expected_end_sample = std::min (end_by_follow_length, end_by_beatcnt);
 		} else {
@@ -1615,24 +1649,20 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 		}
 	} else {
 		if (internal_use_follow_length()) {
-			expected_end_sample = std::min (end_by_follow_length, end_by_data_length);
+			expected_end_sample = std::min (end_by_follow_length, end_by_fixed_samples);
 		} else {
-			expected_end_sample = end_by_data_length;
+			expected_end_sample = end_by_fixed_samples;
 		}
 	}
 
-	if (internal_use_follow_length()) {
-		final_processed_sample = end_by_follow_length - transition_sample;
-	} else {
-		final_processed_sample = expected_end_sample - transition_sample;
-	}
+	final_processed_sample = expected_end_sample - transition_sample;
 
 	samplecnt_t usable_length;
 
 	if (internal_use_follow_length() && (end_by_follow_length < end_by_data_length)) {
 		usable_length = end_by_follow_length - transition_samples;
 	} else {
-		usable_length = (data.length - _start_offset);
+		usable_length = std::min ((end_by_beatcnt - transition_samples), (data.length - _start_offset));
 	}
 
 	/* called from compute_end() when we know the time (audio &
@@ -1671,7 +1701,14 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 void
 AudioTrigger::set_length (timecnt_t const & newlen)
 {
-	/* XXX what? */
+	/* XXX what */
+}
+
+void
+AudioTrigger::set_user_data_length (samplecnt_t s)
+{
+	_user_data_length = s;
+	send_property_change (ARDOUR::Properties::length);
 }
 
 timepos_t
@@ -1722,6 +1759,7 @@ AudioTrigger::set_region_in_worker_thread_internal (std::shared_ptr<Region> r, b
 
 	if (!r) {
 		data.reset ();
+		send_property_change (ARDOUR::Properties::region);
 		return 0;
 	}
 
@@ -1737,7 +1775,7 @@ AudioTrigger::set_region_in_worker_thread_internal (std::shared_ptr<Region> r, b
 
 	/* given an initial tempo guess, we need to set our operating tempo and beat_cnt value.
 	 *  this may be reset momentarily with user-settings (UIState) from a d+d operation */
-	set_segment_tempo(_estimated_tempo);
+	set_segment_tempo (_estimated_tempo);
 
 	if (!from_capture) {
 		setup_stretcher ();
@@ -1782,11 +1820,9 @@ AudioTrigger::set_region_in_worker_thread_internal (std::shared_ptr<Region> r, b
 void
 AudioTrigger::estimate_tempo ()
 {
-	double beatcount;
-	ARDOUR::estimate_audio_tempo_region (_region, data[0], data.length, _box.session().sample_rate(), _estimated_tempo, _meter, beatcount);
+	ARDOUR::estimate_audio_tempo_region (_region, data[0], data.length, _box.session().sample_rate(), _estimated_tempo, _meter, _beatcnt);
 	/* initialize our follow_length to match the beatcnt ... user can later change this value to have the clip end sooner or later than its data length */
-	set_follow_length(Temporal::BBT_Offset( 0, rint(beatcount), 0));
-
+	set_follow_length (Temporal::BBT_Offset ( 0, floor (_beatcnt), 0));
 }
 
 bool
@@ -1795,8 +1831,8 @@ AudioTrigger::probably_oneshot () const
 	assert (_segment_tempo != 0.);
 
 	if ((data.length < (_box.session().sample_rate()/2)) ||  //less than 1/2 second
-        (_segment_tempo > 140) ||                            //minibpm thinks this is really fast
-        (_segment_tempo < 60)) {                             //minibpm thinks this is really slow
+	    (_segment_tempo > 140) ||                            //minibpm thinks this is really fast
+	    (_segment_tempo < 60)) {                             //minibpm thinks this is really slow
 		return true;
 	}
 
@@ -1876,6 +1912,7 @@ AudioTrigger::captured (SlotArmInfo& ai)
 
 	data.length = ai.audio_buf.length;
 	data.capacity = ai.audio_buf.capacity;
+	_user_data_length = data.length;
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 captured a total of %3\n", _box.order(), _index, data.length));
 
@@ -1932,6 +1969,7 @@ AudioTrigger::load_data (std::shared_ptr<AudioRegion> ar)
 		}
 
 		data.length = len;
+		_user_data_length = len;
 		set_name (ar->name());
 
 	} catch (...) {
@@ -2281,6 +2319,38 @@ AudioTrigger::reload (BufferSet&, void*)
 {
 }
 
+void
+AudioTrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& bufs)
+{
+	/* NOTE: this method runs synchronously with respect to the process
+	   cycle. The trigger will not be in ::run() while we execute this.
+
+	   On the other hand, another (UI) thread could be queing another
+	   pending swap.
+	*/
+
+	PendingSwap* pending = pending_swap.exchange (nullptr);
+
+	if (!pending) {
+		return;
+	}
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 noticed pending swap @ %3\n", _box.order(), index(), pending));
+	adjust_bounds (pending->play_start, pending->play_end, pending->length, true);
+	old_pending_swap.store (pending);
+}
+
+
+void
+AudioTrigger::adjust_bounds (Temporal::timepos_t const & start, Temporal::timepos_t const & end, Temporal::timecnt_t const & length, bool)
+{
+	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+	set_start (timepos_t (start.samples()));
+	set_user_data_length (length.samples());
+	/* XXX not 100% sure that we should set this here or not */
+	_beatcnt = Temporal::DoubleableBeats (length.beats()).to_double();
+}
+
 /*--------------------*/
 
 MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
@@ -2293,8 +2363,6 @@ MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	, first_event_index (0)
 	, last_event_index (0)
 	, rt_midibuffer (nullptr)
-	, pending_swap (nullptr)
-	, old_pending_swap (nullptr)
 	, map_change (false)
 {
 	_channel_map.assign (16, -1);
@@ -2314,7 +2382,7 @@ MIDITrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& b
 	   pending swap.
 	*/
 
-	PendingSwap* pending = pending_swap.exchange (nullptr);
+	MIDIPendingSwap* pending = dynamic_cast<MIDIPendingSwap*> (pending_swap.exchange (nullptr));
 	RTMidiBufferBeats* old_rtmb = nullptr;
 
 	if (!pending) {
@@ -2403,29 +2471,29 @@ MIDITrigger::setup_event_indices ()
 }
 
 void
-MIDITrigger::adjust_bounds (Temporal::Beats const & start, Temporal::Beats const & end, Temporal::Beats const & length, bool from_region)
+MIDITrigger::adjust_bounds (Temporal::timepos_t const & start, Temporal::timepos_t const & end, Temporal::timecnt_t const & length, bool from_region)
 {
 	if (!from_region && _region) {
 		_region->set_length (timecnt_t (length, timepos_t (start)));
 	}
 
-	_play_start = start;
-	_play_end = end;
+	_play_start = start.beats();
+	_play_end = end.beats();
 
 	/* Note that in theory we may be able to get loop start/end from the
 	 * SMF and it could different from the data start/end
 	 */
 
-	_loop_start = start;
-	_loop_end = end;
+	_loop_start = _play_start;
+	_loop_end = _play_end;
 
-	data_length = length;
-	_follow_length = Temporal::BBT_Offset (0, length.get_beats(), 0);
+	data_length = length.beats();
+	_follow_length = Temporal::BBT_Offset (0, data_length.get_beats(), 0);
 	set_length (timecnt_t (length));
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 new bounds %3..%4 %5..%6 len %7 of %7\n", _box.order(), index(), _play_start, _play_end, _loop_start, _loop_end, length, rt_midibuffer.load()->size()));
-
 	setup_event_indices ();
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 new bounds %3..%4 %5..%6 len %7 of %7\n", _box.order(), index(), _play_start, _play_end, _loop_start, _loop_end, length, rt_midibuffer.load()->size()));
 }
 
 void
@@ -2458,7 +2526,7 @@ MIDITrigger::captured (SlotArmInfo& ai)
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	timecnt_t dur = tmap->convert_duration (timecnt_t (ai.captured), timepos_t (ai.start_samples), Temporal::BeatTime);
 
-	adjust_bounds (Temporal::Beats(), dur.beats(), dur.beats(), false);
+	adjust_bounds (timepos_t::zero (Temporal::BeatTime), timepos_t (dur.beats()), dur, false);
 
 	iter = 0;
 	_follow_action0 = FollowAction::Again;
@@ -2987,6 +3055,7 @@ MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 		delete old;
 		_model.reset ();
 		set_name ("");
+		send_property_change (ARDOUR::Properties::region);
 		return 0;
 	}
 
@@ -3092,7 +3161,7 @@ MIDITrigger::tempo_map_changed ()
 void
 MIDITrigger::model_contents_changed ()
 {
-	PendingSwap* pending = new PendingSwap;
+	MIDIPendingSwap* pending = new MIDIPendingSwap;
 	pending->rt_midibuffer = new RTMidiBufferBeats;
 
 	pending->play_start = _play_start;
@@ -3117,38 +3186,27 @@ MIDITrigger::model_contents_changed ()
 	}
 }
 
-void
-MIDITrigger::bounds_changed (Temporal::timepos_t const & start, Temporal::timepos_t const & end)
-{
-	PendingSwap* pending = new PendingSwap;
-
-	pending->play_start = start.beats();
-	pending->play_end = end.beats();
-	pending->loop_start = pending->play_start;
-	pending->loop_end = pending->play_end;
-	pending->length = pending->play_end - pending->play_start;
-
-	/* And set it. RT thread will find this and do what needs to be done */
-
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 pushed pending swap @ %3 for bounds change\n", _box.order(), index(), pending));
-	pending_swap.store (pending);
-
-	/* Clean up a previous RT midi buffer swap (if there is one) */
-
-	PendingSwap* old = old_pending_swap.exchange (nullptr);
-
-	if (old) {
-		delete old;
-	}
-}
-
 template<bool in_process_context>
 pframes_t
 MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
                        Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
                        pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t& quantize_offset)
 {
-	assert (rt_midibuffer);
+	/* We can get here if our Triggerbox is in an inactive track, and some
+	   transport operations (load, stop) are called. That's OK, but the
+	   route must be inactive. A null rt_midibuffer value in any condition
+	   is a coding error.
+	*/
+
+	if (!rt_midibuffer) {
+		Route* rt = static_cast<Route*> (box().owner());
+
+		if (!rt || !rt->active()) {
+			return nframes;
+		}
+
+		assert (false);
+	}
 
 	MidiBuffer* mb (in_process_context? &bufs.get_midi (0) : nullptr);
 	typedef Evoral::Event<MidiModel::TimeType> MidiEvent;
@@ -5424,11 +5482,13 @@ TriggerBox::set_state (const XMLNode& node, int version)
 {
 	Processor::set_state (node, version);
 
+	XMLNode* tnode (node.child (X_("Triggers")));
+	if (!tnode) {
+		return -1;
+	}
+
 	node.get_property (X_("data-type"), _data_type);
 	node.get_property (X_("order"), _order);
-
-	XMLNode* tnode (node.child (X_("Triggers")));
-	assert (tnode);
 
 	XMLNodeList const & tchildren (tnode->children());
 

@@ -21,7 +21,10 @@
 #include <cerrno>
 #include <cstring>
 #include <fcntl.h>
+
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #ifdef PLATFORM_WINDOWS
 #include <winsock2.h>

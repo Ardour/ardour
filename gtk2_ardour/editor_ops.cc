@@ -1925,7 +1925,7 @@ Editor::choose_new_marker_name(string &name, bool is_range) {
 
 	dialog.set_name ("MarkNameWindow");
 	dialog.set_size_request (250, -1);
-	dialog.set_position (Gtk::WIN_POS_MOUSE);
+	dialog.set_position (UIConfiguration::instance().get_default_window_position());
 
 	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
 	dialog.set_initial_text (name);
@@ -4119,7 +4119,7 @@ Editor::bounce_range_selection (BounceTarget target, bool with_processing)
 
 		dialog.set_name ("BounceNameWindow");
 		dialog.set_size_request (400, -1);
-		dialog.set_position (Gtk::WIN_POS_MOUSE);
+		dialog.set_position (UIConfiguration::instance().get_default_window_position());
 
 		dialog.add_button (_("Bounce"), RESPONSE_ACCEPT);
 		dialog.set_initial_text (bounce_name);
@@ -8594,7 +8594,7 @@ Editor::start_visual_state_op (uint32_t n)
 {
 	save_visual_state (n);
 
-	PopUp* pup = new PopUp (WIN_POS_MOUSE, 1000, true);
+	PopUp* pup = new PopUp (UIConfiguration::instance().get_default_window_position(), 1000, true);
 	char buf[32];
 	snprintf (buf, sizeof (buf), _("Saved view %u"), n+1);
 	pup->set_text (buf);

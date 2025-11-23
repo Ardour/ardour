@@ -152,11 +152,10 @@ AudioClipEditor::pack_outer (Gtk::Box& box)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (with_transport_controls) {
-		box.pack_start (play_box, false, false);
+		box.pack_start (play_box, false, false, 12);
 	}
 
 	box.pack_start (rec_box, false, false);
-	box.pack_start (follow_playhead_button, false, false);
 }
 
 void

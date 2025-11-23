@@ -23,14 +23,16 @@
 
 #include <pangomm/fontdescription.h>
 
+#include "ytkmm/enums.h"
+
 #include "pbd/configuration.h"
 #include "gtkmm2ext/colors.h"
 
-#include "widgets/visibility.h"
+#include "gtkmm2ext/visibility.h"
 
-namespace ArdourWidgets {
+namespace Gtkmm2ext {
 
-class LIBWIDGETS_API UIConfigurationBase : public PBD::Configuration
+class LIBGTKMM2EXT_API UIConfigurationBase : public PBD::Configuration
 {
 protected:
 	virtual ~UIConfigurationBase() { _instance = 0; }
@@ -52,6 +54,8 @@ public:
 	virtual Pango::FontDescription get_NormalMonospaceFont () const = 0;
 	virtual Pango::FontDescription get_SmallMonospaceFont () const = 0;
 	virtual Pango::FontDescription get_ArdourSmallFont () const = 0;
+
+	virtual Gtk::WindowPosition get_default_window_position() const = 0;
 };
 
 }

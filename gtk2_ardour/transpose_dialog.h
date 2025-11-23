@@ -30,7 +30,7 @@
 class TransposeDialog : public ArdourDialog
 {
 public:
-	TransposeDialog ();
+	TransposeDialog (Gtk::Window&);
 
 	int semitones () const;
 

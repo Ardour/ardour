@@ -37,14 +37,9 @@
 #include <cstring>
 #include <cerrno>
 #include <iostream>
-#include <sys/types.h>
 #include <sys/time.h>
-#include <fcntl.h>
-#ifndef COMPILER_MSVC
-#include <dirent.h>
-#endif
 #include <errno.h>
-#include <regex.h>
+#include <fcntl.h>
 
 #include "pbd/gstdio_compat.h"
 
@@ -673,45 +668,30 @@ bool
 ARDOUR::matching_unsuffixed_filename_exists_in (const string& dir, const string& path)
 {
 	string bws = basename_nosuffix (path);
-	struct dirent* dentry;
-	GStatBuf statbuf;
-	DIR* dead;
-	bool ret = false;
 
-        if ((dead = ::opendir (dir.c_str())) == 0) {
-                error << string_compose (_("cannot open directory %1 (%2)"), dir, strerror (errno)) << endl;
-                return false;
-        }
+	try {
+		Glib::Dir directory (dir);
 
-        while ((dentry = ::readdir (dead)) != 0) {
+		for (const auto& name : directory) {
+			if (name == "." || name == "..") {
+				continue;
+			}
 
-                /* avoid '.' and '..' */
+			string fullpath = Glib::build_filename (dir, name);
+			if (!Glib::file_test (fullpath, Glib::FILE_TEST_IS_REGULAR)) {
+				continue;
+			}
 
-                if ((dentry->d_name[0] == '.' && dentry->d_name[1] == '\0') ||
-                    (dentry->d_name[2] == '\0' && dentry->d_name[0] == '.' && dentry->d_name[1] == '.')) {
-                        continue;
-                }
+			if (basename_nosuffix (name) == bws) {
+				return true;
+			}
+		}
+	} catch (const Glib::Error& e) {
+		error << string_compose (_("cannot open directory %1 (%2)"), dir, e.what()) << endl;
+		return false;
+	}
 
-                string fullpath = Glib::build_filename (dir, dentry->d_name);
-
-                if (g_stat (fullpath.c_str(), &statbuf)) {
-                        continue;
-                }
-
-                if (!S_ISREG (statbuf.st_mode)) {
-                        continue;
-                }
-
-                string bws2 = basename_nosuffix (dentry->d_name);
-
-                if (bws2 == bws) {
-                        ret = true;
-                        break;
-                }
-        }
-
-        ::closedir (dead);
-        return ret;
+	return false;
 }
 
 uint32_t
@@ -757,6 +737,8 @@ ARDOUR::how_many_io_threads ()
 	if (pu < 0) {
 		if (-pu < num_cpu) {
 			num_threads = num_cpu + pu;
+		} else {
+			num_threads = 1;
 		}
 	} else if (pu == 0) {
 		num_threads = num_cpu;

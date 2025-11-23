@@ -68,6 +68,9 @@ class LIBARDOUR_API MidiPort : public Port {
 
 	void read_and_parse_entire_midi_buffer_with_no_speed_adjustment (pframes_t nframes, MIDI::Parser& parser, samplepos_t now);
 
+	PBD::Signal<void(int)> NoteOn;
+	PBD::Signal<void(int)> NoteOff;
+
 protected:
 	friend class PortManager;
 

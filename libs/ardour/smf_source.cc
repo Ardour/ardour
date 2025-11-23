@@ -27,9 +27,11 @@
 
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <errno.h>
-#include <regex.h>
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
@@ -379,21 +381,20 @@ timecnt_t
 SMFSource::write_unlocked (const WriterLock&            lock,
                            MidiRingBuffer<samplepos_t>& source,
                            timepos_t const &            position,
-                           timecnt_t const &            cnt)
+                           timecnt_t const &            dur)
 {
 
 	if (!_writing) {
 		mark_streaming_write_started (lock);
 	}
 
-	samplepos_t        time;
-	const samplepos_t        pos_samples = position.samples();
-	const samplecnt_t        cnt_samples = cnt.samples();
+	samplepos_t       time;
+	const samplepos_t pos_samples = position.samples();
+	const samplecnt_t dur_samples = dur.samples();
 	Evoral::EventType type;
 	uint32_t          size;
-
-	size_t   buf_capacity = 4;
-	uint8_t* buf          = (uint8_t*)malloc(buf_capacity);
+	size_t            buf_capacity = 4;
+	uint8_t*          buf = (uint8_t*) malloc (buf_capacity);
 
 	if (_model && !_model->writing()) {
 		_model->start_write();
@@ -408,10 +409,12 @@ SMFSource::write_unlocked (const WriterLock&            lock,
 			break;
 		}
 
-		if ((cnt != timecnt_t::max (cnt.time_domain())) &&
-		    (time > pos_samples + _capture_length + cnt_samples)) {
+		if ((dur != timecnt_t::max (dur.time_domain())) &&
+		    (time > pos_samples + _capture_length + dur_samples)) {
 			/* The diskstream doesn't want us to write everything, and this
-			   event is past the end of this block, so we're done for now. */
+			   event is past the end of this block, so we're done
+			   for now.
+			*/
 			break;
 		}
 
@@ -441,21 +444,21 @@ SMFSource::write_unlocked (const WriterLock&            lock,
 		}
 		time -= pos_samples;
 
-		ev.set(buf, size, time);
-		ev.set_event_type(Evoral::MIDI_EVENT);
-		ev.set_id(Evoral::next_event_id());
+		ev.set (buf, size, time);
+		ev.set_event_type (Evoral::MIDI_EVENT);
+		ev.set_id (Evoral::next_event_id());
 
 		if (!(ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex())) {
 			continue;
 		}
 
-		append_event_samples(lock, ev, pos_samples);
+		append_event_samples (lock, ev, pos_samples);
 	}
 
 	Evoral::SMF::flush ();
 	free (buf);
 
-	return cnt;
+	return dur;
 }
 
 void
@@ -570,10 +573,10 @@ SMFSource::append_event_samples (const WriterLock& lock,
 		event_id = ev.id();
 	}
 
-	/* a distance measure that starts at @p _last_ev_time_samples (audio time) and
-	   extends for ev.time() (audio time)
+	/* a distance measure that holds the distance between ev.time() and
+	   _last_ev_time_samples (in audio time).
 	*/
-	const timecnt_t       delta_distance (timepos_t (ev.time()), timepos_t (_last_ev_time_samples));
+	const timecnt_t       delta_distance (timepos_t (ev.time() - _last_ev_time_samples), timepos_t (_last_ev_time_samples));
 	const Temporal::Beats delta_time_beats = delta_distance.beats ();
 	const uint32_t        delta_time_ticks = delta_time_beats.to_ticks(ppqn());
 
@@ -688,11 +691,6 @@ SMFSource::valid_midi_file (const string& file)
 bool
 SMFSource::safe_midi_file_extension (const string& file)
 {
-	static regex_t compiled_pattern;
-	static bool compile = true;
-	const int nmatches = 2;
-	regmatch_t matches[nmatches];
-
 	if (Glib::file_test (file, Glib::FILE_TEST_EXISTS)) {
 		if (!Glib::file_test (file, Glib::FILE_TEST_IS_REGULAR)) {
 			/* exists but is not a regular file */
@@ -700,17 +698,14 @@ SMFSource::safe_midi_file_extension (const string& file)
 		}
 	}
 
-	if (compile && regcomp (&compiled_pattern, "\\.[mM][iI][dD][iI]?$", REG_EXTENDED)) {
-		return false;
-	} else {
-		compile = false;
-	}
-
-	if (regexec (&compiled_pattern, file.c_str(), nmatches, matches, 0)) {
+	const size_t dot_pos = file.rfind ('.');
+	if (dot_pos == string::npos) {
 		return false;
 	}
 
-	return true;
+	std::string const ext = PBD::downcase (file.substr(dot_pos + 1));
+
+	return ext == "mid" || ext == "midi";
 }
 
 static bool compare_eventlist (
@@ -841,10 +836,9 @@ SMFSource::load_model_unlocked (bool force_reload)
 
 	eventlist.sort(compare_eventlist);
 
-	std::list< std::pair< Evoral::Event<Temporal::Beats>*, gint > >::iterator it;
-	for (it=eventlist.begin(); it!=eventlist.end(); ++it) {
-		_model->append (*it->first, it->second);
-		delete it->first;
+	for (auto & it : eventlist) {
+		_model->append (*it.first, it.second);
+		delete it.first;
 	}
 
 	/* Length ought to be based on data in the file (TrkEnd meta-event, not

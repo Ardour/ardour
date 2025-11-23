@@ -29,7 +29,7 @@
 #include "gtkmm2ext/utils.h"
 #include "widgets/fastmeter.h"
 
-#include "widgets/ui_config.h"
+#include "gtkmm2ext/ui_config.h"
 
 
 #define UINT_TO_RGB(u,r,g,b) { (*(r)) = ((u)>>16)&0xff; (*(g)) = ((u)>>8)&0xff; (*(b)) = (u)&0xff; }

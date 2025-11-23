@@ -24,4 +24,5 @@ using namespace ARDOUR;
 Muteable::Muteable (Session& s, std::string const & name)
 	: _mute_master (new MuteMaster (s, *this, name))
 {
+	_mute_master->MutePointChanged.connect_same_thread (*_mute_master, [&] { mute_points_changed (); });
 }

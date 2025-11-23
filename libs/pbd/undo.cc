@@ -99,7 +99,6 @@ UndoTransaction::remove_command (Command* const action)
 		return;
 	}
 	actions.erase (i);
-	delete action;
 }
 
 bool

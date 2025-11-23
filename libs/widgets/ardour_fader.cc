@@ -29,7 +29,7 @@
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/ardour_fader.h"
-#include "widgets/ui_config.h"
+#include "gtkmm2ext/ui_config.h"
 
 using namespace Gtk;
 using namespace std;

@@ -17,7 +17,6 @@
  */
 
 #include <math.h>
-#include <regex.h>
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/time.h>

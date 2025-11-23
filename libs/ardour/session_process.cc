@@ -38,7 +38,6 @@
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"
 #include "ardour/butler.h"
-#include "ardour/cycle_timer.h"
 #include "ardour/debug.h"
 #include "ardour/disk_reader.h"
 #include "ardour/graph.h"
@@ -198,7 +197,6 @@ Session::fail_roll (pframes_t nframes)
 int
 Session::no_roll (pframes_t nframes)
 {
-	PT_TIMING_CHECK (4);
 	TimerRAII tr (dsp_stats[NoRoll]);
 
 	samplepos_t end_sample = _transport_sample + floor (nframes * _transport_fsm->transport_speed());
@@ -221,7 +219,6 @@ Session::no_roll (pframes_t nframes)
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
 		_process_graph->routes_no_roll(graph_chain, nframes, _transport_sample, end_sample, non_realtime_work_pending());
 	} else {
-		PT_TIMING_CHECK (10);
 		for (auto const& i : *r) {
 
 			if (i->is_auditioner()) {
@@ -234,10 +231,8 @@ Session::no_roll (pframes_t nframes)
 				break;
 			}
 		}
-		PT_TIMING_CHECK (11);
 	}
 
-	PT_TIMING_CHECK (5);
 	return ret;
 }
 
@@ -371,7 +366,6 @@ Session::calc_preroll_subcycle (samplecnt_t ns) const
 void
 Session::process_with_events (pframes_t nframes)
 {
-	PT_TIMING_CHECK (3);
 	TimerRAII tr (dsp_stats[ProcessFunction]);
 
 	SessionEvent*  ev;

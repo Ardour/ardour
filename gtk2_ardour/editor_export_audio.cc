@@ -64,6 +64,7 @@
 #include "selection.h"
 #include "simple_export_dialog.h"
 #include "time_axis_view.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
@@ -344,7 +345,7 @@ Editor::bounce_region_selection (bool with_processing)
 
 		dialog.set_name ("BounceNameWindow");
 		dialog.set_size_request (400, -1);
-		dialog.set_position (Gtk::WIN_POS_MOUSE);
+		dialog.set_position (UIConfiguration::instance().get_default_window_position());
 
 		dialog.add_button (_("Bounce"), RESPONSE_ACCEPT);
 

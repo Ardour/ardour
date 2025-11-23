@@ -949,7 +949,12 @@ Sequence<Time>::append (const Event<Time>& ev, event_id_t evid)
 	assert(_writing);
 
 	if (!midi_event_is_valid(ev.buffer(), ev.size())) {
-		cerr << "WARNING: Sequence ignoring illegal MIDI event" << endl;
+		std::cerr << "WARNING: Sequence ignoring illegal MIDI event (size " << ev.size() << "): ";
+		std::cerr << std::hex;
+		for (size_t n = 0; n < ev.size(); ++n) {
+			std::cerr << "0x" << (int) ev.buffer()[n] << ' ';
+		}
+		std::cerr << std::dec << std::endl;
 		return;
 	}
 

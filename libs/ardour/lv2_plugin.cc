@@ -2851,8 +2851,6 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	DEBUG_TRACE(DEBUG::LV2, string_compose("%1 run %2 offset %3\n", name(), nframes, offset));
 	Plugin::connect_and_run(bufs, start, end, speed, in_map, out_map, nframes, offset);
 
-	cycles_t then = get_cycles();
-
 	/* remain at zero during pre-roll at zero */
 	speed = end > 0 ? speed : 0;
 	samplepos_t start0 = std::max (samplepos_t (0), start);
@@ -3319,10 +3317,14 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 									// TODO: This should emit the control's Changed signal
 									PropertyChanged(prop_id, _property_values[prop_id]);
 								} else {
+#ifndef NDEBUG
 									std::cerr << "warning: patch:Set for unknown property" << std::endl;
+#endif
 								}
 							} else {
+#ifndef NDEBUG
 								std::cerr << "warning: patch:Set for unsupported property" << std::endl;
+#endif
 							}
 						}
 					}
@@ -3354,9 +3356,6 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			}
 		}
 	}
-
-	cycles_t now = get_cycles();
-	set_cycles((uint32_t)(now - then));
 
 	// Update expected transport information for next cycle so we can detect changes
 	_next_cycle_speed = speed;

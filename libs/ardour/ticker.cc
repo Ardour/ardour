@@ -100,7 +100,7 @@ MidiClockTicker::tick (samplepos_t start_sample, samplepos_t end_sample, pframes
 		 */
 
 		if (pre_roll > 0 && pre_roll >= _mclk_out_latency.max && pre_roll < _mclk_out_latency.max + n_samples) {
-			assert (!_rolling);
+			assert (!_rolling); // FIXME this tiggers when grabbing the shuttle while not rolling
 
 			pframes_t pos = pre_roll - _mclk_out_latency.max;
 			_next_tick    = one_ppqn_in_samples (0) - _mclk_out_latency.max;

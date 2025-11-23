@@ -150,7 +150,7 @@ PianorollMidiView::set_height (double h)
 		note_area_height = h;
 		automation_height = 0.;
 	} else {
-		note_area_height = ceil (h / 2.);
+		note_area_height = ceil (2 * h / 3.);
 		automation_height = ceil (h - note_area_height);
 	}
 

@@ -31,6 +31,7 @@
 #include "gtkmm2ext/menu_elems.h"
 #include "gtkmm2ext/utils.h"
 
+#include "widgets/prompter.h"
 #include "widgets/tooltips.h"
 
 #include "context_menu_helper.h"
@@ -332,6 +333,32 @@ IOPluginWindow::IOPlugUI::self_remove ()
 }
 
 void
+IOPluginWindow::IOPlugUI::rename ()
+{
+	ArdourWidgets::Prompter name_prompter (true);
+	name_prompter.set_title (_("Rename I/O Plugin"));
+	name_prompter.set_prompt (_("New name:"));
+	name_prompter.set_initial_text (_iop->name());
+	name_prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
+	name_prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
+	name_prompter.show_all ();
+
+	std::string result;
+	switch (name_prompter.run ()) {
+		case Gtk::RESPONSE_ACCEPT:
+			name_prompter.get_result (result);
+			name_prompter.hide ();
+			if (result.length ()) {
+				_iop->set_name (result);
+				_btn_ioplug.set_text (_iop->name ());
+			}
+			break;
+		default:
+			break;
+	}
+}
+
+void
 IOPluginWindow::IOPlugUI::edit_plugin (bool custom_ui)
 {
 	_window_proxy->set_custom_ui_mode (custom_ui);
@@ -354,6 +381,8 @@ IOPluginWindow::IOPlugUI::button_press_event (GdkEventButton* ev)
 		Gtk::Menu* m = ARDOUR_UI_UTILS::shared_popup_menu ();
 		MenuList& items = m->items ();
 
+		items.push_back (MenuElem (_("Rename"), sigc::mem_fun (*this, &IOPluginWindow::IOPlugUI::rename)));
+		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &IOPluginWindow::IOPlugUI::edit_plugin), true)));
 		items.back().set_sensitive (_iop->plugin ()->has_editor ());
 		items.push_back (MenuElem (_("Edit with generic controls..."), sigc::bind (sigc::mem_fun (*this, &IOPluginWindow::IOPlugUI::edit_plugin), false)));

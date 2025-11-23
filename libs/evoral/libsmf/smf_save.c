@@ -58,21 +58,32 @@ smf_extend(smf_t *smf, const int length)
 	int i, previous_file_buffer_length = smf->file_buffer_length;
 	char *previous_file_buffer = (char*)smf->file_buffer;
 
-	/* XXX: Not terribly efficient. */
-	smf->file_buffer_length += length;
-	smf->file_buffer = realloc(smf->file_buffer, smf->file_buffer_length);
-	if (smf->file_buffer == NULL) {
-		g_warning("realloc(3) failed: %s", strerror(errno));
-		smf->file_buffer_length = 0;
-		return (NULL);
-	}
+	if (smf->file_buffer_capacity >= smf->file_buffer_length + length) {
+		smf->file_buffer_length += length;
+	} else {
 
-	/* Fix up pointers.  XXX: omgwtf. */
-	for (i = 1; i <= smf->number_of_tracks; i++) {
-		smf_track_t *track;
-		track = smf_get_track_by_number(smf, i);
-		if (track->file_buffer != NULL)
-			track->file_buffer = (char *)track->file_buffer + ((char *)smf->file_buffer - previous_file_buffer);
+		if (smf->file_buffer_capacity == 0) {
+			smf->file_buffer_capacity = length * 2;
+		} else {
+			smf->file_buffer_capacity *= 2;
+		}
+		smf->file_buffer = realloc(smf->file_buffer, smf->file_buffer_capacity);
+		if (smf->file_buffer == NULL) {
+			g_warning("realloc(3) failed: %s", strerror(errno));
+			smf->file_buffer_length = 0;
+			smf->file_buffer_capacity = 0;
+			return (NULL);
+		}
+
+		smf->file_buffer_length += length;
+
+		/* Fix up pointers.  XXX: omgwtf. */
+		for (i = 1; i <= smf->number_of_tracks; i++) {
+			smf_track_t *track;
+			track = smf_get_track_by_number(smf, i);
+			if (track->file_buffer != NULL)
+				track->file_buffer = (char *)track->file_buffer + ((char *)smf->file_buffer - previous_file_buffer);
+		}
 	}
 
 	return ((char *)smf->file_buffer + previous_file_buffer_length);
@@ -441,6 +452,7 @@ free_buffer(smf_t *smf)
 	free(smf->file_buffer);
 	smf->file_buffer = NULL;
 	smf->file_buffer_length = 0;
+	smf->file_buffer_capacity = 0;
 
 	for (i = 1; i <= smf->number_of_tracks; i++) {
 		track = smf_get_track_by_number(smf, i);
@@ -681,4 +693,3 @@ smf_save(smf_t *smf, FILE* file)
 
 	return (0);
 }
-

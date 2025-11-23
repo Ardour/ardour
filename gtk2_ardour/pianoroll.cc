@@ -59,6 +59,8 @@
 
 #include "pbd/i18n.h"
 
+#undef PIANOROLL_USER_BUTTONS
+
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourCanvas;
@@ -125,9 +127,11 @@ Pianoroll::rebuild_parameter_button_map()
 	parameter_button_map.insert (std::make_pair (expression_button, Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_EXPRESSION)));
 	parameter_button_map.insert (std::make_pair (modulation_button, Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_MODWHEEL)));
 
+#ifdef PIANOROLL_USER_BUTTONS
 	parameter_button_map.insert (std::make_pair (cc_dropdown1, Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE1)));
 	parameter_button_map.insert (std::make_pair (cc_dropdown2, Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE2)));
 	parameter_button_map.insert (std::make_pair (cc_dropdown3, Evoral::Parameter (ARDOUR::MidiCCAutomation, _visible_channel, MIDI_CTL_MSB_GENERAL_PURPOSE3)));
+#endif
 }
 
 void
@@ -244,6 +248,8 @@ Pianoroll::build_lower_toolbar ()
 	pressure_button = new ArdourButton (_("Pressure"), elements);
 	expression_button = new ArdourButton (_("Expression"), elements);
 	modulation_button = new ArdourButton (_("Modulation"), elements);
+
+#ifdef PIANOROLL_USER_BUTTONS
 	cc_dropdown1 = new MetaButton ();
 	cc_dropdown2 = new MetaButton ();
 	cc_dropdown3 = new MetaButton ();
@@ -255,7 +261,7 @@ Pianoroll::build_lower_toolbar ()
 	cc_dropdown1->add_elements (ArdourButton::Indicator);
 	cc_dropdown2->add_elements (ArdourButton::Indicator);
 	cc_dropdown3->add_elements (ArdourButton::Indicator);
-
+#endif
 	rebuild_parameter_button_map ();
 
 	/* Only need to do this once because i->first is the actual button,
@@ -277,9 +283,12 @@ Pianoroll::build_lower_toolbar ()
 	button_bar.pack_start (*bender_button, false, false);
 	button_bar.pack_start (*pressure_button, false, false);
 	button_bar.pack_start (*modulation_button, false, false);
+
+#ifdef PIANOROLL_USER_BUTTONS
 	button_bar.pack_start (*cc_dropdown1, false, false);
 	button_bar.pack_start (*cc_dropdown2, false, false);
 	button_bar.pack_start (*cc_dropdown3, false, false);
+#endif
 
 	velocity_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_button_event), ARDOUR::MidiVelocityAutomation, 0));
 	pressure_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_button_event), ARDOUR::MidiChannelPressureAutomation, 0));
@@ -293,6 +302,7 @@ Pianoroll::build_lower_toolbar ()
 	modulation_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_led_click), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_MODWHEEL));
 	expression_button->signal_led_clicked.connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::automation_led_click), ARDOUR::MidiCCAutomation, MIDI_CTL_MSB_EXPRESSION));
 
+#ifdef PIANOROLL_USER_BUTTONS
 	cc_dropdown1->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_automation_button_event), cc_dropdown1), false);
 	cc_dropdown2->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_automation_button_event), cc_dropdown2), false);
 	cc_dropdown3->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::user_automation_button_event), cc_dropdown3), false);
@@ -304,6 +314,7 @@ Pianoroll::build_lower_toolbar ()
 	cc_dropdown1->signal_map().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::build_cc_menu), cc_dropdown1));
 	cc_dropdown2->signal_map().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::build_cc_menu), cc_dropdown2));
 	cc_dropdown3->signal_map().connect (sigc::bind (sigc::mem_fun (*this, &Pianoroll::build_cc_menu), cc_dropdown3));
+#endif
 
 	_toolbox.pack_start (*_canvas_hscrollbar, false, false);
 	_toolbox.pack_start (button_bar, false, false);
@@ -315,7 +326,7 @@ Pianoroll::pack_inner (Gtk::Box& box)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	box.pack_start (snap_box, false, false);
-	box.pack_start (grid_box, false, false);
+	box.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 	box.pack_start (draw_box, false, false);
 	draw_box.show ();
 }
@@ -326,14 +337,13 @@ Pianoroll::pack_outer (Gtk::Box& box)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (with_transport_controls) {
-		box.pack_start (play_box, false, false);
+		box.pack_start (play_box, false, false, 12);
 	}
 
 	box.pack_start (rec_box, false, false);
 	box.pack_start (visible_channel_label, false, false);
 	box.pack_start (visible_channel_selector, false, false);
 	box.pack_start (note_mode_button, false, false);
-	box.pack_start (follow_playhead_button, false, false);
 }
 
 void
@@ -1343,10 +1353,9 @@ Pianoroll::trigger_prop_change (PBD::PropertyChange const & what_changed)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (what_changed.contains (Properties::region)) {
+		std::cerr << "PR region changed\n";
 		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (ref.trigger()->the_region());
-		if (mr) {
-			set_region (mr);
-		}
+		set_region (mr);
 	}
 }
 
@@ -1422,6 +1431,7 @@ Pianoroll::set_track (std::shared_ptr<ARDOUR::Track> track)
 		return;
 	}
 
+#ifdef PIANOROLL_USER_BUTTONS
 	cc_dropdown1->menu().items().clear ();
 	cc_dropdown2->menu().items().clear ();
 	cc_dropdown3->menu().items().clear ();
@@ -1435,6 +1445,7 @@ Pianoroll::set_track (std::shared_ptr<ARDOUR::Track> track)
 	if (cc_dropdown3->get_mapped ()) {
 		build_cc_menu (cc_dropdown3);
 	}
+#endif
 }
 
 void
@@ -1449,6 +1460,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	std::shared_ptr<MidiRegion> r (std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region));
 
 	if (!r) {
+		view->set_region (nullptr);
 		_update_connection.disconnect ();
 		return;
 	}

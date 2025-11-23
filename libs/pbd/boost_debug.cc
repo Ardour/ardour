@@ -19,7 +19,7 @@
 
 #include "libpbd-config.h"
 
-#ifdef HAVE_EXECINFO
+#ifdef HAVE_EXECINFO_H
 #include <execinfo.h>
 #endif
 
@@ -47,7 +47,7 @@ std::ostream& operator<< (std::ostream& str, const Backtrace& bt) { return bt.pr
 
 Backtrace::Backtrace()
 {
-#ifdef HAVE_EXECINFO
+#ifdef HAVE_EXECINFO_H
 	size = ::backtrace (trace, 200);
 #endif
 }
@@ -59,7 +59,7 @@ Backtrace::print (std::ostream& str) const
 	size_t i;
 
 	if (size) {
-#ifdef HAVE_EXECINFO
+#ifdef HAVE_EXECINFO_H
 		strings = ::backtrace_symbols (trace, size);
 #endif
 		if (strings) {

@@ -34,7 +34,7 @@
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/ardour_ctrl_base.h"
-#include "widgets/ui_config.h"
+#include "gtkmm2ext/ui_config.h"
 
 #include "pbd/i18n.h"
 

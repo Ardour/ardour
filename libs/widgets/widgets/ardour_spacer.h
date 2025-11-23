@@ -23,7 +23,7 @@
 
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/colors.h"
-#include "widgets/ui_config.h"
+#include "gtkmm2ext/ui_config.h"
 
 #include "widgets/visibility.h"
 
@@ -39,10 +39,10 @@ protected:
 
 	void on_size_request (Gtk::Requisition* req) {
 		if (_natural_width > 0) {
-			req->width = _natural_width * UIConfigurationBase::instance().get_ui_scale ();
+			req->width = _natural_width * Gtkmm2ext::UIConfigurationBase::instance().get_ui_scale ();
 		}
 		if (_natural_height > 0) {
-			req->height = _natural_height * UIConfigurationBase::instance().get_ui_scale ();
+			req->height = _natural_height * Gtkmm2ext::UIConfigurationBase::instance().get_ui_scale ();
 		}
 		CairoWidget::on_size_request (req);
 	}
@@ -69,7 +69,7 @@ protected:
 		float h = height * _ratio;
 		float t = .5f * (height - h);
 		ctx->rectangle (0, t, 1, h);
-		uint32_t c = UIConfigurationBase::instance().color ("neutral:backgroundest");
+		uint32_t c = Gtkmm2ext::UIConfigurationBase::instance().color ("neutral:backgroundest");
 		Gtkmm2ext::set_source_rgba (ctx, c);
 		ctx->fill ();
 	}
@@ -101,7 +101,7 @@ protected:
 		float w = width * _ratio;
 		float t = .5f * (width - w);
 		ctx->rectangle (t, 0, w, 1);
-		uint32_t c = UIConfigurationBase::instance().color ("neutral:backgroundest");
+		uint32_t c = Gtkmm2ext::UIConfigurationBase::instance().color ("neutral:backgroundest");
 		Gtkmm2ext::set_source_rgba (ctx, c);
 		ctx->fill ();
 	}

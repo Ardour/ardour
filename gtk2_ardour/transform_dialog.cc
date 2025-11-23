@@ -76,8 +76,8 @@ TransformDialog::Model::Model()
 	}
 }
 
-TransformDialog::TransformDialog()
-	: ArdourDialog(_("Transform"), false, false)
+TransformDialog::TransformDialog(Gtk::Window& parent)
+	: ArdourDialog(parent, _("Transform"), false, false)
 {
 	_property_combo.set_model(_model.property_list);
 	_property_combo.pack_start(_model.property_cols.label);

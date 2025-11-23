@@ -428,15 +428,15 @@ EditingContext::set_action_defaults ()
 		grid_actions[Editing::GridTypeBeat]->set_active (false);
 		grid_actions[Editing::GridTypeBeat]->set_active (true);
 	}
-	if (draw_length_actions[DRAW_LEN_AUTO]) {
+	if (draw_length_actions.find (DRAW_LEN_AUTO) != draw_length_actions.end()) {
 		draw_length_actions[DRAW_LEN_AUTO]->set_active (false);
 		draw_length_actions[DRAW_LEN_AUTO]->set_active (true);
 	}
-	if (draw_velocity_actions[DRAW_VEL_AUTO]) {
+	if (draw_velocity_actions.find (DRAW_VEL_AUTO) != draw_velocity_actions.end()) {
 		draw_velocity_actions[DRAW_VEL_AUTO]->set_active (false);
 		draw_velocity_actions[DRAW_VEL_AUTO]->set_active (true);
 	}
-	if (draw_channel_actions[DRAW_CHAN_AUTO]) {
+	if (draw_channel_actions.find (DRAW_CHAN_AUTO) != draw_channel_actions.end()) {
 		draw_channel_actions[DRAW_CHAN_AUTO]->set_active (false);
 		draw_channel_actions[DRAW_CHAN_AUTO]->set_active (true);
 	}
@@ -480,12 +480,12 @@ EditingContext::register_common_actions (Bindings* common_bindings, std::string 
 	zoom_actions = ActionManager::create_action_group (common_bindings, prefix + X_("Zoom"));
 	RadioAction::Group zoom_group;
 
-	zoom_focus_actions[Editing::ZoomFocusLeft] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusLeft));
-	zoom_focus_actions[Editing::ZoomFocusRight] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-right", _("Zoom Focus Right"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusRight));
-	zoom_focus_actions[Editing::ZoomFocusCenter] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-center", _("Zoom Focus Center"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusCenter));
-	zoom_focus_actions[Editing::ZoomFocusPlayhead] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-playhead", _("Zoom Focus Playhead"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusPlayhead));
-	zoom_focus_actions[Editing::ZoomFocusMouse] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-mouse", _("Zoom Focus Mouse"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusMouse));
-	zoom_focus_actions[Editing::ZoomFocusEdit] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-edit", _("Zoom Focus Edit Point"), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusEdit));
+	zoom_focus_actions[Editing::ZoomFocusLeft] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", zoom_focus_strings[Editing::ZoomFocusLeft].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusLeft));
+	zoom_focus_actions[Editing::ZoomFocusRight] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-right", zoom_focus_strings[Editing::ZoomFocusRight].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusRight));
+	zoom_focus_actions[Editing::ZoomFocusCenter] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-center", zoom_focus_strings[Editing::ZoomFocusCenter].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusCenter));
+	zoom_focus_actions[Editing::ZoomFocusPlayhead] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-playhead", zoom_focus_strings[Editing::ZoomFocusPlayhead].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusPlayhead));
+	zoom_focus_actions[Editing::ZoomFocusMouse] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-mouse", zoom_focus_strings[Editing::ZoomFocusMouse].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusMouse));
+	zoom_focus_actions[Editing::ZoomFocusEdit] = radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-edit", zoom_focus_strings[Editing::ZoomFocusEdit].c_str(), sigc::bind (sigc::mem_fun (*this, &EditingContext::zoom_focus_chosen), Editing::ZoomFocusEdit));
 
 	ActionManager::register_action (zoom_actions, X_("cycle-zoom-focus"), _("Next Zoom Focus"), sigc::mem_fun (*this, &EditingContext::cycle_zoom_focus));
 
@@ -586,6 +586,8 @@ EditingContext::register_midi_actions (Bindings* midi_bindings, std::string cons
 
 	/* Alt versions allow bindings for both Tab and ISO_Left_Tab, if desired */
 
+	ActionManager::register_action (_midi_actions, X_("select-all"), _("Select All"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::select_all_notes));
+	ActionManager::register_action (_midi_actions, X_("alt-select-all"), _("Select All (alternate)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::select_all_notes));
 	ActionManager::register_action (_midi_actions, X_("select-next"), _("Select Next"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::select_next_note));
 	ActionManager::register_action (_midi_actions, X_("alt-select-next"), _("Select Next (alternate)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::select_next_note));
 	ActionManager::register_action (_midi_actions, X_("select-previous"), _("Select Previous"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::select_previous_note));
@@ -1142,7 +1144,9 @@ EditingContext::set_draw_length (GridType gt)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	draw_length_actions[gt]->set_active (true);
+	if (draw_length_actions.find (gt) != draw_length_actions.end() && draw_length_actions[gt]) {
+		draw_length_actions[gt]->set_active (true);
+	}
 }
 
 void
@@ -1150,11 +1154,11 @@ EditingContext::set_draw_velocity (int v)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (v == DRAW_VEL_AUTO) {
-		draw_velocity_actions[v]->set_active (true);
-	} else {
-		draw_velocity_actions[std::max (std::min (v, 127), 0)]->set_active (true);
+	if (draw_velocity_actions.find (v) == draw_velocity_actions.end() || draw_velocity_actions[v]) {
+		return;
 	}
+
+	draw_velocity_actions[v]->set_active (true);
 }
 
 void
@@ -1162,11 +1166,11 @@ EditingContext::set_draw_channel (int c)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (c == DRAW_CHAN_AUTO) {
-		draw_channel_actions[c]->set_active (true);
-	} else {
-		draw_channel_actions[std::max (std::min (c, 15), 0)]->set_active (true);
+	if (draw_channel_actions.find (c) == draw_channel_actions.end() || draw_channel_actions[c]) {
+		return;
 	}
+
+	draw_channel_actions[c]->set_active (true);
 }
 
 void
@@ -1796,7 +1800,7 @@ EditingContext::get_quantize_op ()
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (!quantize_dialog) {
-		quantize_dialog = new QuantizeDialog (*this);
+		quantize_dialog = new QuantizeDialog (*transient_parent (), *this);
 	}
 
 	quantize_dialog->present ();
@@ -2102,7 +2106,7 @@ EditingContext::transform_regions (const MidiViews& rs)
 		return;
 	}
 
-	TransformDialog td;
+	TransformDialog td (*transient_parent ());
 
 	td.present();
 	const int r = td.run();
@@ -2133,7 +2137,7 @@ EditingContext::transpose_regions (const MidiViews& rs)
 		return;
 	}
 
-	TransposeDialog d;
+	TransposeDialog d (*transient_parent ());
 	int const r = d.run ();
 
 	if (r == RESPONSE_ACCEPT) {
@@ -2166,7 +2170,7 @@ EditingContext::edit_notes (MidiView* mrv)
 		return;
 	}
 
-	EditNoteDialog* d = new EditNoteDialog (mrv, s);
+	EditNoteDialog* d = new EditNoteDialog (*transient_parent (), mrv, s);
 	d->show_all ();
 
 	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &EditingContext::note_edit_done), d));
@@ -2301,7 +2305,6 @@ EditingContext::pack_draw_box (bool with_channel)
 
 	/* Draw  - these MIDI tools are only visible when in Draw mode */
 	draw_box.set_spacing (2);
-	draw_box.set_border_width (2);
 	draw_box.pack_start (*manage (new Label (_("Len:"))), false, false);
 	draw_box.pack_start (draw_length_selector, false, false, 4);
 	if (with_channel) {
@@ -2330,6 +2333,7 @@ EditingContext::pack_snap_box ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
+	snap_box.set_spacing (2);
 	snap_box.pack_start (snap_mode_button, false, false);
 	snap_box.pack_start (grid_type_selector, false, false);
 }
@@ -2611,7 +2615,18 @@ EditingContext::reset_zoom (samplecnt_t spp)
 	}
 
 	std::pair<timepos_t, timepos_t> ext = max_zoom_extent();
-	samplecnt_t max_extents_pp = max_extents_scale() * ((ext.second.samples() - ext.first.samples())  / _track_canvas_width);
+	samplecnt_t p = (ext.second.samples() - ext.first.samples())  / _track_canvas_width;
+
+	if (spp == 0) {
+		/* less samples than pixels */
+		spp = 1;
+	}
+
+	if (p == 0) {
+		/* Less samples to display than there are pixels, use spp = 1 */
+		p = 1;
+	}
+	samplecnt_t max_extents_pp = max_extents_scale() * p;
 
 	if (spp > max_extents_pp) {
 		spp = max_extents_pp;
@@ -2620,6 +2635,8 @@ EditingContext::reset_zoom (samplecnt_t spp)
 	if (spp == samples_per_pixel) {
 		return;
 	}
+
+	assert (spp != 0);
 
 	pending_visual_change.add (VisualChange::ZoomLevel);
 	pending_visual_change.samples_per_pixel = spp;
@@ -3377,7 +3394,8 @@ EditingContext::zoom_focus_chosen (ZoomFocus focus)
 		return;
 	}
 
-	zoom_focus_selector.set_active (zoom_focus_strings[(int)focus]);
+	zoom_focus_selector.set_active (zoom_focus_strings[focus]);
+	set_zoom_focus (focus);
 	instant_save ();
 }
 

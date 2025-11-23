@@ -75,22 +75,22 @@ PBD::hardware_concurrency()
 	int count;
 	size_t size=sizeof(count);
 # ifdef MIXBUS
-	return sysctlbyname("hw.logicalcpu",&count,&size,NULL,0)?0:count;
+	return sysctlbyname ("hw.logicalcpu", &count, &size, NULL, 0) ? 1 : count;
 # else
-	return sysctlbyname("hw.physicalcpu",&count,&size,NULL,0)?0:count;
+	return sysctlbyname ("hw.physicalcpu", &count, &size, NULL, 0) ? 1 :count;
 # endif
 #elif defined(__FreeBSD__)
 	int count;
 	size_t size=sizeof(count);
-	return sysctlbyname("hw.ncpu",&count,&size,NULL,0)?0:count;
-#elif defined(HAVE_UNISTD) && defined(_SC_NPROCESSORS_ONLN)
-	int const count=sysconf(_SC_NPROCESSORS_ONLN);
-	return (count>0)?count:0;
+	return sysctlbyname ("hw.ncpu", &count, &size, NULL, 0) ? 1 : count;
+#elif defined(HAVE_UNISTD_H) && defined(_SC_NPROCESSORS_ONLN)
+	int const count = sysconf (_SC_NPROCESSORS_ONLN);
+	return count > 1 ? count : 1;
 #elif defined(PLATFORM_WINDOWS)
 	SYSTEM_INFO sys_info;
-	GetSystemInfo( &sys_info );
+	GetSystemInfo (&sys_info);
 	return sys_info.dwNumberOfProcessors;
 #else
-	return 0;
+	return 1;
 #endif
 }

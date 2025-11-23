@@ -80,6 +80,7 @@ private:
 
 	/* first page */
 	Gtk::FileChooserButton* default_dir_chooser;
+	Gtk::Label* default_dir_label;
 	void default_dir_changed();
 	void setup_first_page ();
 	Gtk::FileChooserButton new_folder_chooser;

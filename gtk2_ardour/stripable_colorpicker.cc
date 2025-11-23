@@ -35,31 +35,6 @@ StripableColorDialog::StripableColorDialog ()
 {
 	initialize_color_palette ();
 	signal_response().connect (sigc::mem_fun (*this, &StripableColorDialog::finish_color_edit));
-
-#ifdef __APPLE__
-	/* hide eyedropper button -- which does not work on OSX:
-	 * " the problem is worse than just `not getting the color' though.
-	 *   The action doesn't actually complete, and window focus is in a
-	 *   `weird state' until you click inside the color-picker dialog twice;
-	 *   then it all seems back to normal (but no color got picked)"
-	 *
-	 * the alternative is to patch gtk's source:
-	 * gtk/gtkcolorsel.c  gtk_color_selection_init() which packs
-	 *
-	 *  top_hbox [ VBOX [ triangle || hbox [ sample-area || picker-button] ] || ... ]
-	 */
-	ColorSelection* cs = get_color_selection(); // IS-A VBOX
-	if (!cs) { return ; }
-	Gtk::HBox* top_hbox = dynamic_cast<Gtk::HBox*> (cs->children()[0].get_widget());
-	if (!top_hbox) { return ; }
-	Gtk::VBox* vbox = dynamic_cast<Gtk::VBox*> (top_hbox->children()[0].get_widget());
-	if (!vbox) { return ; }
-	Gtk::HBox* hbox = dynamic_cast<Gtk::HBox*> (vbox->children()[1].get_widget());
-	if (!hbox) { return ; }
-	Gtk::Button* picker = dynamic_cast<Gtk::Button*> (hbox->children()[1].get_widget());
-	if (!picker) { return ; }
-	picker->hide ();
-#endif
 }
 
 StripableColorDialog::~StripableColorDialog ()
@@ -123,7 +98,7 @@ StripableColorDialog::popup (const std::string& name, uint32_t color, Gtk::Windo
 	if (parent) {
 		set_transient_for (*parent);
 	}
-	set_position (Gtk::WIN_POS_MOUSE);
+	set_position (UIConfiguration::instance().get_default_window_position());
 	present ();
 }
 
@@ -135,7 +110,7 @@ StripableColorDialog::popup (std::shared_ptr<ARDOUR::Stripable> s, Gtk::Window* 
 			s->active_color_picker()->set_transient_for (*parent);
 		}
 		s->active_color_picker()->set_position (Gtk::WIN_POS_CENTER_ALWAYS); // force update
-		s->active_color_picker()->set_position (Gtk::WIN_POS_MOUSE);
+		s->active_color_picker()->set_position (UIConfiguration::instance().get_default_window_position());
 		s->active_color_picker()->present ();
 		return;
 	}
@@ -145,7 +120,7 @@ StripableColorDialog::popup (std::shared_ptr<ARDOUR::Stripable> s, Gtk::Window* 
 			set_transient_for (*parent);
 		}
 		set_position (Gtk::WIN_POS_CENTER_ALWAYS); // force update
-		set_position (Gtk::WIN_POS_MOUSE);
+		set_position (UIConfiguration::instance().get_default_window_position());
 		present ();
 		return;
 	}

@@ -80,6 +80,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/lmath.h"
 #include "ardour/location.h"
+#include "ardour/midi_track.h"
 #include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
@@ -1299,6 +1300,7 @@ Editor::set_session (Session *t)
 	_session->PositionChanged.connect (_session_connections, invalidator (*this), std::bind (&Editor::map_position_change, this, _1), gui_context());
 	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), std::bind (&Editor::add_vcas, this, _1), gui_context());
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), std::bind (&Editor::add_routes, this, _1), gui_context());
+	_session->InstrumentRouteAdded.connect (_session_connections, invalidator (*this), std::bind (&Editor::add_instrument_routes, this, _1), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), std::bind (&Editor::update_title, this), gui_context());
 	_session->Located.connect (_session_connections, invalidator (*this), std::bind (&Editor::located, this), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), std::bind (&Editor::parameter_changed, this, _1), gui_context());
@@ -2770,8 +2772,8 @@ Editor::setup_toolbar ()
 		_track_box.pack_start (tav_expand_button);
 	}
 
-	snap_box.set_spacing (2);
 	snap_box.set_border_width (spc);
+	draw_box.set_border_width (spc);
 
 	stretch_marker_cb.set_name ("mouse mode button");
 
@@ -4695,22 +4697,22 @@ Editor::add_stripables (StripableList& sl)
 
 	DisplaySuspender ds;
 
-	for (StripableList::iterator s = sl.begin(); s != sl.end(); ++s) {
+	for (auto & s : sl) {
 
-		if ((*s)->is_foldbackbus()) {
+		if (s->is_foldbackbus()) {
 			continue;
 		}
 
-		if ((v = std::dynamic_pointer_cast<VCA> (*s)) != 0) {
+		if ((v = std::dynamic_pointer_cast<VCA> (s)) != 0) {
 
 			VCATimeAxisView* vtv = new VCATimeAxisView (*this, _session, *_track_canvas);
 			vtv->set_vca (v);
 			track_views.push_back (vtv);
 
-			(*s)->gui_changed.connect (*this, invalidator (*this), std::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
+			s->gui_changed.connect (*this, invalidator (*this), std::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
 			changed = true;
 
-		} else if ((r = std::dynamic_pointer_cast<Route> (*s)) != 0) {
+		} else if ((r = std::dynamic_pointer_cast<Route> (s)) != 0) {
 
 			if (r->is_auditioner() || r->is_monitor() || r->is_surround_master ()) {
 				continue;
@@ -4736,7 +4738,7 @@ Editor::add_stripables (StripableList& sl)
 
 			rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
 			rtv->view()->RegionViewRemoved.connect (sigc::mem_fun (*this, &Editor::region_view_removed));
-			(*s)->gui_changed.connect (*this, invalidator (*this), std::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
+			s->gui_changed.connect (*this, invalidator (*this), std::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
 			changed = true;
 		}
 	}
@@ -4756,6 +4758,50 @@ Editor::add_stripables (StripableList& sl)
 
 	if (show_editor_mixer_when_tracks_arrive && !new_selection.empty()) {
 		show_editor_mixer (true);
+	}
+}
+
+void
+Editor::add_instrument_routes (RouteList& rl)
+{
+	std::vector<std::shared_ptr<MidiTrack> > midi_tracks;
+	for (auto & r : rl) {
+		std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (r);
+		if (mt) {
+			midi_tracks.push_back (mt);
+		}
+	}
+
+	if (!midi_tracks.empty()) {
+		maybe_show_instrument_plugin (midi_tracks.front());
+	}
+}
+
+void
+Editor::maybe_show_instrument_plugin (std::shared_ptr<MidiTrack> mt)
+{
+	if (!UIConfiguration::instance().get_open_gui_after_creating_instrument_track ()) {
+		return;
+	}
+	std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (mt->the_instrument ());
+	if (!pi) {
+		return;
+	}
+
+	if (pi->what_can_be_automated ().size () == 0 && !pi->plugin ()->has_editor ()) {
+		return;
+	}
+
+	ProcessorWindowProxy* proxy = pi->window_proxy();
+	if (!proxy) {
+		return;
+	}
+
+	proxy->set_custom_ui_mode (pi->plugin ()->has_editor ());
+	proxy->show_the_right_window ();
+	Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (edit_controls_vbox.get_toplevel ());
+	if (tlw) {
+		proxy->set_transient_for (*tlw);
 	}
 }
 

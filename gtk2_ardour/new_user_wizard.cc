@@ -226,6 +226,7 @@ NewUserWizard::default_dir_changed ()
 	Config->set_default_session_parent_dir (default_dir_chooser->get_filename());
 	// make new session folder chooser point to the new default
 	new_folder_chooser.set_current_folder (Config->get_default_session_parent_dir());
+	default_dir_label->set_text (Config->get_default_session_parent_dir());
 	config_modified = true;
 }
 
@@ -242,6 +243,8 @@ NewUserWizard::setup_first_time_config_page ()
 {
 	default_dir_chooser = manage (new FileChooserButton (string_compose (_("Default folder for %1 sessions"), PROGRAM_NAME),
 							     FILE_CHOOSER_ACTION_SELECT_FOLDER));
+	default_dir_label = manage (new Label);
+
 	Gtk::Label* txt = manage (new Label);
 	HBox* hbox = manage (new HBox);
 	VBox* vbox = manage (new VBox);
@@ -259,8 +262,12 @@ Where would you like new %1 sessions to be stored by default?\n\n\
 	vbox->set_border_width (24);
 
 	hbox->pack_start (*default_dir_chooser, false, true, 8);
+	hbox->pack_start (*default_dir_label, false, false, 8);
+
 	vbox->pack_start (*txt, false, false);
 	vbox->pack_start (*hbox, false, true);
+
+	default_dir_label->set_text (poor_mans_glob (Config->get_default_session_parent_dir()));
 
 	Gtkmm2ext::add_volume_shortcuts (*default_dir_chooser);
 	default_dir_chooser->set_title (_("Default Session Location"));
@@ -296,8 +303,9 @@ If you have an existing collection of samples, telling %1\n\
 where they are will make it easier to find them in the program.\
 \n\
 \n\
-Where would you like new %1 sessions to be stored by default?\n\n\
-<i>(You can store samples anywhere you want, this is just a default)</i></span>"), PROGRAM_NAME));
+Where would you like %1 to look for samples by default? If you\n\
+don't have any samples, just leave this setting as it is.\n\n\
+<i>(You can store samples anywhere you want, this is just an initial default)</i></span>"), PROGRAM_NAME));
 	txt->set_alignment (0.0, 0.0);
 	txt->set_justify (JUSTIFY_FILL);
 

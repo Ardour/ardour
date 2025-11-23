@@ -53,6 +53,7 @@
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 
 bool LoudnessDialog::_first_time = true;

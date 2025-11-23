@@ -33,7 +33,6 @@
 #include "ardour/buffer_set.h"
 #include "ardour/chan_count.h"
 #include "ardour/chan_mapping.h"
-#include "ardour/cycles.h"
 #include "ardour/latent.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/midi_ring_buffer.h"
@@ -326,9 +325,6 @@ public:
 	virtual void set_owner (SessionObject* o) { _owner = o; }
 	SessionObject* owner () const { return _owner; }
 
-	void set_cycles (uint32_t c) { _cycles = c; }
-	cycles_t cycles () const { return _cycles; }
-
 	void use_for_impulse_analysis ()
 	{
 		_for_impulse_analysis = true;
@@ -382,11 +378,19 @@ public:
 	PBD::Signal<void(uint32_t)> StartTouch;
 	PBD::Signal<void(uint32_t)> EndTouch;
 
+	PBD::Signal<void(RouteProcessorChange)> ProcessorChange;
+
 protected:
 	friend class PluginInsert;
 	friend class PlugInsertBase;
 	friend class RegionFxPlugin;
 	friend class Session;
+
+	/* Notifiy owner (Route) that some config property changed.
+	 * -> ProcessorChange ()
+	 * -> route->processors_changed ()
+	 */
+	virtual void send_processors_changed (ARDOUR::RouteProcessorChange const&);
 
 	/* Called when a parameter of the plugin is changed outside of this
 	 * host's control (typical via a plugin's own GUI/editor)

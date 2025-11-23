@@ -578,9 +578,6 @@ Session::Session (AudioEngine &eng,
 
 Session::~Session ()
 {
-#ifdef PT_TIMING
-	ST.dump ("ST.dump");
-#endif
 	destroy ();
 }
 
@@ -2831,6 +2828,9 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 
 		add_routes (new_routes, input_auto_connect, !instrument, order);
 		load_and_connect_instruments (new_routes, strict_io, instrument, pset, existing_outputs);
+		if (instrument) {
+			InstrumentRouteAdded (new_routes);
+		}
 	}
 
 	return ret;
@@ -2911,6 +2911,9 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 
 		add_routes (ret, false, !instrument, order);
 		load_and_connect_instruments (ret, strict_io, instrument, pset, existing_outputs);
+		if (instrument) {
+			InstrumentRouteAdded (ret);
+		}
 	}
 
 	return ret;
@@ -6396,20 +6399,25 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 			}
 		}
 
-		/* XXX NUTEMPO fix this to not use samples */
+		Temporal::Beats bpos (timepos_t (position).beats());
+		Temporal::Beats bout_pos (timepos_t (out_pos).beats());
 
 		for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
 				const MidiBuffer& buf = buffers.get_midi(0);
 				for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
-					Evoral::Event<samplepos_t> ev = *i;
+					Evoral::Event<samplepos_t> sev (*i);
+					Evoral::Event<Temporal::Beats> bev (sev.event_type(), timepos_t (sev.time()).beats(), sev.size(), sev.buffer());
+
 					if (!endpoint || for_export) {
-						ev.set_time(ev.time() - position);
+						bev.set_time (bev.time() - bpos);
 					} else {
 						/* MidiTrack::export_stuff moves event to the current cycle */
-						ev.set_time(ev.time() + out_pos - position);
+						bev.set_time(bev.time() + bout_pos - bpos);
 					}
-					(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position().samples());
+
+					(*m)->src->append_event_beats ((*m)->lock, bev, false);
 				}
+
 		}
 		out_pos += current_chunk;
 		latency_skip = 0;

@@ -54,7 +54,8 @@ class Route;
 class Track;
 class Region;
 class Source;
-class TimelineRange;
+
+struct TimelineRange;
 
 LIBARDOUR_API std::string legalize_for_path (const std::string& str);
 LIBARDOUR_API std::string legalize_for_universal_path (const std::string& str);

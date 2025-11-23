@@ -455,6 +455,8 @@ protected:
 	virtual void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update) = 0;
 
 	std::atomic<int> _suspend_route_redisplay_counter;
+
+	Gtk::Window* transient_parent () { return current_toplevel (); }
 };
 
 class DisplaySuspender {
