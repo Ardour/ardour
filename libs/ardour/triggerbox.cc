@@ -1632,6 +1632,9 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 	samplepos_t end_by_data_length = transition_sample + (data.length - _start_offset);
 	samplepos_t end_by_fixed_samples = std::min (end_by_user_data_length, end_by_data_length);
 
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 computing end with fl %2 bc %3 dl %4 udl %5\n", index(),
+	                                              _follow_length, bc.str(), data.length, _user_data_length));
+
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 SO %9 @ %2 / %3 / %4 ends: FL %5 (from %6) BC %7 DL %8\n",
 	                                              index(), transition_sample, transition_beats, transition_bbt,
 	                                              end_by_follow_length, _follow_length, end_by_beatcnt, end_by_data_length, _start_offset));
@@ -1644,14 +1647,18 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 		*/
 		if (internal_use_follow_length()) {
 			expected_end_sample = std::min (end_by_follow_length, end_by_beatcnt);
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("stretch and use follow, end up at %1\n", expected_end_sample));
 		} else {
 			expected_end_sample = end_by_beatcnt;
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("stretch and no-follow, end up at %1\n", expected_end_sample));
 		}
 	} else {
 		if (internal_use_follow_length()) {
 			expected_end_sample = std::min (end_by_follow_length, end_by_fixed_samples);
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("no-stretch and use follow, end up at %1\n", expected_end_sample));
 		} else {
 			expected_end_sample = end_by_fixed_samples;
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("no-stretch and no-follow, end up at %1\n", expected_end_sample));
 		}
 	}
 
