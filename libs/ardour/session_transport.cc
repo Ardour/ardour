@@ -994,6 +994,21 @@ Session::force_locate (samplepos_t target_sample, LocateTransportDisposition ltd
 	queue_event (ev);
 }
 
+bool
+Session::request_locate_to_mark (std::string const& name, LocateTransportDisposition ltd, TransportRequestSource origin)
+{
+	for (auto const& l : locations()->list()) {
+		if (!l->is_mark() || l->is_hidden() || l->is_session_range()) {
+			continue;
+		}
+		if (l->name () == name) {
+			request_locate (l->start_sample(), false, ltd, origin);
+			return true;
+		}
+	}
+	return false;
+}
+
 void
 Session::unset_preroll_record_trim ()
 {

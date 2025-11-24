@@ -495,6 +495,8 @@ public:
 	void request_stop (bool abort = false, bool clear_state = false, TransportRequestSource origin = TRS_UI);
 	void request_locate (samplepos_t sample, bool force = false, LocateTransportDisposition ltd = RollIfAppropriate, TransportRequestSource origin = TRS_UI);
 
+	bool request_locate_to_mark (std::string const&, LocateTransportDisposition ltd = RollIfAppropriate, TransportRequestSource origin = TRS_UI);
+
 	void request_play_loop (bool yn, bool leave_rolling = false);
 	bool get_play_loop () const { return play_loop; }
 
