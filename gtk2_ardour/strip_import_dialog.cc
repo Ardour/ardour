@@ -223,7 +223,7 @@ StripImportDialog::setup_file_page ()
 		_local_pset_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 		_local_pset_scroller.add (_local_pset_treeview);
 
-		_notebook.append_page (_local_pset_scroller, _("Local Presets"));
+		_notebook.append_page (_local_pset_scroller, _("Local Strip Templates"));
 
 		_notebook_type[page]      = RouteState;
 		_notebook_content[page++] = &_local_pset_treeview;
@@ -247,7 +247,7 @@ StripImportDialog::setup_file_page ()
 		_global_pset_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 		_global_pset_scroller.add (_global_pset_treeview);
 
-		_notebook.append_page (_global_pset_scroller, _("Global Presets"));
+		_notebook.append_page (_global_pset_scroller, _("Global Strip Templates"));
 
 		_notebook_type[page]      = RouteState;
 		_notebook_content[page++] = &_global_pset_treeview;

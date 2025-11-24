@@ -47,18 +47,20 @@ StripExportDialog::StripExportDialog (PublicEditor& editor, Session* s)
 	}
 	_what_to_export.set_active (0);
 
-	_where_to_export.append_text_item (_("Local (Session Folder)"));
-	_where_to_export.append_text_item (_("Global (Config Folder)"));
+	_where_to_export.append_text_item (_("Local strip template (saved in session folder)"));
+	_where_to_export.append_text_item (_("Global strip template (available for all sessions)"));
 	_where_to_export.set_active (0);
 
 	_where_to_export.StateChanged.connect (sigc::mem_fun (*this, &StripExportDialog::path_changed));
 	_name_entry.signal_changed ().connect (sigc::mem_fun (*this, &StripExportDialog::path_changed));
 
-	_table.set_spacings (3);
+	_table.set_col_spacings (10);
+	_table.set_row_spacings (8);
+
 	/* clang-format: off */
-	_table.attach (*manage (new Label (_("What to export:"))), 0, 1, 0, 1, Gtk::FILL, Gtk::SHRINK);
-	_table.attach (*manage (new Label (_("Export as:"))),      0, 1, 1, 2, Gtk::FILL, Gtk::SHRINK);
-	_table.attach (*manage (new Label (_("Name:"))),           0, 1, 2, 3, Gtk::FILL, Gtk::SHRINK);
+	_table.attach (*manage (new Label (_("What to export:"), Gtk::ALIGN_END)), 0, 1, 0, 1, Gtk::FILL, Gtk::SHRINK);
+	_table.attach (*manage (new Label (_("Export as:"), Gtk::ALIGN_END)),      0, 1, 1, 2, Gtk::FILL, Gtk::SHRINK);
+	_table.attach (*manage (new Label (_("Name:"), Gtk::ALIGN_END)),           0, 1, 2, 3, Gtk::FILL, Gtk::SHRINK);
 
 	_table.attach (_what_to_export,  1, 2, 0, 1, Gtk::FILL, Gtk::SHRINK);
 	_table.attach (_where_to_export, 1, 2, 1, 2, Gtk::FILL, Gtk::SHRINK);
