@@ -1872,7 +1872,7 @@ Editor::edit_location (Location& loc, bool with_scene, bool with_command)
 	} else if (loc.is_range()) {
 		dialog.set_title (string_compose (_("%1 Range"), verb));
 	} else {
-		dialog.set_title (string_compose (_("%1 Mark"), verb));
+		dialog.set_title (string_compose (_("%1 Marker"), verb));
 	}
 
 	dialog.set_name ("MarkRenameWindow");
