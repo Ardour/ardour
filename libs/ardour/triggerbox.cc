@@ -1667,9 +1667,9 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 	samplecnt_t usable_length;
 
 	if (internal_use_follow_length() && (end_by_follow_length < end_by_data_length)) {
-		usable_length = end_by_follow_length - transition_samples;
+		usable_length = std::min (end_by_follow_length - transition_samples, end_by_fixed_samples - transition_samples);
 	} else {
-		usable_length = std::min ((end_by_beatcnt - transition_samples), (data.length - _start_offset));
+		usable_length = end_by_fixed_samples - transition_samples;
 	}
 
 	/* called from compute_end() when we know the time (audio &
