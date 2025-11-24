@@ -86,8 +86,6 @@ using namespace ArdourSurface;
 
 #include "pbd/abstract_ui.inc.cc" // instantiate template
 
-OSC* OSC::_instance = 0;
-
 #ifdef DEBUG
 static void error_callback(int num, const char *m, const char *path)
 {
@@ -129,8 +127,6 @@ OSC::OSC (Session& s, uint32_t port)
 	, _zeroconf (0)
 	, gui (0)
 {
-	_instance = this;
-
 	session->Exported.connect (*this, MISSING_INVALIDATOR, std::bind (&OSC::session_exported, this, _1, _2), this);
 }
 
@@ -138,7 +134,6 @@ OSC::~OSC()
 {
 	tick = false;
 	stop ();
-	_instance = 0;
 }
 
 void

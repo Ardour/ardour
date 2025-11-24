@@ -83,18 +83,18 @@ OSCCueObserver::refresh_strip (std::shared_ptr<ARDOUR::Stripable> new_strip, Sor
 
 	send_end (new_sends.size ());
 	_strip = new_strip;
-	_strip->DropReferences.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::clear_observer, this), OSC::instance());
+	_strip->DropReferences.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::clear_observer, this), &_osc);
 	sends = new_sends;
 
-	_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::name_changed, this,_1, 0), OSC::instance());
+	_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::name_changed, this,_1, 0), &_osc);
 	name_changed (ARDOUR::Properties::name, 0);
 
-	_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_change_message, this, X_("/cue/mute"), 0, std::weak_ptr<Controllable>(_strip->mute_control())), OSC::instance());
+	_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_change_message, this, X_("/cue/mute"), 0, std::weak_ptr<Controllable>(_strip->mute_control())), &_osc);
 	send_change_message (X_("/cue/mute"), 0, _strip->mute_control());
 
 	gain_timeout[0] = 0;
 	_last_gain[0] = -1; // unused
-	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_gain_message, this, 0, std::weak_ptr<Controllable>(_strip->gain_control()), false), OSC::instance());
+	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_gain_message, this, 0, std::weak_ptr<Controllable>(_strip->gain_control()), false), &_osc);
 	send_gain_message (0, _strip->gain_control(), true);
 
 	send_init ();
@@ -148,13 +148,13 @@ OSCCueObserver::send_init()
 		std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (sends[i]);
 		std::shared_ptr<Send> send = r->internal_send_for (std::dynamic_pointer_cast<Route> (_strip));
 		if (r) {
-			r->processors_changed.connect  (send_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_restart, this), OSC::instance());
+			r->processors_changed.connect  (send_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_restart, this), &_osc);
 		}
 
 		if (send) {
 			// send name
 			if (r) {
-				sends[i]->PropertyChanged.connect (send_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::name_changed, this,_1, i + 1), OSC::instance());
+				sends[i]->PropertyChanged.connect (send_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::name_changed, this,_1, i + 1), &_osc);
 				name_changed (ARDOUR::Properties::name, i + 1);
 			}
 
@@ -162,13 +162,13 @@ OSCCueObserver::send_init()
 			if (send->gain_control()) {
 				gain_timeout[i + 1] = 0;
 				_last_gain[i + 1] = -1.0;
-				send->gain_control()->Changed.connect (send_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_gain_message, this, i + 1, std::weak_ptr<Controllable>(send->gain_control()), false), OSC::instance());
+				send->gain_control()->Changed.connect (send_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_gain_message, this, i + 1, std::weak_ptr<Controllable>(send->gain_control()), false), &_osc);
 				send_gain_message (i + 1, send->gain_control(), true);
 			}
 
 			std::shared_ptr<Processor> proc = std::dynamic_pointer_cast<Processor> (send);
 			std::weak_ptr<Processor> wproc (proc);
-			proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_enabled_message, this, X_("/cue/send/enable"), i + 1, wproc), OSC::instance());
+			proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, std::bind (&OSCCueObserver::send_enabled_message, this, X_("/cue/send/enable"), i + 1, wproc), &_osc);
 			send_enabled_message (X_("/cue/send/enable"), i + 1, wproc);
 		}
 	}

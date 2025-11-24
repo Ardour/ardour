@@ -80,8 +80,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	OSC (ARDOUR::Session&, uint32_t port);
 	virtual ~OSC();
 
-	static OSC* instance() { return _instance; }
-
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
@@ -766,8 +764,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PBD::ScopedConnectionList session_connections;
 
 	void debugmsg (const char *prefix, const char *path, const char* types, lo_arg **argv, int argc);
-
-	static OSC* _instance;
 
 	mutable void *gui;
 	void build_gui ();
