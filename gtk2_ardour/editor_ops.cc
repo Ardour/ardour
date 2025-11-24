@@ -1766,53 +1766,6 @@ Editor::scroll_up_one_track (bool skip_child_views)
 	return false;
 }
 
-void
-Editor::scroll_left_step ()
-{
-	samplepos_t xdelta = (current_page_samples() / 8);
-
-	if (_leftmost_sample > xdelta) {
-		reset_x_origin (_leftmost_sample - xdelta);
-	} else {
-		reset_x_origin (0);
-	}
-}
-
-
-void
-Editor::scroll_right_step ()
-{
-	samplepos_t xdelta = (current_page_samples() / 8);
-
-	if (max_samplepos - xdelta > _leftmost_sample) {
-		reset_x_origin (_leftmost_sample + xdelta);
-	} else {
-		reset_x_origin (max_samplepos - current_page_samples());
-	}
-}
-
-void
-Editor::scroll_left_half_page ()
-{
-	samplepos_t xdelta = (current_page_samples() / 2);
-	if (_leftmost_sample > xdelta) {
-		reset_x_origin (_leftmost_sample - xdelta);
-	} else {
-		reset_x_origin (0);
-	}
-}
-
-void
-Editor::scroll_right_half_page ()
-{
-	samplepos_t xdelta = (current_page_samples() / 2);
-	if (max_samplepos - xdelta > _leftmost_sample) {
-		reset_x_origin (_leftmost_sample + xdelta);
-	} else {
-		reset_x_origin (max_samplepos - current_page_samples());
-	}
-}
-
 /* ZOOM */
 
 void

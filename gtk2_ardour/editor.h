@@ -344,12 +344,6 @@ public:
 	bool scroll_up_one_track (bool skip_child_views = false);
 	bool scroll_down_one_track (bool skip_child_views = false);
 
-	void scroll_left_step ();
-	void scroll_right_step ();
-
-	void scroll_left_half_page ();
-	void scroll_right_half_page ();
-
 	void select_topmost_track ();
 
 	void cleanup_regions ();

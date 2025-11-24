@@ -196,18 +196,28 @@ PianorollMidiView::scroll (GdkEventScroll* ev)
 		return false;
 	}
 
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-
-		switch (ev->direction) {
-		case GDK_SCROLL_UP:
+	switch (ev->direction) {
+	case GDK_SCROLL_UP:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
+			_editing_context.scroll_left_step ();
+			return true;
+		}
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			_editing_context.reset_zoom (_editing_context.get_current_zoom() / 2);
 			return true;
-		case GDK_SCROLL_DOWN:
+		}
+	case GDK_SCROLL_DOWN:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
+			_editing_context.scroll_right_step ();
+			return true;
+		}
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			_editing_context.reset_zoom (_editing_context.get_current_zoom() * 2);
 			return true;
-		default:
-			break;
 		}
+		break;
+	default:
+		break;
 	}
 
 	return MidiView::scroll (ev);

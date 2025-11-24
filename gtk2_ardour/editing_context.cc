@@ -3918,3 +3918,50 @@ EditingContext::set_minsec_ruler_scale (samplepos_t lower, samplepos_t upper)
 		minsec_ruler_scale = minsec_show_many_hours;
 	}
 }
+
+void
+EditingContext::scroll_left_step ()
+{
+	samplepos_t xdelta = (current_page_samples() / 8);
+
+	if (_leftmost_sample > xdelta) {
+		reset_x_origin (_leftmost_sample - xdelta);
+	} else {
+		reset_x_origin (0);
+	}
+}
+
+
+void
+EditingContext::scroll_right_step ()
+{
+	samplepos_t xdelta = (current_page_samples() / 8);
+
+	if (max_samplepos - xdelta > _leftmost_sample) {
+		reset_x_origin (_leftmost_sample + xdelta);
+	} else {
+		reset_x_origin (max_samplepos - current_page_samples());
+	}
+}
+
+void
+EditingContext::scroll_left_half_page ()
+{
+	samplepos_t xdelta = (current_page_samples() / 2);
+	if (_leftmost_sample > xdelta) {
+		reset_x_origin (_leftmost_sample - xdelta);
+	} else {
+		reset_x_origin (0);
+	}
+}
+
+void
+EditingContext::scroll_right_half_page ()
+{
+	samplepos_t xdelta = (current_page_samples() / 2);
+	if (max_samplepos - xdelta > _leftmost_sample) {
+		reset_x_origin (_leftmost_sample + xdelta);
+	} else {
+		reset_x_origin (max_samplepos - current_page_samples());
+	}
+}
