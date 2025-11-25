@@ -221,10 +221,10 @@ protected:
 
 template<typename Time>
 /*LIBEVORAL_API*/ std::ostream& operator<<(std::ostream& o, const Evoral::Event<Time>& ev) {
-	o << "Event #" << ev.id() << " type = " << ev.event_type() << " @ " << ev.time();
+	o << "Event #" << ev.id() << " @" << &ev << " type = " << ev.event_type() << " @ " << ev.time();
 	o << std::hex;
 	for (uint32_t n = 0; n < ev.size(); ++n) {
-		o << ' ' << (int) ev.buffer()[n];
+		o << " 0x " << (int) ev.buffer()[n];
 	}
 	o << std::dec;
 	return o;
