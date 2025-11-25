@@ -49,7 +49,6 @@
 
 #include <stdint.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <time.h>
 
 #include <glib.h>

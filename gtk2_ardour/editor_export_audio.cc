@@ -26,7 +26,6 @@
 /* Note: public Editor methods are documented in public_editor.h */
 
 #include <inttypes.h>
-#include <unistd.h>
 #include <climits>
 
 #include <ytkmm/messagedialog.h>

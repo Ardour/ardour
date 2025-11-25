@@ -32,7 +32,6 @@
 /* Note: public Editor methods are documented in public_editor.h */
 
 #include <stdint.h>
-#include <unistd.h>
 #include <cstdlib>
 #include <cmath>
 #include <string>

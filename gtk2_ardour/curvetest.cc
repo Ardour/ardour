@@ -20,7 +20,6 @@
 #include <iostream>
 #include <fstream>
 #include <cfloat>
-#include <unistd.h>
 
 #include "ardour/automation_list.h"
 #include "evoral/Curve.h"
