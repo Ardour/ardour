@@ -156,7 +156,6 @@ public:
 
 	/* import dialogs -> ardour-ui ?! */
 	virtual void external_audio_dialog () = 0;
-	virtual void session_import_dialog () = 0;
 
 	virtual void new_region_from_selection () = 0;
 	virtual void separate_region_from_selection () = 0;

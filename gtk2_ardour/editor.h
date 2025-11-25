@@ -1306,7 +1306,6 @@ private:
 
 	/* import & embed */
 	void external_audio_dialog ();
-	void session_import_dialog ();
 
 	/* PT import specific */
 	void external_pt_dialog ();

@@ -663,10 +663,6 @@ Editor::register_actions ()
 	act = reg_sens (editor_actions, X_("addExternalAudioToRegionList"), _("Import to Source List..."), sigc::bind (sigc::mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, X_("importFromSession"), _("Import from Session"), sigc::mem_fun(*this, &Editor::session_import_dialog));
-	ActionManager::write_sensitive_actions.push_back (act);
-
-
 	act = ActionManager::register_action (editor_actions, X_("bring-into-session"), _("Bring all media into session folder"), sigc::mem_fun(*this, &Editor::bring_all_sources_into_session));
 	ActionManager::write_sensitive_actions.push_back (act);
 
