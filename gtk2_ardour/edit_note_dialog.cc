@@ -26,6 +26,7 @@
 
 #include "ardour/midi_region.h"
 
+#include "editing_context.h"
 #include "edit_note_dialog.h"
 #include "midi_view.h"
 #include "note_base.h"
@@ -96,7 +97,7 @@ EditNoteDialog::EditNoteDialog (Gtk::Window& parent, MidiView* rv, set<NoteBase*
 	table->attach (_time_all, 2, 3, r, r + 1);
 	++r;
 
-	// XXXX _time_clock.set_session (_region_view->get_time_axis_view().session ());
+	_time_clock.set_session (_region_view->editing_context().session());
 	_time_clock.set_mode (AudioClock::BBT);
 
 	/* Calculate absolute position of the event on time timeline */
@@ -110,7 +111,7 @@ EditNoteDialog::EditNoteDialog (Gtk::Window& parent, MidiView* rv, set<NoteBase*
 	table->attach (_length_all, 2, 3, r, r + 1);
 	++r;
 
-	// XXXX _length_clock.set_session (_region_view->get_time_axis_view().session ());
+	_length_clock.set_session (_region_view->editing_context().session ());
 	_length_clock.set_mode (AudioClock::BBT);
 	_length_clock.set_duration (timecnt_t ((*_events.begin())->note()->length()), true);
 
