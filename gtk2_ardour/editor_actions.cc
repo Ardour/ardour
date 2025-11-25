@@ -652,7 +652,7 @@ Editor::register_actions ()
 
 	ActionManager::register_action (rl_actions, X_("removeUnusedRegions"), _("Remove Unused"), sigc::mem_fun (*_regions, &EditorRegions::remove_unused_regions));
 
-	act = reg_sens (editor_actions, X_("addExistingPTFiles"), _("Import PT session"), sigc::mem_fun (*this, &Editor::external_pt_dialog));
+	act = reg_sens (editor_actions, X_("addExistingPTFiles"), _("Import PT session..."), sigc::mem_fun (*this, &Editor::external_pt_dialog));
 	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, X_("LoudnessAssistant"), _("Loudness Assistant..."), sigc::bind (sigc::mem_fun (*this, &Editor::loudness_assistant), false));

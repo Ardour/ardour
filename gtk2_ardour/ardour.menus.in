@@ -5,29 +5,26 @@
       <menuitem action='Open'/>
       <menuitem action='Recent'/>
       <menuitem action='Close'/>
+
       <separator/>
+
       <menuitem action='Save'/>
-      <menuitem action='SaveAs'/>
       <menuitem action='Rename'/>
       <menuitem action='SnapshotStay'/>
       <menuitem action='SnapshotSwitch'/>
-      <menuitem action='SaveTemplate'/>
-      <menuitem action='Archive'/>
+      <menuitem action='SaveAs'/>
+
       <separator/>
+
       <menuitem action='AddTrackBus'/>
-      <separator/>
       <menuitem action='addExistingAudioFiles'/>
-      <menuitem action='ImportStrips'/>
-      <menuitem action='ExportStrips'/>
-#ifdef PTFORMAT
-      <menuitem action='addExistingPTFiles'/>
-#endif
-      <!--menuitem action='importFromSession'/-->
+
+      <separator/>
 
       <menuitem action='OpenVideo'/>
       <menuitem action='CloseVideo'/>
 
-      <menuitem action='LoudnessAssistant'/>
+      <separator/>
 
       <menu name='Export' action='Export'>
         <menuitem action='QuickExport'/>
@@ -38,11 +35,23 @@
         <menuitem action='StemExport'/>
         <menuitem action='ExportVideo'/>
       </menu>
+
       <separator/>
+
+#ifdef PTFORMAT
+      <menuitem action='addExistingPTFiles'/>
+#endif
+      <menuitem action='ImportStrips'/>
+      <menuitem action='ExportStrips'/>
+      <menuitem action='SaveTemplate'/>
+
+      <separator/>
+
       <menuitem action='toggle-session-options-editor'/>
 #ifdef VAPOR
       <menuitem action='ToggleSurroundMaster'/>
 #endif
+      <menuitem action='LoudnessAssistant'/>
 
       <menu name='MonitorMenu' action='MonitorMenu'>
         <menuitem action='UseMonitorSection'/>
@@ -55,6 +64,7 @@
         <menuitem action='EditMetadata'/>
         <menuitem action='ImportMetadata'/>
       </menu>
+
       <menu name='Cleanup' action='Cleanup'>
         <menuitem action='bring-into-session'/>
         <menuitem action='CleanupPeakFiles'/>
@@ -62,6 +72,9 @@
         <menuitem action='CleanupUnusedRegions'/>
         <menuitem action='FlushWastebasket'/>
       </menu>
+
+      <menuitem action='Archive'/>
+
 #ifdef __APPLE__
       <menuitem action='toggle-about'/>
 #endif
