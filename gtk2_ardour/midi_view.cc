@@ -1289,6 +1289,9 @@ MidiView::model_changed()
 		}
 	}
 
+	/* don't sound any notes that are added due to undo/redo */
+	PBD::Unwinder<bool> uw (_no_sound_notes, true);
+
 	for (auto & note : missing_notes) {
 		NoteBase* cne;
 		bool visible;
