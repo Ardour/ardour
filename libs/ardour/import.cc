@@ -29,7 +29,6 @@
 #include <string>
 #include <climits>
 #include <cerrno>
-#include <unistd.h>
 #include <sys/stat.h>
 #include <time.h>
 #include <stdint.h>

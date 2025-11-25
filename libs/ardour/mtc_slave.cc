@@ -22,7 +22,6 @@
 #include <iostream>
 #include <errno.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"

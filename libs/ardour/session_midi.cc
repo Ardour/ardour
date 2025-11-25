@@ -29,8 +29,6 @@
 #include <memory>
 #include <string>
 
-#include <unistd.h>
-
 #include <glibmm/main.h>
 
 #include "midi++/mmc.h"

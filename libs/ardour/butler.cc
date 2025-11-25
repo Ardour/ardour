@@ -22,7 +22,6 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <unistd.h>
 
 #ifdef HAVE_IOPRIO
 #include <sys/syscall.h>

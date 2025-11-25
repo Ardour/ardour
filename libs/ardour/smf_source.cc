@@ -25,13 +25,8 @@
 
 #include <vector>
 
-#include <sys/time.h>
 #include <sys/stat.h>
 #include <errno.h>
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"

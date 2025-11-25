@@ -30,7 +30,6 @@
 
 #include <cmath>
 #include <cerrno>
-#include <unistd.h>
 
 #include "pbd/atomic.h"
 #include "pbd/error.h"

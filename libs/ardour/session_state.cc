@@ -40,10 +40,8 @@
 #include <cstdio> /* snprintf(3) ... grrr */
 #include <cmath>
 
-#include <unistd.h>
 #include <climits>
 #include <signal.h>
-#include <sys/time.h>
 /* for open(2) */
 #include <sys/types.h>
 #include <sys/stat.h>

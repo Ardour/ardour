@@ -37,7 +37,6 @@
 #include <sstream>
 
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <sys/types.h>
 #ifndef PLATFORM_WINDOWS
 #include <sys/resource.h>
@@ -45,7 +44,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <time.h>
-#include <unistd.h>
 
 #include <glib.h>
 #include "pbd/gstdio_compat.h"

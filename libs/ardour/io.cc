@@ -28,7 +28,6 @@
 #include <cmath>
 #include <vector>
 
-#include <unistd.h>
 #include <locale.h>
 #include <errno.h>
 

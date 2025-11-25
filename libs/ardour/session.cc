@@ -36,7 +36,6 @@
 #include <cstdio> /* sprintf(3) ... grrr */
 #include <cmath>
 #include <cerrno>
-#include <unistd.h>
 #include <limits.h>
 
 #include <glibmm/datetime.h>

@@ -24,7 +24,6 @@
 #include <cmath>
 #include <cerrno>
 #include <algorithm>
-#include <unistd.h>
 
 #include "pbd/i18n.h"
 #include "pbd/error.h"

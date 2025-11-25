@@ -26,10 +26,8 @@
 
 #include <vector>
 
-#include <sys/time.h>
 #include <sys/stat.h>
 #include <stdio.h> // for rename(), sigh
-#include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 
