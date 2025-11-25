@@ -229,15 +229,15 @@ EditNoteDialog::done (int r)
 
 	}
 
+	list<Evoral::event_id_t> notes;
+	for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+		notes.push_back ((*i)->note()->id());
+	}
+
 	if (had_change) {
 		_region_view->apply_note_diff ();
 	} else {
 		_region_view->abort_note_diff ();
-	}
-
-	list<Evoral::event_id_t> notes;
-	for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
-		notes.push_back ((*i)->note()->id());
 	}
 
 	_region_view->select_notes (notes, true);
