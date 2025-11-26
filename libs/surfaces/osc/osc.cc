@@ -3181,20 +3181,6 @@ OSC::mixer_scene_state (lo_address addr, bool zero_it)
 	return 0;
 }
 
-// two structs to help with going to markers
-struct LocationMarker {
-	LocationMarker (const std::string& l, samplepos_t w)
-		: label (l), when (w) {}
-	std::string label;
-	samplepos_t  when;
-};
-
-struct LocationMarkerSort {
-	bool operator() (const LocationMarker& a, const LocationMarker& b) {
-		return (a.when < b.when);
-	}
-};
-
 int
 OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 {
@@ -3202,6 +3188,7 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 		PBD::warning << "Wrong number of parameters, one only." << endmsg;
 		return -1;
 	}
+
 	const Locations::LocationList& ll (session->locations ()->list ());
 	uint32_t marker = 0;
 
@@ -3237,15 +3224,15 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 			return -1;
 			break;
 	}
-	std::vector<LocationMarker> lm;
+	std::vector<ArdourSurface::LocationMarker> lm;
 	// get Locations that are marks
 	for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
 		if ((*l)->is_mark ()) {
-			lm.push_back (LocationMarker((*l)->name(), (*l)->start_sample ()));
+			lm.push_back (ArdourSurface::LocationMarker((*l)->name(), (*l)->start_sample ()));
 		}
 	}
 	// sort them by position
-	LocationMarkerSort location_marker_sort;
+	ArdourSurface::LocationMarkerSort location_marker_sort;
 	std::sort (lm.begin(), lm.end(), location_marker_sort);
 	// go there
 	if (marker < lm.size()) {

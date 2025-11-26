@@ -51,7 +51,6 @@
 
 class OSCControllable;
 class OSCRouteObserver;
-class OSCGlobalObserver;
 class OSCSelectObserver;
 class OSCCueObserver;
 
@@ -67,6 +66,8 @@ class ZeroConf;
 */
 
 namespace ArdourSurface {
+
+class OSCGlobalObserver;
 
 struct OSCUIRequest : public BaseUI::BaseRequestObject {
   public:
