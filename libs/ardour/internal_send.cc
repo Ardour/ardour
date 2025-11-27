@@ -49,8 +49,6 @@ using namespace std;
 
 PBD::Signal<void(pframes_t)> InternalSend::CycleStart;
 
-#define GAIN_COEFF_DELTA (1e-5)
-
 InternalSend::InternalSend (Session&                      s,
                             std::shared_ptr<Pannable>   p,
                             std::shared_ptr<MuteMaster> mm,

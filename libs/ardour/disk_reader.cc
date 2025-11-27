@@ -1626,7 +1626,6 @@ DiskReader::dec_no_disk_output ()
 /* min gain difference for de-click and loop-fadess
  * (-60dB difference to target)
  */
-#define GAIN_COEFF_DELTA (1e-5)
 
 DiskReader::DeclickAmp::DeclickAmp (samplecnt_t sample_rate)
 {
