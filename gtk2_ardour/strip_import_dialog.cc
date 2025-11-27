@@ -478,7 +478,7 @@ StripImportDialog::refill_import_table ()
 		next_new = PBD::ID (next_id);
 	}
 
-	/* accumulate both dropdowns, so colums are equally spaced */
+	/* accumulate both dropdowns, so columns are equally spaced */
 	std::vector<std::string> sizing_texts;
 
 	_add_rid_dropdown = manage (new ArdourWidgets::ArdourDropdown ());

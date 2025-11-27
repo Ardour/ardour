@@ -34,7 +34,7 @@ function factory () return function ()
 	local rv = LuaDialog.Dialog ("Select Automation State", dialog_options):run()
 	if not rv then return end
 
-	-- calclate max distance in 'ticks'
+	-- calculate max distance in 'ticks'
 	local ticks_per_beat = Temporal.Beats (1, 0):to_ticks ();
 	local max_distance   = ticks_per_beat / rv['divisor']
 
