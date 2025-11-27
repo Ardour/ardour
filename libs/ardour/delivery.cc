@@ -322,7 +322,11 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 {
 	assert (_output);
 
-	if (!check_active()) {
+	/* Do not use check_active() here, because we need to continue running
+	 * until the gain has gone to zero.
+	 */
+
+	if (!_active && !_pending_active) {
 		_output->silence (nframes);
 		return;
 	}
@@ -347,6 +351,11 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 	// which cannot do this.
 
 	tgain = target_gain ();
+	const bool converged = fabsf (_current_gain - tgain) < GAIN_COEFF_DELTA;
+
+	if (converged) {
+		_active = _pending_active;
+	}
 
 	if (tgain != _current_gain) {
 		/* target gain has changed */
