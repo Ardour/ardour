@@ -452,6 +452,11 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("give surface %1 stripables\n", stripables.size()));
 
 				(*si)->map_stripables (stripables);
+
+				// Force RGB update on next redisplay
+				if (_device_info.is_v1m() || _device_info.is_platformMp() || _device_info.is_p1nano()) {
+					(*si)->force_icon_rgb_update();
+				}
 			}
 		}
 

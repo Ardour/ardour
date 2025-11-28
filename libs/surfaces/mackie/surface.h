@@ -205,6 +205,12 @@ public:
 
 	bool get_qcon_flag() { return is_qcon; }
 
+	bool get_v1_flag() { return is_v1m; }
+	bool get_platformMp_flag() { return is_platformMp; }
+	bool get_p1nano_flag() { return is_p1nano; }
+
+	void force_icon_rgb_update() { _pending_icon_rgb.fill(0xFF); }
+
 	void toggle_master_monitor ();
 	bool master_stripable_is_master_monitor ();
 
@@ -226,6 +232,10 @@ public:
 
 	std::string pending_display[2];
 	std::string current_display[2];
+
+	// iCON P1-M / V1-M RGB — same pattern as master display
+	std::array<uint8_t, 24> _pending_icon_rgb{};
+	std::array<uint8_t, 24> _current_icon_rgb{};
 
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 	MidiByteArray host_connection_query (MidiByteArray& bytes);
@@ -255,6 +265,14 @@ public:
 	MidiByteArray display_line (std::string const& msg, int line_num);
 	MidiByteArray display_colors_on_xtouch (const XTouchColors color_values[]) const;
 	uint8_t convert_color_to_xtouch_value (uint32_t color) const;
+
+	// iCON Flags
+	bool is_v1m;
+	bool is_platformMp;
+	bool is_p1nano;
+
+	/** Send RGB colors to P1-M and V1-M scribble strips (iCON-specific SysEx) */
+	MidiByteArray display_colors_on_p1m_v1m (const std::array<uint8_t, 24>& rgb_values) const;
 
   public:
 	/* IP MIDI devices need to keep a handle on this and destroy it */
