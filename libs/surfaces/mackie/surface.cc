@@ -118,6 +118,9 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	, _has_master_meter (false)
 	, connection_state (0)
 	, is_qcon (false)
+	, is_v1m (false)
+	, is_platformMp (false)
+	, is_p1nano (false)
 	, input_source (0)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::Surface init\n");
@@ -131,6 +134,19 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	//Store Qcon flag
 	is_qcon = mcp.device_info().is_qcon();
 
+	//Store iCON P1-M and V1-M flag
+	is_v1m = _mcp.device_info().is_v1m(); // || device_name.find("V1-M") != std::string::npos;
+	is_platformMp = _mcp.device_info().is_platformMp(); // || device_name.find("Platform M+") != std::string::npos;
+	is_p1nano = _mcp.device_info().is_p1nano();
+
+	/* extenders are not flagged by device_info() — detect by port name */
+	is_v1m |= (device_name.find("V1-M") != std::string::npos);
+	is_platformMp |= device_name.find("Platform M+") != std::string::npos;
+	is_p1nano |= device_name.find("P1-NANO") != std::string::npos;
+
+	_pending_icon_rgb.fill(0);
+	_current_icon_rgb.fill(0);
+
 	/* only the first Surface object has global controls */
 	/* lets use master_position instead */
 	uint32_t mp = _mcp.device_info().master_position();
@@ -140,6 +156,11 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 		if ( is_qcon ) {
 			_has_master_display = (mcp.device_info().has_master_fader() && mcp.device_info().has_qcon_second_lcd());
 		}
+
+		if ( is_v1m ) {
+			_has_master_display = (mcp.device_info().has_master_fader() && mcp.device_info().has_qcon_second_lcd());
+		}
+
 		_has_master_meter = mcp.device_info().has_qcon_master_meters();
 
 		if (_mcp.device_info().has_global_controls()) {
@@ -1158,6 +1179,34 @@ Surface::redisplay (PBD::microseconds_t now, bool force)
 		}
 	}
 
+	/* iCON P1-M/P1-NANO/V1-M color update: full RGB SysEx for all 8 strips */
+	if (is_v1m || is_platformMp || is_p1nano) {
+		std::array<uint8_t, 24> pending_rgb{};
+
+		for (size_t i = 0; i < 8 && i < strips.size(); ++i) {
+			if (auto sp = strips[i]->stripable()) {
+				uint32_t c = sp->presentation_info().color();
+				uint8_t r = ((c >> 24) & 0xFF) >> 1;
+				uint8_t g = ((c >> 16) & 0xFF) >> 1;
+				uint8_t b = ((c >>  8) & 0xFF) >> 1;
+
+				r = (r < 20) ? 0 : std::min(127, r + 20);
+				g = (g < 20) ? 0 : std::min(127, g + 20);
+				b = (b < 20) ? 0 : std::min(127, b + 20);
+
+				const size_t o = i * 3;
+				pending_rgb[o+0] = r;
+				pending_rgb[o+1] = g;
+				pending_rgb[o+2] = b;
+			}
+		}
+
+		if (force || pending_rgb != _current_icon_rgb) {
+			_current_icon_rgb = pending_rgb;
+			write(display_colors_on_p1m_v1m(pending_rgb));
+		}
+	}
+
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
 		(*s)->redisplay (now, force);
 	}
@@ -1639,6 +1688,26 @@ Surface::display_message_for (string const& msg, uint64_t msecs)
 		(*s)->block_screen_display_for (msecs);
 	}
 }
+
+/** display color_values on the 8 scribble strips of the iCON P1-M, P1-NANO and V1-M **/
+MidiByteArray
+Surface::display_colors_on_p1m_v1m (const std::array<uint8_t, 24>& rgb_values) const
+{
+	/* Icon P1-M, P1-NANO and V1-M color SysEx: F0 00 02 4E 16 14 [8×(R G B)] F7
+	 * rgb_values: 24 bytes (8 strips × 3 RGB, each 0-127 / 0x00-0x7F)
+	*/
+	MidiByteArray midi_msg;
+	midi_msg << MIDI::sysex
+		<< 0x00 << 0x02 << 0x4E    // iCON manufacturer
+		<< 0x16 << 0x14;           // color command
+
+	for (uint8_t b : rgb_values) {
+		midi_msg << b;
+ 	}
+
+	midi_msg << MIDI::eox;
+	return midi_msg;
+}
  
 /** display @p color_values on the 8 scribble strips of the X-Touch
  *
@@ -1656,7 +1725,7 @@ Surface::display_colors_on_xtouch (const XTouchColors color_values[]) const
 	for (uint8_t i = 0; i < displaycount; ++i) {
 		midi_msg << color_values[i];
 	}
-	
+
 	midi_msg << MIDI::eox;
 	
 	return midi_msg;
