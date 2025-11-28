@@ -429,6 +429,13 @@ Strip::notify_gain_changed (bool force_update)
 		do_parameter_display (ac->desc(), gain_coefficient); // GainAutomation
 		_last_gain_position_written = normalized_position;
 	}
+
+	/* Keep VCA gain display live-updating in normal view */
+	if (_stripable &&
+		(_stripable->presentation_info().flags() & ARDOUR::PresentationInfo::VCA) &&
+		_surface->mcp().subview()->subview_mode() == Subview::None) {
+		return_to_vpot_mode_display();
+	}
 }
 
 void
