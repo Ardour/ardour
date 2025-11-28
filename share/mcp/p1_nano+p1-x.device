@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MackieProtocolDevice>
-  <Name value="iCON Platform M+"/>
+  <Name value="iCON P1-NANO with P1-X on right"/>
   <Strips value="8"/>
-  <Extenders value="0"/>
-  <MasterPosition value="0"/>
+  <Extenders value="1"/>
+  <MasterPosition value="1"/>
   <MasterFader value="yes"/>
   <TimecodeDisplay value="yes"/>
   <TwoCharacterDisplay value="no"/>
@@ -14,7 +14,7 @@
   <LogicControlButtons value="yes"/>
   <usesIPMIDI value="no"/>
   <NoHandShake value="yes"/>
-  <IsPlatformMp value="yes"/>
+  <IsP1Nano value="yes"/>
   <HasQConSecondLCD value="yes"/>
   <HasQConMasterMeters value="yes"/>
 </MackieProtocolDevice>
