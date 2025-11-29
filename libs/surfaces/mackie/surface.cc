@@ -119,7 +119,7 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	, connection_state (0)
 	, is_qcon (false)
 	, is_v1m (false)
-	, is_platformMp (false)
+	, is_p1m (false)
 	, is_p1nano (false)
 	, input_source (0)
 {
@@ -136,12 +136,12 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 
 	//Store iCON P1-M and V1-M flag
 	is_v1m = _mcp.device_info().is_v1m(); // || device_name.find("V1-M") != std::string::npos;
-	is_platformMp = _mcp.device_info().is_platformMp(); // || device_name.find("Platform M+") != std::string::npos;
+	is_p1m = _mcp.device_info().is_p1m(); // || device_name.find("P1-M") != std::string::npos;
 	is_p1nano = _mcp.device_info().is_p1nano();
 
 	/* extenders are not flagged by device_info() — detect by port name */
 	is_v1m |= (device_name.find("V1-M") != std::string::npos);
-	is_platformMp |= device_name.find("Platform M+") != std::string::npos;
+	is_p1m |= device_name.find("P1-M") != std::string::npos;
 	is_p1nano |= device_name.find("P1-NANO") != std::string::npos;
 
 	_pending_icon_rgb.fill(0);
@@ -1180,7 +1180,7 @@ Surface::redisplay (PBD::microseconds_t now, bool force)
 	}
 
 	/* iCON P1-M/P1-NANO/V1-M color update: full RGB SysEx for all 8 strips */
-	if (is_v1m || is_platformMp || is_p1nano) {
+	if (is_v1m || is_p1m || is_p1nano) {
 		std::array<uint8_t, 24> pending_rgb{};
 
 		for (size_t i = 0; i < 8 && i < strips.size(); ++i) {
