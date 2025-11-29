@@ -315,6 +315,7 @@ public:
 
 	virtual bool reconfigure_io (ChanCount /*in*/, ChanCount /*aux_in*/, ChanCount /*out*/) { return true; }
 	virtual bool match_variable_io (ChanCount& /*in*/, ChanCount& /*aux_in*/, ChanCount& /*out*/) { return false; }
+	virtual void request_bus_layout (ChanCount const& /*in*/, ChanCount const& /*aux_in*/, ChanCount const& /*out*/);
 
 	virtual ChanCount output_streams () const;
 	virtual ChanCount input_streams () const;
@@ -531,6 +532,11 @@ public:
 
 	/* @return true if the plugin can change its inputs or outputs on demand. */
 	virtual bool reconfigurable_io () const { return false; }
+
+	/* @return true if the plugin has configurable busses but no AU style reconfigureable I/O (VST3)
+	 * implies request_bus_layout ()
+	 */
+	virtual bool variable_bus_layout () const { return false; }
 
 	/* max [re]configurable outputs (if finite, 0 otherwise) */
 	virtual uint32_t max_configurable_outputs () const

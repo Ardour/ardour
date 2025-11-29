@@ -46,6 +46,7 @@
 #include "ardour/port.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
+#include "ardour/vst3_plugin.h"
 
 #include "pbd/i18n.h"
 
@@ -2100,6 +2101,10 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		/* NB. When resolving impossible matches, "replicate 1 time" is valid.
 		 * e.g. add a MIDI filter (1 MIDI in, 1 MIDI out) after some audio plugin */
 		assert (!_plugins.front()->get_info()->reconfigurable_io ());
+		/* VST3 */
+		for (auto const& p : _plugins) {
+			p->reconfigure_io (natural_input_streams (), aux_in, natural_output_streams ());
+		}
 		break;
 
 	default:
@@ -2260,6 +2265,24 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 bool
 PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
+	if (plugin()->get_info ()->variable_bus_layout ()) {
+		ChanCount input_streams = natural_input_streams ();
+		ChanCount sc;
+		if (_sidechain) {
+			_sidechain->can_support_io_configuration (sc, sc);
+		}
+		for (auto const& p : _plugins) {
+			if (_custom_cfg) {
+				p->request_bus_layout (_custom_sinks, sc, _custom_sinks);
+			} else {
+				p->request_bus_layout (in, sc, in);
+			}
+		}
+		if (input_streams != natural_input_streams ()) {
+			mapping_changed ();
+		}
+	}
+
 	if (_sidechain) {
 		_sidechain->can_support_io_configuration (in, out); // never fails, sets "out"
 	}

@@ -74,7 +74,7 @@ static const char* fmt_type (Vst::BusType t) {
 }
 
 static int32
-count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir, Vst::BusType type, bool verbose = false)
+count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir, Vst::BusType type, bool verbose = false, bool can_fail = true)
 {
 	/* see also libs/ardour/vst3_plugin.cc VST3PI::count_channels */
 	int32 n_busses = c->getBusCount (media, dir);
@@ -100,11 +100,55 @@ count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir,
 			} else {
 				n_channels += bus.channelCount;
 			}
-		} else if (verbose && rv != kResultTrue) {
-			PBD::info << "VST3: \\ error getting busInfo for bus: " << i << " rv: " << rv << ", got type: " << fmt_type (bus.busType) << endmsg;
+		} else if (rv != kResultTrue) {
+			if (verbose) {
+				PBD::info << "VST3: \\ error getting busInfo for bus: " << i << " rv: " << rv << ", got type: " << fmt_type (bus.busType) << endmsg;
+			}
+			if (!can_fail) {
+				return -1;
+			}
 		}
 	}
 	return n_channels;
+}
+
+static bool
+count_all_count_channels (ARDOUR::VST3Info& nfo, Vst::IComponent* c, bool verbose, bool require_result)
+{
+	nfo.n_inputs       = count_channels (c, Vst::kAudio, Vst::kInput,  Vst::kMain, verbose, require_result);
+	nfo.n_aux_inputs   = count_channels (c, Vst::kAudio, Vst::kInput,  Vst::kAux, verbose);
+	nfo.n_outputs      = count_channels (c, Vst::kAudio, Vst::kOutput, Vst::kMain, verbose, require_result);
+	nfo.n_aux_outputs  = count_channels (c, Vst::kAudio, Vst::kOutput, Vst::kAux, verbose);
+	nfo.n_midi_inputs  = count_channels (c, Vst::kEvent, Vst::kInput,  Vst::kMain, verbose);
+	nfo.n_midi_outputs = count_channels (c, Vst::kEvent, Vst::kOutput, Vst::kMain, verbose);
+
+	return nfo.n_inputs < 0 || nfo.n_outputs < 0;
+}
+
+static void
+set_speaker_arrangement (Vst::IComponent* c, IPtr<Vst::IAudioProcessor> p)
+{
+	Vst::SpeakerArrangement null_arrangement = {};
+	typedef std::vector<Vst::SpeakerArrangement> VSTSpeakerArrangements;
+	VSTSpeakerArrangements sa_in;
+	VSTSpeakerArrangements sa_out;
+
+	/* assume stereo by default */
+	int n_bus_in  = c->getBusCount (Vst::kAudio, Vst::kInput);
+	int n_bus_out = c->getBusCount (Vst::kAudio, Vst::kOutput);
+
+	while (sa_in.size () < (VSTSpeakerArrangements::size_type) n_bus_in) {
+		Vst::SpeakerArrangement sa = Vst::SpeakerArr::kStereo;
+		sa_in.push_back (sa);
+	}
+	while (sa_out.size () < (VSTSpeakerArrangements::size_type) n_bus_out) {
+		Vst::SpeakerArrangement sa = Vst::SpeakerArr::kStereo;
+		sa_out.push_back (sa);
+	}
+
+	p->setBusArrangements (sa_in.size () > 0 ? &sa_in[0] : &null_arrangement, sa_in.size (),
+	                       sa_out.size () > 0 ? &sa_out[0] : &null_arrangement, sa_out.size ());
+
 }
 
 static bool
@@ -209,12 +253,12 @@ discover_vst3 (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::vector<ARDOUR::
 				continue;
 			}
 
-			nfo.n_inputs       = count_channels (component, Vst::kAudio, Vst::kInput,  Vst::kMain, verbose);
-			nfo.n_aux_inputs   = count_channels (component, Vst::kAudio, Vst::kInput,  Vst::kAux, verbose);
-			nfo.n_outputs      = count_channels (component, Vst::kAudio, Vst::kOutput, Vst::kMain, verbose);
-			nfo.n_aux_outputs  = count_channels (component, Vst::kAudio, Vst::kOutput, Vst::kAux, verbose);
-			nfo.n_midi_inputs  = count_channels (component, Vst::kEvent, Vst::kInput,  Vst::kMain, verbose);
-			nfo.n_midi_outputs = count_channels (component, Vst::kEvent, Vst::kOutput, Vst::kMain, verbose);
+			/* first try to get default layout ..*/
+			if (!count_all_count_channels (nfo, component, verbose, false)) {
+				/* some plugins e.g. Altiverb require a valid Bus/SpeakerArrangement */
+				set_speaker_arrangement (component, processor);
+				count_all_count_channels (nfo, component, verbose, true);
+			}
 
 			processor->setProcessing (false);
 			component->setActive (false);
