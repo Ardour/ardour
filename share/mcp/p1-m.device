@@ -2,15 +2,19 @@
 <MackieProtocolDevice>
   <Name value="iCON Platform M+"/>
   <Strips value="8"/>
-  <MasterFader value="yes"/>
-  <TimecodeDisplay value="no"/>
-  <TwoCharacterDisplay value="no"/>
   <Extenders value="0"/>
   <MasterPosition value="0"/>
+  <MasterFader value="yes"/>
+  <TimecodeDisplay value="yes"/>
+  <TwoCharacterDisplay value="no"/>
+  <HasSeparateMeters value="yes"/>
   <GlobalControls value="yes"/>
   <JogWheel value="yes"/>
   <TouchSenseFaders value="yes"/>
+  <LogicControlButtons value="yes"/>
+  <usesIPMIDI value="no"/>
   <NoHandShake value="yes"/>
-  <HasMeters value="no"/>
   <IsPlatformMp value="yes"/>
+  <HasQConSecondLCD value="yes"/>
+  <HasQConMasterMeters value="yes"/>
 </MackieProtocolDevice>

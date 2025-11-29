@@ -5,16 +5,14 @@
   <Extenders value="1"/>
   <MasterPosition value="1"/>
   <MasterFader value="yes"/>
-  <TimecodeDisplay value="yes"/>
+  <TimecodeDisplay value="no"/>
   <TwoCharacterDisplay value="no"/>
-  <HasSeparateMeters value="yes"/>
+  <Extenders value="0"/>
+  <MasterPosition value="0"/>
   <GlobalControls value="yes"/>
   <JogWheel value="yes"/>
   <TouchSenseFaders value="yes"/>
-  <LogicControlButtons value="yes"/>
-  <usesIPMIDI value="no"/>
   <NoHandShake value="yes"/>
+  <HasMeters value="no"/>
   <IsPlatformMp value="yes"/>
-  <HasQConSecondLCD value="yes"/>
-  <HasQConMasterMeters value="yes"/>
 </MackieProtocolDevice>
