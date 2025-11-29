@@ -328,14 +328,12 @@ PluginInsert::internal_output_streams() const
 {
 	assert (!_plugins.empty());
 
-	PluginInfoPtr info = _plugins.front()->get_info();
+	ChanCount out (_plugins.front()->output_streams ());
 
-	if (info->reconfigurable_io()) {
-		ChanCount out = _plugins.front()->output_streams ();
+	if (_plugins.front()->get_info()->reconfigurable_io()) {
 		// DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, reconfigur(able) output streams = %1\n", out));
 		return out;
 	} else {
-		ChanCount out = info->n_outputs;
 		// DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, static output streams = %1 for %2 plugins\n", out, _plugins.size()));
 		out.set_audio (out.n_audio() * _plugins.size());
 		out.set_midi (out.n_midi() * _plugins.size());
@@ -348,15 +346,7 @@ PluginInsert::internal_input_streams() const
 {
 	assert (!_plugins.empty());
 
-	ChanCount in;
-
-	PluginInfoPtr info = _plugins.front()->get_info();
-
-	if (info->reconfigurable_io()) {
-		in = _plugins.front()->input_streams();
-	} else {
-		in = info->n_inputs;
-	}
+	ChanCount in (_plugins.front()->input_streams ());
 
 	DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, input streams = %1, match using %2\n", in, _match.method));
 
@@ -397,7 +387,7 @@ PluginInsert::natural_output_streams() const
 		return ChanCount::min (_configured_out, ChanCount (DataType::AUDIO, 2));
 	}
 #endif
-	return _plugins[0]->get_info()->n_outputs;
+	return _plugins[0]->output_streams ();
 }
 
 ChanCount
@@ -408,7 +398,7 @@ PluginInsert::natural_input_streams() const
 		return ChanCount::min (_configured_in, ChanCount (DataType::AUDIO, 2));
 	}
 #endif
-	return _plugins[0]->get_info()->n_inputs;
+	return _plugins[0]->input_streams ();
 }
 
 ChanCount
@@ -2311,11 +2301,12 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 	}
 #endif
 
+	const bool reconfigurable_io = _plugins.front()->get_info()->reconfigurable_io();
+
 	/* if a user specified a custom cfg, so be it. */
 	if (_custom_cfg) {
-		PluginInfoPtr info = _plugins.front()->get_info();
 		out = _custom_out;
-		if (info->reconfigurable_io()) {
+		if (reconfigurable_io) {
 			return Match (Delegate, 1, _strict_io, true);
 		} else {
 			return Match (ExactMatch, get_count(), _strict_io, true);
@@ -2325,9 +2316,8 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 	/* try automatic configuration */
 	Match m = PluginInsert::automatic_can_support_io_configuration (inx, out);
 
-	PluginInfoPtr info = _plugins.front()->get_info();
-	ChanCount inputs  = info->n_inputs;
-	ChanCount outputs = info->n_outputs;
+	ChanCount inputs  = natural_input_streams ();
+	ChanCount outputs = natural_output_streams ();
 
 	/* handle case strict-i/o */
 	if (_strict_io && m.method != Impossible) {
@@ -2375,7 +2365,7 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 
 	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: resolving 'Impossible' match...\n", name()));
 
-	if (info->reconfigurable_io()) {
+	if (reconfigurable_io) {
 		//out = inx; // hint
 		ChanCount main_in = inx;
 		ChanCount aux_in = sidechain_input_pins ();
@@ -2446,11 +2436,12 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const& inx, Chan
 		return Match();
 	}
 
-	PluginInfoPtr info = _plugins.front()->get_info();
+	const bool reconfigurable_io = _plugins.front()->get_info()->reconfigurable_io();
+
 	ChanCount in; in += inx;
 	ChanCount midi_bypass;
 
-	if (info->reconfigurable_io()) {
+	if (reconfigurable_io) {
 		/* Plugin has flexible I/O, so delegate to it
 		 * pre-seed outputs, plugin tries closest match
 		 */
@@ -2467,8 +2458,8 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const& inx, Chan
 		return Match (Delegate, 1);
 	}
 
-	ChanCount inputs  = info->n_inputs;
-	ChanCount outputs = info->n_outputs;
+	ChanCount inputs  = natural_input_streams ();
+	ChanCount outputs = natural_output_streams ();
 	ChanCount ns_inputs  = inputs - sidechain_input_pins ();
 
 	if (in.get(DataType::MIDI) == 1 && outputs.get(DataType::MIDI) == 0) {
@@ -2990,7 +2981,6 @@ PluginInsert::get_impulse_analysis_plugin()
 		ChanCount out (internal_output_streams ());
 		ChanCount aux_in;
 		if (ret->get_info ()->reconfigurable_io ()) {
-			// populate get_info ()->n_inputs and ->n_outputs
 			ret->match_variable_io (ins, aux_in, out);
 			assert (out == internal_output_streams ());
 		}
@@ -3027,6 +3017,21 @@ PluginInsert::collect_signal_for_analysis (samplecnt_t nframes)
 	_signal_analysis_collect_nsamples_max = nframes;
 }
 
+void
+PluginInsert::cache_sidechain_count ()
+{
+	_cached_sidechain_pins.reset ();
+	const ChanCount& nis (plugin()->input_streams ());
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		for (uint32_t in = 0; in < nis.get (*t); ++in) {
+			const Plugin::IOPortDescription& iod (plugin()->describe_io_port (*t, true, in));
+			if (iod.is_sidechain) {
+				_cached_sidechain_pins.set (*t, 1 + _cached_sidechain_pins.n(*t));
+			}
+		}
+	}
+}
+
 /** Add a plugin to our list */
 void
 PluginInsert::add_plugin (std::shared_ptr<Plugin> plugin)
@@ -3041,18 +3046,6 @@ PluginInsert::add_plugin (std::shared_ptr<Plugin> plugin)
 		plugin->PropertyChanged.connect_same_thread (*this, std::bind (&PluginInsert::property_changed_externally, this, _1, _2));
 		plugin->StartTouch.connect_same_thread (*this, std::bind (&PluginInsert::start_touch, this, _1));
 		plugin->EndTouch.connect_same_thread (*this, std::bind (&PluginInsert::end_touch, this, _1));
-		_custom_sinks = plugin->get_info()->n_inputs;
-		// cache sidechain port count
-		_cached_sidechain_pins.reset ();
-		const ChanCount& nis (plugin->get_info()->n_inputs);
-		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			for (uint32_t in = 0; in < nis.get (*t); ++in) {
-				const Plugin::IOPortDescription& iod (plugin->describe_io_port (*t, true, in));
-				if (iod.is_sidechain) {
-					_cached_sidechain_pins.set (*t, 1 + _cached_sidechain_pins.n(*t));
-				}
-			}
-		}
 	}
 
 	plugin->set_insert (this, _plugins.size ());
@@ -3062,6 +3055,10 @@ PluginInsert::add_plugin (std::shared_ptr<Plugin> plugin)
 	if (_plugins.size() > 1) {
 		_plugins[0]->add_slave (plugin, true);
 		plugin->DropReferences.connect_same_thread (*this, std::bind (&PluginInsert::plugin_removed, this, std::weak_ptr<Plugin> (plugin)));
+	} else {
+		/* first plugin */
+		_custom_sinks = plugin->get_info()->n_inputs; // XXX
+		cache_sidechain_count ();
 	}
 }
 

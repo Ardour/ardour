@@ -277,6 +277,7 @@ private:
 
 	void parameter_changed_externally (uint32_t, float);
 	void property_changed_externally (uint32_t which, Variant);
+	void cache_sidechain_count ();
 
 	void set_parameter (Evoral::Parameter param, float val, sampleoffset_t);
 

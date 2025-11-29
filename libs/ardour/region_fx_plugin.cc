@@ -992,8 +992,8 @@ RegionFxPlugin::configure_io (ChanCount in, ChanCount out)
 		return true;
 	}
 
-	ChanCount natural_input_streams  = _plugins[0]->get_info ()->n_inputs;
-	ChanCount natural_output_streams = _plugins[0]->get_info ()->n_outputs;
+	ChanCount natural_input_streams  = _plugins[0]->input_streams ();
+	ChanCount natural_output_streams = _plugins[0]->output_streams ();
 
 	_match = private_can_support_io_configuration (in, out);
 
@@ -1143,8 +1143,8 @@ RegionFxPlugin::check_inplace ()
 			}
 		}
 
-		ChanCount natural_input_streams  = _plugins[0]->get_info ()->n_inputs;
-		ChanCount natural_output_streams = _plugins[0]->get_info ()->n_outputs;
+		ChanCount natural_input_streams  = _plugins[0]->input_streams ();
+		ChanCount natural_output_streams = _plugins[0]->output_streams ();
 
 		if (natural_input_streams * get_count () != _configured_in) {
 			inplace_ok = false;
