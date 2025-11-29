@@ -206,7 +206,7 @@ public:
 	bool get_qcon_flag() { return is_qcon; }
 
 	bool get_v1_flag() { return is_v1m; }
-	bool get_platformMp_flag() { return is_platformMp; }
+	bool get_p1m_flag() { return is_p1m; }
 	bool get_p1nano_flag() { return is_p1nano; }
 
 	void force_icon_rgb_update() { _pending_icon_rgb.fill(0xFF); }
@@ -268,7 +268,7 @@ public:
 
 	// iCON Flags
 	bool is_v1m;
-	bool is_platformMp;
+	bool is_p1m;
 	bool is_p1nano;
 
 	/** Send RGB colors to P1-M and V1-M scribble strips (iCON-specific SysEx) */
