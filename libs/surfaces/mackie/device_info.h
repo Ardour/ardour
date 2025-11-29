@@ -82,6 +82,7 @@ class DeviceInfo
 	bool is_qcon() const;
 	bool is_v1m() const;
 	bool is_platformMp() const;
+	bool is_p1m() const;
 	bool is_p1nano() const;
 	bool is_proG2() const;
 	bool is_xtouch() const;
@@ -120,6 +121,7 @@ class DeviceInfo
 	bool     _is_qcon;
 	bool     _is_v1m;
 	bool     _is_platformMp;
+	bool     _is_p1m;
 	bool     _is_p1nano;
 	bool	 _is_proG2;
 	bool	 _is_xtouch;
