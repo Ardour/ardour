@@ -317,8 +317,8 @@ PluginEqGui::set_buffer_size (uint32_t size, uint32_t signal_size)
 	_signal_buffer_size = signal_size;
 
 	/* allocate separate in+out buffers, VST cannot process in-place */
-	ARDOUR::ChanCount acount (_plugin->get_info()->n_inputs + _plugin->get_info()->n_outputs);
-	ARDOUR::ChanCount ccount = ARDOUR::ChanCount::max (_plugin->get_info()->n_inputs, _plugin->get_info()->n_outputs);
+	ARDOUR::ChanCount acount (_plugin->input_streams () + _plugin->output_streams ());
+	ARDOUR::ChanCount ccount = ARDOUR::ChanCount::max (_plugin->input_streams (), _plugin->output_streams ());
 
 	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
 		_bufferset.ensure_buffers (*i, acount.get (*i), _buffer_size);
@@ -382,8 +382,8 @@ PluginEqGui::run_impulse_analysis ()
 	/* Allocate some thread-local buffers so that Plugin::connect_and_run can use them */
 	ARDOUR_UI::instance()->get_process_buffers ();
 
-	uint32_t inputs  = _plugin->get_info()->n_inputs.n_audio();
-	uint32_t outputs = _plugin->get_info()->n_outputs.n_audio();
+	uint32_t inputs  = _plugin->input_streams ().n_audio ();
+	uint32_t outputs = _plugin->output_streams ().n_audio();
 
 	/* Create the impulse, can't use silence() because consecutive calls won't work */
 	for (uint32_t i = 0; i < inputs; ++i) {
@@ -401,8 +401,8 @@ PluginEqGui::run_impulse_analysis ()
 	}
 
 	/* create default linear I/O maps */
-	ARDOUR::ChanMapping in_map (_plugin->get_info()->n_inputs);
-	ARDOUR::ChanMapping out_map (_plugin->get_info()->n_outputs);
+	ARDOUR::ChanMapping in_map (_plugin->input_streams ());
+	ARDOUR::ChanMapping out_map (_plugin->output_streams ());
 	/* map output buffers after input buffers (no inplace for VST) */
 	out_map.offset_to (DataType::AUDIO, inputs);
 
