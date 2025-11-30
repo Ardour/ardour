@@ -289,7 +289,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void set_start (timepos_t const &) = 0;
 	virtual void set_end (timepos_t const &) = 0;
 	virtual void set_length (timecnt_t const &) = 0;
-	virtual void reload (BufferSet&, void*) = 0;
 	virtual void io_change () {}
 	virtual void set_legato_offset (timepos_t const & offset) = 0;
 
@@ -320,9 +319,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual bool probably_oneshot () const = 0;
 
 	virtual timepos_t start_offset () const = 0; /* offset from start of data */
-	virtual timepos_t current_length() const = 0; /* offset from start() */
-	virtual timepos_t natural_length() const = 0; /* offset from start() */
-
 	void process_state_requests (BufferSet& bufs, pframes_t dest_offset);
 
 	bool active() const { return _state >= Running; }
@@ -552,9 +548,6 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void set_length (timecnt_t const &);
 	void set_user_data_length (samplecnt_t);
 	timepos_t start_offset () const; /* offset from start of data */
-	timepos_t current_length() const; /* offset from start of data */
-	timepos_t natural_length() const; /* offset from start of data */
-	void reload (BufferSet&, void*);
 	void io_change ();
 	bool probably_oneshot () const;
 
@@ -652,9 +645,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void set_length (timecnt_t const &);
 	timepos_t start_offset () const;
 	timepos_t end() const;            /* offset from start of data */
-	timepos_t current_length() const; /* offset from start of data */
-	timepos_t natural_length() const; /* offset from start of data */
-	void reload (BufferSet&, void*);
 	bool probably_oneshot () const;
 
 	void tempo_map_changed();
@@ -926,7 +916,6 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	TriggerPtr get_next_trigger ();
 	TriggerPtr peek_next_trigger ();
 
-	void request_reload (int32_t slot, void*);
 	void set_region (uint32_t slot, std::shared_ptr<Region> region);
 
 	void non_realtime_transport_stop (samplepos_t now, bool flush);
@@ -1049,7 +1038,6 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	struct Request {
 		enum Type {
 			Use,
-			Reload,
 		};
 
 		Type type;
@@ -1076,8 +1064,6 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 
 	void process_requests (BufferSet&);
 	void process_request (BufferSet&, Request*);
-
-	void reload (BufferSet& bufs, int32_t slot, void* ptr);
 
 	void cancel_locate_armed ();
 	void fast_forward_nothing_to_do ();

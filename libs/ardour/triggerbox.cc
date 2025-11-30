@@ -1717,24 +1717,6 @@ AudioTrigger::set_user_data_length (samplecnt_t s)
 	_user_data_length = s;
 	send_property_change (ARDOUR::Properties::length);
 }
-
-timepos_t
-AudioTrigger::current_length() const
-{
-	if (_region) {
-		return timepos_t (data.length);
-	}
-	return timepos_t (Temporal::BeatTime);
-}
-
-timepos_t
-AudioTrigger::natural_length() const
-{
-	if (_region) {
-		return timepos_t::from_superclock (_region->length().magnitude());
-	}
-	return timepos_t (Temporal::BeatTime);
-}
 int
 AudioTrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> r)
 {
@@ -2321,8 +2303,6 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 	return covered_frames;
 }
 
-void
-AudioTrigger::reload (BufferSet&, void*)
 {
 }
 
@@ -2952,24 +2932,6 @@ MIDITrigger::set_length (timecnt_t const & newlen)
 
 }
 
-timepos_t
-MIDITrigger::current_length() const
-{
-	if (_region) {
-		return timepos_t (data_length);
-	}
-	return timepos_t (Temporal::BeatTime);
-}
-
-timepos_t
-MIDITrigger::natural_length() const
-{
-	if (_region) {
-		return timepos_t::from_ticks (_region->length().magnitude());
-	}
-	return timepos_t (Temporal::BeatTime);
-}
-
 void
 MIDITrigger::estimate_midi_patches ()
 {
@@ -3114,11 +3076,6 @@ MIDITrigger::retrigger ()
 	last_event_beats = Temporal::Beats();
 	last_event_samples = 0;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to start, ts = %2\n", _index, transition_beats));
-}
-
-void
-MIDITrigger::reload (BufferSet&, void*)
-{
 }
 
 void
@@ -5567,15 +5524,6 @@ TriggerBox::Request::operator delete (void *ptr, size_t /*size*/)
 }
 
 void
-TriggerBox::request_reload (int32_t slot, void* ptr)
-{
-	Request* r = new Request (Request::Reload);
-	r->slot = slot;
-	r->ptr = ptr;
-	requests.write (&r, 1);
-}
-
-void
 TriggerBox::process_requests (BufferSet& bufs)
 {
 	Request* r;
@@ -5591,21 +5539,9 @@ TriggerBox::process_request (BufferSet& bufs, Request* req)
 	switch (req->type) {
 	case Request::Use:
 		break;
-	case Request::Reload:
-		reload (bufs, req->slot, req->ptr);
-		break;
 	}
 
 	delete req; /* back to the pool, RT-safe */
-}
-
-void
-TriggerBox::reload (BufferSet& bufs, int32_t slot, void* ptr)
-{
-	if (slot >= (int32_t) all_triggers.size()) {
-		return;
-	}
-	all_triggers[slot]->reload (bufs, ptr);
 }
 
 double
