@@ -725,6 +725,25 @@ AudioRegion::read_at (Sample*     buf,
 		}
 	}
 
+	/* Prevent concurrent reads for the same region
+	 * which can happen with shared playlists, or
+	 * after unfreeze of a copied playlist.
+	 *
+	 * Concurrent calls will cause issues when
+	 *  * evaluating gain/fade curves (ControlList lookup_cache)
+	 *  * evaulating regionFX
+	 *
+	 *  This lock is not usually contended, since usually
+	 *  regions are unique.
+	 *
+	 *  Note that AudioSource::read is also exclusive
+	 *  since libsndfile is not thread-safe either.
+	 *  So a more fine-grained lock strategy below
+	 *  (envelope/fades/regionFX) will not make a
+	 *  significant difference.
+	 */
+	Glib::Threads::Mutex::Lock crl (_read_lock);
+
 	Glib::Threads::Mutex::Lock cl (_cache_lock);
 	if (chan_n == 0 && _invalidated.exchange (false)) {
 		_cache_start = _cache_end = -1;
@@ -1038,6 +1057,8 @@ endread:
 			fade_out_limit = 0;
 		}
 	}
+
+	crl.release ();
 
 	/* MIX OR COPY THE REGION BODY FROM mixdown_buffer INTO buf */
 
