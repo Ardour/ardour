@@ -312,11 +312,11 @@ AudioTriggerPropertiesBox::beats_changed ()
 void
 AudioTriggerPropertiesBox::start_clock_changed ()
 {
-	trigger()->set_start(_start_clock.last_when());
+	/* XXX do something, probably to the region */
 }
 
 void
 AudioTriggerPropertiesBox::length_clock_changed ()
 {
-	trigger()->set_length(_length_clock.current_duration());  //?
+	/* XXX do something, probably to the region */
 }
