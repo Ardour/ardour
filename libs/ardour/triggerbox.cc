@@ -2089,6 +2089,16 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 		}
 
 		while (to_pad > 0) {
+			/* It may seem wasteful to resilence each channel
+			   buffer for each loop iteration here. But there's no
+			   inherent guarantee that passing them to the
+			   stretcher will leave them silent (logically, it
+			   must, but that's not part of the stretcher API).
+
+			   Also, in many cases, we only actually do this once
+			   (depending on the ratio of the audioengine buffer
+			   size and the stretcher's latency).
+			*/
 			const samplecnt_t limit = std::min ((samplecnt_t) scratch->get_audio (0).capacity(), to_pad);
 			for (uint32_t chn = 0; chn < nchans; ++chn) {
 				memset (bufp[chn], 0, sizeof (Sample) * limit);
