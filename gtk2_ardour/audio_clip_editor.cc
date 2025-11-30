@@ -430,11 +430,11 @@ AudioClipEditor::position_lines ()
 		return;
 	}
 
-	double width = sample_to_pixel (_region->start().samples());
-	start_line->set (ArdourCanvas::Rect (0., 0., width, _visible_canvas_height));
+	double start_x1 = sample_to_pixel (_region->start().samples());
+	double end_x0 = start_x1 + sample_to_pixel (_region->length().samples());
 
-	double offset = sample_to_pixel ((_region->start() + _region->length()).samples());
-	end_line->set_position (ArdourCanvas::Duple (offset, 0.));
+	start_line->set (ArdourCanvas::Rect (0., 0., start_x1, _visible_canvas_height));
+	end_line->set_position (ArdourCanvas::Duple (end_x0, 0.));
 	end_line->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, _visible_canvas_height));
 }
 
