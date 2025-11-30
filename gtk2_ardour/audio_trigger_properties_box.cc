@@ -30,6 +30,7 @@
 
 #include "widgets/tooltips.h"
 
+#include "ardour/audioregion.h"
 #include "ardour/location.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
@@ -230,8 +231,14 @@ AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& pc)
 		_start_clock.set_mode (mode);
 		_length_clock.set_mode (mode);
 
-		_start_clock.set (at->start_offset ());
-		_length_clock.set (at->current_length ()); // set_duration() ?
+		std::shared_ptr<AudioRegion> ar (std::dynamic_pointer_cast<AudioRegion> (at->the_region()));
+		if (ar) {
+			_start_clock.set (ar->start());
+			_length_clock.set (timepos_t (ar->length()));
+		} else {
+			_start_clock.set (timepos_t (0));
+			_length_clock.set (timepos_t (0));
+		}
 	}
 
 	if ( pc.contains (Properties::tempo_meter) || pc.contains (Properties::follow_length)) {
