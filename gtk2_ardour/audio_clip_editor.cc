@@ -789,15 +789,23 @@ AudioClipEditor::maybe_update ()
 
 			if (playing_trigger->active ()) {
 				if (playing_trigger->the_region()) {
-					_playhead_cursor->set_position (playing_trigger->current_pos().samples() + playing_trigger->the_region()->start().samples());
+
+					/* We can't know the precise sample
+					 * position because we may be
+					 * stretching. So figure out
+					 */
+					std::shared_ptr<ARDOUR::AudioTrigger> at (std::dynamic_pointer_cast<AudioTrigger> (playing_trigger));
+					if (at) {
+						const double f = playing_trigger->position_as_fraction ();
+						_playhead_cursor->set_position (playing_trigger->the_region()->start().samples() + (f * at->data_length()));
+					}
 				}
 			} else {
 				_playhead_cursor->set_position (0);
 			}
 		}
 
-#if 0
-	} else if (view->midi_region()) {
+	} else if (_region) {
 
 		/* Timeline region editor */
 
@@ -806,13 +814,13 @@ AudioClipEditor::maybe_update ()
 		}
 
 		samplepos_t pos = _session->transport_sample();
-		samplepos_t spos = view->midi_region()->source_position().samples();
+		samplepos_t spos = _region->source_position().samples();
 		if (pos < spos) {
 			_playhead_cursor->set_position (0);
 		} else {
 			_playhead_cursor->set_position (pos - spos);
 		}
-#endif
+
 	} else {
 		_playhead_cursor->set_position (0);
 	}
