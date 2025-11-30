@@ -234,7 +234,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _name (Properties::name, "")
 	, _color (Properties::color, 0xBEBEBEFF)
 	, process_index (0)
-	, final_processed_sample (0)
+	, final_process_index (0)
 	, _box (b)
 	, _state (Stopped)
 	, _playout (false)
@@ -726,6 +726,10 @@ Trigger::set_region (std::shared_ptr<Region> r, bool use_thread)
 		/* load data, do analysis in another thread */
 		TriggerBox::worker->set_region (_box, index(), r);
 	} else {
+		/* despite the name, this runs in the current thread. The name
+		   comes from the fact that this is normally called from a worker
+		   thread. It executes in thread it was called in.
+		*/
 		set_region_in_worker_thread (r);
 	}
 }
@@ -769,13 +773,16 @@ Trigger::region_property_change (PropertyChange const & what_changed)
 void
 Trigger::bounds_changed (Temporal::timepos_t const & start, Temporal::timepos_t const & end, Temporal::timecnt_t const & len)
 {
-	PendingSwap* pending = new PendingSwap;
+	PendingSwap* pending = pending_factory();
+	assert (pending);
 
 	pending->play_start = start;
 	pending->play_end = end;
 	pending->loop_start = pending->play_start;
 	pending->loop_end = pending->play_end;
 	pending->length = len;
+
+	load_pending_data (*pending);
 
 	/* And set it. RT thread will find this and do what needs to be done */
 
@@ -804,7 +811,7 @@ Trigger::position_as_fraction () const
 		return 0.0;
 	}
 
-	return process_index / (double) final_processed_sample;
+	return process_index / (double) final_process_index;
 }
 
 void
@@ -1373,6 +1380,37 @@ Trigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position, Tri
 
 /*--------------------*/
 
+void
+AudioTrigger::AudioData::drop ()
+{
+	for (auto& d : *this) {
+		delete [] d;
+	}
+
+	clear ();
+}
+
+AudioTrigger::AudioData&
+AudioTrigger::AudioData::operator= (AudioTrigger::AudioData& other)
+{
+	/* This is really implementing move semantics between two AudioData objects */
+
+	drop ();
+
+	reserve (other.size());
+	for (auto & sample_ptr : other) {
+		push_back (sample_ptr);
+	}
+	length = other.length;
+	capacity = other.capacity;
+
+	other.clear ();
+	other.length = 0;
+	other.capacity = 0;
+
+	return *this;
+}
+
 AudioTrigger::AudioData::~AudioData ()
 {
 	for (auto & s : *this) {
@@ -1410,8 +1448,7 @@ AudioTrigger::AudioData::append (Sample const * src, samplecnt_t cnt, uint32_t c
 
 AudioTrigger::AudioTrigger (uint32_t n, TriggerBox& b)
 	: Trigger (n, b)
-	, _stretcher (0)
-	, _start_offset (0)
+	, _stretcher (nullptr)
 	, read_index (0)
 	, last_readable_sample (0)
 	, _legato_offset (0)
@@ -1424,7 +1461,7 @@ AudioTrigger::AudioTrigger (uint32_t n, TriggerBox& b)
 
 AudioTrigger::~AudioTrigger ()
 {
-	drop_data ();
+	data.drop ();
 	delete _stretcher;
 }
 
@@ -1546,9 +1583,6 @@ XMLNode&
 AudioTrigger::get_state () const
 {
 	XMLNode& node (Trigger::get_state());
-
-	node.set_property (X_("start"), timepos_t (_start_offset));
-
 	return node;
 }
 
@@ -1561,9 +1595,6 @@ AudioTrigger::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	node.get_property (X_("start"), t);
-	_start_offset = t.samples();
-
 	/* we've changed our internal values; we need to update our queued UIState or they will be lost when UIState is applied */
 	copy_to_ui_state ();
 
@@ -1571,29 +1602,9 @@ AudioTrigger::set_state (const XMLNode& node, int version)
 }
 
 void
-AudioTrigger::set_start (timepos_t const & s)
-{
-	/* XXX better minimum size needed */
-	_start_offset = std::max (samplepos_t (4096), s.samples ());
-}
-
-void
-AudioTrigger::set_end (timepos_t const & e)
-{
-	assert (!data.empty());
-	set_length (timecnt_t (e.samples() - _start_offset, timepos_t (_start_offset)));
-}
-
-void
 AudioTrigger::set_legato_offset (timepos_t const & offset)
 {
 	_legato_offset = offset.samples();
-}
-
-timepos_t
-AudioTrigger::start_offset () const
-{
-	return timepos_t (_start_offset);
 }
 
 void
@@ -1609,7 +1620,7 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 
 	   expected_end_sample: (TIMELINE!) the sample position where the data for the clip should run out (taking stretch into account)
            last_readable_sample: (DATA RELATIVE!) the sample in the data where we stop reading
-           final_processed_sample: (DATA RELATIVE!) the sample where the trigger stops and the follow action if any takes effect
+           final_process_index: (DATA RELATIVE!) the sample where the trigger stops and the follow action if any takes effect
 
            Things that affect these values:
 
@@ -1626,51 +1637,37 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 	*/
 	const Temporal::Beats bc (Temporal::Beats::from_double (_beatcnt));
 
-	samplepos_t end_by_follow_length = tmap->sample_at (tmap->bbt_walk (transition_bba, _follow_length));
-	samplepos_t end_by_beatcnt = tmap->sample_at (tmap->bbt_walk (transition_bba, Temporal::BBT_Offset (0, bc.get_beats(), bc.get_ticks())));
-	samplepos_t end_by_user_data_length = transition_sample + (_user_data_length - _start_offset);
-	samplepos_t end_by_data_length = transition_sample + (data.length - _start_offset);
-	samplepos_t end_by_fixed_samples = std::min (end_by_user_data_length, end_by_data_length);
+	/* This is tempo-sensitive - we actually compute the sample position bc
+	   beats after the transition sample, using either the follow length
+	   or _beatcnt
+	*/
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 computing end with fl %2 bc %3 dl %4 udl %5\n", index(),
-	                                              _follow_length, bc.str(), data.length, _user_data_length));
+	const Temporal::BBT_Offset beat_length = internal_use_follow_length() ? _follow_length : Temporal::BBT_Offset (0, bc.get_beats(), bc.get_ticks());
+	samplepos_t end_by_beats = tmap->sample_at (tmap->bbt_walk (transition_bba, beat_length));
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 SO %9 @ %2 / %3 / %4 ends: FL %5 (from %6) BC %7 DL %8\n",
+	/* These are non-tempo-sensitive, and represent data-centric sample counts. */
+	samplepos_t end_by_data_length = transition_sample + data.length;
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 computing end with fl %2 bc %3 dl %4 EDL %5\n", index(),
+	                                              _follow_length, bc.str(), data.length, end_by_data_length));
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 @ %2 / %3 / %4 ends: FL %5 BC %6 from %7 DL %8\n",
 	                                              index(), transition_sample, transition_beats, transition_bbt,
-	                                              end_by_follow_length, _follow_length, end_by_beatcnt, end_by_data_length, _start_offset));
+	                                              _follow_length, end_by_beats,
+	                                              internal_use_follow_length() ? _follow_length : Temporal::BBT_Offset (0, bc.get_beats(), bc.get_ticks()),
+	                                              end_by_data_length));
 
 	if (stretching()) {
-		/* NOTES: beatcnt here will reflect the stretch, which is OK
-		   Because we are stretching. But .. that's wrong when we're not
-		   stretching. So we really need another value: something like
-		   data_length but user-definable.
-		*/
-		if (internal_use_follow_length()) {
-			expected_end_sample = std::min (end_by_follow_length, end_by_beatcnt);
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("stretch and use follow, end up at %1\n", expected_end_sample));
-		} else {
-			expected_end_sample = end_by_beatcnt;
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("stretch and no-follow, end up at %1\n", expected_end_sample));
-		}
+		expected_end_sample = end_by_beats;
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("stretching, end up at %1\n", expected_end_sample));
 	} else {
-		if (internal_use_follow_length()) {
-			expected_end_sample = std::min (end_by_follow_length, end_by_fixed_samples);
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("no-stretch and use follow, end up at %1\n", expected_end_sample));
-		} else {
-			expected_end_sample = end_by_fixed_samples;
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("no-stretch and no-follow, end up at %1\n", expected_end_sample));
-		}
+		expected_end_sample = std::min (end_by_beats, end_by_data_length);
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("no-stretch, end up at %1\n", expected_end_sample));
 	}
 
-	final_processed_sample = expected_end_sample - transition_sample;
-
-	samplecnt_t usable_length;
-
-	if (internal_use_follow_length() && (end_by_follow_length < end_by_data_length)) {
-		usable_length = std::min (end_by_follow_length - transition_samples, end_by_fixed_samples - transition_samples);
-	} else {
-		usable_length = end_by_fixed_samples - transition_samples;
-	}
+	final_process_index = expected_end_sample - transition_sample;
+	samplecnt_t usable_length = end_by_data_length - transition_samples;
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("usable length from end-by-samples %1 - transition @ %2 = %3\n", end_by_data_length, transition_samples, usable_length));
 
 	/* called from compute_end() when we know the time (audio &
 	 * musical time domains when we start starting. Our job here is to
@@ -1681,7 +1678,7 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 
 	if (launch_style() != Repeat || (q == Temporal::BBT_Offset())) {
 
-		last_readable_sample = _start_offset + usable_length;
+		last_readable_sample = usable_length;
 
 	} else {
 
@@ -1693,14 +1690,14 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 		/* XXX MUST HANDLE BAR-LEVEL QUANTIZATION */
 
 		timecnt_t len (Temporal::Beats (q.beats, q.ticks), timepos_t (Temporal::Beats()));
-		last_readable_sample = _start_offset + len.samples();
+		last_readable_sample = len.samples();
 	}
 
-	effective_length = tmap->quarters_at_sample (transition_sample + final_processed_sample) - tmap->quarters_at_sample (transition_sample);
+	effective_length = tmap->quarters_at_sample (transition_sample + final_process_index) - tmap->quarters_at_sample (transition_sample);
 
 	_transition_bbt = transition_bbt;
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: final sample %2 vs ees %3 ls %4\n", index(), final_processed_sample, expected_end_sample, last_readable_sample));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: final process index %2 expected end (timeline) sample %3 final read index %4\n", index(), final_process_index, expected_end_sample, last_readable_sample));
 
 	return timepos_t (expected_end_sample);
 }
@@ -1711,12 +1708,6 @@ AudioTrigger::set_length (timecnt_t const & newlen)
 	/* XXX what */
 }
 
-void
-AudioTrigger::set_user_data_length (samplecnt_t s)
-{
-	_user_data_length = s;
-	send_property_change (ARDOUR::Properties::length);
-}
 int
 AudioTrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> r)
 {
@@ -1753,12 +1744,10 @@ AudioTrigger::set_region_in_worker_thread_internal (std::shared_ptr<Region> r, b
 	}
 
 	if (!from_capture) {
-		load_data (ar);
+		load_data (ar, data);
 	}
 
-	if (from_capture) {
-		set_name (r->name());
-	}
+	set_name (ar->name());
 
 	estimate_tempo ();  /* NOTE: if this is an existing clip (D+D copy) then it will likely have a SD tempo, and that short-circuits minibpm for us */
 
@@ -1880,15 +1869,6 @@ AudioTrigger::setup_stretcher ()
 }
 
 void
-AudioTrigger::drop_data ()
-{
-	for (auto& d : data) {
-		delete [] d;
-	}
-	data.clear ();
-}
-
-void
 AudioTrigger::captured (SlotArmInfo& ai)
 {
 	if (ai.audio_buf.length == 0) {
@@ -1901,7 +1881,6 @@ AudioTrigger::captured (SlotArmInfo& ai)
 
 	data.length = ai.audio_buf.length;
 	data.capacity = ai.audio_buf.capacity;
-	_user_data_length = data.length;
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 captured a total of %3\n", _box.order(), _index, data.length));
 
@@ -1942,27 +1921,25 @@ AudioTrigger::captured (SlotArmInfo& ai)
 }
 
 int
-AudioTrigger::load_data (std::shared_ptr<AudioRegion> ar)
+AudioTrigger::load_data (std::shared_ptr<AudioRegion> ar, AudioData& audio_data)
 {
 	const uint32_t nchans = ar->n_channels();
 
-	drop_data ();
+	audio_data.drop ();
 
 	try {
 		samplecnt_t len = ar->length_samples();
 
-		data.alloc (len, nchans);
+		audio_data.alloc (len, nchans);
 
 		for (uint32_t n = 0; n < nchans; ++n) {
-			ar->read (data[n], 0, len, n);
+			ar->read (audio_data[n], 0, len, n);
 		}
 
-		data.length = len;
-		_user_data_length = len;
-		set_name (ar->name());
+		audio_data.length = len;
 
 	} catch (...) {
-		drop_data ();
+		audio_data.drop ();
 		return -1;
 	}
 
@@ -1977,7 +1954,7 @@ AudioTrigger::retrigger ()
 	update_properties ();
 	reset_stretcher ();
 
-	read_index = _start_offset + _legato_offset;
+	read_index = _legato_offset;
 	retrieved = 0;
 	_legato_offset = 0; /* used one time only */
 
@@ -2080,12 +2057,13 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 #ifdef HAVE_RUBBERBAND_3_0_0
 			to_pad  = _stretcher->getPreferredStartPad();
 			to_drop = _stretcher->getStartDelay();
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requires padding of %2 dropping %3 (RB v3\n", name(), to_pad, to_drop));
 #else
 			to_pad = _stretcher->getLatency();
 			to_drop = to_pad;
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requires padding of %2 dropping %3 (RB < v3\n", name(), to_pad, to_drop));
 #endif
 			got_stretcher_padding = true;
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requires %2 padding %3\n", name(), to_pad));
 		}
 
 		while (to_pad > 0) {
@@ -2137,6 +2115,10 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 						in[chn] = data[chn % data.size ()] + read_index;
 					}
 
+#ifndef NDEBUG
+					samplecnt_t required = _stretcher->getSamplesRequired();
+					samplecnt_t pre_avail = _stretcher->available ();
+#endif
 					/* Note: RubberBandStretcher's process() and retrieve() API's accepts Sample**
 					 * as their first argument. This code may appear to only be processing the first
 					 * channel, but actually processes them all in one pass.
@@ -2147,14 +2129,17 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 					read_index += to_stretcher;
 					avail = _stretcher->available ();
 
+					samplecnt_t this_drop = 0;
+
 					if (to_drop && avail) {
-						samplecnt_t this_drop = std::min (std::min ((samplecnt_t) avail, to_drop), (samplecnt_t) scratch->get_audio (0).capacity());
+						this_drop = std::min (std::min ((samplecnt_t) avail, to_drop), (samplecnt_t) scratch->get_audio (0).capacity());
 						_stretcher->retrieve (&bufp[0], this_drop);
 						to_drop -= this_drop;
 						avail = _stretcher->available ();
 					}
 
-					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 process %2 at-end %3 avail %4 of %5\n", name(), to_stretcher, at_end, avail, nframes));
+					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 process %2 (ri now %6) at-end %3 avail %4 (was %7) of %5 (required was %8)\n",
+					                                              name(), to_stretcher, at_end, avail, nframes, read_index, pre_avail, required));
 				}
 
 				/* we've fed the stretcher enough data to have
@@ -2172,18 +2157,19 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 			}
 
 			/* fetch the stretch */
-
-			retrieved += _stretcher->retrieve (&bufp[0], from_stretcher);
+			samplecnt_t this_retrieve = _stretcher->retrieve (&bufp[0], from_stretcher);
+			retrieved += this_retrieve;
 
 			if (read_index >= last_readable_sample) {
 
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 no more data to deliver to stretcher, but retrieved %2 to put current end at %3 vs %4 / %5 pi %6\n",
-				                                              index(), retrieved, transition_samples + retrieved, expected_end_sample, final_processed_sample, process_index));
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 no more data to deliver to stretcher, but with ri %8 or %9 retrieved %7(%2) to put current end at %3 vs %4 / %5 pi %6\n",
+				                                              index(), retrieved, transition_samples + retrieved, expected_end_sample, final_process_index, process_index, this_retrieve,
+				                                              read_index, last_readable_sample));
 
 				if (transition_samples + retrieved > expected_end_sample) {
 					/* final pull from stretched data into output buffers */
-					// cerr << "FS#2 from ees " << final_processed_sample << " - " << process_index << " & " << from_stretcher;
-					from_stretcher = std::min<samplecnt_t> (from_stretcher, std::max<samplecnt_t> (0, final_processed_sample - process_index));
+					// cerr << "FS#2 from ees " << final_process_index << " - " << process_index << " & " << from_stretcher;
+					from_stretcher = std::min<samplecnt_t> (from_stretcher, std::max<samplecnt_t> (0, final_process_index - process_index));
 					// cerr << " => " << from_stretcher << endl;
 
 					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 total retrieved data %2 exceeds theoretical size %3, truncate from_stretcher to %4\n",
@@ -2191,13 +2177,13 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 
 					if (from_stretcher == 0) {
 
-						if (process_index < final_processed_sample) {
-							DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached (EX) end, entering playout mode to cover %2 .. %3\n", index(), process_index, final_processed_sample));
+						if (process_index < final_process_index) {
+							DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached (EX) end, entering playout mode to cover %2 .. %3\n", index(), process_index, final_process_index));
 							_playout = true;
 						} else {
 							_state = Stopped;
 							_loop_cnt++;
-							DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached (EX) end, now stopped, retrieved %2, avail %3 pi %4 vs fs %5 LC now %6\n", index(), retrieved, avail, process_index, final_processed_sample, _loop_cnt));
+							DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached (EX) end, now stopped, retrieved %2, avail %3 pi %4 vs fs %5 LC now %6\n", index(), retrieved, avail, process_index, final_process_index, _loop_cnt));
 						}
 
 						break;
@@ -2210,7 +2196,6 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 			/* no stretch */
 			assert (last_readable_sample >= read_index);
 			from_stretcher = std::min<samplecnt_t> (nframes, last_readable_sample - read_index);
-			// cerr << "FS#3 from lrs " << last_readable_sample <<  " - " << read_index << " = " << from_stretcher << endl;
 
 		}
 
@@ -2259,14 +2244,19 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 
 		if (read_index >= last_readable_sample && (!do_stretch || avail <= 0)) {
 
-			if (process_index < final_processed_sample) {
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, entering playout mode to cover %2 .. %3\n", index(), process_index, final_processed_sample));
+			if (process_index < final_process_index) {
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, entering playout mode to cover %2 .. %3 avail = %4\n", index(), process_index, final_process_index, avail));
 				_playout = true;
 			} else {
 				_state = Stopped;
 				_loop_cnt++;
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, now stopped, retrieved %2, avail %3 LC now %4\n", index(), retrieved, avail, _loop_cnt));
 			}
+			break;
+		} else if (process_index >= final_process_index) {
+			_state = Stopped;
+			_loop_cnt++;
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end via pi alone, now stopped, retrieved %2, avail %3 LC now %4\n", index(), retrieved, avail, _loop_cnt));
 			break;
 		}
 	}
@@ -2283,18 +2273,18 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 		}
 
 		const pframes_t remaining_frames_for_run= orig_nframes - covered_frames;
-		const pframes_t remaining_frames_till_final = final_processed_sample - process_index;
+		const pframes_t remaining_frames_till_final = final_process_index - process_index;
 		const pframes_t to_fill = std::min (remaining_frames_till_final, remaining_frames_for_run);
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 playout mode, remaining in run %2 till final %3 @ %5 ts %7 vs pi @ %6 to fill %4\n",
-		                                              index(), remaining_frames_for_run, remaining_frames_till_final, to_fill, final_processed_sample, process_index, transition_samples));
+		                                              index(), remaining_frames_for_run, remaining_frames_till_final, to_fill, final_process_index, process_index, transition_samples));
 
 		if (remaining_frames_till_final != 0) {
 
 			process_index += to_fill;
 			covered_frames += to_fill;
 
-			if (process_index < final_processed_sample) {
+			if (process_index < final_process_index) {
 				/* more playout to be done */
 				return covered_frames;
 			}
@@ -2305,6 +2295,8 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 playout finished, LC now %4\n", index(), _loop_cnt));
 	}
 
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 run() finished, ri %2 pi %3 r/p %4\n", index(), read_index, process_index, (double) read_index / process_index));
+
 	if (_state == Stopped || _state == Stopping) {
 		/* note: neither argument is used in the audio case */
 		when_stopped_during_run (bufs, dest_offset);
@@ -2313,7 +2305,20 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 	return covered_frames;
 }
 
+Trigger::PendingSwap*
+AudioTrigger::pending_factory () const
 {
+	return new AudioPendingSwap;
+}
+
+int
+AudioTrigger::load_pending_data (PendingSwap& ps)
+{
+	AudioPendingSwap* aps (dynamic_cast<AudioPendingSwap*> (&ps));
+	assert (aps);
+	std::shared_ptr<AudioRegion> ar (std::dynamic_pointer_cast<AudioRegion> (_region));
+	load_data (ar, aps->audio_data);
+	return 0;
 }
 
 void
@@ -2333,19 +2338,51 @@ AudioTrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& 
 	}
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 noticed pending swap @ %3\n", _box.order(), index(), pending));
-	adjust_bounds (pending->play_start, pending->play_end, pending->length, true);
+
+	/* Need to use the region's tempo (map) to convert between time domains here */
+
+	if (stretching()) {
+
+		Temporal::TempoMap::SharedPtr rmap (_region->tempo_map());
+		assert (rmap);
+
+		if (pending->length.time_domain() == Temporal::BeatTime) {
+			_beatcnt = Temporal::DoubleableBeats (pending->length.beats()).to_double();
+		} else {
+			_beatcnt = Temporal::DoubleableBeats (rmap->quarters_at_sample (pending->length.samples())).to_double();
+		}
+	}
+
+	/* Switch over data, which spans region->start() to region->end() aka
+	 * region->start() + region->length()
+	 */
+
+	AudioPendingSwap* aps (dynamic_cast<AudioPendingSwap*> (pending));
+	assert (aps);
+	data = aps->audio_data;
+
+	/* pending->audio_data is now unusable */
+
+	if (playing) {
+
+		/* if the start has been moved past the current process
+		 * position, we need to do something drastic.
+		 */
+
+		if (pending->play_start > process_index) {
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 new start %3 is past process index %4\n", _box.order(), index(), pending->play_start, process_index));
+			jump_stop (bufs, 0);
+			startup (bufs, 0, _quantization);
+			return;
+		}
+
+		Temporal::Beats elen_ignored;
+		compute_end (Temporal::TempoMap::use(), _transition_bbt, transition_samples, elen_ignored);
+	}
+
+	/* adjust read index to point to the same sample, if possible */
+
 	old_pending_swap.store (pending);
-}
-
-
-void
-AudioTrigger::adjust_bounds (Temporal::timepos_t const & start, Temporal::timepos_t const & end, Temporal::timecnt_t const & length, bool)
-{
-	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-	set_start (timepos_t (start.samples()));
-	set_user_data_length (length.samples());
-	/* XXX not 100% sure that we should set this here or not */
-	_beatcnt = Temporal::DoubleableBeats (length.beats()).to_double();
 }
 
 /*--------------------*/
@@ -2714,7 +2751,7 @@ MIDITrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::
 
 	timepos_t e (final_beat);
 
-	final_processed_sample = e.samples() - transition_samples;
+	final_process_index = e.samples() - transition_samples;
 
 	return e;
 }
@@ -3132,6 +3169,21 @@ MIDITrigger::tempo_map_changed ()
 	map_change = true;
 }
 
+Trigger::PendingSwap*
+MIDITrigger::pending_factory () const
+{
+	return new MIDIPendingSwap;
+}
+
+int
+MIDITrigger::load_pending_data (PendingSwap& ps)
+{
+	MIDIPendingSwap* mps (dynamic_cast<MIDIPendingSwap*> (&ps));
+	assert (mps);
+	_model->render (_model->read_lock(), *mps->rt_midibuffer);
+	return 0;
+}
+
 void
 MIDITrigger::model_contents_changed ()
 {
@@ -3407,28 +3459,28 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 not done with playout, all frames covered\n", index()));
 			} else {
 				/* finishing up playout */
-				samplepos_t final_processed_sample = tmap->sample_at (timepos_t (final_beat));
+				samplepos_t final_process_index = tmap->sample_at (timepos_t (final_beat));
 
 				if (map_change) {
-					if ((start_sample > final_processed_sample) || (final_processed_sample - start_sample > orig_nframes)) {
+					if ((start_sample > final_process_index) || (final_process_index - start_sample > orig_nframes)) {
 						nframes = 0;
 						_loop_cnt++;
 						_state = Stopping;
 					} else {
-						nframes = orig_nframes - (final_processed_sample - start_sample);
+						nframes = orig_nframes - (final_process_index - start_sample);
 					}
 				} else {
-					nframes = orig_nframes - (final_processed_sample - start_sample);
+					nframes = orig_nframes - (final_process_index - start_sample);
 					_loop_cnt++;
 					_state = Stopped;
 				}
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 playout done, nf = %2 fb %3 fs %4 %5 LC %6\n", index(), nframes, final_beat, final_processed_sample, start_sample, _loop_cnt));
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 playout done, nf = %2 fb %3 fs %4 %5 LC %6\n", index(), nframes, final_beat, final_process_index, start_sample, _loop_cnt));
 			}
 
 		} else {
 
-			const samplepos_t final_processed_sample = tmap->sample_at (timepos_t (final_beat));
-			const samplecnt_t nproc = (final_processed_sample - start_sample);
+			const samplepos_t final_process_index = tmap->sample_at (timepos_t (final_beat));
+			const samplecnt_t nproc = (final_process_index - start_sample);
 
 			if (nproc > orig_nframes) {
 				/* tempo map changed, probably */
@@ -3438,7 +3490,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 			}
 			_loop_cnt++;
 			_state = Stopped;
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached final event, now stopped, nf = %2 fb %3 fs %4 %5 LC %6\n", index(), nframes, final_beat, final_processed_sample, start_sample, _loop_cnt));
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached final event, now stopped, nf = %2 fb %3 fs %4 %5 LC %6\n", index(), nframes, final_beat, final_process_index, start_sample, _loop_cnt));
 		}
 
 	} else {
@@ -4886,6 +4938,8 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	const Location* const loop_loc = _loop_location;
 
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("**** Triggerbox::run(%1) from %2 to %3 nf = %4\n", order(), start_sample, end_sample, nframes));
+
 	if (!loop_loc) {
 		run_cycle (bufs, start_sample, end_sample, speed, nframes);
 	} else {
@@ -4923,7 +4977,7 @@ TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		const Temporal::Beats __end_beats (timepos_t (end_sample).beats());
 		const double __bpm = __tmap->quarters_per_minute_at (timepos_t (__start_beats));
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("**** Triggerbox::run() for %6, ss %1 es %2 sb %3 eb %4 bpm %5 nf %7\n", start_sample, end_sample, __start_beats, __end_beats, __bpm, order(), nframes));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("**** Triggerbox::run_cycle() for %6, ss %1 es %2 sb %3 eb %4 bpm %5 nf %7\n", start_sample, end_sample, __start_beats, __end_beats, __bpm, order(), nframes));
 	}
 #endif
 
