@@ -497,8 +497,9 @@ StripImportDialog::refill_import_table ()
 		}
 		ArdourButton* rm = manage (new ArdourButton ());
 		rm->set_icon (ArdourIcon::CloseCross);
+		rm->set_tweaks (ArdourButton::TrackHeader);
 		rm->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &StripImportDialog::remove_mapping), rid));
-		_strip_table.attach (*rm, 3, 4, r, r + 1, Gtk::SHRINK, Gtk::SHRINK, 4, 2);
+		_strip_table.attach (*rm, 3, 4, r, r + 1, Gtk::SHRINK, Gtk::SHRINK, 4, 0);
 	}
 
 	if (r > 1) {
@@ -554,12 +555,13 @@ StripImportDialog::refill_import_table ()
 
 	_add_new_mapping = manage (new ArdourButton ());
 	_add_new_mapping->set_icon (ArdourIcon::PlusSign);
+	_add_new_mapping->set_tweaks (ArdourButton::TrackHeader);
 	_add_new_mapping->signal_clicked.connect (sigc::mem_fun (*this, &StripImportDialog::add_mapping));
 
 	/* clang-format off */
 	_strip_table.attach (*_add_rid_dropdown, 0, 1, r, r + 1, EXPAND | FILL, SHRINK);
 	_strip_table.attach (*_add_eid_dropdown, 2, 3, r, r + 1, EXPAND | FILL, SHRINK);
-	_strip_table.attach (*_add_new_mapping,  3, 4, r, r + 1, Gtk::SHRINK,   SHRINK);
+	_strip_table.attach (*_add_new_mapping,  3, 4, r, r + 1, Gtk::SHRINK,   SHRINK, 4, 0);
 	/* clang-format on */
 
 	bool can_add = !_add_rid_dropdown->items ().empty () && !_add_eid_dropdown->items ().empty ();
