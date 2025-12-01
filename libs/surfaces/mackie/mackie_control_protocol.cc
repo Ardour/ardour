@@ -454,7 +454,7 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 				(*si)->map_stripables (stripables);
 
 				// Force RGB update on next redisplay
-				if (_device_info.is_v1m() || _device_info.is_platformMp() || _device_info.is_p1nano()) {
+				if (_device_info.is_v1m() || _device_info.is_p1m() || _device_info.is_p1nano()) {
 					(*si)->force_icon_rgb_update();
 				}
 			}
