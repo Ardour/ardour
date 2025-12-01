@@ -425,10 +425,29 @@ StripImportDialog::refill_import_table ()
 	_strip_table.attach (*manage (new ArdourHSpacer (1.0)), 0, 4, 1, 2, EXPAND | FILL, SHRINK,        4, 8);
 	/* clang-format on */
 
+	const bool show_all_local_tracks = _show_all_toggle->get_active ();
+
 	std::vector<std::pair<PBD::ID, PBD::ID>> sorted_map;
-	for (auto const& i : _import_map) {
-		sorted_map.push_back (i);
+
+	if (show_all_local_tracks) {
+		for (auto const& r : _route_map) {
+			PBD::ID d (0);
+			try {
+				d = _import_map.at (r.first);
+			} catch (...) {}
+			sorted_map.push_back (make_pair (r.first, d));
+		}
+		for (auto const& i : _import_map) {
+			if (_route_map.find (i.first) == _route_map.end ()) {
+				sorted_map.push_back (i);
+			}
+		}
+	} else {
+		for (auto const& i : _import_map) {
+			sorted_map.push_back (i);
+		}
 	}
+
 	std::sort (sorted_map.begin (), sorted_map.end (), [=] (auto& a, auto& b) {
 		try {
 			return _route_map.at (a.first).pi.order () < _route_map.at (b.first).pi.order ();
@@ -440,27 +459,42 @@ StripImportDialog::refill_import_table ()
 	/* Refill table */
 	int r = 1;
 	for (auto& [rid, eid] : sorted_map /*_import_map*/) {
-		++r;
-		if (_route_map.find (rid) != _route_map.end ()) {
+		bool is_new = _route_map.find (rid) == _route_map.end ();
+
+		if (!is_new) {
 			l = manage (new Label (_route_map.at (rid).name, 0, 0.5));
 		} else {
 			l = manage (new Label (_("<i>New Track</i>"), 0, 0.5));
 			l->set_use_markup ();
 		}
+
+		++r;
 		_strip_table.attach (*l, 0, 1, r, r + 1, EXPAND | FILL, SHRINK);
+
 #if 0
 		l = manage (new Label (_extern_map[eid], 1.0, 0.5));
 		_strip_table.attach (*l, 2, 3, r, r + 1, EXPAND | FILL, SHRINK);
 #else
 		using namespace Menu_Helpers;
 		ArdourDropdown* dd = manage (new ArdourDropdown ());
+		if (show_all_local_tracks) {
+			dd->add_menu_elem (MenuElem ("---", sigc::bind (sigc::mem_fun (*this, &StripImportDialog::change_mapping), dd, rid, PBD::ID (0), "---")));
+		}
 		for (auto& [eid, einfo] : _extern_map) {
 			dd->add_menu_elem (MenuElem (Gtkmm2ext::markup_escape_text (einfo.name), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::change_mapping), dd, rid, eid, einfo.name)));
 		}
-		dd->set_text (_extern_map.at (eid).name);
+		assert (show_all_local_tracks || _extern_map.find (eid) != _extern_map.end ());
+		try {
+			dd->set_text (_extern_map.at (eid).name);
+		} catch (std::out_of_range const&) {
+			dd->set_text ("---");
+		}
 		_strip_table.attach (*dd, 2, 3, r, r + 1, EXPAND | FILL, SHRINK);
 #endif
 
+		if (show_all_local_tracks && !is_new) {
+			continue;
+		}
 		ArdourButton* rm = manage (new ArdourButton ());
 		rm->set_icon (ArdourIcon::CloseCross);
 		rm->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &StripImportDialog::remove_mapping), rid));
@@ -497,12 +531,14 @@ StripImportDialog::refill_import_table ()
 	_add_rid_dropdown->add_menu_elem (MenuElem (_(" -- New Track -- "), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::prepare_mapping), false, next_new, _("New Track"))));
 	sizing_texts.push_back (_(" -- New Track -- "));
 
-	for (auto& [rid, rinfo] : _route_map) {
-		if (_import_map.find (rid) != _import_map.end ()) {
-			continue;
+	if (!show_all_local_tracks) {
+		for (auto& [rid, rinfo] : _route_map) {
+			if (_import_map.find (rid) != _import_map.end ()) {
+				continue;
+			}
+			_add_rid_dropdown->add_menu_elem (MenuElem (Gtkmm2ext::markup_escape_text (rinfo.name), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::prepare_mapping), false, rid, rinfo.name)));
+			sizing_texts.push_back (rinfo.name);
 		}
-		_add_rid_dropdown->add_menu_elem (MenuElem (Gtkmm2ext::markup_escape_text (rinfo.name), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::prepare_mapping), false, rid, rinfo.name)));
-		sizing_texts.push_back (rinfo.name);
 	}
 
 	_add_eid_dropdown = manage (new ArdourWidgets::ArdourDropdown ());
@@ -546,8 +582,16 @@ StripImportDialog::idle_refill_import_table ()
 void
 StripImportDialog::change_mapping (ArdourDropdown* dd, PBD::ID const& rid, PBD::ID const& eid, std::string const& name)
 {
+	if (eid == PBD::ID (0)) {
+		_import_map.erase (rid);
+	} else {
+		_import_map[rid] = eid;
+	}
 	dd->set_text (name);
-	_import_map[rid] = eid;
+
+	if (_show_all_toggle->get_active ()) {
+		idle_refill_import_table ();
+	}
 }
 
 void
@@ -570,7 +614,6 @@ StripImportDialog::add_mapping ()
 	assert (_add_rid != PBD::ID (0));
 	assert (_add_eid != PBD::ID (0));
 
-	_default_mapping      = false;
 	_import_map[_add_rid] = _add_eid;
 
 	idle_refill_import_table ();
@@ -580,7 +623,6 @@ void
 StripImportDialog::remove_mapping (PBD::ID const& id)
 {
 	if (1 == _import_map.erase (id)) {
-		_default_mapping = false;
 		idle_refill_import_table ();
 	}
 }
@@ -588,7 +630,6 @@ StripImportDialog::remove_mapping (PBD::ID const& id)
 void
 StripImportDialog::clear_mapping ()
 {
-	_default_mapping = false;
 	_import_map.clear ();
 	idle_refill_import_table ();
 }
@@ -596,11 +637,18 @@ StripImportDialog::clear_mapping ()
 void
 StripImportDialog::import_all_strips ()
 {
-	_default_mapping = false;
 	_import_map.clear ();
 
 	int64_t next_id = std::numeric_limits<uint64_t>::max () - 1 - _extern_map.size ();
 	for (auto& [eid, einfo] : _extern_map) {
+		if (einfo.pi.special () || einfo.pi.hidden ()) {
+			continue;
+		}
+#ifdef MIXBUS
+		if (einfo.mixbus > 0) {
+			continue;
+		}
+#endif
 		PBD::ID next_new      = PBD::ID (next_id++);
 		_import_map[next_new] = eid;
 	}
@@ -612,7 +660,6 @@ void
 StripImportDialog::set_default_mapping (bool and_idle_update)
 {
 	_import_map.clear ();
-	_default_mapping = true;
 
 	if (_match_pbd_id) {
 		/* try a 1:1 mapping */
@@ -657,23 +704,22 @@ StripImportDialog::setup_strip_import_page ()
 #endif
 	}
 
-	set_default_mapping (false);
+	using namespace Menu_Helpers;
+	_action = manage (new ArdourWidgets::ArdourDropdown ());
+	_action->add_menu_elem (MenuElem (_("Clear Mapping"), sigc::mem_fun (*this, &StripImportDialog::clear_mapping)));
+	_action->add_menu_elem (MenuElem (_("Import all as new tracks"), sigc::mem_fun (*this, &StripImportDialog::import_all_strips)));
+	_action->add_menu_elem (MenuElem (_match_pbd_id ? _("Reset - auto-map by ID") : _("Reset - auto-map by name"), sigc::bind (mem_fun (*this, &StripImportDialog::set_default_mapping), true)));
+	_action->set_text (_("Actions"));
 
-	refill_import_table ();
-
-	_clear_mapping = new ArdourButton (_("Clear Mapping"));
-	_reset_mapping = new ArdourButton (_match_pbd_id ? _("Reset - auto-map by ID") : _("Reset - auto-map by name"));
-	_import_strips = new ArdourButton (_("Import all as new tracks"));
-
-	_clear_mapping->signal_clicked.connect (mem_fun (*this, &StripImportDialog::clear_mapping));
-	_import_strips->signal_clicked.connect (mem_fun (*this, &StripImportDialog::import_all_strips));
-	_reset_mapping->signal_clicked.connect (sigc::bind (mem_fun (*this, &StripImportDialog::set_default_mapping), true));
+	_show_all_toggle = new ArdourButton (_("Show all local tracks"), ArdourButton::led_default_elements, true);
+	_show_all_toggle->set_led_left (true);
+	_show_all_toggle->set_can_focus (true);
+	_show_all_toggle->signal_clicked.connect (mem_fun (*this, &StripImportDialog::refill_import_table));
 
 	HBox* hbox = manage (new HBox ());
 	hbox->set_spacing (4);
-	hbox->pack_start (*_clear_mapping, true, false);
-	hbox->pack_start (*_import_strips, true, false);
-	hbox->pack_start (*_reset_mapping, true, false);
+	hbox->pack_start (*_action, true, false);
+	hbox->pack_start (*_show_all_toggle, true, false);
 
 	VBox* vbox = manage (new VBox ());
 	vbox->pack_start (_strip_table, false, false, 4);
@@ -686,7 +732,10 @@ StripImportDialog::setup_strip_import_page ()
 	_page_strip.pack_end (*hbox, false, false, 4);
 	_page_strip.show_all ();
 
-	_ok_button->set_sensitive (true); // XXX
+	_ok_button->set_sensitive (true);
+
+	set_default_mapping (false);
+	refill_import_table ();
 }
 
 void

@@ -119,9 +119,8 @@ private:
 	ArdourWidgets::ArdourDropdown* _add_rid_dropdown;
 	ArdourWidgets::ArdourDropdown* _add_eid_dropdown;
 	ArdourWidgets::ArdourButton*   _add_new_mapping;
-	ArdourWidgets::ArdourButton*   _clear_mapping;
-	ArdourWidgets::ArdourButton*   _reset_mapping;
-	ArdourWidgets::ArdourButton*   _import_strips;
+	ArdourWidgets::ArdourDropdown* _action;
+	ArdourWidgets::ArdourButton*   _show_all_toggle;
 
 	bool                       _match_pbd_id;
 	std::string                _path;
@@ -132,7 +131,6 @@ private:
 
 	PBD::ID _add_rid;
 	PBD::ID _add_eid;
-	bool    _default_mapping;
 
 	sigc::connection _notebook_connection;
 	sigc::connection _chooser_connection;
