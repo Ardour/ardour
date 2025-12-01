@@ -364,7 +364,7 @@ StripImportDialog::parse_route_state (std::string const& path)
 		goto out;
 	}
 
-	//_extern_map = _session->parse_route_state (path, _match_pbd_id);
+	_extern_map = _session->parse_route_state (path, _match_pbd_id);
 
 out:
 	if (_extern_map.empty ()) {
@@ -425,12 +425,24 @@ StripImportDialog::refill_import_table ()
 	_strip_table.attach (*manage (new ArdourHSpacer (1.0)), 0, 4, 1, 2, EXPAND | FILL, SHRINK,        4, 8);
 	/* clang-format on */
 
+	std::vector<std::pair<PBD::ID, PBD::ID>> sorted_map;
+	for (auto const& i : _import_map) {
+		sorted_map.push_back (i);
+	}
+	std::sort (sorted_map.begin (), sorted_map.end (), [=] (auto& a, auto& b) {
+		try {
+			return _route_map.at (a.first).pi.order () < _route_map.at (b.first).pi.order ();
+		} catch (...) {
+		}
+		return a.second < b.second;
+	});
+
 	/* Refill table */
 	int r = 1;
-	for (auto& [rid, eid] : _import_map) {
+	for (auto& [rid, eid] : sorted_map /*_import_map*/) {
 		++r;
 		if (_route_map.find (rid) != _route_map.end ()) {
-			l = manage (new Label (_route_map[rid], 0, 0.5));
+			l = manage (new Label (_route_map.at (rid).name, 0, 0.5));
 		} else {
 			l = manage (new Label (_("<i>New Track</i>"), 0, 0.5));
 			l->set_use_markup ();
@@ -442,10 +454,10 @@ StripImportDialog::refill_import_table ()
 #else
 		using namespace Menu_Helpers;
 		ArdourDropdown* dd = manage (new ArdourDropdown ());
-		for (auto& [eid, ename] : _extern_map) {
-			dd->add_menu_elem (MenuElem (Gtkmm2ext::markup_escape_text (ename), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::change_mapping), dd, rid, eid, ename)));
+		for (auto& [eid, einfo] : _extern_map) {
+			dd->add_menu_elem (MenuElem (Gtkmm2ext::markup_escape_text (einfo.name), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::change_mapping), dd, rid, eid, einfo.name)));
 		}
-		dd->set_text (_extern_map[eid]);
+		dd->set_text (_extern_map.at (eid).name);
 		_strip_table.attach (*dd, 2, 3, r, r + 1, EXPAND | FILL, SHRINK);
 #endif
 
@@ -485,18 +497,18 @@ StripImportDialog::refill_import_table ()
 	_add_rid_dropdown->add_menu_elem (MenuElem (_(" -- New Track -- "), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::prepare_mapping), false, next_new, _("New Track"))));
 	sizing_texts.push_back (_(" -- New Track -- "));
 
-	for (auto& [rid, rname] : _route_map) {
+	for (auto& [rid, rinfo] : _route_map) {
 		if (_import_map.find (rid) != _import_map.end ()) {
 			continue;
 		}
-		_add_rid_dropdown->add_menu_elem (MenuElem (Gtkmm2ext::markup_escape_text (rname), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::prepare_mapping), false, rid, rname)));
-		sizing_texts.push_back (rname);
+		_add_rid_dropdown->add_menu_elem (MenuElem (Gtkmm2ext::markup_escape_text (rinfo.name), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::prepare_mapping), false, rid, rinfo.name)));
+		sizing_texts.push_back (rinfo.name);
 	}
 
 	_add_eid_dropdown = manage (new ArdourWidgets::ArdourDropdown ());
-	for (auto& [eid, ename] : _extern_map) {
-		_add_eid_dropdown->add_menu_elem (MenuElem (Gtkmm2ext::markup_escape_text (ename), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::prepare_mapping), true, eid, ename)));
-		sizing_texts.push_back (ename);
+	for (auto& [eid, einfo] : _extern_map) {
+		_add_eid_dropdown->add_menu_elem (MenuElem (Gtkmm2ext::markup_escape_text (einfo.name), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::prepare_mapping), true, eid, einfo.name)));
+		sizing_texts.push_back (einfo.name);
 	}
 
 	_add_rid_dropdown->set_sizing_texts (sizing_texts);
@@ -588,7 +600,7 @@ StripImportDialog::import_all_strips ()
 	_import_map.clear ();
 
 	int64_t next_id = std::numeric_limits<uint64_t>::max () - 1 - _extern_map.size ();
-	for (auto& [eid, ename] : _extern_map) {
+	for (auto& [eid, einfo] : _extern_map) {
 		PBD::ID next_new      = PBD::ID (next_id++);
 		_import_map[next_new] = eid;
 	}
@@ -604,17 +616,23 @@ StripImportDialog::set_default_mapping (bool and_idle_update)
 
 	if (_match_pbd_id) {
 		/* try a 1:1 mapping */
-		for (auto& [eid, ename] : _extern_map) {
+		for (auto& [eid, einfo] : _extern_map) {
 			if (_route_map.find (eid) != _route_map.end ()) {
 				_import_map[eid] = eid;
 			}
 		}
 	} else {
 		/* match by name */
-		for (auto& [eid, ename] : _extern_map) {
+		for (auto& [eid, einfo] : _extern_map) {
 			// TODO consider building a reverse [pointer] map
-			for (auto& [rid, rname] : _route_map) {
-				if (ename == rname) {
+			for (auto& [rid, rinfo] : _route_map) {
+#ifdef MIXBUS
+				if (einfo.mixbus > 0 && einfo.mixbus == rinfo.mixbus) {
+					_import_map[rid] = eid;
+					break;
+				}
+#endif
+				if (einfo == rinfo) {
 					_import_map[rid] = eid;
 					break;
 				}
@@ -632,7 +650,11 @@ StripImportDialog::setup_strip_import_page ()
 	_route_map.clear ();
 
 	for (auto const& r : *_session->get_routes ()) {
-		_route_map[r->id ()] = r->name ();
+#ifdef MIXBUS
+		_route_map.emplace (r->id (), Session::RouteImportInfo (r->name (), r->presentation_info (), c->mixbus ()));
+#else
+		_route_map.emplace (r->id (), Session::RouteImportInfo (r->name (), r->presentation_info (), 0));
+#endif
 	}
 
 	set_default_mapping (false);

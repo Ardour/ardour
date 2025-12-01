@@ -28,16 +28,13 @@
 #include <ytkmm/treestore.h>
 #include <ytkmm/treeview.h>
 
-#include "ardour/search_paths.h"
 #include "pbd/id.h"
+
+#include "ardour/search_paths.h"
+#include "ardour/session.h"
 
 #include "ardour/template_utils.h"
 #include "ardour_dialog.h"
-
-namespace ARDOUR
-{
-	class Session;
-}
 
 namespace ArdourWidgets
 {
@@ -126,11 +123,12 @@ private:
 	ArdourWidgets::ArdourButton*   _reset_mapping;
 	ArdourWidgets::ArdourButton*   _import_strips;
 
-	bool                           _match_pbd_id;
-	std::string                    _path;
-	std::map<PBD::ID, std::string> _extern_map;
-	std::map<PBD::ID, std::string> _route_map;
-	std::map<PBD::ID, PBD::ID>     _import_map;
+	bool                       _match_pbd_id;
+	std::string                _path;
+	std::map<PBD::ID, PBD::ID> _import_map;
+
+	std::map<PBD::ID, ARDOUR::Session::RouteImportInfo> _extern_map;
+	std::map<PBD::ID, ARDOUR::Session::RouteImportInfo> _route_map;
 
 	PBD::ID _add_rid;
 	PBD::ID _add_eid;
