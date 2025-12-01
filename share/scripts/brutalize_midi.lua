@@ -1,7 +1,7 @@
 ardour { ["type"] = "EditorAction", name = "Brutalize MIDI",
 	license     = "MIT",
 	author      = "Ardour Team",
-	description = [[Randomize MIDI Note position (de-quantize).]]
+	description = [[Randomize MIDI Note position (de-quantize) of selected MIDI regions.]]
 }
 
 function factory () return function ()
