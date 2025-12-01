@@ -903,33 +903,3 @@ AudioClipEditor::grid_type_chosen (Editing::GridType gt)
 	}
 }
 
-void
-AudioClipEditor::set_session (ARDOUR::Session* s)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	CueEditor::set_session (s);
-
-	if (_session) {
-		_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&AudioClipEditor::map_transport_state, this), gui_context());
-	} else {
-		_session_connections.drop_connections();
-	}
-
-	map_transport_state ();
-}
-
-void
-AudioClipEditor::map_transport_state ()
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	if (!_session) {
-		return;
-	}
-
-	if (!_session->transport_rolling()) {
-		hide_count_in ();
-	}
-}
-

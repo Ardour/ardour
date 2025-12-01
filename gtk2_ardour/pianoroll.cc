@@ -1811,13 +1811,15 @@ Pianoroll::set_session (ARDOUR::Session* s)
 
 	CueEditor::set_session (s);
 
-	if (_session) {
-		_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&Pianoroll::map_transport_state, this), gui_context());
-	} else {
-		_session_connections.drop_connections();
-	}
+	if (with_transport_controls) {
+		if (_session) {
+			_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&Pianoroll::map_transport_state, this), gui_context());
+		} else {
+			_session_connections.drop_connections();
+		}
 
-	map_transport_state ();
+		map_transport_state ();
+	}
 
 	if (_session) {
 		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));

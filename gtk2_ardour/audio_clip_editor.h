@@ -110,8 +110,6 @@ public:
 	samplecnt_t current_page_samples() const;
 	void set_samples_per_pixel (samplecnt_t);
 
-	void set_session (ARDOUR::Session* s);
-
 	Gdk::Cursor* which_track_cursor () const { return nullptr; }
 	Gdk::Cursor* which_mode_cursor () const { return nullptr; }
 	Gdk::Cursor* which_trim_cursor (bool left_side) const { return nullptr; }
@@ -211,6 +209,4 @@ public:
 	void grid_type_chosen (Editing::GridType);
 
 	Gtk::Box* pack_mouse_mode_box () { return nullptr; }
-
-	void map_transport_state ();
 };
