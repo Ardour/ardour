@@ -707,6 +707,7 @@ CueEditor::rec_enable_change ()
 		break;
 	case Disabled:
 		rec_enable_button.set_active_state (Gtkmm2ext::Off);
+		hide_count_in ();
 		break;
 	}
 }
@@ -1447,6 +1448,7 @@ CueEditor::maybe_set_count_in ()
 	}
 
 	if (ref.box()->record_enabled() == Disabled) {
+		hide_count_in ();
 		return;
 	}
 

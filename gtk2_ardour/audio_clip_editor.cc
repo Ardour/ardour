@@ -894,9 +894,42 @@ AudioClipEditor::snap_mode_chosen (Editing::SnapMode)
 void
 AudioClipEditor::grid_type_chosen (Editing::GridType gt)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (gt != Editing::GridTypeMinSec && grid_actions[gt] && grid_actions[gt]->get_active()) {
 		assert (grid_actions[Editing::GridTypeMinSec]);
 		grid_actions[Editing::GridTypeMinSec]->set_active (false);
 		grid_actions[Editing::GridTypeMinSec]->set_active (true);
 	}
 }
+
+void
+AudioClipEditor::set_session (ARDOUR::Session* s)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	CueEditor::set_session (s);
+
+	if (_session) {
+		_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&AudioClipEditor::map_transport_state, this), gui_context());
+	} else {
+		_session_connections.drop_connections();
+	}
+
+	map_transport_state ();
+}
+
+void
+AudioClipEditor::map_transport_state ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (!_session) {
+		return;
+	}
+
+	if (!_session->transport_rolling()) {
+		hide_count_in ();
+	}
+}
+

@@ -558,7 +558,6 @@ Pianoroll::maybe_update ()
 			}
 
 			if (_track->triggerbox()->record_enabled() == Recording) {
-
 				_playhead_cursor->set_position (data_capture_duration);
 			}
 
@@ -1812,15 +1811,13 @@ Pianoroll::set_session (ARDOUR::Session* s)
 
 	CueEditor::set_session (s);
 
-	if (with_transport_controls) {
-		if (_session) {
-			_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&Pianoroll::map_transport_state, this), gui_context());
-		} else {
-			_session_connections.drop_connections();
-		}
-
-		map_transport_state ();
+	if (_session) {
+		_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&Pianoroll::map_transport_state, this), gui_context());
+	} else {
+		_session_connections.drop_connections();
 	}
+
+	map_transport_state ();
 
 	if (_session) {
 		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
@@ -1870,6 +1867,8 @@ Pianoroll::map_transport_state ()
 		} else {
 			loop_button.set_active (false);
 		}
+
+		hide_count_in ();
 	}
 }
 
