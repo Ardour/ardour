@@ -1276,7 +1276,7 @@ Session::parse_route_state (const string& path, bool& match_pbd_id)
 
 			int mixbus = 0;
 #ifdef MIXBUS
-			rxml->get_property (X_("mixbus-num"), mixbus)
+			rxml->get_property (X_("mixbus-num"), mixbus);
 #endif
 
 			rv.emplace (id, RouteImportInfo (name, pi, mixbus));
