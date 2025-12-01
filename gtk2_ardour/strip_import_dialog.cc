@@ -364,7 +364,7 @@ StripImportDialog::parse_route_state (std::string const& path)
 		goto out;
 	}
 
-	_extern_map = _session->parse_route_state (path, _match_pbd_id);
+	//_extern_map = _session->parse_route_state (path, _match_pbd_id);
 
 out:
 	if (_extern_map.empty ()) {
