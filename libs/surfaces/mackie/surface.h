@@ -273,6 +273,9 @@ public:
 
 	/** Send RGB colors to P1-M and V1-M scribble strips (iCON-specific SysEx) */
 	MidiByteArray display_colors_on_p1m_v1m (const std::array<uint8_t, 24>& rgb_values) const;
+	std::array<uint8_t, 24> _solid_icon_rgb{};     // stores the real solid colors
+	bool                   _blink_state = false;   // true = full brightness, false = dim/off
+	uint64_t               _last_blink_toggle = 0;
 
   public:
 	/* IP MIDI devices need to keep a handle on this and destroy it */

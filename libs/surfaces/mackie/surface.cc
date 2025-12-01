@@ -144,8 +144,11 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	is_p1m |= device_name.find("P1-M") != std::string::npos;
 	is_p1nano |= device_name.find("P1-NANO") != std::string::npos;
 
-	_pending_icon_rgb.fill(0);
+	_solid_icon_rgb.fill(0);
 	_current_icon_rgb.fill(0);
+	_pending_icon_rgb.fill(0);
+	_blink_state = false;
+	_last_blink_toggle = 0;
 
 	/* only the first Surface object has global controls */
 	/* lets use master_position instead */
@@ -1183,6 +1186,13 @@ Surface::redisplay (PBD::microseconds_t now, bool force)
 	if (is_v1m || is_p1m || is_p1nano) {
 		std::array<uint8_t, 24> pending_rgb{};
 
+		// 1-second blink cycle (500 ms on / 500 ms off)
+		uint64_t now = g_get_monotonic_time();
+		if (now - _last_blink_toggle >= 500000) {           // 500000 µs = 500 ms
+			_blink_state = !_blink_state;
+			_last_blink_toggle = now;
+		}
+
 		for (size_t i = 0; i < 8 && i < strips.size(); ++i) {
 			if (auto sp = strips[i]->stripable()) {
 				uint32_t c = sp->presentation_info().color();
@@ -1198,6 +1208,33 @@ Surface::redisplay (PBD::microseconds_t now, bool force)
 				pending_rgb[o+0] = r;
 				pending_rgb[o+1] = g;
 				pending_rgb[o+2] = b;
+
+				// Save solid color for blinking reference
+				_solid_icon_rgb[o+0] = r;
+				_solid_icon_rgb[o+1] = g;
+				_solid_icon_rgb[o+2] = b;
+
+				// If this strip is selected → apply blink
+				if (sp->is_selected()) {
+					if (!_blink_state) {
+						// Blink OFF phase: dim to ~20% or full black (choose one)
+						pending_rgb[o+0] = r * 0.2f;
+						pending_rgb[o+1] = g * 0.2f;
+						pending_rgb[o+2] = b * 0.2f;
+						// For full black instead, use:
+						// pending_rgb[o+0] = pending_rgb[o+1] = pending_rgb[o+2] = 0;
+					} else {
+						// Blink ON phase: full solid color
+						pending_rgb[o+0] = r;
+						pending_rgb[o+1] = g;
+						pending_rgb[o+2] = b;
+					}
+				} else {
+					// Not selected → always solid
+					pending_rgb[o+0] = r;
+					pending_rgb[o+1] = g;
+					pending_rgb[o+2] = b;
+				}
 			}
 		}
 
