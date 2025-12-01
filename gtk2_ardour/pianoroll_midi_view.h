@@ -95,6 +95,7 @@ class PianorollMidiView : public MidiView
   protected:
 	bool scroll (GdkEventScroll* ev);
 
+	ArdourCanvas::Item* _noscroll_parent;
 	ArdourCanvas::Rectangle* automation_group;
 	ArdourCanvas::Text* overlay_text;
 

@@ -55,6 +55,7 @@ PianorollMidiView::PianorollMidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
                                       MidiViewBackground&      bg,
                                       uint32_t                 basic_color)
 	: MidiView (mt, parent, ec, bg, basic_color)
+	, _noscroll_parent (&noscroll_parent)
 	, overlay_text (nullptr)
 	, active_automation (nullptr)
 	, velocity_display (nullptr)
@@ -748,7 +749,7 @@ void
 PianorollMidiView::set_overlay_text (std::string const & str)
 {
 	if (!overlay_text) {
-		overlay_text = new ArdourCanvas::Text (_note_group->parent());
+		overlay_text = new ArdourCanvas::Text (_noscroll_parent);
 		Pango::FontDescription font ("Sans 200");
 		overlay_text->set_font_description (font);
 		overlay_text->set_color (0xff000088);
