@@ -702,7 +702,7 @@ AudioClipEditor::set_overlay_text (std::string const & str)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (!overlay_text) {
-		overlay_text = new ArdourCanvas::Text (data_group);
+		overlay_text = new ArdourCanvas::Text (no_scroll_group);
 		Pango::FontDescription font ("Sans 200");
 		overlay_text->set_font_description (font);
 		overlay_text->set_color (0xff000088);
