@@ -1198,16 +1198,8 @@ Session::export_route_state (std::shared_ptr<RouteList> rl, const string& path, 
 }
 
 static bool
-allow_import_route_state (XMLNode const& node, int version)
+allow_import_route_state (PresentationInfo const& pi)
 {
-	XMLNode* pnode = node.child (PresentationInfo::state_node_name.c_str ());
-	if (!pnode) {
-		return false;
-	}
-
-	PresentationInfo pi (PresentationInfo::Flag (0));
-	pi.set_state (*pnode, version);
-
 	if (pi.special (false)) { // |SurroundMaster|MonitorOut|Auditioner
 		return false;
 	}
@@ -1218,10 +1210,24 @@ allow_import_route_state (XMLNode const& node, int version)
 	return true;
 }
 
-std::map<PBD::ID, std::string>
+static bool
+allow_import_route_state (XMLNode const& node, int version)
+{
+	XMLNode* pnode = node.child (PresentationInfo::state_node_name.c_str ());
+	if (!pnode) {
+		return false;
+	}
+
+	PresentationInfo pi (PresentationInfo::Flag (0));
+	pi.set_state (*pnode, version);
+
+	return allow_import_route_state (pi);
+}
+
+std::map<PBD::ID, Session::RouteImportInfo>
 Session::parse_route_state (const string& path, bool& match_pbd_id)
 {
-	std::map<PBD::ID, std::string> rv;
+	std::map<PBD::ID, RouteImportInfo> rv;
 
 	XMLTree tree;
 	if (!tree.read (path)) {
@@ -1256,11 +1262,24 @@ Session::parse_route_state (const string& path, bool& match_pbd_id)
 				continue;
 			}
 
-			if (!allow_import_route_state (*rxml, version)) {
+			XMLNode* pnode = rxml->child (PresentationInfo::state_node_name.c_str ());
+			if (!pnode) {
 				continue;
 			}
 
-			rv[id] = name;
+			PresentationInfo pi (PresentationInfo::Flag (0));
+			pi.set_state (*pnode, version);
+
+			if (!allow_import_route_state (pi)) {
+				continue;
+			}
+
+			int mixbus = 0;
+#ifdef MIXBUS
+			rxml->get_property (X_("mixbus-num"), mixbus)
+#endif
+
+			rv.emplace (id, RouteImportInfo (name, pi, mixbus));
 		}
 	}
 	return rv;
