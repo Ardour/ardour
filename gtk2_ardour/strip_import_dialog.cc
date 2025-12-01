@@ -698,7 +698,7 @@ StripImportDialog::setup_strip_import_page ()
 
 	for (auto const& r : *_session->get_routes ()) {
 #ifdef MIXBUS
-		_route_map.emplace (r->id (), Session::RouteImportInfo (r->name (), r->presentation_info (), c->mixbus ()));
+		_route_map.emplace (r->id (), Session::RouteImportInfo (r->name (), r->presentation_info (), r->mixbus ()));
 #else
 		_route_map.emplace (r->id (), Session::RouteImportInfo (r->name (), r->presentation_info (), 0));
 #endif
