@@ -729,7 +729,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	struct MIDIPendingSwap : public PendingSwap {
 		RTMidiBufferBeats* rt_midibuffer;
 
-		MIDIPendingSwap() : rt_midibuffer (nullptr) {}
+		MIDIPendingSwap();
 		~MIDIPendingSwap() { delete rt_midibuffer; }
 	};
 

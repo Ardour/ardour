@@ -3180,15 +3180,20 @@ MIDITrigger::load_pending_data (PendingSwap& ps)
 {
 	MIDIPendingSwap* mps (dynamic_cast<MIDIPendingSwap*> (&ps));
 	assert (mps);
+	assert (mps->rt_midibuffer);
 	_model->render (_model->read_lock(), *mps->rt_midibuffer);
 	return 0;
+}
+
+MIDITrigger::MIDIPendingSwap::MIDIPendingSwap ()
+	: rt_midibuffer (new RTMidiBufferBeats)
+{
 }
 
 void
 MIDITrigger::model_contents_changed ()
 {
 	MIDIPendingSwap* pending = new MIDIPendingSwap;
-	pending->rt_midibuffer = new RTMidiBufferBeats;
 
 	pending->play_start = _play_start;
 	pending->play_end = _play_end;
