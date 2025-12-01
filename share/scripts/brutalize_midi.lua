@@ -58,7 +58,7 @@ function factory () return function ()
 
 			-- ..generate random offset..
 			local tickdiff = math.floor (rv['rand']() * max_distance);
-			print (old_pos:get_beats (), old_pos:get_ticks (), tickdiff)
+			--print (old_pos:get_beats (), old_pos:get_ticks (), tickdiff)
 
 			-- .. and calculate new position.
 			local new_pos = Temporal.Beats (old_pos:get_beats (), old_pos:get_ticks () + tickdiff)
