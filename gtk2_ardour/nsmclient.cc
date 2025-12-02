@@ -28,12 +28,15 @@
 
 #ifndef COMPILER_MSVC
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-#else
+#endif
+#ifdef PLATFORM_WINDOWS
 #include <process.h>  // Needed for 'getpid()'
 
 #include <lo/lo_osc_types.h>
+#ifdef COMPILER_MSVC
 #define LO_TT_IMMEDIATE lo_get_tt_immediate()
 lo_timetag lo_get_tt_immediate() { lo_timetag tt = {0U,1U}; return tt; }
+#endif
 #endif
 
 namespace NSM
