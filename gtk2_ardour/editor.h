@@ -229,7 +229,7 @@ public:
 
 	bool extend_selection_to_track (TimeAxisView&);
 
-	void edit_region_in_pianoroll_window ();
+	void edit_region_in_dedicated_window ();
 	void maybe_edit_region_in_bottom_pane (RegionView&);
 
 	void play_selection ();
@@ -1156,7 +1156,6 @@ private:
 	void remove_selected_regions ();
 	void remove_regions (const RegionSelection&, bool can_ripple, bool as_part_of_other_command);
 	void remove_clicked_region ();
-	void show_region_properties ();
 	void show_midi_list_editor ();
 	void rename_region ();
 	void duplicate_some_regions (RegionSelection&, float times);

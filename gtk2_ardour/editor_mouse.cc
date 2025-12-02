@@ -1346,7 +1346,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	if (!_drags->active () && Keyboard::is_edit_event (&event->button)) {
 		switch (item_type) {
 		case RegionItem:
-			show_region_properties ();
+			edit_region_in_dedicated_window ();
 			break;
 		case TempoMarkerItem: {
 			ArdourMarker* marker;

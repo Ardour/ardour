@@ -385,10 +385,11 @@
       <separator/>
       <menuitem action='loop-region'/>
       <menuitem action='rename-region'/>
-      <menuitem action='show-region-properties'/>
       <menuitem action='loudness-analyze-region'/>
       <menuitem action='spectral-analyze-region'/>
       <menu action='RegionMenuEdit'>
+        <menuitem action='edit-region-dedicated-window'/>
+        <separator/>
 #ifndef MIXBUS
         <menuitem action='combine-regions'/>
         <menuitem action='uncombine-regions'/>
@@ -925,8 +926,7 @@
     <separator/>
     <menuitem action='loop-region'/>
     <menuitem action='rename-region'/>
-    <menuitem action='show-region-properties'/>
-    <menuitem action='edit-region-pianoroll-window'/>
+    <menuitem action='edit-region-dedicated-window'/>
     <menu action='RegionMenuEdit'>
       <menuitem action='combine-regions'/>
       <menuitem action='uncombine-regions'/>

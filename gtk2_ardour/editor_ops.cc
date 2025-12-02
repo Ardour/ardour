@@ -2757,13 +2757,6 @@ Editor::lower_region_to_bottom ()
 	do_layer_operation (LowerToBottom);
 }
 
-/** Show the region editor for the selected regions */
-void
-Editor::show_region_properties ()
-{
-	selection->foreach_regionview (&RegionView::show_region_editor);
-}
-
 /** Show the midi list editor for the selected MIDI regions */
 void
 Editor::show_midi_list_editor ()
@@ -9520,9 +9513,9 @@ Editor::temporal_zoom_extents ()
 }
 
 void
-Editor::edit_region_in_pianoroll_window ()
+Editor::edit_region_in_dedicated_window ()
 {
-	selection->foreach_midi_regionview (&MidiRegionView::show_region_editor);
+	selection->foreach_regionview (&RegionView::show_region_editor);
 }
 
 void
