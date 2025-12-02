@@ -501,7 +501,7 @@ LoudnessDialog::analyze ()
 	_status->finish (TRS_UI);
 
 	if (!_status->aborted () && _status->result_map.size () != 1) {
-		ArdourMessageDialog (_("Loudness measurement returned no results. Likely because the analyzed range is to short."), false, MESSAGE_ERROR).run ();
+		ArdourMessageDialog (_("Loudness measurement returned no results. Likely because the analyzed range is too short."), false, MESSAGE_ERROR).run ();
 		return 1;
 	}
 

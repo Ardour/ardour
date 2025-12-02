@@ -153,7 +153,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 
 	/* sync_button */
 	_sync_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ApplicationBar::sync_button_clicked), false);
-	_sync_button.set_sizing_text (S_("LogestSync|M-Clk"));
+	_sync_button.set_sizing_text (S_("LongestSync|M-Clk"));
 
 	/* sub-layout for Sync | Shuttle (grow) */
 	HBox* ssbox = manage (new HBox);

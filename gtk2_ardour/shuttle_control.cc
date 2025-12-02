@@ -101,9 +101,9 @@ ShuttleInfoButton::parameter_changed (std::string p)
 		delete disp_context_menu;
 		disp_context_menu = 0;
 		if (Config->get_shuttle_units() == Percentage) {
-			set_sizing_text (S_("LogestShuttle|> 888.9%"));
+			set_sizing_text (S_("LongestShuttle|> 888.9%"));
 		} else {
-			set_sizing_text (S_("LogestShuttle|> +00 st"));
+			set_sizing_text (S_("LongestShuttle|> +00 st"));
 		}
 	}
 }

@@ -3934,7 +3934,7 @@ These settings will only take effect after %1 is restarted.\n\
 		(_sync_framerate->tip_widget(),
 		 string_compose (_("This option controls the value of the video frame rate <i>while chasing</i> an external timecode source.\n\n"
 				   "<b>When enabled</b> the session video frame rate will be changed to match that of the selected external timecode source.\n\n"
-				   "<b>When disabled</b> the session video frame rate will not be changed to match that of the selected external timecode source."
+				   "<b>When disabled</b> the session video frame rate will not be changed to match that of the selected external timecode source. "
 				   "Instead the frame rate indication in the main clock will flash red and %1 will convert between the external "
 				   "timecode standard and the session standard."), PROGRAM_NAME));
 	add_option (_("Transport/Chase"), _sync_framerate);
@@ -4167,7 +4167,7 @@ These settings will only take effect after %1 is restarted.\n\
 		puimode->add (PluginGUIDestroyVST, _("only destroys VST2/3 UIs, hides others"));
 
 		add_option (_("Plugins/GUI"), puimode);
-	Gtkmm2ext::UI::instance()->set_tip (puimode->tip_widget(), _("Closing a plugin window, usually only hides it. This makes is fast to open the same plugin UI again at a later time.\n\nMost plugin UIs are inactive and do not consume any CPU resources while they are not mapped on the screen.\n\nHowever some plugins do consume significant CPU and GPU resources even when they are not currently displayed. This option allows one to work around the issue."));
+	Gtkmm2ext::UI::instance()->set_tip (puimode->tip_widget(), _("Closing a plugin window, usually only hides it. This makes it fast to open the same plugin UI again at a later time.\n\nMost plugin UIs are inactive and do not consume any CPU resources while they are not mapped on the screen.\n\nHowever some plugins do consume significant CPU and GPU resources even when they are not currently displayed. This option allows one to work around the issue."));
 
 #ifdef LV2_EXTENDED
 	add_option (_("Plugins/GUI"), new OptionEditorHeading (_("Mixer Strip Inline Display")));

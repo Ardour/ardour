@@ -9084,7 +9084,7 @@ Editor::do_remove_gaps ()
 	hpacker1.pack_start (e1, false, false);
 
 	Gtk::HBox hpacker2;
-	Gtk::Label label2 (_("Leave a gap of(seconds):"));
+	Gtk::Label label2 (_("Leave a gap of (seconds):"));
 	Gtk::Entry e2;
 
 	hpacker2.set_spacing (12);
