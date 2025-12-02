@@ -27,6 +27,10 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#ifdef COMPILER_MSVC
+#include <io.h>
+#endif
+
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
