@@ -1352,7 +1352,6 @@ Pianoroll::trigger_prop_change (PBD::PropertyChange const & what_changed)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (what_changed.contains (Properties::region)) {
-		std::cerr << "PR region changed\n";
 		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (ref.trigger()->the_region());
 		set_region (mr);
 	}
