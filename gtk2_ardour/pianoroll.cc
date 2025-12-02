@@ -1475,6 +1475,13 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	bg->display_region (*view);
 
 	maybe_set_from_rsu ();
+
+	if (r->source()->empty()) {
+		std::shared_ptr<MidiTrack> mt (std::dynamic_pointer_cast<ARDOUR::MidiTrack> (_track));
+		if (mt) {
+			note_mode_actions[mt->note_mode()]->set_active (true);
+		}
+	}
 }
 
 bool
