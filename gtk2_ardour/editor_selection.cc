@@ -1523,7 +1523,7 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 
 	if (rs.size() > 1) {
 		_region_actions->get_action("show-region-list-editor")->set_sensitive (false);
-		_region_actions->get_action("show-region-properties")->set_sensitive (false);
+		_region_actions->get_action("edit-region-dedicated-window")->set_sensitive (false);
 		_region_actions->get_action("rename-region")->set_sensitive (false);
 		/* XXX need to check whether there is than 1 per
 		   playlist, because otherwise this makes no sense.
