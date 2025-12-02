@@ -467,6 +467,10 @@ EditingContext::register_common_actions (Bindings* common_bindings, std::string 
 	reg_sens (_common_actions, "editor-copy", _("Copy"), sigc::mem_fun (*this, &EditingContext::copy));
 	reg_sens (_common_actions, "editor-paste", _("Paste"), sigc::mem_fun (*this, &EditingContext::keyboard_paste));
 
+	RadioAction::Group note_mode_group;
+	note_mode_actions[ARDOUR::Sustained] = ActionManager::register_radio_action (_common_actions, note_mode_group, "set-note-mode-sustained", _("Sustained"), sigc::bind (sigc::mem_fun (*this, &EditingContext::note_mode_chosen), ARDOUR::Sustained));
+	note_mode_actions[ARDOUR::Percussive] = ActionManager::register_radio_action (_common_actions, note_mode_group, "set-note-mode-percussivee", _("Percussive"), sigc::bind (sigc::mem_fun (*this, &EditingContext::note_mode_chosen), ARDOUR::Percussive));
+
 	RadioAction::Group mouse_mode_group;
 
 	mouse_mode_actions[Editing::MouseObject] = ActionManager::register_radio_action (_common_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::mouse_mode_chosen), Editing::MouseObject));

@@ -100,8 +100,8 @@ class Pianoroll : public CueEditor
 	int visible_channel () const { return _visible_channel; }
 
 	void note_mode_clicked();
-	ARDOUR::NoteMode note_mode() const { return _note_mode; }
-	void set_note_mode (ARDOUR::NoteMode);
+	ARDOUR::NoteMode note_mode() const;
+	void note_mode_chosen (ARDOUR::NoteMode);
 
 	void set_trigger_start (Temporal::timepos_t const &);
 	void set_trigger_end (Temporal::timepos_t const &);
@@ -213,7 +213,6 @@ class Pianoroll : public CueEditor
 
 	int _visible_channel;
 
-	ARDOUR::NoteMode _note_mode;
 	sigc::signal<void> NoteModeChanged;
 
 	void automation_state_changed ();
@@ -253,4 +252,5 @@ class Pianoroll : public CueEditor
 
 	void instant_save ();
 	void parameter_changed (std::string param);
+	void set_from_rsu (RegionUISettings&);
 };

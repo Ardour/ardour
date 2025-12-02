@@ -39,13 +39,14 @@ struct RegionUISettings
 	Editing::SnapMode snap_mode;
 	Editing::ZoomFocus zoom_focus;
 	Editing::MouseMode mouse_mode;
+	ARDOUR::NoteMode note_mode;
 	Temporal::timepos_t x_origin;
 	Temporal::BBT_Offset recording_length;
 	int width;
 	int height;
 	int x;
 	int y;
-	
+
 	/* MIDI specific */
 
 	Editing::GridType draw_length;

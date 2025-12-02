@@ -74,7 +74,6 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	, bg (nullptr)
 	, view (nullptr)
 	, bbt_metric (*this)
-	, _note_mode (Sustained)
 	, ignore_channel_changes (false)
 {
 	autoscroll_vertical_allowed = false;
@@ -1587,6 +1586,40 @@ Pianoroll::automation_state_changed ()
 	}
 }
 
+ARDOUR::NoteMode
+Pianoroll::note_mode () const
+{
+	return bg->note_mode();
+}
+
+void
+Pianoroll::note_mode_chosen (ARDOUR::NoteMode mode)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	Glib::RefPtr<Gtk::RadioAction> ract = note_mode_actions[mode];
+
+	if (!ract->get_active()) {
+		return;
+	}
+
+	if (mode != bg->note_mode()) {
+		bg->set_note_mode (mode);
+		if (bg->note_mode() == Percussive) {
+			note_mode_button.set_active_state (Gtkmm2ext::ExplicitActive);
+		} else {
+			note_mode_button.set_active_state (Gtkmm2ext::Off);
+		}
+	}
+
+	instant_save ();
+}
+
 void
 Pianoroll::note_mode_clicked ()
 {
@@ -1594,27 +1627,11 @@ Pianoroll::note_mode_clicked ()
 
 	assert (bg);
 
+
 	if (bg->note_mode() == Sustained) {
-		set_note_mode (Percussive);
+		note_mode_actions[Percussive]->set_active (true);
 	} else {
-		set_note_mode (Sustained);
-	}
-}
-
-void
-Pianoroll::set_note_mode (NoteMode nm)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	assert (bg);
-
-	if (nm != bg->note_mode()) {
-		bg->set_note_mode (nm);
-		if (bg->note_mode() == Percussive) {
-			note_mode_button.set_active_state (Gtkmm2ext::ExplicitActive);
-		} else {
-			note_mode_button.set_active_state (Gtkmm2ext::Off);
-		}
+		note_mode_actions[Sustained]->set_active (true);
 	}
 }
 
@@ -2038,6 +2055,13 @@ Pianoroll::hide_count_in ()
 }
 
 void
+Pianoroll::set_from_rsu (RegionUISettings& region_ui_settings)
+{
+	note_mode_actions[region_ui_settings.note_mode]->set_active (true);
+	CueEditor::set_from_rsu (region_ui_settings);
+}
+
+void
 Pianoroll::instant_save ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
@@ -2047,6 +2071,7 @@ Pianoroll::instant_save ()
 	region_ui_settings.channel = draw_channel();
 	region_ui_settings.note_min = bg->lowest_note ();
 	region_ui_settings.note_max = bg->highest_note();
+	region_ui_settings.note_mode = note_mode ();
 
 	CueEditor::instant_save ();
 }
