@@ -171,15 +171,12 @@ RegionUISettingsManager::load (std::string const & xmlpath)
 	}
 
 	if (!state_tree.read (xmlpath)) {
-		std::cerr << "bad xmlpath " << xmlpath << std::endl;
 		return -1;
 	}
-	std::cerr << "loading " << xmlpath << std::endl;
 
 	XMLNode const & root (*state_tree.root());
 
 	if (root.name() != X_("RegionUISettings")) {
-		std::cerr << "bad root\n";
 		return -1;
 	}
 
@@ -187,8 +184,6 @@ RegionUISettingsManager::load (std::string const & xmlpath)
 		RegionUISettings rsu;
 		PBD::ID id;
 		node->get_property ("id", id);
-
-		std::cerr << "loaded RSU for " << id << std::endl;
 
 		if (rsu.set_state (*node, 0) == 0) {
 			insert (std::make_pair (id, rsu));
