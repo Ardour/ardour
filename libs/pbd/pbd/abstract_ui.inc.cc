@@ -31,7 +31,7 @@
 
 #include "pbd/i18n.h"
 
-#ifdef COMPILER_MSVC
+#if defined(COMPILER_MSVC) && !defined(OTHER1)
 #include <ardourext/misc.h>  // Needed for 'DECLARE_DEFAULT_COMPARISONS'. Objects in an STL container can be
                              // searched and sorted. Thus, when instantiating the container, MSVC complains
                              // if the type of object being contained has no appropriate comparison operators
