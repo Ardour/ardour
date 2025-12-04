@@ -123,7 +123,7 @@ PluginPinWidget::PluginPinWidget (std::shared_ptr<ARDOUR::PluginInsert> pi)
 	_pm_size_group  = SizeGroup::create (SIZE_GROUP_BOTH);
 	_add_plugin.set_tweaks (ArdourButton::Square);
 	_del_plugin.set_tweaks (ArdourButton::Square);
-	if (_pi->plugin (0)->get_info()->reconfigurable_io ()) {
+	if (_pi->plugin (0)->get_info()->reconfigurable_io () || _pi->plugin (0)->get_info()->variable_bus_layout ()) {
 		_pm_size_group->add_widget (_add_input_audio);
 		_pm_size_group->add_widget (_del_input_audio);
 		_pm_size_group->add_widget (_add_input_midi);
@@ -151,7 +151,7 @@ PluginPinWidget::PluginPinWidget (std::shared_ptr<ARDOUR::PluginInsert> pi)
 	/* left side */
 	tl->pack_start (_set_config, false, false);
 
-	if (_pi->plugin (0)->get_info()->reconfigurable_io ()) {
+	if (_pi->plugin (0)->get_info()->reconfigurable_io () || _pi->plugin (0)->get_info()->variable_bus_layout ()) {
 		box = manage (new HBox ());
 		box->set_border_width (2);
 		box->pack_start (_add_input_audio, true, false);
