@@ -234,7 +234,6 @@ EditingContext::EditingContext (std::string const & name)
 
 	set_tooltip (play_note_selection_button, _("Play notes when selected"));
 	set_tooltip (note_mode_button, _("Switch between sustained and percussive mode"));
-	set_tooltip (follow_playhead_button, _("Scroll automatically to keep playhead visible"));
 	set_tooltip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 	/* Leave tip for full zoom button to derived class */
 	set_tooltip (visible_channel_selector, _("Select visible MIDI channel"));
@@ -454,6 +453,8 @@ EditingContext::register_common_actions (Bindings* common_bindings, std::string 
 
 	follow_playhead_action = toggle_reg_sens (_common_actions, "toggle-follow-playhead", _("Follow Playhead"), sigc::mem_fun (*this, &EditingContext::follow_playhead_chosen));
 	stationary_playhead_action = toggle_reg_sens (_common_actions, "toggle-stationary-playhead", _("Stationary Playhead"), (mem_fun(*this, &EditingContext::stationary_playhead_chosen)));
+
+	follow_playhead_action->set_tooltip (_("Scroll automatically to keep playhead visible"));
 
 	undo_action = reg_sens (_common_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::undo), 1U));
 	redo_action = reg_sens (_common_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::redo), 1U));
