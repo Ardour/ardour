@@ -16,13 +16,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include <regex>
 
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 
 #include "pbd/basename.h"
-#include "pbd/compose.h"
 #include "pbd/convert.h"
 #include "pbd/debug.h"
 #include "pbd/error.h"
