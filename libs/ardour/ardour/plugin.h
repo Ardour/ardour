@@ -315,7 +315,7 @@ public:
 
 	virtual bool reconfigure_io (ChanCount /*in*/, ChanCount /*aux_in*/, ChanCount /*out*/) { return true; }
 	virtual bool match_variable_io (ChanCount& /*in*/, ChanCount& /*aux_in*/, ChanCount& /*out*/) { return false; }
-	virtual void request_bus_layout (ChanCount const& /*in*/, ChanCount const& /*aux_in*/, ChanCount const& /*out*/);
+	virtual void request_bus_layout (ChanCount const& /*in*/, ChanCount const& /*aux_in*/, ChanCount const& /*out*/) { }
 
 	virtual ChanCount output_streams () const;
 	virtual ChanCount input_streams () const;
