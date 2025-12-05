@@ -2351,8 +2351,11 @@ EditingContext::bind_mouse_mode_buttons ()
 	RefPtr<Action> act;
 
 	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("temporal-zoom-in"));
+	act->set_tooltip (_("Zoom In"));
 	zoom_in_button.set_related_action (act);
+
 	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("temporal-zoom-out"));
+	act->set_tooltip (_("Zoom Out"));
 	zoom_out_button.set_related_action (act);
 
 	follow_playhead_button.set_related_action (follow_playhead_action);

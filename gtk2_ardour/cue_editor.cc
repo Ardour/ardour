@@ -489,10 +489,15 @@ CueEditor::build_upper_toolbar ()
 		play_button.set_size_request (PX_SCALE(20), PX_SCALE(20));
 #undef PX_SCALE
 
+		set_tooltip (play_button, _("Play this clip from the top"));
+		set_tooltip (loop_button, _("Loop the range of this clip"));
+		set_tooltip (solo_button, _("Solo the track containing this clip"));
+
 		play_button.signal_button_release_event().connect (sigc::mem_fun (*this, &CueEditor::play_button_press), false);
 		solo_button.signal_button_release_event().connect (sigc::mem_fun (*this, &CueEditor::solo_button_press), false);
 		loop_button.signal_button_release_event().connect (sigc::mem_fun (*this, &CueEditor::loop_button_press), false);
 	} else {
+		set_tooltip (play_button, _("Launch selected clip"));
 		rec_box.pack_start (play_button, false, false);
 		play_button.signal_button_release_event().connect (sigc::mem_fun (*this, &CueEditor::bang_button_press), false);
 	}
@@ -501,6 +506,9 @@ CueEditor::build_upper_toolbar ()
 	rec_enable_button.set_sensitive (false);
 	rec_enable_button.signal_button_release_event().connect (sigc::mem_fun (*this, &CueEditor::rec_button_press), false);
 	rec_enable_button.set_name ("record enable button");
+
+	set_tooltip (rec_enable_button, _("Record clip"));
+	set_tooltip (length_selector, _("Record length"));
 
 	std::string label;
 	std::string noun;

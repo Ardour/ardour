@@ -2894,8 +2894,6 @@ Editor::setup_tooltips ()
 	set_tooltip (*_group_tabs, _("Groups: click to (de)activate\nContext-click for other operations"));
 	set_tooltip (nudge_forward_button, _("Nudge Region/Selection Later"));
 	set_tooltip (nudge_backward_button, _("Nudge Region/Selection Earlier"));
-	set_tooltip (zoom_in_button, _("Zoom In"));
-	set_tooltip (zoom_out_button, _("Zoom Out"));
 	set_tooltip (zoom_preset_selector, _("Zoom to Time Scale"));
 	set_tooltip (full_zoom_button, _("Zoom to Session"));
 	set_tooltip (tav_expand_button, _("Expand Tracks"));
