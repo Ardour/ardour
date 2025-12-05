@@ -29,7 +29,7 @@
 #include "pbd/libpbd_visibility.h"
 #include "pbd/timing.h"
 
-/* check for PTW32_VERSION */
+/* check for __PTW32_VERSION */
 #ifdef COMPILER_MSVC
 #include <ardourext/pthread.h>
 #else
@@ -83,7 +83,7 @@ namespace PBD {
 #define DEBUG_STR(id) __debug_str ## id
 #define DEBUG_STR_APPEND(id,s) __debug_str ## id << s;
 #define DEBUG_ENABLED(bits) (((bits) & PBD::debug_bits).any())
-#ifdef PTW32_VERSION
+#ifdef __PTW32_VERSION
 #define DEBUG_THREAD_SELF pthread_self().p
 #define DEBUG_THREAD_PRINT(t) t.p
 #else

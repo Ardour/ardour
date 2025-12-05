@@ -237,7 +237,7 @@ pthread_set_name (const char* str)
 	/* copy string and delete it when exiting */
 	thread_name.set (strdup (str)); // leaks
 
-#if !defined PTW32_VERSION && defined _GNU_SOURCE
+#if !defined __PTW32_VERSION && defined _GNU_SOURCE
 	/* set public thread name, up to 16 chars */
 	char ptn[16];
 	memset (ptn, 0, 16);
