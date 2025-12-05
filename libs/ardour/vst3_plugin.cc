@@ -351,15 +351,21 @@ VST3Plugin::request_bus_layout (ChanCount const& in, ChanCount const& aux_in, Ch
 bool
 VST3Plugin::reconfigure_io (ChanCount in, ChanCount aux_in, ChanCount out)
 {
+	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3Plugin::reconfigure_io in: %1 aux: %2 out: %3 ; n_in=%4 n_out=%5\n",
+	                                                in, aux_in, out, _plug->n_audio_inputs (), _plug->n_audio_outputs ()));
+
+	assert (_plug->n_audio_inputs () >= in.n_audio () + aux_in.n_audio ());
+	assert (_plug->n_audio_outputs () >= out.n_audio ());
+
 	_connected_inputs.clear ();
 	_connected_inputs.resize (in.n_audio () + aux_in.n_audio ());
 	_connected_inputs.flip ();
+	_connected_inputs.resize (_plug->n_audio_inputs ());
 
 	_connected_outputs.clear ();
 	_connected_outputs.resize (out.n_audio ());
 	_connected_outputs.flip ();
-
-	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3Plugin::reconfigure_io %1 %2 %3\n", in, aux_in, out));
+	_connected_outputs.resize (_plug->n_audio_outputs ());
 
 	_plug->enable_io (_connected_inputs, _connected_outputs);
 	return true;
