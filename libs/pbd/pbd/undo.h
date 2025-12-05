@@ -31,7 +31,7 @@
 
 #ifndef COMPILER_MSVC
 #include <sys/time.h>
-#else
+#elif !defined(OTHER1)
 #include <ardourext/misc.h>
 #endif
 

@@ -492,7 +492,7 @@ SystemExec::start (StdErrMode stderr_mode, const char * /*vfork_exec_wrapper*/)
 		stdinP[0], stdoutP[1], stderrP[1]
 	};
 
-	success = CreateProcess(0, w_args,
+	success = CreateProcessA(0, w_args,
 		0, 0, /* bInheritHandles = */ TRUE,
 		(CREATE_NO_WINDOW&0) | CREATE_UNICODE_ENVIRONMENT | (0&CREATE_NEW_CONSOLE),
 		/*env = */ 0,

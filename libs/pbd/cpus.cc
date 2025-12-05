@@ -36,7 +36,11 @@
 #include "pbd/cpus.h"
 
 #if defined(COMPILER_MSVC) && !defined(PTW32_VERSION)
+#ifndef OTHER1
 #include <ardourext/pthread.h>  // Gets us 'PTW32_VERSION'
+#else
+#include <pthread.h> //Gets us '__PTW32_VERSION'
+#endif
 #endif
 
 int32_t
@@ -69,7 +73,7 @@ PBD::hardware_concurrency()
 			return c;
 		}
 	}
-#if defined(PTW32_VERSION) || defined(__hpux)
+#if defined(PTW32_VERSION) || defined(__hpux) || defined(__PTW32_VERSION)
 	return pthread_num_processors_np();
 #elif defined(__APPLE__)
 	int count;
