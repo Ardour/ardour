@@ -20,10 +20,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #ifdef _MSC_VER
-#include <windows.h>  // Needed for MSVC 'Sleep()'
+#include <windows.h> // Needed for MSVC 'Sleep()'
+#else
+#include <unistd.h>  // for usleep ()
 #endif
 
 #include "zita-convolver/zita-convolver.h"
