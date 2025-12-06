@@ -56,6 +56,7 @@ IOPlug::IOPlug (Session& s, std::shared_ptr<Plugin> p, bool pre)
 	if (_plugin) {
 		setup ();
 		set_name (p->get_info()->name);
+		_plugin->activate ();
 	}
 	_input.reset (new IO (_session, io_name (), IO::Input));
 	_output.reset (new IO (_session, io_name (), IO::Output));
@@ -200,6 +201,8 @@ IOPlug::set_state (const XMLNode& node, int version)
 
 	Latent::set_state (node, version);
 
+	_plugin->activate ();
+
 	return 0;
 }
 
@@ -258,7 +261,6 @@ IOPlug::setup ()
 	 _plugin->ParameterChangedExternally.connect_same_thread (*this, std::bind (&IOPlug::parameter_changed_externally, this, _1, _2));
 	 _plugin->PropertyChanged.connect_same_thread (*this, std::bind (&IOPlug::property_changed_externally, this, _1, _2));
 	 _plugin->ProcessorChange.connect_same_thread (*this, std::bind (&IOPlug::processor_change, this, _1));
-	 _plugin->activate ();
 	 _plugin->set_insert (this, 0);
 }
 
