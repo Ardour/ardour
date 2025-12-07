@@ -2688,6 +2688,11 @@ VST3PI::load_state (RAMStream& stream)
 	}
 
 	PBD::Unwinder<bool> uw (_is_loading_state, true);
+	bool was_active = _is_processing;
+
+	if (!deactivate ()) {
+		DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::load_state failed to deactivate plugin\n");
+	}
 
 	int32 count;
 	stream.read_int32 (count);
@@ -2755,6 +2760,10 @@ VST3PI::load_state (RAMStream& stream)
 	}
 	if (rv && !synced) {
 		synced = synchronize_states ();
+	}
+
+	if (was_active) {
+		activate ();
 	}
 
 	if (rv && synced) {
