@@ -3164,10 +3164,15 @@ Session::save_template (const string& template_name, const string& description, 
 		template_dir_path = template_name;
 	}
 
-	if (!replace_existing && Glib::file_test (template_dir_path, Glib::FILE_TEST_EXISTS)) {
-		warning << string_compose(_("Template \"%1\" already exists - new version not created"),
-		                          template_dir_path) << endmsg;
-		return -2;
+	if (Glib::file_test (template_dir_path, Glib::FILE_TEST_EXISTS)) {
+		if (replace_existing) {
+			/* clean out old plugin state, etc */
+			remove_directory (template_dir_path);
+		} else {
+			warning << string_compose(_("Template \"%1\" already exists - new version not created"),
+			                          template_dir_path) << endmsg;
+			return -2;
+		}
 	}
 
 	if (g_mkdir_with_parents (template_dir_path.c_str(), 0755) != 0) {
