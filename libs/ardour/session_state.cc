@@ -1116,7 +1116,7 @@ bool
 Session::export_route_state (std::shared_ptr<RouteList> rl, const string& path, bool with_sources)
 {
 	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS))  {
-		return false;
+		remove_directory (path);
 	}
 	if (g_mkdir_with_parents (path.c_str(), 0755) != 0) {
 		return false;
