@@ -23,6 +23,7 @@
 #include "ardour/session.h"
 
 #include "strip_export_dialog.h"
+#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -53,6 +54,7 @@ StripExportDialog::StripExportDialog (PublicEditor& editor, Session* s)
 
 	_where_to_export.StateChanged.connect (sigc::mem_fun (*this, &StripExportDialog::path_changed));
 	_name_entry.signal_changed ().connect (sigc::mem_fun (*this, &StripExportDialog::path_changed));
+	_name_entry.signal_activate ().connect (sigc::mem_fun (*this, &StripExportDialog::export_strips));
 
 	_table.set_col_spacings (10);
 	_table.set_row_spacings (8);
@@ -81,10 +83,11 @@ StripExportDialog::path_changed ()
 {
 	string name  = legalize_for_path (_name_entry.get_text ());
 	bool   local = _where_to_export.get_active_row_number () == 0;
-	bool   ok    = false;
+	bool   ok    = true;
 
 	if (name.empty ()) {
 		_path = "";
+		ok = false;
 		goto out;
 	}
 
@@ -94,8 +97,6 @@ StripExportDialog::path_changed ()
 		_path = Glib::build_filename (user_config_directory (), routestates_dir_name, name);
 	}
 
-	ok = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS));
-
 out:
 	_ok_button->set_sensitive (ok);
 }
@@ -103,6 +104,10 @@ out:
 void
 StripExportDialog::export_strips ()
 {
+	if (_path.empty ()) {
+		return;
+	}
+
 	std::shared_ptr<RouteList> rl (new RouteList);
 	if (_what_to_export.get_active_row_number () == 0) {
 		RouteList const& rlx (*_session->get_routes ());
@@ -111,6 +116,16 @@ StripExportDialog::export_strips ()
 		for (auto const& r : _editor.get_selection ().tracks.routelist ()) {
 			rl->push_back (r);
 		}
+	}
+
+	if (Glib::file_test (_path, Glib::FILE_TEST_EXISTS))  {
+		bool overwrite = ARDOUR_UI_UTILS::overwrite_file_dialog (*this,
+				_("Confirm Template Overwrite"),
+				_("A template already exists with that name. Do you want to overwrite it?"));
+
+		 if (!overwrite) {
+			 return;
+		 }
 	}
 
 	int rv = _session->export_route_state (rl, _path, false) ? RESPONSE_ACCEPT : RESPONSE_REJECT;
