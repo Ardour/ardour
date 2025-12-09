@@ -43,6 +43,76 @@ const char* PBD::CCurl::ca_info = NULL;
 #define CCERR(msg) (void)cc;
 #endif
 
+#ifdef ARDOURCURLTRACE
+// inspired by https://curl.se/libcurl/c/debug.html
+// Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+// SPDX-License-Identifier: curl
+static void
+dump (const char* text, FILE* stream, unsigned char* ptr, size_t size)
+{
+	unsigned int width = 0x40;
+
+	fprintf (stream, "%s, %10.10lu bytes (0x%8.8lx)\n", text, (unsigned long)size, (unsigned long)size);
+
+	for (size_t i = 0; i < size; i += width) {
+		fprintf (stream, "%4.4lx: ", (unsigned long)i);
+
+		for (size_t c = 0; (c < width) && (i + c < size); c++) {
+			/* check for 0D0A; if found, skip past and start a new line of output */
+			if ((i + c + 1 < size) && ptr[i + c] == 0x0D && ptr[i + c + 1] == 0x0A) {
+				i += (c + 2 - width);
+				break;
+			}
+
+			fprintf (stream, "%c", (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
+			/* check again for 0D0A, to avoid an extra \n if it is at width */
+			if ((i + c + 2 < size) && ptr[i + c + 1] == 0x0D && ptr[i + c + 2] == 0x0A) {
+				i += (c + 3 - width);
+				break;
+			}
+		}
+		fputc ('\n', stream); /* newline */
+	}
+	fflush (stream);
+}
+
+static int
+curl_trace (CURL* curl, curl_infotype type, char* data, size_t size, void*)
+{
+	const char* text;
+	(void)curl;
+
+	switch (type) {
+		case CURLINFO_TEXT:
+			fprintf (stderr, "== Info: %s", data);
+			return 0;
+		case CURLINFO_HEADER_OUT:
+			text = "=> Send header";
+			break;
+		case CURLINFO_DATA_OUT:
+			text = "=> Send data";
+			break;
+		case CURLINFO_SSL_DATA_OUT:
+			text = "=> Send SSL data";
+			break;
+		case CURLINFO_HEADER_IN:
+			text = "<= Recv header";
+			break;
+		case CURLINFO_DATA_IN:
+			text = "<= Recv data";
+			break;
+		case CURLINFO_SSL_DATA_IN:
+			text = "<= Recv SSL data";
+			break;
+		default: /* in case a new one is introduced to shock us */
+			return 0;
+	}
+
+	dump (text, stderr, (unsigned char*)data, size);
+	return 0;
+}
+#endif
+
 using namespace PBD;
 
 CCurl::CCurl ()
@@ -87,6 +157,13 @@ CCurl::curl () const
 	CCERR ("CURLOPT_TIMEOUT");
 	cc = curl_easy_setopt (_curl, CURLOPT_NOSIGNAL, 1);
 	CCERR ("CURLOPT_NOSIGNAL");
+
+#ifdef ARDOURCURLTRACE
+	cc = curl_easy_setopt (_curl, CURLOPT_DEBUGFUNCTION, curl_trace);
+	CCERR ("CURLOPT_TRACE");
+	cc = curl_easy_setopt (_curl, CURLOPT_VERBOSE, 1L);
+	CCERR ("CURLOPT_VERBOSE");
+#endif
 
 	ca_setopt (_curl);
 
