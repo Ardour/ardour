@@ -348,8 +348,5 @@ SoundcloudUploader::setcUrlOptions()
 	// Allow connections to time out (without using signals)
 	curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
 	curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 30);
-
-	curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYHOST, 0);
-	curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, 0);
 }
 

@@ -96,6 +96,10 @@ CCurl::curl () const
 void
 CCurl::ca_setopt (CURL* c)
 {
+#if defined PLATFORM_WINDOWS || defined __APPLE__
+	/* winSSL and DarwinSSL does not need this, use defaults w/VERIFYHOST */
+	return;
+#endif
 	if (ca_info) {
 		curl_easy_setopt (c, CURLOPT_CAINFO, ca_info);
 	}

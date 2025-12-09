@@ -103,9 +103,6 @@ _pingback (void *arg)
 
 #ifdef MIXBUS
 	curl_easy_setopt (h.curl (), CURLOPT_FOLLOWLOCATION, 1);
-	/* do not check cert */
-	curl_easy_setopt (h.curl (), CURLOPT_SSL_VERIFYPEER, 0);
-	curl_easy_setopt (h.curl (), CURLOPT_SSL_VERIFYHOST, 0);
 #endif
 
 	ping_call* cm = static_cast<ping_call*> (arg);
