@@ -47,7 +47,7 @@
 using namespace std;
 using namespace Steinberg;
 
-#define ARDOUR_VST3_CACHE_FILE_VERSION 2
+#define ARDOUR_VST3_CACHE_FILE_VERSION 3
 
 static const char* fmt_media (Vst::MediaType m) {
 	switch (m) {
@@ -369,9 +369,12 @@ ARDOUR::module_path_vst3 (string const& path)
 	 * (on macOS/X the binary name may differ from the bundle name)
 	 */
 	string plist = Glib::build_filename (path, "Contents", "Info.plist");
+	string macos = Glib::build_filename (path, "Contents", "MacOS");
 	if (Glib::file_test (Glib::path_get_dirname (module_path), Glib::FILE_TEST_IS_DIR) &&
 	    Glib::file_test (Glib::build_filename (path, "Contents", "Info.plist"), Glib::FILE_TEST_IS_REGULAR)) {
-		return plist;
+		return path;
+	} else if (Glib::file_test (macos, Glib::FILE_TEST_IS_DIR)){
+		return path;
 	} else {
 		cerr << "VST3 not a valid bundle: '" << path << "'\n";
 		return "";
