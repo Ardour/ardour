@@ -119,6 +119,14 @@ compiler_flags_dictionaries= {
         'c-anonymous-union': '',
         'execstack': '',
         'cxx17': ['/std:c++17'],
+        'bigobj': ['/bigobj'],
+        'jmc': ['/JMC'],
+        'full-path-diagnostics': ['/FC'],
+        'diagnostics-column': ['/diagnostics:column'],
+        'zc-cplusplus': ['/Zc:__cplusplus'],
+        'linker-guard-cf': ['/guard:cf'],
+        'fs': ['/FS'],
+        'nologo': ['/nologo'], 
     },
 }
 
@@ -476,6 +484,11 @@ int main() { return 0; }''',
     # when we need to add compiler specific flags in certain
     # libraries
     conf.env['compiler_flags_dict'] = flags_dict
+
+    if compiler_name == 'msvc':
+        for f in 'nologo fs bigobj jmc full-path-diagnostics diagnostics-column zc-cplusplus'.split():
+            compiler_flags.extend(flags_dict.get(f, []))
+        linker_flags.extend(flags_dict.get('linker-guard-cf', []))
 
     autowaf.set_basic_compiler_flags (conf,flags_dict)
 
