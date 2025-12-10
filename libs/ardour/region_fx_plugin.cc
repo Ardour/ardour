@@ -32,7 +32,6 @@
 #include "ardour/readonly_control.h"
 #include "ardour/region_fx_plugin.h"
 #include "ardour/session.h"
-#include "ardour/vst3_plugin.h"
 
 using namespace std;
 using namespace ARDOUR;

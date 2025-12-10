@@ -46,7 +46,6 @@
 #include "ardour/port.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
-#include "ardour/vst3_plugin.h"
 
 #include "pbd/i18n.h"
 
