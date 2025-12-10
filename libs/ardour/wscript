@@ -283,6 +283,9 @@ def options(opt):
     pass
 
 def configure(conf):
+    if conf.env['build_target'] == 'msvc':
+        conf.find_program('ml64', var='AS')
+
     conf.load('gas')
     # we don't use hard-coded micro versions with ardour, so hard code it to zero
     autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO',

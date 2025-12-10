@@ -86,7 +86,7 @@ compiler_flags_dictionaries= {
         'cxx17': ['-std=c++17'],
     },
     'msvc' : {
-        'debuggable' : ['/DDEBUG', '/Od', '/Zi', '/MDd', '/Gd', '/EHsc'],
+        'debuggable' : ['/DDEBUG', '/Od', '/Z7', '/MDd', '/Gd', '/EHsc'],
         'linker-debuggable' : ['/DEBUG', '/INCREMENTAL' ],
         'nondebuggable' : ['/DNDEBUG', '/Ob1', '/MD', '/Gd', '/EHsc'],
         'profile' : ['/Oy-'],
@@ -476,6 +476,11 @@ int main() { return 0; }''',
     # when we need to add compiler specific flags in certain
     # libraries
     conf.env['compiler_flags_dict'] = flags_dict
+
+    if compiler_name == 'msvc':
+        compiler_flags.extend(['/nologo', '/FS', '/bigobj', '/JMC', '/FC',
+                               '/diagnostics:column', '/Zc:__cplusplus'])
+        linker_flags.extend(['/guard:cf'])
 
     autowaf.set_basic_compiler_flags (conf,flags_dict)
 
@@ -1262,6 +1267,14 @@ int main () { return 0; }
         # see http://gareus.org/wiki/ardour_windows_gdk_and_cairo
         conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
+        conf.env.append_value('LIB', 'pthreadVC3')
+        conf.env.append_value('LIB', 'Ws2_32')
+        conf.env.append_value('LIB', 'Advapi32')
+        conf.env.append_value('LIB', 'Shell32')
+        conf.env.append_value('LIB', 'Winmm')
+        conf.env.append_value('LIB', 'Dbghelp')
+        conf.env.append_value('LIB', 'User32')
+        conf.env.append_value('LIB', 'Kernel32')
         # MORE STUFF PROBABLY NEEDED HERE
         conf.define ('WINDOWS', 1)
 
@@ -1413,8 +1426,12 @@ int main () { __int128 x = 0; return 0; }
         if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
             conf.fatal("lld is only for Linux builds")
         else:
-            conf.find_program ('lld')
-            conf.env.append_value('LINKFLAGS', '-fuse-ld=lld')
+            if Options.options.dist_target != 'msvc':
+                conf.find_program ('lld')
+                conf.env.append_value('LINKFLAGS', '-fuse-ld=lld')
+            else:
+                conf.find_program('lld-link', var='LINK')
+                conf.env.LINK_CXX = conf.env.LINK
 
     if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
         conf.fatal("PortAudio Backend is not for Linux")
