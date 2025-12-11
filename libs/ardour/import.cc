@@ -469,46 +469,77 @@ write_midi_type0_data_to_one_file (Evoral::SMF* source, ImportStatus& status, si
 
 }
 
+static bool
+track_contains_tempo_or_key_metadata (Evoral::SMF* source, int track)
+{
+	if (source->seek_to_track (track+1) != 0) {
+		return false;
+	}
+
+	uint8_t* buf     = (uint8_t*) malloc (4);
+	uint32_t delta_t = 0;
+	uint32_t size    = 4;
+	bool seen = false;
+	Evoral::event_id_t ignored_note_id; /* imported files either don't have noted IDs or we ignore them */
+
+	while (true) {
+		int ret = source->read_event (&delta_t, &size, &buf, &ignored_note_id);
+
+		if (ret < 0) { // EOT
+			break;
+		}
+
+		if (size == 0) {
+			/* meta event that is not for us */
+			continue;
+		}
+
+		if (Evoral::SMF::is_tempo_or_meter_related (buf, size)) {
+			seen  = true;
+			break;
+		}
+	}
+
+	free (buf);
+	return seen;
+}
+
 /* return true if only meta-data was found */
 static bool
 write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, std::shared_ptr<SMFSource> smfs,
-                                   int track, bool split_midi_channels, int channel)
+                                   int track, bool split_midi_channels, int channel, int meta_track)
 {
 	uint32_t bufsize = 4;
 	uint8_t* buf     = (uint8_t*) malloc (bufsize);
 	bool had_meta    = false;
 	bool had_notes   = false;
-
+	uint32_t written = 0;
 	Evoral::event_id_t ignored_note_id; /* imported files either don't have noted IDs or we ignore them */
+
+	/* libsmf starts counting tracks at one, not zero */
+	track++;
+	meta_track++;
+
+	/* Check track number is legal. 
+	 */
+	if (track > source->num_tracks()) {
+		return false;
+	}
 
 	Source::WriterLock target_lock (smfs->mutex());
 	smfs->mark_streaming_write_started (target_lock);
 	smfs->drop_model (target_lock);
 
-	/* When a type 1 file has only one track, use it as-is.
-	 * If there are more tracks, assume track 1 contains meta-data.
-	 */
-	int track_offset = (source->num_tracks() == 1) ? 1 : 2;
-
-	track += track_offset;
-
 	try {
-
-		/* Check track number is legal. Remember, track 0 is metadata, so the number of
-		 * real tracks is one less than the number of tracks reported via libsmf.
-		 */
-
-		if (track > source->num_tracks()) {
-			return false;
-		}
-
 		/* Get metadata first */
 
-		if (source->seek_to_track (1) == 0) { /* type 1 has metadata in track 1 */
+		if (meta_track > 0 && source->seek_to_track (meta_track) == 0) { 
 
 			uint64_t t       = 0;
 			uint32_t delta_t = 0;
 			uint32_t size    = 0;
+
+			std::cerr << "For track " << track - 1 << " collecting and writing metadata from " << meta_track - 1 << std::endl;
 
 			while (!status.cancel) {
 
@@ -553,8 +584,6 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 				smfs->end_track (target_lock);
 			}
 		}
-
-		uint32_t written = 0;
 
 		if (source->seek_to_track (track) == 0) {
 
@@ -669,6 +698,7 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 	status.progress = 0.0f;
 	size_t nfiles = newsrcs.size();
 	size_t n = 0;
+	int32_t meta_track = -1;
 
 	switch (source->smf_format()) {
 	case 0:
@@ -695,11 +725,20 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 	case 1:
 		channel = 0;
 
+		for (uint16_t n = 0; n < source->num_tracks(); ++n) {
+			if (track_contains_tempo_or_key_metadata (source, n)) {
+				meta_track = n;
+				break;
+			}
+		}
+
+		std::cerr << "tempo/keysig metadata appears to be in track " << meta_track << std::endl;
+
 		for (auto & newsrc : newsrcs) {
 			std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (newsrc);
 			assert (smfs);
 
-			bool meta_only = write_midi_type1_data_to_one_file (source, status, smfs, n, split_midi_channels, channel);
+			bool meta_only = write_midi_type1_data_to_one_file (source, status, smfs, n, split_midi_channels, channel, meta_track);
 
 			if (split_midi_channels && !meta_only) {
 				channel = (channel + 1) % 16;
