@@ -59,8 +59,9 @@
 /* close(), read(), write() */
 #ifdef COMPILER_MSVC
 #include <io.h> // Microsoft's nearest equivalent to <unistd.h>
+#ifndef WAF_BUILD
 #include <ardourext/misc.h>
-#else
+#endif
 #endif
 
 #include "pbd/compose.h"
