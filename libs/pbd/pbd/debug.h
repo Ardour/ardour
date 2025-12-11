@@ -30,7 +30,7 @@
 #include "pbd/timing.h"
 
 /* check for __PTW32_VERSION */
-#ifdef COMPILER_MSVC
+#if defined (COMPILER_MSVC) && !defined (WAF_BUILD)
 #include <ardourext/pthread.h>
 #else
 #include <pthread.h>
