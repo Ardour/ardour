@@ -36,7 +36,7 @@
 #endif  /* __PTW32_VERSION */
 #endif  /* PTHREAD_MACROS_DEFINED */
 
-#ifdef COMPILER_MSVC
+#if defined (COMPILER_MSVC) && !defined (WAF_BUILD)
 #include <ardourext/pthread.h>
 #else
 #include <pthread.h>
