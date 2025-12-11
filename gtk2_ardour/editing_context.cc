@@ -3973,3 +3973,9 @@ EditingContext::scroll_right_half_page ()
 		reset_x_origin (max_samplepos - current_page_samples());
 	}
 }
+
+Gtk::Menu*
+EditingContext::get_single_region_context_menu ()
+{
+	return nullptr;
+}

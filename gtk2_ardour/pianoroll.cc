@@ -2106,3 +2106,36 @@ Pianoroll::source_to_timeline (timepos_t const & source_pos) const
 
 	return source_pos;
 }
+
+Gtk::Menu*
+Pianoroll::get_single_region_context_menu ()
+{
+	using namespace Gtk;
+	using namespace Menu_Helpers;
+
+	Menu* m = new Menu;
+	MenuList& items (m->items());
+
+	items.push_back (MenuElem (_("Quantize..."), sigc::mem_fun (*this, &EditingContext::quantize_region)));
+	items.push_back (MenuElem (_("Legatize"), sigc::bind(sigc::mem_fun (*this, &EditingContext::legatize_region), false)));
+	items.push_back (MenuElem (_("Transform..."), sigc::mem_fun (*this, &EditingContext::transform_region)));
+	items.push_back (MenuElem (_("Remove Overlap"), sigc::bind(sigc::mem_fun (*this, &EditingContext::legatize_region), true)));
+	// items.push_back (MenuElem (_("Insert Patch Change..."), sigc::bind (sigc::mem_fun (*this, &EditingContext::insert_patch_change), false)));
+	// items.push_back (MenuElem (_("Insert Patch Change..."), sigc::bind (sigc::mem_fun (*this, &EditingContext::insert_patch_change), true)));
+
+	return m;
+}
+
+EditingContext::MidiViews
+Pianoroll::midiviews_from_region_selection (RegionSelection const &) const
+{
+	/* there is no region selection */
+
+	MidiViews mv;
+
+	if (midi_view()) {
+		mv.push_back (midi_view());
+	}
+
+	return mv;
+}

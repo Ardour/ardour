@@ -557,8 +557,27 @@ MidiView::leave_internal()
 }
 
 bool
+MidiView::show_context_menu (GdkEventButton* ev)
+{
+	if (_on_timeline) {
+		/* this is handled at a higher level, so that operations apply
+		 * to all selected regions.
+		 */
+		return false;
+	}
+
+	Gtk::Menu* context_menu = _editing_context.get_single_region_context_menu ();
+	context_menu->popup (ev->button, ev->time);
+	return true;
+}
+
+bool
 MidiView::button_press (GdkEventButton* ev)
 {
+	if (Keyboard::is_context_menu_event (ev)) {
+		return show_context_menu (ev);
+	}
+
 	if (ev->button != 1) {
 		return false;
 	}
