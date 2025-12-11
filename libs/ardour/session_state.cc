@@ -1133,11 +1133,14 @@ Session::export_route_state (std::shared_ptr<RouteList> rl, const string& path, 
 	PlaylistSet playlists; // SessionPlaylists
 	SourceSet sources;
 
+	RouteList sorted_rl (*rl);
+	sorted_rl.sort (Stripable::Sorter ());
+
 	/* these will work with  new_route_from_template()
 	 * TODO: LV2 plugin-state-dir needs to be relative (on load?)
 	 */
 	child = node->add_child ("Routes");
-	for (auto const& r: *rl) {
+	for (auto const& r: sorted_rl) {
 		if (r->is_auditioner()) {
 			continue;
 		}
