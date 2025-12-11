@@ -75,7 +75,7 @@ PatchChange::PatchChange (MidiView&                         region,
 
 PatchChange::~PatchChange ()
 {
-	/* _flag is deleted by the canvas container/parent it is placed in */
+	delete _flag;
 }
 
 void
