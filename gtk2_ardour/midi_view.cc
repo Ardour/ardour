@@ -2196,7 +2196,7 @@ MidiView::remove_canvas_patch_change (PatchChange* pc)
 {
 	/* remove the canvas item */
 	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
-		if (x->second->patch() == pc->patch()) {
+		if (x->first == pc->patch()) {
 			_patch_changes.erase (x);
 			break;
 		}
