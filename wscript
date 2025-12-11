@@ -86,7 +86,7 @@ compiler_flags_dictionaries= {
         'cxx17': ['-std=c++17'],
     },
     'msvc' : {
-        'debuggable' : ['/DDEBUG', '/Od', '/Zi', '/MDd', '/Gd', '/EHsc'],
+        'debuggable' : ['/DDEBUG', '/Od', '/Z7', '/MDd', '/Gd', '/EHsc'],
         'linker-debuggable' : ['/DEBUG', '/INCREMENTAL' ],
         'nondebuggable' : ['/DNDEBUG', '/Ob1', '/MD', '/Gd', '/EHsc'],
         'profile' : ['/Oy-'],
@@ -1275,6 +1275,14 @@ int main () { return 0; }
         # see http://gareus.org/wiki/ardour_windows_gdk_and_cairo
         conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
+        conf.env.append_value('LIB', 'pthreadVC3')
+        conf.env.append_value('LIB', 'Ws2_32')
+        conf.env.append_value('LIB', 'Advapi32')
+        conf.env.append_value('LIB', 'Shell32')
+        conf.env.append_value('LIB', 'Winmm')
+        conf.env.append_value('LIB', 'Dbghelp')
+        conf.env.append_value('LIB', 'User32')
+        conf.env.append_value('LIB', 'Kernel32')
         # MORE STUFF PROBABLY NEEDED HERE
         conf.define ('WINDOWS', 1)
 
