@@ -36,7 +36,10 @@
 #include "pbd/cpus.h"
 
 #if defined(COMPILER_MSVC) && !defined(__PTW32_VERSION)
+#ifndef WAF_BUILD
 #include <ardourext/pthread.h>  // Gets us '__PTW32_VERSION'
+#else
+#include <pthread.h>
 #endif
 
 int32_t
