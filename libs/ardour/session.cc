@@ -520,6 +520,8 @@ Session::Session (AudioEngine &eng,
 	StartTimeChanged.connect_same_thread (*this, std::bind (&Session::start_time_changed, this, _1));
 	EndTimeChanged.connect_same_thread (*this, std::bind (&Session::end_time_changed, this, _1));
 
+	RouteGroup::RouteRemoved.connect_same_thread (*this, std::bind (&Session::route_removed_from_route_group, this, _1, _2));
+
 	LatentSend::ChangedLatency.connect_same_thread (*this, std::bind (&Session::send_latency_compensation_change, this));
 	LatentSend::QueueUpdate.connect_same_thread (*this, std::bind (&Session::update_send_delaylines, this));
 	Latent::DisableSwitchChanged.connect_same_thread (*this, std::bind (&Session::queue_latency_recompute, this));

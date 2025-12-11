@@ -147,7 +147,7 @@ public:
 	/** Emitted when a route has been added to this group */
 	PBD::Signal<void(RouteGroup *, std::weak_ptr<ARDOUR::Route> )> RouteAdded;
 	/** Emitted when a route has been removed from this group */
-	PBD::Signal<void(RouteGroup *, std::weak_ptr<ARDOUR::Route> )> RouteRemoved;
+	static PBD::Signal<void(RouteGroup *, std::weak_ptr<ARDOUR::Route> )> RouteRemoved;
 
 	XMLNode& get_state () const;
 

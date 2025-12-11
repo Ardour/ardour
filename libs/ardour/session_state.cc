@@ -3573,7 +3573,6 @@ Session::add_route_group (RouteGroup* g)
 	route_group_added (g); /* EMIT SIGNAL */
 
 	g->RouteAdded.connect_same_thread (*this, std::bind (&Session::route_added_to_route_group, this, _1, _2));
-	g->RouteRemoved.connect_same_thread (*this, std::bind (&Session::route_removed_from_route_group, this, _1, _2));
 	g->PropertyChanged.connect_same_thread (*this, std::bind (&Session::route_group_property_changed, this, g));
 
 	set_dirty ();

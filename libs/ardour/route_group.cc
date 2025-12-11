@@ -64,6 +64,8 @@ namespace ARDOUR {
 	}
 }
 
+PBD::Signal<void(RouteGroup *, std::weak_ptr<ARDOUR::Route> )> RouteGroup::RouteRemoved;
+
 void
 RouteGroup::make_property_quarks ()
 {
