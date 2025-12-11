@@ -27,6 +27,7 @@
    <Binding key="Tertiary-l" action="Mixer/ToggleMixerList" group="Window Visibility"/>
    <Binding key="Tertiary-v" action="Mixer/ToggleVCAPane" group="Window Visibility"/>
    <Binding key="Tertiary-m" action="Mixer/ToggleMonitorSection" group="Window Visibility"/>
+   <Binding key="Tertiary-f" action="Mixer/ToggleFoldbackStrip" group="Window Visibility"/>
 
    <Binding key="Primary-F1" action="Mixer/store-mixer-scene-1" group="Mixer Scenes"/>
    <Binding key="Primary-F2" action="Mixer/store-mixer-scene-2" group="Mixer Scenes"/>
