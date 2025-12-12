@@ -511,8 +511,8 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 {
 	uint32_t bufsize = 4;
 	uint8_t* buf     = (uint8_t*) malloc (bufsize);
-	bool had_meta    = false;
-	bool had_notes   = false;
+	bool meta_in_file  = false;
+	bool meta_in_track = false;
 	uint32_t written = 0;
 	Evoral::event_id_t ignored_note_id; /* imported files either don't have noted IDs or we ignore them */
 
@@ -520,7 +520,7 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 	track++;
 	meta_track++;
 
-	/* Check track number is legal. 
+	/* Check track number is legal.
 	 */
 	if (track > source->num_tracks()) {
 		return false;
@@ -533,13 +533,11 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 	try {
 		/* Get metadata first */
 
-		if (meta_track > 0 && source->seek_to_track (meta_track) == 0) { 
+		if (meta_track > 0 && source->seek_to_track (meta_track) == 0) {
 
 			uint64_t t       = 0;
 			uint32_t delta_t = 0;
 			uint32_t size    = 0;
-
-			std::cerr << "For track " << track - 1 << " collecting and writing metadata from " << meta_track - 1 << std::endl;
 
 			while (!status.cancel) {
 
@@ -564,7 +562,7 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 
 				if (ret == 0) { // meta event
 
-					had_meta = true;
+					meta_in_file = true;
 
 					smfs->append_event_beats (
 						target_lock,
@@ -580,14 +578,18 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 				}
 			}
 
-			if (had_meta) {
+			if (meta_in_file || meta_in_track) {
 				smfs->end_track (target_lock);
 			}
 		}
 
+		/* Now the actual track we're actually trying to write */
+
+		uint64_t t = 0;
+		uint64_t our_t = 0;
+
 		if (source->seek_to_track (track) == 0) {
 
-			uint64_t t       = 0;
 			uint32_t delta_t = 0;
 			uint32_t size    = 0;
 
@@ -615,8 +617,6 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 
 				if (ret > 0) { // non-meta event
 
-					had_notes = true;
-
 					/* if requested by user, each sourcefile gets only a single channel's data */
 
 					if (split_midi_channels) {
@@ -637,11 +637,16 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 							buf));
 
 					written++;
-				}
+					our_t = t;
 
-				else if (ret == 0 && track > 1) { // meta event
+				}  else if (ret == 0 && track != meta_track) {
 
-					had_meta = true;
+					/* meta event on this track that was
+					 * not handled by the meta "pre-write"
+					 * above.
+					 */
+
+					meta_in_track = true;
 
 					smfs->append_event_beats (
 						target_lock,
@@ -650,21 +655,25 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 							Temporal::Beats::ticks_at_rate(t, source->ppqn()),
 							size,
 							buf), true); /* allow meta-events */
+					our_t = t;
 				}
 
 				if (status.progress < 0.99) {
 					status.progress += 0.01;
 				}
 			}
-		} else {
-			std::cerr << "could not seek to " << track << std::endl;
+
 		}
 
-		if (had_meta || written) {
+		if (written == 0) {
+			our_t = 0;
+		}
 
-			/* we wrote something */
+		smfs->mark_streaming_write_completed (target_lock, timecnt_t (Temporal::Beats::ticks_at_rate (our_t, source->ppqn())));
 
-			smfs->mark_streaming_write_completed (target_lock, timecnt_t (source->duration()));
+		if (written) {
+
+			/* we wrote something other than meta-data */
 
 			/* the streaming write that we've just finished
 			 * only wrote data to the SMF object, which is
@@ -685,7 +694,7 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 
 	free (buf);
 
-	return had_meta && !had_notes;
+	return (meta_in_track || meta_in_file) && (written == 0);
 }
 
 static void
@@ -731,8 +740,6 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 				break;
 			}
 		}
-
-		std::cerr << "tempo/keysig metadata appears to be in track " << meta_track << std::endl;
 
 		for (auto & newsrc : newsrcs) {
 			std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (newsrc);
