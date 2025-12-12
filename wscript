@@ -119,14 +119,6 @@ compiler_flags_dictionaries= {
         'c-anonymous-union': '',
         'execstack': '',
         'cxx17': ['/std:c++17'],
-        'bigobj': ['/bigobj'],
-        'jmc': ['/JMC'],
-        'full-path-diagnostics': ['/FC'],
-        'diagnostics-column': ['/diagnostics:column'],
-        'zc-cplusplus': ['/Zc:__cplusplus'],
-        'linker-guard-cf': ['/guard:cf'],
-        'fs': ['/FS'],
-        'nologo': ['/nologo'], 
     },
 }
 
@@ -486,9 +478,9 @@ int main() { return 0; }''',
     conf.env['compiler_flags_dict'] = flags_dict
 
     if compiler_name == 'msvc':
-        for f in 'nologo fs bigobj jmc full-path-diagnostics diagnostics-column zc-cplusplus'.split():
-            compiler_flags.extend(flags_dict.get(f, []))
-        linker_flags.extend(flags_dict.get('linker-guard-cf', []))
+        compiler_flags.extend(['/nologo', '/FS', '/bigobj', '/JMC', '/FC', 
+                               '/diagnostics:column', '/Zc:__cplusplus'])
+        linker_flags.extend(['/guard:cf'])
 
     autowaf.set_basic_compiler_flags (conf,flags_dict)
 
@@ -1434,8 +1426,12 @@ int main () { __int128 x = 0; return 0; }
         if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
             conf.fatal("lld is only for Linux builds")
         else:
-            conf.find_program ('lld')
-            conf.env.append_value('LINKFLAGS', '-fuse-ld=lld')
+            if Options.options.dist_target != 'msvc':
+                conf.find_program ('lld')
+                conf.env.append_value('LINKFLAGS', '-fuse-ld=lld')
+            else:
+                conf.find_program('lld-link', var='LINK')
+                conf.env.LINK_CXX = conf.env.LINK
 
     if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
         conf.fatal("PortAudio Backend is not for Linux")
