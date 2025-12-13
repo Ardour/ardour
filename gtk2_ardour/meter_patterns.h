@@ -40,10 +40,10 @@ namespace ArdourMeter {
 
 extern sigc::signal<void> ResetAllPeakDisplays;
 extern sigc::signal<void,ARDOUR::Route*> ResetRoutePeakDisplays;
-extern sigc::signal<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
+extern sigc::signal<void,std::shared_ptr<ARDOUR::RouteGroup>> ResetGroupPeakDisplays;
 extern sigc::signal<void> RedrawMetrics;
 
-extern sigc::signal<void, int, ARDOUR::RouteGroup*, ARDOUR::MeterType> SetMeterTypeMulti;
+extern sigc::signal<void, int, std::shared_ptr<ARDOUR::RouteGroup>, ARDOUR::MeterType> SetMeterTypeMulti;
 
 gint meter_expose_ticks (GdkEventExpose *ev, ARDOUR::MeterType type, std::vector<ARDOUR::DataType> types, Gtk::DrawingArea *mta);
 gint meter_expose_metrics (GdkEventExpose *ev, ARDOUR::MeterType type, std::vector<ARDOUR::DataType> types, Gtk::DrawingArea *mma);

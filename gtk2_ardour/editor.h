@@ -2140,7 +2140,7 @@ private:
 	void region_view_removed ();
 
 	EditorGroupTabs* _group_tabs;
-	void fit_route_group (ARDOUR::RouteGroup*);
+	void fit_route_group (std::shared_ptr<ARDOUR::RouteGroup>);
 
 	void step_edit_status_change (bool);
 	void start_step_editing ();

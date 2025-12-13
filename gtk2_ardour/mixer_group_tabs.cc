@@ -79,7 +79,7 @@ MixerGroupTabs::compute_tabs () const
 		}
 #endif
 
-		RouteGroup* g = s->route_group ();
+		std::shared_ptr<RouteGroup> g = s->route_group ();
 
 		if (g != tab.group) {
 			if (tab.group) {

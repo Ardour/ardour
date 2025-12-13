@@ -35,13 +35,13 @@ namespace ARDOUR {
 class RouteGroupDialog : public ArdourDialog
 {
 public:
-	RouteGroupDialog (ARDOUR::RouteGroup *, bool);
+	RouteGroupDialog (std::shared_ptr<ARDOUR::RouteGroup>, bool);
 
-	ARDOUR::RouteGroup* group() const { return _group; }
+	std::shared_ptr<ARDOUR::RouteGroup> group() const { return _group; }
 	bool name_check () const;
 
 private:
-	ARDOUR::RouteGroup* _group;
+	std::shared_ptr<ARDOUR::RouteGroup> _group;
 	std::string _initial_name;
 
 	Gtk::Entry _name;

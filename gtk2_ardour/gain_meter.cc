@@ -488,7 +488,7 @@ GainMeterBase::reset_route_peak_display (Route* r)
 }
 
 void
-GainMeterBase::reset_group_peak_display (RouteGroup* group)
+GainMeterBase::reset_group_peak_display (std::shared_ptr<RouteGroup> group)
 {
 	if (route() && group == route()->route_group()) {
 		reset_peak_display ();
@@ -744,7 +744,7 @@ GainMeterBase::set_meter_point (Route& route, MeterPoint mp)
 void
 GainMeterBase::set_route_group_meter_point (Route& route, MeterPoint mp)
 {
-	RouteGroup* route_group;
+	std::shared_ptr<RouteGroup> route_group;
 
 	if ((route_group = route.route_group ()) != 0) {
 		route_group->foreach_route (std::bind (&Route::set_meter_point, _1, mp));

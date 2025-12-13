@@ -1140,7 +1140,7 @@ ApplicationBar::reset_peak_display ()
 }
 
 void
-ApplicationBar::reset_group_peak_display (RouteGroup* group)
+ApplicationBar::reset_group_peak_display (std::shared_ptr<RouteGroup> group)
 {
 	if (!_session || !_session->master_out()) return;
 	if (group == _session->master_out()->route_group()) {

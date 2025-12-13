@@ -64,7 +64,7 @@ RecorderGroupTabs::compute_tabs () const
 			continue;
 		}
 
-		RouteGroup* g = (*i)->route_group ();
+		std::shared_ptr<RouteGroup> g = (*i)->route_group ();
 
 		if (g != tab.group) {
 			if (tab.group) {

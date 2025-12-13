@@ -706,7 +706,7 @@ MeterStrip::reset_route_peak_display (Route* route)
 }
 
 void
-MeterStrip::reset_group_peak_display (RouteGroup* group)
+MeterStrip::reset_group_peak_display (std::shared_ptr<RouteGroup> group)
 {
 	if (_route && group == _route->route_group()) {
 		reset_peak_display ();
@@ -978,7 +978,7 @@ MeterStrip::meter_type_changed (MeterType type)
 }
 
 void
-MeterStrip::set_meter_type_multi (int what, RouteGroup* group, MeterType type)
+MeterStrip::set_meter_type_multi (int what, std::shared_ptr<RouteGroup> group, MeterType type)
 {
 	switch (what) {
 		case -1:

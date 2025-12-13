@@ -472,7 +472,7 @@ RouteListBase::on_tv_visible_changed (std::string const& path)
 			stripable->presentation_info ().set_hidden (hidden);
 
 			std::shared_ptr<Route> route = std::dynamic_pointer_cast<Route> (stripable);
-			RouteGroup*              rg    = route ? route->route_group () : 0;
+			std::shared_ptr<RouteGroup> rg (route ? route->route_group () : nullptr);
 			if (rg && rg->is_active () && rg->is_hidden ()) {
 				std::shared_ptr<RouteList> rl (rg->route_list ());
 				for (RouteList::const_iterator i = rl->begin (); i != rl->end (); ++i) {

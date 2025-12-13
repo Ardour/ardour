@@ -114,7 +114,7 @@ public:
 	{
 		return _route;
 	}
-	ARDOUR::RouteGroup* route_group () const;
+	std::shared_ptr<ARDOUR::RouteGroup> route_group () const;
 
 	std::shared_ptr<ARDOUR::Track>      track () const;
 	std::shared_ptr<ARDOUR::AudioTrack> audio_track () const;

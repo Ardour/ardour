@@ -60,7 +60,7 @@ EditorGroupTabs::compute_tabs () const
 			continue;
 		}
 
-		RouteGroup* g = (*i)->route_group ();
+		std::shared_ptr<RouteGroup> g ((*i)->route_group ());
 
 		if (g != tab.group) {
 			if (tab.group) {
@@ -184,7 +184,7 @@ EditorGroupTabs::routes_for_tab (Tab const * t) const
 
 
 void
-EditorGroupTabs::add_menu_items (Gtk::Menu* m, RouteGroup* g)
+EditorGroupTabs::add_menu_items (Gtk::Menu* m, std::shared_ptr<RouteGroup> g)
 {
 	using namespace Gtk::Menu_Helpers;
 

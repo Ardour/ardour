@@ -1032,7 +1032,7 @@ MixerStrip::select_route_group (GdkEventButton *ev)
 		r.push_back (route ());
 		group_menu->build (r);
 
-		RouteGroup *rg = _route->route_group();
+		std::shared_ptr<RouteGroup> rg = _route->route_group();
 
 		Gtkmm2ext::anchored_menu_popup(group_menu->menu(), &group_button,
 		                               rg ? rg->name() : _("No Group"),
@@ -1045,9 +1045,9 @@ MixerStrip::select_route_group (GdkEventButton *ev)
 void
 MixerStrip::route_group_changed ()
 {
-	ENSURE_GUI_THREAD (*this, &MixerStrip::route_group_changed)
+	ENSURE_GUI_THREAD (*this, &MixerStrip::route_group_changed);
 
-	RouteGroup *rg = _route->route_group();
+	std::shared_ptr<RouteGroup> rg (_route->route_group());
 
 	if (rg) {
 		group_button.set_text (PBD::short_version (rg->name(), 5));

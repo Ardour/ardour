@@ -591,7 +591,7 @@ TriggerStrip::reset_route_peak_display (Route* route)
 }
 
 void
-TriggerStrip::reset_group_peak_display (RouteGroup* group)
+TriggerStrip::reset_group_peak_display (std::shared_ptr<RouteGroup> group)
 {
 	if (_route && group == _route->route_group ()) {
 		reset_peak_display ();

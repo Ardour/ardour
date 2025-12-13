@@ -329,7 +329,7 @@ private:
 	void remove_selected_route_group ();
 	void activate_all_route_groups ();
 	void disable_all_route_groups ();
-	void add_route_group (ARDOUR::RouteGroup *);
+	void add_route_group (std::shared_ptr<ARDOUR::RouteGroup>);
 	void route_groups_changed ();
 	void route_group_name_edit (const std::string&, const std::string&);
 	void route_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter);
@@ -348,7 +348,7 @@ private:
 	bool _show_foldback_strip;
 
 	void stripable_property_changed (const PBD::PropertyChange& what_changed, std::weak_ptr<ARDOUR::Stripable> ws);
-	void route_group_property_changed (ARDOUR::RouteGroup *, const PBD::PropertyChange &);
+	void route_group_property_changed (std::weak_ptr<ARDOUR::RouteGroup>, const PBD::PropertyChange &);
 
 	/* various treeviews */
 
@@ -373,7 +373,7 @@ private:
 		}
 		Gtk::TreeModelColumn<bool>            visible;
 		Gtk::TreeModelColumn<std::string>         text;
-		Gtk::TreeModelColumn<ARDOUR::RouteGroup*> group;
+		Gtk::TreeModelColumn<std::shared_ptr<ARDOUR::RouteGroup>> group;
 	};
 
 	struct PluginsDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
@@ -420,7 +420,7 @@ private:
 	bool ignore_plugin_reorder;
 
 	void parameter_changed (std::string const &);
-	void set_route_group_activation (ARDOUR::RouteGroup *, bool);
+	void set_route_group_activation (std::shared_ptr<ARDOUR::RouteGroup>, bool);
 
 	void setup_track_display ();
 	void new_track_or_bus ();

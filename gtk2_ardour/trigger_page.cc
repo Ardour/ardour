@@ -881,7 +881,7 @@ TriggerPage::no_strip_drag_data_received (Glib::RefPtr<Gdk::DragContext> const& 
 			                                         Config->get_strict_io () || Profile->get_mixbus (),
 			                                         std::shared_ptr<ARDOUR::PluginInfo>(),
 			                                         (ARDOUR::Plugin::PresetRecord*) 0,
-			                                         (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order, Normal, true, true);
+			                                         nullptr, 1, region->name(), PresentationInfo::max_order, Normal, true, true);
 			if (!midi_tracks.empty()) {
 				triggerbox = midi_tracks.front()->triggerbox ();
 			}

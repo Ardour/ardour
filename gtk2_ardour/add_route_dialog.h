@@ -85,7 +85,7 @@ public:
 	ARDOUR::PluginInfoPtr requested_instrument ();
 
 	ARDOUR::TrackMode   mode ();
-	ARDOUR::RouteGroup* route_group ();
+	std::shared_ptr<ARDOUR::RouteGroup> route_group ();
 
 	RouteDialogs::InsertAt insert_at ();
 	bool                   use_strict_io ();
@@ -122,7 +122,7 @@ private:
 	void        refill_channel_setups ();
 	void        refill_route_groups ();
 	void        refill_track_modes ();
-	void        add_route_group (ARDOUR::RouteGroup*);
+	void        add_route_group (std::shared_ptr<ARDOUR::RouteGroup>);
 	void        group_changed ();
 	void        channel_combo_changed ();
 	bool        channel_separator (const Glib::RefPtr<Gtk::TreeModel>& m, const Gtk::TreeModel::iterator& i);

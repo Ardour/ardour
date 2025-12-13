@@ -124,7 +124,7 @@ public:
 	virtual std::shared_ptr<AutomationTimeAxisView> automation_child(Evoral::Parameter param, PBD::ID ctrl_id = PBD::ID(0));
 
 	StreamView*         view() const { return _view; }
-	ARDOUR::RouteGroup* route_group() const;
+	std::shared_ptr<ARDOUR::RouteGroup> route_group() const;
 	std::shared_ptr<ARDOUR::Playlist> playlist() const;
 
 	void fast_update ();

@@ -206,7 +206,7 @@ protected:
 
 	void reset_peak_display ();
 	void reset_route_peak_display (ARDOUR::Route*);
-	void reset_group_peak_display (ARDOUR::RouteGroup*);
+	void reset_group_peak_display (std::shared_ptr<ARDOUR::RouteGroup>);
 
 	void redraw_metrics ();
 	void on_theme_changed ();
