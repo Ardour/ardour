@@ -699,6 +699,9 @@ StripImportDialog::setup_strip_import_page ()
 	_route_map.clear ();
 
 	for (auto const& r : *_session->get_routes ()) {
+		if (r->is_main_bus () && !r->is_master ()) {
+			continue;
+		}
 #ifdef MIXBUS
 		_route_map.emplace (r->id (), Session::RouteImportInfo (r->name (), r->presentation_info (), r->mixbus ()));
 #else
