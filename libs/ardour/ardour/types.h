@@ -71,6 +71,7 @@ class Source;
 class AudioSource;
 class GraphNode;
 class Route;
+class RouteGroup;
 class Region;
 class Playlist;
 class Stripable;
@@ -103,6 +104,8 @@ typedef std::map<std::shared_ptr<ARDOUR::Region>,AudioIntervalResult> AudioInter
 
 typedef std::list<std::shared_ptr<Region> > RegionList;
 typedef std::set<std::shared_ptr<Playlist> > PlaylistSet;
+typedef std::list<std::shared_ptr<RouteGroup>> RouteGroupList;
+	
 
 struct IOChange {
 

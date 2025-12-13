@@ -64,7 +64,7 @@ namespace ARDOUR {
 	}
 }
 
-PBD::Signal<void(RouteGroup *, std::weak_ptr<ARDOUR::Route> )> RouteGroup::RouteRemoved;
+PBD::Signal<void(std::shared_ptr<RouteGroup>, std::weak_ptr<ARDOUR::Route> )> RouteGroup::RouteRemoved;
 
 void
 RouteGroup::make_property_quarks ()
@@ -200,7 +200,7 @@ RouteGroup::add (std::shared_ptr<Route> r)
 		_sursend_enable_group->add_control (r->surround_send ()->send_enable_control ());
 	}
 
-	r->set_route_group (this);
+	r->set_route_group (shared_from_this());
 	r->DropReferences.connect_same_thread (*this, std::bind (&RouteGroup::remove_when_going_away, this, std::weak_ptr<Route> (r)));
 
 	std::shared_ptr<VCA> vca (group_master.lock());
@@ -210,7 +210,7 @@ RouteGroup::add (std::shared_ptr<Route> r)
 	}
 
 	_session.set_dirty ();
-	RouteAdded (this, std::weak_ptr<Route> (r)); /* EMIT SIGNAL */
+	RouteAdded (shared_from_this(), std::weak_ptr<Route> (r)); /* EMIT SIGNAL */
 	return 0;
 }
 
@@ -271,7 +271,7 @@ RouteGroup::remove (std::shared_ptr<Route> r)
 		}
 		routes->erase (i);
 		_session.set_dirty ();
-		RouteRemoved (this, std::weak_ptr<Route> (r)); /* EMIT SIGNAL */
+		RouteRemoved (shared_from_this(), std::weak_ptr<Route> (r)); /* EMIT SIGNAL */
 		return 0;
 	}
 

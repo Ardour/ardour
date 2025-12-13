@@ -2478,7 +2478,7 @@ OSC::parse_sel_group (const char *path, const char* types, lo_arg **argv, int ar
 			PBD::warning << "OSC: VCAs can not be part of a group." << endmsg;
 			return ret;
 		}
-		RouteGroup *rg = rt->route_group();
+		std::shared_ptr<RouteGroup> rg = rt->route_group();
 		if (!rg) {
 			PBD::warning << "OSC: This strip is not part of a group." << endmsg;
 		}
@@ -2621,7 +2621,7 @@ OSC::set_temp_mode (lo_address addr)
 		if (sur->temp_mode == GroupOnly) {
 			std::shared_ptr<Route> rt = std::dynamic_pointer_cast<Route> (s);
 			if (rt) {
-				RouteGroup *rg = rt->route_group();
+				std::shared_ptr<RouteGroup> rg = rt->route_group();
 				if (rg) {
 					sur->temp_strips.clear();
 					std::shared_ptr<RouteList> rl = rg->route_list();
@@ -3257,9 +3257,8 @@ OSC::send_group_list (lo_address addr)
 
 	lo_message_add_string (reply, X_("none"));
 
-	std::list<RouteGroup*> groups = session->route_groups ();
-	for (std::list<RouteGroup *>::iterator i = groups.begin(); i != groups.end(); ++i) {
-		RouteGroup *rg = *i;
+	RouteGroupList groups = session->route_groups ();
+	for (auto const & rg : groups) {
 		lo_message_add_string (reply, rg->name().c_str());
 	}
 	lo_send_message (addr, X_("/group/list"), reply);
@@ -3996,7 +3995,7 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 	else if (!strncmp (sub_path, X_("group"), 5)) {
 		if (!control_disabled) {
 			if (rt) {
-				RouteGroup *rg = rt->route_group();
+				std::shared_ptr<RouteGroup> rg = rt->route_group();
 				if (argc > (param_1)) {
 					if (types[param_1] == 's') {
 
@@ -4005,12 +4004,12 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 							strng = "none";
 						}
 
-						RouteGroup* new_rg = session->route_group_by_name (strng);
+						std::shared_ptr<RouteGroup> new_rg = session->route_group_by_name (strng);
 						if (rg) {
 							string old_group = rg->name();
 							if (strng == "none") {
 								if (rg->size () == 1) {
-									session->remove_route_group (*rg);
+									session->remove_route_group (rg);
 								} else {
 									rg->remove (rt);
 								}
@@ -4040,8 +4039,7 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 								ret = 0;
 							} else {
 								// create new group with this strip in it
-								RouteGroup* new_rg = new RouteGroup (*session, strng);
-								session->add_route_group (new_rg);
+								std::shared_ptr<RouteGroup> new_rg (session->new_route_group (strng));
 								new_rg->add (rt);
 								ret = 0;
 							}
@@ -4606,7 +4604,7 @@ OSC::spill (const char *path, const char* types, lo_arg **argv, int argc, lo_mes
 		if (strstr (path, X_("/group"))) {
 			//strp must be in a group
 			if (rt) {
-				RouteGroup *rg = rt->route_group();
+				std::shared_ptr<RouteGroup> rg = rt->route_group();
 				if (rg) {
 					new_mode = GroupOnly;
 				} else {

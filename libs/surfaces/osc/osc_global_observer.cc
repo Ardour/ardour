@@ -137,9 +137,9 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 			send_change_message (X_("/click/level"), click_controllable);
 		}
 
-		session->route_group_added.connect (session_connections, MISSING_INVALIDATOR, std::bind (static_cast<void (OSCGlobalObserver::*)(ARDOUR::RouteGroup*)>(&OSCGlobalObserver::group_changed), this, _1), &_osc);
-		session->route_group_removed.connect (session_connections, MISSING_INVALIDATOR, std::bind (static_cast<void (OSCGlobalObserver::*)(void)>(&OSCGlobalObserver::group_changed), this), &_osc);
-		session->route_groups_reordered.connect (session_connections, MISSING_INVALIDATOR, std::bind (static_cast<void (OSCGlobalObserver::*)(void)>(&OSCGlobalObserver::group_changed), this), &_osc);
+		session->route_group_added.connect (session_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::group_changed, this), &_osc);
+		session->route_group_removed.connect (session_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::group_changed, this), &_osc);
+		session->route_groups_reordered.connect (session_connections, MISSING_INVALIDATOR, std::bind (&OSCGlobalObserver::group_changed, this), &_osc);
 		_osc.send_group_list (addr);
 
 		extra_check ();
@@ -586,12 +586,6 @@ OSCGlobalObserver::jog_mode (uint32_t jogmode)
 			break;
 	}
 	_osc.int_message (X_("/jog/mode"), jogmode, addr);
-}
-
-void
-OSCGlobalObserver::group_changed (ARDOUR::RouteGroup *rg)
-{
-	_osc.send_group_list (addr);
 }
 
 void

@@ -1376,7 +1376,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_bypassed", &PannerShell::set_bypassed)
 		.endClass ()
 
-		.deriveClass <RouteGroup, SessionObject> ("RouteGroup")
+		.deriveWSPtrClass <RouteGroup, SessionObject> ("RouteGroup")
+		.addNilPtrConstructor ()
 		.addFunction ("is_active", &RouteGroup::is_active)
 		.addFunction ("is_relative", &RouteGroup::is_relative)
 		.addFunction ("is_hidden", &RouteGroup::is_hidden)
@@ -2317,8 +2318,9 @@ LuaBindings::common (lua_State* L)
 		.beginConstStdList <std::weak_ptr<Route> > ("WeakRouteList")
 		.endClass ()
 
-		// RouteGroupList == std::list<RouteGroup*>
-		.beginConstStdCPtrList <RouteGroup> ("RouteGroupList")
+		// RouteGroupList == std::list<shared_ptr<RouteGroup>>
+		.beginPtrStdList <std::shared_ptr<RouteGroup>> ("RouteGroupList")
+		.addVoidPtrConstructor<std::list<std::shared_ptr <RouteGroup> > > ()
 		.endClass ()
 
 		// typedef std::vector<std::shared_ptr<Source> > Region::SourceList
@@ -3189,7 +3191,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("maybe_update_session_range", &Session::maybe_update_session_range)
 		.addFunction ("remove_route", &Session::remove_route)
 		.addFunction ("remove_routes", &Session::remove_routes)
-		.addFunction ("remove_route_group", (void (Session::*)(RouteGroup*))&Session::remove_route_group)
+		.addFunction ("remove_route_group", &Session::remove_route_group)
 		.addFunction ("cut_copy_section", &Session::cut_copy_section)
 		.addFunction ("vca_manager", &Session::vca_manager_ptr)
 		.addExtCFunction ("timecode_to_sample_lua", ARDOUR::LuaAPI::timecode_to_sample_lua)

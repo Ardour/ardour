@@ -497,7 +497,7 @@ OSCRouteObserver::group_name ()
 {
 	std::shared_ptr<Route> rt = std::dynamic_pointer_cast<Route> (_strip);
 
-	RouteGroup *rg = rt->route_group();
+	std::shared_ptr<RouteGroup> rg = rt->route_group();
 	if (rg) {
 		_osc.text_message_with_id (X_("/strip/group"), ssid, rg->name(), in_line, addr);
 	} else {

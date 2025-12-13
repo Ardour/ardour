@@ -21,12 +21,15 @@
 #pragma once
 
 #include "ardour/libardour_visibility.h"
+
 #include "pbd/controllable.h"
 #include "pbd/signals.h"
 
+#include "ardour/route_group.h"
+
 namespace ARDOUR  {
 
-class RouteGroup;
+//class RouteGroup;
 
 class LIBARDOUR_API RouteGroupMember
 {
@@ -34,18 +37,18 @@ class LIBARDOUR_API RouteGroupMember
 	RouteGroupMember () : _route_group (0) {}
 	virtual ~RouteGroupMember() {}
 
-	RouteGroup* route_group () const { return _route_group; }
+	std::shared_ptr<RouteGroup> route_group () const { return _route_group ? _route_group : nullptr; }
 
 	/** Emitted when this member joins or leaves a route group */
 	PBD::Signal<void()> route_group_changed;
 
   protected:
-	RouteGroup* _route_group;
+  	std::shared_ptr<RouteGroup> _route_group;
 
   private:
 	friend class RouteGroup;
 
-	void set_route_group (RouteGroup *);
+	void set_route_group (std::shared_ptr<RouteGroup>);
 };
 
 }
