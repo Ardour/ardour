@@ -8,7 +8,7 @@ function factory (params) return function ()
 	end
 
 	-- create two mono tracks
-	local tl = Session:new_audio_track (1, chan_out, nil, 2, "Ducks", ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal, true)
+	local tl = Session:new_audio_track (1, chan_out, ARDOUR.RouteGroup(), 2, "Ducks", ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal, true)
 	for t in tl:iter() do
 		t:set_strict_io (true)
 		-- switch tracks to monitor input

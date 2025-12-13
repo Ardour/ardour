@@ -15,7 +15,7 @@ end
 function factory (p) return function ()
 	local name      = "Sweet16"
 	local insert_at = ARDOUR.PresentationInfo.max_order
-	local group     = nil
+	local group     = ARDOUR.RouteGroup()
 
 	-- check for "MIDI Channel Map" LV2 from x42 midifilters.lv2
 	if ARDOUR.LuaAPI.new_plugin_info ("http://gareus.org/oss/lv2/midifilter#channelmap", ARDOUR.PluginType.LV2):isnil () then
@@ -27,7 +27,7 @@ function factory (p) return function ()
 		-- used from the AddRouteDialog (or w/action_params)
 		name      = p["name"] or 'Sweet16'
 		insert_at = p["insert_at"] or ARDOUR.PresentationInfo.max_order;
-		group     = p["group"] or nil
+		group     = p["group"] or ARDOUR.RouteGroup()
 	else
 		-- used standalone, prompt for name and insert position
 		local dialog_options = {
