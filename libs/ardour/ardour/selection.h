@@ -42,7 +42,7 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 	CoreSelection (Session& s);
 	~CoreSelection ();
 
-	bool select_stripable_and_maybe_group (std::shared_ptr<Stripable> s, SelectionOperation op, bool with_group = true, bool routes_only = true, RouteGroup* = nullptr);
+	bool select_stripable_and_maybe_group (std::shared_ptr<Stripable> s, SelectionOperation op, bool with_group = true, bool routes_only = true, std::shared_ptr<RouteGroup> = nullptr);
 	void select_stripable_with_control (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl>, SelectionOperation);
 
 	void select_next_stripable (bool mixer_order, bool routes_only);
@@ -125,7 +125,7 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 	bool remove (StripableList&, std::shared_ptr<AutomationControl>);
 	bool set (StripableList&, std::shared_ptr<AutomationControl>, std::vector<std::shared_ptr<Stripable> > &);
 
-	bool do_select (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c, SelectionOperation op, bool with_group, bool routes_only, RouteGroup* not_allowed_in_group);
+	bool do_select (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c, SelectionOperation op, bool with_group, bool routes_only, std::shared_ptr<RouteGroup> not_allowed_in_group);
 };
 
 } // namespace ARDOUR

@@ -27,12 +27,12 @@ namespace ARDOUR { class RouteGroup; }
 
 /** Set the route group; it can be set to 0 for `none' */
 void
-RouteGroupMember::set_route_group (RouteGroup *rg)
+RouteGroupMember::set_route_group (std::shared_ptr<RouteGroup> rg)
 {
-	if (rg == _route_group) {
+	if (rg.get() == _route_group) {
 		return;
 	}
 
-	_route_group = rg;
+	_route_group = rg.get();
 	route_group_changed (); /* EMIT SIGNAL */
 }

@@ -5106,7 +5106,7 @@ Route::set_active (bool yn, void* src)
 	}
 
 	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_route_active()) {
-		_route_group->foreach_route (std::bind (&Route::set_active, _1, yn, _route_group));
+		_route_group->foreach_route (std::bind (&Route::set_active, _1, yn, route_group().get()));
 		return;
 	}
 

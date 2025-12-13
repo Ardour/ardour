@@ -736,17 +736,17 @@ void
 OSCSelectObserver::group_name ()
 {
 	std::shared_ptr<Route> rt = std::dynamic_pointer_cast<Route> (_strip);
-	RouteGroup *rg = rt->route_group();
+	std::shared_ptr<RouteGroup> rg = rt->route_group();
 	group_sharing (rg);
 }
 
 void
-OSCSelectObserver::group_sharing (RouteGroup *rgc)
+OSCSelectObserver::group_sharing (std::shared_ptr<RouteGroup> rgc)
 {
 	_group_sharing[15] = 1;
 	std::shared_ptr<Route> rt = std::dynamic_pointer_cast<Route> (_strip);
 	string new_name = "none";
-	RouteGroup* rg = NULL;
+	std::shared_ptr<RouteGroup> rg = NULL;
 	if (rt) {
 		rg = rt->route_group();
 	}

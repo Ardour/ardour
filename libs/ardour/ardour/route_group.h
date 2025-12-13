@@ -69,12 +69,11 @@ class Session;
  *
  * A route can at most be in one group.
  */
-class LIBARDOUR_API RouteGroup : public SessionObject
+class LIBARDOUR_API RouteGroup : public SessionObject, public std::enable_shared_from_this<RouteGroup>
 {
-public:
+  public:
 	static void make_property_quarks();
 
-	RouteGroup (Session& s, const std::string &n);
 	~RouteGroup ();
 
 	bool is_active () const { return _active.val(); }
@@ -117,12 +116,7 @@ public:
 	int add (std::shared_ptr<Route>);
 	int remove (std::shared_ptr<Route>);
 
-	template<typename Function>
-	void foreach_route (Function f) {
-		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-			f (i->get());
-		}
-	}
+	template<typename Function> void foreach_route (Function f) { for (auto & r : *routes) {f (r); } }
 
 	/* to use these, #include "ardour/route_group_specialized.h" */
 
@@ -145,9 +139,9 @@ public:
 	std::shared_ptr<RouteList> route_list() { return routes; }
 
 	/** Emitted when a route has been added to this group */
-	PBD::Signal<void(RouteGroup *, std::weak_ptr<ARDOUR::Route> )> RouteAdded;
+	PBD::Signal<void(std::shared_ptr<RouteGroup>, std::weak_ptr<ARDOUR::Route> )> RouteAdded;
 	/** Emitted when a route has been removed from this group */
-	static PBD::Signal<void(RouteGroup *, std::weak_ptr<ARDOUR::Route> )> RouteRemoved;
+	static PBD::Signal<void(std::shared_ptr<RouteGroup>, std::weak_ptr<ARDOUR::Route> )> RouteRemoved;
 
 	XMLNode& get_state () const;
 
@@ -167,7 +161,11 @@ public:
 	 * to libardour color */
 	void migrate_rgba (uint32_t color) { _rgba = color; }
 
-private:
+  protected:
+	friend class Session;
+	RouteGroup (Session& s, const std::string &n);
+
+  private:
 	std::shared_ptr<RouteList> routes;
 	std::shared_ptr<Route> _subgroup_bus;
 	std::weak_ptr<VCA> group_master;
