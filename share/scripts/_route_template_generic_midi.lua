@@ -46,7 +46,7 @@ function factory (params) return function ()
 	local name       = p["name"] or 'Audio'
 	local how_many   = p["how_many"] or 1
 	local insert_at  = p["insert_at"] or ARDOUR.PresentationInfo.max_order;
-	local group      = p["group"] or nil
+	local group      = p["group"] or ARDOUR.RouteGroup()
 	local strict_io  = p["strict_io"] or false
 	local instrument = p["instrument"] or nil
 

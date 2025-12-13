@@ -9,9 +9,9 @@ ardour {
 function factory () return function ()
 	local sel = Editor:get_selection ()
 	if not Editor:get_selection ():empty () and not Editor:get_selection ().tracks:routelist ():empty ()  then
-		tr = Session:new_audio_track (1, 2, nil, 1, "Audio", Editor:get_selection ().tracks:routelist ():front():presentation_info_ptr ():order () + 1, ARDOUR.TrackMode.Normal, true)
+		tr = Session:new_audio_track (1, 2, ARDOUR.RouteGroup(), 1, "Audio", Editor:get_selection ().tracks:routelist ():front():presentation_info_ptr ():order () + 1, ARDOUR.TrackMode.Normal, true)
 	else
-		tr = Session:new_audio_track (1, 2, nil, 1, "Audio", -1, ARDOUR.TrackMode.Normal, true)
+		tr = Session:new_audio_track (1, 2, ARDOUR.RouteGroup(), 1, "Audio", -1, ARDOUR.TrackMode.Normal, true)
 	end
 	tr:front ():peak_meter ():set_meter_type (ARDOUR.MeterType.MeterKrms)
 

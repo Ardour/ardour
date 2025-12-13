@@ -51,7 +51,7 @@ function factory (p)
 			local how_many  = p["how_many"] or 1
 			local channels  = p["channels"] or 1
 			local insert_at = p["insert_at"] or ARDOUR.PresentationInfo.max_order;
-			local group     = p["group"] or nil
+			local group     = p["group"] or ARDOUR.RouteGroup()
 			local mode      = p["track_mode"] or ARDOUR.TrackMode.Normal
 			local strict_io = p["strict_io"] or false
 			local chan_out  = 0
@@ -108,7 +108,7 @@ function factory (p)
 		end
 
 		-- create tracks
-		local tl = Session:new_audio_track (chan_in, chan_out, nil, rv['tracks'], "", ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+		local tl = Session:new_audio_track (chan_in, chan_out, ARDOUR.RouteGroup(), rv['tracks'], "", ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
 		-- and optionally record-arm them
 		if rv['recarm'] then
 			for track in tl:iter() do

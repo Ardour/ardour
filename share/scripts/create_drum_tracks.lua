@@ -21,7 +21,7 @@ function factory () return function ()
 
 		local i = 1
 		while names[i] do
-			local tl = Session:new_audio_track (1, 2, nil, 1, names[i],
+			local tl = Session:new_audio_track (1, 2, ARDOUR.RouteGroup(), 1, names[i],
 			                                    ARDOUR.PresentationInfo.max_order,
 			                                    ARDOUR.TrackMode.Normal, true)
 

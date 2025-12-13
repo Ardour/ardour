@@ -9,7 +9,7 @@ function factory () return function ()
 	end
 
 	-- create a stereo track
-	local newtracks = Session:new_audio_track (2, n_chan_out, nil, 1, "All Audio Sources", ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal, true)
+	local newtracks = Session:new_audio_track (2, n_chan_out, ARDOUR.RouteGroup(), 1, "All Audio Sources", ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal, true)
 	-- and get playlist of the new track
 	-- https://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:Playlist
 	local playlist = newtracks:front():playlist()

@@ -45,7 +45,7 @@ function factory () return function ()
 		for t,c in pairs (targets) do
 			local rt = Session:route_by_name (t)
 			if rt:isnil () then
-				Session:new_audio_route (c, outputs, nil, 1, t, ARDOUR.PresentationInfo.Flag.AudioBus, ARDOUR.PresentationInfo.max_order)
+				Session:new_audio_route (c, outputs, ARDOUR.RouteGroup(), 1, t, ARDOUR.PresentationInfo.Flag.AudioBus, ARDOUR.PresentationInfo.max_order)
 			end
 		end
 
