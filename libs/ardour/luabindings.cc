@@ -1377,6 +1377,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <RouteGroup, SessionObject> ("RouteGroup")
+		.addNilPtrConstructor ()
 		.addFunction ("is_active", &RouteGroup::is_active)
 		.addFunction ("is_relative", &RouteGroup::is_relative)
 		.addFunction ("is_hidden", &RouteGroup::is_hidden)
@@ -2317,8 +2318,9 @@ LuaBindings::common (lua_State* L)
 		.beginConstStdList <std::weak_ptr<Route> > ("WeakRouteList")
 		.endClass ()
 
-		// RouteGroupList == std::list<RouteGroup*>
-		.beginConstStdCPtrList <RouteGroup> ("RouteGroupList")
+		// RouteGroupList == std::list<shared_ptr<RouteGroup>>
+		.beginPtrStdList <std::shared_ptr<RouteGroup>> ("RouteGroupList")
+		.addVoidPtrConstructor<std::list<std::shared_ptr <RouteGroup> > > ()
 		.endClass ()
 
 		// typedef std::vector<std::shared_ptr<Source> > Region::SourceList
