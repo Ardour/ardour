@@ -3283,6 +3283,22 @@ Route::import_state (const XMLNode& node, bool use_pbd_ids, bool processor_only)
 				}
 				continue;
 			}
+			if (prop->value() == "sursend") {
+				if (_surround_send) {
+					XMLNode* proc = new XMLNode (*child);
+					proc->set_property ("id", _surround_send->id());
+					processor_state.add_child_nocopy (*proc);
+				}
+				continue;
+			}
+			if (prop->value() == "surreturn") {
+				if (_surround_return) {
+					XMLNode* proc = new XMLNode (*child);
+					proc->set_property ("id", _surround_return->id());
+					processor_state.add_child_nocopy (*proc);
+				}
+				continue;
+			}
 
 			/* special case processors with controls */
 
