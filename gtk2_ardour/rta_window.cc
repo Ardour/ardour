@@ -752,7 +752,7 @@ RTAWindow::darea_expose_event (GdkEventExpose* ev)
 		const int n_bins = r.analyzers ().front ()->fftlen ();
 		color_t   color;
 
-		RouteGroup* group = r.route ()->route_group ();
+		std::shared_ptr<RouteGroup> group = r.route ()->route_group ();
 		if (r.route ()->is_singleton ()) {
 			color = 0xff | _textc;
 		} else if (group && group->is_color ()) {

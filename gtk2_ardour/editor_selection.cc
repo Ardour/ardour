@@ -390,7 +390,7 @@ Editor::mapover_grouped_routes (sigc::slot<void, RouteUI&> sl, RouteUI* basis, P
 
 	routes.insert(basis);
 
-	RouteGroup* group = basis->route()->route_group();
+	std::shared_ptr<RouteGroup> group = basis->route()->route_group();
 
 	if (group && group->enabled_property(prop) && group->enabled_property (Properties::active.property_id)) {
 
@@ -479,7 +479,7 @@ Editor::mapover_tracks_with_unique_playlists (sigc::slot<void, RouteTimeAxisView
 	set<RouteTimeAxisView*> tracks;
 	tracks.insert (route_basis);
 
-	RouteGroup* group = route_basis->route()->route_group(); // could be null, not a problem
+	std::shared_ptr<RouteGroup> group = route_basis->route()->route_group(); // could be null, not a problem
 
 	if (group && group->enabled_property(prop) && group->enabled_property (Properties::active.property_id)) {
 

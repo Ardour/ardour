@@ -5094,7 +5094,7 @@ Editor::get_stripable_time_axis_by_id (const PBD::ID& id) const
 }
 
 void
-Editor::fit_route_group (RouteGroup *g)
+Editor::fit_route_group (std::shared_ptr<RouteGroup> g)
 {
 	TrackViewList ts = axis_views_from_routes (g->route_list ());
 	fit_tracks (ts);

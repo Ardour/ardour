@@ -42,7 +42,7 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
+RouteGroupDialog::RouteGroupDialog (std::shared_ptr<RouteGroup> g, bool creating_new)
 	: ArdourDialog (_("Track/bus Group"))
 	, _group (g)
 	, _initial_name (g->name ())
@@ -246,8 +246,8 @@ bool
 RouteGroupDialog::unique_name (std::string const name) const
 {
 	if (name.empty()) return false; // do not allow empty name, empty means unset.
-	list<RouteGroup*> route_groups = _group->session().route_groups ();
-	list<RouteGroup*>::iterator i = route_groups.begin ();
+	RouteGroupList route_groups = _group->session().route_groups ();
+	RouteGroupList::iterator i = route_groups.begin ();
 	while (i != route_groups.end() && ((*i)->name() != name || *i == _group)) {
 		++i;
 	}

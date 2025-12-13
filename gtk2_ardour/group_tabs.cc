@@ -209,7 +209,7 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 
 	} else if (ev->button == 3) {
 
-		RouteGroup* g = t ? t->group : 0;
+		std::shared_ptr<RouteGroup> g (t ? t->group : nullptr);
 
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier) && g) {
 			remove_group (g);
@@ -309,6 +309,12 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 	_initial_dragging_routes.clear ();
 
 	return true;
+}
+
+void
+GroupTabs::clear ()
+{
+	_tabs.clear ();
 }
 
 void
@@ -413,7 +419,7 @@ GroupTabs::add_new_from_items (Menu_Helpers::MenuList& items)
 }
 
 Gtk::Menu*
-GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
+GroupTabs::get_menu (std::shared_ptr<RouteGroup> g, bool in_tab_area)
 {
 	using namespace Menu_Helpers;
 
@@ -526,7 +532,7 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 }
 
 void
-GroupTabs::assign_group_to_master (uint32_t which, RouteGroup* group, bool rename_master) const
+GroupTabs::assign_group_to_master (uint32_t which, std::shared_ptr<RouteGroup> group, bool rename_master) const
 {
 	if (!_session || !group) {
 		return;
@@ -562,7 +568,7 @@ GroupTabs::assign_group_to_master (uint32_t which, RouteGroup* group, bool renam
 }
 
 void
-GroupTabs::unassign_group_to_master (uint32_t which, RouteGroup* group) const
+GroupTabs::unassign_group_to_master (uint32_t which, std::shared_ptr<RouteGroup> group) const
 {
 	if (!_session || !group) {
 		return;
@@ -708,7 +714,7 @@ GroupTabs::run_new_group_dialog (RouteList const * rl, bool with_master)
 		return;
 	}
 
-	RouteGroup* g = new RouteGroup (*_session, "");
+	std::shared_ptr<RouteGroup> g (_session->new_route_group (""));
 	RouteGroupDialog* d = new RouteGroupDialog (g, true); // XXX
 
 	if (rl) {
@@ -742,8 +748,6 @@ GroupTabs::new_group_dialog_finished (int r, RouteGroupDialog* d, RouteList cons
 				assign_group_to_master (0, d->group(), true); /* zero => new master */
 			}
 		}
-	} else {
-		delete d->group ();
 	}
 
 	delete rl;
@@ -751,7 +755,7 @@ GroupTabs::new_group_dialog_finished (int r, RouteGroupDialog* d, RouteList cons
 }
 
 void
-GroupTabs::edit_group (RouteGroup* g)
+GroupTabs::edit_group (std::shared_ptr<RouteGroup> g)
 {
 	RouteGroupDialog* d = new RouteGroupDialog (g, false);
 	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &GroupTabs::edit_group_dialog_finished), d));
@@ -765,13 +769,13 @@ GroupTabs::edit_group_dialog_finished (int r, RouteGroupDialog* d) const
 }
 
 void
-GroupTabs::subgroup (RouteGroup* g, bool aux, Placement placement)
+GroupTabs::subgroup (std::shared_ptr<RouteGroup> g, bool aux, Placement placement)
 {
 	g->make_subgroup (aux, placement);
 }
 
 void
-GroupTabs::un_subgroup (RouteGroup* g)
+GroupTabs::un_subgroup (std::shared_ptr<RouteGroup> g)
 {
 	g->destroy_subgroup ();
 }
@@ -780,7 +784,7 @@ GroupTabs::un_subgroup (RouteGroup* g)
  *  @param g Group to collect.
  */
 void
-GroupTabs::collect (RouteGroup* g)
+GroupTabs::collect (std::shared_ptr<RouteGroup> g)
 {
 	std::shared_ptr<RouteList> group_routes = g->route_list ();
 	group_routes->sort (Stripable::Sorter());
@@ -841,23 +845,23 @@ GroupTabs::disable_all ()
 }
 
 void
-GroupTabs::set_activation (RouteGroup* g, bool a)
+GroupTabs::set_activation (std::shared_ptr<RouteGroup> g, bool a)
 {
 	g->set_active (a, this);
 }
 
 void
-GroupTabs::remove_group (RouteGroup* g)
+GroupTabs::remove_group (std::shared_ptr<RouteGroup> g)
 {
 	std::shared_ptr<RouteList> rl (g->route_list ());
-	_session->remove_route_group (*g);
+	_session->remove_route_group (g);
 
 	emit_gui_changed_for_members (rl);
 }
 
 /** Set the color of the tab of a route group */
 void
-GroupTabs::set_group_color (RouteGroup* group, uint32_t color)
+GroupTabs::set_group_color (std::shared_ptr<RouteGroup> group, uint32_t color)
 {
 	assert (group);
 	PresentationInfo::ChangeSuspender cs;
@@ -866,7 +870,7 @@ GroupTabs::set_group_color (RouteGroup* group, uint32_t color)
 
 /** @return the ID string to use for the GUI state of a route group */
 string
-GroupTabs::group_gui_id (RouteGroup* group)
+GroupTabs::group_gui_id (std::shared_ptr<RouteGroup> group)
 {
 	assert (group);
 
@@ -878,7 +882,7 @@ GroupTabs::group_gui_id (RouteGroup* group)
 
 /** @return the color to use for a route group tab */
 uint32_t
-GroupTabs::group_color (RouteGroup* group)
+GroupTabs::group_color (std::shared_ptr<RouteGroup> group)
 {
 	assert (group);
 
@@ -919,7 +923,7 @@ GroupTabs::group_color (RouteGroup* group)
 }
 
 void
-GroupTabs::route_group_property_changed (RouteGroup* rg)
+GroupTabs::route_group_property_changed (std::shared_ptr<RouteGroup> rg)
 {
 	/* This is a bit of a hack, but this might change
 	   our route's effective color, so emit gui_changed
@@ -932,7 +936,7 @@ GroupTabs::route_group_property_changed (RouteGroup* rg)
 }
 
 void
-GroupTabs::route_added_to_route_group (RouteGroup*, std::weak_ptr<Route> w)
+GroupTabs::route_added_to_route_group (std::shared_ptr<RouteGroup>, std::weak_ptr<Route> w)
 {
 	/* Similarly-spirited hack as in route_group_property_changed */
 
@@ -947,7 +951,7 @@ GroupTabs::route_added_to_route_group (RouteGroup*, std::weak_ptr<Route> w)
 }
 
 void
-GroupTabs::route_removed_from_route_group (RouteGroup*, std::weak_ptr<Route> w)
+GroupTabs::route_removed_from_route_group (std::shared_ptr<RouteGroup>, std::weak_ptr<Route> w)
 {
 	/* Similarly-spirited hack as in route_group_property_changed */
 

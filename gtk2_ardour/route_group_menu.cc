@@ -62,7 +62,7 @@ RouteGroupMenu::build (WeakRouteList const & s)
 	_subject = s;
 
 	/* FInd all the route groups that our subjects are members of */
-	std::set<RouteGroup*> groups;
+	std::set<std::shared_ptr<RouteGroup>> groups;
 	for (WeakRouteList::const_iterator i = _subject.begin (); i != _subject.end(); ++i) {
 		std::shared_ptr<Route> r = i->lock ();
 		if (r) {
@@ -92,7 +92,7 @@ RouteGroupMenu::build (WeakRouteList const & s)
 	RadioMenuItem::Group group;
 	items.push_back (RadioMenuElem (group, _("No Group")));
 	RadioMenuItem* i = static_cast<RadioMenuItem *> (&items.back ());
-	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::set_group), i, (RouteGroup *) 0));
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::set_group), i, nullptr));
 
 	if (groups.size() == 1 && *groups.begin() == 0) {
 		i->set_active ();
@@ -112,7 +112,7 @@ RouteGroupMenu::build (WeakRouteList const & s)
  *  @param group Radio item group to add radio items to.
  */
 void
-RouteGroupMenu::add_item (RouteGroup* rg, std::set<RouteGroup*> const & groups, RadioMenuItem::Group* group)
+RouteGroupMenu::add_item (std::shared_ptr<RouteGroup> rg, std::set<std::shared_ptr<RouteGroup>> const & groups, RadioMenuItem::Group* group)
 {
 	using namespace Menu_Helpers;
 
@@ -135,7 +135,7 @@ RouteGroupMenu::add_item (RouteGroup* rg, std::set<RouteGroup*> const & groups, 
  *  @param Group, or 0 for none.
  */
 void
-RouteGroupMenu::set_group (Gtk::RadioMenuItem* e, RouteGroup* g)
+RouteGroupMenu::set_group (Gtk::RadioMenuItem* e, std::shared_ptr<RouteGroup> g)
 {
 	if (_inhibit_group_selected) {
 		return;
@@ -168,7 +168,7 @@ RouteGroupMenu::new_group ()
 		return;
 	}
 
-	RouteGroup* g = new RouteGroup (*_session, "");
+	std::shared_ptr<RouteGroup> g (_session->new_route_group (""));
 	RouteGroupDialog* d = new RouteGroupDialog (g, true);
 
 	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::new_group_dialog_finished), d));
@@ -181,15 +181,13 @@ RouteGroupMenu::new_group_dialog_finished (int r, RouteGroupDialog* d)
 	if (r == RESPONSE_OK) {
 		_session->add_route_group (d->group());
 		set_group (0, d->group());
-	} else {
-		delete d->group ();
 	}
 
 	delete_when_idle (d);
 }
 
 void
-RouteGroupMenu::edit_group (ARDOUR::RouteGroup* g)
+RouteGroupMenu::edit_group (std::shared_ptr<ARDOUR::RouteGroup> g)
 {
 	RouteGroupDialog* d = new RouteGroupDialog (g, false);
 	d->signal_response().connect (sigc::hide (sigc::bind (sigc::ptr_fun (&delete_when_idle<RouteGroupDialog>), d)));

@@ -1097,16 +1097,16 @@ Mixer_UI::fan_out (std::weak_ptr<Route> wr, bool to_busses, bool group)
 #undef BUSNAME
 
 	if (group) {
-		RouteGroup* rg = NULL;
-		const std::list<RouteGroup*>& rgs (_session->route_groups ());
-		for (std::list<RouteGroup*>::const_iterator i = rgs.begin (); i != rgs.end (); ++i) {
+		std::shared_ptr<RouteGroup> rg;
+		const RouteGroupList & rgs (_session->route_groups ());
+		for (RouteGroupList::const_iterator i = rgs.begin (); i != rgs.end (); ++i) {
 			if ((*i)->name () == pi->name ()) {
 				rg = *i;
 				break;
 			}
 		}
 		if (!rg) {
-			rg = new RouteGroup (*_session, pi->name ());
+			rg = _session->new_route_group (pi->name ());
 			_session->add_route_group (rg);
 			rg->set_gain (false);
 		}
@@ -1376,9 +1376,11 @@ Mixer_UI::session_going_away ()
 {
 	ENSURE_GUI_THREAD (*this, &Mixer_UI::session_going_away);
 
-	_in_group_rebuild_or_clear = true;
-	group_model->clear ();
-	_in_group_rebuild_or_clear = false;
+	{
+		PBD::Unwinder<bool> uw (_in_group_rebuild_or_clear, true);
+		group_model->clear ();
+	}
+
 
 	_selection.clear ();
 	track_model->clear ();
@@ -2153,10 +2155,10 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 		return true;
 	}
 
-	RouteGroup* group = (*iter)[group_columns.group];
+	std::shared_ptr<RouteGroup> group = (*iter)[group_columns.group];
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		_group_tabs->get_menu(group)->popup (ev->button, ev->time);
+		_group_tabs->get_menu(group->shared_from_this())->popup (ev->button, ev->time);
 		return true;
 	}
 
@@ -2207,11 +2209,12 @@ Mixer_UI::route_groups_changed ()
 {
 	ENSURE_GUI_THREAD (*this, &Mixer_UI::route_groups_changed);
 
-	_in_group_rebuild_or_clear = true;
+	PBD::Unwinder<bool> uw (_in_group_rebuild_or_clear, true);
 
 	/* just rebuild the while thing */
 
 	group_model->clear ();
+	_group_tabs->clear ();
 
 #if 0
 	/* this is currently not used,
@@ -2226,14 +2229,12 @@ Mixer_UI::route_groups_changed ()
 		row = *(group_model->append());
 		row[group_columns.visible] = true;
 		row[group_columns.text] = (_("-all-"));
-		row[group_columns.group] = 0;
+		row[group_columns.group] = nullptr;
 	}
 #endif
 
 	_session->foreach_route_group (sigc::mem_fun (*this, &Mixer_UI::add_route_group));
-
 	_group_tabs->set_dirty ();
-	_in_group_rebuild_or_clear = false;
 }
 
 void
@@ -2259,18 +2260,23 @@ Mixer_UI::remove_selected_route_group ()
 
 	if ((iter = group_model->get_iter (*i))) {
 
-		RouteGroup* rg = (*iter)[group_columns.group];
+		std::shared_ptr<RouteGroup> rg = (*iter)[group_columns.group];
 
 		if (rg) {
-			_session->remove_route_group (*rg);
+			_session->remove_route_group (rg);
 		}
 	}
 }
 
 void
-Mixer_UI::route_group_property_changed (RouteGroup* group, const PropertyChange& change)
+Mixer_UI::route_group_property_changed (std::weak_ptr<RouteGroup> wgroup, const PropertyChange& change)
 {
 	if (in_group_row_change) {
+		return;
+	}
+
+	std::shared_ptr<RouteGroup> group (wgroup.lock());
+	if (!group) {
 		return;
 	}
 
@@ -2291,7 +2297,8 @@ Mixer_UI::route_group_property_changed (RouteGroup* group, const PropertyChange&
 	in_group_row_change = true;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		if ((*i)[group_columns.group] == group) {
+		std::shared_ptr<RouteGroup> rg ((*i)[group_columns.group]);
+		if (rg == group) {
 			(*i)[group_columns.visible] = !group->is_hidden ();
 			(*i)[group_columns.text] = group->name ();
 			break;
@@ -2399,7 +2406,7 @@ Mixer_UI::showhide_mixbuses (bool on)
 void
 Mixer_UI::route_group_name_edit (const std::string& path, const std::string& new_text)
 {
-	RouteGroup* group;
+	std::shared_ptr<RouteGroup> group;
 	TreeIter iter;
 
 	if ((iter = group_model->get_iter (path))) {
@@ -2417,13 +2424,15 @@ Mixer_UI::route_group_name_edit (const std::string& path, const std::string& new
 void
 Mixer_UI::route_group_row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator& iter)
 {
-	RouteGroup* group;
+	std::shared_ptr<RouteGroup> group;
 
 	if (in_group_row_change) {
 		return;
 	}
 
-	if ((group = (*iter)[group_columns.group]) == 0) {
+	group = (*iter)[group_columns.group];
+
+	if (!group) {
 		return;
 	}
 
@@ -2453,11 +2462,11 @@ Mixer_UI::route_group_row_deleted (Gtk::TreeModel::Path const &)
 
 	/* Re-write the session's route group list so that the new order is preserved */
 
-	list<RouteGroup*> new_list;
+	RouteGroupList new_list;
 
 	Gtk::TreeModel::Children children = group_model->children();
 	for (Gtk::TreeModel::Children::iterator i = children.begin(); i != children.end(); ++i) {
-		RouteGroup* g = (*i)[group_columns.group];
+		std::shared_ptr<RouteGroup> g = (*i)[group_columns.group];
 		if (g) {
 			new_list.push_back (g);
 		}
@@ -2468,7 +2477,7 @@ Mixer_UI::route_group_row_deleted (Gtk::TreeModel::Path const &)
 
 
 void
-Mixer_UI::add_route_group (RouteGroup* group)
+Mixer_UI::add_route_group (std::shared_ptr<RouteGroup> group)
 {
 	ENSURE_GUI_THREAD (*this, &Mixer_UI::add_route_group, group)
 	bool focus = false;
@@ -2485,7 +2494,8 @@ Mixer_UI::add_route_group (RouteGroup* group)
 		focus = true;
 	}
 
-	group->PropertyChanged.connect (*this, invalidator (*this), std::bind (&Mixer_UI::route_group_property_changed, this, group, _1), gui_context());
+	std::weak_ptr<RouteGroup> wg (group);
+	group->PropertyChanged.connect (*this, invalidator (*this), std::bind (&Mixer_UI::route_group_property_changed, this, wg, _1), gui_context());
 
 	if (focus) {
 		TreeViewColumn* col = group_display.get_column (0);
@@ -2532,7 +2542,7 @@ Mixer_UI::scroller_drag_data_received (const Glib::RefPtr<Gdk::DragContext>& con
 		if (!pip->is_instrument ()) {
 			continue;
 		}
-		ARDOUR_UI::instance()->session_add_midi_route (true, (RouteGroup*) 0, 1, _("MIDI"), Config->get_strict_io (), pip, ppp->_preset.valid ? &ppp->_preset : 0, PresentationInfo::max_order, false);
+		ARDOUR_UI::instance()->session_add_midi_route (true, nullptr, 1, _("MIDI"), Config->get_strict_io (), pip, ppp->_preset.valid ? &ppp->_preset : 0, PresentationInfo::max_order, false);
 		ok = true;
 	}
 
@@ -2944,7 +2954,7 @@ Mixer_UI::parameter_changed (string const & p)
 }
 
 void
-Mixer_UI::set_route_group_activation (RouteGroup* g, bool a)
+Mixer_UI::set_route_group_activation (std::shared_ptr<RouteGroup> g, bool a)
 {
 	g->set_active (a, this);
 }

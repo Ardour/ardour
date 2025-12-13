@@ -1239,7 +1239,7 @@ RouteTimeAxisView::get_regionviews_at_or_after (timepos_t const & pos, RegionSel
 	_view->get_regionviews_at_or_after (pos, regions);
 }
 
-RouteGroup*
+std::shared_ptr<RouteGroup>
 RouteTimeAxisView::route_group () const
 {
 	return _route->route_group();
@@ -1431,7 +1431,7 @@ RouteTimeAxisView::paste (timepos_t const & pos, const Selection& selection, Pas
 void
 RouteTimeAxisView::update_playlist_tip ()
 {
-	RouteGroup* rg = route_group ();
+	std::shared_ptr<RouteGroup> rg = route_group ();
 	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::group_select.property_id)) {
 		string group_string = "." + rg->name() + ".";
 

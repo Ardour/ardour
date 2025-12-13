@@ -169,8 +169,8 @@ public:
 
 	virtual void step_height (bool);
 
-	virtual ARDOUR::RouteGroup* route_group() const { return 0; }
-	virtual std::shared_ptr<ARDOUR::Playlist> playlist() const { return std::shared_ptr<ARDOUR::Playlist> (); }
+	virtual std::shared_ptr<ARDOUR::RouteGroup> route_group() const { return nullptr; }
+	virtual std::shared_ptr<ARDOUR::Playlist> playlist() const { return nullptr; }
 
 	virtual void set_samples_per_pixel (double);
 	virtual void show_selection (TimeSelection&);
