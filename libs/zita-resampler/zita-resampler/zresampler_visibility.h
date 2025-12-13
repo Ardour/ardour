@@ -11,7 +11,7 @@
   #define LIBZRESAMPLER_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
 #endif
 
-#ifdef LIBZRESAMPLER_STATIC // libzita-resampler is a DLL
+#ifdef LIBZRESAMPLER_STATIC // libzita-resampler is not a DLL
   #define LIBZRESAMPLER_API
   #define LIBZRESAMPLER_LOCAL
   #define LIBZRESAMPLER_TEMPLATE_API
