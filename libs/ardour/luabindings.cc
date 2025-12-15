@@ -2319,8 +2319,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		// RouteGroupList == std::list<shared_ptr<RouteGroup>>
-		.beginPtrStdList <std::shared_ptr<RouteGroup>> ("RouteGroupList")
-		.addVoidPtrConstructor<std::list<std::shared_ptr <RouteGroup> > > ()
+		.beginStdList <std::shared_ptr<RouteGroup>> ("RouteGroupList")
 		.endClass ()
 
 		// typedef std::vector<std::shared_ptr<Source> > Region::SourceList
