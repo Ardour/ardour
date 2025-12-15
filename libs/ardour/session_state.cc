@@ -1339,6 +1339,9 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 	}
 
 	XMLNode* xroutes = tree.root()->child ("Routes");
+
+	std::vector<std::pair<PBD::ID, PresentationInfo::order_t>> new_track_order;
+
 	if (xroutes) {
 		/* foreach route .. */
 		for (auto const rxml : xroutes->children()) {
@@ -1374,6 +1377,7 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 					assert (rl.size () < 2);
 					if (rl.size () > 0) {
 						r = rl.front ();
+						new_track_order.push_back (make_pair (r->id(), pi.order()));
 					}
 				}
 
@@ -1394,6 +1398,7 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 					assert (rl.size () < 2);
 					if (rl.size () > 0) {
 						r = rl.front ();
+						new_track_order.push_back (make_pair (r->id(), pi.order()));
 					}
 				}
 				/* set route-group */
@@ -1416,6 +1421,26 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 				}
 			}
 		}
+	}
+
+	if (!new_track_order.empty ()) {
+		std::sort (new_track_order.begin (), new_track_order.end (), [=] (auto& a, auto& b) { return a.second < b.second; });
+
+		/* sort all after the end, and then rely on
+		 * ensure_stripable_sort_order () to pull them back.
+		 *
+		 * Otherwise two routes may temporarily have the same order-id
+		 * and since signals are not blocked, the GUI may sync* callbacks
+		 * may interfere.
+		 */
+		uint32_t n_routes = routes.reader()->size ();
+		uint32_t added = 0;
+
+		for (auto const& [rid, _] : new_track_order) {
+			std::shared_ptr<Route> r = route_by_id (rid);
+			r->set_presentation_order (n_routes + added++);
+		}
+		ensure_stripable_sort_order ();
 	}
 
 	return 0;
