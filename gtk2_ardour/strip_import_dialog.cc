@@ -453,7 +453,7 @@ StripImportDialog::refill_import_table ()
 			return _route_map.at (a.first).pi.order () < _route_map.at (b.first).pi.order ();
 		} catch (...) {
 		}
-		return a.second < b.second;
+		return a.first < b.first;
 	});
 
 	/* Refill table */
@@ -641,7 +641,8 @@ StripImportDialog::import_all_strips (bool only_visible)
 {
 	_import_map.clear ();
 
-	int64_t next_id = std::numeric_limits<uint64_t>::max () - 1 - _extern_map.size ();
+	std::vector<std::pair<PBD::ID, PresentationInfo::order_t>> sorted_eid;
+
 	for (auto& [eid, einfo] : _extern_map) {
 		if (einfo.pi.special () || (only_visible && einfo.pi.hidden ())) {
 			continue;
@@ -651,6 +652,15 @@ StripImportDialog::import_all_strips (bool only_visible)
 			continue;
 		}
 #endif
+		sorted_eid.push_back (make_pair (eid, einfo.pi.order ()));
+	}
+
+	std::sort (sorted_eid.begin (), sorted_eid.end (), [=] (auto& a, auto& b) {
+		return a.second < b.second;
+	});
+
+	int64_t next_id = std::numeric_limits<uint64_t>::max () - 1 - sorted_eid.size ();
+	for (auto const& [eid, _] : sorted_eid) {
 		PBD::ID next_new      = PBD::ID (next_id++);
 		_import_map[next_new] = eid;
 	}
