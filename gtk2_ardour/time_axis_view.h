@@ -106,6 +106,8 @@ public:
 	TimeAxisView(ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
 
+	std::string name () const { return name_label.get_text (); }
+
 	static PBD::Signal<void(TimeAxisView*)> CatchDeletion;
 
 	static void setup_sizes ();
@@ -267,7 +269,6 @@ protected:
 
 	void begin_name_edit ();
 	void end_name_edit (std::string, int);
-	virtual std::string name () const { return name_label.get_text (); }
 
 	/* derived classes can override these */
 
