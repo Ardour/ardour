@@ -856,16 +856,14 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 	Editing::MouseMode mouse_mode = current_mouse_mode();
 	switch (item_type) {
 	case NoteItem:
-		if (mouse_mode == Editing::MouseContent) {
-			/* Existing note: allow trimming/motion */
-			if ((note = reinterpret_cast<NoteBase*> (item->get_data ("notebase")))) {
-				if (note->big_enough_to_trim() && note->mouse_near_ends()) {
-					_drags->set (new NoteResizeDrag (*this, item), event, get_canvas_cursor());
-				} else {
-					NoteDrag* nd = new NoteDrag (*this, item);
-					nd->set_bounding_item (data_group);
-					_drags->set (nd, event);
-				}
+		/* Existing note: allow trimming/motion */
+		if ((note = reinterpret_cast<NoteBase*> (item->get_data ("notebase")))) {
+			if (note->big_enough_to_trim() && note->mouse_near_ends()) {
+				_drags->set (new NoteResizeDrag (*this, item), event, get_canvas_cursor());
+			} else {
+				NoteDrag* nd = new NoteDrag (*this, item);
+				nd->set_bounding_item (data_group);
+				_drags->set (nd, event);
 			}
 		}
 		return true;
