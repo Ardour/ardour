@@ -637,13 +637,13 @@ StripImportDialog::clear_mapping ()
 }
 
 void
-StripImportDialog::import_all_strips ()
+StripImportDialog::import_all_strips (bool only_visible)
 {
 	_import_map.clear ();
 
 	int64_t next_id = std::numeric_limits<uint64_t>::max () - 1 - _extern_map.size ();
 	for (auto& [eid, einfo] : _extern_map) {
-		if (einfo.pi.special () || einfo.pi.hidden ()) {
+		if (einfo.pi.special () || (only_visible && einfo.pi.hidden ())) {
 			continue;
 		}
 #ifdef MIXBUS
@@ -712,7 +712,8 @@ StripImportDialog::setup_strip_import_page ()
 	using namespace Menu_Helpers;
 	_action = manage (new ArdourWidgets::ArdourDropdown ());
 	_action->add_menu_elem (MenuElem (_("Clear Mapping"), sigc::mem_fun (*this, &StripImportDialog::clear_mapping)));
-	_action->add_menu_elem (MenuElem (_("Import all as new tracks"), sigc::mem_fun (*this, &StripImportDialog::import_all_strips)));
+	_action->add_menu_elem (MenuElem (_("Import all as new tracks"), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::import_all_strips), false)));
+	_action->add_menu_elem (MenuElem (_("Import visible as new tracks"), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::import_all_strips), true)));
 	_action->add_menu_elem (MenuElem (_match_pbd_id ? _("Reset - auto-map by ID") : _("Reset - auto-map by name"), sigc::bind (mem_fun (*this, &StripImportDialog::set_default_mapping), true)));
 	_action->set_text (_("Actions"));
 
