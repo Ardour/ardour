@@ -367,11 +367,11 @@ EditingContext::register_automation_actions (Bindings* automation_bindings, std:
 	_automation_actions = ActionManager::create_action_group (automation_bindings, prefix + X_("Automation"));
 
 	reg_sens (_automation_actions, "create-point", _("Create Automation Point"), std::bind (sigc::mem_fun (*this, &EditingContext::automation_create_point_at_edit_point), false));
-	reg_sens (_automation_actions, "create-point-with-guards", _("Create Automation Point"), std::bind (sigc::mem_fun (*this, &EditingContext::automation_create_point_at_edit_point), true));
-	reg_sens (_automation_actions, "move-points-later", _("Create Automation P (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_move_points_later));
-	reg_sens (_automation_actions, "move-points-earlier", _("Create Automation Point (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_move_points_earlier));
-	reg_sens (_automation_actions, "raise-points", _("Create Automation Point (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_raise_points));
-	reg_sens (_automation_actions, "lower-points", _("Create Automation Point (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_lower_points));
+	reg_sens (_automation_actions, "create-point-with-guards", _("Create Automation Point (with Guard Points)"), std::bind (sigc::mem_fun (*this, &EditingContext::automation_create_point_at_edit_point), true));
+	reg_sens (_automation_actions, "move-points-later", _("Move Selected Automation Points Later"), sigc::mem_fun (*this, &EditingContext::automation_move_points_later));
+	reg_sens (_automation_actions, "move-points-earlier", _("Move Selected Automation Points Earlier"), sigc::mem_fun (*this, &EditingContext::automation_move_points_earlier));
+	reg_sens (_automation_actions, "raise-points", _("Increase Value of Selected Automation Points"), sigc::mem_fun (*this, &EditingContext::automation_raise_points));
+	reg_sens (_automation_actions, "lower-points", _("Decrease Value of Selected Automatuon Points"), sigc::mem_fun (*this, &EditingContext::automation_lower_points));
 	reg_sens (_automation_actions, "begin-edit", _("Open value entry window for automation editing"), sigc::mem_fun (*this, &EditingContext::automation_begin_edit));
 	reg_sens (_automation_actions, "end-edit", _("Close value entry window for automation editing"), sigc::mem_fun (*this, &EditingContext::automation_end_edit));
 
