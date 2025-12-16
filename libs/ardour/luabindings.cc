@@ -289,7 +289,6 @@ CLASSKEYS(ARDOUR::LuaTableRef);
 CLASSKEYS(ARDOUR::MidiModel::NoteDiffCommand);
 CLASSKEYS(ARDOUR::MidiModel::SysExDiffCommand);
 CLASSKEYS(ARDOUR::MonitorProcessor);
-CLASSKEYS(ARDOUR::RouteGroup);
 CLASSKEYS(ARDOUR::ParameterDescriptor);
 CLASSKEYS(ARDOUR::PeakMeter);
 CLASSKEYS(ARDOUR::PluginInfo);
@@ -336,6 +335,7 @@ CLASSKEYS(std::list<std::shared_ptr<ARDOUR::PluginInfo> >); // PluginInfoList
 CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Port> >);
 CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Region> >);
 CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Route> >);
+CLASSKEYS(std::list<std::shared_ptr<ARDOUR::RouteGroup> >);
 CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Stripable> >);
 
 CLASSKEYS(std::shared_ptr<std::list<std::shared_ptr<ARDOUR::Route> > >);
@@ -357,6 +357,7 @@ CLASSKEYS(std::shared_ptr<ARDOUR::PluginInfo>);
 CLASSKEYS(std::shared_ptr<ARDOUR::PluginInsert>);
 CLASSKEYS(std::shared_ptr<ARDOUR::RegionFxPlugin>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Route>);
+CLASSKEYS(std::shared_ptr<ARDOUR::RouteGroup>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Playlist>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Processor>);
 CLASSKEYS(std::shared_ptr<ARDOUR::AudioReadable>);
