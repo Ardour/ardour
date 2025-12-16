@@ -120,7 +120,9 @@ RouteGroupMenu::add_item (std::shared_ptr<RouteGroup> rg, std::set<std::shared_p
 
 	items.push_back (RadioMenuElem (*group, rg->name()));
 	RadioMenuItem* i = static_cast<RadioMenuItem*> (&items.back ());
-	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::set_group), i, rg));
+	std::weak_ptr<RouteGroup> wg (rg);
+
+	i->signal_activate().connect ([wg, i, this]() { std::shared_ptr<RouteGroup> g (wg.lock()); if (g) { set_group (i, g); }}); 
 
 	if (groups.size() == 1 && *groups.begin() == rg) {
 		/* there's only one active group, and it's this one */
