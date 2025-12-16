@@ -207,7 +207,7 @@ EditorRouteGroups::remove_selected ()
 		std::shared_ptr<RouteGroup> rg = (*iter)[_columns.routegroup];
 
 		if (rg) {
-			_session->remove_route_group (rg->shared_from_this());
+			_session->remove_route_group (rg);
 		}
 	}
 }
