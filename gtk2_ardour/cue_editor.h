@@ -120,7 +120,7 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	std::pair<Temporal::timepos_t,Temporal::timepos_t> max_zoom_extent() const;
 
 	void full_zoom_clicked();
-	void zoom_to_show (Temporal::timecnt_t const &);
+	void zoom_to_show (std::pair<Temporal::timepos_t,Temporal::timepos_t> const &);
 
 	bool ruler_event (GdkEvent*);
 

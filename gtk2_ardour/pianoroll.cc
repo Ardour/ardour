@@ -658,7 +658,7 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 
 	if (zoom_in_allocate) {
 
-		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
+		zoom_to_show (max_zoom_extent());
 		if (_region) {
 			bg->display_region (*view);
 		}
@@ -1468,7 +1468,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 
 	/* Compute zoom level to show entire source plus some margin if possible */
 
-	zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
+	zoom_to_show (max_zoom_extent());
 
 	bg->display_region (*view);
 
@@ -1843,7 +1843,7 @@ Pianoroll::set_session (ARDOUR::Session* s)
 	}
 
 	if (_session) {
-		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
+		zoom_to_show (max_zoom_extent());
 	}
 }
 

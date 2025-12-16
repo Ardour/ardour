@@ -1189,12 +1189,14 @@ CueEditor::max_zoom_extent() const
 
 		if (show_source) {
 			len = _region->source()->length().beats();
+			if (len != Temporal::Beats()) {
+				return std::make_pair (timepos_t (Temporal::Beats()), timepos_t (_region->end().beats()));
+			}
 		} else {
 			len = _region->length().beats();
-		}
-
-		if (len != Temporal::Beats()) {
-			return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (len));
+			if (len != Temporal::Beats()) {
+				return std::make_pair (timepos_t (_region->start().beats()), timepos_t (_region->end().beats()));
+			}
 		}
 	}
 
@@ -1203,7 +1205,7 @@ CueEditor::max_zoom_extent() const
 }
 
 void
-CueEditor::zoom_to_show (Temporal::timecnt_t const & duration)
+CueEditor::zoom_to_show (std::pair<Temporal::timepos_t,Temporal::timepos_t> const & z)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
@@ -1212,7 +1214,7 @@ CueEditor::zoom_to_show (Temporal::timecnt_t const & duration)
 		return;
 	}
 
-	reset_zoom ((samplecnt_t) floor (duration.samples() / _track_canvas_width));
+	reposition_and_zoom (z.first.samples(), (samplecnt_t) floor ((max_extents_scale() * ((z.second.samples() - z.first.samples())) / (double) _track_canvas_width)));
 }
 
 void
