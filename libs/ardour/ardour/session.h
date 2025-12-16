@@ -1946,6 +1946,7 @@ private:
 	int load_route_groups (const XMLNode&, int);
 
 	RouteGroupList _route_groups;
+	void route_group_emptied (std::shared_ptr<RouteGroup>);
 
 	/* routes stuff */
 

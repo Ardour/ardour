@@ -3609,6 +3609,18 @@ Session::add_route_group (std::shared_ptr<RouteGroup> g)
 void
 Session::remove_route_group (std::shared_ptr<RouteGroup> rg)
 {
+	if (!rg) {
+		return;
+	}
+
+	rg->clear ();
+
+	/* by the magic of reference counting, rg will now be deleted */
+}
+
+void
+Session::route_group_emptied (std::shared_ptr<RouteGroup> rg)
+{
 	list<std::shared_ptr<RouteGroup>>::iterator i;
 
 	if ((i = find (_route_groups.begin(), _route_groups.end(), rg)) != _route_groups.end()) {

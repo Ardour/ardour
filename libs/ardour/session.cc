@@ -6829,8 +6829,10 @@ Session::route_removed_from_route_group (std::shared_ptr<RouteGroup> rg, std::we
 	update_route_record_state ();
 	RouteRemovedFromRouteGroup (rg, r); /* EMIT SIGNAL */
 
+	std::shared_ptr<Route> rr (r.lock());
+
 	if (!rg->has_control_master () && !rg->has_subgroup () && rg->empty()) {
-		remove_route_group (rg);
+		route_group_emptied (rg);
 	}
 }
 

@@ -244,6 +244,18 @@ RouteGroup::unset_subgroup_bus ()
 	_subgroup_bus.reset ();
 }
 
+void
+RouteGroup::clear ()
+{
+	RouteList copy (*routes);
+
+	for (auto & r : copy) {
+		remove (r);
+	}
+
+	changed ();
+}
+
 int
 RouteGroup::remove (std::shared_ptr<Route> r)
 {

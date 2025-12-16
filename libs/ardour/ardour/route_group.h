@@ -115,6 +115,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject, public std::enable_shared
 
 	int add (std::shared_ptr<Route>);
 	int remove (std::shared_ptr<Route>);
+	void clear ();
 
 	template<typename Function> void foreach_route (Function f) { for (auto & r : *routes) {f (r); } }
 
@@ -125,11 +126,6 @@ class LIBARDOUR_API RouteGroup : public SessionObject, public std::enable_shared
 	/* fills at_set with all members of the group that are AudioTracks */
 
 	void audio_track_group (std::set<std::shared_ptr<AudioTrack> >& at_set);
-
-	void clear () {
-		routes->clear ();
-		changed();
-	}
 
 	bool has_subgroup() const;
 	bool can_subgroup (bool, Placement) const;
