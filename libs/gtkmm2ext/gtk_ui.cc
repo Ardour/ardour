@@ -26,7 +26,6 @@
 #include <cmath>
 #include <fcntl.h>
 #include <signal.h>
-#include <unistd.h>
 #include <cerrno>
 #include <climits>
 #include <cctype>
