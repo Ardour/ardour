@@ -3165,7 +3165,9 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 	if (_midi_region) {
 		Temporal::Beats lno (_midi_region->source_beats_to_absolute_time (last_note_off).beats());
 		if (lno > _midi_region->end().beats()) {
-			_midi_region->playlist()->clear_owned_changes ();
+			if (_midi_region->playlist()) {
+				_midi_region->playlist()->clear_owned_changes ();
+			}
 			_midi_region->trim_end (timepos_t (lno));
 			_editing_context.add_command (new StatefulDiffCommand (_midi_region));
 		}
