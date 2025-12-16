@@ -152,8 +152,8 @@ private:
 	void route_added_to_route_group (std::shared_ptr<ARDOUR::RouteGroup>, std::weak_ptr<ARDOUR::Route>);
 	void route_removed_from_route_group (std::shared_ptr<ARDOUR::RouteGroup>, std::weak_ptr<ARDOUR::Route>);
 
-	void assign_group_to_master (uint32_t which, std::shared_ptr<ARDOUR::RouteGroup>, bool rename_master) const;
-	void unassign_group_to_master (uint32_t which, std::shared_ptr<ARDOUR::RouteGroup>) const;
+	void assign_group_to_master (std::shared_ptr<ARDOUR::RouteGroup>, uint32_t which, bool rename_master) const;
+	void unassign_group_to_master (std::shared_ptr<ARDOUR::RouteGroup>, uint32_t which) const;
 	void assign_selection_to_master (uint32_t which);
 	void assign_recenabled_to_master (uint32_t which);
 	void assign_soloed_to_master (uint32_t which);

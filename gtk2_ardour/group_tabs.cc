@@ -445,21 +445,29 @@ GroupTabs::get_menu (std::shared_ptr<RouteGroup> g, bool in_tab_area)
 	}
 
 	if (g) {
-		items.push_back (MenuElem (_("Edit Group..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::edit_group), g)));
-		items.push_back (MenuElem (_("Collect Group"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::collect), g)));
-		items.push_back (MenuElem (_("Remove Group"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::remove_group), g)));
+		std::weak_ptr<RouteGroup> wg (g);
+
+#define SAFE_BIND(func,weak) [weak,this]() { std::shared_ptr<RouteGroup> g(weak.lock()); if (g) { func (g); }}
+#define SAFE_BIND1(func,weak,arg1) [weak,this]() { std::shared_ptr<RouteGroup> g(weak.lock()); if (g) { func (g,arg1); }}
+#define SAFE_BIND2(func,weak,arg1,arg2) [weak,this]() { std::shared_ptr<RouteGroup> g(weak.lock()); if (g) { func (g,arg1,arg2); }}
+
+		items.push_back (MenuElem (_("Edit Group..."), SAFE_BIND (edit_group, wg)));
+		items.push_back (MenuElem (_("Collect Group"), SAFE_BIND (collect, wg)));
+		items.push_back (MenuElem (_("Remove Group"), SAFE_BIND (remove_group, wg)));
 
 		items.push_back (SeparatorElem());
 
 		if (g->has_control_master()) {
-			items.push_back (MenuElem (_("Drop Group from VCA..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::unassign_group_to_master), g->group_master_number(), g)));
+			items.push_back (MenuElem (_("Drop Group from VCA..."), SAFE_BIND1 (unassign_group_to_master, wg, g->group_master_number())));
 		} else {
 			vca_menu = manage (new Menu);
 			MenuList& f (vca_menu->items());
-			f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), 0, g, true)));
+			f.push_back (MenuElem ("New", SAFE_BIND2 (assign_group_to_master, wg, 0, true)));
 
-			for (VCAList::const_iterator v = vcas.begin(); v != vcas.end(); ++v) {
-				f.push_back (MenuElem ((*v)->name().empty() ? string_compose ("VCA %1", (*v)->number()) : (*v)->name(), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), (*v)->number(), g, true)));
+			for (auto & vca : vcas) {
+				uint32_t num = vca->number();
+				f.push_back (MenuElem (vca->name().empty() ? string_compose ("VCA %1", vca->number()) : vca->name(),
+				                       [wg,this,num]() { std::shared_ptr<RouteGroup> g (wg.lock()); if (g) { assign_group_to_master (g, num, true); }}));
 			}
 			items.push_back (MenuElem (_("Assign Group to VCA..."), *vca_menu));
 		}
@@ -467,13 +475,13 @@ GroupTabs::get_menu (std::shared_ptr<RouteGroup> g, bool in_tab_area)
 		items.push_back (SeparatorElem());
 
 		if (g->has_subgroup ()) {
-			items.push_back (MenuElem (_("Remove Subgroup Bus"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::un_subgroup), g)));
+			items.push_back (MenuElem (_("Remove Subgroup Bus"), SAFE_BIND (un_subgroup, wg)));
 		} else {
-			items.push_back (MenuElem (_("Add New Subgroup Bus"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, false, PreFader)));
+			items.push_back (MenuElem (_("Add New Subgroup Bus"), SAFE_BIND2 (subgroup, wg, false, PreFader)));
 			items.back().set_sensitive (g->can_subgroup (false, PostFader));
-			items.push_back (MenuElem (_("Add New Aux Bus (pre-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PreFader)));
+			items.push_back (MenuElem (_("Add New Aux Bus (pre-fader)"), SAFE_BIND2 (subgroup, wg, true, PreFader)));
 			items.back().set_sensitive (g->can_subgroup (true, PreFader));
-			items.push_back (MenuElem (_("Add New Aux Bus (post-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PostFader)));
+			items.push_back (MenuElem (_("Add New Aux Bus (post-fader)"), SAFE_BIND2 (subgroup, wg, true, PostFader)));
 			items.back().set_sensitive (g->can_subgroup (true, PostFader));
 		}
 
@@ -532,7 +540,7 @@ GroupTabs::get_menu (std::shared_ptr<RouteGroup> g, bool in_tab_area)
 }
 
 void
-GroupTabs::assign_group_to_master (uint32_t which, std::shared_ptr<RouteGroup> group, bool rename_master) const
+GroupTabs::assign_group_to_master (std::shared_ptr<RouteGroup> group, uint32_t which, bool rename_master) const
 {
 	if (!_session || !group) {
 		return;
@@ -568,7 +576,7 @@ GroupTabs::assign_group_to_master (uint32_t which, std::shared_ptr<RouteGroup> g
 }
 
 void
-GroupTabs::unassign_group_to_master (uint32_t which, std::shared_ptr<RouteGroup> group) const
+GroupTabs::unassign_group_to_master (std::shared_ptr<RouteGroup> group, uint32_t which) const
 {
 	if (!_session || !group) {
 		return;
@@ -745,7 +753,7 @@ GroupTabs::new_group_dialog_finished (int r, RouteGroupDialog* d, RouteList cons
 			}
 
 			if (with_master) {
-				assign_group_to_master (0, d->group(), true); /* zero => new master */
+				assign_group_to_master (d->group(), 0, true); /* zero => new master */
 			}
 		}
 	}
