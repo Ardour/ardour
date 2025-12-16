@@ -1083,6 +1083,15 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* /*ev*/, StreamView*
 void
 Editor::presentation_info_changed (PropertyChange const & what_changed)
 {
+	if (!_session || _session->deletion_in_progress()) {
+		/* static signal, that the editor c'tor subscribes to.
+		 * It may be received during connect_dependents_to_session() when
+		 * signals are processed in BootMessage -> GUIIdle, just
+		 * just before Editor::set_session();
+		 */
+		return;
+	}
+
 	uint32_t n_tracks = 0;
 	uint32_t n_busses = 0;
 	uint32_t n_vcas = 0;
