@@ -1618,7 +1618,13 @@ Editor::automation_move_points_later ()
 	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
 	ControlPoint* point (points.front());
 	timepos_t model_time ((*point->model())->when);
-	model_time += Temporal::BBT_Offset (0, 1, 0);
+
+	bool success;
+	Temporal::Beats how_far (get_grid_type_as_beats (success, model_time));
+	if (!success) {
+		how_far = Temporal::Beats (1, 0);
+	}
+	model_time += Temporal::BBT_Offset (0, how_far.get_beats(), how_far.get_ticks());
 	atv->line()->the_list()->modify (point->model(), model_time, (*point->model())->value);
 	add_command (new MementoCommand<AutomationList>(atv->line()->memento_command_binder (), 0, &atv->line()->the_list()->get_state()));
 	commit_reversible_command ();
@@ -1645,7 +1651,13 @@ Editor::automation_move_points_earlier ()
 	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
 	ControlPoint* point (points.front());
 	timepos_t model_time ((*point->model())->when);
-	model_time = model_time.earlier (Temporal::BBT_Offset (0, 1, 0));
+
+	bool success;
+	Temporal::Beats how_far (get_grid_type_as_beats (success, model_time));
+	if (!success) {
+		how_far = Temporal::Beats (1, 0);
+	}
+	model_time = model_time.earlier (Temporal::BBT_Offset (0, how_far.get_beats(), how_far.get_ticks()));
 	atv->line()->the_list()->modify (point->model(), model_time, (*point->model())->value);
 	add_command (new MementoCommand<AutomationList>(atv->line()->memento_command_binder (), 0, &atv->line()->the_list()->get_state()));
 	commit_reversible_command ();
