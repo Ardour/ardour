@@ -749,9 +749,6 @@ Session::destroy ()
 	delete _butler;
 	_butler = 0;
 
-	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
-	_route_groups.clear ();
-
 	if (click_data != default_click) {
 		delete [] click_data;
 	}
@@ -827,6 +824,9 @@ Session::destroy ()
 		/* writer goes out of scope and updates master */
 	}
 	routes.flush ();
+
+	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
+	_route_groups.clear ();
 
 	{
 		DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
