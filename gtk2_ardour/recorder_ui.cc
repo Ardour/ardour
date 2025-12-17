@@ -1139,7 +1139,7 @@ struct TrackRecordAxisSorter {
 void
 RecorderUI::presentation_info_changed (PBD::PropertyChange const& what_changed)
 {
-	if (!_session || _session->deletion_in_progress()) {
+	if (!_session) {
 		return;
 	}
 	if (what_changed.contains (Properties::hidden)) {

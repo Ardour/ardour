@@ -1083,7 +1083,7 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* /*ev*/, StreamView*
 void
 Editor::presentation_info_changed (PropertyChange const & what_changed)
 {
-	if (!_session || _session->deletion_in_progress()) {
+	if (!_session) {
 		/* static signal, that the editor c'tor subscribes to.
 		 * It may be received during connect_dependents_to_session() when
 		 * signals are processed in BootMessage -> GUIIdle, just
