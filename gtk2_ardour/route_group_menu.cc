@@ -85,7 +85,8 @@ RouteGroupMenu::build (WeakRouteList const & s)
 
 	items.push_back (MenuElem (_("New Group..."), sigc::mem_fun (*this, &RouteGroupMenu::new_group)));
 	if (groups.size() == 1 && *groups.begin() != 0) {
-		items.push_back (MenuElem (_("Edit Group..."), sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::edit_group), *groups.begin ())));
+		std::weak_ptr<RouteGroup> wg (*groups.begin ());
+		items.push_back (MenuElem (_("Edit Group..."), sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::edit_group), wg)));
 	}
 	items.push_back (SeparatorElem ());
 
@@ -122,7 +123,7 @@ RouteGroupMenu::add_item (std::shared_ptr<RouteGroup> rg, std::set<std::shared_p
 	RadioMenuItem* i = static_cast<RadioMenuItem*> (&items.back ());
 	std::weak_ptr<RouteGroup> wg (rg);
 
-	i->signal_activate().connect ([wg, i, this]() { std::shared_ptr<RouteGroup> g (wg.lock()); if (g) { set_group (i, g); }}); 
+	i->signal_activate().connect ([=]() { if (!i->get_active()) { return; } std::shared_ptr<RouteGroup> g (wg.lock()); if (g) { set_group (i, g); }}); 
 
 	if (groups.size() == 1 && *groups.begin() == rg) {
 		/* there's only one active group, and it's this one */
@@ -189,8 +190,12 @@ RouteGroupMenu::new_group_dialog_finished (int r, RouteGroupDialog* d)
 }
 
 void
-RouteGroupMenu::edit_group (std::shared_ptr<ARDOUR::RouteGroup> g)
+RouteGroupMenu::edit_group (std::weak_ptr<ARDOUR::RouteGroup> wg)
 {
+	std::shared_ptr<RouteGroup> g (wg.lock());
+	if (!g) {
+		return;
+	}
 	RouteGroupDialog* d = new RouteGroupDialog (g, false);
 	d->signal_response().connect (sigc::hide (sigc::bind (sigc::ptr_fun (&delete_when_idle<RouteGroupDialog>), d)));
 	d->present ();
