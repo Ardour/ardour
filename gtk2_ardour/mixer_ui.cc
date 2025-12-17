@@ -2158,7 +2158,7 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 	std::shared_ptr<RouteGroup> group = (*iter)[group_columns.group];
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		_group_tabs->get_menu(group->shared_from_this())->popup (ev->button, ev->time);
+		_group_tabs->get_menu(group)->popup (ev->button, ev->time);
 		return true;
 	}
 

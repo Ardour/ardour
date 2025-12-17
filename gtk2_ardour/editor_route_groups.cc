@@ -242,7 +242,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 	}
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		_editor._group_tabs->get_menu(group->shared_from_this())->popup (1, ev->time);
+		_editor._group_tabs->get_menu(group)->popup (1, ev->time);
 		return true;
 	}
 
