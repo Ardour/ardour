@@ -283,6 +283,7 @@ RouteGroup::remove (std::shared_ptr<Route> r)
 		}
 		routes->erase (i);
 		if (routes->empty()) {
+			_subgroup_bus.reset ();
 			group_master.reset ();
 			_group_master_number = -1;
 		}
