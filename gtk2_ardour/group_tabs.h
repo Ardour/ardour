@@ -75,12 +75,12 @@ public:
 protected:
 
 	struct Tab {
-		Tab () : group (0) {}
+		Tab () {}
 
 		double from;
 		double to;
 		uint32_t color; ///< color
-		std::shared_ptr<ARDOUR::RouteGroup> group; ///< route group
+		std::weak_ptr<ARDOUR::RouteGroup> group; ///< route group
 	};
 
 	/** @return Size of the widget along the primary axis */

@@ -57,7 +57,6 @@ MixerGroupTabs::compute_tabs () const
 
 	Tab tab;
 	tab.from = 0;
-	tab.group = 0;
 
 	int32_t x = 0;
 	TreeModel::Children rows = _mixer->track_model->children ();
@@ -80,9 +79,10 @@ MixerGroupTabs::compute_tabs () const
 #endif
 
 		std::shared_ptr<RouteGroup> g = s->route_group ();
+		std::shared_ptr<RouteGroup> tab_group = s->route_group ();
 
-		if (g != tab.group) {
-			if (tab.group) {
+		if (g != tab_group) {
+			if (tab_group) {
 				tab.to = x;
 				tabs.push_back (tab);
 			}
@@ -100,7 +100,7 @@ MixerGroupTabs::compute_tabs () const
 		x += ww;
 	}
 
-	if (tab.group) {
+	if (tab.group.lock()) {
 		tab.to = x;
 		tabs.push_back (tab);
 	}
@@ -113,10 +113,11 @@ MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab)
 {
 	double const arc_radius = get_height();
 	double r, g, b, a;
+	std::shared_ptr<RouteGroup> tab_group (tab.group.lock());
 
-	if (tab.group && tab.group->is_active()) {
+	if (tab_group && tab_group->is_active()) {
 		Gtkmm2ext::color_to_rgba (tab.color, r, g, b, a);
-	} else if (!tab.group && _dragging_new_tab) {
+	} else if (!tab_group && _dragging_new_tab) {
 		Gdk::Color col = ARDOUR_UI_UTILS::round_robin_palette_color (true);
 		color_t ct = Gtkmm2ext::gdk_color_to_rgba (col);
 		Gtkmm2ext::color_to_rgba (ct, r, g, b, a);
@@ -133,14 +134,14 @@ MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab)
 	cairo_line_to (cr, tab.from, get_height());
 	cairo_fill (cr);
 
-	if (tab.group && (tab.to - tab.from) > arc_radius) {
+	if (tab_group && (tab.to - tab.from) > arc_radius) {
 		int text_width, text_height;
 
 		Glib::RefPtr<Pango::Layout> layout;
 		layout = Pango::Layout::create (get_pango_context ());
 		layout->set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 
-		layout->set_text (tab.group->name ());
+		layout->set_text (tab_group->name ());
 		layout->set_width ((tab.to - tab.from - arc_radius) * PANGO_SCALE);
 		layout->get_pixel_size (text_width, text_height);
 
@@ -209,4 +210,3 @@ MixerGroupTabs::selected_routes () const
 	}
 	return rl;
 }
-

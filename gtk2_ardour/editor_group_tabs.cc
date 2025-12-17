@@ -51,7 +51,6 @@ EditorGroupTabs::compute_tabs () const
 
 	Tab tab;
 	tab.from = 0;
-	tab.group = 0;
 
 	int32_t y = 0;
 	for (TrackViewList::iterator i = _editor.track_views.begin(); i != _editor.track_views.end(); ++i) {
@@ -61,9 +60,10 @@ EditorGroupTabs::compute_tabs () const
 		}
 
 		std::shared_ptr<RouteGroup> g ((*i)->route_group ());
+		std::shared_ptr<RouteGroup> tab_group (tab.group.lock());
 
-		if (g != tab.group) {
-			if (tab.group) {
+		if (g != tab_group) {
+			if (tab_group) {
 				tab.to = y;
 				tabs.push_back (tab);
 			}
@@ -78,7 +78,7 @@ EditorGroupTabs::compute_tabs () const
 		y += (*i)->effective_height ();
 	}
 
-	if (tab.group) {
+	if (tab.group.lock()) {
 		tab.to = y;
 		tabs.push_back (tab);
 	}
@@ -99,9 +99,11 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab)
 	double const arc_radius = get_width();
 	double r, g, b, a;
 
-	if (tab.group && tab.group->is_active()) {
+	std::shared_ptr<RouteGroup> tab_group (tab.group.lock());
+
+	if (tab_group && tab_group->is_active()) {
 		Gtkmm2ext::color_to_rgba (tab.color, r, g, b, a);
-	} else if (!tab.group && _dragging_new_tab) {
+	} else if (!tab_group && _dragging_new_tab) {
 		Gdk::Color col = ARDOUR_UI_UTILS::round_robin_palette_color (true);
 		color_t ct = Gtkmm2ext::gdk_color_to_rgba (col);
 		Gtkmm2ext::color_to_rgba (ct, r, g, b, a);
@@ -119,14 +121,14 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab)
 	cairo_line_to (cr, 0, from + arc_radius);
 	cairo_fill (cr);
 
-	if (tab.group && (to - from) > arc_radius) {
+	if (tab_group && (to - from) > arc_radius) {
 		int text_width, text_height;
 
 		Glib::RefPtr<Pango::Layout> layout;
 		layout = Pango::Layout::create (get_pango_context ());
 		layout->set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 
-		layout->set_text (tab.group->name ());
+		layout->set_text (tab_group->name ());
 		layout->set_width ((to - from - arc_radius) * PANGO_SCALE);
 		layout->get_pixel_size (text_width, text_height);
 
@@ -210,4 +212,3 @@ EditorGroupTabs::selected_routes () const
 
 	return rl;
 }
-

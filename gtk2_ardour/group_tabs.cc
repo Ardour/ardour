@@ -209,7 +209,7 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 
 	} else if (ev->button == 3) {
 
-		std::shared_ptr<RouteGroup> g (t ? t->group : nullptr);
+		std::shared_ptr<RouteGroup> g (t ? t->group.lock() : nullptr);
 
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier) && g) {
 			remove_group (g);
@@ -265,13 +265,17 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 
 	if (!_drag_moved) {
 
-		if (_dragging->group) {
+		std::shared_ptr<RouteGroup> group (_dragging->group.lock());
+
+		if (group) {
 			/* toggle active state */
-			_dragging->group->set_active (!_dragging->group->is_active (), this);
+			group->set_active (!group->is_active (), this);
 		}
 
 	} else {
 		/* finish drag */
+
+		std::shared_ptr<RouteGroup> group (_dragging->group.lock());
 		RouteList routes = routes_for_tab (_dragging);
 
 		if (!routes.empty()) {
@@ -285,7 +289,7 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 				 */
 				for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
 					/* RouteGroup::add () ignores routes already present in the set */
-					_dragging->group->add (*i);
+					group->add (*i);
 				}
 				for (auto const& i : *r) {
 
@@ -295,7 +299,7 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 					bool const now_in_tab = find (routes.begin(), routes.end(), i) != routes.end();
 
 					if (was_in_tab && !now_in_tab) {
-						_dragging->group->remove (i);
+						group->remove (i);
 					}
 				}
 
