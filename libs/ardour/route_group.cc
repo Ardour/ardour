@@ -282,6 +282,10 @@ RouteGroup::remove (std::shared_ptr<Route> r)
 			_sursend_enable_group->remove_control (r->surround_send ()->send_enable_control ());
 		}
 		routes->erase (i);
+		if (routes->empty()) {
+			group_master.reset ();
+			_group_master_number = -1;
+		}
 		_session.set_dirty ();
 		RouteRemoved (shared_from_this(), std::weak_ptr<Route> (r)); /* EMIT SIGNAL */
 		return 0;
