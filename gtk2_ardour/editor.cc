@@ -4029,8 +4029,10 @@ Editor::_get_preferred_edit_position (EditIgnoreOption ignore, bool from_context
 		if (_dragging_playhead) {
 			/* NOTE: since the user is dragging with the mouse, this operation will implicitly be Snapped */
 			where = timepos_t (_playhead_cursor->current_sample());
-		} else {
+		} else if (_session) {
 			where = timepos_t (_session->audible_sample());
+		} else {
+			where = timepos_t (0);
 		}
 		DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use playhead @ %1\n", where));
 		break;
