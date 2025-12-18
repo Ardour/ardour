@@ -627,6 +627,10 @@ RouteTimeAxisView::build_display_menu ()
 		detach_menu (*automation_action_menu);
 	}
 
+	if (route_group_menu) {
+		route_group_menu->detach ();
+	}
+
 	TimeAxisView::build_display_menu ();
 
 	bool active = _route->active ();
@@ -812,7 +816,6 @@ RouteTimeAxisView::build_display_menu ()
 		}
 
 		if (!_route->is_singleton ()) {
-			route_group_menu->detach ();
 			route_group_menu->build (r);
 			items.push_back (MenuElem (_("Group"), *route_group_menu->menu ()));
 		}

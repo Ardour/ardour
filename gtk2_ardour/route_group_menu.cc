@@ -47,6 +47,7 @@ RouteGroupMenu::RouteGroupMenu (Session* s, PropertyList* plist)
 
 RouteGroupMenu::~RouteGroupMenu()
 {
+	detach ();
 	delete _menu;
 	delete _default_properties;
 }
