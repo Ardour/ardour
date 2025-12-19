@@ -429,7 +429,7 @@ no_audio_tracks:
 				ChanCount (DataType::MIDI, 1),
 				true,
 				instrument, (Plugin::PresetRecord*) 0,
-				(RouteGroup*) 0,
+				nullptr,
 				1,
 				a->trname,
 				PresentationInfo::max_order,

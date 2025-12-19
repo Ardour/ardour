@@ -453,7 +453,7 @@ StripImportDialog::refill_import_table ()
 			return _route_map.at (a.first).pi.order () < _route_map.at (b.first).pi.order ();
 		} catch (...) {
 		}
-		return a.second < b.second;
+		return a.first < b.first;
 	});
 
 	/* Refill table */
@@ -637,13 +637,14 @@ StripImportDialog::clear_mapping ()
 }
 
 void
-StripImportDialog::import_all_strips ()
+StripImportDialog::import_all_strips (bool only_visible)
 {
 	_import_map.clear ();
 
-	int64_t next_id = std::numeric_limits<uint64_t>::max () - 1 - _extern_map.size ();
+	std::vector<std::pair<PBD::ID, PresentationInfo::order_t>> sorted_eid;
+
 	for (auto& [eid, einfo] : _extern_map) {
-		if (einfo.pi.special () || einfo.pi.hidden ()) {
+		if (einfo.pi.special () || (only_visible && einfo.pi.hidden ())) {
 			continue;
 		}
 #ifdef MIXBUS
@@ -651,6 +652,15 @@ StripImportDialog::import_all_strips ()
 			continue;
 		}
 #endif
+		sorted_eid.push_back (make_pair (eid, einfo.pi.order ()));
+	}
+
+	std::sort (sorted_eid.begin (), sorted_eid.end (), [=] (auto& a, auto& b) {
+		return a.second < b.second;
+	});
+
+	int64_t next_id = std::numeric_limits<uint64_t>::max () - 1 - sorted_eid.size ();
+	for (auto const& [eid, _] : sorted_eid) {
 		PBD::ID next_new      = PBD::ID (next_id++);
 		_import_map[next_new] = eid;
 	}
@@ -699,6 +709,9 @@ StripImportDialog::setup_strip_import_page ()
 	_route_map.clear ();
 
 	for (auto const& r : *_session->get_routes ()) {
+		if (r->is_main_bus () && !r->is_master ()) {
+			continue;
+		}
 #ifdef MIXBUS
 		_route_map.emplace (r->id (), Session::RouteImportInfo (r->name (), r->presentation_info (), r->mixbus ()));
 #else
@@ -709,7 +722,8 @@ StripImportDialog::setup_strip_import_page ()
 	using namespace Menu_Helpers;
 	_action = manage (new ArdourWidgets::ArdourDropdown ());
 	_action->add_menu_elem (MenuElem (_("Clear Mapping"), sigc::mem_fun (*this, &StripImportDialog::clear_mapping)));
-	_action->add_menu_elem (MenuElem (_("Import all as new tracks"), sigc::mem_fun (*this, &StripImportDialog::import_all_strips)));
+	_action->add_menu_elem (MenuElem (_("Import all as new tracks"), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::import_all_strips), false)));
+	_action->add_menu_elem (MenuElem (_("Import visible as new tracks"), sigc::bind (sigc::mem_fun (*this, &StripImportDialog::import_all_strips), true)));
 	_action->add_menu_elem (MenuElem (_match_pbd_id ? _("Reset - auto-map by ID") : _("Reset - auto-map by name"), sigc::bind (mem_fun (*this, &StripImportDialog::set_default_mapping), true)));
 	_action->set_text (_("Actions"));
 

@@ -38,6 +38,10 @@
 #include "pbd/pthread_utils.h"
 #include "pbd/progress.h"
 
+#ifdef COMPILER_MSVC
+#include <io.h> // For read, close
+#endif
+
 using namespace PBD;
 
 static size_t

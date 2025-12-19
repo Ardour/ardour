@@ -1767,7 +1767,7 @@ RegionMoveDrag::create_destination_time_axis (std::shared_ptr<Region> region, Ti
 			                                                   Config->get_strict_io () || Profile->get_mixbus (),
 			                                                   std::shared_ptr<ARDOUR::PluginInfo> (),
 			                                                   (ARDOUR::Plugin::PresetRecord*)0,
-			                                                   (ARDOUR::RouteGroup*)0, 1, region->name (), PresentationInfo::max_order, Normal, true);
+			                                                   nullptr, 1, region->name (), PresentationInfo::max_order, Normal, true);
 			tav         = _editor.time_axis_view_from_stripable (midi_tracks.front ());
 		}
 
@@ -5637,14 +5637,14 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 				 */
 				TrackViewList       tracks_to_add;
 				TrackViewList       tracks_to_remove;
-				vector<RouteGroup*> selected_route_groups;
+				vector<std::shared_ptr<RouteGroup>> selected_route_groups;
 
 				if (!first_move) {
 					for (TrackViewList::const_iterator i = editing_context.get_selection().tracks.begin (); i != editing_context.get_selection().tracks.end (); ++i) {
 						if (!new_selection.contains (*i) && !_track_selection_at_start.contains (*i)) {
 							tracks_to_remove.push_back (*i);
 						} else {
-							RouteGroup* rg = (*i)->route_group ();
+							std::shared_ptr<RouteGroup> rg ((*i)->route_group ());
 							if (rg && rg->is_active () && rg->is_select () && gcd != Controllable::NoGroup) {
 								selected_route_groups.push_back (rg);
 							}
@@ -5655,7 +5655,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 				for (TrackViewList::const_iterator i = new_selection.begin (); i != new_selection.end (); ++i) {
 					if (!editing_context.get_selection().tracks.contains (*i)) {
 						tracks_to_add.push_back (*i);
-						RouteGroup* rg = (*i)->route_group ();
+						std::shared_ptr<RouteGroup> rg ((*i)->route_group ());
 
 						if (rg && rg->is_active () && rg->is_select () && gcd != Controllable::NoGroup) {
 							selected_route_groups.push_back (rg);
@@ -5672,7 +5672,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 					 */
 
 					for (TrackViewList::iterator i = tracks_to_remove.begin (); i != tracks_to_remove.end ();) {
-						RouteGroup* rg = (*i)->route_group ();
+						std::shared_ptr<RouteGroup> rg ((*i)->route_group ());
 
 						if (rg && find (selected_route_groups.begin (), selected_route_groups.end (), rg) != selected_route_groups.end ()) {
 							i = tracks_to_remove.erase (i);

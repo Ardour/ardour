@@ -3283,6 +3283,22 @@ Route::import_state (const XMLNode& node, bool use_pbd_ids, bool processor_only)
 				}
 				continue;
 			}
+			if (prop->value() == "sursend") {
+				if (_surround_send) {
+					XMLNode* proc = new XMLNode (*child);
+					proc->set_property ("id", _surround_send->id());
+					processor_state.add_child_nocopy (*proc);
+				}
+				continue;
+			}
+			if (prop->value() == "surreturn") {
+				if (_surround_return) {
+					XMLNode* proc = new XMLNode (*child);
+					proc->set_property ("id", _surround_return->id());
+					processor_state.add_child_nocopy (*proc);
+				}
+				continue;
+			}
 
 			/* special case processors with controls */
 
@@ -5105,8 +5121,12 @@ Route::set_active (bool yn, void* src)
 		return;
 	}
 
-	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_route_active()) {
-		_route_group->foreach_route (std::bind (&Route::set_active, _1, yn, _route_group));
+	if (is_singleton ()) {
+		return;
+	}
+
+	if (_route_group && src != _route_group.get() && _route_group->is_active() && _route_group->is_route_active()) {
+		_route_group->foreach_route (std::bind (&Route::set_active, _1, yn, _route_group.get()));
 		return;
 	}
 

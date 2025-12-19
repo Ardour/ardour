@@ -79,7 +79,7 @@ protected:
 
 	void setup_model (const std::vector<ARDOUR::TemplateInfo>& templates);
 
-	void row_selection_changed ();
+	virtual void row_selection_changed ();
 
 	virtual void delete_selected_template () = 0;
 	bool adjust_plugin_paths (XMLNode* node, const std::string& name, const std::string& new_name) const;
@@ -101,8 +101,13 @@ protected:
 
 	Gtk::TreeModel::const_iterator _current_selection;
 
-	Gtk::ProgressBar _progress_bar;
 	std::string _current_action;
+	bool        _desc_dirty;
+
+	Gtk::ProgressBar _progress_bar;
+	Gtk::Button      _remove_button;
+	Gtk::Button      _rename_button;
+	Gtk::TreeView    _template_treeview;
 
 private:
 	void render_template_names (Gtk::CellRenderer* rnd, const Gtk::TreeModel::iterator& it);
@@ -114,9 +119,7 @@ private:
 	bool key_event (GdkEventKey* ev);
 
 	virtual void get_templates (vector<TemplateInfo>& templates) const = 0;
-
 	virtual void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name) = 0;
-
 	virtual void save_template_desc ();
 
 	void export_all_templates ();
@@ -128,14 +131,9 @@ private:
 
 	virtual bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const = 0;
 
-	Gtk::TreeView _template_treeview;
+
 	Gtk::CellRendererText _validating_cellrenderer;
 	Gtk::TreeView::Column _validated_column;
-
-	bool _desc_dirty;
-
-	Gtk::Button _remove_button;
-	Gtk::Button _rename_button;
 
 	Gtk::Button _export_all_templates_button;
 	Gtk::Button _import_template_set_button;
@@ -188,6 +186,27 @@ private:
 	bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const;
 };
 
+class StripStateManager : public TemplateManager
+{
+public:
+	StripStateManager () : TemplateManager () {}
+	~StripStateManager () {}
+
+	void init ();
+
+	void get_templates (vector<TemplateInfo>& templates) const;
+
+private:
+	void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name);
+	void row_selection_changed ();
+	void delete_selected_template ();
+
+	std::string templates_dir () const;
+	virtual std::string templates_dir_basename () const;
+	std::string template_file (const Gtk::TreeModel::const_iterator& item) const;
+
+	bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const;
+};
 
 TemplateDialog::TemplateDialog ()
 	: ArdourDialog ("Manage Templates")
@@ -200,6 +219,9 @@ TemplateDialog::TemplateDialog ()
 	RouteTemplateManager* route_tm = manage (new RouteTemplateManager);
 	nb->append_page (*route_tm, _("Track Templates"));
 
+	StripStateManager* strip_tm = manage (new StripStateManager);
+	nb->append_page (*strip_tm, _("Global Strip Templates"));
+
 	get_vbox()->pack_start (*nb);
 	add_button (_("Done"), Gtk::RESPONSE_OK);
 
@@ -207,9 +229,11 @@ TemplateDialog::TemplateDialog ()
 
 	session_tm->init ();
 	route_tm->init ();
+	strip_tm->init ();
 
 	session_tm->TemplatesImported.connect (*this, invalidator (*this), std::bind (&RouteTemplateManager::init, route_tm), gui_context ());
 	route_tm->TemplatesImported.connect (*this, invalidator (*this), std::bind (&SessionTemplateManager::init, session_tm), gui_context ());
+	strip_tm->TemplatesImported.connect (*this, invalidator (*this), std::bind (&StripStateManager::init, strip_tm), gui_context ());
 
 	signal_hide().connect (sigc::mem_fun (session_tm, &TemplateManager::handle_dirty_description));
 	signal_hide().connect (sigc::mem_fun (route_tm, &TemplateManager::handle_dirty_description));
@@ -237,7 +261,7 @@ TemplateManager::TemplateManager ()
 
 	_validated_column.set_cell_data_func (_validating_cellrenderer, sigc::mem_fun (*this, &TemplateManager::render_template_names));
 	_validating_cellrenderer.signal_edited().connect (sigc::mem_fun (*this, &TemplateManager::validate_edit));
-	_cursor_changed_connection = _template_treeview.signal_cursor_changed().connect (sigc::mem_fun (*this, &TemplateManager::row_selection_changed));
+	_cursor_changed_connection = _template_treeview.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &TemplateManager::row_selection_changed));
 	_template_treeview.signal_key_press_event().connect (sigc::mem_fun (*this, &TemplateManager::key_event));
 
 	ScrolledWindow* sw = manage (new ScrolledWindow);
@@ -349,6 +373,8 @@ TemplateManager::row_selection_changed ()
 	if (_current_selection) {
 		const string desc = _current_selection->get_value (_template_columns.description);
 		_description_editor.get_buffer()->set_text (desc);
+	} else {
+		_description_editor.get_buffer()->set_text ("");
 	}
 
 	_desc_dirty = false;
@@ -530,6 +556,7 @@ TemplateManager::export_all_templates ()
 
 	vector<string> files;
 	PBD::find_files_matching_regex (files, tmpdir, string ("\\.template$"), /* recurse = */ true);
+	PBD::find_files_matching_regex (files, tmpdir, string ("\\.routestate"), /* recurse = */ true);
 
 	vector<string>::const_iterator it;
 	for (it = files.begin(); it != files.end(); ++it) {
@@ -594,8 +621,11 @@ TemplateManager::import_template_set ()
 		const std::string dest = Glib::build_filename (user_config_directory(), fn.substr (pos));
 		ar.extract_current_file (dest);
 	}
+
+	//
 	vector<string> files;
 	PBD::find_files_matching_regex (files, templates_dir (), string ("\\.template$"), /* recurse = */ true);
+	PBD::find_files_matching_regex (files, templates_dir (), string ("\\.routestate$"), /* recurse = */ true);
 
 	vector<string>::const_iterator it;
 	for (it = files.begin(); it != files.end(); ++it) {
@@ -692,6 +722,18 @@ RouteTemplateManager::init ()
 }
 
 void
+StripStateManager::init ()
+{
+	vector<TemplateInfo> templates;
+	get_templates (templates);
+	setup_model (templates);
+
+	_progress_bar.hide ();
+	_description_editor.set_sensitive (false);
+	_save_desc.set_sensitive (false);
+}
+
+void
 SessionTemplateManager::get_templates (vector<TemplateInfo>& templates) const
 {
 	find_session_templates (templates, /* read_xml = */ true);
@@ -701,6 +743,33 @@ void
 RouteTemplateManager::get_templates (vector<TemplateInfo>& templates) const
 {
 	find_route_templates (templates);
+}
+
+void
+StripStateManager::get_templates (vector<TemplateInfo>& template_info) const
+{
+	Searchpath global_path (ardour_data_search_path ());
+	global_path.add_subdirectory_to_paths (routestates_dir_name);
+
+	vector<string> templates;
+	/* clang-format off */
+	find_paths_matching_filter (templates,
+	                            global_path,
+	                            [] (const string& str, void*) { return Glib::file_test (str, Glib::FILE_TEST_IS_DIR); },
+	                            0, true, true);
+	/* clang-format on */
+
+	for (vector<string>::iterator i = templates.begin (); i != templates.end (); ++i) {
+		string file = session_template_dir_to_file (*i);
+
+		TemplateInfo rti;
+		rti.name = Glib::path_get_basename (*i);
+		rti.path = *i;
+		rti.description = "";
+
+		template_info.push_back (rti);
+	}
+	std::sort (template_info.begin (), template_info.end ());
 }
 
 #include <cerrno>
@@ -788,7 +857,6 @@ SessionTemplateManager::templates_dir_basename () const
 {
 	return string (templates_dir_name);
 }
-
 
 string
 SessionTemplateManager::template_file (const TreeModel::const_iterator& item) const
@@ -902,7 +970,6 @@ RouteTemplateManager::templates_dir_basename () const
 	return string (route_templates_dir_name);
 }
 
-
 string
 RouteTemplateManager::template_file (const TreeModel::const_iterator& item) const
 {
@@ -913,4 +980,124 @@ bool
 RouteTemplateManager::adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const
 {
 	return adjust_plugin_paths (tree.root(), old_name, string (new_name));
+}
+
+void
+StripStateManager::rename_template (TreeModel::iterator& item, const Glib::ustring& new_name_)
+{
+	const string old_path = item->get_value (_template_columns.path);
+	const string old_name = item->get_value (_template_columns.name);
+	const string new_name = new_name_;
+
+	if (old_name == new_name) {
+		return;
+	}
+
+	const string old_file_old_path = Glib::build_filename (old_path, old_name + routestate_suffix);
+
+	XMLTree tree;
+
+	if (!tree.read(old_file_old_path)) {
+		error << string_compose (_("Could not parse template file \"%1\"."), old_file_old_path) << endmsg;
+		return;
+	}
+
+	const XMLNode* const routes_node = tree.root()->child (X_("Routes"));
+	if (routes_node) {
+		for (auto const& rit : routes_node->children (X_("Route"))) {
+			adjust_plugin_paths (rit, old_name, new_name);
+		}
+	}
+
+	const string new_file_old_path = Glib::build_filename (old_path, new_name + routestate_suffix);
+
+	tree.set_filename (new_file_old_path);
+
+	if (!tree.write ()) {
+		error << string_compose(_("Could not write to new template file \"%1\"."), new_file_old_path);
+		return;
+	}
+
+	const string new_path = Glib::build_filename (templates_dir (), new_name);
+
+	if (g_rename (old_path.c_str(), new_path.c_str()) != 0) {
+		error << string_compose (_("Could not rename template directory from \"%1\" to \"%2\": %3"),
+					 old_path, new_path, strerror (errno)) << endmsg;
+		g_unlink (new_file_old_path.c_str());
+		return;
+	}
+
+	const string old_file_new_path = Glib::build_filename (new_path, old_name + routestate_suffix);
+	if (g_unlink (old_file_new_path.c_str())) {
+		error << string_compose (X_("Could not delete old template file \"%1\": %2"),
+					 old_file_new_path, strerror (errno)) << endmsg;
+	}
+
+	item->set_value (_template_columns.name, new_name);
+	item->set_value (_template_columns.path, new_path);
+}
+
+void
+StripStateManager::delete_selected_template ()
+{
+	if (!_current_selection) {
+		return;
+	}
+
+	PBD::remove_directory (_current_selection->get_value (_template_columns.path));
+
+	_template_model->erase (_current_selection);
+	_current_selection = TreeIter ();
+	row_selection_changed ();
+}
+
+string
+StripStateManager::templates_dir () const
+{
+	return Glib::build_filename (user_config_directory(), routestates_dir_name);
+}
+
+string
+StripStateManager::templates_dir_basename () const
+{
+	return routestates_dir_name;
+}
+
+string
+StripStateManager::template_file (const TreeModel::const_iterator& item) const
+{
+	return item->get_value (_template_columns.path);
+}
+
+bool
+StripStateManager::adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const
+{
+	bool adjusted = false;
+	XMLNode* root = tree.root();
+
+	const XMLNode* const routes_node = root->child (X_("Routes"));
+	if (routes_node) {
+		const XMLNodeList& routes = routes_node->children (X_("Route"));
+		XMLNodeConstIterator rit;
+		for (rit = routes.begin(); rit != routes.end(); ++rit) {
+			if (adjust_plugin_paths (*rit, old_name, new_name)) {
+				adjusted = true;
+			}
+		}
+	}
+
+	return adjusted;
+}
+
+void
+StripStateManager::row_selection_changed ()
+{
+	_description_editor.get_buffer()->set_text ("Strip Templates currently have no user-editable description");
+	_description_editor.set_sensitive (false);
+	_desc_dirty = false;
+	_save_desc.set_sensitive (false);
+
+	_current_selection = _template_treeview.get_selection()->get_selected ();
+	_rename_button.set_sensitive (_current_selection);
+	_remove_button.set_sensitive (_current_selection);
 }

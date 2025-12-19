@@ -658,7 +658,7 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 
 	if (zoom_in_allocate) {
 
-		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
+		zoom_to_show (max_zoom_extent());
 		if (_region) {
 			bg->display_region (*view);
 		}
@@ -856,16 +856,14 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 	Editing::MouseMode mouse_mode = current_mouse_mode();
 	switch (item_type) {
 	case NoteItem:
-		if (mouse_mode == Editing::MouseContent) {
-			/* Existing note: allow trimming/motion */
-			if ((note = reinterpret_cast<NoteBase*> (item->get_data ("notebase")))) {
-				if (note->big_enough_to_trim() && note->mouse_near_ends()) {
-					_drags->set (new NoteResizeDrag (*this, item), event, get_canvas_cursor());
-				} else {
-					NoteDrag* nd = new NoteDrag (*this, item);
-					nd->set_bounding_item (data_group);
-					_drags->set (nd, event);
-				}
+		/* Existing note: allow trimming/motion */
+		if ((note = reinterpret_cast<NoteBase*> (item->get_data ("notebase")))) {
+			if (note->big_enough_to_trim() && note->mouse_near_ends()) {
+				_drags->set (new NoteResizeDrag (*this, item), event, get_canvas_cursor());
+			} else {
+				NoteDrag* nd = new NoteDrag (*this, item);
+				nd->set_bounding_item (data_group);
+				_drags->set (nd, event);
 			}
 		}
 		return true;
@@ -1470,7 +1468,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 
 	/* Compute zoom level to show entire source plus some margin if possible */
 
-	zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
+	zoom_to_show (max_zoom_extent());
 
 	bg->display_region (*view);
 
@@ -1845,7 +1843,7 @@ Pianoroll::set_session (ARDOUR::Session* s)
 	}
 
 	if (_session) {
-		zoom_to_show (timecnt_t (timepos_t (max_extents_scale() * max_zoom_extent ().second.samples())));
+		zoom_to_show (max_zoom_extent());
 	}
 }
 
@@ -2105,4 +2103,37 @@ Pianoroll::source_to_timeline (timepos_t const & source_pos) const
 	}
 
 	return source_pos;
+}
+
+Gtk::Menu*
+Pianoroll::get_single_region_context_menu ()
+{
+	using namespace Gtk;
+	using namespace Menu_Helpers;
+
+	Menu* m = new Menu;
+	MenuList& items (m->items());
+
+	items.push_back (MenuElem (_("Quantize..."), sigc::mem_fun (*this, &EditingContext::quantize_region)));
+	items.push_back (MenuElem (_("Legatize"), sigc::bind(sigc::mem_fun (*this, &EditingContext::legatize_region), false)));
+	items.push_back (MenuElem (_("Transform..."), sigc::mem_fun (*this, &EditingContext::transform_region)));
+	items.push_back (MenuElem (_("Remove Overlap"), sigc::bind(sigc::mem_fun (*this, &EditingContext::legatize_region), true)));
+	// items.push_back (MenuElem (_("Insert Patch Change..."), sigc::bind (sigc::mem_fun (*this, &EditingContext::insert_patch_change), false)));
+	// items.push_back (MenuElem (_("Insert Patch Change..."), sigc::bind (sigc::mem_fun (*this, &EditingContext::insert_patch_change), true)));
+
+	return m;
+}
+
+EditingContext::MidiViews
+Pianoroll::midiviews_from_region_selection (RegionSelection const &) const
+{
+	/* there is no region selection */
+
+	MidiViews mv;
+
+	if (midi_view()) {
+		mv.push_back (midi_view());
+	}
+
+	return mv;
 }

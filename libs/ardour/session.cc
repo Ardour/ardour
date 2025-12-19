@@ -307,7 +307,6 @@ Session::Session (AudioEngine &eng,
 	, ltc_timecode_negative_offset (false)
 	, midi_control_ui (0)
 	, _punch_or_loop (NoConstraint)
-	, _all_route_group (new RouteGroup (*this, "all"))
 	, routes (new RouteList)
 	, _adding_routes_in_progress (false)
 	, _reconnecting_routes_in_progress (false)
@@ -519,6 +518,8 @@ Session::Session (AudioEngine &eng,
 
 	StartTimeChanged.connect_same_thread (*this, std::bind (&Session::start_time_changed, this, _1));
 	EndTimeChanged.connect_same_thread (*this, std::bind (&Session::end_time_changed, this, _1));
+
+	RouteGroup::RouteRemoved.connect_same_thread (*this, std::bind (&Session::route_removed_from_route_group, this, _1, _2));
 
 	LatentSend::ChangedLatency.connect_same_thread (*this, std::bind (&Session::send_latency_compensation_change, this));
 	LatentSend::QueueUpdate.connect_same_thread (*this, std::bind (&Session::update_send_delaylines, this));
@@ -748,13 +749,6 @@ Session::destroy ()
 	delete _butler;
 	_butler = 0;
 
-	delete _all_route_group;
-
-	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
-	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
-		delete *i;
-	}
-
 	if (click_data != default_click) {
 		delete [] click_data;
 	}
@@ -830,6 +824,9 @@ Session::destroy ()
 		/* writer goes out of scope and updates master */
 	}
 	routes.flush ();
+
+	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
+	_route_groups.clear ();
 
 	{
 		DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
@@ -2747,7 +2744,7 @@ Session::default_track_name_pattern (DataType t)
 list<std::shared_ptr<MidiTrack> >
 Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool strict_io,
                          std::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset,
-                         RouteGroup* route_group, uint32_t how_many,
+                         std::shared_ptr<RouteGroup> route_group, uint32_t how_many,
                          string name_template, PresentationInfo::order_t order,
                          TrackMode mode, bool input_auto_connect,
                          bool trigger_visibility)
@@ -2836,7 +2833,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 }
 
 RouteList
-Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name_template, bool strict_io,
+Session::new_midi_route (std::shared_ptr<RouteGroup> route_group, uint32_t how_many, string name_template, bool strict_io,
                          std::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset,
                          PresentationInfo::Flag flag, PresentationInfo::order_t order)
 {
@@ -3008,7 +3005,7 @@ Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new
  *  @param name_template string to use for the start of the name, or "" to use "Audio".
  */
 list< std::shared_ptr<AudioTrack> >
-Session::new_audio_track (int input_channels, int output_channels, RouteGroup* route_group,
+Session::new_audio_track (int input_channels, int output_channels, std::shared_ptr<RouteGroup> route_group,
                           uint32_t how_many, string name_template, PresentationInfo::order_t order,
                           TrackMode mode, bool input_auto_connect,
                           bool trigger_visibility)
@@ -3100,7 +3097,7 @@ Session::new_audio_track (int input_channels, int output_channels, RouteGroup* r
  *  @param name_template string to use for the start of the name, or "" to use "Bus".
  */
 RouteList
-Session::new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, string name_template,
+Session::new_audio_route (int input_channels, int output_channels, std::shared_ptr<RouteGroup> route_group, uint32_t how_many, string name_template,
                           PresentationInfo::Flag flags, PresentationInfo::order_t order)
 {
 	string bus_name;
@@ -3962,7 +3959,7 @@ Session::route_listen_changed (Controllable::GroupControlDisposition group_overr
 
 			_engine.monitor_port().clear_ports (false);
 
-			RouteGroup* rg = route->route_group ();
+			std::shared_ptr<RouteGroup> rg (route->route_group ());
 			const bool group_already_accounted_for = (group_override == Controllable::ForGroup);
 
 			std::shared_ptr<RouteList const> r = routes.reader ();
@@ -4071,7 +4068,7 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 	 * belongs to.
 	 */
 
-	RouteGroup* rg = route->route_group ();
+	std::shared_ptr<RouteGroup> rg = route->route_group ();
 	const bool group_already_accounted_for = (group_override == Controllable::ForGroup);
 
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("propagate to session, group accounted for ? %1\n", group_already_accounted_for));
@@ -6810,27 +6807,32 @@ Session::solo_control_mode_changed ()
 
 /** Called when a property of one of our route groups changes */
 void
-Session::route_group_property_changed (RouteGroup* rg)
+Session::route_group_property_changed (std::weak_ptr<RouteGroup> wrg)
 {
-	RouteGroupPropertyChanged (rg); /* EMIT SIGNAL */
+	std::shared_ptr<RouteGroup> rg (wrg.lock());
+	if (rg) {
+		RouteGroupPropertyChanged (rg); /* EMIT SIGNAL */
+	}
 }
 
 /** Called when a route is added to one of our route groups */
 void
-Session::route_added_to_route_group (RouteGroup* rg, std::weak_ptr<Route> r)
+Session::route_added_to_route_group (std::shared_ptr<RouteGroup> rg, std::weak_ptr<Route> r)
 {
 	RouteAddedToRouteGroup (rg, r);
 }
 
 /** Called when a route is removed from one of our route groups */
 void
-Session::route_removed_from_route_group (RouteGroup* rg, std::weak_ptr<Route> r)
+Session::route_removed_from_route_group (std::shared_ptr<RouteGroup> rg, std::weak_ptr<Route> r)
 {
 	update_route_record_state ();
 	RouteRemovedFromRouteGroup (rg, r); /* EMIT SIGNAL */
 
+	std::shared_ptr<Route> rr (r.lock());
+
 	if (!rg->has_control_master () && !rg->has_subgroup () && rg->empty()) {
-		remove_route_group (*rg);
+		route_group_emptied (rg);
 	}
 }
 

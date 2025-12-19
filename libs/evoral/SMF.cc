@@ -449,6 +449,31 @@ SMF::is_meta (uint8_t const* buf, uint32_t size)
 	return false;
 }
 
+bool
+SMF::is_tempo_or_meter_related (uint8_t const* buf, uint32_t size)
+{
+	if (size < 2) {
+		return false;
+	}
+
+	/* unlike the libsmf version of this functionality, this explicitly
+	 * tests for known metadata event types, and only allows them.
+	 */
+
+	if (buf[0] == 0xff) {
+		switch (buf[1]) {
+		case 0x51: /* set tempo */
+		case 0x58: /* time signature */
+		case 0x59: /* key signaturey */
+			return true;
+		default:
+			break;
+		}
+	}
+
+	return false;
+}
+
 int
 SMF::append_event_delta (uint32_t delta_t, uint32_t size, const uint8_t* buf, event_id_t note_id, bool allow_meta)
 {

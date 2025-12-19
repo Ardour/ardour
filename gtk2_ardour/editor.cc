@@ -2894,8 +2894,6 @@ Editor::setup_tooltips ()
 	set_tooltip (*_group_tabs, _("Groups: click to (de)activate\nContext-click for other operations"));
 	set_tooltip (nudge_forward_button, _("Nudge Region/Selection Later"));
 	set_tooltip (nudge_backward_button, _("Nudge Region/Selection Earlier"));
-	set_tooltip (zoom_in_button, _("Zoom In"));
-	set_tooltip (zoom_out_button, _("Zoom Out"));
 	set_tooltip (zoom_preset_selector, _("Zoom to Time Scale"));
 	set_tooltip (full_zoom_button, _("Zoom to Session"));
 	set_tooltip (tav_expand_button, _("Expand Tracks"));
@@ -4031,8 +4029,10 @@ Editor::_get_preferred_edit_position (EditIgnoreOption ignore, bool from_context
 		if (_dragging_playhead) {
 			/* NOTE: since the user is dragging with the mouse, this operation will implicitly be Snapped */
 			where = timepos_t (_playhead_cursor->current_sample());
-		} else {
+		} else if (_session) {
 			where = timepos_t (_session->audible_sample());
+		} else {
+			where = timepos_t (0);
 		}
 		DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use playhead @ %1\n", where));
 		break;
@@ -5096,7 +5096,7 @@ Editor::get_stripable_time_axis_by_id (const PBD::ID& id) const
 }
 
 void
-Editor::fit_route_group (RouteGroup *g)
+Editor::fit_route_group (std::shared_ptr<RouteGroup> g)
 {
 	TrackViewList ts = axis_views_from_routes (g->route_list ());
 	fit_tracks (ts);

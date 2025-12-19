@@ -384,16 +384,32 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		return false;
 	}
 
+	bool search_name = _search_name_checkbox->get_active();
+	bool search_tags = _search_tags_checkbox->get_active();
+	bool search_creator = false;
+
+	if (!search_name && !search_tags) {
+		search_name = true;
+		search_tags = true;
+		search_creator = true;
+	}
+
 	if (!searchstr.empty()) {
 
-		if (_search_name_checkbox->get_active()) { /* name contains */
+		if (search_name) {
 			std::string compstr = info->name;
 			setup_search_string (compstr);
 			maybe_show |= match_search_strings (compstr, searchstr);
 		}
 
-		if (_search_tags_checkbox->get_active()) { /* tag contains */
+		if (search_tags) {
 			std::string compstr = manager.get_tags_as_string (info);
+			setup_search_string (compstr);
+			maybe_show |= match_search_strings (compstr, searchstr);
+		}
+
+		if (search_creator) {
+			std::string compstr = info->creator;
 			setup_search_string (compstr);
 			maybe_show |= match_search_strings (compstr, searchstr);
 		}

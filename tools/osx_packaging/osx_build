@@ -68,6 +68,8 @@ while [ $# -gt 0 ] ; do
 		WITH_HARRISON_VBM=1 ;
 		WITH_COMMERCIAL_X42_LV2=1
 		WITH_GRATIS_X42_LV2=1
+		WITH_XJADEO= ;
+		WITH_HARVID= ;
 		STRIP= ;
 		PRODUCT_PKG_DIR=MixbusVBM;
 		lower_case_appname=mixbusvbm;

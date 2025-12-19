@@ -835,6 +835,12 @@ RegionFxPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& ou
 		out = ChanCount::min (in, out);
 		return true;
 	}
+	if (plugin()->get_info ()->variable_bus_layout ()) {
+		ChanCount sc;
+		for (auto const& p : _plugins) {
+			p->request_bus_layout (in, sc, in);
+		}
+	}
 	return private_can_support_io_configuration (in, out).method != Impossible;
 }
 

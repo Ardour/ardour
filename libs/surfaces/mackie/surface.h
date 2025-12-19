@@ -20,6 +20,7 @@
 #ifndef mackie_surface_h
 #define mackie_surface_h
 
+#include <array>
 #include <stdint.h>
 
 #include <sigc++/trackable.h>

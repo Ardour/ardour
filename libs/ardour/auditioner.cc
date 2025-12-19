@@ -471,15 +471,9 @@ Auditioner::audition_region (std::shared_ptr<Region> region, bool loop)
 	_disk_reader->seek (offset.samples(), true);
 
 	if (_midi_audition) {
-		/* Fill MIDI buffers.
-		 * This is safe to call from here. ::::audition_region()
-		 * is called by the butler thread. Also the session is not
-		 * yet auditioning. So Session::non_realtime_overwrite()
-		 * does call the auditioner's DR.
-		 */
+		/* Request Fill MIDI buffers. */
 		_queue_panic = true;
 		set_pending_overwrite (PlaylistModified);
-		_disk_reader->overwrite_existing_buffers ();
 	}
 
 	current_sample = offset.samples();

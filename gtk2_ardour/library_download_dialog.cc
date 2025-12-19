@@ -31,6 +31,7 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/library.h"
 
+#include "ardour_message.h"
 #include "gui_thread.h"
 #include "library_download_dialog.h"
 #include "ui_config.h"
@@ -94,7 +95,10 @@ void
 LibraryDownloadDialog::refill ()
 {
 	ARDOUR::LibraryFetcher lf;
-	lf.get_descriptions ();
+	if (lf.get_descriptions () || 0 == lf.n_descriptions()) {
+		ArdourMessageDialog msg (*this, _("Failed to download library index.\nPlease check your internet connection."));
+		msg.run ();
+	}
 
 	if (lf.n_descriptions()) {
 		_model->clear ();

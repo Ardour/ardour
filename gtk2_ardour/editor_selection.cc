@@ -390,7 +390,7 @@ Editor::mapover_grouped_routes (sigc::slot<void, RouteUI&> sl, RouteUI* basis, P
 
 	routes.insert(basis);
 
-	RouteGroup* group = basis->route()->route_group();
+	std::shared_ptr<RouteGroup> group = basis->route()->route_group();
 
 	if (group && group->enabled_property(prop) && group->enabled_property (Properties::active.property_id)) {
 
@@ -479,7 +479,7 @@ Editor::mapover_tracks_with_unique_playlists (sigc::slot<void, RouteTimeAxisView
 	set<RouteTimeAxisView*> tracks;
 	tracks.insert (route_basis);
 
-	RouteGroup* group = route_basis->route()->route_group(); // could be null, not a problem
+	std::shared_ptr<RouteGroup> group = route_basis->route()->route_group(); // could be null, not a problem
 
 	if (group && group->enabled_property(prop) && group->enabled_property (Properties::active.property_id)) {
 
@@ -1083,6 +1083,15 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* /*ev*/, StreamView*
 void
 Editor::presentation_info_changed (PropertyChange const & what_changed)
 {
+	if (!_session) {
+		/* static signal, that the editor c'tor subscribes to.
+		 * It may be received during connect_dependents_to_session() when
+		 * signals are processed in BootMessage -> GUIIdle, just
+		 * just before Editor::set_session();
+		 */
+		return;
+	}
+
 	uint32_t n_tracks = 0;
 	uint32_t n_busses = 0;
 	uint32_t n_vcas = 0;
@@ -1523,7 +1532,7 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 
 	if (rs.size() > 1) {
 		_region_actions->get_action("show-region-list-editor")->set_sensitive (false);
-		_region_actions->get_action("show-region-properties")->set_sensitive (false);
+		_region_actions->get_action("edit-region-dedicated-window")->set_sensitive (false);
 		_region_actions->get_action("rename-region")->set_sensitive (false);
 		/* XXX need to check whether there is than 1 per
 		   playlist, because otherwise this makes no sense.

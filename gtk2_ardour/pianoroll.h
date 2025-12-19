@@ -253,4 +253,7 @@ class Pianoroll : public CueEditor
 	void instant_save ();
 	void parameter_changed (std::string param);
 	void set_from_rsu (RegionUISettings&);
+
+	Gtk::Menu* get_single_region_context_menu ();
+	MidiViews midiviews_from_region_selection (RegionSelection const &) const;
 };

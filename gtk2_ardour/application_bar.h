@@ -105,7 +105,7 @@ private:
 
 	void reset_peak_display ();
 	void reset_route_peak_display (ARDOUR::Route*);
-	void reset_group_peak_display (ARDOUR::RouteGroup*);
+	void reset_group_peak_display (std::shared_ptr<ARDOUR::RouteGroup>);
 
 	bool editor_meter_peak_button_release (GdkEventButton*);
 

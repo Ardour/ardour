@@ -32,7 +32,14 @@
 #ifndef COMPILER_MSVC
 #include <sys/time.h>
 #else
+#ifndef WAF_BUILD
 #include <ardourext/misc.h>
+#else
+struct timeval {
+    long tv_sec;
+    long tv_usec;
+};
+#endif
 #endif
 
 #include "pbd/command.h"

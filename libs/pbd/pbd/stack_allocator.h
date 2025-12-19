@@ -31,6 +31,10 @@
 # define DEBUG_STACK_ALLOC(...)
 #endif
 
+#ifdef COMPILER_MSVC
+#undef max
+#endif
+
 namespace PBD {
 
 template <class T, std::size_t stack_capacity>

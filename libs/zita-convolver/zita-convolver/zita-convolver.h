@@ -27,7 +27,7 @@
 
 #include "zita-convolver/zconvolver_visibility.h"
 
-#if defined(__linux__) || defined(__GNU__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(PTW32_VERSION) || defined(__WINPTHREADS_VERSION)
+#if defined(__linux__) || defined(__GNU__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__PTW32_VERSION) || defined(__WINPTHREADS_VERSION)
 #include <semaphore.h>
 #endif
 
@@ -38,7 +38,7 @@ namespace ArdourZita {
 #endif
 
 /* note: mingw and msvc actually use PTW32's implementation of semaphores */
-#if defined(__linux__) || defined(__GNU__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(PTW32_VERSION) || defined (__WINPTHREADS_VERSION)
+#if defined(__linux__) || defined(__GNU__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__PTW32_VERSION) || defined (__WINPTHREADS_VERSION)
 
 class LIBZCONVOLVER_API ZCsema
 {

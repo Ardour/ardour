@@ -520,6 +520,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 		std::shared_ptr<Evoral::ControlList> copy; ///< copied events for the cut buffer
 	};
 
+	virtual Gtk::Menu* get_single_region_context_menu ();
+
   protected:
 	std::string _name;
 	bool within_track_canvas;
@@ -702,7 +704,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	void note_edit_done (int, EditNoteDialog*);
 
-	MidiViews midiviews_from_region_selection (RegionSelection const &) const;
+	virtual MidiViews midiviews_from_region_selection (RegionSelection const &) const;
 
 	/** the adjustment that controls the overall editing vertical scroll position */
 	friend class EditorSummary;

@@ -72,7 +72,7 @@ private:
 	void prepare_mapping (bool, PBD::ID const&, std::string const&);
 	void remove_mapping (PBD::ID const&);
 	void clear_mapping ();
-	void import_all_strips ();
+	void import_all_strips (bool only_visible);
 	void set_default_mapping (bool and_idle_update);
 	void update_sensitivity_ok ();
 	void ok_activated ();

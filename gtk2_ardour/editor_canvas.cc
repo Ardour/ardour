@@ -886,8 +886,8 @@ Editor::left_track_canvas (GdkEventCrossing* ev)
 	const bool was_within = within_track_canvas;
 	DropDownKeys ();
 	within_track_canvas = false;
-	set_entered_track (0);
-	set_entered_regionview (0);
+	set_entered_track (nullptr);
+	set_entered_regionview (nullptr);
 	reset_canvas_action_sensitivity (false);
 
 	if (was_within) {

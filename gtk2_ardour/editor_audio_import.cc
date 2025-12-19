@@ -283,7 +283,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 
 	if (tmcb && !tmcb->empty()) {
 		std::cerr << "CB\n";
-		tmcb->dump (std::cerr); 
+		tmcb->dump (std::cerr);
 		wmap->paste (*tmcb, pos, false, _("import"));
 		TempoMap::update (wmap);
 		std::cerr << "final map\n";
@@ -743,7 +743,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 
 int
 Editor::add_sources (vector<string>            paths,
-                     SourceList&               sources,
+                     SourceList&               possible_sources,
                      timepos_t&              pos,
                      ImportDisposition         disposition,
                      ImportMode                mode,
@@ -762,6 +762,18 @@ Editor::add_sources (vector<string>            paths,
 	vector<string> track_names;
 
 	use_timestamp = (pos == timepos_t::max (pos.time_domain()));
+
+	SourceList sources;
+
+	for (auto const & s : possible_sources) {
+		if (!s->empty()) {
+			sources.push_back (s);
+		}
+	}
+
+	if (sources.empty()) {
+		return -1;
+	}
 
 	// kludge (for MIDI we're abusing "channel" for "track" here)
 	if (SMFSource::safe_midi_file_extension (paths.front())) {
@@ -891,6 +903,7 @@ Editor::add_sources (vector<string>            paths,
 			}
 
 			regions.push_back (r);
+			++n;
 		}
 	}
 
@@ -1073,7 +1086,7 @@ Editor::finish_bringing_in_material (std::shared_ptr<Region> region,
 					                          ChanCount (DataType::MIDI, 1),
 					                          Config->get_strict_io () || Profile->get_mixbus (),
 					                          instrument, (Plugin::PresetRecord*) 0,
-					                          (RouteGroup*) 0,
+					                          nullptr,
 					                          1,
 					                          string(),
 					                          PresentationInfo::max_order,

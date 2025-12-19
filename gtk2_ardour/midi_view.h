@@ -664,7 +664,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	void start_note_splitting ();
 	void end_note_splitting ();
-
+	
 	void split_notes_grid ();
 	void split_notes_more ();
 	void split_notes_less ();
@@ -684,6 +684,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	void color_note (NoteBase*, int channel);
 	virtual bool post_paste (Temporal::timepos_t const & pos, const ::Selection& selection, PasteContext& ctx) { return false; }
+	bool show_context_menu (GdkEventButton*);
 };
 
 

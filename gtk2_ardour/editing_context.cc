@@ -234,7 +234,6 @@ EditingContext::EditingContext (std::string const & name)
 
 	set_tooltip (play_note_selection_button, _("Play notes when selected"));
 	set_tooltip (note_mode_button, _("Switch between sustained and percussive mode"));
-	set_tooltip (follow_playhead_button, _("Scroll automatically to keep playhead visible"));
 	set_tooltip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 	/* Leave tip for full zoom button to derived class */
 	set_tooltip (visible_channel_selector, _("Select visible MIDI channel"));
@@ -368,11 +367,11 @@ EditingContext::register_automation_actions (Bindings* automation_bindings, std:
 	_automation_actions = ActionManager::create_action_group (automation_bindings, prefix + X_("Automation"));
 
 	reg_sens (_automation_actions, "create-point", _("Create Automation Point"), std::bind (sigc::mem_fun (*this, &EditingContext::automation_create_point_at_edit_point), false));
-	reg_sens (_automation_actions, "create-point-with-guards", _("Create Automation Point"), std::bind (sigc::mem_fun (*this, &EditingContext::automation_create_point_at_edit_point), true));
-	reg_sens (_automation_actions, "move-points-later", _("Create Automation P (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_move_points_later));
-	reg_sens (_automation_actions, "move-points-earlier", _("Create Automation Point (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_move_points_earlier));
-	reg_sens (_automation_actions, "raise-points", _("Create Automation Point (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_raise_points));
-	reg_sens (_automation_actions, "lower-points", _("Create Automation Point (at Playhead)"), sigc::mem_fun (*this, &EditingContext::automation_lower_points));
+	reg_sens (_automation_actions, "create-point-with-guards", _("Create Automation Point (with Guard Points)"), std::bind (sigc::mem_fun (*this, &EditingContext::automation_create_point_at_edit_point), true));
+	reg_sens (_automation_actions, "move-points-later", _("Move Selected Automation Points Later"), sigc::mem_fun (*this, &EditingContext::automation_move_points_later));
+	reg_sens (_automation_actions, "move-points-earlier", _("Move Selected Automation Points Earlier"), sigc::mem_fun (*this, &EditingContext::automation_move_points_earlier));
+	reg_sens (_automation_actions, "raise-points", _("Increase Value of Selected Automation Points"), sigc::mem_fun (*this, &EditingContext::automation_raise_points));
+	reg_sens (_automation_actions, "lower-points", _("Decrease Value of Selected Automatuon Points"), sigc::mem_fun (*this, &EditingContext::automation_lower_points));
 	reg_sens (_automation_actions, "begin-edit", _("Open value entry window for automation editing"), sigc::mem_fun (*this, &EditingContext::automation_begin_edit));
 	reg_sens (_automation_actions, "end-edit", _("Close value entry window for automation editing"), sigc::mem_fun (*this, &EditingContext::automation_end_edit));
 
@@ -454,6 +453,8 @@ EditingContext::register_common_actions (Bindings* common_bindings, std::string 
 
 	follow_playhead_action = toggle_reg_sens (_common_actions, "toggle-follow-playhead", _("Follow Playhead"), sigc::mem_fun (*this, &EditingContext::follow_playhead_chosen));
 	stationary_playhead_action = toggle_reg_sens (_common_actions, "toggle-stationary-playhead", _("Stationary Playhead"), (mem_fun(*this, &EditingContext::stationary_playhead_chosen)));
+
+	follow_playhead_action->set_tooltip (_("Scroll automatically to keep playhead visible"));
 
 	undo_action = reg_sens (_common_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::undo), 1U));
 	redo_action = reg_sens (_common_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun (*this, &EditingContext::redo), 1U));
@@ -2350,8 +2351,11 @@ EditingContext::bind_mouse_mode_buttons ()
 	RefPtr<Action> act;
 
 	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("temporal-zoom-in"));
+	act->set_tooltip (_("Zoom In"));
 	zoom_in_button.set_related_action (act);
+
 	act = ActionManager::get_action ((_name + X_("Editing")).c_str(), X_("temporal-zoom-out"));
+	act->set_tooltip (_("Zoom Out"));
 	zoom_out_button.set_related_action (act);
 
 	follow_playhead_button.set_related_action (follow_playhead_action);
@@ -3968,4 +3972,10 @@ EditingContext::scroll_right_half_page ()
 	} else {
 		reset_x_origin (max_samplepos - current_page_samples());
 	}
+}
+
+Gtk::Menu*
+EditingContext::get_single_region_context_menu ()
+{
+	return nullptr;
 }

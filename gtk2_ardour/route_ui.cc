@@ -2309,7 +2309,7 @@ Gdk::Color
 RouteUI::route_color () const
 {
 	Gdk::Color c;
-	RouteGroup* g = _route->route_group ();
+	std::shared_ptr<RouteGroup> g = _route->route_group ();
 	string p;
 
 	if (g && g->is_color()) {
@@ -2356,7 +2356,7 @@ RouteUI::bus_send_display_changed (std::shared_ptr<Route> send_to)
 	}
 }
 
-RouteGroup*
+std::shared_ptr<RouteGroup>
 RouteUI::route_group() const
 {
 	return _route->route_group();
@@ -2506,7 +2506,7 @@ RouteUI::playlist_tip () const
 		return "";
 	}
 
-	RouteGroup* rg = route_group ();
+	std::shared_ptr<RouteGroup> rg = route_group ();
 	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::group_select.property_id)) {
 		string group_string = "." + rg->name() + ".";
 

@@ -489,10 +489,15 @@ CueEditor::build_upper_toolbar ()
 		play_button.set_size_request (PX_SCALE(20), PX_SCALE(20));
 #undef PX_SCALE
 
+		set_tooltip (play_button, _("Play this clip from the top"));
+		set_tooltip (loop_button, _("Loop the range of this clip"));
+		set_tooltip (solo_button, _("Solo the track containing this clip"));
+
 		play_button.signal_button_release_event().connect (sigc::mem_fun (*this, &CueEditor::play_button_press), false);
 		solo_button.signal_button_release_event().connect (sigc::mem_fun (*this, &CueEditor::solo_button_press), false);
 		loop_button.signal_button_release_event().connect (sigc::mem_fun (*this, &CueEditor::loop_button_press), false);
 	} else {
+		set_tooltip (play_button, _("Launch selected clip"));
 		rec_box.pack_start (play_button, false, false);
 		play_button.signal_button_release_event().connect (sigc::mem_fun (*this, &CueEditor::bang_button_press), false);
 	}
@@ -501,6 +506,9 @@ CueEditor::build_upper_toolbar ()
 	rec_enable_button.set_sensitive (false);
 	rec_enable_button.signal_button_release_event().connect (sigc::mem_fun (*this, &CueEditor::rec_button_press), false);
 	rec_enable_button.set_name ("record enable button");
+
+	set_tooltip (rec_enable_button, _("Record clip"));
+	set_tooltip (length_selector, _("Record length"));
 
 	std::string label;
 	std::string noun;
@@ -1181,12 +1189,14 @@ CueEditor::max_zoom_extent() const
 
 		if (show_source) {
 			len = _region->source()->length().beats();
+			if (len != Temporal::Beats()) {
+				return std::make_pair (timepos_t (Temporal::Beats()), timepos_t (_region->end().beats()));
+			}
 		} else {
 			len = _region->length().beats();
-		}
-
-		if (len != Temporal::Beats()) {
-			return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (len));
+			if (len != Temporal::Beats()) {
+				return std::make_pair (timepos_t (_region->start().beats()), timepos_t (_region->end().beats()));
+			}
 		}
 	}
 
@@ -1195,7 +1205,7 @@ CueEditor::max_zoom_extent() const
 }
 
 void
-CueEditor::zoom_to_show (Temporal::timecnt_t const & duration)
+CueEditor::zoom_to_show (std::pair<Temporal::timepos_t,Temporal::timepos_t> const & z)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
@@ -1204,7 +1214,7 @@ CueEditor::zoom_to_show (Temporal::timecnt_t const & duration)
 		return;
 	}
 
-	reset_zoom ((samplecnt_t) floor (duration.samples() / _track_canvas_width));
+	reposition_and_zoom (z.first.samples(), (samplecnt_t) floor ((max_extents_scale() * ((z.second.samples() - z.first.samples())) / (double) _track_canvas_width)));
 }
 
 void

@@ -1139,6 +1139,9 @@ struct TrackRecordAxisSorter {
 void
 RecorderUI::presentation_info_changed (PBD::PropertyChange const& what_changed)
 {
+	if (!_session) {
+		return;
+	}
 	if (what_changed.contains (Properties::hidden)) {
 		update_rec_table_layout ();
 	} else if (what_changed.contains (Properties::order)) {
@@ -1320,7 +1323,7 @@ RecorderUI::new_track_for_port (DataType dt, string const& port_name)
 					ChanCount (DataType::MIDI, 1), ChanCount (DataType::MIDI, 1),
 					strict_io,
 					instrument_combo.selected_instrument (), (Plugin::PresetRecord*) 0,
-					(RouteGroup*) 0,
+					nullptr,
 					1, track_name, PresentationInfo::max_order, Normal, false);
 			r = tl.front ();
 		} catch (...) {

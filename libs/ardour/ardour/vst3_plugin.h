@@ -202,6 +202,7 @@ public:
 	void set_owner (ARDOUR::SessionObject* o);
 	void set_non_realtime (bool);
 
+	void request_bus_layout (uint32_t main_in, uint32_t aux_in, uint32_t main_out);
 	void enable_io (std::vector<bool> const&, std::vector<bool> const&, bool force = false);
 
 	void process (float** ins, float** outs, uint32_t n_samples);
@@ -242,7 +243,9 @@ private:
 	bool disconnect_components ();
 
 	bool  update_processor ();
+	void  query_io_config ();
 	int32 count_channels (Vst::MediaType, Vst::BusDirection, Vst::BusType);
+
 
 	bool evoral_to_vst3 (Vst::Event&, Evoral::Event<samplepos_t> const&, int32_t);
 
@@ -403,6 +406,12 @@ public:
 	IOPortDescription           describe_io_port (DataType dt, bool input, uint32_t id) const;
 	PluginOutputConfiguration   possible_output () const;
 
+	void request_bus_layout (ChanCount const& /*in*/, ChanCount const& /*aux_in*/, ChanCount const& /*out*/);
+	bool reconfigure_io (ChanCount /*in*/, ChanCount /*aux_in*/, ChanCount /*out*/);
+
+	ChanCount output_streams () const;
+	ChanCount input_streams () const;
+
 	void set_automation_control (uint32_t, std::shared_ptr<ARDOUR::AutomationControl>);
 
 	std::string state_node_name () const
@@ -486,6 +495,8 @@ public:
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 	bool                              is_instrument () const;
 	PBD::Searchpath                   preset_search_path () const;
+
+	bool variable_bus_layout () const { return true; }
 
 	std::optional<bool>             has_editor;
 

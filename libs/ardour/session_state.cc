@@ -184,7 +184,6 @@ Session::pre_engine_init (string fullpath)
 	_playback_load.store (100);
 	_capture_load.store (100);
 	set_next_event ();
-	_all_route_group->set_active (true, this);
 
 	if (config.get_use_video_sync()) {
 		waiting_for_sync_offset = true;
@@ -1116,7 +1115,7 @@ bool
 Session::export_route_state (std::shared_ptr<RouteList> rl, const string& path, bool with_sources)
 {
 	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS))  {
-		return false;
+		remove_directory (path);
 	}
 	if (g_mkdir_with_parents (path.c_str(), 0755) != 0) {
 		return false;
@@ -1133,11 +1132,14 @@ Session::export_route_state (std::shared_ptr<RouteList> rl, const string& path, 
 	PlaylistSet playlists; // SessionPlaylists
 	SourceSet sources;
 
+	RouteList sorted_rl (*rl);
+	sorted_rl.sort (Stripable::Sorter ());
+
 	/* these will work with  new_route_from_template()
 	 * TODO: LV2 plugin-state-dir needs to be relative (on load?)
 	 */
 	child = node->add_child ("Routes");
-	for (auto const& r: *rl) {
+	for (auto const& r: sorted_rl) {
 		if (r->is_auditioner()) {
 			continue;
 		}
@@ -1337,6 +1339,9 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 	}
 
 	XMLNode* xroutes = tree.root()->child ("Routes");
+
+	std::vector<std::pair<PBD::ID, PresentationInfo::order_t>> new_track_order;
+
 	if (xroutes) {
 		/* foreach route .. */
 		for (auto const rxml : xroutes->children()) {
@@ -1372,6 +1377,7 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 					assert (rl.size () < 2);
 					if (rl.size () > 0) {
 						r = rl.front ();
+						new_track_order.push_back (make_pair (r->id(), pi.order()));
 					}
 				}
 
@@ -1392,20 +1398,21 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 					assert (rl.size () < 2);
 					if (rl.size () > 0) {
 						r = rl.front ();
+						new_track_order.push_back (make_pair (r->id(), pi.order()));
 					}
 				}
 				/* set route-group */
 				if (r && route_groupname.find (src) != route_groupname.end ()) {
-					RouteGroup* rg;
+					std::shared_ptr<RouteGroup> rg;
 					switch (rgim) {
 						case IgnoreRouteGroup:
-							rg = nullptr;
 							break;
 						case UseRouteGroup:
 							rg = route_group_by_name (route_groupname[src]);
 							break;
 						case CreateRouteGroup:
 							rg = new_route_group (route_groupname[src]);
+							add_route_group (rg);
 							break;
 					}
 					if (rg) {
@@ -1414,6 +1421,26 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 				}
 			}
 		}
+	}
+
+	if (!new_track_order.empty ()) {
+		std::sort (new_track_order.begin (), new_track_order.end (), [=] (auto& a, auto& b) { return a.second < b.second; });
+
+		/* sort all after the end, and then rely on
+		 * ensure_stripable_sort_order () to pull them back.
+		 *
+		 * Otherwise two routes may temporarily have the same order-id
+		 * and since signals are not blocked, the GUI may sync* callbacks
+		 * may interfere.
+		 */
+		uint32_t n_routes = routes.reader()->size ();
+		uint32_t added = 0;
+
+		for (auto const& [rid, _] : new_track_order) {
+			std::shared_ptr<Route> r = route_by_id (rid);
+			r->set_presentation_order (n_routes + added++);
+		}
+		ensure_stripable_sort_order ();
 	}
 
 	return 0;
@@ -1797,8 +1824,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 	_playlists->add_state (node, save_template, !only_used_assets);
 
 	child = node->add_child ("RouteGroups");
-	for (list<RouteGroup *>::const_iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
-		child->add_child_nocopy ((*i)->get_state());
+	for (auto const & rg : _route_groups) {
+		child->add_child_nocopy (rg->get_state());
 	}
 
 	if (_click_io) {
@@ -2049,7 +2076,7 @@ Session::set_state (const XMLNode& node, int version)
 	if ((child = find_named_node (node, "ProgramVersion")) != 0) {
 		child->get_property (X_("created-with"), created_with);
 
- 		child->get_property (X_("modified-with"), modified_with);
+		child->get_property (X_("modified-with"), modified_with);
 #if 0
 		if (modified_with.rfind (PROGRAM_NAME, 0) != 0) {
 			throw WrongProgram (modified_with);
@@ -3164,10 +3191,15 @@ Session::save_template (const string& template_name, const string& description, 
 		template_dir_path = template_name;
 	}
 
-	if (!replace_existing && Glib::file_test (template_dir_path, Glib::FILE_TEST_EXISTS)) {
-		warning << string_compose(_("Template \"%1\" already exists - new version not created"),
-		                          template_dir_path) << endmsg;
-		return -2;
+	if (Glib::file_test (template_dir_path, Glib::FILE_TEST_EXISTS)) {
+		if (replace_existing) {
+			/* clean out old plugin state, etc */
+			remove_directory (template_dir_path);
+		} else {
+			warning << string_compose(_("Template \"%1\" already exists - new version not created"),
+			                          template_dir_path) << endmsg;
+			return -2;
+		}
 	}
 
 	if (g_mkdir_with_parents (template_dir_path.c_str(), 0755) != 0) {
@@ -3474,7 +3506,7 @@ Session::load_route_groups (const XMLNode& node, int version)
 
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			if ((*niter)->name() == "RouteGroup") {
-				RouteGroup* rg = new RouteGroup (*this, "");
+				std::shared_ptr<RouteGroup> rg (new RouteGroup (*this, ""));
 				add_route_group (rg);
 				rg->set_state (**niter, version);
 			}
@@ -3484,7 +3516,7 @@ Session::load_route_groups (const XMLNode& node, int version)
 
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			if ((*niter)->name() == "EditGroup" || (*niter)->name() == "MixGroup") {
-				RouteGroup* rg = new RouteGroup (*this, "");
+				std::shared_ptr<RouteGroup> rg (new RouteGroup (*this, ""));
 				add_route_group (rg);
 				rg->set_state (**niter, version);
 			}
@@ -3539,47 +3571,61 @@ Session::possible_states () const
 	return possible_states(_path);
 }
 
-RouteGroup*
+std::shared_ptr<RouteGroup>
 Session::new_route_group (const std::string& name)
 {
-	RouteGroup* rg = NULL;
+	std::shared_ptr<RouteGroup> rg;
 
-	for (std::list<RouteGroup*>::const_iterator i = _route_groups.begin (); i != _route_groups.end (); ++i) {
-		if ((*i)->name () == name) {
-			rg = *i;
+	for (auto const & grp : _route_groups) {
+		if (grp->name () == name) {
+			rg = grp;
 			break;
 		}
 	}
 
 	if (!rg) {
-		rg = new RouteGroup (*this, name);
-		add_route_group (rg);
+		rg.reset (new RouteGroup (*this, name));
 	}
-	return (rg);
+
+	return rg;
 }
 
 void
-Session::add_route_group (RouteGroup* g)
+Session::add_route_group (std::shared_ptr<RouteGroup> g)
 {
 	_route_groups.push_back (g);
 	route_group_added (g); /* EMIT SIGNAL */
 
 	g->RouteAdded.connect_same_thread (*this, std::bind (&Session::route_added_to_route_group, this, _1, _2));
-	g->RouteRemoved.connect_same_thread (*this, std::bind (&Session::route_removed_from_route_group, this, _1, _2));
-	g->PropertyChanged.connect_same_thread (*this, std::bind (&Session::route_group_property_changed, this, g));
+
+
+	/* Cannot bind std::shared_ptr<> to a signal connection because of lifetime issues */
+	std::weak_ptr<RouteGroup> wrg (g);
+	g->PropertyChanged.connect_same_thread (*this, std::bind (&Session::route_group_property_changed, this, wrg));
 
 	set_dirty ();
 }
 
 void
-Session::remove_route_group (RouteGroup& rg)
+Session::remove_route_group (std::shared_ptr<RouteGroup> rg)
 {
-	list<RouteGroup*>::iterator i;
+	if (!rg) {
+		return;
+	}
 
-	if ((i = find (_route_groups.begin(), _route_groups.end(), &rg)) != _route_groups.end()) {
+	rg->clear ();
+
+	/* by the magic of reference counting, rg will now be deleted */
+}
+
+void
+Session::route_group_emptied (std::shared_ptr<RouteGroup> rg)
+{
+	list<std::shared_ptr<RouteGroup>>::iterator i;
+
+	if ((i = find (_route_groups.begin(), _route_groups.end(), rg)) != _route_groups.end()) {
 		_route_groups.erase (i);
-		delete &rg;
-
+		rg->drop_references ();
 		route_group_removed (); /* EMIT SIGNAL */
 	}
 }
@@ -3588,7 +3634,7 @@ Session::remove_route_group (RouteGroup& rg)
  *  @param groups Route group list in the new order.
  */
 void
-Session::reorder_route_groups (list<RouteGroup*> groups)
+Session::reorder_route_groups (RouteGroupList groups)
 {
 	_route_groups = groups;
 
@@ -3597,23 +3643,15 @@ Session::reorder_route_groups (list<RouteGroup*> groups)
 }
 
 
-RouteGroup *
+std::shared_ptr<RouteGroup>
 Session::route_group_by_name (string name)
 {
-	list<RouteGroup *>::iterator i;
-
-	for (i = _route_groups.begin(); i != _route_groups.end(); ++i) {
-		if ((*i)->name() == name) {
-			return* i;
+	for (auto & rg : _route_groups) {
+		if (rg->name() == name) {
+			return rg;
 		}
 	}
 	return 0;
-}
-
-RouteGroup&
-Session::all_route_group() const
-{
-	return *_all_route_group;
 }
 
 static bool

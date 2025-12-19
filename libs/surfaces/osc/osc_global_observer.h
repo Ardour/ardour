@@ -110,7 +110,6 @@ class OSCGlobalObserver
 	void extra_check (void);
 	void marks_changed (void);
 	void mark_update (void);
-	void group_changed (ARDOUR::RouteGroup*);
 	void group_changed (void);
 };
 

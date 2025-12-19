@@ -361,10 +361,10 @@ public:
 	void flush_videotimeline_cache (bool localcacheonly=false);
 	void export_video (bool range = false);
 
-	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, ARDOUR::RouteGroup *,
+	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, std::shared_ptr<ARDOUR::RouteGroup>,
 	                              uint32_t, std::string const &, bool, ARDOUR::PresentationInfo::order_t order, bool trigger_visibility);
 
-	void session_add_midi_route (bool, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool,
+	void session_add_midi_route (bool, std::shared_ptr<ARDOUR::RouteGroup>, uint32_t, std::string const &, bool,
 	                             ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*,
 	                             ARDOUR::PresentationInfo::order_t order, bool trigger_visibility);
 

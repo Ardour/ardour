@@ -1509,7 +1509,7 @@ ARDOUR_UI::update_wall_clock ()
 void
 ARDOUR_UI::session_add_midi_route (
 		bool disk,
-		RouteGroup* route_group,
+		std::shared_ptr<RouteGroup> route_group,
 		uint32_t how_many,
 		const string& name_template,
 		bool strict_io,
@@ -1563,7 +1563,7 @@ ARDOUR_UI::session_add_audio_route (
 	int32_t input_channels,
 	int32_t output_channels,
 	ARDOUR::TrackMode mode,
-	RouteGroup* route_group,
+	std::shared_ptr<RouteGroup> route_group,
 	uint32_t how_many,
 	string const & name_template,
 	bool strict_io,
@@ -2853,7 +2853,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 	ChanCount input_chan= add_route_dialog->channels ();
 	ChanCount output_chan;
 	PluginInfoPtr instrument = add_route_dialog->requested_instrument ();
-	RouteGroup* route_group = add_route_dialog->route_group ();
+	std::shared_ptr<RouteGroup> route_group = add_route_dialog->route_group ();
 	AutoConnectOption oac = Config->get_output_auto_connect();
 	bool strict_io = add_route_dialog->use_strict_io ();
 	bool trigger_visibility = add_route_dialog->show_on_cue_page ();

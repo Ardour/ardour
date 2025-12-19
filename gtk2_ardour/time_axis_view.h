@@ -106,6 +106,8 @@ public:
 	TimeAxisView(ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
 
+	std::string name () const { return name_label.get_text (); }
+
 	static PBD::Signal<void(TimeAxisView*)> CatchDeletion;
 
 	static void setup_sizes ();
@@ -169,8 +171,8 @@ public:
 
 	virtual void step_height (bool);
 
-	virtual ARDOUR::RouteGroup* route_group() const { return 0; }
-	virtual std::shared_ptr<ARDOUR::Playlist> playlist() const { return std::shared_ptr<ARDOUR::Playlist> (); }
+	virtual std::shared_ptr<ARDOUR::RouteGroup> route_group() const { return nullptr; }
+	virtual std::shared_ptr<ARDOUR::Playlist> playlist() const { return nullptr; }
 
 	virtual void set_samples_per_pixel (double);
 	virtual void show_selection (TimeSelection&);
@@ -267,7 +269,6 @@ protected:
 
 	void begin_name_edit ();
 	void end_name_edit (std::string, int);
-	virtual std::string name () const { return name_label.get_text (); }
 
 	/* derived classes can override these */
 
