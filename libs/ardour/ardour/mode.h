@@ -20,7 +20,9 @@
 
 #include <vector>
 
-class MusicalMode
+#include "ardour/libardour_visibility.h"
+
+class LIBARDOUR_API MusicalMode
 {
   public:
 	enum Type {
