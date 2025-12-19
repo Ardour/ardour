@@ -26,12 +26,13 @@
 #include <cairomm/region.h>
 
 #include "canvas/item.h"
+#include "canvas/visibility.h"
 
 namespace ArdourCanvas {
 
 class Canvas;
 
-class Meter : public Item {
+class LIBCANVAS_API Meter : public Item {
   public:
 	enum Orientation {
 		Horizontal,
