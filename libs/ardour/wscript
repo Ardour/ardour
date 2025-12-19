@@ -411,7 +411,8 @@ def build(bld):
         obj.uselib += ['DL']
     elif sys.platform == "win32":
         obj.cxxflags += ['-Og']
-
+    if bld.env['build_target'] == 'msvc':
+        obj.env['LIB_LO'] = ['liblo']
 
     if bld.is_defined('USE_EXTERNAL_LIBS'):
         obj.uselib.extend(['VAMPSDK', 'LIBLTC', 'LIBFLUIDSYNTH'])
@@ -436,7 +437,7 @@ def build(bld):
 
     if bld.is_defined('HAVE_LILV') :
         obj.source += ['lv2_plugin.cc', 'lv2_evbuf.cc', 'uri_map.cc']
-        obj.uselib += ['LILV']
+        obj.uselib += ['LILV', 'SERD', 'SRATOM']
         if bld.is_defined('HAVE_SUIL'):
             obj.use += [ 'libsuil' ]
 
@@ -482,6 +483,7 @@ def build(bld):
         includes = obj.includes,
         use      = lua_use,
         uselib   = obj.uselib,
+        defines  = ['LIBARDOUR_DLL_EXPORTS']*(bld.env['build_target']=='msvc'),
         target   = 'luabindings')
 
     obj.use += ['luabindings' ]

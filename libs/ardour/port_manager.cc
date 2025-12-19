@@ -22,7 +22,9 @@
 #include <vector>
 
 #ifdef COMPILER_MSVC
+#ifndef WAF_BUILD
 #include <ardourext/misc.h>
+#endif
 #include <io.h> // Microsoft's nearest equivalent to <unistd.h>
 #endif
 

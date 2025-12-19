@@ -24,6 +24,7 @@
 #include <string>
 
 #include "temporal/types.h"
+#include "temporal/types_convert.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"

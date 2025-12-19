@@ -40,6 +40,16 @@
 
 #include "pbd/i18n.h"
 
+#ifdef COMPILER_MSVC
+#include <direct.h> // for _getcwd
+#include <sys/stat.h> // for _S_IFDIR, _S_IFREG
+
+#define S_ISDIR(mode) (((mode) & _S_IFMT) == _S_IFDIR)
+#define S_ISREG(mode) (((mode) & _S_IFMT) == _S_IFREG)
+
+#define getcwd _getcwd
+#endif
+
 using namespace std;
 using namespace PBD;
 

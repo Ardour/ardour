@@ -1131,7 +1131,12 @@ AudioSource::compute_and_write_peaks (Sample const * buf, samplecnt_t first_samp
 
 		if (endpos < target_length) {
 			DEBUG_TRACE(DEBUG::Peaks, string_compose ("Truncating Peakfile A %1 to %2\n", _peakpath, target_length));
-			if (ftruncate (_peakfile_fd, target_length)) {
+#ifdef COMPILER_MSVC
+			if (_chsize_s (_peakfile_fd, target_length))
+#else
+			if (ftruncate (_peakfile_fd, target_length))
+#endif
+			{
 				/* error doesn't actually matter so continue on without testing */
 			}
 		}
@@ -1182,7 +1187,12 @@ AudioSource::truncate_peakfile ()
 
 	if (end > _peak_byte_max) {
 		DEBUG_TRACE(DEBUG::Peaks, string_compose ("Truncating Peakfile B %1 to %2\n", _peakpath, _peak_byte_max));
-		if (ftruncate (_peakfile_fd, _peak_byte_max)) {
+#ifdef COMPILER_MSVC
+		if (_chsize_s (_peakfile_fd, target_length))
+#else
+		if (ftruncate (_peakfile_fd, target_length))
+#endif
+		{
 			error << string_compose (_("could not truncate peakfile %1 to %2 (error: %3)"),
 						 _peakpath, _peak_byte_max, errno) << endmsg;
 		}
