@@ -27,6 +27,13 @@
 #include <sys/time.h>
 #endif
 
+#ifdef COMPILER_MSVC
+struct timeval {
+	long tv_sec;
+	long tv_usec;
+};
+#endif
+
 #include <glibmm.h>
 
 #include "portaudio_backend.h"
