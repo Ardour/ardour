@@ -12,7 +12,7 @@
     COPYING included with this distribution for more information.
 */
 
-#ifdef COMPILER_MSVC
+#if defined(COMPILER_MSVC) && !defined(WAF_BUILD)
 #include <ardourext/float_cast.h>
 #endif
 #include "OnsetDetect.h"
