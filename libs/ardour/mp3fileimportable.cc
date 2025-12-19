@@ -27,6 +27,10 @@
 #include <sys/mman.h>
 #endif
 
+#ifdef COMPILER_MSVC
+#include <io.h>
+#endif
+
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 
