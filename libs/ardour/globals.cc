@@ -53,6 +53,10 @@
 #include <windows.h> // for LARGE_INTEGER
 #endif
 
+#ifdef COMPILER_MSVC
+#include <io.h>
+#endif
+
 #ifdef HAVE_FFTW35F
 #include <fftw3.h>
 #endif
