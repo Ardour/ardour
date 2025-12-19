@@ -19,7 +19,11 @@
 #ifndef __CANVAS_DEBUG_H__
 #define __CANVAS_DEBUG_H__
 
+#ifndef COMPILER_MSVC
 #include <sys/time.h>
+#else
+#include <winsock2.h>
+#endif
 #include <map>
 #include "pbd/debug.h"
 
