@@ -501,7 +501,7 @@ JACKAudioBackend::_start (bool for_latency_measurement)
 		return -1;
 	}
 
-	if (!jack_port_type_get_buffer_size) {
+	if (jack_port_type_get_buffer_size == nullptr) {
 		warning << _("This version of JACK is old - you should upgrade to a newer version that supports jack_port_type_get_buffer_size()") << endmsg;
 	}
 
@@ -685,7 +685,7 @@ JACKAudioBackend::set_jack_callbacks ()
 	}
 #endif
 
-        if (jack_set_latency_callback) {
+        if (jack_set_latency_callback != nullptr) {
 	        JACK_SERVER_CALL (jack_set_latency_callback (_priv_jack, _latency_callback, this));
         }
 
@@ -846,7 +846,7 @@ JACKAudioBackend::join_process_threads ()
 bool
 JACKAudioBackend::in_process_thread ()
 {
-#if defined COMPILER_MINGW && (!defined __PTW32_VERSION || defined __jack_systemdeps_h__)
+#if (defined COMPILER_MINGW || defined COMPILER_MSVC) && (!defined __PTW32_VERSION || defined __jack_systemdeps_h__)
 	if (_main_thread == GetCurrentThread()) {
 		return true;
 	}
@@ -858,7 +858,7 @@ JACKAudioBackend::in_process_thread ()
 
 	for (auto & thread : _jack_threads) {
 
-#if defined COMPILER_MINGW && (!defined __PTW32_VERSION || defined __jack_systemdeps_h__)
+#if (defined COMPILER_MINGW || defined COMPILER_MSVC) && (!defined __PTW32_VERSION || defined __jack_systemdeps_h__)
 		if (thread == GetCurrentThread()) {
 			return true;
 		}
@@ -909,7 +909,7 @@ JACKAudioBackend::process_thread ()
         /* JACK doesn't do this for us when we use the wait API
          */
 
-#if defined COMPILER_MINGW && (!defined __PTW32_VERSION || defined __jack_systemdeps_h__)
+#if (defined COMPILER_MINGW || defined COMPILER_MSVC) && (!defined __PTW32_VERSION || defined __jack_systemdeps_h__)
 	_main_thread = GetCurrentThread();
 #else
 	_main_thread = pthread_self ();
@@ -976,7 +976,7 @@ JACKAudioBackend::jack_bufsize_callback (pframes_t nframes)
 
 	_current_buffer_size = nframes;
 
-        if (jack_port_type_get_buffer_size) {
+        if (jack_port_type_get_buffer_size != nullptr) {
                 _raw_buffer_sizes[DataType::AUDIO] = jack_port_type_get_buffer_size (_priv_jack, JACK_DEFAULT_AUDIO_TYPE);
                 _raw_buffer_sizes[DataType::MIDI] = jack_port_type_get_buffer_size (_priv_jack, JACK_DEFAULT_MIDI_TYPE);
         } else {
