@@ -30,7 +30,9 @@
 #include <string>
 #include <vector>
 
+#ifndef COMPILER_MSVC
 #include <sys/time.h>
+#endif
 #include <pthread.h>
 
 
