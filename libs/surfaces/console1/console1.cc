@@ -18,6 +18,9 @@
 
 #include <optional>
 
+#ifdef COMPILER_MSVC
+#define ABSTRACT_UI_EXPORTS
+#endif
 #include "pbd/abstract_ui.inc.cc" // instantiate template
 #include "pbd/controllable.h"
 #include "pbd/i18n.h"

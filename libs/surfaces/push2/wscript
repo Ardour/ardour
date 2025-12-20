@@ -37,5 +37,7 @@ def build(bld):
     obj.name         = 'libardour_push2'
     obj.target       = 'ardour_push2'
     obj.uselib       = 'CAIROMM PANGOMM USB SIGCPP XML OSX GLIBMM GIOMM'
+    if bld.env['build_target'] == 'msvc':
+        obj.uselib  += 'PANGOCAIRO'
     obj.use          = 'libardour libardour_cp libardour_midisurface libgtkmm2ext libpbd libevoral libcanvas libtemporal libytkmm'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
