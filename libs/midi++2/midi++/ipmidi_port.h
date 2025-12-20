@@ -23,7 +23,7 @@
 #include <string>
 #include <iostream>
 #if defined(PLATFORM_WINDOWS)
-#include <winsock.h>
+#include <winsock2.h>
 #elif defined(__FreeBSD__) || defined(__OpenBSD__)
 #include <netinet/in.h>
 #include <sys/socket.h>
