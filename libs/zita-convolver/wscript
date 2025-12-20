@@ -34,3 +34,6 @@ def build(bld):
     obj.vnum            = ZCONVOLVER_LIB_VERSION
     obj.uselib          = 'FFTW3F'
     obj.defines         = [ 'PACKAGE="' + I18N_PACKAGE + '"', 'ENABLE_VECTOR_MODE', '_POSIX_PTHREAD_SEMANTICS', '_REENTRANT' ]
+    if bld.env['build_target'] == 'msvc':
+        obj.defines    += ['LIBZCONVOLVER_STATIC']
+        obj.export_defines = ['LIBZCONVOLVER_STATIC']
