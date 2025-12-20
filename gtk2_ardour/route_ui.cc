@@ -1752,7 +1752,7 @@ RouteUI::verify_new_route_name (const std::string& name)
 	}
 
 	MessageDialog (
-		_("The name includes special characters (<>:\"/\\|?*) which is discouraged in track and bus names, due to filename restrictiosn on some systems.\n"),
+		_("The name includes special characters (<>:\"/\\|?*) which is discouraged in track and bus names, due to filename restrictions on some systems.\n"),
 		false, MESSAGE_INFO, BUTTONS_OK
 		).run ();
 
