@@ -26,9 +26,6 @@
 
 #include <inttypes.h>
 #include <float.h>
-#ifndef COMPILER_MSVC
-#include <sys/time.h>
-#endif
 #include <errno.h>
 
 #include <glibmm/miscutils.h>
