@@ -779,6 +779,22 @@ public:
 		bool trigger_visibility = false
 		);
 
+	/* Call this repeatedly with different track name templates and finally call add_routes.
+	 * useful for speeding up imports of various kinds that involve lots of tracks */
+	bool new_audio_routes_tracks_bulk (
+		RouteList& routes,
+		std::list<std::shared_ptr<AudioTrack> >& tracks,
+		int input_channels,
+		int output_channels,
+		std::shared_ptr<RouteGroup> route_group,
+		uint32_t how_many,
+		std::string name_template,
+		PresentationInfo::order_t order,
+		TrackMode mode = Normal,
+		bool input_auto_connect = true,
+		bool trigger_visibility = false
+		);
+
 	std::list<std::shared_ptr<MidiTrack> > new_midi_track (
 		const ChanCount& input, const ChanCount& output, bool strict_io,
 		std::shared_ptr<PluginInfo> instrument,
