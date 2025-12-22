@@ -4663,48 +4663,63 @@ msgid "Zoom Focus"
 msgstr "Zoomer sur"
 
 #: editing_context.cc:235
+#, fuzzy
 msgid "Play notes when selected"
-msgstr ""
+msgstr "Jouer les notes au moment ou elles sont sélectionnées"
 
 #: editing_context.cc:236
+#, fuzzy
 msgid "Switch between sustained and percussive mode"
-msgstr ""
+msgstr "Basculer entre le mode sustain et le mode percussif"
 
 #: editing_context.cc:239
+#, fuzzy
 msgid "Select visible MIDI channel"
-msgstr ""
+msgstr "Sélectionner le canal MIDI visible"
 
 #: editing_context.cc:369
+#, fuzzy
 msgid "Create Automation Point"
-msgstr ""
+msgstr "Créer un point d'automatisation"
 
 #: editing_context.cc:370
+#, fuzzy
 msgid "Create Automation Point (with Guard Points)"
-msgstr ""
+msgstr "Créer un point d'automatisation (avec points de garde)"
 
 #: editing_context.cc:371
+#, fuzzy
 msgid "Move Selected Automation Points Later"
-msgstr ""
+msgstr "Déplacer le point d'automatisation sélectionné plus tard"
 
 #: editing_context.cc:372
+#, fuzzy
 msgid "Move Selected Automation Points Earlier"
-msgstr ""
+msgstr "Déplacer le point d'automatisation sélectionné plus tôt"
 
 #: editing_context.cc:373
+#, fuzzy
 msgid "Increase Value of Selected Automation Points"
-msgstr ""
+msgstr "Augmenter la valeur des points d'automatisation sélectionnés"
 
 #: editing_context.cc:374
+#, fuzzy
 msgid "Decrease Value of Selected Automatuon Points"
-msgstr ""
+msgstr "Diminuer la valeur des points d'automatisation sélectionnés"
 
 #: editing_context.cc:375
+#, fuzzy
 msgid "Open value entry window for automation editing"
 msgstr ""
+"Ouvrir la fenêtre de saisie des valeurs pour la modification de "
+"l'automatisation"
 
 #: editing_context.cc:376
+#, fuzzy
 msgid "Close value entry window for automation editing"
 msgstr ""
+"Fermer la fenêtre de saisie des valeurs pour la modification de "
+"l'automatisation"
 
 #: editing_context.cc:451 editing_context.cc:2358
 msgid "Zoom Out"
@@ -4719,8 +4734,9 @@ msgid "Stationary Playhead"
 msgstr "Tête fixe"
 
 #: editing_context.cc:457
+#, fuzzy
 msgid "Scroll automatically to keep playhead visible"
-msgstr ""
+msgstr "Défilement automatique pour garder la tête de lecture visible"
 
 #: editing_context.cc:459 editing_context.cc:2704
 msgid "Command|Undo"
@@ -4752,8 +4768,9 @@ msgid "Percussive"
 msgstr "Percussive"
 
 #: editing_context.cc:477
+#, fuzzy
 msgid "Grab (Object Tool)"
-msgstr ""
+msgstr "Saisir (outil objet)"
 
 #: editing_context.cc:478
 msgid "Range Tool"
@@ -4772,8 +4789,9 @@ msgid "Grid Tool"
 msgstr "Outil grille"
 
 #: editing_context.cc:482
+#, fuzzy
 msgid "Internal Edit (Content Tool)"
-msgstr ""
+msgstr "Modification interne (outil de contenu)"
 
 #: editing_context.cc:483
 msgid "Cut Tool"
@@ -4860,8 +4878,9 @@ msgid "Select All"
 msgstr "Sélectionner tout"
 
 #: editing_context.cc:595
+#, fuzzy
 msgid "Select All (alternate)"
-msgstr ""
+msgstr "Sélectionner tout (alternatif)"
 
 #: editing_context.cc:596
 msgid "Select Next"
@@ -5024,12 +5043,14 @@ msgid "Join Selected Notes"
 msgstr "Joindre les notes sélectionnées"
 
 #: editing_context.cc:643
+#, fuzzy
 msgid "Strum Notes Forward"
-msgstr ""
+msgstr "Notes à jouer \"vers l'avant\""
 
 #: editing_context.cc:644
+#, fuzzy
 msgid "Strum Notes Backward"
-msgstr ""
+msgstr "Notes à jouer \"vers l'arrière\""
 
 #: editing_context.cc:646
 msgid "Edit Note Channels"
@@ -5098,12 +5119,14 @@ msgid "Transform..."
 msgstr "Transformer..."
 
 #: editing_context.cc:1963
+#, fuzzy
 msgid "Strum Forward"
-msgstr ""
+msgstr "Jouer en avant"
 
 #: editing_context.cc:1964
+#, fuzzy
 msgid "Strum Backward"
-msgstr ""
+msgstr "Jouer en arrière"
 
 #: editing_context.cc:2313
 msgid "Len:"
@@ -5259,16 +5282,22 @@ msgid "Location Markers"
 msgstr "Repères de position"
 
 #: editor.cc:432
+#, fuzzy
 msgid "Arrangement Markers"
-msgstr ""
+msgstr "Repères d'arrangement"
 
 #: editor.cc:465
+#, fuzzy
 msgid ""
 "Right-click\n"
 "or Double-click here\n"
 "to add Track, Bus,\n"
 " or VCA."
 msgstr ""
+"Cliquez avec le bouton droit\n"
+"ou double-cliquez ici\n"
+"pour ajouter une piste, un bus\n"
+" ou un VCA."
 
 #: editor.cc:541 mixer_ui.cc:359 port_group.cc:360 trigger_page.cc:141
 msgid "Tracks"
@@ -5307,8 +5336,9 @@ msgid "Snapshots"
 msgstr "Clichés"
 
 #: editor.cc:547 mixer_ui.cc:360
+#, fuzzy
 msgid "Groups"
-msgstr ""
+msgstr "Groupes"
 
 #: editor.cc:547 mixer_ui.cc:360
 msgid "Track & Bus Groups"
@@ -6073,8 +6103,9 @@ msgid "Lua Scripts"
 msgstr "Scripts Lua"
 
 #: editor_actions.cc:178
+#, fuzzy
 msgid "Global Quantization"
-msgstr ""
+msgstr "Quantization globale"
 
 #: editor_actions.cc:187
 msgid "Session|Lock"
@@ -6089,8 +6120,9 @@ msgid "Show Editor Mixer"
 msgstr "Afficher la tranche de mixage"
 
 #: editor_actions.cc:199
+#, fuzzy
 msgid "Show Editor Properties Box"
-msgstr ""
+msgstr "Afficher la boite d'édition des propriétés"
 
 #: editor_actions.cc:203
 msgid "Playhead to Next Region Boundary"
@@ -6491,12 +6523,14 @@ msgid "Add Range Marker from Selection"
 msgstr "Ajouter un repère d'intervalle depuis la sélection"
 
 #: editor_actions.cc:413
+#, fuzzy
 msgid "Add Tempo Marker at Playhead"
-msgstr ""
+msgstr "Ajouter une indication de tempo sur la tête de lecture"
 
 #: editor_actions.cc:416
+#, fuzzy
 msgid "Add Time Signature at Playhead"
-msgstr ""
+msgstr "Ajouter une signature rythmique sur la tête de lecture"
 
 #: editor_actions.cc:419
 msgid "Consolidate Range (with processing)"
@@ -6587,8 +6621,9 @@ msgid "Toggle Active"
 msgstr "Activer/désactiver"
 
 #: editor_actions.cc:507
+#, fuzzy
 msgid "Remove Selected Track(s)"
-msgstr ""
+msgstr "Supprimer la ou les piste(s) sélectionnée(s)"
 
 #: editor_actions.cc:510
 msgid "Fit Selection (Vertical)"
@@ -6657,44 +6692,54 @@ msgid "Show Marker Lines"
 msgstr "Afficher les barres de repères"
 
 #: editor_actions.cc:586
+#, fuzzy
 msgid "All Markers"
-msgstr ""
+msgstr "Tous les repères"
 
 #: editor_actions.cc:587
+#, fuzzy
 msgid "Only CD Markers"
-msgstr ""
+msgstr "Repères de CD seulement"
 
 #: editor_actions.cc:588
+#, fuzzy
 msgid "Only Cue Markers"
-msgstr ""
+msgstr "Repères de Cue seulement"
 
 #: editor_actions.cc:589
+#, fuzzy
 msgid "Only Scene Markers"
-msgstr ""
+msgstr "Repères de scène seulement"
 
 #: editor_actions.cc:590
+#, fuzzy
 msgid "Only Location Markers"
-msgstr ""
+msgstr "Repères de position seulement"
 
 #: editor_actions.cc:592 editor_rulers.cc:335
+#, fuzzy
 msgid "All Ranges"
-msgstr ""
+msgstr "Tous les intervalles"
 
 #: editor_actions.cc:593
+#, fuzzy
 msgid "Only Session Range"
-msgstr ""
+msgstr "Intervalles de session seulement"
 
 #: editor_actions.cc:594
+#, fuzzy
 msgid "Only Punch Range"
-msgstr ""
+msgstr "Intervalles de punch seulement"
 
 #: editor_actions.cc:595
+#, fuzzy
 msgid "Only Loop Range"
-msgstr ""
+msgstr "Intervalles de boucle seulement"
 
 #: editor_actions.cc:596
+#, fuzzy
 msgid "Only Named Ranges"
-msgstr ""
+msgstr "Intervalles nommés seulement"
 
 #: editor_actions.cc:598 editor_actions.cc:601 editor_rulers.cc:290
 #: rc_option_editor.cc:1815
@@ -6730,8 +6775,9 @@ msgid "Remove Unused"
 msgstr "Supprimer les régions inutilisées"
 
 #: editor_actions.cc:655
+#, fuzzy
 msgid "Import PT session..."
-msgstr ""
+msgstr "Importer une session PT..."
 
 #: editor_actions.cc:663
 msgid "Import to Source List..."
@@ -6806,12 +6852,14 @@ msgid "Move to Original Position"
 msgstr "Remettre à sa position d'origine"
 
 #: editor_actions.cc:1321
+#, fuzzy
 msgid "Unlock"
-msgstr ""
+msgstr "Déverrouiller"
 
 #: editor_actions.cc:1324
+#, fuzzy
 msgid "Lock (toggle)"
-msgstr ""
+msgstr "Verrouiller (basculer)"
 
 #: editor_actions.cc:1325
 msgid "Lock to Video"
@@ -6930,8 +6978,9 @@ msgid "List Editor..."
 msgstr "Éditeur en liste..."
 
 #: editor_actions.cc:1421
+#, fuzzy
 msgid "Edit in separate window..."
-msgstr ""
+msgstr "Éditer dans une fenêtre séparée"
 
 #: editor_actions.cc:1427
 msgid "Bounce (without processing)"
@@ -7673,24 +7722,29 @@ msgid "%1 Marker"
 msgstr ""
 
 #: editor_markers.cc:1897
+#, fuzzy
 msgid "Program Number"
-msgstr ""
+msgstr "Numéro de programme"
 
 #: editor_markers.cc:1898
+#, fuzzy
 msgid "Bank Number"
-msgstr ""
+msgstr "Numéro de banque"
 
 #: editor_markers.cc:1912
+#, fuzzy
 msgid "Scene Change"
-msgstr ""
+msgstr "Changement de scène"
 
 #: editor_markers.cc:1933
+#, fuzzy
 msgid "Clear scene change"
-msgstr ""
+msgstr "Nettoyer les changements de scène"
 
 #: editor_markers.cc:1968
+#, fuzzy
 msgid "edit marker"
-msgstr ""
+msgstr "Éditer les repères"
 
 #: editor_markers.cc:1968
 msgid "rename marker"
@@ -7818,8 +7872,9 @@ msgid "cue %1"
 msgstr "cue %1"
 
 #: editor_ops.cc:1952
+#, fuzzy
 msgid "section"
-msgstr ""
+msgstr "section"
 
 #: editor_ops.cc:1954
 msgid "cd trk"
@@ -7876,8 +7931,9 @@ msgid "Cut/Copy Tempo Map"
 msgstr ""
 
 #: editor_ops.cc:2427
+#, fuzzy
 msgid "Do not show this dialog again."
-msgstr ""
+msgstr "Ne plus afficher cette boîte de dialogue."
 
 #: editor_ops.cc:2674
 msgid "raise regions"
@@ -8109,8 +8165,9 @@ msgid "recover regions"
 msgstr "recouvrir les régions"
 
 #: editor_ops.cc:4659
+#, fuzzy
 msgid "remove regions"
-msgstr ""
+msgstr "Supprimer les régions"
 
 #: editor_ops.cc:5270
 msgid "duplicate range selection"
@@ -8186,12 +8243,14 @@ msgid "region gain envelope active"
 msgstr "enveloppe de gain de la région active"
 
 #: editor_ops.cc:6194
+#, fuzzy
 msgid "region lock"
-msgstr ""
+msgstr "verrouiller la région"
 
 #: editor_ops.cc:6218
+#, fuzzy
 msgid "region unlock"
-msgstr ""
+msgstr "déverrouiller la région"
 
 #: editor_ops.cc:6242
 msgid "toggle region lock"
@@ -11290,7 +11349,7 @@ msgstr " et GCC version "
 
 #: main.cc:366
 msgid "Copyright (C) 1999-2025 Paul Davis"
-msgstr ""
+msgstr "Copyright (C) 1999-2025 Paul Davis"
 
 #: main.cc:367
 msgid ""
@@ -12341,20 +12400,24 @@ msgid "Mixer Scenes (F1..F8 to recall)"
 msgstr ""
 
 #: mixer_ui.cc:349 mixer_ui.cc:354
+#, fuzzy
 msgid "Favorite"
-msgstr ""
+msgstr "Favoris"
 
 #: mixer_ui.cc:350 mixer_ui.cc:355
+#, fuzzy
 msgid "Recent"
-msgstr ""
+msgstr "Récent"
 
 #: mixer_ui.cc:350 mixer_ui.cc:355
+#, fuzzy
 msgid "Recently Used Plugins"
-msgstr ""
+msgstr "Greffons récemment utilisés"
 
 #: mixer_ui.cc:351 mixer_ui.cc:356
+#, fuzzy
 msgid "Top-10"
-msgstr ""
+msgstr "Top-10"
 
 #: mixer_ui.cc:351 mixer_ui.cc:356
 msgid "Top-10 Plugins"
@@ -12366,8 +12429,9 @@ msgid "Search"
 msgstr "Recherche"
 
 #: mixer_ui.cc:352 mixer_ui.cc:357
+#, fuzzy
 msgid "Search All Plugins"
-msgstr ""
+msgstr "Rechercher tous les greffons"
 
 #: mixer_ui.cc:359
 msgid "Track & Bus Visibility"
@@ -13117,8 +13181,9 @@ msgstr ""
 "par défaut)</i></span>"
 
 #: new_user_wizard.cc:273
+#, fuzzy
 msgid "Default Session Location"
-msgstr ""
+msgstr "Emplacement de session par défaut"
 
 #: new_user_wizard.cc:281
 msgid "Default folder for new sessions"
@@ -14381,8 +14446,9 @@ msgid "LTC Out"
 msgstr "Sortie LTC"
 
 #: port_group.cc:526
+#, fuzzy
 msgid "Control Surface"
-msgstr ""
+msgstr "Surface de contrôle"
 
 #: port_group.cc:573
 msgid "MMC in"
@@ -16077,20 +16143,24 @@ msgid "Default location of new windows"
 msgstr ""
 
 #: rc_option_editor.cc:3200
+#, fuzzy
 msgid "Center of screen"
-msgstr ""
+msgstr "Centre de l'écran"
 
 #: rc_option_editor.cc:3201
+#, fuzzy
 msgid "Mouse position"
-msgstr ""
+msgstr "Position de la souris"
 
 #: rc_option_editor.cc:3202
+#, fuzzy
 msgid "Center of screen, really"
-msgstr ""
+msgstr "Centre de l'écran, vraiment"
 
 #: rc_option_editor.cc:3203
+#, fuzzy
 msgid "Center of parent window"
-msgstr ""
+msgstr "Centre de la fenêtre parent"
 
 #: rc_option_editor.cc:3208 rc_option_editor.cc:3219
 msgid "Appearance/Translation"
@@ -16374,12 +16444,14 @@ msgid "Approximate Grid/Ruler granularity (pixels)"
 msgstr "Granularité approximative de la grille/règle (pixels) "
 
 #: rc_option_editor.cc:3465
+#, fuzzy
 msgid "Region Editing"
-msgstr ""
+msgstr "Édition de région"
 
 #: rc_option_editor.cc:3468
+#, fuzzy
 msgid "Region Editing Preference"
-msgstr ""
+msgstr "Préférence d'édition de région"
 
 #: rc_option_editor.cc:3475
 msgid "Only ever use the bottom pane"
@@ -16394,8 +16466,9 @@ msgid "Use bottom pane if visible, or own window"
 msgstr ""
 
 #: rc_option_editor.cc:3478
+#, fuzzy
 msgid "Always use a separate window"
-msgstr ""
+msgstr "Utiliser toujours une fenêtre séparée"
 
 #: rc_option_editor.cc:3485
 msgid "Show \"snapped cursor\""
@@ -17232,8 +17305,9 @@ msgstr ""
 "ajouté possède un mode d'affichage en-ligne"
 
 #: rc_option_editor.cc:4188
+#, fuzzy
 msgid "VST3 UI"
-msgstr ""
+msgstr "VST3 IU"
 
 #: rc_option_editor.cc:4193
 msgid "Automatically show 'Micro Edit' tagged controls on the mixer-strip"
@@ -17242,12 +17316,14 @@ msgstr ""
 "de mixage"
 
 #: rc_option_editor.cc:4200
+#, fuzzy
 msgid "VST3 Knob Mode"
-msgstr ""
+msgstr "VST3 Mode bouton"
 
 #: rc_option_editor.cc:4205
+#, fuzzy
 msgid "Plugin Default"
-msgstr ""
+msgstr "Défaut du greffon"
 
 #: rc_option_editor.cc:4206
 msgid "Circular with jump to clicked position (discouraged)"
@@ -17867,8 +17943,9 @@ msgid "Enable automatic analysis of audio"
 msgstr "Activer l'analyse automatique de l'audio"
 
 #: rc_option_editor.cc:4913
+#, fuzzy
 msgid "Realtime Analyzer"
-msgstr ""
+msgstr "Analyseur temps-réel"
 
 #: rc_option_editor.cc:4917
 msgid "Limit concurrent RTA spectra"
@@ -18023,12 +18100,14 @@ msgid "No priority"
 msgstr ""
 
 #: rc_option_editor.cc:5095
+#, fuzzy
 msgid "Realtime (FIFO)"
-msgstr ""
+msgstr "Temps-réel (FIFO)"
 
 #: rc_option_editor.cc:5096
+#, fuzzy
 msgid "Realtime (Round Robin)"
-msgstr ""
+msgstr "Temps-réel (arrondi robin)"
 
 #: rc_option_editor.cc:5102
 msgid "Memory Usage"
@@ -18340,8 +18419,9 @@ msgid "Sync point (absolute)"
 msgstr ""
 
 #: region_editor.cc:131
+#, fuzzy
 msgid "File start"
-msgstr ""
+msgstr "Début du fichier"
 
 #: region_editor.cc:133
 msgid "Region Effects"
