@@ -687,8 +687,9 @@ msgid "Add Track/Bus/VCA"
 msgstr "Ajouter piste/bus/VCA"
 
 #: add_route_dialog.cc:74
+#, fuzzy
 msgid "Input Config:"
-msgstr ""
+msgstr "Configuration d'entrées :"
 
 #: add_route_dialog.cc:75
 msgid "Configuration:"
@@ -1151,10 +1152,12 @@ msgid "Mute All"
 msgstr "Muter tout"
 
 #: application_bar.cc:392
+#, fuzzy
 msgid "Feedgeek"
-msgstr ""
+msgstr "Feedgeek"
 
 #: application_bar.cc:428
+#, fuzzy
 msgid ""
 "<b>Layered</b>, new recordings will be added as regions on a layer atop "
 "existing regions.\n"
@@ -1163,6 +1166,12 @@ msgid ""
 "<b>SoundOnSound</b>, behaves like <i>Layered</i>, except underlying regions "
 "will be audible."
 msgstr ""
+"<b>Superposés</b>, les nouveaux enregistrements seront ajoutés en tant que "
+"régions sur une couche au-dessus des régions existantes.\n"
+"<b>Non superposés</b>, la région sous-jacente sera coupée et remplacée par "
+"la région nouvellement enregistrée.\n"
+"<b>Son sur son</b>, se comporte comme <i>Superposés</i>, sauf que les "
+"régions sous-jacentes seront audibles."
 
 #: application_bar.cc:429
 msgid ""
@@ -1286,8 +1295,10 @@ msgid "Enable/Disable external positional sync"
 msgstr "(Dés)activer la synchro de position externe"
 
 #: application_bar.cc:951
+#, fuzzy
 msgid "External sync is not possible: video pull up/down is set"
 msgstr ""
+"Synchronisation externe impossible : le \"pullup/pulldown\" vidéo est activé"
 
 #: ardour_http.cc:160 ardour_http.cc:163 ardour_http.cc:183
 msgid "HTTP request failed: (%1) %2"
@@ -1898,6 +1909,7 @@ msgstr ""
 "trop important pour le disque.\n"
 
 #: ardour_ui.cc:2983
+#, fuzzy
 msgid ""
 "<b>MMCSS priority can not be set!</b>\n"
 "\n"
@@ -1913,6 +1925,19 @@ msgid ""
 "<a href=\"https://helpcenter.steinberg.de/hc/en-us/articles/13338094735762-"
 "Error-message-on-Windows-MMCSS-priority-cannot-be-set\">here</a>."
 msgstr ""
+"<b>La priorité MMCSS ne peut pas être définie !</b>\n"
+"\n"
+"Le service Windows Multimedia Class Scheduler Service (MCSS) est utilisé "
+"pour le traitement audio critique en termes de temps. Par défaut, Microsoft "
+"a limité le nombre de fils MMCSS à 32, et cette limite a été atteinte.\n"
+"\n"
+"Vous pouvez réduire le nombre de fils de processus dans Préférences > "
+"Performances, mais cela peut s'avérer insuffisant, car les fils MCSS sont "
+"également utilisés pour les E/S audio et MIDI.\n"
+"Une solution consiste à augmenter le nombre de fils MCSS disponibles en "
+"modifiant le registre Windows. Vous trouverez un outil pratique pour cela <a "
+"href=\"https://helpcenter.steinberg.de/hc/en-us/articles/13338094735762-"
+"Error-message-on-Windows-MMCSS-priority-cannot-be-set\">ici</a>."
 
 #: ardour_ui.cc:3016
 msgid "Crash Recovery"
@@ -2021,36 +2046,49 @@ msgid "Name"
 msgstr "Nom"
 
 #: ardour_ui_aaf.cc:486
+#, fuzzy
 msgid "AAF: Destination '%1' already exists."
-msgstr ""
+msgstr "AAF : La destination '%1' existe déjà."
 
 #: ardour_ui_aaf.cc:498
+#, fuzzy
 msgid "AAF: Could not prepare media cache: %1"
-msgstr ""
+msgstr "AAF : Impossible de préparer le cache multimédia : %1"
 
 #: ardour_ui_aaf.cc:527
+#, fuzzy
 msgid "AAF: Could not start [dummy] engine for AAF import ."
 msgstr ""
+"AAF : Impossible de démarrer le moteur [fictif] pour l'importation AAF."
 
 #: ardour_ui_aaf.cc:540
+#, fuzzy
 msgid "AAF: Could not create new session for AAF import ."
-msgstr ""
+msgstr "AAF : Impossible de créer une nouvelle session pour l'importation AAF."
 
 #: ardour_ui_aaf.cc:603
+#, fuzzy
 msgid "AAF: Clip has no essence."
-msgstr ""
+msgstr "AAF : Le clip n'a aucune substance."
 
 #: ardour_ui_aaf.cc:616
+#, fuzzy
 msgid "AAF: Audio essence pointer is missing an audio essence file entry"
 msgstr ""
+"AAF : le pointeur de substance sonore n'a pas d'entrée de fichier substance "
+"sonore"
 
 #: ardour_ui_aaf.cc:656
+#, fuzzy
 msgid "AAF: Could not create new region for clip '%1': Region has no source"
 msgstr ""
+"AAF : Impossible de créer une nouvelle région pour le clip « %1 » : la "
+"région n'a pas de source."
 
 #: ardour_ui_aaf.cc:663
+#, fuzzy
 msgid "AAF: Could not create new region for clip '%1'"
-msgstr ""
+msgstr "AAF : Impossible de créer une nouvelle région pour le clip « %1 »."
 
 #: ardour_ui_access_web.cc:54
 msgid ""
@@ -2343,12 +2381,14 @@ msgid "Templates"
 msgstr "Modèles"
 
 #: ardour_ui_ed.cc:260
+#, fuzzy
 msgid "Save Mixer Strips..."
-msgstr ""
+msgstr "sauver les tranches de mélangeur..."
 
 #: ardour_ui_ed.cc:263
+#, fuzzy
 msgid "Import Mixer Strips..."
-msgstr ""
+msgstr "Importer les tranches de mélangeur..."
 
 #: ardour_ui_ed.cc:266 export_format_dialog.cc:324
 msgid "Metadata"
@@ -2631,8 +2671,9 @@ msgid "Click"
 msgstr "Métronome"
 
 #: ardour_ui_ed.cc:499
+#, fuzzy
 msgid "Click when Recording"
-msgstr ""
+msgstr "Cliquer lors de l'enregistrement"
 
 #: ardour_ui_ed.cc:502
 msgid "Auto Input"
@@ -2651,12 +2692,14 @@ msgid "Disable Latency Compensation"
 msgstr "Désactiver la compensation de latence"
 
 #: ardour_ui_ed.cc:518
+#, fuzzy
 msgid "Reset Mixer Meter Peaks"
-msgstr ""
+msgstr "Réinitialiser les crêtes de l'indicateur du mélangeur"
 
 #: ardour_ui_ed.cc:521
+#, fuzzy
 msgid "Reset All Meter Peak Hold"
-msgstr ""
+msgstr "Réinitialisation de tous indicateurs de maintien de crête"
 
 #: ardour_ui_ed.cc:524
 msgid "Monitor Section"
@@ -2723,28 +2766,34 @@ msgid "Jump to Next Mark"
 msgstr "Aller au repère suivant"
 
 #: ardour_ui_ed.cc:600
+#, fuzzy
 msgid "Jump to Previous Location Mark"
-msgstr ""
+msgstr "Sauter au repère \"location\" précédent"
 
 #: ardour_ui_ed.cc:604
+#, fuzzy
 msgid "Jump to Next Location Mark"
-msgstr ""
+msgstr "Sauter au repère \"location\" suivant"
 
 #: ardour_ui_ed.cc:608
+#, fuzzy
 msgid "Jump to Previous Range"
-msgstr ""
+msgstr "Sauter à la \"range\" précédente"
 
 #: ardour_ui_ed.cc:612
+#, fuzzy
 msgid "Jump to Next Range"
-msgstr ""
+msgstr "Sauter à la \"range\" suivante"
 
 #: ardour_ui_ed.cc:616
+#, fuzzy
 msgid "Jump to Previous Arrangement Mark"
-msgstr ""
+msgstr "Sauter au repère arrangement précédent"
 
 #: ardour_ui_ed.cc:620
+#, fuzzy
 msgid "Jump to Next Arrangement Mark"
-msgstr ""
+msgstr "Sauter au repère arrangement suivant"
 
 #: ardour_ui_ed.cc:626
 msgid "Locate to Mark %1"
@@ -2759,8 +2808,9 @@ msgid "Jump to Loop End"
 msgstr "Aller à la fin de boucle"
 
 #: ardour_ui_ed.cc:636
+#, fuzzy
 msgid "Import Audio/MIDI files..."
-msgstr ""
+msgstr "Importer les fichiers audio et MIDI"
 
 #: ardour_ui_ed.cc:640
 msgid "Stem export..."
@@ -2811,8 +2861,9 @@ msgid "Remove Mark at Playhead"
 msgstr "Supprimer le repère à la tête"
 
 #: ardour_ui_ed.cc:690
+#, fuzzy
 msgid "Add Arrangement Mark at Playhead"
-msgstr ""
+msgstr "Ajouter un repère arrangement au niveau de la tête de lecture"
 
 #: ardour_ui_ed.cc:693
 msgid "Add BBT Marker from Playhead"
@@ -3044,10 +3095,14 @@ msgid "%1 is now silent"
 msgstr "%1 est maintenant silencieux"
 
 #: ardour_ui_engine.cc:68
+#, fuzzy
 msgid ""
 "Please consider paying for a copy of %1 - you can pay whatever you want.\n"
 "Download the unrestricted build after paying..."
 msgstr ""
+"Envisagez d'acheter une copie de %1 - vous pouvez payer le montant que vous "
+"souhaitez.\n"
+"Téléchargez la version sans restriction après avoir effectué le paiement..."
 
 #: ardour_ui_engine.cc:69
 msgid "Better yet become a subscriber - subscriptions start at US$1 per month."
@@ -3348,10 +3403,14 @@ msgid "Session Archiving failed."
 msgstr "Échec de l'archivage de session."
 
 #: ardour_ui_session.cc:1156
+#, fuzzy
 msgid ""
 "The currently loaded session name cannot be used as new snapshot.\n"
 "Just save the session for this operation."
 msgstr ""
+"Le nom de la session actuellement chargée ne peut pas être utilisé comme "
+"nouvel instantané.\n"
+"Enregistrez simplement la session pour cette opération."
 
 #: ardour_ui_session.cc:1164
 msgid ""
@@ -3704,12 +3763,14 @@ msgid "Polarity Invert"
 msgstr "Inversion de polarité"
 
 #: audio_region_editor.cc:63
+#, fuzzy
 msgid "Fade before Fx"
-msgstr ""
+msgstr "Fondu avant effet"
 
 #: audio_region_editor.cc:64
+#, fuzzy
 msgid "Show on Touch"
-msgstr ""
+msgstr "Afficher au toucher"
 
 #: audio_region_editor.cc:68
 #, fuzzy
@@ -3717,12 +3778,14 @@ msgid "Region gain"
 msgstr "Gain de région"
 
 #: audio_region_editor.cc:72
+#, fuzzy
 msgid "Peak Amplitude"
-msgstr ""
+msgstr "Amplitude crête"
 
 #: audio_region_editor.cc:76
+#, fuzzy
 msgid "Region Line:"
-msgstr ""
+msgstr "Ligne de région :"
 
 #: audio_region_editor.cc:100 rhythm_ferret.cc:140 rhythm_ferret.cc:157
 msgid "dB"
@@ -3737,21 +3800,30 @@ msgid "dBFS"
 msgstr "dBFS"
 
 #: audio_region_editor.cc:125
+#, fuzzy
 msgid "Invert the signal polarity (180deg phase shift)"
-msgstr ""
+msgstr "Inverser la polarité du signal (déphasage de 180 degrés)"
 
 #: audio_region_editor.cc:126
+#, fuzzy
 msgid ""
 "Apply region effects after the region fade.\n"
 "This is useful if the effect(s) have tail, which would otherwise be faded "
 "out by the region fade (e.g. reverb, delay)"
 msgstr ""
+"Appliquez les effets de région après le fondu de région.\n"
+"Ceci est utile si les effets ont une queue, qui serait autrement atténuée "
+"par le fondu de région (par exemple, réverbération, délai)."
 
 #: audio_region_editor.cc:127
+#, fuzzy
 msgid ""
 "When touching a control in a region effect plugin UI, the corresponding "
 "region-automation line is shown the editor, and edit mode is set to 'draw'."
 msgstr ""
+"Lorsque vous touchez un contrôle dans l'interface utilisateur d'un greffon "
+"d'effet de région, la ligne d'automatisation de région correspondante "
+"s'affiche dans l'éditeur et le mode d'édition est défini sur « dessiner »."
 
 #: audio_region_editor.cc:143 strip_silence_dialog.cc:127
 #: strip_silence_dialog.cc:316
@@ -3759,8 +3831,9 @@ msgid "Analyzing"
 msgstr "Analyse"
 
 #: audio_region_editor.cc:308 audio_region_editor.cc:316
+#, fuzzy
 msgid "Gain Envelope"
-msgstr ""
+msgstr "enveloppe de gain"
 
 #: audio_region_view.cc:1561
 msgid "add gain control point"
@@ -3874,8 +3947,9 @@ msgid "remove control point"
 msgstr "retrait de point de contrôle"
 
 #: automation_line.cc:1312 automation_line.cc:1382 automation_line.cc:1409
+#, fuzzy
 msgid "Ignoring illegal points on EditorAutomationLine \"%1\""
-msgstr ""
+msgstr "Ignorer les points illégaux sur \"EditorAutomationLine\" « %1 »"
 
 #: automation_line.cc:1810 automation_region_view.cc:215
 msgid "add automation event"
@@ -4177,8 +4251,9 @@ msgid "CueBox for XXXX"
 msgstr "CueBox pour XXXX"
 
 #: cue_editor.cc:54
+#, fuzzy
 msgid "Record:"
-msgstr ""
+msgstr "Enregistrement :"
 
 #: cue_editor.cc:55 editor_route_groups.cc:99 mixer_strip.cc:1789
 #: meter_strip.cc:396 route_list_base.cc:209 route_time_axis.cc:2420
@@ -4187,52 +4262,66 @@ msgid "Solo|S"
 msgstr "S"
 
 #: cue_editor.cc:460
+#, fuzzy
 msgid "Zoom to full clip"
-msgstr ""
+msgstr "Zoomer sur le clip entier"
 
 #: cue_editor.cc:461
+#, fuzzy
 msgid "Toggle between drum and regular note drawing"
 msgstr ""
+"Basculer entre le dessin de notes à la batterie et le dessin de notes "
+"normales"
 
 #: cue_editor.cc:492
+#, fuzzy
 msgid "Play this clip from the top"
-msgstr ""
+msgstr "Jouer ce clip depuis le début"
 
 #: cue_editor.cc:493
+#, fuzzy
 msgid "Loop the range of this clip"
-msgstr ""
+msgstr "Boucler la plage de ce clip"
 
 #: cue_editor.cc:494
+#, fuzzy
 msgid "Solo the track containing this clip"
-msgstr ""
+msgstr "Solo la piste contenant ce clip"
 
 #: cue_editor.cc:500
+#, fuzzy
 msgid "Launch selected clip"
-msgstr ""
+msgstr "Écouter le clip sélectionné"
 
 #: cue_editor.cc:510
+#, fuzzy
 msgid "Record clip"
-msgstr ""
+msgstr "Enregistrement du clip"
 
 #: cue_editor.cc:511
+#, fuzzy
 msgid "Record length"
-msgstr ""
+msgstr "Enregistrement d'un intervalle"
 
 #: cue_editor.cc:516 cue_editor.cc:523 cue_editor.cc:732
+#, fuzzy
 msgid "Until Stopped"
-msgstr ""
+msgstr "Jusqu'à ce qu'on l'arrête"
 
 #: cue_editor.cc:615
+#, fuzzy
 msgid "loop region"
-msgstr ""
+msgstr "Boucler la région"
 
 #: cue_editor.cc:1991
+#, fuzzy
 msgid "trim region front"
-msgstr ""
+msgstr "rogner le début de la région"
 
 #: cue_editor.cc:2011
+#, fuzzy
 msgid "trim region end"
-msgstr ""
+msgstr "rogner la fin de la région"
 
 #: dsp_stats_ui.cc:43 idleometer.cc:43 panner_ui.cc:415 plugin_selector.cc:286
 #: plugin_ui.cc:533 plugin_dspload_ui.cc:37 rc_option_editor.cc:769
