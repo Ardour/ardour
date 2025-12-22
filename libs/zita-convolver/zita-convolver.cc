@@ -23,6 +23,9 @@
 
 #ifdef _MSC_VER
 #include <windows.h> // Needed for MSVC 'Sleep()'
+#ifdef ENABLE_VECTOR_MODE
+#include <immintrin.h>
+#endif
 #else
 #include <unistd.h>  // for usleep ()
 #endif
@@ -425,7 +428,25 @@ Convproc::print (FILE* F)
 }
 
 #ifdef ENABLE_VECTOR_MODE
+#ifdef COMPILER_MSVC
+typedef __m128 FV4;
+
+// MSVC operator overloads to match GCC vector extension behavior
+static inline __m128 operator+(const __m128& a, const __m128& b) {
+    return _mm_add_ps(a, b);
+}
+static inline __m128 operator-(const __m128& a, const __m128& b) {
+    return _mm_sub_ps(a, b);
+}
+static inline __m128 operator*(const __m128& a, const __m128& b) {
+    return _mm_mul_ps(a, b);
+}
+static inline __m128& operator+=(__m128& a, const __m128& b) {
+    return a = _mm_add_ps(a, b);
+}
+#else
 typedef float FV4 __attribute__ ((vector_size (16)));
+#endif
 #endif
 
 Convlevel::Convlevel (void)
