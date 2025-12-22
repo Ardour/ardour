@@ -6367,8 +6367,9 @@ msgid "Fit All Tracks"
 msgstr "Afficher toutes les pistes"
 
 #: editor_actions.cc:319
+#, fuzzy
 msgid "Fit Selected Tracks"
-msgstr ""
+msgstr "Afficher les pistes sélectionnées"
 
 #: editor_actions.cc:326
 msgid "Zoom to 5 min"
@@ -6439,8 +6440,9 @@ msgid "Use Skip Ranges"
 msgstr "Utiliser les sauts d'intervalle"
 
 #: editor_actions.cc:357
+#, fuzzy
 msgid "Find & Display Track/Bus..."
-msgstr ""
+msgstr "Rechercher et afficher la piste/le bus..."
 
 #: editor_actions.cc:362
 msgid "Insert Time Section at Playhead"
@@ -7131,20 +7133,24 @@ msgid "Choose Top..."
 msgstr "Choisir le dessus..."
 
 #: editor_actions.cc:1565
+#, fuzzy
 msgid "automation event lower"
-msgstr ""
+msgstr "Évènement d'automatisation inférieur"
 
 #: editor_actions.cc:1592
+#, fuzzy
 msgid "automation event raise"
-msgstr ""
+msgstr "événement d'automatisation déclenché"
 
 #: editor_actions.cc:1617
+#, fuzzy
 msgid "automation points move later"
-msgstr ""
+msgstr "déplacement d'événement d'automation plus tard"
 
 #: editor_actions.cc:1650
+#, fuzzy
 msgid "automation points move earlier"
-msgstr ""
+msgstr "déplacement d'événement d'automation plus tôt"
 
 #: editor_audio_import.cc:87 editor_audio_import.cc:109
 msgid "You can't import or embed an audiofile until you have a session loaded."
@@ -7710,16 +7716,19 @@ msgid "New Name:"
 msgstr "Nouveau nom :"
 
 #: editor_markers.cc:1871
+#, fuzzy
 msgid "%1 Arrangement Section"
-msgstr ""
+msgstr "%1 Section d'arrangement"
 
 #: editor_markers.cc:1873
+#, fuzzy
 msgid "%1 Range"
-msgstr ""
+msgstr "%1 Intervalle"
 
 #: editor_markers.cc:1875
+#, fuzzy
 msgid "%1 Marker"
-msgstr ""
+msgstr "%1 Repère"
 
 #: editor_markers.cc:1897
 #, fuzzy
@@ -7877,8 +7886,9 @@ msgid "section"
 msgstr "section"
 
 #: editor_ops.cc:1954
+#, fuzzy
 msgid "cd trk"
-msgstr ""
+msgstr "plage CD"
 
 #: editor_ops.cc:1956
 msgid "mark"
@@ -8630,8 +8640,9 @@ msgid "remove gaps"
 msgstr "supprimer les écarts"
 
 #: editor_ops.cc:9524
+#, fuzzy
 msgid "Find Track/Bus"
-msgstr ""
+msgstr "Rechercher piste ou bus"
 
 #: editor_regions.cc:66 editor_sources.cc:87 trigger_region_list.cc:28
 #: trigger_source_list.cc:31
@@ -8756,8 +8767,9 @@ msgid "RTA|RA"
 msgstr ""
 
 #: editor_routes.cc:41 route_list_base.cc:87
+#, fuzzy
 msgid "Realtime Analyzer active?"
-msgstr ""
+msgstr "Analyseur temps-réel actif ?"
 
 #: editor_rulers.cc:246
 msgid "Add New Tempo"
@@ -8792,16 +8804,19 @@ msgid "Add BBT Marker"
 msgstr "Ajouter un marqueur BBT"
 
 #: editor_rulers.cc:310
+#, fuzzy
 msgid "Location Marker"
-msgstr ""
+msgstr "Repère de position"
 
 #: editor_rulers.cc:311
+#, fuzzy
 msgid "Arrangement Marker"
-msgstr ""
+msgstr "Repère d'arrangement"
 
 #: editor_rulers.cc:312
+#, fuzzy
 msgid "CD Track Marker"
-msgstr ""
+msgstr "Repère de piste CD"
 
 #: editor_rulers.cc:317
 msgid "Stop All Cues"
@@ -8821,28 +8836,34 @@ msgid "Punch Range"
 msgstr ""
 
 #: editor_rulers.cc:334
+#, fuzzy
 msgid "All Locations"
-msgstr ""
+msgstr "Toutes les positions"
 
 #: editor_rulers.cc:336
+#, fuzzy
 msgid "All Cues"
-msgstr ""
+msgstr "Toutes les Cues"
 
 #: editor_rulers.cc:337
+#, fuzzy
 msgid "All Xruns"
-msgstr ""
+msgstr "Tous les décrochages"
 
 #: editor_rulers.cc:338
+#, fuzzy
 msgid "All (MIDI) Scenes"
-msgstr ""
+msgstr "Toutes les scènes (MIDI)"
 
 #: editor_rulers.cc:367
+#, fuzzy
 msgid "Show Locations..."
-msgstr ""
+msgstr "Afficher les positions"
 
 #: editor_rulers.cc:379
+#, fuzzy
 msgid "Show Ranges..."
-msgstr ""
+msgstr "Afficher les plages"
 
 #: editor_sections.cc:508
 msgid "Rename the selected Section"
@@ -11913,8 +11934,9 @@ msgid "paste"
 msgstr "coller"
 
 #: midi_view.cc:4993
+#, fuzzy
 msgid "delete sysex"
-msgstr ""
+msgstr "Effacer le sysex"
 
 #: midi_view.cc:5285
 msgid "split notes"
@@ -17128,8 +17150,9 @@ msgid "Scan for Plugins"
 msgstr "Rechercher des greffons"
 
 #: rc_option_editor.cc:4069
+#, fuzzy
 msgid "Scan for [New] Plugins on Application Start"
-msgstr ""
+msgstr "Rechercher les [nouveaux] greffons au démarrage de l'application"
 
 #: rc_option_editor.cc:4075
 msgid ""
