@@ -1364,7 +1364,7 @@ public:
 	void import_pt_rest (PTFFormat& ptf);
 	bool import_sndfile_as_region (std::string path, SrcQuality quality, timepos_t& pos, SourceList& sources, ImportStatus& status, uint32_t current, uint32_t total);
 
-	struct ptflookup {
+	typedef struct ptflookup {
 		uint16_t index1;
 		uint16_t index2;
 		PBD::ID  id;
@@ -1372,9 +1372,8 @@ public:
 		bool operator ==(const struct ptflookup& other) {
 			return (this->index1 == other.index1);
 		}
-	};
-	std::vector<struct ptflookup> ptfwavpair;
-	SourceList pt_imported_sources;
+	} PtfLookup;
+	std::vector<PtfLookup> ptfregpair;
 
 	enum TimingTypes {
 		OverallProcess = 0,
