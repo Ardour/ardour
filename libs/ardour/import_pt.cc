@@ -277,11 +277,13 @@ Session::import_pt_rest (PTFFormat& ptf)
 	string fullpath;
 	uint32_t srate = sample_rate ();
 	timepos_t latest = timepos_t (0);
+	bool ok;
 
 	vector<struct ptflookup> ptfregpair;
 
 	SourceList just_one_src;
-
+	RouteList routes;
+	list<std::shared_ptr<AudioTrack> > tracks;
 	std::shared_ptr<AudioTrack> existing_track;
 	uint16_t nth = 0;
 	struct ptflookup utr;
@@ -345,22 +347,32 @@ Session::import_pt_rest (PTFFormat& ptf)
 			if (!(existing_track = dynamic_pointer_cast<AudioTrack> (route_by_name (a->name)))) {
 				/* Create missing track */
 				DEBUG_TRACE (DEBUG::PTImport, string_compose ("Create tr(%1) '%2'\n", nth, a->name));
-				list<std::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, a->name.c_str(), PresentationInfo::max_order, Normal));
-				if (at.empty ()) {
-					return;
-				}
-				existing_track = at.back();
-			}
-			track_map[a->name] = existing_track;
-			std::shared_ptr<Playlist> playlist = existing_track->playlist();
+				ok = new_audio_routes_tracks_bulk (routes,
+								   tracks,
+								   1, 2, 0, 1,
+								   a->name.c_str (),
+								   PresentationInfo::max_order,
+								   Normal
+								  );
+				if (ok) {
+					existing_track = tracks.back();
+					track_map[a->name] = existing_track;
+					std::shared_ptr<Playlist> playlist = existing_track->playlist();
 
-			PlaylistState before;
-			before.playlist = playlist;
-			before.before = &playlist->get_state();
-			playlist->clear_changes ();
-			playlist->freeze ();
-			playlists.push_back(before);
+					PlaylistState before;
+					before.playlist = playlist;
+					before.before = &playlist->get_state();
+					playlist->clear_changes ();
+					playlist->freeze ();
+					playlists.push_back(before);
+				}
+			}
 		}
+	}
+
+	/* Finish bringing in routes */
+	if (!routes.empty ()) {
+		add_routes (routes, true, true, PresentationInfo::max_order);
 	}
 
 	/* Add regions */
