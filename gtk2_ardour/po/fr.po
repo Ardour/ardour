@@ -1129,11 +1129,11 @@ msgstr "Enreg. :"
 
 #: application_bar.cc:169 ardour_ui_ed.cc:485
 msgid "Punch|In"
-msgstr "Ent."
+msgstr "Ent"
 
 #: application_bar.cc:170 ardour_ui_ed.cc:489
 msgid "Punch|Out"
-msgstr "Sor."
+msgstr "Sor"
 
 #: application_bar.cc:177
 msgid "Disable PDC"
@@ -1437,11 +1437,11 @@ msgstr "Mixer"
 
 #: ardour_ui.cc:347
 msgid "Window|Prefs"
-msgstr "Préfs."
+msgstr "Préfs"
 
 #: ardour_ui.cc:348
 msgid "Window|Rec"
-msgstr "Enr."
+msgstr "Enr"
 
 #: ardour_ui.cc:349
 msgid "Window|Cue"
@@ -1665,11 +1665,11 @@ msgstr "%02dh:%02dm:%02ds"
 
 #: ardour_ui.cc:1374
 msgid "Available record time"
-msgstr "Temps d'enreg. dispo."
+msgstr "Temps d'enreg. dispo"
 
 #: ardour_ui.cc:1376 editor_route_groups.cc:100
 msgid "Rec"
-msgstr "Enreg."
+msgstr "Enreg"
 
 #: ardour_ui.cc:1383 rec_info_box.cc:292 rec_info_box.cc:335
 #: rec_info_box.cc:353
@@ -2083,7 +2083,7 @@ msgstr ""
 msgid "AAF: Could not create new region for clip '%1': Region has no source"
 msgstr ""
 "AAF : Impossible de créer une nouvelle région pour le clip « %1 » : la "
-"région n'a pas de source."
+"région n'a pas de source"
 
 #: ardour_ui_aaf.cc:663
 #, fuzzy
@@ -2383,7 +2383,7 @@ msgstr "Modèles"
 #: ardour_ui_ed.cc:260
 #, fuzzy
 msgid "Save Mixer Strips..."
-msgstr "sauver les tranches de mélangeur..."
+msgstr "Sauver les tranches de mélangeur..."
 
 #: ardour_ui_ed.cc:263
 #, fuzzy
@@ -2810,7 +2810,7 @@ msgstr "Aller à la fin de boucle"
 #: ardour_ui_ed.cc:636
 #, fuzzy
 msgid "Import Audio/MIDI files..."
-msgstr "Importer les fichiers audio et MIDI"
+msgstr "Importer les fichiers audio et MIDI..."
 
 #: ardour_ui_ed.cc:640
 msgid "Stem export..."
@@ -2867,7 +2867,7 @@ msgstr "Ajouter un repère arrangement au niveau de la tête de lecture"
 
 #: ardour_ui_ed.cc:693
 msgid "Add BBT Marker from Playhead"
-msgstr "ajouter un marqueur BBT sur la tête de lecture"
+msgstr "Ajouter un marqueur BBT sur la tête de lecture"
 
 #: ardour_ui_ed.cc:696
 msgid "Nudge Next Later"
@@ -3020,7 +3020,7 @@ msgstr ""
 
 #: ardour_ui_ed.cc:812
 msgid "Monitor section dim output"
-msgstr "Section moniteur sortie estom."
+msgstr "Section moniteur sortie estomp"
 
 #: ardour_ui_ed.cc:813
 msgid "Monitor section mono output"
@@ -3833,7 +3833,7 @@ msgstr "Analyse"
 #: audio_region_editor.cc:308 audio_region_editor.cc:316
 #, fuzzy
 msgid "Gain Envelope"
-msgstr "enveloppe de gain"
+msgstr "Enveloppe de gain"
 
 #: audio_region_view.cc:1561
 msgid "add gain control point"
@@ -4311,7 +4311,7 @@ msgstr "Jusqu'à ce qu'on l'arrête"
 #: cue_editor.cc:615
 #, fuzzy
 msgid "loop region"
-msgstr "Boucler la région"
+msgstr "boucler la région"
 
 #: cue_editor.cc:1991
 #, fuzzy
@@ -4551,44 +4551,54 @@ msgid "CD Frames"
 msgstr "Trames de CD"
 
 #: editing_context.cc:112
+#, fuzzy
 msgid "1/3 Note"
-msgstr ""
+msgstr "Triolet de croches"
 
 #: editing_context.cc:113
+#, fuzzy
 msgid "1/6 Note"
-msgstr ""
+msgstr "Triolet de double-croches"
 
 #: editing_context.cc:114
+#, fuzzy
 msgid "1/12 Note"
-msgstr ""
+msgstr "Triolet de triple-croches"
 
 #: editing_context.cc:115
+#, fuzzy
 msgid "1/24 Note"
-msgstr ""
+msgstr "Triolet de quadruple-croches"
 
 #: editing_context.cc:116
+#, fuzzy
 msgid "1/5 Note"
-msgstr ""
+msgstr "Quintolet de double-croches"
 
 #: editing_context.cc:117
+#, fuzzy
 msgid "1/10 Note"
-msgstr ""
+msgstr "Quintolet de triple-croches"
 
 #: editing_context.cc:118
+#, fuzzy
 msgid "1/20 Note"
-msgstr ""
+msgstr "Quintolet de quadruple-croches"
 
 #: editing_context.cc:119
+#, fuzzy
 msgid "1/7 Note"
-msgstr ""
+msgstr "Septolet de triple-croches"
 
 #: editing_context.cc:120
+#, fuzzy
 msgid "1/14 Note"
-msgstr ""
+msgstr "Septolet de quadruple-croches"
 
 #: editing_context.cc:121
+#, fuzzy
 msgid "1/28 Note"
-msgstr ""
+msgstr "Septolet de quintuple-croches"
 
 #: editing_context.cc:130 mono_panner_editor.cc:45
 msgid "Left"
@@ -5320,16 +5330,18 @@ msgid "Clips"
 msgstr "Clips"
 
 #: editor.cc:545
+#, fuzzy
 msgid "Arrange"
-msgstr ""
+msgstr "\"Composer\""
 
 #: editor.cc:545 editor_actions.cc:580
 msgid "Arrangement"
 msgstr "Composition"
 
 #: editor.cc:546
+#, fuzzy
 msgid "Snaps"
-msgstr ""
+msgstr "Aimants"
 
 #: editor.cc:546
 msgid "Snapshots"
@@ -6982,7 +6994,7 @@ msgstr "Éditeur en liste..."
 #: editor_actions.cc:1421
 #, fuzzy
 msgid "Edit in separate window..."
-msgstr "Éditer dans une fenêtre séparée"
+msgstr "Éditer dans une fenêtre séparée..."
 
 #: editor_actions.cc:1427
 msgid "Bounce (without processing)"
@@ -7135,7 +7147,7 @@ msgstr "Choisir le dessus..."
 #: editor_actions.cc:1565
 #, fuzzy
 msgid "automation event lower"
-msgstr "Évènement d'automatisation inférieur"
+msgstr "évènement d'automatisation inférieur"
 
 #: editor_actions.cc:1592
 #, fuzzy
@@ -7180,7 +7192,7 @@ msgstr ""
 
 #: editor_audio_import.cc:287
 msgid "import"
-msgstr "Importer"
+msgstr "importer"
 
 #: editor_audio_import.cc:359 luawindow.cc:98 pt_import_selector.cc:44
 #: rc_option_editor.cc:2449 session_metadata_dialog.cc:465 sfdb_ui.cc:678
@@ -7274,8 +7286,9 @@ msgid "Slip Contents"
 msgstr "Glisser les contenus"
 
 #: editor_drag.cc:843
+#, fuzzy
 msgid "Region brush drag"
-msgstr ""
+msgstr "\"Glisser le pinceau de région\""
 
 #: editor_drag.cc:1656
 msgid "fixed time region drag"
@@ -7402,8 +7415,9 @@ msgid "Automation range drag created for invalid region type"
 msgstr "Zone d'automation créée pour un type de région invalide"
 
 #: editor_drag.cc:7035
+#, fuzzy
 msgid "brush notes"
-msgstr ""
+msgstr "\"peindre les notes\""
 
 #: editor_drag.cc:7276
 msgid "Edit Cue Marker Name"
@@ -7412,7 +7426,7 @@ msgstr "Éditer le nom du repère Cue"
 # Short for color
 #: editor_route_groups.cc:92
 msgid "Col"
-msgstr "Coul."
+msgstr "Coul"
 
 #: editor_route_groups.cc:92
 msgid "Group Tab Color"
@@ -7434,7 +7448,7 @@ msgstr "Groupe visible ?"
 # Active
 #: editor_route_groups.cc:95
 msgid "On"
-msgstr "Act."
+msgstr "Act"
 
 #: editor_route_groups.cc:95
 msgid "Group is enabled?"
@@ -7702,7 +7716,7 @@ msgstr "verrouiller le tempo sur la précédente"
 
 #: editor_markers.cc:1759
 msgid "set tempo to ramp to next"
-msgstr "Régler le tempo sur rampe sur suivant"
+msgstr "régler le tempo sur rampe sur suivant"
 
 #: editor_markers.cc:1865 editor_mouse.cc:2123 io_plugin_window.cc:342
 #: io_plugin_window.cc:384 mixer_ui.cc:4211 mixer_ui.cc:4246
@@ -7753,7 +7767,7 @@ msgstr "Nettoyer les changements de scène"
 #: editor_markers.cc:1968
 #, fuzzy
 msgid "edit marker"
-msgstr "Éditer les repères"
+msgstr "éditer les repères"
 
 #: editor_markers.cc:1968
 msgid "rename marker"
@@ -7816,12 +7830,14 @@ msgid "Name for region:"
 msgstr "Nom de la région :"
 
 #: editor_mouse.cc:2557
+#, fuzzy
 msgid "tempo mapping: end-stretch"
-msgstr ""
+msgstr "cartographie du tempo : fin d'étirement"
 
 #: editor_mouse.cc:2563 editor_mouse.cc:2567
+#, fuzzy
 msgid "tempo mapping: mid-twist"
-msgstr ""
+msgstr "cartographie du tempo : torsion moyenne"
 
 #: editor_ops.cc:280
 msgid "split"
@@ -7842,7 +7858,7 @@ msgstr "décaler l'emplacement vers la droite"
 #: editor_ops.cc:577
 #, fuzzy
 msgid "nudge automation forward"
-msgstr "Avancer l'automatisation"
+msgstr "avancer l'automatisation"
 
 #: editor_ops.cc:613
 msgid "nudge regions backward"
@@ -8151,7 +8167,7 @@ msgstr "\"bouncer\" l'intervalle"
 
 #: editor_ops.cc:4261
 msgid "delete control points"
-msgstr "Effacer les points de contrôle :"
+msgstr "effacer les points de contrôle :"
 
 #: editor_ops.cc:4302 pianoroll.cc:1696
 msgid "delete"
@@ -8184,7 +8200,7 @@ msgstr "recouvrir les régions"
 #: editor_ops.cc:4659
 #, fuzzy
 msgid "remove regions"
-msgstr "Supprimer les régions"
+msgstr "supprimer les régions"
 
 #: editor_ops.cc:5270
 msgid "duplicate range selection"
@@ -8384,7 +8400,7 @@ msgstr ""
 
 #: editor_ops.cc:7238
 msgid "set tempo from %1"
-msgstr "Régler le tempo depuis %1"
+msgstr "régler le tempo depuis %1"
 
 #: editor_ops.cc:7262
 msgid "split regions"
@@ -8846,8 +8862,9 @@ msgid "Range"
 msgstr "Intervalle"
 
 #: editor_rulers.cc:327
+#, fuzzy
 msgid "Punch Range"
-msgstr ""
+msgstr "Plage de \"punch\""
 
 #: editor_rulers.cc:334
 #, fuzzy
@@ -8872,12 +8889,12 @@ msgstr "Toutes les scènes (MIDI)"
 #: editor_rulers.cc:367
 #, fuzzy
 msgid "Show Locations..."
-msgstr "Afficher les positions"
+msgstr "Afficher les positions..."
 
 #: editor_rulers.cc:379
 #, fuzzy
 msgid "Show Ranges..."
-msgstr "Afficher les plages"
+msgstr "Afficher les plages..."
 
 #: editor_sections.cc:508
 msgid "Rename the selected Section"
@@ -9053,11 +9070,11 @@ msgstr "supprimer le repère de tempo"
 
 #: editor_tempodisplay.cc:970 editor_tempodisplay.cc:973
 msgid "clear earlier tempos"
-msgstr "Effacer les tempos précédents"
+msgstr "effacer les tempos précédents"
 
 #: editor_tempodisplay.cc:991 editor_tempodisplay.cc:994
 msgid "clear later tempos"
-msgstr "Effacer les tempos suivants"
+msgstr "effacer les tempos suivants"
 
 #: editor_timefx.cc:72
 msgid "stretch/shrink"
@@ -11711,8 +11728,9 @@ msgid "External Device Mode"
 msgstr "Mode appareil externe"
 
 #: midi_time_axis.cc:279
+#, fuzzy
 msgid "MIDNAM Channel Display"
-msgstr ""
+msgstr "Affichage du canal MIDNAM"
 
 #: midi_time_axis.cc:332 midi_time_axis.cc:337 midi_view.cc:4097
 msgid "Channel "
@@ -11740,8 +11758,9 @@ msgid "Note Mode"
 msgstr "Type de note"
 
 #: midi_time_axis.cc:741
+#, fuzzy
 msgid "MIDNAM Selector..."
-msgstr ""
+msgstr "Sélecteur MIDNAM..."
 
 #: midi_time_axis.cc:744
 msgid "Channel Selector..."
@@ -11761,8 +11780,9 @@ msgid "Color Mode"
 msgstr "Mode couleur"
 
 #: midi_time_axis.cc:788
+#, fuzzy
 msgid "MIDNAM Selector for %1"
-msgstr ""
+msgstr "Sélecteur MIDNAM pour %1"
 
 #: midi_time_axis.cc:834 pianoroll.cc:246
 msgid "Bender"
@@ -11858,8 +11878,9 @@ msgid "Port:"
 msgstr "Port :"
 
 #: midi_tracer.cc:198
+#, fuzzy
 msgid "HW: %1"
-msgstr ""
+msgstr "HW : %1"
 
 #: midi_util.cc:164 midi_util.cc:166
 msgid "Controller %1"
@@ -11960,7 +11981,7 @@ msgstr "coller"
 #: midi_view.cc:4993
 #, fuzzy
 msgid "delete sysex"
-msgstr "Effacer le sysex"
+msgstr "effacer le sysex"
 
 #: midi_view.cc:5285
 msgid "split notes"
@@ -11972,15 +11993,16 @@ msgstr "fractionner plus les notes"
 
 #: midi_view.cc:5341
 msgid "split notes less"
-msgstr "Fractionner moins les notes"
+msgstr "fractionner moins les notes"
 
 #: midi_view.cc:5404
 msgid "join notes"
 msgstr "joindre les notes"
 
 #: midi_view.cc:5460
+#, fuzzy
 msgid "Shift MIDI by %1"
-msgstr ""
+msgstr "Décaler le MIDI de %1"
 
 #: mini_timeline.cc:80
 msgid ""
@@ -12202,11 +12224,11 @@ msgstr "Verrouiller le statut de solo"
 
 #: mixer_strip.cc:234 mixer_strip.cc:1767
 msgid "SoloLock|Lock"
-msgstr "Verr."
+msgstr "Verr"
 
 #: mixer_strip.cc:235 mixer_strip.cc:1766
 msgid "Iso"
-msgstr "Iso."
+msgstr "Iso"
 
 #: mixer_strip.cc:289
 msgid "Mix group"
@@ -12223,7 +12245,7 @@ msgstr ""
 "Cliquez avec le bouton gauche pour activer/désactiver l'analyse de la "
 "piste.\n"
 "Cliquez avec le bouton droit pour activer/désactiver l'affichage de la "
-"fenêtre RTA."
+"fenêtre RTA"
 
 #: mixer_strip.cc:305
 msgid "Trim: "
@@ -12252,7 +12274,7 @@ msgstr "Enregistrement et écoute de contrôle"
 
 #: mixer_strip.cc:412 rc_option_editor.cc:2867
 msgid "Solo Iso / Lock"
-msgstr "Solo iso / verr."
+msgstr "Solo iso / verr"
 
 #: mixer_strip.cc:415 rc_option_editor.cc:2870
 msgid "VCA Assigns"
@@ -12809,8 +12831,9 @@ msgid "Grande"
 msgstr "Grande"
 
 #: meter_strip.cc:934
+#, fuzzy
 msgid "Venti"
-msgstr ""
+msgstr "Venti"
 
 #: meter_patterns.cc:85
 msgid "Peak (+6dBFS)"
@@ -12902,7 +12925,7 @@ msgstr "Les contrôles de solo sont pré-atténuateur"
 
 #: monitor_section.cc:175
 msgid "Excl. Solo"
-msgstr "Solo excl."
+msgstr "Solo excl"
 
 #: monitor_section.cc:177
 msgid "Exclusive solo means that only 1 solo is active at a time"
@@ -13572,8 +13595,9 @@ msgid "Group ID"
 msgstr "ID du groupe"
 
 #: playlist_selector.cc:80
+#, fuzzy
 msgid "Scope: "
-msgstr ""
+msgstr "Portée : "
 
 #: playlist_selector.cc:83
 msgid "Only this track/group"
@@ -13854,11 +13878,12 @@ msgstr "Total"
 
 #: plugin_manager_ui.cc:615
 msgid "Err"
-msgstr "Err."
+msgstr "Err"
 
 #: plugin_manager_ui.cc:619
+#, fuzzy
 msgid "Mis"
-msgstr ""
+msgstr "\"Mis\""
 
 #: plugin_manager_ui.cc:735 rc_option_editor.cc:5342
 msgid "Re-scan Plugins now?"
@@ -13899,7 +13924,7 @@ msgstr "Configuration manuelle"
 
 #: plugin_pin_dialog.cc:64
 msgid "Sidechain"
-msgstr "Chaine lat."
+msgstr "Chaine lat"
 
 #: plugin_pin_dialog.cc:65 plugin_pin_dialog.cc:67 plugin_pin_dialog.cc:69
 #: plugin_pin_dialog.cc:71 plugin_pin_dialog.cc:73 step_entry.cc:87
@@ -13979,8 +14004,9 @@ msgid "Latency %1 spl%2 %3"
 msgstr "Latence %1 spl%2 %3"
 
 #: plugin_pin_dialog.cc:1063 plugin_pin_dialog.cc:1067
+#, fuzzy
 msgid "no-inplace"
-msgstr ""
+msgstr "pas sur place"
 
 #: plugin_pin_dialog.cc:1065
 msgid "Latency %1 spl"
@@ -15991,12 +16017,14 @@ msgid "User Interface Size and Scale"
 msgstr "Taille et échelle de l'interface utilisateur"
 
 #: rc_option_editor.cc:3001
+#, fuzzy
 msgid "Drag Deadzone"
-msgstr ""
+msgstr "Zone morte de glissement"
 
 #: rc_option_editor.cc:3009
+#, fuzzy
 msgid "Huge"
-msgstr ""
+msgstr "Énorme"
 
 #: rc_option_editor.cc:3012
 #, fuzzy
@@ -16010,7 +16038,7 @@ msgstr ""
 "avant qu'une opération de glisser-déposer ne commence.\n"
 "Des valeurs plus élevées nécessitent un mouvement plus important pour "
 "démarrer un glisser-déposer, tandis que des valeurs plus faibles permettent "
-"de le démarrer après un mouvement beaucoup plus court."
+"de le démarrer après un mouvement beaucoup plus court"
 
 #: rc_option_editor.cc:3016 rc_option_editor.cc:3017 rc_option_editor.cc:3018
 #: rc_option_editor.cc:3030 rc_option_editor.cc:3042 rc_option_editor.cc:3055
@@ -16177,7 +16205,7 @@ msgstr ""
 msgid "Use macOS to determine GUI redraw areas"
 msgstr ""
 "Utilisez macOS pour déterminer les zones de rafraîchissement de l'interface "
-"graphique."
+"graphique"
 
 #: rc_option_editor.cc:3144
 #, fuzzy
@@ -16187,7 +16215,7 @@ msgid ""
 msgstr ""
 "Lorsque cette option est activée, macOS se charge de redessiner certaines "
 "zones de l'interface graphique.\n"
-"Lorsque cette option est désactivée, %1 gère cela lui-même."
+"Lorsque cette option est désactivée, %1 gère cela lui-même"
 
 #: rc_option_editor.cc:3150
 msgid "Graphics Acceleration"
@@ -16567,18 +16595,17 @@ msgstr "Préférence d'édition de région"
 #: rc_option_editor.cc:3475
 #, fuzzy
 msgid "Only ever use the bottom pane"
-msgstr "N'utilisez que le volet inférieur."
+msgstr "N'utilisez que le volet inférieur"
 
 #: rc_option_editor.cc:3476
 #, fuzzy
 msgid "Open bottom pane, if necessary"
-msgstr "Ouvrez le volet inférieur, si nécessaire."
+msgstr "Ouvrez le volet inférieur, si nécessaire"
 
 #: rc_option_editor.cc:3477
 #, fuzzy
 msgid "Use bottom pane if visible, or own window"
-msgstr ""
-"Utilisez le volet inférieur s'il est visible, ou une fenêtre distincte."
+msgstr "Utilisez le volet inférieur s'il est visible, ou une fenêtre distincte"
 
 #: rc_option_editor.cc:3478
 #, fuzzy
@@ -16677,13 +16704,13 @@ msgstr "Edition"
 msgid "When drawing new notes, select only the last drawn note"
 msgstr ""
 "Lors du dessin de nouvelles notes, seule la dernière note dessinée est "
-"sélectionnée."
+"sélectionnée"
 
 #: rc_option_editor.cc:3621
 msgid "Scroll wheel use when editing MIDI adjusts selected note velocity"
 msgstr ""
 "L'utilisation de la molette de défilement lors de l'édition MIDI permet "
-"d'ajuster la vélocité de la note sélectionnée."
+"d'ajuster la vélocité de la note sélectionnée"
 
 #: rc_option_editor.cc:3631
 msgid "Sound MIDI notes as they are selected in the editor"
@@ -16793,7 +16820,7 @@ msgstr ""
 "quand il atteint le marqueur de fin de session actuel.\n"
 "\n"
 "<b>Si décoché</b>, Ardour continuera toujours à rouler au-delà du marqueur "
-"de fin de session."
+"de fin de session"
 
 #: rc_option_editor.cc:3723
 msgid "Keep record-enable engaged on stop"
@@ -16870,7 +16897,7 @@ msgstr ""
 "immédiatement le sens de la lecture, le cas échéant.\n"
 "\n"
 "<b>Si désactivées</b> les commandes de rembobinage et de défilement "
-"accélèrent ou ralentissent progressivement la lecture."
+"accélèrent ou ralentissent progressivement la lecture"
 
 #: rc_option_editor.cc:3776
 msgid "Allow auto-return after rewind/ffwd operations"
@@ -16891,7 +16918,7 @@ msgstr ""
 "défilement.\n"
 "\n"
 "<b>Si désactivées</b> la tête de lecture ne reviendra jamais automatiquement "
-"après les opérations de rembobinage/débobinage."
+"après les opérations de rembobinage/débobinage"
 
 # extraspace needed to get a space before the semicolon
 #: rc_option_editor.cc:3789
@@ -17061,20 +17088,26 @@ msgid "Inbound MMC device ID"
 msgstr "Identifiant de l'appareil MMC en entrée "
 
 #: rc_option_editor.cc:3908
+#, fuzzy
 msgid "MMC Fast-wind behavior"
-msgstr ""
+msgstr "Comportement en avance rapide MMC"
 
 #: rc_option_editor.cc:3912
+#, fuzzy
 msgid "Off (MMC fast-forward+rewind are ignored)"
 msgstr ""
+"Désactivé (les fonctions d'avance rapide et de retour rapide MMC sont "
+"ignorées)"
 
 #: rc_option_editor.cc:3913 varispeed_dialog.cc:33
 msgid "Varispeed"
 msgstr "Varispeed"
 
 #: rc_option_editor.cc:3914
+#, fuzzy
 msgid "Marker Locate (MMC ffwd/rewd jumps to next/prior marker)"
 msgstr ""
+"Localisation du marqueur (MMC Av/Ret passe au marqueur suivant/précédent)"
 
 #: rc_option_editor.cc:3920
 msgid "Show Transport Masters Window"
@@ -17198,7 +17231,7 @@ msgstr "Activer le générateur MTC"
 
 #: rc_option_editor.cc:4003
 msgid "Max MTC varispeed (%)"
-msgstr "Varispeed MTC maxi (%s) "
+msgstr "Varispeed MTC maxi (%s)"
 
 #: rc_option_editor.cc:4008
 msgid "Percentage either side of normal transport speed to transmit MTC."
@@ -17319,7 +17352,7 @@ msgstr ""
 "<b>Si coché</b> les greffons seront activés quand ils seront ajoutés à une "
 "piste/un bus.\n"
 "<b>Si décoché</b> les greffons seront laissé inactifs quand ils seront "
-"ajoutés à une piste/un bus."
+"ajoutés à une piste/un bus"
 
 #: rc_option_editor.cc:4120
 msgid "Setup Sidechain ports when loading plugin with aux inputs"
@@ -17749,7 +17782,7 @@ msgstr "Éteint (pas de vari-speed)"
 
 #: rc_option_editor.cc:4573
 msgid "Low (16 samples latency)"
-msgstr "Faible (échantillons)latence de 16 "
+msgstr "Faible (échantillons)latence de 16"
 
 #: rc_option_editor.cc:4574
 msgid "Moderate (32 samples latency), default"
@@ -18099,8 +18132,9 @@ msgid "Realtime Analyzer"
 msgstr "Analyseur temps-réel"
 
 #: rc_option_editor.cc:4917
+#, fuzzy
 msgid "Limit concurrent RTA spectra"
-msgstr ""
+msgstr "Limiter les spectres RTA simultanés"
 
 #: rc_option_editor.cc:4921
 #, fuzzy
@@ -18235,8 +18269,9 @@ msgid "Disk I/O Buffering"
 msgstr "Mise en mémoire tampon des E/S du disque"
 
 #: rc_option_editor.cc:5070
+#, fuzzy
 msgid "Disk I/O threads"
-msgstr ""
+msgstr "Flux d'E/S disque"
 
 #: rc_option_editor.cc:5075
 #, fuzzy
@@ -18244,8 +18279,9 @@ msgid "all but two processor"
 msgstr "tous les processeurs sauf deux"
 
 #: rc_option_editor.cc:5090
+#, fuzzy
 msgid "Disk I/O thread scheduling policy"
-msgstr ""
+msgstr "Politique de planification des flux d'E/S disque"
 
 #: rc_option_editor.cc:5094
 #, fuzzy
@@ -18797,8 +18833,9 @@ msgid "Detection function"
 msgstr "Fonction de détection"
 
 #: rhythm_ferret.cc:129
+#, fuzzy
 msgid "Trigger gap (postproc)"
-msgstr ""
+msgstr "Écart de déclenchement (post-traitement)"
 
 #: rhythm_ferret.cc:134
 msgid "Peak threshold"
@@ -18809,16 +18846,18 @@ msgid "Silence threshold"
 msgstr "Seuil de silence"
 
 #: rhythm_ferret.cc:144
+#, fuzzy
 msgid "Min Inter-Onset Time"
-msgstr ""
+msgstr "Temps inter-déclenchement minimal"
 
 #: rhythm_ferret.cc:151
 msgid "Sensitivity"
 msgstr "Sensibilité"
 
 #: rhythm_ferret.cc:155
+#, fuzzy
 msgid "Cut Pos Threshold"
-msgstr ""
+msgstr "Seuil de position de coupe"
 
 #: rhythm_ferret.cc:160
 msgid "Operation"
@@ -20320,8 +20359,9 @@ msgid "Always count-in when recording"
 msgstr "Toujours décompter avant d'enregistrer"
 
 #: session_option_editor.cc:439
+#, fuzzy
 msgid "Project Banner"
-msgstr ""
+msgstr "Bannière du projet"
 
 #: session_option_editor.cc:443
 #, fuzzy
@@ -21168,8 +21208,9 @@ msgid "rest"
 msgstr "silence"
 
 #: step_entry.cc:75
+#, fuzzy
 msgid "g-rest"
-msgstr ""
+msgstr "\"g-rest\""
 
 #: step_entry.cc:76
 msgid "back"
@@ -21835,7 +21876,7 @@ msgstr "ronde"
 #: tempo_dialog.cc:114 tempo_dialog.cc:115
 #, fuzzy
 msgid "half"
-msgstr "Demi temps"
+msgstr "demi temps"
 
 #: tempo_dialog.cc:116 tempo_dialog.cc:117 tempo_dialog.cc:652
 #: tempo_dialog.cc:653
