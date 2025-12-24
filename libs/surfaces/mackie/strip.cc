@@ -213,6 +213,12 @@ Strip::set_stripable (std::shared_ptr<Stripable> r, bool /*with_messages*/)
 
 	_stripable = r;
 
+	/* VCA meter reset: VCAs have no peak_meter() → meters stick to previous bank.
+	Force zero on assignment (bank switch/session load). */
+	if (r && r->presentation_info().flags() & ARDOUR::PresentationInfo::VCA && _meter) {
+		_meter->send_update(*_surface, 0.0f);
+	}
+
 	reset_saved_values ();
 
 	if (!r) {
@@ -428,6 +434,13 @@ Strip::notify_gain_changed (bool force_update)
 
 		do_parameter_display (ac->desc(), gain_coefficient); // GainAutomation
 		_last_gain_position_written = normalized_position;
+	}
+
+	/* Keep VCA gain display live-updating in normal view */
+	if (_stripable &&
+		(_stripable->presentation_info().flags() & (ARDOUR::PresentationInfo::VCA | ARDOUR::PresentationInfo::FoldbackBus)) &&
+		_surface->mcp().subview()->subview_mode() == Subview::None) {
+		return_to_vpot_mode_display();
 	}
 }
 
@@ -1264,11 +1277,33 @@ Strip::return_to_vpot_mode_display ()
 	if (_surface->mcp().subview()->subview_mode() != Subview::None) {
 		/* do nothing - second line shows value of current subview parameter */
 		return;
-	} else if (_stripable) {
-		pending_display[1] = vpot_mode_string();
-	} else {
-		pending_display[1] = string();
 	}
+
+	if (!_stripable) {
+		pending_display[1] = string();
+		return;
+	}
+
+	/* VCA and FB strips: always show current gain in dB permanently */
+	if (_stripable->presentation_info().flags() &
+		(ARDOUR::PresentationInfo::VCA | ARDOUR::PresentationInfo::FoldbackBus)) {
+		float db = -INFINITY;
+		if (auto gain = _stripable->gain_control()) {
+			float coeff = gain->get_value();
+			if (coeff > 0.0f) {
+				db = accurate_coefficient_to_dB(coeff);
+			}
+		}
+
+		/* Also drive the meter with VCA gain */
+		if (_meter && (_stripable->presentation_info().flags() & ARDOUR::PresentationInfo::VCA)) {
+			_meter->send_update(*_surface, db);
+		}
+		return;
+	}
+
+	/* Normal tracks/buses: show pan mode or value */
+	pending_display[1] = vpot_mode_string();
 }
 
 void
