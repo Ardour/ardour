@@ -38,12 +38,20 @@
 #include "pbd/pthread_utils.h"
 
 #ifdef COMPILER_MSVC
+#ifndef WAF_BUILD
+DECLARE_DEFAULT_COMPARISONS(pthread_t) // Needed for 'DECLARE_DEFAULT_COMPARISONS'. Objects in an STL container can be
+                                       // searched and sorted. Thus, when instantiating the container, MSVC complains
+                                       // if the type of object being contained has no appropriate comparison operators
+                                       // defined (specifically, if operators '<' and '==' are undefined). This seems
+                                       // to be the case with ptw32 'pthread_t' which is a simple struct.
+#else
 LIBPBD_API inline bool operator<(const pthread_t& lhs, const pthread_t& rhs) {
     return lhs.p < rhs.p || (lhs.p == rhs.p && lhs.x < rhs.x);
 }
 LIBPBD_API inline bool operator==(const pthread_t& lhs, const pthread_t& rhs) {
     return lhs.p == rhs.p && lhs.x == rhs.x;
 }
+#endif
 #define pthread_gethandle  pthread_getw32threadhandle_np
 #endif
 
