@@ -36,12 +36,14 @@
 
 /* need _BSD_SOURCE to get timersub macros */
 
+#ifndef COMPILER_MSVC //Skip including sys/time.h for MSVC
 #ifdef _BSD_SOURCE
 #include <sys/time.h>
 #else
 #define _BSD_SOURCE
 #include <sys/time.h>
 #undef _BSD_SOURCE
+#endif
 #endif
 
 #include <list>
