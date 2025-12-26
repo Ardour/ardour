@@ -649,13 +649,19 @@ def build(bld):
 
     obj.defines = [
         'PACKAGE="' + I18N_PACKAGE + '"',
-        'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
-        'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
-        'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
+        'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']).replace('\\', '/') + '"',
+        'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']).replace('\\', '/') + '"',
+        'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']).replace('\\', '/') + '"',
         ]
     obj.install_path = bld.env['DLLDIR']
     obj.linkflags    = bld.env['compiler_flags_dict']['execstack']
     obj.uselib       = 'UUID FLAC FONTCONFIG GTHREAD OGG PANGOMM CURL DL CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK GLIBMM GIOMM PANGOFT2 LIBPNG'
+
+    if bld.env['build_target'] == 'msvc':
+        obj.env['LIB_LO'] = ['liblo']
+        obj.use += ['liblua']
+        obj.uselib += ' PANGOCAIRO GDI32'
+        obj.lib = ['getopt']
 
     if False and bld.is_defined('USE_EXTERNAL_LIBS'):
         obj.uselib += ' LIBAAF'
@@ -668,8 +674,11 @@ def build(bld):
         obj.uselib += ' AUDIOUNITS OSX '
         obj.use    += ' libappleutility'
         obj.source += [ 'cocoacarbon.mm', 'bundle_env_cocoa.cc' ]
-    elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
+    elif bld.env['build_target'] == 'mingw':
         obj.source += [ 'bundle_env_mingw.cc' ]
+        obj.source += [ 'windows_icon.rc' ]
+    elif bld.env['build_target'] == 'msvc':
+        obj.source += [ 'bundle_env_msvc2.cc' ]
         obj.source += [ 'windows_icon.rc' ]
     else:
         obj.source += [ 'bundle_env_linux.cc' ]
@@ -679,8 +688,11 @@ def build(bld):
     obj.includes += ['../libs/vst3']
 
     if bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
-        obj.linkflags += ' -mwindows'
         obj.use += [ 'PANGOFT2' ]
+        if bld.env['build_target'] == 'mingw':
+            obj.linkflags += ' -mwindows'
+        else:
+            obj.linkflags += ' /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup'
 
     if bld.is_defined('HAVE_SUIL'):
         obj.source += [ 'lv2_plugin_ui.cc' ]
@@ -859,6 +871,8 @@ def build(bld):
     menus_argv = []
     if sys.platform == 'darwin':
         menus_argv = [ '-E', '-P', '-D__APPLE__', '-' ]
+    elif bld.env['build_target'] == 'msvc':
+        menus_argv = [ '/EP', '/nologo' ]
     else:
         menus_argv = [ '-E', '-P' ]
 
@@ -878,10 +892,16 @@ def build(bld):
     # so that we can try them out with different program builds.
 
     obj = bld(features = 'command-output')
-    obj.command = 'cpp'
+    if bld.env['build_target'] == 'msvc':
+        obj.command = 'cl'
+    else:
+        obj.command = 'cpp'
     obj.command_is_external = True
     obj.no_inputs = True
     obj.argv = menus_argv
+    if bld.env['build_target'] == 'msvc':
+        menu_path = bld.path.find_resource('ardour.menus.in').abspath()
+        obj.argv += [ menu_path ]
     obj.dep_vars = ['PTFORMAT', 'MIXBUS', 'WINDOWS', 'DEBUG']
     if bld.is_defined('LIVETRAX'):
         obj.stdin = 'livetrax.menus.in'
