@@ -1709,7 +1709,7 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 		changed_tracks = true;
 	} else {
 		if (_views.front ().time_axis_view < 0) {
-#warning paul fix this code
+#pragma message("WARNING:paul fix this code")
 			/* XXX this test is nonsensical. See  0aef128207 and
 			   #8672 for the origin of this and related code
 			*/
