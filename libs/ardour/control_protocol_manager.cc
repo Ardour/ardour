@@ -23,6 +23,9 @@
 
 #ifdef HAVE_USB
 #include "pbd/pthread_utils.h"
+#if defined(COMPILER_MSVC) && defined (WAF_BUILD)
+#define _WINSOCKAPI_
+#endif
 
 #include <libusb.h>
 /* ControlProtocolManager is a singleton, so we can use static

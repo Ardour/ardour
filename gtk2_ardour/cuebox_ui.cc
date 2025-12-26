@@ -308,7 +308,7 @@ CueBoxUI::get_slots (TriggerList &triggerlist, uint64_t idx)
 	std::shared_ptr<RouteList const> rl = _session->get_routes();
 	for (auto const& route : *rl) {
 		std::shared_ptr<TriggerBox> box = route->triggerbox();
-#warning @Ben disambiguate processor *active* vs *visibility*
+#pragma message("WARNING: @Ben disambiguate processor *active* vs *visibility*")
 		if (box /*&& box.active*/) {
 			TriggerPtr trigger = box->trigger(idx);
 			triggerlist.push_back(trigger);
