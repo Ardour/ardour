@@ -56,6 +56,11 @@ using namespace VideoUtils;
 #define MIN(a,b) ( (a) < (b) ? (a) : (b) )
 #endif
 
+#ifdef COMPILER_MSVC
+#include <io.h>
+#define R_OK 4
+#endif
+
 AddVideoDialog::AddVideoDialog (Session* s)
 	: ArdourDialog (_("Set Video Track"))
 	, seek_slider (0,1000,1)
